@@ -38,20 +38,20 @@ bool& EnableMainRender = g_sceneInit.LegacyRefEnableMainRender();
 // Scene Common Utilities
 //=============================================================================
 #include "Engine/Object/ZzzInterface.h"
-#include "UI/NewUI/HUD/Notices.h"
+#include "UI/HUD/Notices.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzOpenData.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Audio/DSPlaySound.h"
 #include "App/Platform/Windows/Local.h"
 #include "I18N/All.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "GameLogic/Items/CComGem.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Core/SceneUICoordinator.h"
 
 // External variable declarations (defined in ZzzScene.cpp or other files)
 extern wchar_t AbuseFilter[][20];
@@ -160,19 +160,6 @@ bool CheckName()
 // UI Utility Functions
 ///////////////////////////////////////////////////////////////////////////////
 
-BOOL CheckOptionMouseClick(int iOptionPos_y, BOOL bPlayClickSound)
-{
-    if (CheckMouseIn((REFERENCE_WIDTH - 120) / 2, 30 + iOptionPos_y, 120, 22) && MouseLButtonPush)
-    {
-        MouseLButtonPush = false;
-        MouseUpdateTime = 0;
-        MouseUpdateTimeMax = 6;
-        if (bPlayClickSound == TRUE) PlayBuffer(SOUND_CLICK01);
-        return TRUE;
-    }
-    return FALSE;
-}
-
 // SeparateTextIntoLines lives in src/source/Core/Text/TextLineWrap.cpp so it can be
 // unit-tested without dragging in the full scene/UI translation unit.
 
@@ -197,95 +184,16 @@ void SetEffectVolumeLevel(int level)
 // Rendering Functions
 ///////////////////////////////////////////////////////////////////////////////
 
-// DXP-07d increment 1's shadow-compare diagnostic validated RenderInfomation3D()'s proj/view closed
-// form and post-pop GlobalUBO restore across multiple soaks; DXP-08a deleted the diagnostic and the
-// FFP matrix-stack calls it was validating (see RenderInfomation3D()'s own comments below).
-static float s_PreInfo3DProj[16];
-static float s_PreInfo3DView[16];
-
-void RenderInfomation3D()
-{
-    bool Success = false;
-
-    if (((ErrorMessage == MESSAGE_TRADE_CHECK || ErrorMessage == MESSAGE_CHECK) && AskYesOrNo == 1)
-        || ErrorMessage == MESSAGE_USE_STATE
-        || ErrorMessage == MESSAGE_USE_STATE2)
-    {
-        Success = true;
-    }
-
-    if (ErrorMessage == MESSAGE_TRADE_CHECK && AskYesOrNo == 5)
-    {
-        Success = true;
-    }
-    if (ErrorMessage == MESSAGE_PERSONALSHOP_WARNING)
-    {
-        Success = true;
-    }
-
-    if (Success)
-    {
-        mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
-        mu::GetRenderer().PushMatrix();
-        mu::GetRenderer().LoadIdentity();
-        SetRenderViewport(0, 0, WindowWidth, WindowHeight);
-        gluPerspective2(1.f, (float)(WindowWidth) / (float)(WindowHeight), g_Camera.ViewNear, g_Camera.ViewFar);
-        mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
-        mu::GetRenderer().PushMatrix();
-        mu::GetRenderer().LoadIdentity();
-        CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
-        EnableDepthTest();
-        EnableDepthMask();
-
-        float Width, Height;
-        float x = (REFERENCE_WIDTH - 150) / 2;
-        float y;
-        if (ErrorMessage == MESSAGE_TRADE_CHECK)
-        {
-            y = 60 + 55;
-        }
-        else
-        {
-            y = 60 + 55;
-        }
-
-        Width = 40.f; Height = 60.f;
-        int iRenderType = ErrorMessage;
-        if (AskYesOrNo == 5)
-            iRenderType = MESSAGE_USE_STATE;
-        switch (iRenderType)
-        {
-        case MESSAGE_USE_STATE:
-        case MESSAGE_USE_STATE2:
-        case MESSAGE_PERSONALSHOP_WARNING:
-            RenderItem3D(x, y, Width, Height, TargetItem.Type, TargetItem.Level, TargetItem.ExcellentFlags, TargetItem.AncientDiscriminator, true);
-            break;
-
-        default:
-            RenderItem3D(x, y, Width, Height, PickItem.Type, PickItem.Level, PickItem.ExcellentFlags, PickItem.AncientDiscriminator, true);
-            break;
-        }
-
-        mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
-        mu::GetRenderer().PopMatrix();
-        mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
-        mu::GetRenderer().PopMatrix();
-        UpdateMousePositionn();
-    }
-}
-
 void RenderInfomation()
 {
     UI::Notices::Render();
 
-    CUIMng::Instance().Render();
+    CSceneUICoordinator::Instance().Render();
 
-    if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
-    {
-        RenderCursor();
-    }
-
-    RenderInfomation3D();
+    // The login/character-scene cursor render that used to happen here moved to
+    // Winmain.cpp's SetPostRmlUiCallback registration, which fires after RmlUi's own render
+    // pass -- RmlUi always renders after this point in the frame, so drawing the cursor here
+    // (before it) let an opaque RmlUi panel visually cover it.
 }
 
 /**

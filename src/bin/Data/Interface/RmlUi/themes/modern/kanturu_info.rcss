@@ -1,0 +1,42 @@
+/* Modern theme for CKanturuInfoWindow: the modern panel surface instead of newui_Figure_kantru; the
+   texts and digits keep the legacy geometry and colours (see the legacy theme). */
+
+body { pointer-events: none; }
+
+.screen {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640px;
+	height: 480px;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+#panel { position: absolute; width: 99px; height: 78px; font-family: "token(font-body)"; }
+#back { position: absolute; left: 0; top: 0; width: 99px; height: 78px; background-color: token(surface-panel); border: 1px token(border-frame); }
+
+.info-text {
+	display: block;
+	position: absolute;
+	transform-origin: left top;
+	white-space: nowrap;
+	font-weight: bold;
+	color: #8686c7;
+}
+#users { left: 10px; top: 15px; }
+#monsters { left: 10px; top: 35px; }
+#colon { left: 48px; top: 57px; }
+
+.digit { position: absolute; top: 55px; width: 8.4px; height: 11.2px; }
+.digit.blank { visibility: hidden; }
+/* RenderNumber(): 8.4-unit digits 6.72 apart, the run starting half its digit count's width left
+   of its x. */
+#minutes .digit { left: calc(35px - var(--n) * 4.2px + var(--i) * 6.72px); }
+#seconds .digit { left: calc(65px - var(--n) * 4.2px + var(--i) * 6.72px); }
+
+/* The HUD takes no pointer events where it is placed (base.rcss gives a placed panel them). */
+#panel.slot-placed { pointer-events: none; }
+
+/* The data-for template row has no index of its own; it inherits this one. */
+.run { --i: 0; }

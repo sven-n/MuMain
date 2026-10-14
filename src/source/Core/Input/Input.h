@@ -58,13 +58,13 @@ public:
     {
         if (m_bTextEditMode)
             return false;
-        return SEASON3B::IsPress(nVirtualKeyCode);
+        return mu::ui::window::IsPress(nVirtualKeyCode);
     }
     bool IsKeyHeldDown(int nVirtualKeyCode)
     {
         if (m_bTextEditMode)
             return false;
-        return SEASON3B::IsRepeat(nVirtualKeyCode);
+        return mu::ui::window::IsRepeat(nVirtualKeyCode);
     }
 
     POINT GetCursorPos() { return m_ptCursor; }

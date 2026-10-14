@@ -1,0 +1,161 @@
+﻿
+#include "stdafx.h"
+#include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowCommon.h"
+#include "UI/Core/WindowGeometry.h"
+#include "UI/NPCs/EmpireGuardianNPC.h"
+#include "I18N/All.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+#include "Audio/DSPlaySound.h"
+#include "UI/Social/SocialWindowBase.h"
+#include "Render/Text/CUIRenderText.h"
+#include "Render/Text/TextWrap.h"
+
+using namespace SEASON3B;
+using namespace mu::ui::window;
+
+CEmpireGuardianNPC::CEmpireGuardianNPC()
+{
+    m_pNewUIMng = NULL;
+    m_bCanClick = true;
+}
+
+CEmpireGuardianNPC::~CEmpireGuardianNPC()
+{
+    Release();
+}
+
+bool CEmpireGuardianNPC::Create(CManager* pNewUIMng)
+{
+    if (NULL == pNewUIMng || NULL == g_pNewItemMng)
+        return false;
+
+    m_pNewUIMng = pNewUIMng;
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC, this);
+    m_View.SetItemDrawer([this](int, const Rml::Vector2f& offset, const Rml::Vector2f& size) { RenderItem3D(offset, size); });
+
+    m_View.SetWindowId(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC);
+    m_View.Build();
+
+    Show(false);
+
+    return true;
+}
+
+void CEmpireGuardianNPC::Release()
+{
+    m_View.Release();
+
+    if (m_pNewUIMng)
+    {
+        m_pNewUIMng->RemoveUIObj(this);
+        m_pNewUIMng = NULL;
+    }
+}
+
+bool CEmpireGuardianNPC::UpdateMouseEvent()
+{
+    return !m_View.IsPointerOver();
+}
+
+bool CEmpireGuardianNPC::UpdateKeyEvent()
+{
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC) == true)
+    {
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
+        {
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC);
+            PlayBuffer(SOUND_CLICK01);
+            return false;
+        }
+    }
+    return true;
+}
+
+bool CEmpireGuardianNPC::Update()
+{
+    SyncView();
+
+    // A click RmlUi reported (the original's button handling in BtnProcess()).
+    const int pressed = m_View.TakePressedButton();
+    if (!IsVisible())
+        return true;
+    if (pressed == 0)
+    {
+        SocketClient->ToGameServer()->SendEnterEmpireGuardianEvent();
+        ::PlayBuffer(SOUND_INTERFACE01);
+        m_bCanClick = false;
+    }
+    else if (pressed == 1)
+    {
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC);
+    }
+    return true;
+}
+
+bool CEmpireGuardianNPC::IsVisible() const
+{
+    return CObject::IsVisible();
+}
+
+bool CEmpireGuardianNPC::Render()
+{
+    // Nothing native left but the 3D preview (Render3D()): the frame, the texts and the buttons
+    // are RmlUi. Kept because CObject requires the override.
+    return true;
+}
+
+void CEmpireGuardianNPC::SyncView()
+{
+    if (IsVisible())
+    {
+        // The original's RenderFrame()/Render(): the title and the texts in (220, 220, 220),
+        // Gaion's Order bold yellow, the warning bold red. Both cut texts share one buffer, the
+        // second over the first, as the original's did.
+        const float centreX = static_cast<float>(NPC_WINDOW_WIDTH) / 2;
+        wchar_t szTextOut[2][300] = {};
+        std::vector<EventItemEntryView::Text> texts;
+        texts.push_back({I18N::Game::JerintTheAssistant, 110.f, true});
+        texts.push_back({I18N::Game::WithoutGaionSOrder, 190.f});
+        g_pRenderText->SetFont(g_hFont);
+        CutStr(I18N::Game::YouCannotEnterTheFortressOfEmpireGuardians, szTextOut[0], 150, 2, 300);
+        texts.push_back({szTextOut[0], 190.f});
+        texts.push_back({szTextOut[1], 190.f});
+        texts.push_back({I18N::Game::WillYouShowMeTheOrder, 190.f});
+        texts.push_back({I18N::Game::GaionSOrder, 110.f, true});
+        texts.push_back({I18N::Game::Warning2223, 110.f, true});
+        texts.push_back({I18N::Game::TheRound7MapSundayCanOnly, 200.f});
+        texts.push_back({I18N::Game::BeAccessedIfYouHaveA, 200.f});
+        texts.push_back({I18N::Game::CompleteSecromicon2837, 200.f});
+        g_pRenderText->SetFont(g_hFont);
+        CutStr(I18N::Game::YouCanOnlyEnterAsAMemberOfAParty, szTextOut[0], 155, 2, 300);
+        texts.push_back({szTextOut[0], 200.f});
+        texts.push_back({szTextOut[1], 200.f});
+        m_View.SetTexts(std::move(texts));
+
+        m_View.SetButtons({{I18N::Game::Enter, false}, {I18N::Game::Close388, false}});
+    }
+    m_View.Sync(IsVisible());
+}
+
+float CEmpireGuardianNPC::GetLayerDepth()
+{
+    return 1.2f;
+}
+
+void CEmpireGuardianNPC::OpenningProcess()
+{
+}
+
+void CEmpireGuardianNPC::ClosingProcess()
+{
+}
+
+// Into the theme's .entry-item-box (the original's 20x27 centred at y 50 + 70).
+void CEmpireGuardianNPC::RenderItem3D(const Rml::Vector2f& offset, const Rml::Vector2f& size)
+{
+    int nItemType = ITEM_GAIONS_ORDER;
+    int nItemLevel = 0;
+    ::RenderItem3D(offset.x, offset.y, size.x, size.y, nItemType, nItemLevel, 0, 0, false);
+}

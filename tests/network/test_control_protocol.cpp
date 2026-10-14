@@ -83,9 +83,10 @@ TEST_CASE("Control protocol treats a blank line as no request [network][control-
 TEST_CASE("Control protocol serves the documented command vocabulary [network][control-protocol]")
 {
     const std::vector<std::string> expected = {
-        "ping",    "scene", "state", "nearby",   "events",   "wait-for", "screenshot", "login", "select-char", "logout",
-        "quit",    "move",  "warp",  "teleport", "attack",   "skill",    "pickup",     "use",   "equip",       "say",
-        "whisper", "party", "halt",  "hotkey",   "click-ui", "ui",       "slot-pixel", "trade", "type",
+        "ping",    "scene", "state", "nearby",   "events",   "wait-for", "screenshot", "login",    "select-char", "logout",
+        "quit",    "move",  "warp",  "teleport", "attack",   "skill",    "pickup",     "use",      "equip",       "say",
+        "whisper", "party", "halt",  "hotkey",   "click-ui", "drag-ui",  "hover-ui",   "type",     "ui",          "slot-pixel",
+        "trade",
     };
 
     for (const std::string& command : expected)
@@ -188,4 +189,18 @@ TEST_CASE("Control protocol maps every login failure macro to a reason [network]
     CHECK_FALSE(App::Control::IsLoginFailureCode(RECEIVE_CHARACTERS_LIST));
     // Unknown codes still get a usable reason rather than an empty message.
     CHECK_FALSE(App::Control::LoginFailureReason(-1).empty());
+}
+
+TEST_CASE("Type request requires a strict optional boolean [network][control-protocol]")
+{
+    auto request = Request::Parse(R"({"cmd":"type","text":"hello","enter":true})");
+    REQUIRE(request.IsValid());
+    bool enter = false;
+    CHECK(request.GetStrictBool("enter", enter));
+    CHECK(enter);
+    request = Request::Parse(R"({"cmd":"type","text":"hello","enter":1})");
+    CHECK_FALSE(request.GetStrictBool("enter", enter));
+    request = Request::Parse(R"({"cmd":"type","text":"hello","enter":null})");
+    CHECK(request.Contains("enter"));
+    CHECK_FALSE(request.GetStrictBool("enter", enter));
 }

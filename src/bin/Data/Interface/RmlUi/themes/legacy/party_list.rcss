@@ -1,0 +1,84 @@
+/* Legacy theme for CPartyListWindow, reproducing the original's Render() card by card: a black
+   fill (0xE6000000) inset 2 units, the absent (0x804D0000), defence-buff (0x3333FF33) or hovered
+   (0xB3666666) tint over it, the card art (newui_party_back), the leader's flag, the name, the
+   health bar (the left part of newui_party_hpbar, one tenth per health step) and the leave button.
+   The fills are RenderColorQuadARGB()'s genuine ARGB words; the name colours are the RGBA() values
+   the original passed. Reference px inside #panel (at the dock's scale). */
+
+@spritesheet plist-back-sheet { src: "../../../newui_party_back.tga"; plist-back: 0px 0px 77px 23px; }
+@spritesheet plist-flag-sheet { src: "../../../newui_party_flag.tga"; plist-flag: 0px 0px 9px 10px; }
+@spritesheet plist-hpbar-sheet { src: "../../../newui_party_hpbar.jpg"; plist-hpbar: 0px 0px 69px 3px; }
+@spritesheet plist-leave-sheet
+{
+	src: "../../../newui_party_x.tga";
+	plist-leave-up: 0px 0px 11px 11px;
+	plist-leave-down: 0px 11px 11px 11px;
+}
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 77px;
+	font-family: "token(font-body)";
+	pointer-events: none;
+}
+
+/* Cards 24 apart: 23 tall with a 1-unit gap. */
+.card { display: block; position: relative; width: 77px; height: 23px; margin-bottom: 1px; }
+
+.card-fill, .card-tint, .card-select { position: absolute; left: 2px; top: 2px; width: 74px; height: 17px; }
+.card-fill { background-color: rgba(0, 0, 0, 230); }
+.card-tint, .card-select { display: none; }
+.card.defense .card-tint { display: block; background-color: rgba(51, 255, 51, 51); }
+.card.selected .card-select { display: block; background-color: rgba(102, 102, 102, 179); }
+.card.absent .card-tint { display: block; background-color: rgba(77, 0, 0, 128); }
+
+.card-back { position: absolute; left: 0; top: 0; width: 77px; height: 23px; decorator: image(plist-back); }
+
+.card-flag { display: none; position: absolute; left: 53px; top: 3px; width: 9px; height: 10px; decorator: image(plist-flag); }
+.card.leader .card-flag { display: block; }
+
+/* RenderText(x + 4, y + 4, name, box, 0, RT3_SORT_LEFT). */
+.card-name {
+	display: block;
+	position: absolute;
+	left: 4px;
+	top: 4px;
+	white-space: nowrap;
+	color: #ffffff;
+}
+.card.absent .card-name { color: #808080; }
+.card.leader .card-name { color: #ff9416; }
+.card.leader.absent .card-name { color: #804b0b; }
+
+/* The bar shows the texture's left part, it does not stretch it: scale-none crops the sprite to
+   the element (overflow clipping does not work under the panel's transform in this build). */
+.card-health {
+	position: absolute;
+	left: 4px;
+	top: 16px;
+	height: 3px;
+	decorator: image(plist-hpbar scale-none left top);
+}
+
+.card-leave {
+	position: absolute;
+	left: 63px;
+	top: 3px;
+	width: 11px;
+	height: 11px;
+	decorator: image(plist-leave-up);
+	pointer-events: auto;
+}
+.card-leave:active { decorator: image(plist-leave-down); }
+
+/* Keep the dock's preferred offset where it fits; the workspace's top edge clears the shell
+   header. All five cards fit below this anchor at the supported viewport and scale settings. */
+#panel {
+	left: calc(var(--world-right, 100%) - 79px * var(--dock-scale, 1));
+	top: max(calc(var(--workspace-top, 0px) + 14px * var(--dock-scale, 1)), calc(var(--workspace-bottom, 100%) - 418px * var(--dock-scale, 1)));
+	transform: scale(var(--dock-scale, 1));
+	--root-scale: var(--dock-scale, 1);
+}
+/* A card takes the pointer: its hover is the skill target, and a click on it never walks. */
+.card { pointer-events: auto; }

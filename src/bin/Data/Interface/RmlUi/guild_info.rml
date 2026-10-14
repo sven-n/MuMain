@@ -1,0 +1,212 @@
+<rml>
+<head>
+	<title>Guild</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="guild_info.rcss"/>
+</head>
+<body>
+	<!-- The guild window (CGuildInfoWindow), docked right: the no-guild hint, or the Guild, Members
+	     and Alliance tabs. Every position and size below is the theme's; C++ keeps the native list
+	     controls for their data, scrolling and line clicks, so a list row's own top follows their
+	     scroll position and the scroll thumb its offset. The workspace slot places and scales
+	     #panel; a .sharp-text layer's own width and
+	     font size stay bound for the counter-scale (base.rcss). A button click is queued with
+	     guild_info_button(n). -->
+	<div id="panel" data-model="guild_info">
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+
+		<div data-if="!no_guild">
+			<div id="tab_list"></div>
+			<div id="tab_point" data-class-tab-0="tab == 0" data-class-tab-1="tab == 1" data-class-tab-2="tab == 2"></div>
+		</div>
+
+		<!-- RenderNoneGuild(). -->
+		<div class="gi-page" data-if="no_guild">
+		<span id="gi_hint_title" class="sharp-text gi-line"
+		      data-style-font-size="hint_title.text_px + 'px'">{{hint_title.text}}</span>
+		<span id="gi_hint_1" class="sharp-text gi-note"
+		      data-style-font-size="hint_line1.text_px + 'px'">{{hint_line1.text}}</span>
+		<span id="gi_hint_2" class="sharp-text gi-note"
+		      data-style-font-size="hint_line2.text_px + 'px'">{{hint_line2.text}}</span>
+		<span id="gi_hint_3" class="sharp-text gi-note"
+		      data-style-font-size="hint_line3.text_px + 'px'">{{hint_line3.text}}</span>
+		</div>
+
+		<!-- The tabs' hit areas: the original's 56-unit columns over the top 90 units. -->
+		<div class="gi-tab-hit" id="gi_tab_hit_0" data-event-mousedown="guild_info_tab(0)"></div>
+		<div class="gi-tab-hit" id="gi_tab_hit_1" data-event-mousedown="guild_info_tab(1)"></div>
+		<div class="gi-tab-hit" id="gi_tab_hit_2" data-event-mousedown="guild_info_tab(2)"></div>
+		<!-- The header every tab shares. -->
+		<div class="gi-page" data-if="!no_guild">
+		<span id="gi_title" class="sharp-text gi-line"
+		      data-style-font-size="title.text_px + 'px'">{{title.text}}</span>
+		<span id="gi_name" class="sharp-text gi-line"
+		      data-style-font-size="guild_name.text_px + 'px'">{{guild_name.text}}</span>
+		<span id="gi_tab_info" class="sharp-text gi-line gi-tab-label"
+		      data-style-font-size="tab_info.text_px + 'px'">{{tab_info.text}}</span>
+		<span id="gi_tab_members" class="sharp-text gi-line gi-tab-label"
+		      data-style-font-size="tab_members.text_px + 'px'">{{tab_members.text}}</span>
+		<span id="gi_tab_union" class="sharp-text gi-line gi-tab-label"
+		      data-style-font-size="tab_union.text_px + 'px'">{{tab_union.text}}</span>
+		</div>
+
+		<!-- The Guild tab. -->
+		<div class="gi-page" data-if="!no_guild &amp;&amp; tab == 0">
+			<div class="t-edge-top mark-edge-top"></div>
+			<div class="t-edge-bottom mark-edge-bottom"></div>
+			<div class="t-edge-left mark-edge-left"></div>
+			<div class="t-edge-right mark-edge-right"></div>
+			<div class="t-corner t-tl mark-corner-tl"></div>
+			<div class="t-corner t-tr mark-corner-tr"></div>
+			<div class="t-corner t-bl mark-corner-bl"></div>
+			<div class="t-corner t-br mark-corner-br"></div>
+			<div id="guild_mark"><div class="mark-cell" data-for="m : mark_cells" data-style-background-color="m"></div></div>
+			<div class="t-edge-top figures-edge-top"></div>
+			<div class="t-edge-bottom figures-edge-bottom"></div>
+			<div class="t-edge-left figures-edge-left"></div>
+			<div class="t-edge-right figures-edge-right"></div>
+			<div class="t-corner t-tl figures-corner-tl"></div>
+			<div class="t-corner t-tr figures-corner-tr"></div>
+			<div class="t-corner t-bl figures-corner-bl"></div>
+			<div class="t-corner t-br figures-corner-br"></div>
+			<div class="fill notice-fill"></div>
+			<div class="t-edge-top notice-edge-top"></div>
+			<div class="t-edge-bottom notice-edge-bottom"></div>
+			<div class="t-edge-left notice-edge-left"></div>
+			<div class="t-edge-right notice-edge-right"></div>
+			<div class="t-corner t-tr notice-corner-tr"></div>
+			<div class="t-corner t-bl notice-corner-bl"></div>
+			<div class="t-corner t-br notice-corner-br"></div>
+			<div id="tab_head"></div>
+			<span id="gi_notice_label" class="sharp-text gi-line"
+			      data-style-font-size="notice_label.text_px + 'px'">{{notice_label.text}}</span>
+			<span id="gi_created" class="sharp-text gi-figure"
+			      data-style-font-size="created.text_px + 'px'">{{created.text}}</span>
+			<span id="gi_score" class="sharp-text gi-figure"
+			      data-style-font-size="score.text_px + 'px'">{{score.text}}</span>
+			<span id="gi_member_count" class="sharp-text gi-figure"
+			      data-style-font-size="member_count.text_px + 'px'">{{member_count.text}}</span>
+			<span id="gi_rival" class="sharp-text gi-figure"
+			      data-style-font-size="rival.text_px + 'px'">{{rival.text}}</span>
+			<!-- base.rcss's .scroll-pane: RmlUi owns the scroll position, the wheel and the
+			     scrollbar, replacing the thumb/track tile stack and the C++ line window this
+			     list used to carry. Counter-scaled out of #panel's transform so the announcement
+			     stays at the native text size in a dense box (component-catalog.md). -->
+			<div id="gi_notice_list" class="scroll-pane gi-pane counter-scaled"
+			     data-style-font-size="text_px + 'px'">
+				<!-- Explicitly sized, not 100%: a percentage would shrink the moment the
+				     scrollbar appears, and a full-width row sits under the handle. -->
+				<div class="gi-pane-row" data-for="r : notice_rows">
+					<span class="gi-pane-cell">{{r.text}}</span>
+				</div>
+			</div>
+			<div id="btn_guild_out" class="gi-btn" data-if="guild_out_button.shown" data-event-click="guild_info_button(0)">
+				<span class="sharp-text sharp-middle gi-label" data-style-font-size="text_px + 'px'"
+				      data-style-line-height="label_line_px + 'px'"><span class="native-fit">{{guild_out_button.label}}</span></span>
+			</div>
+		</div>
+
+		<!-- The Members tab. -->
+		<div class="gi-page" data-if="!no_guild &amp;&amp; tab == 1">
+			<div class="fill members-fill"></div>
+			<div class="fill members-head-fill"></div>
+			<div class="t-edge-top members-edge-top"></div>
+			<div class="t-edge-bottom members-edge-bottom"></div>
+			<div class="t-edge-left members-edge-left"></div>
+			<div class="t-edge-right members-edge-right"></div>
+			<div class="t-corner t-tl members-corner-tl"></div>
+			<div class="t-corner t-tr members-corner-tr"></div>
+			<div class="t-corner t-bl members-corner-bl"></div>
+			<div class="t-corner t-br members-corner-br"></div>
+			<span id="gi_hdr_name" class="sharp-text gi-header"
+			      data-style-font-size="header_name.text_px + 'px'">{{header_name.text}}</span>
+			<span id="gi_hdr_position" class="sharp-text gi-header"
+			      data-style-font-size="header_position.text_px + 'px'">{{header_position.text}}</span>
+			<span id="gi_hdr_server" class="sharp-text gi-header"
+			      data-style-font-size="header_server.text_px + 'px'">{{header_server.text}}</span>
+			<!-- 18 rows of 13 units, the native box's own m_iNumRenderLine x line step. -->
+			<div id="gi_member_list" class="scroll-pane gi-pane counter-scaled"
+			     data-style-font-size="text_px + 'px'">
+				<div class="gi-pane-row gi-member-row" data-for="r : member_rows"
+				     data-class-selected="r.selected" data-class-officer="r.officer"
+				     data-event-click="guild_info_select_member(it_index)">
+					<!-- A backgrounded element with children paints an unclosed box in this
+					     build, so the row backdrop is a childless leaf (engine-findings.md). -->
+					<div class="gi-pane-row-back"></div>
+					<span class="gi-pane-cell cell-member-name">{{r.name}}</span>
+					<span class="gi-pane-cell cell-member-role"
+					      data-style-font-size="r.role_text_px + 'px'">{{r.role}}</span>
+					<span class="gi-pane-cell cell-member-server">{{r.server}}</span>
+				</div>
+			</div>
+			<div id="btn_get_position" class="gi-btn" data-if="get_position_button.shown" data-event-click="guild_info_button(1)">
+				<span class="sharp-text sharp-middle gi-label" data-style-font-size="text_px + 'px'"
+				      data-style-line-height="label_line_px + 'px'"><span class="native-fit">{{get_position_button.label}}</span></span>
+			</div>
+			<div id="btn_free_position" class="gi-btn" data-if="free_position_button.shown" data-event-click="guild_info_button(2)">
+				<span class="sharp-text sharp-middle gi-label" data-style-font-size="text_px + 'px'"
+				      data-style-line-height="label_line_px + 'px'"><span class="native-fit">{{free_position_button.label}}</span></span>
+			</div>
+			<div id="btn_get_out" class="gi-btn" data-if="get_out_button.shown" data-event-click="guild_info_button(3)">
+				<span class="sharp-text sharp-middle gi-label" data-style-font-size="text_px + 'px'"
+				      data-style-line-height="label_line_px + 'px'"><span class="native-fit">{{get_out_button.label}}</span></span>
+			</div>
+		</div>
+
+		<!-- The Alliance tab, once the hero is in one. -->
+		<div class="gi-page" data-if="!no_guild &amp;&amp; tab == 2 &amp;&amp; union_shown">
+			<div class="fill union-fill"></div>
+			<div class="fill union-head-fill"></div>
+			<div class="t-edge-top union-edge-top"></div>
+			<div class="t-edge-bottom union-edge-bottom"></div>
+			<div class="t-edge-left union-edge-left"></div>
+			<div class="t-edge-right union-edge-right"></div>
+			<div class="t-corner t-tl union-corner-tl"></div>
+			<div class="t-corner t-tr union-corner-tr"></div>
+			<div class="t-corner t-bl union-corner-bl"></div>
+			<div class="t-corner t-br union-corner-br"></div>
+			<span id="gi_hdr_union_name" class="sharp-text gi-header"
+			      data-style-font-size="header_union_name.text_px + 'px'">{{header_union_name.text}}</span>
+			<span id="gi_hdr_union_members" class="sharp-text gi-header"
+			      data-style-font-size="header_union_members.text_px + 'px'">{{header_union_members.text}}</span>
+			<!-- 6 rows of 13 units, the native box's own m_iNumRenderLine x line step. -->
+			<div id="gi_union_list" class="scroll-pane gi-pane counter-scaled"
+			     data-style-font-size="text_px + 'px'">
+				<div class="gi-pane-row gi-union-row" data-for="r : union_rows"
+				     data-class-selected="r.selected"
+				     data-event-click="guild_info_select_union(it_index)">
+					<div class="gi-pane-row-back"></div>
+					<!-- The mark is art, not text, so unlike its row's glyphs it keeps growing
+					     with the panel: its box is bound and the 64 cells are eighths of it. -->
+					<div class="line-mark"><div class="line-mark-cell"
+					     data-for="c : r.mark_cells" data-style-background-color="c"></div></div>
+					<span class="gi-pane-cell cell-union-name">{{r.name}}</span>
+					<span class="gi-pane-cell cell-union-count"
+					      data-style-font-size="r.count_text_px + 'px'">{{r.member_count}}</span>
+				</div>
+			</div>
+			<div id="btn_union_create" class="gi-btn" data-if="union_create_button.shown" data-event-click="guild_info_button(4)">
+				<span class="sharp-text sharp-middle gi-label" data-style-font-size="text_px + 'px'"
+				      data-style-line-height="label_line_px + 'px'"><span class="native-fit">{{union_create_button.label}}</span></span>
+			</div>
+			<div id="btn_union_out" class="gi-btn" data-if="union_out_button.shown" data-event-click="guild_info_button(5)">
+				<span class="sharp-text sharp-middle gi-label" data-style-font-size="text_px + 'px'"
+				      data-style-line-height="label_line_px + 'px'"><span class="native-fit">{{union_out_button.label}}</span></span>
+			</div>
+		</div>
+
+		<!-- Render_Guild_Info()'s explanation, while the hero is in no alliance. -->
+		<div class="gi-page gi-alliance-note" data-if="!no_guild &amp;&amp; tab == 2 &amp;&amp; !union_shown">
+			<span class="sharp-text gi-note gi-alliance-line" data-for="l : alliance_lines"
+			      data-style-font-size="l.text_px + 'px'">{{l.text}}</span>
+		</div>
+
+		<div id="btn_exit" data-event-click="guild_info_button(6)" data-attr-data-hint="exit_tooltip"></div>
+		<div id="frame_corner_close" data-event-click="guild_info_button(6)"></div>
+	</div>
+</body>
+</rml>

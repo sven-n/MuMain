@@ -1,0 +1,36 @@
+<rml>
+<head>
+	<title>Main Frame Top</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="main_frame_top.rcss"/>
+</head>
+<body data-model="main_frame">
+	<!-- The corner buttons as a top-right panel, for a theme that wants them there instead of
+	     main_frame.rml's bottom #buttons row (each theme hides the one it doesn't use). A document
+	     of its own, bound to main_frame.rml's model, so it can stack under the windows docked over
+	     the top-right corner while the bars stay over them (see RmlStackingOrder.cpp). Uses flex;justify-content:flex-end instead of
+	     `.anchor-top-right`'s `right:0` -- `right:0` was confirmed not to render this element at
+	     all here (root cause unknown), flex sidesteps it. -->
+	<div id="top_right_row" class="anchor-top-left">
+		<div id="buttons_top">
+			<div id="btn_cshop_top" class="frame-btn-top" data-class-open="cshop_open" data-event-click="mainframe_cshop_click" data-attr-data-hint="cshop_tooltip">
+				<span>SHOP</span>
+			</div>
+			<div id="btn_chainfo_top" class="frame-btn-top" data-class-open="chainfo_open" data-event-click="mainframe_chainfo_click" data-attr-data-hint="chainfo_tooltip">
+				<span>CHAR</span>
+				<div class="alert-dot-top" data-class-hidden="!chainfo_alert"></div>
+			</div>
+			<div id="btn_myinven_top" class="frame-btn-top" data-class-open="myinven_open" data-event-click="mainframe_myinven_click" data-attr-data-hint="myinven_tooltip">
+				<span>INV</span>
+			</div>
+			<div id="btn_friend_top" class="frame-btn-top" data-class-open="friend_open" data-event-click="mainframe_friend_click" data-attr-data-hint="friend_tooltip">
+				<span>FRIEND</span>
+				<div class="alert-dot-top" data-class-hidden="!friend_alert"></div>
+			</div>
+			<div id="btn_window_top" class="frame-btn-top" data-class-open="window_open" data-event-click="mainframe_window_click" data-attr-data-hint="window_tooltip">
+				<span>MENU</span>
+			</div>
+		</div>
+	</div>
+</body>
+</rml>

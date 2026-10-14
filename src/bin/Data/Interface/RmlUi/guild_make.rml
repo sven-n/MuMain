@@ -1,0 +1,90 @@
+<rml>
+<head>
+	<title>Guild Master</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="guild_make.rcss"/>
+</head>
+<body>
+	<!-- The guild master's guild creation window (CGuildMakeWindow), docked right, one of three
+	     pages: the question and Create Guild (page 0); the name field, the 8 x 8 mark editor, its
+	     palette and the selected colour, Back / Next (page 1); the finished mark and name, Back /
+	     Next (page 2). The workspace slot places and scales #panel; everything inside is
+	     reference px; text is .sharp-text at the native size, counter-scaled out of the panel.
+	     A grid cell paints with guild_mark_paint(cell), a palette cell picks with
+	     guild_mark_color(colour); a button click is queued with guild_make_button(n). -->
+	<div id="panel" data-model="guild_make">
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+
+		<span class="sharp-text gm-centred" id="title" data-style-font-size="title_px + 'px'">{{title_text}}</span>
+
+		<div data-if="page == 0">
+			<span class="sharp-text gm-centred" id="info" data-style-font-size="info_px + 'px'">{{info_text}}</span>
+			<div class="gm-btn gm-btn-big" id="btn_make" data-event-click="guild_make_button(0)">
+				<span class="sharp-text sharp-middle gm-label" data-style-font-size="text_px + 'px'"
+				      data-style-line-height="label_line_px + 'px'">{{make_text}}</span>
+			</div>
+			<div id="btn_exit" data-event-click="guild_make_button(3)" data-attr-data-hint="exit_tooltip"></div>
+		</div>
+
+		<div data-if="page == 1">
+			<span class="sharp-text" id="name_label" data-style-font-size="text_px + 'px'">{{name_text}}</span>
+			<div id="name_back"></div>
+			<div class="gold-rect" id="mark_rect"><div class="gold-h"></div><div class="gold-h gold-h-end"></div><div class="gold-v"></div><div class="gold-v gold-v-end"></div></div>
+			<!-- The mark grid and the palette: each set has its own container so the theme can
+			     count its cells from the first one. -->
+			<div class="gm-grid">
+				<div class="gm-cell gm-cell-13" data-for="c : cells" data-event-mousedown="guild_mark_paint(it_index)"
+				     data-event-mouseover="guild_mark_paint(it_index)">
+					<div class="gm-fill" data-style-background-color="c.color">
+						<div class="gm-cross gm-cross-a" data-if="c.empty"></div>
+						<div class="gm-cross gm-cross-b" data-if="c.empty"></div>
+					</div>
+				</div>
+			</div>
+			<div class="gm-palette">
+				<div class="gm-cell gm-cell-18" data-for="c : palette" data-event-mousedown="guild_mark_color(it_index)">
+					<div class="gm-fill" data-style-background-color="c.color">
+						<div class="gm-cross gm-cross-a" data-if="c.empty"></div>
+						<div class="gm-cross gm-cross-b" data-if="c.empty"></div>
+					</div>
+				</div>
+			</div>
+			<div class="gm-cell gm-cell-23" id="selected_swatch">
+				<div class="gm-fill" data-style-background-color="selected.color">
+					<div class="gm-cross gm-cross-a" data-if="selected.empty"></div>
+					<div class="gm-cross gm-cross-b" data-if="selected.empty"></div>
+				</div>
+			</div>
+			<span class="sharp-text gm-hint gm-hint-1" data-style-font-size="text_px + 'px'">{{palette_hint_1}}</span>
+			<span class="sharp-text gm-hint gm-hint-2" data-style-font-size="text_px + 'px'">{{palette_hint_2}}</span>
+		</div>
+
+		<div data-if="page == 2">
+			<div class="gold-rect" id="result_rect"><div class="gold-h"></div><div class="gold-h gold-h-end"></div><div class="gold-v"></div><div class="gold-v gold-v-end"></div></div>
+			<div id="result_mark"><div class="mark-cell" data-for="m : mark_cells" data-style-background-color="m"></div></div>
+			<span class="sharp-text gm-centred" id="result" data-style-font-size="result_px + 'px'">{{result_text}}</span>
+		</div>
+
+		<div data-if="page != 0">
+			<div class="gm-btn gm-btn-small" id="btn_back" data-event-click="guild_make_button(1)">
+				<span class="sharp-text sharp-middle gm-label" data-style-font-size="text_px + 'px'"
+				      data-style-line-height="label_line_px + 'px'">{{back_text}}</span>
+			</div>
+			<div class="gm-btn gm-btn-small" id="btn_next" data-event-click="guild_make_button(2)">
+				<span class="sharp-text sharp-middle gm-label" data-style-font-size="text_px + 'px'"
+				      data-style-line-height="label_line_px + 'px'">{{next_text}}</span>
+			</div>
+		</div>
+
+		<!-- The name field, outside the page blocks so it keeps its element (and its typed value)
+		     across page changes; shown on page 1 only. -->
+		<input id="name_field" type="text" class="text-field sharp-text" maxlength="8" data-value="guild_name" data-class-shown="page == 1"
+		       data-style-font-size="text_px + 'px'"/>
+		<div id="frame_corner_close" data-event-click="guild_make_button(3)"></div>
+	</div>
+</body>
+</rml>

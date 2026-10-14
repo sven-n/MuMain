@@ -1,0 +1,63 @@
+/* The performance overlays ($fps, $details, $glstats). The workspace places this passive panel
+   at the top-left corner; $glstats sits to the right of $details. Every row is a block of its own: RmlUi lays elements out inline
+   unless a sheet says otherwise. */
+body { pointer-events: none; }
+#panel {
+    position: absolute;
+    left: 4dp;
+    top: 4dp;
+    max-width: 98vw;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    font-family: "token(font-body)";
+    font-size: 9dp;
+    line-height: 13dp;
+    pointer-events: none;
+}
+#panel.workspace-placed { transform-origin: left top; }
+#panel div { display: block; }
+
+.section { position: relative; flex: 0 0 auto; padding: 6dp 8dp 7dp 8dp; margin-right: 6dp; margin-bottom: 6dp; }
+.section > div { position: relative; }
+.section > .section-back { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
+#summary { min-width: 196dp; }
+#summary.fps-only { width: auto; }
+
+.title { font-size: 10dp; line-height: 15dp; font-weight: bold; margin-bottom: 2dp; }
+.heading { font-weight: bold; margin-top: 5dp; }
+.note { margin-top: 2dp; }
+/* Build, OS and camera, one line each, after the notes. */
+.info-line { display: block; margin-top: 2dp; white-space: nowrap; }
+
+/* A label and a value, twice, or a label and two values: columns that fill the summary's 180dp so
+   the rows line up. */
+#panel .metric { display: flex; white-space: nowrap; }
+.metric span { display: block; flex: 0 0 auto; }
+.metric .label { width: 44dp; }
+.metric .value { width: 46dp; }
+.metric .value.pair { width: 68dp; }
+#counters .metric .value.pair { width: 90dp; }
+
+#panel #graph { display: flex; width: 100%; height: 30dp; margin-top: 6dp; }
+#graph progress { display: block; flex: 1 1 0; height: 100%; }
+
+/* The passes side by side, half each, so the table stays above the HUD. */
+#panel .pass-columns { display: flex; margin-top: 4dp; margin-bottom: 4dp; }
+#panel .pass-column { margin-right: 12dp; }
+#panel .pass-column:last-child { margin-right: 0; }
+#panel .pass-row { display: flex; white-space: nowrap; }
+.pass-row span { display: block; box-sizing: border-box; width: 32dp; padding-left: 4dp; text-align: right; }
+.pass-row span:first-child { width: 50dp; padding-left: 0; text-align: left; }
+.pass-row span:last-child { width: 40dp; }
+.pass-head { font-weight: bold; }
+
+/* The original's look: white text on translucent black, yellow headings. */
+#panel { color: #eeeeee; }
+.section > .section-back { background-color: rgba(0, 0, 0, 180); }
+.title, .heading, .pass-head { color: #ffe0a0; }
+.note, .metric .label { color: #b5b5b5; }
+#graph { background-color: #101010; }
+#graph progress fill { background-color: #40d050; }
+#graph progress.medium fill { background-color: #d0d040; }
+#graph progress.slow fill { background-color: #e04040; }

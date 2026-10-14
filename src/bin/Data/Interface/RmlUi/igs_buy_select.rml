@@ -1,0 +1,54 @@
+<rml>
+<head>
+	<title>IGS Buy Select</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="igs_common.rcss"/>
+	<link type="text/rcss" href="igs_buy_select.rcss"/>
+</head>
+<body data-model="igs_buy_select">
+	<!-- CMsgBoxIGSBuySelectItem: a package with several prices. The title, the picked option's live
+	     3D item C++ draws into #igs_item, the package's name and description, the options to pick
+	     from, the picked one's price, and Buy, Gift and Cancel. -->
+	<div class="igs-dim"></div>
+	<div id="stage" class="stage">
+		<div id="panel">
+			<div class="igs-dialog-frame"></div>
+			<img id="igs_item"/>
+			<div id="igs_item_box"></div>
+			<div id="igs_title" class="igs-dialog-line">
+				<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{title}}</span>
+			</div>
+			<div id="igs_name" class="igs-dialog-line">
+				<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{name}}</span>
+			</div>
+			<div id="igs_description">
+				<div class="igs-description-line" data-for="d : description_lines">
+					<span class="sharp-text" data-style-font-size="text_px + 'px'">{{d}}</span>
+				</div>
+			</div>
+			<!-- 3 rows of 33 units, the native box's own m_iNumRenderLine times TEXT_HEIGHTSIZE. -->
+			<div id="igs_option_list" class="scroll-pane igs-pane counter-scaled"
+			     data-style-font-size="text_px + 'px'">
+				<div class="igs-option" data-for="o : options"
+				     data-class-selected="o.selected"
+				     data-event-click="igs_select_option(it_index)">
+					<!-- Was a ::CRadioButton carried on every row; the indicator is the theme's now. -->
+					<div class="igs-option-radio"></div>
+					<span class="igs-option-label">{{o.name}}</span>
+				</div>
+			</div>
+			<span id="igs_price" class="sharp-text sharp-right" data-style-font-size="text_px + 'px'">{{price}}</span>
+			<div class="igs-dialog-buttons">
+				<div class="igs-btn" data-for="b, i : buttons" data-class-disabled="!b.enabled" data-event-click="igs_dialog_button(i)">
+					<span class="sharp-text sharp-middle sharp-centre igs-btn-label" data-style-font-size="text_px + 'px'">{{b.label}}</span>
+				</div>
+			</div>
+			<div class="igs-debug">
+				<div class="igs-debug-line" data-for="d : debug_lines">
+					<span class="sharp-text" data-style-font-size="text_px + 'px'">{{d}}</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</rml>

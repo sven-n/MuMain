@@ -43,7 +43,51 @@ add_subdirectory(ThirdParty/SDL EXCLUDE_FROM_ALL)
 set(_saved_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
 set(BUILD_SHARED_LIBS OFF)
 FetchContent_MakeAvailable(SDL3_ttf)
+if(NOT TARGET SDL3_ttf::SDL3_ttf OR NOT TARGET Freetype::Freetype)
+  message(FATAL_ERROR
+    "SDL3_ttf did not provide its SDL3_ttf::SDL3_ttf and Freetype::Freetype targets. "
+    "Its cached sources may be missing while FetchContent is disconnected. "
+    "Reconfigure with -DFETCHCONTENT_FULLY_DISCONNECTED=OFF to restore SDL3_ttf "
+    "and its vendored FreeType before building RmlUi.")
+endif()
+FetchContent_MakeAvailable(SDL3_image)
 set(BUILD_SHARED_LIBS "${_saved_BUILD_SHARED_LIBS}")
+
+# FreeType -- RmlUi's default font engine (below) requires a Freetype::Freetype target.
+# Not vendored separately, and no alias needed here either: SDL3_ttf's own CMakeLists.txt
+# (FetchContent'd above) already does `if(NOT TARGET Freetype::Freetype)
+# add_library(Freetype::Freetype ALIAS freetype)` for its own vendored copy -- confirmed in
+# _deps/sdl3_ttf-src/CMakeLists.txt. RmlUi's own Dependencies.cmake only checks
+# `if(NOT TARGET Freetype::Freetype)` (CMake/Utilities.cmake's
+# report_dependency_found_or_error), so it picks up SDL3_ttf's alias for free. A second
+# `add_library(... ALIAS ...)` here collided with it under vcpkg's `_add_library` override
+# (CMake error: "cannot create ALIAS target 'Freetype::Freetype' because another target
+# with the same name already exists") -- don't re-add it.
+
+mu_ensure_submodule("ThirdParty/RmlUi"
+  INDICATOR "CMakeLists.txt"
+  URL "https://github.com/nitoygo/RmlUi.git")
+
+# RmlUi -- static link, no bundled samples/Lua bindings. We supply our own
+# Rml::RenderInterface/SystemInterface (source/Render/RmlUi/) targeting this branch's
+# IMuRenderer/SDL_GPU renderer instead of one of RmlUi's stock backends -- except for the
+# renderer, which (unlike on feature/rmlui-migration, where RHI:: was a closer match than
+# any of RmlUi's own backends) reuses RmlUi's own vendored RenderInterface_SDL_GPU
+# (Backends/RmlUi_Renderer_SDL_GPU.cpp, compiled explicitly below) rather than a hand-rolled
+# bridge -- see the rmlui-on-sdl-gpu port plan for why. RMLUI_BACKEND only selects which
+# backend the SAMPLES build against (RmlUi's own CMakeLists.txt validates it unconditionally
+# regardless of RMLUI_SAMPLES though, so it must still be left at a valid value from
+# CMake/OptionsLists.cmake; "auto" is a no-op here since RMLUI_SAMPLES is OFF). Font engine
+# left at RmlUi's own default (freetype, vendored above) rather than building a custom bridge
+# to this engine's text rendering. Not gated behind ENABLE_EDITOR (unlike imgui above): this
+# ships in the real game, not just admin/editor builds.
+set(RMLUI_SAMPLES OFF CACHE BOOL "" FORCE)
+set(RMLUI_BACKEND "auto" CACHE STRING "" FORCE)
+set(RMLUI_LUA_BINDINGS OFF CACHE BOOL "" FORCE)
+set(RMLUI_INSTALL OFF CACHE BOOL "" FORCE)
+# calc(), min(), max() and clamp(): the themes size the item grids from their --item-cell pitch.
+set(RMLUI_MATH_EXPRESSIONS ON CACHE BOOL "" FORCE)
+add_subdirectory(ThirdParty/RmlUi EXCLUDE_FROM_ALL)
 
 # Determine architecture if CMAKE_SIZEOF_VOID_P isn't set
 if (NOT DEFINED CMAKE_SIZEOF_VOID_P OR CMAKE_SIZEOF_VOID_P EQUAL 0)
@@ -139,6 +183,19 @@ list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Render[/\\]Renderer[/\\]MuRend
 # compiled as a second backend.
 list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Render[/\\](Core|RHI|Shaders)[/\\]")
 
+# RmlUi's official SDL input-event backend (RmlSDL::InputEventHandler/ConvertKey/
+# ConvertMouseButton/GetKeyModifierState) and SDL_GPU renderer backend
+# (RenderInterface_SDL_GPU) -- neither is part of RmlUi::Core itself (RMLUI_SAMPLES=OFF
+# above skips building any of RmlUi's bundled renderer/platform backends). Only these two
+# files are compiled, not the rest of ThirdParty/RmlUi/Backends/ (which also contains
+# GL2/GL3/Vulkan renderer backends and a SystemInterface_SDL class this project doesn't
+# need -- see RmlUiSystemInterface). Not picked up by the GLOB_RECURSE above since it globs
+# "source/*.cpp", not ThirdParty/.
+list(APPEND MU_CLIENT_SOURCES
+  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/RmlUi/Backends/RmlUi_Platform_SDL.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/RmlUi/Backends/RmlUi_Renderer_SDL_GPU.cpp"
+)
+
 # The control socket and its local-socket transport exist only in developer
 # builds. The two headers that the rest of the client includes
 # (App/Control/ControlTaps.h, ControlServer.h) compile to no-ops without
@@ -146,8 +203,8 @@ list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Render[/\\](Core|RHI|Shaders)[
 if(NOT ENABLE_CONTROL_SOCKET)
   list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]App[/\\]Control[/\\]")
   list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Core[/\\]Platform[/\\]LocalSocket\\.cpp$")
-  # The injector is the control socket's hands; its header compiles the two
-  # calls the rest of the client makes to nothing.
+  # The injector is the control socket's hands; its header leaves no-op
+  # call sites for ordinary player builds.
   list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Core[/\\]Input[/\\]SyntheticInput\\.cpp$")
 endif()
 
@@ -229,6 +286,30 @@ target_link_libraries(MuClient PUBLIC OpenSSL::Crypto)
 if(TARGET SDL3_ttf::SDL3_ttf)
   target_link_libraries(MuClient PUBLIC SDL3_ttf::SDL3_ttf)
 endif()
+if(TARGET SDL3_image::SDL3_image)
+  target_link_libraries(MuClient PUBLIC SDL3_image::SDL3_image)
+endif()
+
+# RmlUi (game UI middleware). The real target is rmlui_core, aliased as RmlUi::Core
+# (Source/Core/CMakeLists.txt).
+target_link_libraries(MuClient PUBLIC RmlUi::Core)
+target_include_directories(MuClient PUBLIC
+  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/RmlUi/Backends"
+)
+# RmlUi_Platform_SDL.h's SDL2-vs-SDL3 API switch -- this project is SDL3-only.
+target_compile_definitions(MuClient PUBLIC RMLUI_SDL_VERSION_MAJOR=3)
+
+# Multisampled RmlUi layers trigger device loss on reported NVIDIA/Vulkan runs.
+# Use single-sampled UI by default on every driver; keep MSAA opt-in for diagnosis.
+set(RMLUI_SDL_GPU_NUM_MSAA_SAMPLES "1" CACHE STRING "RmlUi layer samples (1 disables MSAA)")
+set(MU_RMLUI_MSAA_SAMPLE_COUNTS 1 2 4 8)
+set_property(CACHE RMLUI_SDL_GPU_NUM_MSAA_SAMPLES PROPERTY STRINGS ${MU_RMLUI_MSAA_SAMPLE_COUNTS})
+if(NOT RMLUI_SDL_GPU_NUM_MSAA_SAMPLES IN_LIST MU_RMLUI_MSAA_SAMPLE_COUNTS)
+  message(FATAL_ERROR "RMLUI_SDL_GPU_NUM_MSAA_SAMPLES must be 1, 2, 4, or 8")
+endif()
+target_compile_definitions(MuClient PUBLIC
+  RMLUI_SDL_GPU_NUM_MSAA_SAMPLES=${RMLUI_SDL_GPU_NUM_MSAA_SAMPLES}
+)
 
 # The in-game shop downloader uses libcurl on every platform.
 find_package(CURL REQUIRED)
@@ -320,6 +401,29 @@ if (MSVC)
   target_link_options(Main PRIVATE
     $<$<CONFIG:Release>:/DEBUG>
     $<$<CONFIG:Release>:/MAP:$<TARGET_FILE_DIR:Main>/Main.map>
+  )
+endif()
+
+# Dead-code evidence from the real build: /OPT:REF discards every COMDAT nothing
+# references, and /MAP then lists exactly what survived. A function defined in
+# MuClient.lib but absent from Main.map had no caller. Off by default -- it
+# forces /INCREMENTAL:NO (mutually exclusive with /OPT:REF), so it's a
+# deliberate investigation pass, not normal iteration.
+#
+# Deliberately not /VERBOSE:REF, which names each discarded COMDAT directly but
+# writes to the linker's stdout -- CMake wraps MSVC links in `cmake -E
+# vs_link_exe` (manifest handling) and that wrapper swallows it, so the report
+# never reaches the build log. The map file survives the wrapper.
+#
+# Reads as evidence only at COMDAT granularity: a function reachable solely
+# through a vtable slot still counts as referenced, so a discarded symbol is
+# proof of death while a surviving one is not proof of life.
+option(MU_REPORT_DEAD_SYMBOLS "Link with /OPT:REF + /MAP to expose unreferenced functions" OFF)
+if (MSVC AND MU_REPORT_DEAD_SYMBOLS)
+  target_link_options(Main PRIVATE
+    /INCREMENTAL:NO
+    /OPT:REF
+    $<$<NOT:$<CONFIG:Release>>:/MAP:$<TARGET_FILE_DIR:Main>/Main.map>
   )
 endif()
 
@@ -991,6 +1095,47 @@ add_custom_target(CheckGLWrapperMonopoly ALL
   VERBATIM
 )
 add_dependencies(MuClient CheckGLWrapperMonopoly)
+
+# No OUTPUT means this target is always considered out-of-date and re-runs every build. See
+# tools/check_rml_rcss_syntax.py's own docstring for what it does and doesn't check.
+add_custom_target(CheckRmlRcssSyntax ALL
+  COMMAND "${Python3_EXECUTABLE}" "${REPO_ROOT}/tools/check_rml_rcss_syntax.py"
+          --asset-root "${ASSETS_DIR}/Data/Interface/RmlUi"
+  COMMENT "Checking RML/RCSS syntax (comment nesting, brace balance)"
+  VERBATIM
+)
+add_dependencies(Main CheckRmlRcssSyntax)
+
+# No OUTPUT means this target is always considered out-of-date and re-runs every build. See
+# tools/check_rml_rcss_drift.py's own docstring for what it does and doesn't check.
+add_custom_target(CheckRmlRcssDrift ALL
+  COMMAND "${Python3_EXECUTABLE}" "${REPO_ROOT}/tools/check_rml_rcss_drift.py"
+          --source-root "${CMAKE_CURRENT_SOURCE_DIR}/source"
+          --asset-root "${ASSETS_DIR}/Data/Interface/RmlUi"
+  COMMENT "Checking RML/RCSS theme-fork drift (every theme copy still satisfies its C++ contract)"
+  VERBATIM
+)
+add_dependencies(Main CheckRmlRcssDrift)
+
+# No OUTPUT means this target is always considered out-of-date and re-runs every build. See
+# tools/check_rml_bound_geometry.py's own docstring for why a bound coordinate is worth a guard.
+add_custom_target(CheckRmlBoundGeometry ALL
+  COMMAND "${Python3_EXECUTABLE}" "${REPO_ROOT}/tools/check_rml_bound_geometry.py"
+          --asset-root "${ASSETS_DIR}/Data/Interface/RmlUi"
+  COMMENT "Checking RML bound-geometry ownership (layout a theme cannot override)"
+  VERBATIM
+)
+add_dependencies(Main CheckRmlBoundGeometry)
+
+# No OUTPUT means this target is always considered out-of-date and re-runs every build. See
+# tools/check_layout_transform_users.py's own docstring for what it counts and why.
+add_custom_target(CheckLayoutTransformUsers ALL
+  COMMAND "${Python3_EXECUTABLE}" "${REPO_ROOT}/tools/check_layout_transform_users.py"
+          --source-root "${CMAKE_CURRENT_SOURCE_DIR}/source"
+  COMMENT "Checking active UI transform users (only the infrastructure may use it)"
+  VERBATIM
+)
+add_dependencies(Main CheckLayoutTransformUsers)
 
 # MinGW (32-bit or 64-bit) cross-toolchains: link against the Windows/OpenGL
 # system libraries so that gl*, wgl*, Imm*, timeGetTime, etc. resolve.

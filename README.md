@@ -2,311 +2,166 @@
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/sven-n/MuMain)
 
-This is my special fork of the Season 5.2 client sources [uploaded by Luois](https://github.com/LouisEmulator/Main5.2).
+A fork of the Season 5.2 client sources [uploaded by Louis](https://github.com/LouisEmulator/Main5.2),
+modernized for Season 6 Episode 3 and playable with [OpenMU](https://github.com/MUnique/OpenMU).
+The project improves rendering, UI, networking and developer tooling while continuing work
+on Season 6 compatibility.
 
-The ultimate goal is to clean it up and make it compatible and feature complete
-to Season 6 Episode 3.
+## Features
 
-What I have done so far:
-  * 🔥 The framerate has been increased.
-    * By default, it uses V-Sync without fps limit. If V-Sync is not
-    available, it limits to 60 fps.
-    * The options menu includes a checkbox to reduce effects to achieve higher frame rates.
-    * Chat commands:
-      * Change FPS-Limit: `$fps <value>`
-      * V-Sync: `$vsync on` / `$vsync off`
-      * Show simple FPS counter: `$fpscounter on` / `$fpscounter off`
-      * Show a details overlay (FPS, slowest frames, frame time graph, build, scene, mouse, and camera): `$details on` / `$details off`
-      * Show SDL GPU draw, merge, buffer, texture, and per-pass CPU statistics (including skinning, effect simulation, and present time): `$glstats on` / `$glstats off`
-  * 🔥 Rendering uses deferred SDL GPU commands, indexed quads and strips,
-    growable per-frame buffers, and safe adjacent draw merging.
-  * 🔥 The upstream Core Profile performance series is mapped to SDL GPU (see
-    [docs/GPU Skinning/glperf](docs/GPU%20Skinning/glperf/README.md)): packed
-    3x4 bone palettes, renderer statistics, pass attribution, buffer growth,
-    and heap-free sprite geometry generation are retained without restoring the
-    retired OpenGL RHI or its hardware-specific measurements.
-  * 🔥 Added inventory and vault extensions.
-  * 🔥 The master skill tree system was upgraded to Season 6
-  * 🔥 Unicode support: The client works with UTF-16LE instead of ANSI in memory.
-    All strings and char arrays have been changed to use wide characters.
-    Strings coming from files and the network are handled as UTF-8.
-  * 🔥 Replaced the network stack with MUnique.OpenMU.Network to make it easier to
-    apply changes. This repository includes a C# .NET 10 client library which is built
-    with Native AOT.
-  * 🔥 The network protocol has been adapted for Season 6 Episode 3 - there is probably
-    still some work to do, but it connects to [OpenMU](https://github.com/MUnique/OpenMU)
-    and is playable. Additionally, the protocol has been extended so it's not standard
-    anymore.
-    * Damage, Exp etc. can exceed 16 bit now.
-    * Improved item serialization
-    * Improved appearance serialization
-    * Added monster health status bar after attack
-  * 🔥 Significant changes from Qubit have been incorporated, such as
-    * Rage Fighter class
-    * Visual bug when Dark Lord walks with Raven
-    * Item equipping with right mouse click
-    * Glow for red, blue and black fenrir
-    * Additional screen resolutions
-  * 🔥 Incorporated MU Helper UI and logic - there's some work to do but core functionality is usable
-  * 🔥 Auto-reconnect system
-  * Removed if-defs for Rage Fighter class as we are targeting Season 6, so Rage
-    Fighter should always be included.
-  * Some minor bug fixes, e.g.:
-    * Storm Crow item labels
-    * Ancient set labels
-  * The code has been refactored. A lot of magic values have been replaced by
-    enums and constants.
-  * 🔥 New Translation system (see [docs/translation-system.md](docs/translation-system.md))
+### Gameplay and compatibility
 
-What needs to be done for Season 6:
-  * Lucky Items
+- 🔥 Inventory and vault extensions, the Season 6 master skill tree, and Rage Fighter support.
+- 🔥 MU Helper UI and core logic, with further improvements still planned.
+- 🔥 Automatic reconnection and monster health bars after attacking.
+- 🔥 Qubit's improvements to right-click equipping, Dark Lord's Raven visuals, Fenrir glow,
+  and screen resolutions.
+- 🔥 Extended Season 6 networking with larger damage/EXP values and improved item and
+  appearance serialization. The protocol includes custom extensions.
+
+### Rendering and UI
+
+- 🔥 Higher frame rates than the original's fixed 25 FPS: VSync by default, uncapped when VSync
+  is off (`$fps <value>` sets a cap), while animation and movement keep their 25 FPS timing
+  ([ADR 0001](docs/adr/0001-preserve-25-fps-reference-timing.md)).
+- 🔥 SDL GPU rendering with deferred draw batching, indexed geometry, growable buffers,
+  packed bone palettes, allocation-free sprites, and detailed performance statistics.
+- 🔥 A unified RmlUi system with layout and styling in RML/RCSS, centralized UI scaling,
+  theme inheritance, and theme-defined window placement.
+- 🔥 Unicode text and a generated translation system for runtime language switching.
+- 🔥 A C# .NET 10 network library built with Native AOT, using MUnique.OpenMU.Network.
+
+### Developer tools
+
+- 🔥 Socket-based automation for gameplay and UI interactions, state inspection, and screenshots;
+  the in-game tester generates pass/fail reports.
+- 🔥 An in-game MU Editor for camera and rendering tuning, terrain and world object editing,
+  and minimap capture.
+- 🔥 Chat diagnostics for frame timing, rendering statistics and per-system rendering cost,
+  plus UI previews of any window or event; see [Chat commands](#chat-commands).
+
+Remaining Season 6 work includes Lucky Items.
 
 ## Release downloads
 
-CI validates Windows native x64 Release, Linux x64 Release, and
-macOS arm64 Release, all with the editor OFF, and uploads no-data runtime
-artifacts for all three. Semantic Release publishes all three as GitHub Release
-assets. The runtimes exclude `Data/` and `fonts/`; each release has a
-**Compatible game data** link to the exact separate data release tagged
-`data-<id>`. Follow the platform-specific assembly steps in the build guide.
+Hosted releases provide Windows native x64 Release, Linux x64 Release and macOS arm64 Release
+builds with the editor disabled; Semantic Release publishes all three as GitHub Release assets.
+Each runtime excludes `Data/` and `fonts/`: its **Compatible game data** link points to the
+separate data release tagged `data-<id>`. Follow the platform-specific assembly steps in the
+[release instructions](docs/build/README.md#hosted-releases).
 
-x86, Debug, editor-ON, MinGW, and other configurations remain supported where
-listed below, but are not hosted artifacts. Whoever needs one must build locally.
-See the [build guide](docs/build/README.md#hosted-releases) for checksum and
-assembly commands.
+x86, Debug, editor-enabled and MinGW configurations are not hosted; build locally where
+supported. See the [supported targets](docs/build/README.md#supported-targets).
 
-## How to build & run
+## Build quick start
 
-### Requirements
-* **CMake** 3.25 or newer (bundled with Visual Studio and CLion)
-* **.NET SDK 10.0** or newer (for building the Client Library)
-* **Visual Studio 2022+** with C++ and C# workloads, **CLion**, or **Rider** (see IDE-specific instructions below)
-* A compatible server: [OpenMU](https://github.com/MUnique/OpenMU)
+Use **CMake 3.25+**, a platform C++ toolchain, and the **.NET 10 SDK**. Platform-specific
+prerequisites, IDE setup, dependency troubleshooting and cross-compilation instructions
+live in the [build guide](docs/build/README.md).
 
-### First Time Setup - Initialize Submodules
+| Environment             | Guide                                                                   |
+| ----------------------- | ----------------------------------------------------------------------- |
+| Windows / Visual Studio | [Visual Studio setup](docs/build/windows/visual-studio.md)              |
+| Windows / terminal      | [CMake presets and prerequisites](docs/build/windows/console.md)        |
+| Linux / terminal        | [Native Linux setup](docs/build/linux/console.md)                       |
+| Linux or Windows IDEs   | [CLion, Rider and VS Code guides](docs/build/README.md#pick-your-setup) |
+| WSL / MinGW             | [Windows cross-compilation](docs/build/windows/wsl.md)                  |
 
-The project uses three git submodules under `src/ThirdParty/`:
-
-- `SDL` - windowing, input and audio backend (required for all builds)
-- `SDL_mixer` - audio mixer (required for all builds)
-- `imgui` - in-game editor UI (only needed when built with `-DENABLE_EDITOR=ON`, independent of Debug/Release)
-
-CMake initializes these automatically on first configure. If that fails for any reason, run from the repository root:
-
-```bash
-git submodule update --init
-```
-
-### Build Configurations
-
-There are two orthogonal choices: **editor on/off** (configure-time, picked via preset) and **Debug/Release** (build-time).
-
-#### Editor builds (`windows-x86-mueditor` / `windows-x64-mueditor`)
-- Configure preset sets `ENABLE_EDITOR=ON`
-- Includes the in-game MU Editor (ImGui-based); the `imgui` submodule must be initialized
-- Press **F12** in-game to toggle the editor
-- Start with `--editor` flag to launch with editor enabled
-- Preprocessor define: `_EDITOR`
-
-#### Standard builds (`windows-x86` / `windows-x64`)
-- Configure preset sets `ENABLE_EDITOR=OFF`; no editor code is compiled in and the `imgui` submodule is not initialized
-- Zero editor overhead
-
-Either configuration can be built as Debug or Release via the corresponding build preset (`*-debug` or `*-release`).
-
-### Building with CMake and MinGW-w64 (Linux)
-
-The repository also contains a CMake setup to cross-compile the Windows client
-from Linux using a MinGW-w64 toolchain.
-
-**Prerequisites**
-
-  * A working MinGW-w64 toolchain (for example `i686-w64-mingw32-g++`).
-  * A MinGW-w64 build of libjpeg-turbo which provides a `libturbojpeg` library
-    (static or import library) on the library search path of your toolchain.
-  * Standard Windows / OpenGL libraries shipped with MinGW-w64 (e.g. `opengl32`,
-    `glu32`, `winmm`, `imm32`, `ws2_32`, etc.).
-
-**Example build commands on Linux**
-
-From the repository root:
-
-```sh
-cmake -S . -B build-mingw \
-  -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/mingw-w64-i686.cmake \
-  -DCMAKE_BUILD_TYPE=Release
-cmake --build build-mingw -j$(nproc)
-```
-
-If the linker reports `cannot find -lturbojpeg`, install a MinGW-w64 build of
-libjpeg-turbo (providing `libturbojpeg.a` / `libturbojpeg.dll.a`) or adjust the
-`target_link_libraries` entry in `src/CMakeLists.txt` to match the
-name of the library available on your system.
-
----
-
-
-
-
-
-### Building the Project
-
-The project uses **CMake** as its build system. The `.NET Client Library` is automatically built by CMake when you build the main project - no manual publishing required!
-
-#### Option 1: Visual Studio 2022+ (Recommended)
-
-1. **Open the project:**
-   - File → Open → Folder
-   - Select the root `MuMain` folder (not `src`)
-
-2. **Wait for CMake to configure** (automatically happens, check Output window)
-
-3. **Select build configuration:**
-   - Use the dropdown to select `x86-Debug` or `x86-Release`
-
-4. **Build:**
-   - Build → Build All
-   - Or press `Ctrl+Shift+B`
-
-5. **Run/Debug:**
-   - Select `Main.exe` as startup item
-   - Press `F5` to debug or `Ctrl+F5` to run
-   - Working directory is automatically set to `src/bin`
-
-**Note:** The working directory is pre-configured in `.vs/launch.vs.json`. If it's not working, ensure you opened the root `MuMain` folder, not a subfolder.
-
-#### Option 2: CLion
-
-1. **Open the project:**
-   - File → Open
-   - Select the root `MuMain` folder
-
-2. **Wait for CMake to configure** (automatically happens)
-
-3. **Configure working directory:**
-   - Run → Edit Configurations
-   - Select `Main`
-   - Set "Working directory" to the build output directory (e.g. `cmake-build-debug/src/Debug`)
-   - The post-build step copies all game assets there automatically
-
-4. **Build and Run:**
-   - Click the hammer icon to build
-   - Click the play icon to run
-
-#### Option 3: Rider (CMake via Command Line + Rider for Development)
-
-Rider doesn't have full CMake support for C++ projects, so you need to generate a Visual Studio solution first:
-
-1. **Generate the solution** (one-time setup):
-   ```bash
-   cmake -B build -G "Visual Studio 17 2022" -A Win32
-   ```
-   *(Adjust the generator version based on your installed Visual Studio)*
-
-2. **Open in Rider:**
-   - File → Open
-   - Select `build/MuMain.sln`
-
-3. **Build and Run:**
-   - Build → Build Solution
-   - Run → Run 'Main'
-
-**Important:** When you modify `CMakeLists.txt`, you must manually regenerate the solution by running the cmake command again.
-
-#### Option 4: Command Line Build (Windows)
-
-Using CMakePresets.json with Ninja (same as IDEs, much faster than MSBuild):
+For a Windows x64 player build, install the prerequisites in the Windows terminal guide,
+set `VCPKG_ROOT`, then run from the repository root in a Visual Studio Developer PowerShell:
 
 ```powershell
-# Configure x86 build (first time only, or when CMakeLists.txt changes)
-cmake --preset windows-x86
-
-# Build Debug
-cmake --build --preset windows-x86-debug
-
-# Build Release
-cmake --build --preset windows-x86-release
-
-# For x64 builds, use windows-x64 presets instead
 cmake --preset windows-x64
-cmake --build --preset windows-x64-debug
+cmake --build --preset windows-x64-release
+cd out/build/windows-x64/src/Release
+.\Main.exe
 ```
 
-**Note:** Ninja Multi-Config allows switching between Debug and Release without reconfiguring. Assets are automatically copied to the build output directory during compilation.
+CMake initializes required submodules and downloads dependencies during configuration.
+Native builds also build the network library and stage game assets beside the executable.
+Run from that output directory so the client finds its data and libraries.
 
-**To start fresh (clean build):**
-```powershell
-Remove-Item -Recurse -Force out
-```
+Player presets disable the editor and control socket. The `-mueditor` presets enable
+both, plus the in-game tester. These configure-time choices are independent of Debug,
+Release or RelWithDebInfo; see [build options](docs/build/README.md#build-options).
 
-**Run the executable:**
-```powershell
-# x86 Debug
-./out/build/windows-x86/src/Debug/Main.exe
+## Running the client
 
-# x86 Release
-./out/build/windows-x86/src/Release/Main.exe
-```
+Run `Main.exe` from its output directory. It connects to the server in `config.ini`
+(`[CONNECTION SETTINGS]`, localhost port `44405` by default); `Main.exe connect /u<IP> /p<PORT>`
+overrides it for that run, for example `Main.exe connect /u192.168.0.20 /p55902`. The
+[OpenMU launcher](https://github.com/MUnique/OpenMU/releases) passes the same arguments.
+The client identifies itself with version `2.04d` and serial `k1Pk2jcET48mxL3b`.
 
-#### Option 5: Command Line Build (Linux) !Not Working Yet!
-For Linux builds, you'll need to add Linux presets to CMakePresets.json. Example workflow:
+### Client configuration (`config.ini`)
 
-```bash
-# Configure for Debug with Ninja (recommended)
-cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DENABLE_EDITOR=OFF
+The client reads `config.ini` from the executable directory and creates it on first save.
+Missing keys take the defaults below. The options window writes most of them; see
+[Options window and config](docs/options-window.md).
 
-# Build
-cmake --build build
+| Section                     | Key                                                                                                   | Default              | Description                                                                                                                                                      |
+| :-------------------------- | :---------------------------------------------------------------------------------------------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`[Window]`**              | `Width`, `Height`                                                                                     | `1024`, `768`        | Window or fullscreen resolution.                                                                                                                                 |
+| **`[Window]`**              | `Windowed`                                                                                            | `1`                  | `0` runs fullscreen.                                                                                                                                             |
+| **`[Audio]`**               | `SoundVolume`, `MusicVolume`                                                                          | `5`                  | `0` mutes.                                                                                                                                                       |
+| **`[LOGIN]`**               | `Language`                                                                                            | `Eng`                | Game data language: the `Data/Local/<Language>/` folder (item names, map name art).                                                                              |
+| **`[LOGIN]`**               | `RememberMe`, `SavePassword`                                                                          | `0`                  | Remember the account name, and the password too. Both are stored encrypted for this machine and user (`EncryptedUsername`, `EncryptedPassword`).                 |
+| **`[CONNECTION SETTINGS]`** | `ServerIP`, `ServerPort`                                                                              | `localhost`, `44405` | Server to connect to when no `connect` argument is given.                                                                                                        |
+| **`[UI]`**                  | `Locale`                                                                                              | `en`                 | UI language (`en`, `de`, `es`, `id`, `ja`, `pl`, `pt`, `ru`, `tl`, `uk`, `zh-TW`). Switchable at runtime in the options window.                                  |
+| **`[UI]`**                  | `Font`                                                                                                | empty                | UI font family; empty uses the platform's default.                                                                                                               |
+| **`[UI]`**                  | `RmlTheme`                                                                                            | `legacy`             | UI theme: `legacy` (the original look) or `modern`. `$theme <name>` switches it for the session.                                                                 |
+| **`[UI]`**                  | `UIScalePercent`                                                                                      | `100`                | UI scale, clamped to `75`-`150`.                                                                                                                                 |
+| **`[UI]`**                  | `EnableAnimationTaskPool`                                                                             | `0`                  | `1` updates character animation through `AnimationTaskPool` when at least 20 characters are visible.                                                             |
+| **`[Camera]`**              | `Zoom`                                                                                                | `1735`               | Persisted Orbital-camera distance.                                                                                                                               |
+| **`[Render]`**              | `VSync`                                                                                               | `1`                  | `0` disables VSync across restarts and resolution changes. `$vsync on` / `$vsync off` update it.                                                                 |
+| **`[Render]`**              | `FpsCap`                                                                                              | `-1`                 | Frame cap while VSync is off; `-1` is uncapped. `$fps <value>` updates it.                                                                                       |
+| **`[Render]`**              | `Backend`                                                                                             | `default`            | SDL GPU driver: `default`, `vulkan`, `direct3d12` (or `d3d12`), `metal`. Falls back to SDL's choice with a logged warning when unavailable. Edited by hand only. |
+| **`[Render]`**              | `DisableEffects`, `DisableParticles`, `DisableSkillEffectModels`, `DisableBoids`, `DisableWingShadow` | `0`                  | Rendering-cost reductions for low-end PCs, also in the options window and `$effects`.                                                                            |
+| **`[Render]`**              | `SortParticleDraws`                                                                                   | `0`                  | Opt-in depth sorting of particle draws.                                                                                                                          |
+| **`[ChatCommands]`**        | `Favourite<N>`, `Template<N>`                                                                         | none                 | Written by the [chat commands window](docs/chat-commands.md).                                                                                                    |
 
-# To switch to Release, reconfigure:
-cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DENABLE_EDITOR=OFF
-cmake --build build
-```
+The retired `[Render] CoreProfile` key is ignored, and keys the client no longer uses are
+removed from the file when it loads.
 
-**To start fresh (clean build):**
-```bash
-rm -rf build
-```
+### Command-line flags and options
 
-**Run the executable:**
-```bash
-./build/src/Main
-```
+- **`connect /u<IP> /p<PORT>`**: connects to that server instead of `[CONNECTION SETTINGS]`.
+- **`--enable-taskpool`**: enables `AnimationTaskPool` regardless of `config.ini`; the
+  20-character threshold still applies.
+- **`--editor`**: starts with the ImGui editor open in editor-enabled builds (the `-mueditor`
+  presets); **F12** toggles it.
 
----
+### Chat commands
 
-### Running the Client
+Typed into the chat input, in any build:
 
-It supports the common starting parameters `/u` and `/p`, example: `main.exe connect /u192.168.0.20 /p55902`.
-The [OpenMU launcher](https://github.com/MUnique/OpenMU/releases/download/v0.8.17/MUnique.OpenMU.ClientLauncher_0.8.17.zip)
-will work as well. By default, it connects to localhost and port `44406`.
-The client identifies itself with Version `2.04d` and serial `k1Pk2jcET48mxL3b`.
+- `$fps <value>`, `$vsync on|off`, `$fpscounter on|off`, `$details on|off`, `$glstats on|off`:
+  frame timing and rendering statistics.
+- `$effects on|off` and `$effects <system> on|off`, where `<system>` is `sprites`, `particles`,
+  `skillmodels`, `boids`, `wingshadow`, `joints` or `wingextralayers`: turn rendering systems
+  off to compare their cost.
+- `$theme <name>`: switch the UI theme for this session.
+- `$win <name> [full]` (`$win list` names them), `$preview <event>` (`$preview` lists them,
+  `$preview off` ends one) and `$dialog`: open any window, event windows with sample data, and
+  test dialogs, for UI work.
 
-#### Client configuration (`config.ini`)
+### Environment variables
 
-The client reads options from `config.ini` in the executable directory:
+Developer diagnostics, read at startup:
 
-| Section | Key | Default Value | Description |
-| :--- | :--- | :--- | :--- |
-| **`[UI]`** | `EnableAnimationTaskPool` | `0` | Set to `1` to process character animation through `AnimationTaskPool` when at least 20 active characters are visible. `0` keeps sequential updates. |
-| **`[UI]`** | `Locale` | `"en"` | Active generated UI locale. The Options window persists runtime language changes here. |
-| **`[Camera]`** | `Zoom` | `1735` | Persisted Orbital-camera distance. |
-| **`[Render]`** | `VSync` | `1` | `1` enables display-paced presentation; `0` keeps VSync disabled across restarts and fullscreen/resolution changes. `$vsync on` / `$vsync off` update this value. |
-
-Rendering always uses the SDL GPU backend. The legacy `[Render] CoreProfile`
-key is not read; values `0` and `1` have no effect and do not select an OpenGL
-context.
-
-#### Command-line flags and options
-
-- **Connection string**: `main.exe connect /u<IP> /p<PORT>`.
-- **`--enable-taskpool`**: Enables `AnimationTaskPool` regardless of
-  `config.ini`; the 20-character threshold still applies.
-- **`--editor`**: Starts the ImGui editor enabled on `*_mueditor` builds;
-  **F12** toggles it.
+| Variable                                                            | Effect                                                                                                                                          |
+| :------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MU_CONTROL_SOCKET=<path>`                                          | Opens the [control socket](docs/control-socket.md) there (builds with `ENABLE_CONTROL_SOCKET`).                                                 |
+| `MU_CAPTURE_FRAME=<N>`, `MU_CAPTURE_PATH=<file>`                    | Dumps the Nth presented frame as a PPM (default `mu-frame.ppm`), for headless setups.                                                           |
+| `MU_RENDER_TIMING`                                                  | Logs frame timing and renderer counters every 60 frames; see [rendering parity](docs/build/rendering-parity.md).                                |
+| `MU_INPUT_DIAGNOSTICS`                                              | Logs window scale metrics and input routing.                                                                                                    |
+| `MU_NETWORK_DIAGNOSTICS`                                            | Logs every sent and received packet.                                                                                                            |
+| `MU_D3D12_DISABLE_CULLING=1`, `MU_D3D12_DISABLE_TRIANGLE_MERGING=1` | Direct3D 12 driver only: turn culling or triangle merging off to isolate driver issues; see [rendering parity](docs/build/rendering-parity.md). |
 
 ## Documentation
 
+- [RmlUi UI system](docs/rmlui-ui-system/README.md) - UI architecture, building
+  windows, layout and scaling, theming, and reusable components.
 - [GPU skinning and SDL GPU rendering](docs/GPU%20Skinning/README.md) - the
   downstream mapping for upstream Core Profile, GPU skinning, and DXP work.
 - [Camera system](docs/camera-system.md) - modes, switching (F9), config,
@@ -315,8 +170,8 @@ context.
 - [Chat commands window](docs/chat-commands.md) - the commands the server
   offers (J), how their values are entered, and how favourites and
   templates are stored.
-- [DevEditor](docs/dev-editor.md) - the in-game tuning UI (F12, debug
-  builds only), including the [Map Editor tab](docs/dev-editor.md#33-map-editor-tab)
+- [DevEditor](docs/dev-editor.md) - the in-game tuning UI (F12, editor-enabled
+  builds), including the [Map Editor tab](docs/dev-editor.md#33-map-editor-tab)
   for terrain textures/height/attributes, world objects, and minimap capture.
 - [Options window and config](docs/options-window.md) - runtime
   resolution / windowed toggle, slider rounding, and what the options
@@ -343,8 +198,14 @@ AI coding assistants (Claude Code, Cursor, Codex, etc.) should also read
 
 ## Credits
 
-  * Webzen
-  * Louis
-  * Qubit (tuservermu.com.ve)
-  * Community members of RaGEZONE and tuservermu.com.ve for posting fixes
-  * [Nitoy](https://github.com/nitoygo) for the MU Helper
+- Webzen
+- Louis
+- Qubit (tuservermu.com.ve)
+- Community members of RaGEZONE and tuservermu.com.ve for posting fixes
+- [Nitoy](https://github.com/nitoygo) for the MU Helper and RmlUi UI System
+- [janblade](https://github.com/janblade) for the work on GPU Skinning and some rendering optimizations
+- [yesid](https://github.com/yesid-bocanegra) for the SDL3 and SDL_GPU porting
+- [valentino](https://github.com/valentinoConti) for the Map Editor
+- [StinkyFax](https://github.com/alandarev) for the Socket Control automation
+- [Mosch](https://github.com/Mosch0512) for general maintenance, code quality and organizational fixes, and various feature support (such as MU Editor, data driven framework, etc)
+- And to all the contributors who helped test, report issues, suggest improvements, and send PRs. 🔥

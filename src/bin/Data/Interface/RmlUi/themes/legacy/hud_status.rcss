@@ -1,0 +1,25 @@
+/* Legacy theme for the HUD status texts (see hud_status.rml), reproducing the original's native
+   draws: RenderSwichState()'s crown switch lines centred at 480 - 85 and 15 below it in white;
+   RenderTimes()'s "Macro Time" at 480 - 48 - 40 over RenderBar()'s 50 x 2 bar (frame 54 x 6, its
+   half-black shadow one pixel down and right), centred on the uncovered world; CSBaseMatch::RenderTime()'s
+   countdown centred at 480 - 70 in (128, 128, 255) on a half-black box. Reference px on the HUD
+   board. */
+
+#screen {
+	pointer-events: none;
+	font-family: "token(font-body)";
+}
+
+.status-line { position: absolute; left: 0; width: 640px; height: 0; }
+.status-line .sharp-text { position: absolute; top: 0; white-space: nowrap; color: #ffffff; }
+#switch_first { top: 395px; }
+#switch_second { top: 410px; }
+#countdown { top: 410px; }
+.countdown-text { color: rgb(128, 128, 255); background-color: rgba(0, 0, 0, 128); }
+
+#macro { position: absolute; margin-left: -25px; top: 392px; width: 55px; height: 19px; }
+.macro-label { position: absolute; left: 0; top: 0; white-space: nowrap; color: #ffffff; }
+.macro-shadow { position: absolute; left: 1px; top: 13px; width: 54px; height: 6px; background-color: rgba(0, 0, 0, 128); }
+.macro-bar { position: absolute; left: 0; top: 12px; width: 54px; height: 6px; background-color: rgb(0, 51, 51); }
+.macro-track { position: absolute; left: 2px; top: 2px; width: 50px; height: 2px; background-color: rgb(0, 50, 50); }
+.macro-fill { position: absolute; left: 0; top: 0; height: 2px; background-color: rgb(0, 200, 50); }

@@ -23,6 +23,57 @@ The generic `FrameProfiler` contains no graphics API calls. SDL GPU does not
 currently expose raw per-pass GPU timestamps through this overlay, so no GPU
 milliseconds are claimed.
 
+## Scaled diagnostic overlays
+
+`$details on` shows the compact FPS/frame/CPU summary, active SDL GPU driver, UI/RmlUi
+timings, renderer timings, and frame-time history. `$glstats on` adds the per-pass table;
+placement-layout, input, flush, and overlay measurements live there. `$fpscounter on` shows just FPS.
+The overlays are RmlUi documents, follow UI scale, reload with the theme, and pass mouse
+input through to the game. The summary and the per-pass table sit side by side, the table in
+two columns, so both fit above the HUD at 4:3; a narrower window wraps the table below.
+
+The workspace stacks diagnostics below the system-message area with a theme-defined gap.
+All six message rows stay reserved even when empty or hidden, so blue/red messages do not
+cover diagnostics and arriving messages do not move them. Both are overlays and do not
+reduce the gameplay content area. Themes can change this arrangement in `workspace.rml`
+and `workspace.rcss`, and style diagnostics in `diagnostics.rcss`.
+
+Diagnostic values refresh four times per second to limit the overlay's own cost. Each pass
+reading is a sampled completed frame, not an average over the refresh interval.
+
+## `$details` CPU timings
+
+Use `$details on` and `$details off`. Enabling details starts a fresh frame-time history,
+so time spent with the overlay hidden does not become a false slow frame.
+
+Pass timings and counters show the last completed frame, including RmlUi's main and
+background contexts. Timings are CPU elapsed milliseconds, including waits within a
+scope; they are not GPU execution time. Nested timings are inclusive: do not add the rows.
+
+- **UI update/input** covers the main scene's UI controllers, model synchronization,
+  window input, and placement updates. **Rml input** separately covers SDL event dispatch
+  through RmlUi, including the callbacks it invokes.
+- **UI render** covers main-scene native UI rendering, background RmlUi contexts,
+  native portrait preparation, and the final UI overlay/cursor callback.
+- **Rml update/render** covers all three contexts and native text fitting.
+- **Placement layout** measures explicit document layout calls in workspace placement,
+  workspace participants, and fill sizing. It is a subset of layout work; other document
+  updates remain in their enclosing UI/RmlUi scopes.
+- **UI-triggered flush** can include replay of previously recorded world commands.
+  It is included in UI render and must not be interpreted as pure UI drawing cost.
+- **Renderer begin/end** includes setup and finalization respectively; end includes
+  deferred replay, RmlUi, and submission. **Submit** measures the actual SDL submission
+  calls, including the screenshot submission path. These replace the old unmeasured Present row.
+- **Debug overlay** includes drawing diagnostics and the reconnect dialog.
+
+**Avg frame** is the rolling mean of up to 300 frame intervals, refreshed every 500 ms.
+The 1% low uses the mean duration of the slowest 1% of those samples (at least one).
+These include frame pacing and are not expected to equal a sum of CPU scopes.
+Per-pass times are unsmoothed samples. A displayed 0.00 can mean less than 0.005 ms.
+Loading progress may submit several renderer frames inside one game-loop sample;
+the first sample after loading includes that work. Renderer-owned statistics describe
+its last individual submission.
+
 ## Milestone mapping
 
 | Milestone | Upstream intent | SDL GPU representation |

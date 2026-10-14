@@ -1,0 +1,68 @@
+/* Modern theme for the item help boxes: the original's layout and text colours on the modern
+   tooltip surface. */
+
+#panel { font-family: "token(font-body)"; pointer-events: none; }
+
+/* The box: RenderTipTextList() drew it from the screen's top-left, as wide as its content. Its
+   lengths are physical px, reference px times --root-scale. */
+#tip_box {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	padding: 0px calc(2px * var(--root-scale));
+	border-width: calc(1px * var(--root-scale));
+	border-color: token(border-frame);
+	background-color: token(surface-tooltip);
+	text-align: center;
+}
+
+/* RenderTipTextList()'s rows: a line height, the next 1.1 of them below; a " " spacer takes that
+   whole advance, a "
+" spacer half of it. */
+.tip-line {
+	display: block;
+	white-space: nowrap;
+	height: calc(var(--line-height, 0px) * var(--root-scale));
+	line-height: calc(var(--line-height, 0px) * var(--root-scale));
+	margin-bottom: calc(var(--line-height, 0px) * 0.1 * var(--root-scale));
+}
+.tip-line.bold {
+	height: calc(var(--bold-line-height, 0px) * var(--root-scale));
+	line-height: calc(var(--bold-line-height, 0px) * var(--root-scale));
+	margin-bottom: calc(var(--bold-line-height, 0px) * 0.1 * var(--root-scale));
+	font-weight: bold;
+}
+.tip-line--full { height: calc(var(--line-height, 0px) * 1.1 * var(--root-scale)); margin-bottom: 0px; }
+.tip-line--half { height: calc(var(--line-height, 0px) * 0.55 * var(--root-scale)); margin-bottom: 0px; }
+
+/* The original's text colours, and its highlighted lines' boxes. */
+.tip-line--white { color: token(text-primary); }
+.tip-line--blue { color: #80b3ff; }
+.tip-line--gray { color: #666666; }
+.tip-line--red { color: #ff331a; }
+.tip-line--yellow { color: #ffcc1a; }
+.tip-line--green { color: #1aff80; }
+.tip-line--purple { color: #ff1aff; }
+.tip-line--redpurple { color: #cc80cc; }
+.tip-line--violet { color: #b366ff; }
+.tip-line--orange { color: #e66b0a; }
+.tip-line--hl-darkred span { color: #ffffff; background-color: rgb(160, 0, 0); }
+.tip-line--hl-darkblue span { color: #ffffff; background-color: rgb(0, 0, 160); }
+.tip-line--hl-darkyellow span { color: #ffffff; background-color: rgb(160, 102, 0); }
+.tip-line--hl-greenblue span { color: #00ff00; background-color: rgb(60, 60, 200); }
+
+/* The levels table: a column per value, each as wide as its widest text, with its heading in blue
+   over a value per level, centred; red where the hero cannot equip the item. Every cell is one row
+   tall, so the columns' rows line up. */
+.tip-table { display: block; white-space: nowrap; text-align: center; }
+.tip-column { display: inline-block; vertical-align: top; padding: 0px calc(4px * var(--root-scale)); }
+.tip-cell {
+	display: block;
+	height: calc(var(--line-height, 0px) * 1.1 * var(--root-scale));
+	line-height: calc(var(--line-height, 0px) * var(--root-scale));
+	white-space: nowrap;
+	text-align: center;
+	color: token(text-primary);
+}
+.tip-cell--head { color: #80b3ff; }
+.tip-cell.cannot-equip { color: #ff331a; }

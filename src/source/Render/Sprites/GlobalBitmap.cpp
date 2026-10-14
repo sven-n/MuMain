@@ -1,6 +1,3 @@
-// GlobalBitmap.cpp: implementation of the CGlobalBitmap class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "turbojpeg.h"
@@ -93,6 +90,23 @@ int NextPowerOfTwo(int value, int maxValue)
         result <<= 1;
     }
     return std::min<int>(result, maxValue);
+}
+
+std::unique_ptr<BITMAP_t> CreateBitmapStorage(GLuint index, const std::wstring& filename,
+                                            int width, int height, int components)
+{
+    auto bitmap = std::make_unique<BITMAP_t>();
+    bitmap->BitmapIndex = index;
+    wcsncpy(bitmap->FileName, filename.c_str(), MAX_BITMAP_FILE_NAME - 1);
+    bitmap->FileName[MAX_BITMAP_FILE_NAME - 1] = L'\0';
+    bitmap->Width = static_cast<float>(width);
+    bitmap->Height = static_cast<float>(height);
+    bitmap->Components = components;
+    bitmap->Ref = 1;
+    const auto bufferSize = static_cast<std::size_t>(width) * static_cast<std::size_t>(height) * components;
+    bitmap->BufferStorage.resize(bufferSize);
+    bitmap->Buffer = bitmap->BufferStorage.data();
+    return bitmap;
 }
 
 std::string NarrowPath(const std::wstring& wide)
@@ -532,7 +546,17 @@ GLuint CGlobalBitmap::LoadImage(const std::wstring& filename, GLuint uiFilter, G
     }
     return BITMAP_UNKNOWN;
 }
-bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode)
+GLuint CGlobalBitmap::LoadImageExclusive(const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode, bool padToPowerOfTwo)
+{
+    GLuint uiNewTextureIndex = GenerateTextureIndex();
+    if (true == LoadImage(uiNewTextureIndex, filename, uiFilter, uiWrapMode, padToPowerOfTwo))
+    {
+        m_listNonamedIndex.push_back(uiNewTextureIndex);
+        return uiNewTextureIndex;
+    }
+    return BITMAP_UNKNOWN;
+}
+bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode, bool padToPowerOfTwo)
 {
     unsigned int UICLAMP = GL_CLAMP_TO_EDGE;
     unsigned int UIREPEAT = GL_REPEAT;
@@ -580,9 +604,9 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename
 
     bool loaded = false;
     if (0 == _wcsicmp(ext.c_str(), L"jpg"))
-        loaded = OpenJpegTurbo(uiBitmapIndex, filename, uiFilter, uiWrapMode);
+        loaded = OpenJpegTurbo(uiBitmapIndex, filename, uiFilter, uiWrapMode, padToPowerOfTwo);
     else if (0 == _wcsicmp(ext.c_str(), L"tga"))
-        loaded = OpenTga(uiBitmapIndex, filename, uiFilter, uiWrapMode);
+        loaded = OpenTga(uiBitmapIndex, filename, uiFilter, uiWrapMode, padToPowerOfTwo);
 #ifdef _EDITOR
     if (loaded)
         m_loadWorlds[uiBitmapIndex] = Core::AssetLoadWorld::Get();
@@ -802,7 +826,7 @@ GLuint CGlobalBitmap::FindAvailableTextureIndex(GLuint uiSeed)
 }
 
 bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter,
-                                  GLuint uiWrapMode)
+                                  GLuint uiWrapMode, bool padToPowerOfTwo)
 {
     std::wstring filename_ozj;
     ExchangeExt(filename, L"OZJ", filename_ozj);
@@ -858,26 +882,11 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
         return false;
     }
 
-    const int textureWidth = NextPowerOfTwo(jpegWidth, MAX_WIDTH);
-    const int textureHeight = NextPowerOfTwo(jpegHeight, MAX_HEIGHT);
+    const int textureWidth = padToPowerOfTwo ? NextPowerOfTwo(jpegWidth, MAX_WIDTH) : jpegWidth;
+    const int textureHeight = padToPowerOfTwo ? NextPowerOfTwo(jpegHeight, MAX_HEIGHT) : jpegHeight;
 
-    auto pNewBitmap = std::make_unique<BITMAP_t>();
-
-    pNewBitmap->BitmapIndex = uiBitmapIndex;
-
-    wcsncpy(pNewBitmap->FileName, filename.c_str(), MAX_BITMAP_FILE_NAME - 1);
-    pNewBitmap->FileName[MAX_BITMAP_FILE_NAME - 1] = L'\0';
-
-    pNewBitmap->Width = static_cast<float>(textureWidth);
-    pNewBitmap->Height = static_cast<float>(textureHeight);
-    pNewBitmap->Components = 3;
-    pNewBitmap->Ref = 1;
-
-    const auto textureBufferSize =
-        static_cast<std::size_t>(textureWidth) * static_cast<std::size_t>(textureHeight) * 3u;
-    pNewBitmap->BufferStorage.resize(textureBufferSize);
-    pNewBitmap->Buffer = pNewBitmap->BufferStorage.data();
-    m_dwUsedTextureMemory += static_cast<std::uint32_t>(textureBufferSize);
+    auto pNewBitmap = CreateBitmapStorage(uiBitmapIndex, filename, textureWidth, textureHeight, 3);
+    m_dwUsedTextureMemory += static_cast<std::uint32_t>(pNewBitmap->BufferStorage.size());
 
     const int jpegRowSize = jpegWidth * 3;
     const int textureRowSize = textureWidth * 3;
@@ -917,7 +926,7 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
     return true;
 }
 
-bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode)
+bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode, bool padToPowerOfTwo)
 {
     namespace Ozt = Render::Textures::Ozt;
 
@@ -948,25 +957,11 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
         return false;
     }
 
-    const int Width = NextPowerOfTwo(header.width, MAX_WIDTH);
-    const int Height = NextPowerOfTwo(header.height, MAX_HEIGHT);
+    const int Width = padToPowerOfTwo ? NextPowerOfTwo(header.width, MAX_WIDTH) : header.width;
+    const int Height = padToPowerOfTwo ? NextPowerOfTwo(header.height, MAX_HEIGHT) : header.height;
 
-    auto pNewBitmap = std::make_unique<BITMAP_t>();
-
-    pNewBitmap->BitmapIndex = uiBitmapIndex;
-
-    wcsncpy(pNewBitmap->FileName, filename.c_str(), MAX_BITMAP_FILE_NAME - 1);
-    pNewBitmap->FileName[MAX_BITMAP_FILE_NAME - 1] = L'\0';
-
-    pNewBitmap->Width = static_cast<float>(Width);
-    pNewBitmap->Height = static_cast<float>(Height);
-    pNewBitmap->Components = 4;
-    pNewBitmap->Ref = 1;
-
-    const std::size_t BufferSize = static_cast<std::size_t>(Width) * static_cast<std::size_t>(Height) * 4u;
-    pNewBitmap->BufferStorage.resize(BufferSize);
-    pNewBitmap->Buffer = pNewBitmap->BufferStorage.data();
-
+    auto pNewBitmap = CreateBitmapStorage(uiBitmapIndex, filename, Width, Height, 4);
+    const std::size_t BufferSize = pNewBitmap->BufferStorage.size();
     m_dwUsedTextureMemory += static_cast<std::uint32_t>(BufferSize);
 
     Ozt::CopyPixels(pakBuffer, header, std::span<std::uint8_t>(pNewBitmap->Buffer, BufferSize), Width);

@@ -59,6 +59,32 @@ inline std::string mu_narrow_path(const wchar_t* path)
     return result;
 }
 
+// RmlUi port: symmetric counterpart to mu_wchar_to_utf8 above -- StringUtils::NarrowToWide needs
+// UTF-8 -> UTF-16 for the legacy CGlobalBitmap::LoadImage(std::wstring, ...) API.
+inline std::wstring mu_utf8_to_wchar(const std::string& text)
+{
+    if (text.empty())
+    {
+        return {};
+    }
+
+    const int charCount = ::MultiByteToWideChar(CP_UTF8, 0, text.data(), static_cast<int>(text.size()), nullptr, 0);
+    if (charCount <= 0)
+    {
+        return {};
+    }
+
+    std::wstring result(static_cast<size_t>(charCount), L'\0');
+    const int converted =
+        ::MultiByteToWideChar(CP_UTF8, 0, text.data(), static_cast<int>(text.size()), result.data(), charCount);
+    if (converted != charCount)
+    {
+        return {};
+    }
+
+    return result;
+}
+
 inline std::string mu_narrow_path(const std::wstring& path)
 {
     return mu_narrow_path(path.c_str());
@@ -184,6 +210,46 @@ inline std::string mu_narrow_path(const wchar_t* path)
 {
     std::string result = mu_wchar_to_utf8(path);
     std::replace(result.begin(), result.end(), '\\', '/');
+    return result;
+}
+
+// RmlUi port: symmetric counterpart to mu_wchar_to_utf8 above. wchar_t is 32-bit on this branch
+// (glibc convention), so each decoded UTF-8 code point maps to exactly one wchar_t -- no
+// surrogate-pair handling needed the way mu_wchar_to_char16 above needs it for UTF-16.
+inline std::wstring mu_utf8_to_wchar(const std::string& text)
+{
+    std::wstring result;
+    size_t i = 0;
+    while (i < text.size())
+    {
+        const unsigned char lead = static_cast<unsigned char>(text[i]);
+        char32_t ch = 0;
+        size_t extraBytes = 0;
+
+        if (lead < 0x80) { ch = lead; extraBytes = 0; }
+        else if ((lead & 0xE0) == 0xC0) { ch = lead & 0x1F; extraBytes = 1; }
+        else if ((lead & 0xF0) == 0xE0) { ch = lead & 0x0F; extraBytes = 2; }
+        else if ((lead & 0xF8) == 0xF0) { ch = lead & 0x07; extraBytes = 3; }
+        else { return {}; } // invalid leading byte
+
+        if (i + extraBytes >= text.size())
+        {
+            return {}; // truncated sequence
+        }
+
+        for (size_t k = 1; k <= extraBytes; ++k)
+        {
+            const unsigned char cont = static_cast<unsigned char>(text[i + k]);
+            if ((cont & 0xC0) != 0x80)
+            {
+                return {}; // invalid continuation byte
+            }
+            ch = (ch << 6) | (cont & 0x3F);
+        }
+
+        result.push_back(static_cast<wchar_t>(ch));
+        i += extraBytes + 1;
+    }
     return result;
 }
 

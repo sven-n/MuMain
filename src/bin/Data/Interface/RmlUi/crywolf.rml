@@ -1,0 +1,73 @@
+<rml>
+	<!-- bound-geometry: the success/failure banner and the rank label slide in and out, Balgass's health
+	     and the statue's shield are gauge lengths (the shield shortens from its left, so its left moves
+	     with it) -->
+<head>
+	<title>Crywolf (CCryWolf)</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="crywolf.rcss"/>
+</head>
+<body data-model="crywolf">
+	<!-- The Crywolf HUD (CCryWolf): the end-of-battle result (the success or failure banner, the
+	     rank table, the rank letter and the experience), the battle panel of the ready and start
+	     states (altars, dark elves, Balgass and his health, the time, the statue's shield) and the
+	     ready-state notice. Drawn on the HUD board at the original's 640x480 reference positions:
+	     .screen is that screen at the bottom HUD's scale, centred like the HUD. Text takes the
+	     native size and cancels the scale. Takes no pointer events. An image whose src is
+	     bound also binds its rect: RmlUi drops a static rect when it first loads an empty src. -->
+	<div class="screen hud-board">
+		<div id="result" data-if="result_visible">
+			<img id="banner" data-attr-src="banner_src" data-attr-rect="'0 0 328 93'"
+			     data-style-left="banner_left + 'px'" data-style-opacity="banner_opacity"/>
+			<img id="rank_table" src="../../../icon_Rank_table.tga" rect="0 0 195 140"/>
+			<img id="rank_label" src="../../../icon_Rank_rank.tga" rect="0 0 110 27"
+			     data-style-left="rank_label_left + 'px'"/>
+			<div data-if="rank_details_visible">
+				<img id="rank_letter" data-if="rank_letter_src != ''" data-attr-src="rank_letter_src" data-attr-rect="'0 0 29 27'"/>
+				<img id="exp_label" src="../../../icon_Rank_exp.tga" rect="0 0 60 19"/>
+				<!-- The nine experience digits, counted in their own container. -->
+				<div class="exp-digits"><img class="exp-digit" data-for="d : exp_digits" data-attr-src="d.src"
+				     data-attr-rect="d.rect"/></div>
+			</div>
+		</div>
+		<div id="hud" data-if="hud_visible">
+			<img id="main" src="../../../in_main-New.tga" rect="0 0 120 118"/>
+			<!-- All five altars, each on its own place; one with no contract state shows nothing,
+			     and still holds its place so the others do not shift. -->
+			<div class="altars"><img class="altar" data-for="a : altars" data-class-hidden="!a.shown"
+			     data-attr-src="a.src" data-attr-rect="a.rect"/></div>
+			<img id="dark_elf_icon" data-attr-src="dark_elf_icon_src" data-attr-rect="'0 0 14 14'"/>
+			<img id="plate" src="../../../t_main-New.tga" rect="0 0 104 36"/>
+			<span class="hud-text counter-scaled" id="dark_elf_text" data-style-font-size="normal_text_px + 'px'">{{dark_elf_text}}</span>
+			<div data-if="balgass_visible">
+				<img id="balgass_icon" src="../../../in_main_icon_bal1.tga" rect="0 0 14 14"/>
+				<span class="hud-text counter-scaled" id="balgass_text" data-style-font-size="normal_text_px + 'px'">{{balgass_text}}</span>
+				<img id="balgass_bar" src="../../../in_bar2.jpg" data-attr-rect="balgass_bar_rect"
+				     data-style-width="balgass_bar_width + 'px'"/>
+			</div>
+			<!-- The clock: a leading zero below ten, then each run's digits, which the theme centres
+			     from the run's digit count and each digit's index. -->
+			<img class="timer-digit" id="minute_pad" data-if="minute_pad" src="../../../FontTest.tga" rect="0 0 16 16"
+			     data-class-urgent="timer_urgent"/>
+			<div class="timer-run" id="minutes" data-style---n="minute_digits.size">
+				<img class="timer-digit" src="../../../FontTest.tga" data-for="cell, i : minute_digits"
+				     data-attr-rect="cell" data-style---i="i" data-class-urgent="timer_urgent"/>
+			</div>
+			<img class="timer-digit" id="second_pad" data-if="second_pad" src="../../../FontTest.tga" rect="0 0 16 16"
+			     data-class-urgent="timer_urgent"/>
+			<div class="timer-run" id="seconds" data-style---n="second_digits.size">
+				<img class="timer-digit" src="../../../FontTest.tga" data-for="cell, i : second_digits"
+				     data-attr-rect="cell" data-style---i="i" data-class-urgent="timer_urgent"/>
+			</div>
+			<img id="statue_bar" data-if="statue_bar_width > 0" src="../../../in_main2-New.tga"
+			     data-attr-rect="statue_bar_rect" data-style-left="statue_bar_left + 'px'"
+			     data-style-width="statue_bar_width + 'px'"/>
+			<!-- The notice's four lines, the first its heading; the theme places and colours them. -->
+			<div class="notices">
+				<span class="notice counter-scaled" data-for="n : notices" data-class-heading="n.heading"
+				      data-style-font-size="bold_text_px + 'px'" data-style-line-height="bold_line_px + 'px'">{{n.text}}</span>
+			</div>
+		</div>
+	</div>
+</body>
+</rml>

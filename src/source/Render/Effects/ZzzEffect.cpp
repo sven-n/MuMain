@@ -15,13 +15,13 @@
 #include "Render/Effects/Behaviors/MoveHandlers.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Audio/DSPlaySound.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Skills/SkillEffectMgr.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Character/CharacterManager.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Scenes/MainScene.h"
 
@@ -7737,7 +7737,7 @@ void RenderEffects(bool bRenderBlendMesh)
         }
         else
         {
-            if (IsSkillEffectModelsDisabledDebug()) // DXP-23 diagnostic
+            if (IsSkillEffectModelsDisabledDebug())
             {
                 continue;
             }

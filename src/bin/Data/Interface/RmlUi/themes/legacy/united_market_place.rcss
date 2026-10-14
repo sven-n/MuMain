@@ -1,0 +1,58 @@
+/* Legacy theme for CUnitedMarketPlaceWindow, reproducing its RenderFrame()/Render(): the
+   docked_panel_frame.rcss frame (linked first; newui_item_back01 top), "Julia" bold (220, 220, 220)
+   centred on 160 units from x 15 at y 13, the description in the normal font, (220, 220, 220),
+   centred on 190 units every 20 from y 60, the 53 x 23 Warp button at (68, 230)
+   (newui_btn_empty_very_small up / over / down, tinted (100, 100, 100) with a grey label while
+   locked) and the exit button. Coordinates are reference px inside #panel. */
+
+@spritesheet market-btn-sheet
+{
+	src: "../../../newui_btn_empty_very_small.tga";
+	market-btn-up: 0px 0px 53px 23px;
+	market-btn-over: 0px 23px 53px 23px;
+	market-btn-down: 0px 46px 53px 23px;
+}
+
+.frame-top { decorator: image(docked-bg-top-b); }
+#panel { pointer-events: auto; }
+
+#title, .market-line, #warp_label {
+	display: block;
+	position: absolute;
+	white-space: nowrap;
+	text-align: center;
+	pointer-events: none;
+}
+#title { left: 15px; top: 13px; font-weight: bold; color: #dcdcdc; }
+.market-line { left: 0; color: #dcdcdc; }
+
+#warp {
+	display: block;
+	position: absolute;
+	left: 68px;
+	top: 230px;
+	width: 53px;
+	height: 23px;
+	decorator: image(market-btn-up);
+	pointer-events: auto;
+}
+#warp:hover { decorator: image(market-btn-over); }
+#warp:active { decorator: image(market-btn-down); }
+#warp.locked, #warp.locked:hover, #warp.locked:active { decorator: image(market-btn-up); image-color: #646464; }
+#warp_label { left: 0; color: #ffffff; }
+#warp.locked #warp_label { color: #646464; }
+
+/* The description's own rows: every 20 units from y 60. */
+.market-lines { position: static; }
+.market-line:nth-child(1) { top: 60px; }
+.market-line:nth-child(2) { top: 80px; }
+.market-line:nth-child(3) { top: 100px; }
+.market-line:nth-child(4) { top: 120px; }
+.market-line:nth-child(5) { top: 140px; }
+.market-line:nth-child(6) { top: 160px; }
+.market-line:nth-child(7) { top: 180px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#title { width: calc(160px * var(--root-scale)); }
+.market-line { width: calc(190px * var(--root-scale)); }
+#warp_label { width: calc(53px * var(--root-scale)); }

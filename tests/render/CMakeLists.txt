@@ -12,6 +12,13 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME overlay2d_recorder_tests
+    SOURCES
+        test_overlay2d_recorder.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/Overlay2DRecorder.cpp
+)
+
+mu_add_test(
     NAME quad_topology_tests
     SOURCES
         test_quad_topology.cpp
@@ -87,6 +94,8 @@ add_test(
     NAME render_diagnostics_contract
     COMMAND "${CMAKE_COMMAND}"
         "-DMU_SCENE_MANAGER_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Scenes/SceneManager.cpp"
+        "-DMU_DIAGNOSTICS_OVERLAY_SOURCE=${CMAKE_SOURCE_DIR}/src/source/UI/Diagnostics/DiagnosticsOverlay.cpp"
+        "-DMU_DIAGNOSTICS_DOCUMENT=${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi/diagnostics.rml"
         -P "${CMAKE_CURRENT_SOURCE_DIR}/test_render_diagnostics.cmake"
 )
 

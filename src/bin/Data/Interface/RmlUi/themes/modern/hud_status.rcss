@@ -1,0 +1,21 @@
+/* Modern theme for the HUD status texts: the legacy geometry (see the legacy theme) with the
+   countdown on the modern panel surface and the macro cooldown as a thin gauge. */
+
+#screen {
+	pointer-events: none;
+	font-family: "token(font-body)";
+}
+
+.status-line { position: absolute; left: 0; width: 640px; height: 0; }
+.status-line .sharp-text { position: absolute; top: 0; white-space: nowrap; color: token(text-primary); }
+#switch_first { top: 395px; }
+#switch_second { top: 410px; }
+#countdown { top: 410px; }
+.countdown-text { color: rgb(128, 128, 255); background-color: token(surface-panel); }
+
+#macro { position: absolute; margin-left: -25px; top: 392px; width: 55px; height: 19px; }
+.macro-label { position: absolute; left: 0; top: 0; white-space: nowrap; color: token(text-primary); }
+.macro-shadow { display: none; }
+.macro-bar { position: absolute; left: 0; top: 12px; width: 54px; height: 6px; background-color: token(surface-recessed); border: 1px token(border-frame); border-radius: token(radius-sm); }
+.macro-track { position: absolute; left: 1px; top: 1px; width: 50px; height: 2px; }
+.macro-fill { position: absolute; left: 0; top: 0; height: 2px; background-color: token(semantic-success); }

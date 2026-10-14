@@ -1,0 +1,161 @@
+#ifndef _NEWUICHATINPUTBOX_H_
+#define _NEWUICHATINPUTBOX_H_
+
+#pragma once
+
+#include "UI/Core/WindowObject.h"
+#include "UI/RmlBridge/RmlThemedView.h"
+
+#pragma warning(disable : 4786)
+#include <array>
+#include <string>
+#include <vector>
+
+namespace Rml
+{
+    class ElementDocument;
+}
+
+namespace mu::ui::window
+{
+    class CManager;
+    class CChatLogWindow;
+    class CSystemLogWindow;
+
+    // Every piece of this window's presentation is RmlUi's now: the bar art, all ten buttons, the
+    // tooltip and both text fields. C++ keeps the chat/whisper history, the send logic and the
+    // keyboard handling, which runs while one of its fields is focused (TakesTypingFrom()).
+    struct ChatInputRmlModel
+    {
+        Rml::String chatText;
+        Rml::String whisperId;
+
+        int inputMsgType = 0;   // INPUT_CHAT_MESSAGE..INPUT_GENS_MESSAGE, as a 0-based index
+        bool blockWhisper = false;
+        bool showSystem = true;
+        bool showChatLog = true;
+        bool showFrame = false;
+        bool whisperSend = true;
+
+        // The buttons' hints, in the button row's order.
+        std::array<Rml::String, 10> buttonHints;
+    };
+
+    class CChatInputBox : public CObject
+    {
+    public:
+        // It's also the size of the graphics IMAGE_INPUTBOX_BACK.
+        enum
+        {
+            CHATBOX_WIDTH = 281,
+            CHATBOX_HEIGHT = 47,
+        };
+
+        enum INPUT_MESSAGE_TYPE
+        {
+            INPUT_NOTHING = -1,
+            INPUT_CHAT_MESSAGE,
+            INPUT_PARTY_MESSAGE,
+            INPUT_GUILD_MESSAGE,
+            INPUT_GENS_MESSAGE,
+        };
+
+    private:
+        typedef std::wstring type_string;
+        typedef std::vector<type_string>	type_vec_history;
+
+        const uint64_t ChatCooldownMs = 1000; // 1 Second
+        uint64_t  m_lastChatTime = 0;
+
+        CManager* m_pNewUIMng;
+        CChatLogWindow* m_pNewUIChatLogWnd;
+        CSystemLogWindow* m_pNewUISystemLogWnd;
+
+        type_vec_history	m_vecChatHistory, m_vecWhsprIDHistory;
+
+        int m_iCurChatHistory, m_iCurWhisperIDHistory;
+
+        int m_iInputMsgType;
+        bool m_bBlockWhisper;
+        bool m_bShowSystemMessages;
+        bool m_bShowChatLog;
+        bool m_bWhisperSend;
+        bool m_bShowMessageElseNormal;
+
+        void Init();
+
+        void SetInputMsgType(int iInputMsgType);
+        int GetInputMsgType() const;
+
+        void BuildRmlUi();
+        void SyncRmlModel();
+        // Focus/value access for the two <input>s, so the key handler below never has to know they
+        // are RmlUi elements.
+        Rml::Element* GetField(const char* id) const;
+        bool IsFieldFocused(const char* id) const;
+        void SetFieldText(const char* id, const type_string& text);
+        void FocusField(const char* id);
+
+        void BindRmlModel(Rml::DataModelConstructor& c, ChatInputRmlModel& model);
+        void OnRmlReloaded();
+        UI::RmlBridge::ThemedView<ChatInputRmlModel> m_RmlView{"chat_input",
+            [this](Rml::DataModelConstructor& c, ChatInputRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/chat_input.rml"}}, {.afterReload = [this] { OnRmlReloaded(); }}};
+        // Set by OpenningProcess(), consumed once the document is actually visible. CSystem::Show()
+        // runs OpenningProcess() BEFORE ShowInterface(), so IsVisible() is still false there and
+        // focusing the field at that point lands on a hidden document and is lost. It also has to
+        // happen after SyncDocumentVisibility()'s own Show(), which defaults to FocusFlag::Auto and
+        // would blur the field again.
+        bool m_bFocusPending = false;
+
+    public:
+        CChatInputBox();
+        virtual ~CChatInputBox();
+
+        bool Create(CManager* pNewUIMng,
+            CChatLogWindow* pNewUIChatLogWnd,
+            CSystemLogWindow* pNewUISystemLogWnd);
+        void Release();
+
+
+
+        bool HaveFocus();
+
+        void AddChatHistory(const type_string& strText);
+        void RemoveChatHistory(int index);
+        void RemoveAllChatHIstory();
+
+        void AddWhsprIDHistory(const type_string& strWhsprID);
+        void RemoveWhsprIDHistory(int index);
+        void RemoveAllWhsprIDHIstory();
+
+        bool IsBlockWhisper();
+        void SetBlockWhisper(bool bBlockWhisper);
+
+        bool UpdateMouseEvent();
+        bool UpdateKeyEvent();
+        bool Update();
+        // Enter, Escape and the history keys while the player types a line.
+        bool TakesTypingFrom(const Rml::ElementDocument* document) const override
+        {
+            return document == m_RmlView.Document();
+        }
+        bool Render();
+
+        float GetLayerDepth();
+        float GetKeyEventOrder();
+
+        void OpenningProcess();
+        void ClosingProcess();
+
+        void SetWhsprID(const wchar_t* strWhsprID);
+
+    protected:
+        void GetChatText(type_string& strText);
+        void GetWhsprID(type_string& strWhsprID);
+
+        void UpdateWhisperTargetFromRightClick();
+    };
+}
+
+#endif // _NEWUICHATINPUTBOX_H_

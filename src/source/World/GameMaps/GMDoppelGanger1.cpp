@@ -1,6 +1,4 @@
-﻿// GMDoppelGanger1.cpp: implementation of the CGMDoppelGanger1 class.
-//////////////////////////////////////////////////////////////////////
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -11,7 +9,7 @@
 #include "Engine/Object/ZzzOpenData.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/AI/GOBoid.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "World/MapInfra/MapManager.h"
 
 extern int GetMp3PlayPosition();

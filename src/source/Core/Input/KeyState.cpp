@@ -10,6 +10,8 @@ namespace Core::Input
     {
         bool g_leftMouseButtonPressEdge = false;
 
+        } // namespace
+
         // Map a Win32 virtual-key code (or ASCII letter/digit) to an SDL
         // scancode. Returns SDL_SCANCODE_UNKNOWN for keys we don't translate.
         SDL_Scancode VkToScancode(int vk)
@@ -52,7 +54,6 @@ namespace Core::Input
             default:         return SDL_SCANCODE_UNKNOWN;
             }
         }
-    }
 
     void RecordLeftMouseButtonPressEdge()
     {

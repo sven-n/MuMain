@@ -1,0 +1,67 @@
+<rml>
+<head>
+	<title>Quest Progress</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="quest_progress.rcss"/>
+</head>
+<!-- CQuestProgressByEtc's own document -- shares quest_progress.rcss with CQuestProgress's own
+     quest_progress.rml (see that file's header comment for why two .rml files, one .rcss). Unlike
+     that sibling document, this one has no NPC-name/player-name preamble at all (a structural
+     difference, not a data toggle) and carries the "qp-etc" modifier class on #panel, which
+     quest_progress.rcss uses to override the handful of pixel values that genuinely differ between
+     the two windows (NPC-line/button top offsets, the answers block's top). -->
+<body>
+	<div id="panel" class="qp-etc" data-model="quest_progress_etc"
+	     data-style---text-px="text_px + 'px'">
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+
+		<span class="sharp-text" id="title" data-style-font-size="text_px + 'px'">Quest</span>
+		<div class="sharp-text qp-subject" data-style-font-size="text_px + 'px'">{{subject}}</div>
+
+		<div class="sharp-text qp-npc-lines" data-style-font-size="text_px + 'px'">
+			<span class="qp-line" data-for="l : npc_lines">{{l.text}}</span>
+		</div>
+
+		<div id="btn_prev" class="qp-btn-l" data-class-locked="!prev_enabled"
+		     data-event-click="questprogressetc_prev_page"></div>
+		<div id="btn_next" class="qp-btn-r" data-class-locked="!next_enabled"
+		     data-event-click="questprogressetc_next_page"></div>
+
+		<div class="qp-divider"></div>
+
+		<div class="sharp-text qp-answers" data-class-hidden="active_view != 1" data-style-font-size="text_px + 'px'">
+			<div class="qp-answer-row" data-for="a : answers"
+			     data-event-click="questprogressetc_select_answer(a.index)">{{a.text}}</div>
+		</div>
+
+		<div class="qp-reward" data-class-hidden="active_view != 2">
+			<div class="sharp-text qp-reward-list" data-style-font-size="text_px + 'px'">
+				<span class="qp-reward-row" data-for="r : reward_rows"
+				      data-class-clickable="r.clickable"
+				      data-class-row-heading="r.style == 'heading'"
+				      data-class-row-requirement="r.style == 'requirement'"
+				      data-class-row-requirement-unmet="r.style == 'requirement-unmet'"
+				      data-class-row-reward="r.style == 'reward'"
+				      data-class-row-random-reward="r.style == 'random-reward'"
+				      data-event-click="questprogressetc_select_reward(r.index)">{{r.text}}</span>
+			</div>
+			<!-- Zero-size marker read live by QuestProgressByEtc.cpp's Render() -- where the
+			     selected reward-item's native info-tooltip popup anchors, replacing a hardcoded
+			     m_Pos+95,+360 offset. .qp-reward has zero left/top of its own, so this resolves to
+			     the same panel-relative coordinates the old offset did. -->
+			<div id="reward_popup_anchor" class="qp-popup-anchor"></div>
+			<div id="btn_complete" class="sharp-text qp-btn-complete" data-class-disabled="!request_complete" data-style-font-size="text_px + 'px'"
+			     data-event-click="questprogressetc_complete">{{ok_label}}</div>
+		</div>
+
+		<div id="btn_exit" class="qp-btn-exit" data-event-click="questprogressetc_click_close" data-attr-data-hint="exit_tooltip">
+			<span class="btn-exit-label">×</span>
+		</div>
+		<div id="frame_corner_close" data-event-click="questprogressetc_click_close"></div>
+	</div>
+</body>
+</rml>

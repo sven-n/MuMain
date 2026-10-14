@@ -1,6 +1,4 @@
-﻿// MapManager.cpp: implementation of the CMapManager class.
-//////////////////////////////////////////////////////////////////////
-
+﻿
 #include "stdafx.h"
 #include "World/MapInfra/MapManager.h"
 #include "Camera/CameraMove.h"
@@ -8,7 +6,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Data/DataHandler/LoadData.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzCharacter.h"

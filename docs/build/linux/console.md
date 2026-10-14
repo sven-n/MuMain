@@ -1,7 +1,7 @@
 # Linux - Terminal
 
 Native 64-bit Linux build from the command line. Produces a full, playable
-client: the engine, the `linux-x64` network library, SDL/OpenGL rendering.
+client: the engine, the `linux-x64` network library, SDL GPU/Vulkan rendering.
 
 See [the build guide](../README.md) for shared concepts (editor flag, the
 network library, output layout).

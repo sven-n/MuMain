@@ -16,9 +16,9 @@ the original client.
 ## Setting a price
 
 Right-click an item in the own shop (or drop one into it) to enter its price.
-When the server allows other prices, the input box shows a button with the
-currency below the message; each click on it switches to the next allowed
-currency, in the order the server sent them, after zen. Zen prices below the
+When the server allows other prices, the price dialog shows a button with the
+currency next to OK; each click on it switches to the next allowed currency, in
+the order the server sent them, after zen, and keeps the typed amount. Zen prices below the
 item's value still ask for a confirmation; the other currencies don't.
 
 The server checks every price: a price item or coin that isn't allowed, or an

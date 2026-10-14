@@ -1,0 +1,13 @@
+<rml>
+<head>
+	<title>World Labels</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="world_labels.rcss"/>
+</head>
+<body>
+	<!-- CNameWindow's world labels (names, chat balloons, shop titles, Gens marks, health bars,
+	     ground item names, the macro bar and event times). Empty on purpose: UI::Character::
+	     WorldLabelLayer adds one absolutely positioned .label per recorded native draw, in draw
+	     order, at physical window pixels, and reuses them every frame. -->
+</body>
+</rml>

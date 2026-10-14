@@ -1,0 +1,120 @@
+/* Modern theme for the server-select dialog -- flat programmatic chrome, no legacy sprite art.
+   Same DOM/class structure as the legacy theme (server_select.rml is shared); only the visual
+   treatment differs. #panel stays invisible, matching the real legacy screen.
+
+   Two always-visible columns laid out by real flexbox (#columns/#group_col/#server_col), not an
+   absolutely-positioned flyout. #panel/#pvp_notice/#desc_panel are plain normal-flow block
+   content, sized to their real children. */
+
+/* No explicit position here -- .center-both (base.rcss) supplies position:absolute plus the
+   centering math, same as sys_menu.rcss/msg_win.rcss's #panel. */
+#panel {
+	width: 420px;
+	font-family: "token(font-body)";
+	font-size: 12px;
+	color: token(text-primary);
+	padding: 10px;
+}
+
+/* height:300px is fixed, not auto -- #panel uses .center-both, which recenters around #panel's
+   current size on every change, so an auto height here would visibly shift the whole panel as
+   #columns grows/shrinks. Each column scrolls internally via overflow:auto instead. */
+#columns {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	gap: 18px; /* matches the reference's own two-column gap */
+	height: 300px;
+}
+
+/* height (not max-height) matches #columns' fixed height -- a shorter list centers within this
+   fixed box instead of shrinking it; overflow:auto still scrolls a taller one. */
+#group_col {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 6px; /* matches the reference's own list row gap */
+	width: 140px;
+	height: 300px;
+	overflow: hidden auto;
+}
+#server_col {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 6px;
+	width: 240px;
+	height: 300px;
+	overflow: hidden auto;
+}
+/* #server_col is an ID selector, so it always outranks base.rcss's global `.hidden{display:none}`
+   on specificity alone (an ID beats any number of plain classes) -- unlike the many `.foo.hidden`
+   compound overrides elsewhere in this codebase, which only break a same-specificity class-vs-class
+   tie. Without this, data-class-hidden="!server_list_visible" (server_select.rml) never actually
+   hid this column. */
+#server_col.hidden {
+	display: none;
+}
+
+/* Shared base styles supply selectable-button chrome and states. Geometry stays
+   local so this theme can keep its wider rows and population bars. */
+.group-btn {
+	width: 140px;
+	height: 30px;
+	text-align: center;
+	line-height: 30px;
+}
+.server-row {
+	display: block;
+	width: 218px;
+	height: 23px;
+	padding: 3px 10px 4px;
+	text-align: center;
+	line-height: 14px;
+	white-space: nowrap;
+}
+.button-label {
+	pointer-events: none;
+}
+
+/* Recessed population track, with tier colors on the fill. */
+.server-gauge-slot {
+	display: block;
+	width: 200px;
+	height: 5px;
+	margin: 4px 0 0 9px;
+	background-color: #050605;
+	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 199);
+}
+/* Population tier by load_fraction -- medium is the default/untagged case, overridden by
+   .tier-low/.tier-high. Dark-stop hexes have no token of their own; bright stops are the real
+   semantic-success/-warning/-danger tokens. */
+.server-gauge-fill {
+	display: block;
+	height: 100%;
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 23);
+	decorator: linear-gradient(to right, #765c22, token(semantic-warning));
+}
+.server-gauge-fill.tier-low {
+	decorator: linear-gradient(to right, #516a3d, token(semantic-success));
+}
+.server-gauge-fill.tier-high {
+	decorator: linear-gradient(to right, #6d1711, token(semantic-danger));
+}
+
+/* Normal block flow below #columns, not position:absolute with a hand-picked top offset. */
+#pvp_notice {
+	margin-top: 16px;
+	width: 100%;
+	color: token(semantic-warning);
+	font-size: 11px;
+	font-family: "token(font-body)";
+}
+
+#desc_panel {
+	margin-top: 10px;
+	width: 100%;
+	color: token(text-primary);
+	white-space: normal;
+	font-family: "token(font-body)";
+}
