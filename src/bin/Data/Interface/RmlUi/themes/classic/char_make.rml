@@ -8,8 +8,8 @@
 	<!-- Classic (0.97) NEW CHARACTER window: the stone panel hangs from the top centre, with the
 	     3D portrait, the name field, the class name and its arrows, and the CANCEL / OK plates.
 	     The 0.97 window has no class buttons, stats or description: the class changes with the
-	     arrows (the previous / next class; locked classes are refused by C++), the second row of
-	     arrows does nothing, as in 0.97. #panel stays as the anchor CharMakeWin.cpp moves; the
+	     arrows (the previous / next class C++ enables: job_previous / job_next, -1 when there is
+	     none), the second row of arrows does nothing, as in 0.97. #panel stays as the anchor CharMakeWin.cpp moves; the
 	     window is placed by the stylesheet. Keep the ids, data-model and event names in sync with
 	     ../../char_make.rml (CharMakeWin.cpp binds them by name). -->
 	<div id="panel"></div>
@@ -23,10 +23,10 @@
 		       data-value="char_name" autofocus/>
 
 		<div class="class-name" data-for="job : jobs" data-if="job.checked">{{job.label}}</div>
-		<div class="arrow arrow-previous" data-for="job : jobs" data-if="job.checked"
-		     data-class-blocked="it_index == 0" data-event-click="charmake_select_job(it_index - 1)"></div>
-		<div class="arrow arrow-next" data-for="job : jobs" data-if="job.checked"
-		     data-class-blocked="it_index >= 3" data-event-click="charmake_select_job(it_index + 1)"></div>
+		<div class="arrow arrow-previous" data-class-blocked="job_previous < 0"
+		     data-event-click="charmake_select_job(job_previous)"></div>
+		<div class="arrow arrow-next" data-class-blocked="job_next < 0"
+		     data-event-click="charmake_select_job(job_next)"></div>
 		<div class="arrow arrow-row2 arrow-previous-row2"></div>
 		<div class="arrow arrow-row2 arrow-next-row2"></div>
 

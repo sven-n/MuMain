@@ -20,6 +20,7 @@
 
 #include "App/Platform/Windows/Local.h"
 #include "CharacterManager.h"
+#include "ClassStep.h"
 
 #include <algorithm>
 #include <array>
@@ -194,6 +195,8 @@ void CCharMakeWin::BindRmlModel(Rml::DataModelConstructor& c, CharMakeRmlModel& 
     c.RegisterArray<std::vector<JobButtonEntry>>();
 
     c.Bind("jobs", &model.jobs);
+    c.Bind("job_previous", &model.jobPrevious);
+    c.Bind("job_next", &model.jobNext);
     c.Bind("dark_lord_extra", &model.darkLordExtra);
     c.Bind("stat_label0", &model.statLabel0);
     c.Bind("stat_label1", &model.statLabel1);
@@ -455,6 +458,7 @@ void CCharMakeWin::SyncRmlModel()
     auto& model = m_RmlView.GetModel();
     auto& jobs = model.jobs;
     bool jobsDirty = false;
+    std::array<bool, MAX_CLASS> enabled{};
     for (int classIndex = 0; classIndex < MAX_CLASS; ++classIndex)
     {
         JobButtonEntry& entry = jobs[classIndex];
@@ -462,12 +466,26 @@ void CCharMakeWin::SyncRmlModel()
         const bool disabled = !m_aJobState[classIndex].enabled;
         if (entry.checked != checked) { entry.checked = checked; jobsDirty = true; }
         if (entry.disabled != disabled) { entry.disabled = disabled; jobsDirty = true; }
+        enabled[classIndex] = !disabled;
 
         const std::string label = StringUtils::WideToNarrow(I18N::Game::Lookup(kClassButtonTextIds[classIndex]));
         if (entry.label != label) { entry.label = label; jobsDirty = true; }
     }
     if (jobsDirty)
         m_RmlView.MarkDirty("jobs");
+
+    const int jobPrevious = UI::CharacterCreation::StepToEnabledClass(enabled, m_nSelJob, -1);
+    const int jobNext = UI::CharacterCreation::StepToEnabledClass(enabled, m_nSelJob, +1);
+    if (model.jobPrevious != jobPrevious)
+    {
+        model.jobPrevious = jobPrevious;
+        m_RmlView.MarkDirty("job_previous");
+    }
+    if (model.jobNext != jobNext)
+    {
+        model.jobNext = jobNext;
+        m_RmlView.MarkDirty("job_next");
+    }
 
     const bool isDarkLord = (m_nSelJob == CLASS_DARK_LORD);
     if (model.darkLordExtra != isDarkLord)

@@ -118,10 +118,16 @@ RML, templates, RCSS and theme-local images use the first matching whole file. A
 stylesheet replaces its ancestor's file; rules are not automatically combined. Paths to common
 assets outside the theme folder keep their ordinary meaning.
 
-`[Tokens]`, `[Capabilities]` and `[Fonts]` inherit individual keys. A child value wins, including
+`[Tokens]`, `[Capabilities]`, `[Fonts]` and `[Stacking]` inherit individual keys. A child value wins, including
 `NativeTextSize=0` or an empty font entry. Display names stay specific to the child. Names use
 letters, digits, `_` and `-` and are normalized to lowercase. Missing ancestors, invalid names
 and inheritance cycles make a theme unavailable for selection.
+
+`[Stacking]` moves one of the theme's documents in the stacking order, when its layout makes two
+documents overlap the other way round. `chat_input.rml=10.65` puts the chat input over the HUD
+(`main_frame.rml`, 10.6) and under the tooltips (10.69). The depths are the original windows'
+layer depths, listed in `UI/RmlBridge/RmlStackingOrder.cpp`; a document the theme does not list
+keeps its own.
 
 1. Create `src/bin/Data/Interface/RmlUi/themes/<your-theme-name>/`.
 2. Declare `Base=legacy` or `Base=modern` in `[Theme]`, or supply your own complete stylesheets.
@@ -349,12 +355,18 @@ message boxes and chat. The art lives outside the RmlUi tree, in `Data/Interface
 
 What changes for the player, besides the look:
 
+- **Character creation:** the class is chosen with arrows, which step through the classes the
+  client enables.
 - **World:** no map title when entering a map.
 
 The HUD model also exposes what the 0.97 bar shows and the S6 bar does not: `party_open` /
 `guild_open` with `mainframe_party_click` / `mainframe_guild_click` and their tooltips,
 `coord_x` / `coord_y`, and `left_covered` / `right_covered` (a docked window covers that side
 of the world).
+
+The character creation model has `job_previous` / `job_next`: the enabled class before and after
+the selected one, or -1, for a theme that steps through the classes with arrows
+(`charmake_select_job(job_next)`) instead of a button per class.
 
 The pet / durability HUD (`item_endurance.rml`) marks `#pets` with `.in-party` while the hero is
 in a party, so a theme can keep the pet column clear of the party list. The classic theme also
