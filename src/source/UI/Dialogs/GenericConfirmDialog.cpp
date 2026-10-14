@@ -8,6 +8,7 @@
 #include "Core/Globals/_enum.h"
 #include "Core/Utilities/StringUtils.h"
 #include "Engine/Object/ZzzInventory.h" // RenderItem3D
+#include "I18N/All.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Core/WindowCommon.h"
 #include "UI/Core/WindowManager.h"
@@ -57,6 +58,7 @@ void CGenericConfirmDialog::BindRmlModel(Rml::DataModelConstructor& c, GenericDi
     c.Bind("primary_is_stock_ok", &model.primaryIsStockOk);
     c.Bind("has_secondary", &model.hasSecondary);
     c.Bind("secondary_label", &model.secondaryLabel);
+    c.Bind("secondary_is_stock_max", &model.secondaryIsStockMax);
     c.Bind("show_cancel", &model.showCancel);
     c.Bind("cancel_label", &model.cancelLabel);
     c.Bind("cancel_is_stock_cancel", &model.cancelIsStockCancel);
@@ -367,6 +369,25 @@ void CGenericConfirmDialog::ApplyInputFieldConfig(const Rml::String& value)
     FocusInputWhenShown();
 }
 
+void CGenericConfirmDialog::ClampInputToMaxValue()
+{
+    if (!m_Active.input || !m_Active.input->maxValue || !m_Active.input->numericOnly
+        || m_Active.input->mode != GenericDialogConfig::InputField::Mode::Text)
+        return;
+
+    const std::uint64_t maxValue = *m_Active.input->maxValue;
+    std::uint64_t value = 0;
+    for (const char digit : UI::RmlBridge::KeepDigitsOnly(m_RmlView.GetModel().inputValue))
+    {
+        value = value * 10 + static_cast<std::uint64_t>(digit - '0');
+        if (value > maxValue)
+        {
+            ApplyInputFieldConfig(std::to_string(maxValue));
+            return;
+        }
+    }
+}
+
 void CGenericConfirmDialog::FocusInputWhenShown()
 {
     if (!m_bFocusInput)
@@ -425,6 +446,7 @@ bool CGenericConfirmDialog::Update()
 
     SyncCanvasTop();
     FocusInputWhenShown();
+    ClampInputToMaxValue();
 
     if (m_Active.progress)
     {
@@ -572,6 +594,12 @@ void CGenericConfirmDialog::SyncRmlModel()
     {
         model.secondaryLabel = secondaryLabel;
         m_RmlView.MarkDirty("secondary_label");
+    }
+    const bool secondaryIsStockMax = m_Active.secondaryLabel == I18N::Game::Max;
+    if (model.secondaryIsStockMax != secondaryIsStockMax)
+    {
+        model.secondaryIsStockMax = secondaryIsStockMax;
+        m_RmlView.MarkDirty("secondary_is_stock_max");
     }
 
     if (model.showCancel != m_Active.showCancel)

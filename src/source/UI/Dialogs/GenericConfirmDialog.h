@@ -83,6 +83,9 @@ namespace mu::ui::window
             bool masked = false;       // password-style masking (Text mode only -- NumericKeypad
                                        // is unconditionally masked)
             bool numericOnly = false;  // Text mode only; NumericKeypad is always digits-only
+            // Text mode with numericOnly: the typed number is replaced by this maximum as soon as it
+            // would exceed it. Unset = no limit.
+            std::optional<std::uint64_t> maxValue;
             std::wstring initialText;
         };
         std::optional<InputField> input;
@@ -200,6 +203,7 @@ namespace mu::ui::window
         // `value`: the initial text on Show(), the typed text on a theme reload. This dialog is
         // shared, so the field is reconfigured on every Show().
         void ApplyInputFieldConfig(const Rml::String& value);
+        void ClampInputToMaxValue();
         // Focuses the text field once it is shown: it is hidden until the model update that shows
         // its row has run, and a hidden element cannot take the focus.
         void FocusInputWhenShown();
@@ -221,6 +225,8 @@ namespace mu::ui::window
 
             bool hasSecondary = false;
             Rml::String secondaryLabel;
+            // The label is the stock "Max": a theme may draw its lettered button art.
+            bool secondaryIsStockMax = false;
 
             bool showCancel = false;
             Rml::String cancelLabel;

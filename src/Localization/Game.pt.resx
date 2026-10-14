@@ -8429,6 +8429,9 @@
     <value>Máximo</value>
     <comment>legacy_id=2342</comment>
   </data>
+  <data name="Max" xml:space="preserve">
+    <value>Máx.</value>
+  </data>
   <data name="Rate increase" xml:space="preserve">
     <value>Aumento da taxa</value>
     <comment>legacy_id=2344</comment>
