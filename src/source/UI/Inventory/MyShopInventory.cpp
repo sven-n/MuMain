@@ -6,7 +6,9 @@
 #include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlWindowClose.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
+#include "UI/Dialogs/GenericMenuDialog.h"
 #include "UI/Core/WindowCommon.h" // g_IsPurchaseShop
+#include "GameLogic/Items/PersonalShopCurrency.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "I18N/All.h"
 #include "GameLogic/Items/ShopRestrictions.h"
@@ -18,174 +20,212 @@
 #include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
+#include <optional>
+#include <vector>
 
 const int iMAX_SHOPTITLE_MULTI = 26;
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-void mu::ui::window::ShowPersonalShopItemValueDialog()
+namespace
 {
-    // Numeric Mode::Text price entry. See MyShopInventory.h's own declaration comment for why
-    // this is a free function shared across all 4 call sites instead of duplicated per site.
+// Sends the price of an item of the own personal shop. Zen prices use the original packet, so
+// they work with every server.
+void SendItemPrice(int itemSlot, const GameLogic::PersonalShop::ItemPrice& price)
+{
+    if (price.Kind == GameLogic::PersonalShop::PriceKind::Zen)
+    {
+        SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(itemSlot, price.Amount);
+        return;
+    }
+
+    const auto encoded = GameLogic::PersonalShop::EncodeExtendedPrice(price);
+    SocketClient->ToGameServer()->SendPlayerShopSetItemPriceExtended(encoded.MoneyPrice, encoded.PriceItemType,
+                                                                     encoded.RequiredItemAmount, itemSlot);
+}
+
+// Sends the price of the item which is moved into or within the own shop, or whose price is
+// changed, and remembers it for the tooltip. sourceIndex is the shop slot of the item whose price
+// is changed when no item is picked; a negative one changes nothing.
+void ApplyPersonalShopItemPrice(const GameLogic::PersonalShop::ItemPrice& price, int sourceIndex)
+{
+    if (g_pMyShopInventory->IsEnablePersonalShop() == true)
+    {
+        SocketClient->ToGameServer()->SendPlayerShopClose();
+    }
+
+    CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
+    if (pPickedItem == nullptr)
+    {
+        if (sourceIndex >= 0)
+        {
+            SendItemPrice(sourceIndex, price);
+            AddPersonalItemPrice(sourceIndex, price, g_IsPurchaseShop);
+        }
+
+        return;
+    }
+
+    ITEM* pItemObj = pPickedItem->GetItem();
+    const int iSourceIndex = pPickedItem->GetSourceLinealPos();
+    const int iTargetIndex = g_pMyShopInventory->GetTargetIndex();
+    const auto* pOwnerInventory = pPickedItem->GetOwnerInventory();
+    const bool isFromInventory = pOwnerInventory == g_pMyInventory->GetInventoryCtrl() || pOwnerInventory == nullptr;
+    const bool isFromShop = pOwnerInventory == g_pMyShopInventory->GetInventoryCtrl();
+    if (isFromInventory || isFromShop)
+    {
+        SendItemPrice(iSourceIndex, price);
+        const STORAGE_TYPE sourceStorage = isFromShop ? STORAGE_TYPE::MYSHOP : STORAGE_TYPE::INVENTORY;
+        SendRequestEquipmentItem(sourceStorage, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
+    }
+
+    AddPersonalItemPrice(iTargetIndex, price, g_IsPurchaseShop);
+}
+
+ITEM* FindPricedItem()
+{
+    CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
+    return pPickedItem ? pPickedItem->GetItem() : g_pMyShopInventory->FindItem(g_pMyShopInventory->GetSourceIndex());
+}
+
+// A zen price below the value of the item has to be confirmed by the player.
+void ShowZenPriceConfirmation(const ITEM& item, const wchar_t* strPrice,
+                              const GameLogic::PersonalShop::ItemPrice& price)
+{
+    // Plain item3D + OkCancel confirm, same shape as NPCShop.cpp's own IsHighValueItem() sell
+    // confirm. The price is just captured by value here instead of needing a GenericDialogConfig
+    // field of its own.
+    wchar_t strText[MAX_TEXT_LENGTH] = {};
+    mu_swprintf(strText, I18N::Game::SellingPriceSZen, strPrice);
+
     GenericDialogConfig cfg;
     cfg.showCancel = true;
-    cfg.lines = { { I18N::Game::EnterSellingPrice, false } };
+    cfg.item3D = item;
+    cfg.lines = {
+        {strText, true},
+        {I18N::Game::DoYouWantToSellItemAtThisPrice, false},
+    };
+    cfg.onPrimary = [price]
+    {
+        int sourceIndex = -1;
+        if (ITEM* pItem = g_pMyShopInventory->FindItem(g_pMyShopInventory->GetSourceIndex()))
+        {
+            sourceIndex = g_pMyShopInventory->GetItemInventoryIndex(pItem);
+        }
+
+        ApplyPersonalShopItemPrice(price, sourceIndex);
+    };
+    cfg.onCancel = [] { CInventoryCtrl::BackupPickedItem(); };
+    // Chained from inside the price dialog's own onPrimary -- proven-safe pattern, see
+    // CGenericConfirmDialog::Resolve()'s own comment on why this doesn't stomp the dialog that's
+    // still resolving.
+    g_pGenericConfirmDialog->Show(std::move(cfg));
+}
+
+void ShowItemPriceDialog(const GameLogic::PersonalShop::ItemPrice& priceType, const std::wstring& initialText);
+
+// A menu of currencies to choose the one of the price from. Choosing one, or closing the menu,
+// shows the price dialog again with the typed amount. A long list takes two columns, so the
+// menu stays on the screen.
+void ShowPriceTypeMenu(const std::wstring& title, const std::vector<GameLogic::PersonalShop::ItemPrice>& priceTypes,
+                       std::optional<std::vector<GameLogic::PersonalShop::ItemPrice>> otherItems,
+                       const GameLogic::PersonalShop::ItemPrice& current, const std::wstring& typedText)
+{
+    constexpr size_t MaximumSingleColumnButtons = 6;
+
+    GenericMenuConfig cfg;
+    cfg.title = title;
+    for (const auto& priceType : priceTypes)
+    {
+        GenericMenuConfig::MenuButton button;
+        button.label = GameLogic::PersonalShop::GetCurrencyName(priceType);
+        button.onClick = [priceType, typedText] { ShowItemPriceDialog(priceType, typedText); };
+        cfg.buttons.push_back(std::move(button));
+    }
+
+    if (otherItems)
+    {
+        GenericMenuConfig::MenuButton button;
+        button.label = I18N::Game::OtherItems;
+        button.onClick = [items = *otherItems, current, typedText]
+        { ShowPriceTypeMenu(I18N::Game::OtherItems, items, std::nullopt, current, typedText); };
+        cfg.buttons.push_back(std::move(button));
+    }
+
+    if (cfg.buttons.size() > MaximumSingleColumnButtons)
+    {
+        cfg.columns = 2;
+    }
+
+    GenericMenuConfig::MenuButton cancel;
+    cancel.label = I18N::Game::Cancel;
+    cancel.compact = true;
+    cancel.dismiss = true;
+    cancel.onClick = [current, typedText] { ShowItemPriceDialog(current, typedText); };
+    cfg.buttons.push_back(std::move(cancel));
+    cfg.onCancel = [current, typedText] { ShowItemPriceDialog(current, typedText); };
+
+    g_pGenericMenuDialog->Show(std::move(cfg));
+}
+
+// The currencies the server allows: the common ones (zen, the account coins, the jewels), and
+// the other items in a second menu behind an "Other items" button.
+void ShowPriceTypeMenu(const GameLogic::PersonalShop::ItemPrice& current, const std::wstring& typedText)
+{
+    std::vector<GameLogic::PersonalShop::ItemPrice> common;
+    std::vector<GameLogic::PersonalShop::ItemPrice> others;
+    for (const auto& priceType : GameLogic::PersonalShop::GetAllowedPriceTypes())
+    {
+        (GameLogic::PersonalShop::IsCommonPriceType(priceType) ? common : others).push_back(priceType);
+    }
+
+    ShowPriceTypeMenu(I18N::Game::Currency, common, others.empty() ? std::nullopt : std::optional(std::move(others)),
+                      current, typedText);
+}
+
+// The price dialog with the given currency. When the server allows other prices than zen, it
+// names the currency in its own line, and its secondary button opens the menu of the currencies.
+void ShowItemPriceDialog(const GameLogic::PersonalShop::ItemPrice& priceType, const std::wstring& initialText)
+{
+    GenericDialogConfig cfg;
+    cfg.showCancel = true;
+    cfg.lines = {{I18N::Game::EnterSellingPrice, false}};
     cfg.input = GenericDialogConfig::InputField{};
     cfg.input->mode = GenericDialogConfig::InputField::Mode::Text;
     cfg.input->maxLength = 8;
     cfg.input->numericOnly = true;
+    cfg.input->initialText = initialText;
 
-    cfg.onPrimary = []
+    if (GameLogic::PersonalShop::AreOtherPricesThanZenAllowed())
+    {
+        wchar_t currencyLine[MAX_TEXT_LENGTH] = {};
+        mu_swprintf(currencyLine, I18N::Game::CurrencyLs, GameLogic::PersonalShop::GetCurrencyName(priceType));
+        cfg.lines.push_back({currencyLine, true, RGBA(255, 210, 60, 255)});
+        cfg.secondaryLabel = I18N::Game::Currency;
+        cfg.onSecondary = [priceType] { ShowPriceTypeMenu(priceType, g_pGenericConfirmDialog->GetInputText()); };
+    }
+
+    cfg.onPrimary = [priceType]
     {
         const std::wstring strTextW = g_pGenericConfirmDialog->GetInputText();
-        if (strTextW.empty())
+        GameLogic::PersonalShop::ItemPrice price = priceType;
+        price.Amount = strTextW.empty() ? 0 : _wtoi(strTextW.c_str());
+        if (price.Amount == 0)
         {
             g_pGenericConfirmDialog->KeepOpen();
             return;
         }
-        const int iInputZen = _wtoi(strTextW.c_str());
-        if (iInputZen == 0)
-        {
-            g_pGenericConfirmDialog->KeepOpen();
-            return;
-        }
-        const wchar_t* strText = strTextW.c_str();
 
-        CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
-        ITEM* pItem = NULL;
-        if (pPickedItem)
+        ITEM* pItem = FindPricedItem();
+        if (pItem != nullptr && price.Kind == GameLogic::PersonalShop::PriceKind::Zen &&
+            price.Amount < static_cast<int>(ItemValue(pItem, 2)))
         {
-            pItem = pPickedItem->GetItem();
+            ShowZenPriceConfirmation(*pItem, strTextW.c_str(), price);
         }
         else
         {
-            int iSourceIndex = g_pMyShopInventory->GetSourceIndex();
-            pItem = g_pMyShopInventory->FindItem(iSourceIndex);
-        }
-
-        bool bResult = false;
-        if (pItem)
-        {
-            DWORD dwItemValue = ItemValue(pItem, 2);
-            if (iInputZen < (int)dwItemValue)
-                bResult = true;
-        }
-
-        if (bResult == true)
-        {
-            // Plain item3D + OkCancel confirm, same shape as NPCShop.cpp's own IsHighValueItem()
-            // sell confirm. iInputZen is just captured by value here instead of needing a
-            // GenericDialogConfig field of its own.
-            wchar_t strText2[MAX_TEXT_LENGTH] = { 0, };
-            mu_swprintf(strText2, I18N::Game::SellingPriceSZen, strText);
-
-            GenericDialogConfig cfg;
-            cfg.showCancel = true;
-            cfg.item3D = *pItem;
-            cfg.lines = {
-                { strText2, true },
-                { I18N::Game::DoYouWantToSellItemAtThisPrice, false },
-            };
-            cfg.onPrimary = [iInputZen]
-            {
-                if (g_pMyShopInventory->IsEnablePersonalShop() == true)
-                {
-                    SocketClient->ToGameServer()->SendPlayerShopClose();
-                }
-
-                CPickedItem* pPickedItem2 = CInventoryCtrl::GetPickedItem();
-
-                int iSourceIndex = -1, iTargetIndex = -1;
-
-                if (pPickedItem2)
-                {
-                    ITEM* pItemObj = pPickedItem2->GetItem();
-                    iSourceIndex = pPickedItem2->GetSourceLinealPos();
-                    iTargetIndex = g_pMyShopInventory->GetTargetIndex();
-
-                    if (pPickedItem2->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
-                    {
-                        SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
-                        SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
-                    }
-                    else if (pPickedItem2->GetOwnerInventory() == nullptr)
-                    {
-                        SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
-                        SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
-                    }
-                    else if (pPickedItem2->GetOwnerInventory() == g_pMyShopInventory->GetInventoryCtrl())
-                    {
-                        SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
-                        SendRequestEquipmentItem(STORAGE_TYPE::MYSHOP, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
-                    }
-
-                    AddPersonalItemPrice(iTargetIndex, iInputZen, g_IsPurchaseShop);
-                }
-                else
-                {
-                    ITEM* pItem2 = g_pMyShopInventory->FindItem(g_pMyShopInventory->GetSourceIndex());
-                    if (pItem2)
-                    {
-                        iSourceIndex = g_pMyShopInventory->GetItemInventoryIndex(pItem2);
-                        if (iSourceIndex >= 0)
-                        {
-                            SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
-                            AddPersonalItemPrice(iSourceIndex, iInputZen, g_IsPurchaseShop);
-                        }
-                    }
-                }
-            };
-            cfg.onCancel = []
-            {
-                CInventoryCtrl::BackupPickedItem();
-            };
-            // Chained from inside ShowPersonalShopItemValueDialog()'s own onPrimary -- proven-safe
-            // pattern, see CGenericConfirmDialog::Resolve()'s own comment on why this doesn't stomp
-            // the dialog that's still resolving.
-            g_pGenericConfirmDialog->Show(std::move(cfg));
-        }
-        else
-        {
-            if (g_pMyShopInventory->IsEnablePersonalShop() == true)
-            {
-                SocketClient->ToGameServer()->SendPlayerShopClose();
-            }
-
-            CPickedItem* pPickedItem2 = CInventoryCtrl::GetPickedItem();
-
-            int iSourceIndex = -1, iTargetIndex = -1;
-
-            if (pPickedItem2)
-            {
-                ITEM* pItemObj = pPickedItem2->GetItem();
-                iSourceIndex = pPickedItem2->GetSourceLinealPos();
-                iTargetIndex = g_pMyShopInventory->GetTargetIndex();
-
-                if (pPickedItem2->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
-                {
-                    SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
-                    SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
-                }
-                else if (pPickedItem2->GetOwnerInventory() == nullptr)
-                {
-                    SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
-                    SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
-                }
-                else if (pPickedItem2->GetOwnerInventory() == g_pMyShopInventory->GetInventoryCtrl())
-                {
-                    SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
-                    SendRequestEquipmentItem(STORAGE_TYPE::MYSHOP, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
-                }
-
-                AddPersonalItemPrice(iTargetIndex, iInputZen, g_IsPurchaseShop);
-            }
-            else
-            {
-                iSourceIndex = g_pMyShopInventory->GetSourceIndex();
-                SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
-                AddPersonalItemPrice(iSourceIndex, iInputZen, g_IsPurchaseShop);
-            }
+            ApplyPersonalShopItemPrice(price, g_pMyShopInventory->GetSourceIndex());
         }
 
         g_pMyShopInventory->SetInputValueTextBox(false);
@@ -197,6 +237,14 @@ void mu::ui::window::ShowPersonalShopItemValueDialog()
     };
 
     g_pGenericConfirmDialog->Show(std::move(cfg));
+}
+} // namespace
+
+void mu::ui::window::ShowPersonalShopItemValueDialog()
+{
+    // Numeric Mode::Text price entry. See MyShopInventory.h's own declaration comment for why
+    // this is a free function shared across all 4 call sites instead of duplicated per site.
+    ShowItemPriceDialog({}, {});
 }
 
 mu::ui::window::CMyShopInventory::CMyShopInventory() : m_SourceIndex(-1), m_TargetIndex(-1), m_EnablePersonalShop(false)

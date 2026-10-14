@@ -1921,12 +1921,26 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
         && !GameLogic::Items::IsPersonalShopBan(ip))
     {
         {
-            int price = 0;
+            GameLogic::PersonalShop::ItemPrice itemPrice;
             int indexInv = g_pMyShopInventory->GetInventoryCtrl()->GetIndexByItem(ip);
             wchar_t Text[100];
 
-            if (GetPersonalItemPrice(indexInv, price, g_IsPurchaseShop))
+            const bool hasPrice = GetPersonalItemPrice(indexInv, itemPrice, g_IsPurchaseShop);
+            if (hasPrice && itemPrice.Kind != GameLogic::PersonalShop::PriceKind::Zen)
             {
+                // The server tells the player when the jewels or coins are not enough.
+                mu_swprintf(Text, L"%d %ls", itemPrice.Amount, GameLogic::PersonalShop::GetCurrencyName(itemPrice));
+                mu_swprintf(TextList[TextNum], I18N::Game::SellingPriceS, Text);
+                TextListColor[TextNum] = TEXT_COLOR_YELLOW;
+                TextBold[TextNum] = true;
+                TextNum++;
+                mu_swprintf(TextList[TextNum], L"\n");
+                TextNum++;
+                SkipNum++;
+            }
+            else if (hasPrice)
+            {
+                const int price = itemPrice.Amount;
                 ConvertGold(price, Text);
                 mu_swprintf(TextList[TextNum], I18N::Game::SellingPriceS, Text);
 
