@@ -150,10 +150,7 @@ namespace SEASON4A
         // is the only caller.
         bool BuildSocketOptionTooltipModel(UI::Inventory::Tooltip::Model& outModel);
 
-        // Array references keep the bounds (all callers pass 64- resp. 16-wide buffers): plain
-        // pointers would make mu_swprintf assume 1024 characters, which glibc's _FORTIFY_SOURCE
-        // aborts on once the call is inlined and the real (smaller) buffers are visible.
-        void CreateSocketOptionText(wchar_t (&pszOptionText)[64], int iSeedID, int iSphereLv);
+        void CreateSocketOptionText(wchar_t* pszOptionText, int iSeedID, int iSphereLv);
 
         __int64 CalcSocketBonusItemValue(const ITEM* pItem, __int64 iOrgGold);
 
@@ -167,7 +164,7 @@ namespace SEASON4A
     protected:
         BOOL IsSocketItem(int iItemType);
 
-        void CalcSocketOptionValueText(wchar_t (&pszOptionValueText)[16], int iOptionType, float fOptionValue);
+        void CalcSocketOptionValueText(wchar_t* pszOptionValueText, int iOptionType, float fOptionValue);
         int CalcSocketOptionValue(int iOptionType, float fOptionValue);
 
     protected:

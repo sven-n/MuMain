@@ -190,7 +190,7 @@ int CSocketItemMgr::CalcSocketOptionValue(int iOptionType, float fOptionValue)
     }
 }
 
-void CSocketItemMgr::CalcSocketOptionValueText(wchar_t (&pszOptionValueText)[16], int iOptionType, float fOptionValue)
+void CSocketItemMgr::CalcSocketOptionValueText(wchar_t* pszOptionValueText, int iOptionType, float fOptionValue)
 {
     switch (iOptionType)
     {
@@ -203,7 +203,7 @@ void CSocketItemMgr::CalcSocketOptionValueText(wchar_t (&pszOptionValueText)[16]
     }
 }
 
-void CSocketItemMgr::CreateSocketOptionText(wchar_t (&pszOptionText)[64], int iSeedID, int iSphereLv)
+void CSocketItemMgr::CreateSocketOptionText(wchar_t* pszOptionText, int iSeedID, int iSphereLv)
 {
     if (pszOptionText == NULL) return;
 

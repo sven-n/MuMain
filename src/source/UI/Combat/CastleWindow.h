@@ -121,10 +121,7 @@ private:
     {
         m_iCurrMsgBoxRequest = iMsgBoxRequest;
     }
-    // Array reference keeps the bound (all callers pass 256-wide buffers): a plain pointer
-    // would make mu_swprintf assume 1024 characters, which glibc's _FORTIFY_SOURCE aborts on
-    // once the call is inlined and the real (smaller) buffer is visible.
-    void InsertComma(wchar_t (&pszText)[256], DWORD dwNumber);
+    void InsertComma(wchar_t* pszText, DWORD dwNumber);
 
     void UpdateGateManagingTab(SENATUS_BUTTON button);
     void UpdateStatueManagingTab(SENATUS_BUTTON button);

@@ -228,13 +228,8 @@ double GetTargetFps()
  * @brief Generates a timestamped filename and message for screenshot capture.
  * @param outFileName Buffer to receive the filename
  * @param outMessage Buffer to receive the log message
- *
- * Array references keep the bounds: plain pointers would make mu_swprintf assume 1024
- * characters, which glibc's _FORTIFY_SOURCE aborts on once the call is inlined and the
- * real (smaller) buffers are visible.
  */
-template <size_t FileNameN, size_t MessageN>
-static void GenerateScreenshotFilename(wchar_t (&outFileName)[FileNameN], wchar_t (&outMessage)[MessageN])
+static void GenerateScreenshotFilename(wchar_t* outFileName, wchar_t* outMessage)
 {
     SYSTEMTIME st;
     GetLocalTime(&st);

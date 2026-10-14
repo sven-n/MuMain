@@ -117,11 +117,7 @@ void HelperLifeFrameName(wchar_t (&szText)[N])
 }
 
 // The elf's arrow / bolt count line ("Arrows %d (%d)"), false when none is shown.
-// Array reference keeps the bound, like HelperLifeFrameName(): a plain pointer would make
-// mu_swprintf assume 1024 characters, which glibc's _FORTIFY_SOURCE aborts on once the
-// call is inlined and the real (smaller) buffer is visible.
-template <size_t N>
-bool ArrowCountText(int arrowType, int bowArrows, int crossbowBolts, wchar_t (&szText)[N])
+bool ArrowCountText(int arrowType, int bowArrows, int crossbowBolts, wchar_t* szText)
 {
     int iNumEquipedArrowDurability = 0;
     int iNumArrowSetInInven = 0;
