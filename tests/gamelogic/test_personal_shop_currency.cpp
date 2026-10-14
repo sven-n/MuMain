@@ -12,16 +12,22 @@
 
 using GameLogic::PersonalShop::DecodeExtendedPrice;
 using GameLogic::PersonalShop::EncodeExtendedPrice;
-using GameLogic::PersonalShop::GetNextAllowedPriceType;
+using GameLogic::PersonalShop::GetAllowedPriceTypes;
+using GameLogic::PersonalShop::IsCommonPriceType;
 using GameLogic::PersonalShop::ItemPrice;
 using GameLogic::PersonalShop::PriceKind;
 using GameLogic::PersonalShop::SetAllowedPriceTypes;
 
 namespace
 {
-// Jewel of Bless: group 14, number 13; Jewel of Soul: group 14, number 14.
+// Jewel of Bless: group 14, number 13; Jewel of Soul: group 14, number 14; Jewel of Chaos: group 12,
+// number 15; Loch's Feather: group 13, number 14; Gemstone: group 14, number 41.
 constexpr uint16_t JewelOfBless = 0xE00D;
 constexpr uint16_t JewelOfSoul = 0xE00E;
+constexpr uint16_t JewelOfChaos = 0xC00F;
+constexpr uint16_t LochsFeather = 0xD00E;
+constexpr uint16_t Gemstone = 0xE029;
+constexpr uint16_t WCoinC = 0xFFF0;
 constexpr uint16_t GoblinPoints = 0xFFF2;
 } // namespace
 
@@ -70,23 +76,34 @@ TEST_CASE("the price input offers only zen until the server allows other prices"
 {
     SetAllowedPriceTypes({});
     CHECK_FALSE(GameLogic::PersonalShop::AreOtherPricesThanZenAllowed());
-    CHECK(GetNextAllowedPriceType({}).Kind == PriceKind::Zen);
+    const auto choices = GetAllowedPriceTypes();
+    REQUIRE(choices.size() == 1);
+    CHECK(choices[0].Kind == PriceKind::Zen);
 }
 
-TEST_CASE("the price input cycles through zen and the allowed price types")
+TEST_CASE("the price input offers zen, the coins and the jewels before the other items")
 {
-    const std::array<uint16_t, 2> allowed = { JewelOfSoul, GoblinPoints };
+    // As a server could send them: items of its configuration first, then the coins.
+    const std::array<uint16_t, 7> allowed = { Gemstone, JewelOfChaos, LochsFeather, JewelOfBless, GoblinPoints,
+                                              JewelOfSoul, WCoinC };
     SetAllowedPriceTypes(allowed);
     CHECK(GameLogic::PersonalShop::AreOtherPricesThanZenAllowed());
 
-    const auto soul = GetNextAllowedPriceType({});
-    CHECK(soul.Kind == PriceKind::Item);
-    CHECK(soul.PriceItemType == JewelOfSoul);
+    const auto choices = GetAllowedPriceTypes();
+    const std::array<uint16_t, 8> expected = { 0, WCoinC, GoblinPoints, JewelOfBless, JewelOfSoul, JewelOfChaos,
+                                               Gemstone, LochsFeather };
+    REQUIRE(choices.size() == expected.size());
+    for (size_t i = 0; i < expected.size(); ++i)
+    {
+        CHECK(choices[i].PriceItemType == expected[i]);
+        CHECK(choices[i].Amount == 0);
+    }
 
-    const auto goblinPoints = GetNextAllowedPriceType(soul);
-    CHECK(goblinPoints.Kind == PriceKind::AccountCoin);
-    CHECK(goblinPoints.PriceItemType == GoblinPoints);
-
-    CHECK(GetNextAllowedPriceType(goblinPoints).Kind == PriceKind::Zen);
+    CHECK(choices[0].Kind == PriceKind::Zen);
+    CHECK(choices[1].Kind == PriceKind::AccountCoin);
+    CHECK(choices[3].Kind == PriceKind::Item);
+    CHECK(IsCommonPriceType(choices[5]));
+    CHECK_FALSE(IsCommonPriceType(choices[6]));
+    CHECK_FALSE(IsCommonPriceType(choices[7]));
     SetAllowedPriceTypes({});
 }

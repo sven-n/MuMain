@@ -6,6 +6,7 @@
 #include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlWindowClose.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
+#include "UI/Dialogs/GenericMenuDialog.h"
 #include "UI/Core/WindowCommon.h" // g_IsPurchaseShop
 #include "GameLogic/Items/PersonalShopCurrency.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
@@ -19,6 +20,8 @@
 #include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
+#include <optional>
+#include <vector>
 
 const int iMAX_SHOPTITLE_MULTI = 26;
 
@@ -120,9 +123,69 @@ void ShowZenPriceConfirmation(const ITEM& item, const wchar_t* strPrice,
     g_pGenericConfirmDialog->Show(std::move(cfg));
 }
 
-// The price dialog with the given currency. When the server allows other prices than zen, its
-// secondary button names the currency and shows the dialog again with the next allowed one,
-// keeping the typed amount.
+void ShowItemPriceDialog(const GameLogic::PersonalShop::ItemPrice& priceType, const std::wstring& initialText);
+
+// A menu of currencies to choose the one of the price from. Choosing one, or closing the menu,
+// shows the price dialog again with the typed amount. A long list takes two columns, so the
+// menu stays on the screen.
+void ShowPriceTypeMenu(const std::wstring& title, const std::vector<GameLogic::PersonalShop::ItemPrice>& priceTypes,
+                       std::optional<std::vector<GameLogic::PersonalShop::ItemPrice>> otherItems,
+                       const GameLogic::PersonalShop::ItemPrice& current, const std::wstring& typedText)
+{
+    constexpr size_t MaximumSingleColumnButtons = 6;
+
+    GenericMenuConfig cfg;
+    cfg.title = title;
+    for (const auto& priceType : priceTypes)
+    {
+        GenericMenuConfig::MenuButton button;
+        button.label = GameLogic::PersonalShop::GetCurrencyName(priceType);
+        button.onClick = [priceType, typedText] { ShowItemPriceDialog(priceType, typedText); };
+        cfg.buttons.push_back(std::move(button));
+    }
+
+    if (otherItems)
+    {
+        GenericMenuConfig::MenuButton button;
+        button.label = I18N::Game::OtherItems;
+        button.onClick = [items = *otherItems, current, typedText]
+        { ShowPriceTypeMenu(I18N::Game::OtherItems, items, std::nullopt, current, typedText); };
+        cfg.buttons.push_back(std::move(button));
+    }
+
+    if (cfg.buttons.size() > MaximumSingleColumnButtons)
+    {
+        cfg.columns = 2;
+    }
+
+    GenericMenuConfig::MenuButton cancel;
+    cancel.label = I18N::Game::Cancel;
+    cancel.compact = true;
+    cancel.dismiss = true;
+    cancel.onClick = [current, typedText] { ShowItemPriceDialog(current, typedText); };
+    cfg.buttons.push_back(std::move(cancel));
+    cfg.onCancel = [current, typedText] { ShowItemPriceDialog(current, typedText); };
+
+    g_pGenericMenuDialog->Show(std::move(cfg));
+}
+
+// The currencies the server allows: the common ones (zen, the account coins, the jewels), and
+// the other items in a second menu behind an "Other items" button.
+void ShowPriceTypeMenu(const GameLogic::PersonalShop::ItemPrice& current, const std::wstring& typedText)
+{
+    std::vector<GameLogic::PersonalShop::ItemPrice> common;
+    std::vector<GameLogic::PersonalShop::ItemPrice> others;
+    for (const auto& priceType : GameLogic::PersonalShop::GetAllowedPriceTypes())
+    {
+        (GameLogic::PersonalShop::IsCommonPriceType(priceType) ? common : others).push_back(priceType);
+    }
+
+    ShowPriceTypeMenu(I18N::Game::Currency, common, others.empty() ? std::nullopt : std::optional(std::move(others)),
+                      current, typedText);
+}
+
+// The price dialog with the given currency. When the server allows other prices than zen, it
+// names the currency in its own line, and its secondary button opens the menu of the currencies.
 void ShowItemPriceDialog(const GameLogic::PersonalShop::ItemPrice& priceType, const std::wstring& initialText)
 {
     GenericDialogConfig cfg;
@@ -136,12 +199,11 @@ void ShowItemPriceDialog(const GameLogic::PersonalShop::ItemPrice& priceType, co
 
     if (GameLogic::PersonalShop::AreOtherPricesThanZenAllowed())
     {
-        cfg.secondaryLabel = GameLogic::PersonalShop::GetCurrencyName(priceType);
-        cfg.onSecondary = [priceType]
-        {
-            ShowItemPriceDialog(GameLogic::PersonalShop::GetNextAllowedPriceType(priceType),
-                                g_pGenericConfirmDialog->GetInputText());
-        };
+        wchar_t currencyLine[MAX_TEXT_LENGTH] = {};
+        mu_swprintf(currencyLine, I18N::Game::CurrencyLs, GameLogic::PersonalShop::GetCurrencyName(priceType));
+        cfg.lines.push_back({currencyLine, true, RGBA(255, 210, 60, 255)});
+        cfg.secondaryLabel = I18N::Game::Currency;
+        cfg.onSecondary = [priceType] { ShowPriceTypeMenu(priceType, g_pGenericConfirmDialog->GetInputText()); };
     }
 
     cfg.onPrimary = [priceType]

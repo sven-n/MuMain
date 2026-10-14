@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <span>
+#include <vector>
 
 // The prices of items in personal shops. Zen always works; prices in items
 // (e.g. jewels) and account coins only when the server allows them and told
@@ -63,9 +64,14 @@ void SetAllowedPriceTypes(std::span<const uint16_t> priceItemTypes);
 /// set with the extended packet.
 bool AreOtherPricesThanZenAllowed();
 
-/// The allowed price type after the one of the given price, wrapping
-/// around to zen. The amount of the result is the one of the given price.
-ItemPrice GetNextAllowedPriceType(const ItemPrice& current);
+/// True for the currencies which are commonly used as prices: zen, the
+/// account coins and the jewels.
+bool IsCommonPriceType(const ItemPrice& price);
+
+/// The price types the player can choose from, without amount: the common
+/// ones first (zen, the account coins, the jewels), then the other allowed
+/// items in the order the server sent them.
+std::vector<ItemPrice> GetAllowedPriceTypes();
 
 /// The name of the currency of the price, e.g. "Jewel of Bless".
 /// Defined in PersonalShopCurrencyName.cpp, as it needs the item and

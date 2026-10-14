@@ -13183,4 +13183,13 @@
   <data name="Goblin Points" xml:space="preserve">
     <value>Goblin Points</value>
   </data>
+  <data name="Currency" xml:space="preserve">
+    <value>Currency</value>
+  </data>
+  <data name="Currency: %ls" xml:space="preserve">
+    <value>Currency: %ls</value>
+  </data>
+  <data name="Other items" xml:space="preserve">
+    <value>Other items</value>
+  </data>
 </root>

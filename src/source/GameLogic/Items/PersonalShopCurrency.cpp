@@ -2,6 +2,7 @@
 #include "GameLogic/Items/PersonalShopCurrency.h"
 
 #include <algorithm>
+#include <array>
 #include <vector>
 
 namespace
@@ -11,6 +12,27 @@ using GameLogic::PersonalShop::ItemPrice;
 using GameLogic::PersonalShop::PriceKind;
 
 std::vector<uint16_t> AllowedPriceTypes;
+
+// The jewels which are commonly used as prices, in the order of their usual value: Bless, Soul,
+// Chaos, Life, Creation, Guardian and Harmony (group in the highest 4 bits, number in the others).
+constexpr std::array<uint16_t, 7> CommonPriceItemTypes = {0xE00D, 0xE00E, 0xC00F, 0xE010, 0xE016, 0xE01F, 0xE02A};
+
+// The position of a price item type in the menu: account coins, then common jewels, then the rest.
+size_t MenuRank(uint16_t priceItemType)
+{
+    if (IsAccountCoin(priceItemType))
+    {
+        return priceItemType - GameLogic::PersonalShop::FirstAccountCoinPriceItemType;
+    }
+
+    const auto common = std::find(CommonPriceItemTypes.begin(), CommonPriceItemTypes.end(), priceItemType);
+    if (common != CommonPriceItemTypes.end())
+    {
+        return GameLogic::PersonalShop::AccountCoinCount + (common - CommonPriceItemTypes.begin());
+    }
+
+    return GameLogic::PersonalShop::AccountCoinCount + CommonPriceItemTypes.size();
+}
 
 ItemPrice ToPrice(uint16_t priceItemType, int amount)
 {
@@ -60,24 +82,25 @@ bool AreOtherPricesThanZenAllowed()
     return !AllowedPriceTypes.empty();
 }
 
-ItemPrice GetNextAllowedPriceType(const ItemPrice& current)
+bool IsCommonPriceType(const ItemPrice& price)
 {
-    // The order of the choices: zen, then the allowed price types as the server sent them.
-    auto next = AllowedPriceTypes.begin();
-    if (current.Kind != PriceKind::Zen)
+    return price.Kind != PriceKind::Item ||
+           MenuRank(price.PriceItemType) < AccountCoinCount + CommonPriceItemTypes.size();
+}
+
+std::vector<ItemPrice> GetAllowedPriceTypes()
+{
+    std::vector<uint16_t> priceItemTypes = AllowedPriceTypes;
+    // Stable, so the items which aren't common keep the order of the server.
+    std::stable_sort(priceItemTypes.begin(), priceItemTypes.end(),
+                     [](uint16_t a, uint16_t b) { return MenuRank(a) < MenuRank(b); });
+
+    std::vector<ItemPrice> result{ItemPrice{}};
+    for (const uint16_t priceItemType : priceItemTypes)
     {
-        next = std::find(AllowedPriceTypes.begin(), AllowedPriceTypes.end(), current.PriceItemType);
-        if (next != AllowedPriceTypes.end())
-        {
-            ++next;
-        }
+        result.push_back(ToPrice(priceItemType, 0));
     }
 
-    if (next == AllowedPriceTypes.end())
-    {
-        return {current.Amount, PriceKind::Zen, 0};
-    }
-
-    return ToPrice(*next, current.Amount);
+    return result;
 }
 } // namespace GameLogic::PersonalShop
