@@ -840,7 +840,7 @@ void CCastleWindow::SyncContent()
     SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
 }
 
-void CCastleWindow::InsertComma(wchar_t* pszText, DWORD dwNumber)
+void CCastleWindow::InsertComma(wchar_t (&pszText)[256], DWORD dwNumber)
 {
     wchar_t szNumber[32];
     mu_swprintf(szNumber, L"%d", dwNumber);

@@ -21,7 +21,10 @@ extern  int SrcInventoryIndex;
 
 namespace npcBreeder
 {
-    int CalcRecoveryZen(BYTE type, wchar_t* Text)
+    // Array reference keeps the bound: a plain pointer would make mu_swprintf assume 1024
+    // characters, which glibc's _FORTIFY_SOURCE aborts on once the call is inlined and the
+    // real (smaller) buffer is visible. All callers pass 100-wide buffers.
+    int CalcRecoveryZen(BYTE type, wchar_t (&Text)[100])
     {
         ITEM* ip;
 
