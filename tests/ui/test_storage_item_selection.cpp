@@ -3,6 +3,7 @@
 #include <cwchar>
 #include <ostream>
 
+#include "Core/Platform/SecureCrt.h"
 #include "GameShop/StorageItemSelection.h"
 
 using GameShop::StorageItem;
