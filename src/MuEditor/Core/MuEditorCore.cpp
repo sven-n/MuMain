@@ -4,10 +4,13 @@
 
 #include "MuEditorCore.h"
 #include "imgui.h"
+#include "imgui_internal.h"
 #include "imgui_impl_sdl3.h"
 #include "imgui_impl_sdlgpu3.h"
 #include <SDL3/SDL_events.h>
+#include <SDL3/SDL_keyboard.h>
 #include <SDL3/SDL_mouse.h>
+#include <SDL3/SDL_video.h>
 #include "MuInputBlockerCore.h"
 #include "Core/Input/SyntheticInput.h"
 #include "../Config/MuEditorConfig.h"
@@ -70,12 +73,26 @@ constexpr float EDITOR_BTN_Y = 8.0f;
 constexpr float EDITOR_BTN_WIDTH = 100.0f;
 constexpr float EDITOR_BTN_HEIGHT = 24.0f;
 
-// Editor UI scale limits (the toolbar's -/+ buttons step by 0.1).
+// Editor UI scale limits (the menu bar's -/+ buttons step by 0.1).
 constexpr float UI_SCALE_MIN = 0.7f;
 constexpr float UI_SCALE_MAX = 2.5f;
 
 namespace
 {
+// The editor's own windows present without waiting for the display where the
+// driver can, so that they never hold back the game's frame.
+SDL_GPUPresentMode EditorWindowPresentMode(SDL_GPUDevice* device, SDL_Window* gameWindow)
+{
+    for (const SDL_GPUPresentMode mode : {SDL_GPU_PRESENTMODE_MAILBOX, SDL_GPU_PRESENTMODE_IMMEDIATE})
+    {
+        if (SDL_WindowSupportsGPUPresentMode(device, gameWindow, mode))
+        {
+            return mode;
+        }
+    }
+    return SDL_GPU_PRESENTMODE_VSYNC;
+}
+
 bool InitializeImGuiBackends(SDL_Window* window)
 {
     SDL_GPUDevice* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
@@ -105,6 +122,7 @@ bool InitializeImGuiBackends(SDL_Window* window)
     initInfo.Device = device;
     initInfo.ColorTargetFormat = colorTargetFormat;
     initInfo.MSAASamples = SDL_GPU_SAMPLECOUNT_1;
+    initInfo.PresentMode = EditorWindowPresentMode(device, window);
     if (!ImGui_ImplSDLGPU3_Init(&initInfo))
     {
         fwprintf(stderr, L"[MuEditor] ImGui_ImplSDLGPU3_Init failed\n");
@@ -137,7 +155,7 @@ CMuEditorCore::CMuEditorCore()
 
 void CMuEditorCore::SetUIScale(float scale)
 {
-    // Clamp to something sane; the toolbar steps this in 0.1 increments.
+    // Clamp to something sane; the menu bar steps this in 0.1 increments.
     if (scale < UI_SCALE_MIN) scale = UI_SCALE_MIN;
     if (scale > UI_SCALE_MAX) scale = UI_SCALE_MAX;
     if (scale == m_UIScale)
@@ -204,6 +222,18 @@ void CMuEditorCore::Initialize(SDL_Window* window)
     // Let ImGui manage the mouse cursor (Windows cursor) when editor is open
     // Game cursor is disabled when editor is open (see ZzzScene.cpp)
     io.MouseDrawCursor = false; // Don't let ImGui draw its own cursor, use Windows cursor
+
+    // The editor's windows dock into one another and can leave the game window
+    // (an OS window each, see SelectWindowMode), staying in front of it: the
+    // platform backend makes them children of the game window.
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigViewportsNoDefaultParent = false;
+    m_pGameWindow = window;
+    // ImGui sees the game window's keys too, and its Ctrl+Tab window switch
+    // (force attack and the minimap in the game) would move the keyboard into
+    // an editor window.
+    ImGui::GetCurrentContext()->ConfigNavWindowingKeyNext = 0;
+    ImGui::GetCurrentContext()->ConfigNavWindowingKeyPrev = 0;
 
     fwprintf(stderr, L"[MuEditor] ImGui context created\n");
     fflush(stderr);
@@ -437,6 +467,7 @@ void CMuEditorCore::Shutdown()
 
     m_bInitialized = false;
     m_bDrawDataReady = false;
+    m_bPlatformWindowsPending = false;
 }
 
 void CMuEditorCore::Update()
@@ -451,6 +482,10 @@ void CMuEditorCore::Update()
         m_bScaleDirty = false;
     }
 
+    // ImGui needs the editor's own windows updated after each frame it ended,
+    // also when that frame ended away from the main loop's.
+    RenderPlatformWindows();
+
     // Only start a new frame if we haven't already
     if (!m_bFrameStarted)
     {
@@ -461,6 +496,7 @@ void CMuEditorCore::Update()
         // only before the renderer's frame starts.
         g_MuEffectBrowserUI.BeforeFrame();
 
+        SelectWindowMode();
         // The SDL3 backend fills display size and mouse/keyboard from the SDL
         // events fed via ImGui_ImplSDL3_ProcessEvent, so it works the same
         // whether the editor is open or only the "Open Editor" button is shown
@@ -474,102 +510,156 @@ void CMuEditorCore::Update()
     // When editor is closed, check for "Open Editor" button click (after ImGui frame started)
     if (!m_bEditorMode)
     {
-        ImGuiIO& io = ImGui::GetIO();
-
-        // Get mouse position
-        POINT mousePos;
-        if (GetCursorPos(&mousePos))
-        {
-            extern HWND g_hWnd;
-            ScreenToClient(g_hWnd, &mousePos);
-
-            // Check if mouse is over button area (top-right corner)
-            RECT rect;
-            GetClientRect(g_hWnd, &rect);
-            float screenWidth = (float)(rect.right - rect.left);
-            float buttonX = screenWidth - EDITOR_BTN_X_OFFSET * m_UIScale;
-            float buttonY = EDITOR_BTN_Y * m_UIScale;
-            float buttonWidth = EDITOR_BTN_WIDTH * m_UIScale;
-            float buttonHeight = EDITOR_BTN_HEIGHT * m_UIScale;
-
-            if (mousePos.x >= buttonX && mousePos.x <= (buttonX + buttonWidth) &&
-                mousePos.y >= buttonY && mousePos.y <= (buttonY + buttonHeight))
-            {
-                // Check for click
-                extern bool MouseLButtonPush;
-                if (MouseLButtonPush)
-                {
-                    m_bEditorMode = true;
-
-                    // Clear the click so it doesn't go to game
-                    extern bool MouseLButton, MouseLButtonPop, MouseLButtonDBClick;
-                    MouseLButton = false;
-                    MouseLButtonPop = false;
-                    MouseLButtonPush = false;
-                    MouseLButtonDBClick = false;
-                }
-            }
-        }
+        OpenOnButtonClick();
     }
 
-    // When editor is closed, handle "Open Editor" button hover to block game input
+    // Block the game's input under the editor: the Open Editor button while it
+    // is closed, its windows while it is open
     if (!m_bEditorMode)
     {
-        ImGuiIO& io = ImGui::GetIO();
-        io.WantCaptureMouse = false;
-        io.WantCaptureKeyboard = false;
+        BlockGameInputOverOpenButton();
+    }
+    else
+    {
+        BlockGameInputOverEditor();
+    }
+}
+
+void CMuEditorCore::OpenOnButtonClick()
+{
+    // Get mouse position
+    POINT mousePos;
+    if (GetCursorPos(&mousePos))
+    {
+        extern HWND g_hWnd;
+        ScreenToClient(g_hWnd, &mousePos);
 
         // Check if mouse is over button area (top-right corner)
-        float buttonX = io.DisplaySize.x - EDITOR_BTN_X_OFFSET * m_UIScale;
+        RECT rect;
+        GetClientRect(g_hWnd, &rect);
+        float screenWidth = (float)(rect.right - rect.left);
+        float buttonX = screenWidth - EDITOR_BTN_X_OFFSET * m_UIScale;
         float buttonY = EDITOR_BTN_Y * m_UIScale;
         float buttonWidth = EDITOR_BTN_WIDTH * m_UIScale;
         float buttonHeight = EDITOR_BTN_HEIGHT * m_UIScale;
 
-        // A click the control socket injects is somewhere else than the real
-        // pointer, which is what ImGui's mouse position follows.
-        if (!Core::Input::Synthetic::IsInjecting() && io.MousePos.x >= buttonX &&
-            io.MousePos.x <= (buttonX + buttonWidth) && io.MousePos.y >= buttonY &&
-            io.MousePos.y <= (buttonY + buttonHeight))
+        if (mousePos.x >= buttonX && mousePos.x <= (buttonX + buttonWidth) && mousePos.y >= buttonY &&
+            mousePos.y <= (buttonY + buttonHeight))
         {
-            // Mouse is over button - block game input for this frame
-            extern bool MouseLButton, MouseLButtonPop, MouseLButtonPush, MouseLButtonDBClick;
-            MouseLButton = false;
-            MouseLButtonPop = false;
-            MouseLButtonPush = false;
-            MouseLButtonDBClick = false;
+            // Check for click
+            extern bool MouseLButtonPush;
+            if (MouseLButtonPush)
+            {
+                m_bEditorMode = true;
+
+                // Clear the click so it doesn't go to game
+                extern bool MouseLButton, MouseLButtonPop, MouseLButtonDBClick;
+                MouseLButton = false;
+                MouseLButtonPop = false;
+                MouseLButtonPush = false;
+                MouseLButtonDBClick = false;
+            }
         }
     }
-    // When editor is open, block input based on UI state
-    else if (m_bEditorMode)
+}
+
+void CMuEditorCore::BlockGameInputOverOpenButton()
+{
+    ImGuiIO& io = ImGui::GetIO();
+    io.WantCaptureMouse = false;
+    io.WantCaptureKeyboard = false;
+
+    // Check if mouse is over button area (top-right corner of the game
+    // window, whose place on the desktop ImGui's mouse position is from)
+    const ImGuiViewport* gameViewport = ImGui::GetMainViewport();
+    const ImVec2 mouse(io.MousePos.x - gameViewport->Pos.x, io.MousePos.y - gameViewport->Pos.y);
+    float buttonX = gameViewport->Size.x - EDITOR_BTN_X_OFFSET * m_UIScale;
+    float buttonY = EDITOR_BTN_Y * m_UIScale;
+    float buttonWidth = EDITOR_BTN_WIDTH * m_UIScale;
+    float buttonHeight = EDITOR_BTN_HEIGHT * m_UIScale;
+
+    // A click the control socket injects is somewhere else than the real
+    // pointer, which is what ImGui's mouse position follows.
+    if (!Core::Input::Synthetic::IsInjecting() && mouse.x >= buttonX && mouse.x <= (buttonX + buttonWidth) &&
+        mouse.y >= buttonY && mouse.y <= (buttonY + buttonHeight))
     {
-        // Block mouse input when hovering UI (from previous frame)
-        if (m_bPreviousFrameHoveringUI)
-        {
-            extern bool MouseLButton, MouseLButtonPop, MouseLButtonPush, MouseLButtonDBClick;
-            extern bool MouseRButton, MouseRButtonPop, MouseRButtonPush;
-            extern bool MouseMButton;
-
-            MouseLButton = false;
-            MouseLButtonPop = false;
-            MouseLButtonPush = false;
-            MouseLButtonDBClick = false;
-            MouseRButton = false;
-            MouseRButtonPop = false;
-            MouseRButtonPush = false;
-            MouseMButton = false;
-        }
-
-        // Process input blocking for editor UI (keyboard)
-        g_MuInputBlockerCore.ProcessInputBlocking();
-
-        // Capture the mouse for the Map Editor and stop painting clicks from
-        // reaching the game (so the hero doesn't walk while painting). Runs here,
-        // before the scene consumes input this frame.
-        g_MapEditorUI.CaptureInputForPainting();
-
-        // Note: Keyboard blocking is now handled in ScanAsyncKeyState() in WindowCommon.cpp
-        // It prevents the game from scanning keyboard state when ImGui wants to capture it
+        // Mouse is over button - block game input for this frame
+        extern bool MouseLButton, MouseLButtonPop, MouseLButtonPush, MouseLButtonDBClick;
+        MouseLButton = false;
+        MouseLButtonPop = false;
+        MouseLButtonPush = false;
+        MouseLButtonDBClick = false;
     }
+}
+
+void CMuEditorCore::BlockGameInputOverEditor()
+{
+    // Block mouse input when hovering UI (from previous frame)
+    if (m_bPreviousFrameHoveringUI)
+    {
+        extern bool MouseLButton, MouseLButtonPop, MouseLButtonPush, MouseLButtonDBClick;
+        extern bool MouseRButton, MouseRButtonPop, MouseRButtonPush;
+        extern bool MouseMButton;
+
+        MouseLButton = false;
+        MouseLButtonPop = false;
+        MouseLButtonPush = false;
+        MouseLButtonDBClick = false;
+        MouseRButton = false;
+        MouseRButtonPop = false;
+        MouseRButtonPush = false;
+        MouseMButton = false;
+    }
+
+    // Process input blocking for editor UI (keyboard)
+    g_MuInputBlockerCore.ProcessInputBlocking();
+
+    // Capture the mouse for the Map Editor and stop painting clicks from
+    // reaching the game (so the hero doesn't walk while painting). Runs here,
+    // before the scene consumes input this frame.
+    g_MapEditorUI.CaptureInputForPainting();
+
+    // Note: Keyboard blocking is now handled in ScanAsyncKeyState() in WindowCommon.cpp
+    // It prevents the game from scanning keyboard state when ImGui wants to capture it
+}
+
+void CMuEditorCore::SelectWindowMode()
+{
+    // A full-screen game covers the editor's own windows and holds the cursor
+    // in its window: the editor's windows then stay inside the game window,
+    // as they do where the platform has no windows of their own (Wayland).
+    // On macOS the platform backend does not make them children of the game
+    // window, so they would not stay in front of it.
+    ImGuiIO& io = ImGui::GetIO();
+#ifdef __APPLE__
+    const bool platformHasWindows = false;
+#else
+    const bool platformHasWindows = (io.BackendFlags & ImGuiBackendFlags_PlatformHasViewports) != 0;
+#endif
+    const bool gameFullscreen = (SDL_GetWindowFlags(m_pGameWindow) & SDL_WINDOW_FULLSCREEN) != 0;
+    if (platformHasWindows && !gameFullscreen)
+    {
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    }
+    else
+    {
+        io.ConfigFlags &= ~ImGuiConfigFlags_ViewportsEnable;
+    }
+}
+
+bool CMuEditorCore::IsEditorWindow(SDL_Window* window) const
+{
+    return m_bInitialized && window != nullptr && window != m_pGameWindow;
+}
+
+bool CMuEditorCore::IsKeyboardInEditorWindow() const
+{
+    return IsEditorWindow(SDL_GetKeyboardFocus());
+}
+
+bool CMuEditorCore::IsMouseInEditorWindow() const
+{
+    return IsEditorWindow(SDL_GetMouseFocus());
 }
 
 bool CMuEditorCore::ClaimsEvent(const SDL_Event& event)
@@ -578,10 +668,13 @@ bool CMuEditorCore::ClaimsEvent(const SDL_Event& event)
     {
         return false;
     }
-    // Over an editor window: the windows that say so, and with the editor open
-    // also what ImGui captures (popups, combos, the Dev Editor).
+    // What happens in the editor's own windows is the editor's, but for the
+    // releases below. Over an editor window in the game window: the windows
+    // that say so, and with the editor open also what ImGui captures (popups,
+    // combos, the Dev Editor).
     const ImGuiIO& io = ImGui::GetIO();
-    const bool wantsMouse = m_bHoveringUI || (m_bEditorMode && io.WantCaptureMouse);
+    const bool ofEditorWindow = IsEditorWindow(SDL_GetWindowFromEvent(&event));
+    const bool wantsMouse = ofEditorWindow || m_bHoveringUI || (m_bEditorMode && io.WantCaptureMouse);
     switch (event.type)
     {
     case SDL_EVENT_MOUSE_BUTTON_DOWN:
@@ -598,14 +691,16 @@ bool CMuEditorCore::ClaimsEvent(const SDL_Event& event)
         m_claimedButtons &= ~button;
         return claimed;
     }
+    case SDL_EVENT_KEY_UP:
+        return false;
     case SDL_EVENT_MOUSE_WHEEL:
         return wantsMouse;
     case SDL_EVENT_KEY_DOWN:
     case SDL_EVENT_TEXT_INPUT:
     case SDL_EVENT_TEXT_EDITING:
-        return m_bEditorMode && io.WantCaptureKeyboard;
+        return ofEditorWindow || (m_bEditorMode && io.WantCaptureKeyboard);
     default:
-        return false;
+        return ofEditorWindow;
     }
 }
 
@@ -618,12 +713,14 @@ void CMuEditorCore::Render()
     if (!m_bFrameStarted)
         return;
 
-    // Reset hover state at start of frame
-    m_bHoveringUI = false;
+    // Reset hover state at start of frame: the mouse over one of the editor's
+    // own windows is over the editor for every tool window below.
+    m_bHoveringUI = IsMouseInEditorWindow();
 
-    // Render toolbar (handles both open and closed states)
-    g_MuEditorUI.RenderToolbar(m_bEditorMode, m_bShowItemEditor, m_bShowSkillEditor, m_bShowDevEditor, m_bShowMapEditor,
-                               m_bShowEffectBrowser, m_bShowConsole);
+    // The editor window when open, else the Open Editor button. Before the
+    // tool windows: they dock into the editor window.
+    g_MuEditorUI.Render(m_bEditorMode, m_bShowItemEditor, m_bShowSkillEditor, m_bShowDevEditor, m_bShowMapEditor,
+                        m_bShowEffectBrowser, m_bShowConsole);
 
     if (m_bEditorMode)
     {
@@ -666,9 +763,38 @@ void CMuEditorCore::Render()
     // effect browser's world preview keeps what it created running.
     g_MuEffectBrowserUI.AfterRender(m_bShowEffectBrowser);
 
+    // With the editor open, the mouse over any of its windows in the game
+    // window, or holding one of its widgets, is over the editor.
+    const bool overEditorWindow =
+        ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+    const bool draggingEditorWidget = ImGui::IsAnyItemActive() && ImGui::IsAnyMouseDown();
+    if (m_bEditorMode && (overEditorWindow || draggingEditorWidget))
+    {
+        m_bHoveringUI = true;
+    }
+
     // Store current hover state for next frame's input blocking
     m_bPreviousFrameHoveringUI = m_bHoveringUI;
 
+    UpdateCursorVisibility();
+
+    // The game draws this frame unless it skipped it (see RenderPlatformWindows).
+    m_bGameFrameActive = mu::GetRenderer().IsFrameActive();
+
+    // Finalize draw data. The renderer draws the game window's part over the
+    // frame, after RmlUi; the editor's own windows follow once that frame went
+    // to the GPU (RenderPlatformWindows).
+    ImGui::Render();
+    m_bDrawDataReady = true;
+    m_bPlatformWindowsPending = true;
+    mu::QueueEditorRenderCommand();
+
+    // Frame is complete, reset for next frame
+    m_bFrameStarted = false;
+}
+
+void CMuEditorCore::UpdateCursorVisibility()
+{
     // Control game cursor rendering via global flag
     // When hovering UI, hide game cursor; otherwise show it
     extern bool g_bRenderGameCursor;
@@ -696,15 +822,24 @@ void CMuEditorCore::Render()
         lastHoveringState = m_bHoveringUI;
     }
 #endif
+}
 
-    // Finalize draw data. A later step uploads and renders it inside the engine's
-    // existing SDL GPU pass; starting another pass here would break ownership.
-    ImGui::Render();
-    m_bDrawDataReady = true;
-    mu::QueueEditorRenderCommand();
+void CMuEditorCore::RenderPlatformWindows()
+{
+    if (!m_bPlatformWindowsPending)
+    {
+        return;
+    }
+    m_bPlatformWindowsPending = false;
 
-    // Frame is complete, reset for next frame
-    m_bFrameStarted = false;
+    // ImGui wants the update after every frame it ended, also while the
+    // editor's windows stay inside the game window (it does nothing then).
+    ImGui::UpdatePlatformWindows();
+    const bool platformWindowsOn = (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) != 0;
+    if (m_bGameFrameActive && platformWindowsOn)
+    {
+        ImGui::RenderPlatformWindowsDefault();
+    }
 }
 
 void CMuEditorCore::PrepareDrawData(SDL_GPUCommandBuffer* commandBuffer)

@@ -411,6 +411,58 @@ if(NOT editor_shutdown_position LESS renderer_shutdown_position)
     message(FATAL_ERROR "ShutdownRuntime must shut down the editor before renderer/device teardown")
 endif()
 
+# The editor's own windows (ImGui viewports outside the game window): updated after every frame ImGui
+# ended and drawn once the game's frame went to the GPU, from the main loop, or before the next editor
+# frame starts for a frame that ended elsewhere.
+string(FIND "${editor_code}" "void CMuEditorCore::RenderPlatformWindows()" platform_windows_start)
+if(platform_windows_start EQUAL -1 OR NOT editor_render_start LESS platform_windows_start
+        OR NOT platform_windows_start LESS editor_prepare_start)
+    message(FATAL_ERROR "Could not isolate CMuEditorCore::RenderPlatformWindows()")
+endif()
+math(EXPR platform_windows_length "${editor_prepare_start} - ${platform_windows_start}")
+string(SUBSTRING "${editor_code}" ${platform_windows_start} ${platform_windows_length} platform_windows)
+require_match(platform_windows
+    "if[ \t\r\n]*\\([ \t]*![ \t]*m_bPlatformWindowsPending[ \t]*\\)[ \t\r\n]*\\{[ \t\r\n]*return[ \t]*;[ \t\r\n]*\\}[ \t\r\n]*m_bPlatformWindowsPending[ \t]*=[ \t]*false[ \t]*;"
+    "the editor's own windows run once per ended editor frame")
+require_call_count(platform_windows "ImGui::UpdatePlatformWindows" 1
+    "the editor updates its own windows once per ended frame, also while they are off")
+require_match(platform_windows
+    "platformWindowsOn[ \t]*=[ \t]*\\([ \t]*ImGui::GetIO\\(\\)\\.ConfigFlags[ \t]*&[ \t]*ImGuiConfigFlags_ViewportsEnable[ \t]*\\)[ \t]*!=[ \t]*0[ \t]*;"
+    "the editor knows whether its own windows are on")
+require_match(platform_windows
+    "if[ \t\r\n]*\\([ \t]*m_bGameFrameActive[ \t]*&&[ \t]*platformWindowsOn[ \t]*\\)[ \t\r\n]*\\{[ \t\r\n]*ImGui::RenderPlatformWindowsDefault\\(\\)[ \t]*;"
+    "the editor draws its own windows only while they are on and the game draws the frame")
+string(FIND "${platform_windows}" "ImGui::UpdatePlatformWindows()" platform_update_position)
+string(FIND "${platform_windows}" "ImGui::RenderPlatformWindowsDefault()" platform_render_position)
+if(NOT platform_update_position LESS platform_render_position)
+    message(FATAL_ERROR "The editor must update its own windows before drawing them")
+endif()
+
+string(FIND "${editor_render}" "m_bGameFrameActive = mu::GetRenderer().IsFrameActive()" game_frame_active_position)
+if(game_frame_active_position EQUAL -1 OR NOT game_frame_active_position LESS imgui_render_position)
+    message(FATAL_ERROR "Editor Render() must note whether the game draws the frame before ImGui::Render() ends it")
+endif()
+string(FIND "${editor_render}" "m_bPlatformWindowsPending = true" platform_pending_position)
+if(platform_pending_position EQUAL -1 OR NOT imgui_render_position LESS platform_pending_position
+        OR NOT platform_pending_position LESS frame_finished_position)
+    message(FATAL_ERROR "Editor Render() must mark its own windows pending once ImGui::Render() ended the frame")
+endif()
+
+string(FIND "${editor_update}" "RenderPlatformWindows();" update_platform_windows_position)
+string(FIND "${editor_update}" "ImGui::NewFrame();" update_new_frame_position)
+if(update_platform_windows_position EQUAL -1 OR update_new_frame_position EQUAL -1
+        OR NOT update_platform_windows_position LESS update_new_frame_position)
+    message(FATAL_ERROR "Editor Update() must finish the last frame's own windows before ImGui::NewFrame()")
+endif()
+
+require_call_count(app_code "g_MuEditorCore\\.RenderPlatformWindows" 1
+    "the main loop draws the editor's own windows once per frame")
+string(FIND "${app_code}" "RenderProfiledFrame();" app_frame_position)
+string(FIND "${app_code}" "g_MuEditorCore.RenderPlatformWindows();" app_platform_windows_position)
+if(app_frame_position EQUAL -1 OR NOT app_frame_position LESS app_platform_windows_position)
+    message(FATAL_ERROR "The main loop must draw the editor's own windows after the game's frame went to the GPU")
+endif()
+
 require_editor_before_cursor(scene_manager_code "if (Success)" "CheckServerConnection()" "SceneManager editor/cursor region")
 require_editor_before_cursor(loading_scene_code "::EndOpengl();" "UI::Reconnect::RenderDialog()"
     "LoadingScene editor/cursor region")

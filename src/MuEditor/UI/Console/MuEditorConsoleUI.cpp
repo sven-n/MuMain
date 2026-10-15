@@ -15,6 +15,7 @@
 #include <algorithm>
 
 #include "../MuEditor/Core/MuEditorCore.h"
+#include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 
 // Mutex for thread-safe console access
 static std::mutex g_consoleMutex;
@@ -295,19 +296,13 @@ void CMuEditorConsoleUI::LogGame(const std::string& message)
 
 void CMuEditorConsoleUI::Render()
 {
-    ImGuiIO& io = ImGui::GetIO();
-    ImVec2 bottom_pos = ImVec2(0, io.DisplaySize.y - 200);
-    ImVec2 bottom_size = ImVec2(io.DisplaySize.x, 200);
-
-    ImGui::SetNextWindowPos(bottom_pos, ImGuiCond_Always);
-    ImGui::SetNextWindowSize(bottom_size, ImGuiCond_Always);
-
-    ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
+    // Docked along the bottom of the editor window at first; movable like the
+    // other tool windows.
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse;
 
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.1f, 0.1f, 0.1f, 0.9f));
 
-    if (ImGui::Begin("Console", nullptr, flags))
+    if (ImGui::Begin(MuEditor::WindowIds::Console, nullptr, flags))
     {
         // Check if hovering this window or any of its children
         if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))

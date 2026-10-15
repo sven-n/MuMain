@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "MapEditorUI.h"
+#include "UI/Common/MuEditorWindowIds.h"
 #include "MapEditorSave.h"
 #include "MapAttributeSave.h"
 #include "MapEditorFileUtil.h"
@@ -149,6 +150,16 @@ void CMapEditorUI::RestoreGameMode()
     m_bEditActive = false;
 }
 
+void CMapEditorUI::ReleaseWorld()
+{
+    g_bMapEditorAttrOverlay = false;
+    g_bMapEditorBrushHighlight = false;
+    g_MapEditorSelectedObject = nullptr;
+    g_MapEditorHoveredObject = nullptr;
+    g_MapEditorPlacementPreviewActive = false;
+    RestoreGameMode();
+}
+
 void CMapEditorUI::Render(bool* p_open)
 {
     const bool show = (p_open != nullptr && *p_open);
@@ -207,20 +218,22 @@ void CMapEditorUI::Render(bool* p_open)
 
     if (!show)
     {
-        g_bMapEditorAttrOverlay = false;     // no panel -> no overlay
-        g_bMapEditorBrushHighlight = false;  // no panel -> no brush cursor
-        g_MapEditorSelectedObject = nullptr; // no panel -> no selection outline
-        g_MapEditorHoveredObject = nullptr;  // no panel -> no hover outline
-        g_MapEditorPlacementPreviewActive = false; // no panel -> no placement preview
-        RestoreGameMode();
+        ReleaseWorld();
         return;
     }
 
     ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Map Editor", p_open))
+    if (!ImGui::Begin(MuEditor::WindowIds::MapEditor, p_open))
     {
+        // Docked behind another tab, the panel is out of sight as if closed; it
+        // takes the world again when its tab shows. Collapsed but still open:
+        // keep edit mode as-is.
+        const bool behindAnotherTab = ImGui::IsWindowDocked();
         ImGui::End();
-        // Collapsed but still open: keep edit mode as-is.
+        if (behindAnotherTab)
+        {
+            ReleaseWorld();
+        }
         return;
     }
 

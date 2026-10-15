@@ -948,6 +948,11 @@ static bool SDLCALL Win32MessageHook(void* /*userdata*/, MSG* msg)
     // SDL. SDL turns the close into SDL_EVENT_QUIT, which the main loop handles.
     if (msg->message == WM_CLOSE)
         return true;
+#ifdef _EDITOR
+    // The editor's own windows are not the game's: SDL alone handles theirs.
+    if (msg->hwnd != nullptr && msg->hwnd != g_hWnd)
+        return true;
+#endif
 
     WndProc(msg->hwnd, msg->message, msg->wParam, msg->lParam);
     return true;
@@ -1535,9 +1540,13 @@ MSG MainLoop()
             if (g_bUseWindowMode || g_bWndActive || g_HasInactiveFpsOverride)
             {
 #ifdef _EDITOR
-                // F12 key toggle for editor
+                // F12 key toggle for editor, from the game window or the editor's
+                // own: the key itself, not the game's keys (IsKeyDown leaves out
+                // what is pressed in the editor's windows).
                 static bool wasF12Pressed = false;
-                if (Core::Input::IsKeyDown(VK_F12))
+                const bool f12Down = Core::Input::Synthetic::IsKeyHeld(VK_F12) ||
+                                     SDL_GetKeyboardState(nullptr)[Core::Input::VkToScancode(VK_F12)];
+                if (f12Down)
                 {
                     if (!wasF12Pressed)
                     {
@@ -1559,6 +1568,10 @@ MSG MainLoop()
                 RequestDiagnosticFrameCapture();
                 ApplyPendingVSyncPreference();
                 RenderProfiledFrame();
+#ifdef _EDITOR
+                // The editor's own windows, now that the game's frame went to the GPU.
+                g_MuEditorCore.RenderPlatformWindows();
+#endif
                 ConsumeDiagnosticFrameCapture();
             }
         }

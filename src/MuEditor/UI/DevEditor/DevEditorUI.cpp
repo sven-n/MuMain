@@ -14,6 +14,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "UI/Console/MuEditorConsoleUI.h"
+#include "UI/Common/MuEditorWindowIds.h"
 
 // External C functions
 extern "C" CameraManager& CameraManager_Instance();
@@ -87,7 +88,9 @@ void CDevEditorUI::Render(bool* p_open)
         return;
 
     ImGui::SetNextWindowSize(ImVec2(450, 500), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin(I18N::Editor::DevEditor, p_open))
+    char title[MuEditor::WindowIds::TitleCapacity];
+    if (!ImGui::Begin(MuEditor::WindowIds::Title(title, I18N::Editor::DevEditor, MuEditor::WindowIds::DevEditor),
+                      p_open))
     {
         ImGui::End();
         return;
