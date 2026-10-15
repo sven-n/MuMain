@@ -2730,8 +2730,9 @@ public:
     // without extra bookkeeping here.
     [[nodiscard]] FrameGpuContext GetFrameGpuContext() override
     {
+        // Every frame target has the swapchain's format, and the main one exists only when that format can be sampled.
         return FrameGpuContext{s_cmdBuf, s_frameColorTarget ? s_frameColorTarget : s_swapchainTexture, s_swapW,
-                               s_swapH};
+                               s_swapH, s_frameColorTarget != nullptr && s_mainColorTarget != nullptr};
     }
 
     // RmlUi port: looks up s_textureMap directly rather than going through ResolveTextureId(),
