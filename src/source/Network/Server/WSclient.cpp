@@ -9283,20 +9283,31 @@ void ReceiveSetPriceResult(const BYTE* ReceiveBuffer)
 {
     auto Header = (LPPSHOPSETPRICE_RESULTINFO)ReceiveBuffer;
 
-    if (Header->byResult != 0x01 && g_IsPurchaseShop == PSHOPWNDTYPE_SALE)
+    if (g_IsPurchaseShop != PSHOPWNDTYPE_SALE)
     {
-        // Header->byResult == 0x06
-        if (UI::Inventory::HasPickedItem())
-        {
-            UI::Inventory::DiscardPickedItem();
-        }
-
-        RemovePersonalItemPrice(UI::Shop::OwnShopPriceTargetIndex(), PSHOPWNDTYPE_SALE);
-
-        SocketClient->ToGameServer()->SendInventoryRequest();
-
-        g_ErrorReport.Write(L"@ [Fault] ReceiveSetPriceResult (result : %d)\n", Header->byResult);
+        return;
     }
+
+    if (Header->byResult == 0x01)
+    {
+        UI::Shop::ForgetReplacedOwnShopPrice(Header->byItemPos);
+        return;
+    }
+
+    // The server refused the price (Header->byResult == 0x06).
+    if (UI::Inventory::HasPickedItem())
+    {
+        UI::Inventory::DiscardPickedItem();
+    }
+
+    if (!UI::Shop::RestoreReplacedOwnShopPrice(Header->byItemPos))
+    {
+        RemovePersonalItemPrice(UI::Shop::OwnShopPriceTargetIndex(), PSHOPWNDTYPE_SALE);
+    }
+
+    SocketClient->ToGameServer()->SendInventoryRequest();
+
+    g_ErrorReport.Write(L"@ [Fault] ReceiveSetPriceResult (result : %d)\n", Header->byResult);
 }
 
 void ReceiveCreatePersonalShop(const BYTE* ReceiveBuffer)

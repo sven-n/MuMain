@@ -27,6 +27,18 @@ void SetOwnShopOpen(bool open);
 void ReplaceOwnShopItems(std::span<const ShopItem> items, std::wstring_view title);
 int OwnShopPriceTargetIndex();
 
+// Remembers the current price of the own shop slot before an update replaces it, so a
+// refused update can restore it. Only the latest update is remembered; set-price answers
+// arrive in request order, so any of them settles it.
+void RememberReplacedOwnShopPrice(int slot);
+// Restores the remembered price for slot after the server refused its update, removing the
+// refused entry when the slot had no price. Returns false when nothing was remembered for
+// slot. Consumes the memory either way.
+bool RestoreReplacedOwnShopPrice(int slot);
+// Drops the remembered price for slot, e.g. after the server accepted its update. Answers
+// arrive in request order, so only the matching one settles the memory.
+void ForgetReplacedOwnShopPrice(int slot);
+
 // Another player's personal shop.
 int BrowsedShopCharacterIndex();
 // Closes the vault and inventory, then opens the browsed shop beside the inventory.

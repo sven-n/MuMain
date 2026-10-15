@@ -2,12 +2,23 @@
 
 #include "UI/Inventory/ShopUpdates.h"
 
+#include "Core/Globals/_enum.h"
+#include "GameLogic/Items/PersonalShopCurrency.h"
+#include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "GameShop/InGameShop.h"
 #include "UI/Core/WindowAccess.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Inventory/InventoryCtrl.h"
 
 #include <string>
+
+namespace
+{
+// The slot, previous presence and price of the latest own shop price update.
+int ReplacedPriceSlot = -1;
+bool ReplacedPriceHadPrice = false;
+GameLogic::PersonalShop::ItemPrice ReplacedPrice{};
+} // namespace
 
 namespace UI::Shop
 {
@@ -51,6 +62,40 @@ void ReplaceOwnShopItems(std::span<const ShopItem> items, std::wstring_view titl
 int OwnShopPriceTargetIndex()
 {
     return g_pMyShopInventory->GetTargetIndex();
+}
+
+void RememberReplacedOwnShopPrice(int slot)
+{
+    ReplacedPriceSlot = slot;
+    ReplacedPriceHadPrice = GetPersonalItemPrice(slot, ReplacedPrice, PSHOPWNDTYPE_SALE);
+}
+
+bool RestoreReplacedOwnShopPrice(int slot)
+{
+    if (slot != ReplacedPriceSlot)
+    {
+        return false;
+    }
+
+    ReplacedPriceSlot = -1;
+    if (ReplacedPriceHadPrice)
+    {
+        AddPersonalItemPrice(slot, ReplacedPrice, PSHOPWNDTYPE_SALE);
+    }
+    else
+    {
+        RemovePersonalItemPrice(slot, PSHOPWNDTYPE_SALE);
+    }
+
+    return true;
+}
+
+void ForgetReplacedOwnShopPrice(int slot)
+{
+    if (slot == ReplacedPriceSlot)
+    {
+        ReplacedPriceSlot = -1;
+    }
 }
 
 int BrowsedShopCharacterIndex()

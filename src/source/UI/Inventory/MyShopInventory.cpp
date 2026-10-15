@@ -8,6 +8,7 @@
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "UI/Dialogs/GenericMenuDialog.h"
 #include "UI/Core/WindowCommon.h" // g_IsPurchaseShop
+#include "UI/Inventory/ShopUpdates.h"
 #include "GameLogic/Items/PersonalShopCurrency.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "I18N/All.h"
@@ -60,10 +61,14 @@ void ApplyPersonalShopItemPrice(const GameLogic::PersonalShop::ItemPrice& price,
     {
         if (sourceIndex >= 0)
         {
+            UI::Shop::RememberReplacedOwnShopPrice(sourceIndex);
             SendItemPrice(sourceIndex, price);
             AddPersonalItemPrice(sourceIndex, price, g_IsPurchaseShop);
         }
 
+        // The slot is consumed: a stale source index would poison TransferSourceIndex()'s
+        // fallback for later move responses without a picked item (e.g. vault auto-moves).
+        g_pMyShopInventory->ChangeSourceIndex(-1);
         return;
     }
 
@@ -81,6 +86,7 @@ void ApplyPersonalShopItemPrice(const GameLogic::PersonalShop::ItemPrice& price,
     }
 
     AddPersonalItemPrice(iTargetIndex, price, g_IsPurchaseShop);
+    g_pMyShopInventory->ChangeSourceIndex(-1);
 }
 
 ITEM* FindPricedItem()
@@ -116,7 +122,11 @@ void ShowZenPriceConfirmation(const ITEM& item, const wchar_t* strPrice,
 
         ApplyPersonalShopItemPrice(price, sourceIndex);
     };
-    cfg.onCancel = [] { CInventoryCtrl::BackupPickedItem(); };
+    cfg.onCancel = []
+    {
+        CInventoryCtrl::BackupPickedItem();
+        g_pMyShopInventory->ChangeSourceIndex(-1);
+    };
     // Chained from inside the price dialog's own onPrimary -- proven-safe pattern, see
     // CGenericConfirmDialog::Resolve()'s own comment on why this doesn't stomp the dialog that's
     // still resolving.
@@ -234,6 +244,7 @@ void ShowItemPriceDialog(const GameLogic::PersonalShop::ItemPrice& priceType, co
     {
         CInventoryCtrl::BackupPickedItem();
         g_pMyShopInventory->SetInputValueTextBox(false);
+        g_pMyShopInventory->ChangeSourceIndex(-1);
     };
 
     g_pGenericConfirmDialog->Show(std::move(cfg));
@@ -611,6 +622,9 @@ bool mu::ui::window::CMyShopInventory::MyShopInventoryProcess()
                 ChangeTargetIndex(iTargetIndex);
                 SendRequestEquipmentItem(STORAGE_TYPE::MYSHOP, iSourceIndex, pItemObj,
                     STORAGE_TYPE::MYSHOP, iTargetIndex);
+                // No price dialog follows, so reset right away: see ApplyPersonalShopItemPrice
+                // for why no stale source index may stay behind.
+                ChangeSourceIndex(-1);
                 return true;
             }
         }
@@ -629,7 +643,9 @@ bool mu::ui::window::CMyShopInventory::MyShopInventoryProcess()
 
             if(pItem)
             {
-                ChangeSourceIndex(iCurSquareIndex);
+                // The price table, the tooltip and the server all key the price by the item's
+                // origin cell; the hovered cell can be any covered cell of a multi-cell item.
+                ChangeSourceIndex(m_pNewInventoryCtrl->GetIndexByItem(pItem));
                 ChangeTargetIndex(-1);
                 ShowPersonalShopItemValueDialog();
                 SetInputValueTextBox(true);
