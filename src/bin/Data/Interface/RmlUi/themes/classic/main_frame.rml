@@ -29,8 +29,8 @@
 		<div id="frame_left" class="frame-art"></div>
 		<div id="frame_middle" class="frame-art"></div>
 		<div id="frame_right" class="frame-art"></div>
-		<div id="dragon_left" class="frame-art" data-class-hidden="left_covered"></div>
-		<div id="dragon_right" class="frame-art" data-class-hidden="right_covered"></div>
+		<div id="dragon_left" class="frame-art"></div>
+		<div id="dragon_right" class="frame-art"></div>
 		<div id="gauge_fill_left"></div>
 		<div id="gauge_fill_right"></div>
 		<div id="item_band_fill" class="slot-fill"></div>
