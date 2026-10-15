@@ -103,9 +103,11 @@
 .levelup-point-text.hidden, .attr-label.hidden, .attr-value.hidden { display: none; }
 
 /* Derived lines under each stat, white on half-black strips: Strength's from y 140, Agility's from
-   200, Vitality's from 260, Energy's from 320. 0.97 set them 15 apart, but MuMain lists more of
-   them (attack rate, defence rate) than 0.97's one or two, so they keep the S6 13 to stay clear
-   of the next box. */
+   200, Vitality's from 260, Energy's from 320. 0.97 set its one or two lines 15 apart; MuMain lists
+   up to three (attack rate, defence rate) in the 36 between a block's first line and the next box,
+   so the rows are 12: three of them end on that box at any panel scale. The rows follow the panel
+   while the text keeps its native size, so a taller row ran the third line onto the box where the
+   panel is smaller than the text (75% at 800x600). */
 .attr-lines { position: absolute; left: 24px; transform-origin: left top; pointer-events: none; }
 .attr-lines span { display: block; white-space: nowrap; color: #ffffff; background-color: rgba(0, 0, 0, 128); }
 .attr-lines span.boosted { color: rgb(100, 150, 255); }
@@ -114,10 +116,10 @@
 .attr-lines-agi { top: 200px; }
 .attr-lines-vit { top: 260px; }
 .attr-lines-ene { top: 320px; }
-.attr-lines.attr-lines-str span { height: calc(13px * var(--root-scale)); }
-.attr-lines.attr-lines-agi span { height: calc(13px * var(--root-scale)); }
-.attr-lines.attr-lines-vit span { height: calc(13px * var(--root-scale)); }
-.attr-lines.attr-lines-ene span { height: calc(13px * var(--root-scale)); }
+.attr-lines.attr-lines-str span { height: calc(12px * var(--root-scale)); }
+.attr-lines.attr-lines-agi span { height: calc(12px * var(--root-scale)); }
+.attr-lines.attr-lines-vit span { height: calc(12px * var(--root-scale)); }
+.attr-lines.attr-lines-ene span { height: calc(12px * var(--root-scale)); }
 
 /* "+" (24x24 at x 125, beside each box), the second image while pressed. */
 .stat-btn {
