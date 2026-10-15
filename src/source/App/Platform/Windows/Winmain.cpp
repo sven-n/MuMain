@@ -335,8 +335,16 @@ void ApplyVSyncPreferenceNow(bool enabled)
         return;
     }
 
-    const bool applied = enabled ? EnableVSync() : DisableVSync();
-    SetTargetFps((applied || IsVSyncEnabled()) ? -1 : EffectiveOffVSyncTargetFps());
+    if (enabled)
+    {
+        EnableVSync();
+    }
+    else
+    {
+        DisableVSync();
+    }
+
+    SetTargetFps(IsVSyncEnabled() ? -1 : EffectiveOffVSyncTargetFps());
     ResetFrameStats();
 }
 
