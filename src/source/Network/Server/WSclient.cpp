@@ -10829,15 +10829,17 @@ void ReceiveBCStatus(const BYTE* ReceiveBuffer)
         CMultiLanguage::ConvertFromUtf8(ownerGuild, Data->cOwnerGuild, MAX_GUILDNAME);
         CMultiLanguage::ConvertFromUtf8(ownerGuildMaster, Data->cOwnerGuildMaster, MAX_USERNAME_SIZE);
         UI::Siege::GuardStatus status{
-            static_cast<CASTLESIEGE_STATE>(Data->cCastleSiegeState), ownerGuild, ownerGuildMaster,
-            {MAKEWORD(Data->btStartYearL, Data->btStartYearH), Data->btStartMonth,
-             Data->btStartDay, Data->btStartHour, Data->btStartMinute},
-            {MAKEWORD(Data->btEndYearL, Data->btEndYearH), Data->btEndMonth,
-             Data->btEndDay, Data->btEndHour, Data->btEndMinute},
-            {MAKEWORD(Data->btSiegeStartYearL, Data->btSiegeStartYearH), Data->btSiegeStartMonth,
-             Data->btSiegeStartDay, Data->btSiegeStartHour, Data->btSiegeStartMinute},
-            MAKELONG(MAKEWORD(Data->btStateLeftSec4, Data->btStateLeftSec3),
-                     MAKEWORD(Data->btStateLeftSec2, Data->btStateLeftSec1))};
+            static_cast<CASTLESIEGE_STATE>(Data->cCastleSiegeState),
+            ownerGuild,
+            ownerGuildMaster,
+            {MAKEWORD(Data->btStartYearL, Data->btStartYearH), Data->btStartMonth, Data->btStartDay, Data->btStartHour,
+             Data->btStartMinute},
+            {MAKEWORD(Data->btEndYearL, Data->btEndYearH), Data->btEndMonth, Data->btEndDay, Data->btEndHour,
+             Data->btEndMinute},
+            {MAKEWORD(Data->btSiegeStartYearL, Data->btSiegeStartYearH), Data->btSiegeStartMonth, Data->btSiegeStartDay,
+             Data->btSiegeStartHour, Data->btSiegeStartMinute},
+            static_cast<std::uint32_t>(MAKELONG(MAKEWORD(Data->btStateLeftSec4, Data->btStateLeftSec3),
+                                                MAKEWORD(Data->btStateLeftSec2, Data->btStateLeftSec1)))};
         UI::Siege::ShowGuardStatus(status);
     }
     break;

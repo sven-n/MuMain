@@ -1727,7 +1727,7 @@ bool mu::ui::window::CGuild_ToPerson_Position::Update()
 
     std::vector<MessageBoxView::Line> lines;
     for (const std::wstring& text : texts)
-        lines.push_back({"message", {{text, true, RGBA(255, 128, 0, 255)}}});
+        lines.push_back({"message", {{text, true, static_cast<DWORD>(RGBA(255, 128, 0, 255))}}});
 
     // The two appointments, OK and Close.
     const std::vector<MessageBoxView::Button> buttons = {
