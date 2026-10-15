@@ -8,6 +8,8 @@ namespace Core::Platform
 {
 namespace
 {
+SDL_Window* g_gameWindow = nullptr;
+
 SDL_WindowID FindFirstOpenedWindow()
 {
     int count = 0;
@@ -28,6 +30,10 @@ SDL_WindowID FindFirstOpenedWindow()
 
 SDL_Window* GameWindow()
 {
+    if (g_gameWindow != nullptr)
+    {
+        return g_gameWindow;
+    }
     // Kept by id, so that asking every frame does not list the windows.
     static SDL_WindowID gameWindowId = 0;
     if (gameWindowId == 0 || SDL_GetWindowFromID(gameWindowId) == nullptr)
@@ -35,6 +41,11 @@ SDL_Window* GameWindow()
         gameWindowId = FindFirstOpenedWindow();
     }
     return gameWindowId != 0 ? SDL_GetWindowFromID(gameWindowId) : nullptr;
+}
+
+void SetGameWindow(SDL_Window* window)
+{
+    g_gameWindow = window;
 }
 
 SDL_Window* MessageBoxParent(SDL_Window* preferred)

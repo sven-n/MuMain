@@ -211,6 +211,7 @@ static void ShutdownRendererWindow()
 
     if (g_sdlWindow)
     {
+        Core::Platform::SetGameWindow(nullptr);
         SDL_DestroyWindow(g_sdlWindow);
         g_sdlWindow = nullptr;
         g_hWnd = nullptr;
@@ -2060,7 +2061,16 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 #endif
 
     // SDL owns the window; SDL_gpu owns the rendering device.
-    if (!SDL_InitSubSystem(SDL_INIT_VIDEO))
+    bool videoReady = SDL_InitSubSystem(SDL_INIT_VIDEO);
+#if defined(_EDITOR) && defined(__linux__)
+    // Neither X11 nor Wayland (a console, a headless machine): SDL's own choice.
+    if (!videoReady)
+    {
+        SDL_ResetHint(SDL_HINT_VIDEO_DRIVER);
+        videoReady = SDL_InitSubSystem(SDL_INIT_VIDEO);
+    }
+#endif
+    if (!videoReady)
     {
         const char* requestedVideoDriver = SDL_GetHint(SDL_HINT_VIDEO_DRIVER);
         const std::wstring requestedDriver = requestedVideoDriver != nullptr && requestedVideoDriver[0] != '\0'
@@ -2093,6 +2103,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         MessageBox(nullptr, L"Windows aplication error!", L"Aplication Error", MB_ICONERROR);
         return 0;
     }
+    Core::Platform::SetGameWindow(g_sdlWindow);
 
     RefreshWindowContentScale();
 

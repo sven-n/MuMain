@@ -53,7 +53,15 @@ public:
     // windows instead of the game window: what is pressed there is not the
     // game's.
     bool IsKeyboardInEditorWindow() const;
-    bool IsMouseInEditorWindow() const;
+    // As found at the start of the frame (Update).
+    bool IsMouseInEditorWindow() const
+    {
+        return m_bMouseInEditorWindow;
+    }
+    // Whether a key or button (a virtual-key code) is with one of the
+    // editor's own windows: the mouse's buttons by where the mouse is, the
+    // other keys by where the keyboard is.
+    bool IsWithEditorWindow(int virtualKey) const;
 
     // Global scale for ALL editor UI (fonts + widget/padding sizes). Driven by the
     // -/+ buttons in the editor window's menu bar. Applied between frames, not mid-frame.
@@ -67,12 +75,12 @@ private:
     void ApplyUIScale();
     void LogVideoDriver() const;
     void SelectWindowMode();
-    void OpenOnButtonClick();
     void BlockGameInputOverOpenButton();
     void BlockGameInputOverEditor();
     void UpdateCursorVisibility();
     void ToggleFullscreenOnF11();
     bool IsEditorWindow(SDL_Window* window) const;
+    bool FindMouseInEditorWindow() const;
 
     bool m_bEditorMode;
     bool m_bInitialized;
@@ -96,10 +104,12 @@ private:
     SDL_Window* m_pGameWindow = nullptr;
     // Render() ended a frame whose own windows are not updated and drawn yet.
     bool m_bPlatformWindowsPending = false;
+    bool m_bMouseInEditorWindow = false;
     // The game draws the frame Render() ended. When it skips one (the GPU is
     // behind), the editor's windows keep their picture instead of one without
     // the game's offscreen views (the effect preview).
     bool m_bGameFrameActive = false;
+    int m_skippedGameFrames = 0;
 };
 
 // Global accessor

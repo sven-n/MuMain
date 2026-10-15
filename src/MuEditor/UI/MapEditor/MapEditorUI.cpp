@@ -5,6 +5,7 @@
 #include "MapEditorUI.h"
 #include "UI/Common/MuEditorWindowIds.h"
 #include "UI/Common/MuEditorLayout.h"
+#include "../MuEditor/Core/MuEditorPlatformWindows.h"
 #include "MapEditorSave.h"
 #include "MapAttributeSave.h"
 #include "MapEditorFileUtil.h"
@@ -151,8 +152,26 @@ void CMapEditorUI::RestoreGameMode()
     m_bEditActive = false;
 }
 
+void CMapEditorUI::EndMinimapMode()
+{
+    if (!m_bMinimapMode)
+    {
+        return;
+    }
+    m_bMinimapMode = false;
+    // As "Back to game camera": FreeFly flies again when it is next used.
+    CameraManager& cameras = CameraManager::Instance();
+    ICamera* camera = cameras.GetActiveCamera();
+    if (camera && strcmp(camera->GetName(), "FreeFly") == 0)
+        static_cast<FreeFlyCamera*>(camera)->ClearTopDown();
+    if (cameras.GetCurrentMode() == CameraMode::FreeFly)
+        cameras.SetCameraMode(CameraMode::Default);
+}
+
 void CMapEditorUI::ReleaseWorld()
 {
+    // The next frame drops the top-down flags (m_topdownWasActive in Render).
+    EndMinimapMode();
     g_bMapEditorAttrOverlay = false;
     g_bMapEditorBrushHighlight = false;
     g_MapEditorSelectedObject = nullptr;
@@ -182,11 +201,9 @@ void CMapEditorUI::Render(bool* p_open)
         // clicked "Back to game camera" -- otherwise TopViewEnable/full-terrain
         // stay stuck true and MainScene's TopViewEnable early-return permanently
         // freezes normal gameplay input/UI processing.
-        if (!show && m_bMinimapMode)
+        if (!show)
         {
-            m_bMinimapMode = false;
-            if (CameraManager::Instance().GetCurrentMode() == CameraMode::FreeFly)
-                CameraManager::Instance().SetCameraMode(CameraMode::Default);
+            EndMinimapMode();
         }
 
         const bool topdown = m_bMinimapMode &&
@@ -231,7 +248,7 @@ void CMapEditorUI::Render(bool* p_open)
     // drawn for a frame while its dock node gets its window: keep edit mode
     // as-is.
     const bool behindAnotherTab = !panelDrawn && ImGui::IsWindowDocked();
-    const bool inMinimizedWindow = (ImGui::GetWindowViewport()->Flags & ImGuiViewportFlags_IsMinimized) != 0;
+    const bool inMinimizedWindow = MuEditor::PlatformWindows::IsMinimized(ImGui::GetWindowViewport());
     if (behindAnotherTab || inMinimizedWindow)
     {
         ImGui::End();

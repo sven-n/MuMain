@@ -41,6 +41,10 @@ float GameTitleBarHeight();
 // on Linux, where the window manager draws the frames.
 bool IsMouseOverOsWindow();
 
+// Whether the viewport's OS window is minimized; not one that is only covered
+// (which ImGui also skips on macOS).
+bool IsMinimized(const ImGuiViewport* viewport);
+
 bool IsFullscreen(SDL_Window* window);
 void ToggleFullscreen(SDL_Window* window);
 } // namespace MuEditor::PlatformWindows

@@ -5,6 +5,7 @@
 #include "MuEditorUI.h"
 
 #include "imgui.h"
+#include "imgui_internal.h"
 #include "MuEditorLayout.h"
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/Core/MuEditorPlatformWindows.h"
@@ -12,6 +13,7 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "I18N/All.h"
 
+#include <algorithm>
 #include <cstring>
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 
@@ -49,6 +51,12 @@ void CMuEditorUI::Render(bool& editorEnabled, bool& showItemEditor, bool& showSk
     {
         RenderToolbarOpen(editorEnabled);
     }
+}
+
+bool CMuEditorUI::IsOnOpenButton(float x, float y) const
+{
+    return x >= m_openButtonMinX && x <= m_openButtonMaxX && y >= m_openButtonMinY && y <= m_openButtonMaxY &&
+           m_openButtonMaxX > m_openButtonMinX;
 }
 
 void CMuEditorUI::RenderToolbarOpen(bool& editorEnabled)
@@ -95,6 +103,10 @@ void CMuEditorUI::RenderToolbarOpen(bool& editorEnabled)
         // Get button rect for manual click detection
         ImVec2 buttonMin = ImGui::GetItemRectMin();
         ImVec2 buttonMax = ImGui::GetItemRectMax();
+        m_openButtonMinX = buttonMin.x;
+        m_openButtonMinY = buttonMin.y;
+        m_openButtonMaxX = buttonMax.x;
+        m_openButtonMaxY = buttonMax.y;
 
         ImGui::PopStyleColor(2);
 
@@ -134,9 +146,13 @@ void CMuEditorUI::RenderEditorWindow(bool& editorEnabled, bool& showItemEditor, 
                                      bool& showDevEditor, bool& showMapEditor, bool& showEffectBrowser,
                                      bool& showConsole)
 {
-    const MuEditor::Layout::WindowRect first = MuEditor::Layout::FirstEditorWindowRect(g_MuEditorCore.GetUIScale());
-    ImGui::SetNextWindowPos(first.position, ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(first.size, ImGuiCond_FirstUseEver);
+    // Only for its first appearance: no window and no imgui.ini entry yet.
+    if (ImGui::FindWindowByName(EDITOR_WINDOW_NAME) == nullptr)
+    {
+        const MuEditor::Layout::WindowRect first = MuEditor::Layout::FirstEditorWindowRect(g_MuEditorCore.GetUIScale());
+        ImGui::SetNextWindowPos(first.position, ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(first.size, ImGuiCond_FirstUseEver);
+    }
     // An OS window of its own also where it overlaps the game window, so it
     // never merges into the game's frame. It appears without taking the
     // keyboard from the game.
@@ -225,7 +241,7 @@ void CMuEditorUI::RenderUIScale()
 
 void CMuEditorUI::RenderLanguageSelector()
 {
-    ImGui::SetNextItemWidth(LANGUAGE_COMBO_WIDTH);
+    ImGui::SetNextItemWidth(LANGUAGE_COMBO_WIDTH * g_MuEditorCore.GetUIScale());
 
     const char* currentLocale = I18N::GetCurrentLocale();
     std::span<const char* const> availableLocales = I18N::GetAvailableLocales();
@@ -263,8 +279,10 @@ void CMuEditorUI::RenderLanguageSelector()
 
 void CMuEditorUI::RenderCloseButton(bool& editorEnabled)
 {
-    // On the far right of the menu bar
-    ImGui::SameLine(ImGui::GetWindowWidth() - BUTTON_WIDTH_OFFSET * g_MuEditorCore.GetUIScale());
+    // On the far right of the menu bar, but after the other items in a narrow
+    // window
+    const float rightAligned = ImGui::GetWindowWidth() - BUTTON_WIDTH_OFFSET * g_MuEditorCore.GetUIScale();
+    ImGui::SameLine(std::max(rightAligned, ImGui::GetCursorPosX()));
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.3f, 0.3f, 1.0f));
     if (ImGui::Button("Close Editor"))

@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "MuEditorPlatformWindows.h"
+#include "ScopedHint.h"
 
 #include "Core/Platform/GameWindow.h"
 #include "imgui.h"
@@ -11,6 +12,7 @@
 #include <SDL3/SDL_keyboard.h>
 #include <SDL3/SDL_mouse.h>
 #include <SDL3/SDL_surface.h>
+#include <SDL3/SDL_timer.h>
 #include <SDL3/SDL_video.h>
 
 #include <algorithm>
@@ -20,6 +22,10 @@
 
 namespace
 {
+// How long a window may take to become full screen once asked (the macOS
+// Space animation, an X11 window manager).
+constexpr Uint64 FullscreenEntryTimeoutMs = 3000;
+
 // The platform backend's handlers that the editor's own wrap.
 struct BackendHandlers
 {
@@ -74,38 +80,31 @@ void ForgetMouseOutsideWindows()
 // macOS' standard title bar; SDL cannot tell window borders there.
 constexpr float MacTitleBarHeight = 28.0f;
 
-// Sets an SDL hint for a scope and puts the earlier value back.
-class ScopedHint
-{
-public:
-    ScopedHint(const char* name, const char* value) : m_name(name)
-    {
-        if (const char* previous = SDL_GetHint(name))
-        {
-            m_previous = previous;
-            m_hadValue = true;
-        }
-        SDL_SetHint(name, value);
-    }
-    ~ScopedHint()
-    {
-        if (m_hadValue)
-        {
-            SDL_SetHint(m_name, m_previous.c_str());
-        }
-        else
-        {
-            SDL_ResetHint(m_name);
-        }
-    }
-    ScopedHint(const ScopedHint&) = delete;
-    ScopedHint& operator=(const ScopedHint&) = delete;
+using MuEditor::ScopedHint;
 
-private:
-    const char* m_name;
-    std::string m_previous;
-    bool m_hadValue = false;
+// macOS moves a window into a full-screen Space asynchronously: until SDL
+// reports it full screen it keeps the normal level ToggleFullscreen gave it.
+struct FullscreenEntry
+{
+    SDL_WindowID window;
+    Uint64 startedAt;
 };
+std::vector<FullscreenEntry> g_fullscreenEntries;
+
+bool IsEnteringFullscreen(SDL_Window* window)
+{
+    const Uint64 now = SDL_GetTicks();
+    std::erase_if(g_fullscreenEntries,
+                  [now](const FullscreenEntry& entry)
+                  {
+                      SDL_Window* entering = SDL_GetWindowFromID(entry.window);
+                      return entering == nullptr || MuEditor::PlatformWindows::IsFullscreen(entering) ||
+                             now - entry.startedAt > FullscreenEntryTimeoutMs;
+                  });
+    const SDL_WindowID id = SDL_GetWindowID(window);
+    return std::any_of(g_fullscreenEntries.begin(), g_fullscreenEntries.end(),
+                       [id](const FullscreenEntry& entry) { return entry.window == id; });
+}
 
 // macOS has no owned windows that keep the editor in front of the game
 // without moving with it (child windows do), so the editor's windows float
@@ -128,7 +127,7 @@ void ApplyWindowLevel(ImGuiViewport* viewport, bool appActive)
     // change); a full-screen window is in a Space of its own.
     SDL_Window* window = SdlWindowOf(viewport);
     if (window == nullptr || (viewport->Flags & ImGuiViewportFlags_TopMost) != 0 ||
-        MuEditor::PlatformWindows::IsFullscreen(window))
+        MuEditor::PlatformWindows::IsFullscreen(window) || IsEnteringFullscreen(window))
     {
         return;
     }
@@ -364,20 +363,69 @@ void ResizeEditorWindow(ImGuiViewport* viewport, ImVec2 size)
     g_backend.setWindowSize(viewport, size);
 }
 
+// Where each window was before ToggleFullscreen took it full screen.
+struct WindowedRect
+{
+    SDL_WindowID window;
+    SDL_Rect rect;
+    Uint64 savedAt;
+};
+std::vector<WindowedRect> g_windowedRects;
+
+// A window that left full screen another way than ToggleFullscreen (the
+// window manager, the green button) no longer has a windowed rect to keep.
+void ForgetLeftFullscreens()
+{
+    const Uint64 now = SDL_GetTicks();
+    std::erase_if(g_windowedRects,
+                  [now](const WindowedRect& entry)
+                  {
+                      SDL_Window* window = SDL_GetWindowFromID(entry.window);
+                      return window == nullptr || (!MuEditor::PlatformWindows::IsFullscreen(window) &&
+                                                   now - entry.savedAt > FullscreenEntryTimeoutMs);
+                  });
+}
+
+SDL_Rect WindowRect(SDL_Window* window)
+{
+    SDL_Rect rect{};
+    SDL_GetWindowPosition(window, &rect.x, &rect.y);
+    SDL_GetWindowSize(window, &rect.w, &rect.h);
+    return rect;
+}
+
+void RememberWindowedRect(SDL_Window* window)
+{
+    const SDL_WindowID id = SDL_GetWindowID(window);
+    std::erase_if(g_windowedRects, [id](const WindowedRect& entry) { return entry.window == id; });
+    g_windowedRects.push_back({id, WindowRect(window), SDL_GetTicks()});
+}
+
+bool TakeWindowedRect(SDL_Window* window, SDL_Rect& rect)
+{
+    const SDL_WindowID id = SDL_GetWindowID(window);
+    const auto found = std::find_if(g_windowedRects.begin(), g_windowedRects.end(),
+                                    [id](const WindowedRect& entry) { return entry.window == id; });
+    if (found == g_windowedRects.end())
+    {
+        return false;
+    }
+    rect = found->rect;
+    g_windowedRects.erase(found);
+    return true;
+}
+
 // Hands ImGui the window's windowed rect, which it keeps (and saves to
 // imgui.ini) for when the window opens again.
-void KeepWindowedRect(ImGuiViewport* viewport, SDL_Window* window)
+void KeepWindowedRect(ImGuiViewport* viewport, const SDL_Rect& rect)
 {
     ImGuiWindow* imguiWindow = static_cast<ImGuiViewportP*>(viewport)->Window;
     if (imguiWindow == nullptr)
     {
         return;
     }
-    int x = 0, y = 0, width = 0, height = 0;
-    SDL_GetWindowPosition(window, &x, &y);
-    SDL_GetWindowSize(window, &width, &height);
-    const ImVec2 position(static_cast<float>(x), static_cast<float>(y));
-    const ImVec2 size(static_cast<float>(width), static_cast<float>(height));
+    const ImVec2 position(static_cast<float>(rect.x), static_cast<float>(rect.y));
+    const ImVec2 size(static_cast<float>(rect.w), static_cast<float>(rect.h));
     imguiWindow->Pos = position;
     imguiWindow->Size = imguiWindow->SizeFull = size;
     // A floating tool window is shown by its dock node, whose rect imgui.ini keeps.
@@ -390,15 +438,23 @@ void KeepWindowedRect(ImGuiViewport* viewport, SDL_Window* window)
 }
 
 // A window closed while full screen would come back as a plain window covering
-// the monitor, its title bar above the screen: it goes back to windowed first.
+// the monitor, its title bar above the screen: ImGui keeps its windowed place,
+// the one from before ToggleFullscreen, or the one the window goes back to
+// when it leaves full screen (waiting for that, an animation on macOS).
 void DestroyEditorWindow(ImGuiViewport* viewport)
 {
     SDL_Window* window = SdlWindowOf(viewport);
+    SDL_Rect windowed{};
+    const bool remembered = window != nullptr && TakeWindowedRect(window, windowed);
     if (MuEditor::PlatformWindows::IsFullscreen(window))
     {
-        SDL_SetWindowFullscreen(window, false);
-        SDL_SyncWindow(window);
-        KeepWindowedRect(viewport, window);
+        if (!remembered)
+        {
+            SDL_SetWindowFullscreen(window, false);
+            SDL_SyncWindow(window);
+            windowed = WindowRect(window);
+        }
+        KeepWindowedRect(viewport, windowed);
     }
     g_backend.destroyWindow(viewport);
 }
@@ -435,6 +491,7 @@ void Install()
 
 void BeforeNewFrame()
 {
+    ForgetLeftFullscreens();
 #ifdef __APPLE__
     KeepInFrontOfGame();
     ReportHoveredWindow();
@@ -504,6 +561,12 @@ bool IsMouseOverOsWindow()
     return false;
 }
 
+bool IsMinimized(const ImGuiViewport* viewport)
+{
+    SDL_Window* window = WindowOf(viewport);
+    return window != nullptr && (SDL_GetWindowFlags(window) & SDL_WINDOW_MINIMIZED) != 0;
+}
+
 bool IsFullscreen(SDL_Window* window)
 {
     return window != nullptr && (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) != 0;
@@ -516,12 +579,22 @@ void ToggleFullscreen(SDL_Window* window)
         return;
     }
     const bool enter = !IsFullscreen(window);
+    if (enter)
+    {
+        RememberWindowedRect(window);
+    }
+    else
+    {
+        SDL_Rect unused{};
+        TakeWindowedRect(window, unused);
+    }
 #ifdef __APPLE__
     // A full-screen Space takes a window at the normal level; back to
-    // floating once it leaves (KeepInFrontOfGame).
+    // floating once it is out again (KeepInFrontOfGame).
     if (enter)
     {
         SDL_SetWindowAlwaysOnTop(window, false);
+        g_fullscreenEntries.push_back({SDL_GetWindowID(window), SDL_GetTicks()});
     }
 #endif
     // Full screen on the window's monitor at the desktop's resolution.

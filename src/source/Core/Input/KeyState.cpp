@@ -4,10 +4,6 @@
 
 #include <SDL3/SDL.h>
 
-#ifdef _EDITOR
-#include "../MuEditor/Core/MuEditorCore.h"
-#endif
-
 namespace Core::Input
 {
     namespace
@@ -15,13 +11,7 @@ namespace Core::Input
         bool g_leftMouseButtonPressEdge = false;
 
 #ifdef _EDITOR
-        // The editor's own windows are windows of this process too: a key or
-        // button pressed while its device is with one of them is not the game's.
-        bool IsWithEditorWindow(int virtualKey)
-        {
-            const bool mouseButton = virtualKey == VK_LBUTTON || virtualKey == VK_RBUTTON || virtualKey == VK_MBUTTON;
-            return mouseButton ? g_MuEditorCore.IsMouseInEditorWindow() : g_MuEditorCore.IsKeyboardInEditorWindow();
-        }
+        OtherWindowQuery g_otherWindowQuery = nullptr;
 #endif
 
         } // namespace
@@ -88,7 +78,7 @@ namespace Core::Input
             return true;
         }
 #ifdef _EDITOR
-        if (IsWithEditorWindow(virtualKey))
+        if (g_otherWindowQuery != nullptr && g_otherWindowQuery(virtualKey))
         {
             return false;
         }
@@ -119,4 +109,11 @@ namespace Core::Input
         const bool* state = SDL_GetKeyboardState(nullptr);
         return state != nullptr && state[sc];
     }
+
+#ifdef _EDITOR
+    void SetOtherWindowQuery(OtherWindowQuery query)
+    {
+        g_otherWindowQuery = query;
+    }
+#endif
 }

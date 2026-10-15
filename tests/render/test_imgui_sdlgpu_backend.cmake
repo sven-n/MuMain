@@ -430,8 +430,11 @@ require_match(platform_windows
     "platformWindowsOn[ \t]*=[ \t]*\\([ \t]*ImGui::GetIO\\(\\)\\.ConfigFlags[ \t]*&[ \t]*ImGuiConfigFlags_ViewportsEnable[ \t]*\\)[ \t]*!=[ \t]*0[ \t]*;"
     "the editor knows whether its own windows are on")
 require_match(platform_windows
-    "if[ \t\r\n]*\\([ \t]*m_bGameFrameActive[ \t]*&&[ \t]*platformWindowsOn[ \t]*\\)[ \t\r\n]*\\{[ \t\r\n]*ImGui::RenderPlatformWindowsDefault\\(\\)[ \t]*;"
-    "the editor draws its own windows only while they are on and the game draws the frame")
+    "gameWindowHidden[ \t\r\n]*=[^;]*SDL_WINDOW_MINIMIZED[^;]*m_skippedGameFrames[^;]*;"
+    "the editor knows whether the game window is out of sight (minimized, or skipping frame after frame)")
+require_match(platform_windows
+    "if[ \t\r\n]*\\([ \t]*platformWindowsOn[ \t]*&&[ \t]*\\([ \t]*m_bGameFrameActive[ \t]*\\|\\|[ \t]*gameWindowHidden[ \t]*\\)[ \t]*\\)[ \t\r\n]*\\{[ \t\r\n]*ImGui::RenderPlatformWindowsDefault\\(\\)[ \t]*;"
+    "the editor draws its own windows while they are on, unless the game skipped a frame of a window that is shown")
 string(FIND "${platform_windows}" "ImGui::UpdatePlatformWindows()" platform_update_position)
 string(FIND "${platform_windows}" "ImGui::RenderPlatformWindowsDefault()" platform_render_position)
 if(NOT platform_update_position LESS platform_render_position)
