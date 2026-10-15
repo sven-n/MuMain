@@ -3,6 +3,7 @@
 #ifndef _WIN32
 
 #include "Core/Platform/WinUser.h"
+#include "Core/Platform/GameWindow.h"
 
 #include <SDL3/SDL.h>
 #include <string>
@@ -123,7 +124,20 @@ BOOL GetCursorPos(LPPOINT lpPoint)
 {
     if (!lpPoint) return FALSE;
     float x = 0.0f, y = 0.0f;
-    SDL_GetMouseState(&x, &y);  // already window-relative
+    SDL_GetMouseState(&x, &y); // relative to the window the mouse is in
+    // In another window of the game (the editor's own) the position is made
+    // relative to the game window, as Win32's GetCursorPos plus
+    // ScreenToClient(g_hWnd) gives it.
+    SDL_Window* mouseWindow = SDL_GetMouseFocus();
+    SDL_Window* gameWindow = Core::Platform::GameWindow();
+    if (mouseWindow != nullptr && gameWindow != nullptr && mouseWindow != gameWindow)
+    {
+        int mouseWindowX = 0, mouseWindowY = 0, gameWindowX = 0, gameWindowY = 0;
+        SDL_GetWindowPosition(mouseWindow, &mouseWindowX, &mouseWindowY);
+        SDL_GetWindowPosition(gameWindow, &gameWindowX, &gameWindowY);
+        x += static_cast<float>(mouseWindowX - gameWindowX);
+        y += static_cast<float>(mouseWindowY - gameWindowY);
+    }
     lpPoint->x = static_cast<LONG>(x);
     lpPoint->y = static_cast<LONG>(y);
     return TRUE;

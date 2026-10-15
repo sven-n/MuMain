@@ -19,6 +19,7 @@
 #include <mach-o/dyld.h>
 #endif
 #include <clocale>
+#include <cstring>
 #include <filesystem>
 #include <optional>
 #include <utility>
@@ -2049,6 +2050,14 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     g_hInst = hInstance;
 
+#if defined(_EDITOR) && defined(__linux__)
+    // The editor's own windows need a video driver that places windows and
+    // knows the mouse outside them: X11, through XWayland on a Wayland desktop.
+    // SDL_VIDEO_DRIVER in the environment still decides; without X11 the
+    // editor stays inside the game window on Wayland.
+    SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "x11,wayland");
+#endif
+
     // SDL owns the window; SDL_gpu owns the rendering device.
     if (!SDL_InitSubSystem(SDL_INIT_VIDEO))
     {
@@ -2226,8 +2235,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // Initialize MU Editor with the live SDL GPU window.
     g_MuEditorCore.Initialize(g_sdlWindow);
 
-    // Check for --editor command line flag
-    if (szCmdLine && wcsstr(GetCommandLineW(), L"--editor"))
+    // Check for --editor command line flag (in szCmdLine on every platform;
+    // GetCommandLineW is an empty stub off Windows)
+    if (szCmdLine && std::strstr(szCmdLine, "--editor"))
     {
         g_MuEditorCore.SetEnabled(true);
         fwprintf(stderr, L"[Editor] Starting in editor mode (--editor flag detected)\n");

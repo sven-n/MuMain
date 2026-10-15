@@ -22,6 +22,8 @@ The MU Editor is a C++ ImGui-based in-game editor that provides real-time game e
 - **MuEditorUI.h/cpp** - The editor window and its menu bar, or the Open Editor button while closed
 - **MuEditorLayout.h/cpp** - Where the editor window first opens, and the first layout of its tool windows
 - **MuEditorWindowIds.h** - The names the tool windows are docked by
+- **MuEditorPlatformWindows.h/cpp** - The editor's own OS windows on Windows, Linux (X11) and macOS
+- **MuEditorCursor.h/cpp** - The OS cursor's shape over the editor off Windows
 
 ### Console System
 - **MuEditorConsole.h/cpp** - Console rendering and logging (split Editor/Game consoles)

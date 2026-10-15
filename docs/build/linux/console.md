@@ -113,6 +113,11 @@ MESA_LOADER_DRIVER_OVERRIDE=d3d12 ./Main
 
 ### Wayland
 
+Editor builds (`linux-x64-mueditor`) run on X11, through XWayland on a Wayland
+desktop, so that the editor's windows can leave the game window: Wayland does
+not let them be placed. `SDL_VIDEO_DRIVER=wayland ./Main` runs them on Wayland,
+with the editor inside the game window. Player builds use SDL's own choice.
+
 Wayland compositors decide where windows go, so changing the resolution in
 windowed mode resizes the client but does not re-center it: drag it where you
 want it, or restart the client. The resolution is already saved when you apply

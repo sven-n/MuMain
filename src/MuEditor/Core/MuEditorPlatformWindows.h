@@ -9,10 +9,21 @@ struct ImGuiViewport;
 namespace MuEditor::PlatformWindows
 {
 // Hooks the platform backend's window handlers, after the backends are set
-// up: on Windows the editor's windows show the game's icon in their title bar
-// and taskbar button; a maximized or full-screen window ImGui moves or sizes
-// turns normal first; one closed while full screen keeps its windowed place.
+// up: the editor's windows show the game's icon (Windows, Linux); popups and
+// tooltips do not take the keyboard (Linux, macOS); on macOS the editor's
+// windows appear without taking the keyboard where ImGui says so; a maximized
+// or full-screen window ImGui moves or sizes turns normal first; one closed
+// while full screen keeps its windowed place.
 void Install();
+
+// Once per frame, after the platform backend's NewFrame and before ImGui's: on
+// macOS keeps the editor's windows in front of the game while MU is the
+// active app, and tells ImGui which of them the mouse is over (the backend
+// cannot there).
+void BeforeNewFrame();
+
+// Frees what the editor's windows share, at shutdown.
+void Release();
 
 // The OS window of an editor viewport; null for the game window and while the
 // viewport has no OS window yet.
@@ -22,9 +33,10 @@ SDL_Window* WindowOf(const ImGuiViewport* viewport);
 // windows have the same. 0 without one.
 float GameTitleBarHeight();
 
-// Whether the mouse is over one of the editor's own OS windows, frame and
-// title bar included (Windows only): for where SDL reports no window under the
-// mouse.
+// Whether the mouse is over one of the editor's own OS windows, for where SDL
+// reports no window or the game window under the mouse: on Windows frame and
+// title bar included, on macOS by where they float over the game. Always false
+// on Linux, where the window manager draws the frames.
 bool IsMouseOverOsWindow();
 
 bool IsFullscreen(SDL_Window* window);

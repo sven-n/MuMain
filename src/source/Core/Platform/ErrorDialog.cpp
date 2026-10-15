@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "ErrorDialog.h"
+#include "GameWindow.h"
 #include "ScopedSystemCursor.h"
 
 #include "Core/Utilities/Log/MuLogger.h"
@@ -41,22 +42,10 @@ std::vector<SDL_MessageBoxButtonData> MakeButtons(bool canContinue)
 }
 
 // The game window, so the dialog stays in front of it even when the game
-// does not have the focus (e.g. during the long loading). The client opens
-// that one first (the editor's own windows come later), and SDL numbers its
-// windows in the order they open.
+// does not have the focus (e.g. during the long loading).
 SDL_Window* GetGameWindow()
 {
-    int count = 0;
-    SDL_Window** windows = SDL_GetWindows(&count);
-    SDL_Window* window = nullptr;
-    for (int i = 0; windows != nullptr && i < count; ++i)
-    {
-        if (window == nullptr || SDL_GetWindowID(windows[i]) < SDL_GetWindowID(window))
-        {
-            window = windows[i];
-        }
-    }
-    SDL_free(windows);
+    SDL_Window* window = Core::Platform::GameWindow();
     return window != nullptr ? window : SDL_GetKeyboardFocus();
 }
 

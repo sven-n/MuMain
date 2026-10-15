@@ -12,6 +12,7 @@
 #include <SDL3/SDL_mouse.h>
 #include <SDL3/SDL_video.h>
 #include "MuInputBlockerCore.h"
+#include "MuEditorCursor.h"
 #include "MuEditorPlatformWindows.h"
 #include "Core/Input/SyntheticInput.h"
 #include "../Config/MuEditorConfig.h"
@@ -223,6 +224,12 @@ void CMuEditorCore::Initialize(SDL_Window* window)
     // Let ImGui manage the mouse cursor (Windows cursor) when editor is open
     // Game cursor is disabled when editor is open (see ZzzScene.cpp)
     io.MouseDrawCursor = false; // Don't let ImGui draw its own cursor, use Windows cursor
+#ifndef _WIN32
+    // Off Windows SDL has one cursor for all of the game's windows, which the
+    // game keeps blank: the editor sets it over its windows itself
+    // (UpdateCursorVisibility), so the backend must not.
+    io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
+#endif
 
     // The editor's windows dock into one another and can leave the game window
     // (an OS window each, see SelectWindowMode), staying in front of it: the
@@ -426,6 +433,11 @@ void CMuEditorCore::Initialize(SDL_Window* window)
     }
 
     MuEditor::PlatformWindows::Install();
+    const char* videoDriver = SDL_GetCurrentVideoDriver();
+    g_MuEditorConsoleUI.LogEditor(std::string("Video driver: ") + (videoDriver != nullptr ? videoDriver : "none") +
+                                  ((io.BackendFlags & ImGuiBackendFlags_PlatformHasViewports) != 0
+                                       ? " (the editor's windows can leave the game window)"
+                                       : " (the editor stays inside the game window)"));
 
     fwprintf(stderr, L"[MuEditor] ImGui backends initialized\n");
     fflush(stderr);
@@ -469,6 +481,8 @@ void CMuEditorCore::Shutdown()
     ImGui_ImplSDLGPU3_Shutdown();
     ImGui_ImplSDL3_Shutdown();
     ImGui::DestroyContext();
+    MuEditor::PlatformWindows::Release();
+    MuEditor::Cursor::Release();
 
     m_bInitialized = false;
     m_bDrawDataReady = false;
@@ -507,6 +521,7 @@ void CMuEditorCore::Update()
         // whether the editor is open or only the "Open Editor" button is shown
         // (issue #442) - no manual Win32 frame setup needed.
         ImGui_ImplSDL3_NewFrame();
+        MuEditor::PlatformWindows::BeforeNewFrame();
 
         ImGui::NewFrame();
         m_bFrameStarted = true;
@@ -651,15 +666,10 @@ void CMuEditorCore::SelectWindowMode()
 {
     // A full-screen game covers the editor's own windows and holds the cursor
     // in its window: the editor's windows then stay inside the game window,
-    // as they do where the platform has no windows of their own (Wayland).
-    // On macOS the platform backend does not make them children of the game
-    // window, so they would not stay in front of it.
+    // as they do where the platform has no windows of their own (the Wayland
+    // video driver; editor builds prefer X11 on Linux, see Winmain.cpp).
     ImGuiIO& io = ImGui::GetIO();
-#ifdef __APPLE__
-    const bool platformHasWindows = false;
-#else
     const bool platformHasWindows = (io.BackendFlags & ImGuiBackendFlags_PlatformHasViewports) != 0;
-#endif
     const bool gameFullscreen = (SDL_GetWindowFlags(m_pGameWindow) & SDL_WINDOW_FULLSCREEN) != 0;
     if (platformHasWindows && !gameFullscreen)
     {
@@ -687,15 +697,17 @@ bool CMuEditorCore::IsMouseInEditorWindow() const
     {
         return false;
     }
-    // Over a window's frame and title bar SDL reports no window. A held button
-    // keeps the window it was pressed in, whatever is under the mouse now.
+    // A held button keeps the window it was pressed in, whatever is under the
+    // mouse now.
     SDL_Window* focus = SDL_GetMouseFocus();
-    if (focus != nullptr)
+    const bool mouseInEditorWindow = focus != nullptr && IsEditorWindow(focus);
+    if (SDL_GetMouseState(nullptr, nullptr) != 0)
     {
-        return IsEditorWindow(focus);
+        return mouseInEditorWindow;
     }
-    const bool buttonHeld = SDL_GetMouseState(nullptr, nullptr) != 0;
-    return !buttonHeld && MuEditor::PlatformWindows::IsMouseOverOsWindow();
+    // Over a window's frame and title bar SDL reports no window, and on macOS
+    // the game window can have the mouse while an editor window floats over it.
+    return mouseInEditorWindow || MuEditor::PlatformWindows::IsMouseOverOsWindow();
 }
 
 bool CMuEditorCore::ClaimsEvent(const SDL_Event& event)
@@ -836,12 +848,11 @@ void CMuEditorCore::UpdateCursorVisibility()
     extern bool g_bRenderGameCursor;
     g_bRenderGameCursor = !m_bHoveringUI;
 
-#ifdef _WIN32
-    // Manage Windows cursor visibility
-    // Windows maintains an internal display counter - cursor is visible when counter >= 0
-    // We need to loop to force the counter to the correct state.
-    // Off Windows the SDL/ImGui backend drives the OS cursor itself, and the
-    // ShowCursor stub returns a constant so these loops would never terminate.
+    // The OS cursor shows over the editor and hides over the game, which draws
+    // its own. Windows maintains an internal display counter - cursor is
+    // visible when counter >= 0 - and off Windows the game's ShowCursor keeps
+    // the same counter over SDL's cursor. We need to loop to force the counter
+    // to the correct state.
     static bool lastHoveringState = false;
     if (m_bHoveringUI != lastHoveringState)
     {
@@ -857,7 +868,10 @@ void CMuEditorCore::UpdateCursorVisibility()
         }
         lastHoveringState = m_bHoveringUI;
     }
-#endif
+    if (m_bHoveringUI)
+    {
+        MuEditor::Cursor::ShowImGuiShape();
+    }
 }
 
 void CMuEditorCore::RenderPlatformWindows()
