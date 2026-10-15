@@ -4,6 +4,7 @@
 #include "Core/Input/KeyState.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Input/SyntheticInput.h"
+#include "Core/Platform/GameWindow.h"
 #include "Core/Input/UiInputRouter.h"
 #include "App/Control/ControlServer.h"
 #include "Core/Text/Utf8.h"
@@ -2096,7 +2097,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     RefreshWindowContentScale();
 
 #if defined(__linux__)
-    SDL_Surface* applicationIcon = SDL_LoadPNG("MuMainIcon.png");
+    SDL_Surface* applicationIcon = SDL_LoadPNG(Core::Platform::GameWindowIconFile);
     if (applicationIcon != nullptr)
     {
         SDL_SetWindowIcon(g_sdlWindow, applicationIcon);

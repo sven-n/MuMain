@@ -64,7 +64,7 @@ Choice Show(const std::string& title, const std::string& message, bool canContin
 {
     const std::vector<SDL_MessageBoxButtonData> buttons = MakeButtons(canContinue);
     const SDL_MessageBoxData data = {SDL_MESSAGEBOX_ERROR | SDL_MESSAGEBOX_BUTTONS_LEFT_TO_RIGHT,
-                                     GetGameWindow(),
+                                     Core::Platform::MessageBoxParent(GetGameWindow()),
                                      title.c_str(),
                                      message.c_str(),
                                      static_cast<int>(buttons.size()),

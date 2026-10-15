@@ -131,6 +131,9 @@ reverted size.
 ## Reporting a Wayland problem
 
 From the repository root, run `scripts/wayland-diag.sh --timeout 60 --`.
+It runs the player build with SDL's own choice of video driver. An editor build
+(`--client out/build/linux-x64-mueditor/src/Release/Main`) prefers X11; run the
+script with `SDL_VIDEO_DRIVER=wayland` set to diagnose it on Wayland.
 It writes a sanitized `summary.txt` under `diag/`; paste that into the report
 and attach only relevant raw-log excerpts. A pre-existing `MuError.log` is
 copied into the bundle as `MuError.log.previous` before the fresh run. `--tar`

@@ -36,4 +36,14 @@ SDL_Window* GameWindow()
     }
     return gameWindowId != 0 ? SDL_GetWindowFromID(gameWindowId) : nullptr;
 }
+
+SDL_Window* MessageBoxParent(SDL_Window* preferred)
+{
+#if defined(_EDITOR) && defined(__APPLE__)
+    (void)preferred;
+    return nullptr;
+#else
+    return preferred;
+#endif
+}
 } // namespace Core::Platform

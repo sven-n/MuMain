@@ -65,6 +65,7 @@ private:
     ~CMuEditorCore();
 
     void ApplyUIScale();
+    void LogVideoDriver() const;
     void SelectWindowMode();
     void OpenOnButtonClick();
     void BlockGameInputOverOpenButton();

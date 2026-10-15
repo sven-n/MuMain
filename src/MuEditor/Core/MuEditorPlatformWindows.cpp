@@ -4,6 +4,7 @@
 
 #include "MuEditorPlatformWindows.h"
 
+#include "Core/Platform/GameWindow.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 #include <SDL3/SDL_hints.h>
@@ -12,8 +13,10 @@
 #include <SDL3/SDL_surface.h>
 #include <SDL3/SDL_video.h>
 
+#include <algorithm>
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace
 {
@@ -25,6 +28,7 @@ struct BackendHandlers
     void (*destroyWindow)(ImGuiViewport* viewport) = nullptr;
     void (*setWindowPos)(ImGuiViewport* viewport, ImVec2 position) = nullptr;
     void (*setWindowSize)(ImGuiViewport* viewport, ImVec2 size) = nullptr;
+    bool (*getWindowMinimized)(ImGuiViewport* viewport) = nullptr;
 };
 BackendHandlers g_backend;
 
@@ -39,17 +43,30 @@ SDL_Window* SdlWindowOf(const ImGuiViewport* viewport)
 }
 
 #ifdef __linux__
-// The file the game window's icon comes from (Winmain.cpp).
-constexpr char GameIconFile[] = "MuMainIcon.png";
 SDL_Surface* g_gameIcon = nullptr;
+bool g_gameIconLoaded = false;
 
 SDL_Surface* GameIcon()
 {
-    if (g_gameIcon == nullptr)
+    if (!g_gameIconLoaded)
     {
-        g_gameIcon = SDL_LoadPNG(GameIconFile);
+        g_gameIcon = SDL_LoadPNG(Core::Platform::GameWindowIconFile);
+        g_gameIconLoaded = true;
     }
     return g_gameIcon;
+}
+
+// With no window of the game under the mouse, SDL's global mouse position can
+// be stale (XWayland stops updating it over other apps' windows), which would
+// keep editor widgets hovered: no position then, as when the mouse leaves.
+void ForgetMouseOutsideWindows()
+{
+    ImGuiIO& io = ImGui::GetIO();
+    const bool platformWindowsOn = (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) != 0;
+    if (platformWindowsOn && SDL_GetMouseFocus() == nullptr && SDL_GetMouseState(nullptr, nullptr) == 0)
+    {
+        io.AddMousePosEvent(-FLT_MAX, -FLT_MAX);
+    }
 }
 #endif
 
@@ -103,10 +120,12 @@ bool IsAppActive()
     return g_framesInactive < InactiveFramesBeforeNormalLevel;
 }
 
+bool g_appWasActive = true;
+
 void ApplyWindowLevel(ImGuiViewport* viewport, bool appActive)
 {
-    // Tooltips float by ImGui's own flag; a full-screen window is in a Space of
-    // its own.
+    // Tooltips have ImGui's own always-on-top (raised again after a level
+    // change); a full-screen window is in a Space of its own.
     SDL_Window* window = SdlWindowOf(viewport);
     if (window == nullptr || (viewport->Flags & ImGuiViewportFlags_TopMost) != 0 ||
         MuEditor::PlatformWindows::IsFullscreen(window))
@@ -116,15 +135,71 @@ void ApplyWindowLevel(ImGuiViewport* viewport, bool appActive)
     SDL_SetWindowAlwaysOnTop(window, appActive);
 }
 
+void RaiseWithoutActivation(SDL_Window* window)
+{
+    const ScopedHint noActivation(SDL_HINT_WINDOW_ACTIVATE_WHEN_RAISED, "0");
+    SDL_RaiseWindow(window);
+}
+
+// AppKit puts a window that changes level in front of the others of its new
+// level. When MU's active state changes, the windows change level in the
+// order they were last focused, so the one focused last ends up in front, as
+// EditorViewportAt assumes; tooltips go in front of them again.
+void ChangeLevels(bool appActive)
+{
+    const ImGuiPlatformIO& platformIO = ImGui::GetPlatformIO();
+    std::vector<ImGuiViewportP*> byFocus;
+    for (int i = 1; i < platformIO.Viewports.Size; ++i)
+    {
+        byFocus.push_back(static_cast<ImGuiViewportP*>(platformIO.Viewports[i]));
+    }
+    std::sort(byFocus.begin(), byFocus.end(), [](const ImGuiViewportP* a, const ImGuiViewportP* b)
+              { return a->LastFocusedStampCount < b->LastFocusedStampCount; });
+    for (ImGuiViewportP* viewport : byFocus)
+    {
+        ApplyWindowLevel(viewport, appActive);
+    }
+    for (ImGuiViewportP* viewport : byFocus)
+    {
+        SDL_Window* window = SdlWindowOf(viewport);
+        if ((viewport->Flags & ImGuiViewportFlags_TopMost) != 0 && window != nullptr &&
+            (SDL_GetWindowFlags(window) & SDL_WINDOW_HIDDEN) == 0)
+        {
+            RaiseWithoutActivation(window);
+        }
+    }
+}
+
 void KeepInFrontOfGame()
 {
     g_framesInactive = SDL_GetKeyboardFocus() != nullptr ? 0 : g_framesInactive + 1;
     const bool appActive = IsAppActive();
+    if (appActive != g_appWasActive)
+    {
+        g_appWasActive = appActive;
+        ChangeLevels(appActive);
+        return;
+    }
+    // A new window got its level when it was created; one back from a
+    // full-screen Space gets it again here.
     const ImGuiPlatformIO& platformIO = ImGui::GetPlatformIO();
     for (int i = 1; i < platformIO.Viewports.Size; ++i)
     {
         ApplyWindowLevel(platformIO.Viewports[i], appActive);
     }
+}
+
+// An editor window that cannot be seen - in a full-screen Space the user left,
+// or wholly covered - counts as minimized: ImGui then neither draws it nor
+// finds the mouse over it.
+bool IsEditorWindowMinimized(ImGuiViewport* viewport)
+{
+    if (g_backend.getWindowMinimized(viewport))
+    {
+        return true;
+    }
+    SDL_Window* window = viewport != ImGui::GetMainViewport() ? SdlWindowOf(viewport) : nullptr;
+    return window != nullptr && (SDL_GetWindowFlags(window) & SDL_WINDOW_OCCLUDED) != 0;
 }
 
 // The editor window under the mouse: where several overlap, the one focused
@@ -170,8 +245,10 @@ void ReportHoveredWindow()
     {
         return;
     }
+    // Over an editor window's title bar too, as IsMouseOverOsWindow: no editor
+    // widget is there, and the game under it is not hovered.
     const ImVec2 mouse = GlobalMousePosition();
-    ImGuiViewport* hovered = EditorViewportAt(mouse, false);
+    ImGuiViewport* hovered = EditorViewportAt(mouse, true);
     ImGuiViewport* game = ImGui::GetMainViewport();
     if (hovered == nullptr && static_cast<ImGuiViewportP*>(game)->GetMainRect().Contains(mouse))
     {
@@ -197,8 +274,7 @@ void ShowEditorWindow(ImGuiViewport* viewport)
         const ScopedHint noActivation(SDL_HINT_WINDOW_ACTIVATE_WHEN_SHOWN, "0");
         SDL_ShowWindow(window);
     }
-    const ScopedHint noActivation(SDL_HINT_WINDOW_ACTIVATE_WHEN_RAISED, "0");
-    SDL_RaiseWindow(window);
+    RaiseWithoutActivation(window);
 }
 #endif
 
@@ -223,8 +299,11 @@ void CopyGameIcon(ImGuiViewport* viewport)
 #elif defined(__linux__)
     // Popups and tooltips have no title bar to show it in.
     SDL_Window* window = SdlWindowOf(viewport);
-    SDL_Surface* icon = GameIcon();
-    if (window != nullptr && icon != nullptr && (viewport->Flags & ImGuiViewportFlags_NoDecoration) == 0)
+    if (window == nullptr || (viewport->Flags & ImGuiViewportFlags_NoDecoration) != 0)
+    {
+        return;
+    }
+    if (SDL_Surface* icon = GameIcon())
     {
         SDL_SetWindowIcon(window, icon);
     }
@@ -345,7 +424,12 @@ void Install()
     platformIO.Platform_SetWindowPos = MoveEditorWindow;
     platformIO.Platform_SetWindowSize = ResizeEditorWindow;
 #ifdef __APPLE__
+    g_backend.getWindowMinimized = platformIO.Platform_GetWindowMinimized;
     platformIO.Platform_ShowWindow = ShowEditorWindow;
+    if (g_backend.getWindowMinimized != nullptr)
+    {
+        platformIO.Platform_GetWindowMinimized = IsEditorWindowMinimized;
+    }
 #endif
 }
 
@@ -354,6 +438,8 @@ void BeforeNewFrame()
 #ifdef __APPLE__
     KeepInFrontOfGame();
     ReportHoveredWindow();
+#elif defined(__linux__)
+    ForgetMouseOutsideWindows();
 #endif
 }
 
@@ -365,6 +451,7 @@ void Release()
         SDL_DestroySurface(g_gameIcon);
         g_gameIcon = nullptr;
     }
+    g_gameIconLoaded = false;
 #endif
 }
 

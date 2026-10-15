@@ -84,9 +84,9 @@ When `_EDITOR` is defined:
 #include "MuEditor/MuEditor.h"
 
 // Initialization
-g_MuEditor.Initialize(g_hWnd, g_hDC);
-if (szCmdLine && wcsstr(GetCommandLineW(), L"--editor"))
-    g_MuEditor.SetEnabled(true);
+g_MuEditorCore.Initialize(g_sdlWindow);
+if (szCmdLine && std::strstr(szCmdLine, "--editor"))
+    g_MuEditorCore.SetEnabled(true);
 
 // Main loop - Update and Render
 g_MuEditor.Update();

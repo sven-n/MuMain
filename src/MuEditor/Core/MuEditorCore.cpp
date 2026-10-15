@@ -64,7 +64,8 @@ namespace
 }
 #endif
 
-// Windows cursor display counter thresholds
+// Cursor display counter thresholds (Win32's counter, or the game's ShowCursor
+// shim over SDL's cursor off Windows)
 // The cursor is visible when the counter is >= CURSOR_VISIBLE_THRESHOLD
 // The cursor is hidden when the counter is < CURSOR_VISIBLE_THRESHOLD
 constexpr int CURSOR_VISIBLE_THRESHOLD = 0;
@@ -221,9 +222,9 @@ void CMuEditorCore::Initialize(SDL_Window* window)
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
 
-    // Let ImGui manage the mouse cursor (Windows cursor) when editor is open
-    // Game cursor is disabled when editor is open (see ZzzScene.cpp)
-    io.MouseDrawCursor = false; // Don't let ImGui draw its own cursor, use Windows cursor
+    // The OS cursor over the editor; the game cursor is hidden there (see
+    // UpdateCursorVisibility)
+    io.MouseDrawCursor = false; // Don't let ImGui draw its own cursor, use the OS cursor
 #ifndef _WIN32
     // Off Windows SDL has one cursor for all of the game's windows, which the
     // game keeps blank: the editor sets it over its windows itself
@@ -233,8 +234,10 @@ void CMuEditorCore::Initialize(SDL_Window* window)
 
     // The editor's windows dock into one another and can leave the game window
     // (an OS window each, see SelectWindowMode), staying in front of it: the
-    // platform backend makes them children of the game window. Those windows
-    // have the OS title bar with its minimize, maximize and close buttons.
+    // platform backend makes them children of the game window, except on
+    // macOS, where they float above it while MU is the active app
+    // (MuEditor::PlatformWindows::BeforeNewFrame). Those windows have the OS
+    // title bar with its buttons.
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.ConfigViewportsNoDefaultParent = false;
     io.ConfigViewportsNoDecoration = false;
@@ -433,11 +436,7 @@ void CMuEditorCore::Initialize(SDL_Window* window)
     }
 
     MuEditor::PlatformWindows::Install();
-    const char* videoDriver = SDL_GetCurrentVideoDriver();
-    g_MuEditorConsoleUI.LogEditor(std::string("Video driver: ") + (videoDriver != nullptr ? videoDriver : "none") +
-                                  ((io.BackendFlags & ImGuiBackendFlags_PlatformHasViewports) != 0
-                                       ? " (the editor's windows can leave the game window)"
-                                       : " (the editor stays inside the game window)"));
+    LogVideoDriver();
 
     fwprintf(stderr, L"[MuEditor] ImGui backends initialized\n");
     fflush(stderr);
@@ -660,6 +659,15 @@ void CMuEditorCore::BlockGameInputOverEditor()
 
     // Note: Keyboard blocking is now handled in ScanAsyncKeyState() in WindowCommon.cpp
     // It prevents the game from scanning keyboard state when ImGui wants to capture it
+}
+
+void CMuEditorCore::LogVideoDriver() const
+{
+    const char* videoDriver = SDL_GetCurrentVideoDriver();
+    const bool platformHasWindows = (ImGui::GetIO().BackendFlags & ImGuiBackendFlags_PlatformHasViewports) != 0;
+    g_MuEditorConsoleUI.LogEditor(std::string("Video driver: ") + (videoDriver != nullptr ? videoDriver : "none") +
+                                  (platformHasWindows ? " (the editor's windows can leave the game window)"
+                                                      : " (the editor stays inside the game window)"));
 }
 
 void CMuEditorCore::SelectWindowMode()

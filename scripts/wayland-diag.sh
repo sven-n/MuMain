@@ -437,11 +437,6 @@ run_client() {
     if [[ -z "${SDL_LOGGING+x}" ]]; then
         client_environment+=("SDL_LOGGING=video=verbose,gpu=verbose")
     fi
-    # Editor builds prefer X11 (XWayland) for the editor's own windows; this
-    # diagnoses the Wayland driver unless the caller picks one.
-    if [[ -z "${SDL_VIDEO_DRIVER+x}" && -z "${SDL_VIDEODRIVER+x}" ]]; then
-        client_environment+=("SDL_VIDEO_DRIVER=wayland")
-    fi
     if [[ "$validation_enabled" == true ]]; then
         client_environment+=(
             "VK_INSTANCE_LAYERS=VK_LAYER_KHRONOS_validation"
