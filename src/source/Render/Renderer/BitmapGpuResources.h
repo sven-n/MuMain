@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Render/Sprites/BitmapTextureLimits.h"
+#include "Render/Textures/MipChain.h"
 
 #include <SDL3/SDL_gpu.h>
 
@@ -32,6 +33,10 @@ public:
         kMaximumPitch * static_cast<std::uint64_t>(Sprites::kBitmapMaximumHeight);
     static_assert(kSlotCapacity <= std::numeric_limits<Uint32>::max());
     static_assert(kSlotCapacity <= std::numeric_limits<std::size_t>::max());
+    // Where a mip level starts when it shares a slot with the level before it:
+    // the D3D12 placement alignment, which keeps every backend on its direct
+    // copy path.
+    static constexpr std::uint64_t kLevelAlignment = 512;
 
     struct Calls
     {
@@ -75,8 +80,12 @@ public:
     // Initialize/Shutdown and destruction must be externally serialized with all calls.
     // During an initialized lifetime, wrong-thread uploads reject without changing owner state.
     bool Initialize(SDL_GPUDevice* device);
+    // `mips` are the levels below `pixels`, each half the size of the one
+    // before it (at least 1x1). The levels are staged through the same slots:
+    // as many consecutive levels as fit one slot share one submission, so a
+    // full 1024x1024 chain takes two.
     Result Upload(std::span<const std::uint8_t> pixels, int width, int height, SDL_GPUFilter filter,
-                  SDL_GPUSamplerAddressMode wrap);
+                  SDL_GPUSamplerAddressMode wrap, std::span<const Textures::MipLevel> mips = {});
     // Call before destroying the device, after clearing non-owning sampler registries.
     bool Shutdown();
     const std::string& LastError() const

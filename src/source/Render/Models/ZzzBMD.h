@@ -191,6 +191,9 @@ public:
     Bitmap_t* LightMaps;    //ver1.2
 
     bool          LightEnable;
+    // Enhanced lighting: Blinn-Phong strength of this model's lit, non-skin meshes, declared by
+    // its item model ("material.specular"); 0 = no highlight.
+    float SpecularStrength = 0.f;
     bool          ContrastEnable;
     vec3_t        BodyLight;
     int           BoneHead;

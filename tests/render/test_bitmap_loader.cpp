@@ -104,7 +104,8 @@ IMuRenderer& GetRenderer()
 }
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): matches the production bridge signature.
 Render::Renderer::BitmapGpuResources::Result UploadBitmapPixels(std::span<const std::uint8_t> pixels, int width,
-                                                                int height, SDL_GPUFilter, SDL_GPUSamplerAddressMode)
+                                                                int height, SDL_GPUFilter, SDL_GPUSamplerAddressMode,
+                                                                std::span<const Render::Textures::MipLevel>)
 {
     ++record.calls;
     record.pixels.assign(pixels.begin(), pixels.end());
@@ -143,6 +144,14 @@ void ClearSamplerRegistry()
 {
     record.samplers.clear();
 }
+// Texture filtering stays off in these tests: no world texture gets a chain.
+void RegisterFilteredSampler(std::uint32_t, void*) {}
+void MarkFilteredSamplerPending(std::uint32_t) {}
+void TakeFilteredSamplerRequests(std::vector<std::uint32_t>& requests)
+{
+    requests.clear();
+}
+void SetTextureFilteringEnabled(bool) {}
 } // namespace mu
 
 namespace mu

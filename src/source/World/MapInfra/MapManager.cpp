@@ -1506,6 +1506,8 @@ void CMapManager::LoadWorld(int Map)
         g_pNewUIMiniMap->UnloadImages();
         g_pNewUIMiniMap->LoadImages(WorldName);
     }
+
+    Bitmaps.LogTextureFilteringSummary("world loaded");
 }
 
 void CMapManager::DeleteObjects()

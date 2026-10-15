@@ -167,7 +167,7 @@ std::vector<std::uint8_t> Pattern(Dimensions size, int seed)
 }
 
 bool CheckDownload(SDL_GPUDevice* device, SDL_GPUTexture* texture, SDL_GPUTransferBuffer* buffer, Dimensions size,
-                   const std::vector<std::uint8_t>& expected)
+                   const std::vector<std::uint8_t>& expected, Uint32 mipLevel = 0)
 {
     const auto pitch = (static_cast<std::size_t>(size.width) * 4 + 255) / 256 * 256;
     auto* command = SDL_AcquireGPUCommandBuffer(device);
@@ -181,6 +181,7 @@ bool CheckDownload(SDL_GPUDevice* device, SDL_GPUTexture* texture, SDL_GPUTransf
     }
     SDL_GPUTextureRegion region{};
     region.texture = texture;
+    region.mip_level = mipLevel;
     region.w = static_cast<Uint32>(size.width);
     region.h = static_cast<Uint32>(size.height);
     region.d = 1;
@@ -342,12 +343,39 @@ bool RunLifetime(SDL_GPUDevice* device, int lifetime)
                        CheckDownload(device, result.texture, smokeReadback, {kSmallWidth, kSmallHeight}, pixels);
     if (result)
         SDL_ReleaseGPUTexture(device, result.texture);
+
+    // A full 1024x1024 mip chain through the same fixed slots: every level
+    // reads back as uploaded.
+    std::vector<Render::Textures::MipLevel> chain;
+    for (int edge = Render::Sprites::kBitmapMaximumWidth / 2, seed = 1; edge >= 1; edge /= 2, ++seed)
+    {
+        chain.push_back({static_cast<std::uint32_t>(edge), static_cast<std::uint32_t>(edge),
+                         Pattern({edge, edge}, lifetime * 100 + seed)});
+    }
+    const auto top =
+        Pattern({Render::Sprites::kBitmapMaximumWidth, Render::Sprites::kBitmapMaximumWidth}, lifetime * 100);
+    const auto mipped =
+        defaultOwner.Upload(top, Render::Sprites::kBitmapMaximumWidth, Render::Sprites::kBitmapMaximumWidth,
+                            SDL_GPU_FILTER_LINEAR, SDL_GPU_SAMPLERADDRESSMODE_REPEAT, chain);
+    bool mips = mipped && smokeReadback &&
+                CheckDownload(device, mipped.texture, smokeReadback,
+                              {Render::Sprites::kBitmapMaximumWidth, Render::Sprites::kBitmapMaximumWidth}, top);
+    for (std::size_t level = 0; mips && level < chain.size(); ++level)
+    {
+        const int edge = static_cast<int>(chain[level].width);
+        mips = CheckDownload(device, mipped.texture, smokeReadback, {edge, edge}, chain[level].rgba,
+                             static_cast<Uint32>(level + 1));
+    }
+    if (mipped)
+        SDL_ReleaseGPUTexture(device, mipped.texture);
+
     if (smokeReadback)
         SDL_ReleaseGPUTransferBuffer(device, smokeReadback);
     if (!defaultOwner.Shutdown())
         good = false;
-    std::printf("lifetime=%d default_texture_smoke=%s\n", lifetime, smoke ? "pass" : "fail");
-    return good && smoke;
+    std::printf("lifetime=%d default_texture_smoke=%s mip_chain_smoke=%s\n", lifetime, smoke ? "pass" : "fail",
+                mips ? "pass" : "fail");
+    return good && smoke && mips;
 }
 } // namespace
 

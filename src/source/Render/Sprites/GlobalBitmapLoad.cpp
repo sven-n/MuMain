@@ -8,13 +8,16 @@
 #include "Render/Sprites/BitmapTextureLimits.h"
 #include "GlobalBitmapPath.h"
 
+#include "Render/Textures/MipChain.h"
 #include "Render/Textures/OztFile.h"
+#include "Render/Textures/TextureFiltering.h"
 #ifdef _EDITOR
 #include "Core/Utilities/AssetLoadWorld.h"
 #endif
 
 #include <SDL3/SDL_gpu.h>
 #include <algorithm>
+#include <chrono>
 #include <cstdint>
 #include <cstring>
 #include <fstream>
@@ -32,6 +35,10 @@ void RegisterSampler(std::uint32_t id, void* sampler);
 void UnregisterSampler(std::uint32_t id);
 void ClearTextureRegistry();
 void ClearSamplerRegistry();
+void RegisterFilteredSampler(std::uint32_t id, void* sampler);
+void MarkFilteredSamplerPending(std::uint32_t id);
+void TakeFilteredSamplerRequests(std::vector<std::uint32_t>& requests);
+void SetTextureFilteringEnabled(bool enabled);
 } // namespace mu
 
 namespace
@@ -124,9 +131,10 @@ std::vector<std::uint8_t> PadRGBToRGBA(const BYTE* rgbData, int width, int heigh
 }
 
 bool UploadTextureSDLGpu(BITMAP_t* bitmap, std::span<const std::uint8_t> pixels, int width, int height,
-                         SDL_GPUFilter filter, SDL_GPUSamplerAddressMode wrapMode)
+                         SDL_GPUFilter filter, SDL_GPUSamplerAddressMode wrapMode,
+                         std::span<const Render::Textures::MipLevel> chain)
 {
-    auto result = mu::UploadBitmapPixels(pixels, width, height, filter, wrapMode);
+    auto result = mu::UploadBitmapPixels(pixels, width, height, filter, wrapMode, chain);
     if (!result)
     {
         const char* driver = mu::BitmapUploadDriverName();
@@ -138,7 +146,47 @@ bool UploadTextureSDLGpu(BITMAP_t* bitmap, std::span<const std::uint8_t> pixels,
     }
     bitmap->sdlTexture = result.texture;
     bitmap->sdlSampler = result.sampler;
+    bitmap->mipLevels = static_cast<std::uint8_t>(chain.size() + 1u);
     return true;
+}
+
+// Enhanced samplers cover the whole chain (Vulkan's VK_LOD_CLAMP_NONE).
+constexpr float UnclampedMaxLod = 1000.0f;
+
+// Build mip chains requested by world draws for at most this long per frame.
+constexpr std::chrono::milliseconds MipChainBudgetPerFrame{4};
+
+// The mip chain of a bitmap's RGBA8 pixels. Textures with an alpha channel
+// keep their alpha-test coverage at every level; opaque ones are box filtered.
+std::vector<Render::Textures::MipLevel> BuildBitmapMipChain(const std::uint8_t* rgba, int width, int height,
+                                                            bool hasAlpha, double& seconds)
+{
+    const auto start = std::chrono::steady_clock::now();
+    const std::span<const std::uint8_t> pixels(rgba, static_cast<std::size_t>(width) * height * 4u);
+    std::vector<Render::Textures::MipLevel> chain =
+        hasAlpha ? Render::Textures::BuildCoveragePreservingMipChain(
+                       pixels, static_cast<std::uint32_t>(width), static_cast<std::uint32_t>(height),
+                       Render::Textures::AlphaTest::FromReference(Render::Textures::AlphaTestReference))
+                 : Render::Textures::BuildMipChain(pixels, static_cast<std::uint32_t>(width),
+                                                   static_cast<std::uint32_t>(height));
+    seconds += std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
+    return chain;
+}
+
+// GPU bytes of a bitmap's RGBA8 texture, all of its mip levels included.
+
+std::uint64_t GpuTextureBytes(const BITMAP_t& bitmap)
+{
+    auto width = static_cast<std::uint32_t>(bitmap.Width);
+    auto height = static_cast<std::uint32_t>(bitmap.Height);
+    std::uint64_t bytes = 0;
+    for (std::uint32_t level = 0; level < bitmap.mipLevels; ++level)
+    {
+        bytes += static_cast<std::uint64_t>(width) * height * 4u;
+        width = std::max<std::uint32_t>(1u, width / 2u);
+        height = std::max<std::uint32_t>(1u, height / 2u);
+    }
+    return bytes;
 }
 } // namespace
 
@@ -226,11 +274,14 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename
     std::wstring ext;
     SplitExt(filename, ext, false);
 
+    const bool worldTexture = Render::Textures::IsWorldTexturePath(filename);
+    const auto start = std::chrono::steady_clock::now();
     bool loaded = false;
     if (0 == _wcsicmp(ext.c_str(), L"jpg"))
-        loaded = OpenJpegTurbo(uiBitmapIndex, filename, uiFilter, uiWrapMode, padToPowerOfTwo);
+        loaded = OpenJpegTurbo(uiBitmapIndex, filename, uiFilter, uiWrapMode, worldTexture, padToPowerOfTwo);
     else if (0 == _wcsicmp(ext.c_str(), L"tga"))
-        loaded = OpenTga(uiBitmapIndex, filename, uiFilter, uiWrapMode, padToPowerOfTwo);
+        loaded = OpenTga(uiBitmapIndex, filename, uiFilter, uiWrapMode, worldTexture, padToPowerOfTwo);
+    m_textureLoadSeconds += std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
 #ifdef _EDITOR
     if (loaded)
         m_loadWorlds[uiBitmapIndex] = Core::AssetLoadWorld::Get();
@@ -289,6 +340,10 @@ void CGlobalBitmap::UnloadAllImages()
 {
     if (m_mapBitmap.empty())
     {
+        // The bitmaps may have been unloaded one by one; the shared Enhanced
+        // samplers outlive them.
+        ReleaseFilteredSamplers();
+        m_mipChainRequests.clear();
         return;
     }
 
@@ -318,6 +373,8 @@ void CGlobalBitmap::UnloadAllImages()
         mu::ClearTextureRegistry();
         mu::ClearSamplerRegistry();
     }
+    ReleaseFilteredSamplers();
+    m_mipChainRequests.clear();
 
     for ([[maybe_unused]] auto& pair : m_mapBitmap)
     {
@@ -363,7 +420,7 @@ GLuint CGlobalBitmap::FindAvailableTextureIndex(GLuint uiSeed)
 }
 
 bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter,
-                                  GLuint uiWrapMode, bool padToPowerOfTwo)
+                                  GLuint uiWrapMode, bool worldTexture, bool padToPowerOfTwo)
 {
     std::wstring filename_ozj;
     ExchangeExt(filename, L"OZJ", filename_ozj);
@@ -448,25 +505,33 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
     }
 
     pNewBitmap->TextureNumber = uiBitmapIndex;
+    pNewBitmap->worldTexture = worldTexture;
+    pNewBitmap->wrapRepeat = uiWrapMode == GL_REPEAT;
     std::vector<std::uint8_t> rgbaData = PadRGBToRGBA(pNewBitmap->Buffer, textureWidth, textureHeight);
+    const std::vector<Render::Textures::MipLevel> chain =
+        worldTexture && m_textureFilteringEnabled
+            ? BuildBitmapMipChain(rgbaData.data(), textureWidth, textureHeight, false, m_mipChainSeconds)
+            : std::vector<Render::Textures::MipLevel>{};
     if (!UploadTextureSDLGpu(pNewBitmap.get(), rgbaData, textureWidth, textureHeight, MapGLFilterToSDL(uiFilter),
-                             MapGLWrapToSDL(uiWrapMode)))
+                             MapGLWrapToSDL(uiWrapMode), chain))
     {
         return false;
     }
 
     SDL_GPUTexture* rawTexture = pNewBitmap->sdlTexture;
     SDL_GPUSampler* rawSampler = pNewBitmap->sdlSampler;
+    const BITMAP_t& loaded = *pNewBitmap;
     m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, std::move(pNewBitmap)));
     mu::RegisterTexture(uiBitmapIndex, rawTexture);
     mu::RegisterSampler(uiBitmapIndex, rawSampler);
+    RegisterFilteredSampler(loaded);
     m_dwUsedTextureMemory += static_cast<std::uint32_t>(textureBufferSize);
 
     return true;
 }
 
 bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode,
-                            bool padToPowerOfTwo)
+                            bool worldTexture, bool padToPowerOfTwo)
 {
     namespace Ozt = Render::Textures::Ozt;
 
@@ -509,20 +574,258 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
     Ozt::CopyPixels(pakBuffer, header, std::span<std::uint8_t>(pNewBitmap->Buffer, BufferSize), Width);
 
     pNewBitmap->TextureNumber = uiBitmapIndex;
+    pNewBitmap->worldTexture = worldTexture;
+    pNewBitmap->wrapRepeat = uiWrapMode == GL_REPEAT;
+    const std::vector<Render::Textures::MipLevel> chain =
+        worldTexture && m_textureFilteringEnabled
+            ? BuildBitmapMipChain(pNewBitmap->Buffer, Width, Height, true, m_mipChainSeconds)
+            : std::vector<Render::Textures::MipLevel>{};
     if (!UploadTextureSDLGpu(pNewBitmap.get(), pNewBitmap->BufferStorage, Width, Height, MapGLFilterToSDL(uiFilter),
-                             MapGLWrapToSDL(uiWrapMode)))
+                             MapGLWrapToSDL(uiWrapMode), chain))
     {
         return false;
     }
 
     SDL_GPUTexture* rawTexture = pNewBitmap->sdlTexture;
     SDL_GPUSampler* rawSampler = pNewBitmap->sdlSampler;
+    const BITMAP_t& loaded = *pNewBitmap;
     m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, std::move(pNewBitmap)));
     mu::RegisterTexture(uiBitmapIndex, rawTexture);
     mu::RegisterSampler(uiBitmapIndex, rawSampler);
+    RegisterFilteredSampler(loaded);
     m_dwUsedTextureMemory += static_cast<std::uint32_t>(BufferSize);
 
     return true;
+}
+
+void CGlobalBitmap::SetTextureFiltering(bool enabled, int anisotropy)
+{
+    m_textureFilteringRequested = enabled;
+    m_requestedAnisotropy = anisotropy;
+    m_textureFilteringSwitchPending = true;
+}
+
+void CGlobalBitmap::UpdateTextureFiltering()
+{
+    if (m_textureFilteringSwitchPending)
+    {
+        ApplyTextureFilteringSwitch();
+    }
+    if (!m_textureFilteringEnabled)
+    {
+        return;
+    }
+
+    mu::TakeFilteredSamplerRequests(m_mipChainRequests);
+    if (m_mipChainRequests.empty())
+    {
+        return;
+    }
+
+    const auto start = std::chrono::steady_clock::now();
+    std::size_t built = 0;
+    while (built < m_mipChainRequests.size())
+    {
+        BuildMipChain(m_mipChainRequests[built++]);
+        if (std::chrono::steady_clock::now() - start >= MipChainBudgetPerFrame)
+        {
+            break;
+        }
+    }
+    m_mipChainRequests.erase(m_mipChainRequests.begin(),
+                             m_mipChainRequests.begin() + static_cast<std::ptrdiff_t>(built));
+}
+
+void CGlobalBitmap::ApplyTextureFilteringSwitch()
+{
+    m_textureFilteringSwitchPending = false;
+
+    const Render::Textures::AnisotropyLevel anisotropy = Render::Textures::ClampAnisotropy(m_requestedAnisotropy);
+    if (anisotropy.clamped && !m_anisotropyClampLogged)
+    {
+        mu::log::Get("render")->warn("Texture filtering: anisotropy {} is above the highest level the GPU supports; "
+                                     "using {}",
+                                     m_requestedAnisotropy, anisotropy.value);
+        m_anisotropyClampLogged = true;
+    }
+    if (anisotropy.value != m_anisotropy)
+    {
+        // The shared samplers bake in the level; rebuild them and point every
+        // chained texture at the new ones.
+        ReleaseFilteredSamplers();
+        m_anisotropy = anisotropy.value;
+        for (const auto& [index, bitmap] : m_mapBitmap)
+        {
+            RegisterFilteredSampler(*bitmap);
+        }
+    }
+
+    const bool changed = m_textureFilteringEnabled != m_textureFilteringRequested;
+    m_textureFilteringEnabled = m_textureFilteringRequested;
+    mu::SetTextureFilteringEnabled(m_textureFilteringEnabled);
+    m_mipChainRequests.clear();
+    if (m_textureFilteringEnabled)
+    {
+        // World textures loaded while Classic have no chain yet: build each one
+        // the first time a world draw uses it.
+        for (const auto& [index, bitmap] : m_mapBitmap)
+        {
+            if (bitmap->worldTexture && bitmap->mipLevels <= 1u)
+            {
+                mu::MarkFilteredSamplerPending(index);
+            }
+        }
+    }
+
+    if (changed)
+    {
+        LogTextureFilteringSummary(m_textureFilteringEnabled ? "switched to Enhanced" : "switched to Classic");
+    }
+}
+
+void CGlobalBitmap::RegisterFilteredSampler(const BITMAP_t& bitmap)
+{
+    if (!bitmap.worldTexture || bitmap.mipLevels <= 1u)
+    {
+        return;
+    }
+    SDL_GPUSampler* sampler = GetFilteredSampler(bitmap.wrapRepeat);
+    if (sampler)
+    {
+        mu::RegisterFilteredSampler(bitmap.BitmapIndex, sampler);
+    }
+}
+
+SDL_GPUSampler* CGlobalBitmap::GetFilteredSampler(bool wrapRepeat)
+{
+    SDL_GPUSampler*& sampler = m_filteredSamplers[wrapRepeat ? 1u : 0u];
+    if (sampler)
+    {
+        return sampler;
+    }
+
+    SDL_GPUDevice* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
+    if (!device)
+    {
+        return nullptr;
+    }
+
+    const SDL_GPUSamplerAddressMode wrapMode =
+        wrapRepeat ? SDL_GPU_SAMPLERADDRESSMODE_REPEAT : SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
+    const std::uint32_t anisotropy = std::max<std::uint32_t>(1u, m_anisotropy);
+
+    SDL_GPUSamplerCreateInfo samplerInfo{};
+    samplerInfo.min_filter = SDL_GPU_FILTER_LINEAR;
+    samplerInfo.mag_filter = SDL_GPU_FILTER_LINEAR;
+    samplerInfo.mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_LINEAR;
+    samplerInfo.address_mode_u = wrapMode;
+    samplerInfo.address_mode_v = wrapMode;
+    samplerInfo.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
+    samplerInfo.min_lod = 0.0f;
+    samplerInfo.max_lod = UnclampedMaxLod;
+    samplerInfo.enable_anisotropy = anisotropy > 1u;
+    samplerInfo.max_anisotropy = static_cast<float>(anisotropy);
+
+    sampler = SDL_CreateGPUSampler(device, &samplerInfo);
+    if (!sampler)
+    {
+        mu::log::Get("render")->error("Texture filtering: creating the Enhanced sampler failed: {}", SDL_GetError());
+    }
+    return sampler;
+}
+
+void CGlobalBitmap::ReleaseFilteredSamplers()
+{
+    SDL_GPUDevice* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
+    for (SDL_GPUSampler*& sampler : m_filteredSamplers)
+    {
+        if (sampler && device)
+        {
+            SDL_ReleaseGPUSampler(device, sampler);
+        }
+        sampler = nullptr;
+    }
+}
+
+bool CGlobalBitmap::BuildMipChain(GLuint uiBitmapIndex)
+{
+    auto found = m_mapBitmap.find(uiBitmapIndex);
+    if (found == m_mapBitmap.end())
+    {
+        return false;
+    }
+    BITMAP_t& bitmap = *found->second;
+    const auto width = static_cast<int>(bitmap.Width);
+    const auto height = static_cast<int>(bitmap.Height);
+    SDL_GPUDevice* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
+    if (!device || !bitmap.worldTexture || bitmap.mipLevels > 1u || !bitmap.Buffer || width <= 0 || height <= 0 ||
+        (bitmap.Components != 3 && bitmap.Components != 4))
+    {
+        return false;
+    }
+
+    const bool hasAlpha = bitmap.Components == 4;
+    const std::vector<std::uint8_t> padded =
+        hasAlpha ? std::vector<std::uint8_t>{} : PadRGBToRGBA(bitmap.Buffer, width, height);
+    const std::uint8_t* rgba = hasAlpha ? bitmap.Buffer : padded.data();
+    const std::vector<Render::Textures::MipLevel> chain =
+        BuildBitmapMipChain(rgba, width, height, hasAlpha, m_mipChainSeconds);
+
+    // Only the texture is replaced: the bitmap keeps its Classic sampler, so the
+    // filter passed here does not matter.
+    const auto result = mu::UploadBitmapPixels(
+        std::span<const std::uint8_t>(rgba, static_cast<std::size_t>(width) * static_cast<std::size_t>(height) * 4u),
+        width, height, SDL_GPU_FILTER_LINEAR,
+        bitmap.wrapRepeat ? SDL_GPU_SAMPLERADDRESSMODE_REPEAT : SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE, chain);
+    if (!result)
+    {
+        mu::log::Get("render")->error("Texture filtering: creating the mipmapped texture {} failed at {}: {}",
+                                      mu_wchar_to_utf8(bitmap.FileName), result.stage, result.error);
+        return false;
+    }
+    SDL_GPUTexture* texture = result.texture;
+
+    // Runs between frames, so no recorded draw still refers to the old texture.
+    SDL_GPUTexture* previous = bitmap.sdlTexture;
+    bitmap.sdlTexture = texture;
+    bitmap.mipLevels = static_cast<std::uint8_t>(chain.size() + 1u);
+    mu::RegisterTexture(uiBitmapIndex, texture);
+    if (previous)
+    {
+        mu::ReleaseBitmapTexture(device, previous);
+    }
+    RegisterFilteredSampler(bitmap);
+    return true;
+}
+
+void CGlobalBitmap::LogTextureFilteringSummary(const char* context) const
+{
+    std::size_t world = 0;
+    std::size_t mipmapped = 0;
+    std::size_t screenSpace = 0;
+    std::uint64_t gpuBytes = 0;
+    for (const auto& [index, bitmap] : m_mapBitmap)
+    {
+        if (bitmap->worldTexture)
+        {
+            ++world;
+        }
+        else
+        {
+            ++screenSpace;
+        }
+        if (bitmap->mipLevels > 1u)
+        {
+            ++mipmapped;
+        }
+        gpuBytes += GpuTextureBytes(*bitmap);
+    }
+
+    mu::log::Get("render")->info(
+        "Texture filtering ({}): {}, anisotropy {}; {} world textures ({} mipmapped), {} screen-space; "
+        "{:.1f} MiB on the GPU; texture loading {:.0f} ms, of which mip chains {:.0f} ms",
+        context, m_textureFilteringEnabled ? "Enhanced" : "Classic", m_anisotropy, world, mipmapped, screenSpace,
+        static_cast<double>(gpuBytes) / (1024.0 * 1024.0), m_textureLoadSeconds * 1000.0, m_mipChainSeconds * 1000.0);
 }
 
 void CGlobalBitmap::SplitExt(IN const std::wstring& filepath, OUT std::wstring& ext, bool bIncludeDot)

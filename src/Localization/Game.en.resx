@@ -1433,6 +1433,9 @@
   <data name="Windowed mode" xml:space="preserve">
     <value>Windowed mode</value>
   </data>
+  <data name="Enhanced graphics" xml:space="preserve">
+    <value>Enhanced graphics</value>
+  </data>
   <data name="Gameplay" xml:space="preserve">
     <value>Gameplay</value>
   </data>

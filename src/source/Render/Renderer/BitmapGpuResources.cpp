@@ -2,7 +2,9 @@
 
 #include <SDL3/SDL_error.h>
 
+#include <algorithm>
 #include <cstring>
+#include <vector>
 
 namespace Render::Renderer
 {
@@ -100,8 +102,27 @@ bool BitmapGpuResources::Retire(Slot& slot)
     return true;
 }
 
+namespace
+{
+struct StagedLevel
+{
+    const std::uint8_t* pixels = nullptr;
+    std::uint64_t width = 0;
+    std::uint64_t height = 0;
+    std::uint64_t rowBytes = 0;
+    std::uint64_t pitch = 0;
+    std::uint64_t offset = 0;
+};
+
+std::uint64_t AlignUp(std::uint64_t value, std::uint64_t alignment)
+{
+    return (value + alignment - 1) / alignment * alignment;
+}
+} // namespace
+
 BitmapGpuResources::Result BitmapGpuResources::Upload(std::span<const std::uint8_t> pixels, int width, int height,
-                                                      SDL_GPUFilter filter, SDL_GPUSamplerAddressMode wrap)
+                                                      SDL_GPUFilter filter, SDL_GPUSamplerAddressMode wrap,
+                                                      std::span<const Textures::MipLevel> mips)
 {
     if (!OnOwnerThread())
     {
@@ -120,91 +141,147 @@ BitmapGpuResources::Result BitmapGpuResources::Upload(std::span<const std::uint8
         Fail("upload: invalid dimensions or sampler configuration", false);
         return Failure();
     }
-    const auto rowBytes = static_cast<std::uint64_t>(width) * kBytesPerPixel;
-    const auto pitch = (rowBytes + kRowAlignment - 1) / kRowAlignment * kRowAlignment;
-    const auto sourceBytes = rowBytes * static_cast<std::uint64_t>(height);
-    const auto stagingBytes = pitch * static_cast<std::uint64_t>(height);
-    if (pixels.size() < sourceBytes || stagingBytes > kSlotCapacity)
+
+    std::vector<StagedLevel> levels;
+    levels.reserve(mips.size() + 1);
+    const auto addLevel =
+        [&levels](std::span<const std::uint8_t> levelPixels, std::uint64_t levelWidth, std::uint64_t levelHeight)
+    {
+        StagedLevel level{levelPixels.data(), levelWidth, levelHeight};
+        level.rowBytes = levelWidth * kBytesPerPixel;
+        level.pitch = AlignUp(level.rowBytes, kRowAlignment);
+        if (levelPixels.size() < level.rowBytes * levelHeight || level.pitch * levelHeight > kSlotCapacity)
+        {
+            return false;
+        }
+        levels.push_back(level);
+        return true;
+    };
+    if (!addLevel(pixels, static_cast<std::uint64_t>(width), static_cast<std::uint64_t>(height)))
     {
         Fail("upload: insufficient pixels or staging capacity", false);
         return Failure();
     }
-
-    auto& slot = m_slots[m_next];
-    if (!Retire(slot))
+    for (const Textures::MipLevel& mip : mips)
     {
-        return Failure();
+        const StagedLevel& above = levels.back();
+        const bool halved = mip.width == std::max<std::uint64_t>(1, above.width / 2) &&
+                            mip.height == std::max<std::uint64_t>(1, above.height / 2);
+        const bool belowSmallest = above.width == 1 && above.height == 1;
+        if (!halved || belowSmallest || !addLevel(mip.rgba, mip.width, mip.height))
+        {
+            Fail("upload: invalid mip chain", false);
+            return Failure();
+        }
     }
 
-    SDL_GPUTextureCreateInfo textureInfo{};
-    textureInfo.type = SDL_GPU_TEXTURETYPE_2D;
-    textureInfo.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
-    textureInfo.width = static_cast<Uint32>(width);
-    textureInfo.height = static_cast<Uint32>(height);
-    textureInfo.layer_count_or_depth = 1;
-    textureInfo.num_levels = 1;
-    textureInfo.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER;
-    SDL_GPUTexture* texture = m_calls.createTexture(m_device, &textureInfo);
-    if (!texture)
+    SDL_GPUTexture* texture = nullptr;
+    std::size_t next = 0;
+    while (next < levels.size())
     {
-        Fail("create bitmap texture", true);
-        return Failure();
-    }
+        auto& slot = m_slots[m_next];
+        if (!Retire(slot))
+        {
+            if (texture)
+            {
+                m_calls.releaseTexture(m_device, texture);
+            }
+            return Failure();
+        }
 
-    void* mapped = m_calls.map(m_device, slot.transfer, false);
-    if (!mapped)
-    {
-        Fail("map bitmap transfer buffer", true);
-        m_calls.releaseTexture(m_device, texture);
-        return Failure();
-    }
-    auto* target = static_cast<std::uint8_t*>(mapped);
-    for (int row = 0; row < height; ++row)
-    {
-        std::memcpy(target + static_cast<std::size_t>(row) * pitch,
-                    pixels.data() + static_cast<std::size_t>(row) * rowBytes, static_cast<std::size_t>(rowBytes));
-    }
-    m_calls.unmap(m_device, slot.transfer);
+        if (!texture)
+        {
+            SDL_GPUTextureCreateInfo textureInfo{};
+            textureInfo.type = SDL_GPU_TEXTURETYPE_2D;
+            textureInfo.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
+            textureInfo.width = static_cast<Uint32>(width);
+            textureInfo.height = static_cast<Uint32>(height);
+            textureInfo.layer_count_or_depth = 1;
+            textureInfo.num_levels = static_cast<Uint32>(levels.size());
+            textureInfo.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER;
+            texture = m_calls.createTexture(m_device, &textureInfo);
+            if (!texture)
+            {
+                Fail("create bitmap texture", true);
+                return Failure();
+            }
+        }
 
-    SDL_GPUCommandBuffer* command = m_calls.acquire(m_device);
-    if (!command)
-    {
-        Fail("acquire bitmap upload command buffer", true);
-        m_calls.releaseTexture(m_device, texture);
-        return Failure();
-    }
-    SDL_GPUCopyPass* pass = m_calls.beginCopy(command);
-    if (!pass)
-    {
-        Fail("begin bitmap upload copy pass", true);
-        m_calls.cancel(command);
-        m_calls.releaseTexture(m_device, texture);
-        return Failure();
-    }
-    SDL_GPUTextureTransferInfo source{};
-    source.transfer_buffer = slot.transfer;
-    source.offset = 0;
-    source.pixels_per_row = static_cast<Uint32>(pitch / kBytesPerPixel);
-    source.rows_per_layer = static_cast<Uint32>(height);
-    SDL_GPUTextureRegion destination{};
-    destination.texture = texture;
-    destination.w = static_cast<Uint32>(width);
-    destination.h = static_cast<Uint32>(height);
-    destination.d = 1;
-    m_calls.upload(pass, &source, &destination, false);
-    m_calls.endCopy(pass);
+        void* mapped = m_calls.map(m_device, slot.transfer, false);
+        if (!mapped)
+        {
+            Fail("map bitmap transfer buffer", true);
+            m_calls.releaseTexture(m_device, texture);
+            return Failure();
+        }
+        // As many consecutive levels as fit the slot; a single level always does.
+        auto* target = static_cast<std::uint8_t*>(mapped);
+        const std::size_t first = next;
+        std::uint64_t used = 0;
+        while (next < levels.size())
+        {
+            StagedLevel& level = levels[next];
+            const std::uint64_t offset = next == first ? 0 : AlignUp(used, kLevelAlignment);
+            if (offset + level.pitch * level.height > kSlotCapacity)
+            {
+                break;
+            }
+            for (std::uint64_t row = 0; row < level.height; ++row)
+            {
+                std::memcpy(target + offset + row * level.pitch, level.pixels + row * level.rowBytes,
+                            static_cast<std::size_t>(level.rowBytes));
+            }
+            level.offset = offset;
+            used = offset + level.pitch * level.height;
+            ++next;
+        }
+        m_calls.unmap(m_device, slot.transfer);
 
-    // SDL consumes the command even on a failed submit. An uncertain slot is
-    // never reused; only device teardown may reclaim it after that failure.
-    SDL_GPUFence* fence = m_calls.submit(command);
-    if (!fence)
-    {
-        Fail("submit bitmap upload and acquire fence", true);
-        m_calls.releaseTexture(m_device, texture);
-        return Failure();
+        SDL_GPUCommandBuffer* command = m_calls.acquire(m_device);
+        if (!command)
+        {
+            Fail("acquire bitmap upload command buffer", true);
+            m_calls.releaseTexture(m_device, texture);
+            return Failure();
+        }
+        SDL_GPUCopyPass* pass = m_calls.beginCopy(command);
+        if (!pass)
+        {
+            Fail("begin bitmap upload copy pass", true);
+            m_calls.cancel(command);
+            m_calls.releaseTexture(m_device, texture);
+            return Failure();
+        }
+        for (std::size_t index = first; index < next; ++index)
+        {
+            const StagedLevel& level = levels[index];
+            SDL_GPUTextureTransferInfo source{};
+            source.transfer_buffer = slot.transfer;
+            source.offset = static_cast<Uint32>(level.offset);
+            source.pixels_per_row = static_cast<Uint32>(level.pitch / kBytesPerPixel);
+            source.rows_per_layer = static_cast<Uint32>(level.height);
+            SDL_GPUTextureRegion destination{};
+            destination.texture = texture;
+            destination.mip_level = static_cast<Uint32>(index);
+            destination.w = static_cast<Uint32>(level.width);
+            destination.h = static_cast<Uint32>(level.height);
+            destination.d = 1;
+            m_calls.upload(pass, &source, &destination, false);
+        }
+        m_calls.endCopy(pass);
+
+        // SDL consumes the command even on a failed submit. An uncertain slot is
+        // never reused; only device teardown may reclaim it after that failure.
+        SDL_GPUFence* fence = m_calls.submit(command);
+        if (!fence)
+        {
+            Fail("submit bitmap upload and acquire fence", true);
+            m_calls.releaseTexture(m_device, texture);
+            return Failure();
+        }
+        slot.fence = fence;
+        m_next = (m_next + 1) % kSlotCount;
     }
-    slot.fence = fence;
-    m_next = (m_next + 1) % kSlotCount;
     m_stage.clear();
     m_error.clear();
     const std::size_t samplerIndex =

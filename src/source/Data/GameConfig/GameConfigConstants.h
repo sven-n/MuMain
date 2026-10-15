@@ -53,6 +53,15 @@ namespace CfgKeys
     inline constexpr wchar_t CfgKeyCoreProfile[] = L"CoreProfile";
     inline constexpr wchar_t CfgKeySortParticleDraws[] = L"SortParticleDraws";
     inline constexpr wchar_t CfgKeyVSync[] = L"VSync";
+    // The look preset, the player's only look setting: Classic or Enhanced (texture
+    // filtering, Enhanced lighting, dynamic model lights, the light mood at full
+    // strength and post-processing). A missing or invalid value is the default.
+    inline constexpr wchar_t CfgKeyLook[] = L"Look";
+    // Anisotropy of the Enhanced texture filtering (acts only while it is on).
+    inline constexpr wchar_t CfgKeyAnisotropy[] = L"Anisotropy";
+    // Multisample anti-aliasing of the Enhanced look: 0 (off), 2, 4 or 8 samples per pixel.
+    inline constexpr wchar_t CfgKeyAntialiasing[] = L"Antialiasing";
+
     inline constexpr wchar_t CfgKeyRenderBackend[] = L"Backend";
     // DXP-23's per-system effect-cost toggles (MainScene.h's SetDisableEffects/SetDisableParticles/
     // SetDisableSkillEffectModels/SetDisableBoids/SetDisableWingShadow), originally console-only
@@ -116,6 +125,15 @@ namespace CfgDefaults
     // Opt-in until real effects have been visually checked on target hardware.
     inline constexpr bool CfgDefaultSortParticleDraws = false;
     inline constexpr bool CfgDefaultVSync = true;
+
+    // The look a missing or invalid [Render] Look stands for.
+    inline constexpr wchar_t CfgDefaultLook[] = L"Classic";
+    // 8x anisotropy while texture filtering is on.
+    inline constexpr int CfgDefaultAnisotropy = 8;
+
+    // The samples the Enhanced look renders with (Classic renders without); a
+    // requested count is lowered to what the GPU supports.
+    inline constexpr int CfgDefaultAntialiasing = 4;
 
     inline constexpr bool CfgDefaultDisableEffects = false;
     inline constexpr bool CfgDefaultDisableParticles = false;

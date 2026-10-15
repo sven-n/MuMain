@@ -82,6 +82,14 @@ require_shader_load_assignment(s_vertShaderSkinned skinned_textured vert VERTEX)
 require_source("${executable_load_source}"
     "s_vertShaderSkinned[ \t\r\n]*=[^;]*createShader[^;]*\"skinned_textured\"[^;]*SDL_GPU_SHADERSTAGE_VERTEX[^;]*true[ \t\r\n]*\\);"
     "skinned_textured.vert must be fatal")
+require_shader_load_assignment(s_fragShaderTexFog basic_textured_fog frag FRAGMENT)
+require_shader_load_assignment(s_fragShaderLit skinned_lit frag FRAGMENT)
+require_source("${executable_load_source}"
+    "s_fragShaderTexFog[ \t\r\n]*=[^;]*createShader[^;]*\"basic_textured_fog\"[^;]*false[ \t\r\n]*\\);"
+    "basic_textured_fog.frag must be optional")
+require_source("${executable_load_source}"
+    "s_fragShaderLit[ \t\r\n]*=[^;]*createShader[^;]*\"skinned_lit\"[^;]*false[ \t\r\n]*\\);"
+    "skinned_lit.frag must be optional")
 require_source("${executable_load_source}"
     "if[ \t\r\n]*\\(!s_vertShaderSkinned\\)[ \t\r\n]*\\{[^}]*ReleaseShaders[ \t\r\n]*\\([^}]*return false;"
     "skinned shader failure must release earlier shader handles")
@@ -93,9 +101,25 @@ string(REGEX MATCHALL "buildRequiredPipeline[ \t\r\n]*\\(" required_calls "${cre
 string(REGEX MATCHALL "buildOptionalPipeline[ \t\r\n]*\\(" optional_calls "${create_source}")
 list(LENGTH required_calls required_call_count)
 list(LENGTH optional_calls optional_call_count)
-if(NOT required_call_count EQUAL 9 OR NOT optional_call_count EQUAL 1)
-    message(FATAL_ERROR "CreatePipelines must build exactly nine required sets and one optional set")
+# Nine required Classic sets, the optional 2D depth-on set, and the four optional calls of one
+# Enhanced lighting family (buildEnhancedSet), which builds the three Enhanced families.
+if(NOT required_call_count EQUAL 9 OR NOT optional_call_count EQUAL 5)
+    message(FATAL_ERROR "CreatePipelines must build exactly nine required sets and the optional 2D and Enhanced sets")
 endif()
+string(REGEX MATCHALL "buildEnhancedSet[ \t\r\n]*\\([ \t\r\n]*s_pipelines[A-Za-z0-9]+" enhanced_calls "${create_source}")
+set(expected_enhanced_calls)
+foreach(enhanced_set IN ITEMS s_pipelines3DEnhancedFog s_pipelinesSkinnedEnhancedFog s_pipelinesSkinnedLit)
+    string(REGEX MATCH "buildEnhancedSet[ \t\r\n]*\\([ \t\r\n]*${enhanced_set}[ \t\r\n]*," enhanced_call "${create_source}")
+    if(NOT enhanced_call)
+        message(FATAL_ERROR "CreatePipelines must build the Enhanced lighting set ${enhanced_set}")
+    endif()
+endforeach()
+list(LENGTH enhanced_calls enhanced_call_count)
+if(NOT enhanced_call_count EQUAL 3)
+    message(FATAL_ERROR "CreatePipelines must build exactly three Enhanced lighting sets")
+endif()
+require_source("${create_source}" "s_enhancedLightingAvailable[ \t\r\n]*=[^;]*IsComplete"
+    "Enhanced lighting must be available only when every Enhanced set is complete")
 
 require_pipeline_descriptor(buildOptionalPipeline s_pipelines2D "2d-depth-on" true true TwoDimensional false)
 require_pipeline_descriptor(buildRequiredPipeline s_pipelines2DDepthOff "2d-depth-off" false false TwoDimensional false)
@@ -125,12 +149,20 @@ require_source("${renderer_source}" "error=\\{\\}" "pipeline diagnostics must in
 require_source("${build_source}"
     "pipelineInfo\\.vertex_shader[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinned[ \t\r\n]*:[ \t\r\n]*s_vertShader2D"
     "pipeline vertex shader handles must remain selected from the pipeline layout")
-require_source("${build_source}" "pipelineInfo\\.fragment_shader[ \t\r\n]*=[ \t\r\n]*s_fragShaderTex"
-    "pipeline fragment shader handle must remain basic_textured.frag")
+require_source("${build_source}"
+    "pipelineInfo\\.fragment_shader[ \t\r\n]*=[ \t\r\n]*GetFragmentShader\\(description\\.fragmentShader\\)"
+    "pipeline fragment shader handles must be selected from the pipeline description")
+require_source("${renderer_source}"
+    "FragmentShader[ \t\r\n]+fragmentShader[ \t\r\n]*=[ \t\r\n]*FragmentShader::Textured;"
+    "pipeline descriptions must default to basic_textured.frag")
+require_source("${renderer_source}"
+    "case FragmentShader::Textured:[ \t\r\n]*break;[ \t\r\n]*\\}[ \t\r\n]*return s_fragShaderTex;"
+    "the Textured fragment shader must remain basic_textured.frag")
 require_source("${log_source}"
     "vertexShaderName[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*\"skinned_textured\\.vert\"[ \t\r\n]*:[ \t\r\n]*\"basic_textured\\.vert\""
     "pipeline diagnostics must map the built vertex layout to its exact shader identifier")
-require_source("${log_source}" "fragmentShaderName[ \t\r\n]*=[ \t\r\n]*\"basic_textured\\.frag\""
+require_source("${log_source}"
+    "fragmentShaderName[ \t\r\n]*=[ \t\r\n]*GetFragmentShaderName\\(description\\.fragmentShader\\)"
     "pipeline diagnostics must name the exact fragment shader identifier")
 
 string(REGEX REPLACE "\"[ \t\r\n]*\"" "" compact_log_source "${log_source}")
@@ -157,7 +189,9 @@ if(required_failure_branch EQUAL -1 OR required_failure_return LESS required_fai
     message(FATAL_ERROR "CreatePipelines must reject required failures")
 endif()
 
-string(FIND "${init_source}" "if (!CreatePipelines())" failure_branch_start)
+# Init builds through CreatePipelinesForSampleCount, which retries with one
+# sample when multisampled pipelines fail and otherwise returns CreatePipelines'.
+string(FIND "${init_source}" "if (!CreatePipelinesForSampleCount())" failure_branch_start)
 string(FIND "${init_source}" "// Shaders are no longer needed" failure_branch_end)
 if(failure_branch_start EQUAL -1 OR failure_branch_end LESS failure_branch_start)
     message(FATAL_ERROR "CreatePipelines failure branch is missing")

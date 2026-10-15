@@ -9,6 +9,7 @@
 #include <cstring>
 #include <string>
 #include <thread>
+#include <utility>
 #include <vector>
 
 namespace
@@ -32,6 +33,8 @@ struct Fake
     std::vector<SDL_GPUSamplerCreateInfo> descriptors;
     SDL_GPUTextureTransferInfo source{};
     SDL_GPUTextureRegion destination{};
+    std::vector<std::pair<SDL_GPUTextureTransferInfo, SDL_GPUTextureRegion>> uploads;
+    Uint32 textureLevels = 0;
     std::string lastEvent;
 
     Fake()
@@ -73,6 +76,7 @@ struct Fake
     static SDL_GPUTexture* CreateTexture(SDL_GPUDevice*, const SDL_GPUTextureCreateInfo* info)
     {
         CHECK(info->format == SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM);
+        active->textureLevels = info->num_levels;
         ++active->textures;
         return active->failTexture ? nullptr : Handle<SDL_GPUTexture>(40 + active->textures % 20);
     }
@@ -109,6 +113,7 @@ struct Fake
         active->cycled |= cycle;
         active->source = *src;
         active->destination = *dst;
+        active->uploads.emplace_back(*src, *dst);
     }
     static void End(SDL_GPUCopyPass*) {}
     static bool Cancel(SDL_GPUCommandBuffer*)
@@ -433,4 +438,66 @@ TEST_CASE("bitmap sampler keys select four device-owned handles")
     }
     CHECK(fake.samplers == 4);
     CHECK(owner.Shutdown());
+}
+
+namespace
+{
+// The levels below a square image of `size` texels, each filled with its level number.
+std::vector<Render::Textures::MipLevel> Chain(std::uint32_t size)
+{
+    std::vector<Render::Textures::MipLevel> chain;
+    std::uint8_t level = 1;
+    for (std::uint32_t edge = size / 2; edge >= 1; edge /= 2, ++level)
+    {
+        chain.push_back({edge, edge, std::vector<std::uint8_t>(static_cast<std::size_t>(edge) * edge * 4u, level)});
+    }
+    return chain;
+}
+} // namespace
+
+TEST_CASE("a full 1024x1024 mip chain uploads through the fixed staging slots")
+{
+    Fake fake;
+    Owner owner(fake.Calls());
+    REQUIRE(owner.Initialize(Device()));
+    const std::vector<std::uint8_t> top(std::size_t{1024} * 1024u * 4u, 0);
+    const auto chain = Chain(1024);
+    REQUIRE(chain.size() == 10);
+
+    auto result = owner.Upload(top, 1024, 1024, filter, wrap, chain);
+    REQUIRE(result);
+    CHECK(fake.textures == 1);
+    CHECK(fake.textureLevels == 11);
+    // Level 0 fills a slot by itself; the ten smaller levels share the next one.
+    CHECK(fake.fences == 2);
+    REQUIRE(fake.uploads.size() == 11);
+    for (std::size_t level = 0; level < fake.uploads.size(); ++level)
+    {
+        const auto& [source, destination] = fake.uploads[level];
+        const Uint32 edge = 1024u >> level;
+        CHECK(destination.mip_level == level);
+        CHECK(destination.w == edge);
+        CHECK(destination.h == edge);
+        CHECK(source.offset % Owner::kLevelAlignment == 0);
+        CHECK(source.offset + static_cast<std::uint64_t>(source.pixels_per_row) * 4u * source.rows_per_layer <=
+              Owner::kSlotCapacity);
+        const auto slot = (Index(source.transfer_buffer) - 1) % static_cast<int>(Owner::kSlotCount);
+        CHECK(fake.bytes[slot][source.offset] == level);
+    }
+}
+
+TEST_CASE("a mip chain whose levels do not halve is refused before anything is created")
+{
+    Fake fake;
+    Owner owner(fake.Calls());
+    REQUIRE(owner.Initialize(Device()));
+    const std::vector<std::uint8_t> top(std::size_t{64} * 64u * 4u, 0);
+    auto chain = Chain(64);
+    chain[1] = {20, 20, std::vector<std::uint8_t>(std::size_t{20} * 20u * 4u, 2)};
+
+    const auto result = owner.Upload(top, 64, 64, filter, wrap, chain);
+    CHECK_FALSE(result);
+    CHECK(fake.textures == 0);
+    CHECK(fake.uploads.empty());
+    CHECK(owner.LastStage() == "upload: invalid mip chain");
 }

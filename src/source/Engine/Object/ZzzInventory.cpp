@@ -6711,6 +6711,9 @@ void RenderItem3DWithHover(float sx, float sy, float Width, float Height, int Ty
 static void RenderItem3DAt(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags,
                            int ancientDiscriminator, bool PickUp, bool hovered)
 {
+    // Item previews are screen-space: keep Classic texture sampling.
+    const mu::ScopedScreenSpaceSampling screenSpaceSampling;
+
     const bool Success = UI::Items::ShouldAnimatePreview(hovered, g_pPickedItem != nullptr, PickUp);
 
     const Render::Items::Display::Anchor anchor = Render::Items::Display::GetInventoryAnchor(Type, Level);

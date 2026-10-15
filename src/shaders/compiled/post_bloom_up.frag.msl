@@ -1,0 +1,31 @@
+#include <metal_stdlib>
+#include <simd/simd.h>
+
+using namespace metal;
+
+struct BloomUniforms
+{
+    float2 sourceTexelSize;
+    float levelWeight;
+    float padding;
+};
+
+struct main0_out
+{
+    float4 _entryPointOutput [[color(0)]];
+};
+
+struct main0_in
+{
+    float2 input_uv [[user(locn0)]];
+};
+
+fragment main0_out main0(main0_in in [[stage_in]], constant BloomUniforms& _19 [[buffer(0)]], texture2d<float> source [[texture(0)]], sampler linearSampler [[sampler(0)]])
+{
+    main0_out out = {};
+    float2 _200 = _19.sourceTexelSize * 0.5;
+    float3 _324 = ((((((((source.sample(linearSampler, (in.input_uv + float2(_200.x * (-2.0), 0.0))).xyz + source.sample(linearSampler, (in.input_uv + float2(_200.x * 2.0, 0.0))).xyz) + source.sample(linearSampler, (in.input_uv + float2(0.0, _200.y * (-2.0)))).xyz) + source.sample(linearSampler, (in.input_uv + float2(0.0, _200.y * 2.0))).xyz) + (source.sample(linearSampler, (in.input_uv + float2(-_200.x, -_200.y))).xyz * 2.0)) + (source.sample(linearSampler, (in.input_uv + float2(_200.x, -_200.y))).xyz * 2.0)) + (source.sample(linearSampler, (in.input_uv + float2(-_200.x, _200.y))).xyz * 2.0)) + (source.sample(linearSampler, (in.input_uv + _200)).xyz * 2.0)) * float3(0.083333335816860198974609375)) * _19.levelWeight;
+    out._entryPointOutput = float4(_324, 1.0);
+    return out;
+}
+

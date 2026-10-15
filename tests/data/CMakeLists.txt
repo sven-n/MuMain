@@ -6,10 +6,35 @@ mu_add_test(
         test_item_model_json.cpp
         test_item_model_display_json.cpp
         test_item_model_glow_json.cpp
+        test_item_model_material_json.cpp
         test_item_model_problems.cpp
         test_localized_string.cpp
     LINK_LIBS
         MuClient
+)
+
+# The light mood of the world maps (Data/Maps/LightMood.json).
+mu_add_test(
+    NAME light_mood_data_tests
+    SOURCES
+        test_light_mood_json.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(light_mood_data_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
+# The look profile of the Enhanced rendering features (Data/Render/Look.json).
+mu_add_test(
+    NAME look_profile_data_tests
+    SOURCES
+        test_look_profile_json.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(look_profile_data_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
 # Reads the item and item model files shipped in src/bin/Data through the real

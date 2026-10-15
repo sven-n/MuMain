@@ -144,6 +144,9 @@ namespace mu::ui::window
         void RmlToggleDisableSkillEffectModels();
         void RmlToggleDisableBoids();
         void RmlToggleDisableWingShadow();
+        // The look preset is read live (SyncRmlModel), since `$look classic|enhanced` changes it
+        // outside this window too.
+        void RmlToggleEnhancedGraphics();
         // Interface/UI tab -- Show FPS Counter/Show Debug Info stay ephemeral (SceneManager.h
         // globals, no GameConfig persistence), matching $fpscounter/$details today.
         void RmlToggleShowFpsCounter();
@@ -244,6 +247,9 @@ namespace mu::ui::window
             Rml::String disableBoidsLabel;
             bool disableWingShadow = false;
             Rml::String disableWingShadowLabel;
+            // The look preset: ticked is Enhanced, unticked Classic.
+            bool enhancedGraphics = false;
+            Rml::String enhancedGraphicsLabel;
 
             // Interface/UI tab.
             bool showFpsCounter = false;

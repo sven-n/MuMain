@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "Core/Platform/WinCompat.h"
+#include "Data/GameConfig/GameConfigValidation.h"
 
 class GameConfig
 {
@@ -103,6 +104,23 @@ public:
     bool GetSortParticleDraws() const { return m_sortParticleDraws; }
     bool GetVSyncEnabled() const { return m_vsyncEnabled; }
     void SetVSyncEnabled(bool enabled);
+    // The look preset, the player's only look setting ([Render] Look).
+    LookPreset GetLook() const
+    {
+        return m_look;
+    }
+    void SetLook(LookPreset look);
+    int GetAnisotropy() const
+    {
+        return m_anisotropy;
+    }
+    void SetAnisotropy(int anisotropy);
+    // Samples per pixel: 0 (off), 2, 4 or 8.
+    int GetAntialiasing() const
+    {
+        return m_antialiasing;
+    }
+    void SetAntialiasing(int samples);
 
     // DXP-23's per-system effect-cost toggles, promoted from console-only ($effects ...)
     // diagnostics to persisted, in-game-options-exposed settings -- see MainScene.h's
@@ -169,6 +187,9 @@ private:
     int m_zoom;
     bool m_sortParticleDraws;
     bool m_vsyncEnabled;
+    LookPreset m_look;
+    int m_anisotropy;
+    int m_antialiasing;
     std::wstring m_renderBackend;
     bool m_disableEffects;
     bool m_disableParticles;
@@ -194,3 +215,6 @@ private:
     std::wstring DecryptSetting(const std::wstring& hexInput);
     std::wstring EncryptSetting(const wchar_t* input);
 };
+
+// The [Render] Look of a config.ini as GameConfig::Load reads it.
+LookPreset ReadLookPreset(const std::filesystem::path& configFile);

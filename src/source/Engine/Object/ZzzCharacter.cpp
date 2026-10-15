@@ -130,6 +130,7 @@ namespace
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Social/MonkSystem.h"
 #include "UI/Core/WindowSystem.h"
+#include "Render/Lighting/LightMoodSetting.h"
 
 CHARACTER* CharactersClient;
 CHARACTER CharacterView;
@@ -9252,7 +9253,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     }
     else
     {
-        RequestTerrainLight(o->Position[0], o->Position[1], Light);
+        RequestModelTerrainLight(o->Position[0], o->Position[1], Light);
+        Render::Lighting::LightMood::CorrectFigureTerrainLight(o->Position[0], o->Position[1], Light);
     }
 
     VectorAdd(Light, o->Light, c->Light);
@@ -9338,7 +9340,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             VectorAdd(Light, o->Light, c->Light);
         }
         else
-            VectorCopy(AbilityLight, c->Light);
+            Render::Lighting::LightMood::ScaleOwnHeroLight(o->Position[0], o->Position[1], AbilityLight, c->Light);
     }
 
     if (o->Kind == KIND_NPC && gMapManager.WorldActive == WD_0LORENCIA && o->Type == MODEL_PLAYER && (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3))
@@ -11414,6 +11416,9 @@ void RenderCharactersClient()
 
     WaitCharactersAnimation();
 
+    // Characters keep their Classic look with post-processing on: their bodies,
+    // equipment, wings and glow parts never feed the bloom.
+    const mu::ScopedBloomExclusion classicCharacters;
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
     {
         CHARACTER* c = &CharactersClient[i];

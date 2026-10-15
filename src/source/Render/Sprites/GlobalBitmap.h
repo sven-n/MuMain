@@ -41,6 +41,12 @@ public:
 #pragma pack(pop)
     SDL_GPUTexture* sdlTexture = nullptr;
     SDL_GPUSampler* sdlSampler = nullptr; // Borrowed from the renderer until device shutdown.
+
+    // Enhanced texture filtering: a world texture (see IsWorldTexturePath) can
+    // get a mip chain; sdlSampler stays the Classic sampler either way.
+    bool worldTexture = false;
+    bool wrapRepeat = false;
+    std::uint8_t mipLevels = 1;
 };
 
 class CBitmapCache
@@ -111,6 +117,20 @@ class CGlobalBitmap
     std::uint32_t m_dwUsedTextureMemory;
 
     CBitmapCache	m_BitmapCache;
+
+    // Enhanced texture filtering. The requested
+    // state is applied between frames by UpdateTextureFiltering.
+    bool m_textureFilteringEnabled = false;
+    bool m_textureFilteringRequested = false;
+    bool m_textureFilteringSwitchPending = false;
+    int m_requestedAnisotropy = 8;
+    std::uint32_t m_anisotropy = 0;
+    bool m_anisotropyClampLogged = false;
+    // Shared Enhanced samplers: [0] clamp to edge, [1] repeat.
+    std::array<SDL_GPUSampler*, 2> m_filteredSamplers{};
+    std::vector<std::uint32_t> m_mipChainRequests;
+    double m_textureLoadSeconds = 0.0;
+    double m_mipChainSeconds = 0.0;
 #ifdef DEBUG_BITMAP_CACHE
     CTimer2				m_DebugOutputTimer;
 #endif // DEBUG_BITMAP_CACHE
@@ -156,6 +176,20 @@ public:
 
     void Manage();
 
+    // Enhanced texture filtering: mip chains and anisotropic sampling for world
+    // textures. SetTextureFiltering only records the request; the main loop
+    // applies it between frames through UpdateTextureFiltering, which also
+    // builds the mip chains that world draws asked for since the last frame.
+    void SetTextureFiltering(bool enabled, int anisotropy);
+    void UpdateTextureFiltering();
+    bool IsTextureFilteringEnabled() const
+    {
+        return m_textureFilteringEnabled;
+    }
+    // Logs how many textures are world (and how many of those have a mip
+    // chain) and screen-space, their GPU size, and the time spent loading.
+    void LogTextureFilteringSummary(const char* context) const;
+
     inline BITMAP_t& operator [] (GLuint uiBitmapIndex) { return *GetTexture(uiBitmapIndex); }
 
     // Drops the quick-cache entry for this index (including a cached "empty" one)
@@ -169,8 +203,15 @@ protected:
     GLuint GenerateTextureIndex();
     GLuint FindAvailableTextureIndex(GLuint uiSeed);
 
-    bool OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE, bool padToPowerOfTwo = true);
-    bool OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE, bool padToPowerOfTwo = true);
+    bool OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode,
+                       bool worldTexture, bool padToPowerOfTwo = true);
+    bool OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode,
+                 bool worldTexture, bool padToPowerOfTwo = true);
+    void RegisterFilteredSampler(const BITMAP_t& bitmap);
+    SDL_GPUSampler* GetFilteredSampler(bool wrapRepeat);
+    void ReleaseFilteredSamplers();
+    void ApplyTextureFilteringSwitch();
+    bool BuildMipChain(GLuint uiBitmapIndex);
     void SplitFileName(IN const std::wstring& filepath, OUT std::wstring& filename, bool bIncludeExt);
     void SplitExt(IN const std::wstring& filepath, OUT std::wstring& ext, bool bIncludeDot);
     void ExchangeExt(IN const std::wstring& in_filepath, IN const std::wstring& ext, OUT std::wstring& out_filepath);
