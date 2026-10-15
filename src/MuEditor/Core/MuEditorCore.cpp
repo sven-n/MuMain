@@ -6,6 +6,8 @@
 #include "imgui.h"
 #include "imgui_impl_sdl3.h"
 #include "imgui_impl_sdlgpu3.h"
+#include <SDL3/SDL_events.h>
+#include <SDL3/SDL_mouse.h>
 #include "MuInputBlockerCore.h"
 #include "Core/Input/SyntheticInput.h"
 #include "../Config/MuEditorConfig.h"
@@ -567,6 +569,43 @@ void CMuEditorCore::Update()
 
         // Note: Keyboard blocking is now handled in ScanAsyncKeyState() in WindowCommon.cpp
         // It prevents the game from scanning keyboard state when ImGui wants to capture it
+    }
+}
+
+bool CMuEditorCore::ClaimsEvent(const SDL_Event& event)
+{
+    if (!m_bInitialized || ImGui::GetCurrentContext() == nullptr)
+    {
+        return false;
+    }
+    // Over an editor window: the windows that say so, and with the editor open
+    // also what ImGui captures (popups, combos, the Dev Editor).
+    const ImGuiIO& io = ImGui::GetIO();
+    const bool wantsMouse = m_bHoveringUI || (m_bEditorMode && io.WantCaptureMouse);
+    switch (event.type)
+    {
+    case SDL_EVENT_MOUSE_BUTTON_DOWN:
+        if (!wantsMouse)
+        {
+            return false;
+        }
+        m_claimedButtons |= SDL_BUTTON_MASK(event.button.button);
+        return true;
+    case SDL_EVENT_MOUSE_BUTTON_UP:
+    {
+        const unsigned int button = SDL_BUTTON_MASK(event.button.button);
+        const bool claimed = (m_claimedButtons & button) != 0;
+        m_claimedButtons &= ~button;
+        return claimed;
+    }
+    case SDL_EVENT_MOUSE_WHEEL:
+        return wantsMouse;
+    case SDL_EVENT_KEY_DOWN:
+    case SDL_EVENT_TEXT_INPUT:
+    case SDL_EVENT_TEXT_EDITING:
+        return m_bEditorMode && io.WantCaptureKeyboard;
+    default:
+        return false;
     }
 }
 

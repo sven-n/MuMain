@@ -85,14 +85,14 @@ endfunction()
 
 set(editor_else_probe [[
 #ifdef _EDITOR
-EditorOverlay
+RenderEditorOverlayPass
 #else
 g_MuEditorCore
 #endif
 ]])
 strip_editor_sections(editor_else_probe editor_else_probe_off)
 require_match(editor_else_probe_off "g_MuEditorCore" "editor-OFF extraction retains an outer _EDITOR #else branch")
-forbid_symbol(editor_else_probe_off "EditorOverlay")
+forbid_symbol(editor_else_probe_off "RenderEditorOverlayPass")
 
 function(require_editor_before_cursor source_variable start_marker end_marker description)
     string(FIND "${${source_variable}}" "${start_marker}" region_start)
@@ -249,59 +249,47 @@ foreach(symbol IN ITEMS
     forbid_symbol(app_code "${symbol}")
 endforeach()
 
-require_match(renderer_code
-    "#[ \t]*ifdef[ \t]+_EDITOR[ \t\r\n]+EditorOverlay[ \t]*,[ \t\r\n]+#[ \t]*endif"
-    "editor marker enum exists only in editor builds")
-require_match(renderer_code
-    "if[ \t\r\n]*\\([ \t]*type[ \t]*==[ \t]*RenderCmdType::EditorOverlay[ \t]*\\)[ \t\r\n]*\\{[ \t\r\n]*return[ \t]+true[ \t]*;"
-    "editor marker is a draw-command batch boundary")
+# The editor is not a command of the game's list: it is drawn after RmlUi, in a pass of its own.
+forbid_symbol(renderer_code "RenderCmdType::EditorOverlay")
 
 string(FIND "${renderer_code}" "void QueueEditorRenderCommand()" queue_function_start)
+string(FIND "${renderer_code}" "static void RenderEditorOverlayPass" overlay_pass_start)
 string(FIND "${renderer_code}" "class MuRendererSDLGpu" renderer_class_start)
-if(queue_function_start EQUAL -1 OR renderer_class_start EQUAL -1 OR NOT queue_function_start LESS renderer_class_start)
-    message(FATAL_ERROR "Could not isolate the editor marker queue function")
+if(queue_function_start EQUAL -1 OR overlay_pass_start EQUAL -1 OR renderer_class_start EQUAL -1
+        OR NOT queue_function_start LESS overlay_pass_start OR NOT overlay_pass_start LESS renderer_class_start)
+    message(FATAL_ERROR "Could not isolate the editor queue function and its overlay pass")
 endif()
-math(EXPR queue_function_length "${renderer_class_start} - ${queue_function_start}")
+math(EXPR queue_function_length "${overlay_pass_start} - ${queue_function_start}")
 string(SUBSTRING "${renderer_code}" ${queue_function_start} ${queue_function_length} queue_function)
 require_match(queue_function
-    "RenderCmd[ \t]+command[ \t]*\\{\\}[ \t]*;[ \t\r\n]*command\.type[ \t]*=[ \t]*RenderCmdType::EditorOverlay[ \t]*;[ \t\r\n]*s_renderCmds\.push_back[ \t\r\n]*\\([ \t]*command[ \t]*\\)[ \t]*;"
-    "queue function appends one editor marker at the current command position")
-require_call_count(queue_function "s_renderCmds\\.push_back" 1
-    "editor queue function must append exactly one marker")
+    "if[ \t\r\n]*\\([ \t]*![ \t]*s_frameActive[ \t]*\\)[ \t\r\n]*\\{[ \t\r\n]*return[ \t]*;[ \t\r\n]*\\}[ \t\r\n]*s_editorDrawPending[ \t]*=[ \t]*true[ \t]*;"
+    "queue function marks the current frame's editor draw as pending")
+forbid_symbol(queue_function "s_renderCmds")
 
-string(FIND "${renderer_code}" "static void PreparePendingEditorDrawData" prepare_helper_start)
-string(FIND "${renderer_code}" "static std::vector<Uint16> s_stripIdxScratch" prepare_helper_end)
-if(prepare_helper_start EQUAL -1 OR prepare_helper_end EQUAL -1
-        OR NOT prepare_helper_start LESS prepare_helper_end)
-    message(FATAL_ERROR "Could not isolate the pending editor draw-data helper")
+string(FIND "${renderer_code}" "static std::vector<Uint16> s_stripIdxScratch" overlay_pass_end)
+if(overlay_pass_end EQUAL -1 OR NOT overlay_pass_start LESS overlay_pass_end)
+    message(FATAL_ERROR "Could not isolate the editor overlay pass")
 endif()
-math(EXPR prepare_helper_length "${prepare_helper_end} - ${prepare_helper_start}")
-string(SUBSTRING "${renderer_code}" ${prepare_helper_start} ${prepare_helper_length} prepare_helper)
-require_match(prepare_helper
-    "static[ \t]+void[ \t]+PreparePendingEditorDrawData[ \t\r\n]*\\([ \t\r\n]*SDL_GPUCommandBuffer[ \t]*\\*[ \t]*commandBuffer[ \t\r\n]*\\)"
-    "pending editor draw-data helper is file-local")
-require_call_count(prepare_helper "std::any_of" 1 "pending editor helper scans the command list exactly once")
-require_call_count(prepare_helper "g_MuEditorCore\\.PrepareDrawData" 1
-    "pending editor helper prepares draw data exactly once")
-string(REGEX MATCHALL "RenderCmdType::EditorOverlay" prepare_helper_markers "${prepare_helper}")
-list(LENGTH prepare_helper_markers prepare_helper_marker_count)
-if(NOT prepare_helper_marker_count EQUAL 1)
-    message(FATAL_ERROR
-        "Invalid SDL_GPU editor contract: pending editor helper must inspect exactly one EditorOverlay marker; found ${prepare_helper_marker_count}")
-endif()
-string(FIND "${prepare_helper}" "std::any_of" prepare_helper_scan_position)
-string(FIND "${prepare_helper}" "RenderCmdType::EditorOverlay" prepare_helper_marker_position)
-string(FIND "${prepare_helper}" "if (!editorRenderPending)" prepare_helper_guard_position)
-string(FIND "${prepare_helper}" "return;" prepare_helper_return_position)
-string(FIND "${prepare_helper}" "g_MuEditorCore.PrepareDrawData(commandBuffer)" prepare_helper_call_position)
-if(prepare_helper_scan_position EQUAL -1 OR prepare_helper_marker_position EQUAL -1
-        OR prepare_helper_guard_position EQUAL -1 OR prepare_helper_return_position EQUAL -1
-        OR prepare_helper_call_position EQUAL -1
-        OR NOT prepare_helper_scan_position LESS prepare_helper_marker_position
-        OR NOT prepare_helper_marker_position LESS prepare_helper_guard_position
-        OR NOT prepare_helper_guard_position LESS prepare_helper_return_position
-        OR NOT prepare_helper_return_position LESS prepare_helper_call_position)
-    message(FATAL_ERROR "Pending editor helper must scan, guard, then prepare current draw data")
+math(EXPR overlay_pass_length "${overlay_pass_end} - ${overlay_pass_start}")
+string(SUBSTRING "${renderer_code}" ${overlay_pass_start} ${overlay_pass_length} overlay_pass)
+require_match(overlay_pass
+    "static[ \t]+void[ \t]+RenderEditorOverlayPass[ \t\r\n]*\\([ \t\r\n]*SDL_GPUCommandBuffer[ \t]*\\*[ \t]*commandBuffer[ \t]*,[ \t\r\n]*SDL_GPUTexture[ \t]*\\*[ \t]*colorTexture[ \t\r\n]*\\)"
+    "editor overlay pass is file-local")
+require_call_count(overlay_pass "g_MuEditorCore\\.PrepareDrawData" 1 "editor overlay pass uploads the draw data once")
+require_call_count(overlay_pass "SDL_BeginGPURenderPass" 1 "editor overlay pass opens exactly one render pass")
+require_call_count(overlay_pass "g_MuEditorCore\\.RenderDrawData" 1 "editor overlay pass draws the draw data once")
+require_match(overlay_pass "colorTarget\\.load_op[ \t]*=[ \t]*SDL_GPU_LOADOP_LOAD"
+    "editor overlay pass loads the frame, RmlUi included, instead of clearing it")
+require_match(overlay_pass
+    "SDL_BeginGPURenderPass[ \t\r\n]*\\([ \t]*commandBuffer[ \t]*,[ \t]*&colorTarget[ \t]*,[ \t]*1[ \t]*,[ \t]*nullptr[ \t]*\\)"
+    "editor overlay pass has no depth target, as the ImGui pipeline")
+string(FIND "${overlay_pass}" "g_MuEditorCore.PrepareDrawData" overlay_prepare_position)
+string(FIND "${overlay_pass}" "SDL_BeginGPURenderPass" overlay_begin_position)
+string(FIND "${overlay_pass}" "g_MuEditorCore.RenderDrawData" overlay_draw_position)
+string(FIND "${overlay_pass}" "SDL_EndGPURenderPass" overlay_end_position)
+if(NOT overlay_prepare_position LESS overlay_begin_position OR NOT overlay_begin_position LESS overlay_draw_position
+        OR NOT overlay_draw_position LESS overlay_end_position)
+    message(FATAL_ERROR "Editor overlay pass must upload, open its pass, draw, then close it")
 endif()
 
 string(FIND "${renderer_code}" "void EndFrame() override" end_frame_start)
@@ -320,11 +308,16 @@ require_match(end_frame "postUiColorTarget\\.load_op = SDL_GPU_LOADOP_LOAD"
 require_call_count(end_frame "SDL_SubmitGPUCommandBuffer" 1 "EndFrame must keep one direct frame submission")
 require_call_count(end_frame "SDL_SubmitGPUCommandBufferAndAcquireFence" 0
     "EndFrame must not add a second frame submission through a fence")
-require_call_count(end_frame "PreparePendingEditorDrawData" 1
-    "EndFrame must invoke the pending editor helper exactly once")
-forbid_symbol(end_frame "g_MuEditorCore.PrepareDrawData")
-# The replay loop lives in ReplayCommandRange(); EndFrame runs it once per pass (main, post-RmlUi)
-# and the editor overlay command is replayed from inside it.
+require_call_count(end_frame "RenderEditorOverlayPass" 1 "EndFrame must draw the editor exactly once")
+forbid_symbol(end_frame "g_MuEditorCore")
+string(FIND "${end_frame}" "s_preSubmitCallback()" pre_submit_position)
+string(FIND "${end_frame}" "RenderEditorOverlayPass(s_cmdBuf, frameColorTexture)" overlay_call_position)
+string(FIND "${end_frame}" "s_postRmlUiCallback()" post_rmlui_position)
+if(pre_submit_position EQUAL -1 OR overlay_call_position EQUAL -1 OR post_rmlui_position EQUAL -1
+        OR NOT pre_submit_position LESS overlay_call_position OR NOT overlay_call_position LESS post_rmlui_position)
+    message(FATAL_ERROR "EndFrame must draw the editor after RmlUi and before the post-RmlUi pass (game cursor)")
+endif()
+# The replay loop lives in ReplayCommandRange(); EndFrame runs it once per pass (main, post-RmlUi).
 require_call_count(end_frame "ReplayCommandRange" 2 "EndFrame must replay commands once per render pass")
 string(FIND "${renderer_code}" "void ReplayCommandRange(" replay_range_start)
 string(FIND "${renderer_code}" "void FlushRenderCommands() override" replay_range_end)
@@ -333,15 +326,7 @@ if(replay_range_start EQUAL -1 OR replay_range_end EQUAL -1 OR NOT replay_range_
 endif()
 math(EXPR replay_range_length "${replay_range_end} - ${replay_range_start}")
 string(SUBSTRING "${renderer_code}" ${replay_range_start} ${replay_range_length} replay_range)
-forbid_symbol(replay_range "g_MuEditorCore.PrepareDrawData")
-require_call_count(replay_range "g_MuEditorCore\\.RenderDrawData" 1
-    "ReplayCommandRange must render ImGui draw data exactly once")
-string(FIND "${end_frame}" "PreparePendingEditorDrawData(s_cmdBuf)" prepare_helper_call_position)
-string(FIND "${end_frame}" "SDL_BeginGPURenderPass" begin_pass_position)
-if(prepare_helper_call_position EQUAL -1 OR begin_pass_position EQUAL -1
-        OR NOT prepare_helper_call_position LESS begin_pass_position)
-    message(FATAL_ERROR "EndFrame must prepare pending editor draw data before SDL_BeginGPURenderPass")
-endif()
+forbid_symbol(replay_range "g_MuEditorCore")
 string(FIND "${replay_range}" "SDL_GPUViewport currentViewport" viewport_init_start)
 string(FIND "${replay_range}" "SDL_Rect currentScissor" viewport_init_end)
 if(viewport_init_start EQUAL -1 OR viewport_init_end EQUAL -1 OR NOT viewport_init_start LESS viewport_init_end)
@@ -378,8 +363,8 @@ endforeach()
 
 forbid_symbol(replay_range "if (!s_texturesInvalidated)")
 require_match(renderer_code
-    "if[ \t\r\n]*\\([ \t]*type[ \t]*==[ \t]*RenderCmdType::EditorOverlay[ \t]*\\)[ \t\r\n]*\\{[ \t\r\n]*return[ \t]+false[ \t]*;[ \t\r\n]*\\}[ \t\r\n]*#[ \t]*endif[ \t\r\n]*return[ \t]+IsDrawCommand[ \t\r\n]*\\([ \t]*type[ \t]*\\)[ \t]*;"
-    "texture invalidation skips game draws but preserves state and editor markers")
+    "IsUnsafeInvalidatedDrawCommand[ \t\r\n]*\\([ \t]*RenderCmdType[ \t]+type[ \t]*\\)[ \t\r\n]*\\{[ \t\r\n]*return[ \t]+IsDrawCommand[ \t\r\n]*\\([ \t]*type[ \t]*\\)[ \t]*;"
+    "texture invalidation skips game draws but preserves state commands")
 string(FIND "${replay_range}" "const RenderCmd& cmd = s_renderCmds[i];" replay_loop_position)
 string(FIND "${replay_range}" "if (s_texturesInvalidated && IsUnsafeInvalidatedDrawCommand(cmd.type))"
     invalidated_skip_position)
@@ -394,23 +379,11 @@ if(replay_loop_position EQUAL -1 OR invalidated_skip_position EQUAL -1 OR replay
         "Replay must skip unsafe invalidated game draws before counting processed commands")
 endif()
 
-string(FIND "${replay_range}" "case RenderCmdType::EditorOverlay:" marker_case_start)
-string(FIND "${replay_range}" "case RenderCmdType::DrawTriangles:" marker_case_end)
-if(marker_case_start EQUAL -1 OR marker_case_end EQUAL -1 OR NOT marker_case_start LESS marker_case_end)
-    message(FATAL_ERROR "Could not isolate editor marker replay")
-endif()
-math(EXPR marker_case_length "${marker_case_end} - ${marker_case_start}")
-string(SUBSTRING "${replay_range}" ${marker_case_start} ${marker_case_length} marker_case)
-require_match(marker_case
-    "g_MuEditorCore\.RenderDrawData[ \t\r\n]*\\([ \t]*s_cmdBuf[ \t]*,[ \t]*s_renderPass[ \t]*\\)[ \t]*;[ \t\r\n]*replayState\.Invalidate[ \t\r\n]*\\([ \t]*\\)[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectViewport[ \t\r\n]*\\([ \t]*currentViewport[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUViewport[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&currentViewport[ \t]*\\)[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectScissor[ \t\r\n]*\\([ \t]*currentScissor[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUScissor[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&currentScissor[ \t]*\\)[ \t]*;[ \t\r\n]*break[ \t]*;"
-    "marker invalidates cached state then restores viewport and scissor")
-forbid_symbol(marker_case "return")
-
 strip_editor_sections(renderer_code renderer_editor_off_code)
 foreach(symbol IN ITEMS
-        "EditorOverlay"
         "QueueEditorRenderCommand"
-        "PreparePendingEditorDrawData"
+        "RenderEditorOverlayPass"
+        "s_editorDrawPending"
         "g_MuEditorCore"
         "ImGui_ImplSDLGPU3_PrepareDrawData"
         "ImGui_ImplSDLGPU3_RenderDrawData")

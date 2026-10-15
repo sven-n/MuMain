@@ -7,6 +7,7 @@
 struct SDL_Window;
 struct SDL_GPUCommandBuffer;
 struct SDL_GPURenderPass;
+union SDL_Event;
 
 class CMuEditorCore
 {
@@ -37,6 +38,12 @@ public:
     bool IsHoveringUI() const { return m_bHoveringUI; }
     void SetHoveringUI(bool hovering) { m_bHoveringUI = hovering; }
 
+    // Whether the editor takes an event of the window's input, so that RmlUi and
+    // the game under it do not get it: a press or the wheel over an editor
+    // window, the release of a press it took, and keys and text while it has
+    // the keyboard. Key releases and mouse motion always go through.
+    bool ClaimsEvent(const SDL_Event& event);
+
     // Global scale for ALL editor UI (fonts + widget/padding sizes). Driven by the
     // -/+ buttons in the toolbar. Applied between frames, not mid-frame.
     void  SetUIScale(float scale);
@@ -63,6 +70,9 @@ private:
 
     float m_UIScale;        // 1.0 = default ImGui size
     bool  m_bScaleDirty;    // apply the new scale at the start of the next frame
+    // The mouse buttons whose press the editor took (SDL_BUTTON_MASK bits), so
+    // that their releases stay with it too.
+    unsigned int m_claimedButtons = 0;
 };
 
 // Global accessor

@@ -597,9 +597,6 @@ enum class RenderCmdType : uint8_t
 {
     SetViewport,
     SetScissor, // pixel-level rect clip — Vulkan/Metal/D3D12 viewport alone doesn't clip
-#ifdef _EDITOR
-    EditorOverlay,
-#endif
     DrawTriangles, // non-indexed 3D (Vertex3D)
     DrawSkinnedTriangles,
     DrawIndexedQuads, // indexed 2D or 3D with static quad index buffer
@@ -639,23 +636,11 @@ static Render::DrawCommandHistory s_previousDrawCommands;
 
 [[nodiscard]] static bool IsDrawCommand(RenderCmdType type)
 {
-#ifdef _EDITOR
-    if (type == RenderCmdType::EditorOverlay)
-    {
-        return true;
-    }
-#endif
     return type != RenderCmdType::SetViewport && type != RenderCmdType::SetScissor;
 }
 
 [[nodiscard]] static bool IsUnsafeInvalidatedDrawCommand(RenderCmdType type)
 {
-#ifdef _EDITOR
-    if (type == RenderCmdType::EditorOverlay)
-    {
-        return false;
-    }
-#endif
     return IsDrawCommand(type);
 }
 
@@ -766,6 +751,10 @@ static bool s_frameActive = false;
 static std::size_t s_replayedCmdCount = 0u;
 static bool s_mainColorPassOpenedThisFrame = false;
 #ifdef _EDITOR
+// The editor's ImGui frame waits to be drawn over this frame: after RmlUi, in a pass of its own
+// (RenderEditorOverlayPass, from EndFrame), so the editor's windows sit on top of the game's UI.
+static bool s_editorDrawPending = false;
+
 void QueueEditorRenderCommand()
 {
     if (!s_frameActive)
@@ -773,21 +762,37 @@ void QueueEditorRenderCommand()
         return;
     }
 
-    RenderCmd command{};
-    command.type = RenderCmdType::EditorOverlay;
-    s_renderCmds.push_back(command);
+    s_editorDrawPending = true;
 }
 
-static void PreparePendingEditorDrawData(SDL_GPUCommandBuffer* commandBuffer)
+// Uploads and draws the editor's draw data onto the frame's colour target. Runs once RmlUi's
+// passes have closed (PrepareDrawData opens a copy pass) and before the post-RmlUi pass, so the
+// game cursor still goes over the editor. Colour only: the ImGui pipeline has no depth target.
+static void RenderEditorOverlayPass(SDL_GPUCommandBuffer* commandBuffer, SDL_GPUTexture* colorTexture)
 {
-    const bool editorRenderPending = std::any_of(s_renderCmds.begin(), s_renderCmds.end(), [](const RenderCmd& command)
-                                                 { return command.type == RenderCmdType::EditorOverlay; });
-    if (!editorRenderPending)
+    if (!s_editorDrawPending)
+    {
+        return;
+    }
+    s_editorDrawPending = false;
+    if (!commandBuffer || !colorTexture)
     {
         return;
     }
 
     g_MuEditorCore.PrepareDrawData(commandBuffer);
+
+    SDL_GPUColorTargetInfo colorTarget{};
+    colorTarget.texture = colorTexture;
+    colorTarget.load_op = SDL_GPU_LOADOP_LOAD;
+    colorTarget.store_op = SDL_GPU_STOREOP_STORE;
+    SDL_GPURenderPass* pass = SDL_BeginGPURenderPass(commandBuffer, &colorTarget, 1, nullptr);
+    if (!pass)
+    {
+        return;
+    }
+    g_MuEditorCore.RenderDrawData(commandBuffer, pass);
+    SDL_EndGPURenderPass(pass);
 }
 #endif
 
@@ -1697,6 +1702,9 @@ public:
         s_previousDrawCommands.fill(kNoDrawCommand);
         s_replayedCmdCount = 0u;
         s_mainColorPassOpenedThisFrame = false;
+#ifdef _EDITOR
+        s_editorDrawPending = false;
+#endif
         s_stripIdxScratch.clear();
         s_boneRowScratch.clear();
         s_lastBonePalette = nullptr;
@@ -1951,19 +1959,6 @@ public:
                 break;
             }
 
-#ifdef _EDITOR
-            case RenderCmdType::EditorOverlay:
-            {
-                g_MuEditorCore.RenderDrawData(s_cmdBuf, s_renderPass);
-                replayState.Invalidate();
-                if (replayState.SelectViewport(currentViewport))
-                    SDL_SetGPUViewport(s_renderPass, &currentViewport);
-                if (replayState.SelectScissor(currentScissor))
-                    SDL_SetGPUScissor(s_renderPass, &currentScissor);
-                break;
-            }
-#endif
-
             case RenderCmdType::DrawTriangles:
             case RenderCmdType::DrawSkinnedTriangles:
             case RenderCmdType::DrawIndexedQuads:
@@ -2121,9 +2116,6 @@ public:
 
         bool renderPassCompleted = false;
         s_renderReplayBeginTime = std::chrono::steady_clock::now();
-#ifdef _EDITOR
-        PreparePendingEditorDrawData(s_cmdBuf);
-#endif
         {
             SDL_GPUColorTargetInfo colorTarget{};
             colorTarget.texture = frameColorTexture;
@@ -2173,6 +2165,11 @@ public:
         {
             s_preSubmitCallback();
         }
+
+#ifdef _EDITOR
+        // The editor goes over RmlUi, and the game cursor of the pass below over the editor.
+        RenderEditorOverlayPass(s_cmdBuf, frameColorTexture);
+#endif
 
         // RmlUi port: content that must sit visually on top of RmlUi (the game cursor, legacy
         // CUITextInputBox text -- see SetPostRmlUiCallback's own comment, MuRenderer.h). Fires
@@ -4842,7 +4839,7 @@ private:
                 cmd.consumedByOffscreenCapture = true;
                 if (!isGeometryDraw)
                 {
-                    continue; // SetViewport/SetScissor/EditorOverlay - the capture sets its own viewport
+                    continue; // SetViewport/SetScissor - the capture sets its own viewport
                 }
                 ReplayDrawCommand(cmd, boneDataReady, scissor, replayState);
             }

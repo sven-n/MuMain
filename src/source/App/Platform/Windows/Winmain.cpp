@@ -1428,6 +1428,17 @@ MSG MainLoop()
             // Guard on an active context: editor init can fail or be shut down.
             if (ImGui::GetCurrentContext() != nullptr)
                 ImGui_ImplSDL3_ProcessEvent(&event);
+            // What the editor takes (a click or a key on one of its windows) does
+            // not reach RmlUi or the game under it.
+            if (g_MuEditorCore.ClaimsEvent(event))
+            {
+                ++messageProcessed;
+                if (g_MaxMessagePerCycle > 0 && messageProcessed >= g_MaxMessagePerCycle)
+                {
+                    break;
+                }
+                continue;
+            }
 #endif
             switch (event.type)
             {
