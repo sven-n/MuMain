@@ -142,6 +142,8 @@ struct FrameGpuContext
     SDL_GPUTexture* swapchainTexture = nullptr;
     std::uint32_t width = 0;
     std::uint32_t height = 0;
+    // The texture has the swapchain's format and can be sampled, so RmlUi can draw straight into it.
+    bool drawable = false;
 };
 
 struct RendererStats

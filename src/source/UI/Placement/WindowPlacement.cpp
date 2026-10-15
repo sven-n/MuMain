@@ -155,9 +155,10 @@ Rml::Vector2f PanelSize(const Entry& entry)
             return panel != nullptr ? panel->GetBox().GetSize(Rml::BoxArea::Border) : Rml::Vector2f{};
         };
         Rml::Vector2f size = panelSize();
-        if (size.x <= 0.f || size.y <= 0.f)
+        // The context leaves hidden documents out of its update: a window about to open may still be laid
+        // out as it was when hidden (before a resize or a content change), or never laid out at all.
+        if (!document->IsVisible() || size.x <= 0.f || size.y <= 0.f)
         {
-            // Never shown yet: lay it out once to learn its size.
             {
                 FRAME_PROFILE(UILayout);
                 document->UpdateDocument();

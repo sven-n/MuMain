@@ -524,6 +524,49 @@ static Uint32 s_vtxCapacity = 0u;
 static Uint32 s_vtxOffset = 0u;
 static std::vector<Uint8> s_vtxScratch;
 
+// How much of a per-frame scratch buffer is already on its GPU buffer this frame (StageDeferredGpuData).
+struct StagedRange
+{
+    SDL_GPUBuffer* buffer = nullptr;
+    Uint32 bytes = 0u;
+};
+static StagedRange s_stagedVertices;
+static StagedRange s_stagedBones;
+static StagedRange s_stagedStripIndices;
+
+struct BufferUpload
+{
+    SDL_GPUTransferBuffer* transfer;
+    SDL_GPUBuffer* buffer;
+    Uint32 offset;
+    Uint32 size;
+    bool cycle;
+};
+
+// Copies the part of `scratch` not yet staged into `transfer` and queues its upload. The frame's first upload
+// cycles the buffer (the GPU may still read last frame's) and so sends everything; a later one sends only the
+// appended tail into that same instance, which this frame's earlier passes read. False if the map failed.
+static bool StageAppended(SDL_GPUTransferBuffer* transfer, SDL_GPUBuffer* buffer, const void* scratch, Uint32 totalBytes,
+                          StagedRange& staged, std::vector<BufferUpload>& uploads)
+{
+    // A different buffer means a regrow since the last call, which kept none of the staged data.
+    const Uint32 start = staged.buffer == buffer ? staged.bytes : 0u;
+    if (totalBytes <= start)
+    {
+        return true;
+    }
+    void* mapped = SDL_MapGPUTransferBuffer(s_device, transfer, true);
+    if (!mapped)
+    {
+        return false;
+    }
+    std::memcpy(mapped, static_cast<const Uint8*>(scratch) + start, totalBytes - start);
+    SDL_UnmapGPUTransferBuffer(s_device, transfer);
+    uploads.push_back({transfer, buffer, start, totalBytes - start, start == 0u});
+    staged = {buffer, totalBytes};
+    return true;
+}
+
 // Per-frame packed float4 bone rows. Three rows represent one affine 3x4 bone transform.
 static SDL_GPUTransferBuffer* s_boneTransferBuf = nullptr;
 static SDL_GPUBuffer* s_boneGpuBuf = nullptr;
@@ -1647,6 +1690,9 @@ public:
         // Texture uploads may be queued by legacy asset loading before BeginFrame,
         // so keep s_textureUpdates until EndFrame has submitted them.
         s_vtxOffset = 0u;
+        s_stagedVertices = {};
+        s_stagedBones = {};
+        s_stagedStripIndices = {};
         s_renderCmds.clear();
         s_previousDrawCommands.fill(kNoDrawCommand);
         s_replayedCmdCount = 0u;
@@ -1735,74 +1781,42 @@ public:
     // render pass will read from the updated GPU buffer.
     // -----------------------------------------------------------------------
     // Stages this frame's accumulated CPU-side vertex/bone/strip-index/texture-update scratch
-    // buffers to the GPU via one copy pass. Safe to call more than once per frame --
-    // FlushRenderCommands (mid-recording) and EndFrame's own final stage both call this. Each
-    // call re-uploads the buffers' current full contents from offset 0, not just what's new since
-    // the last call: harmless (offsets already used stay unchanged, only the tail is new data),
-    // same "just redo the whole thing" precedent the pre-existing post-RmlUi pass already
-    // established below. Returns whether bone data is ready, for ReplayCommandRange to pass into
-    // ReplayDrawCommand.
+    // buffers to the GPU via one copy pass. Safe to call more than once per frame (EndFrame and
+    // the post-RmlUi pass both do): scratch data is only ever appended, so a later call sends just
+    // what was recorded since the last one. Returns whether bone data is ready, for
+    // ReplayCommandRange to pass into ReplayDrawCommand.
     bool StageDeferredGpuData()
     {
-        // ---------------------------------------------------------------
-        // Grow GPU buffers if needed, then stage recorded CPU vertices.
-        // This happens BEFORE the render pass so the GPU reads current-
-        // frame data, eliminating the 1-frame vertex delay that caused
-        // streak artifacts when vertex counts varied between frames.
-        // ---------------------------------------------------------------
-        bool vertexDataReady = s_vtxOffset == 0u;
-        if (s_vtxOffset > 0u && EnsureVertexBufferCapacity(s_vtxOffset))
+        // Staged BEFORE the render pass so the GPU reads current-frame data, eliminating the
+        // 1-frame vertex delay that caused streak artifacts when vertex counts varied between frames.
+        std::vector<BufferUpload> bufferUploads;
+
+        if (s_vtxOffset > 0u && EnsureVertexBufferCapacity(s_vtxOffset) &&
+            !StageAppended(s_vtxTransferBuf, s_vtxGpuBuf, s_vtxScratch.data(), s_vtxOffset, s_stagedVertices,
+                           bufferUploads))
         {
-            void* mapped = SDL_MapGPUTransferBuffer(s_device, s_vtxTransferBuf, true);
-            if (mapped)
-            {
-                std::memcpy(mapped, s_vtxScratch.data(), s_vtxOffset);
-                SDL_UnmapGPUTransferBuffer(s_device, s_vtxTransferBuf);
-                vertexDataReady = true;
-            }
-            else
-            {
-                mu::log::Get("render")->error("SDL_gpu -- failed to map vertex transfer buffer: {}", SDL_GetError());
-            }
+            mu::log::Get("render")->error("SDL_gpu -- failed to map vertex transfer buffer: {}", SDL_GetError());
         }
 
-        Uint32 boneDataSize = 0u;
         bool boneDataReady = s_boneRowScratch.empty();
         if (!s_boneRowScratch.empty())
         {
             const std::size_t boneBytes = s_boneRowScratch.size() * sizeof(float);
             if (boneBytes <= std::numeric_limits<Uint32>::max())
             {
-                boneDataSize = static_cast<Uint32>(boneBytes);
-                if (EnsureBoneBufferCapacity(boneDataSize))
-                {
-                    void* mapped = SDL_MapGPUTransferBuffer(s_device, s_boneTransferBuf, true);
-                    if (mapped)
-                    {
-                        std::memcpy(mapped, s_boneRowScratch.data(), boneDataSize);
-                        SDL_UnmapGPUTransferBuffer(s_device, s_boneTransferBuf);
-                        boneDataReady = true;
-                    }
-                }
+                const Uint32 boneDataSize = static_cast<Uint32>(boneBytes);
+                boneDataReady = EnsureBoneBufferCapacity(boneDataSize) &&
+                                StageAppended(s_boneTransferBuf, s_boneGpuBuf, s_boneRowScratch.data(), boneDataSize,
+                                              s_stagedBones, bufferUploads);
             }
         }
 
-        bool stripIdxReady = false;
-        if (!s_stripIdxScratch.empty())
+        // EnsureStripIndexBuffer may release/create GPU resources, so it runs before the copy pass.
+        if (!s_stripIdxScratch.empty() && EnsureStripIndexBuffer(static_cast<Uint32>(s_stripIdxScratch.size())))
         {
-            // Ensure GPU-side strip index buffer is large enough BEFORE the copy pass
-            // (EnsureStripIndexBuffer may release/create GPU resources).
-            if (EnsureStripIndexBuffer(static_cast<Uint32>(s_stripIdxScratch.size())))
-            {
-                void* pIdxMapped = SDL_MapGPUTransferBuffer(s_device, s_stripIdxTransfer, true);
-                if (pIdxMapped)
-                {
-                    const Uint32 totalIdxBytes = static_cast<Uint32>(s_stripIdxScratch.size() * sizeof(Uint16));
-                    std::memcpy(pIdxMapped, s_stripIdxScratch.data(), totalIdxBytes);
-                    SDL_UnmapGPUTransferBuffer(s_device, s_stripIdxTransfer);
-                    stripIdxReady = true;
-                }
-            }
+            const Uint32 totalIdxBytes = static_cast<Uint32>(s_stripIdxScratch.size() * sizeof(Uint16));
+            StageAppended(s_stripIdxTransfer, s_stripIdxBuf, s_stripIdxScratch.data(), totalIdxBytes,
+                          s_stagedStripIndices, bufferUploads);
         }
 
         // Prepare texture update transfer buffers BEFORE the copy pass.
@@ -1841,55 +1855,22 @@ public:
             }
         }
 
-        if (s_vtxOffset > 0u || boneDataSize > 0u || stripIdxReady || !preparedTexUploads.empty())
+        if (!bufferUploads.empty() || !preparedTexUploads.empty())
         {
             SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(s_cmdBuf);
             if (copyPass)
             {
-                // Copy vertex data.
-                if (s_vtxOffset > 0u && vertexDataReady)
+                for (const BufferUpload& upload : bufferUploads)
                 {
-                    SDL_GPUTransferBufferLocation vtxSrc{};
-                    vtxSrc.transfer_buffer = s_vtxTransferBuf;
-                    vtxSrc.offset = 0;
+                    SDL_GPUTransferBufferLocation source{};
+                    source.transfer_buffer = upload.transfer;
 
-                    SDL_GPUBufferRegion vtxDst{};
-                    vtxDst.buffer = s_vtxGpuBuf;
-                    vtxDst.offset = 0;
-                    vtxDst.size = s_vtxOffset;
+                    SDL_GPUBufferRegion destination{};
+                    destination.buffer = upload.buffer;
+                    destination.offset = upload.offset;
+                    destination.size = upload.size;
 
-                    SDL_UploadToGPUBuffer(copyPass, &vtxSrc, &vtxDst, true);
-                }
-
-                if (boneDataSize > 0u && boneDataReady)
-                {
-                    SDL_GPUTransferBufferLocation boneSrc{};
-                    boneSrc.transfer_buffer = s_boneTransferBuf;
-                    boneSrc.offset = 0;
-
-                    SDL_GPUBufferRegion boneDst{};
-                    boneDst.buffer = s_boneGpuBuf;
-                    boneDst.offset = 0;
-                    boneDst.size = boneDataSize;
-
-                    SDL_UploadToGPUBuffer(copyPass, &boneSrc, &boneDst, true);
-                }
-
-                // Copy accumulated strip index data (all strips for this frame).
-                if (stripIdxReady)
-                {
-                    const Uint32 totalIdxBytes = static_cast<Uint32>(s_stripIdxScratch.size() * sizeof(Uint16));
-
-                    SDL_GPUTransferBufferLocation idxSrc{};
-                    idxSrc.transfer_buffer = s_stripIdxTransfer;
-                    idxSrc.offset = 0;
-
-                    SDL_GPUBufferRegion idxDst{};
-                    idxDst.buffer = s_stripIdxBuf;
-                    idxDst.offset = 0;
-                    idxDst.size = totalIdxBytes;
-
-                    SDL_UploadToGPUBuffer(copyPass, &idxSrc, &idxDst, true);
+                    SDL_UploadToGPUBuffer(copyPass, &source, &destination, upload.cycle);
                 }
 
                 // Upload queued dynamic texture updates.
@@ -2730,8 +2711,9 @@ public:
     // without extra bookkeeping here.
     [[nodiscard]] FrameGpuContext GetFrameGpuContext() override
     {
+        // Every frame target has the swapchain's format, and the main one exists only when that format can be sampled.
         return FrameGpuContext{s_cmdBuf, s_frameColorTarget ? s_frameColorTarget : s_swapchainTexture, s_swapW,
-                               s_swapH};
+                               s_swapH, s_frameColorTarget != nullptr && s_mainColorTarget != nullptr};
     }
 
     // RmlUi port: looks up s_textureMap directly rather than going through ResolveTextureId(),

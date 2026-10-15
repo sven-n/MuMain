@@ -147,6 +147,9 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
     LoadBundledFonts();
 
     m_Context = Rml::CreateContext("main", Rml::Vector2i(windowWidth, windowHeight));
+    // Every window keeps its document loaded and hidden; only the shown ones need a per-frame update.
+    if (m_Context)
+        m_Context->SetSkipHiddenDocuments(true);
 
     RefreshScale();
 
@@ -369,7 +372,7 @@ void RmlUiRuntime::Render()
     if (!ctx.commandBuffer || !ctx.swapchainTexture) return;
 
     FRAME_PROFILE(RmlUiRender);
-    m_RenderInterface->BeginFrame(ctx.commandBuffer, ctx.swapchainTexture, ctx.width, ctx.height);
+    m_RenderInterface->BeginFrame(ctx.commandBuffer, ctx.swapchainTexture, ctx.width, ctx.height, ctx.drawable);
     m_Context->Render();
     m_RenderInterface->EndFrame();
 }
