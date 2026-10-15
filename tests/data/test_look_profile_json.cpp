@@ -247,3 +247,41 @@ TEST_CASE("a look profile file is read from disk [data][look]")
     CHECK_MESSAGE(loaded.issues.empty(), Messages(loaded.issues));
     CHECK(loaded.data.ForWorld(Dungeon)[LookValue::GradingStrength] == doctest::Approx(0.8));
 }
+
+TEST_CASE("the shipped look profile holds the tuned Enhanced values [data][look]")
+{
+    // MU_TEST_DATA_DIR is the client folder's Data; the file name starts with it.
+    const std::filesystem::path file =
+        std::filesystem::path(MU_TEST_DATA_DIR).parent_path() / Data::Maps::LookProfileFile;
+    const Data::Maps::LookProfileLoadResult loaded = Data::Maps::LoadLookProfileFile(file);
+
+    CHECK_MESSAGE(loaded.issues.empty(), Messages(loaded.issues));
+    // The tuned Enhanced look; unlisted values stay at their built-in value.
+    const std::pair<LookValue, double> accepted[] = {
+        {LookValue::DiffuseScale, 1.0},        {LookValue::DiffuseAmbient, 0.3},
+        {LookValue::DiffuseFloor, 0.15},       {LookValue::RimStrength, 0.4},
+        {LookValue::DynamicWrap, 0.3},         {LookValue::DynamicMapSmoothing, 0.5},
+        {LookValue::DynamicEffectGain, 2.5},   {LookValue::DynamicEffectRange, 3.0},
+        {LookValue::DynamicEffectRangeMax, 8}, {LookValue::DynamicEffectFade, 0.5},
+        {LookValue::DynamicEffectCap, 2.5},    {LookValue::BloomStrength, 1.0},
+        {LookValue::BloomLevelFalloff, 0.6},
+    };
+    for (const Data::Maps::LookValueInfo& info : Data::Maps::LookValueInfos())
+    {
+        CAPTURE(info.name);
+        // The file names every value.
+        REQUIRE(loaded.data.defaultOverrides[info.value].has_value());
+        double expected = info.builtIn;
+        for (const auto& [value, number] : accepted)
+        {
+            if (value == info.value)
+            {
+                expected = number;
+            }
+        }
+        CHECK(*loaded.data.defaultOverrides[info.value] == doctest::Approx(expected));
+    }
+    // Icarus: less bloom, which widened its fog clouds.
+    CHECK(loaded.data.ForWorld(Icarus)[LookValue::BloomStrength] == doctest::Approx(0.3));
+    CHECK(loaded.data.ForWorld(Lorencia)[LookValue::BloomStrength] == doctest::Approx(1.0));
+}
