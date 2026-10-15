@@ -41,7 +41,9 @@
 }
 
 /* The bar and its dragons (0.97: bar at y 432, dragons 108x45 at x 0 and 532, y 387). The bar
-   takes the pointer so clicks on it don't reach the world; the dragons don't. */
+   takes the pointer so clicks on it don't reach the world; the dragons don't. A window docked on a
+   side covers that side's dragon, as in 0.97: the theme stacks the HUD under the windows
+   (theme.ini [Stacking]). */
 #hud_strip { left: 0dp; top: 0dp; width: 640dp; height: 48dp; pointer-events: auto; }
 .frame-art { position: absolute; top: 0dp; height: 48dp; pointer-events: none; }
 #frame_left   { left: 0dp;   width: 256dp; decorator: image(classic-hud-bar-left); }

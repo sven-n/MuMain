@@ -124,10 +124,12 @@ letters, digits, `_` and `-` and are normalized to lowercase. Missing ancestors,
 and inheritance cycles make a theme unavailable for selection.
 
 `[Stacking]` moves one of the theme's documents in the stacking order, when its layout makes two
-documents overlap the other way round. `chat_input.rml=10.65` puts the chat input over the HUD
-(`main_frame.rml`, 10.6) and under the tooltips (10.69). The depths are the original windows'
-layer depths, listed in `UI/RmlBridge/RmlStackingOrder.cpp`; a document the theme does not list
-keeps its own.
+documents overlap the other way round. The classic theme puts its HUD under the windows
+(`main_frame.rml=1.95`; the lowest window is 2.0), so a window docked or dragged over the bar's
+ends covers the dragons there, as in 0.97, and its chat input over the windows and under the
+tooltips (`chat_input.rml=10.65`; tooltips are 10.69). The depths are the original windows' layer
+depths, listed in `UI/RmlBridge/RmlStackingOrder.cpp`; a document the theme does not list keeps
+its own.
 
 1. Create `src/bin/Data/Interface/RmlUi/themes/<your-theme-name>/`.
 2. Declare `Base=legacy` or `Base=modern` in `[Theme]`, or supply your own complete stylesheets.
@@ -408,8 +410,7 @@ What changes for the player, besides the look:
 
 The HUD model also exposes what the 0.97 bar shows and the S6 bar does not: `party_open` /
 `guild_open` with `mainframe_party_click` / `mainframe_guild_click` and their tooltips,
-`coord_x` / `coord_y`, and `left_covered` / `right_covered` (a docked window covers that side
-of the world).
+and `coord_x` / `coord_y`.
 
 The character creation model has `job_previous` / `job_next`: the enabled class before and after
 the selected one, or -1, for a theme that steps through the classes with arrows
