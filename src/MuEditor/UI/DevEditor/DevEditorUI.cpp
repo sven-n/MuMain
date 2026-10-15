@@ -15,6 +15,7 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "UI/Console/MuEditorConsoleUI.h"
 #include "UI/Common/MuEditorWindowIds.h"
+#include "UI/Common/MuEditorLayout.h"
 
 // External C functions
 extern "C" CameraManager& CameraManager_Instance();
@@ -89,6 +90,7 @@ void CDevEditorUI::Render(bool* p_open)
 
     ImGui::SetNextWindowSize(ImVec2(450, 500), ImGuiCond_FirstUseEver);
     char title[MuEditor::WindowIds::TitleCapacity];
+    MuEditor::Layout::PrepareToolWindow();
     if (!ImGui::Begin(MuEditor::WindowIds::Title(title, I18N::Editor::DevEditor, MuEditor::WindowIds::DevEditor),
                       p_open))
     {

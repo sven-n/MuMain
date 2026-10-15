@@ -4,6 +4,7 @@
 
 #include "MapEditorUI.h"
 #include "UI/Common/MuEditorWindowIds.h"
+#include "UI/Common/MuEditorLayout.h"
 #include "MapEditorSave.h"
 #include "MapAttributeSave.h"
 #include "MapEditorFileUtil.h"
@@ -223,17 +224,23 @@ void CMapEditorUI::Render(bool* p_open)
     }
 
     ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin(MuEditor::WindowIds::MapEditor, p_open))
+    MuEditor::Layout::PrepareToolWindow();
+    const bool panelDrawn = ImGui::Begin(MuEditor::WindowIds::MapEditor, p_open);
+    // Docked behind another tab or in a minimized editor window, the panel is
+    // out of sight as if closed; it takes the world again when it shows. Not
+    // drawn for a frame while its dock node gets its window: keep edit mode
+    // as-is.
+    const bool behindAnotherTab = !panelDrawn && ImGui::IsWindowDocked();
+    const bool inMinimizedWindow = (ImGui::GetWindowViewport()->Flags & ImGuiViewportFlags_IsMinimized) != 0;
+    if (behindAnotherTab || inMinimizedWindow)
     {
-        // Docked behind another tab, the panel is out of sight as if closed; it
-        // takes the world again when its tab shows. Collapsed but still open:
-        // keep edit mode as-is.
-        const bool behindAnotherTab = ImGui::IsWindowDocked();
         ImGui::End();
-        if (behindAnotherTab)
-        {
-            ReleaseWorld();
-        }
+        ReleaseWorld();
+        return;
+    }
+    if (!panelDrawn)
+    {
+        ImGui::End();
         return;
     }
 

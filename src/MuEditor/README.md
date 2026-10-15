@@ -153,6 +153,7 @@ Game console captures all standard output automatically via console redirection.
 // In CMuEditorCore::Render(), after g_MuEditorUI.Render(...)
 if (m_bShowMyWindow)
 {
+    MuEditor::Layout::PrepareToolWindow();  // its tab, also when floating
     if (ImGui::Begin("My Window", &m_bShowMyWindow))
     {
         ImGui::Text("Custom content here");

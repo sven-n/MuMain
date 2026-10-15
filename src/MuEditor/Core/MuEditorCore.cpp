@@ -12,6 +12,7 @@
 #include <SDL3/SDL_mouse.h>
 #include <SDL3/SDL_video.h>
 #include "MuInputBlockerCore.h"
+#include "MuEditorPlatformWindows.h"
 #include "Core/Input/SyntheticInput.h"
 #include "../Config/MuEditorConfig.h"
 #include "../MuEditor/UI/Common/MuEditorCenterPaneUI.h"
@@ -225,9 +226,11 @@ void CMuEditorCore::Initialize(SDL_Window* window)
 
     // The editor's windows dock into one another and can leave the game window
     // (an OS window each, see SelectWindowMode), staying in front of it: the
-    // platform backend makes them children of the game window.
+    // platform backend makes them children of the game window. Those windows
+    // have the OS title bar with its minimize, maximize and close buttons.
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.ConfigViewportsNoDefaultParent = false;
+    io.ConfigViewportsNoDecoration = false;
     m_pGameWindow = window;
     // ImGui sees the game window's keys too, and its Ctrl+Tab window switch
     // (force attack and the minimap in the game) would move the keyboard into
@@ -422,6 +425,8 @@ void CMuEditorCore::Initialize(SDL_Window* window)
         return;
     }
 
+    MuEditor::PlatformWindows::Install();
+
     fwprintf(stderr, L"[MuEditor] ImGui backends initialized\n");
     fflush(stderr);
 
@@ -505,6 +510,9 @@ void CMuEditorCore::Update()
 
         ImGui::NewFrame();
         m_bFrameStarted = true;
+
+        // Once per ImGui frame: a frame that carries over keeps its key presses.
+        ToggleFullscreenOnF11();
     }
 
     // When editor is closed, check for "Open Editor" button click (after ImGui frame started)
@@ -522,6 +530,22 @@ void CMuEditorCore::Update()
     else
     {
         BlockGameInputOverEditor();
+    }
+}
+
+void CMuEditorCore::ToggleFullscreenOnF11()
+{
+    // F11 in one of the editor's own windows; in the game window it stays the
+    // game's (the game reads no keys pressed in the editor's windows). Not for
+    // the borderless windows of popups and tooltips.
+    if (!m_bEditorMode || !ImGui::IsKeyPressed(ImGuiKey_F11, false))
+    {
+        return;
+    }
+    SDL_Window* keyboardWindow = SDL_GetKeyboardFocus();
+    if (IsEditorWindow(keyboardWindow) && (SDL_GetWindowFlags(keyboardWindow) & SDL_WINDOW_BORDERLESS) == 0)
+    {
+        MuEditor::PlatformWindows::ToggleFullscreen(keyboardWindow);
     }
 }
 
@@ -659,7 +683,19 @@ bool CMuEditorCore::IsKeyboardInEditorWindow() const
 
 bool CMuEditorCore::IsMouseInEditorWindow() const
 {
-    return IsEditorWindow(SDL_GetMouseFocus());
+    if (!m_bInitialized)
+    {
+        return false;
+    }
+    // Over a window's frame and title bar SDL reports no window. A held button
+    // keeps the window it was pressed in, whatever is under the mouse now.
+    SDL_Window* focus = SDL_GetMouseFocus();
+    if (focus != nullptr)
+    {
+        return IsEditorWindow(focus);
+    }
+    const bool buttonHeld = SDL_GetMouseState(nullptr, nullptr) != 0;
+    return !buttonHeld && MuEditor::PlatformWindows::IsMouseOverOsWindow();
 }
 
 bool CMuEditorCore::ClaimsEvent(const SDL_Event& event)
@@ -749,7 +785,7 @@ void CMuEditorCore::Render()
         // Render console (if enabled)
         if (m_bShowConsole)
         {
-            g_MuEditorConsoleUI.Render();
+            g_MuEditorConsoleUI.Render(&m_bShowConsole);
         }
     }
     else

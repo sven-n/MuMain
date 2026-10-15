@@ -21,6 +21,10 @@ WindowRect FirstEditorWindowRect(float uiScale);
 // them out first when there is no layout yet or resetLayout is set: the console
 // along the bottom, the other tool windows as tabs above it.
 void SubmitDockSpace(bool resetLayout);
+
+// Call right before a tool window's Begin(): floating, it keeps a tab to drag
+// it back into a dock by (under the OS title bar when it is a window of its own).
+void PrepareToolWindow();
 } // namespace MuEditor::Layout
 
 #endif // _EDITOR

@@ -16,6 +16,7 @@
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
+#include "../MuEditor/UI/Common/MuEditorLayout.h"
 
 // Mutex for thread-safe console access
 static std::mutex g_consoleMutex;
@@ -293,8 +294,7 @@ void CMuEditorConsoleUI::LogGame(const std::string& message)
     WriteToLogFile("[GAME] " + message);
 }
 
-
-void CMuEditorConsoleUI::Render()
+void CMuEditorConsoleUI::Render(bool* open)
 {
     // Docked along the bottom of the editor window at first; movable like the
     // other tool windows.
@@ -302,7 +302,8 @@ void CMuEditorConsoleUI::Render()
 
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.1f, 0.1f, 0.1f, 0.9f));
 
-    if (ImGui::Begin(MuEditor::WindowIds::Console, nullptr, flags))
+    MuEditor::Layout::PrepareToolWindow();
+    if (ImGui::Begin(MuEditor::WindowIds::Console, open, flags))
     {
         // Check if hovering this window or any of its children
         if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))

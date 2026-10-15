@@ -5,6 +5,7 @@
 #include "MuEditorLayout.h"
 
 #include "MuEditorWindowIds.h"
+#include "../MuEditor/Core/MuEditorPlatformWindows.h"
 #include "imgui_internal.h"
 
 #include <algorithm>
@@ -41,30 +42,33 @@ namespace MuEditor::Layout
 WindowRect FirstEditorWindowRect(float uiScale)
 {
     ImGuiViewport* game = ImGui::GetMainViewport();
-    const ImGuiPlatformMonitor* monitor = ImGui::GetViewportPlatformMonitor(game);
     const float width = std::min(EditorWindowWidth * uiScale, game->Size.x);
-    const ImVec2 size(width, std::min(game->Size.y, monitor->WorkSize.y));
-
     const float gameRight = game->Pos.x + game->Size.x;
-    float x = gameRight - width;
     // Inside the game window, the only place it can be, while the editor's
     // windows stay in it.
     if ((ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) == 0)
     {
-        return {ImVec2(x, game->Pos.y), ImVec2(width, game->Size.y)};
+        return {ImVec2(gameRight - width, game->Pos.y), ImVec2(width, game->Size.y)};
     }
 
+    // Positions are of the client area; the OS title bar comes on top of it,
+    // as tall as the game window's.
+    const float titleBar = MuEditor::PlatformWindows::GameTitleBarHeight();
+    const ImGuiPlatformMonitor* monitor = ImGui::GetViewportPlatformMonitor(game);
+    const float height = std::min(game->Size.y, monitor->WorkSize.y - titleBar);
     const float roomRight = monitor->WorkPos.x + monitor->WorkSize.x - gameRight;
     const float roomLeft = game->Pos.x - monitor->WorkPos.x;
     if (roomRight >= width)
     {
-        x = gameRight;
+        return {ImVec2(gameRight, game->Pos.y), ImVec2(width, height)};
     }
-    else if (roomLeft >= width)
+    if (roomLeft >= width)
     {
-        x = game->Pos.x - width;
+        return {ImVec2(game->Pos.x - width, game->Pos.y), ImVec2(width, height)};
     }
-    return {ImVec2(x, game->Pos.y), size};
+    // Over the right of the game window, below the game's title bar and its
+    // buttons.
+    return {ImVec2(gameRight - width, game->Pos.y + titleBar), ImVec2(width, height - titleBar)};
 }
 
 void SubmitDockSpace(bool resetLayout)
@@ -76,6 +80,13 @@ void SubmitDockSpace(bool resetLayout)
         BuildDefaultLayout(dockSpace, ImMax(ImGui::GetContentRegionAvail(), ImVec2(1.0f, 1.0f)));
     }
     ImGui::DockSpace(dockSpace);
+}
+
+void PrepareToolWindow()
+{
+    ImGuiWindowClass toolWindow;
+    toolWindow.DockingAlwaysTabBar = true;
+    ImGui::SetNextWindowClass(&toolWindow);
 }
 } // namespace MuEditor::Layout
 

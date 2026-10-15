@@ -7,6 +7,7 @@
 #include "imgui.h"
 #include "MuEditorLayout.h"
 #include "../MuEditor/Core/MuEditorCore.h"
+#include "../MuEditor/Core/MuEditorPlatformWindows.h"
 #include "../MuEditor/Config/MuEditorConfig.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "I18N/All.h"
@@ -143,9 +144,15 @@ void CMuEditorUI::RenderEditorWindow(bool& editorEnabled, bool& showItemEditor, 
     ownWindow.ViewportFlagsOverrideSet = ImGuiViewportFlags_NoAutoMerge | ImGuiViewportFlags_NoFocusOnAppearing;
     ImGui::SetNextWindowClass(&ownWindow);
 
+    // In an OS window of its own the OS title bar and frame replace ImGui's
+    // title bar, moving and sizing.
+    const bool ownOsWindow = (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) != 0;
+    const ImGuiWindowFlags osFrame =
+        ownOsWindow ? ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize
+                    : ImGuiWindowFlags_None;
     bool open = true;
     ImGui::Begin(EDITOR_WINDOW_NAME, &open,
-                 ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoCollapse);
+                 ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoCollapse | osFrame);
     // Its menu bar, dock space and docked windows count as the editor, also
     // while one of their widgets is held.
     if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_DockHierarchy |
@@ -155,8 +162,8 @@ void CMuEditorUI::RenderEditorWindow(bool& editorEnabled, bool& showItemEditor, 
     }
     if (ImGui::BeginMenuBar())
     {
-        RenderWindowsMenu(showItemEditor, showSkillEditor, showDevEditor, showMapEditor, showEffectBrowser,
-                          showConsole);
+        RenderWindowsMenu(showItemEditor, showSkillEditor, showDevEditor, showMapEditor, showEffectBrowser, showConsole,
+                          MuEditor::PlatformWindows::WindowOf(ImGui::GetWindowViewport()));
         RenderUIScale();
         RenderLanguageSelector();
         RenderCloseButton(editorEnabled);
@@ -174,7 +181,8 @@ void CMuEditorUI::RenderEditorWindow(bool& editorEnabled, bool& showItemEditor, 
 }
 
 void CMuEditorUI::RenderWindowsMenu(bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor,
-                                    bool& showMapEditor, bool& showEffectBrowser, bool& showConsole)
+                                    bool& showMapEditor, bool& showEffectBrowser, bool& showConsole,
+                                    SDL_Window* editorOsWindow)
 {
     if (!ImGui::BeginMenu("Windows"))
     {
@@ -190,6 +198,13 @@ void CMuEditorUI::RenderWindowsMenu(bool& showItemEditor, bool& showSkillEditor,
     if (ImGui::MenuItem("Reset Layout"))
     {
         m_bResetLayout = true;
+    }
+    // The editor window full screen (F11 in any of the editor's own windows);
+    // not while it is inside the game window.
+    if (ImGui::MenuItem("Fullscreen", "F11", MuEditor::PlatformWindows::IsFullscreen(editorOsWindow),
+                        editorOsWindow != nullptr))
+    {
+        MuEditor::PlatformWindows::ToggleFullscreen(editorOsWindow);
     }
     ImGui::EndMenu();
 }

@@ -44,6 +44,16 @@ anywhere, over the game window too, or onto another window to dock it there;
 **Windows > Reset Layout** docks them all back. The layout and the windows'
 places are kept between sessions (`imgui.ini` in the game folder).
 
+The editor window, and a tool window floating outside the game window, are
+ordinary windows with a title bar (minimize, maximize, close) and a taskbar
+button. Closing the editor window closes the editor. A floating tool window
+keeps its tab under the title bar: drag the tab, not the title bar, to dock it
+again. **Windows > Fullscreen** switches the editor window to full screen and
+back; **F11** does the same for whichever of the editor's windows has the
+keyboard (in the game window F11 stays the game's camera reset). On Windows,
+dragging or resizing an editor window by its title bar or frame pauses the
+game until the mouse is released, as it does for the game window.
+
 With the game in full-screen mode, on Wayland and on macOS, the editor's
 windows stay inside the game window instead.
 

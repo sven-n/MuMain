@@ -11,6 +11,7 @@
 #include "../MuEditor/Config/MuEditorConfig.h"
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
+#include "../MuEditor/UI/Common/MuEditorLayout.h"
 #include "I18N/All.h"
 #include "imgui.h"
 #include <algorithm>
@@ -91,13 +92,14 @@ void CMuItemEditorUI::Render(bool& showEditor)
     if (!ItemAttribute)
         return;
 
-    // Docked in the editor window or anywhere on the desktop: no bounds but a
-    // minimum size
+    // The size it first floats at; once docked (as a tool window always is,
+    // also when floating) its dock node sizes it
     ImGui::SetNextWindowSizeConstraints(ImVec2(400, 300), // Min size
                                         ImVec2(FLT_MAX, FLT_MAX));
 
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse;
     char title[MuEditor::WindowIds::TitleCapacity];
+    MuEditor::Layout::PrepareToolWindow();
     if (ImGui::Begin(MuEditor::WindowIds::Title(title, I18N::Editor::ItemEditor, MuEditor::WindowIds::ItemEditor),
                      &showEditor, flags))
     {

@@ -2,6 +2,8 @@
 
 #ifdef _EDITOR
 
+struct SDL_Window;
+
 class CMuEditorUI
 {
 public:
@@ -19,8 +21,10 @@ private:
     void RenderToolbarOpen(bool& editorEnabled);
     void RenderEditorWindow(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor,
                             bool& showMapEditor, bool& showEffectBrowser, bool& showConsole);
+    // editorOsWindow is the editor window's own OS window, null while it is
+    // inside the game window.
     void RenderWindowsMenu(bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor, bool& showMapEditor,
-                           bool& showEffectBrowser, bool& showConsole);
+                           bool& showEffectBrowser, bool& showConsole, SDL_Window* editorOsWindow);
     void RenderUIScale();
     void RenderLanguageSelector();
     void RenderCloseButton(bool& editorEnabled);

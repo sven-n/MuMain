@@ -70,6 +70,7 @@ private:
     void BlockGameInputOverOpenButton();
     void BlockGameInputOverEditor();
     void UpdateCursorVisibility();
+    void ToggleFullscreenOnF11();
     bool IsEditorWindow(SDL_Window* window) const;
 
     bool m_bEditorMode;

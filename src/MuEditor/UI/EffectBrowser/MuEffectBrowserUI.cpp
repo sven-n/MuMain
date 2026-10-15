@@ -8,6 +8,7 @@
 #include "EffectBrowserLabels.h"
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
+#include "../MuEditor/UI/Common/MuEditorLayout.h"
 #include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "I18N/All.h"
 #include "Render/Effects/EffectRegistry.h"
@@ -48,6 +49,7 @@ void CMuEffectBrowserUI::Render(bool* open)
                                     std::min(DefaultHeight * scale, screen.y * MaxDefaultScreenShare)),
                              ImGuiCond_FirstUseEver);
     char title[MuEditor::WindowIds::TitleCapacity];
+    MuEditor::Layout::PrepareToolWindow();
     if (!ImGui::Begin(
             MuEditor::WindowIds::Title(title, I18N::Editor::EffectBrowser, MuEditor::WindowIds::EffectBrowser), open,
             ImGuiWindowFlags_NoCollapse))
