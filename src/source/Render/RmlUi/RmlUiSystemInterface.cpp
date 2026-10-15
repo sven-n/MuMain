@@ -33,7 +33,7 @@ bool RmlUiSystemInterface::LogMessage(Rml::Log::Type type, const Rml::String& me
         case Rml::Log::LT_DEBUG:   tag = L"[RmlUi][Debug]";   break;
         default: break;
     }
-    g_ErrorReport.Write(L"%s %s\r\n", tag, StringUtils::NarrowToWide(message).c_str());
+    g_ErrorReport.Write(L"%ls %ls\r\n", tag, StringUtils::NarrowToWide(message).c_str());
     return true; // continue execution -- never break into the debugger from here
 }
 

@@ -10,6 +10,9 @@
 // Defined in UIWindows.cpp; declared per translation unit across the UI, with no header.
 void SetLineColor(int iType, float fAlphaRate = 1.0f);
 
+// Window-active flag from Winmain.cpp.
+extern bool g_bWndActive;
+
 namespace UI::HUD
 {
 SlideLane::SlideLane()
@@ -412,7 +415,6 @@ void SlideTicker::Init()
     //m_HelpSlide.SetPosition(0, 429);
     //m_NoticeSlide.SetPosition(0, 429);
 
-    extern bool g_bWndActive;
     Core::Time::FrameTimerScheduler::Instance().SetRepeating(
         SLIDEHELP_TIMER, m_iCreateDelay * 1000,
         [this] { if (g_bWndActive) CreateSlideText(); });
