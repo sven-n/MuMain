@@ -629,10 +629,10 @@ void CalcSuccessfulBlocking(ITEM* ip, ITEM_ATTRIBUTE* p)
         if (p->Level)
             ip->SuccessfulBlocking += p->SuccessfulBlocking * 25 / p->Level + 5;
     }
-    ip->SuccessfulBlocking += (std::min<int>(9, p->Level) * 3);	// ~ +9
-    if (p->Level - 9 > 0)
+    ip->SuccessfulBlocking += (std::min<int>(9, ip->Level) * 3); // ~ +9
+    if (ip->Level - 9 > 0)
     {
-        ip->SuccessfulBlocking += p->Level - 6;
+        ip->SuccessfulBlocking += ip->Level - 6;
     }
 }
 
@@ -640,10 +640,10 @@ void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
 {
     if (p->MagicDefense > 0)
     {
-        ip->MagicDefense += (std::min<int>(9, p->Level) * 3);	// ~ +9
-        if(p->Level - 9 > 0)
+        ip->MagicDefense += (std::min<int>(9, ip->Level) * 3); // ~ +9
+        if (ip->Level - 9 > 0)
         {
-            ip->MagicDefense += p->Level - 6;
+            ip->MagicDefense += ip->Level - 6;
         }
     }
 
