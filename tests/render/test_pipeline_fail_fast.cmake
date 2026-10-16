@@ -79,6 +79,10 @@ require_source("${renderer_source}" "constexpr[ \t]+int[ \t]+k_PipelineCount[ \t
 require_shader_load_assignment(s_vertShader2D basic_textured vert VERTEX)
 require_shader_load_assignment(s_fragShaderTex basic_textured frag FRAGMENT)
 require_shader_load_assignment(s_vertShaderSkinned skinned_textured vert VERTEX)
+require_shader_load_assignment(s_vertShaderSkinnedShadow skinned_shadow vert VERTEX)
+require_source("${executable_load_source}"
+    "s_vertShaderSkinnedShadow[ \t\r\n]*=[^;]*createShader[^;]*\"skinned_shadow\"[^;]*SDL_GPU_SHADERSTAGE_VERTEX[^;]*false[ \t\r\n]*\\);"
+    "skinned_shadow.vert must be optional")
 require_source("${executable_load_source}"
     "s_vertShaderSkinned[ \t\r\n]*=[^;]*createShader[^;]*\"skinned_textured\"[^;]*SDL_GPU_SHADERSTAGE_VERTEX[^;]*true[ \t\r\n]*\\);"
     "skinned_textured.vert must be fatal")
@@ -93,8 +97,8 @@ string(REGEX MATCHALL "buildRequiredPipeline[ \t\r\n]*\\(" required_calls "${cre
 string(REGEX MATCHALL "buildOptionalPipeline[ \t\r\n]*\\(" optional_calls "${create_source}")
 list(LENGTH required_calls required_call_count)
 list(LENGTH optional_calls optional_call_count)
-if(NOT required_call_count EQUAL 9 OR NOT optional_call_count EQUAL 1)
-    message(FATAL_ERROR "CreatePipelines must build exactly nine required sets and one optional set")
+if(NOT required_call_count EQUAL 9 OR NOT optional_call_count EQUAL 3)
+    message(FATAL_ERROR "CreatePipelines must build exactly nine required sets and three optional sets")
 endif()
 
 require_pipeline_descriptor(buildOptionalPipeline s_pipelines2D "2d-depth-on" true true TwoDimensional false)
@@ -107,8 +111,12 @@ require_pipeline_descriptor(buildRequiredPipeline s_pipelinesSkinned "skinned-cu
 require_pipeline_descriptor(buildRequiredPipeline s_pipelinesSkinnedNoCull "skinned-no-cull" true true Skinned false)
 require_pipeline_descriptor(buildRequiredPipeline s_pipelinesSkinnedDepthOff "skinned-depth-off" false false Skinned false)
 require_pipeline_descriptor(buildRequiredPipeline s_pipelinesSkinnedDepthReadOnly "skinned-depth-read-only" true false Skinned false)
+require_pipeline_descriptor(buildOptionalPipeline s_pipelinesSkinnedShadow "skinned-shadow" true false SkinnedShadow false)
+require_pipeline_descriptor(buildOptionalPipeline s_pipelinesSkinnedShadowDepthOff "skinned-shadow-depth-off" false false SkinnedShadow false)
 reject_source("${create_source}" "if[ \t\r\n]*\\([ \t\r\n]*s_vertShaderSkinned[ \t\r\n]*\\)"
     "required skinned pipelines must not be guarded")
+require_source("${create_source}" "if[ \t\r\n]*\\([ \t\r\n]*s_vertShaderSkinnedShadow[ \t\r\n]*\\)"
+    "shadow pipelines must be skipped without their optional shader")
 
 require_source("${create_source}" "requiredFailureCount[ \t\r\n]*!=[ \t\r\n]*0" "required failures must be aggregated")
 require_source("${create_source}" "firstRequiredError" "the first required SDL error must be retained")
@@ -123,12 +131,12 @@ require_source("${renderer_source}" "depth_write=\\{\\}" "pipeline diagnostics m
 require_source("${renderer_source}" "cull=\\{\\}" "pipeline diagnostics must include cull state")
 require_source("${renderer_source}" "error=\\{\\}" "pipeline diagnostics must include the SDL error")
 require_source("${build_source}"
-    "pipelineInfo\\.vertex_shader[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinned[ \t\r\n]*:[ \t\r\n]*s_vertShader2D"
+    "pipelineInfo\\.vertex_shader[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinned[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedShadow[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinnedShadow[ \t\r\n]*:[ \t\r\n]*s_vertShader2D"
     "pipeline vertex shader handles must remain selected from the pipeline layout")
 require_source("${build_source}" "pipelineInfo\\.fragment_shader[ \t\r\n]*=[ \t\r\n]*s_fragShaderTex"
     "pipeline fragment shader handle must remain basic_textured.frag")
 require_source("${log_source}"
-    "vertexShaderName[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*\"skinned_textured\\.vert\"[ \t\r\n]*:[ \t\r\n]*\"basic_textured\\.vert\""
+    "vertexShaderName[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*\"skinned_textured\\.vert\"[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedShadow[ \t\r\n]*\\?[ \t\r\n]*\"skinned_shadow\\.vert\"[ \t\r\n]*:[ \t\r\n]*\"basic_textured\\.vert\""
     "pipeline diagnostics must map the built vertex layout to its exact shader identifier")
 require_source("${log_source}" "fragmentShaderName[ \t\r\n]*=[ \t\r\n]*\"basic_textured\\.frag\""
     "pipeline diagnostics must name the exact fragment shader identifier")

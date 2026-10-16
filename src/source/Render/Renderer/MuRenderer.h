@@ -130,6 +130,16 @@ struct SkinningParameters
     bool lightEnabled = false;
 };
 
+// Where a body shadow lands, as CalcShadowPosition() puts it there.
+struct ShadowProjection
+{
+    float origin[3]{};
+    float shearX = 0.0f;        // sx
+    float shearHeight = 0.0f;   // sy
+    float specialHeight = 0.0f; // the height of TW_HEIGHT cells
+    bool terrain = true;        // false in the scenes where RequestTerrainHeight() returns 0
+};
+
 // RmlUi port: the current frame's raw SDL_GPU submission context. RmlUi's own vendored
 // RenderInterface_SDL_GPU (ThirdParty/RmlUi/Backends/) manages its own pipelines/buffers but
 // needs the active command buffer + swapchain texture to record into and present through --
@@ -222,6 +232,30 @@ public:
     virtual void ReleaseSkinnedMesh(const void* mesh)
     {
         (void)mesh;
+    }
+
+    // A cached mesh drawn as its ground shadow, with the active texture, blend and depth test state and depth
+    // writes off. Needs SetTerrainHeights() this frame. False means the caller draws the shadow itself.
+    [[nodiscard]] virtual bool RenderCachedSkinnedShadow(const void* mesh, std::uint32_t color,
+                                                         const SkinningParameters& parameters,
+                                                         const ShadowProjection& projection)
+    {
+        (void)mesh;
+        (void)color;
+        (void)parameters;
+        (void)projection;
+        return false;
+    }
+
+    // The map's heights and wall flags (TERRAIN_SIZE * TERRAIN_SIZE each) for shaders that follow the
+    // ground, copied again only when `version` changes. False means the GPU has no heights to read.
+    [[nodiscard]] virtual bool SetTerrainHeights(std::span<const float> heights, std::span<const std::uint16_t> walls,
+                                                 std::uint32_t version)
+    {
+        (void)heights;
+        (void)walls;
+        (void)version;
+        return false;
     }
 
     // Render a quad strip from world-space vertices (requires >= 4 vertices, even count ideal).

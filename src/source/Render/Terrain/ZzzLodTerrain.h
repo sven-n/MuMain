@@ -78,6 +78,10 @@ void ResetFrustrumBoundsFullTerrain();  // Set bounds to cover entire terrain (f
 void CreateLodBuffer();
 
 float RequestTerrainHeight(float xf, float yf);
+// Changes whenever BackTerrainHeight or a cell's TW_HEIGHT bit may have changed.
+unsigned int TerrainHeightVersion();
+// For code that writes BackTerrainHeight or TerrainWall directly instead of through the functions here.
+void MarkTerrainHeightsChanged();
 
 // Debug visualization
 void RenderDebugSphere(const vec3_t center, float radius, float r, float g, float b);

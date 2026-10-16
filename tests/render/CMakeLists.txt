@@ -39,6 +39,12 @@ mu_add_test(
         ${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/RangeAllocator.cpp
 )
 
+mu_add_test(
+    NAME terrain_height_grid_tests
+    SOURCES
+        test_terrain_height_grid.cpp
+)
+
 # The OZT reader of CGlobalBitmap::OpenTga, without the renderer. It also reads
 # the OZT files shipped in src/bin/Data.
 mu_add_test(

@@ -14,6 +14,7 @@ set(MU_SHADER_STAGE_NAMES
     basic_colored.vert
     basic_colored.frag
     skinned_textured.vert
+    skinned_shadow.vert
     shadow_volume.vert
 )
 set(MU_SHADER_BLOB_FORMATS spv msl dxil)

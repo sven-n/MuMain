@@ -411,6 +411,9 @@ private:
         std::uint32_t color) const;
     void AddMeshShadowTriangles(int blendMesh, int hiddenMesh, int startMesh, int endMesh, float sx, float sy,
         std::uint32_t color) const;
+    // The same shadow from a cached rest-pose stream skinned on the GPU; false leaves it to the CPU.
+    [[nodiscard]] bool RenderGpuMeshShadow(int blendMesh, int hiddenMesh, int startMesh, int endMesh, float sx,
+        float sy, std::uint32_t color) const;
 };
 
 extern BMD* Models;
