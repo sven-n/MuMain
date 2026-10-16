@@ -178,13 +178,13 @@ void UpdateSummary(DiagnosticsModel& model, const FrameSummary& summary)
     model.frameMs = summary.frameMs;
     model.cpu = summary.cpu;
     model.vsync = summary.vsync;
-    // Each bar is the slowest frame of its group, so a spike still shows with a fifth of the bars.
+    // Each bar is the slowest frame of its group, so a spike still shows with a fifth of the bars. The
+    // bar count never changes: a shrinking array leaves RmlUi evaluating the bars it is about to remove.
     const size_t samples = summary.history.size();
-    const size_t bars = std::min(samples, GraphBars);
-    model.history.assign(bars, 0.f);
+    model.history.assign(GraphBars, 0.f);
     for (size_t i = 0; i < samples; ++i)
     {
-        float& bar = model.history[i * bars / samples];
+        float& bar = model.history[samples <= GraphBars ? i : i * GraphBars / samples];
         bar = std::max(bar, summary.history[(summary.oldestSample + i) % samples]);
     }
 }
