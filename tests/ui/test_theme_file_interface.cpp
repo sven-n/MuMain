@@ -69,6 +69,7 @@ struct Fixture
         }
         Rml::Shutdown();
         UI::RmlBridge::ClearThemeFontCache();
+        UI::RmlBridge::SetSelectedFontFamily({});
         Rml::SetFileInterface(nullptr);
         Rml::SetRenderInterface(nullptr);
         std::filesystem::remove_all(root);
@@ -230,7 +231,7 @@ TEST_CASE("focused confirmation input claims its document and accepts Enter and 
     int cancelled = 0;
     mu::ui::window::GenericDialogConfig config;
     config.showCancel = true;
-    config.input.emplace();
+    config.input = mu::ui::window::GenericDialogConfig::InputField{};
     config.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
     config.onPrimary = [&] { ++accepted; };
     config.onCancel = [&] { ++cancelled; };
@@ -473,6 +474,35 @@ TEST_CASE("system font paths expand environment variables and missing files rema
     UI::RmlBridge::LoadThemeFonts(theme);
     CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-body") == std::optional<std::string>("Liberation Sans"));
     CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-title") == std::optional<std::string>("Liberation Sans"));
+}
+
+TEST_CASE("a loaded font selection replaces the body and title tokens only [ui][rml-theme]")
+{
+    Fixture fixture;
+    for (const char* name : {"LiberationSans-Regular.ttf", "DejaVuSans.ttf"})
+        REQUIRE(Rml::LoadFontFace((std::filesystem::path(MU_FONT_DIR) / name).generic_string()));
+    fixture.Write(fixture.Theme("child") / "tokens.ini",
+                  "[Tokens]\nfont-body=DejaVu Sans\nfont-title=DejaVu Sans\nfont-icon=DejaVu Sans\n");
+    const UI::RmlBridge::ThemeInheritance theme(fixture.Theme("child"));
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-body") == std::optional<std::string>("DejaVu Sans"));
+    UI::RmlBridge::SetSelectedFontFamily("Liberation Sans");
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-body") == std::optional<std::string>("Liberation Sans"));
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-title") == std::optional<std::string>("Liberation Sans"));
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-icon") == std::optional<std::string>("DejaVu Sans"));
+    UI::RmlBridge::SetSelectedFontFamily("Unavailable Test Family");
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-body") == std::optional<std::string>("DejaVu Sans"));
+}
+
+TEST_CASE("the native font token names the native text renderer's family [ui][rml-theme]")
+{
+    Fixture fixture;
+    for (const char* name : {"LiberationSans-Regular.ttf", "DejaVuSans.ttf"})
+        REQUIRE(Rml::LoadFontFace((std::filesystem::path(MU_FONT_DIR) / name).generic_string()));
+    fixture.Write(fixture.Theme("child") / "tokens.ini", "[Tokens]\nfont-body=Liberation Sans\n");
+    const UI::RmlBridge::ThemeInheritance theme(fixture.Theme("child"));
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-native") == std::optional<std::string>("DejaVu Sans"));
+    UI::RmlBridge::SetSelectedFontFamily("Liberation Sans");
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-native") == std::optional<std::string>("Liberation Sans"));
 }
 
 TEST_CASE("an empty legacy child preserves real theme resources and layout [ui][rml-theme]")

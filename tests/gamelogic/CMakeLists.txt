@@ -5,3 +5,11 @@ mu_add_test(
     LINK_LIBS
         MuClient
 )
+
+mu_add_test(
+    NAME test_personal_shop_currency
+    SOURCES
+        test_personal_shop_currency.cpp
+    LINK_LIBS
+        MuClient
+)

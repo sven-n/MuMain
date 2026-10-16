@@ -234,6 +234,14 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME world_label_layer_tests
+    SOURCES
+        test_world_label_layer.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
     NAME rml_counter_scale_tests
     SOURCES
         test_rml_counter_scale.cpp

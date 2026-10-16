@@ -3,10 +3,16 @@
 
 #include "stdafx.h"
 #include <cstdint>
+// u_char is used below. On glibc it arrives transitively through other
+// headers; musl targets (Emscripten) need its declaring header explicitly.
+#include <sys/types.h>
 #include <cstring>
 #include <cmath>
 #include <cassert>
+#include <climits>
+#include <map>
 #include <set>
+#include <tuple>
 #include <utility>
 #include "Render/Textures/ZzzOpenglUtil.h"
 
@@ -28,7 +34,9 @@
 #include "Render/Models/GpuSkinningPath.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/RenderUtils.h"
+#include "Render/Terrain/TerrainHeightGrid.h"
 #include "Core/Utilities/FrameProfiler.h"
+#include "Scenes/MainScene.h"
 
 using mu::PackABGR;
 
@@ -122,6 +130,16 @@ bool CanGpuSkinMesh(int finalRenderFlags, int renderFlags, const float (*boneMat
 std::pair<int, int> ResolveMeshRange(int meshCount, int requestedStart, int requestedEnd)
 {
     return {requestedStart == -1 ? 0 : requestedStart, requestedEnd == -1 ? meshCount : requestedEnd};
+}
+
+// One cached shadow stream per model and RenderBodyShadow() mesh selection (model, start, end, hidden mesh,
+// blend texture); an entry's address is its key in the renderer's mesh cache. Kept outside BMD, which
+// OpenPlayers() zero-fills, and never destroyed, so a model released at exit still finds it.
+using ShadowStreamId = std::tuple<std::uintptr_t, int, int, int, int>;
+std::map<ShadowStreamId, char>& ShadowStreams()
+{
+    static auto* streams = new std::map<ShadowStreamId, char>();
+    return *streams;
 }
 } // namespace
 
@@ -338,6 +356,7 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
 }
 
 extern EGameScene SceneFlag;
+extern float g_fSpecialHeight;
 extern int EditFlag;
 
 bool HighLight = true;
@@ -1658,38 +1677,38 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
     if (gpuSkinningEligible)
     {
         const auto textureCoordinates = GetSkinningTextureCoordinates(renderFlags);
-        auto skinnedVertices = GetRendererSkinnedVertexScratch(maxVertexCount);
-        std::size_t skinnedVertexCount = 0;
-        for (int j = 0; j < m->NumTriangles; ++j)
+        // A scrolling texture bakes this frame's offset into the UVs, so only the other meshes are cached.
+        const bool waveTextureCoordinates = textureCoordinates == mu::SkinningTextureCoordinates::Mesh && EnableWave;
+        const std::uint32_t color =
+            PackABGR(BodyLight[0] * colorScale, BodyLight[1] * colorScale, BodyLight[2] * colorScale, baseAlpha);
+        auto buildSkinnedVertices = [&]()
         {
-            const auto* triangle = &m->Triangles[j];
-            for (int k = 0; k < triangle->Polygon; ++k)
+            auto skinnedVertices = GetRendererSkinnedVertexScratch(maxVertexCount);
+            std::size_t skinnedVertexCount = 0;
+            for (int j = 0; j < m->NumTriangles; ++j)
             {
-                const int vertexIndex = triangle->VertexIndex[k];
-                const int normalIndex = triangle->NormalIndex[k];
-                const auto& vertex = m->Vertices[vertexIndex];
-                const auto& normal = m->Normals[normalIndex];
-                const auto& texCoord = m->TexCoords[triangle->TexCoordIndex[k]];
-                const bool useMeshTextureCoordinates = textureCoordinates == mu::SkinningTextureCoordinates::Mesh;
-                const float u =
-                    texCoord.TexCoordU + (useMeshTextureCoordinates && EnableWave ? blendMeshTextureCoordU : 0.0f);
-                const float v =
-                    texCoord.TexCoordV + (useMeshTextureCoordinates && EnableWave ? blendMeshTextureCoordV : 0.0f);
-                const std::uint32_t color = PackABGR(BodyLight[0] * colorScale, BodyLight[1] * colorScale,
-                                                     BodyLight[2] * colorScale, baseAlpha);
-                skinnedVertices[skinnedVertexCount++] = {vertex.Position[0],
-                                                         vertex.Position[1],
-                                                         vertex.Position[2],
-                                                         normal.Normal[0],
-                                                         normal.Normal[1],
-                                                         normal.Normal[2],
-                                                         u,
-                                                         v,
-                                                         color,
-                                                         vertex.Node,
-                                                         normal.Node};
+                const auto* triangle = &m->Triangles[j];
+                for (int k = 0; k < triangle->Polygon; ++k)
+                {
+                    const auto& vertex = m->Vertices[triangle->VertexIndex[k]];
+                    const auto& normal = m->Normals[triangle->NormalIndex[k]];
+                    const auto& texCoord = m->TexCoords[triangle->TexCoordIndex[k]];
+                    const float u = texCoord.TexCoordU + (waveTextureCoordinates ? blendMeshTextureCoordU : 0.0f);
+                    const float v = texCoord.TexCoordV + (waveTextureCoordinates ? blendMeshTextureCoordV : 0.0f);
+                    skinnedVertices[skinnedVertexCount++] = {vertex.Position[0],
+                                                             vertex.Position[1],
+                                                             vertex.Position[2],
+                                                             normal.Normal[0],
+                                                             normal.Normal[1],
+                                                             normal.Normal[2],
+                                                             u,
+                                                             v,
+                                                             vertex.Node,
+                                                             normal.Node};
+                }
             }
-        }
+            return skinnedVertices.first(skinnedVertexCount);
+        };
 
         mu::SkinningParameters skinning{
             .boneMatrices = {&m_pCurrentBoneTransform[0][0][0], MAX_BONES * 12u},
@@ -1708,8 +1727,16 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             .translate = m_LastTranslate,
             .lightEnabled = usesCpuLighting,
         };
-        gpuSkinningSubmitted =
-            mu::GetRenderer().RenderSkinnedTriangles(skinnedVertices.first(skinnedVertexCount), 0u, skinning);
+        auto& renderer = mu::GetRenderer();
+        if (!waveTextureCoordinates &&
+            (renderer.IsSkinnedMeshCached(m) || renderer.CacheSkinnedMesh(m, buildSkinnedVertices())))
+        {
+            gpuSkinningSubmitted = renderer.RenderCachedSkinnedMesh(m, color, 0u, skinning);
+        }
+        else
+        {
+            gpuSkinningSubmitted = renderer.RenderSkinnedTriangles(buildSkinnedVertices(), color, 0u, skinning);
+        }
     }
 
     const Render::Models::GpuSkinningPath skinningPath =
@@ -2767,10 +2794,98 @@ void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, cons
     mu::GetRenderer().RenderTriangles(muVerts, 0u);
 }
 
+bool BMD::RenderGpuMeshShadow(const int blendMesh, const int hiddenMesh, const int startMesh, const int endMesh,
+    const float sx, const float sy, const std::uint32_t color) const
+{
+    if (!m_pCurrentBoneTransform || startMesh < 0 || endMesh > NumMeshs || endMesh > MAX_MESH)
+    {
+        return false;
+    }
+
+    const auto drawn = [&](int i)
+    {
+        return i != hiddenMesh && Meshs[i].NumTriangles > 0 && Meshs[i].Texture != blendMesh;
+    };
+    const bool cpuVerticesCurrent = m_SkinStamp == g_SkinStampCounter;
+    for (int i = startMesh; i < endMesh; i++)
+    {
+        // Already skinned this frame, maybe at another BodyOrigin, or written by the cloth simulation: the CPU
+        // shadow draws those positions.
+        if (drawn(i) && cpuVerticesCurrent && m_CpuVertsReady[i])
+        {
+            return false;
+        }
+    }
+
+    auto& renderer = mu::GetRenderer();
+    if (!renderer.SetTerrainHeights({BackTerrainHeight, Render::kTerrainCells}, {TerrainWall, Render::kTerrainCells},
+                                    TerrainHeightVersion()))
+    {
+        return false;
+    }
+
+    const auto stream = ShadowStreams()
+                            .try_emplace({reinterpret_cast<std::uintptr_t>(this), startMesh, endMesh, hiddenMesh,
+                                          blendMesh})
+                            .first;
+    const void* key = &*stream;
+    if (!renderer.IsSkinnedMeshCached(key))
+    {
+        std::size_t vertexCount = 0;
+        for (int i = startMesh; i < endMesh; i++)
+        {
+            for (int j = 0; drawn(i) && j < Meshs[i].NumTriangles; j++)
+            {
+                vertexCount += static_cast<std::size_t>(Meshs[i].Triangles[j].Polygon);
+            }
+        }
+
+        auto vertices = GetRendererSkinnedVertexScratch(vertexCount);
+        std::size_t count = 0;
+        for (int i = startMesh; i < endMesh; i++)
+        {
+            const Mesh_t* mesh = &Meshs[i];
+            for (int j = 0; drawn(i) && j < mesh->NumTriangles; j++)
+            {
+                const auto* tp = &mesh->Triangles[j];
+                for (int k = 0; k < tp->Polygon; k++)
+                {
+                    const auto& vertex = mesh->Vertices[tp->VertexIndex[k]];
+                    vertices[count++] = {vertex.Position[0], vertex.Position[1], vertex.Position[2], 0.f, 0.f, 0.f,
+                                         0.f, 0.f, vertex.Node, -1};
+                }
+            }
+        }
+        if (!renderer.CacheSkinnedMesh(key, vertices.first(count)))
+        {
+            return false;
+        }
+    }
+
+    // What EnsureCpuVertices() would skin with now.
+    const mu::SkinningParameters skinning{
+        .boneMatrices = {&m_pCurrentBoneTransform[0][0][0], MAX_BONES * 12u},
+        .paletteVersion = g_BoneTransformVersion,
+        .bodyOrigin = {BodyOrigin[0], BodyOrigin[1], BodyOrigin[2]},
+        .bodyScale = BodyScale,
+        .boneScale = m_LastBoneScale,
+        .restPoseScale = m_LastSkinScale,
+        .translate = m_LastTranslate,
+    };
+    const mu::ShadowProjection projection{
+        .origin = {BodyOrigin[0], BodyOrigin[1], BodyOrigin[2]},
+        .shearX = sx,
+        .shearHeight = sy,
+        .specialHeight = g_fSpecialHeight,
+        .terrain = SceneFlag != SERVER_LIST_SCENE && SceneFlag != WEBZEN_SCENE && SceneFlag != LOADING_SCENE,
+    };
+    return renderer.RenderCachedSkinnedShadow(key, color, skinning, projection);
+}
+
 void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int startMeshNumber,
     const int endMeshNumber, void* pClothes, const int clothesCount, const float alpha)
 {
-    if (!g_pOption->GetRenderAllEffects())
+    if (!g_pOption->GetRenderAllEffects() || IsBodyShadowsDisabledDebug())
     {
         return;
     }
@@ -2794,7 +2909,10 @@ void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int 
 
     if (clothesCount == 0)
     {
-        AddMeshShadowTriangles(blendMesh, hiddenMesh, startMesh, endMesh, sx, sy, shadowColor);
+        if (!RenderGpuMeshShadow(blendMesh, hiddenMesh, startMesh, endMesh, sx, sy, shadowColor))
+        {
+            AddMeshShadowTriangles(blendMesh, hiddenMesh, startMesh, endMesh, sx, sy, shadowColor);
+        }
     }
     else
     {
@@ -2960,6 +3078,15 @@ long BMD::GetDataUserCount() const
 
 void BMD::Release()
 {
+    auto& shadowStreams = ShadowStreams();
+    const auto self = reinterpret_cast<std::uintptr_t>(this);
+    for (auto stream = shadowStreams.lower_bound({self, INT_MIN, INT_MIN, INT_MIN, INT_MIN});
+         stream != shadowStreams.end() && std::get<0>(stream->first) == self;)
+    {
+        mu::GetRenderer().ReleaseSkinnedMesh(&*stream);
+        stream = shadowStreams.erase(stream);
+    }
+
     const bool othersUseTheData = m_sharedDataUsers && m_sharedDataUsers.use_count() > 1;
     m_sharedDataUsers.reset();
     if (othersUseTheData)
@@ -3030,6 +3157,7 @@ void BMD::Release()
         {
             Mesh_t* m = &Meshs[i];
 
+            mu::GetRenderer().ReleaseSkinnedMesh(m);
             if (m->Vertices) { delete[] m->Vertices; m->Vertices = nullptr; }
             if (m->Normals) { delete[] m->Normals; m->Normals = nullptr; }
             if (m->TexCoords) { delete[] m->TexCoords; m->TexCoords = nullptr; }

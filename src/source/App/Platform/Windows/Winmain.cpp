@@ -4,6 +4,7 @@
 #include "Core/Input/KeyState.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Input/SyntheticInput.h"
+#include "Core/Platform/GameWindow.h"
 #include "Core/Input/UiInputRouter.h"
 #include "App/Control/ControlServer.h"
 #include "Core/Text/Utf8.h"
@@ -19,6 +20,7 @@
 #include <mach-o/dyld.h>
 #endif
 #include <clocale>
+#include <cstring>
 #include <filesystem>
 #include <optional>
 #include <utility>
@@ -209,6 +211,7 @@ static void ShutdownRendererWindow()
 
     if (g_sdlWindow)
     {
+        Core::Platform::SetGameWindow(nullptr);
         SDL_DestroyWindow(g_sdlWindow);
         g_sdlWindow = nullptr;
         g_hWnd = nullptr;
@@ -335,8 +338,16 @@ void ApplyVSyncPreferenceNow(bool enabled)
         return;
     }
 
-    const bool applied = enabled ? EnableVSync() : DisableVSync();
-    SetTargetFps((applied || IsVSyncEnabled()) ? -1 : EffectiveOffVSyncTargetFps());
+    if (enabled)
+    {
+        EnableVSync();
+    }
+    else
+    {
+        DisableVSync();
+    }
+
+    SetTargetFps(IsVSyncEnabled() ? -1 : EffectiveOffVSyncTargetFps());
     ResetFrameStats();
 }
 
@@ -940,6 +951,11 @@ static bool SDLCALL Win32MessageHook(void* /*userdata*/, MSG* msg)
     // SDL. SDL turns the close into SDL_EVENT_QUIT, which the main loop handles.
     if (msg->message == WM_CLOSE)
         return true;
+#ifdef _EDITOR
+    // The editor's own windows are not the game's: SDL alone handles theirs.
+    if (msg->hwnd != nullptr && msg->hwnd != g_hWnd)
+        return true;
+#endif
 
     WndProc(msg->hwnd, msg->message, msg->wParam, msg->lParam);
     return true;
@@ -1420,6 +1436,17 @@ MSG MainLoop()
             // Guard on an active context: editor init can fail or be shut down.
             if (ImGui::GetCurrentContext() != nullptr)
                 ImGui_ImplSDL3_ProcessEvent(&event);
+            // What the editor takes (a click or a key on one of its windows) does
+            // not reach RmlUi or the game under it.
+            if (g_MuEditorCore.ClaimsEvent(event))
+            {
+                ++messageProcessed;
+                if (g_MaxMessagePerCycle > 0 && messageProcessed >= g_MaxMessagePerCycle)
+                {
+                    break;
+                }
+                continue;
+            }
 #endif
             switch (event.type)
             {
@@ -1516,9 +1543,13 @@ MSG MainLoop()
             if (g_bUseWindowMode || g_bWndActive || g_HasInactiveFpsOverride)
             {
 #ifdef _EDITOR
-                // F12 key toggle for editor
+                // F12 key toggle for editor, from the game window or the editor's
+                // own: the key itself, not the game's keys (IsKeyDown leaves out
+                // what is pressed in the editor's windows).
                 static bool wasF12Pressed = false;
-                if (Core::Input::IsKeyDown(VK_F12))
+                const bool f12Down = Core::Input::Synthetic::IsKeyHeld(VK_F12) ||
+                                     SDL_GetKeyboardState(nullptr)[Core::Input::VkToScancode(VK_F12)];
+                if (f12Down)
                 {
                     if (!wasF12Pressed)
                     {
@@ -1540,6 +1571,10 @@ MSG MainLoop()
                 RequestDiagnosticFrameCapture();
                 ApplyPendingVSyncPreference();
                 RenderProfiledFrame();
+#ifdef _EDITOR
+                // The editor's own windows, now that the game's frame went to the GPU.
+                g_MuEditorCore.RenderPlatformWindows();
+#endif
                 ConsumeDiagnosticFrameCapture();
             }
         }
@@ -2017,8 +2052,25 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     g_hInst = hInstance;
 
+#if defined(_EDITOR) && defined(__linux__)
+    // The editor's own windows need a video driver that places windows and
+    // knows the mouse outside them: X11, through XWayland on a Wayland desktop.
+    // SDL_VIDEO_DRIVER in the environment still decides; without X11 the
+    // editor stays inside the game window on Wayland.
+    SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "x11,wayland");
+#endif
+
     // SDL owns the window; SDL_gpu owns the rendering device.
-    if (!SDL_InitSubSystem(SDL_INIT_VIDEO))
+    bool videoReady = SDL_InitSubSystem(SDL_INIT_VIDEO);
+#if defined(_EDITOR) && defined(__linux__)
+    // Neither X11 nor Wayland (a console, a headless machine): SDL's own choice.
+    if (!videoReady)
+    {
+        SDL_ResetHint(SDL_HINT_VIDEO_DRIVER);
+        videoReady = SDL_InitSubSystem(SDL_INIT_VIDEO);
+    }
+#endif
+    if (!videoReady)
     {
         const char* requestedVideoDriver = SDL_GetHint(SDL_HINT_VIDEO_DRIVER);
         const std::wstring requestedDriver = requestedVideoDriver != nullptr && requestedVideoDriver[0] != '\0'
@@ -2051,11 +2103,12 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         MessageBox(nullptr, L"Windows aplication error!", L"Aplication Error", MB_ICONERROR);
         return 0;
     }
+    Core::Platform::SetGameWindow(g_sdlWindow);
 
     RefreshWindowContentScale();
 
 #if defined(__linux__)
-    SDL_Surface* applicationIcon = SDL_LoadPNG("MuMainIcon.png");
+    SDL_Surface* applicationIcon = SDL_LoadPNG(Core::Platform::GameWindowIconFile);
     if (applicationIcon != nullptr)
     {
         SDL_SetWindowIcon(g_sdlWindow, applicationIcon);
@@ -2194,8 +2247,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // Initialize MU Editor with the live SDL GPU window.
     g_MuEditorCore.Initialize(g_sdlWindow);
 
-    // Check for --editor command line flag
-    if (szCmdLine && wcsstr(GetCommandLineW(), L"--editor"))
+    // Check for --editor command line flag (in szCmdLine on every platform;
+    // GetCommandLineW is an empty stub off Windows)
+    if (szCmdLine && std::strstr(szCmdLine, "--editor"))
     {
         g_MuEditorCore.SetEnabled(true);
         fwprintf(stderr, L"[Editor] Starting in editor mode (--editor flag detected)\n");

@@ -219,6 +219,19 @@ public:
     void SendPlayerShopCloseOther(uint16_t playerId, const char16_t* playerName);
 
     /// <summary>
+    /// Sends a PlayerShopSetItemPriceExtended to this connection.
+    /// </summary>
+    /// <param name="moneyPrice">The price in zen, or in account coins when PriceItemType is one of the account coin values. Encoded like the price of PlayerShopItemExtended.</param>
+    /// <param name="priceItemType">The item (group in the highest 4 bits, number in the remaining ones) with which the price is paid, when RequiredItemAmount is greater than 0. Otherwise, 0xFFF0 = WCoin (C), 0xFFF1 = WCoin (P) and 0xFFF2 = Goblin Points define an account coin price; any other value a zen price. Encoded like the price of PlayerShopItemExtended.</param>
+    /// <param name="requiredItemAmount">The number of pieces of the item which is defined by PriceItemType; 0, if the price is not paid with items. Encoded like the price of PlayerShopItemExtended.</param>
+    /// <param name="itemSlot">The item slot.</param>
+    /// <remarks>
+    /// Is sent by the client when: The player wants to set a price of an item which is inside his personal item shop, in zen or in one of the price types which are allowed by the server (see PlayerShopPriceTypesExtended).
+    /// Causes reaction on server side: The price is set for the specified item, if its price type is allowed and the amount is within the configured limits. Works only if the shop is currently closed. The server responds with a PlayerShopSetItemPriceResponse.
+    /// </remarks>
+    void SendPlayerShopSetItemPriceExtended(uint32_t moneyPrice, uint16_t priceItemType, uint16_t requiredItemAmount, BYTE itemSlot);
+
+    /// <summary>
     /// Sends a PickupItemRequest to this connection.
     /// </summary>
     /// <param name="itemId">The item id.</param>
@@ -514,13 +527,13 @@ public:
     /// <summary>
     /// Sends a CastleSiegeTaxChangeRequest to this connection.
     /// </summary>
-    /// <param name="taxType">0=Undefined, 1=ChaosMachine, 2 = Normal, 3 = EntranceFeeLandOfTrials</param>
-    /// <param name="taxRate">The tax rate.</param>
+    /// <param name="taxType">The tax type.</param>
+    /// <param name="taxValue">The percentage rate for shop and Chaos Machine taxes, or the entrance fee amount for the hunting zone.</param>
     /// <remarks>
     /// Is sent by the client when: The guild master wants to change the tax rate in the castle npc.
     /// Causes reaction on server side: The server changes the tax rates accordingly.
     /// </remarks>
-    void SendCastleSiegeTaxChangeRequest(BYTE taxType, uint32_t taxRate);
+    void SendCastleSiegeTaxChangeRequest(CastleSiegeTaxType taxType, uint32_t taxValue);
 
     /// <summary>
     /// Sends a CastleSiegeTaxMoneyWithdraw to this connection.
@@ -535,13 +548,13 @@ public:
     /// <summary>
     /// Sends a ToggleCastleGateRequest to this connection.
     /// </summary>
-    /// <param name="closeState">The close state.</param>
+    /// <param name="isOpen">The is open.</param>
     /// <param name="gateId">The gate id.</param>
     /// <remarks>
     /// Is sent by the client when: The guild member of the castle owner wants to toggle the gate switch.
     /// Causes reaction on server side: The castle gate is getting opened or closed.
     /// </remarks>
-    void SendToggleCastleGateRequest(BYTE closeState, uint16_t gateId);
+    void SendToggleCastleGateRequest(BYTE isOpen, uint16_t gateId);
 
     /// <summary>
     /// Sends a CastleGuildCommand to this connection.
@@ -549,12 +562,12 @@ public:
     /// <param name="team">Team Number 0 to 7.</param>
     /// <param name="positionX">The position x.</param>
     /// <param name="positionY">The position y.</param>
-    /// <param name="command">0 = Attack, 1 = Defend, 2 = Wait</param>
+    /// <param name="command">The command.</param>
     /// <remarks>
     /// Is sent by the client when: The guild master sent a command to his guild during the castle siege event.
     /// Causes reaction on server side: The command is shown on the mini map of the guild members.
     /// </remarks>
-    void SendCastleGuildCommand(BYTE team, BYTE positionX, BYTE positionY, BYTE command);
+    void SendCastleGuildCommand(BYTE team, BYTE positionX, BYTE positionY, CastleSiegeGuildCommandType command);
 
     /// <summary>
     /// Sends a CastleSiegeHuntingZoneEntranceSetting to this connection.

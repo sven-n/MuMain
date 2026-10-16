@@ -5,7 +5,8 @@ The active implementation spans:
 - `Render/Models/ZzzBMD.cpp` and `ZzzBMD.h`;
 - `Render/Renderer/MuRenderer.h`;
 - `Render/Renderer/MuRendererSDLGpu.cpp`;
-- `src/shaders/skinned_textured.vert.hlsl`.
+- `Render/Terrain/TerrainHeightGrid.h`, for body shadows;
+- `src/shaders/skinned_textured.vert.hlsl` and `skinned_shadow.vert.hlsl`.
 
 It ports upstream GPU-skinning behavior into SDL GPU without restoring the
 upstream `BoneUBO`, RHI, or OpenGL shader classes.
@@ -15,8 +16,8 @@ upstream `BoneUBO`, RHI, or OpenGL shader classes.
 ```text
 animation palette
   -> BMD rest vertices and position/normal bone indices
-  -> IMuRenderer::RenderSkinnedTriangles
-  -> per-frame vertex scratch + packed palette rows
+  -> IMuRenderer::RenderSkinnedTriangles, or RenderCachedSkinnedMesh
+  -> per-frame vertex scratch or cached mesh + packed palette rows
   -> deferred DrawSkinnedTriangles command
   -> SDL GPU vertex/storage bindings
   -> skinned_textured.vert.hlsl
@@ -32,9 +33,14 @@ uses the established CPU-skinned path.
 - rest position: three floats;
 - rest normal: three floats;
 - source UV: two floats;
-- packed ABGR color;
 - position bone index;
 - normal bone index.
+
+The colour is one packed ABGR value per draw, read as a per-instance attribute
+from vertex buffer slot 1. A mesh without a scrolling texture is cached on the
+GPU under its `Mesh_t*` the first time it is drawn (`CacheSkinnedMesh`), so
+later draws upload only that colour; `BMD::Release()` releases the entry before
+it frees the mesh data.
 
 `SkinningParameters::boneMatrices` contains 12 floats per bone in row-major
 3x4 affine form:
@@ -123,12 +129,40 @@ test, and depth-write combinations as ordinary 3D draws. GPU submission is
 rejected when the required pipeline, texture, sampler, frame, palette, or vertex
 allocation is unavailable.
 
+## Body shadows
+
+`BMD::RenderBodyShadow()` draws a model's projected shadow. `CalcShadowPosition()`
+shears each skinned vertex away from the body origin and places it 5 units above
+the terrain height from `RequestTerrainHeight()`. `skinned_shadow.vert.hlsl`
+applies the same projection to the cached mesh, so the shadow no longer skins
+and uploads its vertices on the CPU every frame.
+
+- **Shadow streams.** `BMD::RenderGpuMeshShadow()` caches one rest-pose stream
+  per model and mesh selection: range, hidden mesh, and blend texture. It draws
+  the stream with one `RenderCachedSkinnedShadow()` call, using the skinning
+  parameters `EnsureCpuVertices()` would apply at that moment. The streams are
+  tracked outside `BMD`, and `BMD::Release()` frees them.
+- **Terrain heights.** The shader reads a `Render::TerrainHeightGrid`: every
+  cell's height, then one `TW_HEIGHT` bit per cell. `RequestTerrainHeight()`
+  uses the same sampler over the raw map arrays, so both sides follow one set of
+  rules. `SetTerrainHeights()` uploads the grid only when
+  `TerrainHeightVersion()` changes, which happens at map loads and when a
+  catapult crater or a terrain attribute changes the map.
+- **Bindings.** The draw binds the bone rows at vertex storage slot 0 and the
+  grid at slot 1. Vertex uniform slot 1 carries the body origin, the shear, the
+  height of `TW_HEIGHT` cells, and whether the scene has terrain at all.
+- **Pipelines.** Shadow pipelines use the active blend mode with depth writes
+  off, the state the CPU shadow draws in, with depth testing on or off. Both
+  sets are optional and are skipped when the shader does not load.
+
 ## CPU fallback boundaries
 
 GPU skinning is an optimization, not a replacement for every transformed-vertex
 consumer. CPU materialization remains authoritative for:
 
-- cloth simulation and cloth rendering;
+- cloth simulation and cloth rendering, including clothes shadows;
+- body-shadow meshes whose CPU vertices already exist this frame, such as cloth
+  write-back or a mesh skinned earlier at another body origin;
 - shadow volumes and shadow-map-specific paths;
 - vertex-wave deformation;
 - unsupported render states or missing GPU resources.
@@ -137,8 +171,12 @@ consumer. CPU materialization remains authoritative for:
 
 ## Verification
 
-- `tests/render/test_gpu_skinning_contract.cpp` checks the renderer contract.
-- `tests/render/test_gpu_skinning_path.cmake` checks the source-to-shader path,
-  CPU fallback, and chrome-mode coverage.
-- `glslangValidator`, `spirv-val`, and `spirv-cross` validate the HLSL and
-  checked-in SPIR-V/MSL artifacts.
+- `tests/render/test_gpu_skinning_path.cpp` checks which meshes select CPU
+  skinning.
+- `tests/render/test_sdl_gpu_replay_state.cpp` checks replay bindings, including
+  the colour slot and a shadow's second uniform slot and storage buffer.
+- `tests/render/test_terrain_height_grid.cpp` compares the shadow grid with
+  `RequestTerrainHeight()`'s lookup at the map edges and at random points.
+- `cmake/ValidateShaderReflection.cmake` and `ValidateDxilReflection.cmake`
+  check the SPIR-V, MSL, and DXIL bindings of both skinned shaders against the
+  renderer's shader metadata.

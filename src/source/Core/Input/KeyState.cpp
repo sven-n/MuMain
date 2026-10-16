@@ -10,6 +10,10 @@ namespace Core::Input
     {
         bool g_leftMouseButtonPressEdge = false;
 
+#ifdef _EDITOR
+        OtherWindowQuery g_otherWindowQuery = nullptr;
+#endif
+
         } // namespace
 
         // Map a Win32 virtual-key code (or ASCII letter/digit) to an SDL
@@ -73,6 +77,12 @@ namespace Core::Input
         {
             return true;
         }
+#ifdef _EDITOR
+        if (g_otherWindowQuery != nullptr && g_otherWindowQuery(virtualKey))
+        {
+            return false;
+        }
+#endif
 
         // Poll live input from SDL on every platform. The Win32 path used
         // GetAsyncKeyState because the old child EDIT controls stole keyboard
@@ -99,4 +109,11 @@ namespace Core::Input
         const bool* state = SDL_GetKeyboardState(nullptr);
         return state != nullptr && state[sc];
     }
+
+#ifdef _EDITOR
+    void SetOtherWindowQuery(OtherWindowQuery query)
+    {
+        g_otherWindowQuery = query;
+    }
+#endif
 }

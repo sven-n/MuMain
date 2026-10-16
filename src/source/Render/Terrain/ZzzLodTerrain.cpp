@@ -12,6 +12,7 @@
 #endif
 #include <math.h>
 #include <iterator>
+#include <vector>
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "ZzzLodTerrain.h"
@@ -24,6 +25,7 @@
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/RenderUtils.h"
+#include "Render/Terrain/TerrainHeightGrid.h"
 #include "I18N/All.h"
 
 #include "GameLogic/Events/CSChaosCastle.h"
@@ -83,6 +85,21 @@ float           WaterMove;
 int             CurrentLayer;
 
 float           g_fSpecialHeight = 1200.f;
+
+static_assert(Render::kTerrainSize == TERRAIN_SIZE && Render::kTerrainScale == TERRAIN_SCALE &&
+              Render::kTerrainWallHeight == TW_HEIGHT);
+
+static unsigned int s_terrainHeightVersion = 0;
+
+unsigned int TerrainHeightVersion()
+{
+    return s_terrainHeightVersion;
+}
+
+void MarkTerrainHeightsChanged()
+{
+    ++s_terrainHeightVersion;
+}
 
 #ifdef DYNAMIC_FRUSTRUM
 FrustrumMap_t	g_FrustrumMap;
@@ -178,6 +195,7 @@ int OpenTerrainAttribute(wchar_t* FileName)
     }
 
     delete[] decrypted_data;
+    ++s_terrainHeightVersion;
 
     // Check file header
     bool Error = false;
@@ -256,11 +274,15 @@ void AddTerrainAttribute(int x, int y, BYTE att)
 {
     int     iIndex = (x + (y * TERRAIN_SIZE));
     TerrainWall[iIndex] |= att;
+    if ((att & TW_HEIGHT) == TW_HEIGHT)
+        ++s_terrainHeightVersion;
 }
 
 void SubTerrainAttribute(int x, int y, BYTE att)
 {
     int     iIndex = (x + (y * TERRAIN_SIZE));
+    if ((att & TW_HEIGHT) == TW_HEIGHT)
+        ++s_terrainHeightVersion;
 
     TerrainWall[iIndex] ^= (TerrainWall[iIndex] & att);
 }
@@ -285,6 +307,7 @@ void AddTerrainAttributeRange(int x, int y, int dx, int dy, BYTE att, BYTE Add)
 
 void SetTerrainWaterState(std::list<int>& terrainIndex, int state)
 {
+    ++s_terrainHeightVersion;
     if (state == 0)
     {
         terrainIndex.clear();
@@ -732,6 +755,7 @@ bool OpenTerrainHeight(wchar_t* filename)
             dst++;
         }
     }
+    ++s_terrainHeightVersion;
 
     delete[] Buffer;
     return true;
@@ -857,6 +881,7 @@ bool OpenTerrainHeightNew(const wchar_t* strFilename)
         BackTerrainHeight[i] = (float)dwHeight;
         BackTerrainHeight[i] += g_fMinHeight;
     }
+    ++s_terrainHeightVersion;
 
     delete[] pbyData;
     return true;
@@ -870,33 +895,7 @@ float RequestTerrainHeight(float xf, float yf) {
     if (xf < 0.0f || yf < 0.0f)
         return 0.0f;
 
-    xf /= TERRAIN_SCALE;
-    yf /= TERRAIN_SCALE;
-
-    unsigned int Index = TERRAIN_INDEX(xf, yf);
-
-    if (Index >= TERRAIN_SIZE * TERRAIN_SIZE)
-        return g_fSpecialHeight;
-
-    if ((TerrainWall[Index] & TW_HEIGHT) == TW_HEIGHT)
-        return g_fSpecialHeight;
-
-    int xi = static_cast<int>(xf);
-    int yi = static_cast<int>(yf);
-    float xd = xf - static_cast<float>(xi);
-    float yd = yf - static_cast<float>(yi);
-    unsigned int Index1 = TERRAIN_INDEX_REPEAT(xi, yi);
-    unsigned int Index2 = TERRAIN_INDEX_REPEAT(xi, yi + 1);
-    unsigned int Index3 = TERRAIN_INDEX_REPEAT(xi + 1, yi);
-    unsigned int Index4 = TERRAIN_INDEX_REPEAT(xi + 1, yi + 1);
-
-    if (Index1 >= TERRAIN_SIZE * TERRAIN_SIZE || Index2 >= TERRAIN_SIZE * TERRAIN_SIZE ||
-        Index3 >= TERRAIN_SIZE * TERRAIN_SIZE || Index4 >= TERRAIN_SIZE * TERRAIN_SIZE)
-        return g_fSpecialHeight;
-
-    float left = BackTerrainHeight[Index1] + (BackTerrainHeight[Index2] - BackTerrainHeight[Index1]) * yd;
-    float right = BackTerrainHeight[Index3] + (BackTerrainHeight[Index4] - BackTerrainHeight[Index3]) * yd;
-    return left + (right - left) * xd;
+    return Render::SampleTerrainHeight(BackTerrainHeight, TerrainWall, xf, yf, g_fSpecialHeight);
 }
 
 void RequestTerrainNormal(float xf, float yf, vec3_t Normal)
@@ -911,6 +910,8 @@ void RequestTerrainNormal(float xf, float yf, vec3_t Normal)
 void AddTerrainHeight(float xf, float yf, float Height, int Range, float* Buffer)
 {
     auto rf = (float)Range;
+    if (Buffer == BackTerrainHeight)
+        ++s_terrainHeightVersion;
 
     xf = xf / TERRAIN_SCALE;
     yf = yf / TERRAIN_SCALE;
@@ -1366,11 +1367,35 @@ void RenderFace_After(int Texture, int mx, int my)
     mu::GetRenderer().RenderQuad3D(vertices, 0u);
 }
 
+// The layers blended over the ground, drawn after all of it so the ground and each layer draw in runs
+// of one texture instead of alternating per tile.
+struct LayerFace
+{
+    int texture;
+    bool blend;
+    mu::Vertex3D vertices[4];
+};
+static std::vector<LayerFace> s_layerFaces;
+
+static void RenderLayerFaces()
+{
+    // Depth-tested without writing, so a layer stays on its own ground (same vertices, less or equal)
+    // and nearer ground drawn before it still hides it.
+    EnableDepthTest();
+    for (const LayerFace& face : s_layerFaces)
+    {
+        if (face.blend)
+            EnableAlphaBlend();
+        else
+            EnableAlphaBlend3();
+        BindTexture(BITMAP_MAPTILE + face.texture);
+        mu::GetRenderer().RenderQuad3D(face.vertices, 0u);
+    }
+    s_layerFaces.clear();
+}
+
 void RenderFaceAlpha(int Texture, int mx, int my)
 {
-    DisableDepthTest();
-    EnableAlphaBlend3();
-    BindTexture(BITMAP_MAPTILE + Texture);
     auto MakeVert = [](const float* pos, const float* tc, const float* light, float alpha) -> mu::Vertex3D
     {
         return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, tc[0], tc[1],
@@ -1380,15 +1405,11 @@ void RenderFaceAlpha(int Texture, int mx, int my)
     const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], PrimaryTerrainLight[TerrainIndex2], TerrainMappingAlpha[TerrainIndex2]);
     const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], PrimaryTerrainLight[TerrainIndex3], TerrainMappingAlpha[TerrainIndex3]);
     const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], PrimaryTerrainLight[TerrainIndex4], TerrainMappingAlpha[TerrainIndex4]);
-    const mu::Vertex3D vertices[4] = {v0, v1, v2, v3};
-    mu::GetRenderer().RenderQuad3D(vertices, 0u);
-    EnableDepthTest();
+    s_layerFaces.push_back({Texture, false, {v0, v1, v2, v3}});
 }
 
 void RenderFaceBlend(int Texture, int mx, int my)
 {
-    EnableAlphaBlend();
-    BindTexture(BITMAP_MAPTILE + Texture);
     auto MakeVert = [](const float* pos, const float* tc, float light) -> mu::Vertex3D
     {
         return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, tc[0], tc[1], mu::PackABGR(light, light, light, 1.f)};
@@ -1397,8 +1418,7 @@ void RenderFaceBlend(int Texture, int mx, int my)
     const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], TerrainMappingAlpha[TerrainIndex2]);
     const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], TerrainMappingAlpha[TerrainIndex3]);
     const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], TerrainMappingAlpha[TerrainIndex4]);
-    const mu::Vertex3D vertices[4] = {v0, v1, v2, v3};
-    mu::GetRenderer().RenderQuad3D(vertices, 0u);
+    s_layerFaces.push_back({Texture, true, {v0, v1, v2, v3}});
 }
 
 void FaceTexture(int Texture, float xf, float yf, bool Water, bool Scale)
@@ -3142,6 +3162,8 @@ void RenderTerrain(bool EditFlag)
 
     if (!EditFlag)
     {
+        // The ground, its layers and the grass all rely on it; earlier 2D passes may leave it off.
+        EnableDepthTest();
         DisableAlphaBlend();
     }
     else
@@ -3152,6 +3174,7 @@ void RenderTerrain(bool EditFlag)
 
     TerrainFlag = TERRAIN_MAP_NORMAL;
     RenderTerrainFrustrum(EditFlag);
+    RenderLayerFaces();
     //
     if (EditFlag && SelectFlag)
     {

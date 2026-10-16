@@ -316,10 +316,10 @@
    fourteen alternate right and left of it, the next four continue left, and the rest form a second
    row above, heading right. */
 #skill_grid .skill-cell { top: 0dp; }
-#skill_grid .skill-cell:nth-child(2n+1):nth-child(-n+13) { left: calc(var(--i) * 16dp); }
-#skill_grid .skill-cell:nth-child(2n):nth-child(-n+14) { left: calc(var(--i) * -16dp - 16dp); }
-#skill_grid .skill-cell:nth-child(n+15):nth-child(-n+18) { left: calc(192dp - var(--i) * 32dp); }
-#skill_grid .skill-cell:nth-child(n+19) { left: calc(var(--i) * 32dp - 928dp); top: -38dp; }
+#skill_grid .skill-cell:nth-child(2n+1):nth-child(-n+13) { left: calc(var(--i, 0) * 16dp); }
+#skill_grid .skill-cell:nth-child(2n):nth-child(-n+14) { left: calc(var(--i, 0) * -16dp - 16dp); }
+#skill_grid .skill-cell:nth-child(n+15):nth-child(-n+18) { left: calc(192dp - var(--i, 0) * 32dp); }
+#skill_grid .skill-cell:nth-child(n+19) { left: calc(var(--i, 0) * 32dp - 928dp); top: -38dp; }
 #pet_skill_row .skill-cell { top: -38dp; }
 #pet_skill_row .skill-cell:nth-child(1) { left: -32dp; }
 #pet_skill_row .skill-cell:nth-child(2) { left: 0dp; }

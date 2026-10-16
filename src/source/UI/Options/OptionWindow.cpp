@@ -448,8 +448,14 @@ void mu::ui::window::COptionWindow::Show(bool bShow)
     mu::ui::window::CObject::Show(bShow);
     if (m_RmlView.Document())
     {
-        if (bShow) m_RmlView.Document()->Show();
-        else m_RmlView.Document()->Hide();
+        // A hidden window skips its sync, so it catches up before its document shows.
+        if (bShow)
+        {
+            SyncRmlModel();
+            m_RmlView.Document()->Show();
+        }
+        else
+            m_RmlView.Document()->Hide();
     }
 }
 
@@ -481,10 +487,11 @@ bool mu::ui::window::COptionWindow::UpdateKeyEvent()
 
 bool mu::ui::window::COptionWindow::Update()
 {
-    // Outside any RmlUi event dispatch -- safe to destroy/rebuild m_RmlView.Document() here if a theme switch
-    // was requested (see m_bPendingThemeSwitch's own comment), and to resize the window for a new
+    // Outside any RmlUi event dispatch -- safe to destroy/rebuild m_RmlView.Document() here if a theme or
+    // font switch was requested (see m_bPendingThemeSwitch's own comment), and to resize the window for a new
     // UI scale (m_bPendingUIScaleApply's own comment).
     ApplyPendingThemeSwitch();
+    ApplyPendingFont();
     ApplyPendingUIScale();
     SyncRmlModel();
     ScrollOpenDropdownToSelection();
@@ -720,6 +727,15 @@ void mu::ui::window::COptionWindow::RmlFontChanged(int index)
     if (index < 0 || index >= s_NumFonts)
         return;
     m_iFontIndex = index;
+    // Deferred to Update() -- the font change rebuilds every RmlUi document, see m_bPendingThemeSwitch.
+    m_bPendingFontApply = true;
+}
+
+void mu::ui::window::COptionWindow::ApplyPendingFont()
+{
+    if (!m_bPendingFontApply)
+        return;
+    m_bPendingFontApply = false;
     ApplyFont();
 }
 
@@ -1014,6 +1030,8 @@ void mu::ui::window::COptionWindow::ApplyFont()
     // Recreate the GDI fonts from config so the change takes effect live.
     ReinitializeFonts();
     GameConfig::GetInstance().Save();
+    // RmlUi text draws with the same family (font tokens), so its documents are rebuilt with it.
+    UI::RmlBridge::ApplySelectedFontFamily(StringUtils::WideToNarrow(s_Fonts[m_iFontIndex].name));
 }
 
 int mu::ui::window::COptionWindow::FindCurrentFpsCapIndex()
@@ -1110,6 +1128,8 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     // Saturates rather than wrapping; only ever compared against kRmlSelectSettleFrames below.
     if (m_rmlSyncCount < 1000)
         ++m_rmlSyncCount;
+    if (!IsVisible())
+        return;
 
     auto& model = m_RmlView.GetModel();
 

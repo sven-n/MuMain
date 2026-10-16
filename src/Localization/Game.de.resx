@@ -13114,4 +13114,19 @@
   <data name="QuestRequirementBuff" xml:space="preserve">
     <value>Bonus: %ls</value>
   </data>
+  <data name="W Coin(C)" xml:space="preserve">
+    <value>W Coin(C)</value>
+  </data>
+  <data name="Goblin Points" xml:space="preserve">
+    <value>Goblin-Punkte</value>
+  </data>
+  <data name="Currency" xml:space="preserve">
+    <value>Währung</value>
+  </data>
+  <data name="Currency: %ls" xml:space="preserve">
+    <value>Währung: %ls</value>
+  </data>
+  <data name="Other items" xml:space="preserve">
+    <value>Andere Gegenstände</value>
+  </data>
 </root>

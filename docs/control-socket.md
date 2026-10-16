@@ -76,6 +76,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `hover-ui` (`x`, `y`) | move the pointer to a window pixel with no button, as physical motion: RmlUi hover and the game's own pointer (native hover, tooltips) both follow it |
 | `drag-ui` (`x`, `y`, `to_x`, `to_y`, `button`) | press at one window pixel, move to the other over eight frames with the button held, release there |
 | `type` (`text`, `enter`) | deliver committed UTF-8 to the focused field; optional boolean `enter` submits on a later frame |
+| `console` (`text`) | run one `$` developer command (`$fps 60`, …) as if typed into the chat box, without opening it, so nothing typed shows in the frame; `bad_request` when the text is not a `$` command the client knows, or its arguments are missing or malformed |
 | `ui` | the open windows by name — `inventory`, `inventory_extension`, `character`, `trade`, `storage`, `storage_extension`, `mix`, `npc_shop`, `lucky_item`, `chat_input`, `party`, `command`, `my_shop`, `purchase_shop`, `npc_quest` (the quest dialog of Sebina, Marlon and Devin), and `message_box` while a dialog waits for Enter or Esc — and the window pixels of the named elements that are shown: `trade.confirm`, `trade.zen`, `inventory.repair`, `inventory.my_shop`, `npc_shop.repair`, `npc_shop.repair_all`, `my_shop.title`, `my_shop.open`, `my_shop.close`, `command.trade`, `command.purchase`, `command.party`, `npc_quest.answer.0` and on (the rows of the quest dialog's answers), `npc_quest.complete`, `npc_quest.close`, `character.stat.strength` (`agility`, `vitality`, `energy`, `command`: the character window's "+" buttons, while there are level-up points) |
 | `slot-pixel` (`grid`, `slot`) | the window pixel of a slot's square: `inventory` and `equipment` (the slot numbers `state` reports), `trade`, `trade_partner`, `storage`, `mix`, `npc_shop`, and the personal shops `my_shop` and `purchase_shop` (slots 204 and up, as `state` and the server number them); `not_open` while that window is closed, `bad_request` for a slot the grid does not have |
 | `login` (`account`, `password`, `server`) | server selection, credentials, character list |
@@ -110,7 +111,12 @@ The shops: `npc_shop` is the open NPC shop (`repair_shop`, `tax_rate`,
 included) or `null`; `my_shop` is the player's own personal shop (`open`, the
 `title` in its title field, its goods with `price`), `purchase_shop` the
 personal shop the player looks into (`seller`, `title`, goods with `price`) or
-`null`. `repair_mode` says whether a click repairs instead of picking up.
+`null`. The goods of the personal shops whose price isn't in zen also carry the
+`price_item_type` of their price, as the server encodes it: the item (group in
+the highest 4 bits, number in the others) or the account coin (`0xFFF0` WCoin
+(C), `0xFFF1` WCoin (P), `0xFFF2` Goblin Points); see
+[personal-shop.md](personal-shop.md). `repair_mode` says whether a click
+repairs instead of picking up.
 
 For the quests and their rewards: `class_name` (e.g. `Blade Knight`; `class`
 is the client's number, e.g. 1 Dark Knight, 8 Blade Knight, 12 Blade Master),

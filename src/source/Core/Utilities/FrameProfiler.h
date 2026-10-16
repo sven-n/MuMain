@@ -36,6 +36,11 @@ enum class Pass : int
     Overlay,
     RmlUiUpdate,
     RmlUiRender,
+    // The parts of RendererEnd.
+    RendererOffscreen,
+    RendererStage,
+    RendererReplay,
+    RendererPostUi,
     Count_
 };
 
@@ -44,6 +49,7 @@ inline constexpr const char* kPassNames[static_cast<int>(Pass::Count_)] = {
     "Skinning", "UI", "RenderBegin", "RenderEnd", "Submit", "UIUpdate", "RmlInput", "UILayout", "Flush",
     "Sprites", "Particles", "Joints", "Overlay",
     "RmlUpd", "RmlRend",
+    "EndOffscr", "EndStage", "EndReplay", "EndPostUI",
 };
 
 enum class Counter : int

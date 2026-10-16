@@ -325,6 +325,15 @@ first available family for that token in an ancestor, then bundled Liberation Sa
 CJK glyph fallbacks remain loaded. Custom literal `font-family` rules must still name a loaded
 family; use the tokens for optional system fonts.
 
+The player's font choice in the options (`[UI] Font`) overrides `font-body` and `font-title` in
+every theme, as long as RmlUi has that family loaded. With `Default`, the theme's own families
+apply. Other `font-*` tokens always keep the theme's value. A new choice applies right away: every
+themed document is rebuilt with it, the same way as after a theme switch.
+
+`font-native` always names the family the native text renderer uses (the `Font` choice, and
+DejaVu Sans for `Default`). It is meant for text RmlUi draws inside a box the native renderer
+measured, such as the world labels. Themes do not set it.
+
 Fonts load before themed documents at startup and on theme selection. RmlUi retains loaded
 families for the session, so a family loaded by an earlier theme remains available. Reselecting
 a theme retries optional files; restart the client to replace a font file whose family is

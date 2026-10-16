@@ -32,6 +32,19 @@ mu_add_test(
     LINK_LIBS SDL3::SDL3
 )
 
+mu_add_test(
+    NAME range_allocator_tests
+    SOURCES
+        test_range_allocator.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/RangeAllocator.cpp
+)
+
+mu_add_test(
+    NAME terrain_height_grid_tests
+    SOURCES
+        test_terrain_height_grid.cpp
+)
+
 # The OZT reader of CGlobalBitmap::OpenTga, without the renderer. It also reads
 # the OZT files shipped in src/bin/Data.
 mu_add_test(
@@ -105,6 +118,13 @@ add_test(
         "-DMU_BMD_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Models/ZzzBMD.cpp"
         "-DMU_SHADOW_VOLUME_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Models/ShadowVolume.cpp"
         -P "${CMAKE_CURRENT_SOURCE_DIR}/test_projected_shadow_state.cmake"
+)
+
+add_test(
+    NAME terrain_depth_state_contract
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_TERRAIN_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Terrain/ZzzLodTerrain.cpp"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_terrain_depth_state.cmake"
 )
 
 add_test(

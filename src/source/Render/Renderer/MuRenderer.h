@@ -86,13 +86,12 @@ struct Vertex3D
     std::uint32_t color; // packed ABGR
 };
 
-// Rest-pose model vertex for GPU bone skinning.
+// Rest-pose model vertex for GPU bone skinning. The colour is per draw, not per vertex.
 struct SkinnedVertex3D
 {
     float x, y, z;
     float nx, ny, nz;
     float u, v;
-    std::uint32_t color;
     std::int32_t positionBoneIndex;
     std::int32_t normalBoneIndex;
 };
@@ -131,6 +130,16 @@ struct SkinningParameters
     bool lightEnabled = false;
 };
 
+// Where a body shadow lands, as CalcShadowPosition() puts it there.
+struct ShadowProjection
+{
+    float origin[3]{};
+    float shearX = 0.0f;        // sx
+    float shearHeight = 0.0f;   // sy
+    float specialHeight = 0.0f; // the height of TW_HEIGHT cells
+    bool terrain = true;        // false in the scenes where RequestTerrainHeight() returns 0
+};
+
 // RmlUi port: the current frame's raw SDL_GPU submission context. RmlUi's own vendored
 // RenderInterface_SDL_GPU (ThirdParty/RmlUi/Backends/) manages its own pipelines/buffers but
 // needs the active command buffer + swapchain texture to record into and present through --
@@ -142,6 +151,8 @@ struct FrameGpuContext
     SDL_GPUTexture* swapchainTexture = nullptr;
     std::uint32_t width = 0;
     std::uint32_t height = 0;
+    // The texture has the swapchain's format and can be sampled, so RmlUi can draw straight into it.
+    bool drawable = false;
 };
 
 struct RendererStats
@@ -182,14 +193,68 @@ public:
     // Render independent world-space quads in perimeter order.
     virtual void RenderQuad3D(std::span<const Vertex3D> vertices, std::uint32_t textureId) = 0;
 
-    // Render rest-pose triangles using a GPU bone palette. False means an eligible draw failed
-    // submission and must not trigger CPU fallback.
-    [[nodiscard]] virtual bool RenderSkinnedTriangles(std::span<const SkinnedVertex3D> vertices,
+    // Render rest-pose triangles using a GPU bone palette, in one packed ABGR colour. False means an
+    // eligible draw failed submission and must not trigger CPU fallback.
+    [[nodiscard]] virtual bool RenderSkinnedTriangles(std::span<const SkinnedVertex3D> vertices, std::uint32_t color,
                                                       std::uint32_t textureId, const SkinningParameters& parameters)
     {
         (void)vertices;
+        (void)color;
         (void)textureId;
         (void)parameters;
+        return false;
+    }
+
+    // Rest-pose triangles kept on the GPU under `mesh`, so a draw no longer uploads them. The data
+    // must not change while cached; ReleaseSkinnedMesh before it is freed. Releasing is safe at any
+    // time, also after the renderer has shut down.
+    [[nodiscard]] virtual bool IsSkinnedMeshCached(const void* mesh) const
+    {
+        (void)mesh;
+        return false;
+    }
+    [[nodiscard]] virtual bool CacheSkinnedMesh(const void* mesh, std::span<const SkinnedVertex3D> vertices)
+    {
+        (void)mesh;
+        (void)vertices;
+        return false;
+    }
+    // Same contract as RenderSkinnedTriangles, for a cached mesh.
+    [[nodiscard]] virtual bool RenderCachedSkinnedMesh(const void* mesh, std::uint32_t color, std::uint32_t textureId,
+                                                       const SkinningParameters& parameters)
+    {
+        (void)mesh;
+        (void)color;
+        (void)textureId;
+        (void)parameters;
+        return false;
+    }
+    virtual void ReleaseSkinnedMesh(const void* mesh)
+    {
+        (void)mesh;
+    }
+
+    // A cached mesh drawn as its ground shadow, with the active texture, blend and depth test state and depth
+    // writes off. Needs SetTerrainHeights() this frame. False means the caller draws the shadow itself.
+    [[nodiscard]] virtual bool RenderCachedSkinnedShadow(const void* mesh, std::uint32_t color,
+                                                         const SkinningParameters& parameters,
+                                                         const ShadowProjection& projection)
+    {
+        (void)mesh;
+        (void)color;
+        (void)parameters;
+        (void)projection;
+        return false;
+    }
+
+    // The map's heights and wall flags (TERRAIN_SIZE * TERRAIN_SIZE each) for shaders that follow the
+    // ground, copied again only when `version` changes. False means the GPU has no heights to read.
+    [[nodiscard]] virtual bool SetTerrainHeights(std::span<const float> heights, std::span<const std::uint16_t> walls,
+                                                 std::uint32_t version)
+    {
+        (void)heights;
+        (void)walls;
+        (void)version;
         return false;
     }
 

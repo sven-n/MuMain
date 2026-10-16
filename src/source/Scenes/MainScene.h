@@ -47,6 +47,10 @@ bool IsBoidsDisabledDebug();
 void SetDisableWingShadow(bool disabled);
 bool IsWingShadowDisabledDebug();
 
+// Every BMD::RenderBodyShadow() draw: characters, their wings and pets, objects and boids.
+void SetDisableBodyShadows(bool disabled);
+bool IsBodyShadowsDisabledDebug();
+
 // DXP-23 diagnostic: RenderJoints() (ZzzEffectJoint.cpp) -- the beam/tail-trail effect system Wing of
 // Ruin's growing tail-light AND Beam Knight's lightning beam both use (CreateTail(), MaxTails-capped
 // per-tail but NOT gated by g_pOption->GetRenderAllEffects() at all, so $effects off never covered

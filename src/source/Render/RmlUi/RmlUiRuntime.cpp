@@ -40,7 +40,7 @@ void RmlUiRuntime::ApplyScale(std::span<Rml::Context* const> contexts, const Rml
 
 void RmlUiRuntime::RefreshScale()
 {
-    Rml::Context* const contexts[] = {m_Context};
+    Rml::Context* const contexts[] = {m_Context, m_DebugContext};
     ApplyScale(contexts, m_Hooks);
 }
 
@@ -147,6 +147,12 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
     LoadBundledFonts();
 
     m_Context = Rml::CreateContext("main", Rml::Vector2i(windowWidth, windowHeight));
+    // Every window keeps its document loaded and hidden; only the shown ones need a per-frame update.
+    if (m_Context)
+        m_Context->SetSkipHiddenDocuments(true);
+    m_DebugContext = Rml::CreateContext("debug", Rml::Vector2i(windowWidth, windowHeight));
+    if (m_DebugContext)
+        m_DebugContext->SetSkipHiddenDocuments(true);
 
     RefreshScale();
 
@@ -190,6 +196,7 @@ void RmlUiRuntime::Destroy()
     // m_RenderInterface before this call.
     Rml::Shutdown();
     m_Context = nullptr;
+    m_DebugContext = nullptr;
 
     // Per RenderInterface.h/SystemInterface.h's own contract: the application must keep these
     // alive until after Rml::Shutdown() and destroy them itself afterward -- RmlUi never takes
@@ -205,7 +212,7 @@ void RmlUiRuntime::Destroy()
 void RmlUiRuntime::OnResize(int windowWidth, int windowHeight)
 {
     if (!m_Context) return;
-    for (Rml::Context* context : {m_Context})
+    for (Rml::Context* context : {m_Context, m_DebugContext})
     {
         if (context)
             context->SetDimensions(Rml::Vector2i(windowWidth, windowHeight));
@@ -216,12 +223,20 @@ void RmlUiRuntime::OnResize(int windowWidth, int windowHeight)
 void RmlUiRuntime::Update()
 {
     if (!m_Context) return;
-    FRAME_PROFILE(RmlUiUpdate);
-    if (m_Hooks.beforeUpdate)
-        m_Hooks.beforeUpdate();
-    ReleaseStrandedFieldFocus();
-    m_Context->Update();
-    AfterUpdate(m_Context);
+    {
+        FRAME_PROFILE(RmlUiUpdate);
+        if (m_Hooks.beforeUpdate)
+            m_Hooks.beforeUpdate();
+        ReleaseStrandedFieldFocus();
+        m_Context->Update();
+        AfterUpdate(m_Context);
+    }
+    if (m_DebugContext)
+    {
+        FRAME_PROFILE(Overlay);
+        m_DebugContext->Update();
+        AfterUpdate(m_DebugContext);
+    }
 }
 
 void RmlUiRuntime::ReleaseStrandedFieldFocus()
@@ -368,9 +383,17 @@ void RmlUiRuntime::Render()
     const mu::FrameGpuContext ctx = mu::GetRenderer().GetFrameGpuContext();
     if (!ctx.commandBuffer || !ctx.swapchainTexture) return;
 
+    {
+        FRAME_PROFILE(RmlUiRender);
+        m_RenderInterface->BeginFrame(ctx.commandBuffer, ctx.swapchainTexture, ctx.width, ctx.height, ctx.drawable);
+        m_Context->Render();
+    }
+    if (m_DebugContext)
+    {
+        FRAME_PROFILE(Overlay);
+        m_DebugContext->Render();
+    }
     FRAME_PROFILE(RmlUiRender);
-    m_RenderInterface->BeginFrame(ctx.commandBuffer, ctx.swapchainTexture, ctx.width, ctx.height);
-    m_Context->Render();
     m_RenderInterface->EndFrame();
 }
 

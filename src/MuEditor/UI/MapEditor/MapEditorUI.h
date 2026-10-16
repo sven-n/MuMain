@@ -78,6 +78,11 @@ private:
     void EnterEditMode(int editFlag);
     // Returns the game to normal play (EDIT_NONE) if this panel had taken it.
     void RestoreGameMode();
+    // No panel in sight: no overlay, outline or preview in the world, no
+    // top-down minimap view, and the game back to normal play.
+    void ReleaseWorld();
+    // Ends the top-down minimap view, back to the game's camera.
+    void EndMinimapMode();
 
     // Resolves which World{N}/EncTerrain{N} the live map maps to. -1 = auto from
     // the active world; a user override wins when >= 0.

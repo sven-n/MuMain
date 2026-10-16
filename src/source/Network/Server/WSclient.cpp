@@ -692,6 +692,9 @@ void ReceiveCharacterListExtended(const BYTE* ReceiveBuffer)
 {
     InitGuildWar();
 
+    // The server sends the allowed price types again when a character enters the game.
+    GameLogic::PersonalShop::SetAllowedPriceTypes({});
+
     ClearCharacters();
     SelectedCharacter = -1;
     SelectedHero = -1;
@@ -6218,7 +6221,7 @@ BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
 
         if (iSourceIndex >= MAX_MY_INVENTORY_EX_INDEX)
         {
-            int price = 0;
+            GameLogic::PersonalShop::ItemPrice price;
             if (GetPersonalItemPrice(iSourceIndex, price, g_IsPurchaseShop))
             {
                 RemovePersonalItemPrice(iSourceIndex, g_IsPurchaseShop);
@@ -9280,20 +9283,31 @@ void ReceiveSetPriceResult(const BYTE* ReceiveBuffer)
 {
     auto Header = (LPPSHOPSETPRICE_RESULTINFO)ReceiveBuffer;
 
-    if (Header->byResult != 0x01 && g_IsPurchaseShop == PSHOPWNDTYPE_SALE)
+    if (g_IsPurchaseShop != PSHOPWNDTYPE_SALE)
     {
-        // Header->byResult == 0x06
-        if (UI::Inventory::HasPickedItem())
-        {
-            UI::Inventory::DiscardPickedItem();
-        }
-
-        RemovePersonalItemPrice(UI::Shop::OwnShopPriceTargetIndex(), PSHOPWNDTYPE_SALE);
-
-        SocketClient->ToGameServer()->SendInventoryRequest();
-
-        g_ErrorReport.Write(L"@ [Fault] ReceiveSetPriceResult (result : %d)\n", Header->byResult);
+        return;
     }
+
+    if (Header->byResult == 0x01)
+    {
+        UI::Shop::ForgetReplacedOwnShopPrice(Header->byItemPos);
+        return;
+    }
+
+    // The server refused the price (Header->byResult == 0x06).
+    if (UI::Inventory::HasPickedItem())
+    {
+        UI::Inventory::DiscardPickedItem();
+    }
+
+    if (!UI::Shop::RestoreReplacedOwnShopPrice(Header->byItemPos))
+    {
+        RemovePersonalItemPrice(UI::Shop::OwnShopPriceTargetIndex(), PSHOPWNDTYPE_SALE);
+    }
+
+    SocketClient->ToGameServer()->SendInventoryRequest();
+
+    g_ErrorReport.Write(L"@ [Fault] ReceiveSetPriceResult (result : %d)\n", Header->byResult);
 }
 
 void ReceiveCreatePersonalShop(const BYTE* ReceiveBuffer)
@@ -9333,6 +9347,36 @@ void ReceiveDestroyPersonalShop(const BYTE* ReceiveBuffer)
     }
 }
 
+namespace
+{
+GameLogic::PersonalShop::ItemPrice DecodeShopItemPrice(const GETPSHOPITEM_DATAINFO& shopItem)
+{
+    return GameLogic::PersonalShop::DecodeExtendedPrice(static_cast<uint32_t>(shopItem.MoneyPrice),
+                                                        shopItem.PriceItemType, shopItem.RequiredItemAmount);
+}
+} // namespace
+
+void ReceivePersonalShopPriceTypes(std::span<const BYTE> ReceiveBuffer)
+{
+    auto Header = safe_cast<PSHOP_PRICETYPES_HEADERINFO>(ReceiveBuffer);
+    if (Header == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
+    const auto priceTypesData = ReceiveBuffer.subspan(sizeof(PSHOP_PRICETYPES_HEADERINFO));
+    const size_t count = std::min<size_t>(Header->Count, priceTypesData.size() / sizeof(WORD));
+    std::vector<uint16_t> priceItemTypes(count);
+    for (size_t i = 0; i < count; ++i)
+    {
+        priceItemTypes[i] =
+            static_cast<uint16_t>(priceTypesData[i * sizeof(WORD)] | (priceTypesData[i * sizeof(WORD) + 1] << 8));
+    }
+
+    GameLogic::PersonalShop::SetAllowedPriceTypes(priceItemTypes);
+}
+
 void ReceivePersonalShopItemList(std::span<const BYTE> ReceiveBuffer)
 {
     auto Header = safe_cast<GETPSHOPITEMLIST_HEADERINFO>(ReceiveBuffer);
@@ -9366,11 +9410,11 @@ void ReceivePersonalShopItemList(std::span<const BYTE> ReceiveBuffer)
             int length = CalcItemLength(itemData);
             itemData = itemData.subspan(0, length);
 
-            // todo: use item prices as well when the UI is ready
-            if (pShopItem->MoneyPrice > 0)
+            const auto price = DecodeShopItemPrice(*pShopItem);
+            if (price.Amount > 0)
             {
                 UI::Shop::AddBrowsedShopItem({ pShopItem->ItemSlot, itemData });
-                AddPersonalItemPrice(pShopItem->ItemSlot, pShopItem->MoneyPrice, PSHOPWNDTYPE_PURCHASE);
+                AddPersonalItemPrice(pShopItem->ItemSlot, price, PSHOPWNDTYPE_PURCHASE);
             }
             else
             {
@@ -9443,7 +9487,7 @@ void ReceiveRefreshItemList(std::span<const BYTE> ReceiveBuffer)
             itemData = itemData.subspan(0, length);
 
             items.push_back({ pShopItem->ItemSlot, itemData });
-            AddPersonalItemPrice(pShopItem->ItemSlot, pShopItem->MoneyPrice, PSHOPWNDTYPE_SALE);
+            AddPersonalItemPrice(pShopItem->ItemSlot, DecodeShopItemPrice(*pShopItem), PSHOPWNDTYPE_SALE);
 
             Offset += length;
         }
@@ -9474,7 +9518,7 @@ void ReceiveRefreshItemList(std::span<const BYTE> ReceiveBuffer)
             itemData = itemData.subspan(0, length);
 
             items.push_back({ pShopItem->ItemSlot, itemData });
-            AddPersonalItemPrice(pShopItem->ItemSlot, pShopItem->MoneyPrice, PSHOPWNDTYPE_PURCHASE);
+            AddPersonalItemPrice(pShopItem->ItemSlot, DecodeShopItemPrice(*pShopItem), PSHOPWNDTYPE_PURCHASE);
 
             Offset += length;
         }
@@ -9545,6 +9589,9 @@ void ReceivePurchaseItem(std::span<const BYTE> ReceiveBuffer)
             UI::Chat::PostSystem(I18N::Game::InventoryIsFull, mu::ui::window::TYPE_ERROR_MESSAGE);
         }
         break;
+        case PURCHASEITEM_RESULTINFO::LackOfPriceCurrency:
+            // The server tells which amount of jewels or coins is missing in a message.
+            break;
         case PURCHASEITEM_RESULTINFO::ItemBlock:
         default:
             g_ErrorReport.Write(L"@ [Fault] ReceivePurchaseItem (result : %d)\n", Header->Result);
@@ -10782,15 +10829,17 @@ void ReceiveBCStatus(const BYTE* ReceiveBuffer)
         CMultiLanguage::ConvertFromUtf8(ownerGuild, Data->cOwnerGuild, MAX_GUILDNAME);
         CMultiLanguage::ConvertFromUtf8(ownerGuildMaster, Data->cOwnerGuildMaster, MAX_USERNAME_SIZE);
         UI::Siege::GuardStatus status{
-            static_cast<CASTLESIEGE_STATE>(Data->cCastleSiegeState), ownerGuild, ownerGuildMaster,
-            {MAKEWORD(Data->btStartYearL, Data->btStartYearH), Data->btStartMonth,
-             Data->btStartDay, Data->btStartHour, Data->btStartMinute},
-            {MAKEWORD(Data->btEndYearL, Data->btEndYearH), Data->btEndMonth,
-             Data->btEndDay, Data->btEndHour, Data->btEndMinute},
-            {MAKEWORD(Data->btSiegeStartYearL, Data->btSiegeStartYearH), Data->btSiegeStartMonth,
-             Data->btSiegeStartDay, Data->btSiegeStartHour, Data->btSiegeStartMinute},
-            MAKELONG(MAKEWORD(Data->btStateLeftSec4, Data->btStateLeftSec3),
-                     MAKEWORD(Data->btStateLeftSec2, Data->btStateLeftSec1))};
+            static_cast<CASTLESIEGE_STATE>(Data->cCastleSiegeState),
+            ownerGuild,
+            ownerGuildMaster,
+            {MAKEWORD(Data->btStartYearL, Data->btStartYearH), Data->btStartMonth, Data->btStartDay, Data->btStartHour,
+             Data->btStartMinute},
+            {MAKEWORD(Data->btEndYearL, Data->btEndYearH), Data->btEndMonth, Data->btEndDay, Data->btEndHour,
+             Data->btEndMinute},
+            {MAKEWORD(Data->btSiegeStartYearL, Data->btSiegeStartYearH), Data->btSiegeStartMonth, Data->btSiegeStartDay,
+             Data->btSiegeStartHour, Data->btSiegeStartMinute},
+            static_cast<std::uint32_t>(MAKELONG(MAKEWORD(Data->btStateLeftSec4, Data->btStateLeftSec3),
+                                                MAKEWORD(Data->btStateLeftSec2, Data->btStateLeftSec1)))};
         UI::Siege::ShowGuardStatus(status);
     }
     break;
@@ -14080,6 +14129,9 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
             break;
         case 0x08:
             NotifySoldItem(ReceiveBuffer);
+            break;
+        case 0x0A:
+            ReceivePersonalShopPriceTypes(received_span);
             break;
         case 0x10:
             ReceiveShopTitleChange(ReceiveBuffer);

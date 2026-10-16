@@ -23,6 +23,22 @@ class RmlLayoutFixture
         void SetScissorRegion(Rml::Rectanglei) override {}
     };
 
+    // The fixture links stylesheets by absolute path. RmlUi's default JoinPath strips the leading
+    // '/' of one (it means "relative to the working directory" there), which loses a POSIX
+    // absolute path; a drive-letter path is kept as is.
+    struct AbsolutePathSystem : Rml::SystemInterface
+    {
+        void JoinPath(Rml::String& translated, const Rml::String& document, const Rml::String& path) override
+        {
+            if (!path.empty() && path.front() == '/')
+            {
+                translated = path;
+                return;
+            }
+            Rml::SystemInterface::JoinPath(translated, document, path);
+        }
+    };
+
 public:
     RmlLayoutFixture();
     ~RmlLayoutFixture();
@@ -34,6 +50,7 @@ public:
 
 private:
     NullRenderer m_Renderer;
+    AbsolutePathSystem m_System;
     UI::RmlBridge::ThemeFileInterface m_Files;
     int m_PreviousPercent;
     float m_PreviousContentScale;

@@ -106,6 +106,8 @@ namespace mu::ui::window
         // m_bPendingThemeSwitch's own comment for why this can't happen synchronously inside the
         // dropdown-option click event that recorded it.
         void ApplyPendingThemeSwitch();
+        // Same deferral for the font row -- see m_bPendingFontApply's own comment.
+        void ApplyPendingFont();
         // Same deferral for the UI-scale row -- see m_bPendingUIScaleApply's own comment.
         void ApplyPendingUIScale();
 
@@ -335,6 +337,10 @@ namespace mu::ui::window
         // from Update(), outside any RmlUi event) performs it on the next tick.
         bool m_bPendingThemeSwitch = false;
         std::string m_pendingThemeName;
+        // A font change rebuilds every RmlUi document too (their font tokens carry the family), so it
+        // is deferred to Update() for the same reason as m_bPendingThemeSwitch; m_iFontIndex holds the
+        // requested font.
+        bool m_bPendingFontApply = false;
         // Applying a UI scale resizes the window to its current size (MuApplyWindowResolution),
         // which re-runs every resolution-dependent system, re-asserts RmlUi's dp ratio on all
         // three contexts and pumps SDL while settling the window -- too much to run while still

@@ -239,7 +239,7 @@ every user.
 
 ## Effect browser (MuEditor)
 
-The effect browser (editor builds, **Effect Browser** in the toolbar) shows
+The effect browser (editor builds, **Windows > Effect Browser** in the editor window) shows
 the catalogue as the running game loaded it, read only. Values are changed
 in the files for now.
 

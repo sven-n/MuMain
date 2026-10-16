@@ -416,6 +416,16 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         SetDisableWingShadow(false);
         return true;
     }
+    else if (strCommand.compare(L"$effects shadows off") == 0)
+    {
+        SetDisableBodyShadows(true);
+        return true;
+    }
+    else if (strCommand.compare(L"$effects shadows on") == 0)
+    {
+        SetDisableBodyShadows(false);
+        return true;
+    }
     // RenderJoints() (beam/tail-trail effects -- Wing of Ruin's growing tail
     // light, Beam Knight's lightning beam) was never gated by g_pOption->GetRenderAllEffects() at
     // all, so $effects off never covered it. Isolates it directly.

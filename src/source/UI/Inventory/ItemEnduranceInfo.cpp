@@ -45,69 +45,72 @@ bool HasHelperLifeFrame()
 }
 
 // The HP frame's name of the equipped helper (HasHelperLifeFrame()).
-void HelperLifeFrameName(wchar_t* szText)
+// Names are copied, never formatted: a '%' in a name would be read as a
+// format specifier and overflow szText. Array reference keeps the bound.
+template <size_t N>
+void HelperLifeFrameName(wchar_t (&szText)[N])
 {
     switch (Hero->Helper.Type)
     {
     case MODEL_HELPER:
     {
-        mu_swprintf(szText, I18N::Game::GuardianAngel);
+        wcsncpy_s(szText, I18N::Game::GuardianAngel, _TRUNCATE);
     }
     break;
     case MODEL_IMP:
     {
         ITEM_ATTRIBUTE* p = &ItemAttribute[Data::Items::ToItemType(Hero->Helper.Type)];
-        mu_swprintf(szText, p->Name);
+        wcsncpy_s(szText, p->Name, _TRUNCATE);
     }
     break;
     case MODEL_HORN_OF_UNIRIA:
     {
-        mu_swprintf(szText, I18N::Game::Uniria);
+        wcsncpy_s(szText, I18N::Game::Uniria, _TRUNCATE);
     }
     break;
     case MODEL_HORN_OF_DINORANT:
     {
-        mu_swprintf(szText, I18N::Game::Dinorant);
+        wcsncpy_s(szText, I18N::Game::Dinorant, _TRUNCATE);
     }
     break;
     case MODEL_DARK_HORSE_ITEM:
     {
-        mu_swprintf(szText, I18N::Game::DarkHorse);
+        wcsncpy_s(szText, I18N::Game::DarkHorse, _TRUNCATE);
     }
     break;
     case MODEL_HORN_OF_FENRIR:
     {
-        mu_swprintf(szText, I18N::Game::Fenrir);
+        wcsncpy_s(szText, I18N::Game::Fenrir, _TRUNCATE);
     }
     break;
     case MODEL_DEMON:
     {
-        mu_swprintf(szText, ItemAttribute[ITEM_DEMON].Name);
+        wcsncpy_s(szText, ItemAttribute[ITEM_DEMON].Name, _TRUNCATE);
     }
     break;
     case MODEL_SPIRIT_OF_GUARDIAN:
     {
-        mu_swprintf(szText, ItemAttribute[ITEM_SPIRIT_OF_GUARDIAN].Name);
+        wcsncpy_s(szText, ItemAttribute[ITEM_SPIRIT_OF_GUARDIAN].Name, _TRUNCATE);
     }
     break;
     case MODEL_PET_RUDOLF:
     {
-        mu_swprintf(szText, ItemAttribute[ITEM_PET_RUDOLF].Name);
+        wcsncpy_s(szText, ItemAttribute[ITEM_PET_RUDOLF].Name, _TRUNCATE);
     }
     break;
     case MODEL_PET_PANDA:
     {
-        mu_swprintf(szText, ItemAttribute[ITEM_PET_PANDA].Name);
+        wcsncpy_s(szText, ItemAttribute[ITEM_PET_PANDA].Name, _TRUNCATE);
     }
     break;
     case MODEL_PET_UNICORN:
     {
-        mu_swprintf(szText, ItemAttribute[ITEM_PET_UNICORN].Name);
+        wcsncpy_s(szText, ItemAttribute[ITEM_PET_UNICORN].Name, _TRUNCATE);
     }
     break;
     case MODEL_PET_SKELETON:
     {
-        mu_swprintf(szText, ItemAttribute[ITEM_PET_SKELETON].Name);
+        wcsncpy_s(szText, ItemAttribute[ITEM_PET_SKELETON].Name, _TRUNCATE);
     }
     break;
     }
