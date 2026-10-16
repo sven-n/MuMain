@@ -2864,6 +2864,14 @@ public:
         {
             mu::log::Get("render")->warn("SDL_gpu -- failed to set {} present mode: {}", PresentModeName(presentMode),
                                          SDL_GetError());
+            // Vulkan keeps the failed mode and has already destroyed the old swapchain, so build one in
+            // VSync, which every driver supports, as the caller now records.
+            if (!enabled &&
+                !SDL_SetGPUSwapchainParameters(s_device, s_window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR,
+                                               SDL_GPU_PRESENTMODE_VSYNC))
+            {
+                mu::log::Get("render")->error("SDL_gpu -- failed to restore VSync present mode: {}", SDL_GetError());
+            }
             return false;
         }
 
