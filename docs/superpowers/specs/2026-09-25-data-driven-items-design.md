@@ -964,11 +964,12 @@ types and model slots (4d2). 239 identify an item by its model slot
   - Damage gets the level bonus. Magic power gets it too, then the sum with
     the excellent and ancient bonuses is halved and items that are not
     sceptres add `2 * level`.
-  - Defense gets 2, 3 or 4 times `min(9, level)` (2 for second tier wings
-    and the Capes of Lord and Fighter, 4 for third tier wings) and the
-    steps above +9, which start at 5 instead of 4 for third tier wings
-    (`GetItemLevelBonusAboveNine`); armor gets the level bonus; shields get
-    only `+ level` and their ancient bonus.
+  - Defense gets the level bonus with 2, 3 or 4 per level up to +9 (2 for
+    second tier wings and the Capes of Lord and Fighter, 4 for third tier
+    wings, 3 for armor and the other wings) and steps above +9 that start
+    at 5 instead of 4 for third tier wings (the parameters of
+    `GetItemLevelBonus`); shields get only `+ level` and their ancient
+    bonus.
   - Blocking and magic defense get the level bonus like damage. 815b8828
     had made them use the drop level, so they never grew with the item
     level; #683 brought the item level back, as in the client before and in
