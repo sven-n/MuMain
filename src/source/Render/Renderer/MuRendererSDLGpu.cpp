@@ -235,6 +235,39 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
 static SDL_GPUDevice* s_device = nullptr;
 static SDL_Window* s_window = nullptr;
 
+// Uncapped present mode for VSync off: IMMEDIATE when the window supports it, otherwise
+// MAILBOX (also not tied to the display refresh). Vulkan only guarantees VSYNC (FIFO), and
+// Wayland compositors without tearing support do not offer IMMEDIATE, so asking for it
+// alone left VSync on there.
+[[nodiscard]] static SDL_GPUPresentMode PickUncappedPresentMode()
+{
+    if (SDL_WindowSupportsGPUPresentMode(s_device, s_window, SDL_GPU_PRESENTMODE_IMMEDIATE))
+    {
+        return SDL_GPU_PRESENTMODE_IMMEDIATE;
+    }
+
+    if (SDL_WindowSupportsGPUPresentMode(s_device, s_window, SDL_GPU_PRESENTMODE_MAILBOX))
+    {
+        mu::log::Get("render")->info("SDL_gpu -- immediate present mode not supported, using mailbox");
+        return SDL_GPU_PRESENTMODE_MAILBOX;
+    }
+
+    return SDL_GPU_PRESENTMODE_IMMEDIATE;
+}
+
+[[nodiscard]] static const char* PresentModeName(SDL_GPUPresentMode mode)
+{
+    switch (mode)
+    {
+    case SDL_GPU_PRESENTMODE_VSYNC:
+        return "VSync";
+    case SDL_GPU_PRESENTMODE_MAILBOX:
+        return "mailbox";
+    default:
+        return "immediate";
+    }
+}
+
 // RmlUi port: see SetPreSubmitCallback's own comment (MuRenderer.h) for what this is and why.
 static std::function<void()> s_preSubmitCallback;
 
@@ -2697,11 +2730,11 @@ public:
             return false;
         }
 
-        const SDL_GPUPresentMode presentMode = enabled ? SDL_GPU_PRESENTMODE_VSYNC : SDL_GPU_PRESENTMODE_IMMEDIATE;
+        const SDL_GPUPresentMode presentMode = enabled ? SDL_GPU_PRESENTMODE_VSYNC : PickUncappedPresentMode();
         if (!SDL_SetGPUSwapchainParameters(s_device, s_window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, presentMode))
         {
-            mu::log::Get("render")->warn("SDL_gpu -- failed to set {} present mode: {}",
-                                         enabled ? "VSync" : "immediate", SDL_GetError());
+            mu::log::Get("render")->warn("SDL_gpu -- failed to set {} present mode: {}", PresentModeName(presentMode),
+                                         SDL_GetError());
             return false;
         }
 
