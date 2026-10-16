@@ -98,3 +98,16 @@ TEST_CASE("a new vertex size moves the binding to the draw's own offset [render]
     CHECK(state.SelectVertexBuffer(Pointer<SDL_GPUBuffer>(1), 20, 200));
     CHECK(state.VertexBufferOffset() == 200);
 }
+
+TEST_CASE("the instance buffer is tracked apart from the vertex buffer [render][sdl_gpu_replay_state]")
+{
+    Render::SdlGpuReplayState state;
+
+    CHECK(state.SelectVertexBuffer(Pointer<SDL_GPUBuffer>(1), 40, 0));
+    CHECK(state.SelectInstanceBuffer(Pointer<SDL_GPUBuffer>(1)));
+    CHECK(state.SelectVertexBuffer(Pointer<SDL_GPUBuffer>(2), 40, 0));
+    CHECK_FALSE(state.SelectInstanceBuffer(Pointer<SDL_GPUBuffer>(1)));
+
+    state.Invalidate();
+    CHECK(state.SelectInstanceBuffer(Pointer<SDL_GPUBuffer>(1)));
+}

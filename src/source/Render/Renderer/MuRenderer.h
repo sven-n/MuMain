@@ -86,13 +86,12 @@ struct Vertex3D
     std::uint32_t color; // packed ABGR
 };
 
-// Rest-pose model vertex for GPU bone skinning.
+// Rest-pose model vertex for GPU bone skinning. The colour is per draw, not per vertex.
 struct SkinnedVertex3D
 {
     float x, y, z;
     float nx, ny, nz;
     float u, v;
-    std::uint32_t color;
     std::int32_t positionBoneIndex;
     std::int32_t normalBoneIndex;
 };
@@ -184,15 +183,45 @@ public:
     // Render independent world-space quads in perimeter order.
     virtual void RenderQuad3D(std::span<const Vertex3D> vertices, std::uint32_t textureId) = 0;
 
-    // Render rest-pose triangles using a GPU bone palette. False means an eligible draw failed
-    // submission and must not trigger CPU fallback.
-    [[nodiscard]] virtual bool RenderSkinnedTriangles(std::span<const SkinnedVertex3D> vertices,
+    // Render rest-pose triangles using a GPU bone palette, in one packed ABGR colour. False means an
+    // eligible draw failed submission and must not trigger CPU fallback.
+    [[nodiscard]] virtual bool RenderSkinnedTriangles(std::span<const SkinnedVertex3D> vertices, std::uint32_t color,
                                                       std::uint32_t textureId, const SkinningParameters& parameters)
     {
         (void)vertices;
+        (void)color;
         (void)textureId;
         (void)parameters;
         return false;
+    }
+
+    // Rest-pose triangles kept on the GPU under `mesh`, so a draw no longer uploads them. The data
+    // must not change while cached; ReleaseSkinnedMesh before it is freed. Releasing is safe at any
+    // time, also after the renderer has shut down.
+    [[nodiscard]] virtual bool IsSkinnedMeshCached(const void* mesh) const
+    {
+        (void)mesh;
+        return false;
+    }
+    [[nodiscard]] virtual bool CacheSkinnedMesh(const void* mesh, std::span<const SkinnedVertex3D> vertices)
+    {
+        (void)mesh;
+        (void)vertices;
+        return false;
+    }
+    // Same contract as RenderSkinnedTriangles, for a cached mesh.
+    [[nodiscard]] virtual bool RenderCachedSkinnedMesh(const void* mesh, std::uint32_t color, std::uint32_t textureId,
+                                                       const SkinningParameters& parameters)
+    {
+        (void)mesh;
+        (void)color;
+        (void)textureId;
+        (void)parameters;
+        return false;
+    }
+    virtual void ReleaseSkinnedMesh(const void* mesh)
+    {
+        (void)mesh;
     }
 
     // Render a quad strip from world-space vertices (requires >= 4 vertices, even count ideal).

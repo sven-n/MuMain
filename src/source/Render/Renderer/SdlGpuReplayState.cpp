@@ -87,6 +87,16 @@ bool SdlGpuReplayState::SelectVertexBuffer(SDL_GPUBuffer* buffer, Uint32 stride,
     return true;
 }
 
+bool SdlGpuReplayState::SelectInstanceBuffer(SDL_GPUBuffer* buffer)
+{
+    if (m_instanceBufferValid && m_instanceBuffer == buffer)
+        return false;
+
+    m_instanceBuffer = buffer;
+    m_instanceBufferValid = true;
+    return true;
+}
+
 bool SdlGpuReplayState::SelectIndexBuffer(SDL_GPUBuffer* buffer, Uint32 offset, SDL_GPUIndexElementSize elementSize)
 {
     if (m_indexBufferValid && m_indexBuffer == buffer && m_indexOffset == offset &&
@@ -137,6 +147,7 @@ void SdlGpuReplayState::Invalidate()
     m_fragmentUniformsValid = false;
     m_vertexStorageBufferValid = false;
     m_vertexBufferValid = false;
+    m_instanceBufferValid = false;
     m_indexBufferValid = false;
     m_viewportValid = false;
     m_scissorValid = false;

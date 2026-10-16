@@ -34,6 +34,7 @@
 #include "DrawCommandHistory.h"
 #include "MuRenderer.h"
 #include "QuadTopology.h"
+#include "RangeAllocator.h"
 #include "SdlGpuPixelFormat.h"
 #include "SdlGpuReplayState.h"
 #include "SdlGpuValidation.h"
@@ -574,6 +575,7 @@ struct BufferUpload
     Uint32 offset;
     Uint32 size;
     bool cycle;
+    Uint32 transferOffset = 0u;
 };
 
 // Copies the part of `scratch` not yet staged into `transfer` and queues its upload. The frame's first upload
@@ -599,6 +601,47 @@ static bool StageAppended(SDL_GPUTransferBuffer* transfer, SDL_GPUBuffer* buffer
     staged = {buffer, totalBytes};
     return true;
 }
+
+// Rest-pose vertices of cached skinned meshes (CacheSkinnedMesh), sub-allocated from a few large vertex buffers in
+// whole vertices. A draw then uploads only its colour.
+constexpr Uint32 k_SkinnedMeshBlockVertices = 4u * 1024u * 1024u / sizeof(mu::SkinnedVertex3D);
+// A released range stays untouched until no frame still in flight can read it.
+constexpr std::uint64_t k_SkinnedMeshFreeDelayFrames = 3u;
+
+struct SkinnedMeshBlock
+{
+    SDL_GPUBuffer* buffer;
+    Render::RangeAllocator ranges;
+};
+
+struct CachedSkinnedMesh
+{
+    Uint32 block;
+    Uint32 firstVertex;
+    Uint32 vertexCount;
+};
+
+struct PendingSkinnedMeshUpload
+{
+    CachedSkinnedMesh range;
+    std::size_t stagingFirst; // into s_skinnedMeshStaging
+};
+
+struct DeferredSkinnedMeshFree
+{
+    CachedSkinnedMesh range;
+    std::uint64_t releasedAtFrame;
+};
+
+static std::vector<SkinnedMeshBlock> s_skinnedMeshBlocks;
+static std::unordered_map<const void*, CachedSkinnedMesh> s_skinnedMeshes;
+// Meshes cached since the last StageDeferredGpuData, waiting for its copy pass.
+static std::vector<mu::SkinnedVertex3D> s_skinnedMeshStaging;
+static std::vector<PendingSkinnedMeshUpload> s_pendingSkinnedMeshUploads;
+static std::vector<DeferredSkinnedMeshFree> s_deferredSkinnedMeshFrees;
+static SDL_GPUTransferBuffer* s_skinnedMeshTransferBuf = nullptr;
+static Uint32 s_skinnedMeshTransferCapacity = 0u;
+static std::uint64_t s_submittedFrames = 0u;
 
 // Per-frame packed float4 bone rows. Three rows represent one affine 3x4 bone transform.
 static SDL_GPUTransferBuffer* s_boneTransferBuf = nullptr;
@@ -643,8 +686,10 @@ struct RenderCmd
     SDL_GPUGraphicsPipeline* pipeline;
     SDL_GPUTexture* texture;
     SDL_GPUSampler* sampler;
+    SDL_GPUBuffer* vtxBuffer = nullptr; // null: the frame's s_vtxGpuBuf
     Uint32 vtxOffset;      // in bytes, a multiple of vtxStride
     Uint32 vtxStride;
+    Uint32 colorOffset = 0u; // DrawSkinnedTriangles' colour, in bytes into s_vtxGpuBuf
     Uint32 vtxCount;       // for DrawTriangles
     Uint32 idxCount;       // for DrawIndexed*
     Uint32 stripIdxOffset; // byte offset into strip index scratch buffer
@@ -900,13 +945,25 @@ static void ReplayDrawCommand(const RenderCmd& command, bool boneDataReady, cons
     else
         PushReplayVertexUniforms(&command.vu, sizeof(command.vu), state);
 
-    // Bound again only when the vertex size changes; draws in between say where their vertices start.
-    if (state.SelectVertexBuffer(s_vtxGpuBuf, command.vtxStride, command.vtxOffset))
+    // Bound again only when the buffer or the vertex size changes; draws in between say where their vertices start.
+    SDL_GPUBuffer* const vertexBuffer = command.vtxBuffer ? command.vtxBuffer : s_vtxGpuBuf;
+    if (state.SelectVertexBuffer(vertexBuffer, command.vtxStride, command.vtxOffset))
     {
-        const SDL_GPUBufferBinding vertexBinding{s_vtxGpuBuf, state.VertexBufferOffset()};
+        const SDL_GPUBufferBinding vertexBinding{vertexBuffer, state.VertexBufferOffset()};
         SDL_BindGPUVertexBuffers(s_renderPass, 0, &vertexBinding, 1);
     }
     const Uint32 firstVertex = (command.vtxOffset - state.VertexBufferOffset()) / command.vtxStride;
+    // A skinned draw's one colour is a per-instance attribute: its single instance starts at it.
+    Uint32 firstInstance = 0u;
+    if (skinned)
+    {
+        if (state.SelectInstanceBuffer(s_vtxGpuBuf))
+        {
+            const SDL_GPUBufferBinding colorBinding{s_vtxGpuBuf, 0u};
+            SDL_BindGPUVertexBuffers(s_renderPass, 1, &colorBinding, 1);
+        }
+        firstInstance = command.colorOffset / sizeof(Uint32);
+    }
 
     if (skinned && state.SelectVertexStorageBuffer(s_boneGpuBuf))
     {
@@ -929,7 +986,7 @@ static void ReplayDrawCommand(const RenderCmd& command, bool boneDataReady, cons
     if (command.type == RenderCmdType::DrawIndexedQuads || command.type == RenderCmdType::DrawIndexedStrip)
         SDL_DrawGPUIndexedPrimitives(s_renderPass, command.idxCount, 1, firstIndex, static_cast<Sint32>(firstVertex), 0);
     else
-        SDL_DrawGPUPrimitives(s_renderPass, command.vtxCount, 1, firstVertex, 0);
+        SDL_DrawGPUPrimitives(s_renderPass, command.vtxCount, 1, firstVertex, firstInstance);
     ++s_dbgGpuDrawCallsThisFrame;
 }
 
@@ -1693,6 +1750,7 @@ public:
         DestroyQuadIndexBuffer();
         DestroyVertexBuffers();
         DestroyBoneBuffers();
+        DestroySkinnedMeshCache();
         DestroyPipelines();
         ReleaseShaders();
 
@@ -1833,6 +1891,58 @@ public:
     // accumulated vertex data to the GPU vertex buffer. The next frame's
     // render pass will read from the updated GPU buffer.
     // -----------------------------------------------------------------------
+    // Queues the meshes cached since the last call into their block ranges. Those ranges are new, so no
+    // frame reads them yet and the shared blocks are written in place instead of cycled. False keeps them
+    // pending for the next call.
+    [[nodiscard]] static bool StageSkinnedMeshes(std::vector<BufferUpload>& uploads)
+    {
+        constexpr Uint32 stride = sizeof(SkinnedVertex3D);
+        if (s_skinnedMeshStaging.size() > std::numeric_limits<Uint32>::max() / stride)
+        {
+            return false;
+        }
+        const Uint32 bytes = static_cast<Uint32>(s_skinnedMeshStaging.size()) * stride;
+        if (s_skinnedMeshTransferCapacity < bytes)
+        {
+            const Uint32 capacity =
+                std::max({bytes, k_SkinnedMeshBlockVertices * stride, s_skinnedMeshTransferCapacity * 2u});
+            SDL_GPUTransferBufferCreateInfo transferInfo{};
+            transferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
+            transferInfo.size = capacity;
+            SDL_GPUTransferBuffer* transfer = SDL_CreateGPUTransferBuffer(s_device, &transferInfo);
+            if (!transfer)
+            {
+                return false;
+            }
+            if (s_skinnedMeshTransferBuf)
+            {
+                SDL_ReleaseGPUTransferBuffer(s_device, s_skinnedMeshTransferBuf);
+            }
+            s_skinnedMeshTransferBuf = transfer;
+            s_skinnedMeshTransferCapacity = capacity;
+        }
+
+        void* mapped = SDL_MapGPUTransferBuffer(s_device, s_skinnedMeshTransferBuf, true);
+        if (!mapped)
+        {
+            return false;
+        }
+        std::memcpy(mapped, s_skinnedMeshStaging.data(), bytes);
+        SDL_UnmapGPUTransferBuffer(s_device, s_skinnedMeshTransferBuf);
+        s_dbgVtxBytesThisFrame += bytes;
+        FrameProfiler::Count(FrameProfiler::Counter::VertexBytes, bytes);
+
+        for (const PendingSkinnedMeshUpload& pending : s_pendingSkinnedMeshUploads)
+        {
+            uploads.push_back({s_skinnedMeshTransferBuf, s_skinnedMeshBlocks[pending.range.block].buffer,
+                               pending.range.firstVertex * stride, pending.range.vertexCount * stride, false,
+                               static_cast<Uint32>(pending.stagingFirst) * stride});
+        }
+        s_pendingSkinnedMeshUploads.clear();
+        s_skinnedMeshStaging.clear();
+        return true;
+    }
+
     // Stages this frame's accumulated CPU-side vertex/bone/strip-index/texture-update scratch
     // buffers to the GPU via one copy pass. Safe to call more than once per frame (EndFrame and
     // the post-RmlUi pass both do): scratch data is only ever appended, so a later call sends just
@@ -1862,6 +1972,13 @@ public:
                                 StageAppended(s_boneTransferBuf, s_boneGpuBuf, s_boneRowScratch.data(), boneDataSize,
                                               s_stagedBones, bufferUploads);
             }
+        }
+
+        if (!s_pendingSkinnedMeshUploads.empty() && !StageSkinnedMeshes(bufferUploads))
+        {
+            mu::log::Get("render")->error("SDL_gpu -- failed to stage cached skinned meshes: {}", SDL_GetError());
+            // Their ranges hold nothing yet; skinned draws wait for the retry rather than read them.
+            boneDataReady = false;
         }
 
         // EnsureStripIndexBuffer may release/create GPU resources, so it runs before the copy pass.
@@ -1917,6 +2034,7 @@ public:
                 {
                     SDL_GPUTransferBufferLocation source{};
                     source.transfer_buffer = upload.transfer;
+                    source.offset = upload.transferOffset;
 
                     SDL_GPUBufferRegion destination{};
                     destination.buffer = upload.buffer;
@@ -2380,6 +2498,17 @@ public:
         }
 
         s_swapchainTexture = nullptr;
+
+        ++s_submittedFrames;
+        std::erase_if(s_deferredSkinnedMeshFrees,
+                      [](const DeferredSkinnedMeshFree& released)
+                      {
+                          if (s_submittedFrames < released.releasedAtFrame + k_SkinnedMeshFreeDelayFrames)
+                              return false;
+                          s_skinnedMeshBlocks[released.range.block].ranges.Free(released.range.firstVertex,
+                                                                                released.range.vertexCount);
+                          return true;
+                      });
 
         const auto frameCompletedAt = std::chrono::steady_clock::now();
         s_lastFrameStats.requestedDrawCalls = s_dbgDrawCallsThisFrame;
@@ -3566,91 +3695,83 @@ public:
         FrameProfiler::Count(FrameProfiler::Counter::VertexBytes, byteSize);
     }
 
-    [[nodiscard]] bool RenderSkinnedTriangles(std::span<const SkinnedVertex3D> vertices, std::uint32_t textureId,
-                                              const SkinningParameters& parameters) override
+    [[nodiscard]] bool RenderSkinnedTriangles(std::span<const SkinnedVertex3D> vertices, std::uint32_t color,
+                                              std::uint32_t textureId, const SkinningParameters& parameters) override
     {
-        if (vertices.empty() || vertices.size() % 3 != 0 || !s_frameActive || !m_colorWriteEnabled ||
-            m_stencilTestEnabled || parameters.boneMatrices.empty() || parameters.boneMatrices.size() % 12 != 0)
+        return RecordSkinnedDraw(vertices.data(), {}, static_cast<Uint32>(vertices.size()), color, textureId,
+                                 parameters);
+    }
+
+    [[nodiscard]] bool IsSkinnedMeshCached(const void* mesh) const override
+    {
+        return s_skinnedMeshes.contains(mesh);
+    }
+
+    [[nodiscard]] bool CacheSkinnedMesh(const void* mesh, std::span<const SkinnedVertex3D> vertices) override
+    {
+        if (!s_device || vertices.empty() || vertices.size() > std::numeric_limits<Uint32>::max() ||
+            s_skinnedMeshes.contains(mesh))
         {
             return false;
         }
 
-        const std::uint32_t resolvedTexId = ResolveTextureId(textureId);
-        auto* texture = static_cast<SDL_GPUTexture*>(LookupTextureForDraw(resolvedTexId));
-        if (!texture)
+        const Uint32 vertexCount = static_cast<Uint32>(vertices.size());
+        std::optional<CachedSkinnedMesh> range;
+        for (Uint32 block = 0u; block < s_skinnedMeshBlocks.size() && !range; ++block)
         {
-            return false;
+            if (const auto first = s_skinnedMeshBlocks[block].ranges.Allocate(vertexCount))
+                range = CachedSkinnedMesh{block, *first, vertexCount};
+        }
+        if (!range)
+        {
+            // shortcut: blocks are never released before Shutdown, fine while the loaded meshes fit a few blocks;
+            // release empty ones if a long session keeps growing them.
+            const Uint32 blockVertices = std::max(k_SkinnedMeshBlockVertices, vertexCount);
+            if (blockVertices > std::numeric_limits<Uint32>::max() / sizeof(SkinnedVertex3D))
+            {
+                return false;
+            }
+            SDL_GPUBufferCreateInfo bufferInfo{};
+            bufferInfo.usage = SDL_GPU_BUFFERUSAGE_VERTEX;
+            bufferInfo.size = blockVertices * static_cast<Uint32>(sizeof(SkinnedVertex3D));
+            SDL_GPUBuffer* buffer = SDL_CreateGPUBuffer(s_device, &bufferInfo);
+            if (!buffer)
+            {
+                mu::log::Get("render")->error("SDL_gpu -- skinned mesh buffer creation failed: {}", SDL_GetError());
+                return false;
+            }
+            s_skinnedMeshBlocks.push_back({buffer, Render::RangeAllocator(blockVertices)});
+            const auto first = s_skinnedMeshBlocks.back().ranges.Allocate(vertexCount);
+            range = CachedSkinnedMesh{static_cast<Uint32>(s_skinnedMeshBlocks.size() - 1u), *first, vertexCount};
         }
 
-        const int pipelineIdx = GetActivePipelineIndex();
-        const bool cullFaceEnabled = m_cullFaceEnabled && !s_disableD3D12Culling;
-        SDL_GPUGraphicsPipeline* pipeline =
-            m_depthTestEnabled
-                ? (m_depthMaskEnabled
-                       ? (cullFaceEnabled ? s_pipelinesSkinned[pipelineIdx] : s_pipelinesSkinnedNoCull[pipelineIdx])
-                       : s_pipelinesSkinnedDepthReadOnly[pipelineIdx])
-                : s_pipelinesSkinnedDepthOff[pipelineIdx];
-        if (!pipeline)
-        {
-            return false;
-        }
-
-        const Uint32 paletteRowOffset = RecordBonePalette(parameters);
-        if (paletteRowOffset == ~0u)
-        {
-            return false;
-        }
-
-        const Uint32 byteSize = static_cast<Uint32>(vertices.size() * sizeof(SkinnedVertex3D));
-        const Uint32 vtxOffset = UploadVertices(vertices.data(), byteSize, sizeof(SkinnedVertex3D));
-        if (vtxOffset == ~0u)
-        {
-            return false;
-        }
-
-        RenderCmd cmd{};
-        cmd.type = RenderCmdType::DrawSkinnedTriangles;
-        SkinningVertexUniforms& skinningVu = s_skinningUniforms.emplace_back();
-        cmd.skinningIndex = static_cast<Uint32>(s_skinningUniforms.size() - 1u);
-        cmd.pipeline = pipeline;
-        cmd.texture = texture;
-        void* sampler = LookupSampler(resolvedTexId);
-        cmd.sampler = sampler ? static_cast<SDL_GPUSampler*>(sampler) : s_defaultSampler;
-        cmd.vtxOffset = vtxOffset;
-        cmd.vtxStride = sizeof(SkinnedVertex3D);
-        cmd.vtxCount = static_cast<Uint32>(vertices.size());
-        skinningVu.mvp = m_mvpMatrix;
-        skinningVu.bodyOriginAndScale[0] = parameters.bodyOrigin[0];
-        skinningVu.bodyOriginAndScale[1] = parameters.bodyOrigin[1];
-        skinningVu.bodyOriginAndScale[2] = parameters.bodyOrigin[2];
-        skinningVu.bodyOriginAndScale[3] = parameters.bodyScale;
-        skinningVu.skinningScales[0] = parameters.boneScale;
-        skinningVu.skinningScales[1] = parameters.restPoseScale;
-        skinningVu.palette[0] = paletteRowOffset;
-        skinningVu.palette[1] = static_cast<std::uint32_t>(parameters.boneMatrices.size() / 12);
-        skinningVu.palette[2] = parameters.translate ? 1u : 0u;
-        skinningVu.palette[3] = parameters.lightEnabled ? 1u : 0u;
-        skinningVu.lightDirection[0] = parameters.lightDirection[0];
-        skinningVu.lightDirection[1] = parameters.lightDirection[1];
-        skinningVu.lightDirection[2] = parameters.lightDirection[2];
-        skinningVu.fogParameters[0] = m_fogUniform.fogStart;
-        skinningVu.fogParameters[1] = m_fogUniform.fogEnd;
-        skinningVu.textureCoordinates[0] = static_cast<std::uint32_t>(parameters.textureCoordinates);
-        skinningVu.chromeParameters[0] = parameters.chromeWave;
-        skinningVu.chromeParameters[1] = parameters.chromeWave2;
-        skinningVu.chromeParameters[2] = parameters.chromeLight[0];
-        skinningVu.chromeParameters[3] = parameters.chromeLight[1];
-        skinningVu.textureCoordinateParameters[0] = parameters.textureCoordinateOffset[0];
-        skinningVu.textureCoordinateParameters[1] = parameters.textureCoordinateOffset[1];
-        skinningVu.textureCoordinateParameters[2] = parameters.chromeTimeTerm;
-        cmd.fogUniform = m_fogUniform;
-        s_renderCmds.push_back(cmd);
-
-        ++s_dbgDrawCallsThisFrame;
-        s_dbgVtxBytesThisFrame += byteSize;
-        FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
-        FrameProfiler::Count(FrameProfiler::Counter::VertexBytes, byteSize);
+        s_pendingSkinnedMeshUploads.push_back({*range, s_skinnedMeshStaging.size()});
+        s_skinnedMeshStaging.insert(s_skinnedMeshStaging.end(), vertices.begin(), vertices.end());
+        s_skinnedMeshes.emplace(mesh, *range);
         return true;
+    }
+
+    [[nodiscard]] bool RenderCachedSkinnedMesh(const void* mesh, std::uint32_t color, std::uint32_t textureId,
+                                               const SkinningParameters& parameters) override
+    {
+        const auto cached = s_skinnedMeshes.find(mesh);
+        if (cached == s_skinnedMeshes.end())
+        {
+            return false;
+        }
+        return RecordSkinnedDraw(nullptr, cached->second, cached->second.vertexCount, color, textureId, parameters);
+    }
+
+    // CPU bookkeeping only, so a model released after Shutdown finds an empty cache.
+    void ReleaseSkinnedMesh(const void* mesh) override
+    {
+        const auto cached = s_skinnedMeshes.find(mesh);
+        if (cached == s_skinnedMeshes.end())
+        {
+            return;
+        }
+        s_deferredSkinnedMeshFrees.push_back({cached->second, s_submittedFrames});
+        s_skinnedMeshes.erase(cached);
     }
 
     // -----------------------------------------------------------------------
@@ -3959,6 +4080,109 @@ public:
     }
 
 private:
+    // Records one skinned draw. `frameVertices` are uploaded with this frame's vertices; without them the draw
+    // reads `cached`, already on the GPU.
+    [[nodiscard]] bool RecordSkinnedDraw(const SkinnedVertex3D* frameVertices, const CachedSkinnedMesh& cached,
+                                         Uint32 vertexCount, std::uint32_t color, std::uint32_t textureId,
+                                         const SkinningParameters& parameters)
+    {
+        if (vertexCount == 0u || vertexCount % 3 != 0 || !s_frameActive || !m_colorWriteEnabled ||
+            m_stencilTestEnabled || parameters.boneMatrices.empty() || parameters.boneMatrices.size() % 12 != 0)
+        {
+            return false;
+        }
+
+        const std::uint32_t resolvedTexId = ResolveTextureId(textureId);
+        auto* texture = static_cast<SDL_GPUTexture*>(LookupTextureForDraw(resolvedTexId));
+        if (!texture)
+        {
+            return false;
+        }
+
+        const int pipelineIdx = GetActivePipelineIndex();
+        const bool cullFaceEnabled = m_cullFaceEnabled && !s_disableD3D12Culling;
+        SDL_GPUGraphicsPipeline* pipeline =
+            m_depthTestEnabled
+                ? (m_depthMaskEnabled
+                       ? (cullFaceEnabled ? s_pipelinesSkinned[pipelineIdx] : s_pipelinesSkinnedNoCull[pipelineIdx])
+                       : s_pipelinesSkinnedDepthReadOnly[pipelineIdx])
+                : s_pipelinesSkinnedDepthOff[pipelineIdx];
+        if (!pipeline)
+        {
+            return false;
+        }
+
+        const Uint32 paletteRowOffset = RecordBonePalette(parameters);
+        if (paletteRowOffset == ~0u)
+        {
+            return false;
+        }
+
+        Uint32 byteSize = 0u;
+        Uint32 vtxOffset = cached.firstVertex * static_cast<Uint32>(sizeof(SkinnedVertex3D));
+        if (frameVertices)
+        {
+            byteSize = vertexCount * static_cast<Uint32>(sizeof(SkinnedVertex3D));
+            vtxOffset = UploadVertices(frameVertices, byteSize, sizeof(SkinnedVertex3D));
+            if (vtxOffset == ~0u)
+            {
+                return false;
+            }
+        }
+        const Uint32 colorOffset = UploadVertices(&color, sizeof(color), sizeof(color));
+        if (colorOffset == ~0u)
+        {
+            return false;
+        }
+        byteSize += sizeof(color);
+
+        RenderCmd cmd{};
+        cmd.type = RenderCmdType::DrawSkinnedTriangles;
+        SkinningVertexUniforms& skinningVu = s_skinningUniforms.emplace_back();
+        cmd.skinningIndex = static_cast<Uint32>(s_skinningUniforms.size() - 1u);
+        cmd.pipeline = pipeline;
+        cmd.texture = texture;
+        void* sampler = LookupSampler(resolvedTexId);
+        cmd.sampler = sampler ? static_cast<SDL_GPUSampler*>(sampler) : s_defaultSampler;
+        cmd.vtxBuffer = frameVertices ? nullptr : s_skinnedMeshBlocks[cached.block].buffer;
+        cmd.vtxOffset = vtxOffset;
+        cmd.vtxStride = sizeof(SkinnedVertex3D);
+        cmd.colorOffset = colorOffset;
+        cmd.vtxCount = vertexCount;
+        skinningVu.mvp = m_mvpMatrix;
+        skinningVu.bodyOriginAndScale[0] = parameters.bodyOrigin[0];
+        skinningVu.bodyOriginAndScale[1] = parameters.bodyOrigin[1];
+        skinningVu.bodyOriginAndScale[2] = parameters.bodyOrigin[2];
+        skinningVu.bodyOriginAndScale[3] = parameters.bodyScale;
+        skinningVu.skinningScales[0] = parameters.boneScale;
+        skinningVu.skinningScales[1] = parameters.restPoseScale;
+        skinningVu.palette[0] = paletteRowOffset;
+        skinningVu.palette[1] = static_cast<std::uint32_t>(parameters.boneMatrices.size() / 12);
+        skinningVu.palette[2] = parameters.translate ? 1u : 0u;
+        skinningVu.palette[3] = parameters.lightEnabled ? 1u : 0u;
+        skinningVu.lightDirection[0] = parameters.lightDirection[0];
+        skinningVu.lightDirection[1] = parameters.lightDirection[1];
+        skinningVu.lightDirection[2] = parameters.lightDirection[2];
+        skinningVu.fogParameters[0] = m_fogUniform.fogStart;
+        skinningVu.fogParameters[1] = m_fogUniform.fogEnd;
+        skinningVu.textureCoordinates[0] = static_cast<std::uint32_t>(parameters.textureCoordinates);
+        skinningVu.chromeParameters[0] = parameters.chromeWave;
+        skinningVu.chromeParameters[1] = parameters.chromeWave2;
+        skinningVu.chromeParameters[2] = parameters.chromeLight[0];
+        skinningVu.chromeParameters[3] = parameters.chromeLight[1];
+        skinningVu.textureCoordinateParameters[0] = parameters.textureCoordinateOffset[0];
+        skinningVu.textureCoordinateParameters[1] = parameters.textureCoordinateOffset[1];
+        skinningVu.textureCoordinateParameters[2] = parameters.chromeTimeTerm;
+        cmd.fogUniform = m_fogUniform;
+        s_renderCmds.push_back(cmd);
+
+        ++s_dbgDrawCallsThisFrame;
+        s_dbgVtxBytesThisFrame += byteSize;
+        FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
+        FrameProfiler::Count(FrameProfiler::Counter::VertexBytes, byteSize);
+        return true;
+    }
+
     glm::mat4& ActiveMatrix()
     {
         return (m_matrixMode == 0x1700) ? m_modelViewMatrix : m_projMatrix;
@@ -4306,7 +4530,9 @@ private:
 
         SDL_GPUVertexAttribute vertexAttribs[6];
         Uint32 numAttribs = 0;
-        SDL_GPUVertexBufferDescription vtxBufDesc{};
+        SDL_GPUVertexBufferDescription vtxBufDescs[2]{};
+        SDL_GPUVertexBufferDescription& vtxBufDesc = vtxBufDescs[0];
+        Uint32 numVtxBufs = 1;
         vtxBufDesc.slot = 0;
         vtxBufDesc.input_rate = SDL_GPU_VERTEXINPUTRATE_VERTEX;
         vtxBufDesc.instance_step_rate = 0;
@@ -4383,11 +4609,17 @@ private:
             vertexAttribs[2].format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2;
             vertexAttribs[2].offset = static_cast<Uint32>(offsetof(SkinnedVertex3D, u));
 
+            // One colour per draw, from slot 1: the draw is a single instance that starts at it.
             vertexAttribs[3] = {};
             vertexAttribs[3].location = 3;
-            vertexAttribs[3].buffer_slot = 0;
+            vertexAttribs[3].buffer_slot = 1;
             vertexAttribs[3].format = SDL_GPU_VERTEXELEMENTFORMAT_UBYTE4_NORM;
-            vertexAttribs[3].offset = static_cast<Uint32>(offsetof(SkinnedVertex3D, color));
+            vertexAttribs[3].offset = 0;
+            vtxBufDescs[1].slot = 1;
+            vtxBufDescs[1].pitch = sizeof(std::uint32_t);
+            vtxBufDescs[1].input_rate = SDL_GPU_VERTEXINPUTRATE_INSTANCE;
+            vtxBufDescs[1].instance_step_rate = 0;
+            numVtxBufs = 2;
 
             vertexAttribs[4] = {};
             vertexAttribs[4].location = 4;
@@ -4406,8 +4638,8 @@ private:
         }
 
         SDL_GPUVertexInputState vtxInputState{};
-        vtxInputState.vertex_buffer_descriptions = &vtxBufDesc;
-        vtxInputState.num_vertex_buffers = 1;
+        vtxInputState.vertex_buffer_descriptions = vtxBufDescs;
+        vtxInputState.num_vertex_buffers = numVtxBufs;
         vtxInputState.vertex_attributes = vertexAttribs;
         vtxInputState.num_vertex_attributes = numAttribs;
 
@@ -5106,6 +5338,25 @@ private:
         }
         s_boneCapacity = 0u;
         s_boneRowScratch.clear();
+    }
+
+    static void DestroySkinnedMeshCache()
+    {
+        for (const SkinnedMeshBlock& block : s_skinnedMeshBlocks)
+        {
+            SDL_ReleaseGPUBuffer(s_device, block.buffer);
+        }
+        s_skinnedMeshBlocks.clear();
+        s_skinnedMeshes.clear();
+        s_skinnedMeshStaging.clear();
+        s_pendingSkinnedMeshUploads.clear();
+        s_deferredSkinnedMeshFrees.clear();
+        if (s_skinnedMeshTransferBuf)
+        {
+            SDL_ReleaseGPUTransferBuffer(s_device, s_skinnedMeshTransferBuf);
+            s_skinnedMeshTransferBuf = nullptr;
+        }
+        s_skinnedMeshTransferCapacity = 0u;
     }
 
     [[nodiscard]] static bool CreateQuadIndexBuffer()

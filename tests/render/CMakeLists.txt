@@ -32,6 +32,13 @@ mu_add_test(
     LINK_LIBS SDL3::SDL3
 )
 
+mu_add_test(
+    NAME range_allocator_tests
+    SOURCES
+        test_range_allocator.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/RangeAllocator.cpp
+)
+
 # The OZT reader of CGlobalBitmap::OpenTga, without the renderer. It also reads
 # the OZT files shipped in src/bin/Data.
 mu_add_test(
