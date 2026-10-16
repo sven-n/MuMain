@@ -7,11 +7,18 @@
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Engine/Object/ZzzInfomation.h"
+#include "Engine/Object/ZzzInterface.h"
+#include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "I18N/All.h"
 
 #include <filesystem>
+#include <iterator>
 #include <string>
+
+// The item help table (ComputeItemInfo) and the item it was computed for.
+extern int g_iCurrentItem;
+extern int g_iItemInfo[16][17];
 
 using namespace Data::Items;
 
@@ -51,6 +58,37 @@ public:
 
 private:
     ClientDataScope m_client;
+};
+
+// Points the item help table at test-owned state: ComputeItemInfo reads the item from
+// ItemHelp and marks the levels the hero can equip. The table was computed from the test's
+// ItemAttribute, so it is marked as computed for no item afterwards.
+class ItemHelpScope
+{
+public:
+    ItemHelpScope() : m_previousItemHelp(ItemHelp), m_previousHero(CharacterAttribute)
+    {
+        CharacterAttribute = &m_hero;
+    }
+
+    ~ItemHelpScope()
+    {
+        g_iCurrentItem = -1;
+        ItemHelp = m_previousItemHelp;
+        CharacterAttribute = m_previousHero;
+    }
+
+    void Compute(int itemType)
+    {
+        ItemHelp = itemType;
+        g_iCurrentItem = -1;
+        ComputeItemInfo(itemType);
+    }
+
+private:
+    CHARACTER_ATTRIBUTE m_hero{};
+    int m_previousItemHelp;
+    CHARACTER_ATTRIBUTE* m_previousHero;
 };
 
 ITEM ComputeItem(int itemType, int level, BYTE excellentFlags = 0, BYTE ancientDiscriminator = 0)
@@ -97,6 +135,7 @@ TEST_CASE("Magic defense grows with the + level [data][items]")
 
     CHECK(ComputeItem(BronzeArmorType, 0).MagicDefense == 10);
     CHECK(ComputeItem(BronzeArmorType, 9).MagicDefense == 37);
+    CHECK(ComputeItem(BronzeArmorType, 15).MagicDefense == 76);
 }
 
 TEST_CASE("The late wings, crystals and small wings keep their level requirement [data][items]")
@@ -180,5 +219,73 @@ TEST_CASE("The excellent bonus adds the same to minimum and maximum damage [data
         const ITEM normal = ComputeItem(type, 0);
         const ITEM excellent = ComputeItem(type, 0, 0x01);
         CHECK(excellent.DamageMax - normal.DamageMax == excellent.DamageMin - normal.DamageMin);
+    }
+}
+
+TEST_CASE("The + level bonus adds up above +9 [data][items]")
+{
+    ShippedItemAttributes items;
+    // The Season 6 client and OpenMU: 27 at +9, then 31, 36, 42, 49, 57 and 66 at +10 to +15.
+    constexpr int FirstLevelAboveNine = 10;
+    constexpr int BonusFromTen[] = {31, 36, 42, 49, 57, 66};
+
+    for (int i = 0; i < static_cast<int>(std::size(BonusFromTen)); ++i)
+    {
+        const int level = FirstLevelAboveNine + i;
+        CAPTURE(level);
+        CHECK(ComputeItem(ITEM_DOUBLE_BLADE, level).DamageMin == items[ITEM_DOUBLE_BLADE].DamageMin + BonusFromTen[i]);
+        CHECK(ComputeItem(ITEM_DOUBLE_BLADE, level).DamageMax == items[ITEM_DOUBLE_BLADE].DamageMax + BonusFromTen[i]);
+        CHECK(ComputeItem(ITEM_DRAGON_ARMOR, level).Defense == items[ITEM_DRAGON_ARMOR].Defense + BonusFromTen[i]);
+        CHECK(ComputeItem(DragonShieldType, level).SuccessfulBlocking ==
+              items[DragonShieldType].SuccessfulBlocking + BonusFromTen[i]);
+    }
+
+    // Magic power is halved after the bonus; staffs add 2 per level, sceptres don't (OpenMU's
+    // staff and sceptre rise tables).
+    CHECK(ComputeItem(ITEM_LEGENDARY_STAFF, 15).MagicPower == 92);
+    CHECK(ComputeItem(ITEM_GREAT_LORD_SCEPTER, 15).MagicPower == 66);
+    CHECK(ComputeItem(ITEM_DIVINE_STAFF_OF_ARCHANGEL, 15).MagicPower == 141);
+    // With the excellent bonus the sum passes 255 before the halving.
+    CHECK(ComputeItem(ITEM_DIVINE_STAFF_OF_ARCHANGEL, 15, 0x01).MagicPower == 162);
+}
+
+TEST_CASE("Wing defense adds up above +9, from 5 for the third tier wings [data][items]")
+{
+    ShippedItemAttributes items;
+
+    CHECK(ComputeItem(ITEM_WING_OF_STORM, 10).Defense == 101);
+    CHECK(ComputeItem(ITEM_WINGS_OF_DRAGON, 10).Defense == 67);
+
+    CHECK(ComputeItem(ITEM_WING_OF_STORM, 15).Defense == 141);
+    CHECK(ComputeItem(ITEM_WINGS_OF_DRAGON, 15).Defense == 102);
+    CHECK(ComputeItem(ITEM_WINGS_OF_SATAN, 15).Defense == 86);
+    CHECK(ComputeItem(ITEM_CAPE_OF_LORD, 15).Defense == 72);
+}
+
+TEST_CASE("The item help table shows the stats the item has at each level [data][items]")
+{
+    ShippedItemAttributes items;
+    ItemHelpScope help;
+
+    help.Compute(ITEM_DOUBLE_BLADE);
+    CHECK(g_iItemInfo[15][_COLUMN_TYPE_ATTMIN] == items[ITEM_DOUBLE_BLADE].DamageMin + 66);
+
+    for (const int type :
+         {static_cast<int>(ITEM_DOUBLE_BLADE), static_cast<int>(ITEM_LEGENDARY_STAFF),
+          static_cast<int>(ITEM_GREAT_LORD_SCEPTER), static_cast<int>(ITEM_DRAGON_ARMOR), DragonShieldType})
+    {
+        CAPTURE(type);
+        help.Compute(type);
+        const int magicColumn = IsCepterItem(type) ? _COLUMN_TYPE_PET_ATTACK : _COLUMN_TYPE_MAGIC;
+        for (int level = 0; level <= 15; ++level)
+        {
+            CAPTURE(level);
+            const ITEM item = ComputeItem(type, level);
+            CHECK(g_iItemInfo[level][_COLUMN_TYPE_ATTMIN] == item.DamageMin);
+            CHECK(g_iItemInfo[level][_COLUMN_TYPE_ATTMAX] == item.DamageMax);
+            CHECK(g_iItemInfo[level][magicColumn] == item.MagicPower);
+            CHECK(g_iItemInfo[level][_COLUMN_TYPE_DEFENCE] == item.Defense);
+            CHECK(g_iItemInfo[level][_COLUMN_TYPE_DEFRATE] == item.SuccessfulBlocking);
+        }
     }
 }

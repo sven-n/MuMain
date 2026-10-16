@@ -23,6 +23,7 @@
 #include "GameLogic/Pets/GIPetManager.h"
 #include "GameLogic/Items/CComGem.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "GameLogic/Items/ItemLevelBonus.h"
 #include "UI/Inventory/InventoryCtrl.h"
 #include "Network/Server/SocketSystem.h"
 #include "UI/Core/WindowSystem.h"
@@ -548,12 +549,7 @@ void CalcDamageMin(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
         ip->DamageMin += 5 + (GetDropLevel(p) / 40);
     }
 
-    ip->DamageMin += (std::min<int>(9, ip->Level) * 3);
-
-    if (ip->Level - 9 > 0)
-    {
-        ip->DamageMin += ip->Level - 6;
-    }
+    ip->DamageMin += GameLogic::Items::GetItemLevelBonus(ip->Level);
 }
 
 void CalcDamageMax(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
@@ -579,12 +575,7 @@ void CalcDamageMax(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
         ip->DamageMax += 5 + (GetDropLevel(p) / 40);
     }
 
-    ip->DamageMax += (std::min<int>(9, ip->Level) * 3);
-
-    if (ip->Level - 9 > 0)
-    {
-        ip->DamageMax += ip->Level - 6;
-    }
+    ip->DamageMax += GameLogic::Items::GetItemLevelBonus(ip->Level);
 }
 
 void CalcMagicPower(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
@@ -610,19 +601,16 @@ void CalcMagicPower(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
         ip->MagicPower += 2 + (GetDropLevel(p) / 60);
     }
 
-    ip->MagicPower += (std::min<int>(9, ip->Level) * 3);
-
-    if (ip->Level - 9 > 0)
-    {
-        ip->MagicPower += ip->Level - 6;
-    }
-
-    ip->MagicPower /= 2;
+    // MagicPower is a BYTE; with the level bonus the sum can pass 255 before it is
+    // halved (an excellent +15 Divine Staff of Archangel: 156 + 42 + 66).
+    int magicPower = ip->MagicPower + GameLogic::Items::GetItemLevelBonus(ip->Level);
+    magicPower /= 2;
 
     if (!IsCepterItem(ip->Type))
     {
-        ip->MagicPower += ip->Level * 2;
+        magicPower += ip->Level * 2;
     }
+    ip->MagicPower = static_cast<BYTE>(magicPower);
 }
 
 void CalcSuccessfulBlocking(ITEM* ip, ITEM_ATTRIBUTE* p)
@@ -637,22 +625,14 @@ void CalcSuccessfulBlocking(ITEM* ip, ITEM_ATTRIBUTE* p)
         if (p->Level)
             ip->SuccessfulBlocking += p->SuccessfulBlocking * 25 / p->Level + 5;
     }
-    ip->SuccessfulBlocking += (std::min<int>(9, ip->Level) * 3); // ~ +9
-    if (ip->Level - 9 > 0)
-    {
-        ip->SuccessfulBlocking += ip->Level - 6;
-    }
+    ip->SuccessfulBlocking += GameLogic::Items::GetItemLevelBonus(ip->Level);
 }
 
 void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
 {
     if (p->MagicDefense > 0)
     {
-        ip->MagicDefense += (std::min<int>(9, ip->Level) * 3); // ~ +9
-        if (ip->Level - 9 > 0)
-        {
-            ip->MagicDefense += ip->Level - 6;
-        }
+        ip->MagicDefense += GameLogic::Items::GetItemLevelBonus(ip->Level);
     }
 
     if (ip->Type == ITEM_CAPE_OF_LORD)
@@ -708,20 +688,9 @@ void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
     {
         ip->Defense += (std::min<int>(9, ip->Level) * 3);	// ~ +9
     }
-    if (GameLogic::Items::IsThirdTierWing(ip))
-    {
-        if (ip->Level - 9 > 0)
-        {
-            ip->Defense += ip->Level - 5;
-        }
-    }
-    else
-    {
-        if (ip->Level - 9 > 0)
-        {
-            ip->Defense += ip->Level - 6;
-        }
-    }
+    ip->Defense += GameLogic::Items::GetItemLevelBonusAboveNine(
+        ip->Level, GameLogic::Items::IsThirdTierWing(ip) ? GameLogic::Items::ThirdTierWingFirstLevelBonusStepAboveNine
+                                                         : GameLogic::Items::FirstLevelBonusStepAboveNine);
 }
 
 void CalcRequirements(ITEM* ip, ITEM_ATTRIBUTE* p)
