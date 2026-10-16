@@ -33,8 +33,14 @@ struct DiagnosticsModel
     float rendererBegin = 0;
     float rendererEnd = 0;
     float submit = 0;
+    float endOffscreen = 0;
+    float endStage = 0;
+    float endReplay = 0;
+    float endPostUi = 0;
     int requested = 0;
     int submitted = 0;
+    int commands = 0;
+    float frameVertexKB = 0;
     int texturesUploaded = 0;
     int glyphsUploaded = 0;
     int pipelineBinds = 0;

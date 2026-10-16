@@ -16,6 +16,11 @@ public:
     bool SelectVertexUniforms(std::span<const std::byte> bytes);
     bool SelectFragmentUniforms(std::span<const std::byte> bytes);
     bool SelectVertexStorageBuffer(SDL_GPUBuffer* buffer);
+    // True when the buffer must be bound again, at VertexBufferOffset(), to draw `stride`-byte vertices
+    // starting `offset` bytes in. A new stride always moves the binding: SDL's D3D12 backend takes the
+    // stride from the pipeline only when the binding changes.
+    bool SelectVertexBuffer(SDL_GPUBuffer* buffer, Uint32 stride, Uint32 offset);
+    Uint32 VertexBufferOffset() const { return m_vertexBufferOffset; }
     bool SelectIndexBuffer(SDL_GPUBuffer* buffer, Uint32 offset, SDL_GPUIndexElementSize elementSize);
     bool SelectViewport(const SDL_GPUViewport& viewport);
     bool SelectScissor(const SDL_Rect& scissor);
@@ -33,6 +38,9 @@ private:
     SDL_GPUTexture* m_texture = nullptr;
     SDL_GPUSampler* m_sampler = nullptr;
     SDL_GPUBuffer* m_vertexStorageBuffer = nullptr;
+    SDL_GPUBuffer* m_vertexBuffer = nullptr;
+    Uint32 m_vertexStride = 0;
+    Uint32 m_vertexBufferOffset = 0;
     SDL_GPUBuffer* m_indexBuffer = nullptr;
     Uint32 m_indexOffset = 0;
     SDL_GPUIndexElementSize m_indexElementSize = SDL_GPU_INDEXELEMENTSIZE_16BIT;
@@ -43,6 +51,7 @@ private:
     bool m_vertexUniformsValid = false;
     bool m_fragmentUniformsValid = false;
     bool m_vertexStorageBufferValid = false;
+    bool m_vertexBufferValid = false;
     bool m_indexBufferValid = false;
     bool m_viewportValid = false;
     bool m_scissorValid = false;
