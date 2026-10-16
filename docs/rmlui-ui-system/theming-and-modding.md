@@ -352,7 +352,8 @@ already loaded. Referencing a player's installed font does not package it with t
 `RmlTheme=classic` gives the interface of the original 0.97 client, drawn with its own art. It
 inherits `legacy` and restyles the login box, server list, character select and creation, HUD,
 inventory, character, party, NPC shop, storage, trade, Chaos Machine, guild, event entries,
-message boxes and chat. The art lives outside the RmlUi tree, in `Data/Interface/Classic` and
+message boxes, confirmations, the Esc menus, the command window (D) and chat. The NPC menus that
+share the Esc menu's document keep legacy's look, as 0.97 has none of them. The art lives outside the RmlUi tree, in `Data/Interface/Classic` and
 `Data/Logo/Classic`, so its file names cannot collide with S6 files of the same name.
 
 What changes for the player, besides the look:
