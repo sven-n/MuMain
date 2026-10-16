@@ -71,16 +71,30 @@ TEST_CASE("viewport scissor and editor invalidation are explicit [render][sdl_gp
     CHECK(state.SelectScissor(scissor));
 }
 
-TEST_CASE("the vertex buffer is bound once until it changes [render][sdl_gpu_replay_state]")
+TEST_CASE("the vertex buffer is bound once per vertex size [render][sdl_gpu_replay_state]")
 {
     Render::SdlGpuReplayState state;
 
-    CHECK(state.SelectVertexBuffer(Pointer<SDL_GPUBuffer>(1)));
-    CHECK_FALSE(state.SelectVertexBuffer(Pointer<SDL_GPUBuffer>(1)));
+    CHECK(state.SelectVertexBuffer(Pointer<SDL_GPUBuffer>(1), 36, 72));
+    CHECK(state.VertexBufferOffset() == 72);
+    CHECK_FALSE(state.SelectVertexBuffer(Pointer<SDL_GPUBuffer>(1), 36, 360));
     state.SelectPipeline(Pointer<SDL_GPUGraphicsPipeline>(2));
-    CHECK_FALSE(state.SelectVertexBuffer(Pointer<SDL_GPUBuffer>(1)));
-    CHECK(state.SelectVertexBuffer(Pointer<SDL_GPUBuffer>(3)));
+    CHECK_FALSE(state.SelectVertexBuffer(Pointer<SDL_GPUBuffer>(1), 36, 396));
+    CHECK(state.SelectVertexBuffer(Pointer<SDL_GPUBuffer>(3), 36, 396));
 
     state.Invalidate();
-    CHECK(state.SelectVertexBuffer(Pointer<SDL_GPUBuffer>(3)));
+    CHECK(state.SelectVertexBuffer(Pointer<SDL_GPUBuffer>(3), 36, 396));
+}
+
+TEST_CASE("a new vertex size moves the binding to the draw's own offset [render][sdl_gpu_replay_state]")
+{
+    Render::SdlGpuReplayState state;
+
+    CHECK(state.SelectVertexBuffer(Pointer<SDL_GPUBuffer>(1), 36, 0));
+    CHECK(state.SelectVertexBuffer(Pointer<SDL_GPUBuffer>(1), 20, 400));
+    CHECK(state.VertexBufferOffset() == 400);
+    CHECK_FALSE(state.SelectVertexBuffer(Pointer<SDL_GPUBuffer>(1), 20, 480));
+    // Before the binding: the draw cannot name a negative first vertex.
+    CHECK(state.SelectVertexBuffer(Pointer<SDL_GPUBuffer>(1), 20, 200));
+    CHECK(state.VertexBufferOffset() == 200);
 }

@@ -867,13 +867,13 @@ static void ReplayDrawCommand(const RenderCmd& command, bool boneDataReady, cons
     else
         PushReplayVertexUniforms(&command.vu, sizeof(command.vu), state);
 
-    // Bound once at offset 0; each draw says where its vertices start instead.
-    if (state.SelectVertexBuffer(s_vtxGpuBuf))
+    // Bound again only when the vertex size changes; draws in between say where their vertices start.
+    if (state.SelectVertexBuffer(s_vtxGpuBuf, command.vtxStride, command.vtxOffset))
     {
-        const SDL_GPUBufferBinding vertexBinding{s_vtxGpuBuf, 0u};
+        const SDL_GPUBufferBinding vertexBinding{s_vtxGpuBuf, state.VertexBufferOffset()};
         SDL_BindGPUVertexBuffers(s_renderPass, 0, &vertexBinding, 1);
     }
-    const Uint32 firstVertex = command.vtxOffset / command.vtxStride;
+    const Uint32 firstVertex = (command.vtxOffset - state.VertexBufferOffset()) / command.vtxStride;
 
     if (skinned && state.SelectVertexStorageBuffer(s_boneGpuBuf))
     {

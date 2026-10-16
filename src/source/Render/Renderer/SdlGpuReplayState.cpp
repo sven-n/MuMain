@@ -72,12 +72,17 @@ bool SdlGpuReplayState::SelectVertexStorageBuffer(SDL_GPUBuffer* buffer)
     return true;
 }
 
-bool SdlGpuReplayState::SelectVertexBuffer(SDL_GPUBuffer* buffer)
+bool SdlGpuReplayState::SelectVertexBuffer(SDL_GPUBuffer* buffer, Uint32 stride, Uint32 offset)
 {
-    if (m_vertexBufferValid && m_vertexBuffer == buffer)
+    if (m_vertexBufferValid && m_vertexBuffer == buffer && m_vertexStride == stride && offset >= m_vertexBufferOffset &&
+        (offset - m_vertexBufferOffset) % stride == 0)
+    {
         return false;
+    }
 
     m_vertexBuffer = buffer;
+    m_vertexStride = stride;
+    m_vertexBufferOffset = offset;
     m_vertexBufferValid = true;
     return true;
 }
