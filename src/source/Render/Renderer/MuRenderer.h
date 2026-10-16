@@ -224,6 +224,17 @@ public:
         (void)mesh;
     }
 
+    // The map's heights and wall flags (TERRAIN_SIZE * TERRAIN_SIZE each) for shaders that follow the
+    // ground, copied again only when `version` changes. False means the GPU has no heights to read.
+    [[nodiscard]] virtual bool SetTerrainHeights(std::span<const float> heights, std::span<const std::uint16_t> walls,
+                                                 std::uint32_t version)
+    {
+        (void)heights;
+        (void)walls;
+        (void)version;
+        return false;
+    }
+
     // Render a quad strip from world-space vertices (requires >= 4 vertices, even count ideal).
     virtual void RenderQuadStrip(std::span<const Vertex3D> vertices, std::uint32_t textureId) = 0;
 

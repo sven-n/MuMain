@@ -40,6 +40,7 @@
 #include "SdlGpuValidation.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/MuLogger.h"
+#include "Render/Terrain/TerrainHeightGrid.h"
 #include "Render/Text/SdlTtfFontSet.h"
 #ifdef _EDITOR
 #include "Core/MuEditorCore.h"
@@ -652,6 +653,12 @@ static const float* s_lastBonePalette = nullptr;
 static std::size_t s_lastBonePaletteSize = 0u;
 static std::uint32_t s_lastBonePaletteVersion = 0u;
 static Uint32 s_lastBonePaletteRowOffset = 0u;
+
+// The Render::TerrainHeightGrid that ground-following shaders read (SetTerrainHeights).
+static SDL_GPUTransferBuffer* s_terrainHeightTransferBuf = nullptr;
+static SDL_GPUBuffer* s_terrainHeightGpuBuf = nullptr;
+static std::optional<std::uint32_t> s_terrainHeightVersion;
+static bool s_terrainHeightUploadPending = false;
 
 // Static quad index buffer (pre-generated [0,1,2, 0,2,3] pattern × k_MaxQuads).
 static SDL_GPUBuffer* s_quadIdxBuf = nullptr;
@@ -1750,6 +1757,7 @@ public:
         DestroyQuadIndexBuffer();
         DestroyVertexBuffers();
         DestroyBoneBuffers();
+        DestroyTerrainHeightBuffers();
         DestroySkinnedMeshCache();
         DestroyPipelines();
         ReleaseShaders();
@@ -1979,6 +1987,15 @@ public:
             mu::log::Get("render")->error("SDL_gpu -- failed to stage cached skinned meshes: {}", SDL_GetError());
             // Their ranges hold nothing yet; skinned draws wait for the retry rather than read them.
             boneDataReady = false;
+        }
+
+        if (s_terrainHeightUploadPending)
+        {
+            constexpr Uint32 gridBytes = sizeof(Render::TerrainHeightGrid);
+            bufferUploads.push_back({s_terrainHeightTransferBuf, s_terrainHeightGpuBuf, 0u, gridBytes, true});
+            s_terrainHeightUploadPending = false;
+            s_dbgVtxBytesThisFrame += gridBytes;
+            FrameProfiler::Count(FrameProfiler::Counter::VertexBytes, gridBytes);
         }
 
         // EnsureStripIndexBuffer may release/create GPU resources, so it runs before the copy pass.
@@ -3774,6 +3791,53 @@ public:
         s_skinnedMeshes.erase(cached);
     }
 
+    [[nodiscard]] bool SetTerrainHeights(std::span<const float> heights, std::span<const std::uint16_t> walls,
+                                         std::uint32_t version) override
+    {
+        if (s_terrainHeightVersion == version)
+        {
+            return true;
+        }
+        if (!s_device || heights.size() != Render::kTerrainCells || walls.size() != Render::kTerrainCells)
+        {
+            return false;
+        }
+
+        if (!s_terrainHeightGpuBuf)
+        {
+            SDL_GPUTransferBufferCreateInfo transferInfo{};
+            transferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
+            transferInfo.size = sizeof(Render::TerrainHeightGrid);
+            SDL_GPUBufferCreateInfo bufferInfo{};
+            bufferInfo.usage = SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ;
+            bufferInfo.size = sizeof(Render::TerrainHeightGrid);
+            s_terrainHeightTransferBuf = SDL_CreateGPUTransferBuffer(s_device, &transferInfo);
+            s_terrainHeightGpuBuf = s_terrainHeightTransferBuf ? SDL_CreateGPUBuffer(s_device, &bufferInfo) : nullptr;
+            if (!s_terrainHeightGpuBuf)
+            {
+                mu::log::Get("render")->error("SDL_gpu -- terrain height buffer creation failed: {}", SDL_GetError());
+                DestroyTerrainHeightBuffers();
+                return false;
+            }
+        }
+
+        // Cycled, so frames still in flight keep reading the previous heights.
+        auto* grid = static_cast<Render::TerrainHeightGrid*>(
+            SDL_MapGPUTransferBuffer(s_device, s_terrainHeightTransferBuf, true));
+        if (!grid)
+        {
+            mu::log::Get("render")->error("SDL_gpu -- failed to map terrain height buffer: {}", SDL_GetError());
+            return false;
+        }
+        Render::BuildTerrainHeightGrid(heights.data(), walls.data(), *grid);
+        SDL_UnmapGPUTransferBuffer(s_device, s_terrainHeightTransferBuf);
+
+        s_terrainHeightVersion = version;
+        s_terrainHeightUploadPending = true;
+        mu::log::Get("render")->info("SDL_gpu -- terrain heights uploaded (version {})", version);
+        return true;
+    }
+
     // -----------------------------------------------------------------------
     // RenderQuadStrip: Render a quad strip as triangle list.
     // Converts vertex pairs (0,1), (2,3), ... into triangles.
@@ -5338,6 +5402,22 @@ private:
         }
         s_boneCapacity = 0u;
         s_boneRowScratch.clear();
+    }
+
+    static void DestroyTerrainHeightBuffers()
+    {
+        if (s_terrainHeightGpuBuf)
+        {
+            SDL_ReleaseGPUBuffer(s_device, s_terrainHeightGpuBuf);
+            s_terrainHeightGpuBuf = nullptr;
+        }
+        if (s_terrainHeightTransferBuf)
+        {
+            SDL_ReleaseGPUTransferBuffer(s_device, s_terrainHeightTransferBuf);
+            s_terrainHeightTransferBuf = nullptr;
+        }
+        s_terrainHeightVersion.reset();
+        s_terrainHeightUploadPending = false;
     }
 
     static void DestroySkinnedMeshCache()
