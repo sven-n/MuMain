@@ -4776,18 +4776,15 @@ private:
         depthState.enable_depth_test = description.depthTestEnabled;
         depthState.enable_depth_write = description.depthWriteEnabled;
         depthState.enable_stencil_test = false;
-        // Depth compare selection:
-        //   LESS for opaque 3D (depth write ON): strict layering, normal opaque z-sort.
-        //   LESS_OR_EQUAL for depth-read-only 3D (write OFF) and all 2D: these are additive/
-        //   glow overlays drawn on top of geometry at the same depth (forge-level sprites,
-        //   weapon chrome/bright mesh passes, terrain texture layering). LESS would reject
-        //   every equal-depth fragment before the blend stage — the classic MU OpenGL client
-        //   ran these passes with GL_LEQUAL effectively by calling SetDepthFunc(GL_LEQUAL)
-        //   before them, which the SDL3 backend doesn't propagate. Using LESS_OR_EQUAL on
-        //   read-only variants recovers the intended behavior uniformly.
+        // Depth compare: LESS_OR_EQUAL for every pipeline, as the classic MU OpenGL client
+        // set glDepthFunc(GL_LEQUAL) at the start of each 3D scene (SetDepthFunc, which this
+        // backend doesn't propagate). Many models are drawn in several passes over the same
+        // mesh: glow overlays (forge-level sprites, weapon chrome/bright passes, terrain
+        // texture layering), but also opaque passes that write depth, like the Bill of
+        // Balrog's textured body over its chrome body. LESS would reject every equal-depth
+        // fragment of the later pass, so only the first pass would show.
         const bool usesWorldDepth = description.vertexLayout != VertexLayout::TwoDimensional;
-        const bool strictLayering = usesWorldDepth && description.depthWriteEnabled;
-        depthState.compare_op = strictLayering ? SDL_GPU_COMPAREOP_LESS : SDL_GPU_COMPAREOP_LESS_OR_EQUAL;
+        depthState.compare_op = SDL_GPU_COMPAREOP_LESS_OR_EQUAL;
 
         SDL_GPUGraphicsPipelineTargetInfo targetInfo{};
         targetInfo.color_target_descriptions = &colorTargetDesc;
