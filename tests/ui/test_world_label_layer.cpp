@@ -5,11 +5,16 @@
 #include "UI/RmlBridge/RmlTheme.h"
 
 #include <RmlUi/Core.h>
+#include <RmlUi/Core/ElementText.h>
 
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <map>
 #include <string>
 #include <string_view>
+#include <utility>
+#include <vector>
 
 namespace
 {
@@ -125,6 +130,33 @@ float ZIndex(Rml::Element* box)
 {
     return box->GetComputedValues().z_index().value;
 }
+
+// Every shown label box with its text, in document order.
+std::vector<std::pair<std::string, Rml::Element*>> ShownLabels(Rml::Context* context)
+{
+    context->Update();
+    std::vector<std::pair<std::string, Rml::Element*>> labels;
+    Rml::ElementDocument* document = LabelDocument(context);
+    for (int i = 0; document != nullptr && i < document->GetNumChildren(); ++i)
+    {
+        Rml::Element* box = document->GetChild(i);
+        if (box->GetComputedValues().display() == Rml::Style::Display::None || box->GetNumChildren() == 0)
+            continue;
+        const auto* text = dynamic_cast<Rml::ElementText*>(box->GetChild(0)->GetChild(0));
+        if (text != nullptr)
+            labels.emplace_back(text->GetText(), box);
+    }
+    return labels;
+}
+
+void DrawFrame(UI::Character::WorldLabelLayer& layer, const std::vector<std::string>& labels)
+{
+    layer.BeginFrame();
+    float x = 0.0f;
+    for (const std::string& utf8 : labels)
+        layer.RecordText(Label(utf8, x += 1.0f));
+    layer.EndFrame();
+}
 } // namespace
 
 // Slots used to follow the draw order, so one label entering or leaving the view moved the text of
@@ -154,6 +186,38 @@ TEST_CASE("a label keeps its element when the draw order changes [ui][world-labe
     CHECK(Showing(fixture.context, "Alpha") == alpha);
     CHECK(Showing(fixture.context, "Bravo") == nullptr);
     CHECK(Showing(fixture.context, "Charlie") == nullptr);
+
+    layer.Release();
+}
+
+// The last label drawn first (a selected ground item's name) once moved each later match to the end
+// of the pool, so every label searched the whole pool again.
+TEST_CASE("a large reorder keeps every label and its duplicates on their elements [ui][world-labels]")
+{
+    Fixture fixture;
+    UI::Character::WorldLabelLayer layer;
+    REQUIRE(layer.Create());
+
+    std::vector<std::string> labels;
+    for (int i = 0; i < 1000; ++i)
+        labels.push_back("Item " + std::to_string(i));
+    labels.push_back("Spider");
+    labels.push_back("Spider");
+    DrawFrame(layer, labels);
+    const auto before = ShownLabels(fixture.context);
+    REQUIRE(before.size() == labels.size());
+
+    std::rotate(labels.rbegin(), labels.rbegin() + 3, labels.rend());
+    DrawFrame(layer, labels);
+    const auto after = ShownLabels(fixture.context);
+    REQUIRE(after.size() == labels.size());
+    // The same boxes show the same texts: none was emptied and refilled with another label.
+    std::multimap<std::string, Rml::Element*> expected(before.begin(), before.end());
+    std::multimap<std::string, Rml::Element*> actual(after.begin(), after.end());
+    CHECK(actual == expected);
+    for (const auto& [utf8, box] : after)
+        if (utf8 == "Item 999")
+            CHECK(ZIndex(box) == 0.0f);
 
     layer.Release();
 }
