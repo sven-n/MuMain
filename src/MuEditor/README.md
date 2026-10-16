@@ -81,21 +81,24 @@ When `_EDITOR` is defined:
 ### In Winmain.cpp
 ```cpp
 #ifdef _EDITOR
-#include "MuEditor/MuEditor.h"
+#include "../MuEditor/Core/MuEditorCore.h"
 
 // Initialization
 g_MuEditorCore.Initialize(g_sdlWindow);
 if (szCmdLine && std::strstr(szCmdLine, "--editor"))
     g_MuEditorCore.SetEnabled(true);
 
-// Main loop - Update and Render
-g_MuEditor.Update();
-RenderScene(g_hDC);
-g_MuEditor.Render();
+// SDL events: what the editor takes (a click or a key on one of its windows)
+// does not reach RmlUi or the game
+if (g_MuEditorCore.ClaimsEvent(event))
+    continue;
 
-// F12 toggle
-if (GetAsyncKeyState(VK_F12) & 0x8000)
-    g_MuEditor.ToggleEditor();
+// Main loop: F12 from the key itself, in the game window or the editor's own
+if (f12Down && !wasF12Pressed)
+    g_MuEditorCore.ToggleEditor();
+g_MuEditorCore.Update();                // before the game's frame
+RenderProfiledFrame();                  // the scene calls g_MuEditorCore.Render()
+g_MuEditorCore.RenderPlatformWindows(); // the editor's own windows, after the game's frame
 #endif
 ```
 
