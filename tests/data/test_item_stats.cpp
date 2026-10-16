@@ -4,6 +4,7 @@
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Engine/Object/ZzzInfomation.h"
+#include "GameLogic/Items/ItemCategories.h"
 #include "I18N/All.h"
 
 #include <filesystem>
@@ -21,8 +22,12 @@ namespace
 {
 const std::filesystem::path ClientDirectory = std::filesystem::path(MU_TEST_DATA_DIR).parent_path();
 
+constexpr int MorningStarType = MakeItemType(2, 1);
+constexpr int SmallShieldType = MakeItemType(6, 0);
 constexpr int DragonShieldType = MakeItemType(6, 13);
 constexpr int BronzeArmorType = MakeItemType(8, 0);
+constexpr int LeatherArmorType = MakeItemType(8, 5);
+constexpr int StormCrowArmorType = MakeItemType(8, 15);
 constexpr int FirstSmallWingType = MakeItemType(12, 130);
 constexpr int LastSmallWingType = MakeItemType(12, 135);
 
@@ -133,4 +138,42 @@ TEST_CASE("The late wings, crystals and small wings keep their level requirement
         CHECK(ComputeItem(ITEM_CAPE_OF_EMPEROR, level).RequireLevel == 400);
         CHECK(ComputeItem(ITEM_CAPE_OF_FIGHTER, level).RequireLevel == 180 + level * 4);
     }
+}
+
+TEST_CASE("A wing's option does not count as excellent [data][items]")
+{
+    ShippedItemAttributes items;
+
+    CHECK(ComputeItem(ITEM_WING_OF_STORM, 0, 0x01).Defense == 60);
+    CHECK(ComputeItem(ITEM_CAPE_OF_LORD, 0, 0x01).Defense == 15);
+
+    for (int type = MakeItemType(12, 0); type < MakeItemType(14, 0); ++type)
+    {
+        ITEM wing{};
+        wing.Type = static_cast<short>(type);
+        if (items[type].Name[0] == L'\0' || !GameLogic::Items::IsWingItem(&wing))
+        {
+            continue;
+        }
+        CAPTURE(type);
+        for (int level = 0; level <= 15; ++level)
+        {
+            CAPTURE(level);
+            CHECK(ComputeItem(type, level, 0x01).Defense == ComputeItem(type, level).Defense);
+        }
+    }
+}
+
+TEST_CASE("Ancient items get the excellent bonus and their base defense once [data][items]")
+{
+    ShippedItemAttributes items;
+
+    CHECK(ComputeItem(LeatherArmorType, 0, 0, 1).Defense == 33);
+    CHECK(ComputeItem(StormCrowArmorType, 0, 0, 1).Defense == 76);
+    CHECK(ComputeItem(SmallShieldType, 0, 0, 1).SuccessfulBlocking == 33);
+    CHECK(ComputeItem(MorningStarType, 0, 0, 1).DamageMin == 49);
+
+    // Unchanged: excellent armor, and the stat requirements of ancient items.
+    CHECK(ComputeItem(LeatherArmorType, 0, 0x01).Defense == 28);
+    CHECK(ComputeItem(BronzeArmorType, 0, 0, 1).RequireStrength == 135);
 }

@@ -512,6 +512,14 @@ int GetExcellentAddValue(ITEM *ip)
     return 0;
 }
 
+// Excellent and ancient items get the excellent bonus of damage, magic power,
+// blocking and defense. Wings keep their wing options in ExcellentFlags, but they
+// are not excellent.
+static bool HasExcellentBonus(const ITEM* ip)
+{
+    return (ip->ExcellentFlags > 0 && !GameLogic::Items::IsWingItem(ip)) || ip->AncientDiscriminator > 0;
+}
+
 void CalcDamageMin(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
 {
     //ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
@@ -524,7 +532,7 @@ void CalcDamageMin(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
     {
         
     }
-    if (ip->ExcellentFlags > 0) // TODO: For wings, too?
+    if (HasExcellentBonus(ip))
     {
         if (p->Level)
         {
@@ -555,7 +563,7 @@ void CalcDamageMax(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
         return;
     }
 
-    if (ip->ExcellentFlags > 0)
+    if (HasExcellentBonus(ip))
     {
         if (p->Level)
         {
@@ -586,7 +594,7 @@ void CalcMagicPower(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
         return;
     }
 
-    if (ip->ExcellentFlags > 0)
+    if (HasExcellentBonus(ip))
     {
         if (p->Level)
         {
@@ -624,7 +632,7 @@ void CalcSuccessfulBlocking(ITEM* ip, ITEM_ATTRIBUTE* p)
         return;
     }
 
-    if (ip->ExcellentFlags > 0)
+    if (HasExcellentBonus(ip))
     {
         if (p->Level)
             ip->SuccessfulBlocking += p->SuccessfulBlocking * 25 / p->Level + 5;
@@ -659,7 +667,7 @@ void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
     }
 
     auto isAncientItem = ip->AncientDiscriminator > 0;
-    auto isExcellent = ip->ExcellentFlags > 0;
+    auto isExcellent = HasExcellentBonus(ip);
     auto setItemDropLevel = GetDropLevel(p);
 
     if (ip->Type >= ITEM_SHIELD && ip->Type < ITEM_SHIELD + MAX_ITEM_INDEX)
@@ -680,7 +688,7 @@ void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
 
     if (isAncientItem)
     {
-        ip->Defense += p->Defense + (ip->Defense * 3 / setItemDropLevel + 2 + setItemDropLevel / 30);
+        ip->Defense += ip->Defense * 3 / setItemDropLevel + 2 + setItemDropLevel / 30;
     }
 
     if (GameLogic::Items::IsSecondTierWingExceptCape(ip))
