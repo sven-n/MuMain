@@ -51,8 +51,10 @@
 
 - Body shadows read a GPU copy of `BackTerrainHeight` and the `TW_HEIGHT` cells,
   uploaded again only when `TerrainHeightVersion()` changes. Code that changes
-  either must use the ZzzLodTerrain.cpp functions that increase it, or increase
-  it itself; otherwise shadows keep following the old ground.
+  either must go through the ZzzLodTerrain.cpp functions that increase it, or
+  call `MarkTerrainHeightsChanged()` after writing the arrays directly, as the
+  map editor's brushes and undo do; otherwise shadows keep following the old
+  ground.
 - `g_fSpecialHeight` follows the camera, so it travels in the shadow uniforms,
   not in the grid.
 

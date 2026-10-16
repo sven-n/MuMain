@@ -95,6 +95,11 @@ unsigned int TerrainHeightVersion()
     return s_terrainHeightVersion;
 }
 
+void MarkTerrainHeightsChanged()
+{
+    ++s_terrainHeightVersion;
+}
+
 #ifdef DYNAMIC_FRUSTRUM
 FrustrumMap_t	g_FrustrumMap;
 #endif //DYNAMIC_FRUSTRUM

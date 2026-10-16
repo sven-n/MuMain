@@ -1001,6 +1001,7 @@ void CMapEditorUI::PaintAttribute()
         }
     }
     m_attrCountDirty = true;
+    MarkTerrainHeightsChanged();
 }
 
 void CMapEditorUI::TakeAttrUndoSnapshot()
@@ -1014,6 +1015,7 @@ void CMapEditorUI::UndoAttr()
     if (!m_bAttrHasUndo)
         return;
     std::memcpy(TerrainWall, m_attrUndo.data(), CELLS * sizeof(unsigned short));
+    MarkTerrainHeightsChanged();
     m_bAttrHasUndo = false;
     m_attrStatus = "Undo: reverted last attribute stroke.";
     m_attrCountDirty = true;
@@ -1235,6 +1237,7 @@ void CMapEditorUI::SculptHeight()
             float& h = BackTerrainHeight[TERRAIN_INDEX_REPEAT(ix, iy)];
             h = std::clamp(h, 0.0f, maxHeight);
         }
+    MarkTerrainHeightsChanged();
 
     // Rebuild lighting/normals so the change is visible immediately.
     CreateTerrainNormal();
@@ -1252,6 +1255,7 @@ void CMapEditorUI::UndoHeight()
     if (!m_bHeightHasUndo)
         return;
     std::memcpy(BackTerrainHeight, m_heightUndo.data(), CELLS * sizeof(float));
+    MarkTerrainHeightsChanged();
     CreateTerrainNormal();
     CreateTerrainLight();
     m_bHeightHasUndo = false;
