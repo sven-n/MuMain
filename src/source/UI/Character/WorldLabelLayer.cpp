@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <cwchar>
+#include <utility>
 
 namespace
 {
@@ -88,7 +89,6 @@ void UI::Character::WorldLabelLayer::Release()
     m_view.Release();
     m_slots.clear();
     m_used = 0;
-    m_shown = 0;
 }
 
 // A rebuilt document has none of the old one's slots.
@@ -96,7 +96,6 @@ void UI::Character::WorldLabelLayer::OnBuilt()
 {
     m_slots.clear();
     m_used = 0;
-    m_shown = 0;
 }
 
 void UI::Character::WorldLabelLayer::Hide()
@@ -120,15 +119,23 @@ void UI::Character::WorldLabelLayer::BeginFrame()
 
 void UI::Character::WorldLabelLayer::EndFrame()
 {
-    // Only the slots used last frame but not this one: the ones beyond were hidden already.
-    for (std::size_t i = m_used; i < m_shown && i < m_slots.size(); ++i)
+    for (std::size_t i = m_used; i < m_slots.size(); ++i)
         SetKind(m_slots[i], SlotKind::Hidden);
-    m_shown = m_used;
 }
 
-UI::Character::WorldLabelLayer::Slot& UI::Character::WorldLabelLayer::NextSlot(SlotKind kind)
+// A slot still showing what is drawn needs no new text or size, either of which lays the document out
+// again. Otherwise a hidden one, so a label never takes the slot of one drawn later this frame.
+template <typename Matches>
+UI::Character::WorldLabelLayer::Slot& UI::Character::WorldLabelLayer::NextSlot(SlotKind kind, Matches&& matches)
 {
-    if (m_used == m_slots.size())
+    std::size_t reuse = m_slots.size();
+    for (std::size_t i = m_used; i < m_slots.size() && reuse == m_slots.size(); ++i)
+        if (m_slots[i].kind == kind && matches(m_slots[i]))
+            reuse = i;
+    for (std::size_t i = m_used; i < m_slots.size() && reuse == m_slots.size(); ++i)
+        if (m_slots[i].kind == SlotKind::Hidden)
+            reuse = i;
+    if (reuse == m_slots.size())
     {
         Slot slot;
         Rml::ElementPtr box = m_view.Document()->CreateElement("div");
@@ -137,8 +144,15 @@ UI::Character::WorldLabelLayer::Slot& UI::Character::WorldLabelLayer::NextSlot(S
         SetDisplay(slot.box, false);
         m_slots.push_back(slot);
     }
+    std::swap(m_slots[m_used], m_slots[reuse]);
+    const auto drawOrder = static_cast<float>(m_used);
     Slot& slot = m_slots[m_used++];
     SetKind(slot, kind);
+    if (slot.zIndex != drawOrder)
+    {
+        slot.zIndex = drawOrder;
+        slot.box->SetProperty(Rml::PropertyId::ZIndex, Rml::Property(drawOrder, Rml::Unit::NUMBER));
+    }
     return slot;
 }
 
@@ -189,7 +203,10 @@ void UI::Character::WorldLabelLayer::SetBox(Slot& slot, const Rect& rect, std::u
 
 void UI::Character::WorldLabelLayer::RecordText(const Render::Renderer::RecordedText& text)
 {
-    Slot& slot = NextSlot(SlotKind::Text);
+    Slot& slot = NextSlot(SlotKind::Text, [&](const Slot& candidate)
+    {
+        return candidate.utf8 == text.utf8 && candidate.textPixelSize == text.textPixelSize && candidate.bold == text.bold;
+    });
     const bool textChanged =
         slot.utf8 != text.utf8 || slot.textPixelSize != text.textPixelSize || slot.bold != text.bold;
     const float textOffset = text.textX - text.boxX;
@@ -235,7 +252,8 @@ void UI::Character::WorldLabelLayer::RecordText(const Render::Renderer::Recorded
 
 void UI::Character::WorldLabelLayer::RecordQuad(const Render::Renderer::RecordedQuad& quad)
 {
-    Slot& slot = NextSlot(SlotKind::Quad);
+    // A quad has nothing to keep but its kind.
+    Slot& slot = NextSlot(SlotKind::Quad, [](const Slot&) { return true; });
     SetFill(slot, {quad.x, quad.y, quad.width, quad.height}, AbgrFromArgb(quad.argb), quad.blend);
 }
 
@@ -272,7 +290,13 @@ void UI::Character::WorldLabelLayer::SetAdditive(Slot& slot, bool additive, std:
 
 void UI::Character::WorldLabelLayer::RecordBitmap(const Render::Renderer::RecordedBitmap& bitmap)
 {
-    Slot& slot = NextSlot(SlotKind::Bitmap);
+    Slot& slot = NextSlot(SlotKind::Bitmap, [&](const Slot& candidate)
+    {
+        return candidate.imageFile != nullptr && bitmap.fileName != nullptr &&
+               std::wcscmp(candidate.imageFile, bitmap.fileName) == 0 && candidate.sourceX == bitmap.sourceX &&
+               candidate.sourceY == bitmap.sourceY && candidate.sourceWidth == bitmap.sourceWidth &&
+               candidate.sourceHeight == bitmap.sourceHeight;
+    });
     SetBox(slot, {bitmap.x, bitmap.y, bitmap.width, bitmap.height}, 0u);
     SetAdditive(slot, false, 0u);
 

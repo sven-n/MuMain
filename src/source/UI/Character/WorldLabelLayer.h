@@ -19,8 +19,9 @@ namespace UI::Character
 // CNameWindow's world labels in RmlUi: one document (world_labels.rml) behind every other
 // document, holding a pool of absolutely positioned elements filled in draw order from
 // what the native label code draws while this layer records (Render::Renderer::Overlay2DRecordScope).
-// Each frame only the properties that changed are written and the unused tail is hidden, so the cost
-// follows the labels drawn, not the pool.
+// A label takes back the slot that drew the same thing last frame, whatever its draw order now, and
+// z-index keeps the draw order; only the properties that changed are written and the unused tail is
+// hidden, so the cost follows what changed, not the labels drawn.
 class WorldLabelLayer final : public Render::Renderer::IOverlay2DRecorder
 {
 public:
@@ -61,6 +62,7 @@ private:
         Rml::ElementText* textNode = nullptr;
         Rml::Element* image = nullptr;
         SlotKind kind = SlotKind::Hidden;
+        float zIndex = -1.0f;
         float x = -1.0f, y = -1.0f, width = -1.0f, height = -1.0f;
         std::uint32_t boxColor = 1;
         bool additive = false;           // the box adds its colour (an additive-fill decorator)
@@ -77,7 +79,8 @@ private:
     };
 
     void OnBuilt();
-    Slot& NextSlot(SlotKind kind);
+    template <typename Matches>
+    Slot& NextSlot(SlotKind kind, Matches&& matches);
     void SetKind(Slot& slot, SlotKind kind);
     struct Rect
     {
@@ -92,7 +95,6 @@ private:
 
     std::vector<Slot> m_slots;
     std::size_t m_used = 0;
-    std::size_t m_shown = 0; // slots used by the last finished frame
     // The labels draw under every window.
     UI::RmlBridge::ThemedView<> m_view{{{"Data/Interface/RmlUi/world_labels.rml"}},
                                        {.stacking = UI::RmlBridge::ThemedStacking::Back,
