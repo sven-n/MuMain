@@ -2,9 +2,9 @@
 
 ## Overview
 The MU Editor is a C++ ImGui-based in-game editor that provides real-time game editing capabilities:
-- **Top Toolbar**: Editor controls and buttons
-- **Center Viewport**: Game renders here
-- **Bottom Console**: Split view with Editor Console (left) and Game Console (right)
+- **Editor Window**: Its own window beside the game window, in front of it, with a menu bar (tool windows, UI scale, language, Close Editor)
+- **Tool Windows**: Docked as tabs in the editor window; drag one out to float it anywhere, also over the game
+- **Console**: Split view with Editor Console (left) and Game Console (right), docked along the bottom at first
 - **Item Editor**: Edit item attributes in real-time
 
 ## Key Features
@@ -19,7 +19,11 @@ The MU Editor is a C++ ImGui-based in-game editor that provides real-time game e
 
 ### Core Editor
 - **MuEditor.h/cpp** - Main editor class, initialization, lifecycle management
-- **MuEditorUI.h/cpp** - Toolbar rendering (open/close, item editor buttons)
+- **MuEditorUI.h/cpp** - The editor window and its menu bar, or the Open Editor button while closed
+- **MuEditorLayout.h/cpp** - Where the editor window first opens, and the first layout of its tool windows
+- **MuEditorWindowIds.h** - The names the tool windows are docked by
+- **MuEditorPlatformWindows.h/cpp** - The editor's own OS windows on Windows, Linux (X11) and macOS
+- **MuEditorCursor.h/cpp** - The OS cursor's shape over the editor off Windows
 
 ### Console System
 - **MuEditorConsole.h/cpp** - Console rendering and logging (split Editor/Game consoles)
@@ -77,21 +81,24 @@ When `_EDITOR` is defined:
 ### In Winmain.cpp
 ```cpp
 #ifdef _EDITOR
-#include "MuEditor/MuEditor.h"
+#include "../MuEditor/Core/MuEditorCore.h"
 
 // Initialization
-g_MuEditor.Initialize(g_hWnd, g_hDC);
-if (szCmdLine && wcsstr(GetCommandLineW(), L"--editor"))
-    g_MuEditor.SetEnabled(true);
+g_MuEditorCore.Initialize(g_sdlWindow);
+if (szCmdLine && std::strstr(szCmdLine, "--editor"))
+    g_MuEditorCore.SetEnabled(true);
 
-// Main loop - Update and Render
-g_MuEditor.Update();
-RenderScene(g_hDC);
-g_MuEditor.Render();
+// SDL events: what the editor takes (a click or a key on one of its windows)
+// does not reach RmlUi or the game
+if (g_MuEditorCore.ClaimsEvent(event))
+    continue;
 
-// F12 toggle
-if (GetAsyncKeyState(VK_F12) & 0x8000)
-    g_MuEditor.ToggleEditor();
+// Main loop: F12 from the key itself, in the game window or the editor's own
+if (f12Down && !wasF12Pressed)
+    g_MuEditorCore.ToggleEditor();
+g_MuEditorCore.Update();                // before the game's frame
+RenderProfiledFrame();                  // the scene calls g_MuEditorCore.Render()
+g_MuEditorCore.RenderPlatformWindows(); // the editor's own windows, after the game's frame
 #endif
 ```
 
@@ -127,7 +134,7 @@ main.exe --editor
 ```
 
 ### Current Features
-- **Toolbar** - Open/close editor, toggle item editor
+- **Editor Window** - Menu bar to open the tool windows, docked as tabs; Close Editor
 - **Console** - Dual-panel console with auto-scroll and copy/clear
 - **Item Editor** - Live editing of item attributes
 - **Input Blocking** - Game input blocked when hovering UI
@@ -148,9 +155,10 @@ Game console captures all standard output automatically via console redirection.
 
 ### 3. Add New Editor Window
 ```cpp
-// In MuEditor::Render()
+// In CMuEditorCore::Render(), after g_MuEditorUI.Render(...)
 if (m_bShowMyWindow)
 {
+    MuEditor::Layout::PrepareToolWindow();  // its tab, also when floating
     if (ImGui::Begin("My Window", &m_bShowMyWindow))
     {
         ImGui::Text("Custom content here");
@@ -158,6 +166,10 @@ if (m_bShowMyWindow)
     ImGui::End();
 }
 ```
+To open it as a tab of the editor window like the other tool windows, add its
+name to `MuEditorWindowIds.h` (with a `###` id if the title is translated),
+Begin it with that name, add the name to the first layout in
+`MuEditorLayout.cpp` and a `MenuItem` to the Windows menu in `MuEditorUI.cpp`.
 
 ### 4. Access Game State
 ```cpp
@@ -176,7 +188,7 @@ if (g_MuEditor.IsEnabled())
 ### Component Hierarchy
 ```
 CMuEditor (main editor singleton)
-├── CMuEditorUI (toolbar rendering)
+├── CMuEditorUI (the editor window and its menu bar, or the Open Editor button)
 ├── CMuEditorConsole (console rendering & logging)
 │   └── ConsoleStreamBuf (C++ stream redirection for cout/cerr)
 ├── CMuItemEditor (item editor window)
