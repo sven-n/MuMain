@@ -1,6 +1,9 @@
 #include "stdafx.h"
+
 #include "doctest.h"
-#include "Core/Utilities/Log/MuLogger.h"
+
+#include "ClientDataScope.h"
+
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -9,15 +12,13 @@
 
 #include <filesystem>
 #include <string>
-#include <vector>
-
-extern ITEM_ATTRIBUTE* ItemAttribute;
 
 using namespace Data::Items;
 
 // What SetItemAttributes computes from the shipped item data: the values the item
-// tooltip and the character window show. The expected values are the ones OpenMU
-// computes for the same items.
+// tooltip and the character window show. The values the fixes of #683 changed are
+// the ones the client before 815b8828 and OpenMU compute; the "Unchanged" checks
+// pin the client's other values.
 namespace
 {
 const std::filesystem::path ClientDirectory = std::filesystem::path(MU_TEST_DATA_DIR).parent_path();
@@ -32,40 +33,24 @@ constexpr int FirstSmallWingType = MakeItemType(12, 130);
 constexpr int LastSmallWingType = MakeItemType(12, 135);
 
 // Loads the shipped item data into a test-owned ItemAttribute, as the game does at
-// startup, and restores the previous one.
+// startup; the client data scope restores the previous one, also when loading fails.
 class ShippedItemAttributes
 {
 public:
-    ShippedItemAttributes()
-        : m_items(MAX_ITEM, ITEM_ATTRIBUTE{}), m_previousItems(ItemAttribute),
-          m_previousDirectory(std::filesystem::current_path())
+    ShippedItemAttributes() : m_client(ClientDirectory)
     {
-        mu::log::Init();
-        ItemAttribute = m_items.data();
-        std::filesystem::current_path(ClientDirectory);
         I18N::SetLocale("en");
         std::string errorMessage;
         REQUIRE(g_ItemDataHandler.Load(errorMessage));
     }
 
-    ~ShippedItemAttributes()
-    {
-        // Resetting the locale refills ItemAttribute, so it runs while ItemAttribute
-        // still points at the test's table.
-        I18N::SetLocale("en");
-        std::filesystem::current_path(m_previousDirectory);
-        ItemAttribute = m_previousItems;
-    }
-
     ITEM_ATTRIBUTE& operator[](int itemType)
     {
-        return m_items[itemType];
+        return ItemAttribute[itemType];
     }
 
 private:
-    std::vector<ITEM_ATTRIBUTE> m_items;
-    ITEM_ATTRIBUTE* m_previousItems;
-    std::filesystem::path m_previousDirectory;
+    ClientDataScope m_client;
 };
 
 ITEM ComputeItem(int itemType, int level, BYTE excellentFlags = 0, BYTE ancientDiscriminator = 0)
@@ -109,7 +94,6 @@ TEST_CASE("Magic defense grows with the + level [data][items]")
     ShippedItemAttributes items;
     // No shipped item has magic defense; the editor can give one some.
     items[BronzeArmorType].MagicDefense = 10;
-    items[BronzeArmorType].Level = 50;
 
     CHECK(ComputeItem(BronzeArmorType, 0).MagicDefense == 10);
     CHECK(ComputeItem(BronzeArmorType, 9).MagicDefense == 37);
@@ -126,10 +110,12 @@ TEST_CASE("The late wings, crystals and small wings keep their level requirement
         CHECK(ComputeItem(ITEM_CAPE_OF_OVERRULE, level).RequireLevel == 400);
         for (int type = ITEM_CRYSTAL_OF_DESTRUCTION; type <= ITEM_SCROLL_OF_CHAOTIC_DISEIER; ++type)
         {
+            CAPTURE(type);
             CHECK(ComputeItem(type, level).RequireLevel == 220);
         }
         for (int type = FirstSmallWingType; type <= LastSmallWingType; ++type)
         {
+            CAPTURE(type);
             CHECK(ComputeItem(type, level).RequireLevel == 1);
         }
 
