@@ -184,17 +184,21 @@ SDL_GPUSampler* CreateSampler(SDL_GPUDevice* device, SDL_GPUFilter filter, SDL_G
     return SDL_CreateGPUSampler(device, &samplerInfo);
 }
 
-// The CPU copy of an upscaled texture is up to 16 times the original and
-// nothing reads it after the upload: only the canvases (LoadCanvasBitmap) are
-// redrawn through Buffer, and those are never uploaded upscaled. Keeping the
-// copies took the 32 bit client past 3.3 GB of address space.
-// Returns the bytes released.
-std::size_t ReleaseUploadedPixels(BITMAP_t& bitmap)
+// Nothing reads the CPU copy of a texture after the upload except for the
+// canvases (LoadCanvasBitmap), which are redrawn through Buffer. The copy of an
+// upscaled texture is up to 16 times the original; keeping the copies took the
+// 32 bit client past 3.3 GB of address space.
+void ReleaseUploadedPixels(BITMAP_t& bitmap)
 {
-    const std::size_t released = bitmap.BufferStorage.size();
     std::vector<std::uint8_t>().swap(bitmap.BufferStorage);
     bitmap.Buffer = nullptr;
-    return released;
+}
+
+// The size of the base level of an uploaded texture, which the loader counts as
+// texture memory.
+std::uint32_t UploadedBytes(int width, int height)
+{
+    return static_cast<std::uint32_t>(width) * static_cast<std::uint32_t>(height) * 4u;
 }
 
 // A canvas is drawn on through Buffer at the original size, so an upscaled file
@@ -705,8 +709,7 @@ void CGlobalBitmap::UnloadImage(GLuint uiBitmapIndex, bool bForce)
                 }
             }
 
-            const auto memoryUsed = static_cast<std::uint32_t>(pBitmap->BufferStorage.size());
-            m_dwUsedTextureMemory -= memoryUsed;
+            m_dwUsedTextureMemory -= pBitmap->UploadedBytes;
 
             m_mapBitmap.erase(mi);
 #ifdef _EDITOR
@@ -983,7 +986,6 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
     {
         ShrinkCanvas(*pNewBitmap, uploadWidth, uploadHeight, scale);
     }
-    m_dwUsedTextureMemory += static_cast<std::uint32_t>(pNewBitmap->BufferStorage.size());
 
     pNewBitmap->TextureNumber = uiBitmapIndex;
     std::vector<std::uint8_t> rgbaData = PadRGBToRGBA(pNewBitmap->Buffer, uploadWidth, uploadHeight);
@@ -993,9 +995,11 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
         g_ErrorReport.Write(L"SDL texture upload failed %ls (%d)\r\n", filename.c_str(), uiBitmapIndex);
         return false;
     }
-    if (upscaled)
+    pNewBitmap->UploadedBytes = UploadedBytes(uploadWidth, uploadHeight);
+    m_dwUsedTextureMemory += pNewBitmap->UploadedBytes;
+    if (!keepPixels)
     {
-        m_dwUsedTextureMemory -= static_cast<std::uint32_t>(ReleaseUploadedPixels(*pNewBitmap));
+        ReleaseUploadedPixels(*pNewBitmap);
     }
 
     SDL_GPUTexture* rawTexture = pNewBitmap->sdlTexture;
@@ -1061,7 +1065,6 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
     {
         ShrinkCanvas(*pNewBitmap, uploadWidth, uploadHeight, scale);
     }
-    m_dwUsedTextureMemory += static_cast<std::uint32_t>(pNewBitmap->BufferStorage.size());
 
     pNewBitmap->TextureNumber = uiBitmapIndex;
     if (!UploadTextureSDLGpu(pNewBitmap.get(), pNewBitmap->Buffer, uploadWidth, uploadHeight,
@@ -1070,9 +1073,11 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
         g_ErrorReport.Write(L"SDL texture upload failed %ls (%d)\r\n", filename.c_str(), uiBitmapIndex);
         return false;
     }
-    if (upscaled)
+    pNewBitmap->UploadedBytes = UploadedBytes(uploadWidth, uploadHeight);
+    m_dwUsedTextureMemory += pNewBitmap->UploadedBytes;
+    if (!keepPixels)
     {
-        m_dwUsedTextureMemory -= static_cast<std::uint32_t>(ReleaseUploadedPixels(*pNewBitmap));
+        ReleaseUploadedPixels(*pNewBitmap);
     }
 
     SDL_GPUTexture* rawTexture = pNewBitmap->sdlTexture;

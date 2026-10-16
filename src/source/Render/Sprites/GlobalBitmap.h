@@ -24,8 +24,7 @@ struct BITMAP_t
     GLuint BitmapIndex;
     wchar_t FileName[MAX_BITMAP_FILE_NAME];
     // The size the game works with. For upscaled art (Render/Textures/UpscaleMarker.h)
-    // the uploaded texture is larger and Buffer is released after the upload. A canvas
-    // (LoadCanvasBitmap: BITMAP_GUILD, BITMAP_INTERFACE_MAP) keeps Buffer at this size.
+    // the uploaded texture is larger.
     float Width;
     float Height;
     char Components;
@@ -33,6 +32,8 @@ struct BITMAP_t
     std::uint8_t Ref;
     bool IsSkin;
     bool IsHair;
+    // The pixels, released after the upload except for a canvas (LoadCanvasBitmap:
+    // BITMAP_GUILD, BITMAP_INTERFACE_MAP), which keeps them at the size above.
     BYTE* Buffer;
     std::vector<std::uint8_t> BufferStorage;
 
@@ -44,6 +45,8 @@ public:
 #pragma pack(pop)
     SDL_GPUTexture* sdlTexture = nullptr;
     SDL_GPUSampler* sdlSampler = nullptr;
+    // The base level, counted as texture memory.
+    std::uint32_t UploadedBytes = 0;
 };
 
 class CBitmapCache
