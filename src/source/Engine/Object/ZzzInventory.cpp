@@ -728,34 +728,24 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
     }
 }
 
-const int iMaxLevel = 15;
-const int iMaxColumn = 17;
 int g_iCurrentItem = -1;
-int g_iItemInfo[iMaxLevel + 1][iMaxColumn];
+int g_iItemInfo[iMaxLevel + 1][_COLUMN_TYPE_COUNT];
 
 namespace
 {
-// The magic power goes into one column: Curse for summoner books, Attack for sceptres, WIZDmg for
-// the other items. The window shows every column with a value at +0, and g_iItemInfo still holds
-// the item shown before, so the other two are cleared.
-void SetItemInfoMagicColumns(int level, int itemType, int magic)
+// The column the magic power goes into: Curse for summoner books, Attack for sceptres, WIZDmg for
+// the other items.
+int GetItemInfoMagicColumn(int itemType)
 {
-    g_iItemInfo[level][_COLUMN_TYPE_MAGIC] = 0;
-    g_iItemInfo[level][_COLUMN_TYPE_CURSE] = 0;
-    g_iItemInfo[level][_COLUMN_TYPE_PET_ATTACK] = 0;
-
     if (GameLogic::Items::IsSummonerBookType(itemType))
     {
-        g_iItemInfo[level][_COLUMN_TYPE_CURSE] = magic;
+        return _COLUMN_TYPE_CURSE;
     }
-    else if (IsCepterItem(itemType))
+    if (IsCepterItem(itemType))
     {
-        g_iItemInfo[level][_COLUMN_TYPE_PET_ATTACK] = magic;
+        return _COLUMN_TYPE_PET_ATTACK;
     }
-    else
-    {
-        g_iItemInfo[level][_COLUMN_TYPE_MAGIC] = magic;
-    }
+    return _COLUMN_TYPE_MAGIC;
 }
 } // namespace
 
@@ -767,6 +757,7 @@ void ComputeItemInfo(int iHelpItem)
         g_iCurrentItem = iHelpItem;
 
     ITEM_ATTRIBUTE* p = &ItemAttribute[iHelpItem];
+    const int magicColumn = GetItemInfoMagicColumn(iHelpItem);
 
     for (int Level = 0; Level <= iMaxLevel; Level++)
     {
@@ -868,10 +859,13 @@ void ComputeItemInfo(int iHelpItem)
         if (p->RequireCharisma)	RequireCharisma = 20 + p->RequireCharisma * (p->Level + Level * 3) * 3 / 100;
         else RequireCharisma = 0;
 
+        // The window shows every column with a value at +0, so the row starts empty: no column of
+        // the item shown before stays.
+        std::ranges::fill(g_iItemInfo[Level], 0);
         g_iItemInfo[Level][_COLUMN_TYPE_LEVEL] = Level;
         g_iItemInfo[Level][_COLUMN_TYPE_ATTMIN] = DamageMin;
         g_iItemInfo[Level][_COLUMN_TYPE_ATTMAX] = DamageMax;
-        SetItemInfoMagicColumns(Level, iHelpItem, Magic);
+        g_iItemInfo[Level][magicColumn] = Magic;
         g_iItemInfo[Level][_COLUMN_TYPE_DEFENCE] = Defense;
         g_iItemInfo[Level][_COLUMN_TYPE_DEFRATE] = Blocking;
         g_iItemInfo[Level][_COLUMN_TYPE_REQSTR] = RequireStrength;

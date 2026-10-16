@@ -12,7 +12,6 @@
 #include "Engine/Object/ZzzInterface.h"
 
 extern int TextNum;
-extern int g_iItemInfo[16][17];
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
