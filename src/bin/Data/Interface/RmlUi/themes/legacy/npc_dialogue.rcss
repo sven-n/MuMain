@@ -54,7 +54,6 @@
 .nd-line {
 	display: block;
 	color: token(text-narrative);
-	line-height: inherit; /* native ND_TEXT_GAP, from .nd-npc-lines (npc_dialogue.rml) */
 	white-space: nowrap;
 }
 
@@ -92,7 +91,6 @@
 .nd-answer-row {
 	display: block;
 	color: token(text-narrative);
-	line-height: inherit; /* native ND_TEXT_GAP, from .nd-answers (npc_dialogue.rml) */
 	white-space: pre-line;
 	cursor: pointer;
 	pointer-events: auto;
