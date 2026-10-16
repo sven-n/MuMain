@@ -867,6 +867,11 @@ void CMyInventory::SyncRmlModel()
     m_ItemTarget.Sync(m_RmlView.Document() ? m_RmlView.Document()->GetElementById("item_view") : nullptr, IsVisible());
     if (!m_RmlView.Document()) return;
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
+    if (!IsVisible())
+    {
+        UI::RmlBridge::Tooltip::Hide(this);
+        return;
+    }
 
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     SyncNativeLayout();
