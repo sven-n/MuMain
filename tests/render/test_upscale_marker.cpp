@@ -68,3 +68,10 @@ TEST_CASE("an upscaled image shrinks to the average of each block [render][upsca
 
     CHECK(original == std::vector<std::uint8_t>{6, 10, 20, 101, 0, 255});
 }
+
+TEST_CASE("the marked scale needs no image size [render][upscale_marker]")
+{
+    CHECK(Upscale::ReadMarkedScale(MarkedFile(4)) == 4);
+    CHECK(Upscale::ReadMarkedScale(MarkedFile(3)) == Upscale::NoScale);
+    CHECK(Upscale::ReadMarkedScale(std::vector<std::uint8_t>{0xFF, 0xD8, 0xFF, 0xE0}) == Upscale::NoScale);
+}

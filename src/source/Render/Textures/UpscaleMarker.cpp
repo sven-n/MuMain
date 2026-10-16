@@ -19,7 +19,7 @@ bool HasMarker(std::span<const std::uint8_t> file)
 }
 } // namespace
 
-int ReadScale(std::span<const std::uint8_t> file, int textureWidth, int textureHeight)
+int ReadMarkedScale(std::span<const std::uint8_t> file)
 {
     if (!HasMarker(file))
     {
@@ -27,7 +27,13 @@ int ReadScale(std::span<const std::uint8_t> file, int textureWidth, int textureH
     }
 
     const int scale = file[ScaleOffset];
-    if (!IsSupportedScale(scale) || textureWidth < scale || textureHeight < scale)
+    return IsSupportedScale(scale) ? scale : NoScale;
+}
+
+int ReadScale(std::span<const std::uint8_t> file, int textureWidth, int textureHeight)
+{
+    const int scale = ReadMarkedScale(file);
+    if (textureWidth < scale || textureHeight < scale)
     {
         return NoScale;
     }

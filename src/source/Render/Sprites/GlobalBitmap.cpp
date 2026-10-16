@@ -918,6 +918,11 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
         return false;
     }
 
+    // A marked file holds an image up to its scale times the largest original.
+    const int markedScale = Render::Textures::Upscale::ReadMarkedScale(jpegBuf);
+    const int maxWidth = MAX_WIDTH * markedScale;
+    const int maxHeight = MAX_HEIGHT * markedScale;
+
     // Skip first 24 bytes (OZJ header)
     const unsigned char* jpegData = jpegBuf.data() + 24;
     const auto jpegSize = static_cast<unsigned long>(jpegBuf.size() - 24);
@@ -935,9 +940,15 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
 
     auto headerResult =
         tjDecompressHeader3(tjHandle.get(), jpegData, jpegSize, &jpegWidth, &jpegHeight, &jpegSubsamp, &jpegColorspace);
-    if (headerResult != 0 || jpegWidth <= 0 || jpegHeight <= 0 || jpegWidth > MAX_WIDTH || jpegHeight > MAX_HEIGHT)
+    if (headerResult != 0 || jpegWidth <= 0 || jpegHeight <= 0)
     {
         ReportTurboError(L"tjDecompressHeader3");
+        return false;
+    }
+    if (jpegWidth > maxWidth || jpegHeight > maxHeight)
+    {
+        g_ErrorReport.Write(L"OpenJpegTurbo: image too large %ls (%dx%d, at most %dx%d)\r\n", filename_ozj.c_str(),
+                            jpegWidth, jpegHeight, maxWidth, maxHeight);
         return false;
     }
 
@@ -951,8 +962,8 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
         return false;
     }
 
-    const int textureWidth = padToPowerOfTwo ? NextPowerOfTwo(jpegWidth, MAX_WIDTH) : jpegWidth;
-    const int textureHeight = padToPowerOfTwo ? NextPowerOfTwo(jpegHeight, MAX_HEIGHT) : jpegHeight;
+    const int textureWidth = padToPowerOfTwo ? NextPowerOfTwo(jpegWidth, maxWidth) : jpegWidth;
+    const int textureHeight = padToPowerOfTwo ? NextPowerOfTwo(jpegHeight, maxHeight) : jpegHeight;
     const int scale = Render::Textures::Upscale::ReadScale(jpegBuf, textureWidth, textureHeight);
     const bool upscaled = scale > Render::Textures::Upscale::NoScale && !keepPixels;
 
@@ -1029,8 +1040,13 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
     std::vector<unsigned char> pakBuffer((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
     input.close();
 
+    // A marked file holds an image up to its scale times the largest original.
+    const int markedScale = Render::Textures::Upscale::ReadMarkedScale(pakBuffer);
+    const int maxWidth = MAX_WIDTH * markedScale;
+    const int maxHeight = MAX_HEIGHT * markedScale;
+
     // A file cut off in its header or its pixels is too small.
-    const Ozt::Header header = Ozt::ReadHeader(pakBuffer, MAX_WIDTH, MAX_HEIGHT);
+    const Ozt::Header header = Ozt::ReadHeader(pakBuffer, maxWidth, maxHeight);
     if (header.status == Ozt::Status::TooSmall)
     {
         g_ErrorReport.Write(L"OpenTga: file too small %ls (%zu bytes)\r\n", filename_ozt.c_str(), pakBuffer.size());
@@ -1038,13 +1054,13 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
     }
     if (header.status == Ozt::Status::InvalidFormat)
     {
-        g_ErrorReport.Write(L"OpenTga: invalid format %ls (bit=%d, %dx%d)\r\n", filename_ozt.c_str(),
-                            header.bitsPerPixel, header.width, header.height);
+        g_ErrorReport.Write(L"OpenTga: invalid format %ls (bit=%d, %dx%d, at most %dx%d)\r\n", filename_ozt.c_str(),
+                            header.bitsPerPixel, header.width, header.height, maxWidth, maxHeight);
         return false;
     }
 
-    const int Width = padToPowerOfTwo ? NextPowerOfTwo(header.width, MAX_WIDTH) : header.width;
-    const int Height = padToPowerOfTwo ? NextPowerOfTwo(header.height, MAX_HEIGHT) : header.height;
+    const int Width = padToPowerOfTwo ? NextPowerOfTwo(header.width, maxWidth) : header.width;
+    const int Height = padToPowerOfTwo ? NextPowerOfTwo(header.height, maxHeight) : header.height;
     const int scale = Render::Textures::Upscale::ReadScale(pakBuffer, Width, Height);
     const bool upscaled = scale > Render::Textures::Upscale::NoScale && !keepPixels;
 

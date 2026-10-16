@@ -10,11 +10,17 @@
 // in the first 4 bytes, which no loader reads (an original file repeats the
 // start of its JPEG or TGA data there). The game uploads the whole image but
 // keeps working with the original size, so terrain UVs, sprite sizes and UI
-// coordinates stay valid.
+// coordinates stay valid. The loader accepts a marked image up to the scale
+// times the largest original (CGlobalBitmap's MAX_WIDTH x MAX_HEIGHT, 1024 px).
 namespace Render::Textures::Upscale
 {
 inline constexpr std::size_t MarkerSize = 4;
 inline constexpr int NoScale = 1;
+
+// The scale in the marker of a file: 2 or 4 for a marked file, 1 for any other.
+// Needs no image size, so the loader can widen its size limit before it reads
+// the image.
+int ReadMarkedScale(std::span<const std::uint8_t> file);
 
 // The scale of the image in a file: 2 or 4 for a marked file, 1 for any other.
 // Also 1 when the texture is smaller than the scale, as it then has no
