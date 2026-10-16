@@ -115,7 +115,7 @@ void FriendDialogs::AddFriend(DWORD parentUIID)
     config.primaryLabel = I18N::Game::OK;
     config.showCancel = true;
     config.cancelLabel = I18N::Game::Cancel;
-    config.input.emplace();
+    config.input = GenericDialogConfig::InputField{};
     config.input->maxLength = MAX_USERNAME_SIZE;
     config.onPrimary = [parentUIID]
     {

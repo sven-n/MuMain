@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "ErrorDialog.h"
+#include "GameWindow.h"
 #include "ScopedSystemCursor.h"
 
 #include "Core/Utilities/Log/MuLogger.h"
@@ -41,14 +42,10 @@ std::vector<SDL_MessageBoxButtonData> MakeButtons(bool canContinue)
 }
 
 // The game window, so the dialog stays in front of it even when the game
-// does not have the focus (e.g. during the long loading). The client opens
-// only that one.
+// does not have the focus (e.g. during the long loading).
 SDL_Window* GetGameWindow()
 {
-    int count = 0;
-    SDL_Window** windows = SDL_GetWindows(&count);
-    SDL_Window* window = windows != nullptr && count > 0 ? windows[0] : nullptr;
-    SDL_free(windows);
+    SDL_Window* window = Core::Platform::GameWindow();
     return window != nullptr ? window : SDL_GetKeyboardFocus();
 }
 
@@ -67,7 +64,7 @@ Choice Show(const std::string& title, const std::string& message, bool canContin
 {
     const std::vector<SDL_MessageBoxButtonData> buttons = MakeButtons(canContinue);
     const SDL_MessageBoxData data = {SDL_MESSAGEBOX_ERROR | SDL_MESSAGEBOX_BUTTONS_LEFT_TO_RIGHT,
-                                     GetGameWindow(),
+                                     Core::Platform::MessageBoxParent(GetGameWindow()),
                                      title.c_str(),
                                      message.c_str(),
                                      static_cast<int>(buttons.size()),
