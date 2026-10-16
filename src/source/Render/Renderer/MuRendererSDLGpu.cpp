@@ -111,6 +111,14 @@ struct SkinningVertexUniforms
 };
 static_assert(sizeof(SkinningVertexUniforms) == 192, "SkinningVertexUniforms must be 192 bytes");
 
+// skinned_shadow.vert's Shadow cbuffer.
+struct ShadowVertexUniforms
+{
+    float origin[4]{};     // xyz: BodyOrigin, w: height of TW_HEIGHT cells
+    float projection[4]{}; // x, y: sx, sy; z: 1 when the scene has terrain
+};
+static_assert(sizeof(ShadowVertexUniforms) == 32, "ShadowVertexUniforms must be 32 bytes");
+
 } // anonymous namespace
 
 namespace mu
@@ -705,6 +713,7 @@ struct RenderCmd
     Uint32 stripIdxOffset; // byte offset into strip index scratch buffer
     VertexUniforms vu;
     Uint32 skinningIndex = 0u; // into s_skinningUniforms, for DrawSkinnedTriangles
+    Uint32 shadowIndex = ~0u;  // into s_shadowUniforms when a DrawSkinnedTriangles is a body shadow
     FogUniform fogUniform;
     SDL_GPUViewport viewport; // for SetViewport only
     SDL_Rect scissor;         // for SetScissor only
@@ -722,6 +731,7 @@ struct RenderCmd
 static std::vector<RenderCmd> s_renderCmds;
 // Kept apart from RenderCmd: only skinned draws carry them, and they would nearly double every command.
 static std::vector<SkinningVertexUniforms> s_skinningUniforms;
+static std::vector<ShadowVertexUniforms> s_shadowUniforms;
 static constexpr std::size_t kNoDrawCommand = std::numeric_limits<std::size_t>::max();
 static Render::DrawCommandHistory s_previousDrawCommands;
 
@@ -900,13 +910,13 @@ static bool BindReplayPipeline(const RenderCmd& command, Render::SdlGpuReplaySta
     return true;
 }
 
-static void PushReplayVertexUniforms(const void* data, std::size_t size, Render::SdlGpuReplayState& state)
+static void PushReplayVertexUniforms(Uint32 slot, const void* data, std::size_t size, Render::SdlGpuReplayState& state)
 {
     const auto* bytes = static_cast<const std::byte*>(data);
-    if (!state.SelectVertexUniforms({bytes, size}))
+    if (!state.SelectVertexUniforms(slot, {bytes, size}))
         return;
 
-    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, data, static_cast<Uint32>(size));
+    SDL_PushGPUVertexUniformData(s_cmdBuf, slot, data, static_cast<Uint32>(size));
     ++s_dbgVertexUniformPushesThisFrame;
 }
 
@@ -944,16 +954,19 @@ static void ReplayDrawCommand(const RenderCmd& command, bool boneDataReady, cons
                               Render::SdlGpuReplayState& state)
 {
     const bool skinned = command.type == RenderCmdType::DrawSkinnedTriangles;
+    const bool shadow = skinned && command.shadowIndex != ~0u;
     if (!command.texture || !command.sampler || (skinned && (!boneDataReady || !s_boneGpuBuf)) ||
-        !BindReplayPipeline(command, state, scissor))
+        (shadow && !s_terrainHeightGpuBuf) || !BindReplayPipeline(command, state, scissor))
     {
         return;
     }
 
     if (skinned)
-        PushReplayVertexUniforms(&s_skinningUniforms[command.skinningIndex], sizeof(SkinningVertexUniforms), state);
+        PushReplayVertexUniforms(0, &s_skinningUniforms[command.skinningIndex], sizeof(SkinningVertexUniforms), state);
     else
-        PushReplayVertexUniforms(&command.vu, sizeof(command.vu), state);
+        PushReplayVertexUniforms(0, &command.vu, sizeof(command.vu), state);
+    if (shadow)
+        PushReplayVertexUniforms(1, &s_shadowUniforms[command.shadowIndex], sizeof(ShadowVertexUniforms), state);
 
     // Bound again only when the buffer or the vertex size changes; draws in between say where their vertices start.
     SDL_GPUBuffer* const vertexBuffer = command.vtxBuffer ? command.vtxBuffer : s_vtxGpuBuf;
@@ -975,10 +988,12 @@ static void ReplayDrawCommand(const RenderCmd& command, bool boneDataReady, cons
         firstInstance = command.colorOffset / sizeof(Uint32);
     }
 
-    if (skinned && state.SelectVertexStorageBuffer(s_boneGpuBuf))
+    if (skinned)
     {
-        SDL_GPUBuffer* boneBuffer = s_boneGpuBuf;
-        SDL_BindGPUVertexStorageBuffers(s_renderPass, 0, &boneBuffer, 1);
+        SDL_GPUBuffer* const storageBuffers[] = {s_boneGpuBuf, s_terrainHeightGpuBuf};
+        const std::span<SDL_GPUBuffer* const> bound{storageBuffers, shadow ? 2u : 1u};
+        if (state.SelectVertexStorageBuffers(bound))
+            SDL_BindGPUVertexStorageBuffers(s_renderPass, 0, bound.data(), static_cast<Uint32>(bound.size()));
     }
 
     Uint32 firstIndex = 0u;
@@ -1815,6 +1830,7 @@ public:
         s_stagedStripIndices = {};
         s_renderCmds.clear();
         s_skinningUniforms.clear();
+        s_shadowUniforms.clear();
         s_previousDrawCommands.fill(kNoDrawCommand);
         s_replayedCmdCount = 0u;
         s_mainColorPassOpenedThisFrame = false;
@@ -3783,6 +3799,19 @@ public:
         return RecordSkinnedDraw(nullptr, cached->second, cached->second.vertexCount, color, textureId, parameters);
     }
 
+    [[nodiscard]] bool RenderCachedSkinnedShadow(const void* mesh, std::uint32_t color,
+                                                 const SkinningParameters& parameters,
+                                                 const ShadowProjection& projection) override
+    {
+        const auto cached = s_skinnedMeshes.find(mesh);
+        if (cached == s_skinnedMeshes.end())
+        {
+            return false;
+        }
+        return RecordSkinnedDraw(nullptr, cached->second, cached->second.vertexCount, color, 0u, parameters,
+                                 &projection);
+    }
+
     // CPU bookkeeping only, so a model released after Shutdown finds an empty cache.
     void ReleaseSkinnedMesh(const void* mesh) override
     {
@@ -4149,10 +4178,11 @@ public:
 
 private:
     // Records one skinned draw. `frameVertices` are uploaded with this frame's vertices; without them the draw
-    // reads `cached`, already on the GPU.
+    // reads `cached`, already on the GPU. With `shadow`, it is drawn as that ground shadow.
     [[nodiscard]] bool RecordSkinnedDraw(const SkinnedVertex3D* frameVertices, const CachedSkinnedMesh& cached,
                                          Uint32 vertexCount, std::uint32_t color, std::uint32_t textureId,
-                                         const SkinningParameters& parameters)
+                                         const SkinningParameters& parameters,
+                                         const ShadowProjection* shadow = nullptr)
     {
         if (vertexCount == 0u || vertexCount % 3 != 0 || !s_frameActive || !m_colorWriteEnabled ||
             m_stencilTestEnabled || parameters.boneMatrices.empty() || parameters.boneMatrices.size() % 12 != 0)
@@ -4175,6 +4205,14 @@ private:
                        ? (cullFaceEnabled ? s_pipelinesSkinned[pipelineIdx] : s_pipelinesSkinnedNoCull[pipelineIdx])
                        : s_pipelinesSkinnedDepthReadOnly[pipelineIdx])
                 : s_pipelinesSkinnedDepthOff[pipelineIdx];
+        if (shadow)
+        {
+            // Only the states the CPU shadow is drawn in; the heights must be on the GPU.
+            pipeline = !s_terrainHeightVersion ? nullptr
+                       : !m_depthTestEnabled   ? s_pipelinesSkinnedShadowDepthOff[pipelineIdx]
+                       : !m_depthMaskEnabled   ? s_pipelinesSkinnedShadow[pipelineIdx]
+                                               : nullptr;
+        }
         if (!pipeline)
         {
             return false;
@@ -4241,6 +4279,18 @@ private:
         skinningVu.textureCoordinateParameters[0] = parameters.textureCoordinateOffset[0];
         skinningVu.textureCoordinateParameters[1] = parameters.textureCoordinateOffset[1];
         skinningVu.textureCoordinateParameters[2] = parameters.chromeTimeTerm;
+        if (shadow)
+        {
+            ShadowVertexUniforms& shadowVu = s_shadowUniforms.emplace_back();
+            cmd.shadowIndex = static_cast<Uint32>(s_shadowUniforms.size() - 1u);
+            shadowVu.origin[0] = shadow->origin[0];
+            shadowVu.origin[1] = shadow->origin[1];
+            shadowVu.origin[2] = shadow->origin[2];
+            shadowVu.origin[3] = shadow->specialHeight;
+            shadowVu.projection[0] = shadow->shearX;
+            shadowVu.projection[1] = shadow->shearHeight;
+            shadowVu.projection[2] = shadow->terrain ? 1.0f : 0.0f;
+        }
         cmd.fogUniform = m_fogUniform;
         s_renderCmds.push_back(cmd);
 
