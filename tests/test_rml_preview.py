@@ -90,7 +90,67 @@ class StylesheetTest(unittest.TestCase):
         self.assertIn("background-image: linear-gradient(to right, #000, #fff)", css)
 
 
+def tga(rgba):
+    """A 1x1 uncompressed 32-bit TGA of one RGBA pixel."""
+    header = struct.pack("<BBBHHBHHHHBB", 0, 0, 2, 0, 0, 0, 0, 0, 1, 1, 32, 0)
+    red, green, blue, alpha = rgba
+    return header + bytes((blue, green, red, alpha))
+
+
+class ParseTest(unittest.TestCase):
+    def test_attributes_without_a_value_parse_as_empty(self):
+        root = rml_preview.parse_rml(
+            '<rml><body><input type="text" autofocus/><div data-covers-world class="a">x</div>'
+            '<div data-if="a > b && c < d" hidden></div></body></rml>')
+        body = root.find("body")
+        self.assertEqual(body[0].attrib, {"type": "text", "autofocus": ""})
+        self.assertEqual(body[1].attrib, {"data-covers-world": "", "class": "a"})
+        self.assertEqual(body[2].get("data-if"), "a > b && c < d")
+        self.assertEqual(body[2].get("hidden"), "")
+
+    def test_documents_with_attributes_without_a_value_render(self):
+        for document in ("char_make", "workspace"):
+            for theme in ("legacy", "modern"):
+                with self.subTest(document=document, theme=theme), tempfile.TemporaryDirectory() as temp:
+                    pages, _, _ = rml_preview.render(document, theme, rml_preview.load_states(None), (1024, 768),
+                                                     100, pathlib.Path(temp), "#000")
+                    self.assertEqual(len(pages), 1)
+
+
+class BindingTest(unittest.TestCase):
+    def bind(self, rml, models):
+        root = rml_preview.parse_rml(rml)
+        body = root.find("body")
+        rml_preview.DocumentRenderer(models, lambda src: None, lambda style: style).bind(body, dict(models), root)
+        return body
+
+    def test_a_loop_naming_only_its_item_still_has_it_index(self):
+        body = self.bind('<rml><body><div data-for="label : labels" data-class-selected="it_index == chosen">'
+                         '{{label}}</div></body></rml>', {"labels": ["a", "b", "c"], "chosen": 1})
+        self.assertEqual([(div.text, div.get("class")) for div in body], [("a", None), ("b", "selected"), ("c", None)])
+
+    def test_a_document_with_an_unbound_image_renders(self):
+        with tempfile.TemporaryDirectory() as temp:
+            pages, _, _ = rml_preview.render("map_name", "legacy", rml_preview.load_states(None), (1024, 768), 100,
+                                             pathlib.Path(temp), "#000")
+            self.assertEqual(len(pages), 1)
+
+
 class TextureTest(unittest.TestCase):
+    def test_a_directory_is_not_a_texture(self):
+        with tempfile.TemporaryDirectory() as temp:
+            (pathlib.Path(temp) / "images").mkdir()
+            self.assertIsNone(rml_preview.find_texture(pathlib.Path(temp) / "images"))
+
+    def test_a_sprite_is_cropped_again_from_a_changed_sheet(self):
+        with tempfile.TemporaryDirectory() as temp:
+            sheet, out = pathlib.Path(temp) / "sheet.tga", pathlib.Path(temp) / "out"
+            sheet.write_bytes(tga((255, 0, 0, 255)))
+            first = (out / rml_preview.Textures(out).crop(sheet, (0, 0, 1, 1))).read_text()
+            sheet.write_bytes(tga((0, 0, 255, 255)))
+            second = (out / rml_preview.Textures(out).crop(sheet, (0, 0, 1, 1))).read_text()
+            self.assertNotEqual(first, second)
+
     def test_bottom_up_tga_is_flipped_to_top_down_rgba(self):
         header = struct.pack("<BBBHHBHHHHBB", 0, 0, 2, 0, 0, 0, 0, 0, 1, 2, 32, 0)
         bottom, top = bytes((0, 0, 255, 255)), bytes((255, 0, 0, 128))  # BGRA: red, then blue

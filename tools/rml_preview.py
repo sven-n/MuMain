@@ -140,11 +140,12 @@ def theme_setting(chain, section, key):
 def find_texture(path):
     """The file the game loads for an image path: .tga is stored as .OZT, .jpg as .OZJ."""
     alternatives = {".tga": ".ozt", ".jpg": ".ozj", ".jpeg": ".ozj"}
-    candidates = [path.suffix.lower(), alternatives.get(path.suffix.lower(), "")]
+    suffix = path.suffix.lower()
+    candidates = {suffix, alternatives.get(suffix, suffix)} - {""}
     directory = path.parent
     if directory.is_dir():
         for entry in directory.iterdir():
-            if entry.stem.lower() == path.stem.lower() and entry.suffix.lower() in candidates:
+            if entry.stem.lower() == path.stem.lower() and entry.suffix.lower() in candidates and entry.is_file():
                 return entry
     return None
 
@@ -218,6 +219,7 @@ class Textures:
     def __init__(self, out_dir):
         self.out_dir = out_dir
         self.images = {}  # source file -> (relative url, width, height, data uri)
+        self.sprites = set()  # the cropped sprite files written this run
         (out_dir / "img").mkdir(parents=True, exist_ok=True)
 
     def load(self, path):
@@ -258,12 +260,14 @@ class Textures:
         _, width, height, uri = image
         x, y, w, h = rect
         name = f"{path.stem.lower()}_{x}_{y}_{w}_{h}.svg"
-        target = self.out_dir / "img" / name
-        if not target.exists():
-            target.write_text(
-                f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" '
-                f'width="{w}" height="{h}" viewBox="{x} {y} {w} {h}" preserveAspectRatio="none">'
-                f'<image width="{width}" height="{height}" xlink:href="{uri}" style="image-rendering:auto"/></svg>')
+        if name in self.sprites:
+            return f"img/{name}"
+        # Written once each run, as the sheets are: a sprite left from an earlier run would show the old art.
+        self.sprites.add(name)
+        (self.out_dir / "img" / name).write_text(
+            f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" '
+            f'width="{w}" height="{h}" viewBox="{x} {y} {w} {h}" preserveAspectRatio="none">'
+            f'<image width="{width}" height="{height}" xlink:href="{uri}" style="image-rendering:auto"/></svg>')
         return f"img/{name}"
 
 
@@ -713,8 +717,22 @@ def interpolate(text, scope):
     return INTERPOLATION_RE.sub(lambda m: to_text(evaluate(m.group(1), scope)), text) if text else text
 
 
+ATTRIBUTE_VALUE = r"""(?:"[^"]*"|'[^']*'|[^\s"'>]+)"""
+START_TAG_RE = re.compile(r"<[A-Za-z][\w:.-]*(?:\s+[^\s\"'>/=]+(?:\s*=\s*" + ATTRIBUTE_VALUE + r")?)*\s*/?>")
+ATTRIBUTE_RE = re.compile(r"(\s+)([^\s\"'>/=]+)(\s*=\s*" + ATTRIBUTE_VALUE + r")?")
+
+
+def give_attributes_values(tag):
+    """RmlUi takes an attribute without a value (autofocus), XML doesn't: it becomes name=""."""
+    name_end = re.match(r"<[A-Za-z][\w:.-]*", tag).end()
+    attributes = ATTRIBUTE_RE.sub(lambda m: m.group(0) if m.group(3) else f'{m.group(1)}{m.group(2)}=""',
+                                  tag[name_end:])
+    return tag[:name_end] + attributes
+
+
 def parse_rml(text):
     text = re.sub(r"<!--.*?-->", "", text, flags=re.S)
+    text = START_TAG_RE.sub(lambda m: give_attributes_values(m.group(0)), text)
     text = re.sub(r"&(?!amp;|lt;|gt;|quot;|apos;|#)", "&amp;", text)
     # RmlUi accepts "<" in attribute values (data-if="a < b"), XML doesn't.
     text = re.sub(r'="([^"]*)"', lambda m: '="' + m.group(1).replace("<", "&lt;") + '"', text)
@@ -789,7 +807,9 @@ class DocumentRenderer:
         if "data-for" in attributes:
             declaration = attributes.pop("data-for")
             names, _, collection = declaration.rpartition(":")
-            names = [n.strip() for n in names.split(",")] if names else ["it", "it_index"]
+            names = [n.strip() for n in names.split(",")] if names else ["it"]
+            if len(names) == 1:
+                names.append("it_index")  # RmlUi's index alias when the loop names only its item
             items = evaluate(collection.strip(), scope) or []
             position = list(parent).index(element)
             parent.remove(element)
@@ -1001,6 +1021,9 @@ def render(document, theme, states, window, ui_scale, out_dir, background):
     faces = font_faces(out_dir)
 
     def image_url(src):
+        # A source bound to a missing model value is empty: no image, as in the game.
+        if not src.strip():
+            return None
         if src in converter.sprites:
             sheet, rect, _ = converter.sprites[src]
             return textures.crop(sheet, rect)
