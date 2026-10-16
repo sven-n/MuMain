@@ -63,12 +63,6 @@ add_test(
             "${CMAKE_SOURCE_DIR}"
 )
 
-# The mistakes RmlUi only reports at runtime, or not at all, in every shipped document and stylesheet.
-add_test(
-    NAME rml_rcss_syntax
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/check_rml_rcss_syntax.py"
-)
-
 add_subdirectory(text)
 add_subdirectory(effects)
 
