@@ -550,6 +550,9 @@ static SDL_GPUGraphicsPipeline* s_pipelinesSkinned[k_PipelineCount] = {};
 static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedNoCull[k_PipelineCount] = {};
 static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedDepthOff[k_PipelineCount] = {};
 static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedDepthReadOnly[k_PipelineCount] = {};
+// Body shadows (skinned_shadow.vert): the depth states RenderBodyShadow() draws with.
+static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedShadow[k_PipelineCount] = {};
+static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedShadowDepthOff[k_PipelineCount] = {};
 
 // Single pre-frame vertex upload.
 // Draws accumulate in growable CPU memory before one GPU upload.
@@ -4571,6 +4574,7 @@ private:
         TwoDimensional,
         ThreeDimensional,
         Skinned,
+        SkinnedShadow, // the skinned layout, with skinned_shadow.vert
     };
 
     struct PipelineBuildDescription
@@ -4752,8 +4756,9 @@ private:
         rasterState.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
 
         SDL_GPUGraphicsPipelineCreateInfo pipelineInfo{};
-        pipelineInfo.vertex_shader =
-            description.vertexLayout == VertexLayout::Skinned ? s_vertShaderSkinned : s_vertShader2D;
+        pipelineInfo.vertex_shader = description.vertexLayout == VertexLayout::Skinned         ? s_vertShaderSkinned
+                                     : description.vertexLayout == VertexLayout::SkinnedShadow ? s_vertShaderSkinnedShadow
+                                                                                               : s_vertShader2D;
         pipelineInfo.fragment_shader = s_fragShaderTex;
         pipelineInfo.vertex_input_state = vtxInputState;
         pipelineInfo.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
@@ -4780,8 +4785,10 @@ private:
         const char* layoutName = description.vertexLayout == VertexLayout::TwoDimensional     ? "2D"
                                  : description.vertexLayout == VertexLayout::ThreeDimensional ? "3D"
                                                                                               : "skinned";
-        const char* vertexShaderName =
-            description.vertexLayout == VertexLayout::Skinned ? "skinned_textured.vert" : "basic_textured.vert";
+        const char* vertexShaderName = description.vertexLayout == VertexLayout::Skinned ? "skinned_textured.vert"
+                                       : description.vertexLayout == VertexLayout::SkinnedShadow
+                                           ? "skinned_shadow.vert"
+                                           : "basic_textured.vert";
         constexpr const char* fragmentShaderName = "basic_textured.frag";
         const char* cullMode =
             description.vertexLayout != VertexLayout::TwoDimensional && description.cullFaceEnabled ? "back" : "none";
@@ -4930,6 +4937,16 @@ private:
             buildRequiredPipeline(
                 s_pipelinesSkinnedDepthReadOnly[i], blendState,
                 {"skinned-depth-read-only", table[i].name, i, true, false, VertexLayout::Skinned, false});
+
+            if (s_vertShaderSkinnedShadow)
+            {
+                buildOptionalPipeline(
+                    s_pipelinesSkinnedShadow[i], blendState,
+                    {"skinned-shadow", table[i].name, i, true, false, VertexLayout::SkinnedShadow, false});
+                buildOptionalPipeline(
+                    s_pipelinesSkinnedShadowDepthOff[i], blendState,
+                    {"skinned-shadow-depth-off", table[i].name, i, false, false, VertexLayout::SkinnedShadow, false});
+            }
         }
 
         if (requiredFailureCount != 0)
@@ -4995,6 +5012,16 @@ private:
             {
                 SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelinesSkinnedDepthReadOnly[i]);
                 s_pipelinesSkinnedDepthReadOnly[i] = nullptr;
+            }
+            if (s_pipelinesSkinnedShadow[i])
+            {
+                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelinesSkinnedShadow[i]);
+                s_pipelinesSkinnedShadow[i] = nullptr;
+            }
+            if (s_pipelinesSkinnedShadowDepthOff[i])
+            {
+                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelinesSkinnedShadowDepthOff[i]);
+                s_pipelinesSkinnedShadowDepthOff[i] = nullptr;
             }
         }
     }
