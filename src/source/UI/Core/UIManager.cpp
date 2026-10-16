@@ -28,7 +28,6 @@ ItemAddOptioninfo* g_pItemAddOptioninfo = NULL;
 
 extern int g_iCancelSkillTarget;
 extern int TextNum;
-extern int g_iItemInfo[16][17];
 
 namespace mu::ui::window
 {
@@ -38,7 +37,6 @@ namespace mu::ui::window
 	int (&TextListColor)[50] = ::TextListColor;
 	int (&TextBold)[50] = ::TextBold;
 	int& TextNum = ::TextNum;
-	int (&g_iItemInfo)[16][17] = ::g_iItemInfo;
 	int& ItemHelp = ::ItemHelp;
 	JewelHarmonyInfo*& g_pUIJewelHarmonyinfo = ::g_pUIJewelHarmonyinfo;
 	int& SelectedCharacter = ::SelectedCharacter;

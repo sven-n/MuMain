@@ -7,18 +7,15 @@
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Engine/Object/ZzzInfomation.h"
-#include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "I18N/All.h"
 
+#include <algorithm>
+#include <array>
 #include <filesystem>
 #include <iterator>
 #include <string>
-
-// The item help table (ComputeItemInfo) and the item it was computed for.
-extern int g_iCurrentItem;
-extern int g_iItemInfo[16][17];
 
 using namespace Data::Items;
 
@@ -60,13 +57,15 @@ private:
     ClientDataScope m_client;
 };
 
-// Points the item help table at test-owned state: ComputeItemInfo reads the item from
-// ItemHelp and marks the levels the hero can equip. The table was computed from the test's
-// ItemAttribute, so it is marked as computed for no item afterwards.
+using ItemInfoTable = std::array<std::array<int, _COLUMN_TYPE_COUNT>, iMaxLevel + 1>;
+
+// Points the item help table at test-owned state: ComputeItemInfo marks the levels the hero
+// can equip. The table was computed from the test's ItemAttribute, so it is marked as computed
+// for no item afterwards.
 class ItemHelpScope
 {
 public:
-    ItemHelpScope() : m_previousItemHelp(ItemHelp), m_previousHero(CharacterAttribute)
+    ItemHelpScope() : m_previousHero(CharacterAttribute)
     {
         CharacterAttribute = &m_hero;
     }
@@ -74,22 +73,56 @@ public:
     ~ItemHelpScope()
     {
         g_iCurrentItem = -1;
-        ItemHelp = m_previousItemHelp;
         CharacterAttribute = m_previousHero;
     }
 
+    // Computes the table again, over what the item before left in it.
     void Compute(int itemType)
     {
-        ItemHelp = itemType;
         g_iCurrentItem = -1;
         ComputeItemInfo(itemType);
     }
 
+    // The table of the first item the window shows, while the table is still empty.
+    ItemInfoTable ComputeFirst(int itemType)
+    {
+        for (auto& row : g_iItemInfo)
+        {
+            std::ranges::fill(row, 0);
+        }
+        Compute(itemType);
+
+        ItemInfoTable table{};
+        for (int level = 0; level <= iMaxLevel; ++level)
+        {
+            std::ranges::copy(g_iItemInfo[level], table[level].begin());
+        }
+        return table;
+    }
+
 private:
     CHARACTER_ATTRIBUTE m_hero{};
-    int m_previousItemHelp;
     CHARACTER_ATTRIBUTE* m_previousHero;
 };
+
+constexpr int NoMagicColumn = -1;
+
+struct HelpTableCase
+{
+    int itemType;
+    int magicColumn;
+};
+
+// The column an item's magic power goes into: Curse for a summoner book, Attack for a sceptre,
+// WIZDmg for a staff, none for an item without magic power.
+constexpr HelpTableCase HelpTableCases[] = {
+    {ITEM_BOOK_OF_SAHAMUTT, _COLUMN_TYPE_CURSE},
+    {ITEM_GREAT_LORD_SCEPTER, _COLUMN_TYPE_PET_ATTACK},
+    {ITEM_LEGENDARY_STAFF, _COLUMN_TYPE_MAGIC},
+    {ITEM_KRIS, NoMagicColumn},
+};
+
+constexpr int MagicColumns[] = {_COLUMN_TYPE_MAGIC, _COLUMN_TYPE_CURSE, _COLUMN_TYPE_PET_ATTACK};
 
 ITEM ComputeItem(int itemType, int level, BYTE excellentFlags = 0, BYTE ancientDiscriminator = 0)
 {
@@ -301,6 +334,68 @@ TEST_CASE("The item help table shows the stats the item has at each level [data]
             CHECK(g_iItemInfo[level][magicColumn] == item.MagicPower);
             CHECK(g_iItemInfo[level][_COLUMN_TYPE_DEFENCE] == item.Defense);
             CHECK(g_iItemInfo[level][_COLUMN_TYPE_DEFRATE] == item.SuccessfulBlocking);
+        }
+    }
+}
+
+TEST_CASE("The item help table shows the magic power in the item's own column [data][items]")
+{
+    ShippedItemAttributes items;
+    ItemHelpScope help;
+
+    for (const HelpTableCase& item : HelpTableCases)
+    {
+        CAPTURE(item.itemType);
+        const ItemInfoTable table = help.ComputeFirst(item.itemType);
+        for (int level = 0; level <= iMaxLevel; ++level)
+        {
+            CAPTURE(level);
+            for (const int column : MagicColumns)
+            {
+                CAPTURE(column);
+                if (column == item.magicColumn)
+                {
+                    CHECK(table[level][column] > 0);
+                }
+                else
+                {
+                    CHECK(table[level][column] == 0);
+                }
+            }
+        }
+    }
+}
+
+TEST_CASE("The item help table keeps nothing of the item shown before [data][items]")
+{
+    ShippedItemAttributes items;
+    ItemHelpScope help;
+
+    // The table is global: /Book of Samut and then /Legendary Staff showed a Curse column under
+    // the staff, and /Book of Samut and then /Kris one under the Kris.
+    for (const HelpTableCase& shown : HelpTableCases)
+    {
+        const ItemInfoTable first = help.ComputeFirst(shown.itemType);
+        for (const HelpTableCase& before : HelpTableCases)
+        {
+            if (before.itemType == shown.itemType)
+            {
+                continue;
+            }
+
+            CAPTURE(before.itemType);
+            CAPTURE(shown.itemType);
+            help.Compute(before.itemType);
+            help.Compute(shown.itemType);
+            for (int level = 0; level <= iMaxLevel; ++level)
+            {
+                CAPTURE(level);
+                for (int column = 0; column < _COLUMN_TYPE_COUNT; ++column)
+                {
+                    CAPTURE(column);
+                    CHECK(g_iItemInfo[level][column] == first[level][column]);
+                }
+            }
         }
     }
 }

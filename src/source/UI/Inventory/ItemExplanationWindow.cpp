@@ -12,7 +12,6 @@
 #include "Engine/Object/ZzzInterface.h"
 
 extern int TextNum;
-extern int g_iItemInfo[16][17];
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -166,8 +165,10 @@ void mu::ui::window::CItemExplanationWindow::SyncContent()
     }
     if (g_iItemInfo[0][_COLUMN_TYPE_MAGIC] > 0)
         column(I18N::Game::WIZDmg, number(_COLUMN_TYPE_MAGIC, L"%d%%"));
+    // The original showed the curse without %, but it is a percent like WIZDmg: the tooltip reads
+    // "Curse Spell increment %d%%".
     if (g_iItemInfo[0][_COLUMN_TYPE_CURSE] > 0)
-        column(I18N::Game::Curse, number(_COLUMN_TYPE_CURSE, L"%d"));
+        column(I18N::Game::Curse, number(_COLUMN_TYPE_CURSE, L"%d%%"));
     if (g_iItemInfo[0][_COLUMN_TYPE_PET_ATTACK] > 0)
         column(I18N::Game::Attack, number(_COLUMN_TYPE_PET_ATTACK, L"%d%%"));
     if (g_iItemInfo[0][_COLUMN_TYPE_DEFENCE] > 0)

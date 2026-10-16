@@ -728,10 +728,26 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
     }
 }
 
-const int iMaxLevel = 15;
-const int iMaxColumn = 17;
 int g_iCurrentItem = -1;
-int g_iItemInfo[iMaxLevel + 1][iMaxColumn];
+int g_iItemInfo[iMaxLevel + 1][_COLUMN_TYPE_COUNT];
+
+namespace
+{
+// The column the magic power goes into: Curse for summoner books, Attack for sceptres, WIZDmg for
+// the other items.
+int GetItemInfoMagicColumn(int itemType)
+{
+    if (GameLogic::Items::IsSummonerBookType(itemType))
+    {
+        return _COLUMN_TYPE_CURSE;
+    }
+    if (IsCepterItem(itemType))
+    {
+        return _COLUMN_TYPE_PET_ATTACK;
+    }
+    return _COLUMN_TYPE_MAGIC;
+}
+} // namespace
 
 void ComputeItemInfo(int iHelpItem)
 {
@@ -740,7 +756,8 @@ void ComputeItemInfo(int iHelpItem)
     else
         g_iCurrentItem = iHelpItem;
 
-    ITEM_ATTRIBUTE* p = &ItemAttribute[ItemHelp];
+    ITEM_ATTRIBUTE* p = &ItemAttribute[iHelpItem];
+    const int magicColumn = GetItemInfoMagicColumn(iHelpItem);
 
     for (int Level = 0; Level <= iMaxLevel; Level++)
     {
@@ -770,7 +787,7 @@ void ComputeItemInfo(int iHelpItem)
             Magic += GameLogic::Items::GetItemLevelBonus(Level);
             Magic /= 2;
 
-            if (IsCepterItem(ItemHelp) == false)
+            if (IsCepterItem(iHelpItem) == false)
             {
                 Magic += Level * 2;
             }
@@ -778,7 +795,7 @@ void ComputeItemInfo(int iHelpItem)
 
         if (Defense > 0)
         {
-            if (ItemHelp >= ITEM_SHIELD && ItemHelp < ITEM_SHIELD + MAX_ITEM_INDEX)
+            if (iHelpItem >= ITEM_SHIELD && iHelpItem < ITEM_SHIELD + MAX_ITEM_INDEX)
             {
                 Defense += Level;
             }
@@ -818,13 +835,13 @@ void ComputeItemInfo(int iHelpItem)
 
         if (p->RequireEnergy)
         {
-            if (GameLogic::Items::IsSummonerBookType(ItemHelp))
+            if (GameLogic::Items::IsSummonerBookType(iHelpItem))
             {
                 RequireEnergy = 20 + p->RequireEnergy * (p->Level + Level * 1) * 3 / 100;
             }
             else
             {
-                if ((p->RequireLevel > 0) && (ItemHelp >= ITEM_ETC && ItemHelp < ITEM_ETC + MAX_ITEM_INDEX))
+                if ((p->RequireLevel > 0) && (iHelpItem >= ITEM_ETC && iHelpItem < ITEM_ETC + MAX_ITEM_INDEX))
                 {
                     RequireEnergy = 20 + (p->RequireEnergy) * (p->RequireLevel) * 4 / 100;
                 }
@@ -842,20 +859,13 @@ void ComputeItemInfo(int iHelpItem)
         if (p->RequireCharisma)	RequireCharisma = 20 + p->RequireCharisma * (p->Level + Level * 3) * 3 / 100;
         else RequireCharisma = 0;
 
+        // The window shows every column with a value at +0, so the row starts empty: no column of
+        // the item shown before stays.
+        std::ranges::fill(g_iItemInfo[Level], 0);
         g_iItemInfo[Level][_COLUMN_TYPE_LEVEL] = Level;
         g_iItemInfo[Level][_COLUMN_TYPE_ATTMIN] = DamageMin;
         g_iItemInfo[Level][_COLUMN_TYPE_ATTMAX] = DamageMax;
-
-        if (GameLogic::Items::IsSummonerBookType(ItemHelp))
-        {
-            g_iItemInfo[Level][_COLUMN_TYPE_CURSE] = Magic;
-        }
-        else
-        {
-            g_iItemInfo[Level][_COLUMN_TYPE_MAGIC] = Magic;
-        }
-
-        g_iItemInfo[Level][_COLUMN_TYPE_PET_ATTACK] = Magic;
+        g_iItemInfo[Level][magicColumn] = Magic;
         g_iItemInfo[Level][_COLUMN_TYPE_DEFENCE] = Defense;
         g_iItemInfo[Level][_COLUMN_TYPE_DEFRATE] = Blocking;
         g_iItemInfo[Level][_COLUMN_TYPE_REQSTR] = RequireStrength;
@@ -864,16 +874,6 @@ void ComputeItemInfo(int iHelpItem)
         g_iItemInfo[Level][_COLUMN_TYPE_REQCHA] = RequireCharisma;
         g_iItemInfo[Level][_COLUMN_TYPE_REQVIT] = RequireVitality;
         g_iItemInfo[Level][_COLUMN_TYPE_REQNLV] = RequireLevel;
-
-        if (IsCepterItem(ItemHelp) == true)
-
-        {
-            g_iItemInfo[Level][_COLUMN_TYPE_MAGIC] = 0;
-        }
-        else
-        {
-            g_iItemInfo[Level][_COLUMN_TYPE_PET_ATTACK] = 0;
-        }
 
         WORD Strength, Dexterity, Energy, Vitality, Charisma;
 
