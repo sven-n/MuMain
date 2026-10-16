@@ -22,6 +22,18 @@ std::unordered_set<std::string>& LoadedFiles()
     return paths;
 }
 
+std::string& SelectedFontFamily()
+{
+    static std::string family;
+    return family;
+}
+
+// The tokens a selected font replaces. Other font-* tokens keep the theme's family.
+bool FollowsSelectedFont(const std::string& token)
+{
+    return token == "font-body" || token == "font-title";
+}
+
 std::optional<std::string> EnvironmentValue(const std::string& name)
 {
 #ifdef _WIN32
@@ -108,10 +120,18 @@ void LoadActiveThemeFonts()
     LoadThemeFonts(ThemeInheritance(std::filesystem::path("Data/Interface/RmlUi/themes") / GetActiveThemeName()));
 }
 
+void SetSelectedFontFamily(std::string family)
+{
+    SelectedFontFamily() = std::move(family);
+}
+
 std::optional<std::string> ResolveThemeFontToken(const ThemeInheritance& theme, const std::string& token)
 {
     if (!token.starts_with("font-") || !theme.IsValid())
         return std::nullopt;
+    const std::string& selected = SelectedFontFamily();
+    if (FollowsSelectedFont(token) && !selected.empty() && FamilyAvailable(selected))
+        return selected;
     for (const auto& directory : theme.Directories())
     {
         const auto family = ThemeInheritance::ReadSetting(directory, "Tokens", token);
