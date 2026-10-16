@@ -24,7 +24,7 @@
                 <div id="graph">
                     <progress data-for="sample : history" direction="top" max="33.3"
                         data-attr-value="sample" data-class-slow="sample &gt;= 25"
-                        data-class-medium="sample &gt;= 16.67 &amp;&amp; sample &lt; 25"/>
+                        data-class-medium="sample &gt;= 16.67 &amp;&amp; sample &lt; 25"></progress>
                 </div>
                 <div class="note">Inclusive: a pass contains the passes it calls.</div>
                 <div class="info-line" data-for="line : info">{{line}}</div>

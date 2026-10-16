@@ -235,6 +235,9 @@ Before considering a new or changed component complete:
    python tools/check_layout_transform_users.py
    ```
 
+   The syntax guard also runs in CTest (`rml_rcss_syntax`). It catches markup and values RmlUi only
+   reports in its log, such as a self-closed `data-for` element or `line-height: inherit`.
+
    Contract-checker scope and exception markers are described in
    [Theming & Modding](theming-and-modding.md#shared-markup-and-theme-specific-structure).
    A geometry exception needs a `<!-- bound-geometry: reason -->` comment; the guard rejects

@@ -24,7 +24,7 @@
 			<div id="fight" data-if="watching">
 				<img class="gauge" data-for="g : gauges" data-attr-src="g.src" data-attr-rect="g.rect"
 				     data-class-mirrored="g.mirrored" data-style-left="g.left + 'px'" data-style-top="g.top + 'px'"
-				     data-style-width="g.width + 'px'" data-style-height="g.height + 'px'"/>
+				     data-style-width="g.width + 'px'" data-style-height="g.height + 'px'"></img>
 				<!-- A mark per point, each fighter's row stepping away from its own end of the frame. -->
 				<div class="score-row" id="score_hero"><div class="score" data-for="hero_marks"></div></div>
 				<div class="score-row" id="score_enemy"><div class="score" data-for="enemy_marks"></div></div>

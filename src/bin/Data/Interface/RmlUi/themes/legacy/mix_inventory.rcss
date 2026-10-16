@@ -73,7 +73,6 @@
 .mix-list.hidden, .mix-head.hidden, .mix-descriptions.hidden { display: none; }
 .mix-list-line {
 	display: block;
-	line-height: inherit;
 	font-weight: bold;
 	font-size: 1em;
 	color: #dcdcdc;
