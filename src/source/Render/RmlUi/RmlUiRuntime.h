@@ -98,6 +98,9 @@ public:
     void CancelSyntheticMousePress(unsigned char button, SDL_Window* window) override;
 
     Rml::Context* GetContext() const { return m_Context; }
+    // The debug overlay's context: updated and drawn in the Overlay pass, so the RmlUi passes it
+    // reports measure only the game's UI.
+    Rml::Context* GetDebugContext() const { return m_DebugContext; }
 
     // True from the moment any RmlUi <input> across any of the three contexts is focused until
     // it's blurred (RmlUiSystemInterface::ActivateKeyboard/DeactivateKeyboard, which
@@ -150,4 +153,5 @@ private:
     std::unique_ptr<TextInputMethodEditor_SDL> m_TextInputMethodEditor;
 
     Rml::Context* m_Context = nullptr; // owned by Rml::Core, released via Rml::Shutdown()
+    Rml::Context* m_DebugContext = nullptr; // likewise
 };
