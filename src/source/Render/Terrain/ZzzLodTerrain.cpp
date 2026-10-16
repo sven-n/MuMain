@@ -12,6 +12,7 @@
 #endif
 #include <math.h>
 #include <iterator>
+#include <vector>
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "ZzzLodTerrain.h"
@@ -1366,11 +1367,34 @@ void RenderFace_After(int Texture, int mx, int my)
     mu::GetRenderer().RenderQuad3D(vertices, 0u);
 }
 
+// The layers blended over the ground, drawn after all of it so the ground and each layer draw in runs
+// of one texture instead of alternating per tile.
+struct LayerFace
+{
+    int texture;
+    bool blend;
+    mu::Vertex3D vertices[4];
+};
+static std::vector<LayerFace> s_layerFaces;
+
+static void RenderLayerFaces()
+{
+    for (const LayerFace& face : s_layerFaces)
+    {
+        if (face.blend)
+            EnableAlphaBlend();
+        else
+            // Depth-tested without writing, so a layer stays on its own ground (same vertices, less or equal)
+            // and nearer ground drawn before it still hides it.
+            EnableAlphaBlend3();
+        BindTexture(BITMAP_MAPTILE + face.texture);
+        mu::GetRenderer().RenderQuad3D(face.vertices, 0u);
+    }
+    s_layerFaces.clear();
+}
+
 void RenderFaceAlpha(int Texture, int mx, int my)
 {
-    DisableDepthTest();
-    EnableAlphaBlend3();
-    BindTexture(BITMAP_MAPTILE + Texture);
     auto MakeVert = [](const float* pos, const float* tc, const float* light, float alpha) -> mu::Vertex3D
     {
         return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, tc[0], tc[1],
@@ -1380,15 +1404,11 @@ void RenderFaceAlpha(int Texture, int mx, int my)
     const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], PrimaryTerrainLight[TerrainIndex2], TerrainMappingAlpha[TerrainIndex2]);
     const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], PrimaryTerrainLight[TerrainIndex3], TerrainMappingAlpha[TerrainIndex3]);
     const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], PrimaryTerrainLight[TerrainIndex4], TerrainMappingAlpha[TerrainIndex4]);
-    const mu::Vertex3D vertices[4] = {v0, v1, v2, v3};
-    mu::GetRenderer().RenderQuad3D(vertices, 0u);
-    EnableDepthTest();
+    s_layerFaces.push_back({Texture, false, {v0, v1, v2, v3}});
 }
 
 void RenderFaceBlend(int Texture, int mx, int my)
 {
-    EnableAlphaBlend();
-    BindTexture(BITMAP_MAPTILE + Texture);
     auto MakeVert = [](const float* pos, const float* tc, float light) -> mu::Vertex3D
     {
         return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, tc[0], tc[1], mu::PackABGR(light, light, light, 1.f)};
@@ -1397,8 +1417,7 @@ void RenderFaceBlend(int Texture, int mx, int my)
     const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], TerrainMappingAlpha[TerrainIndex2]);
     const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], TerrainMappingAlpha[TerrainIndex3]);
     const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], TerrainMappingAlpha[TerrainIndex4]);
-    const mu::Vertex3D vertices[4] = {v0, v1, v2, v3};
-    mu::GetRenderer().RenderQuad3D(vertices, 0u);
+    s_layerFaces.push_back({Texture, true, {v0, v1, v2, v3}});
 }
 
 void FaceTexture(int Texture, float xf, float yf, bool Water, bool Scale)
@@ -3152,6 +3171,7 @@ void RenderTerrain(bool EditFlag)
 
     TerrainFlag = TERRAIN_MAP_NORMAL;
     RenderTerrainFrustrum(EditFlag);
+    RenderLayerFaces();
     //
     if (EditFlag && SelectFlag)
     {
