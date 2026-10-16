@@ -149,4 +149,9 @@ namespace UI::RmlBridge
     // one call a theme switch needs after SetActiveThemeName(). Works on a copy of the registry, so
     // an owner registering or unregistering another during the sweep is safe.
     void ReloadAllThemedDocuments();
+
+    // A [UI] Font change: records the family for the font tokens (SetSelectedFontFamily()), drops
+    // the cached stylesheets that still carry the previous family, and rebuilds every themed
+    // document. Destroys documents, so it must run outside RmlUi's event dispatch, like a theme switch.
+    void ApplySelectedFontFamily(const std::string& family);
 }

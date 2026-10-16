@@ -68,6 +68,7 @@ private:
 
         float textOffset = -1.0f, textPixelSize = -1.0f, lineHeight = -1.0f;
         bool bold = false;
+        float drawnTextWidth = 0.0f; // the text's width as RmlUi draws it, see RecordText()
         std::uint32_t textColor = 1;
         std::string utf8;
         const wchar_t* imageFile = nullptr; // the recorded file name the src was built from
