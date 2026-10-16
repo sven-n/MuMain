@@ -16,6 +16,7 @@ public:
     bool SelectVertexUniforms(std::span<const std::byte> bytes);
     bool SelectFragmentUniforms(std::span<const std::byte> bytes);
     bool SelectVertexStorageBuffer(SDL_GPUBuffer* buffer);
+    bool SelectVertexBuffer(SDL_GPUBuffer* buffer);
     bool SelectIndexBuffer(SDL_GPUBuffer* buffer, Uint32 offset, SDL_GPUIndexElementSize elementSize);
     bool SelectViewport(const SDL_GPUViewport& viewport);
     bool SelectScissor(const SDL_Rect& scissor);
@@ -33,6 +34,7 @@ private:
     SDL_GPUTexture* m_texture = nullptr;
     SDL_GPUSampler* m_sampler = nullptr;
     SDL_GPUBuffer* m_vertexStorageBuffer = nullptr;
+    SDL_GPUBuffer* m_vertexBuffer = nullptr;
     SDL_GPUBuffer* m_indexBuffer = nullptr;
     Uint32 m_indexOffset = 0;
     SDL_GPUIndexElementSize m_indexElementSize = SDL_GPU_INDEXELEMENTSIZE_16BIT;
@@ -43,6 +45,7 @@ private:
     bool m_vertexUniformsValid = false;
     bool m_fragmentUniformsValid = false;
     bool m_vertexStorageBufferValid = false;
+    bool m_vertexBufferValid = false;
     bool m_indexBufferValid = false;
     bool m_viewportValid = false;
     bool m_scissorValid = false;

@@ -613,12 +613,13 @@ struct RenderCmd
     SDL_GPUGraphicsPipeline* pipeline;
     SDL_GPUTexture* texture;
     SDL_GPUSampler* sampler;
-    Uint32 vtxOffset;
+    Uint32 vtxOffset;      // in bytes, a multiple of vtxStride
+    Uint32 vtxStride;
     Uint32 vtxCount;       // for DrawTriangles
     Uint32 idxCount;       // for DrawIndexed*
     Uint32 stripIdxOffset; // byte offset into strip index scratch buffer
     VertexUniforms vu;
-    SkinningVertexUniforms skinningVu{};
+    Uint32 skinningIndex = 0u; // into s_skinningUniforms, for DrawSkinnedTriangles
     FogUniform fogUniform;
     SDL_GPUViewport viewport; // for SetViewport only
     SDL_Rect scissor;         // for SetScissor only
@@ -634,6 +635,8 @@ struct RenderCmd
 };
 
 static std::vector<RenderCmd> s_renderCmds;
+// Kept apart from RenderCmd: only skinned draws carry them, and they would nearly double every command.
+static std::vector<SkinningVertexUniforms> s_skinningUniforms;
 static constexpr std::size_t kNoDrawCommand = std::numeric_limits<std::size_t>::max();
 static Render::DrawCommandHistory s_previousDrawCommands;
 
@@ -855,12 +858,17 @@ static void ReplayDrawCommand(const RenderCmd& command, bool boneDataReady, cons
     }
 
     if (skinned)
-        PushReplayVertexUniforms(&command.skinningVu, sizeof(command.skinningVu), state);
+        PushReplayVertexUniforms(&s_skinningUniforms[command.skinningIndex], sizeof(SkinningVertexUniforms), state);
     else
         PushReplayVertexUniforms(&command.vu, sizeof(command.vu), state);
 
-    const SDL_GPUBufferBinding vertexBinding{s_vtxGpuBuf, command.vtxOffset};
-    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vertexBinding, 1);
+    // Bound once at offset 0; each draw says where its vertices start instead.
+    if (state.SelectVertexBuffer(s_vtxGpuBuf))
+    {
+        const SDL_GPUBufferBinding vertexBinding{s_vtxGpuBuf, 0u};
+        SDL_BindGPUVertexBuffers(s_renderPass, 0, &vertexBinding, 1);
+    }
+    const Uint32 firstVertex = command.vtxOffset / command.vtxStride;
 
     if (skinned && state.SelectVertexStorageBuffer(s_boneGpuBuf))
     {
@@ -868,18 +876,22 @@ static void ReplayDrawCommand(const RenderCmd& command, bool boneDataReady, cons
         SDL_BindGPUVertexStorageBuffers(s_renderPass, 0, &boneBuffer, 1);
     }
 
+    Uint32 firstIndex = 0u;
     if (command.type == RenderCmdType::DrawIndexedQuads)
         BindReplayIndexBuffer(s_quadIdxBuf, 0, SDL_GPU_INDEXELEMENTSIZE_16BIT, state);
     else if (command.type == RenderCmdType::DrawIndexedStrip)
-        BindReplayIndexBuffer(s_stripIdxBuf, command.stripIdxOffset, SDL_GPU_INDEXELEMENTSIZE_16BIT, state);
+    {
+        BindReplayIndexBuffer(s_stripIdxBuf, 0, SDL_GPU_INDEXELEMENTSIZE_16BIT, state);
+        firstIndex = command.stripIdxOffset / sizeof(Uint16);
+    }
 
     BindReplayFragmentSampler(command, state);
     PushReplayFragmentUniforms(command.fogUniform, state);
 
     if (command.type == RenderCmdType::DrawIndexedQuads || command.type == RenderCmdType::DrawIndexedStrip)
-        SDL_DrawGPUIndexedPrimitives(s_renderPass, command.idxCount, 1, 0, 0, 0);
+        SDL_DrawGPUIndexedPrimitives(s_renderPass, command.idxCount, 1, firstIndex, static_cast<Sint32>(firstVertex), 0);
     else
-        SDL_DrawGPUPrimitives(s_renderPass, command.vtxCount, 1, 0, 0);
+        SDL_DrawGPUPrimitives(s_renderPass, command.vtxCount, 1, firstVertex, 0);
     ++s_dbgGpuDrawCallsThisFrame;
 }
 
@@ -1694,6 +1706,7 @@ public:
         s_stagedBones = {};
         s_stagedStripIndices = {};
         s_renderCmds.clear();
+        s_skinningUniforms.clear();
         s_previousDrawCommands.fill(kNoDrawCommand);
         s_replayedCmdCount = 0u;
         s_mainColorPassOpenedThisFrame = false;
@@ -2804,7 +2817,7 @@ public:
         }
 
         const Uint32 byteSize = static_cast<Uint32>(vertices.size() * sizeof(Vertex2D));
-        const Uint32 vtxOffset = UploadVertices(vertices.data(), byteSize);
+        const Uint32 vtxOffset = UploadVertices(vertices.data(), byteSize, sizeof(Vertex2D));
         if (vtxOffset == ~0u)
         {
             return;
@@ -2824,6 +2837,7 @@ public:
         cmd.texture = static_cast<SDL_GPUTexture*>(atlasTexture);
         cmd.sampler = sampler ? static_cast<SDL_GPUSampler*>(sampler) : s_defaultSampler;
         cmd.vtxOffset = vtxOffset;
+        cmd.vtxStride = sizeof(Vertex2D);
         cmd.vtxCount = static_cast<Uint32>(vertices.size());
         cmd.fogUniform = m_fogUniform;
         cmd.blendMode = BlendMode::Alpha;
@@ -3256,7 +3270,7 @@ public:
             ++s_dbgRealTextureDrawsThisFrame;
 
         const Uint32 byteSize = static_cast<Uint32>(vertices.size() * sizeof(Vertex2D));
-        const Uint32 vtxOffset = UploadVertices(vertices.data(), byteSize);
+        const Uint32 vtxOffset = UploadVertices(vertices.data(), byteSize, sizeof(Vertex2D));
         if (vtxOffset == ~0u)
         {
             return;
@@ -3298,6 +3312,7 @@ public:
         cmd.texture = static_cast<SDL_GPUTexture*>(pTex);
         cmd.sampler = pSampler ? static_cast<SDL_GPUSampler*>(pSampler) : s_defaultSampler;
         cmd.vtxOffset = vtxOffset;
+        cmd.vtxStride = sizeof(Vertex2D);
         cmd.idxCount = drawQuads * 6;
         cmd.fogUniform = m_fogUniform;
         cmd.blendMode = m_activeBlendMode;
@@ -3363,7 +3378,7 @@ public:
             ++s_dbgRealTextureDrawsThisFrame;
 
         const Uint32 byteSize = static_cast<Uint32>(vertices.size() * sizeof(Vertex3D));
-        const Uint32 vtxOffset = UploadVertices(vertices.data(), byteSize);
+        const Uint32 vtxOffset = UploadVertices(vertices.data(), byteSize, sizeof(Vertex3D));
         if (vtxOffset == ~0u)
         {
             return;
@@ -3392,6 +3407,7 @@ public:
         cmd.texture = static_cast<SDL_GPUTexture*>(pTex);
         cmd.sampler = pSampler ? static_cast<SDL_GPUSampler*>(pSampler) : s_defaultSampler;
         cmd.vtxOffset = vtxOffset;
+        cmd.vtxStride = sizeof(Vertex3D);
         cmd.vtxCount = static_cast<Uint32>(vertices.size());
         cmd.vu.mvp = m_mvpMatrix;
         cmd.vu.fogStart = m_fogUniform.fogStart;
@@ -3461,7 +3477,7 @@ public:
         const Uint32 drawQuads =
             (numQuads <= static_cast<Uint32>(k_MaxQuads)) ? numQuads : static_cast<Uint32>(k_MaxQuads);
         const Uint32 byteSize = drawQuads * 4u * static_cast<Uint32>(sizeof(Vertex3D));
-        const Uint32 vtxOffset = UploadVertices(vertices.data(), byteSize);
+        const Uint32 vtxOffset = UploadVertices(vertices.data(), byteSize, sizeof(Vertex3D));
         if (vtxOffset == ~0u)
         {
             return;
@@ -3488,6 +3504,7 @@ public:
         cmd.texture = static_cast<SDL_GPUTexture*>(pTex);
         cmd.sampler = pSampler ? static_cast<SDL_GPUSampler*>(pSampler) : s_defaultSampler;
         cmd.vtxOffset = vtxOffset;
+        cmd.vtxStride = sizeof(Vertex3D);
         cmd.idxCount = drawQuads * 6u;
         cmd.vu.mvp = m_mvpMatrix;
         cmd.vu.fogStart = m_fogUniform.fogStart;
@@ -3555,7 +3572,7 @@ public:
         }
 
         const Uint32 byteSize = static_cast<Uint32>(vertices.size() * sizeof(SkinnedVertex3D));
-        const Uint32 vtxOffset = UploadVertices(vertices.data(), byteSize);
+        const Uint32 vtxOffset = UploadVertices(vertices.data(), byteSize, sizeof(SkinnedVertex3D));
         if (vtxOffset == ~0u)
         {
             return false;
@@ -3563,36 +3580,39 @@ public:
 
         RenderCmd cmd{};
         cmd.type = RenderCmdType::DrawSkinnedTriangles;
+        SkinningVertexUniforms& skinningVu = s_skinningUniforms.emplace_back();
+        cmd.skinningIndex = static_cast<Uint32>(s_skinningUniforms.size() - 1u);
         cmd.pipeline = pipeline;
         cmd.texture = texture;
         void* sampler = LookupSampler(resolvedTexId);
         cmd.sampler = sampler ? static_cast<SDL_GPUSampler*>(sampler) : s_defaultSampler;
         cmd.vtxOffset = vtxOffset;
+        cmd.vtxStride = sizeof(SkinnedVertex3D);
         cmd.vtxCount = static_cast<Uint32>(vertices.size());
-        cmd.skinningVu.mvp = m_mvpMatrix;
-        cmd.skinningVu.bodyOriginAndScale[0] = parameters.bodyOrigin[0];
-        cmd.skinningVu.bodyOriginAndScale[1] = parameters.bodyOrigin[1];
-        cmd.skinningVu.bodyOriginAndScale[2] = parameters.bodyOrigin[2];
-        cmd.skinningVu.bodyOriginAndScale[3] = parameters.bodyScale;
-        cmd.skinningVu.skinningScales[0] = parameters.boneScale;
-        cmd.skinningVu.skinningScales[1] = parameters.restPoseScale;
-        cmd.skinningVu.palette[0] = paletteRowOffset;
-        cmd.skinningVu.palette[1] = static_cast<std::uint32_t>(parameters.boneMatrices.size() / 12);
-        cmd.skinningVu.palette[2] = parameters.translate ? 1u : 0u;
-        cmd.skinningVu.palette[3] = parameters.lightEnabled ? 1u : 0u;
-        cmd.skinningVu.lightDirection[0] = parameters.lightDirection[0];
-        cmd.skinningVu.lightDirection[1] = parameters.lightDirection[1];
-        cmd.skinningVu.lightDirection[2] = parameters.lightDirection[2];
-        cmd.skinningVu.fogParameters[0] = m_fogUniform.fogStart;
-        cmd.skinningVu.fogParameters[1] = m_fogUniform.fogEnd;
-        cmd.skinningVu.textureCoordinates[0] = static_cast<std::uint32_t>(parameters.textureCoordinates);
-        cmd.skinningVu.chromeParameters[0] = parameters.chromeWave;
-        cmd.skinningVu.chromeParameters[1] = parameters.chromeWave2;
-        cmd.skinningVu.chromeParameters[2] = parameters.chromeLight[0];
-        cmd.skinningVu.chromeParameters[3] = parameters.chromeLight[1];
-        cmd.skinningVu.textureCoordinateParameters[0] = parameters.textureCoordinateOffset[0];
-        cmd.skinningVu.textureCoordinateParameters[1] = parameters.textureCoordinateOffset[1];
-        cmd.skinningVu.textureCoordinateParameters[2] = parameters.chromeTimeTerm;
+        skinningVu.mvp = m_mvpMatrix;
+        skinningVu.bodyOriginAndScale[0] = parameters.bodyOrigin[0];
+        skinningVu.bodyOriginAndScale[1] = parameters.bodyOrigin[1];
+        skinningVu.bodyOriginAndScale[2] = parameters.bodyOrigin[2];
+        skinningVu.bodyOriginAndScale[3] = parameters.bodyScale;
+        skinningVu.skinningScales[0] = parameters.boneScale;
+        skinningVu.skinningScales[1] = parameters.restPoseScale;
+        skinningVu.palette[0] = paletteRowOffset;
+        skinningVu.palette[1] = static_cast<std::uint32_t>(parameters.boneMatrices.size() / 12);
+        skinningVu.palette[2] = parameters.translate ? 1u : 0u;
+        skinningVu.palette[3] = parameters.lightEnabled ? 1u : 0u;
+        skinningVu.lightDirection[0] = parameters.lightDirection[0];
+        skinningVu.lightDirection[1] = parameters.lightDirection[1];
+        skinningVu.lightDirection[2] = parameters.lightDirection[2];
+        skinningVu.fogParameters[0] = m_fogUniform.fogStart;
+        skinningVu.fogParameters[1] = m_fogUniform.fogEnd;
+        skinningVu.textureCoordinates[0] = static_cast<std::uint32_t>(parameters.textureCoordinates);
+        skinningVu.chromeParameters[0] = parameters.chromeWave;
+        skinningVu.chromeParameters[1] = parameters.chromeWave2;
+        skinningVu.chromeParameters[2] = parameters.chromeLight[0];
+        skinningVu.chromeParameters[3] = parameters.chromeLight[1];
+        skinningVu.textureCoordinateParameters[0] = parameters.textureCoordinateOffset[0];
+        skinningVu.textureCoordinateParameters[1] = parameters.textureCoordinateOffset[1];
+        skinningVu.textureCoordinateParameters[2] = parameters.chromeTimeTerm;
         cmd.fogUniform = m_fogUniform;
         s_renderCmds.push_back(cmd);
 
@@ -3628,7 +3648,7 @@ public:
             ++s_dbgRealTextureDrawsThisFrame;
 
         const Uint32 byteSize = static_cast<Uint32>(vertices.size() * sizeof(Vertex3D));
-        const Uint32 vtxOffset = UploadVertices(vertices.data(), byteSize);
+        const Uint32 vtxOffset = UploadVertices(vertices.data(), byteSize, sizeof(Vertex3D));
         if (vtxOffset == ~0u)
         {
             return;
@@ -3680,6 +3700,7 @@ public:
         cmd.texture = static_cast<SDL_GPUTexture*>(pTex);
         cmd.sampler = pSampler ? static_cast<SDL_GPUSampler*>(pSampler) : s_defaultSampler;
         cmd.vtxOffset = vtxOffset;
+        cmd.vtxStride = sizeof(Vertex3D);
         cmd.idxCount = numIndices;
         cmd.stripIdxOffset = stripIdxByteOffset;
         cmd.vu.mvp = m_mvpMatrix;
@@ -4004,14 +4025,15 @@ private:
     // single copy pass BEFORE beginning the render pass, so draw commands
     // always read current-frame vertex data (no 1-frame latency).
     // -----------------------------------------------------------------------
-    [[nodiscard]] static Uint32 UploadVertices(const void* pData, Uint32 byteSize)
+    [[nodiscard]] static Uint32 UploadVertices(const void* pData, Uint32 byteSize, Uint32 stride)
     {
-        if (!pData || byteSize == 0u)
+        if (!pData || byteSize == 0u || stride == 0u)
         {
             return ~0u;
         }
 
-        const Uint32 alignedOffset = (s_vtxOffset + 3u) & ~3u; // 4-byte alignment
+        // A whole number of strides in, so the replay can address the data by vertex index.
+        const Uint32 alignedOffset = (s_vtxOffset + stride - 1u) / stride * stride;
         if (byteSize > std::numeric_limits<Uint32>::max() - alignedOffset)
         {
             mu::log::Get("render")->error("SDL_gpu -- vertex staging size exceeds Uint32 range");

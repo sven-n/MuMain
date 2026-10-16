@@ -70,3 +70,17 @@ TEST_CASE("viewport scissor and editor invalidation are explicit [render][sdl_gp
     CHECK(state.SelectViewport(viewport));
     CHECK(state.SelectScissor(scissor));
 }
+
+TEST_CASE("the vertex buffer is bound once until it changes [render][sdl_gpu_replay_state]")
+{
+    Render::SdlGpuReplayState state;
+
+    CHECK(state.SelectVertexBuffer(Pointer<SDL_GPUBuffer>(1)));
+    CHECK_FALSE(state.SelectVertexBuffer(Pointer<SDL_GPUBuffer>(1)));
+    state.SelectPipeline(Pointer<SDL_GPUGraphicsPipeline>(2));
+    CHECK_FALSE(state.SelectVertexBuffer(Pointer<SDL_GPUBuffer>(1)));
+    CHECK(state.SelectVertexBuffer(Pointer<SDL_GPUBuffer>(3)));
+
+    state.Invalidate();
+    CHECK(state.SelectVertexBuffer(Pointer<SDL_GPUBuffer>(3)));
+}
