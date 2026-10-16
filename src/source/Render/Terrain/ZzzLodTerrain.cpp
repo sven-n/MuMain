@@ -1379,13 +1379,14 @@ static std::vector<LayerFace> s_layerFaces;
 
 static void RenderLayerFaces()
 {
+    // Depth-tested without writing, so a layer stays on its own ground (same vertices, less or equal)
+    // and nearer ground drawn before it still hides it.
+    EnableDepthTest();
     for (const LayerFace& face : s_layerFaces)
     {
         if (face.blend)
             EnableAlphaBlend();
         else
-            // Depth-tested without writing, so a layer stays on its own ground (same vertices, less or equal)
-            // and nearer ground drawn before it still hides it.
             EnableAlphaBlend3();
         BindTexture(BITMAP_MAPTILE + face.texture);
         mu::GetRenderer().RenderQuad3D(face.vertices, 0u);
