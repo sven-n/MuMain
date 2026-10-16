@@ -29,6 +29,7 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/RenderUtils.h"
 #include "Core/Utilities/FrameProfiler.h"
+#include "Scenes/MainScene.h"
 
 using mu::PackABGR;
 
@@ -2778,7 +2779,7 @@ void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, cons
 void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int startMeshNumber,
     const int endMeshNumber, void* pClothes, const int clothesCount, const float alpha)
 {
-    if (!g_pOption->GetRenderAllEffects())
+    if (!g_pOption->GetRenderAllEffects() || IsBodyShadowsDisabledDebug())
     {
         return;
     }

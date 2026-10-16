@@ -449,6 +449,16 @@ bool IsWingShadowDisabledDebug()
     return g_bDisableWingShadowDebug;
 }
 
+static bool g_bDisableBodyShadowsDebug = false;
+void SetDisableBodyShadows(bool disabled)
+{
+    g_bDisableBodyShadowsDebug = disabled;
+}
+bool IsBodyShadowsDisabledDebug()
+{
+    return g_bDisableBodyShadowsDebug;
+}
+
 static bool g_bDisableJointsDebug = false;
 void SetDisableJoints(bool disabled)
 {
