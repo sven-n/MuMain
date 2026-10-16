@@ -3,6 +3,9 @@
 
 #include "stdafx.h"
 #include <cstdint>
+// u_char is used below. On glibc it arrives transitively through other
+// headers; musl targets (Emscripten) need its declaring header explicitly.
+#include <sys/types.h>
 #include <cstring>
 #include <cmath>
 #include <cassert>
