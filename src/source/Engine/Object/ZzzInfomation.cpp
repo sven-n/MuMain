@@ -738,12 +738,10 @@ void CalcRequirements(ITEM* ip, ITEM_ATTRIBUTE* p)
         addValue = 5;
     }
 
-    if (p->RequireLevel
-        && ((ip->Type >= ITEM_SWORD && ip->Type < ITEM_WING)
-        || (ip->Type == ITEM_HORN_OF_FENRIR)
-        || (ip->Type >= ITEM_ORB_OF_TWISTING_SLASH && ip->Type <= ITEM_CAPE_OF_EMPEROR)
-        || (ip->Type >= ITEM_WING_OF_DIMENSION && ip->Type < ITEM_CAPE_OF_EMPEROR)
-        && (ip->Type != ITEM_CAPE_OF_FIGHTER)))
+    if (p->RequireLevel &&
+        ((ip->Type >= ITEM_SWORD && ip->Type < ITEM_WING) || (ip->Type == ITEM_HORN_OF_FENRIR) ||
+         (ip->Type >= ITEM_ORB_OF_TWISTING_SLASH && ip->Type <= ITEM_CAPE_OF_EMPEROR) ||
+         (ip->Type >= ITEM_WING_OF_DIMENSION && ip->Type < ITEM_HELPER) && (ip->Type != ITEM_CAPE_OF_FIGHTER)))
     {
         ip->RequireLevel = p->RequireLevel;
     }

@@ -23,6 +23,8 @@ const std::filesystem::path ClientDirectory = std::filesystem::path(MU_TEST_DATA
 
 constexpr int DragonShieldType = MakeItemType(6, 13);
 constexpr int BronzeArmorType = MakeItemType(8, 0);
+constexpr int FirstSmallWingType = MakeItemType(12, 130);
+constexpr int LastSmallWingType = MakeItemType(12, 135);
 
 // Loads the shipped item data into a test-owned ItemAttribute, as the game does at
 // startup, and restores the previous one.
@@ -106,4 +108,29 @@ TEST_CASE("Magic defense grows with the + level [data][items]")
 
     CHECK(ComputeItem(BronzeArmorType, 0).MagicDefense == 10);
     CHECK(ComputeItem(BronzeArmorType, 9).MagicDefense == 37);
+}
+
+TEST_CASE("The late wings, crystals and small wings keep their level requirement [data][items]")
+{
+    ShippedItemAttributes items;
+
+    for (int level = 0; level <= 15; ++level)
+    {
+        CAPTURE(level);
+        CHECK(ComputeItem(ITEM_WING_OF_DIMENSION, level).RequireLevel == 400);
+        CHECK(ComputeItem(ITEM_CAPE_OF_OVERRULE, level).RequireLevel == 400);
+        for (int type = ITEM_CRYSTAL_OF_DESTRUCTION; type <= ITEM_SCROLL_OF_CHAOTIC_DISEIER; ++type)
+        {
+            CHECK(ComputeItem(type, level).RequireLevel == 220);
+        }
+        for (int type = FirstSmallWingType; type <= LastSmallWingType; ++type)
+        {
+            CHECK(ComputeItem(type, level).RequireLevel == 1);
+        }
+
+        // Unchanged: the other third tier wings keep theirs, the Cape of Fighter's grows.
+        CHECK(ComputeItem(ITEM_WING_OF_STORM, level).RequireLevel == 400);
+        CHECK(ComputeItem(ITEM_CAPE_OF_EMPEROR, level).RequireLevel == 400);
+        CHECK(ComputeItem(ITEM_CAPE_OF_FIGHTER, level).RequireLevel == 180 + level * 4);
+    }
 }
