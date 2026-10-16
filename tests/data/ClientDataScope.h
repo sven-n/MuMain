@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core/Globals/_define.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Data/GameData/ItemData/ItemStructs.h"
 #include "I18N/All.h"

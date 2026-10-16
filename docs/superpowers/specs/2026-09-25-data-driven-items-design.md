@@ -979,8 +979,10 @@ types and model slots (4d2). 239 identify an item by its model slot
     power, `GetExcellentAddValue`) and
     `base * 12 / drop level + 4 + drop level / 5` to defense, not to
     shields. Excellent here means an excellent item that is not a wing, or
-    an ancient item, as in the client before 815b8828 and in OpenMU: wings
-    keep their wing options in the excellent flags. 815b8828 had counted
+    an ancient item, as in OpenMU: wings keep their wing options in the
+    excellent flags. The client before 815b8828 had the same rule but also
+    left out the four archangel weapons; the client follows OpenMU there,
+    which gives them the bonus with excellent options. 815b8828 had counted
     any excellent flag, so wings with a wing option got the defense bonus
     and ancient items lost the bonus, and it took the maximum damage bonus
     from the maximum damage; #683 fixed both. The + 25 drop level of the
