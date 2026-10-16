@@ -6,11 +6,15 @@
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
 
+#include <RmlUi/Core/ComputedValues.h>
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/ElementText.h>
+#include <RmlUi/Core/FontEngineInterface.h>
+#include <RmlUi/Core/TextShapingContext.h>
 
+#include <algorithm>
 #include <cstdio>
 #include <cwchar>
 
@@ -40,6 +44,22 @@ void SetDisplay(Rml::Element* element, bool shown)
 {
     element->SetProperty(Rml::PropertyId::Display,
                          Rml::Property(shown ? Rml::Style::Display::Block : Rml::Style::Display::None));
+}
+
+// The width RmlUi draws a label's text at. Its face size is the font-size truncated to whole pixels
+// and its advances are hinted, so with some families (DejaVu Sans) it comes out a few pixels wider
+// than the native measurement the label box was sized from.
+float DrawnTextWidth(const Rml::ComputedValues& values, bool bold, float pixelSize, const std::string& utf8)
+{
+    Rml::FontEngineInterface* fonts = Rml::GetFontEngineInterface();
+    const Rml::Style::FontWeight weight = bold ? Rml::Style::FontWeight::Bold : Rml::Style::FontWeight::Normal;
+    const Rml::FontFaceHandle face = fonts->GetFontFaceHandle(values.font_family(), Rml::Style::FontStyle::Normal,
+                                                              weight, static_cast<int>(pixelSize));
+    if (face == 0)
+        return 0.0f;
+    const Rml::TextShapingContext shaping{values.language(), values.direction(), values.font_kerning(),
+                                          values.letter_spacing()};
+    return static_cast<float>(fonts->GetStringWidth(face, utf8, shaping));
 }
 
 // "/Data/Interface/x.tga": absolute to the file interface root, as CGlobalBitmap loads it.
@@ -170,19 +190,10 @@ void UI::Character::WorldLabelLayer::SetBox(Slot& slot, const Rect& rect, std::u
 void UI::Character::WorldLabelLayer::RecordText(const Render::Renderer::RecordedText& text)
 {
     Slot& slot = NextSlot(SlotKind::Text);
-    // The native renderer draws no box for a fully transparent background colour; a box keeps the
-    // blend state it was drawn under (opaque after the F8 health bars' DisableAlphaBlend()).
-    const Rect box{text.boxX, text.boxY, text.boxWidth, text.boxHeight};
-    if ((text.backColor >> 24) == 0)
-    {
-        SetBox(slot, box, 0u);
-        SetAdditive(slot, false, 0u);
-    }
-    else
-    {
-        SetFill(slot, box, text.backColor, text.backBlend);
-    }
-    SetPx(slot.text, Rml::PropertyId::Left, slot.textOffset, text.textX - text.boxX);
+    const bool textChanged =
+        slot.utf8 != text.utf8 || slot.textPixelSize != text.textPixelSize || slot.bold != text.bold;
+    const float textOffset = text.textX - text.boxX;
+    SetPx(slot.text, Rml::PropertyId::Left, slot.textOffset, textOffset);
     SetPx(slot.text, Rml::PropertyId::FontSize, slot.textPixelSize, text.textPixelSize);
     SetPx(slot.text, Rml::PropertyId::LineHeight, slot.lineHeight, text.lineHeight);
     if (slot.bold != text.bold)
@@ -200,6 +211,25 @@ void UI::Character::WorldLabelLayer::RecordText(const Render::Renderer::Recorded
     {
         slot.utf8.assign(text.utf8);
         slot.textNode->SetText(slot.utf8);
+    }
+    // Measured again until the document's font resolves (zero before its first layout).
+    if (textChanged || slot.drawnTextWidth == 0.0f)
+        slot.drawnTextWidth =
+            DrawnTextWidth(m_view.Document()->GetComputedValues(), text.bold, text.textPixelSize, slot.utf8);
+
+    // The native renderer draws no box for a fully transparent background colour; a box keeps the
+    // blend state it was drawn under (opaque after the F8 health bars' DisableAlphaBlend()). The box
+    // never ends before the text RmlUi draws in it.
+    const float boxWidth = std::max(text.boxWidth, textOffset + slot.drawnTextWidth);
+    const Rect box{text.boxX, text.boxY, boxWidth, text.boxHeight};
+    if ((text.backColor >> 24) == 0)
+    {
+        SetBox(slot, box, 0u);
+        SetAdditive(slot, false, 0u);
+    }
+    else
+    {
+        SetFill(slot, box, text.backColor, text.backBlend);
     }
 }
 
