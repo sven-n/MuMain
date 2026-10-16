@@ -5,7 +5,7 @@
 	<link type="text/rcss" href="base.rcss"/>
 	<link type="text/rcss" href="chat_log.rcss"/>
 </head>
-<body data-model="chat_log">
+<body class="native-text" data-model="chat_log">
 	<!-- Bottom-left HUD panel, anchored above the chat input box. Sized in dp like its already-
 	     ported HUD siblings (buff_strip, mu_helper_bar), not via a root-transform scale: this tier
 	     has no live-3D content to paint behind, so nothing forces the px + transform:scale pattern
