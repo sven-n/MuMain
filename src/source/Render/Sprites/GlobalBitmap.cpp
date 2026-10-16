@@ -7,7 +7,9 @@
 
 #include <SDL3/SDL_gpu.h>
 #include "Render/Renderer/MuRenderer.h"
+#include "Render/RmlUi/RmlPremultiply.h"
 #include "Render/Textures/OztFile.h"
+#include "Render/Textures/UpscaleMarker.h"
 #ifdef _EDITOR
 #include "Core/Utilities/AssetLoadWorld.h"
 #endif
@@ -145,8 +147,58 @@ std::vector<std::uint8_t> PadRGBToRGBA(const BYTE* rgbData, int width, int heigh
     return rgba;
 }
 
+// A sampler stops at the base level unless told how far down the chain it may go.
+constexpr float AllMipLevels = 1000.0f;
+constexpr float MipmappedAnisotropy = 16.0f;
+
+// The base level and every halving of the longer side down to 1 pixel.
+Uint32 MipLevelCount(int width, int height)
+{
+    Uint32 levels = 1;
+    for (int size = std::max<int>(width, height); size > 1; size >>= 1)
+    {
+        ++levels;
+    }
+    return levels;
+}
+
+// Upscaled art is always drawn smaller than it is stored, so it is sampled
+// trilinear and anisotropic whatever filter the caller asked for; without that
+// its detail shimmers at a distance.
+SDL_GPUSampler* CreateSampler(SDL_GPUDevice* device, SDL_GPUFilter filter, SDL_GPUSamplerAddressMode wrapMode,
+                              bool mipmapped)
+{
+    SDL_GPUSamplerCreateInfo samplerInfo{};
+    samplerInfo.min_filter = mipmapped ? SDL_GPU_FILTER_LINEAR : filter;
+    samplerInfo.mag_filter = mipmapped ? SDL_GPU_FILTER_LINEAR : filter;
+    samplerInfo.mipmap_mode = mipmapped ? SDL_GPU_SAMPLERMIPMAPMODE_LINEAR : SDL_GPU_SAMPLERMIPMAPMODE_NEAREST;
+    samplerInfo.address_mode_u = wrapMode;
+    samplerInfo.address_mode_v = wrapMode;
+    samplerInfo.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
+    if (mipmapped)
+    {
+        samplerInfo.max_lod = AllMipLevels;
+        samplerInfo.enable_anisotropy = true;
+        samplerInfo.max_anisotropy = MipmappedAnisotropy;
+    }
+    return SDL_CreateGPUSampler(device, &samplerInfo);
+}
+
+// The CPU copy of an upscaled texture is up to 16 times the original and
+// nothing reads it after the upload: only the canvases (BITMAP_FONT,
+// BITMAP_GUILD) are redrawn through Buffer, and those never carry the marker.
+// Keeping the copies took the 32 bit client past 3.3 GB of address space.
+// Returns the bytes released.
+std::size_t ReleaseUploadedPixels(BITMAP_t& bitmap)
+{
+    const std::size_t released = bitmap.BufferStorage.size();
+    std::vector<std::uint8_t>().swap(bitmap.BufferStorage);
+    bitmap.Buffer = nullptr;
+    return released;
+}
+
 bool UploadTextureSDLGpu(BITMAP_t* bitmap, const std::uint8_t* pixelData, int width, int height, SDL_GPUFilter filter,
-                         SDL_GPUSamplerAddressMode wrapMode)
+                         SDL_GPUSamplerAddressMode wrapMode, bool mipmapped)
 {
     SDL_GPUDevice* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
     if (!device || !bitmap || !pixelData || width <= 0 || height <= 0)
@@ -160,8 +212,13 @@ bool UploadTextureSDLGpu(BITMAP_t* bitmap, const std::uint8_t* pixelData, int wi
     texInfo.width = static_cast<Uint32>(width);
     texInfo.height = static_cast<Uint32>(height);
     texInfo.layer_count_or_depth = 1;
-    texInfo.num_levels = 1;
+    texInfo.num_levels = mipmapped ? MipLevelCount(width, height) : 1;
     texInfo.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER;
+    if (mipmapped)
+    {
+        // SDL renders the lower levels into the texture.
+        texInfo.usage |= SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
+    }
 
     SDL_GPUTexture* gpuTexture = SDL_CreateGPUTexture(device, &texInfo);
     if (!gpuTexture)
@@ -223,18 +280,14 @@ bool UploadTextureSDLGpu(BITMAP_t* bitmap, const std::uint8_t* pixelData, int wi
 
     SDL_UploadToGPUTexture(copyPass, &src, &dst, false);
     SDL_EndGPUCopyPass(copyPass);
+    if (mipmapped)
+    {
+        SDL_GenerateMipmapsForGPUTexture(commandBuffer, gpuTexture);
+    }
     SDL_SubmitGPUCommandBuffer(commandBuffer);
     SDL_ReleaseGPUTransferBuffer(device, transfer);
 
-    SDL_GPUSamplerCreateInfo samplerInfo{};
-    samplerInfo.min_filter = filter;
-    samplerInfo.mag_filter = filter;
-    samplerInfo.mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_NEAREST;
-    samplerInfo.address_mode_u = wrapMode;
-    samplerInfo.address_mode_v = wrapMode;
-    samplerInfo.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
-
-    SDL_GPUSampler* sampler = SDL_CreateGPUSampler(device, &samplerInfo);
+    SDL_GPUSampler* sampler = CreateSampler(device, filter, wrapMode, mipmapped);
     if (!sampler)
     {
         SDL_ReleaseGPUTexture(device, gpuTexture);
@@ -546,17 +599,17 @@ GLuint CGlobalBitmap::LoadImage(const std::wstring& filename, GLuint uiFilter, G
     }
     return BITMAP_UNKNOWN;
 }
-GLuint CGlobalBitmap::LoadImageExclusive(const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode, bool padToPowerOfTwo)
+GLuint CGlobalBitmap::LoadImageExclusive(const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode, bool padToPowerOfTwo, bool premultiplyAlpha)
 {
     GLuint uiNewTextureIndex = GenerateTextureIndex();
-    if (true == LoadImage(uiNewTextureIndex, filename, uiFilter, uiWrapMode, padToPowerOfTwo))
+    if (true == LoadImage(uiNewTextureIndex, filename, uiFilter, uiWrapMode, padToPowerOfTwo, premultiplyAlpha))
     {
         m_listNonamedIndex.push_back(uiNewTextureIndex);
         return uiNewTextureIndex;
     }
     return BITMAP_UNKNOWN;
 }
-bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode, bool padToPowerOfTwo)
+bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode, bool padToPowerOfTwo, bool premultiplyAlpha)
 {
     unsigned int UICLAMP = GL_CLAMP_TO_EDGE;
     unsigned int UIREPEAT = GL_REPEAT;
@@ -606,7 +659,7 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename
     if (0 == _wcsicmp(ext.c_str(), L"jpg"))
         loaded = OpenJpegTurbo(uiBitmapIndex, filename, uiFilter, uiWrapMode, padToPowerOfTwo);
     else if (0 == _wcsicmp(ext.c_str(), L"tga"))
-        loaded = OpenTga(uiBitmapIndex, filename, uiFilter, uiWrapMode, padToPowerOfTwo);
+        loaded = OpenTga(uiBitmapIndex, filename, uiFilter, uiWrapMode, padToPowerOfTwo, premultiplyAlpha);
 #ifdef _EDITOR
     if (loaded)
         m_loadWorlds[uiBitmapIndex] = Core::AssetLoadWorld::Get();
@@ -884,8 +937,11 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
 
     const int textureWidth = padToPowerOfTwo ? NextPowerOfTwo(jpegWidth, MAX_WIDTH) : jpegWidth;
     const int textureHeight = padToPowerOfTwo ? NextPowerOfTwo(jpegHeight, MAX_HEIGHT) : jpegHeight;
+    const int scale = Render::Textures::Upscale::ReadScale(jpegBuf, textureWidth, textureHeight);
 
     auto pNewBitmap = CreateBitmapStorage(uiBitmapIndex, filename, textureWidth, textureHeight, 3);
+    pNewBitmap->Width = static_cast<float>(textureWidth / scale);
+    pNewBitmap->Height = static_cast<float>(textureHeight / scale);
     m_dwUsedTextureMemory += static_cast<std::uint32_t>(pNewBitmap->BufferStorage.size());
 
     const int jpegRowSize = jpegWidth * 3;
@@ -911,10 +967,14 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
     pNewBitmap->TextureNumber = uiBitmapIndex;
     std::vector<std::uint8_t> rgbaData = PadRGBToRGBA(pNewBitmap->Buffer, textureWidth, textureHeight);
     if (!UploadTextureSDLGpu(pNewBitmap.get(), rgbaData.data(), textureWidth, textureHeight, MapGLFilterToSDL(uiFilter),
-                             MapGLWrapToSDL(uiWrapMode)))
+                             MapGLWrapToSDL(uiWrapMode), scale > Render::Textures::Upscale::NoScale))
     {
         g_ErrorReport.Write(L"SDL texture upload failed %ls (%d)\r\n", filename.c_str(), uiBitmapIndex);
         return false;
+    }
+    if (scale > Render::Textures::Upscale::NoScale)
+    {
+        m_dwUsedTextureMemory -= static_cast<std::uint32_t>(ReleaseUploadedPixels(*pNewBitmap));
     }
 
     SDL_GPUTexture* rawTexture = pNewBitmap->sdlTexture;
@@ -926,7 +986,7 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
     return true;
 }
 
-bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode, bool padToPowerOfTwo)
+bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode, bool padToPowerOfTwo, bool premultiplyAlpha)
 {
     namespace Ozt = Render::Textures::Ozt;
 
@@ -959,19 +1019,30 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
 
     const int Width = padToPowerOfTwo ? NextPowerOfTwo(header.width, MAX_WIDTH) : header.width;
     const int Height = padToPowerOfTwo ? NextPowerOfTwo(header.height, MAX_HEIGHT) : header.height;
+    const int scale = Render::Textures::Upscale::ReadScale(pakBuffer, Width, Height);
 
     auto pNewBitmap = CreateBitmapStorage(uiBitmapIndex, filename, Width, Height, 4);
+    pNewBitmap->Width = static_cast<float>(Width / scale);
+    pNewBitmap->Height = static_cast<float>(Height / scale);
     const std::size_t BufferSize = pNewBitmap->BufferStorage.size();
     m_dwUsedTextureMemory += static_cast<std::uint32_t>(BufferSize);
 
     Ozt::CopyPixels(pakBuffer, header, std::span<std::uint8_t>(pNewBitmap->Buffer, BufferSize), Width);
+    if (premultiplyAlpha)
+    {
+        Render::RmlUi::PremultiplyAlpha(pNewBitmap->Buffer, BufferSize / Ozt::BytesPerPixel);
+    }
 
     pNewBitmap->TextureNumber = uiBitmapIndex;
     if (!UploadTextureSDLGpu(pNewBitmap.get(), pNewBitmap->Buffer, Width, Height, MapGLFilterToSDL(uiFilter),
-                             MapGLWrapToSDL(uiWrapMode)))
+                             MapGLWrapToSDL(uiWrapMode), scale > Render::Textures::Upscale::NoScale))
     {
         g_ErrorReport.Write(L"SDL texture upload failed %ls (%d)\r\n", filename.c_str(), uiBitmapIndex);
         return false;
+    }
+    if (scale > Render::Textures::Upscale::NoScale)
+    {
+        m_dwUsedTextureMemory -= static_cast<std::uint32_t>(ReleaseUploadedPixels(*pNewBitmap));
     }
 
     SDL_GPUTexture* rawTexture = pNewBitmap->sdlTexture;

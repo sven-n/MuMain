@@ -57,6 +57,14 @@ target_compile_definitions(ozt_file_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
+# The marker of upscaled art that CGlobalBitmap reads from OZJ and OZT files.
+mu_add_test(
+    NAME upscale_marker_tests
+    SOURCES
+        test_upscale_marker.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/UpscaleMarker.cpp
+)
+
 mu_add_test(
     NAME sdl_gpu_validation_tests
     SOURCES
