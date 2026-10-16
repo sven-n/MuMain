@@ -570,7 +570,7 @@ void CalcDamageMax(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
             if (excelAddValue)
                 ip->DamageMax += excelAddValue;
             else
-                ip->DamageMax += p->DamageMax * 25 / p->Level + 5;
+                ip->DamageMax += p->DamageMin * 25 / p->Level + 5;
         }
     }
 

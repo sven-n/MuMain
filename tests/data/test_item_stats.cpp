@@ -177,3 +177,22 @@ TEST_CASE("Ancient items get the excellent bonus and their base defense once [da
     CHECK(ComputeItem(LeatherArmorType, 0, 0x01).Defense == 28);
     CHECK(ComputeItem(BronzeArmorType, 0, 0, 1).RequireStrength == 135);
 }
+
+TEST_CASE("The excellent bonus adds the same to minimum and maximum damage [data][items]")
+{
+    ShippedItemAttributes items;
+
+    CHECK(ComputeItem(MorningStarType, 0, 0, 1).DamageMax == 58);
+
+    for (int type = MakeItemType(0, 0); type < MakeItemType(6, 0); ++type)
+    {
+        if (items[type].DamageMin <= 0 || items[type].DamageMax <= 0 || items[type].Level == 0)
+        {
+            continue;
+        }
+        CAPTURE(type);
+        const ITEM normal = ComputeItem(type, 0);
+        const ITEM excellent = ComputeItem(type, 0, 0x01);
+        CHECK(excellent.DamageMax - normal.DamageMax == excellent.DamageMin - normal.DamageMin);
+    }
+}
