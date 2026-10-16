@@ -19,6 +19,7 @@ mu_add_test(
     NAME test_item_database_files
     SOURCES
         test_item_database_files.cpp
+        test_item_help_table.cpp
         test_item_model_files.cpp
         test_item_rules.cpp
         test_item_stats.cpp

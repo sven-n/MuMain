@@ -733,6 +733,32 @@ const int iMaxColumn = 17;
 int g_iCurrentItem = -1;
 int g_iItemInfo[iMaxLevel + 1][iMaxColumn];
 
+namespace
+{
+// The magic power goes into one column: Curse for summoner books, Attack for sceptres, WIZDmg for
+// the other items. The window shows every column with a value at +0, and g_iItemInfo still holds
+// the item shown before, so the other two are cleared.
+void SetItemInfoMagicColumns(int level, int itemType, int magic)
+{
+    g_iItemInfo[level][_COLUMN_TYPE_MAGIC] = 0;
+    g_iItemInfo[level][_COLUMN_TYPE_CURSE] = 0;
+    g_iItemInfo[level][_COLUMN_TYPE_PET_ATTACK] = 0;
+
+    if (GameLogic::Items::IsSummonerBookType(itemType))
+    {
+        g_iItemInfo[level][_COLUMN_TYPE_CURSE] = magic;
+    }
+    else if (IsCepterItem(itemType))
+    {
+        g_iItemInfo[level][_COLUMN_TYPE_PET_ATTACK] = magic;
+    }
+    else
+    {
+        g_iItemInfo[level][_COLUMN_TYPE_MAGIC] = magic;
+    }
+}
+} // namespace
+
 void ComputeItemInfo(int iHelpItem)
 {
     if (g_iCurrentItem == iHelpItem)
@@ -740,7 +766,7 @@ void ComputeItemInfo(int iHelpItem)
     else
         g_iCurrentItem = iHelpItem;
 
-    ITEM_ATTRIBUTE* p = &ItemAttribute[ItemHelp];
+    ITEM_ATTRIBUTE* p = &ItemAttribute[iHelpItem];
 
     for (int Level = 0; Level <= iMaxLevel; Level++)
     {
@@ -770,7 +796,7 @@ void ComputeItemInfo(int iHelpItem)
             Magic += GameLogic::Items::GetItemLevelBonus(Level);
             Magic /= 2;
 
-            if (IsCepterItem(ItemHelp) == false)
+            if (IsCepterItem(iHelpItem) == false)
             {
                 Magic += Level * 2;
             }
@@ -778,7 +804,7 @@ void ComputeItemInfo(int iHelpItem)
 
         if (Defense > 0)
         {
-            if (ItemHelp >= ITEM_SHIELD && ItemHelp < ITEM_SHIELD + MAX_ITEM_INDEX)
+            if (iHelpItem >= ITEM_SHIELD && iHelpItem < ITEM_SHIELD + MAX_ITEM_INDEX)
             {
                 Defense += Level;
             }
@@ -818,13 +844,13 @@ void ComputeItemInfo(int iHelpItem)
 
         if (p->RequireEnergy)
         {
-            if (GameLogic::Items::IsSummonerBookType(ItemHelp))
+            if (GameLogic::Items::IsSummonerBookType(iHelpItem))
             {
                 RequireEnergy = 20 + p->RequireEnergy * (p->Level + Level * 1) * 3 / 100;
             }
             else
             {
-                if ((p->RequireLevel > 0) && (ItemHelp >= ITEM_ETC && ItemHelp < ITEM_ETC + MAX_ITEM_INDEX))
+                if ((p->RequireLevel > 0) && (iHelpItem >= ITEM_ETC && iHelpItem < ITEM_ETC + MAX_ITEM_INDEX))
                 {
                     RequireEnergy = 20 + (p->RequireEnergy) * (p->RequireLevel) * 4 / 100;
                 }
@@ -845,17 +871,7 @@ void ComputeItemInfo(int iHelpItem)
         g_iItemInfo[Level][_COLUMN_TYPE_LEVEL] = Level;
         g_iItemInfo[Level][_COLUMN_TYPE_ATTMIN] = DamageMin;
         g_iItemInfo[Level][_COLUMN_TYPE_ATTMAX] = DamageMax;
-
-        if (GameLogic::Items::IsSummonerBookType(ItemHelp))
-        {
-            g_iItemInfo[Level][_COLUMN_TYPE_CURSE] = Magic;
-        }
-        else
-        {
-            g_iItemInfo[Level][_COLUMN_TYPE_MAGIC] = Magic;
-        }
-
-        g_iItemInfo[Level][_COLUMN_TYPE_PET_ATTACK] = Magic;
+        SetItemInfoMagicColumns(Level, iHelpItem, Magic);
         g_iItemInfo[Level][_COLUMN_TYPE_DEFENCE] = Defense;
         g_iItemInfo[Level][_COLUMN_TYPE_DEFRATE] = Blocking;
         g_iItemInfo[Level][_COLUMN_TYPE_REQSTR] = RequireStrength;
@@ -864,16 +880,6 @@ void ComputeItemInfo(int iHelpItem)
         g_iItemInfo[Level][_COLUMN_TYPE_REQCHA] = RequireCharisma;
         g_iItemInfo[Level][_COLUMN_TYPE_REQVIT] = RequireVitality;
         g_iItemInfo[Level][_COLUMN_TYPE_REQNLV] = RequireLevel;
-
-        if (IsCepterItem(ItemHelp) == true)
-
-        {
-            g_iItemInfo[Level][_COLUMN_TYPE_MAGIC] = 0;
-        }
-        else
-        {
-            g_iItemInfo[Level][_COLUMN_TYPE_PET_ATTACK] = 0;
-        }
 
         WORD Strength, Dexterity, Energy, Vitality, Charisma;
 
