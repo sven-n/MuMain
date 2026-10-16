@@ -57,7 +57,8 @@ identical captured state and contiguous vertex storage can merge.
 
 - `Vertex2D` contains screen position, UV, and packed ABGR color: 20 bytes.
 - `Vertex3D` contains position, normal, UV, and packed ABGR color: 36 bytes.
-- `SkinnedVertex3D` adds separate position and normal bone indices: 44 bytes.
+- `SkinnedVertex3D` drops the colour for separate position and normal bone indices: 40 bytes. A draw's
+  one packed ABGR colour is a per-instance attribute from a second vertex buffer slot.
 - Quad indices and strip indices use dedicated per-frame storage.
 - Bone palettes use a separate growable storage buffer.
 

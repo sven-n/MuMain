@@ -32,9 +32,14 @@ uses the established CPU-skinned path.
 - rest position: three floats;
 - rest normal: three floats;
 - source UV: two floats;
-- packed ABGR color;
 - position bone index;
 - normal bone index.
+
+The colour is one packed ABGR value per draw, read as a per-instance attribute
+from vertex buffer slot 1. A mesh without a scrolling texture is cached on the
+GPU under its `Mesh_t*` the first time it is drawn (`CacheSkinnedMesh`), so
+later draws upload only that colour; `BMD::Release()` releases the entry before
+it frees the mesh data.
 
 `SkinningParameters::boneMatrices` contains 12 floats per bone in row-major
 3x4 affine form:
