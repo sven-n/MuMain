@@ -552,8 +552,9 @@ server with original clients (after phases 6 and B).
    the empty level requirement range from the Wing of Dimension on, the
    ancient defense's second base, the maximum damage bonus from the maximum
    damage) were fixed first, with #683. The level bonus above +9, added once
-   since 2021 where the Season 6 client and OpenMU add it cumulatively, is
-   fixed before this phase too, so the tables match OpenMU's. The fork
+   from 2021 where the Season 6 client and OpenMU add it cumulatively, was
+   fixed before this phase too (`GameLogic::Items::GetItemLevelBonus`), so
+   the tables can match OpenMU's. The fork
    branch `fix-some-item-calculations`
    (January 2026, still in the old `Source Main 5.2` layout) holds fixes of
    these formulas after the Season 6 client and is compared when this phase
@@ -951,22 +952,25 @@ types and model slots (4d2). 239 identify an item by its model slot
   `Calc*` functions (`ZzzInfomation.cpp`; `ItemConvert` there is an empty
   stub) compute what the item level adds. Here level is the item level
   (`ip->Level`, 0 to 15), drop level the kind's `Level` (`p->Level`,
-  OpenMU's `DropLevel`) and base the kind's value; "above +9" adds
-  `level - 6` once, so +4 at +10 up to +9 at +15. The Season 6 client and
-  OpenMU add these steps cumulatively (+4, +9, +15, +22, +30, +39, so 31 to
-  66 in total at +10 to +15); the client adds them once since d301eb1fb and
-  a366bc05b (2021), a known difference.
-  - Damage gets `3 * min(9, level)` and `level - 6` above +9. Magic power
-    gets the same, then the sum with the excellent and ancient bonuses is
-    halved and items that are not sceptres add `2 * level`.
+  OpenMU's `DropLevel`) and base the kind's value. The level bonus
+  (`GameLogic::Items::GetItemLevelBonus`) is `3 * min(9, level)` and,
+  above +9, steps of 4, 5, 6, 7, 8 and 9 at +10 to +15, each on top of the
+  ones below: 27 at +9, then 31, 36, 42, 49, 57 and 66, as in the Season 6
+  client and OpenMU's level bonus tables. From 2021 (d301eb1fb, a366bc05b)
+  to its fix the client added only the last step (`level - 6`, so 31 to 36
+  at +10 to +15).
+  - Damage gets the level bonus. Magic power gets it too, then the sum with
+    the excellent and ancient bonuses is halved and items that are not
+    sceptres add `2 * level`.
   - Defense gets 2, 3 or 4 times `min(9, level)` (2 for second tier wings
-    and the Capes of Lord and Fighter, 4 for third tier wings) and
-    `level - 5` (third tier wings) or `level - 6` above +9; shields get
+    and the Capes of Lord and Fighter, 4 for third tier wings) and the
+    steps above +9, which start at 5 instead of 4 for third tier wings
+    (`GetItemLevelBonusAboveNine`); armor gets the level bonus; shields get
     only `+ level` and their ancient bonus.
-  - Blocking and magic defense grow like damage: `3 * min(9, level)` and
-    `level - 6` above +9. 815b8828 had made them use the drop level, so they
-    never grew with the item level; #683 brought the item level back, as in
-    the client before and in OpenMU.
+  - Blocking and magic defense get the level bonus like damage. 815b8828
+    had made them use the drop level, so they never grew with the item
+    level; #683 brought the item level back, as in the client before and in
+    OpenMU.
   - Excellent items add `base * 25 / drop level + 5` to damage (from the
     minimum damage, to minimum and maximum damage alike), magic power and
     blocking (three chaos weapons have fixed values for damage and magic
