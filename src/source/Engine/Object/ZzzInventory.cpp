@@ -37,6 +37,7 @@
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "GameLogic/Items/ItemLevelBonus.h"
 #include "Render/Items/ItemDisplay.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "UI/Scaling/UITransform.h"
@@ -757,46 +758,16 @@ void ComputeItemInfo(int iHelpItem)
 
         if (DamageMin > 0)
         {
-            DamageMin += (std::min<int>(9, Level) * 3);
-            switch (Level - 9)
-            {
-            case 6: DamageMin += 9; break;	// +15
-            case 5: DamageMin += 8; break;	// +14
-            case 4: DamageMin += 7; break;	// +13
-            case 3: DamageMin += 6; break;	// +12
-            case 2: DamageMin += 5; break;	// +11
-            case 1: DamageMin += 4; break;	// +10
-            default: break;
-            };
+            DamageMin += GameLogic::Items::GetItemLevelBonus(Level);
         }
         if (DamageMax > 0)
         {
-            DamageMax += (std::min<int>(9, Level) * 3);
-            switch (Level - 9)
-            {
-            case 6: DamageMax += 9; break;	// +15
-            case 5: DamageMax += 8; break;	// +14
-            case 4: DamageMax += 7; break;	// +13
-            case 3: DamageMax += 6; break;	// +12
-            case 2: DamageMax += 5; break;	// +11
-            case 1: DamageMax += 4; break;	// +10
-            default: break;
-            };
+            DamageMax += GameLogic::Items::GetItemLevelBonus(Level);
         }
 
         if (Magic > 0)
         {
-            Magic += (std::min<int>(9, Level) * 3);	// ~ +9
-            switch (Level - 9)
-            {
-            case 6: Magic += 9; break;		// +15
-            case 5: Magic += 8; break;		// +14
-            case 4: Magic += 7; break;	    // +13
-            case 3: Magic += 6; break;		// +12
-            case 2: Magic += 5; break;		// +11
-            case 1: Magic += 4; break;		// +10
-            default: break;
-            };
+            Magic += GameLogic::Items::GetItemLevelBonus(Level);
             Magic /= 2;
 
             if (IsCepterItem(ItemHelp) == false)
@@ -813,32 +784,12 @@ void ComputeItemInfo(int iHelpItem)
             }
             else
             {
-                Defense += (std::min<int>(9, Level) * 3);	// ~ +9
-                switch (Level - 9)
-                {
-                case 6: Defense += 9; break;	// +15
-                case 5: Defense += 8; break;	// +14
-                case 4: Defense += 7; break;	// +13
-                case 3: Defense += 6; break;	// +12
-                case 2: Defense += 5; break;	// +11
-                case 1: Defense += 4; break;	// +10
-                default: break;
-                };
+                Defense += GameLogic::Items::GetItemLevelBonus(Level);
             }
         }
         if (Blocking > 0)
         {
-            Blocking += (std::min<int>(9, Level) * 3);	// ~ +9
-            switch (Level - 9)
-            {
-            case 6: Blocking += 9; break;	// +15
-            case 5: Blocking += 8; break;	// +14
-            case 4: Blocking += 7; break;	// +13
-            case 3: Blocking += 6; break;	// +12
-            case 2: Blocking += 5; break;	// +11
-            case 1: Blocking += 4; break;	// +10
-            default: break;
-            };
+            Blocking += GameLogic::Items::GetItemLevelBonus(Level);
         }
 
         if (p->RequireLevel)
