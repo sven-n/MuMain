@@ -63,6 +63,13 @@ add_test(
             "${CMAKE_SOURCE_DIR}"
 )
 
+add_test(
+    NAME rml_preview
+    COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/test_rml_preview.py"
+            "${CMAKE_SOURCE_DIR}"
+)
+
 add_subdirectory(text)
 add_subdirectory(effects)
 

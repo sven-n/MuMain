@@ -264,6 +264,44 @@ event map alone does not supply its state. Use the
 and test against a running server for gameplay behavior. Scripted checks can use the
 [control socket](../control-socket.md) and [in-game tester](../in-game-tests.md).
 
+## Preview a document in a browser
+
+`tools/rml_preview.py` shows a document without building or starting the client. It turns the
+document and its theme's stylesheets into an HTML page:
+
+- it resolves files through the theme chain, as the game does;
+- it sizes `dp` and `rem` for a window size, as `UI::Scaling` does;
+- it evaluates the data bindings against a JSON model;
+- it draws the sprites from the game's own textures, with the bundled fonts.
+
+With `--png` it also screenshots each page, using Chrome, Edge or Chromium.
+
+```powershell
+python tools/rml_preview.py generic_confirm_dialog --theme modern `
+    --model tools/rml_preview_models/generic_confirm_dialog.json --png
+```
+
+The pages land in `build/rml-preview/`, one per state of the model.
+
+**The model.** It is the binding names of the document's data model. A document with several
+models takes them keyed by model name, and `{"states": {...}}` renders one page per state. Names
+the model leaves out evaluate to nothing, and the tool lists them.
+`tools/rml_preview_models/` holds example models; add one for a document you preview often.
+
+**Other options.** `--window 1920x1080` and `--ui-scale 150` show other sizes, and
+`--pixel-ratio 2` gives sharper screenshots.
+
+**Limits.** The browser lays the page out, not RmlUi, so the preview is close to the game but not
+identical. It leaves out:
+
+- live 3D content (items, render targets);
+- scrollbars and font effects;
+- placement that C++ pushes at runtime;
+- state that isn't in the model.
+
+Use it to look at a layout, a theme change or a long translation quickly, or to attach a picture
+to a pull request. Check the result in the game before you rely on details.
+
 ## Where detailed guidance lives
 
 | Task | Detailed reference |
