@@ -17,6 +17,8 @@
 #include <algorithm>
 #include <cstdio>
 #include <cwchar>
+#include <functional>
+#include <string_view>
 #include <utility>
 
 namespace
@@ -63,6 +65,25 @@ float DrawnTextWidth(const Rml::ComputedValues& values, bool bold, float pixelSi
     return static_cast<float>(fonts->GetStringWidth(face, utf8, shaping));
 }
 
+std::size_t CombineKey(std::size_t key, std::size_t value)
+{
+    return key ^ (value + 0x9e3779b97f4a7c15ull + (key << 6) + (key >> 2));
+}
+
+std::size_t TextKey(const Render::Renderer::RecordedText& text)
+{
+    const std::size_t key = CombineKey(std::hash<std::string_view>{}(text.utf8), std::hash<float>{}(text.textPixelSize));
+    return CombineKey(key, text.bold ? 1u : 0u);
+}
+
+std::size_t BitmapKey(const Render::Renderer::RecordedBitmap& bitmap)
+{
+    std::size_t key = std::hash<std::wstring_view>{}(bitmap.fileName != nullptr ? bitmap.fileName : L"");
+    for (const float value : {bitmap.sourceX, bitmap.sourceY, bitmap.sourceWidth, bitmap.sourceHeight})
+        key = CombineKey(key, std::hash<float>{}(value));
+    return key;
+}
+
 // "/Data/Interface/x.tga": absolute to the file interface root, as CGlobalBitmap loads it.
 std::string ImageSource(const wchar_t* fileName)
 {
@@ -87,15 +108,16 @@ bool UI::Character::WorldLabelLayer::Create()
 void UI::Character::WorldLabelLayer::Release()
 {
     m_view.Release();
-    m_slots.clear();
-    m_used = 0;
+    OnBuilt();
 }
 
 // A rebuilt document has none of the old one's slots.
 void UI::Character::WorldLabelLayer::OnBuilt()
 {
     m_slots.clear();
-    m_used = 0;
+    m_shownByContent.clear();
+    m_hiddenSlots.clear();
+    m_drawn = 0;
 }
 
 void UI::Character::WorldLabelLayer::Hide()
@@ -106,7 +128,17 @@ void UI::Character::WorldLabelLayer::Hide()
 
 void UI::Character::WorldLabelLayer::BeginFrame()
 {
-    m_used = 0;
+    m_drawn = 0;
+    m_shownByContent.clear();
+    m_hiddenSlots.clear();
+    for (std::size_t i = 0; i < m_slots.size(); ++i)
+    {
+        m_slots[i].drawn = false;
+        if (m_slots[i].kind == SlotKind::Hidden)
+            m_hiddenSlots.push_back(i);
+        else
+            m_shownByContent.emplace(m_slots[i].contentKey, i);
+    }
     if (m_view.Document() == nullptr)
         return;
 
@@ -119,23 +151,34 @@ void UI::Character::WorldLabelLayer::BeginFrame()
 
 void UI::Character::WorldLabelLayer::EndFrame()
 {
-    for (std::size_t i = m_used; i < m_slots.size(); ++i)
-        SetKind(m_slots[i], SlotKind::Hidden);
+    for (Slot& slot : m_slots)
+        if (!slot.drawn)
+            SetKind(slot, SlotKind::Hidden);
 }
 
 // A slot still showing what is drawn needs no new text or size, either of which lays the document out
 // again. Otherwise a hidden one, so a label never takes the slot of one drawn later this frame.
 template <typename Matches>
-UI::Character::WorldLabelLayer::Slot& UI::Character::WorldLabelLayer::NextSlot(SlotKind kind, Matches&& matches)
+UI::Character::WorldLabelLayer::Slot& UI::Character::WorldLabelLayer::NextSlot(SlotKind kind, std::size_t contentKey,
+                                                                               Matches&& matches)
 {
-    std::size_t reuse = m_slots.size();
-    for (std::size_t i = m_used; i < m_slots.size() && reuse == m_slots.size(); ++i)
-        if (m_slots[i].kind == kind && matches(m_slots[i]))
-            reuse = i;
-    for (std::size_t i = m_used; i < m_slots.size() && reuse == m_slots.size(); ++i)
-        if (m_slots[i].kind == SlotKind::Hidden)
-            reuse = i;
-    if (reuse == m_slots.size())
+    std::size_t index = m_slots.size();
+    const auto [first, last] = m_shownByContent.equal_range(contentKey);
+    for (auto it = first; it != last; ++it)
+    {
+        if (m_slots[it->second].kind == kind && matches(m_slots[it->second]))
+        {
+            index = it->second;
+            m_shownByContent.erase(it);
+            break;
+        }
+    }
+    if (index == m_slots.size() && !m_hiddenSlots.empty())
+    {
+        index = m_hiddenSlots.back();
+        m_hiddenSlots.pop_back();
+    }
+    if (index == m_slots.size())
     {
         Slot slot;
         Rml::ElementPtr box = m_view.Document()->CreateElement("div");
@@ -144,9 +187,10 @@ UI::Character::WorldLabelLayer::Slot& UI::Character::WorldLabelLayer::NextSlot(S
         SetDisplay(slot.box, false);
         m_slots.push_back(slot);
     }
-    std::swap(m_slots[m_used], m_slots[reuse]);
-    const auto drawOrder = static_cast<float>(m_used);
-    Slot& slot = m_slots[m_used++];
+    const auto drawOrder = static_cast<float>(m_drawn++);
+    Slot& slot = m_slots[index];
+    slot.drawn = true;
+    slot.contentKey = contentKey;
     SetKind(slot, kind);
     if (slot.zIndex != drawOrder)
     {
@@ -203,7 +247,7 @@ void UI::Character::WorldLabelLayer::SetBox(Slot& slot, const Rect& rect, std::u
 
 void UI::Character::WorldLabelLayer::RecordText(const Render::Renderer::RecordedText& text)
 {
-    Slot& slot = NextSlot(SlotKind::Text, [&](const Slot& candidate)
+    Slot& slot = NextSlot(SlotKind::Text, TextKey(text), [&](const Slot& candidate)
     {
         return candidate.utf8 == text.utf8 && candidate.textPixelSize == text.textPixelSize && candidate.bold == text.bold;
     });
@@ -253,7 +297,7 @@ void UI::Character::WorldLabelLayer::RecordText(const Render::Renderer::Recorded
 void UI::Character::WorldLabelLayer::RecordQuad(const Render::Renderer::RecordedQuad& quad)
 {
     // A quad has nothing to keep but its kind.
-    Slot& slot = NextSlot(SlotKind::Quad, [](const Slot&) { return true; });
+    Slot& slot = NextSlot(SlotKind::Quad, 0, [](const Slot&) { return true; });
     SetFill(slot, {quad.x, quad.y, quad.width, quad.height}, AbgrFromArgb(quad.argb), quad.blend);
 }
 
@@ -290,7 +334,7 @@ void UI::Character::WorldLabelLayer::SetAdditive(Slot& slot, bool additive, std:
 
 void UI::Character::WorldLabelLayer::RecordBitmap(const Render::Renderer::RecordedBitmap& bitmap)
 {
-    Slot& slot = NextSlot(SlotKind::Bitmap, [&](const Slot& candidate)
+    Slot& slot = NextSlot(SlotKind::Bitmap, BitmapKey(bitmap), [&](const Slot& candidate)
     {
         return candidate.imageFile != nullptr && bitmap.fileName != nullptr &&
                std::wcscmp(candidate.imageFile, bitmap.fileName) == 0 && candidate.sourceX == bitmap.sourceX &&
