@@ -9,6 +9,13 @@ add_test(
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/check_rml_rcss_syntax.py"
 )
 
+add_test(
+    NAME rml_preview
+    COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/test_rml_preview.py"
+            "${CMAKE_SOURCE_DIR}"
+)
+
 mu_add_test(
     NAME rml_image_crop_tests
     SOURCES test_rml_image_crop.cpp
