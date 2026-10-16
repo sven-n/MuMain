@@ -957,8 +957,10 @@ types and model slots (4d2). 239 identify an item by its model slot
   above +9, steps of 4, 5, 6, 7, 8 and 9 at +10 to +15, each on top of the
   ones below: 27 at +9, then 31, 36, 42, 49, 57 and 66, as in the Season 6
   client and OpenMU's level bonus tables. From 2021 (d301eb1fb, a366bc05b)
-  to its fix the client added only the last step (`level - 6`, so 31 to 36
-  at +10 to +15).
+  to its fix the client added only the last step to damage, magic power,
+  defense and blocking (`level - 6`, so 31 to 36 at +10 to +15); magic
+  defense kept adding them up, without the +14 step (87f3f72e0), until
+  815b8828.
   - Damage gets the level bonus. Magic power gets it too, then the sum with
     the excellent and ancient bonuses is halved and items that are not
     sceptres add `2 * level`.
