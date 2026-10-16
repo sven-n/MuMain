@@ -71,9 +71,12 @@
 
 ## Batching and profiling
 
-- Do not reorder blended terrain by texture pair. Base and overlay layers are
-  separate downstream draws, and overlays may render with depth testing off.
-  Only adjacent compatible commands may merge.
+- Terrain draws its ground first and its blended overlays after, each in its
+  original order; do not sort either by texture. The split relies on the
+  overlays staying depth-tested with depth writes off (`LESS_OR_EQUAL` against
+  their coplanar ground); an overlay drawn with the depth test off would paint
+  over nearer ground. `terrain_depth_state_contract` guards this. Only adjacent
+  compatible commands may merge.
 - A merge key must include pipeline, texture, sampler, MVP, fog, and contiguous
   vertex storage. Omitting captured state can replay earlier geometry with a
   later draw's settings.

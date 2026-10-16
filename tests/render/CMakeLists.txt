@@ -121,6 +121,13 @@ add_test(
 )
 
 add_test(
+    NAME terrain_depth_state_contract
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_TERRAIN_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Terrain/ZzzLodTerrain.cpp"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_terrain_depth_state.cmake"
+)
+
+add_test(
     NAME coin_heap_skin_contract
     COMMAND "${CMAKE_COMMAND}"
         "-DMU_BMD_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Models/ZzzBMD.cpp"
