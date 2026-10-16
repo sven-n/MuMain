@@ -9,6 +9,7 @@
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/RmlBridge/RmlWorkspaceParticipant.h"
 
+#include <algorithm>
 #include <chrono>
 #include <cstdio>
 #include <memory>
@@ -21,6 +22,7 @@ using View = UI::RmlBridge::ThemedView<DiagnosticsModel>;
 std::unique_ptr<View> g_view;
 constexpr auto RefreshInterval = std::chrono::milliseconds(250);
 auto g_nextRefresh = std::chrono::steady_clock::time_point{};
+constexpr size_t GraphBars = 60;
 
 void RegisterModel(Rml::DataModelConstructor& constructor, DiagnosticsModel& model)
 {
@@ -60,8 +62,14 @@ void RegisterModel(Rml::DataModelConstructor& constructor, DiagnosticsModel& mod
     constructor.Bind("renderer_begin", &model.rendererBegin);
     constructor.Bind("renderer_end", &model.rendererEnd);
     constructor.Bind("submit", &model.submit);
+    constructor.Bind("end_offscreen", &model.endOffscreen);
+    constructor.Bind("end_stage", &model.endStage);
+    constructor.Bind("end_replay", &model.endReplay);
+    constructor.Bind("end_post_ui", &model.endPostUi);
     constructor.Bind("requested", &model.requested);
     constructor.Bind("submitted", &model.submitted);
+    constructor.Bind("commands", &model.commands);
+    constructor.Bind("frame_vertex_kb", &model.frameVertexKB);
     constructor.Bind("textures_uploaded", &model.texturesUploaded);
     constructor.Bind("glyphs_uploaded", &model.glyphsUploaded);
     constructor.Bind("pipeline_binds", &model.pipelineBinds);
@@ -102,6 +110,10 @@ void UpdateTimings(DiagnosticsModel& model)
     model.rendererBegin = FrameProfiler::CompletedMs(Pass::RendererBegin);
     model.rendererEnd = FrameProfiler::CompletedMs(Pass::RendererEnd);
     model.submit = FrameProfiler::CompletedMs(Pass::RendererSubmit);
+    model.endOffscreen = FrameProfiler::CompletedMs(Pass::RendererOffscreen);
+    model.endStage = FrameProfiler::CompletedMs(Pass::RendererStage);
+    model.endReplay = FrameProfiler::CompletedMs(Pass::RendererReplay);
+    model.endPostUi = FrameProfiler::CompletedMs(Pass::RendererPostUi);
     const char* driver = mu::GetRenderer().GetGPUDriverName();
     model.driver = driver ? driver : "Unavailable";
 }
@@ -112,6 +124,8 @@ void UpdateCounters(DiagnosticsModel& model)
     const auto stats = mu::GetRenderer().GetFrameStats();
     model.requested = static_cast<int>(stats.requestedDrawCalls);
     model.submitted = static_cast<int>(stats.submittedDrawCalls);
+    model.commands = static_cast<int>(stats.commandCount);
+    model.frameVertexKB = static_cast<float>(stats.vertexBytes) / 1024.f;
     model.texturesUploaded = static_cast<int>(stats.textureUploads);
     model.glyphsUploaded = static_cast<int>(FrameProfiler::CompletedCounter(Counter::GlyphUploads));
     model.pipelineBinds = static_cast<int>(stats.pipelineBinds);
@@ -150,9 +164,15 @@ void UpdateSummary(DiagnosticsModel& model, const FrameSummary& summary)
     model.frameMs = summary.frameMs;
     model.cpu = summary.cpu;
     model.vsync = summary.vsync;
-    model.history.resize(summary.history.size());
-    for (size_t i = 0; i < summary.history.size(); ++i)
-        model.history[i] = summary.history[(summary.oldestSample + i) % summary.history.size()];
+    // Each bar is the slowest frame of its group, so a spike still shows with a fifth of the bars.
+    const size_t samples = summary.history.size();
+    const size_t bars = std::min(samples, GraphBars);
+    model.history.assign(bars, 0.f);
+    for (size_t i = 0; i < samples; ++i)
+    {
+        float& bar = model.history[i * bars / samples];
+        bar = std::max(bar, summary.history[(summary.oldestSample + i) % samples]);
+    }
 }
 }
 
@@ -185,7 +205,8 @@ void Update(const FrameSummary& summary)
         static constexpr const char* Fields[] = {
             "details", "counters", "fps_only", "fps", "average_fps", "low_fps", "slowest_fps", "frame_ms", "cpu", "vsync",
             "driver", "ui_update", "ui_render", "rml_update", "rml_render", "renderer_begin", "renderer_end",
-            "submit", "requested", "submitted", "textures_uploaded", "glyphs_uploaded", "pipeline_binds",
+            "submit", "end_offscreen", "end_stage", "end_replay", "end_post_ui", "requested", "submitted",
+            "commands", "frame_vertex_kb", "textures_uploaded", "glyphs_uploaded", "pipeline_binds",
             "sampler_binds", "vertex_uniforms", "fragment_uniforms", "merged_2d", "skin_gpu",
             "skin_cpu_ineligible", "skin_failed", "batch_draws", "vertices_per_batch", "passes", "history", "info"};
         for (const char* field : Fields)

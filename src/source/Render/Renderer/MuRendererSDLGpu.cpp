@@ -2062,6 +2062,7 @@ public:
         // been replayed yet -- see SetOffscreenRenderCallback (MuRenderer.h).
         if (s_offscreenRenderCallback)
         {
+            FRAME_PROFILE(RendererOffscreen);
             s_offscreenRenderCallback();
         }
         s_frameActive = false;
@@ -2071,12 +2072,19 @@ public:
         // (StageDeferredGpuData is safe to call again even if FlushRenderCommands already
         // called it earlier this same frame -- see its own comment).
         // ---------------------------------------------------------------
-        const bool boneDataReady = StageDeferredGpuData();
+        bool boneDataReady = false;
+        {
+            FRAME_PROFILE(RendererStage);
+            boneDataReady = StageDeferredGpuData();
+        }
 
         // Replay pending offscreen captures into their own textures now that the GPU vertex
         // buffer holds their data: before the main pass below, which must skip them, and before
         // the UI seams, which sample them.
-        ProcessPendingOffscreenCaptures(boneDataReady);
+        {
+            FRAME_PROFILE(RendererOffscreen);
+            ProcessPendingOffscreenCaptures(boneDataReady);
+        }
 
         // ---------------------------------------------------------------
         // Render pass — replay all recorded draw commands.
@@ -2124,6 +2132,7 @@ public:
 #ifdef _EDITOR
         PreparePendingEditorDrawData(s_cmdBuf);
 #endif
+        std::optional<FrameProfiler::Scope> replayScope(std::in_place, FrameProfiler::Pass::RendererReplay);
         {
             SDL_GPUColorTargetInfo colorTarget{};
             colorTarget.texture = frameColorTexture;
@@ -2160,6 +2169,7 @@ public:
             s_mainColorPassOpenedThisFrame = true;
             s_replayedCmdCount = s_renderCmds.size();
         }
+        replayScope.reset();
 
         // RmlUi port: fires after this frame's own game content is fully recorded onto s_cmdBuf
         // but before it's submitted -- see SetPreSubmitCallback's own comment (MuRenderer.h) for
@@ -2186,6 +2196,7 @@ public:
         // so this stacks on top of the main pass's content and RmlUi's, rather than erasing them.
         if (s_cmdBuf && s_postRmlUiCallback)
         {
+            FRAME_PROFILE(RendererPostUi);
             const std::size_t postUiCmdStart = s_renderCmds.size();
 
             // RenderQuad2D/RenderTriangles/etc. all early-return on !s_frameActive, which was
@@ -2239,7 +2250,11 @@ public:
             // texture data together -- it's explicitly documented as safe to call more than once
             // per frame, the same guarantee FlushRenderCommands already relies on mid-recording --
             // and returns a boneDataReady that's actually correct for what THIS callback recorded.
-            const bool postUiBoneDataReady = StageDeferredGpuData();
+            bool postUiBoneDataReady = false;
+            {
+                FRAME_PROFILE(RendererStage);
+                postUiBoneDataReady = StageDeferredGpuData();
+            }
 
             if (s_renderCmds.size() > postUiCmdStart)
             {
