@@ -232,6 +232,7 @@ set(shader_specs
     "basic_colored.frag|frag||0|0|0"
     "shadow_volume.vert|vert|0|0|0|1"
     "skinned_textured.vert|vert|0,1,2,3,4,5|0|1|1"
+    "skinned_shadow.vert|vert|0,3,4|0|2|2"
 )
 
 foreach(shader_spec IN LISTS shader_specs)
@@ -319,4 +320,4 @@ if(validation_errors)
     message(FATAL_ERROR "Shader reflection validation failed:\n  - ${validation_details}")
 endif()
 
-message(STATUS "Validated SDL_GPU reflection and MSL layout for 6 shaders")
+message(STATUS "Validated SDL_GPU reflection and MSL layout for 7 shaders")

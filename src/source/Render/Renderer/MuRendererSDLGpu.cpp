@@ -1028,6 +1028,7 @@ static SDL_GPUShader* s_vertShader2DCol = nullptr;   // basic_colored.vert
 static SDL_GPUShader* s_fragShaderCol = nullptr;     // basic_colored.frag
 static SDL_GPUShader* s_vertShaderShadow = nullptr;  // shadow_volume.vert
 static SDL_GPUShader* s_vertShaderSkinned = nullptr; // skinned_textured.vert
+static SDL_GPUShader* s_vertShaderSkinnedShadow = nullptr; // skinned_shadow.vert
 
 // Depth buffer texture for correct 3D depth testing.
 // Created in Init() at swapchain dimensions, recreated on window resize.
@@ -4509,12 +4510,17 @@ private:
             return false;
         }
 
+        // Body shadows: bone rows and terrain heights, then the skinning and shadow uniforms. Without it,
+        // shadows stay on the CPU.
+        s_vertShaderSkinnedShadow =
+            createShader("skinned_shadow", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 2, 2, /*fatal=*/false);
+
         mu::log::Get("render")->info("SDL_gpu -- shaders loaded for driver: {}", driverName ? driverName : "unknown");
         return true;
     }
 
     // -----------------------------------------------------------------------
-    // ReleaseShaders — release all 6 shader handles.
+    // ReleaseShaders — release all 7 shader handles.
     // Called after CreatePipelines() and during Shutdown() as a safety net.
     // -----------------------------------------------------------------------
     static void ReleaseShaders()
@@ -4548,6 +4554,11 @@ private:
         {
             SDL_ReleaseGPUShader(s_device, s_vertShaderSkinned);
             s_vertShaderSkinned = nullptr;
+        }
+        if (s_vertShaderSkinnedShadow)
+        {
+            SDL_ReleaseGPUShader(s_device, s_vertShaderSkinnedShadow);
+            s_vertShaderSkinnedShadow = nullptr;
         }
     }
 
