@@ -4653,6 +4653,22 @@ private:
         std::string error;
     };
 
+    // Every variant compares depth with LESS_OR_EQUAL, as the classic MU OpenGL client set
+    // glDepthFunc(GL_LEQUAL) at the start of each 3D scene (SetDepthFunc, which this backend
+    // doesn't propagate). Depth-read-only and 2D pipelines always did. Depth-writing ones need it
+    // for models drawn in several depth-writing passes over the same mesh, like the Bill of
+    // Balrog's textured body over its chrome body: with LESS the later pass lost every
+    // equal-depth fragment, so only the first pass showed.
+    [[nodiscard]] static SDL_GPUDepthStencilState MakeDepthStencilState(const PipelineBuildDescription& description)
+    {
+        SDL_GPUDepthStencilState depthState{};
+        depthState.enable_depth_test = description.depthTestEnabled;
+        depthState.enable_depth_write = description.depthWriteEnabled;
+        depthState.enable_stencil_test = false;
+        depthState.compare_op = SDL_GPU_COMPAREOP_LESS_OR_EQUAL;
+        return depthState;
+    }
+
     [[nodiscard]] static PipelineBuildResult BuildBlendPipeline(SDL_GPUColorTargetBlendState blendState,
                                                                 const PipelineBuildDescription& description)
     {
@@ -4780,23 +4796,6 @@ private:
         vtxInputState.vertex_attributes = vertexAttribs;
         vtxInputState.num_vertex_attributes = numAttribs;
 
-        SDL_GPUDepthStencilState depthState{};
-        depthState.enable_depth_test = description.depthTestEnabled;
-        depthState.enable_depth_write = description.depthWriteEnabled;
-        depthState.enable_stencil_test = false;
-        // Depth compare selection:
-        //   LESS for opaque 3D (depth write ON): strict layering, normal opaque z-sort.
-        //   LESS_OR_EQUAL for depth-read-only 3D (write OFF) and all 2D: these are additive/
-        //   glow overlays drawn on top of geometry at the same depth (forge-level sprites,
-        //   weapon chrome/bright mesh passes, terrain texture layering). LESS would reject
-        //   every equal-depth fragment before the blend stage — the classic MU OpenGL client
-        //   ran these passes with GL_LEQUAL effectively by calling SetDepthFunc(GL_LEQUAL)
-        //   before them, which the SDL3 backend doesn't propagate. Using LESS_OR_EQUAL on
-        //   read-only variants recovers the intended behavior uniformly.
-        const bool usesWorldDepth = description.vertexLayout != VertexLayout::TwoDimensional;
-        const bool strictLayering = usesWorldDepth && description.depthWriteEnabled;
-        depthState.compare_op = strictLayering ? SDL_GPU_COMPAREOP_LESS : SDL_GPU_COMPAREOP_LESS_OR_EQUAL;
-
         SDL_GPUGraphicsPipelineTargetInfo targetInfo{};
         targetInfo.color_target_descriptions = &colorTargetDesc;
         targetInfo.num_color_targets = 1;
@@ -4805,12 +4804,11 @@ private:
         targetInfo.has_depth_stencil_target = true;
         targetInfo.depth_stencil_format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT;
 
-        // Back-face culling: enable for opaque 3D geometry (depth write ON).
-        // Disable for transparent/glow passes (depth write OFF) and all 2D.
+        // Back-face culling as the descriptor asks: on for opaque 3D geometry (depth write ON),
+        // off for transparent/glow passes (depth write OFF) and in every 2D descriptor.
         SDL_GPURasterizerState rasterState{};
         rasterState.fill_mode = SDL_GPU_FILLMODE_FILL;
-        rasterState.cull_mode =
-            (usesWorldDepth && description.cullFaceEnabled) ? SDL_GPU_CULLMODE_BACK : SDL_GPU_CULLMODE_NONE;
+        rasterState.cull_mode = description.cullFaceEnabled ? SDL_GPU_CULLMODE_BACK : SDL_GPU_CULLMODE_NONE;
         rasterState.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
 
         SDL_GPUGraphicsPipelineCreateInfo pipelineInfo{};
@@ -4821,7 +4819,7 @@ private:
         pipelineInfo.vertex_input_state = vtxInputState;
         pipelineInfo.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
         pipelineInfo.rasterizer_state = rasterState;
-        pipelineInfo.depth_stencil_state = depthState;
+        pipelineInfo.depth_stencil_state = MakeDepthStencilState(description);
         pipelineInfo.target_info = targetInfo;
         pipelineInfo.props = 0;
 
@@ -4848,8 +4846,7 @@ private:
                                            ? "skinned_shadow.vert"
                                            : "basic_textured.vert";
         constexpr const char* fragmentShaderName = "basic_textured.frag";
-        const char* cullMode =
-            description.vertexLayout != VertexLayout::TwoDimensional && description.cullFaceEnabled ? "back" : "none";
+        const char* cullMode = description.cullFaceEnabled ? "back" : "none";
         if (required)
         {
             mu::log::Get("render")->error(
