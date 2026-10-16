@@ -2,6 +2,7 @@
 #include "UI/RmlBridge/ThemeFonts.h"
 #include "UI/RmlBridge/ThemeInheritance.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "Core/Platform/BundledFonts.h"
 #include "Core/Utilities/StringUtils.h"
 
 #include <RmlUi/Core/Core.h>
@@ -33,6 +34,10 @@ bool FollowsSelectedFont(const std::string& token)
 {
     return token == "font-body" || token == "font-title";
 }
+
+// Names the family the native text renderer measures and draws with, for text drawn in a box the
+// native renderer sized (the world labels).
+constexpr const char* kNativeFontToken = "font-native";
 
 std::optional<std::string> EnvironmentValue(const std::string& name)
 {
@@ -130,8 +135,16 @@ std::optional<std::string> ResolveThemeFontToken(const ThemeInheritance& theme, 
     if (!token.starts_with("font-") || !theme.IsValid())
         return std::nullopt;
     const std::string& selected = SelectedFontFamily();
-    if (FollowsSelectedFont(token) && !selected.empty() && FamilyAvailable(selected))
+    if (token == kNativeFontToken)
+    {
+        const std::string native = ResolveBundledFont(selected).family;
+        if (FamilyAvailable(native))
+            return native;
+    }
+    else if (FollowsSelectedFont(token) && !selected.empty() && FamilyAvailable(selected))
+    {
         return selected;
+    }
     for (const auto& directory : theme.Directories())
     {
         const auto family = ThemeInheritance::ReadSetting(directory, "Tokens", token);
