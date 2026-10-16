@@ -34,13 +34,12 @@ void RegisterModel(Rml::DataModelConstructor& constructor, DiagnosticsModel& mod
         std::snprintf(text, sizeof(text), "%.2f", args.front().Get<double>());
         return Rml::Variant(Rml::String(text));
     });
-    auto row = constructor.RegisterStruct<DiagnosticsModel::PassRow>();
-    row.RegisterMember("name", &DiagnosticsModel::PassRow::name);
-    row.RegisterMember("ms", &DiagnosticsModel::PassRow::milliseconds);
-    row.RegisterMember("draws", &DiagnosticsModel::PassRow::draws);
-    row.RegisterMember("merged", &DiagnosticsModel::PassRow::merged);
-    row.RegisterMember("vertex_kb", &DiagnosticsModel::PassRow::vertexKB);
-    constructor.RegisterArray<Rml::Vector<DiagnosticsModel::PassRow>>();
+    auto columns = constructor.RegisterStruct<DiagnosticsModel::PassColumns>();
+    columns.RegisterMember("names", &DiagnosticsModel::PassColumns::names);
+    columns.RegisterMember("ms", &DiagnosticsModel::PassColumns::milliseconds);
+    columns.RegisterMember("draws", &DiagnosticsModel::PassColumns::draws);
+    columns.RegisterMember("merged", &DiagnosticsModel::PassColumns::merged);
+    columns.RegisterMember("vertex_kb", &DiagnosticsModel::PassColumns::vertexKB);
     constructor.RegisterArray<Rml::Vector<float>>();
     constructor.RegisterArray<Rml::Vector<Rml::String>>();
     constructor.Bind("details", &model.details);
@@ -82,7 +81,8 @@ void RegisterModel(Rml::DataModelConstructor& constructor, DiagnosticsModel& mod
     constructor.Bind("skin_failed", &model.skinFailed);
     constructor.Bind("batch_draws", &model.batchDraws);
     constructor.Bind("vertices_per_batch", &model.verticesPerBatch);
-    constructor.Bind("passes", &model.passes);
+    constructor.Bind("passes_left", &model.passesLeft);
+    constructor.Bind("passes_right", &model.passesRight);
     constructor.Bind("history", &model.history);
 }
 
@@ -140,17 +140,31 @@ void UpdateCounters(DiagnosticsModel& model)
     const auto batchVertices = FrameProfiler::CompletedCounter(Counter::BatchVertices);
     model.batchDraws = static_cast<int>(batchDraws);
     model.verticesPerBatch = batchDraws > 0 ? static_cast<float>(batchVertices) / static_cast<float>(batchDraws) : 0.f;
-    model.passes.resize(static_cast<size_t>(FrameProfiler::Pass::Count_));
-    for (size_t index = 0; index < model.passes.size(); ++index)
+    // The first half of the passes in the left columns, the rest in the right.
+    constexpr int PassCount = static_cast<int>(FrameProfiler::Pass::Count_);
+    model.passesLeft = {};
+    model.passesRight = {};
+    for (int index = 0; index < PassCount; ++index)
     {
         const auto pass = static_cast<FrameProfiler::Pass>(index);
-        auto& row = model.passes[index];
-        row.name = FrameProfiler::kPassNames[index];
-        row.milliseconds = FrameProfiler::CompletedMs(pass);
-        row.draws = static_cast<int>(FrameProfiler::CompletedCounter(pass, Counter::DrawCalls));
-        row.merged = static_cast<int>(FrameProfiler::CompletedCounter(pass, Counter::MergedDraws));
+        auto& columns = index * 2 < PassCount ? model.passesLeft : model.passesRight;
+        const auto addLine = [](Rml::String& column, const char* text)
+        {
+            if (!column.empty())
+                column += '\n';
+            column += text;
+        };
+        char text[32];
+        addLine(columns.names, FrameProfiler::kPassNames[index]);
+        std::snprintf(text, sizeof(text), "%.2f", FrameProfiler::CompletedMs(pass));
+        addLine(columns.milliseconds, text);
+        std::snprintf(text, sizeof(text), "%u", FrameProfiler::CompletedCounter(pass, Counter::DrawCalls));
+        addLine(columns.draws, text);
+        std::snprintf(text, sizeof(text), "%u", FrameProfiler::CompletedCounter(pass, Counter::MergedDraws));
+        addLine(columns.merged, text);
         constexpr float BytesPerKilobyte = 1024.f;
-        row.vertexKB = FrameProfiler::CompletedCounter(pass, Counter::VertexBytes) / BytesPerKilobyte;
+        std::snprintf(text, sizeof(text), "%.2f", FrameProfiler::CompletedCounter(pass, Counter::VertexBytes) / BytesPerKilobyte);
+        addLine(columns.vertexKB, text);
     }
 }
 
@@ -208,7 +222,7 @@ void Update(const FrameSummary& summary)
             "submit", "end_offscreen", "end_stage", "end_replay", "end_post_ui", "requested", "submitted",
             "commands", "frame_vertex_kb", "textures_uploaded", "glyphs_uploaded", "pipeline_binds",
             "sampler_binds", "vertex_uniforms", "fragment_uniforms", "merged_2d", "skin_gpu",
-            "skin_cpu_ineligible", "skin_failed", "batch_draws", "vertices_per_batch", "passes", "history", "info"};
+            "skin_cpu_ineligible", "skin_failed", "batch_draws", "vertices_per_batch", "passes_left", "passes_right", "history", "info"};
         for (const char* field : Fields)
             g_view->MarkDirty(field);
         g_nextRefresh = now + RefreshInterval;
