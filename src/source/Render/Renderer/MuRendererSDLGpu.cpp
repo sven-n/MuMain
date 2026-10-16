@@ -1727,7 +1727,6 @@ public:
         s_dbgVertexUniformPushesThisFrame = 0u;
         s_dbgFragmentUniformPushesThisFrame = 0u;
         ++s_dbgFrameCount;
-        s_vtxScratch.clear();
 
         s_swapW = 0u;
         s_swapH = 0u;
@@ -4020,7 +4019,10 @@ private:
         }
 
         const Uint32 requiredSize = alignedOffset + byteSize;
-        s_vtxScratch.resize(requiredSize);
+        // Kept at its largest size across frames (s_vtxOffset is the used part): resize() zero-fills
+        // what it adds, which the copy below would overwrite anyway.
+        if (s_vtxScratch.size() < requiredSize)
+            s_vtxScratch.resize(std::max<std::size_t>(requiredSize, s_vtxScratch.size() * 2u));
         std::memcpy(s_vtxScratch.data() + alignedOffset, pData, byteSize);
 
         s_vtxOffset = requiredSize;
