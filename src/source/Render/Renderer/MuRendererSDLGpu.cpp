@@ -1977,6 +1977,8 @@ public:
         if (!s_pendingSkinnedMeshUploads.empty() && !StageSkinnedMeshes(bufferUploads))
         {
             mu::log::Get("render")->error("SDL_gpu -- failed to stage cached skinned meshes: {}", SDL_GetError());
+            // Their ranges hold nothing yet; skinned draws wait for the retry rather than read them.
+            boneDataReady = false;
         }
 
         // EnsureStripIndexBuffer may release/create GPU resources, so it runs before the copy pass.
