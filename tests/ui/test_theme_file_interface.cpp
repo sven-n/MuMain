@@ -230,7 +230,7 @@ TEST_CASE("focused confirmation input claims its document and accepts Enter and 
     int cancelled = 0;
     mu::ui::window::GenericDialogConfig config;
     config.showCancel = true;
-    config.input.emplace();
+    config.input = mu::ui::window::GenericDialogConfig::InputField{};
     config.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
     config.onPrimary = [&] { ++accepted; };
     config.onCancel = [&] { ++cancelled; };
