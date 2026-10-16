@@ -185,9 +185,9 @@ SDL_GPUSampler* CreateSampler(SDL_GPUDevice* device, SDL_GPUFilter filter, SDL_G
 }
 
 // The CPU copy of an upscaled texture is up to 16 times the original and
-// nothing reads it after the upload: only the canvases (BITMAP_FONT,
-// BITMAP_GUILD) are redrawn through Buffer, and those never carry the marker.
-// Keeping the copies took the 32 bit client past 3.3 GB of address space.
+// nothing reads it after the upload: only the canvases (LoadCanvasBitmap) are
+// redrawn through Buffer, and those are never uploaded upscaled. Keeping the
+// copies took the 32 bit client past 3.3 GB of address space.
 // Returns the bytes released.
 std::size_t ReleaseUploadedPixels(BITMAP_t& bitmap)
 {
@@ -195,6 +195,18 @@ std::size_t ReleaseUploadedPixels(BITMAP_t& bitmap)
     std::vector<std::uint8_t>().swap(bitmap.BufferStorage);
     bitmap.Buffer = nullptr;
     return released;
+}
+
+// A canvas is drawn on through Buffer at the original size, so an upscaled file
+// loaded into one is brought back to that size. Width and height become the
+// size to upload.
+void ShrinkCanvas(BITMAP_t& bitmap, int& width, int& height, int scale)
+{
+    bitmap.BufferStorage =
+        Render::Textures::Upscale::ShrinkToOriginal(bitmap.BufferStorage, width, height, bitmap.Components, scale);
+    bitmap.Buffer = bitmap.BufferStorage.data();
+    width /= scale;
+    height /= scale;
 }
 
 bool UploadTextureSDLGpu(BITMAP_t* bitmap, const std::uint8_t* pixelData, int width, int height, SDL_GPUFilter filter,
@@ -609,7 +621,8 @@ GLuint CGlobalBitmap::LoadImageExclusive(const std::wstring& filename, GLuint ui
     }
     return BITMAP_UNKNOWN;
 }
-bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode, bool padToPowerOfTwo, bool premultiplyAlpha)
+bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode,
+                              bool padToPowerOfTwo, bool premultiplyAlpha, bool keepPixels)
 {
     unsigned int UICLAMP = GL_CLAMP_TO_EDGE;
     unsigned int UIREPEAT = GL_REPEAT;
@@ -657,9 +670,9 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename
 
     bool loaded = false;
     if (0 == _wcsicmp(ext.c_str(), L"jpg"))
-        loaded = OpenJpegTurbo(uiBitmapIndex, filename, uiFilter, uiWrapMode, padToPowerOfTwo);
+        loaded = OpenJpegTurbo(uiBitmapIndex, filename, uiFilter, uiWrapMode, padToPowerOfTwo, keepPixels);
     else if (0 == _wcsicmp(ext.c_str(), L"tga"))
-        loaded = OpenTga(uiBitmapIndex, filename, uiFilter, uiWrapMode, padToPowerOfTwo, premultiplyAlpha);
+        loaded = OpenTga(uiBitmapIndex, filename, uiFilter, uiWrapMode, padToPowerOfTwo, premultiplyAlpha, keepPixels);
 #ifdef _EDITOR
     if (loaded)
         m_loadWorlds[uiBitmapIndex] = Core::AssetLoadWorld::Get();
@@ -879,7 +892,7 @@ GLuint CGlobalBitmap::FindAvailableTextureIndex(GLuint uiSeed)
 }
 
 bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter,
-                                  GLuint uiWrapMode, bool padToPowerOfTwo)
+                                  GLuint uiWrapMode, bool padToPowerOfTwo, bool keepPixels)
 {
     std::wstring filename_ozj;
     ExchangeExt(filename, L"OZJ", filename_ozj);
@@ -938,11 +951,11 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
     const int textureWidth = padToPowerOfTwo ? NextPowerOfTwo(jpegWidth, MAX_WIDTH) : jpegWidth;
     const int textureHeight = padToPowerOfTwo ? NextPowerOfTwo(jpegHeight, MAX_HEIGHT) : jpegHeight;
     const int scale = Render::Textures::Upscale::ReadScale(jpegBuf, textureWidth, textureHeight);
+    const bool upscaled = scale > Render::Textures::Upscale::NoScale && !keepPixels;
 
     auto pNewBitmap = CreateBitmapStorage(uiBitmapIndex, filename, textureWidth, textureHeight, 3);
     pNewBitmap->Width = static_cast<float>(textureWidth / scale);
     pNewBitmap->Height = static_cast<float>(textureHeight / scale);
-    m_dwUsedTextureMemory += static_cast<std::uint32_t>(pNewBitmap->BufferStorage.size());
 
     const int jpegRowSize = jpegWidth * 3;
     const int textureRowSize = textureWidth * 3;
@@ -964,15 +977,23 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
                static_cast<std::size_t>(jpegHeight) * static_cast<std::size_t>(jpegWidth) * 3u);
     }
 
+    int uploadWidth = textureWidth;
+    int uploadHeight = textureHeight;
+    if (keepPixels && scale > Render::Textures::Upscale::NoScale)
+    {
+        ShrinkCanvas(*pNewBitmap, uploadWidth, uploadHeight, scale);
+    }
+    m_dwUsedTextureMemory += static_cast<std::uint32_t>(pNewBitmap->BufferStorage.size());
+
     pNewBitmap->TextureNumber = uiBitmapIndex;
-    std::vector<std::uint8_t> rgbaData = PadRGBToRGBA(pNewBitmap->Buffer, textureWidth, textureHeight);
-    if (!UploadTextureSDLGpu(pNewBitmap.get(), rgbaData.data(), textureWidth, textureHeight, MapGLFilterToSDL(uiFilter),
-                             MapGLWrapToSDL(uiWrapMode), scale > Render::Textures::Upscale::NoScale))
+    std::vector<std::uint8_t> rgbaData = PadRGBToRGBA(pNewBitmap->Buffer, uploadWidth, uploadHeight);
+    if (!UploadTextureSDLGpu(pNewBitmap.get(), rgbaData.data(), uploadWidth, uploadHeight, MapGLFilterToSDL(uiFilter),
+                             MapGLWrapToSDL(uiWrapMode), upscaled))
     {
         g_ErrorReport.Write(L"SDL texture upload failed %ls (%d)\r\n", filename.c_str(), uiBitmapIndex);
         return false;
     }
-    if (scale > Render::Textures::Upscale::NoScale)
+    if (upscaled)
     {
         m_dwUsedTextureMemory -= static_cast<std::uint32_t>(ReleaseUploadedPixels(*pNewBitmap));
     }
@@ -986,7 +1007,8 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
     return true;
 }
 
-bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode, bool padToPowerOfTwo, bool premultiplyAlpha)
+bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode,
+                            bool padToPowerOfTwo, bool premultiplyAlpha, bool keepPixels)
 {
     namespace Ozt = Render::Textures::Ozt;
 
@@ -1020,12 +1042,12 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
     const int Width = padToPowerOfTwo ? NextPowerOfTwo(header.width, MAX_WIDTH) : header.width;
     const int Height = padToPowerOfTwo ? NextPowerOfTwo(header.height, MAX_HEIGHT) : header.height;
     const int scale = Render::Textures::Upscale::ReadScale(pakBuffer, Width, Height);
+    const bool upscaled = scale > Render::Textures::Upscale::NoScale && !keepPixels;
 
     auto pNewBitmap = CreateBitmapStorage(uiBitmapIndex, filename, Width, Height, 4);
     pNewBitmap->Width = static_cast<float>(Width / scale);
     pNewBitmap->Height = static_cast<float>(Height / scale);
     const std::size_t BufferSize = pNewBitmap->BufferStorage.size();
-    m_dwUsedTextureMemory += static_cast<std::uint32_t>(BufferSize);
 
     Ozt::CopyPixels(pakBuffer, header, std::span<std::uint8_t>(pNewBitmap->Buffer, BufferSize), Width);
     if (premultiplyAlpha)
@@ -1033,14 +1055,22 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
         Render::RmlUi::PremultiplyAlpha(pNewBitmap->Buffer, BufferSize / Ozt::BytesPerPixel);
     }
 
+    int uploadWidth = Width;
+    int uploadHeight = Height;
+    if (keepPixels && scale > Render::Textures::Upscale::NoScale)
+    {
+        ShrinkCanvas(*pNewBitmap, uploadWidth, uploadHeight, scale);
+    }
+    m_dwUsedTextureMemory += static_cast<std::uint32_t>(pNewBitmap->BufferStorage.size());
+
     pNewBitmap->TextureNumber = uiBitmapIndex;
-    if (!UploadTextureSDLGpu(pNewBitmap.get(), pNewBitmap->Buffer, Width, Height, MapGLFilterToSDL(uiFilter),
-                             MapGLWrapToSDL(uiWrapMode), scale > Render::Textures::Upscale::NoScale))
+    if (!UploadTextureSDLGpu(pNewBitmap.get(), pNewBitmap->Buffer, uploadWidth, uploadHeight,
+                             MapGLFilterToSDL(uiFilter), MapGLWrapToSDL(uiWrapMode), upscaled))
     {
         g_ErrorReport.Write(L"SDL texture upload failed %ls (%d)\r\n", filename.c_str(), uiBitmapIndex);
         return false;
     }
-    if (scale > Render::Textures::Upscale::NoScale)
+    if (upscaled)
     {
         m_dwUsedTextureMemory -= static_cast<std::uint32_t>(ReleaseUploadedPixels(*pNewBitmap));
     }

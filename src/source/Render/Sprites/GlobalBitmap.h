@@ -24,8 +24,8 @@ struct BITMAP_t
     GLuint BitmapIndex;
     wchar_t FileName[MAX_BITMAP_FILE_NAME];
     // The size the game works with. For upscaled art (Render/Textures/UpscaleMarker.h)
-    // the uploaded texture is larger and Buffer is released after the upload. A bitmap
-    // drawn on through Buffer (BITMAP_FONT, BITMAP_GUILD) must therefore never be upscaled.
+    // the uploaded texture is larger and Buffer is released after the upload. A canvas
+    // (LoadCanvasBitmap: BITMAP_GUILD, BITMAP_INTERFACE_MAP) keeps Buffer at this size.
     float Width;
     float Height;
     char Components;
@@ -131,7 +131,11 @@ public:
     virtual ~CGlobalBitmap();
 
     GLuint LoadImage(const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
-    bool LoadImage(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE, bool padToPowerOfTwo = true, bool premultiplyAlpha = false);
+    // keepPixels: the game draws on the texture through Buffer (a canvas), so Buffer stays
+    // at the original size, also for an upscaled file.
+    bool LoadImage(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST,
+                   GLuint uiWrapMode = GL_CLAMP_TO_EDGE, bool padToPowerOfTwo = true, bool premultiplyAlpha = false,
+                   bool keepPixels = false);
     // Like LoadImage(filename, ...), but never shares an existing by-filename match -- always
     // creates its own independent entry, even if the same file is already resident under a
     // numbered slot (e.g. BITMAP_LOG_IN+7). Needed by callers that cache the resolved GPU
@@ -180,8 +184,11 @@ protected:
     GLuint GenerateTextureIndex();
     GLuint FindAvailableTextureIndex(GLuint uiSeed);
 
-    bool OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE, bool padToPowerOfTwo = true);
-    bool OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE, bool padToPowerOfTwo = true, bool premultiplyAlpha = false);
+    bool OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST,
+                       GLuint uiWrapMode = GL_CLAMP_TO_EDGE, bool padToPowerOfTwo = true, bool keepPixels = false);
+    bool OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST,
+                 GLuint uiWrapMode = GL_CLAMP_TO_EDGE, bool padToPowerOfTwo = true, bool premultiplyAlpha = false,
+                 bool keepPixels = false);
     void SplitFileName(IN const std::wstring& filepath, OUT std::wstring& filename, bool bIncludeExt);
     void SplitExt(IN const std::wstring& filepath, OUT std::wstring& ext, bool bIncludeDot);
     void ExchangeExt(IN const std::wstring& in_filepath, IN const std::wstring& ext, OUT std::wstring& out_filepath);

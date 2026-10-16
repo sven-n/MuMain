@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <span>
+#include <vector>
 
 // Upscaled art: an OZJ or OZT file whose image is 2 or 4 times the size the
 // game was written against. Such a file starts with 'M' 'U' 'X' and the scale,
@@ -19,4 +20,11 @@ inline constexpr int NoScale = 1;
 // Also 1 when the texture is smaller than the scale, as it then has no
 // original size.
 int ReadScale(std::span<const std::uint8_t> file, int textureWidth, int textureHeight);
+
+// An upscaled image brought back to the original size, each pixel the average
+// of a scale x scale block. For a texture the game draws on through its pixels,
+// which are laid out for the original size. Width and height are multiples of
+// the scale.
+std::vector<std::uint8_t> ShrinkToOriginal(std::span<const std::uint8_t> pixels, int width, int height,
+                                           int bytesPerPixel, int scale);
 } // namespace Render::Textures::Upscale
