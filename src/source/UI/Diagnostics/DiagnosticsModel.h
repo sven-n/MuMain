@@ -6,13 +6,15 @@ namespace UI::Diagnostics
 {
 struct DiagnosticsModel
 {
-    struct PassRow
+    // Half of the pass table, a column each: one line per pass. Text columns instead of a box per
+    // cell, so a refresh lays out a few text blocks rather than hundreds of boxes.
+    struct PassColumns
     {
-        Rml::String name;
-        float milliseconds = 0;
-        int draws = 0;
-        int merged = 0;
-        float vertexKB = 0;
+        Rml::String names;
+        Rml::String milliseconds;
+        Rml::String draws;
+        Rml::String merged;
+        Rml::String vertexKB;
     };
 
     bool details = false;
@@ -53,7 +55,8 @@ struct DiagnosticsModel
     int skinFailed = 0;
     int batchDraws = 0;
     float verticesPerBatch = 0;
-    Rml::Vector<PassRow> passes;
+    PassColumns passesLeft;
+    PassColumns passesRight;
     Rml::Vector<float> history;
     Rml::Vector<Rml::String> info;
 };

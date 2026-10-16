@@ -448,8 +448,14 @@ void mu::ui::window::COptionWindow::Show(bool bShow)
     mu::ui::window::CObject::Show(bShow);
     if (m_RmlView.Document())
     {
-        if (bShow) m_RmlView.Document()->Show();
-        else m_RmlView.Document()->Hide();
+        // A hidden window skips its sync, so it catches up before its document shows.
+        if (bShow)
+        {
+            SyncRmlModel();
+            m_RmlView.Document()->Show();
+        }
+        else
+            m_RmlView.Document()->Hide();
     }
 }
 
@@ -1122,6 +1128,8 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     // Saturates rather than wrapping; only ever compared against kRmlSelectSettleFrames below.
     if (m_rmlSyncCount < 1000)
         ++m_rmlSyncCount;
+    if (!IsVisible())
+        return;
 
     auto& model = m_RmlView.GetModel();
 

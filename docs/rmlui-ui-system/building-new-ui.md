@@ -115,6 +115,12 @@ document. `CObject::Show(bool)` is virtual. A window may override it to synchron
 or use `SyncDocumentVisibility()` in its update path. Synchronize only on visibility transitions:
 calling `ElementDocument::Show()` every frame can steal focus from an input field.
 
+`Update()` runs for every enabled window, shown or not, so `SyncRmlModel()` returns once the
+window is hidden, right after `SyncDocumentVisibility()`. The model then catches up in the call
+that shows the document. A window whose `Show(true)` shows the document itself calls
+`SyncRmlModel()` first. Anything the window owns outside its document (a shared tooltip) is
+released on that early return.
+
 Use RmlUi event callbacks for visible controls. Repeated rows bind data with `data-for`; use the
 catalog's [List / repeated rows](component-catalog.md#list--repeated-rows) and
 [Tab / TabBar](component-catalog.md#tab--tabbar) patterns instead of inventing a native control.
