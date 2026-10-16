@@ -3162,6 +3162,8 @@ void RenderTerrain(bool EditFlag)
 
     if (!EditFlag)
     {
+        // The ground, its layers and the grass all rely on it; earlier 2D passes may leave it off.
+        EnableDepthTest();
         DisableAlphaBlend();
     }
     else
