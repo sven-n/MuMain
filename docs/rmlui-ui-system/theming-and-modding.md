@@ -353,8 +353,13 @@ already loaded. Referencing a player's installed font does not package it with t
 inherits `legacy` and restyles the login box, server list, character select and creation, HUD,
 inventory, character, party, NPC shop, storage, trade, Chaos Machine, guild, event entries,
 message boxes, confirmations, the Esc menus, the command window (D) and chat. The NPC menus that
-share the Esc menu's document keep legacy's look, as 0.97 has none of them. The art lives outside the RmlUi tree, in `Data/Interface/Classic` and
-`Data/Logo/Classic`, so its file names cannot collide with S6 files of the same name.
+share the Esc menu's document keep legacy's look, as 0.97 has none of them. Where the Season 1 and
+2 clients, which kept the classic interface, add a part for something MuMain has, the theme draws
+it as they did instead of hiding it: on the HUD the SD column and the command window and friend
+buttons, in the character window the quest and pet buttons, in the inventory the personal shop
+button. A window 0.97 does not have follows those clients, else the closest classic window. The
+art lives outside the RmlUi tree, in `Data/Interface/Classic` and `Data/Logo/Classic`, so its file
+names cannot collide with S6 files of the same name.
 
 What changes for the player, besides the look:
 
@@ -362,9 +367,10 @@ What changes for the player, besides the look:
   client enables.
 - **World:** no map title when entering a map.
 
-The HUD model also exposes what the 0.97 bar shows and the S6 bar does not: `party_open` /
-`guild_open` with `mainframe_party_click` / `mainframe_guild_click` and their tooltips,
-and `coord_x` / `coord_y`.
+The HUD model also exposes what the classic bar shows and the S6 bar does not: `party_open` /
+`guild_open` / `command_open` with `mainframe_party_click` / `mainframe_guild_click` /
+`mainframe_command_click` (the command window under the D key's rules) and their tooltips, and
+`coord_x` / `coord_y`.
 
 The character creation model has `job_previous` / `job_next`: the enabled class before and after
 the selected one, or -1, for a theme that steps through the classes with arrows

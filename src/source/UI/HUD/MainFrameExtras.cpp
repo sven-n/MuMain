@@ -6,6 +6,8 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "I18N/All.h"
 #include "UI/Core/WindowSystem.h"
+#include "Engine/Object/ZzzInventory.h"
+#include "World/MapInfra/MapManager.h"
 
 #include <RmlUi/Core/DataModelHandle.h>
 
@@ -30,8 +32,10 @@ struct Model
     Rml::String coordY;
     bool partyOpen = false;
     bool guildOpen = false;
+    bool commandOpen = false;
     WideText partyTooltip;
     WideText guildTooltip;
+    WideText commandTooltip;
     int heroX = -1;
     int heroY = -1;
 };
@@ -43,6 +47,21 @@ void Toggle(mu::ui::window::INTERFACE_LIST window)
 {
     g_pNewUISystem->Toggle(window);
     PlayBuffer(SOUND_CLICK01);
+}
+
+// The command window, under the D key's rules (HotKey.cpp): nothing in Chaos Castle, a notice in a
+// battle zone.
+void ToggleCommandWindow()
+{
+    if (gMapManager.InChaosCastle())
+        return;
+    if (::IsStrifeMap(gMapManager.WorldActive))
+    {
+        if (g_pSystemLogBox->CheckChatRedundancy(I18N::Game::TheCommandWindowCannotBeActivatedInBattleZone) == FALSE)
+            g_pSystemLogBox->AddText(I18N::Game::TheCommandWindowCannotBeActivatedInBattleZone, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        return;
+    }
+    Toggle(mu::ui::window::INTERFACE_COMMAND);
 }
 
 void SyncText(Rml::String& field, const char* name, Rml::String value)
@@ -77,8 +96,12 @@ void BindModel(Rml::DataModelConstructor& constructor)
     constructor.Bind("coord_y", &s_model.coordY);
     constructor.Bind("party_open", &s_model.partyOpen);
     constructor.Bind("guild_open", &s_model.guildOpen);
+    constructor.Bind("command_open", &s_model.commandOpen);
     constructor.Bind("party_tooltip", &s_model.partyTooltip.text);
     constructor.Bind("guild_tooltip", &s_model.guildTooltip.text);
+    constructor.Bind("command_tooltip", &s_model.commandTooltip.text);
+    constructor.BindEventCallback("mainframe_command_click",
+        [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { ToggleCommandWindow(); });
     constructor.BindEventCallback("mainframe_party_click",
         [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { Toggle(mu::ui::window::INTERFACE_PARTY); });
     constructor.BindEventCallback("mainframe_guild_click",
@@ -101,7 +124,9 @@ void SyncModel()
     }
     SyncBool(s_model.partyOpen, "party_open", g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_PARTY));
     SyncBool(s_model.guildOpen, "guild_open", g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GUILDINFO));
+    SyncBool(s_model.commandOpen, "command_open", g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_COMMAND));
     SyncWide(s_model.partyTooltip, "party_tooltip", I18N::Game::PartyP);
     SyncWide(s_model.guildTooltip, "guild_tooltip", I18N::Game::GuildG);
+    SyncWide(s_model.commandTooltip, "command_tooltip", I18N::Game::CommandD);
 }
 } // namespace UI::Hud::MainFrameExtras
