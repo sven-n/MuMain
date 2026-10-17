@@ -51,7 +51,7 @@
 
 	<div class="option-close-btn" data-event-click="option_click_close"></div>
 
-	<div class="option-tab-scroll">
+	<div class="option-tab-scroll scroll-pane">
 	<div class="option-tab-panel" data-class-hidden="active_tab != 0">
 		<!-- Custom dropdown, not RmlUi's native <select>/<option> -- that was tried first and never
 		     reliably worked in this engine: WidgetDropDown's own generated

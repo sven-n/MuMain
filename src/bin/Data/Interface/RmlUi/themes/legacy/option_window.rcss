@@ -91,36 +91,15 @@
 	decorator: ninepatch(option-tab-active, option-tab-active-inner);
 }
 
-/* The settings of the active tab, below the tab row. It scrolls when the panel is capped to a short
-   screen; the tabs and the close cross stay where they are. Its lower rows open their dropdown
-   lists upwards (.option-opens-up), so a list stays inside this area. */
+/* The settings of the active tab, below the tab row. It scrolls with the chat log's scrollbar
+   (base.rcss's .scroll-pane) when its rows don't fit; the tabs and the close cross stay where they
+   are. A tab's last dropdown opens its list upwards (.option-opens-up), so it stays inside this area. */
 .option-tab-scroll {
 	position: absolute;
 	left: 0;
 	right: 0;
 	top: 30dp;
 	bottom: 0;
-	overflow-y: auto;
-	pointer-events: auto;
-}
-.option-tab-scroll scrollbarvertical {
-	width: 6dp;
-	margin: 0;
-}
-.option-tab-scroll scrollbarvertical slidertrack {
-	background-color: token(surface-recessed);
-}
-.option-tab-scroll scrollbarvertical sliderbar {
-	background-color: token(control-thumb);
-}
-.option-tab-scroll scrollbarvertical sliderbar:hover,
-.option-tab-scroll scrollbarvertical sliderbar:active {
-	background-color: token(control-thumb-hover);
-}
-.option-tab-scroll scrollbarvertical sliderarrowdec,
-.option-tab-scroll scrollbarvertical sliderarrowinc {
-	width: 0;
-	height: 0;
 }
 
 /* One tab's rows, top to bottom. The .hidden override is needed because this display:flex would
