@@ -9,8 +9,10 @@ The interface of the original 0.97 client, drawn with its own art.
   - `Data/Interface/Classic/` — the 0.97 client's `Data/Interface`;
   - `Data/Interface/Classic/099b/` — classic-era files the 0.99b client adds (not in 0.97);
   - `Data/Interface/Classic/s1/`, `s2/` — files of the Season 1 and Season 2 clients, which kept
-    the classic interface, for windows 0.97 does not have (the duel crest, the quest book, the
-    personal shop's buttons, Season 1's text button, the Season 2 cash shop's pieces);
+    the classic interface, for the parts and windows 0.97 does not have (the bar's thirds with the
+    command window and friend buttons' boxes and the SD column, the quest, pet and personal shop
+    buttons, the duel crest, the quest book, Season 1's text button, the Season 2 cash shop's
+    pieces);
   - `Data/Logo/Classic/` — the 0.97 login box and character select art.
 - **Paths** are relative to the stylesheet: from a stylesheet here, `../../../Classic/Menu01_new.jpg`
   and `../../../../Logo/Classic/0box.jpg`. The engine opens `.jpg` as `.OZJ` and `.tga` as `.OZT`.

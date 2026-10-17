@@ -78,8 +78,8 @@
 #gold_text.gold-million { color: #ff9600; }
 #gold_text.gold-ten-million { color: #ff0000; }
 
-/* Close (25, 395) and Repair (60, 395), 24x24; the second image while pressed. 0.97 has no
-   personal shop and no inventory extension. */
+/* Close and Repair, 24x24 at (20, 395) and (48, 395), where the Season 1 client draws them beside
+   its personal shop button (0.97, without it: 25 and 60); the second image while pressed. */
 @spritesheet classic-inv-exit-sheet    { src: ../../../Classic/Exit_01.jpg;   classic-inv-exit: 0px 0px 24px 24px; }
 @spritesheet classic-inv-exit2-sheet   { src: ../../../Classic/Exit_02.jpg;   classic-inv-exit-pressed: 0px 0px 24px 24px; }
 @spritesheet classic-inv-repair-sheet  { src: ../../../Classic/Repair_01.jpg; classic-inv-repair: 0px 0px 24px 24px; }
@@ -93,17 +93,24 @@
 	pointer-events: auto;
 }
 .inv-btn.hidden { display: none; }
-.inv-btn-exit   { left: 25px; decorator: image(classic-inv-exit); }
+.inv-btn-exit   { left: 20px; decorator: image(classic-inv-exit); }
 .inv-btn-exit:active { decorator: image(classic-inv-exit-pressed); }
-.inv-btn-repair { left: 60px; decorator: image(classic-inv-repair); }
+.inv-btn-repair { left: 48px; decorator: image(classic-inv-repair); }
 .inv-btn-repair:active { decorator: image(classic-inv-repair-pressed); }
-#btn_myshop { display: none; }
 
-/* The extended inventory's button has no 0.97 counterpart: it keeps legacy's own art
-   (newui_expansion_btn, 36x29) after the 0.97 buttons, on the row's centre, until the classic
+/* The Season 1 client's personal shop button (005c76d0): btn_pshop (24x24) at (76, 395),
+   btn_pshop2 while the shop is open. Dimmed while it cannot be used. */
+@spritesheet classic-inv-pshop-sheet  { src: ../../../Classic/s1/btn_pshop.jpg;  classic-inv-pshop: 0px 0px 24px 24px; }
+@spritesheet classic-inv-pshop2-sheet { src: ../../../Classic/s1/btn_pshop2.jpg; classic-inv-pshop-open: 0px 0px 24px 24px; }
+#btn_myshop { left: 76px; decorator: image(classic-inv-pshop); }
+#btn_myshop.close-mode { decorator: image(classic-inv-pshop-open); }
+#btn_myshop.locked { filter: brightness(0.6); }
+
+/* The extended inventory's button has no 0.97 or Season 1 counterpart: it keeps legacy's own art
+   (newui_expansion_btn, 36x29) after the Season 1 buttons, on the row's centre, until the classic
    theme has art for it. */
 @spritesheet classic-inv-expand-sheet { src: "../../../newui_expansion_btn.tga"; classic-inv-expand: 0px 0px 36px 29px; }
-#btn_expand { display: block; left: 95px; top: 393px; width: 36px; height: 29px; decorator: image(classic-inv-expand); }
+#btn_expand { display: block; left: 108px; top: 393px; width: 36px; height: 29px; decorator: image(classic-inv-expand); }
 #btn_expand:hover { filter: brightness(1.25); }
 
 /* Equipment: each slot is its 0.97 background at its 0.97 place (the box is also where the slot
