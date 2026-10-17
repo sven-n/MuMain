@@ -555,8 +555,17 @@ server with original clients (after phases 6 and B).
      swords, axes and maces: one `weaponKind` field per item (like
      `wingTier`; the kinds are exclusive and match OpenMU's item groups)
      instead of a tag per kind, plus the tags `sceptre` and `magicSword`.
+     3b-3 includes the character window's wizardry damage
+     (`CharacterInfoWindow.cpp`), which picks the magic durability by the
+     staff group and five Magic Gladiator swords, while the maximum
+     durability follows `magicDurability` since 3b-1.
    - **3b-4** the tags `luckyItem`, `shieldPotion` and `transformationRing`,
-     with the potion hotkeys.
+     with the potion hotkeys. It also decides the potion order: the potion
+     searches take the highest item type first (the largest potion), which
+     the data cannot change, so a higher numbered potion tagged in the
+     editor (Siege Potion, Elite Healing Potion) would come before the
+     Large Healing Potion. An order or strength per potion would let the
+     data decide.
    The 38 items named "…-J" (copies of existing items with no model, unknown
    to OpenMU; what "J" stands for is not known) follow their data. Two lists
    the inventory found wrong are fixed on their own, not in 3b: the
