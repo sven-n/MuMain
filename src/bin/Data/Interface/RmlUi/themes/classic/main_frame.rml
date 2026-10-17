@@ -72,6 +72,8 @@
 	<!-- The original's bottom button row. A theme that puts these buttons elsewhere hides it (the
 	     modern theme's are in main_frame_top.rml). -->
 	<div id="buttons" class="hud-part">
+		<!-- The Season 1 client's command window button, in the bar's top-left box (MainFrameExtras). -->
+		<div id="btn_command" class="frame-btn" data-class-open="command_open" data-event-click="mainframe_command_click" data-attr-data-hint="command_tooltip"></div>
 		<div id="btn_party" class="frame-btn" data-class-open="party_open" data-event-click="mainframe_party_click" data-attr-data-hint="party_tooltip"></div>
 		<div id="btn_guild" class="frame-btn" data-class-open="guild_open" data-event-click="mainframe_guild_click" data-attr-data-hint="guild_tooltip"></div>
 		<div id="btn_cshop" class="frame-btn slot-frame slot-fill" data-class-open="cshop_open" data-event-click="mainframe_cshop_click" data-attr-data-hint="cshop_tooltip">

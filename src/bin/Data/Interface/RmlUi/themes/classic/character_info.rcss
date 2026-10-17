@@ -143,6 +143,38 @@
 .stat-btn-ene { top: 295px; }
 .stat-btn-cmd { top: 355px; }
 
-/* 0.97 has no Quest, Pet or Master Level shortcuts (Close shares .info-btn and stays). */
-.info-btn-quest, .info-btn-pet, .info-btn-masterlevel { display: none; }
+/* The classic clients have no Master Level shortcut (Close shares .info-btn and stays). */
+.info-btn-masterlevel { display: none; }
+
+/* The Season 1 client's pet button (00421e40): pet1 (24x24) at (85, 395), beside Close, while the
+   character window is open; pet2 pressed. It opens the pet window. */
+@spritesheet chainfo-classic-pet-sheet { src: ../../../Classic/s1/pet1.jpg; chainfo-classic-pet: 0px 0px 24px 24px; }
+@spritesheet chainfo-classic-pet2-sheet { src: ../../../Classic/s1/pet2.jpg; chainfo-classic-pet-pressed: 0px 0px 24px 24px; }
+.info-btn-pet {
+	position: absolute;
+	left: 85px;
+	top: 395px;
+	width: 24px;
+	height: 24px;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(chainfo-classic-pet);
+}
+.info-btn-pet:active { decorator: image(chainfo-classic-pet-pressed); }
+
+/* The Season 1 client's quest button (00419f90): Quest1 (24x24) at (55, 395), between Close and the
+   pet button; Quest2 pressed. It opens the quest window. */
+@spritesheet chainfo-classic-quest-sheet { src: ../../../Classic/s1/Quest1.jpg; chainfo-classic-quest: 0px 0px 24px 24px; }
+@spritesheet chainfo-classic-quest2-sheet { src: ../../../Classic/s1/Quest2.jpg; chainfo-classic-quest-pressed: 0px 0px 24px 24px; }
+.info-btn-quest {
+	position: absolute;
+	left: 55px;
+	top: 395px;
+	width: 24px;
+	height: 24px;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(chainfo-classic-quest);
+}
+.info-btn-quest:active { decorator: image(chainfo-classic-quest-pressed); }
 .btn-exit-label { display: none; }
