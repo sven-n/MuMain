@@ -3,6 +3,7 @@
 #include "UI/Options/OptionWindow.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/RmlBridge/RmlPointer.h"
+#include "Render/Textures/TexturePack.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Audio/DSPlaySound.h"
 #include "Data/GameConfig/GameConfig.h"
@@ -321,6 +322,7 @@ mu::ui::window::COptionWindow::COptionWindow()
     m_bDisableBodyShadows = GameConfig::GetInstance().GetDisableBodyShadows();
 
     m_iThemeIndex = -1;
+    m_iTexturePackIndex = 0;
     m_iUIScaleIndex = FindCurrentUIScaleIndex();
 }
 
@@ -339,6 +341,7 @@ bool mu::ui::window::COptionWindow::Create(CManager* pNewUIMng)
     InitResolutionCombo();
     InitLanguageCombo();
     InitFontCombo();
+    RefreshTexturePackChoices();
 
     BuildRmlUi();
 
@@ -488,6 +491,11 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("ui_scale_row_label", &model.uiScaleRowLabel);
     c.Bind("ui_scale_value_label", &model.uiScaleValueLabel);
     c.Bind("ui_scale_tooltip", &model.uiScaleTooltip);
+    c.Bind("texture_pack_labels", &model.texturePackLabels);
+    c.Bind("texture_pack_index", &model.texturePackIndex);
+    c.Bind("texture_pack_row_label", &model.texturePackRowLabel);
+    c.Bind("texture_pack_value_label", &model.texturePackValueLabel);
+    c.Bind("texture_pack_tooltip", &model.texturePackTooltip);
 
     c.BindEventCallback("option_click_close",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
@@ -778,6 +786,7 @@ void mu::ui::window::COptionWindow::OpenningProcess()
 
     RefreshThemeChoices();
     m_iUIScaleIndex = FindCurrentUIScaleIndex();
+    RefreshTexturePackChoices();
 }
 
 void mu::ui::window::COptionWindow::ClosingProcess()
@@ -817,7 +826,7 @@ void mu::ui::window::COptionWindow::SyncImpliedEffectRows(OptionRmlModel& model)
 
 void mu::ui::window::COptionWindow::RmlToggleDropdown(int dropdownId)
 {
-    if (dropdownId < 0 || dropdownId > 7)
+    if (dropdownId < 0 || dropdownId > 8)
         return;
     // Toggle: clicking the currently-open one's own value box closes it; clicking any other
     // (including a different dropdown's) overwrites m_iOpenDropdown, which closes whatever else
@@ -855,6 +864,9 @@ void mu::ui::window::COptionWindow::RmlDropdownOptionClick(int dropdownId, int o
         break;
     case 7:
         RmlAnisotropyChanged(optionIndex);
+        break;
+    case 8:
+        RmlTexturePackChanged(optionIndex);
         break;
     default:
         break;
@@ -1274,6 +1286,20 @@ void mu::ui::window::COptionWindow::RmlAnisotropyChanged(int index)
     MuSetAnisotropyPreference(s_AnisotropyValues[index]);
 }
 
+void mu::ui::window::COptionWindow::RmlTexturePackChanged(int index)
+{
+    // See RmlResolutionChanged's own comment -- same settle-frame guard applies here.
+    if (m_rmlSyncCount < kRmlSelectSettleFrames)
+        return;
+    if (index < 0 || index >= static_cast<int>(m_texturePackNames.size()))
+        return;
+    if (index == m_iTexturePackIndex)
+        return;
+    m_iTexturePackIndex = index;
+    GameConfig::GetInstance().SetTexturePack(m_texturePackNames[index]);
+    GameConfig::GetInstance().Save();
+}
+
 void mu::ui::window::COptionWindow::RmlToggleShowFpsCounter()
 {
     // No member/persistence -- SetShowFpsCounter() also clears ShowDebugInfo internally
@@ -1510,6 +1536,63 @@ int mu::ui::window::COptionWindow::FindCurrentFpsCapIndex()
             return i;
     }
     return s_NumFpsCapValues - 1;  // "Uncapped" -- last entry, matches CfgDefaultFpsCap (-1)
+}
+
+void mu::ui::window::COptionWindow::RefreshTexturePackChoices()
+{
+    m_texturePackNames = Render::Textures::TexturePack::ListInstalledPacks();
+    m_texturePackNames.insert(m_texturePackNames.begin(), std::wstring());
+    m_iTexturePackIndex = FindCurrentTexturePackIndex();
+}
+
+// A saved pack that is no longer installed shows as the original textures, which is what the
+// loader falls back to.
+int mu::ui::window::COptionWindow::FindCurrentTexturePackIndex()
+{
+    const std::wstring current = GameConfig::GetInstance().GetTexturePack();
+    const auto found = std::find(m_texturePackNames.begin(), m_texturePackNames.end(), current);
+    if (found == m_texturePackNames.end())
+        return 0;
+    return static_cast<int>(found - m_texturePackNames.begin());
+}
+
+void mu::ui::window::COptionWindow::SyncTexturePackRow()
+{
+    auto& model = m_RmlView.GetModel();
+    const auto syncText = [this](Rml::String& field, const char* fieldName, const Rml::String& value)
+    {
+        if (field == value)
+            return;
+        field = value;
+        m_RmlView.MarkDirty(fieldName);
+    };
+
+    syncText(model.texturePackRowLabel, "texture_pack_row_label", StringUtils::WideToNarrow(I18N::Game::TexturePack));
+    syncText(model.texturePackTooltip, "texture_pack_tooltip", StringUtils::WideToNarrow(I18N::Game::TexturePackTooltip));
+
+    // Rebuilt every sync, same reasoning as font_labels' own "Default" entry -- the localized
+    // "Original" entry needs to follow a live language switch. Pack names are folder names.
+    std::vector<Rml::String> labels;
+    labels.reserve(m_texturePackNames.size());
+    labels.push_back(StringUtils::WideToNarrow(I18N::Game::OriginalTextures));
+    for (size_t i = 1; i < m_texturePackNames.size(); ++i)
+        labels.push_back(StringUtils::WideToNarrow(m_texturePackNames[i].c_str()));
+    if (labels != model.texturePackLabels)
+    {
+        model.texturePackLabels = std::move(labels);
+        m_RmlView.MarkDirty("texture_pack_labels");
+    }
+
+    if (model.texturePackIndex != m_iTexturePackIndex)
+    {
+        model.texturePackIndex = m_iTexturePackIndex;
+        m_RmlView.MarkDirty("texture_pack_index");
+    }
+
+    const bool validIndex = model.texturePackIndex >= 0 &&
+                            model.texturePackIndex < static_cast<int>(model.texturePackLabels.size());
+    syncText(model.texturePackValueLabel, "texture_pack_value_label",
+             validIndex ? model.texturePackLabels[model.texturePackIndex] : Rml::String());
 }
 
 int mu::ui::window::COptionWindow::FindCurrentThemeIndex()
@@ -1828,4 +1911,6 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
         m_RmlView.MarkDirty("ui_scale_index");
     }
     syncDropdownValue(model.uiScaleValueLabel, "ui_scale_value_label", model.uiScaleLabels, model.uiScaleIndex);
+
+    SyncTexturePackRow();
 }

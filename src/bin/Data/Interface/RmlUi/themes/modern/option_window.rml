@@ -439,6 +439,21 @@
 							</div>
 						</div>
 					</div>
+					<!-- The tip sits after the control so it paints above an open list. -->
+					<div class="opt-row opt-row-tipped">
+						<span class="opt-label">{{texture_pack_row_label}}</span>
+						<div class="opt-control">
+							<div class="option-dropdown">
+								<div class="option-dropdown-value" data-class-open="open_dropdown == 8" data-event-click="option_toggle_dropdown(8)">{{texture_pack_value_label}}<div class="opt-caret"></div></div>
+								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 8">
+									<div class="option-dropdown-option" data-for="label : texture_pack_labels"
+									     data-class-selected="it_index == texture_pack_index"
+									     data-event-click="option_dropdown_option_click(8, it_index)">{{label}}</div>
+								</div>
+							</div>
+						</div>
+						<span class="opt-row-tip">{{texture_pack_tooltip}}</span>
+					</div>
 					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_show_fps_counter">
 						<span class="opt-label">{{show_fps_counter_label}}</span>
 						<div class="opt-control"><div class="opt-toggle" data-class-checked="show_fps_counter"><div class="opt-toggle-knob"></div></div></div>
