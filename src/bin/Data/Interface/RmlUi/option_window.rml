@@ -122,6 +122,30 @@
 				<div class="checkbox-tick"></div>
 			</div>
 		</div>
+		<div class="option-row option-checkbox-row option-sub-row" data-class-locked="look_features_locked" data-event-click="option_toggle_enhanced_feature(0)">
+			<span class="option-row-label">{{look_lighting_label}}</span>
+			<div class="checkbox-box" data-class-checked="look_lighting">
+				<div class="checkbox-tick"></div>
+			</div>
+		</div>
+		<div class="option-row option-checkbox-row option-sub-row" data-class-locked="look_dynamic_lights_locked" data-event-click="option_toggle_enhanced_feature(1)">
+			<span class="option-row-label">{{look_dynamic_lights_label}}</span>
+			<div class="checkbox-box" data-class-checked="look_dynamic_lights">
+				<div class="checkbox-tick"></div>
+			</div>
+		</div>
+		<div class="option-row option-checkbox-row option-sub-row" data-class-locked="look_features_locked" data-event-click="option_toggle_enhanced_feature(2)">
+			<span class="option-row-label">{{look_light_mood_label}}</span>
+			<div class="checkbox-box" data-class-checked="look_light_mood">
+				<div class="checkbox-tick"></div>
+			</div>
+		</div>
+		<div class="option-row option-checkbox-row option-sub-row" data-class-locked="look_features_locked" data-event-click="option_toggle_enhanced_feature(3)">
+			<span class="option-row-label">{{look_post_processing_label}}</span>
+			<div class="checkbox-box" data-class-checked="look_post_processing">
+				<div class="checkbox-tick"></div>
+			</div>
+		</div>
 		<div class="option-row option-select-row option-row-tipped" data-attr-data-hint="antialiasing_tooltip">
 			<span class="option-row-label">{{antialiasing_row_label}}</span>
 			<div class="option-dropdown">

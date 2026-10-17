@@ -343,6 +343,16 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("body_shadows_locked", &model.bodyShadowsLocked);
     c.Bind("wing_shadow_locked", &model.wingShadowLocked);
     c.Bind("enhanced_graphics", &model.enhancedGraphics);
+    c.Bind("look_lighting", &model.lookLighting);
+    c.Bind("look_dynamic_lights", &model.lookDynamicLights);
+    c.Bind("look_light_mood", &model.lookLightMood);
+    c.Bind("look_post_processing", &model.lookPostProcessing);
+    c.Bind("look_features_locked", &model.lookFeaturesLocked);
+    c.Bind("look_dynamic_lights_locked", &model.lookDynamicLightsLocked);
+    c.Bind("look_lighting_label", &model.lookLightingLabel);
+    c.Bind("look_dynamic_lights_label", &model.lookDynamicLightsLabel);
+    c.Bind("look_light_mood_label", &model.lookLightMoodLabel);
+    c.Bind("look_post_processing_label", &model.lookPostProcessingLabel);
     c.Bind("enhanced_graphics_label", &model.enhancedGraphicsLabel);
     c.Bind("antialiasing_labels", &model.antialiasingLabels);
     c.Bind("antialiasing_index", &model.antialiasingIndex);
@@ -432,6 +442,12 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.BindEventCallback("option_toggle_enhanced_graphics",
                         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                         { RmlToggleEnhancedGraphics(); });
+    c.BindEventCallback("option_toggle_enhanced_feature",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+        {
+            if (arguments.size() == 1)
+                RmlToggleEnhancedFeature(arguments[0].Get<int>(-1));
+        });
 
     c.BindEventCallback("option_toggle_show_fps_counter",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleShowFpsCounter(); });
@@ -918,6 +934,19 @@ void mu::ui::window::COptionWindow::RmlToggleEnhancedGraphics()
     Render::Look::ApplyLookPreset(enhanced ? LookPreset::Classic : LookPreset::Enhanced);
 }
 
+void mu::ui::window::COptionWindow::RmlToggleEnhancedFeature(int feature)
+{
+    using Render::Look::EnhancedFeature;
+    if (feature < 0 || feature > static_cast<int>(EnhancedFeature::PostProcessing))
+        return;
+    if (Render::Look::ActiveLookPreset() != LookPreset::Enhanced)
+        return;
+    const auto chosen = static_cast<EnhancedFeature>(feature);
+    if (chosen == EnhancedFeature::DynamicLights && !Render::Look::EnhancedFeatureChosen(EnhancedFeature::Lighting))
+        return; // dynamic lights act only with Enhanced lighting
+    Render::Look::ChooseEnhancedFeature(chosen, !Render::Look::EnhancedFeatureChosen(chosen));
+}
+
 // MuSetAntialiasingPreference saves the count and applies it while the Enhanced look is active.
 void mu::ui::window::COptionWindow::RmlAntialiasingChanged(int index)
 {
@@ -1325,6 +1354,10 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     syncLabel(model.disableWingShadowLabel, "disable_wing_shadow_label", I18N::Game::DisableWingShadow);
     syncLabel(model.disableBodyShadowsLabel, "disable_body_shadows_label", I18N::Game::DisableShadows);
     syncLabel(model.enhancedGraphicsLabel, "enhanced_graphics_label", I18N::Game::EnhancedGraphics);
+    syncLabel(model.lookLightingLabel, "look_lighting_label", I18N::Game::EnhancedLighting);
+    syncLabel(model.lookDynamicLightsLabel, "look_dynamic_lights_label", I18N::Game::DynamicLights);
+    syncLabel(model.lookLightMoodLabel, "look_light_mood_label", I18N::Game::LightMood);
+    syncLabel(model.lookPostProcessingLabel, "look_post_processing_label", I18N::Game::BloomAndColourGrading);
     syncLabel(model.antialiasingRowLabel, "antialiasing_row_label", I18N::Game::AntiAliasing);
     syncLabel(model.antialiasingTooltip, "antialiasing_tooltip", I18N::Game::AntiAliasingTooltip);
     syncLabel(model.anisotropyRowLabel, "anisotropy_row_label", I18N::Game::AnisotropicFiltering);
@@ -1417,6 +1450,25 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     {
         model.enhancedGraphics = enhancedGraphics;
         m_RmlView.MarkDirty("enhanced_graphics");
+    }
+    {
+        using Render::Look::EnhancedFeature;
+        using Render::Look::EnhancedFeatureChosen;
+        const auto syncFlag = [this](bool& field, const char* name, bool value)
+        {
+            if (field != value)
+            {
+                field = value;
+                m_RmlView.MarkDirty(name);
+            }
+        };
+        const bool lighting = EnhancedFeatureChosen(EnhancedFeature::Lighting);
+        syncFlag(model.lookLighting, "look_lighting", lighting);
+        syncFlag(model.lookDynamicLights, "look_dynamic_lights", lighting && EnhancedFeatureChosen(EnhancedFeature::DynamicLights));
+        syncFlag(model.lookLightMood, "look_light_mood", EnhancedFeatureChosen(EnhancedFeature::LightMood));
+        syncFlag(model.lookPostProcessing, "look_post_processing", EnhancedFeatureChosen(EnhancedFeature::PostProcessing));
+        syncFlag(model.lookFeaturesLocked, "look_features_locked", !enhancedGraphics);
+        syncFlag(model.lookDynamicLightsLocked, "look_dynamic_lights_locked", !enhancedGraphics || !lighting);
     }
 
     // Rebuilt every sync for the localized "Off", as the FPS Limit row's "Uncapped".

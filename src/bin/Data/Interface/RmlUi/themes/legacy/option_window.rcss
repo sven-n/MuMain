@@ -144,6 +144,12 @@
 	min-height: 20dp;
 	margin-bottom: 6dp;
 }
+/* A part of the row above it: indented under its label, its control still in the column. */
+.option-sub-row .option-row-label {
+	margin-right: -12dp;
+	padding-left: 12dp;
+}
+
 /* A heading over a group of rows. */
 .option-section {
 	flex-shrink: 0;

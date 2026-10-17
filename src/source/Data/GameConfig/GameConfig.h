@@ -121,6 +121,14 @@ public:
         return m_antialiasing;
     }
     void SetAntialiasing(int samples);
+    bool GetEnhancedLighting() const { return m_enhancedLighting; }
+    void SetEnhancedLighting(bool enabled) { m_enhancedLighting = enabled; }
+    bool GetDynamicLights() const { return m_dynamicLights; }
+    void SetDynamicLights(bool enabled) { m_dynamicLights = enabled; }
+    bool GetLightMood() const { return m_lightMood; }
+    void SetLightMood(bool enabled) { m_lightMood = enabled; }
+    bool GetPostProcessing() const { return m_postProcessing; }
+    void SetPostProcessing(bool enabled) { m_postProcessing = enabled; }
 
     // DXP-23's per-system effect-cost toggles, promoted from console-only ($effects ...)
     // diagnostics to persisted, in-game-options-exposed settings -- see MainScene.h's
@@ -196,6 +204,10 @@ private:
     LookPreset m_look;
     int m_anisotropy;
     int m_antialiasing;
+    bool m_enhancedLighting;
+    bool m_dynamicLights;
+    bool m_lightMood;
+    bool m_postProcessing;
     std::wstring m_renderBackend;
     bool m_disableEffects;
     bool m_disableParticles;

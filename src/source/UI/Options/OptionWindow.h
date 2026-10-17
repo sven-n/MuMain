@@ -151,6 +151,8 @@ namespace mu::ui::window
         // The look preset is read live (SyncRmlModel), since `$look classic|enhanced` changes it
         // outside this window too.
         void RmlToggleEnhancedGraphics();
+        // The Enhanced features (Render::Look::EnhancedFeature, by index).
+        void RmlToggleEnhancedFeature(int feature);
         // Video tab's Anti-aliasing and Anisotropic filtering rows; their values are read live
         // from GameConfig, since `$msaa` changes the first outside this window too.
         void RmlAntialiasingChanged(int index);
@@ -270,6 +272,18 @@ namespace mu::ui::window
             // The look preset: ticked is Enhanced, unticked Classic.
             bool enhancedGraphics = false;
             Rml::String enhancedGraphicsLabel;
+            // The Enhanced features the player keeps on; locked while Classic, and dynamic lights
+            // also without Enhanced lighting.
+            bool lookLighting = true;
+            bool lookDynamicLights = true;
+            bool lookLightMood = true;
+            bool lookPostProcessing = true;
+            bool lookFeaturesLocked = false;
+            bool lookDynamicLightsLocked = false;
+            Rml::String lookLightingLabel;
+            Rml::String lookDynamicLightsLabel;
+            Rml::String lookLightMoodLabel;
+            Rml::String lookPostProcessingLabel;
             // [Render] Antialiasing (the Enhanced look's samples) and Anisotropy.
             std::vector<Rml::String> antialiasingLabels;
             int antialiasingIndex = 0;

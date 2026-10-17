@@ -85,6 +85,9 @@ window writes to these sections:
   - `Anisotropy` (`1` is off, up to `16`; default `8`): the Anisotropic
     filtering row, for every texture with mip levels: world textures in the
     Enhanced look, upscaled textures in both.
+  - `EnhancedLighting`, `DynamicLights`, `LightMood`, `PostProcessing`
+    (default `1`): the rows under "Enhanced graphics", each a feature of the
+    Enhanced look; see [`enhanced-look.md`](enhanced-look.md).
   - `DisableEffects`, `DisableParticles`, `DisableSkillEffectModels`,
     `DisableBoids`, `DisableBodyShadows`, `DisableWingShadow`: the Graphics
     tab's toggles. A toggle another one already covers shows ticked and

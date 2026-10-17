@@ -94,6 +94,22 @@
 						<span class="opt-label">{{enhanced_graphics_label}}</span>
 						<div class="opt-control"><div class="opt-toggle" data-class-checked="enhanced_graphics"><div class="opt-toggle-knob"></div></div></div>
 					</div>
+					<div class="opt-row opt-toggle-row opt-sub-row" data-class-locked="look_features_locked" data-event-click="option_toggle_enhanced_feature(0)">
+						<span class="opt-label">{{look_lighting_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="look_lighting"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+					<div class="opt-row opt-toggle-row opt-sub-row" data-class-locked="look_dynamic_lights_locked" data-event-click="option_toggle_enhanced_feature(1)">
+						<span class="opt-label">{{look_dynamic_lights_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="look_dynamic_lights"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+					<div class="opt-row opt-toggle-row opt-sub-row" data-class-locked="look_features_locked" data-event-click="option_toggle_enhanced_feature(2)">
+						<span class="opt-label">{{look_light_mood_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="look_light_mood"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+					<div class="opt-row opt-toggle-row opt-sub-row" data-class-locked="look_features_locked" data-event-click="option_toggle_enhanced_feature(3)">
+						<span class="opt-label">{{look_post_processing_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="look_post_processing"><div class="opt-toggle-knob"></div></div></div>
+					</div>
 					<div class="opt-row opt-row-tipped">
 						<span class="opt-label">{{antialiasing_row_label}}</span>
 						<div class="opt-control">

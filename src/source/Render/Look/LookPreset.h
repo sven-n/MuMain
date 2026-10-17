@@ -68,13 +68,17 @@ public:
         std::function<void(const LookFeatures&)> apply;
     };
 
-    explicit LookPresetController(Hooks hooks);
+    // `choices`: the Enhanced features the player switched off (SetChoices).
+    explicit LookPresetController(Hooks hooks, FeatureOverrides choices = {});
 
     // Saves the preset, clears every override and applies the preset's features: start-up, the
     // options window's checkbox and `$look classic|enhanced`.
     void ApplyPreset(LookPreset preset);
     // A developer override for the session: applied, not saved, the preset unchanged.
     void Override(const FeatureOverrides& change);
+    // The player's Enhanced features, saved by the caller: they act on Enhanced only, under the
+    // developer overrides, and applying a preset keeps them.
+    void SetChoices(const FeatureOverrides& choices);
 
     [[nodiscard]] LookPreset Preset() const
     {
@@ -84,12 +88,17 @@ public:
     {
         return m_overrides;
     }
+    [[nodiscard]] const FeatureOverrides& Choices() const
+    {
+        return m_choices;
+    }
     [[nodiscard]] LookFeatures Effective() const;
 
 private:
     Hooks m_hooks;
     LookPreset m_preset = LookPreset::Enhanced;
     FeatureOverrides m_overrides;
+    FeatureOverrides m_choices;
 };
 
 // `$look classic|enhanced` (any case); nothing for any other text.

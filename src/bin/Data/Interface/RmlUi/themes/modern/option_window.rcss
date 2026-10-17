@@ -126,6 +126,12 @@
 		0 12dp 32dp rgba(0, 0, 0, 140);
 }
 
+/* A part of the row above it: indented under its label. */
+.opt-sub-row .opt-label {
+	box-sizing: border-box;
+	padding-left: 16dp;
+}
+
 /* A heading over a group of rows. */
 .opt-section {
 	margin: 18dp 0 4dp;
