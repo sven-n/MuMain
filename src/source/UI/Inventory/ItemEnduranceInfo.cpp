@@ -11,6 +11,7 @@
 
 #include "Character/CharacterManager.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -34,14 +35,13 @@ using namespace mu::ui::window;
 
 namespace
 {
-// The equipped helper that has an HP frame (guardian angel, imp, horns, dark horse, pets).
+// The equipped helper that has an HP frame: every pet slot item (guardian angel, imp,
+// horns, dark horse, pets) but the gamble items, which only use the slot in the shop.
 bool HasHelperLifeFrame()
 {
-    return Hero->Helper.Type >= MODEL_HELPER && Hero->Helper.Type <= MODEL_DARK_HORSE_ITEM ||
-           GameLogic::Items::IsDemonOrSpiritOfGuardianModel(Hero->Helper.Type) ||
-           Hero->Helper.Type == MODEL_PET_RUDOLF || Hero->Helper.Type == MODEL_PET_PANDA ||
-           Hero->Helper.Type == MODEL_PET_UNICORN || Hero->Helper.Type == MODEL_PET_SKELETON ||
-           Hero->Helper.Type == MODEL_HORN_OF_FENRIR;
+    const int helperType = Data::Items::ToItemType(Hero->Helper.Type);
+    return g_ItemDatabase.GetSlot(helperType) == Data::Items::ItemSlot::Pet &&
+           !g_ItemDatabase.HasTag(helperType, Data::Items::ItemTag::GambleItem);
 }
 
 // The HP frame's name of the equipped helper (HasHelperLifeFrame()).
@@ -445,14 +445,13 @@ void mu::ui::window::CItemEnduranceInfo::SyncIcons()
                 continue;
             if (i == EQUIPMENT_HELPER || pItem->Type == -1)
                 continue;
-            if (i == EQUIPMENT_WEAPON_RIGHT && pItem->Type == ITEM_ARROWS)
+            // Arrows (right hand) and bolts (left hand) have no durability icon.
+            if (GameLogic::Items::IsAmmunition(pItem))
                 continue;
             if (i == EQUIPMENT_WEAPON_LEFT)
             {
                 if (gCharacterManager.GetEquipedBowType(pItem) == BOWTYPE_BOW)
                     iImageIndex = m_iItemDurImageIndex[EQUIPMENT_WEAPON_RIGHT];
-                if (pItem->Type == ITEM_BOLT)
-                    continue;
             }
 
             int iLevel = pItem->Level;

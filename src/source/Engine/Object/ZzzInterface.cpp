@@ -3263,7 +3263,9 @@ void MoveHero()
                     }
                 }
             }
-            else if (SelectedOperate != -1 && (c->SafeZone || (c->Helper.Type<MODEL_HORN_OF_UNIRIA || c->Helper.Type>MODEL_DARK_HORSE_ITEM || c->Helper.Type != MODEL_HORN_OF_FENRIR)))
+            // Riders can operate objects too: the rider check here (as in the Season 6
+            // client) was always true.
+            else if (SelectedOperate != -1)
             {
                 TargetX = (int)(Operates[SelectedOperate].Owner->Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(Operates[SelectedOperate].Owner->Position[1] / TERRAIN_SCALE);
@@ -3479,7 +3481,10 @@ void SendMacroChat(wchar_t* Text)
 {
     if (!CheckCommand(Text, true))
     {
-        if ((Hero->Helper.Type<MODEL_HORN_OF_UNIRIA || Hero->Helper.Type>MODEL_DARK_HORSE_ITEM) || Hero->SafeZone)
+        // Not while riding, outside the safe zone; the Horn of Fenrir was never in this check.
+        const bool riding =
+            GameLogic::Items::IsRideableMountModel(Hero->Helper.Type) && Hero->Helper.Type != MODEL_HORN_OF_FENRIR;
+        if (!riding || Hero->SafeZone)
         {
             // Send animation for specific texts
             UI::Chat::CheckChatText(Text);

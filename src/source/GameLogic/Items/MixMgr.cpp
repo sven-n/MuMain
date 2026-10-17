@@ -10,6 +10,7 @@
 #include "Network/Server/SocketSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
 
 using namespace SEASON3A;
 
@@ -127,31 +128,20 @@ void CMixItem::SetItem(ITEM* pItem, DWORD dwMixValue)
         m_wHarmonyOptionLevel = pItem->Jewel_Of_Harmony_OptionLevel;
     }
 
-    switch (pItem->Type)
+    // The small wings have none of the three flags.
+    switch (g_ItemDatabase.GetWingTier(pItem->Type))
     {
-    case ITEM_WING:
-    case ITEM_WINGS_OF_HEAVEN:
-    case ITEM_WINGS_OF_SATAN:
-    case ITEM_WING_OF_CURSE:
+    case Data::Items::WingTier::First:
         m_bIsWing = TRUE;
         break;
-    case ITEM_WINGS_OF_SPIRITS:
-    case ITEM_WINGS_OF_SOUL:
-    case ITEM_WINGS_OF_DRAGON:
-    case ITEM_WINGS_OF_DARKNESS:
-    case ITEM_CAPE_OF_LORD:
-    case ITEM_WINGS_OF_DESPAIR:
-    case ITEM_CAPE_OF_FIGHTER:
+    case Data::Items::WingTier::Second:
         m_bIsUpgradedWing = TRUE;
         break;
-    case ITEM_WING_OF_STORM:
-    case ITEM_WING_OF_ETERNAL:
-    case ITEM_WING_OF_ILLUSION:
-    case ITEM_WING_OF_RUIN:
-    case ITEM_CAPE_OF_EMPEROR:
-    case ITEM_WING_OF_DIMENSION:
-    case ITEM_CAPE_OF_OVERRULE:
+    case Data::Items::WingTier::Third:
         m_bIs3rdUpgradedWing = TRUE;
+        break;
+    default:
+        break;
     }
 
     if (m_bIsWing || m_bIsUpgradedWing || m_bIs3rdUpgradedWing)

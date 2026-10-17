@@ -3331,7 +3331,7 @@ void CHARACTER_MACHINE::CalculateDefense()
     }
 
     PlusSpecial(&Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE, &Equipment[EQUIPMENT_HELPER]);
-    if (Equipment[EQUIPMENT_WING].Type == ITEM_CAPE_OF_LORD || Equipment[EQUIPMENT_WING].Type == ITEM_CAPE_OF_FIGHTER)
+    if (GameLogic::Items::IsSecondTierCape(&Equipment[EQUIPMENT_WING]))
     {
         PlusSpecial(&Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE, &Equipment[EQUIPMENT_WING]);
     }
