@@ -75,7 +75,11 @@ window writes to these sections:
     filtering row, for every texture with mip levels: world textures in the
     Enhanced look, upscaled textures in both.
   - `DisableEffects`, `DisableParticles`, `DisableSkillEffectModels`,
-    `DisableBoids`, `DisableWingShadow`: the Graphics tab's toggles.
+    `DisableBoids`, `DisableBodyShadows`, `DisableWingShadow`: the Graphics
+    tab's toggles. A toggle another one already covers shows ticked and
+    greyed out: Disable Effects covers skill effects and wildlife; without
+    Render full effects, or with Disable Shadows, no wing shadow is drawn
+    (and without full effects no shadow at all).
 
   Set by hand only, never written by the game:
   - `Backend` (`default`/`vulkan`/`direct3d12`/`metal`, case-insensitive,

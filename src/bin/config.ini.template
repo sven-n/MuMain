@@ -31,5 +31,6 @@ DisableParticles=0
 DisableSkillEffectModels=0
 DisableBoids=0
 DisableWingShadow=0
+DisableBodyShadows=0
 FpsCap=-1
 Backend=default

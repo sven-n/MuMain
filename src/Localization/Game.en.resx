@@ -1472,6 +1472,9 @@
   <data name="Disable Wing Shadow" xml:space="preserve">
     <value>Disable Wing Shadow</value>
   </data>
+  <data name="Disable Shadows" xml:space="preserve">
+    <value>Disable Shadows</value>
+  </data>
   <data name="Show FPS Counter" xml:space="preserve">
     <value>Show FPS Counter</value>
   </data>

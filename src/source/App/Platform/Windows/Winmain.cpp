@@ -2312,6 +2312,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         SetDisableSkillEffectModels(cfg.GetDisableSkillEffectModels());
         SetDisableBoids(cfg.GetDisableBoids());
         SetDisableWingShadow(cfg.GetDisableWingShadow());
+        SetDisableBodyShadows(cfg.GetDisableBodyShadows());
     }
 
     // Make the bundled ./fonts faces resolvable by GDI before the first CreateFont,

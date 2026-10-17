@@ -74,6 +74,8 @@ namespace CfgKeys
     inline constexpr wchar_t CfgKeyDisableSkillEffectModels[] = L"DisableSkillEffectModels";
     inline constexpr wchar_t CfgKeyDisableBoids[] = L"DisableBoids";
     inline constexpr wchar_t CfgKeyDisableWingShadow[] = L"DisableWingShadow";
+    // Every body shadow: characters, their wings and pets, objects and wildlife.
+    inline constexpr wchar_t CfgKeyDisableBodyShadows[] = L"DisableBodyShadows";
     // User-chosen FPS cap when VSync is off; -1 = uncapped. Same promotion story as the toggles
     // above, this time for the console-only `$fps <N>` diagnostic.
     inline constexpr wchar_t CfgKeyFpsCap[] = L"FpsCap";
@@ -141,6 +143,7 @@ namespace CfgDefaults
     inline constexpr bool CfgDefaultDisableSkillEffectModels = false;
     inline constexpr bool CfgDefaultDisableBoids = false;
     inline constexpr bool CfgDefaultDisableWingShadow = false;
+    inline constexpr bool CfgDefaultDisableBodyShadows = false;
     inline constexpr int CfgDefaultFpsCap = -1;  // Uncapped
 
     // "default" = this app's own platform-aware pick (prefers Vulkan on Windows to avoid

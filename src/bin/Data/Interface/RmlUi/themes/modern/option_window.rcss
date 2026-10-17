@@ -487,3 +487,10 @@
 @media (max-height: 380dp) {
 	.opt-pane { overflow-y: auto; }
 }
+
+/* A setting another one already covers (OptionWindow.h's OptionRmlModel): shown ticked, dimmed, and
+   not clickable. */
+.opt-toggle-row.locked {
+	opacity: 0.45;
+	cursor: default;
+}

@@ -136,6 +136,8 @@ public:
     void SetDisableBoids(bool disabled);
     bool GetDisableWingShadow() const { return m_disableWingShadow; }
     void SetDisableWingShadow(bool disabled);
+    bool GetDisableBodyShadows() const { return m_disableBodyShadows; }
+    void SetDisableBodyShadows(bool disabled);
 
     // User-chosen FPS cap when VSync is off; -1 = uncapped. Same promotion story as the toggles
     // above, this time for the console-only `$fps <N>` diagnostic (SceneManager::SetTargetFps).
@@ -200,6 +202,7 @@ private:
     bool m_disableSkillEffectModels;
     bool m_disableBoids;
     bool m_disableWingShadow;
+    bool m_disableBodyShadows;
     int m_fpsCap;
 
     int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue) const;

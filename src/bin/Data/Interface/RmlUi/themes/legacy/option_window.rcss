@@ -178,7 +178,7 @@
 	position: relative;
 	flex-shrink: 0;
 	width: 124dp;
-	height: 16dp;
+	height: 14dp;
 }
 .option-gauge.effect-gauge {
 	width: 70dp;
@@ -320,10 +320,10 @@
 @spritesheet option-close-sheet { src: "../../../win_size.jpg"; option-close: 0px 9px 9px 9px; option-close-inner: 0px 9px 9px 9px; }
 .option-close-btn {
 	position: absolute;
-	right: -6dp;
-	top: -19dp;
-	width: 16dp;
-	height: 16dp;
+	right: -5dp;
+	top: -18dp;
+	width: 14dp;
+	height: 14dp;
 	cursor: pointer;
 	pointer-events: auto;
 	decorator: ninepatch(option-close, option-close-inner);
@@ -337,3 +337,10 @@
    (its font was an unsubstituted token in window_shell.rcss). */
 .window-shell-header-rail,
 .window-shell-header-title { display: none; }
+
+/* A setting another one already covers (OptionWindow.h's OptionRmlModel): shown ticked, dimmed, and
+   not clickable. */
+.option-checkbox-row.locked {
+	opacity: 0.45;
+	cursor: default;
+}

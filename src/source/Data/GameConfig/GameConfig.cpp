@@ -105,6 +105,7 @@ void GameConfig::Load()
         ReadBool(CfgSectionRender, CfgKeyDisableSkillEffectModels, CfgDefaultDisableSkillEffectModels);
     m_disableBoids = ReadBool(CfgSectionRender, CfgKeyDisableBoids, CfgDefaultDisableBoids);
     m_disableWingShadow = ReadBool(CfgSectionRender, CfgKeyDisableWingShadow, CfgDefaultDisableWingShadow);
+    m_disableBodyShadows = ReadBool(CfgSectionRender, CfgKeyDisableBodyShadows, CfgDefaultDisableBodyShadows);
     m_fpsCap = ReadInt(CfgSectionRender, CfgKeyFpsCap, CfgDefaultFpsCap);
 
     // Strip keys/sections we used to write but no longer use, so user config
@@ -161,6 +162,7 @@ void GameConfig::Save()
     WriteBool(CfgSectionRender, CfgKeyDisableSkillEffectModels, m_disableSkillEffectModels);
     WriteBool(CfgSectionRender, CfgKeyDisableBoids, m_disableBoids);
     WriteBool(CfgSectionRender, CfgKeyDisableWingShadow, m_disableWingShadow);
+    WriteBool(CfgSectionRender, CfgKeyDisableBodyShadows, m_disableBodyShadows);
     WriteInt(CfgSectionRender, CfgKeyFpsCap, m_fpsCap);
 }
 
@@ -274,6 +276,11 @@ void GameConfig::SetDisableBoids(bool disabled)
 void GameConfig::SetDisableWingShadow(bool disabled)
 {
     m_disableWingShadow = disabled;
+}
+
+void GameConfig::SetDisableBodyShadows(bool disabled)
+{
+    m_disableBodyShadows = disabled;
 }
 
 void GameConfig::SetFpsCap(int fps)

@@ -196,19 +196,25 @@
 				<div class="checkbox-tick"></div>
 			</div>
 		</div>
-		<div class="option-row option-checkbox-row" data-event-click="option_toggle_disable_skill_effect_models">
+		<div class="option-row option-checkbox-row" data-class-locked="skill_effect_models_locked" data-event-click="option_toggle_disable_skill_effect_models">
 			<span class="option-row-label">{{disable_skill_effect_models_label}}</span>
 			<div class="checkbox-box" data-class-checked="disable_skill_effect_models">
 				<div class="checkbox-tick"></div>
 			</div>
 		</div>
-		<div class="option-row option-checkbox-row" data-event-click="option_toggle_disable_boids">
+		<div class="option-row option-checkbox-row" data-class-locked="boids_locked" data-event-click="option_toggle_disable_boids">
 			<span class="option-row-label">{{disable_boids_label}}</span>
 			<div class="checkbox-box" data-class-checked="disable_boids">
 				<div class="checkbox-tick"></div>
 			</div>
 		</div>
-		<div class="option-row option-checkbox-row" data-event-click="option_toggle_disable_wing_shadow">
+		<div class="option-row option-checkbox-row" data-class-locked="body_shadows_locked" data-event-click="option_toggle_disable_body_shadows">
+			<span class="option-row-label">{{disable_body_shadows_label}}</span>
+			<div class="checkbox-box" data-class-checked="disable_body_shadows">
+				<div class="checkbox-tick"></div>
+			</div>
+		</div>
+		<div class="option-row option-checkbox-row" data-class-locked="wing_shadow_locked" data-event-click="option_toggle_disable_wing_shadow">
 			<span class="option-row-label">{{disable_wing_shadow_label}}</span>
 			<div class="checkbox-box" data-class-checked="disable_wing_shadow">
 				<div class="checkbox-tick"></div>

@@ -147,6 +147,7 @@ namespace mu::ui::window
         void RmlToggleDisableSkillEffectModels();
         void RmlToggleDisableBoids();
         void RmlToggleDisableWingShadow();
+        void RmlToggleDisableBodyShadows();
         // The look preset is read live (SyncRmlModel), since `$look classic|enhanced` changes it
         // outside this window too.
         void RmlToggleEnhancedGraphics();
@@ -255,6 +256,15 @@ namespace mu::ui::window
             Rml::String disableBoidsLabel;
             bool disableWingShadow = false;
             Rml::String disableWingShadowLabel;
+            bool disableBodyShadows = false;
+            Rml::String disableBodyShadowsLabel;
+            // A row another setting already covers shows ticked and ignores clicks: Disable Effects
+            // skips skill effect models and wildlife; without full effects, or with every body
+            // shadow off, no wing shadow is drawn either.
+            bool skillEffectModelsLocked = false;
+            bool boidsLocked = false;
+            bool bodyShadowsLocked = false;
+            bool wingShadowLocked = false;
             // The look preset: ticked is Enhanced, unticked Classic.
             bool enhancedGraphics = false;
             Rml::String enhancedGraphicsLabel;
@@ -290,6 +300,7 @@ namespace mu::ui::window
             Rml::String uiScaleTooltip;
         };
         void BindRmlModel(Rml::DataModelConstructor& c, OptionRmlModel& model);
+        void SyncImpliedEffectRows(OptionRmlModel& model);
         void OnRmlBuilt();
         UI::RmlBridge::ThemedView<OptionRmlModel> m_RmlView{"option_window",
             [this](Rml::DataModelConstructor& c, OptionRmlModel& model) { BindRmlModel(c, model); },
@@ -340,6 +351,7 @@ namespace mu::ui::window
         bool m_bDisableSkillEffectModels;
         bool m_bDisableBoids;
         bool m_bDisableWingShadow;
+        bool m_bDisableBodyShadows;
 
         // Interface/UI tab -- selection indexes the displayed theme snapshot.
         // Show FPS Counter/Show Debug Info need no members -- SyncRmlModel()
