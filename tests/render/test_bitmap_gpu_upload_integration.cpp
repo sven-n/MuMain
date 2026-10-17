@@ -369,13 +369,30 @@ bool RunLifetime(SDL_GPUDevice* device, int lifetime)
     if (mipped)
         SDL_ReleaseGPUTexture(device, mipped.texture);
 
+    // An upscaled image larger than one slot, staged in bands of rows, with the GPU
+    // building its mips after the last band: the base level reads back as uploaded.
+    constexpr Dimensions kBanded{2048, 1030};
+    const auto banded = Pattern(kBanded, lifetime * 100 + 50);
+    const auto bandedResult = defaultOwner.Upload(banded, kBanded.width, kBanded.height, SDL_GPU_FILTER_LINEAR,
+                                                  SDL_GPU_SAMPLERADDRESSMODE_REPEAT, {}, true);
+    SDL_GPUTransferBufferCreateInfo bandedInfo{};
+    bandedInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_DOWNLOAD;
+    bandedInfo.size = static_cast<Uint32>(kBanded.width) * 4u * static_cast<Uint32>(kBanded.height);
+    auto* bandedReadback = SDL_CreateGPUTransferBuffer(device, &bandedInfo);
+    const bool bands =
+        bandedResult && bandedReadback && CheckDownload(device, bandedResult.texture, bandedReadback, kBanded, banded);
+    if (bandedResult)
+        SDL_ReleaseGPUTexture(device, bandedResult.texture);
+    if (bandedReadback)
+        SDL_ReleaseGPUTransferBuffer(device, bandedReadback);
+
     if (smokeReadback)
         SDL_ReleaseGPUTransferBuffer(device, smokeReadback);
     if (!defaultOwner.Shutdown())
         good = false;
-    std::printf("lifetime=%d default_texture_smoke=%s mip_chain_smoke=%s\n", lifetime, smoke ? "pass" : "fail",
-                mips ? "pass" : "fail");
-    return good && smoke && mips;
+    std::printf("lifetime=%d default_texture_smoke=%s mip_chain_smoke=%s banded_smoke=%s\n", lifetime,
+                smoke ? "pass" : "fail", mips ? "pass" : "fail", bands ? "pass" : "fail");
+    return good && smoke && mips && bands;
 }
 } // namespace
 
