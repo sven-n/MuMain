@@ -303,8 +303,10 @@ TEST_CASE("bitmap owner checks dimensions and copies exact rows")
     CHECK(owner.Shutdown());
 }
 
-TEST_CASE("bitmap owner faults on GPU errors and preserves error before cleanup")
+TEST_CASE("bitmap owner fails one upload on GPU errors and faults only without a usable slot")
 {
+    // Texture, map, acquire and begin-copy fail before the slot is in use: only that upload fails.
+    // A failed submit takes its slot out of service, and the next upload uses another.
     for (int stage = 0; stage < 5; ++stage)
     {
         Fake fake;
@@ -317,11 +319,32 @@ TEST_CASE("bitmap owner faults on GPU errors and preserves error before cleanup"
         fake.failSubmit = stage == 4;
         std::array<std::uint8_t, 4> pixels{};
         CHECK_FALSE(owner.Upload(pixels, 1, 1, filter, wrap));
-        CHECK(owner.IsFaulted());
+        CHECK_FALSE(owner.IsFaulted());
         CHECK(owner.LastError() == "original SDL error");
         CHECK(fake.canceled == (stage == 3));
-        CHECK_FALSE(owner.Upload(pixels, 1, 1, filter, wrap));
-        CHECK(fake.textures == 1);
+        fake.failTexture = fake.failMap = fake.failAcquire = fake.failBegin = fake.failSubmit = false;
+        auto next = owner.Upload(pixels, 1, 1, filter, wrap);
+        REQUIRE(next);
+        fake.Calls().releaseTexture(Device(), next.texture);
+        owner.Shutdown();
+    }
+    {
+        Fake fake;
+        Owner owner(fake.Calls());
+        REQUIRE(owner.Initialize(Device()));
+        fake.failSubmit = true;
+        std::array<std::uint8_t, 4> pixels{};
+        for (std::size_t lost = 1; lost <= Owner::kSlotCount; ++lost)
+        {
+            CHECK_FALSE(owner.Upload(pixels, 1, 1, filter, wrap));
+            CHECK(owner.IsFaulted() == (lost == Owner::kSlotCount));
+        }
+        fake.failSubmit = false;
+        const auto texturesBefore = fake.textures;
+        const auto rejected = owner.Upload(pixels, 1, 1, filter, wrap);
+        CHECK_FALSE(rejected);
+        CHECK(rejected.error == "original SDL error"); // the cause is kept, not the rejection
+        CHECK(fake.textures == texturesBefore);
         owner.Shutdown();
     }
     Fake fake;
@@ -339,10 +362,10 @@ TEST_CASE("bitmap owner faults on GPU errors and preserves error before cleanup"
     }
     fake.failWait = true;
     CHECK_FALSE(owner.Upload(pixels, 1, 1, filter, wrap));
-    CHECK(owner.IsFaulted());
+    CHECK_FALSE(owner.IsFaulted()); // that slot only
     CHECK(fake.fences == 3);
     CHECK(fake.textures == 3);
-    CHECK(owner.Shutdown());
+    owner.Shutdown();
     CHECK(fake.fences == 0);
 }
 

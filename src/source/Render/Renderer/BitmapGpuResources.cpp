@@ -21,10 +21,24 @@ void BitmapGpuResources::Fail(const char* stage, bool gpuError)
     m_stage = stage;
     const char* text = gpuError ? m_calls.getError() : nullptr;
     m_error = text && *text ? text : (gpuError ? "SDL GPU operation failed" : stage);
-    if (gpuError)
+}
+
+void BitmapGpuResources::LoseSlot(Slot& slot)
+{
+    slot.lost = true;
+    m_faulted = std::all_of(m_slots.begin(), m_slots.end(), [](const Slot& each) { return each.lost; });
+    if (!m_faulted)
     {
-        m_faulted = true;
+        AdvanceSlot();
     }
+}
+
+void BitmapGpuResources::AdvanceSlot()
+{
+    do
+    {
+        m_next = (m_next + 1) % kSlotCount;
+    } while (m_slots[m_next].lost);
 }
 
 BitmapGpuResources::Result BitmapGpuResources::Failure() const
@@ -55,6 +69,7 @@ bool BitmapGpuResources::Initialize(SDL_GPUDevice* device)
         if (!slot.transfer)
         {
             Fail("initialize: create transfer buffer", true);
+            m_faulted = true; // no retry on this device lifetime
             ReleaseHandles();
             m_device = nullptr;
             return false;
@@ -78,6 +93,7 @@ bool BitmapGpuResources::Initialize(SDL_GPUDevice* device)
             Fail("initialize: create bitmap sampler", true);
             m_stage += (i < 2 ? " nearest/" : " linear/");
             m_stage += (i % 2 == 0 ? "repeat" : "clamp-to-edge");
+            m_faulted = true;
             ReleaseHandles();
             m_device = nullptr;
             return false;
@@ -95,6 +111,7 @@ bool BitmapGpuResources::Retire(Slot& slot)
     if (!m_calls.wait(m_device, true, &slot.fence, 1))
     {
         Fail("wait for upload fence", true);
+        LoseSlot(slot);
         return false;
     }
     m_calls.releaseFence(m_device, slot.fence);
@@ -138,15 +155,18 @@ BitmapGpuResources::Result BitmapGpuResources::Upload(std::span<const std::uint8
                                                       SDL_GPUFilter filter, SDL_GPUSamplerAddressMode wrap,
                                                       std::span<const Textures::MipLevel> mips, bool generateMips)
 {
+    if (!m_device)
+    {
+        return {nullptr, nullptr, "upload: uninitialized", "the bitmap uploader is not initialized"};
+    }
     if (!OnOwnerThread())
     {
         // A rejected caller must not race with the owner's diagnostics or SDL calls.
         return {nullptr, nullptr, "upload: wrong thread", "upload must run on the owner thread"};
     }
-    if (!m_device || m_faulted)
+    if (m_faulted)
     {
-        Fail("upload: uninitialized or faulted", false);
-        return Failure();
+        return {nullptr, nullptr, "upload: faulted", m_error};
     }
     if (width <= 0 || height <= 0 || width > kMaximumWidth || height > kMaximumHeight ||
         (filter != SDL_GPU_FILTER_NEAREST && filter != SDL_GPU_FILTER_LINEAR) ||
@@ -306,10 +326,11 @@ BitmapGpuResources::Result BitmapGpuResources::Upload(std::span<const std::uint8
         {
             Fail("submit bitmap upload and acquire fence", true);
             m_calls.releaseTexture(m_device, texture);
+            LoseSlot(slot);
             return Failure();
         }
         slot.fence = fence;
-        m_next = (m_next + 1) % kSlotCount;
+        AdvanceSlot();
     }
     m_stage.clear();
     m_error.clear();
@@ -357,20 +378,18 @@ bool BitmapGpuResources::Shutdown()
         return false;
     }
     bool retired = true;
-    if (!m_faulted)
+    for (auto& slot : m_slots)
     {
-        for (auto& slot : m_slots)
+        if (!slot.lost && !Retire(slot))
         {
-            if (!Retire(slot))
-            {
-                retired = false;
-                break;
-            }
+            retired = false;
+            break;
         }
     }
     // On device failure SDL handles remain valid until device destruction;
     // do not treat an unsuccessful wait as proof that staging can be reused.
     ReleaseHandles();
+    m_slots = {};
     m_device = nullptr;
     m_thread = {};
     m_next = 0;

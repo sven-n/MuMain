@@ -102,6 +102,7 @@ public:
     {
         return m_stage;
     }
+    // Every slot lost a submission or a fence wait; uploads stay off until Shutdown.
     bool IsFaulted() const
     {
         return m_faulted;
@@ -112,10 +113,14 @@ private:
     {
         SDL_GPUTransferBuffer* transfer = nullptr;
         SDL_GPUFence* fence = nullptr;
+        // A failed submission or fence wait leaves the GPU's use of it unknown: never reused.
+        bool lost = false;
     };
     bool OnOwnerThread() const;
     void Fail(const char* stage, bool gpuError);
     bool Retire(Slot& slot);
+    void LoseSlot(Slot& slot);
+    void AdvanceSlot();
     void ReleaseHandles();
     Result Failure() const;
 
