@@ -135,6 +135,7 @@ TEST_CASE("3b: the wing lists match the wing tiers [data][items][3b]")
         CAPTURE(itemType);
         const ITEM item = MakeItem(itemType);
         CHECK(OldIsCapeOfLordOrFighter(itemType) == GameLogic::Items::IsSecondTierCape(&item));
+        CHECK(OldHasSecondTierWingDefensePerLevel(&item) == GameLogic::Items::IsSecondTierWing(&item));
 
         const OldWingFlags flags = OldMixWingFlags(itemType);
         const WingTier tier = g_ItemDatabase.GetWingTier(itemType);

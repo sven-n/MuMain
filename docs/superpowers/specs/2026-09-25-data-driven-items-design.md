@@ -543,7 +543,10 @@ server with original clients (after phases 6 and B).
      the chat animation, the mana and healing potion searches
      (`ItemDatabase::GetItemTypesWithTag`), the ammunition's durability
      icon, the capes' defense option, the excellent durability bonus, the
-     mix's wing flags and the staffs' magic durability. MoveHero's rider
+     mix's wing flags and the staffs' magic durability; also the capes'
+     defense per level in `CalcDefense` (phase 3c's code, but the same cape
+     list as the defense option, which an edited `cape` tag would otherwise
+     split). MoveHero's rider
      check for operating objects was always true and is gone; `CalcPartType`
      and `ITEM::Part` were written but never read and are gone. The Crywolf
      contract's horn check stays until the unformatted code around it is

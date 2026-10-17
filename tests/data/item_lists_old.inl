@@ -56,6 +56,13 @@ bool OldIsCapeOfLordOrFighter(int itemType)
     return itemType == ITEM_CAPE_OF_LORD || itemType == ITEM_CAPE_OF_FIGHTER;
 }
 
+// ZzzInfomation.cpp, CalcDefense: the items whose defense grows by the second tier wings' value per level.
+bool OldHasSecondTierWingDefensePerLevel(const ITEM* ip)
+{
+    return GameLogic::Items::IsSecondTierWingExceptCape(ip) || ip->Type == ITEM_CAPE_OF_LORD ||
+           ip->Type == ITEM_CAPE_OF_FIGHTER;
+}
+
 // MixMgr.cpp, CMixItem::SetItem: the three wing flags.
 struct OldWingFlags
 {

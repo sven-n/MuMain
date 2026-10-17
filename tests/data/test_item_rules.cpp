@@ -269,6 +269,11 @@ TEST_CASE("Item categories come from the item data [data][items][rules]")
     CHECK(IsSecondOrThirdTierWing(&wingOfStorm));
     CHECK_FALSE(IsSecondOrThirdTierWing(&wingsOfElf));
     CHECK_FALSE(IsSecondOrThirdTierWing(&smallCapeOfLord));
+    CHECK(IsSecondTierWing(&wingsOfSpirits));
+    CHECK(IsSecondTierWing(&capeOfLord));
+    CHECK_FALSE(IsSecondTierWing(&wingOfStorm));
+    CHECK_FALSE(IsSecondTierWing(&wingsOfElf));
+    CHECK_FALSE(IsSecondTierWing(&smallCapeOfLord));
     CHECK(IsSecondTierCape(&capeOfLord));
     CHECK_FALSE(IsSecondTierCape(&wingsOfSpirits));
     CHECK_FALSE(IsSecondTierCape(&capeOfEmperor));

@@ -664,8 +664,7 @@ void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
 
     int perLevelUpToNine = GameLogic::Items::LevelBonusPerLevelUpToNine;
     int firstStepAboveNine = GameLogic::Items::FirstLevelBonusStepAboveNine;
-    if (GameLogic::Items::IsSecondTierWingExceptCape(ip) || ip->Type == ITEM_CAPE_OF_LORD ||
-        ip->Type == ITEM_CAPE_OF_FIGHTER)
+    if (GameLogic::Items::IsSecondTierWing(ip))
     {
         perLevelUpToNine = SecondTierWingDefensePerLevel;
     }

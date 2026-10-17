@@ -9,6 +9,8 @@ namespace GameLogic::Items
     // Wings
     bool IsWingItem(const ITEM* pItem);
     bool IsSecondTierWingExceptCape(const ITEM* pItem);
+    // Every second tier wing, the Capes of Lord and Fighter included.
+    bool IsSecondTierWing(const ITEM* pItem);
     bool IsThirdTierWing(const ITEM* pItem);
     bool IsSecondOrThirdTierWing(const ITEM* pItem);
     // The Capes of Lord and Fighter.

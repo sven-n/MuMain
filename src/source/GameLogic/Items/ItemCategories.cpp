@@ -46,6 +46,11 @@ namespace GameLogic::Items
         return HasWingTier(pItem, WingTier::Second) && !HasTag(pItem, ItemTag::Cape);
     }
 
+    bool IsSecondTierWing(const ITEM* pItem)
+    {
+        return HasWingTier(pItem, WingTier::Second);
+    }
+
     bool IsThirdTierWing(const ITEM* pItem)
     {
         return HasWingTier(pItem, WingTier::Third);
@@ -53,7 +58,8 @@ namespace GameLogic::Items
 
     bool IsSecondOrThirdTierWing(const ITEM* pItem)
     {
-        return HasWingTier(pItem, WingTier::Second) || HasWingTier(pItem, WingTier::Third);
+        const WingTier tier = g_ItemDatabase.GetWingTier(pItem->Type);
+        return tier == WingTier::Second || tier == WingTier::Third;
     }
 
     bool IsSecondTierCape(const ITEM* pItem)
