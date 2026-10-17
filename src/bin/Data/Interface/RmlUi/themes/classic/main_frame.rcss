@@ -80,7 +80,8 @@
 .gauge-fill-ag { decorator: image(classic-hud-ag cover left bottom); }
 
 /* The current values, centred under each gauge at y 467 (0.97 drew sprite digits 9x10 from
-   Interface\FontTest; plain bold text here): life at x 100, mana at 540, AG at 571. */
+   Interface\FontTest; plain bold text here): life at x 100, mana at 540 (528 here, below), AG at
+   571. */
 .gauge-num {
 	position: absolute;
 	z-index: 1;
@@ -96,7 +97,10 @@
 	pointer-events: none;
 }
 #bar_hp .gauge-num { left: -27dp; }
-#bar_mp .gauge-num { left: 21dp; }
+/* Mana 12 left of 0.97's 540 (at 528, still over the orb): the AG value is centred only 31 to its
+   right, and with five-digit mana and four-digit AG (high-level characters) 0.97's own numbers run
+   into each other. The AG cannot move right (the Guild button starts at 582). */
+#bar_mp .gauge-num { left: 9dp; }
 #bar_ag .gauge-num { left: -10dp; top: 30dp; }
 
 /* The hero's coordinates in the box at the left end, centred at x 24 and 48, y 462. */
