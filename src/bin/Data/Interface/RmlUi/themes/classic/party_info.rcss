@@ -28,7 +28,7 @@
 	font-size: 1em;
 	text-align: left;
 }
-.party-empty-msg span { display: block; line-height: inherit; }
+.party-empty-msg span { display: block; }
 .party-empty-msg span.paragraph { margin-top: calc(5px * var(--root-scale)); }
 .party-empty-msg { line-height: calc(15px * var(--root-scale)); }
 
