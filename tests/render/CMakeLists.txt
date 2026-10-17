@@ -30,6 +30,12 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME skinned_bone_palette_tests
+    SOURCES
+        test_skinned_bone_palette.cpp
+)
+
+mu_add_test(
     NAME overlay2d_recorder_tests
     SOURCES
         test_overlay2d_recorder.cpp

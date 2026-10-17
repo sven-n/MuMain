@@ -66,6 +66,8 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+
+#include "Render/Renderer/SkinnedBonePalette.h"
 #include <utility>
 #include <vector>
 
@@ -744,8 +746,8 @@ static const float* s_lastBonePalette = nullptr;
 static std::size_t s_lastBonePaletteSize = 0u;
 static std::uint32_t s_lastBonePaletteVersion = 0u;
 static Uint32 s_lastBonePaletteRowOffset = 0u;
-// Bones of the last palette the draws reading it index, for the BonePaletteUsedBytes counter.
-static Uint32 s_lastBonePaletteBonesUsed = 0u;
+// Bones of the last palette uploaded; a draw indexing more uploads it again, longer.
+static Uint32 s_lastBonePaletteBones = 0u;
 // The skinned draw keys seen this frame, for the DistinctSkinnedDraws counter.
 static std::unordered_set<std::uint64_t> s_skinnedDrawKeys;
 
@@ -2146,6 +2148,7 @@ public:
         s_lastBonePaletteSize = 0u;
         s_lastBonePaletteVersion = 0u;
         s_lastBonePaletteRowOffset = 0u;
+        s_lastBonePaletteBones = 0u;
         // Before the reset below, so these invalidate nothing this frame records.
         for (const std::uint32_t textureId : s_pendingRenderTargetReleases)
         {
@@ -4463,10 +4466,7 @@ public:
         }
 
         const Uint32 vertexCount = static_cast<Uint32>(vertices.size());
-        std::int32_t highestBone = -1;
-        for (const SkinnedVertex3D& vertex : vertices)
-            highestBone = std::max({highestBone, vertex.positionBoneIndex, vertex.normalBoneIndex});
-        const Uint32 bonesUsed = static_cast<Uint32>(highestBone + 1);
+        const Uint32 bonesUsed = Render::BonesIndexed(vertices);
         std::optional<CachedSkinnedMesh> range;
         for (Uint32 block = 0u; block < s_skinnedMeshBlocks.size() && !range; ++block)
         {
@@ -4977,8 +4977,10 @@ private:
             return false;
         }
 
-        const Uint32 paletteRowOffset = RecordBonePalette(parameters, cached.bonesUsed);
-        if (paletteRowOffset == ~0u)
+        const Uint32 bonesUsed =
+            frameVertices ? Render::BonesIndexed(std::span(frameVertices, vertexCount)) : cached.bonesUsed;
+        const std::optional<BonePaletteSlot> palette = RecordBonePalette(parameters, bonesUsed);
+        if (!palette)
         {
             return false;
         }
@@ -5021,8 +5023,8 @@ private:
         skinningVu.bodyOriginAndScale[3] = parameters.bodyScale;
         skinningVu.skinningScales[0] = parameters.boneScale;
         skinningVu.skinningScales[1] = parameters.restPoseScale;
-        skinningVu.palette[0] = paletteRowOffset;
-        skinningVu.palette[1] = static_cast<std::uint32_t>(parameters.boneMatrices.size() / 12);
+        skinningVu.palette[0] = palette->rowOffset;
+        skinningVu.palette[1] = palette->bones;
         skinningVu.palette[2] = parameters.translate ? 1u : 0u;
         skinningVu.palette[3] = enhancedLit               ? EnhancedSkinningLighting()
                                 : parameters.lightEnabled ? k_SkinningLightingClassic
@@ -5296,45 +5298,46 @@ private:
         return alignedOffset;
     }
 
-    // `bonesUsed`: one past the highest bone the draw's vertices index, 0 when unknown (all of them).
-    [[nodiscard]] static Uint32 RecordBonePalette(const SkinningParameters& parameters, Uint32 bonesUsed)
+    struct BonePaletteSlot
     {
-        const auto bones = parameters.boneMatrices;
-        if (bones.empty() || bones.size() % 12 != 0)
-        {
-            return ~0u;
-        }
-        constexpr Uint32 BoneBytes = 12u * sizeof(float);
-        const Uint32 paletteBones = static_cast<Uint32>(bones.size() / 12);
-        const Uint32 indexedBones = bonesUsed == 0u ? paletteBones : std::min(bonesUsed, paletteBones);
-        if (bones.data() == s_lastBonePalette && bones.size() == s_lastBonePaletteSize &&
-            parameters.paletteVersion == s_lastBonePaletteVersion)
-        {
-            if (indexedBones > s_lastBonePaletteBonesUsed)
-            {
-                FrameProfiler::Count(FrameProfiler::Counter::BonePaletteUsedBytes,
-                                     (indexedBones - s_lastBonePaletteBonesUsed) * BoneBytes);
-                s_lastBonePaletteBonesUsed = indexedBones;
-            }
-            return s_lastBonePaletteRowOffset;
-        }
-        FrameProfiler::Count(FrameProfiler::Counter::BonePaletteBytes, paletteBones * BoneBytes);
-        FrameProfiler::Count(FrameProfiler::Counter::BonePaletteUsedBytes, indexedBones * BoneBytes);
-        s_lastBonePaletteBonesUsed = indexedBones;
+        Uint32 rowOffset;
+        Uint32 bones;
+    };
 
+    // Uploads the bones the draw indexes (`bonesUsed`, 0 when unknown: all of them). Meshes of one
+    // object share the upload while it holds every bone they index.
+    [[nodiscard]] static std::optional<BonePaletteSlot> RecordBonePalette(const SkinningParameters& parameters,
+                                                                          Uint32 bonesUsed)
+    {
+        const auto palette = parameters.boneMatrices;
+        if (palette.empty() || palette.size() % 12 != 0)
+        {
+            return std::nullopt;
+        }
+        const Uint32 bones = Render::PaletteBonesToUpload(static_cast<Uint32>(palette.size() / 12), bonesUsed);
+        if (palette.data() == s_lastBonePalette && palette.size() == s_lastBonePaletteSize &&
+            parameters.paletteVersion == s_lastBonePaletteVersion && bones <= s_lastBonePaletteBones)
+        {
+            return BonePaletteSlot{s_lastBonePaletteRowOffset, s_lastBonePaletteBones};
+        }
+
+        const std::size_t floats = static_cast<std::size_t>(bones) * 12u;
         const std::size_t rowOffset = s_boneRowScratch.size() / 4;
         if (rowOffset > std::numeric_limits<Uint32>::max() ||
-            bones.size() > std::numeric_limits<Uint32>::max() / sizeof(float) - s_boneRowScratch.size())
+            floats > std::numeric_limits<Uint32>::max() / sizeof(float) - s_boneRowScratch.size())
         {
-            return ~0u;
+            return std::nullopt;
         }
 
-        s_boneRowScratch.insert(s_boneRowScratch.end(), bones.begin(), bones.end());
-        s_lastBonePalette = bones.data();
-        s_lastBonePaletteSize = bones.size();
+        s_boneRowScratch.insert(s_boneRowScratch.end(), palette.begin(), palette.begin() + floats);
+        FrameProfiler::Count(FrameProfiler::Counter::BonePaletteBytes,
+                             static_cast<std::uint32_t>(floats * sizeof(float)));
+        s_lastBonePalette = palette.data();
+        s_lastBonePaletteSize = palette.size();
         s_lastBonePaletteVersion = parameters.paletteVersion;
         s_lastBonePaletteRowOffset = static_cast<Uint32>(rowOffset);
-        return s_lastBonePaletteRowOffset;
+        s_lastBonePaletteBones = bones;
+        return BonePaletteSlot{s_lastBonePaletteRowOffset, bones};
     }
 
     // -----------------------------------------------------------------------

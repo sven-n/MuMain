@@ -75,9 +75,8 @@ enum class Counter : int
     BatchBreakMatrix,
     BatchBreakDraw,
     BatchBreakOther,
-    // Bone palette bytes uploaded, and how many of them the meshes' vertices actually index.
+    // Bone palette bytes uploaded.
     BonePaletteBytes,
-    BonePaletteUsedBytes,
     PipelineBinds,
     SamplerBinds,
     // Skinned draws whose mesh, texture and pipeline no earlier draw in the pass had this frame.
@@ -106,7 +105,6 @@ inline constexpr const char* kCounterNames[static_cast<int>(Counter::Count_)] = 
     "BatchBreakDraw",
     "BatchBreakOther",
     "BonePaletteBytes",
-    "BonePaletteUsedBytes",
     "PipelineBinds",
     "SamplerBinds",
     "DistinctSkinnedDraws",
