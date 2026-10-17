@@ -79,46 +79,47 @@
    own rectangle (engine-findings.md, image repeat modes). */
 .gcd-sprite-middle { top: 5dp; bottom: 5dp; decorator: image(classic-gcd-stone repeat-y left top); }
 .gcd-sprite-bottom { bottom: 0; height: 5dp; decorator: image(classic-gcd-edge); }
-/* The overlay-portrait box is native's CDuelMsgBox/CDuelResultMsgBox (no 0.97 counterpart:
-   legacy's rules, with its text blanks, over the narrower box): top edge at y=70, 67 + 7*15 +
-   50 = 222 tall, the 148x138 crest drawn at y+15 behind the text. The text block ends right
-   above the buttons (last line at y+151 in both boxes), with the bold caption one 20 row above
-   its first line (y+100 over three lines, y+115 over two), lines 16 apart. */
+/* The overlay-portrait box is the duel request (CDuelMsgBox) and result. 0.97 has no duel; the
+   Season 1 client's request (005c8af0) is a 0.97 box at (213, 110), four stones tall
+   (5 + 4 * 40 + 5 = 170), its DuelWindow crest (128 x 128) at (256, 120) behind the text, the
+   caption bold (255, 207, 24) centred at y 141, the two lines at 180 and 200, each text over a
+   black copy one unit down and right, and OK / Cancel (70 x 21) at (237, 250) and (332, 250).
+   In the box: the caption at 31, the lines 20 apart ending at 106 (more lines grow upwards), the
+   buttons 24 and 119 from its left, 9 above its bottom. */
 #panel.portrait {
-	top: 70dp;
-	min-height: 222dp;
+	top: 110dp;
+	min-height: 170dp;
 }
 #panel.portrait .gcd-body {
-	margin: 35dp 14.5dp 56dp 14.5dp; /* legacy's blanks and 184 text column, not the 0.97 ones below */
-	height: 131dp; /* 222 - 35 top - 56 button blank: ends just above the buttons */
+	margin: 27dp 6dp 64dp 6dp;
+	height: 79dp; /* 170 - 27 top - 64 under the last line */
 	align-items: stretch;
 }
 #panel.portrait .gcd-text-col {
 	justify-content: flex-end;
 	overflow: visible; /* a fixed native box never scrolls */
 }
+#panel.portrait .gcd-portrait2d-text { margin-bottom: auto; color: rgb(255, 207, 24); font-effect: shadow(1dp 1dp black); }
 /* Positioned so they paint above the (positioned) crest, which comes first in the markup. Regular
-   weight unless the caller asks for bold, as legacy draws them: the bold of .gcd-line below is
-   0.97's, and this box has no 0.97 counterpart. */
+   weight unless the caller asks for bold, as Season 1 draws them. */
 #panel.portrait .gcd-line {
 	position: relative;
-	line-height: 16dp;
-	min-height: 16dp; /* an empty line keeps its row, as native draws every row at its own y */
+	line-height: 20dp;
+	min-height: 20dp; /* an empty line keeps its row, as native draws every row at its own y */
 	font-weight: normal;
+	font-effect: shadow(1dp 1dp black);
 }
 #panel.portrait .gcd-line.bold { font-weight: bold; }
-/* The portrait is tall as well: the paired 0.97 placement, not the keypad's. */
-#panel.portrait .gcd-btn-primary { left: 21dp; bottom: 19dp; }
-#panel.portrait .gcd-btn-secondary, #panel.portrait .gcd-btn-cancel { left: 120dp; bottom: 19dp; }
+#panel.portrait .gcd-btn-primary { left: 24dp; bottom: 9dp; }
+#panel.portrait .gcd-btn-secondary, #panel.portrait .gcd-btn-cancel { left: 119dp; bottom: 9dp; }
 
-/* GenericDialogConfig::Portrait2D's own art -- currently always native's IMAGE_MSGBOX_DUEL_BACK
-   sprite (newui_DuelWindow.tga), a fixed 148x138 portrait with a caption drawn directly on top --
-   the only real consumer today, though Portrait2D itself isn't Duel-specific. A plain, un-skinned
-   native asset with no 0.97 counterpart: legacy's rule. */
+/* GenericDialogConfig::Portrait2D's own art -- the duel crest: Season 1's DuelWindow (128 x 128),
+   which Season 1 drew additively (its black square vanishes over the stone): the derived
+   DuelWindow_add (tools/classic_theme/make_classic_derived_textures.py) carries that as alpha. */
 @spritesheet portrait2d-sheet
 {
-	src: "../../../newui_DuelWindow.tga";
-	portrait2d-image: 0px 0px 148px 138px;
+	src: ../../../Classic/s1/DuelWindow_add.tga;
+	portrait2d-image: 0px 0px 128px 128px;
 }
 
 /* 0.97 has no title banner (legacy's IMAGE_MSGBOX_TOP_TITLEBAR, newui_Message_03.tga, dropped
@@ -217,14 +218,14 @@
 #gcd_item3d { position: absolute; left: -80dp; top: -80dp; width: 200dp; height: 200dp; pointer-events: none; }
 
 /* Optional 2D portrait (GenericDialogConfig::Portrait2D), Overlay layout (the default) -- a direct
-   #panel child at native's fixed crest position (y+15, 148x138), behind the text, unlike
-   .gcd-item3d (icon-left/text-right, that's the Beside layout below). Centred in the 213 box. */
+   #panel child at Season 1's crest position (y+10, 128x128), behind the text, unlike .gcd-item3d
+   (icon-left/text-right, that's the Beside layout below). */
 .gcd-portrait2d {
 	position: absolute;
-	left: 32.5dp; /* (213 - 148) / 2 */
-	top: 15dp;
-	width: 148dp;
-	height: 138dp;
+	left: 43dp; /* Season 1: 256 - 213 */
+	top: 10dp;
+	width: 128dp;
+	height: 128dp;
 	decorator: image(portrait2d-image);
 }
 /* Same cascade-tie fix as .gcd-item3d above. */
@@ -391,3 +392,24 @@
 #panel .gcd-btn-primary.triple { left: 4dp; width: 64dp; }
 #panel .gcd-btn-secondary.triple { left: 75dp; width: 64dp; }
 #panel .gcd-btn-cancel.triple { left: 146dp; width: 64dp; }
+
+/* Scrolling lists: the Season 1 client's win_scrollbar (as the classic social windows'), in place of
+   base.rcss's S6 track and knob: 13x13 arrows at both ends, the track between two 106,97,88 lines,
+   a grey thumb sized to the list. */
+@spritesheet gcd-scroll-sheet
+{
+	src: "../../../win_scrollbar.jpg";
+	gcd-scroll-thumb: 0px 1px 11px 1px;
+	gcd-scroll-up: 0px 3px 13px 13px;
+	gcd-scroll-down: 0px 16px 13px 13px;
+}
+.scroll-pane scrollbarvertical { width: 13dp; margin: 0; }
+.scroll-pane scrollbarvertical slidertrack { decorator: none; box-sizing: border-box; border-left: 1dp rgb(106, 97, 88); border-right: 1dp rgb(106, 97, 88); }
+.scroll-pane scrollbarvertical sliderbar { height: auto; min-height: 6dp; margin: 0 1dp; decorator: image(gcd-scroll-thumb fill); }
+.scroll-pane scrollbarvertical sliderbar:active { filter: none; }
+.scroll-pane scrollbarvertical sliderarrowdec,
+.scroll-pane scrollbarvertical sliderarrowinc { width: 100%; height: 13dp; pointer-events: auto; }
+.scroll-pane scrollbarvertical sliderarrowdec { decorator: image(gcd-scroll-up); }
+.scroll-pane scrollbarvertical sliderarrowinc { decorator: image(gcd-scroll-down); }
+.scroll-pane scrollbarvertical sliderarrowdec:active,
+.scroll-pane scrollbarvertical sliderarrowinc:active { filter: brightness(0.7); }
