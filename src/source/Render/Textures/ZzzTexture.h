@@ -18,6 +18,10 @@ bool LoadBitmap(const wchar_t* szFileName, GLuint uiTextureIndex, GLuint uiFilte
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
 bool LoadBitmap(const wchar_t* szFileName, GLuint uiTextureIndex, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE, bool bCheck = true);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+// Loads a texture the game draws on through its pixels (BITMAP_t::Buffer), such as
+// the guild mark. The pixels are kept at the original size, also for upscaled art.
+bool LoadCanvasBitmap(const wchar_t* szFileName, GLuint uiTextureIndex, GLuint uiFilter = GL_NEAREST,
+                      GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
 void DeleteBitmap(GLuint uiTextureIndex, bool bForce = false);
 void PopUpErrorCheckMsgBox(const wchar_t* szErrorMsg, bool bForceDestroy = false);
 // Shows the error (UTF-8) with Copy text, Continue and Quit, or only Copy

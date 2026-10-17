@@ -7227,6 +7227,12 @@ void CreateCastleMark(int Type, BYTE* buffer, bool blend)
     Width = (int)b->Width;
     Height = (int)b->Height;
     BYTE* Buffer = b->Buffer;
+    if (!Buffer || Width == 0 || Height == 0)
+    {
+        mu::log::Get("gameplay")
+            ->error("[CreateCastleMark] bitmap {} not loaded (BitmapIndex={})", Type, b->BitmapIndex);
+        return;
+    }
 
     int alpha = 128;
     if (blend)

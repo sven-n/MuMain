@@ -241,6 +241,32 @@ bool OpenJpegBuffer(wchar_t* filename, float* BufferFloat)
     return true;
 }
 
+namespace
+{
+bool LoadDataBitmap(const wchar_t* szFullPath, GLuint uiTextureIndex, GLuint uiFilter, GLuint uiWrapMode, bool bCheck,
+                    bool keepPixels)
+{
+    if (bCheck)
+    {
+        if (false == Bitmaps.LoadImage(uiTextureIndex, szFullPath, uiFilter, uiWrapMode, true, false, keepPixels))
+        {
+            wchar_t szErrorMsg[256] = {
+                0,
+            };
+            mu_swprintf(szErrorMsg, L"LoadBitmap Failed: %ls", szFullPath);
+#ifdef FOR_WORK
+            PopUpErrorCheckMsgBox(szErrorMsg);
+#else  // FOR_WORK
+            PopUpErrorCheckMsgBox(szErrorMsg, true);
+#endif // FOR_WORK
+            return false;
+        }
+        return true;
+    }
+    return Bitmaps.LoadImage(uiTextureIndex, szFullPath, uiFilter, uiWrapMode, true, false, keepPixels);
+}
+} // namespace
+
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 bool LoadBitmap(const wchar_t* szFileName, GLuint uiTextureIndex, GLuint uiFilter, GLuint uiWrapMode, bool bCheck,
                 bool bFullPath)
@@ -265,24 +291,17 @@ bool LoadBitmap(const wchar_t* szFileName, GLuint uiTextureIndex, GLuint uiFilte
     wcscpy(szFullPath, L"Data\\");
     wcscat(szFullPath, szFileName);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-    if (bCheck)
-    {
-        if (false == Bitmaps.LoadImage(uiTextureIndex, szFullPath, uiFilter, uiWrapMode))
-        {
-            wchar_t szErrorMsg[256] = {
-                0,
-            };
-            mu_swprintf(szErrorMsg, L"LoadBitmap Failed: %ls", szFullPath);
-#ifdef FOR_WORK
-            PopUpErrorCheckMsgBox(szErrorMsg);
-#else  // FOR_WORK
-            PopUpErrorCheckMsgBox(szErrorMsg, true);
-#endif // FOR_WORK
-            return false;
-        }
-        return true;
-    }
-    return Bitmaps.LoadImage(uiTextureIndex, szFullPath, uiFilter, uiWrapMode);
+    return LoadDataBitmap(szFullPath, uiTextureIndex, uiFilter, uiWrapMode, bCheck, false);
+}
+
+bool LoadCanvasBitmap(const wchar_t* szFileName, GLuint uiTextureIndex, GLuint uiFilter, GLuint uiWrapMode)
+{
+    wchar_t szFullPath[256] = {
+        0,
+    };
+    wcscpy(szFullPath, L"Data\\");
+    wcscat(szFullPath, szFileName);
+    return LoadDataBitmap(szFullPath, uiTextureIndex, uiFilter, uiWrapMode, true, true);
 }
 void DeleteBitmap(GLuint uiTextureIndex, bool bForce)
 {
