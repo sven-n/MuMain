@@ -17,12 +17,36 @@ foreach(required_text IN ITEMS CfgKeyVSync CfgDefaultVSync CfgKeyLook CfgDefault
     endif()
 endforeach()
 
-# The look preset is the only setting of the Enhanced features: no per-feature switch.
-foreach(forbidden_text IN ITEMS TextureFiltering EnhancedLighting DynamicLights PostProcessing BloomStrength
-        LightMood)
+# The look preset gates Enhanced, with the four persisted feature choices offered in options.
+foreach(feature IN ITEMS EnhancedLighting DynamicLights LightMood PostProcessing)
+    foreach(prefix IN ITEMS CfgKey CfgDefault)
+        string(FIND "${config_constants}" "${prefix}${feature}" found_at)
+        if(found_at EQUAL -1)
+            message(FATAL_ERROR "GameConfigConstants.h must define ${prefix}${feature}")
+        endif()
+    endforeach()
+    set(required_text "ReadBool(CfgSectionRender, CfgKey${feature}, CfgDefault${feature})")
+    string(FIND "${config_source}" "${required_text}" found_at)
+    if(found_at EQUAL -1)
+        message(FATAL_ERROR "GameConfig.cpp must load the feature choice through: ${required_text}")
+    endif()
+endforeach()
+foreach(required_text IN ITEMS
+        "WriteBool(CfgSectionRender, CfgKeyEnhancedLighting, m_enhancedLighting)"
+        "WriteBool(CfgSectionRender, CfgKeyDynamicLights, m_dynamicLights)"
+        "WriteBool(CfgSectionRender, CfgKeyLightMood, m_lightMood)"
+        "WriteBool(CfgSectionRender, CfgKeyPostProcessing, m_postProcessing)")
+    string(FIND "${config_source}" "${required_text}" found_at)
+    if(found_at EQUAL -1)
+        message(FATAL_ERROR "GameConfig.cpp must save the feature choice through: ${required_text}")
+    endif()
+endforeach()
+
+# Texture filtering still follows Look; numeric tuning does not use retired per-feature keys.
+foreach(forbidden_text IN ITEMS TextureFiltering BloomStrength LightMoodStrength)
     string(FIND "${config_constants}" "CfgKey${forbidden_text}" found_at)
     if(NOT found_at EQUAL -1)
-        message(FATAL_ERROR "GameConfigConstants.h must not define a per-feature key CfgKey${forbidden_text}")
+        message(FATAL_ERROR "GameConfigConstants.h must not define a retired key CfgKey${forbidden_text}")
     endif()
 endforeach()
 
