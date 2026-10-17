@@ -12887,6 +12887,15 @@
   <data name="DefaultFont" xml:space="preserve">
     <value>Domyślny</value>
   </data>
+  <data name="Texture Pack" xml:space="preserve">
+    <value>Paczka tekstur</value>
+  </data>
+  <data name="Original Textures" xml:space="preserve">
+    <value>Oryginalne</value>
+  </data>
+  <data name="Texture Pack Tooltip" xml:space="preserve">
+    <value>Foldery z Data/TexturePacks; zmiana działa po ponownym uruchomieniu gry</value>
+  </data>
   <data name="BasicAttackFallback" xml:space="preserve">
     <value>Awaryjny atak podstawowy</value>
   </data>
