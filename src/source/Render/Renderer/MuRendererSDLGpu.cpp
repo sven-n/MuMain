@@ -67,6 +67,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "Render/Renderer/ReorderableDrawRuns.h"
 #include "Render/Renderer/SkinnedBonePalette.h"
 #include <utility>
 #include <vector>
@@ -1222,6 +1223,17 @@ struct PendingOffscreenCapture
     Uint32 height;
 };
 static std::vector<PendingOffscreenCapture> s_pendingOffscreenCaptures;
+
+static bool s_drawReorderingEnabled = true;
+// What a reorderable block must not span: a flush, or an offscreen capture's start or end.
+struct ReorderableDrawsMark
+{
+    std::size_t firstCommand = 0u;
+    std::size_t replayedCommands = 0u;
+    std::size_t pendingCaptures = 0u;
+    std::uint32_t captureTexture = 0u;
+};
+static ReorderableDrawsMark s_reorderableDraws;
 static std::size_t s_offscreenCaptureStart = 0u;
 static std::uint32_t s_offscreenCaptureTextureId = 0u;
 // SetOffscreen2DRect()'s projection for the open capture's 2D draws.
@@ -3519,6 +3531,51 @@ public:
     [[nodiscard]] int GetAntialiasingSamples() const override
     {
         return s_sampleCount;
+    }
+
+    [[nodiscard]] std::size_t BeginReorderableDraws() override
+    {
+        s_reorderableDraws = {s_renderCmds.size(), s_replayedCmdCount, s_pendingOffscreenCaptures.size(),
+                              s_offscreenCaptureTextureId};
+        return s_renderCmds.size();
+    }
+
+    void EndReorderableDraws(std::size_t mark) override
+    {
+        const ReorderableDrawsMark& begun = s_reorderableDraws;
+        if (!s_drawReorderingEnabled || mark != begun.firstCommand || mark >= s_renderCmds.size() ||
+            begun.replayedCommands != s_replayedCmdCount ||
+            begun.pendingCaptures != s_pendingOffscreenCaptures.size() ||
+            begun.captureTexture != s_offscreenCaptureTextureId)
+        {
+            return;
+        }
+        const auto reorderable = [](const RenderCmd& command)
+        {
+            return command.type == RenderCmdType::DrawSkinnedTriangles && command.shadowIndex == ~0u &&
+                   !command.blendEnabled && command.depthTestEnabled && command.depthMaskEnabled;
+        };
+        const auto stateKey = [](const RenderCmd& command)
+        {
+            return std::tuple{
+                reinterpret_cast<std::uintptr_t>(command.pipeline), reinterpret_cast<std::uintptr_t>(command.texture),
+                reinterpret_cast<std::uintptr_t>(command.sampler), reinterpret_cast<std::uintptr_t>(command.vtxBuffer)};
+        };
+        Render::GroupReorderableFirst(std::span(s_renderCmds).subspan(mark), reorderable,
+                                      [&](const RenderCmd& left, const RenderCmd& right)
+                                      { return stateKey(left) < stateKey(right); });
+        // A later draw must not merge into a command that moved.
+        s_previousDrawCommands.fill(kNoDrawCommand);
+    }
+
+    void SetDrawReorderingEnabled(bool enabled) override
+    {
+        s_drawReorderingEnabled = enabled;
+    }
+
+    [[nodiscard]] bool IsDrawReorderingEnabled() const override
+    {
+        return s_drawReorderingEnabled;
     }
 
     void EndSceneGeometry() override

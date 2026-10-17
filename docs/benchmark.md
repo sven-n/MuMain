@@ -84,6 +84,7 @@ it found when it ends or is stopped.
 | `look.post.off` | Bloom and colour grading. |
 | `aa.off` | Multisample anti-aliasing. |
 | `aniso.off` | Anisotropic filtering (1x); mipmaps stay. |
+| `render.sort.off` | Opaque map object draws submitted as recorded instead of first, grouped by pipeline and texture. |
 
 The `look.*` and `aa.off` segments act on the Enhanced look; under Classic they change nothing.
 They, `aniso.off` and `look.texfilter.off` change how the frame is shaded or sampled, not what it
@@ -144,7 +145,7 @@ submitted the same number of draw calls as the baseline. That segment disabled n
 either the scene had none of what it targets (no wings equipped, no particles on screen) or its
 configuration does not reach the path it names. Its timing is then not evidence that what it
 targets is cheap, and the report says so rather than leaving the row to be misread. Segments
-tagged `look`, `textures` or `antialiasing` are exempt: they submit the same draws by design.
+tagged `look`, `textures`, `antialiasing` or `order` are exempt: they submit the same draws by design.
 
 ## 4. Recording which commit a run came from
 

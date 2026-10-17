@@ -32,6 +32,7 @@ enum SegmentTag : uint32_t
     TagLook = 1u << 9,
     TagTextures = 1u << 10,
     TagAntialiasing = 1u << 11,
+    TagOrder = 1u << 12,
 };
 
 // What the segment switches off while it is measured: the `$effects ...` console toggles
@@ -67,6 +68,9 @@ struct SceneConfig
     // -1 keeps what the run found.
     int antialiasingSamples = -1;
     int anisotropy = -1;
+
+    // Opaque map object draws in the order they were recorded, not sorted by state.
+    bool disableDrawReordering = false;
 
     bool operator==(const SceneConfig&) const = default;
 };

@@ -81,5 +81,7 @@ void ApplyConfig(const SceneConfig& config)
         Bitmaps.SetAnisotropy(anisotropy);
         s_anisotropyApplied = anisotropy;
     }
+
+    mu::GetRenderer().SetDrawReorderingEnabled(!config.disableDrawReordering);
 }
 } // namespace Core::Benchmark::Scene

@@ -109,8 +109,9 @@ void CheckSubmissionBound(const RunData& run, const Stats::SegmentStats& segment
 // segment's configuration does not reach the path it names. Both are worth saying out loud:
 // otherwise the row reads as "this costs nothing", which is a very different claim.
 //
-// Segments that change how things are shaded or sampled (the look, textures, anti-aliasing)
-// submit the same draws by design, so draw counts say nothing about them and they are skipped.
+// Segments that change how things are shaded or sampled (the look, textures, anti-aliasing), or
+// only the order draws are submitted in, submit the same draws by design, so draw counts say nothing about them and
+// they are skipped.
 bool ChangesShadingOnly(const RunData& run, const std::string& segmentName)
 {
     for (const SegmentSamples& segment : run.segments)
@@ -119,7 +120,7 @@ bool ChangesShadingOnly(const RunData& run, const std::string& segmentName)
             continue;
         const std::string tags = " " + segment.tags + " ";
         return tags.find(" look ") != std::string::npos || tags.find(" textures ") != std::string::npos ||
-               tags.find(" antialiasing ") != std::string::npos;
+               tags.find(" antialiasing ") != std::string::npos || tags.find(" order ") != std::string::npos;
     }
     return false;
 }
