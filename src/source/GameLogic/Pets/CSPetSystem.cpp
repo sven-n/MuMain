@@ -460,7 +460,7 @@ void CSPetDarkSpirit::MovePet(void)
         int speedRandom = 28;
         int CharacterHeight = 250;
 
-        if (m_PetOwner->Helper.Type == ITEM_DARK_HORSE_ITEM || gMapManager.WorldActive == WD_55LOGINSCENE)
+        if (m_PetOwner->Helper.Type == MODEL_DARK_HORSE_ITEM || gMapManager.WorldActive == WD_55LOGINSCENE)
         {
             CharacterHeight = 350;
         }
