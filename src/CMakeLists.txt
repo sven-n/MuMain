@@ -743,6 +743,28 @@ if (MSVC)
     COMMENT "Staging linked-target runtime DLLs"
     VERBATIM
   )
+
+  # TARGET_RUNTIME_DLLS misses DLLs of non-SHARED imported targets (FindOpenSSL's
+  # libcrypto) and DLLs loaded through other DLLs (libcurl's zlib). Stage those
+  # from vcpkg without relying on vcpkg's toolchain-injected applocal step.
+  if(VCPKG_INSTALLED_DIR AND VCPKG_TARGET_TRIPLET)
+    get_filename_component(MU_LINKER_DIR "${CMAKE_LINKER}" DIRECTORY)
+    find_program(MU_DUMPBIN dumpbin HINTS "${MU_LINKER_DIR}")
+    if(MU_DUMPBIN)
+      add_custom_command(TARGET Main POST_BUILD
+        COMMAND "${CMAKE_COMMAND}"
+          "-DEXE=$<TARGET_FILE:Main>"
+          "-DDLL_DIR=${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}$<$<CONFIG:Debug>:/debug>/bin"
+          "-DDUMPBIN=${MU_DUMPBIN}"
+          -P "${REPO_ROOT}/cmake/StageVcpkgRuntimeDlls.cmake"
+        COMMENT "Staging vcpkg runtime DLLs"
+        VERBATIM
+      )
+    else()
+      message(WARNING "dumpbin not found next to ${CMAKE_LINKER}; vcpkg runtime DLLs "
+        "are staged only if vcpkg's applocal step runs.")
+    endif()
+  endif()
 endif()
 
 # .NET Client Library and tools (platform-agnostic, requires dotnet SDK)
