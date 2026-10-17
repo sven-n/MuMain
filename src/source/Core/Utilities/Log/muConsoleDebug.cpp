@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include <cstdlib>
 #include <string_view>
+#include "Core/Utilities/Benchmark/BenchConsoleCommand.h"
 #include "Core/Utilities/Log/MuLogger.h"
 
 #include "muConsoleDebug.h"	// self
@@ -224,6 +225,11 @@ void ListDebugWindows()
 
 bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
 {
+    if (Core::Benchmark::Console::HandleCommand(strCommand))
+    {
+        return true;
+    }
+
     // "$win <name>" toggles a window, "$win list" names them. Temporary; see kDebugWindows above.
     if (strCommand.compare(0, 4, L"$win") == 0 && strCommand.compare(0, 7, L"$winmsg") != 0)
     {

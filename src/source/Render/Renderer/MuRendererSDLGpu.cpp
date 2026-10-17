@@ -4115,6 +4115,15 @@ public:
         return s_device ? SDL_GetGPUDeviceDriver(s_device) : "unknown";
     }
 
+    [[nodiscard]] const char* GetGPUDeviceName() const override
+    {
+        if (!s_device)
+        {
+            return "";
+        }
+        return SDL_GetStringProperty(SDL_GetGPUDeviceProperties(s_device), SDL_PROP_GPU_DEVICE_NAME_STRING, "");
+    }
+
     // -----------------------------------------------------------------------
     // RenderQuad2D: Render a screen-space textured quad (4 vertices per quad).
     // Vertex count must be a multiple of 4.

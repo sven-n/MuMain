@@ -728,6 +728,11 @@ public:
     {
         return "unknown";
     }
+    // The adapter's name as the driver reports it; empty when unknown.
+    [[nodiscard]] virtual const char* GetGPUDeviceName() const
+    {
+        return "";
+    }
 };
 
 // ---------------------------------------------------------------------------

@@ -125,6 +125,15 @@ void LookPresetController::Override(const FeatureOverrides& change)
     }
 }
 
+void LookPresetController::ReplaceOverrides(const FeatureOverrides& overrides)
+{
+    m_overrides = overrides;
+    if (m_hooks.apply)
+    {
+        m_hooks.apply(Effective());
+    }
+}
+
 void LookPresetController::SetChoices(const FeatureOverrides& choices)
 {
     m_choices = choices;

@@ -39,6 +39,7 @@ FrameTimingState g_frameTiming;
 #include "LoginSceneOverlay.h"
 #include "ScreenshotCaptureState.h"
 #include "Audio/DSPlaySound.h"
+#include "Core/Utilities/BuildInfo.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/RenderUtils.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -134,8 +135,12 @@ bool GetShowFpsCounter()
     return g_bShowFpsCounter;
 }
 
+// The overlay has its own flag: a benchmark run counts without drawing it into its own frames.
+static bool g_bShowGLStatsOverlay = false;
+
 void SetShowGLStats(bool enabled)
 {
+    g_bShowGLStatsOverlay = enabled;
     FrameProfiler::g_CountersEnabled = enabled;
     mu::GetRenderer().SetStatsEnabled(enabled);
 }
@@ -649,39 +654,9 @@ static void RestartFrameStatsOnSceneChange()
 // Which binary runs where: one line each for the build and the OS.
 static void AddBuildLines(std::vector<std::string>& lines)
 {
-    constexpr const char* kBuildType =
-#if defined(_DEBUG) || defined(DEBUG)
-        "Debug";
-#else
-        "Release";
-#endif
-    constexpr const char* kEditor =
-#ifdef _EDITOR
-        "Editor";
-#else
-        "NoEditor";
-#endif
-    constexpr const char* kCompiler =
-#if defined(__MINGW32__) || defined(__MINGW64__)
-        "MinGW";
-#elif defined(__clang__)
-        "Clang";
-#elif defined(_MSC_VER)
-        "MSVC";
-#elif defined(__GNUC__)
-        "GCC";
-#else
-        "Unknown";
-#endif
-    constexpr const char* kArch =
-#if defined(_WIN64) || defined(__x86_64__) || defined(__aarch64__)
-        "x64";
-#else
-        "x86";
-#endif
     char line[160];
-    std::snprintf(line, sizeof(line), "Build: %s %s %s %s  %s %s", kBuildType, kEditor, kCompiler, kArch, __DATE__,
-                  __TIME__);
+    std::snprintf(line, sizeof(line), "Build: %s %s %s %s  %s %s", Core::Build::kConfiguration, Core::Build::kEditor,
+                  Core::Build::kCompiler, Core::Build::kArchitecture, Core::Build::kDate, Core::Build::kTime);
     lines.emplace_back(line);
     lines.push_back("OS: " + Core::Text::ToUtf8(Core::Platform::GetOSVersionString().c_str()));
 }
@@ -731,7 +706,7 @@ static void UpdateDiagnostics()
     }
     UI::Diagnostics::FrameSummary summary;
     summary.details = g_bShowDebugInfo;
-    summary.counters = FrameProfiler::g_CountersEnabled;
+    summary.counters = g_bShowGLStatsOverlay;
     summary.fpsOnly = g_bShowFpsCounter;
     summary.fps = FPS_AVG;
     summary.averageFps = s_avgFps;

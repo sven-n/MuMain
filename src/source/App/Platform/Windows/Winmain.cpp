@@ -43,6 +43,7 @@
 #include "Network/IncomingPacketQueue.h"
 #include "Core/Time/FrameTimerScheduler.h"
 #include "Core/Utilities/FrameProfiler.h"
+#include "Core/Utilities/Benchmark/BenchRecorder.h"
 #include <SDL3/SDL.h>
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -409,6 +410,12 @@ void MuSetAntialiasingPreference(int samples)
         return;
     }
     mu::GetRenderer().SetAntialiasingSamples(config.GetAntialiasing());
+}
+
+void MuSetVSyncForSession(bool enabled)
+{
+    g_pendingVSyncPreference = enabled;
+    g_hasPendingVSyncPreference = true;
 }
 
 void MuReapplyVSyncPreference()
@@ -919,6 +926,7 @@ static void RenderProfiledFrame()
         mu::GetRenderer().EndFrame();
     }
     FrameProfiler::CompleteFrame();
+    Core::Benchmark::Recorder::Instance().Tick();
 }
 
 void RecordCpuUsage()

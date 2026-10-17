@@ -76,6 +76,8 @@ public:
     void ApplyPreset(LookPreset preset);
     // A developer override for the session: applied, not saved, the preset unchanged.
     void Override(const FeatureOverrides& change);
+    // Every override at once, for the benchmark's segments and their restore.
+    void ReplaceOverrides(const FeatureOverrides& overrides);
     // The player's Enhanced features, saved by the caller: they act on Enhanced only, under the
     // developer overrides, and applying a preset keeps them.
     void SetChoices(const FeatureOverrides& choices);

@@ -24,6 +24,7 @@ void SetBuildIdentifier(std::string identifier);
 
 // Query family.
 std::string Ping(const Request& request, std::unique_ptr<Act>& act);
+std::string Bench(const Request& request, std::unique_ptr<Act>& act);
 std::string Scene(const Request& request, std::unique_ptr<Act>& act);
 std::string State(const Request& request, std::unique_ptr<Act>& act);
 std::string Nearby(const Request& request, std::unique_ptr<Act>& act);
