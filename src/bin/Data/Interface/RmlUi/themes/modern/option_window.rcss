@@ -113,8 +113,6 @@
 .opt-pane {
 	position: relative;
 	flex: 1 1 0;
-	padding: 22dp 28dp;
-	overflow-y: auto;
 	background-color: rgba(22, 26, 32, 140);
 	backdrop-filter: blur(12dp);
 	decorator: linear-gradient(to bottom, rgba(255, 255, 255, 20), rgba(255, 255, 255, 0) 30%);
@@ -134,11 +132,27 @@
 
 /* A heading over a group of rows. */
 .opt-section {
+	display: block;
 	margin: 18dp 0 4dp;
 	font-size: 12dp;
 	font-weight: bold;
 	letter-spacing: 2dp;
 	color: token(text-secondary);
+}
+
+.opt-page-title + .opt-section {
+	margin-top: 8dp;
+}
+
+/* The active page, scrolling (base.rcss's .scroll-pane) when its rows don't fit. Absolute, so the
+   pane's width never depends on its content: a flex item that scrolls shrinks its rows to nothing. */
+.opt-scroll {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	padding: 22dp 28dp;
 }
 
 /* .hidden ties with this rule's display at equal specificity, so it is restated. */
@@ -486,7 +500,7 @@
 	.opt-close-bar { left: 5dp; top: 14dp; }
 	.opt-body { margin-top: 10dp; }
 	.opt-nav-item { height: 32dp; line-height: 32dp; margin-bottom: 2dp; }
-	.opt-pane { padding: 12dp 16dp; }
+	.opt-scroll { padding: 12dp 16dp; }
 	.opt-page-title { padding-bottom: 6dp; margin-bottom: 4dp; font-size: 14dp; }
 	.opt-row { height: 34dp; }
 	.opt-footer { height: 36dp; margin-top: 8dp; }

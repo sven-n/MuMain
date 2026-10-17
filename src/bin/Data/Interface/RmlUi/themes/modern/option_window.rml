@@ -34,6 +34,7 @@
 			</div>
 
 			<div class="opt-pane">
+			<div class="opt-scroll scroll-pane">
 				<div class="opt-page" data-class-hidden="active_tab != 0">
 					<div class="opt-page-title">{{tab_display_label}}</div>
 					<div class="opt-row">
@@ -277,6 +278,7 @@
 						<div class="opt-control"><div class="opt-toggle" data-class-checked="show_debug_info"><div class="opt-toggle-knob"></div></div></div>
 					</div>
 				</div>
+			</div>
 			</div>
 		</div>
 
