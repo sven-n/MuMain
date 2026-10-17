@@ -115,6 +115,14 @@ mu_add_test(
         ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/UpscaleMarker.cpp
 )
 
+# The texture packs whose files CGlobalBitmap reads before those in Data.
+mu_add_test(
+    NAME texture_pack_tests
+    SOURCES
+        test_texture_pack.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/TexturePack.cpp
+)
+
 mu_add_test(
     NAME sdl_gpu_validation_tests
     SOURCES
