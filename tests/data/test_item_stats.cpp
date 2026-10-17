@@ -5,11 +5,14 @@
 #include "ClientDataScope.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "I18N/All.h"
+#include "UI/Inventory/ItemHelpContentKey.h"
 
 #include <algorithm>
 #include <array>
@@ -59,19 +62,21 @@ private:
 
 using ItemInfoTable = std::array<std::array<int, _COLUMN_TYPE_COUNT>, iMaxLevel + 1>;
 
-// Points the item help table at a test-owned hero: ComputeItemInfo marks the levels the hero
-// can equip.
+// Points the item help window at a test-owned hero: ComputeItemInfo marks the levels its
+// attributes can equip, and the "Can be equipped by" lines compare its class.
 class ItemHelpScope
 {
 public:
-    ItemHelpScope() : m_previousHero(CharacterAttribute)
+    ItemHelpScope() : m_previousHero(CharacterAttribute), m_previousHeroCharacter(::Hero)
     {
         CharacterAttribute = &m_hero;
+        ::Hero = &m_heroCharacter;
     }
 
     ~ItemHelpScope()
     {
         CharacterAttribute = m_previousHero;
+        ::Hero = m_previousHeroCharacter;
     }
 
     CHARACTER_ATTRIBUTE& Hero()
@@ -79,9 +84,16 @@ public:
         return m_hero;
     }
 
+    CHARACTER& HeroCharacter()
+    {
+        return m_heroCharacter;
+    }
+
 private:
     CHARACTER_ATTRIBUTE m_hero{};
+    CHARACTER m_heroCharacter;
     CHARACTER_ATTRIBUTE* m_previousHero;
+    CHARACTER* m_previousHeroCharacter;
 };
 
 // The table of the first item the window shows, while the table is still empty.
@@ -467,4 +479,38 @@ TEST_CASE("The item help table shows the item editor's changes to the item it sh
         CAPTURE(level);
         CHECK(g_iItemInfo[level][_COLUMN_TYPE_ATTMIN] == ComputeItem(ITEM_DOUBLE_BLADE, level).DamageMin);
     }
+}
+
+TEST_CASE("The item help window builds its content again only when what it shows changes [data][items]")
+{
+    using mu::ui::window::GetItemHelpContentKey;
+
+    ShippedItemAttributes items;
+    ItemHelpScope help;
+    help.HeroCharacter().Class = CLASS_WIZARD;
+    const auto shown = GetItemHelpContentKey(ITEM_BONE_BLADE);
+
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) == shown);
+    CHECK(GetItemHelpContentKey(ITEM_DOUBLE_BLADE) != shown);
+
+    help.Hero().Level = 1;
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != shown);
+    help.Hero().Level = 0;
+
+    help.Hero().AddStrength = 1;
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != shown);
+    help.Hero().AddStrength = 0;
+
+    help.HeroCharacter().Class = CLASS_KNIGHT;
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != shown);
+    help.HeroCharacter().Class = CLASS_WIZARD;
+
+    I18N::SetLocale("pt");
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != shown);
+    I18N::SetLocale("en");
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) == shown);
+
+    // An item editor change, which stores the item in the item database.
+    g_ItemDatabase.Set(*g_ItemDatabase.Find(ITEM_BONE_BLADE));
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != shown);
 }

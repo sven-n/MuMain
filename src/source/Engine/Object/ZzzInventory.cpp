@@ -747,16 +747,14 @@ int GetItemInfoMagicColumn(int itemType)
     return _COLUMN_TYPE_MAGIC;
 }
 
-// The hero's level and stats, the stats with the bonuses of items and buffs.
-struct ItemInfoHeroStats
+// Whether the hero reaches every requirement of a row: the window shows the row white, else red.
+bool CanEquipItemInfoRow(const int (&row)[_COLUMN_TYPE_COUNT], const ItemInfoHeroStats& hero)
 {
-    WORD level;
-    WORD strength;
-    WORD dexterity;
-    WORD energy;
-    WORD vitality;
-    WORD charisma;
-};
+    return row[_COLUMN_TYPE_REQSTR] <= hero.strength && row[_COLUMN_TYPE_REQDEX] <= hero.dexterity &&
+           row[_COLUMN_TYPE_REQENG] <= hero.energy && row[_COLUMN_TYPE_REQVIT] <= hero.vitality &&
+           row[_COLUMN_TYPE_REQCHA] <= hero.charisma && row[_COLUMN_TYPE_REQNLV] <= hero.level;
+}
+} // namespace
 
 ItemInfoHeroStats GetItemInfoHeroStats()
 {
@@ -767,15 +765,6 @@ ItemInfoHeroStats GetItemInfoHeroStats()
             static_cast<WORD>(CharacterAttribute->Vitality + CharacterAttribute->AddVitality),
             static_cast<WORD>(CharacterAttribute->Charisma + CharacterAttribute->AddCharisma)};
 }
-
-// Whether the hero reaches every requirement of a row: the window shows the row white, else red.
-bool CanEquipItemInfoRow(const int (&row)[_COLUMN_TYPE_COUNT], const ItemInfoHeroStats& hero)
-{
-    return row[_COLUMN_TYPE_REQSTR] <= hero.strength && row[_COLUMN_TYPE_REQDEX] <= hero.dexterity &&
-           row[_COLUMN_TYPE_REQENG] <= hero.energy && row[_COLUMN_TYPE_REQVIT] <= hero.vitality &&
-           row[_COLUMN_TYPE_REQCHA] <= hero.charisma && row[_COLUMN_TYPE_REQNLV] <= hero.level;
-}
-} // namespace
 
 // Not cached per item: the levels the hero can equip follow the hero's level and stats, and the
 // values follow the item editor's changes.
