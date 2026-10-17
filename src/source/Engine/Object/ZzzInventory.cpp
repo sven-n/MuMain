@@ -746,6 +746,35 @@ int GetItemInfoMagicColumn(int itemType)
     }
     return _COLUMN_TYPE_MAGIC;
 }
+
+// The hero's level and stats, the stats with the bonuses of items and buffs.
+struct ItemInfoHeroStats
+{
+    WORD level;
+    WORD strength;
+    WORD dexterity;
+    WORD energy;
+    WORD vitality;
+    WORD charisma;
+};
+
+ItemInfoHeroStats GetItemInfoHeroStats()
+{
+    return {CharacterAttribute->Level,
+            static_cast<WORD>(CharacterAttribute->Strength + CharacterAttribute->AddStrength),
+            static_cast<WORD>(CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity),
+            static_cast<WORD>(CharacterAttribute->Energy + CharacterAttribute->AddEnergy),
+            static_cast<WORD>(CharacterAttribute->Vitality + CharacterAttribute->AddVitality),
+            static_cast<WORD>(CharacterAttribute->Charisma + CharacterAttribute->AddCharisma)};
+}
+
+// Whether the hero reaches every requirement of a row: the window shows the row white, else red.
+bool CanEquipItemInfoRow(const int (&row)[_COLUMN_TYPE_COUNT], const ItemInfoHeroStats& hero)
+{
+    return row[_COLUMN_TYPE_REQSTR] <= hero.strength && row[_COLUMN_TYPE_REQDEX] <= hero.dexterity &&
+           row[_COLUMN_TYPE_REQENG] <= hero.energy && row[_COLUMN_TYPE_REQVIT] <= hero.vitality &&
+           row[_COLUMN_TYPE_REQCHA] <= hero.charisma && row[_COLUMN_TYPE_REQNLV] <= hero.level;
+}
 } // namespace
 
 // Not cached per item: the levels the hero can equip follow the hero's level and stats, and the
@@ -754,6 +783,7 @@ void ComputeItemInfo(int iHelpItem)
 {
     ITEM_ATTRIBUTE* p = &ItemAttribute[iHelpItem];
     const int magicColumn = GetItemInfoMagicColumn(iHelpItem);
+    const ItemInfoHeroStats hero = GetItemInfoHeroStats();
 
     for (int Level = 0; Level <= iMaxLevel; Level++)
     {
@@ -870,24 +900,7 @@ void ComputeItemInfo(int iHelpItem)
         g_iItemInfo[Level][_COLUMN_TYPE_REQCHA] = RequireCharisma;
         g_iItemInfo[Level][_COLUMN_TYPE_REQVIT] = RequireVitality;
         g_iItemInfo[Level][_COLUMN_TYPE_REQNLV] = RequireLevel;
-
-        WORD Strength, Dexterity, Energy, Vitality, Charisma;
-
-        Strength = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
-        Dexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
-        Energy = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
-        Vitality = CharacterAttribute->Vitality + CharacterAttribute->AddVitality;
-        Charisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
-
-        if (RequireStrength <= Strength
-            && RequireDexterity <= Dexterity
-            && RequireEnergy <= Energy
-            && RequireVitality <= Vitality
-            && RequireCharisma <= Charisma
-            && RequireLevel <= CharacterAttribute->Level)
-            g_iItemInfo[Level][_COLUMN_TYPE_CAN_EQUIP] = TRUE;
-        else
-            g_iItemInfo[Level][_COLUMN_TYPE_CAN_EQUIP] = FALSE;
+        g_iItemInfo[Level][_COLUMN_TYPE_CAN_EQUIP] = CanEquipItemInfoRow(g_iItemInfo[Level], hero) ? TRUE : FALSE;
     }
 }
 
