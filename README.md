@@ -115,13 +115,16 @@ Missing keys take the defaults below. The options window writes most of them; se
 | **`[Camera]`**              | `Zoom`                                                                                                | `1735`               | Persisted Orbital-camera distance.                                                                                                                               |
 | **`[Render]`**              | `VSync`                                                                                               | `1`                  | `0` disables VSync across restarts and resolution changes. `$vsync on` / `$vsync off` update it.                                                                 |
 | **`[Render]`**              | `FpsCap`                                                                                              | `-1`                 | Frame cap while VSync is off; `-1` is uncapped. `$fps <value>` updates it.                                                                                       |
+| **`[Render]`**              | `Look`                                                                                                | `Classic`            | `Enhanced` turns on the Enhanced look ([docs](docs/enhanced-look.md)); the options window's "Enhanced graphics" checkbox and `$look` update it.                  |
+| **`[Render]`**              | `Antialiasing`                                                                                        | `4`                  | Samples of the Enhanced look: `0` (off), `2`, `4`, `8`. Classic renders without. The options window and `$msaa` update it.                                       |
+| **`[Render]`**              | `Anisotropy`                                                                                          | `8`                  | Anisotropic filtering (`1` is off, up to `16`) of every texture with mip levels. Set in the options window.                                                      |
 | **`[Render]`**              | `Backend`                                                                                             | `default`            | SDL GPU driver: `default`, `vulkan`, `direct3d12` (or `d3d12`), `metal`. Falls back to SDL's choice with a logged warning when unavailable. Edited by hand only. |
-| **`[Render]`**              | `DisableEffects`, `DisableParticles`, `DisableSkillEffectModels`, `DisableBoids`, `DisableWingShadow` | `0`                  | Rendering-cost reductions for low-end PCs, also in the options window and `$effects`.                                                                            |
+| **`[Render]`**              | `DisableEffects`, `DisableParticles`, `DisableSkillEffectModels`, `DisableBoids`, `DisableWingShadow`, `DisableBodyShadows` | `0`                  | Rendering-cost reductions for low-end PCs, also in the options window and `$effects`.                                                                            |
 | **`[Render]`**              | `SortParticleDraws`                                                                                   | `0`                  | Opt-in depth sorting of particle draws.                                                                                                                          |
 | **`[ChatCommands]`**        | `Favourite<N>`, `Template<N>`                                                                         | none                 | Written by the [chat commands window](docs/chat-commands.md).                                                                                                    |
 
-The retired `[Render] CoreProfile` key is ignored, and keys the client no longer uses are
-removed from the file when it loads.
+A new install starts from `src/bin/config.ini.template`. Retired keys, such as
+`[Render] CoreProfile`, are removed from the file when it loads.
 
 ### Command-line flags and options
 

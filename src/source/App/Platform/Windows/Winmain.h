@@ -91,6 +91,8 @@ extern void MuSetVSyncPreference(bool enabled);
 extern void MuReapplyVSyncPreference();
 // Switches Enhanced texture filtering from the next frame on (the look preset); nothing is saved.
 extern void MuSetTextureFilteringEnabled(bool enabled);
+// Saves [Render] Anisotropy and applies it between frames to every texture with mip levels.
+extern void MuSetAnisotropyPreference(int anisotropy);
 // Persists the anti-aliasing setting (0 off, 2, 4, 8 samples); applied between frames.
 extern void MuSetAntialiasingPreference(int samples);
 // Multisampling on (at [Render] Antialiasing) or off, as the active look asks.

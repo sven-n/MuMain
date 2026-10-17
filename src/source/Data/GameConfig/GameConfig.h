@@ -136,6 +136,8 @@ public:
     void SetDisableBoids(bool disabled);
     bool GetDisableWingShadow() const { return m_disableWingShadow; }
     void SetDisableWingShadow(bool disabled);
+    bool GetDisableBodyShadows() const { return m_disableBodyShadows; }
+    void SetDisableBodyShadows(bool disabled);
 
     // User-chosen FPS cap when VSync is off; -1 = uncapped. Same promotion story as the toggles
     // above, this time for the console-only `$fps <N>` diagnostic (SceneManager::SetTargetFps).
@@ -145,6 +147,9 @@ public:
     // GPU backend override -- "default"/"vulkan"/"direct3d12"/"metal". Manual config.ini edit
     // only, same as GetSortParticleDraws() above: no setter, no in-game options-window exposure.
     std::wstring GetRenderBackend() const { return m_renderBackend; }
+
+    // [UI] EnableAnimationTaskPool: manual config.ini edit only, like the two above.
+    bool GetEnableAnimationTaskPool() const { return m_enableAnimationTaskPool; }
 
     // Helpers
     static std::wstring BinaryToHex(const BYTE* data, DWORD size);
@@ -183,6 +188,7 @@ private:
     std::wstring m_fontSelection;
     std::wstring m_rmlTheme;
     int m_uiScalePercent;
+    bool m_enableAnimationTaskPool;
 
     int m_zoom;
     bool m_sortParticleDraws;
@@ -196,6 +202,7 @@ private:
     bool m_disableSkillEffectModels;
     bool m_disableBoids;
     bool m_disableWingShadow;
+    bool m_disableBodyShadows;
     int m_fpsCap;
 
     int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue) const;

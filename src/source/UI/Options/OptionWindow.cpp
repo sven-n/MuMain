@@ -175,6 +175,36 @@ static const int s_NumFonts = sizeof(s_Fonts) / sizeof(s_Fonts[0]);
 static const int s_FpsCapValues[] = { 24, 30, 60, 120, 144, -1 };
 static const int s_NumFpsCapValues = sizeof(s_FpsCapValues) / sizeof(s_FpsCapValues[0]);
 
+// The Video tab's Anti-aliasing and Anisotropic filtering rows, in the values config.ini holds
+// ([Render] Antialiasing, Anisotropy); the first entry of each is "Off".
+static constexpr int s_AntialiasingValues[] = {0, 2, 4, 8};
+static constexpr int s_AnisotropyValues[] = {1, 2, 4, 8, 16};
+
+namespace
+{
+// The row's entry for a config value: the largest entry at or below it, as GameConfig rounds.
+template <std::size_t N> int FindValueIndex(const int (&values)[N], int value)
+{
+    int index = 0;
+    for (int i = 0; i < static_cast<int>(N); ++i)
+    {
+        if (values[i] <= value)
+            index = i;
+    }
+    return index;
+}
+
+template <std::size_t N> std::vector<Rml::String> MultiplierLabels(const int (&values)[N])
+{
+    std::vector<Rml::String> labels;
+    labels.reserve(N);
+    labels.push_back(StringUtils::WideToNarrow(I18N::Game::Off));
+    for (std::size_t i = 1; i < N; ++i)
+        labels.push_back(std::to_string(values[i]) + "x");
+    return labels;
+}
+} // namespace
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -205,6 +235,7 @@ mu::ui::window::COptionWindow::COptionWindow()
     m_bDisableSkillEffectModels = GameConfig::GetInstance().GetDisableSkillEffectModels();
     m_bDisableBoids = GameConfig::GetInstance().GetDisableBoids();
     m_bDisableWingShadow = GameConfig::GetInstance().GetDisableWingShadow();
+    m_bDisableBodyShadows = GameConfig::GetInstance().GetDisableBodyShadows();
 
     m_iThemeIndex = -1;
     m_iUIScaleIndex = FindCurrentUIScaleIndex();
@@ -303,8 +334,24 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("disable_boids_label", &model.disableBoidsLabel);
     c.Bind("disable_wing_shadow", &model.disableWingShadow);
     c.Bind("disable_wing_shadow_label", &model.disableWingShadowLabel);
+    c.Bind("disable_body_shadows", &model.disableBodyShadows);
+    c.Bind("disable_body_shadows_label", &model.disableBodyShadowsLabel);
+    c.Bind("skill_effect_models_locked", &model.skillEffectModelsLocked);
+    c.Bind("boids_locked", &model.boidsLocked);
+    c.Bind("body_shadows_locked", &model.bodyShadowsLocked);
+    c.Bind("wing_shadow_locked", &model.wingShadowLocked);
     c.Bind("enhanced_graphics", &model.enhancedGraphics);
     c.Bind("enhanced_graphics_label", &model.enhancedGraphicsLabel);
+    c.Bind("antialiasing_labels", &model.antialiasingLabels);
+    c.Bind("antialiasing_index", &model.antialiasingIndex);
+    c.Bind("antialiasing_row_label", &model.antialiasingRowLabel);
+    c.Bind("antialiasing_value_label", &model.antialiasingValueLabel);
+    c.Bind("antialiasing_tooltip", &model.antialiasingTooltip);
+    c.Bind("anisotropy_labels", &model.anisotropyLabels);
+    c.Bind("anisotropy_index", &model.anisotropyIndex);
+    c.Bind("anisotropy_row_label", &model.anisotropyRowLabel);
+    c.Bind("anisotropy_value_label", &model.anisotropyValueLabel);
+    c.Bind("anisotropy_tooltip", &model.anisotropyTooltip);
 
     // Interface/UI tab.
     c.Bind("show_fps_counter", &model.showFpsCounter);
@@ -378,6 +425,8 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleDisableBoids(); });
     c.BindEventCallback("option_toggle_disable_wing_shadow",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleDisableWingShadow(); });
+    c.BindEventCallback("option_toggle_disable_body_shadows",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleDisableBodyShadows(); });
     c.BindEventCallback("option_toggle_enhanced_graphics",
                         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                         { RmlToggleEnhancedGraphics(); });
@@ -567,6 +616,7 @@ void mu::ui::window::COptionWindow::OpenningProcess()
     m_bDisableSkillEffectModels = GameConfig::GetInstance().GetDisableSkillEffectModels();
     m_bDisableBoids = GameConfig::GetInstance().GetDisableBoids();
     m_bDisableWingShadow = GameConfig::GetInstance().GetDisableWingShadow();
+    m_bDisableBodyShadows = GameConfig::GetInstance().GetDisableBodyShadows();
 
     RefreshThemeChoices();
     m_iUIScaleIndex = FindCurrentUIScaleIndex();
@@ -584,9 +634,32 @@ void mu::ui::window::COptionWindow::RmlClickSelectTab(int nTab)
     PlayBuffer(SOUND_CLICK01);
 }
 
+// A row another setting covers shows ticked and locked (OptionRmlModel's comment).
+void mu::ui::window::COptionWindow::SyncImpliedEffectRows(OptionRmlModel& model)
+{
+    const auto syncFlag = [this](bool& field, const char* name, bool value)
+    {
+        if (field != value)
+        {
+            field = value;
+            m_RmlView.MarkDirty(name);
+        }
+    };
+    const bool noBodyShadows = !m_bRenderAllEffects;
+    const bool noWingShadow = noBodyShadows || m_bDisableBodyShadows;
+    syncFlag(model.skillEffectModelsLocked, "skill_effect_models_locked", m_bDisableEffects);
+    syncFlag(model.boidsLocked, "boids_locked", m_bDisableEffects);
+    syncFlag(model.bodyShadowsLocked, "body_shadows_locked", noBodyShadows);
+    syncFlag(model.wingShadowLocked, "wing_shadow_locked", noWingShadow);
+    syncFlag(model.disableSkillEffectModels, "disable_skill_effect_models", m_bDisableSkillEffectModels || m_bDisableEffects);
+    syncFlag(model.disableBoids, "disable_boids", m_bDisableBoids || m_bDisableEffects);
+    syncFlag(model.disableBodyShadows, "disable_body_shadows", m_bDisableBodyShadows || noBodyShadows);
+    syncFlag(model.disableWingShadow, "disable_wing_shadow", m_bDisableWingShadow || noWingShadow);
+}
+
 void mu::ui::window::COptionWindow::RmlToggleDropdown(int dropdownId)
 {
-    if (dropdownId < 0 || dropdownId > 5)
+    if (dropdownId < 0 || dropdownId > 7)
         return;
     // Toggle: clicking the currently-open one's own value box closes it; clicking any other
     // (including a different dropdown's) overwrites m_iOpenDropdown, which closes whatever else
@@ -618,6 +691,12 @@ void mu::ui::window::COptionWindow::RmlDropdownOptionClick(int dropdownId, int o
         break;
     case 5:
         RmlUIScaleChanged(optionIndex);
+        break;
+    case 6:
+        RmlAntialiasingChanged(optionIndex);
+        break;
+    case 7:
+        RmlAnisotropyChanged(optionIndex);
         break;
     default:
         break;
@@ -791,6 +870,8 @@ void mu::ui::window::COptionWindow::RmlToggleDisableParticles()
 
 void mu::ui::window::COptionWindow::RmlToggleDisableSkillEffectModels()
 {
+    if (m_bDisableEffects)
+        return; // Disable Effects already skips them
     m_bDisableSkillEffectModels = !m_bDisableSkillEffectModels;
     SetDisableSkillEffectModels(m_bDisableSkillEffectModels);
     GameConfig::GetInstance().SetDisableSkillEffectModels(m_bDisableSkillEffectModels);
@@ -799,6 +880,8 @@ void mu::ui::window::COptionWindow::RmlToggleDisableSkillEffectModels()
 
 void mu::ui::window::COptionWindow::RmlToggleDisableBoids()
 {
+    if (m_bDisableEffects)
+        return; // Disable Effects already skips them
     m_bDisableBoids = !m_bDisableBoids;
     SetDisableBoids(m_bDisableBoids);
     GameConfig::GetInstance().SetDisableBoids(m_bDisableBoids);
@@ -807,9 +890,21 @@ void mu::ui::window::COptionWindow::RmlToggleDisableBoids()
 
 void mu::ui::window::COptionWindow::RmlToggleDisableWingShadow()
 {
+    if (!m_bRenderAllEffects || m_bDisableBodyShadows)
+        return; // no body shadow is drawn, the wing's included
     m_bDisableWingShadow = !m_bDisableWingShadow;
     SetDisableWingShadow(m_bDisableWingShadow);
     GameConfig::GetInstance().SetDisableWingShadow(m_bDisableWingShadow);
+    GameConfig::GetInstance().Save();
+}
+
+void mu::ui::window::COptionWindow::RmlToggleDisableBodyShadows()
+{
+    if (!m_bRenderAllEffects)
+        return; // without full effects no body shadow is drawn
+    m_bDisableBodyShadows = !m_bDisableBodyShadows;
+    SetDisableBodyShadows(m_bDisableBodyShadows);
+    GameConfig::GetInstance().SetDisableBodyShadows(m_bDisableBodyShadows);
     GameConfig::GetInstance().Save();
 }
 
@@ -819,6 +914,27 @@ void mu::ui::window::COptionWindow::RmlToggleEnhancedGraphics()
 {
     const bool enhanced = Render::Look::ActiveLookPreset() == LookPreset::Enhanced;
     Render::Look::ApplyLookPreset(enhanced ? LookPreset::Classic : LookPreset::Enhanced);
+}
+
+// MuSetAntialiasingPreference saves the count and applies it while the Enhanced look is active.
+void mu::ui::window::COptionWindow::RmlAntialiasingChanged(int index)
+{
+    // See RmlResolutionChanged's own comment -- same settle-frame guard applies here.
+    if (m_rmlSyncCount < kRmlSelectSettleFrames)
+        return;
+    if (index < 0 || index >= static_cast<int>(std::size(s_AntialiasingValues)))
+        return;
+    MuSetAntialiasingPreference(s_AntialiasingValues[index]);
+}
+
+void mu::ui::window::COptionWindow::RmlAnisotropyChanged(int index)
+{
+    // See RmlResolutionChanged's own comment -- same settle-frame guard applies here.
+    if (m_rmlSyncCount < kRmlSelectSettleFrames)
+        return;
+    if (index < 0 || index >= static_cast<int>(std::size(s_AnisotropyValues)))
+        return;
+    MuSetAnisotropyPreference(s_AnisotropyValues[index]);
 }
 
 void mu::ui::window::COptionWindow::RmlToggleShowFpsCounter()
@@ -1203,7 +1319,12 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
               I18N::Game::DisableSkillEffectModels);
     syncLabel(model.disableBoidsLabel, "disable_boids_label", I18N::Game::DisableAmbientWildlife);
     syncLabel(model.disableWingShadowLabel, "disable_wing_shadow_label", I18N::Game::DisableWingShadow);
+    syncLabel(model.disableBodyShadowsLabel, "disable_body_shadows_label", I18N::Game::DisableShadows);
     syncLabel(model.enhancedGraphicsLabel, "enhanced_graphics_label", I18N::Game::EnhancedGraphics);
+    syncLabel(model.antialiasingRowLabel, "antialiasing_row_label", I18N::Game::AntiAliasing);
+    syncLabel(model.antialiasingTooltip, "antialiasing_tooltip", I18N::Game::AntiAliasingTooltip);
+    syncLabel(model.anisotropyRowLabel, "anisotropy_row_label", I18N::Game::AnisotropicFiltering);
+    syncLabel(model.anisotropyTooltip, "anisotropy_tooltip", I18N::Game::AnisotropicFilteringTooltip);
     syncLabel(model.showFpsCounterLabel, "show_fps_counter_label", I18N::Game::ShowFPSCounter);
     syncLabel(model.showDebugInfoLabel, "show_debug_info_label", I18N::Game::ShowDebugInfo);
     syncLabel(model.themeRowLabel, "theme_row_label", I18N::Game::UITheme);
@@ -1282,9 +1403,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
 
     if (model.disableEffects != m_bDisableEffects) { model.disableEffects = m_bDisableEffects; m_RmlView.MarkDirty("disable_effects"); }
     if (model.disableParticles != m_bDisableParticles) { model.disableParticles = m_bDisableParticles; m_RmlView.MarkDirty("disable_particles"); }
-    if (model.disableSkillEffectModels != m_bDisableSkillEffectModels) { model.disableSkillEffectModels = m_bDisableSkillEffectModels; m_RmlView.MarkDirty("disable_skill_effect_models"); }
-    if (model.disableBoids != m_bDisableBoids) { model.disableBoids = m_bDisableBoids; m_RmlView.MarkDirty("disable_boids"); }
-    if (model.disableWingShadow != m_bDisableWingShadow) { model.disableWingShadow = m_bDisableWingShadow; m_RmlView.MarkDirty("disable_wing_shadow"); }
+    SyncImpliedEffectRows(model);
 
     // Read live, not from a member -- SetShowFpsCounter()/SetShowDebugInfo() (SceneManager.h) are
     // mutually exclusive, so this reflects either checkbox toggling the other one off immediately,
@@ -1295,6 +1414,30 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
         model.enhancedGraphics = enhancedGraphics;
         m_RmlView.MarkDirty("enhanced_graphics");
     }
+
+    // Rebuilt every sync for the localized "Off", as the FPS Limit row's "Uncapped".
+    const auto syncMultiplierRow = [&](std::vector<Rml::String>& labels, const char* labelsName, int& index,
+                                       const char* indexName, Rml::String& valueLabel, const char* valueName,
+                                       std::vector<Rml::String> newLabels, int newIndex)
+    {
+        if (labels != newLabels)
+        {
+            labels = std::move(newLabels);
+            m_RmlView.MarkDirty(labelsName);
+        }
+        if (index != newIndex)
+        {
+            index = newIndex;
+            m_RmlView.MarkDirty(indexName);
+        }
+        syncDropdownValue(valueLabel, valueName, labels, index);
+    };
+    syncMultiplierRow(model.antialiasingLabels, "antialiasing_labels", model.antialiasingIndex, "antialiasing_index",
+                      model.antialiasingValueLabel, "antialiasing_value_label", MultiplierLabels(s_AntialiasingValues),
+                      FindValueIndex(s_AntialiasingValues, GameConfig::GetInstance().GetAntialiasing()));
+    syncMultiplierRow(model.anisotropyLabels, "anisotropy_labels", model.anisotropyIndex, "anisotropy_index",
+                      model.anisotropyValueLabel, "anisotropy_value_label", MultiplierLabels(s_AnisotropyValues),
+                      FindValueIndex(s_AnisotropyValues, GameConfig::GetInstance().GetAnisotropy()));
 
     const bool showFpsCounter = GetShowFpsCounter();
     const bool showDebugInfo = GetShowDebugInfo();

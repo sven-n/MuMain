@@ -85,6 +85,8 @@ void GameConfig::Load()
     m_rmlTheme = ReadString(CfgSectionUI, CfgKeyRmlTheme, CfgDefaultRmlTheme);
     m_uiScalePercent = std::clamp(ReadInt(CfgSectionUI, CfgKeyUIScalePercent, CfgDefaultUIScalePercent),
                                   CfgDefaults::CfgMinUIScalePercent, CfgDefaults::CfgMaxUIScalePercent);
+    m_enableAnimationTaskPool =
+        ReadBool(CfgSectionUI, CfgKeyEnableAnimationTaskPool, CfgDefaultEnableAnimationTaskPool);
 
     m_zoom = ReadInt(CfgSectionCamera, CfgKeyZoom, CfgDefaultZoom);
     m_sortParticleDraws = ReadBool(CfgSectionRender, CfgKeySortParticleDraws, CfgDefaultSortParticleDraws);
@@ -103,6 +105,7 @@ void GameConfig::Load()
         ReadBool(CfgSectionRender, CfgKeyDisableSkillEffectModels, CfgDefaultDisableSkillEffectModels);
     m_disableBoids = ReadBool(CfgSectionRender, CfgKeyDisableBoids, CfgDefaultDisableBoids);
     m_disableWingShadow = ReadBool(CfgSectionRender, CfgKeyDisableWingShadow, CfgDefaultDisableWingShadow);
+    m_disableBodyShadows = ReadBool(CfgSectionRender, CfgKeyDisableBodyShadows, CfgDefaultDisableBodyShadows);
     m_fpsCap = ReadInt(CfgSectionRender, CfgKeyFpsCap, CfgDefaultFpsCap);
 
     // Strip keys/sections we used to write but no longer use, so user config
@@ -115,6 +118,7 @@ void GameConfig::Load()
     RemoveObsoleteKey(CfgSectionAudio,    L"VolumeLevel");    // legacy single-volume key
     RemoveObsoleteKey(CfgSectionLogin,    L"Version");        // launcher metadata, never read by client
     RemoveObsoleteKey(CfgSectionLogin,    L"TestVersion");    // launcher metadata, never read by client
+    RemoveObsoleteKey(CfgSectionRender,   L"CoreProfile");    // OpenGL context flag, unused since SDL GPU
     RemoveObsoleteSection(CfgSectionGraphics);                // empty after RenderTextType + ColorDepth removal
     RemoveObsoleteSection(L"PARTITION");                      // launcher metadata, never read by client
 }
@@ -158,6 +162,7 @@ void GameConfig::Save()
     WriteBool(CfgSectionRender, CfgKeyDisableSkillEffectModels, m_disableSkillEffectModels);
     WriteBool(CfgSectionRender, CfgKeyDisableBoids, m_disableBoids);
     WriteBool(CfgSectionRender, CfgKeyDisableWingShadow, m_disableWingShadow);
+    WriteBool(CfgSectionRender, CfgKeyDisableBodyShadows, m_disableBodyShadows);
     WriteInt(CfgSectionRender, CfgKeyFpsCap, m_fpsCap);
 }
 
@@ -271,6 +276,11 @@ void GameConfig::SetDisableBoids(bool disabled)
 void GameConfig::SetDisableWingShadow(bool disabled)
 {
     m_disableWingShadow = disabled;
+}
+
+void GameConfig::SetDisableBodyShadows(bool disabled)
+{
+    m_disableBodyShadows = disabled;
 }
 
 void GameConfig::SetFpsCap(int fps)

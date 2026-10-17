@@ -131,6 +131,34 @@
 						<span class="opt-label">{{enhanced_graphics_label}}</span>
 						<div class="opt-control"><div class="opt-toggle" data-class-checked="enhanced_graphics"><div class="opt-toggle-knob"></div></div></div>
 					</div>
+					<div class="opt-row opt-row-tipped">
+						<span class="opt-label">{{antialiasing_row_label}}</span>
+						<div class="opt-control">
+							<div class="option-dropdown">
+								<div class="option-dropdown-value" data-class-open="open_dropdown == 6" data-event-click="option_toggle_dropdown(6)">{{antialiasing_value_label}}<div class="opt-caret"></div></div>
+								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 6">
+									<div class="option-dropdown-option" data-for="label : antialiasing_labels"
+									     data-class-selected="it_index == antialiasing_index"
+									     data-event-click="option_dropdown_option_click(6, it_index)">{{label}}</div>
+								</div>
+							</div>
+						</div>
+						<span class="opt-row-tip">{{antialiasing_tooltip}}</span>
+					</div>
+					<div class="opt-row opt-row-tipped">
+						<span class="opt-label">{{anisotropy_row_label}}</span>
+						<div class="opt-control">
+							<div class="option-dropdown">
+								<div class="option-dropdown-value" data-class-open="open_dropdown == 7" data-event-click="option_toggle_dropdown(7)">{{anisotropy_value_label}}<div class="opt-caret"></div></div>
+								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 7">
+									<div class="option-dropdown-option" data-for="label : anisotropy_labels"
+									     data-class-selected="it_index == anisotropy_index"
+									     data-event-click="option_dropdown_option_click(7, it_index)">{{label}}</div>
+								</div>
+							</div>
+						</div>
+						<span class="opt-row-tip">{{anisotropy_tooltip}}</span>
+					</div>
 				</div>
 
 				<!-- Graphics -->
@@ -148,15 +176,19 @@
 						<span class="opt-label">{{disable_particles_label}}</span>
 						<div class="opt-control"><div class="opt-toggle" data-class-checked="disable_particles"><div class="opt-toggle-knob"></div></div></div>
 					</div>
-					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_disable_skill_effect_models">
+					<div class="opt-row opt-toggle-row" data-class-locked="skill_effect_models_locked" data-event-click="option_toggle_disable_skill_effect_models">
 						<span class="opt-label">{{disable_skill_effect_models_label}}</span>
 						<div class="opt-control"><div class="opt-toggle" data-class-checked="disable_skill_effect_models"><div class="opt-toggle-knob"></div></div></div>
 					</div>
-					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_disable_boids">
+					<div class="opt-row opt-toggle-row" data-class-locked="boids_locked" data-event-click="option_toggle_disable_boids">
 						<span class="opt-label">{{disable_boids_label}}</span>
 						<div class="opt-control"><div class="opt-toggle" data-class-checked="disable_boids"><div class="opt-toggle-knob"></div></div></div>
 					</div>
-					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_disable_wing_shadow">
+					<div class="opt-row opt-toggle-row" data-class-locked="body_shadows_locked" data-event-click="option_toggle_disable_body_shadows">
+						<span class="opt-label">{{disable_body_shadows_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="disable_body_shadows"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+					<div class="opt-row opt-toggle-row" data-class-locked="wing_shadow_locked" data-event-click="option_toggle_disable_wing_shadow">
 						<span class="opt-label">{{disable_wing_shadow_label}}</span>
 						<div class="opt-control"><div class="opt-toggle" data-class-checked="disable_wing_shadow"><div class="opt-toggle-knob"></div></div></div>
 					</div>
