@@ -5,11 +5,14 @@
 #include "ClientDataScope.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "I18N/All.h"
+#include "UI/Inventory/ItemHelpContentKey.h"
 
 #include <algorithm>
 #include <array>
@@ -59,51 +62,56 @@ private:
 
 using ItemInfoTable = std::array<std::array<int, _COLUMN_TYPE_COUNT>, iMaxLevel + 1>;
 
-// Points the item help table at test-owned state: ComputeItemInfo marks the levels the hero
-// can equip. The table was computed from the test's ItemAttribute, so it is marked as computed
-// for no item afterwards.
+// Points the item help window at a test-owned hero: ComputeItemInfo marks the levels its
+// attributes can equip, and the "Can be equipped by" lines compare its class.
 class ItemHelpScope
 {
 public:
-    ItemHelpScope() : m_previousHero(CharacterAttribute)
+    ItemHelpScope() : m_previousHero(CharacterAttribute), m_previousHeroCharacter(::Hero)
     {
         CharacterAttribute = &m_hero;
+        ::Hero = &m_heroCharacter;
     }
 
     ~ItemHelpScope()
     {
-        g_iCurrentItem = -1;
         CharacterAttribute = m_previousHero;
+        ::Hero = m_previousHeroCharacter;
     }
 
-    // Computes the table again, over what the item before left in it.
-    void Compute(int itemType)
+    CHARACTER_ATTRIBUTE& Hero()
     {
-        g_iCurrentItem = -1;
-        ComputeItemInfo(itemType);
+        return m_hero;
     }
 
-    // The table of the first item the window shows, while the table is still empty.
-    ItemInfoTable ComputeFirst(int itemType)
+    CHARACTER& HeroCharacter()
     {
-        for (auto& row : g_iItemInfo)
-        {
-            std::ranges::fill(row, 0);
-        }
-        Compute(itemType);
-
-        ItemInfoTable table{};
-        for (int level = 0; level <= iMaxLevel; ++level)
-        {
-            std::ranges::copy(g_iItemInfo[level], table[level].begin());
-        }
-        return table;
+        return m_heroCharacter;
     }
 
 private:
     CHARACTER_ATTRIBUTE m_hero{};
+    CHARACTER m_heroCharacter;
     CHARACTER_ATTRIBUTE* m_previousHero;
+    CHARACTER* m_previousHeroCharacter;
 };
+
+// The table of the first item the window shows, while the table is still empty.
+ItemInfoTable ComputeFirstItemInfo(int itemType)
+{
+    for (auto& row : g_iItemInfo)
+    {
+        std::ranges::fill(row, 0);
+    }
+    ComputeItemInfo(itemType);
+
+    ItemInfoTable table{};
+    for (int level = 0; level <= iMaxLevel; ++level)
+    {
+        std::ranges::copy(g_iItemInfo[level], table[level].begin());
+    }
+    return table;
+}
 
 constexpr int NoMagicColumn = -1;
 
@@ -133,6 +141,30 @@ ITEM ComputeItem(int itemType, int level, BYTE excellentFlags = 0, BYTE ancientD
     item.AncientDiscriminator = ancientDiscriminator;
     SetItemAttributes(&item);
     return item;
+}
+
+// The + levels the item help table shows in white.
+int CountEquippableLevels()
+{
+    int count = 0;
+    for (const auto& row : g_iItemInfo)
+    {
+        if (row[_COLUMN_TYPE_CAN_EQUIP] == TRUE)
+        {
+            ++count;
+        }
+    }
+    return count;
+}
+
+// Gives the hero the stats the help table's item requires at the + level, no more.
+void GiveRequiredStats(CHARACTER_ATTRIBUTE& hero, int level)
+{
+    hero.Strength = static_cast<WORD>(g_iItemInfo[level][_COLUMN_TYPE_REQSTR]);
+    hero.Dexterity = static_cast<WORD>(g_iItemInfo[level][_COLUMN_TYPE_REQDEX]);
+    hero.Energy = static_cast<WORD>(g_iItemInfo[level][_COLUMN_TYPE_REQENG]);
+    hero.Vitality = static_cast<WORD>(g_iItemInfo[level][_COLUMN_TYPE_REQVIT]);
+    hero.Charisma = static_cast<WORD>(g_iItemInfo[level][_COLUMN_TYPE_REQCHA]);
 }
 } // namespace
 
@@ -315,7 +347,7 @@ TEST_CASE("The item help table shows the stats the item has at each level [data]
     ShippedItemAttributes items;
     ItemHelpScope help;
 
-    help.Compute(ITEM_DOUBLE_BLADE);
+    ComputeItemInfo(ITEM_DOUBLE_BLADE);
     CHECK(g_iItemInfo[15][_COLUMN_TYPE_ATTMIN] == items[ITEM_DOUBLE_BLADE].DamageMin + 66);
 
     for (const int type :
@@ -323,7 +355,7 @@ TEST_CASE("The item help table shows the stats the item has at each level [data]
           static_cast<int>(ITEM_GREAT_LORD_SCEPTER), static_cast<int>(ITEM_DRAGON_ARMOR), DragonShieldType})
     {
         CAPTURE(type);
-        help.Compute(type);
+        ComputeItemInfo(type);
         const int magicColumn = IsCepterItem(type) ? _COLUMN_TYPE_PET_ATTACK : _COLUMN_TYPE_MAGIC;
         for (int level = 0; level <= 15; ++level)
         {
@@ -346,7 +378,7 @@ TEST_CASE("The item help table shows the magic power in the item's own column [d
     for (const HelpTableCase& item : HelpTableCases)
     {
         CAPTURE(item.itemType);
-        const ItemInfoTable table = help.ComputeFirst(item.itemType);
+        const ItemInfoTable table = ComputeFirstItemInfo(item.itemType);
         for (int level = 0; level <= iMaxLevel; ++level)
         {
             CAPTURE(level);
@@ -375,7 +407,7 @@ TEST_CASE("The item help table keeps nothing of the item shown before [data][ite
     // the staff, and /Book of Samut and then /Kris one under the Kris.
     for (const HelpTableCase& shown : HelpTableCases)
     {
-        const ItemInfoTable first = help.ComputeFirst(shown.itemType);
+        const ItemInfoTable first = ComputeFirstItemInfo(shown.itemType);
         for (const HelpTableCase& before : HelpTableCases)
         {
             if (before.itemType == shown.itemType)
@@ -385,8 +417,8 @@ TEST_CASE("The item help table keeps nothing of the item shown before [data][ite
 
             CAPTURE(before.itemType);
             CAPTURE(shown.itemType);
-            help.Compute(before.itemType);
-            help.Compute(shown.itemType);
+            ComputeItemInfo(before.itemType);
+            ComputeItemInfo(shown.itemType);
             for (int level = 0; level <= iMaxLevel; ++level)
             {
                 CAPTURE(level);
@@ -398,4 +430,87 @@ TEST_CASE("The item help table keeps nothing of the item shown before [data][ite
             }
         }
     }
+}
+
+TEST_CASE("The item help table follows the hero's level and stats while it shows the same item [data][items]")
+{
+    ShippedItemAttributes items;
+    ItemHelpScope help;
+    CHARACTER_ATTRIBUTE& hero = help.Hero();
+    const int requiredLevel = items[ITEM_BONE_BLADE].RequireLevel;
+    REQUIRE(requiredLevel > 0);
+
+    ComputeItemInfo(ITEM_BONE_BLADE);
+    CHECK(CountEquippableLevels() == 0);
+
+    // Stat points for every + level, one level short.
+    GiveRequiredStats(hero, iMaxLevel);
+    hero.Level = static_cast<WORD>(requiredLevel - 1);
+    ComputeItemInfo(ITEM_BONE_BLADE);
+    CHECK(CountEquippableLevels() == 0);
+
+    hero.Level = static_cast<WORD>(requiredLevel);
+    ComputeItemInfo(ITEM_BONE_BLADE);
+    CHECK(CountEquippableLevels() == iMaxLevel + 1);
+
+    // Another character, with the stats for +0 only.
+    GiveRequiredStats(hero, 0);
+    ComputeItemInfo(ITEM_BONE_BLADE);
+    CHECK(g_iItemInfo[0][_COLUMN_TYPE_CAN_EQUIP] == TRUE);
+    CHECK(g_iItemInfo[iMaxLevel][_COLUMN_TYPE_CAN_EQUIP] == FALSE);
+}
+
+TEST_CASE("The item help table shows the item editor's changes to the item it shows [data][items]")
+{
+    ShippedItemAttributes items;
+    ItemHelpScope help;
+    constexpr int AddedDamage = 10;
+
+    ComputeItemInfo(ITEM_DOUBLE_BLADE);
+    const int shippedDamageMin = g_iItemInfo[0][_COLUMN_TYPE_ATTMIN];
+
+    // The item editor's fields change ItemAttribute first, which the table reads.
+    items[ITEM_DOUBLE_BLADE].DamageMin += AddedDamage;
+
+    ComputeItemInfo(ITEM_DOUBLE_BLADE);
+    CHECK(g_iItemInfo[0][_COLUMN_TYPE_ATTMIN] == shippedDamageMin + AddedDamage);
+    for (int level = 0; level <= iMaxLevel; ++level)
+    {
+        CAPTURE(level);
+        CHECK(g_iItemInfo[level][_COLUMN_TYPE_ATTMIN] == ComputeItem(ITEM_DOUBLE_BLADE, level).DamageMin);
+    }
+}
+
+TEST_CASE("The item help window builds its content again only when what it shows changes [data][items]")
+{
+    using mu::ui::window::GetItemHelpContentKey;
+
+    ShippedItemAttributes items;
+    ItemHelpScope help;
+    help.HeroCharacter().Class = CLASS_WIZARD;
+    const auto shown = GetItemHelpContentKey(ITEM_BONE_BLADE);
+
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) == shown);
+    CHECK(GetItemHelpContentKey(ITEM_DOUBLE_BLADE) != shown);
+
+    help.Hero().Level = 1;
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != shown);
+    help.Hero().Level = 0;
+
+    help.Hero().AddStrength = 1;
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != shown);
+    help.Hero().AddStrength = 0;
+
+    help.HeroCharacter().Class = CLASS_KNIGHT;
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != shown);
+    help.HeroCharacter().Class = CLASS_WIZARD;
+
+    I18N::SetLocale("pt");
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != shown);
+    I18N::SetLocale("en");
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) == shown);
+
+    // An item editor change, which stores the item in the item database.
+    g_ItemDatabase.Set(*g_ItemDatabase.Find(ITEM_BONE_BLADE));
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != shown);
 }
