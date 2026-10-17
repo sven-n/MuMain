@@ -1,0 +1,51 @@
+<rml>
+<head>
+	<title>Kanturu info (CKanturuInfoWindow)</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="kanturu_info.rcss"/>
+</head>
+<body data-model="kanturu_info">
+	<!-- Classic fork of kanturu_info.rml: the Season 2 client's two Kanturu HUDs in one document.
+	     The count box (MonsterCount) with the characters and the monsters (or the boss), and the
+	     hourglass timer under it, its minutes and seconds in Interface\FontTest digits with a black
+	     shadow. A digit is drawn by class (d0-d9) from its newui_number1 cell, which the C++ binds
+	     (DigitCells(n, 12, 14): digit d at x = 12 d). Same ids and bindings as the shared document. -->
+	<div class="screen">
+		<div id="panel">
+			<div id="back"></div>
+			<div id="hourglass"></div>
+			<span class="info-text counter-scaled" id="users" data-style-font-size="bold_text_px + 'px'">{{users_text}}</span>
+			<span class="info-text counter-scaled" id="monsters" data-style-font-size="bold_text_px + 'px'">{{monsters_text}}</span>
+			<span class="info-text counter-scaled" id="colon" data-if="colon_visible" data-style-font-size="bold_text_px + 'px'">:</span>
+			<div class="run shadow" id="minutes_shadow" data-style---n="minute_digits.size">
+				<div class="digit" data-for="cell, i : minute_digits" data-style---i="i" data-class-blank="cell == ''"
+				     data-class-d0="cell == '0 0 12 14'" data-class-d1="cell == '12 0 12 14'" data-class-d2="cell == '24 0 12 14'"
+				     data-class-d3="cell == '36 0 12 14'" data-class-d4="cell == '48 0 12 14'" data-class-d5="cell == '60 0 12 14'"
+				     data-class-d6="cell == '72 0 12 14'" data-class-d7="cell == '84 0 12 14'" data-class-d8="cell == '96 0 12 14'"
+				     data-class-d9="cell == '108 0 12 14'"></div>
+			</div>
+			<div class="run shadow" id="seconds_shadow" data-style---n="second_digits.size">
+				<div class="digit" data-for="cell, i : second_digits" data-style---i="i" data-class-blank="cell == ''"
+				     data-class-d0="cell == '0 0 12 14'" data-class-d1="cell == '12 0 12 14'" data-class-d2="cell == '24 0 12 14'"
+				     data-class-d3="cell == '36 0 12 14'" data-class-d4="cell == '48 0 12 14'" data-class-d5="cell == '60 0 12 14'"
+				     data-class-d6="cell == '72 0 12 14'" data-class-d7="cell == '84 0 12 14'" data-class-d8="cell == '96 0 12 14'"
+				     data-class-d9="cell == '108 0 12 14'"></div>
+			</div>
+			<div class="run" id="minutes" data-style---n="minute_digits.size">
+				<div class="digit" data-for="cell, i : minute_digits" data-style---i="i" data-class-blank="cell == ''"
+				     data-class-d0="cell == '0 0 12 14'" data-class-d1="cell == '12 0 12 14'" data-class-d2="cell == '24 0 12 14'"
+				     data-class-d3="cell == '36 0 12 14'" data-class-d4="cell == '48 0 12 14'" data-class-d5="cell == '60 0 12 14'"
+				     data-class-d6="cell == '72 0 12 14'" data-class-d7="cell == '84 0 12 14'" data-class-d8="cell == '96 0 12 14'"
+				     data-class-d9="cell == '108 0 12 14'"></div>
+			</div>
+			<div class="run" id="seconds" data-style---n="second_digits.size">
+				<div class="digit" data-for="cell, i : second_digits" data-style---i="i" data-class-blank="cell == ''"
+				     data-class-d0="cell == '0 0 12 14'" data-class-d1="cell == '12 0 12 14'" data-class-d2="cell == '24 0 12 14'"
+				     data-class-d3="cell == '36 0 12 14'" data-class-d4="cell == '48 0 12 14'" data-class-d5="cell == '60 0 12 14'"
+				     data-class-d6="cell == '72 0 12 14'" data-class-d7="cell == '84 0 12 14'" data-class-d8="cell == '96 0 12 14'"
+				     data-class-d9="cell == '108 0 12 14'"></div>
+			</div>
+		</div>
+	</div>
+</body>
+</rml>
