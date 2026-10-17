@@ -1,0 +1,53 @@
+/* Classic theme for Julia's market warp (CUnitedMarketPlaceWindow). 0.97 has no market; the window
+   takes the classic NPC entries' parts (event_entry.rcss): the 0.97 inventory frame
+   (docked_panel_frame.rcss, Item_Back01 over Item_Back02, 0.97's Close), the title in light grey
+   bold at the top, the description in white, centred every 20 from y 60, and Warp as one 0.97 text
+   plate (Message_box, 140x35 at x 25 like the Blood Castle's and Devil Square's) tinted
+   (0.9, 0.8, 0.7) and lit white under the mouse, its label white and bold; while locked the plate is
+   darkened (0.4, 0.4, 0.5) and its label grey. Coordinates are reference px inside #panel. */
+
+@spritesheet market-classic-plate-sheet { src: ../../../Classic/Message_box.jpg; market-classic-plate: 0px 0px 213px 64px; }
+
+.frame-top { decorator: image(docked-bg-top-b); }
+#panel { pointer-events: auto; }
+
+#title, .market-line, #warp_label {
+	display: block;
+	position: absolute;
+	white-space: nowrap;
+	text-align: center;
+	pointer-events: none;
+}
+#title { left: 15px; top: 12px; font-weight: bold; color: #dcdcdc; }
+.market-line { left: 0; color: #ffffff; }
+
+#warp {
+	display: block;
+	position: absolute;
+	left: 25px;
+	top: 225px;
+	width: 140px;
+	height: 35px;
+	decorator: image(market-classic-plate fill);
+	image-color: #e6ccb3;
+	pointer-events: auto;
+}
+#warp:hover, #warp:active { image-color: #ffffff; }
+#warp.locked, #warp.locked:hover, #warp.locked:active { image-color: #66667f; }
+#warp_label { left: 0; color: #ffffff; font-weight: bold; }
+#warp.locked #warp_label { color: #808080; }
+
+/* The description's own rows: every 20 units from y 60. */
+.market-lines { position: static; }
+.market-line:nth-child(1) { top: 60px; }
+.market-line:nth-child(2) { top: 80px; }
+.market-line:nth-child(3) { top: 100px; }
+.market-line:nth-child(4) { top: 120px; }
+.market-line:nth-child(5) { top: 140px; }
+.market-line:nth-child(6) { top: 160px; }
+.market-line:nth-child(7) { top: 180px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#title { width: calc(160px * var(--root-scale)); }
+.market-line { width: calc(190px * var(--root-scale)); }
+#warp_label { width: calc(140px * var(--root-scale)); }

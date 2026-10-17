@@ -1,0 +1,53 @@
+/* Classic rows for Lugard's Doppelganger entry (CDoppelGangerWindow). 0.97 has no such window; it takes the
+   classic Golden Archer's parts (gold_bowman.rcss): the 0.97 frame, the entry button on a 0.97 text
+   plate (Message_box, 120 x 22) lit warm under the mouse and darkened while locked, the 0.97 Close
+   (Exit_01, Exit_02 pressed) at (25, 395) in place of the bottom button, and 0.97's divider
+   (Trading_line) in place of the S6 separator. Legacy's rows first, then the classic rules. */
+
+/* Where doppelganger_enter.rml's own lines and buttons sit. CDoppelGangerWindow's RenderTexts(): the name bold in its 160-unit box, the description centred on 190 from y 50, the buttons 53 x 23 at x 68.
+   The look they share is event_item_entry.rcss; only the rows are this document's. */
+
+.entry-text:nth-child(1) { left: 15px; top: 13px; color: #dcdcdc; font-weight: bold; }
+.entry-text:nth-child(2) { left: 0px; top: 50px; color: #dcdcdc; }
+.entry-text:nth-child(3) { left: 0px; top: 65px; color: #dcdcdc; }
+.entry-text:nth-child(4) { left: 0px; top: 80px; color: #dcdcdc; }
+.entry-text:nth-child(5) { left: 0px; top: 95px; color: #dcdcdc; }
+.entry-text:nth-child(6) { left: 0px; top: 110px; color: #dcdcdc; }
+.entry-text:nth-child(7) { left: 0px; top: 170px; color: #dcdcdc; font-weight: bold; }
+.entry-text:nth-child(8) { left: 0px; top: 260px; color: #dcdcdc; }
+.entry-text:nth-child(9) { left: 0px; top: 280px; color: #dcdcdc; }
+
+.entry-btn:nth-child(1) { left: 68px; top: 190px; width: 53px; height: 23px; }
+.entry-btn:nth-child(1) { decorator: image(item-entry-btn-up); }
+.entry-btn:nth-child(1):hover { decorator: image(item-entry-btn-over); }
+.entry-btn:nth-child(1):active { decorator: image(item-entry-btn-down); }
+.entry-btn:nth-child(1).locked, .entry-btn:nth-child(1).locked:hover, .entry-btn:nth-child(1).locked:active { decorator: image(item-entry-btn-up); image-color: #646464; }
+
+.entry-btn:nth-child(2) { left: 68px; top: 360px; width: 53px; height: 23px; }
+.entry-btn:nth-child(2) { decorator: image(item-entry-btn-up); }
+.entry-btn:nth-child(2):hover { decorator: image(item-entry-btn-over); }
+.entry-btn:nth-child(2):active { decorator: image(item-entry-btn-down); }
+.entry-btn:nth-child(2).locked, .entry-btn:nth-child(2).locked:hover, .entry-btn:nth-child(2).locked:active { decorator: image(item-entry-btn-up); image-color: #646464; }
+
+/* The name's box is 160 wide. */
+.entry-text:nth-child(1) { width: 160px; }
+
+/* Where C++ draws the live 3D preview: the original's place and size. */
+.entry-item-box { position: absolute; left: 85px; top: 125px; width: 20px; height: 27px; pointer-events: none; }
+
+/* --- Classic ---------------------------------------------------------------------------------- */
+@spritesheet dg-classic-plate-sheet { src: ../../../Classic/Message_box.jpg; dg-classic-plate: 0px 0px 213px 64px; }
+@spritesheet dg-classic-exit-sheet  { src: ../../../Classic/Exit_01.jpg; dg-classic-exit: 0px 0px 24px 24px; }
+@spritesheet dg-classic-exit2-sheet { src: ../../../Classic/Exit_02.jpg; dg-classic-exit-pressed: 0px 0px 24px 24px; }
+@spritesheet dg-classic-line-sheet  { src: ../../../Classic/Trading_line.jpg; dg-classic-line: 0px 0px 190px 10px; }
+
+.entry-line { left: 0; top: 225px; width: 190px; height: 10px; decorator: image(dg-classic-line); }
+.entry-label { color: #ffffff; }
+.entry-btn.locked .entry-label { color: #808080; }
+.entry-btn:nth-child(1) { left: 35px; top: 190px; width: 120px; height: 22px; decorator: image(dg-classic-plate fill); image-color: #ffffff; }
+.entry-btn:nth-child(1):hover, .entry-btn:nth-child(1):active { decorator: image(dg-classic-plate fill); image-color: #ffd9b3; }
+.entry-btn:nth-child(1).locked, .entry-btn:nth-child(1).locked:hover, .entry-btn:nth-child(1).locked:active { decorator: image(dg-classic-plate fill); image-color: #666666; }
+.entry-btn:nth-child(2) { left: 25px; top: 395px; width: 24px; height: 24px; decorator: image(dg-classic-exit); }
+.entry-btn:nth-child(2):hover { decorator: image(dg-classic-exit); image-color: #ffffff; }
+.entry-btn:nth-child(2):active { decorator: image(dg-classic-exit-pressed); image-color: #ffffff; }
+.entry-btn:nth-child(2) .entry-label { display: none; }

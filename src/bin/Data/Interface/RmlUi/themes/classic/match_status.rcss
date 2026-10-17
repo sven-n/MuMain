@@ -1,0 +1,73 @@
+/* Classic theme for a guild war's or battle soccer's time and result (match_status.rml is forked
+   here). The 0.97 client (004bc220) draws the time with the score at the top of the
+   area the open windows leave free: "Time" at (centre + 80, 4) and the minutes:seconds under it at
+   17, (255, 200, 150) in the normal font on a black 50% box. Here the bound text carries its own
+   label, so it is one line at (centre + 80, 4). 0.97 has no result panel: the classic
+   one is the 0.97 box (Message_box1 stones between Message_box2 edges) with legacy's layout and
+   0.97's OK. Legacy's rules first, then the classic ones. */
+
+/* Legacy theme for a guild war's or battle soccer's time and result (see match_status.rml),
+   reproducing the original's RenderTournamentInterface(): the big countdown at 350 on the
+   uncovered world's centre, red -- yellow in its last minute or before the start -- with a white
+   copy one pixel down and right; the result panel (300 x 210 at 170, 120) with the big title,
+   "VS" in yellow, the team names right-aligned under it at 50, their scores at (45, 75) and
+   (215, 75), and the big outcome at (47, 115) and (218, 115) or the tie centred, and ok.jpg's
+   70 x 20 button (ok2.jpg under the pointer) at (115, 160). The original's frame textures were
+   never loaded, so the panel is a dark fill here; the winner reads yellow and the loser red where
+   the original coloured by side and all but hid the left one. Reference px. */
+
+@spritesheet ms-ok-sheet { src: "../../../ok.jpg"; ms-ok: 0px 0px 70px 20px; }
+@spritesheet ms-ok-over-sheet { src: "../../../ok2.jpg"; ms-ok-over: 0px 0px 70px 20px; }
+
+body { pointer-events: none; }
+#hud, #stage { pointer-events: none; font-family: "token(font-body)"; }
+
+#countdown { position: absolute; top: 350px; width: 0; height: 0; }
+#countdown .sharp-text { position: absolute; top: 0; white-space: nowrap; }
+.countdown-shadow { color: rgb(255, 10, 10); }
+#countdown.soon .countdown-shadow { color: rgb(255, 255, 10); }
+.countdown-face { margin-top: 1px; padding-left: 2px; color: #ffffff; }
+
+#result { position: absolute; left: 170px; top: 120px; width: 300px; height: 210px; }
+#result_back { position: absolute; left: 0; top: 0; width: 300px; height: 210px; background-color: rgba(0, 0, 0, 200); border: 1px rgb(90, 80, 60); }
+#result .sharp-text { position: absolute; top: 0; white-space: nowrap; color: #ffffff; }
+.result-line { position: absolute; left: 0; width: 300px; height: 0; }
+.result-cell { position: absolute; height: 0; }
+#result_title { top: 20px; }
+#result_title .sharp-text { color: rgb(200, 240, 255); }
+#result_vs { top: 50px; }
+#result_vs .sharp-text { color: rgb(255, 255, 10); }
+#result_team1 { left: 0; top: 50px; width: 65px; }
+#result_team2 { left: 170px; top: 50px; width: 65px; }
+#result_team1 .sharp-right, #result_team2 .sharp-right { right: 0; }
+#result_score1 { left: 45px; top: 75px; }
+#result_score2 { left: 215px; top: 75px; }
+#result_outcome1 { left: 47px; top: 115px; }
+#result_outcome2 { left: 218px; top: 115px; }
+#result_outcome1 .sharp-text, #result_outcome2 .sharp-text { color: rgb(255, 10, 10); }
+#result_outcome1.win .sharp-text, #result_outcome2.win .sharp-text { color: rgb(255, 255, 10); }
+#result_tie { top: 115px; }
+#result_tie .sharp-text { color: rgb(255, 255, 10); }
+
+#result_ok { position: absolute; left: 115px; top: 160px; width: 70px; height: 20px; decorator: image(ms-ok); pointer-events: auto; cursor: pointer; }
+#result_ok:hover { decorator: image(ms-ok-over); }
+.ok-label { display: none; }
+
+/* --- Classic ---------------------------------------------------------------------------------- */
+@spritesheet ms-classic-stone-sheet { src: ../../../Classic/Message_box1.jpg; ms-classic-stone: 0px 0px 213px 40px; }
+@spritesheet ms-classic-edge-sheet  { src: ../../../Classic/Message_box2.jpg; ms-classic-edge: 0px 0px 213px 5px; }
+#countdown { top: 4px; margin-left: 80px; }
+#countdown .sharp-text, #countdown.soon .sharp-text { color: rgb(255, 200, 150); background-color: rgba(0, 0, 0, 128); padding: 0; margin: 0; }
+/* Five stones, each stretched to the box's width (as Season 2 stretched them for wider boxes), so
+   both side borders show; 5 + 5 * 40 + 5 = 210. */
+#result_back { display: none; }
+.result-stones { position: static; }
+.result-stone { position: absolute; left: 0; width: 300px; height: 40px; decorator: image(ms-classic-stone fill); }
+.result-stone:nth-child(1) { top: 5px; }
+.result-stone:nth-child(2) { top: 45px; }
+.result-stone:nth-child(3) { top: 85px; }
+.result-stone:nth-child(4) { top: 125px; }
+.result-stone:nth-child(5) { top: 165px; }
+.result-edge { position: absolute; left: 0; width: 300px; height: 5px; decorator: image(ms-classic-edge fill); }
+#result_edge_top { top: 0; }
+#result_edge_bottom { top: 205px; }

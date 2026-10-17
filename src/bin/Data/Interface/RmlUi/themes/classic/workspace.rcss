@@ -82,12 +82,18 @@ body {
 }
 .event-hud .slot { position: absolute; }
 .event-hud .slot[data-window="blood_castle_time"],
-.event-hud .slot[data-window="chaos_castle_time"] { left: calc(513px * var(--hud-scale)); top: calc(348px * var(--hud-scale)); }
-.event-hud .slot[data-window="battle_soccer"],
-.event-hud .slot[data-window="duel"] { left: calc(509px * var(--hud-scale)); top: calc(359px * var(--hud-scale)); }
-.event-hud .slot[data-window="kanturu_info"] { left: calc(541px * var(--hud-scale)); top: calc(351px * var(--hud-scale)); }
-.event-hud .slot[data-window="empire_guardian_timer"] { left: calc(507px * var(--hud-scale)); top: calc(342px * var(--hud-scale)); }
-.event-hud .slot[data-window="doppelganger_frame"] { left: calc(413px * var(--hud-scale)); top: calc(342px * var(--hud-scale)); }
+.event-hud .slot[data-window="chaos_castle_time"],
+.event-hud .slot[data-window="empire_guardian_timer"] { left: calc(513px * var(--hud-scale)); top: calc(348px * var(--hud-scale)); }
+/* The guild war / battle soccer score: the 0.97 client's, at the top, 20 left of the centre. */
+.event-hud .slot[data-window="battle_soccer"] { left: calc(300px * var(--hud-scale)); top: 0; }
+/* The duel score: the Season 1 client's band at the top centre (duel_window.rcss). */
+.event-hud .slot[data-window="duel"] { left: calc(170px * var(--hud-scale)); top: calc(20px * var(--hud-scale)); }
+/* Kanturu: the Season 2 client's count box at (0, 300); its hourglass timer is placed from there
+   (kanturu_info.rcss). */
+.event-hud .slot[data-window="kanturu_info"] { left: 0; top: calc(300px * var(--hud-scale)); }
+/* Doppelganger: the event's own frame, raised clear of the 0.97 HUD's right dragon (its bottom at
+   y 380). */
+.event-hud .slot[data-window="doppelganger_frame"] { left: calc(413px * var(--hud-scale)); top: calc(293px * var(--hud-scale)); }
 .event-hud .slot[data-window="duel_watch_users"] { left: calc(583px * var(--hud-scale)); top: calc(429px * var(--hud-scale)); }
 
 /* Where a free window (the friend list) first opens: the bottom-right corner above the HUD. */
@@ -109,7 +115,8 @@ body {
 	flex-direction: column;
 	align-items: center;
 }
-.panel-stage .slot[data-window="kanturu_entry"] { margin-top: 20dp; }
+/* Kanturu: the Season 2 client's entry box at y 15. */
+.panel-stage .slot[data-window="kanturu_entry"] { margin-top: 15dp; }
 .panel-stage .slot[data-window="cursed_temple_entry"] { margin-top: 80dp; }
 .panel-stage .slot[data-window="cursed_temple_result"] { margin-top: 120dp; }
 .panel-stage .slot[data-window="in_game_shop"] { margin-top: 0; }
