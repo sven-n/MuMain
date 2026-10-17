@@ -201,6 +201,10 @@ public:
     {
         SetTextureFiltering(m_textureFilteringRequested, anisotropy);
     }
+    int RequestedAnisotropy() const
+    {
+        return m_requestedAnisotropy;
+    }
     void UpdateTextureFiltering();
     bool IsTextureFilteringEnabled() const
     {

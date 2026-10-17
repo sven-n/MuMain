@@ -11,52 +11,52 @@
 
 namespace Core::Build
 {
-    inline constexpr const char* kConfiguration =
+inline constexpr const char* kConfiguration =
 #if defined(_DEBUG) || defined(DEBUG)
-        "Debug";
+    "Debug";
 #else
-        "Release";
+    "Release";
 #endif
 
-    inline constexpr const char* kEditor =
+inline constexpr const char* kEditor =
 #ifdef _EDITOR
-        "Editor";
+    "Editor";
 #else
-        "NoEditor";
+    "NoEditor";
 #endif
 
-    inline constexpr const char* kCompiler =
+inline constexpr const char* kCompiler =
 #if defined(__MINGW32__) || defined(__MINGW64__)
-        "MinGW";
+    "MinGW";
 #elif defined(__clang__)
-        "Clang";
+    "Clang";
 #elif defined(_MSC_VER)
-        "MSVC";
+            "MSVC";
 #elif defined(__GNUC__)
-        "GCC";
+            "GCC";
 #else
-        "Unknown";
+            "Unknown";
 #endif
 
-    inline constexpr const char* kArchitecture =
+inline constexpr const char* kArchitecture =
 #if defined(_WIN64) || defined(__x86_64__) || defined(__aarch64__)
-        "x64";
+    "x64";
 #else
-        "x86";
+    "x86";
 #endif
 
-    inline constexpr const char* kDate = __DATE__;
-    inline constexpr const char* kTime = __TIME__;
+inline constexpr const char* kDate = __DATE__;
+inline constexpr const char* kTime = __TIME__;
 
 #ifdef MU_GIT_DESCRIBE
-    inline constexpr const char* kGitDescribe = MU_GIT_DESCRIBE;
+inline constexpr const char* kGitDescribe = MU_GIT_DESCRIBE;
 #else
-    inline constexpr const char* kGitDescribe = "";
+inline constexpr const char* kGitDescribe = "";
 #endif
 
 #ifdef MU_GIT_DIRTY
-    inline constexpr bool kGitDirty = true;
+inline constexpr bool kGitDirty = true;
 #else
-    inline constexpr bool kGitDirty = false;
+inline constexpr bool kGitDirty = false;
 #endif
-}
+} // namespace Core::Build

@@ -410,6 +410,11 @@ void SetDisableEffects(bool disabled)
     g_bDisableEffectsDebug = disabled;
 }
 
+bool IsEffectsDisabledDebug()
+{
+    return g_bDisableEffectsDebug;
+}
+
 // Diagnostic toggles, finer-grained bisection -- see MainScene.h doc comments.
 static bool g_bDisableSpritesDebug = false;
 static bool g_bDisableParticlesDebug = false;

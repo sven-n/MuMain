@@ -29,6 +29,10 @@ enum class EnhancedFeature
 // Saves the choice and applies it while the Enhanced look is active.
 void ChooseEnhancedFeature(EnhancedFeature feature, bool enabled);
 
+// The session overrides: applied, never saved, cleared by applying a preset.
+[[nodiscard]] FeatureOverrides SessionOverrides();
+void ReplaceSessionOverrides(const FeatureOverrides& overrides);
+
 #if defined(MU_ENABLE_CONTROL_SOCKET) || defined(_EDITOR)
 // The per-feature developer commands as session overrides; false when the text is none of them.
 bool HandleFeatureOverrideCommand(std::wstring_view command);

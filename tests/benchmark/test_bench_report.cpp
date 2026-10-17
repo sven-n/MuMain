@@ -11,77 +11,77 @@ using namespace Core::Benchmark;
 
 namespace
 {
-    int CountOccurrences(const std::string& haystack, const std::string& needle)
-    {
-        int count = 0;
-        for (size_t at = haystack.find(needle); at != std::string::npos; at = haystack.find(needle, at + needle.size()))
-            count++;
-        return count;
-    }
-
-    bool HasRule(const std::vector<Findings::Finding>& findings, const std::string& rule)
-    {
-        for (const Findings::Finding& finding : findings)
-            if (finding.rule == rule) return true;
-        return false;
-    }
-
-    RepeatSamples MakeRepeat(int index, int frameCount, float frameMs)
-    {
-        RepeatSamples repeat;
-        repeat.repeatIndex = index;
-        for (int i = 0; i < frameCount; i++)
-        {
-            FrameSample sample;
-            sample.frameMs = frameMs;
-            sample.cpuMs[0] = frameMs * 0.5f;   // Terrain
-            sample.gpuMs[0] = frameMs * 0.25f;
-            repeat.frames.push_back(sample);
-        }
-        repeat.counters.total[0] = (uint64_t)(100 * frameCount);
-        repeat.counters.perPass[0][0] = (uint64_t)(60 * frameCount);
-        return repeat;
-    }
-
-    // A minimal but complete run: two segments, two repeats each, one pass carrying half the
-    // frame so the attribution remainder is a known 50%.
-    RunData MakeRun()
-    {
-        RunData run;
-        run.runId = "20260818_142233_test";
-        run.manifest.label = "test";
-        run.manifest.pattern = "*";
-        run.manifest.repeats = 2;
-        run.manifest.warmupFrames = 30;
-        run.manifest.measureFrames = 10;
-        run.manifest.segmentNames = { "scene.full", "fx.particles.off" };
-        run.manifestHash = ComputeManifestHash(run.manifest);
-        run.passNames = { "Terrain", "Skinning", "Present" };
-        run.passIsNested = { false, true, false };
-        run.counterNames = { "DrawCalls", "IRDraws", "IRVertices" };
-        run.environment.buildConfig = "Release";
-        run.environment.glRenderer = "Test Renderer";
-
-        for (const std::string& name : run.manifest.segmentNames)
-        {
-            SegmentSamples segment;
-            segment.name = name;
-            segment.repeats.push_back(MakeRepeat(0, 10, 10.0f));
-            segment.repeats.push_back(MakeRepeat(1, 10, 10.0f));
-            run.segments.push_back(segment);
-        }
-        return run;
-    }
+int CountOccurrences(const std::string& haystack, const std::string& needle)
+{
+    int count = 0;
+    for (size_t at = haystack.find(needle); at != std::string::npos; at = haystack.find(needle, at + needle.size()))
+        count++;
+    return count;
 }
+
+bool HasRule(const std::vector<Findings::Finding>& findings, const std::string& rule)
+{
+    for (const Findings::Finding& finding : findings)
+        if (finding.rule == rule)
+            return true;
+    return false;
+}
+
+RepeatSamples MakeRepeat(int index, int frameCount, float frameMs)
+{
+    RepeatSamples repeat;
+    repeat.repeatIndex = index;
+    for (int i = 0; i < frameCount; i++)
+    {
+        FrameSample sample;
+        sample.frameMs = frameMs;
+        sample.cpuMs[0] = frameMs * 0.5f; // Terrain
+        repeat.frames.push_back(sample);
+    }
+    repeat.counters.total[0] = (uint64_t)(100 * frameCount);
+    repeat.counters.perPass[0][0] = (uint64_t)(60 * frameCount);
+    return repeat;
+}
+
+// A minimal but complete run: two segments, two repeats each, one pass carrying half the
+// frame so the attribution remainder is a known 50%.
+RunData MakeRun()
+{
+    RunData run;
+    run.runId = "20260818_142233_test";
+    run.manifest.label = "test";
+    run.manifest.pattern = "*";
+    run.manifest.repeats = 2;
+    run.manifest.warmupFrames = 30;
+    run.manifest.measureFrames = 10;
+    run.manifest.segmentNames = {"scene.full", "fx.particles.off"};
+    run.manifestHash = ComputeManifestHash(run.manifest);
+    run.passNames = {"Terrain", "Skinning", "RenderBegin"};
+    run.passIsNested = {false, true, false};
+    run.counterNames = {"DrawCalls", "BatchDraws", "BatchVertices"};
+    run.environment.buildConfig = "Release";
+    run.environment.gpuDevice = "Test Renderer";
+
+    for (const std::string& name : run.manifest.segmentNames)
+    {
+        SegmentSamples segment;
+        segment.name = name;
+        segment.repeats.push_back(MakeRepeat(0, 10, 10.0f));
+        segment.repeats.push_back(MakeRepeat(1, 10, 10.0f));
+        run.segments.push_back(segment);
+    }
+    return run;
+}
+} // namespace
 
 TEST_CASE("manifest hash changes with the segment order but not with the label")
 {
     RunManifest a;
-    a.segmentNames = { "scene.full", "fx.particles.off" };
+    a.segmentNames = {"scene.full", "fx.particles.off"};
     a.repeats = 3;
 
     RunManifest reordered = a;
-    reordered.segmentNames = { "fx.particles.off", "scene.full" };
+    reordered.segmentNames = {"fx.particles.off", "scene.full"};
 
     RunManifest relabelled = a;
     relabelled.label = "something else";
@@ -99,8 +99,8 @@ TEST_CASE("frames.csv has one header plus one row per measured frame")
     // 2 segments x 2 repeats x 10 frames, plus the header.
     CHECK(CountOccurrences(csv, "\n") == 41);
     CHECK(csv.rfind("segment,repeat,frame,frame_ms,cpu_Terrain", 0) == 0);
-    CHECK(csv.find("cpu_Present") != std::string::npos);
-    CHECK(csv.find("gpu_Terrain") != std::string::npos);
+    CHECK(csv.find("cpu_RenderBegin") != std::string::npos);
+    CHECK(csv.find("gpu_") == std::string::npos);
     // Counters belong in passes.csv, never per frame.
     CHECK(csv.find("DrawCalls") == std::string::npos);
 }
@@ -115,7 +115,7 @@ TEST_CASE("passes.csv carries one row per pass plus a TOTAL row, per repeat")
     CHECK(CountOccurrences(csv, ",TOTAL,") == 4);
     CHECK(csv.find("DrawCalls") != std::string::npos);
     // 100 draw calls per frame, summed over 10 frames and reported per frame again.
-    CHECK(csv.find(",TOTAL,10.00,0.00,100.0") != std::string::npos);
+    CHECK(csv.find(",TOTAL,10.00,100.0") != std::string::npos);
 }
 
 TEST_CASE("the report renders every section and is byte-identical for identical input")
@@ -173,7 +173,7 @@ TEST_CASE("strings that would break the exports are escaped, not passed through"
 {
     RunData run = MakeRun();
     run.manifest.label = "quote\" and \\ backslash";
-    run.environment.glRenderer = "line\nbreak";
+    run.environment.gpuDevice = "line\nbreak";
 
     const std::vector<Stats::SegmentStats> stats = Stats::SummarizeRun(run);
     const std::string json = Report::BuildRunJson(run, stats, {});
@@ -216,12 +216,12 @@ TEST_CASE("drift stays quiet when the closing baseline matches")
     CHECK_FALSE(HasRule(Findings::Evaluate(run, stats), "drift"));
 }
 
-TEST_CASE("submission-bound fires on many IR draws carrying almost no vertices")
+TEST_CASE("submission-bound fires on many batched draws carrying almost no vertices")
 {
     RunData run = MakeRun();
     for (RepeatSamples& repeat : run.segments.front().repeats)
     {
-        repeat.counters.perPass[0][1] = 3000 * 10;  // IRDraws over 10 frames
+        repeat.counters.perPass[0][1] = 3000 * 10; // BatchDraws over 10 frames
         repeat.counters.perPass[0][2] = 3000 * 10 * 6;
     }
 
@@ -251,6 +251,57 @@ TEST_CASE("a discarded repeat is reported rather than silently averaged in")
     CHECK(HasRule(Findings::Evaluate(run, stats), "invalid-repeats"));
 }
 
+TEST_CASE("a segment that changed no draw calls is flagged as inert")
+{
+    // The failure this catches: a segment runs, produces a plausible timing, and is read as
+    // "what it disables is cheap" when in fact it disabled nothing at all.
+    RunData run = MakeRun();
+    const std::vector<Stats::SegmentStats> stats = Stats::SummarizeRun(run);
+
+    // Both segments in the fixture submit the same 100 draws/frame.
+    const std::vector<Findings::Finding> findings = Findings::Evaluate(run, stats);
+    CHECK(HasRule(findings, "segment-inert"));
+    for (const Findings::Finding& finding : findings)
+        if (finding.rule == "segment-inert")
+            CHECK(finding.segment == "fx.particles.off");
+}
+
+TEST_CASE("a segment that really removed work is not flagged as inert")
+{
+    RunData run = MakeRun();
+    for (RepeatSamples& repeat : run.segments[1].repeats)
+        repeat.counters.total[0] /= 2; // half the draw calls of the baseline
+
+    const std::vector<Stats::SegmentStats> stats = Stats::SummarizeRun(run);
+    CHECK_FALSE(HasRule(Findings::Evaluate(run, stats), "segment-inert"));
+}
+
+TEST_CASE("a segment that only changes shading is never called inert")
+{
+    // Anti-aliasing, texture filtering and the look's features submit the same draws by design.
+    RunData run = MakeRun();
+    run.segments[1].tags = "look";
+
+    const std::vector<Stats::SegmentStats> stats = Stats::SummarizeRun(run);
+    CHECK_FALSE(HasRule(Findings::Evaluate(run, stats), "segment-inert"));
+}
+
+TEST_CASE("the drift control is never itself called inert")
+{
+    RunData run = MakeRun();
+    SegmentSamples driftControl;
+    driftControl.name = std::string(kBaselineSegmentName) + kDriftControlSuffix;
+    driftControl.repeats.push_back(MakeRepeat(0, 10, 10.0f));
+    run.segments.push_back(driftControl);
+
+    // Other rules may legitimately have something to say about it; "inert" must not, since it is
+    // a deliberate re-measurement of the baseline and identical draw counts are the point.
+    const std::vector<Stats::SegmentStats> stats = Stats::SummarizeRun(run);
+    for (const Findings::Finding& finding : Findings::Evaluate(run, stats))
+        if (finding.rule == "segment-inert")
+            CHECK(finding.segment != std::string(kBaselineSegmentName) + kDriftControlSuffix);
+}
+
 TEST_CASE("vsync and a dirty tree are flagged for the run as a whole")
 {
     RunData run = MakeRun();
@@ -261,4 +312,15 @@ TEST_CASE("vsync and a dirty tree are flagged for the run as a whole")
     const std::vector<Findings::Finding> findings = Findings::Evaluate(run, stats);
     CHECK(HasRule(findings, "vsync-on"));
     CHECK(HasRule(findings, "dirty-tree"));
+}
+
+TEST_CASE("swapchain-wait fires when RenderBegin is most of the frame")
+{
+    RunData run = MakeRun();
+    for (RepeatSamples& repeat : run.segments.front().repeats)
+        for (FrameSample& frame : repeat.frames)
+            frame.cpuMs[2] = frame.frameMs * 0.5f;
+
+    const std::vector<Stats::SegmentStats> stats = Stats::SummarizeRun(run);
+    CHECK(HasRule(Findings::Evaluate(run, stats), "swapchain-wait"));
 }

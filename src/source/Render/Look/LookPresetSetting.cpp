@@ -113,6 +113,16 @@ bool HandleLookPresetCommand(std::wstring_view command)
     return true;
 }
 
+FeatureOverrides SessionOverrides()
+{
+    return Controller().Overrides();
+}
+
+void ReplaceSessionOverrides(const FeatureOverrides& overrides)
+{
+    Controller().ReplaceOverrides(overrides);
+}
+
 #if defined(MU_ENABLE_CONTROL_SOCKET) || defined(_EDITOR)
 bool HandleFeatureOverrideCommand(std::wstring_view command)
 {

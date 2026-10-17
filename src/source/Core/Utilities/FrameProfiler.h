@@ -76,6 +76,29 @@ enum class Counter : int
     Count_
 };
 
+inline constexpr const char* kCounterNames[static_cast<int>(Counter::Count_)] = {
+    "DrawCalls",
+    "MergedDraws",
+    "Merged2DDraws",
+    "GlyphUploads",
+    "GpuSkinningSubmissions",
+    "CpuSkinningIneligible",
+    "GpuSkinningFailures",
+    "VertexBytes",
+    "TextureUploads",
+    "BatchDraws",
+    "BatchVertices",
+    "BatchBreakTexture",
+    "BatchBreakBlend",
+    "BatchBreakDepth",
+    "BatchBreakProgram",
+    "BatchBreakUniform",
+    "BatchBreakMatrix",
+    "BatchBreakDraw",
+    "BatchBreakOther",
+};
+static_assert(kCounterNames[static_cast<int>(Counter::Count_) - 1] != nullptr, "a counter without a name");
+
 inline bool g_CountersEnabled = false;
 
 inline float& AccumulatorMs(Pass pass)
@@ -173,6 +196,13 @@ inline PassState& State()
 }
 }
 
+// A pass seen opening inside another one: its time is already in that pass's.
+inline bool& NestedPass(Pass pass)
+{
+    static bool nested[static_cast<int>(Pass::Count_)]{};
+    return nested[static_cast<int>(pass)];
+}
+
 inline Pass CurrentPass()
 {
     return detail::State().current;
@@ -188,6 +218,10 @@ inline void PushPass(Pass pass)
         return;
     }
 
+    if (state.depth > 0)
+    {
+        NestedPass(pass) = true;
+    }
     state.stack[state.depth++] = state.current;
     state.current = pass;
 }

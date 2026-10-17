@@ -89,6 +89,8 @@ extern void ReinitializeFonts();
 extern void UpdateResolutionDependentSystems();
 extern void MuSetVSyncPreference(bool enabled);
 extern void MuReapplyVSyncPreference();
+// VSync on or off from the next frame, not saved; MuReapplyVSyncPreference puts the saved one back.
+extern void MuSetVSyncForSession(bool enabled);
 // Switches Enhanced texture filtering from the next frame on (the look preset); nothing is saved.
 extern void MuSetTextureFilteringEnabled(bool enabled);
 // Saves [Render] Anisotropy and applies it between frames to every texture with mip levels.

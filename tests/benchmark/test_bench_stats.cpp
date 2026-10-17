@@ -8,25 +8,25 @@ using namespace Core::Benchmark;
 
 namespace
 {
-    // A repeat with the given frame times, and nothing else set.
-    RepeatSamples MakeRepeat(int index, const std::vector<float>& frameTimesMs)
+// A repeat with the given frame times, and nothing else set.
+RepeatSamples MakeRepeat(int index, const std::vector<float>& frameTimesMs)
+{
+    RepeatSamples repeat;
+    repeat.repeatIndex = index;
+    for (float ms : frameTimesMs)
     {
-        RepeatSamples repeat;
-        repeat.repeatIndex = index;
-        for (float ms : frameTimesMs)
-        {
-            FrameSample sample;
-            sample.frameMs = ms;
-            repeat.frames.push_back(sample);
-        }
-        return repeat;
+        FrameSample sample;
+        sample.frameMs = ms;
+        repeat.frames.push_back(sample);
     }
-
-    std::vector<float> ConstantFrames(int count, float ms)
-    {
-        return std::vector<float>((size_t)count, ms);
-    }
+    return repeat;
 }
+
+std::vector<float> ConstantFrames(int count, float ms)
+{
+    return std::vector<float>((size_t)count, ms);
+}
+} // namespace
 
 TEST_CASE("empty input produces a zeroed summary, not a division by zero")
 {
@@ -69,7 +69,8 @@ TEST_CASE("pacing separates a smooth stream from an alternating one with the sam
     const Stats::TimingStats smooth = Stats::Summarize(ConstantFrames(100, 10.0f));
 
     std::vector<float> alternating;
-    for (int i = 0; i < 100; i++) alternating.push_back((i % 2 == 0) ? 5.0f : 15.0f);
+    for (int i = 0; i < 100; i++)
+        alternating.push_back((i % 2 == 0) ? 5.0f : 15.0f);
     const Stats::TimingStats jittery = Stats::Summarize(alternating);
 
     CHECK(smooth.meanMs == doctest::Approx(jittery.meanMs));
@@ -129,12 +130,12 @@ TEST_CASE("nested passes are excluded from the attribution total")
     repeat.repeatIndex = 0;
     FrameSample sample;
     sample.frameMs = 10.0f;
-    sample.cpuMs[0] = 6.0f;   // a top-level pass
-    sample.cpuMs[1] = 3.0f;   // nested inside pass 0 -- already counted in its 6 ms
+    sample.cpuMs[0] = 6.0f; // a top-level pass
+    sample.cpuMs[1] = 3.0f; // nested inside pass 0 -- already counted in its 6 ms
     repeat.frames.push_back(sample);
     segment.repeats.push_back(repeat);
 
-    const std::vector<bool> nested = { false, true };
+    const std::vector<bool> nested = {false, true};
     const Stats::SegmentStats stats = Stats::Summarize(segment, nested);
     CHECK(stats.attributedCpuMs == doctest::Approx(6.0f));
     CHECK(stats.unattributedMs == doctest::Approx(4.0f));
