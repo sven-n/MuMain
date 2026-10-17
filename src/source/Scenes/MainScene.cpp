@@ -484,6 +484,16 @@ bool IsJointsDisabledDebug()
     return g_bDisableJointsDebug;
 }
 
+static bool g_bDisableEffectCullingDebug = false;
+void SetDisableEffectCulling(bool disabled)
+{
+    g_bDisableEffectCullingDebug = disabled;
+}
+bool IsEffectCullingDisabledDebug()
+{
+    return g_bDisableEffectCullingDebug;
+}
+
 static bool g_bDisableWingExtraLayersDebug = false;
 void SetDisableWingExtraLayers(bool disabled)
 {

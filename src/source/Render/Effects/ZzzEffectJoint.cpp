@@ -18,6 +18,7 @@
 #include "Render/Effects/AuraJointLifecycle.h"
 #include "Network/Server/WSclient.h"
 #include "GameLogic/Pets/CSPetSystem.h"
+#include "Core/Utilities/FrameProfiler.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/RenderUtils.h"
 #include "Scenes/MainScene.h"
@@ -69,6 +70,48 @@ static inline float GetTailDistanceSq(const vec3_t a, const vec3_t b)
     float dy = a[1] - b[1];
     float dz = a[2] - b[2];
     return dx * dx + dy * dy + dz * dz;
+}
+
+// Segments are tested for the view frustum this many at a time.
+constexpr int kCulledSegmentRun = 8;
+
+// Whether the segments from `first` on, up to kCulledSegmentRun of them, may touch the view frustum:
+// the sphere around their tails' midpoints, widened by how far the corners reach from them. The
+// midpoint is corners 0 and 1's, so corner 1 is as far from it as corner 0.
+static bool IsTailRunInFrustum(const JOINT* o, int first)
+{
+    vec3_t low{FLT_MAX, FLT_MAX, FLT_MAX};
+    vec3_t high{-FLT_MAX, -FLT_MAX, -FLT_MAX};
+    float halfWidthSq = 0.f;
+    bool anyTail = false;
+    const int last = std::min<int>({first + kCulledSegmentRun, (int)o->NumTails, MAX_TAILS - 1});
+    for (int j = first; j <= last; ++j)
+    {
+        const vec3_t* tail = o->Tails[j];
+        if (!IsValidTailQuad(tail))
+            continue;
+        anyTail = true;
+        vec3_t mid;
+        for (int axis = 0; axis < 3; ++axis)
+        {
+            mid[axis] = (tail[0][axis] + tail[1][axis]) * 0.5f;
+            low[axis] = std::min(low[axis], mid[axis]);
+            high[axis] = std::max(high[axis], mid[axis]);
+        }
+        halfWidthSq = std::max({halfWidthSq, GetTailDistanceSq(mid, tail[0]), GetTailDistanceSq(mid, tail[2]),
+                                GetTailDistanceSq(mid, tail[3])});
+    }
+    if (!anyTail)
+        return true;
+
+    vec3_t center;
+    vec3_t extent;
+    for (int axis = 0; axis < 3; ++axis)
+    {
+        center[axis] = (low[axis] + high[axis]) * 0.5f;
+        extent[axis] = (high[axis] - low[axis]) * 0.5f;
+    }
+    return TestFrustrum(center, VectorLength(extent) + std::sqrt(halfWidthSq));
 }
 
 void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle, int SubType, OBJECT* Target, float Scale, short PKKey,
@@ -7034,8 +7077,36 @@ void RenderJoints(BYTE bRenderOneMore)
             }
             BindTexture(o->TexType);
 
+            // Runs of segments outside the view frustum are skipped. Not for the trails that fade their
+            // light per drawn segment, add sprites larger than the trail, or draw translated from it.
+            const bool cullOffscreen =
+                !IsEffectCullingDisabledDebug() &&
+                !(o->Type == BITMAP_JOINT_HEALING && (o->SubType == 9 || o->SubType == 10)) &&
+                !(o->Type == MODEL_SPEARSKILL && (o->SubType == 0 || o->SubType == 4 || o->SubType == 9)) &&
+                !(o->Type == BITMAP_FLARE + 1 && (o->SubType == 6 || o->SubType == 8)) &&
+                !(o->Type == BITMAP_FLARE && o->SubType == 22);
+            bool runVisible = true;
+
+            // One joint's quads share its texture and state, so they go to the renderer in one call.
+            static std::vector<mu::Vertex3D> s_quads;
+            const auto flushQuads = [&]
+            {
+                if (!s_quads.empty())
+                    mu::GetRenderer().RenderQuad3D(s_quads, static_cast<std::uint32_t>(o->TexType));
+                s_quads.clear();
+            };
+            const auto addQuad = [](const mu::Vertex3D(&quad)[4]) { s_quads.insert(s_quads.end(), quad, quad + 4); };
+
             for (int j = 0; j < (int)o->NumTails; j++)
             {
+                if (cullOffscreen && j % kCulledSegmentRun == 0)
+                    runVisible = IsTailRunInFrustum(o, j);
+                if (!runVisible)
+                {
+                    FrameProfiler::Count(FrameProfiler::Counter::JointSegmentsCulled);
+                    continue;
+                }
+
                 if (o->Type == BITMAP_SMOKE && o->SubType == 0 && j < 1)
                 {
                     continue;
@@ -7124,7 +7195,7 @@ void RenderJoints(BYTE bRenderOneMore)
                         {nextTail[1][0], nextTail[1][1], nextTail[1][2], 0.f, 0.f, 0.f, Light2, 1.f, forceColor},
                         {nextTail[0][0], nextTail[0][1], nextTail[0][2], 0.f, 0.f, 0.f, Light2, 0.f, forceColor},
                     };
-                    mu::GetRenderer().RenderQuad3D(forceVerts, static_cast<std::uint32_t>(o->TexType));
+                    addQuad(forceVerts);
                 }
                 else
                 {
@@ -7262,6 +7333,7 @@ void RenderJoints(BYTE bRenderOneMore)
                     {
                         vec3_t t_bias;
                         VectorSubtract(o->Target->Position, o->StartPosition, t_bias);
+                        flushQuads();
                         mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
                         mu::GetRenderer().PushMatrix();
                         mu::GetRenderer().Translate(t_bias[0], t_bias[1], t_bias[2]);
@@ -7315,7 +7387,7 @@ void RenderJoints(BYTE bRenderOneMore)
                             {nextTail[3][0], nextTail[3][1], nextTail[3][2], 0.f, 0.f, 0.f, L2, V1, faceColor},
                             {nextTail[2][0], nextTail[2][1], nextTail[2][2], 0.f, 0.f, 0.f, L2, V2, faceColor},
                         };
-                        mu::GetRenderer().RenderQuad3D(faceOneVerts, static_cast<std::uint32_t>(o->TexType));
+                        addQuad(faceOneVerts);
                     }
 
                     if ((o->RenderFace & RENDER_FACE_TWO) == RENDER_FACE_TWO)
@@ -7331,10 +7403,11 @@ void RenderJoints(BYTE bRenderOneMore)
                             {nextTail[1][0], nextTail[1][1], nextTail[1][2], 0.f, 0.f, 0.f, L2, V2, faceColor},
                             {nextTail[0][0], nextTail[0][1], nextTail[0][2], 0.f, 0.f, 0.f, L2, V1, faceColor},
                         };
-                        mu::GetRenderer().RenderQuad3D(faceTwoVerts, static_cast<std::uint32_t>(o->TexType));
+                        addQuad(faceTwoVerts);
                     }
                 }
             }
+            flushQuads();
             if (o->Type == BITMAP_JOINT_HEALING && o->SubType == 8)
             {
                 EnableDepthTest();

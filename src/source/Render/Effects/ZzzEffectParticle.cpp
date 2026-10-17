@@ -16,6 +16,7 @@
 #include "Network/Server/WSclient.h"
 #include "World/MapInfra/MapManager.h"
 #include "UI/Core/WindowSystem.h"
+#include "Core/Utilities/FrameProfiler.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Effects/ParticleDrawOrder.h"
 #include "Data/GameConfig/GameConfig.h"
@@ -8969,6 +8970,7 @@ void RenderParticles(BYTE byRenderOneMore)
     static Entry drawOrder[MAX_PARTICLES];
     static Entry drawOrderScratch[MAX_PARTICLES];
 
+    const bool cullOffscreen = !IsEffectCullingDisabledDebug();
     const bool sortDraws = GameConfig::GetInstance().GetSortParticleDraws();
     std::size_t drawCount = MAX_PARTICLES;
     if (sortDraws)
@@ -8995,6 +8997,16 @@ void RenderParticles(BYTE byRenderOneMore)
             BITMAP_t* pBitmap = Bitmaps.GetTexture(o->TexType);
             float Width = pBitmap->Width * o->Scale;
             float Height = pBitmap->Height * o->Scale;
+            // The margin covers the few types drawn a little off their position. Damage numbers
+            // brighten on every draw and firecrackers trail far behind theirs, so those always draw.
+            if (cullOffscreen && o->Type != BITMAP_DAMAGE1 && o->Type != BITMAP_FIRECRACKER &&
+                !TestFrustrum(o->Position, std::max(Width, Height) + 50.f))
+            {
+                FrameProfiler::Count(FrameProfiler::Counter::ParticlesCulled);
+                if (o->LifeTime < 0)
+                    o->LifeTime = 0;
+                continue;
+            }
             if (pBitmap->Components == 3)
             {
                 EnableAlphaBlend();
