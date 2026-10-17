@@ -52,12 +52,14 @@ namespace
         { CLASS_TEMPLENIGHT, 3151 },
     }};
 
+    // MODEL_BOW + 27 and ITEM_BOW + 27: Silver Bow-J.
     constexpr bool IsBowModel(int type)
     {
         return InRange(type, MODEL_BOW, MODEL_CHAOS_NATURE_BOW) ||
                type == MODEL_CELESTIAL_BOW ||
                InRange(type, MODEL_ARROW_VIPER_BOW, MODEL_STINGER_BOW) ||
-               type == MODEL_AIR_LYN_BOW;
+               type == MODEL_AIR_LYN_BOW ||
+               type == MODEL_BOW + 27;
     }
 
     constexpr bool IsCrossbowModel(int type)
@@ -72,7 +74,8 @@ namespace
         return InRange(type, ITEM_BOW, ITEM_CHAOS_NATURE_BOW) ||
                type == ITEM_CELESTIAL_BOW ||
                InRange(type, ITEM_ARROW_VIPER_BOW, ITEM_STINGER_BOW) ||
-               type == ITEM_AIR_LYN_BOW;
+               type == ITEM_AIR_LYN_BOW ||
+               type == ITEM_BOW + 27;
     }
 
     constexpr bool IsGeneralCrossbowItem(int type)
