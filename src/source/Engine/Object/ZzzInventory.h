@@ -43,9 +43,8 @@ extern int		g_nTaxRate;
 extern int		g_nChaosTaxRate;
 
 // The item help table (/<item name> in the chat): ComputeItemInfo fills a row for each + level of
-// g_iCurrentItem, with a column for each _COLUMN_TYPE.
+// the item it is given, with a column for each _COLUMN_TYPE.
 inline constexpr int iMaxLevel = 15;
-extern int g_iCurrentItem;
 extern int g_iItemInfo[iMaxLevel + 1][_COLUMN_TYPE_COUNT];
 
 ///////////////////////////////////////////////////////////////////////////////

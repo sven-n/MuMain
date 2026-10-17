@@ -728,7 +728,6 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
     }
 }
 
-int g_iCurrentItem = -1;
 int g_iItemInfo[iMaxLevel + 1][_COLUMN_TYPE_COUNT];
 
 namespace
@@ -749,13 +748,10 @@ int GetItemInfoMagicColumn(int itemType)
 }
 } // namespace
 
+// Not cached per item: the levels the hero can equip follow the hero's level and stats, and the
+// values follow the item editor's changes.
 void ComputeItemInfo(int iHelpItem)
 {
-    if (g_iCurrentItem == iHelpItem)
-        return;
-    else
-        g_iCurrentItem = iHelpItem;
-
     ITEM_ATTRIBUTE* p = &ItemAttribute[iHelpItem];
     const int magicColumn = GetItemInfoMagicColumn(iHelpItem);
 

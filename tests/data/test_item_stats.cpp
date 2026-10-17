@@ -5,6 +5,7 @@
 #include "ClientDataScope.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"
@@ -60,8 +61,7 @@ private:
 using ItemInfoTable = std::array<std::array<int, _COLUMN_TYPE_COUNT>, iMaxLevel + 1>;
 
 // Points the item help table at test-owned state: ComputeItemInfo marks the levels the hero
-// can equip. The table was computed from the test's ItemAttribute, so it is marked as computed
-// for no item afterwards.
+// can equip.
 class ItemHelpScope
 {
 public:
@@ -72,14 +72,13 @@ public:
 
     ~ItemHelpScope()
     {
-        g_iCurrentItem = -1;
         CharacterAttribute = m_previousHero;
     }
 
-    // Computes the table again, over what the item before left in it.
+    // Computes the table again, over what the item before left in it, as the item help window
+    // does each frame while it shows the item.
     void Compute(int itemType)
     {
-        g_iCurrentItem = -1;
         ComputeItemInfo(itemType);
     }
 
@@ -98,6 +97,11 @@ public:
             std::ranges::copy(g_iItemInfo[level], table[level].begin());
         }
         return table;
+    }
+
+    CHARACTER_ATTRIBUTE& Hero()
+    {
+        return m_hero;
     }
 
 private:
@@ -133,6 +137,20 @@ ITEM ComputeItem(int itemType, int level, BYTE excellentFlags = 0, BYTE ancientD
     item.AncientDiscriminator = ancientDiscriminator;
     SetItemAttributes(&item);
     return item;
+}
+
+// The + levels the item help table shows in white.
+int CountEquippableLevels()
+{
+    int count = 0;
+    for (const auto& row : g_iItemInfo)
+    {
+        if (row[_COLUMN_TYPE_CAN_EQUIP] == TRUE)
+        {
+            ++count;
+        }
+    }
+    return count;
 }
 } // namespace
 
@@ -399,3 +417,59 @@ TEST_CASE("The item help table keeps nothing of the item shown before [data][ite
         }
     }
 }
+
+TEST_CASE("The item help table follows the hero's level and stats while it shows the same item [data][items]")
+{
+    ShippedItemAttributes items;
+    ItemHelpScope help;
+    CHARACTER_ATTRIBUTE& hero = help.Hero();
+    const int requiredLevel = items[ITEM_BONE_BLADE].RequireLevel;
+    REQUIRE(requiredLevel > 0);
+
+    help.Compute(ITEM_BONE_BLADE);
+    CHECK(CountEquippableLevels() == 0);
+
+    // Stat points for every + level, one level short.
+    hero.Strength = static_cast<WORD>(g_iItemInfo[iMaxLevel][_COLUMN_TYPE_REQSTR]);
+    hero.Dexterity = static_cast<WORD>(g_iItemInfo[iMaxLevel][_COLUMN_TYPE_REQDEX]);
+    hero.Level = static_cast<WORD>(requiredLevel - 1);
+    help.Compute(ITEM_BONE_BLADE);
+    CHECK(CountEquippableLevels() == 0);
+
+    hero.Level = static_cast<WORD>(requiredLevel);
+    help.Compute(ITEM_BONE_BLADE);
+    CHECK(CountEquippableLevels() == iMaxLevel + 1);
+
+    // Another character, with the stats for +0 only.
+    hero.Strength = static_cast<WORD>(g_iItemInfo[0][_COLUMN_TYPE_REQSTR]);
+    hero.Dexterity = static_cast<WORD>(g_iItemInfo[0][_COLUMN_TYPE_REQDEX]);
+    help.Compute(ITEM_BONE_BLADE);
+    CHECK(g_iItemInfo[0][_COLUMN_TYPE_CAN_EQUIP] == TRUE);
+    CHECK(g_iItemInfo[iMaxLevel][_COLUMN_TYPE_CAN_EQUIP] == FALSE);
+}
+
+#ifdef _EDITOR
+TEST_CASE("The item help table shows the item editor's changes to the item it shows [data][items][editor]")
+{
+    ShippedItemAttributes items;
+    ItemHelpScope help;
+    constexpr int AddedDamage = 10;
+
+    help.Compute(ITEM_DOUBLE_BLADE);
+    const int shippedDamageMin = g_iItemInfo[0][_COLUMN_TYPE_ATTMIN];
+
+    // The editor's fields change ItemAttribute, then the item goes into the item database.
+    items[ITEM_DOUBLE_BLADE].DamageMin += AddedDamage;
+    const int versionBefore = g_ItemDatabase.GetVersion();
+    g_ItemDataHandler.OnItemEdited(ITEM_DOUBLE_BLADE);
+    REQUIRE(g_ItemDatabase.GetVersion() != versionBefore);
+
+    help.Compute(ITEM_DOUBLE_BLADE);
+    CHECK(g_iItemInfo[0][_COLUMN_TYPE_ATTMIN] == shippedDamageMin + AddedDamage);
+    for (int level = 0; level <= iMaxLevel; ++level)
+    {
+        CAPTURE(level);
+        CHECK(g_iItemInfo[level][_COLUMN_TYPE_ATTMIN] == ComputeItem(ITEM_DOUBLE_BLADE, level).DamageMin);
+    }
+}
+#endif
