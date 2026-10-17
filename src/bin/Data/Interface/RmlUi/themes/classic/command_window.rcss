@@ -1,0 +1,81 @@
+/* Classic (0.97) theme for CCommandWindow (D). 0.97 has no command window (its player commands
+   are chat commands: /trade, /party, /guild...), so this is legacy's window in classic art: the
+   0.97 frame comes from docked_panel_frame.rcss (linked first); the twelve buttons are 0.97's text
+   plate, Message_box (213x64) squashed to the button box as the 0.97 Esc menu does, lit warm under
+   the mouse and while armed as its plates are; the target box at
+   the pointer is the 0.99b client's Cursorid_wnd (128x32). Positions are legacy's (InitButtons(),
+   RenderBaseWindow()); coordinates are reference px inside #panel. */
+
+@spritesheet classic-cmd-plate-sheet { src: ../../../Classic/Message_box.jpg; classic-cmd-plate: 0px 0px 213px 64px; }
+@spritesheet classic-cmd-target-sheet { src: ../../../Classic/099b/Cursorid_wnd.jpg; classic-cmd-target: 0px 0px 128px 32px; }
+
+.frame-top { decorator: image(docked-bg-top-b); }
+#panel { height: 432px; pointer-events: auto; }
+/* The frame's pieces keep docked_panel_frame.rcss's 0.97 sizes (Item_Back02 is 177 tall from y
+   256): legacy's side-piece height (323) would stretch it past the window's foot. */
+
+/* RenderText(x + 60, y + 12, title, 72, 0, RT3_SORT_CENTER), bold white. */
+#title {
+	display: block;
+	position: absolute;
+	left: 60px;
+	top: 12px;
+	text-align: center;
+	white-space: nowrap;
+	color: #ffffff;
+	font-weight: bold;
+	pointer-events: none;
+}
+
+/* InitButtons(): plates of 108x29, centred on the 190-wide panel (x 41), from y 33, 30 apart. */
+#buttons { position: absolute; left: 41px; top: 33px; width: 108px; }
+.cmd-btn {
+	display: block;
+	position: relative;
+	width: 108px;
+	height: 29px;
+	margin-bottom: 1px;
+	decorator: image(classic-cmd-plate);
+	pointer-events: auto;
+}
+/* 0.97 redraws the plate under the mouse additively tinted (0.8, 0.6, 0.4), a warm brightening:
+   the plate is brightened and warmed, under the mouse and while the command is armed. */
+.cmd-btn:hover, .cmd-btn:active, .cmd-btn.selected { image-color: #ffe3c6; filter: brightness(1.7); }
+
+/* CButton::Render(): the label centred in the button box, white; the armed command's in bold. */
+.cmd-label {
+	display: block;
+	position: absolute;
+	left: 0;
+	text-align: center;
+	white-space: nowrap;
+	color: #ffffff;
+	pointer-events: none;
+}
+.cmd-btn.selected .cmd-label { font-weight: bold; }
+
+/* The target box: Cursorid_wnd (128x32, 0.99b's newui_cursorid_wnd) at the pointer + 5; the name in the big font,
+   centred on the box 7 units below its top, white, or red (255, 0, 0) out of reach. */
+#target {
+	position: absolute;
+	width: 128px;
+	height: 32px;
+	decorator: image(classic-cmd-target);
+	pointer-events: none;
+}
+#target_name {
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 7px;
+	text-align: center;
+	white-space: nowrap;
+	color: #ffffff;
+	pointer-events: none;
+}
+#target.out-of-range #target_name { color: #ff0000; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#title { width: calc(72px * var(--root-scale)); }
+.cmd-label { width: calc(108px * var(--root-scale)); }
+#target_name { width: calc(128px * var(--root-scale)); }

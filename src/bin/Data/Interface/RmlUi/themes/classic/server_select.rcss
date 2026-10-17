@@ -1,0 +1,152 @@
+/* Classic (0.97) server list. From the 0.97 client's art and layout:
+   - group buttons 70x16 (0Box squashed) in a column centred on the screen, from y=220 of 480,
+     dimmed to 0.8 and lit (and pushed 10 px right) when selected;
+   - the selected group's servers 134x20 (0Box squashed) at x=365 of 640 (centre + 45), each with
+     its load bar under the name: cyan -> white -> red;
+   - Non-PvP servers yellowish, closed ones orange; text white.
+   Differences from the original, for want of data in a stylesheet: the server rows start level
+   with the group column instead of centred on the selected group, and the load bar is one strip
+   instead of 20 squares.
+   1 original pixel = 1/480 of the screen height, as the 0.97 client scales its 2D art. The text
+   does not stretch with it: 0.97 drew its font at screen pixels, so it is 13rem, 13 px growing
+   like the native text (server_select.rml's body is "scene-window-scale", RmlNativeText.h). */
+
+@spritesheet classic-server-box-sheet
+{
+	src: ../../../../Logo/Classic/0box.jpg;
+	classic-server-box: 0px 0px 134px 30px;
+}
+
+body {
+	--px: calc(100vh / 480);
+}
+
+#panel {
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	padding: 0;
+	transform: none;
+	font-family: "token(font-body)";
+	font-size: 13rem;
+	color: #ffffff;
+}
+
+#columns {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	display: block;
+}
+
+#group_col {
+	position: absolute;
+	left: 50%;
+	top: calc(220 * var(--px));
+	margin-left: calc(-35 * var(--px));
+	width: calc(80 * var(--px));
+	display: block;
+}
+
+.group-btn {
+	display: block;
+	width: calc(70 * var(--px));
+	height: calc(16 * var(--px));
+	line-height: calc(16 * var(--px));
+	text-align: center;
+	white-space: nowrap;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(classic-server-box);
+	filter: brightness(0.8);
+}
+.group-btn.checked {
+	margin-left: calc(10 * var(--px));
+	filter: brightness(1.0);
+}
+
+#server_col {
+	position: absolute;
+	left: 50%;
+	top: calc(218 * var(--px));
+	margin-left: calc(45 * var(--px));
+	width: calc(134 * var(--px));
+	display: block;
+}
+#server_col.hidden {
+	display: none;
+}
+
+.server-row {
+	position: relative;
+	display: block;
+	width: calc(134 * var(--px));
+	height: calc(20 * var(--px));
+	padding: 0;
+	padding-top: calc(1 * var(--px));
+	text-align: center;
+	line-height: calc(12 * var(--px));
+	white-space: nowrap;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(classic-server-box);
+	filter: brightness(0.8);
+	color: #ffffb3;
+}
+.server-row:hover {
+	filter: brightness(1.0);
+}
+.server-row.gray {
+	color: #ffffff;
+}
+.server-row.orange {
+	color: #ffb27f;
+}
+
+/* base.rcss gives the server list's buttons (.server-group-btn / .server-option-btn) the legacy
+   sprites and colours for each state (the selected group red): these keep the 0.97 plate and
+   colours when selected, hovered and pressed. */
+.group-btn:hover, .group-btn:active, .group-btn.checked, .group-btn.checked:hover, .group-btn.checked:active,
+.server-row:hover, .server-row:active {
+	decorator: image(classic-server-box);
+}
+.group-btn, .group-btn:hover, .group-btn:active,
+.group-btn.checked, .group-btn.checked:hover, .group-btn.checked:active { color: #ffffff; }
+.server-row:hover, .server-row:active { color: #ffffb3; }
+.server-row.gray:hover, .server-row.gray:active { color: #ffffff; }
+.server-row.orange:hover, .server-row.orange:active { color: #ffb27f; }
+
+.server-gauge-slot {
+	position: absolute;
+	left: calc(18 * var(--px));
+	top: calc(14 * var(--px));
+	width: calc(98 * var(--px));
+	height: calc(3 * var(--px));
+	margin: 0;
+	background-color: #1a1a1a;
+}
+.server-gauge-fill {
+	display: block;
+	height: 100%;
+	decorator: linear-gradient(to right, #00ffff, #ffffff, #ff0000);
+}
+
+/* Test-server warning: two lines in red, left of the list (x=150 of 640). */
+#pvp_notice {
+	position: absolute;
+	left: 50%;
+	top: calc(174 * var(--px));
+	margin-left: calc(-170 * var(--px));
+	color: #ff3319;
+}
+#pvp_notice.hidden {
+	display: none;
+}
+
+/* The 0.97 list has no description panel. */
+#desc_panel {
+	display: none;
+}

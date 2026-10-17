@@ -275,12 +275,38 @@ namespace UI::RmlBridge
         return doc;
     }
 
+    std::optional<float> ThemedStackingDepth(const ThemeInheritance& theme, std::string_view documentName)
+    {
+        const auto setting = theme.GetSetting("Stacking", std::string(documentName));
+        if (!setting)
+            return StackingDepthForDocument(documentName);
+
+        char* end = nullptr;
+        const float depth = std::strtof(setting->value.c_str(), &end);
+        if (end == setting->value.c_str() || *end != '\0')
+        {
+            g_ErrorReport.Write(L"> [RmlTheme] Bad [Stacking] depth '%hs' for '%hs'.\r\n", setting->value.c_str(),
+                                std::string(documentName).c_str());
+            return StackingDepthForDocument(documentName);
+        }
+        return depth;
+    }
+
+    namespace
+    {
+        std::optional<float> ActiveThemeStackingDepth(const std::string& documentName)
+        {
+            const ThemeInheritance theme(std::filesystem::path("Data/Interface/RmlUi/themes") / GetActiveThemeName());
+            return ThemedStackingDepth(theme, documentName);
+        }
+    } // namespace
+
     void ApplyStackingDepth(Rml::ElementDocument* document, const std::string& documentName)
     {
         if (document == nullptr)
             return;
 
-        const std::optional<float> depth = StackingDepthForDocument(documentName);
+        const std::optional<float> depth = ActiveThemeStackingDepth(documentName);
         if (!depth)
         {
             g_ErrorReport.Write(L"> [RmlTheme] No stacking depth for '%hs'.\r\n", documentName.c_str());
@@ -295,7 +321,7 @@ namespace UI::RmlBridge
             return;
         if (SceneForDocument(documentName) == DocumentScene::Main)
             document->SetAttribute(MainSceneDocumentAttribute, true);
-        const std::optional<float> mainDepth = StackingDepthForDocument(documentName);
+        const std::optional<float> mainDepth = ActiveThemeStackingDepth(documentName);
         if (const std::optional<float> otherDepth = StackingDepthOutsideMainScene(documentName); otherDepth && mainDepth)
         {
             document->SetAttribute(MainSceneDepthAttribute, *mainDepth);

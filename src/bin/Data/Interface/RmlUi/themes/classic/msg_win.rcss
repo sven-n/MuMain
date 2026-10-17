@@ -1,0 +1,93 @@
+/* Classic (0.97) message box of the login and character scenes (CMsgWin): Message_box (213x64) at
+   the top centre (y 60 of the 640x480 frame), one line centred at y 75 or two at 69 and 81, and
+   the 0.97 OK / Cancel plates (70x21, the second image under the mouse) -- OK alone at (284, 98),
+   OK and Cancel at (234, 98) and (334, 98), the narrow pair (40 wide) at (323, 98) and (373, 98)
+   beside an input. From the 0.97 client's RenderMessageBox (0051af50). Positions below are the
+   box's own, in 1/480 of the screen height. The text does not stretch with the box: 0.97 drew its
+   font at screen pixels, so it is 1rem, the native text size (msg_win.rml's body is "native-text",
+   RmlNativeText.h). */
+
+@spritesheet classic-msgwin-back-sheet { src: ../../../Classic/Message_box.jpg; classic-msgwin-back: 0px 0px 213px 64px; }
+@spritesheet classic-msgwin-ok-sheet { src: ../../../Classic/Ok.jpg; classic-msgwin-ok: 0px 0px 70px 21px; }
+@spritesheet classic-msgwin-ok2-sheet { src: ../../../Classic/Ok2.jpg; classic-msgwin-ok-hover: 0px 0px 70px 21px; }
+@spritesheet classic-msgwin-cancel-sheet { src: ../../../Classic/Cancel.jpg; classic-msgwin-cancel: 0px 0px 70px 21px; }
+@spritesheet classic-msgwin-cancel2-sheet { src: ../../../Classic/Cancel2.jpg; classic-msgwin-cancel-hover: 0px 0px 70px 21px; }
+
+body { --px: calc(100vh / 480); }
+
+#panel {
+	position: absolute;
+	left: 50%;
+	top: calc(60 * var(--px));
+	transform: none;
+	width: calc(213 * var(--px));
+	height: calc(64 * var(--px));
+	margin-left: calc(-106.5 * var(--px));
+	font-family: "token(font-body)";
+	font-size: 1rem;
+	decorator: image(classic-msgwin-back);
+}
+
+#msg_line1, #msg_line2 {
+	position: absolute;
+	left: 0;
+	right: 0;
+	text-align: center;
+	color: #ffffff;
+	white-space: nowrap;
+	pointer-events: none;
+}
+#msg_line1 { top: calc(15 * var(--px)); }
+#msg_line1.multi-line { top: calc(9 * var(--px)); }
+#msg_line2 { top: calc(21 * var(--px)); }
+#msg_line2.hidden { display: none; }
+.no-buttons #msg_line1 { top: calc(24 * var(--px)); }
+.no-buttons #msg_line1.multi-line { top: calc(18 * var(--px)); }
+.no-buttons #msg_line2 { top: calc(30 * var(--px)); }
+
+/* The personal number field (deleting a character), left of the narrow buttons. */
+#input_frame {
+	display: none;
+	position: absolute;
+	left: calc(12 * var(--px));
+	top: calc(38 * var(--px));
+	width: calc(95 * var(--px));
+	height: calc(21 * var(--px));
+	background-color: rgba(0, 0, 0, 160);
+	pointer-events: none;
+}
+.mode-input #input_frame { display: block; }
+.msgwin-input-field {
+	position: absolute;
+	left: calc(16 * var(--px));
+	top: calc(41 * var(--px));
+	width: calc(87 * var(--px));
+	height: calc(15 * var(--px));
+	padding: 0;
+	color: #ffe6d2;
+	background-color: transparent;
+	border-width: 0;
+	box-shadow: none;
+	decorator: none;
+}
+
+.btn {
+	display: none;
+	position: absolute;
+	top: calc(38 * var(--px));
+	width: calc(70 * var(--px));
+	height: calc(21 * var(--px));
+	cursor: pointer;
+	pointer-events: auto;
+	color: transparent;
+}
+#btn_ok { left: calc(71 * var(--px)); decorator: image(classic-msgwin-ok); }
+#btn_ok:hover { decorator: image(classic-msgwin-ok-hover); }
+#btn_cancel { left: calc(71 * var(--px)); decorator: image(classic-msgwin-cancel); }
+#btn_cancel:hover { decorator: image(classic-msgwin-cancel-hover); }
+.mode-ok-only #btn_ok, .mode-both #btn_ok, .mode-input #btn_ok,
+.mode-cancel-only #btn_cancel, .mode-both #btn_cancel, .mode-input #btn_cancel { display: block; }
+.mode-both #btn_ok { left: calc(21 * var(--px)); }
+.mode-both #btn_cancel { left: calc(121 * var(--px)); }
+.mode-input #btn_ok { left: calc(110 * var(--px)); width: calc(40 * var(--px)); }
+.mode-input #btn_cancel { left: calc(160 * var(--px)); width: calc(40 * var(--px)); }

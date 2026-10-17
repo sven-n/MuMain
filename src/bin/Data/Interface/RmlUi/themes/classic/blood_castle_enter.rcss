@@ -1,0 +1,8 @@
+/* Classic (0.97) Blood Castle entry. 0.97: "Messenger of Archangel", the description from y 64,
+   and six plates 140x33 from y 170, 40 apart, tinted (0.7, 0.7, 0.9), labelled in pale blue
+   (190, 220, 255). MuMain: the description from y 46 to 156, its eight bands from y 160 to 388,
+   above the Close at 395; more content scrolls. */
+.entry-lines { top: 46px; height: calc(110px * var(--root-scale)); }
+.entry-buttons { top: 160px; height: calc(228px * var(--root-scale)); }
+.entry-btn.enabled .entry-btn-art { image-color: #b3b3e6; }
+.entry-btn.enabled .entry-label { color: rgb(190, 220, 255); }

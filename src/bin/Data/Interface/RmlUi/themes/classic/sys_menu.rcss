@@ -1,0 +1,81 @@
+/* Classic (0.97) system menu of the login and character scenes (CSysMenuWin): Esc opens a column
+   of Message_box plates (213x64 squashed to 120x22) at x 260, y 60 + 30*i of the 640x480 frame,
+   with no panel, frame or darkening behind them; the plate under the mouse is drawn again in
+   additive blend tinted (0.8, 0.6, 0.4); each label is centred on x 320 at the plate's y + 5,
+   white. Login shows Exit game / Options / Cancel (3 plates), the character scene Exit game /
+   Select server / Options / Cancel (4 plates; C++ hides #btn_select_server where it does not
+   apply, which also sets .compact). From the 0.97 client's RenderMessageBox (0051af50), message
+   0x6e. Positions below are the column's own, in 1/480 of the screen height, as msg_win.rcss.
+   The labels keep legacy's size, the native text size C++ sets on #panel ("native-text",
+   RmlNativeText.h): 0.97 drew its font at screen pixels, and 1rem here is one original pixel,
+   not the text size (sys_menu.rml's body is "scene-window-scale").
+
+   Dropped from legacy: the op1_back1 cap sprite and the .panel-cap-top / .panel-cap-bottom /
+   .panel-middle art sizes (0.97 draws nothing behind the plates, so those three art elements
+   are hidden below; they are art, not controls), and the 213x187rem panel and 108x30rem button
+   geometry, replaced by the plates'. The modal #backdrop stays (base.rcss: full screen, takes
+   the pointer) but shows nothing. */
+
+@spritesheet classic-sysmenu-plate-sheet { src: ../../../Classic/Message_box.jpg; classic-sysmenu-plate: 0px 0px 213px 64px; }
+
+body { --px: calc(100vh / 480); }
+
+/* 0.97 darkens nothing behind the menu: the catcher keeps the clicks, not the dim. */
+#backdrop {
+	background-color: transparent;
+}
+
+/* The column: 120 wide, centred on x 320, from y 60; 4 plates reach y 112 (3 reach 82). */
+#panel {
+	position: absolute;
+	left: 50%;
+	top: calc(60 * var(--px));
+	transform: none;
+	width: calc(120 * var(--px));
+	height: calc(112 * var(--px));
+	margin-left: calc(-60 * var(--px));
+	font-family: "token(font-body)";
+	color: white;
+}
+#panel.compact {
+	height: calc(82 * var(--px));
+}
+
+/* The S6 panel art (caps and stone middle): 0.97 has no panel behind the plates. */
+#panel .panel-cap-top,
+#panel .panel-cap-bottom,
+#panel .panel-middle {
+	display: none;
+}
+
+/* The plates: Message_box squashed to 120x22, one every 30, the label on one line centred on the
+   plate (a label wider than the plate stays centred: 0.97 centred it on x 320 whatever its
+   width; vertically the 22-high line box centres it, where 0.97 put its top at plate y + 5,
+   about the same for the native text size). Under the mouse 0.97 adds the plate to itself
+   tinted (0.8, 0.6, 0.4), a brightening RCSS cannot express; image-color keeps that tint's hue
+   (1.8 : 1.6 : 1.4 with the brightest channel left at full) on hover and while pressed (0.97
+   has no pressed state). */
+#panel .btn {
+	left: 0;
+	width: calc(120 * var(--px));
+	height: calc(22 * var(--px));
+	line-height: calc(22 * var(--px));
+	white-space: nowrap;
+	decorator: image(classic-sysmenu-plate);
+}
+#panel .btn:hover,
+#panel .btn:active {
+	decorator: image(classic-sysmenu-plate);
+	image-color: #ffe3c6;
+	filter: brightness(1.8);
+}
+
+#btn_exit_game     { top: 0; }
+#btn_select_server { top: calc(30 * var(--px)); }
+#btn_option        { top: calc(60 * var(--px)); }
+#btn_close         { top: calc(90 * var(--px)); }
+
+/* Login (.compact, #btn_select_server hidden by C++): Options and Cancel close up to the 3-plate
+   column. */
+#panel.compact #btn_option { top: calc(30 * var(--px)); }
+#panel.compact #btn_close  { top: calc(60 * var(--px)); }

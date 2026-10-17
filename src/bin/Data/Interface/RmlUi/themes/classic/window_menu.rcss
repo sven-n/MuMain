@@ -1,0 +1,62 @@
+/* Classic (0.97) theme for CWindowMenu (U). 0.97 has no window menu, so this is legacy's in 0.97's
+   parts, as the classic quick command menu: the box 0.97 drew its hints and item boxes in (black at
+   0.8 inside a 1-unit black frame, 004c2420) and each entry on a 0.97 text plate (Message_box,
+   213x64, squashed to the row) lit warm under the mouse as 0.97 lit its plates. The S6 frame
+   pieces, lines and arrows are not drawn. Reference px relative to the menu's top-left, at the
+   original's (528, 284) on the HUD board (window_menu.rml). */
+
+@spritesheet classic-wmenu-plate-sheet { src: ../../../Classic/Message_box.jpg; classic-wmenu-plate: 0px 0px 213px 64px; }
+
+#screen { pointer-events: none; }
+
+#panel {
+	position: absolute;
+	left: 528px;
+	top: 284px;
+	width: 112px;
+	height: 146px;
+	font-family: "token(font-body)";
+	pointer-events: auto;
+}
+
+#back {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 112px;
+	height: 146px;
+	box-sizing: border-box;
+	border-width: 1px;
+	border-color: #000000;
+	background-color: rgba(0, 0, 0, 204);
+}
+#frame_up, .frame-middle, #frame_down, .line, .arrow { display: none; }
+.frame-middles, .lines { position: static; }
+
+/* Six plates 96x18 from y 13, every 20, the label centred on each; white, yellow under the mouse
+   as legacy's. */
+#rows { position: absolute; left: 0; top: 13px; width: 112px; }
+.menu-row {
+	display: block;
+	position: relative;
+	width: 96px;
+	height: 18px;
+	margin: 0 0 2px 8px;
+	pointer-events: auto;
+	cursor: pointer;
+	decorator: image(classic-wmenu-plate fill);
+}
+.menu-row:hover { image-color: #ffe3c6; filter: brightness(1.7); }
+.menu-label {
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 1px;
+	width: calc(96px * var(--root-scale));
+	transform-origin: left top;
+	text-align: center;
+	white-space: nowrap;
+	color: #ffffff;
+	pointer-events: none;
+}
+.menu-row:hover .menu-label { color: #ffff00; }

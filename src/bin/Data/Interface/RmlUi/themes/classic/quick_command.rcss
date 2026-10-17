@@ -1,0 +1,69 @@
+/* Classic (0.97) theme for CQuickCommandWindow, the menu opened on a player. 0.97 has none (its
+   player commands are chat commands), so this is legacy's menu in 0.97's parts, as the classic
+   command window (D) is: the box 0.97 drew its hints and item boxes in (black at 0.8 inside a
+   1-unit black frame, 004c2420), the player's name in bold green, and each action on a 0.97 text
+   plate (Message_box, 213x64, squashed to the row) lit warm under the mouse as 0.97 lit its plates.
+   The S6 frame pieces, lines and arrows are not drawn. Reference px relative to the menu's
+   top-left (#panel is placed at the UI scale). */
+
+@spritesheet classic-qcmd-plate-sheet { src: ../../../Classic/Message_box.jpg; classic-qcmd-plate: 0px 0px 213px 64px; }
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 112px;
+	height: 140px;
+	font-family: "token(font-body)";
+}
+
+#back {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 112px;
+	height: 140px;
+	box-sizing: border-box;
+	border-width: 1px;
+	border-color: #000000;
+	background-color: rgba(0, 0, 0, 204);
+}
+#frame_up, .frame-middle, #frame_down, .line, .arrow { display: none; }
+
+/* The name centred near the top: bold, (0, 255, 0), as legacy's. */
+#name {
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 14px;
+	text-align: center;
+	white-space: nowrap;
+	color: #00ff00;
+	font-weight: bold;
+}
+
+/* The rows from y 42, a plate 96x17 every 19, the label centred on it; white, yellow under the
+   mouse as legacy's. */
+#rows { position: absolute; left: 0; top: 42px; width: 112px; }
+.quick-row {
+	display: block;
+	position: relative;
+	width: 96px;
+	height: 17px;
+	margin: 0 0 2px 8px;
+	decorator: image(classic-qcmd-plate fill);
+}
+.quick-row:hover { image-color: #ffe3c6; filter: brightness(1.7); }
+.quick-label {
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 1px;
+	text-align: center;
+	white-space: nowrap;
+	color: #ffffff;
+}
+.quick-row:hover .quick-label { color: #ffff00; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#name { width: calc(112px * var(--root-scale)); }
+.quick-label { width: calc(96px * var(--root-scale)); }

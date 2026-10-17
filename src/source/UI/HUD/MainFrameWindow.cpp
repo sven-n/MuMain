@@ -38,6 +38,7 @@
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlWorkspaceParticipant.h"
+#include "UI/HUD/MainFrameExtras.h"
 #include "UI/Placement/WindowPlacement.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 #include "Core/Utilities/StringUtils.h"
@@ -278,6 +279,7 @@ void mu::ui::window::CMainFrameWindow::BindRmlModel(Rml::DataModelConstructor& c
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickFriend(); });
     c.BindEventCallback("mainframe_window_click",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickWindow(); });
+    UI::Hud::MainFrameExtras::BindModel(c);
 }
 
 void mu::ui::window::CMainFrameWindow::OnRmlReloaded()
@@ -487,6 +489,7 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
     };
 
     m_ItemHotKey.SyncSlotIcons(m_RmlView.Document());
+    UI::Hud::MainFrameExtras::SyncModel();
 
     // HP/MP -- legacy RenderLifeMana(). fLife/fMana there are the EMPTY fraction; store filled.
     DWORD wLifeMax, wLife, wManaMax, wMana;
