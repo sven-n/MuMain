@@ -111,7 +111,7 @@ can have several tags; the file lists them in the order below.
 | `jewel` | Jewels of Bless, Soul, Life, Chaos, Creation and Guardian |
 | `refineStone` | Lower and Higher Refine Stone |
 | `socketSeed`, `socketSphere`, `socketSeedSphere` | Socket system items |
-| `healingPotion`, `manaPotion`, `complexPotion` | Potions the hotkeys look for; a skill without enough mana and the MU Helper use the healing and mana potions, the highest item number (the largest potion) first |
+| `healingPotion`, `manaPotion`, `complexPotion` | Potions the hotkeys look for; a skill without enough mana takes a mana potion and the MU Helper a healing potion, the one with the highest group and number first (the largest potion) |
 | `elitePotion`, `elixir`, `buffScroll`, `battleOrStrengthScroll` | Cash shop potions and scrolls |
 | `ammunition` | Arrows and bolts |
 | `bloodCastleTicketPart` | Scroll of Archangel and Blood Bone |
