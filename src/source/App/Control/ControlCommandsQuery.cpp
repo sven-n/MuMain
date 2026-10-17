@@ -4,6 +4,7 @@
 #include "App/Control/ControlEvents.h"
 #include "App/Control/ControlState.h"
 #include "Core/Input/SyntheticInput.h"
+#include "Core/Utilities/Benchmark/BenchRecorder.h"
 #include "Core/Text/Utf8.h"
 #include "Network/Server/WSclient.h"
 #include "Scenes/SceneCore.h"
@@ -411,6 +412,17 @@ std::string Ping(const Request& request, std::unique_ptr<Act>&)
     result["commit"] = MU_GIT_COMMIT;
     result["commit_changed"] = MU_GIT_COMMIT_CHANGED != 0;
     result["scene"] = CurrentSceneName();
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+// A benchmark run's progress; `$bench run ...` through `console` starts one.
+std::string Bench(const Request& request, std::unique_ptr<Act>&)
+{
+    const Core::Benchmark::Recorder& recorder = Core::Benchmark::Recorder::Instance();
+    json result;
+    result["running"] = recorder.IsRunning();
+    result["status"] = recorder.StatusText();
+    result["last_run"] = recorder.LastOutputPath();
     return EncodeResult(request.EncodedId(), result.dump());
 }
 
