@@ -43,6 +43,38 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME mip_chain_tests
+    SOURCES
+        test_mip_chain.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/MipChain.cpp
+)
+
+mu_add_test(
+    NAME texture_filtering_tests
+    SOURCES
+        test_texture_filtering.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/TextureFiltering.cpp
+)
+
+mu_add_test(
+    NAME antialiasing_tests
+    SOURCES
+        test_antialiasing.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/Antialiasing.cpp
+)
+
+mu_add_test(
+    NAME post_processing_tests
+    SOURCES
+        test_post_processing.cpp
+        test_color_grading_table.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/PostProcessing/BloomSource.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/PostProcessing/ColorGradingTable.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/PostProcessing/SceneBoundary.cpp
+    LINK_LIBS SDL3::SDL3
+)
+
+mu_add_test(
     NAME sdl_gpu_replay_state_tests
     SOURCES
         test_sdl_gpu_replay_state.cpp
@@ -99,6 +131,59 @@ mu_add_test(
     NAME gpu_skinning_path_tests
     SOURCES
         test_gpu_skinning_path.cpp
+)
+
+mu_add_test(
+    NAME dynamic_lights_tests
+    SOURCES
+        test_dynamic_lights.cpp
+        test_dynamic_light_history.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Lighting/DynamicLightHistory.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Lighting/DynamicLightList.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Lighting/DynamicLightSelection.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Terrain/TerrainLightGrid.cpp
+)
+
+mu_add_test(
+    NAME single_sample_twins_tests
+    SOURCES test_single_sample_twins.cpp
+)
+
+mu_add_test(
+    NAME scene_lighting_tests
+    SOURCES
+        test_scene_lighting.cpp
+        test_world_pipeline_set.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/SceneLighting.cpp
+)
+
+mu_add_test(
+    NAME light_mood_scales_tests
+    SOURCES
+        test_light_mood_scales.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Lighting/LightMoodScales.cpp
+)
+
+# The look profile's parameters: built-in values, CPU mirrors, range ends and uniform packing.
+mu_add_test(
+    NAME look_profile_tests
+    SOURCES
+        test_look_profile.cpp
+        test_look_tuning.cpp
+        test_look_preset.cpp
+    LINK_LIBS
+        MuClient
+)
+
+# The light mood against the real terrain light buffers; they come with the
+# client globals of Winmain.cpp.
+mu_add_test(
+    NAME light_mood_terrain_tests
+    SOURCES
+        test_light_mood_terrain.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
 )
 
 add_test(

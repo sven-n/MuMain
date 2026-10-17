@@ -127,6 +127,10 @@
 							</div>
 						</div>
 					</div>
+					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_enhanced_graphics">
+						<span class="opt-label">{{enhanced_graphics_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="enhanced_graphics"><div class="opt-toggle-knob"></div></div></div>
+					</div>
 				</div>
 
 				<!-- Graphics -->

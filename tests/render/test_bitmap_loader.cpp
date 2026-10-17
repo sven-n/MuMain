@@ -26,6 +26,8 @@ struct UploadRecord
     bool reject = false;
     int calls = 0;
     bool mipmapped = false;
+    // Upscaled art creates a real filtered sampler, which the fake device cannot.
+    bool noDevice = false;
     int releasedTextures = 0;
     std::map<std::uint32_t, void*> textures;
     std::map<std::uint32_t, void*> samplers;
@@ -51,7 +53,7 @@ public:
     void RenderLines(std::span<const mu::Vertex3D>, std::uint32_t) override {}
     void* GetDevice() override
     {
-        return reinterpret_cast<void*>(1);
+        return record.noDevice ? nullptr : reinterpret_cast<void*>(1);
     }
 };
 
@@ -114,10 +116,11 @@ IMuRenderer& GetRenderer()
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): matches the production bridge signature.
 Render::Renderer::BitmapGpuResources::Result UploadBitmapPixels(std::span<const std::uint8_t> pixels, int width,
                                                                 int height, SDL_GPUFilter, SDL_GPUSamplerAddressMode,
-                                                                bool mipmapped)
+                                                                std::span<const Render::Textures::MipLevel> mips,
+                                                                bool generateMips)
 {
     ++record.calls;
-    record.mipmapped = mipmapped;
+    record.mipmapped = generateMips || !mips.empty();
     record.pixels.assign(pixels.begin(), pixels.end());
     record.width = width;
     record.height = height;
@@ -154,6 +157,14 @@ void ClearSamplerRegistry()
 {
     record.samplers.clear();
 }
+// Texture filtering stays off in these tests: no world texture gets a chain.
+void RegisterFilteredSampler(std::uint32_t, void*) {}
+void MarkFilteredSamplerPending(std::uint32_t) {}
+void TakeFilteredSamplerRequests(std::vector<std::uint32_t>& requests)
+{
+    requests.clear();
+}
+void SetTextureFilteringEnabled(bool) {}
 } // namespace mu
 
 namespace mu
@@ -296,6 +307,7 @@ TEST_CASE("bitmap replacement keeps existing ID and refcount semantics on reject
 TEST_CASE("bitmap loader uploads marked files mipmapped at their original size")
 {
     record = {};
+    record.noDevice = true;
     auto dir = MakeFixtureDir("upscaled");
     WriteMarkedTga(dir / "marked.OZT");
     CGlobalBitmap bitmaps;

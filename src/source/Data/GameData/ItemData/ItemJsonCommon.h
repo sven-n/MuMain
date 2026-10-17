@@ -5,6 +5,8 @@
 
 #include "json.hpp"
 
+#include <filesystem>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -38,6 +40,9 @@ void AddFileIssue(std::vector<ItemDataIssue>& issues, const std::string& source,
 // "formatVersion" (1 to maxFormatVersion).
 bool ReadFileVersion(std::string_view text, const std::string& source, int maxFormatVersion, OrderedJson& root,
                      std::vector<ItemDataIssue>& issues);
+
+// The whole file as text without a UTF-8 byte order mark; nothing when it cannot be opened.
+std::optional<std::string> ReadTextFile(const std::filesystem::path& path);
 
 // ReadFileVersion, and checks that the file has a valid "group".
 bool ReadFileHeader(std::string_view text, const std::string& source, int maxFormatVersion, OrderedJson& root,

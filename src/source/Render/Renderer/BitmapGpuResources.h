@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Render/Sprites/BitmapTextureLimits.h"
+#include "Render/Textures/MipChain.h"
 
 #include <SDL3/SDL_gpu.h>
 
@@ -36,6 +37,10 @@ public:
     static constexpr int kMaximumWidth = Sprites::kBitmapMaximumWidth * Sprites::kBitmapMaximumScale;
     static constexpr int kMaximumHeight = Sprites::kBitmapMaximumHeight * Sprites::kBitmapMaximumScale;
     static_assert(kMaximumPitch * Sprites::kBitmapMaximumScale <= kSlotCapacity);
+    // Where a mip level starts when it shares a slot with the level before it:
+    // the D3D12 placement alignment, which keeps every backend on its direct
+    // copy path.
+    static constexpr std::uint64_t kLevelAlignment = 512;
 
     struct Calls
     {
@@ -80,11 +85,13 @@ public:
     // Initialize/Shutdown and destruction must be externally serialized with all calls.
     // During an initialized lifetime, wrong-thread uploads reject without changing owner state.
     bool Initialize(SDL_GPUDevice* device);
-    // An image taller than a slot holds is staged in bands of rows, one submission each.
-    // `mipmapped`: the GPU builds the full mip chain, sampled trilinear and anisotropic
-    // whatever `filter` says (upscaled art, which is always drawn smaller than stored).
+    // `mips` are the levels below `pixels`, each half the size of the one
+    // before it (at least 1x1); with `generateMips` instead, the GPU builds the
+    // whole chain after the upload. A level larger than one slot is staged in
+    // bands of rows; consecutive pieces that fit one slot share a submission.
     Result Upload(std::span<const std::uint8_t> pixels, int width, int height, SDL_GPUFilter filter,
-                  SDL_GPUSamplerAddressMode wrap, bool mipmapped = false);
+                  SDL_GPUSamplerAddressMode wrap, std::span<const Textures::MipLevel> mips = {},
+                  bool generateMips = false);
     // Call before destroying the device, after clearing non-owning sampler registries.
     bool Shutdown();
     const std::string& LastError() const
@@ -116,11 +123,7 @@ private:
     SDL_GPUDevice* m_device = nullptr;
     std::thread::id m_thread;
     std::array<Slot, kSlotCount> m_slots{};
-    // Nearest/linear x repeat/clamp, then mipmapped (linear) x repeat/clamp.
-    static constexpr std::size_t kMipmappedSampler = 4;
-    static constexpr float kAllMipLevels = 1000.0f;
-    static constexpr float kMipmappedAnisotropy = 16.0f;
-    std::array<SDL_GPUSampler*, 6> m_samplers{};
+    std::array<SDL_GPUSampler*, 4> m_samplers{};
     std::size_t m_next = 0;
     bool m_faulted = false;
     std::string m_stage;

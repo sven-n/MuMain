@@ -22,6 +22,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "Scenes/MainScene.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "Render/Renderer/MuRenderer.h"
 
 int EnableEvent = 0;
 
@@ -720,6 +721,8 @@ bool RenderMount(OBJECT* o, bool bForceRender)
 
 void RenderMount()
 {
+    // Like their riders, mounts keep their Classic look: no bloom from them.
+    const mu::ScopedBloomExclusion classicMounts;
     for (int i = 0; i < MAX_MOUNTS; i++)
     {
         OBJECT* o = &Mounts[i];

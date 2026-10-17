@@ -134,7 +134,11 @@ void RenderTarget::Draw()
     auto& renderer = mu::GetRenderer();
     if (renderer.BeginOffscreenCapture(target.id, target.width, target.height) == 0)
         return;
-    m_drawer(target.width, target.height);
+    {
+        // A document shows these models as UI images: keep Classic texture sampling for them.
+        const mu::ScopedScreenSpaceSampling screenSpaceSampling;
+        m_drawer(target.width, target.height);
+    }
     renderer.EndOffscreenCapture();
 
     if (!promoting)

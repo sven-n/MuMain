@@ -9,6 +9,7 @@
 #include <cstring>
 #include <string>
 #include <thread>
+#include <utility>
 #include <vector>
 
 namespace
@@ -21,7 +22,7 @@ struct Fake
 {
     static inline Fake* active = nullptr;
     std::array<int, 128> tokens{};
-    int transfers = 0, samplers = 0, textures = 0, waits = 0, releases = 0, fences = 0, uploads = 0, mipmaps = 0;
+    int transfers = 0, samplers = 0, textures = 0, waits = 0, releases = 0, fences = 0, mipmaps = 0;
     int failureAt = -1, creates = 0;
     const char* failure = "original SDL error";
     bool failWait = false, failSubmit = false, failMap = false, failAcquire = false, failBegin = false;
@@ -33,6 +34,8 @@ struct Fake
     SDL_GPUTextureTransferInfo source{};
     SDL_GPUTextureRegion destination{};
     SDL_GPUTextureCreateInfo texture{};
+    std::vector<std::pair<SDL_GPUTextureTransferInfo, SDL_GPUTextureRegion>> uploads;
+    Uint32 textureLevels = 0;
     std::string lastEvent;
 
     Fake()
@@ -75,6 +78,7 @@ struct Fake
     {
         CHECK(info->format == SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM);
         active->texture = *info;
+        active->textureLevels = info->num_levels;
         ++active->textures;
         return active->failTexture ? nullptr : Handle<SDL_GPUTexture>(40 + active->textures % 20);
     }
@@ -111,7 +115,7 @@ struct Fake
         active->cycled |= cycle;
         active->source = *src;
         active->destination = *dst;
-        ++active->uploads;
+        active->uploads.emplace_back(*src, *dst);
     }
     static void End(SDL_GPUCopyPass*) {}
     static void GenerateMipmaps(SDL_GPUCommandBuffer*, SDL_GPUTexture*)
@@ -195,7 +199,7 @@ SDL_GPUDevice* Device()
 
 TEST_CASE("bitmap owner fixed allocations and sampler descriptors")
 {
-    for (int fail = 0; fail < 9; ++fail)
+    for (int fail = 0; fail < 7; ++fail)
     {
         Fake fake;
         fake.failureAt = fail;
@@ -210,7 +214,7 @@ TEST_CASE("bitmap owner fixed allocations and sampler descriptors")
     Owner owner(fake.Calls());
     REQUIRE(owner.Initialize(Device()));
     CHECK(fake.transfers == 3);
-    CHECK(fake.samplers == 6);
+    CHECK(fake.samplers == 4);
     for (int i = 0; i < 4; ++i)
     {
         const auto& d = fake.descriptors[i];
@@ -222,19 +226,9 @@ TEST_CASE("bitmap owner fixed allocations and sampler descriptors")
         CHECK(d.address_mode_v == d.address_mode_u);
         CHECK(d.address_mode_w == SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE);
     }
-    for (int i = 4; i < 6; ++i)
-    {
-        const auto& d = fake.descriptors[i];
-        CHECK(d.min_filter == SDL_GPU_FILTER_LINEAR);
-        CHECK(d.mipmap_mode == SDL_GPU_SAMPLERMIPMAPMODE_LINEAR);
-        CHECK(d.max_lod > 10.0f);
-        CHECK(d.enable_anisotropy);
-        CHECK(d.address_mode_u ==
-              (i % 2 == 0 ? SDL_GPU_SAMPLERADDRESSMODE_REPEAT : SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE));
-    }
     CHECK(owner.Shutdown());
     CHECK(owner.Shutdown());
-    CHECK(fake.releases == 9);
+    CHECK(fake.releases == 7);
 }
 
 TEST_CASE("bitmap owner uses only three uncycled slots for repeated uploads")
@@ -260,7 +254,7 @@ TEST_CASE("bitmap owner uses only three uncycled slots for repeated uploads")
         fake.Calls().releaseTexture(Device(), result.texture);
     }
     CHECK(fake.transfers == 3);
-    CHECK(fake.samplers == 6);
+    CHECK(fake.samplers == 4);
     CHECK(fake.waits == 10001 - 3);
     CHECK(fake.fences == 3);
     CHECK_FALSE(fake.overwrite);
@@ -449,7 +443,7 @@ TEST_CASE("bitmap sampler keys select four device-owned handles")
         for (std::size_t j = i + 1; j < selected.size(); ++j)
             CHECK(selected[i] != selected[j]);
     }
-    CHECK(fake.samplers == 6);
+    CHECK(fake.samplers == 4);
     CHECK(owner.Shutdown());
 }
 
@@ -463,10 +457,10 @@ TEST_CASE("bitmap owner stages upscaled images in bands and builds their mips la
     std::vector<std::uint8_t> pixels(std::size_t{width} * height * 4u);
     for (std::size_t row = 0; row < height; ++row)
         std::fill_n(pixels.begin() + static_cast<std::ptrdiff_t>(row * width * 4u), width * 4, static_cast<std::uint8_t>(row % 251));
-    auto result = owner.Upload(pixels, width, height, filter, wrap, true);
+    auto result = owner.Upload(pixels, width, height, filter, wrap, {}, true);
     REQUIRE(result);
     // 8 KiB rows: 512 per 4 MiB slot, so three bands, the last of 6 rows.
-    CHECK(fake.uploads == 3);
+    CHECK(fake.uploads.size() == 3);
     CHECK(fake.destination.y == 1024);
     CHECK(fake.destination.h == 6);
     CHECK(fake.source.rows_per_layer == 6);
@@ -476,14 +470,74 @@ TEST_CASE("bitmap owner stages upscaled images in bands and builds their mips la
     CHECK(fake.texture.num_levels == 12);
     CHECK((fake.texture.usage & SDL_GPU_TEXTUREUSAGE_COLOR_TARGET) != 0);
     CHECK(fake.mipmaps == 1);
-    CHECK(fake.descriptors.size() == 6);
     fake.Calls().releaseTexture(Device(), result.texture);
 
     auto plain = owner.Upload(std::span(pixels).first(16), 2, 2, filter, wrap);
     REQUIRE(plain);
-    CHECK(plain.sampler != result.sampler);
     CHECK(fake.texture.num_levels == 1);
     CHECK(fake.mipmaps == 1);
     fake.Calls().releaseTexture(Device(), plain.texture);
     CHECK(owner.Shutdown());
+}
+
+namespace
+{
+// The levels below a square image of `size` texels, each filled with its level number.
+std::vector<Render::Textures::MipLevel> Chain(std::uint32_t size)
+{
+    std::vector<Render::Textures::MipLevel> chain;
+    std::uint8_t level = 1;
+    for (std::uint32_t edge = size / 2; edge >= 1; edge /= 2, ++level)
+    {
+        chain.push_back({edge, edge, std::vector<std::uint8_t>(static_cast<std::size_t>(edge) * edge * 4u, level)});
+    }
+    return chain;
+}
+} // namespace
+
+TEST_CASE("a full 1024x1024 mip chain uploads through the fixed staging slots")
+{
+    Fake fake;
+    Owner owner(fake.Calls());
+    REQUIRE(owner.Initialize(Device()));
+    const std::vector<std::uint8_t> top(std::size_t{1024} * 1024u * 4u, 0);
+    const auto chain = Chain(1024);
+    REQUIRE(chain.size() == 10);
+
+    auto result = owner.Upload(top, 1024, 1024, filter, wrap, chain);
+    REQUIRE(result);
+    CHECK(fake.textures == 1);
+    CHECK(fake.textureLevels == 11);
+    // Level 0 fills a slot by itself; the ten smaller levels share the next one.
+    CHECK(fake.fences == 2);
+    REQUIRE(fake.uploads.size() == 11);
+    for (std::size_t level = 0; level < fake.uploads.size(); ++level)
+    {
+        const auto& [source, destination] = fake.uploads[level];
+        const Uint32 edge = 1024u >> level;
+        CHECK(destination.mip_level == level);
+        CHECK(destination.w == edge);
+        CHECK(destination.h == edge);
+        CHECK(source.offset % Owner::kLevelAlignment == 0);
+        CHECK(source.offset + static_cast<std::uint64_t>(source.pixels_per_row) * 4u * source.rows_per_layer <=
+              Owner::kSlotCapacity);
+        const auto slot = (Index(source.transfer_buffer) - 1) % static_cast<int>(Owner::kSlotCount);
+        CHECK(fake.bytes[slot][source.offset] == level);
+    }
+}
+
+TEST_CASE("a mip chain whose levels do not halve is refused before anything is created")
+{
+    Fake fake;
+    Owner owner(fake.Calls());
+    REQUIRE(owner.Initialize(Device()));
+    const std::vector<std::uint8_t> top(std::size_t{64} * 64u * 4u, 0);
+    auto chain = Chain(64);
+    chain[1] = {20, 20, std::vector<std::uint8_t>(std::size_t{20} * 20u * 4u, 2)};
+
+    const auto result = owner.Upload(top, 64, 64, filter, wrap, chain);
+    CHECK_FALSE(result);
+    CHECK(fake.textures == 0);
+    CHECK(fake.uploads.empty());
+    CHECK(owner.LastStage() == "upload: invalid mip chain");
 }

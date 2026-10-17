@@ -578,6 +578,40 @@ TEST_CASE("Shipped item models mark the capes that are worn as cloth [data][item
     CHECK(cloth == capes);
 }
 
+// Specular (Enhanced lighting) is declared for the metal armour sets only, at
+// the Dragon set's strength, chosen by comparing the sets side by side.
+// Destory and Phantom are left out: specular applies to the whole model, and
+// their cloth parts (skirt, cape) would shine like metal.
+TEST_CASE("Shipped item models declare specular for the metal armour sets [data][items]")
+{
+    const std::vector<int> metal{
+        0,  1,  6,  8,  9,  16, 17, 21, 29, 34, 45, 46, // Dark Knight
+        15, 20, 23, 32, 37,                             // Magic Gladiator
+        25, 26, 27, 28, 33, 38, 51,                     // Dark Lord
+    };
+    std::vector<std::pair<int, int>> declared;
+    std::vector<std::pair<int, int>> expected;
+    for (const ItemModelDefinition& model : ShippedModels().models)
+    {
+        if (model.material.specular > 0.0)
+        {
+            declared.emplace_back(model.group, model.number);
+            CAPTURE(model.group);
+            CAPTURE(model.number);
+            CHECK(model.material.specular == doctest::Approx(0.6));
+        }
+        const bool armourPart = model.group >= 7 && model.group <= 11;
+        if (armourPart && std::find(metal.begin(), metal.end(), model.number) != metal.end())
+        {
+            expected.emplace_back(model.group, model.number);
+        }
+    }
+    std::sort(declared.begin(), declared.end());
+    std::sort(expected.begin(), expected.end());
+    CHECK(declared == expected);
+    CHECK(expected.size() == 115); // 24 sets, five parts each; the Magic Gladiator sets have no helm
+}
+
 // The place in the slot of the items whose place depends on their level, as
 // the old drawing code had it (recorded for levels 0 to 15). The old code put
 // the Life Stone above level 1 and Rena above level 3 at the top left corner

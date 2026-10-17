@@ -61,7 +61,9 @@ FrameTimingState g_frameTiming;
 #include "Camera/CameraMode.h"
 #include "Camera/CameraConfig.h"
 #include "Camera/CameraProjection.h"
+#include "Scenes/SceneLightingSetup.h"
 #include "Scenes/SceneNames.h"
+#include "Render/Lighting/LightMoodSetting.h"
 
 #ifdef _EDITOR
 #include "../MuEditor/Core/MuEditorCore.h"
@@ -546,11 +548,17 @@ static void UpdateCoreSystems()
  * @brief Sets both the OpenGL clear color and the global fog color to the same RGB.
  *
  * Every world uses the fog color as its clear color, so this keeps them in sync
- * and avoids duplicating the two assignments at every call site.
+ * and avoids duplicating the two assignments at every call site. The map's
+ * light mood scales both (its background scale), so distant geometry does not
+ * fade into a background brighter than the scene.
  */
 static void SetClearAndFogColor(float r, float g, float b)
 {
     extern GLfloat FogColor[4];
+    const float background = Render::Lighting::LightMood::Active().background;
+    r *= background;
+    g *= background;
+    b *= background;
     mu::GetRenderer().SetClearColor(r, g, b, 1.f);
     FogColor[0] = r;
     FogColor[1] = g;
@@ -1179,6 +1187,7 @@ void MainScene(HDC hDC)
     try
     {
         Success = RenderCurrentScene(hDC);
+        Scenes::Lighting::SubmitDynamicLights();
 
         LogFrameTiming();
         {

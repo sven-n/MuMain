@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <vector>
 
 namespace Render::Renderer
 {
@@ -63,27 +64,19 @@ bool BitmapGpuResources::Initialize(SDL_GPUDevice* device)
     for (std::size_t i = 0; i < m_samplers.size(); ++i)
     {
         SDL_GPUSamplerCreateInfo info{};
-        const bool mipmapped = i >= kMipmappedSampler;
         const auto filter = (i / 2 == 0) ? SDL_GPU_FILTER_NEAREST : SDL_GPU_FILTER_LINEAR;
         const auto wrap = (i % 2 == 0) ? SDL_GPU_SAMPLERADDRESSMODE_REPEAT : SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
         info.min_filter = filter;
         info.mag_filter = filter;
-        info.mipmap_mode = mipmapped ? SDL_GPU_SAMPLERMIPMAPMODE_LINEAR : SDL_GPU_SAMPLERMIPMAPMODE_NEAREST;
+        info.mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_NEAREST;
         info.address_mode_u = wrap;
         info.address_mode_v = wrap;
         info.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
-        if (mipmapped)
-        {
-            // A zeroed max_lod stops sampling at the base level.
-            info.max_lod = kAllMipLevels;
-            info.enable_anisotropy = true;
-            info.max_anisotropy = kMipmappedAnisotropy;
-        }
         m_samplers[i] = m_calls.createSampler(device, &info);
         if (!m_samplers[i])
         {
             Fail("initialize: create bitmap sampler", true);
-            m_stage += mipmapped ? " mipmapped/" : (i < 2 ? " nearest/" : " linear/");
+            m_stage += (i < 2 ? " nearest/" : " linear/");
             m_stage += (i % 2 == 0 ? "repeat" : "clamp-to-edge");
             ReleaseHandles();
             m_device = nullptr;
@@ -92,20 +85,6 @@ bool BitmapGpuResources::Initialize(SDL_GPUDevice* device)
     }
     return true;
 }
-
-namespace
-{
-// The base level and every halving of the longer side down to 1 pixel.
-Uint32 MipLevelCount(int width, int height)
-{
-    Uint32 levels = 1;
-    for (int size = std::max(width, height); size > 1; size >>= 1)
-    {
-        ++levels;
-    }
-    return levels;
-}
-} // namespace
 
 bool BitmapGpuResources::Retire(Slot& slot)
 {
@@ -123,9 +102,41 @@ bool BitmapGpuResources::Retire(Slot& slot)
     return true;
 }
 
+namespace
+{
+// A band of rows of one mip level, staged in one slot.
+struct StagedPiece
+{
+    const std::uint8_t* pixels = nullptr;
+    std::uint32_t level = 0;
+    std::uint64_t width = 0;
+    std::uint64_t top = 0;
+    std::uint64_t rows = 0;
+    std::uint64_t rowBytes = 0;
+    std::uint64_t pitch = 0;
+    std::uint64_t offset = 0;
+};
+
+std::uint64_t AlignUp(std::uint64_t value, std::uint64_t alignment)
+{
+    return (value + alignment - 1) / alignment * alignment;
+}
+
+// The base level and every halving of the longer side down to 1 pixel.
+Uint32 MipLevelCount(int width, int height)
+{
+    Uint32 levels = 1;
+    for (int size = std::max(width, height); size > 1; size >>= 1)
+    {
+        ++levels;
+    }
+    return levels;
+}
+} // namespace
+
 BitmapGpuResources::Result BitmapGpuResources::Upload(std::span<const std::uint8_t> pixels, int width, int height,
                                                       SDL_GPUFilter filter, SDL_GPUSamplerAddressMode wrap,
-                                                      bool mipmapped)
+                                                      std::span<const Textures::MipLevel> mips, bool generateMips)
 {
     if (!OnOwnerThread())
     {
@@ -144,21 +155,51 @@ BitmapGpuResources::Result BitmapGpuResources::Upload(std::span<const std::uint8
         Fail("upload: invalid dimensions or sampler configuration", false);
         return Failure();
     }
-    const auto rowBytes = static_cast<std::uint64_t>(width) * kBytesPerPixel;
-    const auto pitch = (rowBytes + kRowAlignment - 1) / kRowAlignment * kRowAlignment;
-    const auto sourceBytes = rowBytes * static_cast<std::uint64_t>(height);
-    if (pixels.size() < sourceBytes)
+
+    // Each level in bands of rows that fit one slot: a whole level up to the unscaled limits.
+    std::vector<StagedPiece> pieces;
+    std::uint64_t levelWidth = static_cast<std::uint64_t>(width);
+    std::uint64_t levelHeight = static_cast<std::uint64_t>(height);
+    const auto addLevel = [&](std::span<const std::uint8_t> levelPixels, std::uint32_t level)
+    {
+        const std::uint64_t rowBytes = levelWidth * kBytesPerPixel;
+        const std::uint64_t pitch = AlignUp(rowBytes, kRowAlignment);
+        if (levelPixels.size() < rowBytes * levelHeight)
+        {
+            return false;
+        }
+        const std::uint64_t bandRows = kSlotCapacity / pitch;
+        for (std::uint64_t top = 0; top < levelHeight; top += bandRows)
+        {
+            pieces.push_back({levelPixels.data() + top * rowBytes, level, levelWidth, top,
+                              std::min(bandRows, levelHeight - top), rowBytes, pitch});
+        }
+        return true;
+    };
+    if (!addLevel(pixels, 0))
     {
         Fail("upload: insufficient pixels or staging capacity", false);
         return Failure();
     }
-    // A whole image up to the unscaled limits fits one slot; a larger one takes several bands.
-    const auto bandRows = static_cast<int>(kSlotCapacity / pitch);
+    for (std::uint32_t level = 1; level <= mips.size(); ++level)
+    {
+        const Textures::MipLevel& mip = mips[level - 1];
+        const bool belowSmallest = levelWidth == 1 && levelHeight == 1;
+        levelWidth = std::max<std::uint64_t>(1, levelWidth / 2);
+        levelHeight = std::max<std::uint64_t>(1, levelHeight / 2);
+        if (belowSmallest || mip.width != levelWidth || mip.height != levelHeight || !addLevel(mip.rgba, level))
+        {
+            Fail("upload: invalid mip chain", false);
+            return Failure();
+        }
+    }
+    const Uint32 levelCount = generateMips && mips.empty() ? MipLevelCount(width, height)
+                                                           : static_cast<Uint32>(mips.size() + 1);
 
     SDL_GPUTexture* texture = nullptr;
-    for (int top = 0; top < height; top += bandRows)
+    std::size_t next = 0;
+    while (next < pieces.size())
     {
-        const int rows = std::min(bandRows, height - top);
         auto& slot = m_slots[m_next];
         if (!Retire(slot))
         {
@@ -177,10 +218,11 @@ BitmapGpuResources::Result BitmapGpuResources::Upload(std::span<const std::uint8
             textureInfo.width = static_cast<Uint32>(width);
             textureInfo.height = static_cast<Uint32>(height);
             textureInfo.layer_count_or_depth = 1;
-            textureInfo.num_levels = mipmapped ? MipLevelCount(width, height) : 1;
-            // The GPU renders the lower levels of a mipmapped texture into it.
-            textureInfo.usage =
-                SDL_GPU_TEXTUREUSAGE_SAMPLER | (mipmapped ? SDL_GPU_TEXTUREUSAGE_COLOR_TARGET : SDL_GPUTextureUsageFlags{0});
+            textureInfo.num_levels = levelCount;
+            // The GPU renders the lower levels it builds into the texture.
+            textureInfo.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER |
+                                (generateMips && levelCount > 1 ? SDL_GPU_TEXTUREUSAGE_COLOR_TARGET
+                                                                : SDL_GPUTextureUsageFlags{0});
             texture = m_calls.createTexture(m_device, &textureInfo);
             if (!texture)
             {
@@ -196,12 +238,26 @@ BitmapGpuResources::Result BitmapGpuResources::Upload(std::span<const std::uint8
             m_calls.releaseTexture(m_device, texture);
             return Failure();
         }
+        // As many consecutive pieces as fit the slot; a single piece always does.
         auto* target = static_cast<std::uint8_t*>(mapped);
-        const std::uint8_t* band = pixels.data() + static_cast<std::size_t>(top) * rowBytes;
-        for (int row = 0; row < rows; ++row)
+        const std::size_t first = next;
+        std::uint64_t used = 0;
+        while (next < pieces.size())
         {
-            std::memcpy(target + static_cast<std::size_t>(row) * pitch,
-                        band + static_cast<std::size_t>(row) * rowBytes, static_cast<std::size_t>(rowBytes));
+            StagedPiece& piece = pieces[next];
+            const std::uint64_t offset = next == first ? 0 : AlignUp(used, kLevelAlignment);
+            if (offset + piece.pitch * piece.rows > kSlotCapacity)
+            {
+                break;
+            }
+            for (std::uint64_t row = 0; row < piece.rows; ++row)
+            {
+                std::memcpy(target + offset + row * piece.pitch, piece.pixels + row * piece.rowBytes,
+                            static_cast<std::size_t>(piece.rowBytes));
+            }
+            piece.offset = offset;
+            used = offset + piece.pitch * piece.rows;
+            ++next;
         }
         m_calls.unmap(m_device, slot.transfer);
 
@@ -220,20 +276,25 @@ BitmapGpuResources::Result BitmapGpuResources::Upload(std::span<const std::uint8
             m_calls.releaseTexture(m_device, texture);
             return Failure();
         }
-        SDL_GPUTextureTransferInfo source{};
-        source.transfer_buffer = slot.transfer;
-        source.offset = 0;
-        source.pixels_per_row = static_cast<Uint32>(pitch / kBytesPerPixel);
-        source.rows_per_layer = static_cast<Uint32>(rows);
-        SDL_GPUTextureRegion destination{};
-        destination.texture = texture;
-        destination.y = static_cast<Uint32>(top);
-        destination.w = static_cast<Uint32>(width);
-        destination.h = static_cast<Uint32>(rows);
-        destination.d = 1;
-        m_calls.upload(pass, &source, &destination, false);
+        for (std::size_t index = first; index < next; ++index)
+        {
+            const StagedPiece& piece = pieces[index];
+            SDL_GPUTextureTransferInfo source{};
+            source.transfer_buffer = slot.transfer;
+            source.offset = static_cast<Uint32>(piece.offset);
+            source.pixels_per_row = static_cast<Uint32>(piece.pitch / kBytesPerPixel);
+            source.rows_per_layer = static_cast<Uint32>(piece.rows);
+            SDL_GPUTextureRegion destination{};
+            destination.texture = texture;
+            destination.mip_level = piece.level;
+            destination.y = static_cast<Uint32>(piece.top);
+            destination.w = static_cast<Uint32>(piece.width);
+            destination.h = static_cast<Uint32>(piece.rows);
+            destination.d = 1;
+            m_calls.upload(pass, &source, &destination, false);
+        }
         m_calls.endCopy(pass);
-        if (mipmapped && top + rows == height)
+        if (generateMips && levelCount > 1 && next == pieces.size())
         {
             m_calls.generateMipmaps(command, texture);
         }
@@ -253,8 +314,7 @@ BitmapGpuResources::Result BitmapGpuResources::Upload(std::span<const std::uint8
     m_stage.clear();
     m_error.clear();
     const std::size_t samplerIndex =
-        (mipmapped ? kMipmappedSampler : (filter == SDL_GPU_FILTER_LINEAR ? 2u : 0u)) +
-        (wrap == SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE ? 1u : 0u);
+        (filter == SDL_GPU_FILTER_LINEAR ? 2u : 0u) + (wrap == SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE ? 1u : 0u);
     return {texture, m_samplers[samplerIndex], {}, {}};
 }
 

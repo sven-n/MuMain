@@ -7669,7 +7669,7 @@ void RenderWheelWeapon(OBJECT* o)
     ItemObjectAttribute(o);
     b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, false);
     vec3_t Light;
-    RequestTerrainLight(o->Position[0], o->Position[1], Light);
+    RequestModelTerrainLight(o->Position[0], o->Position[1], Light);
     VectorAdd(Light, o->Light, Light);
     RenderPartObject(o, Type, NULL, Light, Alpha, o->Owner->WeaponLevel, 0, 0, true, true, true);
     o->Type = (short)TempType;
@@ -7700,7 +7700,7 @@ void RenderFuryStrike(OBJECT* o)
         ItemObjectAttribute(o);
         o->Gravity = tempGravity;
 
-        RequestTerrainLight(o->Position[0], o->Position[1], Light);
+        RequestModelTerrainLight(o->Position[0], o->Position[1], Light);
         VectorAdd(Light, o->Light, Light);
         VectorCopy(o->Angle, Angle);
 
