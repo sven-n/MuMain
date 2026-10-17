@@ -849,6 +849,12 @@ SDL_GPUSampler* CGlobalBitmap::GetFilteredSampler(bool wrapRepeat)
 
 void CGlobalBitmap::ReleaseFilteredSamplers()
 {
+    // The static Bitmaps runs this again at exit, after the renderer and the logger are gone.
+    if (std::none_of(m_filteredSamplers.begin(), m_filteredSamplers.end(),
+                     [](const SDL_GPUSampler* sampler) { return sampler != nullptr; }))
+    {
+        return;
+    }
     SDL_GPUDevice* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
     for (SDL_GPUSampler*& sampler : m_filteredSamplers)
     {
