@@ -5298,7 +5298,8 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
                     ITEM* r = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT];
                     ITEM* l = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
 
-                    if ((r->Type >= ITEM_BOW && r->Type < ITEM_BOW + MAX_ITEM_INDEX) && (l->Type >= ITEM_BOW && l->Type < ITEM_BOW + MAX_ITEM_INDEX))
+                    if (GameLogic::Items::IsBowCrossbowOrAmmunition(r) &&
+                        GameLogic::Items::IsBowCrossbowOrAmmunition(l))
                     {
                         PlayBuffer(static_cast<ESound>(SOUND_ATTACK_MELEE_HIT1 + 5 + rand() % 4), o);
                     }
