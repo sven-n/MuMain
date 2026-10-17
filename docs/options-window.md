@@ -40,6 +40,23 @@ What was added on top of that:
   with the active layout up to the dock scale, shrinking only when needed to
   fit an existing control.
 
+## Layout
+
+The window has six tabs: Gameplay, Audio, Video, Graphics, UI and General.
+Each setting is a row with its name on the left and its control on the
+right, aligned in two columns.
+
+- **Legacy theme:** the window keeps the same size on every tab, so it does
+  not move when you switch tabs. A long setting name, for example in a
+  translation or with a larger font, wraps to a second line. On a screen too
+  short for the window, it shrinks to fit and the settings scroll below the
+  tab row. The small cross in the top-right corner closes it. The window can
+  be dragged by any part that is not a control.
+- **Modern theme:** a full-screen settings page with the tabs on the left.
+
+Rows with a hint (UI Scale, Anti-aliasing, Anisotropic filtering) show it
+while the pointer is over the row.
+
 ## What it stores in `config.ini`
 
 Settings are written next to the executable as `config.ini`. The options
