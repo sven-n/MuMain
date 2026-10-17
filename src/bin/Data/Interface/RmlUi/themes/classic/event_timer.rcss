@@ -1,0 +1,60 @@
+/* Classic (0.97) theme for the event time HUDs. 0.97 has only Blood Castle's (004bf2d0): no frame,
+   three lines centred at x 570 of its 640x480 frame, the kill count ("Monster: (k / n)") at y 345
+   and "Remain time" at 357 in the normal font, the time at 367 in the big font, orange (255, 150,
+   0), the time red under five minutes. Chaos Castle's and the Imperial Guardian's (no 0.97
+   counterpart) take the same look. The rest is legacy's (newui_Figure_blood, 124 x 81,
+   lines at y 13 / 38 / 50 of it). Reference px relative to the window's top-left, under .screen's
+   W/640 x H/480 stretch; the classic workspace puts the window's top at y 351 and its centre at
+   x 575 (workspace.rcss). */
+
+@spritesheet timer-back-sheet { src: "../../../newui_Figure_blood.tga"; timer-back: 0px 0px 124px 81px; }
+
+body { pointer-events: none; }
+
+.screen {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640px;
+	height: 480px;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+#panel { position: absolute; width: 124px; height: 81px; font-family: "token(font-body)"; }
+#back { position: absolute; left: 0; top: 0; width: 124px; height: 81px; decorator: image(timer-back); }
+
+.timer-text {
+	display: block;
+	position: absolute;
+	left: 0;
+	transform-origin: left top;
+	white-space: nowrap;
+	text-align: center;
+}
+#kills { top: 13px; }
+#time_left { top: 38px; }
+#time { top: 50px; font-weight: bold; }
+
+/* How pressing the line is: the original's own colours per state. */
+.timer-text.plain { color: #ffffff; }
+.timer-text.standby { color: rgb(10, 200, 10); }
+.timer-text.normal { color: rgb(255, 150, 0); }
+.timer-text.closing { color: rgb(255, 70, 0); }
+.timer-text.imminent { color: rgb(255, 32, 32); }
+.timer-text.expiring { color: rgb(255, 0, 0); }
+
+/* Each line's box, in the panel's reference px, counter-scaled with the line: the frame's width,
+   or the Imperial Guardian's 110 centred on it. */
+.timer-text { --box-width: 124px; width: calc(var(--box-width) * var(--root-scale)); }
+#panel.empire-guardian .timer-text { left: 7px; --box-width: 110px; }
+
+/* The HUD takes no pointer events where it is placed (base.rcss gives a placed panel them). */
+#panel.slot-placed { pointer-events: none; }
+
+/* 0.97: no frame, the lines 5 units left of the window's centre (x 570) at y 345, 357 and 367. */
+#back { display: none; }
+#panel .timer-text, #panel.empire-guardian .timer-text { left: -5px; --box-width: 124px; }
+#kills { top: -6px; }
+#time_left { top: 6px; }
+#time { top: 16px; }
