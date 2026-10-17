@@ -124,6 +124,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
         {
             o->Live = true;
             std::memset(o->Tails, 0, sizeof(o->Tails));
+            o->TailFrames = 0.f;
             o->Type = Type;
             o->TexType = o->Type;
             o->SubType = SubType;
@@ -2848,6 +2849,22 @@ bool SearchJoint(int Type, OBJECT* Target, int SubType)
     return false;
 }
 
+// Writes the newest tail, Tails[0], across the joint's position: Scale wide along the rotated x axis
+// and along the rotated `secondAxis` (1: y, 2: z).
+static void SetNewestTail(JOINT* o, float Matrix[3][4], int secondAxis)
+{
+    const float half = o->Scale * 0.5f;
+    vec3_t offsets[4] = {{-half, 0.f, 0.f}, {half, 0.f, 0.f}, {0.f, 0.f, 0.f}, {0.f, 0.f, 0.f}};
+    offsets[2][secondAxis] = -half;
+    offsets[3][secondAxis] = half;
+    for (int corner = 0; corner < 4; ++corner)
+    {
+        vec3_t p;
+        VectorRotate(offsets[corner], Matrix, p);
+        VectorAdd(o->Position, p, o->Tails[0][corner]);
+    }
+}
+
 void CreateTailAxis(JOINT* o, float Matrix[3][4], BYTE axis)
 {
     o->NumTails++;
@@ -2863,37 +2880,7 @@ void CreateTailAxis(JOINT* o, float Matrix[3][4], BYTE axis)
             VectorCopy(o->Tails[j][k], o->Tails[j + 1][k]);
     }
 
-    vec3_t Position, p;
-    if (axis == 0)
-    {
-        Vector(-o->Scale * 0.5f, 0.f, 0.f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][0]);
-        Vector(o->Scale * 0.5f, 0.f, 0.f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][1]);
-        Vector(0.f, 0.f, -o->Scale * 0.5f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][2]);
-        Vector(0.f, 0.f, o->Scale * 0.5f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][3]);
-    }
-    else
-    {
-        Vector(-o->Scale * 0.5f, 0.f, 0.f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][0]);
-        Vector(o->Scale * 0.5f, 0.f, 0.f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][1]);
-        Vector(0.f, -o->Scale * 0.5f, 0.f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][2]);
-        Vector(0.f, o->Scale * 0.5f, 0.f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][3]);
-    }
+    SetNewestTail(o, Matrix, axis == 0 ? 2 : 1);
 }
 
 void CreateTail(JOINT* o, float Matrix[3][4], bool Blur)
@@ -2946,23 +2933,7 @@ void CreateTail(JOINT* o, float Matrix[3][4], bool Blur)
             }
             else
             {
-                vec3_t Position, p;
-
-                Vector(-o->Scale * 0.5f, 0.f, 0.f, Position);
-                VectorRotate(Position, Matrix, p);
-                VectorAdd(o->Position, p, o->Tails[0][0]);
-
-                Vector(o->Scale * 0.5f, 0.f, 0.f, Position);
-                VectorRotate(Position, Matrix, p);
-                VectorAdd(o->Position, p, o->Tails[0][1]);
-
-                Vector(0.f, 0.f, -o->Scale * 0.5f, Position);
-                VectorRotate(Position, Matrix, p);
-                VectorAdd(o->Position, p, o->Tails[0][2]);
-
-                Vector(0.f, 0.f, o->Scale * 0.5f, Position);
-                VectorRotate(Position, Matrix, p);
-                VectorAdd(o->Position, p, o->Tails[0][3]);
+                SetNewestTail(o, Matrix, 2);
             }
         }
     }
@@ -2982,26 +2953,29 @@ void CreateTail(JOINT* o, float Matrix[3][4], bool Blur)
                 VectorCopy(o->Tails[j][k], o->Tails[j + 1][k]);
         }
 
-        vec3_t Position, p;
-
-        Vector(-o->Scale * 0.5f, 0.f, 0.f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][0]);
-
-        Vector(o->Scale * 0.5f, 0.f, 0.f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][1]);
-
-        Vector(0.f, 0.f, -o->Scale * 0.5f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][2]);
-
-        Vector(0.f, 0.f, o->Scale * 0.5f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][3]);
+        SetNewestTail(o, Matrix, 2);
     }
 }
 
+// Whether the joint being moved lays new tails this frame. Trails were authored with one tail per
+// 25 FPS reference frame; on the frames in between, the newest tail follows the joint instead.
+static bool s_layTails = true;
+
+static void FollowTail(JOINT* o, float Matrix[3][4], bool blur = false)
+{
+    if (s_layTails || o->NumTails == 0)
+        CreateTail(o, Matrix, blur);
+    else
+        SetNewestTail(o, Matrix, 2);
+}
+
+static void FollowTailAxis(JOINT* o, float Matrix[3][4], BYTE axis)
+{
+    if (s_layTails || o->NumTails == 0)
+        CreateTailAxis(o, Matrix, axis);
+    else
+        SetNewestTail(o, Matrix, axis == 0 ? 2 : 1);
+}
 
 /*void MoveShpere(vec3_t Position,vec3_t Angle)
 {
@@ -3032,6 +3006,11 @@ void MoveJoint(JOINT* o, int iIndex)
     float dy = o->Position[1] - o->TargetPosition[1];
 
     float Matrix[3][4];
+
+    o->TailFrames += FPS_ANIMATION_FACTOR;
+    s_layTails = o->TailFrames >= 1.f;
+    if (s_layTails)
+        o->TailFrames -= 1.f;
 
     if (!(o->Type == BITMAP_JOINT_FORCE && o->SubType == 0) && !(o->Type == BITMAP_JOINT_THUNDER && o->SubType == 15) && o->Type != BITMAP_LIGHT
         && o->Type != BITMAP_PIERCING && o->Type != BITMAP_FLARE_FORCE
@@ -4269,7 +4248,7 @@ void MoveJoint(JOINT* o, int iIndex)
         Distance = MoveHumming(o->Position, o->Angle, o->TargetPosition, 0.f);
         float Matrix[3][4];
         AngleMatrix(o->Angle, Matrix);
-        CreateTail(o, Matrix);
+        FollowTail(o, Matrix);
         if (Distance <= o->Velocity)
         {
             o->Live = false;
@@ -4434,7 +4413,7 @@ void MoveJoint(JOINT* o, int iIndex)
             AngleMatrix(o->Angle, Matrix);
             VectorRotate(o->Direction, Matrix, Position);
             VectorAdd(o->StartPosition, Position, o->Position);
-            CreateTail(o, Matrix);
+            FollowTail(o, Matrix);
 
             o->StartPosition[2] += (15.f) * FPS_ANIMATION_FACTOR;
         }
@@ -5876,7 +5855,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 {
                     o->Velocity = 0.f;
                     AngleMatrix(o->HeadAngle, Matrix);
-                    CreateTail(o, Matrix);
+                    FollowTail(o, Matrix);
                 }
                 else
                 {
@@ -6727,7 +6706,7 @@ void MoveJoint(JOINT* o, int iIndex)
             if (o->m_bCreateTails)
             {
                 AngleMatrix(o->Angle, Matrix);
-                CreateTail(o, Matrix);
+                FollowTail(o, Matrix);
             }
 
             o->Velocity += FPS_ANIMATION_FACTOR * 10.f;
@@ -6864,7 +6843,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 CreateParticleFpsChecked(BITMAP_ADV_SMOKE + 1, tPos, o->Angle, o->Light, 2, 3.f);
             }
 
-            CreateTailAxis(o, Matrix, 1);
+            FollowTailAxis(o, Matrix, 1);
 
             if (o->LifeTime < (o->Weapon / 2))
             {
@@ -6983,10 +6962,7 @@ void MoveJoint(JOINT* o, int iIndex)
 
     if (o->m_bCreateTails)
     {
-        if (o->Type == BITMAP_JOINT_ENERGY && o->SubType == 54)
-            CreateTail(o, Matrix, true);
-        else
-            CreateTail(o, Matrix);
+        FollowTail(o, Matrix, o->Type == BITMAP_JOINT_ENERGY && o->SubType == 54);
     }
 
     o->LifeTime -= FPS_ANIMATION_FACTOR;
