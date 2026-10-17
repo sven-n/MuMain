@@ -91,6 +91,12 @@ void ValidateSlot(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
         AddIssue(issues, ItemDataIssueSeverity::Warning, definition, "has a wing tier, but its slot is not \"wings\"",
                  "wingTier");
     }
+    if (definition.weaponKind != WeaponKind::None && definition.slot != ItemSlot::MainHand &&
+        definition.slot != ItemSlot::OffHand)
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
+                 "has a weapon kind, but its slot is not \"mainHand\" or \"offHand\"", "weaponKind");
+    }
 }
 } // namespace
 

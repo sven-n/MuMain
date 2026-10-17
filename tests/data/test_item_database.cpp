@@ -242,15 +242,20 @@ TEST_CASE("Item database answers tag, slot and rule questions [data][items]")
     wing.wingTier = WingTier::First;
     wing.tags.Set(ItemTag::Valuable);
     wing.tradable = false;
+    ItemDefinition shield = MakeItem(6, 0, "Small Shield");
+    shield.slot = ItemSlot::OffHand;
+    shield.weaponKind = WeaponKind::Shield;
 
     ItemDatabase database;
-    database.Build(std::vector<ItemDefinition>{wing});
+    database.Build(std::vector<ItemDefinition>{wing, shield});
     const int wingType = MakeItemType(12, 0);
 
     CHECK(database.HasTag(wingType, ItemTag::Valuable));
     CHECK_FALSE(database.HasTag(wingType, ItemTag::Jewel));
     CHECK(database.GetSlot(wingType) == ItemSlot::Wings);
     CHECK(database.GetWingTier(wingType) == WingTier::First);
+    CHECK(database.GetWeaponKind(wingType) == WeaponKind::None);
+    CHECK(database.GetWeaponKind(MakeItemType(6, 0)) == WeaponKind::Shield);
     CHECK_FALSE(database.IsAllowed(wingType, ItemAction::Trade));
     CHECK(database.IsAllowed(wingType, ItemAction::Drop));
 
@@ -259,6 +264,7 @@ TEST_CASE("Item database answers tag, slot and rule questions [data][items]")
     {
         CHECK_FALSE(database.HasTag(itemType, ItemTag::Valuable));
         CHECK(database.GetSlot(itemType) == ItemSlot::None);
+        CHECK(database.GetWeaponKind(itemType) == WeaponKind::None);
         CHECK_FALSE(database.IsAllowed(itemType, ItemAction::Trade));
         CHECK_FALSE(database.IsAllowed(itemType, ItemAction::Repair));
     }

@@ -52,7 +52,8 @@ The file name is only a convention; the group comes from the file content.
 - An item is identified by its group and `number` (0–511), the same as
   on the server.
 - **Fields with their default value are left out.** Missing fields get the
-  default: `0`/`false`, no slot (not equippable), no wing tier, no tags,
+  default: `0`/`false`, no slot (not equippable), no wing tier, no weapon
+  kind, no tags,
   and the rule flags at their defaults (see [Rules](#rules)).
 - Items are sorted by number and the fields always come in the same order,
   so saving unchanged data gives the same file.
@@ -79,6 +80,7 @@ read as the English name only; saving writes the object form.
 | `width`, `height` | Size in inventory slots |
 | `slot` | Equipment slot: `mainHand`, `offHand`, `helm`, `armor`, `pants`, `gloves`, `boots`, `wings`, `pet`, `pendant`, `ring`. Left out = not equippable |
 | `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, defense per level, damage increase, absorption) depend on it; excellent second and third tier wings get no extra durability, and the chaos mix knows a wing's tier from it |
+| `weaponKind` | Only for weapons and shields: `spear`, `bow`, `crossbow`, `shield`, as OpenMU's item groups 3, 4 and 6 (bows go in the left hand, crossbows in the right; arrows and bolts have none). Swords, axes, maces and staffs have none yet |
 | `twoHanded` | Weapon needs both hands |
 | `skill` | Skill the item gives |
 | `level` | Item level (the drop level); also used in price and damage calculations |
@@ -199,13 +201,14 @@ the field (**Copy text** copies it). All problems are also written to
 - a name that is not a text, e.g. `"pt": 5`
 - a language code that is empty or has other characters than letters,
   digits and `-` (e.g. `"p=t"`)
-- a `slot`, `wingTier` or tag name that does not exist
+- a `slot`, `wingTier`, `weaponKind` or tag name that does not exist
 
 **Warnings** are logged, and the game starts anyway:
 
 - unknown fields (they are ignored)
 - names longer than 49 characters (the game shows them cut)
 - a `wingTier` on an item whose slot is not `wings`
+- a `weaponKind` on an item whose slot is not `mainHand` or `offHand`
 - a `slot` written as a number, as files saved before tags existed have
   it; the number is read, and saving writes the name
 

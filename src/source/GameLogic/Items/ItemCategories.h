@@ -3,7 +3,7 @@
 typedef struct tagITEM ITEM;
 
 // Item categories. The ones in the first part come from the item data
-// (tags, slot and wing tier in Data/Items); see docs/item-data.md.
+// (tags, slot, wing tier and weapon kind in Data/Items); see docs/item-data.md.
 namespace GameLogic::Items
 {
     // Wings
@@ -86,6 +86,17 @@ namespace GameLogic::Items
     bool IsSummonerBook(const ITEM* pItem);
     bool IsSummonerBookType(int itemType);
     bool IsSummonerBookModel(int modelType);
+
+    // Weapons
+    bool IsBowType(int itemType);
+    bool IsBowModel(int modelType);
+    bool IsCrossbowType(int itemType);
+    bool IsCrossbowModel(int modelType);
+    bool IsSpearType(int itemType);
+    bool IsSpearModel(int modelType);
+    bool IsShield(const ITEM* pItem);
+    // A bow, a crossbow, arrows or bolts.
+    bool IsBowCrossbowOrAmmunition(const ITEM* pItem);
 
     // Item value
     bool IsHighValueItem(const ITEM* pItem);

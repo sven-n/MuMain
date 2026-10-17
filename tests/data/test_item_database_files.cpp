@@ -388,8 +388,8 @@ TEST_CASE("Exporting the items as bmd and importing them again gives the same da
     const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
     REQUIRE_FALSE(HasErrors(result.issues));
     CHECK(result.validationIssues.empty());
-    // Tags, wing tiers and rule flags are not in the bmd files; the items keep
-    // the ones they have, so the files below match.
+    // Tags, wing tiers, weapon kinds and rule flags are not in the bmd files;
+    // the items keep the ones they have, so the files below match.
     for (int group = 0; group < MAX_ITEM_TYPE; ++group)
     {
         INFO(GetItemGroupFileName(group));

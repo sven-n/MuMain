@@ -299,6 +299,50 @@ TEST_CASE("Item categories come from the item data [data][items][rules]")
     CHECK_FALSE(IsPetSlotModel(MODEL_ITEM + MAX_ITEM));
 }
 
+TEST_CASE("Weapon kinds come from the item data [data][items][rules]")
+{
+    ShippedItemsScope items;
+    const ITEM smallShield = MakeItem(ITEM_SHIELD);
+    const ITEM legendaryShieldJ = MakeItem(ITEM_SHIELD + 27);
+    const ITEM shortBow = MakeItem(ITEM_BOW);
+    const ITEM crossbow = MakeItem(ITEM_CROSSBOW);
+    const ITEM arrows = MakeItem(ITEM_ARROWS);
+    const ITEM bolt = MakeItem(ITEM_BOLT);
+    const ITEM kris = MakeItem(KrisType);
+
+    // Bows have the slot offHand, crossbows mainHand; arrows and bolts are neither.
+    CHECK(IsBowType(ITEM_BOW));
+    CHECK(IsBowType(ITEM_CELESTIAL_BOW));
+    CHECK(IsBowType(ITEM_BOW + 27)); // Silver Bow-J
+    CHECK_FALSE(IsBowType(ITEM_CROSSBOW));
+    CHECK_FALSE(IsBowType(ITEM_BOLT));
+    CHECK(IsCrossbowType(ITEM_CROSSBOW));
+    CHECK(IsCrossbowType(ITEM_DIVINE_CB_OF_ARCHANGEL));
+    CHECK_FALSE(IsCrossbowType(ITEM_BOW));
+    CHECK_FALSE(IsCrossbowType(ITEM_ARROWS));
+    CHECK(IsBowModel(MODEL_ITEM + ITEM_BOW));
+    CHECK(IsCrossbowModel(MODEL_ITEM + ITEM_CROSSBOW));
+
+    CHECK(IsSpearType(ITEM_SPEAR));
+    CHECK(IsSpearModel(MODEL_ITEM + ITEM_SPEAR));
+    CHECK_FALSE(IsSpearType(KrisType));
+
+    CHECK(IsShield(&smallShield));
+    CHECK(IsShield(&legendaryShieldJ));
+    CHECK_FALSE(IsShield(&kris));
+
+    CHECK(IsBowCrossbowOrAmmunition(&shortBow));
+    CHECK(IsBowCrossbowOrAmmunition(&crossbow));
+    CHECK(IsBowCrossbowOrAmmunition(&arrows));
+    CHECK(IsBowCrossbowOrAmmunition(&bolt));
+    CHECK_FALSE(IsBowCrossbowOrAmmunition(&kris));
+    CHECK_FALSE(IsBowCrossbowOrAmmunition(&smallShield));
+
+    // Model ids outside the item range are no weapons.
+    CHECK_FALSE(IsSpearModel(-1));
+    CHECK_FALSE(IsBowModel(MODEL_ITEM + MAX_ITEM));
+}
+
 TEST_CASE("The item types with a tag come lowest first [data][items][rules]")
 {
     ShippedItemsScope items;

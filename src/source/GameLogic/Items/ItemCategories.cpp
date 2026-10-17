@@ -4,14 +4,15 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 
-// The categories come from the item data (tags, slot and wing tier in
-// Data/Items/*.json); see docs/item-data.md. The lists that are only used for
+// The categories come from the item data (tags, slot, wing tier and weapon
+// kind in Data/Items/*.json); see docs/item-data.md. The lists that are only used for
 // drawing items and for tooltips are still hardcoded, in
 // ItemDisplayCategories.cpp.
 namespace
 {
 using Data::Items::ItemSlot;
 using Data::Items::ItemTag;
+using Data::Items::WeaponKind;
 using Data::Items::WingTier;
 
 bool HasTag(int itemType, ItemTag tag)
@@ -354,6 +355,47 @@ namespace GameLogic::Items
     bool IsSummonerBookModel(int modelType)
     {
         return HasTag(Data::Items::ToItemType(modelType), ItemTag::SummonerBook);
+    }
+
+    bool IsBowType(int itemType)
+    {
+        return g_ItemDatabase.GetWeaponKind(itemType) == WeaponKind::Bow;
+    }
+
+    bool IsBowModel(int modelType)
+    {
+        return IsBowType(Data::Items::ToItemType(modelType));
+    }
+
+    bool IsCrossbowType(int itemType)
+    {
+        return g_ItemDatabase.GetWeaponKind(itemType) == WeaponKind::Crossbow;
+    }
+
+    bool IsCrossbowModel(int modelType)
+    {
+        return IsCrossbowType(Data::Items::ToItemType(modelType));
+    }
+
+    bool IsSpearType(int itemType)
+    {
+        return g_ItemDatabase.GetWeaponKind(itemType) == WeaponKind::Spear;
+    }
+
+    bool IsSpearModel(int modelType)
+    {
+        return IsSpearType(Data::Items::ToItemType(modelType));
+    }
+
+    bool IsShield(const ITEM* pItem)
+    {
+        return g_ItemDatabase.GetWeaponKind(pItem->Type) == WeaponKind::Shield;
+    }
+
+    bool IsBowCrossbowOrAmmunition(const ITEM* pItem)
+    {
+        const WeaponKind kind = g_ItemDatabase.GetWeaponKind(pItem->Type);
+        return kind == WeaponKind::Bow || kind == WeaponKind::Crossbow || IsAmmunition(pItem);
     }
 
     bool IsHighValueItem(const ITEM* pItem)

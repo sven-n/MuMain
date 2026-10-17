@@ -46,6 +46,7 @@ template <typename TDefinition, typename TVisitor> void VisitStatFields(TDefinit
     visit("height", definition.height, BYTE{0});
     visit("slot", definition.slot, ItemSlot::None);
     visit("wingTier", definition.wingTier, WingTier::None);
+    visit("weaponKind", definition.weaponKind, WeaponKind::None);
     visit("twoHanded", definition.twoHanded, false);
     visit("skill", definition.skill, WORD{0});
     visit("level", definition.level, WORD{0});
