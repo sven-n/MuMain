@@ -20,3 +20,6 @@ RmlTheme=legacy
 UIScalePercent=100
 [Render]
 VSync=1
+Look=Classic
+Anisotropy=8
+Antialiasing=4

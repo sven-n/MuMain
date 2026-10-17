@@ -4,6 +4,7 @@
 #include "ItemJsonCommon.h"
 #include "ItemModelDisplayJson.h"
 #include "ItemModelGlowJson.h"
+#include "ItemModelMaterialJson.h"
 #include "ItemTextureFiles.h"
 
 #include <algorithm>
@@ -30,11 +31,18 @@ constexpr const char* ItemEffect = "itemEffect";
 } // namespace Keys
 
 // The fields of a model entry and of a shared model; others are warned about.
-const std::set<std::string, std::less<>> ItemModelKeys{
-    Keys::Number,           Keys::Model,           Keys::File,
-    Keys::TextureFolders,   Keys::NoneBlendMeshes, DisplayJson::InventoryKey,
-    DisplayJson::GroundKey, DisplayJson::ClothKey, GlowJson::GlowKey,
-    Keys::RenderStyle,      Keys::ItemEffect};
+const std::set<std::string, std::less<>> ItemModelKeys{Keys::Number,
+                                                       Keys::Model,
+                                                       Keys::File,
+                                                       Keys::TextureFolders,
+                                                       Keys::NoneBlendMeshes,
+                                                       DisplayJson::InventoryKey,
+                                                       DisplayJson::GroundKey,
+                                                       DisplayJson::ClothKey,
+                                                       GlowJson::GlowKey,
+                                                       MaterialJson::MaterialKey,
+                                                       Keys::RenderStyle,
+                                                       Keys::ItemEffect};
 const std::set<std::string, std::less<>> SharedModelKeys{Keys::Name, Keys::File, Keys::TextureFolders,
                                                          Keys::NoneBlendMeshes};
 
@@ -110,6 +118,7 @@ OrderedJson WriteModel(const ItemModelDefinition& model)
     }
     DisplayJson::Write(model, json);
     GlowJson::Write(model, json);
+    MaterialJson::Write(model, json);
     if (!model.renderStyle.empty())
     {
         json[Keys::RenderStyle] = model.renderStyle;
@@ -328,6 +337,7 @@ bool ItemModelReader::Read(const OrderedJson& json, ItemModelDefinition& model)
     { AddIssue(severity, field, message); };
     DisplayJson::Read(json, model, report);
     GlowJson::Read(json, model, report);
+    MaterialJson::Read(json, model, report);
     ReadLookName(json, Keys::RenderStyle, model.renderStyle);
     ReadLookName(json, Keys::ItemEffect, model.itemEffect);
     WarnAboutUnknownKeys(json, ItemModelKeys);

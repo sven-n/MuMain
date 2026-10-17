@@ -15,8 +15,11 @@
 #include "Network/Server/WSclient.h"
 #include "UI/Core/WindowSystem.h"
 #include "Scenes/MainScene.h"
+#include "Render/Renderer/MuRenderer.h"
 
 #include <algorithm>
+#include <array>
+#include <optional>
 
 namespace
 {
@@ -39,6 +42,14 @@ float UpdateAnimationFrame(float currentFrame, bool isVisible)
 
 OBJECT Sprites[MAX_SPRITES];
 
+namespace
+{
+// Sprites created inside a bloom exclusion - a character's gem sparkles, item
+// glows and eye lights - are drawn inside one, so post-processing leaves the
+// character's Classic look alone.
+std::array<bool, MAX_SPRITES> s_spriteBloomExcluded{};
+} // namespace
+
 int CreateSprite(int Type, vec3_t Position, float Scale, vec3_t Light, OBJECT* Owner, float Rotation, int SubType)
 {
     if (!g_pOption->GetRenderAllEffects())
@@ -55,6 +66,7 @@ int CreateSprite(int Type, vec3_t Position, float Scale, vec3_t Light, OBJECT* O
             o->Type = Type;
             o->SubType = SubType;
             o->Owner = Owner;
+            s_spriteBloomExcluded[i] = mu::GetRenderer().IsBloomExcluded();
             o->AnimationFrame = 1.f;
             o->Scale = Scale;
             o->Angle[2] = Rotation;
@@ -184,7 +196,14 @@ void RenderSprites(BYTE byRenderOneMore)
             {
                 EnableAlphaBlend2();
             }
-            RenderSprite(o, o->Owner);
+            {
+                std::optional<mu::ScopedBloomExclusion> exclusion;
+                if (s_spriteBloomExcluded[i])
+                {
+                    exclusion.emplace();
+                }
+                RenderSprite(o, o->Owner);
+            }
 
             if (byRenderOneMore == 0 || byRenderOneMore == 2)
             {

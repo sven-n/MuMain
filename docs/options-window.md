@@ -53,6 +53,9 @@ window writes to these sections:
   manual-edit-only, not exposed in the options window or written by it;
   forces a specific SDL_gpu GPU backend at startup, falling back to SDL's
   own auto-pick with a logged warning if the requested one is unavailable.
+  `Look` (default `Classic`): the "Enhanced graphics" checkbox on the Video
+  tab, ticked for the Enhanced look and unticked for Classic, applied at once;
+  see [`enhanced-look.md`](enhanced-look.md).
 - `[Audio]` - volumes.
 - `[Login]` - language, and the remembered-credential keys (`RememberMe`,
   `SavePassword`, `EncryptedUsername`, `EncryptedPassword`); see

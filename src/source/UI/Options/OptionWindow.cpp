@@ -7,6 +7,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Data/GameConfig/GameConfigConstants.h"
+#include "Render/Look/LookPresetSetting.h"
 #include "Audio/AudioPlayer.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlDraggable.h"
@@ -302,6 +303,8 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("disable_boids_label", &model.disableBoidsLabel);
     c.Bind("disable_wing_shadow", &model.disableWingShadow);
     c.Bind("disable_wing_shadow_label", &model.disableWingShadowLabel);
+    c.Bind("enhanced_graphics", &model.enhancedGraphics);
+    c.Bind("enhanced_graphics_label", &model.enhancedGraphicsLabel);
 
     // Interface/UI tab.
     c.Bind("show_fps_counter", &model.showFpsCounter);
@@ -375,6 +378,9 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleDisableBoids(); });
     c.BindEventCallback("option_toggle_disable_wing_shadow",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleDisableWingShadow(); });
+    c.BindEventCallback("option_toggle_enhanced_graphics",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { RmlToggleEnhancedGraphics(); });
 
     c.BindEventCallback("option_toggle_show_fps_counter",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleShowFpsCounter(); });
@@ -807,6 +813,14 @@ void mu::ui::window::COptionWindow::RmlToggleDisableWingShadow()
     GameConfig::GetInstance().Save();
 }
 
+// The look preset through the one function start-up and `$look classic|enhanced` use: it saves
+// [Render] Look, switches the Enhanced features and clears developer overrides.
+void mu::ui::window::COptionWindow::RmlToggleEnhancedGraphics()
+{
+    const bool enhanced = Render::Look::ActiveLookPreset() == LookPreset::Enhanced;
+    Render::Look::ApplyLookPreset(enhanced ? LookPreset::Classic : LookPreset::Enhanced);
+}
+
 void mu::ui::window::COptionWindow::RmlToggleShowFpsCounter()
 {
     // No member/persistence -- SetShowFpsCounter() also clears ShowDebugInfo internally
@@ -1189,6 +1203,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
               I18N::Game::DisableSkillEffectModels);
     syncLabel(model.disableBoidsLabel, "disable_boids_label", I18N::Game::DisableAmbientWildlife);
     syncLabel(model.disableWingShadowLabel, "disable_wing_shadow_label", I18N::Game::DisableWingShadow);
+    syncLabel(model.enhancedGraphicsLabel, "enhanced_graphics_label", I18N::Game::EnhancedGraphics);
     syncLabel(model.showFpsCounterLabel, "show_fps_counter_label", I18N::Game::ShowFPSCounter);
     syncLabel(model.showDebugInfoLabel, "show_debug_info_label", I18N::Game::ShowDebugInfo);
     syncLabel(model.themeRowLabel, "theme_row_label", I18N::Game::UITheme);
@@ -1274,6 +1289,13 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     // Read live, not from a member -- SetShowFpsCounter()/SetShowDebugInfo() (SceneManager.h) are
     // mutually exclusive, so this reflects either checkbox toggling the other one off immediately,
     // including when toggled via the $fpscounter/$details console commands instead of this window.
+    const bool enhancedGraphics = Render::Look::ActiveLookPreset() == LookPreset::Enhanced;
+    if (model.enhancedGraphics != enhancedGraphics)
+    {
+        model.enhancedGraphics = enhancedGraphics;
+        m_RmlView.MarkDirty("enhanced_graphics");
+    }
+
     const bool showFpsCounter = GetShowFpsCounter();
     const bool showDebugInfo = GetShowDebugInfo();
     if (model.showFpsCounter != showFpsCounter) { model.showFpsCounter = showFpsCounter; m_RmlView.MarkDirty("show_fps_counter"); }

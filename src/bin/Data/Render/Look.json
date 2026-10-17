@@ -1,0 +1,30 @@
+{
+  "formatVersion": 1,
+  "default": {
+    "lighting.diffuse.scale": 1.0,
+    "lighting.diffuse.ambient": 0.3,
+    "lighting.diffuse.floor": 0.15,
+    "lighting.highlightKnee": 0.8,
+    "lighting.rim.strength": 0.4,
+    "lighting.rim.power": 3,
+    "lighting.specular.scale": 1.0,
+    "lighting.specular.power": 32,
+    "dynamic.wrap": 0.3,
+    "dynamic.mapSmoothing": 0.5,
+    "dynamic.effectGain": 2.5,
+    "dynamic.effectRange": 3,
+    "dynamic.effectRangeMax": 8,
+    "dynamic.effectFade": 0.5,
+    "dynamic.effectCap": 2.5,
+    "bloom.strength": 1.0,
+    "bloom.levelFalloff": 0.6,
+    "grading.strength": 1
+  },
+  "maps": [
+    {
+      "world": 10,
+      "name": "Icarus",
+      "bloom.strength": 0.3
+    }
+  ]
+}

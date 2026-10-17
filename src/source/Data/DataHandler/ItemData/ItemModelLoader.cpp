@@ -132,6 +132,13 @@ void CheckModel(int itemType, const ItemModelDefinition& model, const LookNames&
     CheckLookName(model, model.itemEffect, lookNames.itemEffect, ItemModelProblemType::ItemEffectUnknown);
 }
 
+// The material values of the item's slot: every slot keeps its own, also one
+// that uses the data of a shared model.
+void ApplyMaterial(int itemType, const ItemModelDefinition& model)
+{
+    Models[ToModelSlot(itemType)].SpecularStrength = static_cast<float>(model.material.specular);
+}
+
 // Whether the file was opened.
 bool OpenModel(int itemType, const ItemModelDefinition& model, const LookNames& lookNames)
 {
@@ -146,6 +153,7 @@ bool OpenModel(int itemType, const ItemModelDefinition& model, const LookNames& 
         return false;
     }
     MarkNoneBlendMeshes(itemType, model);
+    ApplyMaterial(itemType, model);
     CheckModel(itemType, model, lookNames);
     return true;
 }
@@ -173,6 +181,7 @@ void OpenSharedModel(int itemType, const ItemModelDefinition& model, const LookN
         return;
     }
     gLoadData.ShareModel(ToModelSlot(itemType), ToModelSlot(opened->second));
+    ApplyMaterial(itemType, model);
     CheckModel(itemType, model, lookNames);
 }
 

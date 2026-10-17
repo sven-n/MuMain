@@ -237,7 +237,7 @@ void BodyLight(OBJECT* o, BMD* b)
     if (o->LightEnable)
     {
         vec3_t Light;
-        RequestTerrainLight(o->Position[0], o->Position[1], Light);
+        RequestModelTerrainLight(o->Position[0], o->Position[1], Light);
         VectorAdd(Light, o->Light, b->BodyLight);
     }
     else
@@ -5798,6 +5798,8 @@ void RenderZen(int itemIndex, ITEM_t* item, vec3_t light)
 // Render dropped items and fall animation and camera rotation for items on the ground
 void RenderItems()
 {
+    // Items on the ground keep their Classic look like equipped ones: no bloom from them.
+    const mu::ScopedBloomExclusion classicItems;
     for (int i = 0; i < MAX_ITEMS; i++)
     {
         OBJECT* o = &Items[i].Object;
@@ -5832,7 +5834,7 @@ void RenderItems()
                 b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, false);
 
                 vec3_t Light;
-                RequestTerrainLight(o->Position[0], o->Position[1], Light);
+                RequestModelTerrainLight(o->Position[0], o->Position[1], Light);
                 VectorAdd(Light, o->Light, Light);
                 if (o->Type == MODEL_ZEN) // Zen
                 {

@@ -24,8 +24,7 @@ struct BITMAP_t
     GLuint BitmapIndex;
     wchar_t FileName[MAX_BITMAP_FILE_NAME];
     // The size the game works with. For upscaled art (Render/Textures/UpscaleMarker.h)
-    // the uploaded texture is larger and Buffer is released after the upload. A bitmap
-    // drawn on through Buffer (BITMAP_FONT, BITMAP_GUILD) must therefore never be upscaled.
+    // the uploaded texture is larger.
     float Width;
     float Height;
     char Components;
@@ -33,6 +32,8 @@ struct BITMAP_t
     std::uint8_t Ref;
     bool IsSkin;
     bool IsHair;
+    // The pixels, released after the upload except for a canvas (LoadCanvasBitmap:
+    // BITMAP_GUILD, BITMAP_INTERFACE_MAP), which keeps them at the size above.
     BYTE* Buffer;
     std::vector<std::uint8_t> BufferStorage;
 
@@ -43,7 +44,18 @@ private:
 public:
 #pragma pack(pop)
     SDL_GPUTexture* sdlTexture = nullptr;
-    SDL_GPUSampler* sdlSampler = nullptr;
+    SDL_GPUSampler* sdlSampler = nullptr; // Borrowed from the renderer until device shutdown.
+    // The base level, counted as texture memory.
+    std::uint32_t UploadedBytes = 0;
+
+    // Enhanced texture filtering: a world texture (see IsWorldTexturePath) can
+    // get a mip chain; sdlSampler stays the Classic sampler either way.
+    bool worldTexture = false;
+    bool wrapRepeat = false;
+    std::uint8_t mipLevels = 1;
+    // Upscaled art: the uploaded texture is this times Width x Height, always
+    // mipmapped and sampled through the shared anisotropic samplers.
+    std::uint8_t scale = 1;
 };
 
 class CBitmapCache
@@ -76,7 +88,7 @@ class CBitmapCache
     type_cache_map		m_mapCacheEffect;
 
     QUICK_CACHE			m_QuickCache[NUMBER_OF_QUICK_CACHE];
-    BITMAP_t* m_pNullBitmap;
+    BITMAP_t* m_pNullBitmap = nullptr;
 
     CTimer2				m_ManageTimer;
 
@@ -100,12 +112,6 @@ public:
 
 class CGlobalBitmap
 {
-    enum
-    {
-        MAX_WIDTH = 1024,
-        MAX_HEIGHT = 1024,
-    };
-
     using BitmapPtr = std::unique_ptr<BITMAP_t>;
     using type_bitmap_map = std::map<GLuint, BitmapPtr>;
     using type_index_list = std::list<GLuint>;
@@ -120,6 +126,20 @@ class CGlobalBitmap
     std::uint32_t m_dwUsedTextureMemory;
 
     CBitmapCache	m_BitmapCache;
+
+    // Enhanced texture filtering. The requested
+    // state is applied between frames by UpdateTextureFiltering.
+    bool m_textureFilteringEnabled = false;
+    bool m_textureFilteringRequested = false;
+    bool m_textureFilteringSwitchPending = false;
+    int m_requestedAnisotropy = 8;
+    std::uint32_t m_anisotropy = 0;
+    bool m_anisotropyClampLogged = false;
+    // Shared Enhanced samplers: [0] clamp to edge, [1] repeat.
+    std::array<SDL_GPUSampler*, 2> m_filteredSamplers{};
+    std::vector<std::uint32_t> m_mipChainRequests;
+    double m_textureLoadSeconds = 0.0;
+    double m_mipChainSeconds = 0.0;
 #ifdef DEBUG_BITMAP_CACHE
     CTimer2				m_DebugOutputTimer;
 #endif // DEBUG_BITMAP_CACHE
@@ -131,7 +151,11 @@ public:
     virtual ~CGlobalBitmap();
 
     GLuint LoadImage(const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
-    bool LoadImage(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE, bool padToPowerOfTwo = true, bool premultiplyAlpha = false);
+    // keepPixels: the game draws on the texture through Buffer (a canvas), so Buffer stays
+    // at the original size, also for an upscaled file.
+    bool LoadImage(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST,
+                   GLuint uiWrapMode = GL_CLAMP_TO_EDGE, bool padToPowerOfTwo = true, bool premultiplyAlpha = false,
+                   bool keepPixels = false);
     // Like LoadImage(filename, ...), but never shares an existing by-filename match -- always
     // creates its own independent entry, even if the same file is already resident under a
     // numbered slot (e.g. BITMAP_LOG_IN+7). Needed by callers that cache the resolved GPU
@@ -167,6 +191,20 @@ public:
 
     void Manage();
 
+    // Enhanced texture filtering: mip chains and anisotropic sampling for world
+    // textures. SetTextureFiltering only records the request; the main loop
+    // applies it between frames through UpdateTextureFiltering, which also
+    // builds the mip chains that world draws asked for since the last frame.
+    void SetTextureFiltering(bool enabled, int anisotropy);
+    void UpdateTextureFiltering();
+    bool IsTextureFilteringEnabled() const
+    {
+        return m_textureFilteringEnabled;
+    }
+    // Logs how many textures are world (and how many of those have a mip
+    // chain) and screen-space, their GPU size, and the time spent loading.
+    void LogTextureFilteringSummary(const char* context) const;
+
     inline BITMAP_t& operator [] (GLuint uiBitmapIndex) { return *GetTexture(uiBitmapIndex); }
 
     // Drops the quick-cache entry for this index (including a cached "empty" one)
@@ -180,8 +218,18 @@ protected:
     GLuint GenerateTextureIndex();
     GLuint FindAvailableTextureIndex(GLuint uiSeed);
 
-    bool OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE, bool padToPowerOfTwo = true);
-    bool OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE, bool padToPowerOfTwo = true, bool premultiplyAlpha = false);
+    bool OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode,
+                       bool worldTexture, bool padToPowerOfTwo = true, bool keepPixels = false);
+    bool OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode,
+                 bool worldTexture, bool padToPowerOfTwo = true, bool premultiplyAlpha = false,
+                 bool keepPixels = false);
+    void RegisterFilteredSampler(const BITMAP_t& bitmap);
+    SDL_GPUSampler* GetFilteredSampler(bool wrapRepeat);
+    void ReleaseFilteredSamplers();
+    void ApplyTextureFilteringSwitch();
+    // The RGBA pixels of a loaded original texture, read from its file again.
+    bool ReadBitmapPixels(const BITMAP_t& bitmap, std::vector<std::uint8_t>& rgba);
+    bool BuildMipChain(GLuint uiBitmapIndex);
     void SplitFileName(IN const std::wstring& filepath, OUT std::wstring& filename, bool bIncludeExt);
     void SplitExt(IN const std::wstring& filepath, OUT std::wstring& ext, bool bIncludeDot);
     void ExchangeExt(IN const std::wstring& in_filepath, IN const std::wstring& ext, OUT std::wstring& out_filepath);

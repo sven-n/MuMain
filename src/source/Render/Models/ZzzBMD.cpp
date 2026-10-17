@@ -11,6 +11,7 @@
 #include <cassert>
 #include <climits>
 #include <map>
+#include <optional>
 #include <set>
 #include <tuple>
 #include <utility>
@@ -37,6 +38,7 @@
 #include "Render/Terrain/TerrainHeightGrid.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Scenes/MainScene.h"
+#include "Render/Lighting/LightMoodSetting.h"
 
 using mu::PackABGR;
 
@@ -360,6 +362,19 @@ extern float g_fSpecialHeight;
 extern int EditFlag;
 
 bool HighLight = true;
+
+// The light mood's highlight shoulder on a CPU-lit model colour; a knee of 1 (Classic) leaves it.
+static void RollOffModelLight(vec3_t light, float knee)
+{
+    if (knee >= 1.f)
+    {
+        return;
+    }
+    for (int i = 0; i < 3; ++i)
+    {
+        light[i] = Render::Lighting::LightMood::RollOffHighlight(light[i], knee);
+    }
+}
 float BoneScale = 1.f;
 
 void BMD::ClaimSkinStamp() const
@@ -421,6 +436,8 @@ void BMD::TransformCheap(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_
             Vector(0.f, -1.5f, 0.f, Position);
         }
 
+        // The light mood's sun scales the directional part of the model light.
+        Render::Lighting::LightMood::ScaleSunDirection(Render::Lighting::LightMood::Active(), Position);
         AngleMatrix(ShadowAngle, Matrix);
         VectorIRotate(Position, Matrix, m_LastLightPosition); // for RenderMesh's GPU-skinned in-shader lighting
     }
@@ -1384,6 +1401,8 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
 
     int finalRenderFlags = renderFlags;
     bool useBlendMeshColor = false;
+    // A chrome pass reflects light off the surface and is no bloom source; held until the mesh is drawn.
+    std::optional<mu::ScopedBloomExclusion> chromePass;
     if ((renderFlags & RENDER_COLOR) == RENDER_COLOR)
     {
         finalRenderFlags = RENDER_COLOR;
@@ -1430,6 +1449,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
         if (m->NoneBlendMesh)
             return;
 
+        chromePass.emplace();
         finalRenderFlags = RENDER_CHROME;
         if ((renderFlags & RENDER_CHROME4) == RENDER_CHROME4)
         {
@@ -1603,9 +1623,15 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
 
         if (usesCpuLighting)
         {
+            // Lit per vertex here, so the point lights the base light leaves out come back as a whole.
+            vec3_t light;
+            VectorCopy(BodyLight, light);
+            AddVertexLitDynamicLight(BodyOrigin[0], BodyOrigin[1], light);
+            const float knee = Render::Lighting::LightMood::Active().highlightKnee;
             for (int j = 0; j < m->NumNormals; ++j)
             {
-                VectorScale(BodyLight, IntensityTransform[meshIndex][j], LightTransform[meshIndex][j]);
+                VectorScale(light, IntensityTransform[meshIndex][j], LightTransform[meshIndex][j]);
+                RollOffModelLight(LightTransform[meshIndex][j], knee);
             }
         }
 
@@ -1718,6 +1744,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             .boneScale = m_LastBoneScale,
             .restPoseScale = m_LastSkinScale,
             .lightDirection = {m_LastLightPosition[0], m_LastLightPosition[1], m_LastLightPosition[2]},
+            .highlightKnee = Render::Lighting::LightMood::Active().highlightKnee,
             .textureCoordinateOffset = {blendMeshTextureCoordU, blendMeshTextureCoordV},
             .chromeWave = wave,
             .chromeWave2 = static_cast<int>(WorldTime) % 5000 * 0.00024f - 0.4f,
@@ -1726,6 +1753,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             .textureCoordinates = textureCoordinates,
             .translate = m_LastTranslate,
             .lightEnabled = usesCpuLighting,
+            .specularStrength = texture->IsSkin || texture->IsHair ? 0.0f : SpecularStrength,
         };
         auto& renderer = mu::GetRenderer();
         if (!waveTextureCoordinates &&
@@ -1888,14 +1916,18 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
     }
     else if (EnableLight)
     {
+        const float knee = Render::Lighting::LightMood::Active().highlightKnee;
         for (int j = 0; j < m->NumNormals; j++)
         {
             VectorScale(BodyLight, IntensityTransform[i][j], LightTransform[i][j]);
+            RollOffModelLight(LightTransform[i][j], knee);
         }
     }
 
     int Render = RenderFlag;
     bool useBlendMeshColor = false;
+    // A chrome pass reflects light off the surface and is no bloom source; held until the mesh is drawn.
+    std::optional<mu::ScopedBloomExclusion> chromePass;
     if ((RenderFlag & RENDER_COLOR) == RENDER_COLOR)
     {
         Render = RENDER_COLOR;
@@ -1933,6 +1965,7 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
         }
         if (m->NoneBlendMesh)
             return;
+        chromePass.emplace();
         Render = RENDER_CHROME;
         if ((RenderFlag & RENDER_CHROME4) == RENDER_CHROME4)
         {
@@ -2452,14 +2485,18 @@ void BMD::RenderMeshTranslate(int i, int RenderFlag, float Alpha, int BlendMesh,
     }
     else if (EnableLight)
     {
+        const float knee = Render::Lighting::LightMood::Active().highlightKnee;
         for (int j = 0; j < m->NumNormals; j++)
         {
             VectorScale(BodyLight, IntensityTransform[i][j], LightTransform[i][j]);
+            RollOffModelLight(LightTransform[i][j], knee);
         }
     }
 
     int Render = RenderFlag;
     bool useBlendMeshColor = false;
+    // A chrome pass reflects light off the surface and is no bloom source; held until the mesh is drawn.
+    std::optional<mu::ScopedBloomExclusion> chromePass;
     if ((RenderFlag & RENDER_COLOR) == RENDER_COLOR)
     {
         Render = RENDER_COLOR;
@@ -2483,6 +2520,7 @@ void BMD::RenderMeshTranslate(int i, int RenderFlag, float Alpha, int BlendMesh,
         }
         if (m->NoneBlendMesh)
             return;
+        chromePass.emplace();
         Render = RENDER_CHROME;
 
         float Wave2 = (int)WorldTime % 5000 * 0.00024f - 0.4f;

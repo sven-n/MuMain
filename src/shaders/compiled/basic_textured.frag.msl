@@ -8,7 +8,7 @@ struct FogUniforms
     uint fogEnabled;
     uint alphaDiscardEnabled;
     float alphaThreshold;
-    float pad0;
+    uint alphaToCoverage;
     float fogStart;
     float fogEnd;
     float4 fogColor;
@@ -29,27 +29,43 @@ struct main0_in
 fragment main0_out main0(main0_in in [[stage_in]], constant FogUniforms& _40 [[buffer(0)]], texture2d<float> tex [[texture(0)]], sampler s [[sampler(0)]])
 {
     main0_out out = {};
-    float4 _118 = tex.sample(s, in.input_uv);
-    float4 _121 = _118 * in.input_color;
-    if ((_40.alphaDiscardEnabled != 0u) && (_121.w <= _40.alphaThreshold))
+    float4 _153 = tex.sample(s, in.input_uv);
+    float4 _156 = _153 * in.input_color;
+    float4 _247;
+    if (_40.alphaToCoverage != 0u)
     {
-        discard_fragment();
-    }
-    float4 _178;
-    if (_40.fogEnabled != 0u)
-    {
-        float3 _145 = mix(_40.fogColor.xyz, _121.xyz, float3(in.input_fogFactor));
-        float4 _173 = _121;
-        _173.x = _145.x;
-        _173.y = _145.y;
-        _173.z = _145.z;
-        _178 = _173;
+        float _176 = _156.w * fast::clamp(((_156.w - _40.alphaThreshold) / fast::max(fwidth(_156.w), 9.9999997473787516355514526367188e-05)) + 0.5, 0.0, 1.0);
+        float4 _238 = _156;
+        _238.w = _176;
+        if (_176 <= 0.0)
+        {
+            discard_fragment();
+        }
+        _247 = _238;
     }
     else
     {
-        _178 = _121;
+        if ((_40.alphaDiscardEnabled != 0u) && (_156.w <= _40.alphaThreshold))
+        {
+            discard_fragment();
+        }
+        _247 = _156;
     }
-    out._entryPointOutput = _178;
+    float4 _248;
+    if (_40.fogEnabled != 0u)
+    {
+        float3 _208 = mix(_40.fogColor.xyz, _247.xyz, float3(in.input_fogFactor));
+        float4 _242 = _247;
+        _242.x = _208.x;
+        _242.y = _208.y;
+        _242.z = _208.z;
+        _248 = _242;
+    }
+    else
+    {
+        _248 = _247;
+    }
+    out._entryPointOutput = _248;
     return out;
 }
 

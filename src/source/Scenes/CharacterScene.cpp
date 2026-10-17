@@ -42,6 +42,8 @@
 #include "Camera/CameraMode.h"
 #include "Camera/FrustumRenderer.h"
 #endif
+#include "Scenes/SceneLightingSetup.h"
+#include "Scenes/ScenePostProcessing.h"
 
 // External declarations
 extern EGameScene SceneFlag;
@@ -309,6 +311,7 @@ static void SetupCharacterSceneViewport(int& outWidth, int& outHeight)
 
     mu::GetRenderer().SetClearColor(0.f, 0.f, 0.f, 1.f);
     BeginOpengl(viewport.x, viewport.y, outWidth, outHeight);
+    Scenes::Lighting::SubmitSceneLighting();
 
     // Build global frustum arrays for TestFrustrum/TestFrustrum2D
     // Must be called after BeginOpengl (needs GL matrices) in every scene that renders terrain/objects
@@ -369,7 +372,7 @@ static void RenderCharacterScene3D()
     RenderBlurs();
     RenderJoints();
     RenderEffects();
-    ThePetProcess().RenderPets();
+    Scenes::PostProcessing::RenderPetsWithoutBloom();
     RenderBoids();
     RenderObjects_AfterCharacter();
     CheckSprites();
@@ -412,16 +415,22 @@ static void RenderSelectedCharacterEffects()
 }
 
 /**
- * @brief Renders UI elements for character selection scene.
+ * @brief Renders the sprites, particles and damage points of the character selection scene.
  */
-static void RenderCharacterSceneUI()
+static void RenderCharacterSceneSprites()
 {
     BeginSprite();
     RenderSprites();
     RenderParticles();
     RenderPoints();
     EndSprite();
+}
 
+/**
+ * @brief Renders UI elements for character selection scene.
+ */
+static void RenderCharacterSceneUI()
+{
     BeginBitmap();
     RenderInfomation();
 
@@ -474,6 +483,8 @@ bool NewRenderCharacterScene(HDC hDC)
     }
 #endif
 
+    RenderCharacterSceneSprites();
+    Scenes::PostProcessing::EndSceneGeometry();
     RenderCharacterSceneUI();
 
     // Handle option window in login/character scenes (can't use full g_pNewUISystem update).

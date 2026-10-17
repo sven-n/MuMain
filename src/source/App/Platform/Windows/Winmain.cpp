@@ -31,6 +31,8 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "Render/Look/LookPresetSetting.h"
+#include "Render/Look/LookProfileSetting.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlRuntimeHooks.h"
 #include "Engine/Object/ZzzOpenData.h"
@@ -369,6 +371,36 @@ void MuSetVSyncPreference(bool enabled)
     GameConfig::GetInstance().Save();
     g_pendingVSyncPreference = enabled;
     g_hasPendingVSyncPreference = true;
+}
+
+void MuSetTextureFilteringEnabled(bool enabled)
+{
+    Bitmaps.SetTextureFiltering(enabled, GameConfig::GetInstance().GetAnisotropy());
+}
+
+// Whether the active look renders with multisampling (Enhanced does, Classic does not).
+static bool g_antialiasingActive = false;
+
+void MuSetAntialiasingActive(bool active)
+{
+    g_antialiasingActive = active;
+    // The renderer rebuilds its pipelines and targets at the next BeginFrame, if the count changed.
+    mu::GetRenderer().SetAntialiasingSamples(active ? GameConfig::GetInstance().GetAntialiasing() : 0);
+}
+
+void MuSetAntialiasingPreference(int samples)
+{
+    GameConfig& config = GameConfig::GetInstance();
+    config.SetAntialiasing(samples);
+    config.Save();
+    if (!g_antialiasingActive)
+    {
+        mu::log::Get("render")->info("Anti-aliasing: {} saved for the Enhanced look; Classic renders without",
+                                     config.GetAntialiasing() > 1 ? std::to_string(config.GetAntialiasing()) + "x"
+                                                                  : std::string("off"));
+        return;
+    }
+    mu::GetRenderer().SetAntialiasingSamples(config.GetAntialiasing());
 }
 
 void MuReapplyVSyncPreference()
@@ -1570,6 +1602,8 @@ MSG MainLoop()
 
                 RequestDiagnosticFrameCapture();
                 ApplyPendingVSyncPreference();
+                // Between frames: a texture replaced mid-frame would drop the frame's draws.
+                Bitmaps.UpdateTextureFiltering();
                 RenderProfiledFrame();
 #ifdef _EDITOR
                 // The editor's own windows, now that the game's frame went to the GPU.
@@ -2128,6 +2162,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     const std::string selectedFontFamily = WideToUtf8(GameConfig::GetInstance().GetFontSelection());
     const std::string renderBackend = WideToUtf8(GameConfig::GetInstance().GetRenderBackend());
     const FontSizes initialFontSizes = CalculateFontSizes();
+    // Before Init, so the pipelines are built once, with the sample count of the configured look.
+    MuSetAntialiasingActive(Render::Look::PresetFeatures(GameConfig::GetInstance().GetLook()).antialiasing);
     if (!mu::InitSDLGpuRenderer(g_sdlWindow, selectedFontFamily, renderBackend,
                                 static_cast<float>(initialFontSizes.normal),
                                 static_cast<float>(initialFontSizes.big),
@@ -2139,6 +2175,11 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
                    MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }
+
+    // Before the first texture loads, so Enhanced filtering builds mip chains at load.
+    Bitmaps.SetTextureFiltering(Render::Look::PresetFeatures(GameConfig::GetInstance().GetLook()).textureFiltering,
+                                GameConfig::GetInstance().GetAnisotropy());
+    Bitmaps.UpdateTextureFiltering();
 
 #ifdef _WIN32
     // Bridge SDL's native handles so the remaining Win32 code (IME, DirectSound,
@@ -2262,6 +2303,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     InitVSync();
     ApplyVSyncPreferenceNow(GameConfig::GetInstance().GetVSyncEnabled());
+    Render::Look::LoadProfile();
+    Render::Look::ApplyLookPreset(GameConfig::GetInstance().GetLook());
 
     // Apply persisted DXP-23 effect-cost toggles (Options window's Graphics tab, formerly only
     // reachable via the console-only $effects ... diagnostics) at launch, same as VSync above.

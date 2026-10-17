@@ -6662,6 +6662,9 @@ void RenderItem3DWithHover(float sx, float sy, float Width, float Height, int Ty
 static void RenderItem3DAt(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags,
                            int ancientDiscriminator, bool PickUp, bool hovered)
 {
+    // Item previews are screen-space: keep Classic texture sampling.
+    const mu::ScopedScreenSpaceSampling screenSpaceSampling;
+
     const bool Success = UI::Items::ShouldAnimatePreview(hovered, g_pPickedItem != nullptr, PickUp);
 
     const Render::Items::Display::Anchor anchor = Render::Items::Display::GetInventoryAnchor(Type, Level);
@@ -7227,6 +7230,12 @@ void CreateCastleMark(int Type, BYTE* buffer, bool blend)
     Width = (int)b->Width;
     Height = (int)b->Height;
     BYTE* Buffer = b->Buffer;
+    if (!Buffer || Width == 0 || Height == 0)
+    {
+        mu::log::Get("gameplay")
+            ->error("[CreateCastleMark] bitmap {} not loaded (BitmapIndex={})", Type, b->BitmapIndex);
+        return;
+    }
 
     int alpha = 128;
     if (blend)
