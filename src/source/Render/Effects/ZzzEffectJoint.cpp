@@ -7101,20 +7101,6 @@ void RenderJoints(BYTE bRenderOneMore)
                     continue;
                 }
 
-                vec3_t midCur, midNext;
-                midCur[0] = (currentTail[0][0] + currentTail[1][0]) * 0.5f;
-                midCur[1] = (currentTail[0][1] + currentTail[1][1]) * 0.5f;
-                midCur[2] = (currentTail[0][2] + currentTail[1][2]) * 0.5f;
-                midNext[0] = (nextTail[0][0] + nextTail[1][0]) * 0.5f;
-                midNext[1] = (nextTail[0][1] + nextTail[1][1]) * 0.5f;
-                midNext[2] = (nextTail[0][2] + nextTail[1][2]) * 0.5f;
-
-                float distSq = GetTailDistanceSq(midCur, midNext);
-                if (distSq > 60.f * 60.f)
-                {
-                    continue;
-                }
-
                 float Light1, Light2;
                 if (o->bTileMapping)
                 {
