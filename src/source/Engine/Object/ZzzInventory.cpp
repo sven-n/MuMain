@@ -1161,7 +1161,8 @@ WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
 {
     WORD maxDurability = p->Durability;
 
-    if (ip->Type >= ITEM_STAFF && ip->Type < ITEM_STAFF + MAX_ITEM_INDEX)
+    // Staffs, sticks and books have a durability of their own for magic.
+    if (p->MagicDur > 0)
     {
         maxDurability = p->MagicDur;
     }
@@ -1217,13 +1218,8 @@ WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
     {
         maxDurability += 20;
     }
-    else if (ip->ExcellentFlags > 0 &&
-        (ip->Type<ITEM_WINGS_OF_SPIRITS || ip->Type>ITEM_WINGS_OF_DARKNESS) &&
-        !GameLogic::Items::IsDivineArchangelWeapon(ip)
-        && ip->Type != ITEM_CAPE_OF_LORD
-        && (ip->Type<ITEM_WING_OF_STORM || ip->Type>ITEM_CAPE_OF_EMPEROR)
-        && (ip->Type<ITEM_WINGS_OF_DESPAIR || ip->Type>ITEM_WING_OF_DIMENSION)
-        && !(ip->Type >= ITEM_CAPE_OF_FIGHTER && ip->Type <= ITEM_CAPE_OF_OVERRULE))
+    else if (ip->ExcellentFlags > 0 && !GameLogic::Items::IsSecondOrThirdTierWing(ip) &&
+             !GameLogic::Items::IsDivineArchangelWeapon(ip))
     {
         maxDurability += 15;
     }

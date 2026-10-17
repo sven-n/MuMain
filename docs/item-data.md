@@ -78,11 +78,11 @@ read as the English name only; saving writes the object form.
 | `tags` | Categories the game code asks for, e.g. `["mount", "flying"]`; see [Tags](#tags) |
 | `width`, `height` | Size in inventory slots |
 | `slot` | Equipment slot: `mainHand`, `offHand`, `helm`, `armor`, `pants`, `gloves`, `boots`, `wings`, `pet`, `pendant`, `ring`. Left out = not equippable |
-| `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, damage increase, absorption) depend on it |
+| `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, defense per level, damage increase, absorption) depend on it; excellent second and third tier wings get no extra durability, and the chaos mix knows a wing's tier from it |
 | `twoHanded` | Weapon needs both hands |
 | `skill` | Skill the item gives |
 | `level` | Item level (the drop level); also used in price and damage calculations |
-| `durability`, `magicDurability` | Durability at item level 0 |
+| `durability`, `magicDurability` | Durability at item level 0; an item with `magicDurability` (staffs, sticks, books) uses it as its maximum durability instead |
 | `damageMin`, `damageMax`, `attackSpeed`, `walkSpeed`, `magicPower` | Weapon values |
 | `defense`, `magicDefense`, `blockRate` | Armor and shield values |
 | `attackType` | Attack type used by the client |
@@ -101,7 +101,7 @@ can have several tags; the file lists them in the order below.
 
 | Tag | Meaning |
 |---|---|
-| `cape` | A cape (Cape of Lord, Cape of Fighter, …); second tier capes have their own wing formulas |
+| `cape` | A cape (Cape of Lord, Cape of Fighter, …); second tier capes have their own wing formulas, and their defense set option counts |
 | `mount` | Can be ridden (Uniria, Dinorant, Dark Horse, Fenrir) |
 | `hornMount` | A mount summoned by a horn (Uniria, Dinorant, Fenrir) |
 | `flying` | A mount that can fly (Dinorant, Dark Horse, Fenrir), needed for Icarus; see [Flight equipment](#flight-equipment) |
@@ -111,7 +111,7 @@ can have several tags; the file lists them in the order below.
 | `jewel` | Jewels of Bless, Soul, Life, Chaos, Creation and Guardian |
 | `refineStone` | Lower and Higher Refine Stone |
 | `socketSeed`, `socketSphere`, `socketSeedSphere` | Socket system items |
-| `healingPotion`, `manaPotion`, `complexPotion` | Potions the hotkeys look for |
+| `healingPotion`, `manaPotion`, `complexPotion` | Potions the hotkeys look for; a skill without enough mana takes a mana potion and the MU Helper a healing potion, the one with the highest group and number first (the largest potion) |
 | `elitePotion`, `elixir`, `buffScroll`, `battleOrStrengthScroll` | Cash shop potions and scrolls |
 | `ammunition` | Arrows and bolts |
 | `bloodCastleTicketPart` | Scroll of Archangel and Blood Bone |

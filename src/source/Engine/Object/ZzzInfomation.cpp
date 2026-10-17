@@ -664,8 +664,7 @@ void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
 
     int perLevelUpToNine = GameLogic::Items::LevelBonusPerLevelUpToNine;
     int firstStepAboveNine = GameLogic::Items::FirstLevelBonusStepAboveNine;
-    if (GameLogic::Items::IsSecondTierWingExceptCape(ip) || ip->Type == ITEM_CAPE_OF_LORD ||
-        ip->Type == ITEM_CAPE_OF_FIGHTER)
+    if (GameLogic::Items::IsSecondTierWing(ip))
     {
         perLevelUpToNine = SecondTierWingDefensePerLevel;
     }
@@ -1015,51 +1014,6 @@ void CalcExcellentOptions(ITEM* ip)
         ip->SpecialValue[ip->SpecialNum] = 10;
         ip->Special[ip->SpecialNum] = AT_IMPROVE_ATTACK_SPEED; ip->SpecialNum++;
     }
-}
-
-void CalcPartType(ITEM* ip)
-{
-    //part
-    if (ip->Type >= ITEM_BOW && ip->Type < ITEM_CROSSBOW || ip->Type == ITEM_CELESTIAL_BOW)
-        ip->Part = EQUIPMENT_WEAPON_LEFT;
-    if (GameLogic::Items::IsSummonerBook(ip))
-        ip->Part = EQUIPMENT_WEAPON_LEFT;
-    else if (ip->Type >= ITEM_SWORD && ip->Type < ITEM_STAFF + MAX_ITEM_INDEX)
-        ip->Part = EQUIPMENT_WEAPON_RIGHT;
-    else if (ip->Type >= ITEM_SHIELD && ip->Type < ITEM_SHIELD + MAX_ITEM_INDEX)
-        ip->Part = EQUIPMENT_WEAPON_LEFT;
-    else if (ip->Type >= ITEM_HELM && ip->Type < ITEM_HELM + MAX_ITEM_INDEX)
-        ip->Part = EQUIPMENT_HELM;
-    else if (ip->Type >= ITEM_ARMOR && ip->Type < ITEM_ARMOR + MAX_ITEM_INDEX)
-        ip->Part = EQUIPMENT_ARMOR;
-    else if (ip->Type >= ITEM_PANTS && ip->Type < ITEM_PANTS + MAX_ITEM_INDEX)
-        ip->Part = EQUIPMENT_PANTS;
-    else if (ip->Type >= ITEM_GLOVES && ip->Type < ITEM_GLOVES + MAX_ITEM_INDEX)
-        ip->Part = EQUIPMENT_GLOVES;
-    else if (ip->Type >= ITEM_BOOTS && ip->Type < ITEM_BOOTS + MAX_ITEM_INDEX)
-        ip->Part = EQUIPMENT_BOOTS;
-    else if (ip->Type >= ITEM_WING && ip->Type < ITEM_ORB_OF_TWISTING_SLASH)
-        ip->Part = EQUIPMENT_WING;
-    else if (ip->Type >= ITEM_WING_OF_STORM && ip->Type <= ITEM_WING_OF_DIMENSION)
-        ip->Part = EQUIPMENT_WING;
-    else if (ip->Type == ITEM_DARK_RAVEN_ITEM)
-        ip->Part = EQUIPMENT_WEAPON_LEFT;
-    else if (ip->Type >= ITEM_HELPER && ip->Type < ITEM_RING_OF_ICE)
-        ip->Part = EQUIPMENT_HELPER;
-    else if ((ip->Type >= ITEM_RING_OF_ICE && ip->Type < ITEM_PENDANT_OF_LIGHTING) || (ip->Type == ITEM_WIZARDS_RING && ip->Level == 0)
-        || (ip->Type == ITEM_WIZARDS_RING && ip->Level == 3)
-    )
-        ip->Part = EQUIPMENT_RING_RIGHT;
-    else if (ip->Type >= ITEM_RING_OF_FIRE && ip->Type <= ITEM_RING_OF_MAGIC)
-        ip->Part = EQUIPMENT_RING_RIGHT;
-    else if (ip->Type >= ITEM_PENDANT_OF_ICE && ip->Type <= ITEM_PENDANT_OF_ABILITY)
-        ip->Part = EQUIPMENT_AMULET;
-    else if (ip->Type >= ITEM_PENDANT_OF_LIGHTING && ip->Type < ITEM_HELPER + MAX_ITEM_INDEX)
-        ip->Part = EQUIPMENT_AMULET;
-    else if (ip->Type >= ITEM_CAPE_OF_FIGHTER && ip->Type <= ITEM_CAPE_OF_OVERRULE)
-        ip->Part = EQUIPMENT_WING;
-    else
-        ip->Part = -1;
 }
 
 void SetItemAttributes(ITEM* ip)
@@ -1413,8 +1367,6 @@ void SetItemAttributes(ITEM* ip)
     }
 
     CalcExcellentOptions(ip);
-
-    CalcPartType(ip);
 }
 
 int64_t ItemValue(ITEM* ip, int goldType)
@@ -3331,7 +3283,7 @@ void CHARACTER_MACHINE::CalculateDefense()
     }
 
     PlusSpecial(&Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE, &Equipment[EQUIPMENT_HELPER]);
-    if (Equipment[EQUIPMENT_WING].Type == ITEM_CAPE_OF_LORD || Equipment[EQUIPMENT_WING].Type == ITEM_CAPE_OF_FIGHTER)
+    if (GameLogic::Items::IsSecondTierCape(&Equipment[EQUIPMENT_WING]))
     {
         PlusSpecial(&Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE, &Equipment[EQUIPMENT_WING]);
     }

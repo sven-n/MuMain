@@ -3,6 +3,7 @@
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemType.h"
 
+#include <array>
 #include <cstdint>
 #include <span>
 #include <string>
@@ -80,6 +81,15 @@ public:
         return IsValidItemType(itemType) ? m_ruleData[itemType].wingTier : WingTier::None;
     }
 
+    // The item types with the tag, lowest first. Built again whenever the
+    // items change, so the span is valid until then.
+    std::span<const int> GetItemTypesWithTag(ItemTag tag) const
+    {
+        const auto tagIndex = static_cast<size_t>(tag);
+        return tagIndex < m_itemTypesByTag.size() ? std::span<const int>(m_itemTypesByTag[tagIndex])
+                                                  : std::span<const int>();
+    }
+
     // All MAX_ITEM slots, indexed by item type, including empty ones.
     std::span<const ItemDefinition> GetAllSlots() const
     {
@@ -128,9 +138,13 @@ private:
     void Store(int itemType, ItemDefinition definition);
     void UpdateDisplayName(ItemDefinition& definition) const;
     void CountExistingItems();
+    // Fills m_itemTypesByTag from the rule data; after every change of the items.
+    void BuildItemTypesByTag();
 
     std::vector<ItemDefinition> m_definitions;
     std::vector<RuleData> m_ruleData;
+    // GetItemTypesWithTag's lists, one per tag.
+    std::array<std::vector<int>, static_cast<size_t>(ItemTag::Count)> m_itemTypesByTag;
     std::string m_displayLocale{LocalizedString::NeutralLocale};
     int m_existingItemCount = 0;
     int m_version = 0;

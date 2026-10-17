@@ -173,7 +173,6 @@ typedef struct tagITEM
     WORD  Jewel_Of_Harmony_OptionLevel;
     bool HasSkill;
     bool HasLuck;
-    BYTE  Part;
     BYTE  Class;
     bool  TwoHand;
     WORD  DamageMin;

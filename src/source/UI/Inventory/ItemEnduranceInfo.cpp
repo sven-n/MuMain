@@ -34,14 +34,12 @@ using namespace mu::ui::window;
 
 namespace
 {
-// The equipped helper that has an HP frame (guardian angel, imp, horns, dark horse, pets).
+// The equipped helper that has an HP frame: every pet slot item (guardian angel, imp,
+// horns, dark horse, pets) but the gamble items, which only use the slot in the shop.
 bool HasHelperLifeFrame()
 {
-    return Hero->Helper.Type >= MODEL_HELPER && Hero->Helper.Type <= MODEL_DARK_HORSE_ITEM ||
-           GameLogic::Items::IsDemonOrSpiritOfGuardianModel(Hero->Helper.Type) ||
-           Hero->Helper.Type == MODEL_PET_RUDOLF || Hero->Helper.Type == MODEL_PET_PANDA ||
-           Hero->Helper.Type == MODEL_PET_UNICORN || Hero->Helper.Type == MODEL_PET_SKELETON ||
-           Hero->Helper.Type == MODEL_HORN_OF_FENRIR;
+    return GameLogic::Items::IsPetSlotModel(Hero->Helper.Type) &&
+           !GameLogic::Items::IsGambleItemModel(Hero->Helper.Type);
 }
 
 // The HP frame's name of the equipped helper (HasHelperLifeFrame()).
@@ -111,6 +109,13 @@ void HelperLifeFrameName(wchar_t (&szText)[N])
     case MODEL_PET_SKELETON:
     {
         wcsncpy_s(szText, ItemAttribute[ITEM_PET_SKELETON].Name, _TRUNCATE);
+    }
+    break;
+    default:
+    {
+        // A pet slot item without a case of its own, such as one added in the item editor:
+        // HasHelperLifeFrame() made sure the model is an item's.
+        wcsncpy_s(szText, ItemAttribute[Data::Items::ToItemType(Hero->Helper.Type)].Name, _TRUNCATE);
     }
     break;
     }
@@ -423,6 +428,36 @@ void mu::ui::window::CItemEnduranceInfo::SyncLeftColumn()
 
     SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::pets, "pets", std::move(pets));
 }
+
+const char* mu::ui::window::CItemEnduranceInfo::DurabilityIconImage(int imageIndex)
+{
+    switch (imageIndex)
+    {
+    case IMAGE_ITEM_DUR_BOOTS:
+        return "boots";
+    case IMAGE_ITEM_DUR_CAP:
+        return "cap";
+    case IMAGE_ITEM_DUR_GLOVES:
+        return "gloves";
+    case IMAGE_ITEM_DUR_LOWER:
+        return "lower";
+    case IMAGE_ITEM_DUR_NECKLACE:
+        return "necklace";
+    case IMAGE_ITEM_DUR_RING:
+        return "ring";
+    case IMAGE_ITEM_DUR_SHIELD:
+        return "shield";
+    case IMAGE_ITEM_DUR_UPPER:
+        return "upper";
+    case IMAGE_ITEM_DUR_WEAPON:
+        return "weapon";
+    case IMAGE_ITEM_DUR_WING:
+        return "wing";
+    default:
+        return "";
+    }
+}
+
 // The original's RenderItemEndurance(): every worn item at most half durable, in slot order, two
 // per column leftwards from the theme's column (the original's (W - 25, 140) on the dock), 25 apart; the rings share one
 // icon, each tinting its half (right ring the left half). None while the trade window is open.
@@ -445,14 +480,13 @@ void mu::ui::window::CItemEnduranceInfo::SyncIcons()
                 continue;
             if (i == EQUIPMENT_HELPER || pItem->Type == -1)
                 continue;
-            if (i == EQUIPMENT_WEAPON_RIGHT && pItem->Type == ITEM_ARROWS)
+            // Arrows (right hand) and bolts (left hand) have no durability icon.
+            if (GameLogic::Items::IsAmmunition(pItem))
                 continue;
             if (i == EQUIPMENT_WEAPON_LEFT)
             {
                 if (gCharacterManager.GetEquipedBowType(pItem) == BOWTYPE_BOW)
                     iImageIndex = m_iItemDurImageIndex[EQUIPMENT_WEAPON_RIGHT];
-                if (pItem->Type == ITEM_BOLT)
-                    continue;
             }
 
             int iLevel = pItem->Level;
@@ -470,41 +504,7 @@ void mu::ui::window::CItemEnduranceInfo::SyncIcons()
             icon.band = DurabilityBand(pItem->Durability, iMaxDurability);
             if (i != EQUIPMENT_RING_LEFT || bRenderRingWarning != true)
             {
-                switch (iImageIndex)
-                {
-                case IMAGE_ITEM_DUR_BOOTS:
-                    icon.image = "boots";
-                    break;
-                case IMAGE_ITEM_DUR_CAP:
-                    icon.image = "cap";
-                    break;
-                case IMAGE_ITEM_DUR_GLOVES:
-                    icon.image = "gloves";
-                    break;
-                case IMAGE_ITEM_DUR_LOWER:
-                    icon.image = "lower";
-                    break;
-                case IMAGE_ITEM_DUR_NECKLACE:
-                    icon.image = "necklace";
-                    break;
-                case IMAGE_ITEM_DUR_RING:
-                    icon.image = "ring";
-                    break;
-                case IMAGE_ITEM_DUR_SHIELD:
-                    icon.image = "shield";
-                    break;
-                case IMAGE_ITEM_DUR_UPPER:
-                    icon.image = "upper";
-                    break;
-                case IMAGE_ITEM_DUR_WEAPON:
-                    icon.image = "weapon";
-                    break;
-                case IMAGE_ITEM_DUR_WING:
-                    icon.image = "wing";
-                    break;
-                default:
-                    break;
-                }
+                icon.image = DurabilityIconImage(iImageIndex);
             }
 
             // Both rings warning at once share one icon, each tinting its own half of it.

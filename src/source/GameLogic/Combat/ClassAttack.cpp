@@ -656,7 +656,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                 break;
             case AT_SKILL_POWER_SLASH:
             case AT_SKILL_POWER_SLASH_STR:
-                if (c->Helper.Type<MODEL_HORN_OF_UNIRIA || c->Helper.Type>MODEL_DARK_HORSE_ITEM && c->Helper.Type != MODEL_HORN_OF_FENRIR)
+                if (!GameLogic::Items::IsRideableMountModel(c->Helper.Type))
                 {
                     o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 

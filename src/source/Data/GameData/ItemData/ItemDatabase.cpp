@@ -41,6 +41,7 @@ void ItemDatabase::Build(std::span<const ItemDefinition> definitions)
         }
     }
     CountExistingItems();
+    BuildItemTypesByTag();
 }
 
 void ItemDatabase::SetDisplayLocale(std::string_view locale)
@@ -90,6 +91,7 @@ void ItemDatabase::Set(const ItemDefinition& definition)
     // and typed again in the editor keeps its values.
     Store(MakeItemType(definition.group, definition.number), definition);
     CountExistingItems();
+    BuildItemTypesByTag();
 }
 
 void ItemDatabase::Swap(int firstItemType, int secondItemType)
@@ -103,6 +105,26 @@ void ItemDatabase::Swap(int firstItemType, int secondItemType)
     ItemDefinition second = m_definitions[secondItemType];
     Store(firstItemType, std::move(second));
     Store(secondItemType, std::move(first));
+    BuildItemTypesByTag();
+}
+
+void ItemDatabase::BuildItemTypesByTag()
+{
+    for (std::vector<int>& itemTypes : m_itemTypesByTag)
+    {
+        itemTypes.clear();
+    }
+    for (int itemType = 0; itemType < static_cast<int>(m_ruleData.size()); ++itemType)
+    {
+        const ItemTagSet& tags = m_ruleData[itemType].tags;
+        for (size_t tagIndex = 0; tagIndex < m_itemTypesByTag.size(); ++tagIndex)
+        {
+            if (tags.Has(static_cast<ItemTag>(tagIndex)))
+            {
+                m_itemTypesByTag[tagIndex].push_back(itemType);
+            }
+        }
+    }
 }
 
 void ItemDatabase::UpdateDisplayName(ItemDefinition& definition) const

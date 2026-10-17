@@ -14,6 +14,7 @@
 #include "World/MapInfra/MapManager.h"
 
 #include <filesystem>
+#include <vector>
 
 extern CHARACTER* Hero;
 
@@ -260,7 +261,27 @@ TEST_CASE("Item categories come from the item data [data][items][rules]")
     CHECK_FALSE(IsWingItem(&kris));
     CHECK(IsSecondTierWingExceptCape(&wingsOfSpirits));
     CHECK_FALSE(IsSecondTierWingExceptCape(&capeOfLord));
+    const ITEM wingOfStorm = MakeItem(ITEM_WING_OF_STORM);
+    const ITEM capeOfEmperor = MakeItem(ITEM_CAPE_OF_EMPEROR);
+    const ITEM smallCapeOfLord = MakeItem(ITEM_SMALL_CAPE_OF_LORD);
+    CHECK(IsSecondOrThirdTierWing(&wingsOfSpirits));
+    CHECK(IsSecondOrThirdTierWing(&capeOfLord));
+    CHECK(IsSecondOrThirdTierWing(&wingOfStorm));
+    CHECK_FALSE(IsSecondOrThirdTierWing(&wingsOfElf));
+    CHECK_FALSE(IsSecondOrThirdTierWing(&smallCapeOfLord));
+    CHECK(IsSecondTierWing(&wingsOfSpirits));
+    CHECK(IsSecondTierWing(&capeOfLord));
+    CHECK_FALSE(IsSecondTierWing(&wingOfStorm));
+    CHECK_FALSE(IsSecondTierWing(&wingsOfElf));
+    CHECK_FALSE(IsSecondTierWing(&smallCapeOfLord));
+    CHECK(IsSecondTierCape(&capeOfLord));
+    CHECK_FALSE(IsSecondTierCape(&wingsOfSpirits));
+    CHECK_FALSE(IsSecondTierCape(&capeOfEmperor));
+    CHECK_FALSE(IsSecondTierCape(&smallCapeOfLord));
 
+    CHECK(IsPetSlotModel(MODEL_ITEM + ITEM_HELPER));
+    CHECK(IsPetSlotModel(MODEL_ITEM + ITEM_HORN_OF_FENRIR));
+    CHECK_FALSE(IsPetSlotModel(MODEL_ITEM + KrisType));
     CHECK(IsRideableMount(&uniria));
     CHECK(IsHornMountModel(MODEL_ITEM + ITEM_HORN_OF_UNIRIA));
     CHECK_FALSE(IsHornMountModel(MODEL_ITEM + ITEM_DARK_HORSE_ITEM));
@@ -274,6 +295,18 @@ TEST_CASE("Item categories come from the item data [data][items][rules]")
     // Model ids outside the item range are no items.
     CHECK_FALSE(IsRideableMountModel(-1));
     CHECK_FALSE(IsRideableMountModel(MODEL_ITEM + MAX_ITEM));
+    CHECK_FALSE(IsPetSlotModel(-1));
+    CHECK_FALSE(IsPetSlotModel(MODEL_ITEM + MAX_ITEM));
+}
+
+TEST_CASE("The item types with a tag come lowest first [data][items][rules]")
+{
+    ShippedItemsScope items;
+
+    const auto manaPotions = g_ItemDatabase.GetItemTypesWithTag(ItemTag::ManaPotion);
+    CHECK(std::vector<int>(manaPotions.begin(), manaPotions.end()) ==
+          std::vector<int>{ITEM_SMALL_MANA_POTION, ITEM_MEDIUM_MANA_POTION, ITEM_LARGE_MANA_POTION});
+    CHECK(g_ItemDatabase.GetItemTypesWithTag(ItemTag::Ammunition).size() == 2);
 }
 
 TEST_CASE("Wings, the Dinorant, the Dark Horse and the Fenrir are flight equipment [data][items][rules]")
