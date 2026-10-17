@@ -84,6 +84,9 @@ namespace CfgKeys
     // User-chosen FPS cap when VSync is off; -1 = uncapped. Same promotion story as the toggles
     // above, this time for the console-only `$fps <N>` diagnostic.
     inline constexpr wchar_t CfgKeyFpsCap[] = L"FpsCap";
+    // Active texture pack, a folder in Data/TexturePacks; empty = the original textures. Read once
+    // at startup -- see Render::Textures::TexturePack.
+    inline constexpr wchar_t CfgKeyTexturePack[] = L"TexturePack";
 }
 
 namespace CfgDefaults
@@ -154,6 +157,7 @@ namespace CfgDefaults
     inline constexpr bool CfgDefaultDisableWingShadow = false;
     inline constexpr bool CfgDefaultDisableBodyShadows = false;
     inline constexpr int CfgDefaultFpsCap = -1;  // Uncapped
+    inline constexpr wchar_t CfgDefaultTexturePack[] = L""; // The original textures
 
     // "default" = this app's own platform-aware pick (prefers Vulkan on Windows to avoid
     // D3D12's vsync-cap bug; SDL's own auto-pick elsewhere). Other accepted values:
