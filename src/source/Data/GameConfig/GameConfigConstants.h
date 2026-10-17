@@ -54,9 +54,9 @@ namespace CfgKeys
     // Render
     inline constexpr wchar_t CfgKeySortParticleDraws[] = L"SortParticleDraws";
     inline constexpr wchar_t CfgKeyVSync[] = L"VSync";
-    // The look preset, the player's only look setting: Classic or Enhanced (texture
-    // filtering, Enhanced lighting, dynamic model lights, the light mood at full
-    // strength and post-processing). A missing or invalid value is the default.
+    // The look preset: Classic or Enhanced (texture filtering, Enhanced lighting,
+    // dynamic model lights, the light mood at full strength and post-processing).
+    // A missing or invalid value is the default.
     inline constexpr wchar_t CfgKeyLook[] = L"Look";
     // Anisotropic filtering of every texture with mip levels: world textures in the Enhanced
     // look, upscaled textures in both looks. 1 is off.
