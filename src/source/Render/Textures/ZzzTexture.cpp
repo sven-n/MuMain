@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include "ZzzTexture.h"
+#include "TextureFailure.h"
 
 #include "Network/Server/WSclient.h"
 #include "turbojpeg.h"
@@ -314,18 +315,21 @@ void PopUpErrorCheckMsgBox(const wchar_t* szErrorMsg, bool bForceDestroy)
 
 void PopUpErrorCheckMsgBox(const std::string& title, const std::string& message, bool canContinue)
 {
-    using Core::Platform::ErrorDialog::Choice;
-    if (Core::Platform::ErrorDialog::Show(title, message, canContinue) == Choice::Continue)
-    {
-        return;
-    }
-
-    if (SocketClient != nullptr)
-    {
-        SocketClient->Close();
-    }
-
-    DestroySound();
-    DestroyWindow();
-    ExitProcess(0);
+    const Render::Textures::TextureErrorActions actions{
+        [](const std::string& dialogTitle, const std::string& dialogMessage, bool forceDestroy)
+        {
+            using Core::Platform::ErrorDialog::Choice;
+            return Core::Platform::ErrorDialog::Show(dialogTitle, dialogMessage, !forceDestroy) == Choice::Continue;
+        },
+        []()
+        {
+            if (SocketClient != nullptr)
+            {
+                SocketClient->Close();
+            }
+        },
+        []() { DestroySound(); },
+        []() { DestroyWindow(); },
+    };
+    Render::Textures::DispatchTextureError(title, message, !canContinue, actions);
 }
