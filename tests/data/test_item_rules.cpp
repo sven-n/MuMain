@@ -279,6 +279,9 @@ TEST_CASE("Item categories come from the item data [data][items][rules]")
     CHECK_FALSE(IsSecondTierCape(&capeOfEmperor));
     CHECK_FALSE(IsSecondTierCape(&smallCapeOfLord));
 
+    CHECK(IsPetSlotModel(MODEL_ITEM + ITEM_HELPER));
+    CHECK(IsPetSlotModel(MODEL_ITEM + ITEM_HORN_OF_FENRIR));
+    CHECK_FALSE(IsPetSlotModel(MODEL_ITEM + KrisType));
     CHECK(IsRideableMount(&uniria));
     CHECK(IsHornMountModel(MODEL_ITEM + ITEM_HORN_OF_UNIRIA));
     CHECK_FALSE(IsHornMountModel(MODEL_ITEM + ITEM_DARK_HORSE_ITEM));
@@ -292,6 +295,8 @@ TEST_CASE("Item categories come from the item data [data][items][rules]")
     // Model ids outside the item range are no items.
     CHECK_FALSE(IsRideableMountModel(-1));
     CHECK_FALSE(IsRideableMountModel(MODEL_ITEM + MAX_ITEM));
+    CHECK_FALSE(IsPetSlotModel(-1));
+    CHECK_FALSE(IsPetSlotModel(MODEL_ITEM + MAX_ITEM));
 }
 
 TEST_CASE("The item types with a tag come lowest first [data][items][rules]")

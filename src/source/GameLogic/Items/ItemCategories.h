@@ -18,6 +18,8 @@ namespace GameLogic::Items
     bool IsSmallWing(const ITEM* pItem);
 
     // Mounts and pets
+    // The model of an item that goes into the pet slot (helpers, mounts, pets).
+    bool IsPetSlotModel(int modelType);
     bool IsRideableMount(const ITEM* pItem);
     bool IsRideableMountModel(int modelType);
     bool IsHornMountModel(int modelType);

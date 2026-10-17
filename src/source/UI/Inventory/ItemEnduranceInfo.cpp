@@ -11,7 +11,6 @@
 
 #include "Character/CharacterManager.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
-#include "Data/GameData/ItemData/ItemDatabase.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -39,9 +38,8 @@ namespace
 // horns, dark horse, pets) but the gamble items, which only use the slot in the shop.
 bool HasHelperLifeFrame()
 {
-    const int helperType = Data::Items::ToItemType(Hero->Helper.Type);
-    return g_ItemDatabase.GetSlot(helperType) == Data::Items::ItemSlot::Pet &&
-           !g_ItemDatabase.HasTag(helperType, Data::Items::ItemTag::GambleItem);
+    return GameLogic::Items::IsPetSlotModel(Hero->Helper.Type) &&
+           !GameLogic::Items::IsGambleItemModel(Hero->Helper.Type);
 }
 
 // The HP frame's name of the equipped helper (HasHelperLifeFrame()).
@@ -111,6 +109,13 @@ void HelperLifeFrameName(wchar_t (&szText)[N])
     case MODEL_PET_SKELETON:
     {
         wcsncpy_s(szText, ItemAttribute[ITEM_PET_SKELETON].Name, _TRUNCATE);
+    }
+    break;
+    default:
+    {
+        // A pet slot item without a case of its own, such as one added in the item editor:
+        // HasHelperLifeFrame() made sure the model is an item's.
+        wcsncpy_s(szText, ItemAttribute[Data::Items::ToItemType(Hero->Helper.Type)].Name, _TRUNCATE);
     }
     break;
     }

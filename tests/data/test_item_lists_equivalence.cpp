@@ -73,9 +73,8 @@ TEST_CASE("3b: the helper lists match the mount, pet and gamble data [data][item
         CAPTURE(model);
         CHECK(OldPowerSlashNotRiding(model) == !GameLogic::Items::IsRideableMountModel(model));
 
-        const int helperType = ToItemType(model);
-        CHECK(OldHasHelperLifeFrame(model) == (g_ItemDatabase.GetSlot(helperType) == ItemSlot::Pet &&
-                                               !g_ItemDatabase.HasTag(helperType, ItemTag::GambleItem)));
+        CHECK(OldHasHelperLifeFrame(model) ==
+              (GameLogic::Items::IsPetSlotModel(model) && !GameLogic::Items::IsGambleItemModel(model)));
 
         for (const bool safeZone : {false, true})
         {

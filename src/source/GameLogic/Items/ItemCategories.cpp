@@ -72,6 +72,11 @@ namespace GameLogic::Items
         return HasWingTier(pItem, WingTier::Small);
     }
 
+    bool IsPetSlotModel(int modelType)
+    {
+        return g_ItemDatabase.GetSlot(Data::Items::ToItemType(modelType)) == ItemSlot::Pet;
+    }
+
     bool IsRideableMount(const ITEM* pItem)
     {
         return HasTag(pItem, ItemTag::Mount);
