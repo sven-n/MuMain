@@ -182,10 +182,12 @@ namespace mu::ui::window
             int activeTab = 0;
             Rml::String tabGameplayLabel;
             Rml::String tabAudioLabel;
-            Rml::String tabVideoLabel;
+            Rml::String tabDisplayLabel;
             Rml::String tabGraphicsLabel;
-            Rml::String tabUiLabel;
-            Rml::String tabGeneralLabel;
+            Rml::String tabInterfaceLabel;
+            Rml::String sectionQualityLabel;
+            Rml::String sectionEffectsLabel;
+            Rml::String sectionShadowsLabel;
 
             // Which custom dropdown (.option-dropdown) is currently open, -1 = none. A single
             // field rather than one bool per dropdown gives exclusivity for free -- opening one

@@ -18,7 +18,7 @@ Enhanced preset" below).
 
 ## Choosing the look
 
-- **Options window**: the "Enhanced graphics" checkbox on the Video tab. Ticked
+- **Options window**: the "Enhanced graphics" checkbox on the Graphics tab. Ticked
   is Enhanced, unticked Classic; it applies at once and is saved.
 - **Chat box**: `$look enhanced` and `$look classic`, in every build; saved too.
 - **`config.ini`**, section `[Render]`:

@@ -276,10 +276,12 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("active_tab", &model.activeTab);
     c.Bind("tab_gameplay_label", &model.tabGameplayLabel);
     c.Bind("tab_audio_label", &model.tabAudioLabel);
-    c.Bind("tab_video_label", &model.tabVideoLabel);
+    c.Bind("tab_display_label", &model.tabDisplayLabel);
     c.Bind("tab_graphics_label", &model.tabGraphicsLabel);
-    c.Bind("tab_ui_label", &model.tabUiLabel);
-    c.Bind("tab_general_label", &model.tabGeneralLabel);
+    c.Bind("tab_interface_label", &model.tabInterfaceLabel);
+    c.Bind("section_quality_label", &model.sectionQualityLabel);
+    c.Bind("section_effects_label", &model.sectionEffectsLabel);
+    c.Bind("section_shadows_label", &model.sectionShadowsLabel);
 
     c.Bind("open_dropdown", &model.openDropdown);
 
@@ -628,7 +630,7 @@ void mu::ui::window::COptionWindow::ClosingProcess()
 
 void mu::ui::window::COptionWindow::RmlClickSelectTab(int nTab)
 {
-    if (nTab < 0 || nTab > 5)
+    if (nTab < 0 || nTab > 4)
         return;
     m_iActiveTab = nTab;
     PlayBuffer(SOUND_CLICK01);
@@ -1296,10 +1298,12 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     syncLabel(model.closeLabel, "close_label", I18N::Game::Close);
     syncLabel(model.tabGameplayLabel, "tab_gameplay_label", I18N::Game::Gameplay);
     syncLabel(model.tabAudioLabel, "tab_audio_label", I18N::Game::Audio);
-    syncLabel(model.tabVideoLabel, "tab_video_label", I18N::Game::Video);
+    syncLabel(model.tabDisplayLabel, "tab_display_label", I18N::Game::Display);
     syncLabel(model.tabGraphicsLabel, "tab_graphics_label", I18N::Game::Graphics);
-    syncLabel(model.tabUiLabel, "tab_ui_label", I18N::Game::UI);
-    syncLabel(model.tabGeneralLabel, "tab_general_label", I18N::Game::General);
+    syncLabel(model.tabInterfaceLabel, "tab_interface_label", I18N::Game::Interface);
+    syncLabel(model.sectionQualityLabel, "section_quality_label", I18N::Game::Quality);
+    syncLabel(model.sectionEffectsLabel, "section_effects_label", I18N::Game::Effects);
+    syncLabel(model.sectionShadowsLabel, "section_shadows_label", I18N::Game::Shadows);
     syncLabel(model.autoAttackLabel, "auto_attack_label", I18N::Game::AutomaticAttack);
     syncLabel(model.whisperSoundLabel, "whisper_sound_label", I18N::Game::BeepSoundForWhispering);
     syncLabel(model.slideHelpLabel, "slide_help_label", I18N::Game::SlideHelp);

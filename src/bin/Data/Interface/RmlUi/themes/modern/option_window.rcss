@@ -114,6 +114,7 @@
 	position: relative;
 	flex: 1 1 0;
 	padding: 22dp 28dp;
+	overflow-y: auto;
 	background-color: rgba(22, 26, 32, 140);
 	backdrop-filter: blur(12dp);
 	decorator: linear-gradient(to bottom, rgba(255, 255, 255, 20), rgba(255, 255, 255, 0) 30%);
@@ -123,6 +124,15 @@
 	box-shadow:
 		inset 0 1dp 0 rgba(255, 255, 255, 30),
 		0 12dp 32dp rgba(0, 0, 0, 140);
+}
+
+/* A heading over a group of rows. */
+.opt-section {
+	margin: 18dp 0 4dp;
+	font-size: 12dp;
+	font-weight: bold;
+	letter-spacing: 2dp;
+	color: token(text-secondary);
 }
 
 /* .hidden ties with this rule's display at equal specificity, so it is restated. */
@@ -408,7 +418,7 @@
 .opt-row-tipped:hover .opt-row-tip {
 	display: block;
 }
-.opt-row-tipped .option-dropdown-list {
+.option-opens-up .option-dropdown-list {
 	top: auto;
 	bottom: 100%;
 	margin-top: 0;
@@ -482,10 +492,6 @@
 	.opt-control { width: 44%; }
 	.opt-toggle-row .opt-control { width: auto; }
 	.opt-label { white-space: normal; line-height: 14dp; }
-}
-/* Smaller still, the page scrolls rather than run under the footer. */
-@media (max-height: 380dp) {
-	.opt-pane { overflow-y: auto; }
 }
 
 /* A setting another one already covers (OptionWindow.h's OptionRmlModel): shown ticked, dimmed, and

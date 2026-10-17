@@ -6,7 +6,7 @@
    (RmlTheme.cpp), which is always "Data/Interface/RmlUi/themes/<theme>/<name>.rml" regardless of
    which path the RML's own bytes were actually read from.
 
-   The panel is wider than the shell's 230dp msgbox art: six tabs, a label column that can hold a
+   The panel is wider than the shell's 230dp msgbox art: five tabs, a label column that can hold a
    translated setting name, and a control column wide enough for a resolution or a language. Its
    height is one fixed size for every tab, so switching tabs never moves the window; it fits the
    tallest tab (Video) with room for labels that wrap to a second line, and is capped to the
@@ -68,7 +68,7 @@
 	height: 22dp;
 	decorator: ninepatch(option-tab-back, option-tab-back-inner);
 }
-/* Sized by their labels (not six equal cells): "Gameplay" and "Graphics" need more room than
+/* Sized by their labels (not equal cells): "Gameplay" and "Graphics" need more room than
    "UI", and equal cells cut them off. */
 .option-tab-btn {
 	flex: 1 1 auto;
@@ -93,7 +93,7 @@
 
 /* The settings of the active tab, below the tab row. It scrolls when the panel is capped to a short
    screen; the tabs and the close cross stay where they are. Its lower rows open their dropdown
-   lists upwards (.option-row-tipped), so a list stays inside this area. */
+   lists upwards (.option-opens-up), so a list stays inside this area. */
 .option-tab-scroll {
 	position: absolute;
 	left: 0;
@@ -143,6 +143,17 @@
 	flex-shrink: 0;
 	min-height: 20dp;
 	margin-bottom: 6dp;
+}
+/* A heading over a group of rows. */
+.option-section {
+	flex-shrink: 0;
+	margin: 6dp 0 6dp;
+	padding-bottom: 2dp;
+	border-bottom: 1dp #5a4a2a;
+	color: token(text-primary);
+}
+.option-section:first-child {
+	margin-top: 0;
 }
 .option-checkbox-row {
 	cursor: pointer;
@@ -303,12 +314,12 @@
 }
 
 /* A row with a hint (data-hint) takes the pointer itself, so the hint shows anywhere on the row:
-   body's pointer-events: none would leave only its control hoverable. These are the lower rows of
-   their tabs, so their lists open upwards, over the rows above. */
+   body's pointer-events: none would leave only its control hoverable. */
 .option-row-tipped {
 	pointer-events: auto;
 }
-.option-row-tipped .option-dropdown-list {
+/* A tab's last dropdown opens its list upwards, over the rows above. */
+.option-opens-up .option-dropdown-list {
 	top: auto;
 	bottom: 100%;
 }
