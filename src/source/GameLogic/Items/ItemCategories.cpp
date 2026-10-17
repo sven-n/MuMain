@@ -51,6 +51,16 @@ namespace GameLogic::Items
         return HasWingTier(pItem, WingTier::Third);
     }
 
+    bool IsSecondOrThirdTierWing(const ITEM* pItem)
+    {
+        return HasWingTier(pItem, WingTier::Second) || HasWingTier(pItem, WingTier::Third);
+    }
+
+    bool IsSecondTierCape(const ITEM* pItem)
+    {
+        return HasWingTier(pItem, WingTier::Second) && HasTag(pItem, ItemTag::Cape);
+    }
+
     bool IsSmallWing(const ITEM* pItem)
     {
         return HasWingTier(pItem, WingTier::Small);

@@ -105,6 +105,30 @@ void ItemDatabase::Swap(int firstItemType, int secondItemType)
     Store(secondItemType, std::move(first));
 }
 
+std::span<const int> ItemDatabase::GetItemTypesWithTag(ItemTag tag) const
+{
+    const auto tagIndex = static_cast<size_t>(tag);
+    if (m_itemTypesByTag.size() <= tagIndex)
+    {
+        m_itemTypesByTag.resize(tagIndex + 1);
+    }
+
+    ItemTypesWithTag& list = m_itemTypesByTag[tagIndex];
+    if (list.version != m_version)
+    {
+        list.itemTypes.clear();
+        for (int itemType = 0; itemType < static_cast<int>(m_ruleData.size()); ++itemType)
+        {
+            if (m_ruleData[itemType].tags.Has(tag))
+            {
+                list.itemTypes.push_back(itemType);
+            }
+        }
+        list.version = m_version;
+    }
+    return list.itemTypes;
+}
+
 void ItemDatabase::UpdateDisplayName(ItemDefinition& definition) const
 {
     definition.name =

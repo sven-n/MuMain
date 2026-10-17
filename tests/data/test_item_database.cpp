@@ -281,16 +281,28 @@ TEST_CASE("Item database rule data follows editor changes [data][items]")
     database.Build(std::vector<ItemDefinition>{MakeItem(SwordGroup, 0, "Kris")});
     const int krisType = MakeItemType(SwordGroup, 0);
 
+    const auto valuableTypes = [&database]
+    {
+        const auto itemTypes = database.GetItemTypesWithTag(ItemTag::Valuable);
+        return std::vector<int>(itemTypes.begin(), itemTypes.end());
+    };
+    CHECK(valuableTypes().empty());
+
     ItemDefinition changed = *database.Find(krisType);
     changed.tags.Set(ItemTag::Valuable);
     changed.droppable = false;
     database.Set(changed);
     CHECK(database.HasTag(krisType, ItemTag::Valuable));
     CHECK_FALSE(database.IsAllowed(krisType, ItemAction::Drop));
+    CHECK(valuableTypes() == std::vector<int>{krisType});
 
     database.Swap(krisType, MakeItemType(SwordGroup, 5));
     CHECK_FALSE(database.HasTag(krisType, ItemTag::Valuable));
     CHECK(database.IsAllowed(MakeItemType(SwordGroup, 5), ItemAction::Trade));
     CHECK(database.HasTag(MakeItemType(SwordGroup, 5), ItemTag::Valuable));
     CHECK_FALSE(database.IsAllowed(MakeItemType(SwordGroup, 5), ItemAction::Drop));
+    CHECK(valuableTypes() == std::vector<int>{MakeItemType(SwordGroup, 5)});
+
+    database.Build(std::vector<ItemDefinition>{MakeItem(SwordGroup, 0, "Kris")});
+    CHECK(valuableTypes().empty());
 }

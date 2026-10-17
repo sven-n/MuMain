@@ -80,6 +80,9 @@ public:
         return IsValidItemType(itemType) ? m_ruleData[itemType].wingTier : WingTier::None;
     }
 
+    // The item types with the tag, lowest first. Kept until the items change.
+    std::span<const int> GetItemTypesWithTag(ItemTag tag) const;
+
     // All MAX_ITEM slots, indexed by item type, including empty ones.
     std::span<const ItemDefinition> GetAllSlots() const
     {
@@ -129,8 +132,16 @@ private:
     void UpdateDisplayName(ItemDefinition& definition) const;
     void CountExistingItems();
 
+    // GetItemTypesWithTag's lists, each with the version it was made for.
+    struct ItemTypesWithTag
+    {
+        int version = -1;
+        std::vector<int> itemTypes;
+    };
+
     std::vector<ItemDefinition> m_definitions;
     std::vector<RuleData> m_ruleData;
+    mutable std::vector<ItemTypesWithTag> m_itemTypesByTag;
     std::string m_displayLocale{LocalizedString::NeutralLocale};
     int m_existingItemCount = 0;
     int m_version = 0;
