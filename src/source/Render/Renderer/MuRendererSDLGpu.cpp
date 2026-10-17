@@ -709,6 +709,8 @@ struct CachedSkinnedMesh
     Uint32 block;
     Uint32 firstVertex;
     Uint32 vertexCount;
+    // One past the highest bone the vertices index; 0 when unknown.
+    Uint32 bonesUsed = 0u;
 };
 
 struct PendingSkinnedMeshUpload
@@ -742,6 +744,10 @@ static const float* s_lastBonePalette = nullptr;
 static std::size_t s_lastBonePaletteSize = 0u;
 static std::uint32_t s_lastBonePaletteVersion = 0u;
 static Uint32 s_lastBonePaletteRowOffset = 0u;
+// Bones of the last palette the draws reading it index, for the BonePaletteUsedBytes counter.
+static Uint32 s_lastBonePaletteBonesUsed = 0u;
+// The skinned draw keys seen this frame, for the DistinctSkinnedDraws counter.
+static std::unordered_set<std::uint64_t> s_skinnedDrawKeys;
 
 // The Render::TerrainHeightGrid that ground-following shaders read (SetTerrainHeights).
 static SDL_GPUTransferBuffer* s_terrainHeightTransferBuf = nullptr;
@@ -988,6 +994,7 @@ static bool BindReplayPipeline(SDL_GPUGraphicsPipeline* pipeline, Render::SdlGpu
     SDL_BindGPUGraphicsPipeline(s_renderPass, pipeline);
     SDL_SetGPUScissor(s_renderPass, &scissor);
     ++s_dbgPipelineBindsThisFrame;
+    FrameProfiler::Count(FrameProfiler::Counter::PipelineBinds);
     return true;
 }
 
@@ -1030,6 +1037,7 @@ static void BindReplayFragmentSampler(const RenderCmd& command, Render::SdlGpuRe
     const SDL_GPUTextureSamplerBinding samplerBinding{command.texture, command.sampler};
     SDL_BindGPUFragmentSamplers(s_renderPass, 0, &samplerBinding, 1);
     ++s_dbgSamplerBindsThisFrame;
+    FrameProfiler::Count(FrameProfiler::Counter::SamplerBinds);
 }
 
 static void BindReplayIndexBuffer(SDL_GPUBuffer* buffer, Uint32 offset, SDL_GPUIndexElementSize elementSize,
@@ -2166,6 +2174,7 @@ public:
         s_dbgRealTextureDrawsThisFrame = 0u;
         s_dbgPipelineBindsThisFrame = 0u;
         s_dbgSamplerBindsThisFrame = 0u;
+        s_skinnedDrawKeys.clear();
         s_dbgVertexUniformPushesThisFrame = 0u;
         s_dbgFragmentUniformPushesThisFrame = 0u;
         ++s_dbgFrameCount;
@@ -4454,11 +4463,15 @@ public:
         }
 
         const Uint32 vertexCount = static_cast<Uint32>(vertices.size());
+        std::int32_t highestBone = -1;
+        for (const SkinnedVertex3D& vertex : vertices)
+            highestBone = std::max({highestBone, vertex.positionBoneIndex, vertex.normalBoneIndex});
+        const Uint32 bonesUsed = static_cast<Uint32>(highestBone + 1);
         std::optional<CachedSkinnedMesh> range;
         for (Uint32 block = 0u; block < s_skinnedMeshBlocks.size() && !range; ++block)
         {
             if (const auto first = s_skinnedMeshBlocks[block].ranges.Allocate(vertexCount))
-                range = CachedSkinnedMesh{block, *first, vertexCount};
+                range = CachedSkinnedMesh{block, *first, vertexCount, bonesUsed};
         }
         if (!range)
         {
@@ -4480,7 +4493,8 @@ public:
             }
             s_skinnedMeshBlocks.push_back({buffer, Render::RangeAllocator(blockVertices)});
             const auto first = s_skinnedMeshBlocks.back().ranges.Allocate(vertexCount);
-            range = CachedSkinnedMesh{static_cast<Uint32>(s_skinnedMeshBlocks.size() - 1u), *first, vertexCount};
+            range =
+                CachedSkinnedMesh{static_cast<Uint32>(s_skinnedMeshBlocks.size() - 1u), *first, vertexCount, bonesUsed};
         }
 
         s_pendingSkinnedMeshUploads.push_back({*range, s_skinnedMeshStaging.size()});
@@ -4963,7 +4977,7 @@ private:
             return false;
         }
 
-        const Uint32 paletteRowOffset = RecordBonePalette(parameters);
+        const Uint32 paletteRowOffset = RecordBonePalette(parameters, cached.bonesUsed);
         if (paletteRowOffset == ~0u)
         {
             return false;
@@ -5052,6 +5066,20 @@ private:
         cmd.fogUniform.alphaToCoverage = coverage.alphaToCoverage ? 1u : 0u;
         RecordDrawState(cmd);
         s_renderCmds.push_back(cmd);
+
+        if (FrameProfiler::g_CountersEnabled)
+        {
+            // shortcut: a hash of the key, not the key; a collision only undercounts by one.
+            const auto mix = [](std::uint64_t seed, std::uint64_t value)
+            { return seed ^ (value + 0x9e3779b97f4a7c15ull + (seed << 6) + (seed >> 2)); };
+            std::uint64_t key = static_cast<std::uint64_t>(FrameProfiler::CurrentPass());
+            key = mix(key, reinterpret_cast<std::uintptr_t>(cmd.vtxBuffer));
+            key = mix(key, cmd.vtxOffset);
+            key = mix(key, reinterpret_cast<std::uintptr_t>(cmd.texture));
+            key = mix(key, reinterpret_cast<std::uintptr_t>(cmd.pipeline));
+            if (s_skinnedDrawKeys.insert(key).second)
+                FrameProfiler::Count(FrameProfiler::Counter::DistinctSkinnedDraws);
+        }
 
         ++s_dbgDrawCallsThisFrame;
         s_dbgVtxBytesThisFrame += byteSize;
@@ -5268,18 +5296,31 @@ private:
         return alignedOffset;
     }
 
-    [[nodiscard]] static Uint32 RecordBonePalette(const SkinningParameters& parameters)
+    // `bonesUsed`: one past the highest bone the draw's vertices index, 0 when unknown (all of them).
+    [[nodiscard]] static Uint32 RecordBonePalette(const SkinningParameters& parameters, Uint32 bonesUsed)
     {
         const auto bones = parameters.boneMatrices;
         if (bones.empty() || bones.size() % 12 != 0)
         {
             return ~0u;
         }
+        constexpr Uint32 BoneBytes = 12u * sizeof(float);
+        const Uint32 paletteBones = static_cast<Uint32>(bones.size() / 12);
+        const Uint32 indexedBones = bonesUsed == 0u ? paletteBones : std::min(bonesUsed, paletteBones);
         if (bones.data() == s_lastBonePalette && bones.size() == s_lastBonePaletteSize &&
             parameters.paletteVersion == s_lastBonePaletteVersion)
         {
+            if (indexedBones > s_lastBonePaletteBonesUsed)
+            {
+                FrameProfiler::Count(FrameProfiler::Counter::BonePaletteUsedBytes,
+                                     (indexedBones - s_lastBonePaletteBonesUsed) * BoneBytes);
+                s_lastBonePaletteBonesUsed = indexedBones;
+            }
             return s_lastBonePaletteRowOffset;
         }
+        FrameProfiler::Count(FrameProfiler::Counter::BonePaletteBytes, paletteBones * BoneBytes);
+        FrameProfiler::Count(FrameProfiler::Counter::BonePaletteUsedBytes, indexedBones * BoneBytes);
+        s_lastBonePaletteBonesUsed = indexedBones;
 
         const std::size_t rowOffset = s_boneRowScratch.size() / 4;
         if (rowOffset > std::numeric_limits<Uint32>::max() ||

@@ -41,15 +41,17 @@ enum class Pass : int
     RendererStage,
     RendererReplay,
     RendererPostUi,
+    // The two halves of a map object inside Objects: its animation and bones, and its draws.
+    ObjectsAnimate,
+    ObjectsDraw,
     Count_
 };
 
 inline constexpr const char* kPassNames[static_cast<int>(Pass::Count_)] = {
-    "Terrain", "Objects", "Chars", "Items", "Effects", "Other", "CharWait", "MoveFx", "MovePart",
-    "Skinning", "UI", "RenderBegin", "RenderEnd", "Submit", "UIUpdate", "RmlInput", "UILayout", "Flush",
-    "Sprites", "Particles", "Joints", "Overlay",
-    "RmlUpd", "RmlRend",
-    "EndOffscr", "EndStage", "EndReplay", "EndPostUI",
+    "Terrain",   "Objects",  "Chars",     "Items",       "Effects",   "Other",   "CharWait", "MoveFx",
+    "MovePart",  "Skinning", "UI",        "RenderBegin", "RenderEnd", "Submit",  "UIUpdate", "RmlInput",
+    "UILayout",  "Flush",    "Sprites",   "Particles",   "Joints",    "Overlay", "RmlUpd",   "RmlRend",
+    "EndOffscr", "EndStage", "EndReplay", "EndPostUI",   "ObjAnim",   "ObjDraw",
 };
 
 enum class Counter : int
@@ -73,6 +75,13 @@ enum class Counter : int
     BatchBreakMatrix,
     BatchBreakDraw,
     BatchBreakOther,
+    // Bone palette bytes uploaded, and how many of them the meshes' vertices actually index.
+    BonePaletteBytes,
+    BonePaletteUsedBytes,
+    PipelineBinds,
+    SamplerBinds,
+    // Skinned draws whose mesh, texture and pipeline no earlier draw in the pass had this frame.
+    DistinctSkinnedDraws,
     Count_
 };
 
@@ -96,6 +105,11 @@ inline constexpr const char* kCounterNames[static_cast<int>(Counter::Count_)] = 
     "BatchBreakMatrix",
     "BatchBreakDraw",
     "BatchBreakOther",
+    "BonePaletteBytes",
+    "BonePaletteUsedBytes",
+    "PipelineBinds",
+    "SamplerBinds",
+    "DistinctSkinnedDraws",
 };
 static_assert(kCounterNames[static_cast<int>(Counter::Count_) - 1] != nullptr, "a counter without a name");
 
