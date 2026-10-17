@@ -1618,6 +1618,9 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                     o->TexType = BITMAP_JOINT_SPIRIT;
                     break;
                 case 2:
+                    // Death Stab's wind. Its five tails are a reference frame apart, so each gust draws as
+                    // a long line, as at 25 FPS; when tails were laid every rendered frame, high frame
+                    // rates shortened it to a dash.
                     VectorCopy(TargetPosition, o->TargetPosition);
                     Vector(1.0f, .3f, .3f, o->Light);
                     o->LifeTime = 20;
