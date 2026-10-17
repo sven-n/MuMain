@@ -68,7 +68,7 @@
 .point-text { left: 24px; top: 95px; color: #6496ff; background-color: rgba(0, 0, 0, 128); }
 
 /* Stats: Strength 116, Agility 176, Vitality 236, Energy 296 (boxes); the name on the left and
-   the value on the right of the box, in 0.97's gold. 0.97 has no Command. */
+   the value on the right of the box, in 0.97's gold; Command (Dark Lord) below them. */
 .attr-textbox {
 	position: absolute;
 	left: 13px;
@@ -81,7 +81,11 @@
 .attr-textbox-agi { top: 176px; }
 .attr-textbox-vit { top: 236px; }
 .attr-textbox-ene { top: 296px; }
-.attr-textbox-cmd, .attr-label-cmd, .attr-value-cmd, .stat-btn-cmd { display: none; }
+/* Command, the Dark Lord's fifth stat (shown only while the C++ says so, show_charisma): 0.97 has
+   no Dark Lord; the Season 1 client (005c3a40) draws one more box for class 4, 60 below Energy,
+   at y 356, its text and + button in step with the others. */
+.attr-textbox-cmd { top: 356px; }
+.attr-textbox-cmd.hidden, .stat-btn-cmd.hidden { display: none; }
 
 .attr-label, .attr-value {
 	display: block;
@@ -98,6 +102,7 @@
 .attr-label-agi, .attr-value-agi { top: 180px; }
 .attr-label-vit, .attr-value-vit { top: 240px; }
 .attr-label-ene, .attr-value-ene { top: 300px; }
+.attr-label-cmd, .attr-value-cmd { top: 360px; }
 .attr-value.attr-boosted, .attr-label.attr-boosted { color: rgb(100, 150, 255); }
 .attr-value.attr-potion,  .attr-label.attr-potion  { color: rgb(255, 120, 0); }
 .levelup-point-text.hidden, .attr-label.hidden, .attr-value.hidden { display: none; }
@@ -136,6 +141,7 @@
 .stat-btn-agi { top: 175px; }
 .stat-btn-vit { top: 235px; }
 .stat-btn-ene { top: 295px; }
+.stat-btn-cmd { top: 355px; }
 
 /* 0.97 has no Quest, Pet or Master Level shortcuts (Close shares .info-btn and stays). */
 .info-btn-quest, .info-btn-pet, .info-btn-masterlevel { display: none; }

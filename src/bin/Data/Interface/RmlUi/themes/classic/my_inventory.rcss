@@ -97,7 +97,14 @@
 .inv-btn-exit:active { decorator: image(classic-inv-exit-pressed); }
 .inv-btn-repair { left: 60px; decorator: image(classic-inv-repair); }
 .inv-btn-repair:active { decorator: image(classic-inv-repair-pressed); }
-#btn_myshop, #btn_expand { display: none; }
+#btn_myshop { display: none; }
+
+/* The extended inventory's button has no 0.97 counterpart: it keeps legacy's own art
+   (newui_expansion_btn, 36x29) after the 0.97 buttons, on the row's centre, until the classic
+   theme has art for it. */
+@spritesheet classic-inv-expand-sheet { src: "../../../newui_expansion_btn.tga"; classic-inv-expand: 0px 0px 36px 29px; }
+#btn_expand { display: block; left: 95px; top: 393px; width: 36px; height: 29px; decorator: image(classic-inv-expand); }
+#btn_expand:hover { filter: brightness(1.25); }
 
 /* Equipment: each slot is its 0.97 background at its 0.97 place (the box is also where the slot
    is clicked and the item drawn). */
