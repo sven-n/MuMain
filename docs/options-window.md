@@ -96,6 +96,10 @@ window writes to these sections:
     Render full effects, or with Disable Shadows, no wing shadow is drawn
     (and without full effects no shadow at all).
 
+  Set from the Interface tab, applied at the next start:
+  - `TexturePack` (default empty, the original textures): the Texture Pack
+    row, the [texture pack](texture-packs.md) to read textures from first.
+
   Set by hand only, never written by the game:
   - `Backend` (`default`/`vulkan`/`direct3d12`/`metal`, case-insensitive,
     `d3d12` accepted as an alias for `direct3d12`) forces a specific SDL_gpu
