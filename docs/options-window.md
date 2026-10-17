@@ -65,8 +65,8 @@ so a tab can take more rows.
 - **Modern theme:** a full-screen settings page with the tabs on the left.
   The page scrolls when its rows don't fit.
 
-Rows with a hint (UI Scale, Anti-aliasing, Anisotropic filtering) show it
-while the pointer is over the row.
+Rows with a hint (UI Scale, Anti-aliasing, Anisotropic filtering and the
+Enhanced tuning sliders) show it while the pointer is over the row.
 
 ## What it stores in `config.ini`
 
@@ -86,8 +86,9 @@ window writes to these sections:
     filtering row, for every texture with mip levels: world textures in the
     Enhanced look, upscaled textures in both.
   - `EnhancedLighting`, `DynamicLights`, `LightMood`, `PostProcessing`
-    (default `1`): the rows under "Enhanced graphics", each a feature of the
-    Enhanced look; see [`enhanced-look.md`](enhanced-look.md).
+    (default `1`): the checkboxes of the rows under "Enhanced graphics", each a
+    feature of the Enhanced look; see [`enhanced-look.md`](enhanced-look.md).
+    Clicking a row's name opens its tuning sliders instead.
   - `DisableEffects`, `DisableParticles`, `DisableSkillEffectModels`,
     `DisableBoids`, `DisableBodyShadows`, `DisableWingShadow`: the Graphics
     tab's toggles. A toggle another one already covers shows ticked and
@@ -101,6 +102,12 @@ window writes to these sections:
     GPU backend at startup, falling back to SDL's own auto-pick with a logged
     warning if the requested one is unavailable.
   - `SortParticleDraws` (`0`/`1`) sorts particle draws back to front.
+- `[EnhancedTuning]` - only the tuning sliders under "Enhanced graphics" the
+  player moved, one global key per value applying on every map and after restart;
+  no per-map player setup is needed. "Defaults" means no personal override;
+  Reset removes the key again. Written on its
+  own, through a temporary file, when a slider is let go; see "Tuning it
+  yourself" in [`enhanced-look.md`](enhanced-look.md).
 - `[UI]` - `Locale`, `Font`, `RmlTheme` and `UIScalePercent` from the Display and
   Interface tabs. `EnableAnimationTaskPool` (`0`/`1`, set by hand only, like the
   `--enable-taskpool` command-line flag) animates characters on worker
