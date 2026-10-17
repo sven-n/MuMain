@@ -393,6 +393,8 @@ const char* ToString(LookValueSource source)
         return "default";
     case LookValueSource::Map:
         return "map";
+    case LookValueSource::Personal:
+        return "player";
     case LookValueSource::BuiltIn:
         break;
     }

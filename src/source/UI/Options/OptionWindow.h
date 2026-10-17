@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <array>
 #include <string>
 #include <utility>
 #include <vector>
@@ -153,6 +154,23 @@ namespace mu::ui::window
         void RmlToggleEnhancedGraphics();
         // The Enhanced features (Render::Look::EnhancedFeature, by index).
         void RmlToggleEnhancedFeature(int feature);
+        // The player's tuning under each feature (Render/Look/TuningControls.h): a group's label
+        // or chevron expands it (never its switch), "More settings" its specialist rows. A slider
+        // previews while it is pressed, dragged or stepped by a key and is saved when the pointer
+        // or key is released, the slider loses focus or the window closes
+        // (FinishTuningInteraction()). Controls by Render::Look::TuningControlId, groups by
+        // Render::Look::TuningGroup.
+        void RmlToggleTuningGroup(int group);
+        void RmlToggleTuningMore(int group);
+        void RmlTuningPointer(Rml::Event& event, int control);
+        void RmlTuningKey(Rml::Event& event, int control);
+        void RmlTuningCommit();
+        void RmlResetTuning(int control);
+        void RmlResetTuningGroup(int group);
+        void RmlResetAllTuning();
+        // True when a group's sliders apply right now (Enhanced, the feature on and available).
+        bool TuningGroupUnlocked(int group) const;
+        void FinishTuningInteraction();
         // Video tab's Anti-aliasing and Anisotropic filtering rows; their values are read live
         // from GameConfig, since `$msaa` changes the first outside this window too.
         void RmlAntialiasingChanged(int index);
@@ -164,6 +182,24 @@ namespace mu::ui::window
         void RmlThemeChanged(int index);
         void RmlUIScaleChanged(int index);
         void RmlClickClose();
+
+        // One tuning slider (UI::Options::TuningRow) as the RmlUi model binds it.
+        struct TuningRowModel
+        {
+            int control = 0;
+            Rml::String label;
+            Rml::String help;
+            Rml::String valueText;
+            Rml::String minText;
+            Rml::String maxText;
+            Rml::String stateText;
+            // "inherited", "custom" or "unsaved", for the state's class.
+            Rml::String state;
+            float fillPercent = 0.f;
+
+            bool operator==(const TuningRowModel&) const = default;
+        };
+        static constexpr std::size_t TuningGroupCount = 4;
 
         struct OptionRmlModel
         {
@@ -284,6 +320,21 @@ namespace mu::ui::window
             Rml::String lookDynamicLightsLabel;
             Rml::String lookLightMoodLabel;
             Rml::String lookPostProcessingLabel;
+            // The player's tuning, per group (Render::Look::TuningGroup): its common and its "More
+            // settings" rows, whether it is expanded, and why its sliders do not apply (empty when
+            // they do).
+            std::array<std::vector<TuningRowModel>, TuningGroupCount> tuningRows;
+            std::array<std::vector<TuningRowModel>, TuningGroupCount> tuningMoreRows;
+            std::array<bool, TuningGroupCount> tuningExpanded{};
+            std::array<bool, TuningGroupCount> tuningMoreExpanded{};
+            std::array<bool, TuningGroupCount> tuningLocked{};
+            std::array<Rml::String, TuningGroupCount> tuningReason;
+            Rml::String tuningMoreLabel;
+            Rml::String tuningResetLabel;
+            Rml::String tuningResetGroupLabel;
+            Rml::String tuningResetAllLabel;
+            // Shown while the last save failed; empty otherwise.
+            Rml::String tuningSaveMessage;
             // [Render] Antialiasing (the Enhanced look's samples) and Anisotropy.
             std::vector<Rml::String> antialiasingLabels;
             int antialiasingIndex = 0;
@@ -317,6 +368,7 @@ namespace mu::ui::window
         };
         void BindRmlModel(Rml::DataModelConstructor& c, OptionRmlModel& model);
         void SyncImpliedEffectRows(OptionRmlModel& model);
+        void SyncTuningModel(OptionRmlModel& model);
         void OnRmlBuilt();
         UI::RmlBridge::ThemedView<OptionRmlModel> m_RmlView{"option_window",
             [this](Rml::DataModelConstructor& c, OptionRmlModel& model) { BindRmlModel(c, model); },
@@ -349,6 +401,11 @@ namespace mu::ui::window
         std::vector<std::wstring> m_resolutionLabels;
 
         int m_iActiveTab = 0;
+        // The tuning groups start collapsed in every session; see RmlToggleTuningGroup().
+        std::array<bool, TuningGroupCount> m_tuningExpanded{};
+        std::array<bool, TuningGroupCount> m_tuningMoreExpanded{};
+        // A slider was previewed since the last save (FinishTuningInteraction()).
+        bool m_tuningPreviewPending = false;
         // -1 = none open. See model.openDropdown's own comment (OptionRmlModel) for the id scheme.
         int m_iOpenDropdown = -1;
         bool m_bScrollDropdownPending = false;

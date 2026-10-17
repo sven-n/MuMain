@@ -33,6 +33,7 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Look/LookPresetSetting.h"
 #include "Render/Look/LookProfileSetting.h"
+#include "Render/Look/TuningSetting.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlRuntimeHooks.h"
 #include "Engine/Object/ZzzOpenData.h"
@@ -1620,6 +1621,9 @@ MSG MainLoop()
                 ApplyPendingVSyncPreference();
                 // Between frames: a texture replaced mid-frame would drop the frame's draws.
                 Bitmaps.UpdateTextureFiltering();
+                // The player's Mood strength, at most one map light rebuild per frame however often
+                // it moved (options open or closed).
+                Render::Look::ApplyPendingTuning();
                 RenderProfiledFrame();
 #ifdef _EDITOR
                 // The editor's own windows, now that the game's frame went to the GPU.
@@ -2309,6 +2313,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     InitVSync();
     ApplyVSyncPreferenceNow(GameConfig::GetInstance().GetVSyncEnabled());
     Render::Look::LoadProfile();
+    Render::Look::LoadPersonalTuning();
     Render::Look::ApplyLookPreset(GameConfig::GetInstance().GetLook());
 
     // Apply persisted DXP-23 effect-cost toggles (Options window's Graphics tab, formerly only
