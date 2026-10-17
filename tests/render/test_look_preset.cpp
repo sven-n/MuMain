@@ -96,6 +96,30 @@ TEST_CASE("re-applying the current preset clears every override [render][look][p
     CHECK(recorder.applied.back() == AllOff);
 }
 
+TEST_CASE("the player's Enhanced choices act on Enhanced only, survive a preset and yield to an override "
+          "[render][look][preset]")
+{
+    Recorder recorder;
+    LookPresetController controller = recorder.Controller();
+    controller.ApplyPreset(LookPreset::Enhanced);
+
+    controller.SetChoices(PostOff());
+    LookFeatures expected = AllOn;
+    expected.postProcessing = false;
+    CHECK(recorder.applied.back() == expected);
+    CHECK(recorder.saved.size() == 1); // the caller saves choices
+
+    controller.ApplyPreset(LookPreset::Classic);
+    CHECK(recorder.applied.back() == AllOff);
+    controller.ApplyPreset(LookPreset::Enhanced);
+    CHECK(recorder.applied.back() == expected);
+
+    FeatureOverrides postOn;
+    postOn.postProcessing = true;
+    controller.Override(postOn);
+    CHECK(recorder.applied.back() == AllOn);
+}
+
 TEST_CASE("$look classic|enhanced and the per-feature commands parse [render][look][preset]")
 {
     using Render::Look::ParseFeatureOverrideCommand;

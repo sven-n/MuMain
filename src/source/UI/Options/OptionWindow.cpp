@@ -276,10 +276,12 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("active_tab", &model.activeTab);
     c.Bind("tab_gameplay_label", &model.tabGameplayLabel);
     c.Bind("tab_audio_label", &model.tabAudioLabel);
-    c.Bind("tab_video_label", &model.tabVideoLabel);
+    c.Bind("tab_display_label", &model.tabDisplayLabel);
     c.Bind("tab_graphics_label", &model.tabGraphicsLabel);
-    c.Bind("tab_ui_label", &model.tabUiLabel);
-    c.Bind("tab_general_label", &model.tabGeneralLabel);
+    c.Bind("tab_interface_label", &model.tabInterfaceLabel);
+    c.Bind("section_quality_label", &model.sectionQualityLabel);
+    c.Bind("section_effects_label", &model.sectionEffectsLabel);
+    c.Bind("section_shadows_label", &model.sectionShadowsLabel);
 
     c.Bind("open_dropdown", &model.openDropdown);
 
@@ -341,6 +343,16 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("body_shadows_locked", &model.bodyShadowsLocked);
     c.Bind("wing_shadow_locked", &model.wingShadowLocked);
     c.Bind("enhanced_graphics", &model.enhancedGraphics);
+    c.Bind("look_lighting", &model.lookLighting);
+    c.Bind("look_dynamic_lights", &model.lookDynamicLights);
+    c.Bind("look_light_mood", &model.lookLightMood);
+    c.Bind("look_post_processing", &model.lookPostProcessing);
+    c.Bind("look_features_locked", &model.lookFeaturesLocked);
+    c.Bind("look_dynamic_lights_locked", &model.lookDynamicLightsLocked);
+    c.Bind("look_lighting_label", &model.lookLightingLabel);
+    c.Bind("look_dynamic_lights_label", &model.lookDynamicLightsLabel);
+    c.Bind("look_light_mood_label", &model.lookLightMoodLabel);
+    c.Bind("look_post_processing_label", &model.lookPostProcessingLabel);
     c.Bind("enhanced_graphics_label", &model.enhancedGraphicsLabel);
     c.Bind("antialiasing_labels", &model.antialiasingLabels);
     c.Bind("antialiasing_index", &model.antialiasingIndex);
@@ -430,6 +442,12 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.BindEventCallback("option_toggle_enhanced_graphics",
                         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                         { RmlToggleEnhancedGraphics(); });
+    c.BindEventCallback("option_toggle_enhanced_feature",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+        {
+            if (arguments.size() == 1)
+                RmlToggleEnhancedFeature(arguments[0].Get<int>(-1));
+        });
 
     c.BindEventCallback("option_toggle_show_fps_counter",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleShowFpsCounter(); });
@@ -628,7 +646,7 @@ void mu::ui::window::COptionWindow::ClosingProcess()
 
 void mu::ui::window::COptionWindow::RmlClickSelectTab(int nTab)
 {
-    if (nTab < 0 || nTab > 5)
+    if (nTab < 0 || nTab > 4)
         return;
     m_iActiveTab = nTab;
     PlayBuffer(SOUND_CLICK01);
@@ -914,6 +932,19 @@ void mu::ui::window::COptionWindow::RmlToggleEnhancedGraphics()
 {
     const bool enhanced = Render::Look::ActiveLookPreset() == LookPreset::Enhanced;
     Render::Look::ApplyLookPreset(enhanced ? LookPreset::Classic : LookPreset::Enhanced);
+}
+
+void mu::ui::window::COptionWindow::RmlToggleEnhancedFeature(int feature)
+{
+    using Render::Look::EnhancedFeature;
+    if (feature < 0 || feature > static_cast<int>(EnhancedFeature::PostProcessing))
+        return;
+    if (Render::Look::ActiveLookPreset() != LookPreset::Enhanced)
+        return;
+    const auto chosen = static_cast<EnhancedFeature>(feature);
+    if (chosen == EnhancedFeature::DynamicLights && !Render::Look::EnhancedFeatureChosen(EnhancedFeature::Lighting))
+        return; // dynamic lights act only with Enhanced lighting
+    Render::Look::ChooseEnhancedFeature(chosen, !Render::Look::EnhancedFeatureChosen(chosen));
 }
 
 // MuSetAntialiasingPreference saves the count and applies it while the Enhanced look is active.
@@ -1296,10 +1327,12 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     syncLabel(model.closeLabel, "close_label", I18N::Game::Close);
     syncLabel(model.tabGameplayLabel, "tab_gameplay_label", I18N::Game::Gameplay);
     syncLabel(model.tabAudioLabel, "tab_audio_label", I18N::Game::Audio);
-    syncLabel(model.tabVideoLabel, "tab_video_label", I18N::Game::Video);
+    syncLabel(model.tabDisplayLabel, "tab_display_label", I18N::Game::Display);
     syncLabel(model.tabGraphicsLabel, "tab_graphics_label", I18N::Game::Graphics);
-    syncLabel(model.tabUiLabel, "tab_ui_label", I18N::Game::UI);
-    syncLabel(model.tabGeneralLabel, "tab_general_label", I18N::Game::General);
+    syncLabel(model.tabInterfaceLabel, "tab_interface_label", I18N::Game::Interface);
+    syncLabel(model.sectionQualityLabel, "section_quality_label", I18N::Game::Quality);
+    syncLabel(model.sectionEffectsLabel, "section_effects_label", I18N::Game::Effects);
+    syncLabel(model.sectionShadowsLabel, "section_shadows_label", I18N::Game::Shadows);
     syncLabel(model.autoAttackLabel, "auto_attack_label", I18N::Game::AutomaticAttack);
     syncLabel(model.whisperSoundLabel, "whisper_sound_label", I18N::Game::BeepSoundForWhispering);
     syncLabel(model.slideHelpLabel, "slide_help_label", I18N::Game::SlideHelp);
@@ -1321,6 +1354,10 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     syncLabel(model.disableWingShadowLabel, "disable_wing_shadow_label", I18N::Game::DisableWingShadow);
     syncLabel(model.disableBodyShadowsLabel, "disable_body_shadows_label", I18N::Game::DisableShadows);
     syncLabel(model.enhancedGraphicsLabel, "enhanced_graphics_label", I18N::Game::EnhancedGraphics);
+    syncLabel(model.lookLightingLabel, "look_lighting_label", I18N::Game::EnhancedLighting);
+    syncLabel(model.lookDynamicLightsLabel, "look_dynamic_lights_label", I18N::Game::DynamicLights);
+    syncLabel(model.lookLightMoodLabel, "look_light_mood_label", I18N::Game::LightMood);
+    syncLabel(model.lookPostProcessingLabel, "look_post_processing_label", I18N::Game::BloomAndColourGrading);
     syncLabel(model.antialiasingRowLabel, "antialiasing_row_label", I18N::Game::AntiAliasing);
     syncLabel(model.antialiasingTooltip, "antialiasing_tooltip", I18N::Game::AntiAliasingTooltip);
     syncLabel(model.anisotropyRowLabel, "anisotropy_row_label", I18N::Game::AnisotropicFiltering);
@@ -1413,6 +1450,25 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     {
         model.enhancedGraphics = enhancedGraphics;
         m_RmlView.MarkDirty("enhanced_graphics");
+    }
+    {
+        using Render::Look::EnhancedFeature;
+        using Render::Look::EnhancedFeatureChosen;
+        const auto syncFlag = [this](bool& field, const char* name, bool value)
+        {
+            if (field != value)
+            {
+                field = value;
+                m_RmlView.MarkDirty(name);
+            }
+        };
+        const bool lighting = EnhancedFeatureChosen(EnhancedFeature::Lighting);
+        syncFlag(model.lookLighting, "look_lighting", lighting);
+        syncFlag(model.lookDynamicLights, "look_dynamic_lights", lighting && EnhancedFeatureChosen(EnhancedFeature::DynamicLights));
+        syncFlag(model.lookLightMood, "look_light_mood", EnhancedFeatureChosen(EnhancedFeature::LightMood));
+        syncFlag(model.lookPostProcessing, "look_post_processing", EnhancedFeatureChosen(EnhancedFeature::PostProcessing));
+        syncFlag(model.lookFeaturesLocked, "look_features_locked", !enhancedGraphics);
+        syncFlag(model.lookDynamicLightsLocked, "look_dynamic_lights_locked", !enhancedGraphics || !lighting);
     }
 
     // Rebuilt every sync for the localized "Off", as the FPS Limit row's "Uncapped".

@@ -113,7 +113,6 @@
 .opt-pane {
 	position: relative;
 	flex: 1 1 0;
-	padding: 22dp 28dp;
 	background-color: rgba(22, 26, 32, 140);
 	backdrop-filter: blur(12dp);
 	decorator: linear-gradient(to bottom, rgba(255, 255, 255, 20), rgba(255, 255, 255, 0) 30%);
@@ -123,6 +122,37 @@
 	box-shadow:
 		inset 0 1dp 0 rgba(255, 255, 255, 30),
 		0 12dp 32dp rgba(0, 0, 0, 140);
+}
+
+/* A part of the row above it: indented under its label. */
+.opt-sub-row .opt-label {
+	box-sizing: border-box;
+	padding-left: 16dp;
+}
+
+/* A heading over a group of rows. */
+.opt-section {
+	display: block;
+	margin: 18dp 0 4dp;
+	font-size: 12dp;
+	font-weight: bold;
+	letter-spacing: 2dp;
+	color: token(text-secondary);
+}
+
+.opt-page-title + .opt-section {
+	margin-top: 8dp;
+}
+
+/* The active page, scrolling (base.rcss's .scroll-pane) when its rows don't fit. Absolute, so the
+   pane's width never depends on its content: a flex item that scrolls shrinks its rows to nothing. */
+.opt-scroll {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	padding: 22dp 28dp;
 }
 
 /* .hidden ties with this rule's display at equal specificity, so it is restated. */
@@ -408,7 +438,7 @@
 .opt-row-tipped:hover .opt-row-tip {
 	display: block;
 }
-.opt-row-tipped .option-dropdown-list {
+.option-opens-up .option-dropdown-list {
 	top: auto;
 	bottom: 100%;
 	margin-top: 0;
@@ -470,7 +500,7 @@
 	.opt-close-bar { left: 5dp; top: 14dp; }
 	.opt-body { margin-top: 10dp; }
 	.opt-nav-item { height: 32dp; line-height: 32dp; margin-bottom: 2dp; }
-	.opt-pane { padding: 12dp 16dp; }
+	.opt-scroll { padding: 12dp 16dp; }
 	.opt-page-title { padding-bottom: 6dp; margin-bottom: 4dp; font-size: 14dp; }
 	.opt-row { height: 34dp; }
 	.opt-footer { height: 36dp; margin-top: 8dp; }
@@ -482,10 +512,6 @@
 	.opt-control { width: 44%; }
 	.opt-toggle-row .opt-control { width: auto; }
 	.opt-label { white-space: normal; line-height: 14dp; }
-}
-/* Smaller still, the page scrolls rather than run under the footer. */
-@media (max-height: 380dp) {
-	.opt-pane { overflow-y: auto; }
 }
 
 /* A setting another one already covers (OptionWindow.h's OptionRmlModel): shown ticked, dimmed, and

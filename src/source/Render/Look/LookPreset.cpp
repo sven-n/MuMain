@@ -97,7 +97,10 @@ std::string FeatureOverrides::Describe() const
     return text.empty() ? "none" : text;
 }
 
-LookPresetController::LookPresetController(Hooks hooks) : m_hooks(std::move(hooks)) {}
+LookPresetController::LookPresetController(Hooks hooks, FeatureOverrides choices)
+    : m_hooks(std::move(hooks)), m_choices(std::move(choices))
+{
+}
 
 void LookPresetController::ApplyPreset(LookPreset preset)
 {
@@ -122,9 +125,22 @@ void LookPresetController::Override(const FeatureOverrides& change)
     }
 }
 
+void LookPresetController::SetChoices(const FeatureOverrides& choices)
+{
+    m_choices = choices;
+    if (m_hooks.apply)
+    {
+        m_hooks.apply(Effective());
+    }
+}
+
 LookFeatures LookPresetController::Effective() const
 {
     LookFeatures features = PresetFeatures(m_preset);
+    if (m_preset == LookPreset::Enhanced)
+    {
+        m_choices.ApplyTo(features);
+    }
     m_overrides.ApplyTo(features);
     return features;
 }

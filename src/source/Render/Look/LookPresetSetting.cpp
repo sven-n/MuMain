@@ -32,9 +32,22 @@ void ApplyFeatures(const LookFeatures& features)
     MuSetAntialiasingActive(features.antialiasing);
 }
 
+// Only a feature switched off is a choice; one left on follows the preset.
+FeatureOverrides SavedChoices()
+{
+    const GameConfig& config = GameConfig::GetInstance();
+    FeatureOverrides choices;
+    const auto offOnly = [](bool enabled) { return enabled ? std::nullopt : std::optional<bool>(false); };
+    choices.enhancedLighting = offOnly(config.GetEnhancedLighting());
+    choices.dynamicLights = offOnly(config.GetDynamicLights());
+    choices.lightMood = offOnly(config.GetLightMood());
+    choices.postProcessing = offOnly(config.GetPostProcessing());
+    return choices;
+}
+
 LookPresetController& Controller()
 {
-    static LookPresetController controller({SaveLook, ApplyFeatures});
+    static LookPresetController controller({SaveLook, ApplyFeatures}, SavedChoices());
     return controller;
 }
 } // namespace
@@ -48,6 +61,45 @@ void ApplyLookPreset(LookPreset preset)
 LookPreset ActiveLookPreset()
 {
     return Controller().Preset();
+}
+
+bool EnhancedFeatureChosen(EnhancedFeature feature)
+{
+    const GameConfig& config = GameConfig::GetInstance();
+    switch (feature)
+    {
+    case EnhancedFeature::Lighting:
+        return config.GetEnhancedLighting();
+    case EnhancedFeature::DynamicLights:
+        return config.GetDynamicLights();
+    case EnhancedFeature::LightMood:
+        return config.GetLightMood();
+    case EnhancedFeature::PostProcessing:
+        return config.GetPostProcessing();
+    }
+    return true;
+}
+
+void ChooseEnhancedFeature(EnhancedFeature feature, bool enabled)
+{
+    GameConfig& config = GameConfig::GetInstance();
+    switch (feature)
+    {
+    case EnhancedFeature::Lighting:
+        config.SetEnhancedLighting(enabled);
+        break;
+    case EnhancedFeature::DynamicLights:
+        config.SetDynamicLights(enabled);
+        break;
+    case EnhancedFeature::LightMood:
+        config.SetLightMood(enabled);
+        break;
+    case EnhancedFeature::PostProcessing:
+        config.SetPostProcessing(enabled);
+        break;
+    }
+    config.Save();
+    Controller().SetChoices(SavedChoices());
 }
 
 bool HandleLookPresetCommand(std::wstring_view command)

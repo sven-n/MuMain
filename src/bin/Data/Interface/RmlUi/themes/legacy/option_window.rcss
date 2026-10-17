@@ -6,7 +6,7 @@
    (RmlTheme.cpp), which is always "Data/Interface/RmlUi/themes/<theme>/<name>.rml" regardless of
    which path the RML's own bytes were actually read from.
 
-   The panel is wider than the shell's 230dp msgbox art: six tabs, a label column that can hold a
+   The panel is wider than the shell's 230dp msgbox art: five tabs, a label column that can hold a
    translated setting name, and a control column wide enough for a resolution or a language. Its
    height is one fixed size for every tab, so switching tabs never moves the window; it fits the
    tallest tab (Video) with room for labels that wrap to a second line, and is capped to the
@@ -68,7 +68,7 @@
 	height: 22dp;
 	decorator: ninepatch(option-tab-back, option-tab-back-inner);
 }
-/* Sized by their labels (not six equal cells): "Gameplay" and "Graphics" need more room than
+/* Sized by their labels (not equal cells): "Gameplay" and "Graphics" need more room than
    "UI", and equal cells cut them off. */
 .option-tab-btn {
 	flex: 1 1 auto;
@@ -91,36 +91,15 @@
 	decorator: ninepatch(option-tab-active, option-tab-active-inner);
 }
 
-/* The settings of the active tab, below the tab row. It scrolls when the panel is capped to a short
-   screen; the tabs and the close cross stay where they are. Its lower rows open their dropdown
-   lists upwards (.option-row-tipped), so a list stays inside this area. */
+/* The settings of the active tab, below the tab row. It scrolls with the chat log's scrollbar
+   (base.rcss's .scroll-pane) when its rows don't fit; the tabs and the close cross stay where they
+   are. A tab's last dropdown opens its list upwards (.option-opens-up), so it stays inside this area. */
 .option-tab-scroll {
 	position: absolute;
 	left: 0;
 	right: 0;
 	top: 30dp;
 	bottom: 0;
-	overflow-y: auto;
-	pointer-events: auto;
-}
-.option-tab-scroll scrollbarvertical {
-	width: 6dp;
-	margin: 0;
-}
-.option-tab-scroll scrollbarvertical slidertrack {
-	background-color: token(surface-recessed);
-}
-.option-tab-scroll scrollbarvertical sliderbar {
-	background-color: token(control-thumb);
-}
-.option-tab-scroll scrollbarvertical sliderbar:hover,
-.option-tab-scroll scrollbarvertical sliderbar:active {
-	background-color: token(control-thumb-hover);
-}
-.option-tab-scroll scrollbarvertical sliderarrowdec,
-.option-tab-scroll scrollbarvertical sliderarrowinc {
-	width: 0;
-	height: 0;
 }
 
 /* One tab's rows, top to bottom. The .hidden override is needed because this display:flex would
@@ -143,6 +122,23 @@
 	flex-shrink: 0;
 	min-height: 20dp;
 	margin-bottom: 6dp;
+}
+/* A part of the row above it: indented under its label, its control still in the column. */
+.option-sub-row .option-row-label {
+	margin-right: -12dp;
+	padding-left: 12dp;
+}
+
+/* A heading over a group of rows. */
+.option-section {
+	flex-shrink: 0;
+	margin: 6dp 0 6dp;
+	padding-bottom: 2dp;
+	border-bottom: 1dp #5a4a2a;
+	color: token(text-primary);
+}
+.option-section:first-child {
+	margin-top: 0;
 }
 .option-checkbox-row {
 	cursor: pointer;
@@ -303,12 +299,12 @@
 }
 
 /* A row with a hint (data-hint) takes the pointer itself, so the hint shows anywhere on the row:
-   body's pointer-events: none would leave only its control hoverable. These are the lower rows of
-   their tabs, so their lists open upwards, over the rows above. */
+   body's pointer-events: none would leave only its control hoverable. */
 .option-row-tipped {
 	pointer-events: auto;
 }
-.option-row-tipped .option-dropdown-list {
+/* A tab's last dropdown opens its list upwards, over the rows above. */
+.option-opens-up .option-dropdown-list {
 	top: auto;
 	bottom: 100%;
 }

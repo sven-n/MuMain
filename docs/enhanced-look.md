@@ -18,7 +18,10 @@ Enhanced preset" below).
 
 ## Choosing the look
 
-- **Options window**: the "Enhanced graphics" checkbox on the Video tab. Ticked
+- **Options window**: the "Enhanced graphics" checkbox on the Graphics tab. Under
+  it, Enhanced lighting, Dynamic lights, Darker map light (the light mood) and
+  Bloom and colour grading switch those features of Enhanced off one by one;
+  dynamic lights need Enhanced lighting. Ticked
   is Enhanced, unticked Classic; it applies at once and is saved.
 - **Chat box**: `$look enhanced` and `$look classic`, in every build; saved too.
 - **`config.ini`**, section `[Render]`:
@@ -28,6 +31,7 @@ Enhanced preset" below).
   | `Look` | `Enhanced` or `Classic` | `Classic` |
   | `Antialiasing` | samples of the Enhanced look: `0` (off), `2`, `4` or `8` | `4` |
   | `Anisotropy` | maximum anisotropic filtering, clamped to the GPU | `8` |
+  | `EnhancedLighting`, `DynamicLights`, `LightMood`, `PostProcessing` | `0` switches that feature of Enhanced off; Classic ignores them | `1` |
 
   A missing or unknown `Look` counts as Classic, so the classic look stays
   until a player ticks "Enhanced graphics". Classic renders without
