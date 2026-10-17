@@ -41,6 +41,7 @@ void ItemDatabase::Build(std::span<const ItemDefinition> definitions)
         }
     }
     CountExistingItems();
+    BuildItemTypesByTag();
 }
 
 void ItemDatabase::SetDisplayLocale(std::string_view locale)
@@ -90,6 +91,7 @@ void ItemDatabase::Set(const ItemDefinition& definition)
     // and typed again in the editor keeps its values.
     Store(MakeItemType(definition.group, definition.number), definition);
     CountExistingItems();
+    BuildItemTypesByTag();
 }
 
 void ItemDatabase::Swap(int firstItemType, int secondItemType)
@@ -103,30 +105,26 @@ void ItemDatabase::Swap(int firstItemType, int secondItemType)
     ItemDefinition second = m_definitions[secondItemType];
     Store(firstItemType, std::move(second));
     Store(secondItemType, std::move(first));
+    BuildItemTypesByTag();
 }
 
-std::span<const int> ItemDatabase::GetItemTypesWithTag(ItemTag tag) const
+void ItemDatabase::BuildItemTypesByTag()
 {
-    const auto tagIndex = static_cast<size_t>(tag);
-    if (m_itemTypesByTag.size() <= tagIndex)
+    for (std::vector<int>& itemTypes : m_itemTypesByTag)
     {
-        m_itemTypesByTag.resize(tagIndex + 1);
+        itemTypes.clear();
     }
-
-    ItemTypesWithTag& list = m_itemTypesByTag[tagIndex];
-    if (list.version != m_version)
+    for (int itemType = 0; itemType < static_cast<int>(m_ruleData.size()); ++itemType)
     {
-        list.itemTypes.clear();
-        for (int itemType = 0; itemType < static_cast<int>(m_ruleData.size()); ++itemType)
+        const ItemTagSet& tags = m_ruleData[itemType].tags;
+        for (size_t tagIndex = 0; tagIndex < m_itemTypesByTag.size(); ++tagIndex)
         {
-            if (m_ruleData[itemType].tags.Has(tag))
+            if (tags.Has(static_cast<ItemTag>(tagIndex)))
             {
-                list.itemTypes.push_back(itemType);
+                m_itemTypesByTag[tagIndex].push_back(itemType);
             }
         }
-        list.version = m_version;
     }
-    return list.itemTypes;
 }
 
 void ItemDatabase::UpdateDisplayName(ItemDefinition& definition) const
