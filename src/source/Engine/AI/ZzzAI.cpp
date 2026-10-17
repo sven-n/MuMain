@@ -409,6 +409,27 @@ void MoveHead(CHARACTER* c)
     }
 }
 
+void SmoothHeadAngles(vec3_t angles, const vec3_t targetAngles, float referenceFrames)
+{
+    constexpr int HeadRotationAxisCount = 2;
+    constexpr float ReferenceHeadTurnBlend = 0.2f;
+    const float boundedReferenceFrames = std::clamp(referenceFrames, 0.f, 1.f);
+    if (boundedReferenceFrames == 0.f)
+    {
+        return;
+    }
+
+    // Preserve the remaining angular gap across fractional 25-FPS reference frames.
+    const float blend = boundedReferenceFrames == 1.f
+                            ? ReferenceHeadTurnBlend
+                            : 1.f - std::pow(1.f - ReferenceHeadTurnBlend, boundedReferenceFrames);
+    for (int axis = 0; axis < HeadRotationAxisCount; ++axis)
+    {
+        const float turnStep = FarAngle(angles[axis], targetAngles[axis]) * blend;
+        angles[axis] = TurnAngle2(angles[axis], targetAngles[axis], turnStep);
+    }
+}
+
 void Damage(vec3_t soPosition, CHARACTER* tc, float AttackRange, int AttackPoint, bool Hit)
 {
     return;

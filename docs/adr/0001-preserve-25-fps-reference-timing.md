@@ -37,6 +37,16 @@ Below 25 FPS the factor remains capped at `1`. The simulation slows instead
 of taking oversized steps that can skip animation keys or destabilize legacy
 logic.
 
+## Head-turn smoothing
+
+Characters turn their heads toward their existing look targets by closing 20% of the remaining angular gap per 25-FPS reference frame.
+For a fractional reference frame, the blend is `1 - pow(0.8, FPS_ANIMATION_FACTOR)` rather than `0.2 * FPS_ANIMATION_FACTOR`.
+This preserves the exponential response over equal elapsed time at frame rates of at least 25 FPS.
+Below 25 FPS, each update remains capped at the original 20% blend.
+Yaw and pitch follow the shortest angular path; roll and look-target selection are unchanged.
+This also applies to helper NPCs using player models, such as Leo the Helper.
+No player configuration or FPS cap is required.
+
 ## Consequences
 
 - Raw per-frame increments are defects unless the value is intentionally
