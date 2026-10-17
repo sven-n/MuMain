@@ -128,8 +128,30 @@ void CMixItem::SetItem(ITEM* pItem, DWORD dwMixValue)
         m_wHarmonyOptionLevel = pItem->Jewel_Of_Harmony_OptionLevel;
     }
 
+    SetWingFlags(pItem->Type);
+    switch (pItem->Type)
+    {
+    case ITEM_LARGE_HEALING_POTION:
+    case ITEM_SMALL_COMPLEX_POTION:
+    case ITEM_MEDIUM_COMPLEX_POTION:
+    case ITEM_TALISMAN_OF_LUCK:
+    case ITEM_WHITE_CHERRY_BLOSSOM_BRANCH:
+    case ITEM_RED_CHERRY_BLOSSOM_BRANCH:
+    case ITEM_GOLDEN_CHERRY_BLOSSOM_BRANCH:
+    case ITEM_POTION + 100:
+        m_bCanStack = TRUE;
+        break;
+    }
+    m_dwMixValue = dwMixValue;
+
+    if (m_bCanStack == TRUE) m_iCount = m_iDurability;
+    else m_iCount = 1;
+}
+
+void CMixItem::SetWingFlags(int itemType)
+{
     // The small wings have none of the three flags.
-    switch (g_ItemDatabase.GetWingTier(pItem->Type))
+    switch (g_ItemDatabase.GetWingTier(itemType))
     {
     case Data::Items::WingTier::First:
         m_bIsWing = TRUE;
@@ -149,23 +171,6 @@ void CMixItem::SetItem(ITEM* pItem, DWORD dwMixValue)
         if (m_dwSpecialItem & RCP_SP_EXCELLENT)
             m_dwSpecialItem ^= RCP_SP_EXCELLENT;
     }
-    switch (pItem->Type)
-    {
-    case ITEM_LARGE_HEALING_POTION:
-    case ITEM_SMALL_COMPLEX_POTION:
-    case ITEM_MEDIUM_COMPLEX_POTION:
-    case ITEM_TALISMAN_OF_LUCK:
-    case ITEM_WHITE_CHERRY_BLOSSOM_BRANCH:
-    case ITEM_RED_CHERRY_BLOSSOM_BRANCH:
-    case ITEM_GOLDEN_CHERRY_BLOSSOM_BRANCH:
-    case ITEM_POTION + 100:
-        m_bCanStack = TRUE;
-        break;
-    }
-    m_dwMixValue = dwMixValue;
-
-    if (m_bCanStack == TRUE) m_iCount = m_iDurability;
-    else m_iCount = 1;
 }
 
 int CMixItemInventory::AddItem(ITEM* pItem)
