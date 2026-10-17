@@ -532,6 +532,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
                 {
                     FRAME_PROFILE(Objects);
                     Render::Lighting::LightSourceScope mapLights(Render::Lighting::LightSource::Map);
+                    mu::ScopedReorderableDraws reorderable;
                     RenderObjects();
                 }
                 { FRAME_PROFILE(Terrain); RenderTerrain(false); }
@@ -542,6 +543,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     {
         FRAME_PROFILE(Objects);
         Render::Lighting::LightSourceScope mapLights(Render::Lighting::LightSource::Map);
+        mu::ScopedReorderableDraws reorderable;
         RenderObjects();
     }
 
@@ -573,7 +575,11 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         RenderBoids(true);
 
     if (renderStatic)
-        { FRAME_PROFILE(Objects); RenderObjects_AfterCharacter(); }
+    {
+        FRAME_PROFILE(Objects);
+        mu::ScopedReorderableDraws reorderable;
+        RenderObjects_AfterCharacter();
+    }
 
     { FRAME_PROFILE(Joints); RenderJoints(byWaterMap); }
 

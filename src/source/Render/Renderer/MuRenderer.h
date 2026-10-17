@@ -417,6 +417,21 @@ public:
     // image. The first call of a frame counts; a frame without one is not
     // processed.
     virtual void EndSceneGeometry() {}
+
+    // Opaque, depth-writing draws recorded between these two move ahead of the others and are
+    // grouped by state, to cut state changes; depth decides what shows, and the others keep
+    // their order after them. Use ScopedReorderableDraws.
+    [[nodiscard]] virtual std::size_t BeginReorderableDraws()
+    {
+        return 0u;
+    }
+    virtual void EndReorderableDraws(std::size_t /*mark*/) {}
+    // On by default; the benchmark turns it off to measure it.
+    virtual void SetDrawReorderingEnabled(bool /*enabled*/) {}
+    [[nodiscard]] virtual bool IsDrawReorderingEnabled() const
+    {
+        return false;
+    }
     // Returns false when post-processing was requested but this backend could
     // not build it; frames then stay unprocessed.
     [[nodiscard]] virtual bool SetPostProcessing(bool enabled)
@@ -770,6 +785,22 @@ public:
     ScopedBloomExclusion(const ScopedBloomExclusion&) = delete;
     ScopedBloomExclusion& operator=(const ScopedBloomExclusion&) = delete;
 };
+// The draws recorded in its lifetime may be reordered (BeginReorderableDraws).
+class ScopedReorderableDraws
+{
+public:
+    ScopedReorderableDraws() : m_mark(GetRenderer().BeginReorderableDraws()) {}
+    ~ScopedReorderableDraws()
+    {
+        GetRenderer().EndReorderableDraws(m_mark);
+    }
+    ScopedReorderableDraws(const ScopedReorderableDraws&) = delete;
+    ScopedReorderableDraws& operator=(const ScopedReorderableDraws&) = delete;
+
+private:
+    std::size_t m_mark;
+};
+
 [[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow, std::string_view fontFamily,
                                       std::string_view renderBackend, float normalPointSize,
                                       float bigPointSize, float fixedPointSize);

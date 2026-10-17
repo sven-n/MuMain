@@ -10,6 +10,8 @@
 #endif
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
+#include "Core/Utilities/FrameProfiler.h"
+#include <optional>
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -2665,10 +2667,20 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
 
 void RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
 {
-    if (Calc_RenderObject(o, Translate, Select, ExtraMon) == false)
+    // Split only for map objects; characters' parts come through here too.
+    const bool mapObject = FrameProfiler::CurrentPass() == FrameProfiler::Pass::Objects;
     {
-        return;
+        std::optional<FrameProfiler::Scope> animate;
+        if (mapObject)
+            animate.emplace(FrameProfiler::Pass::ObjectsAnimate);
+        if (Calc_RenderObject(o, Translate, Select, ExtraMon) == false)
+        {
+            return;
+        }
     }
+    std::optional<FrameProfiler::Scope> draw;
+    if (mapObject)
+        draw.emplace(FrameProfiler::Pass::ObjectsDraw);
     Draw_RenderObject(o, Translate, Select, ExtraMon);
 }
 

@@ -153,6 +153,15 @@ const std::vector<Segment>& Catalog()
              c.anisotropy = 1;
              return c;
          }()},
+
+        {"render.sort.off",
+         "Opaque map object draws submitted as recorded, not first and grouped by pipeline and texture.", TagOrder,
+         []
+         {
+             SceneConfig c;
+             c.disableDrawReordering = true;
+             return c;
+         }()},
     };
     return s_segments;
 }
@@ -167,6 +176,7 @@ const TagName kTagNames[] = {
     {TagBaseline, "baseline"}, {TagEffects, "effects"}, {TagSprites, "sprites"},   {TagParticles, "particles"},
     {TagJoints, "joints"},     {TagModels, "models"},   {TagWildlife, "wildlife"}, {TagWings, "wings"},
     {TagShadows, "shadows"},   {TagLook, "look"},       {TagTextures, "textures"}, {TagAntialiasing, "antialiasing"},
+    {TagOrder, "order"},
 };
 
 bool HasTagNamed(uint32_t tags, const std::string& wanted)

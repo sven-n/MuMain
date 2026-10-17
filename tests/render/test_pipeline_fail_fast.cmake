@@ -235,7 +235,7 @@ if(cleanup_position EQUAL -1
 endif()
 
 string(FIND "${renderer_source}" "RenderSkinnedTriangles(std::span" skinned_start)
-string(FIND "${renderer_source}" "const Uint32 paletteRowOffset" skinned_pipeline_end)
+string(FIND "${renderer_source}" "const std::optional<BonePaletteSlot> palette" skinned_pipeline_end)
 if(skinned_start EQUAL -1 OR skinned_pipeline_end LESS skinned_start)
     message(FATAL_ERROR "RenderSkinnedTriangles pipeline selection is missing")
 endif()
