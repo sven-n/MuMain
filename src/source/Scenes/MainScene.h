@@ -61,6 +61,10 @@ bool IsBodyShadowsDisabledDebug();
 void SetDisableJoints(bool disabled);
 bool IsJointsDisabledDebug();
 
+// Joint trail segments and particles outside the view frustum are not drawn; this draws them anyway.
+void SetDisableEffectCulling(bool disabled);
+bool IsEffectCullingDisabledDebug();
+
 // DXP-23 diagnostic: MODEL_WING_OF_RUIN's own body render (RenderPartObjectBody(), ZzzObject.cpp
 // ~6997-7008) draws its mesh THREE separate times per frame -- a base texture pass, an animated-
 // luminosity overlay pass, and a second glow-layer pass (BITMAP_3RDWING_LAYER) -- none chrome-flagged

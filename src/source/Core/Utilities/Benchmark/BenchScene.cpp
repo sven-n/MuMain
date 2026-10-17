@@ -33,6 +33,7 @@ SceneConfig CaptureCurrentConfig()
     config.disableWingShadow = IsWingShadowDisabledDebug();
     config.disableWingExtraLayers = IsWingExtraLayersDisabledDebug();
     config.disableBodyShadows = IsBodyShadowsDisabledDebug();
+    config.disableEffectCulling = IsEffectCullingDisabledDebug();
 
     s_overridesBeforeRun = Render::Look::SessionOverrides();
     s_antialiasingBeforeRun = mu::GetRenderer().GetAntialiasingSamples();
@@ -54,6 +55,7 @@ void ApplyConfig(const SceneConfig& config)
     SetDisableWingShadow(config.disableWingShadow);
     SetDisableWingExtraLayers(config.disableWingExtraLayers);
     SetDisableBodyShadows(config.disableBodyShadows);
+    SetDisableEffectCulling(config.disableEffectCulling);
 
     // Only an "off" is set, so what the run found otherwise stays in place.
     Render::Look::FeatureOverrides overrides = s_overridesBeforeRun;
