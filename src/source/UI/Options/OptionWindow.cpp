@@ -175,6 +175,36 @@ static const int s_NumFonts = sizeof(s_Fonts) / sizeof(s_Fonts[0]);
 static const int s_FpsCapValues[] = { 24, 30, 60, 120, 144, -1 };
 static const int s_NumFpsCapValues = sizeof(s_FpsCapValues) / sizeof(s_FpsCapValues[0]);
 
+// The Video tab's Anti-aliasing and Anisotropic filtering rows, in the values config.ini holds
+// ([Render] Antialiasing, Anisotropy); the first entry of each is "Off".
+static constexpr int s_AntialiasingValues[] = {0, 2, 4, 8};
+static constexpr int s_AnisotropyValues[] = {1, 2, 4, 8, 16};
+
+namespace
+{
+// The row's entry for a config value: the largest entry at or below it, as GameConfig rounds.
+template <std::size_t N> int FindValueIndex(const int (&values)[N], int value)
+{
+    int index = 0;
+    for (int i = 0; i < static_cast<int>(N); ++i)
+    {
+        if (values[i] <= value)
+            index = i;
+    }
+    return index;
+}
+
+template <std::size_t N> std::vector<Rml::String> MultiplierLabels(const int (&values)[N])
+{
+    std::vector<Rml::String> labels;
+    labels.reserve(N);
+    labels.push_back(StringUtils::WideToNarrow(I18N::Game::Off));
+    for (std::size_t i = 1; i < N; ++i)
+        labels.push_back(std::to_string(values[i]) + "x");
+    return labels;
+}
+} // namespace
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -305,6 +335,16 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("disable_wing_shadow_label", &model.disableWingShadowLabel);
     c.Bind("enhanced_graphics", &model.enhancedGraphics);
     c.Bind("enhanced_graphics_label", &model.enhancedGraphicsLabel);
+    c.Bind("antialiasing_labels", &model.antialiasingLabels);
+    c.Bind("antialiasing_index", &model.antialiasingIndex);
+    c.Bind("antialiasing_row_label", &model.antialiasingRowLabel);
+    c.Bind("antialiasing_value_label", &model.antialiasingValueLabel);
+    c.Bind("antialiasing_tooltip", &model.antialiasingTooltip);
+    c.Bind("anisotropy_labels", &model.anisotropyLabels);
+    c.Bind("anisotropy_index", &model.anisotropyIndex);
+    c.Bind("anisotropy_row_label", &model.anisotropyRowLabel);
+    c.Bind("anisotropy_value_label", &model.anisotropyValueLabel);
+    c.Bind("anisotropy_tooltip", &model.anisotropyTooltip);
 
     // Interface/UI tab.
     c.Bind("show_fps_counter", &model.showFpsCounter);
@@ -586,7 +626,7 @@ void mu::ui::window::COptionWindow::RmlClickSelectTab(int nTab)
 
 void mu::ui::window::COptionWindow::RmlToggleDropdown(int dropdownId)
 {
-    if (dropdownId < 0 || dropdownId > 5)
+    if (dropdownId < 0 || dropdownId > 7)
         return;
     // Toggle: clicking the currently-open one's own value box closes it; clicking any other
     // (including a different dropdown's) overwrites m_iOpenDropdown, which closes whatever else
@@ -618,6 +658,12 @@ void mu::ui::window::COptionWindow::RmlDropdownOptionClick(int dropdownId, int o
         break;
     case 5:
         RmlUIScaleChanged(optionIndex);
+        break;
+    case 6:
+        RmlAntialiasingChanged(optionIndex);
+        break;
+    case 7:
+        RmlAnisotropyChanged(optionIndex);
         break;
     default:
         break;
@@ -819,6 +865,27 @@ void mu::ui::window::COptionWindow::RmlToggleEnhancedGraphics()
 {
     const bool enhanced = Render::Look::ActiveLookPreset() == LookPreset::Enhanced;
     Render::Look::ApplyLookPreset(enhanced ? LookPreset::Classic : LookPreset::Enhanced);
+}
+
+// MuSetAntialiasingPreference saves the count and applies it while the Enhanced look is active.
+void mu::ui::window::COptionWindow::RmlAntialiasingChanged(int index)
+{
+    // See RmlResolutionChanged's own comment -- same settle-frame guard applies here.
+    if (m_rmlSyncCount < kRmlSelectSettleFrames)
+        return;
+    if (index < 0 || index >= static_cast<int>(std::size(s_AntialiasingValues)))
+        return;
+    MuSetAntialiasingPreference(s_AntialiasingValues[index]);
+}
+
+void mu::ui::window::COptionWindow::RmlAnisotropyChanged(int index)
+{
+    // See RmlResolutionChanged's own comment -- same settle-frame guard applies here.
+    if (m_rmlSyncCount < kRmlSelectSettleFrames)
+        return;
+    if (index < 0 || index >= static_cast<int>(std::size(s_AnisotropyValues)))
+        return;
+    MuSetAnisotropyPreference(s_AnisotropyValues[index]);
 }
 
 void mu::ui::window::COptionWindow::RmlToggleShowFpsCounter()
@@ -1204,6 +1271,10 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     syncLabel(model.disableBoidsLabel, "disable_boids_label", I18N::Game::DisableAmbientWildlife);
     syncLabel(model.disableWingShadowLabel, "disable_wing_shadow_label", I18N::Game::DisableWingShadow);
     syncLabel(model.enhancedGraphicsLabel, "enhanced_graphics_label", I18N::Game::EnhancedGraphics);
+    syncLabel(model.antialiasingRowLabel, "antialiasing_row_label", I18N::Game::AntiAliasing);
+    syncLabel(model.antialiasingTooltip, "antialiasing_tooltip", I18N::Game::AntiAliasingTooltip);
+    syncLabel(model.anisotropyRowLabel, "anisotropy_row_label", I18N::Game::AnisotropicFiltering);
+    syncLabel(model.anisotropyTooltip, "anisotropy_tooltip", I18N::Game::AnisotropicFilteringTooltip);
     syncLabel(model.showFpsCounterLabel, "show_fps_counter_label", I18N::Game::ShowFPSCounter);
     syncLabel(model.showDebugInfoLabel, "show_debug_info_label", I18N::Game::ShowDebugInfo);
     syncLabel(model.themeRowLabel, "theme_row_label", I18N::Game::UITheme);
@@ -1295,6 +1366,30 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
         model.enhancedGraphics = enhancedGraphics;
         m_RmlView.MarkDirty("enhanced_graphics");
     }
+
+    // Rebuilt every sync for the localized "Off", as the FPS Limit row's "Uncapped".
+    const auto syncMultiplierRow = [&](std::vector<Rml::String>& labels, const char* labelsName, int& index,
+                                       const char* indexName, Rml::String& valueLabel, const char* valueName,
+                                       std::vector<Rml::String> newLabels, int newIndex)
+    {
+        if (labels != newLabels)
+        {
+            labels = std::move(newLabels);
+            m_RmlView.MarkDirty(labelsName);
+        }
+        if (index != newIndex)
+        {
+            index = newIndex;
+            m_RmlView.MarkDirty(indexName);
+        }
+        syncDropdownValue(valueLabel, valueName, labels, index);
+    };
+    syncMultiplierRow(model.antialiasingLabels, "antialiasing_labels", model.antialiasingIndex, "antialiasing_index",
+                      model.antialiasingValueLabel, "antialiasing_value_label", MultiplierLabels(s_AntialiasingValues),
+                      FindValueIndex(s_AntialiasingValues, GameConfig::GetInstance().GetAntialiasing()));
+    syncMultiplierRow(model.anisotropyLabels, "anisotropy_labels", model.anisotropyIndex, "anisotropy_index",
+                      model.anisotropyValueLabel, "anisotropy_value_label", MultiplierLabels(s_AnisotropyValues),
+                      FindValueIndex(s_AnisotropyValues, GameConfig::GetInstance().GetAnisotropy()));
 
     const bool showFpsCounter = GetShowFpsCounter();
     const bool showDebugInfo = GetShowDebugInfo();

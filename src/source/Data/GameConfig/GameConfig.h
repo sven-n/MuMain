@@ -146,6 +146,9 @@ public:
     // only, same as GetSortParticleDraws() above: no setter, no in-game options-window exposure.
     std::wstring GetRenderBackend() const { return m_renderBackend; }
 
+    // [UI] EnableAnimationTaskPool: manual config.ini edit only, like the two above.
+    bool GetEnableAnimationTaskPool() const { return m_enableAnimationTaskPool; }
+
     // Helpers
     static std::wstring BinaryToHex(const BYTE* data, DWORD size);
     static std::vector<BYTE> HexToBinary(const std::wstring& hex);
@@ -183,6 +186,7 @@ private:
     std::wstring m_fontSelection;
     std::wstring m_rmlTheme;
     int m_uiScalePercent;
+    bool m_enableAnimationTaskPool;
 
     int m_zoom;
     bool m_sortParticleDraws;

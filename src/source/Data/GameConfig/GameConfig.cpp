@@ -85,6 +85,8 @@ void GameConfig::Load()
     m_rmlTheme = ReadString(CfgSectionUI, CfgKeyRmlTheme, CfgDefaultRmlTheme);
     m_uiScalePercent = std::clamp(ReadInt(CfgSectionUI, CfgKeyUIScalePercent, CfgDefaultUIScalePercent),
                                   CfgDefaults::CfgMinUIScalePercent, CfgDefaults::CfgMaxUIScalePercent);
+    m_enableAnimationTaskPool =
+        ReadBool(CfgSectionUI, CfgKeyEnableAnimationTaskPool, CfgDefaultEnableAnimationTaskPool);
 
     m_zoom = ReadInt(CfgSectionCamera, CfgKeyZoom, CfgDefaultZoom);
     m_sortParticleDraws = ReadBool(CfgSectionRender, CfgKeySortParticleDraws, CfgDefaultSortParticleDraws);
@@ -115,6 +117,7 @@ void GameConfig::Load()
     RemoveObsoleteKey(CfgSectionAudio,    L"VolumeLevel");    // legacy single-volume key
     RemoveObsoleteKey(CfgSectionLogin,    L"Version");        // launcher metadata, never read by client
     RemoveObsoleteKey(CfgSectionLogin,    L"TestVersion");    // launcher metadata, never read by client
+    RemoveObsoleteKey(CfgSectionRender,   L"CoreProfile");    // OpenGL context flag, unused since SDL GPU
     RemoveObsoleteSection(CfgSectionGraphics);                // empty after RenderTextType + ColorDepth removal
     RemoveObsoleteSection(L"PARTITION");                      // launcher metadata, never read by client
 }

@@ -110,7 +110,7 @@
 		     .option-dropdown-value, so clicking an option doesn't also bubble into the toggle
 		     handler), and each data-for-generated .option-dropdown-option calls
 		     option_dropdown_option_click(N, it_index) on click. Same shape reused below for FPS
-		     Limit/UI Theme/UI Scale/Language/Font. -->
+		     Limit/Anti-aliasing/Anisotropic filtering/UI Theme/UI Scale/Language/Font. -->
 		<div class="option-row option-select-row">
 			<span class="option-row-label">{{resolution_row_label}}</span>
 			<div class="option-dropdown">
@@ -149,6 +149,28 @@
 			<span class="option-row-label">{{enhanced_graphics_label}}</span>
 			<div class="checkbox-box" data-class-checked="enhanced_graphics">
 				<div class="checkbox-tick"></div>
+			</div>
+		</div>
+		<div class="option-row option-select-row" data-attr-data-hint="antialiasing_tooltip">
+			<span class="option-row-label">{{antialiasing_row_label}}</span>
+			<div class="option-dropdown">
+				<div class="option-dropdown-value" data-event-click="option_toggle_dropdown(6)">{{antialiasing_value_label}}</div>
+				<div class="option-dropdown-list" data-class-hidden="open_dropdown != 6">
+					<div class="option-dropdown-option" data-for="label : antialiasing_labels"
+					     data-class-selected="it_index == antialiasing_index"
+					     data-event-click="option_dropdown_option_click(6, it_index)">{{label}}</div>
+				</div>
+			</div>
+		</div>
+		<div class="option-row option-select-row" data-attr-data-hint="anisotropy_tooltip">
+			<span class="option-row-label">{{anisotropy_row_label}}</span>
+			<div class="option-dropdown">
+				<div class="option-dropdown-value" data-event-click="option_toggle_dropdown(7)">{{anisotropy_value_label}}</div>
+				<div class="option-dropdown-list" data-class-hidden="open_dropdown != 7">
+					<div class="option-dropdown-option" data-for="label : anisotropy_labels"
+					     data-class-selected="it_index == anisotropy_index"
+					     data-event-click="option_dropdown_option_click(7, it_index)">{{label}}</div>
+				</div>
 			</div>
 		</div>
 	</div>

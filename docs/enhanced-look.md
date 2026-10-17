@@ -32,8 +32,10 @@ Enhanced preset" below).
   A missing or unknown `Look` counts as Classic, so the classic look stays
   until a player ticks "Enhanced graphics". Classic renders without
   anti-aliasing whatever `Antialiasing` says; Enhanced uses its count, lowered
-  to what the GPU supports. `$msaa off|2|4|8` in the chat box changes and saves
-  the count (on a slow GPU, `$msaa off` keeps Enhanced without anti-aliasing).
+  to what the GPU supports. The options window's Anti-aliasing row, or
+  `$msaa off|2|4|8` in the chat box, changes and saves the count (on a slow GPU,
+  Off keeps Enhanced without anti-aliasing). The Anisotropic filtering row sets
+  `Anisotropy`.
   The anisotropy level applies to every texture with mip levels: world
   textures in Enhanced, and upscaled textures (an optional asset pack) in both
   looks, because they are always drawn smaller than they are stored.

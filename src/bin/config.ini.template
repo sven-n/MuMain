@@ -1,5 +1,6 @@
 [LOGIN]
 RememberMe=0
+SavePassword=0
 Language=Eng
 EncryptedUsername=
 EncryptedPassword=
@@ -18,8 +19,17 @@ Locale=en
 Font=
 RmlTheme=legacy
 UIScalePercent=100
+[Camera]
+Zoom=1735
 [Render]
 VSync=1
 Look=Classic
 Anisotropy=8
 Antialiasing=4
+DisableEffects=0
+DisableParticles=0
+DisableSkillEffectModels=0
+DisableBoids=0
+DisableWingShadow=0
+FpsCap=-1
+Backend=default

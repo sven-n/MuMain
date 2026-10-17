@@ -1496,6 +1496,21 @@
   <data name="Uncapped" xml:space="preserve">
     <value>Uncapped</value>
   </data>
+  <data name="Off" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="Anti-aliasing" xml:space="preserve">
+    <value>Anti-aliasing</value>
+  </data>
+  <data name="Anti-aliasing Tooltip" xml:space="preserve">
+    <value>Smooths edges in the Enhanced look; Classic always renders without it</value>
+  </data>
+  <data name="Anisotropic filtering" xml:space="preserve">
+    <value>Anisotropic filtering</value>
+  </data>
+  <data name="Anisotropic Filtering Tooltip" xml:space="preserve">
+    <value>Keeps textures sharp at a slant: world textures in the Enhanced look, upscaled textures in both looks</value>
+  </data>
   <data name="Close388" xml:space="preserve">
     <value>Close</value>
     <comment>legacy_id=388,1002</comment>

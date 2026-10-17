@@ -44,20 +44,22 @@ namespace CfgKeys
     // Rml::Context::SetDensityIndependentPixelRatio(). Only RCSS authored in `dp` units responds
     // to this; existing `px`-authored windows are unaffected until retrofitted.
     inline constexpr wchar_t CfgKeyUIScalePercent[] = L"UIScalePercent";
+    // Animates characters on worker threads when many are in view. Off unless set here or
+    // started with --enable-taskpool; manual config.ini edit only.
+    inline constexpr wchar_t CfgKeyEnableAnimationTaskPool[] = L"EnableAnimationTaskPool";
 
     // Camera
     inline constexpr wchar_t CfgKeyZoom[] = L"Zoom";
 
     // Render
-    // Core Profile GL context flip. 0 = compatibility (rollback), 1 = core.
-    inline constexpr wchar_t CfgKeyCoreProfile[] = L"CoreProfile";
     inline constexpr wchar_t CfgKeySortParticleDraws[] = L"SortParticleDraws";
     inline constexpr wchar_t CfgKeyVSync[] = L"VSync";
     // The look preset, the player's only look setting: Classic or Enhanced (texture
     // filtering, Enhanced lighting, dynamic model lights, the light mood at full
     // strength and post-processing). A missing or invalid value is the default.
     inline constexpr wchar_t CfgKeyLook[] = L"Look";
-    // Anisotropy of the Enhanced texture filtering (acts only while it is on).
+    // Anisotropic filtering of every texture with mip levels: world textures in the Enhanced
+    // look, upscaled textures in both looks. 1 is off.
     inline constexpr wchar_t CfgKeyAnisotropy[] = L"Anisotropy";
     // Multisample anti-aliasing of the Enhanced look: 0 (off), 2, 4 or 8 samples per pixel.
     inline constexpr wchar_t CfgKeyAntialiasing[] = L"Antialiasing";
@@ -119,8 +121,7 @@ namespace CfgDefaults
     inline constexpr int CfgMinUIScalePercent = 75;
     inline constexpr int CfgMaxUIScalePercent = 150;
 
-    // Legacy config compatibility only. SDL GPU ignores this key and default.
-    inline constexpr bool CfgDefaultCoreProfile = true;
+    inline constexpr bool CfgDefaultEnableAnimationTaskPool = false;
 
     // Opt-in until real effects have been visually checked on target hardware.
     inline constexpr bool CfgDefaultSortParticleDraws = false;
@@ -128,7 +129,7 @@ namespace CfgDefaults
 
     // The look a missing or invalid [Render] Look stands for.
     inline constexpr wchar_t CfgDefaultLook[] = L"Classic";
-    // 8x anisotropy while texture filtering is on.
+    // 8x anisotropy on textures with mip levels.
     inline constexpr int CfgDefaultAnisotropy = 8;
 
     // The samples the Enhanced look renders with (Classic renders without); a

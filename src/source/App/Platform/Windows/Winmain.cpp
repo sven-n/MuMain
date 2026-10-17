@@ -378,6 +378,14 @@ void MuSetTextureFilteringEnabled(bool enabled)
     Bitmaps.SetTextureFiltering(enabled, GameConfig::GetInstance().GetAnisotropy());
 }
 
+void MuSetAnisotropyPreference(int anisotropy)
+{
+    GameConfig& config = GameConfig::GetInstance();
+    config.SetAnisotropy(anisotropy);
+    config.Save();
+    Bitmaps.SetAnisotropy(config.GetAnisotropy());
+}
+
 // Whether the active look renders with multisampling (Enhanced does, Classic does not).
 static bool g_antialiasingActive = false;
 
@@ -2003,21 +2011,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // Load game settings from INI file first
     GameConfig::GetInstance().Load();
 
-    // Check if animation task pool should be enabled (disabled by default)
+    // The animation task pool is off unless config.ini or the command line turns it on.
+    if (GameConfig::GetInstance().GetEnableAnimationTaskPool() || wcsstr(GetCommandLineW(), L"--enable-taskpool"))
     {
-        wchar_t configPath[MAX_PATH];
-        GetModuleFileNameW(nullptr, configPath, MAX_PATH);
-        wchar_t* lastSlash = wcsrchr(configPath, L'\\');
-        if (!lastSlash)
-            lastSlash = wcsrchr(configPath, L'/');
-        if (lastSlash)
-            *(lastSlash + 1) = L'\0';
-        wcscat(configPath, L"config.ini");
-        int enableTaskPool = GetPrivateProfileIntW(L"UI", L"EnableAnimationTaskPool", 0, configPath);
-        if (enableTaskPool != 0 || wcsstr(GetCommandLineW(), L"--enable-taskpool"))
-        {
-            g_bDisableAnimationTaskPool = false;
-        }
+        g_bDisableAnimationTaskPool = false;
     }
 
     // Check for command line server override

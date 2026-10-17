@@ -46,16 +46,30 @@ Settings are written next to the executable as `config.ini`. The options
 window writes to these sections:
 
 - `[Window]` - width, height, windowed flag.
-- `[Render]` - the persisted `VSync` preference. `$vsync on` and `$vsync off`
-  update it; startup and fullscreen/resolution changes reapply it before the
-  next frame begins. Also `Backend` (`default`/`vulkan`/`direct3d12`/`metal`,
-  case-insensitive, `d3d12` accepted as an alias for `direct3d12`) --
-  manual-edit-only, not exposed in the options window or written by it;
-  forces a specific SDL_gpu GPU backend at startup, falling back to SDL's
-  own auto-pick with a logged warning if the requested one is unavailable.
-  `Look` (default `Classic`): the "Enhanced graphics" checkbox on the Video
-  tab, ticked for the Enhanced look and unticked for Classic, applied at once;
-  see [`enhanced-look.md`](enhanced-look.md).
+- `[Render]` - set from the Video and Graphics tabs, each applied at once:
+  - `VSync`: `$vsync on` and `$vsync off` update it too; startup and
+    fullscreen/resolution changes reapply it before the next frame begins.
+  - `FpsCap`: the frame limit while VSync is off, `-1` for none.
+  - `Look` (default `Classic`): the "Enhanced graphics" checkbox, ticked for
+    the Enhanced look; see [`enhanced-look.md`](enhanced-look.md).
+  - `Antialiasing` (`0`, `2`, `4`, `8`; default `4`): the Anti-aliasing row,
+    the samples of the Enhanced look. Classic always renders without it.
+  - `Anisotropy` (`1` is off, up to `16`; default `8`): the Anisotropic
+    filtering row, for every texture with mip levels: world textures in the
+    Enhanced look, upscaled textures in both.
+  - `DisableEffects`, `DisableParticles`, `DisableSkillEffectModels`,
+    `DisableBoids`, `DisableWingShadow`: the Graphics tab's toggles.
+
+  Set by hand only, never written by the game:
+  - `Backend` (`default`/`vulkan`/`direct3d12`/`metal`, case-insensitive,
+    `d3d12` accepted as an alias for `direct3d12`) forces a specific SDL_gpu
+    GPU backend at startup, falling back to SDL's own auto-pick with a logged
+    warning if the requested one is unavailable.
+  - `SortParticleDraws` (`0`/`1`) sorts particle draws back to front.
+- `[UI]` - `Locale`, `Font`, `RmlTheme` and `UIScalePercent` from the UI and
+  General tabs. `EnableAnimationTaskPool` (`0`/`1`, set by hand only, like the
+  `--enable-taskpool` command-line flag) animates characters on worker
+  threads.
 - `[Audio]` - volumes.
 - `[Login]` - language, and the remembered-credential keys (`RememberMe`,
   `SavePassword`, `EncryptedUsername`, `EncryptedPassword`); see
@@ -66,7 +80,8 @@ window writes to these sections:
 
 Missing keys fall back to compile-time defaults from
 `src/source/Data/GameConfig/GameConfigConstants.h`. If `config.ini` doesn't exist,
-it's created the first time anything calls `Save()`.
+the build seeds it from `src/bin/config.ini.template`, which lists every key the
+game writes, in the order `Save()` writes them, plus `Backend`.
 
 ## Remembering login credentials
 

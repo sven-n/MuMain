@@ -116,7 +116,8 @@ namespace mu::ui::window
         void RmlClickSelectTab(int nTab);
         // Custom-dropdown mechanism (option_window.rml's own .option-dropdown family; RmlUi's
         // native <select> isn't used here) -- dropdownId is 0=resolution,1=fpsCap,2=theme,
-        // 3=language,4=font,5=uiScale, matching model.openDropdown's own comment (OptionWindow.h).
+        // 3=language,4=font,5=uiScale,6=antialiasing,7=anisotropy, matching model.openDropdown's
+        // own comment (OptionWindow.h).
         // RmlDropdownOptionClick dispatches to RmlResolutionChanged()/RmlFpsCapChanged()/etc. per
         // dropdownId.
         void RmlToggleDropdown(int dropdownId);
@@ -149,6 +150,10 @@ namespace mu::ui::window
         // The look preset is read live (SyncRmlModel), since `$look classic|enhanced` changes it
         // outside this window too.
         void RmlToggleEnhancedGraphics();
+        // Video tab's Anti-aliasing and Anisotropic filtering rows; their values are read live
+        // from GameConfig, since `$msaa` changes the first outside this window too.
+        void RmlAntialiasingChanged(int index);
+        void RmlAnisotropyChanged(int index);
         // Interface/UI tab -- Show FPS Counter/Show Debug Info stay ephemeral (SceneManager.h
         // globals, no GameConfig persistence), matching $fpscounter/$details today.
         void RmlToggleShowFpsCounter();
@@ -184,7 +189,8 @@ namespace mu::ui::window
             // Which custom dropdown (.option-dropdown) is currently open, -1 = none. A single
             // field rather than one bool per dropdown gives exclusivity for free -- opening one
             // overwrites whichever other id was here, no separate "close the others" step needed.
-            // 0=resolution, 1=fpsCap, 2=theme, 3=language, 4=font, 5=uiScale (RmlToggleDropdown()/
+            // 0=resolution, 1=fpsCap, 2=theme, 3=language, 4=font, 5=uiScale, 6=antialiasing,
+            // 7=anisotropy (RmlToggleDropdown()/
             // RmlDropdownOptionClick()'s own ids). Replaces RmlUi's native <select>/<option>
             // (WidgetDropDown) entirely -- see option_window.rml's own history for why: that
             // widget's own generated selectbox/selectvalue/selectarrow sub-elements need CSS this
@@ -252,6 +258,17 @@ namespace mu::ui::window
             // The look preset: ticked is Enhanced, unticked Classic.
             bool enhancedGraphics = false;
             Rml::String enhancedGraphicsLabel;
+            // [Render] Antialiasing (the Enhanced look's samples) and Anisotropy.
+            std::vector<Rml::String> antialiasingLabels;
+            int antialiasingIndex = 0;
+            Rml::String antialiasingRowLabel;
+            Rml::String antialiasingValueLabel;
+            Rml::String antialiasingTooltip;
+            std::vector<Rml::String> anisotropyLabels;
+            int anisotropyIndex = 0;
+            Rml::String anisotropyRowLabel;
+            Rml::String anisotropyValueLabel;
+            Rml::String anisotropyTooltip;
 
             // Interface/UI tab.
             bool showFpsCounter = false;

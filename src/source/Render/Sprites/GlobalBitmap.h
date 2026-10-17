@@ -196,6 +196,11 @@ public:
     // applies it between frames through UpdateTextureFiltering, which also
     // builds the mip chains that world draws asked for since the last frame.
     void SetTextureFiltering(bool enabled, int anisotropy);
+    // Keeps the requested filtering state; the shared samplers are rebuilt between frames.
+    void SetAnisotropy(int anisotropy)
+    {
+        SetTextureFiltering(m_textureFilteringRequested, anisotropy);
+    }
     void UpdateTextureFiltering();
     bool IsTextureFilteringEnabled() const
     {
