@@ -17,9 +17,32 @@ foreach(required_text IN ITEMS CfgKeyVSync CfgDefaultVSync CfgKeyLook CfgDefault
     endif()
 endforeach()
 
-# The look preset is the only setting of the Enhanced features: no per-feature switch.
-foreach(forbidden_text IN ITEMS TextureFiltering EnhancedLighting DynamicLights PostProcessing BloomStrength
-        LightMood)
+# The look preset turns the Enhanced features on; the player can switch these off one by one
+# ([Render] EnhancedLighting, DynamicLights, LightMood, PostProcessing; on by default).
+foreach(feature IN ITEMS EnhancedLighting DynamicLights LightMood PostProcessing)
+    foreach(required_text IN ITEMS "CfgKey${feature}[] = L\"${feature}\"" "CfgDefault${feature} = true;")
+        string(FIND "${config_constants}" "${required_text}" found_at)
+        if(found_at EQUAL -1)
+            message(FATAL_ERROR "GameConfigConstants.h must define the Enhanced feature switch: ${required_text}")
+        endif()
+    endforeach()
+
+    string(SUBSTRING "${feature}" 0 1 first_letter)
+    string(SUBSTRING "${feature}" 1 -1 other_letters)
+    string(TOLOWER "${first_letter}" first_letter)
+    set(member "m_${first_letter}${other_letters}")
+    foreach(required_text IN ITEMS
+            "${member} = ReadBool(CfgSectionRender, CfgKey${feature}, CfgDefault${feature});"
+            "WriteBool(CfgSectionRender, CfgKey${feature}, ${member});")
+        string(FIND "${config_source}" "${required_text}" found_at)
+        if(found_at EQUAL -1)
+            message(FATAL_ERROR "GameConfig.cpp must persist the Enhanced feature switch through: ${required_text}")
+        endif()
+    endforeach()
+endforeach()
+
+# Texture filtering and the bloom strength follow the look preset: no switch of their own.
+foreach(forbidden_text IN ITEMS TextureFiltering BloomStrength)
     string(FIND "${config_constants}" "CfgKey${forbidden_text}" found_at)
     if(NOT found_at EQUAL -1)
         message(FATAL_ERROR "GameConfigConstants.h must not define a per-feature key CfgKey${forbidden_text}")
@@ -86,7 +109,8 @@ if(preset_position EQUAL -1 OR NOT developer_end LESS preset_position)
     message(FATAL_ERROR "muConsoleDebug.cpp must offer $look classic|enhanced outside the developer block")
 endif()
 foreach(forbidden_text IN ITEMS "SetEnhancedLightingPreference" "SetDynamicLightsPreference"
-        "SetPostProcessingPreference" "MuSetTextureFilteringPreference" "LightMood::HandleCommand(")
+        "SetPostProcessingPreference" "MuSetTextureFilteringPreference" "LightMood::HandleCommand("
+        "ChooseEnhancedFeature(")
     string(FIND "${console_source}" "${forbidden_text}" found_at)
     if(NOT found_at EQUAL -1)
         message(FATAL_ERROR "muConsoleDebug.cpp must not persist a per-feature switch: ${forbidden_text}")
