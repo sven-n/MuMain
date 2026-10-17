@@ -51,6 +51,9 @@ vec3_t BoundingMin[MAX_BONES];
 vec3_t BoundingMax[MAX_BONES];
 
 float  BoneTransform[MAX_BONES][3][4];
+// BoneTransform's slots from here on are identity; Animation's tail fill only rewrites what lies
+// below it. Starts at MAX_BONES: the zero-initialised array is not identity.
+static int s_boneTransformWrittenEnd = MAX_BONES;
 const float (*g_pActiveBoneTransform)[3][4] = nullptr;
 unsigned int g_BoneTransformVersion = 0;
 
@@ -161,7 +164,6 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
     if (PriorAction >= NumActions) PriorAction = 0;
     if (currentAction >= NumActions) currentAction = 0;
 
-    vec4_t boneQuaternion[MAX_BONES] = {};
 
     float currentAnimation = AnimationFrame;
     int currentAnimationFrame = (int)AnimationFrame;
@@ -281,17 +283,18 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
             q2 = bm2->Quaternion[currentAnimationFrame];
         }
 
+        vec4_t boneQuaternion;
         if (!QuaternionCompare(q1, q2))
         {
-            QuaternionNLERP(q1, q2, s1, boneQuaternion[i]);
+            QuaternionNLERP(q1, q2, s1, boneQuaternion);
         }
         else
         {
-            QuaternionCopy(q1, boneQuaternion[i]);
+            QuaternionCopy(q1, boneQuaternion);
         }
 
         float Matrix[3][4];
-        QuaternionMatrix(boneQuaternion[i], Matrix);
+        QuaternionMatrix(boneQuaternion, Matrix);
         const float* Position1 = bm1->Position[PriorAnimationFrame];
         const float* Position2 = bm2->Position[currentAnimationFrame];
 
@@ -340,7 +343,15 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
     // declared buffer capacity -- NOT MAX_BONES -- because several internal callers pass
     // NumBones-sized heap scratch buffers (AnimationTransformWithAttachHighModel* /
     // AnimationTransformOnlySelf), which a MAX_BONES-bound loop would overflow.
-    for (int i = NumBones; i < BoneMatrixCapacity; i++)
+    // The shared BoneTransform tracks how far the last models wrote, so the tail fill stops there
+    // instead of rewriting slots that are already identity.
+    const bool sharedPalette = BoneMatrix == BoneTransform && BoneMatrixCapacity == MAX_BONES;
+    const int fillEnd = sharedPalette ? std::max<int>(NumBones, s_boneTransformWrittenEnd) : BoneMatrixCapacity;
+    if (sharedPalette)
+    {
+        s_boneTransformWrittenEnd = NumBones;
+    }
+    for (int i = NumBones; i < fillEnd; i++)
     {
         BoneMatrix[i][0][0] = 1.f;
         BoneMatrix[i][0][1] = 0.f;
@@ -875,6 +886,7 @@ void BMD::AnimationTransformWithAttachHighModel_usingGlobalTM(OBJECT* oHighHiera
 
     Animation(arrBonesTMLocal, 0, 0, 0, Temp, Temp, false, false, nullptr, -1, NumBones);
 
+    s_boneTransformWrittenEnd = std::max<int>(s_boneTransformWrittenEnd, NumBones);
     for (int i_ = 0; i_ < NumBones; ++i_)
     {
         R_ConcatTransforms(tmBoneHierarchicalObject, arrBonesTMLocal[i_], BoneTransform[i_]);
