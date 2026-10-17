@@ -163,5 +163,5 @@ body {
 }
 .btn-cancel { left: calc(21 * var(--px)); }
 .btn-ok     { left: calc(121 * var(--px)); }
-.btn-cancel:hover { decorator: image(classic-charmake-cancel); }
-.btn-ok:hover     { decorator: image(classic-charmake-ok); }
+.btn-cancel:hover, .btn-cancel:active { decorator: image(classic-charmake-cancel); }
+.btn-ok:hover, .btn-ok:active         { decorator: image(classic-charmake-ok); }

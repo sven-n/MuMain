@@ -67,3 +67,24 @@
 #panel.fill-placement { box-sizing: border-box; }
 /* 0.97 has no corner close. */
 #frame_corner_close { display: none; }
+
+/* Scrolling lists: the Season 1 client's win_scrollbar (as the classic social windows'), in place of
+   base.rcss's S6 track and knob: 13x13 arrows at both ends, the track between two 106,97,88 lines,
+   a grey thumb sized to the list. */
+@spritesheet docked-scroll-sheet
+{
+	src: "../../../win_scrollbar.jpg";
+	docked-scroll-thumb: 0px 1px 11px 1px;
+	docked-scroll-up: 0px 3px 13px 13px;
+	docked-scroll-down: 0px 16px 13px 13px;
+}
+.scroll-pane scrollbarvertical { width: 13dp; margin: 0; }
+.scroll-pane scrollbarvertical slidertrack { decorator: none; box-sizing: border-box; border-left: 1dp rgb(106, 97, 88); border-right: 1dp rgb(106, 97, 88); }
+.scroll-pane scrollbarvertical sliderbar { height: auto; min-height: 6dp; margin: 0 1dp; decorator: image(docked-scroll-thumb fill); }
+.scroll-pane scrollbarvertical sliderbar:active { filter: none; }
+.scroll-pane scrollbarvertical sliderarrowdec,
+.scroll-pane scrollbarvertical sliderarrowinc { width: 100%; height: 13dp; pointer-events: auto; }
+.scroll-pane scrollbarvertical sliderarrowdec { decorator: image(docked-scroll-up); }
+.scroll-pane scrollbarvertical sliderarrowinc { decorator: image(docked-scroll-down); }
+.scroll-pane scrollbarvertical sliderarrowdec:active,
+.scroll-pane scrollbarvertical sliderarrowinc:active { filter: brightness(0.7); }
