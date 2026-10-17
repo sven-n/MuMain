@@ -46,7 +46,8 @@ function(function_body source_variable signature output_variable)
 endfunction()
 
 # The position of the #endif that closes the #if at `begin`, past every #if/#ifdef/#ifndef inside
-# it; -1 when it is missing.
+# it; -1 when it is missing, or when the #if has an #else or #elif of its own, since what follows
+# that is not guarded by it.
 function(matching_endif source_variable begin output_variable)
     set(depth 1)
     math(EXPR position "${begin} + 1")
@@ -54,7 +55,13 @@ function(matching_endif source_variable begin output_variable)
         string(SUBSTRING "${${source_variable}}" ${position} -1 rest)
         string(FIND "${rest}" "#if" next_if)
         string(FIND "${rest}" "#endif" next_endif)
+        string(FIND "${rest}" "#el" next_else)
         if(next_endif EQUAL -1)
+            set(${output_variable} -1 PARENT_SCOPE)
+            return()
+        endif()
+        if(depth EQUAL 1 AND NOT next_else EQUAL -1 AND next_else LESS next_endif
+           AND (next_if EQUAL -1 OR next_else LESS next_if))
             set(${output_variable} -1 PARENT_SCOPE)
             return()
         endif()
