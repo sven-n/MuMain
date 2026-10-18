@@ -301,124 +301,6 @@ int g_iCurrentDialog = -1;
 // item
 ///////////////////////////////////////////////////////////////////////////////
 
-void PrintItem(wchar_t* FileName)
-{
-    FILE* fp = _wfopen(FileName, L"wt");
-    fwprintf(fp, L"                이름  최소공격력 최대공격력 방어력 방어율 필요힘 필요민첩 필요에너지\n");
-    //fwprintf(fp,"                이름    카오스성공확률\n");
-    bool Excellent = true;
-    for (int i = 0; i < 16 * MAX_ITEM_INDEX; i++)
-    {
-        if ((i & 0x1FF) == 0)
-        {
-            fwprintf(fp, L"------------------------------------------------------------------------------------------------------\n");
-        }
-        ITEM_ATTRIBUTE* p = &ItemAttribute[i];
-        if (p->Name[0] != 0)
-        {
-            int Plus;
-            if (i >= 12 * MAX_ITEM_INDEX)
-                Plus = 1;
-            else
-                Plus = 10;
-            for (int j = 0; j < Plus; j++)
-            {
-                int Level = j;
-                int RequireStrength = 0;
-                int RequireDexterity = 0;
-                int RequireEnergy = 0;
-                int DamageMin = p->DamageMin;
-                int DamageMax = p->DamageMax;
-                int Defense = p->Defense;
-                int SuccessfulBlocking = p->SuccessfulBlocking;
-                if (DamageMin > 0)
-                {
-                    if (Excellent)
-                    {
-                        if (p->Level)
-                            DamageMin += p->DamageMin * 25 / p->Level + 5;
-                    }
-                    DamageMin += Level * 3;
-                }
-                if (DamageMax > 0)
-                {
-                    if (Excellent)
-                    {
-                        if (p->Level)
-                            DamageMax += p->DamageMin * 25 / p->Level + 5;
-                    }
-                    DamageMax += Level * 3;
-                }
-                if (Defense > 0)
-                {
-                    if (i >= ITEM_SHIELD && i < ITEM_SHIELD + MAX_ITEM_INDEX)
-                    {
-                        Defense += Level;
-                    }
-                    else
-                    {
-                        if (Excellent)
-                        {
-                            if (p->Level)
-                                Defense += p->Defense * 12 / p->Level + 4 + p->Level / 5;
-                        }
-                        Defense += Level * 3;
-                    }
-                }
-                if (SuccessfulBlocking > 0)
-                {
-                    if (Excellent)
-                    {
-                        if (p->Level)
-                            SuccessfulBlocking += p->SuccessfulBlocking * 25 / p->Level + 5;
-                    }
-                    SuccessfulBlocking += Level * 3;
-                }
-                int ItemLevel = p->Level;
-                if (Excellent)
-                    ItemLevel = p->Level + 25;
-                if (p->RequireStrength)
-                    RequireStrength = 20 + p->RequireStrength * (ItemLevel + Level * 3) * 3 / 100;
-                else
-                    RequireStrength = 0;
-                if (p->RequireDexterity)
-                    RequireDexterity = 20 + p->RequireDexterity * (ItemLevel + Level * 3) * 3 / 100;
-                else
-                    RequireDexterity = 0;
-                if (p->RequireEnergy)
-                {
-                    RequireEnergy = 20 + p->RequireEnergy * (ItemLevel + Level * 3) * 4 / 10;
-                }
-                else
-                {
-                    RequireEnergy = 0;
-                }
-                if (i >= ITEM_STAFF && i < ITEM_STAFF * MAX_ITEM_INDEX)
-                {
-                    DamageMin = DamageMin / 2 + Level * 2;
-                    DamageMax = 0;
-                }
-                ITEM ip;
-                ip.Type = i;
-                ip.ExcellentFlags = Excellent;
-                ip.Level = Level;
-                SetItemAttributes(&ip);
-
-                ItemValue(&ip, 0);
-
-                if (j == 0)
-                    fwprintf(fp, L"%20s %8d %8d %8d %8d %8d %8d %8d %8d %8d\n", p->Name, DamageMin, DamageMax, Defense, SuccessfulBlocking, RequireStrength, RequireDexterity, RequireEnergy, p->WeaponSpeed, ItemValue(&ip));
-                //fwprintf(fp,"%20s %4d%%",p->Name, iRate);
-                else
-                    fwprintf(fp, L"%17s +%d %8d %8d %8d %8d %8d %8d %8d %8d %8d\n", L"", Level, DamageMin, DamageMax, Defense, SuccessfulBlocking, RequireStrength, RequireDexterity, RequireEnergy, p->WeaponSpeed, ItemValue(&ip));
-                //fwprintf(fp,"%4d%%<+%d>",iRate,Level);
-            }
-            fwprintf(fp, L"\n");
-        }
-    }
-    fclose(fp);
-}
-
 ActionSkillType GetSkillByBook(int Type)
 {
     switch (Type)
@@ -456,11 +338,6 @@ ActionSkillType GetSkillByBook(int Type)
     default:
         return AT_SKILL_UNDEFINED;
     }
-}
-
-void ItemConvert(ITEM* ip, BYTE Attribute1, BYTE Attribute2, BYTE ancientDiscriminator)
-{
-    // todo...
 }
 
 int GetDropLevel(ITEM_ATTRIBUTE* p)
