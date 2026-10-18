@@ -1433,6 +1433,282 @@
   <data name="Windowed mode" xml:space="preserve">
     <value>Tryb okienkowy</value>
   </data>
+  <data name="Enhanced graphics" xml:space="preserve">
+    <value>Ulepszona grafika</value>
+  </data>
+  <data name="Gameplay" xml:space="preserve">
+    <value>Rozgrywka</value>
+  </data>
+  <data name="Audio" xml:space="preserve">
+    <value>Dźwięk</value>
+  </data>
+  <data name="Video" xml:space="preserve">
+    <value>Obraz</value>
+  </data>
+  <data name="Graphics" xml:space="preserve">
+    <value>Grafika</value>
+  </data>
+  <data name="UI" xml:space="preserve">
+    <value>UI</value>
+  </data>
+  <data name="Display" xml:space="preserve">
+    <value>Wyświetlanie</value>
+  </data>
+  <data name="Interface" xml:space="preserve">
+    <value>Interfejs</value>
+  </data>
+  <data name="Quality" xml:space="preserve">
+    <value>Jakość</value>
+  </data>
+  <data name="Effects" xml:space="preserve">
+    <value>Efekty</value>
+  </data>
+  <data name="Shadows" xml:space="preserve">
+    <value>Cienie</value>
+  </data>
+  <data name="Enhanced Lighting" xml:space="preserve">
+    <value>Ulepszone oświetlenie</value>
+  </data>
+  <data name="Dynamic Lights" xml:space="preserve">
+    <value>Dynamiczne światła</value>
+  </data>
+  <data name="Light Mood" xml:space="preserve">
+    <value>Ciemniejsze światło mapy</value>
+  </data>
+  <data name="Bloom And Colour Grading" xml:space="preserve">
+    <value>Poświata i korekcja kolorów</value>
+  </data>
+  <data name="Tuning Directional Light" xml:space="preserve">
+    <value>Światło kierunkowe</value>
+  </data>
+  <data name="Tuning Directional Light Help" xml:space="preserve">
+    <value>Jak mocno słońce oświetla stronę postaci, potwora lub NPC zwróconą w jego stronę.</value>
+  </data>
+  <data name="Tuning Rim Intensity" xml:space="preserve">
+    <value>Siła obrysu</value>
+  </data>
+  <data name="Tuning Rim Intensity Help" xml:space="preserve">
+    <value>Światło wzdłuż konturu modelu, które odcina go od tła.</value>
+  </data>
+  <data name="Tuning Metallic Shine" xml:space="preserve">
+    <value>Metaliczny połysk</value>
+  </data>
+  <data name="Tuning Metallic Shine Help" xml:space="preserve">
+    <value>Odblaski na metalowych zestawach zbroi, które mają połysk.</value>
+  </data>
+  <data name="Tuning Ambient Fill" xml:space="preserve">
+    <value>Światło otoczenia</value>
+  </data>
+  <data name="Tuning Ambient Fill Help" xml:space="preserve">
+    <value>Światło, które dociera do każdej strony modelu, także tej odwróconej od słońca.</value>
+  </data>
+  <data name="Tuning Minimum Light" xml:space="preserve">
+    <value>Minimalne światło</value>
+  </data>
+  <data name="Tuning Minimum Light Help" xml:space="preserve">
+    <value>Jak ciemna może być zacieniona strona modelu.</value>
+  </data>
+  <data name="Tuning Highlight Knee" xml:space="preserve">
+    <value>Próg prześwietleń</value>
+  </data>
+  <data name="Tuning Highlight Knee Help" xml:space="preserve">
+    <value>Od którego miejsca jasne kolory modelu zaczynają łagodnie przechodzić w biel, zamiast stawać się płasko białe. Niżej = łagodniej.</value>
+  </data>
+  <data name="Tuning Rim Concentration" xml:space="preserve">
+    <value>Skupienie obrysu</value>
+  </data>
+  <data name="Tuning Rim Concentration Help" xml:space="preserve">
+    <value>Jak wąskie jest światło konturu. Wyżej = cieńszy obrys.</value>
+  </data>
+  <data name="Tuning Shine Concentration" xml:space="preserve">
+    <value>Skupienie połysku</value>
+  </data>
+  <data name="Tuning Shine Concentration Help" xml:space="preserve">
+    <value>Jak mały jest odblask na metalu. Wyżej = mniejszy i ostrzejszy odblask.</value>
+  </data>
+  <data name="Tuning Skill Intensity" xml:space="preserve">
+    <value>Światło umiejętności</value>
+  </data>
+  <data name="Tuning Skill Intensity Help" xml:space="preserve">
+    <value>Jasność światła, które umiejętności i efekty rzucają na modele i ziemię — nie samych grafik umiejętności: 0 usuwa tylko ich światło. Do sumy dokładają się też światła mapy i ciemniejsze światło mapy.</value>
+  </data>
+  <data name="Tuning Skill Radius" xml:space="preserve">
+    <value>Zasięg światła</value>
+  </data>
+  <data name="Tuning Skill Radius Help" xml:space="preserve">
+    <value>Jak daleko sięga światło umiejętności, jako wielokrotność jego pierwotnego promienia. Wynik ogranicza Maks. zasięg światła.</value>
+  </data>
+  <data name="Tuning Skill Fade" xml:space="preserve">
+    <value>Wygaszanie światła</value>
+  </data>
+  <data name="Tuning Skill Fade Help" xml:space="preserve">
+    <value>Ile sekund gaśnie światło umiejętności po jej zakończeniu. „Natychmiast” wyłącza je od razu.</value>
+  </data>
+  <data name="Tuning Overlapping Light Cap" xml:space="preserve">
+    <value>Limit nakładania światła</value>
+  </data>
+  <data name="Tuning Overlapping Light Cap Help" xml:space="preserve">
+    <value>Najwięcej światła, ile mogą dać nakładające się umiejętności. „Bez limitu” pozwala im sumować się dowolnie; nie wyłącza świateł umiejętności.</value>
+  </data>
+  <data name="Tuning Light Wrap" xml:space="preserve">
+    <value>Opływanie światła</value>
+  </data>
+  <data name="Tuning Light Wrap Help" xml:space="preserve">
+    <value>Jak daleko światło świecy, ognia lub umiejętności sięga na boki modelu.</value>
+  </data>
+  <data name="Tuning Map Light Smoothing" xml:space="preserve">
+    <value>Wygładzanie świateł mapy</value>
+  </data>
+  <data name="Tuning Map Light Smoothing Help" xml:space="preserve">
+    <value>Przez ile sekund migoczące świece, ogniska i światła postaci płynnie dochodzą do nowej jasności. „Natychmiast” podąża za każdym mignięciem.</value>
+  </data>
+  <data name="Tuning Maximum Skill Radius" xml:space="preserve">
+    <value>Maks. zasięg światła</value>
+  </data>
+  <data name="Tuning Maximum Skill Radius Help" xml:space="preserve">
+    <value>Najdalej, jak może sięgnąć światło umiejętności po zastosowaniu Zasięgu światła, w polach terenu. „Bez limitu” usuwa ograniczenie; nie wyłącza świateł umiejętności.</value>
+  </data>
+  <data name="Tuning Mood Strength" xml:space="preserve">
+    <value>Siła nastroju</value>
+  </data>
+  <data name="Tuning Mood Strength Help" xml:space="preserve">
+    <value>Jaka część ciemniejszego światła mapy jest stosowana. 0 % to oryginalne światło mapy, a reszta Ulepszonej grafiki pozostaje włączona. Skaluje też, jak bardzo ciemniejsze światło wzmacnia świece, ogniska i światła umiejętności.</value>
+  </data>
+  <data name="Tuning Bloom Intensity" xml:space="preserve">
+    <value>Siła poświaty</value>
+  </data>
+  <data name="Tuning Bloom Intensity Help" xml:space="preserve">
+    <value>Jak silna jest poświata wokół jasnych efektów. 0 usuwa poświatę.</value>
+  </data>
+  <data name="Tuning Bloom Spread" xml:space="preserve">
+    <value>Zasięg poświaty</value>
+  </data>
+  <data name="Tuning Bloom Spread Help" xml:space="preserve">
+    <value>Jak szeroko poświata rozchodzi się wokół jasnych efektów.</value>
+  </data>
+  <data name="Tuning Colour Grading Strength" xml:space="preserve">
+    <value>Siła korekcji kolorów</value>
+  </data>
+  <data name="Tuning Colour Grading Strength Help" xml:space="preserve">
+    <value>Jaka część korekcji kolorów mapy jest stosowana. 0 % wyłącza ją, a poświata pozostaje włączona.</value>
+  </data>
+  <data name="Tuning More Settings" xml:space="preserve">
+    <value>Więcej ustawień</value>
+  </data>
+  <data name="Tuning Reset" xml:space="preserve">
+    <value>Resetuj</value>
+  </data>
+  <data name="Tuning Reset Group" xml:space="preserve">
+    <value>Resetuj te ustawienia</value>
+  </data>
+  <data name="Tuning Reset All" xml:space="preserve">
+    <value>Resetuj wszystkie ustawienia</value>
+  </data>
+  <data name="Tuning Map Default" xml:space="preserve">
+    <value>Domyślne</value>
+  </data>
+  <data name="Tuning Custom" xml:space="preserve">
+    <value>Własne</value>
+  </data>
+  <data name="Tuning Not Saved" xml:space="preserve">
+    <value>Niezapisane</value>
+  </data>
+  <data name="Tuning No Cap" xml:space="preserve">
+    <value>Bez limitu</value>
+  </data>
+  <data name="Tuning Immediate" xml:space="preserve">
+    <value>Natychmiast</value>
+  </data>
+  <data name="Tuning Seconds Unit" xml:space="preserve">
+    <value>s</value>
+  </data>
+  <data name="Tuning Cells Unit" xml:space="preserve">
+    <value>pól</value>
+  </data>
+  <data name="Tuning Locked Classic" xml:space="preserve">
+    <value>Zaznacz Ulepszoną grafikę, aby użyć tych ustawień. Twoje wartości zostaną zachowane.</value>
+  </data>
+  <data name="Tuning Locked Off" xml:space="preserve">
+    <value>Włącz tę funkcję, aby użyć tych ustawień. Twoje wartości zostaną zachowane.</value>
+  </data>
+  <data name="Tuning Locked Needs Lighting" xml:space="preserve">
+    <value>Wymaga Ulepszonego oświetlenia. Twoje wartości zostaną zachowane.</value>
+  </data>
+  <data name="Tuning Locked Unavailable" xml:space="preserve">
+    <value>Niedostępne na tej karcie graficznej.</value>
+  </data>
+  <data name="Tuning Locked Session" xml:space="preserve">
+    <value>Wyłączone na tę sesję komendą deweloperską.</value>
+  </data>
+  <data name="Tuning Locked Session Value" xml:space="preserve">
+    <value>Ustawione na tę sesję komendą deweloperską.</value>
+  </data>
+  <data name="Tuning Save Failed" xml:space="preserve">
+    <value>Nie udało się zapisać ustawień grafiki; zmiana jest widoczna, ale niezapisana:</value>
+  </data>
+  <data name="VSync" xml:space="preserve">
+    <value>VSync</value>
+  </data>
+  <data name="FPS Limit" xml:space="preserve">
+    <value>Limit FPS</value>
+  </data>
+  <data name="Disable Effects" xml:space="preserve">
+    <value>Wyłącz efekty</value>
+  </data>
+  <data name="Disable Particles" xml:space="preserve">
+    <value>Wyłącz cząsteczki</value>
+  </data>
+  <data name="Disable Skill Effect Models" xml:space="preserve">
+    <value>Wyłącz efekty umiejętności</value>
+  </data>
+  <data name="Disable Ambient Wildlife" xml:space="preserve">
+    <value>Wyłącz zwierzęta otoczenia</value>
+  </data>
+  <data name="Disable Wing Shadow" xml:space="preserve">
+    <value>Wyłącz cień skrzydeł</value>
+  </data>
+  <data name="Disable Shadows" xml:space="preserve">
+    <value>Wyłącz cienie</value>
+  </data>
+  <data name="Show FPS Counter" xml:space="preserve">
+    <value>Pokaż licznik FPS</value>
+  </data>
+  <data name="Show Debug Info" xml:space="preserve">
+    <value>Pokaż informacje debugowania</value>
+  </data>
+  <data name="UI Theme" xml:space="preserve">
+    <value>Motyw interfejsu</value>
+  </data>
+  <data name="UI Scale" xml:space="preserve">
+    <value>Skala interfejsu</value>
+  </data>
+  <data name="UI Scale Tooltip" xml:space="preserve">
+    <value>Mnożnik nakładany na automatyczne dopasowanie do rozmiaru okna</value>
+  </data>
+  <data name="Legacy" xml:space="preserve">
+    <value>Klasyczny</value>
+  </data>
+  <data name="Modern" xml:space="preserve">
+    <value>Nowoczesny</value>
+  </data>
+  <data name="Uncapped" xml:space="preserve">
+    <value>Bez limitu</value>
+  </data>
+  <data name="Off" xml:space="preserve">
+    <value>Wył.</value>
+  </data>
+  <data name="Anti-aliasing" xml:space="preserve">
+    <value>Wygładzanie krawędzi</value>
+  </data>
+  <data name="Anti-aliasing Tooltip" xml:space="preserve">
+    <value>Wygładza krawędzie w Ulepszonej grafice; tryb klasyczny zawsze renderuje bez wygładzania</value>
+  </data>
+  <data name="Anisotropic filtering" xml:space="preserve">
+    <value>Filtrowanie anizotropowe</value>
+  </data>
+  <data name="Anisotropic Filtering Tooltip" xml:space="preserve">
+    <value>Utrzymuje ostrość tekstur oglądanych pod kątem: tekstur świata w Ulepszonej grafice, a tekstur w wyższej rozdzielczości w obu trybach</value>
+  </data>
   <data name="Close388" xml:space="preserve">
     <value>Zamknij</value>
     <comment>legacy_id=388,1002</comment>
@@ -1680,6 +1956,26 @@
   <data name="Password" xml:space="preserve">
     <value>Hasło</value>
     <comment>legacy_id=451</comment>
+  </data>
+  <data name="LoginRememberUsername" xml:space="preserve">
+    <value>Zapamiętaj login</value>
+    <comment>Login screen: remember-username checkbox label.</comment>
+  </data>
+  <data name="LoginRememberPassword" xml:space="preserve">
+    <value>Zapamiętaj hasło</value>
+    <comment>Login screen: remember-password checkbox label.</comment>
+  </data>
+  <data name="LoginTrustWarning" xml:space="preserve">
+    <value>Zapisuj hasło tylko na komputerze, któremu ufasz.</value>
+    <comment>Login screen: warning under the remember-password checkbox.</comment>
+  </data>
+  <data name="LoginSavePasswordWarningTitle" xml:space="preserve">
+    <value>UWAGA!!!</value>
+    <comment>Remember-password confirmation dialog: header.</comment>
+  </data>
+  <data name="LoginSavePasswordWarningBody" xml:space="preserve">
+    <value>Zapisane hasło pozwoli każdemu, kto korzysta z tego komputera, zalogować się na twoje konto. Rób to tylko na komputerze, któremu ufasz. Zapisać hasło?</value>
+    <comment>Remember-password confirmation dialog: body.</comment>
   </data>
   <data name="Connect" xml:space="preserve">
     <value>Połącz</value>
@@ -12896,6 +13192,48 @@
   <data name="Texture Pack Tooltip" xml:space="preserve">
     <value>Foldery z Data/TexturePacks; zmiana działa po ponownym uruchomieniu gry</value>
   </data>
+  <data name="ChatCommandsTitle" xml:space="preserve">
+    <value>Komendy</value>
+  </data>
+  <data name="ChatCommandsNotSupported" xml:space="preserve">
+    <value>Ten serwer nie udostępnia listy komend.</value>
+  </data>
+  <data name="ChatCommandsExecute" xml:space="preserve">
+    <value>Wykonaj</value>
+  </data>
+  <data name="JToggleChatCommands" xml:space="preserve">
+    <value>J: włącz/wyłącz komendy czatu</value>
+  </data>
+  <data name="SpecialCommands" xml:space="preserve">
+    <value>Specjalne</value>
+  </data>
+  <data name="ChatCommandsBack" xml:space="preserve">
+    <value>Wstecz</value>
+  </data>
+  <data name="ChatCommandsTemplates" xml:space="preserve">
+    <value>Szablony</value>
+  </data>
+  <data name="ChatCommandsNoTemplates" xml:space="preserve">
+    <value>Brak zapisanych szablonów.</value>
+  </data>
+  <data name="ChatCommandsSaveTemplate" xml:space="preserve">
+    <value>Zapisz jako szablon</value>
+  </data>
+  <data name="ChatCommandsAddFavourite" xml:space="preserve">
+    <value>Dodaj do ulubionych</value>
+  </data>
+  <data name="ChatCommandsRemoveFavourite" xml:space="preserve">
+    <value>Usuń z ulubionych</value>
+  </data>
+  <data name="ChatCommandsFillRequired" xml:space="preserve">
+    <value>Najpierw wpisz wymagane wartości.</value>
+  </data>
+  <data name="ChatCommandsUnknownCommand" xml:space="preserve">
+    <value>Ta komenda nie jest już dostępna.</value>
+  </data>
+  <data name="KeepFlightEquipmentInIcarus" xml:space="preserve">
+    <value>W Icarus nie możesz zdjąć ostatnich skrzydeł ani latającego wierzchowca.</value>
+  </data>
   <data name="BasicAttackFallback" xml:space="preserve">
     <value>Awaryjny atak podstawowy</value>
   </data>
@@ -13060,5 +13398,20 @@
   </data>
   <data name="QuestRequirementBuff" xml:space="preserve">
     <value>Bonus: %ls</value>
+  </data>
+  <data name="W Coin(C)" xml:space="preserve">
+    <value>WCoin (C)</value>
+  </data>
+  <data name="Goblin Points" xml:space="preserve">
+    <value>Goblin Points</value>
+  </data>
+  <data name="Currency" xml:space="preserve">
+    <value>Waluta</value>
+  </data>
+  <data name="Currency: %ls" xml:space="preserve">
+    <value>Waluta: %ls</value>
+  </data>
+  <data name="Other items" xml:space="preserve">
+    <value>Inne przedmioty</value>
   </data>
 </root>
