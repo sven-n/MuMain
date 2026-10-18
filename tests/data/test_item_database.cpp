@@ -416,7 +416,7 @@ TEST_CASE("The stat profile an item's data gives [data][items]")
 {
     ItemDefinition item = MakeItem(2, 8, "Battle Scepter");
     item.weaponKind = WeaponKind::Mace;
-    CHECK(DeriveStatProfile(item).empty());
+    CHECK(DeriveStatProfile(item) == "weapon");
     item.tags.Set(ItemTag::Sceptre);
     CHECK(DeriveStatProfile(item) == "sceptre");
 
@@ -442,7 +442,39 @@ TEST_CASE("The stat profile an item's data gives [data][items]")
     CHECK(DeriveStatProfile(wing) == "secondTierCape");
     // A wing tier counts only on the wings slot.
     wing.slot = ItemSlot::Helm;
-    CHECK(DeriveStatProfile(wing).empty());
+    CHECK(DeriveStatProfile(wing) == "armor");
+}
+
+TEST_CASE("The stat profiles of weapons, armour, books, helpers and scrolls [data][items]")
+{
+    ItemDefinition kris = MakeItem(0, 0, "Kris");
+    kris.slot = ItemSlot::MainHand;
+    kris.weaponKind = WeaponKind::Sword;
+    CHECK(DeriveStatProfile(kris) == "weapon");
+
+    ItemDefinition book = MakeItem(5, 21, "Book of Samut");
+    book.weaponKind = WeaponKind::Book;
+    book.tags.Set(ItemTag::SummonerBook);
+    CHECK(DeriveStatProfile(book) == "book");
+
+    ItemDefinition bolt = MakeItem(4, 7, "Bolt");
+    bolt.tags.Set(ItemTag::Ammunition);
+    CHECK(DeriveStatProfile(bolt).empty());
+
+    ItemDefinition helm = MakeItem(7, 0, "Bronze Helm");
+    helm.slot = ItemSlot::Helm;
+    CHECK(DeriveStatProfile(helm) == "armor");
+
+    ItemDefinition ring = MakeItem(13, 8, "Ring of Ice");
+    ring.slot = ItemSlot::Ring;
+    CHECK(DeriveStatProfile(ring).empty());
+    ring.requirements.level = 20;
+    CHECK(DeriveStatProfile(ring) == "helper");
+
+    ItemDefinition scroll = MakeItem(15, 0, "Scroll of Poison");
+    CHECK(DeriveStatProfile(scroll).empty());
+    scroll.requirements.energy = 100;
+    CHECK(DeriveStatProfile(scroll) == "scroll");
 }
 
 TEST_CASE("An edited item's stat profile follows its data while it is the derived one [data][items]")

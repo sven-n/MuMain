@@ -83,7 +83,7 @@ read as the English name only; saving writes the object form.
 | `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, defense per level, damage increase, absorption) depend on it; excellent second and third tier wings get no extra durability, and the chaos mix knows a wing's tier from it |
 | `weaponKind` | Only for weapons and shields: `sword`, `glove`, `axe`, `mace`, `spear`, `bow`, `crossbow`, `staff`, `book`, `shield`, as OpenMU's item groups 0 to 6: swords and the Rage Fighter's gloves (group 0; gloves are the items only the Rage Fighter may use), axes (1), maces and sceptres (2), spears (3), bows and crossbows (4: bows have the slot `offHand`, crossbows `mainHand`; arrows and bolts have no weapon kind), staffs, sticks and books (5: books have the slot `offHand`) and shields (6). While an item has the weapon kind its group gives, the bmd import and the item editor (also when it moves an item to another number) keep it matching the group, the slot and, in group 0, the class requirements (a group gives its kind only on that kind's slot, and in group 4 only to two-handed items), so a new weapon gets one too; a kind written in the file that differs from the group's stays as long as it differs. Which bow or crossbow a character holds (its animations, arrows and damage), the elf's arrows-only rule, a spear's reach and Impale, the shield defense set option, the bonus of leveled arrows and bolts, a staff's damage (it counts for the left hand), which right-hand weapons a summoner may hold in the left hand (not staffs or books), the character window's wizardry line, the tooltip's magic power line, the knight skills that need a weapon without a staff or book, Death Stab, Death Cannon and Spiral Slash, the weapon in the left hand that adds its magic options, the dual wield of Dark Knights, Magic Gladiators and Rage Fighters, and the weapon that moves into an empty right hand depend on it |
 | `potionPriority` | Only for potions with the `healingPotion`, `manaPotion`, `complexPotion` or `shieldPotion` tag: which one of a kind the game takes first, the higher the earlier (0 or left out = last; equal ones take the higher group and number first). The shipped potions count up with their size, so the largest is taken first. A client-only field (OpenMU has none); the bmd import keeps it |
-| `statProfile` | The item's profile in the [item stat file](#item-stats-by-level): what its + level, excellent options and ancient set add to its stats. Left out = the default. The shipped data gives `sceptre` to the items with the `sceptre` tag, `shield` to shields and a wing tier's profile to wings (`firstTierWing`, `secondTierWing`, `secondTierCape` for the second tier capes, `thirdTierWing`, `smallWing`). While an item has the profile its data gives, the bmd import and the item editor keep it matching (also when it moves an item to another number); a profile written in the file that differs from it stays as long as it differs |
+| `statProfile` | The item's profile in the [item stat file](#item-stats-by-level): what its + level, excellent options and ancient set add to its stats. Left out = the default. The shipped data gives `sceptre` to the items with the `sceptre` tag, `book` to summoner books, `shield` to shields, `weapon` to the other items with a weapon kind (not arrows and bolts), `armor` to helms, armour, pants, gloves and boots, `scroll` to the items of group 15 with requirements, `helper` to the items of groups 13 and 14 with a level requirement except the Horn of Fenrir, and a wing tier's profile to wings (`firstTierWing`, `secondTierWing`, `secondTierCape` for the second tier capes, `thirdTierWing`, `smallWing`). While an item has the profile its data gives, the bmd import and the item editor keep it matching (also when it moves an item to another number); a profile written in the file that differs from it stays as long as it differs |
 | `twoHanded` | Weapon needs both hands |
 | `skill` | Skill the item gives |
 | `level` | Item level (the drop level); also used in price and damage calculations |
@@ -277,7 +277,12 @@ The shipped profiles:
 
 | Profile | Differs from the default |
 |---|---|
-| `sceptre` | No magic power per level after halving: the Dark Lord's sceptres |
+| `weapon` | 5 strength per option level: the other weapons (staffs and the Magic Gladiator's swords included) |
+| `armor` | 5 strength per option level: helms, armour, pants, gloves and boots |
+| `book` | Energy `20 + base * (drop level + item level) * 3 / 100`; 5 strength per option level: summoner books |
+| `helper` | Level requirement +4 per level: items of groups 13 and 14 with a level requirement (rings, pendants, pets) |
+| `scroll` | Level requirement +4 per level; energy from the level requirement (`20 + base * level requirement * 4 / 100`) when the item has one: the skill scrolls and parchments of group 15 |
+| `sceptre` | No magic power per level after halving; 5 strength per option level: the Dark Lord's sceptres |
 | `shield` | Defense +1 per level (`defenseIncreaseShields`), no excellent part, ancient part `(defense + level) * 20 / d + 2` |
 | `firstTierWing` | Defense from `defenseBonus1stWings`; level requirement +4 per level |
 | `smallWing` | Defense from `defenseBonus1stWings` |
@@ -285,7 +290,9 @@ The shipped profiles:
 | `secondTierCape` | Defense from `defenseBonus2ndWings`; level requirement +4 per level |
 | `thirdTierWing` | Defense from `defenseBonus3rdWings`: 4 per level up to +9, then 5 to 10 more per level |
 
-`sceptre` and `shield` also add 5 strength per option level.
+The shield also adds 5 strength per option level. Items without a profile
+(arrows and bolts, jewels, potions, the Horn of Fenrir, …) have the default:
+their level requirement does not grow.
 
 **Errors** in the file stop the start like errors in the item files: invalid
 JSON or `formatVersion`, a missing `dropLevelBonus.excellent` or `.ancient`,

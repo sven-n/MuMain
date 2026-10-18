@@ -67,8 +67,27 @@
   },
   "profiles": [
     {
+      "name": "armor",
+      "requirements": {
+        "strengthPerOptionLevel": 5
+      }
+    },
+    {
+      "name": "book",
+      "requirements": {
+        "energy": {"add": 20, "levelWeight": 1, "percent": 3},
+        "strengthPerOptionLevel": 5
+      }
+    },
+    {
       "name": "firstTierWing",
       "defense": {"table": "defenseBonus1stWings"},
+      "requirements": {
+        "levelPerItemLevel": 4
+      }
+    },
+    {
+      "name": "helper",
       "requirements": {
         "levelPerItemLevel": 4
       }
@@ -78,6 +97,13 @@
       "magicPower": {"perLevelAfterHalving": 0},
       "requirements": {
         "strengthPerOptionLevel": 5
+      }
+    },
+    {
+      "name": "scroll",
+      "requirements": {
+        "levelPerItemLevel": 4,
+        "energy": {"add": 20, "levelWeight": 3, "percent": 4, "basis": "levelRequirement"}
       }
     },
     {
@@ -108,6 +134,12 @@
     {
       "name": "thirdTierWing",
       "defense": {"table": "defenseBonus3rdWings"}
+    },
+    {
+      "name": "weapon",
+      "requirements": {
+        "strengthPerOptionLevel": 5
+      }
     }
   ]
 }

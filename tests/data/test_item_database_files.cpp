@@ -471,7 +471,7 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         REQUIRE(g_ItemDatabase.Find(ITEM_WINGS_OF_ELF)->statProfile == "firstTierWing");
         ItemAttribute[ITEM_WINGS_OF_ELF].m_byItemSlot = static_cast<BYTE>(ItemSlot::Helm);
         g_ItemDataHandler.OnItemEdited(ITEM_WINGS_OF_ELF);
-        CHECK(g_ItemDatabase.Find(ITEM_WINGS_OF_ELF)->statProfile.empty());
+        CHECK(g_ItemDatabase.Find(ITEM_WINGS_OF_ELF)->statProfile == "armor");
 
         ItemAttribute[ITEM_WINGS_OF_ELF].m_byItemSlot = static_cast<BYTE>(ItemSlot::Wings);
         g_ItemDataHandler.OnItemEdited(ITEM_WINGS_OF_ELF);

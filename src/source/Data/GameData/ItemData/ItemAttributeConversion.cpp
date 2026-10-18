@@ -153,6 +153,24 @@ WeaponKind GetStaffGroupWeaponKind(ItemSlot slot)
         return WeaponKind::None;
     }
 }
+
+// The stat profile of a wing's tier; none without a tier.
+std::string GetWingStatProfile(const ItemDefinition& definition)
+{
+    switch (definition.wingTier)
+    {
+    case WingTier::Small:
+        return "smallWing";
+    case WingTier::First:
+        return "firstTierWing";
+    case WingTier::Second:
+        return definition.tags.Has(ItemTag::Cape) ? "secondTierCape" : "secondTierWing";
+    case WingTier::Third:
+        return "thirdTierWing";
+    default:
+        return "";
+    }
+}
 } // namespace
 
 WeaponKind GetGroupWeaponKind(const ItemDefinition& definition)
@@ -201,31 +219,54 @@ WeaponKind GetGroupWeaponKind(const ItemDefinition& definition)
 
 std::string DeriveStatProfile(const ItemDefinition& definition)
 {
+    constexpr int HelperGroup = 13;
+    constexpr int PotionGroup = 14;
+    constexpr int EtcGroup = 15;
+
+    if (definition.tags.Has(ItemTag::Ammunition))
+    {
+        return "";
+    }
     if (definition.tags.Has(ItemTag::Sceptre))
     {
         return "sceptre";
+    }
+    if (definition.tags.Has(ItemTag::SummonerBook))
+    {
+        return "book";
     }
     if (definition.weaponKind == WeaponKind::Shield)
     {
         return "shield";
     }
-    if (definition.slot != ItemSlot::Wings)
+    if (definition.weaponKind != WeaponKind::None)
     {
-        return "";
+        return "weapon";
     }
-    switch (definition.wingTier)
+    switch (definition.slot)
     {
-    case WingTier::Small:
-        return "smallWing";
-    case WingTier::First:
-        return "firstTierWing";
-    case WingTier::Second:
-        return definition.tags.Has(ItemTag::Cape) ? "secondTierCape" : "secondTierWing";
-    case WingTier::Third:
-        return "thirdTierWing";
+    case ItemSlot::Helm:
+    case ItemSlot::Armor:
+    case ItemSlot::Pants:
+    case ItemSlot::Gloves:
+    case ItemSlot::Boots:
+        return "armor";
     default:
-        return "";
+        break;
     }
+    if (definition.slot == ItemSlot::Wings)
+    {
+        return GetWingStatProfile(definition);
+    }
+    if (definition.group == EtcGroup && definition.requirements != ItemRequirements{})
+    {
+        return "scroll";
+    }
+    if ((definition.group == HelperGroup || definition.group == PotionGroup) && definition.requirements.level > 0)
+    {
+        return "helper";
+    }
+    return "";
 }
 
 std::string FollowStatProfile(const ItemDefinition* previous, const ItemDefinition& updated)

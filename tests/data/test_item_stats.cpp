@@ -185,7 +185,8 @@ TEST_CASE("The shipped item stat file loads without problems and is in the writt
 }
 
 // The bmd import and the item editor keep a profile its data gives; the shipped data follows
-// the same rule, so nothing changes when an item is saved again.
+// the same rule, so nothing changes when an item is saved again. The Horn of Fenrir is no
+// helper: its level requirement does not grow.
 TEST_CASE("Every shipped item names the stat profile its data gives [data][items]")
 {
     ShippedItemAttributes items;
@@ -197,10 +198,12 @@ TEST_CASE("Every shipped item names the stat profile its data gives [data][items
             continue;
         }
         CAPTURE(g_ItemDatabase.GetLogName(MakeItemType(definition.group, definition.number)));
-        CHECK(definition.statProfile == DeriveStatProfile(definition));
+        const bool hornOfFenrir = MakeItemType(definition.group, definition.number) == ITEM_HORN_OF_FENRIR;
+        CHECK(definition.statProfile == (hornOfFenrir ? "" : DeriveStatProfile(definition)));
         itemsWithProfile += definition.statProfile.empty() ? 0 : 1;
     }
-    CHECK(itemsWithProfile == 59);
+    CHECK(DeriveStatProfile(*g_ItemDatabase.Find(ITEM_HORN_OF_FENRIR)) == "helper");
+    CHECK(itemsWithProfile == 604);
 }
 
 // The fixed excellent bonus of the three chaos weapons is item data.

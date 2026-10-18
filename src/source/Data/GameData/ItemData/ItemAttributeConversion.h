@@ -42,10 +42,14 @@ WeaponKind GetGroupWeaponKind(const ItemDefinition& definition);
 // as it differs.
 WeaponKind FollowGroupWeaponKind(const ItemDefinition* previous, const ItemDefinition& updated);
 
-// The stat profile the item's own data gives: "sceptre" for an item with the
-// sceptre tag, "shield" for a shield, the wing tier's profile for wings
-// ("firstTierWing", "secondTierWing", "secondTierCape" for a second tier cape,
-// "thirdTierWing", "smallWing"), and the default ("") for the others.
+// The stat profile the item's own data gives: none for arrows and bolts,
+// "sceptre" for an item with the sceptre tag, "book" for a summoner book,
+// "shield" for a shield, "weapon" for another item with a weapon kind, "armor"
+// for an armour slot, the wing tier's profile for wings ("firstTierWing",
+// "secondTierWing", "secondTierCape" for a second tier cape, "thirdTierWing",
+// "smallWing"), "scroll" for another item of group 15 with requirements,
+// "helper" for another item of group 13 or 14 with a level requirement, and the
+// default ("") for the others.
 std::string DeriveStatProfile(const ItemDefinition& definition);
 
 // The stat profile of an item after the bmd import or the item editor changed
