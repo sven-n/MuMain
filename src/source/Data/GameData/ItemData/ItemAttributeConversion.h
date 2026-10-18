@@ -21,8 +21,21 @@ std::wstring CutToItemAttributeName(const std::wstring& name);
 void CopyItemAttributeStats(const ITEM_ATTRIBUTE& attribute, ItemDefinition& definition);
 
 // Copies the fields ITEM_ATTRIBUTE (and so item.bmd) does not have: tags,
-// wing tier and rule flags.
+// wing tier, weapon kind and rule flags.
 void CopyFieldsNotInItemAttribute(const ItemDefinition& source, ItemDefinition& target);
+
+// The weapon kind the item's group gives, by group and slot as in OpenMU:
+// spears in group 3, shields in group 6, and in group 4 bows on offHand and
+// crossbows on mainHand. The arrows and bolts of group 4 are left out as
+// one-handed items (OpenMU tells them apart by their height of 1).
+WeaponKind GetGroupWeaponKind(const ItemDefinition& definition);
+
+// The weapon kind of an item after the bmd import or the item editor changed it
+// (previous: the item before the change, nullptr for a new item). While the
+// item has the kind its group gives, or is new, the kind follows its group and
+// slot, so an undone edit undoes it too; a kind set in the item file that
+// differs from the group's stays as long as it differs.
+WeaponKind FollowGroupWeaponKind(const ItemDefinition* previous, const ItemDefinition& updated);
 
 // The attribute's name becomes the neutral (English) name.
 ItemDefinition ToItemDefinition(const ITEM_ATTRIBUTE& attribute, int itemType);

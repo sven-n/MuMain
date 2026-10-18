@@ -455,7 +455,7 @@ bool IsHudSkillUsable(ActionSkillType bySkillType)
     {
         int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
         int iTypeR = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
-        if ((iTypeL < ITEM_SPEAR || iTypeL >= ITEM_BOW) && (iTypeR < ITEM_SPEAR || iTypeR >= ITEM_BOW))
+        if (!GameLogic::Items::IsSpearType(iTypeL) && !GameLogic::Items::IsSpearType(iTypeR))
         {
             bCantSkill = true;
         }

@@ -2680,7 +2680,7 @@ void CHARACTER_MACHINE::CalculateDamage()
     Character.AttackDamageMinLeft += Damage;
     Character.AttackDamageMaxLeft += Damage;
 
-    if ((Right->Type >= ITEM_BOW && Right->Type < ITEM_BOW + MAX_ITEM_INDEX) && (Left->Type >= ITEM_BOW && Left->Type < ITEM_BOW + MAX_ITEM_INDEX))
+    if (GameLogic::Items::IsBowCrossbowOrAmmunition(Right) && GameLogic::Items::IsBowCrossbowOrAmmunition(Left))
     {
         int LLevel = Left->Level;
         int RLevel = Right->Level;
@@ -3277,7 +3277,7 @@ void CHARACTER_MACHINE::CalculateDefense()
     g_csItemOption.PlusSpecialLevel(&Character.Defense, Dexterity, AT_SET_OPTION_IMPROVE_DEFENCE_3);
     g_csItemOption.PlusSpecialLevel(&Character.Defense, Vitality, AT_SET_OPTION_IMPROVE_DEFENCE_4);
 
-    if (Equipment[EQUIPMENT_WEAPON_LEFT].Type >= ITEM_SHIELD && Equipment[EQUIPMENT_WEAPON_LEFT].Type < ITEM_SHIELD + MAX_ITEM_INDEX)
+    if (GameLogic::Items::IsShieldType(Equipment[EQUIPMENT_WEAPON_LEFT].Type))
     {
         g_csItemOption.PlusSpecialPercent(&Character.Defense, AT_SET_OPTION_IMPROVE_SHIELD_DEFENCE);
     }

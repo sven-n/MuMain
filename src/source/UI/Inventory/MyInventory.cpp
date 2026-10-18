@@ -398,8 +398,9 @@ bool CMyInventory::IsEquipable(int iIndex, ITEM* pItem) const
     if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF)
     {
         const ITEM* l = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
-        if (iIndex == EQUIPMENT_WEAPON_RIGHT && l->Type != ITEM_BOLT
-            && (l->Type >= ITEM_BOW && l->Type < ITEM_BOW + MAX_ITEM_INDEX))
+        // With a bow in the left hand only arrows go in the right. As before, a crossbow or arrows
+        // there count too, though only the server could put them in an elf's left hand.
+        if (iIndex == EQUIPMENT_WEAPON_RIGHT && l->Type != ITEM_BOLT && GameLogic::Items::IsBowCrossbowOrAmmunition(l))
         {
             if (pItem->Type != ITEM_ARROWS)
                 bEquipable = false;
