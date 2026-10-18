@@ -81,6 +81,9 @@ enum class Counter : int
     SamplerBinds,
     // Skinned draws whose mesh, texture and pipeline no earlier draw in the pass had this frame.
     DistinctSkinnedDraws,
+    // Joint trail segments and particles not drawn because they lie outside the view frustum.
+    JointSegmentsCulled,
+    ParticlesCulled,
     Count_
 };
 
@@ -108,6 +111,8 @@ inline constexpr const char* kCounterNames[static_cast<int>(Counter::Count_)] = 
     "PipelineBinds",
     "SamplerBinds",
     "DistinctSkinnedDraws",
+    "JointSegmentsCulled",
+    "ParticlesCulled",
 };
 static_assert(kCounterNames[static_cast<int>(Counter::Count_) - 1] != nullptr, "a counter without a name");
 

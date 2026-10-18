@@ -63,6 +63,15 @@ const std::vector<Segment>& Catalog()
              return c;
          }()},
 
+        {"fx.culling.off", "Joint trail segments and particles outside the view frustum drawn anyway.",
+         TagEffects | TagCulling,
+         []
+         {
+             SceneConfig c;
+             c.disableEffectCulling = true;
+             return c;
+         }()},
+
         {"fx.boids.off", "Ambient wildlife off. Always-on cost in town maps, independent of combat.", TagWildlife,
          []
          {
@@ -176,7 +185,7 @@ const TagName kTagNames[] = {
     {TagBaseline, "baseline"}, {TagEffects, "effects"}, {TagSprites, "sprites"},   {TagParticles, "particles"},
     {TagJoints, "joints"},     {TagModels, "models"},   {TagWildlife, "wildlife"}, {TagWings, "wings"},
     {TagShadows, "shadows"},   {TagLook, "look"},       {TagTextures, "textures"}, {TagAntialiasing, "antialiasing"},
-    {TagOrder, "order"},
+    {TagOrder, "order"},       {TagCulling, "culling"},
 };
 
 bool HasTagNamed(uint32_t tags, const std::string& wanted)

@@ -77,6 +77,7 @@ it found when it ends or is stopped.
 | `fx.wingshadow.off` | The extra per-wing body shadow draw. |
 | `fx.winglayers.off` | Wing glow overlay passes. Visibly changes the wing while it runs. |
 | `fx.bodyshadows.off` | Every body shadow: characters, their wings and pets, objects, wildlife. |
+| `fx.culling.off` | Joint trail segments and particles outside the view frustum, drawn anyway (`$effects culling off`). |
 | `look.texfilter.off` | Enhanced texture filtering: mipmaps and anisotropy on world textures. |
 | `look.lighting.off` | Enhanced per-pixel model lighting, and the dynamic lights that need it. |
 | `look.dynlights.off` | Dynamic model lights from candles, fires and spells. |
@@ -146,7 +147,7 @@ submitted the same number of draw calls as the baseline. That segment disabled n
 either the scene had none of what it targets (no wings equipped, no particles on screen) or its
 configuration does not reach the path it names. Its timing is then not evidence that what it
 targets is cheap, and the report says so rather than leaving the row to be misread. Segments
-tagged `look`, `textures`, `antialiasing` or `order` are exempt: they submit the same draws by design.
+tagged `look`, `textures`, `antialiasing`, `order` or `culling` are exempt: they submit the same draws by design.
 
 ## 4. Recording which commit a run came from
 

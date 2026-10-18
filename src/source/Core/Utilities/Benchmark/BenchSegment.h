@@ -33,6 +33,7 @@ enum SegmentTag : uint32_t
     TagTextures = 1u << 10,
     TagAntialiasing = 1u << 11,
     TagOrder = 1u << 12,
+    TagCulling = 1u << 13,
 };
 
 // What the segment switches off while it is measured: the `$effects ...` console toggles
@@ -56,6 +57,7 @@ struct SceneConfig
     bool disableWingShadow = false;
     bool disableWingExtraLayers = false;
     bool disableBodyShadows = false;
+    bool disableEffectCulling = false;
 
     // The Enhanced look's features, switched off as session overrides. They change nothing
     // while the look is Classic, which the segment-inert finding then says.
