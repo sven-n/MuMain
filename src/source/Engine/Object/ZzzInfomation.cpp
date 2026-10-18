@@ -788,20 +788,11 @@ void CalcRequirements(ITEM* ip, ITEM_ATTRIBUTE* p)
         (ip->Type >= ITEM_DRAGON_KNIGHT_ARMOR && ip->Type <= ITEM_SUNLIGHT_ARMOR) ||
         (ip->Type >= ITEM_DRAGON_KNIGHT_PANTS && ip->Type <= ITEM_SUNLIGHT_PANTS) ||
         (ip->Type >= ITEM_DRAGON_KNIGHT_GLOVES && ip->Type <= ITEM_SUNLIGHT_GLOVES) ||
-        (ip->Type >= ITEM_DRAGON_KNIGHT_BOOTS && ip->Type <= ITEM_SUNLIGHT_BOOTS) ||
-        ip->Type == ITEM_BONE_BLADE ||
-        ip->Type == ITEM_EXPLOSION_BLADE ||
-        ip->Type == ITEM_GRAND_VIPER_STAFF ||
-        ip->Type == ITEM_SYLPH_WIND_BOW ||
-        ip->Type == ITEM_SOLEIL_SCEPTER
-        || ITEM_STORM_BLITZ_STICK == ip->Type
-        || ITEM_AURA_HELM == ip->Type
-        || ITEM_AURA_ARMOR == ip->Type
-        || ITEM_AURA_PANTS == ip->Type
-        || ITEM_AURA_GLOVES == ip->Type
-        || ITEM_AURA_BOOTS == ip->Type
-        || Check_LuckyItem(ip->Type)
-        )
+        (ip->Type >= ITEM_DRAGON_KNIGHT_BOOTS && ip->Type <= ITEM_SUNLIGHT_BOOTS) || ip->Type == ITEM_BONE_BLADE ||
+        ip->Type == ITEM_EXPLOSION_BLADE || ip->Type == ITEM_GRAND_VIPER_STAFF || ip->Type == ITEM_SYLPH_WIND_BOW ||
+        ip->Type == ITEM_SOLEIL_SCEPTER || ITEM_STORM_BLITZ_STICK == ip->Type || ITEM_AURA_HELM == ip->Type ||
+        ITEM_AURA_ARMOR == ip->Type || ITEM_AURA_PANTS == ip->Type || ITEM_AURA_GLOVES == ip->Type ||
+        ITEM_AURA_BOOTS == ip->Type || GameLogic::Items::IsLuckyItemType(ip->Type))
     {
         isExcellent = false;
     }
@@ -2107,7 +2098,8 @@ EXIT_CALCULATE:
     {
         Gold = (Gold / 10) * 10;
     }
-    if (Check_LuckyItem(ip->Type))	Gold = 0;
+    if (GameLogic::Items::IsLuckyItemType(ip->Type))
+        Gold = 0;
 
     return (int64_t)Gold;
 }

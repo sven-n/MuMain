@@ -1,7 +1,8 @@
 // One-time check for phase 3b-4 of the data-driven items plan: the lucky set armour
-// range, the transformation ring lists and the order in which potions are taken. This
-// file keeps a copy of the old code (item_lists_old.inl) and checks that the tag queries
-// and the potion use order that replace it give the same answers for every item type.
+// range, the transformation ring lists, the order in which potions are taken and the
+// items the hotkeys take. This file keeps a copy of the old code (item_lists_old.inl)
+// and checks that the tag queries and the potion use order that replace it give the
+// same answers for every item type.
 // The lucky set range also covered the two numbers in it that have no item data (7/71
 // and 10/72; the client cannot name them and OpenMU does not define them); the tag does
 // not, and the checks spell that out. It is not meant to stay: once the data is the
@@ -17,6 +18,7 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "UI/HUD/ItemHotKey.h"
 
 #include <array>
 #include <filesystem>
@@ -126,5 +128,26 @@ TEST_CASE("3b-4: the potions are taken in the same order [data][items][3b]")
     {
         CAPTURE(static_cast<int>(tag));
         CHECK(OldItemTypesWithTagHighestFirst(tag) == ItemTypesInUseOrder(tag));
+    }
+}
+
+TEST_CASE("3b-4: the hotkeys take the same items [data][items][3b]")
+{
+    ShippedItems items;
+    for (int hotKey = mu::ui::window::HOTKEY_Q; hotKey < mu::ui::window::HOTKEY_COUNT; ++hotKey)
+    {
+        CAPTURE(hotKey);
+        for (int boundType = FirstItemType; boundType <= LastItemType; ++boundType)
+        {
+            CAPTURE(boundType);
+            // Remedy of Love counts as one item only at level 0.
+            for (const int boundLevel : {0, 1})
+            {
+                CAPTURE(boundLevel);
+                const auto itemTypes = mu::ui::window::GetHotKeyItemTypes(hotKey, boundType, boundLevel);
+                CHECK(OldHotKey::OldHotKeyItemTypes(hotKey, boundType, boundLevel) ==
+                      std::vector<int>(itemTypes.begin(), itemTypes.end()));
+            }
+        }
     }
 }

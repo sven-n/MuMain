@@ -1,4 +1,4 @@
-// One-time copy of the lucky item, transformation ring and potion checks before phase 3b-4
+// One-time copy of the lucky item, transformation ring, potion and hotkey checks before phase 3b-4
 // (see test_item_lists_equivalence.cpp).
 
 // _define.h and ZzzInventory.cpp, Check_LuckyItem. In a namespace so that the constants
@@ -80,3 +80,135 @@ std::vector<int> OldItemTypesWithTagHighestFirst(Data::Items::ItemTag tag)
     const auto itemTypes = g_ItemDatabase.GetItemTypesWithTag(tag);
     return std::vector<int>(itemTypes.rbegin(), itemTypes.rend());
 }
+
+// ItemHotKey.cpp, CItemHotKey::GetHotKeyCommonItem and the start of GetHotKeyItemIndex, with
+// the bound item type and level as parameters instead of members. OldHotKeyItemTypes gives
+// the item types of the loop that follows, from iStartItemType down to iEndItemType.
+namespace OldHotKey
+{
+using namespace mu::ui::window;
+
+bool OldGetHotKeyCommonItem(int boundType, int boundLevel, int& iStart, int& iEnd)
+{
+    switch (boundType)
+    {
+    case ITEM_SIEGE_POTION:
+    case ITEM_ANTIDOTE:
+    case ITEM_ALE:
+    case ITEM_TOWN_PORTAL_SCROLL:
+    case ITEM_REMEDY_OF_LOVE:
+    case ITEM_JACK_OLANTERN_BLESSINGS:
+    case ITEM_JACK_OLANTERN_WRATH:
+    case ITEM_JACK_OLANTERN_CRY:
+    case ITEM_JACK_OLANTERN_FOOD:
+    case ITEM_JACK_OLANTERN_DRINK:
+    case ITEM_ELITE_HEALING_POTION:
+    case ITEM_ELITE_MANA_POTION:
+    case ITEM_ELIXIR_OF_STRENGTH:
+    case ITEM_ELIXIR_OF_AGILITY:
+    case ITEM_ELIXIR_OF_HEALTH:
+    case ITEM_ELIXIR_OF_ENERGY:
+    case ITEM_ELIXIR_OF_CONTROL:
+    case ITEM_MEDIUM_ELITE_HEALING_POTION:
+    case ITEM_CHERRY_BLOSSOM_WINE:
+    case ITEM_CHERRY_BLOSSOM_RICE_CAKE:
+    case ITEM_CHERRY_BLOSSOM_FLOWER_PETAL:
+    case ITEM_ELITE_SD_POTION:
+        if (boundType != ITEM_REMEDY_OF_LOVE || boundLevel == 0)
+        {
+            iStart = iEnd = boundType;
+            return true;
+        }
+        break;
+    default:
+        if (boundType >= ITEM_SMALL_SHIELD_POTION && boundType <= ITEM_LARGE_SHIELD_POTION)
+        {
+            iStart = ITEM_LARGE_SHIELD_POTION; iEnd = ITEM_SMALL_SHIELD_POTION;
+            return true;
+        }
+        else if (GameLogic::Items::IsComplexPotionType(boundType))
+        {
+            iStart = ITEM_LARGE_COMPLEX_POTION; iEnd = ITEM_SMALL_COMPLEX_POTION;
+            return true;
+        }
+        break;
+    }
+    return false;
+}
+
+std::vector<int> OldHotKeyItemTypes(int iType, int boundType, int boundLevel)
+{
+    int iStartItemType = 0, iEndItemType = 0;
+
+    switch (iType)
+    {
+    case HOTKEY_Q:
+        if (OldGetHotKeyCommonItem(boundType, boundLevel, iStartItemType, iEndItemType) == false)
+        {
+            if (GameLogic::Items::IsManaPotionType(boundType))
+            {
+                iStartItemType = ITEM_LARGE_MANA_POTION; iEndItemType = ITEM_SMALL_MANA_POTION;
+            }
+            else
+            {
+                iStartItemType = ITEM_LARGE_HEALING_POTION; iEndItemType = ITEM_APPLE;
+            }
+        }
+        break;
+    case HOTKEY_W:
+        if (OldGetHotKeyCommonItem(boundType, boundLevel, iStartItemType, iEndItemType) == false)
+        {
+            if (GameLogic::Items::IsHealingPotionType(boundType))
+            {
+                iStartItemType = ITEM_LARGE_HEALING_POTION; iEndItemType = ITEM_APPLE;
+            }
+            else
+            {
+                iStartItemType = ITEM_LARGE_MANA_POTION; iEndItemType = ITEM_SMALL_MANA_POTION;
+            }
+        }
+        break;
+    case HOTKEY_E:
+        if (OldGetHotKeyCommonItem(boundType, boundLevel, iStartItemType, iEndItemType) == false)
+        {
+            if (GameLogic::Items::IsHealingPotionType(boundType))
+            {
+                iStartItemType = ITEM_LARGE_HEALING_POTION; iEndItemType = ITEM_APPLE;
+            }
+            else if (GameLogic::Items::IsManaPotionType(boundType))
+            {
+                iStartItemType = ITEM_LARGE_MANA_POTION; iEndItemType = ITEM_SMALL_MANA_POTION;
+            }
+            else
+            {
+                iStartItemType = ITEM_ANTIDOTE; iEndItemType = ITEM_ANTIDOTE;
+            }
+        }
+        break;
+    case HOTKEY_R:
+        if (OldGetHotKeyCommonItem(boundType, boundLevel, iStartItemType, iEndItemType) == false)
+        {
+            if (GameLogic::Items::IsHealingPotionType(boundType))
+            {
+                iStartItemType = ITEM_LARGE_HEALING_POTION; iEndItemType = ITEM_APPLE;
+            }
+            else if (GameLogic::Items::IsManaPotionType(boundType))
+            {
+                iStartItemType = ITEM_LARGE_MANA_POTION; iEndItemType = ITEM_SMALL_MANA_POTION;
+            }
+            else
+            {
+                iStartItemType = ITEM_LARGE_SHIELD_POTION; iEndItemType = ITEM_SMALL_SHIELD_POTION;
+            }
+        }
+        break;
+    }
+
+    std::vector<int> itemTypes;
+    for (int i = iStartItemType; i >= iEndItemType; --i)
+    {
+        itemTypes.push_back(i);
+    }
+    return itemTypes;
+}
+} // namespace OldHotKey
