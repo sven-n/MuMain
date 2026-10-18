@@ -5538,8 +5538,7 @@ bool GetAttackDamage(int* iMinDamage, int* iMaxDamage)
     }
     else if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF)
     {
-        if ((r->Type >= ITEM_BOW && r->Type < ITEM_BOW + MAX_ITEM_INDEX) &&
-            (l->Type >= ITEM_BOW && l->Type < ITEM_BOW + MAX_ITEM_INDEX))
+        if (GameLogic::Items::IsBowCrossbowOrAmmunition(r) && GameLogic::Items::IsBowCrossbowOrAmmunition(l))
         {
             if ((l->Type == ITEM_BOLT && l->Level >= 1) || (r->Type == ITEM_ARROWS && r->Level >= 1))
             {

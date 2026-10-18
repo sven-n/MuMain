@@ -186,6 +186,8 @@ void CItemDataHandler::OnItemEdited(int itemType)
     definition.group = GetItemGroup(itemType);
     definition.number = GetItemNumber(itemType);
     CopyItemAttributeStats(attribute, definition);
+    // The editor does not show the weapon kind.
+    definition.weaponKind = FollowGroupWeaponKind(g_ItemDatabase.Find(itemType), definition);
 
     // Only a changed name is stored; otherwise every stat edit would turn the
     // shown English fallback into a translation. ITEM_ATTRIBUTE holds a cut
@@ -215,7 +217,33 @@ void CItemDataHandler::OnItemEdited(int itemType)
 
 void CItemDataHandler::OnItemsSwapped(int firstItemType, int secondItemType)
 {
+    if (!IsValidItemType(firstItemType) || !IsValidItemType(secondItemType))
+    {
+        return;
+    }
+
+    const ItemDefinition first = g_ItemDatabase.GetAllSlots()[firstItemType];
+    const ItemDefinition second = g_ItemDatabase.GetAllSlots()[secondItemType];
     g_ItemDatabase.Swap(firstItemType, secondItemType);
+    FollowGroupWeaponKindAfterMove(first, secondItemType);
+    FollowGroupWeaponKindAfterMove(second, firstItemType);
+}
+
+void CItemDataHandler::FollowGroupWeaponKindAfterMove(const ItemDefinition& before, int newItemType)
+{
+    const ItemDefinition* moved = g_ItemDatabase.Find(newItemType);
+    if (moved == nullptr)
+    {
+        return;
+    }
+
+    const WeaponKind weaponKind = FollowGroupWeaponKind(&before, *moved);
+    if (weaponKind != moved->weaponKind)
+    {
+        ItemDefinition changed = *moved;
+        changed.weaponKind = weaponKind;
+        g_ItemDatabase.Set(changed);
+    }
 }
 
 ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
@@ -263,7 +291,8 @@ void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items,
     { return std::find(importedLocales.begin(), importedLocales.end(), locale) != importedLocales.end(); };
     for (ItemDefinition& item : items)
     {
-        if (const ItemDefinition* current = g_ItemDatabase.Find(item.group, item.number))
+        const ItemDefinition* current = g_ItemDatabase.Find(item.group, item.number);
+        if (current != nullptr)
         {
             CopyFieldsNotInItemAttribute(*current, item);
             for (const auto& [locale, text] : current->names.GetTranslations())
@@ -274,6 +303,7 @@ void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items,
                 }
             }
         }
+        item.weaponKind = FollowGroupWeaponKind(current, item);
     }
 }
 

@@ -53,9 +53,9 @@ public:
     const ItemDefinition* Find(int group, int number) const;
 
     // Fast checks for the rule code. They read a small table next to the
-    // definitions. Invalid ids and empty slots have no tags and no slot, and
-    // allow no action: an item the client does not know cannot be traded,
-    // dropped, stored, sold or repaired.
+    // definitions. Invalid ids and empty slots have no tags, slot, wing tier
+    // or weapon kind, and allow no action: an item the client does not know
+    // cannot be traded, dropped, stored, sold or repaired.
     bool HasTag(int itemType, ItemTag tag) const
     {
         return IsValidItemType(itemType) && m_ruleData[itemType].tags.Has(tag);
@@ -79,6 +79,11 @@ public:
     WingTier GetWingTier(int itemType) const
     {
         return IsValidItemType(itemType) ? m_ruleData[itemType].wingTier : WingTier::None;
+    }
+
+    WeaponKind GetWeaponKind(int itemType) const
+    {
+        return IsValidItemType(itemType) ? m_ruleData[itemType].weaponKind : WeaponKind::None;
     }
 
     // The item types with the tag, lowest first. Built again whenever the
@@ -123,6 +128,7 @@ private:
         uint16_t blockedActions = AllActions;
         ItemSlot slot = ItemSlot::None;
         WingTier wingTier = WingTier::None;
+        WeaponKind weaponKind = WeaponKind::None;
     };
 
     static constexpr uint16_t ActionBit(ItemAction action)

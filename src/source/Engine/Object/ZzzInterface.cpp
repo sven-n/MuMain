@@ -1242,7 +1242,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         int Right = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
         int Left = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
 
-        if (Right >= ITEM_SPEAR && Right < ITEM_SPEAR + MAX_ITEM_INDEX)
+        if (GameLogic::Items::IsSpearType(Right))
         {
             Range = 2.2f;
         }
