@@ -821,7 +821,8 @@ void ComputeItemInfo(int iHelpItem)
         }
         if (Blocking > 0)
         {
-            Blocking += GameLogic::Items::GetItemLevelBonus(Level);
+            // Like the item's defense rate, a BYTE that stops at 255.
+            Blocking = std::min(Blocking + GameLogic::Items::GetItemLevelBonus(Level), 255);
         }
 
         if (p->RequireLevel)

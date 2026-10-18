@@ -353,6 +353,13 @@ TEST_CASE("Magic power and defense rate past 255 are not wrapped around [data][i
     CHECK(ComputeItem(ITEM_LEGENDARY_STAFF, 15, 0x01).MagicPower == 196);
     // 170 + 47 (excellent) + 66 (+15) = 283.
     CHECK(ComputeItem(DragonShieldType, 15, 0x01).SuccessfulBlocking == 255);
+
+    // The help table shows the same: 200 + 66 (+15) = 266.
+    items[DragonShieldType].SuccessfulBlocking = 200;
+    ItemHelpScope help;
+    ComputeItemInfo(DragonShieldType);
+    CHECK(ComputeItem(DragonShieldType, 15).SuccessfulBlocking == 255);
+    CHECK(g_iItemInfo[15][_COLUMN_TYPE_DEFRATE] == 255);
 }
 
 TEST_CASE("The item help table shows the stats the item has at each level [data][items]")
