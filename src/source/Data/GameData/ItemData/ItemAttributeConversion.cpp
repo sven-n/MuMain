@@ -121,18 +121,66 @@ void CopyFieldsNotInItemAttribute(const ItemDefinition& source, ItemDefinition& 
     target.sellableWhenRentalExpired = source.sellableWhenRentalExpired;
 }
 
+namespace
+{
+// Only the Rage Fighter may use the item: in group 0 that is one of his gloves.
+bool IsForRageFighterOnly(const ItemDefinition& definition)
+{
+    for (size_t characterClass = 0; characterClass < definition.classRequirements.size(); ++characterClass)
+    {
+        const bool required = definition.classRequirements[characterClass] > 0;
+        if (required != (characterClass == static_cast<size_t>(CLASS_RAGEFIGHTER)))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Group 5 holds the staffs and sticks (mainHand) and the books (offHand).
+WeaponKind GetStaffGroupWeaponKind(ItemSlot slot)
+{
+    switch (slot)
+    {
+    case ItemSlot::MainHand:
+        return WeaponKind::Staff;
+    case ItemSlot::OffHand:
+        return WeaponKind::Book;
+    default:
+        return WeaponKind::None;
+    }
+}
+} // namespace
+
 WeaponKind GetGroupWeaponKind(const ItemDefinition& definition)
 {
+    constexpr int SwordGroup = 0;
+    constexpr int AxeGroup = 1;
+    constexpr int MaceGroup = 2;
     constexpr int SpearGroup = 3;
     constexpr int BowGroup = 4;
+    constexpr int StaffGroup = 5;
     constexpr int ShieldGroup = 6;
 
+    const bool mainHand = definition.slot == ItemSlot::MainHand;
     switch (definition.group)
     {
+    case SwordGroup:
+        if (!mainHand)
+        {
+            return WeaponKind::None;
+        }
+        return IsForRageFighterOnly(definition) ? WeaponKind::Glove : WeaponKind::Sword;
+    case AxeGroup:
+        return mainHand ? WeaponKind::Axe : WeaponKind::None;
+    case MaceGroup:
+        return mainHand ? WeaponKind::Mace : WeaponKind::None;
+    case StaffGroup:
+        return GetStaffGroupWeaponKind(definition.slot);
     case SpearGroup:
-        return WeaponKind::Spear;
+        return mainHand ? WeaponKind::Spear : WeaponKind::None;
     case ShieldGroup:
-        return WeaponKind::Shield;
+        return definition.slot == ItemSlot::OffHand ? WeaponKind::Shield : WeaponKind::None;
     case BowGroup:
         if (!definition.twoHanded)
         {

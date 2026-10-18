@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "ItemDataValidation.h"
+#include "ItemAttributeConversion.h"
 #include "ItemEnumNames.h"
 #include "ItemType.h"
 #include "Core/Text/Utf8.h"
@@ -78,17 +79,26 @@ void ValidateName(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
         check(locale, text);
     }
 }
-// The slot the code looks in for each weapon kind: the left hand (offHand) for
-// bows and shields, the right hand (mainHand) for crossbows and spears.
+// The slot of each weapon kind: the left hand (offHand) for bows, shields and
+// books, the right hand (mainHand) for the others. The code looks for a bow or
+// a shield only in the left hand and for a crossbow or a spear only in the
+// right; one-handed swords, axes, maces, staffs and gloves may also go in the
+// left.
 ItemSlot GetWeaponKindSlot(WeaponKind kind)
 {
     switch (kind)
     {
     case WeaponKind::Bow:
     case WeaponKind::Shield:
+    case WeaponKind::Book:
         return ItemSlot::OffHand;
     case WeaponKind::Crossbow:
     case WeaponKind::Spear:
+    case WeaponKind::Sword:
+    case WeaponKind::Axe:
+    case WeaponKind::Mace:
+    case WeaponKind::Staff:
+    case WeaponKind::Glove:
         return ItemSlot::MainHand;
     default:
         return ItemSlot::None;
@@ -108,12 +118,20 @@ void ValidateSlot(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
         AddIssue(issues, ItemDataIssueSeverity::Warning, definition, "has a wing tier, but its slot is not \"wings\"",
                  "wingTier");
     }
+    // Item files saved before a group got its weapon kind have none; nothing fills it in.
+    const WeaponKind groupWeaponKind = GetGroupWeaponKind(definition);
+    if (definition.weaponKind == WeaponKind::None && groupWeaponKind != WeaponKind::None)
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
+                 std::string("has no weapon kind, but its group gives \"") + FindEnumName(groupWeaponKind) + "\"",
+                 "weaponKind");
+    }
     const ItemSlot weaponKindSlot = GetWeaponKindSlot(definition.weaponKind);
     if (weaponKindSlot != ItemSlot::None && definition.slot != weaponKindSlot)
     {
         AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
-                 std::string("is a ") + FindEnumName(definition.weaponKind) + ", but its slot is not \"" +
-                     FindEnumName(weaponKindSlot) + "\"",
+                 std::string("has the weapon kind \"") + FindEnumName(definition.weaponKind) +
+                     "\", but its slot is not \"" + FindEnumName(weaponKindSlot) + "\"",
                  "weaponKind");
     }
 }

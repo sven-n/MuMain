@@ -40,6 +40,8 @@ enum class ItemTag : uint8_t
     // Class equipment
     SummonerBook,
     DivineArchangelWeapon,
+    Sceptre,
+    MagicSword,
     // Cash shop
     CashShop,
     GambleItem,

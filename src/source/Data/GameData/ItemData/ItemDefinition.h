@@ -39,10 +39,11 @@ enum class WingTier : BYTE
     Third,
 };
 
-// The kind of weapon, as OpenMU's item groups give it: spears (group 3),
+// The kind of weapon, as OpenMU's item groups give it: swords and the Rage
+// Fighter's gloves (group 0), axes (1), maces and sceptres (2), spears (3),
 // bows and crossbows (group 4: bows have the slot offHand, crossbows
-// mainHand; arrows and bolts are neither) and shields (group 6). Swords,
-// axes, maces and staffs have none yet.
+// mainHand; arrows and bolts are neither), staffs, sticks and the summoner's
+// books (5: books have the slot offHand) and shields (6).
 enum class WeaponKind : BYTE
 {
     None,
@@ -50,6 +51,12 @@ enum class WeaponKind : BYTE
     Bow,
     Crossbow,
     Shield,
+    Sword,
+    Axe,
+    Mace,
+    Staff,
+    Glove,
+    Book,
 };
 
 // What a player may do with an item. See the rule flags in ItemDefinition.

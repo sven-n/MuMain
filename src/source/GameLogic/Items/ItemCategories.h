@@ -86,6 +86,9 @@ namespace GameLogic::Items
     bool IsSummonerBook(const ITEM* pItem);
     bool IsSummonerBookType(int itemType);
     bool IsSummonerBookModel(int modelType);
+    bool IsSceptreType(int itemType);
+    // The Magic Gladiator's swords with magic power.
+    bool IsMagicSwordType(int itemType);
 
     // Weapons
     bool IsBowType(int itemType);
@@ -97,6 +100,16 @@ namespace GameLogic::Items
     bool IsShieldType(int itemType);
     // A bow, a crossbow, arrows or bolts.
     bool IsBowCrossbowOrAmmunition(const ITEM* pItem);
+    bool IsSwordOrGloveType(int itemType);
+    bool IsSwordOrGloveModel(int modelType);
+    bool IsSwordAxeMaceOrGloveType(int itemType);
+    // A staff or a stick.
+    bool IsStaffType(int itemType);
+    // A staff, a stick or a book.
+    bool IsStaffOrBookType(int itemType);
+    bool IsStaffOrBookModel(int modelType);
+    // A sword, glove, axe, mace, spear, bow, crossbow, staff or book, or arrows or bolts.
+    bool IsWeaponOrAmmunition(const ITEM* pItem);
 
     // Item value
     bool IsHighValueItem(const ITEM* pItem);
