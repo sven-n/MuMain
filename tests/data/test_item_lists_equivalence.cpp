@@ -85,6 +85,10 @@ TEST_CASE("3b-3: the sceptre and magic sword lists match the tags [data][items][
         CHECK(OldIsCepterItem(itemType) == IsSceptreType(itemType));
         CHECK(OldIsRightMagicSword(&item) == IsMagicSwordType(itemType));
         CHECK(OldTooltipWizardryDamageOption(&item) == IsMagicSwordType(itemType));
+        // These checks see a weapon with something in the other hand, so a one-handed one.
+        // The two-handed magic swords count now as well, which the hands never allow.
+        const bool twoHandedMagicSword = IsMagicSwordType(itemType) && g_ItemDatabase.Find(itemType)->twoHanded;
+        CHECK(OldIsImperialSword(itemType) == (IsMagicSwordType(itemType) && !twoHandedMagicSword));
     }
 }
 

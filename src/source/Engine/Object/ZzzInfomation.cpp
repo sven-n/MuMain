@@ -2815,7 +2815,7 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
 
             if (GameLogic::Items::IsWeaponOrAmmunition(Left))
             {
-                if (Left->Type == ITEM_IMPERIAL_SWORD)
+                if (GameLogic::Items::IsMagicSwordType(Left->Type))
                 {
                     PlusSpecial(&DamageMin, AT_IMPROVE_DAMAGE, Left);
                     PlusSpecial(&DamageMax, AT_IMPROVE_DAMAGE, Left);
@@ -2848,7 +2848,7 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
             percent = CalcDurabilityPercent(Left->Durability, p->Durability, Left->Level, Left->ExcellentFlags, Left->AncientDiscriminator);
             DamageMin = 0; DamageMax = 0;
 
-            if (Right->Type == ITEM_IMPERIAL_SWORD)
+            if (GameLogic::Items::IsMagicSwordType(Right->Type))
             {
                 PlusSpecial(&DamageMin, AT_IMPROVE_DAMAGE, Right);
                 PlusSpecial(&DamageMax, AT_IMPROVE_DAMAGE, Right);

@@ -120,3 +120,10 @@ bool OldTooltipWizardryDamageOption(const ITEM* ip)
                 || (ip->Type == ITEM_IMPERIAL_SWORD)
                 );
 }
+
+// ZzzInfomation.cpp, CHARACTER_MACHINE::CalculateMagicDamage: the left-hand weapon and, with a
+// left-hand weapon, the right one count their damage option instead of the magic option.
+bool OldIsImperialSword(int type)
+{
+    return type == ITEM_IMPERIAL_SWORD;
+}
