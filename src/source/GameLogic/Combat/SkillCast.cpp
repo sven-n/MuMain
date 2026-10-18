@@ -147,8 +147,7 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
         switch (Skill)
         {
         case AT_SKILL_IMPALE:
-            if (!(o->Type == MODEL_PLAYER && Hero->Weapon[0].Type != -1 &&
-                (Hero->Weapon[0].Type >= MODEL_SPEAR && Hero->Weapon[0].Type < MODEL_SPEAR + MAX_ITEM_INDEX)))
+            if (!(o->Type == MODEL_PLAYER && GameLogic::Items::IsSpearModel(Hero->Weapon[0].Type)))
             {
                 return false;
             }

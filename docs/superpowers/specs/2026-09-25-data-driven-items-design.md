@@ -401,7 +401,7 @@ in both repos (as separate PRs, one per repo).
 | 1 | Item database | Client | MuMain | 0 | `ItemDefinition` model and flat in-memory table, built from the loaded `Item_<lang>.bmd` data; English names for logs; log-name helper; load-time log. No behavior change. |
 | 2 | Data file format and names | Client | MuMain | 1 | JSON per group becomes the only item source and the database becomes the source for `ItemAttribute[]`; translated names in the UI locale; loading, writing and validation rules; automated data test; bmd import (with repair) and export in MuEditor; editor edits go into the database right away. |
 | 3 | Rules and categories into data | Client | MuMain | 2 | Flags and tags replace the hardcoded lists; client ↔ OpenMU rule mapping (input for A). |
-| 3b | Remaining item lists | Client | MuMain | 3 | The lists of item ids outside the phase 3 files that repeat data that exists or need one new tag (see "Item-specific code that is left"), checked like phase 3. |
+| 3b | Remaining item lists | Client | MuMain | 3 | The lists of item ids outside the phase 3 files that repeat data that exists or need new data (see "Item-specific code that is left"), checked like phase 3. |
 | 3c | Item stats by level | Both | MuMain (+ mapping for A) | 3 | How damage, defense, magic power, blocking and requirements change with the item level, and the bonus of excellent and ancient items, become named level bonus tables and formula parameters in data (D43), matching OpenMU's `ItemLevelBonusTable`; checked against the old formulas for every item and level. |
 | A | Server rule fields and checks | Server | OpenMU | 3 (mapping) | New `ItemDefinition` fields or tables, migration, Season 6 values, update plug-in, enforcement in player actions. |
 | 4 | Models into data | Client | MuMain | 2 | Model files per item group (D22), model slots stay `MODEL_ITEM + type` (D23, own model slots). One PR per part: **4a** model files and textures (`OpenItems()` / `OpenItemTextures()`), **4b** inventory and ground display, **4c** render effects (D24) in three parts: **4c1** glow, **4c2** render styles, **4c3** item effects. |
@@ -465,7 +465,8 @@ server with original clients (after phases 6 and B).
 
    As built:
    - Item fields: `tags` (a list of names, a bitmask in memory),
-     `wingTier` (`small`/`first`/`second`/`third`), the rule flags
+     `wingTier` (`small`/`first`/`second`/`third`), `weaponKind`
+     (`spear`/`bow`/`crossbow`/`shield`, since 3b-2), the rule flags
      `tradable`, `droppable`, `storable`, `sellable`,
      `personalShopSellable`, `repairable` (default `true`, only `false`
      is written), the rental rules `droppableWhileRented`,
@@ -476,7 +477,7 @@ server with original clients (after phases 6 and B).
    - Items without a definition allow no action.
    - The rule functions stay and read the data through a small table next
      to the definitions (`ItemDatabase::HasTag`, `IsAllowed`, `GetSlot`,
-     `GetWingTier`): one array read plus a bit test.
+     `GetWingTier`, `GetWeaponKind`): one array read plus a bit test.
    - What stays in code: exceptions that depend on the item level, the
      durability or the player, with named constants, see
      `docs/item-data.md` → Rules; and the lists that are only used for
@@ -513,6 +514,7 @@ server with original clients (after phases 6 and B).
    |---|---|---|
    | `slot` | `ItemDefinition.ItemSlot` (an `ItemSlotType` with its slot numbers) | Exchange maps the names to slot types: `mainHand` ↔ types containing 0, `offHand` ↔ 1, …, `ring` ↔ 10/11 |
    | `wingTier` | None; wing values are power-ups and options per wing | Client-only for now; phase 9 (options) may replace it |
+   | `weaponKind` | Item groups: spears 3, bows and crossbows 4 (split by slot into `Stats.IsBowEquipped` and `IsCrossBowEquipped`), shields 6 (`ShieldItemGroup`, `Stats.IsShieldEquipped`) | Derived from group and slot (ammunition has none); no new OpenMU field needed |
    | `tradable`, `storable`, `personalShopSellable`, `sellable` = false | Only `IsBoundToCharacter`, which blocks all four at once (sell with a durability exception) | Separate rules, e.g. one `[Flags] ItemRestrictions` column with the six names; enforce in `MoveItemAction` (trade, vault, personal shop) and `SellItemToNpcAction`; `IsBoundToCharacter` stays for "only the owner can pick it up" |
    | `droppable` = false | None (`DropItemAction` drops everything) | Enforce in `DropItemAction` |
    | `repairable` = false | None (`ItemRepairAction` repairs any item below its maximum durability) | Enforce in `ItemRepairAction` |
@@ -551,10 +553,23 @@ server with original clients (after phases 6 and B).
      and `ITEM::Part` were written but never read and are gone. The Crywolf
      contract's horn check stays until the unformatted code around it is
      touched anyway.
-   - **3b-2** bows, crossbows, spears and shields, and **3b-3** staffs,
-     swords, axes and maces: one `weaponKind` field per item (like
-     `wingTier`; the kinds are exclusive and match OpenMU's item groups)
-     instead of a tag per kind, plus the tags `sceptre` and `magicSword`.
+   - **3b-2** (done): bows, crossbows, spears and shields. One
+     `weaponKind` field per item (`spear`, `bow`, `crossbow`, `shield`;
+     like `wingTier`, the kinds are exclusive and match OpenMU's item
+     groups 3, 4 and 6, group 4 split by slot) instead of a tag per kind.
+     13 places ask it: `CCharacterManager`'s bow and crossbow lists (four
+     functions), the elf's arrows-only rule, the shield defense set
+     option, a spear's reach (`Action`, the MU Helper) and Impale (skill
+     icon and skill use), and the checks of a bow or crossbow with its
+     ammunition in both hands (`CalculateDamage`, `GetAttackDamage`, the
+     hit sound in `MoveCharacter`). Silver Bow-J (4/27) joined the bow
+     lists in a commit of its own. The group ranges also counted the
+     numbers of their group that have no item data, which the client does
+     not know; the weapon kind does not. The bmd import and the item editor
+     keep a weapon kind that its group gives matching the group and slot, so
+     new weapons get one; the game reads only the field.
+   - **3b-3** staffs, swords, axes and maces: the weapon kinds `sword`,
+     `axe`, `mace` and `staff`, plus the tags `sceptre` and `magicSword`.
      3b-3 includes the character window's wizardry damage
      (`CharacterInfoWindow.cpp`), which picks the magic durability by the
      staff group and five Magic Gladiator swords, while the maximum
@@ -966,8 +981,8 @@ types and model slots (4d2). 239 identify an item by its model slot
   would turn about 50 chains into one value; the roadmap's "later: pets"
   should cover mounts.
 - **Phase 3b** (about 35 places): lists that repeat data that exists
-  (tags, `slot`, `wingTier`, `storable`, the files below) or need one new
-  tag (bow, crossbow, scepter, …).
+  (tags, `slot`, `wingTier`, `storable`, the files below) or need new
+  data (the `weaponKind` field, tags such as `sceptre`).
 - **Held and worn items** (about 34 places): their position on the
   character (per hand, on the back, link bone) and their looks while held
   (an item effect that runs while the item is held, swing trails). An

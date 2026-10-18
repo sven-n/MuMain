@@ -146,6 +146,7 @@ void ItemDatabase::Store(int itemType, ItemDefinition definition)
         ruleData.tags = definition.tags;
         ruleData.slot = definition.slot;
         ruleData.wingTier = definition.wingTier;
+        ruleData.weaponKind = definition.weaponKind;
         ruleData.blockedActions = 0;
         for (int action = 0; action < static_cast<int>(ItemAction::Count); ++action)
         {

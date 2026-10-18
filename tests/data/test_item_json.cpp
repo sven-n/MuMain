@@ -96,12 +96,14 @@ TEST_CASE("Item JSON leaves out default values [data][items]")
     const std::string text = WriteItemGroupJson(14, std::vector<ItemDefinition>{apple});
 
     CHECK(text.find("\"slot\"") == std::string::npos);
+    CHECK(text.find("\"weaponKind\"") == std::string::npos);
     CHECK(text.find("\"width\"") == std::string::npos);
     CHECK(text.find("\"requirements\"") == std::string::npos);
 
     const ReadResult result = Read(text);
     REQUIRE(result.items.size() == 1);
     CHECK(result.items.front().slot == ItemSlot::None);
+    CHECK(result.items.front().weaponKind == WeaponKind::None);
 }
 
 TEST_CASE("Item JSON output is sorted and stable [data][items]")
@@ -300,7 +302,26 @@ TEST_CASE("Item slots, wing tiers and tags are written by name [data][items]")
     CHECK(text.find("\"tradable\"") == std::string::npos);
 }
 
-TEST_CASE("Unknown slots, wing tiers and tags are errors [data][items]")
+TEST_CASE("Item weapon kinds are written by name after the slot and read back [data][items]")
+{
+    ItemDefinition bow = MakeKris();
+    bow.slot = ItemSlot::OffHand;
+    bow.weaponKind = WeaponKind::Bow;
+
+    const std::string text = WriteItemGroupJson(0, std::vector<ItemDefinition>{bow});
+    const size_t slot = text.find(R"("slot": "offHand",)");
+    const size_t weaponKind = text.find(R"("weaponKind": "bow",)");
+    REQUIRE(slot != std::string::npos);
+    REQUIRE(weaponKind != std::string::npos);
+    CHECK(slot < weaponKind);
+
+    const ReadResult result = Read(text);
+    REQUIRE(result.issues.empty());
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items.front().weaponKind == WeaponKind::Bow);
+}
+
+TEST_CASE("Unknown slots, wing tiers, weapon kinds and tags are errors [data][items]")
 {
     CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "slot": 11})")).issues,
                    ItemDataIssueSeverity::Error, "slot"));
@@ -308,6 +329,8 @@ TEST_CASE("Unknown slots, wing tiers and tags are errors [data][items]")
                    ItemDataIssueSeverity::Error, "slot"));
     CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "wingTier": "fifth"})")).issues,
                    ItemDataIssueSeverity::Error, "wingTier"));
+    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "weaponKind": "wand"})")).issues,
+                   ItemDataIssueSeverity::Error, "weaponKind"));
     CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "tags": ["jewl"]})")).issues,
                    ItemDataIssueSeverity::Error, "tags"));
     CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "tags": "jewel"})")).issues,
@@ -316,13 +339,24 @@ TEST_CASE("Unknown slots, wing tiers and tags are errors [data][items]")
                    ItemDataIssueSeverity::Error, "tradable"));
 }
 
-TEST_CASE("Item validation checks slots and wing tiers [data][items]")
+TEST_CASE("Item validation checks slots, wing tiers and weapon kinds [data][items]")
 {
     ItemDefinition unnamedSlot = MakeKris();
     unnamedSlot.slot = static_cast<ItemSlot>(11);
     ItemDefinition wingTierWithoutWingSlot = MakeKris();
     wingTierWithoutWingSlot.number = 1;
     wingTierWithoutWingSlot.wingTier = WingTier::First;
+    ItemDefinition weaponKindWithoutHandSlot = MakeKris();
+    weaponKindWithoutHandSlot.slot = ItemSlot::Helm;
+    weaponKindWithoutHandSlot.weaponKind = WeaponKind::Shield;
+    // The code looks for a bow in the left hand only.
+    ItemDefinition bowInRightHand = MakeKris();
+    bowInRightHand.weaponKind = WeaponKind::Bow;
+    ItemDefinition spear = MakeKris();
+    spear.weaponKind = WeaponKind::Spear;
+    ItemDefinition shield = MakeKris();
+    shield.slot = ItemSlot::OffHand;
+    shield.weaponKind = WeaponKind::Shield;
 
     std::vector<ItemDataIssue> issues;
     ValidateItems(std::vector<ItemDefinition>{unnamedSlot}, issues);
@@ -332,6 +366,24 @@ TEST_CASE("Item validation checks slots and wing tiers [data][items]")
     ValidateItems(std::vector<ItemDefinition>{wingTierWithoutWingSlot}, issues);
     CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "wingTier"));
     CHECK_FALSE(HasErrors(issues));
+
+    issues.clear();
+    ValidateItems(std::vector<ItemDefinition>{weaponKindWithoutHandSlot}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "weaponKind"));
+    CHECK_FALSE(HasErrors(issues));
+
+    issues.clear();
+    ValidateItems(std::vector<ItemDefinition>{bowInRightHand}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "weaponKind"));
+    CHECK_FALSE(HasErrors(issues));
+
+    issues.clear();
+    ValidateItems(std::vector<ItemDefinition>{spear}, issues);
+    CHECK(issues.empty());
+
+    issues.clear();
+    ValidateItems(std::vector<ItemDefinition>{shield}, issues);
+    CHECK(issues.empty());
 }
 
 TEST_CASE("Rental rules are kept through write and read [data][items]")

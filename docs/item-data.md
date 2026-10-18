@@ -52,7 +52,8 @@ The file name is only a convention; the group comes from the file content.
 - An item is identified by its group and `number` (0–511), the same as
   on the server.
 - **Fields with their default value are left out.** Missing fields get the
-  default: `0`/`false`, no slot (not equippable), no wing tier, no tags,
+  default: `0`/`false`, no slot (not equippable), no wing tier, no weapon
+  kind, no tags,
   and the rule flags at their defaults (see [Rules](#rules)).
 - Items are sorted by number and the fields always come in the same order,
   so saving unchanged data gives the same file.
@@ -79,6 +80,7 @@ read as the English name only; saving writes the object form.
 | `width`, `height` | Size in inventory slots |
 | `slot` | Equipment slot: `mainHand`, `offHand`, `helm`, `armor`, `pants`, `gloves`, `boots`, `wings`, `pet`, `pendant`, `ring`. Left out = not equippable |
 | `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, defense per level, damage increase, absorption) depend on it; excellent second and third tier wings get no extra durability, and the chaos mix knows a wing's tier from it |
+| `weaponKind` | Only for weapons and shields: `spear`, `bow`, `crossbow`, `shield`, as OpenMU's item groups 3, 4 and 6 (bows have the slot `offHand`, crossbows `mainHand`; arrows and bolts have no weapon kind). Swords, axes, maces and staffs have none yet. While an item has the weapon kind its group gives, the bmd import and the item editor (also when it moves an item to another number) keep it matching the group and slot (in group 4 only two-handed items are bows or crossbows), so a new spear, bow, crossbow or shield gets one too; a kind written in the file that differs from the group's stays as long as it differs. Which bow or crossbow a character holds (its animations, arrows and damage), the elf's arrows-only rule, a spear's reach and Impale, the shield defense set option and the bonus of leveled arrows and bolts depend on it |
 | `twoHanded` | Weapon needs both hands |
 | `skill` | Skill the item gives |
 | `level` | Item level (the drop level); also used in price and damage calculations |
@@ -199,13 +201,15 @@ the field (**Copy text** copies it). All problems are also written to
 - a name that is not a text, e.g. `"pt": 5`
 - a language code that is empty or has other characters than letters,
   digits and `-` (e.g. `"p=t"`)
-- a `slot`, `wingTier` or tag name that does not exist
+- a `slot`, `wingTier`, `weaponKind` or tag name that does not exist
 
 **Warnings** are logged, and the game starts anyway:
 
 - unknown fields (they are ignored)
 - names longer than 49 characters (the game shows them cut)
 - a `wingTier` on an item whose slot is not `wings`
+- a `weaponKind` on an item that is not in the slot the code looks in:
+  bows and shields need `offHand`, crossbows and spears `mainHand`
 - a `slot` written as a number, as files saved before tags existed have
   it; the number is read, and saving writes the name
 
@@ -510,15 +514,18 @@ only item data. The import is there to bring in your own old item files.
   files there first. English provides the values and is required,
   Portuguese and Spanish add their names (a translation equal to the
   English name is not stored). Items the English file does not have keep
-  the English name they have now, and every item keeps its tags, wing tier
-  and rule flags (the bmd format has none). Save afterwards to keep the
+  the English name they have now, and every item keeps its tags, wing tier,
+  weapon kind and rule flags (the bmd format has none). A weapon kind that
+  its group gives follows the imported slot, so a new spear, bow, crossbow
+  or shield gets one too. Save afterwards to keep the
   result. The console lists what the import had to fix (see below) and any
   problem the imported data still has; Save refuses it until those are
   fixed.
 - **Export as bmd** writes `Item_<lang>.bmd` for English, Portuguese and
   Spanish with the names of each language; a backup of each old file is kept.
   Files that already have the data stay as they are. Values that the bmd
-  format does not have (tags, wing tier, rule flags) are left out.
+  format does not have (tags, wing tier, weapon kind, rule flags) are left
+  out.
 
 ### How the bmd import repairs the legacy files
 

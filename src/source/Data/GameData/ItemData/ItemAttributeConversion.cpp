@@ -109,6 +109,7 @@ void CopyFieldsNotInItemAttribute(const ItemDefinition& source, ItemDefinition& 
 {
     target.tags = source.tags;
     target.wingTier = source.wingTier;
+    target.weaponKind = source.weaponKind;
     target.tradable = source.tradable;
     target.droppable = source.droppable;
     target.storable = source.storable;
@@ -118,6 +119,42 @@ void CopyFieldsNotInItemAttribute(const ItemDefinition& source, ItemDefinition& 
     target.droppableWhileRented = source.droppableWhileRented;
     target.personalShopSellableWhileRented = source.personalShopSellableWhileRented;
     target.sellableWhenRentalExpired = source.sellableWhenRentalExpired;
+}
+
+WeaponKind GetGroupWeaponKind(const ItemDefinition& definition)
+{
+    constexpr int SpearGroup = 3;
+    constexpr int BowGroup = 4;
+    constexpr int ShieldGroup = 6;
+
+    switch (definition.group)
+    {
+    case SpearGroup:
+        return WeaponKind::Spear;
+    case ShieldGroup:
+        return WeaponKind::Shield;
+    case BowGroup:
+        if (!definition.twoHanded)
+        {
+            return WeaponKind::None;
+        }
+        if (definition.slot == ItemSlot::OffHand)
+        {
+            return WeaponKind::Bow;
+        }
+        return definition.slot == ItemSlot::MainHand ? WeaponKind::Crossbow : WeaponKind::None;
+    default:
+        return WeaponKind::None;
+    }
+}
+
+WeaponKind FollowGroupWeaponKind(const ItemDefinition* previous, const ItemDefinition& updated)
+{
+    if (previous != nullptr && previous->weaponKind != GetGroupWeaponKind(*previous))
+    {
+        return previous->weaponKind;
+    }
+    return GetGroupWeaponKind(updated);
 }
 
 ItemDefinition ToItemDefinition(const ITEM_ATTRIBUTE& attribute, int itemType)
