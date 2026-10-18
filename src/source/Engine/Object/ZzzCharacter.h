@@ -32,6 +32,7 @@ void MoveCharacterClient(CHARACTER* cc);
 void MoveCharactersClient();
 void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters);
 void WaitCharactersAnimation();
+void AnimateCharacterBones(OBJECT* o);
 
 void MoveEye(OBJECT* o, BMD* b, int Right, int Left, int Right2 = -1, int Left2 = -1, int Right3 = -1, int Left3 = -1);
 void DeleteCloth(CHARACTER* c, OBJECT* o = NULL, PART_t* p2 = NULL);

@@ -6501,6 +6501,8 @@ void MoveCharactersClient()
     }
     UpdateCharactersAnimationParallel(std::span<CHARACTER>(CharactersClient, MAX_CHARACTERS_CLIENT));
     MoveBlurs();
+    // Effects, joints and particles read these bones next.
+    WaitCharactersAnimation();
 }
 
 // Active-character count and which animation path this tick took (worker thread pool or
@@ -6539,25 +6541,20 @@ void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters)
     {
         for (CHARACTER* c : activeChars)
         {
-            OBJECT* o = &c->Object;
-            BMD* model = &Models[o->Type];
-            if (!model || model->NumBones <= 0) continue;
-
-            model->Animation(
-                o->BoneTransform,
-                o->AnimationFrame,
-                o->PriorAnimationFrame,
-                o->PriorAction,
-                o->Angle,
-                o->HeadAngle,
-                false,
-                true,
-                nullptr,
-                o->CurrentAction
-            );
-            o->EnableBoneMatrix = true;
+            AnimateCharacterBones(&c->Object);
         }
     }
+}
+
+void AnimateCharacterBones(OBJECT* o)
+{
+    BMD* model = &Models[o->Type];
+    if (model->NumBones <= 0) return;
+
+    // Model space, as render builds them: the model's BodyOrigin and BodyScale belong to whichever object set them last.
+    model->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
+                     o->HeadAngle, false, false, nullptr, o->CurrentAction);
+    o->EnableBoneMatrix = true;
 }
 
 void WaitCharactersAnimation()
