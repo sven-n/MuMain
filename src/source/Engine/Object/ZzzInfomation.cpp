@@ -458,16 +458,6 @@ ActionSkillType GetSkillByBook(int Type)
     }
 }
 
-// ITEM_MACE + 21: Master Scepter-J.
-bool IsCepterItem(int iType)
-{
-    if ((iType >= ITEM_BATTLE_SCEPTER && iType <= ITEM_SHINING_SCEPTER) || iType == ITEM_ABSOLUTE_SCEPTER || iType == ITEM_STRYKER_SCEPTER || iType == ITEM_MACE + 21)
-    {
-        return true;
-    }
-    return false;
-}
-
 void ItemConvert(ITEM* ip, BYTE Attribute1, BYTE Attribute2, BYTE ancientDiscriminator)
 {
     // todo...
@@ -596,7 +586,7 @@ void CalcMagicPower(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
     magicPower += GameLogic::Items::GetItemLevelBonus(ip->Level);
     magicPower /= 2;
 
-    if (!IsCepterItem(ip->Type))
+    if (!GameLogic::Items::IsSceptreType(ip->Type))
     {
         magicPower += ip->Level * 2;
     }
@@ -2580,7 +2570,7 @@ void CHARACTER_MACHINE::CalculateDamage()
         DamageMin = DamageMin - (WORD)(DamageMin * percent);
         DamageMax = DamageMax - (WORD)(DamageMax * percent);
 
-        if (Right->Type >= ITEM_STAFF && Right->Type < ITEM_STAFF + MAX_ITEM_INDEX)
+        if (GameLogic::Items::IsStaffOrBookType(Right->Type))
         {
             Character.AttackDamageMinLeft += (WORD)(DamageMin);
             Character.AttackDamageMaxLeft += (WORD)(DamageMax);
@@ -2611,16 +2601,8 @@ void CHARACTER_MACHINE::CalculateDamage()
         DamageMin = DamageMin - (WORD)(DamageMin * percent);
         DamageMax = DamageMax - (WORD)(DamageMax * percent);
 
-        if (Left->Type >= ITEM_STAFF && Left->Type <= ITEM_STAFF + MAX_ITEM_INDEX)
-        {
-            Character.AttackDamageMinLeft += (WORD)(DamageMin);
-            Character.AttackDamageMaxLeft += (WORD)(DamageMax);
-        }
-        else
-        {
-            Character.AttackDamageMinLeft += DamageMin;
-            Character.AttackDamageMaxLeft += DamageMax;
-        }
+        Character.AttackDamageMinLeft += DamageMin;
+        Character.AttackDamageMaxLeft += DamageMax;
 
         PlusSpecial(&Character.AttackDamageMinLeft, AT_IMPROVE_DAMAGE_LEVEL, Left);
         PlusSpecial(&Character.AttackDamageMaxLeft, AT_IMPROVE_DAMAGE_LEVEL, Left);
@@ -2802,12 +2784,7 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
         percent = CalcDurabilityPercent(Right->Durability, p->Durability, Right->Level, Right->ExcellentFlags, Right->AncientDiscriminator);
         DamageMin = 0; DamageMax = 0;
 
-        if (Right->Type == ITEM_DARK_REIGN_BLADE
-            || Right->Type == ITEM_RUNE_BLADE
-            || Right->Type == ITEM_EXPLOSION_BLADE
-            || Right->Type == ITEM_SWORD_DANCER
-            || Right->Type == ITEM_IMPERIAL_SWORD
-            )
+        if (GameLogic::Items::IsMagicSwordType(Right->Type))
         {
             PlusSpecial(&DamageMin, AT_IMPROVE_DAMAGE, Right);
             PlusSpecial(&DamageMax, AT_IMPROVE_DAMAGE, Right);
@@ -2836,7 +2813,7 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
             percent = CalcDurabilityPercent(Left->Durability, p->Durability, Left->Level, Left->ExcellentFlags, Left->AncientDiscriminator);
             DamageMin = 0; DamageMax = 0;
 
-            if (Left->Type >= ITEM_SWORD && Left->Type < ITEM_SHIELD)
+            if (GameLogic::Items::IsWeaponOrAmmunition(Left))
             {
                 if (Left->Type == ITEM_IMPERIAL_SWORD)
                 {

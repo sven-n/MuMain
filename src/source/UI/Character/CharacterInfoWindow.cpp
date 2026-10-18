@@ -1359,10 +1359,8 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
             iMagicDamageMax += nTemp / 4 * fTemp;
         }
 
-        if ((pWeaponRight->Type >= ITEM_STAFF && pWeaponRight->Type < (ITEM_STAFF + MAX_ITEM_INDEX)) ||
-            pWeaponRight->Type == ITEM_RUNE_BLADE || pWeaponRight->Type == ITEM_EXPLOSION_BLADE ||
-            pWeaponRight->Type == ITEM_SWORD_DANCER || pWeaponRight->Type == ITEM_DARK_REIGN_BLADE ||
-            pWeaponRight->Type == ITEM_IMPERIAL_SWORD)
+        if (GameLogic::Items::IsStaffOrBookType(pWeaponRight->Type) ||
+            GameLogic::Items::IsMagicSwordType(pWeaponRight->Type))
         {
             float magicPercent = (float)(pWeaponRight->MagicPower) / 100;
 

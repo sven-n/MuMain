@@ -3189,10 +3189,8 @@ void MoveHero()
             mu::ui::window::CPickedItem* pPickedItem = mu::ui::window::CInventoryCtrl::GetPickedItem();
 
             if (!pPickedItem && RightType == -1 &&
-                ((LeftType >= ITEM_SWORD && LeftType < ITEM_MACE + MAX_ITEM_INDEX)
-                    || (LeftType >= ITEM_STAFF && LeftType < ITEM_STAFF + MAX_ITEM_INDEX
-                        && !GameLogic::Items::IsSummonerBookType(LeftType)
-                        )))
+                (GameLogic::Items::IsSwordAxeMaceOrGloveType(LeftType) ||
+                 (GameLogic::Items::IsStaffOrBookType(LeftType) && !GameLogic::Items::IsSummonerBookType(LeftType))))
             {
                 if (g_pMyInventory->IsEquipable(EQUIPMENT_WEAPON_LEFT, &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT]))
                 {

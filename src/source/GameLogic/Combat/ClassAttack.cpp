@@ -481,8 +481,8 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
     int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
     int iTypeR = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
 
-    if (((iTypeR != -1 && (iTypeR < ITEM_STAFF || iTypeR >= ITEM_STAFF + MAX_ITEM_INDEX) &&
-          (iTypeL < ITEM_STAFF || iTypeL >= ITEM_STAFF + MAX_ITEM_INDEX)) ||
+    if (((iTypeR != -1 && !GameLogic::Items::IsStaffOrBookType(iTypeR) &&
+          !GameLogic::Items::IsStaffOrBookType(iTypeL)) ||
          Skill == AT_SKILL_SWELL_LIFE || Skill == AT_SKILL_SWELL_LIFE_STR || Skill == AT_SKILL_SWELL_LIFE_PROFICIENCY ||
          Skill == AT_SKILL_ADD_CRITICAL || Skill == AT_SKILL_ADD_CRITICAL_STR1 || Skill == AT_SKILL_ADD_CRITICAL_STR2 ||
          Skill == AT_SKILL_ADD_CRITICAL_STR3 || Skill == AT_SKILL_PARTY_TELEPORT || Skill == AT_SKILL_THUNDER_STRIKE ||

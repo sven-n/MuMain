@@ -740,7 +740,7 @@ int GetItemInfoMagicColumn(int itemType)
     {
         return _COLUMN_TYPE_CURSE;
     }
-    if (IsCepterItem(itemType))
+    if (GameLogic::Items::IsSceptreType(itemType))
     {
         return _COLUMN_TYPE_PET_ATTACK;
     }
@@ -802,7 +802,7 @@ void ComputeItemInfo(int iHelpItem)
             Magic += GameLogic::Items::GetItemLevelBonus(Level);
             Magic /= 2;
 
-            if (IsCepterItem(iHelpItem) == false)
+            if (!GameLogic::Items::IsSceptreType(iHelpItem))
             {
                 Magic += Level * 2;
             }
@@ -4643,7 +4643,7 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
         TextNum++;
     }
 
-    if (IsCepterItem(ip->Type) == true)
+    if (GameLogic::Items::IsSceptreType(ip->Type))
     {
         mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
         mu_swprintf(TextList[TextNum], I18N::Game::IncreasePetAttackAsD, ip->MagicPower);
@@ -5515,7 +5515,7 @@ bool GetAttackDamage(int* iMinDamage, int* iMaxDamage)
         AttackDamageMin = CharacterAttribute->AttackDamageMinLeft;
         AttackDamageMax = CharacterAttribute->AttackDamageMaxLeft;
     }
-    else if (r->Type >= ITEM_STAFF && r->Type < ITEM_SHIELD)
+    else if (GameLogic::Items::IsStaffOrBookType(r->Type))
     {
         AttackDamageMin = CharacterAttribute->AttackDamageMinLeft;
         AttackDamageMax = CharacterAttribute->AttackDamageMaxLeft;
@@ -5529,7 +5529,7 @@ bool GetAttackDamage(int* iMinDamage, int* iMaxDamage)
     bool Alpha = false;
     if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_KNIGHT || gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK)
     {
-        if (l->Type >= ITEM_SWORD && l->Type < ITEM_STAFF + MAX_ITEM_INDEX && r->Type >= ITEM_SWORD && r->Type < ITEM_STAFF + MAX_ITEM_INDEX)
+        if (GameLogic::Items::IsWeaponOrAmmunition(l) && GameLogic::Items::IsWeaponOrAmmunition(r))
         {
             Alpha = true;
             AttackDamageMin = ((CharacterAttribute->AttackDamageMinRight * 55) / 100 + (CharacterAttribute->AttackDamageMinLeft * 55) / 100);
@@ -5548,7 +5548,8 @@ bool GetAttackDamage(int* iMinDamage, int* iMaxDamage)
     }
     else if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER)
     {
-        if (l->Type >= ITEM_SWORD && l->Type < ITEM_MACE + MAX_ITEM_INDEX && r->Type >= ITEM_SWORD && r->Type < ITEM_MACE + MAX_ITEM_INDEX)
+        if (GameLogic::Items::IsSwordAxeMaceOrGloveType(l->Type) &&
+            GameLogic::Items::IsSwordAxeMaceOrGloveType(r->Type))
         {
             Alpha = true;
             AttackDamageMin = ((CharacterAttribute->AttackDamageMinRight + CharacterAttribute->AttackDamageMinLeft) * 60 / 100);
