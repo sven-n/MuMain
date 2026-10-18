@@ -400,10 +400,18 @@ TEST_CASE("Item validation checks the stat profiles against the stat file [data]
     unknown.statProfile = "wing";
     ItemDefinition withoutProfile = MakeKris();
     withoutProfile.number = 2;
+    // Deleted items (no name) count for nothing.
+    ItemDefinition deletedUnknown = MakeKris();
+    deletedUnknown.number = 3;
+    deletedUnknown.names = {};
+    deletedUnknown.statProfile = "cape";
+    ItemDefinition deletedSceptre = deletedUnknown;
+    deletedSceptre.number = 4;
+    deletedSceptre.statProfile = "sceptre";
 
     std::vector<ItemDataIssue> issues;
-    ValidateStatProfiles(std::vector<ItemDefinition>{shield, unknown, withoutProfile}, profiles, "ItemStats.json",
-                         issues);
+    ValidateStatProfiles(std::vector<ItemDefinition>{shield, unknown, withoutProfile, deletedUnknown, deletedSceptre},
+                         profiles, "ItemStats.json", issues);
     CHECK(HasIssue(issues, ItemDataIssueSeverity::Error, "statProfile"));
     CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "profiles.sceptre"));
     CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "profiles.shield"));

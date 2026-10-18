@@ -258,6 +258,13 @@ void CItemDataHandler::FollowDerivedFieldsAfterMove(const ItemDefinition& before
 
 ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
 {
+    // A profile the item stat file does not have would stop the next start.
+    ValidateStatProfiles(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(),
+                         GetItemStatsFile().generic_string(), issues);
+    if (HasErrors(issues))
+    {
+        return ItemDataSaveResult::InvalidData;
+    }
     return SaveItemDataDirectory(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(), issues);
 }
 
@@ -272,6 +279,8 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
     result.keptEnglishNameCount = KeepCurrentEnglishNames(result.items);
     KeepFieldsNotInBmd(result.items, result.importedLocales);
     ValidateItems(result.items, result.validationIssues);
+    ValidateStatProfiles(result.items, g_ItemDatabase.GetStatProfiles(), GetItemStatsFile().generic_string(),
+                         result.validationIssues);
 
     g_ItemDatabase.Build(result.items);
     FillItemAttributes();

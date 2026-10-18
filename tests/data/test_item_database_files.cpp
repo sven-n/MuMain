@@ -540,6 +540,43 @@ TEST_CASE("Exporting the items as bmd and importing them again gives the same da
     }
 }
 
+// The bmd import and the editor give items the profile their data gives; a stat file can lack it.
+TEST_CASE("A stat profile the item stat file does not have is an error on import and save [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    std::string changeLog;
+    REQUIRE(g_ItemDataHandler.ExportAsBmd(changeLog));
+
+    ItemStatsLoadResult stats = LoadItemStatsFile(folder.Directory() / GetItemStatsFile());
+    REQUIRE_FALSE(HasErrors(stats.issues));
+    std::erase_if(stats.file.profiles, [](const WrittenStatProfile& profile) { return profile.name == "shield"; });
+    g_ItemDatabase.SetStatProfiles(ItemStatProfiles(stats.file));
+    const auto namesShield = [](const ItemDataIssue& issue)
+    {
+        return issue.severity == ItemDataIssueSeverity::Error && issue.field == "statProfile" &&
+               issue.message.find("\"shield\"") != std::string::npos;
+    };
+
+    SUBCASE("the import")
+    {
+        const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
+        REQUIRE_FALSE(HasErrors(result.issues));
+        CHECK(std::ranges::any_of(result.validationIssues, namesShield));
+    }
+
+    SUBCASE("the save")
+    {
+        std::vector<ItemDataIssue> issues;
+        CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::InvalidData);
+        CHECK(std::ranges::any_of(issues, namesShield));
+    }
+}
+
 TEST_CASE("Exporting unchanged bmd files is not a failure [data][items][editor]")
 {
     TemporaryClientFolder folder;

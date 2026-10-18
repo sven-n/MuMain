@@ -222,7 +222,8 @@ void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatP
     std::set<std::string> used;
     for (const ItemDefinition& definition : items)
     {
-        if (definition.statProfile.empty())
+        // A deleted item keeps its fields in the item database, but is not saved.
+        if (!definition.Exists() || definition.statProfile.empty())
         {
             continue;
         }

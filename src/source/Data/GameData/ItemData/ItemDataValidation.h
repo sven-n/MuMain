@@ -21,9 +21,9 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
 // Checks that no item has more than one model. Appends the problems to `issues`.
 void ValidateItemModels(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues);
 
-// The items' stat profiles against the item stat file (`statFile` names it in
-// messages): a profile the file does not have is an error, a profile of the
-// file that no item names is a warning.
+// The stat profiles of the items that exist against the item stat file
+// (`statFile` names it in messages): a profile the file does not have is an
+// error, a profile of the file that no item names is a warning.
 void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
                           const std::string& statFile, std::vector<ItemDataIssue>& issues);
 
