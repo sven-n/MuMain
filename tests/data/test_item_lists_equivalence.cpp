@@ -134,9 +134,11 @@ TEST_CASE("3b-3: the sword, axe and mace group checks match the weapon kinds [da
               (IsWeaponOrAmmunition(&item) || IsUnknownItemOfGroups(itemType, SwordGroup, StaffGroup)));
         CHECK(OldDualWieldHand(&item) ==
               (IsWeaponOrAmmunition(&item) || IsUnknownItemOfGroups(itemType, SwordGroup, StaffGroup)));
-        const bool staffButNotBook = (IsStaffOrBookType(itemType) && !IsSummonerBookType(itemType)) ||
-                                     IsUnknownItemOfGroups(itemType, StaffGroup, StaffGroup);
-        CHECK(OldMoveHeroMovesLeftWeapon(itemType) == (meleeWeapon || staffButNotBook));
+        // MoveHero asks for a staff now, so Book of Neil-J (a book without the summonerBook tag)
+        // is no longer moved into the right hand.
+        const bool bookOfNeilJ = itemType == ITEM_STAFF + 40;
+        const bool staff = IsStaffType(itemType) || IsUnknownItemOfGroups(itemType, StaffGroup, StaffGroup);
+        CHECK(OldMoveHeroMovesLeftWeapon(itemType) == (meleeWeapon || staff || bookOfNeilJ));
     }
     for (int model = FirstModel; model <= LastModel; ++model)
     {

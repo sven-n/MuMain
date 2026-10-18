@@ -426,6 +426,11 @@ namespace GameLogic::Items
                kind == WeaponKind::Glove;
     }
 
+    bool IsStaffType(int itemType)
+    {
+        return g_ItemDatabase.GetWeaponKind(itemType) == WeaponKind::Staff;
+    }
+
     bool IsStaffOrBookType(int itemType)
     {
         const WeaponKind kind = g_ItemDatabase.GetWeaponKind(itemType);

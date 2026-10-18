@@ -103,6 +103,8 @@ namespace GameLogic::Items
     bool IsSwordOrGloveType(int itemType);
     bool IsSwordOrGloveModel(int modelType);
     bool IsSwordAxeMaceOrGloveType(int itemType);
+    // A staff or a stick.
+    bool IsStaffType(int itemType);
     // A staff, a stick or a book.
     bool IsStaffOrBookType(int itemType);
     bool IsStaffOrBookModel(int modelType);
