@@ -837,8 +837,8 @@ void ComputeItemInfo(int iHelpItem)
             RequireEnergy = 0;
         }
 
-        if (p->RequireCharisma)	RequireCharisma = 20 + p->RequireCharisma * (p->Level + Level * 3) * 3 / 100;
-        else RequireCharisma = 0;
+        // Like the item: the command requirement stays the base value.
+        RequireCharisma = p->RequireCharisma;
 
         // The window shows every column with a value at +0, so the row starts empty: no column of
         // the item shown before stays.

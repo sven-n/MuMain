@@ -477,6 +477,22 @@ TEST_CASE("The item help table shows the stats the item has at each level [data]
     }
 }
 
+// The item keeps its command requirement whatever its level; the help table shows the same.
+TEST_CASE("The item help table shows the command requirement the item has [data][items]")
+{
+    ShippedItemAttributes items;
+    ItemHelpScope help;
+    // No shipped item the window shows has a command requirement; the editor can give one.
+    items[ITEM_DRAGON_ARMOR].RequireCharisma = 100;
+    ComputeItemInfo(ITEM_DRAGON_ARMOR);
+    for (const int level : {0, 9, 15})
+    {
+        CAPTURE(level);
+        CHECK(g_iItemInfo[level][_COLUMN_TYPE_REQCHA] == ComputeItem(ITEM_DRAGON_ARMOR, level).RequireCharisma);
+        CHECK(g_iItemInfo[level][_COLUMN_TYPE_REQCHA] == 100);
+    }
+}
+
 TEST_CASE("The item help table shows the magic power in the item's own column [data][items]")
 {
     ShippedItemAttributes items;
