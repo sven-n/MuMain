@@ -65,7 +65,8 @@ struct ItemGlow
     static constexpr const char* DefaultColor = "orange";
     static constexpr const char* DefaultShineColor = "white";
     static constexpr const char* DefaultAncientColor = "azure";
-    // The item levels 0 to 15.
+    // The item levels 0 to 15, as Data::Items::ItemLevelCount (this header is
+    // used without the game's type definitions that ItemType.h needs).
     static constexpr size_t ItemLevelCount = 16;
 
     // The level the item glows like at each item level instead of its own:
