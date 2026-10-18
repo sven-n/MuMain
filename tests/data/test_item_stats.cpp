@@ -23,6 +23,7 @@
 #include <array>
 #include <filesystem>
 #include <iterator>
+#include <optional>
 #include <string>
 
 using namespace Data::Items;
@@ -535,6 +536,38 @@ TEST_CASE("Magic power and defense rate past 255 are not wrapped around [data][i
     ComputeItemInfo(DragonShieldType);
     CHECK(ComputeItem(DragonShieldType, 15).SuccessfulBlocking == 255);
     CHECK(g_iItemInfo[15][_COLUMN_TYPE_DEFRATE] == 255);
+}
+
+// The numbers of the item stat file go up to 65535; with the largest ones the sums pass what
+// an int holds.
+TEST_CASE("Item stats and requirements stop at 65535 [data][items]")
+{
+    ShippedItemAttributes items;
+    ItemStatsLoadResult stats = LoadItemStatsFile(ClientDirectory / GetItemStatsFile());
+    REQUIRE_FALSE(HasErrors(stats.issues));
+    WrittenStatSection& damage = stats.file.defaults[static_cast<size_t>(ItemStat::Damage)];
+    damage.excellent.values.times = 65535;
+    damage.ancient.values = {65535, 65535, 1, true};
+    std::optional<RequirementFormula>& strength =
+        stats.file.defaultRequirements.stats[static_cast<size_t>(ItemRequirementStat::Strength)];
+    REQUIRE(strength);
+    strength->levelWeight = 65535;
+    strength->percent = 65535;
+    stats.file.defaultRequirements.excellentLevelAdd = 65535;
+    g_ItemDatabase.SetStatProfiles(ItemStatProfiles(stats.file));
+    items[ITEM_BLADE].DamageMin = 255;
+    items[ITEM_BLADE].Level = 1;
+    items[ITEM_BLADE].RequireStrength = 65535;
+    items[ITEM_BLADE].RequireLevel = 400;
+
+    const GameLogic::Items::ItemStatValues values =
+        GameLogic::Items::ComputeItemStats(items[ITEM_BLADE], {ITEM_BLADE, 255, 0x01, 1, 15});
+    CHECK(values.damageMin == 65535);
+    CHECK(values.requireStrength == 65535);
+    CHECK(values.requireLevel == 65535);
+    const ITEM item = ComputeItem(ITEM_BLADE, 255, 0x01, 1);
+    CHECK(item.DamageMin == 65535);
+    CHECK(item.RequireStrength == 65535);
 }
 
 TEST_CASE("The item help table shows the stats the item has at each level [data][items]")

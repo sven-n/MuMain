@@ -6,7 +6,8 @@ namespace GameLogic::Items
 {
 // What an item has of the stats and requirements the item stat file
 // (Data/Items/Stats/ItemStats.json) covers: the kind's base value with what the item's
-// + level, excellent options, ancient set and option level add.
+// + level, excellent options, ancient set and option level add. Each stops at 65535, what
+// the item's fields hold.
 struct ItemStatValues
 {
     int damageMin = 0;
@@ -28,6 +29,7 @@ struct ItemStatValues
 struct ItemStatInput
 {
     int itemType = 0;
+    // The + level, a byte in the item data.
     int level = 0;
     BYTE excellentFlags = 0;
     BYTE ancientDiscriminator = 0;

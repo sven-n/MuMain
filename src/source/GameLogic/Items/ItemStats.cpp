@@ -5,6 +5,7 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 
 #include <algorithm>
+#include <cstdint>
 
 namespace GameLogic::Items
 {
@@ -22,6 +23,16 @@ using Data::Items::StatBonusTerm;
 using Data::Items::StatTerms;
 
 constexpr int MaxByteStat = 255;
+
+// The numbers of the item stat file go up to 65535, so the sums and products are computed in
+// 64 bits, and the values stop at the 65535 the item's fields hold.
+using WideValue = std::int64_t;
+constexpr WideValue MaxItemValue = 65535;
+
+int LimitToItemValue(WideValue value)
+{
+    return static_cast<int>(std::clamp<WideValue>(value, 0, MaxItemValue));
+}
 
 struct StatContext
 {
@@ -47,27 +58,27 @@ int AddUpStat(const StatTerms& terms, int base, int excellentBase, bool fixedBon
         return 0;
     }
 
-    int excellent = 0;
+    WideValue excellent = 0;
     if (context.excellent && context.dropLevel > 0 && terms.excellent)
     {
         excellent = fixedBonusCounts && context.fixedExcellentBonus != 0
                         ? context.fixedExcellentBonus
-                        : excellentBase * terms.excellent->times / context.dropLevel + terms.excellent->add +
+                        : WideValue{excellentBase} * terms.excellent->times / context.dropLevel + terms.excellent->add +
                               DropLevelPart(*terms.excellent, context.dropLevel);
     }
 
-    const int levelBonus = context.profiles.GetLevelBonus(terms, context.level);
+    const WideValue levelBonus = context.profiles.GetLevelBonus(terms, context.level);
 
-    int ancient = 0;
+    WideValue ancient = 0;
     if (context.ancient && terms.ancient)
     {
         const int dropLevel = context.dropLevel + context.profiles.GetAncientDropLevelBonus();
-        const int value = base + excellent + (terms.ancient->afterLevelBonus ? levelBonus : 0);
+        const WideValue value = base + excellent + (terms.ancient->afterLevelBonus ? levelBonus : 0);
         ancient = (dropLevel > 0 ? value * terms.ancient->times / dropLevel : 0) + terms.ancient->add +
                   DropLevelPart(*terms.ancient, dropLevel);
     }
 
-    return base + excellent + ancient + levelBonus;
+    return LimitToItemValue(base + excellent + ancient + levelBonus);
 }
 
 int GetRequirementBase(const ITEM_ATTRIBUTE& attribute, ItemRequirementStat stat)
@@ -111,9 +122,13 @@ int ComputeStatRequirement(const RequirementFormula& formula, int base, int drop
     }
     if (formula.levelRequirementBasis && levelRequirement > 0)
     {
-        return formula.add + base * levelRequirement * formula.percent / 100;
+        return LimitToItemValue(formula.add + WideValue{base} * levelRequirement * formula.percent / 100);
     }
-    return formula.add + base * (dropLevel + level * formula.levelWeight) * formula.percent / 100;
+    // Times the percent this could pass 64 bits. A weight above 100 * 65536 gives the highest
+    // value with any percent but 0 (which gives add), so it is cut there.
+    const WideValue weighted =
+        std::min(WideValue{base} * (dropLevel + WideValue{level} * formula.levelWeight), 100 * (MaxItemValue + 1));
+    return LimitToItemValue(formula.add + weighted * formula.percent / 100);
 }
 
 void ComputeRequirements(const ITEM_ATTRIBUTE& attribute, const ItemStatInput& input, const ItemDefinition* definition,
@@ -127,15 +142,15 @@ void ComputeRequirements(const ITEM_ATTRIBUTE& attribute, const ItemStatInput& i
     {
         values.requireLevel = (*levels)[levelIndex];
     }
-    else
+    else if (attribute.RequireLevel > 0)
     {
         values.requireLevel =
-            attribute.RequireLevel > 0 ? attribute.RequireLevel + terms.levelPerItemLevel * input.level : 0;
+            LimitToItemValue(attribute.RequireLevel + WideValue{terms.levelPerItemLevel} * input.level);
     }
     const bool raisesLevel = definition == nullptr || definition->excellentRaisesLevel;
     if (excellentOptions && values.requireLevel > 0 && !wing && raisesLevel)
     {
-        values.requireLevel += terms.excellentLevelAdd;
+        values.requireLevel = LimitToItemValue(values.requireLevel + WideValue{terms.excellentLevelAdd});
     }
 
     const int dropLevel = attribute.Level + (excellentOptions                 ? profiles.GetExcellentDropLevelBonus()
@@ -156,7 +171,8 @@ void ComputeRequirements(const ITEM_ATTRIBUTE& attribute, const ItemStatInput& i
         *requirements[stat] = ComputeStatRequirement(terms.Get(requirement), GetRequirementBase(attribute, requirement),
                                                      dropLevel, attribute.RequireLevel, input.level);
     }
-    values.requireStrength += terms.strengthPerOptionLevel * input.optionLevel;
+    values.requireStrength =
+        LimitToItemValue(values.requireStrength + WideValue{terms.strengthPerOptionLevel} * input.optionLevel);
 }
 } // namespace
 
