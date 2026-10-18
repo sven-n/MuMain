@@ -99,7 +99,7 @@ void CLuckyItemWnd::RenderMixEffect()
     }
     else
     {
-        --m_nMixEffectTimer;
+        m_nMixEffectTimer -= REFERENCE_FRAME_STEP;
     }
 
     EnableAlphaBlend();

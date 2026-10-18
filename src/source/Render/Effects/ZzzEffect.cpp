@@ -7866,7 +7866,7 @@ void RenderEffects(bool bRenderBlendMesh)
                         vec3_t vLight;
                         // (Shockwave)
                         Vector(0.6f, 0.8f, 0.6f, vLight);
-                        o->m_iAnimation++;
+                        o->m_iAnimation += REFERENCE_FRAME_STEP;
                         CreateSprite(BITMAP_SHOCK_WAVE, o->Position, 0.8f, vLight, o, -(o->m_iAnimation * 3.f));
                         // Flare1
                         Vector(0.8f, 0.6f, 0.f, vLight);

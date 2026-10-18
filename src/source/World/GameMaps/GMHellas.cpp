@@ -1596,22 +1596,26 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 if (o->CurrentAction == MONSTER01_SHOCK)
                 {
                     if (o->AnimationFrame > 10.0f && o->PKKey > 10)
-                        o->PKKey -= 1;
+                        o->PKKey -= REFERENCE_FRAME_STEP;
                     else if (o->AnimationFrame > 4.0f)
-                        o->PKKey += 1;
+                        o->PKKey += REFERENCE_FRAME_STEP;
                     else o->PKKey = 10;
 
                     fRoar = o->PKKey * 0.15f;
                     if (o->AnimationFrame > 4.0f && o->AnimationFrame < 6.0f)
                     {
-                        if (o->AnimationFrame < 5.0f) o->Skill += 3;
-                        else if (o->Skill > 3) o->Skill -= 3;
+                        if (o->AnimationFrame < 5.0f)
+                            o->Skill += 3 * REFERENCE_FRAME_STEP;
+                        else if (o->Skill > 3)
+                            o->Skill -= 3 * REFERENCE_FRAME_STEP;
                         fRoar += o->Skill * 0.15f;
                     }
                     else if (o->AnimationFrame > 8.0f && o->AnimationFrame < 10.0f)
                     {
-                        if (o->AnimationFrame < 9.0f) o->Skill += 3;
-                        else if (o->Skill > 3) o->Skill -= 3;
+                        if (o->AnimationFrame < 9.0f)
+                            o->Skill += 3 * REFERENCE_FRAME_STEP;
+                        else if (o->Skill > 3)
+                            o->Skill -= 3 * REFERENCE_FRAME_STEP;
                         fRoar += o->Skill * 0.15f;
                     }
                     else

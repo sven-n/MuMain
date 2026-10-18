@@ -12,6 +12,7 @@ extern vec3_t CollisionPosition;
 extern double  FPS;
 extern double  FPS_AVG;
 extern float  FPS_ANIMATION_FACTOR;
+extern int REFERENCE_FRAME_STEP;
 extern double  WorldTime;
 extern bool   FogEnable;
 extern bool   TextureEnable;

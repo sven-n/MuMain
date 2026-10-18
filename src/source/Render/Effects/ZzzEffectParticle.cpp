@@ -4148,14 +4148,14 @@ void MoveParticles()
                 switch (o->SubType)
                 {
                 case 0:
-                    o->Frame++;
+                    o->Frame += REFERENCE_FRAME_STEP;
                     o->Position[0] += (float)(rand() % 20 - 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
                     o->Position[1] += (float)(rand() % 20 - 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
                     o->Position[2] += (float)(rand() % 20 + 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
                     break;
 
                 case 1:
-                    o->Frame++;
+                    o->Frame += REFERENCE_FRAME_STEP;
                     o->Position[0] += (float)(rand() % 30 - 15) * 1.f * o->Scale * FPS_ANIMATION_FACTOR;
                     o->Position[1] += (float)(rand() % 30 - 15) * 1.f * o->Scale * FPS_ANIMATION_FACTOR;
                     o->Position[2] += (float)(rand() % 20 + 10) * 0.3f * o->Scale * FPS_ANIMATION_FACTOR;
@@ -4170,7 +4170,7 @@ void MoveParticles()
                     break;
 
                 case 3:
-                    o->Frame++;
+                    o->Frame += REFERENCE_FRAME_STEP;
                     o->Position[0] += (float)(rand() % 20 - 10) * 2.5f * o->Gravity * FPS_ANIMATION_FACTOR;
                     o->Position[1] += (float)(rand() % 20 - 10) * 2.5f * o->Gravity * FPS_ANIMATION_FACTOR;
                     o->Position[2] += (float)(rand() % 20 + 10) * 2.5f * o->Gravity * FPS_ANIMATION_FACTOR;
@@ -4187,7 +4187,7 @@ void MoveParticles()
                     }
                     break;
                 case 5:
-                    o->Frame++;
+                    o->Frame += REFERENCE_FRAME_STEP;
                     o->Position[0] += (float)(rand() % 20 - 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
                     o->Position[1] += (float)(rand() % 20 - 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
                     o->Position[2] += (float)(rand() % 20 + 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
@@ -8379,7 +8379,7 @@ void MoveParticles()
                     {
                         Vector(0.5f, 0.5f, 0.5f, o->Light);
                     }
-                    o->Rotation++;
+                    o->Rotation += FPS_ANIMATION_FACTOR;
                     o->Scale += FPS_ANIMATION_FACTOR * 0.01f;
                     o->Velocity[2] -= (0.4f) * FPS_ANIMATION_FACTOR;
                 }

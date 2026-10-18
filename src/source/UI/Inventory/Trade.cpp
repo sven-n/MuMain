@@ -651,7 +651,7 @@ void CTrade::ProcessCloseBtn()
 bool CTrade::ProcessBtns()
 {
     if (m_nMyTradeWait > 0)
-        --m_nMyTradeWait;
+        m_nMyTradeWait -= REFERENCE_FRAME_STEP;
 
     return false;
 }

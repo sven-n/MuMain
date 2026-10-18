@@ -10,6 +10,9 @@
  */
 constexpr double REFERENCE_FPS = 25.0;
 
+// Adds a frame's share of a reference frame and takes out the whole reference frames it completes.
+int TakeReferenceFrameSteps(float& referenceFrames, float frameFactor);
+
 int CalcAngle(float PositionX, float PositionY, float TargetX, float TargetY);
 float CreateAngle(float x1, float y1, float x2, float y2);
 float CreateAngle2D(const vec3_t from, const vec2_t to);

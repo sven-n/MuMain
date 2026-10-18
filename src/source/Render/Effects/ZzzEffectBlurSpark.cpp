@@ -126,6 +126,13 @@ void AddBlur(Blur* b, vec3_t p1, vec3_t p2, vec3_t Light, int Type)
 {
     b->Type = Type;
     VectorCopy(Light, b->Light);
+    // Samples are a reference frame apart; between reference frames the newest one follows the weapon.
+    if (REFERENCE_FRAME_STEP == 0 && b->Number > 0)
+    {
+        VectorCopy(p1, b->P1[0]);
+        VectorCopy(p2, b->P2[0]);
+        return;
+    }
     for (int i = b->Number - 1; i >= 0; --i)
     {
         VectorCopy(b->P1[i], b->P1[i + 1]);
@@ -172,6 +179,10 @@ void CreateBlur(CHARACTER* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, 
 
 void MoveBlurs()
 {
+    if (REFERENCE_FRAME_STEP == 0)
+    {
+        return;
+    }
     for (auto& blur : g_blurs)
     {
         if (!blur.Live)
@@ -272,6 +283,12 @@ void AddObjectBlur(ObjectBlur* b, vec3_t p1, vec3_t p2, vec3_t Light, int Type)
 {
     b->Type = Type;
     VectorCopy(Light, b->Light);
+    if (REFERENCE_FRAME_STEP == 0 && b->Number > 0)
+    {
+        VectorCopy(p1, b->P1[0]);
+        VectorCopy(p2, b->P2[0]);
+        return;
+    }
 
     for (int i = b->Number - 1; i >= 0; --i)
     {
@@ -329,6 +346,10 @@ void CreateObjectBlur(OBJECT* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Typ
 
 void MoveObjectBlurs()
 {
+    if (REFERENCE_FRAME_STEP == 0)
+    {
+        return;
+    }
     for (auto& blur : g_objectBlurs)
     {
         if (!blur.Live)

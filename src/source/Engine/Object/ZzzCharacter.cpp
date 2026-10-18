@@ -8984,7 +8984,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
         if (o->CurrentAction == MONSTER01_WALK)
         {
-            o->m_iAnimation++;
+            o->m_iAnimation += REFERENCE_FRAME_STEP;
             if (rand_fps_check(20))
                 PlayBuffer(SOUND_MOONRABBIT_WALK);
         }
@@ -10987,7 +10987,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
                     c->ExtendStateTime = 0;
                 }
-                c->ExtendStateTime++;
+                c->ExtendStateTime += REFERENCE_FRAME_STEP;
             }
 
             if (fullset && g_pOption->GetRenderLevel() >= 2)

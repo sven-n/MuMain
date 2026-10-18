@@ -70,6 +70,12 @@ No player configuration or FPS cap is required.
   pick. A gate nested in another gate, or around a `*FpsChecked` spawn,
   scales the chance twice. Where the original rolled `rand() % n`, keep that
   `n`: it is the intended rate at 25 FPS.
+- An integer frame counter, or anything laid once per frame (trail tails,
+  weapon blurs), cannot take a fractional step. It steps by
+  `REFERENCE_FRAME_STEP`, the whole reference frames that passed this frame
+  (0 or 1), or keeps its own accumulator like `JOINT::TailFrames`. A counter
+  compared with `==` needs care: between steps it holds its value for
+  several frames.
 - Changing `REFERENCE_FPS` changes global gameplay timing and requires
   asset calibration plus broad behavioral verification.
 - Frame caps remain performance and presentation controls, not correctness
