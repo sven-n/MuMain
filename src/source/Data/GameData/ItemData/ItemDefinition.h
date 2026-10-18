@@ -109,6 +109,9 @@ struct ItemDefinition
     ItemSlot slot = ItemSlot::None;
     WingTier wingTier = WingTier::None;
     WeaponKind weaponKind = WeaponKind::None;
+    // Which potion of a kind the game takes first: the higher, the earlier;
+    // see ItemDatabase::GetItemTypesWithTagInUseOrder.
+    BYTE potionPriority = 0;
     bool twoHanded = false;
     WORD skill = 0;
     WORD level = 0;

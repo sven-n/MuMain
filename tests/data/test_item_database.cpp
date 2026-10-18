@@ -338,6 +338,36 @@ TEST_CASE("Item database answers tag, slot and rule questions [data][items]")
     }
 }
 
+TEST_CASE("The item types with a tag come in use order: higher potion priority, then higher type [data][items]")
+{
+    std::vector<ItemDefinition> potions;
+    for (const auto& [number, priority] : {std::pair{0, 2}, std::pair{1, 0}, std::pair{2, 2}, std::pair{3, 5}})
+    {
+        ItemDefinition potion = MakeItem(PotionGroup, number, "Potion");
+        potion.tags.Set(ItemTag::HealingPotion);
+        potion.potionPriority = static_cast<BYTE>(priority);
+        potions.push_back(potion);
+    }
+
+    ItemDatabase database;
+    database.Build(potions);
+    const auto inUseOrder = [&database]
+    {
+        const auto itemTypes = database.GetItemTypesWithTagInUseOrder(ItemTag::HealingPotion);
+        return std::vector<int>(itemTypes.begin(), itemTypes.end());
+    };
+    CHECK(inUseOrder() == std::vector<int>{MakeItemType(PotionGroup, 3), MakeItemType(PotionGroup, 2),
+                                           MakeItemType(PotionGroup, 0), MakeItemType(PotionGroup, 1)});
+    CHECK(database.GetItemTypesWithTagInUseOrder(ItemTag::ManaPotion).empty());
+    CHECK(database.GetItemTypesWithTagInUseOrder(ItemTag::Count).empty());
+
+    // Editor changes reorder the list.
+    ItemDefinition changed = *database.Find(MakeItemType(PotionGroup, 1));
+    changed.potionPriority = 9;
+    database.Set(changed);
+    CHECK(inUseOrder().front() == MakeItemType(PotionGroup, 1));
+}
+
 TEST_CASE("Item tag sets test several tags at once [data][items]")
 {
     const ItemTagSet socketItems{ItemTag::SocketSeed, ItemTag::SocketSphere};

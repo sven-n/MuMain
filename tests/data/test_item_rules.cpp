@@ -412,6 +412,25 @@ TEST_CASE("Lucky items, shield potions and transformation rings come from the it
     CHECK_FALSE(IsPandaOrSkeletonType(ITEM_TRANSFORMATION_RING));
 }
 
+TEST_CASE("The shipped potions are taken largest first [data][items][rules]")
+{
+    ShippedItemsScope items;
+    const auto inUseOrder = [](ItemTag tag)
+    {
+        const auto itemTypes = g_ItemDatabase.GetItemTypesWithTagInUseOrder(tag);
+        return std::vector<int>(itemTypes.begin(), itemTypes.end());
+    };
+
+    CHECK(inUseOrder(ItemTag::HealingPotion) == std::vector<int>{ITEM_LARGE_HEALING_POTION, ITEM_MEDIUM_HEALING_POTION,
+                                                                 ITEM_SMALL_HEALING_POTION, ITEM_APPLE});
+    CHECK(inUseOrder(ItemTag::ManaPotion) ==
+          std::vector<int>{ITEM_LARGE_MANA_POTION, ITEM_MEDIUM_MANA_POTION, ITEM_SMALL_MANA_POTION});
+    CHECK(inUseOrder(ItemTag::ShieldPotion) ==
+          std::vector<int>{ITEM_LARGE_SHIELD_POTION, ITEM_MEDIUM_SHIELD_POTION, ITEM_SMALL_SHIELD_POTION});
+    CHECK(inUseOrder(ItemTag::ComplexPotion) ==
+          std::vector<int>{ITEM_LARGE_COMPLEX_POTION, ITEM_MEDIUM_COMPLEX_POTION, ITEM_SMALL_COMPLEX_POTION});
+}
+
 TEST_CASE("The item types with a tag come lowest first [data][items][rules]")
 {
     ShippedItemsScope items;

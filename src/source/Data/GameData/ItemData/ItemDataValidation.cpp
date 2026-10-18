@@ -135,6 +135,19 @@ void ValidateSlot(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
                  "weaponKind");
     }
 }
+
+// Only the potion lists are taken in priority order.
+void ValidatePotionPriority(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
+{
+    const ItemTagSet potions{ItemTag::HealingPotion, ItemTag::ManaPotion, ItemTag::ComplexPotion,
+                             ItemTag::ShieldPotion};
+    if (definition.potionPriority != 0 && !definition.tags.HasAny(potions))
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
+                 "has a potion priority, but no healingPotion, manaPotion, complexPotion or shieldPotion tag",
+                 "potionPriority");
+    }
+}
 } // namespace
 
 void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIssue>& issues)
@@ -157,6 +170,7 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
 
         ValidateName(definition, issues);
         ValidateSlot(definition, issues);
+        ValidatePotionPriority(definition, issues);
     }
 }
 
