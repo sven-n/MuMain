@@ -9,6 +9,7 @@
 #include <cmath>
 #include <cstring>
 #include <filesystem>
+#include <span>
 
 namespace
 {
@@ -63,3 +64,55 @@ TEST_CASE("Character bones from the pre-pass do not depend on the model's last d
     CHECK(std::abs(nearBones[0][0][3]) < 1000.f);
     CHECK(std::abs(farBones[0][0][3]) < 1000.f);
 }
+
+TEST_CASE("The pre-pass animates characters at render's height, not one an item preview left [data][animation]")
+{
+    TestModelSlots slots;
+    BMD& model = Models[MODEL_PLAYER];
+    const std::wstring folder = PlayerFolder.wstring() + L"/";
+    REQUIRE(model.Open2(folder.c_str(), L"player.bmd"));
+
+    // The root height applies only to actions that lock positions.
+    int lockedAction = -1;
+    for (int action = 0; action < model.NumActions && lockedAction < 0; ++action)
+    {
+        if (model.Actions[action].LockPositions && model.Actions[action].NumAnimationKeys > 1) lockedAction = action;
+    }
+    REQUIRE(lockedAction >= 0);
+
+    static float bones[MAX_BONES][3][4];
+    static float rendered[MAX_BONES][3][4];
+    static CHARACTER characters[1];
+    OBJECT& o = characters[0].Object;
+    PlaceCharacter(o, 100.f, 1.f, bones);
+    o.CurrentAction = o.PriorAction = static_cast<unsigned short>(lockedAction);
+    o.Live = true;
+    o.Visible = true;
+
+    model.BodyHeight = -160.f;
+    UpdateCharactersAnimationParallel(std::span<CHARACTER>(characters, 1));
+
+    model.BodyHeight = 0.f;
+    model.Animation(rendered, o.AnimationFrame, o.PriorAnimationFrame, o.PriorAction, o.Angle, o.HeadAngle, false, false,
+                    nullptr, o.CurrentAction);
+    CHECK(bones[0][2][3] == rendered[0][2][3]);
+    CHECK(std::memcmp(bones, rendered, sizeof(float) * 12 * model.NumBones) == 0);
+}
+
+#ifdef MU_ENABLE_CONTROL_SOCKET
+TEST_CASE("The bones check counts a character whose bone differs [data][animation]")
+{
+    static float prepass[2][3][4];
+    static float rendered[2][3][4];
+    g_PrepassBoneCheck = PrepassBoneCheck{};
+    RecordPrepassBones(prepass, rendered, 2, true);
+    rendered[1][2][3] = -160.f;
+    RecordPrepassBones(prepass, rendered, 2, false);
+
+    CHECK(g_PrepassBoneCheck.checked == 2);
+    CHECK(g_PrepassBoneCheck.players == 1);
+    CHECK(g_PrepassBoneCheck.mismatched == 1);
+    CHECK(g_PrepassBoneCheck.maxDelta == doctest::Approx(160.f));
+    g_PrepassBoneCheck = PrepassBoneCheck{};
+}
+#endif

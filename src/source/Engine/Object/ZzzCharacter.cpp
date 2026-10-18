@@ -6522,6 +6522,8 @@ void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters)
         c.Object.EnableBoneMatrix = false;
         if (c.Object.Live && c.Object.Visible)
         {
+            // Render animates characters at height 0; item previews leave other heights on the shared model.
+            Models[c.Object.Type].BodyHeight = 0.f;
             activeChars.push_back(&c);
         }
     }
@@ -6561,6 +6563,10 @@ void AnimateCharacterBones(OBJECT* o)
 #ifdef MU_ENABLE_CONTROL_SOCKET
 PrepassBoneCheck g_PrepassBoneCheck;
 
+namespace
+{
+float PrepassBones[MAX_BONES][3][4];
+
 bool IsClientCharacterObject(const OBJECT* o)
 {
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
@@ -6569,8 +6575,22 @@ bool IsClientCharacterObject(const OBJECT* o)
     }
     return false;
 }
+} // namespace
 
-void RecordPrepassBones(const float (*prepass)[3][4], const float (*rendered)[3][4], int numBones)
+bool BeginPrepassBoneCheck(const OBJECT* o, int numBones)
+{
+    if (!g_PrepassBoneCheck.enabled || !o->EnableBoneMatrix || numBones > MAX_BONES || !IsClientCharacterObject(o))
+        return false;
+    memcpy(PrepassBones, o->BoneTransform, sizeof(float) * 12 * numBones);
+    return true;
+}
+
+void EndPrepassBoneCheck(const OBJECT* o, int numBones)
+{
+    RecordPrepassBones(PrepassBones, o->BoneTransform, numBones, o->Type == MODEL_PLAYER);
+}
+
+void RecordPrepassBones(const float (*prepass)[3][4], const float (*rendered)[3][4], int numBones, bool player)
 {
     float delta = 0.f;
     for (int bone = 0; bone < numBones; ++bone)
@@ -6578,6 +6598,7 @@ void RecordPrepassBones(const float (*prepass)[3][4], const float (*rendered)[3]
             for (int c = 0; c < 4; ++c)
                 delta = std::max(delta, std::abs(prepass[bone][r][c] - rendered[bone][r][c]));
     ++g_PrepassBoneCheck.checked;
+    if (player) ++g_PrepassBoneCheck.players;
     if (delta > 0.01f) ++g_PrepassBoneCheck.mismatched;
     g_PrepassBoneCheck.maxDelta = std::max(g_PrepassBoneCheck.maxDelta, delta);
 }
