@@ -1612,7 +1612,7 @@ namespace Render::Effects::Behaviors
         if (o->SubType == 1 || o->SubType == 2)
         {
             BMD* b = &Models[o->Owner->Type];
-            Vector(0.f, 0.f, 10.f * FPS_ANIMATION_FACTOR, p);
+            Vector(0.f, 0.f, 10.f, p);
             VectorCopy(o->StartPosition, b->BodyOrigin);
             b->TransformPosition(o->Owner->BoneTransform[33], p, o->Position, true);
         }

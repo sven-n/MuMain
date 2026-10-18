@@ -6095,9 +6095,11 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             if (g_isCharacterBuff(o->Owner, eBuff_Cloaking)) break;
 
+            const int priorStep = (int)o->Velocity;
             o->Velocity += FPS_ANIMATION_FACTOR;
 
-            if (((int)(o->Velocity) % 50) == 0)
+            // Act on the frame Velocity reaches each 50th reference frame, not on every frame it stays there.
+            if ((int)o->Velocity != priorStep && ((int)(o->Velocity) % 50) == 0)
             {
                 if (o->Owner != NULL)
                 {
@@ -6109,7 +6111,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     o->Position[1] = o->Owner->Position[1] + cosf(o->Angle[2] * 0.1f) * 80.f;
                     o->Position[2] = o->Owner->Position[2] + 50;
 
-                    CreateJointFpsChecked(BITMAP_JOINT_HEALING, o->Position, o->Position, o->Angle, 9, o->Owner, 15.f);
+                    CreateJoint(BITMAP_JOINT_HEALING, o->Position, o->Position, o->Angle, 9, o->Owner, 15.f);
                 }
             }
         }

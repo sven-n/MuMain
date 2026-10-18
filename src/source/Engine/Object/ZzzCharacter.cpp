@@ -9315,7 +9315,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
         if (g_isCharacterBuff((&c->Object), eBuff_Doppelganger_Ascension))
         {
-            o->Position[2] += 2.0f;
+            o->Position[2] += 2.0f * FPS_ANIMATION_FACTOR;
         }
     }
 
