@@ -44,6 +44,8 @@ The turn limit is applied as degrees per reference frame multiplied by the frame
 For a Lorencia bird's 13-degree reference step, this is 325 degrees per second at frame rates of at least 25 FPS.
 Below 25 FPS, each update remains capped at the reference step.
 Fractional headings are retained so small high-FPS turns are not rounded away.
+Butterflies steer only when `rand_fps_check(4)` passes, about every four reference frames at any frame rate.
+That gate already follows time, so each of their steers takes the whole reference step rather than a share of it.
 Normalized flock directions describe geometry, not elapsed time; only the turn step is time-scaled.
 Players do not need to change VSync or their FPS limit to keep the intended turning speed.
 

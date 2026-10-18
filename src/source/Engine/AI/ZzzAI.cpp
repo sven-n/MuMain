@@ -98,7 +98,7 @@ void Alpha(OBJECT* o)
         o->BlendMeshLight = o->Alpha;
 }
 
-void MoveBoid(OBJECT* o, int i, OBJECT* Boids, int MAX)
+void MoveBoid(OBJECT* o, int i, OBJECT* Boids, int MAX, float referenceFrames)
 {
     int NumBirds = 0;
     float TargetX = 0.f;
@@ -144,7 +144,7 @@ void MoveBoid(OBJECT* o, int i, OBJECT* Boids, int MAX)
     const float targetX = o->Position[0] + TargetX / NumBirds;
     const float targetY = o->Position[1] + TargetY / NumBirds;
     const float targetHeading = static_cast<float>(CalcAngle(o->Position[0], o->Position[1], targetX, targetY));
-    o->Angle[2] = Engine::AI::BoidSteering::TurnTowards(o->Angle[2], targetHeading, o->Gravity, FPS_ANIMATION_FACTOR);
+    o->Angle[2] = Engine::AI::BoidSteering::TurnTowards(o->Angle[2], targetHeading, o->Gravity, referenceFrames);
 }
 
 void PushObject(vec3_t PushPosition, vec3_t Position, float Power, vec3_t Angle)

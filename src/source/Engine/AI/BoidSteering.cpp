@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Engine/AI/BoidSteering.h"
 #include "Engine/AI/ZzzAI.h"
+#include "Core/Utilities/Random.h"
 
 #include <algorithm>
 #include <cmath>
@@ -24,5 +25,15 @@ float TurnTowards(float heading, float targetHeading, float referenceTurnDegrees
 {
     const float turnStep = referenceTurnDegrees * std::clamp(referenceFrames, 0.f, 1.f);
     return TurnAngle2(heading, targetHeading, turnStep);
+}
+
+float SteerFrames(bool rateGated, float frameFactor)
+{
+    constexpr int GatedSteerReferenceFrames = 4;
+    if (!rateGated)
+    {
+        return frameFactor;
+    }
+    return Random::FpsCheck(GatedSteerReferenceFrames, frameFactor) ? 1.f : 0.f;
 }
 } // namespace Engine::AI::BoidSteering
