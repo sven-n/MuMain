@@ -10,8 +10,14 @@ namespace GameLogic::Items
 {
 namespace
 {
+using Data::Items::ItemDefinition;
+using Data::Items::ItemRequirement;
+using Data::Items::ItemRequirementStat;
 using Data::Items::ItemSlot;
 using Data::Items::ItemStat;
+using Data::Items::RequirementByLevel;
+using Data::Items::RequirementFormula;
+using Data::Items::RequirementTerms;
 using Data::Items::StatBonusTerm;
 using Data::Items::StatTerms;
 
@@ -63,6 +69,95 @@ int AddUpStat(const StatTerms& terms, int base, int excellentBase, bool fixedBon
 
     return base + excellent + ancient + levelBonus;
 }
+
+int GetRequirementBase(const ITEM_ATTRIBUTE& attribute, ItemRequirementStat stat)
+{
+    switch (stat)
+    {
+    case ItemRequirementStat::Strength:
+        return attribute.RequireStrength;
+    case ItemRequirementStat::Dexterity:
+        return attribute.RequireDexterity;
+    case ItemRequirementStat::Energy:
+        return attribute.RequireEnergy;
+    case ItemRequirementStat::Vitality:
+        return attribute.RequireVitality;
+    case ItemRequirementStat::Leadership:
+        return attribute.RequireCharisma;
+    default:
+        return 0;
+    }
+}
+
+const RequirementByLevel* FindRequirementByLevel(const ItemDefinition* definition, ItemRequirement requirement)
+{
+    if (definition == nullptr)
+    {
+        return nullptr;
+    }
+    const auto& levels = definition->requirementsByLevel[static_cast<size_t>(requirement)];
+    return levels ? &*levels : nullptr;
+}
+
+int ComputeStatRequirement(const RequirementFormula& formula, int base, int dropLevel, int levelRequirement, int level)
+{
+    if (base == 0)
+    {
+        return 0;
+    }
+    if (formula.keepBase)
+    {
+        return base;
+    }
+    if (formula.levelRequirementBasis && levelRequirement > 0)
+    {
+        return formula.add + base * levelRequirement * formula.percent / 100;
+    }
+    return formula.add + base * (dropLevel + level * formula.levelWeight) * formula.percent / 100;
+}
+
+void ComputeRequirements(const ITEM_ATTRIBUTE& attribute, const ItemStatInput& input, const ItemDefinition* definition,
+                         const RequirementTerms& terms, bool wing, const Data::Items::ItemStatProfiles& profiles,
+                         ItemStatValues& values)
+{
+    const size_t levelIndex = static_cast<size_t>(std::clamp(input.level, 0, Data::Items::ItemLevelCount - 1));
+    const bool excellentOptions = input.excellentFlags > 0;
+
+    if (const RequirementByLevel* levels = FindRequirementByLevel(definition, ItemRequirement::Level))
+    {
+        values.requireLevel = (*levels)[levelIndex];
+    }
+    else
+    {
+        values.requireLevel =
+            attribute.RequireLevel > 0 ? attribute.RequireLevel + terms.levelPerItemLevel * input.level : 0;
+    }
+    const bool raisesLevel = definition == nullptr || definition->excellentRaisesLevel;
+    if (excellentOptions && values.requireLevel > 0 && !wing && raisesLevel)
+    {
+        values.requireLevel += terms.excellentLevelAdd;
+    }
+
+    const int dropLevel = attribute.Level + (excellentOptions                 ? profiles.GetExcellentDropLevelBonus()
+                                             : input.ancientDiscriminator > 0 ? profiles.GetAncientDropLevelBonus()
+                                                                              : 0);
+    int* const requirements[] = {&values.requireStrength, &values.requireDexterity, &values.requireEnergy,
+                                 &values.requireVitality, &values.requireLeadership};
+    for (size_t stat = 0; stat < Data::Items::ItemRequirementStatCount; ++stat)
+    {
+        const auto requirement = static_cast<ItemRequirementStat>(stat);
+        // ItemRequirement has the level first, then the stats in the same order.
+        if (const RequirementByLevel* levels =
+                FindRequirementByLevel(definition, static_cast<ItemRequirement>(stat + 1)))
+        {
+            *requirements[stat] = (*levels)[levelIndex];
+            continue;
+        }
+        *requirements[stat] = ComputeStatRequirement(terms.Get(requirement), GetRequirementBase(attribute, requirement),
+                                                     dropLevel, attribute.RequireLevel, input.level);
+    }
+    values.requireStrength += terms.strengthPerOptionLevel * input.optionLevel;
+}
 } // namespace
 
 ItemStatValues ComputeItemStats(const ITEM_ATTRIBUTE& attribute, const ItemStatInput& input)
@@ -94,6 +189,8 @@ ItemStatValues ComputeItemStats(const ITEM_ATTRIBUTE& attribute, const ItemStatI
     values.defense = AddUpStat(profile.Get(ItemStat::Defense), attribute.Defense, attribute.Defense, false, context);
     values.magicDefense =
         AddUpStat(profile.Get(ItemStat::MagicDefense), attribute.MagicDefense, attribute.MagicDefense, false, context);
+    ComputeRequirements(attribute, input, definition, profile.requirements, wing, g_ItemDatabase.GetStatProfiles(),
+                        values);
     return values;
 }
 } // namespace GameLogic::Items

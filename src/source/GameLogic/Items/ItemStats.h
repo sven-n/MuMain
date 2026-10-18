@@ -4,9 +4,9 @@
 
 namespace GameLogic::Items
 {
-// What an item has of the stats the item stat file (Data/Items/Stats/ItemStats.json)
-// covers: the kind's base value with what the item's + level, excellent options and
-// ancient set add.
+// What an item has of the stats and requirements the item stat file
+// (Data/Items/Stats/ItemStats.json) covers: the kind's base value with what the item's
+// + level, excellent options, ancient set and option level add.
 struct ItemStatValues
 {
     int damageMin = 0;
@@ -16,6 +16,13 @@ struct ItemStatValues
     int blockRate = 0;
     int defense = 0;
     int magicDefense = 0;
+
+    int requireLevel = 0;
+    int requireStrength = 0;
+    int requireDexterity = 0;
+    int requireEnergy = 0;
+    int requireVitality = 0;
+    int requireLeadership = 0;
 };
 
 struct ItemStatInput
@@ -24,12 +31,17 @@ struct ItemStatInput
     int level = 0;
     BYTE excellentFlags = 0;
     BYTE ancientDiscriminator = 0;
+    BYTE optionLevel = 0;
 };
 
 // The base values and the drop level come from `attribute`, the kind's ItemAttribute
 // entry, so the item editor's changes count; the stat profile, the fixed excellent
-// bonus and the slot come from the item database. A stat the kind does not have stays
-// 0. Excellent options count on items that are not wings (a wing's are wing options),
-// and ancient items get the excellent part too.
+// bonus, the requirements by level, excellentRaisesLevel and the slot come from the
+// item database. A stat or requirement with a base value of 0 stays 0, except a requirement
+// given by level and the strength the option level adds. For the stats,
+// excellent options count on items that are not wings (a wing's are wing options), and
+// ancient items get the excellent part too. For the requirements any excellent option
+// counts (the excellent drop level bonus before the ancient one), and the level
+// requirement of a wing does not grow with excellent options.
 [[nodiscard]] ItemStatValues ComputeItemStats(const ITEM_ATTRIBUTE& attribute, const ItemStatInput& input);
 } // namespace GameLogic::Items

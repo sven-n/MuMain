@@ -137,13 +137,14 @@ constexpr HelpTableCase HelpTableCases[] = {
 
 constexpr int MagicColumns[] = {_COLUMN_TYPE_MAGIC, _COLUMN_TYPE_CURSE, _COLUMN_TYPE_PET_ATTACK};
 
-ITEM ComputeItem(int itemType, int level, BYTE excellentFlags = 0, BYTE ancientDiscriminator = 0)
+ITEM ComputeItem(int itemType, int level, BYTE excellentFlags = 0, BYTE ancientDiscriminator = 0, BYTE optionLevel = 0)
 {
     ITEM item{};
     item.Type = static_cast<short>(itemType);
     item.Level = level;
     item.ExcellentFlags = excellentFlags;
     item.AncientDiscriminator = ancientDiscriminator;
+    item.OptionLevel = optionLevel;
     SetItemAttributes(&item);
     return item;
 }
@@ -256,6 +257,58 @@ TEST_CASE("Item stats come from the item's stat profile [data][items]")
     // A kind without a stat keeps 0.
     CHECK(stats(ITEM_KRIS, 15).defense == 0);
     CHECK(stats(ITEM_KRIS, 15).magicPower == 0);
+}
+
+// The requirements come from the profile's requirement terms and the item's own data.
+TEST_CASE("Item requirements come from the item's stat profile [data][items]")
+{
+    ShippedItemAttributes items;
+    const auto stats =
+        [&items](int itemType, int level, BYTE excellentFlags = 0, BYTE ancientDiscriminator = 0, BYTE optionLevel = 0)
+    {
+        return GameLogic::Items::ComputeItemStats(items[itemType],
+                                                  {itemType, level, excellentFlags, ancientDiscriminator, optionLevel});
+    };
+    // The checks against ComputeItem (the item SetItemAttributes fills) hold before and after it uses the profiles.
+    ItemHelpScope hero;
+
+    // Weapon: 20 + base * (drop level + 3 * level) * 3 / 100; excellent drop level + 25; 5 strength per option level.
+    CHECK(stats(ITEM_BLADE, 0).requireStrength == 106);
+    CHECK(stats(ITEM_BLADE, 0).requireDexterity == 74);
+    CHECK(stats(ITEM_BLADE, 9, 0x01).requireStrength == 231);
+    CHECK(stats(ITEM_BLADE, 15, 0, 1, 4).requireStrength == ComputeItem(ITEM_BLADE, 15, 0, 1, 4).RequireStrength);
+    CHECK(stats(ITEM_BLADE, 15, 0, 1, 4).requireStrength == 306);
+    // Excellent and ancient: the excellent drop level bonus counts.
+    CHECK(stats(ITEM_DRAGON_ARMOR, 9, 0x01, 1).requireStrength == 419);
+    CHECK(stats(ITEM_DRAGON_ARMOR, 9, 0, 1).requireStrength == 437);
+
+    // Level requirement growth: second tier wings 5 per level, capes and group 13 4; no +20 for wings.
+    CHECK(stats(ITEM_WINGS_OF_DRAGON, 15, 0x01).requireLevel == 290);
+    CHECK(stats(ITEM_CAPE_OF_LORD, 15).requireLevel == 240);
+    CHECK(stats(ITEM_RING_OF_ICE, 4).requireLevel == 36);
+    CHECK(stats(ITEM_RING_OF_ICE, 4, 0x01).requireLevel == 56);
+    // excellentRaisesLevel false: the Dragon Knight Helm needs 380 also when excellent, and the
+    // Horn of Fenrir keeps 300 at every level.
+    CHECK(stats(ITEM_DRAGON_KNIGHT_HELM, 0, 0x01).requireLevel == 380);
+    CHECK(stats(ITEM_HORN_OF_FENRIR, 15, 0x01).requireLevel == 300);
+
+    // Requirements by level, and the +20 on top of the ring's list.
+    CHECK(stats(ITEM_ORB_OF_SUMMONING, 3).requireEnergy == 130);
+    CHECK(stats(ITEM_ORB_OF_SUMMONING, 7).requireEnergy == 500);
+    CHECK(stats(ITEM_ORB_OF_SUMMONING, 8).requireEnergy == 0);
+    CHECK(stats(ITEM_TRANSFORMATION_RING, 2).requireLevel == 20);
+    CHECK(stats(ITEM_TRANSFORMATION_RING, 3, 0x01).requireLevel == 70);
+
+    // Books: energy with one per level; their strength grows with the option even from 0.
+    CHECK(stats(ITEM_BOOK_OF_SAHAMUTT, 0).requireEnergy == ComputeItem(ITEM_BOOK_OF_SAHAMUTT, 0).RequireEnergy);
+    CHECK(stats(ITEM_BOOK_OF_SAHAMUTT, 15, 0, 0, 12).requireStrength == 60);
+    CHECK(stats(ITEM_BOOK_OF_SAHAMUTT, 15, 0, 0, 12).requireStrength ==
+          ComputeItem(ITEM_BOOK_OF_SAHAMUTT, 15, 0, 0, 12).RequireStrength);
+
+    // Scrolls: energy from the level requirement, the level requirement + 4 per level.
+    const int wizardryEnhance = MakeItemType(15, 28);
+    CHECK(stats(wizardryEnhance, 5).requireEnergy == 1058);
+    CHECK(stats(wizardryEnhance, 5).requireLevel == 240);
 }
 
 // The items whose level requirement excellent options do not raise are item data: the
