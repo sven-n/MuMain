@@ -298,6 +298,12 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
         }
     }
 
+#ifdef MU_ENABLE_CONTROL_SOCKET
+    static float prepassBones[MAX_BONES][3][4];
+    const bool checkBones = g_PrepassBoneCheck.enabled && o->EnableBoneMatrix && b->NumBones <= MAX_BONES &&
+                            IsClientCharacterObject(o);
+    if (checkBones) memcpy(prepassBones, o->BoneTransform, sizeof(float) * 12 * b->NumBones);
+#endif
     if (o->EnableBoneMatrix)
     {
         b->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
@@ -308,6 +314,10 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
         b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle,
                      false, !Translate);
     }
+
+#ifdef MU_ENABLE_CONTROL_SOCKET
+    if (checkBones) RecordPrepassBones(prepassBones, o->BoneTransform, b->NumBones);
+#endif
 
     BoneScale = 1.f;
     if (3 == Select)

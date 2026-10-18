@@ -6,6 +6,7 @@
 #include "Core/Input/SyntheticInput.h"
 #include "Core/Utilities/Benchmark/BenchRecorder.h"
 #include "Core/Text/Utf8.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Network/Server/WSclient.h"
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
@@ -423,6 +424,28 @@ std::string Bench(const Request& request, std::unique_ptr<Act>&)
     result["running"] = recorder.IsRunning();
     result["status"] = recorder.StatusText();
     result["last_run"] = recorder.LastOutputPath();
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+// How render's bones compare with the character pre-pass; `start` clears the counts and begins checking.
+std::string Bones(const Request& request, std::unique_ptr<Act>&)
+{
+    bool start = false;
+    if (request.Has("start") && !request.GetBool("start", start))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "start must be a boolean");
+    }
+    if (start)
+    {
+        g_PrepassBoneCheck = PrepassBoneCheck{};
+        g_PrepassBoneCheck.enabled = true;
+    }
+    json result;
+    result["checked"] = g_PrepassBoneCheck.checked;
+    result["mismatched"] = g_PrepassBoneCheck.mismatched;
+    result["max_delta"] = g_PrepassBoneCheck.maxDelta;
+    result["characters"] = g_LastActiveCharacterCount;
+    result["parallel"] = g_LastAnimationWasParallel;
     return EncodeResult(request.EncodedId(), result.dump());
 }
 
