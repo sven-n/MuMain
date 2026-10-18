@@ -37,7 +37,7 @@
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "GameLogic/Items/ItemCategories.h"
-#include "GameLogic/Items/ItemLevelBonus.h"
+#include "GameLogic/Items/ItemStats.h"
 #include "Render/Items/ItemDisplay.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "UI/Scaling/UITransform.h"
@@ -782,48 +782,13 @@ void ComputeItemInfo(int iHelpItem)
         int RequireCharisma = 0;
         int RequireVitality = 0;
         int RequireLevel = 0;
-        int DamageMin = p->DamageMin;
-        int DamageMax = p->DamageMax;
-        int Defense = p->Defense;
-        int Magic = p->MagicPower;
-        int Blocking = p->SuccessfulBlocking;
-
-        if (DamageMin > 0)
-        {
-            DamageMin += GameLogic::Items::GetItemLevelBonus(Level);
-        }
-        if (DamageMax > 0)
-        {
-            DamageMax += GameLogic::Items::GetItemLevelBonus(Level);
-        }
-
-        if (Magic > 0)
-        {
-            Magic += GameLogic::Items::GetItemLevelBonus(Level);
-            Magic /= 2;
-
-            if (!GameLogic::Items::IsSceptreType(iHelpItem))
-            {
-                Magic += Level * 2;
-            }
-        }
-
-        if (Defense > 0)
-        {
-            if (iHelpItem >= ITEM_SHIELD && iHelpItem < ITEM_SHIELD + MAX_ITEM_INDEX)
-            {
-                Defense += Level;
-            }
-            else
-            {
-                Defense += GameLogic::Items::GetItemLevelBonus(Level);
-            }
-        }
-        if (Blocking > 0)
-        {
-            // Like the item's defense rate, a BYTE that stops at 255.
-            Blocking = std::min(Blocking + GameLogic::Items::GetItemLevelBonus(Level), 255);
-        }
+        // The stats a normal item of the level has.
+        const GameLogic::Items::ItemStatValues stats = GameLogic::Items::ComputeItemStats(*p, {iHelpItem, Level});
+        const int DamageMin = stats.damageMin;
+        const int DamageMax = stats.damageMax;
+        const int Defense = stats.defense;
+        const int Magic = stats.magicPower;
+        const int Blocking = stats.blockRate;
 
         if (p->RequireLevel)
         {
