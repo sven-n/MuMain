@@ -4043,6 +4043,19 @@ void CreateWeaponBlur(CHARACTER* c, OBJECT* o, BMD* b)
     }
 }
 
+namespace
+{
+// A hit sounds like the attacker's weapon: the missile hit sounds for a bow or crossbow, the
+// melee hit sounds for anything else.
+void PlayAttackHitSound(CHARACTER* attacker, OBJECT* o)
+{
+    constexpr int HitSoundVariants = 4;
+    const ESound firstSound = gCharacterManager.GetEquipedBowType(attacker) != BOWTYPE_NONE ? SOUND_ATTACK_MISSILE_HIT1
+                                                                                            : SOUND_ATTACK_MELEE_HIT1;
+    PlayBuffer(static_cast<ESound>(firstSound + rand() % HitSoundVariants), o);
+}
+} // namespace
+
 void MoveCharacter(CHARACTER* c, OBJECT* o)
 {
     if (o->Type == MODEL_WARCRAFT)
@@ -5296,18 +5309,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
                 }
                 else
                 {
-                    ITEM* r = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT];
-                    ITEM* l = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
-
-                    if (GameLogic::Items::IsBowCrossbowOrAmmunition(r) &&
-                        GameLogic::Items::IsBowCrossbowOrAmmunition(l))
-                    {
-                        PlayBuffer(static_cast<ESound>(SOUND_ATTACK_MELEE_HIT1 + 5 + rand() % 4), o);
-                    }
-                    else
-                    {
-                        PlayBuffer(static_cast<ESound>(SOUND_ATTACK_MELEE_HIT1 + rand() % 4), o);
-                    }
+                    PlayAttackHitSound(c, o);
                 }
                 break;
             }
