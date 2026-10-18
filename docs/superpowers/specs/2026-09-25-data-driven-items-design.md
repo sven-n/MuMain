@@ -574,21 +574,28 @@ server with original clients (after phases 6 and B).
      weapon kinds `sword`, `glove` (the Rage Fighter's gloves, OpenMU's
      `IsGloveWeaponEquipped`), `axe`, `mace`, `staff` and `book` (the
      summoner's books, OpenMU's `IsBookEquipped`), plus the tags `sceptre`
-     and `magicSword`. 17 places ask them: the sceptre list
-     (`IsCepterItem`, its callers ask the tag), the two magic sword lists
-     (wizardry damage and the character window's wizardry line), the staff
-     checks (`CalculateDamage`, `GetAttackDamage`, the character window's
-     wizardry line, the summoner's left hand, three knight skill checks in the skill list and one in
-     `AttackKnight`, Death Stab, Death Cannon), Spiral Slash, the left-hand
-     weapon of `CalculateMagicDamage`, both dual wield checks and the
-     weapon `MoveHero` moves into an empty right hand; a staff branch of
-     `CalculateDamage` whose two sides were the same is gone. Master
-     Scepter-J (2/21) joined the sceptre list, and two staff ranges that
-     ended with `<=` (and so took in the Small Shield 6/0) end before it,
-     each in a commit of its own. With their own kinds, the gloves and
-     books mean "sword or glove" for group 0 and "staff or book" for group
-     5 at the converted places; Book of Neil-J (5/40) is a book by its kind
-     but still lacks the `summonerBook` tag the book-only code asks.
+     and `magicSword`. 21 places ask them: the sceptre list
+     (`IsCepterItem`, its callers ask the tag), the magic sword checks
+     (wizardry damage for the right-hand weapon, the left-hand weapon and
+     the right one beside it, the character window's wizardry line, the
+     tooltip's magic power and wizardry damage lines), the staff checks
+     (`CalculateDamage`, `GetAttackDamage`, the character window's
+     wizardry line, the tooltip's magic power line, the summoner's left
+     hand, three knight skill checks in the skill list and one in
+     `AttackKnight`, Death Stab, Death Cannon), Spiral Slash, the
+     left-hand weapon of `CalculateMagicDamage`, both dual wield checks
+     and the weapon `MoveHero` moves into an empty right hand; a staff
+     branch of `CalculateDamage` whose two sides were the same is gone.
+     In commits of their own: Master Scepter-J (2/21) joined the sceptre
+     list; two staff ranges that ended with `<=` (and so took in the Small
+     Shield 6/0) end before it; the two-handed magic swords count their
+     damage option in `CalculateMagicDamage`'s checks with something in
+     the other hand too (a combination the hands never allow); and
+     `MoveHero` moves only a staff, so Book of Neil-J (5/40, a book by its
+     kind that lacks the `summonerBook` tag the book-only code asks) stays
+     in the left hand. With their own kinds, the gloves and books mean
+     "sword or glove" for group 0 and "staff or book" for group 5 at the
+     converted places.
    - **3b-4** the tags `luckyItem`, `shieldPotion` and `transformationRing`,
      with the potion hotkeys. It also decides the potion order: the potion
      searches take the highest item type first (the largest potion), which
