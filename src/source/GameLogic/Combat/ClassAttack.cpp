@@ -481,32 +481,16 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
     int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
     int iTypeR = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
 
-    if (((iTypeR != -1 &&
-        (iTypeR < ITEM_STAFF || iTypeR >= ITEM_STAFF + MAX_ITEM_INDEX) &&
-        (iTypeL < ITEM_STAFF || iTypeL >= ITEM_STAFF + MAX_ITEM_INDEX))
-        || Skill == AT_SKILL_SWELL_LIFE
-        || Skill == AT_SKILL_SWELL_LIFE_STR
-        || Skill == AT_SKILL_SWELL_LIFE_PROFICIENCY
-        || Skill == AT_SKILL_ADD_CRITICAL
-        || Skill == AT_SKILL_ADD_CRITICAL_STR1
-        || Skill == AT_SKILL_ADD_CRITICAL_STR2
-        || Skill == AT_SKILL_ADD_CRITICAL_STR3
-        || Skill == AT_SKILL_PARTY_TELEPORT
-        || Skill == AT_SKILL_THUNDER_STRIKE
-        || Skill == AT_SKILL_EARTHSHAKE
-        || Skill == AT_SKILL_EARTHSHAKE_STR
-        || Skill == AT_SKILL_EARTHSHAKE_MASTERY
-        || Skill == AT_SKILL_BRAND_OF_SKILL
-        || Skill == AT_SKILL_PLASMA_STORM_FENRIR
-        || Skill == AT_SKILL_FIRE_SCREAM
-        || Skill == AT_SKILL_FIRE_SCREAM_STR
-        || Skill == AT_SKILL_GIGANTIC_STORM
-        || Skill == AT_SKILL_CHAOTIC_DISEIER
-        || Skill == AT_SKILL_TWISTING_SLASH
-        || Skill == AT_SKILL_TWISTING_SLASH_STR
-        || Skill == AT_SKILL_TWISTING_SLASH_STR_MG
-        || Skill == AT_SKILL_TWISTING_SLASH_MASTERY
-        ))
+    if (((iTypeR != -1 && (iTypeR < ITEM_STAFF || iTypeR >= ITEM_STAFF + MAX_ITEM_INDEX) &&
+          (iTypeL < ITEM_STAFF || iTypeL >= ITEM_STAFF + MAX_ITEM_INDEX)) ||
+         Skill == AT_SKILL_SWELL_LIFE || Skill == AT_SKILL_SWELL_LIFE_STR || Skill == AT_SKILL_SWELL_LIFE_PROFICIENCY ||
+         Skill == AT_SKILL_ADD_CRITICAL || Skill == AT_SKILL_ADD_CRITICAL_STR1 || Skill == AT_SKILL_ADD_CRITICAL_STR2 ||
+         Skill == AT_SKILL_ADD_CRITICAL_STR3 || Skill == AT_SKILL_PARTY_TELEPORT || Skill == AT_SKILL_THUNDER_STRIKE ||
+         Skill == AT_SKILL_EARTHSHAKE || Skill == AT_SKILL_EARTHSHAKE_STR || Skill == AT_SKILL_EARTHSHAKE_MASTERY ||
+         Skill == AT_SKILL_BRAND_OF_SKILL || Skill == AT_SKILL_PLASMA_STORM_FENRIR || Skill == AT_SKILL_FIRE_SCREAM ||
+         Skill == AT_SKILL_FIRE_SCREAM_STR || Skill == AT_SKILL_GIGANTIC_STORM || Skill == AT_SKILL_CHAOTIC_DISEIER ||
+         Skill == AT_SKILL_TWISTING_SLASH || Skill == AT_SKILL_TWISTING_SLASH_STR ||
+         Skill == AT_SKILL_TWISTING_SLASH_STR_MG || Skill == AT_SKILL_TWISTING_SLASH_MASTERY))
     {
         bool Success = true;
 
