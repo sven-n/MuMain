@@ -3,8 +3,8 @@
    legacy's layout (whose comments follow): its panes and group boxes as Season 1's frames of lines
    (0.9, 0.9, 0.6, the pet window's) on the translucent fills, the classic social windows' check
    boxes, win_button tabs (the selected one raised and bright), text_button buttons, black fields
-   edged in the window line colour, and plain boxes for the skill slots (0.97's skill icons carry
-   their own frame). The range steppers and digits stay legacy's. */
+   edged in the window line colour, and plain boxes for the skill slots (the classic clients have
+   no skill box art). The range steppers and digits stay legacy's. */
 
 /* Legacy pieces the MU Helper config window and its detail panel share -- each one a straight
    reading of the native draw call it replaces. Link
