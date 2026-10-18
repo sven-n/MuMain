@@ -212,6 +212,9 @@ the field (**Copy text** copies it). All problems are also written to
 - a `wingTier` on an item whose slot is not `wings`
 - a `weaponKind` on an item that is not in the slot of its kind: bows,
   shields and books need `offHand`, the other kinds `mainHand`
+- no `weaponKind` on an item whose group and slot give one, as in item files
+  saved before the kind existed for that group: the game then treats the
+  item as no weapon of that kind
 - a `slot` written as a number, as files saved before tags existed have
   it; the number is read, and saving writes the name
 

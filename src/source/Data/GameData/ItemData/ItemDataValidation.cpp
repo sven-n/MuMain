@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "ItemDataValidation.h"
+#include "ItemAttributeConversion.h"
 #include "ItemEnumNames.h"
 #include "ItemType.h"
 #include "Core/Text/Utf8.h"
@@ -116,6 +117,14 @@ void ValidateSlot(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
     {
         AddIssue(issues, ItemDataIssueSeverity::Warning, definition, "has a wing tier, but its slot is not \"wings\"",
                  "wingTier");
+    }
+    // Item files saved before a group got its weapon kind have none; nothing fills it in.
+    const WeaponKind groupWeaponKind = GetGroupWeaponKind(definition);
+    if (definition.weaponKind == WeaponKind::None && groupWeaponKind != WeaponKind::None)
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
+                 std::string("has no weapon kind, but its group gives \"") + FindEnumName(groupWeaponKind) + "\"",
+                 "weaponKind");
     }
     const ItemSlot weaponKindSlot = GetWeaponKindSlot(definition.weaponKind);
     if (weaponKindSlot != ItemSlot::None && definition.slot != weaponKindSlot)
