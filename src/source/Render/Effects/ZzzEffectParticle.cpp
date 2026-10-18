@@ -8997,6 +8997,17 @@ void RenderParticles(BYTE byRenderOneMore)
             BITMAP_t* pBitmap = Bitmaps.GetTexture(o->TexType);
             float Width = pBitmap->Width * o->Scale;
             float Height = pBitmap->Height * o->Scale;
+
+            // The depth test these two set stays for the particles after them, so they set it
+            // whether or not they are drawn.
+            if (o->Type == BITMAP_LIGHT && o->SubType == 6)
+            {
+                EnableDepthTest();
+            }
+            if (o->Type == BITMAP_EXPLOTION && o->SubType == 5)
+            {
+                DisableDepthTest();
+            }
             // The margin covers the few types drawn a little off their position. Damage numbers
             // brighten on every draw and firecrackers trail far behind theirs, so those always draw.
             if (cullOffscreen && o->Type != BITMAP_DAMAGE1 && o->Type != BITMAP_FIRECRACKER &&
@@ -9016,14 +9027,6 @@ void RenderParticles(BYTE byRenderOneMore)
                 EnableAlphaTest(false);
             }
 
-            if (o->Type == BITMAP_LIGHT && o->SubType == 6)
-            {
-                EnableDepthTest();
-            }
-            if (o->Type == BITMAP_EXPLOTION && o->SubType == 5)
-            {
-                DisableDepthTest();
-            }
             int Frame;
             switch (o->Type)
             {

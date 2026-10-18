@@ -206,6 +206,13 @@ add_test(
 )
 
 add_test(
+    NAME particle_cull_keeps_depth_state
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_PARTICLE_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Effects/ZzzEffectParticle.cpp"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_particle_cull_state.cmake"
+)
+
+add_test(
     NAME renderer_pipeline_fail_fast
     COMMAND "${CMAKE_COMMAND}"
         "-DMU_RENDERER_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/MuRendererSDLGpu.cpp"
