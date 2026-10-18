@@ -15,6 +15,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "GameLogic/Items/ItemStats.h"
 #include "I18N/All.h"
 #include "UI/Inventory/ItemHelpContentKey.h"
 
@@ -215,6 +216,43 @@ TEST_CASE("The chaos weapons' fixed excellent bonus is item data [data][items]")
         itemsWithBonus += definition.excellentBonus != 0 ? 1 : 0;
     }
     CHECK(itemsWithBonus == 3);
+}
+
+// ComputeItemStats takes the terms from the item stat file and the item's profile.
+TEST_CASE("Item stats come from the item's stat profile [data][items]")
+{
+    ShippedItemAttributes items;
+    const auto stats = [&items](int itemType, int level, BYTE excellentFlags = 0, BYTE ancientDiscriminator = 0)
+    {
+        return GameLogic::Items::ComputeItemStats(items[itemType],
+                                                  {itemType, level, excellentFlags, ancientDiscriminator});
+    };
+
+    // Shield: block rate from the default table, defense +1 per level and no excellent part;
+    // the ancient part counts the level bonus: 29 + 29 * 20 / 90 + 2.
+    CHECK(stats(DragonShieldType, 15).blockRate == 126);
+    CHECK(stats(DragonShieldType, 15).defense == 29);
+    CHECK(stats(DragonShieldType, 15, 0x01).blockRate == 156);
+    CHECK(stats(DragonShieldType, 15, 0x01).defense == 29);
+    CHECK(stats(DragonShieldType, 15, 0, 1).defense == 37);
+
+    // Second tier wing: 2 per level up to +9; a wing option is no excellent option.
+    CHECK(stats(ITEM_WINGS_OF_DRAGON, 9).defense == 63);
+    CHECK(stats(ITEM_WINGS_OF_DRAGON, 15).defense == 102);
+    CHECK(stats(ITEM_WINGS_OF_DRAGON, 15, 0x01).defense == 102);
+    CHECK(stats(ITEM_CAPE_OF_LORD, 15).defense == 72);
+
+    // The fixed excellent bonus of the Chaos Dragon Axe instead of 102 * 25 / 75 + 5.
+    CHECK(stats(ITEM_CHAOS_DRAGON_AXE, 0, 0x01).damageMin == 117);
+    CHECK(stats(ITEM_CHAOS_DRAGON_AXE, 0, 0x01).damageMax == 145);
+
+    // Magic power: halved, then +2 per level except for sceptres.
+    CHECK(stats(ITEM_DRAGON_SOUL_STAFF, 15).magicPower == 109);
+    CHECK(stats(ITEM_BATTLE_SCEPTER, 15).magicPower == 34);
+
+    // A kind without a stat keeps 0.
+    CHECK(stats(ITEM_KRIS, 15).defense == 0);
+    CHECK(stats(ITEM_KRIS, 15).magicPower == 0);
 }
 
 TEST_CASE("A shield's defense rate grows with its + level [data][items]")
