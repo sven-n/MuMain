@@ -389,7 +389,7 @@ bool CMyInventory::IsEquipable(int iIndex, ITEM* pItem) const
 #endif //PBG_FIX_EQUIP_TWOHANDSWORD
         }
         else if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_SUMMONER &&
-            !(pItem->Type >= ITEM_STAFF && pItem->Type <= ITEM_STAFF + MAX_ITEM_INDEX))
+            !(pItem->Type >= ITEM_STAFF && pItem->Type < ITEM_STAFF + MAX_ITEM_INDEX))
             bEquipable = true;
     }
     else if (pItemAttr->m_byItemSlot == EQUIPMENT_RING_RIGHT && iIndex == EQUIPMENT_RING_LEFT)

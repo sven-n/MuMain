@@ -2580,7 +2580,7 @@ void CHARACTER_MACHINE::CalculateDamage()
         DamageMin = DamageMin - (WORD)(DamageMin * percent);
         DamageMax = DamageMax - (WORD)(DamageMax * percent);
 
-        if (Right->Type >= ITEM_STAFF && Right->Type <= ITEM_STAFF + MAX_ITEM_INDEX)
+        if (Right->Type >= ITEM_STAFF && Right->Type < ITEM_STAFF + MAX_ITEM_INDEX)
         {
             Character.AttackDamageMinLeft += (WORD)(DamageMin);
             Character.AttackDamageMaxLeft += (WORD)(DamageMax);
