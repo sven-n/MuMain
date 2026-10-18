@@ -21,7 +21,7 @@ std::wstring CutToItemAttributeName(const std::wstring& name);
 void CopyItemAttributeStats(const ITEM_ATTRIBUTE& attribute, ItemDefinition& definition);
 
 // Copies the fields ITEM_ATTRIBUTE (and so item.bmd) does not have: tags,
-// wing tier, weapon kind and rule flags.
+// wing tier, weapon kind, stat profile, potion priority and rule flags.
 void CopyFieldsNotInItemAttribute(const ItemDefinition& source, ItemDefinition& target);
 
 // The weapon kind the item's group gives, by group and slot as in OpenMU:
@@ -40,6 +40,18 @@ WeaponKind GetGroupWeaponKind(const ItemDefinition& definition);
 // too; a kind set in the item file that differs from the group's stays as long
 // as it differs.
 WeaponKind FollowGroupWeaponKind(const ItemDefinition* previous, const ItemDefinition& updated);
+
+// The stat profile the item's own data gives: "sceptre" for an item with the
+// sceptre tag, "shield" for a shield, the wing tier's profile for wings
+// ("firstTierWing", "secondTierWing", "secondTierCape" for a second tier cape,
+// "thirdTierWing", "smallWing"), and the default ("") for the others.
+std::string DeriveStatProfile(const ItemDefinition& definition);
+
+// The stat profile of an item after the bmd import or the item editor changed
+// it, like FollowGroupWeaponKind: while the item has the profile its data gives,
+// or is new, the profile follows its data; a profile set in the item file that
+// differs from it stays as long as it differs.
+std::string FollowStatProfile(const ItemDefinition* previous, const ItemDefinition& updated);
 
 // The attribute's name becomes the neutral (English) name.
 ItemDefinition ToItemDefinition(const ITEM_ATTRIBUTE& attribute, int itemType);

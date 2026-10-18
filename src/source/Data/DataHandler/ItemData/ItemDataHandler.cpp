@@ -95,6 +95,14 @@ bool CItemDataHandler::Load(std::string& errorMessage)
 {
     const auto loadStart = std::chrono::steady_clock::now();
     ItemDataLoadResult result = LoadItemDataDirectory(GetItemDataDirectory());
+    ItemStatsLoadResult stats = LoadItemStatsFile(GetItemStatsFile());
+    result.issues.insert(result.issues.end(), stats.issues.begin(), stats.issues.end());
+    ItemStatProfiles statProfiles;
+    if (!HasErrors(stats.issues))
+    {
+        statProfiles = ItemStatProfiles(stats.file);
+        ValidateStatProfiles(result.items, statProfiles, GetItemStatsFile().generic_string(), result.issues);
+    }
     Data::LogDataIssues(ItemDataLabel, result.issues);
     if (HasErrors(result.issues))
     {
@@ -105,6 +113,7 @@ bool CItemDataHandler::Load(std::string& errorMessage)
 
     const auto buildStart = std::chrono::steady_clock::now();
     g_ItemDatabase.SetDisplayLocale(I18N::GetCurrentLocale());
+    g_ItemDatabase.SetStatProfiles(std::move(statProfiles));
     g_ItemDatabase.Build(result.items);
     FillItemAttributes();
     RegisterLocaleObserver();
@@ -186,8 +195,9 @@ void CItemDataHandler::OnItemEdited(int itemType)
     definition.group = GetItemGroup(itemType);
     definition.number = GetItemNumber(itemType);
     CopyItemAttributeStats(attribute, definition);
-    // The editor does not show the weapon kind.
+    // The editor does not show the weapon kind or the stat profile.
     definition.weaponKind = FollowGroupWeaponKind(g_ItemDatabase.Find(itemType), definition);
+    definition.statProfile = FollowStatProfile(g_ItemDatabase.Find(itemType), definition);
 
     // Only a changed name is stored; otherwise every stat edit would turn the
     // shown English fallback into a translation. ITEM_ATTRIBUTE holds a cut
@@ -225,11 +235,11 @@ void CItemDataHandler::OnItemsSwapped(int firstItemType, int secondItemType)
     const ItemDefinition first = g_ItemDatabase.GetAllSlots()[firstItemType];
     const ItemDefinition second = g_ItemDatabase.GetAllSlots()[secondItemType];
     g_ItemDatabase.Swap(firstItemType, secondItemType);
-    FollowGroupWeaponKindAfterMove(first, secondItemType);
-    FollowGroupWeaponKindAfterMove(second, firstItemType);
+    FollowDerivedFieldsAfterMove(first, secondItemType);
+    FollowDerivedFieldsAfterMove(second, firstItemType);
 }
 
-void CItemDataHandler::FollowGroupWeaponKindAfterMove(const ItemDefinition& before, int newItemType)
+void CItemDataHandler::FollowDerivedFieldsAfterMove(const ItemDefinition& before, int newItemType)
 {
     const ItemDefinition* moved = g_ItemDatabase.Find(newItemType);
     if (moved == nullptr)
@@ -237,11 +247,11 @@ void CItemDataHandler::FollowGroupWeaponKindAfterMove(const ItemDefinition& befo
         return;
     }
 
-    const WeaponKind weaponKind = FollowGroupWeaponKind(&before, *moved);
-    if (weaponKind != moved->weaponKind)
+    ItemDefinition changed = *moved;
+    changed.weaponKind = FollowGroupWeaponKind(&before, changed);
+    changed.statProfile = FollowStatProfile(&before, changed);
+    if (changed.weaponKind != moved->weaponKind || changed.statProfile != moved->statProfile)
     {
-        ItemDefinition changed = *moved;
-        changed.weaponKind = weaponKind;
         g_ItemDatabase.Set(changed);
     }
 }
@@ -304,6 +314,7 @@ void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items,
             }
         }
         item.weaponKind = FollowGroupWeaponKind(current, item);
+        item.statProfile = FollowStatProfile(current, item);
     }
 }
 

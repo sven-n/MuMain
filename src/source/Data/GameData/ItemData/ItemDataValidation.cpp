@@ -174,6 +174,34 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
     }
 }
 
+void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
+                          const std::string& statFile, std::vector<ItemDataIssue>& issues)
+{
+    std::set<std::string> used;
+    for (const ItemDefinition& definition : items)
+    {
+        if (definition.statProfile.empty())
+        {
+            continue;
+        }
+        if (profiles.Find(definition.statProfile) == ItemStatProfiles::UnknownProfile)
+        {
+            AddIssue(issues, ItemDataIssueSeverity::Error, definition,
+                     "\"" + definition.statProfile + "\" is not a profile of " + statFile, "statProfile");
+            continue;
+        }
+        used.insert(definition.statProfile);
+    }
+    for (const std::string& name : profiles.GetProfileNames())
+    {
+        if (!used.contains(name))
+        {
+            issues.push_back({ItemDataIssueSeverity::Warning, statFile, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
+                              "profiles." + name, "no item names this profile"});
+        }
+    }
+}
+
 void ValidateItemModels(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues)
 {
     std::set<int> seenItemTypes;

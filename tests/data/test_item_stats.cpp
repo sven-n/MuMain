@@ -7,6 +7,7 @@
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
+#include "Data/GameData/ItemData/ItemAttributeConversion.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemStatsJson.h"
 #include "Data/GameData/ItemData/ItemType.h"
@@ -180,6 +181,25 @@ TEST_CASE("The shipped item stat file loads without problems and is in the writt
         CHECK(false);
     }
     CHECK(WriteItemStatsJson(result.file) == TestFiles::ReadWholeFile(ClientDirectory / GetItemStatsFile()));
+}
+
+// The bmd import and the item editor keep a profile its data gives; the shipped data follows
+// the same rule, so nothing changes when an item is saved again.
+TEST_CASE("Every shipped item names the stat profile its data gives [data][items]")
+{
+    ShippedItemAttributes items;
+    int itemsWithProfile = 0;
+    for (const ItemDefinition& definition : g_ItemDatabase.GetAllSlots())
+    {
+        if (!definition.Exists())
+        {
+            continue;
+        }
+        CAPTURE(g_ItemDatabase.GetLogName(MakeItemType(definition.group, definition.number)));
+        CHECK(definition.statProfile == DeriveStatProfile(definition));
+        itemsWithProfile += definition.statProfile.empty() ? 0 : 1;
+    }
+    CHECK(itemsWithProfile == 59);
 }
 
 TEST_CASE("A shield's defense rate grows with its + level [data][items]")

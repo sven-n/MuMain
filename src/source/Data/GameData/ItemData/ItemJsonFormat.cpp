@@ -47,6 +47,7 @@ template <typename TDefinition, typename TVisitor> void VisitStatFields(TDefinit
     visit("slot", definition.slot, ItemSlot::None);
     visit("wingTier", definition.wingTier, WingTier::None);
     visit("weaponKind", definition.weaponKind, WeaponKind::None);
+    visit("statProfile", definition.statProfile, std::string{});
     visit("potionPriority", definition.potionPriority, BYTE{0});
     visit("twoHanded", definition.twoHanded, false);
     visit("skill", definition.skill, WORD{0});
@@ -264,6 +265,15 @@ template <typename T> void ItemReader::ReadValue(const OrderedJson& json, const 
             return;
         }
         value = json.get<bool>();
+    }
+    else if constexpr (std::is_same_v<T, std::string>)
+    {
+        if (!json.is_string() || !Json::IsName(json.get_ref<const std::string&>()))
+        {
+            AddIssue(ItemDataIssueSeverity::Error, field, "must be a name of letters and digits");
+            return;
+        }
+        value = json.get<std::string>();
     }
     else
     {

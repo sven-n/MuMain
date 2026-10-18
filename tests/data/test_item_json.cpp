@@ -284,6 +284,51 @@ TEST_CASE("Item tags, wing tier, potion priority and rule flags are kept through
     CHECK(read.sellable);
 }
 
+TEST_CASE("An item's stat profile is kept through write and read [data][items]")
+{
+    ItemDefinition kris = MakeKris();
+    kris.statProfile = "weapon";
+
+    const std::string text = WriteItemGroupJson(0, std::vector<ItemDefinition>{kris});
+    CHECK(text.find(R"("statProfile": "weapon")") != std::string::npos);
+    const ReadResult result = Read(text);
+    REQUIRE(result.issues.empty());
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items.front().statProfile == "weapon");
+
+    // The default profile is not written.
+    CHECK(WriteItemGroupJson(0, std::vector<ItemDefinition>{MakeKris()}).find("statProfile") == std::string::npos);
+
+    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "statProfile": "two words"})")).issues,
+                   ItemDataIssueSeverity::Error, "statProfile"));
+    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "statProfile": 5})")).issues,
+                   ItemDataIssueSeverity::Error, "statProfile"));
+}
+
+TEST_CASE("Item validation checks the stat profiles against the stat file [data][items]")
+{
+    ItemStatFile file;
+    file.profiles.push_back({"shield", {}});
+    file.profiles.push_back({"sceptre", {}});
+    const ItemStatProfiles profiles(file);
+
+    ItemDefinition shield = MakeKris();
+    shield.statProfile = "shield";
+    ItemDefinition unknown = MakeKris();
+    unknown.number = 1;
+    unknown.statProfile = "wing";
+    ItemDefinition withoutProfile = MakeKris();
+    withoutProfile.number = 2;
+
+    std::vector<ItemDataIssue> issues;
+    ValidateStatProfiles(std::vector<ItemDefinition>{shield, unknown, withoutProfile}, profiles, "ItemStats.json",
+                         issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Error, "statProfile"));
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "profiles.sceptre"));
+    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "profiles.shield"));
+    CHECK(issues.size() == 2);
+}
+
 TEST_CASE("Item slots, wing tiers and tags are written by name [data][items]")
 {
     ItemDefinition wing = MakeKris();

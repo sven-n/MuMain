@@ -368,6 +368,100 @@ TEST_CASE("The item types with a tag come in use order: higher potion priority, 
     CHECK(inUseOrder().front() == MakeItemType(PotionGroup, 1));
 }
 
+TEST_CASE("Item database resolves the stat profile of every item [data][items]")
+{
+    ItemStatFile file;
+    file.tables.push_back(LevelBonusTable{"linear", {}, {}, 1});
+    WrittenStatProfile shield{"shield", {}};
+    shield.stats[static_cast<size_t>(ItemStat::Defense)].table = "linear";
+    file.profiles.push_back(shield);
+
+    ItemDefinition smallShield = MakeItem(6, 0, "Small Shield");
+    smallShield.statProfile = "shield";
+    ItemDefinition shortSword = MakeItem(0, 1, "Short Sword");
+    shortSword.statProfile = "missing";
+    const int smallShieldType = MakeItemType(6, 0);
+    const int krisType = MakeItemType(0, 0);
+    const int shortSwordType = MakeItemType(0, 1);
+
+    ItemDatabase database;
+    database.Build(std::vector<ItemDefinition>{smallShield, MakeItem(0, 0, "Kris"), shortSword});
+    const auto defenseBonus = [&database](int itemType, int level)
+    {
+        const ItemStatProfiles& profiles = database.GetStatProfiles();
+        return profiles.GetLevelBonus(database.GetStatProfile(itemType).Get(ItemStat::Defense), level);
+    };
+    // Without a stat file every item has the empty default.
+    CHECK(defenseBonus(smallShieldType, 7) == 0);
+
+    database.SetStatProfiles(ItemStatProfiles(file));
+    CHECK(defenseBonus(smallShieldType, 7) == 7);
+    CHECK(defenseBonus(krisType, 7) == 0);
+    // A profile the file does not have, an empty slot and an invalid id get the default.
+    CHECK(defenseBonus(shortSwordType, 7) == 0);
+    CHECK(defenseBonus(MakeItemType(6, 1), 7) == 0);
+    CHECK(defenseBonus(-1, 7) == 0);
+
+    // Moves and edits resolve the profile again.
+    database.Swap(smallShieldType, MakeItemType(6, 5));
+    CHECK(defenseBonus(MakeItemType(6, 5), 7) == 7);
+    CHECK(defenseBonus(smallShieldType, 7) == 0);
+    ItemDefinition kris = *database.Find(krisType);
+    kris.statProfile = "shield";
+    database.Set(kris);
+    CHECK(defenseBonus(krisType, 7) == 7);
+}
+
+TEST_CASE("The stat profile an item's data gives [data][items]")
+{
+    ItemDefinition item = MakeItem(2, 8, "Battle Scepter");
+    item.weaponKind = WeaponKind::Mace;
+    CHECK(DeriveStatProfile(item).empty());
+    item.tags.Set(ItemTag::Sceptre);
+    CHECK(DeriveStatProfile(item) == "sceptre");
+
+    ItemDefinition shield = MakeItem(6, 0, "Small Shield");
+    shield.slot = ItemSlot::OffHand;
+    shield.weaponKind = WeaponKind::Shield;
+    CHECK(DeriveStatProfile(shield) == "shield");
+
+    ItemDefinition wing = MakeItem(12, 0, "Wings of Elf");
+    wing.slot = ItemSlot::Wings;
+    const std::pair<WingTier, const char*> tiers[] = {{WingTier::None, ""},
+                                                      {WingTier::Small, "smallWing"},
+                                                      {WingTier::First, "firstTierWing"},
+                                                      {WingTier::Second, "secondTierWing"},
+                                                      {WingTier::Third, "thirdTierWing"}};
+    for (const auto& [tier, profile] : tiers)
+    {
+        wing.wingTier = tier;
+        CHECK(DeriveStatProfile(wing) == profile);
+    }
+    wing.wingTier = WingTier::Second;
+    wing.tags.Set(ItemTag::Cape);
+    CHECK(DeriveStatProfile(wing) == "secondTierCape");
+    // A wing tier counts only on the wings slot.
+    wing.slot = ItemSlot::Helm;
+    CHECK(DeriveStatProfile(wing).empty());
+}
+
+TEST_CASE("An edited item's stat profile follows its data while it is the derived one [data][items]")
+{
+    ItemDefinition shield = MakeItem(6, 0, "Small Shield");
+    shield.slot = ItemSlot::OffHand;
+    shield.weaponKind = WeaponKind::Shield;
+    shield.statProfile = "shield";
+
+    ItemDefinition edited = shield;
+    edited.weaponKind = WeaponKind::None;
+    CHECK(FollowStatProfile(&shield, edited).empty());
+    CHECK(FollowStatProfile(nullptr, shield) == "shield");
+
+    // A profile the file sets that differs from the derived one stays.
+    shield.statProfile = "custom";
+    CHECK(FollowStatProfile(&shield, edited) == "custom");
+}
+
 TEST_CASE("Item tag sets test several tags at once [data][items]")
 {
     const ItemTagSet socketItems{ItemTag::SocketSeed, ItemTag::SocketSphere};

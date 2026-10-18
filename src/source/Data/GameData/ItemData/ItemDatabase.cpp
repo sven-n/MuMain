@@ -108,6 +108,25 @@ void ItemDatabase::Swap(int firstItemType, int secondItemType)
     BuildItemTypesByTag();
 }
 
+void ItemDatabase::SetStatProfiles(ItemStatProfiles profiles)
+{
+    ++m_version;
+    m_statProfiles = std::move(profiles);
+    for (size_t itemType = 0; itemType < m_definitions.size(); ++itemType)
+    {
+        if (m_definitions[itemType].Exists())
+        {
+            m_ruleData[itemType].statProfile = ResolveStatProfile(m_definitions[itemType].statProfile);
+        }
+    }
+}
+
+int ItemDatabase::ResolveStatProfile(const std::string& name) const
+{
+    const int profile = m_statProfiles.Find(name);
+    return profile == ItemStatProfiles::UnknownProfile ? ItemStatProfiles::DefaultProfile : profile;
+}
+
 void ItemDatabase::BuildItemTypesByTag()
 {
     for (std::vector<int>& itemTypes : m_itemTypesByTag)
@@ -157,6 +176,7 @@ void ItemDatabase::Store(int itemType, ItemDefinition definition)
         ruleData.slot = definition.slot;
         ruleData.wingTier = definition.wingTier;
         ruleData.weaponKind = definition.weaponKind;
+        ruleData.statProfile = ResolveStatProfile(definition.statProfile);
         ruleData.blockedActions = 0;
         for (int action = 0; action < static_cast<int>(ItemAction::Count); ++action)
         {

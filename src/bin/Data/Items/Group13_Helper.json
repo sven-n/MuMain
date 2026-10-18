@@ -782,6 +782,7 @@
       "height": 3,
       "slot": "wings",
       "wingTier": "second",
+      "statProfile": "secondTierCape",
       "level": 180,
       "durability": 200,
       "defense": 15,

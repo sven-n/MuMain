@@ -456,6 +456,28 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         CHECK(g_ItemDatabase.GetWeaponKind(ITEM_BOLT) == WeaponKind::None);
     }
 
+    SUBCASE("a moved shield's stat profile follows its weapon kind")
+    {
+        const int emptySwordType = MakeItemType(0, 100);
+        REQUIRE(g_ItemDatabase.Find(ITEM_SMALL_SHIELD)->statProfile == "shield");
+        std::swap(ItemAttribute[ITEM_SMALL_SHIELD], ItemAttribute[emptySwordType]);
+        g_ItemDataHandler.OnItemsSwapped(ITEM_SMALL_SHIELD, emptySwordType);
+        CHECK(g_ItemDatabase.GetWeaponKind(emptySwordType) == WeaponKind::None);
+        CHECK(g_ItemDatabase.Find(emptySwordType)->statProfile.empty());
+    }
+
+    SUBCASE("a wing's stat profile follows its slot")
+    {
+        REQUIRE(g_ItemDatabase.Find(ITEM_WINGS_OF_ELF)->statProfile == "firstTierWing");
+        ItemAttribute[ITEM_WINGS_OF_ELF].m_byItemSlot = static_cast<BYTE>(ItemSlot::Helm);
+        g_ItemDataHandler.OnItemEdited(ITEM_WINGS_OF_ELF);
+        CHECK(g_ItemDatabase.Find(ITEM_WINGS_OF_ELF)->statProfile.empty());
+
+        ItemAttribute[ITEM_WINGS_OF_ELF].m_byItemSlot = static_cast<BYTE>(ItemSlot::Wings);
+        g_ItemDataHandler.OnItemEdited(ITEM_WINGS_OF_ELF);
+        CHECK(g_ItemDatabase.Find(ITEM_WINGS_OF_ELF)->statProfile == "firstTierWing");
+    }
+
     SUBCASE("a moved item keeps all its names")
     {
         const int emptyType = MakeItemType(0, 100);

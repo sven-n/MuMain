@@ -110,6 +110,7 @@ void CopyFieldsNotInItemAttribute(const ItemDefinition& source, ItemDefinition& 
     target.tags = source.tags;
     target.wingTier = source.wingTier;
     target.weaponKind = source.weaponKind;
+    target.statProfile = source.statProfile;
     target.potionPriority = source.potionPriority;
     target.tradable = source.tradable;
     target.droppable = source.droppable;
@@ -195,6 +196,44 @@ WeaponKind GetGroupWeaponKind(const ItemDefinition& definition)
     default:
         return WeaponKind::None;
     }
+}
+
+std::string DeriveStatProfile(const ItemDefinition& definition)
+{
+    if (definition.tags.Has(ItemTag::Sceptre))
+    {
+        return "sceptre";
+    }
+    if (definition.weaponKind == WeaponKind::Shield)
+    {
+        return "shield";
+    }
+    if (definition.slot != ItemSlot::Wings)
+    {
+        return "";
+    }
+    switch (definition.wingTier)
+    {
+    case WingTier::Small:
+        return "smallWing";
+    case WingTier::First:
+        return "firstTierWing";
+    case WingTier::Second:
+        return definition.tags.Has(ItemTag::Cape) ? "secondTierCape" : "secondTierWing";
+    case WingTier::Third:
+        return "thirdTierWing";
+    default:
+        return "";
+    }
+}
+
+std::string FollowStatProfile(const ItemDefinition* previous, const ItemDefinition& updated)
+{
+    if (previous != nullptr && previous->statProfile != DeriveStatProfile(*previous))
+    {
+        return previous->statProfile;
+    }
+    return DeriveStatProfile(updated);
 }
 
 WeaponKind FollowGroupWeaponKind(const ItemDefinition* previous, const ItemDefinition& updated)
