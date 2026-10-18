@@ -765,7 +765,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                             Position[0] = o->StartPosition[0];// + rand()%8-4;
                             Position[1] = o->StartPosition[1];// + rand()%8-4;
                         }
-                        VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
+                        VectorAdd(o->Position, Position, o->Position);
                         CreateTail(o, Matrix);
                         o->Position[0] -= Position[0];
                         o->Position[0] += o->StartPosition[0];
@@ -1265,7 +1265,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                             Position[0] = o->StartPosition[0] + rand() % 16 - 8;
                             Position[1] = o->StartPosition[1] + rand() % 16 - 8;
                         }
-                        VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
+                        VectorAdd(o->Position, Position, o->Position);
                         CreateTail(o, Matrix);
                         o->Position[0] -= Position[0];
                         o->Position[0] += o->StartPosition[0];
@@ -1315,7 +1315,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                             Position[0] = o->StartPosition[0];
                             Position[1] = o->StartPosition[1];
                         }
-                        VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
+                        VectorAdd(o->Position, Position, o->Position);
                         CreateTail(o, Matrix);
                         o->Position[0] -= Position[0];
                         o->Position[0] += o->StartPosition[0];
@@ -1343,7 +1343,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                         if (Distance <= 400 && to->Live && tc->Dead == 0 && to->Kind == KIND_MONSTER && to->Visible && to != Target)
                         {
                             o->TargetIndex[(int)o->MultiUse] = j;
-                            o->MultiUse += FPS_ANIMATION_FACTOR;
+                            o->MultiUse++;
                         }
 
                         if (o->MultiUse > 5) break;
@@ -1548,7 +1548,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                     VectorRotate(p1, Matrix, p2);
 
                     Vector(p2[0] * o->Scale / 2.0f, p2[1] * o->Scale / 2.0f, p2[2] * o->Scale / 2.0f, p2);
-                    VectorAddScaled(o->Position, p2, o->Position, FPS_ANIMATION_FACTOR);
+                    VectorAdd(o->Position, p2, o->Position);
                     VectorCopy(o->Position, o->StartPosition);
 
                     int iScale = 1;
@@ -1893,7 +1893,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                     o->Direction[1] = -15.f;
                     AngleMatrix(o->Angle, Matrix);
                     VectorRotate(o->Direction, Matrix, Position);
-                    VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
+                    VectorAdd(o->Position, Position, o->Position);
                     VectorCopy(o->Position, o->StartPosition);
                     o->Direction[1] = -50.f;
                     o->m_bCreateTails = false;
@@ -1920,7 +1920,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                     AngleMatrix(o->Angle, Matrix);
                     Vector(0.f, 100, 0.f, p);
                     VectorRotate(p, Matrix, Position);
-                    VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
+                    VectorAdd(o->Position, Position, o->Position);
 
                     CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(rand() % 8 + 8) * 0.3f, o->Light, NULL, (float)(rand() % 360));
 
@@ -2449,7 +2449,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
 
                     AngleMatrix(o->Angle, Matrix);
                     VectorRotate(p, Matrix, Position);
-                    VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
+                    VectorAdd(o->Position, Position, o->Position);
                     //					Vector(1.f,1.f,1.f,o->Light);
                 }
                 else if (o->SubType == 20)	// SubType : 7
@@ -2549,7 +2549,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                 o->Scale = Scale;
                 o->MultiUse = 1;
                 o->Velocity = -3.f;
-                o->Position[2] += 150.f * FPS_ANIMATION_FACTOR;
+                o->Position[2] += 150.f;
                 Vector(0.f, 0.f, 0.f, o->Direction);
                 Vector(0.f, 0.f, 0.f, o->TargetPosition);
                 Vector(1.f, 0.8f, 1.f, o->Light);

@@ -1054,7 +1054,7 @@ bool M31HuntingGround::CreateMist(PARTICLE* pParticleObj)
             vec3_t Velocity, Direction;
             Vector(0.f, -45.f * CharacterMoveSpeed(Hero), 0.f, Velocity);
             VectorRotate(Velocity, Matrix, Direction);
-            VectorAddScaled(TargetPosition, Direction, TargetPosition, FPS_ANIMATION_FACTOR);
+            VectorAdd(TargetPosition, Direction, TargetPosition);
         }
         if (Hero->Movement || (rand() % 2 == 0))
         {
