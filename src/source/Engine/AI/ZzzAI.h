@@ -29,6 +29,7 @@ bool TestDistance(CHARACTER* c, vec3_t TargetPosition, float Range);
 
 void LookAtTarget(OBJECT* o, const CHARACTER* targetCharacter);
 void MoveHead(CHARACTER* c);
+void SmoothHeadAngles(vec3_t angles, const vec3_t targetAngles, float referenceFrames);
 void Damage(vec3_t soPosition, CHARACTER* tc, float AttackRange, int AttackPoint, bool Hit);
 
 bool MovePath(CHARACTER* c, bool Turn = true);
