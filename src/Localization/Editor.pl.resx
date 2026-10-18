@@ -101,10 +101,10 @@
     <value>Przedmioty zapisane pomyślnie!</value>
   </data>
   <data name="Exported as legacy format successfully!" xml:space="preserve">
-    <value>Pomyślnie wyeksportowano jako format starszego typu!</value>
+    <value>Pomyślnie wyeksportowano do starszego formatu!</value>
   </data>
   <data name="Failed to export as legacy format!" xml:space="preserve">
-    <value>Nie udało się wyeksportować jako format starszego typu!</value>
+    <value>Nie udało się wyeksportować do starszego formatu!</value>
   </data>
   <data name="Items exported as CSV successfully!" xml:space="preserve">
     <value>Przedmioty wyeksportowane jako CSV pomyślnie!</value>
@@ -125,7 +125,7 @@
     <value>Edytor Przedmiotów</value>
   </data>
   <data name="Dev Editor" xml:space="preserve">
-    <value>Edytor Dewelopera</value>
+    <value>Edytor Deweloperski</value>
   </data>
   <data name="Scenes" xml:space="preserve">
     <value>Sceny</value>
@@ -212,10 +212,10 @@
     <value>Przełącz na (lub obserwuj) Default lub Orbital, aby edytować nadpisania.</value>
   </data>
   <data name="Override Default Camera Config" xml:space="preserve">
-    <value>Nadpisz Konfigurację Default</value>
+    <value>Nadpisz Konfigurację Kamery Default</value>
   </data>
   <data name="Hero-relative camera with hardcoded 2D trapezoid culling." xml:space="preserve">
-    <value>Kamera względna bohatera z zakodowanym odrzucaniem trapezu 2D.</value>
+    <value>Kamera względem bohatera, ze stałym odrzucaniem trapezowym 2D.</value>
   </data>
   <data name="View Frustum" xml:space="preserve">
     <value>Frustum Widoku</value>
@@ -257,13 +257,13 @@
     <value>Koniec Mgły %</value>
   </data>
   <data name="Reset to Camera Defaults" xml:space="preserve">
-    <value>Reset do Domyślnych Kamery</value>
+    <value>Przywróć Domyślne Ustawienia Kamery</value>
   </data>
   <data name="Override Orbital Camera Config" xml:space="preserve">
-    <value>Nadpisz Konfigurację Orbital</value>
+    <value>Nadpisz Konfigurację Kamery Orbital</value>
   </data>
   <data name="Tunes the 2D terrain-cull hull; does not touch FOV / far clip." xml:space="preserve">
-    <value>Reguluje skorupę odrzucania terenu 2D; nie zmienia FOV / dalekiego clipa.</value>
+    <value>Reguluje otoczkę odrzucania terenu 2D; nie zmienia FOV ani dalekiej płaszczyzny odcięcia.</value>
   </data>
   <data name="2D Culling Trapezoid (world units)" xml:space="preserve">
     <value>Trapez Odrzucania 2D (jednostki świata)</value>
@@ -290,10 +290,10 @@
     <value>Wizualizacja Debugu:</value>
   </data>
   <data name="Character Pick Boxes" xml:space="preserve">
-    <value>Pudełka Wyboru Postaci</value>
+    <value>Obszary Zaznaczania Postaci</value>
   </data>
   <data name="Item Pick Boxes" xml:space="preserve">
-    <value>Pudełka Wyboru Przedmiotów</value>
+    <value>Obszary Zaznaczania Przedmiotów</value>
   </data>
   <data name="Item Cull Sphere" xml:space="preserve">
     <value>Sfera Odrzucania Przedmiotów</value>
@@ -428,16 +428,16 @@
     <value>Tryb Okna</value>
   </data>
   <data name="Windowed" xml:space="preserve">
-    <value>Okno</value>
+    <value>W Oknie</value>
   </data>
   <data name="Fullscreen" xml:space="preserve">
     <value>Pełny Ekran</value>
   </data>
   <data name="Actual Window Client" xml:space="preserve">
-    <value>Rzeczywisty Klient Okna</value>
+    <value>Rzeczywisty Obszar Roboczy Okna</value>
   </data>
   <data name="Calculated Scale from Client" xml:space="preserve">
-    <value>Obliczona Skala z Klienta</value>
+    <value>Skala Obliczona z Obszaru Roboczego</value>
   </data>
   <data name="Debug info copied to clipboard" xml:space="preserve">
     <value>Info debugu skopiowane do schowka</value>

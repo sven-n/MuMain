@@ -35,13 +35,13 @@
     <value>Wysokość</value>
   </data>
   <data name="Min Damage" xml:space="preserve">
-    <value>Min Obrażenia</value>
+    <value>Min. Obrażenia</value>
   </data>
   <data name="Max Damage" xml:space="preserve">
-    <value>Maks Obrażenia</value>
+    <value>Maks. Obrażenia</value>
   </data>
   <data name="Block Rate" xml:space="preserve">
-    <value>Wskaźnik Bloku</value>
+    <value>Szansa na Blok</value>
   </data>
   <data name="Defense" xml:space="preserve">
     <value>Obrona</value>
