@@ -87,6 +87,7 @@ TEST_CASE("Control protocol serves the documented command vocabulary [network][c
         "logout", "quit",  "move",       "warp",   "teleport", "attack",   "skill",      "pickup",  "use",
         "equip",  "say",   "whisper",    "party",  "halt",     "hotkey",   "click-ui",   "drag-ui", "hover-ui",
         "type",   "ui",    "slot-pixel", "trade",  "console",  "bench",
+        "bones",
     };
 
     for (const std::string& command : expected)

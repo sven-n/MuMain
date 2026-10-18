@@ -6557,6 +6557,31 @@ void AnimateCharacterBones(OBJECT* o)
     o->EnableBoneMatrix = true;
 }
 
+#ifdef MU_ENABLE_CONTROL_SOCKET
+PrepassBoneCheck g_PrepassBoneCheck;
+
+bool IsClientCharacterObject(const OBJECT* o)
+{
+    for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
+    {
+        if (&CharactersClient[i].Object == o) return true;
+    }
+    return false;
+}
+
+void RecordPrepassBones(const float (*prepass)[3][4], const float (*rendered)[3][4], int numBones)
+{
+    float delta = 0.f;
+    for (int bone = 0; bone < numBones; ++bone)
+        for (int r = 0; r < 3; ++r)
+            for (int c = 0; c < 4; ++c)
+                delta = std::max(delta, std::abs(prepass[bone][r][c] - rendered[bone][r][c]));
+    ++g_PrepassBoneCheck.checked;
+    if (delta > 0.01f) ++g_PrepassBoneCheck.mismatched;
+    g_PrepassBoneCheck.maxDelta = std::max(g_PrepassBoneCheck.maxDelta, delta);
+}
+#endif
+
 void WaitCharactersAnimation()
 {
     FRAME_PROFILE(CharWait);
