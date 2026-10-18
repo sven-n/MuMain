@@ -340,139 +340,6 @@ ActionSkillType GetSkillByBook(int Type)
     }
 }
 
-void CalcRequirements(ITEM* ip, ITEM_ATTRIBUTE* p)
-{
-    bool isExcellent = ip->ExcellentFlags > 0;
-    bool isAncientItem = ip->AncientDiscriminator > 0;
-    int ItemLevel = p->Level;
-
-    if (isExcellent)
-    {
-        ItemLevel = p->Level + 25;
-    }
-    else if (isAncientItem)
-    {
-        ItemLevel = p->Level + 30;
-    }
-
-    int addValue = 4;
-
-    if (GameLogic::Items::IsSecondTierWingExceptCape(ip))
-    {
-        addValue = 5;
-    }
-
-    // These keep their base level requirement; the ones in the next branch grow with the + level.
-    const bool isWeaponOrArmor = ip->Type >= ITEM_SWORD && ip->Type < ITEM_WING;
-    const bool isFromOrbsToThirdTierWings = ip->Type >= ITEM_ORB_OF_TWISTING_SLASH && ip->Type <= ITEM_CAPE_OF_EMPEROR;
-    const bool isLateWingGroupKind =
-        ip->Type >= ITEM_WING_OF_DIMENSION && ip->Type < ITEM_HELPER && ip->Type != ITEM_CAPE_OF_FIGHTER;
-    const bool keepsBaseLevelRequirement =
-        isWeaponOrArmor || ip->Type == ITEM_HORN_OF_FENRIR || isFromOrbsToThirdTierWings || isLateWingGroupKind;
-
-    if (p->RequireLevel && keepsBaseLevelRequirement)
-    {
-        ip->RequireLevel = p->RequireLevel;
-    }
-    else if (p->RequireLevel && ((ip->Type >= ITEM_WING && ip->Type <= ITEM_ORB_OF_TWISTING_SLASH)
-        || (ip->Type >= ITEM_WING_OF_CURSE && ip->Type <= ITEM_WINGS_OF_DESPAIR)
-        || (ip->Type == ITEM_CAPE_OF_FIGHTER)
-        || ip->Type >= ITEM_HELPER))
-    {
-        ip->RequireLevel = p->RequireLevel + ip->Level * addValue;
-    }
-    else
-        ip->RequireLevel = 0;
-
-    if (p->RequireStrength)
-        ip->RequireStrength = 20 + (p->RequireStrength) * (ItemLevel + ip->Level * 3) * 3 / 100;
-    else	ip->RequireStrength = 0;
-
-    if (p->RequireDexterity)
-        ip->RequireDexterity = 20 + (p->RequireDexterity) * (ItemLevel + ip->Level * 3) * 3 / 100;
-    else	ip->RequireDexterity = 0;
-
-    if (p->RequireVitality)
-        ip->RequireVitality = 20 + (p->RequireVitality) * (ItemLevel + ip->Level * 3) * 3 / 100;
-    else	ip->RequireVitality = 0;
-
-    if (p->RequireEnergy)
-    {
-        if (GameLogic::Items::IsSummonerBook(ip))
-        {
-            ip->RequireEnergy = 20 + (p->RequireEnergy) * (ItemLevel + ip->Level * 1) * 3 / 100;
-        }
-        else
-
-            if ((p->RequireLevel > 0) && (ip->Type >= ITEM_ETC && ip->Type < ITEM_ETC + MAX_ITEM_INDEX))
-            {
-                ip->RequireEnergy = 20 + (p->RequireEnergy) * (p->RequireLevel) * 4 / 100;
-            }
-            else
-
-            {
-                ip->RequireEnergy = 20 + (p->RequireEnergy) * (ItemLevel + ip->Level * 3) * 4 / 100;
-            }
-    }
-    else
-    {
-        ip->RequireEnergy = 0;
-    }
-
-    if (p->RequireCharisma)
-        ip->RequireCharisma = 20 + (p->RequireCharisma) * (ItemLevel + ip->Level * 3) * 3 / 100;
-    else	ip->RequireCharisma = 0;
-
-    if (ip->Type == ITEM_ORB_OF_SUMMONING)
-    {
-        WORD Energy = 0;
-
-        switch (ip->Level)
-        {
-        case 0:Energy = 30; break;
-        case 1:Energy = 60; break;
-        case 2:Energy = 90; break;
-        case 3:Energy = 130; break;
-        case 4:Energy = 170; break;
-        case 5:Energy = 210; break;
-        case 6:Energy = 300; break;
-        case 7:Energy = 500; break;
-        }
-        ip->RequireEnergy = Energy;
-    }
-
-    if (p->RequireCharisma)
-    {
-        ip->RequireCharisma = p->RequireCharisma;
-    }
-
-    if (ip->Type == ITEM_TRANSFORMATION_RING)
-    {
-        if (ip->Level <= 2)
-            ip->RequireLevel = 20;
-        else
-            ip->RequireLevel = 50;
-    }
-
-    if ((ip->Type >= ITEM_DRAGON_KNIGHT_HELM && ip->Type <= ITEM_SUNLIGHT_MASK) ||
-        (ip->Type >= ITEM_DRAGON_KNIGHT_ARMOR && ip->Type <= ITEM_SUNLIGHT_ARMOR) ||
-        (ip->Type >= ITEM_DRAGON_KNIGHT_PANTS && ip->Type <= ITEM_SUNLIGHT_PANTS) ||
-        (ip->Type >= ITEM_DRAGON_KNIGHT_GLOVES && ip->Type <= ITEM_SUNLIGHT_GLOVES) ||
-        (ip->Type >= ITEM_DRAGON_KNIGHT_BOOTS && ip->Type <= ITEM_SUNLIGHT_BOOTS) || ip->Type == ITEM_BONE_BLADE ||
-        ip->Type == ITEM_EXPLOSION_BLADE || ip->Type == ITEM_GRAND_VIPER_STAFF || ip->Type == ITEM_SYLPH_WIND_BOW ||
-        ip->Type == ITEM_SOLEIL_SCEPTER || ITEM_STORM_BLITZ_STICK == ip->Type || ITEM_AURA_HELM == ip->Type ||
-        ITEM_AURA_ARMOR == ip->Type || ITEM_AURA_PANTS == ip->Type || ITEM_AURA_GLOVES == ip->Type ||
-        ITEM_AURA_BOOTS == ip->Type || GameLogic::Items::IsLuckyItemType(ip->Type))
-    {
-        isExcellent = false;
-    }
-
-    if (isExcellent && ip->RequireLevel > 0 && !GameLogic::Items::IsWingItem(ip) && ip->Type != ITEM_HORN_OF_FENRIR)
-    {
-        ip->RequireLevel += 20;
-    }
-}
-
 void CalcWingOptions(ITEM* ip)
 {
     if (GameLogic::Items::IsSecondTierWingExceptCape(ip))
@@ -675,17 +542,21 @@ void SetItemAttributes(ITEM* ip)
     ip->WeaponSpeed = p->WeaponSpeed;
     ip->WalkSpeed = p->WalkSpeed;
 
-    // What the + level, excellent options and ancient set add, from the item stat file.
-    const GameLogic::Items::ItemStatValues stats =
-        GameLogic::Items::ComputeItemStats(*p, {ip->Type, ip->Level, ip->ExcellentFlags, ip->AncientDiscriminator});
+    // What the + level, excellent options, ancient set and option level add, from the item stat file.
+    const GameLogic::Items::ItemStatValues stats = GameLogic::Items::ComputeItemStats(
+        *p, {ip->Type, ip->Level, ip->ExcellentFlags, ip->AncientDiscriminator, ip->OptionLevel});
     ip->DamageMin = static_cast<WORD>(stats.damageMin);
     ip->DamageMax = static_cast<WORD>(stats.damageMax);
     ip->MagicPower = static_cast<BYTE>(stats.magicPower);
     ip->SuccessfulBlocking = static_cast<BYTE>(stats.blockRate);
     ip->Defense = static_cast<WORD>(stats.defense);
     ip->MagicDefense = static_cast<WORD>(stats.magicDefense);
-
-    CalcRequirements(ip, p);
+    ip->RequireLevel = static_cast<WORD>(stats.requireLevel);
+    ip->RequireStrength = static_cast<WORD>(stats.requireStrength);
+    ip->RequireDexterity = static_cast<WORD>(stats.requireDexterity);
+    ip->RequireEnergy = static_cast<WORD>(stats.requireEnergy);
+    ip->RequireVitality = static_cast<WORD>(stats.requireVitality);
+    ip->RequireCharisma = static_cast<WORD>(stats.requireLeadership);
 
     ip->SpecialNum = 0;
 
@@ -757,7 +628,6 @@ void SetItemAttributes(ITEM* ip)
                 {
                     ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
                     ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE; ip->SpecialNum++;
-                    ip->RequireStrength += Option3 * 5;
                 }
             }
             if (ip->Type >= ITEM_STAFF && ip->Type < ITEM_STAFF + MAX_ITEM_INDEX)
@@ -768,19 +638,16 @@ void SetItemAttributes(ITEM* ip)
                 else
                     ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC;
                 ip->SpecialNum++;
-                ip->RequireStrength += Option3 * 5;
             }
             if (ip->Type >= ITEM_SHIELD && ip->Type < ITEM_SHIELD + MAX_ITEM_INDEX)
             {
                 ip->SpecialValue[ip->SpecialNum] = Option3 * 5;
                 ip->Special[ip->SpecialNum] = AT_IMPROVE_BLOCKING; ip->SpecialNum++;
-                ip->RequireStrength += Option3 * 5;
             }
             if (ip->Type >= ITEM_HELM && ip->Type < ITEM_BOOTS + MAX_ITEM_INDEX)
             {
                 ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
                 ip->Special[ip->SpecialNum] = AT_IMPROVE_DEFENSE; ip->SpecialNum++;
-                ip->RequireStrength += Option3 * 5;
             }
             if (ip->Type >= ITEM_RING_OF_ICE && ip->Type < ITEM_HELPER + MAX_ITEM_INDEX && ip->Type != ITEM_CAPE_OF_LORD)
             {
