@@ -108,6 +108,7 @@ struct EnvironmentInfo
     // The settings that decide which render paths run.
     std::string look;             // Classic / Enhanced
     std::string enhancedFeatures; // the Enhanced features on, space-separated
+    std::string enhancedTuning;   // the player's [EnhancedTuning] values as key=value, space-separated
     int antialiasingSamples = 0;  // in effect: 0 while Classic
     int anisotropy = 0;
 

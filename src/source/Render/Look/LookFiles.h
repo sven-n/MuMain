@@ -63,6 +63,8 @@ enum class LookValueSource : std::uint8_t
     BuiltIn,
     Default,
     Map,
+    // The player's own value ([EnhancedTuning] of config.ini), never part of the files.
+    Personal,
 };
 [[nodiscard]] const char* ToString(LookValueSource source);
 

@@ -14,6 +14,13 @@ public:
     void Load();
     void Save();
 
+    // config.ini beside the executable. Its [EnhancedTuning] section is read and written on its own
+    // (Data/GameConfig/PersonalTuning.h); Save() leaves it as it is.
+    const std::filesystem::path& GetConfigPath() const
+    {
+        return m_configPath;
+    }
+
     // Window
     int  GetWindowWidth()  const { return m_windowWidth; }
     int  GetWindowHeight() const { return m_windowHeight; }

@@ -6,6 +6,7 @@
 #include "Core/Utilities/PlatformInfo.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Render/Look/LookPresetSetting.h"
+#include "Render/Look/TuningSetting.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -139,6 +140,20 @@ void CaptureGraphics(EnvironmentInfo& info)
         add(EnhancedFeature::LightMood, "mood");
         add(EnhancedFeature::PostProcessing, "post");
     }
+    // The player's own values change what Enhanced costs (light ranges and caps, bloom), so a run
+    // records them; they apply only to the Enhanced look.
+    const Data::Config::PersonalTuning& tuning = Render::Look::PersonalTuningSession().Persisted();
+    const auto addTuning = [&info](std::string_view key, const std::string& value)
+    {
+        if (!info.enhancedTuning.empty())
+            info.enhancedTuning += ' ';
+        info.enhancedTuning += std::string(key) + "=" + value;
+    };
+    for (const Data::Maps::LookValueInfo& value : Data::Maps::LookValueInfos())
+        if (const std::optional<double>& set = tuning.look[value.value])
+            addTuning(value.name, Data::Config::FormatTuningNumber(*set));
+    if (tuning.moodStrengthPercent)
+        addTuning(Data::Config::MoodStrengthKey, std::to_string(*tuning.moodStrengthPercent));
     // Samples per pixel the frames render with; 1 is off.
     const int samples = mu::GetRenderer().GetAntialiasingSamples();
     info.antialiasingSamples = samples > 1 ? samples : 0;

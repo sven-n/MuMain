@@ -160,10 +160,10 @@ TEST_CASE("a value out of range makes the whole file unusable [data][look]")
     const ReadResult result = Read(R"({
       "formatVersion": 1,
       "default": { "bloom.strength": 0.6 },
-      "maps": [ { "world": 1, "grading.strength": 0.05 } ]
+      "maps": [ { "world": 1, "grading.strength": -0.05 } ]
     })");
 
-    CHECK_MESSAGE(Mentions(result.issues, "Look.json: maps[world 1].grading.strength: is 0.05, must be from 0.1 to 1"),
+    CHECK_MESSAGE(Mentions(result.issues, "Look.json: maps[world 1].grading.strength: is -0.05, must be from 0 to 1"),
                   Messages(result.issues));
     CheckBuiltInEverywhere(result);
 
@@ -172,7 +172,7 @@ TEST_CASE("a value out of range makes the whole file unusable [data][look]")
       "formatVersion": 1,
       "default": { "dynamic.wrap": 0, "lighting.highlightKnee": 0.9, "bloom.levelFalloff": 0.25 },
       "maps": [ { "world": 1, "dynamic.wrap": 0.5, "lighting.highlightKnee": 0.5, "bloom.levelFalloff": 1,
-                  "grading.strength": 0.1 } ]
+                  "grading.strength": 0 } ]
     })");
     CHECK_MESSAGE(ends.issues.empty(), Messages(ends.issues));
     CheckBuiltInEverywhere(Read(R"({ "formatVersion": 1, "default": { "dynamic.wrap": 0.51 } })"));

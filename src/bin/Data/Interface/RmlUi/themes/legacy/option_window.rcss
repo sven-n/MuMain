@@ -340,3 +340,169 @@
 	opacity: 0.45;
 	cursor: default;
 }
+
+/* The player's tuning of each Enhanced feature (OptionWindow.h's tuning rows), under the feature's
+   row. The feature's label and chevron expand its sliders; only the checkbox switches the feature.
+   A locked feature dims its checkbox, not its label, which still expands the tuning. */
+.option-tuning-group-row {
+	cursor: default;
+}
+.option-tuning-group-row.locked {
+	opacity: 1;
+}
+.option-tuning-group-row.locked .checkbox-box {
+	opacity: 0.45;
+}
+.option-tuning-group-row .checkbox-box {
+	cursor: pointer;
+}
+.option-tuning-group-label {
+	cursor: pointer;
+}
+.option-tuning-group-label:hover {
+	color: token(text-primary);
+}
+/* A small arrow before the label: pointing right while collapsed, down while expanded. */
+.option-tuning-chevron {
+	display: inline-block;
+	width: 5dp;
+	height: 5dp;
+	margin: 0 6dp 1dp -10dp;
+	border-right: 1dp token(text-secondary);
+	border-bottom: 1dp token(text-secondary);
+	transform: rotate(-45deg);
+}
+.option-tuning-chevron.expanded {
+	transform: rotate(45deg);
+}
+/* .hidden ties with these rules' display at equal specificity, so it is restated. */
+.option-tuning-group,
+.option-tuning-more,
+.option-tuning-rows {
+	display: block;
+	flex-shrink: 0;
+}
+.option-tuning-group {
+	margin: -2dp 0 8dp 12dp;
+	padding-left: 6dp;
+	border-left: 1dp #5a4a2a;
+}
+.option-tuning-group.hidden,
+.option-tuning-more.hidden,
+.option-tuning-reason.hidden,
+.option-tuning-error.hidden {
+	display: none;
+}
+.option-tuning-reason {
+	display: block;
+	margin-bottom: 4dp;
+	color: token(semantic-warning);
+}
+.option-tuning-row {
+	display: block;
+	margin-bottom: 6dp;
+}
+.option-tuning-head {
+	display: flex;
+	align-items: center;
+}
+.option-tuning-label {
+	flex: 1 1 auto;
+	color: token(text-input);
+}
+.option-tuning-value {
+	flex: 0 0 auto;
+	margin-left: 6dp;
+	color: token(text-primary);
+}
+.option-tuning-state {
+	flex: 0 0 auto;
+	margin-left: 6dp;
+	color: token(text-muted);
+}
+.option-tuning-state.custom {
+	color: token(accent-gold);
+}
+.option-tuning-state.unsaved {
+	color: token(semantic-warning);
+}
+.option-tuning-reset {
+	flex: 0 0 auto;
+	margin-left: 6dp;
+	padding: 0 4dp;
+	cursor: pointer;
+	pointer-events: auto;
+	color: token(text-muted);
+	border-width: 1dp;
+	border-color: token(border-control);
+	background-color: token(surface-control);
+}
+.option-tuning-reset:hover {
+	color: token(text-primary);
+}
+.option-tuning-track {
+	display: flex;
+	align-items: center;
+	margin-top: 2dp;
+}
+.option-tuning-bound {
+	flex: 0 0 auto;
+	width: 52dp;
+	white-space: nowrap;
+	color: token(text-muted);
+}
+.option-tuning-track .option-tuning-bound:last-child {
+	text-align: right;
+}
+/* The volume gauge's art: its rail, and its full fill at its own size, cut off at the value as
+   native draws it (scale-none crops the image to the fill's width). */
+.option-tuning-slider {
+	margin: 0 6dp;
+}
+.option-tuning-fill {
+	decorator: image(level-gauge-fill-10 scale-none left center);
+}
+.option-tuning-hit {
+	left: -6dp;
+	right: -6dp;
+	top: -5dp;
+	bottom: -5dp;
+}
+.option-tuning-hit:focus {
+	border-width: 1dp;
+	border-color: token(accent-gold);
+}
+.option-tuning-group.locked .option-tuning-track {
+	opacity: 0.45;
+}
+.option-tuning-group.locked .option-tuning-hit {
+	cursor: default;
+}
+.option-tuning-more-head {
+	display: block;
+	margin: 2dp 0 6dp;
+	cursor: pointer;
+	pointer-events: auto;
+	color: token(text-secondary);
+}
+.option-tuning-more-head .option-tuning-chevron {
+	margin-left: 0;
+}
+.option-tuning-more-head:hover {
+	color: token(text-primary);
+}
+.option-tuning-actions {
+	display: flex;
+	flex-shrink: 0;
+	justify-content: flex-end;
+	margin-bottom: 4dp;
+}
+.option-tuning-all {
+	margin: 0 0 8dp;
+}
+.option-tuning-error {
+	display: block;
+	flex-shrink: 0;
+	margin-bottom: 8dp;
+	color: token(semantic-danger);
+}

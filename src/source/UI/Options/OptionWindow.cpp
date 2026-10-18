@@ -8,6 +8,13 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "Data/GameConfig/GameConfigConstants.h"
 #include "Render/Look/LookPresetSetting.h"
+#include "Render/Look/LookProfileSetting.h"
+#include "Render/Look/TuningSetting.h"
+#include "Render/Lighting/DynamicLightsSetting.h"
+#include "Render/Lighting/EnhancedLightingSetting.h"
+#include "Render/Lighting/LightMoodScales.h"
+#include "Render/PostProcessing/PostProcessingSetting.h"
+#include "UI/Options/TuningRows.h"
 #include "Audio/AudioPlayer.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlDraggable.h"
@@ -22,7 +29,9 @@
 #include "UI/Core/SceneUICoordinator.h"
 #include "UI/Windows/RememberPasswordPrompt.h"
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
+#include <optional>
 #include <cstring>
 #include "I18N/All.h"
 
@@ -203,6 +212,80 @@ template <std::size_t N> std::vector<Rml::String> MultiplierLabels(const int (&v
         labels.push_back(std::to_string(values[i]) + "x");
     return labels;
 }
+
+// A level no tuning track has (they start at 0), for ApplyLevelGaugeEvent's current level. The
+// sliders bind no wheel event, the only one the gauge would step from it.
+constexpr int kNoTuningLevel = -1;
+
+bool ValidTuningGroup(int group)
+{
+    return group >= 0 && group < static_cast<int>(Render::Look::TuningGroupCount);
+}
+
+bool ValidTuningControl(int control)
+{
+    return control >= 0 && control < static_cast<int>(Render::Look::TuningControlCount);
+}
+
+// What a tuning slider shows: what applies. A developer's session strength of the light mood goes
+// over the player's value, which goes over the look profile's and the map's.
+double CurrentTuningValue(const Render::Look::TuningControl& control)
+{
+    if (!control.lookValue)
+        if (const std::optional<int> session = Render::Look::SessionOverrides().lightMoodStrength)
+            return static_cast<double>(*session);
+    if (const std::optional<double> value = Render::Look::PersonalTuningSession().Override(control.id))
+        return *value;
+    if (control.lookValue)
+        return Render::Look::Active()[*control.lookValue];
+    return Render::Lighting::LightMood::MaxStrength;
+}
+
+UI::Options::TuningLock TuningLockOf(int group)
+{
+    using Render::Look::EnhancedFeature;
+    using Render::Look::EnhancedFeatureChosen;
+    const auto feature = static_cast<EnhancedFeature>(group);
+    const Render::Look::FeatureOverrides session = Render::Look::SessionOverrides();
+    UI::Options::TuningFeatureState state;
+    state.chosen = EnhancedFeatureChosen(feature);
+    switch (feature)
+    {
+    case EnhancedFeature::Lighting:
+        state.active = Render::Lighting::EnhancedLightingActive();
+        state.sessionOff = session.enhancedLighting == false;
+        break;
+    case EnhancedFeature::DynamicLights:
+        state.active = Render::Lighting::DynamicLightsActive();
+        state.sessionOff = session.dynamicLights == false || session.enhancedLighting == false;
+        break;
+    case EnhancedFeature::LightMood:
+        state.sessionOff = session.lightMood == false;
+        state.sessionSet = session.lightMoodStrength.has_value();
+        break;
+    case EnhancedFeature::PostProcessing:
+        state.active = Render::PostProcessing::PostProcessingActive();
+        state.sessionOff = session.postProcessing == false;
+        break;
+    }
+    return UI::Options::TuningGroupLock(static_cast<Render::Look::TuningGroup>(group),
+                                        Render::Look::ActiveLookPreset() == LookPreset::Enhanced,
+                                        EnhancedFeatureChosen(EnhancedFeature::Lighting), state);
+}
+
+Rml::String TuningStateClass(UI::Options::TuningRowState state)
+{
+    switch (state)
+    {
+    case UI::Options::TuningRowState::Custom:
+        return "custom";
+    case UI::Options::TuningRowState::Unsaved:
+        return "unsaved";
+    case UI::Options::TuningRowState::Inherited:
+        break;
+    }
+    return "inherited";
+}
 } // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -354,6 +437,32 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("look_light_mood_label", &model.lookLightMoodLabel);
     c.Bind("look_post_processing_label", &model.lookPostProcessingLabel);
     c.Bind("enhanced_graphics_label", &model.enhancedGraphicsLabel);
+    auto tuningRow = c.RegisterStruct<TuningRowModel>();
+    tuningRow.RegisterMember("control", &TuningRowModel::control);
+    tuningRow.RegisterMember("label", &TuningRowModel::label);
+    tuningRow.RegisterMember("help", &TuningRowModel::help);
+    tuningRow.RegisterMember("value_text", &TuningRowModel::valueText);
+    tuningRow.RegisterMember("min_text", &TuningRowModel::minText);
+    tuningRow.RegisterMember("max_text", &TuningRowModel::maxText);
+    tuningRow.RegisterMember("state_text", &TuningRowModel::stateText);
+    tuningRow.RegisterMember("state", &TuningRowModel::state);
+    tuningRow.RegisterMember("fill_percent", &TuningRowModel::fillPercent);
+    c.RegisterArray<std::vector<TuningRowModel>>();
+    for (std::size_t group = 0; group < TuningGroupCount; ++group)
+    {
+        const std::string suffix = "_" + std::to_string(group);
+        c.Bind("tuning_rows" + suffix, &model.tuningRows[group]);
+        c.Bind("tuning_more_rows" + suffix, &model.tuningMoreRows[group]);
+        c.Bind("tuning_expanded" + suffix, &model.tuningExpanded[group]);
+        c.Bind("tuning_more_expanded" + suffix, &model.tuningMoreExpanded[group]);
+        c.Bind("tuning_locked" + suffix, &model.tuningLocked[group]);
+        c.Bind("tuning_reason" + suffix, &model.tuningReason[group]);
+    }
+    c.Bind("tuning_more_label", &model.tuningMoreLabel);
+    c.Bind("tuning_reset_label", &model.tuningResetLabel);
+    c.Bind("tuning_reset_group_label", &model.tuningResetGroupLabel);
+    c.Bind("tuning_reset_all_label", &model.tuningResetAllLabel);
+    c.Bind("tuning_save_message", &model.tuningSaveMessage);
     c.Bind("antialiasing_labels", &model.antialiasingLabels);
     c.Bind("antialiasing_index", &model.antialiasingIndex);
     c.Bind("antialiasing_row_label", &model.antialiasingRowLabel);
@@ -449,6 +558,34 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
                 RmlToggleEnhancedFeature(arguments[0].Get<int>(-1));
         });
 
+    const auto intArgument = [](const Rml::VariantList& arguments)
+    { return arguments.size() == 1 ? arguments[0].Get<int>(-1) : -1; };
+    c.BindEventCallback("option_toggle_tuning_group",
+                        [this, intArgument](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                        { RmlToggleTuningGroup(intArgument(arguments)); });
+    c.BindEventCallback("option_toggle_tuning_more",
+                        [this, intArgument](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                        { RmlToggleTuningMore(intArgument(arguments)); });
+    c.BindEventCallback("option_tuning_pointer",
+                        [this, intArgument](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& arguments)
+                        { RmlTuningPointer(event, intArgument(arguments)); });
+    c.BindEventCallback("option_tuning_key",
+                        [this, intArgument](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& arguments)
+                        { RmlTuningKey(event, intArgument(arguments)); });
+    c.BindEventCallback("option_tuning_commit",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlTuningCommit(); });
+    c.BindEventCallback("option_reset_tuning",
+                        [this, intArgument](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& arguments)
+                        {
+                            event.StopPropagation();
+                            RmlResetTuning(intArgument(arguments));
+                        });
+    c.BindEventCallback("option_reset_tuning_group",
+                        [this, intArgument](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                        { RmlResetTuningGroup(intArgument(arguments)); });
+    c.BindEventCallback("option_reset_all_tuning",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlResetAllTuning(); });
+
     c.BindEventCallback("option_toggle_show_fps_counter",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleShowFpsCounter(); });
     c.BindEventCallback("option_toggle_show_debug_info",
@@ -530,6 +667,9 @@ void mu::ui::window::COptionWindow::Show(bool bShow)
         else
             m_RmlView.Document()->Hide();
     }
+    // Closing the window ends a tuning interaction too (a slider still held or focused).
+    if (!bShow)
+        FinishTuningInteraction();
 }
 
 bool mu::ui::window::COptionWindow::UpdateMouseEvent()
@@ -945,6 +1085,172 @@ void mu::ui::window::COptionWindow::RmlToggleEnhancedFeature(int feature)
     if (chosen == EnhancedFeature::DynamicLights && !Render::Look::EnhancedFeatureChosen(EnhancedFeature::Lighting))
         return; // dynamic lights act only with Enhanced lighting
     Render::Look::ChooseEnhancedFeature(chosen, !Render::Look::EnhancedFeatureChosen(chosen));
+}
+
+void mu::ui::window::COptionWindow::RmlToggleTuningGroup(int group)
+{
+    if (!ValidTuningGroup(group))
+        return;
+    m_tuningExpanded[group] = !m_tuningExpanded[group];
+    PlayBuffer(SOUND_CLICK01);
+}
+
+void mu::ui::window::COptionWindow::RmlToggleTuningMore(int group)
+{
+    if (!ValidTuningGroup(group))
+        return;
+    m_tuningMoreExpanded[group] = !m_tuningMoreExpanded[group];
+    PlayBuffer(SOUND_CLICK01);
+}
+
+bool mu::ui::window::COptionWindow::TuningGroupUnlocked(int group) const
+{
+    return ValidTuningGroup(group) && TuningLockOf(group) == UI::Options::TuningLock::None;
+}
+
+void mu::ui::window::COptionWindow::RmlTuningPointer(Rml::Event& event, int control)
+{
+    if (!ValidTuningControl(control))
+        return;
+    const Render::Look::TuningControl& tuning =
+        Render::Look::Control(static_cast<Render::Look::TuningControlId>(control));
+    if (!TuningGroupUnlocked(static_cast<int>(tuning.group)))
+        return;
+    // The track as a level gauge with one level per step. The gauge is told no level is current
+    // (kNoTuningLevel), so it reports the pointer's level every time; whether that changes the value
+    // is decided against the exact value, which an inherited one between two steps may not be on.
+    const int steps = Render::Look::TuningStepCount(tuning);
+    const auto fromPointer = [steps](float x, float width)
+    { return x < 0.f ? 0 : static_cast<int>(std::lround(static_cast<float>(steps) * x / width)); };
+    const std::optional<int> level = UI::RmlBridge::ApplyLevelGaugeEvent(event, kNoTuningLevel, steps, fromPointer);
+    if (!level)
+        return;
+    const std::optional<double> next = Render::Look::TuningPointerValue(tuning, CurrentTuningValue(tuning), *level);
+    if (next && Render::Look::PersonalTuningSession().Preview(tuning.id, *next))
+        m_tuningPreviewPending = true;
+}
+
+void mu::ui::window::COptionWindow::RmlTuningKey(Rml::Event& event, int control)
+{
+    if (!ValidTuningControl(control))
+        return;
+    const Render::Look::TuningControl& tuning =
+        Render::Look::Control(static_cast<Render::Look::TuningControlId>(control));
+    // The gauge decodes the key and keeps it; the value steps from the exact value, which an
+    // inherited one between two steps may not be on.
+    const std::optional<UI::RmlBridge::LevelGaugeKeyMove> move = UI::RmlBridge::LevelGaugeKey(event);
+    if (!move || !TuningGroupUnlocked(static_cast<int>(tuning.group)))
+        return;
+    using To = UI::RmlBridge::LevelGaugeKeyMove::To;
+    const double next = move->to == To::Min ? tuning.min
+                        : move->to == To::Max
+                            ? tuning.max
+                            : Render::Look::StepTuningValue(tuning, CurrentTuningValue(tuning), move->steps);
+    if (Render::Look::PersonalTuningSession().Preview(tuning.id, next))
+        m_tuningPreviewPending = true;
+}
+
+void mu::ui::window::COptionWindow::RmlTuningCommit()
+{
+    FinishTuningInteraction();
+}
+
+void mu::ui::window::COptionWindow::FinishTuningInteraction()
+{
+    // Saves only; a pending Mood strength is applied by the frame loop (ApplyPendingTuning()).
+    Render::Look::TuningSession& session = Render::Look::PersonalTuningSession();
+    // A failed save is tried again when the window closes, never per frame.
+    if (m_tuningPreviewPending || (!IsVisible() && session.SaveState() != Render::Look::TuningSaveState::Saved))
+    {
+        m_tuningPreviewPending = false;
+        (void)session.Commit();
+    }
+}
+
+void mu::ui::window::COptionWindow::RmlResetTuning(int control)
+{
+    if (!ValidTuningControl(control))
+        return;
+    Render::Look::PersonalTuningSession().Reset(static_cast<Render::Look::TuningControlId>(control));
+    PlayBuffer(SOUND_CLICK01);
+}
+
+void mu::ui::window::COptionWindow::RmlResetTuningGroup(int group)
+{
+    if (!ValidTuningGroup(group))
+        return;
+    Render::Look::PersonalTuningSession().ResetGroup(static_cast<Render::Look::TuningGroup>(group));
+    PlayBuffer(SOUND_CLICK01);
+}
+
+void mu::ui::window::COptionWindow::RmlResetAllTuning()
+{
+    Render::Look::PersonalTuningSession().ResetAll();
+    PlayBuffer(SOUND_CLICK01);
+}
+
+void mu::ui::window::COptionWindow::SyncTuningModel(OptionRmlModel& model)
+{
+    const auto syncText = [this](Rml::String& field, const std::string& name, const std::string& value)
+    {
+        if (field != value)
+        {
+            field = value;
+            m_RmlView.MarkDirty(name);
+        }
+    };
+    const auto syncFlag = [this](bool& field, const std::string& name, bool value)
+    {
+        if (field != value)
+        {
+            field = value;
+            m_RmlView.MarkDirty(name);
+        }
+    };
+    syncText(model.tuningMoreLabel, "tuning_more_label", UI::Options::TuningMoreSettingsLabel());
+    syncText(model.tuningResetLabel, "tuning_reset_label", UI::Options::TuningResetLabel());
+    syncText(model.tuningResetGroupLabel, "tuning_reset_group_label", UI::Options::TuningResetGroupLabel());
+    syncText(model.tuningResetAllLabel, "tuning_reset_all_label", UI::Options::TuningResetAllLabel());
+
+    const Render::Look::TuningSession& session = Render::Look::PersonalTuningSession();
+    syncText(model.tuningSaveMessage, "tuning_save_message", UI::Options::TuningSaveMessage(session));
+
+    std::array<std::vector<TuningRowModel>, TuningGroupCount> rows;
+    std::array<std::vector<TuningRowModel>, TuningGroupCount> moreRows;
+    for (const Render::Look::TuningControl& control : Render::Look::TuningControls())
+    {
+        const UI::Options::TuningRow row = UI::Options::BuildTuningRow(control, CurrentTuningValue(control),
+                                                                       UI::Options::TuningStateOf(session, control.id));
+        const TuningRowModel bound{static_cast<int>(control.id),
+                                   row.label,
+                                   row.help,
+                                   row.valueText,
+                                   row.minText,
+                                   row.maxText,
+                                   row.stateText,
+                                   TuningStateClass(row.state),
+                                   row.fillPercent};
+        (control.specialist ? moreRows : rows)[static_cast<std::size_t>(control.group)].push_back(bound);
+    }
+    for (std::size_t group = 0; group < TuningGroupCount; ++group)
+    {
+        const std::string suffix = "_" + std::to_string(group);
+        if (model.tuningRows[group] != rows[group])
+        {
+            model.tuningRows[group] = std::move(rows[group]);
+            m_RmlView.MarkDirty("tuning_rows" + suffix);
+        }
+        if (model.tuningMoreRows[group] != moreRows[group])
+        {
+            model.tuningMoreRows[group] = std::move(moreRows[group]);
+            m_RmlView.MarkDirty("tuning_more_rows" + suffix);
+        }
+        syncFlag(model.tuningExpanded[group], "tuning_expanded" + suffix, m_tuningExpanded[group]);
+        syncFlag(model.tuningMoreExpanded[group], "tuning_more_expanded" + suffix, m_tuningMoreExpanded[group]);
+        const UI::Options::TuningLock lock = TuningLockOf(static_cast<int>(group));
+        syncFlag(model.tuningLocked[group], "tuning_locked" + suffix, lock != UI::Options::TuningLock::None);
+        syncText(model.tuningReason[group], "tuning_reason" + suffix, UI::Options::TuningLockReason(lock));
+    }
 }
 
 // MuSetAntialiasingPreference saves the count and applies it while the Enhanced look is active.
@@ -1470,6 +1776,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
         syncFlag(model.lookFeaturesLocked, "look_features_locked", !enhancedGraphics);
         syncFlag(model.lookDynamicLightsLocked, "look_dynamic_lights_locked", !enhancedGraphics || !lighting);
     }
+    SyncTuningModel(model);
 
     // Rebuilt every sync for the localized "Off", as the FPS Limit row's "Uncapped".
     const auto syncMultiplierRow = [&](std::vector<Rml::String>& labels, const char* labelsName, int& index,
