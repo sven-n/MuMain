@@ -193,13 +193,13 @@ checks; the design document lists how the flags map to OpenMU.
 
 `Stats/ItemStats.json` says what an item's + level, excellent options and
 ancient set add to its damage, magic power, defense rate (`blockRate`),
-defense and magic defense. It is in a folder of its own because every
+defense and magic defense, and how its requirements grow. It is in a folder of its own because every
 `*.json` file in `Data/Items` is read as a group file. An excerpt:
 
 ```json
 {
   "formatVersion": 1,
-  "dropLevelBonus": {"ancient": 30},
+  "dropLevelBonus": {"excellent": 25, "ancient": 30},
   "tables": [
     {
       "name": "damageIncreaseWeapons",
@@ -209,7 +209,14 @@ defense and magic defense. It is in a folder of its own because every
   ],
   "default": {
     "damage": {"table": "damageIncreaseWeapons", "excellent": {"times": 25, "add": 5}, "ancient": {"add": 5, "dropLevelDivisor": 40}},
-    "magicDefense": {"table": "magicDefenseIncrease", "excellent": "none", "ancient": "none"}
+    "magicDefense": {"table": "magicDefenseIncrease", "excellent": "none", "ancient": "none"},
+    "requirements": {
+      "levelPerItemLevel": 0,
+      "excellentLevelAdd": 20,
+      "strength": {"add": 20, "levelWeight": 3, "percent": 3},
+      "leadership": "base",
+      "strengthPerOptionLevel": 0
+    }
   },
   "profiles": [
     {
@@ -240,6 +247,22 @@ defense and magic defense. It is in a folder of its own because every
 
   `"none"` means the stat has no such term. A number left out of a term is 0;
   a left-out `dropLevelDivisor` leaves its part out.
+- **Requirements** (`requirements` in the default and the profiles):
+  - `levelPerItemLevel`: the level requirement grows by this much per item
+    level (an item without a level requirement keeps none);
+  - `excellentLevelAdd`: an item with excellent options needs this much more
+    level, if it has a level requirement, is not a wing and does not have
+    `excellentRaisesLevel: false`;
+  - `strength`, `dexterity`, `energy`, `vitality`, `leadership`: each
+    `add + base * (drop level + item level * levelWeight) * percent / 100`,
+    where the drop level is the item's `level` plus `dropLevelBonus.excellent`
+    for an item with excellent options, else plus `dropLevelBonus.ancient`
+    for an ancient item; `"base"` keeps the base value, and `"basis":
+    "levelRequirement"` takes the item's level requirement instead of the drop
+    level (without the item level) when it has one. A requirement the item
+    does not have stays 0;
+  - `strengthPerOptionLevel`: the strength requirement grows by this much per
+    option level (also when the item has no strength requirement).
 - **Profiles** (`profiles`) write only what differs from the default. A term
   a profile writes replaces the default's as a whole. An item names its
   profile with `statProfile`; an item without one has the default.
@@ -256,19 +279,22 @@ The shipped profiles:
 |---|---|
 | `sceptre` | No magic power per level after halving: the Dark Lord's sceptres |
 | `shield` | Defense +1 per level (`defenseIncreaseShields`), no excellent part, ancient part `(defense + level) * 20 / d + 2` |
-| `firstTierWing`, `smallWing` | Defense from `defenseBonus1stWings` |
-| `secondTierWing`, `secondTierCape` | Defense from `defenseBonus2ndWings`: 2 per level up to +9, then 4 to 9 more per level |
+| `firstTierWing` | Defense from `defenseBonus1stWings`; level requirement +4 per level |
+| `smallWing` | Defense from `defenseBonus1stWings` |
+| `secondTierWing` | Defense from `defenseBonus2ndWings` (2 per level up to +9, then 4 to 9 more per level); level requirement +5 per level |
+| `secondTierCape` | Defense from `defenseBonus2ndWings`; level requirement +4 per level |
 | `thirdTierWing` | Defense from `defenseBonus3rdWings`: 4 per level up to +9, then 5 to 10 more per level |
 
-`firstTierWing` and `smallWing`, and `secondTierWing` and `secondTierCape`,
-have the same stat terms; they differ in how their level requirement grows.
+`sceptre` and `shield` also add 5 strength per option level.
 
 **Errors** in the file stop the start like errors in the item files: invalid
-JSON or `formatVersion`, a missing `dropLevelBonus.ancient`, a name that is
-not letters and digits or is defined twice, a table without `values` or
-`perLevel`, `values` that are not one number or 16 numbers from 0 to 65535,
-a default without a stat or a term, a `table` the file does not have, a term
-that is neither an object nor `"none"`, and a `dropLevelDivisor` of 0.
+JSON or `formatVersion`, a missing `dropLevelBonus.excellent` or `.ancient`,
+a name that is not letters and digits or is defined twice, a table without
+`values` or `perLevel`, `values` that are not one number or 16 numbers from 0
+to 65535, a default without a stat, a term or a requirement term, a `table`
+the file does not have, a term that is neither an object nor `"none"`, a
+requirement formula that is neither an object nor `"base"`, a `basis` other
+than `"levelRequirement"`, and a `dropLevelDivisor` of 0.
 **Warnings:** unknown fields, a table no stat uses, and a caption without
 English. An item whose `statProfile` the file does not have is an error, and
 a profile no item names is a warning.

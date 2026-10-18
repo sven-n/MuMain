@@ -13,9 +13,9 @@
 #include <vector>
 
 // The item stat file (Data/Items/Stats/ItemStats.json): what an item's + level,
-// excellent options and ancient set add to its stats, as named level bonus
-// tables, a default term set and named profiles that differ from it. Items
-// name their profile ("statProfile"). See docs/item-data.md.
+// excellent options and ancient set add to its stats and requirements, as named
+// level bonus tables, a default term set and named profiles that differ from
+// it. Items name their profile ("statProfile"). See docs/item-data.md.
 namespace Data::Items
 {
 // The stats the file has terms for. Damage stands for the minimum and the
@@ -32,6 +32,21 @@ enum class ItemStat : uint8_t
 };
 
 constexpr size_t ItemStatCount = static_cast<size_t>(ItemStat::Count);
+
+// The stat requirements the file has formulas for, in the order of
+// ItemRequirements after the level.
+enum class ItemRequirementStat : uint8_t
+{
+    Strength,
+    Dexterity,
+    Energy,
+    Vitality,
+    Leadership,
+
+    Count
+};
+
+constexpr size_t ItemRequirementStatCount = static_cast<size_t>(ItemRequirementStat::Count);
 
 // What the + level adds to a stat: the value of the level (above +15 the +15
 // value) plus perLevel for every level.
@@ -95,10 +110,42 @@ struct WrittenStatSection
     bool operator==(const WrittenStatSection& other) const = default;
 };
 
+// How a stat requirement grows with the item:
+//   add + base * (drop level + level * levelWeight) * percent / 100
+// where the drop level has the excellent or ancient drop level bonus. keepBase
+// keeps the base value. levelRequirementBasis takes the item's level
+// requirement instead of the drop level (and no level weight) when it has one.
+struct RequirementFormula
+{
+    bool keepBase = true;
+    int add = 0;
+    int levelWeight = 0;
+    int percent = 0;
+    bool levelRequirementBasis = false;
+
+    bool operator==(const RequirementFormula& other) const = default;
+};
+
+// The requirement terms of the default or of a profile, as the file has them.
+// A term a profile writes replaces the default's.
+struct WrittenRequirementSection
+{
+    // What the level requirement grows by per item level.
+    std::optional<int> levelPerItemLevel;
+    // What an excellent item needs more (see ItemDefinition::excellentRaisesLevel).
+    std::optional<int> excellentLevelAdd;
+    std::array<std::optional<RequirementFormula>, ItemRequirementStatCount> stats;
+    // What the strength requirement grows by per option level.
+    std::optional<int> strengthPerOptionLevel;
+
+    bool operator==(const WrittenRequirementSection& other) const = default;
+};
+
 struct WrittenStatProfile
 {
     std::string name;
     std::array<WrittenStatSection, ItemStatCount> stats;
+    WrittenRequirementSection requirements;
 
     bool operator==(const WrittenStatProfile& other) const = default;
 };
@@ -106,10 +153,14 @@ struct WrittenStatProfile
 // The whole file as written; reading and writing it keeps it exactly.
 struct ItemStatFile
 {
-    // Added to the drop level for the ancient terms.
+    // Added to the drop level for the requirements of excellent items.
+    int excellentDropLevelBonus = 0;
+    // Added to the drop level for the ancient terms and the requirements of
+    // ancient items that are not excellent.
     int ancientDropLevelBonus = 0;
     std::vector<LevelBonusTable> tables;
     std::array<WrittenStatSection, ItemStatCount> defaults;
+    WrittenRequirementSection defaultRequirements;
     std::vector<WrittenStatProfile> profiles;
 
     bool operator==(const ItemStatFile& other) const = default;
@@ -127,9 +178,24 @@ struct StatTerms
     int perLevelAfterHalving = 0;
 };
 
+// The requirement terms with the profile laid over the default.
+struct RequirementTerms
+{
+    int levelPerItemLevel = 0;
+    int excellentLevelAdd = 0;
+    std::array<RequirementFormula, ItemRequirementStatCount> stats;
+    int strengthPerOptionLevel = 0;
+
+    const RequirementFormula& Get(ItemRequirementStat stat) const
+    {
+        return stats[static_cast<size_t>(stat)];
+    }
+};
+
 struct ItemStatProfile
 {
     std::array<StatTerms, ItemStatCount> stats;
+    RequirementTerms requirements;
 
     const StatTerms& Get(ItemStat stat) const
     {
@@ -146,7 +212,8 @@ public:
     static constexpr int DefaultProfile = 0;
     static constexpr int UnknownProfile = -1;
 
-    // Only the default, without tables or terms: every stat keeps its base value.
+    // Only the default, without tables or terms: every stat and requirement keeps
+    // its base value.
     ItemStatProfiles();
     // The file as ReadItemStatsJson gives it; a name it does not know adds nothing.
     explicit ItemStatProfiles(const ItemStatFile& file);
@@ -159,6 +226,10 @@ public:
     std::vector<std::string> GetProfileNames() const;
 
     int GetLevelBonus(const StatTerms& terms, int level) const;
+    int GetExcellentDropLevelBonus() const
+    {
+        return m_excellentDropLevelBonus;
+    }
     int GetAncientDropLevelBonus() const
     {
         return m_ancientDropLevelBonus;
@@ -168,6 +239,7 @@ private:
     std::vector<LevelBonusTable> m_tables;
     std::vector<std::string> m_names;
     std::vector<ItemStatProfile> m_profiles;
+    int m_excellentDropLevelBonus = 0;
     int m_ancientDropLevelBonus = 0;
 };
 } // namespace Data::Items

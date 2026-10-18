@@ -16,7 +16,7 @@ constexpr const char* Source = "ItemStats.json";
 // A small file in the written format: two tables, the default and two profiles.
 constexpr const char* SmallFile = R"({
   "formatVersion": 1,
-  "dropLevelBonus": {"ancient": 30},
+  "dropLevelBonus": {"excellent": 25, "ancient": 30},
   "tables": [
     {
       "name": "linear",
@@ -34,7 +34,17 @@ constexpr const char* SmallFile = R"({
     "magicPower": {"table": "steps", "excellent": {"times": 25, "add": 5}, "ancient": {"add": 2, "dropLevelDivisor": 60}, "perLevelAfterHalving": 2},
     "blockRate": {"table": "steps", "excellent": {"times": 25, "add": 5}, "ancient": "none"},
     "defense": {"table": "steps", "excellent": {"times": 12, "add": 4, "dropLevelDivisor": 5}, "ancient": {"times": 3, "add": 2, "dropLevelDivisor": 30}},
-    "magicDefense": {"table": "steps", "excellent": "none", "ancient": "none"}
+    "magicDefense": {"table": "steps", "excellent": "none", "ancient": "none"},
+    "requirements": {
+      "levelPerItemLevel": 0,
+      "excellentLevelAdd": 20,
+      "strength": {"add": 20, "levelWeight": 3, "percent": 3},
+      "dexterity": {"add": 20, "levelWeight": 3, "percent": 3},
+      "energy": {"add": 20, "levelWeight": 3, "percent": 4},
+      "vitality": {"add": 20, "levelWeight": 3, "percent": 3},
+      "leadership": "base",
+      "strengthPerOptionLevel": 0
+    }
   },
   "profiles": [
     {
@@ -43,7 +53,12 @@ constexpr const char* SmallFile = R"({
     },
     {
       "name": "shield",
-      "defense": {"table": "linear", "excellent": "none", "ancient": {"times": 20, "add": 2, "afterLevelBonus": true}}
+      "defense": {"table": "linear", "excellent": "none", "ancient": {"times": 20, "add": 2, "afterLevelBonus": true}},
+      "requirements": {
+        "levelPerItemLevel": 4,
+        "energy": {"add": 20, "percent": 4, "basis": "levelRequirement"},
+        "strengthPerOptionLevel": 5
+      }
     }
   ]
 }
@@ -92,6 +107,7 @@ TEST_CASE("The item stat file reads and writes back the same [data][items]")
     CHECK(WriteItemStatsJson(result.file) == SmallFile);
 
     REQUIRE(result.file.tables.size() == 2);
+    CHECK(result.file.excellentDropLevelBonus == 25);
     CHECK(result.file.ancientDropLevelBonus == 30);
     CHECK(result.file.tables[0].name == "linear");
     CHECK(result.file.tables[0].perLevel == 1);
@@ -149,6 +165,25 @@ TEST_CASE("Item stat profiles lay their terms over the default [data][items]")
     CHECK(shieldDefense.ancient->dropLevelDivisor == 0);
     CHECK(shieldDefense.ancient->afterLevelBonus);
 
+    // Requirements: the shield's terms replace the default's; the rest is the default.
+    CHECK(profiles.GetExcellentDropLevelBonus() == 25);
+    const RequirementTerms& defaultRequirements = defaults.requirements;
+    CHECK(defaultRequirements.levelPerItemLevel == 0);
+    CHECK(defaultRequirements.excellentLevelAdd == 20);
+    CHECK(defaultRequirements.Get(ItemRequirementStat::Leadership).keepBase);
+    CHECK(defaultRequirements.Get(ItemRequirementStat::Energy).percent == 4);
+    const RequirementTerms& shieldRequirements = shield.requirements;
+    CHECK(shieldRequirements.levelPerItemLevel == 4);
+    CHECK(shieldRequirements.excellentLevelAdd == 20);
+    CHECK(shieldRequirements.strengthPerOptionLevel == 5);
+    const RequirementFormula& energy = shieldRequirements.Get(ItemRequirementStat::Energy);
+    CHECK_FALSE(energy.keepBase);
+    CHECK(energy.levelRequirementBasis);
+    CHECK(energy.levelWeight == 0);
+    CHECK(shieldRequirements.Get(ItemRequirementStat::Strength) ==
+          defaultRequirements.Get(ItemRequirementStat::Strength));
+    CHECK(sceptre.requirements.strengthPerOptionLevel == 0);
+
     // Level bonus: the table's value of the level (+15's above it) plus its part per level.
     CHECK(profiles.GetLevelBonus(defaults.Get(ItemStat::Defense), 10) == 31);
     CHECK(profiles.GetLevelBonus(defaults.Get(ItemStat::Defense), 20) == 66);
@@ -167,13 +202,28 @@ TEST_CASE("Item stat profiles without a file keep every stat at its base [data][
     CHECK(profiles.GetLevelBonus(damage, 15) == 0);
     CHECK_FALSE(damage.excellent.has_value());
     CHECK_FALSE(damage.ancient.has_value());
+    const RequirementTerms& requirements = profiles.Get(ItemStatProfiles::DefaultProfile).requirements;
+    CHECK(requirements.Get(ItemRequirementStat::Strength).keepBase);
+    CHECK(requirements.levelPerItemLevel == 0);
+    CHECK(requirements.excellentLevelAdd == 0);
 }
 
 TEST_CASE("Item stat file errors [data][items]")
 {
     using Severity = ItemDataIssueSeverity;
-    CHECK(
-        HasIssue(Read(Changed(R"("dropLevelBonus": {"ancient": 30},)", "")).issues, Severity::Error, "dropLevelBonus"));
+    CHECK(HasIssue(Read(Changed(R"("dropLevelBonus": {"excellent": 25, "ancient": 30},)", "")).issues, Severity::Error,
+                   "dropLevelBonus"));
+    CHECK(HasIssue(Read(Changed(R"("excellent": 25, )", "")).issues, Severity::Error, "dropLevelBonus.excellent"));
+    CHECK(HasIssue(Read(Changed(R"("leadership": "base",)", "")).issues, Severity::Error,
+                   "default.requirements.leadership"));
+    CHECK(HasIssue(Read(Changed(R"("excellentLevelAdd": 20,)", "")).issues, Severity::Error,
+                   "default.requirements.excellentLevelAdd"));
+    CHECK(HasIssue(Read(Changed(R"("leadership": "base")", R"("leadership": "keep")")).issues, Severity::Error,
+                   "default.requirements.leadership"));
+    CHECK(HasIssue(Read(Changed(R"("basis": "levelRequirement")", R"("basis": "dropLevel")")).issues, Severity::Error,
+                   "profiles.shield.requirements.energy.basis"));
+    CHECK(HasIssue(Read(Changed(R"("strengthPerOptionLevel": 5)", R"("strengthPerOptionLevel": 256)")).issues,
+                   Severity::Error, "profiles.shield.requirements.strengthPerOptionLevel"));
     CHECK(HasIssue(Read(Changed(R"("ancient": 30)", R"("ancient": -1)")).issues, Severity::Error,
                    "dropLevelBonus.ancient"));
     CHECK(

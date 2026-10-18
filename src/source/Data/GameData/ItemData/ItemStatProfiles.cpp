@@ -48,14 +48,38 @@ void LaySection(const WrittenStatSection& section, const std::vector<LevelBonusT
     }
 }
 
+void LayRequirements(const WrittenRequirementSection& section, RequirementTerms& terms)
+{
+    if (section.levelPerItemLevel)
+    {
+        terms.levelPerItemLevel = *section.levelPerItemLevel;
+    }
+    if (section.excellentLevelAdd)
+    {
+        terms.excellentLevelAdd = *section.excellentLevelAdd;
+    }
+    for (size_t stat = 0; stat < ItemRequirementStatCount; ++stat)
+    {
+        if (section.stats[stat])
+        {
+            terms.stats[stat] = *section.stats[stat];
+        }
+    }
+    if (section.strengthPerOptionLevel)
+    {
+        terms.strengthPerOptionLevel = *section.strengthPerOptionLevel;
+    }
+}
+
 ItemStatProfile LayProfile(const ItemStatProfile& below, const std::array<WrittenStatSection, ItemStatCount>& sections,
-                           const std::vector<LevelBonusTable>& tables)
+                           const WrittenRequirementSection& requirements, const std::vector<LevelBonusTable>& tables)
 {
     ItemStatProfile profile = below;
     for (size_t stat = 0; stat < ItemStatCount; ++stat)
     {
         LaySection(sections[stat], tables, profile.stats[stat]);
     }
+    LayRequirements(requirements, profile.requirements);
     return profile;
 }
 } // namespace
@@ -63,14 +87,15 @@ ItemStatProfile LayProfile(const ItemStatProfile& below, const std::array<Writte
 ItemStatProfiles::ItemStatProfiles() : m_names{""}, m_profiles(1) {}
 
 ItemStatProfiles::ItemStatProfiles(const ItemStatFile& file)
-    : m_tables(file.tables), m_ancientDropLevelBonus(file.ancientDropLevelBonus)
+    : m_tables(file.tables), m_excellentDropLevelBonus(file.excellentDropLevelBonus),
+      m_ancientDropLevelBonus(file.ancientDropLevelBonus)
 {
     m_names.push_back("");
-    m_profiles.push_back(LayProfile(ItemStatProfile{}, file.defaults, m_tables));
+    m_profiles.push_back(LayProfile(ItemStatProfile{}, file.defaults, file.defaultRequirements, m_tables));
     for (const WrittenStatProfile& profile : file.profiles)
     {
         m_names.push_back(profile.name);
-        m_profiles.push_back(LayProfile(m_profiles[DefaultProfile], profile.stats, m_tables));
+        m_profiles.push_back(LayProfile(m_profiles[DefaultProfile], profile.stats, profile.requirements, m_tables));
     }
 }
 

@@ -11,7 +11,7 @@
 //
 //   {
 //     "formatVersion": 1,
-//     "dropLevelBonus": {"ancient": 30},
+//     "dropLevelBonus": {"excellent": 25, "ancient": 30},
 //     "tables": [
 //       {
 //         "name": "damageIncreaseWeapons",
@@ -23,7 +23,15 @@
 //     "default": {
 //       "damage": {"table": "damageIncreaseWeapons", "excellent": {"times": 25, "add": 5},
 //                  "ancient": {"add": 5, "dropLevelDivisor": 40}},
-//       ... "magicPower", "blockRate", "defense", "magicDefense"
+//       ... "magicPower", "blockRate", "defense", "magicDefense",
+//       "requirements": {
+//         "levelPerItemLevel": 0,
+//         "excellentLevelAdd": 20,
+//         "strength": {"add": 20, "levelWeight": 3, "percent": 3},
+//         ... "dexterity", "energy", "vitality",
+//         "leadership": "base",
+//         "strengthPerOptionLevel": 0
+//       }
 //     },
 //     "profiles": [
 //       {"name": "sceptre", "magicPower": {"perLevelAfterHalving": 0}}
@@ -34,7 +42,8 @@
 // level or one per item level 0 to 15. The default writes every term of every
 // stat ("none" for a term the stat does not have); a profile writes only what
 // differs from it, and a term it writes replaces the default's as a whole. A
-// left-out number in a term is 0. The writer sorts tables and profiles by name.
+// left-out number in a term is 0. A requirement formula is an object or "base"
+// (the base value stays). The writer sorts tables and profiles by name.
 namespace Data::Items
 {
 constexpr int ItemStatsJsonFormatVersion = 1;

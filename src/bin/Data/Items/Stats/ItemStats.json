@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "dropLevelBonus": {"ancient": 30},
+  "dropLevelBonus": {"excellent": 25, "ancient": 30},
   "tables": [
     {
       "name": "damageIncreaseWeapons",
@@ -53,28 +53,53 @@
     "magicPower": {"table": "magicPowerIncrease", "excellent": {"times": 25, "add": 5}, "ancient": {"add": 2, "dropLevelDivisor": 60}, "perLevelAfterHalving": 2},
     "blockRate": {"table": "defenseRateIncreaseShields", "excellent": {"times": 25, "add": 5}, "ancient": "none"},
     "defense": {"table": "defenseIncreaseArmors", "excellent": {"times": 12, "add": 4, "dropLevelDivisor": 5}, "ancient": {"times": 3, "add": 2, "dropLevelDivisor": 30}},
-    "magicDefense": {"table": "magicDefenseIncrease", "excellent": "none", "ancient": "none"}
+    "magicDefense": {"table": "magicDefenseIncrease", "excellent": "none", "ancient": "none"},
+    "requirements": {
+      "levelPerItemLevel": 0,
+      "excellentLevelAdd": 20,
+      "strength": {"add": 20, "levelWeight": 3, "percent": 3},
+      "dexterity": {"add": 20, "levelWeight": 3, "percent": 3},
+      "energy": {"add": 20, "levelWeight": 3, "percent": 4},
+      "vitality": {"add": 20, "levelWeight": 3, "percent": 3},
+      "leadership": "base",
+      "strengthPerOptionLevel": 0
+    }
   },
   "profiles": [
     {
       "name": "firstTierWing",
-      "defense": {"table": "defenseBonus1stWings"}
+      "defense": {"table": "defenseBonus1stWings"},
+      "requirements": {
+        "levelPerItemLevel": 4
+      }
     },
     {
       "name": "sceptre",
-      "magicPower": {"perLevelAfterHalving": 0}
+      "magicPower": {"perLevelAfterHalving": 0},
+      "requirements": {
+        "strengthPerOptionLevel": 5
+      }
     },
     {
       "name": "secondTierCape",
-      "defense": {"table": "defenseBonus2ndWings"}
+      "defense": {"table": "defenseBonus2ndWings"},
+      "requirements": {
+        "levelPerItemLevel": 4
+      }
     },
     {
       "name": "secondTierWing",
-      "defense": {"table": "defenseBonus2ndWings"}
+      "defense": {"table": "defenseBonus2ndWings"},
+      "requirements": {
+        "levelPerItemLevel": 5
+      }
     },
     {
       "name": "shield",
-      "defense": {"table": "defenseIncreaseShields", "excellent": "none", "ancient": {"times": 20, "add": 2, "afterLevelBonus": true}}
+      "defense": {"table": "defenseIncreaseShields", "excellent": "none", "ancient": {"times": 20, "add": 2, "afterLevelBonus": true}},
+      "requirements": {
+        "strengthPerOptionLevel": 5
+      }
     },
     {
       "name": "smallWing",

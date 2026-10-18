@@ -110,7 +110,8 @@ struct ItemDefinition
     WingTier wingTier = WingTier::None;
     WeaponKind weaponKind = WeaponKind::None;
     // The item's profile in the item stat file (Data/Items/Stats/ItemStats.json):
-    // what its + level, excellent options and ancient set add to its stats.
+    // what its + level, excellent options, ancient set and option level add to its
+    // stats and requirements.
     // Empty for the default. See ItemDatabase::GetStatProfile.
     std::string statProfile;
     // Which potion of a kind the game takes first: the higher, the earlier;

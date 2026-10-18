@@ -56,7 +56,8 @@ struct ItemStatsLoadResult
 };
 
 // Data/Items/Stats/ItemStats.json, relative to the client folder: what the
-// + level, excellent options and ancient sets add to the item stats, see
+// + level, excellent options, ancient sets and option level add to the item
+// stats and requirements, see
 // ItemStatsJson.h. It is in a folder of its own because every *.json file in
 // Data/Items is read as an item group file.
 std::filesystem::path GetItemStatsFile();
