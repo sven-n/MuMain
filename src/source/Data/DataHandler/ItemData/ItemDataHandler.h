@@ -38,13 +38,15 @@ public:
     // into the item database. A changed name is stored for the current UI
     // locale.
     void OnItemEdited(int itemType);
-    // The item editor swapped two entries of ItemAttribute[]. A moved item's
-    // weapon kind and stat profile follow its new group like an edit
-    // (FollowDerivedFieldsAfterMove).
+    // The item editor swapped two entries of ItemAttribute[]. A moved item
+    // takes its model along (the item model database and the opened model
+    // slot), and its weapon kind and stat profile follow its new group like
+    // an edit (FollowDerivedFieldsAfterMove).
     void OnItemsSwapped(int firstItemType, int secondItemType);
 
-    // Validates the item database and writes Data/Items. Nothing is written
-    // when the data has errors.
+    // Validates the item database and writes Data/Items, then the model files
+    // of Data/Items/Models (moved items moved their models). Nothing is
+    // written when the item data has errors.
     Data::Items::ItemDataSaveResult Save(std::vector<Data::Items::ItemDataIssue>& issues);
 
     // Replaces all items with the legacy Item_<language>.bmd files. Items the

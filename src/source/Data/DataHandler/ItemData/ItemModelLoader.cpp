@@ -266,6 +266,19 @@ void OpenTextures()
         });
 }
 
+void SwapOpenedModels(int firstItemType, int secondItemType)
+{
+    if (Models == nullptr || !IsValidItemType(firstItemType) || !IsValidItemType(secondItemType))
+    {
+        return;
+    }
+
+    gLoadData.SwapModels(ToModelSlot(firstItemType), ToModelSlot(secondItemType));
+    const std::span<const ItemModelDefinition> models = g_ItemModelDatabase.GetAllSlots();
+    ApplyMaterial(firstItemType, models[firstItemType]);
+    ApplyMaterial(secondItemType, models[secondItemType]);
+}
+
 std::string TakeProblemMessage()
 {
     const std::string message = DescribeItemModelErrors(g_problems, g_ItemDatabase, MaxErrorsInMessage);

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ItemDataHandler.h"
 #include "ItemJsonStorage.h"
+#include "ItemModelLoader.h"
 #include "Core/Globals/_struct.h"
 #include "Core/Globals/_define.h"
 #include "Core/Text/Utf8.h"
@@ -257,6 +258,9 @@ void CItemDataHandler::OnItemsSwapped(int firstItemType, int secondItemType)
     const ItemDefinition first = g_ItemDatabase.GetAllSlots()[firstItemType];
     const ItemDefinition second = g_ItemDatabase.GetAllSlots()[secondItemType];
     g_ItemDatabase.Swap(firstItemType, secondItemType);
+    // Each item keeps the model slot of its item type, so the model moves too.
+    g_ItemModelDatabase.Swap(firstItemType, secondItemType);
+    Data::Items::ModelLoader::SwapOpenedModels(firstItemType, secondItemType);
     FollowDerivedFieldsAfterMove(first, secondItemType);
     FollowDerivedFieldsAfterMove(second, firstItemType);
 }
@@ -286,7 +290,15 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
     // the items too and refuses on any error, so everything is reported at once.
     ValidateStatProfiles(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(),
                          GetItemStatsFile().generic_string(), issues);
-    return SaveItemDataDirectory(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(), issues);
+    const ItemDataSaveResult result =
+        SaveItemDataDirectory(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(), issues);
+    if (result != ItemDataSaveResult::Saved)
+    {
+        return result;
+    }
+    return SaveItemModelDataDirectory(GetItemModelDataDirectory(), g_ItemModelDatabase.GetAllSlots(), issues)
+               ? ItemDataSaveResult::Saved
+               : ItemDataSaveResult::WriteFailed;
 }
 
 ItemBmdImportResult CItemDataHandler::ImportFromBmd()

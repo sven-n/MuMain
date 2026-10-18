@@ -641,7 +641,11 @@ The item editor (editor builds, F12) edits the items of the running game:
 - **Name changes are stored for the current UI locale.** To edit a
   translation, switch the language first; to edit the English name,
   switch to English.
-- **Save Items** checks the data and writes `Data/Items` next to the game.
+- **Moving an item** to an empty item number (the Index column) takes its
+  model along: the model data in `Data/Items/Models` and the model the game
+  has opened, so the item keeps its looks.
+- **Save Items** checks the data and writes `Data/Items` next to the game,
+  with the model files in `Data/Items/Models`.
   With errors nothing is written, and the errors are listed in the
   editor console. If a file cannot be written (read-only folder, file
   open in another program), the popup says so and the console names the
@@ -660,7 +664,7 @@ model, a render style or an item effect opens to the list of all items that
 use it; clicking one selects it in the table (the search is cleared when it
 hides that item). Items without item data are listed too; they are not in
 the table, but selecting one shows its looks. Changing the looks is done in
-the model files for now.
+the model files for now; only moving an item changes them in the editor.
 
 ### Import from bmd / Export as bmd
 

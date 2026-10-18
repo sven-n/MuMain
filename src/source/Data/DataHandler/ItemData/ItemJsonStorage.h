@@ -90,4 +90,11 @@ enum class ItemDataSaveResult
 // the old one; files whose content did not change are not touched.
 ItemDataSaveResult SaveItemDataDirectory(const std::filesystem::path& directory, std::span<const ItemDefinition> items,
                                          std::vector<ItemDataIssue>& issues);
+
+// Writes one model file per group from `models` (the slots of the item model
+// database), like SaveItemDataDirectory; the shared model file is not
+// written, nothing changes it yet. Returns false when a file could not be
+// written or replaced.
+bool SaveItemModelDataDirectory(const std::filesystem::path& directory, std::span<const ItemModelDefinition> models,
+                                std::vector<ItemDataIssue>& issues);
 } // namespace Data::Items

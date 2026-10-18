@@ -14,6 +14,8 @@
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
+#include "Data/GameData/EffectData/GlowColorList.h"
+#include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/ItemStructs.h"
 #include "Data/GameData/ItemData/ItemType.h"
@@ -511,6 +513,50 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         CHECK(moved->names.Get("pt") == "L\xC3\xA2mina");
         CHECK(g_ItemDatabase.Find(BladeType) == nullptr);
     }
+}
+
+// The item editor moves an item's model with the item, and saving writes the
+// model files too.
+TEST_CASE("A moved item takes its model along, and saving writes it [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    // The models name their glow colors from this file.
+    const std::filesystem::path glowColorsFile = folder.Directory() / GetGlowColorsFile();
+    std::filesystem::create_directories(glowColorsFile.parent_path());
+    std::filesystem::copy_file(ShippedClientDirectory / GetGlowColorsFile(), glowColorsFile);
+    ClientDataScope client(folder.Directory());
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE_MESSAGE(g_ItemDataHandler.LoadModels(errorMessage), errorMessage);
+    const int emptyType = MakeItemType(0, 100);
+    REQUIRE(g_ItemDatabase.Find(emptyType) == nullptr);
+    REQUIRE(g_ItemModelDatabase.Find(emptyType) == nullptr);
+    REQUIRE(g_ItemModelDatabase.Find(KrisType) != nullptr);
+    const std::string krisModelFile = g_ItemModelDatabase.Find(KrisType)->file;
+
+    std::swap(ItemAttribute[KrisType], ItemAttribute[emptyType]);
+    g_ItemDataHandler.OnItemsSwapped(KrisType, emptyType);
+    REQUIRE(g_ItemModelDatabase.Find(emptyType) != nullptr);
+    CHECK(g_ItemModelDatabase.Find(emptyType)->file == krisModelFile);
+    CHECK(g_ItemModelDatabase.Find(KrisType) == nullptr);
+
+    std::vector<ItemDataIssue> issues;
+    CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+    const ItemModelDataLoadResult saved = LoadItemModelDataDirectory(folder.Directory() / GetItemModelDataDirectory());
+    CHECK_FALSE(HasErrors(saved.issues));
+    const auto findModel = [&saved](int group, int number) -> const ItemModelDefinition*
+    {
+        const auto model =
+            std::find_if(saved.models.begin(), saved.models.end(), [&](const ItemModelDefinition& candidate)
+                         { return candidate.group == group && candidate.number == number; });
+        return model != saved.models.end() ? &*model : nullptr;
+    };
+    REQUIRE(findModel(0, 100) != nullptr);
+    CHECK(findModel(0, 100)->file == krisModelFile);
+    CHECK(findModel(0, 0) == nullptr);
+
+    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }
 
 // The names of a language whose item.bmd is missing stay as they are, like

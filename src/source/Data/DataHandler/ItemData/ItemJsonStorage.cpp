@@ -231,4 +231,19 @@ ItemDataSaveResult SaveItemDataDirectory(const std::filesystem::path& directory,
     }
     return success ? ItemDataSaveResult::Saved : ItemDataSaveResult::WriteFailed;
 }
+
+bool SaveItemModelDataDirectory(const std::filesystem::path& directory, std::span<const ItemModelDefinition> models,
+                                std::vector<ItemDataIssue>& issues)
+{
+    std::error_code error;
+    std::filesystem::create_directories(directory, error);
+
+    bool success = true;
+    for (int group = 0; group < MAX_ITEM_TYPE; ++group)
+    {
+        const std::string text = WriteItemModelGroupJson(group, models);
+        success = WriteFileIfChanged(directory / GetItemGroupFileName(group), text, issues) && success;
+    }
+    return success;
+}
 } // namespace Data::Items

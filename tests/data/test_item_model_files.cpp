@@ -7,6 +7,7 @@
 
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/DataHandler/ItemData/ItemModelLoader.h"
+#include "Data/DataHandler/LoadData.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/EffectData/GlowColors.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
@@ -169,8 +170,9 @@ TEST_CASE("Shipped item models load without problems [data][items]")
     CHECK(result.models.size() > 850);
 }
 
-// Nothing in the client saves model files yet; this checks that the shipped
-// files are in the format the writer produces (sorted, fixed field order).
+// The shipped files are in the format the writer produces (sorted, fixed
+// field order), so the item editor's save leaves the models it did not move
+// as they are.
 TEST_CASE("Shipped item model files are in the written format [data][items]")
 {
     for (int group = 0; group < MAX_ITEM_TYPE; ++group)
@@ -182,6 +184,29 @@ TEST_CASE("Shipped item model files are in the written format [data][items]")
     }
     CHECK(WriteSharedItemModelsJson(ShippedModels().sharedModels) ==
           TestFiles::ReadWholeFile(ModelDirectory / SharedItemModelsFileName));
+}
+
+// The item editor saves the model files from the item model database.
+TEST_CASE("Saving the shipped item models from the model database gives the shipped files [data][items]")
+{
+    ItemModelDatabase database;
+    database.Build(ShippedModels().models, Data::Effects::GlowColorList{});
+    const std::filesystem::path folder =
+        std::filesystem::temp_directory_path() / ("mu_test_item_models_" + std::to_string(std::random_device{}()));
+
+    std::vector<ItemDataIssue> issues;
+    CHECK(SaveItemModelDataDirectory(folder, database.GetAllSlots(), issues));
+    CHECK(issues.empty());
+    for (int group = 0; group < MAX_ITEM_TYPE; ++group)
+    {
+        const std::string fileName = GetItemGroupFileName(group);
+        INFO(fileName);
+        CHECK(TestFiles::ReadWholeFile(folder / fileName) == TestFiles::ReadWholeFile(ModelDirectory / fileName));
+    }
+    CHECK_FALSE(std::filesystem::exists(folder / SharedItemModelsFileName));
+
+    std::error_code ignored;
+    std::filesystem::remove_all(folder, ignored);
 }
 
 // A model file is opened once: a file that several items use is a shared
@@ -448,6 +473,75 @@ TEST_CASE("The first item of a shared model opens its file and the others share 
     CHECK(message.find("(15,22)") != std::string::npos);
     CHECK(message.find("(15,19)") == std::string::npos);
     CHECK(message.find("(15,20)") == std::string::npos);
+}
+
+// The item editor moves an item's model with the item: the model data and the
+// opened model change slots, nothing is opened again.
+TEST_CASE("Moving item models swaps their data and their opened models [data][items]")
+{
+    TestItemModelSlots slots;
+    ItemModelDefinition parchment = MakeSharedModelItem(19, "", "Data/Item/rollofpaper.bmd");
+    parchment.material.specular = 0.5;
+    ItemModelDefinition secondParchment = MakeSharedModelItem(20, "", "Data/Item/rollofpaper.bmd");
+    secondParchment.material.specular = 0.25;
+    g_ItemModelDatabase.Build(std::vector<ItemModelDefinition>{parchment, secondParchment},
+                              Data::Effects::GlowColorList{});
+    ModelLoader::OpenModels({});
+
+    const int parchmentType = MakeItemType(15, 19);
+    const int secondType = MakeItemType(15, 20);
+    const int emptyType = MakeItemType(15, 23);
+    const BMD& parchmentSlot = Models[ToModelSlot(parchmentType)];
+    const BMD& secondSlot = Models[ToModelSlot(secondType)];
+    const BMD& emptySlot = Models[ToModelSlot(emptyType)];
+    REQUIRE(parchmentSlot.NumMeshs > 0);
+    REQUIRE(secondSlot.NumMeshs > 0);
+    const Mesh_t* parchmentMeshes = parchmentSlot.Meshs;
+    const Mesh_t* secondMeshes = secondSlot.Meshs;
+    const int version = g_ItemModelDatabase.GetVersion();
+
+    SUBCASE("to an empty slot")
+    {
+        g_ItemModelDatabase.Swap(parchmentType, emptyType);
+        ModelLoader::SwapOpenedModels(parchmentType, emptyType);
+
+        const ItemModelDefinition* moved = g_ItemModelDatabase.Find(emptyType);
+        REQUIRE(moved != nullptr);
+        CHECK(moved->group == 15);
+        CHECK(moved->number == 23);
+        CHECK(moved->file == parchment.file);
+        CHECK(g_ItemModelDatabase.Find(parchmentType) == nullptr);
+        CHECK(g_ItemModelDatabase.GetVersion() != version);
+        CHECK(emptySlot.Meshs == parchmentMeshes);
+        CHECK(emptySlot.SpecularStrength == 0.5f);
+        CHECK(parchmentSlot.Meshs == nullptr);
+        CHECK(parchmentSlot.NumMeshs == 0);
+        CHECK(parchmentSlot.SpecularStrength == 0.f);
+        CHECK(gLoadData.GetModelFile(ToModelSlot(emptyType)).find(L"rollofpaper") != std::wstring::npos);
+
+        // Back again; the data stayed loaded all along.
+        g_ItemModelDatabase.Swap(emptyType, parchmentType);
+        ModelLoader::SwapOpenedModels(emptyType, parchmentType);
+        CHECK(parchmentSlot.Meshs == parchmentMeshes);
+        CHECK(parchmentSlot.SpecularStrength == 0.5f);
+        CHECK(emptySlot.Meshs == nullptr);
+        REQUIRE(g_ItemModelDatabase.Find(parchmentType) != nullptr);
+        CHECK(g_ItemModelDatabase.Find(parchmentType)->number == 19);
+    }
+
+    SUBCASE("between two models")
+    {
+        g_ItemModelDatabase.Swap(parchmentType, secondType);
+        ModelLoader::SwapOpenedModels(parchmentType, secondType);
+
+        CHECK(parchmentSlot.Meshs == secondMeshes);
+        CHECK(secondSlot.Meshs == parchmentMeshes);
+        CHECK(parchmentSlot.SpecularStrength == 0.25f);
+        CHECK(secondSlot.SpecularStrength == 0.5f);
+        REQUIRE(g_ItemModelDatabase.Find(parchmentType) != nullptr);
+        CHECK(g_ItemModelDatabase.Find(parchmentType)->number == 19);
+        CHECK(g_ItemModelDatabase.Find(parchmentType)->material.specular == 0.25);
+    }
 }
 
 TEST_CASE("Item types and model slots convert both ways [data][items]")
