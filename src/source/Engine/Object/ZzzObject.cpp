@@ -2814,7 +2814,7 @@ void RenderObjectVisual(OBJECT* o)
             CreateSprite(BITMAP_LIGHTNING + 1, Position, 2.5f, Light, o, -Rotation);
             break;
         case 103:		//. Sleddog
-            if (b->CurrentAnimationFrame == b->Actions[o->CurrentAction].NumAnimationKeys - 1) {
+            if ((int)o->AnimationFrame == b->Actions[o->CurrentAction].NumAnimationKeys - 1) {
                 if (rand_fps_check(32))
                     SetAction(o, 1);
                 else
