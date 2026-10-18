@@ -189,6 +189,7 @@
       "damageMin": 88,
       "damageMax": 106,
       "attackSpeed": 35,
+      "excellentBonus": 30,
       "requirements": {
         "strength": 40,
         "dexterity": 150

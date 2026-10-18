@@ -136,6 +136,17 @@ void ValidateSlot(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
     }
 }
 
+// The fixed excellent bonus counts for damage and magic power only.
+void ValidateExcellentBonus(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
+{
+    if (definition.excellentBonus != 0 && definition.damageMin == 0 && definition.damageMax == 0 &&
+        definition.magicPower == 0)
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
+                 "has an excellent bonus, but no damage or magic power it adds to", "excellentBonus");
+    }
+}
+
 // Only the potion lists are taken in priority order.
 void ValidatePotionPriority(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
 {
@@ -171,6 +182,7 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
         ValidateName(definition, issues);
         ValidateSlot(definition, issues);
         ValidatePotionPriority(definition, issues);
+        ValidateExcellentBonus(definition, issues);
     }
 }
 

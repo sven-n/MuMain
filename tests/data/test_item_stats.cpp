@@ -202,6 +202,21 @@ TEST_CASE("Every shipped item names the stat profile its data gives [data][items
     CHECK(itemsWithProfile == 59);
 }
 
+// The fixed excellent bonus of the three chaos weapons is item data.
+TEST_CASE("The chaos weapons' fixed excellent bonus is item data [data][items]")
+{
+    ShippedItemAttributes items;
+    CHECK(g_ItemDatabase.Find(ITEM_CHAOS_DRAGON_AXE)->excellentBonus == 15);
+    CHECK(g_ItemDatabase.Find(ITEM_CHAOS_NATURE_BOW)->excellentBonus == 30);
+    CHECK(g_ItemDatabase.Find(ITEM_CHAOS_LIGHTNING_STAFF)->excellentBonus == 25);
+    int itemsWithBonus = 0;
+    for (const ItemDefinition& definition : g_ItemDatabase.GetAllSlots())
+    {
+        itemsWithBonus += definition.excellentBonus != 0 ? 1 : 0;
+    }
+    CHECK(itemsWithBonus == 3);
+}
+
 TEST_CASE("A shield's defense rate grows with its + level [data][items]")
 {
     ShippedItemAttributes items;

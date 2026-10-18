@@ -217,6 +217,7 @@
       "damageMax": 48,
       "attackSpeed": 30,
       "magicPower": 94,
+      "excellentBonus": 25,
       "requirements": {
         "strength": 60,
         "dexterity": 10

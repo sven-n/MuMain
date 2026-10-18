@@ -89,6 +89,7 @@ read as the English name only; saving writes the object form.
 | `level` | Item level (the drop level); also used in price and damage calculations |
 | `durability`, `magicDurability` | Durability at item level 0; an item with `magicDurability` (staffs, sticks, books) uses it as its maximum durability instead |
 | `damageMin`, `damageMax`, `attackSpeed`, `walkSpeed`, `magicPower` | Weapon values |
+| `excellentBonus` | A fixed excellent bonus of damage and magic power instead of the [item stat file's](#item-stats-by-level) excellent term; left out = the term. The Chaos Dragon Axe has 15, the Chaos Nature Bow 30 and the Chaos Lightning Staff 25. The bmd import keeps it |
 | `defense`, `magicDefense`, `blockRate` | Armor and shield values |
 | `attackType` | Attack type used by the client |
 | `sellValue` | Value factor used by the price calculation of some items |
@@ -309,6 +310,7 @@ the field (**Copy text** copies it). All problems are also written to
   item as no weapon of that kind
 - a `potionPriority` on an item without a `healingPotion`, `manaPotion`,
   `complexPotion` or `shieldPotion` tag (nothing reads it there)
+- an `excellentBonus` on an item without damage or magic power
 - a `slot` written as a number, as files saved before tags existed have
   it; the number is read, and saving writes the name
 

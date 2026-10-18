@@ -130,6 +130,9 @@ struct ItemDefinition
     BYTE attackSpeed = 0;
     BYTE walkSpeed = 0;
     BYTE magicPower = 0;
+    // A fixed excellent bonus of damage and magic power instead of the stat
+    // file's excellent term (three chaos weapons); 0 uses the term.
+    BYTE excellentBonus = 0;
     BYTE attackType = 0;
 
     ItemRequirements requirements;

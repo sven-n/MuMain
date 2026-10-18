@@ -305,6 +305,29 @@ TEST_CASE("An item's stat profile is kept through write and read [data][items]")
                    ItemDataIssueSeverity::Error, "statProfile"));
 }
 
+TEST_CASE("An item's excellent bonus is kept through write and read, and warns without damage [data][items]")
+{
+    ItemDefinition axe = MakeKris();
+    axe.excellentBonus = 15;
+    const ReadResult result = Read(WriteItemGroupJson(0, std::vector<ItemDefinition>{axe}));
+    REQUIRE(result.issues.empty());
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items.front().excellentBonus == 15);
+
+    ItemDefinition helm = MakeKris();
+    helm.damageMin = 0;
+    helm.damageMax = 0;
+    helm.excellentBonus = 15;
+    std::vector<ItemDataIssue> issues;
+    ValidateItems(std::vector<ItemDefinition>{helm}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "excellentBonus"));
+    CHECK_FALSE(HasErrors(issues));
+
+    issues.clear();
+    ValidateItems(std::vector<ItemDefinition>{axe}, issues);
+    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "excellentBonus"));
+}
+
 TEST_CASE("Item validation checks the stat profiles against the stat file [data][items]")
 {
     ItemStatFile file;
