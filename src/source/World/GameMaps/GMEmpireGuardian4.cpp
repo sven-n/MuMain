@@ -966,7 +966,7 @@ bool GMEmpireGuardian4::RenderObjectVisual(OBJECT* o, BMD* b)
         Vector(1.f, 1.f, 1.f, Light);
         if (rand_fps_check(8))
         {
-            CreateParticleFpsChecked(BITMAP_WATERFALL_2, o->Position, o->Angle, Light, 4, o->Scale);
+            CreateParticle(BITMAP_WATERFALL_2, o->Position, o->Angle, Light, 4, o->Scale);
         }
     }
         return true;

@@ -186,7 +186,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
         {
             if ((int)((pObject->Timer += FPS_ANIMATION_FACTOR) + 2) % 4 == 0)
             {
-                if (rand_fps_check(2))
+                if (rand() % 2 == 0)
                 {
                     Vector(0.f, 0.0f, 0.0f, Light);
                     CreateParticle(BITMAP_ADV_SMOKE + 1, pObject->Position, pObject->Angle, Light, 1, pObject->Scale);
@@ -997,7 +997,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderBalgasBarrackMonsterVisual(CHARACTER* c, OB
             for (int i = 0; i < 10; ++i)
             {
                 b->TransformPosition(o->BoneTransform[iBoneThunder[i]], vRelativePos, vPos, true);
-                if (rand_fps_check(2))
+                if (rand() % 2 == 0)
                 {
                     CreateEffect(MODEL_FENRIR_THUNDER, vPos, o->Angle, vLight, 1, o);
                 }

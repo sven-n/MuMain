@@ -479,7 +479,7 @@ bool CGMDoppelGanger1::RenderObjectVisual(OBJECT* o, BMD* b)
             int iScale = o->Scale * 60;
             vPos[0] += rand() % iScale - iScale / 2;
             vPos[1] += rand() % iScale - iScale / 2;
-            CreateParticleFpsChecked(BITMAP_LIGHT, vPos, o->Angle, Light, 15, o->Scale, o);
+            CreateParticle(BITMAP_LIGHT, vPos, o->Angle, Light, 15, o->Scale, o);
         }
         return true;
     }

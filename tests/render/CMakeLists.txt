@@ -229,6 +229,13 @@ add_test(
 )
 
 add_test(
+    NAME fps_gates_are_not_nested
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_SOURCE_DIR=${CMAKE_SOURCE_DIR}/src/source"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_no_nested_fps_gate.cmake"
+)
+
+add_test(
     NAME renderer_pipeline_fail_fast
     COMMAND "${CMAKE_COMMAND}"
         "-DMU_RENDERER_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/MuRendererSDLGpu.cpp"

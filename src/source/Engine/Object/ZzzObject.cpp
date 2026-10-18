@@ -739,7 +739,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                         Vector(0.f, 0.f, 0.f, vRelativePos);
                         b->TransformPosition(BoneTransform[20], vRelativePos, vPos);
                         Vector(1.f, 1.f, 1.f, vLight);
-                        CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, vLight);
+                        CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight);
                     }
                 }
                 else if (o->Type == 67)
@@ -3043,8 +3043,8 @@ void RenderObjectVisual(OBJECT* o)
                         Position[0] = o->Position[0] + (rand() % 128 - 64);
                         Position[1] = o->Position[1] + (rand() % 128 - 64);
                         Position[2] = o->Position[2];
-                        CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, o->Light, 4, o->Scale * 0.5f);
-                        CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
+                        CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light, 4, o->Scale * 0.5f);
+                        CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
                     }
                 }
             }
@@ -4321,7 +4321,7 @@ int MoveHeavenThunder(void)
             objectCount = rand() % visibleObject;
         }
 
-        if (rand_fps_check(5))
+        if (rand() % 5 == 0)
         {
             float Matrix1[3][4];
             float Matrix2[3][4];

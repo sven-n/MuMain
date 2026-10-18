@@ -346,7 +346,7 @@ bool MoveHellasObjectSetting(int& objCount, int object)
 
         CreateParticle(BITMAP_LIGHT, Position, Hero->Object.Angle, Light, 7, 1.f, &Hero->Object);
 
-        if (rand_fps_check(15))
+        if (rand() % 15 == 0)
         {
             vec3_t Angle = { 0.f, 0.f, 0.f };
             Position[2] = Hero->Object.Position[2] + 800.f;
@@ -1436,7 +1436,7 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
             Vector(2.f, 30.f, 0.f, p);
             b->TransformPosition(o->BoneTransform[6], p, Position, true);
             Vector(1.0f, 0.2f, 0.0f, Light);
-            CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 17);
+            CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 17);
         }
         return true;
 
@@ -1468,7 +1468,7 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
                 {
                     Vector(0.0f, 0.3f, 1.0f, Light);
                 }
-                CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 17);
+                CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 17);
             }
         }
         return true;

@@ -2103,7 +2103,7 @@ bool M34CryWolf1st::CreateMist(PARTICLE* pParticleObj)
             VectorRotate(Velocity, Matrix, Direction);
             VectorAddScaled(TargetPosition, Direction, TargetPosition, FPS_ANIMATION_FACTOR);
         }
-        if (Hero->Movement || (rand_fps_check(2)))
+        if (Hero->Movement || (rand() % 2 == 0))
         {
             CreateParticle(BITMAP_CLOUD, TargetPosition, TargetAngle, Light, 8, 0.4f);
         }

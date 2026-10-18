@@ -4671,7 +4671,7 @@ void MoveJoint(JOINT* o, int iIndex)
                     {
                         Vector((float)(rand() % 64 - 32), (float)(rand() % 64 - 32), (float)(rand() % 64 - 32), Position);
                         VectorAdd(Position, o->TargetPosition, Position);
-                        CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light);
+                        CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light);
                     }
                 }
                 break;
@@ -4722,7 +4722,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 {
                     Vector((float)(rand() % 64 - 32), (float)(rand() % 64 - 32), (float)(rand() % 64 - 32), Position);
                     VectorAdd(Position, o->TargetPosition, Position);
-                    CreateParticleFpsChecked(BITMAP_FIRE, o->Position, o->Angle, o->Light);
+                    CreateParticle(BITMAP_FIRE, o->Position, o->Angle, o->Light);
                 }
                 //CreateParticle(BITMAP_ENERGY,o->Position,o->Angle,o->Light);
                 /*o->TargetCharacter->TargetCharacter = o->OwnerCharacter;
@@ -6282,7 +6282,7 @@ void MoveJoint(JOINT* o, int iIndex)
                     {
                         if (rand_fps_check(2))
                         {
-                            CreateParticleFpsChecked(BITMAP_FIRE, o->Position, o->Angle, o->Light, 0);
+                            CreateParticle(BITMAP_FIRE, o->Position, o->Angle, o->Light, 0);
                         }
 
                         CreateJointFpsChecked(BITMAP_JOINT_THUNDER, Light, o->Position, o->Angle, 3, NULL, rand() % 10 + 5.f, 5, 10);

@@ -5783,7 +5783,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             vec3_t vLight;
             Vector(o->Alpha * 0.7f, o->Alpha * 0.3f, o->Alpha * 1.f, vLight);
-            CreateParticleFpsChecked(BITMAP_CLUD64, o->Position, o->Angle, vLight, 10, 1.f, pObject);
+            CreateParticle(BITMAP_CLUD64, o->Position, o->Angle, vLight, 10, 1.f, pObject);
         }
     }
         // The original code went on with the move code of the summoner casting effects; it is a
@@ -5874,7 +5874,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     if (rand_fps_check(2))
                     {
                         vWorldPos[2] -= 20.f;
-                        CreateParticleFpsChecked(o->Type, vWorldPos, o->Angle, o->Light, 0, o->Scale);
+                        CreateParticle(o->Type, vWorldPos, o->Angle, o->Light, 0, o->Scale);
                     }
                 }
             }
@@ -5906,7 +5906,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->LifeTime = 100;
 
             if (rand_fps_check(60))
-                CreateParticleFpsChecked(o->Type, o->Position, o->Angle, o->Light, o->SubType, 0.5f, o->Owner);
+                CreateParticle(o->Type, o->Position, o->Angle, o->Light, o->SubType, 0.5f, o->Owner);
         }
         break;
 
@@ -5923,9 +5923,9 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 Position[2] += Scale * 4.f;
                 if (j == 0)
-                    CreateParticleFpsChecked(BITMAP_SPARK + 1, Position, o->Angle, Light, 1, Scale * 2.f);
+                    CreateParticle(BITMAP_SPARK + 1, Position, o->Angle, Light, 1, Scale * 2.f);
                 else
-                    CreateParticleFpsChecked(BITMAP_SPARK + 1, Position, o->Angle, Light, 1, Scale);
+                    CreateParticle(BITMAP_SPARK + 1, Position, o->Angle, Light, 1, Scale);
             }
         }
         break;
@@ -6148,7 +6148,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 {
                     if (rand_fps_check(1))
                     {
-                        CreateEffectFpsChecked(MODEL_METEO1 + rand() % 2, o->Position, o->Angle, o->Light, 0);
+                        CreateEffect(MODEL_METEO1 + rand() % 2, o->Position, o->Angle, o->Light, 0);
                     }
                 }
             }
@@ -6200,7 +6200,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 VectorRotate(p, Matrix, Position);
                 VectorAdd(Position, o->Position, Position);
 
-                CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, Position, o->Angle, o->Light, 0);
+                CreateEffect(MODEL_STONE1 + rand() % 2, Position, o->Angle, o->Light, 0);
             }
         }
 
@@ -6252,7 +6252,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 VectorRotate(p, Matrix, Position);
                 VectorAdd(Position, o->Position, Position);
 
-                CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, Position, o->Angle, o->Light, 0);
+                CreateEffect(MODEL_STONE1 + rand() % 2, Position, o->Angle, o->Light, 0);
             }
         }
 
@@ -6417,7 +6417,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             }
 
             if (rand_fps_check(30))
-                CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light);
+                CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light);
         }
         else if (o->SubType == 1)
         {
@@ -6646,7 +6646,7 @@ void MoveEffect(OBJECT* o, int iIndex)
     case MODEL_PIERCING + 1:
         if (rand_fps_check(2))
         {
-            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, Light, 0);
+            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 0);
         }
         CreateParticleFpsChecked(BITMAP_FIRE, o->Position, o->Angle, Light, 5);
         CreateParticleFpsChecked(BITMAP_FIRE, o->Position, o->Angle, Light, 5);
@@ -6712,7 +6712,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     Vector(o->Position[0] + (float)(rand() % 64 - 32),
                         o->Position[1] + (float)(rand() % 64 - 32),
                         o->Position[2] + (float)(rand() % 128 + 32), Position);
-                    CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, o->Light);
+                    CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light);
                 }
                 //AttackRange(o->Position,200.f,10);
                 o->Alpha -= (0.05f) * FPS_ANIMATION_FACTOR;
@@ -7069,7 +7069,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
         if (rand_fps_check(10))
         {
-            CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, o->Angle, Light);
+            CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, Light);
         }
         break;
 
@@ -7099,7 +7099,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         o->Alpha = o->LifeTime / 10.f;
         if (rand_fps_check(10))
         {
-            CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, o->Angle, Light);
+            CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, Light);
         }
         break;
 

@@ -446,7 +446,7 @@ void SetPlayerStop(CHARACTER* c)
         }
         else if (c->Helper.Type == MODEL_HORN_OF_FENRIR)
         {
-            if (rand_fps_check(3))
+            if (rand() % 3 == 0)
             {
                 PlayBuffer(static_cast<ESound>(SOUND_FENRIR_IDLE_1 + rand() % 2), o);
             }
@@ -1660,7 +1660,7 @@ void AttackEffect(CHARACTER* c)
     case MONSTER_MAGIC_SKELETON_7:
         if ((c->Skill) == AT_SKILL_BOSS)
         {
-            if (rand_fps_check(2))
+            if (rand() % 2 == 0)
             {
                 if (c->CheckAttackTime(1))
                 {
@@ -1668,7 +1668,7 @@ void AttackEffect(CHARACTER* c)
                     c->SetLastAttackEffectTime();
                 }
             }
-            else
+            else if (rand_fps_check(1))
             {
                 Vector(o->Position[0] + rand() % 1024 - 512, o->Position[1] + rand() % 1024 - 512, o->Position[2], Position);
                 CreateEffect(MODEL_FIRE, Position, o->Angle, o->Light);
@@ -2055,7 +2055,7 @@ void AttackEffect(CHARACTER* c)
                 {
                     if (c->CheckAttackTime(8))
                     {
-                        if (rand_fps_check(2))
+                        if (rand() % 2 == 0)
                         {
                             CreateEffect(MODEL_SKILL_BLAST, to->Position, o->Angle, o->Light, 0, o);
                             CreateEffect(MODEL_SKILL_BLAST, to->Position, o->Angle, o->Light, 0, o);
@@ -9142,7 +9142,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             {
                 auto randpos = (float)(rand() % 30 + 5);
 
-                if (rand_fps_check(2)) {
+                if (rand() % 2 == 0)
+                {
                     vtaWorldPos[0] += randpos;
                 }
                 else {
@@ -11108,7 +11109,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         }
                         else if (EquipmentLevelSet == 11)
                         {
-                            if (rand_fps_check(8))
+                            if (rand() % 8 == 0)
                             {
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 0, o);
                             }
@@ -11119,25 +11120,25 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         }
                         else if (EquipmentLevelSet == 12)
                         {
-                            if (rand_fps_check(6))
+                            if (rand() % 6 == 0)
                             {
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
                             }
-                            else if (rand_fps_check(3))
+                            else if (rand() % 3 == 0)
                             {
                                 CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
                             }
                         }
                         else if (EquipmentLevelSet == 13)
                         {
-                            if (rand_fps_check(6))
+                            if (rand() % 6 == 0)
                             {
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
                             }
 
-                            if (rand_fps_check(4))
+                            if (rand() % 4 == 0)
                             {
                                 CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
                                 CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 7, o, 20, 40, 1);
@@ -11145,13 +11146,13 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         }
                         else if (EquipmentLevelSet == 14)
                         {
-                            if (rand_fps_check(6))
+                            if (rand() % 6 == 0)
                             {
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
                             }
 
-                            if (rand_fps_check(4))
+                            if (rand() % 4 == 0)
                             {
                                 CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
                                 CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 7, o, 20, 40, 1);
@@ -11159,13 +11160,13 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         }
                         else if (EquipmentLevelSet == 15)
                         {
-                            if (rand_fps_check(6))
+                            if (rand() % 6 == 0)
                             {
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
                             }
 
-                            if (rand_fps_check(4))
+                            if (rand() % 4 == 0)
                             {
                                 CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
                                 CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 7, o, 20, 40, 1);
