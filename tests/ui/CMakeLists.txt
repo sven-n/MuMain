@@ -83,6 +83,16 @@ mu_add_test(
     LINK_LIBS MuClient
 )
 
+# The options window's tuning rows of the Enhanced look, and their markup in both bundled themes.
+mu_add_test(
+    NAME tuning_rows_tests
+    SOURCES test_tuning_rows.cpp
+    LINK_LIBS MuClient
+)
+target_compile_definitions(tuning_rows_tests PRIVATE
+    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
+)
+
 mu_add_test(
     NAME guild_mark_palette_tests
     SOURCES

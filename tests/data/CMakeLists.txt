@@ -25,11 +25,13 @@ target_compile_definitions(light_mood_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
-# The look profile of the Enhanced rendering features (Data/Render/Look.json).
+# The look profile of the Enhanced rendering features (Data/Render/Look.json) and the player's own
+# tuning of it ([EnhancedTuning] of config.ini).
 mu_add_test(
     NAME look_profile_data_tests
     SOURCES
         test_look_profile_json.cpp
+        test_personal_tuning.cpp
     LINK_LIBS
         MuClient
 )

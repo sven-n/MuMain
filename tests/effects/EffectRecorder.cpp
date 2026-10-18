@@ -80,7 +80,7 @@ constexpr std::array<float, 3> SecondLight{0.35f, 0.55f, 0.65f};
     F(Angle) F(HeadAngle) F(Light) F(Target) F(TargetPosition) F(byOnlyOneRender) F(LifeTime) F(Collision)           \
     F(Velocity) F(Direction) F(PKKey) F(Skill) F(Weapon) F(MultiUse) F(bTileMapping) F(m_byReverseUV)                \
     F(TargetIndex) F(m_bySkillSerialNum) F(m_iChaIndex) F(m_sTargetIndex) F(m_bCreateTails) F(NumTails)              \
-    F(MaxTails) F(Tails)
+    F(MaxTails) F(Tails) F(TailFrames)
 // clang-format on
 
 // A field added to one of the structs changes its size, so the build stops
@@ -90,7 +90,7 @@ constexpr std::array<float, 3> SecondLight{0.35f, 0.55f, 0.65f};
 #if defined(_MSC_VER) && defined(_WIN64) && defined(_ITERATOR_DEBUG_LEVEL) && _ITERATOR_DEBUG_LEVEL == 0
 static_assert(sizeof(OBJECT) == 680, "OBJECT changed: update RECORDER_OBJECT_FIELDS");
 static_assert(sizeof(PARTICLE) == 136, "PARTICLE changed: update RECORDER_PARTICLE_FIELDS");
-static_assert(sizeof(JOINT) == 9792, "JOINT changed: update RECORDER_JOINT_FIELDS");
+static_assert(sizeof(JOINT) == 9800, "JOINT changed: update RECORDER_JOINT_FIELDS");
 #endif
 
 // Calls visitor(name, field of `target`, same field of `reference`) for every field.

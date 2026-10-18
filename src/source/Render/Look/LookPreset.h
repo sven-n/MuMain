@@ -67,6 +67,8 @@ public:
         std::function<void(LookPreset)> persist;
         // Switches the features from the next frame on.
         std::function<void(const LookFeatures&)> apply;
+        // Applies only the light mood's switch and strength; without it, `apply` is used.
+        std::function<void(const LookFeatures&)> applyMood;
     };
 
     // `choices`: the Enhanced features the player switched off (SetChoices).
@@ -82,6 +84,9 @@ public:
     // The player's Enhanced features, saved by the caller: they act on Enhanced only, under the
     // developer overrides, and applying a preset keeps them.
     void SetChoices(const FeatureOverrides& choices);
+    // The player's light mood strength (a choice like the switches): only the light mood is
+    // applied again, so dragging the strength does not switch the other features each time.
+    void SetMoodStrengthChoice(std::optional<int> percent);
 
     [[nodiscard]] LookPreset Preset() const
     {

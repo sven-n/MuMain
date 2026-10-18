@@ -21,6 +21,13 @@ namespace
         const Rml::String& tag = element->GetTagName();
         return tag == "input" || tag == "textarea";
     }
+
+    // A control that handles keys itself while focused (a slider's arrows): markup marks it with
+    // data-takes-keys.
+    bool TakesKeys(const Rml::Element* element)
+    {
+        return IsTextEntry(element) || element->HasAttribute("data-takes-keys");
+    }
 }
 
 // SetDensityIndependentPixelRatio() sets an absolute ratio, so re-applying it on every resize
@@ -286,6 +293,11 @@ bool RmlUiRuntime::ProcessSdlEvent(SDL_Event& event, SDL_Window* window)
     {
         const bool propagates =
             m_Context->ProcessMouseButtonDown(RmlSDL::ConvertMouseButton(event.button.button), RmlSDL::GetKeyModifierState());
+        // RmlUi moves the focus only to an element under the pointer, so a press in the game world
+        // would leave a control that takes keys focused, and the game's keys with it.
+        Rml::Element* focused = m_Context->GetFocusElement();
+        if (propagates && focused != nullptr && !IsTextEntry(focused) && TakesKeys(focused))
+            focused->Blur();
         ReleaseStrandedFieldFocus();
         return propagates;
     }
@@ -360,6 +372,16 @@ Rml::ElementDocument* RmlUiRuntime::GetTypingDocument() const
 {
     Rml::Element* field = GetFocusedTextField();
     return field ? field->GetOwnerDocument() : nullptr;
+}
+
+Rml::ElementDocument* RmlUiRuntime::GetKeyOwningDocument() const
+{
+    if (Rml::ElementDocument* typing = GetTypingDocument())
+        return typing;
+    Rml::Element* focused = m_Context ? m_Context->GetFocusElement() : nullptr;
+    if (!focused || IsTextEntry(focused) || !TakesKeys(focused) || !focused->IsVisible(true))
+        return nullptr;
+    return focused->GetOwnerDocument();
 }
 
 void RmlUiRuntime::ProcessTextEditing(const SDL_Event& event)

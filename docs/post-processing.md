@@ -24,11 +24,18 @@ no grading table, the frame looks the same as with it off.
 
 ## Settings
 
-Players do not set post-processing on its own: the `Look` preset switches it.
-Its strengths are values of the look profile, `Data/Render/Look.json`:
+The `Look` preset switches post-processing with the rest of the Enhanced look,
+and the options window's "Bloom and colour grading" row switches it off on its
+own. Its strengths are values of the look profile, `Data/Render/Look.json`:
 `bloom.strength` (0 to 2, shipped 1.0, 0.3 in Icarus), `bloom.levelFalloff`
-(how wide the halo spreads) and `grading.strength` (how much of a map's table
-applies).
+(0.25 to 1, how wide the halo spreads) and `grading.strength` (0 to 1, how much
+of a map's table applies). A grading strength of 0 applies no grading at all
+while the bloom stays on.
+
+Players tune the three under that row (Bloom intensity, Bloom spread, Colour
+grading strength, the last in percent); see "Tuning it yourself" in
+[enhanced-look.md](enhanced-look.md). A value a player changed applies on every
+map in place of the map's value until it is reset.
 
 If the graphics device cannot build post-processing, the Enhanced look logs a
 warning and the frame stays unprocessed.

@@ -5,6 +5,7 @@
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Render/Lighting/LightMoodSetting.h"
 #include "Render/Look/LookFiles.h"
+#include "Render/Look/LookLayers.h"
 #include "Render/Look/LookTuning.h"
 #include "World/MapInfra/MapManager.h"
 
@@ -14,7 +15,6 @@
 #include "Render/Look/LookTuningCommand.h"
 #endif
 
-#include <limits>
 #include <utility>
 
 namespace Render::Look
@@ -24,28 +24,15 @@ namespace
 using Data::Maps::LookValue;
 using Data::Maps::LookValues;
 
-constexpr int NoWorld = std::numeric_limits<int>::min();
-
 struct State
 {
-    // The live documents and values, and the files they were loaded from (for reset).
-    LookFiles live;
-    LookFiles loaded;
+    // The live documents and everything layered over them (Render/Look/LookLayers.h); a mood change
+    // rebuilds the static map light.
+    LookLayers layers{[](const Data::Maps::LightMoodData& mood) { Lighting::LightMood::SetMoodData(mood); }};
     std::string source = "shipped";
-    std::uint32_t revision = 0;
-    // The world and revision `values` belong to; NoWorld recomputes them.
-    int world = NoWorld;
-    std::uint32_t valuesRevision = 0;
-    LookValues values = Data::Maps::BuiltInLookValues();
 };
 
 State s_state;
-
-void Changed()
-{
-    ++s_state.revision;
-    s_state.world = NoWorld;
-}
 
 void LogIssues(const std::vector<Data::Items::ItemDataIssue>& issues)
 {
@@ -57,11 +44,8 @@ void LogIssues(const std::vector<Data::Items::ItemDataIssue>& issues)
 
 void UseFiles(LookFiles files, std::string source)
 {
-    s_state.live = files;
-    s_state.loaded = std::move(files);
     s_state.source = std::move(source);
-    Changed();
-    Lighting::LightMood::SetMoodData(s_state.live.moodData);
+    s_state.layers.UseFiles(std::move(files));
 }
 
 LookFilesLoad LoadShipped(LookFileSystem& fileSystem)
@@ -88,14 +72,22 @@ void LoadProfile()
 
 const LookValues& Active()
 {
-    const int world = gMapManager.WorldActive;
-    if (world != s_state.world || s_state.valuesRevision != s_state.revision)
-    {
-        s_state.world = world;
-        s_state.valuesRevision = s_state.revision;
-        s_state.values = s_state.live.lookData.ForWorld(world);
-    }
-    return s_state.values;
+    return s_state.layers.Active(gMapManager.WorldActive);
+}
+
+void SetPersonalLookOverrides(const Data::Maps::LookOverrides& overrides)
+{
+    s_state.layers.SetPersonal(overrides);
+}
+
+void SetPersonalTuningGroups(const TuningGroupSet& applying)
+{
+    s_state.layers.SetApplyingGroups(applying);
+}
+
+LookValues InheritedValues()
+{
+    return s_state.layers.Inherited(gMapManager.WorldActive);
 }
 
 float Value(LookValue value)
@@ -105,7 +97,7 @@ float Value(LookValue value)
 
 std::uint32_t Revision()
 {
-    return s_state.revision;
+    return s_state.layers.Revision();
 }
 
 Lighting::LightHistorySettings LightHistorySettings()
@@ -124,19 +116,14 @@ Lighting::LightHistorySettings LightHistorySettings()
 #if defined(MU_ENABLE_CONTROL_SOCKET) || defined(_EDITOR)
 namespace
 {
-// Applies an edit's result: the next frame uses the live values; mood edits rebuild the static
-// map light as a mood change does.
-bool Apply(const LookEditResult& result, const char* what)
+// An edit's result: applied, the next frame uses the live values (Render/Look/LookLayers.h has
+// already rebuilt the map light for a mood edit); refused, nothing changed.
+bool Applied(const LookEditResult& result, const char* what)
 {
     if (!result.applied)
     {
         mu::log::Get("render")->warn("$look {} refused: {}", what, result.error);
         return false;
-    }
-    Changed();
-    if (result.moodChanged)
-    {
-        Lighting::LightMood::SetMoodData(s_state.live.moodData);
     }
     return true;
 }
@@ -177,7 +164,7 @@ bool Show(std::optional<std::string_view> name)
 
 const LookFiles& LiveFiles()
 {
-    return s_state.live;
+    return s_state.layers.Live();
 }
 
 const std::string& LiveSource()
@@ -187,7 +174,7 @@ const std::string& LiveSource()
 
 std::vector<LookValueState> DescribeLive(std::optional<std::string_view> name)
 {
-    return DescribeLookValues(s_state.live, gMapManager.WorldActive, name);
+    return s_state.layers.Describe(gMapManager.WorldActive, name);
 }
 
 bool SetLive(std::span<const LookEdit> edits, bool currentMap)
@@ -199,9 +186,8 @@ bool SetLive(std::span<const LookEdit> edits, bool currentMap)
         return false;
     }
     const std::optional<int> scope = currentMap ? std::optional<int>(world) : std::nullopt;
-    const LookEditResult result =
-        SetLookValues(s_state.live, edits, scope, currentMap ? MapName(world) : std::string());
-    if (!Apply(result, "set"))
+    const LookEditResult result = s_state.layers.Set(edits, scope, currentMap ? MapName(world) : std::string());
+    if (!Applied(result, "set"))
     {
         return false;
     }
@@ -215,8 +201,7 @@ bool SetLive(std::span<const LookEdit> edits, bool currentMap)
 
 bool ResetLive(std::optional<std::string_view> name)
 {
-    const LookEditResult result = ResetLookValues(s_state.live, s_state.loaded, name, gMapManager.WorldActive);
-    if (!Apply(result, "reset"))
+    if (!Applied(s_state.layers.Reset(name, gMapManager.WorldActive), "reset"))
     {
         return false;
     }
@@ -253,14 +238,14 @@ bool SaveLive()
 {
     DiskLookFileSystem fileSystem;
     const LookSaveResult result =
-        SaveLookFiles(fileSystem, s_state.live, Data::Maps::LookProfileFile, Data::Maps::LightMoodFile);
+        SaveLookFiles(fileSystem, s_state.layers.Live(), Data::Maps::LookProfileFile, Data::Maps::LightMoodFile);
     if (!result.saved)
     {
         mu::log::Get("render")->error("$look save failed: {}", result.message);
         return false;
     }
     // What was saved is now what a reset goes back to.
-    s_state.loaded = s_state.live;
+    s_state.layers.MarkSaved();
     mu::log::Get("render")->info("$look save: {}", result.message);
     return true;
 }

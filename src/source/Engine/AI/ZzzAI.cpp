@@ -12,6 +12,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/AI/ZzzAI.h"
+#include "Engine/AI/BoidSteering.h"
 
 #include <algorithm>
 #include <cmath>
@@ -33,6 +34,8 @@ namespace
 {
 constexpr double MIN_FRAME_TIME_MS = 0.001;
 constexpr double MILLISECONDS_IN_SECOND = 1000.0;
+constexpr float BoidNeighborRange = 400.f;
+constexpr float BoidSeparationRange = 80.f;
 } // namespace
 
 float MoveHumming(vec3_t Position, vec3_t Angle, vec3_t TargetPosition, float Turn)
@@ -95,7 +98,7 @@ void Alpha(OBJECT* o)
         o->BlendMeshLight = o->Alpha;
 }
 
-void MoveBoid(OBJECT* o, int i, OBJECT* Boids, int MAX)
+void MoveBoid(OBJECT* o, int i, OBJECT* Boids, int MAX, float referenceFrames)
 {
     int NumBirds = 0;
     float TargetX = 0.f;
@@ -103,43 +106,45 @@ void MoveBoid(OBJECT* o, int i, OBJECT* Boids, int MAX)
     for (int j = 0; j < MAX; j++)
     {
         OBJECT* t = &Boids[j];
-        if (t->Live && j != i)
+        if (!t->Live || j == i)
         {
-            vec3_t Range;
-            VectorSubtract(o->Position, t->Position, Range);
-            const auto distance = VectorLength(Range);
-            if (distance < 400.f)
-            {
-                float xdist = t->Direction[0] - t->Position[0];
-                float ydist = t->Direction[1] - t->Position[1];
-                if (distance < 80.f)
-                {
-                    xdist -= t->Direction[0] - o->Position[0];
-                    ydist -= t->Direction[1] - o->Position[1];
-                }
-                else
-                {
-                    xdist += t->Direction[0] - o->Position[0];
-                    ydist += t->Direction[1] - o->Position[1];
-                }
-
-                xdist *= FPS_ANIMATION_FACTOR;
-                ydist *= FPS_ANIMATION_FACTOR;
-                float pdist = std::sqrt(xdist * xdist + ydist * ydist);
-                TargetX += xdist / pdist;
-                TargetY += ydist / pdist;
-                NumBirds++;
-            }
+            continue;
         }
-    }
-    if (NumBirds > 0)
-    {
-        TargetX = o->Position[0] + TargetX / NumBirds;
-        TargetY = o->Position[1] + TargetY / NumBirds;
 
-        o->Angle[2] = (float)TurnAngle((int)o->Angle[2], CalcAngle(o->Position[0], o->Position[1], TargetX, TargetY),
-                                       (int)o->Gravity);
+        vec3_t Range;
+        VectorSubtract(o->Position, t->Position, Range);
+        const float distanceSquared = VectorDotProduct(Range, Range);
+        const bool withinFlockRange = distanceSquared < BoidNeighborRange * BoidNeighborRange;
+        if (!withinFlockRange)
+        {
+            continue;
+        }
+
+        float xdist = t->Direction[0] - t->Position[0];
+        float ydist = t->Direction[1] - t->Position[1];
+        if (distanceSquared < BoidSeparationRange * BoidSeparationRange)
+        {
+            xdist -= t->Direction[0] - o->Position[0];
+            ydist -= t->Direction[1] - o->Position[1];
+        }
+        else
+        {
+            xdist += t->Direction[0] - o->Position[0];
+            ydist += t->Direction[1] - o->Position[1];
+        }
+
+        Engine::AI::BoidSteering::AddDirection(xdist, ydist, TargetX, TargetY);
+        ++NumBirds;
     }
+    if (NumBirds == 0 || (TargetX == 0.f && TargetY == 0.f))
+    {
+        return;
+    }
+
+    const float targetX = o->Position[0] + TargetX / NumBirds;
+    const float targetY = o->Position[1] + TargetY / NumBirds;
+    const float targetHeading = static_cast<float>(CalcAngle(o->Position[0], o->Position[1], targetX, targetY));
+    o->Angle[2] = Engine::AI::BoidSteering::TurnTowards(o->Angle[2], targetHeading, o->Gravity, referenceFrames);
 }
 
 void PushObject(vec3_t PushPosition, vec3_t Position, float Power, vec3_t Angle)
@@ -406,6 +411,27 @@ void MoveHead(CHARACTER* c)
             o->HeadTargetAngle[0] = 0.f;
             o->HeadTargetAngle[1] = 0.f;
         }
+    }
+}
+
+void SmoothHeadAngles(vec3_t angles, const vec3_t targetAngles, float referenceFrames)
+{
+    constexpr int HeadRotationAxisCount = 2;
+    constexpr float ReferenceHeadTurnBlend = 0.2f;
+    const float boundedReferenceFrames = std::clamp(referenceFrames, 0.f, 1.f);
+    if (boundedReferenceFrames == 0.f)
+    {
+        return;
+    }
+
+    // Preserve the remaining angular gap across fractional 25-FPS reference frames.
+    const float blend = boundedReferenceFrames == 1.f
+                            ? ReferenceHeadTurnBlend
+                            : 1.f - std::pow(1.f - ReferenceHeadTurnBlend, boundedReferenceFrames);
+    for (int axis = 0; axis < HeadRotationAxisCount; ++axis)
+    {
+        const float turnStep = FarAngle(angles[axis], targetAngles[axis]) * blend;
+        angles[axis] = TurnAngle2(angles[axis], targetAngles[axis], turnStep);
     }
 }
 

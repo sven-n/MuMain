@@ -256,6 +256,7 @@ void AppendGraphicsSection(std::string& out, const EnvironmentInfo& env)
     AppendRow(out, "GPU", env.gpuDevice);
     AppendRow(out, "Look", env.look);
     AppendRow(out, "Enhanced features", env.enhancedFeatures);
+    AppendRow(out, "Enhanced tuning", env.enhancedTuning.empty() ? "defaults" : env.enhancedTuning);
     AppendRow(out, "Anti-aliasing samples", std::to_string(env.antialiasingSamples));
     AppendRow(out, "Anisotropy", std::to_string(env.anisotropy));
     AppendRow(out, "Resolution", std::to_string(env.windowWidth) + "x" + std::to_string(env.windowHeight));
@@ -477,6 +478,7 @@ void AppendJsonEnvironment(std::string& out, const EnvironmentInfo& env)
     out += "    " + JsonString("gpuDevice", env.gpuDevice) + "\n";
     out += "    " + JsonString("look", env.look) + "\n";
     out += "    " + JsonString("enhancedFeatures", env.enhancedFeatures) + "\n";
+    out += "    " + JsonString("enhancedTuning", env.enhancedTuning) + "\n";
     out += "    " + JsonInt("antialiasingSamples", env.antialiasingSamples) + "\n";
     out += "    " + JsonInt("anisotropy", env.anisotropy) + "\n";
     out += "    " + JsonString("buildConfig", env.buildConfig) + "\n";

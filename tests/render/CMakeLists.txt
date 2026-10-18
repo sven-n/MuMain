@@ -183,8 +183,16 @@ mu_add_test(
         test_look_profile.cpp
         test_look_tuning.cpp
         test_look_preset.cpp
+        test_tuning_controls.cpp
+        test_tuning_session.cpp
+        test_look_layers.cpp
     LINK_LIBS
         MuClient
+)
+# The player tuning tests copy the shipped look and mood files to check they stay untouched, and read
+# the sources for the one place that applies a pending light mood strength.
+target_compile_definitions(look_profile_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
 # The light mood against the real terrain light buffers; they come with the
@@ -203,6 +211,13 @@ add_test(
     COMMAND "${CMAKE_COMMAND}"
         "-DMU_SOURCE_DIR=${CMAKE_SOURCE_DIR}/src"
         -P "${CMAKE_CURRENT_SOURCE_DIR}/test_imgui_sdlgpu_backend.cmake"
+)
+
+add_test(
+    NAME particle_cull_keeps_depth_state
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_PARTICLE_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Effects/ZzzEffectParticle.cpp"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_particle_cull_state.cmake"
 )
 
 add_test(
