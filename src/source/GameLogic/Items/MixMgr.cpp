@@ -256,7 +256,8 @@ BOOL CMixRecipes::IsMixSource(ITEM* pItem)
     CMixItem mixitem;
     mixitem.SetItem(pItem, 0);
 
-    if (Check_LuckyItem(pItem->Type) && g_MixRecipeMgr.GetMixInventoryType() != MIXTYPE_JERRIDON)	return FALSE;
+    if (GameLogic::Items::IsLuckyItemType(pItem->Type) && g_MixRecipeMgr.GetMixInventoryType() != MIXTYPE_JERRIDON)
+        return FALSE;
 
     if (IsCharmItem(mixitem))
     {

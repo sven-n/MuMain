@@ -122,7 +122,6 @@ inline DWORD GenerateCheckSum2(const BYTE* pbyBuffer, DWORD dwSize, WORD wKey)
     return (dwResult);
 }
 
-bool IsCepterItem(int iType);
 extern CHARACTER_MACHINE* CharacterMachine;
 extern CHARACTER_ATTRIBUTE* CharacterAttribute;
 

@@ -458,15 +458,6 @@ ActionSkillType GetSkillByBook(int Type)
     }
 }
 
-bool IsCepterItem(int iType)
-{
-    if ((iType >= ITEM_BATTLE_SCEPTER && iType <= ITEM_SHINING_SCEPTER) || iType == ITEM_ABSOLUTE_SCEPTER || iType == ITEM_STRYKER_SCEPTER)
-    {
-        return true;
-    }
-    return false;
-}
-
 void ItemConvert(ITEM* ip, BYTE Attribute1, BYTE Attribute2, BYTE ancientDiscriminator)
 {
     // todo...
@@ -595,7 +586,7 @@ void CalcMagicPower(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
     magicPower += GameLogic::Items::GetItemLevelBonus(ip->Level);
     magicPower /= 2;
 
-    if (!IsCepterItem(ip->Type))
+    if (!GameLogic::Items::IsSceptreType(ip->Type))
     {
         magicPower += ip->Level * 2;
     }
@@ -797,20 +788,11 @@ void CalcRequirements(ITEM* ip, ITEM_ATTRIBUTE* p)
         (ip->Type >= ITEM_DRAGON_KNIGHT_ARMOR && ip->Type <= ITEM_SUNLIGHT_ARMOR) ||
         (ip->Type >= ITEM_DRAGON_KNIGHT_PANTS && ip->Type <= ITEM_SUNLIGHT_PANTS) ||
         (ip->Type >= ITEM_DRAGON_KNIGHT_GLOVES && ip->Type <= ITEM_SUNLIGHT_GLOVES) ||
-        (ip->Type >= ITEM_DRAGON_KNIGHT_BOOTS && ip->Type <= ITEM_SUNLIGHT_BOOTS) ||
-        ip->Type == ITEM_BONE_BLADE ||
-        ip->Type == ITEM_EXPLOSION_BLADE ||
-        ip->Type == ITEM_GRAND_VIPER_STAFF ||
-        ip->Type == ITEM_SYLPH_WIND_BOW ||
-        ip->Type == ITEM_SOLEIL_SCEPTER
-        || ITEM_STORM_BLITZ_STICK == ip->Type
-        || ITEM_AURA_HELM == ip->Type
-        || ITEM_AURA_ARMOR == ip->Type
-        || ITEM_AURA_PANTS == ip->Type
-        || ITEM_AURA_GLOVES == ip->Type
-        || ITEM_AURA_BOOTS == ip->Type
-        || Check_LuckyItem(ip->Type)
-        )
+        (ip->Type >= ITEM_DRAGON_KNIGHT_BOOTS && ip->Type <= ITEM_SUNLIGHT_BOOTS) || ip->Type == ITEM_BONE_BLADE ||
+        ip->Type == ITEM_EXPLOSION_BLADE || ip->Type == ITEM_GRAND_VIPER_STAFF || ip->Type == ITEM_SYLPH_WIND_BOW ||
+        ip->Type == ITEM_SOLEIL_SCEPTER || ITEM_STORM_BLITZ_STICK == ip->Type || ITEM_AURA_HELM == ip->Type ||
+        ITEM_AURA_ARMOR == ip->Type || ITEM_AURA_PANTS == ip->Type || ITEM_AURA_GLOVES == ip->Type ||
+        ITEM_AURA_BOOTS == ip->Type || GameLogic::Items::IsLuckyItemType(ip->Type))
     {
         isExcellent = false;
     }
@@ -2116,7 +2098,8 @@ EXIT_CALCULATE:
     {
         Gold = (Gold / 10) * 10;
     }
-    if (Check_LuckyItem(ip->Type))	Gold = 0;
+    if (GameLogic::Items::IsLuckyItemType(ip->Type))
+        Gold = 0;
 
     return (int64_t)Gold;
 }
@@ -2579,7 +2562,7 @@ void CHARACTER_MACHINE::CalculateDamage()
         DamageMin = DamageMin - (WORD)(DamageMin * percent);
         DamageMax = DamageMax - (WORD)(DamageMax * percent);
 
-        if (Right->Type >= ITEM_STAFF && Right->Type <= ITEM_STAFF + MAX_ITEM_INDEX)
+        if (GameLogic::Items::IsStaffOrBookType(Right->Type))
         {
             Character.AttackDamageMinLeft += (WORD)(DamageMin);
             Character.AttackDamageMaxLeft += (WORD)(DamageMax);
@@ -2610,16 +2593,8 @@ void CHARACTER_MACHINE::CalculateDamage()
         DamageMin = DamageMin - (WORD)(DamageMin * percent);
         DamageMax = DamageMax - (WORD)(DamageMax * percent);
 
-        if (Left->Type >= ITEM_STAFF && Left->Type <= ITEM_STAFF + MAX_ITEM_INDEX)
-        {
-            Character.AttackDamageMinLeft += (WORD)(DamageMin);
-            Character.AttackDamageMaxLeft += (WORD)(DamageMax);
-        }
-        else
-        {
-            Character.AttackDamageMinLeft += DamageMin;
-            Character.AttackDamageMaxLeft += DamageMax;
-        }
+        Character.AttackDamageMinLeft += DamageMin;
+        Character.AttackDamageMaxLeft += DamageMax;
 
         PlusSpecial(&Character.AttackDamageMinLeft, AT_IMPROVE_DAMAGE_LEVEL, Left);
         PlusSpecial(&Character.AttackDamageMaxLeft, AT_IMPROVE_DAMAGE_LEVEL, Left);
@@ -2801,12 +2776,7 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
         percent = CalcDurabilityPercent(Right->Durability, p->Durability, Right->Level, Right->ExcellentFlags, Right->AncientDiscriminator);
         DamageMin = 0; DamageMax = 0;
 
-        if (Right->Type == ITEM_DARK_REIGN_BLADE
-            || Right->Type == ITEM_RUNE_BLADE
-            || Right->Type == ITEM_EXPLOSION_BLADE
-            || Right->Type == ITEM_SWORD_DANCER
-            || Right->Type == ITEM_IMPERIAL_SWORD
-            )
+        if (GameLogic::Items::IsMagicSwordType(Right->Type))
         {
             PlusSpecial(&DamageMin, AT_IMPROVE_DAMAGE, Right);
             PlusSpecial(&DamageMax, AT_IMPROVE_DAMAGE, Right);
@@ -2835,9 +2805,9 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
             percent = CalcDurabilityPercent(Left->Durability, p->Durability, Left->Level, Left->ExcellentFlags, Left->AncientDiscriminator);
             DamageMin = 0; DamageMax = 0;
 
-            if (Left->Type >= ITEM_SWORD && Left->Type < ITEM_SHIELD)
+            if (GameLogic::Items::IsWeaponOrAmmunition(Left))
             {
-                if (Left->Type == ITEM_IMPERIAL_SWORD)
+                if (GameLogic::Items::IsMagicSwordType(Left->Type))
                 {
                     PlusSpecial(&DamageMin, AT_IMPROVE_DAMAGE, Left);
                     PlusSpecial(&DamageMax, AT_IMPROVE_DAMAGE, Left);
@@ -2870,7 +2840,7 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
             percent = CalcDurabilityPercent(Left->Durability, p->Durability, Left->Level, Left->ExcellentFlags, Left->AncientDiscriminator);
             DamageMin = 0; DamageMax = 0;
 
-            if (Right->Type == ITEM_IMPERIAL_SWORD)
+            if (GameLogic::Items::IsMagicSwordType(Right->Type))
             {
                 PlusSpecial(&DamageMin, AT_IMPROVE_DAMAGE, Right);
                 PlusSpecial(&DamageMax, AT_IMPROVE_DAMAGE, Right);

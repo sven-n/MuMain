@@ -32,6 +32,8 @@ namespace GameLogic::Items
     bool IsDemonOrSpiritOfGuardianType(int itemType);
     bool IsDemonOrSpiritOfGuardianModel(int modelType);
     bool IsPandaOrSkeletonItem(const ITEM* pItem);
+    bool IsPandaOrSkeletonType(int itemType);
+    bool IsTransformationRingType(int itemType);
 
     // Crafting materials
     bool IsJewelItem(const ITEM* pItem);
@@ -51,6 +53,7 @@ namespace GameLogic::Items
     bool IsManaPotionType(int itemType);
     bool IsComplexPotion(const ITEM* pItem);
     bool IsComplexPotionType(int itemType);
+    bool IsShieldPotionType(int itemType);
     bool IsElitePotion(const ITEM* pItem);
     bool IsElitePotionType(int itemType);
     bool IsElixir(const ITEM* pItem);
@@ -66,6 +69,8 @@ namespace GameLogic::Items
     // Tickets and cash shop items
     bool IsLuckyItemTicket(const ITEM* pItem);
     bool IsLuckyItemTicketModel(int modelType);
+    // The lucky set armour the lucky item tickets give.
+    bool IsLuckyItemType(int itemType);
     bool IsGemJewelry(const ITEM* pItem);
     bool IsGambleItem(const ITEM* pItem);
     bool IsGambleItemType(int itemType);
@@ -86,6 +91,9 @@ namespace GameLogic::Items
     bool IsSummonerBook(const ITEM* pItem);
     bool IsSummonerBookType(int itemType);
     bool IsSummonerBookModel(int modelType);
+    bool IsSceptreType(int itemType);
+    // The Magic Gladiator's swords with magic power.
+    bool IsMagicSwordType(int itemType);
 
     // Weapons
     bool IsBowType(int itemType);
@@ -97,6 +105,16 @@ namespace GameLogic::Items
     bool IsShieldType(int itemType);
     // A bow, a crossbow, arrows or bolts.
     bool IsBowCrossbowOrAmmunition(const ITEM* pItem);
+    bool IsSwordOrGloveType(int itemType);
+    bool IsSwordOrGloveModel(int modelType);
+    bool IsSwordAxeMaceOrGloveType(int itemType);
+    // A staff or a stick.
+    bool IsStaffType(int itemType);
+    // A staff, a stick or a book.
+    bool IsStaffOrBookType(int itemType);
+    bool IsStaffOrBookModel(int modelType);
+    // A sword, glove, axe, mace, spear, bow, crossbow, staff or book, or arrows or bolts.
+    bool IsWeaponOrAmmunition(const ITEM* pItem);
 
     // Item value
     bool IsHighValueItem(const ITEM* pItem);

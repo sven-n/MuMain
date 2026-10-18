@@ -344,6 +344,93 @@ TEST_CASE("Weapon kinds come from the item data [data][items][rules]")
     CHECK_FALSE(IsBowModel(MODEL_ITEM + MAX_ITEM));
 }
 
+TEST_CASE("Swords, gloves, staffs, books, sceptres and magic swords come from the item data [data][items][rules]")
+{
+    ShippedItemsScope items;
+    const int sacredGloveJ = MakeItemType(0, 40);
+    const int bookOfNeilJ = MakeItemType(5, 40);
+    const int masterScepterJ = MakeItemType(2, 21);
+    const ITEM kris = MakeItem(KrisType);
+    const ITEM bolt = MakeItem(ITEM_BOLT);
+    const ITEM bookOfSahamutt = MakeItem(ITEM_BOOK_OF_SAHAMUTT);
+    const ITEM smallShield = MakeItem(ITEM_SHIELD);
+    const ITEM apple = MakeItem(ITEM_APPLE);
+
+    CHECK(IsSwordOrGloveModel(MODEL_ITEM + KrisType));
+    CHECK(IsSwordOrGloveModel(MODEL_ITEM + ITEM_SACRED_GLOVE));
+    CHECK_FALSE(IsSwordOrGloveModel(MODEL_ITEM + ITEM_AXE));
+
+    CHECK(IsSwordAxeMaceOrGloveType(KrisType));
+    CHECK(IsSwordAxeMaceOrGloveType(ITEM_AXE));
+    CHECK(IsSwordAxeMaceOrGloveType(ITEM_FROST_MACE));
+    CHECK(IsSwordAxeMaceOrGloveType(sacredGloveJ));
+    CHECK_FALSE(IsSwordAxeMaceOrGloveType(ITEM_SPEAR));
+    CHECK_FALSE(IsSwordAxeMaceOrGloveType(ITEM_STAFF));
+
+    CHECK(IsStaffOrBookType(ITEM_STAFF));
+    CHECK(IsStaffOrBookType(ITEM_BOOK_OF_SAHAMUTT));
+    CHECK(IsStaffOrBookType(bookOfNeilJ));
+    CHECK_FALSE(IsStaffOrBookType(KrisType));
+    CHECK(IsStaffOrBookModel(MODEL_ITEM + ITEM_STAFF));
+
+    CHECK(IsWeaponOrAmmunition(&kris));
+    CHECK(IsWeaponOrAmmunition(&bolt));
+    CHECK(IsWeaponOrAmmunition(&bookOfSahamutt));
+    CHECK_FALSE(IsWeaponOrAmmunition(&smallShield));
+    CHECK_FALSE(IsWeaponOrAmmunition(&apple));
+
+    CHECK(IsSceptreType(ITEM_BATTLE_SCEPTER));
+    CHECK(IsSceptreType(masterScepterJ));
+    CHECK_FALSE(IsSceptreType(ITEM_FROST_MACE));
+
+    CHECK(IsMagicSwordType(ITEM_DARK_REIGN_BLADE));
+    CHECK_FALSE(IsMagicSwordType(ITEM_BONE_BLADE));
+}
+
+TEST_CASE("Lucky items, shield potions and transformation rings come from the item data [data][items][rules]")
+{
+    ShippedItemsScope items;
+    const int scaleHelmLucky = MakeItemType(7, 62);
+    const int stormJahadBootsLucky = MakeItemType(11, 72);
+    const int phoenixSoulHelm = MakeItemType(7, 73);
+
+    CHECK(IsLuckyItemType(scaleHelmLucky));
+    CHECK(IsLuckyItemType(stormJahadBootsLucky));
+    CHECK_FALSE(IsLuckyItemType(phoenixSoulHelm));
+    CHECK_FALSE(IsLuckyItemType(ITEM_HELM));
+
+    CHECK(IsShieldPotionType(ITEM_SMALL_SHIELD_POTION));
+    CHECK(IsShieldPotionType(ITEM_LARGE_SHIELD_POTION));
+    CHECK_FALSE(IsShieldPotionType(ITEM_ELITE_SD_POTION));
+    CHECK_FALSE(IsShieldPotionType(ITEM_SMALL_COMPLEX_POTION));
+
+    CHECK(IsTransformationRingType(ITEM_TRANSFORMATION_RING));
+    CHECK(IsTransformationRingType(ITEM_SNOWMAN_TRANSFORMATION_RING));
+    CHECK(IsTransformationRingType(ITEM_PANDA_TRANSFORMATION_RING));
+    CHECK_FALSE(IsTransformationRingType(ITEM_RING_OF_ICE));
+    CHECK(IsPandaOrSkeletonType(ITEM_PANDA_TRANSFORMATION_RING));
+    CHECK_FALSE(IsPandaOrSkeletonType(ITEM_TRANSFORMATION_RING));
+}
+
+TEST_CASE("The shipped potions are taken largest first [data][items][rules]")
+{
+    ShippedItemsScope items;
+    const auto inUseOrder = [](ItemTag tag)
+    {
+        const auto itemTypes = g_ItemDatabase.GetItemTypesWithTagInUseOrder(tag);
+        return std::vector<int>(itemTypes.begin(), itemTypes.end());
+    };
+
+    CHECK(inUseOrder(ItemTag::HealingPotion) == std::vector<int>{ITEM_LARGE_HEALING_POTION, ITEM_MEDIUM_HEALING_POTION,
+                                                                 ITEM_SMALL_HEALING_POTION, ITEM_APPLE});
+    CHECK(inUseOrder(ItemTag::ManaPotion) ==
+          std::vector<int>{ITEM_LARGE_MANA_POTION, ITEM_MEDIUM_MANA_POTION, ITEM_SMALL_MANA_POTION});
+    CHECK(inUseOrder(ItemTag::ShieldPotion) ==
+          std::vector<int>{ITEM_LARGE_SHIELD_POTION, ITEM_MEDIUM_SHIELD_POTION, ITEM_SMALL_SHIELD_POTION});
+    CHECK(inUseOrder(ItemTag::ComplexPotion) ==
+          std::vector<int>{ITEM_LARGE_COMPLEX_POTION, ITEM_MEDIUM_COMPLEX_POTION, ITEM_SMALL_COMPLEX_POTION});
+}
+
 TEST_CASE("The item types with a tag come lowest first [data][items][rules]")
 {
     ShippedItemsScope items;

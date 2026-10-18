@@ -258,11 +258,12 @@ TEST_CASE("Item name language codes must be codes [data][items]")
     CHECK_FALSE(HasErrors(issues));
 }
 
-TEST_CASE("Item tags, wing tier and rule flags are kept through write and read [data][items]")
+TEST_CASE("Item tags, wing tier, potion priority and rule flags are kept through write and read [data][items]")
 {
     ItemDefinition wing = MakeKris();
     wing.slot = ItemSlot::Wings;
     wing.wingTier = WingTier::Third;
+    wing.potionPriority = 7;
     wing.tags.Set(ItemTag::Valuable);
     wing.tags.Set(ItemTag::CashShop);
     wing.tradable = false;
@@ -275,6 +276,7 @@ TEST_CASE("Item tags, wing tier and rule flags are kept through write and read [
     const ItemDefinition& read = result.items.front();
     CHECK(read.slot == ItemSlot::Wings);
     CHECK(read.wingTier == WingTier::Third);
+    CHECK(read.potionPriority == 7);
     CHECK(read.tags == wing.tags);
     CHECK_FALSE(read.tradable);
     CHECK_FALSE(read.repairable);
@@ -357,6 +359,18 @@ TEST_CASE("Item validation checks slots, wing tiers and weapon kinds [data][item
     ItemDefinition shield = MakeKris();
     shield.slot = ItemSlot::OffHand;
     shield.weaponKind = WeaponKind::Shield;
+    // A book goes in the left hand.
+    ItemDefinition bookInRightHand = MakeKris();
+    bookInRightHand.weaponKind = WeaponKind::Book;
+    // Group 0 gives a sword on mainHand.
+    ItemDefinition swordWithoutKind = MakeKris();
+    ItemDefinition swordWithPotionPriority = MakeKris();
+    swordWithPotionPriority.weaponKind = WeaponKind::Sword;
+    swordWithPotionPriority.potionPriority = 1;
+    ItemDefinition potion = MakeKris();
+    potion.slot = ItemSlot::None;
+    potion.tags.Set(ItemTag::ShieldPotion);
+    potion.potionPriority = 3;
 
     std::vector<ItemDataIssue> issues;
     ValidateItems(std::vector<ItemDefinition>{unnamedSlot}, issues);
@@ -383,6 +397,24 @@ TEST_CASE("Item validation checks slots, wing tiers and weapon kinds [data][item
 
     issues.clear();
     ValidateItems(std::vector<ItemDefinition>{shield}, issues);
+    CHECK(issues.empty());
+
+    issues.clear();
+    ValidateItems(std::vector<ItemDefinition>{bookInRightHand}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "weaponKind"));
+
+    issues.clear();
+    ValidateItems(std::vector<ItemDefinition>{swordWithoutKind}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "weaponKind"));
+    CHECK_FALSE(HasErrors(issues));
+
+    issues.clear();
+    ValidateItems(std::vector<ItemDefinition>{swordWithPotionPriority}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "potionPriority"));
+    CHECK_FALSE(HasErrors(issues));
+
+    issues.clear();
+    ValidateItems(std::vector<ItemDefinition>{potion}, issues);
     CHECK(issues.empty());
 }
 

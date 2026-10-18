@@ -414,7 +414,35 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
 
         std::swap(ItemAttribute[ITEM_SPEAR], ItemAttribute[emptySwordType]);
         g_ItemDataHandler.OnItemsSwapped(ITEM_SPEAR, emptySwordType);
-        CHECK(g_ItemDatabase.GetWeaponKind(emptySwordType) == WeaponKind::None);
+        CHECK(g_ItemDatabase.GetWeaponKind(emptySwordType) == WeaponKind::Sword);
+    }
+
+    SUBCASE("a sword is a glove while only the Rage Fighter may use it")
+    {
+        REQUIRE(g_ItemDatabase.GetWeaponKind(KrisType) == WeaponKind::Sword);
+        const ITEM_ATTRIBUTE kris = ItemAttribute[KrisType];
+        for (int characterClass = 0; characterClass < MAX_CLASS; ++characterClass)
+        {
+            ItemAttribute[KrisType].RequireClass[characterClass] = characterClass == CLASS_RAGEFIGHTER ? 1 : 0;
+        }
+        g_ItemDataHandler.OnItemEdited(KrisType);
+        CHECK(g_ItemDatabase.GetWeaponKind(KrisType) == WeaponKind::Glove);
+
+        ItemAttribute[KrisType] = kris;
+        g_ItemDataHandler.OnItemEdited(KrisType);
+        CHECK(g_ItemDatabase.GetWeaponKind(KrisType) == WeaponKind::Sword);
+    }
+
+    SUBCASE("a staff is a book while it is on offHand")
+    {
+        REQUIRE(g_ItemDatabase.GetWeaponKind(ITEM_STAFF) == WeaponKind::Staff);
+        ItemAttribute[ITEM_STAFF].m_byItemSlot = static_cast<BYTE>(ItemSlot::OffHand);
+        g_ItemDataHandler.OnItemEdited(ITEM_STAFF);
+        CHECK(g_ItemDatabase.GetWeaponKind(ITEM_STAFF) == WeaponKind::Book);
+
+        ItemAttribute[ITEM_STAFF].m_byItemSlot = static_cast<BYTE>(ItemSlot::MainHand);
+        g_ItemDataHandler.OnItemEdited(ITEM_STAFF);
+        CHECK(g_ItemDatabase.GetWeaponKind(ITEM_STAFF) == WeaponKind::Staff);
     }
 
     SUBCASE("an undone edit undoes the weapon kind")
@@ -480,7 +508,7 @@ TEST_CASE("Exporting the items as bmd and importing them again gives the same da
     const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
     REQUIRE_FALSE(HasErrors(result.issues));
     CHECK(result.validationIssues.empty());
-    // Tags, wing tiers, weapon kinds and rule flags are not in the bmd files;
+    // Tags, wing tiers, weapon kinds, potion priorities and rule flags are not in the bmd files;
     // the items keep the ones they have, so the files below match.
     for (int group = 0; group < MAX_ITEM_TYPE; ++group)
     {

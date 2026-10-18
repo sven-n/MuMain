@@ -740,7 +740,7 @@ int GetItemInfoMagicColumn(int itemType)
     {
         return _COLUMN_TYPE_CURSE;
     }
-    if (IsCepterItem(itemType))
+    if (GameLogic::Items::IsSceptreType(itemType))
     {
         return _COLUMN_TYPE_PET_ATTACK;
     }
@@ -802,7 +802,7 @@ void ComputeItemInfo(int iHelpItem)
             Magic += GameLogic::Items::GetItemLevelBonus(Level);
             Magic /= 2;
 
-            if (IsCepterItem(iHelpItem) == false)
+            if (!GameLogic::Items::IsSceptreType(iHelpItem))
             {
                 Magic += Level * 2;
             }
@@ -1098,7 +1098,8 @@ void RepairAllGold(void)
             {
                 int gold = ConvertRepairGold(ItemValue(ip, 2), ip->Durability, maxDurability, ip->Type, text);
 
-                if (Check_LuckyItem(ip->Type))	gold = 0;
+                if (GameLogic::Items::IsLuckyItemType(ip->Type))
+                    gold = 0;
                 AllRepairGold += gold;
             }
         }
@@ -1125,7 +1126,8 @@ void RepairAllGold(void)
             if (pItem->Durability < maxDurability)
             {
                 int gold = ConvertRepairGold(ItemValue(pItem, 2), pItem->Durability, maxDurability, pItem->Type, text);
-                if (Check_LuckyItem(pItem->Type))	gold = 0;
+                if (GameLogic::Items::IsLuckyItemType(pItem->Type))
+                    gold = 0;
                 AllRepairGold += gold;
             }
         }
@@ -1224,7 +1226,7 @@ WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
         maxDurability += 15;
     }
 
-    if (Check_LuckyItem(ip->Type))
+    if (GameLogic::Items::IsLuckyItemType(ip->Type))
     {
         maxDurability = 255;
     }
@@ -4438,7 +4440,8 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
     int si_iNeedStrength = 0, si_iNeedDex = 0;
     bool bRequireStat = true;
 
-    if (Check_LuckyItem(ip->Type)) bRequireStat = false;
+    if (GameLogic::Items::IsLuckyItemType(ip->Type))
+        bRequireStat = false;
 
     if (Level >= ip->Jewel_Of_Harmony_OptionLevel)
     {
@@ -4629,9 +4632,7 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
             TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = true; TextNum++;
         }
     }
-    if ((ip->Type >= ITEM_STAFF && ip->Type < ITEM_STAFF + MAX_ITEM_INDEX) || (ip->Type == ITEM_RUNE_BLADE) ||
-        (ip->Type == ITEM_EXPLOSION_BLADE) || (ip->Type == ITEM_SWORD_DANCER) || (ip->Type == ITEM_DARK_REIGN_BLADE) ||
-        (ip->Type == ITEM_IMPERIAL_SWORD))
+    if (GameLogic::Items::IsStaffOrBookType(ip->Type) || GameLogic::Items::IsMagicSwordType(ip->Type))
     {
         mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
@@ -4643,7 +4644,7 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
         TextNum++;
     }
 
-    if (IsCepterItem(ip->Type) == true)
+    if (GameLogic::Items::IsSceptreType(ip->Type))
     {
         mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
         mu_swprintf(TextList[TextNum], I18N::Game::IncreasePetAttackAsD, ip->MagicPower);
@@ -4779,14 +4780,7 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
             mu_swprintf(TextList[TextNum], I18N::Game::DarkLordExclusiveSkill);
             TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
         }
-        else if ((ip->Special[i] == AT_IMPROVE_DAMAGE) &&
-            ((ip->Type == ITEM_RUNE_BLADE)
-                || (ip->Type == ITEM_DARK_REIGN_BLADE)
-                || (ip->Type == ITEM_EXPLOSION_BLADE)
-                || (ip->Type == ITEM_SWORD_DANCER)
-                || (ip->Type == ITEM_IMPERIAL_SWORD)
-                )
-            )
+        else if (ip->Special[i] == AT_IMPROVE_DAMAGE && GameLogic::Items::IsMagicSwordType(ip->Type))
         {
             mu_swprintf(TextList[TextNum], I18N::Game::AdditionalWizardryDmgD, ip->SpecialValue[i]);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -5515,7 +5509,7 @@ bool GetAttackDamage(int* iMinDamage, int* iMaxDamage)
         AttackDamageMin = CharacterAttribute->AttackDamageMinLeft;
         AttackDamageMax = CharacterAttribute->AttackDamageMaxLeft;
     }
-    else if (r->Type >= ITEM_STAFF && r->Type < ITEM_SHIELD)
+    else if (GameLogic::Items::IsStaffOrBookType(r->Type))
     {
         AttackDamageMin = CharacterAttribute->AttackDamageMinLeft;
         AttackDamageMax = CharacterAttribute->AttackDamageMaxLeft;
@@ -5529,7 +5523,7 @@ bool GetAttackDamage(int* iMinDamage, int* iMaxDamage)
     bool Alpha = false;
     if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_KNIGHT || gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK)
     {
-        if (l->Type >= ITEM_SWORD && l->Type < ITEM_STAFF + MAX_ITEM_INDEX && r->Type >= ITEM_SWORD && r->Type < ITEM_STAFF + MAX_ITEM_INDEX)
+        if (GameLogic::Items::IsWeaponOrAmmunition(l) && GameLogic::Items::IsWeaponOrAmmunition(r))
         {
             Alpha = true;
             AttackDamageMin = ((CharacterAttribute->AttackDamageMinRight * 55) / 100 + (CharacterAttribute->AttackDamageMinLeft * 55) / 100);
@@ -5548,7 +5542,8 @@ bool GetAttackDamage(int* iMinDamage, int* iMaxDamage)
     }
     else if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER)
     {
-        if (l->Type >= ITEM_SWORD && l->Type < ITEM_MACE + MAX_ITEM_INDEX && r->Type >= ITEM_SWORD && r->Type < ITEM_MACE + MAX_ITEM_INDEX)
+        if (GameLogic::Items::IsSwordAxeMaceOrGloveType(l->Type) &&
+            GameLogic::Items::IsSwordAxeMaceOrGloveType(r->Type))
         {
             Alpha = true;
             AttackDamageMin = ((CharacterAttribute->AttackDamageMinRight + CharacterAttribute->AttackDamageMinLeft) * 60 / 100);
@@ -6474,36 +6469,6 @@ int CompareItem(ITEM item1, ITEM item2)
 
 bool EquipmentItem = false;
 extern int BuyCost;
-
-bool Check_LuckyItem(int _nIndex, int _nType)
-{
-    int		nItemTabIndex = (_nIndex + _nType) % MAX_ITEM_INDEX;
-
-    if (_nIndex < ITEM_HELM || _nIndex > ITEM_WING)	return false;
-    if (nItemTabIndex >= LUCKY_SET_ARMOR_START_INDEX
-        && nItemTabIndex < LUCKY_SET_ARMOR_START_INDEX + LUCKY_SET_ARMOR_COUNT)
-        return true;
-
-    return false;
-}
-
-bool IsLuckySetItem(int iType)
-{
-    int iItemIndex = iType % MAX_ITEM_INDEX;
-
-#ifdef LEM_FIX_SELL_LUCKYITEM_BOOTS_POPUP
-    if ((iType >= ITEM_HELM && iType <= ITEM_WING)
-#else // LEM_FIX_SELL_LUCKYITEM_BOOTS_POPUP
-    if ((iType >= ITEM_HELM && iType <= ITEM_BOOTS)
-#endif // LEM_FIX_SELL_LUCKYITEM_BOOTS_POPUP
-        && (iItemIndex >= LUCKY_SET_ARMOR_START_INDEX
-            && iItemIndex < LUCKY_SET_ARMOR_START_INDEX + LUCKY_SET_ARMOR_COUNT))
-    {
-        return true;
-    }
-
-    return false;
-}
 
 bool IsExcellentItem(ITEM* pItem)
 {

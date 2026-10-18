@@ -4,6 +4,8 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
 
+#include "Core/Globals/_enum.h"
+
 #include <string>
 #include <vector>
 
@@ -115,7 +117,27 @@ TEST_CASE("A weapon's group gives its weapon kind [data][items]")
     // Arrows and bolts are one-handed.
     CHECK(groupWeaponKind(4, ItemSlot::MainHand, false) == WeaponKind::None);
     CHECK(groupWeaponKind(4, ItemSlot::OffHand, false) == WeaponKind::None);
-    CHECK(groupWeaponKind(SwordGroup, ItemSlot::MainHand, false) == WeaponKind::None);
+    CHECK(groupWeaponKind(SwordGroup, ItemSlot::MainHand, false) == WeaponKind::Sword);
+    CHECK(groupWeaponKind(1, ItemSlot::MainHand, true) == WeaponKind::Axe);
+    CHECK(groupWeaponKind(2, ItemSlot::MainHand, false) == WeaponKind::Mace);
+    // Group 5: staffs and sticks on mainHand, books on offHand.
+    CHECK(groupWeaponKind(5, ItemSlot::MainHand, false) == WeaponKind::Staff);
+    CHECK(groupWeaponKind(5, ItemSlot::OffHand, false) == WeaponKind::Book);
+    CHECK(groupWeaponKind(5, ItemSlot::None, false) == WeaponKind::None);
+    CHECK(groupWeaponKind(PotionGroup, ItemSlot::None, false) == WeaponKind::None);
+    // Only on the slot of the kind.
+    CHECK(groupWeaponKind(SwordGroup, ItemSlot::None, false) == WeaponKind::None);
+    CHECK(groupWeaponKind(1, ItemSlot::OffHand, false) == WeaponKind::None);
+    CHECK(groupWeaponKind(3, ItemSlot::None, true) == WeaponKind::None);
+    CHECK(groupWeaponKind(6, ItemSlot::MainHand, false) == WeaponKind::None);
+
+    // In group 0, an item only the Rage Fighter may use is one of his gloves.
+    ItemDefinition glove = MakeItem(SwordGroup, 32, "Glove");
+    glove.slot = ItemSlot::MainHand;
+    glove.classRequirements[CLASS_RAGEFIGHTER] = 1;
+    CHECK(GetGroupWeaponKind(glove) == WeaponKind::Glove);
+    glove.classRequirements[CLASS_KNIGHT] = 1;
+    CHECK(GetGroupWeaponKind(glove) == WeaponKind::Sword);
 }
 
 TEST_CASE("An edited weapon's kind follows its group while it is the group's [data][items]")
@@ -124,7 +146,9 @@ TEST_CASE("An edited weapon's kind follows its group while it is the group's [da
     bolt.slot = ItemSlot::OffHand;
 
     // A new item gets its group's kind.
-    CHECK(FollowGroupWeaponKind(nullptr, MakeItem(3, 100, "Spear")) == WeaponKind::Spear);
+    ItemDefinition spear = MakeItem(3, 100, "Spear");
+    spear.slot = ItemSlot::MainHand;
+    CHECK(FollowGroupWeaponKind(nullptr, spear) == WeaponKind::Spear);
 
     // Made two-handed, the bolt is a bow; one-handed again, it is none again.
     ItemDefinition twoHandedBolt = bolt;
@@ -135,6 +159,7 @@ TEST_CASE("An edited weapon's kind follows its group while it is the group's [da
 
     // A kind set in the item file that the group does not give stays.
     ItemDefinition shieldWithoutKind = MakeItem(6, 100, "Not a shield");
+    shieldWithoutKind.slot = ItemSlot::OffHand;
     CHECK(FollowGroupWeaponKind(&shieldWithoutKind, shieldWithoutKind) == WeaponKind::None);
     ItemDefinition swordAsSpear = MakeItem(SwordGroup, 100, "Sword");
     swordAsSpear.weaponKind = WeaponKind::Spear;
@@ -311,6 +336,36 @@ TEST_CASE("Item database answers tag, slot and rule questions [data][items]")
         CHECK_FALSE(database.IsAllowed(itemType, ItemAction::Trade));
         CHECK_FALSE(database.IsAllowed(itemType, ItemAction::Repair));
     }
+}
+
+TEST_CASE("The item types with a tag come in use order: higher potion priority, then higher type [data][items]")
+{
+    std::vector<ItemDefinition> potions;
+    for (const auto& [number, priority] : {std::pair{0, 2}, std::pair{1, 0}, std::pair{2, 2}, std::pair{3, 5}})
+    {
+        ItemDefinition potion = MakeItem(PotionGroup, number, "Potion");
+        potion.tags.Set(ItemTag::HealingPotion);
+        potion.potionPriority = static_cast<BYTE>(priority);
+        potions.push_back(potion);
+    }
+
+    ItemDatabase database;
+    database.Build(potions);
+    const auto inUseOrder = [&database]
+    {
+        const auto itemTypes = database.GetItemTypesWithTagInUseOrder(ItemTag::HealingPotion);
+        return std::vector<int>(itemTypes.begin(), itemTypes.end());
+    };
+    CHECK(inUseOrder() == std::vector<int>{MakeItemType(PotionGroup, 3), MakeItemType(PotionGroup, 2),
+                                           MakeItemType(PotionGroup, 0), MakeItemType(PotionGroup, 1)});
+    CHECK(database.GetItemTypesWithTagInUseOrder(ItemTag::ManaPotion).empty());
+    CHECK(database.GetItemTypesWithTagInUseOrder(ItemTag::Count).empty());
+
+    // Editor changes reorder the list.
+    ItemDefinition changed = *database.Find(MakeItemType(PotionGroup, 1));
+    changed.potionPriority = 9;
+    database.Set(changed);
+    CHECK(inUseOrder().front() == MakeItemType(PotionGroup, 1));
 }
 
 TEST_CASE("Item tag sets test several tags at once [data][items]")

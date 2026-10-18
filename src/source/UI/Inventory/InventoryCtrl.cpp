@@ -1075,7 +1075,7 @@ bool mu::ui::window::CInventoryCtrl::DropActsOn(ITEM* pPickItem, ITEM* pTargetIt
 
     if (bSuccess == false && m_pOwner == g_pMyInventory)
         bSuccess = AreItemsStackable(pPickItem, pTargetItem);
-    if (Check_LuckyItem(pTargetItem->Type))
+    if (GameLogic::Items::IsLuckyItemType(pTargetItem->Type))
     {
         bSuccess = false;
         if (pPickItem->Type == ITEM_POTION + 161)

@@ -1303,6 +1303,7 @@
         "es": "Pantalones de Escamas",
         "pt": "Calças de escamas"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1333,6 +1334,7 @@
         "es": "Pantalones de Seda",
         "pt": "Calças de seda"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1360,6 +1362,7 @@
         "es": "Pantalones Esfinge",
         "pt": "Calças de Esfinge"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1388,6 +1391,7 @@
         "es": "Pantalones Viento Violento",
         "pt": "Calças do vento violento"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1415,6 +1419,7 @@
         "es": "Pantalones Adamantinos",
         "pt": "Calças de adamantina"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1442,6 +1447,7 @@
         "es": "Pantalones Dragón",
         "pt": "Calças de Dragão"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1470,6 +1476,7 @@
         "es": "Pantalones Guardián",
         "pt": "Calças de Guardião"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1497,6 +1504,7 @@
         "es": "Pantalones Legendarios",
         "pt": "Calças Lendárias"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1525,6 +1533,7 @@
         "es": "Pantalones Ala Roja",
         "pt": "Calças da asa vermelha"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1552,6 +1561,7 @@
         "es": "Pantalones Cuervo de Tormenta",
         "pt": "Calças do corvo da tempestade"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1579,6 +1589,7 @@
         "es": "Pantalones de Tormenta Zahard",
         "pt": "Calças de  Tempestade Zahard"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "pants",

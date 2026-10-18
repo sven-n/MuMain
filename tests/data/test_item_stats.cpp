@@ -356,7 +356,7 @@ TEST_CASE("The item help table shows the stats the item has at each level [data]
     {
         CAPTURE(type);
         ComputeItemInfo(type);
-        const int magicColumn = IsCepterItem(type) ? _COLUMN_TYPE_PET_ATTACK : _COLUMN_TYPE_MAGIC;
+        const int magicColumn = GameLogic::Items::IsSceptreType(type) ? _COLUMN_TYPE_PET_ATTACK : _COLUMN_TYPE_MAGIC;
         for (int level = 0; level <= 15; ++level)
         {
             CAPTURE(level);

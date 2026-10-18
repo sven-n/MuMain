@@ -466,7 +466,8 @@ server with original clients (after phases 6 and B).
    As built:
    - Item fields: `tags` (a list of names, a bitmask in memory),
      `wingTier` (`small`/`first`/`second`/`third`), `weaponKind`
-     (`spear`/`bow`/`crossbow`/`shield`, since 3b-2), the rule flags
+     (`sword`/`glove`/`axe`/`mace`/`spear`/`bow`/`crossbow`/`staff`/`book`/`shield`,
+     since 3b-2 and 3b-3), the rule flags
      `tradable`, `droppable`, `storable`, `sellable`,
      `personalShopSellable`, `repairable` (default `true`, only `false`
      is written), the rental rules `droppableWhileRented`,
@@ -514,7 +515,12 @@ server with original clients (after phases 6 and B).
    |---|---|---|
    | `slot` | `ItemDefinition.ItemSlot` (an `ItemSlotType` with its slot numbers) | Exchange maps the names to slot types: `mainHand` ↔ types containing 0, `offHand` ↔ 1, …, `ring` ↔ 10/11 |
    | `wingTier` | None; wing values are power-ups and options per wing | Client-only for now; phase 9 (options) may replace it |
-   | `weaponKind` | Item groups: spears 3, bows and crossbows 4 (split by slot into `Stats.IsBowEquipped` and `IsCrossBowEquipped`), shields 6 (`ShieldItemGroup`, `Stats.IsShieldEquipped`) | Derived from group and slot (ammunition has none); no new OpenMU field needed |
+   | `weaponKind` | Item groups: swords 0 (the Rage Fighter's gloves get `Stats.IsGloveWeaponEquipped` instead of the sword ones), axes 1, maces 2 (`ItemGroups.Scepters`), spears 3, bows and crossbows 4 (split by slot into `Stats.IsBowEquipped` and `IsCrossBowEquipped`), staffs 5 (`StaffItemGroup`; the books get `Stats.IsBookEquipped`, the summoner's sticks `IsStickEquipped`), shields 6 (`ShieldItemGroup`, `Stats.IsShieldEquipped`) | Derived from group, slot and class (ammunition has none); no new OpenMU field needed. OpenMU's sticks have no kind of their own in the client (they are staffs) |
+   | `sceptre`, `magicSword` | `ScepterRise` and `IsScepterEquipped` for group 2 items with Force Wave; `StaffRise` for group 0 items with Power Slash and magic power | Derived from skill and group; no new field |
+   | `transformationRing` | `IsTransformationRing`: a base power-up on `Stats.TransformationSkin`, on the same eight rings; read for durability and Chaos Castle only | Derived from the power-up; no new field. The client's ring rules (one dragged onto a ring slot, no Kanturu entry, no Icarus except with the panda and skeleton rings) have no server side; OpenMU's Icarus asks only for `Stats.CanFly` |
+   | `shieldPotion` | `ItemConstants.SmallShieldPotion`, `MediumShieldPotion`, `LargeShieldPotion` | Client-only, like the other potion tags |
+   | `potionPriority` | None; OpenMU keeps a potion's strength in its consume handler plug-ins, and its offline leveling (`HealingHandler`) lists the healing and mana potions largest first in code | Client-only for now |
+   | `luckyItem` | None; OpenMU's Season 6 data has no lucky set armour (numbers 62 to 72 of groups 7 to 11) | Client-only until OpenMU has them |
    | `tradable`, `storable`, `personalShopSellable`, `sellable` = false | Only `IsBoundToCharacter`, which blocks all four at once (sell with a durability exception) | Separate rules, e.g. one `[Flags] ItemRestrictions` column with the six names; enforce in `MoveItemAction` (trade, vault, personal shop) and `SellItemToNpcAction`; `IsBoundToCharacter` stays for "only the owner can pick it up" |
    | `droppable` = false | None (`DropItemAction` drops everything) | Enforce in `DropItemAction` |
    | `repairable` = false | None (`ItemRepairAction` repairs any item below its maximum durability) | Enforce in `ItemRepairAction` |
@@ -529,7 +535,7 @@ server with original clients (after phases 6 and B).
    **A (OpenMU):** new rule fields/tables with migration, initialization,
    update plug-in and server enforcement, based on the mapping above.
 
-   **3b Remaining item lists (in progress).** The lists of item ids outside
+   **3b Remaining item lists (done).** The lists of item ids outside
    the phase 3 files that repeat data the items already have (tags, `slot`,
    `wingTier`, `storable`, the model and display files) or need new data.
    As in phase 3, the code asks the item data instead of naming items, and a
@@ -568,19 +574,54 @@ server with original clients (after phases 6 and B).
      not know; the weapon kind does not. The bmd import and the item editor
      keep a weapon kind that its group gives matching the group and slot, so
      new weapons get one; the game reads only the field.
-   - **3b-3** staffs, swords, axes and maces: the weapon kinds `sword`,
-     `axe`, `mace` and `staff`, plus the tags `sceptre` and `magicSword`.
-     3b-3 includes the character window's wizardry damage
-     (`CharacterInfoWindow.cpp`), which picks the magic durability by the
-     staff group and five Magic Gladiator swords, while the maximum
-     durability follows `magicDurability` since 3b-1.
-   - **3b-4** the tags `luckyItem`, `shieldPotion` and `transformationRing`,
-     with the potion hotkeys. It also decides the potion order: the potion
-     searches take the highest item type first (the largest potion), which
-     the data cannot change, so a higher numbered potion tagged in the
-     editor (Siege Potion, Elite Healing Potion) would come before the
-     Large Healing Potion. An order or strength per potion would let the
-     data decide.
+   - **3b-3** (done): swords, gloves, axes, maces, staffs and books. The
+     weapon kinds `sword`, `glove` (the Rage Fighter's gloves, OpenMU's
+     `IsGloveWeaponEquipped`), `axe`, `mace`, `staff` and `book` (the
+     summoner's books, OpenMU's `IsBookEquipped`), plus the tags `sceptre`
+     and `magicSword`. 21 places ask them: the sceptre list
+     (`IsCepterItem`, its callers ask the tag), the magic sword checks
+     (wizardry damage for the right-hand weapon, the left-hand weapon and
+     the right one beside it, the character window's wizardry line, the
+     tooltip's magic power and wizardry damage lines), the staff checks
+     (`CalculateDamage`, `GetAttackDamage`, the character window's
+     wizardry line, the tooltip's magic power line, the summoner's left
+     hand, three knight skill checks in the skill list and one in
+     `AttackKnight`, Death Stab, Death Cannon), Spiral Slash, the
+     left-hand weapon of `CalculateMagicDamage`, both dual wield checks
+     and the weapon `MoveHero` moves into an empty right hand; a staff
+     branch of `CalculateDamage` whose two sides were the same is gone.
+     In commits of their own: Master Scepter-J (2/21) joined the sceptre
+     list; two staff ranges that ended with `<=` (and so took in the Small
+     Shield 6/0) end before it; the two-handed magic swords count their
+     damage option in `CalculateMagicDamage`'s checks with something in
+     the other hand too (a combination the hands never allow); and
+     `MoveHero` moves only a staff, so Book of Neil-J (5/40, a book by its
+     kind that lacks the `summonerBook` tag the book-only code asks) stays
+     in the left hand. With their own kinds, the gloves and books mean
+     "sword or glove" for group 0 and "staff or book" for group 5 at the
+     converted places.
+   - **3b-4** (done): the lucky set armour, the SD potions and the
+     transformation rings. The tags `luckyItem` (numbers 62 to 72 of groups
+     7 to 11), `shieldPotion` (14/35 to 14/37; the Elite SD Potion 14/133
+     stays a hotkey item of its own) and `transformationRing` (the eight
+     rings of `ChangeRingManager`), and the field `potionPriority`, which
+     says which potion of a kind the game takes first: the higher, the
+     earlier, ties to the higher item type. The potion searches took the
+     highest item type first (the largest potion), so a higher numbered
+     potion tagged in the editor (Siege Potion, Elite Healing Potion)
+     would have come before the Large Healing Potion; the shipped potions
+     count up with their size, so the order stays. The places that ask
+     them: the nine callers of `Check_LuckyItem` (repair costs, the
+     maximum durability, the price, the excellent level requirement, the
+     tooltip's stat requirements, the mix sources and two jewel checks)
+     and the lucky item window's refinery; the transformation ring checks
+     (`CheckChangeRing`, `CheckMoveMap`, `CheckBanMoveIcarusMap`, where a
+     ring that is not the panda or skeleton ring bans Icarus); the mana and
+     healing potion searches; and the items the hotkeys take
+     (`GetHotKeyItemTypes`, which replaces `GetHotKeyCommonItem` and the
+     ranges per key). `Check_LuckyItem`, the unused `IsLuckySetItem` and
+     `CheckRepair` and the lucky set constants are gone. The lucky set
+     range also counted 7/71 and 10/72, which have no item data.
    The 38 items named "…-J" (copies of existing items with no model, unknown
    to OpenMU; what "J" stands for is not known) follow their data. Two lists
    the inventory found wrong are fixed on their own, not in 3b: the

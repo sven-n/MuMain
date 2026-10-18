@@ -205,8 +205,4 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort);
 
 BYTE CaculateFreeTicketLevel(int iType);
 
-bool Check_LuckyItem(int _nIndex, int _nType = 0);
-
-bool IsLuckySetItem(int iType);
-
 #endif //__ZZZINVENTORY_H__

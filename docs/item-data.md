@@ -80,7 +80,8 @@ read as the English name only; saving writes the object form.
 | `width`, `height` | Size in inventory slots |
 | `slot` | Equipment slot: `mainHand`, `offHand`, `helm`, `armor`, `pants`, `gloves`, `boots`, `wings`, `pet`, `pendant`, `ring`. Left out = not equippable |
 | `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, defense per level, damage increase, absorption) depend on it; excellent second and third tier wings get no extra durability, and the chaos mix knows a wing's tier from it |
-| `weaponKind` | Only for weapons and shields: `spear`, `bow`, `crossbow`, `shield`, as OpenMU's item groups 3, 4 and 6 (bows have the slot `offHand`, crossbows `mainHand`; arrows and bolts have no weapon kind). Swords, axes, maces and staffs have none yet. While an item has the weapon kind its group gives, the bmd import and the item editor (also when it moves an item to another number) keep it matching the group and slot (in group 4 only two-handed items are bows or crossbows), so a new spear, bow, crossbow or shield gets one too; a kind written in the file that differs from the group's stays as long as it differs. Which bow or crossbow a character holds (its animations, arrows and damage), the elf's arrows-only rule, a spear's reach and Impale, the shield defense set option and the bonus of leveled arrows and bolts depend on it |
+| `weaponKind` | Only for weapons and shields: `sword`, `glove`, `axe`, `mace`, `spear`, `bow`, `crossbow`, `staff`, `book`, `shield`, as OpenMU's item groups 0 to 6: swords and the Rage Fighter's gloves (group 0; gloves are the items only the Rage Fighter may use), axes (1), maces and sceptres (2), spears (3), bows and crossbows (4: bows have the slot `offHand`, crossbows `mainHand`; arrows and bolts have no weapon kind), staffs, sticks and books (5: books have the slot `offHand`) and shields (6). While an item has the weapon kind its group gives, the bmd import and the item editor (also when it moves an item to another number) keep it matching the group, the slot and, in group 0, the class requirements (a group gives its kind only on that kind's slot, and in group 4 only to two-handed items), so a new weapon gets one too; a kind written in the file that differs from the group's stays as long as it differs. Which bow or crossbow a character holds (its animations, arrows and damage), the elf's arrows-only rule, a spear's reach and Impale, the shield defense set option, the bonus of leveled arrows and bolts, a staff's damage (it counts for the left hand), which right-hand weapons a summoner may hold in the left hand (not staffs or books), the character window's wizardry line, the tooltip's magic power line, the knight skills that need a weapon without a staff or book, Death Stab, Death Cannon and Spiral Slash, the weapon in the left hand that adds its magic options, the dual wield of Dark Knights, Magic Gladiators and Rage Fighters, and the weapon that moves into an empty right hand depend on it |
+| `potionPriority` | Only for potions with the `healingPotion`, `manaPotion`, `complexPotion` or `shieldPotion` tag: which one of a kind the game takes first, the higher the earlier (0 or left out = last; equal ones take the higher group and number first). The shipped potions count up with their size, so the largest is taken first. A client-only field (OpenMU has none); the bmd import keeps it |
 | `twoHanded` | Weapon needs both hands |
 | `skill` | Skill the item gives |
 | `level` | Item level (the drop level); also used in price and damage calculations |
@@ -110,16 +111,20 @@ can have several tags; the file lists them in the order below.
 | `darkLordPet` | Dark Horse and Dark Raven |
 | `guardianPet` | Demon and Spirit of Guardian |
 | `pandaOrSkeleton` | The panda and skeleton pets and transformation rings |
+| `transformationRing` | Rings that change the character's look: a second one cannot be dragged onto a ring slot, the Kanturu entry and `/move` to Icarus refuse them, and the move window offers no Icarus with one that is not the panda or skeleton ring |
 | `jewel` | Jewels of Bless, Soul, Life, Chaos, Creation and Guardian |
 | `refineStone` | Lower and Higher Refine Stone |
 | `socketSeed`, `socketSphere`, `socketSeedSphere` | Socket system items |
-| `healingPotion`, `manaPotion`, `complexPotion` | Potions the hotkeys look for; a skill without enough mana takes a mana potion and the MU Helper a healing potion, the one with the highest group and number first (the largest potion) |
+| `healingPotion`, `manaPotion`, `complexPotion`, `shieldPotion` | Potions the hotkeys look for; a skill without enough mana takes a mana potion and the MU Helper a healing potion. They take the one with the highest `potionPriority` first, then the highest group and number |
 | `elitePotion`, `elixir`, `buffScroll`, `battleOrStrengthScroll` | Cash shop potions and scrolls |
 | `ammunition` | Arrows and bolts |
 | `bloodCastleTicketPart` | Scroll of Archangel and Blood Bone |
 | `secondClassQuestItem`, `thirdClassQuestItem` | Class change quest items |
 | `summonerBook` | Summoner books |
 | `divineArchangelWeapon` | The Divine weapons of the Archangel |
+| `sceptre` | The Dark Lord's sceptres |
+| `magicSword` | The Magic Gladiator's swords with magic power |
+| `luckyItem` | The lucky set armour (numbers 62 to 72 of groups 7 to 11): no repair cost and no price, a maximum durability of 255, no extra level requirement for excellent ones, no stat requirements in the tooltip; only Jerridon's mix and the lucky item window's refinery take them, and of the jewels only the Jewels of Extension and Elevation act on them |
 | `cashShop` | Items from the cash shop. Only information for now (for the editors and the OpenMU exchange); no client code reads it |
 | `gambleItem` | Gamble items |
 | `gemJewelry` | The gem rings and necklaces from the cash shop |
@@ -208,8 +213,13 @@ the field (**Copy text** copies it). All problems are also written to
 - unknown fields (they are ignored)
 - names longer than 49 characters (the game shows them cut)
 - a `wingTier` on an item whose slot is not `wings`
-- a `weaponKind` on an item that is not in the slot the code looks in:
-  bows and shields need `offHand`, crossbows and spears `mainHand`
+- a `weaponKind` on an item that is not in the slot of its kind: bows,
+  shields and books need `offHand`, the other kinds `mainHand`
+- no `weaponKind` on an item whose group and slot give one, as in item files
+  saved before the kind existed for that group: the game then treats the
+  item as no weapon of that kind
+- a `potionPriority` on an item without a `healingPotion`, `manaPotion`,
+  `complexPotion` or `shieldPotion` tag (nothing reads it there)
 - a `slot` written as a number, as files saved before tags existed have
   it; the number is read, and saving writes the name
 
@@ -516,8 +526,8 @@ only item data. The import is there to bring in your own old item files.
   English name is not stored). Items the English file does not have keep
   the English name they have now, and every item keeps its tags, wing tier,
   weapon kind and rule flags (the bmd format has none). A weapon kind that
-  its group gives follows the imported slot, so a new spear, bow, crossbow
-  or shield gets one too. Save afterwards to keep the
+  its group gives follows the imported slot (in group 0 also the class
+  requirements), so a new weapon gets one too. Save afterwards to keep the
   result. The console lists what the import had to fix (see below) and any
   problem the imported data still has; Save refuses it until those are
   fixed.

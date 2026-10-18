@@ -247,6 +247,7 @@
         "es": "Anillo de Transformación",
         "pt": "Anel de Transformação"
       },
+      "tags": ["transformationRing"],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -984,6 +985,7 @@
         "es": "Aro Esqueleto Traslado Élite",
         "pt": "Anel Esqueleto Transf. Acel."
       },
+      "tags": ["transformationRing"],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -1013,6 +1015,7 @@
         "es": "Anillo de Jack O'Lantern",
         "pt": "Anel do Jack Olantern"
       },
+      "tags": ["transformationRing"],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -1040,6 +1043,7 @@
         "es": "Aro de Traslado de Navidad",
         "pt": "Anel do Natal de Transf."
       },
+      "tags": ["transformationRing"],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -1067,6 +1071,7 @@
         "es": "Anillo de GM",
         "pt": "Anel de GM"
       },
+      "tags": ["transformationRing"],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -1751,6 +1756,7 @@
         "es": "Aro Mutación Hombre de Nieve",
         "pt": "Anel Transf. Homem da Neve"
       },
+      "tags": ["transformationRing"],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -1951,7 +1957,7 @@
         "es": "Anillo Panda",
         "pt": "Anel do Panda"
       },
-      "tags": ["pandaOrSkeleton", "valuable"],
+      "tags": ["pandaOrSkeleton", "transformationRing", "valuable"],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -2898,7 +2904,7 @@
         "es": "Aro Mutación de Esqueleto",
         "pt": "Anel Transf. de Esqueleto"
       },
-      "tags": ["pandaOrSkeleton", "valuable"],
+      "tags": ["pandaOrSkeleton", "transformationRing", "valuable"],
       "width": 1,
       "height": 1,
       "slot": "ring",

@@ -231,9 +231,9 @@ namespace mu::ui::window
         void LoadImages() const;
         void UnloadImages();
 
-        // The inventory index of an item with the tag, the highest item type first
-        // (the largest potion); -1 if there is none.
-        int FindItemIndexWithTagHighestFirst(Data::Items::ItemTag tag) const;
+        // The inventory index of an item with the tag, in the order the game takes them
+        // (ItemDatabase::GetItemTypesWithTagInUseOrder); -1 if there is none.
+        int FindItemIndexWithTagInUseOrder(Data::Items::ItemTag tag) const;
 
         bool EquipmentWindowProcess();
         // The pointer over the drawn panel.

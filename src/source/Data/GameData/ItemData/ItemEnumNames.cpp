@@ -30,11 +30,17 @@ constexpr std::array<EnumName<WingTier>, 4> WingTierNames = {{
     {WingTier::Third, "third"},
 }};
 
-constexpr std::array<EnumName<WeaponKind>, 4> WeaponKindNames = {{
+constexpr std::array<EnumName<WeaponKind>, 10> WeaponKindNames = {{
     {WeaponKind::Spear, "spear"},
     {WeaponKind::Bow, "bow"},
     {WeaponKind::Crossbow, "crossbow"},
     {WeaponKind::Shield, "shield"},
+    {WeaponKind::Sword, "sword"},
+    {WeaponKind::Axe, "axe"},
+    {WeaponKind::Mace, "mace"},
+    {WeaponKind::Staff, "staff"},
+    {WeaponKind::Glove, "glove"},
+    {WeaponKind::Book, "book"},
 }};
 
 constexpr std::array<EnumName<ItemTag>, static_cast<size_t>(ItemTag::Count)> ItemTagNames = {{
@@ -45,6 +51,7 @@ constexpr std::array<EnumName<ItemTag>, static_cast<size_t>(ItemTag::Count)> Ite
     {ItemTag::DarkLordPet, "darkLordPet"},
     {ItemTag::GuardianPet, "guardianPet"},
     {ItemTag::PandaOrSkeleton, "pandaOrSkeleton"},
+    {ItemTag::TransformationRing, "transformationRing"},
     {ItemTag::Jewel, "jewel"},
     {ItemTag::RefineStone, "refineStone"},
     {ItemTag::SocketSeed, "socketSeed"},
@@ -53,6 +60,7 @@ constexpr std::array<EnumName<ItemTag>, static_cast<size_t>(ItemTag::Count)> Ite
     {ItemTag::HealingPotion, "healingPotion"},
     {ItemTag::ManaPotion, "manaPotion"},
     {ItemTag::ComplexPotion, "complexPotion"},
+    {ItemTag::ShieldPotion, "shieldPotion"},
     {ItemTag::ElitePotion, "elitePotion"},
     {ItemTag::Elixir, "elixir"},
     {ItemTag::BuffScroll, "buffScroll"},
@@ -63,6 +71,9 @@ constexpr std::array<EnumName<ItemTag>, static_cast<size_t>(ItemTag::Count)> Ite
     {ItemTag::ThirdClassQuestItem, "thirdClassQuestItem"},
     {ItemTag::SummonerBook, "summonerBook"},
     {ItemTag::DivineArchangelWeapon, "divineArchangelWeapon"},
+    {ItemTag::Sceptre, "sceptre"},
+    {ItemTag::MagicSword, "magicSword"},
+    {ItemTag::LuckyItem, "luckyItem"},
     {ItemTag::CashShop, "cashShop"},
     {ItemTag::GambleItem, "gambleItem"},
     {ItemTag::GemJewelry, "gemJewelry"},
