@@ -208,7 +208,8 @@ the field (**Copy text** copies it). All problems are also written to
 - unknown fields (they are ignored)
 - names longer than 49 characters (the game shows them cut)
 - a `wingTier` on an item whose slot is not `wings`
-- a `weaponKind` on an item whose slot is not `mainHand` or `offHand`
+- a `weaponKind` on an item that is not in the slot the code looks in:
+  bows and shields need `offHand`, crossbows and spears `mainHand`
 - a `slot` written as a number, as files saved before tags existed have
   it; the number is read, and saving writes the name
 

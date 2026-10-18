@@ -349,8 +349,14 @@ TEST_CASE("Item validation checks slots, wing tiers and weapon kinds [data][item
     ItemDefinition weaponKindWithoutHandSlot = MakeKris();
     weaponKindWithoutHandSlot.slot = ItemSlot::Helm;
     weaponKindWithoutHandSlot.weaponKind = WeaponKind::Shield;
+    // The code looks for a bow in the left hand only.
+    ItemDefinition bowInRightHand = MakeKris();
+    bowInRightHand.weaponKind = WeaponKind::Bow;
     ItemDefinition spear = MakeKris();
     spear.weaponKind = WeaponKind::Spear;
+    ItemDefinition shield = MakeKris();
+    shield.slot = ItemSlot::OffHand;
+    shield.weaponKind = WeaponKind::Shield;
 
     std::vector<ItemDataIssue> issues;
     ValidateItems(std::vector<ItemDefinition>{unnamedSlot}, issues);
@@ -367,7 +373,16 @@ TEST_CASE("Item validation checks slots, wing tiers and weapon kinds [data][item
     CHECK_FALSE(HasErrors(issues));
 
     issues.clear();
+    ValidateItems(std::vector<ItemDefinition>{bowInRightHand}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "weaponKind"));
+    CHECK_FALSE(HasErrors(issues));
+
+    issues.clear();
     ValidateItems(std::vector<ItemDefinition>{spear}, issues);
+    CHECK(issues.empty());
+
+    issues.clear();
+    ValidateItems(std::vector<ItemDefinition>{shield}, issues);
     CHECK(issues.empty());
 }
 

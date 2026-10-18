@@ -78,6 +78,23 @@ void ValidateName(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
         check(locale, text);
     }
 }
+// The slot the code looks in for each weapon kind: the left hand (offHand) for
+// bows and shields, the right hand (mainHand) for crossbows and spears.
+ItemSlot GetWeaponKindSlot(WeaponKind kind)
+{
+    switch (kind)
+    {
+    case WeaponKind::Bow:
+    case WeaponKind::Shield:
+        return ItemSlot::OffHand;
+    case WeaponKind::Crossbow:
+    case WeaponKind::Spear:
+        return ItemSlot::MainHand;
+    default:
+        return ItemSlot::None;
+    }
+}
+
 // The item files store slots by name, so every slot needs one.
 void ValidateSlot(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
 {
@@ -91,11 +108,13 @@ void ValidateSlot(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
         AddIssue(issues, ItemDataIssueSeverity::Warning, definition, "has a wing tier, but its slot is not \"wings\"",
                  "wingTier");
     }
-    if (definition.weaponKind != WeaponKind::None && definition.slot != ItemSlot::MainHand &&
-        definition.slot != ItemSlot::OffHand)
+    const ItemSlot weaponKindSlot = GetWeaponKindSlot(definition.weaponKind);
+    if (weaponKindSlot != ItemSlot::None && definition.slot != weaponKindSlot)
     {
         AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
-                 "has a weapon kind, but its slot is not \"mainHand\" or \"offHand\"", "weaponKind");
+                 std::string("is a ") + FindEnumName(definition.weaponKind) + ", but its slot is not \"" +
+                     FindEnumName(weaponKindSlot) + "\"",
+                 "weaponKind");
     }
 }
 } // namespace
