@@ -443,10 +443,7 @@ void CalcRequirements(ITEM* ip, ITEM_ATTRIBUTE* p)
 
     if (p->RequireCharisma)
     {
-        if (ip->Type == MODEL_DARK_RAVEN_ITEM)
-            ip->RequireCharisma = (185 + (p->RequireCharisma * 15));
-        else
-            ip->RequireCharisma = p->RequireCharisma;
+        ip->RequireCharisma = p->RequireCharisma;
     }
 
     if (ip->Type == ITEM_TRANSFORMATION_RING)
