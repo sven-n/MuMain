@@ -3744,7 +3744,7 @@ void AnimationCharacter(CHARACTER* c, OBJECT* o, BMD* b)
     switch (o->Type)
     {
     case MODEL_DEVIAS_TRADER:
-        if (b->CurrentAnimationFrame == b->Actions[o->CurrentAction].NumAnimationKeys - 1)
+        if ((int)o->AnimationFrame == b->Actions[o->CurrentAction].NumAnimationKeys - 1)
         {
             if (rand_fps_check(32))
                 SetAction(o, 1);
@@ -3753,7 +3753,7 @@ void AnimationCharacter(CHARACTER* c, OBJECT* o, BMD* b)
         }
         break;
     case MODEL_RABBIT:
-        if (o->CurrentAction <= 1 && b->CurrentAnimationFrame == b->Actions[o->CurrentAction].NumAnimationKeys - 1)
+        if (o->CurrentAction <= 1 && (int)o->AnimationFrame == b->Actions[o->CurrentAction].NumAnimationKeys - 1)
         {
             if (rand_fps_check(10))
                 SetAction(o, 1);
