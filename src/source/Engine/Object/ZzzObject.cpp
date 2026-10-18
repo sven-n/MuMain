@@ -299,10 +299,7 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
     }
 
 #ifdef MU_ENABLE_CONTROL_SOCKET
-    static float prepassBones[MAX_BONES][3][4];
-    const bool checkBones = g_PrepassBoneCheck.enabled && o->EnableBoneMatrix && b->NumBones <= MAX_BONES &&
-                            IsClientCharacterObject(o);
-    if (checkBones) memcpy(prepassBones, o->BoneTransform, sizeof(float) * 12 * b->NumBones);
+    const bool checkBones = BeginPrepassBoneCheck(o, b->NumBones);
 #endif
     if (o->EnableBoneMatrix)
     {
@@ -316,7 +313,7 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
     }
 
 #ifdef MU_ENABLE_CONTROL_SOCKET
-    if (checkBones) RecordPrepassBones(prepassBones, o->BoneTransform, b->NumBones);
+    if (checkBones) EndPrepassBoneCheck(o, b->NumBones);
 #endif
 
     BoneScale = 1.f;
@@ -415,6 +412,9 @@ bool Calc_ObjectAnimation(OBJECT* o, bool Translate, int Select)
     b->CurrentAction = o->CurrentAction;
     VectorCopy(o->Position, b->BodyOrigin);
 
+#ifdef MU_ENABLE_CONTROL_SOCKET
+    const bool checkBones = BeginPrepassBoneCheck(o, b->NumBones);
+#endif
     if (o->EnableBoneMatrix)
     {
         b->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, !Translate);
@@ -423,6 +423,9 @@ bool Calc_ObjectAnimation(OBJECT* o, bool Translate, int Select)
     {
         b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, !Translate);
     }
+#ifdef MU_ENABLE_CONTROL_SOCKET
+    if (checkBones) EndPrepassBoneCheck(o, b->NumBones);
+#endif
     return true;
 }
 
