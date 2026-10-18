@@ -85,7 +85,9 @@ No player configuration or FPS cap is required.
   `REFERENCE_FRAME_STEP`, the whole reference frames that passed this frame
   (0 or 1), or keeps its own accumulator like `JOINT::TailFrames`. A counter
   compared with `==` needs care: between steps it holds its value for
-  several frames.
+  several frames. Blurs age their trail on reference frames only; the
+  poses one frame submits replace the previous frame's poses until a
+  reference frame keeps them, so a multi-pose swing stays whole.
 - Changing `REFERENCE_FPS` changes global gameplay timing and requires
   asset calibration plus broad behavioral verification.
 - Frame caps remain performance and presentation controls, not correctness

@@ -636,6 +636,8 @@ double FPS;
 float FPS_ANIMATION_FACTOR;
 // Whole 25 FPS reference frames that passed this frame (0 or 1): the step for integer frame counters.
 int REFERENCE_FRAME_STEP;
+// Counts rendered frames: tells which calls came within the same frame.
+unsigned int RENDERED_FRAME;
 double FPS_AVG;
 double WorldTime = 0.0;
 
@@ -674,6 +676,7 @@ void CalcFPS()
     FPS_ANIMATION_FACTOR = std::clamp(static_cast<float>(fpsRatio), 0.f, 1.f);
     static float referenceFrames = 0.f;
     REFERENCE_FRAME_STEP = TakeReferenceFrameSteps(referenceFrames, FPS_ANIMATION_FACTOR);
+    ++RENDERED_FRAME;
 
     // Calculate average fps every 2 seconds or 25 frames
     const double diffSinceStart = WorldTime - start;
