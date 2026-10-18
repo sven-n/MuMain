@@ -121,8 +121,8 @@ void ValidateSlot(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
     if (weaponKindSlot != ItemSlot::None && definition.slot != weaponKindSlot)
     {
         AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
-                 std::string("is a ") + FindEnumName(definition.weaponKind) + ", but its slot is not \"" +
-                     FindEnumName(weaponKindSlot) + "\"",
+                 std::string("has the weapon kind \"") + FindEnumName(definition.weaponKind) +
+                     "\", but its slot is not \"" + FindEnumName(weaponKindSlot) + "\"",
                  "weaponKind");
     }
 }

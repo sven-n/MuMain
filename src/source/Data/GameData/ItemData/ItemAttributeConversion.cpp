@@ -162,20 +162,25 @@ WeaponKind GetGroupWeaponKind(const ItemDefinition& definition)
     constexpr int StaffGroup = 5;
     constexpr int ShieldGroup = 6;
 
+    const bool mainHand = definition.slot == ItemSlot::MainHand;
     switch (definition.group)
     {
     case SwordGroup:
+        if (!mainHand)
+        {
+            return WeaponKind::None;
+        }
         return IsForRageFighterOnly(definition) ? WeaponKind::Glove : WeaponKind::Sword;
     case AxeGroup:
-        return WeaponKind::Axe;
+        return mainHand ? WeaponKind::Axe : WeaponKind::None;
     case MaceGroup:
-        return WeaponKind::Mace;
+        return mainHand ? WeaponKind::Mace : WeaponKind::None;
     case StaffGroup:
         return GetStaffGroupWeaponKind(definition.slot);
     case SpearGroup:
-        return WeaponKind::Spear;
+        return mainHand ? WeaponKind::Spear : WeaponKind::None;
     case ShieldGroup:
-        return WeaponKind::Shield;
+        return definition.slot == ItemSlot::OffHand ? WeaponKind::Shield : WeaponKind::None;
     case BowGroup:
         if (!definition.twoHanded)
         {

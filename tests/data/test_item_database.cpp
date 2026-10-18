@@ -125,6 +125,11 @@ TEST_CASE("A weapon's group gives its weapon kind [data][items]")
     CHECK(groupWeaponKind(5, ItemSlot::OffHand, false) == WeaponKind::Book);
     CHECK(groupWeaponKind(5, ItemSlot::None, false) == WeaponKind::None);
     CHECK(groupWeaponKind(PotionGroup, ItemSlot::None, false) == WeaponKind::None);
+    // Only on the slot of the kind.
+    CHECK(groupWeaponKind(SwordGroup, ItemSlot::None, false) == WeaponKind::None);
+    CHECK(groupWeaponKind(1, ItemSlot::OffHand, false) == WeaponKind::None);
+    CHECK(groupWeaponKind(3, ItemSlot::None, true) == WeaponKind::None);
+    CHECK(groupWeaponKind(6, ItemSlot::MainHand, false) == WeaponKind::None);
 
     // In group 0, an item only the Rage Fighter may use is one of his gloves.
     ItemDefinition glove = MakeItem(SwordGroup, 32, "Glove");
@@ -141,7 +146,9 @@ TEST_CASE("An edited weapon's kind follows its group while it is the group's [da
     bolt.slot = ItemSlot::OffHand;
 
     // A new item gets its group's kind.
-    CHECK(FollowGroupWeaponKind(nullptr, MakeItem(3, 100, "Spear")) == WeaponKind::Spear);
+    ItemDefinition spear = MakeItem(3, 100, "Spear");
+    spear.slot = ItemSlot::MainHand;
+    CHECK(FollowGroupWeaponKind(nullptr, spear) == WeaponKind::Spear);
 
     // Made two-handed, the bolt is a bow; one-handed again, it is none again.
     ItemDefinition twoHandedBolt = bolt;
@@ -152,6 +159,7 @@ TEST_CASE("An edited weapon's kind follows its group while it is the group's [da
 
     // A kind set in the item file that the group does not give stays.
     ItemDefinition shieldWithoutKind = MakeItem(6, 100, "Not a shield");
+    shieldWithoutKind.slot = ItemSlot::OffHand;
     CHECK(FollowGroupWeaponKind(&shieldWithoutKind, shieldWithoutKind) == WeaponKind::None);
     ItemDefinition swordAsSpear = MakeItem(SwordGroup, 100, "Sword");
     swordAsSpear.weaponKind = WeaponKind::Spear;

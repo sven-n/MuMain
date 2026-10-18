@@ -26,10 +26,11 @@ void CopyFieldsNotInItemAttribute(const ItemDefinition& source, ItemDefinition& 
 
 // The weapon kind the item's group gives, by group and slot as in OpenMU:
 // swords in group 0 (gloves when only the Rage Fighter may use the item),
-// axes in group 1, maces in group 2, spears in group 3, in group 4 bows on
-// offHand and crossbows on mainHand, in group 5 staffs on mainHand and books
-// on offHand, and shields in group 6. The arrows and bolts of group 4 are left
-// out as one-handed items (OpenMU tells them apart by their height of 1).
+// axes in group 1, maces in group 2 and spears in group 3, all on mainHand; in
+// group 4 bows on offHand and crossbows on mainHand, in group 5 staffs on
+// mainHand and books on offHand, and shields in group 6 on offHand. An item on
+// another slot gets none. The arrows and bolts of group 4 are left out as
+// one-handed items (OpenMU tells them apart by their height of 1).
 WeaponKind GetGroupWeaponKind(const ItemDefinition& definition);
 
 // The weapon kind of an item after the bmd import or the item editor changed it
