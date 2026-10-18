@@ -1237,7 +1237,8 @@ namespace Render::Effects::Behaviors
         if (o->AnimationFrame >= 11.0f)
         {
             CreateBomb3(o->Position, o->SubType);
-            if (rand() % 2 == 0)
+            // AnimationFrame stays clamped at 12, so this runs every frame until the summon fades out.
+            if (rand_fps_check(2))
                 PlayBuffer(SOUND_SUMMON_EXPLOSION);
         }
 
