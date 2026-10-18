@@ -6127,7 +6127,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     o->Position[1] = o->Owner->Position[1] + cosf(o->Angle[2] * 0.1f) * 50.f;
                     o->Position[2] = o->Owner->Position[2] + 20;
 
-                    CreateJointFpsChecked(BITMAP_JOINT_HEALING, o->Position, o->Position, o->Angle, 9, o->Owner, 10.f);
+                    CreateJoint(BITMAP_JOINT_HEALING, o->Position, o->Position, o->Angle, 9, o->Owner, 10.f);
                 }
             }
         }
