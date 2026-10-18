@@ -417,6 +417,34 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         CHECK(g_ItemDatabase.GetWeaponKind(emptySwordType) == WeaponKind::Sword);
     }
 
+    SUBCASE("a sword is a glove while only the Rage Fighter may use it")
+    {
+        REQUIRE(g_ItemDatabase.GetWeaponKind(KrisType) == WeaponKind::Sword);
+        const ITEM_ATTRIBUTE kris = ItemAttribute[KrisType];
+        for (int characterClass = 0; characterClass < MAX_CLASS; ++characterClass)
+        {
+            ItemAttribute[KrisType].RequireClass[characterClass] = characterClass == CLASS_RAGEFIGHTER ? 1 : 0;
+        }
+        g_ItemDataHandler.OnItemEdited(KrisType);
+        CHECK(g_ItemDatabase.GetWeaponKind(KrisType) == WeaponKind::Glove);
+
+        ItemAttribute[KrisType] = kris;
+        g_ItemDataHandler.OnItemEdited(KrisType);
+        CHECK(g_ItemDatabase.GetWeaponKind(KrisType) == WeaponKind::Sword);
+    }
+
+    SUBCASE("a staff is a book while it is on offHand")
+    {
+        REQUIRE(g_ItemDatabase.GetWeaponKind(ITEM_STAFF) == WeaponKind::Staff);
+        ItemAttribute[ITEM_STAFF].m_byItemSlot = static_cast<BYTE>(ItemSlot::OffHand);
+        g_ItemDataHandler.OnItemEdited(ITEM_STAFF);
+        CHECK(g_ItemDatabase.GetWeaponKind(ITEM_STAFF) == WeaponKind::Book);
+
+        ItemAttribute[ITEM_STAFF].m_byItemSlot = static_cast<BYTE>(ItemSlot::MainHand);
+        g_ItemDataHandler.OnItemEdited(ITEM_STAFF);
+        CHECK(g_ItemDatabase.GetWeaponKind(ITEM_STAFF) == WeaponKind::Staff);
+    }
+
     SUBCASE("an undone edit undoes the weapon kind")
     {
         ItemAttribute[ITEM_BOLT].TwoHand = true;
