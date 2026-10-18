@@ -70,6 +70,16 @@ No player configuration or FPS cap is required.
   pick. A gate nested in another gate, or around a `*FpsChecked` spawn,
   scales the chance twice. Where the original rolled `rand() % n`, keep that
   `n`: it is the intended rate at 25 FPS.
+- To choose, ask whether the line runs more often per second when the frame
+  rate rises. Code that looks one-shot can run every frame while its
+  condition holds: a clamped `AnimationFrame` with a `>=` test, a range of
+  attack times, a state nothing resets. Only a condition that ends (the object
+  dies, a counter resets, `CheckAttackTime` fires once) makes a roll per
+  event. When unsure, count the line over 10 seconds at `$fps 25` and
+  uncapped.
+- `if (gate) A; else B;`, with both rolled every frame, runs `B` on nearly
+  every frame at high FPS. Gate the frame, then pick:
+  `if (rand_fps_check(1)) { if (rand() % n == 0) A; else B; }`.
 - Changing `REFERENCE_FPS` changes global gameplay timing and requires
   asset calibration plus broad behavioral verification.
 - Frame caps remain performance and presentation controls, not correctness
