@@ -217,7 +217,33 @@ void CItemDataHandler::OnItemEdited(int itemType)
 
 void CItemDataHandler::OnItemsSwapped(int firstItemType, int secondItemType)
 {
+    if (!IsValidItemType(firstItemType) || !IsValidItemType(secondItemType))
+    {
+        return;
+    }
+
+    const ItemDefinition first = g_ItemDatabase.GetAllSlots()[firstItemType];
+    const ItemDefinition second = g_ItemDatabase.GetAllSlots()[secondItemType];
     g_ItemDatabase.Swap(firstItemType, secondItemType);
+    FollowGroupWeaponKindAfterMove(first, secondItemType);
+    FollowGroupWeaponKindAfterMove(second, firstItemType);
+}
+
+void CItemDataHandler::FollowGroupWeaponKindAfterMove(const ItemDefinition& before, int newItemType)
+{
+    const ItemDefinition* moved = g_ItemDatabase.Find(newItemType);
+    if (moved == nullptr)
+    {
+        return;
+    }
+
+    const WeaponKind weaponKind = FollowGroupWeaponKind(&before, *moved);
+    if (weaponKind != moved->weaponKind)
+    {
+        ItemDefinition changed = *moved;
+        changed.weaponKind = weaponKind;
+        g_ItemDatabase.Set(changed);
+    }
 }
 
 ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)

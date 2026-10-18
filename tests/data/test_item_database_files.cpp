@@ -387,6 +387,34 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         ItemAttribute[newBowType].m_byItemSlot = static_cast<BYTE>(ItemSlot::OffHand);
         g_ItemDataHandler.OnItemEdited(newBowType);
         CHECK(g_ItemDatabase.GetWeaponKind(newBowType) == WeaponKind::Bow);
+
+        // The other order: on offHand first, then two-handed.
+        const int otherBowType = MakeItemType(4, 101);
+        REQUIRE(g_ItemDatabase.Find(otherBowType) == nullptr);
+        std::fill(std::begin(ItemAttribute[otherBowType].Name), std::end(ItemAttribute[otherBowType].Name), L' ');
+        name.copy(ItemAttribute[otherBowType].Name, name.size());
+        ItemAttribute[otherBowType].m_byItemSlot = static_cast<BYTE>(ItemSlot::OffHand);
+        g_ItemDataHandler.OnItemEdited(otherBowType);
+        CHECK(g_ItemDatabase.GetWeaponKind(otherBowType) == WeaponKind::None);
+        ItemAttribute[otherBowType].TwoHand = true;
+        g_ItemDataHandler.OnItemEdited(otherBowType);
+        CHECK(g_ItemDatabase.GetWeaponKind(otherBowType) == WeaponKind::Bow);
+    }
+
+    SUBCASE("a moved weapon's kind follows its new group")
+    {
+        const int emptySpearType = MakeItemType(3, 100);
+        const int emptySwordType = MakeItemType(0, 100);
+        REQUIRE(g_ItemDatabase.Find(emptySpearType) == nullptr);
+        REQUIRE(g_ItemDatabase.Find(emptySwordType) == nullptr);
+
+        std::swap(ItemAttribute[KrisType], ItemAttribute[emptySpearType]);
+        g_ItemDataHandler.OnItemsSwapped(KrisType, emptySpearType);
+        CHECK(g_ItemDatabase.GetWeaponKind(emptySpearType) == WeaponKind::Spear);
+
+        std::swap(ItemAttribute[ITEM_SPEAR], ItemAttribute[emptySwordType]);
+        g_ItemDataHandler.OnItemsSwapped(ITEM_SPEAR, emptySwordType);
+        CHECK(g_ItemDatabase.GetWeaponKind(emptySwordType) == WeaponKind::None);
     }
 
     SUBCASE("an undone edit undoes the weapon kind")
