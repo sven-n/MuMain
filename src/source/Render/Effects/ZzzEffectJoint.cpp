@@ -650,7 +650,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                 {
                     o->RenderType = RENDER_TYPE_ALPHA_BLEND_MINUS;
                     o->Velocity = 40.f + rand() % 20;
-                    if (rand_fps_check(2))
+                    if (rand() % 2 == 0)
                         o->LifeTime = 67;
                     else
                         o->LifeTime = 75;
@@ -683,7 +683,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                     o->Position[0] += vRandPos[0];
                     o->Position[1] += vRandPos[1];
                     o->Position[2] = (rand() % 100) + 200;
-                    o->TargetPosition[2] = o->Position[2] - (rand() % 100 - 100) * (rand_fps_check(2) ? 1 : -1);
+                    o->TargetPosition[2] = o->Position[2] - (rand() % 100 - 100) * ((rand() % 2 == 0) ? 1 : -1);
 
                     VectorSubtract(o->TargetPosition, o->Position, o->Direction);
 
@@ -2508,7 +2508,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                     o->Velocity = 20.f;
                     Vector(-90.f, 0.f, Angle[2], o->Angle);
                     Vector(0.f, 0.f, 0.f, o->Direction);
-                    if (rand_fps_check(2))
+                    if (rand() % 2 == 0)
                     {
                         Vector(1.f, 0.8f, 0.6f, o->Light);
                     }
@@ -2529,7 +2529,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                     o->Velocity = 20.f;
                     Vector(-90.f, 0.f, Angle[2], o->Angle);
                     Vector(0.f, 0.f, 0.f, o->Direction);
-                    if (rand_fps_check(2))
+                    if (rand() % 2 == 0)
                     {
                         Vector(1.f, 0.8f, 0.6f, o->Light);
                     }
@@ -2724,7 +2724,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                     o->RenderType = RENDER_TYPE_ALPHA_BLEND;
 
                     // o->Target
-                    if (rand_fps_check(2))
+                    if (rand() % 2 == 0)
                     {
                         o->Angle[2] += 90.f;
                     }

@@ -1236,7 +1236,7 @@ namespace Render::Effects::Behaviors
         if (o->AnimationFrame >= 11.0f)
         {
             CreateBomb3(o->Position, o->SubType);
-            if (rand_fps_check(2))
+            if (rand() % 2 == 0)
                 PlayBuffer(SOUND_SUMMON_EXPLOSION);
         }
 
@@ -1805,10 +1805,8 @@ namespace Render::Effects::Behaviors
                 VectorAdd(Position, o->Position, Position);
                 CreateParticleFpsChecked(BITMAP_FLAME, Position, o->Angle, Light);
             }
-            if (rand_fps_check(8))
-            {
-                CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
-            }
+            // The original spawned a stone on 15 of every 16 frames ((int)WorldTime % 16); rand_fps_check(8) thins it.
+            CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
 
             Vector(Luminosity * 1.f, Luminosity * 0.4f, Luminosity * 0.f, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
@@ -7627,7 +7625,7 @@ namespace Render::Effects::Behaviors
                         vPos[2] += rand() % 300 - 150;
                         float fScale = 1.6f + rand() % 10 * 0.1f;
                         Vector(0.5f, 0.5f, 1.0f, vLight);
-                        int index = (rand_fps_check(2)) ? BITMAP_WATERFALL_5 : BITMAP_WATERFALL_3;
+                        int index = (rand() % 2 == 0) ? BITMAP_WATERFALL_5 : BITMAP_WATERFALL_3;
                         CreateParticleFpsChecked(index, vPos, o->Angle, vLight, 8, fScale);
                         Vector(1.0f, 1.0f, 1.0f, vLight);
                         if (rand_fps_check(2))
@@ -9062,7 +9060,7 @@ namespace Render::Effects::Behaviors
                         vPos[2] += rand() % 400 - 200;
                         float fScale = (o->Scale * 1.6f) + rand() % 10 * 0.1f;
                         Vector(0.3f, 0.3f, 1.0f, vLight);
-                        int index = (rand_fps_check(2)) ? BITMAP_WATERFALL_5 : BITMAP_WATERFALL_3;
+                        int index = (rand() % 2 == 0) ? BITMAP_WATERFALL_5 : BITMAP_WATERFALL_3;
                         CreateParticleFpsChecked(index, vPos, o->Angle, vLight, 8, fScale);
                         Vector(1.0f, 1.0f, 1.0f, vLight);
                         if (rand_fps_check(2))
@@ -9702,7 +9700,7 @@ namespace Render::Effects::Behaviors
                 {
                     VectorCopy(o->Position, Position);
                     Vector(1.0f, 0.12f, 0.0f, Light);
-                    b->TransformByObjectBone(Position, o->Owner, (rand_fps_check(2)) ? 26 : 35);
+                    b->TransformByObjectBone(Position, o->Owner, (rand() % 2 == 0) ? 26 : 35);
                     CreateParticleFpsChecked(BITMAP_SMOKELINE1, Position, o->Angle, Light, 5, 0.005f, o->Owner);
                 }
             }

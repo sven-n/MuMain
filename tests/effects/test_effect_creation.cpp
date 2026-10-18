@@ -159,10 +159,10 @@ TEST_CASE("The effect recorder counts the values rand() and Random:: give [effec
     CHECK(Find(record, "draws.rand") == "3");
     CHECK(Find(record, "draws.Random") == "0");
 
-    // rand_fps_check(2), which takes two values of Random::, then nine rand().
+    // A rand() pick of its variant, then nine rand().
     record = RecordCall(CallOf(MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_GREEN), {});
-    CHECK(Find(record, "draws.rand") == "9");
-    CHECK(Find(record, "draws.Random") == "2");
+    CHECK(Find(record, "draws.rand") == "10");
+    CHECK(Find(record, "draws.Random") == "0");
 }
 
 TEST_CASE("A skill effect of the hero goes into the skill effect pool [effects][recorder]")

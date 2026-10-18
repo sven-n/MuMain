@@ -2562,7 +2562,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                     if (o->SubType == 2)
                     {
                         CreateJoint(BITMAP_JOINT_THUNDER + 1, o->Position, o->Position, o->Angle, 4, o, 60.f + rand() % 10);
-                        if (rand_fps_check(2))
+                        if (rand() % 2 == 0)
                             CreateJoint(BITMAP_JOINT_THUNDER + 1, o->Position, o->Position, o->Angle, 4, o, 60.f + rand() % 10);
                     }
                 }
@@ -2867,7 +2867,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 {
                     float angle = 45.f + (-90.f * o->SubType);
 
-                    if (rand_fps_check(2))
+                    if (rand() % 2 == 0)
                     {
                         if (o->SubType)
                         {
@@ -3196,12 +3196,12 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
             {
                 if (o->Type == MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_GREEN)
                 {
-                    if (rand_fps_check(2))
+                    if (rand() % 2 == 0)
                         o->Type = MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_RED;
                 }
                 else if (o->Type == MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_RED)
                 {
-                    if (rand_fps_check(2))
+                    if (rand() % 2 == 0)
                         o->Type = MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_GREEN;
                 }
 
@@ -3290,7 +3290,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
 
                     default:
                         o->m_vDeadPosition[0] = Hero->Object.Position[0] + (rand() % 16 - 8) * TERRAIN_SCALE;
-                        if (rand_fps_check(5))
+                        if (rand() % 5 == 0)
                             o->m_vDeadPosition[1] = 114 * TERRAIN_SCALE;
                         else
                             o->m_vDeadPosition[1] = (rand() % 33 + 98) * TERRAIN_SCALE;
@@ -3544,7 +3544,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                     else if (irandom >= 6 && irandom <= 7)
                     {
                         o->Scale -= (0.2f) * FPS_ANIMATION_FACTOR;
-                        if (rand_fps_check(2))
+                        if (rand() % 2 == 0)
                             p_b->TransformPosition(BoneTransform[50], vPos, o->Position, false);
                         else
                             p_b->TransformPosition(BoneTransform[51], vPos, o->Position, false);

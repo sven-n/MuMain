@@ -220,6 +220,14 @@ add_test(
         -P "${CMAKE_CURRENT_SOURCE_DIR}/test_particle_cull_state.cmake"
 )
 
+set(MU_EFFECTS_DIR "${CMAKE_SOURCE_DIR}/src/source/Render/Effects")
+add_test(
+    NAME create_functions_have_no_fps_gate
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_EFFECT_SOURCES=CreateEffect=${MU_EFFECTS_DIR}/ZzzEffect.cpp\;CreateJoint=${MU_EFFECTS_DIR}/ZzzEffectJoint.cpp\;CreateParticle=${MU_EFFECTS_DIR}/ZzzEffectParticle.cpp"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_create_has_no_fps_gate.cmake"
+)
+
 add_test(
     NAME renderer_pipeline_fail_fast
     COMMAND "${CMAKE_COMMAND}"

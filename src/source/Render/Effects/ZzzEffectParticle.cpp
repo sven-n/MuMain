@@ -1492,7 +1492,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->LifeTime = rand() % 50 + 100;
                     o->Rotation = (float)(rand() % 360);
                     o->Scale = Scale * 0.4f;
-                    if (rand_fps_check(2))
+                    if (rand() % 2 == 0)
                         o->Angle[0] = 1.0f;
                     else
                         o->Angle[0] = -1.0f;
@@ -2156,7 +2156,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     VectorRotate(p, Matrix, o->Velocity);
                     break;
                 case 6:
-                    if (rand_fps_check(50))
+                    if (rand() % 50 == 0)
                     {
                         o->LifeTime = 50;
                         o->Gravity = 1.0f + (float)(rand() % 20) / 5.f;
@@ -2226,7 +2226,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->Scale += -(float)(rand() % 15) / 10.0f * FPS_ANIMATION_FACTOR;
                     break;
                 case 14:
-                    if (rand_fps_check(2))
+                    if (rand() % 2 == 0)
                     {
                         o->Alpha = 1.0f;
                         o->Velocity[0] = -4.0f + (float)(rand() % 4);
@@ -2237,7 +2237,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     }
                     break;
                 case 15:
-                    if (rand_fps_check(3))
+                    if (rand() % 3 == 0)
                     {
                         o->Alpha = 1.0f;
                         o->LifeTime = 35;
@@ -3093,7 +3093,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
 
                         o->Scale = 0;//(((float)(rand()%20+20)*0.001f) * o->Scale);
                         Vector(0.f, 0.f, 0.f, o->TurningForce);
-                        o->TurningForce[0] = (rand_fps_check(2) ? 1.0f : -1.0f);
+                        o->TurningForce[0] = ((rand() % 2 == 0) ? 1.0f : -1.0f);
 
                         float fAngle = o->Angle[2] + 90 + (rand() % 40) - 20;
                         vec3_t vAngle, vDirection;
@@ -3466,7 +3466,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 }
                 else if (o->SubType == 7)
                 {
-                    o->TexType = rand_fps_check(2) ? BITMAP_WATERFALL_4 : BITMAP_WATERFALL_5;
+                    o->TexType = (rand() % 2 == 0) ? BITMAP_WATERFALL_4 : BITMAP_WATERFALL_5;
                     o->LifeTime = 30;
                     o->Rotation = (float)(rand() % 360);
                     o->Scale = (float)(rand() % 50) * 0.05f + Scale;

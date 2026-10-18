@@ -63,6 +63,13 @@ No player configuration or FPS cap is required.
 
 - Raw per-frame increments are defects unless the value is intentionally
   frame-count based.
+- `rand_fps_check(n)` is the per-frame form of the original `rand() % n == 0`
+  and belongs only on chances rolled every frame. A pick between variants, or
+  a chance rolled once per event (spawn setup in `CreateEffect`,
+  `CreateJoint`, `CreateParticle`, packet handlers), stays a plain `rand()`
+  pick. A gate nested in another gate, or around a `*FpsChecked` spawn,
+  scales the chance twice. Where the original rolled `rand() % n`, keep that
+  `n`: it is the intended rate at 25 FPS.
 - Changing `REFERENCE_FPS` changes global gameplay timing and requires
   asset calibration plus broad behavioral verification.
 - Frame caps remain performance and presentation controls, not correctness

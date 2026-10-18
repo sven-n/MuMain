@@ -1387,7 +1387,7 @@ void SetPlayerShock(CHARACTER* c, int Hit)
             if (c->Helper.Type == MODEL_HORN_OF_FENRIR)
             {
                 SetAction_Fenrir_Damage(c, &c->Object);
-                if (rand_fps_check(3))
+                if (rand() % 3 == 0)
                     PlayBuffer(static_cast<ESound>(SOUND_FENRIR_DAMAGE_1 + rand() % 2), o);
             }
             else
@@ -1440,7 +1440,7 @@ void SetPlayerShock(CHARACTER* c, int Hit)
             vec3_t Position;
             for (int i = 0; i < 5; i++)
             {
-                if (rand_fps_check(2))
+                if (rand() % 2 == 0)
                 {
                     Position[0] = o->Position[0] + (rand() % 128 - 64);
                     Position[1] = o->Position[1];
@@ -2665,7 +2665,8 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
 
         if (6 <= c->AttackTime && c->AttackTime <= 12)
         {	// 꼬깔 만들기
-            if (rand_fps_check(2))
+            // One spear every reference frame, as at 25 FPS; rand_fps_check(2) halves the spears for cheaper casts.
+            if (rand_fps_check(1))
             {
                 vec3_t Position;
 
@@ -9102,7 +9103,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             b->TransformPosition(BoneTransform[43], vRelativePos, vtaWorldPos, false);
             vtaWorldPos[2] += 20.f;
 
-            CreateParticle(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle, rand_fps_check(3) ? vLight : vLight1, 1, 0.3f);
+            CreateParticle(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle,
+                           (rand() % 3 == 0) ? vLight : vLight1, 1, 0.3f);
         }
 
         VectorCopy(o->Position, b->BodyOrigin);
@@ -9112,8 +9114,10 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
         if (rand_fps_check(1))
         {
-            CreateParticle(BITMAP_SPARK + 1, vtaWorldPos, o->Angle, rand_fps_check(3) ? vLight2 : vLight1, 25, Scale + 0.2f);
-            CreateParticle(BITMAP_SPARK + 1, vtaWorldPos, o->Angle, rand_fps_check(2) ? vLight2 : vLight1, 25, Scale + 0.3f);
+            CreateParticle(BITMAP_SPARK + 1, vtaWorldPos, o->Angle, (rand() % 3 == 0) ? vLight2 : vLight1, 25,
+                           Scale + 0.2f);
+            CreateParticle(BITMAP_SPARK + 1, vtaWorldPos, o->Angle, (rand() % 2 == 0) ? vLight2 : vLight1, 25,
+                           Scale + 0.3f);
         }
 
         Vector(0.7f, 0.5f, 0.2f, vLight);
