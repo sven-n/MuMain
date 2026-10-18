@@ -527,15 +527,49 @@ server with original clients (after phases 6 and B).
    **A (OpenMU):** new rule fields/tables with migration, initialization,
    update plug-in and server enforcement, based on the mapping above.
 
-   **3b Remaining item lists (not started).** The lists of item ids outside
-   the phase 3 files: about 35 places (see "Item-specific code that is left"
-   → Phase 3b) that repeat data the items already have (tags, `slot`,
-   `wingTier`, `storable`, the model and display files) or need one new tag
-   (bow, crossbow, sceptre, …). As in phase 3, the code asks the item data
-   instead of naming items, and a one-time test compares the old and the new
-   code for every item before the lists go; intended behavior changes, if
-   any, get commits of their own. New tags that OpenMU checks in
-   `ItemConstants` go into the mapping for A.
+   **3b Remaining item lists (in progress).** The lists of item ids outside
+   the phase 3 files that repeat data the items already have (tags, `slot`,
+   `wingTier`, `storable`, the model and display files) or need new data.
+   As in phase 3, the code asks the item data instead of naming items, and a
+   one-time test compares the old and the new code for every item type and
+   item model slot before the lists go; intended behavior changes, if any,
+   get commits of their own. New tags that OpenMU checks in `ItemConstants`
+   go into the mapping for A. An inventory (2026-10-17) found 52 places
+   (more than the estimated 35: the lucky items, SD potions and
+   transformation rings, and conditions over several weapon groups), done
+   in four parts:
+   - **3b-1** (done): 14 places that repeat data the items have: the mount
+     and pet checks of Power Slash, Chaos Castle, the helper HP frame and
+     the chat animation, the mana and healing potion searches
+     (`ItemDatabase::GetItemTypesWithTag`), the ammunition's durability
+     icon, the capes' defense option, the excellent durability bonus, the
+     mix's wing flags and the staffs' magic durability; also the capes'
+     defense per level in `CalcDefense` (phase 3c's code, but the same cape
+     list as the defense option, which an edited `cape` tag would otherwise
+     split). MoveHero's rider
+     check for operating objects was always true and is gone; `CalcPartType`
+     and `ITEM::Part` were written but never read and are gone. The Crywolf
+     contract's horn check stays until the unformatted code around it is
+     touched anyway.
+   - **3b-2** bows, crossbows, spears and shields, and **3b-3** staffs,
+     swords, axes and maces: one `weaponKind` field per item (like
+     `wingTier`; the kinds are exclusive and match OpenMU's item groups)
+     instead of a tag per kind, plus the tags `sceptre` and `magicSword`.
+     3b-3 includes the character window's wizardry damage
+     (`CharacterInfoWindow.cpp`), which picks the magic durability by the
+     staff group and five Magic Gladiator swords, while the maximum
+     durability follows `magicDurability` since 3b-1.
+   - **3b-4** the tags `luckyItem`, `shieldPotion` and `transformationRing`,
+     with the potion hotkeys. It also decides the potion order: the potion
+     searches take the highest item type first (the largest potion), which
+     the data cannot change, so a higher numbered potion tagged in the
+     editor (Siege Potion, Elite Healing Potion) would come before the
+     Large Healing Potion. An order or strength per potion would let the
+     data decide.
+   The 38 items named "…-J" (copies of existing items with no model, unknown
+   to OpenMU; what "J" stands for is not known) follow their data. Two lists
+   the inventory found wrong are fixed on their own, not in 3b: the
+   Illusion Temple team skins (#669) and the trade warning (#671).
 
    **3c Item stats by level (not started).** What the item level adds to
    damage, magic power, defense, blocking, the requirements and the wing

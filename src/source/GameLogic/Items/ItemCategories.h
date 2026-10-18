@@ -9,10 +9,17 @@ namespace GameLogic::Items
     // Wings
     bool IsWingItem(const ITEM* pItem);
     bool IsSecondTierWingExceptCape(const ITEM* pItem);
+    // Every second tier wing, the Capes of Lord and Fighter included.
+    bool IsSecondTierWing(const ITEM* pItem);
     bool IsThirdTierWing(const ITEM* pItem);
+    bool IsSecondOrThirdTierWing(const ITEM* pItem);
+    // The Capes of Lord and Fighter.
+    bool IsSecondTierCape(const ITEM* pItem);
     bool IsSmallWing(const ITEM* pItem);
 
     // Mounts and pets
+    // The model of an item that goes into the pet slot (helpers, mounts, pets).
+    bool IsPetSlotModel(int modelType);
     bool IsRideableMount(const ITEM* pItem);
     bool IsRideableMountModel(int modelType);
     bool IsHornMountModel(int modelType);

@@ -93,6 +93,8 @@ namespace mu::ui::window
         void SyncView();
         void SyncLeftColumn();
         void SyncIcons();
+        // The image name of an IMAGE_ITEM_DUR_* durability icon; empty for none.
+        static const char* DurabilityIconImage(int imageIndex);
         void SyncTooltip();
 
         void BindRmlModel(Rml::DataModelConstructor& c, UI::ItemEndurance::ItemEnduranceRmlModel& model);

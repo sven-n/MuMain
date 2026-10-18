@@ -7,10 +7,11 @@
 #include <string>
 #include <string_view>
 
-// The look preset: the player's only look setting ([Render] Look, Classic or Enhanced). Enhanced
-// switches on texture filtering, Enhanced lighting, dynamic model lights, the light mood at full
-// strength, post-processing and multisample anti-aliasing (at the [Render] Antialiasing sample
-// count); Classic switches all of them off, as the game always looked. The anisotropy level is a
+// The look preset ([Render] Look, Classic or Enhanced). Enhanced switches on texture filtering,
+// Enhanced lighting, dynamic model lights, the light mood at full strength, post-processing and
+// multisample anti-aliasing (at the [Render] Antialiasing sample count); Classic switches all of
+// them off, as the game always looked. The player can switch Enhanced lighting, dynamic lights,
+// the light mood and post-processing off one by one (SetChoices). The anisotropy level is a
 // setting of its own (it acts only with texture filtering).
 //
 // Developer builds (MU_ENABLE_CONTROL_SOCKET or _EDITOR) can override one feature, or the light

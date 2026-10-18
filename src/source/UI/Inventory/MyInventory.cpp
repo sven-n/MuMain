@@ -32,6 +32,7 @@ extern bool SelectFlag;
 #include "GameLogic/Social/MonkSystem.h"
 #include "Character/CharacterManager.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "UI/Scaling/UITransform.h"
@@ -499,7 +500,7 @@ bool CMyInventory::IsEquipable(int iIndex, ITEM* pItem) const
     if (gMapManager.InChaosCastle() || (Get_State_Only_Elf()
         && g_isCharacterBuff((&Hero->Object), eBuff_CrywolfHeroContracted)))
     {
-        if ((pItem->Type >= ITEM_HORN_OF_UNIRIA && pItem->Type <= ITEM_DARK_RAVEN_ITEM) || pItem->Type == ITEM_HORN_OF_FENRIR)
+        if (GameLogic::Items::IsRideableMount(pItem) || GameLogic::Items::IsDarkLordPet(pItem))
             return false;
     }
     else if (GameLogic::Items::IsRideableMount(pItem)
@@ -1823,23 +1824,20 @@ int CMyInventory::GetPointedItemIndex() const
 
 int CMyInventory::FindManaItemIndex() const
 {
-    for (int i = ITEM_LARGE_MANA_POTION; i >= ITEM_SMALL_MANA_POTION; i--)
-    {
-        const int iIndex = FindItemReverseIndex(i);
-        if (iIndex != -1)
-        {
-            return iIndex;
-        }
-    }
-
-    return -1;
+    return FindItemIndexWithTagHighestFirst(Data::Items::ItemTag::ManaPotion);
 }
 
 int CMyInventory::FindHealingItemIndex() const
 {
-    for (int i = ITEM_LARGE_HEALING_POTION; i >= ITEM_APPLE; i--)
+    return FindItemIndexWithTagHighestFirst(Data::Items::ItemTag::HealingPotion);
+}
+
+int CMyInventory::FindItemIndexWithTagHighestFirst(Data::Items::ItemTag tag) const
+{
+    const auto itemTypes = g_ItemDatabase.GetItemTypesWithTag(tag);
+    for (auto itemType = itemTypes.rbegin(); itemType != itemTypes.rend(); ++itemType)
     {
-        const int iIndex = FindItemReverseIndex(i);
+        const int iIndex = FindItemReverseIndex(*itemType);
         if (iIndex != -1)
         {
             return iIndex;

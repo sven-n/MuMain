@@ -46,14 +46,35 @@ namespace GameLogic::Items
         return HasWingTier(pItem, WingTier::Second) && !HasTag(pItem, ItemTag::Cape);
     }
 
+    bool IsSecondTierWing(const ITEM* pItem)
+    {
+        return HasWingTier(pItem, WingTier::Second);
+    }
+
     bool IsThirdTierWing(const ITEM* pItem)
     {
         return HasWingTier(pItem, WingTier::Third);
     }
 
+    bool IsSecondOrThirdTierWing(const ITEM* pItem)
+    {
+        const WingTier tier = g_ItemDatabase.GetWingTier(pItem->Type);
+        return tier == WingTier::Second || tier == WingTier::Third;
+    }
+
+    bool IsSecondTierCape(const ITEM* pItem)
+    {
+        return HasWingTier(pItem, WingTier::Second) && HasTag(pItem, ItemTag::Cape);
+    }
+
     bool IsSmallWing(const ITEM* pItem)
     {
         return HasWingTier(pItem, WingTier::Small);
+    }
+
+    bool IsPetSlotModel(int modelType)
+    {
+        return g_ItemDatabase.GetSlot(Data::Items::ToItemType(modelType)) == ItemSlot::Pet;
     }
 
     bool IsRideableMount(const ITEM* pItem)

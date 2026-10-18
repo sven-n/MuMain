@@ -111,7 +111,7 @@ public:
     bool GetSortParticleDraws() const { return m_sortParticleDraws; }
     bool GetVSyncEnabled() const { return m_vsyncEnabled; }
     void SetVSyncEnabled(bool enabled);
-    // The look preset, the player's only look setting ([Render] Look).
+    // The look preset ([Render] Look).
     LookPreset GetLook() const
     {
         return m_look;
