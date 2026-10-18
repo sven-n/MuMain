@@ -3,9 +3,12 @@
 #include "doctest.h"
 
 #include "ClientDataScope.h"
+#include "TestFiles.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemStatsJson.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -167,6 +170,17 @@ void GiveRequiredStats(CHARACTER_ATTRIBUTE& hero, int level)
     hero.Charisma = static_cast<WORD>(g_iItemInfo[level][_COLUMN_TYPE_REQCHA]);
 }
 } // namespace
+
+TEST_CASE("The shipped item stat file loads without problems and is in the written format [data][items]")
+{
+    const ItemStatsLoadResult result = LoadItemStatsFile(ClientDirectory / GetItemStatsFile());
+    for (const ItemDataIssue& issue : result.issues)
+    {
+        INFO(issue.ToString());
+        CHECK(false);
+    }
+    CHECK(WriteItemStatsJson(result.file) == TestFiles::ReadWholeFile(ClientDirectory / GetItemStatsFile()));
+}
 
 TEST_CASE("A shield's defense rate grows with its + level [data][items]")
 {

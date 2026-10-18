@@ -1,0 +1,239 @@
+#include "stdafx.h"
+
+#include "doctest.h"
+
+#include "Data/GameData/ItemData/ItemStatsJson.h"
+
+#include <string>
+#include <vector>
+
+using namespace Data::Items;
+
+namespace
+{
+constexpr const char* Source = "ItemStats.json";
+
+// A small file in the written format: two tables, the default and two profiles.
+constexpr const char* SmallFile = R"({
+  "formatVersion": 1,
+  "dropLevelBonus": {"ancient": 30},
+  "tables": [
+    {
+      "name": "linear",
+      "caption": {"en": "Linear", "de": "Linear"},
+      "perLevel": 1
+    },
+    {
+      "name": "steps",
+      "caption": {"en": "Steps"},
+      "values": [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 31, 36, 42, 49, 57, 66]
+    }
+  ],
+  "default": {
+    "damage": {"table": "steps", "excellent": {"times": 25, "add": 5}, "ancient": {"add": 5, "dropLevelDivisor": 40}},
+    "magicPower": {"table": "steps", "excellent": {"times": 25, "add": 5}, "ancient": {"add": 2, "dropLevelDivisor": 60}, "perLevelAfterHalving": 2},
+    "blockRate": {"table": "steps", "excellent": {"times": 25, "add": 5}, "ancient": "none"},
+    "defense": {"table": "steps", "excellent": {"times": 12, "add": 4, "dropLevelDivisor": 5}, "ancient": {"times": 3, "add": 2, "dropLevelDivisor": 30}},
+    "magicDefense": {"table": "steps", "excellent": "none", "ancient": "none"}
+  },
+  "profiles": [
+    {
+      "name": "sceptre",
+      "magicPower": {"perLevelAfterHalving": 0}
+    },
+    {
+      "name": "shield",
+      "defense": {"table": "linear", "excellent": "none", "ancient": {"times": 20, "add": 2, "afterLevelBonus": true}}
+    }
+  ]
+}
+)";
+
+struct ReadResult
+{
+    ItemStatFile file;
+    std::vector<ItemDataIssue> issues;
+};
+
+ReadResult Read(const std::string& text)
+{
+    ReadResult result;
+    ReadItemStatsJson(text, Source, result.file, result.issues);
+    return result;
+}
+
+bool HasIssue(const std::vector<ItemDataIssue>& issues, ItemDataIssueSeverity severity, const std::string& field)
+{
+    for (const ItemDataIssue& issue : issues)
+    {
+        if (issue.severity == severity && issue.field == field)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+// The small file with `from` replaced by `to` (once).
+std::string Changed(const std::string& from, const std::string& to)
+{
+    std::string text = SmallFile;
+    const size_t position = text.find(from);
+    REQUIRE(position != std::string::npos);
+    text.replace(position, from.size(), to);
+    return text;
+}
+} // namespace
+
+TEST_CASE("The item stat file reads and writes back the same [data][items]")
+{
+    const ReadResult result = Read(SmallFile);
+    CHECK(result.issues.empty());
+    CHECK(WriteItemStatsJson(result.file) == SmallFile);
+
+    REQUIRE(result.file.tables.size() == 2);
+    CHECK(result.file.ancientDropLevelBonus == 30);
+    CHECK(result.file.tables[0].name == "linear");
+    CHECK(result.file.tables[0].perLevel == 1);
+    CHECK(result.file.tables[0].caption.Get("de") == "Linear");
+    CHECK(result.file.tables[1].values[15] == 66);
+    REQUIRE(result.file.profiles.size() == 2);
+    CHECK(result.file.profiles[1].stats[static_cast<size_t>(ItemStat::Defense)].excellent.state ==
+          WrittenStatTerm::State::None);
+}
+
+TEST_CASE("The item stat writer sorts by name and keeps one value for every level as one number [data][items]")
+{
+    ItemStatFile file = Read(SmallFile).file;
+    std::swap(file.tables[0], file.tables[1]);
+    std::swap(file.profiles[0], file.profiles[1]);
+    file.tables[1].perLevel = 0;
+    file.tables[1].values.fill(7);
+
+    const std::string text = WriteItemStatsJson(file);
+    CHECK(text.find(R"("name": "linear",)") < text.find(R"("name": "steps",)"));
+    CHECK(text.find(R"("name": "sceptre",)") < text.find(R"("name": "shield",)"));
+    CHECK(text.find(R"("values": 7)") != std::string::npos);
+
+    const ReadResult reread = Read(text);
+    CHECK(reread.issues.empty());
+    CHECK(reread.file.tables[0].values[9] == 7);
+}
+
+TEST_CASE("Item stat profiles lay their terms over the default [data][items]")
+{
+    const ItemStatProfiles profiles(Read(SmallFile).file);
+
+    CHECK(profiles.Find("") == ItemStatProfiles::DefaultProfile);
+    CHECK(profiles.Find("shield") == 2);
+    CHECK(profiles.Find("unknown") == ItemStatProfiles::UnknownProfile);
+    CHECK(profiles.GetProfileNames() == std::vector<std::string>{"sceptre", "shield"});
+    CHECK(profiles.GetAncientDropLevelBonus() == 30);
+
+    const ItemStatProfile& defaults = profiles.Get(ItemStatProfiles::DefaultProfile);
+    const ItemStatProfile& sceptre = profiles.Get(profiles.Find("sceptre"));
+    const ItemStatProfile& shield = profiles.Get(profiles.Find("shield"));
+
+    // The sceptre writes only the magic power's per level term; the rest is the default.
+    CHECK(defaults.Get(ItemStat::MagicPower).perLevelAfterHalving == 2);
+    CHECK(sceptre.Get(ItemStat::MagicPower).perLevelAfterHalving == 0);
+    CHECK(sceptre.Get(ItemStat::MagicPower).excellent == defaults.Get(ItemStat::MagicPower).excellent);
+    CHECK(sceptre.Get(ItemStat::Defense).ancient == defaults.Get(ItemStat::Defense).ancient);
+
+    // A term the profile writes replaces the default's as a whole: the shield's
+    // ancient term has no drop level divisor although the default's has one.
+    const StatTerms& shieldDefense = shield.Get(ItemStat::Defense);
+    CHECK_FALSE(shieldDefense.excellent.has_value());
+    REQUIRE(shieldDefense.ancient.has_value());
+    CHECK(shieldDefense.ancient->times == 20);
+    CHECK(shieldDefense.ancient->dropLevelDivisor == 0);
+    CHECK(shieldDefense.ancient->afterLevelBonus);
+
+    // Level bonus: the table's value of the level (+15's above it) plus its part per level.
+    CHECK(profiles.GetLevelBonus(defaults.Get(ItemStat::Defense), 10) == 31);
+    CHECK(profiles.GetLevelBonus(defaults.Get(ItemStat::Defense), 20) == 66);
+    CHECK(profiles.GetLevelBonus(shieldDefense, 20) == 20);
+
+    // An index the file does not have is the default.
+    CHECK(profiles.Get(99).Get(ItemStat::MagicPower).perLevelAfterHalving == 2);
+}
+
+TEST_CASE("Item stat profiles without a file keep every stat at its base [data][items]")
+{
+    const ItemStatProfiles profiles;
+    CHECK(profiles.Find("") == ItemStatProfiles::DefaultProfile);
+    CHECK(profiles.Find("shield") == ItemStatProfiles::UnknownProfile);
+    const StatTerms& damage = profiles.Get(ItemStatProfiles::DefaultProfile).Get(ItemStat::Damage);
+    CHECK(profiles.GetLevelBonus(damage, 15) == 0);
+    CHECK_FALSE(damage.excellent.has_value());
+    CHECK_FALSE(damage.ancient.has_value());
+}
+
+TEST_CASE("Item stat file errors [data][items]")
+{
+    using Severity = ItemDataIssueSeverity;
+    CHECK(
+        HasIssue(Read(Changed(R"("dropLevelBonus": {"ancient": 30},)", "")).issues, Severity::Error, "dropLevelBonus"));
+    CHECK(HasIssue(Read(Changed(R"("ancient": 30)", R"("ancient": -1)")).issues, Severity::Error,
+                   "dropLevelBonus.ancient"));
+    CHECK(
+        HasIssue(Read(Changed(R"("name": "linear")", R"("name": "steps")")).issues, Severity::Error, "tables[1].name"));
+    CHECK(HasIssue(Read(Changed(R"("name": "linear")", R"("name": "lin ear")")).issues, Severity::Error,
+                   "tables[0].name"));
+    CHECK(HasIssue(Read(Changed(R"("perLevel": 1)", R"("caption2": 1)")).issues, Severity::Error, "tables.linear"));
+    CHECK(HasIssue(Read(Changed("[0, 3, 6, 9, 12, 15,", "[0, 3, 6, 9, 12,")).issues, Severity::Error,
+                   "tables.steps.values"));
+    CHECK(HasIssue(Read(Changed("[0, 3, 6,", "[0, -3, 6,")).issues, Severity::Error, "tables.steps.values[1]"));
+    CHECK(HasIssue(Read(Changed(R"("magicDefense": {"table": "steps", "excellent": "none", "ancient": "none"})",
+                                R"("magicDefense": {"table": "steps", "excellent": "none"})"))
+                       .issues,
+                   Severity::Error, "default.magicDefense.ancient"));
+    CHECK(HasIssue(Read(Changed(R"(,
+    "magicDefense": {"table": "steps", "excellent": "none", "ancient": "none"})",
+                                ""))
+                       .issues,
+                   Severity::Error, "default.magicDefense"));
+    CHECK(HasIssue(Read(Changed(R"(, "perLevelAfterHalving": 2})", "}")).issues, Severity::Error,
+                   "default.magicPower.perLevelAfterHalving"));
+    CHECK(HasIssue(Read(Changed(R"("defense": {"table": "linear")", R"("defense": {"table": "missing")")).issues,
+                   Severity::Error, "profiles.shield.defense.table"));
+    CHECK(HasIssue(Read(Changed(R"("dropLevelDivisor": 40)", R"("dropLevelDivisor": 0)")).issues, Severity::Error,
+                   "default.damage.ancient.dropLevelDivisor"));
+    CHECK(HasIssue(Read(Changed(R"("ancient": "none"})", R"("ancient": "nothing"})")).issues, Severity::Error,
+                   "default.blockRate.ancient"));
+    CHECK(HasIssue(Read(Changed(R"("name": "sceptre")", R"("name": "shield")")).issues, Severity::Error,
+                   "profiles[1].name"));
+    CHECK(HasIssue(Read(Changed(R"("afterLevelBonus": true)", R"("afterLevelBonus": 1)")).issues, Severity::Error,
+                   "profiles.shield.defense.ancient.afterLevelBonus"));
+    CHECK(HasIssue(Read(R"({"formatVersion": 2})").issues, Severity::Error, "formatVersion"));
+}
+
+TEST_CASE("Item stat file warnings [data][items]")
+{
+    using Severity = ItemDataIssueSeverity;
+    const auto warningsOnly = [](const std::vector<ItemDataIssue>& issues)
+    { return !HasErrors(issues) && !issues.empty(); };
+
+    const ReadResult unknownKey =
+        Read(Changed(R"("perLevelAfterHalving": 0})", R"("perLevelAfterHalving": 0, "speed": 1})"));
+    CHECK(warningsOnly(unknownKey.issues));
+    CHECK(HasIssue(unknownKey.issues, Severity::Warning, "profiles.sceptre.magicPower.speed"));
+
+    // The per level term after halving belongs to the magic power only.
+    const ReadResult wrongStat =
+        Read(Changed(R"("ancient": "none"})", R"("ancient": "none", "perLevelAfterHalving": 1})"));
+    CHECK(HasIssue(wrongStat.issues, Severity::Warning, "default.blockRate.perLevelAfterHalving"));
+
+    // afterLevelBonus belongs to the ancient term only.
+    const ReadResult excellentAfter =
+        Read(Changed(R"("excellent": {"times": 12, "add": 4, "dropLevelDivisor": 5})",
+                     R"("excellent": {"times": 12, "add": 4, "dropLevelDivisor": 5, "afterLevelBonus": true})"));
+    CHECK(HasIssue(excellentAfter.issues, Severity::Warning, "default.defense.excellent.afterLevelBonus"));
+
+    const ReadResult unusedTable = Read(Changed(R"("defense": {"table": "linear", )", R"("defense": {)"));
+    CHECK(warningsOnly(unusedTable.issues));
+    CHECK(HasIssue(unusedTable.issues, Severity::Warning, "tables.linear"));
+
+    const ReadResult noEnglish = Read(Changed(R"({"en": "Steps"})", R"({"de": "Stufen"})"));
+    CHECK(HasIssue(noEnglish.issues, Severity::Warning, "tables.steps.caption"));
+}

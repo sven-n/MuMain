@@ -2,9 +2,13 @@
 
 #include "Core/Globals/_define.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
+#include "Data/GameData/ItemData/ItemType.h"
 
 #include "json.hpp"
 
+#include <algorithm>
+#include <array>
+#include <cstddef>
 #include <filesystem>
 #include <optional>
 #include <string>
@@ -70,6 +74,39 @@ template <typename TAddIssue> bool ReadNumber(const OrderedJson& json, int& numb
 
 // Names in the data (e.g. glow colors) have only letters and digits.
 bool IsName(std::string_view text);
+
+// A value for each item level 0 to 15: one number when all are the same, else the list.
+template <typename T> OrderedJson WritePerLevelValues(const std::array<T, ItemLevelCount>& values)
+{
+    const bool sameForEveryLevel =
+        std::all_of(values.begin(), values.end(), [&](const T& value) { return value == values.front(); });
+    return sameForEveryLevel ? OrderedJson(values.front()) : OrderedJson(values);
+}
+
+// Reads what WritePerLevelValues writes, each number with readValue(json, field, value).
+// Anything else is an error, added with addError(field, message); then false is returned.
+template <typename T, typename TReadValue, typename TAddError>
+bool ReadPerLevelValues(const OrderedJson& json, const std::string& field, std::array<T, ItemLevelCount>& values,
+                        TReadValue&& readValue, TAddError&& addError)
+{
+    if (json.is_number())
+    {
+        T value{};
+        readValue(json, field, value);
+        values.fill(value);
+        return true;
+    }
+    if (!json.is_array() || json.size() != values.size())
+    {
+        addError(field, "must be one number, or a list of one number for each item level 0 to 15");
+        return false;
+    }
+    for (size_t level = 0; level < values.size(); ++level)
+    {
+        readValue(json[level], field + "[" + std::to_string(level) + "]", values[level]);
+    }
+    return true;
+}
 
 // The JSON writer puts every list entry on its own line. Short lists of
 // words or numbers are easier to read on one line: "tags": ["jewel", "valuable"].

@@ -1,0 +1,88 @@
+{
+  "formatVersion": 1,
+  "dropLevelBonus": {"ancient": 30},
+  "tables": [
+    {
+      "name": "damageIncreaseWeapons",
+      "caption": {"en": "Damage Increase (Weapons)"},
+      "values": [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 31, 36, 42, 49, 57, 66]
+    },
+    {
+      "name": "defenseBonus1stWings",
+      "caption": {"en": "Defense Bonus (1st Wings)"},
+      "values": [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 31, 36, 42, 49, 57, 66]
+    },
+    {
+      "name": "defenseBonus2ndWings",
+      "caption": {"en": "Defense Bonus (2nd Wings and Capes)"},
+      "values": [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 22, 27, 33, 40, 48, 57]
+    },
+    {
+      "name": "defenseBonus3rdWings",
+      "caption": {"en": "Defense Bonus (3rd Wings)"},
+      "values": [0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 41, 47, 54, 62, 71, 81]
+    },
+    {
+      "name": "defenseIncreaseArmors",
+      "caption": {"en": "Defense Increase (Armors)"},
+      "values": [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 31, 36, 42, 49, 57, 66]
+    },
+    {
+      "name": "defenseIncreaseShields",
+      "caption": {"en": "Defense Increase (Shields)"},
+      "perLevel": 1
+    },
+    {
+      "name": "defenseRateIncreaseShields",
+      "caption": {"en": "Defense Rate Increase (Shields)"},
+      "values": [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 31, 36, 42, 49, 57, 66]
+    },
+    {
+      "name": "magicDefenseIncrease",
+      "caption": {"en": "Magic Defense Increase"},
+      "values": [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 31, 36, 42, 49, 57, 66]
+    },
+    {
+      "name": "magicPowerIncrease",
+      "caption": {"en": "Magic Power Increase"},
+      "values": [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 31, 36, 42, 49, 57, 66]
+    }
+  ],
+  "default": {
+    "damage": {"table": "damageIncreaseWeapons", "excellent": {"times": 25, "add": 5}, "ancient": {"add": 5, "dropLevelDivisor": 40}},
+    "magicPower": {"table": "magicPowerIncrease", "excellent": {"times": 25, "add": 5}, "ancient": {"add": 2, "dropLevelDivisor": 60}, "perLevelAfterHalving": 2},
+    "blockRate": {"table": "defenseRateIncreaseShields", "excellent": {"times": 25, "add": 5}, "ancient": "none"},
+    "defense": {"table": "defenseIncreaseArmors", "excellent": {"times": 12, "add": 4, "dropLevelDivisor": 5}, "ancient": {"times": 3, "add": 2, "dropLevelDivisor": 30}},
+    "magicDefense": {"table": "magicDefenseIncrease", "excellent": "none", "ancient": "none"}
+  },
+  "profiles": [
+    {
+      "name": "firstTierWing",
+      "defense": {"table": "defenseBonus1stWings"}
+    },
+    {
+      "name": "sceptre",
+      "magicPower": {"perLevelAfterHalving": 0}
+    },
+    {
+      "name": "secondTierCape",
+      "defense": {"table": "defenseBonus2ndWings"}
+    },
+    {
+      "name": "secondTierWing",
+      "defense": {"table": "defenseBonus2ndWings"}
+    },
+    {
+      "name": "shield",
+      "defense": {"table": "defenseIncreaseShields", "excellent": "none", "ancient": {"times": 20, "add": 2, "afterLevelBonus": true}}
+    },
+    {
+      "name": "smallWing",
+      "defense": {"table": "defenseBonus1stWings"}
+    },
+    {
+      "name": "thirdTierWing",
+      "defense": {"table": "defenseBonus3rdWings"}
+    }
+  ]
+}

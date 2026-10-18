@@ -16,6 +16,7 @@ fields, so it can later be exchanged with the server.
 | File | Group |
 |---|---|
 | `Group00_Sword.json` … `Group15_Etc.json` | 0–15, named after the `ITEM_GROUP_*` constants |
+| `Stats/ItemStats.json` | What the + level, excellent options and ancient sets add to the stats; see [Item stats by level](#item-stats-by-level) |
 
 The file name is only a convention; the group comes from the file content.
 
@@ -185,6 +186,88 @@ and are in the code (`GameLogic/Items/TradeRestrictions.cpp`,
 
 These checks only decide what the client allows. The server has its own
 checks; the design document lists how the flags map to OpenMU.
+
+## Item stats by level
+
+`Stats/ItemStats.json` says what an item's + level, excellent options and
+ancient set add to its damage, magic power, defense rate (`blockRate`),
+defense and magic defense. It is in a folder of its own because every
+`*.json` file in `Data/Items` is read as a group file. An excerpt:
+
+```json
+{
+  "formatVersion": 1,
+  "dropLevelBonus": {"ancient": 30},
+  "tables": [
+    {
+      "name": "damageIncreaseWeapons",
+      "caption": {"en": "Damage Increase (Weapons)"},
+      "values": [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 31, 36, 42, 49, 57, 66]
+    }
+  ],
+  "default": {
+    "damage": {"table": "damageIncreaseWeapons", "excellent": {"times": 25, "add": 5}, "ancient": {"add": 5, "dropLevelDivisor": 40}},
+    "magicDefense": {"table": "magicDefenseIncrease", "excellent": "none", "ancient": "none"}
+  },
+  "profiles": [
+    {
+      "name": "sceptre",
+      "magicPower": {"perLevelAfterHalving": 0}
+    }
+  ]
+}
+```
+
+- **Tables** (`tables`) hold what the + level adds: `values` has one value
+  for each item level 0 to 15 (or one number for all of them), and
+  `perLevel` adds that much for every level. Above +15 the +15 value of
+  `values` counts, while `perLevel` keeps growing. The names and captions
+  follow OpenMU's level bonus tables (`ItemLevelBonusTable`).
+- **The default** (`default`) writes the terms of every stat:
+  - `table`: its level bonus table;
+  - `excellent`: added to excellent and ancient items, as
+    `base * times / drop level + add + drop level / dropLevelDivisor`, where
+    the drop level is the item's `level`. Damage takes the minimum damage
+    as the base of both damage values;
+  - `ancient`: added to ancient items, as
+    `value * times / d + add + d / dropLevelDivisor`, where `d` is the drop
+    level plus `dropLevelBonus.ancient` and the value is the base plus the
+    excellent part (with `afterLevelBonus` also the level bonus);
+  - `perLevelAfterHalving`, magic power only: the magic power is halved
+    after everything is added, then this is added for every level.
+
+  `"none"` means the stat has no such term. A number left out of a term is 0;
+  a left-out `dropLevelDivisor` leaves its part out.
+- **Profiles** (`profiles`) write only what differs from the default. A term
+  a profile writes replaces the default's as a whole.
+- Every `/` is a whole-number division, from left to right.
+- What stays code: the order of the terms; which items count as excellent
+  (excellent options on wings are wing options, and ancient items get the
+  excellent part too); that a stat the item does not have stays 0; that the
+  excellent part needs a drop level above 0; and that magic power and defense
+  rate stop at 255.
+
+The shipped profiles:
+
+| Profile | Differs from the default |
+|---|---|
+| `sceptre` | No magic power per level after halving: the Dark Lord's sceptres |
+| `shield` | Defense +1 per level (`defenseIncreaseShields`), no excellent part, ancient part `(defense + level) * 20 / d + 2` |
+| `firstTierWing`, `smallWing` | Defense from `defenseBonus1stWings` |
+| `secondTierWing`, `secondTierCape` | Defense from `defenseBonus2ndWings`: 2 per level up to +9, then 4 to 9 more per level |
+| `thirdTierWing` | Defense from `defenseBonus3rdWings`: 4 per level up to +9, then 5 to 10 more per level |
+
+`firstTierWing` and `smallWing`, and `secondTierWing` and `secondTierCape`,
+have the same stat terms; they differ in how their level requirement grows.
+
+**Errors** in the file stop the start like errors in the item files: invalid
+JSON or `formatVersion`, a missing `dropLevelBonus.ancient`, a name that is
+not letters and digits or is defined twice, a table without `values` or
+`perLevel`, `values` that are not one number or 16 numbers from 0 to 65535,
+a default without a stat or a term, a `table` the file does not have, a term
+that is neither an object nor `"none"`, and a `dropLevelDivisor` of 0.
+**Warnings:** unknown fields, a table no stat uses, and a caption without
+English.
 
 ---
 
