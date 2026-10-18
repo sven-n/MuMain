@@ -208,19 +208,20 @@
 	cursor: pointer;
 }
 
-/* Skills (0.97): the current skill's icon fills the ring at x 304, y 444 (32x36, the 0.97 icon
-   with its stone frame, tinted (1, 0.9, 0.8)); a click opens the list: every learned skill in one
-   row of 32x36 icons centred on x 320 at y 370 (each cell takes the pointer down to y 412), the
-   current one tinted like the ring, the rest (0.6, 0.7, 0.8). Each icon carries its hotkey digit
-   centred at x + 4, y + 26. Icons: skill_icons.rcss (0.97 Skill.jpg for skills 1-56). */
+/* Skills (0.97): the current skill sits in the ring at x 304, y 444 (32x36, tinted (1, 0.9, 0.8));
+   a click opens the list: every learned skill in one row of 32x36 cells centred on x 320 at y 370
+   (each cell takes the pointer down to y 412), the current one tinted like the ring, the rest
+   (0.6, 0.7, 0.8). Each cell carries its hotkey digit centred at x + 4, y + 26. The icons are
+   legacy's (skill_icons.rcss, 20x28, centred in the cell): the classic clients' Skill.jpg has no
+   icon for the skills added later, and 0.97 drew its 32x36 icons with their own stone frame. */
 #skill_slots { left: 304dp; top: 12dp; width: 32dp; height: 36dp; }
 #current_skill_slot { position: absolute; left: 0dp; top: 0dp; width: 32dp; height: 36dp; }
 .skill-icon {
 	position: absolute;
-	left: 0;
-	top: 0;
-	width: 32dp;
-	height: 36dp;
+	left: 6dp;
+	top: 4dp;
+	width: 20dp;
+	height: 28dp;
 	pointer-events: none;
 	image-color: #b3c0cc;
 }
@@ -271,6 +272,18 @@
 	cursor: pointer;
 }
 .skill-cell .cooldown-wipe { bottom: auto; top: 0; max-height: 36dp; }
-/* 0.97 has no pet commands. */
-#pet_skill_row { display: none; }
+/* The Dark Lord's pet commands (0.97 has no Dark Lord): their own row of the same cells, centred
+   just above the skill row, while the list is open. */
+#pet_skill_row {
+	position: absolute;
+	left: 0;
+	top: -42dp;
+	width: 640dp;
+	height: 42dp;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	pointer-events: none;
+}
+#pet_skill_row.hidden { display: none; }
 
