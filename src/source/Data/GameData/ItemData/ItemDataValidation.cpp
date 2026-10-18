@@ -150,10 +150,28 @@ void ValidateExcellentBonus(const ItemDefinition& definition, std::vector<ItemDa
 // excellentRaisesLevel only matters for an item with a level requirement.
 void ValidateExcellentRaisesLevel(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
 {
-    if (!definition.excellentRaisesLevel && definition.requirements.level == 0)
+    const bool hasLevelRequirement = definition.requirements.level > 0 ||
+                                     definition.requirementsByLevel[static_cast<size_t>(ItemRequirement::Level)];
+    if (!definition.excellentRaisesLevel && !hasLevelRequirement)
     {
         AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
                  "is set, but the item has no level requirement it would raise", "excellentRaisesLevel");
+    }
+}
+
+// A requirement given by level takes the place of its base value.
+void ValidateRequirementsByLevel(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
+{
+    const WORD bases[] = {definition.requirements.level,     definition.requirements.strength,
+                          definition.requirements.dexterity, definition.requirements.energy,
+                          definition.requirements.vitality,  definition.requirements.leadership};
+    for (size_t requirement = 0; requirement < ItemRequirementCount; ++requirement)
+    {
+        if (definition.requirementsByLevel[requirement] && bases[requirement] != 0)
+        {
+            AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
+                     "gives a requirement by level and also its base value, which is not used", "requirementsByLevel");
+        }
     }
 }
 
@@ -194,6 +212,7 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
         ValidatePotionPriority(definition, issues);
         ValidateExcellentBonus(definition, issues);
         ValidateExcellentRaisesLevel(definition, issues);
+        ValidateRequirementsByLevel(definition, issues);
     }
 }
 

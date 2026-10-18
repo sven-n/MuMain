@@ -266,6 +266,7 @@
       "level": 3,
       "buyPrice": 150,
       "repairable": false,
+      "requirementsByLevel": {"energy": [30, 60, 90, 130, 170, 210, 300, 500, 0, 0, 0, 0, 0, 0, 0, 0]},
       "classRequirements": {
         "fairyElf": 1
       }

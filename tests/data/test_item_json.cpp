@@ -351,6 +351,41 @@ TEST_CASE("An item's excellentRaisesLevel is kept through write and read, and wa
     CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "excellentRaisesLevel"));
 }
 
+TEST_CASE("An item's requirements by level are kept through write and read [data][items]")
+{
+    ItemDefinition orb = MakeKris();
+    orb.requirements = {};
+    orb.requirementsByLevel[static_cast<size_t>(ItemRequirement::Energy)] =
+        RequirementByLevel{30, 60, 90, 130, 170, 210, 300, 500, 0, 0, 0, 0, 0, 0, 0, 0};
+    RequirementByLevel same{};
+    same.fill(7);
+    orb.requirementsByLevel[static_cast<size_t>(ItemRequirement::Leadership)] = same;
+
+    const std::string text = WriteItemGroupJson(0, std::vector<ItemDefinition>{orb});
+    CHECK(
+        text.find(
+            R"("requirementsByLevel": {"energy": [30, 60, 90, 130, 170, 210, 300, 500, 0, 0, 0, 0, 0, 0, 0, 0], "leadership": 7})") !=
+        std::string::npos);
+    const ReadResult result = Read(text);
+    REQUIRE(result.issues.empty());
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items.front().requirementsByLevel == orb.requirementsByLevel);
+
+    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "requirementsByLevel": {"luck": 1}})")).issues,
+                   ItemDataIssueSeverity::Error, "requirementsByLevel.luck"));
+    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "requirementsByLevel": {"level": [1, 2]}})")).issues,
+                   ItemDataIssueSeverity::Error, "requirementsByLevel.level"));
+    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "requirementsByLevel": {"level": 70000}})")).issues,
+                   ItemDataIssueSeverity::Error, "requirementsByLevel.level"));
+
+    // A base value next to the list is not used.
+    ItemDefinition both = orb;
+    both.requirements.energy = 10;
+    std::vector<ItemDataIssue> issues;
+    ValidateItems(std::vector<ItemDefinition>{both}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "requirementsByLevel"));
+}
+
 TEST_CASE("Item validation checks the stat profiles against the stat file [data][items]")
 {
     ItemStatFile file;

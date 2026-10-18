@@ -22,7 +22,7 @@ void CopyItemAttributeStats(const ITEM_ATTRIBUTE& attribute, ItemDefinition& def
 
 // Copies the fields ITEM_ATTRIBUTE (and so item.bmd) does not have: tags,
 // wing tier, weapon kind, stat profile, potion priority, excellent bonus,
-// excellentRaisesLevel and rule flags.
+// excellentRaisesLevel, the requirements by level and rule flags.
 void CopyFieldsNotInItemAttribute(const ItemDefinition& source, ItemDefinition& target);
 
 // The weapon kind the item's group gives, by group and slot as in OpenMU:

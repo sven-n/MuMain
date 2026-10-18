@@ -260,6 +260,7 @@
       "slot": "ring",
       "durability": 200,
       "repairable": false,
+      "requirementsByLevel": {"level": [20, 20, 20, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50]},
       "classRequirements": {
         "darkWizard": 1,
         "darkKnight": 1,

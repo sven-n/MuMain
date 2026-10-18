@@ -25,6 +25,7 @@ constexpr const char* Items = "items";
 constexpr const char* Name = "name";
 constexpr const char* Tags = "tags";
 constexpr const char* Requirements = "requirements";
+constexpr const char* RequirementsByLevel = "requirementsByLevel";
 constexpr const char* ClassRequirements = "classRequirements";
 constexpr const char* Resistances = "resistances";
 } // namespace Keys
@@ -91,15 +92,20 @@ template <typename TEnum> std::string JoinEnumNames()
     return text;
 }
 
+// Same order as ItemRequirement and VisitRequirementFields.
+constexpr std::array<const char*, ItemRequirementCount> RequirementKeys = {"level",  "strength", "dexterity",
+                                                                           "energy", "vitality", "leadership"};
+
 template <typename TRequirements, typename TVisitor>
 void VisitRequirementFields(TRequirements& requirements, TVisitor&& visit)
 {
-    visit("level", requirements.level, WORD{0});
-    visit("strength", requirements.strength, WORD{0});
-    visit("dexterity", requirements.dexterity, WORD{0});
-    visit("energy", requirements.energy, WORD{0});
-    visit("vitality", requirements.vitality, WORD{0});
-    visit("leadership", requirements.leadership, WORD{0});
+    const auto key = [](ItemRequirement requirement) { return RequirementKeys[static_cast<size_t>(requirement)]; };
+    visit(key(ItemRequirement::Level), requirements.level, WORD{0});
+    visit(key(ItemRequirement::Strength), requirements.strength, WORD{0});
+    visit(key(ItemRequirement::Dexterity), requirements.dexterity, WORD{0});
+    visit(key(ItemRequirement::Energy), requirements.energy, WORD{0});
+    visit(key(ItemRequirement::Vitality), requirements.vitality, WORD{0});
+    visit(key(ItemRequirement::Leadership), requirements.leadership, WORD{0});
 }
 
 // ---------------------------------------------------------------- writing
@@ -193,6 +199,21 @@ OrderedJson WriteItem(const ItemDefinition& definition)
         item[Keys::Requirements] = std::move(requirements);
     }
 
+    OrderedJson requirementsByLevel = OrderedJson::object();
+    for (size_t requirement = 0; requirement < ItemRequirementCount; ++requirement)
+    {
+        const std::optional<RequirementByLevel>& values = definition.requirementsByLevel[requirement];
+        if (!values)
+        {
+            continue;
+        }
+        requirementsByLevel[RequirementKeys[requirement]] = Json::WritePerLevelValues(*values);
+    }
+    if (!requirementsByLevel.empty())
+    {
+        item[Keys::RequirementsByLevel] = std::move(requirementsByLevel);
+    }
+
     WriteByteTable(item, Keys::ClassRequirements, definition.classRequirements, ClassKeys);
     WriteByteTable(item, Keys::Resistances, definition.resistances, ResistanceKeys);
     return item;
@@ -218,6 +239,7 @@ private:
     void ReadTags(const OrderedJson& json, ItemTagSet& tags);
     void ReadStats(const OrderedJson& json, ItemDefinition& definition);
     void ReadRequirements(const OrderedJson& json, ItemDefinition& definition);
+    void ReadRequirementsByLevel(const OrderedJson& json, ItemDefinition& definition);
     template <size_t Count>
     void ReadByteTable(const OrderedJson& json, const char* key, std::array<BYTE, Count>& values,
                        const std::array<const char*, Count>& keys);
@@ -455,10 +477,48 @@ void ItemReader::WarnAboutUnknownKeys(const OrderedJson& json, const std::set<st
     }
 }
 
+void ItemReader::ReadRequirementsByLevel(const OrderedJson& json, ItemDefinition& definition)
+{
+    const auto byLevel = json.find(Keys::RequirementsByLevel);
+    if (byLevel == json.end())
+    {
+        return;
+    }
+    if (!byLevel->is_object())
+    {
+        AddIssue(ItemDataIssueSeverity::Error, Keys::RequirementsByLevel, "must be an object");
+        return;
+    }
+    for (const auto& [key, values] : byLevel->items())
+    {
+        const std::string field = std::string(Keys::RequirementsByLevel) + "." + key;
+        const auto requirement = std::find(RequirementKeys.begin(), RequirementKeys.end(), key);
+        if (requirement == RequirementKeys.end())
+        {
+            AddIssue(ItemDataIssueSeverity::Error, field, "is not a requirement");
+            continue;
+        }
+        RequirementByLevel levels{};
+        const bool read = Json::ReadPerLevelValues(
+            values, field, levels, [this](const OrderedJson& entry, const std::string& entryField, WORD& value)
+            { ReadValue(entry, entryField, value); }, [this](const std::string& errorField, const std::string& message)
+            { AddIssue(ItemDataIssueSeverity::Error, errorField, message); });
+        if (read)
+        {
+            definition.requirementsByLevel[static_cast<size_t>(requirement - RequirementKeys.begin())] = levels;
+        }
+    }
+}
+
 std::set<std::string, std::less<>> GetKnownItemKeys()
 {
-    std::set<std::string, std::less<>> keys{
-        Keys::Number, Keys::Name, Keys::Tags, Keys::Requirements, Keys::ClassRequirements, Keys::Resistances};
+    std::set<std::string, std::less<>> keys{Keys::Number,
+                                            Keys::Name,
+                                            Keys::Tags,
+                                            Keys::Requirements,
+                                            Keys::RequirementsByLevel,
+                                            Keys::ClassRequirements,
+                                            Keys::Resistances};
     ItemDefinition unused;
     VisitStatFields(unused, [&](const char* key, auto&, const auto&) { keys.insert(key); });
     return keys;
@@ -479,6 +539,7 @@ bool ItemReader::Read(const OrderedJson& json, ItemDefinition& definition)
     ReadTags(json, definition.tags);
     ReadStats(json, definition);
     ReadRequirements(json, definition);
+    ReadRequirementsByLevel(json, definition);
     ReadByteTable(json, Keys::ClassRequirements, definition.classRequirements, ClassKeys);
     ReadByteTable(json, Keys::Resistances, definition.resistances, ResistanceKeys);
 
@@ -541,8 +602,8 @@ std::string WriteItemGroupJson(int group, std::span<const ItemDefinition> items)
 
     // Names are UTF-8 already; replace (instead of throwing on) anything that
     // is not, so a bad name can never stop a save half-way.
-    return Json::PutListsOnOneLine(root.dump(Json::Indent, ' ', false, OrderedJson::error_handler_t::replace),
-                                   Keys::Tags) +
-           "\n";
+    const std::string text =
+        Json::PutListsOnOneLine(root.dump(Json::Indent, ' ', false, OrderedJson::error_handler_t::replace), Keys::Tags);
+    return Json::PutObjectsOnOneLine(text, Keys::RequirementsByLevel) + "\n";
 }
 } // namespace Data::Items

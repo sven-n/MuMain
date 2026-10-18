@@ -276,6 +276,20 @@ TEST_CASE("The items excellent options do not raise the level requirement of [da
     CHECK(g_ItemDatabase.Find(ITEM_KRIS)->excellentRaisesLevel);
 }
 
+// The Orb of Summoning's energy and the Transformation Ring's level requirement by level are
+// item data.
+TEST_CASE("The requirements given by level are item data [data][items]")
+{
+    ShippedItemAttributes items;
+    const auto& orb = g_ItemDatabase.Find(ITEM_ORB_OF_SUMMONING)->requirementsByLevel;
+    REQUIRE(orb[static_cast<size_t>(ItemRequirement::Energy)].has_value());
+    CHECK((*orb[static_cast<size_t>(ItemRequirement::Energy)])[7] == 500);
+    const auto& ring = g_ItemDatabase.Find(ITEM_TRANSFORMATION_RING)->requirementsByLevel;
+    REQUIRE(ring[static_cast<size_t>(ItemRequirement::Level)].has_value());
+    CHECK((*ring[static_cast<size_t>(ItemRequirement::Level)])[2] == 20);
+    CHECK((*ring[static_cast<size_t>(ItemRequirement::Level)])[3] == 50);
+}
+
 TEST_CASE("A shield's defense rate grows with its + level [data][items]")
 {
     ShippedItemAttributes items;

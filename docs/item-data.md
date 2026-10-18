@@ -96,6 +96,7 @@ read as the English name only; saving writes the object form.
 | `sellValue` | Value factor used by the price calculation of some items |
 | `buyPrice` | Fixed price; when set, it replaces the calculated price |
 | `requirements` | `level`, `strength`, `dexterity`, `energy`, `vitality`, `leadership` |
+| `requirementsByLevel` | A requirement for each item level 0 to 15 (one number for all of them, or 16), instead of the [item stat file's](#item-stats-by-level) formula; above +15 the +15 value counts. The Orb of Summoning has `{"energy": [30, 60, 90, 130, 170, 210, 300, 500, 0, ...]}` and the Transformation Ring `{"level": [20, 20, 20, 50, ...]}`. The base value of that requirement is not used. The bmd import keeps it |
 | `classRequirements` | Per class (`darkWizard`, `darkKnight`, `fairyElf`, `magicGladiator`, `darkLord`, `summoner`, `rageFighter`): 0 = cannot use, otherwise the class level needed |
 | `resistances` | `ice`, `poison`, `lightning`, `fire`, `earth`, `wind`, `water` |
 | `tradable`, `droppable`, `storable`, `sellable`, `personalShopSellable`, `repairable` | What a player may do with the item; see [Rules](#rules). Only `false` is written |
@@ -331,6 +332,8 @@ the field (**Copy text** copies it). All problems are also written to
 - a `slot`, `wingTier`, `weaponKind` or tag name that does not exist
 - a `statProfile` that is not a name of letters and digits, or that the
   item stat file does not have
+- a `requirementsByLevel` entry that is not a requirement or not one number
+  or 16 numbers from 0 to 65535
 
 **Warnings** are logged, and the game starts anyway:
 
@@ -346,6 +349,7 @@ the field (**Copy text** copies it). All problems are also written to
   `complexPotion` or `shieldPotion` tag (nothing reads it there)
 - an `excellentBonus` on an item without damage or magic power
 - `excellentRaisesLevel: false` on an item without a level requirement
+- a `requirementsByLevel` entry next to a base value of the same requirement
 - a `slot` written as a number, as files saved before tags existed have
   it; the number is read, and saving writes the name
 

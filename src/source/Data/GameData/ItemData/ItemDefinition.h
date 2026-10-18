@@ -4,8 +4,10 @@
 #include "Core/Globals/_define.h"
 #include "Data/GameData/Common/LocalizedString.h"
 #include "Data/GameData/ItemData/ItemTagSet.h"
+#include "Data/GameData/ItemData/ItemType.h"
 
 #include <array>
+#include <optional>
 #include <string>
 
 namespace Data::Items
@@ -76,6 +78,24 @@ enum class ItemAction : BYTE
     Count
 };
 
+// The requirements in the order of ItemRequirements.
+enum class ItemRequirement : BYTE
+{
+    Level,
+    Strength,
+    Dexterity,
+    Energy,
+    Vitality,
+    Leadership,
+
+    Count
+};
+
+constexpr size_t ItemRequirementCount = static_cast<size_t>(ItemRequirement::Count);
+
+// A requirement for each item level 0 to 15; above +15 the +15 value.
+using RequirementByLevel = std::array<WORD, ItemLevelCount>;
+
 struct ItemRequirements
 {
     WORD level = 0;
@@ -140,6 +160,10 @@ struct ItemDefinition
     BYTE attackType = 0;
 
     ItemRequirements requirements;
+    // Requirements given per item level instead of the stat file's formula (the
+    // Orb of Summoning's energy, the Transformation Ring's level requirement);
+    // the base value of that requirement is not used.
+    std::array<std::optional<RequirementByLevel>, ItemRequirementCount> requirementsByLevel;
     std::array<BYTE, MAX_CLASS> classRequirements{};
     std::array<BYTE, MAX_RESISTANCE + 1> resistances{};
 
