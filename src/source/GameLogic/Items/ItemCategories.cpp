@@ -357,6 +357,16 @@ namespace GameLogic::Items
         return HasTag(Data::Items::ToItemType(modelType), ItemTag::SummonerBook);
     }
 
+    bool IsSceptreType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::Sceptre);
+    }
+
+    bool IsMagicSwordType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::MagicSword);
+    }
+
     bool IsBowType(int itemType)
     {
         return g_ItemDatabase.GetWeaponKind(itemType) == WeaponKind::Bow;
@@ -398,10 +408,15 @@ namespace GameLogic::Items
         return kind == WeaponKind::Bow || kind == WeaponKind::Crossbow || IsAmmunition(pItem);
     }
 
+    bool IsSwordOrGloveType(int itemType)
+    {
+        const WeaponKind kind = g_ItemDatabase.GetWeaponKind(itemType);
+        return kind == WeaponKind::Sword || kind == WeaponKind::Glove;
+    }
+
     bool IsSwordOrGloveModel(int modelType)
     {
-        const WeaponKind kind = g_ItemDatabase.GetWeaponKind(Data::Items::ToItemType(modelType));
-        return kind == WeaponKind::Sword || kind == WeaponKind::Glove;
+        return IsSwordOrGloveType(Data::Items::ToItemType(modelType));
     }
 
     bool IsSwordAxeMaceOrGloveType(int itemType)
@@ -424,18 +439,21 @@ namespace GameLogic::Items
 
     bool IsWeaponOrAmmunition(const ITEM* pItem)
     {
-        const WeaponKind kind = g_ItemDatabase.GetWeaponKind(pItem->Type);
-        return (kind != WeaponKind::None && kind != WeaponKind::Shield) || IsAmmunition(pItem);
-    }
-
-    bool IsSceptreType(int itemType)
-    {
-        return HasTag(itemType, ItemTag::Sceptre);
-    }
-
-    bool IsMagicSwordType(int itemType)
-    {
-        return HasTag(itemType, ItemTag::MagicSword);
+        switch (g_ItemDatabase.GetWeaponKind(pItem->Type))
+        {
+        case WeaponKind::Sword:
+        case WeaponKind::Glove:
+        case WeaponKind::Axe:
+        case WeaponKind::Mace:
+        case WeaponKind::Spear:
+        case WeaponKind::Bow:
+        case WeaponKind::Crossbow:
+        case WeaponKind::Staff:
+        case WeaponKind::Book:
+            return true;
+        default:
+            return IsAmmunition(pItem);
+        }
     }
 
     bool IsHighValueItem(const ITEM* pItem)
