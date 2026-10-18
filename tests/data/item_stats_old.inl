@@ -1,7 +1,10 @@
-// One-time copy of the item stat code before phase 3c-1 (see test_item_stats_equivalence.cpp):
-// the stat functions of ZzzInfomation.cpp, GameLogic/Items/ItemLevelBonus and the stat columns
-// of the item help table (ZzzInventory.cpp, ComputeItemInfo), renamed Old... so the copy keeps
-// working when the originals go.
+// One-time copy of the item stat and requirement code before the refactor commits of phase 3c
+// (see test_item_stats_equivalence.cpp): the stat and requirement functions of ZzzInfomation.cpp,
+// the strength the option level adds, GameLogic/Items/ItemLevelBonus and the columns of the item
+// help table (ZzzInventory.cpp, ComputeItemInfo), renamed Old... so the copy keeps working when
+// the originals go. It has the fixes 3c made in commits of their own before them: no Cape of Lord
+// defense in code, and the help table's defense rate cap and command requirement. It still has
+// the dead Dark Raven branch of the command requirement, which never runs.
 
 // GameLogic/Items/ItemLevelBonus.h and .cpp.
 constexpr int OldLevelBonusPerLevelUpToNine = 3;
@@ -280,4 +283,249 @@ OldHelpTableStats OldComputeItemInfoStats(int iHelpItem, int Level)
     }
 
     return {DamageMin, DamageMax, Magic, Defense, Blocking};
+}
+
+// Engine/Object/ZzzInfomation.cpp.
+void OldCalcRequirements(ITEM* ip, ITEM_ATTRIBUTE* p)
+{
+    bool isExcellent = ip->ExcellentFlags > 0;
+    bool isAncientItem = ip->AncientDiscriminator > 0;
+    int ItemLevel = p->Level;
+
+    if (isExcellent)
+    {
+        ItemLevel = p->Level + 25;
+    }
+    else if (isAncientItem)
+    {
+        ItemLevel = p->Level + 30;
+    }
+
+    int addValue = 4;
+
+    if (GameLogic::Items::IsSecondTierWingExceptCape(ip))
+    {
+        addValue = 5;
+    }
+
+    // These keep their base level requirement; the ones in the next branch grow with the + level.
+    const bool isWeaponOrArmor = ip->Type >= ITEM_SWORD && ip->Type < ITEM_WING;
+    const bool isFromOrbsToThirdTierWings = ip->Type >= ITEM_ORB_OF_TWISTING_SLASH && ip->Type <= ITEM_CAPE_OF_EMPEROR;
+    const bool isLateWingGroupKind =
+        ip->Type >= ITEM_WING_OF_DIMENSION && ip->Type < ITEM_HELPER && ip->Type != ITEM_CAPE_OF_FIGHTER;
+    const bool keepsBaseLevelRequirement =
+        isWeaponOrArmor || ip->Type == ITEM_HORN_OF_FENRIR || isFromOrbsToThirdTierWings || isLateWingGroupKind;
+
+    if (p->RequireLevel && keepsBaseLevelRequirement)
+    {
+        ip->RequireLevel = p->RequireLevel;
+    }
+    else if (p->RequireLevel && ((ip->Type >= ITEM_WING && ip->Type <= ITEM_ORB_OF_TWISTING_SLASH)
+        || (ip->Type >= ITEM_WING_OF_CURSE && ip->Type <= ITEM_WINGS_OF_DESPAIR)
+        || (ip->Type == ITEM_CAPE_OF_FIGHTER)
+        || ip->Type >= ITEM_HELPER))
+    {
+        ip->RequireLevel = p->RequireLevel + ip->Level * addValue;
+    }
+    else
+        ip->RequireLevel = 0;
+
+    if (p->RequireStrength)
+        ip->RequireStrength = 20 + (p->RequireStrength) * (ItemLevel + ip->Level * 3) * 3 / 100;
+    else	ip->RequireStrength = 0;
+
+    if (p->RequireDexterity)
+        ip->RequireDexterity = 20 + (p->RequireDexterity) * (ItemLevel + ip->Level * 3) * 3 / 100;
+    else	ip->RequireDexterity = 0;
+
+    if (p->RequireVitality)
+        ip->RequireVitality = 20 + (p->RequireVitality) * (ItemLevel + ip->Level * 3) * 3 / 100;
+    else	ip->RequireVitality = 0;
+
+    if (p->RequireEnergy)
+    {
+        if (GameLogic::Items::IsSummonerBook(ip))
+        {
+            ip->RequireEnergy = 20 + (p->RequireEnergy) * (ItemLevel + ip->Level * 1) * 3 / 100;
+        }
+        else
+
+            if ((p->RequireLevel > 0) && (ip->Type >= ITEM_ETC && ip->Type < ITEM_ETC + MAX_ITEM_INDEX))
+            {
+                ip->RequireEnergy = 20 + (p->RequireEnergy) * (p->RequireLevel) * 4 / 100;
+            }
+            else
+
+            {
+                ip->RequireEnergy = 20 + (p->RequireEnergy) * (ItemLevel + ip->Level * 3) * 4 / 100;
+            }
+    }
+    else
+    {
+        ip->RequireEnergy = 0;
+    }
+
+    if (p->RequireCharisma)
+        ip->RequireCharisma = 20 + (p->RequireCharisma) * (ItemLevel + ip->Level * 3) * 3 / 100;
+    else	ip->RequireCharisma = 0;
+
+    if (ip->Type == ITEM_ORB_OF_SUMMONING)
+    {
+        WORD Energy = 0;
+
+        switch (ip->Level)
+        {
+        case 0:Energy = 30; break;
+        case 1:Energy = 60; break;
+        case 2:Energy = 90; break;
+        case 3:Energy = 130; break;
+        case 4:Energy = 170; break;
+        case 5:Energy = 210; break;
+        case 6:Energy = 300; break;
+        case 7:Energy = 500; break;
+        }
+        ip->RequireEnergy = Energy;
+    }
+
+    if (p->RequireCharisma)
+    {
+        if (ip->Type == MODEL_DARK_RAVEN_ITEM)
+            ip->RequireCharisma = (185 + (p->RequireCharisma * 15));
+        else
+            ip->RequireCharisma = p->RequireCharisma;
+    }
+
+    if (ip->Type == ITEM_TRANSFORMATION_RING)
+    {
+        if (ip->Level <= 2)
+            ip->RequireLevel = 20;
+        else
+            ip->RequireLevel = 50;
+    }
+
+    if ((ip->Type >= ITEM_DRAGON_KNIGHT_HELM && ip->Type <= ITEM_SUNLIGHT_MASK) ||
+        (ip->Type >= ITEM_DRAGON_KNIGHT_ARMOR && ip->Type <= ITEM_SUNLIGHT_ARMOR) ||
+        (ip->Type >= ITEM_DRAGON_KNIGHT_PANTS && ip->Type <= ITEM_SUNLIGHT_PANTS) ||
+        (ip->Type >= ITEM_DRAGON_KNIGHT_GLOVES && ip->Type <= ITEM_SUNLIGHT_GLOVES) ||
+        (ip->Type >= ITEM_DRAGON_KNIGHT_BOOTS && ip->Type <= ITEM_SUNLIGHT_BOOTS) || ip->Type == ITEM_BONE_BLADE ||
+        ip->Type == ITEM_EXPLOSION_BLADE || ip->Type == ITEM_GRAND_VIPER_STAFF || ip->Type == ITEM_SYLPH_WIND_BOW ||
+        ip->Type == ITEM_SOLEIL_SCEPTER || ITEM_STORM_BLITZ_STICK == ip->Type || ITEM_AURA_HELM == ip->Type ||
+        ITEM_AURA_ARMOR == ip->Type || ITEM_AURA_PANTS == ip->Type || ITEM_AURA_GLOVES == ip->Type ||
+        ITEM_AURA_BOOTS == ip->Type || GameLogic::Items::IsLuckyItemType(ip->Type))
+    {
+        isExcellent = false;
+    }
+
+    if (isExcellent && ip->RequireLevel > 0 && !GameLogic::Items::IsWingItem(ip) && ip->Type != ITEM_HORN_OF_FENRIR)
+    {
+        ip->RequireLevel += 20;
+    }
+}
+
+// Engine/Object/ZzzInfomation.cpp, SetItemAttributes: the lines of the option level block that
+// add to the strength requirement (the specials it also writes are left out).
+void OldAddOptionStrength(ITEM* ip)
+{
+    int Option3 = ip->OptionLevel;
+    if (Option3)
+    {
+        if (ip->Type == ITEM_HORN_OF_DINORANT)
+        {
+        }
+        else
+        {
+            if (ip->Type >= ITEM_SWORD && ip->Type < ITEM_BOW + MAX_ITEM_INDEX)
+            {
+                if (!GameLogic::Items::IsAmmunition(ip))
+                {
+                    ip->RequireStrength += Option3 * 5;
+                }
+            }
+            if (ip->Type >= ITEM_STAFF && ip->Type < ITEM_STAFF + MAX_ITEM_INDEX)
+            {
+                ip->RequireStrength += Option3 * 5;
+            }
+            if (ip->Type >= ITEM_SHIELD && ip->Type < ITEM_SHIELD + MAX_ITEM_INDEX)
+            {
+                ip->RequireStrength += Option3 * 5;
+            }
+            if (ip->Type >= ITEM_HELM && ip->Type < ITEM_BOOTS + MAX_ITEM_INDEX)
+            {
+                ip->RequireStrength += Option3 * 5;
+            }
+        }
+    }
+}
+
+// Engine/Object/ZzzInventory.cpp, ComputeItemInfo: the requirement columns of the row of one level.
+struct OldHelpTableRequirements
+{
+    int RequireLevel;
+    int RequireStrength;
+    int RequireDexterity;
+    int RequireEnergy;
+    int RequireVitality;
+    int RequireCharisma;
+};
+
+OldHelpTableRequirements OldComputeItemInfoRequirements(int iHelpItem, int Level)
+{
+    ITEM_ATTRIBUTE* p = &ItemAttribute[iHelpItem];
+    int RequireStrength = 0;
+    int RequireDexterity = 0;
+    int RequireEnergy = 0;
+    int RequireCharisma = 0;
+    int RequireVitality = 0;
+    int RequireLevel = 0;
+    if (p->RequireLevel)
+    {
+        RequireLevel = p->RequireLevel;
+    }
+    else
+    {
+        RequireLevel = 0;
+    }
+
+    if (p->RequireStrength)
+    {
+        RequireStrength = 20 + p->RequireStrength * (p->Level + Level * 3) * 3 / 100;
+    }
+    else
+    {
+        RequireStrength = 0;
+    }
+
+    if (p->RequireDexterity)	RequireDexterity = 20 + p->RequireDexterity * (p->Level + Level * 3) * 3 / 100;
+    else RequireDexterity = 0;
+
+    if (p->RequireVitality)	RequireVitality = 20 + p->RequireVitality * (p->Level + Level * 3) * 3 / 100;
+    else RequireVitality = 0;
+
+    if (p->RequireEnergy)
+    {
+        if (GameLogic::Items::IsSummonerBookType(iHelpItem))
+        {
+            RequireEnergy = 20 + p->RequireEnergy * (p->Level + Level * 1) * 3 / 100;
+        }
+        else
+        {
+            if ((p->RequireLevel > 0) && (iHelpItem >= ITEM_ETC && iHelpItem < ITEM_ETC + MAX_ITEM_INDEX))
+            {
+                RequireEnergy = 20 + (p->RequireEnergy) * (p->RequireLevel) * 4 / 100;
+            }
+            else
+            {
+                RequireEnergy = 20 + p->RequireEnergy * (p->Level + Level * 3) * 4 / 100;
+            }
+        }
+    }
+    else
+    {
+        RequireEnergy = 0;
+    }
+
+    // Like the item: the command requirement stays the base value.
+    RequireCharisma = p->RequireCharisma;
+
+    return {RequireLevel, RequireStrength, RequireDexterity, RequireEnergy, RequireVitality, RequireCharisma};
 }
