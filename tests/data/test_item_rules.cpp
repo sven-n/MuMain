@@ -387,6 +387,31 @@ TEST_CASE("Swords, gloves, staffs, books, sceptres and magic swords come from th
     CHECK_FALSE(IsMagicSwordType(ITEM_BONE_BLADE));
 }
 
+TEST_CASE("Lucky items, shield potions and transformation rings come from the item data [data][items][rules]")
+{
+    ShippedItemsScope items;
+    const int scaleHelmLucky = MakeItemType(7, 62);
+    const int stormJahadBootsLucky = MakeItemType(11, 72);
+    const int phoenixSoulHelm = MakeItemType(7, 73);
+
+    CHECK(IsLuckyItemType(scaleHelmLucky));
+    CHECK(IsLuckyItemType(stormJahadBootsLucky));
+    CHECK_FALSE(IsLuckyItemType(phoenixSoulHelm));
+    CHECK_FALSE(IsLuckyItemType(ITEM_HELM));
+
+    CHECK(IsShieldPotionType(ITEM_SMALL_SHIELD_POTION));
+    CHECK(IsShieldPotionType(ITEM_LARGE_SHIELD_POTION));
+    CHECK_FALSE(IsShieldPotionType(ITEM_ELITE_SD_POTION));
+    CHECK_FALSE(IsShieldPotionType(ITEM_SMALL_COMPLEX_POTION));
+
+    CHECK(IsTransformationRingType(ITEM_TRANSFORMATION_RING));
+    CHECK(IsTransformationRingType(ITEM_SNOWMAN_TRANSFORMATION_RING));
+    CHECK(IsTransformationRingType(ITEM_PANDA_TRANSFORMATION_RING));
+    CHECK_FALSE(IsTransformationRingType(ITEM_RING_OF_ICE));
+    CHECK(IsPandaOrSkeletonType(ITEM_PANDA_TRANSFORMATION_RING));
+    CHECK_FALSE(IsPandaOrSkeletonType(ITEM_TRANSFORMATION_RING));
+}
+
 TEST_CASE("The item types with a tag come lowest first [data][items][rules]")
 {
     ShippedItemsScope items;

@@ -1280,6 +1280,7 @@
         "es": "Guantes de Escamas",
         "pt": "Luvas de escamas"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1311,6 +1312,7 @@
         "es": "Guantes de Seda",
         "pt": "Luvas de seda"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1339,6 +1341,7 @@
         "es": "Guantes Esfinge",
         "pt": "Luvas de Esfinge"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1367,6 +1370,7 @@
         "es": "Guantes Viento Violento",
         "pt": "Luvas do vento violento"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1395,6 +1399,7 @@
         "es": "Guantes Adamantinos",
         "pt": "Luvas de adamantina"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1423,6 +1428,7 @@
         "es": "Guantes Dragón",
         "pt": "Luvas de Dragão"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1452,6 +1458,7 @@
         "es": "Guantes Guardián",
         "pt": "Luvas de Guardião"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1480,6 +1487,7 @@
         "es": "Guantes Legendarios",
         "pt": "Luvas Lendárias"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1508,6 +1516,7 @@
         "es": "Guantes Ala Roja",
         "pt": "Luvas da asa vermelha"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1536,6 +1545,7 @@
         "es": "Guantes Cuervo de Tormenta",
         "pt": "Luvas do corvo da tempestade"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "gloves",

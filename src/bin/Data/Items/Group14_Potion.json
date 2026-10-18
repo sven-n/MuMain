@@ -466,6 +466,7 @@
         "es": "Pócima de SD Pequeña",
         "pt": "Pequena poção de SD"
       },
+      "tags": ["shieldPotion"],
       "width": 1,
       "height": 1,
       "sellValue": 50,
@@ -479,6 +480,7 @@
         "es": "Pócima de SD",
         "pt": "Poção de SD"
       },
+      "tags": ["shieldPotion"],
       "width": 1,
       "height": 1,
       "sellValue": 80,
@@ -492,6 +494,7 @@
         "es": "Pócima de SD Grande",
         "pt": "Grande poção de SD"
       },
+      "tags": ["shieldPotion"],
       "width": 1,
       "height": 1,
       "sellValue": 100,

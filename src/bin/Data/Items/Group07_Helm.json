@@ -1132,6 +1132,7 @@
         "es": "Yelmo de Escamas",
         "pt": "Elmo de escamas"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1161,6 +1162,7 @@
         "es": "Yelmo de Seda",
         "pt": "Elmo de seda"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1188,6 +1190,7 @@
         "es": "Casco Esfinge",
         "pt": "Elmo de Esfinge"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1215,6 +1218,7 @@
         "es": "Yelmo Viento Violento",
         "pt": "Elmo do vento violento"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1242,6 +1246,7 @@
         "es": "Casco de Alma Oscura",
         "pt": "Elmo de Alma Sombria"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1269,6 +1274,7 @@
         "es": "Casco Dragón",
         "pt": "Elmo de Dragão"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1296,6 +1302,7 @@
         "es": "Yelmo Guardián",
         "pt": "Elmo de Guardião"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1323,6 +1330,7 @@
         "es": "Casco Legendario",
         "pt": "Elmo Lendário"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1350,6 +1358,7 @@
         "es": "Yelmo Ala Roja",
         "pt": "Elmo da asa vermelha"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1377,6 +1386,7 @@
         "es": "Casco de Tormenta Zahard",
         "pt": "Elmo de Tempestade Zahard"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "helm",

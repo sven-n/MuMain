@@ -110,10 +110,11 @@ can have several tags; the file lists them in the order below.
 | `darkLordPet` | Dark Horse and Dark Raven |
 | `guardianPet` | Demon and Spirit of Guardian |
 | `pandaOrSkeleton` | The panda and skeleton pets and transformation rings |
+| `transformationRing` | Rings that change the character's look: a second one cannot be dragged onto a ring slot, the Kanturu entry and `/move` to Icarus refuse them, and the move window offers no Icarus with one that is not the panda or skeleton ring |
 | `jewel` | Jewels of Bless, Soul, Life, Chaos, Creation and Guardian |
 | `refineStone` | Lower and Higher Refine Stone |
 | `socketSeed`, `socketSphere`, `socketSeedSphere` | Socket system items |
-| `healingPotion`, `manaPotion`, `complexPotion` | Potions the hotkeys look for; a skill without enough mana takes a mana potion and the MU Helper a healing potion, the one with the highest group and number first (the largest potion) |
+| `healingPotion`, `manaPotion`, `complexPotion`, `shieldPotion` | Potions the hotkeys look for; a skill without enough mana takes a mana potion and the MU Helper a healing potion, the one with the highest group and number first (the largest potion) |
 | `elitePotion`, `elixir`, `buffScroll`, `battleOrStrengthScroll` | Cash shop potions and scrolls |
 | `ammunition` | Arrows and bolts |
 | `bloodCastleTicketPart` | Scroll of Archangel and Blood Bone |
@@ -122,6 +123,7 @@ can have several tags; the file lists them in the order below.
 | `divineArchangelWeapon` | The Divine weapons of the Archangel |
 | `sceptre` | The Dark Lord's sceptres |
 | `magicSword` | The Magic Gladiator's swords with magic power |
+| `luckyItem` | The lucky set armour (numbers 62 to 72 of groups 7 to 11): no repair cost and no price, a maximum durability of 255, no extra level requirement for excellent ones, no stat requirements in the tooltip; only Jerridon's mix and the lucky item window's refinery take them, and of the jewels only the Jewels of Extension and Elevation act on them |
 | `cashShop` | Items from the cash shop. Only information for now (for the editors and the OpenMU exchange); no client code reads it |
 | `gambleItem` | Gamble items |
 | `gemJewelry` | The gem rings and necklaces from the cash shop |
