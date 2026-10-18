@@ -84,6 +84,7 @@ TEST_CASE("3b-3: the sceptre and magic sword lists match the tags [data][items][
         const ITEM item = MakeItem(itemType);
         CHECK(OldIsCepterItem(itemType) == IsSceptreType(itemType));
         CHECK(OldIsRightMagicSword(&item) == IsMagicSwordType(itemType));
+        CHECK(OldTooltipWizardryDamageOption(&item) == IsMagicSwordType(itemType));
     }
 }
 
@@ -100,6 +101,7 @@ TEST_CASE("3b-3: the staff group checks match staffs and books [data][items][3b]
         CHECK(OldRightStaffShowsLeftDamage(&item) == staff);
         CHECK(OldSummonerTakesInLeftHand(&item) == !staff);
         CHECK(OldWizardryWeaponRight(&item) == (staff || IsMagicSwordType(itemType)));
+        CHECK(OldTooltipMagicPowerLine(&item) == (staff || IsMagicSwordType(itemType)));
         // Either hand, with nothing or a sword in the other.
         CHECK(OldWeaponWithoutStaff(-1, itemType) == (itemType != -1 && !staff));
         CHECK(OldWeaponWithoutStaff(itemType, kris) == !staff);

@@ -101,3 +101,22 @@ bool OldWizardryWeaponRight(const ITEM* pWeaponRight)
             pWeaponRight->Type == ITEM_SWORD_DANCER || pWeaponRight->Type == ITEM_DARK_REIGN_BLADE ||
             pWeaponRight->Type == ITEM_IMPERIAL_SWORD;
 }
+
+// ZzzInventory.cpp, RenderItemInfo: the magic power line of a staff or magic sword.
+bool OldTooltipMagicPowerLine(const ITEM* ip)
+{
+    return (ip->Type >= ITEM_STAFF && ip->Type < ITEM_STAFF + MAX_ITEM_INDEX) || (ip->Type == ITEM_RUNE_BLADE) ||
+        (ip->Type == ITEM_EXPLOSION_BLADE) || (ip->Type == ITEM_SWORD_DANCER) || (ip->Type == ITEM_DARK_REIGN_BLADE) ||
+        (ip->Type == ITEM_IMPERIAL_SWORD);
+}
+
+// ZzzInventory.cpp, RenderItemInfo: the damage option of a magic sword shows as additional wizardry damage.
+bool OldTooltipWizardryDamageOption(const ITEM* ip)
+{
+    return ((ip->Type == ITEM_RUNE_BLADE)
+                || (ip->Type == ITEM_DARK_REIGN_BLADE)
+                || (ip->Type == ITEM_EXPLOSION_BLADE)
+                || (ip->Type == ITEM_SWORD_DANCER)
+                || (ip->Type == ITEM_IMPERIAL_SWORD)
+                );
+}

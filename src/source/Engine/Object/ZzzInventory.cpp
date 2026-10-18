@@ -4629,9 +4629,7 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
             TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = true; TextNum++;
         }
     }
-    if ((ip->Type >= ITEM_STAFF && ip->Type < ITEM_STAFF + MAX_ITEM_INDEX) || (ip->Type == ITEM_RUNE_BLADE) ||
-        (ip->Type == ITEM_EXPLOSION_BLADE) || (ip->Type == ITEM_SWORD_DANCER) || (ip->Type == ITEM_DARK_REIGN_BLADE) ||
-        (ip->Type == ITEM_IMPERIAL_SWORD))
+    if (GameLogic::Items::IsStaffOrBookType(ip->Type) || GameLogic::Items::IsMagicSwordType(ip->Type))
     {
         mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
@@ -4779,14 +4777,7 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
             mu_swprintf(TextList[TextNum], I18N::Game::DarkLordExclusiveSkill);
             TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
         }
-        else if ((ip->Special[i] == AT_IMPROVE_DAMAGE) &&
-            ((ip->Type == ITEM_RUNE_BLADE)
-                || (ip->Type == ITEM_DARK_REIGN_BLADE)
-                || (ip->Type == ITEM_EXPLOSION_BLADE)
-                || (ip->Type == ITEM_SWORD_DANCER)
-                || (ip->Type == ITEM_IMPERIAL_SWORD)
-                )
-            )
+        else if (ip->Special[i] == AT_IMPROVE_DAMAGE && GameLogic::Items::IsMagicSwordType(ip->Type))
         {
             mu_swprintf(TextList[TextNum], I18N::Game::AdditionalWizardryDmgD, ip->SpecialValue[i]);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
