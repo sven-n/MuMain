@@ -458,9 +458,10 @@ ActionSkillType GetSkillByBook(int Type)
     }
 }
 
+// ITEM_MACE + 21: Master Scepter-J.
 bool IsCepterItem(int iType)
 {
-    if ((iType >= ITEM_BATTLE_SCEPTER && iType <= ITEM_SHINING_SCEPTER) || iType == ITEM_ABSOLUTE_SCEPTER || iType == ITEM_STRYKER_SCEPTER)
+    if ((iType >= ITEM_BATTLE_SCEPTER && iType <= ITEM_SHINING_SCEPTER) || iType == ITEM_ABSOLUTE_SCEPTER || iType == ITEM_STRYKER_SCEPTER || iType == ITEM_MACE + 21)
     {
         return true;
     }
