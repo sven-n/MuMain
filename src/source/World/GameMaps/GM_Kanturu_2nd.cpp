@@ -736,7 +736,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterObjectMesh(OBJECT* o, BMD* b, int E
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
-            o->Alpha -= 0.1f;
+            o->Alpha -= 0.1f * FPS_ANIMATION_FACTOR;
             if (o->Alpha <= 0.0f)
             {
                 o->Alpha = 0.0f;
@@ -906,7 +906,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
             vec3_t Light;
             float Scale, Angle;
 
-            o->Distance += 0.05f;
+            o->Distance += 0.05f * FPS_ANIMATION_FACTOR;
             Scale = o->Distance;
 
             if (Scale >= 3.0f)
@@ -1022,7 +1022,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
             vec3_t Light;
             float Scale, Angle;
 
-            o->Distance += 0.05f;
+            o->Distance += 0.05f * FPS_ANIMATION_FACTOR;
             Scale = o->Distance;
 
             if (Scale >= 3.0f)

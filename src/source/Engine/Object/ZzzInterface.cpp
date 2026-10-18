@@ -2651,7 +2651,7 @@ void Attack(CHARACTER* c)
 
     if (o->Teleport == TELEPORT_BEGIN)
     {
-        o->Alpha -= 0.1f;
+        o->Alpha -= 0.1f * FPS_ANIMATION_FACTOR;
         if (o->Alpha < 0.1f)
         {
             o->Teleport = TELEPORT;

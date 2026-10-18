@@ -5766,14 +5766,16 @@ void MoveEffect(OBJECT* o, int iIndex)
 
         if (o->Kind == 1)
         {
-            if (o->Alpha > 0.0f) o->Alpha -= 0.03f;
+            if (o->Alpha > 0.0f)
+                o->Alpha -= 0.03f * FPS_ANIMATION_FACTOR;
             else DeleteEffect(MODEL_SUMMONER_EQUIP_HEAD_LAGUL, o->Owner);
         }
         else
         {
             if (Hero->SafeZone || sinf(WorldTime * 0.0004f + o->Skill * 0.024f) < 0.3f)
                 o->Kind = 1;
-            if (o->Alpha < 1.0f) o->Alpha += 0.03f;
+            if (o->Alpha < 1.0f)
+                o->Alpha += 0.03f * FPS_ANIMATION_FACTOR;
         }
 
         if (pObject->Live)

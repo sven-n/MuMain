@@ -4068,7 +4068,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
 
     if (c->Freeze > 0.f)
     {
-        c->Freeze -= 0.03f;
+        c->Freeze -= 0.03f * FPS_ANIMATION_FACTOR;
     }
 
     AnimationCharacter(c, o, b);
@@ -5989,13 +5989,13 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
         case MODEL_HYDRA:
             if (o->CurrentAction >= MONSTER01_ATTACK1 && o->CurrentAction <= MONSTER01_ATTACK2)
             {
-                o->BlendMeshLight += 0.1f;
+                o->BlendMeshLight += 0.1f * FPS_ANIMATION_FACTOR;
                 if (o->BlendMeshLight > 1.f)
                     o->BlendMeshLight = 1.f;
             }
             else
             {
-                o->BlendMeshLight -= 0.1f;
+                o->BlendMeshLight -= 0.1f * FPS_ANIMATION_FACTOR;
                 if (o->BlendMeshLight < 0.f)
                     o->BlendMeshLight = 0.f;
             }
@@ -8096,9 +8096,9 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         }
         if (Object->Timer > 0.5f)
         {
-            Object->EyeRight[0] *= 0.95f;
-            Object->EyeRight[1] *= 0.95f;
-            Object->EyeRight[2] *= 0.95f;
+            Object->EyeRight[0] *= powf(0.95f, FPS_ANIMATION_FACTOR);
+            Object->EyeRight[1] *= powf(0.95f, FPS_ANIMATION_FACTOR);
+            Object->EyeRight[2] *= powf(0.95f, FPS_ANIMATION_FACTOR);
         }
 
         CreateSprite(BITMAP_SHOCK_WAVE, Position, Object->Timer, Object->EyeRight, o);
@@ -9292,7 +9292,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             }
             else
             {
-                c->Object.Alpha -= 0.07f;
+                c->Object.Alpha -= 0.07f * FPS_ANIMATION_FACTOR;
                 float fAlpha = c->Object.Alpha;
                 if (fAlpha < 0) fAlpha = 0;
 

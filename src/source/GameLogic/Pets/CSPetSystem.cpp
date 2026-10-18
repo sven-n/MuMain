@@ -469,14 +469,14 @@ void CSPetDarkSpirit::MovePet(void)
         if (o->Position[2] < Height)
         {
             speedRandom = 10;
-            o->Angle[0] -= 2.f;
+            o->Angle[0] -= 2.f * FPS_ANIMATION_FACTOR;
             if (o->Angle[0] < -15.f)
                 o->Angle[0] = -15.f;
         }
         else if (o->Position[2] > Height + 100)
         {
             speedRandom = 20;
-            o->Angle[0] += 2.f;
+            o->Angle[0] += 2.f * FPS_ANIMATION_FACTOR;
             if (o->Angle[0] > 15.f)
                 o->Angle[0] = 15.f;
         }
@@ -586,7 +586,7 @@ void CSPetDarkSpirit::MovePet(void)
         b->TransformPosition(Owner->BoneTransform[42], p, Pos, true);
 
         float Distance = MoveHumming(o->Position, o->Angle, Pos, o->Velocity);
-        o->Velocity++;
+        o->Velocity += FPS_ANIMATION_FACTOR;
         if (Distance < 50)
         {
             SetAI(PET_STAND);

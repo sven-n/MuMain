@@ -663,8 +663,10 @@ bool MoveMount(OBJECT* o, bool bForceRender)
                 o->Direction[1] = Speed;
                 o->Direction[2] = (float)(rand() % 64 - 32) * 0.1f;
             }
-            if (o->Position[2] < o->Owner->Position[2] + 100.f) o->Direction[2] += 1.5f;
-            if (o->Position[2] > o->Owner->Position[2] + 200.f) o->Direction[2] -= 1.5f;
+            if (o->Position[2] < o->Owner->Position[2] + 100.f)
+                o->Direction[2] += 1.5f * FPS_ANIMATION_FACTOR;
+            if (o->Position[2] > o->Owner->Position[2] + 200.f)
+                o->Direction[2] -= 1.5f * FPS_ANIMATION_FACTOR;
         }
     }
     return TRUE;
