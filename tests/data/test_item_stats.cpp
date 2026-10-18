@@ -230,6 +230,19 @@ TEST_CASE("The late wings, crystals and small wings keep their level requirement
     }
 }
 
+// The Cape of Lord's defense of 15 is item data: the item table has it from the start, and
+// creating a cape writes nothing into the table.
+TEST_CASE("The Cape of Lord's base defense is item data [data][items]")
+{
+    ShippedItemAttributes items;
+    CHECK(items[ITEM_CAPE_OF_LORD].Defense == 15);
+
+    CHECK(ComputeItem(ITEM_CAPE_OF_LORD, 0).Defense == 15);
+    items[ITEM_CAPE_OF_LORD].Defense = 20;
+    CHECK(ComputeItem(ITEM_CAPE_OF_LORD, 0).Defense == 20);
+    CHECK(items[ITEM_CAPE_OF_LORD].Defense == 20);
+}
+
 TEST_CASE("A wing's option does not count as excellent [data][items]")
 {
     ShippedItemAttributes items;

@@ -494,12 +494,6 @@ void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
         ip->MagicDefense += GameLogic::Items::GetItemLevelBonus(ip->Level);
     }
 
-    if (ip->Type == ITEM_CAPE_OF_LORD)
-    {
-        p->Defense = 15;
-        ip->Defense = 15;
-    }
-
     if (p->Defense == 0)
     {
         return;

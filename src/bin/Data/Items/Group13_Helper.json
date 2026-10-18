@@ -784,6 +784,7 @@
       "wingTier": "second",
       "level": 180,
       "durability": 200,
+      "defense": 15,
       "requirements": {
         "level": 180
       },
