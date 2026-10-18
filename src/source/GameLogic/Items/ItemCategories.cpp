@@ -137,6 +137,16 @@ namespace GameLogic::Items
         return HasTag(pItem, ItemTag::PandaOrSkeleton);
     }
 
+    bool IsPandaOrSkeletonType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::PandaOrSkeleton);
+    }
+
+    bool IsTransformationRingType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::TransformationRing);
+    }
+
     bool IsJewelItem(const ITEM* pItem)
     {
         return HasTag(pItem, ItemTag::Jewel);
@@ -212,6 +222,11 @@ namespace GameLogic::Items
         return HasTag(itemType, ItemTag::ComplexPotion);
     }
 
+    bool IsShieldPotionType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::ShieldPotion);
+    }
+
     bool IsElitePotion(const ITEM* pItem)
     {
         return HasTag(pItem, ItemTag::ElitePotion);
@@ -270,6 +285,11 @@ namespace GameLogic::Items
     bool IsLuckyItemTicket(const ITEM* pItem)
     {
         return HasTag(pItem, ItemTag::LuckyItemTicket);
+    }
+
+    bool IsLuckyItemType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::LuckyItem);
     }
 
     bool IsLuckyItemTicketModel(int modelType)

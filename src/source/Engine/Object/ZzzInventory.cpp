@@ -1098,7 +1098,8 @@ void RepairAllGold(void)
             {
                 int gold = ConvertRepairGold(ItemValue(ip, 2), ip->Durability, maxDurability, ip->Type, text);
 
-                if (Check_LuckyItem(ip->Type))	gold = 0;
+                if (GameLogic::Items::IsLuckyItemType(ip->Type))
+                    gold = 0;
                 AllRepairGold += gold;
             }
         }
@@ -1125,7 +1126,8 @@ void RepairAllGold(void)
             if (pItem->Durability < maxDurability)
             {
                 int gold = ConvertRepairGold(ItemValue(pItem, 2), pItem->Durability, maxDurability, pItem->Type, text);
-                if (Check_LuckyItem(pItem->Type))	gold = 0;
+                if (GameLogic::Items::IsLuckyItemType(pItem->Type))
+                    gold = 0;
                 AllRepairGold += gold;
             }
         }
@@ -1224,7 +1226,7 @@ WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
         maxDurability += 15;
     }
 
-    if (Check_LuckyItem(ip->Type))
+    if (GameLogic::Items::IsLuckyItemType(ip->Type))
     {
         maxDurability = 255;
     }
@@ -4438,7 +4440,8 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
     int si_iNeedStrength = 0, si_iNeedDex = 0;
     bool bRequireStat = true;
 
-    if (Check_LuckyItem(ip->Type)) bRequireStat = false;
+    if (GameLogic::Items::IsLuckyItemType(ip->Type))
+        bRequireStat = false;
 
     if (Level >= ip->Jewel_Of_Harmony_OptionLevel)
     {
@@ -6466,36 +6469,6 @@ int CompareItem(ITEM item1, ITEM item2)
 
 bool EquipmentItem = false;
 extern int BuyCost;
-
-bool Check_LuckyItem(int _nIndex, int _nType)
-{
-    int		nItemTabIndex = (_nIndex + _nType) % MAX_ITEM_INDEX;
-
-    if (_nIndex < ITEM_HELM || _nIndex > ITEM_WING)	return false;
-    if (nItemTabIndex >= LUCKY_SET_ARMOR_START_INDEX
-        && nItemTabIndex < LUCKY_SET_ARMOR_START_INDEX + LUCKY_SET_ARMOR_COUNT)
-        return true;
-
-    return false;
-}
-
-bool IsLuckySetItem(int iType)
-{
-    int iItemIndex = iType % MAX_ITEM_INDEX;
-
-#ifdef LEM_FIX_SELL_LUCKYITEM_BOOTS_POPUP
-    if ((iType >= ITEM_HELM && iType <= ITEM_WING)
-#else // LEM_FIX_SELL_LUCKYITEM_BOOTS_POPUP
-    if ((iType >= ITEM_HELM && iType <= ITEM_BOOTS)
-#endif // LEM_FIX_SELL_LUCKYITEM_BOOTS_POPUP
-        && (iItemIndex >= LUCKY_SET_ARMOR_START_INDEX
-            && iItemIndex < LUCKY_SET_ARMOR_START_INDEX + LUCKY_SET_ARMOR_COUNT))
-    {
-        return true;
-    }
-
-    return false;
-}
 
 bool IsExcellentItem(ITEM* pItem)
 {

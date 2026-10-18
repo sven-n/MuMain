@@ -95,6 +95,16 @@ public:
                                                   : std::span<const int>();
     }
 
+    // The item types with the tag in the order the game takes them: the
+    // higher potionPriority first, then the higher item type. Built again
+    // whenever the items change, so the span is valid until then.
+    std::span<const int> GetItemTypesWithTagInUseOrder(ItemTag tag) const
+    {
+        const auto tagIndex = static_cast<size_t>(tag);
+        return tagIndex < m_itemTypesByTagInUseOrder.size() ? std::span<const int>(m_itemTypesByTagInUseOrder[tagIndex])
+                                                            : std::span<const int>();
+    }
+
     // All MAX_ITEM slots, indexed by item type, including empty ones.
     std::span<const ItemDefinition> GetAllSlots() const
     {
@@ -144,13 +154,16 @@ private:
     void Store(int itemType, ItemDefinition definition);
     void UpdateDisplayName(ItemDefinition& definition) const;
     void CountExistingItems();
-    // Fills m_itemTypesByTag from the rule data; after every change of the items.
+    // Fills m_itemTypesByTag and m_itemTypesByTagInUseOrder; after every
+    // change of the items.
     void BuildItemTypesByTag();
 
     std::vector<ItemDefinition> m_definitions;
     std::vector<RuleData> m_ruleData;
     // GetItemTypesWithTag's lists, one per tag.
     std::array<std::vector<int>, static_cast<size_t>(ItemTag::Count)> m_itemTypesByTag;
+    // GetItemTypesWithTagInUseOrder's lists, one per tag.
+    std::array<std::vector<int>, static_cast<size_t>(ItemTag::Count)> m_itemTypesByTagInUseOrder;
     std::string m_displayLocale{LocalizedString::NeutralLocale};
     int m_existingItemCount = 0;
     int m_version = 0;

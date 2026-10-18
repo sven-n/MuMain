@@ -1316,6 +1316,7 @@
         "es": "Botas de Escamas",
         "pt": "Botas de escamas"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1347,6 +1348,7 @@
         "es": "Botas de Seda",
         "pt": "Botas de seda"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1374,6 +1376,7 @@
         "es": "Botas Esfinge",
         "pt": "Botas de Esfinge"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1403,6 +1406,7 @@
         "es": "Botas Viento Violento",
         "pt": "Botas do vento violento"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1430,6 +1434,7 @@
         "es": "Botas Adamantinas",
         "pt": "Botas de adamantina"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1457,6 +1462,7 @@
         "es": "Botas Dragón",
         "pt": "Botas de Dragão"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1486,6 +1492,7 @@
         "es": "Botas Guardián",
         "pt": "Botas de Guardião"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1513,6 +1520,7 @@
         "es": "Botas Legendarias",
         "pt": "Botas Lendárias"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1541,6 +1549,7 @@
         "es": "Botas Ala Roja",
         "pt": "Botas da asa vermelha"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1568,6 +1577,7 @@
         "es": "Botas Cuervo de Tormenta",
         "pt": "Botas do corvo da tempestade"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1596,6 +1606,7 @@
         "es": "Botas de Tormenta Zahard",
         "pt": "Botas de Tempestade Zahard"
       },
+      "tags": ["luckyItem"],
       "width": 2,
       "height": 2,
       "slot": "boots",

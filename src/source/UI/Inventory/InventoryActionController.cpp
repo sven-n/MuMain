@@ -612,7 +612,7 @@ bool CInventoryActionController::ApplyJewels(CInventoryCtrl* targetControl, CPic
         }
     }
 
-    if (Check_LuckyItem(pItem->Type))
+    if (GameLogic::Items::IsLuckyItemType(pItem->Type))
     {
         bSuccess = false;
         if (pPickItem->Type == ITEM_POTION + 161)

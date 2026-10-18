@@ -1825,20 +1825,19 @@ int CMyInventory::GetPointedItemIndex() const
 
 int CMyInventory::FindManaItemIndex() const
 {
-    return FindItemIndexWithTagHighestFirst(Data::Items::ItemTag::ManaPotion);
+    return FindItemIndexWithTagInUseOrder(Data::Items::ItemTag::ManaPotion);
 }
 
 int CMyInventory::FindHealingItemIndex() const
 {
-    return FindItemIndexWithTagHighestFirst(Data::Items::ItemTag::HealingPotion);
+    return FindItemIndexWithTagInUseOrder(Data::Items::ItemTag::HealingPotion);
 }
 
-int CMyInventory::FindItemIndexWithTagHighestFirst(Data::Items::ItemTag tag) const
+int CMyInventory::FindItemIndexWithTagInUseOrder(Data::Items::ItemTag tag) const
 {
-    const auto itemTypes = g_ItemDatabase.GetItemTypesWithTag(tag);
-    for (auto itemType = itemTypes.rbegin(); itemType != itemTypes.rend(); ++itemType)
+    for (const int itemType : g_ItemDatabase.GetItemTypesWithTagInUseOrder(tag))
     {
-        const int iIndex = FindItemReverseIndex(*itemType);
+        const int iIndex = FindItemReverseIndex(itemType);
         if (iIndex != -1)
         {
             return iIndex;

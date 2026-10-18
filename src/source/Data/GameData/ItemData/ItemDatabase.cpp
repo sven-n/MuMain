@@ -125,6 +125,16 @@ void ItemDatabase::BuildItemTypesByTag()
             }
         }
     }
+
+    const auto higherPriority = [this](int firstItemType, int secondItemType)
+    { return m_definitions[firstItemType].potionPriority > m_definitions[secondItemType].potionPriority; };
+    for (size_t tagIndex = 0; tagIndex < m_itemTypesByTag.size(); ++tagIndex)
+    {
+        const std::vector<int>& itemTypes = m_itemTypesByTag[tagIndex];
+        std::vector<int>& inUseOrder = m_itemTypesByTagInUseOrder[tagIndex];
+        inUseOrder.assign(itemTypes.rbegin(), itemTypes.rend());
+        std::stable_sort(inUseOrder.begin(), inUseOrder.end(), higherPriority);
+    }
 }
 
 void ItemDatabase::UpdateDisplayName(ItemDefinition& definition) const

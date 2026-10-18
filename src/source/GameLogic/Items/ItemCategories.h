@@ -32,6 +32,8 @@ namespace GameLogic::Items
     bool IsDemonOrSpiritOfGuardianType(int itemType);
     bool IsDemonOrSpiritOfGuardianModel(int modelType);
     bool IsPandaOrSkeletonItem(const ITEM* pItem);
+    bool IsPandaOrSkeletonType(int itemType);
+    bool IsTransformationRingType(int itemType);
 
     // Crafting materials
     bool IsJewelItem(const ITEM* pItem);
@@ -51,6 +53,7 @@ namespace GameLogic::Items
     bool IsManaPotionType(int itemType);
     bool IsComplexPotion(const ITEM* pItem);
     bool IsComplexPotionType(int itemType);
+    bool IsShieldPotionType(int itemType);
     bool IsElitePotion(const ITEM* pItem);
     bool IsElitePotionType(int itemType);
     bool IsElixir(const ITEM* pItem);
@@ -66,6 +69,8 @@ namespace GameLogic::Items
     // Tickets and cash shop items
     bool IsLuckyItemTicket(const ITEM* pItem);
     bool IsLuckyItemTicketModel(int modelType);
+    // The lucky set armour the lucky item tickets give.
+    bool IsLuckyItemType(int itemType);
     bool IsGemJewelry(const ITEM* pItem);
     bool IsGambleItem(const ITEM* pItem);
     bool IsGambleItemType(int itemType);
