@@ -357,6 +357,9 @@ TEST_CASE("Item validation checks slots, wing tiers and weapon kinds [data][item
     ItemDefinition shield = MakeKris();
     shield.slot = ItemSlot::OffHand;
     shield.weaponKind = WeaponKind::Shield;
+    // A book goes in the left hand.
+    ItemDefinition bookInRightHand = MakeKris();
+    bookInRightHand.weaponKind = WeaponKind::Book;
 
     std::vector<ItemDataIssue> issues;
     ValidateItems(std::vector<ItemDefinition>{unnamedSlot}, issues);
@@ -384,6 +387,10 @@ TEST_CASE("Item validation checks slots, wing tiers and weapon kinds [data][item
     issues.clear();
     ValidateItems(std::vector<ItemDefinition>{shield}, issues);
     CHECK(issues.empty());
+
+    issues.clear();
+    ValidateItems(std::vector<ItemDefinition>{bookInRightHand}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "weaponKind"));
 }
 
 TEST_CASE("Rental rules are kept through write and read [data][items]")

@@ -4,6 +4,8 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
 
+#include "Core/Globals/_enum.h"
+
 #include <string>
 #include <vector>
 
@@ -115,7 +117,22 @@ TEST_CASE("A weapon's group gives its weapon kind [data][items]")
     // Arrows and bolts are one-handed.
     CHECK(groupWeaponKind(4, ItemSlot::MainHand, false) == WeaponKind::None);
     CHECK(groupWeaponKind(4, ItemSlot::OffHand, false) == WeaponKind::None);
-    CHECK(groupWeaponKind(SwordGroup, ItemSlot::MainHand, false) == WeaponKind::None);
+    CHECK(groupWeaponKind(SwordGroup, ItemSlot::MainHand, false) == WeaponKind::Sword);
+    CHECK(groupWeaponKind(1, ItemSlot::MainHand, true) == WeaponKind::Axe);
+    CHECK(groupWeaponKind(2, ItemSlot::MainHand, false) == WeaponKind::Mace);
+    // Group 5: staffs and sticks on mainHand, books on offHand.
+    CHECK(groupWeaponKind(5, ItemSlot::MainHand, false) == WeaponKind::Staff);
+    CHECK(groupWeaponKind(5, ItemSlot::OffHand, false) == WeaponKind::Book);
+    CHECK(groupWeaponKind(5, ItemSlot::None, false) == WeaponKind::None);
+    CHECK(groupWeaponKind(PotionGroup, ItemSlot::None, false) == WeaponKind::None);
+
+    // In group 0, an item only the Rage Fighter may use is one of his gloves.
+    ItemDefinition glove = MakeItem(SwordGroup, 32, "Glove");
+    glove.slot = ItemSlot::MainHand;
+    glove.classRequirements[CLASS_RAGEFIGHTER] = 1;
+    CHECK(GetGroupWeaponKind(glove) == WeaponKind::Glove);
+    glove.classRequirements[CLASS_KNIGHT] = 1;
+    CHECK(GetGroupWeaponKind(glove) == WeaponKind::Sword);
 }
 
 TEST_CASE("An edited weapon's kind follows its group while it is the group's [data][items]")

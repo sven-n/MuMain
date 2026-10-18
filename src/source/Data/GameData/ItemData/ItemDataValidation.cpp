@@ -78,17 +78,26 @@ void ValidateName(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
         check(locale, text);
     }
 }
-// The slot the code looks in for each weapon kind: the left hand (offHand) for
-// bows and shields, the right hand (mainHand) for crossbows and spears.
+// The slot of each weapon kind: the left hand (offHand) for bows, shields and
+// books, the right hand (mainHand) for the others. The code looks for a bow or
+// a shield only in the left hand and for a crossbow or a spear only in the
+// right; one-handed swords, axes, maces, staffs and gloves may also go in the
+// left.
 ItemSlot GetWeaponKindSlot(WeaponKind kind)
 {
     switch (kind)
     {
     case WeaponKind::Bow:
     case WeaponKind::Shield:
+    case WeaponKind::Book:
         return ItemSlot::OffHand;
     case WeaponKind::Crossbow:
     case WeaponKind::Spear:
+    case WeaponKind::Sword:
+    case WeaponKind::Axe:
+    case WeaponKind::Mace:
+    case WeaponKind::Staff:
+    case WeaponKind::Glove:
         return ItemSlot::MainHand;
     default:
         return ItemSlot::None;

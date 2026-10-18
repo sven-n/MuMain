@@ -97,6 +97,16 @@ namespace GameLogic::Items
     bool IsShieldType(int itemType);
     // A bow, a crossbow, arrows or bolts.
     bool IsBowCrossbowOrAmmunition(const ITEM* pItem);
+    bool IsSwordOrGloveModel(int modelType);
+    bool IsSwordAxeMaceOrGloveType(int itemType);
+    // A staff, a stick or a book.
+    bool IsStaffOrBookType(int itemType);
+    bool IsStaffOrBookModel(int modelType);
+    // Every weapon kind but the shield, and arrows and bolts.
+    bool IsWeaponOrAmmunition(const ITEM* pItem);
+    bool IsSceptreType(int itemType);
+    // The Magic Gladiator's swords with magic power.
+    bool IsMagicSwordType(int itemType);
 
     // Item value
     bool IsHighValueItem(const ITEM* pItem);

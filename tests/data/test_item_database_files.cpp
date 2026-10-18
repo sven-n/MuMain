@@ -414,7 +414,7 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
 
         std::swap(ItemAttribute[ITEM_SPEAR], ItemAttribute[emptySwordType]);
         g_ItemDataHandler.OnItemsSwapped(ITEM_SPEAR, emptySwordType);
-        CHECK(g_ItemDatabase.GetWeaponKind(emptySwordType) == WeaponKind::None);
+        CHECK(g_ItemDatabase.GetWeaponKind(emptySwordType) == WeaponKind::Sword);
     }
 
     SUBCASE("an undone edit undoes the weapon kind")

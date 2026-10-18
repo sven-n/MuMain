@@ -344,6 +344,49 @@ TEST_CASE("Weapon kinds come from the item data [data][items][rules]")
     CHECK_FALSE(IsBowModel(MODEL_ITEM + MAX_ITEM));
 }
 
+TEST_CASE("Swords, gloves, staffs, books, sceptres and magic swords come from the item data [data][items][rules]")
+{
+    ShippedItemsScope items;
+    const int sacredGloveJ = MakeItemType(0, 40);
+    const int bookOfNeilJ = MakeItemType(5, 40);
+    const int masterScepterJ = MakeItemType(2, 21);
+    const ITEM kris = MakeItem(KrisType);
+    const ITEM bolt = MakeItem(ITEM_BOLT);
+    const ITEM bookOfSahamutt = MakeItem(ITEM_BOOK_OF_SAHAMUTT);
+    const ITEM smallShield = MakeItem(ITEM_SHIELD);
+    const ITEM apple = MakeItem(ITEM_APPLE);
+
+    CHECK(IsSwordOrGloveModel(MODEL_ITEM + KrisType));
+    CHECK(IsSwordOrGloveModel(MODEL_ITEM + ITEM_SACRED_GLOVE));
+    CHECK_FALSE(IsSwordOrGloveModel(MODEL_ITEM + ITEM_AXE));
+
+    CHECK(IsSwordAxeMaceOrGloveType(KrisType));
+    CHECK(IsSwordAxeMaceOrGloveType(ITEM_AXE));
+    CHECK(IsSwordAxeMaceOrGloveType(ITEM_FROST_MACE));
+    CHECK(IsSwordAxeMaceOrGloveType(sacredGloveJ));
+    CHECK_FALSE(IsSwordAxeMaceOrGloveType(ITEM_SPEAR));
+    CHECK_FALSE(IsSwordAxeMaceOrGloveType(ITEM_STAFF));
+
+    CHECK(IsStaffOrBookType(ITEM_STAFF));
+    CHECK(IsStaffOrBookType(ITEM_BOOK_OF_SAHAMUTT));
+    CHECK(IsStaffOrBookType(bookOfNeilJ));
+    CHECK_FALSE(IsStaffOrBookType(KrisType));
+    CHECK(IsStaffOrBookModel(MODEL_ITEM + ITEM_STAFF));
+
+    CHECK(IsWeaponOrAmmunition(&kris));
+    CHECK(IsWeaponOrAmmunition(&bolt));
+    CHECK(IsWeaponOrAmmunition(&bookOfSahamutt));
+    CHECK_FALSE(IsWeaponOrAmmunition(&smallShield));
+    CHECK_FALSE(IsWeaponOrAmmunition(&apple));
+
+    CHECK(IsSceptreType(ITEM_BATTLE_SCEPTER));
+    CHECK(IsSceptreType(masterScepterJ));
+    CHECK_FALSE(IsSceptreType(ITEM_FROST_MACE));
+
+    CHECK(IsMagicSwordType(ITEM_DARK_REIGN_BLADE));
+    CHECK_FALSE(IsMagicSwordType(ITEM_BONE_BLADE));
+}
+
 TEST_CASE("The item types with a tag come lowest first [data][items][rules]")
 {
     ShippedItemsScope items;

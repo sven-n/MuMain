@@ -398,6 +398,46 @@ namespace GameLogic::Items
         return kind == WeaponKind::Bow || kind == WeaponKind::Crossbow || IsAmmunition(pItem);
     }
 
+    bool IsSwordOrGloveModel(int modelType)
+    {
+        const WeaponKind kind = g_ItemDatabase.GetWeaponKind(Data::Items::ToItemType(modelType));
+        return kind == WeaponKind::Sword || kind == WeaponKind::Glove;
+    }
+
+    bool IsSwordAxeMaceOrGloveType(int itemType)
+    {
+        const WeaponKind kind = g_ItemDatabase.GetWeaponKind(itemType);
+        return kind == WeaponKind::Sword || kind == WeaponKind::Axe || kind == WeaponKind::Mace ||
+               kind == WeaponKind::Glove;
+    }
+
+    bool IsStaffOrBookType(int itemType)
+    {
+        const WeaponKind kind = g_ItemDatabase.GetWeaponKind(itemType);
+        return kind == WeaponKind::Staff || kind == WeaponKind::Book;
+    }
+
+    bool IsStaffOrBookModel(int modelType)
+    {
+        return IsStaffOrBookType(Data::Items::ToItemType(modelType));
+    }
+
+    bool IsWeaponOrAmmunition(const ITEM* pItem)
+    {
+        const WeaponKind kind = g_ItemDatabase.GetWeaponKind(pItem->Type);
+        return (kind != WeaponKind::None && kind != WeaponKind::Shield) || IsAmmunition(pItem);
+    }
+
+    bool IsSceptreType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::Sceptre);
+    }
+
+    bool IsMagicSwordType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::MagicSword);
+    }
+
     bool IsHighValueItem(const ITEM* pItem)
     {
         const bool isValuable = HasTag(pItem, ItemTag::Valuable) || pItem->AncientDiscriminator > 0 ||

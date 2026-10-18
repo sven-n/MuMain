@@ -466,7 +466,8 @@ server with original clients (after phases 6 and B).
    As built:
    - Item fields: `tags` (a list of names, a bitmask in memory),
      `wingTier` (`small`/`first`/`second`/`third`), `weaponKind`
-     (`spear`/`bow`/`crossbow`/`shield`, since 3b-2), the rule flags
+     (`sword`/`glove`/`axe`/`mace`/`spear`/`bow`/`crossbow`/`staff`/`book`/`shield`,
+     since 3b-2 and 3b-3), the rule flags
      `tradable`, `droppable`, `storable`, `sellable`,
      `personalShopSellable`, `repairable` (default `true`, only `false`
      is written), the rental rules `droppableWhileRented`,
