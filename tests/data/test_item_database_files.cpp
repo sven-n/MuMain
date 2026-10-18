@@ -192,6 +192,27 @@ TEST_CASE("Item data errors stop loading [data][items]")
     CHECK(errorMessage.find("Group00_Sword.json") != std::string::npos);
 }
 
+// The bmd import and the item editor keep a weapon kind that its group gives
+// following the group and slot; every shipped item has that kind.
+TEST_CASE("The shipped weapon kinds are the ones their groups give [data][items]")
+{
+    ClientDataScope client(ShippedClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+
+    for (const ItemDefinition& definition : g_ItemDatabase.GetAllSlots())
+    {
+        if (!definition.Exists())
+        {
+            continue;
+        }
+        CAPTURE(definition.group);
+        CAPTURE(definition.number);
+        CHECK(definition.weaponKind == GetGroupWeaponKind(definition));
+    }
+}
+
 TEST_CASE("Saved item data loads back the same [data][items]")
 {
     const ItemDataLoadResult shipped = LoadItemDataDirectory(DataDirectory / "Items");
@@ -334,6 +355,49 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
 
         CHECK(g_ItemDatabase.Find(KrisType)->names.GetNeutral() == longName);
         CHECK(g_ItemDatabase.Find(KrisType)->width == 2);
+    }
+
+    SUBCASE("a new weapon gets its group's weapon kind")
+    {
+        const int newSpearType = MakeItemType(3, 100);
+        REQUIRE(g_ItemDatabase.Find(newSpearType) == nullptr);
+        const std::wstring name = L"New Spear";
+        std::fill(std::begin(ItemAttribute[newSpearType].Name), std::end(ItemAttribute[newSpearType].Name), L'\0');
+        name.copy(ItemAttribute[newSpearType].Name, name.size());
+        ItemAttribute[newSpearType].m_byItemSlot = static_cast<BYTE>(ItemSlot::MainHand);
+        g_ItemDataHandler.OnItemEdited(newSpearType);
+
+        REQUIRE(g_ItemDatabase.Find(newSpearType) != nullptr);
+        CHECK(g_ItemDatabase.GetWeaponKind(newSpearType) == WeaponKind::Spear);
+    }
+
+    SUBCASE("a new bow is a bow once it is two-handed and on offHand, in any order")
+    {
+        const int newBowType = MakeItemType(4, 100);
+        REQUIRE(g_ItemDatabase.Find(newBowType) == nullptr);
+        const std::wstring name = L"New Bow";
+        std::fill(std::begin(ItemAttribute[newBowType].Name), std::end(ItemAttribute[newBowType].Name), L'\0');
+        name.copy(ItemAttribute[newBowType].Name, name.size());
+        ItemAttribute[newBowType].m_byItemSlot = static_cast<BYTE>(ItemSlot::MainHand);
+        g_ItemDataHandler.OnItemEdited(newBowType);
+        ItemAttribute[newBowType].TwoHand = true;
+        g_ItemDataHandler.OnItemEdited(newBowType);
+        CHECK(g_ItemDatabase.GetWeaponKind(newBowType) == WeaponKind::Crossbow);
+
+        ItemAttribute[newBowType].m_byItemSlot = static_cast<BYTE>(ItemSlot::OffHand);
+        g_ItemDataHandler.OnItemEdited(newBowType);
+        CHECK(g_ItemDatabase.GetWeaponKind(newBowType) == WeaponKind::Bow);
+    }
+
+    SUBCASE("an undone edit undoes the weapon kind")
+    {
+        ItemAttribute[ITEM_BOLT].TwoHand = true;
+        g_ItemDataHandler.OnItemEdited(ITEM_BOLT);
+        CHECK(g_ItemDatabase.GetWeaponKind(ITEM_BOLT) == WeaponKind::Bow);
+
+        ItemAttribute[ITEM_BOLT].TwoHand = false;
+        g_ItemDataHandler.OnItemEdited(ITEM_BOLT);
+        CHECK(g_ItemDatabase.GetWeaponKind(ITEM_BOLT) == WeaponKind::None);
     }
 
     SUBCASE("a moved item keeps all its names")

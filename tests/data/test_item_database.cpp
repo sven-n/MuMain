@@ -98,6 +98,49 @@ TEST_CASE("Item attribute conversion keeps every field [data][items]")
     }
 }
 
+TEST_CASE("A weapon's group gives its weapon kind [data][items]")
+{
+    const auto groupWeaponKind = [](int group, ItemSlot slot, bool twoHanded)
+    {
+        ItemDefinition definition = MakeItem(group, 0, "Weapon");
+        definition.slot = slot;
+        definition.twoHanded = twoHanded;
+        return GetGroupWeaponKind(definition);
+    };
+
+    CHECK(groupWeaponKind(3, ItemSlot::MainHand, true) == WeaponKind::Spear);
+    CHECK(groupWeaponKind(6, ItemSlot::OffHand, false) == WeaponKind::Shield);
+    CHECK(groupWeaponKind(4, ItemSlot::OffHand, true) == WeaponKind::Bow);
+    CHECK(groupWeaponKind(4, ItemSlot::MainHand, true) == WeaponKind::Crossbow);
+    // Arrows and bolts are one-handed.
+    CHECK(groupWeaponKind(4, ItemSlot::MainHand, false) == WeaponKind::None);
+    CHECK(groupWeaponKind(4, ItemSlot::OffHand, false) == WeaponKind::None);
+    CHECK(groupWeaponKind(SwordGroup, ItemSlot::MainHand, false) == WeaponKind::None);
+}
+
+TEST_CASE("An edited weapon's kind follows its group while it is the group's [data][items]")
+{
+    ItemDefinition bolt = MakeItem(4, 7, "Bolt");
+    bolt.slot = ItemSlot::OffHand;
+
+    // A new item gets its group's kind.
+    CHECK(FollowGroupWeaponKind(nullptr, MakeItem(3, 100, "Spear")) == WeaponKind::Spear);
+
+    // Made two-handed, the bolt is a bow; one-handed again, it is none again.
+    ItemDefinition twoHandedBolt = bolt;
+    twoHandedBolt.twoHanded = true;
+    twoHandedBolt.weaponKind = FollowGroupWeaponKind(&bolt, twoHandedBolt);
+    CHECK(twoHandedBolt.weaponKind == WeaponKind::Bow);
+    CHECK(FollowGroupWeaponKind(&twoHandedBolt, bolt) == WeaponKind::None);
+
+    // A kind set in the item file that the group does not give stays.
+    ItemDefinition shieldWithoutKind = MakeItem(6, 100, "Not a shield");
+    CHECK(FollowGroupWeaponKind(&shieldWithoutKind, shieldWithoutKind) == WeaponKind::None);
+    ItemDefinition swordAsSpear = MakeItem(SwordGroup, 100, "Sword");
+    swordAsSpear.weaponKind = WeaponKind::Spear;
+    CHECK(FollowGroupWeaponKind(&swordAsSpear, swordAsSpear) == WeaponKind::Spear);
+}
+
 TEST_CASE("Item names longer than the bmd field are cut [data][items]")
 {
     ItemDefinition definition;

@@ -80,7 +80,8 @@ private:
     // Gives imported items the current values of the fields item.bmd does
     // not have (tags, wing tier, weapon kind, rule flags) and their current names in the
     // languages whose item.bmd was not read: the ones without one (e.g.
-    // German) and the ones whose file is missing.
+    // German) and the ones whose file is missing. A weapon kind that its group
+    // gives follows the imported slot (FollowGroupWeaponKind).
     static void KeepFieldsNotInBmd(std::vector<Data::Items::ItemDefinition>& items,
                                    const std::vector<std::string>& importedLocales);
 #endif

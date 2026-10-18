@@ -80,7 +80,7 @@ read as the English name only; saving writes the object form.
 | `width`, `height` | Size in inventory slots |
 | `slot` | Equipment slot: `mainHand`, `offHand`, `helm`, `armor`, `pants`, `gloves`, `boots`, `wings`, `pet`, `pendant`, `ring`. Left out = not equippable |
 | `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, defense per level, damage increase, absorption) depend on it; excellent second and third tier wings get no extra durability, and the chaos mix knows a wing's tier from it |
-| `weaponKind` | Only for weapons and shields: `spear`, `bow`, `crossbow`, `shield`, as OpenMU's item groups 3, 4 and 6 (bows have the slot `offHand`, crossbows `mainHand`; arrows and bolts have none). Swords, axes, maces and staffs have none yet. Which bow or crossbow a character holds (its animations, arrows and damage), the elf's arrows-only rule, a spear's reach and Impale, the shield defense set option and the bonus of leveled arrows and bolts depend on it |
+| `weaponKind` | Only for weapons and shields: `spear`, `bow`, `crossbow`, `shield`, as OpenMU's item groups 3, 4 and 6 (bows have the slot `offHand`, crossbows `mainHand`; arrows and bolts have no weapon kind). Swords, axes, maces and staffs have none yet. While an item has the weapon kind its group gives, the bmd import and the item editor keep it matching the group and slot (in group 4 only two-handed items are bows or crossbows), so a new spear, bow, crossbow or shield gets one too; a different kind written in the file stays. Which bow or crossbow a character holds (its animations, arrows and damage), the elf's arrows-only rule, a spear's reach and Impale, the shield defense set option and the bonus of leveled arrows and bolts depend on it |
 | `twoHanded` | Weapon needs both hands |
 | `skill` | Skill the item gives |
 | `level` | Item level (the drop level); also used in price and damage calculations |
@@ -515,7 +515,9 @@ only item data. The import is there to bring in your own old item files.
   Portuguese and Spanish add their names (a translation equal to the
   English name is not stored). Items the English file does not have keep
   the English name they have now, and every item keeps its tags, wing tier,
-  weapon kind and rule flags (the bmd format has none). Save afterwards to keep the
+  weapon kind and rule flags (the bmd format has none). A weapon kind that
+  its group gives follows the imported slot, so a new spear, bow, crossbow
+  or shield gets one too. Save afterwards to keep the
   result. The console lists what the import had to fix (see below) and any
   problem the imported data still has; Save refuses it until those are
   fixed.

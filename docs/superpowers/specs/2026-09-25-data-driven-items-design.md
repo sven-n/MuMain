@@ -565,7 +565,9 @@ server with original clients (after phases 6 and B).
      hit sound in `MoveCharacter`). Silver Bow-J (4/27) joined the bow
      lists in a commit of its own. The group ranges also counted the
      numbers of their group that have no item data, which the client does
-     not know; the weapon kind does not.
+     not know; the weapon kind does not. The bmd import and the item editor
+     keep a weapon kind that its group gives matching the group and slot, so
+     new weapons get one; the game reads only the field.
    - **3b-3** staffs, swords, axes and maces: the weapon kinds `sword`,
      `axe`, `mace` and `staff`, plus the tags `sceptre` and `magicSword`.
      3b-3 includes the character window's wizardry damage

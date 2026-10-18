@@ -186,6 +186,8 @@ void CItemDataHandler::OnItemEdited(int itemType)
     definition.group = GetItemGroup(itemType);
     definition.number = GetItemNumber(itemType);
     CopyItemAttributeStats(attribute, definition);
+    // The editor does not show the weapon kind.
+    definition.weaponKind = FollowGroupWeaponKind(g_ItemDatabase.Find(itemType), definition);
 
     // Only a changed name is stored; otherwise every stat edit would turn the
     // shown English fallback into a translation. ITEM_ATTRIBUTE holds a cut
@@ -263,7 +265,8 @@ void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items,
     { return std::find(importedLocales.begin(), importedLocales.end(), locale) != importedLocales.end(); };
     for (ItemDefinition& item : items)
     {
-        if (const ItemDefinition* current = g_ItemDatabase.Find(item.group, item.number))
+        const ItemDefinition* current = g_ItemDatabase.Find(item.group, item.number);
+        if (current != nullptr)
         {
             CopyFieldsNotInItemAttribute(*current, item);
             for (const auto& [locale, text] : current->names.GetTranslations())
@@ -274,6 +277,7 @@ void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items,
                 }
             }
         }
+        item.weaponKind = FollowGroupWeaponKind(current, item);
     }
 }
 
