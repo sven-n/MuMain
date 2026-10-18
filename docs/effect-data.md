@@ -119,12 +119,8 @@ with when the game creates it. Particles, lightning and sprites have none
 - `position`, `angle`, `direction`, `startPosition` and their offsets are
   vectors: a list of three numbers (x, y, z), or an object with only the
   components that change (`{"y": 0}`); the others keep their value. The
-  offset of `lifeTime` is a number.
-- An offset (a component, or the lifeTime) can be multiplied by the frame
-  factor, as some of the original creation code did: `{"value": 280,
-  "timesFrameFactor": true}`. The frame factor is 1 at 25 frames per second
-  and smaller above, so such effects start at other places at higher frame
-  rates (sven-n/MuMain#681).
+  offset of `lifeTime` is a number. Creation values are the same at every
+  frame rate: none is multiplied by the frame factor.
 - `copy` lists `"field": "source"`. The fields and their sources:
   - `direction`: `"light"` (the move code gets the color too; some effects
     fade it back in from there) or `"callAngle"`;
@@ -153,10 +149,10 @@ with when the game creates it. Particles, lightning and sprites have none
   numbers from -2 to 32767, `kind`, `skill` and `animation` outside their
   ranges, an `alpha` or `alphaTarget` outside 0 to 1, another `renderType`
   than the two names, flags that are not `true`/`false`, vectors that are
-  not three numbers or an object of `x`, `y` and `z`, the frame factor
-  outside an offset, a copy from another source than the ones listed, a
-  field with both a value and a copy, and the old field
-  `copyLightToDirection` (now `"copy": {"direction": "light"}`). An unknown
+  not three numbers or an object of `x`, `y` and `z`, a copy from another
+  source than the ones listed, a field with both a value and a copy, and
+  the old field `copyLightToDirection` (now
+  `"copy": {"direction": "light"}`). An unknown
   field is a warning, and so is a `create` (or `offset`, `copy`, vector)
   that sets no value; a `create` without values still replaces the creation
   code. An offset of a component of `startPosition` that nothing sets or

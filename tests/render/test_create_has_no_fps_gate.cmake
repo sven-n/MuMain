@@ -1,6 +1,6 @@
-# rand_fps_check scales a chance by the frame time, so it belongs on work done every frame. CreateEffect,
-# CreateJoint and CreateParticle run once per spawn; a gate in them makes their random variants rarer at
-# high FPS, where a plain rand() pick keeps the 25 FPS odds.
+# rand_fps_check and FPS_ANIMATION_FACTOR scale by the frame time, so they belong on work done every frame.
+# CreateEffect, CreateJoint and CreateParticle run once per spawn: a gate in them makes their random
+# variants rarer at high FPS, and the factor shrinks spawn offsets, start angles and start rates.
 if(NOT DEFINED MU_EFFECT_SOURCES)
     message(FATAL_ERROR "MU_EFFECT_SOURCES is required")
 endif()
@@ -25,5 +25,12 @@ foreach(entry IN LISTS MU_EFFECT_SOURCES)
     string(FIND "${body}" "rand_fps_check(" gate)
     if(NOT gate EQUAL -1)
         message(FATAL_ERROR "${function} uses rand_fps_check; it runs once per spawn, so use a plain rand() pick")
+    endif()
+
+    # The trail length still makes up for tails laid once per move.
+    string(REPLACE "MaxTails / FPS_ANIMATION_FACTOR" "" scaled "${body}")
+    string(FIND "${scaled}" "FPS_ANIMATION_FACTOR" factor)
+    if(NOT factor EQUAL -1)
+        message(FATAL_ERROR "${function} uses FPS_ANIMATION_FACTOR; it runs once per spawn, so its values take none")
     endif()
 endforeach()

@@ -70,6 +70,10 @@ No player configuration or FPS cap is required.
   pick. A gate nested in another gate, or around a `*FpsChecked` spawn,
   scales the chance twice. Where the original rolled `rand() % n`, keep that
   `n`: it is the intended rate at 25 FPS.
+- A value set once, when an effect, joint or particle is created, never
+  takes `FPS_ANIMATION_FACTOR`: spawn offsets, start angles, random scatter,
+  scale, lifetime and the start values of rates such as gravity, direction
+  and velocity. The move code that applies a rate each frame scales it.
 - To choose, ask whether the line runs more often per second when the frame
   rate rises. Code that looks one-shot can run every frame while its
   condition holds: a clamped `AnimationFrame` with a `>=` test, a range of
