@@ -6079,10 +6079,10 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             Index = rand() % 7;
             Luminosity = g_byUpperBoneLocation[Index];
-            CreateParticleFpsChecked(BITMAP_LIGHT, o->Position, Angle, Light, 4, Luminosity, o->Owner);
+            CreateParticle(BITMAP_LIGHT, o->Position, Angle, Light, 4, Luminosity, o->Owner);
 
             Luminosity = g_byUpperBoneLocation[6 - Index];
-            CreateParticleFpsChecked(BITMAP_LIGHT, o->Position, Angle, Light, 4, Luminosity, o->Owner);
+            CreateParticle(BITMAP_LIGHT, o->Position, Angle, Light, 4, Luminosity, o->Owner);
         }
         else if (o->SubType == 2)
         {

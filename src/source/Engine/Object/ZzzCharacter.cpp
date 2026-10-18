@@ -7069,7 +7069,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
             Vector(i * 30.f - 180.f, -40.f, 0.f, p);
             b->TransformPosition(BoneTransform[0], p, Position, true);
 
-            if (rand_fps_check(3))
+            if (rand() % 3 == 0)
             {
                 CreateSprite(BITMAP_SHINY + 1, Position, 0.6f, Light2, o, (float)(rand() % 360));
             }
@@ -7499,7 +7499,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
             Vector(0.4f, 0.4f, 0.4f, Light2);
             b->TransformPosition(BoneTransform[i + 2], p, Position, true);
 
-            if (rand_fps_check(3))
+            if (rand() % 3 == 0)
             {
                 CreateSprite(BITMAP_SHINY + 1, Position, 0.6f, Light2, o, (float)(rand() % 360));
             }
@@ -7530,7 +7530,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
                     Vector(0.f,i*30.f-10.f,0.f,p);
                     b->TransformPosition(BoneTransform[0],p,Position,true);
 
-                    if ( rand_fps_check(3) )
+                    if ( rand() % 3 == 0 )
                     {
                         CreateSprite(BITMAP_SHINY+1,Position,0.6f,Light2, o, ( float)( rand()%360));
                     }
@@ -7653,7 +7653,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         vec3_t Light2;
         Vector(0.4f, 0.4f, 0.4f, Light2);
         b->TransformPosition(BoneTransform[0], p, Position, true);
-        if (rand_fps_check(3))
+        if (rand() % 3 == 0)
         {
             CreateSprite(BITMAP_SHINY + 1, Position, 0.6f, Light2, o, (float)(rand() % 360));
         }
@@ -11175,16 +11175,20 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         VectorCopy(Light, o->Light);
                     }
 
-                    if (EquipmentLevelSet == 15 && g_pOption->GetRenderLevel() >= 4 && rand_fps_check(1))
+                    if (EquipmentLevelSet == 15 && g_pOption->GetRenderLevel() >= 4)
                     {
                         //left
+                        const bool spawnTrails = rand_fps_check(1);
                         vec3_t vColor;
                         Vector(13.0f, 10.0f, 3.0f, p);
                         b->TransformPosition(o->BoneTransform[20], p, Position, true);
                         VectorCopy(Position, o->EyeLeft);
 
                         Vector(0.09f, 0.09f, 0.8f, vColor);
-                        CreateJoint(BITMAP_JOINT_ENERGY, Position, o->Position, o->Angle, 55, o, 6.0f, -1, 0, 0, -1, vColor);
+                        // Sprites draw every frame; the trail joint spawns at the reference rate.
+                        if (spawnTrails)
+                            CreateJoint(BITMAP_JOINT_ENERGY, Position, o->Position, o->Angle, 55, o, 6.0f, -1, 0, 0, -1,
+                                        vColor);
                         auto fRad = (float)sinf((WorldTime) * 0.002f);
                         Vector(0.2f, 0.4f, 0.8f, vColor);
                         CreateSprite(BITMAP_SHINY + 6, Position, 0.5f * fRad, vColor, o);
@@ -11198,7 +11202,9 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         VectorCopy(Position, o->EyeRight);
 
                         Vector(0.09f, 0.09f, 0.8f, vColor);
-                        CreateJoint(BITMAP_JOINT_ENERGY, Position, o->Position, o->Angle, 56, o, 6.0f, -1, 0, 0, -1, vColor);
+                        if (spawnTrails)
+                            CreateJoint(BITMAP_JOINT_ENERGY, Position, o->Position, o->Angle, 56, o, 6.0f, -1, 0, 0, -1,
+                                        vColor);
 
                         Vector(0.2f, 0.4f, 0.8f, vColor);
                         CreateSprite(BITMAP_SHINY + 6, Position, 0.5f * fRad, vColor, o);
