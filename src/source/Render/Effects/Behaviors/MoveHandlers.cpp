@@ -1612,7 +1612,7 @@ namespace Render::Effects::Behaviors
         if (o->SubType == 1 || o->SubType == 2)
         {
             BMD* b = &Models[o->Owner->Type];
-            Vector(0.f, 0.f, 10.f * FPS_ANIMATION_FACTOR, p);
+            Vector(0.f, 0.f, 10.f, p);
             VectorCopy(o->StartPosition, b->BodyOrigin);
             b->TransformPosition(o->Owner->BoneTransform[33], p, o->Position, true);
         }
@@ -1631,20 +1631,20 @@ namespace Render::Effects::Behaviors
             VectorRotate(p, Matrix, Position);
             VectorAdd(o->Position, Position, Position);
 
-            if (!rand_fps_check(1))
-            {
-                break;
-            }
+            // Sprites draw every frame; the sparks and bolts spawn at the reference rate.
+            const bool spawn = rand_fps_check(1);
 
             if (o->SubType == 1)
             {
                 if (((int)o->LifeTime % 2) == 0)
                 {
-                    CreateJointFpsChecked(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 3, NULL, 10.f, 10, 10);
+                    if (spawn)
+                        CreateJoint(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 3, NULL, 10.f, 10, 10);
                 }
                 else
                 {
-                    CreateParticleFpsChecked(BITMAP_SPARK + 1, Position, Angle, Light, 2, (rand() % 50 + 10) / 100.f, o);
+                    if (spawn)
+                        CreateParticle(BITMAP_SPARK + 1, Position, Angle, Light, 2, (rand() % 50 + 10) / 100.f, o);
                 }
                 CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(rand() % 8 + 8) * 0.2f, o->Light, o, (float)(rand() % 360));
             }
@@ -1652,18 +1652,21 @@ namespace Render::Effects::Behaviors
             {
                 if (((int)o->LifeTime % 2) == 0)
                 {
-                    CreateJointFpsChecked(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 3, NULL, 10.f, 10, 10);
+                    if (spawn)
+                        CreateJoint(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 3, NULL, 10.f, 10, 10);
                 }
                 CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(rand() % 8 + 8) * 0.2f, o->Light, o, (float)(rand() % 360));
             }
             else if (o->SubType == 3)
             {
-                CreateParticleFpsChecked(BITMAP_SPARK + 1, Position, Angle, o->Light, 26, (rand() % 10 + 5) / 25.f, o);
+                if (spawn)
+                    CreateParticle(BITMAP_SPARK + 1, Position, Angle, o->Light, 26, (rand() % 10 + 5) / 25.f, o);
             }
             else
             {
                 CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(rand() % 8 + 8) * 0.3f, o->Light, o, (float)(rand() % 360));
-                CreateParticleFpsChecked(BITMAP_SPARK + 1, Position, Angle, Light, 2, (rand() % 50 + 10) / 100.f, o);
+                if (spawn)
+                    CreateParticle(BITMAP_SPARK + 1, Position, Angle, Light, 2, (rand() % 50 + 10) / 100.f, o);
             }
         }
         return true;
