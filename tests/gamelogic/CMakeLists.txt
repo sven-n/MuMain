@@ -10,6 +10,7 @@ mu_add_test(
     NAME test_head_movement
     SOURCES
         test_head_movement.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
 )

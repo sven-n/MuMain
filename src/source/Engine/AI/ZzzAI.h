@@ -20,7 +20,7 @@ float MoveHumming(vec3_t Position, vec3_t Angle, vec3_t TargetPosition, float Tu
 void MovePosition(vec3_t Position, vec3_t Angle, vec3_t Speed);
 std::uint8_t CalcTargetPos(float x, float y, int Tx, int Ty);
 void Alpha(OBJECT* o);
-void MoveBoid(OBJECT* o, int i, OBJECT* Boids, int MAX);
+void MoveBoid(OBJECT* o, int i, OBJECT* Boids, int MAX, float referenceFrames);
 void PushObject(vec3_t PushPosition, vec3_t Position, float Power, vec3_t Angle);
 
 void SetAction(OBJECT* o, int Action, bool bBlending = true);

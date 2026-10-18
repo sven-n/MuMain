@@ -1,6 +1,7 @@
 #include "doctest.h"
 
 #include "Engine/AI/BoidSteering.h"
+#include "Core/Utilities/Random.h"
 
 #include <algorithm>
 #include <array>
@@ -118,4 +119,35 @@ TEST_CASE("Flock turns wrap, stop at their target, and bound delayed steps [game
     CHECK(TurnTowards(10.f, 170.f, BirdTurnDegrees, 0.f) == 10.f);
     CHECK(TurnTowards(10.f, 170.f, BirdTurnDegrees, -1.f) == 10.f);
     CHECK(TurnTowards(10.f, 170.f, BirdTurnDegrees, 2.f) == 23.f);
+}
+
+TEST_CASE("Rate-gated butterflies keep their reference turning speed at every FPS [gamelogic][boids]")
+{
+    using Engine::AI::BoidSteering::SteerFrames;
+    using Engine::AI::BoidSteering::TurnTowards;
+    constexpr double durationSeconds = 400.0;
+    constexpr double expectedDegreesPerSecond = BirdTurnDegrees * ReferenceFps / 4.0;
+    for (const double fps : std::array{25.0, 60.0, 250.0, 1000.0})
+    {
+        CAPTURE(fps);
+        Random::Seed(771);
+        double turned = 0.0;
+        bool wholeSteps = true;
+        const int frames = static_cast<int>(durationSeconds * fps);
+        for (int frame = 0; frame < frames; ++frame)
+        {
+            const float steerFrames = SteerFrames(true, ReferenceFrames(fps));
+            wholeSteps = wholeSteps && (steerFrames == 0.f || steerFrames == 1.f);
+            turned += TurnTowards(0.f, 90.f, BirdTurnDegrees, steerFrames);
+        }
+        CHECK(wholeSteps);
+        CHECK(turned / durationSeconds == doctest::Approx(expectedDegreesPerSecond).epsilon(0.05));
+    }
+}
+
+TEST_CASE("Ungated flock members steer every frame by its share of a reference frame [gamelogic][boids]")
+{
+    using Engine::AI::BoidSteering::SteerFrames;
+    CHECK(SteerFrames(false, ReferenceFrames(250.0)) == ReferenceFrames(250.0));
+    CHECK(SteerFrames(false, ReferenceFrames(25.0)) == 1.f);
 }

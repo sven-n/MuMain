@@ -12,6 +12,7 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/AI/ZzzAI.h"
+#include "Engine/AI/BoidSteering.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "GameLogic/Events/CSChaosCastle.h"
@@ -1141,9 +1142,11 @@ void MoveBoidGroup(OBJECT* o, int index)
 
     if (o->AI != BOID_GROUND)
     {
-        if (o->Type != MODEL_BUTTERFLY01 || rand_fps_check(4))
+        const float steerFrames =
+            Engine::AI::BoidSteering::SteerFrames(o->Type == MODEL_BUTTERFLY01, FPS_ANIMATION_FACTOR);
+        if (steerFrames > 0.f)
         {
-            MoveBoid(o, index, Boids, MAX_BOIDS);
+            MoveBoid(o, index, Boids, MAX_BOIDS, steerFrames);
         }
 
         AngleMatrix(o->Angle, o->Matrix);
@@ -1814,7 +1817,7 @@ void MoveFishs()
                     SetAction(o, 1);
                 else
                     SetAction(o, 0);
-                MoveBoid(o, i, Fishs, MAX_FISHS);
+                MoveBoid(o, i, Fishs, MAX_FISHS, FPS_ANIMATION_FACTOR);
                 AngleMatrix(o->Angle, o->Matrix);
                 vec3_t Position, Direction;
                 Vector(o->Velocity * (float)(rand() % 4 + 6), 0.f, 0.f, Position);
