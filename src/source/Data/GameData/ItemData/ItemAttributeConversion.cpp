@@ -112,6 +112,7 @@ void CopyFieldsNotInItemAttribute(const ItemDefinition& source, ItemDefinition& 
     target.weaponKind = source.weaponKind;
     target.statProfile = source.statProfile;
     target.excellentBonus = source.excellentBonus;
+    target.excellentRaisesLevel = source.excellentRaisesLevel;
     target.potionPriority = source.potionPriority;
     target.tradable = source.tradable;
     target.droppable = source.droppable;

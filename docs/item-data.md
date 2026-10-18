@@ -90,6 +90,7 @@ read as the English name only; saving writes the object form.
 | `durability`, `magicDurability` | Durability at item level 0; an item with `magicDurability` (staffs, sticks, books) uses it as its maximum durability instead |
 | `damageMin`, `damageMax`, `attackSpeed`, `walkSpeed`, `magicPower` | Weapon values |
 | `excellentBonus` | A fixed excellent bonus of damage and magic power instead of the [item stat file's](#item-stats-by-level) excellent term; left out = the term. The Chaos Dragon Axe has 15, the Chaos Nature Bow 30 and the Chaos Lightning Staff 25. The bmd import keeps it |
+| `excellentRaisesLevel` | `false`: excellent options do not raise the level requirement by the [item stat file's](#item-stats-by-level) `excellentLevelAdd`. Left out = they do. The shipped data has it on the Dragon Knight, Venom Mist, Sylphid Ray, Volcano, Sunlight and Storm Blitz armour, the Bone Blade, Explosion Blade, Soleil Scepter, Sylph Wind Bow, Grand Viper Staff and Storm Blitz Stick, the lucky items and the Horn of Fenrir. The bmd import keeps it |
 | `defense`, `magicDefense`, `blockRate` | Armor and shield values |
 | `attackType` | Attack type used by the client |
 | `sellValue` | Value factor used by the price calculation of some items |
@@ -344,6 +345,7 @@ the field (**Copy text** copies it). All problems are also written to
 - a `potionPriority` on an item without a `healingPotion`, `manaPotion`,
   `complexPotion` or `shieldPotion` tag (nothing reads it there)
 - an `excellentBonus` on an item without damage or magic power
+- `excellentRaisesLevel: false` on an item without a level requirement
 - a `slot` written as a number, as files saved before tags existed have
   it; the number is read, and saving writes the name
 

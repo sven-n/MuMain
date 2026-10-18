@@ -369,6 +369,7 @@
       "damageMax": 74,
       "attackSpeed": 30,
       "magicPower": 130,
+      "excellentRaisesLevel": false,
       "requirements": {
         "level": 380,
         "strength": 39,
@@ -559,6 +560,7 @@
       "damageMax": 53,
       "attackSpeed": 30,
       "magicPower": 110,
+      "excellentRaisesLevel": false,
       "requirements": {
         "level": 380,
         "strength": 64,

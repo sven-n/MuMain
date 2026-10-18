@@ -258,6 +258,24 @@ TEST_CASE("Item stats come from the item's stat profile [data][items]")
     CHECK(stats(ITEM_KRIS, 15).magicPower == 0);
 }
 
+// The items whose level requirement excellent options do not raise are item data: the
+// Dragon Knight to Sunlight and Storm Blitz armour, six weapons, the lucky items and the Horn
+// of Fenrir.
+TEST_CASE("The items excellent options do not raise the level requirement of [data][items]")
+{
+    ShippedItemAttributes items;
+    int itemsWithoutRaise = 0;
+    for (const ItemDefinition& definition : g_ItemDatabase.GetAllSlots())
+    {
+        itemsWithoutRaise += definition.Exists() && !definition.excellentRaisesLevel ? 1 : 0;
+    }
+    CHECK(itemsWithoutRaise == 89);
+    CHECK_FALSE(g_ItemDatabase.Find(ITEM_HORN_OF_FENRIR)->excellentRaisesLevel);
+    CHECK_FALSE(g_ItemDatabase.Find(ITEM_DRAGON_KNIGHT_HELM)->excellentRaisesLevel);
+    CHECK_FALSE(g_ItemDatabase.Find(ITEM_BONE_BLADE)->excellentRaisesLevel);
+    CHECK(g_ItemDatabase.Find(ITEM_KRIS)->excellentRaisesLevel);
+}
+
 TEST_CASE("A shield's defense rate grows with its + level [data][items]")
 {
     ShippedItemAttributes items;

@@ -63,6 +63,7 @@ template <typename TDefinition, typename TVisitor> void VisitStatFields(TDefinit
     visit("walkSpeed", definition.walkSpeed, BYTE{0});
     visit("magicPower", definition.magicPower, BYTE{0});
     visit("excellentBonus", definition.excellentBonus, BYTE{0});
+    visit("excellentRaisesLevel", definition.excellentRaisesLevel, true);
     visit("attackType", definition.attackType, BYTE{0});
     visit("sellValue", definition.sellValue, BYTE{0});
     visit("buyPrice", definition.buyPrice, 0);

@@ -953,6 +953,7 @@
       "slot": "pet",
       "level": 300,
       "durability": 255,
+      "excellentRaisesLevel": false,
       "repairable": false,
       "requirements": {
         "level": 300

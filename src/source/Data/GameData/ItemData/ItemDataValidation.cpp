@@ -147,6 +147,16 @@ void ValidateExcellentBonus(const ItemDefinition& definition, std::vector<ItemDa
     }
 }
 
+// excellentRaisesLevel only matters for an item with a level requirement.
+void ValidateExcellentRaisesLevel(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
+{
+    if (!definition.excellentRaisesLevel && definition.requirements.level == 0)
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
+                 "is set, but the item has no level requirement it would raise", "excellentRaisesLevel");
+    }
+}
+
 // Only the potion lists are taken in priority order.
 void ValidatePotionPriority(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
 {
@@ -183,6 +193,7 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
         ValidateSlot(definition, issues);
         ValidatePotionPriority(definition, issues);
         ValidateExcellentBonus(definition, issues);
+        ValidateExcellentRaisesLevel(definition, issues);
     }
 }
 

@@ -134,6 +134,9 @@ struct ItemDefinition
     // A fixed excellent bonus of damage and magic power instead of the stat
     // file's excellent term (three chaos weapons); 0 uses the term.
     BYTE excellentBonus = 0;
+    // False: excellent options do not raise the level requirement (the stat
+    // file's excellentLevelAdd), as for the lucky items and some sets.
+    bool excellentRaisesLevel = true;
     BYTE attackType = 0;
 
     ItemRequirements requirements;

@@ -328,6 +328,29 @@ TEST_CASE("An item's excellent bonus is kept through write and read, and warns w
     CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "excellentBonus"));
 }
 
+TEST_CASE("An item's excellentRaisesLevel is kept through write and read, and warns without a level requirement "
+          "[data][items]")
+{
+    ItemDefinition helm = MakeKris();
+    helm.requirements.level = 380;
+    helm.excellentRaisesLevel = false;
+    const std::string text = WriteItemGroupJson(0, std::vector<ItemDefinition>{helm});
+    CHECK(text.find(R"("excellentRaisesLevel": false)") != std::string::npos);
+    const ReadResult result = Read(text);
+    REQUIRE(result.items.size() == 1);
+    CHECK_FALSE(result.items.front().excellentRaisesLevel);
+    // The default is not written.
+    CHECK(WriteItemGroupJson(0, std::vector<ItemDefinition>{MakeKris()}).find("excellentRaisesLevel") ==
+          std::string::npos);
+
+    std::vector<ItemDataIssue> issues;
+    ValidateItems(std::vector<ItemDefinition>{helm}, issues);
+    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "excellentRaisesLevel"));
+    helm.requirements.level = 0;
+    ValidateItems(std::vector<ItemDefinition>{helm}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "excellentRaisesLevel"));
+}
+
 TEST_CASE("Item validation checks the stat profiles against the stat file [data][items]")
 {
     ItemStatFile file;
