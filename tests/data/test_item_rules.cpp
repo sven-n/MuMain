@@ -302,8 +302,9 @@ TEST_CASE("Item categories come from the item data [data][items][rules]")
 TEST_CASE("Weapon kinds come from the item data [data][items][rules]")
 {
     ShippedItemsScope items;
+    const int silverBowJ = ITEM_BOW + 27;
+    const int legendaryShieldJ = ITEM_SHIELD + 27;
     const ITEM smallShield = MakeItem(ITEM_SHIELD);
-    const ITEM legendaryShieldJ = MakeItem(ITEM_SHIELD + 27);
     const ITEM shortBow = MakeItem(ITEM_BOW);
     const ITEM crossbow = MakeItem(ITEM_CROSSBOW);
     const ITEM arrows = MakeItem(ITEM_ARROWS);
@@ -313,7 +314,7 @@ TEST_CASE("Weapon kinds come from the item data [data][items][rules]")
     // Bows have the slot offHand, crossbows mainHand; arrows and bolts are neither.
     CHECK(IsBowType(ITEM_BOW));
     CHECK(IsBowType(ITEM_CELESTIAL_BOW));
-    CHECK(IsBowType(ITEM_BOW + 27)); // Silver Bow-J
+    CHECK(IsBowType(silverBowJ));
     CHECK_FALSE(IsBowType(ITEM_CROSSBOW));
     CHECK_FALSE(IsBowType(ITEM_BOLT));
     CHECK(IsCrossbowType(ITEM_CROSSBOW));
@@ -327,9 +328,9 @@ TEST_CASE("Weapon kinds come from the item data [data][items][rules]")
     CHECK(IsSpearModel(MODEL_ITEM + ITEM_SPEAR));
     CHECK_FALSE(IsSpearType(KrisType));
 
-    CHECK(IsShield(&smallShield));
-    CHECK(IsShield(&legendaryShieldJ));
-    CHECK_FALSE(IsShield(&kris));
+    CHECK(IsShieldType(ITEM_SHIELD));
+    CHECK(IsShieldType(legendaryShieldJ));
+    CHECK_FALSE(IsShieldType(KrisType));
 
     CHECK(IsBowCrossbowOrAmmunition(&shortBow));
     CHECK(IsBowCrossbowOrAmmunition(&crossbow));

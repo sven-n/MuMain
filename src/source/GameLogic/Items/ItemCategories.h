@@ -94,7 +94,7 @@ namespace GameLogic::Items
     bool IsCrossbowModel(int modelType);
     bool IsSpearType(int itemType);
     bool IsSpearModel(int modelType);
-    bool IsShield(const ITEM* pItem);
+    bool IsShieldType(int itemType);
     // A bow, a crossbow, arrows or bolts.
     bool IsBowCrossbowOrAmmunition(const ITEM* pItem);
 

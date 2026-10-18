@@ -387,9 +387,9 @@ namespace GameLogic::Items
         return IsSpearType(Data::Items::ToItemType(modelType));
     }
 
-    bool IsShield(const ITEM* pItem)
+    bool IsShieldType(int itemType)
     {
-        return g_ItemDatabase.GetWeaponKind(pItem->Type) == WeaponKind::Shield;
+        return g_ItemDatabase.GetWeaponKind(itemType) == WeaponKind::Shield;
     }
 
     bool IsBowCrossbowOrAmmunition(const ITEM* pItem)

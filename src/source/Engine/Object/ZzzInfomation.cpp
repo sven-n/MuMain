@@ -3277,7 +3277,7 @@ void CHARACTER_MACHINE::CalculateDefense()
     g_csItemOption.PlusSpecialLevel(&Character.Defense, Dexterity, AT_SET_OPTION_IMPROVE_DEFENCE_3);
     g_csItemOption.PlusSpecialLevel(&Character.Defense, Vitality, AT_SET_OPTION_IMPROVE_DEFENCE_4);
 
-    if (GameLogic::Items::IsShield(&Equipment[EQUIPMENT_WEAPON_LEFT]))
+    if (GameLogic::Items::IsShieldType(Equipment[EQUIPMENT_WEAPON_LEFT].Type))
     {
         g_csItemOption.PlusSpecialPercent(&Character.Defense, AT_SET_OPTION_IMPROVE_SHIELD_DEFENCE);
     }

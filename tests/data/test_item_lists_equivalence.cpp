@@ -107,9 +107,8 @@ TEST_CASE("3b-2: the shield and spear ranges match the weapon kinds [data][items
     for (int itemType = FirstItemType; itemType <= LastItemType; ++itemType)
     {
         CAPTURE(itemType);
-        const ITEM item = MakeItem(itemType);
         CHECK(OldIsShieldInLeftHand(itemType) ==
-              (GameLogic::Items::IsShield(&item) || IsUnknownItemOfGroup(itemType, ShieldGroup)));
+              (GameLogic::Items::IsShieldType(itemType) || IsUnknownItemOfGroup(itemType, ShieldGroup)));
 
         const bool spear = GameLogic::Items::IsSpearType(itemType) || IsUnknownItemOfGroup(itemType, SpearGroup);
         CHECK(OldHasSpearReach(itemType) == spear);
