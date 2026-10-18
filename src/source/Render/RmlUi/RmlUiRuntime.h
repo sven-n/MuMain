@@ -117,6 +117,10 @@ public:
     // window that claims the document (CObject::TakesTypingFrom()).
     Rml::Element* GetFocusedTextField() const;
     Rml::ElementDocument* GetTypingDocument() const;
+    // The document whose focused control takes the keys: the typing document, or one with a visible
+    // focused element marked data-takes-keys (a slider stepped by arrows). Only the window that
+    // claims it gets keys (CManager::UpdateKeyEvent()), so its keys don't also trigger hotkeys.
+    Rml::ElementDocument* GetKeyOwningDocument() const;
 
     // Forwards one SDL_EVENT_TEXT_EDITING event to the installed Rml::TextInputHandler (the
     // vendored TextInputMethodEditor_SDL -- see m_TextInputMethodEditor's own comment). Caller

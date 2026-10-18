@@ -36,7 +36,7 @@ struct Recorder
 
     TuningSession Session(PersonalTuning persisted = {})
     {
-        return TuningSession({[this](const PersonalTuning& tuning)
+        return TuningSession({[this](const PersonalTuning&, const PersonalTuning& tuning)
                               {
                                   if (failSave)
                                   {
@@ -263,8 +263,8 @@ TEST_CASE("player tuning writes config.ini only, never the look or mood files [r
     const std::string lookBefore = ReadFile(look);
     const std::string moodBefore = ReadFile(mood);
 
-    TuningSession session({[&config](const PersonalTuning& tuning)
-                           { return Data::Config::SavePersonalTuningFile(config, tuning); },
+    TuningSession session({[&config](const PersonalTuning& saved, const PersonalTuning& tuning)
+                           { return Data::Config::SavePersonalTuningFile(config, saved, tuning); },
                            {},
                            {}},
                           {});

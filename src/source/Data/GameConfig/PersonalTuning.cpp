@@ -46,9 +46,13 @@ bool EqualsIgnoringCase(std::string_view left, std::string_view right)
                { return std::tolower(static_cast<unsigned char>(a)) == std::tolower(static_cast<unsigned char>(b)); });
 }
 
-// The section a line opens, if it is a section header.
+// The section a line opens, if it is a section header. The first line can carry a UTF-8 BOM.
 std::optional<std::string_view> SectionName(std::string_view line)
 {
+    if (line.starts_with("\xEF\xBB\xBF"))
+    {
+        line.remove_prefix(3);
+    }
     const std::string_view trimmed = Trim(line);
     if (trimmed.size() < 2 || trimmed.front() != '[' || trimmed.back() != ']')
     {
@@ -171,21 +175,45 @@ std::string LineBreak(std::string_view text)
     return text.find("\r\n") != std::string_view::npos ? "\r\n" : "\n";
 }
 
-std::string FormatSection(const PersonalTuning& tuning, const std::string& lineBreak)
+// A key a save changes: its new value, or nothing when the key goes.
+struct KeyChange
 {
-    std::string section = "[" + std::string(PersonalTuningSection) + "]" + lineBreak;
+    std::string key;
+    std::optional<std::string> value;
+    bool written = false;
+};
+
+std::vector<KeyChange> Changes(const PersonalTuning& from, const PersonalTuning& to)
+{
+    std::vector<KeyChange> changes;
     for (const LookValueInfo& info : Data::Maps::LookValueInfos())
     {
-        if (const std::optional<double>& value = tuning.look[info.value])
+        const std::optional<double>& value = to.look[info.value];
+        if (value != from.look[info.value])
         {
-            section += std::string(info.name) + "=" + FormatTuningNumber(*value) + lineBreak;
+            changes.push_back(
+                {std::string(info.name), value ? std::optional(FormatTuningNumber(*value)) : std::nullopt});
         }
     }
-    if (tuning.moodStrengthPercent)
+    if (to.moodStrengthPercent != from.moodStrengthPercent)
     {
-        section += std::string(MoodStrengthKey) + "=" + std::to_string(*tuning.moodStrengthPercent) + lineBreak;
+        changes.push_back({std::string(MoodStrengthKey), to.moodStrengthPercent
+                                                             ? std::optional(std::to_string(*to.moodStrengthPercent))
+                                                             : std::nullopt});
     }
-    return section;
+    return changes;
+}
+
+// The key of an entry line, if the line is one.
+std::optional<std::string_view> EntryKey(std::string_view line)
+{
+    const std::string_view trimmed = Trim(line);
+    const std::size_t equals = trimmed.find('=');
+    if (trimmed.empty() || trimmed.front() == ';' || trimmed.front() == '#' || equals == std::string_view::npos)
+    {
+        return std::nullopt;
+    }
+    return Trim(trimmed.substr(0, equals));
 }
 
 std::filesystem::path ResolveConfigFile(const std::filesystem::path& configFile)
@@ -278,37 +306,122 @@ PersonalTuning ReadPersonalTuning(std::string_view configText, std::vector<std::
     return tuning;
 }
 
-std::string ReplacePersonalTuningSection(std::string_view configText, const PersonalTuning& tuning)
+std::string UpdatePersonalTuningSection(std::string_view configText, const PersonalTuning& from,
+                                        const PersonalTuning& to)
 {
+    std::vector<KeyChange> changes = Changes(from, to);
+    if (changes.empty())
+    {
+        return std::string(configText);
+    }
     const std::string lineBreak = LineBreak(configText);
-    const std::string section = tuning.Empty() ? std::string() : FormatSection(tuning, lineBreak);
+    const auto entry = [&lineBreak](const KeyChange& change) { return change.key + "=" + *change.value + lineBreak; };
+    // The changed keys the file did not have yet.
+    const auto newEntries = [&changes, &entry]
+    {
+        std::string text;
+        for (KeyChange& change : changes)
+        {
+            if (change.value && !change.written)
+            {
+                text += entry(change);
+                change.written = true;
+            }
+        }
+        return text;
+    };
+
     std::string result;
-    result.reserve(configText.size() + section.size());
+    result.reserve(configText.size());
+    std::string section;        // the tuning section being read, from its header on
+    std::size_t sectionEnd = 0; // in `section`, after its last line that is not blank
     bool inSection = false;
-    bool written = false;
+    bool sectionSeen = false;
+    bool hasLines = false; // the section keeps a line besides its header
+    // New keys go after the first section's last line; a section left with nothing goes.
+    const auto closeSection = [&]
+    {
+        if (!sectionSeen)
+        {
+            std::string added = newEntries();
+            if (!added.empty())
+            {
+                if (section[sectionEnd - 1] != '\n')
+                {
+                    added.insert(0, lineBreak);
+                }
+                section.insert(sectionEnd, added);
+                hasLines = true;
+            }
+            sectionSeen = true;
+        }
+        if (hasLines)
+        {
+            result += section;
+        }
+        section.clear();
+    };
+
     for (const std::string_view line : SplitLines(configText))
     {
         if (SectionName(line))
         {
-            inSection = IsTuningHeader(line);
-            if (inSection && !written)
+            if (inSection)
             {
-                result += section;
-                written = true;
+                closeSection();
+            }
+            inSection = IsTuningHeader(line);
+            if (inSection)
+            {
+                section = line;
+                sectionEnd = section.size();
+                hasLines = false;
+                continue;
             }
         }
         if (!inSection)
         {
             result += line;
+            continue;
+        }
+        const std::optional<std::string_view> key = EntryKey(line);
+        const auto change = key ? std::find_if(changes.begin(), changes.end(),
+                                               [&key](const KeyChange& candidate) { return candidate.key == *key; })
+                                : changes.end();
+        if (change == changes.end())
+        {
+            section += line;
+        }
+        else if (change->value && !change->written)
+        {
+            section += entry(*change);
+            change->written = true;
+        }
+        else
+        {
+            continue; // the key goes, or a later copy of a key already written
+        }
+        if (!Trim(line).empty())
+        {
+            hasLines = true;
+            sectionEnd = section.size();
         }
     }
-    if (!written && !section.empty())
+    if (inSection)
     {
-        if (!result.empty() && result.back() != '\n')
+        closeSection();
+    }
+    if (!sectionSeen)
+    {
+        const std::string added = newEntries();
+        if (!added.empty())
         {
-            result += lineBreak;
+            if (!result.empty() && result.back() != '\n')
+            {
+                result += lineBreak;
+            }
+            result += "[" + std::string(PersonalTuningSection) + "]" + lineBreak + added;
         }
-        result += section;
     }
     return result;
 }
@@ -323,7 +436,8 @@ PersonalTuning LoadPersonalTuningFile(const std::filesystem::path& configFile, s
     return ReadPersonalTuning(*text, issues);
 }
 
-PersonalTuningSaveResult SavePersonalTuningFile(const std::filesystem::path& configFile, const PersonalTuning& tuning)
+PersonalTuningSaveResult SavePersonalTuningFile(const std::filesystem::path& configFile, const PersonalTuning& from,
+                                                const PersonalTuning& to)
 {
     const std::filesystem::path file = ResolveConfigFile(configFile);
     const std::string name = file.generic_string();
@@ -343,7 +457,7 @@ PersonalTuningSaveResult SavePersonalTuningFile(const std::filesystem::path& con
         return {false, name + " is saved as UTF-16, which the tuning section cannot be written into"};
     }
 
-    const std::string replaced = ReplacePersonalTuningSection(previous, tuning);
+    const std::string replaced = UpdatePersonalTuningSection(previous, from, to);
     if (replaced == previous)
     {
         return {true, {}};

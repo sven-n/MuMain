@@ -112,7 +112,8 @@ Each run writes one directory under `bench/runs/`, named after the timestamp and
 | `passes.csv` | Per segment, repeat and pass: CPU time plus every renderer counter `$glstats` shows, averaged per frame. |
 
 `report.md` opens with what makes the run comparable: the build configuration and commit, the
-SDL_GPU backend and GPU, the look and its Enhanced features, the anti-aliasing and anisotropy
+SDL_GPU backend and GPU, the look with its Enhanced features and the player's own tuning of them
+(`[EnhancedTuning]`, or "defaults"), the anti-aliasing and anisotropy
 levels, the resolution, and whether vsync was on. Those decide which code path the client is
 even running, and a frame time without them next to it is not something anyone can act on
 later.

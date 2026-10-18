@@ -142,16 +142,16 @@
 						<span class="option-tuning-label">{{row.label}}</span>
 						<span class="option-tuning-value">{{row.value_text}}</span>
 						<span data-attr-class="'option-tuning-state ' + row.state">{{row.state_text}}</span>
-						<div class="option-tuning-reset" data-event-click="option_reset_tuning(row.control)">{{tuning_reset_label}}</div>
+						<div class="option-tuning-reset" data-style-visibility="row.state == 'inherited' ? 'hidden' : 'visible'" data-event-click="option_reset_tuning(row.control)">{{tuning_reset_label}}</div>
 					</div>
 					<div class="option-tuning-track">
 						<span class="option-tuning-bound">{{row.min_text}}</span>
-						<div class="option-tuning-slider">
-							<div class="option-tuning-fill" data-style-width="row.fill_percent + '%'"></div>
+						<div class="level-gauge option-gauge option-tuning-slider">
+							<div class="level-gauge-fill option-tuning-fill" data-style-width="row.fill_percent + '%'"></div>
 							<div class="level-gauge-hit option-tuning-hit"
 							     data-event-mousedown="option_tuning_pointer(row.control)" data-event-drag="option_tuning_pointer(row.control)"
 							     data-event-mouseup="option_tuning_commit" data-event-dragend="option_tuning_commit"
-							     data-event-keydown="option_tuning_key(row.control)" data-event-keyup="option_tuning_commit"
+							     data-takes-keys="true" data-event-keydown="option_tuning_key(row.control)" data-event-keyup="option_tuning_commit"
 							     data-event-blur="option_tuning_commit"></div>
 						</div>
 						<span class="option-tuning-bound">{{row.max_text}}</span>
@@ -167,16 +167,16 @@
 						<span class="option-tuning-label">{{row.label}}</span>
 						<span class="option-tuning-value">{{row.value_text}}</span>
 						<span data-attr-class="'option-tuning-state ' + row.state">{{row.state_text}}</span>
-						<div class="option-tuning-reset" data-event-click="option_reset_tuning(row.control)">{{tuning_reset_label}}</div>
+						<div class="option-tuning-reset" data-style-visibility="row.state == 'inherited' ? 'hidden' : 'visible'" data-event-click="option_reset_tuning(row.control)">{{tuning_reset_label}}</div>
 					</div>
 					<div class="option-tuning-track">
 						<span class="option-tuning-bound">{{row.min_text}}</span>
-						<div class="option-tuning-slider">
-							<div class="option-tuning-fill" data-style-width="row.fill_percent + '%'"></div>
+						<div class="level-gauge option-gauge option-tuning-slider">
+							<div class="level-gauge-fill option-tuning-fill" data-style-width="row.fill_percent + '%'"></div>
 							<div class="level-gauge-hit option-tuning-hit"
 							     data-event-mousedown="option_tuning_pointer(row.control)" data-event-drag="option_tuning_pointer(row.control)"
 							     data-event-mouseup="option_tuning_commit" data-event-dragend="option_tuning_commit"
-							     data-event-keydown="option_tuning_key(row.control)" data-event-keyup="option_tuning_commit"
+							     data-takes-keys="true" data-event-keydown="option_tuning_key(row.control)" data-event-keyup="option_tuning_commit"
 							     data-event-blur="option_tuning_commit"></div>
 						</div>
 						<span class="option-tuning-bound">{{row.max_text}}</span>
@@ -199,16 +199,16 @@
 						<span class="option-tuning-label">{{row.label}}</span>
 						<span class="option-tuning-value">{{row.value_text}}</span>
 						<span data-attr-class="'option-tuning-state ' + row.state">{{row.state_text}}</span>
-						<div class="option-tuning-reset" data-event-click="option_reset_tuning(row.control)">{{tuning_reset_label}}</div>
+						<div class="option-tuning-reset" data-style-visibility="row.state == 'inherited' ? 'hidden' : 'visible'" data-event-click="option_reset_tuning(row.control)">{{tuning_reset_label}}</div>
 					</div>
 					<div class="option-tuning-track">
 						<span class="option-tuning-bound">{{row.min_text}}</span>
-						<div class="option-tuning-slider">
-							<div class="option-tuning-fill" data-style-width="row.fill_percent + '%'"></div>
+						<div class="level-gauge option-gauge option-tuning-slider">
+							<div class="level-gauge-fill option-tuning-fill" data-style-width="row.fill_percent + '%'"></div>
 							<div class="level-gauge-hit option-tuning-hit"
 							     data-event-mousedown="option_tuning_pointer(row.control)" data-event-drag="option_tuning_pointer(row.control)"
 							     data-event-mouseup="option_tuning_commit" data-event-dragend="option_tuning_commit"
-							     data-event-keydown="option_tuning_key(row.control)" data-event-keyup="option_tuning_commit"
+							     data-takes-keys="true" data-event-keydown="option_tuning_key(row.control)" data-event-keyup="option_tuning_commit"
 							     data-event-blur="option_tuning_commit"></div>
 						</div>
 						<span class="option-tuning-bound">{{row.max_text}}</span>
@@ -224,16 +224,16 @@
 						<span class="option-tuning-label">{{row.label}}</span>
 						<span class="option-tuning-value">{{row.value_text}}</span>
 						<span data-attr-class="'option-tuning-state ' + row.state">{{row.state_text}}</span>
-						<div class="option-tuning-reset" data-event-click="option_reset_tuning(row.control)">{{tuning_reset_label}}</div>
+						<div class="option-tuning-reset" data-style-visibility="row.state == 'inherited' ? 'hidden' : 'visible'" data-event-click="option_reset_tuning(row.control)">{{tuning_reset_label}}</div>
 					</div>
 					<div class="option-tuning-track">
 						<span class="option-tuning-bound">{{row.min_text}}</span>
-						<div class="option-tuning-slider">
-							<div class="option-tuning-fill" data-style-width="row.fill_percent + '%'"></div>
+						<div class="level-gauge option-gauge option-tuning-slider">
+							<div class="level-gauge-fill option-tuning-fill" data-style-width="row.fill_percent + '%'"></div>
 							<div class="level-gauge-hit option-tuning-hit"
 							     data-event-mousedown="option_tuning_pointer(row.control)" data-event-drag="option_tuning_pointer(row.control)"
 							     data-event-mouseup="option_tuning_commit" data-event-dragend="option_tuning_commit"
-							     data-event-keydown="option_tuning_key(row.control)" data-event-keyup="option_tuning_commit"
+							     data-takes-keys="true" data-event-keydown="option_tuning_key(row.control)" data-event-keyup="option_tuning_commit"
 							     data-event-blur="option_tuning_commit"></div>
 						</div>
 						<span class="option-tuning-bound">{{row.max_text}}</span>
@@ -256,16 +256,16 @@
 						<span class="option-tuning-label">{{row.label}}</span>
 						<span class="option-tuning-value">{{row.value_text}}</span>
 						<span data-attr-class="'option-tuning-state ' + row.state">{{row.state_text}}</span>
-						<div class="option-tuning-reset" data-event-click="option_reset_tuning(row.control)">{{tuning_reset_label}}</div>
+						<div class="option-tuning-reset" data-style-visibility="row.state == 'inherited' ? 'hidden' : 'visible'" data-event-click="option_reset_tuning(row.control)">{{tuning_reset_label}}</div>
 					</div>
 					<div class="option-tuning-track">
 						<span class="option-tuning-bound">{{row.min_text}}</span>
-						<div class="option-tuning-slider">
-							<div class="option-tuning-fill" data-style-width="row.fill_percent + '%'"></div>
+						<div class="level-gauge option-gauge option-tuning-slider">
+							<div class="level-gauge-fill option-tuning-fill" data-style-width="row.fill_percent + '%'"></div>
 							<div class="level-gauge-hit option-tuning-hit"
 							     data-event-mousedown="option_tuning_pointer(row.control)" data-event-drag="option_tuning_pointer(row.control)"
 							     data-event-mouseup="option_tuning_commit" data-event-dragend="option_tuning_commit"
-							     data-event-keydown="option_tuning_key(row.control)" data-event-keyup="option_tuning_commit"
+							     data-takes-keys="true" data-event-keydown="option_tuning_key(row.control)" data-event-keyup="option_tuning_commit"
 							     data-event-blur="option_tuning_commit"></div>
 						</div>
 						<span class="option-tuning-bound">{{row.max_text}}</span>
@@ -288,16 +288,16 @@
 						<span class="option-tuning-label">{{row.label}}</span>
 						<span class="option-tuning-value">{{row.value_text}}</span>
 						<span data-attr-class="'option-tuning-state ' + row.state">{{row.state_text}}</span>
-						<div class="option-tuning-reset" data-event-click="option_reset_tuning(row.control)">{{tuning_reset_label}}</div>
+						<div class="option-tuning-reset" data-style-visibility="row.state == 'inherited' ? 'hidden' : 'visible'" data-event-click="option_reset_tuning(row.control)">{{tuning_reset_label}}</div>
 					</div>
 					<div class="option-tuning-track">
 						<span class="option-tuning-bound">{{row.min_text}}</span>
-						<div class="option-tuning-slider">
-							<div class="option-tuning-fill" data-style-width="row.fill_percent + '%'"></div>
+						<div class="level-gauge option-gauge option-tuning-slider">
+							<div class="level-gauge-fill option-tuning-fill" data-style-width="row.fill_percent + '%'"></div>
 							<div class="level-gauge-hit option-tuning-hit"
 							     data-event-mousedown="option_tuning_pointer(row.control)" data-event-drag="option_tuning_pointer(row.control)"
 							     data-event-mouseup="option_tuning_commit" data-event-dragend="option_tuning_commit"
-							     data-event-keydown="option_tuning_key(row.control)" data-event-keyup="option_tuning_commit"
+							     data-takes-keys="true" data-event-keydown="option_tuning_key(row.control)" data-event-keyup="option_tuning_commit"
 							     data-event-blur="option_tuning_commit"></div>
 						</div>
 						<span class="option-tuning-bound">{{row.max_text}}</span>

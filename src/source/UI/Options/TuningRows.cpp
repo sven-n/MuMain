@@ -107,6 +107,10 @@ TuningLock TuningGroupLock(TuningGroup group, bool enhanced, bool lightingChosen
     {
         return TuningLock::SessionOff;
     }
+    if (feature.sessionSet)
+    {
+        return TuningLock::SessionSet;
+    }
     if (!feature.active)
     {
         return TuningLock::Unavailable;
@@ -128,6 +132,8 @@ std::string TuningLockReason(TuningLock lock)
         return Text(I18N::Game::TuningLockedUnavailable);
     case TuningLock::SessionOff:
         return Text(I18N::Game::TuningLockedSession);
+    case TuningLock::SessionSet:
+        return Text(I18N::Game::TuningLockedSessionValue);
     case TuningLock::None:
         break;
     }

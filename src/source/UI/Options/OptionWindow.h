@@ -48,6 +48,11 @@ namespace mu::ui::window
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
+        // While a tuning slider holds the keys, only this window gets them, so Escape still closes it.
+        bool TakesTypingFrom(const Rml::ElementDocument* document) const override
+        {
+            return document == m_RmlView.Document();
+        }
         bool Update();
         bool Render();
 

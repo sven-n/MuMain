@@ -50,8 +50,6 @@ except the light mood. The interface is the same in both looks.
 
 ## Tuning it yourself
 
-![Expanded Dynamic lights controls in the Legacy options theme](images/advanced-graphics-tuning-legacy.jpg)
-
 Under each of the four rows below "Enhanced graphics" (Enhanced lighting,
 Dynamic lights, Darker map light, Bloom and colour grading), the options
 window has that feature's own sliders. Clicking a row's name or its arrow opens
@@ -78,13 +76,13 @@ window.
 | Enhanced lighting | Highlight knee | `lighting.highlightKnee` | 0.5–0.9 | 0.01 | 0.8 | More settings |
 | Enhanced lighting | Rim concentration | `lighting.rim.power` | 1–8 | 0.1 | 3 | More settings |
 | Enhanced lighting | Shine concentration | `lighting.specular.power` | 4–128 | 1 | 32 | More settings |
-| Dynamic lights | Skill intensity | `dynamic.effectGain` | 0–4× | 0.1× | 1× | common |
-| Dynamic lights | Skill radius | `dynamic.effectRange` | 0.5–4× | 0.1× | 1.5× | common |
+| Dynamic lights | Skill intensity | `dynamic.effectGain` | 0–4× | 0.1× | 2.5× | common |
+| Dynamic lights | Skill radius | `dynamic.effectRange` | 0.5–4× | 0.1× | 3× | common |
 | Dynamic lights | Skill fade | `dynamic.effectFade` | 0–2 s | 0.05 s | 0.5 s | common |
-| Dynamic lights | Overlapping-light cap | `dynamic.effectCap` | 0–8 | 0.1 | 1.4 | common |
+| Dynamic lights | Overlapping-light cap | `dynamic.effectCap` | 0–8 | 0.1 | 2.5 | common |
 | Dynamic lights | Light wrap | `dynamic.wrap` | 0–0.5 | 0.05 | 0.3 | More settings |
 | Dynamic lights | Map-light smoothing | `dynamic.mapSmoothing` | 0–2 s | 0.05 s | 0.5 s | More settings |
-| Dynamic lights | Maximum skill radius | `dynamic.effectRangeMax` | 0–16 cells | 1 cell | 4 cells | More settings |
+| Dynamic lights | Maximum skill radius | `dynamic.effectRangeMax` | 0–16 cells | 1 cell | 8 cells | More settings |
 | Darker map light | Mood strength | `mood.strengthPercent` | 0–100 % | 1 % | 100 % | common |
 | Bloom and colour grading | Bloom intensity | `bloom.strength` | 0–2 | 0.05 | 1 (Icarus 0.3) | common |
 | Bloom and colour grading | Bloom spread | `bloom.levelFalloff` | 0.25–1 | 0.05 | 0.6 | common |
@@ -176,7 +174,7 @@ Classic uses neither file.
 ```json
 {
   "formatVersion": 1,
-  "default": { "bloom.strength": 1.0, "dynamic.effectCap": 1.4 },
+  "default": { "bloom.strength": 1.0, "dynamic.effectCap": 2.5 },
   "maps": [ { "world": 10, "name": "Icarus", "bloom.strength": 0.3 } ]
 }
 ```
@@ -199,11 +197,11 @@ for the whole file.
 | `lighting.specular.power` | 32 | 32 | 4–128 | how small the highlight is |
 | `dynamic.wrap` | 0.3 | 0.5 | 0–0.5 | how far a point light reaches round a model |
 | `dynamic.mapSmoothing` | 0.5 | 0 | 0–2 | seconds over which flickering map and character lights (candles, fires) ease to their new brightness |
-| `dynamic.effectGain` | 1 | 1 | 0–4 | brightness factor of spell and effect lights |
-| `dynamic.effectRange` | 1.5 | 1 | 0.5–4 | range factor of spell and effect lights |
-| `dynamic.effectRangeMax` | 4 | 0 (none) | 0–16 | the most terrain cells the range factor may widen a light to |
+| `dynamic.effectGain` | 2.5 | 1 | 0–4 | brightness factor of spell and effect lights |
+| `dynamic.effectRange` | 3 | 1 | 0.5–4 | range factor of spell and effect lights |
+| `dynamic.effectRangeMax` | 8 | 0 (none) | 0–16 | the most terrain cells the range factor may widen a light to |
 | `dynamic.effectFade` | 0.5 | 0 | 0–2 | seconds over which a spell's light fades out after it ends |
-| `dynamic.effectCap` | 1.4 | 0 (none) | 0–8 | the most light overlapping spell lights may add up to |
+| `dynamic.effectCap` | 2.5 | 0 (none) | 0–8 | the most light overlapping spell lights may add up to |
 | `bloom.strength` | 1.0 (Icarus 0.3) | 0.6 | 0–2 | how strong the halo around light effects is |
 | `bloom.levelFalloff` | 0.6 | 0.5 | 0.25–1 | how wide the halo spreads |
 | `grading.strength` | 1 | 1 | 0–1 | how much of a map's grading table applies; 0 grades nothing while the bloom stays |

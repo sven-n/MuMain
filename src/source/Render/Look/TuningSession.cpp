@@ -148,7 +148,7 @@ bool TuningSession::Commit()
         return true;
     }
     const Data::Config::PersonalTuningSaveResult result =
-        m_hooks.persist ? m_hooks.persist(m_current)
+        m_hooks.persist ? m_hooks.persist(m_persisted, m_current)
                         : Data::Config::PersonalTuningSaveResult{false, "no configuration file"};
     if (!result.saved)
     {

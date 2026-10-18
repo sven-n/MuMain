@@ -648,23 +648,9 @@
 .opt-tuning-track .opt-tuning-bound:last-child {
 	text-align: right;
 }
+/* The volume slider's rail and fill (.opt-slider), with room for the bounds beside it. */
 .opt-tuning-slider {
-	position: relative;
-	flex: 1 1 0;
-	height: 6dp;
 	margin: 0 12dp;
-	border-radius: 3dp;
-	background-color: rgba(255, 255, 255, 34);
-}
-.opt-tuning-fill {
-	position: absolute;
-	left: 0;
-	top: 0;
-	bottom: 0;
-	border-radius: 3dp;
-	pointer-events: none;
-	background-color: token(accent-gold);
-	decorator: linear-gradient(to right, #8f6922, token(accent-gold-hover));
 }
 .opt-tuning-hit {
 	left: -8dp;

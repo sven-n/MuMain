@@ -57,7 +57,8 @@ public:
     LookEditResult Set(std::span<const LookEdit> edits, std::optional<int> world, std::string_view mapName = {});
     // `$look reset`: every value, or `name` in the default and `world`'s entry, with their edit marks.
     LookEditResult Reset(std::optional<std::string_view> name, int world);
-    // `$look save` wrote the live files: a reset goes back to them.
+    // `$look save` wrote the live files: a reset goes back to them, and the edits saved in them are
+    // no longer marked, so the player's values apply over them again.
     void MarkSaved();
 
     [[nodiscard]] const LookFiles& Live() const

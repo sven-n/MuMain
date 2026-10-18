@@ -113,7 +113,7 @@ TEST_CASE("tuning rows show units, No cap and Immediate at their zero [ui][optio
 
 TEST_CASE("a row distinguishes defaults, global custom tuning and unsaved changes [ui][options][tuning]")
 {
-    Render::Look::TuningSession session({[](const Data::Config::PersonalTuning&)
+    Render::Look::TuningSession session({[](const Data::Config::PersonalTuning&, const Data::Config::PersonalTuning&)
                                          { return Data::Config::PersonalTuningSaveResult{false, "read-only"}; },
                                          {},
                                          {}},
@@ -151,8 +151,11 @@ TEST_CASE("a tuning group is locked with its reason and dynamic lights need Enha
     UI::Options::TuningFeatureState session;
     session.sessionOff = true;
     CHECK(TuningGroupLock(TuningGroup::Lighting, true, true, session) == TuningLock::SessionOff);
+    UI::Options::TuningFeatureState sessionValue;
+    sessionValue.sessionSet = true;
+    CHECK(TuningGroupLock(TuningGroup::LightMood, true, true, sessionValue) == TuningLock::SessionSet);
     for (const TuningLock lock : {TuningLock::ClassicLook, TuningLock::FeatureOff, TuningLock::NeedsLighting,
-                                  TuningLock::Unavailable, TuningLock::SessionOff})
+                                  TuningLock::Unavailable, TuningLock::SessionOff, TuningLock::SessionSet})
     {
         CHECK_FALSE(UI::Options::TuningLockReason(lock).empty());
     }

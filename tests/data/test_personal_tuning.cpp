@@ -108,26 +108,63 @@ TEST_CASE("each invalid tuning key is ignored on its own [data][config][tuning]"
     CHECK_MESSAGE(issues.back().find("more ignored keys") != std::string::npos, Join(issues));
 }
 
-TEST_CASE("the tuning section is replaced on its own and removed when empty [data][config][tuning]")
+TEST_CASE("only the changed tuning keys are written, and an emptied section goes [data][config][tuning]")
 {
     PersonalTuning tuning;
     tuning.look[LookValue::BloomStrength] = 0.5;
     tuning.moodStrengthPercent = 40;
 
-    const std::string added = Data::Config::ReplacePersonalTuningSection(ConfigWithoutTuning, tuning);
+    const std::string added = Data::Config::UpdatePersonalTuningSection(ConfigWithoutTuning, {}, tuning);
     CHECK(added == ConfigWithoutTuning + "[EnhancedTuning]\nbloom.strength=0.5\nmood.strengthPercent=40\n");
 
-    // Every other line survives; a section in the middle is replaced in place.
-    const std::string middle = "[Window]\nWidth=1280\n[EnhancedTuning]\nbloom.strength=1\n; note\n[Audio]\nMusic=3\n";
-    const std::string replaced = Data::Config::ReplacePersonalTuningSection(middle, tuning);
-    CHECK(replaced ==
-          "[Window]\nWidth=1280\n[EnhancedTuning]\nbloom.strength=0.5\nmood.strengthPercent=40\n[Audio]\nMusic=3\n");
+    // A changed key is replaced in place, a new one follows the section's last line, and every
+    // other line stays: comments and keys this client does not know included.
+    const std::string middle =
+        "[Window]\nWidth=1280\n[EnhancedTuning]\nbloom.strength=1\nfuture.key=2\n; note\n\n[Audio]\nMusic=3\n";
+    const std::string updated = Data::Config::UpdatePersonalTuningSection(middle, {}, tuning);
+    CHECK(updated == "[Window]\nWidth=1280\n[EnhancedTuning]\nbloom.strength=0.5\nfuture.key=2\n; note\n"
+                     "mood.strengthPercent=40\n\n[Audio]\nMusic=3\n");
 
-    // Reset all: no keys, no section.
-    CHECK(Data::Config::ReplacePersonalTuningSection(replaced, {}) == "[Window]\nWidth=1280\n[Audio]\nMusic=3\n");
+    // Reset all removes this client's keys; the section stays while it holds anything else.
+    CHECK(Data::Config::UpdatePersonalTuningSection(updated, tuning, {}) ==
+          "[Window]\nWidth=1280\n[EnhancedTuning]\nfuture.key=2\n; note\n\n[Audio]\nMusic=3\n");
+    // A section left with nothing goes.
+    CHECK(Data::Config::UpdatePersonalTuningSection(added, tuning, {}) == ConfigWithoutTuning);
+    // Nothing changed, nothing written.
+    CHECK(Data::Config::UpdatePersonalTuningSection(middle, tuning, tuning) == middle);
     // Line endings of the file are kept.
-    CHECK(Data::Config::ReplacePersonalTuningSection("[Window]\r\nWidth=1\r\n", tuning) ==
+    CHECK(Data::Config::UpdatePersonalTuningSection("[Window]\r\nWidth=1\r\n", {}, tuning) ==
           "[Window]\r\nWidth=1\r\n[EnhancedTuning]\r\nbloom.strength=0.5\r\nmood.strengthPercent=40\r\n");
+}
+
+TEST_CASE("two clients saving tuning keep each other's values [data][config][tuning]")
+{
+    // Both started from a file without tuning; each saves only what it changed.
+    PersonalTuning first;
+    first.look[LookValue::BloomStrength] = 0.5;
+    PersonalTuning second;
+    second.look[LookValue::DynamicEffectGain] = 1.2;
+
+    const std::string afterFirst = Data::Config::UpdatePersonalTuningSection(ConfigWithoutTuning, {}, first);
+    const std::string afterSecond = Data::Config::UpdatePersonalTuningSection(afterFirst, {}, second);
+    std::vector<std::string> issues;
+    const PersonalTuning read = Data::Config::ReadPersonalTuning(afterSecond, issues);
+    CHECK(read.look[LookValue::BloomStrength] == 0.5);
+    CHECK(read.look[LookValue::DynamicEffectGain] == 1.2);
+}
+
+TEST_CASE("a tuning section after a UTF-8 BOM is read and updated in place [data][config][tuning]")
+{
+    const std::string withBom = "\xEF\xBB\xBF[EnhancedTuning]\nbloom.strength=0.7\n[Window]\nWidth=1\n";
+    std::vector<std::string> issues;
+    CHECK(Data::Config::ReadPersonalTuning(withBom, issues).look[LookValue::BloomStrength] == 0.7);
+
+    PersonalTuning saved;
+    saved.look[LookValue::BloomStrength] = 0.7;
+    PersonalTuning tuning;
+    tuning.look[LookValue::BloomStrength] = 0.2;
+    CHECK(Data::Config::UpdatePersonalTuningSection(withBom, saved, tuning) ==
+          "\xEF\xBB\xBF[EnhancedTuning]\nbloom.strength=0.2\n[Window]\nWidth=1\n");
 }
 
 TEST_CASE("saved tuning round-trips and resets remove only their keys [data][config][tuning]")
@@ -140,7 +177,7 @@ TEST_CASE("saved tuning round-trips and resets remove only their keys [data][con
     tuning.look[LookValue::BloomStrength] = 0.5;
     tuning.look[LookValue::DynamicEffectGain] = 1.2;
     tuning.moodStrengthPercent = 0;
-    REQUIRE(Data::Config::SavePersonalTuningFile(config, tuning).saved);
+    REQUIRE(Data::Config::SavePersonalTuningFile(config, {}, tuning).saved);
 
     std::vector<std::string> issues;
     CHECK(Data::Config::LoadPersonalTuningFile(config, issues) == tuning);
@@ -149,20 +186,21 @@ TEST_CASE("saved tuning round-trips and resets remove only their keys [data][con
     CHECK_FALSE(std::filesystem::exists(dir.path / "config.ini.tmp"));
 
     // A per-control reset removes that key only.
-    tuning.look[LookValue::BloomStrength].reset();
-    REQUIRE(Data::Config::SavePersonalTuningFile(config, tuning).saved);
+    PersonalTuning reset = tuning;
+    reset.look[LookValue::BloomStrength].reset();
+    REQUIRE(Data::Config::SavePersonalTuningFile(config, tuning, reset).saved);
     const std::string afterReset = ReadFile(config);
     CHECK(afterReset.find("bloom.strength") == std::string::npos);
     CHECK(afterReset.find("dynamic.effectGain=1.2") != std::string::npos);
     CHECK(afterReset.find("mood.strengthPercent=0") != std::string::npos);
 
     // Reset all leaves the file as it was before any tuning.
-    REQUIRE(Data::Config::SavePersonalTuningFile(config, {}).saved);
+    REQUIRE(Data::Config::SavePersonalTuningFile(config, reset, {}).saved);
     CHECK(ReadFile(config) == ConfigWithoutTuning);
 
     // A missing file is created with only the section.
     const std::filesystem::path fresh = dir.path / "fresh.ini";
-    REQUIRE(Data::Config::SavePersonalTuningFile(fresh, tuning).saved);
+    REQUIRE(Data::Config::SavePersonalTuningFile(fresh, {}, tuning).saved);
     CHECK(Data::Config::LoadPersonalTuningFile(fresh, issues) == tuning);
 }
 
@@ -175,7 +213,7 @@ TEST_CASE("a restart reads exactly the value a session applied [data][config][tu
         PersonalTuning tuning;
         tuning.look[LookValue::DiffuseFloor] = kept;
         const PersonalTuning read =
-            Data::Config::ReadPersonalTuning(Data::Config::ReplacePersonalTuningSection("", tuning), issues);
+            Data::Config::ReadPersonalTuning(Data::Config::UpdatePersonalTuningSection("", {}, tuning), issues);
         CHECK(read.look[LookValue::DiffuseFloor] == kept);
     }
 }
@@ -192,7 +230,7 @@ TEST_CASE("a failed tuning save leaves the configuration as it was [data][config
 
     // The temporary file cannot be created: a folder of that name is in the way.
     std::filesystem::create_directory(dir.path / "config.ini.tmp");
-    const Data::Config::PersonalTuningSaveResult blocked = Data::Config::SavePersonalTuningFile(config, tuning);
+    const Data::Config::PersonalTuningSaveResult blocked = Data::Config::SavePersonalTuningFile(config, {}, tuning);
     CHECK_FALSE(blocked.saved);
     CHECK_MESSAGE(blocked.error.find("left as it was") != std::string::npos, blocked.error);
     CHECK(ReadFile(config) == before);
@@ -202,6 +240,6 @@ TEST_CASE("a failed tuning save leaves the configuration as it was [data][config
     // A UTF-16 file is never rewritten.
     const std::string utf16 = std::string("\xFF\xFE[\0W\0]\0", 8);
     WriteFile(config, utf16);
-    CHECK_FALSE(Data::Config::SavePersonalTuningFile(config, tuning).saved);
+    CHECK_FALSE(Data::Config::SavePersonalTuningFile(config, {}, tuning).saved);
     CHECK(ReadFile(config) == utf16);
 }

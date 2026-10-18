@@ -33,8 +33,10 @@ class TuningSession
 public:
     struct Hooks
     {
-        // Writes the tuning ([EnhancedTuning] of config.ini).
-        std::function<Data::Config::PersonalTuningSaveResult(const Data::Config::PersonalTuning&)> persist;
+        // Writes the change from what was saved to the tuning ([EnhancedTuning] of config.ini).
+        std::function<Data::Config::PersonalTuningSaveResult(const Data::Config::PersonalTuning& saved,
+                                                             const Data::Config::PersonalTuning& tuning)>
+            persist;
         // The player's look values changed (the renderer reads them from the next frame on).
         std::function<void(const Data::Maps::LookOverrides&)> applyLook;
         // The player's light mood strength changed (rebuilds the map's static light).

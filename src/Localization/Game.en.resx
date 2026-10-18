@@ -1640,6 +1640,9 @@
   <data name="Tuning Locked Session" xml:space="preserve">
     <value>Switched off for this session by a developer command.</value>
   </data>
+  <data name="Tuning Locked Session Value" xml:space="preserve">
+    <value>Set for this session by a developer command.</value>
+  </data>
   <data name="Tuning Save Failed" xml:space="preserve">
     <value>Your graphics tuning could not be saved; the change is shown but not saved:</value>
   </data>

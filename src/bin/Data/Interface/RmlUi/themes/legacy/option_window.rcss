@@ -454,22 +454,13 @@
 .option-tuning-track .option-tuning-bound:last-child {
 	text-align: right;
 }
+/* The volume gauge's art: its rail, and its full fill at its own size, cut off at the value as
+   native draws it (scale-none crops the image to the fill's width). */
 .option-tuning-slider {
-	position: relative;
-	flex: 1 1 auto;
-	height: 8dp;
 	margin: 0 6dp;
-	background-color: token(surface-recessed);
-	border-width: 1dp;
-	border-color: token(border-control);
 }
 .option-tuning-fill {
-	position: absolute;
-	left: 0;
-	top: 0;
-	bottom: 0;
-	pointer-events: none;
-	background-color: #8f6922;
+	decorator: image(level-gauge-fill-10 scale-none left center);
 }
 .option-tuning-hit {
 	left: -6dp;

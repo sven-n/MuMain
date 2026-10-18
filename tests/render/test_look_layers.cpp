@@ -220,6 +220,24 @@ TEST_CASE("a map-scoped developer edit leaves the player's values on other maps 
     CHECK(Bloom(layers, Lorencia) == 0.5);
 }
 
+TEST_CASE("a saved developer edit is the files' value, under the player's [render][look][tuning]")
+{
+    LookLayers layers;
+    layers.UseFiles(Files());
+    layers.SetApplyingGroups(AllGroups);
+    layers.SetPersonal(PersonalBloom(0.5));
+
+    const LookEdit edit{"bloom.strength", 0.2};
+    REQUIRE(layers.Set({&edit, 1}, std::nullopt).applied);
+    CHECK(Bloom(layers, Lorencia) == 0.2);
+    layers.MarkSaved();
+    CHECK(layers.DeveloperEdits() == Render::Look::DeveloperLookEdits{});
+    CHECK(Bloom(layers, Lorencia) == 0.5);
+    // Without the player's value, the saved one applies.
+    layers.SetPersonal({});
+    CHECK(Bloom(layers, Lorencia) == 0.2);
+}
+
 TEST_CASE("a default developer edit shows where no map entry overrides it [render][look][tuning]")
 {
     LookLayers layers;

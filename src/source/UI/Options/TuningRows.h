@@ -27,6 +27,8 @@ enum class TuningLock : std::uint8_t
     Unavailable,
     // A developer command switched the feature off for this session.
     SessionOff,
+    // A developer command set the group's value for this session ($lightmood's strength).
+    SessionSet,
 };
 
 // The state of one feature for its group's lock.
@@ -36,6 +38,7 @@ struct TuningFeatureState
     // Drawn this frame (chosen, available and not switched off for the session).
     bool active = true;
     bool sessionOff = false;
+    bool sessionSet = false;
 };
 
 // `enhanced`: the Enhanced look is active; `lightingChosen`: the player keeps Enhanced lighting on

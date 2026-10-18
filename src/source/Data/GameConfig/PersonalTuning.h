@@ -18,9 +18,10 @@
 // A key is a look value's name (Data::Maps::LookValueInfos) or mood.strengthPercent, the light
 // mood's strength from 0 to 100. Only the values the player changed are written; a missing key
 // follows the look profile (Data/Render/Look.json) and the current map. A key that is unknown, not
-// a number or out of its range is ignored on its own: the other keys still apply. The section is
-// written as a whole into a temporary file that replaces config.ini only once it is complete, so a
-// failed save leaves the previous file as it was.
+// a number or out of its range is ignored on its own: the other keys still apply. A save writes only
+// the keys it changes, into the file as it is then: every other line stays, so a key this client does
+// not know and a value another client saved meanwhile survive. It goes through a temporary file that
+// replaces config.ini only once it is complete, so a failed save leaves the previous file as it was.
 namespace Data::Config
 {
 
@@ -49,9 +50,11 @@ struct PersonalTuning
 // one line per ignored key, at most MaxPersonalTuningIssues.
 [[nodiscard]] PersonalTuning ReadPersonalTuning(std::string_view configText, std::vector<std::string>& issues);
 
-// `configText` with its [EnhancedTuning] section replaced by `tuning` (removed when it is empty,
-// appended when there was none). Every other line stays as it was.
-[[nodiscard]] std::string ReplacePersonalTuningSection(std::string_view configText, const PersonalTuning& tuning);
+// `configText` with the keys that differ between `from` and `to` written into its [EnhancedTuning]
+// section: a changed key in place, a new one after the section's last line, a removed one dropped (a
+// section left with nothing goes, one is appended when there was none). Every other line stays.
+[[nodiscard]] std::string UpdatePersonalTuningSection(std::string_view configText, const PersonalTuning& from,
+                                                      const PersonalTuning& to);
 
 // Reads the section of `configFile`; a missing file has none.
 [[nodiscard]] PersonalTuning LoadPersonalTuningFile(const std::filesystem::path& configFile,
@@ -64,9 +67,9 @@ struct PersonalTuningSaveResult
     std::string error;
 };
 
-// Writes the section into `configFile` through `<configFile>.tmp`, read back before it replaces
-// the file.
+// Writes the change from `from` (what this client last saved) to `to` into `configFile`
+// (UpdatePersonalTuningSection), through `<configFile>.tmp`, read back before it replaces the file.
 [[nodiscard]] PersonalTuningSaveResult SavePersonalTuningFile(const std::filesystem::path& configFile,
-                                                              const PersonalTuning& tuning);
+                                                              const PersonalTuning& from, const PersonalTuning& to);
 
 } // namespace Data::Config

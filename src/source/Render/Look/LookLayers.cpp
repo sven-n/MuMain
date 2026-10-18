@@ -120,6 +120,9 @@ LookEditResult LookLayers::Reset(std::optional<std::string_view> name, int world
 void LookLayers::MarkSaved()
 {
     m_loaded = m_live;
+    // The developer's values are the files' own now, which the player's go over again.
+    m_developerEdits = {};
+    Changed(true);
 }
 
 } // namespace Render::Look

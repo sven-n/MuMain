@@ -40,7 +40,6 @@
 #include <RmlUi/Core/ElementUtilities.h>
 #include <RmlUi/Core/Event.h>
 #include <RmlUi/Core/EventListener.h>
-#include <RmlUi/Core/Input.h>
 #include <RmlUi/Core/ScrollTypes.h>
 #include <functional>
 
@@ -214,8 +213,6 @@ template <std::size_t N> std::vector<Rml::String> MultiplierLabels(const int (&v
     return labels;
 }
 
-// Steps a key moves a tuning slider by: an arrow one, Page Up/Down this many.
-constexpr int kTuningPageSteps = 10;
 // A level no tuning track has (they start at 0), for ApplyLevelGaugeEvent's current level. The
 // sliders bind no wheel event, the only one the gauge would step from it.
 constexpr int kNoTuningLevel = -1;
@@ -230,9 +227,13 @@ bool ValidTuningControl(int control)
     return control >= 0 && control < static_cast<int>(Render::Look::TuningControlCount);
 }
 
-// What a tuning slider shows: the player's value, or what applies without one.
+// What a tuning slider shows: what applies. A developer's session strength of the light mood goes
+// over the player's value, which goes over the look profile's and the map's.
 double CurrentTuningValue(const Render::Look::TuningControl& control)
 {
+    if (!control.lookValue)
+        if (const std::optional<int> session = Render::Look::SessionOverrides().lightMoodStrength)
+            return static_cast<double>(*session);
     if (const std::optional<double> value = Render::Look::PersonalTuningSession().Override(control.id))
         return *value;
     if (control.lookValue)
@@ -260,6 +261,7 @@ UI::Options::TuningLock TuningLockOf(int group)
         break;
     case EnhancedFeature::LightMood:
         state.sessionOff = session.lightMood == false;
+        state.sessionSet = session.lightMoodStrength.has_value();
         break;
     case EnhancedFeature::PostProcessing:
         state.active = Render::PostProcessing::PostProcessingActive();
@@ -1134,39 +1136,17 @@ void mu::ui::window::COptionWindow::RmlTuningKey(Rml::Event& event, int control)
         return;
     const Render::Look::TuningControl& tuning =
         Render::Look::Control(static_cast<Render::Look::TuningControlId>(control));
-    const auto key = static_cast<Rml::Input::KeyIdentifier>(event.GetParameter<int>("key_identifier", 0));
-    const double current = CurrentTuningValue(tuning);
-    std::optional<double> next;
-    switch (key)
-    {
-    case Rml::Input::KI_LEFT:
-    case Rml::Input::KI_DOWN:
-        next = Render::Look::StepTuningValue(tuning, current, -1);
-        break;
-    case Rml::Input::KI_RIGHT:
-    case Rml::Input::KI_UP:
-        next = Render::Look::StepTuningValue(tuning, current, 1);
-        break;
-    case Rml::Input::KI_PRIOR:
-        next = Render::Look::StepTuningValue(tuning, current, kTuningPageSteps);
-        break;
-    case Rml::Input::KI_NEXT:
-        next = Render::Look::StepTuningValue(tuning, current, -kTuningPageSteps);
-        break;
-    case Rml::Input::KI_HOME:
-        next = tuning.min;
-        break;
-    case Rml::Input::KI_END:
-        next = tuning.max;
-        break;
-    default:
+    // The gauge decodes the key and keeps it; the value steps from the exact value, which an
+    // inherited one between two steps may not be on.
+    const std::optional<UI::RmlBridge::LevelGaugeKeyMove> move = UI::RmlBridge::LevelGaugeKey(event);
+    if (!move || !TuningGroupUnlocked(static_cast<int>(tuning.group)))
         return;
-    }
-    // The slider owns the key: nothing else of the window or document acts on it.
-    event.StopPropagation();
-    if (!TuningGroupUnlocked(static_cast<int>(tuning.group)))
-        return;
-    if (Render::Look::PersonalTuningSession().Preview(tuning.id, *next))
+    using To = UI::RmlBridge::LevelGaugeKeyMove::To;
+    const double next = move->to == To::Min ? tuning.min
+                        : move->to == To::Max
+                            ? tuning.max
+                            : Render::Look::StepTuningValue(tuning, CurrentTuningValue(tuning), move->steps);
+    if (Render::Look::PersonalTuningSession().Preview(tuning.id, next))
         m_tuningPreviewPending = true;
 }
 

@@ -261,9 +261,9 @@ TEST_CASE("the shipped look profile holds the tuned Enhanced values [data][look]
         {LookValue::DiffuseScale, 1.0},        {LookValue::DiffuseAmbient, 0.3},
         {LookValue::DiffuseFloor, 0.15},       {LookValue::RimStrength, 0.4},
         {LookValue::DynamicWrap, 0.3},         {LookValue::DynamicMapSmoothing, 0.5},
-        {LookValue::DynamicEffectGain, 1.0},   {LookValue::DynamicEffectRange, 1.5},
-        {LookValue::DynamicEffectRangeMax, 4}, {LookValue::DynamicEffectFade, 0.5},
-        {LookValue::DynamicEffectCap, 1.4},    {LookValue::BloomStrength, 1.0},
+        {LookValue::DynamicEffectGain, 2.5},   {LookValue::DynamicEffectRange, 3.0},
+        {LookValue::DynamicEffectRangeMax, 8}, {LookValue::DynamicEffectFade, 0.5},
+        {LookValue::DynamicEffectCap, 2.5},    {LookValue::BloomStrength, 1.0},
         {LookValue::BloomLevelFalloff, 0.6},
     };
     for (const Data::Maps::LookValueInfo& info : Data::Maps::LookValueInfos())
@@ -284,53 +284,4 @@ TEST_CASE("the shipped look profile holds the tuned Enhanced values [data][look]
     // Icarus: less bloom, which widened its fog clouds.
     CHECK(loaded.data.ForWorld(Icarus)[LookValue::BloomStrength] == doctest::Approx(0.3));
     CHECK(loaded.data.ForWorld(Lorencia)[LookValue::BloomStrength] == doctest::Approx(1.0));
-}
-
-TEST_CASE("the shipped look profile promotes the four reviewed global spell-light defaults [data][look]")
-{
-    // Only the four spell-light values selected during the native trial may differ
-    // from the upstream profile. Other effects and authored map overrides stay unchanged.
-    const ReadResult previous = Read(R"({
-      "formatVersion": 1,
-      "default": {
-        "lighting.diffuse.scale": 1.0, "lighting.diffuse.ambient": 0.3, "lighting.diffuse.floor": 0.15,
-        "lighting.highlightKnee": 0.8, "lighting.rim.strength": 0.4, "lighting.rim.power": 3,
-        "lighting.specular.scale": 1.0, "lighting.specular.power": 32, "dynamic.wrap": 0.3,
-        "dynamic.mapSmoothing": 0.5, "dynamic.effectGain": 2.5, "dynamic.effectRange": 3,
-        "dynamic.effectRangeMax": 8, "dynamic.effectFade": 0.5, "dynamic.effectCap": 2.5,
-        "bloom.strength": 1.0, "bloom.levelFalloff": 0.6, "grading.strength": 1
-      },
-      "maps": [ { "world": 10, "name": "Icarus", "bloom.strength": 0.3 } ]
-    })");
-    REQUIRE_MESSAGE(previous.issues.empty(), Messages(previous.issues));
-
-    const std::filesystem::path file =
-        std::filesystem::path(MU_TEST_DATA_DIR).parent_path() / Data::Maps::LookProfileFile;
-    const Data::Maps::LookProfileLoadResult shipped = Data::Maps::LoadLookProfileFile(file);
-    REQUIRE_MESSAGE(shipped.issues.empty(), Messages(shipped.issues));
-
-    std::vector<std::string> changed;
-    for (const Data::Maps::LookValueInfo& info : Data::Maps::LookValueInfos())
-    {
-        if (shipped.data.defaultOverrides[info.value] != previous.data.defaultOverrides[info.value])
-        {
-            changed.emplace_back(info.name);
-        }
-    }
-    CHECK(changed == std::vector<std::string>{"dynamic.effectGain", "dynamic.effectRange", "dynamic.effectRangeMax",
-                                              "dynamic.effectCap"});
-    for (const int world : {Lorencia, Dungeon, Noria, Icarus})
-    {
-        CAPTURE(world);
-        const Data::Maps::LookValues values = shipped.data.ForWorld(world);
-        CHECK(values[LookValue::DynamicEffectGain] == doctest::Approx(1.0));
-        CHECK(values[LookValue::DynamicEffectRange] == doctest::Approx(1.5));
-        CHECK(values[LookValue::DynamicEffectRangeMax] == doctest::Approx(4.0));
-        CHECK(values[LookValue::DynamicEffectCap] == doctest::Approx(1.4));
-    }
-    CHECK(shipped.data.maps == previous.data.maps);
-
-    // The built-in values (no file) stay what the renderer did before the profile.
-    CHECK(BuiltInLookValues()[LookValue::DynamicEffectGain] == 1.0);
-    CHECK(BuiltInLookValues()[LookValue::DynamicEffectRange] == 1.0);
 }

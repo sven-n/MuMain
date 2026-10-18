@@ -13,10 +13,11 @@ namespace Render::Look
 {
 namespace
 {
-Data::Config::PersonalTuningSaveResult Persist(const Data::Config::PersonalTuning& tuning)
+Data::Config::PersonalTuningSaveResult Persist(const Data::Config::PersonalTuning& saved,
+                                               const Data::Config::PersonalTuning& tuning)
 {
     Data::Config::PersonalTuningSaveResult result =
-        Data::Config::SavePersonalTuningFile(GameConfig::GetInstance().GetConfigPath(), tuning);
+        Data::Config::SavePersonalTuningFile(GameConfig::GetInstance().GetConfigPath(), saved, tuning);
     if (!result.saved)
     {
         mu::log::Get("render")->error("Enhanced tuning not saved: {}", result.error);
@@ -55,7 +56,8 @@ TuningSession& PersonalTuningSession()
     std::unique_ptr<TuningSession>& session = Session();
     if (!session)
     {
-        // Not loaded (a tool or test without start-up): nothing is tuned yet.
+        // Not loaded (a tool or test without start-up): nothing is tuned yet. A save writes only
+        // what this session changes, so it cannot drop what the file holds.
         session = std::make_unique<TuningSession>(SessionHooks(), Data::Config::PersonalTuning{});
     }
     return *session;
