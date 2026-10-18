@@ -67,6 +67,21 @@ Join = 1, ///< The join type.
 Leave = 2, ///< The leave type.
 };
 
+enum class CastleSiegeTaxType : uint32_t
+{
+Undefined = 0, ///< No tax type is selected.
+ChaosMachine = 1, ///< The Chaos Machine tax rate.
+Store = 2, ///< The NPC store tax rate.
+HuntingZoneEntranceFee = 3, ///< The hunting-zone entrance fee.
+};
+
+enum class CastleSiegeGuildCommandType : uint32_t
+{
+Attack = 0, ///< Orders the team to attack.
+Defend = 1, ///< Orders the team to defend.
+Wait = 2, ///< Orders the team to wait.
+};
+
 enum class FruitUsage : uint32_t
 {
 AddPoints = 0, ///< Adds 1~3 stat points to the character.

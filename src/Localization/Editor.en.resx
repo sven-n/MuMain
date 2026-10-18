@@ -463,6 +463,27 @@
   <data name="Item data could not be written" xml:space="preserve">
     <value>The item data files could not be written. See the console.</value>
   </data>
+  <data name="Look Profile" xml:space="preserve">
+    <value>Look profile</value>
+  </data>
+  <data name="Look Loaded From" xml:space="preserve">
+    <value>Loaded from</value>
+  </data>
+  <data name="Look Scope Default" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="Look Scope Current Map" xml:space="preserve">
+    <value>Current map</value>
+  </data>
+  <data name="Look Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="Look Reset All" xml:space="preserve">
+    <value>Reset all</value>
+  </data>
+  <data name="Look Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
   <data name="Looks" xml:space="preserve">
     <value>Looks</value>
   </data>

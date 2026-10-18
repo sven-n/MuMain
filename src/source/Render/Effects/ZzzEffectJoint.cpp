@@ -18,6 +18,7 @@
 #include "Render/Effects/AuraJointLifecycle.h"
 #include "Network/Server/WSclient.h"
 #include "GameLogic/Pets/CSPetSystem.h"
+#include "Core/Utilities/FrameProfiler.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/RenderUtils.h"
 #include "Scenes/MainScene.h"
@@ -71,6 +72,48 @@ static inline float GetTailDistanceSq(const vec3_t a, const vec3_t b)
     return dx * dx + dy * dy + dz * dz;
 }
 
+// Segments are tested for the view frustum this many at a time.
+constexpr int kCulledSegmentRun = 8;
+
+// Whether the segments from `first` on, up to kCulledSegmentRun of them, may touch the view frustum:
+// the sphere around their tails' midpoints, widened by how far the corners reach from them. The
+// midpoint is corners 0 and 1's, so corner 1 is as far from it as corner 0.
+static bool IsTailRunInFrustum(const JOINT* o, int first)
+{
+    vec3_t low{FLT_MAX, FLT_MAX, FLT_MAX};
+    vec3_t high{-FLT_MAX, -FLT_MAX, -FLT_MAX};
+    float halfWidthSq = 0.f;
+    bool anyTail = false;
+    const int last = std::min<int>({first + kCulledSegmentRun, (int)o->NumTails, MAX_TAILS - 1});
+    for (int j = first; j <= last; ++j)
+    {
+        const vec3_t* tail = o->Tails[j];
+        if (!IsValidTailQuad(tail))
+            continue;
+        anyTail = true;
+        vec3_t mid;
+        for (int axis = 0; axis < 3; ++axis)
+        {
+            mid[axis] = (tail[0][axis] + tail[1][axis]) * 0.5f;
+            low[axis] = std::min(low[axis], mid[axis]);
+            high[axis] = std::max(high[axis], mid[axis]);
+        }
+        halfWidthSq = std::max({halfWidthSq, GetTailDistanceSq(mid, tail[0]), GetTailDistanceSq(mid, tail[2]),
+                                GetTailDistanceSq(mid, tail[3])});
+    }
+    if (!anyTail)
+        return true;
+
+    vec3_t center;
+    vec3_t extent;
+    for (int axis = 0; axis < 3; ++axis)
+    {
+        center[axis] = (low[axis] + high[axis]) * 0.5f;
+        extent[axis] = (high[axis] - low[axis]) * 0.5f;
+    }
+    return TestFrustrum(center, VectorLength(extent) + std::sqrt(halfWidthSq));
+}
+
 void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle, int SubType, OBJECT* Target, float Scale, short PKKey,
     WORD SkillIndex, WORD SkillSerialNum, int iChaIndex, const float* vPriorColor, short int sTargetindex)
 {
@@ -81,6 +124,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
         {
             o->Live = true;
             std::memset(o->Tails, 0, sizeof(o->Tails));
+            o->TailFrames = 0.f;
             o->Type = Type;
             o->TexType = o->Type;
             o->SubType = SubType;
@@ -1574,6 +1618,9 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                     o->TexType = BITMAP_JOINT_SPIRIT;
                     break;
                 case 2:
+                    // Death Stab's wind. Its five tails are a reference frame apart, so each gust draws as
+                    // a long line, as at 25 FPS; when tails were laid every rendered frame, high frame
+                    // rates shortened it to a dash.
                     VectorCopy(TargetPosition, o->TargetPosition);
                     Vector(1.0f, .3f, .3f, o->Light);
                     o->LifeTime = 20;
@@ -2805,6 +2852,22 @@ bool SearchJoint(int Type, OBJECT* Target, int SubType)
     return false;
 }
 
+// Writes the newest tail, Tails[0], across the joint's position: Scale wide along the rotated x axis
+// and along the rotated `secondAxis` (1: y, 2: z).
+static void SetNewestTail(JOINT* o, float Matrix[3][4], int secondAxis)
+{
+    const float half = o->Scale * 0.5f;
+    vec3_t offsets[4] = {{-half, 0.f, 0.f}, {half, 0.f, 0.f}, {0.f, 0.f, 0.f}, {0.f, 0.f, 0.f}};
+    offsets[2][secondAxis] = -half;
+    offsets[3][secondAxis] = half;
+    for (int corner = 0; corner < 4; ++corner)
+    {
+        vec3_t p;
+        VectorRotate(offsets[corner], Matrix, p);
+        VectorAdd(o->Position, p, o->Tails[0][corner]);
+    }
+}
+
 void CreateTailAxis(JOINT* o, float Matrix[3][4], BYTE axis)
 {
     o->NumTails++;
@@ -2820,37 +2883,7 @@ void CreateTailAxis(JOINT* o, float Matrix[3][4], BYTE axis)
             VectorCopy(o->Tails[j][k], o->Tails[j + 1][k]);
     }
 
-    vec3_t Position, p;
-    if (axis == 0)
-    {
-        Vector(-o->Scale * 0.5f, 0.f, 0.f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][0]);
-        Vector(o->Scale * 0.5f, 0.f, 0.f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][1]);
-        Vector(0.f, 0.f, -o->Scale * 0.5f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][2]);
-        Vector(0.f, 0.f, o->Scale * 0.5f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][3]);
-    }
-    else
-    {
-        Vector(-o->Scale * 0.5f, 0.f, 0.f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][0]);
-        Vector(o->Scale * 0.5f, 0.f, 0.f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][1]);
-        Vector(0.f, -o->Scale * 0.5f, 0.f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][2]);
-        Vector(0.f, o->Scale * 0.5f, 0.f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][3]);
-    }
+    SetNewestTail(o, Matrix, axis == 0 ? 2 : 1);
 }
 
 void CreateTail(JOINT* o, float Matrix[3][4], bool Blur)
@@ -2903,23 +2936,7 @@ void CreateTail(JOINT* o, float Matrix[3][4], bool Blur)
             }
             else
             {
-                vec3_t Position, p;
-
-                Vector(-o->Scale * 0.5f, 0.f, 0.f, Position);
-                VectorRotate(Position, Matrix, p);
-                VectorAdd(o->Position, p, o->Tails[0][0]);
-
-                Vector(o->Scale * 0.5f, 0.f, 0.f, Position);
-                VectorRotate(Position, Matrix, p);
-                VectorAdd(o->Position, p, o->Tails[0][1]);
-
-                Vector(0.f, 0.f, -o->Scale * 0.5f, Position);
-                VectorRotate(Position, Matrix, p);
-                VectorAdd(o->Position, p, o->Tails[0][2]);
-
-                Vector(0.f, 0.f, o->Scale * 0.5f, Position);
-                VectorRotate(Position, Matrix, p);
-                VectorAdd(o->Position, p, o->Tails[0][3]);
+                SetNewestTail(o, Matrix, 2);
             }
         }
     }
@@ -2939,26 +2956,29 @@ void CreateTail(JOINT* o, float Matrix[3][4], bool Blur)
                 VectorCopy(o->Tails[j][k], o->Tails[j + 1][k]);
         }
 
-        vec3_t Position, p;
-
-        Vector(-o->Scale * 0.5f, 0.f, 0.f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][0]);
-
-        Vector(o->Scale * 0.5f, 0.f, 0.f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][1]);
-
-        Vector(0.f, 0.f, -o->Scale * 0.5f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][2]);
-
-        Vector(0.f, 0.f, o->Scale * 0.5f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][3]);
+        SetNewestTail(o, Matrix, 2);
     }
 }
 
+// Whether the joint being moved lays new tails this frame. Trails were authored with one tail per
+// 25 FPS reference frame; on the frames in between, the newest tail follows the joint instead.
+static bool s_layTails = true;
+
+static void FollowTail(JOINT* o, float Matrix[3][4], bool blur = false)
+{
+    if (s_layTails || o->NumTails == 0)
+        CreateTail(o, Matrix, blur);
+    else
+        SetNewestTail(o, Matrix, 2);
+}
+
+static void FollowTailAxis(JOINT* o, float Matrix[3][4], BYTE axis)
+{
+    if (s_layTails || o->NumTails == 0)
+        CreateTailAxis(o, Matrix, axis);
+    else
+        SetNewestTail(o, Matrix, axis == 0 ? 2 : 1);
+}
 
 /*void MoveShpere(vec3_t Position,vec3_t Angle)
 {
@@ -2989,6 +3009,11 @@ void MoveJoint(JOINT* o, int iIndex)
     float dy = o->Position[1] - o->TargetPosition[1];
 
     float Matrix[3][4];
+
+    o->TailFrames += FPS_ANIMATION_FACTOR;
+    s_layTails = o->TailFrames >= 1.f;
+    if (s_layTails)
+        o->TailFrames -= 1.f;
 
     if (!(o->Type == BITMAP_JOINT_FORCE && o->SubType == 0) && !(o->Type == BITMAP_JOINT_THUNDER && o->SubType == 15) && o->Type != BITMAP_LIGHT
         && o->Type != BITMAP_PIERCING && o->Type != BITMAP_FLARE_FORCE
@@ -4226,7 +4251,7 @@ void MoveJoint(JOINT* o, int iIndex)
         Distance = MoveHumming(o->Position, o->Angle, o->TargetPosition, 0.f);
         float Matrix[3][4];
         AngleMatrix(o->Angle, Matrix);
-        CreateTail(o, Matrix);
+        FollowTail(o, Matrix);
         if (Distance <= o->Velocity)
         {
             o->Live = false;
@@ -4391,7 +4416,7 @@ void MoveJoint(JOINT* o, int iIndex)
             AngleMatrix(o->Angle, Matrix);
             VectorRotate(o->Direction, Matrix, Position);
             VectorAdd(o->StartPosition, Position, o->Position);
-            CreateTail(o, Matrix);
+            FollowTail(o, Matrix);
 
             o->StartPosition[2] += (15.f) * FPS_ANIMATION_FACTOR;
         }
@@ -5833,7 +5858,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 {
                     o->Velocity = 0.f;
                     AngleMatrix(o->HeadAngle, Matrix);
-                    CreateTail(o, Matrix);
+                    FollowTail(o, Matrix);
                 }
                 else
                 {
@@ -6684,7 +6709,7 @@ void MoveJoint(JOINT* o, int iIndex)
             if (o->m_bCreateTails)
             {
                 AngleMatrix(o->Angle, Matrix);
-                CreateTail(o, Matrix);
+                FollowTail(o, Matrix);
             }
 
             o->Velocity += FPS_ANIMATION_FACTOR * 10.f;
@@ -6821,7 +6846,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 CreateParticleFpsChecked(BITMAP_ADV_SMOKE + 1, tPos, o->Angle, o->Light, 2, 3.f);
             }
 
-            CreateTailAxis(o, Matrix, 1);
+            FollowTailAxis(o, Matrix, 1);
 
             if (o->LifeTime < (o->Weapon / 2))
             {
@@ -6940,10 +6965,7 @@ void MoveJoint(JOINT* o, int iIndex)
 
     if (o->m_bCreateTails)
     {
-        if (o->Type == BITMAP_JOINT_ENERGY && o->SubType == 54)
-            CreateTail(o, Matrix, true);
-        else
-            CreateTail(o, Matrix);
+        FollowTail(o, Matrix, o->Type == BITMAP_JOINT_ENERGY && o->SubType == 54);
     }
 
     o->LifeTime -= FPS_ANIMATION_FACTOR;
@@ -7034,8 +7056,36 @@ void RenderJoints(BYTE bRenderOneMore)
             }
             BindTexture(o->TexType);
 
+            // Runs of segments outside the view frustum are skipped. Not for the trails that fade their
+            // light per drawn segment, add sprites larger than the trail, or draw translated from it.
+            const bool cullOffscreen =
+                !IsEffectCullingDisabledDebug() &&
+                !(o->Type == BITMAP_JOINT_HEALING && (o->SubType == 9 || o->SubType == 10)) &&
+                !(o->Type == MODEL_SPEARSKILL && (o->SubType == 0 || o->SubType == 4 || o->SubType == 9)) &&
+                !(o->Type == BITMAP_FLARE + 1 && (o->SubType == 6 || o->SubType == 8)) &&
+                !(o->Type == BITMAP_FLARE && o->SubType == 22);
+            bool runVisible = true;
+
+            // One joint's quads share its texture and state, so they go to the renderer in one call.
+            static std::vector<mu::Vertex3D> s_quads;
+            const auto flushQuads = [&]
+            {
+                if (!s_quads.empty())
+                    mu::GetRenderer().RenderQuad3D(s_quads, static_cast<std::uint32_t>(o->TexType));
+                s_quads.clear();
+            };
+            const auto addQuad = [](const mu::Vertex3D(&quad)[4]) { s_quads.insert(s_quads.end(), quad, quad + 4); };
+
             for (int j = 0; j < (int)o->NumTails; j++)
             {
+                if (cullOffscreen && j % kCulledSegmentRun == 0)
+                    runVisible = IsTailRunInFrustum(o, j);
+                if (!runVisible)
+                {
+                    FrameProfiler::Count(FrameProfiler::Counter::JointSegmentsCulled);
+                    continue;
+                }
+
                 if (o->Type == BITMAP_SMOKE && o->SubType == 0 && j < 1)
                 {
                     continue;
@@ -7050,20 +7100,6 @@ void RenderJoints(BYTE bRenderOneMore)
                 auto nextTail = o->Tails[j + 1];
 
                 if (!IsValidTailQuad(currentTail) || !IsValidTailQuad(nextTail))
-                {
-                    continue;
-                }
-
-                vec3_t midCur, midNext;
-                midCur[0] = (currentTail[0][0] + currentTail[1][0]) * 0.5f;
-                midCur[1] = (currentTail[0][1] + currentTail[1][1]) * 0.5f;
-                midCur[2] = (currentTail[0][2] + currentTail[1][2]) * 0.5f;
-                midNext[0] = (nextTail[0][0] + nextTail[1][0]) * 0.5f;
-                midNext[1] = (nextTail[0][1] + nextTail[1][1]) * 0.5f;
-                midNext[2] = (nextTail[0][2] + nextTail[1][2]) * 0.5f;
-
-                float distSq = GetTailDistanceSq(midCur, midNext);
-                if (distSq > 60.f * 60.f)
                 {
                     continue;
                 }
@@ -7124,7 +7160,7 @@ void RenderJoints(BYTE bRenderOneMore)
                         {nextTail[1][0], nextTail[1][1], nextTail[1][2], 0.f, 0.f, 0.f, Light2, 1.f, forceColor},
                         {nextTail[0][0], nextTail[0][1], nextTail[0][2], 0.f, 0.f, 0.f, Light2, 0.f, forceColor},
                     };
-                    mu::GetRenderer().RenderQuad3D(forceVerts, static_cast<std::uint32_t>(o->TexType));
+                    addQuad(forceVerts);
                 }
                 else
                 {
@@ -7262,6 +7298,7 @@ void RenderJoints(BYTE bRenderOneMore)
                     {
                         vec3_t t_bias;
                         VectorSubtract(o->Target->Position, o->StartPosition, t_bias);
+                        flushQuads();
                         mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
                         mu::GetRenderer().PushMatrix();
                         mu::GetRenderer().Translate(t_bias[0], t_bias[1], t_bias[2]);
@@ -7315,7 +7352,7 @@ void RenderJoints(BYTE bRenderOneMore)
                             {nextTail[3][0], nextTail[3][1], nextTail[3][2], 0.f, 0.f, 0.f, L2, V1, faceColor},
                             {nextTail[2][0], nextTail[2][1], nextTail[2][2], 0.f, 0.f, 0.f, L2, V2, faceColor},
                         };
-                        mu::GetRenderer().RenderQuad3D(faceOneVerts, static_cast<std::uint32_t>(o->TexType));
+                        addQuad(faceOneVerts);
                     }
 
                     if ((o->RenderFace & RENDER_FACE_TWO) == RENDER_FACE_TWO)
@@ -7331,10 +7368,11 @@ void RenderJoints(BYTE bRenderOneMore)
                             {nextTail[1][0], nextTail[1][1], nextTail[1][2], 0.f, 0.f, 0.f, L2, V2, faceColor},
                             {nextTail[0][0], nextTail[0][1], nextTail[0][2], 0.f, 0.f, 0.f, L2, V1, faceColor},
                         };
-                        mu::GetRenderer().RenderQuad3D(faceTwoVerts, static_cast<std::uint32_t>(o->TexType));
+                        addQuad(faceTwoVerts);
                     }
                 }
             }
+            flushQuads();
             if (o->Type == BITMAP_JOINT_HEALING && o->SubType == 8)
             {
                 EnableDepthTest();

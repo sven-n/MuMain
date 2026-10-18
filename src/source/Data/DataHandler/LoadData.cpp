@@ -9,6 +9,7 @@
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Core/Text/Utf8.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #ifdef _EDITOR
 #include "Core/Utilities/AssetLoadWorld.h"
 #endif
@@ -46,7 +47,7 @@ std::wstring GetModelFileName(const wchar_t* FileName, int i)
 }
 } // namespace
 
-bool CLoadData::AccessModel(int Type, const wchar_t* Dir, const wchar_t* FileName, int i)
+bool CLoadData::AccessModel(int Type, const wchar_t* Dir, const wchar_t* FileName, int i, bool optional)
 {
     const std::wstring Name = GetModelFileName(FileName, i);
 
@@ -60,7 +61,17 @@ bool CLoadData::AccessModel(int Type, const wchar_t* Dir, const wchar_t* FileNam
 
     if (Success == false)
     {
-        g_ErrorReport.Write(L"AccessModel failed: %ls%ls (Type=%d)\r\n", Dir, Name.c_str(), Type);
+        // An optional slot may have no file; only one that is there and fails to load is reported.
+        if (optional)
+        {
+            FILE* fp = _wfopen((std::wstring(Dir) + Name).c_str(), L"rb");
+            if (!fp)
+                return false;
+            fclose(fp);
+        }
+
+        MU_LOG_ERROR(mu::log::Get("data"), "AccessModel failed: {}{} (Type={})", mu_wchar_to_utf8(Dir),
+                     mu_wchar_to_utf8(Name.c_str()), Type);
 
         if (wcscmp(FileName, L"Monster") == 0 || wcscmp(FileName, L"Player") == 0 || wcscmp(FileName, L"PlayerTest") == 0 || wcscmp(FileName, L"Angel") == 0)
         {

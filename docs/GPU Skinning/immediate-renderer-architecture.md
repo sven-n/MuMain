@@ -17,6 +17,8 @@ valid.
 | Quad strips | `RenderQuadStrip()` |
 | Debug and helper lines | `RenderLines()` |
 | Rest-pose skeletal triangles | `RenderSkinnedTriangles()` |
+| Skeletal meshes kept on the GPU | `CacheSkinnedMesh()`, `RenderCachedSkinnedMesh()`, `ReleaseSkinnedMesh()` |
+| Projected body shadows of cached meshes | `RenderCachedSkinnedShadow()`, after `SetTerrainHeights()` |
 
 Legacy helpers such as `RenderBitmap`, `RenderColor`, and older GL-shaped
 wrappers build vertices and call these methods. New code should call
@@ -57,9 +59,15 @@ identical captured state and contiguous vertex storage can merge.
 
 - `Vertex2D` contains screen position, UV, and packed ABGR color: 20 bytes.
 - `Vertex3D` contains position, normal, UV, and packed ABGR color: 36 bytes.
-- `SkinnedVertex3D` adds separate position and normal bone indices: 44 bytes.
+- `SkinnedVertex3D` drops the colour for separate position and normal bone indices: 40 bytes. A draw's
+  one packed ABGR colour is a per-instance attribute from a second vertex buffer slot.
+- Cached skinned meshes live in a few large vertex buffers. A mesh is uploaded
+  once, in the frame's copy pass, and its range is reused three submitted frames
+  after release.
 - Quad indices and strip indices use dedicated per-frame storage.
 - Bone palettes use a separate growable storage buffer.
+- The terrain height grid that body shadows read is a fixed 264 KB storage
+  buffer, uploaded again only when the map's heights change.
 
 This replaces upstream GL ring-buffer orphaning with explicit SDL GPU transfer
 and device buffers.

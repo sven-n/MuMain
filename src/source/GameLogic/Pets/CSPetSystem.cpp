@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Network/Server/WSclient.h"
 #include "I18N/All.h"
 
 #include <algorithm>
@@ -13,7 +14,7 @@
 #include "CSPetSystem.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Combat/DuelMgr.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -27,6 +28,7 @@
 #include "Scenes/SceneCore.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Audio/DSPlaySound.h"
+#include "Render/Text/CUIRenderText.h"
 
 namespace
 {
@@ -620,11 +622,6 @@ void CSPetDarkSpirit::MovePet(void)
 
 void CSPetDarkSpirit::CalcPetInformation(const PET_INFO& Petinfo) {}
 
-void CSPetDarkSpirit::RenderPetInventory(void)
-{
-    RenderCmdType();
-}
-
 void CSPetDarkSpirit::RenderPet(int PetState)
 {
     CHARACTER* c = &m_PetCharacter;
@@ -682,55 +679,6 @@ void CSPetDarkSpirit::Eff_LevelDown(void)
     for (int i = 0; i < 15; ++i)
     {
         CreateJoint(BITMAP_FLARE, Position, o->Position, o->Angle, 0, o, 40, 2);
-    }
-}
-
-void CSPetDarkSpirit::RenderCmdType(void)
-{
-    float x, y, Width, Height;
-    float PartyWidth = 0.f;
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(220, 220, 220, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 128);
-
-    if (PartyNumber > 0)
-    {
-        PartyWidth = 50.f;
-    }
-    if ((Hero->Helper.Type >= MODEL_GUARDIAN_ANGEL && Hero->Helper.Type <= MODEL_DARK_HORSE_ITEM) ||
-        Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
-    {
-        PartyWidth += 60.f;
-    }
-
-    int Dur = 255;
-    Width = 50;
-    Height = 2;
-    x = GetScreenWidth() - Width - PartyWidth - 15;
-    y = 4;
-    int Life = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Durability * (int)Width / Dur;
-
-    EnableAlphaTest();
-
-    g_pRenderText->RenderText((int)x + 50, (int)y, I18N::Game::DarkRaven, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
-
-    RenderBar(x, y + 12, Width, Height, (float)Life);
-
-    Width = 20.f;
-    Height = 28.f;
-    x = GetScreenWidth() - Width - PartyWidth - 65.f;
-    y = 5.f;
-    RenderBitmap(BITMAP_SKILL_INTERFACE + 2, (float)x, (float)y, (float)Width - 4, (float)Height - 8,
-                 (((m_byCommand) % 8) * 32 + 6.f) / 256.f, (((m_byCommand) / 8) * Height + 3.f) / 256.f, Width / 256.f,
-                 (Height - 1.f) / 256.f);
-
-    Width -= 8.f;
-    Height -= 8.f;
-
-    if (MouseX >= x && MouseX <= x + Width && MouseY >= y && MouseY <= y + Height)
-    {
-        RenderTipText((int)x, (int)(y + Height), I18N::Game::Lookup(1219 + m_byCommand));
     }
 }
 

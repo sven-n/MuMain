@@ -3,10 +3,17 @@
 
 #include "stdafx.h"
 #include <cstdint>
+// u_char is used below. On glibc it arrives transitively through other
+// headers; musl targets (Emscripten) need its declaring header explicitly.
+#include <sys/types.h>
 #include <cstring>
 #include <cmath>
 #include <cassert>
+#include <climits>
+#include <map>
+#include <optional>
 #include <set>
+#include <tuple>
 #include <utility>
 #include "Render/Textures/ZzzOpenglUtil.h"
 
@@ -22,14 +29,16 @@
 #include "Core/Utilities/Log/ErrorReport.h"
 #include "Camera/CameraState.h"
 
-#include "UI/Legacy/UIMng.h"
 #include "Camera/CameraMove.h"
 #include "Engine/Physics/PhysicsManager.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Render/Models/GpuSkinningPath.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/RenderUtils.h"
+#include "Render/Terrain/TerrainHeightGrid.h"
 #include "Core/Utilities/FrameProfiler.h"
+#include "Scenes/MainScene.h"
+#include "Render/Lighting/LightMoodSetting.h"
 
 using mu::PackABGR;
 
@@ -42,6 +51,9 @@ vec3_t BoundingMin[MAX_BONES];
 vec3_t BoundingMax[MAX_BONES];
 
 float  BoneTransform[MAX_BONES][3][4];
+// BoneTransform's slots from here on are identity; Animation's tail fill only rewrites what lies
+// below it. Starts at MAX_BONES: the zero-initialised array is not identity.
+static int s_boneTransformWrittenEnd = MAX_BONES;
 const float (*g_pActiveBoneTransform)[3][4] = nullptr;
 unsigned int g_BoneTransformVersion = 0;
 
@@ -56,12 +68,12 @@ vec3_t NormalTransform[MAX_MESH][MAX_VERTICES];
 float  IntensityTransform[MAX_MESH][MAX_VERTICES];
 vec3_t LightTransform[MAX_MESH][MAX_VERTICES];
 
-// DXP-20 increment 4: lazy CPU-skin materialization. Bumped by every TransformCheap() call;
+// Lazy CPU-skin materialization. Bumped by every TransformCheap() call;
 // a BMD's m_SkinStamp matching this value means it currently owns VertexTransform/NormalTransform/
 // IntensityTransform (last-writer-wins global scratch, same sharing model as before this increment).
 // g_LazyCpuSkin is a kill switch -- false reproduces pre-increment-4 eager behavior exactly.
 static uint32_t g_SkinStampCounter = 0;
-static bool g_LazyCpuSkin = true; // DXP-20 inc4 Step D: gate flipped on -- see DXP-20-inc4-plan.md
+static bool g_LazyCpuSkin = true; // Lazy CPU-skin gate, on by default.
 
 vec3_t RenderArrayVertices[MAX_VERTICES * 3];
 vec4_t RenderArrayColors[MAX_VERTICES * 3];
@@ -124,6 +136,16 @@ std::pair<int, int> ResolveMeshRange(int meshCount, int requestedStart, int requ
 {
     return {requestedStart == -1 ? 0 : requestedStart, requestedEnd == -1 ? meshCount : requestedEnd};
 }
+
+// One cached shadow stream per model and RenderBodyShadow() mesh selection (model, start, end, hidden mesh,
+// blend texture); an entry's address is its key in the renderer's mesh cache. Kept outside BMD, which
+// OpenPlayers() zero-fills, and never destroyed, so a model released at exit still finds it.
+using ShadowStreamId = std::tuple<std::uintptr_t, int, int, int, int>;
+std::map<ShadowStreamId, char>& ShadowStreams()
+{
+    static auto* streams = new std::map<ShadowStreamId, char>();
+    return *streams;
+}
 } // namespace
 
 bool  StopMotion = false;
@@ -142,7 +164,6 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
     if (PriorAction >= NumActions) PriorAction = 0;
     if (currentAction >= NumActions) currentAction = 0;
 
-    vec4_t boneQuaternion[MAX_BONES] = {};
 
     float currentAnimation = AnimationFrame;
     int currentAnimationFrame = (int)AnimationFrame;
@@ -223,7 +244,7 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
         const Bone_t* b = &Bones[i];
         if (b->Dummy)
         {
-            // DXP-24 fix (part 2): Dummy bones carry no name/parent/animation data (see Open2's
+            // Dummy bones carry no name/parent/animation data (see Open2's
             // loader -- the !Dummy branch is the only one that reads anything), so this slot was
             // previously left holding whatever the LAST model to animate into this shared buffer
             // wrote there. If that was a differently-positioned character (character-select roster),
@@ -262,17 +283,18 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
             q2 = bm2->Quaternion[currentAnimationFrame];
         }
 
+        vec4_t boneQuaternion;
         if (!QuaternionCompare(q1, q2))
         {
-            QuaternionNLERP(q1, q2, s1, boneQuaternion[i]);
+            QuaternionNLERP(q1, q2, s1, boneQuaternion);
         }
         else
         {
-            QuaternionCopy(q1, boneQuaternion[i]);
+            QuaternionCopy(q1, boneQuaternion);
         }
 
         float Matrix[3][4];
-        QuaternionMatrix(boneQuaternion[i], Matrix);
+        QuaternionMatrix(boneQuaternion, Matrix);
         const float* Position1 = bm1->Position[PriorAnimationFrame];
         const float* Position2 = bm2->Position[currentAnimationFrame];
 
@@ -310,7 +332,7 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
         }
     }
 
-    // DXP-24 fix: this model's own skeleton may have fewer than MAX_BONES real bones, and the loop
+    // This model's own skeleton may have fewer than MAX_BONES real bones, and the loop
     // above only ever writes BoneMatrix[0..NumBones). BoneMatrix is caller-supplied and shared/reused
     // across different models' Animation() calls (not cleared between them), so slots >= NumBones
     // would otherwise keep holding a PREVIOUS, differently-boned model's real (not garbage) transform
@@ -321,7 +343,15 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
     // declared buffer capacity -- NOT MAX_BONES -- because several internal callers pass
     // NumBones-sized heap scratch buffers (AnimationTransformWithAttachHighModel* /
     // AnimationTransformOnlySelf), which a MAX_BONES-bound loop would overflow.
-    for (int i = NumBones; i < BoneMatrixCapacity; i++)
+    // The shared BoneTransform tracks how far the last models wrote, so the tail fill stops there
+    // instead of rewriting slots that are already identity.
+    const bool sharedPalette = BoneMatrix == BoneTransform && BoneMatrixCapacity == MAX_BONES;
+    const int fillEnd = sharedPalette ? std::max<int>(NumBones, s_boneTransformWrittenEnd) : BoneMatrixCapacity;
+    if (sharedPalette)
+    {
+        s_boneTransformWrittenEnd = NumBones;
+    }
+    for (int i = NumBones; i < fillEnd; i++)
     {
         BoneMatrix[i][0][0] = 1.f;
         BoneMatrix[i][0][1] = 0.f;
@@ -339,9 +369,23 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
 }
 
 extern EGameScene SceneFlag;
+extern float g_fSpecialHeight;
 extern int EditFlag;
 
 bool HighLight = true;
+
+// The light mood's highlight shoulder on a CPU-lit model colour; a knee of 1 (Classic) leaves it.
+static void RollOffModelLight(vec3_t light, float knee)
+{
+    if (knee >= 1.f)
+    {
+        return;
+    }
+    for (int i = 0; i < 3; ++i)
+    {
+        light[i] = Render::Lighting::LightMood::RollOffHighlight(light[i], knee);
+    }
+}
 float BoneScale = 1.f;
 
 void BMD::ClaimSkinStamp() const
@@ -352,7 +396,7 @@ void BMD::ClaimSkinStamp() const
     // Reaching here means some OTHER BMD's TransformCheap() ran since this BMD's own last one --
     // this BMD's slice of the shared scratch arrays was evicted, and we're about to re-derive it
     // from our own stashed skin request (self-heal). This is a pre-existing sharing model (last
-    // Transform() wins), not new to DXP-20 inc4 -- but a consumer reaching this branch means it
+    // Transform() wins), not newly introduced by the lazy-skin change -- but a consumer reaching this branch means it
     // read/wrote the arrays OUTSIDE the Calc/Draw (or equivalent) bracket that owns this BMD's
     // data, which is worth knowing about if the soak turns up anything odd.
     g_ErrorReport.Write(
@@ -373,8 +417,8 @@ void BMD::TransformCheap(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_
     m_pCurrentBoneTransform = BoneMatrix;
     SetActiveBoneTransform(BoneMatrix);
     m_LastTranslate = Translate;        // persist for RenderMesh GPU skinning path
-    m_LastSkinScale = _Scale;           // DXP-20 inc4: stashed for EnsureCpuVertices()
-    m_LastBoneScale = BoneScale;        // DXP-20 inc4: snapshot of the global -- callers mutate it right
+    m_LastSkinScale = _Scale;           // stashed for EnsureCpuVertices()
+    m_LastBoneScale = BoneScale;        // snapshot of the global -- callers mutate it right
                                         // after Transform() returns (e.g. monster edge-scale resets),
                                         // so a deferred read of the live global would skin wrong.
     m_SkinStamp = ++g_SkinStampCounter; // this BMD now owns the shared scratch arrays
@@ -403,8 +447,10 @@ void BMD::TransformCheap(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_
             Vector(0.f, -1.5f, 0.f, Position);
         }
 
+        // The light mood's sun scales the directional part of the model light.
+        Render::Lighting::LightMood::ScaleSunDirection(Render::Lighting::LightMood::Active(), Position);
         AngleMatrix(ShadowAngle, Matrix);
-        VectorIRotate(Position, Matrix, m_LastLightPosition); // DXP-20: for RenderMesh's GPU-skinned in-shader lighting
+        VectorIRotate(Position, Matrix, m_LastLightPosition); // for RenderMesh's GPU-skinned in-shader lighting
     }
 
     // Release/gameplay OBB: from the caller-supplied bounding box args, not a vertex-loop-derived
@@ -432,7 +478,7 @@ void BMD::SkinVertex(int mesh, int vertexIndex, float (*BoneMatrix)[3][4], bool 
 {
     const Vertex_t* v = &Meshs[mesh].Vertices[vertexIndex];
 
-    // DXP-20 inc4: reads the BoneScale snapshotted at TransformCheap() time, not the live global --
+    // Reads the BoneScale snapshotted at TransformCheap() time, not the live global --
     // this makes SkinVertex()/SkinVertices() safe to call from a deferred EnsureCpuVertices(), where
     // the global may already have been reset/reused by a later object. Behavior-identical for the
     // pre-inc4 callers (coin heap, skin-shell effect), which always run immediately after
@@ -515,7 +561,7 @@ void BMD::EnsureCpuNormals(int mesh) const
         VectorRotate(sn->Normal, m_pCurrentBoneTransform[sn->Node], tn);
         if (LightEnable)
         {
-            float Luminosity = DotProduct(tn, m_LastLightPosition) * 0.8f + 0.4f;
+            float Luminosity = VectorDotProduct(tn, m_LastLightPosition) * 0.8f + 0.4f;
             if (Luminosity < 0.2f)
                 Luminosity = 0.2f;
             IntensityTransform[mesh][j] = Luminosity;
@@ -535,17 +581,17 @@ void BMD::MarkCpuVerticesExternallyWritten(int mesh) const
 void BMD::Transform(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t BoundingBoxMax, OBB_t* OBB, bool Translate,
                     float _Scale)
 {
-    FRAME_PROFILE(Skinning); // DXP-20 increment 1 baseline measurement
+    FRAME_PROFILE(Skinning); // baseline measurement
     TransformCheap(BoneMatrix, BoundingBoxMin, BoundingBoxMax, OBB, Translate, _Scale);
 
-    // DXP-20 increment 4: with the lazy-skin gate on, ordinary (EditFlag != 2) bodies defer the
+    // With the lazy-skin gate on, ordinary (EditFlag != 2) bodies defer the
     // vertex/normal loops below to EnsureCpuVertices()/EnsureCpuNormals() at each consumer site
     // instead of running them here unconditionally -- TransformCheap() already stashed everything
     // those need. EditFlag == 2 (map editor) always takes the eager path below: it needs the
     // vertex-loop-derived OBB override further down, which EnsureCpu*() never computes (see
     // TransformCheap()'s header comment -- same restriction that already applied to it in
     // increment 2). fTransformedSize is intentionally left stale on the lazy path in both Debug
-    // and Release builds (see DXP-20-inc4-plan.md) -- its only consumer already floors the result.
+    // and Release builds -- its only consumer already floors the result.
     if (g_LazyCpuSkin && EditFlag != 2)
         return;
 
@@ -613,7 +659,7 @@ void BMD::Transform(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t Bou
             if (LightEnable)
             {
                 float Luminosity;
-                Luminosity = DotProduct(tn, m_LastLightPosition) * 0.8f + 0.4f;
+                Luminosity = VectorDotProduct(tn, m_LastLightPosition) * 0.8f + 0.4f;
 
                 if (Luminosity < 0.2f) Luminosity = 0.2f;
                 IntensityTransform[i][j] = Luminosity;
@@ -840,6 +886,7 @@ void BMD::AnimationTransformWithAttachHighModel_usingGlobalTM(OBJECT* oHighHiera
 
     Animation(arrBonesTMLocal, 0, 0, 0, Temp, Temp, false, false, nullptr, -1, NumBones);
 
+    s_boneTransformWrittenEnd = std::max<int>(s_boneTransformWrittenEnd, NumBones);
     for (int i_ = 0; i_ < NumBones; ++i_)
     {
         R_ConcatTransforms(tmBoneHierarchicalObject, arrBonesTMLocal[i_], BoneTransform[i_]);
@@ -1028,10 +1075,10 @@ void BMD::Chrome(float* pchrome, int bone, vec3_t normal)
         g_chromeage[bone] = g_smodels_total;
     }
 
-    n = DotProduct(normal, g_chromeright[bone]);
+    n = VectorDotProduct(normal, g_chromeright[bone]);
     pchrome[0] = (n + 1.f); // FIX: make this a float
 
-    n = DotProduct(normal, g_chromeup[bone]);
+    n = VectorDotProduct(normal, g_chromeup[bone]);
     pchrome[1] = (n + 1.f); // FIX: make this a float
 }
 
@@ -1041,7 +1088,7 @@ void BMD::Lighting(float* pLight, Light_t* lp, vec3_t Position, vec3_t Normal)
     VectorSubtract(lp->Position, Position, Light);
     float Length = sqrtf(Light[0] * Light[0] + Light[1] * Light[1] + Light[2] * Light[2]);
 
-    float LightCos = (DotProduct(Normal, Light) / Length) * 0.8f + 0.3f;
+    float LightCos = (VectorDotProduct(Normal, Light) / Length) * 0.8f + 0.3f;
     if (Length > lp->Range) LightCos -= (Length - lp->Range) * 0.01f;
     if (LightCos < 0.f) LightCos = 0.f;
     pLight[0] += LightCos * lp->Color[0];
@@ -1080,7 +1127,7 @@ void SmoothBitmap(int Width, int Height, unsigned char* Buffer)
 
 bool BMD::CollisionDetectLineToMesh(vec3_t Position, vec3_t Target, bool Collision, int Mesh, int Triangle)
 {
-    EnsureCpuVertices(-1); // DXP-20 inc4: mouse-picking/lightmap-bake reader, not in the original spec's consumer list
+    EnsureCpuVertices(-1); // mouse-picking/lightmap-bake reader, not in the original spec's consumer list
     int i, j;
     for (i = 0; i < NumMeshs; i++)
     {
@@ -1106,13 +1153,13 @@ bool BMD::CollisionDetectLineToMesh(vec3_t Position, vec3_t Target, bool Collisi
 
 void BMD::CreateLightMapSurface(Light_t* lp, Mesh_t* m, int i, int j, int MapWidth, int MapHeight, int MapWidthMax, int MapHeightMax, vec3_t BoundingMin, vec3_t BoundingMax, int Axis)
 {
-    EnsureCpuVertices(i); // DXP-20 inc4: lightmap bake reader, not in the original spec's consumer list
+    EnsureCpuVertices(i); // lightmap bake reader, not in the original spec's consumer list
     EnsureCpuNormals(i);
     int k, l;
     Triangle_t* tp = &m->Triangles[j];
     float* np = NormalTransform[i][tp->NormalIndex[0]];
     float* vp = VertexTransform[i][tp->VertexIndex[0]];
-    float d = -DotProduct(vp, np);
+    float d = -VectorDotProduct(vp, np);
 
     Bitmap_t* lmp = &LightMaps[NumLightMaps];
     if (lmp->Buffer == nullptr)
@@ -1269,7 +1316,7 @@ int BMD::AddToCoinHeap(int coinIndex, int target_vertex_index)
 
             VectorCopy(VertexTransform[meshIndex][source_vertex_index], vertices[target_vertex_index]);
 
-            Vector4(BodyLight[0], BodyLight[1], BodyLight[2], alpha, colors[target_vertex_index]);
+            Vector4Set(BodyLight[0], BodyLight[1], BodyLight[2], alpha, colors[target_vertex_index]);
 
             auto texco = m->TexCoords[triangle->TexCoordIndex[k]];
             texCoords[target_vertex_index][0] = texco.TexCoordU;
@@ -1358,7 +1405,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
     {
         enableLight = false;
     }
-    // DXP-20 inc4 Step C: the LightTransform-materializing loop that used to run right here
+    // The LightTransform-materializing loop that used to run right here
     // unconditionally (even for meshes that end up on the GPU-skinned draw path, which computes
     // lighting in-shader and never reads LightTransform) has moved into the
     // materializeCpuLightingAndChrome() lambda below, called only from the CPU-fallback sub-paths
@@ -1366,6 +1413,8 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
 
     int finalRenderFlags = renderFlags;
     bool useBlendMeshColor = false;
+    // A chrome pass reflects light off the surface and is no bloom source; held until the mesh is drawn.
+    std::optional<mu::ScopedBloomExclusion> chromePass;
     if ((renderFlags & RENDER_COLOR) == RENDER_COLOR)
     {
         finalRenderFlags = RENDER_COLOR;
@@ -1412,6 +1461,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
         if (m->NoneBlendMesh)
             return;
 
+        chromePass.emplace();
         finalRenderFlags = RENDER_CHROME;
         if ((renderFlags & RENDER_CHROME4) == RENDER_CHROME4)
         {
@@ -1422,7 +1472,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             finalRenderFlags = RENDER_OIL;
         }
 
-        // DXP-20 inc4 Step C: the g_chrome-writing loop that used to run right here unconditionally
+        // The g_chrome-writing loop that used to run right here unconditionally
         // (even for the plain-RENDER_CHROME case, which IS GPU-eligible and never reads g_chrome on
         // that path) has moved into the materializeCpuLightingAndChrome() lambda below, called only
         // from the CPU-fallback sub-paths that actually read it.
@@ -1585,9 +1635,15 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
 
         if (usesCpuLighting)
         {
+            // Lit per vertex here, so the point lights the base light leaves out come back as a whole.
+            vec3_t light;
+            VectorCopy(BodyLight, light);
+            AddVertexLitDynamicLight(BodyOrigin[0], BodyOrigin[1], light);
+            const float knee = Render::Lighting::LightMood::Active().highlightKnee;
             for (int j = 0; j < m->NumNormals; ++j)
             {
-                VectorScale(BodyLight, IntensityTransform[meshIndex][j], LightTransform[meshIndex][j]);
+                VectorScale(light, IntensityTransform[meshIndex][j], LightTransform[meshIndex][j]);
+                RollOffModelLight(LightTransform[meshIndex][j], knee);
             }
         }
 
@@ -1608,19 +1664,19 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             }
             else if ((renderFlags & RENDER_CHROME3) == RENDER_CHROME3)
             {
-                g_chrome[j][0] = DotProduct(normal, LightVector);
+                g_chrome[j][0] = VectorDotProduct(normal, LightVector);
                 g_chrome[j][1] = 1.0f - g_chrome[j][0];
             }
             else if ((renderFlags & RENDER_CHROME4) == RENDER_CHROME4)
             {
-                g_chrome[j][0] = DotProduct(normal, light);
+                g_chrome[j][0] = VectorDotProduct(normal, light);
                 g_chrome[j][1] = 1.0f - g_chrome[j][0];
                 g_chrome[j][1] -= normal[2] * 0.5f + wave * 3.0f;
                 g_chrome[j][0] += normal[1] * 0.5f + light[1] * 3.0f;
             }
             else if ((renderFlags & RENDER_CHROME5) == RENDER_CHROME5)
             {
-                g_chrome[j][0] = DotProduct(normal, light);
+                g_chrome[j][0] = VectorDotProduct(normal, light);
                 g_chrome[j][1] = 1.0f - g_chrome[j][0];
                 g_chrome[j][1] -= normal[2] * 2.5f + wave;
                 g_chrome[j][0] += normal[1] * 3.0f + light[1] * 5.0f;
@@ -1659,38 +1715,38 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
     if (gpuSkinningEligible)
     {
         const auto textureCoordinates = GetSkinningTextureCoordinates(renderFlags);
-        auto skinnedVertices = GetRendererSkinnedVertexScratch(maxVertexCount);
-        std::size_t skinnedVertexCount = 0;
-        for (int j = 0; j < m->NumTriangles; ++j)
+        // A scrolling texture bakes this frame's offset into the UVs, so only the other meshes are cached.
+        const bool waveTextureCoordinates = textureCoordinates == mu::SkinningTextureCoordinates::Mesh && EnableWave;
+        const std::uint32_t color =
+            PackABGR(BodyLight[0] * colorScale, BodyLight[1] * colorScale, BodyLight[2] * colorScale, baseAlpha);
+        auto buildSkinnedVertices = [&]()
         {
-            const auto* triangle = &m->Triangles[j];
-            for (int k = 0; k < triangle->Polygon; ++k)
+            auto skinnedVertices = GetRendererSkinnedVertexScratch(maxVertexCount);
+            std::size_t skinnedVertexCount = 0;
+            for (int j = 0; j < m->NumTriangles; ++j)
             {
-                const int vertexIndex = triangle->VertexIndex[k];
-                const int normalIndex = triangle->NormalIndex[k];
-                const auto& vertex = m->Vertices[vertexIndex];
-                const auto& normal = m->Normals[normalIndex];
-                const auto& texCoord = m->TexCoords[triangle->TexCoordIndex[k]];
-                const bool useMeshTextureCoordinates = textureCoordinates == mu::SkinningTextureCoordinates::Mesh;
-                const float u =
-                    texCoord.TexCoordU + (useMeshTextureCoordinates && EnableWave ? blendMeshTextureCoordU : 0.0f);
-                const float v =
-                    texCoord.TexCoordV + (useMeshTextureCoordinates && EnableWave ? blendMeshTextureCoordV : 0.0f);
-                const std::uint32_t color = PackABGR(BodyLight[0] * colorScale, BodyLight[1] * colorScale,
-                                                     BodyLight[2] * colorScale, baseAlpha);
-                skinnedVertices[skinnedVertexCount++] = {vertex.Position[0],
-                                                         vertex.Position[1],
-                                                         vertex.Position[2],
-                                                         normal.Normal[0],
-                                                         normal.Normal[1],
-                                                         normal.Normal[2],
-                                                         u,
-                                                         v,
-                                                         color,
-                                                         vertex.Node,
-                                                         normal.Node};
+                const auto* triangle = &m->Triangles[j];
+                for (int k = 0; k < triangle->Polygon; ++k)
+                {
+                    const auto& vertex = m->Vertices[triangle->VertexIndex[k]];
+                    const auto& normal = m->Normals[triangle->NormalIndex[k]];
+                    const auto& texCoord = m->TexCoords[triangle->TexCoordIndex[k]];
+                    const float u = texCoord.TexCoordU + (waveTextureCoordinates ? blendMeshTextureCoordU : 0.0f);
+                    const float v = texCoord.TexCoordV + (waveTextureCoordinates ? blendMeshTextureCoordV : 0.0f);
+                    skinnedVertices[skinnedVertexCount++] = {vertex.Position[0],
+                                                             vertex.Position[1],
+                                                             vertex.Position[2],
+                                                             normal.Normal[0],
+                                                             normal.Normal[1],
+                                                             normal.Normal[2],
+                                                             u,
+                                                             v,
+                                                             vertex.Node,
+                                                             normal.Node};
+                }
             }
-        }
+            return skinnedVertices.first(skinnedVertexCount);
+        };
 
         mu::SkinningParameters skinning{
             .boneMatrices = {&m_pCurrentBoneTransform[0][0][0], MAX_BONES * 12u},
@@ -1700,6 +1756,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             .boneScale = m_LastBoneScale,
             .restPoseScale = m_LastSkinScale,
             .lightDirection = {m_LastLightPosition[0], m_LastLightPosition[1], m_LastLightPosition[2]},
+            .highlightKnee = Render::Lighting::LightMood::Active().highlightKnee,
             .textureCoordinateOffset = {blendMeshTextureCoordU, blendMeshTextureCoordV},
             .chromeWave = wave,
             .chromeWave2 = static_cast<int>(WorldTime) % 5000 * 0.00024f - 0.4f,
@@ -1708,9 +1765,18 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             .textureCoordinates = textureCoordinates,
             .translate = m_LastTranslate,
             .lightEnabled = usesCpuLighting,
+            .specularStrength = texture->IsSkin || texture->IsHair ? 0.0f : SpecularStrength,
         };
-        gpuSkinningSubmitted =
-            mu::GetRenderer().RenderSkinnedTriangles(skinnedVertices.first(skinnedVertexCount), 0u, skinning);
+        auto& renderer = mu::GetRenderer();
+        if (!waveTextureCoordinates &&
+            (renderer.IsSkinnedMeshCached(m) || renderer.CacheSkinnedMesh(m, buildSkinnedVertices())))
+        {
+            gpuSkinningSubmitted = renderer.RenderCachedSkinnedMesh(m, color, 0u, skinning);
+        }
+        else
+        {
+            gpuSkinningSubmitted = renderer.RenderSkinnedTriangles(buildSkinnedVertices(), color, 0u, skinning);
+        }
     }
 
     const Render::Models::GpuSkinningPath skinningPath =
@@ -1744,7 +1810,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             vec4_t colorComponents;
             vec2_t texCoord;
             VectorCopy(VertexTransform[meshIndex][source_vertex_index], position);
-            Vector4(shadowMap ? 0.0f : BodyLight[0] * colorScale,
+            Vector4Set(shadowMap ? 0.0f : BodyLight[0] * colorScale,
                     shadowMap ? 0.0f : BodyLight[1] * colorScale,
                     shadowMap ? 0.0f : BodyLight[2] * colorScale,
                     baseAlpha,
@@ -1769,7 +1835,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
                     if (enableLight)
                     {
                         auto light = LightTransform[meshIndex][normalIndex];
-                        Vector4(light[0], light[1], light[2], alpha, colorComponents);
+                        Vector4Set(light[0], light[1], light[2], alpha, colorComponents);
                     }
 
                     break;
@@ -1862,14 +1928,18 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
     }
     else if (EnableLight)
     {
+        const float knee = Render::Lighting::LightMood::Active().highlightKnee;
         for (int j = 0; j < m->NumNormals; j++)
         {
             VectorScale(BodyLight, IntensityTransform[i][j], LightTransform[i][j]);
+            RollOffModelLight(LightTransform[i][j], knee);
         }
     }
 
     int Render = RenderFlag;
     bool useBlendMeshColor = false;
+    // A chrome pass reflects light off the surface and is no bloom source; held until the mesh is drawn.
+    std::optional<mu::ScopedBloomExclusion> chromePass;
     if ((RenderFlag & RENDER_COLOR) == RENDER_COLOR)
     {
         Render = RENDER_COLOR;
@@ -1907,6 +1977,7 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
         }
         if (m->NoneBlendMesh)
             return;
+        chromePass.emplace();
         Render = RENDER_CHROME;
         if ((RenderFlag & RENDER_CHROME4) == RENDER_CHROME4)
         {
@@ -1928,13 +1999,13 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
             }
             else if ((RenderFlag & RENDER_CHROME3) == RENDER_CHROME3)
             {
-                g_chrome[j][0] = DotProduct(Normal, LightVector);
-                g_chrome[j][1] = 1.f - DotProduct(Normal, LightVector);
+                g_chrome[j][0] = VectorDotProduct(Normal, LightVector);
+                g_chrome[j][1] = 1.f - VectorDotProduct(Normal, LightVector);
             }
             else if ((RenderFlag & RENDER_CHROME4) == RENDER_CHROME4)
             {
-                g_chrome[j][0] = DotProduct(Normal, L);
-                g_chrome[j][1] = 1.f - DotProduct(Normal, L);
+                g_chrome[j][0] = VectorDotProduct(Normal, L);
+                g_chrome[j][1] = 1.f - VectorDotProduct(Normal, L);
                 g_chrome[j][1] -= Normal[2] * 0.5f + Wave * 3.f;
                 g_chrome[j][0] += Normal[1] * 0.5f + L[1] * 3.f;
             }
@@ -1942,8 +2013,8 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
             {
                 Vector(0.1f, -0.23f, 0.22f, LightVector2);
 
-                g_chrome[j][0] = (DotProduct(Normal, LightVector2) /*+ Normal[1] + LightVector2[1]*3.f */) / 1.08f;
-                g_chrome[j][1] = (1.f - DotProduct(Normal, LightVector2) /*- Normal[2]*0.5f + 3.f */) / 1.08f;
+                g_chrome[j][0] = (VectorDotProduct(Normal, LightVector2) /*+ Normal[1] + LightVector2[1]*3.f */) / 1.08f;
+                g_chrome[j][1] = (1.f - VectorDotProduct(Normal, LightVector2) /*- Normal[2]*0.5f + 3.f */) / 1.08f;
             }
             else if ((RenderFlag & RENDER_CHROME6) == RENDER_CHROME6)
             {
@@ -1954,8 +2025,8 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
             {
                 Vector(0.1f, -0.23f, 0.22f, LightVector2);
 
-                g_chrome[j][0] = (DotProduct(Normal, LightVector2)) / 1.08f;
-                g_chrome[j][1] = (1.f - DotProduct(Normal, LightVector2)) / 1.08f;
+                g_chrome[j][0] = (VectorDotProduct(Normal, LightVector2)) / 1.08f;
+                g_chrome[j][1] = (1.f - VectorDotProduct(Normal, LightVector2)) / 1.08f;
             }
             else if ((RenderFlag & RENDER_CHROME) == RENDER_CHROME)
             {
@@ -2164,7 +2235,7 @@ void BMD::RenderMeshEffect(int i, int iType, int iSubType, vec3_t Angle, VOID* o
     Mesh_t* m = &Meshs[i];
     if (m->NumTriangles <= 0) return;
 
-    EnsureCpuVertices(i); // DXP-20 inc4: spawn-position reads below (~20 sites) need mesh i materialized
+    EnsureCpuVertices(i); // spawn-position reads below (~20 sites) need mesh i materialized
 
     vec3_t angle, Light;
     int iEffectCount = 0;
@@ -2426,14 +2497,18 @@ void BMD::RenderMeshTranslate(int i, int RenderFlag, float Alpha, int BlendMesh,
     }
     else if (EnableLight)
     {
+        const float knee = Render::Lighting::LightMood::Active().highlightKnee;
         for (int j = 0; j < m->NumNormals; j++)
         {
             VectorScale(BodyLight, IntensityTransform[i][j], LightTransform[i][j]);
+            RollOffModelLight(LightTransform[i][j], knee);
         }
     }
 
     int Render = RenderFlag;
     bool useBlendMeshColor = false;
+    // A chrome pass reflects light off the surface and is no bloom source; held until the mesh is drawn.
+    std::optional<mu::ScopedBloomExclusion> chromePass;
     if ((RenderFlag & RENDER_COLOR) == RENDER_COLOR)
     {
         Render = RENDER_COLOR;
@@ -2457,6 +2532,7 @@ void BMD::RenderMeshTranslate(int i, int RenderFlag, float Alpha, int BlendMesh,
         }
         if (m->NoneBlendMesh)
             return;
+        chromePass.emplace();
         Render = RENDER_CHROME;
 
         float Wave2 = (int)WorldTime % 5000 * 0.00024f - 0.4f;
@@ -2768,10 +2844,98 @@ void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, cons
     mu::GetRenderer().RenderTriangles(muVerts, 0u);
 }
 
+bool BMD::RenderGpuMeshShadow(const int blendMesh, const int hiddenMesh, const int startMesh, const int endMesh,
+    const float sx, const float sy, const std::uint32_t color) const
+{
+    if (!m_pCurrentBoneTransform || startMesh < 0 || endMesh > NumMeshs || endMesh > MAX_MESH)
+    {
+        return false;
+    }
+
+    const auto drawn = [&](int i)
+    {
+        return i != hiddenMesh && Meshs[i].NumTriangles > 0 && Meshs[i].Texture != blendMesh;
+    };
+    const bool cpuVerticesCurrent = m_SkinStamp == g_SkinStampCounter;
+    for (int i = startMesh; i < endMesh; i++)
+    {
+        // Already skinned this frame, maybe at another BodyOrigin, or written by the cloth simulation: the CPU
+        // shadow draws those positions.
+        if (drawn(i) && cpuVerticesCurrent && m_CpuVertsReady[i])
+        {
+            return false;
+        }
+    }
+
+    auto& renderer = mu::GetRenderer();
+    if (!renderer.SetTerrainHeights({BackTerrainHeight, Render::kTerrainCells}, {TerrainWall, Render::kTerrainCells},
+                                    TerrainHeightVersion()))
+    {
+        return false;
+    }
+
+    const auto stream = ShadowStreams()
+                            .try_emplace({reinterpret_cast<std::uintptr_t>(this), startMesh, endMesh, hiddenMesh,
+                                          blendMesh})
+                            .first;
+    const void* key = &*stream;
+    if (!renderer.IsSkinnedMeshCached(key))
+    {
+        std::size_t vertexCount = 0;
+        for (int i = startMesh; i < endMesh; i++)
+        {
+            for (int j = 0; drawn(i) && j < Meshs[i].NumTriangles; j++)
+            {
+                vertexCount += static_cast<std::size_t>(Meshs[i].Triangles[j].Polygon);
+            }
+        }
+
+        auto vertices = GetRendererSkinnedVertexScratch(vertexCount);
+        std::size_t count = 0;
+        for (int i = startMesh; i < endMesh; i++)
+        {
+            const Mesh_t* mesh = &Meshs[i];
+            for (int j = 0; drawn(i) && j < mesh->NumTriangles; j++)
+            {
+                const auto* tp = &mesh->Triangles[j];
+                for (int k = 0; k < tp->Polygon; k++)
+                {
+                    const auto& vertex = mesh->Vertices[tp->VertexIndex[k]];
+                    vertices[count++] = {vertex.Position[0], vertex.Position[1], vertex.Position[2], 0.f, 0.f, 0.f,
+                                         0.f, 0.f, vertex.Node, -1};
+                }
+            }
+        }
+        if (!renderer.CacheSkinnedMesh(key, vertices.first(count)))
+        {
+            return false;
+        }
+    }
+
+    // What EnsureCpuVertices() would skin with now.
+    const mu::SkinningParameters skinning{
+        .boneMatrices = {&m_pCurrentBoneTransform[0][0][0], MAX_BONES * 12u},
+        .paletteVersion = g_BoneTransformVersion,
+        .bodyOrigin = {BodyOrigin[0], BodyOrigin[1], BodyOrigin[2]},
+        .bodyScale = BodyScale,
+        .boneScale = m_LastBoneScale,
+        .restPoseScale = m_LastSkinScale,
+        .translate = m_LastTranslate,
+    };
+    const mu::ShadowProjection projection{
+        .origin = {BodyOrigin[0], BodyOrigin[1], BodyOrigin[2]},
+        .shearX = sx,
+        .shearHeight = sy,
+        .specialHeight = g_fSpecialHeight,
+        .terrain = SceneFlag != SERVER_LIST_SCENE && SceneFlag != WEBZEN_SCENE && SceneFlag != LOADING_SCENE,
+    };
+    return renderer.RenderCachedSkinnedShadow(key, color, skinning, projection);
+}
+
 void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int startMeshNumber,
     const int endMeshNumber, void* pClothes, const int clothesCount, const float alpha)
 {
-    if (!g_pOption->GetRenderAllEffects())
+    if (!g_pOption->GetRenderAllEffects() || IsBodyShadowsDisabledDebug())
     {
         return;
     }
@@ -2795,7 +2959,10 @@ void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int 
 
     if (clothesCount == 0)
     {
-        AddMeshShadowTriangles(blendMesh, hiddenMesh, startMesh, endMesh, sx, sy, shadowColor);
+        if (!RenderGpuMeshShadow(blendMesh, hiddenMesh, startMesh, endMesh, sx, sy, shadowColor))
+        {
+            AddMeshShadowTriangles(blendMesh, hiddenMesh, startMesh, endMesh, sx, sy, shadowColor);
+        }
     }
     else
     {
@@ -2961,6 +3128,15 @@ long BMD::GetDataUserCount() const
 
 void BMD::Release()
 {
+    auto& shadowStreams = ShadowStreams();
+    const auto self = reinterpret_cast<std::uintptr_t>(this);
+    for (auto stream = shadowStreams.lower_bound({self, INT_MIN, INT_MIN, INT_MIN, INT_MIN});
+         stream != shadowStreams.end() && std::get<0>(stream->first) == self;)
+    {
+        mu::GetRenderer().ReleaseSkinnedMesh(&*stream);
+        stream = shadowStreams.erase(stream);
+    }
+
     const bool othersUseTheData = m_sharedDataUsers && m_sharedDataUsers.use_count() > 1;
     m_sharedDataUsers.reset();
     if (othersUseTheData)
@@ -3031,6 +3207,7 @@ void BMD::Release()
         {
             Mesh_t* m = &Meshs[i];
 
+            mu::GetRenderer().ReleaseSkinnedMesh(m);
             if (m->Vertices) { delete[] m->Vertices; m->Vertices = nullptr; }
             if (m->Normals) { delete[] m->Normals; m->Normals = nullptr; }
             if (m->TexCoords) { delete[] m->TexCoords; m->TexCoords = nullptr; }

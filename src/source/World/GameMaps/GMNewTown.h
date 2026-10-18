@@ -37,9 +37,6 @@ namespace SEASON3B
         static bool PlayMonsterSound(OBJECT* pObject);
         static void PlayObjectSound(OBJECT* pObject);
 
-        static bool IsCheckMouseIn();
-        static bool CharacterSceneCheckMouse(OBJECT* pObj);
-        static bool m_bCharacterSceneCheckMouse;
     };
 }
 #endif // !defined(AFX_GMNEWTOWN_H__3FBE665B_5FFE_4BF4_B723_A6A9A5DFE479__INCLUDED_)

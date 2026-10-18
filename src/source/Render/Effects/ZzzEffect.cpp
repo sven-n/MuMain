@@ -15,13 +15,13 @@
 #include "Render/Effects/Behaviors/MoveHandlers.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Audio/DSPlaySound.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Skills/SkillEffectMgr.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Character/CharacterManager.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Scenes/MainScene.h"
 
@@ -7669,7 +7669,7 @@ void RenderWheelWeapon(OBJECT* o)
     ItemObjectAttribute(o);
     b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, false);
     vec3_t Light;
-    RequestTerrainLight(o->Position[0], o->Position[1], Light);
+    RequestModelTerrainLight(o->Position[0], o->Position[1], Light);
     VectorAdd(Light, o->Light, Light);
     RenderPartObject(o, Type, NULL, Light, Alpha, o->Owner->WeaponLevel, 0, 0, true, true, true);
     o->Type = (short)TempType;
@@ -7700,7 +7700,7 @@ void RenderFuryStrike(OBJECT* o)
         ItemObjectAttribute(o);
         o->Gravity = tempGravity;
 
-        RequestTerrainLight(o->Position[0], o->Position[1], Light);
+        RequestModelTerrainLight(o->Position[0], o->Position[1], Light);
         VectorAdd(Light, o->Light, Light);
         VectorCopy(o->Angle, Angle);
 
@@ -7737,7 +7737,7 @@ void RenderEffects(bool bRenderBlendMesh)
         }
         else
         {
-            if (IsSkillEffectModelsDisabledDebug()) // DXP-23 diagnostic
+            if (IsSkillEffectModelsDisabledDebug())
             {
                 continue;
             }

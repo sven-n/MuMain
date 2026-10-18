@@ -9,9 +9,9 @@ class OBJECT;
 class CHARACTER;
 #include "Guild/GuildConstants.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
-    class CNewUIItemMng;
+    class CItemMng;
 }
 
 #define MAX_MONSTERSKILL_NUM	10
@@ -173,7 +173,6 @@ typedef struct tagITEM
     WORD  Jewel_Of_Harmony_OptionLevel;
     bool HasSkill;
     bool HasLuck;
-    BYTE  Part;
     BYTE  Class;
     bool  TwoHand;
     WORD  DamageMin;
@@ -226,7 +225,7 @@ typedef struct tagITEM
     long	lExpireTime;
 
 private:
-    friend class SEASON3B::CNewUIItemMng;
+    friend class mu::ui::window::CItemMng;
     int   RefCount;
 } ITEM;
 #pragma pack(pop)
@@ -523,9 +522,11 @@ typedef struct
 
     // Fields about the "Tails" of effects:
     bool        m_bCreateTails; // Flag, if tails are created.
-    int         NumTails; // The number of currently used tail entries. Usually this gets increased by one in every frame until the maximum is reached.
+    int NumTails; // The number of currently used tail entries. Usually this gets increased by one in every reference
+                  // frame until the maximum is reached.
     int         MaxTails; // The maximum number of tail entries to use.
-    vec3_t      Tails[MAX_TAILS][4]; // The tail entries, which are getting moved back by one in every frame.
+    vec3_t Tails[MAX_TAILS][4]; // The tail entries, which are getting moved back by one in every reference frame.
+    float TailFrames;           // Reference frames since tails were last laid.
 } JOINT;
 //character end
 

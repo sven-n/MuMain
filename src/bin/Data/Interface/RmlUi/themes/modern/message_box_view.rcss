@@ -1,0 +1,138 @@
+/* Modern theme for a native message box drawn by MessageBoxView: the modern panel surface and
+   buttons. Geometry is the legacy one (reference px). */
+
+/* The original's boxes: centred on the 640x480 stage, the top at 100 (the Devil Square ranking at
+   60). */
+#stage { pointer-events: none; }
+#panel { position: absolute; left: 205px; top: 100px; width: 230px; font-family: "token(font-body)"; pointer-events: auto; }
+#panel[data-kind="devil-square-rank"] { top: 60px; }
+#back {
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 10px;
+	width: 230px;
+	background-color: token(surface-panel);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+}
+/* This theme draws its own panel: the frame's strips only give the box its height. */
+#frame { position: relative; display: block; width: 230px; visibility: hidden; }
+#box_top { display: block; height: 67px; }
+#box_bottom { display: block; height: 50px; }
+.box-strip { display: block; }
+.box-strip--middle { height: 15px; }
+.box-strip--divider { height: 21px; }
+.box-separator { display: none; position: absolute; left: 13px; width: 205px; height: 1px; background-color: token(border-frame); }
+
+#progress_back { position: absolute; left: 35px; bottom: 32px; width: 160px; height: 18px; background-color: token(surface-recessed); border-radius: token(radius-sm)px; }
+#progress_bar { position: absolute; left: 40px; bottom: 37px; height: 8px; background-color: token(accent-steel); }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; pointer-events: none; transform-origin: left top; }
+
+.box-btn {
+	display: block;
+	position: absolute;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+.box-btn:hover { border-color: token(accent-steel-hover); }
+.box-btn:active { background-color: token(surface-recessed); }
+.box-btn.disabled { background-color: token(surface-recessed); }
+.box-label { color: token(text-primary); }
+.box-btn.disabled .box-label { color: token(text-muted); }
+
+/* The jewel list keeps native text metrics while RmlUi handles scrolling. */
+#list_box { position: absolute; left: 24px; top: 64.5px; width: 181px; height: 111px; pointer-events: none; background-color: token(surface-recessed); }
+#list { position: absolute; left: 25px; top: 65.5px; transform-origin: left top; overflow: hidden scroll; }
+.list-row { display: block; position: relative; pointer-events: auto; }
+.list-row-back { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+.list-row.selected .list-row-back { background-color: token(accent-steel); }
+.list-row-text { position: absolute; left: 3.5714%; top: 23.0769%; white-space: pre; pointer-events: none; color: token(text-primary); }
+
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#list { width: calc(180px * var(--root-scale)); height: calc(109px * var(--root-scale)); }
+.list-row { width: calc(168px * var(--root-scale)); height: calc(13px * var(--root-scale)); }
+
+/* The lines, in one counter-scaled flow from the box's text top, centred on the box. The progress
+   notices, the jewel dissolve box and the guild appointment stack each line one native line height
+   + 4 apart (RenderTexts()); the event results space theirs as RenderMatchResult() did. */
+#lines { left: 0; top: 40px; --flow-w: 230px; text-align: center; }
+.box-line { display: block; white-space: pre; }
+.box-cell { white-space: pre; }
+.box-cell.bold { font-weight: bold; }
+#panel[data-kind="progress"] #lines { top: 35px; }
+#panel[data-kind="gem-disjoint"] #lines { top: 17px; }
+#panel[data-kind="guild-appoint"] #lines { top: 97px; }
+#panel[data-kind="progress"] .box-line, #panel[data-kind="gem-disjoint"] .box-line,
+#panel[data-kind="guild-appoint"] .box-line { height: calc((var(--line-height, 0px) + 4px) * var(--root-scale)); }
+#panel[data-kind="progress"] .box-line.bold, #panel[data-kind="gem-disjoint"] .box-line.bold,
+#panel[data-kind="guild-appoint"] .box-line.bold { height: calc((var(--bold-line-height, 0px) + 4px) * var(--root-scale)); }
+
+/* The Blood Castle and Chaos Castle results: the message 16 apart from 40, the rewards 30 below
+   it, 24 apart (Blood Castle) or 20 (Chaos Castle). */
+#panel[data-kind="blood-castle-result"] .box-line, #panel[data-kind="chaos-castle-result"] .box-line { height: calc(16px * var(--root-scale)); }
+#panel[data-kind="blood-castle-result"] .box-line--message + .box-line--reward,
+#panel[data-kind="chaos-castle-result"] .box-line--message + .box-line--reward { margin-top: calc(14px * var(--root-scale)); }
+#panel[data-kind="blood-castle-result"] .box-line--reward { height: calc(24px * var(--root-scale)); }
+#panel[data-kind="chaos-castle-result"] .box-line--reward { height: calc(20px * var(--root-scale)); }
+/* The Blood Castle outcome is one translated sentence, wrapped to the box's text width, each
+   line 16 apart. */
+#panel[data-kind="blood-castle-result"] .box-line--message { height: auto; white-space: normal; width: calc(210px * var(--root-scale));
+    margin: 0 auto; line-height: calc(16px * var(--root-scale)); }
+#panel[data-kind="blood-castle-result"] .box-line--message .box-cell { white-space: normal; }
+
+/* The Devil Square ranking (CSDevilSquareMatch::RenderMatchResult()): the message from 30, 16 apart
+   from 40; the headers at 80 over the rank, point, experience and reward columns (30, 90, 140,
+   178); the rows from 100, 16 apart, the rank at 15 and the name at 30; "my info" centred at 260
+   and its row at 280. */
+#panel[data-kind="devil-square-rank"] .box-line--message {
+	height: calc(16px * var(--root-scale));
+	padding-left: calc(30px * var(--root-scale));
+	text-align: left;
+}
+#panel[data-kind="devil-square-rank"] .box-line--header { position: relative; margin-top: calc(8px * var(--root-scale)); height: calc(20px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--row { position: relative; height: calc(16px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--my-info { position: absolute; left: 0; width: 100%; top: calc(220px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--my-row { position: absolute; left: 0; width: 100%; top: calc(240px * var(--root-scale)); height: calc(16px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--header .box-cell,
+#panel[data-kind="devil-square-rank"] .box-line--row .box-cell,
+#panel[data-kind="devil-square-rank"] .box-line--my-row .box-cell { position: absolute; top: 0; }
+#panel[data-kind="devil-square-rank"] .box-line--header .box-cell:nth-child(1) { left: calc(30px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--header .box-cell:nth-child(2) { left: calc(90px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--header .box-cell:nth-child(3) { left: calc(140px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--header .box-cell:nth-child(4) { left: calc(178px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--row .box-cell:nth-child(1),
+#panel[data-kind="devil-square-rank"] .box-line--my-row .box-cell:nth-child(1) { left: calc(15px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--row .box-cell:nth-child(2),
+#panel[data-kind="devil-square-rank"] .box-line--my-row .box-cell:nth-child(2) { left: calc(30px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--row .box-cell:nth-child(3),
+#panel[data-kind="devil-square-rank"] .box-line--my-row .box-cell:nth-child(3) { left: calc(90px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--row .box-cell:nth-child(4),
+#panel[data-kind="devil-square-rank"] .box-line--my-row .box-cell:nth-child(4) { left: calc(140px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--row .box-cell:nth-child(5),
+#panel[data-kind="devil-square-rank"] .box-line--my-row .box-cell:nth-child(5) { left: calc(178px * var(--root-scale)); }
+/* Its table's four rules. */
+#panel[data-kind="devil-square-rank"] .box-separator { display: block; }
+#panel[data-kind="devil-square-rank"] .box-separator:nth-child(1) { top: 75px; }
+#panel[data-kind="devil-square-rank"] .box-separator:nth-child(2) { top: 93px; }
+#panel[data-kind="devil-square-rank"] .box-separator:nth-child(3) { top: 255px; }
+#panel[data-kind="devil-square-rank"] .box-separator:nth-child(4) { top: 273px; }
+
+/* The buttons, as each box's SetButtonInfo() placed them: the results' OK centred 20 above the
+   bottom edge; the jewel dissolve box's Close and Dissolve centred, 50 and 85 above it; the guild
+   appointment's two appointments 114 wide at (57, 30) and (57, 57), OK and Close 64 wide at
+   (48, 127) and (112, 127). */
+#panel[data-kind="blood-castle-result"] .box-btn, #panel[data-kind="chaos-castle-result"] .box-btn,
+#panel[data-kind="devil-square-rank"] .box-btn { left: 88px; bottom: 20px; width: 54px; height: 30px; }
+#panel[data-kind="gem-disjoint"] .box-btn { left: 83px; width: 64px; height: 29px; }
+#panel[data-kind="gem-disjoint"] .box-btn:nth-child(1) { bottom: 21px; }
+#panel[data-kind="gem-disjoint"] .box-btn:nth-child(2) { bottom: 56px; }
+#panel[data-kind="guild-appoint"] .box-btn { width: 64px; height: 29px; }
+#panel[data-kind="guild-appoint"] .box-btn:nth-child(1) { left: 57px; top: 30px; width: 114px; }
+#panel[data-kind="guild-appoint"] .box-btn:nth-child(2) { left: 57px; top: 57px; width: 114px; }
+#panel[data-kind="guild-appoint"] .box-btn:nth-child(3) { left: 48px; top: 127px; }
+#panel[data-kind="guild-appoint"] .box-btn:nth-child(4) { left: 112px; top: 127px; }

@@ -30,8 +30,6 @@ private:
     short FindQuestContext(QUEST_ATTRIBUTE* pQuest, int index);
     bool CheckRequestCondition(QUEST_ATTRIBUTE* pQuest, bool bLastCheck = false);
     bool CheckActCondition(QUEST_ATTRIBUTE* pQuest);
-    void RenderDevilSquare(void);
-    void RenderBloodCastle(void);
 
 public:
     CSQuest(void);
@@ -94,8 +92,6 @@ private:
     KillTracker m_anKillMobCount;
     std::uint16_t m_wNPCIndex;
 
-    int     m_iStartX;
-    int     m_iStartY;
 };
 
 #define g_csQuest CSQuest::GetSingleton ()

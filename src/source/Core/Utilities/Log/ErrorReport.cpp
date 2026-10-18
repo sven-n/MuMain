@@ -48,8 +48,12 @@ void CErrorReport::WriteDebugInfoStr(wchar_t* lpszToWrite)
     std::string line = WideToUtf8(lpszToWrite);
     while (!line.empty() && (line.back() == '\r' || line.back() == '\n'))
         line.pop_back();
-    if (!line.empty())
-        MU_LOG_ERROR(mu::log::Get("core"), "{}", line);
+    if (line.empty())
+        return;
+    // The report is the client's progress trail, not a list of errors; flushed per line so a crash keeps its tail.
+    const auto logger = mu::log::Get("core");
+    MU_LOG_INFO(logger, "{}", line);
+    logger->flush();
 }
 
 void CErrorReport::Write(const wchar_t* lpszFormat, ...)

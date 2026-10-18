@@ -2,6 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "mumain",
   "version-string": "0.0.0",
+  "builtin-baseline": "e03dc9b29710050cd1018bc5674688108658d327",
   "description": "MuMain client — Windows MSVC native dependencies. Linux/macOS use system package managers (apt, brew).",
   "dependencies": [
     {

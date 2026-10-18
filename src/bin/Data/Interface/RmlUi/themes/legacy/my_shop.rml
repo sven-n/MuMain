@@ -1,0 +1,82 @@
+<rml>
+<head>
+	<title>Personal Store</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="item_grid.rcss"/>
+	<link type="text/rcss" href="my_shop.rcss"/>
+	<link type="text/rcss" href="shop_notice.rcss"/>
+</head>
+<body data-model="my_shop">
+	<!-- CMyShopInventory (MyShopInventory.h): the frame, the item grid, the items C++ draws live into
+	     #item_view, the stack counts, title, shop-name field and Open/Close/Exit buttons. -->
+	<div id="panel" data-style---text-px="text_px + 'px'">
+		<div id="frame_corner_close" data-event-click="window_close"></div>
+		<!-- The frame. -->
+		<div class="bg-fill"></div>
+		<div class="bg-top"></div>
+		<div class="bg-left"></div>
+		<div class="bg-right"></div>
+		<div class="bg-bottom"></div>
+		<!-- The item_grid grid: its cells, then its frame (UI/Inventory/ItemGridModel.h). -->
+		<div id="item_grid" class="native-anchor item-grid">
+			<div class="item-grid-cells">
+				<div data-for="c : grid_cells" data-attr-class="'item-cell ' + c.tint + ' ' + c.drop">
+					<div class="item-cell-art"></div><div class="item-cell-drop"></div>
+				</div>
+			</div>
+			<div class="item-grid-frame">
+				<div class="igf igf-t"></div><div class="igf igf-b"></div><div class="igf igf-l"></div><div class="igf igf-r"></div>
+				<div class="igf igf-tl"></div><div class="igf igf-tr"></div><div class="igf igf-bl"></div><div class="igf igf-br"></div>
+			</div>
+		</div>
+		<!-- The items, live 3D drawn by C++ over the cells, then the stack counts. -->
+		<img id="item_view" class="item-view"/>
+		<div id="item_grid_counts" class="item-grid-counts">
+			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text counter-scaled" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
+		</div>
+		<span class="sharp-text marquee" id="title" data-style-font-size="text_px + 'px'">{{title}}</span>
+
+		<!-- Shop name. Stock RmlUi <input>: it owns the edit buffer, caret, selection and IME, and
+		     two-way binds the committed value to MyShopRmlModel::shopTitle. Deliberately NOT
+		     autofocus: this is an ordinary non-modal window, so opening it must leave the keyboard
+		     with the game (an auto-focused field would swallow every hotkey the moment the shop
+		     opens). Click the field to type. maxlength comes from C++ (ApplyShopTitleLimit()). Owns
+		     its own background now, so the separate #edit_bg strip this window used to need in the
+		     background document is gone. -->
+		<input id="shop_title" type="text" class="sharp-text text-field my-shop-title-field"
+		       data-value="shop_title"
+		       data-style-font-size="text_px + 'px'"/>
+
+		<div id="btn_exit" class="shop-btn shop-btn-exit" data-event-click="my_shop_exit_click" data-attr-data-hint="exit_tooltip"></div>
+
+		<div id="btn_open" class="shop-btn shop-btn-open" data-class-locked="open_locked"
+		     data-event-click="my_shop_open_click" data-attr-data-hint="open_tooltip"></div>
+
+		<div id="btn_close" class="shop-btn shop-btn-close" data-class-locked="close_locked"
+		     data-event-click="my_shop_close_click" data-attr-data-hint="close_tooltip"></div>
+
+		<!-- Former RenderTextInfo(): native's rows, each a block that wraps, in its three
+		     groups inside one bounded pane (shop_notice.rcss). -->
+		<div data-class-hidden="!show_still_opening">
+			<div id="still_opening_line" class="sharp-text sharp-flow centred shop-still-opening myshop-line-still-opening" data-style-font-size="text_px + 'px'"><span class="notice-line">{{still_opening_text}}</span></div>
+		</div>
+		<div id="shop_notice" class="sharp-text sharp-flow scroll-pane shop-notice" data-style-font-size="text_px + 'px'">
+			<div class="notice-group">
+				<div id="warning_line" class="notice-line notice-warning myshop-line-warning">{{warning_text}}</div>
+			</div>
+			<div class="notice-group myshop-line-info">
+				<div id="selling_price_line" class="notice-line">{{selling_price_text}}</div>
+				<div id="please_verify_line" class="notice-line">{{please_verify_text}}</div>
+				<div id="already_in_store_line" class="notice-line">{{already_in_store_text}}</div>
+				<div id="cancel_sold_line" class="notice-line">{{cancel_sold_text}}</div>
+				<div id="cant_be_returned_line" class="notice-line">{{cant_be_returned_text}}</div>
+			</div>
+			<div class="notice-group notice-warning myshop-line-warning">
+				<div id="all_item_trading_line" class="notice-line">{{all_item_trading_text}}</div>
+				<div id="can_only_be_done_using_zen_line" class="notice-line">{{can_only_be_done_using_zen_text}}</div>
+			</div>
+		</div>
+	</div>
+</body>
+</rml>

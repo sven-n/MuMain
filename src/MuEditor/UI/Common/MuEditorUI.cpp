@@ -5,37 +5,33 @@
 #include "MuEditorUI.h"
 
 #include "imgui.h"
+#include "imgui_internal.h"
+#include "MuEditorLayout.h"
 #include "../MuEditor/Core/MuEditorCore.h"
+#include "../MuEditor/Core/MuEditorPlatformWindows.h"
 #include "../MuEditor/Config/MuEditorConfig.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "I18N/All.h"
 
+#include <algorithm>
 #include <cstring>
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 
-// UI Layout constants. The pixel sizes are multiplied by the editor UI scale so
-// the toolbar grows with the -/+ buttons instead of clipping its own contents.
+// Layout of the Open Editor strip over the game while the editor is closed. The
+// pixel sizes are multiplied by the editor UI scale so the strip grows with it
+// instead of clipping its own contents.
 constexpr float TOOLBAR_HEIGHT = 40.0f;
 constexpr float TOOLBAR_PADDING = 8.0f;
 constexpr float TOOLBAR_INDENT = 10.0f;
 constexpr float BUTTON_WIDTH_OFFSET = 110.0f;
 constexpr int MOUSE_BUTTON_LEFT = 0;
 
-// Step used by the toolbar's -/+ editor-UI-scale buttons.
+// Step used by the menu bar's -/+ editor-UI-scale buttons.
 constexpr float UI_SCALE_STEP = 0.1f;
+constexpr float LANGUAGE_COMBO_WIDTH = 100.0f;
 
-namespace
-{
-// A toolbar button that opens and closes a tool window.
-void RenderWindowToggle(const char* label, bool& showWindow)
-{
-    ImGui::SameLine();
-    if (ImGui::Button(label))
-    {
-        showWindow = !showWindow;
-    }
-}
-} // namespace
+// The editor window; its id stays when its title changes.
+constexpr char EDITOR_WINDOW_NAME[] = "MU Editor###MuEditor";
 
 CMuEditorUI& CMuEditorUI::GetInstance()
 {
@@ -43,18 +39,24 @@ CMuEditorUI& CMuEditorUI::GetInstance()
     return instance;
 }
 
-void CMuEditorUI::RenderToolbar(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor,
-                                bool& showMapEditor, bool& showEffectBrowser, bool& showConsole)
+void CMuEditorUI::Render(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor,
+                         bool& showMapEditor, bool& showEffectBrowser, bool& showConsole)
 {
     if (editorEnabled)
     {
-        RenderToolbarFull(editorEnabled, showItemEditor, showSkillEditor, showDevEditor, showMapEditor,
-                          showEffectBrowser, showConsole);
+        RenderEditorWindow(editorEnabled, showItemEditor, showSkillEditor, showDevEditor, showMapEditor,
+                           showEffectBrowser, showConsole);
     }
     else
     {
         RenderToolbarOpen(editorEnabled);
     }
+}
+
+bool CMuEditorUI::IsOnOpenButton(float x, float y) const
+{
+    return x >= m_openButtonMinX && x <= m_openButtonMaxX && y >= m_openButtonMinY && y <= m_openButtonMaxY &&
+           m_openButtonMaxX > m_openButtonMinX;
 }
 
 void CMuEditorUI::RenderToolbarOpen(bool& editorEnabled)
@@ -67,15 +69,19 @@ void CMuEditorUI::RenderToolbarOpen(bool& editorEnabled)
     io.WantCaptureMouse = false;
     io.WantCaptureKeyboard = false;
 
+    // Along the top of the game window, also when the editor's windows can
+    // leave it.
     const float uiScale = g_MuEditorCore.GetUIScale();
-    ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x, TOOLBAR_HEIGHT * uiScale), ImGuiCond_Always);
-    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+    const ImGuiViewport* game = ImGui::GetMainViewport();
+    ImGui::SetNextWindowViewport(game->ID);
+    ImGui::SetNextWindowSize(ImVec2(game->Size.x, TOOLBAR_HEIGHT * uiScale), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(game->Pos, ImGuiCond_Always);
 
     // NoInputs prevents ImGui from capturing mouse/keyboard, allowing game cursor to work
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
         ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoInputs;
 
-    // Use same window background and border as Toolbar but fully transparent
+    // Fully transparent background and border: only the button shows
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.15f, 0.15f, 0.15f, 0.0f));
     ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
@@ -86,7 +92,7 @@ void CMuEditorUI::RenderToolbarOpen(bool& editorEnabled)
         ImGui::Spacing();
         ImGui::Indent(TOOLBAR_INDENT);
 
-        // Open button on the far right (same position as Close button)
+        // Open button on the far right
         ImGui::SameLine(ImGui::GetWindowWidth() - BUTTON_WIDTH_OFFSET * uiScale);
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.6f, 0.2f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.7f, 0.3f, 1.0f));
@@ -97,6 +103,10 @@ void CMuEditorUI::RenderToolbarOpen(bool& editorEnabled)
         // Get button rect for manual click detection
         ImVec2 buttonMin = ImGui::GetItemRectMin();
         ImVec2 buttonMax = ImGui::GetItemRectMax();
+        m_openButtonMinX = buttonMin.x;
+        m_openButtonMinY = buttonMin.y;
+        m_openButtonMaxX = buttonMax.x;
+        m_openButtonMaxY = buttonMax.y;
 
         ImGui::PopStyleColor(2);
 
@@ -132,115 +142,154 @@ void CMuEditorUI::RenderToolbarOpen(bool& editorEnabled)
     ImGui::PopStyleColor(2);
 }
 
-void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor,
-                                    bool& showDevEditor, bool& showMapEditor, bool& showEffectBrowser,
-                                    bool& showConsole)
+void CMuEditorUI::RenderEditorWindow(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor,
+                                     bool& showDevEditor, bool& showMapEditor, bool& showEffectBrowser,
+                                     bool& showConsole)
 {
-    const float uiScale = g_MuEditorCore.GetUIScale();
-    ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, TOOLBAR_HEIGHT * uiScale), ImGuiCond_Always);
-    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-
-    ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
-
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.15f, 0.15f, 0.15f, 0.95f));
-
-    if (ImGui::Begin("Toolbar", nullptr, flags))
+    // Only for its first appearance: no window and no imgui.ini entry yet.
+    if (ImGui::FindWindowByName(EDITOR_WINDOW_NAME) == nullptr)
     {
-        // Check if hovering this window
-        if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
-        {
-            g_MuEditorCore.SetHoveringUI(true);
-        }
-
-        ImGui::Spacing();
-        ImGui::Indent(10.0f);
-
-        ImGui::Text("MU Editor");
-        RenderWindowToggle("Item Editor", showItemEditor);
-        RenderWindowToggle("Skill Editor", showSkillEditor);
-        RenderWindowToggle("Dev Editor", showDevEditor);
-        RenderWindowToggle("Map Editor", showMapEditor);
-        RenderWindowToggle("Effect Browser", showEffectBrowser);
-
-        // Global editor UI scale (affects every MuEditor window, not just this one).
-        ImGui::SameLine();
-        if (ImGui::Button("-##uiscale"))
-            g_MuEditorCore.SetUIScale(g_MuEditorCore.GetUIScale() - UI_SCALE_STEP);
-        if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("Smaller editor UI");
-        ImGui::SameLine();
-        ImGui::Text("%d%%", (int)(g_MuEditorCore.GetUIScale() * 100.0f + 0.5f));
-        ImGui::SameLine();
-        if (ImGui::Button("+##uiscale"))
-            g_MuEditorCore.SetUIScale(g_MuEditorCore.GetUIScale() + UI_SCALE_STEP);
-        if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("Bigger editor UI");
-
-        // Console toggle
-        ImGui::SameLine();
-        if (ImGui::Checkbox("Console", &showConsole))
-        {
-            // Toggle is handled by reference
-        }
-
-        // Language selector
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(100.0f);
-
-        const char* currentLocale = I18N::GetCurrentLocale();
-        std::span<const char* const> availableLocales = I18N::GetAvailableLocales();
-
-        const char* currentLanguageName = I18N::GetLanguageDisplayName(currentLocale);
-
-        if (ImGui::BeginCombo("##Language", currentLanguageName))
-        {
-            for (size_t i = 0; i < availableLocales.size(); i++)
-            {
-                const char* locale = availableLocales[i];
-                const bool isSelected = (std::strcmp(locale, currentLocale) == 0);
-                const char* displayName = I18N::GetLanguageDisplayName(locale);
-
-                if (ImGui::Selectable(displayName, isSelected))
-                {
-                    I18N::SetLocale(locale);
-                    // Persist to GameConfig.UILocale so the game options
-                    // window and editor stay in sync across restarts.
-                    std::wstring wide(locale, locale + std::strlen(locale));
-                    GameConfig::GetInstance().SetUILocale(wide);
-                    GameConfig::GetInstance().Save();
-                    g_MuEditorConsoleUI.LogEditor(std::string("Language switched to: ") + displayName);
-                }
-
-                if (isSelected)
-                {
-                    ImGui::SetItemDefaultFocus();
-                }
-            }
-            ImGui::EndCombo();
-        }
-
-        // Close button on the far right
-        ImGui::SameLine(ImGui::GetWindowWidth() - BUTTON_WIDTH_OFFSET * uiScale);
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.3f, 0.3f, 1.0f));
-        if (ImGui::Button("Close Editor"))
-        {
-            editorEnabled = false;
-        }
-        ImGui::PopStyleColor(2);
-
-        ImGui::Unindent(10.0f);
+        const MuEditor::Layout::WindowRect first = MuEditor::Layout::FirstEditorWindowRect(g_MuEditorCore.GetUIScale());
+        ImGui::SetNextWindowPos(first.position, ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(first.size, ImGuiCond_FirstUseEver);
     }
+    // An OS window of its own also where it overlaps the game window, so it
+    // never merges into the game's frame. It appears without taking the
+    // keyboard from the game.
+    ImGuiWindowClass ownWindow;
+    ownWindow.ViewportFlagsOverrideSet = ImGuiViewportFlags_NoAutoMerge | ImGuiViewportFlags_NoFocusOnAppearing;
+    ImGui::SetNextWindowClass(&ownWindow);
+
+    // In an OS window of its own the OS title bar and frame replace ImGui's
+    // title bar, moving and sizing.
+    const bool ownOsWindow = (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) != 0;
+    const ImGuiWindowFlags osFrame =
+        ownOsWindow ? ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize
+                    : ImGuiWindowFlags_None;
+    bool open = true;
+    ImGui::Begin(EDITOR_WINDOW_NAME, &open,
+                 ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoCollapse | osFrame);
+    // Its menu bar, dock space and docked windows count as the editor, also
+    // while one of their widgets is held.
+    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_DockHierarchy |
+                               ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
+    {
+        g_MuEditorCore.SetHoveringUI(true);
+    }
+    if (ImGui::BeginMenuBar())
+    {
+        RenderWindowsMenu(showItemEditor, showSkillEditor, showDevEditor, showMapEditor, showEffectBrowser, showConsole,
+                          MuEditor::PlatformWindows::WindowOf(ImGui::GetWindowViewport()));
+        RenderUIScale();
+        RenderLanguageSelector();
+        RenderCloseButton(editorEnabled);
+        ImGui::EndMenuBar();
+    }
+    // Also while the window is hidden: that keeps the tool windows docked.
+    MuEditor::Layout::SubmitDockSpace(m_bResetLayout);
+    m_bResetLayout = false;
     ImGui::End();
-    ImGui::PopStyleColor();
+
+    if (!open)
+    {
+        editorEnabled = false;
+    }
 }
 
-void CMuEditorUI::RenderCenterViewport()
+void CMuEditorUI::RenderWindowsMenu(bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor,
+                                    bool& showMapEditor, bool& showEffectBrowser, bool& showConsole,
+                                    SDL_Window* editorOsWindow)
 {
-    // The game renders automatically in the full window
-    // The ImGui toolbar and console are overlays on top
-    // No need to render anything here
+    if (!ImGui::BeginMenu("Windows"))
+    {
+        return;
+    }
+    ImGui::MenuItem("Item Editor", nullptr, &showItemEditor);
+    ImGui::MenuItem("Skill Editor", nullptr, &showSkillEditor);
+    ImGui::MenuItem("Dev Editor", nullptr, &showDevEditor);
+    ImGui::MenuItem("Map Editor", nullptr, &showMapEditor);
+    ImGui::MenuItem("Effect Browser", nullptr, &showEffectBrowser);
+    ImGui::MenuItem("Console", nullptr, &showConsole);
+    ImGui::Separator();
+    if (ImGui::MenuItem("Reset Layout"))
+    {
+        m_bResetLayout = true;
+    }
+    // The editor window full screen (F11 in any of the editor's own windows);
+    // not while it is inside the game window.
+    if (ImGui::MenuItem("Fullscreen", "F11", MuEditor::PlatformWindows::IsFullscreen(editorOsWindow),
+                        editorOsWindow != nullptr))
+    {
+        MuEditor::PlatformWindows::ToggleFullscreen(editorOsWindow);
+    }
+    ImGui::EndMenu();
+}
+
+void CMuEditorUI::RenderUIScale()
+{
+    // Global editor UI scale (affects every MuEditor window, not just this one).
+    if (ImGui::Button("-##uiscale"))
+        g_MuEditorCore.SetUIScale(g_MuEditorCore.GetUIScale() - UI_SCALE_STEP);
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Smaller editor UI");
+    ImGui::Text("%d%%", (int)(g_MuEditorCore.GetUIScale() * 100.0f + 0.5f));
+    if (ImGui::Button("+##uiscale"))
+        g_MuEditorCore.SetUIScale(g_MuEditorCore.GetUIScale() + UI_SCALE_STEP);
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Bigger editor UI");
+}
+
+void CMuEditorUI::RenderLanguageSelector()
+{
+    ImGui::SetNextItemWidth(LANGUAGE_COMBO_WIDTH * g_MuEditorCore.GetUIScale());
+
+    const char* currentLocale = I18N::GetCurrentLocale();
+    std::span<const char* const> availableLocales = I18N::GetAvailableLocales();
+
+    const char* currentLanguageName = I18N::GetLanguageDisplayName(currentLocale);
+
+    if (!ImGui::BeginCombo("##Language", currentLanguageName))
+    {
+        return;
+    }
+    for (size_t i = 0; i < availableLocales.size(); i++)
+    {
+        const char* locale = availableLocales[i];
+        const bool isSelected = (std::strcmp(locale, currentLocale) == 0);
+        const char* displayName = I18N::GetLanguageDisplayName(locale);
+
+        if (ImGui::Selectable(displayName, isSelected))
+        {
+            I18N::SetLocale(locale);
+            // Persist to GameConfig.UILocale so the game options
+            // window and editor stay in sync across restarts.
+            std::wstring wide(locale, locale + std::strlen(locale));
+            GameConfig::GetInstance().SetUILocale(wide);
+            GameConfig::GetInstance().Save();
+            g_MuEditorConsoleUI.LogEditor(std::string("Language switched to: ") + displayName);
+        }
+
+        if (isSelected)
+        {
+            ImGui::SetItemDefaultFocus();
+        }
+    }
+    ImGui::EndCombo();
+}
+
+void CMuEditorUI::RenderCloseButton(bool& editorEnabled)
+{
+    // On the far right of the menu bar, but after the other items in a narrow
+    // window
+    const float rightAligned = ImGui::GetWindowWidth() - BUTTON_WIDTH_OFFSET * g_MuEditorCore.GetUIScale();
+    ImGui::SameLine(std::max(rightAligned, ImGui::GetCursorPosX()));
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.3f, 0.3f, 1.0f));
+    if (ImGui::Button("Close Editor"))
+    {
+        editorEnabled = false;
+    }
+    ImGui::PopStyleColor(2);
 }
 
 #endif // _EDITOR

@@ -2,6 +2,7 @@
 
 // Include CameraState before compatibility layer
 #include "Camera/CameraState.h"
+#include "Render/Renderer/Overlay2DRecorder.h"
 
 extern int OpenglWindowWidth;
 extern int OpenglWindowHeight;
@@ -53,7 +54,7 @@ void DisableTexture(bool AlphaTest = false);
 void DisableAlphaBlend();
 void EnableLightMap();
 void EnableAlphaTest(bool DepthMake = true);
-// Sets glAlphaFunc(GL_GREATER, ref) and mirrors it to the shader-side alpha-test ref (DXP-01).
+// Sets glAlphaFunc(GL_GREATER, ref) and mirrors it to the shader-side alpha-test ref.
 void SetAlphaFuncRef(float ref);
 void EnableAlphaBlend();
 void EnableAlphaBlendMinus();
@@ -64,7 +65,7 @@ void BindTexture(int tex);
 void BindTextureStream(int tex);
 void EndTextureStream();
 
-// DXP-10 dumb single-call state wrappers. Unlike the Enable/DisableAlphaBlend family above,
+// Dumb single-call state wrappers. Unlike the Enable/DisableAlphaBlend family above,
 // these do NOT cache state or bundle other toggles -- each is the exact single GL call a
 // call site outside Render/ used to make directly, same guard, nothing added or removed.
 // NOT interchangeable with the smart bundled wrappers of the same GL enum (e.g. DisableTexture()
@@ -90,6 +91,9 @@ float ConvertPositionX(float x);
 float ConvertPositionY(float y);
 void BeginOpengl(int x = 0, int y = 0, int Width = REFERENCE_WIDTH, int Height = REFERENCE_HEIGHT);
 void BeginOpenglPhysical(int x, int y, int width, int height);
+// BeginOpenglPhysical() without the viewport, for a render target's drawer: the capture brings its
+// own viewport, the whole target.
+void BeginOpenglForTarget(int width, int height);
 void EndOpengl();
 
 // Perspective setup for item/3D-UI rendering. Sets g_Camera perspective state
@@ -127,13 +131,14 @@ void SetRenderColor(BYTE red, BYTE green, BYTE blue, BYTE alpha);
 void RenderColor(float x, float y, float Width, float Height, float Alpha = 0.f, int Flag = 0);
 void EndRenderColor();
 void RenderColorQuadARGB(float x, float y, float Width, float Height, unsigned int argbColor);
+// The blend state a 2D primitive drawn now would be drawn under, for Overlay2DRecorder records.
+Render::Renderer::RecordedBlend CurrentRecordedBlend();
 void RenderColorLineARGB(float x1, float y1, float x2, float y2, float thickness, unsigned int argbColor);
 void RenderBitmap(int Texture, float x, float y, float Width, float Height, float u = 0.f, float v = 0.f, float uWidth = 1.f, float vHeight = 1.f, bool Scale = true, bool StartScale = true, float Alpha = 0.f);
 void RenderColorBitmap(int Texture, float x, float y, float Width, float Height, float u = 0.f, float v = 0.f, float uWidth = 1.f, float vHeight = 1.f, unsigned int color = 0xffffffff);
 void RenderBitmapRotate(int Texture, float x, float y, float Width, float Height, float Angle, float u = 0.f,
     float v = 0.f, float uWidth = 1.f, float vHeight = 1.f, unsigned int color = 0xFFFFFFFFu);
 void RenderBitRotate(int Texture, float x, float y, float Width, float Height, float Rotate);
-void RenderPointRotate(int Texture, float ix, float iy, float iWidth, float iHeight, float x, float y, float Width, float Height, float Rotate, float Rotate_Loc, float uWidth, float vHeight, int Num = -1);
 void RenderBitmapLocalRotate(int Texture, float x, float y, float Width, float Height, float Rotate, float u = 0.f, float v = 0.f, float uWidth = 1.f, float vHeight = 1.f);
 void RenderBitmapAlpha(int Texture, float sx, float sy, float Width, float Height);
 void RenderBitmapUV(int Texture, float x, float y, float Width, float Height, float u, float v, float uWidth,

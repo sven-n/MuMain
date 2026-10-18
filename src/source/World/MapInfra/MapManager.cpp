@@ -1,6 +1,4 @@
-﻿// MapManager.cpp: implementation of the CMapManager class.
-//////////////////////////////////////////////////////////////////////
-
+﻿
 #include "stdafx.h"
 #include "World/MapInfra/MapManager.h"
 #include "Camera/CameraMove.h"
@@ -8,7 +6,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Data/DataHandler/LoadData.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -1122,7 +1120,7 @@ void CMapManager::Load() // OK
 
         mu_swprintf(DirName, L"Data\\Object%d\\", iMapWorld);
         for (i = MODEL_WORLD_OBJECT; i < MAX_WORLD_OBJECTS; i++)
-            gLoadData.AccessModel(i, DirName, L"Object", i + 1);
+            gLoadData.AccessModel(i, DirName, L"Object", i + 1, true);
 
         mu_swprintf(DirName, L"Object%d\\", iMapWorld);
         for (i = MODEL_WORLD_OBJECT; i < MAX_WORLD_OBJECTS; i++)
@@ -1508,6 +1506,8 @@ void CMapManager::LoadWorld(int Map)
         g_pNewUIMiniMap->UnloadImages();
         g_pNewUIMiniMap->LoadImages(WorldName);
     }
+
+    Bitmaps.LogTextureFilteringSummary("world loaded");
 }
 
 void CMapManager::DeleteObjects()

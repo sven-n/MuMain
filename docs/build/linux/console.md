@@ -1,7 +1,7 @@
 # Linux - Terminal
 
 Native 64-bit Linux build from the command line. Produces a full, playable
-client: the engine, the `linux-x64` network library, SDL/OpenGL rendering.
+client: the engine, the `linux-x64` network library, SDL GPU/Vulkan rendering.
 
 See [the build guide](../README.md) for shared concepts (editor flag, the
 network library, output layout).
@@ -113,6 +113,11 @@ MESA_LOADER_DRIVER_OVERRIDE=d3d12 ./Main
 
 ### Wayland
 
+Editor builds (`linux-x64-mueditor`) run on X11, through XWayland on a Wayland
+desktop, so that the editor's windows can leave the game window: Wayland does
+not let them be placed. `SDL_VIDEO_DRIVER=wayland ./Main` runs them on Wayland,
+with the editor inside the game window. Player builds use SDL's own choice.
+
 Wayland compositors decide where windows go, so changing the resolution in
 windowed mode resizes the client but does not re-center it: drag it where you
 want it, or restart the client. The resolution is already saved when you apply
@@ -126,6 +131,9 @@ reverted size.
 ## Reporting a Wayland problem
 
 From the repository root, run `scripts/wayland-diag.sh --timeout 60 --`.
+It runs the player build with SDL's own choice of video driver. An editor build
+(`--client out/build/linux-x64-mueditor/src/Release/Main`) prefers X11; run the
+script with `SDL_VIDEO_DRIVER=wayland` set to diagnose it on Wayland.
 It writes a sanitized `summary.txt` under `diag/`; paste that into the report
 and attach only relevant raw-log excerpts. A pre-existing `MuError.log` is
 copied into the bundle as `MuError.log.previous` before the fresh run. `--tar`

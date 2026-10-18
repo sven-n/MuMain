@@ -1,0 +1,60 @@
+/* The cash shop's one-price package dialog (CMsgBoxIGSBuyPackageItem) on Ingame_pack_back01:
+   the title, the package's item, its name in gold, the scrolling description, the price and the
+   three buttons. Reference px under the dialog's root transform. */
+
+/* Centred on the cash shop's 640 x 429 area of the stage, 198 x 291. */
+#stage { pointer-events: none; }
+#panel {
+	position: absolute;
+	left: 221px;
+	top: 69px;
+	width: 198px;
+	height: 291px;
+	font-family: "token(font-body)";
+	pointer-events: none;
+}
+
+@spritesheet igs-pack-back-sheet { src: "../../../InGameShop/Ingame_pack_back01.tga"; igs-pack-back: 0px 0px 198px 291px; }
+.igs-dialog-frame { position: absolute; left: 0; top: 0; width: 198px; height: 291px; decorator: image(igs-pack-back); }
+#igs_item { position: absolute; left: 0; top: 0; width: 198px; height: 291px; pointer-events: none; }
+/* Where C++ draws the live 3D item (the original's 96x60 at 50,34). */
+#igs_item_box { position: absolute; left: 50px; top: 34px; width: 96px; height: 60px; pointer-events: none; }
+
+.igs-dialog-line { position: absolute; left: 0; width: 198px; height: 1px; font-weight: bold; }
+#igs_title { top: 10px; color: #ffffff; }
+#igs_name { top: 100px; color: rgb(247, 186, 0); }
+#igs_price { right: 14px; top: 229px; color: rgb(255, 238, 161); }
+
+/* Native placed the box at (14, 216) in left-down coordinates, 175 x 95 -- so its top edge is
+   216 - 95. The height here is the 7 rows it actually drew. */
+#igs_package_info {
+	position: absolute;
+	left: 14px;
+	top: 121px;
+	transform-origin: left top;
+	overflow: hidden scroll;
+	pointer-events: auto;
+}
+/* display: block is explicit: a data-for <div> is inline without it in this build and every line
+   lands on the same row. The 3-unit inset is RenderDataLine()'s own m_iPos_x + 3. */
+.igs-line {
+	position: relative;
+	display: block;
+	padding-left: 3px;
+	white-space: nowrap;
+	color: rgb(255, 230, 210);
+}
+
+/* Buy, Gift and Cancel from (18, 253), 56 apart; the labels sit a unit left of centre. */
+.igs-dialog-buttons { position: absolute; left: 18px; top: 253px; display: flex; pointer-events: none; }
+.igs-dialog-buttons .igs-btn { position: relative; flex: 0 0 52px; margin-right: 4px; }
+.igs-dialog-buttons .igs-btn-label { margin-left: -1001px; }
+.igs-dialog-buttons .igs-btn:active .igs-btn-label { margin-left: -1000px; }
+
+/* Developer builds (FOR_WORK): the package's sequence numbers in red right of the dialog. */
+.igs-debug { position: absolute; left: 198px; top: 10px; color: rgb(255, 0, 0); }
+.igs-debug-line { position: relative; display: block; height: 10px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#igs_package_info { width: calc(175px * var(--root-scale)); height: calc(91px * var(--root-scale)); }
+.igs-line { width: calc(160px * var(--root-scale)); height: calc(13px * var(--root-scale)); }

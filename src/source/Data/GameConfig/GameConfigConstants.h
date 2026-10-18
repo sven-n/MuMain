@@ -37,15 +37,53 @@ namespace CfgKeys
     // UI
     inline constexpr wchar_t CfgKeyUILocale[] = L"Locale";
     inline constexpr wchar_t CfgKeyFont[]     = L"Font";
+    // Active RmlUi theme name ("legacy"/"modern"), Data/Interface/RmlUi/themes/<name>/. Not yet
+    // a full runtime hot-swap -- read once at startup. See UI::RmlBridge::RmlTheme.
+    inline constexpr wchar_t CfgKeyRmlTheme[] = L"RmlTheme";
+    // Global RmlUi UI scale, as a percentage (100 = normal). Drives
+    // Rml::Context::SetDensityIndependentPixelRatio(). Only RCSS authored in `dp` units responds
+    // to this; existing `px`-authored windows are unaffected until retrofitted.
+    inline constexpr wchar_t CfgKeyUIScalePercent[] = L"UIScalePercent";
+    // Animates characters on worker threads when many are in view. Off unless set here or
+    // started with --enable-taskpool; manual config.ini edit only.
+    inline constexpr wchar_t CfgKeyEnableAnimationTaskPool[] = L"EnableAnimationTaskPool";
 
     // Camera
     inline constexpr wchar_t CfgKeyZoom[] = L"Zoom";
 
     // Render
-    // DXP-08: Core Profile GL context flip. 0 = compatibility (rollback), 1 = core.
-    inline constexpr wchar_t CfgKeyCoreProfile[] = L"CoreProfile";
     inline constexpr wchar_t CfgKeySortParticleDraws[] = L"SortParticleDraws";
     inline constexpr wchar_t CfgKeyVSync[] = L"VSync";
+    // The look preset: Classic or Enhanced (texture filtering, Enhanced lighting,
+    // dynamic model lights, the light mood at full strength and post-processing).
+    // A missing or invalid value is the default.
+    inline constexpr wchar_t CfgKeyLook[] = L"Look";
+    // Anisotropic filtering of every texture with mip levels: world textures in the Enhanced
+    // look, upscaled textures in both looks. 1 is off.
+    inline constexpr wchar_t CfgKeyAnisotropy[] = L"Anisotropy";
+    // Multisample anti-aliasing of the Enhanced look: 0 (off), 2, 4 or 8 samples per pixel.
+    inline constexpr wchar_t CfgKeyAntialiasing[] = L"Antialiasing";
+    // The Enhanced look's features the player keeps on; Classic ignores them.
+    inline constexpr wchar_t CfgKeyEnhancedLighting[] = L"EnhancedLighting";
+    inline constexpr wchar_t CfgKeyDynamicLights[] = L"DynamicLights";
+    inline constexpr wchar_t CfgKeyLightMood[] = L"LightMood";
+    inline constexpr wchar_t CfgKeyPostProcessing[] = L"PostProcessing";
+
+    inline constexpr wchar_t CfgKeyRenderBackend[] = L"Backend";
+    // DXP-23's per-system effect-cost toggles (MainScene.h's SetDisableEffects/SetDisableParticles/
+    // SetDisableSkillEffectModels/SetDisableBoids/SetDisableWingShadow), originally console-only
+    // ($effects ...) diagnostics -- promoted to persisted, in-game-options-exposed settings since
+    // they're functionally just "reduce rendering cost for a low-end PC."
+    inline constexpr wchar_t CfgKeyDisableEffects[] = L"DisableEffects";
+    inline constexpr wchar_t CfgKeyDisableParticles[] = L"DisableParticles";
+    inline constexpr wchar_t CfgKeyDisableSkillEffectModels[] = L"DisableSkillEffectModels";
+    inline constexpr wchar_t CfgKeyDisableBoids[] = L"DisableBoids";
+    inline constexpr wchar_t CfgKeyDisableWingShadow[] = L"DisableWingShadow";
+    // Every body shadow: characters, their wings and pets, objects and wildlife.
+    inline constexpr wchar_t CfgKeyDisableBodyShadows[] = L"DisableBodyShadows";
+    // User-chosen FPS cap when VSync is off; -1 = uncapped. Same promotion story as the toggles
+    // above, this time for the console-only `$fps <N>` diagnostic.
+    inline constexpr wchar_t CfgKeyFpsCap[] = L"FpsCap";
 }
 
 namespace CfgDefaults
@@ -76,10 +114,50 @@ namespace CfgDefaults
     // the user picks a font. Any value is passed through as the GDI face name.
     inline constexpr wchar_t CfgDefaultFont[] = L"";
 
-    // Legacy config compatibility only. SDL GPU ignores this key and default.
-    inline constexpr bool CfgDefaultCoreProfile = true;
+    // "legacy" reproduces the pre-RmlUi look with programmatic RCSS and no sprite dependency.
+    // Defaults to legacy so nothing changes for existing players until they opt in.
+    inline constexpr wchar_t CfgDefaultRmlTheme[] = L"legacy";
+
+    // 100% = unscaled. The options window's UI tab offers a fixed ladder of values
+    // (UI::Options::UIScalePercentChoices()); a hand-edited config.ini may hold anything in
+    // [CfgMinUIScalePercent, CfgMaxUIScalePercent].
+    inline constexpr int CfgDefaultUIScalePercent = 100;
+
+    // Bounds GameConfig clamps to, on load and on set. Below 75% text gets too small to read;
+    // above 150% a docked panel no longer fits a small window.
+    inline constexpr int CfgMinUIScalePercent = 75;
+    inline constexpr int CfgMaxUIScalePercent = 150;
+
+    inline constexpr bool CfgDefaultEnableAnimationTaskPool = false;
 
     // Opt-in until real effects have been visually checked on target hardware.
     inline constexpr bool CfgDefaultSortParticleDraws = false;
     inline constexpr bool CfgDefaultVSync = true;
+
+    // The look a missing or invalid [Render] Look stands for.
+    inline constexpr wchar_t CfgDefaultLook[] = L"Classic";
+    // 8x anisotropy on textures with mip levels.
+    inline constexpr int CfgDefaultAnisotropy = 8;
+
+    // The samples the Enhanced look renders with (Classic renders without); a
+    // requested count is lowered to what the GPU supports.
+    inline constexpr int CfgDefaultAntialiasing = 4;
+    inline constexpr bool CfgDefaultEnhancedLighting = true;
+    inline constexpr bool CfgDefaultDynamicLights = true;
+    inline constexpr bool CfgDefaultLightMood = true;
+    inline constexpr bool CfgDefaultPostProcessing = true;
+
+    inline constexpr bool CfgDefaultDisableEffects = false;
+    inline constexpr bool CfgDefaultDisableParticles = false;
+    inline constexpr bool CfgDefaultDisableSkillEffectModels = false;
+    inline constexpr bool CfgDefaultDisableBoids = false;
+    inline constexpr bool CfgDefaultDisableWingShadow = false;
+    inline constexpr bool CfgDefaultDisableBodyShadows = false;
+    inline constexpr int CfgDefaultFpsCap = -1;  // Uncapped
+
+    // "default" = this app's own platform-aware pick (prefers Vulkan on Windows to avoid
+    // D3D12's vsync-cap bug; SDL's own auto-pick elsewhere). Other accepted values:
+    // "vulkan", "direct3d12" (alias "d3d12"), "metal" -- forces that SDL_gpu driver on any
+    // platform, falling back to auto-pick with a warning log if it's unavailable.
+    inline constexpr wchar_t CfgDefaultRenderBackend[] = L"default";
 }

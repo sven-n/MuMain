@@ -2,7 +2,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Placement/WindowPlacement.h"
+#include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Models/ZzzBMD.h"
@@ -36,19 +37,24 @@
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "GameLogic/Items/ItemLevelBonus.h"
 #include "Render/Items/ItemDisplay.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "UI/Scaling/UITransform.h"
 #include "GameLogic/Items/ShopRestrictions.h"
 #include "GameLogic/Items/TradeRestrictions.h"
 #include "GameLogic/Items/MixMgr.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
-#include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
-#include "UI/NewUI/Inventory/NewUIInventoryCtrl.h"
+#include "UI/Dialogs/CommonMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
+#include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/Inventory/InventoryCtrl.h"
+#include "UI/Tooltip/LegacyTextListTooltip.h"
+#include "UI/Scaling/UITransform.h"
+#include "UI/Inventory/MyShopInventory.h" // ShowPersonalShopItemValueDialog
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "Network/Server/SocketSystem.h"
 #include "World/MapInfra/PortalMgr.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Network/Server/ServerListManager.h"
 #include <algorithm>
 #include <time.h>
@@ -59,9 +65,9 @@
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Camera/CameraProjection.h"
+#include "Render/Text/CUIRenderText.h"
 
 extern int g_iChatInputType;
-extern CUIGuildListBox* g_pGuildListBox;
 
 int			g_nTaxRate = 0;
 int			g_nChaosTaxRate = 0;
@@ -89,7 +95,6 @@ ITEM g_PersonalShopInven[MAX_PERSONALSHOP_INVEN];
 ITEM g_PersonalShopBackup[MAX_PERSONALSHOP_INVEN];
 bool g_bEnablePersonalShop = false;
 int g_iPShopWndType = PSHOPWNDTYPE_NONE;
-POINT g_ptPersonalShop = { 0, 0 };
 int g_iPersonalShopMsgType = 0;
 wchar_t g_szPersonalShopTitle[MAX_SHOPTITLE + 1] = { 0, };
 
@@ -401,7 +406,7 @@ void SendRequestUse(int Index, int Target, bool addPoints)
 {
     if (!IsCanUseItem())
     {
-        g_pSystemLogBox->AddText(I18N::Game::YouCannotUseYourItemsWhileUsingTheVaultOrWhileTrading, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCannotUseYourItemsWhileUsingTheVaultOrWhileTrading, mu::ui::window::TYPE_ERROR_MESSAGE);
         return;
     }
     if (EnableUse > 0)
@@ -457,7 +462,7 @@ bool SendRequestEquipmentItem(STORAGE_TYPE iSrcType, int iSrcIndex, ITEM* pItem,
 
 bool IsCanUseItem()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE) || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE))
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_STORAGE) || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_TRADE))
     {
         return false;
     }
@@ -469,7 +474,7 @@ bool IsCanUseItem()
 
 bool IsCanTrade()
 {
-    if (g_pUIManager->IsOpen(INTERFACE_PERSONALSHOPSALE) || g_pUIManager->IsOpen(INTERFACE_PERSONALSHOPPURCHASE))
+    if (g_pUIManager->IsOpen(MUTEX_PERSONALSHOPSALE) || g_pUIManager->IsOpen(MUTEX_PERSONALSHOPPURCHASE))
     {
         return false;
     }
@@ -723,115 +728,51 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
     }
 }
 
-const int iMaxLevel = 15;
-const int iMaxColumn = 17;
-int g_iCurrentItem = -1;
-int g_iItemInfo[iMaxLevel + 1][iMaxColumn];
+int g_iItemInfo[iMaxLevel + 1][_COLUMN_TYPE_COUNT];
 
-void RenderHelpLine(int iColumnType, const wchar_t* pPrintStyle, int& TabSpace, const wchar_t* pGapText, int Pos_y, int iType)
+namespace
 {
-    int iCurrMaxLevel = iMaxLevel;
-
-    if (iType == 5)
-        iCurrMaxLevel = 0;
-
-    for (int Level = 0; Level <= iCurrMaxLevel; ++Level)
+// The column the magic power goes into: Curse for summoner books, Attack for sceptres, WIZDmg for
+// the other items.
+int GetItemInfoMagicColumn(int itemType)
+{
+    if (GameLogic::Items::IsSummonerBookType(itemType))
     {
-        mu_swprintf(TextList[TextNum], pPrintStyle, g_iItemInfo[Level][iColumnType]);
-        if (g_iItemInfo[Level][_COLUMN_TYPE_CAN_EQUIP] == TRUE)
-        {
-            TextListColor[Level] = TEXT_COLOR_WHITE;
-        }
-        else
-        {
-            TextListColor[Level] = TEXT_COLOR_RED;
-        }
-        TextBold[Level] = false;
-        ++TextNum;
+        return _COLUMN_TYPE_CURSE;
     }
-
-    SIZE TextSize;
-    RenderTipTextList(TabSpace, Pos_y, TextNum, 0, RT3_SORT_CENTER, FALSE);
-
-    if (pGapText == NULL)
+    if (IsCepterItem(itemType))
     {
-        TextSize = g_pRenderText->MeasureText(TextList[TextNum - 1], lstrlen(TextList[TextNum - 1]));
+        return _COLUMN_TYPE_PET_ATTACK;
     }
-    else
-    {
-        TextSize = g_pRenderText->MeasureText(pGapText, wcslen(pGapText));
-    }
-    TabSpace += TextSize.cx;
-    if (iType == 6)
-    {
-        TabSpace += 5;
-    }
-    TextNum -= iCurrMaxLevel + 1;
+    return _COLUMN_TYPE_MAGIC;
 }
 
-void RenderHelpCategory(int iColumnType, int Pos_x, int Pos_y)
+// Whether the hero reaches every requirement of a row: the window shows the row white, else red.
+bool CanEquipItemInfoRow(const int (&row)[_COLUMN_TYPE_COUNT], const ItemInfoHeroStats& hero)
 {
-    const wchar_t* pText = NULL;
+    return row[_COLUMN_TYPE_REQSTR] <= hero.strength && row[_COLUMN_TYPE_REQDEX] <= hero.dexterity &&
+           row[_COLUMN_TYPE_REQENG] <= hero.energy && row[_COLUMN_TYPE_REQVIT] <= hero.vitality &&
+           row[_COLUMN_TYPE_REQCHA] <= hero.charisma && row[_COLUMN_TYPE_REQNLV] <= hero.level;
+}
+} // namespace
 
-    switch (iColumnType)
-    {
-    case _COLUMN_TYPE_LEVEL:
-        pText = I18N::Game::LV;
-        break;
-    case _COLUMN_TYPE_ATTMIN: case _COLUMN_TYPE_ATTMAX:
-        pText = I18N::Game::ATKDmg;
-        break;
-    case _COLUMN_TYPE_MAGIC:
-        pText = I18N::Game::WIZDmg;
-        break;
-    case _COLUMN_TYPE_CURSE:
-        pText = I18N::Game::Curse;
-        break;
-    case _COLUMN_TYPE_PET_ATTACK:
-        pText = I18N::Game::Attack;
-        break;
-    case _COLUMN_TYPE_DEFENCE:
-        pText = I18N::Game::DEF;
-        break;
-    case _COLUMN_TYPE_DEFRATE:
-        pText = I18N::Game::DEFRate;
-        break;
-    case _COLUMN_TYPE_REQSTR:
-        pText = I18N::Game::STR;
-        break;
-    case _COLUMN_TYPE_REQDEX:
-        pText = I18N::Game::AGI;
-        break;
-    case _COLUMN_TYPE_REQENG:
-        pText = I18N::Game::ENG;
-        break;
-    case _COLUMN_TYPE_REQCHA:
-        pText = I18N::Game::Command;
-        break;
-    case _COLUMN_TYPE_REQVIT:
-        pText = I18N::Game::STA;
-        break;
-    case _COLUMN_TYPE_REQNLV:
-        pText = I18N::Game::ReqLV;
-        break;
-    default:
-        break;
-    }
-    mu_swprintf(TextList[TextNum], pText);
-    TextListColor[TextNum] = TEXT_COLOR_BLUE;
-    TextNum++;
-    RenderTipTextList(Pos_x, Pos_y, TextNum, 0, RT3_SORT_RIGHT, FALSE);
-    TextNum = 0;
+ItemInfoHeroStats GetItemInfoHeroStats()
+{
+    return {CharacterAttribute->Level,
+            static_cast<WORD>(CharacterAttribute->Strength + CharacterAttribute->AddStrength),
+            static_cast<WORD>(CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity),
+            static_cast<WORD>(CharacterAttribute->Energy + CharacterAttribute->AddEnergy),
+            static_cast<WORD>(CharacterAttribute->Vitality + CharacterAttribute->AddVitality),
+            static_cast<WORD>(CharacterAttribute->Charisma + CharacterAttribute->AddCharisma)};
 }
 
+// Not cached per item: the levels the hero can equip follow the hero's level and stats, and the
+// values follow the item editor's changes.
 void ComputeItemInfo(int iHelpItem)
 {
-    if (g_iCurrentItem == iHelpItem)
-        return;
-    else
-        g_iCurrentItem = iHelpItem;
-
-    ITEM_ATTRIBUTE* p = &ItemAttribute[ItemHelp];
+    ITEM_ATTRIBUTE* p = &ItemAttribute[iHelpItem];
+    const int magicColumn = GetItemInfoMagicColumn(iHelpItem);
+    const ItemInfoHeroStats hero = GetItemInfoHeroStats();
 
     for (int Level = 0; Level <= iMaxLevel; Level++)
     {
@@ -849,49 +790,19 @@ void ComputeItemInfo(int iHelpItem)
 
         if (DamageMin > 0)
         {
-            DamageMin += (std::min<int>(9, Level) * 3);
-            switch (Level - 9)
-            {
-            case 6: DamageMin += 9; break;	// +15
-            case 5: DamageMin += 8; break;	// +14
-            case 4: DamageMin += 7; break;	// +13
-            case 3: DamageMin += 6; break;	// +12
-            case 2: DamageMin += 5; break;	// +11
-            case 1: DamageMin += 4; break;	// +10
-            default: break;
-            };
+            DamageMin += GameLogic::Items::GetItemLevelBonus(Level);
         }
         if (DamageMax > 0)
         {
-            DamageMax += (std::min<int>(9, Level) * 3);
-            switch (Level - 9)
-            {
-            case 6: DamageMax += 9; break;	// +15
-            case 5: DamageMax += 8; break;	// +14
-            case 4: DamageMax += 7; break;	// +13
-            case 3: DamageMax += 6; break;	// +12
-            case 2: DamageMax += 5; break;	// +11
-            case 1: DamageMax += 4; break;	// +10
-            default: break;
-            };
+            DamageMax += GameLogic::Items::GetItemLevelBonus(Level);
         }
 
         if (Magic > 0)
         {
-            Magic += (std::min<int>(9, Level) * 3);	// ~ +9
-            switch (Level - 9)
-            {
-            case 6: Magic += 9; break;		// +15
-            case 5: Magic += 8; break;		// +14
-            case 4: Magic += 7; break;	    // +13
-            case 3: Magic += 6; break;		// +12
-            case 2: Magic += 5; break;		// +11
-            case 1: Magic += 4; break;		// +10
-            default: break;
-            };
+            Magic += GameLogic::Items::GetItemLevelBonus(Level);
             Magic /= 2;
 
-            if (IsCepterItem(ItemHelp) == false)
+            if (IsCepterItem(iHelpItem) == false)
             {
                 Magic += Level * 2;
             }
@@ -899,38 +810,18 @@ void ComputeItemInfo(int iHelpItem)
 
         if (Defense > 0)
         {
-            if (ItemHelp >= ITEM_SHIELD && ItemHelp < ITEM_SHIELD + MAX_ITEM_INDEX)
+            if (iHelpItem >= ITEM_SHIELD && iHelpItem < ITEM_SHIELD + MAX_ITEM_INDEX)
             {
                 Defense += Level;
             }
             else
             {
-                Defense += (std::min<int>(9, Level) * 3);	// ~ +9
-                switch (Level - 9)
-                {
-                case 6: Defense += 9; break;	// +15
-                case 5: Defense += 8; break;	// +14
-                case 4: Defense += 7; break;	// +13
-                case 3: Defense += 6; break;	// +12
-                case 2: Defense += 5; break;	// +11
-                case 1: Defense += 4; break;	// +10
-                default: break;
-                };
+                Defense += GameLogic::Items::GetItemLevelBonus(Level);
             }
         }
         if (Blocking > 0)
         {
-            Blocking += (std::min<int>(9, Level) * 3);	// ~ +9
-            switch (Level - 9)
-            {
-            case 6: Blocking += 9; break;	// +15
-            case 5: Blocking += 8; break;	// +14
-            case 4: Blocking += 7; break;	// +13
-            case 3: Blocking += 6; break;	// +12
-            case 2: Blocking += 5; break;	// +11
-            case 1: Blocking += 4; break;	// +10
-            default: break;
-            };
+            Blocking += GameLogic::Items::GetItemLevelBonus(Level);
         }
 
         if (p->RequireLevel)
@@ -959,13 +850,13 @@ void ComputeItemInfo(int iHelpItem)
 
         if (p->RequireEnergy)
         {
-            if (GameLogic::Items::IsSummonerBookType(ItemHelp))
+            if (GameLogic::Items::IsSummonerBookType(iHelpItem))
             {
                 RequireEnergy = 20 + p->RequireEnergy * (p->Level + Level * 1) * 3 / 100;
             }
             else
             {
-                if ((p->RequireLevel > 0) && (ItemHelp >= ITEM_ETC && ItemHelp < ITEM_ETC + MAX_ITEM_INDEX))
+                if ((p->RequireLevel > 0) && (iHelpItem >= ITEM_ETC && iHelpItem < ITEM_ETC + MAX_ITEM_INDEX))
                 {
                     RequireEnergy = 20 + (p->RequireEnergy) * (p->RequireLevel) * 4 / 100;
                 }
@@ -983,20 +874,13 @@ void ComputeItemInfo(int iHelpItem)
         if (p->RequireCharisma)	RequireCharisma = 20 + p->RequireCharisma * (p->Level + Level * 3) * 3 / 100;
         else RequireCharisma = 0;
 
+        // The window shows every column with a value at +0, so the row starts empty: no column of
+        // the item shown before stays.
+        std::ranges::fill(g_iItemInfo[Level], 0);
         g_iItemInfo[Level][_COLUMN_TYPE_LEVEL] = Level;
         g_iItemInfo[Level][_COLUMN_TYPE_ATTMIN] = DamageMin;
         g_iItemInfo[Level][_COLUMN_TYPE_ATTMAX] = DamageMax;
-
-        if (GameLogic::Items::IsSummonerBookType(ItemHelp))
-        {
-            g_iItemInfo[Level][_COLUMN_TYPE_CURSE] = Magic;
-        }
-        else
-        {
-            g_iItemInfo[Level][_COLUMN_TYPE_MAGIC] = Magic;
-        }
-
-        g_iItemInfo[Level][_COLUMN_TYPE_PET_ATTACK] = Magic;
+        g_iItemInfo[Level][magicColumn] = Magic;
         g_iItemInfo[Level][_COLUMN_TYPE_DEFENCE] = Defense;
         g_iItemInfo[Level][_COLUMN_TYPE_DEFRATE] = Blocking;
         g_iItemInfo[Level][_COLUMN_TYPE_REQSTR] = RequireStrength;
@@ -1005,34 +889,7 @@ void ComputeItemInfo(int iHelpItem)
         g_iItemInfo[Level][_COLUMN_TYPE_REQCHA] = RequireCharisma;
         g_iItemInfo[Level][_COLUMN_TYPE_REQVIT] = RequireVitality;
         g_iItemInfo[Level][_COLUMN_TYPE_REQNLV] = RequireLevel;
-
-        if (IsCepterItem(ItemHelp) == true)
-
-        {
-            g_iItemInfo[Level][_COLUMN_TYPE_MAGIC] = 0;
-        }
-        else
-        {
-            g_iItemInfo[Level][_COLUMN_TYPE_PET_ATTACK] = 0;
-        }
-
-        WORD Strength, Dexterity, Energy, Vitality, Charisma;
-
-        Strength = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
-        Dexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
-        Energy = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
-        Vitality = CharacterAttribute->Vitality + CharacterAttribute->AddVitality;
-        Charisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
-
-        if (RequireStrength <= Strength
-            && RequireDexterity <= Dexterity
-            && RequireEnergy <= Energy
-            && RequireVitality <= Vitality
-            && RequireCharisma <= Charisma
-            && RequireLevel <= CharacterAttribute->Level)
-            g_iItemInfo[Level][_COLUMN_TYPE_CAN_EQUIP] = TRUE;
-        else
-            g_iItemInfo[Level][_COLUMN_TYPE_CAN_EQUIP] = FALSE;
+        g_iItemInfo[Level][_COLUMN_TYPE_CAN_EQUIP] = CanEquipItemInfoRow(g_iItemInfo[Level], hero) ? TRUE : FALSE;
     }
 }
 
@@ -1203,7 +1060,7 @@ int64_t ConvertRepairGold(int64_t Gold, int Durability, int MaxDurability, short
 {
     int64_t repairGold = 0;
 
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) && g_pNPCShop->IsRepairShop()) {
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP) && g_pNPCShop->IsRepairShop()) {
         repairGold = CalcRepairCost(Gold, Durability, MaxDurability, Type, false);
     }
     else if (g_pMyInventory->IsVisible() && !g_pNPCShop->IsVisible()) {
@@ -1285,8 +1142,6 @@ int CharacterInfoStartX;
 int CharacterInfoStartY;
 int GuildStartX;
 int GuildStartY;
-int GuildListStartX;
-int GuildListStartY;
 int SommonTable[] = { 2,7,14,8,9,41 };
 
 wchar_t ChaosEventName[][100] = {
@@ -1306,7 +1161,8 @@ WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
 {
     WORD maxDurability = p->Durability;
 
-    if (ip->Type >= ITEM_STAFF && ip->Type < ITEM_STAFF + MAX_ITEM_INDEX)
+    // Staffs, sticks and books have a durability of their own for magic.
+    if (p->MagicDur > 0)
     {
         maxDurability = p->MagicDur;
     }
@@ -1362,13 +1218,8 @@ WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
     {
         maxDurability += 20;
     }
-    else if (ip->ExcellentFlags > 0 &&
-        (ip->Type<ITEM_WINGS_OF_SPIRITS || ip->Type>ITEM_WINGS_OF_DARKNESS) &&
-        !GameLogic::Items::IsDivineArchangelWeapon(ip)
-        && ip->Type != ITEM_CAPE_OF_LORD
-        && (ip->Type<ITEM_WING_OF_STORM || ip->Type>ITEM_CAPE_OF_EMPEROR)
-        && (ip->Type<ITEM_WINGS_OF_DESPAIR || ip->Type>ITEM_WING_OF_DIMENSION)
-        && !(ip->Type >= ITEM_CAPE_OF_FIGHTER && ip->Type <= ITEM_CAPE_OF_OVERRULE))
+    else if (ip->ExcellentFlags > 0 && !GameLogic::Items::IsSecondOrThirdTierWing(ip) &&
+             !GameLogic::Items::IsDivineArchangelWeapon(ip))
     {
         maxDurability += 15;
     }
@@ -1841,8 +1692,17 @@ void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int 
     }
 }
 
-void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bItemTextListBoxUse)
+// (sx, sy) in the screen's 640x480 stretch, `screen`.
+static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy, ITEM* ip, bool Sell, int Inventype,
+                           bool bItemTextListBoxUse)
 {
+    // Unconditional: the early returns below (and the pet-item delegation further down, which
+    // renders its own tooltip via giPetManager::RenderPetItemInfo() instead) used to mean "this
+    // frame draws nothing" under the old per-frame native draw -- already equivalent to "hidden"
+    // for that item. The shared tooltip document is persistent, so this replicates that; the real
+    // Show() call near the end of this function makes it visible again once actually reached.
+    UI::Tooltip::HideLegacyTextList();
+
     if (ip->Type == -1)
         return;
 
@@ -1888,7 +1748,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 
         debouncedPetInfoRequest.invoke();
 
-        giPetManager::RenderPetItemInfo(sx, sy, ip, Inventype);
+        giPetManager::RenderPetItemInfo(screen, sx, sy, ip, Inventype);
         return;
     }
 
@@ -1977,7 +1837,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         Color = TEXT_COLOR_YELLOW;
     }
 
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) && !GameLogic::Items::IsSellingBan(ip))
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP) && !GameLogic::Items::IsSellingBan(ip))
     {
         wchar_t Text[100];
         {
@@ -2002,16 +1862,30 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
         }
     }
-    if ((Inventype == SEASON3B::TOOLTIP_TYPE_MY_SHOP || Inventype == SEASON3B::TOOLTIP_TYPE_PURCHASE_SHOP)
+    if ((Inventype == mu::ui::window::TOOLTIP_TYPE_MY_SHOP || Inventype == mu::ui::window::TOOLTIP_TYPE_PURCHASE_SHOP)
         && !GameLogic::Items::IsPersonalShopBan(ip))
     {
         {
-            int price = 0;
+            GameLogic::PersonalShop::ItemPrice itemPrice;
             int indexInv = g_pMyShopInventory->GetInventoryCtrl()->GetIndexByItem(ip);
             wchar_t Text[100];
 
-            if (GetPersonalItemPrice(indexInv, price, g_IsPurchaseShop))
+            const bool hasPrice = GetPersonalItemPrice(indexInv, itemPrice, g_IsPurchaseShop);
+            if (hasPrice && itemPrice.Kind != GameLogic::PersonalShop::PriceKind::Zen)
             {
+                // The server tells the player when the jewels or coins are not enough.
+                mu_swprintf(Text, L"%d %ls", itemPrice.Amount, GameLogic::PersonalShop::GetCurrencyName(itemPrice));
+                mu_swprintf(TextList[TextNum], I18N::Game::SellingPriceS, Text);
+                TextListColor[TextNum] = TEXT_COLOR_YELLOW;
+                TextBold[TextNum] = true;
+                TextNum++;
+                mu_swprintf(TextList[TextNum], L"\n");
+                TextNum++;
+                SkipNum++;
+            }
+            else if (hasPrice)
+            {
+                const int price = itemPrice.Amount;
                 ConvertGold(price, Text);
                 mu_swprintf(TextList[TextNum], I18N::Game::SellingPriceS, Text);
 
@@ -5331,7 +5205,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         bool bThisisEquippedItem = false;
 
-        SEASON3B::CNewUIInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
+        mu::ui::window::CInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
         ITEM* pFindItem = pNewInventoryCtrl->FindItemByKey(ip->Key);
         (pFindItem == NULL) ? bThisisEquippedItem = true : bThisisEquippedItem = false;
 
@@ -5373,15 +5247,25 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 
     if (isrendertooltip)
     {
-        if (bItemTextListBoxUse)
-            RenderTipTextList(sx, sy, TextNum, 0, RT3_SORT_CENTER, STRP_BOTTOMCENTER);
-        else
-            RenderTipTextList(sx, sy, TextNum, 0);
+        UI::Tooltip::ShowLegacyTextList(
+            TextNum,
+            UI::Scaling::PositionX(screen, static_cast<float>(sx)),
+            UI::Scaling::PositionY(screen, static_cast<float>(sy)),
+            bItemTextListBoxUse ? UI::Tooltip::Placement::Above : UI::Tooltip::Placement::Below);
     }
 }
 
-void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
+// (sx, sy) in the screen's 640x480 stretch, `screen`.
+static void RenderRepairInfo(const UI::Scaling::Transform& screen, int sx, int sy, ITEM* ip, bool Sell)
 {
+    // Unconditional: the many early returns below used to mean "this frame draws nothing" under
+    // the old per-frame native draw, which was already equivalent to "hidden" for that item type.
+    // The shared tooltip document is persistent, so an explicit Hide() here replicates that -- Show()
+    // at the very end of this function (reached only when none of the guards below fire) makes it
+    // visible again for an allowed item, same net effect as before, one frame earlier than a stale
+    // previous item's tooltip would otherwise have lingered.
+    UI::Tooltip::HideLegacyTextList();
+
     if (GameLogic::Items::IsRepairBan(ip) == true)
     {
         return;
@@ -5565,7 +5449,36 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
     else
         sy += p->Height * INVENTORY_SCALE;
 
-    RenderTipTextList(sx, sy, TextNum, 0);
+    UI::Tooltip::ShowLegacyTextList(
+        TextNum,
+        UI::Scaling::PositionX(screen, static_cast<float>(sx)),
+        UI::Scaling::PositionY(screen, static_cast<float>(sy)));
+}
+
+namespace
+{
+// Runs `render` with the anchor (x, y) in window pixels converted into the screen's 640x480
+// stretch, which it then runs under (its text is measured there).
+template <typename Render> void InScreenSpace(float x, float y, Render render)
+{
+    const UI::Scaling::Transform screen =
+        UI::Scaling::ScreenOverlayTransform(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
+    const UI::Scaling::ScopedActiveTransform scope(screen);
+    render(screen, static_cast<int>(std::lround(UI::Scaling::LogicalX(screen, x))),
+           static_cast<int>(std::lround(UI::Scaling::LogicalY(screen, y))));
+}
+} // namespace
+
+void RenderItemInfoAtPx(float x, float y, ITEM* ip, bool Sell, int Inventype, bool bItemTextListBoxUse)
+{
+    InScreenSpace(x, y, [&](const UI::Scaling::Transform& screen, int sx, int sy)
+                  { RenderItemInfo(screen, sx, sy, ip, Sell, Inventype, bItemTextListBoxUse); });
+}
+
+void RenderRepairInfoAtPx(float x, float y, ITEM* ip, bool Sell)
+{
+    InScreenSpace(x, y, [&](const UI::Scaling::Transform& screen, int sx, int sy)
+                  { RenderRepairInfo(screen, sx, sy, ip, Sell); });
 }
 
 bool GetAttackDamage(int* iMinDamage, int* iMaxDamage)
@@ -6388,86 +6301,22 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
 
 int GetScreenWidth()
 {
-    int iWidth = 0;
+    if (WindowWidth == 0)
+        return REFERENCE_WIDTH;
 
-    // TODO: Refactor this. Wouldn't it be easier to just count how many windows are open? ;)
+    // Right edge of the world the open docked windows leave uncovered, in the 640-wide HUD space.
+    return static_cast<int>(
+        std::lround(UI::Placement::UncoveredWorldRight() * REFERENCE_WIDTH / static_cast<float>(WindowWidth)));
+}
 
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY)
-        && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY_EXT)
-        && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYSHOP_INVENTORY))
-    {
-        iWidth = REFERENCE_WIDTH - (190 * 3);
-    }
-    else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY)
-        && (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER)
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP)
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE)
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE_EXT)
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY)
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE)
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYSHOP_INVENTORY)
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY_EXT)
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY)
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION)
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
-            ))
-    {
-        iWidth = REFERENCE_WIDTH - (190 * 2);
-    }
-    else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER)
-        && (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYQUEST)
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
-        )
-    {
-        iWidth = REFERENCE_WIDTH - (190 * 2);
-    }
-    else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER)
-        && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PET)
-        )
-    {
-        iWidth = REFERENCE_WIDTH - (190 * 2);
-    }
-    else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_REFINERY))
-    {
-        iWidth = REFERENCE_WIDTH - (190 * 2);
-    }
-    else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PARTY)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCGUILDMASTER)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GUILDINFO)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GUARDSMAN)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_SENATUS)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GATEKEEPER)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYQUEST)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_SERVERDIVISION)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_COMMAND)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCQUEST)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GATESWITCH)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CATAPULT)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_DEVILSQUARE)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_BLOODCASTLE)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GOLD_BOWMAN)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GOLD_BOWMAN_LENA)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_DUELWATCH)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPC_DIALOGUE)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_EMPIREGUARDIAN_NPC)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_DOPPELGANGER_NPC)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GENSRANKING)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MUHELPER)
-        )
-    {
-        iWidth = REFERENCE_WIDTH - 190;
-    }
-    else
-    {
-        iWidth = REFERENCE_WIDTH;
-    }
+int GetScreenLeft()
+{
+    if (WindowWidth == 0)
+        return 0;
 
-    return iWidth;
+    // Left edge of the world the open docked windows leave uncovered, in the 640-wide HUD space.
+    return static_cast<int>(
+        std::lround(UI::Placement::UncoveredWorldLeft() * REFERENCE_WIDTH / static_cast<float>(WindowWidth)));
 }
 
 void ClearInventory()
@@ -6710,20 +6559,6 @@ namespace
 // Degrees per millisecond of WorldTime.
 constexpr float GambleItemTurnSpeed = 0.2f;
 constexpr float SelectedItemTurnSpeed = 0.45f;
-
-// The item camera maps world units to pixels by the full window height, while the
-// slot is drawn with the active UI scale. Scale the model and its slot offset
-// together so the preview stays centred in the slot. DockRight (inventory and
-// equipment) also applies kItemPreviewExtraScale; HUD and dialogs do not.
-void ApplyItemPreviewScale(vec3_t position, const std::array<float, 3>& offset, float& scale)
-{
-    const float previewScale = UI::Scaling::ItemPreviewScale(
-        UI::Scaling::GetActiveTransform(), static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
-    position[0] += offset[0] * previewScale;
-    position[1] += offset[1] * previewScale;
-    position[2] += offset[2] * previewScale;
-    scale *= previewScale;
-}
 } // namespace
 
 void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancientDiscriminator, vec3_t Target,
@@ -6769,7 +6604,7 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
         ItemLevel = 0;
     }
 
-    ApplyItemPreviewScale(Position, display.offset, Scale);
+    VectorAdd(Position, display.offset.data(), Position);
 
     b->Animation(BoneTransform, ObjectSelect.AnimationFrame, ObjectSelect.PriorAnimationFrame, ObjectSelect.PriorAction, ObjectSelect.Angle, ObjectSelect.HeadAngle, false, false);
 
@@ -6802,10 +6637,29 @@ bool UI::Items::ShouldAnimatePreview(bool pointerInside, bool pickedItemActive, 
     return pointerInside && (!pickedItemActive || renderingPickedItem);
 }
 
+static void RenderItem3DAt(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags,
+                           int ancientDiscriminator, bool PickUp, bool hovered);
+
 void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags, int ancientDiscriminator, bool PickUp)
 {
-    const bool Success = UI::Items::ShouldAnimatePreview(SEASON3B::CheckMouseIn(sx, sy, Width, Height),
-                                                         g_pPickedItem != nullptr, PickUp);
+    const bool hovered = g_fWindowMouseX >= sx && g_fWindowMouseX < sx + Width && g_fWindowMouseY >= sy &&
+                         g_fWindowMouseY < sy + Height;
+    RenderItem3DAt(sx, sy, Width, Height, Type, Level, excellentFlags, ancientDiscriminator, PickUp, hovered);
+}
+
+void RenderItem3DWithHover(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags,
+                           int ancientDiscriminator, bool hovered)
+{
+    RenderItem3DAt(sx, sy, Width, Height, Type, Level, excellentFlags, ancientDiscriminator, false, hovered);
+}
+
+static void RenderItem3DAt(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags,
+                           int ancientDiscriminator, bool PickUp, bool hovered)
+{
+    // Item previews are screen-space: keep Classic texture sampling.
+    const mu::ScopedScreenSpaceSampling screenSpaceSampling;
+
+    const bool Success = UI::Items::ShouldAnimatePreview(hovered, g_pPickedItem != nullptr, PickUp);
 
     const Render::Items::Display::Anchor anchor = Render::Items::Display::GetInventoryAnchor(Type, Level);
     sx += Width * anchor.x;
@@ -7172,177 +7026,6 @@ void InitPartyList()
     PartyKey = 0;
 }
 
-void MoveServerDivisionInventory()
-{
-    if (!g_pUIManager->IsOpen(INTERFACE_SERVERDIVISION)) return;
-    int x = REFERENCE_WIDTH - 190;
-    int y = 0;
-    int Width, Height;
-
-    if (MouseX >= (int)(x) && MouseX < (int)(x + 190) &&
-        MouseY >= (int)(y) && MouseY < (int)(y + 256 + 177))
-    {
-        MouseOnWindow = true;
-    }
-
-    Width = 16; Height = 16; x = InventoryStartX + 25; y = 240;
-    if (MouseX >= x && MouseX < x + Width && MouseY >= y && MouseY < y + Height && MouseLButtonPush)
-    {
-        g_bServerDivisionAccept ^= true;
-
-        MouseLButtonPush = false;
-        MouseLButton = false;
-    }
-
-    if (g_bServerDivisionAccept)
-    {
-        Width = 120; Height = 24; x = (float)InventoryStartX + 35; y = 320;
-        if (MouseX >= x && MouseX < x + Width && MouseY >= y && MouseY < y + Height && MouseLButtonPush)
-        {
-            MouseLButtonPush = false;
-            MouseLButton = false;
-            AskYesOrNo = 4;
-            OkYesOrNo = -1;
-
-            ShowCheckBox(1, 448, MESSAGE_CHECK);
-        }
-    }
-
-    Width = 120; Height = 24; x = (float)InventoryStartX + 35; y = 350;
-    if (MouseX >= x && MouseX < x + Width && MouseY >= y && MouseY < y + Height && MouseLButtonPush)
-    {
-        MouseLButtonPush = false;
-        MouseLButton = false;
-        MouseUpdateTime = 0;
-        MouseUpdateTimeMax = 6;
-
-        SocketClient->ToGameServer()->SendCloseNpcRequest();
-        g_pUIManager->CloseAll();
-    }
-
-    Width = 24; Height = 24; x = InventoryStartX + 25; y = InventoryStartY + 395;
-    if (MouseX >= x && MouseX < x + Width && MouseY >= y && MouseY < y + Height)
-    {
-        if (MouseLButtonPush)
-        {
-            MouseLButtonPush = false;
-            MouseUpdateTime = 0;
-            MouseUpdateTimeMax = 6;
-
-            g_bEventChipDialogEnable = EVENT_NONE;
-
-            SocketClient->ToGameServer()->SendCloseNpcRequest();
-            g_pUIManager->CloseAll();
-        }
-    }
-}
-
-void HideKeyPad(void)
-{
-    g_iKeyPadEnable = 0;
-}
-
-int CheckMouseOnKeyPad(void)
-{
-    int Width, Height, WindowX, WindowY;
-    Width = 213; Height = 2 * 5 + 6 * 40; WindowX = (REFERENCE_WIDTH - Width) / 2; WindowY = 60 + 40;//60 220
-
-    int iButtonTop = 50;
-
-    for (int i = 0; i < 11; ++i)
-    {
-        int xButton = i % 5;
-        int yButton = i / 5;
-
-        int xLeft = WindowX + 10 + xButton * 40;
-        int yTop = WindowY + iButtonTop + yButton * 40;
-        if (xLeft <= MouseX && MouseX < xLeft + 32 &&
-            yTop <= MouseY && MouseY < yTop + 32)
-        {
-            return (i);
-        }
-    }
-    // Ok, Cancel ( 11 - 12)
-    int yTop = WindowY + iButtonTop + 2 * 40 + 5;
-
-    for (int i = 0; i < 2; ++i)
-    {
-        int xLeft = WindowX + 52 + i * 78;
-        if (xLeft <= MouseX && MouseX < xLeft + 70 &&
-            yTop <= MouseY && MouseY < yTop + 21)
-        {
-            return (11 + i);
-        }
-    }
-
-    return (-1);
-}
-
-bool g_bPadPushed = false;
-
-void MovePersonalShop()
-{
-    if ((g_pUIManager->IsOpen(INTERFACE_PERSONALSHOPSALE) || g_pUIManager->IsOpen(INTERFACE_PERSONALSHOPPURCHASE)) && g_iPShopWndType == PSHOPWNDTYPE_SALE)
-    {
-        if (g_iPersonalShopMsgType == 1)
-        {
-            if (OkYesOrNo == 1)
-            {
-                g_iPersonalShopMsgType = 0;
-                OkYesOrNo = -1;
-            }
-            else if (OkYesOrNo == 2)
-            {
-                g_iPersonalShopMsgType = 0;
-                OkYesOrNo = -1;
-            }
-        }
-        g_ptPersonalShop.x = REFERENCE_WIDTH - 190 * 2;
-        g_ptPersonalShop.y = 0;
-
-        int Width = 56, Height = 24;
-        int ButtonX = g_ptPersonalShop.x + 30, ButtonY = g_ptPersonalShop.y + 396;
-        if (MouseX >= ButtonX && MouseX < ButtonX + Width && MouseY >= ButtonY && MouseY < ButtonY + Height && MouseLButtonPush)
-        {
-            MouseLButtonPush = false;
-            if (!IsExistUndecidedPrice() && wcslen(g_szPersonalShopTitle) > 0)
-            {
-                if (g_bEnablePersonalShop)
-                {
-                    SocketClient->ToGameServer()->SendPlayerShopOpen(MU_C16(g_szPersonalShopTitle));
-                    g_pUIManager->Close(INTERFACE_INVENTORY);
-                }
-                else
-                {
-                    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CPersonalshopCreateMsgBoxLayout));
-                }
-            }
-            else
-            {
-                g_pSystemLogBox->AddText(I18N::Game::ThereSNoStoreNameOrItemPrice, SEASON3B::TYPE_ERROR_MESSAGE);
-            }
-        }
-
-        ButtonX = g_ptPersonalShop.x + 105;
-        if (MouseX >= ButtonX && MouseX < ButtonX + Width && MouseY >= ButtonY && MouseY < ButtonY + Height && MouseLButtonPush)
-        {
-            MouseLButtonPush = false;
-            if (g_bEnablePersonalShop)
-            {
-                SocketClient->ToGameServer()->SendPlayerShopClose();
-            }
-        }
-
-        Width = 150;
-        ButtonX = g_ptPersonalShop.x + 20;
-        ButtonY = g_ptPersonalShop.y + 65;
-        if (MouseX >= ButtonX && MouseX < ButtonX + Width && MouseY >= ButtonY && MouseY < ButtonY + Height && MouseLButtonPush)
-        {
-            OpenPersonalShopMsgWnd(1);
-        }
-    }
-}
-
 void ClosePersonalShop()
 {
     if (g_iPShopWndType == PSHOPWNDTYPE_PURCHASE)
@@ -7410,76 +7093,8 @@ bool IsExistUndecidedPrice()
     return bResult;
 }
 
-void OpenPersonalShopMsgWnd(int iMsgType)
-{
-    if (iMsgType == 1)
-    {
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CPersonalShopNameMsgBoxLayout));
-    }
-    else if (iMsgType == 2)
-    {
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CPersonalShopItemValueMsgBoxLayout));
-    }
-}
-bool IsCorrectShopTitle(const wchar_t* szShopTitle)
-{
-    int j = 0;
-    wchar_t TmpText[2048];
-    for (int i = 0; i < (int)wcslen(szShopTitle); ++i)
-    {
-        if (szShopTitle[i] != 32)
-        {
-            TmpText[j] = szShopTitle[i];
-            j++;
-        }
-    }
-    TmpText[j] = 0;
-
-    for (int i = 0; i < AbuseFilterNumber; i++)
-    {
-        if (FindText(TmpText, AbuseFilter[i]))
-        {
-            return false;
-        }
-    }
-
-    int len = wcslen(szShopTitle);
-    int count = 0;
-
-    for (int i = 0; i < len; i++)
-    {
-        if (szShopTitle[i] == 0x20) {
-            count++;
-            if (i == 1 && count >= 2) return false;
-        }
-        else {
-            count = 0;
-        }
-    }
-    if (count >= 2)
-        return false;
-    return true;
-}
-
 extern DWORD g_dwActiveUIID;
 extern DWORD g_dwMouseUseUIID;
-
-void RenderInventoryInterface(int StartX, int StartY, int Flag)
-{
-    float x, y, Width, Height;
-    Width = 190.f; Height = 256.f; x = (float)StartX; y = (float)StartY;
-
-    RenderBitmap(BITMAP_INVENTORY, x, y, Width, Height, 0.f, 0.f, Width / 256.f, Height / 256.f);
-
-    Width = 190.f; Height = 177.f; x = (float)StartX; y = (float)StartY + 256;
-    RenderBitmap(BITMAP_INVENTORY + 1, x, y, Width, Height, 0.f, 0.f, Width / 256.f, Height / 256.f);
-
-    if (Flag)
-    {
-        Width = 190.f; Height = 10.f; x = (float)StartX; y = (float)StartY + 225;
-        RenderBitmap(BITMAP_INVENTORY + 19, x, y, Width, Height, 0.f, 0.f, Width / 256.f, Height / 16.f);
-    }
-}
 
 bool IsStrifeMap(int nMapIndex)
 {
@@ -7609,6 +7224,12 @@ void CreateCastleMark(int Type, BYTE* buffer, bool blend)
     Width = (int)b->Width;
     Height = (int)b->Height;
     BYTE* Buffer = b->Buffer;
+    if (!Buffer || Width == 0 || Height == 0)
+    {
+        mu::log::Get("gameplay")
+            ->error("[CreateCastleMark] bitmap {} not loaded (BitmapIndex={})", Type, b->BitmapIndex);
+        return;
+    }
 
     int alpha = 128;
     if (blend)
@@ -7709,130 +7330,6 @@ void CreateCastleMark(int Type, BYTE* buffer, bool blend)
     mu::GetRenderer().QueueTextureUpdate(
         b->BitmapIndex, b->Buffer, static_cast<std::uint32_t>(b->Width), static_cast<std::uint32_t>(b->Height));
     mu::GetRenderer().BindTexture(b->BitmapIndex);
-}
-
-void RenderGuildColor(float x, float y, int SizeX, int SizeY, int Index)
-{
-    RenderBitmap(BITMAP_INVENTORY + 18, x - 1, y - 1, (float)SizeX + 2, (float)SizeY + 2, 0.f, 0.f, SizeX / 32.f, SizeY / 30.f);
-
-    if (Index == 0)
-    {
-        const unsigned int black = (255u << 24);
-        const unsigned int gray = (255u << 24) | (128u << 16) | (128u << 8) | 128u;
-        const float fx = x;
-        const float fy = y;
-        const float fw = (float)SizeX;
-        const float fh = (float)SizeY;
-        RenderColorQuadARGB(fx, fy, fw, fh, black);
-        RenderColorLineARGB(fx, fy, fx + fw, fy + fh, 2.0f, gray);
-        RenderColorLineARGB(fx + fw, fy, fx, fy + fh, 2.0f, gray);
-    }
-    else
-    {
-        RenderColorQuadARGB(x, y, (float)SizeX, (float)SizeY, MarkColor[Index]);
-    }
-}
-
-void RenderGuildList(int StartX, int StartY)
-{
-    GuildListStartX = StartX;
-    GuildListStartY = StartY;
-
-    DisableAlphaBlend();
-    float x, y, Width, Height;
-    Width = 190.f; Height = 256.f; x = (float)StartX; y = (float)StartY;
-    RenderBitmap(BITMAP_INVENTORY, x, y, Width, Height, 0.f, 0.f, Width / 256.f, Height / 256.f);
-    Width = 190.f; Height = 177.f; x = (float)StartX; y = (float)StartY + 256;
-    RenderBitmap(BITMAP_INVENTORY + 1, x, y, Width, Height, 0.f, 0.f, Width / 256.f, Height / 256.f);
-
-    EnableAlphaTest();
-
-    g_pRenderText->SetBgColor(20, 20, 20, 255);
-    g_pRenderText->SetTextColor(220, 220, 220, 255);
-    g_pRenderText->SetFont(g_hFontBold);
-
-    wchar_t Text[100];
-    if (Hero->GuildMarkIndex == -1)
-        mu_swprintf(Text, I18N::Game::Guild);
-    else
-        mu_swprintf(Text, L"%ls (Score:%d)", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore);
-
-    g_pRenderText->RenderText(StartX + 95 - 60, StartY + 12, Text, 120 * WindowWidth / REFERENCE_WIDTH, true, 3);
-
-    g_pRenderText->SetBgColor(0);
-    g_pRenderText->SetTextColor(230, 230, 230, 255);
-    g_pRenderText->SetFont(g_hFont);
-
-    if (g_nGuildMemberCount == 0)
-    {
-        g_pRenderText->RenderText(StartX + 20, StartY + 50, I18N::Game::TypeGuildInFrontOf);
-        g_pRenderText->RenderText(StartX + 20, StartY + 65, I18N::Game::TheGuildMasterYouWantToJoin);
-        g_pRenderText->RenderText(StartX + 20, StartY + 80, I18N::Game::AndYouCanJoinTheGuild);
-    }
-    g_pRenderText->SetBgColor(0, 0, 0, 128);
-    g_pRenderText->SetTextColor(100, 255, 200, 255);
-    g_pRenderText->RenderText(StartX + (int)Width / 2, StartY + 44, g_GuildNotice[0], 0, 0, RT3_WRITE_CENTER);
-    g_pRenderText->RenderText(StartX + (int)Width / 2, StartY + 58, g_GuildNotice[1], 0, 0, RT3_WRITE_CENTER);
-
-    int yGuildStart = 72;
-    int Number = g_nGuildMemberCount;
-
-    if (g_nGuildMemberCount >= MAX_GUILD_LINE)
-        Number = MAX_GUILD_LINE;
-}
-
-//#define MAX_LENGTH_CMB	( 26)
-#define NUM_LINE_CMB	( 7)
-
-void RenderServerDivision()
-{
-    if (!g_pUIManager->IsOpen(INTERFACE_SERVERDIVISION)) return;
-
-    float Width, Height, x, y;
-
-    EnableAlphaTest();
-
-    InventoryStartX = REFERENCE_WIDTH - 190;
-    InventoryStartY = 0;
-    Width = 213; Height = 40; x = (float)InventoryStartX; y = (float)InventoryStartY;
-    RenderInventoryInterface((int)x, (int)y, 1);
-
-    g_pRenderText->SetBgColor(0);
-    g_pRenderText->SetTextColor(255, 230, 210, 255);
-
-    g_pRenderText->SetFont(g_hFontBold);
-    x = InventoryStartX + (190 / 2.f);
-    y = 50;
-    for (int i = 462; i < 470; ++i)
-    {
-        g_pRenderText->RenderText(x, y, I18N::Game::Lookup(i), 0, 0, RT3_WRITE_CENTER);
-        y += 20;
-    }
-
-    g_pRenderText->SetFont(g_hFontBold);
-    Width = 16; Height = 16; x = (float)InventoryStartX + 25; y = 240;
-    if (g_bServerDivisionAccept)
-    {
-        g_pRenderText->SetTextColor(212, 150, 0, 255);
-        RenderBitmap(BITMAP_INVENTORY_BUTTON + 11, x, y, Width, Height, 0.f, 0.f, 24 / 32.f, 24 / 32.f);
-    }
-    else
-    {
-        g_pRenderText->SetTextColor(223, 191, 103, 255);
-        RenderBitmap(BITMAP_INVENTORY_BUTTON + 10, x, y, Width, Height, 0.f, 0.f, 24 / 32.f, 24 / 32.f);
-    }
-    g_pRenderText->RenderText((int)(x + Width + 3), (int)(y + 5), I18N::Game::AgreeWithTheAboveAgreement);
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(255, 230, 210, 255);
-
-    Width = 120; Height = 24; x = (float)InventoryStartX + 35; y = 350;//(Width/2.f); y = 231;
-    RenderBitmap(BITMAP_INTERFACE + 10, (float)x, (float)y, (float)Width, (float)Height, 0.f, 0.f, 213.f / 256.f);
-    g_pRenderText->RenderText((int)(x + (Width / 2)), (int)(y + 5), I18N::Game::Cancel, 0, 0, RT3_WRITE_CENTER);
-
-    Width = 120; Height = 24; x = (float)InventoryStartX + 35; y = 320;//(Width/2.f); y = 231;
-    RenderBitmap(BITMAP_INTERFACE + 10, (float)x, (float)y, (float)Width, (float)Height, 0.f, 0.f, 213.f / 256.f);
-    g_pRenderText->RenderText((int)(x + (Width / 2)), (int)(y + 5), I18N::Game::OK, 0, 0, RT3_WRITE_CENTER);
-
 }
 
 BYTE CaculateFreeTicketLevel(int iType)

@@ -42,6 +42,7 @@ endfunction()
 string(FIND "${renderer_source}" "[[nodiscard]] static bool Init(void* pNativeWindow, std::string_view fontFamily" init_start)
 string(FIND "${renderer_source}" "[[nodiscard]] static bool LoadShaders(const char* driverName)" load_start)
 string(FIND "${renderer_source}" "static void ReleaseShaders()" release_start)
+string(FIND "${renderer_source}" "[[nodiscard]] static SDL_GPUDepthStencilState MakeDepthStencilState" depth_state_start)
 string(FIND "${renderer_source}" "[[nodiscard]] static PipelineBuildResult BuildBlendPipeline" build_start)
 string(FIND "${renderer_source}" "static void LogPipelineFailure" log_start)
 string(FIND "${renderer_source}" "[[nodiscard]] static bool CreatePipelines()" create_start)
@@ -49,7 +50,8 @@ string(FIND "${renderer_source}" "static void DestroyPipelines()" destroy_start)
 if(init_start EQUAL -1
         OR load_start EQUAL -1
         OR release_start EQUAL -1
-        OR build_start EQUAL -1
+        OR depth_state_start EQUAL -1
+        OR build_start LESS depth_state_start
         OR log_start EQUAL -1
         OR create_start EQUAL -1
         OR destroy_start EQUAL -1)
@@ -57,11 +59,13 @@ if(init_start EQUAL -1
 endif()
 
 math(EXPR load_length "${release_start} - ${load_start}")
+math(EXPR depth_state_length "${build_start} - ${depth_state_start}")
 math(EXPR build_length "${log_start} - ${build_start}")
 math(EXPR log_length "${create_start} - ${log_start}")
 math(EXPR init_length "${create_start} - ${init_start}")
 math(EXPR create_length "${destroy_start} - ${create_start}")
 string(SUBSTRING "${renderer_source}" ${load_start} ${load_length} load_source)
+string(SUBSTRING "${renderer_source}" ${depth_state_start} ${depth_state_length} depth_state_source)
 string(SUBSTRING "${renderer_source}" ${build_start} ${build_length} build_source)
 string(SUBSTRING "${renderer_source}" ${log_start} ${log_length} log_source)
 string(SUBSTRING "${renderer_source}" ${init_start} ${init_length} init_source)
@@ -79,9 +83,21 @@ require_source("${renderer_source}" "constexpr[ \t]+int[ \t]+k_PipelineCount[ \t
 require_shader_load_assignment(s_vertShader2D basic_textured vert VERTEX)
 require_shader_load_assignment(s_fragShaderTex basic_textured frag FRAGMENT)
 require_shader_load_assignment(s_vertShaderSkinned skinned_textured vert VERTEX)
+require_shader_load_assignment(s_vertShaderSkinnedShadow skinned_shadow vert VERTEX)
+require_source("${executable_load_source}"
+    "s_vertShaderSkinnedShadow[ \t\r\n]*=[^;]*createShader[^;]*\"skinned_shadow\"[^;]*SDL_GPU_SHADERSTAGE_VERTEX[^;]*false[ \t\r\n]*\\);"
+    "skinned_shadow.vert must be optional")
 require_source("${executable_load_source}"
     "s_vertShaderSkinned[ \t\r\n]*=[^;]*createShader[^;]*\"skinned_textured\"[^;]*SDL_GPU_SHADERSTAGE_VERTEX[^;]*true[ \t\r\n]*\\);"
     "skinned_textured.vert must be fatal")
+require_shader_load_assignment(s_fragShaderTexFog basic_textured_fog frag FRAGMENT)
+require_shader_load_assignment(s_fragShaderLit skinned_lit frag FRAGMENT)
+require_source("${executable_load_source}"
+    "s_fragShaderTexFog[ \t\r\n]*=[^;]*createShader[^;]*\"basic_textured_fog\"[^;]*false[ \t\r\n]*\\);"
+    "basic_textured_fog.frag must be optional")
+require_source("${executable_load_source}"
+    "s_fragShaderLit[ \t\r\n]*=[^;]*createShader[^;]*\"skinned_lit\"[^;]*false[ \t\r\n]*\\);"
+    "skinned_lit.frag must be optional")
 require_source("${executable_load_source}"
     "if[ \t\r\n]*\\(!s_vertShaderSkinned\\)[ \t\r\n]*\\{[^}]*ReleaseShaders[ \t\r\n]*\\([^}]*return false;"
     "skinned shader failure must release earlier shader handles")
@@ -93,9 +109,25 @@ string(REGEX MATCHALL "buildRequiredPipeline[ \t\r\n]*\\(" required_calls "${cre
 string(REGEX MATCHALL "buildOptionalPipeline[ \t\r\n]*\\(" optional_calls "${create_source}")
 list(LENGTH required_calls required_call_count)
 list(LENGTH optional_calls optional_call_count)
-if(NOT required_call_count EQUAL 9 OR NOT optional_call_count EQUAL 1)
-    message(FATAL_ERROR "CreatePipelines must build exactly nine required sets and one optional set")
+# Nine required Classic sets; optional: the 2D depth-on set, the two GPU body-shadow sets, and the four
+# calls of one Enhanced lighting family (buildEnhancedSet), which builds the three Enhanced families.
+if(NOT required_call_count EQUAL 9 OR NOT optional_call_count EQUAL 7)
+    message(FATAL_ERROR "CreatePipelines must build exactly nine required sets and the optional 2D, shadow and Enhanced sets")
 endif()
+string(REGEX MATCHALL "buildEnhancedSet[ \t\r\n]*\\([ \t\r\n]*s_pipelines[A-Za-z0-9]+" enhanced_calls "${create_source}")
+set(expected_enhanced_calls)
+foreach(enhanced_set IN ITEMS s_pipelines3DEnhancedFog s_pipelinesSkinnedEnhancedFog s_pipelinesSkinnedLit)
+    string(REGEX MATCH "buildEnhancedSet[ \t\r\n]*\\([ \t\r\n]*${enhanced_set}[ \t\r\n]*," enhanced_call "${create_source}")
+    if(NOT enhanced_call)
+        message(FATAL_ERROR "CreatePipelines must build the Enhanced lighting set ${enhanced_set}")
+    endif()
+endforeach()
+list(LENGTH enhanced_calls enhanced_call_count)
+if(NOT enhanced_call_count EQUAL 3)
+    message(FATAL_ERROR "CreatePipelines must build exactly three Enhanced lighting sets")
+endif()
+require_source("${create_source}" "s_enhancedLightingAvailable[ \t\r\n]*=[^;]*IsComplete"
+    "Enhanced lighting must be available only when every Enhanced set is complete")
 
 require_pipeline_descriptor(buildOptionalPipeline s_pipelines2D "2d-depth-on" true true TwoDimensional false)
 require_pipeline_descriptor(buildRequiredPipeline s_pipelines2DDepthOff "2d-depth-off" false false TwoDimensional false)
@@ -107,8 +139,12 @@ require_pipeline_descriptor(buildRequiredPipeline s_pipelinesSkinned "skinned-cu
 require_pipeline_descriptor(buildRequiredPipeline s_pipelinesSkinnedNoCull "skinned-no-cull" true true Skinned false)
 require_pipeline_descriptor(buildRequiredPipeline s_pipelinesSkinnedDepthOff "skinned-depth-off" false false Skinned false)
 require_pipeline_descriptor(buildRequiredPipeline s_pipelinesSkinnedDepthReadOnly "skinned-depth-read-only" true false Skinned false)
+require_pipeline_descriptor(buildOptionalPipeline s_pipelinesSkinnedShadow "skinned-shadow" true false SkinnedShadow false)
+require_pipeline_descriptor(buildOptionalPipeline s_pipelinesSkinnedShadowDepthOff "skinned-shadow-depth-off" false false SkinnedShadow false)
 reject_source("${create_source}" "if[ \t\r\n]*\\([ \t\r\n]*s_vertShaderSkinned[ \t\r\n]*\\)"
     "required skinned pipelines must not be guarded")
+require_source("${create_source}" "if[ \t\r\n]*\\([ \t\r\n]*s_vertShaderSkinnedShadow[ \t\r\n]*\\)"
+    "shadow pipelines must be skipped without their optional shader")
 
 require_source("${create_source}" "requiredFailureCount[ \t\r\n]*!=[ \t\r\n]*0" "required failures must be aggregated")
 require_source("${create_source}" "firstRequiredError" "the first required SDL error must be retained")
@@ -123,14 +159,32 @@ require_source("${renderer_source}" "depth_write=\\{\\}" "pipeline diagnostics m
 require_source("${renderer_source}" "cull=\\{\\}" "pipeline diagnostics must include cull state")
 require_source("${renderer_source}" "error=\\{\\}" "pipeline diagnostics must include the SDL error")
 require_source("${build_source}"
-    "pipelineInfo\\.vertex_shader[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinned[ \t\r\n]*:[ \t\r\n]*s_vertShader2D"
+    "pipelineInfo\\.vertex_shader[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinned[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedShadow[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinnedShadow[ \t\r\n]*:[ \t\r\n]*s_vertShader2D"
     "pipeline vertex shader handles must remain selected from the pipeline layout")
-require_source("${build_source}" "pipelineInfo\\.fragment_shader[ \t\r\n]*=[ \t\r\n]*s_fragShaderTex"
-    "pipeline fragment shader handle must remain basic_textured.frag")
+require_source("${build_source}"
+    "pipelineInfo\\.fragment_shader[ \t\r\n]*=[ \t\r\n]*GetFragmentShader\\(description\\.fragmentShader\\)"
+    "pipeline fragment shader handles must be selected from the pipeline description")
+require_source("${renderer_source}"
+    "FragmentShader[ \t\r\n]+fragmentShader[ \t\r\n]*=[ \t\r\n]*FragmentShader::Textured;"
+    "pipeline descriptions must default to basic_textured.frag")
+require_source("${renderer_source}"
+    "case FragmentShader::Textured:[ \t\r\n]*break;[ \t\r\n]*\\}[ \t\r\n]*return s_fragShaderTex;"
+    "the Textured fragment shader must remain basic_textured.frag")
+# The classic client compares depth with GL_LEQUAL. With strict LESS, a later depth-writing pass
+# over the same mesh (the Bill of Balrog's textured body over its chrome body) loses every
+# equal-depth fragment.
+require_source("${build_source}"
+    "pipelineInfo\\.depth_stencil_state[ \t\r\n]*=[ \t\r\n]*MakeDepthStencilState[ \t\r\n]*\\([ \t\r\n]*description[ \t\r\n]*\\)"
+    "every pipeline must take its depth state from MakeDepthStencilState")
+require_source("${depth_state_source}" "\\.compare_op[ \t\r\n]*=[ \t\r\n]*SDL_GPU_COMPAREOP_LESS_OR_EQUAL;"
+    "pipelines must compare depth with LESS_OR_EQUAL, as the classic client's GL_LEQUAL")
+reject_source("${renderer_source}" "SDL_GPU_COMPAREOP_LESS([^_]|$)"
+    "no pipeline may compare depth with strict LESS")
 require_source("${log_source}"
-    "vertexShaderName[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*\"skinned_textured\\.vert\"[ \t\r\n]*:[ \t\r\n]*\"basic_textured\\.vert\""
+    "vertexShaderName[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*\"skinned_textured\\.vert\"[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedShadow[ \t\r\n]*\\?[ \t\r\n]*\"skinned_shadow\\.vert\"[ \t\r\n]*:[ \t\r\n]*\"basic_textured\\.vert\""
     "pipeline diagnostics must map the built vertex layout to its exact shader identifier")
-require_source("${log_source}" "fragmentShaderName[ \t\r\n]*=[ \t\r\n]*\"basic_textured\\.frag\""
+require_source("${log_source}"
+    "fragmentShaderName[ \t\r\n]*=[ \t\r\n]*GetFragmentShaderName\\(description\\.fragmentShader\\)"
     "pipeline diagnostics must name the exact fragment shader identifier")
 
 string(REGEX REPLACE "\"[ \t\r\n]*\"" "" compact_log_source "${log_source}")
@@ -157,7 +211,9 @@ if(required_failure_branch EQUAL -1 OR required_failure_return LESS required_fai
     message(FATAL_ERROR "CreatePipelines must reject required failures")
 endif()
 
-string(FIND "${init_source}" "if (!CreatePipelines())" failure_branch_start)
+# Init builds through CreatePipelinesForSampleCount, which retries with one
+# sample when multisampled pipelines fail and otherwise returns CreatePipelines'.
+string(FIND "${init_source}" "if (!CreatePipelinesForSampleCount())" failure_branch_start)
 string(FIND "${init_source}" "// Shaders are no longer needed" failure_branch_end)
 if(failure_branch_start EQUAL -1 OR failure_branch_end LESS failure_branch_start)
     message(FATAL_ERROR "CreatePipelines failure branch is missing")
@@ -179,7 +235,7 @@ if(cleanup_position EQUAL -1
 endif()
 
 string(FIND "${renderer_source}" "RenderSkinnedTriangles(std::span" skinned_start)
-string(FIND "${renderer_source}" "const Uint32 paletteRowOffset" skinned_pipeline_end)
+string(FIND "${renderer_source}" "const std::optional<BonePaletteSlot> palette" skinned_pipeline_end)
 if(skinned_start EQUAL -1 OR skinned_pipeline_end LESS skinned_start)
     message(FATAL_ERROR "RenderSkinnedTriangles pipeline selection is missing")
 endif()

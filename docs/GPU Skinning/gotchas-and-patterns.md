@@ -25,6 +25,9 @@
   mutable globals.
 - Cloth, shadow-volume, shadow-map, and vertex-wave paths intentionally remain
   CPU consumers. GPU eligibility must not bypass their materialization calls.
+- A body shadow whose meshes already have CPU vertices this frame stays on the
+  CPU. Those positions may come from cloth write-back, or from a skin at an
+  earlier body origin; the GPU would skin them again from the current state.
 
 ## Shader compatibility
 
@@ -37,6 +40,23 @@
   the shader must not add body origin a second time.
 - C++ uniform layout, HLSL declarations, and generated MSL/SPIR-V bindings form
   one contract. Keep size assertions and shader validation together.
+- glslang numbers HLSL vertex inputs in declaration order and ignores
+  `TEXCOORDn`. A shader that reads only some attributes of a layout must pin them
+  with `[[vk::location(n)]]`; dxc warns that it ignores the attribute.
+- spirv-cross numbers MSL buffers in order of first use, and SDL expects uniform
+  buffers before storage buffers. A vertex shader with both must read its
+  cbuffers before any storage load, or the reflection validation fails.
+
+## Terrain heights
+
+- Body shadows read a GPU copy of `BackTerrainHeight` and the `TW_HEIGHT` cells,
+  uploaded again only when `TerrainHeightVersion()` changes. Code that changes
+  either must go through the ZzzLodTerrain.cpp functions that increase it, or
+  call `MarkTerrainHeightsChanged()` after writing the arrays directly, as the
+  map editor's brushes and undo do; otherwise shadows keep following the old
+  ground.
+- `g_fSpecialHeight` follows the camera, so it travels in the shadow uniforms,
+  not in the grid.
 
 ## Deferred command lifetime
 
@@ -51,9 +71,12 @@
 
 ## Batching and profiling
 
-- Do not reorder blended terrain by texture pair. Base and overlay layers are
-  separate downstream draws, and overlays may render with depth testing off.
-  Only adjacent compatible commands may merge.
+- Terrain draws its ground first and its blended overlays after, each in its
+  original order; do not sort either by texture. The split relies on the
+  overlays staying depth-tested with depth writes off (`LESS_OR_EQUAL` against
+  their coplanar ground); an overlay drawn with the depth test off would paint
+  over nearer ground. `terrain_depth_state_contract` guards this. Only adjacent
+  compatible commands may merge.
 - A merge key must include pipeline, texture, sampler, MVP, fog, and contiguous
   vertex storage. Omitting captured state can replay earlier geometry with a
   later draw's settings.
@@ -72,6 +95,9 @@
   draw safely. Never enqueue a command with incomplete resources.
 - Frame readback is request-driven. Ordinary frames must not allocate transfer
   buffers or wait on readback fences.
+- `OpenPlayers()` zero-fills the `Models` array after constructing it. A `BMD`
+  member must survive being zeroed, so per-model renderer state such as shadow
+  streams lives outside `BMD`.
 
 ## Compatibility boundary
 

@@ -627,6 +627,46 @@ public unsafe partial class ConnectionManager
     }
 
     /// <summary>
+    /// Sends a <see cref="PlayerShopSetItemPriceExtended" /> to this connection.
+    /// </summary>
+    /// <param name="handle">The handle of the connection.</param>
+    /// <param name="moneyPrice">The price in zen, or in account coins when PriceItemType is one of the account coin values. Encoded like the price of PlayerShopItemExtended.</param>
+    /// <param name="priceItemType">The item (group in the highest 4 bits, number in the remaining ones) with which the price is paid, when RequiredItemAmount is greater than 0. Otherwise, 0xFFF0 = WCoin (C), 0xFFF1 = WCoin (P) and 0xFFF2 = Goblin Points define an account coin price; any other value a zen price. Encoded like the price of PlayerShopItemExtended.</param>
+    /// <param name="requiredItemAmount">The number of pieces of the item which is defined by PriceItemType; 0, if the price is not paid with items. Encoded like the price of PlayerShopItemExtended.</param>
+    /// <param name="itemSlot">The item slot.</param>
+    /// <remarks>
+    /// Is sent by the client when: The player wants to set a price of an item which is inside his personal item shop, in zen or in one of the price types which are allowed by the server (see PlayerShopPriceTypesExtended).
+    /// Causes reaction on server side: The price is set for the specified item, if its price type is allowed and the amount is within the configured limits. Works only if the shop is currently closed. The server responds with a PlayerShopSetItemPriceResponse.
+    /// </remarks>
+    [UnmanagedCallersOnly(EntryPoint = "SendPlayerShopSetItemPriceExtended")]
+    public static void SendPlayerShopSetItemPriceExtended(int handle, uint @moneyPrice, ushort @priceItemType, ushort @requiredItemAmount, byte @itemSlot)
+    {
+        if (!Connections.TryGetValue(handle, out var connection))
+        {
+            return;
+        }
+
+        try
+        {
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = PlayerShopSetItemPriceExtendedRef.Length;
+                var packet = new PlayerShopSetItemPriceExtendedRef(pipeWriter.GetSpan(length)[..length]);
+                packet.MoneyPrice = @moneyPrice;
+                packet.PriceItemType = @priceItemType;
+                packet.RequiredItemAmount = @requiredItemAmount;
+                packet.ItemSlot = @itemSlot;
+
+                return length;
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
+    }
+
+    /// <summary>
     /// Sends a <see cref="PickupItemRequest" /> to this connection.
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
@@ -1570,14 +1610,14 @@ public unsafe partial class ConnectionManager
     /// Sends a <see cref="CastleSiegeTaxChangeRequest" /> to this connection.
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
-    /// <param name="taxType">0=Undefined, 1=ChaosMachine, 2 = Normal, 3 = EntranceFeeLandOfTrials</param>
-    /// <param name="taxRate">The tax rate.</param>
+    /// <param name="taxType">The tax type.</param>
+    /// <param name="taxValue">The percentage rate for shop and Chaos Machine taxes, or the entrance fee amount for the hunting zone.</param>
     /// <remarks>
     /// Is sent by the client when: The guild master wants to change the tax rate in the castle npc.
     /// Causes reaction on server side: The server changes the tax rates accordingly.
     /// </remarks>
     [UnmanagedCallersOnly(EntryPoint = "SendCastleSiegeTaxChangeRequest")]
-    public static void SendCastleSiegeTaxChangeRequest(int handle, byte @taxType, uint @taxRate)
+    public static void SendCastleSiegeTaxChangeRequest(int handle, CastleSiegeTaxType @taxType, uint @taxValue)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -1591,7 +1631,7 @@ public unsafe partial class ConnectionManager
                 var length = CastleSiegeTaxChangeRequestRef.Length;
                 var packet = new CastleSiegeTaxChangeRequestRef(pipeWriter.GetSpan(length)[..length]);
                 packet.TaxType = @taxType;
-                packet.TaxRate = @taxRate;
+                packet.TaxValue = @taxValue;
 
                 return length;
             });
@@ -1640,14 +1680,14 @@ public unsafe partial class ConnectionManager
     /// Sends a <see cref="ToggleCastleGateRequest" /> to this connection.
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
-    /// <param name="closeState">The close state.</param>
+    /// <param name="isOpen">The is open.</param>
     /// <param name="gateId">The gate id.</param>
     /// <remarks>
     /// Is sent by the client when: The guild member of the castle owner wants to toggle the gate switch.
     /// Causes reaction on server side: The castle gate is getting opened or closed.
     /// </remarks>
     [UnmanagedCallersOnly(EntryPoint = "SendToggleCastleGateRequest")]
-    public static void SendToggleCastleGateRequest(int handle, byte @closeState, ushort @gateId)
+    public static void SendToggleCastleGateRequest(int handle, byte @isOpen, ushort @gateId)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -1660,7 +1700,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = ToggleCastleGateRequestRef.Length;
                 var packet = new ToggleCastleGateRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.CloseState = @closeState == 1;
+                packet.IsOpen = @isOpen == 1;
                 packet.GateId = @gateId;
 
                 return length;
@@ -1679,13 +1719,13 @@ public unsafe partial class ConnectionManager
     /// <param name="team">Team Number 0 to 7.</param>
     /// <param name="positionX">The position x.</param>
     /// <param name="positionY">The position y.</param>
-    /// <param name="command">0 = Attack, 1 = Defend, 2 = Wait</param>
+    /// <param name="command">The command.</param>
     /// <remarks>
     /// Is sent by the client when: The guild master sent a command to his guild during the castle siege event.
     /// Causes reaction on server side: The command is shown on the mini map of the guild members.
     /// </remarks>
     [UnmanagedCallersOnly(EntryPoint = "SendCastleGuildCommand")]
-    public static void SendCastleGuildCommand(int handle, byte @team, byte @positionX, byte @positionY, byte @command)
+    public static void SendCastleGuildCommand(int handle, byte @team, byte @positionX, byte @positionY, CastleSiegeGuildCommandType @command)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {

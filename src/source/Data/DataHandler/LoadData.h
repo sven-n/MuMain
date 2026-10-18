@@ -28,7 +28,7 @@ public:
     CLoadData();
     virtual ~CLoadData();
     // Returns false when the model file could not be opened.
-    bool AccessModel(int Type, const wchar_t* Dir, const wchar_t* FileName, int i = -1);
+    bool AccessModel(int Type, const wchar_t* Dir, const wchar_t* FileName, int i = -1, bool optional = false);
     // Lets the slot `Type` use the model data that AccessModel opened into
     // the slot `OwnerType` (BMD::ShareFrom); the last of them to let go frees
     // it.

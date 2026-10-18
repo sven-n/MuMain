@@ -1,5 +1,5 @@
 #pragma once
-#include "UI/NewUI/Inventory/NewUIItemMng.h"
+#include "UI/Inventory/ItemMng.h"
 #include "Render/Items/ItemEffects.h"
 
 extern OBJECT_BLOCK ObjectBlock[256];
@@ -85,6 +85,7 @@ void RenderItems();
 void MoveItems();
 int SelectItem();
 int GetScreenWidth();
+int GetScreenLeft();
 void ClearItems();
 
 void RenderCloudLowLevel(int index, int Type);

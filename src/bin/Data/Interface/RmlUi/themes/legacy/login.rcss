@@ -1,0 +1,174 @@
+/* Legacy theme for the login dialog -- decorators point at the original CWin sprite art
+   (login_back.tga, login_me.tga). #panel's left/top come from C++ to track the window's real
+   pixel origin; children use fixed-pixel offsets relative to it. Sizes are the original's pixels in
+   rem (login.rml's body is "scene-window-scale": 1rem = one original pixel, growing like the native text,
+   RmlNativeText.h); the text inside #panel ("native-text") is at the native text size. */
+
+@spritesheet login-back-sheet
+{
+	src: "../../../login_back.tga";
+	login-back-image: 0px 0px 329px 245px;
+}
+
+@spritesheet login-input-frame-sheet
+{
+	src: "../../../login_me.tga";
+	login-input-frame-image: 0px 0px 156px 23px;
+}
+
+@spritesheet login-checkbox-sheet
+{
+	src: "../../../op2_ch.tga";
+	login-checkbox-unchecked: 0px  0px 16px 16px;
+	login-checkbox-checked:   0px 16px 16px 16px;
+}
+
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	/* Stays none since body spans the whole window -- specific elements opt back in, or every
+	   screen click would hit UI and block legacy input. */
+	pointer-events: none;
+}
+
+#panel {
+	position: absolute;
+	width: 329rem;
+	height: 245rem;
+	font-family: "token(font-body)";
+	color: token(text-primary);
+	decorator: image(login-back-image);
+}
+
+/* modern-only decorative elements (shared markup, login.rml) -- legacy's #panel/.input-frame
+   already supply the full look via real sprite art, so these are just hidden. */
+.frame-accent, .login-content, .header-glow, .separator {
+	display: none;
+}
+
+.label {
+	position: absolute;
+}
+.label-server  { left: 111rem; top: 80rem; }
+.label-account { left: 30rem; top: 113rem; }
+.label-password{ left: 30rem; top: 139rem; }
+
+/* Username/password fields. Placement/size only -- appearance comes from base.rcss's shared
+   .text-field, minus the fill/border, since .input-frame's sprite art already draws each field's visual. Box sits
+   where the native CUITextInputBox overlay did (the old anchor position at its Init()'d 140x14),
+   and the text colour matches its SetTextColor(255, 230, 210). */
+.login-field {
+	position: absolute;
+	width: 140rem;
+	height: 16rem;
+	padding: 0;
+	font-family: "token(font-body)";
+	color: token(text-narrative);
+	background-color: transparent;
+	border-width: 0;
+	box-shadow: none;
+	decorator: none;
+}
+.login-field-account  { left: 115rem; top: 112rem; }
+.login-field-password { left: 115rem; top: 137rem; }
+
+.input-frame {
+	position: absolute;
+	width: 156rem;
+	height: 23rem;
+	decorator: image(login-input-frame-image);
+	pointer-events: none;
+}
+.input-account  { left: 109rem; top: 106rem; }
+.input-password { left: 109rem; top: 131rem; }
+
+.checkbox-row {
+	position: absolute;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.checkbox-remember-me  { left: 109rem; top: 156rem; }
+.checkbox-save-password{ left: 109rem; top: 176rem; }
+
+.checkbox-box {
+	display: inline-block;
+	width: 16rem;
+	height: 16rem;
+	decorator: image(login-checkbox-unchecked);
+}
+.checkbox-box.checked {
+	decorator: image(login-checkbox-checked);
+}
+
+/* Tick is baked into the checked-state art -- .checkbox-tick only matters for modern. */
+.checkbox-tick {
+	display: none;
+}
+
+.checkbox-label {
+	position: absolute;
+	left: 21rem;
+	top: 1rem;
+	white-space: nowrap;
+}
+
+@spritesheet login-ok-sheet
+{
+	src: "../../../message_ok_b_all.tga";
+	login-ok-idle:   0px  0px 54px 30px;
+	login-ok-hover:  0px 30px 54px 30px;
+	login-ok-active: 0px 60px 54px 30px;
+}
+@spritesheet login-cancel-sheet
+{
+	src: "../../../loding_cancel_b_all.tga";
+	login-cancel-idle:   0px  0px 54px 30px;
+	login-cancel-hover:  0px 30px 54px 30px;
+	login-cancel-active: 0px 60px 54px 30px;
+}
+
+/* bottom:15rem anchors these to #panel's own bottom edge: 245 panel - 200 top - 30 button = 15, the
+   original's top:200. */
+.btn {
+	position: absolute;
+	width: 54rem;
+	height: 30rem;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 30rem;
+	cursor: pointer;
+	color: transparent;
+	pointer-events: auto;
+	bottom: 15rem;
+}
+.btn-ok {
+	left: 150rem;
+	decorator: image(login-ok-idle);
+}
+.btn-ok:hover {
+	decorator: image(login-ok-hover);
+}
+.btn-ok:active {
+	decorator: image(login-ok-active);
+}
+.btn-cancel {
+	left: 211rem;
+	decorator: image(login-cancel-idle);
+}
+.btn-cancel:hover {
+	decorator: image(login-cancel-hover);
+}
+.btn-cancel:active {
+	decorator: image(login-cancel-active);
+}
+
+/* Sits below #panel's own bottom edge by design (top: 252 vs a 245-tall panel), not bottom-anchored
+   to it -- this is overflow content, not a panel-relative element like the buttons. */
+.trust-warning {
+	position: absolute;
+	left: 30rem;
+	top: 252rem;
+	width: 280rem;
+	color: token(accent-gold);
+}

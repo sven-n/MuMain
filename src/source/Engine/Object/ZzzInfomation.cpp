@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "UI/Core/UIManager.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "I18N/All.h"
 
@@ -22,9 +23,10 @@
 #include "GameLogic/Pets/GIPetManager.h"
 #include "GameLogic/Items/CComGem.h"
 #include "GameLogic/Items/ItemCategories.h"
-#include "UI/NewUI/Inventory/NewUIInventoryCtrl.h"
+#include "GameLogic/Items/ItemLevelBonus.h"
+#include "UI/Inventory/InventoryCtrl.h"
 #include "Network/Server/SocketSystem.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
@@ -470,22 +472,6 @@ void ItemConvert(ITEM* ip, BYTE Attribute1, BYTE Attribute2, BYTE ancientDiscrim
     // todo...
 }
 
-bool IsWing(ITEM* ip)
-{
-    return (ip->Type >= ITEM_WINGS_OF_SPIRITS && ip->Type <= ITEM_WINGS_OF_DARKNESS)
-        || (ip->Type >= ITEM_WING_OF_STORM && ip->Type <= ITEM_CAPE_OF_EMPEROR)
-        || (ip->Type >= ITEM_WINGS_OF_DESPAIR && ip->Type <= ITEM_WING_OF_DIMENSION)
-        || ip->Type == ITEM_DIVINE_SWORD_OF_ARCHANGEL
-        || ip->Type == ITEM_DIVINE_CB_OF_ARCHANGEL
-        || ip->Type == ITEM_DIVINE_STAFF_OF_ARCHANGEL
-        || ip->Type == ITEM_DIVINE_STICK_OF_ARCHANGEL
-        || ip->Type == ITEM_DIVINE_SCEPTER_OF_ARCHANGEL
-        || ip->Type == ITEM_CAPE_OF_LORD
-        || (ITEM_SMALL_CAPE_OF_LORD <= ip->Type && ip->Type <= ITEM_SMALL_WINGS_OF_SATAN)
-        || (ip->Type >= ITEM_CAPE_OF_FIGHTER && ip->Type <= ITEM_CAPE_OF_OVERRULE)
-        || (ip->Type == ITEM_LITTLE_WARRIORS_CLOAK);
-}
-
 int GetDropLevel(ITEM_ATTRIBUTE* p)
 {
     return p->Level + 30;
@@ -511,6 +497,22 @@ int GetExcellentAddValue(ITEM *ip)
     return 0;
 }
 
+// MagicPower and SuccessfulBlocking are BYTEs: a value past 255 shows as 255, not wrapped.
+constexpr int MaxByteStat = 255;
+// Second tier wings and the Capes of Lord and Fighter grow their defense by 2 per level up to
+// +9, third tier wings by 4 (other items by 3).
+constexpr int SecondTierWingDefensePerLevel = 2;
+constexpr int ThirdTierWingDefensePerLevel = 4;
+
+// Excellent and ancient items get the excellent bonus of damage, magic power,
+// blocking and defense. Wings keep their wing options in ExcellentFlags, but they
+// are not excellent. Excellent archangel weapons get it, as in OpenMU; the client
+// before 815b8828 left them out with the wings.
+static bool HasExcellentBonus(const ITEM* ip)
+{
+    return (ip->ExcellentFlags > 0 && !GameLogic::Items::IsWingItem(ip)) || ip->AncientDiscriminator > 0;
+}
+
 void CalcDamageMin(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
 {
     //ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
@@ -519,11 +521,7 @@ void CalcDamageMin(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
         return;
     }
 
-    if (IsWing(ip))
-    {
-        
-    }
-    if (ip->ExcellentFlags > 0) // TODO: For wings, too?
+    if (HasExcellentBonus(ip))
     {
         if (p->Level)
         {
@@ -539,12 +537,7 @@ void CalcDamageMin(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
         ip->DamageMin += 5 + (GetDropLevel(p) / 40);
     }
 
-    ip->DamageMin += (std::min<int>(9, ip->Level) * 3);
-
-    if (ip->Level - 9 > 0)
-    {
-        ip->DamageMin += ip->Level - 6;
-    }
+    ip->DamageMin += GameLogic::Items::GetItemLevelBonus(ip->Level);
 }
 
 void CalcDamageMax(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
@@ -554,14 +547,14 @@ void CalcDamageMax(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
         return;
     }
 
-    if (ip->ExcellentFlags > 0)
+    if (HasExcellentBonus(ip))
     {
         if (p->Level)
         {
             if (excelAddValue)
                 ip->DamageMax += excelAddValue;
             else
-                ip->DamageMax += p->DamageMax * 25 / p->Level + 5;
+                ip->DamageMax += p->DamageMin * 25 / p->Level + 5;
         }
     }
 
@@ -570,12 +563,7 @@ void CalcDamageMax(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
         ip->DamageMax += 5 + (GetDropLevel(p) / 40);
     }
 
-    ip->DamageMax += (std::min<int>(9, ip->Level) * 3);
-
-    if (ip->Level - 9 > 0)
-    {
-        ip->DamageMax += ip->Level - 6;
-    }
+    ip->DamageMax += GameLogic::Items::GetItemLevelBonus(ip->Level);
 }
 
 void CalcMagicPower(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
@@ -585,35 +573,33 @@ void CalcMagicPower(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
         return;
     }
 
-    if (ip->ExcellentFlags > 0)
+    // MagicPower is a BYTE: the sum can pass 255 before it is halved (an excellent +15
+    // Divine Staff of Archangel: 156 + 42 + 66), so it is added up in an int.
+    int magicPower = ip->MagicPower;
+    if (HasExcellentBonus(ip))
     {
         if (p->Level)
         {
             if (excelAddValue)
-                ip->MagicPower += excelAddValue;
+                magicPower += excelAddValue;
             else
-                ip->MagicPower += p->MagicPower * 25 / p->Level + 5;
+                magicPower += p->MagicPower * 25 / p->Level + 5;
         }
     }
 
     if (ip->AncientDiscriminator > 0)
     {
-        ip->MagicPower += 2 + (GetDropLevel(p) / 60);
+        magicPower += 2 + (GetDropLevel(p) / 60);
     }
 
-    ip->MagicPower += (std::min<int>(9, ip->Level) * 3);
-
-    if (ip->Level - 9 > 0)
-    {
-        ip->MagicPower += ip->Level - 6;
-    }
-
-    ip->MagicPower /= 2;
+    magicPower += GameLogic::Items::GetItemLevelBonus(ip->Level);
+    magicPower /= 2;
 
     if (!IsCepterItem(ip->Type))
     {
-        ip->MagicPower += ip->Level * 2;
+        magicPower += ip->Level * 2;
     }
+    ip->MagicPower = static_cast<BYTE>(std::min(magicPower, MaxByteStat));
 }
 
 void CalcSuccessfulBlocking(ITEM* ip, ITEM_ATTRIBUTE* p)
@@ -623,27 +609,21 @@ void CalcSuccessfulBlocking(ITEM* ip, ITEM_ATTRIBUTE* p)
         return;
     }
 
-    if (ip->ExcellentFlags > 0)
+    int blocking = ip->SuccessfulBlocking;
+    if (HasExcellentBonus(ip))
     {
         if (p->Level)
-            ip->SuccessfulBlocking += p->SuccessfulBlocking * 25 / p->Level + 5;
+            blocking += p->SuccessfulBlocking * 25 / p->Level + 5;
     }
-    ip->SuccessfulBlocking += (std::min<int>(9, p->Level) * 3);	// ~ +9
-    if (p->Level - 9 > 0)
-    {
-        ip->SuccessfulBlocking += p->Level - 6;
-    }
+    blocking += GameLogic::Items::GetItemLevelBonus(ip->Level);
+    ip->SuccessfulBlocking = static_cast<BYTE>(std::min(blocking, MaxByteStat));
 }
 
 void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
 {
     if (p->MagicDefense > 0)
     {
-        ip->MagicDefense += (std::min<int>(9, p->Level) * 3);	// ~ +9
-        if(p->Level - 9 > 0)
-        {
-            ip->MagicDefense += p->Level - 6;
-        }
+        ip->MagicDefense += GameLogic::Items::GetItemLevelBonus(ip->Level);
     }
 
     if (ip->Type == ITEM_CAPE_OF_LORD)
@@ -658,7 +638,7 @@ void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
     }
 
     auto isAncientItem = ip->AncientDiscriminator > 0;
-    auto isExcellent = ip->ExcellentFlags > 0;
+    auto isExcellent = HasExcellentBonus(ip);
     auto setItemDropLevel = GetDropLevel(p);
 
     if (ip->Type >= ITEM_SHIELD && ip->Type < ITEM_SHIELD + MAX_ITEM_INDEX)
@@ -679,40 +659,21 @@ void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
 
     if (isAncientItem)
     {
-        ip->Defense += p->Defense + (ip->Defense * 3 / setItemDropLevel + 2 + setItemDropLevel / 30);
+        ip->Defense += ip->Defense * 3 / setItemDropLevel + 2 + setItemDropLevel / 30;
     }
 
-    if (GameLogic::Items::IsSecondTierWingExceptCape(ip))
+    int perLevelUpToNine = GameLogic::Items::LevelBonusPerLevelUpToNine;
+    int firstStepAboveNine = GameLogic::Items::FirstLevelBonusStepAboveNine;
+    if (GameLogic::Items::IsSecondTierWing(ip))
     {
-        ip->Defense += (std::min<int>(9, ip->Level) * 2);	// ~ +9
-    }
-    else if (ip->Type == ITEM_CAPE_OF_LORD
-        || ip->Type == ITEM_CAPE_OF_FIGHTER)
-    {
-        ip->Defense += (std::min<int>(9, ip->Level) * 2);	// ~ +9
+        perLevelUpToNine = SecondTierWingDefensePerLevel;
     }
     else if (GameLogic::Items::IsThirdTierWing(ip))
     {
-        ip->Defense += (std::min<int>(9, ip->Level) * 4);	// ~ +9
+        perLevelUpToNine = ThirdTierWingDefensePerLevel;
+        firstStepAboveNine = GameLogic::Items::ThirdTierWingFirstLevelBonusStepAboveNine;
     }
-    else
-    {
-        ip->Defense += (std::min<int>(9, ip->Level) * 3);	// ~ +9
-    }
-    if (GameLogic::Items::IsThirdTierWing(ip))
-    {
-        if (ip->Level - 9 > 0)
-        {
-            ip->Defense += ip->Level - 5;
-        }
-    }
-    else
-    {
-        if (ip->Level - 9 > 0)
-        {
-            ip->Defense += ip->Level - 6;
-        }
-    }
+    ip->Defense += GameLogic::Items::GetItemLevelBonus(ip->Level, perLevelUpToNine, firstStepAboveNine);
 }
 
 void CalcRequirements(ITEM* ip, ITEM_ATTRIBUTE* p)
@@ -737,12 +698,15 @@ void CalcRequirements(ITEM* ip, ITEM_ATTRIBUTE* p)
         addValue = 5;
     }
 
-    if (p->RequireLevel
-        && ((ip->Type >= ITEM_SWORD && ip->Type < ITEM_WING)
-        || (ip->Type == ITEM_HORN_OF_FENRIR)
-        || (ip->Type >= ITEM_ORB_OF_TWISTING_SLASH && ip->Type <= ITEM_CAPE_OF_EMPEROR)
-        || (ip->Type >= ITEM_WING_OF_DIMENSION && ip->Type < ITEM_CAPE_OF_EMPEROR)
-        && (ip->Type != ITEM_CAPE_OF_FIGHTER)))
+    // These keep their base level requirement; the ones in the next branch grow with the + level.
+    const bool isWeaponOrArmor = ip->Type >= ITEM_SWORD && ip->Type < ITEM_WING;
+    const bool isFromOrbsToThirdTierWings = ip->Type >= ITEM_ORB_OF_TWISTING_SLASH && ip->Type <= ITEM_CAPE_OF_EMPEROR;
+    const bool isLateWingGroupKind =
+        ip->Type >= ITEM_WING_OF_DIMENSION && ip->Type < ITEM_HELPER && ip->Type != ITEM_CAPE_OF_FIGHTER;
+    const bool keepsBaseLevelRequirement =
+        isWeaponOrArmor || ip->Type == ITEM_HORN_OF_FENRIR || isFromOrbsToThirdTierWings || isLateWingGroupKind;
+
+    if (p->RequireLevel && keepsBaseLevelRequirement)
     {
         ip->RequireLevel = p->RequireLevel;
     }
@@ -1050,51 +1014,6 @@ void CalcExcellentOptions(ITEM* ip)
         ip->SpecialValue[ip->SpecialNum] = 10;
         ip->Special[ip->SpecialNum] = AT_IMPROVE_ATTACK_SPEED; ip->SpecialNum++;
     }
-}
-
-void CalcPartType(ITEM* ip)
-{
-    //part
-    if (ip->Type >= ITEM_BOW && ip->Type < ITEM_CROSSBOW || ip->Type == ITEM_CELESTIAL_BOW)
-        ip->Part = EQUIPMENT_WEAPON_LEFT;
-    if (GameLogic::Items::IsSummonerBook(ip))
-        ip->Part = EQUIPMENT_WEAPON_LEFT;
-    else if (ip->Type >= ITEM_SWORD && ip->Type < ITEM_STAFF + MAX_ITEM_INDEX)
-        ip->Part = EQUIPMENT_WEAPON_RIGHT;
-    else if (ip->Type >= ITEM_SHIELD && ip->Type < ITEM_SHIELD + MAX_ITEM_INDEX)
-        ip->Part = EQUIPMENT_WEAPON_LEFT;
-    else if (ip->Type >= ITEM_HELM && ip->Type < ITEM_HELM + MAX_ITEM_INDEX)
-        ip->Part = EQUIPMENT_HELM;
-    else if (ip->Type >= ITEM_ARMOR && ip->Type < ITEM_ARMOR + MAX_ITEM_INDEX)
-        ip->Part = EQUIPMENT_ARMOR;
-    else if (ip->Type >= ITEM_PANTS && ip->Type < ITEM_PANTS + MAX_ITEM_INDEX)
-        ip->Part = EQUIPMENT_PANTS;
-    else if (ip->Type >= ITEM_GLOVES && ip->Type < ITEM_GLOVES + MAX_ITEM_INDEX)
-        ip->Part = EQUIPMENT_GLOVES;
-    else if (ip->Type >= ITEM_BOOTS && ip->Type < ITEM_BOOTS + MAX_ITEM_INDEX)
-        ip->Part = EQUIPMENT_BOOTS;
-    else if (ip->Type >= ITEM_WING && ip->Type < ITEM_ORB_OF_TWISTING_SLASH)
-        ip->Part = EQUIPMENT_WING;
-    else if (ip->Type >= ITEM_WING_OF_STORM && ip->Type <= ITEM_WING_OF_DIMENSION)
-        ip->Part = EQUIPMENT_WING;
-    else if (ip->Type == ITEM_DARK_RAVEN_ITEM)
-        ip->Part = EQUIPMENT_WEAPON_LEFT;
-    else if (ip->Type >= ITEM_HELPER && ip->Type < ITEM_RING_OF_ICE)
-        ip->Part = EQUIPMENT_HELPER;
-    else if ((ip->Type >= ITEM_RING_OF_ICE && ip->Type < ITEM_PENDANT_OF_LIGHTING) || (ip->Type == ITEM_WIZARDS_RING && ip->Level == 0)
-        || (ip->Type == ITEM_WIZARDS_RING && ip->Level == 3)
-    )
-        ip->Part = EQUIPMENT_RING_RIGHT;
-    else if (ip->Type >= ITEM_RING_OF_FIRE && ip->Type <= ITEM_RING_OF_MAGIC)
-        ip->Part = EQUIPMENT_RING_RIGHT;
-    else if (ip->Type >= ITEM_PENDANT_OF_ICE && ip->Type <= ITEM_PENDANT_OF_ABILITY)
-        ip->Part = EQUIPMENT_AMULET;
-    else if (ip->Type >= ITEM_PENDANT_OF_LIGHTING && ip->Type < ITEM_HELPER + MAX_ITEM_INDEX)
-        ip->Part = EQUIPMENT_AMULET;
-    else if (ip->Type >= ITEM_CAPE_OF_FIGHTER && ip->Type <= ITEM_CAPE_OF_OVERRULE)
-        ip->Part = EQUIPMENT_WING;
-    else
-        ip->Part = -1;
 }
 
 void SetItemAttributes(ITEM* ip)
@@ -1448,8 +1367,6 @@ void SetItemAttributes(ITEM* ip)
     }
 
     CalcExcellentOptions(ip);
-
-    CalcPartType(ip);
 }
 
 int64_t ItemValue(ITEM* ip, int goldType)
@@ -3366,7 +3283,7 @@ void CHARACTER_MACHINE::CalculateDefense()
     }
 
     PlusSpecial(&Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE, &Equipment[EQUIPMENT_HELPER]);
-    if (Equipment[EQUIPMENT_WING].Type == ITEM_CAPE_OF_LORD || Equipment[EQUIPMENT_WING].Type == ITEM_CAPE_OF_FIGHTER)
+    if (GameLogic::Items::IsSecondTierCape(&Equipment[EQUIPMENT_WING]))
     {
         PlusSpecial(&Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE, &Equipment[EQUIPMENT_WING]);
     }

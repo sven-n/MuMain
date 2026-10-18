@@ -85,14 +85,14 @@ endfunction()
 
 set(editor_else_probe [[
 #ifdef _EDITOR
-EditorOverlay
+RenderEditorOverlayPass
 #else
 g_MuEditorCore
 #endif
 ]])
 strip_editor_sections(editor_else_probe editor_else_probe_off)
 require_match(editor_else_probe_off "g_MuEditorCore" "editor-OFF extraction retains an outer _EDITOR #else branch")
-forbid_symbol(editor_else_probe_off "EditorOverlay")
+forbid_symbol(editor_else_probe_off "RenderEditorOverlayPass")
 
 function(require_editor_before_cursor source_variable start_marker end_marker description)
     string(FIND "${${source_variable}}" "${start_marker}" region_start)
@@ -249,59 +249,47 @@ foreach(symbol IN ITEMS
     forbid_symbol(app_code "${symbol}")
 endforeach()
 
-require_match(renderer_code
-    "#[ \t]*ifdef[ \t]+_EDITOR[ \t\r\n]+EditorOverlay[ \t]*,[ \t\r\n]+#[ \t]*endif"
-    "editor marker enum exists only in editor builds")
-require_match(renderer_code
-    "if[ \t\r\n]*\\([ \t]*type[ \t]*==[ \t]*RenderCmdType::EditorOverlay[ \t]*\\)[ \t\r\n]*\\{[ \t\r\n]*return[ \t]+true[ \t]*;"
-    "editor marker is a draw-command batch boundary")
+# The editor is not a command of the game's list: it is drawn after RmlUi, in a pass of its own.
+forbid_symbol(renderer_code "RenderCmdType::EditorOverlay")
 
 string(FIND "${renderer_code}" "void QueueEditorRenderCommand()" queue_function_start)
+string(FIND "${renderer_code}" "static void RenderEditorOverlayPass" overlay_pass_start)
 string(FIND "${renderer_code}" "class MuRendererSDLGpu" renderer_class_start)
-if(queue_function_start EQUAL -1 OR renderer_class_start EQUAL -1 OR NOT queue_function_start LESS renderer_class_start)
-    message(FATAL_ERROR "Could not isolate the editor marker queue function")
+if(queue_function_start EQUAL -1 OR overlay_pass_start EQUAL -1 OR renderer_class_start EQUAL -1
+        OR NOT queue_function_start LESS overlay_pass_start OR NOT overlay_pass_start LESS renderer_class_start)
+    message(FATAL_ERROR "Could not isolate the editor queue function and its overlay pass")
 endif()
-math(EXPR queue_function_length "${renderer_class_start} - ${queue_function_start}")
+math(EXPR queue_function_length "${overlay_pass_start} - ${queue_function_start}")
 string(SUBSTRING "${renderer_code}" ${queue_function_start} ${queue_function_length} queue_function)
 require_match(queue_function
-    "RenderCmd[ \t]+command[ \t]*\\{\\}[ \t]*;[ \t\r\n]*command\.type[ \t]*=[ \t]*RenderCmdType::EditorOverlay[ \t]*;[ \t\r\n]*s_renderCmds\.push_back[ \t\r\n]*\\([ \t]*command[ \t]*\\)[ \t]*;"
-    "queue function appends one editor marker at the current command position")
-require_call_count(queue_function "s_renderCmds\\.push_back" 1
-    "editor queue function must append exactly one marker")
+    "if[ \t\r\n]*\\([ \t]*![ \t]*s_frameActive[ \t]*\\)[ \t\r\n]*\\{[ \t\r\n]*return[ \t]*;[ \t\r\n]*\\}[ \t\r\n]*s_editorDrawPending[ \t]*=[ \t]*true[ \t]*;"
+    "queue function marks the current frame's editor draw as pending")
+forbid_symbol(queue_function "s_renderCmds")
 
-string(FIND "${renderer_code}" "static void PreparePendingEditorDrawData" prepare_helper_start)
-string(FIND "${renderer_code}" "static std::vector<Uint16> s_stripIdxScratch" prepare_helper_end)
-if(prepare_helper_start EQUAL -1 OR prepare_helper_end EQUAL -1
-        OR NOT prepare_helper_start LESS prepare_helper_end)
-    message(FATAL_ERROR "Could not isolate the pending editor draw-data helper")
+string(FIND "${renderer_code}" "static std::vector<Uint16> s_stripIdxScratch" overlay_pass_end)
+if(overlay_pass_end EQUAL -1 OR NOT overlay_pass_start LESS overlay_pass_end)
+    message(FATAL_ERROR "Could not isolate the editor overlay pass")
 endif()
-math(EXPR prepare_helper_length "${prepare_helper_end} - ${prepare_helper_start}")
-string(SUBSTRING "${renderer_code}" ${prepare_helper_start} ${prepare_helper_length} prepare_helper)
-require_match(prepare_helper
-    "static[ \t]+void[ \t]+PreparePendingEditorDrawData[ \t\r\n]*\\([ \t\r\n]*SDL_GPUCommandBuffer[ \t]*\\*[ \t]*commandBuffer[ \t\r\n]*\\)"
-    "pending editor draw-data helper is file-local")
-require_call_count(prepare_helper "std::any_of" 1 "pending editor helper scans the command list exactly once")
-require_call_count(prepare_helper "g_MuEditorCore\\.PrepareDrawData" 1
-    "pending editor helper prepares draw data exactly once")
-string(REGEX MATCHALL "RenderCmdType::EditorOverlay" prepare_helper_markers "${prepare_helper}")
-list(LENGTH prepare_helper_markers prepare_helper_marker_count)
-if(NOT prepare_helper_marker_count EQUAL 1)
-    message(FATAL_ERROR
-        "Invalid SDL_GPU editor contract: pending editor helper must inspect exactly one EditorOverlay marker; found ${prepare_helper_marker_count}")
-endif()
-string(FIND "${prepare_helper}" "std::any_of" prepare_helper_scan_position)
-string(FIND "${prepare_helper}" "RenderCmdType::EditorOverlay" prepare_helper_marker_position)
-string(FIND "${prepare_helper}" "if (!editorRenderPending)" prepare_helper_guard_position)
-string(FIND "${prepare_helper}" "return;" prepare_helper_return_position)
-string(FIND "${prepare_helper}" "g_MuEditorCore.PrepareDrawData(commandBuffer)" prepare_helper_call_position)
-if(prepare_helper_scan_position EQUAL -1 OR prepare_helper_marker_position EQUAL -1
-        OR prepare_helper_guard_position EQUAL -1 OR prepare_helper_return_position EQUAL -1
-        OR prepare_helper_call_position EQUAL -1
-        OR NOT prepare_helper_scan_position LESS prepare_helper_marker_position
-        OR NOT prepare_helper_marker_position LESS prepare_helper_guard_position
-        OR NOT prepare_helper_guard_position LESS prepare_helper_return_position
-        OR NOT prepare_helper_return_position LESS prepare_helper_call_position)
-    message(FATAL_ERROR "Pending editor helper must scan, guard, then prepare current draw data")
+math(EXPR overlay_pass_length "${overlay_pass_end} - ${overlay_pass_start}")
+string(SUBSTRING "${renderer_code}" ${overlay_pass_start} ${overlay_pass_length} overlay_pass)
+require_match(overlay_pass
+    "static[ \t]+void[ \t]+RenderEditorOverlayPass[ \t\r\n]*\\([ \t\r\n]*SDL_GPUCommandBuffer[ \t]*\\*[ \t]*commandBuffer[ \t]*,[ \t\r\n]*SDL_GPUTexture[ \t]*\\*[ \t]*colorTexture[ \t\r\n]*\\)"
+    "editor overlay pass is file-local")
+require_call_count(overlay_pass "g_MuEditorCore\\.PrepareDrawData" 1 "editor overlay pass uploads the draw data once")
+require_call_count(overlay_pass "SDL_BeginGPURenderPass" 1 "editor overlay pass opens exactly one render pass")
+require_call_count(overlay_pass "g_MuEditorCore\\.RenderDrawData" 1 "editor overlay pass draws the draw data once")
+require_match(overlay_pass "colorTarget\\.load_op[ \t]*=[ \t]*SDL_GPU_LOADOP_LOAD"
+    "editor overlay pass loads the frame, RmlUi included, instead of clearing it")
+require_match(overlay_pass
+    "SDL_BeginGPURenderPass[ \t\r\n]*\\([ \t]*commandBuffer[ \t]*,[ \t]*&colorTarget[ \t]*,[ \t]*1[ \t]*,[ \t]*nullptr[ \t]*\\)"
+    "editor overlay pass has no depth target, as the ImGui pipeline")
+string(FIND "${overlay_pass}" "g_MuEditorCore.PrepareDrawData" overlay_prepare_position)
+string(FIND "${overlay_pass}" "SDL_BeginGPURenderPass" overlay_begin_position)
+string(FIND "${overlay_pass}" "g_MuEditorCore.RenderDrawData" overlay_draw_position)
+string(FIND "${overlay_pass}" "SDL_EndGPURenderPass" overlay_end_position)
+if(NOT overlay_prepare_position LESS overlay_begin_position OR NOT overlay_begin_position LESS overlay_draw_position
+        OR NOT overlay_draw_position LESS overlay_end_position)
+    message(FATAL_ERROR "Editor overlay pass must upload, open its pass, draw, then close it")
 endif()
 
 string(FIND "${renderer_code}" "void EndFrame() override" end_frame_start)
@@ -311,42 +299,78 @@ if(end_frame_start EQUAL -1 OR end_frame_end EQUAL -1 OR NOT end_frame_start LES
 endif()
 math(EXPR end_frame_length "${end_frame_end} - ${end_frame_start}")
 string(SUBSTRING "${renderer_code}" ${end_frame_start} ${end_frame_length} end_frame)
-require_call_count(end_frame "SDL_BeginGPURenderPass" 1 "EndFrame must own exactly one render pass")
+
+# EndFrame replays the recorded frame through file-local helpers: one pass for a Classic frame, or
+# scene, bloom and UI passes for a post-processed one. The helpers sit right before EndFrame.
+string(FIND "${renderer_code}" "struct ReplayView" frame_replay_start)
+if(frame_replay_start EQUAL -1 OR NOT frame_replay_start LESS end_frame_start)
+    message(FATAL_ERROR "Could not isolate the frame replay helpers")
+endif()
+math(EXPR frame_replay_length "${end_frame_end} - ${frame_replay_start}")
+string(SUBSTRING "${renderer_code}" ${frame_replay_start} ${frame_replay_length} frame_replay)
+string(FIND "${frame_replay}" "static void ReplayCommands" replay_commands_start)
+string(FIND "${frame_replay}" "static SDL_GPUDepthStencilTargetInfo MakeDepthTarget" replay_commands_end)
+if(replay_commands_start EQUAL -1 OR replay_commands_end EQUAL -1
+        OR NOT replay_commands_start LESS replay_commands_end)
+    message(FATAL_ERROR "Could not isolate ReplayCommands()")
+endif()
+math(EXPR replay_commands_length "${replay_commands_end} - ${replay_commands_start}")
+string(SUBSTRING "${frame_replay}" ${replay_commands_start} ${replay_commands_length} replay_commands)
+
+# EndFrame begins one render pass itself: the post-RmlUi pass that draws content which must sit
+# above RmlUi (cursor, legacy text overlays) and therefore LOADs on top of it. The frame's own
+# passes go through the replay helpers.
+require_call_count(end_frame "SDL_BeginGPURenderPass" 1
+    "EndFrame must begin only the post-RmlUi pass itself; the frame passes go through the replay helpers")
+require_match(end_frame "postUiColorTarget\\.load_op = SDL_GPU_LOADOP_LOAD"
+    "EndFrame's post-RmlUi pass must load the main pass and RmlUi content rather than clear it")
 require_call_count(end_frame "SDL_SubmitGPUCommandBuffer" 1 "EndFrame must keep one direct frame submission")
 require_call_count(end_frame "SDL_SubmitGPUCommandBufferAndAcquireFence" 0
     "EndFrame must not add a second frame submission through a fence")
-require_call_count(end_frame "PreparePendingEditorDrawData" 1
-    "EndFrame must invoke the pending editor helper exactly once")
-forbid_symbol(end_frame "g_MuEditorCore.PrepareDrawData")
-require_call_count(end_frame "g_MuEditorCore\\.RenderDrawData" 1 "EndFrame must render ImGui draw data exactly once")
-string(FIND "${end_frame}" "PreparePendingEditorDrawData(s_cmdBuf)" prepare_helper_call_position)
-string(FIND "${end_frame}" "SDL_BeginGPURenderPass" begin_pass_position)
-if(prepare_helper_call_position EQUAL -1 OR begin_pass_position EQUAL -1
-        OR NOT prepare_helper_call_position LESS begin_pass_position)
-    message(FATAL_ERROR "EndFrame must prepare pending editor draw data before SDL_BeginGPURenderPass")
+require_call_count(end_frame "RenderEditorOverlayPass" 1 "EndFrame must draw the editor exactly once")
+forbid_symbol(end_frame "g_MuEditorCore")
+forbid_symbol(frame_replay "g_MuEditorCore")
+string(FIND "${end_frame}" "s_preSubmitCallback()" pre_submit_position)
+string(FIND "${end_frame}" "RenderEditorOverlayPass(s_cmdBuf, frameColorTexture)" overlay_call_position)
+string(FIND "${end_frame}" "s_postRmlUiCallback()" post_rmlui_position)
+if(pre_submit_position EQUAL -1 OR overlay_call_position EQUAL -1 OR post_rmlui_position EQUAL -1
+        OR NOT pre_submit_position LESS overlay_call_position OR NOT overlay_call_position LESS post_rmlui_position)
+    message(FATAL_ERROR "EndFrame must draw the editor after RmlUi and before the post-RmlUi pass (game cursor)")
 endif()
-string(FIND "${end_frame}" "SDL_GPUViewport s_currentViewport" viewport_init_start)
-string(FIND "${end_frame}" "SDL_Rect s_currentScissor" viewport_init_end)
+string(FIND "${end_frame}" "ReplayPostProcessedFrame(frameColorTexture" post_processed_replay_position)
+string(FIND "${end_frame}" "ReplayFrame(frameColorTexture" classic_replay_position)
+if(post_processed_replay_position EQUAL -1 OR classic_replay_position EQUAL -1
+        OR NOT post_processed_replay_position LESS pre_submit_position
+        OR NOT classic_replay_position LESS pre_submit_position)
+    message(FATAL_ERROR "EndFrame must replay the frame before RmlUi draws over it")
+endif()
+string(FIND "${frame_replay}" "static ReplayView FullFrameView()" viewport_init_start)
+string(FIND "${frame_replay}" "static bool IsMultisampled()" viewport_init_end)
 if(viewport_init_start EQUAL -1 OR viewport_init_end EQUAL -1 OR NOT viewport_init_start LESS viewport_init_end)
     message(FATAL_ERROR "Could not isolate replay viewport initialization")
 endif()
 math(EXPR viewport_init_length "${viewport_init_end} - ${viewport_init_start}")
-string(SUBSTRING "${end_frame}" ${viewport_init_start} ${viewport_init_length} viewport_init)
+string(SUBSTRING "${frame_replay}" ${viewport_init_start} ${viewport_init_length} viewport_init)
 foreach(symbol IN ITEMS "{0.0f, 0.0f" "s_swapW" "s_swapH" "0.0f, 1.0f}")
     string(FIND "${viewport_init}" "${symbol}" viewport_symbol_position)
     if(viewport_symbol_position EQUAL -1)
         message(FATAL_ERROR "Missing SDL_GPU editor contract: replay initializes the active viewport to the full swapchain")
     endif()
 endforeach()
-require_match(end_frame
-    "case[ \t]+RenderCmdType::SetViewport[ \t]*:[ \t\r\n]*\\{[ \t\r\n]*s_currentViewport[ \t]*=[ \t]*cmd\.viewport[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectViewport[ \t\r\n]*\\([ \t]*s_currentViewport[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUViewport[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&s_currentViewport[ \t]*\\)[ \t]*;"
+require_match(replay_commands
+    "Render::SdlGpuReplayState[ \t]+replayState[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectViewport[ \t\r\n]*\\([ \t]*view\.viewport[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUViewport[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&view\.viewport[ \t]*\\)[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectScissor[ \t\r\n]*\\([ \t]*view\.scissor[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUScissor[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&view\.scissor[ \t]*\\)[ \t]*;"
+    "each replay pass owns a render-pass-local replay cache and starts from the carried viewport and scissor")
+string(REGEX MATCHALL "Render::SdlGpuReplayState[ \t]+replayState" replay_caches "${replay_commands}")
+list(LENGTH replay_caches replay_cache_count)
+if(NOT replay_cache_count EQUAL 1)
+    message(FATAL_ERROR "Invalid SDL_GPU editor contract: ReplayCommands must own exactly one replay cache")
+endif()
+require_match(replay_commands
+    "case[ \t]+RenderCmdType::SetViewport[ \t]*:[ \t\r\n]*\\{[ \t\r\n]*view\.viewport[ \t]*=[ \t]*cmd\.viewport[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectViewport[ \t\r\n]*\\([ \t]*view\.viewport[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUViewport[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&view\.viewport[ \t]*\\)[ \t]*;"
     "replay caches and applies the active viewport")
-require_match(end_frame
-    "case[ \t]+RenderCmdType::SetScissor[ \t]*:[ \t\r\n]*\\{[ \t\r\n]*s_currentScissor[ \t]*=[ \t]*cmd\.scissor[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectScissor[ \t\r\n]*\\([ \t]*s_currentScissor[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUScissor[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&s_currentScissor[ \t]*\\)[ \t]*;"
+require_match(replay_commands
+    "case[ \t]+RenderCmdType::SetScissor[ \t]*:[ \t\r\n]*\\{[ \t\r\n]*view\.scissor[ \t]*=[ \t]*cmd\.scissor[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectScissor[ \t\r\n]*\\([ \t]*view\.scissor[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUScissor[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&view\.scissor[ \t]*\\)[ \t]*;"
     "replay caches and applies the active scissor")
-require_match(end_frame
-    "Render::SdlGpuReplayState[ \t]+replayState[ \t]*;[ \t\r\n]*for[ \t]*\\([ \t]*const[ \t]+auto&[ \t]+cmd[ \t]*:[ \t]*s_renderCmds[ \t]*\\)"
-    "EndFrame owns one render-pass-local replay cache")
 foreach(helper IN ITEMS
         "BindReplayPipeline"
         "PushReplayVertexUniforms"
@@ -357,15 +381,15 @@ foreach(helper IN ITEMS
     require_match(renderer_code "${helper}" "renderer must use ${helper} for cached replay")
 endforeach()
 
-forbid_symbol(end_frame "if (!s_texturesInvalidated)")
+forbid_symbol(frame_replay "if (!s_texturesInvalidated)")
 require_match(renderer_code
-    "if[ \t\r\n]*\\([ \t]*type[ \t]*==[ \t]*RenderCmdType::EditorOverlay[ \t]*\\)[ \t\r\n]*\\{[ \t\r\n]*return[ \t]+false[ \t]*;[ \t\r\n]*\\}[ \t\r\n]*#[ \t]*endif[ \t\r\n]*return[ \t]+IsDrawCommand[ \t\r\n]*\\([ \t]*type[ \t]*\\)[ \t]*;"
-    "texture invalidation skips game draws but preserves state and editor markers")
-string(FIND "${end_frame}" "for (const auto& cmd : s_renderCmds)" replay_loop_position)
-string(FIND "${end_frame}" "if (s_texturesInvalidated && IsUnsafeInvalidatedDrawCommand(cmd.type))"
+    "IsUnsafeInvalidatedDrawCommand[ \t\r\n]*\\([ \t]*RenderCmdType[ \t]+type[ \t]*\\)[ \t\r\n]*\\{[ \t\r\n]*return[ \t]+IsDrawCommand[ \t\r\n]*\\([ \t]*type[ \t]*\\)[ \t]*;"
+    "texture invalidation skips game draws but preserves state commands")
+string(FIND "${replay_commands}" "const RenderCmd& cmd = s_renderCmds[index];" replay_loop_position)
+string(FIND "${replay_commands}" "if (s_texturesInvalidated && IsUnsafeInvalidatedDrawCommand(cmd.type))"
     invalidated_skip_position)
-string(FIND "${end_frame}" "++s_dbgRenderCmdsReplayedThisFrame" replay_count_position)
-string(FIND "${end_frame}" "switch (cmd.type)" replay_switch_position)
+string(FIND "${replay_commands}" "++s_dbgRenderCmdsReplayedThisFrame" replay_count_position)
+string(FIND "${replay_commands}" "switch (cmd.type)" replay_switch_position)
 if(replay_loop_position EQUAL -1 OR invalidated_skip_position EQUAL -1 OR replay_count_position EQUAL -1
         OR replay_switch_position EQUAL -1
         OR NOT replay_loop_position LESS invalidated_skip_position
@@ -375,23 +399,11 @@ if(replay_loop_position EQUAL -1 OR invalidated_skip_position EQUAL -1 OR replay
         "Replay must skip unsafe invalidated game draws before counting processed commands")
 endif()
 
-string(FIND "${end_frame}" "case RenderCmdType::EditorOverlay:" marker_case_start)
-string(FIND "${end_frame}" "case RenderCmdType::DrawTriangles:" marker_case_end)
-if(marker_case_start EQUAL -1 OR marker_case_end EQUAL -1 OR NOT marker_case_start LESS marker_case_end)
-    message(FATAL_ERROR "Could not isolate editor marker replay")
-endif()
-math(EXPR marker_case_length "${marker_case_end} - ${marker_case_start}")
-string(SUBSTRING "${end_frame}" ${marker_case_start} ${marker_case_length} marker_case)
-require_match(marker_case
-    "g_MuEditorCore\.RenderDrawData[ \t\r\n]*\\([ \t]*s_cmdBuf[ \t]*,[ \t]*s_renderPass[ \t]*\\)[ \t]*;[ \t\r\n]*replayState\.Invalidate[ \t\r\n]*\\([ \t]*\\)[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectViewport[ \t\r\n]*\\([ \t]*s_currentViewport[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUViewport[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&s_currentViewport[ \t]*\\)[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectScissor[ \t\r\n]*\\([ \t]*s_currentScissor[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUScissor[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&s_currentScissor[ \t]*\\)[ \t]*;[ \t\r\n]*break[ \t]*;"
-    "marker invalidates cached state then restores viewport and scissor")
-forbid_symbol(marker_case "return")
-
 strip_editor_sections(renderer_code renderer_editor_off_code)
 foreach(symbol IN ITEMS
-        "EditorOverlay"
         "QueueEditorRenderCommand"
-        "PreparePendingEditorDrawData"
+        "RenderEditorOverlayPass"
+        "s_editorDrawPending"
         "g_MuEditorCore"
         "ImGui_ImplSDLGPU3_PrepareDrawData"
         "ImGui_ImplSDLGPU3_RenderDrawData")
@@ -417,6 +429,61 @@ if(editor_shutdown_position EQUAL -1 OR renderer_shutdown_position EQUAL -1)
 endif()
 if(NOT editor_shutdown_position LESS renderer_shutdown_position)
     message(FATAL_ERROR "ShutdownRuntime must shut down the editor before renderer/device teardown")
+endif()
+
+# The editor's own windows (ImGui viewports outside the game window): updated after every frame ImGui
+# ended and drawn once the game's frame went to the GPU, from the main loop, or before the next editor
+# frame starts for a frame that ended elsewhere.
+string(FIND "${editor_code}" "void CMuEditorCore::RenderPlatformWindows()" platform_windows_start)
+if(platform_windows_start EQUAL -1 OR NOT editor_render_start LESS platform_windows_start
+        OR NOT platform_windows_start LESS editor_prepare_start)
+    message(FATAL_ERROR "Could not isolate CMuEditorCore::RenderPlatformWindows()")
+endif()
+math(EXPR platform_windows_length "${editor_prepare_start} - ${platform_windows_start}")
+string(SUBSTRING "${editor_code}" ${platform_windows_start} ${platform_windows_length} platform_windows)
+require_match(platform_windows
+    "if[ \t\r\n]*\\([ \t]*![ \t]*m_bPlatformWindowsPending[ \t]*\\)[ \t\r\n]*\\{[ \t\r\n]*return[ \t]*;[ \t\r\n]*\\}[ \t\r\n]*m_bPlatformWindowsPending[ \t]*=[ \t]*false[ \t]*;"
+    "the editor's own windows run once per ended editor frame")
+require_call_count(platform_windows "ImGui::UpdatePlatformWindows" 1
+    "the editor updates its own windows once per ended frame, also while they are off")
+require_match(platform_windows
+    "platformWindowsOn[ \t]*=[ \t]*\\([ \t]*ImGui::GetIO\\(\\)\\.ConfigFlags[ \t]*&[ \t]*ImGuiConfigFlags_ViewportsEnable[ \t]*\\)[ \t]*!=[ \t]*0[ \t]*;"
+    "the editor knows whether its own windows are on")
+require_match(platform_windows
+    "gameWindowHidden[ \t\r\n]*=[^;]*SDL_WINDOW_MINIMIZED[^;]*m_skippedGameFrames[^;]*;"
+    "the editor knows whether the game window is out of sight (minimized, or skipping frame after frame)")
+require_match(platform_windows
+    "if[ \t\r\n]*\\([ \t]*platformWindowsOn[ \t]*&&[ \t]*\\([ \t]*m_bGameFrameActive[ \t]*\\|\\|[ \t]*gameWindowHidden[ \t]*\\)[ \t]*\\)[ \t\r\n]*\\{[ \t\r\n]*ImGui::RenderPlatformWindowsDefault\\(\\)[ \t]*;"
+    "the editor draws its own windows while they are on, unless the game skipped a frame of a window that is shown")
+string(FIND "${platform_windows}" "ImGui::UpdatePlatformWindows()" platform_update_position)
+string(FIND "${platform_windows}" "ImGui::RenderPlatformWindowsDefault()" platform_render_position)
+if(NOT platform_update_position LESS platform_render_position)
+    message(FATAL_ERROR "The editor must update its own windows before drawing them")
+endif()
+
+string(FIND "${editor_render}" "m_bGameFrameActive = mu::GetRenderer().IsFrameActive()" game_frame_active_position)
+if(game_frame_active_position EQUAL -1 OR NOT game_frame_active_position LESS imgui_render_position)
+    message(FATAL_ERROR "Editor Render() must note whether the game draws the frame before ImGui::Render() ends it")
+endif()
+string(FIND "${editor_render}" "m_bPlatformWindowsPending = true" platform_pending_position)
+if(platform_pending_position EQUAL -1 OR NOT imgui_render_position LESS platform_pending_position
+        OR NOT platform_pending_position LESS frame_finished_position)
+    message(FATAL_ERROR "Editor Render() must mark its own windows pending once ImGui::Render() ended the frame")
+endif()
+
+string(FIND "${editor_update}" "RenderPlatformWindows();" update_platform_windows_position)
+string(FIND "${editor_update}" "ImGui::NewFrame();" update_new_frame_position)
+if(update_platform_windows_position EQUAL -1 OR update_new_frame_position EQUAL -1
+        OR NOT update_platform_windows_position LESS update_new_frame_position)
+    message(FATAL_ERROR "Editor Update() must finish the last frame's own windows before ImGui::NewFrame()")
+endif()
+
+require_call_count(app_code "g_MuEditorCore\\.RenderPlatformWindows" 1
+    "the main loop draws the editor's own windows once per frame")
+string(FIND "${app_code}" "RenderProfiledFrame();" app_frame_position)
+string(FIND "${app_code}" "g_MuEditorCore.RenderPlatformWindows();" app_platform_windows_position)
+if(app_frame_position EQUAL -1 OR NOT app_frame_position LESS app_platform_windows_position)
+    message(FATAL_ERROR "The main loop must draw the editor's own windows after the game's frame went to the GPU")
 endif()
 
 require_editor_before_cursor(scene_manager_code "if (Success)" "CheckServerConnection()" "SceneManager editor/cursor region")
