@@ -232,6 +232,27 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
     }
 }
 
+// A fixed excellent bonus takes the place of the excellent term of damage and magic power,
+// so it only counts where the item's profile has that term.
+void ValidateExcellentBonusTerms(const ItemDefinition& definition, const ItemStatProfile& profile,
+                                 std::vector<ItemDataIssue>& issues)
+{
+    if (definition.excellentBonus == 0)
+    {
+        return;
+    }
+    const bool damageWithoutTerm =
+        (definition.damageMin > 0 || definition.damageMax > 0) && !profile.Get(ItemStat::Damage).excellent;
+    const bool magicPowerWithoutTerm = definition.magicPower > 0 && !profile.Get(ItemStat::MagicPower).excellent;
+    if (damageWithoutTerm || magicPowerWithoutTerm)
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
+                 std::string("has an excellent bonus, but its stat profile has no excellent term for its ") +
+                     (damageWithoutTerm ? "damage" : "magic power") + ", so the bonus does not count there",
+                 "excellentBonus");
+    }
+}
+
 void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
                           const std::string& statFile, std::vector<ItemDataIssue>& issues)
 {
@@ -239,17 +260,22 @@ void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatP
     for (const ItemDefinition& definition : items)
     {
         // A deleted item keeps its fields in the item database, but is not saved.
-        if (!definition.Exists() || definition.statProfile.empty())
+        if (!definition.Exists())
         {
             continue;
         }
-        if (profiles.Find(definition.statProfile) == ItemStatProfiles::UnknownProfile)
+        const int profile = profiles.Find(definition.statProfile);
+        if (profile == ItemStatProfiles::UnknownProfile)
         {
             AddIssue(issues, ItemDataIssueSeverity::Error, definition,
                      "\"" + definition.statProfile + "\" is not a profile of " + statFile, "statProfile");
             continue;
         }
-        used.insert(definition.statProfile);
+        ValidateExcellentBonusTerms(definition, profiles.Get(profile), issues);
+        if (!definition.statProfile.empty())
+        {
+            used.insert(definition.statProfile);
+        }
     }
     for (const std::string& name : profiles.GetProfileNames())
     {

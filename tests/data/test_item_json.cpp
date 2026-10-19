@@ -420,6 +420,29 @@ TEST_CASE("Item validation checks the stat profiles against the stat file [data]
     CHECK(issues.size() == 2);
 }
 
+TEST_CASE("Item validation warns about an excellent bonus the stat profile has no term for [data][items]")
+{
+    // Without an excellent damage term the Chaos Dragon Axe's fixed bonus would not count.
+    ItemStatFile file;
+    file.profiles.push_back({"plain", {}});
+    WrittenStatProfile withTerm{"withTerm", {}};
+    withTerm.stats[static_cast<size_t>(ItemStat::Damage)].excellent = {WrittenStatTerm::State::Values, {25, 5}};
+    file.profiles.push_back(withTerm);
+    const ItemStatProfiles profiles(file);
+
+    ItemDefinition axe = MakeKris();
+    axe.excellentBonus = 15;
+    axe.statProfile = "plain";
+    std::vector<ItemDataIssue> issues;
+    ValidateStatProfiles(std::vector<ItemDefinition>{axe}, profiles, "ItemStats.json", issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "excellentBonus"));
+
+    axe.statProfile = "withTerm";
+    issues.clear();
+    ValidateStatProfiles(std::vector<ItemDefinition>{axe}, profiles, "ItemStats.json", issues);
+    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "excellentBonus"));
+}
+
 TEST_CASE("Item slots, wing tiers and tags are written by name [data][items]")
 {
     ItemDefinition wing = MakeKris();

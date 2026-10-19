@@ -23,7 +23,9 @@ void ValidateItemModels(std::span<const ItemModelDefinition> models, std::vector
 
 // The stat profiles of the items that exist against the item stat file
 // (`statFile` names it in messages): a profile the file does not have is an
-// error, a profile of the file that no item names is a warning.
+// error; a profile of the file that no item names, and an excellent bonus where
+// the item's profile has no excellent term for its damage or magic power, are
+// warnings.
 void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
                           const std::string& statFile, std::vector<ItemDataIssue>& issues);
 

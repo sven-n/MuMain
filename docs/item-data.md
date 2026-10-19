@@ -360,7 +360,9 @@ the field (**Copy text** copies it). All problems are also written to
   item as no weapon of that kind
 - a `potionPriority` on an item without a `healingPotion`, `manaPotion`,
   `complexPotion` or `shieldPotion` tag (nothing reads it there)
-- an `excellentBonus` on an item without damage or magic power
+- an `excellentBonus` on an item without damage or magic power, or whose
+  stat profile has no excellent term for its damage or magic power (the
+  bonus takes the term's place, so it does not count there)
 - `excellentRaisesLevel: false` on an item without a level requirement
 - a `requirementsByLevel` entry next to a base value of the same requirement
 - no `statProfile` on an item whose data gives one, as in item files saved
