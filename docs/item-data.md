@@ -70,6 +70,9 @@ read as the English name only; saving writes the object form.
 - The game shows the name in the current UI locale (options window
   → language). Items without a translation show the English name.
   Switching the language updates item names immediately.
+- A name that is the same in a language (*Kris*, *Zen*) is written like the
+  English one (`"de": "Kris"`), so the translations tool does not count it
+  as missing.
 - Logs always use the English name and the item id, e.g.
   `Short Sword (0,1)`, never a translation.
 
@@ -365,6 +368,7 @@ the field (**Copy text** copies it). All problems are also written to
   bonus takes the term's place, so it does not count there)
 - `excellentRaisesLevel: false` on an item without a level requirement
 - a `requirementsByLevel` entry next to a base value of the same requirement
+- a name in a language the game has no UI texts for (it is never shown)
 - no `statProfile` on an item whose data gives one, as in item files saved
   before the field: the item has the default until an edit or a bmd import
   gives it the profile (`"default"` keeps the default without a warning)
@@ -640,7 +644,9 @@ The item editor (editor builds, F12) edits the items of the running game:
   uses it immediately.
 - **Name changes are stored for the current UI locale.** To edit a
   translation, switch the language first; to edit the English name,
-  switch to English.
+  switch to English. The **Item Translations** window edits the names of all
+  languages side by side (see
+  [translation-system.md → In the item editor](translation-system.md#in-the-item-editor)).
 - **Moving an item** to an empty item number (the Index column) takes its
   model along: the model data in `Data/Items/Models` and the model the game
   has opened, so the item keeps its looks. A number with a model of its own
@@ -648,7 +654,8 @@ The item editor (editor builds, F12) edits the items of the running game:
   so, and the item stays where it is.
 - **Save Items** checks the data and writes `Data/Items` next to the game,
   with the model files in `Data/Items/Models` of the groups whose models
-  were moved; the other model files are not touched.
+  were moved; the other model files are not touched. It lists for each UI
+  language how many item names it misses.
   With errors nothing is written, and the errors are listed in the
   editor console. If a file cannot be written (read-only folder, full disk),
   no file is replaced, the popup says so and the console names the file.
@@ -678,8 +685,9 @@ only item data. The import is there to bring in your own old item files.
 - **Import from bmd** replaces all items with
   `Data/Local/<Eng|Por|Spn>/Item_<lang>.bmd` next to the game; copy your
   files there first. English provides the values and is required,
-  Portuguese and Spanish add their names (a translation equal to the
-  English name is not stored). Items the English file does not have keep
+  Portuguese and Spanish add their names (also one equal to the English
+  name, which says the name is the same in that language). Items the
+  English file does not have keep
   the English name they have now, and every item keeps its tags, wing tier,
   weapon kind, stat fields (`statProfile`, `excellentBonus`,
   `excellentRaisesLevel`, `requirementsByLevel`) and rule flags (the bmd

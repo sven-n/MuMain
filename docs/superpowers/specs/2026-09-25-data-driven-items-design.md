@@ -256,8 +256,12 @@ Warnings (data works, but is probably wrong):
 
 - unknown fields (ignored by the game)
 - a name longer than 49 characters (cut in the game)
-- later phases: missing model files or model links (phase 4), missing
-  translations (phase 5), combinations that do not make sense
+- a name in a language the game has no UI texts for (phase 5: it is never
+  shown)
+- later phases: combinations that do not make sense
+
+Missing translations are not warnings at load: the translations tool of the
+editor counts them, and Save Items lists them per language (phase 5).
 
 Behavior:
 
@@ -384,7 +388,7 @@ table:
 | **Categories** | Tag-centered view: pick a tag, see and change its items. |
 | **Model and visuals** | Model file picker for `Data\Item\*.bmd` with 3D preview, texture folder, inventory and ground display values, cloth flag, and glow, render style and effects chosen from lists (D24), each with the list of the other items that use the same look. |
 | **Look editor** (phase 13) | The shared look editor of the [roadmap](2026-09-29-data-driven-content-roadmap-design.md), opened for the looks of the selected item: its building blocks with a live preview, bone picking, the items that use a look and the warning before a shared look changes. |
-| **Translations** | Items × languages grid, filter for missing translations. |
+| **Item Translations** | Items × languages grid (every UI language, English first), the missing names counted per language, a filter for them, "same as English" for names that do not change. Built in phase 5, before the other tools. |
 | **OpenMU sync** | Import, diff and export of the exchange file. |
 
 Common features: validation before saving (duplicate ids, missing English
@@ -407,8 +411,8 @@ in both repos (as separate PRs, one per repo).
 | 4 | Models into data | Client | MuMain | 2 | Model files per item group (D22), model slots stay `MODEL_ITEM + type` (D23, own model slots). One PR per part: **4a** model files and textures (`OpenItems()` / `OpenItemTextures()`), **4b** inventory and ground display, **4c** render effects (D24) in three parts: **4c1** glow, **4c2** render styles, **4c3** item effects. |
 | 4d | Shared models | Client | MuMain | 4 | Models as entries of their own that items reference by name, so items can share a model (D23, shared models). Two PRs: **4d1** shared model entries, each file opened once; **4d2** the conversions between item types and model slots in one place, and shared model data freed by its last user. |
 | 4e | Clear model loading errors | Client | MuMain | 4 | One message for missing model files and textures of item models that names the item, the model entry, the texture and the searched folders. |
-| 5 | Translation tooling | Client | MuMain | 2, 6 | Translations editor (items × languages), missing-translation warnings. The names themselves moved to phase 2 (D17). |
-| 6 | Editors | Client | MuMain | 2–5 | Focused MuEditor tools (section 9) on the rules of D26, including add/remove items and picking the looks of an item from lists. |
+| 5 | Translation tooling | Client | MuMain | 2 | Translations editor (items × languages), missing names counted in the editor. The names themselves moved to phase 2 (D17). Done before phase 6. |
+| 6 | Editors | Client | MuMain | 2–5 | Focused MuEditor tools (section 9) on the rules of D26, including add/remove items and picking the looks of an item from lists. Takes over phase 5's item list. |
 | 7 | Item sync, client side | Client | MuMain | 2, 6 | MuEditor import/export of the item exchange file, with diff. |
 | B | Item sync, server side | Server | OpenMU | 7 (file format) | Admin panel import/export pages for the item exchange file, with diff. |
 | 8 | Data-driven tooltips | Client | MuMain | 2, 5 | Tooltip JSON converted from the `ItemTooltip*` files; `RenderItemInfo()` reads data; tooltip editor. Moved earlier if needed. |
@@ -734,13 +738,13 @@ server with original clients (after phases 6 and B).
 
    Every item keeps its model slot `MODEL_ITEM + item type` (D23, own model slots). Three
    PRs:
-   - **4a Model files and textures:** `OpenItems()` / `OpenItemTextures()`
+   - **4a Model files and textures (done):** `OpenItems()` / `OpenItemTextures()`
      become one loop over the item data. Models that aren't items (e.g.
      `MODEL_EVENT + …`, body parts) and the extra effect bitmaps stay in
      code. `textureFolders` is a search list: each texture comes from the
      first folder that has it (the old code loaded folder after folder and
      sometimes relied on textures another model had loaded before).
-   - **4b Display:** the inventory transform (`RenderItem3D()` slot
+   - **4b Display (done):** the inventory transform (`RenderItem3D()` slot
      anchor, `RenderObjectScreen()` offset, rotation, scale and body
      height) and the ground transform (`ItemAngle()`, `ItemHeight()`) come
      from the data; `"cloth": true` marks capes worn as cloth (their cloth
@@ -751,7 +755,7 @@ server with original clients (after phases 6 and B).
      cases that depend on the item level stay in code until phase 12, and
      so does the look of the event models drawn for level variants, a small
      table in `Render/Items/ItemDisplay.cpp`.
-   - **4c Render effects (D24)**, three PRs because the drawing code is
+   - **4c Render effects (D24) (done)**, three PRs because the drawing code is
      large (about 3,500 lines):
      - **4c1 Glow:** `"glow"` holds the level an item glows like (jewels +8,
        wings +0, or one per item level for arrows, bolts and Devil's Square
@@ -832,7 +836,7 @@ server with original clients (after phases 6 and B).
    Loading models only when an item is first drawn would be a separate step
    later.
 
-   **4d Shared models (D23)**, in two parts:
+   **4d Shared models (D23) (done)**, in two parts:
 
    - **4d1 Shared model entries (done):** the model files that several
      items use (34 files, 145 items: the skill parchments, the socket
@@ -851,7 +855,7 @@ server with original clients (after phases 6 and B).
      first, which used up numbers). A test checks that every file several
      items use is a shared model. The Looks view of MuEditor shows the
      shared model and lists its items.
-   - **4d2 Model slots in one place:** every conversion between an item
+   - **4d2 Model slots in one place (done):** every conversion between an item
      type and its model slot goes through `Data::Items::ToModelSlot`,
      `ToItemType` and `IsItemModelSlot` (`ItemModelSlots.h`) instead of
      `+ MODEL_ITEM` / `- MODEL_ITEM` in about 120 lines. They return what
@@ -890,7 +894,7 @@ server with original clients (after phases 6 and B).
      - No test covers the texture references a sharing slot gives back
        when it lets go last (it needs loaded textures).
 
-   **4e Clear model loading errors:** a missing model file or texture of an
+   **4e Clear model loading errors (done):** a missing model file or texture of an
    item model shows one message after loading instead of one popup per
    texture. Each line names the item (name, group, number), its entry in
    the model files, the `.bmd` file and mesh, the texture (with the
@@ -902,9 +906,32 @@ server with original clients (after phases 6 and B).
    the `.bmd` file instead of the path in the model. The error dialogs
    have a **Copy text** button and show the mouse cursor, which the
    loading screen hides.
-5. **Translation tooling**: a translations editor (items × languages, with
-   a filter for missing translations) and missing-translation warnings.
-   The names themselves are part of phase 2 (D17).
+5. **Translation tooling (done)**: the names themselves are part of phase 2
+   (D17); this phase added the tooling, before phase 6 (the user's order):
+   - The **Item Translations** window of MuEditor: the item names as a grid of
+     items and the UI languages (English first), edited in place for any
+     language and stored whole (also beyond the 49 characters the game
+     shows). Each language's header counts the items without a name of
+     their own in it, also languages without any item names yet; **Missing
+     in** lists them, and a filled name keeps its row until refreshed.
+     "Same as English" and "Remove translation" in the cell menu; clicking
+     an item number shows it in the item table.
+   - A name that is the same in a language is written like the English one
+     (`"de": "Kris"`), so it is not counted as missing; the bmd import keeps
+     such names instead of dropping them.
+   - Missing names are counted in the editor and listed per language on
+     Save Items, not logged at load. Loading warns about a name in a
+     language the game has no UI texts for (it is never shown).
+   - The shipped data: the names that are the same in a language are
+     written explicitly, eight missing Portuguese and Spanish names come
+     from the original client's `ItemTooltip_<lang>.bmd`, and the Spanish
+     names of the Capes of Fighter and Overrule (Korean read as Latin-1)
+     became *Capa del Guerrero* and *Capa Reinante*.
+   - For phase 6: the item list (`CItemListModel`: search over all names,
+     `group,number` and the item type, the missing-name filter) is kept
+     apart from ImGui, so the item browser builds on it, and
+     `CItemDataHandler::SetItemName` edits a name in the item database for
+     any language. Importing names from OpenMU belongs to phase 7.
 6. **Editors**: the MuEditor tools from section 9, including add/remove,
    on the rules of D26 (one selection, "used by", a warning with the list
    of users before a shared definition changes, copies for variants). The
