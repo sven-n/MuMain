@@ -6,11 +6,12 @@
 
 #include "Data/GameData/ItemData/ItemNames.h"
 
+#include <span>
 #include <string>
 #include <vector>
 
-// The translations tool: the item names as a grid of items and languages (the
-// languages of the UI, English first), with how many names each language
+// The Item Translations window: the item names as a grid of items and the
+// languages of the UI (English first), with how many names each language
 // misses and a filter for them. Edits go into the item database right away;
 // Save Items writes them.
 class CMuItemTranslationsUI
@@ -27,10 +28,15 @@ private:
     void RenderTable();
     void RenderIdCell(int itemType);
     void RenderNameCell(int itemType, int column, const char* locale);
-    void CommitName(int itemType, const char* locale);
+    void CommitName(int itemType, const char* locale, const char* text);
+    // Stores the text of a cell that stopped being drawn while it was being
+    // edited (its column or the window hidden, its row gone from the list):
+    // ImGui then drops the edit without reporting its end.
+    void CommitEditNotDrawn();
     void UpdateCounts();
 
-    std::vector<const char*> m_locales;
+    // The UI languages, English first (I18N::GetAvailableLocales).
+    std::span<const char* const> m_locales;
     std::vector<Data::Items::ItemNameCount> m_counts;
     int m_countsVersion = -1;
 
@@ -40,10 +46,13 @@ private:
     int m_missingLocale = -1;
     CItemListModel m_list;
 
-    // The cell being edited, and its text while it is.
+    // The cell being edited, its text so far, and whether it was drawn this
+    // frame.
     int m_editItem = -1;
     int m_editColumn = -1;
-    char m_editBuffer[NameBufferSize] = {};
+    std::string m_editLocale;
+    std::string m_editText;
+    bool m_editDrawn = false;
 };
 
 #define g_MuItemTranslationsUI CMuItemTranslationsUI::GetInstance()

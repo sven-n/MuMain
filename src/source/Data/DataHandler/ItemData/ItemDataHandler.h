@@ -40,11 +40,11 @@ public:
     // into the item database. A changed name is stored for the current UI
     // locale.
     void OnItemEdited(int itemType);
-    // The translations tool set the item's name in `locale` (an empty text
-    // removes the translation; the English name cannot be emptied). Goes into
-    // the item database, whole also when it is longer than ITEM_ATTRIBUTE's
-    // name; ItemAttribute shows the name in the UI locale. False when the item
-    // does not exist or the English name would be empty.
+    // Sets the item's name in `locale` (an empty text removes the translation;
+    // the English name cannot be emptied) in the item database, whole also when
+    // it is longer than ITEM_ATTRIBUTE's name; ItemAttribute shows the name in
+    // the UI locale. False when the item does not exist or the English name
+    // would be empty.
     bool SetItemName(int itemType, std::string_view locale, std::string text);
     // The item editor swapped two entries of ItemAttribute[]. A moved item
     // takes its model along (the item model database and the opened model

@@ -4,13 +4,22 @@
 
 namespace Data::Items
 {
-bool HasNameIn(const ItemDefinition& definition, std::string_view locale)
+const std::string& GetOwnName(const ItemDefinition& definition, std::string_view locale)
 {
+    static const std::string none;
     if (locale == LocalizedString::NeutralLocale)
     {
-        return !definition.names.GetNeutral().empty();
+        return definition.names.GetNeutral();
     }
-    return definition.names.GetTranslations().contains(locale);
+    const auto& translations = definition.names.GetTranslations();
+    const auto translation = translations.find(locale);
+    return translation != translations.end() ? translation->second : none;
+}
+
+bool HasNameIn(const ItemDefinition& definition, std::string_view locale)
+{
+    // A translation is never stored empty (LocalizedString::Set removes it).
+    return !GetOwnName(definition, locale).empty();
 }
 
 std::vector<ItemNameCount> CountItemNames(std::span<const ItemDefinition> items, std::span<const char* const> locales)

@@ -10,7 +10,7 @@
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "../MuEditor/UI/ItemEditor/ItemEditorActions.h"
 #include "../MuEditor/UI/ItemEditor/ItemEditorPopups.h"
-#include "../MuEditor/UI/ItemEditor/ItemEditorTable.h"
+#include "../MuEditor/UI/ItemEditor/MuItemEditorUI.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
@@ -18,7 +18,6 @@
 #include "imgui.h"
 
 #include <algorithm>
-#include <cctype>
 #include <cstdio>
 #include <string_view>
 
@@ -38,31 +37,15 @@ bool IsEnglish(std::string_view locale)
     return locale == Data::LocalizedString::NeutralLocale;
 }
 
-// The item's own name in the language; empty when it shows the English one.
-std::string OwnName(const ItemDefinition& definition, std::string_view locale)
-{
-    if (IsEnglish(locale))
-    {
-        return definition.names.GetNeutral();
-    }
-    const auto& translations = definition.names.GetTranslations();
-    const auto translation = translations.find(locale);
-    return translation != translations.end() ? translation->second : std::string();
-}
-
 template <size_t Size> void CopyToBuffer(char (&buffer)[Size], const std::string& text)
 {
     std::snprintf(buffer, Size, "%s", text.c_str());
 }
 
-std::string ToLower(const char* text)
+std::string MissingLabel(const char* locale, const Data::Items::ItemNameCount& count)
 {
-    std::string lower = text;
-    for (char& character : lower)
-    {
-        character = static_cast<char>(std::tolower(static_cast<unsigned char>(character)));
-    }
-    return lower;
+    return std::string(I18N::GetLanguageDisplayName(locale)) + " (" +
+           I18N::Format(I18N::Editor::CountMissing, {std::to_string(count.missing)}) + ")";
 }
 } // namespace
 
@@ -74,16 +57,8 @@ CMuItemTranslationsUI& CMuItemTranslationsUI::GetInstance()
 
 void CMuItemTranslationsUI::Render(bool* open)
 {
-    // English first, then the other languages of the UI.
-    m_locales.clear();
-    m_locales.push_back(Data::LocalizedString::NeutralLocale.data());
-    for (const char* locale : I18N::GetAvailableLocales())
-    {
-        if (!IsEnglish(locale))
-        {
-            m_locales.push_back(locale);
-        }
-    }
+    m_locales = I18N::GetAvailableLocales();
+    m_editDrawn = false;
 
     char title[MuEditor::WindowIds::TitleCapacity];
     MuEditor::Layout::PrepareToolWindow();
@@ -106,6 +81,7 @@ void CMuItemTranslationsUI::Render(bool* open)
         RenderTable();
     }
     ImGui::End();
+    CommitEditNotDrawn();
 }
 
 void CMuItemTranslationsUI::UpdateCounts()
@@ -136,12 +112,13 @@ void CMuItemTranslationsUI::RenderToolbar()
         {
             m_missingLocale = -1;
         }
-        for (int index = 1; index < static_cast<int>(m_locales.size()); ++index)
+        for (int index = 0; index < static_cast<int>(m_locales.size()); ++index)
         {
-            const std::string label =
-                std::string(I18N::GetLanguageDisplayName(m_locales[index])) + " (" +
-                I18N::Format(I18N::Editor::CountMissing, {std::to_string(m_counts[index].missing)}) + ")";
-            if (ImGui::Selectable(label.c_str(), m_missingLocale == index))
+            if (IsEnglish(m_locales[index]))
+            {
+                continue;
+            }
+            if (ImGui::Selectable(MissingLabel(m_locales[index], m_counts[index]).c_str(), m_missingLocale == index))
             {
                 m_missingLocale = index;
             }
@@ -161,7 +138,7 @@ void CMuItemTranslationsUI::RenderToolbar()
 void CMuItemTranslationsUI::RenderTable()
 {
     CItemListModel::Filter filter;
-    filter.search = ToLower(m_search);
+    filter.search = m_search;
     if (m_missingLocale >= 0)
     {
         filter.missingLocale = m_locales[m_missingLocale];
@@ -182,23 +159,21 @@ void CMuItemTranslationsUI::RenderTable()
     ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_NoHide, IdColumnWidth * uiScale);
     for (size_t column = 0; column < m_locales.size(); ++column)
     {
-        // The language's code after "###" keeps the column's place and
-        // visibility while its count changes.
-        std::string label = I18N::GetLanguageDisplayName(m_locales[column]);
-        if (column > 0)
-        {
-            label += " (" + I18N::Format(I18N::Editor::CountMissing, {std::to_string(m_counts[column].missing)}) + ")";
-        }
+        const bool english = IsEnglish(m_locales[column]);
+        // "###" and the language's code keep the header's id the same while its
+        // count changes.
+        std::string label = english ? std::string(I18N::GetLanguageDisplayName(m_locales[column]))
+                                    : MissingLabel(m_locales[column], m_counts[column]);
         label += std::string("###") + m_locales[column];
-        ImGui::TableSetupColumn(label.c_str(), column == 0 ? ImGuiTableColumnFlags_NoHide : ImGuiTableColumnFlags_None,
+        ImGui::TableSetupColumn(label.c_str(), english ? ImGuiTableColumnFlags_NoHide : ImGuiTableColumnFlags_None,
                                 NameColumnWidth * uiScale);
     }
     ImGui::TableHeadersRow();
 
     ImGuiListClipper clipper;
     clipper.Begin(static_cast<int>(itemTypes.size()));
-    // The row being edited stays, also when it scrolls out of view, so the edit
-    // is not lost.
+    // The row being edited stays drawn when it scrolls out of view, so the edit
+    // goes on.
     const auto editing = std::find(itemTypes.begin(), itemTypes.end(), m_editItem);
     if (editing != itemTypes.end())
     {
@@ -232,8 +207,10 @@ void CMuItemTranslationsUI::RenderIdCell(int itemType)
     std::snprintf(id, sizeof(id), "%d,%d", Data::Items::GetItemGroup(itemType), Data::Items::GetItemNumber(itemType));
     if (ImGui::Selectable(id))
     {
+        // The item table in front, with the item listed and selected.
         g_MuEditorCore.ShowItemEditor();
-        CItemEditorTable::RequestScrollToIndex(itemType);
+        g_MuItemEditorUI.SelectItem(itemType);
+        ImGui::SetWindowFocus(MuEditor::WindowIds::ItemEditor);
     }
     if (ImGui::IsItemHovered())
     {
@@ -250,63 +227,81 @@ void CMuItemTranslationsUI::RenderNameCell(int itemType, int column, const char*
     }
 
     ImGui::PushID(column);
-    const bool editing = m_editItem == itemType && m_editColumn == column;
-    char shown[NameBufferSize];
-    if (!editing)
-    {
-        CopyToBuffer(shown, OwnName(*definition, locale));
-    }
-    char* buffer = editing ? m_editBuffer : shown;
+    // While the field is active, and once more when it stops being active,
+    // ImGui writes its own text into this buffer; the text from the database
+    // only counts while the field is not being edited.
+    char buffer[NameBufferSize];
+    CopyToBuffer(buffer, Data::Items::GetOwnName(*definition, locale));
+    const bool wasEditCell = m_editItem == itemType && m_editColumn == column;
     ImGui::SetNextItemWidth(-FLT_MIN);
     // A missing name shows the English one it falls back to, greyed.
     ImGui::InputTextWithHint("##Name", definition->names.GetNeutral().c_str(), buffer, NameBufferSize);
-    if (ImGui::IsItemActivated())
+    const bool active = ImGui::IsItemActive();
+    if (active)
     {
         m_editItem = itemType;
         m_editColumn = column;
-        CopyToBuffer(m_editBuffer, OwnName(*definition, locale));
+        m_editLocale = locale;
+        m_editText = buffer;
+        m_editDrawn = true;
     }
-    if (ImGui::IsItemDeactivated())
+    else if (ImGui::IsItemDeactivated())
     {
-        if (ImGui::IsItemDeactivatedAfterEdit() && m_editItem == itemType && m_editColumn == column)
+        // Another cell may have taken over earlier in this frame: this cell's
+        // edit is stored all the same, and the other cell stays the edited one.
+        if (ImGui::IsItemDeactivatedAfterEdit())
         {
-            CommitName(itemType, locale);
+            CommitName(itemType, locale, buffer);
         }
-        m_editItem = -1;
-        m_editColumn = -1;
+        if (wasEditCell)
+        {
+            m_editItem = -1;
+            m_editColumn = -1;
+        }
     }
 
-    if (!IsEnglish(locale) && ImGui::BeginPopupContextItem("##NameMenu"))
+    // Not while the field is active: opening the menu would take the focus from
+    // it before its text is stored.
+    if (!IsEnglish(locale) && !active && ImGui::BeginPopupContextItem("##NameMenu"))
     {
         if (ImGui::MenuItem(I18N::Editor::SameAsEnglish))
         {
-            g_ItemDataHandler.SetItemName(itemType, locale, definition->names.GetNeutral());
-            m_list.KeepRowsAfterOwnEdit();
+            CommitName(itemType, locale, definition->names.GetNeutral().c_str());
         }
         if (ImGui::MenuItem(I18N::Editor::RemoveTranslation, nullptr, false,
                             Data::Items::HasNameIn(*definition, locale)))
         {
-            g_ItemDataHandler.SetItemName(itemType, locale, "");
-            m_list.KeepRowsAfterOwnEdit();
+            CommitName(itemType, locale, "");
         }
         ImGui::EndPopup();
     }
     ImGui::PopID();
 }
 
-void CMuItemTranslationsUI::CommitName(int itemType, const char* locale)
+void CMuItemTranslationsUI::CommitName(int itemType, const char* locale, const char* text)
 {
     const ItemDefinition* definition = g_ItemDatabase.Find(itemType);
-    if (definition == nullptr || OwnName(*definition, locale) == m_editBuffer)
+    if (definition == nullptr || Data::Items::GetOwnName(*definition, locale) == text)
     {
         return;
     }
-    if (!g_ItemDataHandler.SetItemName(itemType, locale, m_editBuffer))
+    if (!g_ItemDataHandler.SetItemName(itemType, locale, text))
     {
         g_MuEditorConsoleUI.LogEditor(I18N::Editor::TheEnglishNameCannotBeEmpty);
         return;
     }
     m_list.KeepRowsAfterOwnEdit();
+}
+
+void CMuItemTranslationsUI::CommitEditNotDrawn()
+{
+    if (m_editItem < 0 || m_editDrawn)
+    {
+        return;
+    }
+    CommitName(m_editItem, m_editLocale.c_str(), m_editText.c_str());
+    m_editItem = -1;
+    m_editColumn = -1;
 }
 
 #endif // _EDITOR

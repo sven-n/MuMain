@@ -17,15 +17,15 @@ public:
     void ClearSearch() { m_szItemSearchBuffer[0] = '\0'; }
     void SaveColumnPreferences();
     void LoadColumnPreferences();
+    // Selects the item and shows it in the table; clears the search when it
+    // hides the item.
+    void SelectItem(int itemIndex);
 
 private:
     CMuItemEditorUI();
     ~CMuItemEditorUI();
 
     void RenderSearchBar();
-    // Selects the item and shows it in the table; clears the search when it
-    // hides the item.
-    void SelectItem(int itemIndex);
     void RenderColumnVisibilityMenu();
 
     char m_szItemSearchBuffer[256];

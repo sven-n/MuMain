@@ -5,7 +5,6 @@
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemNames.h"
 
-#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -32,6 +31,9 @@ TEST_CASE("An item has a name in a language when it has a translation, also one 
     CHECK(HasNameIn(kris, "pt"));
     CHECK_FALSE(HasNameIn(kris, "de"));
     CHECK_FALSE(HasNameIn(MakeNamedItem(1, "||de=Klinge"), "en"));
+    CHECK(GetOwnName(kris, "es") == "Daga");
+    CHECK(GetOwnName(kris, "en") == "Kris");
+    CHECK(GetOwnName(kris, "de").empty());
 }
 
 TEST_CASE("Item names are counted by language over the items that exist [data][items]")

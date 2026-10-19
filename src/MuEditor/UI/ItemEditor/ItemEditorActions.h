@@ -41,8 +41,8 @@ public:
 
 private:
     static void LogIssues(const std::vector<Data::Items::ItemDataIssue>& issues);
-    // After a save: for each language of the UI but English, how many item
-    // names it misses (the items show the English name there).
+    // After a save: each UI language that misses item names, with how many (the
+    // items show the English name there).
     static void LogMissingItemNames();
     static void LogImportResult(const Data::Items::ItemBmdImportResult& result);
 

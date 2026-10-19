@@ -11,8 +11,12 @@
 // items have a name of their own in a language.
 namespace Data::Items
 {
-// Whether the item has a name of its own in the language: its English name for
-// "en", else a translation, also one written like the English name.
+// The item's own name in the language: its English name for "en", else its
+// translation, also one written like the English name. Empty when it has none
+// (the game then shows the English name).
+const std::string& GetOwnName(const ItemDefinition& definition, std::string_view locale);
+
+// Whether the item has a name of its own in the language (GetOwnName).
 bool HasNameIn(const ItemDefinition& definition, std::string_view locale);
 
 struct ItemNameCount

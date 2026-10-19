@@ -203,15 +203,9 @@ void CItemEditorActions::RenderExportBmdButton()
 
 void CItemEditorActions::LogMissingItemNames()
 {
-    std::vector<const char*> locales;
-    for (const char* locale : I18N::GetAvailableLocales())
-    {
-        if (locale != Data::LocalizedString::NeutralLocale)
-        {
-            locales.push_back(locale);
-        }
-    }
-    for (const Data::Items::ItemNameCount& count : Data::Items::CountItemNames(g_ItemDatabase.GetAllSlots(), locales))
+    // English never misses a name: an item without one has errors.
+    for (const Data::Items::ItemNameCount& count :
+         Data::Items::CountItemNames(g_ItemDatabase.GetAllSlots(), I18N::GetAvailableLocales()))
     {
         if (count.missing == 0)
         {
