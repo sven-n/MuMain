@@ -356,11 +356,12 @@ TEST_CASE("An item's requirements by level are kept through write and read [data
 {
     ItemDefinition orb = MakeKris();
     orb.requirements = {};
-    orb.requirementsByLevel[static_cast<size_t>(ItemRequirement::Energy)] =
-        RequirementByLevel{30, 60, 90, 130, 170, 210, 300, 500, 0, 0, 0, 0, 0, 0, 0, 0};
     RequirementByLevel same{};
     same.fill(7);
-    orb.requirementsByLevel[static_cast<size_t>(ItemRequirement::Leadership)] = same;
+    // Set in any order; they are written in the order of the requirements.
+    orb.requirementsByLevel.Set(ItemRequirement::Leadership, same);
+    orb.requirementsByLevel.Set(ItemRequirement::Energy,
+                                RequirementByLevel{30, 60, 90, 130, 170, 210, 300, 500, 0, 0, 0, 0, 0, 0, 0, 0});
 
     const std::string text = WriteItemGroupJson(0, std::vector<ItemDefinition>{orb});
     CHECK(

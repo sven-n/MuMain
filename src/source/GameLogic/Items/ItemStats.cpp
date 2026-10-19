@@ -106,8 +106,7 @@ const RequirementByLevel* FindRequirementByLevel(const ItemDefinition* definitio
     {
         return nullptr;
     }
-    const auto& levels = definition->requirementsByLevel[static_cast<size_t>(requirement)];
-    return levels ? &*levels : nullptr;
+    return definition->requirementsByLevel.Find(requirement);
 }
 
 int ComputeStatRequirement(const RequirementFormula& formula, int base, int dropLevel, int levelRequirement, int level)

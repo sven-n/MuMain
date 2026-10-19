@@ -190,8 +190,9 @@ OrderedJson WriteItem(const ItemDefinition& definition)
     OrderedJson requirementsByLevel = OrderedJson::object();
     for (size_t requirement = 0; requirement < ItemRequirementCount; ++requirement)
     {
-        const std::optional<RequirementByLevel>& values = definition.requirementsByLevel[requirement];
-        if (!values)
+        const RequirementByLevel* values =
+            definition.requirementsByLevel.Find(static_cast<ItemRequirement>(requirement));
+        if (values == nullptr)
         {
             continue;
         }
@@ -469,7 +470,8 @@ void ItemReader::ReadRequirementsByLevel(const OrderedJson& json, ItemDefinition
             { AddIssue(ItemDataIssueSeverity::Error, errorField, message); });
         if (read)
         {
-            definition.requirementsByLevel[static_cast<size_t>(requirement - RequirementKeys.begin())] = levels;
+            definition.requirementsByLevel.Set(static_cast<ItemRequirement>(requirement - RequirementKeys.begin()),
+                                               levels);
         }
     }
 }

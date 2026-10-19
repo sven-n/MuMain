@@ -150,8 +150,8 @@ void ValidateExcellentBonus(const ItemDefinition& definition, std::vector<ItemDa
 // excellentRaisesLevel only matters for an item with a level requirement.
 void ValidateExcellentRaisesLevel(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
 {
-    const bool hasLevelRequirement = definition.requirements.level > 0 ||
-                                     definition.requirementsByLevel[static_cast<size_t>(ItemRequirement::Level)];
+    const bool hasLevelRequirement =
+        definition.requirements.level > 0 || definition.requirementsByLevel.Find(ItemRequirement::Level) != nullptr;
     if (!definition.excellentRaisesLevel && !hasLevelRequirement)
     {
         AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
@@ -167,7 +167,8 @@ void ValidateRequirementsByLevel(const ItemDefinition& definition, std::vector<I
                           definition.requirements.vitality,  definition.requirements.leadership};
     for (size_t requirement = 0; requirement < ItemRequirementCount; ++requirement)
     {
-        if (definition.requirementsByLevel[requirement] && bases[requirement] != 0)
+        if (definition.requirementsByLevel.Find(static_cast<ItemRequirement>(requirement)) != nullptr &&
+            bases[requirement] != 0)
         {
             AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
                      "gives a requirement by level and also its base value, which is not used", "requirementsByLevel");

@@ -6,9 +6,11 @@
 #include "Data/GameData/ItemData/ItemTagSet.h"
 #include "Data/GameData/ItemData/ItemType.h"
 
+#include <algorithm>
 #include <array>
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace Data::Items
 {
@@ -96,6 +98,44 @@ constexpr size_t ItemRequirementCount = static_cast<size_t>(ItemRequirement::Cou
 // A requirement for each item level 0 to 15; above +15 the +15 value.
 using RequirementByLevel = std::array<WORD, ItemLevelCount>;
 
+// The requirements an item gives by level instead of by the stat file's
+// formula. Few items have any, so the others keep no room for them.
+class RequirementsByLevel
+{
+public:
+    // The values of the requirement, or nullptr when it is not given by level.
+    const RequirementByLevel* Find(ItemRequirement requirement) const
+    {
+        const auto found = std::ranges::find(m_entries, requirement, &Entry::requirement);
+        return found != m_entries.end() ? &found->values : nullptr;
+    }
+
+    void Set(ItemRequirement requirement, const RequirementByLevel& values)
+    {
+        const auto position = std::ranges::lower_bound(m_entries, requirement, {}, &Entry::requirement);
+        if (position != m_entries.end() && position->requirement == requirement)
+        {
+            position->values = values;
+            return;
+        }
+        m_entries.insert(position, {requirement, values});
+    }
+
+    bool operator==(const RequirementsByLevel& other) const = default;
+
+private:
+    struct Entry
+    {
+        ItemRequirement requirement;
+        RequirementByLevel values;
+
+        bool operator==(const Entry& other) const = default;
+    };
+
+    // In the order of ItemRequirement.
+    std::vector<Entry> m_entries;
+};
+
 struct ItemRequirements
 {
     WORD level = 0;
@@ -163,7 +203,7 @@ struct ItemDefinition
     // Requirements given per item level instead of the stat file's formula (the
     // Orb of Summoning's energy, the Transformation Ring's level requirement);
     // the base value of that requirement is not used.
-    std::array<std::optional<RequirementByLevel>, ItemRequirementCount> requirementsByLevel;
+    RequirementsByLevel requirementsByLevel;
     std::array<BYTE, MAX_CLASS> classRequirements{};
     std::array<BYTE, MAX_RESISTANCE + 1> resistances{};
 
