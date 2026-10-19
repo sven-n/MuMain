@@ -4316,7 +4316,7 @@ void MoveParticles()
                 if (o->SubType == 0)
                 {
                     o->Scale -= (rand() % 20 + 10) * 0.001f * FPS_ANIMATION_FACTOR;
-                    Luminosity -= 0.05f;
+                    Luminosity -= 0.05f * FPS_ANIMATION_FACTOR;
                     o->Position[2] += o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
                 }
                 else if (o->SubType == 1)
@@ -4333,13 +4333,13 @@ void MoveParticles()
                 else if (o->SubType == 2)
                 {
                     o->Scale -= (rand() % 20 + 10) * 0.004f * FPS_ANIMATION_FACTOR;
-                    Luminosity -= 0.05f;
+                    Luminosity -= 0.05f * FPS_ANIMATION_FACTOR;
                     o->Position[2] += o->Gravity * 25.f * FPS_ANIMATION_FACTOR;
                 }
                 else if (o->SubType == 3)
                 {
                     o->Scale -= 0.03f * FPS_ANIMATION_FACTOR;//(rand()%20+10)*0.001f;
-                    Luminosity -= 0.05f;
+                    Luminosity -= 0.05f * FPS_ANIMATION_FACTOR;
                     o->Position[2] += o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
 
                     if (o->Scale < 0)

@@ -6208,7 +6208,7 @@ void MoveJoint(JOINT* o, int iIndex)
 
                 for (int j = 0; j < 3; j++)
                 {
-                    Angle[1] += (30.f) * FPS_ANIMATION_FACTOR;
+                    Angle[1] += 30.f;
                     VectorAdd(o->TargetPosition, pos, o->TargetPosition);
 
                     vec3_t  position;
