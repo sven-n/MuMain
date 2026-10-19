@@ -424,7 +424,8 @@ in both repos (as separate PRs, one per repo).
 | D | Legacy item ids, server side *(to discuss again)* | Server | OpenMU | 12 | Legacy id on item definitions, mapping tool, Season 6 serializer sends legacy ids, serializer for the new client. |
 | FX1 | Effect catalogue *([roadmap](2026-09-29-data-driven-content-roadmap-design.md))* | Client | MuMain | 4c | Every effect, particle, lightning and sprite type gets a name and its creation values in `Data/Effects/`; behavior stays code. |
 | 13 | Looks in data | Client | MuMain | 4c, 6, FX1 | What the named render styles and effects are made of moves from code into `Data/Effects/` as building blocks (D25), with the look editor in MuEditor (preview, bones, the items that use a look). |
-| 14 | Cleanup | Client | MuMain | all item phases | The glow of the Phoenix Soul inventory model; what later areas still need moves to the roadmap; then remove this document. |
+| 14 | UI text translations | Client | MuMain | 5 | A MuEditor window for the `.resx` UI texts (Game, Dialog, Editor, Metadata): keys × languages with the missing texts counted per language and file, written back to `src/Localization`, with placeholder checks. Builds on the Item Translations window. |
+| 15 | Cleanup | Client | MuMain | all item phases | The glow of the Phoenix Soul inventory model; what later areas still need moves to the roadmap; then remove this document. |
 
 The deferred question Q1 (custom items on the original client) is a
 **Server** topic and must be decided before custom items are used on a
@@ -1071,7 +1072,33 @@ server with original clients (after phases 6 and B).
     like phase 4c: every look draws and spawns the same things with the same
     values as its code did, per item and level. The look editor of section 9
     comes with it.
-14. **Cleanup**, once the work has landed:
+14. **UI text translations**: the UI texts are not item data, but they
+    are translated the same way and the tool builds on phase 5's Item
+    Translations window, so it comes before the cleanup. Today they are
+    edited by hand in `src/Localization/<Group>.<locale>.resx` (Game,
+    Dialog, Editor, Metadata), and `tools/ResxGen` compiles them into the
+    game (`docs/translation-system.md`). Measured on 2026-10-20 against
+    English: Game misses 93 German texts, 117 Polish, 124 in each of es, id,
+    pt, ru, tl, uk and zh-TW, and 607 Japanese; Dialog has no file for id,
+    ja, ru, tl, uk and zh-TW (233 texts each) and misses one Spanish and one
+    Portuguese text; Editor misses 7 German texts and about 170 in each
+    other language; Metadata is complete.
+    - A MuEditor window (editor builds) with the texts as a grid of keys and
+      languages, English first, grouped by file: the missing texts counted
+      per language and file, a filter for them and a search over keys and
+      texts, like the Item Translations window.
+    - Edits are written to the `.resx` files of the source tree, not to the
+      game folder, so the editor has to find `src/Localization`. The game
+      reads the texts compiled in, so an edit shows after the next build,
+      unless the window also changes the loaded texts for a preview (to
+      decide).
+    - Checks: a translation keeps the placeholders of the English text
+      (`{0}`, `%s`, `%ls`, `%%`); the German terms of
+      `translation-system.md` can be shown as hints.
+    - Planned like phase 5: an inventory of the files and the generator,
+      then the decisions (preview, which files, adding a missing file such
+      as Dialog for a language), then the window.
+15. **Cleanup**, once the work has landed:
     - The glow of the inventory model of the Phoenix Soul Armor
       (`MODEL_ARMORINVEN_74`) moves into data. It is the only model drawn
       for an item that glows differently from its item: only on its first
