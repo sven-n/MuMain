@@ -3,6 +3,7 @@
 #include "doctest.h"
 
 #include "ClientDataScope.h"
+#include "ItemStatProfilesScope.h"
 #include "TestFiles.h"
 
 #include "Core/Globals/_crypt.h"
@@ -577,6 +578,7 @@ TEST_CASE("A derived stat profile the item stat file does not have keeps the def
     ItemStatsLoadResult stats = LoadItemStatsFile(folder.Directory() / GetItemStatsFile());
     REQUIRE_FALSE(HasErrors(stats.issues));
     std::erase_if(stats.file.profiles, [](const WrittenStatProfile& profile) { return profile.name == "shield"; });
+    ItemStatProfilesScope restoreProfiles;
     g_ItemDatabase.SetStatProfiles(ItemStatProfiles(stats.file));
     const auto namesShield = [](ItemDataIssueSeverity severity)
     {

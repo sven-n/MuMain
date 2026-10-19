@@ -3,6 +3,7 @@
 #include "doctest.h"
 
 #include "ClientDataScope.h"
+#include "ItemStatProfilesScope.h"
 #include "TestFiles.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
@@ -568,6 +569,7 @@ TEST_CASE("Item stats and requirements stop at 65535 [data][items]")
     strength->levelWeight = 65535;
     strength->percent = 65535;
     stats.file.defaultRequirements.excellentLevelAdd = 65535;
+    ItemStatProfilesScope restoreProfiles;
     g_ItemDatabase.SetStatProfiles(ItemStatProfiles(stats.file));
     items[ITEM_BLADE].DamageMin = 255;
     items[ITEM_BLADE].Level = 1;
