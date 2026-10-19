@@ -947,8 +947,8 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     Vector(1.0f, 1.0f, 0.2f, vLight);
                     iSubType = 3;
                 }
-                CreateEffect(MODEL_FENRIR_THUNDER, o->Position, o->Angle, vLight, 0, o);
-                CreateEffect(MODEL_FENRIR_THUNDER, o->Position, o->Angle, vLight, 0, o);
+                CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, o->Position, o->Angle, vLight, 0, o);
+                CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, o->Position, o->Angle, vLight, 0, o);
 
                 Vector(1.0f, 1.0f, 1.0f, vLight);
                 if (o->CurrentAction == FENRIR_WALK)
@@ -957,16 +957,16 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     {
                         Vector(0.0f, 0.0f, 0.0f, vPos);
                         b->TransformPosition(BoneTransform[22], vPos, vPosition, false);
-                        CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
+                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
                         Vector(0.0f, 0.0f, 0.0f, vPos);
                         b->TransformPosition(BoneTransform[28], vPos, vPosition, false);
-                        CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
+                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
                         Vector(0.0f, 0.0f, 0.0f, vPos);
                         b->TransformPosition(BoneTransform[36], vPos, vPosition, false);
-                        CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
+                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
                         Vector(0.0f, 0.0f, 0.0f, vPos);
                         b->TransformPosition(BoneTransform[44], vPos, vPosition, false);
-                        CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
+                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
                     }
                 }
                 else if (o->CurrentAction == FENRIR_RUN)
@@ -975,19 +975,19 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     {
                         Vector(0.0f, 0.0f, 0.0f, vPos);
                         b->TransformPosition(BoneTransform[22], vPos, vPosition, false);
-                        CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
+                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
                         Vector(0.0f, 0.0f, 0.0f, vPos);
                         b->TransformPosition(BoneTransform[28], vPos, vPosition, false);
-                        CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
+                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
                     }
                     else if (o->AnimationFrame > 4.8f && o->AnimationFrame <= 5.2f)
                     {
                         Vector(0.0f, 0.0f, 0.0f, vPos);
                         b->TransformPosition(BoneTransform[36], vPos, vPosition, false);
-                        CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
+                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
                         Vector(0.0f, 0.0f, 0.0f, vPos);
                         b->TransformPosition(BoneTransform[44], vPos, vPosition, false);
-                        CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
+                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
                     }
                 }
             }

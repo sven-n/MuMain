@@ -92,6 +92,18 @@ No player configuration or FPS cap is required.
   several frames. Blurs age their trail on reference frames only; the
   poses one frame submits replace the previous frame's poses until a
   reference frame keeps them, so a multi-pose swing stays whole.
+- A trail that lays one tail per reference frame keeps its authored
+  `MaxTails`; only trails still laid every rendered frame need the
+  `MaxTails / FPS_ANIMATION_FACTOR` stretch from `CreateJoint`.
+- A per-frame multiplier on persistent state (a light fade, friction, a
+  velocity growth such as `VectorScale(o->Light, 0.9f, o->Light)`) becomes
+  `powf(k, FPS_ANIMATION_FACTOR)`, so it compounds to `k` per reference frame.
+  A plain `k` fades or grows exponentially faster at high FPS.
+- A loop that builds a shape within one frame, such as a lightning bolt
+  walking toward its target over `MaxTails` steps, takes spatial steps: its
+  step length, jitter and turns (`MoveHumming(…, false)`) take no factor.
+- Motion driven by `WorldTime` uses a continuous clock, not
+  `(int)(WorldTime / 40)`, which holds still for 40 ms at a time at high FPS.
 - Changing `REFERENCE_FPS` changes global gameplay timing and requires
   asset calibration plus broad behavioral verification.
 - Frame caps remain performance and presentation controls, not correctness

@@ -4682,10 +4682,10 @@ void MoveParticles()
                     o->Gravity += (0.004f) * FPS_ANIMATION_FACTOR;
                     Luminosity = (float)(o->LifeTime) / 24.f;
                     o->Scale += o->Gravity * FPS_ANIMATION_FACTOR;
-                    VectorScale(o->Velocity, 0.98f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.98f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Frame = (23 - o->LifeTime) / 6;
                     o->Position[2] += o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
-                    VectorScale(o->Light, 0.95f, o->Light);
+                    VectorScale(o->Light, powf(0.95f, FPS_ANIMATION_FACTOR), o->Light);
                 }
                 break;
                 default:
@@ -4693,7 +4693,7 @@ void MoveParticles()
                     o->Gravity += (0.004f) * FPS_ANIMATION_FACTOR;
                     Luminosity = (float)(o->LifeTime) / 24.f;
                     o->Scale += o->Gravity * FPS_ANIMATION_FACTOR;
-                    VectorScale(o->Velocity, 0.98f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.98f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Frame = (23 - o->LifeTime) / 6;
                     o->Position[2] += o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
                 }
@@ -4705,7 +4705,7 @@ void MoveParticles()
                 {
                     //					o->Gravity += 0.02f;
                     //					o->Scale += o->Gravity;
-                    VectorScale(o->Velocity, 1.05f, o->Velocity);
+                    VectorScale(o->Velocity, powf(1.05f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Position[2] += o->Gravity * 20.f * FPS_ANIMATION_FACTOR;
                     Luminosity = (float)(o->LifeTime) * 0.2f;
                     Vector(Luminosity, Luminosity, Luminosity, o->Light);
@@ -4714,7 +4714,7 @@ void MoveParticles()
                 {
                     //					o->Gravity += 0.02f;
                     //					o->Scale += o->Gravity;
-                    //     				VectorScale(o->Velocity,1.05f,o->Velocity);
+                    //     				VectorScale(o->Velocity, powf(1.05f, FPS_ANIMATION_FACTOR), o->Velocity);
                     //					o->Position[2] += (o->Gravity*20.f) * FPS_ANIMATION_FACTOR;
                     Luminosity = (float)(o->LifeTime) * 0.2f;
                     Vector(Luminosity, Luminosity, Luminosity, o->Light);
@@ -4723,7 +4723,7 @@ void MoveParticles()
                 {
                     o->Gravity += (0.02f) * FPS_ANIMATION_FACTOR;
                     o->Scale += o->Gravity * FPS_ANIMATION_FACTOR;
-                    VectorScale(o->Velocity, 1.05f, o->Velocity);
+                    VectorScale(o->Velocity, powf(1.05f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Position[2] += o->Gravity * 20.f * FPS_ANIMATION_FACTOR;
                     Luminosity = (float)(o->LifeTime) * 0.2f;
                     Vector(Luminosity, Luminosity, Luminosity, o->Light);
@@ -4755,7 +4755,7 @@ void MoveParticles()
                 }
                 else if (o->SubType == 7)
                 {
-                    VectorScale(o->Velocity, 1.05f, o->Velocity);
+                    VectorScale(o->Velocity, powf(1.05f, FPS_ANIMATION_FACTOR), o->Velocity);
                     Luminosity = (float)(o->LifeTime) * 0.2f;
                     Vector(Luminosity, Luminosity, Luminosity, o->Light);
                 }
@@ -4771,7 +4771,7 @@ void MoveParticles()
                 {
                     o->Gravity += (0.02f) * FPS_ANIMATION_FACTOR;
                     o->Scale += o->Gravity * FPS_ANIMATION_FACTOR;
-                    VectorScale(o->Velocity, 1.05f, o->Velocity);
+                    VectorScale(o->Velocity, powf(1.05f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Position[2] += o->Gravity * 20.f * FPS_ANIMATION_FACTOR;
                     Luminosity = (float)(o->LifeTime) * 0.2f;
                     Vector(Luminosity, Luminosity, Luminosity, o->Light);
@@ -4981,7 +4981,7 @@ void MoveParticles()
                 }
                 else if (o->SubType == 7)
                 {
-                    VectorScale(o->Light, 0.97f, o->Light);
+                    VectorScale(o->Light, powf(0.97f, FPS_ANIMATION_FACTOR), o->Light);
                 }
             }
             break;
@@ -5178,7 +5178,7 @@ void MoveParticles()
                     if (o->LifeTime < 10)
                     {
                         o->Alpha -= FPS_ANIMATION_FACTOR * 0.1f;
-                        VectorScale(o->Light, 0.9f, o->Light);
+                        VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
                     }
                     else if (o->Alpha < 1.0f)
                     {
@@ -5193,7 +5193,7 @@ void MoveParticles()
                     if (o->LifeTime < 10)
                     {
                         o->Alpha -= FPS_ANIMATION_FACTOR * 0.1f;
-                        VectorScale(o->Light, 0.9f, o->Light);
+                        VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
                     }
                     else if (o->Alpha < 1.0f)
                     {
@@ -5311,14 +5311,14 @@ void MoveParticles()
                 case 33:
                     Luminosity = (float)(o->LifeTime) / 8.f;
                     Vector(Luminosity * 0.4f, Luminosity * 0.4f, Luminosity, o->Light);
-                    VectorScale(o->Velocity, 0.001f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.001f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += (0.01f * 2) * FPS_ANIMATION_FACTOR;
                     o->Position[2] += (o->Scale) * FPS_ANIMATION_FACTOR;
                     break;
                 case 32:
                     Luminosity = (float)(o->LifeTime) / 8.f;
                     Vector(Luminosity * 0.8f, Luminosity * 0.8f, Luminosity, o->Light);
-                    VectorScale(o->Velocity, 0.4f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.4f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += FPS_ANIMATION_FACTOR * 0.1f;
                     break;
                 case 23:
@@ -5331,14 +5331,14 @@ void MoveParticles()
                 case 3:
                     Luminosity = (float)(o->LifeTime) / 8.f;
                     Vector(Luminosity * 0.8f, Luminosity * 0.8f, Luminosity, o->Light);
-                    VectorScale(o->Velocity, 0.4f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.4f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += FPS_ANIMATION_FACTOR * 0.1f;
                     break;
                 case 11:
                 case 14:
                     Luminosity = (float)(o->LifeTime) / 50.f;
                     Vector(Luminosity * o->TurningForce[0], Luminosity * o->TurningForce[1], Luminosity * o->TurningForce[2], o->Light);
-                    VectorScale(o->Velocity, 0.4f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.4f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += FPS_ANIMATION_FACTOR * 0.05f;
                     o->Position[2] -= (1.f) * FPS_ANIMATION_FACTOR;
                     break;
@@ -5363,7 +5363,7 @@ void MoveParticles()
                 case 1:
                     Luminosity = (float)(o->LifeTime) / 50.f;
                     Vector(Luminosity * 0.5f, Luminosity * 1.f, Luminosity * 0.8f, o->Light);
-                    VectorScale(o->Velocity, 0.4f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.4f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += FPS_ANIMATION_FACTOR * 0.05f;
                     break;
                 case 2:
@@ -5441,10 +5441,10 @@ void MoveParticles()
                         o->Scale += o->Gravity * FPS_ANIMATION_FACTOR;
                         o->Position[2] += o->Gravity * 20.f * FPS_ANIMATION_FACTOR;
 
-                        VectorScale(o->Velocity, 1.05f, o->Velocity);
+                        VectorScale(o->Velocity, powf(1.05f, FPS_ANIMATION_FACTOR), o->Velocity);
                         Luminosity = (float)(o->LifeTime) / 24.f;
                         Vector(Luminosity, Luminosity, Luminosity, o->Light);
-                        VectorScale(o->Velocity, 0.4f, o->Velocity);
+                        VectorScale(o->Velocity, powf(0.4f, FPS_ANIMATION_FACTOR), o->Velocity);
                     }
                     else
                     {
@@ -5562,7 +5562,7 @@ void MoveParticles()
                 {
                     Luminosity = (float)(o->LifeTime) / 50.f;
                     Vector(Luminosity * 0.5f, Luminosity * 0.5f, Luminosity * 1.0f, o->Light);
-                    VectorScale(o->Velocity, 0.4f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.4f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += FPS_ANIMATION_FACTOR * 0.05f;
                 }
                 break;
@@ -5570,7 +5570,7 @@ void MoveParticles()
                 {
                     Luminosity = (float)(o->LifeTime) / 50.f;
                     Vector(Luminosity * 0.5f, Luminosity * 1.f, Luminosity * 0.8f, o->Light);
-                    VectorScale(o->Velocity, 0.4f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.4f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += FPS_ANIMATION_FACTOR * 0.05f;
                     o->Gravity += (0.2f) * FPS_ANIMATION_FACTOR;
                     o->Position[2] += o->Gravity * FPS_ANIMATION_FACTOR;
@@ -5672,7 +5672,7 @@ void MoveParticles()
                     if (o->Light[0] <= 0.01f)
                         o->LifeTime = 0;
 
-                    VectorScale(o->Velocity, 0.001f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.001f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += (rand() % 15 + 4) * (0.001f) * FPS_ANIMATION_FACTOR;
                     o->Position[2] += (o->Scale * 6.0f) * FPS_ANIMATION_FACTOR;
                     o->Rotation += ((rand() % 10 + 10) * 0.1f * o->Angle[0]) * FPS_ANIMATION_FACTOR;
@@ -5717,7 +5717,7 @@ void MoveParticles()
                 case 53:
                     Luminosity = (float)(o->LifeTime) / 50.f;
                     Vector(Luminosity * 1.f, Luminosity * 1.f, Luminosity * 1.f, o->Light);
-                    VectorScale(o->Velocity, 0.4f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.4f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += FPS_ANIMATION_FACTOR * 0.05f;
                     break;
                 case 54:
@@ -5748,7 +5748,7 @@ void MoveParticles()
                 case 56:
                     Luminosity = (float)(o->LifeTime) / 50.f;
                     Vector(Luminosity * 0.5f, Luminosity * 0.1f, Luminosity * 0.8f, o->Light);
-                    VectorScale(o->Velocity, 0.4f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.4f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += FPS_ANIMATION_FACTOR * 0.05f;
                     break;
                 case 57:
@@ -5762,7 +5762,7 @@ void MoveParticles()
                     Luminosity = (float)(o->LifeTime) / 50.f;
                     Vector(Luminosity * o->StartPosition[0], Luminosity * o->StartPosition[1],
                         Luminosity * o->StartPosition[2], o->Light);
-                    VectorScale(o->Velocity, 0.4f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.4f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += FPS_ANIMATION_FACTOR * 0.05f;
                     break;
                 case 60:
@@ -5788,7 +5788,7 @@ void MoveParticles()
                     Luminosity = (float)(o->LifeTime) / 50.f;
                     //Vector(Luminosity*0.9f,Luminosity*0.4f,Luminosity*0.1f,o->Light);
                     Vector(Luminosity * 0.9f, Luminosity * 0.9f, Luminosity * 0.9f, o->Light);
-                    VectorScale(o->Velocity, 0.001f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.001f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += FPS_ANIMATION_FACTOR * 0.03f;
                 }
                 break;
@@ -6553,7 +6553,7 @@ void MoveParticles()
                 o->Frame = (12 - o->LifeTime) / 3;
                 //o->Position[2] += o->Gravity * FPS_ANIMATION_FACTOR;
                 //o->Gravity -= 1.5f;
-                VectorScale(o->Velocity, 0.95f, o->Velocity);
+                VectorScale(o->Velocity, powf(0.95f, FPS_ANIMATION_FACTOR), o->Velocity);
                 VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
                 break;
             case BITMAP_SPARK:
@@ -7061,7 +7061,7 @@ void MoveParticles()
                 o->Scale += FPS_ANIMATION_FACTOR * 0.08f;
                 //o->Angle[0] += (4.f) * FPS_ANIMATION_FACTOR;
                 VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
-                VectorScale(o->Velocity, 0.9f, o->Velocity);
+                VectorScale(o->Velocity, powf(0.9f, FPS_ANIMATION_FACTOR), o->Velocity);
 
                 if (o->SubType == 6)
                 {
@@ -7349,7 +7349,7 @@ void MoveParticles()
                 else if (o->SubType == 2)
                 {
                     o->Scale *= powf(1.1f, FPS_ANIMATION_FACTOR);
-                    VectorScale(o->Light, 0.9f, o->Light);
+                    VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
                 }
                 break;
             case BITMAP_SHINY + 6:
@@ -8038,17 +8038,17 @@ void MoveParticles()
                 }
                 else if (1 == o->SubType)
                 {
-                    VectorScale(o->Light, 0.9f, o->Light);
+                    VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
                     o->Scale *= powf(0.95f, FPS_ANIMATION_FACTOR);
                 }
                 else if (5 == o->SubType)
                 {
-                    VectorScale(o->Light, 0.9f, o->Light);
+                    VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
                     o->Scale *= powf(0.95f, FPS_ANIMATION_FACTOR);
                 }
                 else if (3 == o->SubType)
                 {
-                    VectorScale(o->Light, 0.9f, o->Light);
+                    VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
                     o->Scale *= powf(0.85f, FPS_ANIMATION_FACTOR);
                     o->Gravity += (5.f) * FPS_ANIMATION_FACTOR;
 
@@ -8134,7 +8134,7 @@ void MoveParticles()
                 }
                 else if (o->SubType == 14)
                 {
-                    VectorScale(o->Light, 0.98f, o->Light);
+                    VectorScale(o->Light, powf(0.98f, FPS_ANIMATION_FACTOR), o->Light);
                     o->Scale *= powf(0.95f, FPS_ANIMATION_FACTOR);
                 }
                 else if (o->SubType == 15)
@@ -8856,7 +8856,7 @@ void MoveParticles()
             case BITMAP_DAMAGE1:
             {
                 o->Scale *= powf(1.2f, FPS_ANIMATION_FACTOR);
-                VectorScale(o->Light, 0.8f, o->Light);
+                VectorScale(o->Light, powf(0.8f, FPS_ANIMATION_FACTOR), o->Light);
             }
             break;
             case BITMAP_SWORD_EFFECT_MONO:
@@ -8883,13 +8883,13 @@ void MoveParticles()
                     }
                 }
 
-                VectorScale(o->Light, 0.94f, o->Light);
+                VectorScale(o->Light, powf(0.94f, FPS_ANIMATION_FACTOR), o->Light);
             }
             break;
             case BITMAP_DAMAGE2:
             {
                 o->Scale *= powf(1.2f, FPS_ANIMATION_FACTOR);
-                VectorScale(o->Light, 0.55f, o->Light);
+                VectorScale(o->Light, powf(0.55f, FPS_ANIMATION_FACTOR), o->Light);
             }
             break;
             }

@@ -1422,27 +1422,27 @@ namespace Render::Effects::Behaviors
         else if (o->SubType == 13)
         {
             o->Scale *= pow(1.1f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->Light, 0.95f, o->Light);
+            VectorScale(o->Light, powf(0.95f, FPS_ANIMATION_FACTOR), o->Light);
             if (o->Scale > 8)
             {
                 o->Live = false;
             }
             if (o->Scale > 4)
             {
-                VectorScale(o->Light, 0.5f, o->Light);
+                VectorScale(o->Light, powf(0.5f, FPS_ANIMATION_FACTOR), o->Light);
             }
         }
         else if (o->SubType == 14)
         {
             o->Scale *= pow(1.1f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->Light, 0.95f, o->Light);
+            VectorScale(o->Light, powf(0.95f, FPS_ANIMATION_FACTOR), o->Light);
             if (o->Scale > 8)
             {
                 o->Live = false;
             }
             if (o->Scale > 4)
             {
-                VectorScale(o->Light, 0.5f, o->Light);
+                VectorScale(o->Light, powf(0.5f, FPS_ANIMATION_FACTOR), o->Light);
             }
         }
         return true;
@@ -3681,7 +3681,7 @@ namespace Render::Effects::Behaviors
         float Height;
     {
         VectorAddScaled(o->Position, o->Direction, o->Position, FPS_ANIMATION_FACTOR);
-        VectorScale(o->Direction, 0.9f, o->Direction);
+        VectorScale(o->Direction, powf(0.9f, FPS_ANIMATION_FACTOR), o->Direction);
         o->Position[2] += (o->Gravity) * FPS_ANIMATION_FACTOR;
         o->Gravity -= (3.f) * FPS_ANIMATION_FACTOR;
         Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
@@ -3959,7 +3959,7 @@ namespace Render::Effects::Behaviors
             VectorRotate(o->Direction, Matrix, Position);
             VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
         }
-        VectorScale(o->Direction, 0.9f, o->Direction);
+        VectorScale(o->Direction, powf(0.9f, FPS_ANIMATION_FACTOR), o->Direction);
         o->Position[2] += (o->Gravity) * FPS_ANIMATION_FACTOR;
         if (o->SubType == 0 || o->SubType == 10 || o->SubType == 12 || o->SubType == 13)
         {
@@ -6535,12 +6535,12 @@ namespace Render::Effects::Behaviors
         VectorAddScaled(o->Position, o->Direction, o->Position, FPS_ANIMATION_FACTOR);
         if (o->Type >= MODEL_WALL_PART1 && o->Type <= MODEL_WALL_PART2)
         {
-            VectorScale(o->Direction, 0.9f, o->Direction);
+            VectorScale(o->Direction, powf(0.9f, FPS_ANIMATION_FACTOR), o->Direction);
             o->Gravity -= (6.f) * FPS_ANIMATION_FACTOR;
         }
         else
         {
-            VectorScale(o->Direction, 0.9f, o->Direction);
+            VectorScale(o->Direction, powf(0.9f, FPS_ANIMATION_FACTOR), o->Direction);
             o->Gravity -= (3.f) * FPS_ANIMATION_FACTOR;
         }
         o->Position[2] += (o->Gravity) * FPS_ANIMATION_FACTOR;
@@ -6588,12 +6588,12 @@ namespace Render::Effects::Behaviors
         vec3_t Position;
         float Height;
         VectorAddScaled(o->Position, o->Direction, o->Position, FPS_ANIMATION_FACTOR);
-        VectorScale(o->Direction, 0.9f, o->Direction);
+        VectorScale(o->Direction, powf(0.9f, FPS_ANIMATION_FACTOR), o->Direction);
         o->Position[2] += (o->Gravity) * FPS_ANIMATION_FACTOR;
 
         if (o->SubType == 1)
         {
-            VectorScale(o->Direction, 1.1f, o->Direction);
+            VectorScale(o->Direction, powf(1.1f, FPS_ANIMATION_FACTOR), o->Direction);
         }
 
         o->Gravity -= (4.f) * FPS_ANIMATION_FACTOR;
@@ -6946,8 +6946,8 @@ namespace Render::Effects::Behaviors
             }
             else
             {
-                VectorAdd(o->Position, o->StartPosition, o->Position);
-                VectorScale(o->StartPosition, 0.9f, o->StartPosition);
+                VectorAddScaled(o->Position, o->StartPosition, o->Position, FPS_ANIMATION_FACTOR);
+                VectorScale(o->StartPosition, powf(0.9f, FPS_ANIMATION_FACTOR), o->StartPosition);
 
                 o->HeadAngle[0] -= (o->Scale * 32.f) * FPS_ANIMATION_FACTOR;
 
@@ -6977,10 +6977,10 @@ namespace Render::Effects::Behaviors
     {
         float Height;
         VectorAddScaled(o->Position, o->Direction, o->Position, FPS_ANIMATION_FACTOR);
-        VectorScale(o->Direction, 0.9f, o->Direction);
+        VectorScale(o->Direction, powf(0.9f, FPS_ANIMATION_FACTOR), o->Direction);
         o->Position[2] += (o->Gravity) * FPS_ANIMATION_FACTOR;
 
-        VectorScale(o->Direction, 1.1f, o->Direction);
+        VectorScale(o->Direction, powf(1.1f, FPS_ANIMATION_FACTOR), o->Direction);
 
         o->Gravity -= (3.f) * FPS_ANIMATION_FACTOR;
         Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
@@ -9434,7 +9434,7 @@ namespace Render::Effects::Behaviors
             o->Alpha = 1.0f;
             o->Scale *= pow(1.24f, FPS_ANIMATION_FACTOR);
             o->Position[2] *= pow(1.19f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->Light, 0.45f, o->Light);
+            VectorScale(o->Light, powf(0.45f, FPS_ANIMATION_FACTOR), o->Light);
             if (o->Light[0] < 0.001f)
             {
                 Vector(0.0f, 0.0f, 0.0f, o->Light);
@@ -9443,9 +9443,9 @@ namespace Render::Effects::Behaviors
         else if (o->SubType == 3)
         {
             o->Scale *= pow(1.15f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->StartPosition, 0.99f, o->StartPosition);
-            VectorSubtract(o->Position, o->StartPosition, o->Position);
-            VectorScale(o->Light, 0.7f, o->Light);
+            VectorScale(o->StartPosition, powf(0.99f, FPS_ANIMATION_FACTOR), o->StartPosition);
+            VectorAddScaled(o->Position, o->StartPosition, o->Position, -FPS_ANIMATION_FACTOR);
+            VectorScale(o->Light, powf(0.7f, FPS_ANIMATION_FACTOR), o->Light);
             if (o->Light[0] > 0.6f)
             {
                 o->SubType = 5;
@@ -9455,9 +9455,9 @@ namespace Render::Effects::Behaviors
         else if (o->SubType == 4)
         {
             o->Scale *= pow(1.15f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->StartPosition, 1.04f, o->StartPosition);
-            VectorSubtract(o->Position, o->StartPosition, o->Position);
-            VectorScale(o->Light, 1.5f, o->Light);
+            VectorScale(o->StartPosition, powf(1.04f, FPS_ANIMATION_FACTOR), o->StartPosition);
+            VectorAddScaled(o->Position, o->StartPosition, o->Position, -FPS_ANIMATION_FACTOR);
+            VectorScale(o->Light, powf(1.5f, FPS_ANIMATION_FACTOR), o->Light);
             if (o->Light[0] > 0.6f)
             {
                 o->SubType = 5;
@@ -9467,18 +9467,18 @@ namespace Render::Effects::Behaviors
         else if (o->SubType == 5)
         {
             o->Scale *= pow(1.15f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->StartPosition, 1.04f, o->StartPosition);
-            VectorSubtract(o->Position, o->StartPosition, o->Position);
-            VectorScale(o->Light, 0.5f, o->Light);
+            VectorScale(o->StartPosition, powf(1.04f, FPS_ANIMATION_FACTOR), o->StartPosition);
+            VectorAddScaled(o->Position, o->StartPosition, o->Position, -FPS_ANIMATION_FACTOR);
+            VectorScale(o->Light, powf(0.5f, FPS_ANIMATION_FACTOR), o->Light);
             o->Position[2] = 160.0f + o->Scale * 10.0f;
         }
         else
         {
             o->Alpha = 1.0f;
             o->Scale += (0.2f) * FPS_ANIMATION_FACTOR;
-            VectorScale(o->StartPosition, 0.99f, o->StartPosition);
-            VectorSubtract(o->Position, o->StartPosition, o->Position);
-            VectorScale(o->Light, 0.65f, o->Light);
+            VectorScale(o->StartPosition, powf(0.99f, FPS_ANIMATION_FACTOR), o->StartPosition);
+            VectorAddScaled(o->Position, o->StartPosition, o->Position, -FPS_ANIMATION_FACTOR);
+            VectorScale(o->Light, powf(0.65f, FPS_ANIMATION_FACTOR), o->Light);
             o->Position[2] = 220.0f + o->Scale * 80.0f;
         }
     }
@@ -9490,9 +9490,9 @@ namespace Render::Effects::Behaviors
     {
     {
         o->Alpha = 1.0f;
-        VectorScale(o->Light, 0.8f, o->Light);
+        VectorScale(o->Light, powf(0.8f, FPS_ANIMATION_FACTOR), o->Light);
         o->Scale += (0.1f) * FPS_ANIMATION_FACTOR;
-        VectorScale(o->StartPosition, 0.95f, o->StartPosition);
+        VectorScale(o->StartPosition, powf(0.95f, FPS_ANIMATION_FACTOR), o->StartPosition);
         VectorSubtract(o->Position, o->StartPosition, o->Position);
     }
         return true;
@@ -9532,7 +9532,7 @@ namespace Render::Effects::Behaviors
         {
             o->Angle[1] += (20.0f) * FPS_ANIMATION_FACTOR;
         }
-        VectorScale(o->Light, 0.9f, o->Light);
+        VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
         o->Alpha = 1.0f;
     }
         return true;
@@ -9550,7 +9550,7 @@ namespace Render::Effects::Behaviors
                 o->Scale = 5.0f;
             }
             o->Angle[0] = -(int)WorldTime * 0.5f;
-            VectorScale(o->Light, 0.9f, o->Light);
+            VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
         }
         else
         {
@@ -9560,7 +9560,7 @@ namespace Render::Effects::Behaviors
                 o->Scale = 3.0f;
             }
             o->Angle[0] = -(int)WorldTime * 0.5f;
-            VectorScale(o->Light, 0.9f, o->Light);
+            VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
         }
     }
         return true;
@@ -9580,7 +9580,7 @@ namespace Render::Effects::Behaviors
                 o->Scale = 3;
             }
             o->Alpha *= pow(0.92f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->Light, 0.9f, o->Light);
+            VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
             if ((int)o->LifeTime == 40 || (int)o->LifeTime == 30)
             {
                 vec3_t vLight;
@@ -9631,7 +9631,7 @@ namespace Render::Effects::Behaviors
                 o->Scale = 3;
             }
             o->Alpha *= pow(0.92f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->Light, 0.85f, o->Light);
+            VectorScale(o->Light, powf(0.85f, FPS_ANIMATION_FACTOR), o->Light);
 
             if ((int)o->LifeTime == 60 || (int)o->LifeTime == 50)
             {
@@ -9649,7 +9649,7 @@ namespace Render::Effects::Behaviors
                 o->Scale = 3;
             }
             o->Alpha *= pow(0.92f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->Light, 0.85f, o->Light);
+            VectorScale(o->Light, powf(0.85f, FPS_ANIMATION_FACTOR), o->Light);
         }
     }
         return true;
@@ -9742,7 +9742,7 @@ namespace Render::Effects::Behaviors
         {
             o->Scale = 1.5f;
         }
-        VectorScale(o->Light, 0.9f, o->Light);
+        VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
         VectorCopy(o->Owner->Position, o->Position);
     }
         return true;
@@ -9852,17 +9852,17 @@ namespace Render::Effects::Behaviors
         if (o->SubType == 1)
         {
             o->Scale *= pow(1.2f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->Light, 0.9f, o->Light);
+            VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
         }
         else if (o->SubType == 2)
         {
             o->Scale *= pow(1.2f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->Light, 0.7f, o->Light);
+            VectorScale(o->Light, powf(0.7f, FPS_ANIMATION_FACTOR), o->Light);
         }
         else
         {
             o->Scale *= pow(1.2f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->Light, 0.8f, o->Light);
+            VectorScale(o->Light, powf(0.8f, FPS_ANIMATION_FACTOR), o->Light);
         }
     }
         return true;

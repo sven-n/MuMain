@@ -525,6 +525,7 @@ typedef struct
     int NumTails; // The number of currently used tail entries. Usually this gets increased by one in every reference
                   // frame until the maximum is reached.
     int         MaxTails; // The maximum number of tail entries to use.
+    int         ReferenceMaxTails; // MaxTails as authored for one tail per reference frame.
     vec3_t Tails[MAX_TAILS][4]; // The tail entries, which are getting moved back by one in every reference frame.
     float TailFrames;           // Reference frames since tails were last laid.
 } JOINT;

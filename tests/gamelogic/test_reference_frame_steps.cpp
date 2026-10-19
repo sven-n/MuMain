@@ -8,6 +8,9 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
+#include <cstdlib>
+#include <numeric>
 #include <vector>
 
 TEST_CASE("Integer frame counters step once per reference frame at every FPS [gamelogic][timing]")
@@ -173,4 +176,70 @@ TEST_CASE("An object blur keeps every sample submitted within a frame [render][t
 {
     static OBJECT owner;
     CheckBatchesWithinFrames(Render::Effects::g_objectBlurs, &owner);
+}
+
+TEST_CASE("A trail laid once per reference frame keeps its authored length at high FPS [render][timing]")
+{
+    for (int i = 0; i < MAX_JOINTS; ++i)
+    {
+        Joints[i].Live = false;
+    }
+    const float savedFactor = FPS_ANIMATION_FACTOR;
+    FPS_ANIMATION_FACTOR = 0.1f;
+    vec3_t position = {1000.f, 1000.f, 100.f};
+    vec3_t angle = {0.f, 0.f, 0.f};
+    CreateJoint(BITMAP_JOINT_SPARK, position, position, angle, 0);
+    JOINT* joint = std::find_if(Joints, Joints + MAX_JOINTS, [](const JOINT& j) { return j.Live; });
+    REQUIRE(joint != Joints + MAX_JOINTS);
+    CHECK(joint->ReferenceMaxTails == 2);
+    CHECK(joint->MaxTails == 20);
+
+    for (int frame = 0; frame < 30 && joint->Live; ++frame)
+    {
+        MoveJoints();
+        CHECK(joint->MaxTails == 2);
+        CHECK(joint->NumTails <= 1);
+    }
+    joint->Live = false;
+    FPS_ANIMATION_FACTOR = savedFactor;
+}
+
+namespace
+{
+// Where a lightning bolt built in one move ends up, from the same random seed.
+std::array<float, 3> BoltEnd(float frameFactor)
+{
+    for (int i = 0; i < MAX_JOINTS; ++i)
+    {
+        Joints[i].Live = false;
+    }
+    static OBJECT target;
+    target.Live = true;
+    Vector(1600.f, 1000.f, 0.f, target.Position);
+    FPS_ANIMATION_FACTOR = frameFactor;
+    vec3_t start = {1000.f, 1000.f, 100.f};
+    vec3_t angle = {0.f, 0.f, 90.f};
+    srand(1234);
+    CreateJoint(BITMAP_JOINT_LASER + 1, start, target.Position, angle, 1, &target, 50.f);
+    JOINT* joint = std::find_if(Joints, Joints + MAX_JOINTS, [](const JOINT& j) { return j.Live; });
+    REQUIRE(joint != Joints + MAX_JOINTS);
+    MoveJoints();
+    const std::array<float, 3> end = {joint->Position[0], joint->Position[1], joint->Position[2]};
+    joint->Live = false;
+    return end;
+}
+} // namespace
+
+TEST_CASE("A lightning bolt reaches its target within one move at every frame rate [render][timing]")
+{
+    const float savedFactor = FPS_ANIMATION_FACTOR;
+    for (const float factor : {1.f, 0.1f})
+    {
+        CAPTURE(factor);
+        const std::array<float, 3> end = BoltEnd(factor);
+        // The bolt aims 80 above the target and stops within two steps (2 x 40) of it.
+        const float dx = end[0] - 1600.f, dy = end[1] - 1000.f, dz = end[2] - 80.f;
+        CHECK(std::sqrt(dx * dx + dy * dy + dz * dz) <= 80.f);
+    }
+    FPS_ANIMATION_FACTOR = savedFactor;
 }

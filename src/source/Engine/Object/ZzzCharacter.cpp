@@ -10638,8 +10638,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             b->TransformPosition(o->BoneTransform[27], vRelativePos, vWorldPos, true);
 
             Vector(0.2f, 0.2f, 1.0f, vLight);
-            CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
-            CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
+            CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
+            CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
         }
         else if (o->CurrentAction >= PLAYER_SKILL_SLEEP && o->CurrentAction <= PLAYER_SKILL_SLEEP_FENRIR)
         {

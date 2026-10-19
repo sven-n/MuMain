@@ -6053,7 +6053,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             VectorAddScaled(o->Position, o->Direction, o->Position, FPS_ANIMATION_FACTOR);
             //o->Direction[2] -= .35f;
             o->Direction[2] -= .01f * FPS_ANIMATION_FACTOR;
-            //VectorScale( o->Light, 0.9f, o->Light);
+            //VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
             CreateParticleFpsChecked(BITMAP_LIGHT, o->Position, o->Angle, o->Light, 1, o->Scale);
             if (o->Direction[2] < -2.f)
             {
@@ -7051,12 +7051,12 @@ void MoveEffect(OBJECT* o, int iIndex)
     case MODEL_GATE:
     case MODEL_GATE + 1:
         VectorAddScaled(o->Position, o->Direction, o->Position, FPS_ANIMATION_FACTOR);
-        VectorScale(o->Direction, 0.9f, o->Direction);
+        VectorScale(o->Direction, powf(0.9f, FPS_ANIMATION_FACTOR), o->Direction);
         o->Position[2] += (o->Gravity) * FPS_ANIMATION_FACTOR;
 
         if (o->SubType == 1)
         {
-            VectorScale(o->Direction, 1.1f, o->Direction);
+            VectorScale(o->Direction, powf(1.1f, FPS_ANIMATION_FACTOR), o->Direction);
         }
 
         o->Gravity -= (4.f) * FPS_ANIMATION_FACTOR;
@@ -7080,12 +7080,12 @@ void MoveEffect(OBJECT* o, int iIndex)
     case MODEL_STONE_COFFIN:
     case MODEL_STONE_COFFIN + 1:
         VectorAddScaled(o->Position, o->Direction, o->Position, FPS_ANIMATION_FACTOR);
-        VectorScale(o->Direction, 0.9f, o->Direction);
+        VectorScale(o->Direction, powf(0.9f, FPS_ANIMATION_FACTOR), o->Direction);
         o->Position[2] += (o->Gravity) * FPS_ANIMATION_FACTOR;
 
         if (o->SubType == 1)
         {
-            VectorScale(o->Direction, 1.1f, o->Direction);
+            VectorScale(o->Direction, powf(1.1f, FPS_ANIMATION_FACTOR), o->Direction);
         }
 
         o->Gravity -= (3.f) * FPS_ANIMATION_FACTOR;
