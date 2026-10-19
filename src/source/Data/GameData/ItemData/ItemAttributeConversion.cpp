@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "ItemAttributeConversion.h"
+#include "ItemStatProfiles.h"
 #include "ItemType.h"
 #include "Core/Text/Utf8.h"
 
@@ -162,13 +163,13 @@ std::string GetWingStatProfile(const ItemDefinition& definition)
     switch (definition.wingTier)
     {
     case WingTier::Small:
-        return "smallWing";
+        return StatProfileNames::SmallWing;
     case WingTier::First:
-        return "firstTierWing";
+        return StatProfileNames::FirstTierWing;
     case WingTier::Second:
-        return definition.tags.Has(ItemTag::Cape) ? "secondTierCape" : "secondTierWing";
+        return definition.tags.Has(ItemTag::Cape) ? StatProfileNames::SecondTierCape : StatProfileNames::SecondTierWing;
     case WingTier::Third:
-        return "thirdTierWing";
+        return StatProfileNames::ThirdTierWing;
     default:
         return "";
     }
@@ -231,19 +232,19 @@ std::string DeriveStatProfile(const ItemDefinition& definition)
     }
     if (definition.tags.Has(ItemTag::Sceptre))
     {
-        return "sceptre";
+        return StatProfileNames::Sceptre;
     }
     if (definition.tags.Has(ItemTag::SummonerBook))
     {
-        return "book";
+        return StatProfileNames::Book;
     }
     if (definition.weaponKind == WeaponKind::Shield)
     {
-        return "shield";
+        return StatProfileNames::Shield;
     }
     if (definition.weaponKind != WeaponKind::None)
     {
-        return "weapon";
+        return StatProfileNames::Weapon;
     }
     switch (definition.slot)
     {
@@ -252,7 +253,7 @@ std::string DeriveStatProfile(const ItemDefinition& definition)
     case ItemSlot::Pants:
     case ItemSlot::Gloves:
     case ItemSlot::Boots:
-        return "armor";
+        return StatProfileNames::Armor;
     default:
         break;
     }
@@ -262,11 +263,11 @@ std::string DeriveStatProfile(const ItemDefinition& definition)
     }
     if (definition.group == EtcGroup && definition.requirements != ItemRequirements{})
     {
-        return "scroll";
+        return StatProfileNames::Scroll;
     }
     if ((definition.group == HelperGroup || definition.group == PotionGroup) && definition.requirements.level > 0)
     {
-        return "helper";
+        return StatProfileNames::Helper;
     }
     return "";
 }

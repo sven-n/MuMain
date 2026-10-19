@@ -16,6 +16,24 @@ namespace Data::Items
 {
 struct ItemStatFile;
 
+// The profiles the item data gives an item (DeriveStatProfile); the stat file
+// must have those its items name.
+namespace StatProfileNames
+{
+constexpr const char* Weapon = "weapon";
+constexpr const char* Armor = "armor";
+constexpr const char* Shield = "shield";
+constexpr const char* Sceptre = "sceptre";
+constexpr const char* Book = "book";
+constexpr const char* Helper = "helper";
+constexpr const char* Scroll = "scroll";
+constexpr const char* SmallWing = "smallWing";
+constexpr const char* FirstTierWing = "firstTierWing";
+constexpr const char* SecondTierWing = "secondTierWing";
+constexpr const char* SecondTierCape = "secondTierCape";
+constexpr const char* ThirdTierWing = "thirdTierWing";
+} // namespace StatProfileNames
+
 // The terms of one stat with the profile laid over the default.
 struct StatTerms
 {
