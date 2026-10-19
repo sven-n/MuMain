@@ -604,11 +604,23 @@ TEST_CASE("A derived stat profile the item stat file does not have keeps the def
         CHECK(g_ItemDatabase.Find(ITEM_SMALL_SHIELD)->statProfile.empty());
     }
 
-    SUBCASE("the save of items that still name it")
+    SUBCASE("the save of items that still name it, with the item checks")
     {
+        // An item without an English name is an error of the item checks.
+        ItemDefinition untranslated = *g_ItemDatabase.Find(KrisType);
+        untranslated.names = Data::LocalizedString{};
+        untranslated.names.Set("pt", "Cris");
+        g_ItemDatabase.Set(untranslated);
+
         std::vector<ItemDataIssue> issues;
         CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::InvalidData);
         CHECK(std::ranges::any_of(issues, namesShield(ItemDataIssueSeverity::Error)));
+        CHECK(std::ranges::any_of(issues,
+                                  [](const ItemDataIssue& issue)
+                                  {
+                                      return issue.severity == ItemDataIssueSeverity::Error && issue.group == 0 &&
+                                             issue.number == 0 && issue.field != "statProfile";
+                                  }));
     }
 }
 

@@ -679,9 +679,11 @@ server with original clients (after phases 6 and B).
      `thirdTierWing` and `smallWing` on 24 wings. The Horn of Fenrir names
      `"default"`: its data gives `helper`, but its level requirement does not
      grow. The other items name none and have the default; a left-out profile
-     follows the data, and one the data gives is a warning (item files saved
-     before the field). Of them, the orbs, crystals and scrolls of group 12,
-     the Horn of Fenrir and the Transformation Ring have requirements:
+     follows the data at the next bmd import or edit, and loading warns about
+     an item that leaves out the profile its data gives (as item files saved
+     before the field do). Of the items with the default, the orbs, crystals
+     and scrolls of group 12, the Horn of Fenrir and the Transformation Ring
+     have requirements:
      their level requirement does not grow with the item level, their stat
      requirements follow the default formula, and the Orb of Summoning's
      energy and the ring's level come from `requirementsByLevel`.

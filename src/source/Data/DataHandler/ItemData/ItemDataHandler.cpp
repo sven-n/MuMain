@@ -62,7 +62,7 @@ std::unique_ptr<ITEM_ATTRIBUTE[]> BuildItemAttributes(std::string_view locale)
 // The stat profile FollowStatProfile gives, if the item stat file has it. One the file
 // lacks (renamed or removed) would stop the next start, and the editor cannot change it,
 // so the item keeps the default and `issues` gets a warning; loading warns about the item
-// until the file has the profile.
+// until an edit, a move or a bmd import gives it the profile, once the file has it again.
 std::string FollowKnownStatProfile(const ItemDefinition* previous, const ItemDefinition& updated,
                                    std::vector<ItemDataIssue>& issues)
 {

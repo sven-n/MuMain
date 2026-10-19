@@ -40,7 +40,7 @@ public:
     void OnItemEdited(int itemType);
     // The item editor swapped two entries of ItemAttribute[]. A moved item's
     // weapon kind and stat profile follow its new group like an edit
-    // (FollowGroupWeaponKind, FollowStatProfile).
+    // (FollowDerivedFieldsAfterMove).
     void OnItemsSwapped(int firstItemType, int secondItemType);
 
     // Validates the item database and writes Data/Items. Nothing is written
@@ -91,8 +91,9 @@ private:
                                    std::vector<Data::Items::ItemDataIssue>& issues);
     // Gives the item a swap moved to newItemType the weapon kind of its new
     // group if it had the one of its old group (FollowGroupWeaponKind), and the
-    // stat profile its data then gives if it had the derived one
-    // (FollowStatProfile).
+    // stat profile its data then gives if it had the derived one or none
+    // (FollowStatProfile), as long as the item stat file has that profile;
+    // otherwise the default, with a warning in the log.
     static void FollowDerivedFieldsAfterMove(const Data::Items::ItemDefinition& before, int newItemType);
 #endif
 

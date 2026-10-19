@@ -576,7 +576,6 @@ void ItemStatsReader::WarnAboutUnusedTables(const ItemStatFile& file)
 
 // ---------------------------------------------------------------- writing
 
-// English first, then the translations sorted by language.
 OrderedJson WriteTable(const LevelBonusTable& table)
 {
     OrderedJson json;
