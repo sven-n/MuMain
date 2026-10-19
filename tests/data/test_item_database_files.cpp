@@ -748,6 +748,23 @@ TEST_CASE("Exporting the items as bmd and importing them again gives the same da
     }
 }
 
+TEST_CASE("The save warns about an item name in a language the game has no texts for [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.SetItemName(BladeType, "fr", "Lame"));
+
+    std::vector<ItemDataIssue> issues;
+    CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+    CHECK(std::ranges::any_of(
+        issues, [](const ItemDataIssue& issue)
+        { return issue.severity == ItemDataIssueSeverity::Warning && issue.message.find("fr") != std::string::npos; }));
+}
+
 // The bmd import and the editor give items the profile their data gives; a stat file can lack it
 // (renamed or removed). The item then keeps the default with a warning; an item that still names
 // the profile is an error on save.
