@@ -137,9 +137,10 @@ void ComputeRequirements(const ITEM_ATTRIBUTE& attribute, const ItemStatInput& i
     const size_t levelIndex = static_cast<size_t>(std::clamp(input.level, 0, Data::Items::ItemLevelCount - 1));
     const bool excellentOptions = input.excellentFlags > 0;
 
-    if (const RequirementByLevel* levels = FindRequirementByLevel(definition, ItemRequirement::Level))
+    const RequirementByLevel* levelByLevel = FindRequirementByLevel(definition, ItemRequirement::Level);
+    if (levelByLevel != nullptr)
     {
-        values.requireLevel = (*levels)[levelIndex];
+        values.requireLevel = (*levelByLevel)[levelIndex];
     }
     else if (attribute.RequireLevel > 0)
     {
@@ -152,6 +153,9 @@ void ComputeRequirements(const ITEM_ATTRIBUTE& attribute, const ItemStatInput& i
         values.requireLevel = LimitToItemValue(values.requireLevel + WideValue{terms.excellentLevelAdd});
     }
 
+    // The level requirement the "levelRequirement" basis takes: the one given by level, or the
+    // base value, without the growth per item level and the excellent addition.
+    const int levelRequirementBasis = levelByLevel != nullptr ? (*levelByLevel)[levelIndex] : attribute.RequireLevel;
     const int dropLevel = attribute.Level + (excellentOptions                 ? profiles.GetExcellentDropLevelBonus()
                                              : input.ancientDiscriminator > 0 ? profiles.GetAncientDropLevelBonus()
                                                                               : 0);
@@ -168,7 +172,7 @@ void ComputeRequirements(const ITEM_ATTRIBUTE& attribute, const ItemStatInput& i
             continue;
         }
         *requirements[stat] = ComputeStatRequirement(terms.Get(requirement), GetRequirementBase(attribute, requirement),
-                                                     dropLevel, attribute.RequireLevel, input.level);
+                                                     dropLevel, levelRequirementBasis, input.level);
     }
     values.requireStrength =
         LimitToItemValue(values.requireStrength + WideValue{terms.strengthPerOptionLevel} * input.optionLevel);

@@ -263,8 +263,9 @@ defense and magic defense, and how its requirements grow. It is in a folder of i
     where the drop level is the item's `level` plus `dropLevelBonus.excellent`
     for an item with excellent options, else plus `dropLevelBonus.ancient`
     for an ancient item; `"base"` keeps the base value, and `"basis":
-    "levelRequirement"` takes the item's level requirement instead of the drop
-    level (without the item level) when it has one. A requirement the item
+    "levelRequirement"` takes the item's level requirement (its base value,
+    or the one `requirementsByLevel` gives at the item's level) instead of
+    the drop level (without the item level) when it has one. A requirement the item
     does not have stays 0;
   - `strengthPerOptionLevel`: the strength requirement grows by this much per
     option level (also when the item has no strength requirement).

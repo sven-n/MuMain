@@ -311,6 +311,17 @@ TEST_CASE("Item requirements come from the item's stat profile [data][items]")
     const int wizardryEnhance = MakeItemType(15, 28);
     CHECK(stats(wizardryEnhance, 5).requireEnergy == 1058);
     CHECK(stats(wizardryEnhance, 5).requireLevel == 240);
+
+    // A level requirement given by level is the one the energy comes from.
+    ItemDefinition givenByLevel = *g_ItemDatabase.Find(wizardryEnhance);
+    RequirementByLevel levels{};
+    levels.fill(100);
+    givenByLevel.requirements.level = 0;
+    givenByLevel.requirementsByLevel.Set(ItemRequirement::Level, levels);
+    g_ItemDatabase.Set(givenByLevel);
+    items[wizardryEnhance].RequireLevel = 0;
+    CHECK(stats(wizardryEnhance, 5).requireLevel == 100);
+    CHECK(stats(wizardryEnhance, 5).requireEnergy == 20 + items[wizardryEnhance].RequireEnergy * 100 * 4 / 100);
 }
 
 // The items whose level requirement excellent options do not raise are item data: the

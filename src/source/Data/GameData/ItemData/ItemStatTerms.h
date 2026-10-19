@@ -81,7 +81,8 @@ struct StatBonusTerm
 //   add + base * (drop level + level * levelWeight) * percent / 100
 // where the drop level has the excellent or ancient drop level bonus. keepBase
 // keeps the base value. levelRequirementBasis takes the item's level
-// requirement instead of the drop level (and no level weight) when it has one.
+// requirement (its base value, or the one given by level at the item's level)
+// instead of the drop level (and no level weight) when it has one.
 struct RequirementFormula
 {
     bool keepBase = true;
