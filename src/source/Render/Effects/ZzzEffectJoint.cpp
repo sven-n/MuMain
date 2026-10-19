@@ -1332,7 +1332,8 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                     o->MaxTails = 0;
                     o->MultiUse = 0;
 
-                    for (int j = 0; j < MAX_CHARACTERS_CLIENT; j++)
+                    // At most one target per TargetIndex entry; the original went one past the end.
+                    for (int j = 0; j < MAX_CHARACTERS_CLIENT && o->MultiUse < static_cast<float>(std::size(o->TargetIndex)); j++)
                     {
                         CHARACTER* tc = &CharactersClient[j];
                         OBJECT* to = &tc->Object;
@@ -1345,8 +1346,6 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                             o->TargetIndex[(int)o->MultiUse] = j;
                             o->MultiUse++;
                         }
-
-                        if (o->MultiUse > 5) break;
                     }
                     o->Weapon = o->MultiUse * 15;
                     o->MultiUse = 0;
