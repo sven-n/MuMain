@@ -521,6 +521,13 @@ server with original clients (after phases 6 and B).
    | `shieldPotion` | `ItemConstants.SmallShieldPotion`, `MediumShieldPotion`, `LargeShieldPotion` | Client-only, like the other potion tags |
    | `potionPriority` | None; OpenMU keeps a potion's strength in its consume handler plug-ins, and its offline leveling (`HealingHandler`) lists the healing and mana potions largest first in code | Client-only for now |
    | `luckyItem` | None; OpenMU's Season 6 data has no lucky set armour (numbers 62 to 72 of groups 7 to 11) | Client-only until OpenMU has them |
+   | Level bonus tables of `Stats/ItemStats.json` | `ItemLevelBonusTable`, attached per item through `BasePowerUpAttributes`: `damageIncreaseWeapons` = Damage Increase (Weapons), `defenseIncreaseArmors` = Defense Increase (Armors), `defenseIncreaseShields` = Defense Increase (Shields), `defenseRateIncreaseShields` = Defense Rate Increase (Shields), `defenseBonus1stWings` = Defense Bonus (1st and 2nd Wings), `defenseBonus3rdWings` = Defense Bonus (3rd Wings) | Same values. `magicPowerIncrease` (T) is what OpenMU's rise tables are made of: Staff Rise even = ⌊T/2⌋ + 2L and odd = ⌈T/2⌉ + 2L, Scepter Rise the same without 2L. The client halves the sum of base, excellent and ancient part, so its table cannot be chosen by the base's parity per item as OpenMU does; the exchange expands it. `defenseBonus2ndWings` (2 per level up to +9) has no OpenMU table: OpenMU gives second tier wings and the capes the 3 per level table. `magicDefenseIncrease` is client-only (no shipped item has magic defense) |
+   | Excellent and ancient terms, `dropLevelBonus` | Hard-coded in `ItemPowerUpFactory` (with a TODO to make them configurable) | Client-only data; the exchange compares them with OpenMU's numbers. Same formulas except magic power's rounding (the client halves the sum, OpenMU each part) |
+   | `statProfile` | None; OpenMU picks the tables per item | The exchange expands the profile into the item's per-stat tables |
+   | `excellentBonus` (Chaos Dragon Axe 15, Chaos Nature Bow 30, Chaos Lightning Staff 25) | None; OpenMU uses the formula | Client-only; a difference to report |
+   | Requirement terms of `Stats/ItemStats.json` (`levelPerItemLevel`, `excellentLevelAdd`, the stat terms, `strengthPerOptionLevel`) | The base values are the item's `Requirements`; `ItemExtensions.GetRequirement` and `CalculateDropLevel` compute the rest in code | Same stat formula `20 + base * (drop level + 3 * level) * 3 / 100` (energy `* 4`) and the same book formula. Differences to report: OpenMU adds the ancient +30 before the excellent +25 (the client the other way round), computes command like the other stats (the client keeps the base), adds the option level's strength only when there is a strength requirement and 5 per level on armour, 4 on other items (the client 5 on all of groups 0 to 11 except ammunition), and neither grows the level requirement with the item level nor adds 20 for excellent items. Scrolls and orbs are not wearable in OpenMU; their requirement is computed once into the item (`OrbRequirements`), for scrolls from the level requirement like the client's `levelRequirement` basis |
+   | `excellentRaisesLevel` = false | None; OpenMU has no excellent +20 | Client-only |
+   | `requirementsByLevel` (Orb of Summoning energy, Transformation Ring level) | The ring: a second level requirement of 50 with `MinimumItemLevel` 3 (`TransformationRingConfiguration`). The Orb of Summoning: no energy requirement, maximum item level 6 | The exchange maps the ring's list to the two requirements; the orb's energy list is a difference to report |
    | `tradable`, `storable`, `personalShopSellable`, `sellable` = false | Only `IsBoundToCharacter`, which blocks all four at once (sell with a durability exception) | Separate rules, e.g. one `[Flags] ItemRestrictions` column with the six names; enforce in `MoveItemAction` (trade, vault, personal shop) and `SellItemToNpcAction`; `IsBoundToCharacter` stays for "only the owner can pick it up" |
    | `droppable` = false | None (`DropItemAction` drops everything) | Enforce in `DropItemAction` |
    | `repairable` = false | None (`ItemRepairAction` repairs any item below its maximum durability) | Enforce in `ItemRepairAction` |
@@ -627,16 +634,16 @@ server with original clients (after phases 6 and B).
    the inventory found wrong are fixed on their own, not in 3b: the
    Illusion Temple team skins (#669) and the trade warning (#671).
 
-   **3c Item stats by level (not started).** What the item level adds to
-   damage, magic power, defense, blocking, the requirements and the wing
-   options, and the bonus of excellent and ancient items, is computed today
-   by `SetItemAttributes` and its `Calc*` functions in `ZzzInfomation.cpp`;
-   the formulas are listed under "Item-specific code that is left" → Item
-   stats by level. They become named level bonus tables and formula
-   parameters in data (D43 of the roadmap), shared in the item exchange and
-   matching OpenMU's `ItemLevelBonusTable` per stat. Checked like phase 3: a
-   one-time test compares the old and the new values for every item at
-   levels 0–15, normal, excellent and ancient. The differences 815b8828 and
+   **3c Item stats by level (done).** What the item level adds to damage,
+   magic power, defense, blocking and the requirements, and the bonus of
+   excellent and ancient items, was computed by `SetItemAttributes` and its
+   `Calc*` functions in `ZzzInfomation.cpp`; the formulas are listed under
+   "Item-specific code that is left" → Item stats by level. They became
+   named level bonus tables and formula parameters in data (D43 of the
+   roadmap), shared in the item exchange and matching OpenMU's
+   `ItemLevelBonusTable` per stat. Checked like phase 3: a one-time test
+   compared the old and the new values for every item at levels 0–15,
+   normal, excellent and ancient. The differences 815b8828 and
    3d5b1adc6 brought into these formulas (blocking by the drop level, the
    excellent bonus for wings with a wing option and not for ancient items,
    the empty level requirement range from the Wing of Dimension on, the
@@ -650,6 +657,70 @@ server with original clients (after phases 6 and B).
    these formulas after the Season 6 client and is compared when this phase
    starts. **A (OpenMU):** the mapping of the tables to
    `ItemLevelBonusTable`, and the formulas OpenMU does not have.
+
+   Decided 2026-10-18 after comparing three shapes (rules over existing
+   data, per-stat table references as in OpenMU, and stat profiles): **stat
+   profiles**. `Data/Items/Stats/ItemStats.json` holds the level bonus tables
+   (16 values or a step per level, named after OpenMU's tables where OpenMU
+   has one), a `default` that writes every stat's
+   table, excellent and ancient terms and the requirement terms once, and
+   named profiles that write only what differs. Each item names its profile
+   (`statProfile`); like `weaponKind` it is written on the items and kept
+   matching their data by the bmd import and the item editor. What belongs
+   to one item stays on the item: `excellentBonus`, `excellentRaisesLevel`
+   and `requirementsByLevel`. Wing options move with the other options to
+   phase 9. The old fork branch had nothing to take over except the Cape of
+   Lord's defense of 15 as data; its other changes are in main already,
+   fixed differently, or wrong (first tier wing steps from 25, Wings of
+   Despair as third tier, a second +25 for excellent requirements).
+   - Nine tables, the default and twelve profiles on 604 items: `weapon`
+     119, `armor` 356, `shield` 24, `sceptre` 11, `book` 3, `helper` 31,
+     `scroll` 36, and `firstTierWing`, `secondTierWing`, `secondTierCape`,
+     `thirdTierWing` and `smallWing` on 24 wings. The Horn of Fenrir names
+     `"default"`: its data gives `helper`, but its level requirement does not
+     grow. The other items name none and have the default; a left-out profile
+     follows the data at the next bmd import or edit, and loading warns about
+     an item that leaves out the profile its data gives (as item files saved
+     before the field do). Of the items with the default, the orbs, crystals
+     and scrolls of group 12, the Horn of Fenrir and the Transformation Ring
+     have requirements:
+     their level requirement does not grow with the item level, their stat
+     requirements follow the default formula, and the Orb of Summoning's
+     energy and the ring's level come from `requirementsByLevel`.
+   - On the items: `excellentBonus` on the three chaos weapons,
+     `excellentRaisesLevel: false` on the 89 items the excellent +20 left
+     out (the Dragon Knight, Venom Mist, Sylphid Ray, Volcano, Sunlight and
+     Storm Blitz armour, six weapons, the lucky items and the Horn of
+     Fenrir), and `requirementsByLevel` for the Orb of Summoning's energy
+     (30 to 500) and the Transformation Ring's level (20, then 50 from +3).
+   - `GameLogic::Items::ComputeItemStats` computes the stats and
+     requirements for `SetItemAttributes` and the item help table, which had
+     its own copy of the formulas. Gone from the code: `CalcDamageMin`,
+     `CalcDamageMax`, `CalcMagicPower`, `CalcSuccessfulBlocking`,
+     `CalcDefense`, `CalcRequirements`, `GetExcellentAddValue` with the three
+     chaos weapon ids, the shield group range, `GetItemLevelBonus`,
+     `GetDropLevel`, the
+     strength the option level added in four group ranges (now
+     `strengthPerOptionLevel` in the profiles), and the dead `PrintItem` and
+     `ItemConvert`.
+   - In commits of their own: the Cape of Lord's defense of 15 became item
+     data (the code wrote it into the item table, which the editor could
+     then save; a bmd import of the original files gives it their 0); the
+     bmd import and the editor's save check the stat profiles against the
+     stat file; values stop at 65535 instead of overflowing; the help table stops the defense rate at 255 and shows the
+     command requirement the item has; and the Dark Raven branch of the
+     command requirement went, which compared the item type with a model
+     number (15/115, no item).
+   - The one-time comparison covered every item at the levels 0 to 15 and
+     higher bytes, each excellent option, A and B ancient, option levels 0,
+     1, 4 and 15, item types without data and values the editor can give;
+     the help table too. The one difference: item types without data in
+     groups 0 to 11 no longer get the option level's strength.
+   - Left for later: which item gets which profile is code
+     (`DeriveStatProfile`) that names the profiles, while the profiles are
+     data; each profile could name in the stat file what it is for (tags,
+     slots, weapon kinds, groups). The stat file's writer has no caller
+     outside the tests yet; an editor for the stat file would use it.
 4. **Models into data**: model and display data in their own files,
    `Data/Items/Models/GroupNN_*.json` (D22):
 
@@ -1039,8 +1110,13 @@ types and model slots (4d2). 239 identify an item by its model slot
 - **Prices, requirements, durability** (about 16 places): fixed prices
   into `buyPrice`, price per durability, how requirements grow.
 - **Item stats by level** (phase 3c, D43): `SetItemAttributes` and its
-  `Calc*` functions (`ZzzInfomation.cpp`; `ItemConvert` there is an empty
-  stub) compute what the item level adds. Here level is the item level
+  `Calc*` functions (`ZzzInfomation.cpp`) computed what the item level adds;
+  since 3c the stats and requirements below come from the item stat file
+  (`docs/item-data.md`), which writes the same formulas as data, and from
+  the items' own fields (`excellentBonus`, `excellentRaisesLevel`,
+  `requirementsByLevel`); the functions named below are the ones the code
+  had before, except `CalcWingOptions`, which computes the wing options
+  until phase 9. Here level is the item level
   (`ip->Level`, 0 to 15), drop level the kind's `Level` (`p->Level`,
   OpenMU's `DropLevel`) and base the kind's value. The level bonus
   (`GameLogic::Items::GetItemLevelBonus`) is `3 * min(9, level)` and,
@@ -1122,9 +1198,8 @@ types and model slots (4d2). 239 identify an item by its model slot
 - The item field `skill` is empty for all scrolls and parchments;
   `GetSkillByBook` maps them in code (SK1).
 
-**Dead code** to delete instead of moving: `PrintItem`
-(`ZzzInfomation.cpp`), `CChangeRingManager::CheckRepair`, the macro
-`NOTSMELTING_DATA_FILE`.
+**Dead code** to delete instead of moving: `CChangeRingManager::CheckRepair`,
+the macro `NOTSMELTING_DATA_FILE` (`PrintItem` went in 3c).
 
 **Bugs found on the way**, filed upstream: the durability warning of
 rings at +2 (sven-n/MuMain#667), the walk of the Dragon Lance (#668),

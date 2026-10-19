@@ -57,6 +57,26 @@ std::unique_ptr<ITEM_ATTRIBUTE[]> BuildItemAttributes(std::string_view locale)
     }
     return attributes;
 }
+
+#ifdef _EDITOR
+// The stat profile FollowStatProfile gives, if the item stat file has it. One the file
+// lacks (renamed or removed) would stop the next start, and the editor cannot change it,
+// so the item keeps the default and `issues` gets a warning; loading warns about the item
+// until an edit, a move or a bmd import gives it the profile, once the file has it again.
+std::string FollowKnownStatProfile(const ItemDefinition* previous, const ItemDefinition& updated,
+                                   std::vector<ItemDataIssue>& issues)
+{
+    std::string profile = FollowStatProfile(previous, updated);
+    if (g_ItemDatabase.GetStatProfiles().Find(profile) != ItemStatProfiles::UnknownProfile)
+    {
+        return profile;
+    }
+    issues.push_back({ItemDataIssueSeverity::Warning, "", updated.group, updated.number, "statProfile",
+                      "its data gives \"" + profile + "\", which " + GetItemStatsFile().generic_string() +
+                          " does not have; it keeps the default"});
+    return "";
+}
+#endif
 } // namespace
 
 CItemDataHandler::CItemDataHandler()
@@ -95,6 +115,14 @@ bool CItemDataHandler::Load(std::string& errorMessage)
 {
     const auto loadStart = std::chrono::steady_clock::now();
     ItemDataLoadResult result = LoadItemDataDirectory(GetItemDataDirectory());
+    ItemStatsLoadResult stats = LoadItemStatsFile(GetItemStatsFile());
+    result.issues.insert(result.issues.end(), stats.issues.begin(), stats.issues.end());
+    ItemStatProfiles statProfiles;
+    if (!HasErrors(stats.issues))
+    {
+        statProfiles = ItemStatProfiles(stats.file);
+        ValidateStatProfiles(result.items, statProfiles, GetItemStatsFile().generic_string(), result.issues);
+    }
     Data::LogDataIssues(ItemDataLabel, result.issues);
     if (HasErrors(result.issues))
     {
@@ -105,6 +133,7 @@ bool CItemDataHandler::Load(std::string& errorMessage)
 
     const auto buildStart = std::chrono::steady_clock::now();
     g_ItemDatabase.SetDisplayLocale(I18N::GetCurrentLocale());
+    g_ItemDatabase.SetStatProfiles(std::move(statProfiles));
     g_ItemDatabase.Build(result.items);
     FillItemAttributes();
     RegisterLocaleObserver();
@@ -186,8 +215,11 @@ void CItemDataHandler::OnItemEdited(int itemType)
     definition.group = GetItemGroup(itemType);
     definition.number = GetItemNumber(itemType);
     CopyItemAttributeStats(attribute, definition);
-    // The editor does not show the weapon kind.
+    // The editor does not show the weapon kind or the stat profile.
     definition.weaponKind = FollowGroupWeaponKind(g_ItemDatabase.Find(itemType), definition);
+    std::vector<ItemDataIssue> issues;
+    definition.statProfile = FollowKnownStatProfile(g_ItemDatabase.Find(itemType), definition, issues);
+    Data::LogDataIssues(ItemDataLabel, issues);
 
     // Only a changed name is stored; otherwise every stat edit would turn the
     // shown English fallback into a translation. ITEM_ATTRIBUTE holds a cut
@@ -225,11 +257,11 @@ void CItemDataHandler::OnItemsSwapped(int firstItemType, int secondItemType)
     const ItemDefinition first = g_ItemDatabase.GetAllSlots()[firstItemType];
     const ItemDefinition second = g_ItemDatabase.GetAllSlots()[secondItemType];
     g_ItemDatabase.Swap(firstItemType, secondItemType);
-    FollowGroupWeaponKindAfterMove(first, secondItemType);
-    FollowGroupWeaponKindAfterMove(second, firstItemType);
+    FollowDerivedFieldsAfterMove(first, secondItemType);
+    FollowDerivedFieldsAfterMove(second, firstItemType);
 }
 
-void CItemDataHandler::FollowGroupWeaponKindAfterMove(const ItemDefinition& before, int newItemType)
+void CItemDataHandler::FollowDerivedFieldsAfterMove(const ItemDefinition& before, int newItemType)
 {
     const ItemDefinition* moved = g_ItemDatabase.Find(newItemType);
     if (moved == nullptr)
@@ -237,17 +269,23 @@ void CItemDataHandler::FollowGroupWeaponKindAfterMove(const ItemDefinition& befo
         return;
     }
 
-    const WeaponKind weaponKind = FollowGroupWeaponKind(&before, *moved);
-    if (weaponKind != moved->weaponKind)
+    ItemDefinition changed = *moved;
+    changed.weaponKind = FollowGroupWeaponKind(&before, changed);
+    std::vector<ItemDataIssue> issues;
+    changed.statProfile = FollowKnownStatProfile(&before, changed, issues);
+    Data::LogDataIssues(ItemDataLabel, issues);
+    if (changed.weaponKind != moved->weaponKind || changed.statProfile != moved->statProfile)
     {
-        ItemDefinition changed = *moved;
-        changed.weaponKind = weaponKind;
         g_ItemDatabase.Set(changed);
     }
 }
 
 ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
 {
+    // A profile the item stat file does not have would stop the next start. The save checks
+    // the items too and refuses on any error, so everything is reported at once.
+    ValidateStatProfiles(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(),
+                         GetItemStatsFile().generic_string(), issues);
     return SaveItemDataDirectory(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(), issues);
 }
 
@@ -260,8 +298,10 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
     }
 
     result.keptEnglishNameCount = KeepCurrentEnglishNames(result.items);
-    KeepFieldsNotInBmd(result.items, result.importedLocales);
+    KeepFieldsNotInBmd(result.items, result.importedLocales, result.validationIssues);
     ValidateItems(result.items, result.validationIssues);
+    ValidateStatProfiles(result.items, g_ItemDatabase.GetStatProfiles(), GetItemStatsFile().generic_string(),
+                         result.validationIssues);
 
     g_ItemDatabase.Build(result.items);
     FillItemAttributes();
@@ -285,7 +325,8 @@ int CItemDataHandler::KeepCurrentEnglishNames(std::vector<ItemDefinition>& items
 }
 
 void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items,
-                                          const std::vector<std::string>& importedLocales)
+                                          const std::vector<std::string>& importedLocales,
+                                          std::vector<ItemDataIssue>& issues)
 {
     const auto imported = [&](std::string_view locale)
     { return std::find(importedLocales.begin(), importedLocales.end(), locale) != importedLocales.end(); };
@@ -304,6 +345,7 @@ void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items,
             }
         }
         item.weaponKind = FollowGroupWeaponKind(current, item);
+        item.statProfile = FollowKnownStatProfile(current, item, issues);
     }
 }
 

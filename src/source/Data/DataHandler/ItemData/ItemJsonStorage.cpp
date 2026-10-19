@@ -5,6 +5,7 @@
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
+#include "Data/GameData/ItemData/ItemStatsJson.h"
 
 #include <algorithm>
 #include <array>
@@ -165,6 +166,25 @@ ItemModelDataLoadResult LoadItemModelDataDirectory(const std::filesystem::path& 
             issue.source = GetItemGroupFileName(issue.group);
         }
     }
+    return result;
+}
+
+std::filesystem::path GetItemStatsFile()
+{
+    return GetItemDataDirectory() / "Stats" / ItemStatsFileName;
+}
+
+ItemStatsLoadResult LoadItemStatsFile(const std::filesystem::path& file)
+{
+    ItemStatsLoadResult result;
+    const std::string source = file.generic_string();
+    const std::optional<std::string> text = ReadTextFile(file);
+    if (!text)
+    {
+        AddError(result.issues, source, "could not be read");
+        return result;
+    }
+    ReadItemStatsJson(*text, source, result.file, result.issues);
     return result;
 }
 

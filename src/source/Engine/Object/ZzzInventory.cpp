@@ -37,7 +37,7 @@
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "GameLogic/Items/ItemCategories.h"
-#include "GameLogic/Items/ItemLevelBonus.h"
+#include "GameLogic/Items/ItemStats.h"
 #include "Render/Items/ItemDisplay.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "UI/Scaling/UITransform.h"
@@ -776,119 +776,24 @@ void ComputeItemInfo(int iHelpItem)
 
     for (int Level = 0; Level <= iMaxLevel; Level++)
     {
-        int RequireStrength = 0;
-        int RequireDexterity = 0;
-        int RequireEnergy = 0;
-        int RequireCharisma = 0;
-        int RequireVitality = 0;
-        int RequireLevel = 0;
-        int DamageMin = p->DamageMin;
-        int DamageMax = p->DamageMax;
-        int Defense = p->Defense;
-        int Magic = p->MagicPower;
-        int Blocking = p->SuccessfulBlocking;
-
-        if (DamageMin > 0)
-        {
-            DamageMin += GameLogic::Items::GetItemLevelBonus(Level);
-        }
-        if (DamageMax > 0)
-        {
-            DamageMax += GameLogic::Items::GetItemLevelBonus(Level);
-        }
-
-        if (Magic > 0)
-        {
-            Magic += GameLogic::Items::GetItemLevelBonus(Level);
-            Magic /= 2;
-
-            if (!GameLogic::Items::IsSceptreType(iHelpItem))
-            {
-                Magic += Level * 2;
-            }
-        }
-
-        if (Defense > 0)
-        {
-            if (iHelpItem >= ITEM_SHIELD && iHelpItem < ITEM_SHIELD + MAX_ITEM_INDEX)
-            {
-                Defense += Level;
-            }
-            else
-            {
-                Defense += GameLogic::Items::GetItemLevelBonus(Level);
-            }
-        }
-        if (Blocking > 0)
-        {
-            Blocking += GameLogic::Items::GetItemLevelBonus(Level);
-        }
-
-        if (p->RequireLevel)
-        {
-            RequireLevel = p->RequireLevel;
-        }
-        else
-        {
-            RequireLevel = 0;
-        }
-
-        if (p->RequireStrength)
-        {
-            RequireStrength = 20 + p->RequireStrength * (p->Level + Level * 3) * 3 / 100;
-        }
-        else
-        {
-            RequireStrength = 0;
-        }
-
-        if (p->RequireDexterity)	RequireDexterity = 20 + p->RequireDexterity * (p->Level + Level * 3) * 3 / 100;
-        else RequireDexterity = 0;
-
-        if (p->RequireVitality)	RequireVitality = 20 + p->RequireVitality * (p->Level + Level * 3) * 3 / 100;
-        else RequireVitality = 0;
-
-        if (p->RequireEnergy)
-        {
-            if (GameLogic::Items::IsSummonerBookType(iHelpItem))
-            {
-                RequireEnergy = 20 + p->RequireEnergy * (p->Level + Level * 1) * 3 / 100;
-            }
-            else
-            {
-                if ((p->RequireLevel > 0) && (iHelpItem >= ITEM_ETC && iHelpItem < ITEM_ETC + MAX_ITEM_INDEX))
-                {
-                    RequireEnergy = 20 + (p->RequireEnergy) * (p->RequireLevel) * 4 / 100;
-                }
-                else
-                {
-                    RequireEnergy = 20 + p->RequireEnergy * (p->Level + Level * 3) * 4 / 100;
-                }
-            }
-        }
-        else
-        {
-            RequireEnergy = 0;
-        }
-
-        if (p->RequireCharisma)	RequireCharisma = 20 + p->RequireCharisma * (p->Level + Level * 3) * 3 / 100;
-        else RequireCharisma = 0;
+        // The stats and requirements a normal item of the level has.
+        const GameLogic::Items::ItemStatValues stats = GameLogic::Items::ComputeItemStats(*p, {iHelpItem, Level});
 
         // The window shows every column with a value at +0, so the row starts empty: no column of
         // the item shown before stays.
         std::ranges::fill(g_iItemInfo[Level], 0);
         g_iItemInfo[Level][_COLUMN_TYPE_LEVEL] = Level;
-        g_iItemInfo[Level][_COLUMN_TYPE_ATTMIN] = DamageMin;
-        g_iItemInfo[Level][_COLUMN_TYPE_ATTMAX] = DamageMax;
-        g_iItemInfo[Level][magicColumn] = Magic;
-        g_iItemInfo[Level][_COLUMN_TYPE_DEFENCE] = Defense;
-        g_iItemInfo[Level][_COLUMN_TYPE_DEFRATE] = Blocking;
-        g_iItemInfo[Level][_COLUMN_TYPE_REQSTR] = RequireStrength;
-        g_iItemInfo[Level][_COLUMN_TYPE_REQDEX] = RequireDexterity;
-        g_iItemInfo[Level][_COLUMN_TYPE_REQENG] = RequireEnergy;
-        g_iItemInfo[Level][_COLUMN_TYPE_REQCHA] = RequireCharisma;
-        g_iItemInfo[Level][_COLUMN_TYPE_REQVIT] = RequireVitality;
-        g_iItemInfo[Level][_COLUMN_TYPE_REQNLV] = RequireLevel;
+        g_iItemInfo[Level][_COLUMN_TYPE_ATTMIN] = stats.damageMin;
+        g_iItemInfo[Level][_COLUMN_TYPE_ATTMAX] = stats.damageMax;
+        g_iItemInfo[Level][magicColumn] = stats.magicPower;
+        g_iItemInfo[Level][_COLUMN_TYPE_DEFENCE] = stats.defense;
+        g_iItemInfo[Level][_COLUMN_TYPE_DEFRATE] = stats.blockRate;
+        g_iItemInfo[Level][_COLUMN_TYPE_REQSTR] = stats.requireStrength;
+        g_iItemInfo[Level][_COLUMN_TYPE_REQDEX] = stats.requireDexterity;
+        g_iItemInfo[Level][_COLUMN_TYPE_REQENG] = stats.requireEnergy;
+        g_iItemInfo[Level][_COLUMN_TYPE_REQCHA] = stats.requireLeadership;
+        g_iItemInfo[Level][_COLUMN_TYPE_REQVIT] = stats.requireVitality;
+        g_iItemInfo[Level][_COLUMN_TYPE_REQNLV] = stats.requireLevel;
         g_iItemInfo[Level][_COLUMN_TYPE_CAN_EQUIP] = CanEquipItemInfoRow(g_iItemInfo[Level], hero) ? TRUE : FALSE;
     }
 }

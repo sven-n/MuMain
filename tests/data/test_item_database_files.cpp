@@ -3,6 +3,7 @@
 #include "doctest.h"
 
 #include "ClientDataScope.h"
+#include "ItemStatProfilesScope.h"
 #include "TestFiles.h"
 
 #include "Core/Globals/_crypt.h"
@@ -13,6 +14,7 @@
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
+#include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/ItemStructs.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -456,6 +458,47 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         CHECK(g_ItemDatabase.GetWeaponKind(ITEM_BOLT) == WeaponKind::None);
     }
 
+    SUBCASE("a moved shield's stat profile follows its weapon kind")
+    {
+        const int emptySwordType = MakeItemType(0, 100);
+        REQUIRE(g_ItemDatabase.Find(ITEM_SMALL_SHIELD)->statProfile == "shield");
+        std::swap(ItemAttribute[ITEM_SMALL_SHIELD], ItemAttribute[emptySwordType]);
+        g_ItemDataHandler.OnItemsSwapped(ITEM_SMALL_SHIELD, emptySwordType);
+        CHECK(g_ItemDatabase.GetWeaponKind(emptySwordType) == WeaponKind::None);
+        CHECK(g_ItemDatabase.Find(emptySwordType)->statProfile.empty());
+    }
+
+    SUBCASE("the Horn of Fenrir keeps the default its file names")
+    {
+        REQUIRE(g_ItemDatabase.Find(ITEM_HORN_OF_FENRIR)->statProfile == "default");
+        ItemAttribute[ITEM_HORN_OF_FENRIR].RequireLevel = 0;
+        g_ItemDataHandler.OnItemEdited(ITEM_HORN_OF_FENRIR);
+        ItemAttribute[ITEM_HORN_OF_FENRIR].RequireLevel = 300;
+        g_ItemDataHandler.OnItemEdited(ITEM_HORN_OF_FENRIR);
+        CHECK(g_ItemDatabase.Find(ITEM_HORN_OF_FENRIR)->statProfile == "default");
+    }
+
+    SUBCASE("an item without a stat profile takes the one its data gives when edited")
+    {
+        ItemDefinition shield = *g_ItemDatabase.Find(ITEM_SMALL_SHIELD);
+        shield.statProfile.clear();
+        g_ItemDatabase.Set(shield);
+        g_ItemDataHandler.OnItemEdited(ITEM_SMALL_SHIELD);
+        CHECK(g_ItemDatabase.Find(ITEM_SMALL_SHIELD)->statProfile == "shield");
+    }
+
+    SUBCASE("a wing's stat profile follows its slot")
+    {
+        REQUIRE(g_ItemDatabase.Find(ITEM_WINGS_OF_ELF)->statProfile == "firstTierWing");
+        ItemAttribute[ITEM_WINGS_OF_ELF].m_byItemSlot = static_cast<BYTE>(ItemSlot::Helm);
+        g_ItemDataHandler.OnItemEdited(ITEM_WINGS_OF_ELF);
+        CHECK(g_ItemDatabase.Find(ITEM_WINGS_OF_ELF)->statProfile == "armor");
+
+        ItemAttribute[ITEM_WINGS_OF_ELF].m_byItemSlot = static_cast<BYTE>(ItemSlot::Wings);
+        g_ItemDataHandler.OnItemEdited(ITEM_WINGS_OF_ELF);
+        CHECK(g_ItemDatabase.Find(ITEM_WINGS_OF_ELF)->statProfile == "firstTierWing");
+    }
+
     SUBCASE("a moved item keeps all its names")
     {
         const int emptyType = MakeItemType(0, 100);
@@ -515,6 +558,69 @@ TEST_CASE("Exporting the items as bmd and importing them again gives the same da
         INFO(GetItemGroupFileName(group));
         CHECK(WriteItemGroupJson(group, g_ItemDatabase.GetAllSlots()) ==
               TestFiles::ReadWholeFile(DataDirectory / "Items" / GetItemGroupFileName(group)));
+    }
+}
+
+// The bmd import and the editor give items the profile their data gives; a stat file can lack it
+// (renamed or removed). The item then keeps the default with a warning; an item that still names
+// the profile is an error on save.
+TEST_CASE("A derived stat profile the item stat file does not have keeps the default [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    std::string changeLog;
+    REQUIRE(g_ItemDataHandler.ExportAsBmd(changeLog));
+
+    ItemStatsLoadResult stats = LoadItemStatsFile(folder.Directory() / GetItemStatsFile());
+    REQUIRE_FALSE(HasErrors(stats.issues));
+    std::erase_if(stats.file.profiles, [](const WrittenStatProfile& profile) { return profile.name == "shield"; });
+    ItemStatProfilesScope restoreProfiles;
+    g_ItemDatabase.SetStatProfiles(ItemStatProfiles(stats.file));
+    const auto namesShield = [](ItemDataIssueSeverity severity)
+    {
+        return [severity](const ItemDataIssue& issue)
+        {
+            return issue.severity == severity && issue.field == "statProfile" &&
+                   issue.message.find("\"shield\"") != std::string::npos;
+        };
+    };
+
+    SUBCASE("the import")
+    {
+        const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
+        REQUIRE_FALSE(HasErrors(result.issues));
+        CHECK_FALSE(HasErrors(result.validationIssues));
+        CHECK(std::ranges::any_of(result.validationIssues, namesShield(ItemDataIssueSeverity::Warning)));
+        CHECK(g_ItemDatabase.Find(ITEM_SMALL_SHIELD)->statProfile.empty());
+    }
+
+    SUBCASE("an edit")
+    {
+        g_ItemDataHandler.OnItemEdited(ITEM_SMALL_SHIELD);
+        CHECK(g_ItemDatabase.Find(ITEM_SMALL_SHIELD)->statProfile.empty());
+    }
+
+    SUBCASE("the save of items that still name it, with the item checks")
+    {
+        // An item without an English name is an error of the item checks.
+        ItemDefinition untranslated = *g_ItemDatabase.Find(KrisType);
+        untranslated.names = Data::LocalizedString{};
+        untranslated.names.Set("pt", "Cris");
+        g_ItemDatabase.Set(untranslated);
+
+        std::vector<ItemDataIssue> issues;
+        CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::InvalidData);
+        CHECK(std::ranges::any_of(issues, namesShield(ItemDataIssueSeverity::Error)));
+        CHECK(std::ranges::any_of(issues,
+                                  [](const ItemDataIssue& issue)
+                                  {
+                                      return issue.severity == ItemDataIssueSeverity::Error && issue.group == 0 &&
+                                             issue.number == 0 && issue.field != "statProfile";
+                                  }));
     }
 }
 

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "ItemAttributeConversion.h"
+#include "ItemStatProfiles.h"
 #include "ItemType.h"
 #include "Core/Text/Utf8.h"
 
@@ -110,6 +111,10 @@ void CopyFieldsNotInItemAttribute(const ItemDefinition& source, ItemDefinition& 
     target.tags = source.tags;
     target.wingTier = source.wingTier;
     target.weaponKind = source.weaponKind;
+    target.statProfile = source.statProfile;
+    target.excellentBonus = source.excellentBonus;
+    target.excellentRaisesLevel = source.excellentRaisesLevel;
+    target.requirementsByLevel = source.requirementsByLevel;
     target.potionPriority = source.potionPriority;
     target.tradable = source.tradable;
     target.droppable = source.droppable;
@@ -149,6 +154,24 @@ WeaponKind GetStaffGroupWeaponKind(ItemSlot slot)
         return WeaponKind::Book;
     default:
         return WeaponKind::None;
+    }
+}
+
+// The stat profile of a wing's tier; none without a tier.
+std::string GetWingStatProfile(const ItemDefinition& definition)
+{
+    switch (definition.wingTier)
+    {
+    case WingTier::Small:
+        return StatProfileNames::SmallWing;
+    case WingTier::First:
+        return StatProfileNames::FirstTierWing;
+    case WingTier::Second:
+        return definition.tags.Has(ItemTag::Cape) ? StatProfileNames::SecondTierCape : StatProfileNames::SecondTierWing;
+    case WingTier::Third:
+        return StatProfileNames::ThirdTierWing;
+    default:
+        return "";
     }
 }
 } // namespace
@@ -195,6 +218,67 @@ WeaponKind GetGroupWeaponKind(const ItemDefinition& definition)
     default:
         return WeaponKind::None;
     }
+}
+
+std::string DeriveStatProfile(const ItemDefinition& definition)
+{
+    constexpr int HelperGroup = 13;
+    constexpr int PotionGroup = 14;
+    constexpr int EtcGroup = 15;
+
+    if (definition.tags.Has(ItemTag::Ammunition))
+    {
+        return "";
+    }
+    if (definition.tags.Has(ItemTag::Sceptre))
+    {
+        return StatProfileNames::Sceptre;
+    }
+    if (definition.tags.Has(ItemTag::SummonerBook))
+    {
+        return StatProfileNames::Book;
+    }
+    if (definition.weaponKind == WeaponKind::Shield)
+    {
+        return StatProfileNames::Shield;
+    }
+    if (definition.weaponKind != WeaponKind::None)
+    {
+        return StatProfileNames::Weapon;
+    }
+    switch (definition.slot)
+    {
+    case ItemSlot::Helm:
+    case ItemSlot::Armor:
+    case ItemSlot::Pants:
+    case ItemSlot::Gloves:
+    case ItemSlot::Boots:
+        return StatProfileNames::Armor;
+    default:
+        break;
+    }
+    if (definition.slot == ItemSlot::Wings)
+    {
+        return GetWingStatProfile(definition);
+    }
+    if (definition.group == EtcGroup && definition.requirements != ItemRequirements{})
+    {
+        return StatProfileNames::Scroll;
+    }
+    if ((definition.group == HelperGroup || definition.group == PotionGroup) && definition.requirements.level > 0)
+    {
+        return StatProfileNames::Helper;
+    }
+    return "";
+}
+
+std::string FollowStatProfile(const ItemDefinition* previous, const ItemDefinition& updated)
+{
+    if (previous != nullptr && !previous->statProfile.empty() && previous->statProfile != DeriveStatProfile(*previous))
+    {
+        return previous->statProfile;
+    }
+    return DeriveStatProfile(updated);
 }
 
 WeaponKind FollowGroupWeaponKind(const ItemDefinition* previous, const ItemDefinition& updated)

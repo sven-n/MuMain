@@ -4,6 +4,7 @@
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
+#include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/SharedItemModel.h"
 
 #include <filesystem>
@@ -47,6 +48,21 @@ std::filesystem::path GetItemModelDataDirectory();
 // Reads every *.json file in the folder (the group files and the shared
 // models, SharedModels.json) and validates the models.
 ItemModelDataLoadResult LoadItemModelDataDirectory(const std::filesystem::path& directory);
+
+struct ItemStatsLoadResult
+{
+    ItemStatFile file;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Items/Stats/ItemStats.json, relative to the client folder: what the
+// + level, excellent options, ancient sets and option level add to the item
+// stats and requirements, see
+// ItemStatsJson.h. It is in a folder of its own because every *.json file in
+// Data/Items is read as an item group file.
+std::filesystem::path GetItemStatsFile();
+
+ItemStatsLoadResult LoadItemStatsFile(const std::filesystem::path& file);
 
 struct GlowColorsLoadResult
 {

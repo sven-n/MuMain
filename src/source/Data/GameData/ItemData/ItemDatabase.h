@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Data/GameData/ItemData/ItemDefinition.h"
+#include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "Data/GameData/ItemData/ItemType.h"
 
 #include <array>
@@ -86,6 +87,24 @@ public:
         return IsValidItemType(itemType) ? m_ruleData[itemType].weaponKind : WeaponKind::None;
     }
 
+    // Replaces the stat profiles (Data/Items/Stats/ItemStats.json) and resolves
+    // every item's profile again. An item naming a profile they do not have
+    // gets the default (the loader reports it as an error).
+    void SetStatProfiles(ItemStatProfiles profiles);
+
+    const ItemStatProfiles& GetStatProfiles() const
+    {
+        return m_statProfiles;
+    }
+
+    // The item's stat profile laid over the default; the default for empty
+    // slots and invalid ids.
+    const ItemStatProfile& GetStatProfile(int itemType) const
+    {
+        return m_statProfiles.Get(IsValidItemType(itemType) ? m_ruleData[itemType].statProfile
+                                                            : ItemStatProfiles::DefaultProfile);
+    }
+
     // The item types with the tag, lowest first. Built again whenever the
     // items change, so the span is valid until then.
     std::span<const int> GetItemTypesWithTag(ItemTag tag) const
@@ -139,6 +158,7 @@ private:
         ItemSlot slot = ItemSlot::None;
         WingTier wingTier = WingTier::None;
         WeaponKind weaponKind = WeaponKind::None;
+        int statProfile = ItemStatProfiles::DefaultProfile;
     };
 
     static constexpr uint16_t ActionBit(ItemAction action)
@@ -158,8 +178,11 @@ private:
     // change of the items.
     void BuildItemTypesByTag();
 
+    int ResolveStatProfile(const std::string& name) const;
+
     std::vector<ItemDefinition> m_definitions;
     std::vector<RuleData> m_ruleData;
+    ItemStatProfiles m_statProfiles;
     // GetItemTypesWithTag's lists, one per tag.
     std::array<std::vector<int>, static_cast<size_t>(ItemTag::Count)> m_itemTypesByTag;
     // GetItemTypesWithTagInUseOrder's lists, one per tag.

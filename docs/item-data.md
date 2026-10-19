@@ -16,6 +16,7 @@ fields, so it can later be exchanged with the server.
 | File | Group |
 |---|---|
 | `Group00_Sword.json` … `Group15_Etc.json` | 0–15, named after the `ITEM_GROUP_*` constants |
+| `Stats/ItemStats.json` | What the + level, excellent options, ancient sets and option level add to the stats and requirements; see [Item stats by level](#item-stats-by-level) |
 
 The file name is only a convention; the group comes from the file content.
 
@@ -82,16 +83,20 @@ read as the English name only; saving writes the object form.
 | `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, defense per level, damage increase, absorption) depend on it; excellent second and third tier wings get no extra durability, and the chaos mix knows a wing's tier from it |
 | `weaponKind` | Only for weapons and shields: `sword`, `glove`, `axe`, `mace`, `spear`, `bow`, `crossbow`, `staff`, `book`, `shield`, as OpenMU's item groups 0 to 6: swords and the Rage Fighter's gloves (group 0; gloves are the items only the Rage Fighter may use), axes (1), maces and sceptres (2), spears (3), bows and crossbows (4: bows have the slot `offHand`, crossbows `mainHand`; arrows and bolts have no weapon kind), staffs, sticks and books (5: books have the slot `offHand`) and shields (6). While an item has the weapon kind its group gives, the bmd import and the item editor (also when it moves an item to another number) keep it matching the group, the slot and, in group 0, the class requirements (a group gives its kind only on that kind's slot, and in group 4 only to two-handed items), so a new weapon gets one too; a kind written in the file that differs from the group's stays as long as it differs. Which bow or crossbow a character holds (its animations, arrows and damage), the elf's arrows-only rule, a spear's reach and Impale, the shield defense set option, the bonus of leveled arrows and bolts, a staff's damage (it counts for the left hand), which right-hand weapons a summoner may hold in the left hand (not staffs or books), the character window's wizardry line, the tooltip's magic power line, the knight skills that need a weapon without a staff or book, Death Stab, Death Cannon and Spiral Slash, the weapon in the left hand that adds its magic options, the dual wield of Dark Knights, Magic Gladiators and Rage Fighters, and the weapon that moves into an empty right hand depend on it |
 | `potionPriority` | Only for potions with the `healingPotion`, `manaPotion`, `complexPotion` or `shieldPotion` tag: which one of a kind the game takes first, the higher the earlier (0 or left out = last; equal ones take the higher group and number first). The shipped potions count up with their size, so the largest is taken first. A client-only field (OpenMU has none); the bmd import keeps it |
+| `statProfile` | The item's profile in the [item stat file](#item-stats-by-level): what its + level, excellent options, ancient set and option level add to its stats and requirements. `"default"` names the default. The shipped data gives `sceptre` to the items with the `sceptre` tag, `book` to summoner books, `shield` to shields, `weapon` to the other items with a weapon kind (not arrows and bolts), `armor` to helms, armour, pants, gloves and boots, `scroll` to the items of group 15 with requirements, `helper` to the items of groups 13 and 14 with a base level requirement (`requirements.level`; the Transformation Ring's comes from `requirementsByLevel`, so it has the default), and a wing tier's profile to wings (`firstTierWing`, `secondTierWing`, `secondTierCape` for the second tier capes, `thirdTierWing`, `smallWing`). While an item has the profile its data gives, the bmd import and the item editor keep it matching (also when it moves an item to another number); a profile written in the file that differs from it stays as long as it differs: the Horn of Fenrir's data gives `helper`, and it names `"default"`. A left-out profile always follows the data; while the data gives one, the item has the default and loading warns about it, as for item files saved before the field. A profile the data gives that the item stat file does not have (renamed or removed) is not taken: the item keeps the default, and the import or the editor warns about it. An item whose data stops giving its profile loses the profile's terms: a bow made one-handed, which is then no bow, loses the `weapon` profile's strength per option level |
 | `twoHanded` | Weapon needs both hands |
 | `skill` | Skill the item gives |
 | `level` | Item level (the drop level); also used in price and damage calculations |
 | `durability`, `magicDurability` | Durability at item level 0; an item with `magicDurability` (staffs, sticks, books) uses it as its maximum durability instead |
 | `damageMin`, `damageMax`, `attackSpeed`, `walkSpeed`, `magicPower` | Weapon values |
+| `excellentBonus` | A fixed excellent bonus of damage and magic power instead of the [item stat file's](#item-stats-by-level) excellent term; left out = the term. The Chaos Dragon Axe has 15, the Chaos Nature Bow 30 and the Chaos Lightning Staff 25. The bmd import keeps it |
+| `excellentRaisesLevel` | `false`: excellent options do not raise the level requirement by the [item stat file's](#item-stats-by-level) `excellentLevelAdd`. Left out = they do. The shipped data has it on the Dragon Knight, Venom Mist, Sylphid Ray, Volcano, Sunlight and Storm Blitz armour, the Bone Blade, Explosion Blade, Soleil Scepter, Sylph Wind Bow, Grand Viper Staff and Storm Blitz Stick, the lucky items and the Horn of Fenrir. The bmd import keeps it |
 | `defense`, `magicDefense`, `blockRate` | Armor and shield values |
 | `attackType` | Attack type used by the client |
 | `sellValue` | Value factor used by the price calculation of some items |
 | `buyPrice` | Fixed price; when set, it replaces the calculated price |
 | `requirements` | `level`, `strength`, `dexterity`, `energy`, `vitality`, `leadership` |
+| `requirementsByLevel` | A requirement for each item level 0 to 15 (one number for all of them, or 16), instead of the [item stat file's](#item-stats-by-level) formula; above +15 the +15 value counts. The Orb of Summoning has `{"energy": [30, 60, 90, 130, 170, 210, 300, 500, 0, ...]}` and the Transformation Ring `{"level": [20, 20, 20, 50, ...]}`. The base value of that requirement is not used. The bmd import keeps it |
 | `classRequirements` | Per class (`darkWizard`, `darkKnight`, `fairyElf`, `magicGladiator`, `darkLord`, `summoner`, `rageFighter`): 0 = cannot use, otherwise the class level needed |
 | `resistances` | `ice`, `poison`, `lightning`, `fire`, `earth`, `wind`, `water` |
 | `tradable`, `droppable`, `storable`, `sellable`, `personalShopSellable`, `repairable` | What a player may do with the item; see [Rules](#rules). Only `false` is written |
@@ -124,7 +129,7 @@ can have several tags; the file lists them in the order below.
 | `divineArchangelWeapon` | The Divine weapons of the Archangel |
 | `sceptre` | The Dark Lord's sceptres |
 | `magicSword` | The Magic Gladiator's swords with magic power |
-| `luckyItem` | The lucky set armour (numbers 62 to 72 of groups 7 to 11): no repair cost and no price, a maximum durability of 255, no extra level requirement for excellent ones, no stat requirements in the tooltip; only Jerridon's mix and the lucky item window's refinery take them, and of the jewels only the Jewels of Extension and Elevation act on them |
+| `luckyItem` | The lucky set armour (numbers 62 to 72 of groups 7 to 11): no repair cost and no price, a maximum durability of 255, no stat requirements in the tooltip (the shipped ones also have `excellentRaisesLevel: false`); only Jerridon's mix and the lucky item window's refinery take them, and of the jewels only the Jewels of Extension and Elevation act on them |
 | `cashShop` | Items from the cash shop. Only information for now (for the editors and the OpenMU exchange); no client code reads it |
 | `gambleItem` | Gamble items |
 | `gemJewelry` | The gem rings and necklaces from the cash shop |
@@ -186,11 +191,142 @@ and are in the code (`GameLogic/Items/TradeRestrictions.cpp`,
 These checks only decide what the client allows. The server has its own
 checks; the design document lists how the flags map to OpenMU.
 
+## Item stats by level
+
+`Stats/ItemStats.json` says what an item's + level, excellent options and
+ancient set add to its damage, magic power, defense rate (`blockRate`),
+defense and magic defense, and how its requirements grow. It is in a folder of its own because every
+`*.json` file in `Data/Items` is read as a group file. An excerpt:
+
+```json
+{
+  "formatVersion": 1,
+  "dropLevelBonus": {"excellent": 25, "ancient": 30},
+  "tables": [
+    {
+      "name": "damageIncreaseWeapons",
+      "caption": {"en": "Damage Increase (Weapons)"},
+      "values": [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 31, 36, 42, 49, 57, 66]
+    }
+  ],
+  "default": {
+    "damage": {"table": "damageIncreaseWeapons", "excellent": {"times": 25, "add": 5}, "ancient": {"add": 5, "dropLevelDivisor": 40}},
+    "magicDefense": {"table": "magicDefenseIncrease", "excellent": "none", "ancient": "none"},
+    "requirements": {
+      "levelPerItemLevel": 0,
+      "excellentLevelAdd": 20,
+      "strength": {"add": 20, "levelWeight": 3, "percent": 3},
+      "leadership": "base",
+      "strengthPerOptionLevel": 0
+    }
+  },
+  "profiles": [
+    {
+      "name": "sceptre",
+      "magicPower": {"perLevelAfterHalving": 0}
+    }
+  ]
+}
+```
+
+- **Tables** (`tables`) hold what the + level adds: `values` has one value
+  for each item level 0 to 15 (or one number for all of them), and
+  `perLevel` adds that much for every level. Above +15 the +15 value of
+  `values` counts, while `perLevel` keeps growing. The names follow OpenMU's
+  level bonus tables (`ItemLevelBonusTable`) where OpenMU has the table:
+  OpenMU's first and second tier wings share one, which the client splits
+  into `defenseBonus1stWings` and `defenseBonus2ndWings`, and
+  `magicPowerIncrease` and `magicDefenseIncrease` are the client's own.
+- **The default** (`default`) writes the terms of every stat:
+  - `table`: its level bonus table;
+  - `excellent`: added to excellent and ancient items, as
+    `base * times / drop level + add + drop level / dropLevelDivisor`, where
+    the drop level is the item's `level`. Damage takes the minimum damage
+    as the base of both damage values;
+  - `ancient`: added to ancient items, as
+    `value * times / d + add + d / dropLevelDivisor`, where `d` is the drop
+    level plus `dropLevelBonus.ancient` and the value is the base plus the
+    excellent part (with `afterLevelBonus` also the level bonus);
+  - `perLevelAfterHalving`, magic power only: the magic power is halved
+    after everything is added, then this is added for every level.
+
+  `"none"` means the stat has no such term. A number left out of a term is 0;
+  a left-out `dropLevelDivisor` leaves its part out.
+- **Requirements** (`requirements` in the default and the profiles):
+  - `levelPerItemLevel`: the level requirement grows by this much per item
+    level (an item without a level requirement keeps none);
+  - `excellentLevelAdd`: an item with excellent options needs this much more
+    level, if it has a level requirement, is not a wing and does not have
+    `excellentRaisesLevel: false`;
+  - `strength`, `dexterity`, `energy`, `vitality`, `leadership`: each
+    `add + base * (drop level + item level * levelWeight) * percent / 100`,
+    where the drop level is the item's `level` plus `dropLevelBonus.excellent`
+    for an item with excellent options, else plus `dropLevelBonus.ancient`
+    for an ancient item; `"base"` keeps the base value, and `"basis":
+    "levelRequirement"` takes the item's level requirement (its base value,
+    or the one `requirementsByLevel` gives at the item's level) instead of
+    the drop level (without the item level) when it has one. A requirement the item
+    does not have stays 0;
+  - `strengthPerOptionLevel`: the strength requirement grows by this much per
+    option level (also when the item has no strength requirement).
+- **Profiles** (`profiles`) write only what differs from the default. A term
+  a profile writes replaces the default's as a whole. An item names its
+  profile with `statProfile`; an item without one has the default.
+- Every `/` is a whole-number division, from left to right.
+- What stays code: the order of the terms; which items count as excellent
+  (excellent options on wings are wing options, and ancient items get the
+  excellent part too); that a stat the item does not have stays 0; that the
+  excellent part needs a drop level above 0; and that magic power and defense
+  rate stop at 255.
+
+The shipped profiles:
+
+| Profile | Differs from the default |
+|---|---|
+| `weapon` | 5 strength per option level: the other weapons (staffs and the Magic Gladiator's swords included) |
+| `armor` | 5 strength per option level: helms, armour, pants, gloves and boots |
+| `book` | Energy `20 + base * (drop level + item level) * 3 / 100`; 5 strength per option level: summoner books |
+| `helper` | Level requirement +4 per level: the items of groups 13 and 14 with a base level requirement (in the shipped data the rings, pendants, pets and Loch's Feather of group 13); the Horn of Fenrir names `"default"` |
+| `scroll` | Level requirement +4 per level; energy from the level requirement (`20 + base * level requirement * 4 / 100`) when the item has one: the skill scrolls and parchments of group 15 |
+| `sceptre` | No magic power per level after halving; 5 strength per option level: the Dark Lord's sceptres |
+| `shield` | Defense +1 per level (`defenseIncreaseShields`), no excellent part, ancient part `(defense + level) * 20 / d + 2` |
+| `firstTierWing` | Defense from `defenseBonus1stWings`; level requirement +4 per level |
+| `smallWing` | Defense from `defenseBonus1stWings` |
+| `secondTierWing` | Defense from `defenseBonus2ndWings` (2 per level up to +9, then 4 to 9 more per level); level requirement +5 per level |
+| `secondTierCape` | Defense from `defenseBonus2ndWings`; level requirement +4 per level |
+| `thirdTierWing` | Defense from `defenseBonus3rdWings`: 4 per level up to +9, then 5 to 10 more per level |
+
+The shield also adds 5 strength per option level. Items without a profile
+or with `"default"` (arrows and bolts, jewels, potions, the orbs, crystals
+and scrolls of group 12, the Horn of Fenrir, …) have the default: their
+level requirement does not grow.
+
+**Errors** in the file stop the start like errors in the item files: a file
+that cannot be read, invalid JSON, a top level that is not an object, a
+missing or unsupported `formatVersion`; a missing `dropLevelBonus` (with
+`excellent` and `ancient`), `tables` or `default`, or one that is not an
+object (`tables` a list of objects); a stat section or `requirements` that
+is not an object; a missing name, or one that is not letters and digits, is
+defined twice or is a profile named `default`; a table without `values` or `perLevel`; `values` that are
+not one number or 16 numbers; a number that is not a whole number in its
+range (`dropLevelBonus` 0 to 1000, `perLevelAfterHalving` and
+`strengthPerOptionLevel` 0 to 255, `dropLevelDivisor` 1 to 65535, all other
+numbers 0 to 65535); a default without a stat, a term or a requirement term;
+a `table` the file does not have; a term that is neither an object nor
+`"none"`; an `afterLevelBonus` that is not true or false; a requirement
+formula that is neither an object nor `"base"`; a `basis` other than
+`"levelRequirement"`; a caption that is neither a text nor texts by
+language; and `profiles` that are not a list of objects.
+**Warnings:** unknown fields, a table no stat uses, and a caption without
+English. An item whose `statProfile` the file does not have is an error, and
+a profile no item names is a warning.
+
 ---
 
 ## Loading and errors
 
-At startup all `*.json` files in `Data/Items` are read and checked.
+At startup all `*.json` files in `Data/Items` and `Stats/ItemStats.json` are
+read and checked.
 
 **Errors** stop the start with a message that names the file, the item and
 the field (**Copy text** copies it). All problems are also written to
@@ -207,6 +343,10 @@ the field (**Copy text** copies it). All problems are also written to
 - a language code that is empty or has other characters than letters,
   digits and `-` (e.g. `"p=t"`)
 - a `slot`, `wingTier`, `weaponKind` or tag name that does not exist
+- a `statProfile` that is not a name of letters and digits, or that the
+  item stat file does not have
+- a `requirementsByLevel` entry that is not a requirement or not one number
+  or 16 numbers from 0 to 65535
 
 **Warnings** are logged, and the game starts anyway:
 
@@ -220,6 +360,14 @@ the field (**Copy text** copies it). All problems are also written to
   item as no weapon of that kind
 - a `potionPriority` on an item without a `healingPotion`, `manaPotion`,
   `complexPotion` or `shieldPotion` tag (nothing reads it there)
+- an `excellentBonus` on an item without damage or magic power, or whose
+  stat profile has no excellent term for its damage or magic power (the
+  bonus takes the term's place, so it does not count there)
+- `excellentRaisesLevel: false` on an item without a level requirement
+- a `requirementsByLevel` entry next to a base value of the same requirement
+- no `statProfile` on an item whose data gives one, as in item files saved
+  before the field: the item has the default until an edit or a bmd import
+  gives it the profile (`"default"` keeps the default without a warning)
 - a `slot` written as a number, as files saved before tags existed have
   it; the number is read, and saving writes the name
 
@@ -525,17 +673,21 @@ only item data. The import is there to bring in your own old item files.
   Portuguese and Spanish add their names (a translation equal to the
   English name is not stored). Items the English file does not have keep
   the English name they have now, and every item keeps its tags, wing tier,
-  weapon kind and rule flags (the bmd format has none). A weapon kind that
-  its group gives follows the imported slot (in group 0 also the class
-  requirements), so a new weapon gets one too. Save afterwards to keep the
-  result. The console lists what the import had to fix (see below) and any
+  weapon kind, stat fields (`statProfile`, `excellentBonus`,
+  `excellentRaisesLevel`, `requirementsByLevel`) and rule flags (the bmd
+  format has none). A weapon kind that its group gives follows the imported
+  slot (in group 0 also the class requirements), so a new weapon gets one
+  too; a stat profile that its data gives follows the same way. The values
+  come from the files: the original ones have no defense for the Cape of
+  Lord (the client set its 15 in code until phase 3c), so it then has none.
+  Save afterwards to keep the result. The console lists what the import had to fix (see below) and any
   problem the imported data still has; Save refuses it until those are
   fixed.
 - **Export as bmd** writes `Item_<lang>.bmd` for English, Portuguese and
   Spanish with the names of each language; a backup of each old file is kept.
   Files that already have the data stay as they are. Values that the bmd
-  format does not have (tags, wing tier, weapon kind, rule flags) are left
-  out.
+  format does not have (tags, wing tier, weapon kind, stat fields, rule
+  flags) are left out.
 
 ### How the bmd import repairs the legacy files
 

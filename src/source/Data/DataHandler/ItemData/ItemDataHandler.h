@@ -39,7 +39,8 @@ public:
     // locale.
     void OnItemEdited(int itemType);
     // The item editor swapped two entries of ItemAttribute[]. A moved item's
-    // weapon kind follows its new group like an edit (FollowGroupWeaponKind).
+    // weapon kind and stat profile follow its new group like an edit
+    // (FollowDerivedFieldsAfterMove).
     void OnItemsSwapped(int firstItemType, int secondItemType);
 
     // Validates the item database and writes Data/Items. Nothing is written
@@ -79,15 +80,21 @@ private:
     // Returns how many names were kept.
     static int KeepCurrentEnglishNames(std::vector<Data::Items::ItemDefinition>& items);
     // Gives imported items the current values of the fields item.bmd does
-    // not have (tags, wing tier, weapon kind, rule flags) and their current names in the
+    // not have (tags, wing tier, weapon kind, stat profile, rule flags) and their current names in the
     // languages whose item.bmd was not read: the ones without one (e.g.
     // German) and the ones whose file is missing. A weapon kind that its group
-    // gives follows the imported slot (FollowGroupWeaponKind).
+    // gives follows the imported slot (FollowGroupWeaponKind), and so does the
+    // stat profile its data gives (FollowStatProfile) if the item stat file has
+    // it; otherwise the item keeps the default and `issues` gets a warning.
     static void KeepFieldsNotInBmd(std::vector<Data::Items::ItemDefinition>& items,
-                                   const std::vector<std::string>& importedLocales);
+                                   const std::vector<std::string>& importedLocales,
+                                   std::vector<Data::Items::ItemDataIssue>& issues);
     // Gives the item a swap moved to newItemType the weapon kind of its new
-    // group if it had the one of its old group (FollowGroupWeaponKind).
-    static void FollowGroupWeaponKindAfterMove(const Data::Items::ItemDefinition& before, int newItemType);
+    // group if it had the one of its old group (FollowGroupWeaponKind), and the
+    // stat profile its data then gives if it had the derived one or none
+    // (FollowStatProfile), as long as the item stat file has that profile;
+    // otherwise the default, with a warning in the log.
+    static void FollowDerivedFieldsAfterMove(const Data::Items::ItemDefinition& before, int newItemType);
 #endif
 
     bool m_localeObserverRegistered = false;

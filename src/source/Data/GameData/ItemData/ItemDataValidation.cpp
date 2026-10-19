@@ -136,6 +136,60 @@ void ValidateSlot(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
     }
 }
 
+// The fixed excellent bonus counts for damage and magic power only.
+void ValidateExcellentBonus(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
+{
+    if (definition.excellentBonus != 0 && definition.damageMin == 0 && definition.damageMax == 0 &&
+        definition.magicPower == 0)
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
+                 "has an excellent bonus, but no damage or magic power it adds to", "excellentBonus");
+    }
+}
+
+// Item files saved before the stat profiles have none; the item then has the
+// default until an edit or a bmd import gives it the profile its data gives.
+void ValidateStatProfileGiven(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
+{
+    const std::string derived = DeriveStatProfile(definition);
+    if (definition.statProfile.empty() && !derived.empty())
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
+                 "has no stat profile, but its data gives \"" + derived + "\" (\"" + StatProfileNames::Default +
+                     "\" keeps the default)",
+                 "statProfile");
+    }
+}
+
+// excellentRaisesLevel only matters for an item with a level requirement.
+void ValidateExcellentRaisesLevel(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
+{
+    const bool hasLevelRequirement =
+        definition.requirements.level > 0 || definition.requirementsByLevel.Find(ItemRequirement::Level) != nullptr;
+    if (!definition.excellentRaisesLevel && !hasLevelRequirement)
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
+                 "is set, but the item has no level requirement it would raise", "excellentRaisesLevel");
+    }
+}
+
+// A requirement given by level takes the place of its base value.
+void ValidateRequirementsByLevel(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
+{
+    const WORD bases[] = {definition.requirements.level,     definition.requirements.strength,
+                          definition.requirements.dexterity, definition.requirements.energy,
+                          definition.requirements.vitality,  definition.requirements.leadership};
+    for (size_t requirement = 0; requirement < ItemRequirementCount; ++requirement)
+    {
+        if (definition.requirementsByLevel.Find(static_cast<ItemRequirement>(requirement)) != nullptr &&
+            bases[requirement] != 0)
+        {
+            AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
+                     "gives a requirement by level and also its base value, which is not used", "requirementsByLevel");
+        }
+    }
+}
+
 // Only the potion lists are taken in priority order.
 void ValidatePotionPriority(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
 {
@@ -171,6 +225,65 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
         ValidateName(definition, issues);
         ValidateSlot(definition, issues);
         ValidatePotionPriority(definition, issues);
+        ValidateStatProfileGiven(definition, issues);
+        ValidateExcellentBonus(definition, issues);
+        ValidateExcellentRaisesLevel(definition, issues);
+        ValidateRequirementsByLevel(definition, issues);
+    }
+}
+
+// A fixed excellent bonus takes the place of the excellent term of damage and magic power,
+// so it only counts where the item's profile has that term.
+void ValidateExcellentBonusTerms(const ItemDefinition& definition, const ItemStatProfile& profile,
+                                 std::vector<ItemDataIssue>& issues)
+{
+    if (definition.excellentBonus == 0)
+    {
+        return;
+    }
+    const bool damageWithoutTerm =
+        (definition.damageMin > 0 || definition.damageMax > 0) && !profile.Get(ItemStat::Damage).excellent;
+    const bool magicPowerWithoutTerm = definition.magicPower > 0 && !profile.Get(ItemStat::MagicPower).excellent;
+    if (damageWithoutTerm || magicPowerWithoutTerm)
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
+                 std::string("has an excellent bonus, but its stat profile has no excellent term for its ") +
+                     (damageWithoutTerm ? "damage" : "magic power") + ", so the bonus does not count there",
+                 "excellentBonus");
+    }
+}
+
+void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
+                          const std::string& statFile, std::vector<ItemDataIssue>& issues)
+{
+    std::set<std::string> used;
+    for (const ItemDefinition& definition : items)
+    {
+        // A deleted item keeps its fields in the item database, but is not saved.
+        if (!definition.Exists())
+        {
+            continue;
+        }
+        const int profile = profiles.Find(definition.statProfile);
+        if (profile == ItemStatProfiles::UnknownProfile)
+        {
+            AddIssue(issues, ItemDataIssueSeverity::Error, definition,
+                     "\"" + definition.statProfile + "\" is not a profile of " + statFile, "statProfile");
+            continue;
+        }
+        ValidateExcellentBonusTerms(definition, profiles.Get(profile), issues);
+        if (!definition.statProfile.empty())
+        {
+            used.insert(definition.statProfile);
+        }
+    }
+    for (const std::string& name : profiles.GetProfileNames())
+    {
+        if (!used.contains(name))
+        {
+            issues.push_back({ItemDataIssueSeverity::Warning, statFile, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
+                              "profiles." + name, "no item names this profile"});
+        }
     }
 }
 
