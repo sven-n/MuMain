@@ -560,8 +560,10 @@ TEST_CASE("Exporting the items as bmd and importing them again gives the same da
     }
 }
 
-// The bmd import and the editor give items the profile their data gives; a stat file can lack it.
-TEST_CASE("A stat profile the item stat file does not have is an error on import and save [data][items][editor]")
+// The bmd import and the editor give items the profile their data gives; a stat file can lack it
+// (renamed or removed). The item then keeps the default with a warning; an item that still names
+// the profile is an error on save.
+TEST_CASE("A derived stat profile the item stat file does not have keeps the default [data][items][editor]")
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
@@ -576,24 +578,35 @@ TEST_CASE("A stat profile the item stat file does not have is an error on import
     REQUIRE_FALSE(HasErrors(stats.issues));
     std::erase_if(stats.file.profiles, [](const WrittenStatProfile& profile) { return profile.name == "shield"; });
     g_ItemDatabase.SetStatProfiles(ItemStatProfiles(stats.file));
-    const auto namesShield = [](const ItemDataIssue& issue)
+    const auto namesShield = [](ItemDataIssueSeverity severity)
     {
-        return issue.severity == ItemDataIssueSeverity::Error && issue.field == "statProfile" &&
-               issue.message.find("\"shield\"") != std::string::npos;
+        return [severity](const ItemDataIssue& issue)
+        {
+            return issue.severity == severity && issue.field == "statProfile" &&
+                   issue.message.find("\"shield\"") != std::string::npos;
+        };
     };
 
     SUBCASE("the import")
     {
         const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
         REQUIRE_FALSE(HasErrors(result.issues));
-        CHECK(std::ranges::any_of(result.validationIssues, namesShield));
+        CHECK_FALSE(HasErrors(result.validationIssues));
+        CHECK(std::ranges::any_of(result.validationIssues, namesShield(ItemDataIssueSeverity::Warning)));
+        CHECK(g_ItemDatabase.Find(ITEM_SMALL_SHIELD)->statProfile.empty());
     }
 
-    SUBCASE("the save")
+    SUBCASE("an edit")
+    {
+        g_ItemDataHandler.OnItemEdited(ITEM_SMALL_SHIELD);
+        CHECK(g_ItemDatabase.Find(ITEM_SMALL_SHIELD)->statProfile.empty());
+    }
+
+    SUBCASE("the save of items that still name it")
     {
         std::vector<ItemDataIssue> issues;
         CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::InvalidData);
-        CHECK(std::ranges::any_of(issues, namesShield));
+        CHECK(std::ranges::any_of(issues, namesShield(ItemDataIssueSeverity::Error)));
     }
 }
 

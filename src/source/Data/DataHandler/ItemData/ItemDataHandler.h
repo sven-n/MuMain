@@ -84,9 +84,11 @@ private:
     // languages whose item.bmd was not read: the ones without one (e.g.
     // German) and the ones whose file is missing. A weapon kind that its group
     // gives follows the imported slot (FollowGroupWeaponKind), and so does the
-    // stat profile its data gives (FollowStatProfile).
+    // stat profile its data gives (FollowStatProfile) if the item stat file has
+    // it; otherwise the item keeps the default and `issues` gets a warning.
     static void KeepFieldsNotInBmd(std::vector<Data::Items::ItemDefinition>& items,
-                                   const std::vector<std::string>& importedLocales);
+                                   const std::vector<std::string>& importedLocales,
+                                   std::vector<Data::Items::ItemDataIssue>& issues);
     // Gives the item a swap moved to newItemType the weapon kind of its new
     // group if it had the one of its old group (FollowGroupWeaponKind), and the
     // stat profile its data then gives if it had the derived one
