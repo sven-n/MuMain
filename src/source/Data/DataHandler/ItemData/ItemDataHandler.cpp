@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ItemDataHandler.h"
 #include "ItemJsonStorage.h"
+#include "ItemModelLoader.h"
 #include "Core/Globals/_struct.h"
 #include "Core/Globals/_define.h"
 #include "Core/Text/Utf8.h"
@@ -163,6 +164,11 @@ bool CItemDataHandler::LoadModels(std::string& errorMessage)
 
     g_GlowColors.Build(colors.colors);
     g_ItemModelDatabase.Build(result.models, g_GlowColors);
+#ifdef _EDITOR
+    // The models are where their files have them again.
+    m_modelMoves.clear();
+    m_movedModelGroups.reset();
+#endif
     MU_LOG_INFO(mu::log::Get("data"), "Loaded {} item models from {} in {:.1f} ms", g_ItemModelDatabase.GetModelCount(),
                 GetItemModelDataDirectory().string(), MillisecondsSince(loadStart));
     return true;
@@ -257,8 +263,28 @@ void CItemDataHandler::OnItemsSwapped(int firstItemType, int secondItemType)
     const ItemDefinition first = g_ItemDatabase.GetAllSlots()[firstItemType];
     const ItemDefinition second = g_ItemDatabase.GetAllSlots()[secondItemType];
     g_ItemDatabase.Swap(firstItemType, secondItemType);
+    // Each item keeps the model slot of its item type, so the model moves too.
+    SwapItemModels(firstItemType, secondItemType);
+    m_modelMoves.emplace_back(firstItemType, secondItemType);
     FollowDerivedFieldsAfterMove(first, secondItemType);
     FollowDerivedFieldsAfterMove(second, firstItemType);
+}
+
+void CItemDataHandler::SwapItemModels(int firstItemType, int secondItemType)
+{
+    g_ItemModelDatabase.Swap(firstItemType, secondItemType);
+    Data::Items::ModelLoader::SwapOpenedModels(firstItemType, secondItemType);
+    m_movedModelGroups.set(static_cast<size_t>(GetItemGroup(firstItemType)));
+    m_movedModelGroups.set(static_cast<size_t>(GetItemGroup(secondItemType)));
+}
+
+void CItemDataHandler::TakeBackModelMoves()
+{
+    for (auto move = m_modelMoves.rbegin(); move != m_modelMoves.rend(); ++move)
+    {
+        SwapItemModels(move->first, move->second);
+    }
+    m_modelMoves.clear();
 }
 
 void CItemDataHandler::FollowDerivedFieldsAfterMove(const ItemDefinition& before, int newItemType)
@@ -286,7 +312,11 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
     // the items too and refuses on any error, so everything is reported at once.
     ValidateStatProfiles(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(),
                          GetItemStatsFile().generic_string(), issues);
-    return SaveItemDataDirectory(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(), issues);
+    // Only the model files of moved models are written; the others keep what
+    // this client does not read from them.
+    return SaveItemAndModelDataDirectories(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(),
+                                           GetItemModelDataDirectory(), g_ItemModelDatabase.GetAllSlots(),
+                                           m_movedModelGroups, issues);
 }
 
 ItemBmdImportResult CItemDataHandler::ImportFromBmd()
@@ -305,6 +335,9 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
 
     g_ItemDatabase.Build(result.items);
     FillItemAttributes();
+    // The bmd files have the items at their old numbers; their models go back
+    // there too.
+    TakeBackModelMoves();
     return result;
 }
 

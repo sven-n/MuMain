@@ -14,6 +14,8 @@
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
+#include "Data/GameData/EffectData/GlowColorList.h"
+#include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/ItemStructs.h"
 #include "Data/GameData/ItemData/ItemType.h"
@@ -96,8 +98,32 @@ public:
         }
     }
 
+    // The shipped glow color list, which the item models name their colors
+    // from.
+    void CopyShippedGlowColors() const
+    {
+        const std::filesystem::path file = m_directory / GetGlowColorsFile();
+        std::filesystem::create_directories(file.parent_path());
+        std::filesystem::copy_file(ShippedClientDirectory / GetGlowColorsFile(), file);
+    }
+
 private:
     std::filesystem::path m_directory;
+};
+
+// Empties the item model database when the test ends, also when a check
+// stops it, so the next test starts without models.
+class ItemModelDatabaseScope
+{
+public:
+    ItemModelDatabaseScope() = default;
+    ~ItemModelDatabaseScope()
+    {
+        g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
+    }
+
+    ItemModelDatabaseScope(const ItemModelDatabaseScope&) = delete;
+    ItemModelDatabaseScope& operator=(const ItemModelDatabaseScope&) = delete;
 };
 
 // A legacy Item_<language>.bmd with 30-byte names, as the original client
@@ -305,6 +331,42 @@ TEST_CASE("A folder that cannot be written is a write failure, not a data error 
     CHECK_FALSE(issues.empty());
 }
 
+// The items and their models are saved together: when one of the files
+// cannot be written, none is replaced, so a moved item never loses its model
+// on disk.
+TEST_CASE("A save that cannot write all its files replaces none of them [data][items]")
+{
+    const ItemDataLoadResult shipped = LoadItemDataDirectory(DataDirectory / "Items");
+    REQUIRE_FALSE(HasErrors(shipped.issues));
+    const ItemModelDataLoadResult shippedModels = LoadItemModelDataDirectory(DataDirectory / "Items" / "Models");
+    REQUIRE_FALSE(HasErrors(shippedModels.issues));
+    ItemModelDatabase models;
+    models.Build(shippedModels.models, Data::Effects::GlowColorList{});
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    const std::filesystem::path itemDirectory = folder.Directory() / GetItemDataDirectory();
+    // Kris moves to a free number, so its group file changes.
+    std::vector<ItemDefinition> items = shipped.items;
+    const auto kris = std::find_if(items.begin(), items.end(), [](const ItemDefinition& item)
+                                   { return MakeItemType(item.group, item.number) == KrisType; });
+    REQUIRE(kris != items.end());
+    kris->number = 100;
+    // A file where the model folder should be: no model file can be written.
+    const std::filesystem::path blockedModels = folder.Directory() / "blocked";
+    std::ofstream(blockedModels) << "not a folder";
+    ItemGroupSet modelGroups;
+    modelGroups.set(0);
+
+    std::vector<ItemDataIssue> issues;
+    CHECK(SaveItemAndModelDataDirectories(itemDirectory, items, blockedModels, models.GetAllSlots(), modelGroups,
+                                          issues) == ItemDataSaveResult::WriteFailed);
+    CHECK_FALSE(issues.empty());
+    const std::string swordFile = GetItemGroupFileName(0);
+    CHECK(TestFiles::ReadWholeFile(itemDirectory / swordFile) ==
+          TestFiles::ReadWholeFile(DataDirectory / "Items" / swordFile));
+    CHECK_FALSE(std::filesystem::exists(itemDirectory / (swordFile + ".tmp")));
+}
+
 #ifdef _EDITOR
 TEST_CASE("Item editor changes go into the item database [data][items][editor]")
 {
@@ -393,7 +455,7 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         // The other order: on offHand first, then two-handed.
         const int otherBowType = MakeItemType(4, 101);
         REQUIRE(g_ItemDatabase.Find(otherBowType) == nullptr);
-        std::fill(std::begin(ItemAttribute[otherBowType].Name), std::end(ItemAttribute[otherBowType].Name), L' ');
+        std::fill(std::begin(ItemAttribute[otherBowType].Name), std::end(ItemAttribute[otherBowType].Name), L'\0');
         name.copy(ItemAttribute[otherBowType].Name, name.size());
         ItemAttribute[otherBowType].m_byItemSlot = static_cast<BYTE>(ItemSlot::OffHand);
         g_ItemDataHandler.OnItemEdited(otherBowType);
@@ -511,6 +573,93 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         CHECK(moved->names.Get("pt") == "L\xC3\xA2mina");
         CHECK(g_ItemDatabase.Find(BladeType) == nullptr);
     }
+}
+
+// The item editor moves an item's model with the item, and saving writes the
+// model files of the moved models.
+TEST_CASE("A moved item takes its model along, and saving writes it [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    // A model file the save must not touch: no model of its group moves.
+    const std::filesystem::path axeModels = folder.Directory() / GetItemModelDataDirectory() / GetItemGroupFileName(1);
+    std::ofstream(axeModels, std::ios::binary | std::ios::app) << "\n";
+    const std::string axeModelsText = TestFiles::ReadWholeFile(axeModels);
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope models;
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE_MESSAGE(g_ItemDataHandler.LoadModels(errorMessage), errorMessage);
+    const int emptyType = MakeItemType(0, 100);
+    REQUIRE(g_ItemDatabase.Find(emptyType) == nullptr);
+    REQUIRE(g_ItemModelDatabase.Find(emptyType) == nullptr);
+    REQUIRE(g_ItemModelDatabase.Find(KrisType) != nullptr);
+    const std::string krisModelFile = g_ItemModelDatabase.Find(KrisType)->file;
+
+    std::swap(ItemAttribute[KrisType], ItemAttribute[emptyType]);
+    g_ItemDataHandler.OnItemsSwapped(KrisType, emptyType);
+    REQUIRE(g_ItemModelDatabase.Find(emptyType) != nullptr);
+    CHECK(g_ItemModelDatabase.Find(emptyType)->file == krisModelFile);
+    CHECK(g_ItemModelDatabase.Find(KrisType) == nullptr);
+
+    std::vector<ItemDataIssue> issues;
+    CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+    const ItemModelDataLoadResult saved = LoadItemModelDataDirectory(folder.Directory() / GetItemModelDataDirectory());
+    CHECK_FALSE(HasErrors(saved.issues));
+    const auto findModel = [&saved](int group, int number) -> const ItemModelDefinition*
+    {
+        const auto model =
+            std::find_if(saved.models.begin(), saved.models.end(), [&](const ItemModelDefinition& candidate)
+                         { return candidate.group == group && candidate.number == number; });
+        return model != saved.models.end() ? &*model : nullptr;
+    };
+    REQUIRE(findModel(0, 100) != nullptr);
+    CHECK(findModel(0, 100)->file == krisModelFile);
+    CHECK(findModel(0, 0) == nullptr);
+    CHECK(TestFiles::ReadWholeFile(axeModels) == axeModelsText);
+}
+
+// The bmd files have the items at their old numbers, so the import moves the
+// models of moved items back as well, also after a save.
+TEST_CASE("A bmd import moves the models of moved items back [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope models;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE_MESSAGE(g_ItemDataHandler.LoadModels(errorMessage), errorMessage);
+    std::string changeLog;
+    REQUIRE(g_ItemDataHandler.ExportAsBmd(changeLog));
+    REQUIRE(g_ItemModelDatabase.Find(KrisType) != nullptr);
+    const std::string krisModelFile = g_ItemModelDatabase.Find(KrisType)->file;
+    const int emptyType = MakeItemType(0, 100);
+    std::swap(ItemAttribute[KrisType], ItemAttribute[emptyType]);
+    g_ItemDataHandler.OnItemsSwapped(KrisType, emptyType);
+    REQUIRE(g_ItemModelDatabase.Find(KrisType) == nullptr);
+    std::vector<ItemDataIssue> issues;
+
+    SUBCASE("before a save") {}
+    SUBCASE("after a save")
+    {
+        REQUIRE(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+    }
+
+    const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
+    REQUIRE_FALSE(HasErrors(result.issues));
+    REQUIRE(g_ItemDatabase.Find(KrisType) != nullptr);
+    REQUIRE(g_ItemModelDatabase.Find(KrisType) != nullptr);
+    CHECK(g_ItemModelDatabase.Find(KrisType)->file == krisModelFile);
+    CHECK(g_ItemModelDatabase.Find(emptyType) == nullptr);
+
+    CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+    const std::string swordFile = GetItemGroupFileName(0);
+    CHECK(TestFiles::ReadWholeFile(folder.Directory() / GetItemModelDataDirectory() / swordFile) ==
+          TestFiles::ReadWholeFile(DataDirectory / "Items" / "Models" / swordFile));
 }
 
 // The names of a language whose item.bmd is missing stay as they are, like

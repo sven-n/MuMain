@@ -17,6 +17,7 @@
 #include <map>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace Data::Items::ModelLoader
@@ -264,6 +265,20 @@ void OpenTextures()
                 OpenModelTextures(itemType, model);
             }
         });
+}
+
+void SwapOpenedModels(int firstItemType, int secondItemType)
+{
+    if (Models == nullptr || !IsValidItemType(firstItemType) || !IsValidItemType(secondItemType))
+    {
+        return;
+    }
+
+    const int firstSlot = ToModelSlot(firstItemType);
+    const int secondSlot = ToModelSlot(secondItemType);
+    gLoadData.SwapModels(firstSlot, secondSlot);
+    // The material values are the model's (ApplyMaterial), so they move with it.
+    std::swap(Models[firstSlot].SpecularStrength, Models[secondSlot].SpecularStrength);
 }
 
 std::string TakeProblemMessage()

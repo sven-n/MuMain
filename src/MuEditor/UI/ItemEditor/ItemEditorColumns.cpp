@@ -7,6 +7,7 @@
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Data/GameData/ItemData/ItemFieldDefs.h"
+#include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "I18N/All.h"
 #include "Core/Globals/_struct.h"
 #include "Core/Globals/_define.h"
@@ -206,8 +207,12 @@ void CItemEditorColumns::RenderIndexColumn(int& colIdx, int itemIndex, bool& row
     {
         char targetName[128];
         WideCharToMultiByte(CP_UTF8, 0, ItemAttribute[newIndex].Name, -1, targetName, sizeof(targetName), NULL, NULL);
+        const bool hasItem = targetName[0] != '\0';
+        // A number without item data can still have a model, which the moved
+        // item's model would push away.
+        const bool hasModel = g_ItemModelDatabase.Find(newIndex) != nullptr;
 
-        if (targetName[0] == '\0')
+        if (!hasItem && !hasModel)
         {
             ITEM_ATTRIBUTE temp = ItemAttribute[itemIndex];
             ItemAttribute[itemIndex] = ItemAttribute[newIndex];
@@ -229,9 +234,9 @@ void CItemEditorColumns::RenderIndexColumn(int& colIdx, int itemIndex, bool& row
         }
         else if (!m_errorLogged)
         {
-            std::string errorMsg = I18N::Format(I18N::Editor::ErrorIndex0AlreadyInUse, {
-                std::to_string(newIndex)
-            });
+            const char* error =
+                hasItem ? I18N::Editor::ErrorIndex0AlreadyInUse : I18N::Editor::ErrorIndex0HasItsOwnModel;
+            std::string errorMsg = I18N::Format(error, {std::to_string(newIndex)});
             g_MuEditorConsoleUI.LogEditor(errorMsg);
             m_errorLogged = true;
         }

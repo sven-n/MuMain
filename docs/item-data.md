@@ -641,11 +641,19 @@ The item editor (editor builds, F12) edits the items of the running game:
 - **Name changes are stored for the current UI locale.** To edit a
   translation, switch the language first; to edit the English name,
   switch to English.
-- **Save Items** checks the data and writes `Data/Items` next to the game.
+- **Moving an item** to an empty item number (the Index column) takes its
+  model along: the model data in `Data/Items/Models` and the model the game
+  has opened, so the item keeps its looks. A number with a model of its own
+  but no item data (the Looks lists these) is not empty: the console says
+  so, and the item stays where it is.
+- **Save Items** checks the data and writes `Data/Items` next to the game,
+  with the model files in `Data/Items/Models` of the groups whose models
+  were moved; the other model files are not touched.
   With errors nothing is written, and the errors are listed in the
-  editor console. If a file cannot be written (read-only folder, file
-  open in another program), the popup says so and the console names the
-  file. Only files whose content changed are rewritten.
+  editor console. If a file cannot be written (read-only folder, full disk),
+  no file is replaced, the popup says so and the console names the file.
+  A file open in another program can still fail when it is replaced, after
+  others were. Only files whose content changed are rewritten.
 
 The game runs from the build folder, which has a copy of `src/bin/Data`.
 To keep your changes, copy the changed files from
@@ -660,7 +668,7 @@ model, a render style or an item effect opens to the list of all items that
 use it; clicking one selects it in the table (the search is cleared when it
 hides that item). Items without item data are listed too; they are not in
 the table, but selecting one shows its looks. Changing the looks is done in
-the model files for now.
+the model files for now; only moving an item changes them in the editor.
 
 ### Import from bmd / Export as bmd
 
@@ -680,6 +688,8 @@ only item data. The import is there to bring in your own old item files.
   too; a stat profile that its data gives follows the same way. The values
   come from the files: the original ones have no defense for the Cape of
   Lord (the client set its 15 in code until phase 3c), so it then has none.
+  The imported items are at their bmd numbers, so the models of items you
+  moved since the start go back to their old numbers too.
   Save afterwards to keep the result. The console lists what the import had to fix (see below) and any
   problem the imported data still has; Save refuses it until those are
   fixed.
