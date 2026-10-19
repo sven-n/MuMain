@@ -654,8 +654,8 @@ The item editor (editor builds, F12) edits the items of the running game:
   so, and the item stays where it is.
 - **Save Items** checks the data and writes `Data/Items` next to the game,
   with the model files in `Data/Items/Models` of the groups whose models
-  were moved; the other model files are not touched. It lists for each UI
-  language how many item names it misses.
+  were moved; the other model files are not touched. It lists each UI
+  language that misses item names, with how many.
   With errors nothing is written, and the errors are listed in the
   editor console. If a file cannot be written (read-only folder, full disk),
   no file is replaced, the popup says so and the console names the file.
@@ -703,6 +703,9 @@ only item data. The import is there to bring in your own old item files.
   fixed.
 - **Export as bmd** writes `Item_<lang>.bmd` for English, Portuguese and
   Spanish with the names of each language; a backup of each old file is kept.
+  A missing Portuguese or Spanish name is written as the English one, so
+  importing the files again makes it a name that is the same in that
+  language.
   Files that already have the data stay as they are. Values that the bmd
   format does not have (tags, wing tier, weapon kind, stat fields, rule
   flags) are left out.

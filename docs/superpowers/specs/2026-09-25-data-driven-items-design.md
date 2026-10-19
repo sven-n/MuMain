@@ -425,7 +425,8 @@ in both repos (as separate PRs, one per repo).
 | FX1 | Effect catalogue *([roadmap](2026-09-29-data-driven-content-roadmap-design.md))* | Client | MuMain | 4c | Every effect, particle, lightning and sprite type gets a name and its creation values in `Data/Effects/`; behavior stays code. |
 | 13 | Looks in data | Client | MuMain | 4c, 6, FX1 | What the named render styles and effects are made of moves from code into `Data/Effects/` as building blocks (D25), with the look editor in MuEditor (preview, bones, the items that use a look). |
 | 14 | UI text translations | Client | MuMain | 5 | A MuEditor window for the `.resx` UI texts (Game, Dialog, Editor, Metadata): keys × languages with the missing texts counted per language and file, written back to `src/Localization`, with placeholder checks. Builds on the Item Translations window. |
-| 15 | Cleanup | Client | MuMain | all item phases | The glow of the Phoenix Soul inventory model; what later areas still need moves to the roadmap; then remove this document. |
+| 15 | Adding a language | Client | MuMain | 14 | Add a UI language from MuEditor: its code and its name in its own language. Creates its `.resx` files; the game's language list and the language names come from the texts instead of code, so after the next build the language is in the game, the editor and the translation windows. |
+| 16 | Cleanup | Client | MuMain | all item phases | The glow of the Phoenix Soul inventory model; what later areas still need moves to the roadmap; then remove this document. |
 
 The deferred question Q1 (custom items on the original client) is a
 **Server** topic and must be decided before custom items are used on a
@@ -908,7 +909,8 @@ server with original clients (after phases 6 and B).
    have a **Copy text** button and show the mouse cursor, which the
    loading screen hides.
 5. **Translation tooling (done)**: the names themselves are part of phase 2
-   (D17); this phase added the tooling, before phase 6 (the user's order):
+   (D17); this phase added the tooling. It came before phase 6, which builds
+   on its item list:
    - The **Item Translations** window of MuEditor: the item names as a grid of
      items and the UI languages (English first), edited in place for any
      language and stored whole (also beyond the 49 characters the game
@@ -924,7 +926,7 @@ server with original clients (after phases 6 and B).
      Save Items, not logged at load. Loading warns about a name in a
      language the game has no UI texts for (it is never shown).
    - The shipped data: the names that are the same in a language are
-     written explicitly, eight missing Portuguese and Spanish names come
+     written explicitly, seven missing Portuguese and Spanish names come
      from the original client's `ItemTooltip_<lang>.bmd`, and the Spanish
      names of the Capes of Fighter and Overrule (Korean read as Latin-1)
      became *Capa del Guerrero* and *Capa Reinante*.
@@ -1098,7 +1100,30 @@ server with original clients (after phases 6 and B).
     - Planned like phase 5: an inventory of the files and the generator,
       then the decisions (preview, which files, adding a missing file such
       as Dialog for a language), then the window.
-15. **Cleanup**, once the work has landed:
+15. **Adding a language**: today a language is added by hand
+    (`docs/translation-system.md`, "Adding a new locale"): its
+    `<Group>.<locale>.resx` files, its name in `KnownLanguageDisplayNames`
+    of `tools/ResxGen`, and an entry in the game's language list
+    (`s_Languages` in `src/source/UI/Options/OptionWindow.cpp`), then a
+    build. Item names in it can then be filled in the Item Translations
+    window; until it has texts, the item data warns about names in it.
+    - An **Add language** action in the translation windows (phase 14 and
+      Item Translations): the code (checked like the item data's language
+      codes, and not one there already) and the language's name in its own
+      language. It creates the language's `.resx` files in
+      `src/Localization` for every group.
+    - One place for the language list and the names: the game's language
+      list shows `GetAvailableLocales` instead of a list of its own, and
+      the name comes from the language's texts (for example a key of the
+      Metadata group) instead of `ResxGen`'s code. To decide in the phase.
+    - The game reads the texts compiled in, so the new language shows in
+      the game and as a column of the windows after the next build, like
+      the text edits of phase 14.
+    - A language whose letters the fonts lack (the editor loads Latin,
+      Cyrillic, Greek and the CJK ranges; the game's font row) is pointed
+      out when it is added.
+    - Removing a language stays by hand.
+16. **Cleanup**, once the work has landed:
     - The glow of the inventory model of the Phoenix Soul Armor
       (`MODEL_ARMORINVEN_74`) moves into data. It is the only model drawn
       for an item that glows differently from its item: only on its first

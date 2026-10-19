@@ -312,7 +312,7 @@ names stay English; items that teach a skill name it after a colon
    `tools/ResxGen/CppEmitter.cs#KnownLanguageDisplayNames` so the language
    dropdown shows it in its own language (e.g. `["fr"] = "Français"`).
 3. Add it to the game's language dropdown: the `s_Languages` list in
-   `src/source/UI/NewUI/Options/NewUIOptionWindow.cpp`. The editor's language
+   `src/source/UI/Options/OptionWindow.cpp`. The editor's language
    menu lists every locale from `GetAvailableLocales` by itself.
 4. Build. `ResxGen` picks up the new locale automatically from the filename;
    `GetAvailableLocales` will include it next run.
@@ -374,13 +374,14 @@ language, English first.
   name. An empty cell shows the English name it falls back to, greyed.
 - Right-click a cell: **Same as English** writes the English name for a name
   that is the same in that language; **Remove translation** removes it.
-- The search finds an item by any of its names, by `group,number` or by its
-  item type. Clicking the number shows the item in the item table.
+- The search finds an item by any of its names (A to Z in either case), by
+  `group,number` or by its item type. Clicking the number shows the item in
+  the item table.
 - Columns can be hidden from the header's right-click menu. The English name
   cannot be emptied, and the names are stored whole, also when they are
   longer than the 49 characters the game shows.
-- **Save Items** writes the files and lists, for each language, how many
-  item names it misses.
+- **Save Items** writes the files and lists each language that misses item
+  names, with how many.
 
 The item table edits the name in the current UI language: switch the
 language (in the game's options window or the editor's language menu), then
