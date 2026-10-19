@@ -663,8 +663,10 @@ bool MoveMount(OBJECT* o, bool bForceRender)
                 o->Direction[1] = Speed;
                 o->Direction[2] = (float)(rand() % 64 - 32) * 0.1f;
             }
-            if (o->Position[2] < o->Owner->Position[2] + 100.f) o->Direction[2] += 1.5f;
-            if (o->Position[2] > o->Owner->Position[2] + 200.f) o->Direction[2] -= 1.5f;
+            if (o->Position[2] < o->Owner->Position[2] + 100.f)
+                o->Direction[2] += 1.5f * FPS_ANIMATION_FACTOR;
+            if (o->Position[2] > o->Owner->Position[2] + 200.f)
+                o->Direction[2] -= 1.5f * FPS_ANIMATION_FACTOR;
         }
     }
     return TRUE;
@@ -741,9 +743,8 @@ void RenderDarkHorseSkill(OBJECT* o, BMD* b)
     if (o == NULL)	return;
     if (b == NULL)	return;
 
-    // The weapon level is misused here to count how many frames have been rendered
-    // for this effect...
-    o->WeaponLevel++;
+    // The weapon level is misused here to count the reference frames of this effect.
+    o->WeaponLevel += REFERENCE_FRAME_STEP;
 
     if (o->LastHorseWaveEffect < WorldTime - HorseEffectInterval)
     {
@@ -753,11 +754,11 @@ void RenderDarkHorseSkill(OBJECT* o, BMD* b)
 
     if (o->AnimationFrame >= 8.f && o->AnimationFrame <= 9.5f)
     {
-        if (rand_fps_check(2))
+        if (REFERENCE_FRAME_STEP > 0 && (o->WeaponLevel % 2) == 1)
         {
             float  Matrix[3][4];
             vec3_t Angle, p, Position;
-            Vector(0.f, 150.f * (o->WeaponLevel / 2) * FPS_ANIMATION_FACTOR, 0.f, p);
+            Vector(0.f, 150.f * (o->WeaponLevel / 2), 0.f, p);
             Vector(0.f, 0.f, (float)(rand() % 360), Angle);
             for (int i = 0; i < 6; ++i)
             {
@@ -771,7 +772,7 @@ void RenderDarkHorseSkill(OBJECT* o, BMD* b)
         }
         EarthQuake = (rand() % 3 - 3) * 0.7f;
     }
-    else if (o->WeaponLevel == (BYTE)(19.f / FPS_ANIMATION_FACTOR))
+    else if (o->WeaponLevel == 19)
     {
         CreateEffect(MODEL_SKILL_FURY_STRIKE, o->Position, o->Angle, o->Light, 0, o, -1, 0, 2);
         o->WeaponLevel = -3;
@@ -788,6 +789,11 @@ void RenderSkillEarthQuake(CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill)
     vec3_t Angle, p, Position;
     OBJECT& TargetO = CharactersClient[c->TargetCharacter].Object;
 
+    // The weapon level counts reference frames; each value lasts one of them.
+    if (REFERENCE_FRAME_STEP == 0)
+    {
+        return;
+    }
     o->WeaponLevel++;
 
     //if ( o->WeaponLevel >= 6 && o->WeaponLevel <= 8 )
@@ -795,7 +801,7 @@ void RenderSkillEarthQuake(CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill)
         o->WeaponLevel == iMaxSkill - 1 ||
         o->WeaponLevel == iMaxSkill - 0)
     {
-        Vector(0.f, 40.f * (o->WeaponLevel / 2) * FPS_ANIMATION_FACTOR, 0.f, p);
+        Vector(0.f, 40.f * (o->WeaponLevel / 2), 0.f, p);
         Vector(0.f, 0.f, (float)(rand() % 360), Angle);
         for (int i = 0; i < 6; ++i)
         {

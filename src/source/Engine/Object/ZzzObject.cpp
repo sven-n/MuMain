@@ -257,7 +257,7 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
 {
     if (gMapManager.InChaosCastle() == true && Hero->Object.m_bActionStart == true)
     {
-        o->Alpha -= 0.15f;
+        o->Alpha -= 0.15f * FPS_ANIMATION_FACTOR;
     }
 
     if (o->Alpha < 0.01f)
@@ -298,6 +298,9 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
         }
     }
 
+#ifdef MU_ENABLE_CONTROL_SOCKET
+    const bool checkBones = BeginPrepassBoneCheck(o, b->NumBones);
+#endif
     if (o->EnableBoneMatrix)
     {
         b->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
@@ -308,6 +311,10 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
         b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle,
                      false, !Translate);
     }
+
+#ifdef MU_ENABLE_CONTROL_SOCKET
+    if (checkBones) EndPrepassBoneCheck(o, b->NumBones);
+#endif
 
     BoneScale = 1.f;
     if (3 == Select)
@@ -392,7 +399,7 @@ bool Calc_ObjectAnimation(OBJECT* o, bool Translate, int Select)
 {
     if (gMapManager.InChaosCastle() == true && Hero->Object.m_bActionStart)
     {
-        o->Alpha -= 0.15f;
+        o->Alpha -= 0.15f * FPS_ANIMATION_FACTOR;
     }
 
     if (o->Alpha < 0.01f) return false;
@@ -405,6 +412,9 @@ bool Calc_ObjectAnimation(OBJECT* o, bool Translate, int Select)
     b->CurrentAction = o->CurrentAction;
     VectorCopy(o->Position, b->BodyOrigin);
 
+#ifdef MU_ENABLE_CONTROL_SOCKET
+    const bool checkBones = BeginPrepassBoneCheck(o, b->NumBones);
+#endif
     if (o->EnableBoneMatrix)
     {
         b->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, !Translate);
@@ -413,6 +423,9 @@ bool Calc_ObjectAnimation(OBJECT* o, bool Translate, int Select)
     {
         b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, !Translate);
     }
+#ifdef MU_ENABLE_CONTROL_SOCKET
+    if (checkBones) EndPrepassBoneCheck(o, b->NumBones);
+#endif
     return true;
 }
 
@@ -739,7 +752,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                         Vector(0.f, 0.f, 0.f, vRelativePos);
                         b->TransformPosition(BoneTransform[20], vRelativePos, vPos);
                         Vector(1.f, 1.f, 1.f, vLight);
-                        CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, vLight);
+                        CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight);
                     }
                 }
                 else if (o->Type == 67)
@@ -934,8 +947,8 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     Vector(1.0f, 1.0f, 0.2f, vLight);
                     iSubType = 3;
                 }
-                CreateEffect(MODEL_FENRIR_THUNDER, o->Position, o->Angle, vLight, 0, o);
-                CreateEffect(MODEL_FENRIR_THUNDER, o->Position, o->Angle, vLight, 0, o);
+                CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, o->Position, o->Angle, vLight, 0, o);
+                CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, o->Position, o->Angle, vLight, 0, o);
 
                 Vector(1.0f, 1.0f, 1.0f, vLight);
                 if (o->CurrentAction == FENRIR_WALK)
@@ -944,16 +957,16 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     {
                         Vector(0.0f, 0.0f, 0.0f, vPos);
                         b->TransformPosition(BoneTransform[22], vPos, vPosition, false);
-                        CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
+                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
                         Vector(0.0f, 0.0f, 0.0f, vPos);
                         b->TransformPosition(BoneTransform[28], vPos, vPosition, false);
-                        CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
+                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
                         Vector(0.0f, 0.0f, 0.0f, vPos);
                         b->TransformPosition(BoneTransform[36], vPos, vPosition, false);
-                        CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
+                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
                         Vector(0.0f, 0.0f, 0.0f, vPos);
                         b->TransformPosition(BoneTransform[44], vPos, vPosition, false);
-                        CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
+                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
                     }
                 }
                 else if (o->CurrentAction == FENRIR_RUN)
@@ -962,19 +975,19 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     {
                         Vector(0.0f, 0.0f, 0.0f, vPos);
                         b->TransformPosition(BoneTransform[22], vPos, vPosition, false);
-                        CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
+                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
                         Vector(0.0f, 0.0f, 0.0f, vPos);
                         b->TransformPosition(BoneTransform[28], vPos, vPosition, false);
-                        CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
+                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
                     }
                     else if (o->AnimationFrame > 4.8f && o->AnimationFrame <= 5.2f)
                     {
                         Vector(0.0f, 0.0f, 0.0f, vPos);
                         b->TransformPosition(BoneTransform[36], vPos, vPosition, false);
-                        CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
+                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
                         Vector(0.0f, 0.0f, 0.0f, vPos);
                         b->TransformPosition(BoneTransform[44], vPos, vPosition, false);
-                        CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
+                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
                     }
                 }
             }
@@ -2814,7 +2827,7 @@ void RenderObjectVisual(OBJECT* o)
             CreateSprite(BITMAP_LIGHTNING + 1, Position, 2.5f, Light, o, -Rotation);
             break;
         case 103:		//. Sleddog
-            if (b->CurrentAnimationFrame == b->Actions[o->CurrentAction].NumAnimationKeys - 1) {
+            if ((int)o->AnimationFrame == b->Actions[o->CurrentAction].NumAnimationKeys - 1) {
                 if (rand_fps_check(32))
                     SetAction(o, 1);
                 else
@@ -3043,8 +3056,8 @@ void RenderObjectVisual(OBJECT* o)
                         Position[0] = o->Position[0] + (rand() % 128 - 64);
                         Position[1] = o->Position[1] + (rand() % 128 - 64);
                         Position[2] = o->Position[2];
-                        CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, o->Light, 4, o->Scale * 0.5f);
-                        CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
+                        CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light, 4, o->Scale * 0.5f);
+                        CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
                     }
                 }
             }
@@ -3365,12 +3378,12 @@ void RenderObjects()
                                     TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -500.f) && fDistance < fDis * 2.0f)
                                 {
                                     if (o->BlendMeshLight < 1.0f)
-                                        o->BlendMeshLight += 0.03f;
+                                        o->BlendMeshLight += 0.03f * FPS_ANIMATION_FACTOR;
                                     else
                                         o->BlendMeshLight = 1.0f;
 
                                     if (o->AlphaTarget < 1.0f)
-                                        o->AlphaTarget += 0.03f;
+                                        o->AlphaTarget += 0.03f * FPS_ANIMATION_FACTOR;
                                     else
                                         o->AlphaTarget = 1.0f;
 
@@ -3380,7 +3393,7 @@ void RenderObjects()
                                 else if (TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -500.f) && fDistance < fDis && o->Type <= MAX_WORLD_OBJECTS)
                                 {
                                     if (o->AlphaTarget < 1.0f)
-                                        o->AlphaTarget += 0.03f;
+                                        o->AlphaTarget += 0.03f * FPS_ANIMATION_FACTOR;
                                     else
                                         o->AlphaTarget = 1.0f;
 
@@ -4260,12 +4273,12 @@ void MoveObject(OBJECT* o)
             {
                 o->Alpha = 1.0f;
                 Vector(1.0f, 1.0f, 1.0f, o->Light);
-                o->Angle[2] -= 0.23f;
+                o->Angle[2] -= 0.23f * FPS_ANIMATION_FACTOR;
             }
             else
             {
                 o->Alpha = 0.2f;
-                o->Angle[2] -= 0.6f;
+                o->Angle[2] -= 0.6f * FPS_ANIMATION_FACTOR;
                 Vector(1.0f, 0.0f, 0.0f, o->Light);
             }
 
@@ -4321,7 +4334,7 @@ int MoveHeavenThunder(void)
             objectCount = rand() % visibleObject;
         }
 
-        if (rand_fps_check(5))
+        if (rand() % 5 == 0)
         {
             float Matrix1[3][4];
             float Matrix2[3][4];
@@ -5723,7 +5736,7 @@ void MoveItems()
         {
             // Apply gravity physics
             o->Position[2] += o->Gravity * FPS_ANIMATION_FACTOR;
-            o->Gravity -= 6.f;
+            o->Gravity -= 6.f * FPS_ANIMATION_FACTOR;
 
             // Calculate ground height
             float groundHeight = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;

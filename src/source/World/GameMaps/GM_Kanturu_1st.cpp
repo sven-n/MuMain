@@ -1324,7 +1324,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
             vec3_t Light;
             float Scale, Angle;
 
-            o->Distance += 0.05f;
+            o->Distance += 0.05f * FPS_ANIMATION_FACTOR;
             Scale = o->Distance;
 
             if (Scale >= 3.0f)

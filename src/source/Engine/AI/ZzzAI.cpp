@@ -38,9 +38,9 @@ constexpr float BoidNeighborRange = 400.f;
 constexpr float BoidSeparationRange = 80.f;
 } // namespace
 
-float MoveHumming(vec3_t Position, vec3_t Angle, vec3_t TargetPosition, float Turn)
+float MoveHumming(vec3_t Position, vec3_t Angle, vec3_t TargetPosition, float Turn, bool perFrame)
 {
-    float scaledTurn = Turn * FPS_ANIMATION_FACTOR;
+    float scaledTurn = perFrame ? Turn * FPS_ANIMATION_FACTOR : Turn;
     float targetAngle = CreateAngle2D(Position, TargetPosition);
     Angle[2] = TurnAngle2(Angle[2], targetAngle, scaledTurn);
     vec3_t Range;
@@ -634,8 +634,20 @@ double FPS;
  * Therefore, the speed of the game is maintained even when the FPS change dynamically.
  */
 float FPS_ANIMATION_FACTOR;
+// Whole 25 FPS reference frames that passed this frame (0 or 1): the step for integer frame counters.
+int REFERENCE_FRAME_STEP;
+// Counts rendered frames: tells which calls came within the same frame.
+unsigned int RENDERED_FRAME;
 double FPS_AVG;
 double WorldTime = 0.0;
+
+int TakeReferenceFrameSteps(float& referenceFrames, float frameFactor)
+{
+    referenceFrames += frameFactor;
+    const int steps = static_cast<int>(referenceFrames);
+    referenceFrames -= static_cast<float>(steps);
+    return steps;
+}
 
 bool rand_fps_check(int reference_frames)
 {
@@ -662,6 +674,9 @@ void CalcFPS()
     // animate with no less than REFERENCE_FPS, otherwise some animations don't work correctly
     const double fpsRatio = (FPS <= 0.0) ? 0.0 : REFERENCE_FPS / FPS;
     FPS_ANIMATION_FACTOR = std::clamp(static_cast<float>(fpsRatio), 0.f, 1.f);
+    static float referenceFrames = 0.f;
+    REFERENCE_FRAME_STEP = TakeReferenceFrameSteps(referenceFrames, FPS_ANIMATION_FACTOR);
+    ++RENDERED_FRAME;
 
     // Calculate average fps every 2 seconds or 25 frames
     const double diffSinceStart = WorldTime - start;

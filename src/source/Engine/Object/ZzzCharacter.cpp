@@ -446,7 +446,7 @@ void SetPlayerStop(CHARACTER* c)
         }
         else if (c->Helper.Type == MODEL_HORN_OF_FENRIR)
         {
-            if (rand_fps_check(3))
+            if (rand() % 3 == 0)
             {
                 PlayBuffer(static_cast<ESound>(SOUND_FENRIR_IDLE_1 + rand() % 2), o);
             }
@@ -1387,7 +1387,7 @@ void SetPlayerShock(CHARACTER* c, int Hit)
             if (c->Helper.Type == MODEL_HORN_OF_FENRIR)
             {
                 SetAction_Fenrir_Damage(c, &c->Object);
-                if (rand_fps_check(3))
+                if (rand() % 3 == 0)
                     PlayBuffer(static_cast<ESound>(SOUND_FENRIR_DAMAGE_1 + rand() % 2), o);
             }
             else
@@ -1440,7 +1440,7 @@ void SetPlayerShock(CHARACTER* c, int Hit)
             vec3_t Position;
             for (int i = 0; i < 5; i++)
             {
-                if (rand_fps_check(2))
+                if (rand() % 2 == 0)
                 {
                     Position[0] = o->Position[0] + (rand() % 128 - 64);
                     Position[1] = o->Position[1];
@@ -1660,7 +1660,7 @@ void AttackEffect(CHARACTER* c)
     case MONSTER_MAGIC_SKELETON_7:
         if ((c->Skill) == AT_SKILL_BOSS)
         {
-            if (rand_fps_check(2))
+            if (rand() % 2 == 0)
             {
                 if (c->CheckAttackTime(1))
                 {
@@ -1668,7 +1668,7 @@ void AttackEffect(CHARACTER* c)
                     c->SetLastAttackEffectTime();
                 }
             }
-            else
+            else if (rand_fps_check(1))
             {
                 Vector(o->Position[0] + rand() % 1024 - 512, o->Position[1] + rand() % 1024 - 512, o->Position[2], Position);
                 CreateEffect(MODEL_FIRE, Position, o->Angle, o->Light);
@@ -2055,7 +2055,7 @@ void AttackEffect(CHARACTER* c)
                 {
                     if (c->CheckAttackTime(8))
                     {
-                        if (rand_fps_check(2))
+                        if (rand() % 2 == 0)
                         {
                             CreateEffect(MODEL_SKILL_BLAST, to->Position, o->Angle, o->Light, 0, o);
                             CreateEffect(MODEL_SKILL_BLAST, to->Position, o->Angle, o->Light, 0, o);
@@ -2665,7 +2665,8 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
 
         if (6 <= c->AttackTime && c->AttackTime <= 12)
         {	// 꼬깔 만들기
-            if (rand_fps_check(2))
+            // One spear every reference frame, as at 25 FPS; rand_fps_check(2) halves the spears for cheaper casts.
+            if (rand_fps_check(1))
             {
                 vec3_t Position;
 
@@ -3744,7 +3745,7 @@ void AnimationCharacter(CHARACTER* c, OBJECT* o, BMD* b)
     switch (o->Type)
     {
     case MODEL_DEVIAS_TRADER:
-        if (b->CurrentAnimationFrame == b->Actions[o->CurrentAction].NumAnimationKeys - 1)
+        if ((int)o->AnimationFrame == b->Actions[o->CurrentAction].NumAnimationKeys - 1)
         {
             if (rand_fps_check(32))
                 SetAction(o, 1);
@@ -3753,7 +3754,7 @@ void AnimationCharacter(CHARACTER* c, OBJECT* o, BMD* b)
         }
         break;
     case MODEL_RABBIT:
-        if (o->CurrentAction <= 1 && b->CurrentAnimationFrame == b->Actions[o->CurrentAction].NumAnimationKeys - 1)
+        if (o->CurrentAction <= 1 && (int)o->AnimationFrame == b->Actions[o->CurrentAction].NumAnimationKeys - 1)
         {
             if (rand_fps_check(10))
                 SetAction(o, 1);
@@ -4080,7 +4081,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
 
     if (c->Freeze > 0.f)
     {
-        c->Freeze -= 0.03f;
+        c->Freeze -= 0.03f * FPS_ANIMATION_FACTOR;
     }
 
     AnimationCharacter(c, o, b);
@@ -5991,13 +5992,13 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
         case MODEL_HYDRA:
             if (o->CurrentAction >= MONSTER01_ATTACK1 && o->CurrentAction <= MONSTER01_ATTACK2)
             {
-                o->BlendMeshLight += 0.1f;
+                o->BlendMeshLight += 0.1f * FPS_ANIMATION_FACTOR;
                 if (o->BlendMeshLight > 1.f)
                     o->BlendMeshLight = 1.f;
             }
             else
             {
-                o->BlendMeshLight -= 0.1f;
+                o->BlendMeshLight -= 0.1f * FPS_ANIMATION_FACTOR;
                 if (o->BlendMeshLight < 0.f)
                     o->BlendMeshLight = 0.f;
             }
@@ -6501,6 +6502,8 @@ void MoveCharactersClient()
     }
     UpdateCharactersAnimationParallel(std::span<CHARACTER>(CharactersClient, MAX_CHARACTERS_CLIENT));
     MoveBlurs();
+    // Effects, joints and particles read these bones next.
+    WaitCharactersAnimation();
 }
 
 // Active-character count and which animation path this tick took (worker thread pool or
@@ -6519,6 +6522,8 @@ void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters)
         c.Object.EnableBoneMatrix = false;
         if (c.Object.Live && c.Object.Visible)
         {
+            // Render animates characters at height 0; item previews leave other heights on the shared model.
+            Models[c.Object.Type].BodyHeight = 0.f;
             activeChars.push_back(&c);
         }
     }
@@ -6539,26 +6544,65 @@ void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters)
     {
         for (CHARACTER* c : activeChars)
         {
-            OBJECT* o = &c->Object;
-            BMD* model = &Models[o->Type];
-            if (!model || model->NumBones <= 0) continue;
-
-            model->Animation(
-                o->BoneTransform,
-                o->AnimationFrame,
-                o->PriorAnimationFrame,
-                o->PriorAction,
-                o->Angle,
-                o->HeadAngle,
-                false,
-                true,
-                nullptr,
-                o->CurrentAction
-            );
-            o->EnableBoneMatrix = true;
+            AnimateCharacterBones(&c->Object);
         }
     }
 }
+
+void AnimateCharacterBones(OBJECT* o)
+{
+    BMD* model = &Models[o->Type];
+    if (model->NumBones <= 0) return;
+
+    // Model space, as render builds them: the model's BodyOrigin and BodyScale belong to whichever object set them last.
+    model->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
+                     o->HeadAngle, false, false, nullptr, o->CurrentAction);
+    o->EnableBoneMatrix = true;
+}
+
+#ifdef MU_ENABLE_CONTROL_SOCKET
+PrepassBoneCheck g_PrepassBoneCheck;
+
+namespace
+{
+float PrepassBones[MAX_BONES][3][4];
+
+bool IsClientCharacterObject(const OBJECT* o)
+{
+    for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
+    {
+        if (&CharactersClient[i].Object == o) return true;
+    }
+    return false;
+}
+} // namespace
+
+bool BeginPrepassBoneCheck(const OBJECT* o, int numBones)
+{
+    if (!g_PrepassBoneCheck.enabled || !o->EnableBoneMatrix || numBones > MAX_BONES || !IsClientCharacterObject(o))
+        return false;
+    memcpy(PrepassBones, o->BoneTransform, sizeof(float) * 12 * numBones);
+    return true;
+}
+
+void EndPrepassBoneCheck(const OBJECT* o, int numBones)
+{
+    RecordPrepassBones(PrepassBones, o->BoneTransform, numBones, o->Type == MODEL_PLAYER);
+}
+
+void RecordPrepassBones(const float (*prepass)[3][4], const float (*rendered)[3][4], int numBones, bool player)
+{
+    float delta = 0.f;
+    for (int bone = 0; bone < numBones; ++bone)
+        for (int r = 0; r < 3; ++r)
+            for (int c = 0; c < 4; ++c)
+                delta = std::max(delta, std::abs(prepass[bone][r][c] - rendered[bone][r][c]));
+    ++g_PrepassBoneCheck.checked;
+    if (player) ++g_PrepassBoneCheck.players;
+    if (delta > 0.01f) ++g_PrepassBoneCheck.mismatched;
+    g_PrepassBoneCheck.maxDelta = std::max(g_PrepassBoneCheck.maxDelta, delta);
+}
+#endif
 
 void WaitCharactersAnimation()
 {
@@ -7071,7 +7115,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
             Vector(i * 30.f - 180.f, -40.f, 0.f, p);
             b->TransformPosition(BoneTransform[0], p, Position, true);
 
-            if (rand_fps_check(3))
+            if (rand() % 3 == 0)
             {
                 CreateSprite(BITMAP_SHINY + 1, Position, 0.6f, Light2, o, (float)(rand() % 360));
             }
@@ -7501,7 +7545,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
             Vector(0.4f, 0.4f, 0.4f, Light2);
             b->TransformPosition(BoneTransform[i + 2], p, Position, true);
 
-            if (rand_fps_check(3))
+            if (rand() % 3 == 0)
             {
                 CreateSprite(BITMAP_SHINY + 1, Position, 0.6f, Light2, o, (float)(rand() % 360));
             }
@@ -7532,7 +7576,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
                     Vector(0.f,i*30.f-10.f,0.f,p);
                     b->TransformPosition(BoneTransform[0],p,Position,true);
 
-                    if ( rand_fps_check(3) )
+                    if ( rand() % 3 == 0 )
                     {
                         CreateSprite(BITMAP_SHINY+1,Position,0.6f,Light2, o, ( float)( rand()%360));
                     }
@@ -7655,7 +7699,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         vec3_t Light2;
         Vector(0.4f, 0.4f, 0.4f, Light2);
         b->TransformPosition(BoneTransform[0], p, Position, true);
-        if (rand_fps_check(3))
+        if (rand() % 3 == 0)
         {
             CreateSprite(BITMAP_SHINY + 1, Position, 0.6f, Light2, o, (float)(rand() % 360));
         }
@@ -8098,9 +8142,9 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         }
         if (Object->Timer > 0.5f)
         {
-            Object->EyeRight[0] *= 0.95f;
-            Object->EyeRight[1] *= 0.95f;
-            Object->EyeRight[2] *= 0.95f;
+            Object->EyeRight[0] *= powf(0.95f, FPS_ANIMATION_FACTOR);
+            Object->EyeRight[1] *= powf(0.95f, FPS_ANIMATION_FACTOR);
+            Object->EyeRight[2] *= powf(0.95f, FPS_ANIMATION_FACTOR);
         }
 
         CreateSprite(BITMAP_SHOCK_WAVE, Position, Object->Timer, Object->EyeRight, o);
@@ -8986,7 +9030,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
         if (o->CurrentAction == MONSTER01_WALK)
         {
-            o->m_iAnimation++;
+            o->m_iAnimation += REFERENCE_FRAME_STEP;
             if (rand_fps_check(20))
                 PlayBuffer(SOUND_MOONRABBIT_WALK);
         }
@@ -9105,7 +9149,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             b->TransformPosition(BoneTransform[43], vRelativePos, vtaWorldPos, false);
             vtaWorldPos[2] += 20.f;
 
-            CreateParticle(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle, rand_fps_check(3) ? vLight : vLight1, 1, 0.3f);
+            CreateParticle(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle,
+                           (rand() % 3 == 0) ? vLight : vLight1, 1, 0.3f);
         }
 
         VectorCopy(o->Position, b->BodyOrigin);
@@ -9115,8 +9160,10 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
         if (rand_fps_check(1))
         {
-            CreateParticle(BITMAP_SPARK + 1, vtaWorldPos, o->Angle, rand_fps_check(3) ? vLight2 : vLight1, 25, Scale + 0.2f);
-            CreateParticle(BITMAP_SPARK + 1, vtaWorldPos, o->Angle, rand_fps_check(2) ? vLight2 : vLight1, 25, Scale + 0.3f);
+            CreateParticle(BITMAP_SPARK + 1, vtaWorldPos, o->Angle, (rand() % 3 == 0) ? vLight2 : vLight1, 25,
+                           Scale + 0.2f);
+            CreateParticle(BITMAP_SPARK + 1, vtaWorldPos, o->Angle, (rand() % 2 == 0) ? vLight2 : vLight1, 25,
+                           Scale + 0.3f);
         }
 
         Vector(0.7f, 0.5f, 0.2f, vLight);
@@ -9141,7 +9188,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             {
                 auto randpos = (float)(rand() % 30 + 5);
 
-                if (rand_fps_check(2)) {
+                if (rand() % 2 == 0)
+                {
                     vtaWorldPos[0] += randpos;
                 }
                 else {
@@ -9290,7 +9338,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             }
             else
             {
-                c->Object.Alpha -= 0.07f;
+                c->Object.Alpha -= 0.07f * FPS_ANIMATION_FACTOR;
                 float fAlpha = c->Object.Alpha;
                 if (fAlpha < 0) fAlpha = 0;
 
@@ -9313,7 +9361,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
         if (g_isCharacterBuff((&c->Object), eBuff_Doppelganger_Ascension))
         {
-            o->Position[2] += 2.0f;
+            o->Position[2] += 2.0f * FPS_ANIMATION_FACTOR;
         }
     }
 
@@ -10590,8 +10638,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             b->TransformPosition(o->BoneTransform[27], vRelativePos, vWorldPos, true);
 
             Vector(0.2f, 0.2f, 1.0f, vLight);
-            CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
-            CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
+            CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
+            CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
         }
         else if (o->CurrentAction >= PLAYER_SKILL_SLEEP && o->CurrentAction <= PLAYER_SKILL_SLEEP_FENRIR)
         {
@@ -10985,7 +11033,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
                     c->ExtendStateTime = 0;
                 }
-                c->ExtendStateTime++;
+                c->ExtendStateTime += REFERENCE_FRAME_STEP;
             }
 
             if (fullset && g_pOption->GetRenderLevel() >= 2)
@@ -11107,7 +11155,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         }
                         else if (EquipmentLevelSet == 11)
                         {
-                            if (rand_fps_check(8))
+                            if (rand() % 8 == 0)
                             {
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 0, o);
                             }
@@ -11118,25 +11166,25 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         }
                         else if (EquipmentLevelSet == 12)
                         {
-                            if (rand_fps_check(6))
+                            if (rand() % 6 == 0)
                             {
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
                             }
-                            else if (rand_fps_check(3))
+                            else if (rand() % 3 == 0)
                             {
                                 CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
                             }
                         }
                         else if (EquipmentLevelSet == 13)
                         {
-                            if (rand_fps_check(6))
+                            if (rand() % 6 == 0)
                             {
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
                             }
 
-                            if (rand_fps_check(4))
+                            if (rand() % 4 == 0)
                             {
                                 CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
                                 CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 7, o, 20, 40, 1);
@@ -11144,13 +11192,13 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         }
                         else if (EquipmentLevelSet == 14)
                         {
-                            if (rand_fps_check(6))
+                            if (rand() % 6 == 0)
                             {
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
                             }
 
-                            if (rand_fps_check(4))
+                            if (rand() % 4 == 0)
                             {
                                 CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
                                 CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 7, o, 20, 40, 1);
@@ -11158,13 +11206,13 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         }
                         else if (EquipmentLevelSet == 15)
                         {
-                            if (rand_fps_check(6))
+                            if (rand() % 6 == 0)
                             {
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
                             }
 
-                            if (rand_fps_check(4))
+                            if (rand() % 4 == 0)
                             {
                                 CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
                                 CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 7, o, 20, 40, 1);
@@ -11173,16 +11221,20 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         VectorCopy(Light, o->Light);
                     }
 
-                    if (EquipmentLevelSet == 15 && g_pOption->GetRenderLevel() >= 4 && rand_fps_check(1))
+                    if (EquipmentLevelSet == 15 && g_pOption->GetRenderLevel() >= 4)
                     {
                         //left
+                        const bool spawnTrails = rand_fps_check(1);
                         vec3_t vColor;
                         Vector(13.0f, 10.0f, 3.0f, p);
                         b->TransformPosition(o->BoneTransform[20], p, Position, true);
                         VectorCopy(Position, o->EyeLeft);
 
                         Vector(0.09f, 0.09f, 0.8f, vColor);
-                        CreateJoint(BITMAP_JOINT_ENERGY, Position, o->Position, o->Angle, 55, o, 6.0f, -1, 0, 0, -1, vColor);
+                        // Sprites draw every frame; the trail joint spawns at the reference rate.
+                        if (spawnTrails)
+                            CreateJoint(BITMAP_JOINT_ENERGY, Position, o->Position, o->Angle, 55, o, 6.0f, -1, 0, 0, -1,
+                                        vColor);
                         auto fRad = (float)sinf((WorldTime) * 0.002f);
                         Vector(0.2f, 0.4f, 0.8f, vColor);
                         CreateSprite(BITMAP_SHINY + 6, Position, 0.5f * fRad, vColor, o);
@@ -11196,7 +11248,9 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         VectorCopy(Position, o->EyeRight);
 
                         Vector(0.09f, 0.09f, 0.8f, vColor);
-                        CreateJoint(BITMAP_JOINT_ENERGY, Position, o->Position, o->Angle, 56, o, 6.0f, -1, 0, 0, -1, vColor);
+                        if (spawnTrails)
+                            CreateJoint(BITMAP_JOINT_ENERGY, Position, o->Position, o->Angle, 56, o, 6.0f, -1, 0, 0, -1,
+                                        vColor);
 
                         Vector(0.2f, 0.4f, 0.8f, vColor);
                         CreateSprite(BITMAP_SHINY + 6, Position, 0.5f * fRad, vColor, o);

@@ -222,7 +222,7 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
             }
 
             EarthQuake = (float)(rand() % 6 - 3) * 2.0f;
-            o->Position[2] += 13.0f;
+            o->Position[2] += 13.0f * FPS_ANIMATION_FACTOR;
 
             PlayBuffer(SOUND_KANTURU_3RD_MAYA_INTRO);
         }
@@ -1271,7 +1271,7 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterObjectMesh(OBJECT* o, BMD* b, bool Ex
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
-            o->Alpha -= 0.1f;
+            o->Alpha -= 0.1f * FPS_ANIMATION_FACTOR;
             if (o->Alpha <= 0.0f)
             {
                 o->Alpha = 0.0f;

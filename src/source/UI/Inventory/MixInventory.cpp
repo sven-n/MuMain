@@ -1082,7 +1082,7 @@ void CMixInventory::RenderMixEffect()
     }
     else
     {
-        --m_iMixEffectTimer;
+        m_iMixEffectTimer -= REFERENCE_FRAME_STEP;
     }
     EnableAlphaBlend();
 
