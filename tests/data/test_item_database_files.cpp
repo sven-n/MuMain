@@ -395,7 +395,7 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         // The other order: on offHand first, then two-handed.
         const int otherBowType = MakeItemType(4, 101);
         REQUIRE(g_ItemDatabase.Find(otherBowType) == nullptr);
-        std::fill(std::begin(ItemAttribute[otherBowType].Name), std::end(ItemAttribute[otherBowType].Name), L' ');
+        std::fill(std::begin(ItemAttribute[otherBowType].Name), std::end(ItemAttribute[otherBowType].Name), L'\0');
         name.copy(ItemAttribute[otherBowType].Name, name.size());
         ItemAttribute[otherBowType].m_byItemSlot = static_cast<BYTE>(ItemSlot::OffHand);
         g_ItemDataHandler.OnItemEdited(otherBowType);
