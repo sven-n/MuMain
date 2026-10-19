@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Globals/_define.h"
+#include "Data/GameData/Common/LocalizedString.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemType.h"
 
@@ -10,7 +11,9 @@
 #include <array>
 #include <cstddef>
 #include <filesystem>
+#include <functional>
 #include <optional>
+#include <set>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -74,6 +77,57 @@ template <typename TAddIssue> bool ReadNumber(const OrderedJson& json, int& numb
 
 // Names in the data (e.g. glow colors) have only letters and digits.
 bool IsName(std::string_view text);
+
+// A text with translations (item names, table captions): English first, then the
+// translations sorted by locale.
+OrderedJson WriteLocalizedString(const LocalizedString& text);
+
+// Reads what WriteLocalizedString writes, or a plain text, which is the English
+// one. Each problem is an error, added with addError(field, message); then false
+// is returned.
+template <typename TAddError>
+bool ReadLocalizedString(const OrderedJson& json, const std::string& field, LocalizedString& text, TAddError&& addError)
+{
+    if (json.is_string())
+    {
+        text.Set(LocalizedString::NeutralLocale, json.get<std::string>());
+        return true;
+    }
+    if (!json.is_object())
+    {
+        addError(field, "must be a text or an object of texts by language");
+        return false;
+    }
+    bool valid = true;
+    for (const auto& [locale, entry] : json.items())
+    {
+        if (!entry.is_string())
+        {
+            addError(field + "." + locale, "must be a text");
+            valid = false;
+            continue;
+        }
+        text.Set(locale, entry.get<std::string>());
+    }
+    return valid;
+}
+
+using KeySet = std::set<std::string, std::less<>>;
+
+// Warns about each field of `json` that is not in knownKeys, with
+// addWarning(prefix + field, message).
+template <typename TAddWarning>
+void WarnAboutUnknownKeys(const OrderedJson& json, const KeySet& knownKeys, const std::string& prefix,
+                          TAddWarning&& addWarning)
+{
+    for (const auto& [key, value] : json.items())
+    {
+        if (!knownKeys.contains(key))
+        {
+            addWarning(prefix + key, "unknown field, ignored");
+        }
+    }
+}
 
 // A value for each item level 0 to 15: one number when all are the same, else the list.
 template <typename T> OrderedJson WritePerLevelValues(const std::array<T, ItemLevelCount>& values)

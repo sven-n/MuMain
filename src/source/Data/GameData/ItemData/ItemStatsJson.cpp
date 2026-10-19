@@ -58,7 +58,7 @@ constexpr int MaxPerLevelAfterHalving = 255;
 constexpr int MaxStrengthPerOptionLevel = 255;
 constexpr int MaxDropLevelBonus = 1000;
 
-using KeySet = std::set<std::string, std::less<>>;
+using Json::KeySet;
 
 const KeySet RootKeys = {Keys::FormatVersion, Keys::DropLevelBonus, Keys::Tables, Keys::Default, Keys::Profiles};
 const KeySet DropLevelBonusKeys = {Keys::Excellent, Keys::Ancient};
@@ -122,13 +122,8 @@ private:
 
 void ItemStatsReader::WarnAboutUnknownKeys(const OrderedJson& json, const KeySet& knownKeys, const std::string& prefix)
 {
-    for (const auto& [key, value] : json.items())
-    {
-        if (!knownKeys.contains(key))
-        {
-            AddIssue(ItemDataIssueSeverity::Warning, prefix + key, "unknown field; it is ignored");
-        }
-    }
+    Json::WarnAboutUnknownKeys(json, knownKeys, prefix, [this](const std::string& field, const std::string& message)
+                               { AddIssue(ItemDataIssueSeverity::Warning, field, message); });
 }
 
 bool ItemStatsReader::ReadNumber(const OrderedJson& json, const std::string& field, int minimum, int maximum,
@@ -249,26 +244,10 @@ void ItemStatsReader::ReadTable(const OrderedJson& json, const std::string& fiel
 
 void ItemStatsReader::ReadCaption(const OrderedJson& json, const std::string& field, LocalizedString& caption)
 {
-    if (json.is_string())
-    {
-        caption.Set(LocalizedString::NeutralLocale, json.get<std::string>());
-        return;
-    }
-    if (!json.is_object())
-    {
-        AddError(field, "must be a text or an object of texts by language");
-        return;
-    }
-    for (const auto& [locale, text] : json.items())
-    {
-        if (!text.is_string())
-        {
-            AddError(field + "." + locale, "must be a text");
-            continue;
-        }
-        caption.Set(locale, text.get<std::string>());
-    }
-    if (caption.GetNeutral().empty())
+    const bool read = Json::ReadLocalizedString(json, field, caption,
+                                                [this](const std::string& errorField, const std::string& message)
+                                                { AddError(errorField, message); });
+    if (read && caption.GetNeutral().empty())
     {
         AddIssue(ItemDataIssueSeverity::Warning, field, "has no English text");
     }
@@ -592,24 +571,13 @@ void ItemStatsReader::WarnAboutUnusedTables(const ItemStatFile& file)
 // ---------------------------------------------------------------- writing
 
 // English first, then the translations sorted by language.
-OrderedJson WriteCaption(const LocalizedString& caption)
-{
-    OrderedJson json = OrderedJson::object();
-    json[std::string(LocalizedString::NeutralLocale)] = caption.GetNeutral();
-    for (const auto& [locale, text] : caption.GetTranslations())
-    {
-        json[locale] = text;
-    }
-    return json;
-}
-
 OrderedJson WriteTable(const LevelBonusTable& table)
 {
     OrderedJson json;
     json[Keys::Name] = table.name;
     if (!table.caption.IsEmpty())
     {
-        json[Keys::Caption] = WriteCaption(table.caption);
+        json[Keys::Caption] = Json::WriteLocalizedString(table.caption);
     }
     // A table that only grows per level needs no values.
     const bool noValues = std::all_of(table.values.begin(), table.values.end(), [](int value) { return value == 0; });

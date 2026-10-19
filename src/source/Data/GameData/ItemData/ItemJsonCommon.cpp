@@ -205,6 +205,17 @@ bool ReadFileHeader(std::string_view text, const std::string& source, int maxFor
     return ReadFileVersion(text, source, maxFormatVersion, root, issues) && ReadGroup(root, source, group, issues);
 }
 
+OrderedJson WriteLocalizedString(const LocalizedString& text)
+{
+    OrderedJson json = OrderedJson::object();
+    json[std::string(LocalizedString::NeutralLocale)] = text.GetNeutral();
+    for (const auto& [locale, translation] : text.GetTranslations())
+    {
+        json[locale] = translation;
+    }
+    return json;
+}
+
 std::string PutListsOnOneLine(const std::string& text, std::string_view key)
 {
     return PutValuesOnOneLine(text, key, '[', ']');

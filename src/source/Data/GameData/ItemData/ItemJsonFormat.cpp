@@ -157,23 +157,11 @@ OrderedJson WriteTags(const ItemTagSet& tags)
     return json;
 }
 
-// English first, then the translations sorted by locale.
-OrderedJson WriteNames(const LocalizedString& names)
-{
-    OrderedJson json = OrderedJson::object();
-    json[std::string(LocalizedString::NeutralLocale)] = names.GetNeutral();
-    for (const auto& [locale, text] : names.GetTranslations())
-    {
-        json[locale] = text;
-    }
-    return json;
-}
-
 OrderedJson WriteItem(const ItemDefinition& definition)
 {
     OrderedJson item;
     item[Keys::Number] = definition.number;
-    item[Keys::Name] = WriteNames(definition.names);
+    item[Keys::Name] = Json::WriteLocalizedString(definition.names);
     if (!definition.tags.IsEmpty())
     {
         item[Keys::Tags] = WriteTags(definition.tags);
@@ -348,28 +336,9 @@ bool ItemReader::ReadIdentity(const OrderedJson& json, ItemDefinition& definitio
 bool ItemReader::ReadNames(const OrderedJson& json, LocalizedString& names)
 {
     // A plain text is the English name only; handy for items written by hand.
-    if (json.is_string())
-    {
-        names.Set(LocalizedString::NeutralLocale, json.get<std::string>());
-        return true;
-    }
-
-    if (!json.is_object())
-    {
-        AddIssue(ItemDataIssueSeverity::Error, Keys::Name, "must be an object of \"<locale>\": \"<name>\" pairs");
-        return false;
-    }
-
-    for (const auto& [locale, text] : json.items())
-    {
-        if (!text.is_string())
-        {
-            AddIssue(ItemDataIssueSeverity::Error, std::string(Keys::Name) + "." + locale, "must be a text");
-            return false;
-        }
-        names.Set(locale, text.get<std::string>());
-    }
-    return true;
+    return Json::ReadLocalizedString(json, Keys::Name, names,
+                                     [this](const std::string& field, const std::string& message)
+                                     { AddIssue(ItemDataIssueSeverity::Error, field, message); });
 }
 
 void ItemReader::ReadTags(const OrderedJson& json, ItemTagSet& tags)
@@ -468,13 +437,8 @@ void ItemReader::ReadByteTable(const OrderedJson& json, const char* key, std::ar
 void ItemReader::WarnAboutUnknownKeys(const OrderedJson& json, const std::set<std::string, std::less<>>& knownKeys,
                                       const std::string& prefix)
 {
-    for (const auto& [key, value] : json.items())
-    {
-        if (!knownKeys.contains(key))
-        {
-            AddIssue(ItemDataIssueSeverity::Warning, prefix + key, "unknown field, ignored");
-        }
-    }
+    Json::WarnAboutUnknownKeys(json, knownKeys, prefix, [this](const std::string& field, const std::string& message)
+                               { AddIssue(ItemDataIssueSeverity::Warning, field, message); });
 }
 
 void ItemReader::ReadRequirementsByLevel(const OrderedJson& json, ItemDefinition& definition)

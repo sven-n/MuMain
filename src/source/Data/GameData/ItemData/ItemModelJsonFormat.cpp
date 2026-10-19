@@ -287,13 +287,8 @@ void ItemModelReader::ReadLookName(const OrderedJson& json, const char* key, std
 
 void ItemModelReader::WarnAboutUnknownKeys(const OrderedJson& json, const std::set<std::string, std::less<>>& knownKeys)
 {
-    for (const auto& [key, value] : json.items())
-    {
-        if (!knownKeys.contains(key))
-        {
-            AddIssue(ItemDataIssueSeverity::Warning, key, "unknown field, ignored");
-        }
-    }
+    Json::WarnAboutUnknownKeys(json, knownKeys, "", [this](const std::string& field, const std::string& message)
+                               { AddIssue(ItemDataIssueSeverity::Warning, field, message); });
 }
 
 bool ItemModelReader::Read(const OrderedJson& json, ItemModelDefinition& model)
