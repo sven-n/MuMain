@@ -18,6 +18,12 @@ namespace Data::Items
 // Appends the problems to `issues`.
 void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIssue>& issues);
 
+// A translation of an item name in a language the game has no texts for is
+// never shown: a warning for each. `uiLocales` are the game's languages
+// (I18N::GetAvailableLocales).
+void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const char* const> uiLocales,
+                         std::vector<ItemDataIssue>& issues);
+
 // Checks that no item has more than one model. Appends the problems to `issues`.
 void ValidateItemModels(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues);
 

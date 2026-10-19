@@ -287,6 +287,28 @@ void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatP
     }
 }
 
+void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const char* const> uiLocales,
+                         std::vector<ItemDataIssue>& issues)
+{
+    for (const ItemDefinition& definition : items)
+    {
+        if (!definition.Exists())
+        {
+            continue;
+        }
+        for (const auto& [locale, text] : definition.names.GetTranslations())
+        {
+            const bool shown = std::any_of(uiLocales.begin(), uiLocales.end(),
+                                           [&](const char* uiLocale) { return locale == uiLocale; });
+            if (!shown)
+            {
+                AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
+                         "the " + locale + " name is never shown: the game has no texts in that language");
+            }
+        }
+    }
+}
+
 void ValidateItemModels(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues)
 {
     std::set<int> seenItemTypes;

@@ -12,6 +12,7 @@
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
+#include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
@@ -186,6 +187,18 @@ TEST_CASE("Shipped item data loads without problems [data][items]")
         CHECK(false);
     }
     CHECK(result.items.size() > 900);
+}
+
+TEST_CASE("The shipped item names are in languages the game shows [data][items]")
+{
+    const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
+    std::vector<ItemDataIssue> issues;
+    ValidateNameLocales(result.items, I18N::GetAvailableLocales(), issues);
+    for (const ItemDataIssue& issue : issues)
+    {
+        INFO(issue.ToString());
+        CHECK(false);
+    }
 }
 
 TEST_CASE("Loading item data fills ItemAttribute in the UI locale [data][items]")
