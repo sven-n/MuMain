@@ -409,6 +409,30 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         CHECK(g_ItemDatabase.Find(BladeType)->names.GetNeutral() == "Blade");
     }
 
+    SUBCASE("a name set for another language goes into the database, not into the shown name")
+    {
+        REQUIRE(g_ItemDataHandler.SetItemName(BladeType, "pl", "Ostrze"));
+        CHECK(g_ItemDatabase.Find(BladeType)->names.Get("pl") == "Ostrze");
+        CHECK(std::wstring(ItemAttribute[BladeType].Name) == L"Blade");
+    }
+
+    SUBCASE("a name set for the shown language is shown, also when it is longer than the game shows")
+    {
+        const std::string longName(60, 'B');
+        REQUIRE(g_ItemDataHandler.SetItemName(BladeType, "en", longName));
+        CHECK(g_ItemDatabase.Find(BladeType)->names.GetNeutral() == longName);
+        CHECK(std::wstring(ItemAttribute[BladeType].Name) == std::wstring(MAX_ITEM_NAME - 1, L'B'));
+    }
+
+    SUBCASE("an empty name removes a translation, but not the English name")
+    {
+        REQUIRE(g_ItemDataHandler.SetItemName(BladeType, "pt", ""));
+        CHECK_FALSE(g_ItemDatabase.Find(BladeType)->names.GetTranslations().contains("pt"));
+        CHECK_FALSE(g_ItemDataHandler.SetItemName(BladeType, "en", ""));
+        CHECK(g_ItemDatabase.Find(BladeType)->names.GetNeutral() == "Blade");
+        CHECK_FALSE(g_ItemDataHandler.SetItemName(MakeItemType(0, 500), "en", "Nothing"));
+    }
+
     SUBCASE("a value change does not turn the English fallback into a translation")
     {
         // No item has a Polish name: the English one is shown.

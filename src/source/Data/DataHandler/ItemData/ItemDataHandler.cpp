@@ -254,6 +254,24 @@ void CItemDataHandler::OnItemEdited(int itemType)
     }
 }
 
+bool CItemDataHandler::SetItemName(int itemType, std::string_view locale, std::string text)
+{
+    const ItemDefinition* current = g_ItemDatabase.Find(itemType);
+    if (current == nullptr || (locale == Data::LocalizedString::NeutralLocale && text.empty()))
+    {
+        return false;
+    }
+
+    ItemDefinition definition = *current;
+    definition.names.Set(locale, std::move(text));
+    g_ItemDatabase.Set(definition);
+    if (const ItemDefinition* updated = g_ItemDatabase.Find(itemType))
+    {
+        ToItemAttribute(*updated, ItemAttribute[itemType]);
+    }
+    return true;
+}
+
 void CItemDataHandler::OnItemsSwapped(int firstItemType, int secondItemType)
 {
     if (!IsValidItemType(firstItemType) || !IsValidItemType(secondItemType))
