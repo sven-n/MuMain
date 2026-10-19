@@ -8,6 +8,10 @@ extern OBJECT Boids[];
 extern OBJECT Fishs[];
 
 extern float EarthQuake;
+
+// Sets EarthQuake from a source near the hero, fading to nothing at about a screen away; returns whether it was in range.
+// Map-wide event shakes write EarthQuake directly.
+bool SetEarthQuakeAt(const vec3_t sourcePosition, float magnitude);
 extern bool EnableShadow;
 extern float AmbientShadowAngle;
 extern float RainTarget;

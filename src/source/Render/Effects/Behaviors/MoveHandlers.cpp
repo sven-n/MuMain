@@ -2910,7 +2910,7 @@ namespace Render::Effects::Behaviors
         Vector(fLevel, fLevel, fLevel + 0.1f, Light);
         AddTerrainLight(o->Position[0], o->Position[1], Light, 10, PrimaryTerrainLight);
 
-        EarthQuake = (float)(rand() % 4 - 2) * 0.1f;
+        SetEarthQuakeAt(o->Position, (float)(rand() % 4 - 2) * 0.1f);
 
         if (rand_fps_check(2)) {
             Vector(0.f, (float)(rand() % 150) + 300.f, 0.f, p);
@@ -3463,7 +3463,7 @@ namespace Render::Effects::Behaviors
         case 5:
         case 6:
         case 7:
-            EarthQuake = (float)(rand() % 8 - 4) * 0.1f;
+            SetEarthQuakeAt(o->Position, (float)(rand() % 8 - 4) * 0.1f);
             CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 28);
             CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 29);
             CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 30);
@@ -3848,7 +3848,7 @@ namespace Render::Effects::Behaviors
             else
                 o->BlendMeshLight = o->LifeTime * 0.1f;
             o->BlendMeshTexCoordU = -(float)o->LifeTime * 0.01f;
-            EarthQuake = (float)(rand() % 6 - 6) * 0.1f;
+            SetEarthQuakeAt(o->Position, (float)(rand() % 6 - 6) * 0.1f);
 
             if (rand_fps_check(value))
             {
@@ -4223,7 +4223,7 @@ namespace Render::Effects::Behaviors
             o->Direction[0] = 0;
             o->Direction[1] = 0;
             o->Direction[2] = 0;
-            EarthQuake = (float)(rand() % 4 + 1) * 0.1f;
+            SetEarthQuakeAt(o->Position, (float)(rand() % 4 + 1) * 0.1f);
         }
         else
         {
@@ -6030,7 +6030,7 @@ namespace Render::Effects::Behaviors
 
             o->Scale += (0.02f) * FPS_ANIMATION_FACTOR;
             //				o->Position[2] -= 0.5f;
-            EarthQuake = (float)(rand() % 8 - 8) * 0.1f;
+            SetEarthQuakeAt(o->Position, (float)(rand() % 8 - 8) * 0.1f);
         }
         return true;
     }
@@ -6128,8 +6128,10 @@ namespace Render::Effects::Behaviors
                 CreateEffectFpsChecked(BITMAP_CRATER, o->Position, o->Angle, o->Light);
             }
 
-            EarthQuake = (float)(rand() % 8 - 8) * 0.1f;
-            EarthQuake *= pow(1.0f / (2.f), FPS_ANIMATION_FACTOR);
+            if (SetEarthQuakeAt(o->Position, (float)(rand() % 8 - 8) * 0.1f))
+            {
+                EarthQuake *= 0.5f;
+            }
 
             o->HiddenMesh = 99;
         }
@@ -6329,14 +6331,17 @@ namespace Render::Effects::Behaviors
                         int CollisionX = (int)(o->Position[0] / TERRAIN_SCALE);
                         int CollisionY = (int)(o->Position[1] / TERRAIN_SCALE);
 
-                        EarthQuake = (float)(rand() % 8 - 8) * 0.1f;
+                        const bool shaking = SetEarthQuakeAt(o->Position, (float)(rand() % 8 - 8) * 0.1f);
                         if (CollisionY < 104 && o->Visible)
                         {
                             AddTerrainHeight(o->Position[0], o->Position[1], -30.f, 2, BackTerrainHeight);
                             CreateTerrainNormal_Part(CollisionX, CollisionY);
                             CreateTerrainLight_Part(CollisionX, CollisionY);
 
-                            EarthQuake *= pow(1.0f / (2.f), FPS_ANIMATION_FACTOR);
+                            if (shaking)
+                            {
+                                EarthQuake *= 0.5f;
+                            }
                         }
                     }
                 }
@@ -6486,14 +6491,17 @@ namespace Render::Effects::Behaviors
                     int CollisionX = (int)(o->Position[0] / TERRAIN_SCALE);
                     int CollisionY = (int)(o->Position[1] / TERRAIN_SCALE);
 
-                    EarthQuake = (float)(rand() % 8 - 8) * 0.1f;
+                    const bool shaking = SetEarthQuakeAt(o->Position, (float)(rand() % 8 - 8) * 0.1f);
                     if (CollisionY < 104 && o->Visible)
                     {
                         AddTerrainHeight(o->Position[0], o->Position[1], -30.f, 2, BackTerrainHeight);
                         CreateTerrainNormal_Part(CollisionX, CollisionY);
                         CreateTerrainLight_Part(CollisionX, CollisionY);
 
-                        EarthQuake *= pow(1.0f / (2.f), FPS_ANIMATION_FACTOR);
+                        if (shaking)
+                        {
+                            EarthQuake *= 0.5f;
+                        }
                     }
                 }
             }
@@ -7579,11 +7587,11 @@ namespace Render::Effects::Behaviors
             {
                 if (o->LifeTime >= 15.f)
                 {
-                    EarthQuake = (float)(rand() % 8 - 4) * 0.1f;
+                    SetEarthQuakeAt(o->Position, (float)(rand() % 8 - 4) * 0.1f);
                 }
                 else
                 {
-                    EarthQuake = 0.f;
+                    SetEarthQuakeAt(o->Position, 0.f);
                 }
 
                 if ((int)o->LifeTime == 23)
@@ -7680,11 +7688,11 @@ namespace Render::Effects::Behaviors
             vec3_t vLight;
             if (o->LifeTime <= 35.0f && o->LifeTime >= 15.0f)
             {
-                EarthQuake = (float)(rand() % 8 - 4) * 0.1f;
+                SetEarthQuakeAt(o->Position, (float)(rand() % 8 - 4) * 0.1f);
             }
             else
             {
-                EarthQuake = 0.f;
+                SetEarthQuakeAt(o->Position, 0.f);
             }
 
             if ((int)o->LifeTime == 30)
@@ -8780,7 +8788,7 @@ namespace Render::Effects::Behaviors
             int	iSwordOnTheLand = (o->ExtState / 2) + 5;
             if (o->LifeTime <= iSwordOnTheLand && o->LifeTime > 10)
             {
-                EarthQuake = (float)(rand() % 2 - 2) * 0.5f;
+                SetEarthQuakeAt(o->Position, (float)(rand() % 2 - 2) * 0.5f);
             }
 
             if ((int)o->LifeTime == o->ExtState)
@@ -9015,11 +9023,11 @@ namespace Render::Effects::Behaviors
             {
                 if (o->LifeTime >= 15.f)
                 {
-                    EarthQuake = (float)(rand() % 8 - 4) * 0.1f;
+                    SetEarthQuakeAt(o->Position, (float)(rand() % 8 - 4) * 0.1f);
                 }
                 else
                 {
-                    EarthQuake = 0.f;
+                    SetEarthQuakeAt(o->Position, 0.f);
                 }
 
                 if ((int)o->LifeTime == 23)
