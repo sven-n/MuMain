@@ -4316,7 +4316,7 @@ void MoveParticles()
                 if (o->SubType == 0)
                 {
                     o->Scale -= (rand() % 20 + 10) * 0.001f * FPS_ANIMATION_FACTOR;
-                    Luminosity -= 0.05f * FPS_ANIMATION_FACTOR;
+                    Luminosity -= 0.05f;
                     o->Position[2] += o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
                 }
                 else if (o->SubType == 1)
@@ -4333,13 +4333,13 @@ void MoveParticles()
                 else if (o->SubType == 2)
                 {
                     o->Scale -= (rand() % 20 + 10) * 0.004f * FPS_ANIMATION_FACTOR;
-                    Luminosity -= 0.05f * FPS_ANIMATION_FACTOR;
+                    Luminosity -= 0.05f;
                     o->Position[2] += o->Gravity * 25.f * FPS_ANIMATION_FACTOR;
                 }
                 else if (o->SubType == 3)
                 {
                     o->Scale -= 0.03f * FPS_ANIMATION_FACTOR;//(rand()%20+10)*0.001f;
-                    Luminosity -= 0.05f * FPS_ANIMATION_FACTOR;
+                    Luminosity -= 0.05f;
                     o->Position[2] += o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
 
                     if (o->Scale < 0)
@@ -7023,9 +7023,9 @@ void MoveParticles()
                     {
                         vec3_t vPos;
                         VectorCopy(o->Position, vPos);
-                        vPos[0] += ((float)(rand() % 100 - 50)) * FPS_ANIMATION_FACTOR;
-                        vPos[1] += ((float)(rand() % 100 - 50)) * FPS_ANIMATION_FACTOR;
-                        vPos[2] += ((float)(rand() % 100 - 50)) * FPS_ANIMATION_FACTOR;
+                        vPos[0] += ((float)(rand() % 100 - 50));
+                        vPos[1] += ((float)(rand() % 100 - 50));
+                        vPos[2] += ((float)(rand() % 100 - 50));
                         CreateBomb(vPos, true);
                     }
                 }
@@ -8822,17 +8822,17 @@ void MoveParticles()
                 if (o->SubType == 0)
                 {
                     o->Scale *= powf(1.05f, FPS_ANIMATION_FACTOR);
-                    Temp_Pos[2] -= (10.0f) * FPS_ANIMATION_FACTOR;
+                    Temp_Pos[2] -= 10.0f;
                 }
                 else if (o->SubType == 1)
                 {
                     o->Scale *= powf(1.02f, FPS_ANIMATION_FACTOR);
-                    Temp_Pos[2] += (10.0f) * FPS_ANIMATION_FACTOR;
+                    Temp_Pos[2] += 10.0f;
                 }
                 else if (o->SubType == 2)
                 {
                     o->Scale *= powf(1.03f, FPS_ANIMATION_FACTOR);
-                    Temp_Pos[2] += (25.0f) * FPS_ANIMATION_FACTOR;
+                    Temp_Pos[2] += 25.0f;
                 }
                 VectorCopy(Temp_Pos, o->Position);
 
@@ -9076,7 +9076,7 @@ void RenderParticles(BYTE byRenderOneMore)
                 for (int i = 0; i < 3; ++i)
                 {
                     RenderSprite(o->Type, vPos, Width, Height, o->Light, o->Rotation);
-                    vPos[2] -= 10.f * FPS_ANIMATION_FACTOR;
+                    vPos[2] -= 10.f;
                 }
             }
             break;
@@ -9340,7 +9340,7 @@ void RenderParticles(BYTE byRenderOneMore)
             {
                 vec3_t vPos;
                 VectorCopy(o->Position, vPos);
-                vPos[2] += (31.0f * o->Scale) * FPS_ANIMATION_FACTOR;
+                vPos[2] += (31.0f * o->Scale);
                 RenderSprite(o->TexType, vPos, Width * 0.9f, Height * 1.1f, o->Light, o->Rotation);
             }
             break;
