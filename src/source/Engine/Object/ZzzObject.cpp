@@ -3275,9 +3275,9 @@ void RenderObjectVisual(OBJECT* o)
 
             if (iTimeCheck >= 7950)
             {
-                Vector(o->Position[0] + (rand() % 2048 - 1024) * FPS_ANIMATION_FACTOR,
-                    o->Position[1] + (rand() % 2048 - 1024) * FPS_ANIMATION_FACTOR,
-                    o->Position[2] + (3000 + rand() % 600) * FPS_ANIMATION_FACTOR,
+                Vector(o->Position[0] + (rand() % 2048 - 1024),
+                    o->Position[1] + (rand() % 2048 - 1024),
+                    o->Position[2] + (3000 + rand() % 600),
                     Position);
                 CreateEffectFpsChecked(MODEL_FIRE, Position, o->Angle, o->Light, 9);
             }
@@ -3802,7 +3802,7 @@ void MoveObject(OBJECT* o)
         switch (o->Type)
         {
         case 8:
-            fSpeed *= pow(4.0f, FPS_ANIMATION_FACTOR);
+            fSpeed *= 4.0f;
             break;
         }
     }
@@ -5947,7 +5947,7 @@ void PartObjectColor(int Type, float Alpha, float Bright, vec3_t Light, bool Ext
         color = Render::Items::Glow::GetColors(Type).color;
     }
 
-    Bright *= pow(Alpha, FPS_ANIMATION_FACTOR);
+    Bright *= Alpha;
     Vector(Bright * color[0], Bright * color[1], Bright * color[2], Light);
 }
 
@@ -5961,7 +5961,7 @@ void PartObjectColor2(int Type, float Alpha, float Bright, vec3_t Light, bool Ex
     }
 
     const Render::Items::Glow::Color& color = colors.shineColor;
-    Bright *= pow(Alpha, FPS_ANIMATION_FACTOR);
+    Bright *= Alpha;
     Vector(Bright * color[0] * Light[0], Bright * color[1] * Light[1], Bright * color[2] * Light[2], Light);
 }
 

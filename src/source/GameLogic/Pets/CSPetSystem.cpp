@@ -525,7 +525,7 @@ void CSPetDarkSpirit::MovePet(void)
 
         if (o->AI == PET_ATTACK)
         {
-            TargetPosition[2] += 50.f * FPS_ANIMATION_FACTOR;
+            TargetPosition[2] += 50.f;
             float Distance = MoveHumming(o->Position, o->Angle, TargetPosition, o->Velocity);
             if (Distance < 20 || o->LifeTime > 20)
             {

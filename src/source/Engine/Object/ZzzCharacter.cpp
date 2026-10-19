@@ -2500,13 +2500,13 @@ bool CharacterAnimation(CHARACTER* c, OBJECT* o)
             PlaySpeed *= 1.5f;
         if (o->CurrentAction == PLAYER_SKILL_VITALITY && o->AnimationFrame > 6.f)
         {
-            PlaySpeed *= pow(1.0f / (2.f), FPS_ANIMATION_FACTOR);
+            PlaySpeed /= 2.f;
         }
         else if ((o->CurrentAction == PLAYER_ATTACK_TELEPORT || o->CurrentAction == PLAYER_ATTACK_RIDE_TELEPORT
             || o->CurrentAction == PLAYER_FENRIR_ATTACK_DARKLORD_TELEPORT
             ) && o->AnimationFrame > 5.5f)
         {
-            PlaySpeed *= pow(1.0f / (10.f), FPS_ANIMATION_FACTOR);
+            PlaySpeed /= 10.f;
         }
         else if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD &&
             (o->CurrentAction == PLAYER_SKILL_FLASH || o->CurrentAction == PLAYER_ATTACK_RIDE_ATTACK_FLASH
@@ -2516,16 +2516,16 @@ bool CharacterAnimation(CHARACTER* c, OBJECT* o)
         {
             if (g_pPartyManager->IsPartyMemberChar(c) == false)
             {
-                PlaySpeed *= pow(1.0f / (2.f), FPS_ANIMATION_FACTOR);
+                PlaySpeed /= 2.f;
             }
             else
             {
-                PlaySpeed *= pow(1.0f / (8.f), FPS_ANIMATION_FACTOR);
+                PlaySpeed /= 8.f;
             }
         }
         if (o->CurrentAction == PLAYER_SKILL_HELL_BEGIN)
         {
-            PlaySpeed *= powf(1.0f / (2.f), FPS_ANIMATION_FACTOR);
+            PlaySpeed /= 2.f;
         }
         if (o->Type != MODEL_PLAYER)
         {
@@ -2533,7 +2533,7 @@ bool CharacterAnimation(CHARACTER* c, OBJECT* o)
             {
             case MODEL_ILLUSION_OF_KUNDUN:
                 if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame > 6)
-                    PlaySpeed *= pow(4.0f, FPS_ANIMATION_FACTOR);
+                    PlaySpeed *= 4.0f;
                 break;
             case MODEL_FACE:
             case MODEL_FACE + 1:
@@ -2542,14 +2542,14 @@ bool CharacterAnimation(CHARACTER* c, OBJECT* o)
             case MODEL_FACE + 4:
             case MODEL_FACE + 5:
             case MODEL_FACE + 6:
-                PlaySpeed *= powf(2.0f, FPS_ANIMATION_FACTOR);
+                PlaySpeed *= 2.0f;
                 break;
             }
         }
         if (o->Type == MODEL_EROHIM)
         {
             if (o->CurrentAction == MONSTER01_DIE)
-                PlaySpeed *= pow(1.0f / (2.f), FPS_ANIMATION_FACTOR);
+                PlaySpeed /= 2.f;
         }
     }
 
