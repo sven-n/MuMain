@@ -142,6 +142,7 @@ TEST_CASE("Item stat profiles lay their terms over the default [data][items]")
     const ItemStatProfiles profiles(Read(SmallFile).file);
 
     CHECK(profiles.Find("") == ItemStatProfiles::DefaultProfile);
+    CHECK(profiles.Find("default") == ItemStatProfiles::DefaultProfile);
     CHECK(profiles.Find("shield") == 2);
     CHECK(profiles.Find("unknown") == ItemStatProfiles::UnknownProfile);
     CHECK(profiles.GetProfileNames() == std::vector<std::string>{"sceptre", "shield"});
@@ -252,6 +253,8 @@ TEST_CASE("Item stat file errors [data][items]")
                    "default.damage.ancient.dropLevelDivisor"));
     CHECK(HasIssue(Read(Changed(R"("ancient": "none"})", R"("ancient": "nothing"})")).issues, Severity::Error,
                    "default.blockRate.ancient"));
+    CHECK(HasIssue(Read(Changed(R"("name": "sceptre")", R"("name": "default")")).issues, Severity::Error,
+                   "profiles[0].name"));
     CHECK(HasIssue(Read(Changed(R"("name": "sceptre")", R"("name": "shield")")).issues, Severity::Error,
                    "profiles[1].name"));
     CHECK(HasIssue(Read(Changed(R"("afterLevelBonus": true)", R"("afterLevelBonus": 1)")).issues, Severity::Error,

@@ -17,9 +17,11 @@ namespace Data::Items
 struct ItemStatFile;
 
 // The profiles the item data gives an item (DeriveStatProfile); the stat file
-// must have those its items name.
+// must have those its items name. Default names the default, which an item file
+// writes for an item that keeps it although its data gives a profile.
 namespace StatProfileNames
 {
+constexpr const char* Default = "default";
 constexpr const char* Weapon = "weapon";
 constexpr const char* Armor = "armor";
 constexpr const char* Shield = "shield";
@@ -86,7 +88,8 @@ public:
     // The file as ReadItemStatsJson gives it; a name it does not know adds nothing.
     explicit ItemStatProfiles(const ItemStatFile& file);
 
-    // The default for "", UnknownProfile for a name the file does not have.
+    // The default for "" and "default", UnknownProfile for a name the file does
+    // not have.
     int Find(std::string_view name) const;
     // The default for an index the file does not have.
     const ItemStatProfile& Get(int index) const;

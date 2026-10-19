@@ -274,7 +274,7 @@ std::string DeriveStatProfile(const ItemDefinition& definition)
 
 std::string FollowStatProfile(const ItemDefinition* previous, const ItemDefinition& updated)
 {
-    if (previous != nullptr && previous->statProfile != DeriveStatProfile(*previous))
+    if (previous != nullptr && !previous->statProfile.empty() && previous->statProfile != DeriveStatProfile(*previous))
     {
         return previous->statProfile;
     }

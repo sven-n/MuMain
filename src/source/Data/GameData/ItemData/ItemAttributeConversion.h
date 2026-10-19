@@ -54,8 +54,9 @@ std::string DeriveStatProfile(const ItemDefinition& definition);
 
 // The stat profile of an item after the bmd import or the item editor changed
 // it, like FollowGroupWeaponKind: while the item has the profile its data gives,
-// or is new, the profile follows its data; a profile set in the item file that
-// differs from it stays as long as it differs.
+// has none (as in item files saved before the field) or is new, the profile
+// follows its data; a profile set in the item file that differs from it, also
+// "default", stays as long as it differs.
 std::string FollowStatProfile(const ItemDefinition* previous, const ItemDefinition& updated);
 
 // The attribute's name becomes the neutral (English) name.

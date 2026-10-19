@@ -102,6 +102,10 @@ ItemStatProfiles::ItemStatProfiles(const ItemStatFile& file)
 
 int ItemStatProfiles::Find(std::string_view name) const
 {
+    if (name == StatProfileNames::Default)
+    {
+        return DefaultProfile;
+    }
     for (size_t index = 0; index < m_names.size(); ++index)
     {
         if (m_names[index] == name)

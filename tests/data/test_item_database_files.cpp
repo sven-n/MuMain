@@ -467,6 +467,25 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         CHECK(g_ItemDatabase.Find(emptySwordType)->statProfile.empty());
     }
 
+    SUBCASE("the Horn of Fenrir keeps the default its file names")
+    {
+        REQUIRE(g_ItemDatabase.Find(ITEM_HORN_OF_FENRIR)->statProfile == "default");
+        ItemAttribute[ITEM_HORN_OF_FENRIR].RequireLevel = 0;
+        g_ItemDataHandler.OnItemEdited(ITEM_HORN_OF_FENRIR);
+        ItemAttribute[ITEM_HORN_OF_FENRIR].RequireLevel = 300;
+        g_ItemDataHandler.OnItemEdited(ITEM_HORN_OF_FENRIR);
+        CHECK(g_ItemDatabase.Find(ITEM_HORN_OF_FENRIR)->statProfile == "default");
+    }
+
+    SUBCASE("an item without a stat profile takes the one its data gives when edited")
+    {
+        ItemDefinition shield = *g_ItemDatabase.Find(ITEM_SMALL_SHIELD);
+        shield.statProfile.clear();
+        g_ItemDatabase.Set(shield);
+        g_ItemDataHandler.OnItemEdited(ITEM_SMALL_SHIELD);
+        CHECK(g_ItemDatabase.Find(ITEM_SMALL_SHIELD)->statProfile == "shield");
+    }
+
     SUBCASE("a wing's stat profile follows its slot")
     {
         REQUIRE(g_ItemDatabase.Find(ITEM_WINGS_OF_ELF)->statProfile == "firstTierWing");

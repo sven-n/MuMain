@@ -490,9 +490,15 @@ TEST_CASE("An edited item's stat profile follows its data while it is the derive
     CHECK(FollowStatProfile(&shield, edited).empty());
     CHECK(FollowStatProfile(nullptr, shield) == "shield");
 
-    // A profile the file sets that differs from the derived one stays.
+    // A profile the file sets that differs from the derived one stays, also "default".
     shield.statProfile = "custom";
     CHECK(FollowStatProfile(&shield, edited) == "custom");
+    shield.statProfile = "default";
+    CHECK(FollowStatProfile(&shield, edited) == "default");
+
+    // An item without a profile, as in item files saved before the field, takes the derived one.
+    shield.statProfile = "";
+    CHECK(FollowStatProfile(&shield, shield) == "shield");
 }
 
 TEST_CASE("Item tag sets test several tags at once [data][items]")

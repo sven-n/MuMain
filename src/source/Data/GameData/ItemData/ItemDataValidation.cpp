@@ -147,6 +147,20 @@ void ValidateExcellentBonus(const ItemDefinition& definition, std::vector<ItemDa
     }
 }
 
+// Item files saved before the stat profiles have none; the item then has the
+// default until an edit or a bmd import gives it the profile its data gives.
+void ValidateStatProfileGiven(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
+{
+    const std::string derived = DeriveStatProfile(definition);
+    if (definition.statProfile.empty() && !derived.empty())
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
+                 "has no stat profile, but its data gives \"" + derived + "\" (\"" + StatProfileNames::Default +
+                     "\" keeps the default)",
+                 "statProfile");
+    }
+}
+
 // excellentRaisesLevel only matters for an item with a level requirement.
 void ValidateExcellentRaisesLevel(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
 {
@@ -211,6 +225,7 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
         ValidateName(definition, issues);
         ValidateSlot(definition, issues);
         ValidatePotionPriority(definition, issues);
+        ValidateStatProfileGiven(definition, issues);
         ValidateExcellentBonus(definition, issues);
         ValidateExcellentRaisesLevel(definition, issues);
         ValidateRequirementsByLevel(definition, issues);

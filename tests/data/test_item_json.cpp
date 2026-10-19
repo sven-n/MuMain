@@ -492,9 +492,11 @@ TEST_CASE("Item validation checks slots, wing tiers and weapon kinds [data][item
     bowInRightHand.weaponKind = WeaponKind::Bow;
     ItemDefinition spear = MakeKris();
     spear.weaponKind = WeaponKind::Spear;
+    spear.statProfile = "weapon";
     ItemDefinition shield = MakeKris();
     shield.slot = ItemSlot::OffHand;
     shield.weaponKind = WeaponKind::Shield;
+    shield.statProfile = "shield";
     // A book goes in the left hand.
     ItemDefinition bookInRightHand = MakeKris();
     bookInRightHand.weaponKind = WeaponKind::Book;
@@ -551,6 +553,24 @@ TEST_CASE("Item validation checks slots, wing tiers and weapon kinds [data][item
 
     issues.clear();
     ValidateItems(std::vector<ItemDefinition>{potion}, issues);
+    CHECK(issues.empty());
+}
+
+TEST_CASE("Item validation warns about an item without the stat profile its data gives [data][items]")
+{
+    // A shield in an item file saved before the stat profiles.
+    ItemDefinition shield = MakeKris();
+    shield.slot = ItemSlot::OffHand;
+    shield.weaponKind = WeaponKind::Shield;
+
+    std::vector<ItemDataIssue> issues;
+    ValidateItems(std::vector<ItemDefinition>{shield}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "statProfile"));
+    CHECK_FALSE(HasErrors(issues));
+
+    shield.statProfile = "default";
+    issues.clear();
+    ValidateItems(std::vector<ItemDefinition>{shield}, issues);
     CHECK(issues.empty());
 }
 

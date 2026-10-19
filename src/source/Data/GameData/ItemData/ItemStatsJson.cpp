@@ -2,6 +2,7 @@
 
 #include "ItemStatsJson.h"
 #include "ItemJsonCommon.h"
+#include "ItemStatProfiles.h"
 
 #include <algorithm>
 #include <array>
@@ -322,6 +323,11 @@ void ItemStatsReader::ReadProfiles(const OrderedJson& root, ItemStatFile& file)
         WrittenStatProfile profile;
         if (!ReadName(json, position, profile.name))
         {
+            continue;
+        }
+        if (profile.name == StatProfileNames::Default)
+        {
+            AddError(position + "." + Keys::Name, "\"" + profile.name + "\" names the default, not a profile");
             continue;
         }
         if (!names.insert(profile.name).second)

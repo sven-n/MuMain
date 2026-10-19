@@ -676,9 +676,12 @@ server with original clients (after phases 6 and B).
    - Nine tables, the default and twelve profiles on 604 items: `weapon`
      119, `armor` 356, `shield` 24, `sceptre` 11, `book` 3, `helper` 31,
      `scroll` 36, and `firstTierWing`, `secondTierWing`, `secondTierCape`,
-     `thirdTierWing` and `smallWing` on 24 wings. The other items name none
-     and have the default. Of them, the orbs, crystals and scrolls of group
-     12, the Horn of Fenrir and the Transformation Ring have requirements:
+     `thirdTierWing` and `smallWing` on 24 wings. The Horn of Fenrir names
+     `"default"`: its data gives `helper`, but its level requirement does not
+     grow. The other items name none and have the default; a left-out profile
+     follows the data, and one the data gives is a warning (item files saved
+     before the field). Of them, the orbs, crystals and scrolls of group 12,
+     the Horn of Fenrir and the Transformation Ring have requirements:
      their level requirement does not grow with the item level, their stat
      requirements follow the default formula, and the Orb of Summoning's
      energy and the ring's level come from `requirementsByLevel`.

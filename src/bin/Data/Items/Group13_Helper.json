@@ -952,6 +952,7 @@
       "width": 2,
       "height": 2,
       "slot": "pet",
+      "statProfile": "default",
       "level": 300,
       "durability": 255,
       "excellentRaisesLevel": false,
