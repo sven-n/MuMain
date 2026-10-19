@@ -647,11 +647,13 @@ The item editor (editor builds, F12) edits the items of the running game:
   but no item data (the Looks lists these) is not empty: the console says
   so, and the item stays where it is.
 - **Save Items** checks the data and writes `Data/Items` next to the game,
-  with the model files in `Data/Items/Models`.
+  with the model files in `Data/Items/Models` of the groups whose models
+  were moved; the other model files are not touched.
   With errors nothing is written, and the errors are listed in the
-  editor console. If a file cannot be written (read-only folder, file
-  open in another program), the popup says so and the console names the
-  file. Only files whose content changed are rewritten.
+  editor console. If a file cannot be written (read-only folder, full disk),
+  no file is replaced, the popup says so and the console names the file.
+  A file open in another program can still fail when it is replaced, after
+  others were. Only files whose content changed are rewritten.
 
 The game runs from the build folder, which has a copy of `src/bin/Data`.
 To keep your changes, copy the changed files from

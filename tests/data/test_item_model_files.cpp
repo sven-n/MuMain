@@ -186,24 +186,57 @@ TEST_CASE("Shipped item model files are in the written format [data][items]")
           TestFiles::ReadWholeFile(ModelDirectory / SharedItemModelsFileName));
 }
 
-// The item editor saves the model files from the item model database.
+// The item editor saves the model files from the item model database, with
+// the items.
 TEST_CASE("Saving the shipped item models from the model database gives the shipped files [data][items]")
 {
     ItemModelDatabase database;
     database.Build(ShippedModels().models, Data::Effects::GlowColorList{});
+    const ItemDataLoadResult items = LoadItemDataDirectory(DataDirectory / "Items");
+    REQUIRE_FALSE(HasErrors(items.issues));
     const std::filesystem::path folder =
         std::filesystem::temp_directory_path() / ("mu_test_item_models_" + std::to_string(std::random_device{}()));
+    ItemGroupSet allGroups;
+    allGroups.set();
 
     std::vector<ItemDataIssue> issues;
-    CHECK(SaveItemModelDataDirectory(folder, database.GetAllSlots(), issues));
+    CHECK(SaveItemAndModelDataDirectories(folder / "Items", items.items, folder / "Models", database.GetAllSlots(),
+                                          allGroups, issues) == ItemDataSaveResult::Saved);
     CHECK(issues.empty());
     for (int group = 0; group < MAX_ITEM_TYPE; ++group)
     {
         const std::string fileName = GetItemGroupFileName(group);
         INFO(fileName);
-        CHECK(TestFiles::ReadWholeFile(folder / fileName) == TestFiles::ReadWholeFile(ModelDirectory / fileName));
+        CHECK(TestFiles::ReadWholeFile(folder / "Models" / fileName) ==
+              TestFiles::ReadWholeFile(ModelDirectory / fileName));
     }
-    CHECK_FALSE(std::filesystem::exists(folder / SharedItemModelsFileName));
+    CHECK_FALSE(std::filesystem::exists(folder / "Models" / SharedItemModelsFileName));
+
+    std::error_code ignored;
+    std::filesystem::remove_all(folder, ignored);
+}
+
+// The item editor writes the model files of the groups whose models it moved;
+// the others keep what this client does not read from them.
+TEST_CASE("Saving writes only the model files of the given groups [data][items]")
+{
+    ItemModelDatabase database;
+    database.Build(ShippedModels().models, Data::Effects::GlowColorList{});
+    const std::filesystem::path folder =
+        std::filesystem::temp_directory_path() / ("mu_test_item_models_" + std::to_string(std::random_device{}()));
+    constexpr int SavedGroup = 4;
+    ItemGroupSet groups;
+    groups.set(SavedGroup);
+
+    std::vector<ItemDataIssue> issues;
+    CHECK(SaveItemAndModelDataDirectories(folder / "Items", {}, folder / "Models", database.GetAllSlots(), groups,
+                                          issues) == ItemDataSaveResult::Saved);
+    for (int group = 0; group < MAX_ITEM_TYPE; ++group)
+    {
+        const std::string fileName = GetItemGroupFileName(group);
+        INFO(fileName);
+        CHECK(std::filesystem::exists(folder / "Models" / fileName) == (group == SavedGroup));
+    }
 
     std::error_code ignored;
     std::filesystem::remove_all(folder, ignored);

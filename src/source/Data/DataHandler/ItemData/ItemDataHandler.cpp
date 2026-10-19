@@ -164,6 +164,10 @@ bool CItemDataHandler::LoadModels(std::string& errorMessage)
 
     g_GlowColors.Build(colors.colors);
     g_ItemModelDatabase.Build(result.models, g_GlowColors);
+#ifdef _EDITOR
+    // The models are where their files have them again.
+    m_movedModelGroups.reset();
+#endif
     MU_LOG_INFO(mu::log::Get("data"), "Loaded {} item models from {} in {:.1f} ms", g_ItemModelDatabase.GetModelCount(),
                 GetItemModelDataDirectory().string(), MillisecondsSince(loadStart));
     return true;
@@ -259,10 +263,17 @@ void CItemDataHandler::OnItemsSwapped(int firstItemType, int secondItemType)
     const ItemDefinition second = g_ItemDatabase.GetAllSlots()[secondItemType];
     g_ItemDatabase.Swap(firstItemType, secondItemType);
     // Each item keeps the model slot of its item type, so the model moves too.
-    g_ItemModelDatabase.Swap(firstItemType, secondItemType);
-    Data::Items::ModelLoader::SwapOpenedModels(firstItemType, secondItemType);
+    SwapItemModels(firstItemType, secondItemType);
     FollowDerivedFieldsAfterMove(first, secondItemType);
     FollowDerivedFieldsAfterMove(second, firstItemType);
+}
+
+void CItemDataHandler::SwapItemModels(int firstItemType, int secondItemType)
+{
+    g_ItemModelDatabase.Swap(firstItemType, secondItemType);
+    Data::Items::ModelLoader::SwapOpenedModels(firstItemType, secondItemType);
+    m_movedModelGroups.set(static_cast<size_t>(GetItemGroup(firstItemType)));
+    m_movedModelGroups.set(static_cast<size_t>(GetItemGroup(secondItemType)));
 }
 
 void CItemDataHandler::FollowDerivedFieldsAfterMove(const ItemDefinition& before, int newItemType)
@@ -290,15 +301,11 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
     // the items too and refuses on any error, so everything is reported at once.
     ValidateStatProfiles(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(),
                          GetItemStatsFile().generic_string(), issues);
-    const ItemDataSaveResult result =
-        SaveItemDataDirectory(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(), issues);
-    if (result != ItemDataSaveResult::Saved)
-    {
-        return result;
-    }
-    return SaveItemModelDataDirectory(GetItemModelDataDirectory(), g_ItemModelDatabase.GetAllSlots(), issues)
-               ? ItemDataSaveResult::Saved
-               : ItemDataSaveResult::WriteFailed;
+    // Only the model files of moved models are written; the others keep what
+    // this client does not read from them.
+    return SaveItemAndModelDataDirectories(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(),
+                                           GetItemModelDataDirectory(), g_ItemModelDatabase.GetAllSlots(),
+                                           m_movedModelGroups, issues);
 }
 
 ItemBmdImportResult CItemDataHandler::ImportFromBmd()

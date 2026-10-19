@@ -44,9 +44,10 @@ public:
     // an edit (FollowDerivedFieldsAfterMove).
     void OnItemsSwapped(int firstItemType, int secondItemType);
 
-    // Validates the item database and writes Data/Items, then the model files
-    // of Data/Items/Models (moved items moved their models). Nothing is
-    // written when the item data has errors.
+    // Validates the item database and the item models and writes Data/Items,
+    // with the model files of Data/Items/Models whose models were moved since
+    // they were loaded. Nothing is written when the data has errors, and no
+    // file is replaced when one of them cannot be written.
     Data::Items::ItemDataSaveResult Save(std::vector<Data::Items::ItemDataIssue>& issues);
 
     // Replaces all items with the legacy Item_<language>.bmd files. Items the
@@ -97,6 +98,12 @@ private:
     // (FollowStatProfile), as long as the item stat file has that profile;
     // otherwise the default, with a warning in the log.
     static void FollowDerivedFieldsAfterMove(const Data::Items::ItemDefinition& before, int newItemType);
+    // Swaps the models of two item types: their entries in the item model
+    // database and their opened model slots.
+    void SwapItemModels(int firstItemType, int secondItemType);
+
+    // The groups of the swapped models: Save writes their model files.
+    Data::Items::ItemGroupSet m_movedModelGroups;
 #endif
 
     bool m_localeObserverRegistered = false;

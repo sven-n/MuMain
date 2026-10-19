@@ -98,8 +98,32 @@ public:
         }
     }
 
+    // The shipped glow color list, which the item models name their colors
+    // from.
+    void CopyShippedGlowColors() const
+    {
+        const std::filesystem::path file = m_directory / GetGlowColorsFile();
+        std::filesystem::create_directories(file.parent_path());
+        std::filesystem::copy_file(ShippedClientDirectory / GetGlowColorsFile(), file);
+    }
+
 private:
     std::filesystem::path m_directory;
+};
+
+// Empties the item model database when the test ends, also when a check
+// stops it, so the next test starts without models.
+class ItemModelDatabaseScope
+{
+public:
+    ItemModelDatabaseScope() = default;
+    ~ItemModelDatabaseScope()
+    {
+        g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
+    }
+
+    ItemModelDatabaseScope(const ItemModelDatabaseScope&) = delete;
+    ItemModelDatabaseScope& operator=(const ItemModelDatabaseScope&) = delete;
 };
 
 // A legacy Item_<language>.bmd with 30-byte names, as the original client
@@ -305,6 +329,42 @@ TEST_CASE("A folder that cannot be written is a write failure, not a data error 
     std::vector<ItemDataIssue> issues;
     CHECK(SaveItemDataDirectory(blocked, shipped.items, issues) == ItemDataSaveResult::WriteFailed);
     CHECK_FALSE(issues.empty());
+}
+
+// The items and their models are saved together: when one of the files
+// cannot be written, none is replaced, so a moved item never loses its model
+// on disk.
+TEST_CASE("A save that cannot write all its files replaces none of them [data][items]")
+{
+    const ItemDataLoadResult shipped = LoadItemDataDirectory(DataDirectory / "Items");
+    REQUIRE_FALSE(HasErrors(shipped.issues));
+    const ItemModelDataLoadResult shippedModels = LoadItemModelDataDirectory(DataDirectory / "Items" / "Models");
+    REQUIRE_FALSE(HasErrors(shippedModels.issues));
+    ItemModelDatabase models;
+    models.Build(shippedModels.models, Data::Effects::GlowColorList{});
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    const std::filesystem::path itemDirectory = folder.Directory() / GetItemDataDirectory();
+    // Kris moves to a free number, so its group file changes.
+    std::vector<ItemDefinition> items = shipped.items;
+    const auto kris = std::find_if(items.begin(), items.end(), [](const ItemDefinition& item)
+                                   { return MakeItemType(item.group, item.number) == KrisType; });
+    REQUIRE(kris != items.end());
+    kris->number = 100;
+    // A file where the model folder should be: no model file can be written.
+    const std::filesystem::path blockedModels = folder.Directory() / "blocked";
+    std::ofstream(blockedModels) << "not a folder";
+    ItemGroupSet modelGroups;
+    modelGroups.set(0);
+
+    std::vector<ItemDataIssue> issues;
+    CHECK(SaveItemAndModelDataDirectories(itemDirectory, items, blockedModels, models.GetAllSlots(), modelGroups,
+                                          issues) == ItemDataSaveResult::WriteFailed);
+    CHECK_FALSE(issues.empty());
+    const std::string swordFile = GetItemGroupFileName(0);
+    CHECK(TestFiles::ReadWholeFile(itemDirectory / swordFile) ==
+          TestFiles::ReadWholeFile(DataDirectory / "Items" / swordFile));
+    CHECK_FALSE(std::filesystem::exists(itemDirectory / (swordFile + ".tmp")));
 }
 
 #ifdef _EDITOR
@@ -516,16 +576,18 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
 }
 
 // The item editor moves an item's model with the item, and saving writes the
-// model files too.
+// model files of the moved models.
 TEST_CASE("A moved item takes its model along, and saving writes it [data][items][editor]")
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    // The models name their glow colors from this file.
-    const std::filesystem::path glowColorsFile = folder.Directory() / GetGlowColorsFile();
-    std::filesystem::create_directories(glowColorsFile.parent_path());
-    std::filesystem::copy_file(ShippedClientDirectory / GetGlowColorsFile(), glowColorsFile);
+    folder.CopyShippedGlowColors();
+    // A model file the save must not touch: no model of its group moves.
+    const std::filesystem::path axeModels = folder.Directory() / GetItemModelDataDirectory() / GetItemGroupFileName(1);
+    std::ofstream(axeModels, std::ios::binary | std::ios::app) << "\n";
+    const std::string axeModelsText = TestFiles::ReadWholeFile(axeModels);
     ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope models;
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     REQUIRE_MESSAGE(g_ItemDataHandler.LoadModels(errorMessage), errorMessage);
@@ -555,8 +617,7 @@ TEST_CASE("A moved item takes its model along, and saving writes it [data][items
     REQUIRE(findModel(0, 100) != nullptr);
     CHECK(findModel(0, 100)->file == krisModelFile);
     CHECK(findModel(0, 0) == nullptr);
-
-    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
+    CHECK(TestFiles::ReadWholeFile(axeModels) == axeModelsText);
 }
 
 // The names of a language whose item.bmd is missing stay as they are, like
