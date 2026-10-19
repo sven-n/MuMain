@@ -3117,6 +3117,30 @@ void BMD::ShareFrom(BMD& owner)
     m_bCompletedAlloc = true;
 }
 
+void BMD::SwapData(BMD& other)
+{
+    if (&other == this)
+    {
+        return;
+    }
+    // They were built from the meshes each slot had.
+    ReleaseShadowStreams();
+    other.ReleaseShadowStreams();
+    std::swap(Name, other.Name);
+    std::swap(Version, other.Version);
+    std::swap(NumMeshs, other.NumMeshs);
+    std::swap(NumBones, other.NumBones);
+    std::swap(NumActions, other.NumActions);
+    std::swap(Meshs, other.Meshs);
+    std::swap(Bones, other.Bones);
+    std::swap(Actions, other.Actions);
+    std::swap(Textures, other.Textures);
+    std::swap(IndexTexture, other.IndexTexture);
+    std::swap(m_bSharedData, other.m_bSharedData);
+    std::swap(m_sharedDataUsers, other.m_sharedDataUsers);
+    std::swap(m_bCompletedAlloc, other.m_bCompletedAlloc);
+}
+
 long BMD::GetDataUserCount() const
 {
     if (m_sharedDataUsers)
@@ -3126,7 +3150,7 @@ long BMD::GetDataUserCount() const
     return Meshs != nullptr ? 1 : 0;
 }
 
-void BMD::Release()
+void BMD::ReleaseShadowStreams()
 {
     auto& shadowStreams = ShadowStreams();
     const auto self = reinterpret_cast<std::uintptr_t>(this);
@@ -3136,6 +3160,11 @@ void BMD::Release()
         mu::GetRenderer().ReleaseSkinnedMesh(&*stream);
         stream = shadowStreams.erase(stream);
     }
+}
+
+void BMD::Release()
+{
+    ReleaseShadowStreams();
 
     const bool othersUseTheData = m_sharedDataUsers && m_sharedDataUsers.use_count() > 1;
     m_sharedDataUsers.reset();

@@ -287,6 +287,10 @@ public:
     // through ModelLoader::OpenModels. Does nothing when `owner` has no data
     // or is this slot.
     void ShareFrom(BMD& owner);
+    // Swaps the loaded data (what Open2 reads, and the slots it is shared
+    // with) with `other`, for the item editor, which moves a model to another
+    // slot. Nothing is opened or freed; the rest stays with each slot.
+    void SwapData(BMD& other);
     bool SharesData() const
     {
         return m_bSharedData;
@@ -409,6 +413,8 @@ private:
     BMD(const BMD& b);
 
     void ClaimSkinStamp() const;
+    // The shadow streams the renderer keeps for the meshes of this slot.
+    void ReleaseShadowStreams();
 
     void AddClothesShadowTriangles(void* pClothes, int clothesCount, float sx, float sy,
         std::uint32_t color) const;

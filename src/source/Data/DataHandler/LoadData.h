@@ -33,7 +33,7 @@ public:
     // the slot `OwnerType` (BMD::ShareFrom); the last of them to let go frees
     // it.
     void ShareModel(int Type, int OwnerType);
-    // Swaps the loaded data of two slots (BMD::ShareFrom, so nothing is
+    // Swaps the loaded data of two slots (BMD::SwapData, so nothing is
     // opened again) and what the slots remember about it, for the item
     // editor, which moves an item's model with the item. Either slot may be
     // empty.

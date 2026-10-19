@@ -514,8 +514,12 @@ TEST_CASE("Moving item models swaps their data and their opened models [data][it
         CHECK(g_ItemModelDatabase.GetVersion() != version);
         CHECK(emptySlot.Meshs == parchmentMeshes);
         CHECK(emptySlot.SpecularStrength == 0.5f);
+        // The data is still the moved slot's alone; it is not shared.
+        CHECK_FALSE(emptySlot.SharesData());
+        CHECK(emptySlot.GetDataUserCount() == 1);
         CHECK(parchmentSlot.Meshs == nullptr);
         CHECK(parchmentSlot.NumMeshs == 0);
+        CHECK(parchmentSlot.GetDataUserCount() == 0);
         CHECK(parchmentSlot.SpecularStrength == 0.f);
         CHECK(gLoadData.GetModelFile(ToModelSlot(emptyType)).find(L"rollofpaper") != std::wstring::npos);
 
@@ -542,6 +546,39 @@ TEST_CASE("Moving item models swaps their data and their opened models [data][it
         CHECK(g_ItemModelDatabase.Find(parchmentType)->number == 19);
         CHECK(g_ItemModelDatabase.Find(parchmentType)->material.specular == 0.25);
     }
+}
+
+// The item that opened a shared model can move too: the other items of the
+// model keep its data, and the moved slot is still the one that opened it.
+TEST_CASE("Moving the item that opened a shared model keeps the data shared [data][items]")
+{
+    TestItemModelSlots slots;
+    g_ItemModelDatabase.Build(
+        std::vector<ItemModelDefinition>{MakeSharedModelItem(19, "skillParchment", "Data/Item/rollofpaper.bmd"),
+                                         MakeSharedModelItem(20, "skillParchment", "Data/Item/rollofpaper.bmd")},
+        Data::Effects::GlowColorList{});
+    ModelLoader::OpenModels({});
+
+    const int openerType = MakeItemType(15, 19);
+    const int sharerType = MakeItemType(15, 20);
+    const int emptyType = MakeItemType(15, 23);
+    const BMD& openerSlot = Models[ToModelSlot(openerType)];
+    const BMD& sharerSlot = Models[ToModelSlot(sharerType)];
+    const BMD& emptySlot = Models[ToModelSlot(emptyType)];
+    REQUIRE(openerSlot.NumMeshs > 0);
+    REQUIRE(sharerSlot.SharesData());
+    const Mesh_t* meshes = openerSlot.Meshs;
+
+    g_ItemModelDatabase.Swap(openerType, emptyType);
+    ModelLoader::SwapOpenedModels(openerType, emptyType);
+
+    CHECK(emptySlot.Meshs == meshes);
+    CHECK_FALSE(emptySlot.SharesData());
+    CHECK(emptySlot.GetDataUserCount() == 2);
+    CHECK(sharerSlot.Meshs == meshes);
+    CHECK(sharerSlot.SharesData());
+    CHECK(openerSlot.Meshs == nullptr);
+    CHECK(openerSlot.GetDataUserCount() == 0);
 }
 
 TEST_CASE("Item types and model slots convert both ways [data][items]")

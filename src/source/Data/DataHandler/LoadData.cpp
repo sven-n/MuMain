@@ -16,8 +16,8 @@
 #include "Data/GameData/ItemData/ItemTextureFiles.h"
 
 #include <algorithm>
-#include <memory>
 #include <string>
+#include <utility>
 
 CLoadData gLoadData;
 
@@ -99,13 +99,7 @@ void CLoadData::SwapModels(int First, int Second)
         return;
     }
 
-    // Holds the data of the first slot while the slots change.
-    const auto held = std::make_unique<BMD>();
-    held->ShareFrom(Models[First]);
-    Models[First].Release();
-    Models[First].ShareFrom(Models[Second]);
-    Models[Second].Release();
-    Models[Second].ShareFrom(*held);
+    Models[First].SwapData(Models[Second]);
     Models[First].m_iBMDSeqID = First;
     Models[Second].m_iBMDSeqID = Second;
 

@@ -34,10 +34,10 @@ void OpenModels(const LookNames& lookNames);
 // a shared model once).
 void OpenTextures();
 
-// The item editor moved two items and the item model database swapped their
-// models (ItemModelDatabase::Swap): their model slots swap the opened data
-// too (CLoadData::SwapModels), and each takes the material values of its new
-// model. Nothing happens before the game has its model slots.
+// The item editor moved two items, and with them their models
+// (ItemModelDatabase::Swap): their model slots swap the opened data
+// (CLoadData::SwapModels) and the material values of the models. Nothing
+// happens before the game has its model slots.
 void SwapOpenedModels(int firstItemType, int secondItemType);
 
 // The message for the player about the missing model files and textures
