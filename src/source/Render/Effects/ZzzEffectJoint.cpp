@@ -4629,6 +4629,8 @@ void MoveJoint(JOINT* o, int iIndex)
         }
         break;
     case MODEL_FENRIR_SKILL_THUNDER:
+        // A bolt is rebuilt each move from spatial steps, so it takes the authored segment count.
+        o->MaxTails = o->ReferenceMaxTails;
         for (int j = 0; j < o->MaxTails; j++)
         {
             if (o->Target)
@@ -4679,6 +4681,7 @@ void MoveJoint(JOINT* o, int iIndex)
     case BITMAP_BLUR + 1:
     case BITMAP_JOINT_LASER + 1:
 
+        o->MaxTails = o->ReferenceMaxTails;
         for (int j = 0; j < o->MaxTails; j++)
         {
             if (o->SubType == 2)
@@ -4771,6 +4774,7 @@ void MoveJoint(JOINT* o, int iIndex)
             break;
         }
 
+        o->MaxTails = o->ReferenceMaxTails;
         for (int j = 0; j < o->MaxTails; j++)
         {
             if (o->SubType == 15)
@@ -5079,6 +5083,7 @@ void MoveJoint(JOINT* o, int iIndex)
 
                 VectorCopy(o->StartPosition, o->Position);
 
+                o->MaxTails = o->ReferenceMaxTails;
                 for (int j = 0; j < o->MaxTails; j++)
                 {
                     Distance = MoveHumming(o->Position, o->Angle, Position, (float)(rand() % 80 + 60.f), false);
@@ -5109,6 +5114,7 @@ void MoveJoint(JOINT* o, int iIndex)
         {
             VectorCopy(o->StartPosition, o->Position);
             AngleMatrix(o->Angle, Matrix);
+            o->MaxTails = o->ReferenceMaxTails;
             for (int i = 0; i < o->MaxTails - 5; ++i)
             {
                 if (o->SubType == 6)

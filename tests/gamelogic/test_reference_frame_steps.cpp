@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "doctest.h"
 
+#include "Core/Utilities/Random.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Effects/EffectBlurs.h"
@@ -220,6 +221,8 @@ std::array<float, 3> BoltEnd(float frameFactor)
     vec3_t start = {1000.f, 1000.f, 100.f};
     vec3_t angle = {0.f, 0.f, 90.f};
     srand(1234);
+    // This seed spawns no fire particle at the bolt's end; particles need the option window, which tests lack.
+    Random::Seed(1);
     CreateJoint(BITMAP_JOINT_LASER + 1, start, target.Position, angle, 1, &target, 50.f);
     JOINT* joint = std::find_if(Joints, Joints + MAX_JOINTS, [](const JOINT& j) { return j.Live; });
     REQUIRE(joint != Joints + MAX_JOINTS);
@@ -240,6 +243,35 @@ TEST_CASE("A lightning bolt reaches its target within one move at every frame ra
         // The bolt aims 80 above the target and stops within two steps (2 x 40) of it.
         const float dx = end[0] - 1600.f, dy = end[1] - 1000.f, dz = end[2] - 80.f;
         CHECK(std::sqrt(dx * dx + dy * dy + dz * dz) <= 80.f);
+    }
+    FPS_ANIMATION_FACTOR = savedFactor;
+}
+
+TEST_CASE("A lightning bolt built in one move keeps its authored segment count at high FPS [render][timing]")
+{
+    const float savedFactor = FPS_ANIMATION_FACTOR;
+    int referenceTails = -1;
+    for (const float factor : {1.f, 0.1f})
+    {
+        CAPTURE(factor);
+        for (int i = 0; i < MAX_JOINTS; ++i)
+        {
+            Joints[i].Live = false;
+        }
+        FPS_ANIMATION_FACTOR = factor;
+        vec3_t start = {1000.f, 1000.f, 300.f};
+        vec3_t target = {1000.f, 1000.f, 0.f};
+        vec3_t angle = {0.f, 0.f, 0.f};
+        CreateJoint(BITMAP_JOINT_THUNDER, start, target, angle, 7, nullptr, 10.f);
+        JOINT* joint = std::find_if(Joints, Joints + MAX_JOINTS, [](const JOINT& j) { return j.Live; });
+        REQUIRE(joint != Joints + MAX_JOINTS);
+        MoveJoints();
+        if (referenceTails < 0)
+        {
+            referenceTails = joint->NumTails;
+        }
+        CHECK(joint->NumTails == referenceTails);
+        joint->Live = false;
     }
     FPS_ANIMATION_FACTOR = savedFactor;
 }
