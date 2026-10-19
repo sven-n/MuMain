@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "ItemStatProfiles.h"
+#include "ItemStatFile.h"
 
 namespace Data::Items
 {

@@ -2,6 +2,7 @@
 
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
+#include "Data/GameData/ItemData/ItemStatFile.h"
 
 #include <algorithm>
 #include <string>

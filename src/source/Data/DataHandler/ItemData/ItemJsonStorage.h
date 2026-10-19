@@ -4,7 +4,7 @@
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
-#include "Data/GameData/ItemData/ItemStatProfiles.h"
+#include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/SharedItemModel.h"
 
 #include <filesystem>

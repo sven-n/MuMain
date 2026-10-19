@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Data/GameData/ItemData/ItemDataIssue.h"
-#include "Data/GameData/ItemData/ItemStatProfiles.h"
+#include "Data/GameData/ItemData/ItemStatFile.h"
 
 #include <string>
 #include <string_view>

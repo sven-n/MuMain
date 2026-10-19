@@ -2,6 +2,7 @@
 
 #include "doctest.h"
 
+#include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "Data/GameData/ItemData/ItemStatsJson.h"
 
 #include <string>
