@@ -688,6 +688,8 @@ only item data. The import is there to bring in your own old item files.
   too; a stat profile that its data gives follows the same way. The values
   come from the files: the original ones have no defense for the Cape of
   Lord (the client set its 15 in code until phase 3c), so it then has none.
+  The imported items are at their bmd numbers, so the models of items you
+  moved since the start go back to their old numbers too.
   Save afterwards to keep the result. The console lists what the import had to fix (see below) and any
   problem the imported data still has; Save refuses it until those are
   fixed.

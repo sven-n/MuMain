@@ -620,6 +620,48 @@ TEST_CASE("A moved item takes its model along, and saving writes it [data][items
     CHECK(TestFiles::ReadWholeFile(axeModels) == axeModelsText);
 }
 
+// The bmd files have the items at their old numbers, so the import moves the
+// models of moved items back as well, also after a save.
+TEST_CASE("A bmd import moves the models of moved items back [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope models;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE_MESSAGE(g_ItemDataHandler.LoadModels(errorMessage), errorMessage);
+    std::string changeLog;
+    REQUIRE(g_ItemDataHandler.ExportAsBmd(changeLog));
+    REQUIRE(g_ItemModelDatabase.Find(KrisType) != nullptr);
+    const std::string krisModelFile = g_ItemModelDatabase.Find(KrisType)->file;
+    const int emptyType = MakeItemType(0, 100);
+    std::swap(ItemAttribute[KrisType], ItemAttribute[emptyType]);
+    g_ItemDataHandler.OnItemsSwapped(KrisType, emptyType);
+    REQUIRE(g_ItemModelDatabase.Find(KrisType) == nullptr);
+    std::vector<ItemDataIssue> issues;
+
+    SUBCASE("before a save") {}
+    SUBCASE("after a save")
+    {
+        REQUIRE(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+    }
+
+    const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
+    REQUIRE_FALSE(HasErrors(result.issues));
+    REQUIRE(g_ItemDatabase.Find(KrisType) != nullptr);
+    REQUIRE(g_ItemModelDatabase.Find(KrisType) != nullptr);
+    CHECK(g_ItemModelDatabase.Find(KrisType)->file == krisModelFile);
+    CHECK(g_ItemModelDatabase.Find(emptyType) == nullptr);
+
+    CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+    const std::string swordFile = GetItemGroupFileName(0);
+    CHECK(TestFiles::ReadWholeFile(folder.Directory() / GetItemModelDataDirectory() / swordFile) ==
+          TestFiles::ReadWholeFile(DataDirectory / "Items" / "Models" / swordFile));
+}
+
 // The names of a language whose item.bmd is missing stay as they are, like
 // the names of the languages that have none (German).
 TEST_CASE("A bmd import keeps the names of a language whose item.bmd is missing [data][items][editor]")

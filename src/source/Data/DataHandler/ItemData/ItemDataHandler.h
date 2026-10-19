@@ -3,6 +3,7 @@
 #include "Data/GameData/ItemData/ItemStructs.h"
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #ifdef _EDITOR
@@ -51,9 +52,11 @@ public:
     Data::Items::ItemDataSaveResult Save(std::vector<Data::Items::ItemDataIssue>& issues);
 
     // Replaces all items with the legacy Item_<language>.bmd files. Items the
-    // English file lacks keep their current English name. Nothing changes
-    // when the files cannot be read; problems the imported data still has
-    // (Save refuses it while they are errors) are in validationIssues.
+    // English file lacks keep their current English name. The imported items
+    // are at their bmd numbers, so the models the editor moved go back to the
+    // numbers they were loaded at. Nothing changes when the files cannot be
+    // read; problems the imported data still has (Save refuses it while they
+    // are errors) are in validationIssues.
     Data::Items::ItemBmdImportResult ImportFromBmd();
 
     // Writes Item_<language>.bmd for every legacy language, with the names
@@ -101,7 +104,12 @@ private:
     // Swaps the models of two item types: their entries in the item model
     // database and their opened model slots.
     void SwapItemModels(int firstItemType, int secondItemType);
+    // Swaps the models the editor moved since LoadModels back, last move
+    // first.
+    void TakeBackModelMoves();
 
+    // The model swaps of the item editor since LoadModels, in order.
+    std::vector<std::pair<int, int>> m_modelMoves;
     // The groups of the swapped models: Save writes their model files.
     Data::Items::ItemGroupSet m_movedModelGroups;
 #endif
