@@ -218,7 +218,7 @@ TEST_CASE("Loading item data fills ItemAttribute in the UI locale [data][items]"
 
     I18N::SetLocale("de");
     CHECK(client.Name(BladeType) == L"Klinge");
-    // No German name: English is shown.
+    // The German name is the English one.
     CHECK(client.Name(KrisType) == L"Kris");
 }
 
@@ -411,12 +411,13 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
 
     SUBCASE("a value change does not turn the English fallback into a translation")
     {
-        I18N::SetLocale("pt");
+        // No item has a Polish name: the English one is shown.
+        I18N::SetLocale("pl");
         REQUIRE(client.Name(KrisType) == L"Kris");
         ItemAttribute[KrisType].Width = 2;
         g_ItemDataHandler.OnItemEdited(KrisType);
 
-        CHECK(g_ItemDatabase.Find(KrisType)->names.GetTranslations().empty());
+        CHECK_FALSE(g_ItemDatabase.Find(KrisType)->names.GetTranslations().contains("pl"));
     }
 
     SUBCASE("a value change keeps a name longer than ITEM_ATTRIBUTE can hold")

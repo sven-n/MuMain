@@ -5,7 +5,10 @@
     {
       "number": 0,
       "name": {
-        "en": "Kris"
+        "en": "Kris",
+        "de": "Kris",
+        "es": "Kris",
+        "pt": "Cris"
       },
       "width": 1,
       "height": 2,
@@ -68,7 +71,9 @@
       "number": 2,
       "name": {
         "en": "Rapier",
-        "es": "Estoque"
+        "de": "Rapier",
+        "es": "Estoque",
+        "pt": "Rapieira"
       },
       "width": 1,
       "height": 3,
@@ -97,6 +102,8 @@
       "number": 3,
       "name": {
         "en": "Katana",
+        "de": "Katana",
+        "es": "Katana",
         "pt": "Cataná"
       },
       "width": 1,
@@ -186,7 +193,10 @@
     {
       "number": 6,
       "name": {
-        "en": "Gladius"
+        "en": "Gladius",
+        "de": "Gladius",
+        "es": "Gladius",
+        "pt": "Gládio"
       },
       "width": 1,
       "height": 3,
@@ -214,6 +224,7 @@
       "number": 7,
       "name": {
         "en": "Falchion",
+        "de": "Falchion",
         "es": "Cimitarra",
         "pt": "Cimitarra"
       },
@@ -776,7 +787,9 @@
       "number": 26,
       "name": {
         "en": "Flameberge",
-        "de": "Flamberge"
+        "de": "Flamberge",
+        "es": "Flameberge",
+        "pt": "Flameberge"
       },
       "width": 1,
       "height": 4,

@@ -338,13 +338,9 @@ void ImportItem(const std::vector<LanguageFile>& files, int itemType, ItemBmdImp
     definition.number = GetItemNumber(itemType);
     for (const LanguageRecord& record : records)
     {
-        // A "translation" equal to the English name adds nothing: the
-        // English name is shown anyway.
-        const std::string& locale = record.file->language->locale;
-        if (locale == LocalizedString::NeutralLocale || record.name != definition.names.GetNeutral())
-        {
-            definition.names.Set(locale, record.name);
-        }
+        // Also a name equal to the English one: it says the name is the same
+        // in that language, not that it still needs a translation.
+        definition.names.Set(record.file->language->locale, record.name);
         result.recoveredNameCount += record.NameRanOn() ? 1 : 0;
         result.reencodedNameCount += record.reencoded ? 1 : 0;
     }
