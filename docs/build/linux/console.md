@@ -20,6 +20,9 @@ sudo apt-get install -y \
   libgl1-mesa-dev libglu1-mesa-dev libglew-dev libegl1-mesa-dev \
   libturbojpeg0-dev
 
+# Crypto++ (the ciphers of version 14 models)
+sudo apt-get install -y libcrypto++-dev
+
 # SDL3 build dependencies (X11 + Wayland + audio)
 sudo apt-get install -y \
   libx11-dev libxext-dev libxrandr-dev libxi-dev libxcursor-dev \

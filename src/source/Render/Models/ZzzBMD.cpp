@@ -25,6 +25,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/AI/ZzzAI.h"
 #include "SMD.h"
+#include "BmdModulusCipher.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Core/Utilities/Log/ErrorReport.h"
 #include "Camera/CameraState.h"
@@ -3364,6 +3365,35 @@ private:
     size_t ptr;
 };
 
+namespace
+{
+// Decrypts the payload of a version 14 model, which follows the int32 payload size at ptr, in place.
+// On success, ptr points to the decrypted model data.
+bool DecryptModulusBody(unsigned char* fileData, int fileSize, int& ptr)
+{
+    std::int32_t payloadSize = 0;
+    if (fileSize - ptr < static_cast<int>(sizeof(payloadSize)))
+    {
+        return false;
+    }
+
+    std::memcpy(&payloadSize, fileData + ptr, sizeof(payloadSize));
+    const int payloadStart = ptr + static_cast<int>(sizeof(payloadSize));
+    if (payloadSize < 0 || payloadSize > fileSize - payloadStart)
+    {
+        return false;
+    }
+
+    if (!Render::Models::BmdModulusCipher::DecryptInPlace(fileData + payloadStart,
+                                                          static_cast<std::size_t>(payloadSize)))
+    {
+        return false;
+    }
+
+    ptr = payloadStart + static_cast<int>(Render::Models::BmdModulusCipher::BodyOffset);
+    return true;
+}
+} // namespace
 
 bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAlloc)
 {
@@ -3439,9 +3469,12 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
     }
     else if (Version == 0xE)
     {
-        wprintf(L"[Open2] Version: %d\n, not yet supported. File: %.64s\n", Version, ModelPath);
-        // FIXME FOR NEW MAPS 
-        // DECRYPT KEY: webzen#@!01webzen#@!01webzen#@!0
+        if (!DecryptModulusBody(fileData.get(), dataSize, ptr))
+        {
+            wprintf(L"[Open2] ERROR: Invalid version 14 model data in %.64s\n", ModelPath);
+            m_bCompletedAlloc = false;
+            return false;
+        }
     }
     else if (Version == 0xA)
     {
