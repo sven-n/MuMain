@@ -12,6 +12,7 @@
 #include <numeric>
 #include <cmath>
 #include <iterator>
+#include <thread>
 #include "SceneManager.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "UI/Diagnostics/DiagnosticsOverlay.h"
@@ -659,6 +660,16 @@ static void AddBuildLines(std::vector<std::string>& lines)
                   Core::Build::kCompiler, Core::Build::kArchitecture, Core::Build::kDate, Core::Build::kTime);
     lines.emplace_back(line);
     lines.push_back("OS: " + Core::Text::ToUtf8(Core::Platform::GetOSVersionString().c_str()));
+
+    const std::string& processor = Core::Platform::GetProcessorName();
+    std::snprintf(line, sizeof(line), "CPU: %s (%u threads)   RAM: %.1f GB",
+                  processor.empty() ? "unknown" : processor.c_str(), std::thread::hardware_concurrency(),
+                  Core::Platform::GetSystemMemoryMB() / 1024.0);
+    lines.emplace_back(line);
+
+    const char* gpu = mu::GetRenderer().GetGPUDeviceName();
+    std::snprintf(line, sizeof(line), "GPU: %s", (gpu && *gpu) ? gpu : "unknown");
+    lines.emplace_back(line);
 }
 
 // The active camera: mode, field of view, angle, distances and culling planes.
