@@ -714,6 +714,11 @@ server with original clients (after phases 6 and B).
      1, 4 and 15, item types without data and values the editor can give;
      the help table too. The one difference: item types without data in
      groups 0 to 11 no longer get the option level's strength.
+   - Left for later: which item gets which profile is code
+     (`DeriveStatProfile`) that names the profiles, while the profiles are
+     data; each profile could name in the stat file what it is for (tags,
+     slots, weapon kinds, groups). The stat file's writer has no caller
+     outside the tests yet; an editor for the stat file would use it.
 4. **Models into data**: model and display data in their own files,
    `Data/Items/Models/GroupNN_*.json` (D22):
 
