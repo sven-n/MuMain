@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <array>
+#include <memory>
 #include <cmath>
 #include <cstdlib>
 #include <numeric>
@@ -274,4 +275,35 @@ TEST_CASE("A lightning bolt built in one move keeps its authored segment count a
         joint->Live = false;
     }
     FPS_ANIMATION_FACTOR = savedFactor;
+}
+
+TEST_CASE("Monster lightning collects at most one target per TargetIndex entry [render]")
+{
+    for (int i = 0; i < MAX_JOINTS; ++i)
+    {
+        Joints[i].Live = false;
+    }
+    static OBJECT caster;
+    caster.Live = true;
+    const auto characters = std::make_unique<CHARACTER[]>(MAX_CHARACTERS_CLIENT);
+    CHARACTER* const savedCharacters = CharactersClient;
+    CharactersClient = characters.get();
+    vec3_t position = {1000.f, 1000.f, 0.f};
+    vec3_t angle = {0.f, 0.f, 0.f};
+    for (int i = 0; i < 6; ++i)
+    {
+        CHARACTER& monster = CharactersClient[i];
+        monster.Object.Live = true;
+        monster.Object.Visible = true;
+        monster.Object.Kind = KIND_MONSTER;
+        monster.Dead = 0;
+        Vector(1000.f + 10.f * i, 1000.f, 0.f, monster.Object.Position);
+    }
+    CreateJoint(BITMAP_JOINT_THUNDER, position, position, angle, 15, &caster, 50.f, -1, 0, 77);
+    JOINT* joint = std::find_if(Joints, Joints + MAX_JOINTS, [](const JOINT& j) { return j.Live; });
+    REQUIRE(joint != Joints + MAX_JOINTS);
+    CHECK(joint->Weapon == 5 * 15);
+    CHECK(joint->m_bySkillSerialNum == 77);
+    joint->Live = false;
+    CharactersClient = savedCharacters;
 }
