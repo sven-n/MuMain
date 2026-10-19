@@ -29,7 +29,8 @@ void BuildDefaultLayout(ImGuiID dockSpace, ImVec2 size)
     ImGui::DockBuilderDockWindow(MuEditor::WindowIds::Console, console);
     for (const char* window :
          {MuEditor::WindowIds::ItemEditor, MuEditor::WindowIds::SkillEditor, MuEditor::WindowIds::DevEditor,
-          MuEditor::WindowIds::MapEditor, MuEditor::WindowIds::EffectBrowser})
+          MuEditor::WindowIds::MapEditor, MuEditor::WindowIds::EffectBrowser,
+          MuEditor::WindowIds::ItemTranslations})
     {
         ImGui::DockBuilderDockWindow(window, tools);
     }

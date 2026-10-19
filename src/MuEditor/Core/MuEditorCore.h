@@ -35,6 +35,7 @@ public:
     void ToggleEditor() { m_bEditorMode = !m_bEditorMode; }
 
     bool IsShowingItemEditor() const { return m_bShowItemEditor; }
+    void ShowItemEditor() { m_bShowItemEditor = true; }
     bool IsShowingSkillEditor() const { return m_bShowSkillEditor; }
     bool IsShowingDevEditor() const { return m_bShowDevEditor; }
     bool IsShowingMapEditor() const { return m_bShowMapEditor; }
@@ -91,6 +92,7 @@ private:
     bool m_bShowDevEditor;
     bool m_bShowMapEditor;
     bool m_bShowEffectBrowser;
+    bool m_bShowTranslations;
     bool m_bShowConsole;
     bool m_bHoveringUI;
     bool m_bPreviousFrameHoveringUI;  // Store previous frame's hover state for input blocking

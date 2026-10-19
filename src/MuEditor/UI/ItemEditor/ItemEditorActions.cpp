@@ -5,7 +5,9 @@
 #include "ItemEditorActions.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemFieldMetadata.h"
+#include "Data/GameData/ItemData/ItemNames.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "I18N/All.h"
 #include "imgui.h"
@@ -139,6 +141,7 @@ void CItemEditorActions::RenderSaveButton()
         {
         case Data::Items::ItemDataSaveResult::Saved:
             g_MuEditorConsoleUI.LogEditor("Items saved to " + Data::Items::GetItemDataDirectory().string());
+            LogMissingItemNames();
             ImGui::OpenPopup("Save Success");
             break;
         case Data::Items::ItemDataSaveResult::InvalidData:
@@ -195,6 +198,29 @@ void CItemEditorActions::RenderExportBmdButton()
     {
         g_MuEditorConsoleUI.LogEditor(I18N::Editor::FailedToExportItemsAsBmd);
         ImGui::OpenPopup("Export Bmd Failed");
+    }
+}
+
+void CItemEditorActions::LogMissingItemNames()
+{
+    std::vector<const char*> locales;
+    for (const char* locale : I18N::GetAvailableLocales())
+    {
+        if (locale != Data::LocalizedString::NeutralLocale)
+        {
+            locales.push_back(locale);
+        }
+    }
+    for (const Data::Items::ItemNameCount& count : Data::Items::CountItemNames(g_ItemDatabase.GetAllSlots(), locales))
+    {
+        if (count.missing == 0)
+        {
+            continue;
+        }
+        g_MuEditorConsoleUI.LogEditor(I18N::Format(I18N::Editor::ItemNamesMissing,
+                                                   {I18N::GetLanguageDisplayName(count.locale.c_str()),
+                                                    std::to_string(count.missing),
+                                                    std::to_string(count.named + count.missing)}));
     }
 }
 

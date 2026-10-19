@@ -925,4 +925,31 @@
   <data name="Preview not its model" xml:space="preserve">
     <value>This map's slot holds another object, not this effect's model (see Asset).</value>
   </data>
+  <data name="Item Translations" xml:space="preserve">
+    <value>Item Translations</value>
+  </data>
+  <data name="Missing in" xml:space="preserve">
+    <value>Missing in:</value>
+  </data>
+  <data name="All items" xml:space="preserve">
+    <value>All items</value>
+  </data>
+  <data name="Count missing" xml:space="preserve">
+    <value>{0} missing</value>
+  </data>
+  <data name="Show in the item table" xml:space="preserve">
+    <value>Show in the item table</value>
+  </data>
+  <data name="Same as English" xml:space="preserve">
+    <value>Same as English</value>
+  </data>
+  <data name="Remove translation" xml:space="preserve">
+    <value>Remove translation</value>
+  </data>
+  <data name="The English name cannot be empty" xml:space="preserve">
+    <value>The English name cannot be empty.</value>
+  </data>
+  <data name="Item names missing" xml:space="preserve">
+    <value>Item names in {0}: {1} of {2} missing</value>
+  </data>
 </root>
