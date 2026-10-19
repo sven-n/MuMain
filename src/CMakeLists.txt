@@ -743,6 +743,17 @@ if (MSVC)
     COMMENT "Staging linked-target runtime DLLs"
     VERBATIM
   )
+endif()
+
+if (MSVC)
+  # A build dir whose cached CMakeSystem.cmake came from a configure without
+  # the vcpkg toolchain silently stops loading vcpkg.cmake, which drops its
+  # applocal step, imported-config maps and manifest installs. VCPKG_TOOLCHAIN
+  # is a normal variable set on every load, so a stale cache can't fake it.
+  if(DEFINED CACHE{VCPKG_TARGET_TRIPLET} AND NOT VCPKG_TOOLCHAIN)
+    message(WARNING "The vcpkg toolchain was not loaded for this configure. "
+      "Delete ${CMAKE_BINARY_DIR}/CMakeFiles and reconfigure.")
+  endif()
 
   # TARGET_RUNTIME_DLLS misses DLLs of non-SHARED imported targets (FindOpenSSL's
   # libcrypto) and DLLs loaded through other DLLs (libcurl's zlib). Stage those
@@ -761,9 +772,12 @@ if (MSVC)
         VERBATIM
       )
     else()
-      message(WARNING "dumpbin not found next to ${CMAKE_LINKER}; vcpkg runtime DLLs "
-        "are staged only if vcpkg's applocal step runs.")
+      message(WARNING "dumpbin not found (searched next to the linker and on PATH); "
+        "vcpkg runtime DLLs are staged only if vcpkg's applocal step runs.")
     endif()
+  elseif(VCPKG_TARGET_TRIPLET)
+    message(WARNING "VCPKG_INSTALLED_DIR is not set; vcpkg runtime DLLs are staged "
+      "only if vcpkg's applocal step runs.")
   endif()
 endif()
 

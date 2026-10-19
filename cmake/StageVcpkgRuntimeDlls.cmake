@@ -15,6 +15,8 @@ foreach(var EXE DLL_DIR DUMPBIN)
 endforeach()
 
 if(NOT IS_DIRECTORY "${DLL_DIR}")
+  # Static triplets have no bin directory, so this isn't an error.
+  message(STATUS "No vcpkg DLL directory at ${DLL_DIR}; nothing to stage")
   return()
 endif()
 
@@ -30,14 +32,16 @@ file(GET_RUNTIME_DEPENDENCIES
   EXECUTABLES "${EXE}"
   DIRECTORIES "${DLL_DIR}"
   PRE_EXCLUDE_REGEXES "^api-ms-" "^ext-ms-"
+  # Don't walk into the OS DLLs: that runs dumpbin on hundreds of files, and
+  # their imports must never be shadowed by a same-named vcpkg DLL.
+  POST_EXCLUDE_REGEXES "^[A-Za-z]:[/\\\\][Ww][Ii][Nn][Dd][Oo][Ww][Ss][/\\\\]"
   RESOLVED_DEPENDENCIES_VAR resolved
-  UNRESOLVED_DEPENDENCIES_VAR unresolved
 )
 
 # Match by file name rather than resolved path: a DLL staged by an earlier
 # build resolves next to EXE and must still be refreshed from DLL_DIR.
 get_filename_component(exe_dir "${EXE}" DIRECTORY)
-foreach(dependency IN LISTS resolved unresolved)
+foreach(dependency IN LISTS resolved)
   get_filename_component(dll_name "${dependency}" NAME)
   if(EXISTS "${DLL_DIR}/${dll_name}")
     file(COPY_FILE "${DLL_DIR}/${dll_name}" "${exe_dir}/${dll_name}" ONLY_IF_DIFFERENT)
