@@ -134,6 +134,7 @@ TEST_CASE("Item model glow values are checked [data][items]")
     CHECK(HasError(R"("glow": {"level": -1})", "glow.level"));
     CHECK(HasError(R"("glow": {"level": 2.5})", "glow.level"));
     CHECK(HasError(R"("glow": {"level": [0, 1, 2]})", "glow.level"));
+    CHECK(HasError(R"("glow": {"level": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 32]})", "glow.level[15]"));
     CHECK(HasError(R"("glow": {"color": [1, 0.5, 0]})", "glow.color"));
     CHECK(HasError(R"("glow": {"color": ""})", "glow.color"));
     CHECK(HasError(R"("glow": {"shineColor": "light blue"})", "glow.shineColor"));

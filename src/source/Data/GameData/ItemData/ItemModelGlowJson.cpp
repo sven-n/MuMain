@@ -88,29 +88,10 @@ OrderedJson WriteGlow(const ItemGlow& glow)
 void ReadLevels(ModelJson::ItemModelValueReader& reader,
                 std::optional<std::array<int, ItemGlow::ItemLevelCount>>& levels)
 {
-    if (!reader.Has(LevelKey))
+    std::array<int, ItemGlow::ItemLevelCount> perItemLevel{};
+    if (reader.ReadPerLevelIndexes(LevelKey, perItemLevel, MaxLevel))
     {
-        return;
-    }
-    int level = 0;
-    std::vector<int> perItemLevel;
-    if (reader.IsNumber(LevelKey))
-    {
-        if (reader.ReadIndex(LevelKey, level, MaxLevel))
-        {
-            levels.emplace();
-            levels->fill(level);
-        }
-    }
-    else if (reader.ReadIndexes(LevelKey, perItemLevel, MaxLevel))
-    {
-        if (perItemLevel.size() != ItemGlow::ItemLevelCount)
-        {
-            reader.Error(LevelKey, "must be one level, or a list of one level for each item level 0 to 15");
-            return;
-        }
-        levels.emplace();
-        std::copy(perItemLevel.begin(), perItemLevel.end(), levels->begin());
+        levels = perItemLevel;
     }
 }
 
