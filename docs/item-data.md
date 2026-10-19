@@ -643,7 +643,9 @@ The item editor (editor builds, F12) edits the items of the running game:
   switch to English.
 - **Moving an item** to an empty item number (the Index column) takes its
   model along: the model data in `Data/Items/Models` and the model the game
-  has opened, so the item keeps its looks.
+  has opened, so the item keeps its looks. A number with a model of its own
+  but no item data (the Looks lists these) is not empty: the console says
+  so, and the item stays where it is.
 - **Save Items** checks the data and writes `Data/Items` next to the game,
   with the model files in `Data/Items/Models`.
   With errors nothing is written, and the errors are listed in the
