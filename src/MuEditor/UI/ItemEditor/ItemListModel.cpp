@@ -9,14 +9,15 @@
 #include "Data/GameData/ItemData/ItemType.h"
 
 #include <algorithm>
-#include <cctype>
 #include <charconv>
 
 namespace
 {
+// Only A to Z: std::tolower follows the process locale, which the client takes
+// from the system; with a Windows code page it changes bytes of UTF-8 letters.
 char ToLowerAscii(char character)
 {
-    return static_cast<char>(std::tolower(static_cast<unsigned char>(character)));
+    return character >= 'A' && character <= 'Z' ? static_cast<char>(character - 'A' + 'a') : character;
 }
 
 bool ContainsIgnoringCase(std::string_view text, std::string_view search)

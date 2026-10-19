@@ -63,6 +63,14 @@ TEST_CASE("The item list finds items by number, item type and any of their names
     CHECK(MatchesItemSearch(Items[1], "0,5"));
     CHECK_FALSE(MatchesItemSearch(Items[1], "0,4"));
     CHECK(MatchesItemSearch(Items[1], "5"));
+    // The group counts, and a number alone is the item type, not the number.
+    CHECK(MatchesItemSearch(Items[2], "14,13"));
+    CHECK_FALSE(MatchesItemSearch(Items[2], "0,13"));
+    CHECK(MatchesItemSearch(Items[2], "7181"));
+    CHECK_FALSE(MatchesItemSearch(Items[2], "13"));
+    CHECK_FALSE(MatchesItemSearch(Items[2], "14,"));
+    // Only A to Z ignore case: an upper-case letter with an accent is another letter.
+    CHECK_FALSE(MatchesItemSearch(Items[1], "L\xC3\x82MINA"));
     CHECK(MatchesItemSearch(Items[1], "klinge"));
     CHECK(MatchesItemSearch(Items[1], "BLADE"));
     CHECK(MatchesItemSearch(Items[1], "L\xC3\xA2min"));
@@ -76,6 +84,8 @@ TEST_CASE("The item list lists the items without a name in a language [editor][i
 
     CHECK(list.GetItemTypes({}) == std::vector<int>{MakeItemType(0, 0), MakeItemType(0, 5), MakeItemType(14, 13)});
     CHECK(list.GetItemTypes({"", "pt"}) == std::vector<int>{MakeItemType(14, 13)});
+    CHECK(list.GetItemTypes({"jewel", ""}) == std::vector<int>{MakeItemType(14, 13)});
+    CHECK(list.GetItemTypes({"7181", ""}) == std::vector<int>{MakeItemType(14, 13)});
     CHECK(list.GetItemTypes({"jewel", "de"}).empty());
 
     // A name filled through the list keeps its row until the list is refreshed.
