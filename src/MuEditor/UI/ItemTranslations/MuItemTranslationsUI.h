@@ -13,10 +13,10 @@
 // languages of the UI, English first), with how many names each language
 // misses and a filter for them. Edits go into the item database right away;
 // Save Items writes them.
-class CMuTranslationsUI
+class CMuItemTranslationsUI
 {
 public:
-    static CMuTranslationsUI& GetInstance();
+    static CMuItemTranslationsUI& GetInstance();
 
     void Render(bool* open);
 
@@ -46,6 +46,6 @@ private:
     char m_editBuffer[NameBufferSize] = {};
 };
 
-#define g_MuTranslationsUI CMuTranslationsUI::GetInstance()
+#define g_MuItemTranslationsUI CMuItemTranslationsUI::GetInstance()
 
 #endif // _EDITOR

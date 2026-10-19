@@ -34,8 +34,8 @@ The MU Editor is a C++ ImGui-based in-game editor that provides real-time game e
 - **MuItemEditor.h/cpp** - Item attribute editor with live editing capabilities
 - **ItemListModel.h/cpp** - The items the item tools list (search over all names, missing-name filter), apart from ImGui
 
-### Translations
-- **MuTranslationsUI.h/cpp** - Item names as a grid of items and languages, with missing counts (docs/translation-system.md)
+### Item Translations
+- **MuItemTranslationsUI.h/cpp** - Item names as a grid of items and languages, with missing counts (docs/translation-system.md)
 
 ### Input Management
 - **MuInputBlocker.h/cpp** - Blocks game input when hovering over ImGui UI

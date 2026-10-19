@@ -2,7 +2,7 @@
 
 #ifdef _EDITOR
 
-#include "MuTranslationsUI.h"
+#include "MuItemTranslationsUI.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MuEditorLayout.h"
@@ -66,13 +66,13 @@ std::string ToLower(const char* text)
 }
 } // namespace
 
-CMuTranslationsUI& CMuTranslationsUI::GetInstance()
+CMuItemTranslationsUI& CMuItemTranslationsUI::GetInstance()
 {
-    static CMuTranslationsUI instance;
+    static CMuItemTranslationsUI instance;
     return instance;
 }
 
-void CMuTranslationsUI::Render(bool* open)
+void CMuItemTranslationsUI::Render(bool* open)
 {
     // English first, then the other languages of the UI.
     m_locales.clear();
@@ -108,7 +108,7 @@ void CMuTranslationsUI::Render(bool* open)
     ImGui::End();
 }
 
-void CMuTranslationsUI::UpdateCounts()
+void CMuItemTranslationsUI::UpdateCounts()
 {
     if (m_countsVersion == g_ItemDatabase.GetVersion() && m_counts.size() == m_locales.size())
     {
@@ -118,7 +118,7 @@ void CMuTranslationsUI::UpdateCounts()
     m_countsVersion = g_ItemDatabase.GetVersion();
 }
 
-void CMuTranslationsUI::RenderToolbar()
+void CMuItemTranslationsUI::RenderToolbar()
 {
     const float uiScale = g_MuEditorCore.GetUIScale();
     ImGui::SetNextItemWidth(SearchWidth * uiScale);
@@ -158,7 +158,7 @@ void CMuTranslationsUI::RenderToolbar()
     }
 }
 
-void CMuTranslationsUI::RenderTable()
+void CMuItemTranslationsUI::RenderTable()
 {
     CItemListModel::Filter filter;
     filter.search = ToLower(m_search);
@@ -172,7 +172,7 @@ void CMuTranslationsUI::RenderTable()
     constexpr ImGuiTableFlags flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Resizable |
                                       ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV |
                                       ImGuiTableFlags_SizingFixedFit;
-    if (!ImGui::BeginTable("##Translations", columnCount, flags))
+    if (!ImGui::BeginTable("##ItemTranslations", columnCount, flags))
     {
         return;
     }
@@ -226,7 +226,7 @@ void CMuTranslationsUI::RenderTable()
     ImGui::EndTable();
 }
 
-void CMuTranslationsUI::RenderIdCell(int itemType)
+void CMuItemTranslationsUI::RenderIdCell(int itemType)
 {
     char id[16];
     std::snprintf(id, sizeof(id), "%d,%d", Data::Items::GetItemGroup(itemType), Data::Items::GetItemNumber(itemType));
@@ -241,7 +241,7 @@ void CMuTranslationsUI::RenderIdCell(int itemType)
     }
 }
 
-void CMuTranslationsUI::RenderNameCell(int itemType, int column, const char* locale)
+void CMuItemTranslationsUI::RenderNameCell(int itemType, int column, const char* locale)
 {
     const ItemDefinition* definition = g_ItemDatabase.Find(itemType);
     if (definition == nullptr)
@@ -294,7 +294,7 @@ void CMuTranslationsUI::RenderNameCell(int itemType, int column, const char* loc
     ImGui::PopID();
 }
 
-void CMuTranslationsUI::CommitName(int itemType, const char* locale)
+void CMuItemTranslationsUI::CommitName(int itemType, const char* locale)
 {
     const ItemDefinition* definition = g_ItemDatabase.Find(itemType);
     if (definition == nullptr || OwnName(*definition, locale) == m_editBuffer)

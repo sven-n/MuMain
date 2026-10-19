@@ -40,12 +40,12 @@ CMuEditorUI& CMuEditorUI::GetInstance()
 }
 
 void CMuEditorUI::Render(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor,
-                         bool& showMapEditor, bool& showEffectBrowser, bool& showTranslations, bool& showConsole)
+                         bool& showMapEditor, bool& showEffectBrowser, bool& showItemTranslations, bool& showConsole)
 {
     if (editorEnabled)
     {
         RenderEditorWindow(editorEnabled, showItemEditor, showSkillEditor, showDevEditor, showMapEditor,
-                           showEffectBrowser, showTranslations, showConsole);
+                           showEffectBrowser, showItemTranslations, showConsole);
     }
     else
     {
@@ -144,7 +144,7 @@ void CMuEditorUI::RenderToolbarOpen(bool& editorEnabled)
 
 void CMuEditorUI::RenderEditorWindow(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor,
                                      bool& showDevEditor, bool& showMapEditor, bool& showEffectBrowser,
-                                     bool& showTranslations, bool& showConsole)
+                                     bool& showItemTranslations, bool& showConsole)
 {
     // Only for its first appearance: no window and no imgui.ini entry yet.
     if (ImGui::FindWindowByName(EDITOR_WINDOW_NAME) == nullptr)
@@ -179,7 +179,8 @@ void CMuEditorUI::RenderEditorWindow(bool& editorEnabled, bool& showItemEditor, 
     if (ImGui::BeginMenuBar())
     {
         RenderWindowsMenu(showItemEditor, showSkillEditor, showDevEditor, showMapEditor, showEffectBrowser,
-                          showTranslations, showConsole, MuEditor::PlatformWindows::WindowOf(ImGui::GetWindowViewport()));
+                          showItemTranslations, showConsole,
+                          MuEditor::PlatformWindows::WindowOf(ImGui::GetWindowViewport()));
         RenderUIScale();
         RenderLanguageSelector();
         RenderCloseButton(editorEnabled);
@@ -197,7 +198,7 @@ void CMuEditorUI::RenderEditorWindow(bool& editorEnabled, bool& showItemEditor, 
 }
 
 void CMuEditorUI::RenderWindowsMenu(bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor,
-                                    bool& showMapEditor, bool& showEffectBrowser, bool& showTranslations,
+                                    bool& showMapEditor, bool& showEffectBrowser, bool& showItemTranslations,
                                     bool& showConsole, SDL_Window* editorOsWindow)
 {
     if (!ImGui::BeginMenu("Windows"))
@@ -209,7 +210,7 @@ void CMuEditorUI::RenderWindowsMenu(bool& showItemEditor, bool& showSkillEditor,
     ImGui::MenuItem("Dev Editor", nullptr, &showDevEditor);
     ImGui::MenuItem("Map Editor", nullptr, &showMapEditor);
     ImGui::MenuItem("Effect Browser", nullptr, &showEffectBrowser);
-    ImGui::MenuItem("Item Translations", nullptr, &showTranslations);
+    ImGui::MenuItem("Item Translations", nullptr, &showItemTranslations);
     ImGui::MenuItem("Console", nullptr, &showConsole);
     ImGui::Separator();
     if (ImGui::MenuItem("Reset Layout"))

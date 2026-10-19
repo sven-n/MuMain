@@ -23,7 +23,7 @@
 #include "../MuEditor/UI/DevEditor/DevEditorUI.h"
 #include "../MuEditor/UI/MapEditor/MapEditorUI.h"
 #include "../MuEditor/UI/EffectBrowser/MuEffectBrowserUI.h"
-#include "../MuEditor/UI/Translations/MuTranslationsUI.h"
+#include "../MuEditor/UI/ItemTranslations/MuItemTranslationsUI.h"
 #include "../UI/Common/MuEditorUI.h"
 #include "../UI/Console/MuEditorConsoleUI.h"
 #include "I18N/All.h"
@@ -148,7 +148,7 @@ CMuEditorCore::CMuEditorCore()
     , m_bShowDevEditor(false)
     , m_bShowMapEditor(false)
     , m_bShowEffectBrowser(false)
-    , m_bShowTranslations(false)
+    , m_bShowItemTranslations(false)
     , m_bShowConsole(true)
     , m_bHoveringUI(false)
     , m_bPreviousFrameHoveringUI(false)
@@ -737,7 +737,7 @@ void CMuEditorCore::Render()
     // The editor window when open, else the Open Editor button. Before the
     // tool windows: they dock into the editor window.
     g_MuEditorUI.Render(m_bEditorMode, m_bShowItemEditor, m_bShowSkillEditor, m_bShowDevEditor, m_bShowMapEditor,
-                        m_bShowEffectBrowser, m_bShowTranslations, m_bShowConsole);
+                        m_bShowEffectBrowser, m_bShowItemTranslations, m_bShowConsole);
 
     if (m_bEditorMode)
     {
@@ -763,9 +763,9 @@ void CMuEditorCore::Render()
             g_MuEffectBrowserUI.Render(&m_bShowEffectBrowser);
         }
 
-        if (m_bShowTranslations)
+        if (m_bShowItemTranslations)
         {
-            g_MuTranslationsUI.Render(&m_bShowTranslations);
+            g_MuItemTranslationsUI.Render(&m_bShowItemTranslations);
         }
 
         // Render console (if enabled)

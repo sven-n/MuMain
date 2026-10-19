@@ -12,7 +12,7 @@ public:
     // With the editor open: the editor window, its menu bar and the dock space
     // of the tool windows. Closed: the Open Editor button over the game.
     void Render(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor,
-                bool& showMapEditor, bool& showEffectBrowser, bool& showTranslations, bool& showConsole);
+                bool& showMapEditor, bool& showEffectBrowser, bool& showItemTranslations, bool& showConsole);
 
     // Whether the point (in ImGui's coordinates) is on the Open Editor button
     // as it was last drawn.
@@ -24,12 +24,12 @@ private:
 
     void RenderToolbarOpen(bool& editorEnabled);
     void RenderEditorWindow(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor,
-                            bool& showMapEditor, bool& showEffectBrowser, bool& showTranslations,
+                            bool& showMapEditor, bool& showEffectBrowser, bool& showItemTranslations,
                             bool& showConsole);
     // editorOsWindow is the editor window's own OS window, null while it is
     // inside the game window.
     void RenderWindowsMenu(bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor, bool& showMapEditor,
-                           bool& showEffectBrowser, bool& showTranslations, bool& showConsole,
+                           bool& showEffectBrowser, bool& showItemTranslations, bool& showConsole,
                            SDL_Window* editorOsWindow);
     void RenderUIScale();
     void RenderLanguageSelector();
