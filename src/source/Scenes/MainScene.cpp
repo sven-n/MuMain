@@ -203,7 +203,11 @@ static void InitializeMainScene()
  */
 static void InitializeSceneFrame()
 {
-    EarthQuake *= 0.2f;
+    // Decays per reference frame, like DefaultCamera samples it.
+    if (REFERENCE_FRAME_STEP > 0)
+    {
+        EarthQuake *= 0.2f;
+    }
     InitTerrainLight();
 
     CheckInventory = NULL;

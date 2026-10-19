@@ -3848,10 +3848,6 @@ namespace Render::Effects::Behaviors
             else
                 o->BlendMeshLight = o->LifeTime * 0.1f;
             o->BlendMeshTexCoordU = -(float)o->LifeTime * 0.01f;
-
-            // Hellfire (AT_SKILL_HELL_FIRE) is the common SubType-0 source of this
-            // effect, and before the distance check a single caster anywhere in scope
-            // shook every nearby player's camera continuously.
             SetEarthQuakeAt(o->Position, (float)(rand() % 6 - 6) * 0.1f);
 
             if (rand_fps_check(value))
@@ -6132,8 +6128,10 @@ namespace Render::Effects::Behaviors
                 CreateEffectFpsChecked(BITMAP_CRATER, o->Position, o->Angle, o->Light);
             }
 
-            SetEarthQuakeAt(o->Position, (float)(rand() % 8 - 8) * 0.1f);
-            EarthQuake *= pow(1.0f / (2.f), FPS_ANIMATION_FACTOR);
+            if (SetEarthQuakeAt(o->Position, (float)(rand() % 8 - 8) * 0.1f))
+            {
+                EarthQuake *= 0.5f;
+            }
 
             o->HiddenMesh = 99;
         }
@@ -6333,14 +6331,17 @@ namespace Render::Effects::Behaviors
                         int CollisionX = (int)(o->Position[0] / TERRAIN_SCALE);
                         int CollisionY = (int)(o->Position[1] / TERRAIN_SCALE);
 
-                        SetEarthQuakeAt(o->Position, (float)(rand() % 8 - 8) * 0.1f);
+                        const bool shaking = SetEarthQuakeAt(o->Position, (float)(rand() % 8 - 8) * 0.1f);
                         if (CollisionY < 104 && o->Visible)
                         {
                             AddTerrainHeight(o->Position[0], o->Position[1], -30.f, 2, BackTerrainHeight);
                             CreateTerrainNormal_Part(CollisionX, CollisionY);
                             CreateTerrainLight_Part(CollisionX, CollisionY);
 
-                            EarthQuake *= pow(1.0f / (2.f), FPS_ANIMATION_FACTOR);
+                            if (shaking)
+                            {
+                                EarthQuake *= 0.5f;
+                            }
                         }
                     }
                 }
@@ -6490,14 +6491,17 @@ namespace Render::Effects::Behaviors
                     int CollisionX = (int)(o->Position[0] / TERRAIN_SCALE);
                     int CollisionY = (int)(o->Position[1] / TERRAIN_SCALE);
 
-                    SetEarthQuakeAt(o->Position, (float)(rand() % 8 - 8) * 0.1f);
+                    const bool shaking = SetEarthQuakeAt(o->Position, (float)(rand() % 8 - 8) * 0.1f);
                     if (CollisionY < 104 && o->Visible)
                     {
                         AddTerrainHeight(o->Position[0], o->Position[1], -30.f, 2, BackTerrainHeight);
                         CreateTerrainNormal_Part(CollisionX, CollisionY);
                         CreateTerrainLight_Part(CollisionX, CollisionY);
 
-                        EarthQuake *= pow(1.0f / (2.f), FPS_ANIMATION_FACTOR);
+                        if (shaking)
+                        {
+                            EarthQuake *= 0.5f;
+                        }
                     }
                 }
             }
@@ -7587,7 +7591,7 @@ namespace Render::Effects::Behaviors
                 }
                 else
                 {
-                    EarthQuake = 0.f;
+                    SetEarthQuakeAt(o->Position, 0.f);
                 }
 
                 if ((int)o->LifeTime == 23)
@@ -7688,7 +7692,7 @@ namespace Render::Effects::Behaviors
             }
             else
             {
-                EarthQuake = 0.f;
+                SetEarthQuakeAt(o->Position, 0.f);
             }
 
             if ((int)o->LifeTime == 30)
@@ -9023,7 +9027,7 @@ namespace Render::Effects::Behaviors
                 }
                 else
                 {
-                    EarthQuake = 0.f;
+                    SetEarthQuakeAt(o->Position, 0.f);
                 }
 
                 if ((int)o->LifeTime == 23)
