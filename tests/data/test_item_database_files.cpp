@@ -781,6 +781,65 @@ TEST_CASE("A bmd round trip keeps missing names missing and names that are the s
     CHECK(HasNameIn(*g_ItemDatabase.Find(BladeType), "es"));
 }
 
+TEST_CASE("The item tools set whole items, and the derived fields follow the data unless set [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    ItemDefinition blade = *g_ItemDatabase.Find(BladeType);
+
+    SUBCASE("a value change reaches the database and ItemAttribute")
+    {
+        blade.damageMax = 99;
+        blade.tags.Set(ItemTag::Valuable);
+        g_ItemDataHandler.SetItem(blade);
+        CHECK(g_ItemDatabase.Find(BladeType)->damageMax == 99);
+        CHECK(g_ItemDatabase.HasTag(BladeType, ItemTag::Valuable));
+        CHECK(ItemAttribute[BladeType].DamageMax == 99);
+    }
+
+    SUBCASE("a weapon kind the user picks stays")
+    {
+        blade.weaponKind = WeaponKind::Glove;
+        g_ItemDataHandler.SetItem(blade);
+        CHECK(g_ItemDatabase.Find(BladeType)->weaponKind == WeaponKind::Glove);
+    }
+
+    SUBCASE("the weapon kind follows the classes in group 0 while it is the derived one")
+    {
+        // Only the Rage Fighter: group 0 makes it a glove.
+        const WeaponKind before = blade.weaponKind;
+        blade.classRequirements.fill(0);
+        blade.classRequirements[CLASS_RAGEFIGHTER] = 1;
+        g_ItemDataHandler.SetItem(blade);
+        CHECK(g_ItemDatabase.Find(BladeType)->weaponKind != before);
+        CHECK(g_ItemDatabase.Find(BladeType)->weaponKind == WeaponKind::Glove);
+    }
+
+    SUBCASE("an item without names leaves the database and empties its row")
+    {
+        blade.names = Data::LocalizedString{};
+        g_ItemDataHandler.SetItem(blade);
+        CHECK(g_ItemDatabase.Find(BladeType) == nullptr);
+        CHECK(ItemAttribute[BladeType].Name[0] == L'\0');
+        CHECK(ItemAttribute[BladeType].Width == 0);
+    }
+
+    SUBCASE("several items at once")
+    {
+        ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+        kris.tradable = false;
+        blade.tradable = false;
+        const std::vector<ItemDefinition> changed = {kris, blade};
+        g_ItemDataHandler.SetItems(changed);
+        CHECK_FALSE(g_ItemDatabase.Find(KrisType)->tradable);
+        CHECK_FALSE(g_ItemDatabase.Find(BladeType)->tradable);
+    }
+}
+
 TEST_CASE("The save warns about an item name in a language the game has no texts for [data][items][editor]")
 {
     TemporaryClientFolder folder;

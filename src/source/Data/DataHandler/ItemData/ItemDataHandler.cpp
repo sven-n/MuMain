@@ -215,6 +215,56 @@ void CItemDataHandler::OnLocaleChanged(void* context) noexcept
 }
 
 #ifdef _EDITOR
+ItemDefinition CItemDataHandler::WithDerivedFields(const ItemDefinition& definition)
+{
+    const ItemDefinition* previous = g_ItemDatabase.Find(definition.group, definition.number);
+    ItemDefinition result = definition;
+    if (previous == nullptr || definition.weaponKind == previous->weaponKind)
+    {
+        result.weaponKind = FollowGroupWeaponKind(previous, definition);
+    }
+    if (previous == nullptr || definition.statProfile == previous->statProfile)
+    {
+        std::vector<ItemDataIssue> issues;
+        result.statProfile = FollowKnownStatProfile(previous, result, issues);
+        Data::LogDataIssues(ItemDataLabel, issues);
+    }
+    return result;
+}
+
+void CItemDataHandler::RefillItemAttribute(int itemType)
+{
+    if (const ItemDefinition* definition = g_ItemDatabase.Find(itemType))
+    {
+        ToItemAttribute(*definition, ItemAttribute[itemType]);
+        return;
+    }
+    ItemAttribute[itemType] = ITEM_ATTRIBUTE{};
+}
+
+void CItemDataHandler::SetItem(const ItemDefinition& definition)
+{
+    SetItems(std::span<const ItemDefinition>(&definition, 1));
+}
+
+void CItemDataHandler::SetItems(std::span<const ItemDefinition> definitions)
+{
+    std::vector<ItemDefinition> stored;
+    stored.reserve(definitions.size());
+    for (const ItemDefinition& definition : definitions)
+    {
+        if (IsValidItemId(definition.group, definition.number))
+        {
+            stored.push_back(WithDerivedFields(definition));
+        }
+    }
+    g_ItemDatabase.SetMany(stored);
+    for (const ItemDefinition& definition : stored)
+    {
+        RefillItemAttribute(MakeItemType(definition.group, definition.number));
+    }
+}
+
 void CItemDataHandler::OnItemEdited(int itemType)
 {
     if (!IsValidItemType(itemType))

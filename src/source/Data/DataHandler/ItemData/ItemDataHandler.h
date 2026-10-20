@@ -2,6 +2,7 @@
 
 #include "Data/GameData/ItemData/ItemStructs.h"
 
+#include <span>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -39,6 +40,15 @@ public:
     bool LoadModels(std::string& errorMessage);
 
 #ifdef _EDITOR
+    // Puts the item into the item database at its (group, number) and refills
+    // its row of ItemAttribute[]: the item in the UI locale, or an empty row
+    // when it no longer exists (no names). The weapon kind and the stat
+    // profile follow the data (FollowGroupWeaponKind, FollowKnownStatProfile)
+    // unless the definition changes them itself: then they are the user's pick.
+    void SetItem(const Data::Items::ItemDefinition& definition);
+    // Like SetItem for several items, with the database lists built once.
+    void SetItems(std::span<const Data::Items::ItemDefinition> definitions);
+
     // The item editor changed ItemAttribute[itemType]; copies the change
     // into the item database. A changed name is stored for the current UI
     // locale.
@@ -137,6 +147,11 @@ private:
     // Swaps the models the editor moved since LoadModels back, last move
     // first.
     void TakeBackModelMoves();
+    // The definition SetItem stores: the weapon kind and the stat profile
+    // follow the data unless `definition` changes them.
+    static Data::Items::ItemDefinition WithDerivedFields(const Data::Items::ItemDefinition& definition);
+    // ItemAttribute[itemType] from the item database: the item, or all zero.
+    static void RefillItemAttribute(int itemType);
 
     // The model swaps of the item editor since LoadModels, in order.
     std::vector<std::pair<int, int>> m_modelMoves;
