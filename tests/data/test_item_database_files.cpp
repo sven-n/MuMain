@@ -1302,11 +1302,26 @@ TEST_CASE("Item Requirements shows what the game asks at each level, from the va
     {
         typed[level] = static_cast<WORD>(darkBreakerTable[level][Strength]);
     }
-    // A base step adds about 3 to the +0 value of this sword.
+    // A base step adds about 3 to the +0 value of this sword (581 at 180, 584
+    // at 181), so 582 is nearest to the base it has.
     typed[0] = static_cast<WORD>(typed[0] + 1);
-    const WORD nearest = FindRequirementBase(darkBreaker, ItemRequirement::Strength, typed);
-    CHECK(nearest >= darkBreaker.requirements.strength);
-    CHECK(nearest <= darkBreaker.requirements.strength + 1);
+    CHECK(FindRequirementBase(darkBreaker, ItemRequirement::Strength, typed) == darkBreaker.requirements.strength);
+
+    // With drop level 0 every base above 0 gives the same +0 value; the other
+    // levels still find the base back.
+    ItemDefinition dropLevelZero = kris;
+    dropLevelZero.level = 0;
+    dropLevelZero.requirements.strength = 1500;
+    const RequirementTable dropLevelZeroTable = ComputeRequirementTable(dropLevelZero, {});
+    RequirementByLevel fromDropLevelZero{};
+    for (size_t level = 0; level < fromDropLevelZero.size(); ++level)
+    {
+        fromDropLevelZero[level] = static_cast<WORD>(dropLevelZeroTable[level][Strength]);
+    }
+    ItemDefinition weakest = dropLevelZero;
+    weakest.requirements.strength = 1;
+    CHECK(ComputeRequirementTable(weakest, {})[0][Strength] == dropLevelZeroTable[0][Strength]);
+    CHECK(FindRequirementBase(dropLevelZero, ItemRequirement::Strength, fromDropLevelZero) == 1500);
 }
 
 // A number field is typed into, then its form is not drawn for a frame (its

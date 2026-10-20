@@ -12,7 +12,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdlib>
-#include <optional>
 #include <string>
 
 namespace MuEditor::Items
@@ -24,10 +23,6 @@ using Data::Items::ItemRequirement;
 using Data::Items::RequirementByLevel;
 
 constexpr int MaxBase = 65535;
-// The bases from the smallest that reaches the +0 value that are tried for all
-// 16 values: a +0 value that hardly grows with the base must not make the
-// search take every base.
-constexpr int MaxCandidates = 1024;
 
 // The profile storing the item would give it (CItemDataHandler::WithDerivedFields).
 const Data::Items::ItemStatProfile& FindProfile(const ItemDefinition& item)
@@ -88,6 +83,34 @@ RequirementByLevel ValuesWithBase(ItemDefinition item, ItemRequirement requireme
     }
     return values;
 }
+
+// The smallest base whose values reach `values` at the first `levels` + levels;
+// each value grows with the base.
+int FindSmallestBaseReaching(const ItemDefinition& item, ItemRequirement requirement, const RequirementByLevel& values,
+                             size_t levels)
+{
+    int low = 0;
+    int high = MaxBase;
+    while (low < high)
+    {
+        const int middle = low + (high - low) / 2;
+        const RequirementByLevel candidate = ValuesWithBase(item, requirement, middle);
+        bool belowSome = false;
+        for (size_t level = 0; level < levels; ++level)
+        {
+            belowSome = belowSome || candidate[level] < values[level];
+        }
+        if (belowSome)
+        {
+            low = middle + 1;
+        }
+        else
+        {
+            high = middle;
+        }
+    }
+    return low;
+}
 } // namespace
 
 RequirementTable ComputeRequirementTable(const ItemDefinition& item, const RequirementVariant& variant)
@@ -116,47 +139,24 @@ WORD FindRequirementBase(const ItemDefinition& item, ItemRequirement requirement
     {
         return static_cast<WORD>(first);
     }
-    // The +0 value grows with the base: the smallest base that reaches it.
-    int low = 0;
-    int high = MaxBase;
-    while (low < high)
+    // A smaller base than the smallest that reaches all 16 values falls short
+    // at some level, so only that one can give them.
+    const int reachingAll = FindSmallestBaseReaching(withoutLevels, requirement, values, values.size());
+    if (ValuesWithBase(withoutLevels, requirement, reachingAll) == values)
     {
-        const int middle = low + (high - low) / 2;
-        if (ValuesWithBase(withoutLevels, requirement, middle)[0] < first)
-        {
-            low = middle + 1;
-        }
-        else
-        {
-            high = middle;
-        }
+        return static_cast<WORD>(reachingAll);
     }
-    std::optional<int> firstMatch;
-    for (int base = low; base <= MaxBase && base < low + MaxCandidates; ++base)
+    // Else the smallest base that gives the +0 value, else the one whose +0
+    // value is nearest.
+    const int low = FindSmallestBaseReaching(withoutLevels, requirement, values, 1);
+    const int atLow = ValuesWithBase(withoutLevels, requirement, low)[0];
+    if (atLow == first)
     {
-        const RequirementByLevel candidate = ValuesWithBase(withoutLevels, requirement, base);
-        if (candidate[0] != first)
-        {
-            break;
-        }
-        if (candidate == values)
-        {
-            return static_cast<WORD>(base);
-        }
-        if (!firstMatch)
-        {
-            firstMatch = base;
-        }
+        return static_cast<WORD>(low);
     }
-    if (firstMatch)
-    {
-        return static_cast<WORD>(*firstMatch);
-    }
-    // No base gives the +0 value: the one whose +0 value is nearest.
     const int below = std::max(low - 1, 0);
     const int distanceBelow = std::abs(ValuesWithBase(withoutLevels, requirement, below)[0] - first);
-    const int distanceAbove = std::abs(ValuesWithBase(withoutLevels, requirement, low)[0] - first);
-    return static_cast<WORD>(distanceBelow <= distanceAbove ? below : low);
+    return static_cast<WORD>(distanceBelow <= std::abs(atLow - first) ? below : low);
 }
 } // namespace MuEditor::Items
 
