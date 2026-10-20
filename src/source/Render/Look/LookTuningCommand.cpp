@@ -27,6 +27,7 @@ const CommandForm CommandForms[] = {
     {L"$dynlights spell ", {LookValue::DynamicEffectGain, LookValue::DynamicEffectRange, LookValue::DynamicEffectFade}},
     {L"$dynlights cap ", {LookValue::DynamicEffectCap}},
     {L"$dynlights reach ", {LookValue::DynamicEffectRangeMax}},
+    {L"$dynlights shadow ", {LookValue::GroundShadowOpacity}},
     {L"$bloom falloff ", {LookValue::BloomLevelFalloff}},
     {L"$bloom ", {LookValue::BloomStrength}},
 };

@@ -20,7 +20,7 @@ struct DynamicLights
     uint dynamicLightCount;
     float dynamicLightWrap;
     uint dynamicWorldLightCount;
-    uint dynamicLightPadding;
+    float groundShadowOpacity;
     float4 dynamicLightPositionAndRadius[32];
     float4 dynamicLightColor[32];
 };
@@ -49,54 +49,55 @@ struct main0_in
     float3 input_worldPosition [[user(locn4)]];
 };
 
-fragment main0_out main0(main0_in in [[stage_in]], constant SceneLighting& _30 [[buffer(0)]], constant DynamicLights& _64 [[buffer(1)]], constant FogUniforms& _169 [[buffer(2)]], texture2d<float> tex [[texture(0)]], sampler s [[sampler(0)]])
+fragment main0_out main0(main0_in in [[stage_in]], constant SceneLighting& _30 [[buffer(0)]], constant DynamicLights& _64 [[buffer(1)]], constant FogUniforms& _208 [[buffer(2)]], texture2d<float> tex [[texture(0)]], texture2d<float> groundShadowMask [[texture(1)]], sampler s [[sampler(0)]], sampler groundShadowSampler [[sampler(1)]], float4 gl_FragCoord [[position]])
 {
     main0_out out = {};
-    uint _389 = min(min(_64.dynamicWorldLightCount, _64.dynamicLightCount), 32u);
-    float3 _472;
-    _472 = float3(0.0);
-    float3 _474;
-    for (uint _471 = 0u; _471 < _389; _472 = _474, _471++)
+    float4 _328 = tex.sample(s, in.input_uv);
+    float4 _310 = _328;
+    uint2 _311 = uint2(groundShadowMask.get_width(), groundShadowMask.get_height());
+    uint _459 = min(min(_64.dynamicWorldLightCount, _64.dynamicLightCount), 32u);
+    float3 _543;
+    _543 = float3(0.0);
+    float3 _545;
+    for (uint _542 = 0u; _542 < _459; _543 = _545, _542++)
     {
-        float4 _379 = _64.dynamicLightPositionAndRadius[_471];
-        float _406 = length(_64.dynamicLightPositionAndRadius[_471].xy - in.input_worldPosition.xy);
-        if (_406 < _379.w)
+        float4 _449 = _64.dynamicLightPositionAndRadius[_542];
+        float _476 = length(_64.dynamicLightPositionAndRadius[_542].xy - in.input_worldPosition.xy);
+        if (_476 < _449.w)
         {
-            _474 = _472 + (_64.dynamicLightColor[_471].xyz * ((_379.w - _406) / _379.w));
+            _545 = _543 + (_64.dynamicLightColor[_542].xyz * ((_449.w - _476) / _449.w));
         }
         else
         {
-            _474 = _472;
+            _545 = _543;
         }
     }
-    float4 _296 = tex.sample(s, in.input_uv);
-    float4 _275 = _296;
-    float4 _276 = float4(_296.xyz * fast::clamp(in.input_color.xyz + _472, float3(0.0), float3(1.0)), _275.w * in.input_color.w);
-    if (_169.alphaToCoverage != 0u)
+    float4 _318 = float4(_328.xyz * fast::clamp((in.input_color.xyz * (1.0 - (_64.groundShadowOpacity * (1.0 - groundShadowMask.sample(groundShadowSampler, (gl_FragCoord.xy / float2(float(_311.x), float(_311.y)))).x)))) + _543, float3(0.0), float3(1.0)), _310.w * in.input_color.w);
+    if (_208.alphaToCoverage != 0u)
     {
-        _276.w *= fast::clamp(((_276.w - _169.alphaThreshold) / fast::max(fwidth(_276.w), 9.9999997473787516355514526367188e-05)) + 0.5, 0.0, 1.0);
-        if (_276.w <= 0.0)
+        _318.w *= fast::clamp(((_318.w - _208.alphaThreshold) / fast::max(fwidth(_318.w), 9.9999997473787516355514526367188e-05)) + 0.5, 0.0, 1.0);
+        if (_318.w <= 0.0)
         {
             discard_fragment();
         }
     }
     else
     {
-        if ((_169.alphaDiscardEnabled != 0u) && (_276.w <= _169.alphaThreshold))
+        if ((_208.alphaDiscardEnabled != 0u) && (_318.w <= _208.alphaThreshold))
         {
             discard_fragment();
         }
     }
-    if ((_169.fogEnabled != 0u) && (_30.sceneFogColor.w > 0.0))
+    if ((_208.fogEnabled != 0u) && (_30.sceneFogColor.w > 0.0))
     {
-        float4 _357 = _276;
-        float _439 = fast::max(in.input_eyeDepth - _30.sceneFogParameters.x, 0.0) * _30.sceneFogParameters.z;
-        float3 _366 = mix(_357.xyz, _30.sceneFogColor.xyz, float3(fast::clamp(1.0 - exp((-_439) * _439), 0.0, 1.0)));
-        _276.x = _366.x;
-        _276.y = _366.y;
-        _276.z = _366.z;
+        float4 _427 = _318;
+        float _509 = fast::max(in.input_eyeDepth - _30.sceneFogParameters.x, 0.0) * _30.sceneFogParameters.z;
+        float3 _436 = mix(_427.xyz, _30.sceneFogColor.xyz, float3(fast::clamp(1.0 - exp((-_509) * _509), 0.0, 1.0)));
+        _318.x = _436.x;
+        _318.y = _436.y;
+        _318.z = _436.z;
     }
-    out._entryPointOutput = _276;
+    out._entryPointOutput = _318;
     return out;
 }
 

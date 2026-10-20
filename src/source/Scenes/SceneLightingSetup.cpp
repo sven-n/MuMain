@@ -84,6 +84,7 @@ void SubmitDynamicLights()
         world.IsPinned() ? Render::Lighting::SelectDynamicLights(world.Selection(), lights.LightsSinceMark(), reference)
                          : Render::Lighting::SelectDynamicLights(lights.Lights(), reference);
     selection.uniform.wrap = Render::Look::Value(Data::Maps::LookValue::DynamicWrap);
+    selection.uniform.groundShadowOpacity = Render::Look::Value(Data::Maps::LookValue::GroundShadowOpacity);
     mu::GetRenderer().SetDynamicLights(selection.uniform);
 
     if (selection.dropped > 0 || lights.Overflow() > 0)

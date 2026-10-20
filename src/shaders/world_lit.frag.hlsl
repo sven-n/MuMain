@@ -8,6 +8,9 @@
 
 Texture2D tex : register(t0, space2);
 SamplerState s : register(s0, space2);
+// Per pixel, 1 minus the darkest ground shadow there (white without shadows).
+Texture2D groundShadowMask : register(t1, space2);
+SamplerState groundShadowSampler : register(s1, space2);
 cbuffer FogUniforms : register(b0, space3)
 {
     uint fogEnabled;
@@ -35,7 +38,7 @@ cbuffer DynamicLights : register(b2, space3)
     uint dynamicLightCount;      // lights used
     float dynamicLightWrap;      // models only
     uint dynamicWorldLightCount; // the first lights: the ones the ground's vertex colour leaves out
-    uint dynamicLightPadding;
+    float groundShadowOpacity;  // how much a shadow darkens the vertex colour
     float4 dynamicLightPositionAndRadius[MaxDynamicLights];
     float4 dynamicLightColor[MaxDynamicLights];
 };
@@ -75,8 +78,17 @@ float3 WorldDynamicLighting(float3 worldPosition)
 
 float4 main(FSInput input) : SV_Target
 {
-    const float3 light = saturate(input.color.rgb + WorldDynamicLighting(input.worldPosition));
+    // Sampled before the mask: spirv-cross numbers the MSL textures in the order the source uses them.
     const float4 texel = tex.Sample(s, input.uv);
+    // The mask covers the render target; a 1x1 white mask clamps to white everywhere.
+    uint maskWidth;
+    uint maskHeight;
+    groundShadowMask.GetDimensions(maskWidth, maskHeight);
+    const float visibility =
+        groundShadowMask.Sample(groundShadowSampler, input.pos.xy / float2(maskWidth, maskHeight)).r;
+    // Shadows dim the ground's own light; the point lights still light shadowed ground.
+    const float shadow = 1.0 - groundShadowOpacity * (1.0 - visibility);
+    const float3 light = saturate(input.color.rgb * shadow + WorldDynamicLighting(input.worldPosition));
     float4 color = float4(texel.rgb * light, texel.a * input.color.a);
     if (alphaToCoverage)
     {
