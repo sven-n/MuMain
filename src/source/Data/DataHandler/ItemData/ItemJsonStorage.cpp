@@ -205,6 +205,10 @@ void AddItemModelFiles(const ItemModelSave& models, std::vector<FileToSave>& fil
     {
         files.push_back({models.directory / SharedItemModelsFileName, WriteSharedItemModelsJson(models.sharedModels)});
     }
+    if (models.glowColorsChanged)
+    {
+        files.push_back({models.glowColorsFile, Effects::WriteGlowColorsJson(models.glowColors)});
+    }
 }
 } // namespace
 
@@ -348,6 +352,15 @@ void ValidateSharedItemModelsAsWritten(std::span<const SharedItemModel> sharedMo
     std::vector<SharedItemModel> readBack;
     std::vector<ItemDataIssue> readIssues;
     ReadSharedItemModelsJson(WriteSharedItemModelsJson(sharedModels), SharedItemModelsFileName, readBack, readIssues);
+    std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
+                 [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Error; });
+}
+
+void ValidateGlowColorsAsWritten(std::span<const Effects::GlowColor> colors, std::vector<ItemDataIssue>& issues)
+{
+    std::vector<Effects::GlowColor> readBack;
+    std::vector<ItemDataIssue> readIssues;
+    Effects::ReadGlowColorsJson(Effects::WriteGlowColorsJson(colors), Effects::GlowColorsFile, readBack, readIssues);
     std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
                  [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Error; });
 }

@@ -41,6 +41,7 @@ stores it when a field is left.
 - **MuItemRulesUI** - The rule flags of many items at once (ItemRulesTable, ItemRuleFlags)
 - **MuItemCategoriesUI** - The items of a tag
 - **MuItemModelUI** - The model entry with a preview, file picker, shared models and looks (ItemModelPreview, ItemModelFilePicker, ItemSharedModelForm, ItemModelForms)
+- **MuItemGlowColorsUI** - The glow color list: new colors, changed values and unused colors removed (GlowColorDialog, which the model tool's color fields open too)
 - **MuItemChecksUI** - The checks of a save, each leading to its item and field (ItemCheckTargets)
 - **ItemToolWindow** - What every item tool window shares: its title, the selected item, Undo and Redo
 

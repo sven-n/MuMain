@@ -83,6 +83,14 @@ public:
     void SetSharedModel(const Data::Items::SharedItemModel& sharedModel, std::string_view previousName = {});
     // Removes a shared model that no item uses; false while one does.
     bool RemoveSharedModel(std::string_view name);
+    // Adds a glow color or changes the value of the one of its name; the
+    // items that use it glow with it. Save writes Data/Effects/GlowColors.json.
+    void SetGlowColor(const Data::Effects::GlowColor& color);
+    // Removes a glow color no item uses; false while one does and for the
+    // default colors (ItemGlow), which items without colors of their own use.
+    bool RemoveGlowColor(std::string_view name);
+    // Makes the glow color list this one (an undo).
+    void RestoreGlowColors(std::span<const Data::Effects::GlowColor> colors);
     // Opens the models changed since the last call again (ModelLoader::ReopenModels).
     // For between frames: the editor calls it before the game draws.
     std::vector<Data::Items::ItemModelProblem>
@@ -201,6 +209,8 @@ private:
     Data::Items::ItemGroupSet m_changedModelGroups;
     // Whether the editor changed a shared model since LoadModels.
     bool m_sharedModelsChanged = false;
+    // Whether the editor changed the glow color list since LoadModels.
+    bool m_glowColorsChanged = false;
     // The item types whose opened models no longer match their model entries.
     std::vector<int> m_modelsToReopen;
 

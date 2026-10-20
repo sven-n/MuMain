@@ -2,6 +2,7 @@
 
 #ifdef _EDITOR
 
+#include "GlowColorDialog.h"
 #include "ItemEditDraft.h"
 #include "ItemLookUseCounts.h"
 
@@ -21,7 +22,10 @@ void RenderOwnFile(ModelDraft& draft, Data::Items::ItemModelDefinition& model);
 void RenderInventory(ModelDraft& draft, Data::Items::ItemInventoryDisplay& inventory);
 // The ground display, the cloth flag and the material.
 void RenderGround(ModelDraft& draft, Data::Items::ItemModelDefinition& model);
-void RenderGlow(ModelDraft& draft, Data::Items::ItemModelDefinition& model, ItemLookUseCounts& counts);
+// The glow; beside each of its colors a button that adds a new color to the
+// list (CGlowColorDialog) and picks it, as one undo step.
+void RenderGlow(ModelDraft& draft, Data::Items::ItemModelDefinition& model, ItemLookUseCounts& counts,
+                CGlowColorDialog& newColor);
 void RenderLooks(ModelDraft& draft, Data::Items::ItemModelDefinition& model, ItemLookUseCounts& counts);
 } // namespace MuEditor::Items::ModelForms
 

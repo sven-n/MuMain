@@ -4,6 +4,7 @@
 
 #include "ItemModelForms.h"
 
+#include "ItemEdits.h"
 #include "ItemFieldWidgets.h"
 #include "ItemListFields.h"
 #include "ItemNumberList.h"
@@ -167,7 +168,8 @@ void LookCombo(ModelDraft& draft, const char* label, std::string& value, std::sp
     ImGui::EndCombo();
 }
 
-void ColorCombo(ModelDraft& draft, const char* label, std::string& value, ItemLookUseCounts& counts)
+// True when its "+" (a new color) is clicked.
+bool ColorCombo(ModelDraft& draft, const char* label, std::string& value, ItemLookUseCounts& counts)
 {
     const std::span<const Data::Effects::GlowColor> colors = g_GlowColors.GetColors();
     const auto swatch = [](const Data::Effects::GlowColorValue& color, const char* id)
@@ -176,18 +178,24 @@ void ColorCombo(ModelDraft& draft, const char* label, std::string& value, ItemLo
             id, ImVec4(static_cast<float>(color[0]), static_cast<float>(color[1]), static_cast<float>(color[2]), 1.0f),
             ImGuiColorEditFlags_NoTooltip);
     };
+    // Three color combos share one ID scope (glow, shine, ancient).
+    ImGui::PushID(label);
     if (const Data::Effects::GlowColorValue* current = g_GlowColors.Find(value))
     {
-        // Three color combos share one ID scope (glow, shine, ancient).
-        ImGui::PushID(label);
         swatch(*current, "##Current");
-        ImGui::PopID();
         ImGui::SameLine();
     }
+    const bool newColor = ImGui::SmallButton("+##NewColor");
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::SetTooltip("%s", I18N::Editor::NewGlowColor);
+    }
+    ImGui::PopID();
+    ImGui::SameLine();
     ImGui::SetNextItemWidth(Fields::ScaledWidth(ComboWidth));
     if (!ImGui::BeginCombo(label, value.c_str()))
     {
-        return;
+        return newColor;
     }
     for (const Data::Effects::GlowColor& color : colors)
     {
@@ -203,6 +211,7 @@ void ColorCombo(ModelDraft& draft, const char* label, std::string& value, ItemLo
         ImGui::PopID();
     }
     ImGui::EndCombo();
+    return newColor;
 }
 
 void GlowMeshes(ModelDraft& draft, const char* onlyLabel, const char* hiddenLabel, Data::Items::ItemGlowMeshes& meshes)
@@ -298,26 +307,46 @@ void RenderGround(ModelDraft& draft, ItemModelDefinition& model)
     Fields::Double(draft, I18N::Editor::Specular, model.material.specular, "%.2f");
 }
 
-void RenderGlow(ModelDraft& draft, ItemModelDefinition& model, ItemLookUseCounts& counts)
+void RenderGlow(ModelDraft& draft, ItemModelDefinition& model, ItemLookUseCounts& counts, CGlowColorDialog& newColor)
 {
     if (!ImGui::CollapsingHeader(I18N::Editor::Glow))
     {
         return;
     }
     Data::Items::ItemGlow& glow = model.glow;
+    // The color fields, in the order newColor's target counts them.
+    std::string* const colors[] = {&glow.color, &glow.shineColor, &glow.ancientColor};
+    const char* const colorLabels[] = {I18N::Editor::GlowColor, I18N::Editor::ShineColor, I18N::Editor::AncientColor};
+    const auto colorField = [&](int index)
+    {
+        if (ColorCombo(draft, colorLabels[index], *colors[index], counts))
+        {
+            newColor.Open(*colors[index], index);
+        }
+    };
     ImGui::PushID("Glow");
     GlowLevels(draft, glow);
-    ColorCombo(draft, I18N::Editor::GlowColor, glow.color, counts);
+    colorField(0);
     GlowMeshes(draft, I18N::Editor::GlowMeshes, I18N::Editor::AllMeshesButThisOne, glow.meshes);
-    ColorCombo(draft, I18N::Editor::ShineColor, glow.shineColor, counts);
+    colorField(1);
     Fields::Check(draft, I18N::Editor::ShineWhite, glow.shineWhite);
     ImGui::PushID("Shine");
     GlowMeshes(draft, I18N::Editor::ShineMeshes, I18N::Editor::AllMeshesButThisOne, glow.shineMeshes);
     ImGui::PopID();
-    ColorCombo(draft, I18N::Editor::AncientColor, glow.ancientColor, counts);
+    colorField(2);
     Fields::Check(draft, I18N::Editor::ExcellentGlow, glow.excellent);
     OptionalInt(draft, I18N::Editor::ExcellentMesh, glow.excellentMesh);
     OptionalInt(draft, I18N::Editor::ExcellentMeshWithoutSkin, glow.excellentMeshWithoutSkin);
+    if (const std::optional<Data::Effects::GlowColor> created = newColor.Render())
+    {
+        // The new color and the field that names it, as one undo step.
+        const int target = newColor.GetTarget();
+        g_ItemEdits.BeginGroup(I18N::Editor::NewGlowColor);
+        g_ItemEdits.SetGlowColor(I18N::Editor::NewGlowColor, *created);
+        *colors[target] = created->name;
+        draft.AfterChange(true, colorLabels[target]);
+        g_ItemEdits.EndGroup();
+    }
     ImGui::PopID();
 }
 

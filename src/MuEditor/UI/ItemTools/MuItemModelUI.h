@@ -2,6 +2,7 @@
 
 #ifdef _EDITOR
 
+#include "GlowColorDialog.h"
 #include "ItemEditDraft.h"
 #include "ItemInventoryGridPreview.h"
 #include "ItemLookUseCounts.h"
@@ -45,6 +46,7 @@ private:
     MuEditor::Items::CItemModelFilePicker m_filePicker;
     MuEditor::Items::CItemSharedModelForm m_sharedForm;
     MuEditor::Items::ItemLookUseCounts m_counts;
+    MuEditor::Items::CGlowColorDialog m_newGlowColor;
 };
 
 #define g_MuItemModelUI CMuItemModelUI::GetInstance()

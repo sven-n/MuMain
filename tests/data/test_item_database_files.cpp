@@ -29,14 +29,17 @@
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
 #ifdef _EDITOR
+#include "UI/ItemTools/GlowColorDialog.h"
 #include "UI/ItemTools/ItemEdits.h"
 #include "UI/ItemTools/ItemRequirementTable.h"
 #include "UI/ItemTools/ItemSelection.h"
 #include "UI/ItemTools/ItemUsage.h"
+#include "UI/ItemTools/ItemUsers.h"
 #include "UI/ItemTools/MuItemBasicsUI.h"
 #include "UI/ItemTools/MuItemBrowserUI.h"
 #include "UI/ItemTools/MuItemCategoriesUI.h"
 #include "UI/ItemTools/MuItemChecksUI.h"
+#include "UI/ItemTools/MuItemGlowColorsUI.h"
 #include "UI/ItemTools/MuItemModelUI.h"
 #include "UI/ItemTools/MuItemRequirementsUI.h"
 #include "UI/ItemTools/MuItemRulesUI.h"
@@ -47,10 +50,12 @@
 #endif
 
 #include <algorithm>
+#include <array>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <random>
+#include <span>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -1207,6 +1212,7 @@ void RenderItemTools()
     g_MuItemRulesUI.Render(&open);
     g_MuItemCategoriesUI.Render(&open);
     g_MuItemModelUI.Render(&open);
+    g_MuItemGlowColorsUI.Render(&open);
     g_MuItemChecksUI.Render(&open);
     g_MuItemTranslationsUI.Render(&open);
 }
@@ -1593,5 +1599,130 @@ TEST_CASE("Exporting unchanged bmd files is not a failure [data][items][editor]"
 
     std::string secondChangeLog;
     CHECK(g_ItemDataHandler.ExportAsBmd(secondChangeLog));
+}
+
+namespace
+{
+using Data::Effects::GlowColor;
+
+std::vector<GlowColor> CurrentGlowColors()
+{
+    const std::span<const GlowColor> colors = g_GlowColors.GetColors();
+    return {colors.begin(), colors.end()};
+}
+
+// Whether one of the item's glow colors (glow, shine, ancient) is this one.
+bool GlowsWith(int itemType, const std::array<float, 3>& color)
+{
+    const ItemGlowColors* colors = g_ItemModelDatabase.FindGlowColors(itemType);
+    return colors != nullptr &&
+           (colors->color == color || colors->shineColor == color || colors->ancientColor == color);
+}
+} // namespace
+
+// D26 for the glow colors: a new color an item picks, a changed value that
+// reaches every item that uses it, and only unused colors removed.
+TEST_CASE("The item tools add glow colors, change them and remove unused ones [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    const std::vector<GlowColor> shipped = CurrentGlowColors();
+    const std::filesystem::path colorsFile = folder.Directory() / GetGlowColorsFile();
+    const std::string shippedText = TestFiles::ReadWholeFile(colorsFile);
+    MuEditor::Items::ItemEdits& edits = g_ItemEdits;
+    edits.GetHistory().Clear();
+    constexpr std::array<float, 3> Teal{0.0f, 0.5f, 0.5f};
+
+    SUBCASE("a new color an item picks is saved, and undone with the pick")
+    {
+        const MuEditor::Items::ItemSlotState kris = MuEditor::Items::ItemEdits::ReadSlot(KrisType);
+        // As the model tool adds it from a color field.
+        edits.BeginGroup("New glow color");
+        edits.SetGlowColor("New glow color", {"teal", {0, 0.5, 0.5}});
+        ItemModelDefinition model = *g_ItemModelDatabase.Find(KrisType);
+        model.glow.color = "teal";
+        edits.SetItemModel("Glow color", model);
+        edits.EndGroup();
+        CHECK(g_GlowColors.GetColors().back() == GlowColor{"teal", {0, 0.5, 0.5}});
+        CHECK(g_ItemModelDatabase.FindGlowColors(KrisType)->color == Teal);
+        CHECK(MuEditor::Items::FindGlowColorUsers("teal") == std::vector<int>{KrisType});
+
+        std::vector<ItemDataIssue> issues;
+        REQUIRE(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+        const GlowColorsLoadResult saved = LoadGlowColorsFile(colorsFile);
+        CHECK(saved.issues.empty());
+        CHECK(saved.colors == CurrentGlowColors());
+
+        REQUIRE(edits.Undo());
+        CHECK(MuEditor::Items::ItemEdits::ReadSlot(KrisType) == kris);
+        CHECK(CurrentGlowColors() == shipped);
+        REQUIRE(edits.Redo());
+        CHECK(g_ItemModelDatabase.FindGlowColors(KrisType)->color == Teal);
+
+        // The next start reads it back.
+        REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+        CHECK(g_ItemModelDatabase.Find(KrisType)->glow.color == "teal");
+        CHECK(g_ItemModelDatabase.FindGlowColors(KrisType)->color == Teal);
+    }
+
+    SUBCASE("a changed value reaches every item that uses the color")
+    {
+        // Nothing changed: the save leaves the file as it is.
+        std::vector<ItemDataIssue> issues;
+        REQUIRE(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+        CHECK(TestFiles::ReadWholeFile(colorsFile) == shippedText);
+
+        const std::vector<int> users = MuEditor::Items::FindGlowColorUsers("gold");
+        REQUIRE(users.size() > 1);
+        const std::array<float, 3> gold = MuEditor::Items::ToColorField(*g_GlowColors.Find("gold"));
+        constexpr std::array<float, 3> Yellow{1.0f, 1.0f, 0.0f};
+        edits.SetGlowColor("Change a glow color", {"gold", {1, 1, 0}});
+        for (const int user : users)
+        {
+            INFO("item type " << user);
+            CHECK(GlowsWith(user, Yellow));
+        }
+        // The color keeps its place in the file.
+        CHECK(CurrentGlowColors().size() == shipped.size());
+
+        REQUIRE(edits.Undo());
+        CHECK(CurrentGlowColors() == shipped);
+        CHECK(GlowsWith(users.front(), gold));
+    }
+
+    SUBCASE("only colors no item uses are removed, never the default colors")
+    {
+        edits.SetGlowColor("New glow color", {"unused", {0.2, 0.2, 0.2}});
+        const std::string names[] = {"unused", Data::Items::ItemGlow::DefaultColor, "gold"};
+        REQUIRE(edits.RemoveGlowColors("Remove unused glow colors", names));
+        CHECK(g_GlowColors.Find("unused") == nullptr);
+        CHECK(g_GlowColors.Find(Data::Items::ItemGlow::DefaultColor) != nullptr);
+        CHECK(g_GlowColors.Find("gold") != nullptr);
+        const std::string used[] = {"gold"};
+        CHECK_FALSE(edits.RemoveGlowColors("Remove a glow color", used));
+
+        REQUIRE(edits.Undo());
+        CHECK(g_GlowColors.Find("unused") != nullptr);
+    }
+
+    SUBCASE("a name the file would refuse stops the save")
+    {
+        g_ItemDataHandler.SetGlowColor({"light blue", {0, 0, 1}});
+        std::vector<ItemDataIssue> issues;
+        CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::InvalidData);
+        CHECK(
+            std::ranges::any_of(issues, [](const ItemDataIssue& issue) { return issue.field == "colors.light blue"; }));
+        CHECK(TestFiles::ReadWholeFile(colorsFile) == shippedText);
+    }
+
+    edits.GetHistory().Clear();
+    g_GlowColors.Build(shipped);
 }
 #endif

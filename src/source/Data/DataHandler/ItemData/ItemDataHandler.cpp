@@ -175,6 +175,7 @@ bool CItemDataHandler::LoadModels(std::string& errorMessage)
     m_modelMoves.clear();
     m_changedModelGroups.reset();
     m_sharedModelsChanged = false;
+    m_glowColorsChanged = false;
     m_modelsToReopen.clear();
 #endif
     MU_LOG_INFO(mu::log::Get("data"), "Loaded {} item models from {} in {:.1f} ms", g_ItemModelDatabase.GetModelCount(),
@@ -406,6 +407,45 @@ bool CItemDataHandler::RemoveSharedModel(std::string_view name)
     return true;
 }
 
+void CItemDataHandler::SetGlowColor(const Data::Effects::GlowColor& color)
+{
+    g_GlowColors.Set(color);
+    m_glowColorsChanged = true;
+    g_ItemModelDatabase.ResolveGlowColors(g_GlowColors);
+}
+
+bool CItemDataHandler::RemoveGlowColor(std::string_view name)
+{
+    if (name == ItemGlow::DefaultColor || name == ItemGlow::DefaultShineColor || name == ItemGlow::DefaultAncientColor)
+    {
+        return false;
+    }
+    const auto slots = g_ItemModelDatabase.GetAllSlots();
+    if (std::ranges::any_of(slots,
+                            [name](const ItemModelDefinition& model)
+                            {
+                                return model.Exists() && (model.glow.color == name || model.glow.shineColor == name ||
+                                                          model.glow.ancientColor == name);
+                            }))
+    {
+        return false;
+    }
+    if (g_GlowColors.Find(name) != nullptr)
+    {
+        g_GlowColors.Remove(name);
+        m_glowColorsChanged = true;
+        g_ItemModelDatabase.ResolveGlowColors(g_GlowColors);
+    }
+    return true;
+}
+
+void CItemDataHandler::RestoreGlowColors(std::span<const Data::Effects::GlowColor> colors)
+{
+    g_GlowColors.Build(colors);
+    m_glowColorsChanged = true;
+    g_ItemModelDatabase.ResolveGlowColors(g_GlowColors);
+}
+
 std::vector<ItemModelProblem> CItemDataHandler::ReopenChangedModels(const ModelLoader::LookNames& lookNames)
 {
     std::vector<int> itemTypes;
@@ -516,6 +556,7 @@ void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
     if (!g_GlowColors.GetColors().empty())
     {
         ValidateItemModelGlowColors(models, g_GlowColors.GetColors(), issues);
+        ValidateGlowColorsAsWritten(g_GlowColors.GetColors(), issues);
     }
     if (m_lookNames)
     {
@@ -545,6 +586,9 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
     models.groups = m_changedModelGroups;
     models.sharedModels = g_ItemModelDatabase.GetSharedModels();
     models.sharedModelsChanged = m_sharedModelsChanged;
+    models.glowColorsFile = GetGlowColorsFile();
+    models.glowColors = g_GlowColors.GetColors();
+    models.glowColorsChanged = m_glowColorsChanged;
     return WriteItemAndModelDataDirectories(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(), models, issues);
 }
 

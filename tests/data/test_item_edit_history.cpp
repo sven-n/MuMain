@@ -12,6 +12,7 @@
 #include <map>
 #include <optional>
 #include <string>
+#include <vector>
 
 using namespace MuEditor::Items;
 using Data::Items::MakeItemType;
@@ -65,10 +66,15 @@ public:
                     {
                         m_shared[model->name] = *model;
                     }
-                }};
+                },
+                {},
+                [this] { return m_colors; },
+                [this](std::span<const Data::Effects::GlowColor> colors)
+                { m_colors.assign(colors.begin(), colors.end()); }};
     }
 
     std::map<std::string, Data::Items::SharedItemModel> m_shared;
+    std::vector<Data::Effects::GlowColor> m_colors;
     // The move changes the weapon kind, as a move to another group may.
     static inline bool MoveDerives = false;
 
@@ -188,6 +194,28 @@ TEST_CASE("The item edit history undoes moves and shared model changes [editor][
         CHECK_FALSE(history.GetLastChangedItem().has_value());
         REQUIRE(history.Redo());
         CHECK(items.m_shared.contains("new"));
+    }
+
+    SUBCASE("a new glow color")
+    {
+        const std::vector<Data::Effects::GlowColor> before{{"orange", {1, 0.5, 0}}};
+        std::vector<Data::Effects::GlowColor> after = before;
+        after.push_back({"teal", {0, 0.5, 0.5}});
+        items.m_colors = after;
+        ItemEditStep step{ItemEditStep::Kind::GlowColors};
+        step.colorsBefore = before;
+        step.colorsAfter = after;
+        history.Record({"New glow color", {step}});
+        REQUIRE(history.Undo());
+        CHECK(items.m_colors == before);
+        CHECK_FALSE(history.GetLastChangedItem().has_value());
+        REQUIRE(history.Redo());
+        CHECK(items.m_colors == after);
+
+        // A list changed past the history is not overwritten.
+        items.m_colors.push_back({"gold", {1, 0.7, 0.2}});
+        CHECK_FALSE(history.Undo());
+        CHECK(history.GetLastRefusal() == ItemEditHistory::Refusal::ItemsChanged);
     }
 }
 

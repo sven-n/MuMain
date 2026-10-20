@@ -55,6 +55,20 @@ void ItemModelDatabase::Build(std::span<const ItemModelDefinition> models, const
     }
 }
 
+#ifdef _EDITOR
+void ItemModelDatabase::ResolveGlowColors(const Effects::GlowColorList& glowColors)
+{
+    ++m_version;
+    for (size_t itemType = 0; itemType < m_models.size(); ++itemType)
+    {
+        if (m_models[itemType].Exists())
+        {
+            m_glowColors[itemType] = FindColors(glowColors, m_models[itemType].glow);
+        }
+    }
+}
+#endif
+
 void ItemModelDatabase::Set(const ItemModelDefinition& model, const Effects::GlowColorList& glowColors)
 {
     if (!IsValidItemId(model.group, model.number))

@@ -174,6 +174,12 @@ bool ItemEditHistory::IsAsLeft(const ItemEditEntry& entry, bool undoing) const
             }
             break;
         }
+        case ItemEditStep::Kind::GlowColors:
+            if (m_hooks.readGlowColors() != (undoing ? step.colorsAfter : step.colorsBefore))
+            {
+                return false;
+            }
+            break;
         }
     }
     return true;
@@ -207,6 +213,7 @@ bool ItemEditHistory::ChangesHeldItem(const ItemEditEntry& entry, bool undoing) 
             }
             break;
         case ItemEditStep::Kind::SharedModel:
+        case ItemEditStep::Kind::GlowColors:
             break;
         }
     }
@@ -230,8 +237,9 @@ void ItemEditHistory::Apply(const ItemEditEntry& entry, bool undoing)
             ApplyStep(step, false);
         }
     }
-    const auto firstItem = std::ranges::find_if(entry.steps, [](const ItemEditStep& step)
-                                                { return step.kind != ItemEditStep::Kind::SharedModel; });
+    const auto firstItem = std::ranges::find_if(
+        entry.steps, [](const ItemEditStep& step)
+        { return step.kind != ItemEditStep::Kind::SharedModel && step.kind != ItemEditStep::Kind::GlowColors; });
     if (firstItem != entry.steps.end())
     {
         m_lastChangedItem =
@@ -265,6 +273,9 @@ void ItemEditHistory::ApplyStep(const ItemEditStep& step, bool undoing)
     }
     case ItemEditStep::Kind::SharedModel:
         m_hooks.restoreSharedModel(SharedModelName(step, undoing), undoing ? step.sharedBefore : step.sharedAfter);
+        break;
+    case ItemEditStep::Kind::GlowColors:
+        m_hooks.restoreGlowColors(undoing ? step.colorsBefore : step.colorsAfter);
         break;
     }
 }

@@ -35,6 +35,11 @@ public:
     void SetSharedModel(std::string label, const Data::Items::SharedItemModel& sharedModel,
                         std::string_view previousName = {});
     bool RemoveSharedModel(std::string label, std::string_view name);
+    // CItemDataHandler::SetGlowColor.
+    void SetGlowColor(std::string label, const Data::Effects::GlowColor& color);
+    // CItemDataHandler::RemoveGlowColor for each name, as one step; false
+    // when none could be removed.
+    bool RemoveGlowColors(std::string label, std::span<const std::string> names);
 
     // The changes until EndGroup are one undo step under `label` (an item
     // duplicated with its model made shared).

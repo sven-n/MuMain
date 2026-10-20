@@ -472,7 +472,9 @@ red, green and blue from 0 to 1:
 A name has only letters and digits. A new color is added to the list and
 can then be used by any item; a name that is not in the list stops the
 start with a message, and so does a list without the defaults (`orange`,
-`white`, `azure`).
+`white`, `azure`). The item editor adds colors, changes their values and
+removes the ones no item uses ([Glow Colors](#glow-colors)), and Save Items
+writes the file in this form, one color a line.
 
 The glow of monsters, and of the event models that level variants are
 drawn with, is still set in code; changing the list does not change them.
@@ -695,6 +697,7 @@ shows it in the others.
 - **Item Categories**: a tag and its items; add the selected item or remove
   items from it. New tags need code.
 - **Item Model**: see [Item Model](#item-model).
+- **Glow Colors**: the glow color list, see [Glow Colors](#glow-colors).
 - **Item Checks**: the checks of a save as a list, errors first. A click on
   a problem of an item selects it and opens the tool of its field; an arrow
   key onto it only selects the item.
@@ -723,9 +726,10 @@ How changes work:
   slot, classes, requirements) while they are what it gives; a value you
   pick stays.
 - **Save Items** runs the checks and writes `Data/Items` next to the game,
-  with the model files of the groups whose models changed and
-  `SharedModels.json` when a shared model changed; the other model files
-  are not touched. It lists each UI language that misses item names, with
+  with the model files of the groups whose models changed,
+  `SharedModels.json` when a shared model changed and
+  `Data/Effects/GlowColors.json` when a glow color changed; the other model
+  files are not touched. It lists each UI language that misses item names, with
   how many. With errors nothing is written, and the errors are listed in
   the editor console and in **Item Checks**. Warnings (a model file that is
   missing, a file several items name themselves instead of through a
@@ -737,7 +741,9 @@ How changes work:
 
 The game runs from the build folder, which has a copy of `src/bin/Data`.
 To keep your changes, copy the changed files from
-`<build folder>/Data/Items` to `src/bin/Data/Items` and commit them. A new
+`<build folder>/Data/Items` to `src/bin/Data/Items` (and
+`<build folder>/Data/Effects/GlowColors.json` to `src/bin/Data/Effects`) and
+commit them. A new
 `.bmd` file or texture has to be copied to `src/bin/Data` too (textures as
 `.OZJ` or `.OZT`).
 
@@ -768,7 +774,9 @@ number that has a model but no item:
   its size, drawn as
   the game's inventory draws it at the preview's item level (it turns while
   the mouse is on it); the ground display, cloth, specular and the glow
-  (levels, colors with their swatches, meshes, excellent). While a slider is
+  (levels, colors with their swatches, meshes, excellent). The **+** beside
+  each glow color adds a new color to the list, starting as a copy of the
+  field's color, and picks it, as one undo step. While a slider is
   dragged, the grid and the game's inventory show the value at once; it is
   stored when the slider is let go.
 - For an item drawn by code with other models at some levels, the list of
@@ -784,6 +792,18 @@ before the next frame, so the game draws it at once. Models that the game
 changes in code after loading (the cloth of some pants, the second models
 of the Rage Fighter gloves, the inventory models of the Rage Fighter
 armors) may need a restart to show a new file.
+
+### Glow Colors
+
+The colors of the glow color list, each with how many models use it (also
+as the default they leave out). **New glow color** adds one: a name of
+letters and digits no other color has, and its red, green and blue. A
+picked color's value is changed with the color field and **Apply to the
+glow color**; when items use it, the change lists them first, as for a
+shared model. A color no item uses is removed (**Remove**, or **Remove
+them** for all of them); the defaults (`orange`, `white`, `azure`) stay,
+since items without colors of their own glow with them. Every change is a
+step of the undo history; renaming a color is left out.
 
 ### Import from bmd / Export as bmd
 

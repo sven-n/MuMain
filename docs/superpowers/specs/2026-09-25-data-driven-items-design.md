@@ -964,7 +964,8 @@ server with original clients (after phases 6 and B).
      record is refused. Fields are edited on a copy and stored when left.
    - Save Items runs the checks first (also shown in Item Checks, each
      leading to its item and field), then writes the item files, the model
-     files of the changed groups and `SharedModels.json` when it changed. A
+     files of the changed groups, `SharedModels.json` and
+     `Data/Effects/GlowColors.json` when they changed. A
      missing model file, a `.bmd` several items name directly and an unknown
      render style or item effect are warnings, so data that loads stays
      saveable.
@@ -974,6 +975,10 @@ server with original clients (after phases 6 and B).
      cannot be removed, glow colours, render styles and item effects picked
      from lists with their users. A changed file, texture folder, mesh list
      or material is opened again between frames.
+   - The glow colour tool (D26 for the colours): new colours (also from a
+     colour field of the model tool, which then picks it), a changed value
+     listing the items it reaches first, and the colours no item uses
+     removed; the three defaults stay. Renaming a colour is left out.
    - Size and slot are refused while the hero wears the item or a window
      shows it (an item grid frees its cells by the size an item has when it
      is taken out); such an item is not moved or removed, an undo step that

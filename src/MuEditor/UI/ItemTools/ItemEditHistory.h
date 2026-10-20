@@ -2,6 +2,7 @@
 
 #ifdef _EDITOR
 
+#include "Data/GameData/EffectData/GlowColors.h"
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
 #include "Data/GameData/ItemData/SharedItemModel.h"
@@ -43,6 +44,8 @@ struct ItemEditStep
         // The shared model went from `sharedBefore` to `sharedAfter` (nullopt:
         // it did not exist); the names differ when it was renamed.
         SharedModel,
+        // The glow color list went from `colorsBefore` to `colorsAfter`.
+        GlowColors,
     };
 
     Kind kind = Kind::Slot;
@@ -52,6 +55,8 @@ struct ItemEditStep
     ItemSlotState after;
     std::optional<Data::Items::SharedItemModel> sharedBefore;
     std::optional<Data::Items::SharedItemModel> sharedAfter;
+    std::vector<Data::Effects::GlowColor> colorsBefore;
+    std::vector<Data::Effects::GlowColor> colorsAfter;
 };
 
 // What one action of a tool changed, undone and redone as a whole: an edited
@@ -88,6 +93,9 @@ public:
         // must not change and it must not move or go (IsHeldByCharacter).
         // Optional.
         std::function<bool(int itemType)> isHeld;
+        // The glow color list, and putting one back (the items glow with it).
+        std::function<std::vector<Data::Effects::GlowColor>()> readGlowColors;
+        std::function<void(std::span<const Data::Effects::GlowColor> colors)> restoreGlowColors;
     };
 
     // Why the last Undo or Redo did nothing.
@@ -127,7 +135,7 @@ public:
     }
 
     // The item type the last Undo or Redo changed first, to select it;
-    // nullopt for a change to a shared model only.
+    // nullopt for a change to shared models or glow colors only.
     std::optional<int> GetLastChangedItem() const
     {
         return m_lastChangedItem;

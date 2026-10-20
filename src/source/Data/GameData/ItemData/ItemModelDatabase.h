@@ -55,6 +55,11 @@ public:
     // the slot. Invalid ids are ignored. For the item editor.
     void Set(const ItemModelDefinition& model, const Effects::GlowColorList& glowColors);
     void Remove(int itemType);
+#ifdef _EDITOR
+    // Looks the glow colors of every model up in `glowColors` again, after
+    // the item editor changed the list.
+    void ResolveGlowColors(const Effects::GlowColorList& glowColors);
+#endif
 
     // The shared models (SharedModels.json), as loaded; the model entries
     // that name one have its file, texture folders and none-blend meshes

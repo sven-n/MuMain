@@ -1444,4 +1444,40 @@
   <data name="The option level still adds to it." xml:space="preserve">
     <value>The option level still adds to it.</value>
   </data>
+  <data name="New glow color" xml:space="preserve">
+    <value>New glow color</value>
+  </data>
+  <data name="A name of letters and digits that no other glow color has" xml:space="preserve">
+    <value>A name of letters and digits that no other glow color has</value>
+  </data>
+  <data name="Glow Colors" xml:space="preserve">
+    <value>Glow Colors</value>
+  </data>
+  <data name="The item models name these colors; the model tool picks an item's colors." xml:space="preserve">
+    <value>The item models name these colors; the model tool picks an item's colors.</value>
+  </data>
+  <data name="Pick a color in the list." xml:space="preserve">
+    <value>Pick a color in the list.</value>
+  </data>
+  <data name="Apply to the glow color" xml:space="preserve">
+    <value>Apply to the glow color</value>
+  </data>
+  <data name="Change a glow color" xml:space="preserve">
+    <value>Change a glow color</value>
+  </data>
+  <data name="Remove a glow color" xml:space="preserve">
+    <value>Remove a glow color</value>
+  </data>
+  <data name="A default color: items without colors of their own glow with it." xml:space="preserve">
+    <value>A default color: items without colors of their own glow with it.</value>
+  </data>
+  <data name="Used by {0} items:" xml:space="preserve">
+    <value>Used by {0} items:</value>
+  </data>
+  <data name="No item uses these glow colors: {0}" xml:space="preserve">
+    <value>No item uses these glow colors: {0}</value>
+  </data>
+  <data name="Remove unused glow colors" xml:space="preserve">
+    <value>Remove unused glow colors</value>
+  </data>
 </root>

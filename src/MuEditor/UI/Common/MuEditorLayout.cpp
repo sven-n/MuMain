@@ -20,10 +20,10 @@ constexpr float ConsoleHeightShare = 0.25f;
 constexpr float ItemBrowserWidthShare = 0.35f;
 constexpr char DockSpaceName[] = "ToolWindows";
 // The tools that show the item the browser selects, in their tab order.
-constexpr const char* ItemToolWindows[] = {MuEditor::WindowIds::ItemBasics,      MuEditor::WindowIds::ItemRequirements,
-                                           MuEditor::WindowIds::ItemRules,       MuEditor::WindowIds::ItemCategories,
-                                           MuEditor::WindowIds::ItemModel,       MuEditor::WindowIds::ItemChecks,
-                                           MuEditor::WindowIds::ItemTranslations};
+constexpr const char* ItemToolWindows[] = {MuEditor::WindowIds::ItemBasics, MuEditor::WindowIds::ItemRequirements,
+                                           MuEditor::WindowIds::ItemRules,  MuEditor::WindowIds::ItemCategories,
+                                           MuEditor::WindowIds::ItemModel,  MuEditor::WindowIds::ItemGlowColors,
+                                           MuEditor::WindowIds::ItemChecks, MuEditor::WindowIds::ItemTranslations};
 
 void BuildDefaultLayout(ImGuiID dockSpace, ImVec2 size)
 {

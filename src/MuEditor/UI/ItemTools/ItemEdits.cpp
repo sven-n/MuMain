@@ -8,6 +8,7 @@
 #include "ItemSelection.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
@@ -66,6 +67,17 @@ void RestoreSharedModel(const std::string& name, const std::optional<SharedItemM
     }
 }
 
+std::vector<Data::Effects::GlowColor> ReadGlowColors()
+{
+    const std::span<const Data::Effects::GlowColor> colors = g_GlowColors.GetColors();
+    return {colors.begin(), colors.end()};
+}
+
+void RestoreGlowColors(std::span<const Data::Effects::GlowColor> colors)
+{
+    g_ItemDataHandler.RestoreGlowColors(colors);
+}
+
 std::vector<int> SharedModelUsers(std::string_view name)
 {
     std::vector<int> users;
@@ -89,7 +101,7 @@ ItemEdits& ItemEdits::GetInstance()
 ItemEdits::ItemEdits()
     : m_history({&ItemEdits::ReadSlot, &RestoreSlots,
                  [](int from, int to) { return g_ItemDataHandler.MoveItem(from, to); }, &ReadSharedModel,
-                 &RestoreSharedModel, &IsHeldByCharacter})
+                 &RestoreSharedModel, &IsHeldByCharacter, &ReadGlowColors, &RestoreGlowColors})
 {
 }
 
@@ -246,6 +258,40 @@ bool ItemEdits::RemoveSharedModel(std::string label, std::string_view name)
     return true;
 }
 
+void ItemEdits::SetGlowColor(std::string label, const Data::Effects::GlowColor& color)
+{
+    std::vector<Data::Effects::GlowColor> before = ReadGlowColors();
+    g_ItemDataHandler.SetGlowColor(color);
+    std::vector<Data::Effects::GlowColor> after = ReadGlowColors();
+    if (after == before)
+    {
+        return;
+    }
+    ItemEditStep step{ItemEditStep::Kind::GlowColors};
+    step.colorsBefore = std::move(before);
+    step.colorsAfter = std::move(after);
+    Record({std::move(label), {std::move(step)}});
+}
+
+bool ItemEdits::RemoveGlowColors(std::string label, std::span<const std::string> names)
+{
+    std::vector<Data::Effects::GlowColor> before = ReadGlowColors();
+    for (const std::string& name : names)
+    {
+        g_ItemDataHandler.RemoveGlowColor(name);
+    }
+    std::vector<Data::Effects::GlowColor> after = ReadGlowColors();
+    if (after == before)
+    {
+        return false;
+    }
+    ItemEditStep step{ItemEditStep::Kind::GlowColors};
+    step.colorsBefore = std::move(before);
+    step.colorsAfter = std::move(after);
+    Record({std::move(label), {std::move(step)}});
+    return true;
+}
+
 void ItemEdits::BeginGroup(std::string label)
 {
     if (!m_group)
@@ -271,24 +317,29 @@ void ItemEdits::Record(ItemEditEntry entry)
         m_history.Record(std::move(entry));
         return;
     }
-    // One step per item type: an item changed twice keeps its first "before"
-    // and its last "after".
+    // One step per item type and one for the glow colors: what changed twice
+    // keeps its first "before" and its last "after".
     for (ItemEditStep& step : entry.steps)
     {
-        const auto same = std::ranges::find_if(m_group->steps,
-                                               [&](const ItemEditStep& grouped)
-                                               {
-                                                   return step.kind == ItemEditStep::Kind::Slot &&
-                                                          grouped.kind == ItemEditStep::Kind::Slot &&
-                                                          grouped.itemType == step.itemType;
-                                               });
-        if (same != m_group->steps.end())
+        const auto same = std::ranges::find_if(
+            m_group->steps,
+            [&](const ItemEditStep& grouped)
+            {
+                return grouped.kind == step.kind &&
+                       ((step.kind == ItemEditStep::Kind::Slot && grouped.itemType == step.itemType) ||
+                        step.kind == ItemEditStep::Kind::GlowColors);
+            });
+        if (same == m_group->steps.end())
         {
-            same->after = std::move(step.after);
+            m_group->steps.push_back(std::move(step));
+        }
+        else if (step.kind == ItemEditStep::Kind::GlowColors)
+        {
+            same->colorsAfter = std::move(step.colorsAfter);
         }
         else
         {
-            m_group->steps.push_back(std::move(step));
+            same->after = std::move(step.after);
         }
     }
 }
