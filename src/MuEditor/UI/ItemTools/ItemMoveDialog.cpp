@@ -75,8 +75,13 @@ void CItemMoveDialog::Render()
         ImGui::TextColored(NotFreeColor, "%s", I18N::Editor::ThisNumberIsNotFree);
     }
     ImGui::Separator();
+    if (m_usage.GoesWithItem())
+    {
+        ImGui::TextUnformatted(I18N::Editor::MovesWithIt);
+        UsageView::RenderGoingWithItem(m_usage);
+    }
     ImGui::TextUnformatted(I18N::Editor::WhatUsesItStaysAtItsOldNumber);
-    UsageView::Render(m_usage);
+    UsageView::RenderUsesAtNumber(m_usage);
     ImGui::Separator();
 
     const bool held = IsHeldByCharacter(m_itemType);

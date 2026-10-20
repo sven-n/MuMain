@@ -92,16 +92,20 @@ void RenderGameData(const ItemUsage& usage)
 }
 } // namespace
 
-void Render(const ItemUsage& usage)
+void RenderGoingWithItem(const ItemUsage& usage)
+{
+    RenderTags(usage);
+    RenderModel(usage);
+}
+
+void RenderUsesAtNumber(const ItemUsage& usage)
 {
     // Without the sources, code may still name the item.
-    if (!usage.IsUsed() && usage.codeKnown)
+    if (!usage.IsUsedAtNumber() && usage.codeKnown)
     {
         ImGui::TextDisabled("%s", I18N::Editor::NothingUsesTheItem);
         return;
     }
-    RenderTags(usage);
-    RenderModel(usage);
     RenderGameData(usage);
     RenderCode(usage);
 }

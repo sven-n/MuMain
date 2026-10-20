@@ -955,10 +955,10 @@ server with original clients (after phases 6 and B).
      item or a size and slot as the start), duplicate (a model file of its
      own becomes a shared model of both), move (to a free number, with the
      model data and the opened model) and remove (with its model entry).
-     Moving and removing list what uses the item first: tags, model and
-     shared model, the source lines naming it (from the sources the editor
-     was built from) and the sets, add options, buffs and pets of the game
-     data.
+     Moving and removing list first what goes with the item (tags, model
+     entry, shared model) and what stays at its number: the source lines
+     naming it (from the sources the editor was built from) and the sets,
+     add options, buffs and pets of the game data.
    - Undo and redo for the session (256 steps, across saves, cleared by the
      bmd import); a step whose item changed in a way the history did not
      record is refused. Fields are edited on a copy and stored when left.

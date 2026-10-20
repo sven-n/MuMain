@@ -13,7 +13,8 @@
 namespace MuEditor::Items
 {
 // What uses an item, shown before it is removed or moved to another number
-// (section 7): those uses stay at its number.
+// (section 7): its tags and its model entry go with the item; the game data
+// and the code that read it by its number stay there.
 struct ItemUsage
 {
     std::vector<Data::Items::ItemTag> tags;
@@ -33,7 +34,17 @@ struct ItemUsage
 
     bool IsUsed() const
     {
-        return !tags.empty() || hasModel || !code.empty() || inAncientSet || hasAddOption || givesBuff || isPet;
+        return GoesWithItem() || IsUsedAtNumber();
+    }
+    // Its tags or its model entry, which move or go with the item.
+    bool GoesWithItem() const
+    {
+        return !tags.empty() || hasModel;
+    }
+    // What reads the item by its number and stays there.
+    bool IsUsedAtNumber() const
+    {
+        return !code.empty() || inAncientSet || hasAddOption || givesBuff || isPet;
     }
 };
 

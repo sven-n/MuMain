@@ -659,11 +659,11 @@ shows it in the others.
     model the game has opened), so the item keeps its looks.
   - **Remove item**: the item and its model entry.
 
-  Moving and removing first list what uses the item by its number: its
-  tags, its model and shared model, the source lines that name it (read
-  from the sources the editor was built from; without them that part is
-  not known), and an ancient set, add option, buff or pet of the game data.
-  These stay at the number.
+  Moving and removing first list what goes with the item (its tags, its
+  model entry and the shared model it names) and what uses it by its
+  number and stays there: the source lines that name it (read from the
+  sources the editor was built from; without them that part is not known)
+  and an ancient set, add option, buff or pet of the game data.
 - **Item Basics**: the English name, size, slot, two-handed, wing tier,
   weapon kind, skill, drop level, potion priority, the stats, the prices,
   the stat profile and the resistances. Size and slot stay as they are

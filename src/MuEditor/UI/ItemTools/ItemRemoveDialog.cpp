@@ -45,8 +45,13 @@ void CItemRemoveDialog::Render()
     ImGui::TextUnformatted(g_ItemDatabase.GetLogName(m_itemType).c_str());
     ImGui::TextUnformatted(I18N::Editor::TheItemAndItsModelEntryAreRemoved);
     ImGui::Separator();
+    if (m_usage.GoesWithItem())
+    {
+        ImGui::TextUnformatted(I18N::Editor::RemovedWithIt);
+        UsageView::RenderGoingWithItem(m_usage);
+    }
     ImGui::TextUnformatted(I18N::Editor::WhatUsesItStaysAtItsNumber);
-    UsageView::Render(m_usage);
+    UsageView::RenderUsesAtNumber(m_usage);
     ImGui::Separator();
 
     const bool held = IsHeldByCharacter(m_itemType);

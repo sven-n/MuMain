@@ -1378,4 +1378,10 @@
   <data name="Remove unused shared models" xml:space="preserve">
     <value>Ungenutzte geteilte Modelle entfernen</value>
   </data>
+  <data name="Moves with it:" xml:space="preserve">
+    <value>Wird mit verschoben:</value>
+  </data>
+  <data name="Removed with it:" xml:space="preserve">
+    <value>Wird mit entfernt:</value>
+  </data>
 </root>
