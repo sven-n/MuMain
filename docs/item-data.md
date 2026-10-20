@@ -743,8 +743,9 @@ number that has a model but no item:
   A shared model that items use cannot be removed; the ones no item uses
   are listed with a button that removes them.
 - For a file of its own, the texture folders and none-blend meshes; then
-  the inventory display as sliders (a drag is one undo step; Ctrl+click
-  types a value) beside the item in an inventory grid of its size, drawn as
+  the inventory display as sliders, each with a number field to type the
+  value (a drag is one undo step) beside the item in an inventory grid of
+  its size, drawn as
   the game's inventory draws it at the preview's item level (it turns while
   the mouse is on it); the ground display, cloth, specular and the glow
   (levels, colors with their swatches, meshes, excellent). While a slider is

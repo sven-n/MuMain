@@ -8,6 +8,7 @@
 
 #include "imgui.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <string>
 
@@ -18,11 +19,14 @@ namespace MuEditor::Items::Fields
 {
 // The width of a number field, before the editor UI scale.
 constexpr float NumberWidth = 120.0f;
-// The width of a slider, before the editor UI scale.
-constexpr float SliderWidth = 220.0f;
+// The width of a slider and of the number field beside it, before the editor
+// UI scale.
+constexpr float SliderWidth = 180.0f;
+constexpr float SliderNumberWidth = 90.0f;
 
-// What a slider spans and how it shows its value. Ctrl+click types a value,
-// also one outside the span unless the flags clamp it.
+// What a slider spans and how it shows its value. The number field beside it
+// (or Ctrl+click on the slider) takes a value outside the span too, unless the
+// flags clamp it.
 struct SliderRange
 {
     double min;
@@ -61,13 +65,28 @@ template <typename TDraft> void Double(TDraft& draft, const char* label, double&
     draft.AfterField(label);
 }
 
-// A slider for the value: a drag is one undo step, stored when it ends.
+// A slider for the value and a number field beside it, to drag or type it: a
+// drag is one undo step, stored when it ends; a typed value is stored when the
+// field is left.
 template <typename TDraft>
 void Slider(TDraft& draft, const char* label, double& value, const SliderRange& range, const char* undoLabel = nullptr)
 {
+    const char* step = undoLabel != nullptr ? undoLabel : label;
+    ImGui::PushID(label);
     ImGui::SetNextItemWidth(ScaledWidth(SliderWidth));
-    ImGui::SliderScalar(label, ImGuiDataType_Double, &value, &range.min, &range.max, range.format, range.flags);
-    draft.AfterField(undoLabel != nullptr ? undoLabel : label);
+    ImGui::SliderScalar("##Slider", ImGuiDataType_Double, &value, &range.min, &range.max, range.format, range.flags);
+    draft.AfterField(step);
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(ScaledWidth(SliderNumberWidth));
+    ImGui::InputScalar("##Number", ImGuiDataType_Double, &value, nullptr, nullptr, range.format);
+    if (ImGui::IsItemEdited() && (range.flags & ImGuiSliderFlags_ClampOnInput) != 0)
+    {
+        value = std::clamp(value, range.min, range.max);
+    }
+    draft.AfterField(step);
+    ImGui::SameLine();
+    ImGui::TextUnformatted(label);
+    ImGui::PopID();
 }
 
 template <typename TDraft> void Check(TDraft& draft, const char* label, bool& value)
