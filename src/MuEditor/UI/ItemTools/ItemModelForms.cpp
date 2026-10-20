@@ -146,7 +146,10 @@ void ColorCombo(ModelDraft& draft, const char* label, std::string& value, ItemLo
     };
     if (const Data::Effects::GlowColorValue* current = g_GlowColors.Find(value))
     {
+        // Three color combos share one ID scope (glow, shine, ancient).
+        ImGui::PushID(label);
         swatch(*current, "##Current");
+        ImGui::PopID();
         ImGui::SameLine();
     }
     ImGui::SetNextItemWidth(Fields::ScaledWidth(ComboWidth));
