@@ -771,8 +771,10 @@ bool CMuEditorCore::ClaimsEvent(const SDL_Event& event)
     {
     case SDL_EVENT_MOUSE_BUTTON_DOWN:
         // An editor window inside the game window takes the keyboard with a
-        // click, the game with a click into it.
-        m_bKeyboardOnEditorInGameWindow = !ofEditorWindow && wantsMouse;
+        // click, the game with a click into it, also one that only closes a
+        // popup.
+        m_bKeyboardOnEditorInGameWindow =
+            !ofEditorWindow && (m_bHoveringUI || (m_bEditorMode && io.WantCaptureMouseUnlessPopupClose));
         if (!wantsMouse)
         {
             return false;
