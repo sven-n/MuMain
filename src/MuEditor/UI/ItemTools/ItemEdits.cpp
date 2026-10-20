@@ -187,12 +187,18 @@ bool ItemEdits::RemoveItem(std::string label, int itemType)
 
 bool ItemEdits::MoveItem(std::string label, int fromItemType, int toItemType)
 {
-    if (IsHeldByCharacter(fromItemType) || !g_ItemDataHandler.MoveItem(fromItemType, toItemType))
+    if (IsHeldByCharacter(fromItemType))
     {
         return false;
     }
-    Record(
-        {std::move(label), {{ItemEditStep::Kind::Move, fromItemType, toItemType, {}, {}, std::nullopt, std::nullopt}}});
+    ItemSlotState before = ReadSlot(fromItemType);
+    if (!g_ItemDataHandler.MoveItem(fromItemType, toItemType))
+    {
+        return false;
+    }
+    Record({std::move(label),
+            {{ItemEditStep::Kind::Move, fromItemType, toItemType, std::move(before), ReadSlot(toItemType), std::nullopt,
+              std::nullopt}}});
     return true;
 }
 

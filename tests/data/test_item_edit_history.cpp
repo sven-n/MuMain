@@ -46,6 +46,10 @@ public:
                     Slot(from) = ItemSlotState{};
                     moved.item.group = Data::Items::GetItemGroup(to);
                     moved.item.number = Data::Items::GetItemNumber(to);
+                    if (MoveDerives)
+                    {
+                        moved.item.weaponKind = Data::Items::WeaponKind::Sword;
+                    }
                     Slot(to) = moved;
                     return true;
                 },
@@ -65,6 +69,8 @@ public:
     }
 
     std::map<std::string, Data::Items::SharedItemModel> m_shared;
+    // The move changes the weapon kind, as a move to another group may.
+    static inline bool MoveDerives = false;
 
 private:
     std::map<int, ItemSlotState> m_slots;
@@ -132,14 +138,41 @@ TEST_CASE("The item edit history undoes moves and shared model changes [editor][
 
     SUBCASE("a move")
     {
+        const ItemSlotState before = items.Slot(Kris);
         items.MakeHooks().moveItem(Kris, target);
-        history.Record({"Move", {{ItemEditStep::Kind::Move, Kris, target, {}, {}, std::nullopt, std::nullopt}}});
+        const ItemSlotState after = items.Slot(target);
+        history.Record({"Move", {{ItemEditStep::Kind::Move, Kris, target, before, after, std::nullopt, std::nullopt}}});
         REQUIRE(history.Undo());
-        CHECK(items.Slot(Kris).item.Exists());
+        CHECK(items.Slot(Kris) == before);
         CHECK_FALSE(items.Slot(target).item.Exists());
         REQUIRE(history.Redo());
         CHECK(history.GetLastChangedItem() == target);
-        CHECK(items.Slot(target).item.Exists());
+        CHECK(items.Slot(target) == after);
+    }
+
+    SUBCASE("a move puts back what the move derived")
+    {
+        items.Slot(Kris).item.weaponKind = Data::Items::WeaponKind::Axe;
+        const ItemSlotState before = items.Slot(Kris);
+        items.MakeHooks().moveItem(Kris, target);
+        const ItemSlotState after = items.Slot(target);
+        history.Record({"Move", {{ItemEditStep::Kind::Move, Kris, target, before, after, std::nullopt, std::nullopt}}});
+        // A move that derives another weapon kind on the way back.
+        FakeItems::MoveDerives = true;
+        REQUIRE(history.Undo());
+        FakeItems::MoveDerives = false;
+        CHECK(items.Slot(Kris).item.weaponKind == Data::Items::WeaponKind::Axe);
+    }
+
+    SUBCASE("a move is not undone when the moved item changed since")
+    {
+        const ItemSlotState before = items.Slot(Kris);
+        items.MakeHooks().moveItem(Kris, target);
+        const ItemSlotState after = items.Slot(target);
+        history.Record({"Move", {{ItemEditStep::Kind::Move, Kris, target, before, after, std::nullopt, std::nullopt}}});
+        items.Slot(target).item.durability = 7;
+        CHECK_FALSE(history.Undo());
+        CHECK(history.GetLastRefusal() == ItemEditHistory::Refusal::ItemsChanged);
     }
 
     SUBCASE("a renamed shared model")
@@ -229,7 +262,8 @@ TEST_CASE("The item edit history refuses a step that would change an item the ga
         items.Slot(moved) = before;
         items.Slot(moved).item.number = 40;
         items.Slot(Kris) = ItemSlotState{};
-        history.Record({"Move", {{ItemEditStep::Kind::Move, Kris, moved, {}, {}, std::nullopt, std::nullopt}}});
+        history.Record(
+            {"Move", {{ItemEditStep::Kind::Move, Kris, moved, before, items.Slot(moved), std::nullopt, std::nullopt}}});
         heldItemType = moved;
         CHECK_FALSE(history.Undo());
         CHECK(history.GetLastRefusal() == ItemEditHistory::Refusal::ItemHeld);

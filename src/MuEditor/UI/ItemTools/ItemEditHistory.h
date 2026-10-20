@@ -34,7 +34,11 @@ struct ItemEditStep
     {
         // The slot of `itemType` went from `before` to `after`.
         Slot,
-        // The item moved from `itemType` to `otherItemType` (with its model).
+        // The item moved from `itemType` to `otherItemType` (with its model):
+        // `before` is it at `itemType` before the move, `after` at
+        // `otherItemType` after it. The move derives fields from the new
+        // number (CItemDataHandler::MoveItem), so these are put back after
+        // the move back and again.
         Move,
         // The shared model went from `sharedBefore` to `sharedAfter` (nullopt:
         // it did not exist); the names differ when it was renamed.

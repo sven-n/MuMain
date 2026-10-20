@@ -157,7 +157,8 @@ bool ItemEditHistory::IsAsLeft(const ItemEditEntry& entry, bool undoing) const
         {
             const int occupied = undoing ? step.otherItemType : step.itemType;
             const int empty = undoing ? step.itemType : step.otherItemType;
-            if (!m_hooks.readSlot(occupied).item.Exists() || m_hooks.readSlot(empty).item.Exists())
+            if (m_hooks.readSlot(occupied) != (undoing ? step.after : step.before) ||
+                m_hooks.readSlot(empty).item.Exists())
             {
                 return false;
             }
@@ -249,6 +250,7 @@ void ItemEditHistory::ApplyStep(const ItemEditStep& step, bool undoing)
         break;
     }
     case ItemEditStep::Kind::Move:
+    {
         if (undoing)
         {
             m_hooks.moveItem(step.otherItemType, step.itemType);
@@ -257,7 +259,10 @@ void ItemEditHistory::ApplyStep(const ItemEditStep& step, bool undoing)
         {
             m_hooks.moveItem(step.itemType, step.otherItemType);
         }
+        const ItemSlotState& state = undoing ? step.before : step.after;
+        m_hooks.restoreSlots(std::span<const ItemSlotState>(&state, 1));
         break;
+    }
     case ItemEditStep::Kind::SharedModel:
         m_hooks.restoreSharedModel(SharedModelName(step, undoing), undoing ? step.sharedBefore : step.sharedAfter);
         break;

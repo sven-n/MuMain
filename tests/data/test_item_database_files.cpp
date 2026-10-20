@@ -1096,6 +1096,20 @@ TEST_CASE("The item tools' changes can be undone and redone [data][items][editor
         CHECK(g_ItemModelDatabase.Find(KrisType) != nullptr);
     }
 
+    SUBCASE("a move to another group and back keeps a picked weapon kind")
+    {
+        ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+        kris.weaponKind = WeaponKind::Axe;
+        edits.SetItem("Weapon kind", kris);
+        const int target = MakeItemType(1, 100);
+        REQUIRE(edits.MoveItem("Move", KrisType, target));
+        REQUIRE(edits.Undo());
+        CHECK(g_ItemDatabase.GetWeaponKind(KrisType) == WeaponKind::Axe);
+        // The step before the move is still as it left the item.
+        REQUIRE(edits.Undo());
+        CHECK(g_ItemDatabase.GetWeaponKind(KrisType) == WeaponKind::Sword);
+    }
+
     SUBCASE("a renamed shared model")
     {
         const SharedItemModel shared = g_ItemModelDatabase.GetSharedModels().front();
