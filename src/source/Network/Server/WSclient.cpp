@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "App/Control/ControlTaps.h"
 #include "Core/Utilities/Log/MuLogger.h"
+#include "UI/Chat/ExternalChat.h"
 #include "UI/Chat/Chat.h"
 #include "UI/Chat/ChatMessages.h"
 #include "UI/Combat/SiegeUpdates.h"
@@ -1819,12 +1820,23 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
         {
             for (int i = 0; i < messageSize - 2; i++)
                 Text[i] = Text[i + 2];
+            if (UI::Chat::External::IsBridgedSender(ID))
+            {
+                // Recorded for the control socket as a Discord line instead.
+                UI::Chat::External::ShowBridged(UI::Chat::External::Scope::Alliance, ID, Text);
+                return;
+            }
             UI::Chat::PostChat(ID, Text, mu::ui::window::TYPE_UNION_MESSAGE);
         }
         else if (Text[0] == L'@')
         {
             for (int i = 0; i < messageSize - 1; i++)
                 Text[i] = Text[i + 1];
+            if (UI::Chat::External::IsBridgedSender(ID))
+            {
+                UI::Chat::External::ShowBridged(UI::Chat::External::Scope::Guild, ID, Text);
+                return;
+            }
             UI::Chat::PostChat(ID, Text, mu::ui::window::TYPE_GUILD_MESSAGE);
         }
         else if (Text[0] == L'$')
