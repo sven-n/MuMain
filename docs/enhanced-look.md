@@ -70,14 +70,14 @@ window.
 |---|---|---|---|---|---|---|
 | Enhanced lighting | Directional light | `lighting.diffuse.scale` | 0–2 | 0.05 | 1 | common |
 | Enhanced lighting | Rim intensity | `lighting.rim.strength` | 0–1 | 0.05 | 0.4 | common |
-| Enhanced lighting | Metallic shine | `lighting.specular.scale` | 0–2 | 0.05 | 1 | common |
+| Enhanced lighting | Metallic shine | `lighting.specular.scale` | 0–2 | 0.05 | 0.8 | common |
 | Enhanced lighting | Ambient fill | `lighting.diffuse.ambient` | 0–1 | 0.05 | 0.3 | More settings |
 | Enhanced lighting | Minimum light | `lighting.diffuse.floor` | 0–1 | 0.05 | 0.15 | More settings |
 | Enhanced lighting | Highlight knee | `lighting.highlightKnee` | 0.5–0.9 | 0.01 | 0.8 | More settings |
 | Enhanced lighting | Rim concentration | `lighting.rim.power` | 1–8 | 0.1 | 3 | More settings |
 | Enhanced lighting | Shine concentration | `lighting.specular.power` | 4–128 | 1 | 32 | More settings |
-| Dynamic lights | Skill intensity | `dynamic.effectGain` | 0–4× | 0.1× | 2.5× | common |
-| Dynamic lights | Skill radius | `dynamic.effectRange` | 0.5–4× | 0.1× | 3× | common |
+| Dynamic lights | Skill intensity | `dynamic.effectGain` | 0–4× | 0.1× | 0.5× | common |
+| Dynamic lights | Skill radius | `dynamic.effectRange` | 0.5–4× | 0.1× | 2× | common |
 | Dynamic lights | Skill fade | `dynamic.effectFade` | 0–2 s | 0.05 s | 0.5 s | common |
 | Dynamic lights | Overlapping-light cap | `dynamic.effectCap` | 0–8 | 0.1 | 2.5 | common |
 | Dynamic lights | Shadow darkness | `dynamic.shadowOpacity` | 0–100 % | 5 % | 60 % | common |
@@ -198,12 +198,12 @@ for the whole file.
 | `lighting.highlightKnee` | 0.8 | 0.8 | 0.5–0.9 | lit colours above it approach white without reaching it |
 | `lighting.rim.strength` | 0.4 | 0.35 | 0–1 | light along a model's silhouette |
 | `lighting.rim.power` | 3 | 3 | 1–8 | how narrow the rim is |
-| `lighting.specular.scale` | 1 | 1 | 0–2 | highlights on item models that declare specular (`material.specular` in the item-model JSON; the metal armour sets) |
+| `lighting.specular.scale` | 0.8 | 1 | 0–2 | highlights on item models that declare specular (`material.specular` in the item-model JSON; the metal armour sets) |
 | `lighting.specular.power` | 32 | 32 | 4–128 | how small the highlight is |
 | `dynamic.wrap` | 0.3 | 0.5 | 0–0.5 | how far a point light reaches round a model |
 | `dynamic.mapSmoothing` | 0.5 | 0 | 0–2 | seconds over which flickering map and character lights (candles, fires) ease to their new brightness |
-| `dynamic.effectGain` | 2.5 | 1 | 0–4 | brightness factor of spell and effect lights |
-| `dynamic.effectRange` | 3 | 1 | 0.5–4 | range factor of spell and effect lights |
+| `dynamic.effectGain` | 0.5 | 1 | 0–4 | brightness factor of spell and effect lights |
+| `dynamic.effectRange` | 2 | 1 | 0.5–4 | range factor of spell and effect lights |
 | `dynamic.effectRangeMax` | 8 | 0 (none) | 0–16 | the most terrain cells the range factor may widen a light to |
 | `dynamic.effectFade` | 0.5 | 0 | 0–2 | seconds over which a spell's light fades out after it ends |
 | `dynamic.effectCap` | 2.5 | 0 (none) | 0–8 | the most light overlapping spell lights may add up to |
