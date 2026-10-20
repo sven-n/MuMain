@@ -26,6 +26,9 @@ private:
 
     void RenderToolbar();
     void RenderTable();
+    // When an item was selected elsewhere: clears the search and the missing
+    // filter if they hide it. Returns whether to scroll to it.
+    bool RevealSelection(int selectedItemType);
     void RenderIdCell(int itemType);
     void RenderNameCell(int itemType, int column, const char* locale);
     void CommitName(int itemType, const char* locale, const char* text);
@@ -52,6 +55,8 @@ private:
     // Index into m_locales of the language whose missing names are listed, or
     // -1 for all items.
     int m_missingLocale = -1;
+    // The selection serial last shown (ItemSelection::GetSerial).
+    int m_shownSerial = -1;
     CItemListModel::Filter m_filter;
     CItemListModel m_list;
 

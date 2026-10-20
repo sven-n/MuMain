@@ -29,6 +29,8 @@ constexpr float NameColumnWidth = 190.0f;
 constexpr float SearchWidth = 220.0f;
 constexpr float MissingComboWidth = 220.0f;
 constexpr int FrozenColumns = 2;
+// The row of the item the tools show, as in the other item tools.
+constexpr ImVec4 MarkedRowColor(0.9f, 0.7f, 0.0f, 0.25f);
 
 using Data::Items::ItemDefinition;
 
@@ -151,8 +153,32 @@ void CMuItemTranslationsUI::RenderToolbar()
     }
 }
 
+bool CMuItemTranslationsUI::RevealSelection(int selectedItemType)
+{
+    if (g_ItemSelection.GetSerial() == m_shownSerial)
+    {
+        return false;
+    }
+    m_shownSerial = g_ItemSelection.GetSerial();
+    if (g_ItemDatabase.Find(selectedItemType) == nullptr)
+    {
+        return false;
+    }
+    m_filter.search.assign(m_search);
+    m_filter.missingLocale.assign(m_missingLocale >= 0 ? m_locales[m_missingLocale] : "");
+    const std::vector<int>& listed = m_list.GetItemTypes(m_filter);
+    if (std::find(listed.begin(), listed.end(), selectedItemType) == listed.end())
+    {
+        m_search[0] = '\0';
+        m_missingLocale = -1;
+    }
+    return true;
+}
+
 void CMuItemTranslationsUI::RenderTable()
 {
+    const int selected = g_ItemSelection.GetItemType();
+    const bool reveal = RevealSelection(selected);
     // Assigned in place, so the strings keep their memory from frame to frame.
     m_filter.search.assign(m_search);
     m_filter.missingLocale.assign(m_missingLocale >= 0 ? m_locales[m_missingLocale] : "");
@@ -188,6 +214,12 @@ void CMuItemTranslationsUI::RenderTable()
     {
         clipper.IncludeItemByIndex(static_cast<int>(editing - itemTypes.begin()));
     }
+    const auto selectedRow = std::find(itemTypes.begin(), itemTypes.end(), selected);
+    const bool scrollToSelected = reveal && selectedRow != itemTypes.end();
+    if (scrollToSelected)
+    {
+        clipper.IncludeItemByIndex(static_cast<int>(selectedRow - itemTypes.begin()));
+    }
     while (clipper.Step())
     {
         for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; ++row)
@@ -195,7 +227,15 @@ void CMuItemTranslationsUI::RenderTable()
             const int itemType = itemTypes[row];
             ImGui::PushID(itemType);
             ImGui::TableNextRow();
+            if (itemType == selected)
+            {
+                ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, ImGui::GetColorU32(MarkedRowColor));
+            }
             ImGui::TableSetColumnIndex(0);
+            if (itemType == selected && scrollToSelected)
+            {
+                ImGui::SetScrollHereY();
+            }
             RenderIdCell(itemType);
             for (size_t column = 0; column < m_locales.size(); ++column)
             {
@@ -218,6 +258,7 @@ void CMuItemTranslationsUI::RenderIdCell(int itemType)
     {
         // The item selected for all item tools, the item browser in front.
         g_ItemSelection.Select(itemType);
+        m_shownSerial = g_ItemSelection.GetSerial();
         g_MuEditorCore.GetToolWindows().itemBrowser = true;
         ImGui::SetWindowFocus(MuEditor::WindowIds::ItemBrowser);
     }

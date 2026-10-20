@@ -376,7 +376,9 @@ language, English first.
   that is the same in that language; **Remove translation** removes it.
 - The search finds an item by any of its names (A to Z in either case), by
   `group,number` or by its item type. Clicking the number selects the item
-  in the other item tools and shows the **Item Browser**.
+  in the other item tools and shows the **Item Browser**. The item the
+  tools show is marked, and an item selected in another tool is scrolled
+  to (the search and filter are cleared when they hide it).
 - Columns can be hidden from the header's right-click menu. A name cannot
   contain `||` (the item checks refuse it). The English name
   cannot be emptied, and the names are stored whole, also when they are
