@@ -3,11 +3,13 @@ mu_add_test(
     SOURCES
         test_item_database.cpp
         test_item_json.cpp
+        test_item_list_model.cpp
         test_item_model_json.cpp
         test_item_model_display_json.cpp
         test_item_model_glow_json.cpp
         test_item_model_material_json.cpp
         test_item_model_problems.cpp
+        test_item_names.cpp
         test_item_stats_json.cpp
         test_localized_string.cpp
     LINK_LIBS

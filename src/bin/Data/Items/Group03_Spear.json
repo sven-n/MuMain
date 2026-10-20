@@ -219,7 +219,8 @@
       "name": {
         "en": "Berdysh",
         "de": "Berdysch",
-        "es": "Berdiche"
+        "es": "Berdiche",
+        "pt": "Berdysh"
       },
       "width": 2,
       "height": 4,
@@ -338,7 +339,10 @@
     {
       "number": 11,
       "name": {
-        "en": "Brova"
+        "en": "Brova",
+        "de": "Brova",
+        "es": "Brova",
+        "pt": "Brova"
       },
       "width": 2,
       "height": 4,

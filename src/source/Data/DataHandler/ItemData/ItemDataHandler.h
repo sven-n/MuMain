@@ -3,6 +3,7 @@
 #include "Data/GameData/ItemData/ItemStructs.h"
 
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -39,6 +40,13 @@ public:
     // into the item database. A changed name is stored for the current UI
     // locale.
     void OnItemEdited(int itemType);
+    // Sets the item's name in `locale` (an empty text removes the translation;
+    // the English name cannot be emptied) in the item database, whole also when
+    // it is longer than ITEM_ATTRIBUTE's name; ItemAttribute shows the name in
+    // the UI locale. False when the item does not exist, when the English name
+    // would be empty (also when the item has none yet) or when the text has
+    // LocalizedString::Separator, which the item checks refuse.
+    bool SetItemName(int itemType, std::string_view locale, std::string text);
     // The item editor swapped two entries of ItemAttribute[]. A moved item
     // takes its model along (the item model database and the opened model
     // slot), and its weapon kind and stat profile follow its new group like
@@ -85,6 +93,13 @@ private:
     // Gives imported items without an English name the one the item has now.
     // Returns how many names were kept.
     static int KeepCurrentEnglishNames(std::vector<Data::Items::ItemDefinition>& items);
+    // An item.bmd has a name for every item, so a missing translation is in it
+    // as the English name (Export as bmd writes it so). An imported name equal
+    // to the English one stays only where the item has a name of its own in
+    // that language now (it is the same there, like Kris); otherwise the name
+    // stays missing.
+    static void KeepMissingNamesMissing(std::vector<Data::Items::ItemDefinition>& items,
+                                        const std::vector<std::string>& importedLocales);
     // Gives imported items the current values of the fields item.bmd does
     // not have (tags, wing tier, weapon kind, stat profile, rule flags) and their current names in the
     // languages whose item.bmd was not read: the ones without one (e.g.

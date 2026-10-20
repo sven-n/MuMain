@@ -904,4 +904,37 @@
   <data name="Preview not its model" xml:space="preserve">
     <value>Der Platz dieser Karte enthält ein anderes Objekt, nicht das Modell dieses Effekts (siehe Ressource).</value>
   </data>
+  <data name="Item Translations" xml:space="preserve">
+    <value>Gegenstandsübersetzungen</value>
+  </data>
+  <data name="Missing in" xml:space="preserve">
+    <value>Fehlt in:</value>
+  </data>
+  <data name="All items" xml:space="preserve">
+    <value>Alle Gegenstände</value>
+  </data>
+  <data name="Count missing" xml:space="preserve">
+    <value>{0} fehlend</value>
+  </data>
+  <data name="Show in the item table" xml:space="preserve">
+    <value>In der Gegenstandstabelle zeigen</value>
+  </data>
+  <data name="Same as English" xml:space="preserve">
+    <value>Wie Englisch</value>
+  </data>
+  <data name="Remove translation" xml:space="preserve">
+    <value>Übersetzung entfernen</value>
+  </data>
+  <data name="The English name cannot be empty" xml:space="preserve">
+    <value>Der englische Name darf nicht leer sein.</value>
+  </data>
+  <data name="Item names cannot contain the separator" xml:space="preserve">
+    <value>Ein Gegenstandsname darf kein "||" enthalten.</value>
+  </data>
+  <data name="Name or number" xml:space="preserve">
+    <value>Name oder Nummer</value>
+  </data>
+  <data name="Item names missing" xml:space="preserve">
+    <value>Fehlende Gegenstandsnamen auf {0}: {1} von {2}</value>
+  </data>
 </root>

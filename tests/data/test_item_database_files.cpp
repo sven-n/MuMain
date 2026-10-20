@@ -12,8 +12,10 @@
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
+#include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
+#include "Data/GameData/ItemData/ItemNames.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
@@ -188,6 +190,18 @@ TEST_CASE("Shipped item data loads without problems [data][items]")
     CHECK(result.items.size() > 900);
 }
 
+TEST_CASE("The shipped item names are in languages the game shows [data][items]")
+{
+    const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
+    std::vector<ItemDataIssue> issues;
+    ValidateNameLocales(result.items, I18N::GetAvailableLocales(), issues);
+    for (const ItemDataIssue& issue : issues)
+    {
+        INFO(issue.ToString());
+        CHECK(false);
+    }
+}
+
 TEST_CASE("Loading item data fills ItemAttribute in the UI locale [data][items]")
 {
     ClientDataScope client(ShippedClientDirectory);
@@ -205,7 +219,7 @@ TEST_CASE("Loading item data fills ItemAttribute in the UI locale [data][items]"
 
     I18N::SetLocale("de");
     CHECK(client.Name(BladeType) == L"Klinge");
-    // No German name: English is shown.
+    // The German name is the English one.
     CHECK(client.Name(KrisType) == L"Kris");
 }
 
@@ -396,14 +410,61 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         CHECK(g_ItemDatabase.Find(BladeType)->names.GetNeutral() == "Blade");
     }
 
+    SUBCASE("a name set for another language goes into the database, not into the shown name")
+    {
+        REQUIRE(g_ItemDataHandler.SetItemName(BladeType, "pl", "Ostrze"));
+        CHECK(g_ItemDatabase.Find(BladeType)->names.Get("pl") == "Ostrze");
+        CHECK(std::wstring(ItemAttribute[BladeType].Name) == L"Blade");
+    }
+
+    SUBCASE("a name set for the shown language is shown, also when it is longer than the game shows")
+    {
+        const std::string longName(60, 'B');
+        REQUIRE(g_ItemDataHandler.SetItemName(BladeType, "en", longName));
+        CHECK(g_ItemDatabase.Find(BladeType)->names.GetNeutral() == longName);
+        CHECK(std::wstring(ItemAttribute[BladeType].Name) == std::wstring(MAX_ITEM_NAME - 1, L'B'));
+    }
+
+    SUBCASE("an empty name removes a translation, but not the English name")
+    {
+        REQUIRE(g_ItemDataHandler.SetItemName(BladeType, "pt", ""));
+        CHECK_FALSE(g_ItemDatabase.Find(BladeType)->names.GetTranslations().contains("pt"));
+        CHECK_FALSE(g_ItemDataHandler.SetItemName(BladeType, "en", ""));
+        CHECK(g_ItemDatabase.Find(BladeType)->names.GetNeutral() == "Blade");
+        CHECK_FALSE(g_ItemDataHandler.SetItemName(MakeItemType(0, 500), "en", "Nothing"));
+    }
+
+    SUBCASE("a name with the separator is refused, since the save would refuse it")
+    {
+        CHECK_FALSE(g_ItemDataHandler.SetItemName(BladeType, "pt", "L\xC3\xA2mina||de=Klinge"));
+        CHECK_FALSE(g_ItemDataHandler.SetItemName(BladeType, "en", "Bl||ade"));
+        CHECK(g_ItemDatabase.Find(BladeType)->names.GetNeutral() == "Blade");
+        CHECK(g_ItemDatabase.Find(BladeType)->names.Get("pt") == "L\xC3\xA2mina");
+    }
+
+    SUBCASE("an item without an English name gets that first, so it cannot lose its last name")
+    {
+        ItemDefinition untranslated = *g_ItemDatabase.Find(KrisType);
+        untranslated.names = Data::LocalizedString{};
+        untranslated.names.Set("pt", "Cris");
+        g_ItemDatabase.Set(untranslated);
+
+        CHECK_FALSE(g_ItemDataHandler.SetItemName(KrisType, "pt", ""));
+        CHECK_FALSE(g_ItemDataHandler.SetItemName(KrisType, "es", "Daga"));
+        REQUIRE(g_ItemDatabase.Find(KrisType) != nullptr);
+        CHECK(g_ItemDatabase.Find(KrisType)->names.Get("pt") == "Cris");
+        CHECK(g_ItemDataHandler.SetItemName(KrisType, "en", "Kris"));
+    }
+
     SUBCASE("a value change does not turn the English fallback into a translation")
     {
-        I18N::SetLocale("pt");
+        // No item has a Polish name: the English one is shown.
+        I18N::SetLocale("pl");
         REQUIRE(client.Name(KrisType) == L"Kris");
         ItemAttribute[KrisType].Width = 2;
         g_ItemDataHandler.OnItemEdited(KrisType);
 
-        CHECK(g_ItemDatabase.Find(KrisType)->names.GetTranslations().empty());
+        CHECK_FALSE(g_ItemDatabase.Find(KrisType)->names.GetTranslations().contains("pl"));
     }
 
     SUBCASE("a value change keeps a name longer than ITEM_ATTRIBUTE can hold")
@@ -708,6 +769,48 @@ TEST_CASE("Exporting the items as bmd and importing them again gives the same da
         CHECK(WriteItemGroupJson(group, g_ItemDatabase.GetAllSlots()) ==
               TestFiles::ReadWholeFile(DataDirectory / "Items" / GetItemGroupFileName(group)));
     }
+}
+
+// Export as bmd writes a missing name as the English one; the import must not
+// turn it into a name that is the same in that language.
+TEST_CASE("A bmd round trip keeps missing names missing and names that are the same [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.SetItemName(BladeType, "pt", ""));
+    REQUIRE(g_ItemDataHandler.SetItemName(KrisType, "es", "Kris"));
+    std::string changeLog;
+    REQUIRE(g_ItemDataHandler.ExportAsBmd(changeLog));
+
+    const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
+    REQUIRE_FALSE(HasErrors(result.issues));
+    CHECK_FALSE(HasNameIn(*g_ItemDatabase.Find(BladeType), "pt"));
+    CHECK(GetOwnName(*g_ItemDatabase.Find(KrisType), "es") == "Kris");
+    CHECK(HasNameIn(*g_ItemDatabase.Find(BladeType), "es"));
+}
+
+TEST_CASE("The save warns about an item name in a language the game has no texts for [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.SetItemName(BladeType, "fr", "Lame"));
+
+    std::vector<ItemDataIssue> issues;
+    CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+    CHECK(std::ranges::any_of(issues,
+                              [](const ItemDataIssue& issue)
+                              {
+                                  return issue.severity == ItemDataIssueSeverity::Warning && issue.group == 0 &&
+                                         issue.number == 5 && issue.message.find("the fr name") != std::string::npos;
+                              }));
 }
 
 // The bmd import and the editor give items the profile their data gives; a stat file can lack it

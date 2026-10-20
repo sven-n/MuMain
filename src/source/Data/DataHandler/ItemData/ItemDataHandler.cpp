@@ -12,6 +12,7 @@
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
+#include "Data/GameData/ItemData/ItemNames.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "I18N/All.h"
 
@@ -116,6 +117,7 @@ bool CItemDataHandler::Load(std::string& errorMessage)
 {
     const auto loadStart = std::chrono::steady_clock::now();
     ItemDataLoadResult result = LoadItemDataDirectory(GetItemDataDirectory());
+    ValidateNameLocales(result.items, I18N::GetAvailableLocales(), result.issues);
     ItemStatsLoadResult stats = LoadItemStatsFile(GetItemStatsFile());
     result.issues.insert(result.issues.end(), stats.issues.begin(), stats.issues.end());
     ItemStatProfiles statProfiles;
@@ -253,6 +255,31 @@ void CItemDataHandler::OnItemEdited(int itemType)
     }
 }
 
+bool CItemDataHandler::SetItemName(int itemType, std::string_view locale, std::string text)
+{
+    const ItemDefinition* current = g_ItemDatabase.Find(itemType);
+    if (current == nullptr || text.find(Data::LocalizedString::Separator) != std::string::npos)
+    {
+        return false;
+    }
+
+    ItemDefinition definition = *current;
+    definition.names.Set(locale, std::move(text));
+    // Also for an item without an English name (from a bmd import): removing
+    // its last translation would end the item in the database while
+    // ItemAttribute kept it. Its English name comes first.
+    if (definition.names.GetNeutral().empty())
+    {
+        return false;
+    }
+    g_ItemDatabase.Set(definition);
+    if (const ItemDefinition* updated = g_ItemDatabase.Find(itemType))
+    {
+        ToItemAttribute(*updated, ItemAttribute[itemType]);
+    }
+    return true;
+}
+
 void CItemDataHandler::OnItemsSwapped(int firstItemType, int secondItemType)
 {
     if (!IsValidItemType(firstItemType) || !IsValidItemType(secondItemType))
@@ -312,6 +339,7 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
     // the items too and refuses on any error, so everything is reported at once.
     ValidateStatProfiles(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(),
                          GetItemStatsFile().generic_string(), issues);
+    ValidateNameLocales(g_ItemDatabase.GetAllSlots(), I18N::GetAvailableLocales(), issues);
     // Only the model files of moved models are written; the others keep what
     // this client does not read from them.
     return SaveItemAndModelDataDirectories(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(),
@@ -328,10 +356,12 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
     }
 
     result.keptEnglishNameCount = KeepCurrentEnglishNames(result.items);
+    KeepMissingNamesMissing(result.items, result.importedLocales);
     KeepFieldsNotInBmd(result.items, result.importedLocales, result.validationIssues);
     ValidateItems(result.items, result.validationIssues);
     ValidateStatProfiles(result.items, g_ItemDatabase.GetStatProfiles(), GetItemStatsFile().generic_string(),
                          result.validationIssues);
+    ValidateNameLocales(result.items, I18N::GetAvailableLocales(), result.validationIssues);
 
     g_ItemDatabase.Build(result.items);
     FillItemAttributes();
@@ -355,6 +385,27 @@ int CItemDataHandler::KeepCurrentEnglishNames(std::vector<ItemDefinition>& items
         ++keptCount;
     }
     return keptCount;
+}
+
+void CItemDataHandler::KeepMissingNamesMissing(std::vector<ItemDefinition>& items,
+                                               const std::vector<std::string>& importedLocales)
+{
+    for (ItemDefinition& item : items)
+    {
+        const ItemDefinition* current = g_ItemDatabase.Find(item.group, item.number);
+        for (const std::string& locale : importedLocales)
+        {
+            if (locale == Data::LocalizedString::NeutralLocale ||
+                Data::Items::GetOwnName(item, locale) != item.names.GetNeutral())
+            {
+                continue;
+            }
+            if (current == nullptr || !Data::Items::HasNameIn(*current, locale))
+            {
+                item.names.Set(locale, "");
+            }
+        }
+    }
 }
 
 void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items,
