@@ -695,10 +695,10 @@ How changes work:
 - A text or number field is stored when you leave it after a change, a
   checkbox or list right away. Each is one step of **Undo** and **Redo**
   (also Ctrl+Z and Ctrl+Y while an item tool has the focus and no field is
-  being typed in), for the whole
-  session and across saves. A step is not undone when the item changed in
-  a way the history did not record. Import from bmd clears the history. The
-  browser's title has a `*` while there are changes that are not saved.
+  being typed in): the last 256 steps, for the whole session and across
+  saves. A step is not undone when the item changed in a way the history
+  did not record. Import from bmd clears the history. The browser's title
+  has a `*` while there are changes that are not saved.
 - The weapon kind and the stat profile follow the item's data (group,
   slot, classes, requirements) while they are what it gives; a value you
   pick stays.
