@@ -68,11 +68,11 @@ PER_FILE_FUNCTION_ALLOWLIST = {
         "glReadPixels",
     },
     # Font/glyph atlas sub-upload -- DXP-12 territory.
-    "UI/Legacy/UIControls.cpp": {
+    "UI/Widgets/UIControls.cpp": {
         "glBindTexture", "glTexSubImage2D",
     },
     # Frozen-frame capture texture for the reconnect overlay -- DXP-12 territory.
-    "UI/NewUI/Dialogs/ReconnectDialog.cpp": {
+    "UI/Dialogs/ReconnectDialog.cpp": {
         "glGenTextures", "glBindTexture", "glTexParameteri", "glReadBuffer", "glCopyTexImage2D",
     },
     # Event fog parameters -- D3D has no fixed-function fog; belongs to DXP-14's shader-uniform design.

@@ -119,12 +119,10 @@ extern bool& EnableMainRender;
 bool CheckAbuseFilter(wchar_t* Text, bool bCheckSlash);
 bool CheckAbuseNameFilter(wchar_t* Text);
 bool CheckName();
-BOOL CheckOptionMouseClick(int iOptionPos_y, BOOL bPlayClickSound = TRUE);
 int SeparateTextIntoLines(const wchar_t* lpszText, wchar_t* lpszSeparated, int iMaxLine, int iLineSize);
 void SetEffectVolumeLevel(int level);
 
 // Rendering utilities
-void RenderInfomation3D();
 void RenderInfomation();
 BOOL ShowCheckBox(int num, int index, int message);
 

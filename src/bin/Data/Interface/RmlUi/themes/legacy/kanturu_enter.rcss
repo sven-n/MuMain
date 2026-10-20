@@ -1,0 +1,78 @@
+/* Legacy theme for CKanturu2ndEnterNpc, reproducing its RenderFrame()/RenderTexts()/
+   RenderButtons(): the message-box back (newui_msgbox_back, 222 x 257 from y 2, sampled 1:1), the
+   top (newui_msgbox_top, 230 x 67), ten middle tiles, the bottom; the subject bold (255, 176, 73),
+   the first state text green (145, 241, 97), the others bright yellow (255, 238, 193), every line
+   centred on 230 units; the Refresh / Enter / Close buttons (newui_btn_empty_very_small, 53 x 23 of
+   its 54-wide rows) at y 220, a locked one tinted (100, 100, 100) and never hovered. Reference px
+   inside #panel. */
+
+@spritesheet kanturu-back-sheet { src: "../../../newui_msgbox_back.jpg"; kanturu-back: 0px 0px 222px 257px; }
+@spritesheet kanturu-top-sheet { src: "../../../newui_msgbox_top.tga"; kanturu-top: 0px 0px 230px 67px; }
+@spritesheet kanturu-middle-sheet { src: "../../../newui_msgbox_middle.tga"; kanturu-middle: 0px 0px 230px 15px; }
+@spritesheet kanturu-bottom-sheet { src: "../../../newui_msgbox_bottom.tga"; kanturu-bottom: 0px 0px 230px 50px; }
+@spritesheet kanturu-btn-sheet
+{
+	src: "../../../newui_btn_empty_very_small.tga";
+	kanturu-btn-up: 0px 0px 53px 23px;
+	kanturu-btn-over: 0px 23px 53px 23px;
+	kanturu-btn-down: 0px 46px 53px 23px;
+}
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 230px;
+	height: 267px;
+	font-family: "token(font-body)";
+	pointer-events: auto;
+}
+
+#back { position: absolute; left: 0; top: 2px; width: 222px; height: 257px; decorator: image(kanturu-back); }
+#frame_top { position: absolute; left: 0; top: 0; width: 230px; height: 67px; decorator: image(kanturu-top); }
+.frame-middle { position: absolute; left: 0; width: 230px; height: 15px; decorator: image(kanturu-middle); }
+#frame_bottom { position: absolute; left: 0; top: 217px; width: 230px; height: 50px; decorator: image(kanturu-bottom); }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: center; pointer-events: none; }
+/* The original's RenderTexts(): lines 12 apart from 30, the state texts 20 below the subject and
+   15 between two of them. */
+#kanturu_lines { left: 0; top: 30px; --flow-w: 230px; }
+.kanturu-line { display: block; height: calc(12px * var(--root-scale)); white-space: nowrap; color: #ffb049; }
+.kanturu-line.tone-state.group-start { margin-top: calc(20px * var(--root-scale)); }
+.kanturu-line.tone-note.group-start { margin-top: calc(15px * var(--root-scale)); }
+.kanturu-line.tone-subject { font-weight: bold; }
+.kanturu-line.tone-state { color: #91f161; }
+.kanturu-line.tone-note { color: #ffeec1; }
+
+.kanturu-btn {
+	display: block;
+	position: absolute;
+	top: 220px;
+	width: 53px;
+	height: 23px;
+	decorator: image(kanturu-btn-up);
+	pointer-events: auto;
+}
+.kanturu-btn:hover { decorator: image(kanturu-btn-over); }
+.kanturu-btn:active { decorator: image(kanturu-btn-down); }
+.kanturu-btn.locked, .kanturu-btn.locked:hover, .kanturu-btn.locked:active { decorator: image(kanturu-btn-up); image-color: #646464; }
+#btn_refresh { left: 17px; }
+#btn_enter { left: 87px; }
+#btn_close { left: 157px; }
+.kanturu-label { left: 0; color: #ffffff; }
+.kanturu-btn.locked .kanturu-label { color: #646464; }
+
+/* The frame tiles are a container so each one can be counted; it takes no space itself. */
+.frame-middles { position: static; }
+.frame-middles .frame-middle:nth-child(1) { top: 67px; }
+.frame-middles .frame-middle:nth-child(2) { top: 82px; }
+.frame-middles .frame-middle:nth-child(3) { top: 97px; }
+.frame-middles .frame-middle:nth-child(4) { top: 112px; }
+.frame-middles .frame-middle:nth-child(5) { top: 127px; }
+.frame-middles .frame-middle:nth-child(6) { top: 142px; }
+.frame-middles .frame-middle:nth-child(7) { top: 157px; }
+.frame-middles .frame-middle:nth-child(8) { top: 172px; }
+.frame-middles .frame-middle:nth-child(9) { top: 187px; }
+.frame-middles .frame-middle:nth-child(10) { top: 202px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+.kanturu-label { width: calc(53px * var(--root-scale)); }

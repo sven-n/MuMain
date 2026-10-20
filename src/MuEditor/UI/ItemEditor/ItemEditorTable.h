@@ -27,8 +27,8 @@ public:
     // set even when the search filter hides the item.
     static void RequestScrollToIndex(int index);
 
-    // Whether the table lists the item with this (lowercase) search filter:
-    // items with a name that contains it.
+    // Whether the table lists the item with this search filter: items with a
+    // name that contains it (ContainsIgnoringCase).
     static bool IsListed(int itemIndex, const std::string& searchFilter);
 
     // Force rebuild of filtered list (call after data changes)

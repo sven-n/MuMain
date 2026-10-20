@@ -136,20 +136,41 @@
       return swprintf_s(buffer, N, format, args...);
   }
 #else
-  // GCC/MinGW/Clang: use std::swprintf with explicit buffer size. For an array
-  // the bound is its real size; a 1024 fallback larger than the array would
-  // overrun smaller buffers, and glibc's _FORTIFY_SOURCE aborts on the
-  // mismatch even before anything is written. Only a plain pointer (size
-  // unknowable) keeps the 1024 assumption.
+  // GCC/MinGW/Clang: use std::swprintf with an explicit buffer size. For an array
+  // the bound is its real size. For a plain pointer, ask the compiler for the size
+  // it can see: the same size glibc's _FORTIFY_SOURCE checks swprintf against, so the
+  // two can't disagree -- once inlining reveals that the pointer aims into a smaller
+  // buffer, the call truncates instead of aborting. Only when the size is unknown
+  // (heap, hidden object) does the historical 1024 assumption remain.
 #ifndef MU_SWPRINTF_DEFINED
 #define MU_SWPRINTF_DEFINED
+  // Historical assumption for buffers whose size the compiler cannot see.
+  inline constexpr size_t kMuSwprintfUnknownBufferChars = 1024;
   template<typename Buf, typename... Args>
   inline int mu_swprintf(Buf&& buffer, const wchar_t* format, Args... args) {
       using Array = std::remove_reference_t<Buf>;
       if constexpr (std::is_array_v<Array>)
           return std::swprintf(buffer, std::extent_v<Array>, format, args...);
       else
-          return std::swprintf(buffer, 1024, format, args...);
+      {
+          // Object size type 1 asks for the maximum size: exactly what glibc's
+          // _FORTIFY_SOURCE checks swprintf against, so the two can't disagree.
+#if defined(__has_builtin)
+#if __has_builtin(__builtin_dynamic_object_size)
+          const size_t bytes = __builtin_dynamic_object_size(buffer, 1);
+#else
+          const size_t bytes = __builtin_object_size(buffer, 1);
+#endif
+#else
+          const size_t bytes = __builtin_object_size(buffer, 1);
+#endif
+          // Unknown (or empty) size keeps the historical assumption; a truly smaller
+          // buffer truncates instead of aborting.
+          const size_t count = (bytes == static_cast<size_t>(-1) || bytes == 0)
+              ? kMuSwprintfUnknownBufferChars
+              : bytes / sizeof(wchar_t);
+          return std::swprintf(buffer, count, format, args...);
+      }
   }
   // mu_swprintf_s with explicit size
   template<typename... Args>
@@ -183,8 +204,7 @@
 #include "Dotnet/PacketFunctions_ClientToServer_Enums.h"
 #include "Core/Utilities/_GlobalFunctions.h"
 #include "Core/Globals/_TextureIndex.h"
-#include "UI/Legacy/UIDefaultBase.h"
-#include "UI/NewUI/NewUICommon.h"
+#include "UI/Core/WindowCommon.h"
 #include "Core/Math/ZzzMathLib.h"
 
 // Reference resolution -- all UI coordinates and screen-space math use this as the base.

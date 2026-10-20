@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "UI/NewUI/NewUISystem.h"
+#include "Core/Globals/_define.h"
 
 inline bool IsMainInventorySlot(const int slot)
 {
@@ -23,21 +23,6 @@ inline bool IsMyShopSlot(const int slot)
 inline bool IsPlayerInventorySlot(const int slot)
 {
     return IsMainInventorySlot(slot) || IsInventoryExtensionSlot(slot);
-}
-
-inline const ITEM* FindInventoryItemBySlot(const int slot)
-{
-    if (!IsPlayerInventorySlot(slot))
-    {
-        return nullptr;
-    }
-
-    if (IsMainInventorySlot(slot))
-    {
-        return (g_pMyInventory != nullptr) ? g_pMyInventory->FindItem(slot) : nullptr;
-    }
-
-    return (g_pMyInventoryExt != nullptr) ? g_pMyInventoryExt->FindItem(slot) : nullptr;
 }
 
 #endif // _INVENTORYUTILS_H_

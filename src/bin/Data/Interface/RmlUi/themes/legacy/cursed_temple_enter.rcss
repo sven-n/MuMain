@@ -1,0 +1,93 @@
+/* Legacy theme for CCursedTempleEnter, reproducing its RenderFrame()/RenderText()/RenderButtons():
+   the message-box back (222 x 242 from y 2), the titled top (newui_Message_03, 230 x 67), nine
+   middle tiles, the bottom and the separator line at y 175; the question bold (255, 176, 73)
+   centred on 230 units at y 13; the lines in the normal font, white, red (255, 0, 0) for the
+   members count and the level-too-low notice, the hero's band on a red text box; the Enter and
+   Close buttons (newui_btn_empty_very_small, 54 x 23) at y 203. Reference px inside #panel. */
+
+@spritesheet temple-back-sheet { src: "../../../newui_msgbox_back.jpg"; temple-back: 0px 0px 222px 242px; }
+@spritesheet temple-top-sheet { src: "../../../newui_Message_03.tga"; temple-top: 0px 0px 230px 67px; }
+@spritesheet temple-middle-sheet { src: "../../../newui_msgbox_middle.tga"; temple-middle: 0px 0px 230px 15px; }
+@spritesheet temple-bottom-sheet { src: "../../../newui_msgbox_bottom.tga"; temple-bottom: 0px 0px 230px 50px; }
+@spritesheet temple-line-sheet { src: "../../../newui_Message_Line.tga"; temple-line: 0px 0px 223px 21px; }
+@spritesheet temple-btn-sheet
+{
+	src: "../../../newui_btn_empty_very_small.tga";
+	temple-btn-up: 0px 0px 54px 23px;
+	temple-btn-over: 0px 23px 54px 23px;
+	temple-btn-down: 0px 46px 54px 23px;
+}
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 230px;
+	height: 252px;
+	font-family: "token(font-body)";
+	pointer-events: auto;
+}
+
+#back { position: absolute; left: 0; top: 2px; width: 222px; height: 242px; decorator: image(temple-back); }
+#frame_top { position: absolute; left: 0; top: 0; width: 230px; height: 67px; decorator: image(temple-top); }
+.frame-middle { position: absolute; left: 0; width: 230px; height: 15px; decorator: image(temple-middle); }
+#frame_bottom { position: absolute; left: 0; top: 202px; width: 230px; height: 50px; decorator: image(temple-bottom); }
+#line { position: absolute; left: 0; top: 175px; width: 223px; height: 21px; decorator: image(temple-line); }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: center; pointer-events: none; }
+#title { left: 0; top: 13px; font-weight: bold; color: #ffb049; }
+.temple-line { color: #ffffff; }
+.temple-line.red { color: #ff0000; }
+/* The frame tiles and the level bands are containers so each piece can be counted; the containers
+   themselves take no space. */
+.frame-middles, .temple-bands { position: static; }
+.frame-middles .frame-middle:nth-child(1) { top: 67px; }
+.frame-middles .frame-middle:nth-child(2) { top: 82px; }
+.frame-middles .frame-middle:nth-child(3) { top: 97px; }
+.frame-middles .frame-middle:nth-child(4) { top: 112px; }
+.frame-middles .frame-middle:nth-child(5) { top: 127px; }
+.frame-middles .frame-middle:nth-child(6) { top: 142px; }
+.frame-middles .frame-middle:nth-child(7) { top: 157px; }
+.frame-middles .frame-middle:nth-child(8) { top: 172px; }
+.frame-middles .frame-middle:nth-child(9) { top: 187px; }
+
+/* RenderText()'s own rows: the temple at y 42, the six bands 15 units apart from y 67, the members
+   count under them, and -- without a level band -- the minimum-level notice on its own. */
+#ct_temple { left: 3px; top: 42px; }
+#ct_members { left: 3px; top: 160px; }
+#ct_notice { left: 0; top: 52px; }
+.temple-band { position: absolute; left: 3px; width: 220px; height: 15px; margin-top: 67px; }
+.temple-band:nth-child(1) { top: 0px; }
+.temple-band:nth-child(2) { top: 15px; }
+.temple-band:nth-child(3) { top: 30px; }
+.temple-band:nth-child(4) { top: 45px; }
+.temple-band:nth-child(5) { top: 60px; }
+.temple-band:nth-child(6) { top: 75px; }
+.temple-band .temple-line { left: 0; top: 0; }
+.band-hero { position: absolute; left: 0; top: 0; width: 220px; background-color: #ff0000;
+             pointer-events: none; }
+
+.temple-btn {
+	display: block;
+	position: absolute;
+	top: 203px;
+	width: 54px;
+	height: 23px;
+	decorator: image(temple-btn-up);
+	pointer-events: auto;
+}
+.temple-btn:hover { decorator: image(temple-btn-over); }
+.temple-btn:active { decorator: image(temple-btn-down); }
+#btn_enter { left: 30px; }
+#btn_close { left: 145px; }
+.temple-label { left: 0; color: #ffffff; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#title { width: calc(230px * var(--root-scale)); }
+#ct_temple { width: calc(220px * var(--root-scale)); }
+.temple-line { width: calc(220px * var(--root-scale)); }
+#ct_members { width: calc(220px * var(--root-scale)); }
+#ct_notice { width: calc(230px * var(--root-scale)); }
+.temple-label { width: calc(54px * var(--root-scale)); }
+
+/* The native line height, counter-scaled out of the panel. */
+.band-hero { height: calc(var(--line-height) / var(--root-scale)); }

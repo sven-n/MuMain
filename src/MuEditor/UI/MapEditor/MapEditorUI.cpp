@@ -3,6 +3,9 @@
 #ifdef _EDITOR
 
 #include "MapEditorUI.h"
+#include "UI/Common/MuEditorWindowIds.h"
+#include "UI/Common/MuEditorLayout.h"
+#include "../MuEditor/Core/MuEditorPlatformWindows.h"
 #include "MapEditorSave.h"
 #include "MapAttributeSave.h"
 #include "MapEditorFileUtil.h"
@@ -149,6 +152,34 @@ void CMapEditorUI::RestoreGameMode()
     m_bEditActive = false;
 }
 
+void CMapEditorUI::EndMinimapMode()
+{
+    if (!m_bMinimapMode)
+    {
+        return;
+    }
+    m_bMinimapMode = false;
+    // As "Back to game camera": FreeFly flies again when it is next used.
+    CameraManager& cameras = CameraManager::Instance();
+    ICamera* camera = cameras.GetActiveCamera();
+    if (camera && strcmp(camera->GetName(), "FreeFly") == 0)
+        static_cast<FreeFlyCamera*>(camera)->ClearTopDown();
+    if (cameras.GetCurrentMode() == CameraMode::FreeFly)
+        cameras.SetCameraMode(CameraMode::Default);
+}
+
+void CMapEditorUI::ReleaseWorld()
+{
+    // The next frame drops the top-down flags (m_topdownWasActive in Render).
+    EndMinimapMode();
+    g_bMapEditorAttrOverlay = false;
+    g_bMapEditorBrushHighlight = false;
+    g_MapEditorSelectedObject = nullptr;
+    g_MapEditorHoveredObject = nullptr;
+    g_MapEditorPlacementPreviewActive = false;
+    RestoreGameMode();
+}
+
 void CMapEditorUI::Render(bool* p_open)
 {
     const bool show = (p_open != nullptr && *p_open);
@@ -170,11 +201,9 @@ void CMapEditorUI::Render(bool* p_open)
         // clicked "Back to game camera" -- otherwise TopViewEnable/full-terrain
         // stay stuck true and MainScene's TopViewEnable early-return permanently
         // freezes normal gameplay input/UI processing.
-        if (!show && m_bMinimapMode)
+        if (!show)
         {
-            m_bMinimapMode = false;
-            if (CameraManager::Instance().GetCurrentMode() == CameraMode::FreeFly)
-                CameraManager::Instance().SetCameraMode(CameraMode::Default);
+            EndMinimapMode();
         }
 
         const bool topdown = m_bMinimapMode &&
@@ -207,20 +236,28 @@ void CMapEditorUI::Render(bool* p_open)
 
     if (!show)
     {
-        g_bMapEditorAttrOverlay = false;     // no panel -> no overlay
-        g_bMapEditorBrushHighlight = false;  // no panel -> no brush cursor
-        g_MapEditorSelectedObject = nullptr; // no panel -> no selection outline
-        g_MapEditorHoveredObject = nullptr;  // no panel -> no hover outline
-        g_MapEditorPlacementPreviewActive = false; // no panel -> no placement preview
-        RestoreGameMode();
+        ReleaseWorld();
         return;
     }
 
     ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Map Editor", p_open))
+    MuEditor::Layout::PrepareToolWindow();
+    const bool panelDrawn = ImGui::Begin(MuEditor::WindowIds::MapEditor, p_open);
+    // Docked behind another tab or in a minimized editor window, the panel is
+    // out of sight as if closed; it takes the world again when it shows. Not
+    // drawn for a frame while its dock node gets its window: keep edit mode
+    // as-is.
+    const bool behindAnotherTab = !panelDrawn && ImGui::IsWindowDocked();
+    const bool inMinimizedWindow = MuEditor::PlatformWindows::IsMinimized(ImGui::GetWindowViewport());
+    if (behindAnotherTab || inMinimizedWindow)
     {
         ImGui::End();
-        // Collapsed but still open: keep edit mode as-is.
+        ReleaseWorld();
+        return;
+    }
+    if (!panelDrawn)
+    {
+        ImGui::End();
         return;
     }
 
@@ -964,6 +1001,7 @@ void CMapEditorUI::PaintAttribute()
         }
     }
     m_attrCountDirty = true;
+    MarkTerrainHeightsChanged();
 }
 
 void CMapEditorUI::TakeAttrUndoSnapshot()
@@ -977,6 +1015,7 @@ void CMapEditorUI::UndoAttr()
     if (!m_bAttrHasUndo)
         return;
     std::memcpy(TerrainWall, m_attrUndo.data(), CELLS * sizeof(unsigned short));
+    MarkTerrainHeightsChanged();
     m_bAttrHasUndo = false;
     m_attrStatus = "Undo: reverted last attribute stroke.";
     m_attrCountDirty = true;
@@ -1198,6 +1237,7 @@ void CMapEditorUI::SculptHeight()
             float& h = BackTerrainHeight[TERRAIN_INDEX_REPEAT(ix, iy)];
             h = std::clamp(h, 0.0f, maxHeight);
         }
+    MarkTerrainHeightsChanged();
 
     // Rebuild lighting/normals so the change is visible immediately.
     CreateTerrainNormal();
@@ -1215,6 +1255,7 @@ void CMapEditorUI::UndoHeight()
     if (!m_bHeightHasUndo)
         return;
     std::memcpy(BackTerrainHeight, m_heightUndo.data(), CELLS * sizeof(float));
+    MarkTerrainHeightsChanged();
     CreateTerrainNormal();
     CreateTerrainLight();
     m_bHeightHasUndo = false;

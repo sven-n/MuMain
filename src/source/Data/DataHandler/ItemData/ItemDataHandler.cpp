@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ItemDataHandler.h"
 #include "ItemJsonStorage.h"
+#include "ItemModelLoader.h"
 #include "Core/Globals/_struct.h"
 #include "Core/Globals/_define.h"
 #include "Core/Text/Utf8.h"
@@ -11,6 +12,7 @@
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
+#include "Data/GameData/ItemData/ItemNames.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "I18N/All.h"
 
@@ -57,6 +59,26 @@ std::unique_ptr<ITEM_ATTRIBUTE[]> BuildItemAttributes(std::string_view locale)
     }
     return attributes;
 }
+
+#ifdef _EDITOR
+// The stat profile FollowStatProfile gives, if the item stat file has it. One the file
+// lacks (renamed or removed) would stop the next start, and the editor cannot change it,
+// so the item keeps the default and `issues` gets a warning; loading warns about the item
+// until an edit, a move or a bmd import gives it the profile, once the file has it again.
+std::string FollowKnownStatProfile(const ItemDefinition* previous, const ItemDefinition& updated,
+                                   std::vector<ItemDataIssue>& issues)
+{
+    std::string profile = FollowStatProfile(previous, updated);
+    if (g_ItemDatabase.GetStatProfiles().Find(profile) != ItemStatProfiles::UnknownProfile)
+    {
+        return profile;
+    }
+    issues.push_back({ItemDataIssueSeverity::Warning, "", updated.group, updated.number, "statProfile",
+                      "its data gives \"" + profile + "\", which " + GetItemStatsFile().generic_string() +
+                          " does not have; it keeps the default"});
+    return "";
+}
+#endif
 } // namespace
 
 CItemDataHandler::CItemDataHandler()
@@ -95,6 +117,15 @@ bool CItemDataHandler::Load(std::string& errorMessage)
 {
     const auto loadStart = std::chrono::steady_clock::now();
     ItemDataLoadResult result = LoadItemDataDirectory(GetItemDataDirectory());
+    ValidateNameLocales(result.items, I18N::GetAvailableLocales(), result.issues);
+    ItemStatsLoadResult stats = LoadItemStatsFile(GetItemStatsFile());
+    result.issues.insert(result.issues.end(), stats.issues.begin(), stats.issues.end());
+    ItemStatProfiles statProfiles;
+    if (!HasErrors(stats.issues))
+    {
+        statProfiles = ItemStatProfiles(stats.file);
+        ValidateStatProfiles(result.items, statProfiles, GetItemStatsFile().generic_string(), result.issues);
+    }
     Data::LogDataIssues(ItemDataLabel, result.issues);
     if (HasErrors(result.issues))
     {
@@ -105,6 +136,7 @@ bool CItemDataHandler::Load(std::string& errorMessage)
 
     const auto buildStart = std::chrono::steady_clock::now();
     g_ItemDatabase.SetDisplayLocale(I18N::GetCurrentLocale());
+    g_ItemDatabase.SetStatProfiles(std::move(statProfiles));
     g_ItemDatabase.Build(result.items);
     FillItemAttributes();
     RegisterLocaleObserver();
@@ -134,6 +166,11 @@ bool CItemDataHandler::LoadModels(std::string& errorMessage)
 
     g_GlowColors.Build(colors.colors);
     g_ItemModelDatabase.Build(result.models, g_GlowColors);
+#ifdef _EDITOR
+    // The models are where their files have them again.
+    m_modelMoves.clear();
+    m_movedModelGroups.reset();
+#endif
     MU_LOG_INFO(mu::log::Get("data"), "Loaded {} item models from {} in {:.1f} ms", g_ItemModelDatabase.GetModelCount(),
                 GetItemModelDataDirectory().string(), MillisecondsSince(loadStart));
     return true;
@@ -186,6 +223,11 @@ void CItemDataHandler::OnItemEdited(int itemType)
     definition.group = GetItemGroup(itemType);
     definition.number = GetItemNumber(itemType);
     CopyItemAttributeStats(attribute, definition);
+    // The editor does not show the weapon kind or the stat profile.
+    definition.weaponKind = FollowGroupWeaponKind(g_ItemDatabase.Find(itemType), definition);
+    std::vector<ItemDataIssue> issues;
+    definition.statProfile = FollowKnownStatProfile(g_ItemDatabase.Find(itemType), definition, issues);
+    Data::LogDataIssues(ItemDataLabel, issues);
 
     // Only a changed name is stored; otherwise every stat edit would turn the
     // shown English fallback into a translation. ITEM_ATTRIBUTE holds a cut
@@ -213,14 +255,96 @@ void CItemDataHandler::OnItemEdited(int itemType)
     }
 }
 
+bool CItemDataHandler::SetItemName(int itemType, std::string_view locale, std::string text)
+{
+    const ItemDefinition* current = g_ItemDatabase.Find(itemType);
+    if (current == nullptr || text.find(Data::LocalizedString::Separator) != std::string::npos)
+    {
+        return false;
+    }
+
+    ItemDefinition definition = *current;
+    definition.names.Set(locale, std::move(text));
+    // Also for an item without an English name (from a bmd import): removing
+    // its last translation would end the item in the database while
+    // ItemAttribute kept it. Its English name comes first.
+    if (definition.names.GetNeutral().empty())
+    {
+        return false;
+    }
+    g_ItemDatabase.Set(definition);
+    if (const ItemDefinition* updated = g_ItemDatabase.Find(itemType))
+    {
+        ToItemAttribute(*updated, ItemAttribute[itemType]);
+    }
+    return true;
+}
+
 void CItemDataHandler::OnItemsSwapped(int firstItemType, int secondItemType)
 {
+    if (!IsValidItemType(firstItemType) || !IsValidItemType(secondItemType))
+    {
+        return;
+    }
+
+    const ItemDefinition first = g_ItemDatabase.GetAllSlots()[firstItemType];
+    const ItemDefinition second = g_ItemDatabase.GetAllSlots()[secondItemType];
     g_ItemDatabase.Swap(firstItemType, secondItemType);
+    // Each item keeps the model slot of its item type, so the model moves too.
+    SwapItemModels(firstItemType, secondItemType);
+    m_modelMoves.emplace_back(firstItemType, secondItemType);
+    FollowDerivedFieldsAfterMove(first, secondItemType);
+    FollowDerivedFieldsAfterMove(second, firstItemType);
+}
+
+void CItemDataHandler::SwapItemModels(int firstItemType, int secondItemType)
+{
+    g_ItemModelDatabase.Swap(firstItemType, secondItemType);
+    Data::Items::ModelLoader::SwapOpenedModels(firstItemType, secondItemType);
+    m_movedModelGroups.set(static_cast<size_t>(GetItemGroup(firstItemType)));
+    m_movedModelGroups.set(static_cast<size_t>(GetItemGroup(secondItemType)));
+}
+
+void CItemDataHandler::TakeBackModelMoves()
+{
+    for (auto move = m_modelMoves.rbegin(); move != m_modelMoves.rend(); ++move)
+    {
+        SwapItemModels(move->first, move->second);
+    }
+    m_modelMoves.clear();
+}
+
+void CItemDataHandler::FollowDerivedFieldsAfterMove(const ItemDefinition& before, int newItemType)
+{
+    const ItemDefinition* moved = g_ItemDatabase.Find(newItemType);
+    if (moved == nullptr)
+    {
+        return;
+    }
+
+    ItemDefinition changed = *moved;
+    changed.weaponKind = FollowGroupWeaponKind(&before, changed);
+    std::vector<ItemDataIssue> issues;
+    changed.statProfile = FollowKnownStatProfile(&before, changed, issues);
+    Data::LogDataIssues(ItemDataLabel, issues);
+    if (changed.weaponKind != moved->weaponKind || changed.statProfile != moved->statProfile)
+    {
+        g_ItemDatabase.Set(changed);
+    }
 }
 
 ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
 {
-    return SaveItemDataDirectory(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(), issues);
+    // A profile the item stat file does not have would stop the next start. The save checks
+    // the items too and refuses on any error, so everything is reported at once.
+    ValidateStatProfiles(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(),
+                         GetItemStatsFile().generic_string(), issues);
+    ValidateNameLocales(g_ItemDatabase.GetAllSlots(), I18N::GetAvailableLocales(), issues);
+    // Only the model files of moved models are written; the others keep what
+    // this client does not read from them.
+    return SaveItemAndModelDataDirectories(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(),
+                                           GetItemModelDataDirectory(), g_ItemModelDatabase.GetAllSlots(),
+                                           m_movedModelGroups, issues);
 }
 
 ItemBmdImportResult CItemDataHandler::ImportFromBmd()
@@ -232,11 +356,18 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
     }
 
     result.keptEnglishNameCount = KeepCurrentEnglishNames(result.items);
-    KeepFieldsNotInBmd(result.items, result.importedLocales);
+    KeepMissingNamesMissing(result.items, result.importedLocales);
+    KeepFieldsNotInBmd(result.items, result.importedLocales, result.validationIssues);
     ValidateItems(result.items, result.validationIssues);
+    ValidateStatProfiles(result.items, g_ItemDatabase.GetStatProfiles(), GetItemStatsFile().generic_string(),
+                         result.validationIssues);
+    ValidateNameLocales(result.items, I18N::GetAvailableLocales(), result.validationIssues);
 
     g_ItemDatabase.Build(result.items);
     FillItemAttributes();
+    // The bmd files have the items at their old numbers; their models go back
+    // there too.
+    TakeBackModelMoves();
     return result;
 }
 
@@ -256,14 +387,37 @@ int CItemDataHandler::KeepCurrentEnglishNames(std::vector<ItemDefinition>& items
     return keptCount;
 }
 
+void CItemDataHandler::KeepMissingNamesMissing(std::vector<ItemDefinition>& items,
+                                               const std::vector<std::string>& importedLocales)
+{
+    for (ItemDefinition& item : items)
+    {
+        const ItemDefinition* current = g_ItemDatabase.Find(item.group, item.number);
+        for (const std::string& locale : importedLocales)
+        {
+            if (locale == Data::LocalizedString::NeutralLocale ||
+                Data::Items::GetOwnName(item, locale) != item.names.GetNeutral())
+            {
+                continue;
+            }
+            if (current == nullptr || !Data::Items::HasNameIn(*current, locale))
+            {
+                item.names.Set(locale, "");
+            }
+        }
+    }
+}
+
 void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items,
-                                          const std::vector<std::string>& importedLocales)
+                                          const std::vector<std::string>& importedLocales,
+                                          std::vector<ItemDataIssue>& issues)
 {
     const auto imported = [&](std::string_view locale)
     { return std::find(importedLocales.begin(), importedLocales.end(), locale) != importedLocales.end(); };
     for (ItemDefinition& item : items)
     {
-        if (const ItemDefinition* current = g_ItemDatabase.Find(item.group, item.number))
+        const ItemDefinition* current = g_ItemDatabase.Find(item.group, item.number);
+        if (current != nullptr)
         {
             CopyFieldsNotInItemAttribute(*current, item);
             for (const auto& [locale, text] : current->names.GetTranslations())
@@ -274,6 +428,8 @@ void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items,
                 }
             }
         }
+        item.weaponKind = FollowGroupWeaponKind(current, item);
+        item.statProfile = FollowKnownStatProfile(current, item, issues);
     }
 }
 

@@ -201,6 +201,104 @@ TEST_CASE("a track stopped by name plays again when replayed [audio][music]")
     std::filesystem::remove_all(testDirectory);
 }
 
+TEST_CASE("missing tracks stay suppressed across frame requests and stops [audio][music]")
+{
+    auto backend = std::make_unique<mu::MiniAudioBackend>();
+    InitNoDeviceEngine(*backend);
+    const auto directory = CreateMusicAsset();
+    const auto source = directory / "Data" / "Music" / "track.wav";
+    const auto first = directory / "Data" / "Music" / "missing-one.wav";
+    const auto second = directory / "Data" / "Music" / "missing-two.wav";
+    const std::string firstName = first.generic_string();
+    const std::string secondName = second.generic_string();
+    const std::string firstWindowsName = directory.string() + "\\Data\\Music\\missing-one.wav";
+    backend->PlayMusic(firstWindowsName.c_str(), false);
+    backend->PlayMusic(secondName.c_str(), false);
+    REQUIRE(backend->m_failedMusicNames.size() == 2);
+    CHECK(backend->IsEndMusic());
+    CHECK(backend->GetMusicPosition() == 0);
+
+    // Make both files playable: any accidental retry now starts music instead of failing again.
+    REQUIRE(std::filesystem::copy_file(source, first));
+    REQUIRE(std::filesystem::copy_file(source, second));
+    constexpr int frameRequests = 50000;
+    for (int frame = 0; frame < frameRequests; ++frame)
+    {
+        const char* name = frame % 2 == 0 ? firstName.c_str() : secondName.c_str();
+        backend->StopMusic(name, false);
+        backend->StopMusic(nullptr, true);
+        backend->PlayMusic(name, false);
+    }
+    CHECK(backend->IsEndMusic());
+    CHECK(backend->m_currentMusicName.empty());
+    CHECK(backend->m_failedMusicNames.size() == 2);
+
+    backend->SetBGMVolume(0.25f);
+    backend->PlayMusic(firstWindowsName.c_str(), true);
+    CHECK_FALSE(backend->IsEndMusic());
+    CHECK(backend->m_failedMusicNames.size() == 1);
+    CHECK(ma_sound_get_volume(&backend->m_musicSound) == doctest::Approx(0.25f));
+    backend->StopMusic(firstName.c_str(), false);
+    backend->PlayMusic(firstName.c_str(), false);
+    CHECK_FALSE(backend->IsEndMusic());
+    backend->PlayMusic(secondName.c_str(), false);
+    CHECK(backend->IsEndMusic());
+    CHECK(backend->m_failedMusicNames.size() == 1);
+
+    backend->Shutdown();
+    std::filesystem::remove_all(directory);
+}
+
+TEST_CASE("decoder failures are suppressed until explicitly retried [audio][music]")
+{
+    auto backend = std::make_unique<mu::MiniAudioBackend>();
+    InitNoDeviceEngine(*backend);
+    const auto directory = CreateMusicAsset();
+    const auto source = directory / "Data" / "Music" / "track.wav";
+    const auto corrupt = directory / "Data" / "Music" / "corrupt.wav";
+    const std::string name = corrupt.generic_string();
+    {
+        std::ofstream file(corrupt, std::ios::binary);
+        REQUIRE((file << "invalid audio").good());
+    }
+    backend->PlayMusic(name.c_str(), false);
+    CHECK(backend->IsEndMusic());
+    REQUIRE(backend->m_failedMusicNames.size() == 1);
+    backend->PlayMusic(name.c_str(), true);
+    CHECK(backend->m_failedMusicNames.size() == 1);
+
+    REQUIRE(std::filesystem::copy_file(source, corrupt, std::filesystem::copy_options::overwrite_existing));
+    backend->PlayMusic(name.c_str(), false);
+    CHECK(backend->IsEndMusic());
+    backend->PlayMusic(name.c_str(), true);
+    CHECK_FALSE(backend->IsEndMusic());
+    CHECK(backend->m_failedMusicNames.empty());
+
+    backend->Shutdown();
+    std::filesystem::remove_all(directory);
+}
+
+TEST_CASE("audio shutdown clears failed tracks even without a loaded stream [audio][music]")
+{
+    auto backend = std::make_unique<mu::MiniAudioBackend>();
+    InitNoDeviceEngine(*backend);
+    const auto directory = CreateMusicAsset();
+    const auto source = directory / "Data" / "Music" / "track.wav";
+    const auto missing = directory / "Data" / "Music" / "missing.wav";
+    const std::string name = missing.generic_string();
+    backend->PlayMusic(name.c_str(), false);
+    REQUIRE(backend->m_failedMusicNames.size() == 1);
+    backend->Shutdown();
+    CHECK(backend->m_failedMusicNames.empty());
+
+    REQUIRE(std::filesystem::copy_file(source, missing));
+    InitNoDeviceEngine(*backend);
+    backend->PlayMusic(name.c_str(), false);
+    CHECK_FALSE(backend->IsEndMusic());
+    backend->Shutdown();
+    std::filesystem::remove_all(directory);
+}
+
 #ifdef _EDITOR
 namespace
 {

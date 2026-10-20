@@ -219,6 +219,19 @@ public:
     void SendPlayerShopCloseOther(uint16_t playerId, const char16_t* playerName);
 
     /// <summary>
+    /// Sends a PlayerShopSetItemPriceExtended to this connection.
+    /// </summary>
+    /// <param name="moneyPrice">The price in zen, or in account coins when PriceItemType is one of the account coin values. Encoded like the price of PlayerShopItemExtended.</param>
+    /// <param name="priceItemType">The item (group in the highest 4 bits, number in the remaining ones) with which the price is paid, when RequiredItemAmount is greater than 0. Otherwise, 0xFFF0 = WCoin (C), 0xFFF1 = WCoin (P) and 0xFFF2 = Goblin Points define an account coin price; any other value a zen price. Encoded like the price of PlayerShopItemExtended.</param>
+    /// <param name="requiredItemAmount">The number of pieces of the item which is defined by PriceItemType; 0, if the price is not paid with items. Encoded like the price of PlayerShopItemExtended.</param>
+    /// <param name="itemSlot">The item slot.</param>
+    /// <remarks>
+    /// Is sent by the client when: The player wants to set a price of an item which is inside his personal item shop, in zen or in one of the price types which are allowed by the server (see PlayerShopPriceTypesExtended).
+    /// Causes reaction on server side: The price is set for the specified item, if its price type is allowed and the amount is within the configured limits. Works only if the shop is currently closed. The server responds with a PlayerShopSetItemPriceResponse.
+    /// </remarks>
+    void SendPlayerShopSetItemPriceExtended(uint32_t moneyPrice, uint16_t priceItemType, uint16_t requiredItemAmount, BYTE itemSlot);
+
+    /// <summary>
     /// Sends a PickupItemRequest to this connection.
     /// </summary>
     /// <param name="itemId">The item id.</param>

@@ -1,0 +1,61 @@
+/* Modern theme's shared window shell -- the "metal rail" chrome (base.rcss's .modern-frame/
+   .modern-shell-edge/.modern-groove/.modern-header-rail/.modern-content-well family), factored out
+   of generic_menu_dialog.rcss into its own template (window_shell.rml) so any consumer -- dialog or
+   plain window -- can reuse the same markup instead of hand-copying it. Loaded automatically by any
+   document that links window_shell.rml as a template (RmlUi merges a template's own <head> links
+   into the consuming document's head) -- a consumer does not need its own <link> to this file.
+
+   Named `window-shell-*`, not `gmd-*`, since this markup isn't specific to the generic menu
+   dialog -- any window needing this same chrome can reuse it. */
+/* Toggled by window_shell.rml's data-class-window-shell-positioned -- cancels .center-both's own
+   transform:translate(-50%,-50%) for a consumer that supplies an already-final real-pixel
+   top-left via root_x/root_y instead of wanting the self-centering shift. See window_shell.rml's
+   own comment for why this is a class toggle, not a raw data-style-transform override. */
+.window-shell-positioned {
+	transform: none;
+}
+
+.window-shell-content {
+	left: 14dp;
+	right: 14dp;
+	top: 10dp;
+	bottom: 16dp;
+	pointer-events: auto;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+/* With a title, the header rail (base.rcss's .modern-header-rail, top:7dp height:38dp) visually
+   overlaps this well's own top edge -- painting order alone (well before rail in the .rml) already
+   keeps the rail's opaque fill on top there, but the well's own FLEX CONTENT still needs to clear
+   the rail's bottom edge, hence this padding rather than moving the well's own box. justify-content
+   also switches to flex-start here -- centering the remainder under the banner would produce a
+   large, content-dependent gap above the first line/button; untitled consumers keep centering since
+   they have no banner to compete with. */
+.window-shell-content.has-title {
+	padding-top: 40dp;
+	justify-content: flex-start;
+}
+/* .window-shell-header-rail needs no rule of its own -- it's co-applied with base.rcss's own
+   .modern-header-rail, which already supplies the full look (position/size/decorator/box-shadow).
+   The window-shell- class exists only so this element has a name that isn't tied to any one
+   consumer, for anything a future variant might need to target specifically. */
+
+/* Footer anchor, sibling of #content -- see window_shell.rml's own comment. Matches #content's own
+   16dp bottom inset so a consumer moving its close button here (via
+   UI::RmlBridge::PromoteToWindowShellFooter()) sees no visual shift. pointer-events:none on the
+   anchor itself (it has no visual/hit-test purpose of its own) -- a moved-in .btn already carries
+   its own pointer-events:auto.
+
+   Explicit height, not left as auto against a bare `bottom` offset -- see legacy's own copy of
+   this comment for why (a moved-in .btn's own text would otherwise not render, resolved against
+   an indeterminate-height footer box). 30dp matches .btn's own height. */
+.window-shell-footer {
+	position: absolute;
+	left: 0;
+	right: 0;
+	height: 30dp;
+	bottom: 16dp;
+	pointer-events: none;
+}

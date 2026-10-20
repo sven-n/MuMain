@@ -1,10 +1,9 @@
-// MoveCommandData.cpp: implementation of the CMoveCommandData class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "MoveCommandData.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 #pragma pack(push, 1)
 typedef struct

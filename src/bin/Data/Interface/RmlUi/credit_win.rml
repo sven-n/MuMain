@@ -1,0 +1,27 @@
+<rml>
+<head>
+	<title>Credits</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="credit_win.rcss"/>
+</head>
+<body>
+	<!-- Full-screen credits scene: crossfading illustrations, deco/logo, close button, scrolling
+	     credit text (each independently opacity-faded). Illustrations are declared first so they
+	     paint behind the rest, matching the original CSprite order, and use data-style-decorator
+	     (matching credit_win.rcss's spritesheet blocks) rather than <img> -- see CreditWin.h. -->
+	<div id="panel" data-model="credit_win">
+		<div id="illust_left" class="illust illust-left" data-style-decorator="illust_left_decorator" data-style-opacity="illust_opacity"></div>
+		<div id="illust_right" class="illust illust-right" data-style-decorator="illust_right_decorator" data-style-opacity="illust_opacity"></div>
+
+		<div id="logo" class="logo"></div>
+		<div id="deco" class="deco"></div>
+		<div id="btn_close" class="btn-close" data-event-click="creditwin_close_click"><span class="btn-close-label">X</span></div>
+
+		<span id="credit_department" class="credit-label credit-department" data-style-opacity="department_opacity">{{department}}</span>
+		<span id="credit_team" class="credit-label credit-team" data-style-opacity="team_opacity">{{team}}</span>
+		<div id="credit_names" class="credit-names" data-style-opacity="names_opacity">
+			<span class="credit-name" data-for="n : names">{{n.text}}</span>
+		</div>
+	</div>
+</body>
+</rml>

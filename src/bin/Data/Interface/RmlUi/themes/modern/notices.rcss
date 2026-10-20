@@ -1,0 +1,32 @@
+/* Modern theme for the notices: the legacy geometry, blink and colours (see the legacy theme) on
+   the modern panel surface. */
+
+body { pointer-events: none; }
+#board { pointer-events: none; font-family: "token(font-body)"; }
+
+/* The original's RenderText(320, 300 + i * 13): the rows 13 apart from 300, centred on 320. */
+#notice_lines {
+	position: absolute;
+	left: 0;
+	top: 300px;
+	--flow-w: 640px;
+	text-align: center;
+}
+.notice-row {
+	display: block;
+	height: calc(13px * var(--root-scale));
+	line-height: var(--line-px, 0px);
+	white-space: nowrap;
+}
+
+.notice-text {
+	display: inline-block;
+	vertical-align: top;
+	font-weight: bold;
+	white-space: nowrap;
+	background-color: token(surface-panel);
+}
+
+.notice-text--gold { color: rgb(255, 200, 80); }
+.notice-text--gold-dim { color: rgba(255, 200, 80, 128); }
+.notice-text--green { color: rgb(100, 255, 200); }

@@ -1,0 +1,98 @@
+/* Legacy theme for a chat room. Same shared window_shell chrome as the friend shell, re-sliced the
+   same way so it survives a window the player resizes, and the same win_* art for the window
+   buttons, the grip and the action buttons. RmlUi owns layout and scrolling; only the usable
+   viewport height is bound. */
+
+/* window_shell.rcss draws its caps with image(), correct at the 230dp the dialogs are locked to
+   and distorting the border art at any other width. Same assets, stretch-safe inner rects, drawn
+   as ninepatches. Scoped to this document. */
+@spritesheet cr-cap-top-sheet    { src: "../../../newui_msgbox_top.tga";    cr-cap-top:    0px 0px 230px 67px; cr-cap-top-inner:    12px 12px 206px 43px; }
+@spritesheet cr-cap-middle-sheet { src: "../../../newui_msgbox_middle.tga"; cr-cap-middle: 0px 0px 230px 15px; cr-cap-middle-inner: 12px  4px 206px  7px; }
+@spritesheet cr-cap-bottom-sheet { src: "../../../newui_msgbox_bottom.tga"; cr-cap-bottom: 0px 0px 230px 50px; cr-cap-bottom-inner: 12px 12px 206px 26px; }
+@spritesheet cr-back-sheet       { src: "../../../newui_msgbox_back.jpg";   cr-back:       0px 0px 222px 250px; cr-back-inner:       8px  8px 206px 234px; }
+@spritesheet cr-banner-sheet     { src: "../../../newui_Message_03.tga";    cr-banner:     0px 0px 230px 67px; cr-banner-inner:     20px 12px 190px 43px; }
+
+.window-shell-sprite-back   { decorator: ninepatch(cr-back, cr-back-inner); }
+.window-shell-sprite-top    { height: 46dp; decorator: ninepatch(cr-cap-top, cr-cap-top-inner); }
+.window-shell-sprite-middle { top: 46dp; bottom: 40dp; decorator: ninepatch(cr-cap-middle, cr-cap-middle-inner); }
+.window-shell-sprite-bottom { height: 40dp; decorator: ninepatch(cr-cap-bottom, cr-cap-bottom-inner); }
+.window-shell-header-rail   { height: 46dp; decorator: ninepatch(cr-banner, cr-banner-inner); }
+
+@spritesheet cr-size-sheet
+{
+	src: "../../../win_size.jpg";
+	cr-minimize: 0px 0px 9px 9px;
+	cr-maximize: 9px 0px 9px 9px;
+	cr-restore:  9px 9px 9px 9px;
+	cr-close:    0px 9px 9px 9px;
+}
+@spritesheet cr-resize-sheet { src: "../../../win_resize.tga"; cr-resize-grip: 0px 0px 9px 9px; }
+@spritesheet cr-button-sheet { src: "../../../win_button.tga"; cr-button: 0px 0px 49px 16px; cr-button-inner: 6px 4px 37px 8px; }
+
+/* An id beats .center-both's own transform, which window_shell cancels through a class toggle that
+   two single-class selectors decide by link order. A surviving transform moves where the panel
+   draws without moving the boxes its children hit-test against. */
+#panel { transform: none; }
+/* CUIChatWindow::Init()'s own SetSize(250, 170) / SetLimitSize(250, 150), given back the height
+   this shell's caps take. font-size: 1rem, never dp -- this theme declares NativeTextSize and
+   window_shell's body carries `native-text`, so the root size is already the original's text size. */
+#panel { width: 300dp; height: 212dp; min-width: 270dp; min-height: 180dp; max-width: 100%; max-height: 100%; font-family: "token(font-body)"; font-size: 1rem; color: token(text-primary); }
+
+/* pointer-events back to none: base.rcss gives `body` none and window_shell makes this well the one
+   `auto` region, but a well covering the whole panel sits on top of the title rail and eats the
+   drag. Each interactive part opts back in. */
+.window-shell-content, .window-shell-content.has-title
+{
+	left: 12dp;
+	right: 12dp;
+	top: 0;
+	bottom: 22dp;
+	padding: 0;
+	display: block;
+	pointer-events: none;
+}
+
+div { display: block; }
+button { font-family: "token(font-body)"; font-size: 1rem; color: token(text-primary); cursor: pointer; pointer-events: auto; }
+
+#window_controls { position: absolute; right: -4dp; top: 8dp; z-index: 10; pointer-events: auto; }
+#window_controls button { display: inline-block; width: 9dp; height: 9dp; margin-left: 5dp; padding: 0; box-sizing: border-box; }
+#btn_minimize { decorator: image(cr-minimize); }
+#btn_maximize { decorator: image(cr-maximize); }
+#btn_maximize.restore { decorator: image(cr-restore); }
+#btn_close { decorator: image(cr-close); }
+
+.btn { position: relative; display: inline-block; box-sizing: border-box; width: auto; height: 16dp; padding: 0 3dp; line-height: 16dp; vertical-align: top; text-align: center; overflow: hidden; pointer-events: auto; decorator: ninepatch(cr-button, cr-button-inner); }
+.btn:hover { image-color: rgba(255, 255, 255, 220); }
+.hidden { display: none; }
+
+/* The log gives up an 80dp column to the participants, and another to the invite list, exactly as
+   CUIChatWindow's own SetResizeType(3, -80, ...) / (3, -80 - 80, ...) did. */
+.scroll-pane { position: absolute; top: 28dp; bottom: 20dp; overflow: hidden scroll; background-color: rgba(0, 0, 0, 179); pointer-events: auto; }
+#chat_log { left: 0; right: 0; }
+#chat_log.with-pals { right: 80dp; }
+#chat_log.with-invite { right: 160dp; }
+#pal_pane { width: 80dp; right: 0; }
+#pal_pane.with-invite { right: 80dp; }
+#invite_pane { width: 80dp; right: 0; }
+
+.line { padding: 0 4dp; }
+.speaker { display: inline-block; color: rgb(255, 200, 50); }
+.speaker:after { content: ": "; }
+.say { display: inline-block; color: rgb(239, 220, 205); }
+/* CUISimpleChatListBox::RenderDataLine()'s own colour table. */
+.say.t0 { color: rgb(0, 0, 0); background-color: rgb(255, 200, 50); }
+.say.t1 { color: rgb(100, 150, 255); }
+.say.t2 { color: rgb(255, 30, 0); }
+.say.t4 { color: rgb(0, 0, 0); background-color: rgb(0, 200, 255); }
+.say.t5 { color: rgb(0, 0, 0); background-color: rgb(0, 255, 150); }
+
+.pal { height: 13dp; line-height: 13dp; padding: 0 3dp; white-space: nowrap; overflow: hidden; cursor: pointer; }
+.pal:hover { background-color: rgb(106, 97, 88); }
+.pal.selected { background-color: rgb(146, 134, 121); color: rgb(0, 0, 0); }
+
+#footer { position: absolute; left: 0; right: 0; bottom: 0; height: 16dp; white-space: nowrap; }
+#chat_field { display: inline-block; box-sizing: border-box; width: 58%; height: 16dp; margin-right: 1%; vertical-align: top; pointer-events: auto; }
+#footer .btn { width: 20%; margin-left: 1%; }
+
+#resize { display: block; position: absolute; right: -4dp; bottom: -14dp; width: 9dp; height: 9dp; z-index: 10; pointer-events: auto; decorator: image(cr-resize-grip); cursor: resize; }

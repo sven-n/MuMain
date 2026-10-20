@@ -52,6 +52,8 @@ typedef void(CORECLR_DELEGATE_CALLTYPE* SendPlayerShopItemBuyRequest)(int32_t, u
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendPlayerShopCloseOther)(int32_t, uint16_t , const char16_t* );
 
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendPlayerShopSetItemPriceExtended)(int32_t, uint32_t , uint16_t , uint16_t , BYTE );
+
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendPickupItemRequest)(int32_t, uint16_t );
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendPickupItemRequest075)(int32_t, uint16_t );

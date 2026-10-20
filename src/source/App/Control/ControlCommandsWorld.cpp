@@ -16,11 +16,12 @@
 #include "GameLogic/Automation/Pickup.h"
 #include "GameLogic/Automation/Skill.h"
 #include "GameLogic/Items/InventoryUtils.h"
+#include "UI/Inventory/InventoryContents.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Network/Server/WSclient.h"
 #include "Scenes/SceneCore.h"
-#include "UI/NewUI/Dialogs/NewUIMessageBox.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Dialogs/ConfirmRequest.h"
+#include "UI/Core/WindowSystem.h"
 #include "World/MapInfra/MapManager.h"
 
 #include "json.hpp"
@@ -901,7 +902,7 @@ std::string UseItem(const Request& request, std::unique_ptr<Act>&)
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`use` needs an inventory slot");
     }
 
-    const ITEM* item = FindInventoryItemBySlot(slot);
+    const ITEM* item = UI::Inventory::FindPlayerItem(slot);
     // `-1` is the client's empty marker; type 0 is a real item.
     if (item == nullptr || item->Type < 0)
     {
@@ -942,7 +943,7 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
                            "`equip` needs an inventory slot and a target slot");
     }
 
-    const ITEM* item = FindInventoryItemBySlot(fromSlot);
+    const ITEM* item = UI::Inventory::FindPlayerItem(fromSlot);
     if (item == nullptr || item->Type < 0)
     {
         return EncodeError(request.EncodedId(), ErrorCode::EmptySlot,
@@ -969,7 +970,7 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
     // The extension slots live in their own control, and the main inventory
     // does not know them: the item is taken from whichever holds the slot.
     const bool inExtension = !IsMainInventorySlot(fromSlot);
-    SEASON3B::CNewUIInventoryCtrl* inventory = nullptr;
+    mu::ui::window::CInventoryCtrl* inventory = nullptr;
     ITEM* moving = nullptr;
     if (inExtension)
     {
@@ -988,7 +989,7 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
         return EncodeError(request.EncodedId(), ErrorCode::Failed, "the inventory is not available");
     }
 
-    if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem() != nullptr)
+    if (mu::ui::window::CInventoryCtrl::GetPickedItem() != nullptr)
     {
         return EncodeError(request.EncodedId(), ErrorCode::Busy, "an item is already being moved");
     }
@@ -1020,19 +1021,19 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
     // while it still occupies its own squares, a move that overlaps them
     // would be refused for colliding with itself.
 
-    if (!SEASON3B::CNewUIInventoryCtrl::CreatePickedItem(inventory, moving, true))
+    if (!mu::ui::window::CInventoryCtrl::CreatePickedItem(inventory, moving, true))
     {
         // CreatePickedItem has already new-ed the picked-item singleton by
         // the time Create() can fail (NewUIInventoryCtrl.cpp), so a bare
         // return would leave it non-null: every later move — ours and the
         // player's own picking — would answer "an item is already being
         // moved" for the rest of the session.
-        SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
+        mu::ui::window::CInventoryCtrl::DeletePickedItem();
         return EncodeError(request.EncodedId(), ErrorCode::Failed, "the item could not be picked up");
     }
     inventory->RemoveItem(moving);
 
-    SEASON3B::CNewUIPickedItem* picked = SEASON3B::CNewUIInventoryCtrl::GetPickedItem();
+    mu::ui::window::CPickedItem* picked = mu::ui::window::CInventoryCtrl::GetPickedItem();
     ITEM* lifted = picked != nullptr ? picked->GetItem() : nullptr;
 
     // Asked now, not before: the item has left its own squares, so a move
@@ -1041,7 +1042,7 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
     // NewUIInventoryActionController.cpp:123).
     if (toSlot >= MAX_EQUIPMENT_INDEX)
     {
-        SEASON3B::CNewUIInventoryCtrl* destination =
+        mu::ui::window::CInventoryCtrl* destination =
             IsMainInventorySlot(toSlot)
                 ? (g_pMyInventory != nullptr ? g_pMyInventory->GetInventoryCtrl() : nullptr)
                 : (g_pMyInventoryExt != nullptr ? g_pMyInventoryExt->TryGetExtensionByInventoryIndex(toSlot) : nullptr);
@@ -1051,7 +1052,7 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
             {
                 inventory->AddItem(lifted->x, lifted->y, lifted);
             }
-            SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
+            mu::ui::window::CInventoryCtrl::DeletePickedItem();
             return EncodeError(request.EncodedId(), ErrorCode::NotAllowed, "the item does not fit in that slot");
         }
     }
@@ -1066,7 +1067,7 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
         {
             inventory->AddItem(lifted->x, lifted->y, lifted);
         }
-        SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
+        mu::ui::window::CInventoryCtrl::DeletePickedItem();
         return EncodeError(request.EncodedId(), ErrorCode::Busy, "another item move has not been answered yet");
     }
 
@@ -1166,15 +1167,13 @@ std::string Party(const Request& request, std::unique_ptr<Act>&)
             return EncodeError(request.EncodedId(), ErrorCode::Failed, "no party invitation is pending");
         }
 
-        SocketClient->ToGameServer()->SendPartyInviteResponse(action == "accept" ? 1 : 0,
-                                                              static_cast<uint16_t>(PartyKey));
-        // The invitation dialog would stay on screen otherwise: the button
-        // handler sends the answer and closes the box in one go.
-        if (!g_MessageBox->IsEmpty())
-        {
-            g_MessageBox->PopMessageBox();
-        }
+        // Through the invitation dialog, as its buttons answer: that sends the answer and closes it.
         result["requester"] = PartyKey;
+        if (!UI::Dialogs::AnswerConfirm("party-invite", action == "accept"))
+        {
+            SocketClient->ToGameServer()->SendPartyInviteResponse(action == "accept" ? 1 : 0,
+                                                                  static_cast<uint16_t>(PartyKey));
+        }
         PartyKey = 0;
         return EncodeResult(request.EncodedId(), result.dump());
     }

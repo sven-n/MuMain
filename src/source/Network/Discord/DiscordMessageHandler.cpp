@@ -4,7 +4,7 @@
 #include "GameLogic/Discord/ServerIntegration.h"
 #include "Network/Discord/DiscordPackets.h"
 #include "UI/Chat/ExternalChat.h"
-#include "UI/NewUI/Dialogs/DiscordMsgBox.h"
+#include "UI/Dialogs/DiscordMsgBox.h"
 
 namespace
 {

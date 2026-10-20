@@ -1,0 +1,15 @@
+/* Modern theme for what the cash shop's documents share (in_game_shop.rml and its igs_*
+   dialogs): a flat button, the dimmed screen behind a dialog, and the counter-scaled text layer. */
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; }
+
+.igs-dim { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background-color: token(surface-backdrop); pointer-events: auto; }
+
+.igs-btn { position: absolute; width: 52px; height: 26px; background-color: token(surface-raised); border: 1px token(border-frame); border-radius: token(radius-sm)px; pointer-events: auto; }
+.igs-btn:hover { border-color: token(accent-steel-hover); }
+.igs-btn:active { background-color: token(surface-recessed); }
+.igs-btn-label { color: token(text-primary); margin-top: -1px; }
+/* A centred label sits at margin-left -1000px (base.rcss's .sharp-centre); a unit right is -999px. */
+.igs-btn:active .igs-btn-label { margin-left: -999px; margin-top: 0; }
+.igs-btn.disabled, .igs-btn.disabled:hover { background-color: token(surface-recessed); border-color: token(border-inner); pointer-events: none; }
+.igs-btn.disabled .igs-btn-label { color: token(text-disabled); }

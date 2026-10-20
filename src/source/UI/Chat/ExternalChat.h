@@ -6,7 +6,7 @@
 // is no character behind it.
 #pragma once
 
-#include "UI/NewUI/HUD/NewUIChatLogWindow.h"
+#include "UI/HUD/ChatLogWindow.h"
 
 #include <cstddef>
 #include <string>
@@ -43,7 +43,7 @@ struct Message
 [[nodiscard]] std::wstring SenderLabel(Source source, std::wstring_view displayName);
 
 // The chat log type whose colours the scope uses.
-[[nodiscard]] SEASON3B::MESSAGE_TYPE ScopeMessageType(Scope scope);
+[[nodiscard]] mu::ui::window::MESSAGE_TYPE ScopeMessageType(Scope scope);
 
 // The text as shown: cut to the length of an in-game chat message.
 [[nodiscard]] std::wstring ShownText(std::wstring_view text);

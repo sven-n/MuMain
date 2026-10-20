@@ -1,6 +1,4 @@
-﻿// GMDoppelGanger1.cpp: implementation of the CGMDoppelGanger1 class.
-//////////////////////////////////////////////////////////////////////
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -11,7 +9,7 @@
 #include "Engine/Object/ZzzOpenData.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/AI/GOBoid.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "World/MapInfra/MapManager.h"
 
 extern int GetMp3PlayPosition();
@@ -481,7 +479,7 @@ bool CGMDoppelGanger1::RenderObjectVisual(OBJECT* o, BMD* b)
             int iScale = o->Scale * 60;
             vPos[0] += rand() % iScale - iScale / 2;
             vPos[1] += rand() % iScale - iScale / 2;
-            CreateParticleFpsChecked(BITMAP_LIGHT, vPos, o->Angle, Light, 15, o->Scale, o);
+            CreateParticle(BITMAP_LIGHT, vPos, o->Angle, Light, 15, o->Scale, o);
         }
         return true;
     }

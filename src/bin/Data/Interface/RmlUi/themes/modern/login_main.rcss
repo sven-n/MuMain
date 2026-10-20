@@ -1,0 +1,42 @@
+/* Modern theme for the login-scene menu/credit button bar -- flat programmatic icon buttons, no
+   legacy sprite art. Plain single-letter monograms (M/C) stand in for icon art.
+
+   .btn-icon/.btn-icon-label/.btn-icon-caption are base.rcss's shared classes; only this window's
+   positional rules remain below, keyed to #btn_menu/#btn_credit directly, not the
+   #btn_menu_item/#btn_credit_item wrappers (both button and caption resolve position:absolute
+   straight against #panel, one level only). */
+
+#panel {
+	position: absolute;
+	font-family: "token(font-body)";
+	font-size: 14dp;
+}
+
+#btn_menu {
+	left: 0;
+	top: 0;
+}
+/* Caption is 72dp wide vs. the 54dp button -- left:-9dp centers it ((72-54)/2). top:34dp sits
+   below the button's 32dp border-box height plus a 2dp gap. */
+#btn_menu_item .btn-icon-caption {
+	left: -9dp;
+	top: 34dp;
+}
+/* right:0dp anchors to #panel's right edge instead of a computed real-pixel offset, so it tracks
+   the button's fixed width automatically without a C++ recompute on resize. */
+#btn_credit {
+	top: 0;
+	right: 0dp;
+}
+#btn_credit_item .btn-icon-caption {
+	top: 34dp;
+	right: -9dp;
+}
+
+.btn-credit-deco {
+	display: none;
+}
+
+.btn-credit-icon {
+	display: none;
+}

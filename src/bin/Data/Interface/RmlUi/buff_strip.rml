@@ -1,0 +1,23 @@
+<rml>
+<head>
+	<title>Buff Strip</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="buff_strip.rcss"/>
+</head>
+<body class="native-text" data-model="buff_strip">
+	<!-- Buff icon strip; #panel wraps the slots into rows (buff_strip.rcss). #strip_slot is the box
+	     the original gave the strip, which the theme centres in the screen width the docked panels
+	     leave free (--world-left / --world-right), at the HUD's scale, so it moves as docks open. A
+	     theme places #panel in it, or ignores it with position: fixed. -->
+	<div id="strip_slot">
+		<div id="panel">
+			<!-- A right-click offers to cancel the buffs the player can end early; hovering one shows
+			     its name, description and duration in the shared tooltip (CBuffStrip). -->
+			<div class="buff-slot" data-for="buff : buffs" data-event-mouseup="buff_cancel(it_index)"
+			     data-event-mouseover="buff_hover(it_index)" data-event-mouseout="buff_leave">
+				<div class="buff-icon-art" data-style-decorator="buff.decorator"></div>
+			</div>
+		</div>
+	</div>
+</body>
+</rml>

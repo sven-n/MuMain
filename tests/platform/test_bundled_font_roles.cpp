@@ -8,9 +8,6 @@
 #include "Core/Platform/BundledFonts.h"
 #include "UI/Scaling/UITransform.h"
 
-int MouseX;
-int MouseY;
-
 TEST_CASE("bundled font roles resolve deterministically [platform][bundled_font]")
 {
     CHECK(ResolveBundledFont("").family == std::string_view("DejaVu Sans"));

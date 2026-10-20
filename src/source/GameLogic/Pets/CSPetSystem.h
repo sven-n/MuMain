@@ -36,7 +36,6 @@ public:
 
     virtual void MovePet(void) = 0;
     virtual void CalcPetInformation(const PET_INFO& Petinfo) = 0;
-    virtual void RenderPetInventory(void) = 0;
     virtual void RenderPet(int PetState = 0) = 0;
 
     virtual void Eff_LevelUp(void) = 0;
@@ -67,12 +66,10 @@ public:
 
     virtual void MovePet(void);
     virtual void CalcPetInformation(const PET_INFO& Petinfo);
-    virtual void RenderPetInventory(void);
     virtual void RenderPet(int PetState = 0);
 
     virtual void Eff_LevelUp(void);
     virtual void Eff_LevelDown(void);
 
     void AttackEffect(CHARACTER* c, OBJECT* o);
-    void RenderCmdType(void);
 };

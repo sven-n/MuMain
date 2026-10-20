@@ -1,0 +1,141 @@
+/* Legacy theme for the character-select scene's button bar (CCharSelMainWin) -- each button's
+   frames as the original's CButton used them: 0 idle, 1 hovered, 2 pressed, 3 disabled (Menu has
+   no disabled frame). Every element anchors to a screen edge/corner via base.rcss's
+   anchor-*/stretch-x utilities; CCharSelMainWin::ApplyLayout() still computes the legacy hit-test
+   rects separately (CalculateLayout(), the original's layout). Sizes are the original's 800x600
+   pixels in rem (char_sel_main.rml's body is "scene-bar-scale": 1rem = one of them scaled like the
+   original, UI::Scaling::SceneBarScale(), RmlNativeText.h), measured from the original's anchor
+   line at 567/600 of the window height, #panel's bottom. */
+
+@spritesheet charsel-create-sheet
+{
+	src: "../../../b_create.tga";
+	charsel-create-icon: 0px 0px 54px 30px;
+	charsel-create-hover: 0px 30px 54px 30px;
+	charsel-create-down: 0px 60px 54px 30px;
+	charsel-create-disabled: 0px 90px 54px 30px;
+}
+@spritesheet charsel-menu-sheet
+{
+	src: "../../../server_menu_b_all.tga";
+	charsel-menu-icon: 0px 0px 54px 30px;
+	charsel-menu-hover: 0px 30px 54px 30px;
+	charsel-menu-down: 0px 60px 54px 30px;
+}
+@spritesheet charsel-connect-sheet
+{
+	src: "../../../b_connect.tga";
+	charsel-connect-icon: 0px 0px 54px 30px;
+	charsel-connect-hover: 0px 30px 54px 30px;
+	charsel-connect-down: 0px 60px 54px 30px;
+	charsel-connect-disabled: 0px 90px 54px 30px;
+}
+@spritesheet charsel-delete-sheet
+{
+	src: "../../../b_delete.tga";
+	charsel-delete-icon: 0px 0px 54px 30px;
+	charsel-delete-hover: 0px 30px 54px 30px;
+	charsel-delete-down: 0px 60px 54px 30px;
+	charsel-delete-disabled: 0px 90px 54px 30px;
+}
+@spritesheet charsel-deco-sheet
+{
+	src: "../../../deco.tga";
+	charsel-deco-image: 0px 0px 189px 103px;
+}
+
+/* Full-width positioning container, not a bar-shaped box -- every child anchors directly to its
+   bottom edge (the original's anchor line) or a corner. */
+#panel {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 94.5vh;
+	pointer-events: none;
+}
+
+.btn-icon {
+	position: absolute;
+	width: 54rem;
+	height: 30rem;
+	bottom: 11rem;
+	cursor: pointer;
+	pointer-events: auto;
+}
+#btn_create { left: 22rem; }
+#btn_menu   { left: 77rem; }
+#btn_connect { right: 77rem; }
+#btn_delete  { right: 22rem; }
+
+.btn-icon.disabled {
+	pointer-events: none;
+	cursor: default;
+}
+#btn_create { decorator: image(charsel-create-icon); }
+#btn_menu { decorator: image(charsel-menu-icon); }
+#btn_connect { decorator: image(charsel-connect-icon); }
+#btn_delete { decorator: image(charsel-delete-icon); }
+#btn_create:hover { decorator: image(charsel-create-hover); }
+#btn_menu:hover { decorator: image(charsel-menu-hover); }
+#btn_connect:hover { decorator: image(charsel-connect-hover); }
+#btn_delete:hover { decorator: image(charsel-delete-hover); }
+#btn_create:active { decorator: image(charsel-create-down); }
+#btn_menu:active { decorator: image(charsel-menu-down); }
+#btn_connect:active { decorator: image(charsel-connect-down); }
+#btn_delete:active { decorator: image(charsel-delete-down); }
+#btn_create.disabled { decorator: image(charsel-create-disabled); }
+#btn_connect.disabled { decorator: image(charsel-connect-disabled); }
+#btn_delete.disabled { decorator: image(charsel-delete-disabled); }
+.btn-icon-label {
+	display: none;
+}
+
+/* modern-only caption below the button -- legacy has no text label here; left unstyled so it
+   stays a zero-height pass-through. */
+.btn-icon-caption {
+	display: none;
+}
+
+/* Flat, semi-transparent backing strip behind the (rarely shown) account-block message. */
+.info-bar {
+	position: absolute;
+	left: 133rem;
+	right: 133rem;
+	bottom: 15rem;
+	height: 21rem;
+	background-color: token(surface-overlay);
+	pointer-events: none;
+}
+
+/* Decorative flourish over the Connect/Delete buttons' top-right corner -- paints behind them
+   (declared first in char_sel_main.rml). */
+.deco {
+	position: absolute;
+	width: 189rem;
+	height: 103rem;
+	right: 0rem;
+	bottom: -3rem;
+	pointer-events: none;
+	decorator: image(charsel-deco-image);
+}
+
+/* Centered around a fixed screen X unrelated to this window's own position. */
+#account_block_message {
+	position: absolute;
+	left: 0;
+	top: 330rem;
+	width: 640rem;
+	pointer-events: none;
+}
+.line-row {
+	line-height: 18rem;
+	text-align: center;
+}
+.line {
+	display: inline-block;
+	color: #000000;
+	background-color: rgba(255, 255, 0, 128);
+	white-space: nowrap;
+	padding: 0 2rem;
+}

@@ -1,0 +1,69 @@
+/* Modern theme for the cash shop's several-price package dialog (CMsgBoxIGSBuySelectItem):
+   legacy's layout on a flat panel. Reference px under the dialog's root transform; the list pane
+   counter-scales out of it. */
+
+/* Centred on the cash shop's 640 x 429 area of the stage, 215 x 346. */
+#stage { pointer-events: none; }
+#panel {
+	position: absolute;
+	left: 212px;
+	top: 41px;
+	width: 215px;
+	height: 346px;
+	font-family: "token(font-body)";
+	pointer-events: none;
+}
+
+.igs-dialog-frame { position: absolute; left: 0; top: 0; width: 215px; height: 346px; background-color: token(surface-panel); border: 1px token(border-frame); border-radius: token(radius-md)px; }
+#igs_item { position: absolute; left: 0; top: 0; width: 215px; height: 346px; pointer-events: none; }
+/* Where C++ draws the live 3D item (the original's 96x60 at 60,33). */
+#igs_item_box { position: absolute; left: 60px; top: 33px; width: 96px; height: 60px; pointer-events: none; }
+
+.igs-dialog-line { position: absolute; left: 0; width: 215px; height: 1px; font-weight: bold; }
+#igs_title { top: 10px; color: token(text-primary); }
+#igs_name { top: 100px; color: token(accent-gold); }
+#igs_description { position: absolute; left: 15px; top: 118px; width: 194px; color: token(text-secondary); }
+.igs-description-line { position: relative; display: block; height: 10px; }
+#igs_price { right: 20px; top: 288px; color: token(text-warm); }
+
+#igs_option_list {
+	position: absolute;
+	left: 17px;
+	top: 177px;
+	transform-origin: left top;
+	overflow: hidden scroll;
+	pointer-events: auto;
+	background-color: token(surface-recessed);
+}
+.igs-option { position: relative; display: block; pointer-events: auto; }
+.igs-option-radio {
+	position: absolute;
+	left: 1px;
+	top: 7px;
+	width: 13px;
+	height: 13px;
+	border: 1px token(border-frame);
+	border-radius: 7px;
+	background-color: token(surface-deep);
+}
+.igs-option.selected .igs-option-radio { background-color: token(accent-gold); }
+.igs-option-label {
+	position: absolute;
+	left: 20px;
+	top: 5px;
+	white-space: nowrap;
+	font-weight: bold;
+	color: token(text-primary);
+}
+
+.igs-dialog-buttons { position: absolute; left: 26px; top: 309px; display: flex; pointer-events: none; }
+.igs-dialog-buttons .igs-btn { position: relative; flex: 0 0 52px; margin-right: 4px; }
+.igs-dialog-buttons .igs-btn-label { margin-left: -1001px; }
+.igs-dialog-buttons .igs-btn:active .igs-btn-label { margin-left: -1000px; }
+
+.igs-debug { position: absolute; left: 215px; top: 10px; color: token(semantic-danger); }
+.igs-debug-line { position: relative; display: block; height: 10px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#igs_option_list { width: calc(180px * var(--root-scale)); height: calc(99px * var(--root-scale)); }
+.igs-option { width: calc(165px * var(--root-scale)); height: calc(33px * var(--root-scale)); }

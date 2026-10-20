@@ -38,14 +38,27 @@ build-linux/
 # Bundled UI fonts (curated, shipped with the client) are source-controlled.
 !**/bin/fonts/
 !**/bin/fonts/**
-# Item data (JSON, written by the item editor) is source-controlled.
+# RmlUi UI content (RML/RCSS documents and themes) is authored source, not build output.
 !src/bin/Data/
+!src/bin/Data/Interface/
+!src/bin/Data/Interface/RmlUi/
+!src/bin/Data/Interface/RmlUi/**
+# Item data (JSON, written by the item editor) is source-controlled.
 !src/bin/Data/Items/
 !src/bin/Data/Items/**
 src/bin/Data/Items/**/*.tmp
 # Effect data (JSON), e.g. the glow colors of the items.
 !src/bin/Data/Effects/
 !src/bin/Data/Effects/**
+# Map data (JSON), e.g. the light mood of the world maps.
+!src/bin/Data/Maps/
+!src/bin/Data/Maps/**
+# Render data (JSON), e.g. the look profile of the Enhanced features.
+!src/bin/Data/Render/
+!src/bin/Data/Render/**
+# Colour grading tables (PNG) of the Enhanced post-processing, one per world.
+!src/bin/Data/Grading/
+!src/bin/Data/Grading/**
 **/obj/
 *.user
 *.suo

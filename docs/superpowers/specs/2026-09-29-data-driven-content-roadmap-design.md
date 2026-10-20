@@ -98,7 +98,7 @@ models stay in `Data/Items/Models`.
 
 | Area | Name | Design document | Depends on | What moves into data | Editor |
 |---|---|---|---|---|---|
-| Items | Items | [items design](2026-09-25-data-driven-items-design.md), phases 0–14 | – | Item data, rules and categories, models, glow, render styles and effects (as names). | The item tools of section 9 there. |
+| Items | Items | [items design](2026-09-25-data-driven-items-design.md), phases 0–16 | – | Item data, rules and categories, models, glow, render styles and effects (as names). | The item tools of section 9 there. |
 | FX1 | Effect catalogue | [effect catalogue design](2026-10-02-effect-catalogue-design.md) (draft) | items 4c | Every effect, particle, lightning and sprite type gets a name and its creation values (the `CreateParams` of the registry) in `Data/Effects/`: the effect types (`effectTypes` in the data). Behavior stays code. Items, skills and monsters then name effect types instead of using type numbers; an item effect (`itemEffect`, what an item does every frame before it is drawn) creates instances of effect types. | Effect browser: each effect with a preview, its values, and where it is used. |
 | Items 13 | Looks in data (items) | items design, phase 13 | FX1, items 6 | What the item looks are made of (D25). | Look editor. |
 | SK1 | Skills as data | not yet | items 2 (the same format rules) | `Skill.bmd` into JSON, like the items in their phase 2: names, requirements, rules; later synced with OpenMU like the items. | Focused skill editors, like the item tools; "used by" (classes, items that give a skill, monsters). |

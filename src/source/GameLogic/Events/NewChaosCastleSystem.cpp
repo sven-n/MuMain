@@ -1,22 +1,20 @@
-// NewUIChaosCastleSystem.cpp: implementation of the CNewUIChaosCastleSystem class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "I18N/All.h"
+#include "Render/Text/CUIRenderText.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 #include "NewChaosCastleSystem.h"
-#include "UI/Legacy/UIWindows.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Scenes/SceneCore.h"
-#include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
+#include "UI/Dialogs/CustomMessageBox.h"
 #include "World/MapInfra/MapManager.h"
 #include "Audio/DSPlaySound.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 
 extern int g_iChatInputType;
 extern int g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];
@@ -53,7 +51,7 @@ void CNewChaosCastleSystem::SetMatchResult(const int iNumDevilRank, const int iM
 
     memcpy(m_MatchResult, pMatchResult, sizeof(MatchResult));
 
-    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CChaosCastleResultMsgBoxLayout));
+    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CChaosCastleResultMsgBoxLayout));
 }
 
 void CNewChaosCastleSystem::SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE data)
@@ -133,10 +131,10 @@ void CNewChaosCastleSystem::RenderMatchTimes(void)
         case 8:
             if (m_iMatchTime > 0)
             {
-                if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHAOSCASTLE_TIME))
+                if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CHAOSCASTLE_TIME))
                 {
                     g_pNewUISystem->HideAll();
-                    g_pNewUISystem->Show(SEASON3B::INTERFACE_CHAOSCASTLE_TIME);
+                    g_pNewUISystem->Show(mu::ui::window::INTERFACE_CHAOSCASTLE_TIME);
                 }
 
                 g_pChaosCastleTime->SetTime(m_iMatchTime);
@@ -163,52 +161,41 @@ void CNewChaosCastleSystem::RenderMatchTimes(void)
     }
     else
     {
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHAOSCASTLE_TIME))
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CHAOSCASTLE_TIME))
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_CHAOSCASTLE_TIME);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CHAOSCASTLE_TIME);
         }
     }
 }
 
-void CNewChaosCastleSystem::RenderMatchResult(void)
+void CNewChaosCastleSystem::CollectMatchResult(std::vector<MatchResultLine>& lines) const
 {
-    int x = REFERENCE_WIDTH / 2;
-    int yPos = m_PosResult.y + 40;
     wchar_t lpszStr[256] = {};
 
-    EnableAlphaTest();
+    auto add = [&lines](const char* role, const wchar_t* text, MatchResultCell::Font font, DWORD color)
+    { lines.push_back({role, {{text, 0, 0, font, color}}}); };
 
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(128, 255, 128, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-
+    const DWORD green = RGBA(128, 255, 128, 255);
     if (m_iNumResult)
     {
-        g_pRenderText->RenderText(x, yPos, I18N::Game::TheSpiritOfTheGuardHasBeenPurified, 0, 0, RT3_WRITE_CENTER);
-        yPos += 16;
-        g_pRenderText->RenderText(x, yPos, I18N::Game::QuestCompletedSuccessfully, 0, 0, RT3_WRITE_CENTER);
+        add("message", I18N::Game::TheSpiritOfTheGuardHasBeenPurified, MatchResultCell::Font::Normal, green);
+        add("message", I18N::Game::QuestCompletedSuccessfully, MatchResultCell::Font::Normal, green);
     }
     else
     {
-        g_pRenderText->RenderText(x, yPos, I18N::Game::QuestFailedUnfortunately, 0, 0, RT3_WRITE_CENTER);
-        yPos += 16;
-        g_pRenderText->RenderText(x, yPos, I18N::Game::TryAgainNextTime, 0, 0, RT3_WRITE_CENTER);
+        add("message", I18N::Game::QuestFailedUnfortunately, MatchResultCell::Font::Normal, green);
+        add("message", I18N::Game::TryAgainNextTime, MatchResultCell::Font::Normal, green);
     }
-    yPos += 30;
 
-    MatchResult* pResult = &m_MatchResult[0];
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(210, 255, 210, 255);
+    const MatchResult* pResult = &m_MatchResult[0];
+    const DWORD rewardColor = RGBA(210, 255, 210, 255);
 
     mu_swprintf(lpszStr, I18N::Game::RewardedExpD, pResult->m_dwExp);
-    g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER); yPos += 20;
+    add("reward", lpszStr, MatchResultCell::Font::Bold, rewardColor);
 
     mu_swprintf(lpszStr, I18N::Game::MonsterKillCountD, pResult->m_iScore);
-    g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER); yPos += 20;
+    add("reward", lpszStr, MatchResultCell::Font::Bold, rewardColor);
 
     mu_swprintf(lpszStr, I18N::Game::PlayersKillCountD, pResult->m_iZen);
-    g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER); yPos += 24;
-
-    DisableAlphaBlend();
+    add("reward", lpszStr, MatchResultCell::Font::Bold, rewardColor);
 }

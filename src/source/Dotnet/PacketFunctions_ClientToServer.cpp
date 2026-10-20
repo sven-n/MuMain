@@ -194,6 +194,17 @@ void PacketFunctions_ClientToServer::SendPlayerShopCloseOther(uint16_t playerId,
     dotnet_SendPlayerShopCloseOther(this->GetHandle(), playerId, playerName);
 }
 
+void PacketFunctions_ClientToServer::SendPlayerShopSetItemPriceExtended(uint32_t moneyPrice, uint16_t priceItemType, uint16_t requiredItemAmount, BYTE itemSlot)
+{
+    static const auto dotnet_SendPlayerShopSetItemPriceExtended = LoadManagedSymbol<::SendPlayerShopSetItemPriceExtended>("SendPlayerShopSetItemPriceExtended");
+    if (!dotnet_SendPlayerShopSetItemPriceExtended)
+    {
+        return;
+    }
+
+    dotnet_SendPlayerShopSetItemPriceExtended(this->GetHandle(), moneyPrice, priceItemType, requiredItemAmount, itemSlot);
+}
+
 void PacketFunctions_ClientToServer::SendPickupItemRequest(uint16_t itemId)
 {
     static const auto dotnet_SendPickupItemRequest = LoadManagedSymbol<::SendPickupItemRequest>("SendPickupItemRequest");

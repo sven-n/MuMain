@@ -5,6 +5,7 @@
 #include "ItemEditorTable.h"
 #include "ItemEditorColumns.h"
 #include "ItemEditorActions.h"
+#include "ItemListModel.h"
 #include "Data/GameData/ItemData/ItemFieldMetadata.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "I18N/All.h"
@@ -32,13 +33,7 @@ bool CItemEditorTable::IsListed(int itemIndex, const std::string& searchFilter)
     {
         return false;
     }
-    if (searchFilter.empty())
-    {
-        return true;
-    }
-    std::string nameLower = nameBuffer;
-    std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
-    return nameLower.find(searchFilter) != std::string::npos;
+    return ContainsIgnoringCase(nameBuffer, searchFilter);
 }
 
 void CItemEditorTable::InvalidateFilter()

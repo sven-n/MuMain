@@ -8,12 +8,12 @@
 #include "doctest.h"
 
 #include "UI/Chat/ExternalChat.h"
-#include "UI/NewUI/HUD/NewUIChatLogWindow.h"
+#include "UI/HUD/ChatLogWindow.h"
 
 #include <string>
 
 using namespace UI::Chat::External;
-using SEASON3B::CNewUIChatLogWindow;
+using mu::ui::window::CChatLogWindow;
 
 namespace
 {
@@ -42,9 +42,9 @@ TEST_CASE("External chat recognises senders bridged from Discord by their prefix
 
 TEST_CASE("External chat takes the colours of its scope [ui][chat]")
 {
-    CHECK(ScopeMessageType(Scope::Guild) == SEASON3B::TYPE_GUILD_MESSAGE);
-    CHECK(ScopeMessageType(Scope::Alliance) == SEASON3B::TYPE_UNION_MESSAGE);
-    CHECK(ScopeMessageType(Scope::World) == SEASON3B::TYPE_CHAT_MESSAGE);
+    CHECK(ScopeMessageType(Scope::Guild) == mu::ui::window::TYPE_GUILD_MESSAGE);
+    CHECK(ScopeMessageType(Scope::Alliance) == mu::ui::window::TYPE_UNION_MESSAGE);
+    CHECK(ScopeMessageType(Scope::World) == mu::ui::window::TYPE_CHAT_MESSAGE);
 }
 
 TEST_CASE("External chat cuts the text to an in-game chat message [ui][chat]")
@@ -56,51 +56,51 @@ TEST_CASE("External chat cuts the text to an in-game chat message [ui][chat]")
 
 TEST_CASE("External chat is listed in its scope, among all messages and in the Discord view [ui][chat]")
 {
-    CNewUIChatLogWindow chatLog;
-    chatLog.AddExternalText(SenderLabel(Source::Discord, L"Sven"), ShortText, SEASON3B::TYPE_GUILD_MESSAGE);
+    CChatLogWindow chatLog;
+    chatLog.AddExternalText(SenderLabel(Source::Discord, L"Sven"), ShortText, mu::ui::window::TYPE_GUILD_MESSAGE);
 
-    CHECK(chatLog.GetNumberOfLines(SEASON3B::TYPE_GUILD_MESSAGE) == 1);
-    CHECK(chatLog.GetNumberOfLines(SEASON3B::TYPE_ALL_MESSAGE) == 1);
-    CHECK(chatLog.GetNumberOfLines(SEASON3B::TYPE_DISCORD_MESSAGE) == 1);
+    CHECK(chatLog.GetNumberOfLines(mu::ui::window::TYPE_GUILD_MESSAGE) == 1);
+    CHECK(chatLog.GetNumberOfLines(mu::ui::window::TYPE_ALL_MESSAGE) == 1);
+    CHECK(chatLog.GetNumberOfLines(mu::ui::window::TYPE_DISCORD_MESSAGE) == 1);
 }
 
 TEST_CASE("In-game chat stays out of the Discord view [ui][chat]")
 {
-    CNewUIChatLogWindow chatLog;
-    chatLog.AddText(L"Player", ShortText, SEASON3B::TYPE_GUILD_MESSAGE);
+    CChatLogWindow chatLog;
+    chatLog.AddText(L"Player", ShortText, mu::ui::window::TYPE_GUILD_MESSAGE);
 
-    CHECK(chatLog.GetNumberOfLines(SEASON3B::TYPE_GUILD_MESSAGE) == 1);
-    CHECK(chatLog.GetNumberOfLines(SEASON3B::TYPE_DISCORD_MESSAGE) == 0);
+    CHECK(chatLog.GetNumberOfLines(mu::ui::window::TYPE_GUILD_MESSAGE) == 1);
+    CHECK(chatLog.GetNumberOfLines(mu::ui::window::TYPE_DISCORD_MESSAGE) == 0);
 }
 
 TEST_CASE("F2 toggles all messages and whispers while nothing came from Discord [ui][chat]")
 {
-    CNewUIChatLogWindow chatLog;
-    CHECK(chatLog.GetNextView() == SEASON3B::TYPE_WHISPER_MESSAGE);
+    CChatLogWindow chatLog;
+    CHECK(chatLog.GetNextView() == mu::ui::window::TYPE_WHISPER_MESSAGE);
 
-    chatLog.ChangeMessage(SEASON3B::TYPE_WHISPER_MESSAGE);
-    CHECK(chatLog.GetNextView() == SEASON3B::TYPE_ALL_MESSAGE);
+    chatLog.ChangeMessage(mu::ui::window::TYPE_WHISPER_MESSAGE);
+    CHECK(chatLog.GetNextView() == mu::ui::window::TYPE_ALL_MESSAGE);
 }
 
 TEST_CASE("F2 also offers the Discord view once something came from Discord [ui][chat]")
 {
-    CNewUIChatLogWindow chatLog;
-    chatLog.AddExternalText(SenderLabel(Source::Discord, L"Sven"), ShortText, SEASON3B::TYPE_CHAT_MESSAGE);
+    CChatLogWindow chatLog;
+    chatLog.AddExternalText(SenderLabel(Source::Discord, L"Sven"), ShortText, mu::ui::window::TYPE_CHAT_MESSAGE);
 
-    chatLog.ChangeMessage(SEASON3B::TYPE_WHISPER_MESSAGE);
-    CHECK(chatLog.GetNextView() == SEASON3B::TYPE_DISCORD_MESSAGE);
+    chatLog.ChangeMessage(mu::ui::window::TYPE_WHISPER_MESSAGE);
+    CHECK(chatLog.GetNextView() == mu::ui::window::TYPE_DISCORD_MESSAGE);
 
-    chatLog.ChangeMessage(SEASON3B::TYPE_DISCORD_MESSAGE);
-    CHECK(chatLog.GetNextView() == SEASON3B::TYPE_ALL_MESSAGE);
+    chatLog.ChangeMessage(mu::ui::window::TYPE_DISCORD_MESSAGE);
+    CHECK(chatLog.GetNextView() == mu::ui::window::TYPE_ALL_MESSAGE);
 }
 
 TEST_CASE("An error is still listed among the messages that caused it [ui][chat]")
 {
-    CNewUIChatLogWindow chatLog;
-    chatLog.AddText(L"", L"not online", SEASON3B::TYPE_ERROR_MESSAGE, SEASON3B::TYPE_WHISPER_MESSAGE);
+    CChatLogWindow chatLog;
+    chatLog.AddText(L"", L"not online", mu::ui::window::TYPE_ERROR_MESSAGE, mu::ui::window::TYPE_WHISPER_MESSAGE);
 
-    CHECK(chatLog.GetNumberOfLines(SEASON3B::TYPE_ERROR_MESSAGE) == 1);
-    CHECK(chatLog.GetNumberOfLines(SEASON3B::TYPE_WHISPER_MESSAGE) == 1);
-    CHECK(chatLog.GetNumberOfLines(SEASON3B::TYPE_ALL_MESSAGE) == 1);
-    CHECK(chatLog.GetNumberOfLines(SEASON3B::TYPE_DISCORD_MESSAGE) == 0);
+    CHECK(chatLog.GetNumberOfLines(mu::ui::window::TYPE_ERROR_MESSAGE) == 1);
+    CHECK(chatLog.GetNumberOfLines(mu::ui::window::TYPE_WHISPER_MESSAGE) == 1);
+    CHECK(chatLog.GetNumberOfLines(mu::ui::window::TYPE_ALL_MESSAGE) == 1);
+    CHECK(chatLog.GetNumberOfLines(mu::ui::window::TYPE_DISCORD_MESSAGE) == 0);
 }
