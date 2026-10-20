@@ -154,6 +154,8 @@ void CItemSharedModelForm::RenderShared(const Data::Items::ItemModelDefinition& 
 
 void CItemSharedModelForm::RenderEdit()
 {
+    // Its fields are named like the model tool's headers (Model file).
+    ImGui::PushID("SharedModel");
     ImGui::SetNextItemWidth(FieldWidth);
     InputString(I18N::Editor::SharedModelName, m_edit.name);
     ImGui::SetNextItemWidth(FieldWidth);
@@ -168,6 +170,7 @@ void CItemSharedModelForm::RenderEdit()
             m_edit.noneBlendMeshes = *meshes;
         }
     }
+    ImGui::PopID();
 }
 
 // D26: a change to a shared model reaches all its items; they are listed
