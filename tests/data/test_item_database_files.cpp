@@ -805,9 +805,12 @@ TEST_CASE("The save warns about an item name in a language the game has no texts
 
     std::vector<ItemDataIssue> issues;
     CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
-    CHECK(std::ranges::any_of(
-        issues, [](const ItemDataIssue& issue)
-        { return issue.severity == ItemDataIssueSeverity::Warning && issue.message.find("fr") != std::string::npos; }));
+    CHECK(std::ranges::any_of(issues,
+                              [](const ItemDataIssue& issue)
+                              {
+                                  return issue.severity == ItemDataIssueSeverity::Warning && issue.group == 0 &&
+                                         issue.number == 5 && issue.message.find("the fr name") != std::string::npos;
+                              }));
 }
 
 // The bmd import and the editor give items the profile their data gives; a stat file can lack it
