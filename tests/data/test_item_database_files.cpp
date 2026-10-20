@@ -26,6 +26,10 @@
 #include "I18N/All.h"
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
+#ifdef _EDITOR
+#include "UI/ItemTools/ItemEdits.h"
+#include "UI/ItemTools/ItemSelection.h"
+#endif
 
 #include <algorithm>
 #include <cstring>
@@ -1011,6 +1015,89 @@ TEST_CASE("The item tools change models and shared models [data][items][editor]"
         CHECK(TestFiles::ReadWholeFile(models / "SharedModels.json").find("unusedModel") != std::string::npos);
         CHECK(TestFiles::ReadWholeFile(models / GetItemGroupFileName(0)).find("0.004") != std::string::npos);
     }
+}
+
+TEST_CASE("The item tools' changes can be undone and redone [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    MuEditor::Items::ItemEdits& edits = g_ItemEdits;
+    edits.GetHistory().Clear();
+    const MuEditor::Items::ItemSlotState kris = MuEditor::Items::ItemEdits::ReadSlot(KrisType);
+
+    SUBCASE("a field")
+    {
+        ItemDefinition changed = kris.item;
+        changed.damageMax = 99;
+        edits.SetItem("Damage", changed);
+        REQUIRE(edits.Undo());
+        CHECK(MuEditor::Items::ItemEdits::ReadSlot(KrisType) == kris);
+        CHECK(ItemAttribute[KrisType].DamageMax == kris.item.damageMax);
+        CHECK(g_ItemSelection.GetItemType() == KrisType);
+        REQUIRE(edits.Redo());
+        CHECK(g_ItemDatabase.Find(KrisType)->damageMax == 99);
+    }
+
+    SUBCASE("a removed item comes back with its model")
+    {
+        REQUIRE(edits.RemoveItem("Remove", KrisType));
+        REQUIRE(edits.Undo());
+        CHECK(MuEditor::Items::ItemEdits::ReadSlot(KrisType) == kris);
+        CHECK(std::wstring(ItemAttribute[KrisType].Name) == L"Kris");
+    }
+
+    SUBCASE("a name")
+    {
+        REQUIRE(edits.SetItemName("Name", KrisType, "de", "Dolch"));
+        REQUIRE(edits.Undo());
+        CHECK(GetOwnName(*g_ItemDatabase.Find(KrisType), "de") != "Dolch");
+        CHECK(MuEditor::Items::ItemEdits::ReadSlot(KrisType) == kris);
+    }
+
+    SUBCASE("a move")
+    {
+        const int target = MakeItemType(0, 100);
+        REQUIRE(edits.MoveItem("Move", KrisType, target));
+        REQUIRE(edits.Undo());
+        CHECK(g_ItemDatabase.Find(KrisType) != nullptr);
+        CHECK(g_ItemDatabase.Find(target) == nullptr);
+        CHECK(g_ItemModelDatabase.Find(KrisType) != nullptr);
+    }
+
+    SUBCASE("a renamed shared model")
+    {
+        const SharedItemModel shared = g_ItemModelDatabase.GetSharedModels().front();
+        SharedItemModel renamed = shared;
+        renamed.name = "renamedModel";
+        edits.SetSharedModel("Rename", renamed, shared.name);
+        REQUIRE(edits.Undo());
+        REQUIRE(g_ItemModelDatabase.FindSharedModel(shared.name) != nullptr);
+        CHECK(*g_ItemModelDatabase.FindSharedModel(shared.name) == shared);
+        CHECK(g_ItemModelDatabase.FindSharedModel("renamedModel") == nullptr);
+        for (const ItemModelDefinition& model : g_ItemModelDatabase.GetAllSlots())
+        {
+            CHECK(model.model != "renamedModel");
+        }
+    }
+
+    SUBCASE("a change past the history is not overwritten")
+    {
+        ItemDefinition changed = kris.item;
+        changed.damageMax = 99;
+        edits.SetItem("Damage", changed);
+        changed.damageMax = 50;
+        g_ItemDataHandler.SetItem(changed);
+        CHECK_FALSE(edits.Undo());
+        CHECK(g_ItemDatabase.Find(KrisType)->damageMax == 50);
+    }
+    edits.GetHistory().Clear();
 }
 
 TEST_CASE("The save warns about an item name in a language the game has no texts for [data][items][editor]")

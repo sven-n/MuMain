@@ -2,6 +2,7 @@ mu_add_test(
     NAME test_item_database
     SOURCES
         test_item_database.cpp
+        test_item_edit_history.cpp
         test_item_json.cpp
         test_item_list_model.cpp
         test_item_model_json.cpp
