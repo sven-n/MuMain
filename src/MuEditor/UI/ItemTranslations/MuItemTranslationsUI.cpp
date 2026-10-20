@@ -121,7 +121,7 @@ void CMuItemTranslationsUI::RenderToolbar()
 {
     const float uiScale = g_MuEditorCore.GetUIScale();
     ImGui::SetNextItemWidth(SearchWidth * uiScale);
-    ImGui::InputTextWithHint("##Search", I18N::Editor::Search, m_search, sizeof(m_search));
+    ImGui::InputTextWithHint("##Search", I18N::Editor::NameOrNumber, m_search, sizeof(m_search));
 
     ImGui::SameLine();
     ImGui::TextUnformatted(I18N::Editor::MissingIn);

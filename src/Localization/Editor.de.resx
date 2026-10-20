@@ -931,6 +931,9 @@
   <data name="Item names cannot contain the separator" xml:space="preserve">
     <value>Ein Gegenstandsname darf kein "||" enthalten.</value>
   </data>
+  <data name="Name or number" xml:space="preserve">
+    <value>Name oder Nummer</value>
+  </data>
   <data name="Item names missing" xml:space="preserve">
     <value>Fehlende Gegenstandsnamen auf {0}: {1} von {2}</value>
   </data>
