@@ -1126,9 +1126,6 @@
   <data name="Size and kind" xml:space="preserve">
     <value>Size and kind</value>
   </data>
-  <data name="Your character holds the item: its size and slot stay as they are." xml:space="preserve">
-    <value>Your character holds the item: its size and slot stay as they are.</value>
-  </data>
   <data name="Wing tier" xml:space="preserve">
     <value>Wing tier</value>
   </data>
@@ -1380,5 +1377,17 @@
   </data>
   <data name="New tags need code that uses them (ItemTag in ItemTagSet.h)." xml:space="preserve">
     <value>New tags need code that uses them (ItemTag in ItemTagSet.h).</value>
+  </data>
+  <data name="The item is worn or in an item window: its size and slot stay as they are." xml:space="preserve">
+    <value>The item is worn or in an item window: its size and slot stay as they are.</value>
+  </data>
+  <data name="The item is worn or in an item window: it is not moved or removed." xml:space="preserve">
+    <value>The item is worn or in an item window: it is not moved or removed.</value>
+  </data>
+  <data name="kept its size and slot: it is worn or in an item window." xml:space="preserve">
+    <value>kept its size and slot: it is worn or in an item window.</value>
+  </data>
+  <data name="Not done: the step would change an item that is worn or in an item window." xml:space="preserve">
+    <value>Not done: the step would change an item that is worn or in an item window.</value>
   </data>
 </root>

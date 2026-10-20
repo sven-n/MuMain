@@ -974,8 +974,11 @@ server with original clients (after phases 6 and B).
      cannot be removed, glow colours, render styles and item effects picked
      from lists with their users. A changed file, texture folder, mesh list
      or material is opened again between frames.
-   - Size and slot are refused while the hero holds the item (the inventory
-     frees its cells by the size an item has when it is taken out).
+   - Size and slot are refused while the hero wears the item or a window
+     shows it (an item grid frees its cells by the size an item has when it
+     is taken out); such an item is not moved or removed, an undo step that
+     would change it is refused, and the bmd import keeps its size and
+     slot.
    - Left out: the custom marker of section 7 (nothing reads it yet; phase
      7 and Q1), mixes and quests in "used by" (their loaded data has no way
      to walk it), the last OpenMU import in the remove warning (phase 7),

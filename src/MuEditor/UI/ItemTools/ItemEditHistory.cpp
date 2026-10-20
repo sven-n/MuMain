@@ -20,6 +20,12 @@ std::string SharedModelName(const ItemEditStep& step, bool undoing)
     const std::optional<Data::Items::SharedItemModel>& other = undoing ? step.sharedBefore : step.sharedAfter;
     return current ? current->name : other->name;
 }
+
+// Whether an item keeps the cells it takes in an item grid.
+bool KeepsShape(const Data::Items::ItemDefinition& from, const Data::Items::ItemDefinition& to)
+{
+    return from.Exists() == to.Exists() && from.width == to.width && from.height == to.height && from.slot == to.slot;
+}
 } // namespace
 
 ItemEditHistory::ItemEditHistory(Hooks hooks) : m_hooks(std::move(hooks)) {}
@@ -70,23 +76,48 @@ const std::string& ItemEditHistory::GetRedoLabel() const
 
 bool ItemEditHistory::Undo()
 {
-    if (!CanUndo() || !IsAsLeft(m_entries[m_done - 1], true))
+    if (!CanUndo())
+    {
+        m_lastRefusal = Refusal::NothingToDo;
+        return false;
+    }
+    if (!TryApply(m_entries[m_done - 1], true))
     {
         return false;
     }
-    Apply(m_entries[m_done - 1], true);
     --m_done;
     return true;
 }
 
 bool ItemEditHistory::Redo()
 {
-    if (!CanRedo() || !IsAsLeft(m_entries[m_done], false))
+    if (!CanRedo())
+    {
+        m_lastRefusal = Refusal::NothingToDo;
+        return false;
+    }
+    if (!TryApply(m_entries[m_done], false))
     {
         return false;
     }
-    Apply(m_entries[m_done], false);
     ++m_done;
+    return true;
+}
+
+bool ItemEditHistory::TryApply(const ItemEditEntry& entry, bool undoing)
+{
+    if (!IsAsLeft(entry, undoing))
+    {
+        m_lastRefusal = Refusal::ItemsChanged;
+        return false;
+    }
+    if (ChangesHeldItem(entry, undoing))
+    {
+        m_lastRefusal = Refusal::ItemHeld;
+        return false;
+    }
+    m_lastRefusal = Refusal::None;
+    Apply(entry, undoing);
     return true;
 }
 
@@ -145,6 +176,40 @@ bool ItemEditHistory::IsAsLeft(const ItemEditEntry& entry, bool undoing) const
         }
     }
     return true;
+}
+
+// Called after IsAsLeft, so the items are in the state the entry starts from.
+bool ItemEditHistory::ChangesHeldItem(const ItemEditEntry& entry, bool undoing) const
+{
+    if (!m_hooks.isHeld)
+    {
+        return false;
+    }
+    for (const ItemEditStep& step : entry.steps)
+    {
+        switch (step.kind)
+        {
+        case ItemEditStep::Kind::Slot:
+        {
+            const ItemSlotState& from = undoing ? step.after : step.before;
+            const ItemSlotState& to = undoing ? step.before : step.after;
+            if (!KeepsShape(from.item, to.item) && m_hooks.isHeld(step.itemType))
+            {
+                return true;
+            }
+            break;
+        }
+        case ItemEditStep::Kind::Move:
+            if (m_hooks.isHeld(undoing ? step.otherItemType : step.itemType))
+            {
+                return true;
+            }
+            break;
+        case ItemEditStep::Kind::SharedModel:
+            break;
+        }
+    }
+    return false;
 }
 
 void ItemEditHistory::Apply(const ItemEditEntry& entry, bool undoing)

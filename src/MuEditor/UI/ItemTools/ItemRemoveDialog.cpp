@@ -5,6 +5,7 @@
 #include "ItemRemoveDialog.h"
 
 #include "ItemEdits.h"
+#include "ItemHeldByCharacter.h"
 #include "ItemUsageView.h"
 
 #include "Data/GameData/ItemData/ItemDatabase.h"
@@ -48,6 +49,12 @@ void CItemRemoveDialog::Render()
     UsageView::Render(m_usage);
     ImGui::Separator();
 
+    const bool held = IsHeldByCharacter(m_itemType);
+    if (held)
+    {
+        ImGui::TextDisabled("%s", I18N::Editor::TheItemIsWornOrInAnItemWindowItIsNotMovedOrRemoved);
+    }
+    ImGui::BeginDisabled(held);
     ImGui::PushStyleColor(ImGuiCol_Button, RemoveColor);
     if (ImGui::Button(I18N::Editor::Remove))
     {
@@ -55,6 +62,7 @@ void CItemRemoveDialog::Render()
         ImGui::CloseCurrentPopup();
     }
     ImGui::PopStyleColor();
+    ImGui::EndDisabled();
     ImGui::SameLine();
     if (ImGui::Button(I18N::Editor::Cancel))
     {

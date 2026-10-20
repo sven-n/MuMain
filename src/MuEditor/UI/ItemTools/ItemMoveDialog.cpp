@@ -6,6 +6,7 @@
 
 #include "ItemEdits.h"
 #include "ItemGroupNames.h"
+#include "ItemHeldByCharacter.h"
 #include "ItemSelection.h"
 #include "ItemUsageView.h"
 
@@ -78,7 +79,12 @@ void CItemMoveDialog::Render()
     UsageView::Render(m_usage);
     ImGui::Separator();
 
-    ImGui::BeginDisabled(!free);
+    const bool held = IsHeldByCharacter(m_itemType);
+    if (held)
+    {
+        ImGui::TextDisabled("%s", I18N::Editor::TheItemIsWornOrInAnItemWindowItIsNotMovedOrRemoved);
+    }
+    ImGui::BeginDisabled(!free || held);
     if (ImGui::Button(I18N::Editor::Move))
     {
         if (g_ItemEdits.MoveItem(I18N::Editor::MoveItem, m_itemType, target))

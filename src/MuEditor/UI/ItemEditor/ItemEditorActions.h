@@ -32,6 +32,9 @@ private:
     // items show the English name there).
     static void LogMissingItemNames();
     static void LogImportResult(const Data::Items::ItemBmdImportResult& result);
+    // After an import: puts back the size and slot (or the whole item, if the
+    // import removed it) of the items the game holds, from `before`.
+    static void KeepHeldItemShapes(const std::vector<Data::Items::ItemDefinition>& before);
 };
 
 #endif // _EDITOR

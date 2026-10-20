@@ -667,8 +667,11 @@ shows it in the others.
 - **Item Basics**: the English name, size, slot, two-handed, wing tier,
   weapon kind, skill, drop level, potion priority, the stats, the prices,
   the stat profile and the resistances. Size and slot stay as they are
-  while your character holds the item: the inventory frees the cells by
-  the size an item has when it is taken out.
+  while your character wears the item or a window shows it (the inventory,
+  the vault, a trade, a shop): an item grid frees the cells by the size an
+  item has when it is taken out. Such an item is not moved or removed
+  either, an undo step that would change it is refused, and Import from bmd
+  keeps its size and slot.
 - **Item Requirements**: the level and stat requirements, each also by item
   level (16 values instead of the base value), the class steps (0: the
   class cannot use the item) and whether excellent options raise the level

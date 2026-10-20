@@ -80,6 +80,22 @@ public:
         // may have another name (a rename).
         std::function<void(const std::string& name, const std::optional<Data::Items::SharedItemModel>& model)>
             restoreSharedModel;
+        // Whether the game holds an item of that type, so its size and slot
+        // must not change and it must not move or go (IsHeldByCharacter).
+        // Optional.
+        std::function<bool(int itemType)> isHeld;
+    };
+
+    // Why the last Undo or Redo did nothing.
+    enum class Refusal
+    {
+        None,
+        NothingToDo,
+        // The items are no longer as the entry expects.
+        ItemsChanged,
+        // The entry would change the size or slot of a held item, or move or
+        // remove it.
+        ItemHeld,
     };
 
     // How many entries are kept; the oldest go first.
@@ -97,9 +113,14 @@ public:
     const std::string& GetRedoLabel() const;
 
     // Undoes the last entry, or redoes the next one. False, with nothing
-    // changed, when there is none or the items are no longer as it expects.
+    // changed, when there is none, the items are no longer as it expects or
+    // it would change a held item (GetLastRefusal says which).
     bool Undo();
     bool Redo();
+    Refusal GetLastRefusal() const
+    {
+        return m_lastRefusal;
+    }
 
     // The item type the last Undo or Redo changed first, to select it;
     // nullopt for a change to a shared model only.
@@ -115,7 +136,9 @@ public:
     bool IsModifiedSinceSave() const;
 
 private:
+    bool TryApply(const ItemEditEntry& entry, bool undoing);
     bool IsAsLeft(const ItemEditEntry& entry, bool undoing) const;
+    bool ChangesHeldItem(const ItemEditEntry& entry, bool undoing) const;
     void Apply(const ItemEditEntry& entry, bool undoing);
     void ApplyStep(const ItemEditStep& step, bool undoing);
 
@@ -126,6 +149,7 @@ private:
     // m_done when the data was saved; nullopt when that state is gone.
     std::optional<size_t> m_saved = 0;
     std::optional<int> m_lastChangedItem;
+    Refusal m_lastRefusal = Refusal::None;
 };
 } // namespace MuEditor::Items
 

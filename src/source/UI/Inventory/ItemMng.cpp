@@ -349,6 +349,20 @@ bool mu::ui::window::CItemMng::IsEmpty()
     return m_listItem.empty();
 }
 
+#ifdef _EDITOR
+bool mu::ui::window::CItemMng::HasItemOfType(int itemType) const
+{
+    for (const ITEM* item : m_listItem)
+    {
+        if (item->Type == itemType)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+#endif
+
 void mu::ui::window::CItemMng::Update()
 {
     m_UpdateTimer.UpdateTime();

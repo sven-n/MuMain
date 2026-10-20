@@ -26,6 +26,8 @@ public:
     bool SetItemName(std::string label, int itemType, std::string_view locale, std::string text);
     bool AddItem(std::string label, const Data::Items::ItemDefinition& item,
                  const Data::Items::ItemModelDefinition* model);
+    // False, with nothing changed, also while the game holds the item
+    // (IsHeldByCharacter).
     bool RemoveItem(std::string label, int itemType);
     bool MoveItem(std::string label, int fromItemType, int toItemType);
     void SetItemModel(std::string label, const Data::Items::ItemModelDefinition& model);
@@ -39,7 +41,8 @@ public:
     void EndGroup();
 
     // Undo and Redo select the item they changed. False when there is
-    // nothing to do or the items changed past the history.
+    // nothing to do, the items changed past the history or the step would
+    // change a held item (ItemEditHistory::GetLastRefusal).
     bool Undo();
     bool Redo();
 

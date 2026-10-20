@@ -9,6 +9,8 @@
 #include "Data/GameData/ItemData/ItemNames.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "../MuEditor/UI/ItemTools/ItemEdits.h"
+#include "../MuEditor/UI/ItemTools/ItemHeldByCharacter.h"
+#include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
 #include "imgui.h"
 #include <string>
@@ -58,6 +60,11 @@ bool CItemEditorActions::RenderImportBmdButton()
         return false;
     }
 
+    std::vector<Data::Items::ItemDefinition> held;
+    for (const int itemType : MuEditor::Items::FindHeldItemTypes())
+    {
+        held.push_back(g_ItemDatabase.GetAllSlots()[itemType]);
+    }
     const Data::Items::ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
     LogIssues(result.issues);
     if (Data::Items::HasErrors(result.issues))
@@ -68,10 +75,36 @@ bool CItemEditorActions::RenderImportBmdButton()
     }
 
     LogImportResult(result);
+    KeepHeldItemShapes(held);
     // The imported items replace all items: no step before them can be undone.
     g_ItemEdits.GetHistory().Clear();
     ImGui::OpenPopup("Import Bmd Success");
     return true;
+}
+
+void CItemEditorActions::KeepHeldItemShapes(const std::vector<Data::Items::ItemDefinition>& before)
+{
+    std::vector<Data::Items::ItemDefinition> kept;
+    for (const Data::Items::ItemDefinition& old : before)
+    {
+        const Data::Items::ItemDefinition* imported = g_ItemDatabase.Find(old.group, old.number);
+        if (imported != nullptr && imported->width == old.width && imported->height == old.height &&
+            imported->slot == old.slot)
+        {
+            continue;
+        }
+        Data::Items::ItemDefinition item = imported != nullptr ? *imported : old;
+        item.width = old.width;
+        item.height = old.height;
+        item.slot = old.slot;
+        kept.push_back(std::move(item));
+        g_MuEditorConsoleUI.LogEditor(g_ItemDatabase.GetLogName(Data::Items::MakeItemType(old.group, old.number)) +
+                                      ": " + I18N::Editor::KeptItsSizeAndSlotItIsWornOrInAnItemWindow);
+    }
+    if (!kept.empty())
+    {
+        g_ItemDataHandler.RestoreItems(kept);
+    }
 }
 
 void CItemEditorActions::RenderExportBmdButton()
@@ -106,10 +139,10 @@ void CItemEditorActions::LogMissingItemNames()
         {
             continue;
         }
-        g_MuEditorConsoleUI.LogEditor(I18N::Format(I18N::Editor::ItemNamesMissing,
-                                                   {I18N::GetLanguageDisplayName(count.locale.c_str()),
-                                                    std::to_string(count.missing),
-                                                    std::to_string(count.named + count.missing)}));
+        g_MuEditorConsoleUI.LogEditor(
+            I18N::Format(I18N::Editor::ItemNamesMissing,
+                         {I18N::GetLanguageDisplayName(count.locale.c_str()), std::to_string(count.missing),
+                          std::to_string(count.named + count.missing)}));
     }
 }
 
@@ -138,7 +171,8 @@ void CItemEditorActions::LogImportResult(const Data::Items::ItemBmdImportResult&
 
     for (const Data::Items::ItemBmdRepair& repair : result.repairs)
     {
-        const std::string source = repair.fromLocale.empty() ? "no language had it, set to the default" : "taken from " + repair.fromLocale;
+        const std::string source =
+            repair.fromLocale.empty() ? "no language had it, set to the default" : "taken from " + repair.fromLocale;
         g_MuEditorConsoleUI.LogEditor("Repaired item (" + std::to_string(repair.group) + "," +
                                       std::to_string(repair.number) + ") " + repair.field + ": " +
                                       std::to_string(repair.oldValue) + " -> " + std::to_string(repair.newValue) +
@@ -166,7 +200,8 @@ void CItemEditorActions::RenderExportS6E3Button()
 
         if (g_ItemDataHandler.ExportAsS6E3(fileName))
         {
-            std::string filename_str = "Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_S6E3.bmd";
+            std::string filename_str =
+                "Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_S6E3.bmd";
             g_MuEditorConsoleUI.LogEditor("Exported items as S6E3 legacy format: " + filename_str);
             ImGui::OpenPopup("Export S6E3 Success");
         }
@@ -192,7 +227,8 @@ void CItemEditorActions::RenderExportCSVButton()
 
         if (g_ItemDataHandler.ExportToCsv(csvFileName))
         {
-            std::string filename_str = "Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_export.csv";
+            std::string filename_str =
+                "Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_export.csv";
             g_MuEditorConsoleUI.LogEditor("Exported items as CSV: " + filename_str);
             ImGui::OpenPopup("Export CSV Success");
         }

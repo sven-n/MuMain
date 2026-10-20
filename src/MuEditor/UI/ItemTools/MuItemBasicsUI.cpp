@@ -138,7 +138,7 @@ void CMuItemBasicsUI::RenderShape(ItemDefinition& item, int itemType)
     ImGui::EndDisabled();
     if (held)
     {
-        ImGui::TextDisabled("%s", I18N::Editor::YourCharacterHoldsTheItemItsSizeAndSlotStayAsTheyAre);
+        ImGui::TextDisabled("%s", I18N::Editor::TheItemIsWornOrInAnItemWindowItsSizeAndSlotStayAsTheyAre);
     }
     Fields::Check(m_draft, I18N::Metadata::TwoHand, item.twoHanded);
     Fields::Enum(m_draft, I18N::Editor::WingTier, item.wingTier);

@@ -6,7 +6,7 @@
 
 #include "Engine/Object/ZzzInfomation.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Inventory/MyInventory.h"
+#include "UI/Inventory/ItemMng.h"
 
 namespace MuEditor::Items
 {
@@ -22,8 +22,21 @@ bool IsHeldByCharacter(int itemType)
             }
         }
     }
-    const mu::ui::window::CMyInventory* inventory = g_pMyInventory;
-    return inventory != nullptr && inventory->FindItemIndex(static_cast<short>(itemType)) >= 0;
+    const mu::ui::window::CItemMng* windowItems = g_pNewItemMng;
+    return windowItems != nullptr && windowItems->HasItemOfType(itemType);
+}
+
+std::vector<int> FindHeldItemTypes()
+{
+    std::vector<int> held;
+    for (int itemType = 0; itemType < MAX_ITEM; ++itemType)
+    {
+        if (IsHeldByCharacter(itemType))
+        {
+            held.push_back(itemType);
+        }
+    }
+    return held;
 }
 } // namespace MuEditor::Items
 

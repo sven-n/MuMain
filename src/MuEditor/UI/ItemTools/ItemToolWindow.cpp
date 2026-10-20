@@ -26,11 +26,27 @@ namespace
 {
 constexpr int VersionBits = 32;
 
+void LogRefusal()
+{
+    switch (g_ItemEdits.GetHistory().GetLastRefusal())
+    {
+    case ItemEditHistory::Refusal::ItemsChanged:
+        g_MuEditorConsoleUI.LogEditor(I18N::Editor::TheItemsChangedSinceThisStepItIsNotUndone);
+        break;
+    case ItemEditHistory::Refusal::ItemHeld:
+        g_MuEditorConsoleUI.LogEditor(I18N::Editor::NotDoneTheStepWouldChangeAnItemThatIsWornOrInAnItemWindow);
+        break;
+    case ItemEditHistory::Refusal::None:
+    case ItemEditHistory::Refusal::NothingToDo:
+        break;
+    }
+}
+
 void Undo()
 {
     if (g_ItemEdits.GetHistory().CanUndo() && !g_ItemEdits.Undo())
     {
-        g_MuEditorConsoleUI.LogEditor(I18N::Editor::TheItemsChangedSinceThisStepItIsNotUndone);
+        LogRefusal();
     }
 }
 
@@ -38,7 +54,7 @@ void Redo()
 {
     if (g_ItemEdits.GetHistory().CanRedo() && !g_ItemEdits.Redo())
     {
-        g_MuEditorConsoleUI.LogEditor(I18N::Editor::TheItemsChangedSinceThisStepItIsNotUndone);
+        LogRefusal();
     }
 }
 

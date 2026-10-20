@@ -1105,9 +1105,6 @@
   <data name="Size and kind" xml:space="preserve">
     <value>Größe und Art</value>
   </data>
-  <data name="Your character holds the item: its size and slot stay as they are." xml:space="preserve">
-    <value>Ihr Charakter hat den Gegenstand: Größe und Platz bleiben, wie sie sind.</value>
-  </data>
   <data name="Wing tier" xml:space="preserve">
     <value>Flügelstufe</value>
   </data>
@@ -1359,5 +1356,17 @@
   </data>
   <data name="New tags need code that uses them (ItemTag in ItemTagSet.h)." xml:space="preserve">
     <value>Neue Tags brauchen Code, der sie nutzt (ItemTag in ItemTagSet.h).</value>
+  </data>
+  <data name="The item is worn or in an item window: its size and slot stay as they are." xml:space="preserve">
+    <value>Der Gegenstand wird getragen oder liegt in einem Gegenstandsfenster: Größe und Platz bleiben, wie sie sind.</value>
+  </data>
+  <data name="The item is worn or in an item window: it is not moved or removed." xml:space="preserve">
+    <value>Der Gegenstand wird getragen oder liegt in einem Gegenstandsfenster: Er wird nicht verschoben oder entfernt.</value>
+  </data>
+  <data name="kept its size and slot: it is worn or in an item window." xml:space="preserve">
+    <value>behält Größe und Platz: Er wird getragen oder liegt in einem Gegenstandsfenster.</value>
+  </data>
+  <data name="Not done: the step would change an item that is worn or in an item window." xml:space="preserve">
+    <value>Nicht ausgeführt: Der Schritt würde einen Gegenstand ändern, der getragen wird oder in einem Gegenstandsfenster liegt.</value>
   </data>
 </root>

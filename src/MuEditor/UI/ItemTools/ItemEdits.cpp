@@ -4,6 +4,7 @@
 
 #include "ItemEdits.h"
 
+#include "ItemHeldByCharacter.h"
 #include "ItemSelection.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
@@ -86,8 +87,9 @@ ItemEdits& ItemEdits::GetInstance()
 }
 
 ItemEdits::ItemEdits()
-    : m_history({&ItemEdits::ReadSlot, &RestoreSlots, [](int from, int to)
-                 { return g_ItemDataHandler.MoveItem(from, to); }, &ReadSharedModel, &RestoreSharedModel})
+    : m_history({&ItemEdits::ReadSlot, &RestoreSlots,
+                 [](int from, int to) { return g_ItemDataHandler.MoveItem(from, to); }, &ReadSharedModel,
+                 &RestoreSharedModel, &IsHeldByCharacter})
 {
 }
 
@@ -172,6 +174,10 @@ bool ItemEdits::AddItem(std::string label, const ItemDefinition& item, const Ite
 
 bool ItemEdits::RemoveItem(std::string label, int itemType)
 {
+    if (IsHeldByCharacter(itemType))
+    {
+        return false;
+    }
     bool removed = false;
     const int itemTypes[] = {itemType};
     RecordSlots(std::move(label), itemTypes, [&] { removed = g_ItemDataHandler.RemoveItem(itemType); });
@@ -180,7 +186,7 @@ bool ItemEdits::RemoveItem(std::string label, int itemType)
 
 bool ItemEdits::MoveItem(std::string label, int fromItemType, int toItemType)
 {
-    if (!g_ItemDataHandler.MoveItem(fromItemType, toItemType))
+    if (IsHeldByCharacter(fromItemType) || !g_ItemDataHandler.MoveItem(fromItemType, toItemType))
     {
         return false;
     }

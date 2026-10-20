@@ -71,6 +71,11 @@ namespace mu::ui::window
         void DeleteAllItems();
 
         bool IsEmpty();
+#ifdef _EDITOR
+        // Whether a window shows an item of that type (an item grid or the
+        // cursor): the item tools keep its size and slot then.
+        bool HasItemOfType(int itemType) const;
+#endif
 
         void Update();
 

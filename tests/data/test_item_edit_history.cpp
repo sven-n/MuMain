@@ -189,6 +189,53 @@ TEST_CASE("The item edit history keeps a limited number of entries and knows the
     CHECK_FALSE(history.IsModifiedSinceSave());
 }
 
+TEST_CASE("The item edit history refuses a step that would change an item the game holds [editor][items]")
+{
+    FakeItems items;
+    int heldItemType = -1;
+    ItemEditHistory::Hooks hooks = items.MakeHooks();
+    hooks.isHeld = [&](int itemType) { return itemType == heldItemType; };
+    ItemEditHistory history(hooks);
+    items.Slot(Kris).item.names = Data::LocalizedString::Parse("Kris");
+    const ItemSlotState before = items.Slot(Kris);
+
+    SUBCASE("its size")
+    {
+        items.Slot(Kris).item.height = 3;
+        history.Record(SlotEntry("Height", Kris, before, items.Slot(Kris)));
+        heldItemType = Kris;
+        CHECK_FALSE(history.Undo());
+        CHECK(history.GetLastRefusal() == ItemEditHistory::Refusal::ItemHeld);
+        CHECK(items.Slot(Kris).item.height == 3);
+        heldItemType = -1;
+        CHECK(history.Undo());
+        CHECK(history.GetLastRefusal() == ItemEditHistory::Refusal::None);
+        CHECK(items.Slot(Kris).item.height == 0);
+    }
+    SUBCASE("another field")
+    {
+        items.Slot(Kris).item.durability = 30;
+        history.Record(SlotEntry("Durability", Kris, before, items.Slot(Kris)));
+        heldItemType = Kris;
+        CHECK(history.Undo());
+        CHECK(items.Slot(Kris).item.durability == before.item.durability);
+    }
+    SUBCASE("a move")
+    {
+        const int moved = MakeItemType(0, 40);
+        items.Slot(moved) = before;
+        items.Slot(moved).item.number = 40;
+        items.Slot(Kris) = ItemSlotState{};
+        history.Record({"Move", {{ItemEditStep::Kind::Move, Kris, moved, {}, {}, std::nullopt, std::nullopt}}});
+        heldItemType = moved;
+        CHECK_FALSE(history.Undo());
+        CHECK(history.GetLastRefusal() == ItemEditHistory::Refusal::ItemHeld);
+        heldItemType = -1;
+        CHECK(history.Undo());
+        CHECK(items.Slot(Kris).item.Exists());
+    }
+}
+
 TEST_CASE("Selecting an item counts, also the same item again [editor][items]")
 {
     ItemSelection& selection = ItemSelection::GetInstance();
