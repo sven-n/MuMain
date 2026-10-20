@@ -21,7 +21,8 @@ std::vector<LevelModelRun> FindLevelModelRuns(int itemType)
         {
             // Also the event models two levels of (14,12) are drawn with.
             run.modelType = Render::Items::Display::GetDrawnModel(drawn->modelType, drawn->drawLevel);
-            run.small = drawn->drawLevel < 0;
+            run.small =
+                Render::Items::Display::GetSmallArchangelWeaponScale(drawn->modelType, drawn->drawLevel).has_value();
         }
         if (!runs.empty() && runs.back().modelType == run.modelType && runs.back().small == run.small)
         {

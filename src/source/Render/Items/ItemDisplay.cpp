@@ -221,8 +221,9 @@ std::optional<InventoryModel> FindInventoryModel(int itemType, int level)
 {
     const auto drawn = [level](int modelType)
     { return std::optional<InventoryModel>(InventoryModel{modelType, level}); };
-    // Drawn small: the Weapon of Archangel shows the archangel weapons with level -1.
-    const auto small = [](int modelType) { return std::optional<InventoryModel>(InventoryModel{modelType, -1}); };
+    // Drawn with level -1 (GetSmallArchangelWeaponScale makes the archangel weapons small with it).
+    const auto levelMinusOne = [](int modelType)
+    { return std::optional<InventoryModel>(InventoryModel{modelType, -1}); };
     constexpr std::optional<InventoryModel> nothing;
     switch (itemType)
     {
@@ -269,14 +270,18 @@ std::optional<InventoryModel> FindInventoryModel(int itemType, int level)
     case ITEM_BLUE_CHOCOLATE_BOX:
         return level == 0 ? drawn(MODEL_BLUE_CHOCOLATE_BOX) : level == 1 ? drawn(MODEL_EVENT + 23) : nothing;
     case ITEM_WEAPON_OF_ARCHANGEL:
-        return level == 0   ? small(MODEL_DIVINE_STAFF_OF_ARCHANGEL)
-               : level == 1 ? small(MODEL_DIVINE_SWORD_OF_ARCHANGEL)
-               : level == 2 ? small(MODEL_DIVINE_CB_OF_ARCHANGEL)
+        return level == 0   ? levelMinusOne(MODEL_DIVINE_STAFF_OF_ARCHANGEL)
+               : level == 1 ? levelMinusOne(MODEL_DIVINE_SWORD_OF_ARCHANGEL)
+               : level == 2 ? levelMinusOne(MODEL_DIVINE_CB_OF_ARCHANGEL)
                             : nothing;
     case ITEM_SCROLL_OF_EMPEROR_RING_OF_HONOR:
-        return level == 0 ? drawn(Data::Items::ToModelSlot(itemType)) : level == 1 ? small(MODEL_EVENT + 12) : nothing;
+        return level == 0   ? drawn(Data::Items::ToModelSlot(itemType))
+               : level == 1 ? levelMinusOne(MODEL_EVENT + 12)
+                            : nothing;
     case ITEM_BROKEN_SWORD_DARK_STONE:
-        return level == 0 ? drawn(Data::Items::ToModelSlot(itemType)) : level == 1 ? small(MODEL_EVENT + 13) : nothing;
+        return level == 0   ? drawn(Data::Items::ToModelSlot(itemType))
+               : level == 1 ? levelMinusOne(MODEL_EVENT + 13)
+                            : nothing;
     case ITEM_WIZARDS_RING:
         return level == 0 ? drawn(MODEL_EVENT + 15) : (1 <= level && level <= 3) ? drawn(MODEL_EVENT + 14) : nothing;
     case ITEM_LIFE_STONE_ITEM:

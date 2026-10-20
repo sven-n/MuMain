@@ -53,7 +53,8 @@ int GetInventoryModel(int itemType);
 std::optional<int> GetItemOfInventoryModel(int modelType);
 
 // What the inventory draws for an item at a level: the model, and the level
-// it is drawn with (-1 makes the archangel weapons small).
+// it is drawn with (-1 for some event models; it makes the archangel weapons
+// small, GetSmallArchangelWeaponScale).
 struct InventoryModel
 {
     int modelType;

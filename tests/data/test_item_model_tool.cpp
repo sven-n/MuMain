@@ -100,8 +100,10 @@ TEST_CASE("The model tool lists the models the game draws an item with by level 
     CHECK_FALSE(ring[2].modelType.has_value());
     CHECK(ring[2].lastLevel == 15);
     CHECK(IsDrawnByCodeAtSomeLevel(ITEM_WIZARDS_RING));
-    // The archangel weapons are drawn small.
+    // The archangel weapons are drawn small; the event models drawn with level
+    // -1 for other items are not.
     CHECK(FindLevelModelRuns(ITEM_WEAPON_OF_ARCHANGEL)[0].small);
+    CHECK_FALSE(FindLevelModelRuns(ITEM_SCROLL_OF_EMPEROR_RING_OF_HONOR)[1].small);
     // The heart of (14,12) at +0 and +2 (GetDrawnModel), the Box of Luck.
     CHECK(IsDrawnByCodeAtSomeLevel(ITEM_POTION + 12));
     CHECK(IsDrawnByCodeAtSomeLevel(ITEM_BOX_OF_LUCK));
