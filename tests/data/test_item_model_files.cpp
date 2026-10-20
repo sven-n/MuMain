@@ -1047,6 +1047,209 @@ void CheckGroundDisplay(int modelType, const Render::Items::Display::GroundDispl
 }
 } // namespace
 
+namespace
+{
+struct Drawn
+{
+    int modelType;
+    int level;
+};
+
+// The chain is the old code as it was; its constants and branches are kept.
+// The choice of RenderItem3DAt before FindInventoryModel, as it was: the
+// model and level it drew with, or nothing.
+std::optional<Drawn> OldInventoryModel(int Type, int Level)
+{
+    if (Type == ITEM_BOX_OF_LUCK && Level == 1)
+    {
+        return Drawn{MODEL_EVENT + 4, Level};
+    }
+    else if (Type == ITEM_BOX_OF_LUCK && Level == 2)
+    {
+        return Drawn{MODEL_EVENT + 5, Level};
+    }
+    else if (Type == ITEM_BOX_OF_LUCK && Level == 3)
+    {
+        return Drawn{MODEL_EVENT + 6, Level};
+    }
+    else if (Type == ITEM_BOX_OF_LUCK && Level == 5)
+    {
+        return Drawn{MODEL_EVENT + 8, Level};
+    }
+    else if (Type == ITEM_BOX_OF_LUCK && Level == 6)
+    {
+        return Drawn{MODEL_EVENT + 9, Level};
+    }
+    else if (Type == ITEM_BOX_OF_LUCK && 8 <= Level && Level <= 12)
+    {
+        return Drawn{MODEL_EVENT + 10, Level};
+    }
+    else if (Type == ITEM_BOX_OF_LUCK && Level == 13)
+    {
+        return Drawn{MODEL_EVENT + 6, Level};
+    }
+    else if (Type == ITEM_BOX_OF_LUCK && (Level == 14 || Level == 15))
+    {
+        return Drawn{MODEL_EVENT + 5, Level};
+    }
+    else if (Type == ITEM_LOCHS_FEATHER && Level == 1)
+    {
+        return Drawn{MODEL_EVENT + 16, Level};
+    }
+    else if (Type == ITEM_ALE && Level == 1)
+    {
+        return Drawn{MODEL_EVENT + 7, Level};
+    }
+    else if (Type == ITEM_RENA)
+    {
+        switch (Level)
+        {
+        case 1:
+            return Drawn{MODEL_EVENT + 11, Level};
+        case 2:
+            return Drawn{MODEL_EVENT + 11, Level};
+        case 3:
+            return Drawn{Data::Items::ToModelSlot(Type), Level};
+        default:
+            return Drawn{Data::Items::ToModelSlot(Type), Level};
+        }
+    }
+    else if (Type == ITEM_PUMPKIN_OF_LUCK)
+    {
+        return Drawn{MODEL_PUMPKIN_OF_LUCK, Level};
+    }
+    else if (Type >= ITEM_JACK_OLANTERN_BLESSINGS && Type <= ITEM_JACK_OLANTERN_CRY)
+    {
+        return Drawn{MODEL_JACK_OLANTERN_BLESSINGS, Level};
+    }
+    else if (Type == ITEM_JACK_OLANTERN_FOOD)
+    {
+        return Drawn{MODEL_JACK_OLANTERN_FOOD, Level};
+    }
+    else if (Type == ITEM_JACK_OLANTERN_DRINK)
+    {
+        return Drawn{MODEL_JACK_OLANTERN_DRINK, Level};
+    }
+    else if (Type == ITEM_PINK_CHOCOLATE_BOX)
+    {
+        switch (Level)
+        {
+        case 0:
+            return Drawn{MODEL_PINK_CHOCOLATE_BOX, Level};
+        case 1:
+            return Drawn{MODEL_EVENT + 21, Level};
+        }
+    }
+    else if (Type == ITEM_RED_CHOCOLATE_BOX)
+    {
+        switch (Level)
+        {
+        case 0:
+            return Drawn{MODEL_RED_CHOCOLATE_BOX, Level};
+        case 1:
+            return Drawn{MODEL_EVENT + 22, Level};
+        }
+    }
+    else if (Type == ITEM_BLUE_CHOCOLATE_BOX)
+    {
+        switch (Level)
+        {
+        case 0:
+            return Drawn{MODEL_BLUE_CHOCOLATE_BOX, Level};
+        case 1:
+            return Drawn{MODEL_EVENT + 23, Level};
+        }
+    }
+    else if (Type == ITEM_WEAPON_OF_ARCHANGEL)
+    {
+        switch (Level)
+        {
+        case 0:
+            return Drawn{MODEL_DIVINE_STAFF_OF_ARCHANGEL, -1};
+        case 1:
+            return Drawn{MODEL_DIVINE_SWORD_OF_ARCHANGEL, -1};
+        case 2:
+            return Drawn{MODEL_DIVINE_CB_OF_ARCHANGEL, -1};
+        }
+    }
+    else if (Type == ITEM_SCROLL_OF_EMPEROR_RING_OF_HONOR)
+    {
+        switch (Level)
+        {
+        case 0:
+            return Drawn{Data::Items::ToModelSlot(Type), Level};
+        case 1:
+            return Drawn{MODEL_EVENT + 12, -1};
+        }
+    }
+    else if (Type == ITEM_BROKEN_SWORD_DARK_STONE)
+    {
+        switch (Level)
+        {
+        case 0:
+            return Drawn{Data::Items::ToModelSlot(Type), Level};
+        case 1:
+            return Drawn{MODEL_EVENT + 13, -1};
+        }
+    }
+    else if (Type == ITEM_WIZARDS_RING)
+    {
+        switch (Level)
+        {
+        case 0:
+            return Drawn{MODEL_EVENT + 15, Level};
+        case 1:
+        case 2:
+        case 3:
+            return Drawn{MODEL_EVENT + 14, Level};
+        }
+    }
+    else if (Type == ITEM_LIFE_STONE_ITEM && Level == 1)
+    {
+        return Drawn{MODEL_EVENT + 18, Level};
+    }
+    else if (Type == ITEM_POTION + 100)
+    {
+        return Drawn{MODEL_POTION + 100, Level};
+    }
+    else
+    {
+        return Drawn{Render::Items::Display::GetInventoryModel(Type), Level};
+    }
+    return std::nullopt;
+}
+} // namespace
+
+// The inventory chose the model of a level variant in RenderItem3DAt; the choice
+// moved into FindInventoryModel, which the editor reads too. For every item type
+// and level both give the same.
+TEST_CASE("The inventory draws each item at each level with the model it drew before [data][items]")
+{
+    g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
+    for (int itemType = 0; itemType < MAX_ITEM; ++itemType)
+    {
+        for (int level = -1; level <= 20; ++level)
+        {
+            const std::optional<Drawn> old = OldInventoryModel(itemType, level);
+            const std::optional<Render::Items::Display::InventoryModel> now =
+                Render::Items::Display::FindInventoryModel(itemType, level);
+            INFO("item type " << itemType << " level " << level);
+            REQUIRE(now.has_value() == old.has_value());
+            if (old)
+            {
+                CHECK(now->modelType == old->modelType);
+                CHECK(now->drawLevel == old->level);
+            }
+        }
+    }
+    // The Wizard's Ring: its own models at +0 and +1 to +3, nothing above.
+    using Render::Items::Display::FindInventoryModel;
+    CHECK(FindInventoryModel(ITEM_WIZARDS_RING, 0)->modelType == MODEL_EVENT + 15);
+    CHECK(FindInventoryModel(ITEM_WIZARDS_RING, 3)->modelType == MODEL_EVENT + 14);
+    CHECK_FALSE(FindInventoryModel(ITEM_WIZARDS_RING, 4).has_value());
+    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
+}
+
 // Spot checks of the models that are drawn for items but are not item
 // models, with the values of the old drawing code.
 TEST_CASE("Models drawn for items keep the look of the old drawing code [data][items]")

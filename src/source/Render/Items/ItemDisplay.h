@@ -52,6 +52,20 @@ int GetInventoryModel(int itemType);
 // The item an inventory model of the Rage Fighter armor is drawn for.
 std::optional<int> GetItemOfInventoryModel(int modelType);
 
+// What the inventory draws for an item at a level: the model, and the level
+// it is drawn with (-1 makes the archangel weapons small).
+struct InventoryModel
+{
+    int modelType;
+    int drawLevel;
+};
+
+// The model the inventory draws for the item at `level`: GetInventoryModel,
+// except for the level variants drawn with event or other items' models
+// (Box of Luck, Wizard's Ring, Weapon of Archangel, ...). Nothing for the
+// levels at which those draw nothing.
+std::optional<InventoryModel> FindInventoryModel(int itemType, int level);
+
 // The model drawn for an item model at this level, in the inventory and on
 // the ground: two level variants of (14,12) are drawn with event models.
 // Inline, because every drawn model part asks for it.
