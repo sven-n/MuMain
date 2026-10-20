@@ -434,6 +434,14 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         CHECK_FALSE(g_ItemDataHandler.SetItemName(MakeItemType(0, 500), "en", "Nothing"));
     }
 
+    SUBCASE("a name with the separator is refused, since the save would refuse it")
+    {
+        CHECK_FALSE(g_ItemDataHandler.SetItemName(BladeType, "pt", "L\xC3\xA2mina||de=Klinge"));
+        CHECK_FALSE(g_ItemDataHandler.SetItemName(BladeType, "en", "Bl||ade"));
+        CHECK(g_ItemDatabase.Find(BladeType)->names.GetNeutral() == "Blade");
+        CHECK(g_ItemDatabase.Find(BladeType)->names.Get("pt") == "L\xC3\xA2mina");
+    }
+
     SUBCASE("an item without an English name gets that first, so it cannot lose its last name")
     {
         ItemDefinition untranslated = *g_ItemDatabase.Find(KrisType);

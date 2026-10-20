@@ -949,6 +949,9 @@
   <data name="The English name cannot be empty" xml:space="preserve">
     <value>The English name cannot be empty.</value>
   </data>
+  <data name="Item names cannot contain the separator" xml:space="preserve">
+    <value>An item name cannot contain "||".</value>
+  </data>
   <data name="Item names missing" xml:space="preserve">
     <value>Item names in {0}: {1} of {2} missing</value>
   </data>

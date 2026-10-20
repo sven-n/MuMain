@@ -377,7 +377,8 @@ language, English first.
 - The search finds an item by any of its names (A to Z in either case), by
   `group,number` or by its item type. Clicking the number shows the item in
   the item table.
-- Columns can be hidden from the header's right-click menu. The English name
+- Columns can be hidden from the header's right-click menu. A name cannot
+  contain `||` (the item checks refuse it). The English name
   cannot be emptied, and the names are stored whole, also when they are
   longer than the 49 characters the game shows.
 - **Save Items** writes the files and lists each language that misses item

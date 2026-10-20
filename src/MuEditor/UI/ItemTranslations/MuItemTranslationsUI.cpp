@@ -285,6 +285,12 @@ void CMuItemTranslationsUI::CommitName(int itemType, const char* locale, const c
     {
         return;
     }
+    // A name with the separator would be stored, then refuse every save.
+    if (std::string_view(text).find(Data::LocalizedString::Separator) != std::string_view::npos)
+    {
+        g_MuEditorConsoleUI.LogEditor(I18N::Editor::ItemNamesCannotContainTheSeparator);
+        return;
+    }
     if (!g_ItemDataHandler.SetItemName(itemType, locale, text))
     {
         g_MuEditorConsoleUI.LogEditor(I18N::Editor::TheEnglishNameCannotBeEmpty);

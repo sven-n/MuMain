@@ -258,7 +258,7 @@ void CItemDataHandler::OnItemEdited(int itemType)
 bool CItemDataHandler::SetItemName(int itemType, std::string_view locale, std::string text)
 {
     const ItemDefinition* current = g_ItemDatabase.Find(itemType);
-    if (current == nullptr)
+    if (current == nullptr || text.find(Data::LocalizedString::Separator) != std::string::npos)
     {
         return false;
     }
