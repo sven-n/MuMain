@@ -55,6 +55,7 @@ TEST_CASE("the look profile's built-in values are the renderer's values before i
     CHECK(BuiltInFloat(LookValue::DynamicEffectRangeMax) == classicHistory.effectRangeMax);
     CHECK(BuiltInFloat(LookValue::DynamicEffectFade) == classicHistory.effectFadeSeconds);
     CHECK(BuiltInFloat(LookValue::DynamicEffectCap) == classicHistory.effectCap);
+    CHECK(BuiltInFloat(LookValue::GroundShadowOpacity) == mu::kDefaultGroundShadowOpacity);
 
     // Post-processing: the former config.ini default bloom strength, the level weight, full grading.
     CHECK(BuiltIn(LookValue::BloomStrength) == Approx(0.6));
@@ -222,6 +223,7 @@ TEST_CASE("the developer tuning commands name their look values [render][look]")
     single(L"$dynlights wrap 0.3", LookValue::DynamicWrap, 0.3);
     single(L"$dynlights smooth 0.4", LookValue::DynamicMapSmoothing, 0.4);
     single(L"$dynlights cap 1", LookValue::DynamicEffectCap, 1.0);
+    single(L"$dynlights shadow 0.4", LookValue::GroundShadowOpacity, 0.4);
     single(L"$bloom falloff 0.6", LookValue::BloomLevelFalloff, 0.6);
     single(L"$bloom 0.9", LookValue::BloomStrength, 0.9);
 
