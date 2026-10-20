@@ -264,7 +264,7 @@ void CMuItemTranslationsUI::RenderIdCell(int itemType)
     }
     if (ImGui::IsItemHovered())
     {
-        ImGui::SetTooltip("%s", I18N::Editor::ShowInTheItemTable);
+        ImGui::SetTooltip("%s", I18N::Editor::SelectTheItemAndShowTheItemBrowser);
     }
 }
 

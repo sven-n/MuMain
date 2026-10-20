@@ -916,9 +916,6 @@
   <data name="Count missing" xml:space="preserve">
     <value>{0} fehlend</value>
   </data>
-  <data name="Show in the item table" xml:space="preserve">
-    <value>In der Gegenstandstabelle zeigen</value>
-  </data>
   <data name="Same as English" xml:space="preserve">
     <value>Wie Englisch</value>
   </data>
@@ -1383,5 +1380,8 @@
   </data>
   <data name="Removed with it:" xml:space="preserve">
     <value>Wird mit entfernt:</value>
+  </data>
+  <data name="Select the item and show the Item Browser" xml:space="preserve">
+    <value>Den Gegenstand auswählen und die Gegenstandsliste zeigen</value>
   </data>
 </root>
