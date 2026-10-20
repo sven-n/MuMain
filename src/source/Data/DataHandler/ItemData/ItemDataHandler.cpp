@@ -166,6 +166,7 @@ bool CItemDataHandler::LoadModels(std::string& errorMessage)
 
     g_GlowColors.Build(colors.colors);
     g_ItemModelDatabase.Build(result.models, g_GlowColors);
+    g_ItemModelDatabase.SetSharedModels(result.sharedModels);
 #ifdef _EDITOR
     // The models are where their files have them again.
     m_modelMoves.clear();

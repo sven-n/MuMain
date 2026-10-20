@@ -2,6 +2,7 @@
 
 #include "doctest.h"
 
+#include "ItemModelDatabaseScope.h"
 #include "TestFiles.h"
 #include "TestModelSlots.h"
 
@@ -510,6 +511,75 @@ TEST_CASE("The first item of a shared model opens its file and the others share 
 
 // The item editor moves an item's model with the item: the model data and the
 // opened model change slots, nothing is opened again.
+TEST_CASE("The item model database sets and removes single models [data][items]")
+{
+    ItemModelDatabaseScope restoreModels;
+    Data::Effects::GlowColorList colors;
+    const std::vector<Data::Effects::GlowColor> colorList = {{"red", {1.0, 0.0, 0.0}}};
+    colors.Build(colorList);
+    g_ItemModelDatabase.Build({}, colors);
+    const int version = g_ItemModelDatabase.GetVersion();
+
+    ItemModelDefinition sword;
+    sword.group = 0;
+    sword.number = 7;
+    sword.file = "Data/Item/Sword08.bmd";
+    sword.glow.color = "red";
+    g_ItemModelDatabase.Set(sword, colors);
+    const int swordType = MakeItemType(0, 7);
+    REQUIRE(g_ItemModelDatabase.Find(swordType) != nullptr);
+    CHECK(*g_ItemModelDatabase.Find(swordType) == sword);
+    CHECK(g_ItemModelDatabase.FindGlowColors(swordType)->color == std::array<float, 3>{1.0f, 0.0f, 0.0f});
+    CHECK(g_ItemModelDatabase.GetModelCount() == 1);
+    CHECK(g_ItemModelDatabase.GetVersion() != version);
+
+    // Setting it again replaces it and does not count it twice.
+    sword.file = "Data/Item/Sword09.bmd";
+    g_ItemModelDatabase.Set(sword, colors);
+    CHECK(g_ItemModelDatabase.Find(swordType)->file == "Data/Item/Sword09.bmd");
+    CHECK(g_ItemModelDatabase.GetModelCount() == 1);
+
+    // An entry without a file and a shared model empties the slot.
+    ItemModelDefinition empty;
+    empty.group = 0;
+    empty.number = 7;
+    g_ItemModelDatabase.Set(empty, colors);
+    CHECK(g_ItemModelDatabase.Find(swordType) == nullptr);
+    CHECK(g_ItemModelDatabase.GetModelCount() == 0);
+
+    g_ItemModelDatabase.Set(sword, colors);
+    g_ItemModelDatabase.Remove(swordType);
+    CHECK(g_ItemModelDatabase.Find(swordType) == nullptr);
+    CHECK(g_ItemModelDatabase.FindGlowColors(swordType) == nullptr);
+    CHECK(g_ItemModelDatabase.GetModelCount() == 0);
+}
+
+TEST_CASE("The item model database keeps the shared models [data][items]")
+{
+    ItemModelDatabaseScope restoreModels;
+    g_ItemModelDatabase.SetSharedModels(ShippedModels().sharedModels);
+    REQUIRE(g_ItemModelDatabase.GetSharedModels().size() == ShippedModels().sharedModels.size());
+    const SharedItemModel& first = ShippedModels().sharedModels.front();
+    REQUIRE(g_ItemModelDatabase.FindSharedModel(first.name) != nullptr);
+    CHECK(*g_ItemModelDatabase.FindSharedModel(first.name) == first);
+    CHECK(g_ItemModelDatabase.FindSharedModel("noSuchModel") == nullptr);
+
+    const int version = g_ItemModelDatabase.GetVersion();
+    SharedItemModel changed = first;
+    changed.file = "Data/Item/Other.bmd";
+    g_ItemModelDatabase.SetSharedModel(changed);
+    CHECK(g_ItemModelDatabase.FindSharedModel(first.name)->file == "Data/Item/Other.bmd");
+    CHECK(g_ItemModelDatabase.GetSharedModels().size() == ShippedModels().sharedModels.size());
+    CHECK(g_ItemModelDatabase.GetVersion() != version);
+
+    SharedItemModel added{"newModel", "Data/Item/New.bmd", {"Item"}, {}};
+    g_ItemModelDatabase.SetSharedModel(added);
+    CHECK(g_ItemModelDatabase.GetSharedModels().size() == ShippedModels().sharedModels.size() + 1);
+    g_ItemModelDatabase.RemoveSharedModel("newModel");
+    CHECK(g_ItemModelDatabase.FindSharedModel("newModel") == nullptr);
+    CHECK(g_ItemModelDatabase.GetSharedModels().size() == ShippedModels().sharedModels.size());
+}
+
 TEST_CASE("Moving item models swaps their data and their opened models [data][items]")
 {
     TestItemModelSlots slots;

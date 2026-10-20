@@ -3,6 +3,7 @@
 #include "doctest.h"
 
 #include "ClientDataScope.h"
+#include "ItemModelDatabaseScope.h"
 #include "ItemStatProfilesScope.h"
 #include "TestFiles.h"
 
@@ -111,21 +112,6 @@ public:
 
 private:
     std::filesystem::path m_directory;
-};
-
-// Empties the item model database when the test ends, also when a check
-// stops it, so the next test starts without models.
-class ItemModelDatabaseScope
-{
-public:
-    ItemModelDatabaseScope() = default;
-    ~ItemModelDatabaseScope()
-    {
-        g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
-    }
-
-    ItemModelDatabaseScope(const ItemModelDatabaseScope&) = delete;
-    ItemModelDatabaseScope& operator=(const ItemModelDatabaseScope&) = delete;
 };
 
 // A legacy Item_<language>.bmd with 30-byte names, as the original client
