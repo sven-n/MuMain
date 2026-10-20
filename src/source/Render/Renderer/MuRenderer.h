@@ -162,6 +162,9 @@ struct ShadowProjection
     float origin[3]{};
     float shearX = 0.0f;        // sx
     float shearHeight = 0.0f;   // sy
+    // Radians from world +x to the axis the shear acts along; shadows fall the opposite way. 0 is
+    // Classic (shadows towards -x).
+    float axisAngle = 0.0f;
     float specialHeight = 0.0f; // the height of TW_HEIGHT cells
     bool terrain = true;        // false in the scenes where RequestTerrainHeight() returns 0
 };

@@ -145,7 +145,7 @@ using WorldPipelines = Render::WorldPipelineSet<SDL_GPUGraphicsPipeline, k_Pipel
 struct ShadowVertexUniforms
 {
     float origin[4]{};     // xyz: BodyOrigin, w: height of TW_HEIGHT cells
-    float projection[4]{}; // x, y: sx, sy; z: 1 when the scene has terrain
+    float projection[4]{}; // x, y: sx, sy; z: 1 when the scene has terrain; w: the shear's axis angle
 };
 static_assert(sizeof(ShadowVertexUniforms) == 32, "ShadowVertexUniforms must be 32 bytes");
 
@@ -5224,6 +5224,7 @@ private:
             shadowVu.projection[0] = shadow->shearX;
             shadowVu.projection[1] = shadow->shearHeight;
             shadowVu.projection[2] = shadow->terrain ? 1.0f : 0.0f;
+            shadowVu.projection[3] = shadow->axisAngle;
         }
         cmd.fogUniform = m_fogUniform;
         cmd.fogUniform.alphaToCoverage = coverage.alphaToCoverage ? 1u : 0u;

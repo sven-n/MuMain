@@ -39,6 +39,7 @@ enum class TuningUnit : std::uint8_t
     // Terrain cells.
     Cells,
     Percent,
+    Degrees,
 };
 
 // What a value of zero means for a control, where it is not simply none of it.
@@ -70,6 +71,7 @@ enum class TuningControlId : std::uint8_t
     Wrap,
     MapSmoothing,
     EffectRangeMax,
+    ShadowAngle,
     MoodStrength,
     BloomStrength,
     BloomLevelFalloff,

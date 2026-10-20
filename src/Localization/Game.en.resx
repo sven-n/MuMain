@@ -1556,6 +1556,12 @@
   <data name="Tuning Shadow Opacity Help" xml:space="preserve">
     <value>How dark characters' shadows make the ground. Candle, fire and skill light still lights shadowed ground.</value>
   </data>
+  <data name="Tuning Shadow Direction" xml:space="preserve">
+    <value>Shadow direction</value>
+  </data>
+  <data name="Tuning Shadow Direction Help" xml:space="preserve">
+    <value>Which way characters' shadows fall, away from the map's sun: 0 degrees is east, 90 north, 180 west (as in the original look).</value>
+  </data>
   <data name="Tuning Light Wrap" xml:space="preserve">
     <value>Light wrap</value>
   </data>

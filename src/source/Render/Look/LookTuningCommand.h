@@ -29,6 +29,7 @@
 //   $dynlights cap <c>             dynamic.effectCap
 //   $dynlights reach <m>           dynamic.effectRangeMax
 //   $dynlights shadow <o>          dynamic.shadowOpacity
+//   $dynlights shadowangle <a>     dynamic.shadowAngle
 //   $bloom falloff <f>             bloom.levelFalloff
 //   $bloom <v>                     bloom.strength
 namespace Render::Look

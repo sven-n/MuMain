@@ -88,6 +88,8 @@ static_assert(sizeof(SceneLightingUniform) == 8 * kSceneLightingRegisterSize);
 inline constexpr float kDefaultDynamicWrap = 0.5f;
 // How much a character's shadow darkens the world-lit ground's own light (the built-in value).
 inline constexpr float kDefaultGroundShadowOpacity = 0.6f;
+// Where characters' shadows fall, in degrees counter-clockwise from world +x: towards -x, as in Classic.
+inline constexpr float kClassicGroundShadowAngle = 180.0f;
 // CPU mirror of the wrapped diffuse in skinned_lit.frag.hlsl's DynamicLighting(); the shader is the
 // implementation.
 [[nodiscard]] float WrappedDiffuse(float normalDotLight, float wrap);
