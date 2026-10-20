@@ -16,7 +16,8 @@ namespace MuEditor::Items
 // after a change, a checkbox or list right when it changes. While no field of
 // the form is being edited, the draft follows the selected item and the data.
 // A selection that changes while a field is edited first stores that edit,
-// to the item it belongs to.
+// to the item it belongs to; so does a form that was not drawn for a frame
+// (its window hidden, the editor closed) while a field was being edited.
 template <typename TValue> class ItemEditDraft
 {
 public:
@@ -32,10 +33,18 @@ public:
     // the values come from. Returns the draft, or nullptr for nothing to edit.
     TValue* Begin(int itemType, long long dataVersion)
     {
-        if (m_active && itemType != m_itemType && m_changed && m_value)
+        // A field stops being edited without being left when the form is not
+        // drawn: ImGui lets go of it.
+        const bool formWasHidden = m_active && m_lastEndFrame != ImGui::GetFrameCount() - 1;
+        if (m_active && (itemType != m_itemType || formWasHidden) && m_changed && m_value)
         {
             m_store(m_activeLabel, *m_value);
             m_changed = false;
+        }
+        if (formWasHidden)
+        {
+            m_active = false;
+            m_reload = true;
         }
         const bool follow = !m_active || itemType != m_itemType;
         if (follow && (itemType != m_itemType || dataVersion != m_version || m_reload))
@@ -63,7 +72,8 @@ public:
         {
             m_changed = true;
         }
-        if (ImGui::IsItemDeactivatedAfterEdit())
+        // Not when the edit was stored already (the form was hidden meanwhile).
+        if (ImGui::IsItemDeactivatedAfterEdit() && m_changed)
         {
             StoreNow(label);
         }
@@ -105,6 +115,7 @@ public:
     void End()
     {
         m_active = m_anyActive;
+        m_lastEndFrame = ImGui::GetFrameCount();
     }
 
 private:
@@ -120,6 +131,8 @@ private:
     // The active field changed the draft since it was stored.
     bool m_changed = false;
     bool m_reload = false;
+    // The ImGui frame of the last End.
+    int m_lastEndFrame = -1;
 };
 } // namespace MuEditor::Items
 

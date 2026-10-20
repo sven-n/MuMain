@@ -1247,6 +1247,65 @@ TEST_CASE("The item tools draw their frames without ImGui errors [data][items][e
     g_MuItemModelUI.BeforeFrame();
 }
 
+// A number field is typed into, then its form is not drawn for a frame (its
+// window hidden, the editor closed): the edit is stored, as when it is left.
+TEST_CASE("An item tool's edit is stored when its form stops being drawn [editor][items]")
+{
+    TestImGuiContext context;
+    int stored = 0;
+    int storedTimes = 0;
+    MuEditor::Items::ItemEditDraft<int> draft([&](int) { return std::optional<int>(stored); },
+                                              [&](const std::string&, const int& value)
+                                              {
+                                                  stored = value;
+                                                  ++storedTimes;
+                                              });
+    const auto drawForm = [&](bool typeDigit)
+    {
+        if (typeDigit)
+        {
+            ImGui::GetIO().AddInputCharacter('7');
+        }
+        ImGui::NewFrame();
+        ImGui::Begin("Form");
+        int* value = draft.Begin(0, 0);
+        REQUIRE(value != nullptr);
+        if (ImGui::GetFrameCount() == 1)
+        {
+            ImGui::SetKeyboardFocusHere();
+        }
+        ImGui::InputInt("Value", value);
+        draft.AfterField("Value");
+        draft.End();
+        ImGui::End();
+        ImGui::Render();
+    };
+    const auto skipFrames = [](int frames)
+    {
+        for (int frame = 0; frame < frames; ++frame)
+        {
+            ImGui::NewFrame();
+            ImGui::Render();
+        }
+    };
+    drawForm(false);
+    drawForm(false);
+    drawForm(true);
+    REQUIRE(storedTimes == 0);
+
+    SUBCASE("for frames")
+    {
+        skipFrames(3);
+    }
+    SUBCASE("for one frame, after which ImGui still reports the field as left")
+    {
+        skipFrames(1);
+    }
+    drawForm(false);
+    CHECK(storedTimes == 1);
+    CHECK(stored == 7);
+}
+
 TEST_CASE("The save warns about an item name in a language the game has no texts for [data][items][editor]")
 {
     TemporaryClientFolder folder;
