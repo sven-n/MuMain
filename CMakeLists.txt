@@ -100,6 +100,21 @@ if(MU_ENABLE_SHADER_COMPILATION)
         set(spv  "${MU_SHADER_OUTPUT_DIR}/${shader_name}.${stage}.spv")
         set(msl  "${MU_SHADER_OUTPUT_DIR}/${shader_name}.${stage}.msl")
         set(dxil "${MU_SHADER_OUTPUT_DIR}/${shader_name}.${stage}.dxil")
+        # SDL binds uniform buffer, texture and sampler slot N to MSL index N: keep the declared
+        # bindings (spirv-cross otherwise numbers them in order of use). Not with storage buffers,
+        # which share the MSL buffer indices and follow the uniform buffers.
+        file(READ "${src}" shader_source)
+        # Storage buffers may be declared in an included .hlsli.
+        string(REGEX MATCHALL "#include \"[^\"]+\"" shader_includes "${shader_source}")
+        foreach(shader_include IN LISTS shader_includes)
+            string(REGEX REPLACE "#include \"([^\"]+)\"" "\\1" shader_include "${shader_include}")
+            file(READ "${MU_SHADER_SOURCE_DIR}/${shader_include}" include_source)
+            string(APPEND shader_source "${include_source}")
+        endforeach()
+        set(msl_flags)
+        if(NOT shader_source MATCHES "StructuredBuffer|ByteAddressBuffer")
+            set(msl_flags --msl-decoration-binding)
+        endif()
 
         add_custom_command(
             OUTPUT "${spv}"
@@ -110,7 +125,7 @@ if(MU_ENABLE_SHADER_COMPILATION)
         )
         add_custom_command(
             OUTPUT "${msl}"
-            COMMAND "${SPIRV_CROSS_EXE}" --msl "${spv}" --output "${msl}"
+            COMMAND "${SPIRV_CROSS_EXE}" --msl ${msl_flags} "${spv}" --output "${msl}"
             DEPENDS "${spv}" "${MU_SHADER_COMPILATION_STAMP}" "${SPIRV_CROSS_EXE}"
             COMMENT "SPIR-V to MSL: ${shader_name}.${stage}.spv"
             VERBATIM
