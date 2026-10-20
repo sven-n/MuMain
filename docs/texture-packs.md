@@ -17,10 +17,18 @@ Data/TexturePacks/upscaled/World1/TileGrass01.OZJ    read instead while "upscale
 2. Open the options, **Interface** tab, and choose the pack under **Texture Pack**.
 3. Restart the game.
 
-One pack is active at a time. For each `.OZJ` and `.OZT` file the client reads the copy in the
+One pack is active at a time. For each `.OZJ` and `.OZT` texture the client reads the copy in the
 active pack when there is one and the original otherwise, so a pack may cover only part of the
-art. The choice is stored as `TexturePack` in the `[Render]` section of `config.ini`; the list in
-the options is read from `Data/TexturePacks/` each time the window opens.
+art. File and folder names in a pack match in any case, also on Linux. The terrain lightmaps
+(`TerrainLight.OZJ`) are map data, not art, and are always read from `Data/`.
+
+A copy in the pack that can't be loaded (a damaged file, or an image larger than the limits below)
+is written to the log with its path in the pack, and the client loads the original instead.
+
+The choice is stored as `TexturePack` in the `[Render]` section of `config.ini`. The client lists
+the active pack's files when it starts, so files added to a pack while the game runs are used
+after a restart. The list in the options is read from `Data/TexturePacks/` each time the window
+opens.
 
 A pack's folder name may contain only ASCII letters, digits, `-` and `_`; other folders are not
 listed. A pack that is chosen but no longer installed falls back to the original textures, with a
