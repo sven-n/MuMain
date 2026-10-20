@@ -695,7 +695,8 @@ shows it in the others.
   items from it. New tags need code.
 - **Item Model**: see [Item Model](#item-model).
 - **Item Checks**: the checks of a save as a list, errors first. A click on
-  a problem of an item selects it and opens the tool of its field.
+  a problem of an item selects it and opens the tool of its field; an arrow
+  key onto it only selects the item.
 - **Item Translations**: the names in all languages, see
   [translation-system.md → In the item editor](translation-system.md#in-the-item-editor).
 

@@ -81,22 +81,23 @@ void RenderIssueTooltip(const ItemDataIssue& issue)
     ImGui::EndTooltip();
 }
 
-// Selects the item of the problem and opens the tool of its field, in front
-// when `bringToFront` (a click; an arrow key keeps the keyboard in the list);
-// a problem that is not about one item has nothing to open.
-void OpenIssue(const ItemDataIssue& issue, bool bringToFront)
+// Selects the item of the problem; a click also opens the tool of its field
+// in front (an arrow key keeps the keyboard in the list and opens no window).
+// A problem that is not about one item has nothing to open.
+void OpenIssue(const ItemDataIssue& issue, bool clicked)
 {
     if (!IsAboutAnItem(issue))
     {
         return;
     }
     g_ItemSelection.Select(Data::Items::MakeItemType(issue.group, issue.number));
+    if (!clicked)
+    {
+        return;
+    }
     const ItemToolWindowRef tool = GetToolWindow(GetToolForIssue(issue));
     g_MuEditorCore.GetToolWindows().*tool.open = true;
-    if (bringToFront)
-    {
-        ImGui::SetWindowFocus(tool.windowId);
-    }
+    ImGui::SetWindowFocus(tool.windowId);
 }
 
 // The box that shows or hides a kind of problem, with their count. The id
