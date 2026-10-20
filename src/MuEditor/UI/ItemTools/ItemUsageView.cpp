@@ -94,7 +94,8 @@ void RenderGameData(const ItemUsage& usage)
 
 void Render(const ItemUsage& usage)
 {
-    if (!usage.IsUsed())
+    // Without the sources, code may still name the item.
+    if (!usage.IsUsed() && usage.codeKnown)
     {
         ImGui::TextDisabled("%s", I18N::Editor::NothingUsesTheItem);
         return;
