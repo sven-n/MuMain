@@ -1,6 +1,6 @@
-// post_composite.frag.hlsl — the processed 3D scene: the scene image with its bloom screen-blended
-// on top, colour graded through the map's lookup table. Draws into the frame's destination before
-// the UI.
+// post_composite.frag.hlsl — the processed 3D scene: the scene image (an HDR scene tone mapped),
+// with its bloom screen-blended on top, colour graded through the map's lookup table and dithered.
+// Draws into the frame's destination before the UI.
 // CompositeUniforms mirrors mu::SdlGpuCompositeUniform.
 Texture2D scene : register(t0, space2);
 SamplerState sceneSampler : register(s0, space2);   // point: one scene texel per pixel
@@ -13,6 +13,9 @@ cbuffer CompositeUniforms : register(b0, space3)
     float2 inverseTargetSize;
     float bloomScale;     // 0: no bloom
     float gradingStrength; // 0: ungraded; else blend of the graded colour with the ungraded one
+    float toneMapKnee;     // channels above it roll off towards 1; 1: none
+    float ditherAmount;    // 0: no dither
+    float2 compositePadding;
 };
 struct FSInput
 {
@@ -28,10 +31,30 @@ static const float kGradingSize = 32.0;
 // bloom, grading): spirv-cross numbers Metal textures in that order.
 float3 Grade(float3 color);
 
+// The HDR scene's tone map: unchanged up to the knee, then an exponential shoulder towards 1, so
+// stacked light rolls off instead of clipping. The same curve as skinned_lit.frag's highlight knee.
+float ToneMapChannel(float value)
+{
+    const float range = 1.0 - toneMapKnee;
+    return value > toneMapKnee ? toneMapKnee + range * (1.0 - exp(-(value - toneMapKnee) / range)) : value;
+}
+
+// Interleaved gradient noise in [0, 1): an ordered dither pattern without a texture.
+float DitherNoise(float2 pixel)
+{
+    return frac(52.9829189 * frac(dot(pixel, float2(0.06711056, 0.00583715))));
+}
+
 float4 main(FSInput input) : SV_Target
 {
     const float2 uv = input.pos.xy * inverseTargetSize;
     float4 color = scene.Sample(sceneSampler, uv);
+    if (toneMapKnee < 1.0)
+    {
+        // Blending over light above 1 (inverse colour) can leave negative values: black.
+        color.rgb = max(color.rgb, 0.0);
+        color.rgb = float3(ToneMapChannel(color.r), ToneMapChannel(color.g), ToneMapChannel(color.b));
+    }
     if (bloomScale > 0.0)
     {
         // Screen blend: a dark pixel gains about the glow's light, a bright one little, so glows
@@ -44,6 +67,8 @@ float4 main(FSInput input) : SV_Target
         // Render::PostProcessing::BlendGrading mirrors this blend.
         color.rgb = lerp(color.rgb, Grade(color.rgb), gradingStrength);
     }
+    if (ditherAmount > 0.0)
+        color.rgb += (DitherNoise(input.pos.xy) - 0.5) * ditherAmount;
     return color;
 }
 

@@ -1054,6 +1054,15 @@ static void BindReplayIndexBuffer(SDL_GPUBuffer* buffer, Uint32 offset, SDL_GPUI
 // sample. s_singleSamplePass makes ReplayDrawCommand use the twins.
 static std::unordered_map<SDL_GPUGraphicsPipeline*, SDL_GPUGraphicsPipeline*> s_singleSamplePipelines;
 static bool s_singleSamplePass = false;
+// The HDR scene: with post-processing, the scene and bloom-source passes draw into float textures
+// (kHdrSceneFormat), so additive light stacks above 1 and the composite rolls it off. Each pipeline
+// those passes use maps to its twin built for that format; s_hdrScenePass makes ReplayDrawCommand
+// use them. Empty when the device cannot render the format at the frame's sample count.
+static constexpr SDL_GPUTextureFormat kHdrSceneFormat = SDL_GPU_TEXTUREFORMAT_R16G16B16A16_FLOAT;
+static std::unordered_map<SDL_GPUGraphicsPipeline*, SDL_GPUGraphicsPipeline*> s_hdrScenePipelines;
+static bool s_hdrScenePass = false;
+// The colour format CreatePipelines builds for instead of the swapchain's (INVALID: the swapchain's).
+static SDL_GPUTextureFormat s_pipelineFormatOverride = SDL_GPU_TEXTUREFORMAT_INVALID;
 // Whether the built pipelines are multisampled; set by CreatePipelinesForSampleCount.
 static bool s_pipelinesMultisampled = false;
 
@@ -1068,6 +1077,11 @@ static void ReplayDrawCommand(const RenderCmd& command, SDL_GPUGraphicsPipeline*
     {
         const auto twin = s_singleSamplePipelines.find(pipeline);
         pipeline = twin != s_singleSamplePipelines.end() ? twin->second : nullptr;
+    }
+    else if (s_hdrScenePass)
+    {
+        const auto twin = s_hdrScenePipelines.find(pipeline);
+        pipeline = twin != s_hdrScenePipelines.end() ? twin->second : nullptr;
     }
     const bool skinned = command.type == RenderCmdType::DrawSkinnedTriangles;
     const bool shadow = skinned && command.shadowIndex != ~0u;
@@ -1202,6 +1216,9 @@ static bool s_alphaCoverageDrawLogged = false;
 static Render::Antialiasing::SupportedSampleCounts s_supportedSampleCounts{};
 static SDL_GPUTexture* s_multisampleColorTexture = nullptr;
 static SDL_GPUTextureCreateInfo s_multisampleColorInfo{};
+// The HDR scene's multisampled colour target (kHdrSceneFormat), while anti-aliasing is on.
+static SDL_GPUTexture* s_hdrMultisampleColorTexture = nullptr;
+static SDL_GPUTextureCreateInfo s_hdrMultisampleColorInfo{};
 // The depth of a single-sample pass at the frame's size while the frame's own depth is multisampled.
 static SDL_GPUTexture* s_singleSampleDepthTexture = nullptr;
 static Uint32 s_singleSampleDepthW = 0u;
@@ -2611,8 +2628,7 @@ public:
     {
         constexpr SDL_FColor noLight{0.0f, 0.0f, 0.0f, 0.0f};
         const SDL_GPUColorTargetInfo colorTarget = CycledTarget(mu::GetSdlGpuFrameColorTarget(
-            {s_postProcessing.GetBloomSourceTexture(), IsMultisampled() ? s_multisampleColorTexture : nullptr},
-            noLight));
+            {s_postProcessing.GetBloomSourceTexture(), SceneMultisampleTexture()}, noLight));
         // The UI pass tests against the same depth, so it is kept.
         if (!BeginReplayPass(colorTarget, MakeDepthTarget(SDL_GPU_LOADOP_LOAD, SDL_GPU_STOREOP_STORE)))
         {
@@ -2624,6 +2640,17 @@ public:
         s_postProcessing.RenderBloom(s_cmdBuf, s_postProcessingLook.bloomLevelFalloff);
     }
 
+    // The multisampled colour target of the scene and bloom-source passes: the HDR one with the HDR
+    // scene; null with one sample.
+    [[nodiscard]] static SDL_GPUTexture* SceneMultisampleTexture()
+    {
+        if (!IsMultisampled())
+        {
+            return nullptr;
+        }
+        return s_hdrScenePass ? s_hdrMultisampleColorTexture : s_multisampleColorTexture;
+    }
+
     // The scene into the scene texture, its bloom, then the processed scene and
     // the UI on top of it into `destination`.
     [[nodiscard]] static bool ReplayPostProcessedFrame(SDL_GPUTexture* destination, std::size_t sceneEnd,
@@ -2631,14 +2658,17 @@ public:
     {
         SDL_GPUTexture* const multisampled = IsMultisampled() ? s_multisampleColorTexture : nullptr;
         ReplayView view = FullFrameView();
+        RenderGroundShadowMask(sceneEnd, boneDataReady);
+        // The scene texture's format says whether this frame's scene is HDR (EnsureTargets).
+        s_hdrScenePass = s_postProcessing.IsHdrScene();
 
         // Its depth stays for the bloom and UI passes, which test against it as
         // the UI did when it shared the scene's pass.
-        const SDL_GPUColorTargetInfo sceneTarget = CycledTarget(
-            mu::GetSdlGpuFrameColorTarget({s_postProcessing.GetSceneTexture(), multisampled}, s_clearColor));
-        RenderGroundShadowMask(sceneEnd, boneDataReady);
+        const SDL_GPUColorTargetInfo sceneTarget = CycledTarget(mu::GetSdlGpuFrameColorTarget(
+            {s_postProcessing.GetSceneTexture(), SceneMultisampleTexture()}, s_clearColor));
         if (!BeginReplayPass(sceneTarget, MakeDepthTarget(SDL_GPU_LOADOP_CLEAR, SDL_GPU_STOREOP_STORE)))
         {
+            s_hdrScenePass = false;
             return false;
         }
         ReplayCommands(0u, sceneEnd, boneDataReady, ReplaySelection::AllCommands, view);
@@ -2648,6 +2678,7 @@ public:
         {
             RenderBloomSources(sceneEnd, boneDataReady);
         }
+        s_hdrScenePass = false;
 
         // The composite covers every pixel: the target's old content is not loaded.
         // A diagnostic view without its image this frame leaves black instead.
@@ -3049,7 +3080,9 @@ public:
             // sample: the rest follows the same way, without multisampling or post-processing.
             renderPassCompleted = ContinueFlushedFrame(frameColorTexture, boneDataReady);
         }
-        else if (split.postProcessed && s_postProcessing.EnsureTargets({s_swapW, s_swapH}))
+        else if (split.postProcessed &&
+                 s_postProcessing.EnsureTargets({s_swapW, s_swapH},
+                                                UsesHdrScene() ? kHdrSceneFormat : SDL_GPU_TEXTUREFORMAT_INVALID))
         {
             renderPassCompleted = ReplayPostProcessedFrame(frameColorTexture, split.sceneEnd, boneDataReady);
         }
@@ -5885,7 +5918,9 @@ private:
         const SDL_GPUTextureFormat swapchainFmt = SDL_GetGPUSwapchainTextureFormat(s_device, s_window);
 
         SDL_GPUColorTargetDescription colorTargetDesc{};
-        colorTargetDesc.format = description.groundShadowMaskTarget ? SDL_GPU_TEXTUREFORMAT_R8_UNORM : swapchainFmt;
+        colorTargetDesc.format = description.groundShadowMaskTarget ? SDL_GPU_TEXTUREFORMAT_R8_UNORM
+                                 : s_pipelineFormatOverride != SDL_GPU_TEXTUREFORMAT_INVALID ? s_pipelineFormatOverride
+                                                                                             : swapchainFmt;
         colorTargetDesc.blend_state = blendState;
 
         SDL_GPUVertexAttribute vertexAttribs[6];
@@ -6270,6 +6305,7 @@ private:
 
     static void DestroyPipelines()
     {
+        DestroyHdrScenePipelines();
         DestroySingleSamplePipelines();
         s_pipelinesMultisampled = false;
         DestroyEnhancedPipelines();
@@ -6434,7 +6470,141 @@ private:
             CreatePostProcessingPipelines();
         }
         s_pipelinesMultisampled = s_sampleCount != Render::Antialiasing::OffSampleCount;
+        CreateHdrScenePipelines();
         return true;
+    }
+
+    // The HDR scene's twins of every pipeline the scene and bloom-source passes replay, built for
+    // kHdrSceneFormat at s_sampleCount (an alpha-to-coverage variant maps to the variant built for its
+    // twin). Optional: without a complete set the scene stays in the swapchain's format.
+    static void CreateHdrScenePipelines()
+    {
+        DestroyHdrScenePipelines();
+        const SDL_GPUTextureUsageFlags usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER;
+        const SDL_GPUSampleCount sampleCount = mu::GetSdlGpuSampleCount(s_sampleCount).value_or(SDL_GPU_SAMPLECOUNT_1);
+        if (!SDL_GPUTextureSupportsFormat(s_device, kHdrSceneFormat, SDL_GPU_TEXTURETYPE_2D, usage) ||
+            !SDL_GPUTextureSupportsSampleCount(s_device, kHdrSceneFormat, sampleCount))
+        {
+            mu::log::Get("render")->info("SDL_gpu -- HDR scene unavailable at {}x: format unsupported", s_sampleCount);
+            return;
+        }
+
+        const std::vector<SDL_GPUGraphicsPipeline**> slots = ReplayPipelineSlots();
+        std::vector<SDL_GPUGraphicsPipeline*> frameFormat;
+        frameFormat.reserve(slots.size());
+        for (SDL_GPUGraphicsPipeline** slot : slots)
+        {
+            frameFormat.push_back(*slot);
+            *slot = nullptr;
+        }
+        const bool enhancedLightingAvailable = s_enhancedLightingAvailable;
+        std::vector<AlphaCoveragePipeline> frameFormatCoverage;
+        frameFormatCoverage.swap(s_alphaCoveragePipelines);
+
+        s_pipelineFormatOverride = kHdrSceneFormat;
+        const bool created = CreatePipelines();
+        CreateAlphaCoveragePipelines();
+        s_pipelineFormatOverride = SDL_GPU_TEXTUREFORMAT_INVALID;
+
+        for (std::size_t i = 0; i < slots.size(); ++i)
+        {
+            if (frameFormat[i] && *slots[i])
+            {
+                s_hdrScenePipelines[frameFormat[i]] = *slots[i];
+            }
+            else if (*slots[i])
+            {
+                SDL_ReleaseGPUGraphicsPipeline(s_device, *slots[i]);
+            }
+            *slots[i] = frameFormat[i];
+        }
+        s_enhancedLightingAvailable = enhancedLightingAvailable;
+        // Both coverage lists were built for the same slots in the same order: pair them by slot.
+        for (const AlphaCoveragePipeline& hdr : s_alphaCoveragePipelines)
+        {
+            const auto original = std::ranges::find(frameFormatCoverage, hdr.opaque, &AlphaCoveragePipeline::opaque);
+            if (original != frameFormatCoverage.end())
+            {
+                s_hdrScenePipelines[original->variant] = hdr.variant;
+            }
+            else
+            {
+                SDL_ReleaseGPUGraphicsPipeline(s_device, hdr.variant);
+            }
+        }
+        s_alphaCoveragePipelines.swap(frameFormatCoverage);
+        for (const AlphaCoveragePipeline& entry : s_alphaCoveragePipelines)
+        {
+            frameFormat.push_back(entry.variant);
+        }
+
+        if (!created || !Render::SingleSampleTwinsComplete<SDL_GPUGraphicsPipeline>(frameFormat, s_hdrScenePipelines))
+        {
+            mu::log::Get("render")->warn("SDL_gpu -- HDR scene pipelines incomplete at {}x; HDR scene off",
+                                         s_sampleCount);
+            DestroyHdrScenePipelines();
+            return;
+        }
+        mu::log::Get("render")->info("SDL_gpu -- {} HDR scene pipelines at {}x", s_hdrScenePipelines.size(),
+                                     s_sampleCount);
+    }
+
+    static void DestroyHdrScenePipelines()
+    {
+        std::unordered_set<SDL_GPUGraphicsPipeline*> released;
+        for (const auto& [frameFormat, twin] : s_hdrScenePipelines)
+        {
+            if (twin && released.insert(twin).second)
+            {
+                SDL_ReleaseGPUGraphicsPipeline(s_device, twin);
+            }
+        }
+        s_hdrScenePipelines.clear();
+    }
+
+    // The HDR scene this frame: its pipelines, and with anti-aliasing its multisampled target.
+    [[nodiscard]] static bool UsesHdrScene()
+    {
+        return !s_hdrScenePipelines.empty() && (!IsMultisampled() || EnsureHdrMultisampleColorTexture());
+    }
+
+    [[nodiscard]] static bool EnsureHdrMultisampleColorTexture()
+    {
+        const SDL_GPUSampleCount sampleCount = mu::GetSdlGpuSampleCount(s_sampleCount).value_or(SDL_GPU_SAMPLECOUNT_1);
+        if (s_hdrMultisampleColorTexture && s_hdrMultisampleColorInfo.width == s_swapW &&
+            s_hdrMultisampleColorInfo.height == s_swapH && s_hdrMultisampleColorInfo.sample_count == sampleCount)
+        {
+            return true;
+        }
+        ReleaseHdrMultisampleColorTexture();
+        SDL_GPUTextureCreateInfo info{};
+        info.type = SDL_GPU_TEXTURETYPE_2D;
+        info.format = kHdrSceneFormat;
+        info.usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
+        info.width = s_swapW;
+        info.height = s_swapH;
+        info.layer_count_or_depth = 1;
+        info.num_levels = 1;
+        info.sample_count = sampleCount;
+        s_hdrMultisampleColorTexture = SDL_CreateGPUTexture(s_device, &info);
+        if (!s_hdrMultisampleColorTexture)
+        {
+            mu::log::Get("render")->error("SDL_gpu -- HDR multisampled colour target creation failed ({}x{}): {}",
+                                          s_swapW, s_swapH, SDL_GetError());
+            return false;
+        }
+        s_hdrMultisampleColorInfo = info;
+        return true;
+    }
+
+    static void ReleaseHdrMultisampleColorTexture()
+    {
+        if (s_hdrMultisampleColorTexture)
+        {
+            SDL_ReleaseGPUTexture(s_device, s_hdrMultisampleColorTexture);
+            s_hdrMultisampleColorTexture = nullptr;
+        }
+        s_hdrMultisampleColorInfo = {};
     }
 
     // Every pipeline slot CreatePipelines() fills, in one fixed order.
@@ -6656,6 +6826,7 @@ private:
         }
         s_multisampleColorInfo = {};
         ReleaseSingleSampleDepthTexture();
+        ReleaseHdrMultisampleColorTexture();
     }
 
     // The multisampled colour target for this frame's swapchain format, size
