@@ -7,7 +7,6 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Sprites/BitmapTextureLimits.h"
 #include "GlobalBitmapPath.h"
-#include "Data/GameConfig/GameConfig.h"
 
 #include "Render/RmlUi/RmlPremultiply.h"
 #include "Render/Textures/MipChain.h"
@@ -28,8 +27,10 @@
 #include <fstream>
 #include <iterator>
 #include <memory>
+#include <optional>
 #include <span>
 #include <string>
+#include <system_error>
 #include <vector>
 
 namespace mu
@@ -73,14 +74,14 @@ private:
     tjhandle handle;
 };
 
-void ReportTurboError(const wchar_t* context)
+void ReportTurboError(const wchar_t* context, const std::wstring& path)
 {
     const char* message = tjGetErrorStr();
     if (message == nullptr)
     {
         message = "Unknown TurboJPEG error";
     }
-    g_ErrorReport.Write(L"[TurboJPEG] %ls: %hs", context, message);
+    g_ErrorReport.Write(L"[TurboJPEG] %ls %ls: %hs", context, path.c_str(), message);
 }
 
 int NextPowerOfTwo(int value, int maxValue)
@@ -111,72 +112,66 @@ std::unique_ptr<BITMAP_t> CreateBitmapStorage(GLuint index, const std::wstring& 
     return bitmap;
 }
 
-// The pack chosen in the options, or empty for the original textures. Read
-// once, so a new choice takes effect after a restart. An unknown or missing
-// pack falls back to the originals, and a client without one does no extra
-// lookups per texture.
-std::wstring FindActiveTexturePack()
-{
-    namespace TexturePack = Render::Textures::TexturePack;
-
-    const std::wstring pack = GameConfig::GetInstance().GetTexturePack();
-    if (pack.empty())
-        return {};
-
-    if (!TexturePack::IsValidName(pack))
-    {
-        mu::log::Get("render")->warn("Texture pack name not valid, using the original textures: {}",
-                                     mu_wchar_to_utf8(pack.c_str()));
-        return {};
-    }
-
-    std::error_code error;
-    const std::wstring folder = std::wstring(TexturePack::PacksFolder) + L"\\" + pack;
-    if (!std::filesystem::is_directory(Render::Sprites::NarrowBitmapPath(folder), error))
-    {
-        mu::log::Get("render")->warn("Texture pack not found, using the original textures: {}",
-                                     mu_wchar_to_utf8(folder.c_str()));
-        return {};
-    }
-
-    mu::log::Get("render")->info("Texture pack: {}", mu_wchar_to_utf8(pack.c_str()));
-    return pack;
-}
-
-const std::wstring& ActiveTexturePack()
-{
-    static const std::wstring pack = FindActiveTexturePack();
-    return pack;
-}
-
-// The copy of a texture file in the active pack; not open when no pack is
-// active or the pack has no such file.
-std::ifstream OpenPackCopy(const std::wstring& path)
-{
-    const std::wstring& pack = ActiveTexturePack();
-    if (pack.empty())
-        return {};
-
-    const auto packPath = Render::Textures::TexturePack::PathInPack(path, pack);
-    if (!packPath)
-        return {};
-
-    std::ifstream file(Render::Sprites::NarrowBitmapPath(*packPath), std::ios::binary);
-    if (file.is_open())
-        mu::log::Get("render")->debug("Texture from the pack: {}", mu_wchar_to_utf8(packPath->c_str()));
-    return file;
-}
-
-// The texture file the game reads: its copy in the active pack when there is
-// one, otherwise the file itself.
-std::ifstream OpenTextureFile(const std::wstring& path)
+std::optional<TextureFileBytes> ReadTextureFile(std::ifstream input, std::wstring path, bool fromTexturePack)
 {
     // is_open, not operator bool: a stream that was never opened has no
     // error flag set.
-    std::ifstream packCopy = OpenPackCopy(path);
-    if (packCopy.is_open())
-        return packCopy;
-    return std::ifstream(Render::Sprites::NarrowBitmapPath(path), std::ios::binary);
+    if (!input.is_open())
+    {
+        return std::nullopt;
+    }
+    TextureFileBytes file;
+    file.bytes.assign(std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>());
+    file.path = std::move(path);
+    file.fromTexturePack = fromTexturePack;
+    return file;
+}
+
+std::optional<TextureFileBytes> ReadOriginal(const std::wstring& path)
+{
+    return ReadTextureFile(std::ifstream(Render::Sprites::NarrowBitmapPath(path), std::ios::binary), path, false);
+}
+
+// The copy of a texture file in the active pack; nothing when no pack is
+// active or the pack has no such file.
+std::optional<TextureFileBytes> ReadPackCopy(const Render::Textures::TexturePackFiles& pack, const std::wstring& path)
+{
+    const std::filesystem::path* copy = pack.Find(path);
+    if (copy == nullptr)
+    {
+        return std::nullopt;
+    }
+    const std::u8string utf8 = copy->u8string();
+    std::wstring copyPath = mu_utf8_to_wchar(std::string(utf8.begin(), utf8.end()));
+    return ReadTextureFile(std::ifstream(*copy, std::ios::binary), std::move(copyPath), true);
+}
+
+// Loads a texture file through `load`: the copy in the active pack first, and
+// the original in Data when the pack has no copy or its copy does not load,
+// so a broken file in a pack costs only that file's replacement.
+template <typename Load>
+bool LoadPackCopyOrOriginal(const Render::Textures::TexturePackFiles& pack, const std::wstring& path,
+                            const char* loader, Load&& load)
+{
+    if (const std::optional<TextureFileBytes> packCopy = ReadPackCopy(pack, path))
+    {
+        if (load(*packCopy))
+        {
+            mu::log::Get("render")->debug("{} -- read from the texture pack: {}", loader,
+                                          mu_wchar_to_utf8(packCopy->path.c_str()));
+            return true;
+        }
+        mu::log::Get("render")->warn("{} -- the texture pack's copy did not load, using the original: {}", loader,
+                                     mu_wchar_to_utf8(packCopy->path.c_str()));
+    }
+
+    const std::optional<TextureFileBytes> original = ReadOriginal(path);
+    if (!original)
+    {
+        mu::log::Get("render")->debug("{} -- file open failed: {}", loader, mu_wchar_to_utf8(path.c_str()));
+        return false;
+    }
+    return load(*original);
 }
 
 SDL_GPUFilter MapGLFilterToSDL(GLuint filter)
@@ -554,20 +549,22 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
     std::wstring filename_ozj;
     ExchangeExt(filename, L"OZJ", filename_ozj);
 
-    std::ifstream compressedFile = OpenTextureFile(filename_ozj);
-    if (!compressedFile)
-    {
-        mu::log::Get("render")->debug("OpenJpegTurbo -- file open failed: {}", mu_wchar_to_utf8(filename_ozj.c_str()));
-        return false;
-    }
+    return LoadPackCopyOrOriginal(m_texturePack, filename_ozj, "OpenJpegTurbo",
+                                  [&](const TextureFileBytes& file)
+                                  {
+                                      return LoadJpegFile(uiBitmapIndex, filename, file, uiFilter, uiWrapMode,
+                                                          worldTexture, padToPowerOfTwo, keepPixels);
+                                  });
+}
 
-    std::vector<unsigned char> jpegBuf((std::istreambuf_iterator<char>(compressedFile)),
-                                       std::istreambuf_iterator<char>());
-    compressedFile.close();
-
+bool CGlobalBitmap::LoadJpegFile(GLuint uiBitmapIndex, const std::wstring& filename, const TextureFileBytes& file,
+                                 GLuint uiFilter, GLuint uiWrapMode, bool worldTexture, bool padToPowerOfTwo,
+                                 bool keepPixels)
+{
+    const std::vector<unsigned char>& jpegBuf = file.bytes;
     if (jpegBuf.size() <= 24)
     {
-        g_ErrorReport.Write(L"OpenJpegTurbo: file too small %ls (%zu bytes)\r\n", filename_ozj.c_str(), jpegBuf.size());
+        g_ErrorReport.Write(L"OpenJpegTurbo: file too small %ls (%zu bytes)\r\n", file.path.c_str(), jpegBuf.size());
         return false;
     }
 
@@ -587,7 +584,7 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
     TurboJpegHandle tjHandle;
     if (!tjHandle.valid())
     {
-        ReportTurboError(L"tjInitDecompress");
+        ReportTurboError(L"tjInitDecompress", file.path);
         return false;
     }
 
@@ -595,12 +592,12 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
         tjDecompressHeader3(tjHandle.get(), jpegData, jpegSize, &jpegWidth, &jpegHeight, &jpegSubsamp, &jpegColorspace);
     if (headerResult != 0 || jpegWidth <= 0 || jpegHeight <= 0)
     {
-        ReportTurboError(L"tjDecompressHeader3");
+        ReportTurboError(L"tjDecompressHeader3", file.path);
         return false;
     }
     if (jpegWidth > maxWidth || jpegHeight > maxHeight)
     {
-        g_ErrorReport.Write(L"OpenJpegTurbo: image too large %ls (%dx%d, at most %dx%d)\r\n", filename_ozj.c_str(),
+        g_ErrorReport.Write(L"OpenJpegTurbo: image too large %ls (%dx%d, at most %dx%d)\r\n", file.path.c_str(),
                             jpegWidth, jpegHeight, maxWidth, maxHeight);
         return false;
     }
@@ -611,7 +608,7 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
                                           jpegHeight, TJPF_RGB, TJFLAG_FASTDCT);
     if (decompressResult != 0)
     {
-        ReportTurboError(L"tjDecompress2");
+        ReportTurboError(L"tjDecompress2", file.path);
         return false;
     }
 
@@ -655,6 +652,7 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
     pNewBitmap->worldTexture = worldTexture;
     pNewBitmap->wrapRepeat = uiWrapMode == GL_REPEAT;
     pNewBitmap->scale = static_cast<std::uint8_t>(upscaled ? scale : 1);
+    pNewBitmap->fromTexturePack = file.fromTexturePack;
     std::vector<std::uint8_t> rgbaData = PadRGBToRGBA(pNewBitmap->Buffer, uploadWidth, uploadHeight);
     const MipLevels mips = PlanMipLevels(upscaled || (worldTexture && m_textureFilteringEnabled), rgbaData.data(),
                                          uploadWidth, uploadHeight, false, m_mipChainSeconds);
@@ -685,20 +683,24 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
 bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode,
                             bool worldTexture, bool padToPowerOfTwo, bool premultiplyAlpha, bool keepPixels)
 {
-    namespace Ozt = Render::Textures::Ozt;
-
     std::wstring filename_ozt;
     ExchangeExt(filename, L"OZT", filename_ozt);
 
-    std::ifstream input = OpenTextureFile(filename_ozt);
-    if (!input)
-    {
-        mu::log::Get("render")->debug("OpenTga -- file open failed: {}", mu_wchar_to_utf8(filename_ozt.c_str()));
-        return false;
-    }
+    return LoadPackCopyOrOriginal(m_texturePack, filename_ozt, "OpenTga",
+                                  [&](const TextureFileBytes& file)
+                                  {
+                                      return LoadTgaFile(uiBitmapIndex, filename, file, uiFilter, uiWrapMode,
+                                                         worldTexture, padToPowerOfTwo, premultiplyAlpha, keepPixels);
+                                  });
+}
 
-    std::vector<unsigned char> pakBuffer((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
-    input.close();
+bool CGlobalBitmap::LoadTgaFile(GLuint uiBitmapIndex, const std::wstring& filename, const TextureFileBytes& file,
+                                GLuint uiFilter, GLuint uiWrapMode, bool worldTexture, bool padToPowerOfTwo,
+                                bool premultiplyAlpha, bool keepPixels)
+{
+    namespace Ozt = Render::Textures::Ozt;
+
+    const std::vector<unsigned char>& pakBuffer = file.bytes;
 
     // A marked file holds an image up to its scale times the largest original.
     const int markedScale = Render::Textures::Upscale::ReadMarkedScale(pakBuffer);
@@ -709,12 +711,12 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
     const Ozt::Header header = Ozt::ReadHeader(pakBuffer, maxWidth, maxHeight);
     if (header.status == Ozt::Status::TooSmall)
     {
-        g_ErrorReport.Write(L"OpenTga: file too small %ls (%zu bytes)\r\n", filename_ozt.c_str(), pakBuffer.size());
+        g_ErrorReport.Write(L"OpenTga: file too small %ls (%zu bytes)\r\n", file.path.c_str(), pakBuffer.size());
         return false;
     }
     if (header.status == Ozt::Status::InvalidFormat)
     {
-        g_ErrorReport.Write(L"OpenTga: invalid format %ls (bit=%d, %dx%d, at most %dx%d)\r\n", filename_ozt.c_str(),
+        g_ErrorReport.Write(L"OpenTga: invalid format %ls (bit=%d, %dx%d, at most %dx%d)\r\n", file.path.c_str(),
                             header.bitsPerPixel, header.width, header.height, maxWidth, maxHeight);
         return false;
     }
@@ -746,6 +748,7 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
     pNewBitmap->worldTexture = worldTexture;
     pNewBitmap->wrapRepeat = uiWrapMode == GL_REPEAT;
     pNewBitmap->scale = static_cast<std::uint8_t>(upscaled ? scale : 1);
+    pNewBitmap->fromTexturePack = file.fromTexturePack;
     const MipLevels mips = PlanMipLevels(upscaled || (worldTexture && m_textureFilteringEnabled), pNewBitmap->Buffer,
                                          uploadWidth, uploadHeight, true, m_mipChainSeconds);
     if (!UploadTextureSDLGpu(pNewBitmap.get(), pNewBitmap->BufferStorage, uploadWidth, uploadHeight,
@@ -777,6 +780,36 @@ void CGlobalBitmap::SetTextureFiltering(bool enabled, int anisotropy)
     m_textureFilteringRequested = enabled;
     m_requestedAnisotropy = anisotropy;
     m_textureFilteringSwitchPending = true;
+}
+
+void CGlobalBitmap::SetTexturePack(const std::wstring& pack)
+{
+    namespace TexturePack = Render::Textures::TexturePack;
+
+    m_texturePack = {};
+    if (pack.empty())
+    {
+        return;
+    }
+    if (!TexturePack::IsValidName(pack))
+    {
+        mu::log::Get("render")->warn("Texture pack name not valid, using the original textures: {}",
+                                     mu_wchar_to_utf8(pack.c_str()));
+        return;
+    }
+
+    const std::wstring folder = TexturePack::PackFolder(pack);
+    const std::filesystem::path root = Render::Sprites::NarrowBitmapPath(folder);
+    std::error_code error;
+    if (!std::filesystem::is_directory(root, error))
+    {
+        mu::log::Get("render")->warn("Texture pack not found, using the original textures: {}",
+                                     mu_wchar_to_utf8(folder.c_str()));
+        return;
+    }
+
+    m_texturePack = Render::Textures::TexturePackFiles::List(root);
+    mu::log::Get("render")->info("Texture pack: {} ({} files)", mu_wchar_to_utf8(pack.c_str()), m_texturePack.Count());
 }
 
 void CGlobalBitmap::UpdateTextureFiltering()
@@ -951,12 +984,14 @@ bool CGlobalBitmap::ReadBitmapPixels(const BITMAP_t& bitmap, std::vector<std::ui
     }
     std::wstring packed;
     ExchangeExt(filename, jpeg ? L"OZJ" : L"OZT", packed);
-    std::ifstream input = OpenTextureFile(packed);
-    if (!input)
+    // The file the texture was loaded from, so the mip levels match level 0.
+    const std::optional<TextureFileBytes> read =
+        bitmap.fromTexturePack ? ReadPackCopy(m_texturePack, packed) : ReadOriginal(packed);
+    if (!read)
     {
         return false;
     }
-    const std::vector<unsigned char> file((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+    const std::vector<unsigned char>& file = read->bytes;
 
     // The texture as loaded: an original image, padded to this size.
     const auto width = static_cast<int>(bitmap.Width);

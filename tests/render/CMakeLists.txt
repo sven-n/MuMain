@@ -134,6 +134,10 @@ mu_add_test(
     SOURCES
         test_texture_pack.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/TexturePack.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/TexturePackFiles.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/AssetPath.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Sprites/GlobalBitmapPath.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Platform/PathResolve.cpp
 )
 
 mu_add_test(

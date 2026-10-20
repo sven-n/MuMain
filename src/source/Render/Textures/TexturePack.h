@@ -1,7 +1,6 @@
 #pragma once
 
 #include <filesystem>
-#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -20,9 +19,9 @@ inline constexpr std::wstring_view PacksFolder = L"Data\\TexturePacks";
 // cannot point outside the packs folder.
 bool IsValidName(std::wstring_view name);
 
-// The path of a file in a pack, or nothing for a path outside Data or an
-// invalid pack name. Takes either separator and any case of "Data".
-std::optional<std::wstring> PathInPack(std::wstring_view path, std::wstring_view pack);
+// The folder of a pack, relative to the client folder, like the paths the
+// texture loader gets.
+std::wstring PackFolder(std::wstring_view pack);
 
 // The packs in a folder: its subfolders with a valid name, sorted.
 std::vector<std::wstring> ListPacks(const std::filesystem::path& folder);

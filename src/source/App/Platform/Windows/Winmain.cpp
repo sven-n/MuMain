@@ -2189,6 +2189,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     Bitmaps.SetTextureFiltering(Render::Look::PresetFeatures(GameConfig::GetInstance().GetLook()).textureFiltering,
                                 GameConfig::GetInstance().GetAnisotropy());
     Bitmaps.UpdateTextureFiltering();
+    // Also before the first texture loads: the pack is read once, so a new choice takes effect after a
+    // restart.
+    Bitmaps.SetTexturePack(GameConfig::GetInstance().GetTexturePack());
 
 #ifdef _WIN32
     // Bridge SDL's native handles so the remaining Win32 code (IME, DirectSound,

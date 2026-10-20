@@ -12,6 +12,7 @@
 #include <setjmp.h>
 #include <cstdint>
 #include "Core/Time/Timer.h"
+#include "Render/Textures/TexturePackFiles.h"
 
 struct SDL_GPUTexture;
 struct SDL_GPUSampler;
@@ -56,6 +57,19 @@ public:
     // Upscaled art: the uploaded texture is this times Width x Height, always
     // mipmapped and sampled through the shared anisotropic samplers.
     std::uint8_t scale = 1;
+    // Read from the active texture pack, not from Data: a later re-read of the
+    // pixels (CGlobalBitmap::ReadBitmapPixels) reads the same file.
+    bool fromTexturePack = false;
+};
+
+// A texture file as the loaders read it.
+struct TextureFileBytes
+{
+    std::vector<unsigned char> bytes;
+    // The file that was read, for messages: the original in Data or its copy
+    // in the texture pack.
+    std::wstring path;
+    bool fromTexturePack = false;
 };
 
 class CBitmapCache
@@ -140,6 +154,8 @@ class CGlobalBitmap
     std::vector<std::uint32_t> m_mipChainRequests;
     double m_textureLoadSeconds = 0.0;
     double m_mipChainSeconds = 0.0;
+    // The files of the active texture pack; empty for the original textures.
+    Render::Textures::TexturePackFiles m_texturePack;
 #ifdef DEBUG_BITMAP_CACHE
     CTimer2				m_DebugOutputTimer;
 #endif // DEBUG_BITMAP_CACHE
@@ -196,6 +212,12 @@ public:
     // applies it between frames through UpdateTextureFiltering, which also
     // builds the mip chains that world draws asked for since the last frame.
     void SetTextureFiltering(bool enabled, int anisotropy);
+
+    // The texture pack (Render/Textures/TexturePack.h) whose files are read
+    // before those in Data: a folder name in Data/TexturePacks, or empty for
+    // the original textures. Set at startup, before the first texture loads;
+    // an invalid or missing pack logs a warning and keeps the originals.
+    void SetTexturePack(const std::wstring& pack);
     // Keeps the requested filtering state; the shared samplers are rebuilt between frames.
     void SetAnisotropy(int anisotropy)
     {
@@ -232,6 +254,12 @@ protected:
     bool OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode,
                  bool worldTexture, bool padToPowerOfTwo = true, bool premultiplyAlpha = false,
                  bool keepPixels = false);
+    // Decode a file OpenJpegTurbo/OpenTga read and upload it as the texture.
+    bool LoadJpegFile(GLuint uiBitmapIndex, const std::wstring& filename, const TextureFileBytes& file, GLuint uiFilter,
+                      GLuint uiWrapMode, bool worldTexture, bool padToPowerOfTwo, bool keepPixels);
+    bool LoadTgaFile(GLuint uiBitmapIndex, const std::wstring& filename, const TextureFileBytes& file, GLuint uiFilter,
+                     GLuint uiWrapMode, bool worldTexture, bool padToPowerOfTwo, bool premultiplyAlpha,
+                     bool keepPixels);
     void RegisterFilteredSampler(const BITMAP_t& bitmap);
     SDL_GPUSampler* GetFilteredSampler(bool wrapRepeat);
     void ReleaseFilteredSamplers();

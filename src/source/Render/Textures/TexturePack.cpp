@@ -1,37 +1,19 @@
 #include "TexturePack.h"
 
+#include "Render/Sprites/GlobalBitmapPath.h"
+
 #include <algorithm>
-#include <cwctype>
+#include <optional>
 
 namespace Render::Textures::TexturePack
 {
 namespace
 {
-constexpr std::wstring_view DataFolder = L"data";
-
-bool IsSeparator(wchar_t c)
-{
-    return c == L'\\' || c == L'/';
-}
-
 bool IsNameCharacter(wchar_t c)
 {
     const bool letter = (c >= L'a' && c <= L'z') || (c >= L'A' && c <= L'Z');
     const bool digit = c >= L'0' && c <= L'9';
     return letter || digit || c == L'-' || c == L'_';
-}
-
-bool StartsWithDataFolder(std::wstring_view path)
-{
-    if (path.size() <= DataFolder.size() || !IsSeparator(path[DataFolder.size()]))
-        return false;
-
-    for (std::size_t i = 0; i < DataFolder.size(); ++i)
-    {
-        if (static_cast<wchar_t>(std::towlower(path[i])) != DataFolder[i])
-            return false;
-    }
-    return true;
 }
 
 // Copied from the native spelling one character at a time: a valid name is
@@ -56,16 +38,12 @@ bool IsValidName(std::wstring_view name)
     return !name.empty() && std::all_of(name.begin(), name.end(), IsNameCharacter);
 }
 
-std::optional<std::wstring> PathInPack(std::wstring_view path, std::wstring_view pack)
+std::wstring PackFolder(std::wstring_view pack)
 {
-    if (!IsValidName(pack) || !StartsWithDataFolder(path))
-        return std::nullopt;
-
-    std::wstring packPath(PacksFolder);
-    packPath += L'\\';
-    packPath += pack;
-    packPath += path.substr(DataFolder.size());
-    return packPath;
+    std::wstring folder(PacksFolder);
+    folder += L'\\';
+    folder += pack;
+    return folder;
 }
 
 std::vector<std::wstring> ListPacks(const std::filesystem::path& folder)
@@ -83,9 +61,8 @@ std::vector<std::wstring> ListPacks(const std::filesystem::path& folder)
 
 std::vector<std::wstring> ListInstalledPacks()
 {
-    // Forward slashes, which std::filesystem takes on every platform.
-    std::wstring folder(PacksFolder);
-    std::replace(folder.begin(), folder.end(), L'\\', L'/');
-    return ListPacks(folder);
+    // Resolved as the loader resolves the pack folder, so on a case-sensitive
+    // filesystem a "data/texturepacks" folder is listed as well as loaded.
+    return ListPacks(Render::Sprites::NarrowBitmapPath(std::wstring(PacksFolder)));
 }
 } // namespace Render::Textures::TexturePack
