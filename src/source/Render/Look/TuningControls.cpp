@@ -66,6 +66,8 @@ constexpr std::array<ControlSpec, TuningControlCount> Specs = {{
      TuningUnit::Seconds, 1.0, TuningZero::Immediate},
     {TuningControlId::EffectRangeMax, TuningGroup::DynamicLights, true, LookValue::DynamicEffectRangeMax, 1.0,
      TuningUnit::Cells, 1.0, TuningZero::NoCap},
+    {TuningControlId::ShadowAngle, TuningGroup::DynamicLights, true, LookValue::GroundShadowAngle, 5.0,
+     TuningUnit::Degrees, 1.0, TuningZero::Plain},
     {TuningControlId::MoodStrength, TuningGroup::LightMood, false, std::nullopt, 1.0, TuningUnit::Percent, 1.0,
      TuningZero::Plain},
     {TuningControlId::BloomStrength, TuningGroup::PostProcessing, false, LookValue::BloomStrength, 0.05,

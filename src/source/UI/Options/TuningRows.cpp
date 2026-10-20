@@ -56,6 +56,8 @@ ControlTexts TextsOf(TuningControlId id)
         return {I18N::Game::TuningOverlappingLightCap, I18N::Game::TuningOverlappingLightCapHelp};
     case TuningControlId::ShadowOpacity:
         return {I18N::Game::TuningShadowOpacity, I18N::Game::TuningShadowOpacityHelp};
+    case TuningControlId::ShadowAngle:
+        return {I18N::Game::TuningShadowDirection, I18N::Game::TuningShadowDirectionHelp};
     case TuningControlId::Wrap:
         return {I18N::Game::TuningLightWrap, I18N::Game::TuningLightWrapHelp};
     case TuningControlId::MapSmoothing:
@@ -165,6 +167,9 @@ std::string FormatTuningText(const TuningControl& control, double value)
     case TuningUnit::Percent:
         // The spacing of the UI Scale row ("100 %").
         return number + " %";
+    case TuningUnit::Degrees:
+        // U+00B0 DEGREE SIGN in UTF-8, the text encoding of the rows.
+        return number + "\xC2\xB0";
     case TuningUnit::None:
         break;
     }
