@@ -651,7 +651,11 @@ shows it in the others.
 - **Item Browser**: the items with a search (a name in any language,
   `group,number` or the item type) and filters: group, tag, a rule flag
   that is off, items without a model, numbers that have a model but no
-  item, items without a name in a language. It has **Save Items**,
+  item, items without a name in a language. An item whose name another
+  item has too shows in grey what tells them apart, in the list and above
+  each tool: the tags it has that not all its namesakes have (the lucky
+  sets: `luckyItem`), or `#1`, `#2` by number where no tag does (the Divine
+  sets, the tiers of the seed spheres). It has **Save Items**,
   **Import from bmd**, **Export as bmd**, **Export as S6E3** and
   **Export as CSV**, and:
   - **Add item**: a group, a free number (one with neither an item nor a

@@ -5,6 +5,7 @@
 #include "ItemToolWindow.h"
 
 #include "ItemEdits.h"
+#include "ItemNamesakes.h"
 #include "ItemSelection.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
@@ -136,6 +137,7 @@ bool RenderSelectedItem(int itemType)
         return false;
     }
     ImGui::TextUnformatted(g_ItemDatabase.GetLogName(itemType).c_str());
+    RenderNamesakeQualifier(itemType);
     return true;
 }
 

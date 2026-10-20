@@ -31,6 +31,7 @@
 #ifdef _EDITOR
 #include "UI/ItemTools/GlowColorDialog.h"
 #include "UI/ItemTools/ItemEdits.h"
+#include "UI/ItemTools/ItemNamesakes.h"
 #include "UI/ItemTools/ItemRequirementTable.h"
 #include "UI/ItemTools/ItemSelection.h"
 #include "UI/ItemTools/ItemUsage.h"
@@ -1252,6 +1253,33 @@ TEST_CASE("The item tools draw their frames without ImGui errors [data][items][e
     }
     // The model tool's inventory display shown before it is stored ends.
     g_MuItemModelUI.BeforeFrame();
+}
+
+// Items with the same name: the lucky sets have a tag their namesakes do not,
+// the Divine sets and the seed sphere tiers count up by number.
+TEST_CASE("The item lists tell items with the same name apart [data][items][editor]")
+{
+    ClientDataScope client(ShippedClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    MuEditor::Items::ItemNamesakes& namesakes = g_ItemNamesakes;
+
+    CHECK(namesakes.GetQualifier(KrisType).empty());
+    CHECK(namesakes.GetQualifier(MakeItemType(7, 1)).empty());
+    CHECK(namesakes.GetQualifier(MakeItemType(7, 67)) == "luckyItem");
+    CHECK(namesakes.GetQualifier(MakeItemType(7, 19)) == "#1");
+    CHECK(namesakes.GetQualifier(MakeItemType(7, 50)) == "#2");
+    CHECK(namesakes.GetQualifier(MakeItemType(12, 100)) == "#1");
+    CHECK(namesakes.GetQualifier(MakeItemType(12, 124)) == "#5");
+
+    // A renamed item has a namesake no more.
+    ItemDefinition renamed = *g_ItemDatabase.Find(MakeItemType(7, 50));
+    renamed.name = L"Divine Helm of Light";
+    renamed.names.Set("en", "Divine Helm of Light");
+    g_ItemDataHandler.SetItem(renamed);
+    CHECK(namesakes.GetQualifier(MakeItemType(7, 19)).empty());
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
 }
 
 TEST_CASE("Item Requirements shows what the game asks at each level, from the values being typed "

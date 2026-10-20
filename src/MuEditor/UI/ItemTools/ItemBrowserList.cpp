@@ -13,6 +13,7 @@
 #include "imgui.h"
 #include "../MuEditor/UI/Common/KeyboardSelection.h"
 #include "ItemLevelModels.h"
+#include "ItemNamesakes.h"
 
 #include <algorithm>
 #include <cstdio>
@@ -43,6 +44,7 @@ void RenderRow(int itemType, bool selected, int& clicked)
     if (const Data::Items::ItemDefinition* item = g_ItemDatabase.Find(itemType))
     {
         ImGui::TextUnformatted(Core::Text::ToUtf8(item->name.c_str()).c_str());
+        RenderNamesakeQualifier(itemType);
     }
     else
     {
