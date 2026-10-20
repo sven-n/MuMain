@@ -11,8 +11,9 @@ namespace MuEditor::Items
 // The model tool's view of the selected item's model as it is opened now,
 // turning, at an item level, excellent or ancient, upright as the inventory
 // turns it or as it lies on the ground: drawn like the effect browser draws an
-// item (EffectPreviewScene), into a texture. The mouse turns the camera, the
-// wheel zooms, a double click puts it back.
+// item (EffectPreviewScene), into a texture. The mouse turns the camera
+// (EffectPreviewInput: the middle button moves the picture, the wheel zooms,
+// a double click puts it back).
 class CItemModelPreview
 {
 public:
@@ -27,7 +28,6 @@ public:
 private:
     void RenderControls();
     void RenderView(const MuEditor::Effects::EffectPreviewRequest& request);
-    void HandleViewInput();
 
     MuEditor::Effects::EffectPreviewCamera m_camera;
     MuEditor::Effects::EffectPreviewScene m_scene;

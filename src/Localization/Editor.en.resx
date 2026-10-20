@@ -740,7 +740,7 @@
     <value>Ancient</value>
   </data>
   <data name="Preview controls" xml:space="preserve">
-    <value>Drag to turn, use the wheel to zoom, double-click to reset the view.</value>
+    <value>Drag to turn, drag with the middle mouse button to move, use the wheel to zoom, double-click to reset the view.</value>
   </data>
   <data name="Preview not drawn by game" xml:space="preserve">
     <value>The game does not draw this model itself: it has no drawing code.</value>

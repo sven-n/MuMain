@@ -5,6 +5,7 @@
 #include "ItemModelPreview.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
+#include "../MuEditor/UI/EffectBrowser/EffectPreviewInput.h"
 #include "../MuEditor/UI/EffectBrowser/EffectPreviewSubject.h"
 #include "I18N/All.h"
 #include "Render/Renderer/MuRenderer.h"
@@ -80,13 +81,7 @@ void CItemModelPreview::RenderView(const MuEditor::Effects::EffectPreviewRequest
     const ImGuiStyle& style = ImGui::GetStyle();
     const float widthWithoutScrollbar = ImGui::GetWindowWidth() - 2.0f * style.WindowPadding.x - style.ScrollbarSize;
     const float height = std::clamp(widthWithoutScrollbar * ViewAspect, MinViewHeight * scale, MaxViewHeight * scale);
-    ImGui::InvisibleButton("##ModelView", ImVec2(width, height), ImGuiButtonFlags_MouseButtonLeft);
-    ImGui::SetItemKeyOwner(ImGuiKey_MouseWheelY);
-    HandleViewInput();
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::SetTooltip("%s", I18N::Editor::PreviewControls);
-    }
+    MuEditor::Effects::PreviewInput::RenderView("##ModelView", width, height, m_camera);
     const ImVec2 min = ImGui::GetItemRectMin();
     const ImVec2 max = ImGui::GetItemRectMax();
     const MuEditor::Effects::PreviewFraming framing = m_scene.Prepare(request);
@@ -124,27 +119,6 @@ void CItemModelPreview::RenderView(const MuEditor::Effects::EffectPreviewRequest
     if (void* pointer = texture != 0 ? mu::GetRenderer().GetTexturePointer(texture) : nullptr)
     {
         ImGui::GetWindowDrawList()->AddImage((ImTextureID)(intptr_t)pointer, min, max);
-    }
-}
-
-void CItemModelPreview::HandleViewInput()
-{
-    const ImGuiIO& io = ImGui::GetIO();
-    if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left, 0.0f))
-    {
-        m_camera.Turn(io.MouseDelta.x, io.MouseDelta.y);
-    }
-    if (!ImGui::IsItemHovered())
-    {
-        return;
-    }
-    if (io.MouseWheel != 0.0f)
-    {
-        m_camera.Zoom(io.MouseWheel);
-    }
-    if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-    {
-        m_camera.Reset();
     }
 }
 } // namespace MuEditor::Items

@@ -115,6 +115,49 @@ TEST_CASE("The effect preview's camera looks at the type from the thumbnails' di
     CHECK(camera.Near() >= 1.0f);
 }
 
+TEST_CASE("The effect preview's camera moves the picture with the mouse and puts it back [effects][editor]")
+{
+    constexpr float Tolerance = 1e-3f;
+    constexpr float ViewHeight = 400.0f;
+    const PreviewVector center = {10.0f, 20.0f, 30.0f};
+    EffectPreviewCamera camera;
+    camera.Frame(center, 100.0f);
+    // Where the framed center lands in the view, as a share of the view's height.
+    const auto onScreen = [&]
+    {
+        const std::array<float, 3> p = Apply(camera.View(), center);
+        const float visible =
+            -p[2] * 2.0f * std::tan(EffectPreviewCamera::FieldOfViewDegrees * 0.5f * 3.14159265f / 180.0f);
+        return std::array<float, 2>{p[0] / visible, p[1] / visible};
+    };
+
+    // The picture follows the mouse: right and, with screen y down, down.
+    camera.Pan(40.0f, 20.0f, ViewHeight);
+    CHECK(onScreen()[0] == doctest::Approx(40.0f / ViewHeight).epsilon(Tolerance));
+    CHECK(onScreen()[1] == doctest::Approx(-20.0f / ViewHeight).epsilon(Tolerance));
+    // Turning keeps the view a look-at view of the moved center.
+    camera.Turn(30.0f, 10.0f);
+    const MuEditor::LookAt::Matrix fromEye =
+        MuEditor::LookAt::ViewMatrix(camera.Eye(), camera.Center(), {0.0f, 0.0f, 1.0f});
+    const std::array<float, 16> cameraView = camera.View();
+    for (size_t i = 0; i < cameraView.size(); ++i)
+    {
+        INFO(i);
+        CHECK(fromEye[i] == doctest::Approx(cameraView[i]).epsilon(Tolerance));
+    }
+
+    // It cannot be moved away for good.
+    camera.Pan(1e7f, 0.0f, ViewHeight);
+    const PreviewVector moved = Minus(camera.Center(), center);
+    CHECK(std::sqrt(moved[0] * moved[0] + moved[1] * moved[1] + moved[2] * moved[2]) <= 300.0f * 1.001f);
+
+    camera.Reset();
+    CHECK(camera.Center() == center);
+    camera.Pan(40.0f, 20.0f, ViewHeight);
+    camera.Frame(center, 100.0f);
+    CHECK(camera.Center() == center);
+}
+
 TEST_CASE("The preview stands an item up as the inventory turns it, facing the camera's first direction "
           "[effects][editor]")
 {

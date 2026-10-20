@@ -719,7 +719,7 @@
     <value>Antik</value>
   </data>
   <data name="Preview controls" xml:space="preserve">
-    <value>Ziehen zum Drehen, Mausrad zum Zoomen, Doppelklick setzt die Ansicht zurück.</value>
+    <value>Ziehen zum Drehen, mit der mittleren Maustaste ziehen zum Verschieben, Mausrad zum Zoomen, Doppelklick setzt die Ansicht zurück.</value>
   </data>
   <data name="Preview not drawn by game" xml:space="preserve">
     <value>Das Spiel zeichnet dieses Modell nicht selbst: es hat keinen Zeichencode.</value>
