@@ -652,6 +652,21 @@ TEST_CASE("The models of items are opened again as the model database has them n
         CHECK(second.SharesData());
     }
 
+    SUBCASE("the items of a shared model whose file does not open are all without a model")
+    {
+        const int types[] = {MakeItemType(15, 20), MakeItemType(15, 21)};
+        for (const int itemType : types)
+        {
+            ItemModelDefinition user = *g_ItemModelDatabase.Find(itemType);
+            user.file = (ClientDirectory / "Data/Item/NoSuchModel.bmd").generic_string();
+            g_ItemModelDatabase.Set(user, Data::Effects::GlowColorList{});
+        }
+        CHECK_FALSE(opened(ModelLoader::ReopenModels(types, {})));
+        CHECK(Models[ToModelSlot(types[0])].NumMeshs == 0);
+        CHECK(Models[ToModelSlot(types[1])].NumMeshs == 0);
+        CHECK(parchmentSlot.NumMeshs > 0);
+    }
+
     SUBCASE("a missing file is a problem of the reopen, not of the startup message")
     {
         ItemModelDefinition missing = parchment;

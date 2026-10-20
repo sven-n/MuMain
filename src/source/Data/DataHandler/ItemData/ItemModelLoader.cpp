@@ -310,6 +310,12 @@ std::vector<ItemModelProblem> ReopenModels(std::span<const int> itemTypes, const
         else
         {
             OpenSharedModel(itemType, *model, lookNames, sharedModelsOpenedBy);
+            // A shared model whose file did not open leaves each of its items
+            // without a model, not with the one its slot had before.
+            if (sharedModelsOpenedBy.find(model->model)->second == NotOpened)
+            {
+                Models[ToModelSlot(itemType)].Release();
+            }
         }
         if (opens && Models[ToModelSlot(itemType)].NumMeshs > 0)
         {
