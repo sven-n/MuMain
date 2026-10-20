@@ -50,6 +50,8 @@
 #include "Core/Utilities/FrameProfiler.h"
 #include "Scenes/MainScene.h"
 #include "Render/Lighting/LightMoodSetting.h"
+#include "Render/Lighting/DynamicLightsSetting.h"
+#include "Render/Look/LookProfileSetting.h"
 
 using mu::PackABGR;
 
@@ -2531,8 +2533,9 @@ void BMD::RenderScriptedMesh(int mesh, int renderFlag, float alpha, int blendMes
     }
 }
 
-__forceinline void CalcShadowPosition(vec3_t* position, const vec3_t origin, const float sx, const float sy)
+__forceinline void CalcShadowPosition(vec3_t* position, const mu::ShadowProjection& projection)
 {
+    const float* origin = projection.origin;
     vec3_t result;
     VectorCopy(*position, result);
 
@@ -2540,8 +2543,12 @@ __forceinline void CalcShadowPosition(vec3_t* position, const vec3_t origin, con
     // The result is the relative coordinate of the vertex to the origin.
     VectorSubtract(result, origin, result)
 
-    // scale the shadow in the x direction
-    result[0] += result[2] * (result[0] + sx) / (result[2] - sy);
+        // shear the shadow along its axis (x in Classic, where axisAngle is 0)
+        const float axis[2] = {std::cos(projection.axisAngle), std::sin(projection.axisAngle)};
+    const float along = result[0] * axis[0] + result[1] * axis[1];
+    const float shift = result[2] * (along + projection.shearX) / (result[2] - projection.shearHeight);
+    result[0] += shift * axis[0];
+    result[1] += shift * axis[1];
 
     // Add the origin again, to get the absolute coordinate of the vertex again
     VectorAdd(result, origin, result);
@@ -2554,14 +2561,14 @@ __forceinline void CalcShadowPosition(vec3_t* position, const vec3_t origin, con
 }
 
 __forceinline void GetClothShadowPosition(vec3_t* target, const Render::ModelDrawing::ClothShadow& cloth,
-                                          const int index, const vec3_t origin, const float sx, const float sy)
+                                          const int index, const mu::ShadowProjection& projection)
 {
     VectorCopy(cloth.points[index], *target);
-    CalcShadowPosition(target, origin, sx, sy);
+    CalcShadowPosition(target, projection);
 }
 
-void BMD::AddClothesShadowTriangles(std::span<const Render::ModelDrawing::ClothShadow> clothes, const float* origin,
-                                    const float sx, const float sy, const std::uint32_t color) const
+void BMD::AddClothesShadowTriangles(std::span<const Render::ModelDrawing::ClothShadow> clothes, 
+                                    const mu::ShadowProjection& projection, const std::uint32_t color) const
 {
     auto vertices = RenderArrayVertices;
     int target_vertex_index = -1;
@@ -2584,10 +2591,10 @@ void BMD::AddClothesShadowTriangles(std::span<const Render::ModelDrawing::ClothS
 
                 vec3_t posA, posB, posC, posD;
 
-                GetClothShadowPosition(&posA, cloth, a, origin, sx, sy);
-                GetClothShadowPosition(&posB, cloth, b, origin, sx, sy);
-                GetClothShadowPosition(&posC, cloth, c, origin, sx, sy);
-                GetClothShadowPosition(&posD, cloth, d, origin, sx, sy);
+                GetClothShadowPosition(&posA, cloth, a, projection);
+                GetClothShadowPosition(&posB, cloth, b, projection);
+                GetClothShadowPosition(&posC, cloth, c, projection);
+                GetClothShadowPosition(&posD, cloth, d, projection);
 
                 // A-Triangle:
                 target_vertex_index++;
@@ -2625,27 +2632,31 @@ void BMD::AddClothesShadowTriangles(std::span<const Render::ModelDrawing::ClothS
 
 namespace
 {
-// What CalcShadowPosition needs besides the position.
-struct ShadowGround
-{
-    const float* origin;
-    float sx;
-    float sy;
-};
-
 void ProjectOntoGround(float position[3], const void* context)
 {
-    const auto* ground = static_cast<const ShadowGround*>(context);
-    CalcShadowPosition(reinterpret_cast<vec3_t*>(position), ground->origin, ground->sx, ground->sy);
+    CalcShadowPosition(reinterpret_cast<vec3_t*>(position), *static_cast<const mu::ShadowProjection*>(context));
 }
 
-// CalcShadowPosition's projection for skinned_shadow.vert.
+// The body shadow's shear axis: Classic's, or with Enhanced dynamic lights the map's shadow direction
+// (dynamic.shadowAngle, where shadows fall; the shear axis points the other way).
+float BodyShadowAxisAngle()
+{
+    if (!Render::Lighting::DynamicLightsActive())
+    {
+        return 0.f;
+    }
+    constexpr float RadiansPerDegree = 3.14159265358979f / 180.f;
+    return (Render::Look::Value(Data::Maps::LookValue::GroundShadowAngle) + 180.f) * RadiansPerDegree;
+}
+
+// Where CalcShadowPosition and skinned_shadow.vert put a body shadow.
 mu::ShadowProjection BodyShadowProjection(const vec3_t origin, const float sx, const float sy)
 {
     return {
         .origin = {origin[0], origin[1], origin[2]},
         .shearX = sx,
         .shearHeight = sy,
+        .axisAngle = BodyShadowAxisAngle(),
         .specialHeight = g_fSpecialHeight,
         .terrain = SceneFlag != SERVER_LIST_SCENE && SceneFlag != WEBZEN_SCENE && SceneFlag != LOADING_SCENE,
     };
@@ -2719,7 +2730,7 @@ void BMD::ProjectWeightedShadowMesh(const Render::ModelDrawing::ShadowDraw& draw
 }
 
 void BMD::AddWeightedMeshShadowTriangles(const Render::ModelDrawing::ShadowDraw& draw, const int startMesh,
-                                         const int endMesh, const float sx, const float sy,
+                                         const int endMesh, const mu::ShadowProjection& projection,
                                          const std::uint32_t color) const
 {
     constexpr std::size_t indexReach = std::size_t{std::numeric_limits<std::uint16_t>::max()} + 1;
@@ -2741,7 +2752,6 @@ void BMD::AddWeightedMeshShadowTriangles(const Render::ModelDrawing::ShadowDraw&
         batchIndices.clear();
     };
 
-    const ShadowGround ground{draw.bodyOrigin, sx, sy};
     for (int i = startMesh; i < endMesh; i++)
     {
         if (i == draw.hiddenMesh)
@@ -2754,7 +2764,7 @@ void BMD::AddWeightedMeshShadowTriangles(const Render::ModelDrawing::ShadowDraw&
             continue;
         }
 
-        ProjectWeightedShadowMesh(draw, i, ProjectOntoGround, &ground, meshVertices, meshIndices);
+        ProjectWeightedShadowMesh(draw, i, ProjectOntoGround, &projection, meshVertices, meshIndices);
         if (meshIndices.empty())
         {
             continue;
@@ -2821,8 +2831,8 @@ const vec3_t* BMD::ShadowVertices(const Render::ModelDrawing::ShadowDraw& draw, 
 }
 
 void BMD::AddMeshShadowTriangles(const Render::ModelDrawing::ShadowDraw& draw, const int blendMesh,
-                                 const int hiddenMesh, const int startMesh, const int endMesh, const float* origin,
-                                 const float sx, const float sy, const std::uint32_t color) const
+                                 const int hiddenMesh, const int startMesh, const int endMesh, 
+                                 const mu::ShadowProjection& projection, const std::uint32_t color) const
 {
     auto vertices = RenderArrayVertices;
     int target_vertex_index = -1;
@@ -2851,7 +2861,7 @@ void BMD::AddMeshShadowTriangles(const Render::ModelDrawing::ShadowDraw& draw, c
 
                 VectorCopy(positions[source_vertex_index], vertices[target_vertex_index]);
 
-                CalcShadowPosition(&vertices[target_vertex_index], origin, sx, sy);
+                CalcShadowPosition(&vertices[target_vertex_index], projection);
             }
         }
     }
@@ -2872,7 +2882,7 @@ void BMD::AddMeshShadowTriangles(const Render::ModelDrawing::ShadowDraw& draw, c
 }
 
 bool BMD::RenderGpuMeshShadow(const Render::ModelDrawing::ShadowDraw& draw, const int startMesh, const int endMesh,
-                              const float sx, const float sy, const std::uint32_t color) const
+                              const mu::ShadowProjection& projection, const std::uint32_t color) const
 {
     if (!draw.skin.bones || startMesh < 0 || endMesh > NumMeshs || endMesh > MAX_MESH)
     {
@@ -2946,11 +2956,11 @@ bool BMD::RenderGpuMeshShadow(const Render::ModelDrawing::ShadowDraw& draw, cons
         .restPoseScale = draw.skin.restPoseScale,
         .translate = draw.skin.translate,
     };
-    return renderer.RenderCachedSkinnedShadow(key, color, skinning, BodyShadowProjection(draw.bodyOrigin, sx, sy));
+    return renderer.RenderCachedSkinnedShadow(key, color, skinning, projection);
 }
 
 void BMD::RenderWeightedMeshShadow(const Render::ModelDrawing::ShadowDraw& draw, const int startMesh, const int endMesh,
-                                   const float sx, const float sy, const std::uint32_t color) const
+                                   const mu::ShadowProjection& projection, const std::uint32_t color) const
 {
     const auto* gltf = Render::Models::Gltf::SkinnedModelOf(*this);
     auto& renderer = mu::GetRenderer();
@@ -2958,7 +2968,7 @@ void BMD::RenderWeightedMeshShadow(const Render::ModelDrawing::ShadowDraw& draw,
         !renderer.SetTerrainHeights({BackTerrainHeight, Render::kTerrainCells}, {TerrainWall, Render::kTerrainCells},
                                     TerrainHeightVersion()))
     {
-        AddWeightedMeshShadowTriangles(draw, startMesh, endMesh, sx, sy, color);
+        AddWeightedMeshShadowTriangles(draw, startMesh, endMesh, projection, color);
         return;
     }
 
@@ -2973,7 +2983,6 @@ void BMD::RenderWeightedMeshShadow(const Render::ModelDrawing::ShadowDraw& draw,
         .restPoseScale = draw.skin.restPoseScale,
         .translate = draw.skin.translate,
     };
-    const mu::ShadowProjection projection = BodyShadowProjection(draw.bodyOrigin, sx, sy);
     for (int i = startMesh; i < endMesh; i++)
     {
         if (i == draw.hiddenMesh || Meshs[i].NumTriangles <= 0 || Meshs[i].Texture == draw.blendMesh)
@@ -2989,7 +2998,7 @@ void BMD::RenderWeightedMeshShadow(const Render::ModelDrawing::ShadowDraw& draw,
         // As RenderGpuMeshShadow: CPU vertices already skinned this frame draw their own shadow.
         if (!lodMesh && ShadowOwnsVertices(draw, i))
         {
-            AddWeightedMeshShadowTriangles(draw, i, i + 1, sx, sy, color);
+            AddWeightedMeshShadowTriangles(draw, i, i + 1, projection, color);
             continue;
         }
 
@@ -3000,7 +3009,7 @@ void BMD::RenderWeightedMeshShadow(const Render::ModelDrawing::ShadowDraw& draw,
                                          renderer.CacheWeightedSkinnedMesh(key, WeightedCorners(packed, 0.f, 0.f)));
         if (!cached || !renderer.RenderCachedSkinnedShadow(key, color, skinning, projection))
         {
-            AddWeightedMeshShadowTriangles(draw, i, i + 1, sx, sy, color);
+            AddWeightedMeshShadowTriangles(draw, i, i + 1, projection, color);
         }
     }
 }
@@ -3098,25 +3107,24 @@ void BMD::DrawShadow(const Render::ModelDrawing::ShadowDraw& draw) const
 
     const auto [startMesh, endMesh] = ResolveMeshRange(NumMeshs, draw.startMesh, draw.endMesh);
 
-    const float sx = gMapManager.InBattleCastle() ? 2500.f : 2000.f;
-    const float sy = 4000.f;
+    const mu::ShadowProjection projection =
+        BodyShadowProjection(draw.bodyOrigin, gMapManager.InBattleCastle() ? 2500.f : 2000.f, 4000.f);
     const std::uint32_t shadowColor = PackABGR(0.f, 0.f, 0.f, std::clamp(draw.alpha, 0.f, 1.f));
 
     if (draw.clothes.empty() && Render::Models::Gltf::SkinnedModelOf(*this))
     {
-        RenderWeightedMeshShadow(draw, startMesh, endMesh, sx, sy, shadowColor);
+        RenderWeightedMeshShadow(draw, startMesh, endMesh, projection, shadowColor);
     }
     else if (draw.clothes.empty())
     {
-        if (!RenderGpuMeshShadow(draw, startMesh, endMesh, sx, sy, shadowColor))
+        if (!RenderGpuMeshShadow(draw, startMesh, endMesh, projection, shadowColor))
         {
-            AddMeshShadowTriangles(draw, draw.blendMesh, draw.hiddenMesh, startMesh, endMesh, draw.bodyOrigin, sx, sy,
-                                   shadowColor);
+            AddMeshShadowTriangles(draw, draw.blendMesh, draw.hiddenMesh, startMesh, endMesh, projection, shadowColor);
         }
     }
     else
     {
-        AddClothesShadowTriangles(draw.clothes, draw.bodyOrigin, sx, sy, shadowColor);
+        AddClothesShadowTriangles(draw.clothes, projection, shadowColor);
     }
 
     EndRender();
