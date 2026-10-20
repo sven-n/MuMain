@@ -737,7 +737,8 @@ number that has a model but no item:
   name, file, texture folders and none-blend meshes. A change is applied
   only after a warning that lists every item it reaches. **Make a copy for
   this item** gives the item a file entry of its own instead (a variant).
-  A shared model that items use cannot be removed.
+  A shared model that items use cannot be removed; the ones no item uses
+  are listed with a button that removes them.
 - For a file of its own, the texture folders and none-blend meshes; then
   the inventory and ground display, cloth, specular and the glow (levels,
   colors with their swatches, meshes, excellent).

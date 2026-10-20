@@ -68,10 +68,46 @@ void CItemSharedModelForm::Render(const Data::Items::ItemModelDefinition& model,
     if (model.model.empty())
     {
         RenderPick(model, counts);
+    }
+    else
+    {
+        RenderShared(model);
+        RenderConfirm();
+    }
+    RenderUnused(counts);
+}
+
+// D26: a shared model is removed only while no item uses it.
+void CItemSharedModelForm::RenderUnused(ItemLookUseCounts& counts)
+{
+    std::vector<std::string> unused;
+    for (const Data::Items::SharedItemModel& shared : g_ItemModelDatabase.GetSharedModels())
+    {
+        if (counts.SharedModel(shared.name) == 0)
+        {
+            unused.push_back(shared.name);
+        }
+    }
+    if (unused.empty())
+    {
         return;
     }
-    RenderShared(model);
-    RenderConfirm();
+    std::string names;
+    for (const std::string& name : unused)
+    {
+        names += (names.empty() ? "" : ", ") + name;
+    }
+    ImGui::TextDisabled("%s", I18N::Format(I18N::Editor::NoItemUsesTheseSharedModels0, {names}).c_str());
+    ImGui::SameLine();
+    if (ImGui::SmallButton(I18N::Editor::RemoveThem))
+    {
+        g_ItemEdits.BeginGroup(I18N::Editor::RemoveUnusedSharedModels);
+        for (const std::string& name : unused)
+        {
+            g_ItemEdits.RemoveSharedModel(I18N::Editor::RemoveUnusedSharedModels, name);
+        }
+        g_ItemEdits.EndGroup();
+    }
 }
 
 void CItemSharedModelForm::RenderPick(const Data::Items::ItemModelDefinition& model, ItemLookUseCounts& counts)

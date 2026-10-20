@@ -1369,4 +1369,13 @@
   <data name="Not done: the step would change an item that is worn or in an item window." xml:space="preserve">
     <value>Nicht ausgeführt: Der Schritt würde einen Gegenstand ändern, der getragen wird oder in einem Gegenstandsfenster liegt.</value>
   </data>
+  <data name="No item uses these shared models: {0}" xml:space="preserve">
+    <value>Kein Gegenstand nutzt diese geteilten Modelle: {0}</value>
+  </data>
+  <data name="Remove them" xml:space="preserve">
+    <value>Entfernen</value>
+  </data>
+  <data name="Remove unused shared models" xml:space="preserve">
+    <value>Ungenutzte geteilte Modelle entfernen</value>
+  </data>
 </root>

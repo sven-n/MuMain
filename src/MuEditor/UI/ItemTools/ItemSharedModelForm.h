@@ -16,7 +16,8 @@ namespace MuEditor::Items
 // one. For the shared model an item uses: its users, and its name, file,
 // texture folders and none-blend meshes, changed in a copy and applied only
 // after a warning that lists every item the change reaches; or the item takes
-// a copy of its own and leaves it.
+// a copy of its own and leaves it. The shared models no item uses can be
+// removed.
 class CItemSharedModelForm
 {
 public:
@@ -28,6 +29,7 @@ private:
     void RenderShared(const Data::Items::ItemModelDefinition& model);
     void RenderEdit();
     void RenderConfirm();
+    void RenderUnused(ItemLookUseCounts& counts);
     void LoadEdit(const Data::Items::SharedItemModel& shared);
     // Whether the copy is as it was loaded or applied (the user did not
     // change it since).
