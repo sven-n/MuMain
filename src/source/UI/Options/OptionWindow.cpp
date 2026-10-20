@@ -826,7 +826,7 @@ void mu::ui::window::COptionWindow::SyncImpliedEffectRows(OptionRmlModel& model)
 
 void mu::ui::window::COptionWindow::RmlToggleDropdown(int dropdownId)
 {
-    if (dropdownId < 0 || dropdownId > 8)
+    if (dropdownId < 0 || dropdownId >= DropdownCount)
         return;
     // Toggle: clicking the currently-open one's own value box closes it; clicking any other
     // (including a different dropdown's) overwrites m_iOpenDropdown, which closes whatever else
@@ -841,31 +841,31 @@ void mu::ui::window::COptionWindow::RmlDropdownOptionClick(int dropdownId, int o
 {
     switch (dropdownId)
     {
-    case 0:
+    case DropdownResolution:
         RmlResolutionChanged(optionIndex);
         break;
-    case 1:
+    case DropdownFpsCap:
         RmlFpsCapChanged(optionIndex);
         break;
-    case 2:
+    case DropdownTheme:
         RmlThemeChanged(optionIndex);
         break;
-    case 3:
+    case DropdownLanguage:
         RmlLanguageChanged(optionIndex);
         break;
-    case 4:
+    case DropdownFont:
         RmlFontChanged(optionIndex);
         break;
-    case 5:
+    case DropdownUIScale:
         RmlUIScaleChanged(optionIndex);
         break;
-    case 6:
+    case DropdownAntialiasing:
         RmlAntialiasingChanged(optionIndex);
         break;
-    case 7:
+    case DropdownAnisotropy:
         RmlAnisotropyChanged(optionIndex);
         break;
-    case 8:
+    case DropdownTexturePack:
         RmlTexturePackChanged(optionIndex);
         break;
     default:
@@ -1293,10 +1293,13 @@ void mu::ui::window::COptionWindow::RmlTexturePackChanged(int index)
         return;
     if (index < 0 || index >= static_cast<int>(m_texturePackNames.size()))
         return;
-    if (index == m_iTexturePackIndex)
-        return;
     m_iTexturePackIndex = index;
-    GameConfig::GetInstance().SetTexturePack(m_texturePackNames[index]);
+    // Compared with the saved name, not the shown index: a saved pack that is no longer installed
+    // shows as Original, and choosing Original has to clear it.
+    const std::wstring& chosen = m_texturePackNames[index];
+    if (chosen == GameConfig::GetInstance().GetTexturePack())
+        return;
+    GameConfig::GetInstance().SetTexturePack(chosen);
     GameConfig::GetInstance().Save();
 }
 
@@ -1543,56 +1546,31 @@ void mu::ui::window::COptionWindow::RefreshTexturePackChoices()
     m_texturePackNames = Render::Textures::TexturePack::ListInstalledPacks();
     m_texturePackNames.insert(m_texturePackNames.begin(), std::wstring());
     m_iTexturePackIndex = FindCurrentTexturePackIndex();
+
+    // Pack names are folder names, so they only change here. The first entry is the localized
+    // "Original", which SyncRmlModel() keeps following a live language switch.
+    auto& model = m_RmlView.GetModel();
+    model.texturePackLabels.clear();
+    model.texturePackLabels.reserve(m_texturePackNames.size());
+    model.texturePackLabels.push_back(StringUtils::WideToNarrow(I18N::Game::OriginalTextures));
+    for (size_t i = 1; i < m_texturePackNames.size(); ++i)
+        model.texturePackLabels.push_back(StringUtils::WideToNarrow(m_texturePackNames[i].c_str()));
+    m_RmlView.MarkDirty("texture_pack_labels");
 }
 
-// A saved pack that is no longer installed shows as the original textures, which is what the
-// loader falls back to.
+// Folder names compare in any case, as the loader opens them. A saved pack that is no longer
+// installed shows as the original textures, which is what the loader falls back to.
 int mu::ui::window::COptionWindow::FindCurrentTexturePackIndex()
 {
     const std::wstring current = GameConfig::GetInstance().GetTexturePack();
-    const auto found = std::find(m_texturePackNames.begin(), m_texturePackNames.end(), current);
+    if (current.empty())
+        return 0;
+    const auto found =
+        std::find_if(m_texturePackNames.begin() + 1, m_texturePackNames.end(), [&current](const std::wstring& name)
+                     { return Render::Textures::TexturePack::SameName(name, current); });
     if (found == m_texturePackNames.end())
         return 0;
     return static_cast<int>(found - m_texturePackNames.begin());
-}
-
-void mu::ui::window::COptionWindow::SyncTexturePackRow()
-{
-    auto& model = m_RmlView.GetModel();
-    const auto syncText = [this](Rml::String& field, const char* fieldName, const Rml::String& value)
-    {
-        if (field == value)
-            return;
-        field = value;
-        m_RmlView.MarkDirty(fieldName);
-    };
-
-    syncText(model.texturePackRowLabel, "texture_pack_row_label", StringUtils::WideToNarrow(I18N::Game::TexturePack));
-    syncText(model.texturePackTooltip, "texture_pack_tooltip", StringUtils::WideToNarrow(I18N::Game::TexturePackTooltip));
-
-    // Rebuilt every sync, same reasoning as font_labels' own "Default" entry -- the localized
-    // "Original" entry needs to follow a live language switch. Pack names are folder names.
-    std::vector<Rml::String> labels;
-    labels.reserve(m_texturePackNames.size());
-    labels.push_back(StringUtils::WideToNarrow(I18N::Game::OriginalTextures));
-    for (size_t i = 1; i < m_texturePackNames.size(); ++i)
-        labels.push_back(StringUtils::WideToNarrow(m_texturePackNames[i].c_str()));
-    if (labels != model.texturePackLabels)
-    {
-        model.texturePackLabels = std::move(labels);
-        m_RmlView.MarkDirty("texture_pack_labels");
-    }
-
-    if (model.texturePackIndex != m_iTexturePackIndex)
-    {
-        model.texturePackIndex = m_iTexturePackIndex;
-        m_RmlView.MarkDirty("texture_pack_index");
-    }
-
-    const bool validIndex = model.texturePackIndex >= 0 &&
-                            model.texturePackIndex < static_cast<int>(model.texturePackLabels.size());
-    syncText(model.texturePackValueLabel, "texture_pack_value_label",
-             validIndex ? model.texturePackLabels[model.texturePackIndex] : Rml::String());
 }
 
 int mu::ui::window::COptionWindow::FindCurrentThemeIndex()
@@ -1912,5 +1890,17 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     }
     syncDropdownValue(model.uiScaleValueLabel, "ui_scale_value_label", model.uiScaleLabels, model.uiScaleIndex);
 
-    SyncTexturePackRow();
+    // The pack labels are built in RefreshTexturePackChoices(); only the localized "Original"
+    // entry can change here.
+    syncLabel(model.texturePackRowLabel, "texture_pack_row_label", I18N::Game::TexturePack);
+    syncLabel(model.texturePackTooltip, "texture_pack_tooltip", I18N::Game::TexturePackTooltip);
+    if (!model.texturePackLabels.empty())
+        syncLabel(model.texturePackLabels.front(), "texture_pack_labels", I18N::Game::OriginalTextures);
+    if (model.texturePackIndex != m_iTexturePackIndex)
+    {
+        model.texturePackIndex = m_iTexturePackIndex;
+        m_RmlView.MarkDirty("texture_pack_index");
+    }
+    syncDropdownValue(model.texturePackValueLabel, "texture_pack_value_label", model.texturePackLabels,
+                      model.texturePackIndex);
 }

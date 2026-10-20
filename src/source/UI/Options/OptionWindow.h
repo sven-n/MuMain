@@ -76,6 +76,23 @@ namespace mu::ui::window
         bool GetRenderAllEffects();
 
     private:
+        // The custom dropdowns, by the number option_window.rml (both themes) passes to
+        // option_toggle_dropdown(N) and option_dropdown_option_click(N, ...) and compares
+        // open_dropdown with.
+        enum DropdownId : int
+        {
+            DropdownResolution = 0,
+            DropdownFpsCap = 1,
+            DropdownTheme = 2,
+            DropdownLanguage = 3,
+            DropdownFont = 4,
+            DropdownUIScale = 5,
+            DropdownAntialiasing = 6,
+            DropdownAnisotropy = 7,
+            DropdownTexturePack = 8,
+            DropdownCount
+        };
+
         void InitResolutionCombo();
         void InitLanguageCombo();
         void InitFontCombo();
@@ -102,8 +119,6 @@ namespace mu::ui::window
         // time the window opens, so a pack copied in while the game runs shows up.
         void RefreshTexturePackChoices();
         int FindCurrentTexturePackIndex();
-        // SyncRmlModel()'s part for that row.
-        void SyncTexturePackRow();
 
         // Interface/UI tab's UI Scale row -- indexes UI::Options::UIScalePercentChoices() against
         // GameConfig::GetUIScalePercent().
@@ -128,8 +143,7 @@ namespace mu::ui::window
         // polled. RmlClickSelectTab first, matching MyQuestInfoWindow's own tab-callback ordering.
         void RmlClickSelectTab(int nTab);
         // Custom-dropdown mechanism (option_window.rml's own .option-dropdown family; RmlUi's
-        // native <select> isn't used here) -- dropdownId is 0=resolution,1=fpsCap,2=theme,
-        // 3=language,4=font,5=uiScale,6=antialiasing,7=anisotropy,8=texturePack, matching
+        // native <select> isn't used here) -- dropdownId is a DropdownId, matching
         // model.openDropdown's own comment (OptionWindow.h).
         // RmlDropdownOptionClick dispatches to RmlResolutionChanged()/RmlFpsCapChanged()/etc. per
         // dropdownId.
@@ -244,8 +258,7 @@ namespace mu::ui::window
             // Which custom dropdown (.option-dropdown) is currently open, -1 = none. A single
             // field rather than one bool per dropdown gives exclusivity for free -- opening one
             // overwrites whichever other id was here, no separate "close the others" step needed.
-            // 0=resolution, 1=fpsCap, 2=theme, 3=language, 4=font, 5=uiScale, 6=antialiasing,
-            // 7=anisotropy, 8=texturePack (RmlToggleDropdown()/
+            // A DropdownId (RmlToggleDropdown()/
             // RmlDropdownOptionClick()'s own ids). Replaces RmlUi's native <select>/<option>
             // (WidgetDropDown) entirely -- see option_window.rml's own history for why: that
             // widget's own generated selectbox/selectvalue/selectarrow sub-elements need CSS this

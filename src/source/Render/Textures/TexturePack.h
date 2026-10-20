@@ -28,4 +28,8 @@ std::vector<std::wstring> ListPacks(const std::filesystem::path& folder);
 
 // The packs installed in the client's Data/TexturePacks.
 std::vector<std::wstring> ListInstalledPacks();
+
+// Whether two pack names are the same pack: folder names compare in any case,
+// as the loader opens them.
+bool SameName(std::wstring_view a, std::wstring_view b);
 } // namespace Render::Textures::TexturePack

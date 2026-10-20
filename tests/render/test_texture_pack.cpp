@@ -61,6 +61,14 @@ TEST_CASE("a pack's folder is in Data/TexturePacks [render][texture_pack]")
     CHECK(TexturePack::PackFolder(L"upscaled") == L"Data\\TexturePacks\\upscaled");
 }
 
+TEST_CASE("pack names compare in any case [render][texture_pack]")
+{
+    CHECK(TexturePack::SameName(L"upscaled", L"Upscaled"));
+    CHECK(TexturePack::SameName(L"HD-2", L"hd-2"));
+    CHECK_FALSE(TexturePack::SameName(L"upscaled", L"upscaled2"));
+    CHECK_FALSE(TexturePack::SameName(L"upscaled", L""));
+}
+
 TEST_CASE("the packs are the folders with a valid name, sorted [render][texture_pack]")
 {
     const TempFolder folder;

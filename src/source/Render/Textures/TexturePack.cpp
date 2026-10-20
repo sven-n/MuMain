@@ -1,6 +1,7 @@
 #include "TexturePack.h"
 
 #include "Render/Sprites/GlobalBitmapPath.h"
+#include "Render/Textures/AssetPath.h"
 
 #include <algorithm>
 #include <optional>
@@ -64,5 +65,10 @@ std::vector<std::wstring> ListInstalledPacks()
     // Resolved as the loader resolves the pack folder, so on a case-sensitive
     // filesystem a "data/texturepacks" folder is listed as well as loaded.
     return ListPacks(Render::Sprites::NarrowBitmapPath(std::wstring(PacksFolder)));
+}
+
+bool SameName(std::wstring_view a, std::wstring_view b)
+{
+    return AssetPath::EqualsIgnoreCase(a, b);
 }
 } // namespace Render::Textures::TexturePack
