@@ -101,7 +101,7 @@ RequirementTable ComputeRequirementTable(const ItemDefinition& item, const Requi
     {
         const GameLogic::Items::ItemStatInput input{
             Data::Items::MakeItemType(item.group, item.number), level, static_cast<BYTE>(variant.excellent ? 1 : 0),
-            static_cast<BYTE>(variant.ancient ? 1 : 0), static_cast<BYTE>(variant.optionLevel)};
+            static_cast<BYTE>(variant.ancient ? 1 : 0), static_cast<BYTE>(std::clamp(variant.optionLevel, 0, 255))};
         table[static_cast<size_t>(level)] = ToRow(GameLogic::Items::ComputeItemStats(sources, input));
     }
     return table;

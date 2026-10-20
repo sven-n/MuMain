@@ -193,7 +193,8 @@ void CMuItemRequirementsUI::RenderLevelTable(const ItemDefinition& item)
     ImGui::Checkbox(I18N::Editor::Ancient, &m_variant.ancient);
     ImGui::SameLine();
     ImGui::SetNextItemWidth(Fields::ScaledWidth(OptionLevelWidth));
-    ImGui::SliderInt(I18N::Editor::OptionLevel, &m_variant.optionLevel, 0, MaxOptionLevel);
+    ImGui::SliderInt(I18N::Editor::OptionLevel, &m_variant.optionLevel, 0, MaxOptionLevel, "%d",
+                     ImGuiSliderFlags_AlwaysClamp);
 
     const RequirementTable table = ComputeRequirementTable(item, m_variant);
     // The requirements the item has at some level, as the game's window shows them.
