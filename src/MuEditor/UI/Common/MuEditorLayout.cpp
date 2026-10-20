@@ -19,6 +19,11 @@ constexpr float ConsoleHeightShare = 0.25f;
 // The share of the tools' width the item browser takes, beside the other tools.
 constexpr float ItemBrowserWidthShare = 0.35f;
 constexpr char DockSpaceName[] = "ToolWindows";
+// The tools that show the item the browser selects, in their tab order.
+constexpr const char* ItemToolWindows[] = {MuEditor::WindowIds::ItemBasics,      MuEditor::WindowIds::ItemRequirements,
+                                           MuEditor::WindowIds::ItemRules,       MuEditor::WindowIds::ItemCategories,
+                                           MuEditor::WindowIds::ItemModel,       MuEditor::WindowIds::ItemChecks,
+                                           MuEditor::WindowIds::ItemTranslations};
 
 void BuildDefaultLayout(ImGuiID dockSpace, ImVec2 size)
 {
@@ -34,13 +39,40 @@ void BuildDefaultLayout(ImGuiID dockSpace, ImVec2 size)
     const ImGuiID browser =
         ImGui::DockBuilderSplitNode(tools, ImGuiDir_Left, ItemBrowserWidthShare, nullptr, &otherTools);
     ImGui::DockBuilderDockWindow(MuEditor::WindowIds::ItemBrowser, browser);
-    for (const char* window :
-         {MuEditor::WindowIds::ItemTranslations, MuEditor::WindowIds::SkillEditor, MuEditor::WindowIds::DevEditor,
-          MuEditor::WindowIds::MapEditor, MuEditor::WindowIds::EffectBrowser})
+    // Also the windows that are closed: they open in their place.
+    for (const char* window : ItemToolWindows)
+    {
+        ImGui::DockBuilderDockWindow(window, otherTools);
+    }
+    for (const char* window : {MuEditor::WindowIds::SkillEditor, MuEditor::WindowIds::DevEditor,
+                               MuEditor::WindowIds::MapEditor, MuEditor::WindowIds::EffectBrowser})
     {
         ImGui::DockBuilderDockWindow(window, otherTools);
     }
     ImGui::DockBuilderFinish(dockSpace);
+}
+
+// The first leaf of a dock node: the node itself, or the first of its splits.
+ImGuiDockNode* FirstLeaf(ImGuiDockNode* node)
+{
+    while (node != nullptr && node->ChildNodes[0] != nullptr)
+    {
+        node = node->ChildNodes[0];
+    }
+    return node;
+}
+
+// Beside the item browser: the node next to the browser's, so the browser
+// stays in view.
+ImGuiDockNode* BesideBrowser(const ImGuiWindow& browser)
+{
+    const ImGuiDockNode* node = browser.DockNode;
+    if (node == nullptr || node->ParentNode == nullptr)
+    {
+        return nullptr;
+    }
+    ImGuiDockNode* parent = node->ParentNode;
+    return FirstLeaf(parent->ChildNodes[0] == node ? parent->ChildNodes[1] : parent->ChildNodes[0]);
 }
 } // namespace
 
@@ -102,7 +134,7 @@ void DockBesideItemTools(const char* windowId)
     {
         return;
     }
-    for (const char* neighbour : {MuEditor::WindowIds::ItemTranslations, MuEditor::WindowIds::ItemBrowser})
+    for (const char* neighbour : ItemToolWindows)
     {
         const ImGuiWindow* window = ImGui::FindWindowByName(neighbour);
         if (window != nullptr && window->DockId != 0)
@@ -110,6 +142,11 @@ void DockBesideItemTools(const char* windowId)
             ImGui::SetNextWindowDockID(window->DockId, ImGuiCond_FirstUseEver);
             return;
         }
+    }
+    const ImGuiWindow* browser = ImGui::FindWindowByName(MuEditor::WindowIds::ItemBrowser);
+    if (const ImGuiDockNode* beside = browser != nullptr ? BesideBrowser(*browser) : nullptr)
+    {
+        ImGui::SetNextWindowDockID(beside->ID, ImGuiCond_FirstUseEver);
     }
 }
 } // namespace MuEditor::Layout

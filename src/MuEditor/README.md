@@ -174,11 +174,12 @@ Game console captures all standard output automatically via console redirection.
 
 ### 3. Add New Editor Window
 ```cpp
-// In CMuEditorCore::Render(), after g_MuEditorUI.Render(...)
-if (m_bShowMyWindow)
+// In CMuEditorCore::Render(), after g_MuEditorUI.Render(...);
+// myWindow is a new flag in struct ToolWindows (MuEditorToolWindows.h)
+if (m_windows.myWindow)
 {
     MuEditor::Layout::PrepareToolWindow();  // its tab, also when floating
-    if (ImGui::Begin("My Window", &m_bShowMyWindow))
+    if (ImGui::Begin("My Window", &m_windows.myWindow))
     {
         ImGui::Text("Custom content here");
     }
@@ -188,7 +189,8 @@ if (m_bShowMyWindow)
 To open it as a tab of the editor window like the other tool windows, add its
 name to `MuEditorWindowIds.h` (with a `###` id if the title is translated),
 Begin it with that name, add the name to the first layout in
-`MuEditorLayout.cpp` and a `MenuItem` to the Windows menu in `MuEditorUI.cpp`.
+`MuEditorLayout.cpp` (BuildDefaultLayout, which Reset Layout builds too) and a
+`MenuItem` to the Windows menu in `MuEditorUI.cpp`.
 
 ### 4. Access Game State
 ```cpp
