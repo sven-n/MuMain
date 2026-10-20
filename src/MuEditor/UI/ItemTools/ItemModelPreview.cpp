@@ -79,26 +79,33 @@ void CItemModelPreview::RenderView(const MuEditor::Effects::EffectPreviewRequest
         m_framedItemType = request.itemType;
         m_camera.Frame(framing.center, framing.radius);
     }
-    if (!ImGui::IsItemVisible() || !mu::GetRenderer().IsFrameActive())
+    if (!ImGui::IsItemVisible())
     {
         return;
     }
-    // The density of the OS window the view is in; ImGui leaves it 0 while the
-    // editor's windows stay in the game window.
-    const float viewportScale = ImGui::GetWindowViewport()->FramebufferScale.x;
-    const float framebufferScale = viewportScale > 0.0f ? viewportScale : ImGui::GetIO().DisplayFramebufferScale.x;
-    const MuEditor::Effects::PreviewTextureSize size =
-        MuEditor::Effects::ChoosePreviewTextureSize(width, height, framebufferScale);
-    const std::uint32_t texture = m_target.Begin(size.width, size.height, !ImGui::IsMouseDown(ImGuiMouseButton_Left));
-    if (texture == 0)
+    std::uint32_t texture = 0;
+    if (mu::GetRenderer().IsFrameActive())
     {
-        return;
-    }
-    {
+        // The density of the OS window the view is in; ImGui leaves it 0
+        // while the editor's windows stay in the game window.
+        const float viewportScale = ImGui::GetWindowViewport()->FramebufferScale.x;
+        const float framebufferScale = viewportScale > 0.0f ? viewportScale : ImGui::GetIO().DisplayFramebufferScale.x;
+        const MuEditor::Effects::PreviewTextureSize size =
+            MuEditor::Effects::ChoosePreviewTextureSize(width, height, framebufferScale);
+        texture = m_target.Begin(size.width, size.height, !ImGui::IsMouseDown(ImGuiMouseButton_Left));
+        if (texture == 0)
+        {
+            return;
+        }
         const MuEditor::ScopedOffscreenCapture endCapture;
         m_scene.Draw(request, m_camera, width / height);
     }
-    if (void* pointer = mu::GetRenderer().GetTexturePointer(texture))
+    else
+    {
+        // The game skipped this frame; the editor's windows may still be drawn.
+        texture = m_target.KeepLastPicture();
+    }
+    if (void* pointer = texture != 0 ? mu::GetRenderer().GetTexturePointer(texture) : nullptr)
     {
         ImGui::GetWindowDrawList()->AddImage((ImTextureID)(intptr_t)pointer, min, max);
     }

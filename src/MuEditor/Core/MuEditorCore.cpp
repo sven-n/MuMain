@@ -912,11 +912,13 @@ void CMuEditorCore::RenderPlatformWindows()
     // ImGui wants the update after every frame it ended, also while the
     // editor's windows stay inside the game window (it does nothing then).
     ImGui::UpdatePlatformWindows();
-    // A frame the game skipped while the GPU is behind (one at a time) keeps
-    // the editor's windows' picture (their effect preview is drawn in the
-    // game's frame). While the game window is minimized, hidden or covered (it
-    // skips frame after frame) they are drawn, as they can stay on screen then
-    // (macOS, some Linux window managers).
+    // A frame the game skipped while the GPU is behind keeps the editor's
+    // windows' picture (their previews are drawn in the game's frame). From
+    // the second skipped frame in a row they are drawn, as the game window may
+    // be minimized, hidden or covered and they can stay on screen then (macOS,
+    // some Linux window managers); an uncapped game behind the GPU gets there
+    // too, so the previews show their last picture then
+    // (EffectPreviewTarget::KeepLastPicture).
     const bool platformWindowsOn = (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) != 0;
     const SDL_WindowFlags gameWindowFlags = SDL_GetWindowFlags(m_pGameWindow);
     const bool gameWindowHidden = (gameWindowFlags & (SDL_WINDOW_MINIMIZED | SDL_WINDOW_HIDDEN)) != 0 ||

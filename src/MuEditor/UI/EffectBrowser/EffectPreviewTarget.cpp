@@ -27,6 +27,12 @@ std::uint32_t EffectPreviewTarget::Begin(int width, int height, bool resizeNow)
     return texture;
 }
 
+std::uint32_t EffectPreviewTarget::KeepLastPicture()
+{
+    m_used = true;
+    return m_texture;
+}
+
 void EffectPreviewTarget::BeforeFrame()
 {
     if (m_texture != 0 && (!m_used || m_resize))
