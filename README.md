@@ -88,7 +88,7 @@ Release or RelWithDebInfo; see [build options](docs/build/README.md#build-option
 ## Running the client
 
 Run `Main.exe` from its output directory. It connects to the server in `config.ini`
-(`[CONNECTION SETTINGS]`, localhost port `44405` by default); `Main.exe connect /u<IP> /p<PORT>`
+(`[CONNECTION SETTINGS]`, localhost port `44406` by default); `Main.exe connect /u<IP> /p<PORT>`
 overrides it for that run, for example `Main.exe connect /u192.168.0.20 /p55902`. The
 [OpenMU launcher](https://github.com/MUnique/OpenMU/releases) passes the same arguments.
 The client identifies itself with version `2.04d` and serial `k1Pk2jcET48mxL3b`.
@@ -106,7 +106,7 @@ Missing keys take the defaults below. The options window writes most of them; se
 | **`[Audio]`**               | `SoundVolume`, `MusicVolume`                                                                          | `5`                  | `0` mutes.                                                                                                                                                       |
 | **`[LOGIN]`**               | `Language`                                                                                            | `Eng`                | Game data language: the `Data/Local/<Language>/` folder (item names, map name art).                                                                              |
 | **`[LOGIN]`**               | `RememberMe`, `SavePassword`                                                                          | `0`                  | Remember the account name, and the password too. Both are stored encrypted for this machine and user (`EncryptedUsername`, `EncryptedPassword`).                 |
-| **`[CONNECTION SETTINGS]`** | `ServerIP`, `ServerPort`                                                                              | `localhost`, `44405` | Server to connect to when no `connect` argument is given.                                                                                                        |
+| **`[CONNECTION SETTINGS]`** | `ServerIP`, `ServerPort`                                                                              | `localhost`, `44406` | Server to connect to when no `connect` argument is given.                                                                                                        |
 | **`[UI]`**                  | `Locale`                                                                                              | `en`                 | UI language (`en`, `de`, `es`, `id`, `ja`, `pl`, `pt`, `ru`, `tl`, `uk`, `zh-TW`). Switchable at runtime in the options window.                                  |
 | **`[UI]`**                  | `Font`                                                                                                | empty                | UI font family; empty uses the platform's default.                                                                                                               |
 | **`[UI]`**                  | `RmlTheme`                                                                                            | `legacy`             | UI theme: `legacy` (the original look) or `modern`. `$theme <name>` switches it for the session.                                                                 |
