@@ -59,6 +59,28 @@ ImGuiID ItemTypeOfRow(ImGuiSelectionBasicStorage* selection, int row)
     return ToSelectionId((*itemTypes)[row]);
 }
 
+// ImGui keeps the row a Shift click starts from across frames, also when the
+// list got shorter since: a range is cut to the rows there are, so the
+// selection never reads past them.
+void KeepRangesInRows(ImGuiMultiSelectIO* selectionIo, int rowCount)
+{
+    ImVector<ImGuiSelectionRequest>& requests = selectionIo->Requests;
+    for (int index = requests.Size - 1; index >= 0; --index)
+    {
+        ImGuiSelectionRequest& request = requests[index];
+        if (request.Type != ImGuiSelectionRequestType_SetRange)
+        {
+            continue;
+        }
+        request.RangeFirstItem = std::max<ImGuiSelectionUserData>(request.RangeFirstItem, 0);
+        request.RangeLastItem = std::min<ImGuiSelectionUserData>(request.RangeLastItem, rowCount - 1);
+        if (request.RangeFirstItem > request.RangeLastItem)
+        {
+            requests.erase(requests.begin() + index);
+        }
+    }
+}
+
 void SetupColumns(std::span<const ItemRuleFlag> flags)
 {
     const float uiScale = g_MuEditorCore.GetUIScale();
@@ -161,6 +183,7 @@ int CItemRulesTable::RenderRows(const std::vector<int>& itemTypes, int markedIte
     m_selection.UserData = const_cast<std::vector<int>*>(&itemTypes);
     m_selection.AdapterIndexToStorageId = &ItemTypeOfRow;
     ImGuiMultiSelectIO* selectionIo = ImGui::BeginMultiSelect(SelectionFlags, m_selection.Size, rowCount);
+    KeepRangesInRows(selectionIo, rowCount);
     m_selection.ApplyRequests(selectionIo);
 
     ImGuiListClipper clipper;
@@ -197,6 +220,7 @@ int CItemRulesTable::RenderRows(const std::vector<int>& itemTypes, int markedIte
     }
     ImGui::PopStyleVar();
     selectionIo = ImGui::EndMultiSelect();
+    KeepRangesInRows(selectionIo, rowCount);
     m_selection.ApplyRequests(selectionIo);
     return clicked;
 }
