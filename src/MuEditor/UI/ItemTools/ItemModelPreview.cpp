@@ -55,8 +55,10 @@ void CItemModelPreview::RenderControls()
     ImGui::Checkbox(I18N::Editor::Ancient, &m_ancient);
     ImGui::SameLine();
     ImGui::Checkbox(I18N::Editor::Turn, &m_turn);
-    // The pose of the display values the sections below edit.
+    // The pose of the display values the sections below edit; their headers
+    // have the same labels.
     using MuEditor::Effects::PreviewItemPose;
+    ImGui::PushID("Pose");
     if (ImGui::RadioButton(I18N::Editor::InTheInventory, m_pose == PreviewItemPose::Inventory))
     {
         m_pose = PreviewItemPose::Inventory;
@@ -66,6 +68,7 @@ void CItemModelPreview::RenderControls()
     {
         m_pose = PreviewItemPose::Ground;
     }
+    ImGui::PopID();
 }
 
 void CItemModelPreview::RenderView(const MuEditor::Effects::EffectPreviewRequest& request)
