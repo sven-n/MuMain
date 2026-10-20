@@ -1384,4 +1384,22 @@
   <data name="Select the item and show the Item Browser" xml:space="preserve">
     <value>Den Gegenstand auswählen und die Gegenstandsliste zeigen</value>
   </data>
+  <data name="Requirements by item level" xml:space="preserve">
+    <value>Anforderungen je Gegenstandsstufe</value>
+  </data>
+  <data name="Option level" xml:space="preserve">
+    <value>Optionsstufe</value>
+  </data>
+  <data name="Given by level" xml:space="preserve">
+    <value>Je Stufe angegeben</value>
+  </data>
+  <data name="The item has no requirements." xml:space="preserve">
+    <value>Der Gegenstand hat keine Anforderungen.</value>
+  </data>
+  <data name="Starts at what a normal item needs at each level and replaces the formula." xml:space="preserve">
+    <value>Beginnt bei dem, was ein normaler Gegenstand auf jeder Stufe braucht, und ersetzt die Formel.</value>
+  </data>
+  <data name="Excellent and ancient items get no higher requirement from it." xml:space="preserve">
+    <value>Exzellente und antike Gegenstände bekommen dadurch keine höhere Anforderung.</value>
+  </data>
 </root>

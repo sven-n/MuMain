@@ -30,6 +30,7 @@
 #include "Render/Items/ItemRenderStyles.h"
 #ifdef _EDITOR
 #include "UI/ItemTools/ItemEdits.h"
+#include "UI/ItemTools/ItemRequirementTable.h"
 #include "UI/ItemTools/ItemSelection.h"
 #include "UI/ItemTools/ItemUsage.h"
 #include "UI/ItemTools/MuItemBasicsUI.h"
@@ -1245,6 +1246,53 @@ TEST_CASE("The item tools draw their frames without ImGui errors [data][items][e
     }
     // The model tool's inventory display shown before it is stored ends.
     g_MuItemModelUI.BeforeFrame();
+}
+
+TEST_CASE("Item Requirements shows what the game asks at each level, from the values being typed "
+          "[data][items][editor]")
+{
+    ClientDataScope client(ShippedClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    using MuEditor::Items::ComputeRequirementTable;
+    using MuEditor::Items::FindRequirementBase;
+    using MuEditor::Items::RequirementTable;
+    constexpr size_t Strength = static_cast<size_t>(ItemRequirement::Strength);
+
+    ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+    // As the game's /Kris window shows it: 20 + 40 * (6 + 3 * level) * 3 / 100.
+    const RequirementTable normal = ComputeRequirementTable(kris, {});
+    const int expected[] = {27, 30, 34, 38, 41, 45, 48, 52, 56, 59, 63, 66, 70, 74, 77, 81};
+    for (size_t level = 0; level < normal.size(); ++level)
+    {
+        CHECK(normal[level][Strength] == expected[level]);
+    }
+    CHECK(ComputeRequirementTable(kris, {true, false, 0})[0][Strength] == 57);
+    CHECK(ComputeRequirementTable(kris, {false, false, 4})[0][Strength] == 47);
+
+    // A base value being typed counts at once.
+    ItemDefinition stronger = kris;
+    stronger.requirements.strength = 80;
+    CHECK(ComputeRequirementTable(stronger, {})[0][Strength] > normal[0][Strength]);
+
+    // By item level: the values a normal item has, so nothing changes for it;
+    // turning it off finds the base value back.
+    RequirementByLevel values{};
+    for (size_t level = 0; level < values.size(); ++level)
+    {
+        values[level] = static_cast<WORD>(normal[level][Strength]);
+    }
+    ItemDefinition byLevel = kris;
+    byLevel.requirementsByLevel.Set(ItemRequirement::Strength, values);
+    byLevel.requirements.strength = 0;
+    const RequirementTable fromLevels = ComputeRequirementTable(byLevel, {});
+    for (size_t level = 0; level < fromLevels.size(); ++level)
+    {
+        CHECK(fromLevels[level][Strength] == normal[level][Strength]);
+    }
+    CHECK(FindRequirementBase(byLevel, ItemRequirement::Strength, values) == kris.requirements.strength);
+    CHECK(FindRequirementBase(byLevel, ItemRequirement::Level, RequirementByLevel{12, 12}) == 12);
 }
 
 // A number field is typed into, then its form is not drawn for a frame (its

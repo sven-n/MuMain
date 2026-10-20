@@ -6,6 +6,7 @@
 
 #include "ItemEdits.h"
 #include "ItemFieldWidgets.h"
+#include "ItemRequirementTable.h"
 #include "ItemSelection.h"
 #include "ItemToolWindow.h"
 
@@ -18,6 +19,7 @@
 #include <cstdio>
 #include <optional>
 #include <string>
+#include <vector>
 
 using namespace MuEditor::Items;
 using Data::Items::ItemDefinition;
@@ -28,6 +30,11 @@ namespace
 constexpr float LevelValueWidth = 46.0f;
 // The item levels shown in one row of a requirement given by level.
 constexpr size_t LevelsPerRow = 8;
+// The option levels an item can have (+4 to +28 damage or defense).
+constexpr int MaxOptionLevel = 7;
+constexpr float OptionLevelWidth = 120.0f;
+constexpr float TableColumnWidth = 70.0f;
+constexpr int TableRows = 16;
 
 std::optional<ItemDefinition> LoadItem(int itemType)
 {
@@ -87,6 +94,7 @@ void CMuItemRequirementsUI::Render(bool* open)
         {
             ImGui::PushID(itemType);
             RenderRequirements(*item);
+            RenderLevelTable(*item);
             RenderClasses(*item);
             Fields::Check(m_draft, I18N::Editor::ExcellentOptionsRaiseTheLevelRequirement, item->excellentRaisesLevel);
             ImGui::PopID();
@@ -124,20 +132,30 @@ void CMuItemRequirementsUI::RenderByLevel(ItemDefinition& item, ItemRequirement 
     {
         if (byLevel)
         {
-            Data::Items::RequirementByLevel values{};
-            // Every level starts at the base value it replaces, which is
+            // Every level starts at the requirement the base value gives a
+            // normal item there, so nothing changes for it; the base value is
             // then not used (the checks warn about one that is kept).
-            values.fill(baseValue);
+            const RequirementTable table = ComputeRequirementTable(item, {});
+            Data::Items::RequirementByLevel values{};
+            for (size_t level = 0; level < values.size(); ++level)
+            {
+                values[level] = static_cast<WORD>(table[level][static_cast<size_t>(requirement)]);
+            }
             item.requirementsByLevel.Set(requirement, values);
             baseValue = 0;
         }
         else
         {
-            // The base value comes back from the first level.
-            baseValue = item.requirementsByLevel.Find(requirement)->front();
+            // The base value that gives these values back.
+            baseValue = FindRequirementBase(item, requirement, *item.requirementsByLevel.Find(requirement));
             item.requirementsByLevel.Remove(requirement);
         }
         m_draft.AfterChange(true, label);
+    }
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::SetTooltip("%s\n%s", I18N::Editor::StartsAtWhatANormalItemNeedsAtEachLevelAndReplacesTheFormula,
+                          I18N::Editor::ExcellentAndAncientItemsGetNoHigherRequirementFromIt);
     }
     const Data::Items::RequirementByLevel* found = item.requirementsByLevel.Find(requirement);
     if (found == nullptr)
@@ -160,6 +178,81 @@ void CMuItemRequirementsUI::RenderByLevel(ItemDefinition& item, ItemRequirement 
         }
         m_draft.AfterField(label);
     }
+}
+
+// What the game asks of the item at each + level, from the values above as
+// they are typed (the /<item name> window shows the normal variant).
+void CMuItemRequirementsUI::RenderLevelTable(const ItemDefinition& item)
+{
+    if (!ImGui::CollapsingHeader(I18N::Editor::RequirementsByItemLevel, ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        return;
+    }
+    ImGui::Checkbox(I18N::Editor::Excellent, &m_variant.excellent);
+    ImGui::SameLine();
+    ImGui::Checkbox(I18N::Editor::Ancient, &m_variant.ancient);
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(Fields::ScaledWidth(OptionLevelWidth));
+    ImGui::SliderInt(I18N::Editor::OptionLevel, &m_variant.optionLevel, 0, MaxOptionLevel);
+
+    const RequirementTable table = ComputeRequirementTable(item, m_variant);
+    // The requirements the item has at some level, as the game's window shows them.
+    std::vector<RequirementField> shown;
+    for (const RequirementField& field : RequirementFields())
+    {
+        const size_t column = static_cast<size_t>(field.requirement);
+        for (const RequirementRow& row : table)
+        {
+            if (row[column] > 0)
+            {
+                shown.push_back(field);
+                break;
+            }
+        }
+    }
+    if (shown.empty())
+    {
+        ImGui::TextDisabled("%s", I18N::Editor::TheItemHasNoRequirements);
+        return;
+    }
+    const float columnWidth = Fields::ScaledWidth(TableColumnWidth);
+    if (!ImGui::BeginTable("##LevelTable", static_cast<int>(shown.size()) + 1,
+                           ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingFixedFit))
+    {
+        return;
+    }
+    ImGui::TableSetupColumn("+", ImGuiTableColumnFlags_None, columnWidth * 0.5f);
+    for (const RequirementField& field : shown)
+    {
+        ImGui::TableSetupColumn(field.label, ImGuiTableColumnFlags_None, columnWidth);
+    }
+    ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
+    ImGui::TableSetColumnIndex(0);
+    ImGui::TableHeader("+");
+    for (size_t index = 0; index < shown.size(); ++index)
+    {
+        ImGui::TableSetColumnIndex(static_cast<int>(index) + 1);
+        const bool byLevel = item.requirementsByLevel.Find(shown[index].requirement) != nullptr;
+        ImGui::PushID(static_cast<int>(index));
+        ImGui::TableHeader(byLevel ? (std::string(shown[index].label) + " *").c_str() : shown[index].label);
+        ImGui::PopID();
+        if (byLevel && ImGui::IsItemHovered())
+        {
+            ImGui::SetTooltip("%s", I18N::Editor::GivenByLevel);
+        }
+    }
+    for (int level = 0; level < TableRows; ++level)
+    {
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::Text("+%d", level);
+        for (size_t index = 0; index < shown.size(); ++index)
+        {
+            ImGui::TableSetColumnIndex(static_cast<int>(index) + 1);
+            ImGui::Text("%d", table[static_cast<size_t>(level)][static_cast<size_t>(shown[index].requirement)]);
+        }
+    }
+    ImGui::EndTable();
 }
 
 void CMuItemRequirementsUI::RenderClasses(ItemDefinition& item)

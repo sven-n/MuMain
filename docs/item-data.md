@@ -672,9 +672,14 @@ shows it in the others.
   item has when it is taken out. Such an item is not moved or removed
   either, an undo step that would change it is refused, and Import from bmd
   keeps its size and slot.
-- **Item Requirements**: the level and stat requirements, each also by item
-  level (16 values instead of the base value, which they start from and
-  give back when turned off), the class steps (0: the
+- **Item Requirements**: the level and stat requirements, the base values
+  the [item stat file](#item-stats-by-level)'s formula takes; each also by
+  item level (16 values that replace the formula; they start at what the
+  base value gives a normal item at each level, and turning them off finds
+  the base value back). Below them, what the game asks at each + level
+  (the `/<item name>` window shows the normal item), also as excellent,
+  ancient or with an option level, while a value is still being typed. Then
+  the class steps (0: the
   class cannot use the item) and whether excellent options raise the level
   requirement.
 - **Item Rules**: the rule flags as a table of items; select several rows
