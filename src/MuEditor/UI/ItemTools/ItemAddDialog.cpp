@@ -261,9 +261,10 @@ void CItemAddDialog::Confirm()
 void CItemAddDialog::AddNew()
 {
     ItemDefinition item;
-    if (m_copySource && g_ItemDatabase.Find(m_sourceItemType) != nullptr)
+    const ItemDefinition* source = m_copySource ? g_ItemDatabase.Find(m_sourceItemType) : nullptr;
+    if (source != nullptr)
     {
-        item = *g_ItemDatabase.Find(m_sourceItemType);
+        item = *source;
     }
     else
     {
@@ -280,7 +281,7 @@ void CItemAddDialog::AddNew()
     item.number = m_number;
     // Only the English name: the translations of a copied item name that item.
     item.names = Data::LocalizedString::Parse(m_name);
-    g_ItemEdits.AddItem(I18N::Editor::AddItem, item, nullptr);
+    g_ItemEdits.AddItem(I18N::Editor::AddItem, item, nullptr, source);
 }
 
 void CItemAddDialog::Duplicate()
@@ -290,7 +291,10 @@ void CItemAddDialog::Duplicate()
     {
         return;
     }
-    ItemDefinition item = *source;
+    // The source as it is now: making its model shared below changes the
+    // model database only.
+    const ItemDefinition copiedFrom = *source;
+    ItemDefinition item = copiedFrom;
     item.group = m_group;
     item.number = m_number;
     item.names = Data::LocalizedString::Parse(m_name);
@@ -298,7 +302,7 @@ void CItemAddDialog::Duplicate()
     const ItemModelDefinition* sourceModel = g_ItemModelDatabase.Find(m_sourceItemType);
     if (sourceModel == nullptr || (sourceModel->model.empty() && !m_shareModel))
     {
-        g_ItemEdits.AddItem(I18N::Editor::DuplicateItem, item, nullptr);
+        g_ItemEdits.AddItem(I18N::Editor::DuplicateItem, item, nullptr, &copiedFrom);
         return;
     }
     ItemModelDefinition model = *sourceModel;
@@ -314,7 +318,7 @@ void CItemAddDialog::Duplicate()
         g_ItemEdits.SetItemModel(I18N::Editor::DuplicateItem, sourceShared);
         model.model = shared.name;
     }
-    g_ItemEdits.AddItem(I18N::Editor::DuplicateItem, item, &model);
+    g_ItemEdits.AddItem(I18N::Editor::DuplicateItem, item, &model, &copiedFrom);
     g_ItemEdits.EndGroup();
 }
 } // namespace MuEditor::Items

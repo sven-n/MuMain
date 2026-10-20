@@ -217,15 +217,21 @@ void CItemDataHandler::OnLocaleChanged(void* context) noexcept
 }
 
 #ifdef _EDITOR
-ItemDefinition CItemDataHandler::WithDerivedFields(const ItemDefinition& definition)
+ItemDefinition CItemDataHandler::WithDerivedFields(const ItemDefinition& definition, const ItemDefinition* previous)
 {
-    const ItemDefinition* previous = g_ItemDatabase.Find(definition.group, definition.number);
     ItemDefinition result = definition;
     if (previous == nullptr || definition.weaponKind == previous->weaponKind)
     {
         result.weaponKind = FollowGroupWeaponKind(previous, definition);
     }
-    if (previous == nullptr || definition.statProfile == previous->statProfile)
+    if (definition.statProfile.empty())
+    {
+        // "Follow the data" was picked: also over a profile picked before.
+        std::vector<ItemDataIssue> issues;
+        result.statProfile = FollowKnownStatProfile(nullptr, result, issues);
+        Data::LogDataIssues(ItemDataLabel, issues);
+    }
+    else if (previous == nullptr || definition.statProfile == previous->statProfile)
     {
         std::vector<ItemDataIssue> issues;
         result.statProfile = FollowKnownStatProfile(previous, result, issues);
@@ -257,7 +263,7 @@ void CItemDataHandler::SetItems(std::span<const ItemDefinition> definitions)
     {
         if (IsValidItemId(definition.group, definition.number))
         {
-            stored.push_back(WithDerivedFields(definition));
+            stored.push_back(WithDerivedFields(definition, g_ItemDatabase.Find(definition.group, definition.number)));
         }
     }
     g_ItemDatabase.SetMany(stored);
@@ -279,14 +285,16 @@ void CItemDataHandler::RestoreItems(std::span<const ItemDefinition> definitions)
     }
 }
 
-bool CItemDataHandler::AddItem(const ItemDefinition& definition, const ItemModelDefinition* model)
+bool CItemDataHandler::AddItem(const ItemDefinition& definition, const ItemModelDefinition* model,
+                               const ItemDefinition* copiedFrom)
 {
     if (!IsValidItemId(definition.group, definition.number) || !definition.Exists() ||
         !IsFreeItemType(MakeItemType(definition.group, definition.number)))
     {
         return false;
     }
-    SetItem(definition);
+    const ItemDefinition stored = WithDerivedFields(definition, copiedFrom);
+    RestoreItems(std::span<const ItemDefinition>(&stored, 1));
     if (model != nullptr)
     {
         ItemModelDefinition placed = *model;

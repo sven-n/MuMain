@@ -25,7 +25,8 @@ public:
     // CItemDataHandler::SetItemName; false when it refused the name.
     bool SetItemName(std::string label, int itemType, std::string_view locale, std::string text);
     bool AddItem(std::string label, const Data::Items::ItemDefinition& item,
-                 const Data::Items::ItemModelDefinition* model);
+                 const Data::Items::ItemModelDefinition* model,
+                 const Data::Items::ItemDefinition* copiedFrom = nullptr);
     // False, with nothing changed, also while the game holds the item
     // (IsHeldByCharacter).
     bool RemoveItem(std::string label, int itemType);

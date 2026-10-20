@@ -164,11 +164,12 @@ bool ItemEdits::SetItemName(std::string label, int itemType, std::string_view lo
     return stored;
 }
 
-bool ItemEdits::AddItem(std::string label, const ItemDefinition& item, const ItemModelDefinition* model)
+bool ItemEdits::AddItem(std::string label, const ItemDefinition& item, const ItemModelDefinition* model,
+                        const ItemDefinition* copiedFrom)
 {
     bool added = false;
     const int itemTypes[] = {Data::Items::MakeItemType(item.group, item.number)};
-    RecordSlots(std::move(label), itemTypes, [&] { added = g_ItemDataHandler.AddItem(item, model); });
+    RecordSlots(std::move(label), itemTypes, [&] { added = g_ItemDataHandler.AddItem(item, model, copiedFrom); });
     return added;
 }
 

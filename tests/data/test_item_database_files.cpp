@@ -474,6 +474,47 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         CHECK(g_ItemDatabase.GetWeaponKind(MakeItemType(3, 100)) == WeaponKind::Spear);
     }
 
+    SUBCASE("a copy keeps a weapon kind and a stat profile its source picked")
+    {
+        // Horn of Fenrir: its data gives "helper", it names "default".
+        const ItemDefinition* fenrir = g_ItemDatabase.Find(13, 37);
+        REQUIRE(fenrir != nullptr);
+        REQUIRE(fenrir->statProfile == "default");
+        ItemDefinition copy = *fenrir;
+        copy.number = 300;
+        REQUIRE(g_ItemDataHandler.AddItem(copy, nullptr, fenrir));
+        CHECK(g_ItemDatabase.Find(13, 300)->statProfile == "default");
+
+        ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+        kris.weaponKind = WeaponKind::Axe;
+        g_ItemDataHandler.SetItem(kris);
+        REQUIRE(g_ItemDatabase.GetWeaponKind(KrisType) == WeaponKind::Axe);
+        const ItemDefinition krisSource = *g_ItemDatabase.Find(KrisType);
+        ItemDefinition krisCopy = krisSource;
+        krisCopy.number = 200;
+        REQUIRE(g_ItemDataHandler.AddItem(krisCopy, nullptr, &krisSource));
+        CHECK(g_ItemDatabase.GetWeaponKind(MakeItemType(0, 200)) == WeaponKind::Axe);
+
+        // Without the source, a new item follows its data.
+        ItemDefinition fresh = *fenrir;
+        fresh.number = 301;
+        REQUIRE(g_ItemDataHandler.AddItem(fresh, nullptr));
+        CHECK(g_ItemDatabase.Find(13, 301)->statProfile == "helper");
+    }
+
+    SUBCASE("picking no stat profile follows the data at once")
+    {
+        ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+        REQUIRE(kris.statProfile == "weapon");
+        kris.statProfile = "default";
+        g_ItemDataHandler.SetItem(kris);
+        REQUIRE(g_ItemDatabase.Find(KrisType)->statProfile == "default");
+        kris = *g_ItemDatabase.Find(KrisType);
+        kris.statProfile.clear();
+        g_ItemDataHandler.SetItem(kris);
+        CHECK(g_ItemDatabase.Find(KrisType)->statProfile == "weapon");
+    }
+
     SUBCASE("a new bow is a bow once it is two-handed and on offHand, in any order")
     {
         const int newBowType = MakeItemType(4, 100);

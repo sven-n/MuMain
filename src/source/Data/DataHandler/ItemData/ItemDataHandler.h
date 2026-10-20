@@ -46,6 +46,7 @@ public:
     // when it no longer exists (no names). The weapon kind and the stat
     // profile follow the data (FollowGroupWeaponKind, FollowKnownStatProfile)
     // unless the definition changes them itself: then they are the user's pick.
+    // An empty stat profile is no pick: it follows the data.
     void SetItem(const Data::Items::ItemDefinition& definition);
     // Like SetItem for several items, with the database lists built once.
     void SetItems(std::span<const Data::Items::ItemDefinition> definitions);
@@ -57,7 +58,11 @@ public:
     // Adds the item at its (group, number), and its model entry when `model`
     // has one (its group and number are the item's). False when the item type
     // is not free (Data::Items::IsFreeItemType) or the item has no names.
-    bool AddItem(const Data::Items::ItemDefinition& definition, const Data::Items::ItemModelDefinition* model);
+    // `copiedFrom` is the item a copy was made of (Duplicate, or Add with the
+    // selected item's values): a weapon kind or stat profile picked there stays
+    // a pick; otherwise they follow the new item's data.
+    bool AddItem(const Data::Items::ItemDefinition& definition, const Data::Items::ItemModelDefinition* model,
+                 const Data::Items::ItemDefinition* copiedFrom = nullptr);
     // Removes the item and its model entry; the item type is free again. False
     // when there is no item.
     bool RemoveItem(int itemType);
@@ -182,8 +187,10 @@ private:
     // first.
     void TakeBackModelMoves();
     // The definition SetItem stores: the weapon kind and the stat profile
-    // follow the data unless `definition` changes them.
-    static Data::Items::ItemDefinition WithDerivedFields(const Data::Items::ItemDefinition& definition);
+    // follow the data unless `definition` changes them from `previous` (the
+    // item as it is, or the one a new item copies; nullptr: none).
+    static Data::Items::ItemDefinition WithDerivedFields(const Data::Items::ItemDefinition& definition,
+                                                         const Data::Items::ItemDefinition* previous);
     // ItemAttribute[itemType] from the item database: the item, or all zero.
     static void RefillItemAttribute(int itemType);
 
