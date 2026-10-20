@@ -13,8 +13,6 @@ namespace MuEditor::WindowIds
 {
 // The id the item table had, so a saved layout puts the browser where it was.
 inline constexpr char ItemBrowser[] = "###ItemEditor";
-// The item table until the item tools have all its fields.
-inline constexpr char ItemTable[] = "###ItemTable";
 inline constexpr char ItemBasics[] = "###ItemBasics";
 inline constexpr char ItemRequirements[] = "###ItemRequirements";
 inline constexpr char ItemRules[] = "###ItemRules";

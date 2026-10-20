@@ -67,10 +67,6 @@ void CMuEditorConfig::Load()
                     m_language = value;
                 }
             }
-            else if (currentSection == "ColumnVisibility")
-            {
-                m_columnVisibility[key] = (value == "1" || value == "true");
-            }
             else if (currentSection == "SkillEditorColumnVisibility")
             {
                 m_skillEditorColumnVisibility[key] = (value == "1" || value == "true");
@@ -98,14 +94,6 @@ void CMuEditorConfig::Save()
     file << "[General]\n";
     file << "Language=" << m_language << "\n\n";
 
-    // Write [ColumnVisibility] section
-    file << "[ColumnVisibility]\n";
-    for (const auto& col : m_columnVisibility)
-    {
-        file << col.first << "=" << (col.second ? "1" : "0") << "\n";
-    }
-    file << "\n";
-
     // Write [SkillEditorColumnVisibility] section
     file << "[SkillEditorColumnVisibility]\n";
     for (const auto& col : m_skillEditorColumnVisibility)
@@ -124,19 +112,6 @@ std::string CMuEditorConfig::GetLanguage() const
 void CMuEditorConfig::SetLanguage(const std::string& language)
 {
     m_language = language;
-}
-
-bool CMuEditorConfig::GetColumnVisibility(const std::string& columnName, bool defaultValue) const
-{
-    auto it = m_columnVisibility.find(columnName);
-    if (it != m_columnVisibility.end())
-        return it->second;
-    return defaultValue;
-}
-
-void CMuEditorConfig::SetColumnVisibility(const std::string& columnName, bool visible)
-{
-    m_columnVisibility[columnName] = visible;
 }
 
 #endif // _EDITOR

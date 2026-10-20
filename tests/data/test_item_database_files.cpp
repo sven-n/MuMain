@@ -376,6 +376,17 @@ TEST_CASE("A save that cannot write all its files replaces none of them [data][i
 }
 
 #ifdef _EDITOR
+namespace
+{
+// An item tool's edit: the item as it is, changed, set back (SetItem).
+template <typename TChange> void EditItem(int itemType, TChange&& change)
+{
+    ItemDefinition item = *g_ItemDatabase.Find(itemType);
+    change(item);
+    g_ItemDataHandler.SetItem(item);
+}
+} // namespace
+
 TEST_CASE("Item editor changes go into the item database [data][items][editor]")
 {
     ClientDataScope client(ShippedClientDirectory);
@@ -383,25 +394,15 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
 
-    SUBCASE("a changed value is copied")
+    SUBCASE("a changed value goes into the database and ItemAttribute, the names stay")
     {
-        ItemAttribute[BladeType].Width = 2;
-        g_ItemDataHandler.OnItemEdited(BladeType);
+        ItemDefinition blade = *g_ItemDatabase.Find(BladeType);
+        blade.width = 2;
+        g_ItemDataHandler.SetItem(blade);
 
         CHECK(g_ItemDatabase.Find(BladeType)->width == 2);
+        CHECK(ItemAttribute[BladeType].Width == 2);
         CHECK(g_ItemDatabase.Find(BladeType)->names.Get("pt") == "L\xC3\xA2mina");
-    }
-
-    SUBCASE("a changed name is stored for the current UI locale")
-    {
-        I18N::SetLocale("pt");
-        const std::wstring newName = L"Lâmina Nova";
-        std::fill(std::begin(ItemAttribute[BladeType].Name), std::end(ItemAttribute[BladeType].Name), L'\0');
-        newName.copy(ItemAttribute[BladeType].Name, newName.size());
-        g_ItemDataHandler.OnItemEdited(BladeType);
-
-        CHECK(g_ItemDatabase.Find(BladeType)->names.Get("pt") == "L\xC3\xA2mina Nova");
-        CHECK(g_ItemDatabase.Find(BladeType)->names.GetNeutral() == "Blade");
     }
 
     SUBCASE("a name set for another language goes into the database, not into the shown name")
@@ -450,73 +451,48 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         CHECK(g_ItemDataHandler.SetItemName(KrisType, "en", "Kris"));
     }
 
-    SUBCASE("a value change does not turn the English fallback into a translation")
-    {
-        // No item has a Polish name: the English one is shown.
-        I18N::SetLocale("pl");
-        REQUIRE(client.Name(KrisType) == L"Kris");
-        ItemAttribute[KrisType].Width = 2;
-        g_ItemDataHandler.OnItemEdited(KrisType);
-
-        CHECK_FALSE(g_ItemDatabase.Find(KrisType)->names.GetTranslations().contains("pl"));
-    }
-
-    SUBCASE("a value change keeps a name longer than ITEM_ATTRIBUTE can hold")
-    {
-        const std::string longName(MAX_ITEM_NAME + 10, 'x');
-        ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
-        kris.names.Set("en", longName);
-        g_ItemDatabase.Set(kris);
-        ToItemAttribute(*g_ItemDatabase.Find(KrisType), ItemAttribute[KrisType]);
-
-        ItemAttribute[KrisType].Width = 2;
-        g_ItemDataHandler.OnItemEdited(KrisType);
-
-        CHECK(g_ItemDatabase.Find(KrisType)->names.GetNeutral() == longName);
-        CHECK(g_ItemDatabase.Find(KrisType)->width == 2);
-    }
-
     SUBCASE("a new weapon gets its group's weapon kind")
     {
-        const int newSpearType = MakeItemType(3, 100);
-        REQUIRE(g_ItemDatabase.Find(newSpearType) == nullptr);
-        const std::wstring name = L"New Spear";
-        std::fill(std::begin(ItemAttribute[newSpearType].Name), std::end(ItemAttribute[newSpearType].Name), L'\0');
-        name.copy(ItemAttribute[newSpearType].Name, name.size());
-        ItemAttribute[newSpearType].m_byItemSlot = static_cast<BYTE>(ItemSlot::MainHand);
-        g_ItemDataHandler.OnItemEdited(newSpearType);
-
-        REQUIRE(g_ItemDatabase.Find(newSpearType) != nullptr);
-        CHECK(g_ItemDatabase.GetWeaponKind(newSpearType) == WeaponKind::Spear);
+        ItemDefinition spear;
+        spear.group = 3;
+        spear.number = 100;
+        spear.names = Data::LocalizedString::Parse("New Spear");
+        spear.slot = ItemSlot::MainHand;
+        REQUIRE(g_ItemDataHandler.AddItem(spear, nullptr));
+        CHECK(g_ItemDatabase.GetWeaponKind(MakeItemType(3, 100)) == WeaponKind::Spear);
     }
 
     SUBCASE("a new bow is a bow once it is two-handed and on offHand, in any order")
     {
         const int newBowType = MakeItemType(4, 100);
-        REQUIRE(g_ItemDatabase.Find(newBowType) == nullptr);
-        const std::wstring name = L"New Bow";
-        std::fill(std::begin(ItemAttribute[newBowType].Name), std::end(ItemAttribute[newBowType].Name), L'\0');
-        name.copy(ItemAttribute[newBowType].Name, name.size());
-        ItemAttribute[newBowType].m_byItemSlot = static_cast<BYTE>(ItemSlot::MainHand);
-        g_ItemDataHandler.OnItemEdited(newBowType);
-        ItemAttribute[newBowType].TwoHand = true;
-        g_ItemDataHandler.OnItemEdited(newBowType);
+        ItemDefinition bow;
+        bow.group = 4;
+        bow.number = 100;
+        bow.names = Data::LocalizedString::Parse("New Bow");
+        bow.slot = ItemSlot::MainHand;
+        REQUIRE(g_ItemDataHandler.AddItem(bow, nullptr));
+        bow = *g_ItemDatabase.Find(newBowType);
+        bow.twoHanded = true;
+        g_ItemDataHandler.SetItem(bow);
         CHECK(g_ItemDatabase.GetWeaponKind(newBowType) == WeaponKind::Crossbow);
 
-        ItemAttribute[newBowType].m_byItemSlot = static_cast<BYTE>(ItemSlot::OffHand);
-        g_ItemDataHandler.OnItemEdited(newBowType);
+        bow = *g_ItemDatabase.Find(newBowType);
+        bow.slot = ItemSlot::OffHand;
+        g_ItemDataHandler.SetItem(bow);
         CHECK(g_ItemDatabase.GetWeaponKind(newBowType) == WeaponKind::Bow);
 
         // The other order: on offHand first, then two-handed.
         const int otherBowType = MakeItemType(4, 101);
-        REQUIRE(g_ItemDatabase.Find(otherBowType) == nullptr);
-        std::fill(std::begin(ItemAttribute[otherBowType].Name), std::end(ItemAttribute[otherBowType].Name), L'\0');
-        name.copy(ItemAttribute[otherBowType].Name, name.size());
-        ItemAttribute[otherBowType].m_byItemSlot = static_cast<BYTE>(ItemSlot::OffHand);
-        g_ItemDataHandler.OnItemEdited(otherBowType);
+        ItemDefinition other;
+        other.group = 4;
+        other.number = 101;
+        other.names = Data::LocalizedString::Parse("New Bow");
+        other.slot = ItemSlot::OffHand;
+        REQUIRE(g_ItemDataHandler.AddItem(other, nullptr));
         CHECK(g_ItemDatabase.GetWeaponKind(otherBowType) == WeaponKind::None);
-        ItemAttribute[otherBowType].TwoHand = true;
-        g_ItemDataHandler.OnItemEdited(otherBowType);
+        other = *g_ItemDatabase.Find(otherBowType);
+        other.twoHanded = true;
+        g_ItemDataHandler.SetItem(other);
         CHECK(g_ItemDatabase.GetWeaponKind(otherBowType) == WeaponKind::Bow);
     }
 
@@ -539,39 +515,37 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
     SUBCASE("a sword is a glove while only the Rage Fighter may use it")
     {
         REQUIRE(g_ItemDatabase.GetWeaponKind(KrisType) == WeaponKind::Sword);
-        const ITEM_ATTRIBUTE kris = ItemAttribute[KrisType];
-        for (int characterClass = 0; characterClass < MAX_CLASS; ++characterClass)
-        {
-            ItemAttribute[KrisType].RequireClass[characterClass] = characterClass == CLASS_RAGEFIGHTER ? 1 : 0;
-        }
-        g_ItemDataHandler.OnItemEdited(KrisType);
+        const ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+        EditItem(KrisType,
+                 [](ItemDefinition& item)
+                 {
+                     for (int characterClass = 0; characterClass < MAX_CLASS; ++characterClass)
+                     {
+                         item.classRequirements[characterClass] = characterClass == CLASS_RAGEFIGHTER ? 1 : 0;
+                     }
+                 });
         CHECK(g_ItemDatabase.GetWeaponKind(KrisType) == WeaponKind::Glove);
 
-        ItemAttribute[KrisType] = kris;
-        g_ItemDataHandler.OnItemEdited(KrisType);
+        g_ItemDataHandler.SetItem(kris);
         CHECK(g_ItemDatabase.GetWeaponKind(KrisType) == WeaponKind::Sword);
     }
 
     SUBCASE("a staff is a book while it is on offHand")
     {
         REQUIRE(g_ItemDatabase.GetWeaponKind(ITEM_STAFF) == WeaponKind::Staff);
-        ItemAttribute[ITEM_STAFF].m_byItemSlot = static_cast<BYTE>(ItemSlot::OffHand);
-        g_ItemDataHandler.OnItemEdited(ITEM_STAFF);
+        EditItem(ITEM_STAFF, [](ItemDefinition& item) { item.slot = ItemSlot::OffHand; });
         CHECK(g_ItemDatabase.GetWeaponKind(ITEM_STAFF) == WeaponKind::Book);
 
-        ItemAttribute[ITEM_STAFF].m_byItemSlot = static_cast<BYTE>(ItemSlot::MainHand);
-        g_ItemDataHandler.OnItemEdited(ITEM_STAFF);
+        EditItem(ITEM_STAFF, [](ItemDefinition& item) { item.slot = ItemSlot::MainHand; });
         CHECK(g_ItemDatabase.GetWeaponKind(ITEM_STAFF) == WeaponKind::Staff);
     }
 
     SUBCASE("an undone edit undoes the weapon kind")
     {
-        ItemAttribute[ITEM_BOLT].TwoHand = true;
-        g_ItemDataHandler.OnItemEdited(ITEM_BOLT);
+        EditItem(ITEM_BOLT, [](ItemDefinition& item) { item.twoHanded = true; });
         CHECK(g_ItemDatabase.GetWeaponKind(ITEM_BOLT) == WeaponKind::Bow);
 
-        ItemAttribute[ITEM_BOLT].TwoHand = false;
-        g_ItemDataHandler.OnItemEdited(ITEM_BOLT);
+        EditItem(ITEM_BOLT, [](ItemDefinition& item) { item.twoHanded = false; });
         CHECK(g_ItemDatabase.GetWeaponKind(ITEM_BOLT) == WeaponKind::None);
     }
 
@@ -588,10 +562,8 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
     SUBCASE("the Horn of Fenrir keeps the default its file names")
     {
         REQUIRE(g_ItemDatabase.Find(ITEM_HORN_OF_FENRIR)->statProfile == "default");
-        ItemAttribute[ITEM_HORN_OF_FENRIR].RequireLevel = 0;
-        g_ItemDataHandler.OnItemEdited(ITEM_HORN_OF_FENRIR);
-        ItemAttribute[ITEM_HORN_OF_FENRIR].RequireLevel = 300;
-        g_ItemDataHandler.OnItemEdited(ITEM_HORN_OF_FENRIR);
+        EditItem(ITEM_HORN_OF_FENRIR, [](ItemDefinition& item) { item.requirements.level = 0; });
+        EditItem(ITEM_HORN_OF_FENRIR, [](ItemDefinition& item) { item.requirements.level = 300; });
         CHECK(g_ItemDatabase.Find(ITEM_HORN_OF_FENRIR)->statProfile == "default");
     }
 
@@ -600,19 +572,17 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         ItemDefinition shield = *g_ItemDatabase.Find(ITEM_SMALL_SHIELD);
         shield.statProfile.clear();
         g_ItemDatabase.Set(shield);
-        g_ItemDataHandler.OnItemEdited(ITEM_SMALL_SHIELD);
+        EditItem(ITEM_SMALL_SHIELD, [](ItemDefinition&) {});
         CHECK(g_ItemDatabase.Find(ITEM_SMALL_SHIELD)->statProfile == "shield");
     }
 
     SUBCASE("a wing's stat profile follows its slot")
     {
         REQUIRE(g_ItemDatabase.Find(ITEM_WINGS_OF_ELF)->statProfile == "firstTierWing");
-        ItemAttribute[ITEM_WINGS_OF_ELF].m_byItemSlot = static_cast<BYTE>(ItemSlot::Helm);
-        g_ItemDataHandler.OnItemEdited(ITEM_WINGS_OF_ELF);
+        EditItem(ITEM_WINGS_OF_ELF, [](ItemDefinition& item) { item.slot = ItemSlot::Helm; });
         CHECK(g_ItemDatabase.Find(ITEM_WINGS_OF_ELF)->statProfile == "armor");
 
-        ItemAttribute[ITEM_WINGS_OF_ELF].m_byItemSlot = static_cast<BYTE>(ItemSlot::Wings);
-        g_ItemDataHandler.OnItemEdited(ITEM_WINGS_OF_ELF);
+        EditItem(ITEM_WINGS_OF_ELF, [](ItemDefinition& item) { item.slot = ItemSlot::Wings; });
         CHECK(g_ItemDatabase.Find(ITEM_WINGS_OF_ELF)->statProfile == "firstTierWing");
     }
 
@@ -1266,7 +1236,7 @@ TEST_CASE("A derived stat profile the item stat file does not have keeps the def
 
     SUBCASE("an edit")
     {
-        g_ItemDataHandler.OnItemEdited(ITEM_SMALL_SHIELD);
+        EditItem(ITEM_SMALL_SHIELD, [](ItemDefinition&) {});
         CHECK(g_ItemDatabase.Find(ITEM_SMALL_SHIELD)->statProfile.empty());
     }
 

@@ -87,10 +87,6 @@ public:
         return !m_modelsToReopen.empty();
     }
 
-    // The item editor changed ItemAttribute[itemType]; copies the change
-    // into the item database. A changed name is stored for the current UI
-    // locale.
-    void OnItemEdited(int itemType);
     // Sets the item's name in `locale` (an empty text removes the translation;
     // the English name cannot be emptied) in the item database, whole also when
     // it is longer than ITEM_ATTRIBUTE's name; ItemAttribute shows the name in

@@ -18,7 +18,6 @@
 #include "Core/Input/SyntheticInput.h"
 #include "../Config/MuEditorConfig.h"
 #include "../MuEditor/UI/Common/MuEditorCenterPaneUI.h"
-#include "../MuEditor/UI/ItemEditor/MuItemEditorUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemBasicsUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemBrowserUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemCategoriesUI.h"
@@ -794,7 +793,7 @@ void CMuEditorCore::Render()
     if (m_bEditorMode)
     {
         // Render center pane (handles all editor windows and input blocking)
-        g_MuEditorCenterPaneUI.Render(m_windows.itemBrowser, m_windows.itemTable, m_windows.skillEditor);
+        g_MuEditorCenterPaneUI.Render(m_windows.itemBrowser, m_windows.skillEditor);
 
         // Render Dev Editor
         if (m_windows.devEditor)

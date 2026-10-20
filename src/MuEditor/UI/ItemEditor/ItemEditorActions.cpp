@@ -6,7 +6,6 @@
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
-#include "Data/GameData/ItemData/ItemFieldMetadata.h"
 #include "Data/GameData/ItemData/ItemNames.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "../MuEditor/UI/ItemTools/ItemEdits.h"
@@ -17,114 +16,6 @@
 #include "../Console/MuEditorConsoleUI.h"
 
 extern std::wstring g_strSelectedML;
-
-// ===== HELPER FUNCTIONS =====
-
-void CItemEditorActions::ConvertItemName(char* outBuffer, size_t bufferSize, const wchar_t* name)
-{
-    WideCharToMultiByte(CP_UTF8, 0, name, -1, outBuffer, (int)bufferSize, NULL, NULL);
-}
-
-std::string CItemEditorActions::GetFieldValueAsString(const ITEM_ATTRIBUTE& item, const ItemFieldDescriptor& desc)
-{
-    std::stringstream ss;
-
-    // Get pointer to the field using offset
-    const BYTE* itemPtr = reinterpret_cast<const BYTE*>(&item);
-    const void* fieldPtr = itemPtr + desc.offset;
-
-    switch (desc.type)
-    {
-    case EItemFieldType::Bool:
-        ss << (*reinterpret_cast<const bool*>(fieldPtr) ? 1 : 0);
-        break;
-
-    case EItemFieldType::Byte:
-        ss << (int)*reinterpret_cast<const BYTE*>(fieldPtr);
-        break;
-
-    case EItemFieldType::Word:
-        ss << *reinterpret_cast<const WORD*>(fieldPtr);
-        break;
-
-    case EItemFieldType::Int:
-        ss << *reinterpret_cast<const int*>(fieldPtr);
-        break;
-
-    case EItemFieldType::WCharArray:
-    {
-        char buffer[256];
-        ConvertItemName(buffer, sizeof(buffer), reinterpret_cast<const wchar_t*>(fieldPtr));
-        ss << buffer;
-        break;
-    }
-    }
-
-    return ss.str();
-}
-
-// ===== EXPORT FUNCTIONS =====
-
-std::string CItemEditorActions::GetCSVHeader()
-{
-    std::stringstream ss;
-    const ItemFieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
-
-    ss << "Index";
-    for (int i = 0; i < fieldCount; ++i)
-    {
-        ss << "," << GetFieldDisplayName(fields[i]);
-    }
-
-    return ss.str();
-}
-
-std::string CItemEditorActions::ExportItemToReadable(int itemIndex, ITEM_ATTRIBUTE& item)
-{
-    std::stringstream ss;
-    const ItemFieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
-
-    ss << "Row " << itemIndex << "\n";
-    ss << "Index = " << itemIndex;
-
-    for (int i = 0; i < fieldCount; ++i)
-    {
-        ss << ", " << GetFieldDisplayName(fields[i]) << " = ";
-        ss << GetFieldValueAsString(item, fields[i]);
-    }
-
-    return ss.str();
-}
-
-std::string CItemEditorActions::ExportItemToCSV(int itemIndex, ITEM_ATTRIBUTE& item)
-{
-    std::stringstream ss;
-    const ItemFieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
-
-    ss << itemIndex;
-
-    for (int i = 0; i < fieldCount; ++i)
-    {
-        ss << ",";
-
-        // Quote strings for CSV
-        if (fields[i].type == EItemFieldType::WCharArray)
-        {
-            ss << "\"" << GetFieldValueAsString(item, fields[i]) << "\"";
-        }
-        else
-        {
-            ss << GetFieldValueAsString(item, fields[i]);
-        }
-    }
-
-    return ss.str();
-}
-
-std::string CItemEditorActions::ExportItemCombined(int itemIndex, ITEM_ATTRIBUTE& item)
-{
-    return ExportItemToReadable(itemIndex, item) + "\n" + ExportItemToCSV(itemIndex, item);
-}
 
 // ===== BUTTON RENDERING =====
 

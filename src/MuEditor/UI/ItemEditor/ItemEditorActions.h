@@ -1,5 +1,4 @@
 #pragma once
-#include "Data/GameData/ItemData/ItemFieldMetadata.h"
 
 #ifdef _EDITOR
 
@@ -9,7 +8,7 @@
 #include <string>
 #include <vector>
 
-// Handles Save/Import/Export action buttons for the Item Editor
+// Handles the Save/Import/Export action buttons of the item tools
 // Uses metadata-driven approach for automatic export generation
 class CItemEditorActions
 {
@@ -24,20 +23,8 @@ public:
     static void RenderExportCSVButton();
 
     // Render all action buttons in a row. Returns true when the items were
-    // replaced, so the table must rebuild its list.
+    // replaced, so a list of them must be built again.
     static bool RenderAllButtons();
-
-    // Export item data to CSV format (metadata-driven)
-    static std::string ExportItemToCSV(int itemIndex, ITEM_ATTRIBUTE& item);
-
-    // Export item data to readable format (key=value pairs, metadata-driven)
-    static std::string ExportItemToReadable(int itemIndex, ITEM_ATTRIBUTE& item);
-
-    // Export both formats combined (readable + CSV)
-    static std::string ExportItemCombined(int itemIndex, ITEM_ATTRIBUTE& item);
-
-    // Get CSV header row (metadata-driven)
-    static std::string GetCSVHeader();
 
 private:
     static void LogIssues(const std::vector<Data::Items::ItemDataIssue>& issues);
@@ -45,12 +32,6 @@ private:
     // items show the English name there).
     static void LogMissingItemNames();
     static void LogImportResult(const Data::Items::ItemBmdImportResult& result);
-
-    // Helper to convert item name to UTF-8
-    static void ConvertItemName(char* outBuffer, size_t bufferSize, const wchar_t* name);
-
-    // Get field value as string (descriptor-driven)
-    static std::string GetFieldValueAsString(const ITEM_ATTRIBUTE &item, const ItemFieldDescriptor &desc);
 };
 
 #endif // _EDITOR

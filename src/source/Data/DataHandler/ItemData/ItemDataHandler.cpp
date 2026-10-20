@@ -406,50 +406,6 @@ std::vector<ItemModelProblem> CItemDataHandler::ReopenChangedModels(const ModelL
     return ModelLoader::ReopenModels(itemTypes, lookNames);
 }
 
-void CItemDataHandler::OnItemEdited(int itemType)
-{
-    if (!IsValidItemType(itemType))
-    {
-        return;
-    }
-
-    ITEM_ATTRIBUTE& attribute = ItemAttribute[itemType];
-    ItemDefinition definition = g_ItemDatabase.GetAllSlots()[itemType];
-    definition.group = GetItemGroup(itemType);
-    definition.number = GetItemNumber(itemType);
-    CopyItemAttributeStats(attribute, definition);
-    // The editor does not show the weapon kind or the stat profile.
-    definition.weaponKind = FollowGroupWeaponKind(g_ItemDatabase.Find(itemType), definition);
-    std::vector<ItemDataIssue> issues;
-    definition.statProfile = FollowKnownStatProfile(g_ItemDatabase.Find(itemType), definition, issues);
-    Data::LogDataIssues(ItemDataLabel, issues);
-
-    // Only a changed name is stored; otherwise every stat edit would turn the
-    // shown English fallback into a translation. ITEM_ATTRIBUTE holds a cut
-    // name, so compare against the cut name, or a stat edit would store the
-    // cut version of a long name.
-    const std::wstring editedName = ReadItemAttributeName(attribute);
-    if (editedName != CutToItemAttributeName(definition.name))
-    {
-        const std::string editedNameUtf8 = Core::Text::ToUtf8(editedName.c_str());
-        definition.names.Set(g_ItemDatabase.GetDisplayLocale(), editedNameUtf8);
-        if (definition.names.GetNeutral().empty())
-        {
-            // A new item needs an English name.
-            definition.names.Set(Data::LocalizedString::NeutralLocale, editedNameUtf8);
-        }
-    }
-
-    g_ItemDatabase.Set(definition);
-
-    // A removed translation shows the English name again.
-    const ItemDefinition* updated = g_ItemDatabase.Find(itemType);
-    if (updated != nullptr && CutToItemAttributeName(updated->name) != editedName)
-    {
-        ToItemAttribute(*updated, attribute);
-    }
-}
-
 bool CItemDataHandler::SetItemName(int itemType, std::string_view locale, std::string text)
 {
     const ItemDefinition* current = g_ItemDatabase.Find(itemType);

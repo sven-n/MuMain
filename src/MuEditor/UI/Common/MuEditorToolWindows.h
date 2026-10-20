@@ -10,7 +10,6 @@ namespace MuEditor
 struct ToolWindows
 {
     bool itemBrowser = false;
-    bool itemTable = false;
     bool itemBasics = false;
     bool itemRequirements = false;
     bool itemRules = false;
