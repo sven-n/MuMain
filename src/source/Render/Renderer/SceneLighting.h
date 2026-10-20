@@ -109,7 +109,7 @@ struct DynamicLightsUniform
     // How much a ground shadow darkens the ground's own light, 0 to 1 (ScopedGroundShadow).
     float groundShadowOpacity = 0.f;
     float positionAndRadius[kMaxDynamicLights][4]; // xyz world position, w radius in world units
-    float color[kMaxDynamicLights][4];             // rgb, w unused
+    float color[kMaxDynamicLights][4];             // rgb, w 1 when it casts character shadows
 };
 
 static_assert(offsetof(DynamicLightsUniform, lightCount) == 0);

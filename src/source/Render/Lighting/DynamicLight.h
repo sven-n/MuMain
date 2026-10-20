@@ -22,6 +22,9 @@ struct DynamicLight
     int range = 0;
     // range in world units.
     float radius = 0.0f;
+    // Whether characters cast a shadow away from it: not for skill lights, whose glow runs along a
+    // beam or burst rather than from one point.
+    bool castsShadows = true;
 };
 
 } // namespace Render::Lighting

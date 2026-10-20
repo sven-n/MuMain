@@ -611,6 +611,7 @@ static Render::PostProcessing::SceneBoundary s_sceneBoundary;
 static int s_bloomExclusionDepth = 0;
 static int s_worldLitGeometryDepth = 0;
 static int s_groundShadowDepth = 0;
+static int s_lightShadowDepth = 0;
 // Ground shadows (BeginGroundShadow) are drawn into a coverage mask the world-lit ground samples, in
 // a frame that recorded world-lit draws; until the mask holds the frame's shadows they draw as before.
 static bool s_frameHasWorldLit = false;
@@ -619,9 +620,9 @@ static bool s_groundShadowMaskReady = false;
 static SDL_GPUTexture* s_groundShadowMask = nullptr;
 static Uint32 s_groundShadowMaskW = 0;
 static Uint32 s_groundShadowMaskH = 0;
-// The mask's pipelines: GPU-skinned shadows, and the CPU and cloth shadows in the 3D layout.
-static SDL_GPUGraphicsPipeline* s_groundShadowMaskSkinnedPipeline = nullptr;
-static SDL_GPUGraphicsPipeline* s_groundShadowMask3DPipeline = nullptr;
+// The mask's pipelines, [point light][skinned]: GPU-skinned shadows, and the CPU and cloth shadows
+// in the 3D layout. Sun shadows write the red channel, point-light shadows the green one.
+static SDL_GPUGraphicsPipeline* s_groundShadowMaskPipelines[2][2]{};
 
 // Alpha-to-coverage variants of the depth-writing world pipelines (each world set's culled and
 // no-cull states), used while anti-aliasing is on by alpha-tested cutout draws (foliage, hair,
@@ -804,6 +805,7 @@ struct RenderCmd
     bool cullFaceEnabled{};
     bool bloomExcluded{}; // recorded inside a ScopedBloomExclusion: never a bloom source
     bool groundShadow{};  // recorded inside a ScopedGroundShadow
+    bool lightShadow{};   // a point light's (GroundShadowSource::PointLight)
     // Set once this command has been replayed into an offscreen capture (see
     // BeginOffscreenCapture/EndOffscreenCapture); the main frame's replay pass then
     // skips it instead of drawing it a second time into the frame.
@@ -838,7 +840,8 @@ static Render::DrawCommandHistory s_previousDrawCommands;
         return Counter::BatchBreakTexture;
     }
     if (previous.blendEnabled != command.blendEnabled || previous.blendMode != command.blendMode ||
-        previous.bloomExcluded != command.bloomExcluded || previous.groundShadow != command.groundShadow)
+        previous.bloomExcluded != command.bloomExcluded || previous.groundShadow != command.groundShadow ||
+        previous.lightShadow != command.lightShadow)
     {
         return Counter::BatchBreakBlend;
     }
@@ -2165,6 +2168,7 @@ public:
         }
         s_worldLitGeometryDepth = 0;
         s_groundShadowDepth = 0;
+        s_lightShadowDepth = 0;
         s_frameHasWorldLit = false;
         s_groundShadowMaskReady = false;
 
@@ -2322,8 +2326,8 @@ public:
 
     [[nodiscard]] static SDL_GPUGraphicsPipeline* GetGroundShadowMaskPipeline(const RenderCmd& command)
     {
-        return command.type == RenderCmdType::DrawSkinnedTriangles ? s_groundShadowMaskSkinnedPipeline
-                                                                   : s_groundShadowMask3DPipeline;
+        return s_groundShadowMaskPipelines[command.lightShadow ? 1 : 0]
+                                          [command.type == RenderCmdType::DrawSkinnedTriangles ? 1 : 0];
     }
 
     // The pipeline `command` replays with in a pass of `selection`, or null when it is not drawn there.
@@ -2334,7 +2338,7 @@ public:
         {
             return command.groundShadow ? GetGroundShadowMaskPipeline(command) : nullptr;
         }
-        if (command.groundShadow && s_groundShadowMaskReady)
+        if (command.lightShadow || (command.groundShadow && s_groundShadowMaskReady))
         {
             return nullptr;
         }
@@ -2472,7 +2476,7 @@ public:
         ReleaseGroundShadowMask();
         SDL_GPUTextureCreateInfo maskInfo{};
         maskInfo.type = SDL_GPU_TEXTURETYPE_2D;
-        maskInfo.format = SDL_GPU_TEXTUREFORMAT_R8_UNORM;
+        maskInfo.format = SDL_GPU_TEXTUREFORMAT_R8G8_UNORM;
         maskInfo.width = s_swapW;
         maskInfo.height = s_swapH;
         maskInfo.layer_count_or_depth = 1;
@@ -2506,7 +2510,7 @@ public:
     // the other passes leave them out.
     static void RenderGroundShadowMask(std::size_t end, bool boneDataReady)
     {
-        if (!s_frameHasWorldLit || !s_groundShadowMask3DPipeline || !EnsureGroundShadowMask())
+        if (!s_frameHasWorldLit || !s_groundShadowMaskPipelines[0][0] || !EnsureGroundShadowMask())
         {
             return;
         }
@@ -3749,16 +3753,17 @@ public:
         }
     }
 
-    void BeginGroundShadow() override
+    void BeginGroundShadow(GroundShadowSource source) override
     {
-        ++s_groundShadowDepth;
+        ++(source == GroundShadowSource::PointLight ? s_lightShadowDepth : s_groundShadowDepth);
     }
 
-    void EndGroundShadow() override
+    void EndGroundShadow(GroundShadowSource source) override
     {
-        if (s_groundShadowDepth > 0)
+        int& depth = source == GroundShadowSource::PointLight ? s_lightShadowDepth : s_groundShadowDepth;
+        if (depth > 0)
         {
-            --s_groundShadowDepth;
+            --depth;
         }
     }
 
@@ -5347,7 +5352,8 @@ private:
         command.depthMaskEnabled = m_depthMaskEnabled;
         command.cullFaceEnabled = m_cullFaceEnabled;
         command.bloomExcluded = s_bloomExclusionDepth > 0;
-        command.groundShadow = s_groundShadowDepth > 0;
+        command.lightShadow = s_lightShadowDepth > 0;
+        command.groundShadow = s_groundShadowDepth > 0 || command.lightShadow;
         if (s_worldLitGeometryDepth > 0)
         {
             s_frameHasWorldLit = true;
@@ -5918,7 +5924,7 @@ private:
         const SDL_GPUTextureFormat swapchainFmt = SDL_GetGPUSwapchainTextureFormat(s_device, s_window);
 
         SDL_GPUColorTargetDescription colorTargetDesc{};
-        colorTargetDesc.format = description.groundShadowMaskTarget ? SDL_GPU_TEXTUREFORMAT_R8_UNORM
+        colorTargetDesc.format = description.groundShadowMaskTarget ? SDL_GPU_TEXTUREFORMAT_R8G8_UNORM
                                  : s_pipelineFormatOverride != SDL_GPU_TEXTUREFORMAT_INVALID ? s_pipelineFormatOverride
                                                                                              : swapchainFmt;
         colorTargetDesc.blend_state = blendState;
@@ -6322,12 +6328,15 @@ private:
                 }
             }
         }
-        for (SDL_GPUGraphicsPipeline** pipeline : {&s_groundShadowMask3DPipeline, &s_groundShadowMaskSkinnedPipeline})
+        for (auto& layouts : s_groundShadowMaskPipelines)
         {
-            if (*pipeline)
+            for (SDL_GPUGraphicsPipeline*& pipeline : layouts)
             {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, *pipeline);
-                *pipeline = nullptr;
+                if (pipeline)
+                {
+                    SDL_ReleaseGPUGraphicsPipeline(s_device, pipeline);
+                    pipeline = nullptr;
+                }
             }
         }
         DestroyAlphaCoveragePipelines();
@@ -6722,7 +6731,9 @@ private:
     // ground shadows draw as recorded.
     static void CreateGroundShadowMaskPipelines()
     {
-        if (!s_fragShaderShadowMask)
+        const SDL_GPUTextureUsageFlags maskUsage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER;
+        if (!s_fragShaderShadowMask || !SDL_GPUTextureSupportsFormat(s_device, SDL_GPU_TEXTUREFORMAT_R8G8_UNORM,
+                                                                     SDL_GPU_TEXTURETYPE_2D, maskUsage))
         {
             return;
         }
@@ -6735,23 +6746,51 @@ private:
         darkest.dst_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
         darkest.alpha_blend_op = SDL_GPU_BLENDOP_MIN;
         darkest.enable_blend = true;
+        darkest.enable_color_write_mask = true;
         const char* deviceDriver = SDL_GetGPUDeviceDriver(s_device);
-        const auto build = [&](SDL_GPUGraphicsPipeline*& destination, const char* name, VertexLayout layout)
+        const auto build = [&](int lightShadow, int skinned, const char* name)
         {
-            PipelineBuildDescription description{name,   "darkest", k_PipelineDisabled,          false, false,
-                                                 layout, false,     FragmentShader::ShadowMask};
+            PipelineBuildDescription description{name,
+                                                 "darkest",
+                                                 k_PipelineDisabled,
+                                                 false,
+                                                 false,
+                                                 skinned ? VertexLayout::SkinnedShadow : VertexLayout::ThreeDimensional,
+                                                 false,
+                                                 FragmentShader::ShadowMask};
             description.groundShadowMaskTarget = true;
+            darkest.color_write_mask = lightShadow ? SDL_GPU_COLORCOMPONENT_G : SDL_GPU_COLORCOMPONENT_R;
             const PipelineBuildResult result = BuildBlendPipeline(darkest, description);
-            destination = result.pipeline;
-            if (!destination)
+            s_groundShadowMaskPipelines[lightShadow][skinned] = result.pipeline;
+            if (!result.pipeline)
             {
                 LogPipelineFailure(deviceDriver ? deviceDriver : "unknown", result, false);
             }
         };
-        build(s_groundShadowMask3DPipeline, "ground-shadow-mask-3d", VertexLayout::ThreeDimensional);
+        build(0, 0, "ground-shadow-mask-3d");
+        build(1, 0, "ground-light-shadow-mask-3d");
         if (s_vertShaderSkinnedShadow)
         {
-            build(s_groundShadowMaskSkinnedPipeline, "ground-shadow-mask-skinned", VertexLayout::SkinnedShadow);
+            build(0, 1, "ground-shadow-mask-skinned");
+            build(1, 1, "ground-light-shadow-mask-skinned");
+        }
+        // All or none: once the mask is ready the scene leaves every ground shadow to it, so a shadow
+        // the mask cannot draw would vanish. Without them, ground shadows draw as recorded.
+        const bool skinnedComplete =
+            !s_vertShaderSkinnedShadow || (s_groundShadowMaskPipelines[0][1] && s_groundShadowMaskPipelines[1][1]);
+        if (!s_groundShadowMaskPipelines[0][0] || !s_groundShadowMaskPipelines[1][0] || !skinnedComplete)
+        {
+            for (auto& layouts : s_groundShadowMaskPipelines)
+            {
+                for (SDL_GPUGraphicsPipeline*& pipeline : layouts)
+                {
+                    if (pipeline)
+                    {
+                        SDL_ReleaseGPUGraphicsPipeline(s_device, pipeline);
+                        pipeline = nullptr;
+                    }
+                }
+            }
         }
     }
 

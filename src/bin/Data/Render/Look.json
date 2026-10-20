@@ -18,6 +18,7 @@
     "dynamic.effectCap": 2.5,
     "dynamic.shadowOpacity": 0.6,
     "dynamic.shadowAngle": 135,
+    "dynamic.shadowLights": 2,
     "bloom.strength": 1.0,
     "bloom.levelFalloff": 0.6,
     "grading.strength": 1

@@ -1556,6 +1556,12 @@
   <data name="Tuning Shadow Opacity Help" xml:space="preserve">
     <value>How dark characters' shadows make the ground. Candle, fire and skill light still lights shadowed ground.</value>
   </data>
+  <data name="Tuning Light Shadows" xml:space="preserve">
+    <value>Light shadows</value>
+  </data>
+  <data name="Tuning Light Shadows Help" xml:space="preserve">
+    <value>How many of the nearest candle, fire and skill lights cast a character's shadow away from them. 0 leaves only the sun's shadow.</value>
+  </data>
   <data name="Tuning Shadow Direction" xml:space="preserve">
     <value>Shadow direction</value>
   </data>

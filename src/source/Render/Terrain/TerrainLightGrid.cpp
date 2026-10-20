@@ -129,12 +129,14 @@ void AddLight(float (*grid)[3], float x, float y, const float* color, int range)
 }
 
 void AddDynamicLight(float (*grid)[3], Lighting::DynamicLightList& frameLights, float x, float y, const float* color,
-                     int range, float terrainHeight)
+                     int range, float terrainHeight, bool castsShadows)
 {
     AddLight(grid, x, y, color, range);
     if (range > 0)
     {
-        frameLights.Add(MakeDynamicLight(x, y, color, range, terrainHeight));
+        Lighting::DynamicLight light = MakeDynamicLight(x, y, color, range, terrainHeight);
+        light.castsShadows = castsShadows;
+        frameLights.Add(light);
     }
 }
 
@@ -145,7 +147,8 @@ void ApplyCall(const FrameLightTarget& target, const Lighting::LightCall& call)
     float color[kColorComponents];
     for (int k = 0; k < kColorComponents; ++k)
         color[k] = call.color[k] > 0.f ? call.color[k] * target.dynamicGain : call.color[k];
-    AddDynamicLight(target.grid, *target.frameLights, call.x, call.y, color, call.range, target.height(call.x, call.y));
+    AddDynamicLight(target.grid, *target.frameLights, call.x, call.y, color, call.range, target.height(call.x, call.y),
+                    call.source != Lighting::LightSource::Effect);
 }
 } // namespace
 

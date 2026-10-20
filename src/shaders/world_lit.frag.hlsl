@@ -8,7 +8,8 @@
 
 Texture2D tex : register(t0, space2);
 SamplerState s : register(s0, space2);
-// Per pixel, 1 minus the darkest ground shadow there (white without shadows).
+// Per pixel, 1 minus the darkest ground shadow there: red the sun's, green the point lights' (white
+// without shadows).
 Texture2D groundShadowMask : register(t1, space2);
 SamplerState groundShadowSampler : register(s1, space2);
 cbuffer FogUniforms : register(b0, space3)
@@ -84,11 +85,12 @@ float4 main(FSInput input) : SV_Target
     uint maskWidth;
     uint maskHeight;
     groundShadowMask.GetDimensions(maskWidth, maskHeight);
-    const float visibility =
-        groundShadowMask.Sample(groundShadowSampler, input.pos.xy / float2(maskWidth, maskHeight)).r;
-    // Shadows dim the ground's own light; the point lights still light shadowed ground.
-    const float shadow = 1.0 - groundShadowOpacity * (1.0 - visibility);
-    const float3 light = saturate(input.color.rgb * shadow + WorldDynamicLighting(input.worldPosition));
+    const float2 visibility =
+        groundShadowMask.Sample(groundShadowSampler, input.pos.xy / float2(maskWidth, maskHeight)).rg;
+    // The sun's shadows dim the ground's own light, the point lights' shadows the point lights.
+    const float2 shadow = 1.0 - groundShadowOpacity * (1.0 - visibility);
+    const float3 light =
+        saturate(input.color.rgb * shadow.x + WorldDynamicLighting(input.worldPosition) * shadow.y);
     float4 color = float4(texel.rgb * light, texel.a * input.color.a);
     if (alphaToCoverage)
     {
