@@ -44,7 +44,7 @@ share with items) is planned in the
 | D7 | File layout | One JSON file per item group. Splitting the mixed groups 12–15 into category files was dropped: with new groups (D21) the group *is* the category, so the file layout is decided together with phase 12. |
 | D8 | Target version | Season 6 only for now. Other versions are easier to add once the data-driven setup exists. |
 | D9 | Identity | `(group, number)` only, no readable string key. Logs always show the English name next to it. Once rules read data instead of hardcoded ids, a readable key has no extra benefit. |
-| D10 | bmd files | The JSON files are the **only** source of truth for items in the game. The game no longer reads `Item_<lang>.bmd`. MuEditor gets "Import from bmd" and "Export as bmd"; fields the bmd format does not have are left out on export and keep their current or default values on import. **Update (2026-09-26):** the repo no longer ships `Item_<lang>.bmd`, and the editor's bmd import was removed; only "Export as bmd" is left. |
+| D10 | bmd files | The JSON files are the **only** source of truth for items in the game. The game no longer reads `Item_<lang>.bmd`. MuEditor gets "Import from bmd" and "Export as bmd"; fields the bmd format does not have are left out on export and keep their current or default values on import. **Update (2026-09-26):** the repo no longer ships `Item_<lang>.bmd`. The editor keeps "Import from bmd" for your own old files and "Export as bmd". |
 | D11 | Exchange scope | Item sets and drop settings are separate exchange files, not part of the item file. |
 | D12 | Id ranges | No reserved number ranges for custom items, and no range checks (`type >= X && type <= Y`) in new code; everything an item "is" comes from its data. OpenMU must keep supporting the original Season 6 client **and** this client (see section 7). |
 | D13 | Other item files | `ItemAddOption`, `SocketItem`, `Mix`, `pet` and set options are decided later, when we know more. |
@@ -1080,11 +1080,13 @@ server with original clients (after phases 6 and B).
     edited by hand in `src/Localization/<Group>.<locale>.resx` (Game,
     Dialog, Editor, Metadata), and `tools/ResxGen` compiles them into the
     game (`docs/translation-system.md`). Measured on 2026-10-20 against
-    English: Game misses 93 German texts, 117 Polish, 124 in each of es, id,
-    pt, ru, tl, uk and zh-TW, and 607 Japanese; Dialog has no file for id,
-    ja, ru, tl, uk and zh-TW (233 texts each) and misses one Spanish and one
-    Portuguese text; Editor misses 7 German texts and about 170 in each
-    other language; Metadata is complete.
+    English, by key: Game misses 92 German texts, 116 Polish, 123 in each
+    of es, id, pt, ru, tl, uk and zh-TW, and 606 Japanese; Dialog has no
+    file for id, ja, ru, tl, uk and zh-TW (233 texts each) and misses one
+    Spanish and one Portuguese text; Editor misses 7 German texts and 170
+    in each other language, and has no Japanese file (313 texts); Metadata
+    is complete but has no Japanese file (59 texts). `Game.en.resx` has the
+    key `Connecting to the server` twice.
     - A MuEditor window (editor builds) with the texts as a grid of keys and
       languages, English first, grouped by file: the missing texts counted
       per language and file, a filter for them and a search over keys and
@@ -1095,8 +1097,8 @@ server with original clients (after phases 6 and B).
       unless the window also changes the loaded texts for a preview (to
       decide).
     - Checks: a translation keeps the placeholders of the English text
-      (`{0}`, `%s`, `%ls`, `%%`); the German terms of
-      `translation-system.md` can be shown as hints.
+      (`{0}`, `%s`, `%ls`, `%%`), and a file has each key once; the German
+      terms of `translation-system.md` can be shown as hints.
     - Planned like phase 5: an inventory of the files and the generator,
       then the decisions (preview, which files, adding a missing file such
       as Dialog for a language), then the window.
@@ -1115,7 +1117,8 @@ server with original clients (after phases 6 and B).
     - One place for the language list and the names: the game's language
       list shows `GetAvailableLocales` instead of a list of its own, and
       the name comes from the language's texts (for example a key of the
-      Metadata group) instead of `ResxGen`'s code. To decide in the phase.
+      Metadata group, which Japanese has no file for yet) instead of
+      `ResxGen`'s code. To decide in the phase.
     - The game reads the texts compiled in, so the new language shows in
       the game and as a column of the windows after the next build, like
       the text edits of phase 14.
