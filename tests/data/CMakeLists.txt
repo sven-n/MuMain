@@ -13,6 +13,7 @@ mu_add_test(
         test_item_model_problems.cpp
         test_item_names.cpp
         test_item_stats_json.cpp
+        test_item_users.cpp
         test_localized_string.cpp
     LINK_LIBS
         MuClient

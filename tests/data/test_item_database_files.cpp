@@ -30,6 +30,7 @@
 #ifdef _EDITOR
 #include "UI/ItemTools/ItemEdits.h"
 #include "UI/ItemTools/ItemSelection.h"
+#include "UI/ItemTools/ItemUsage.h"
 #endif
 
 #include <algorithm>
@@ -1099,6 +1100,30 @@ TEST_CASE("The item tools' changes can be undone and redone [data][items][editor
         CHECK(g_ItemDatabase.Find(KrisType)->damageMax == 50);
     }
     edits.GetHistory().Clear();
+}
+
+TEST_CASE("The usage of an item lists its tags, its model and the code that names it [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+
+    const MuEditor::Items::ItemUsage kris = MuEditor::Items::FindItemUsage(KrisType);
+    CHECK(kris.hasModel);
+    CHECK(kris.IsUsed());
+    // The editor was built from these sources, and the code names the Kris.
+    REQUIRE(kris.codeKnown);
+    CHECK_FALSE(kris.code.empty());
+
+    const MuEditor::Items::ItemUsage nothing = MuEditor::Items::FindItemUsage(MakeItemType(0, 100));
+    CHECK_FALSE(nothing.hasModel);
+    CHECK(nothing.tags.empty());
 }
 
 TEST_CASE("The save warns about an item name in a language the game has no texts for [data][items][editor]")
