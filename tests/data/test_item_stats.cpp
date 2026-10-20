@@ -325,9 +325,6 @@ TEST_CASE("Item requirements come from the item's stat profile [data][items]")
     CHECK(stats(wizardryEnhance, 5).requireEnergy == 20 + items[wizardryEnhance].RequireEnergy * 100 * 4 / 100);
 }
 
-// The items whose level requirement excellent options do not raise are item data: the
-// Dragon Knight to Sunlight and Storm Blitz armour, six weapons, the lucky items and the Horn
-// of Fenrir.
 // The item editor computes an item it has not stored from its definition: for every
 // shipped item that gives what the game computes from the item database.
 TEST_CASE("Item stats from an item's definition are those from the item database [data][items]")
@@ -385,6 +382,9 @@ TEST_CASE("Item stats from an item's definition are those from the item database
     CHECK(compared > 900);
 }
 
+// The items whose level requirement excellent options do not raise are item data: the
+// Dragon Knight to Sunlight and Storm Blitz armour, six weapons, the lucky items and the Horn
+// of Fenrir.
 TEST_CASE("The items excellent options do not raise the level requirement of [data][items]")
 {
     ShippedItemAttributes items;
