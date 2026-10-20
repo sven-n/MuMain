@@ -1,0 +1,49 @@
+/* Legacy theme for the texts and buttons of the right-docked entry windows with a 3D item preview
+   (CDoppelGangerWindow, CEmpireGuardianNPC), reproducing their Render(): each text centred on its
+   box in the normal or bold font and its own colour (bound: the original's SetTextColor()), the
+   53 x 23 buttons newui_btn_empty_very_small up / over / down with a white label, tinted
+   (100, 100, 100) with a grey label and never hovered while locked. The frame is
+   docked_panel_frame.rcss's pieces (linked first) with the newui_item_back01 top, and the
+   newui_myquest_Line separator (188 x 21) at (1, 220). Coordinates are reference px inside
+   #panel. */
+
+@spritesheet item-entry-line-sheet { src: "../../../newui_myquest_Line.tga"; item-entry-line: 0px 0px 188px 21px; }
+.frame-top { decorator: image(docked-bg-top-b); }
+.entry-line { position: absolute; left: 1px; top: 220px; width: 188px; height: 21px; decorator: image(item-entry-line); }
+
+/* The live 3D preview: the panel and a margin around it, since the original drew the lucky coin
+   from 20 left of the panel. */
+.entry-item { position: absolute; left: -60px; top: -30px; width: 310px; height: 489px; pointer-events: none; }
+
+@spritesheet item-entry-btn-sheet
+{
+	src: "../../../newui_btn_empty_very_small.tga";
+	item-entry-btn-up: 0px 0px 53px 23px;
+	item-entry-btn-over: 0px 23px 53px 23px;
+	item-entry-btn-down: 0px 46px 53px 23px;
+}
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+	pointer-events: auto;
+}
+
+.entry-texts, .entry-buttons { position: static; }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: center; pointer-events: none; }
+
+/* Each button's own sprite, size and place are its row rule's (<document>_rows.rcss); what every
+   button shares is only that it is a button. */
+.entry-btn {
+	display: block;
+	position: absolute;
+	pointer-events: auto;
+}
+/* A line's box: the panel's width unless its row rule says otherwise. Its text centres on it. */
+.entry-text { display: block; position: absolute; width: 190px; }
+.entry-label { color: #ffffff; }
+.entry-btn.locked .entry-label { color: #646464; }

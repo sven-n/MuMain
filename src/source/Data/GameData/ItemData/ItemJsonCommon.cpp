@@ -4,6 +4,8 @@
 
 #include <algorithm>
 #include <cctype>
+#include <fstream>
+#include <iterator>
 #include <limits>
 
 namespace Data::Items::Json
@@ -181,10 +183,37 @@ bool ReadFileVersion(std::string_view text, const std::string& source, int maxFo
     return ReadFormatVersion(root, source, maxFormatVersion, issues);
 }
 
+std::optional<std::string> ReadTextFile(const std::filesystem::path& path)
+{
+    constexpr std::string_view Utf8ByteOrderMark = "\xEF\xBB\xBF";
+    std::ifstream file(path, std::ios::binary);
+    if (!file)
+    {
+        return std::nullopt;
+    }
+    std::string text((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    if (text.starts_with(Utf8ByteOrderMark))
+    {
+        text.erase(0, Utf8ByteOrderMark.size());
+    }
+    return text;
+}
+
 bool ReadFileHeader(std::string_view text, const std::string& source, int maxFormatVersion, OrderedJson& root,
                     int& group, std::vector<ItemDataIssue>& issues)
 {
     return ReadFileVersion(text, source, maxFormatVersion, root, issues) && ReadGroup(root, source, group, issues);
+}
+
+OrderedJson WriteLocalizedString(const LocalizedString& text)
+{
+    OrderedJson json = OrderedJson::object();
+    json[std::string(LocalizedString::NeutralLocale)] = text.GetNeutral();
+    for (const auto& [locale, translation] : text.GetTranslations())
+    {
+        json[locale] = translation;
+    }
+    return json;
 }
 
 std::string PutListsOnOneLine(const std::string& text, std::string_view key)

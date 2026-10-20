@@ -10,7 +10,7 @@
 
 #include "Core/Platform/CrtDbg.h"
 
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Core/Utilities/UsefulDef.h"
 
 #define	QM_NPCDIALOGUE_FILE			L"Data\\Local\\NPCDialogue.bmd"
@@ -269,12 +269,12 @@ void CQuestMng::SetCurQuestProgress(DWORD dwQuestIndex)
 
     if (LOWORD(dwQuestIndex) == 0x00FF)
     {
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS))
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_QUEST_PROGRESS);
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC);
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS))
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_QUEST_PROGRESS);
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC))
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC);
 
-        g_pSystemLogBox->AddText(I18N::Game::YouVeSuccessfullyCompletedTheQuest, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouVeSuccessfullyCompletedTheQuest, mu::ui::window::TYPE_ERROR_MESSAGE);
 
         return;
     }
@@ -291,14 +291,14 @@ void CQuestMng::SetCurQuestProgress(DWORD dwQuestIndex)
     if (0 == iter->second.m_byUIType)
     {
         g_pQuestProgress->SetContents(dwQuestIndex);
-        if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS))
-            g_pNewUISystem->Show(SEASON3B::INTERFACE_QUEST_PROGRESS);
+        if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS))
+            g_pNewUISystem->Show(mu::ui::window::INTERFACE_QUEST_PROGRESS);
     }
     else
     {
         g_pQuestProgressByEtc->SetContents(dwQuestIndex);
-        if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
-            g_pNewUISystem->Show(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC);
+        if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC))
+            g_pNewUISystem->Show(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC);
     }
 }
 
@@ -429,6 +429,24 @@ bool CQuestMng::IsRequestRewardQS(DWORD dwQuestIndex)
 
 namespace
 {
+// The original client's text color for each requirement/reward line kind.
+DWORD NativeRequestRewardTextColor(REQUEST_REWARD_TEXT_KIND kind)
+{
+    switch (kind)
+    {
+    case RRTK_HEADING:
+        return ARGB(255, 179, 230, 77);
+    case RRTK_REQUIREMENT_UNMET:
+        return ARGB(255, 255, 30, 30);
+    case RRTK_RANDOM_REWARD:
+        return ARGB(255, 103, 103, 223);
+    case RRTK_REQUIREMENT:
+    case RRTK_REWARD:
+        break;
+    }
+    return ARGB(255, 223, 191, 103);
+}
+
 // m_szText is a small fixed array and translators decide the length of these
 // lines, so every write is bounded and truncates instead of overrunning it.
 template <typename... Args> void FormatRequestRewardText(SRequestRewardText& line, const wchar_t* format, Args... args)
@@ -490,7 +508,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
     int i;
 
     aDest[nLine].m_hFont = g_hFontBold;
-    aDest[nLine].m_dwColor = ARGB(255, 179, 230, 77);
+    aDest[nLine].m_eKind = RRTK_HEADING;
     FormatRequestRewardText(aDest[nLine++], L"%ls", I18N::Game::Requirements);
 
     SQuestRequest* pRequestInfo;
@@ -507,7 +525,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
         switch (pRequestInfo->m_dwType)
         {
         case QUEST_REQUEST_NONE:
-            aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
+            aDest[nLine].m_eKind = RRTK_REQUIREMENT;
             FormatRequestRewardText(aDest[nLine], L"%ls", I18N::Game::None);
             break;
 
@@ -519,11 +537,11 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
         case QUEST_REQUEST_PVP_POINT:
             if (pRequestInfo->m_dwCurValue < pRequestInfo->m_dwValue)
             {
-                aDest[nLine].m_dwColor = ARGB(255, 255, 30, 30);
+                aDest[nLine].m_eKind = RRTK_REQUIREMENT_UNMET;
                 bRequestComplete = false;
             }
             else
-                aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
+                aDest[nLine].m_eKind = RRTK_REQUIREMENT;
 
             switch (pRequestInfo->m_dwType)
             {
@@ -565,12 +583,12 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
         case QUEST_REQUEST_MONSTER:
             if ((DWORD)pRequestInfo->m_wCurValue < pRequestInfo->m_dwValue)
             {
-                aDest[nLine].m_dwColor = ARGB(255, 255, 30, 30);
+                aDest[nLine].m_eKind = RRTK_REQUIREMENT_UNMET;
                 bRequestComplete = false;
             }
             else
             {
-                aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
+                aDest[nLine].m_eKind = RRTK_REQUIREMENT;
             }
 
             {
@@ -590,11 +608,11 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             if (0 == pRequestInfo->m_wCurValue)
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
             {
-                aDest[nLine].m_dwColor = ARGB(255, 255, 30, 30);
+                aDest[nLine].m_eKind = RRTK_REQUIREMENT_UNMET;
                 bRequestComplete = false;
             }
             else
-                aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
+                aDest[nLine].m_eKind = RRTK_REQUIREMENT;
 
             FormatRequestRewardText(aDest[nLine], I18N::Game::QuestRequirementSkill,
                                     SkillAttribute[pRequestInfo->m_wIndex].Name);
@@ -604,11 +622,11 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
         case QUEST_REQUEST_ITEM:
             if ((DWORD)pRequestInfo->m_wCurValue < pRequestInfo->m_dwValue)
             {
-                aDest[nLine].m_dwColor = ARGB(255, 255, 30, 30);
+                aDest[nLine].m_eKind = RRTK_REQUIREMENT_UNMET;
                 bRequestComplete = false;
             }
             else
-                aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
+                aDest[nLine].m_eKind = RRTK_REQUIREMENT;
 
             wchar_t szItemName[32];
             ::GetItemName((int)pRequestInfo->m_pItem->Type, pRequestInfo->m_pItem->Level,
@@ -622,11 +640,11 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
         case QUEST_REQUEST_LEVEL:
             if ((DWORD)pRequestInfo->m_wCurValue < pRequestInfo->m_dwValue)
             {
-                aDest[nLine].m_dwColor = ARGB(255, 255, 30, 30);
+                aDest[nLine].m_eKind = RRTK_REQUIREMENT_UNMET;
                 bRequestComplete = false;
             }
             else
-                aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
+                aDest[nLine].m_eKind = RRTK_REQUIREMENT;
 
             FormatRequestRewardText(aDest[nLine], I18N::Game::QuestRequirementLevel,
                                     static_cast<unsigned long>(pRequestInfo->m_dwValue));
@@ -639,10 +657,10 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
 #else	// ASG_ADD_TIME_LIMIT_QUEST
             if (pRequestInfo->m_wCurValue == 1)
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
-                aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
+                aDest[nLine].m_eKind = RRTK_REQUIREMENT;
             else
             {
-                aDest[nLine].m_dwColor = ARGB(255, 255, 30, 30);
+                aDest[nLine].m_eKind = RRTK_REQUIREMENT_UNMET;
                 bRequestComplete = false;
             }
 
@@ -665,11 +683,11 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             if (pRequestInfo->m_wCurValue == 0)
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
             {
-                aDest[nLine].m_dwColor = ARGB(255, 255, 30, 30);
+                aDest[nLine].m_eKind = RRTK_REQUIREMENT_UNMET;
                 bRequestComplete = false;
             }
             else
-                aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
+                aDest[nLine].m_eKind = RRTK_REQUIREMENT;
 
             const BuffInfo buffinfo = g_BuffInfo((eBuffState)pRequestInfo->m_wIndex);
             FormatRequestRewardText(aDest[nLine], I18N::Game::QuestRequirementBuff, buffinfo.s_BuffName);
@@ -687,11 +705,11 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             if ((DWORD)pRequestInfo->m_wCurValue < pRequestInfo->m_dwValue)
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
             {
-                aDest[nLine].m_dwColor = ARGB(255, 255, 30, 30);
+                aDest[nLine].m_eKind = RRTK_REQUIREMENT_UNMET;
                 bRequestComplete = false;
             }
             else
-                aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
+                aDest[nLine].m_eKind = RRTK_REQUIREMENT;
 
             int nTextIndex = 0;
             switch (pRequestInfo->m_dwType)
@@ -730,11 +748,11 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             if (pRequestInfo->m_wCurValue == 0)
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
             {
-                aDest[nLine].m_dwColor = ARGB(255, 255, 30, 30);
+                aDest[nLine].m_eKind = RRTK_REQUIREMENT_UNMET;
                 bRequestComplete = false;
             }
             else
-                aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
+                aDest[nLine].m_eKind = RRTK_REQUIREMENT;
 
             int nTextIndex = 0;
             switch (pRequestInfo->m_dwType)
@@ -773,7 +791,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
         else
             continue;
         aDest[nLine].m_hFont = g_hFontBold;
-        aDest[nLine++].m_dwColor = ARGB(255, 179, 230, 77);
+        aDest[nLine++].m_eKind = RRTK_HEADING;
 
         byRewardCount = 0 == j
             ? pRequestReward->m_byGeneralRewardCount
@@ -783,7 +801,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             pRewardInfo = &pRequestReward->m_aReward[i];
 
             aDest[nLine].m_hFont = g_hFont;
-            aDest[nLine].m_dwColor = 0 == j ? ARGB(255, 223, 191, 103) : ARGB(255, 103, 103, 223);
+            aDest[nLine].m_eKind = 0 == j ? RRTK_REWARD : RRTK_RANDOM_REWARD;
             aDest[nLine].m_eRequestReward = RRC_REWARD;
             aDest[nLine].m_dwType = pRewardInfo->m_dwType;
             aDest[nLine].m_wIndex = pRewardInfo->m_wIndex;
@@ -793,6 +811,9 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             aDest[nLine].m_szText[QM_MAX_REQUEST_REWARD_TEXT_LEN - 1] = 0;
         }
     }
+
+    for (int line = 0; line < nLine; ++line)
+        aDest[line].m_dwColor = NativeRequestRewardTextColor(aDest[line].m_eKind);
     return bRequestComplete;
 }
 

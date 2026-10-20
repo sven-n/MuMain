@@ -112,6 +112,8 @@ void MoveJoints();
 void RenderJoints(BYTE bRenderOneMore = 0);
 
 void GetMagicScrew(int iParam, vec3_t vResult, float fSpeedRate = 1.0f);
+void GetMagicScrewAt(double frame, vec3_t vResult, float fSpeedRate = 1.0f);
+double ReferenceFrameClock();
 
 inline void GetNearRandomPos(vec3_t Pos, int iRange, vec3_t NewPos)
 {

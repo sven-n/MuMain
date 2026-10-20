@@ -21,8 +21,43 @@ std::wstring CutToItemAttributeName(const std::wstring& name);
 void CopyItemAttributeStats(const ITEM_ATTRIBUTE& attribute, ItemDefinition& definition);
 
 // Copies the fields ITEM_ATTRIBUTE (and so item.bmd) does not have: tags,
-// wing tier and rule flags.
+// wing tier, weapon kind, stat profile, potion priority, excellent bonus,
+// excellentRaisesLevel, the requirements by level and rule flags.
 void CopyFieldsNotInItemAttribute(const ItemDefinition& source, ItemDefinition& target);
+
+// The weapon kind the item's group gives, by group and slot as in OpenMU:
+// swords in group 0 (gloves when only the Rage Fighter may use the item),
+// axes in group 1, maces in group 2 and spears in group 3, all on mainHand; in
+// group 4 bows on offHand and crossbows on mainHand, in group 5 staffs on
+// mainHand and books on offHand, and shields in group 6 on offHand. An item on
+// another slot gets none. The arrows and bolts of group 4 are left out as
+// one-handed items (OpenMU tells them apart by their height of 1).
+WeaponKind GetGroupWeaponKind(const ItemDefinition& definition);
+
+// The weapon kind of an item after the bmd import or the item editor changed it
+// (previous: the item before the change, nullptr for a new item). While the
+// item has the kind its group gives, or is new, the kind follows its group and
+// slot (in group 0 also the class requirements), so an undone edit undoes it
+// too; a kind set in the item file that differs from the group's stays as long
+// as it differs.
+WeaponKind FollowGroupWeaponKind(const ItemDefinition* previous, const ItemDefinition& updated);
+
+// The stat profile the item's own data gives: none for arrows and bolts,
+// "sceptre" for an item with the sceptre tag, "book" for a summoner book,
+// "shield" for a shield, "weapon" for another item with a weapon kind, "armor"
+// for an armour slot, the wing tier's profile for wings ("firstTierWing",
+// "secondTierWing", "secondTierCape" for a second tier cape, "thirdTierWing",
+// "smallWing"), "scroll" for another item of group 15 with requirements,
+// "helper" for another item of group 13 or 14 with a base level requirement, and
+// the default ("") for the others.
+std::string DeriveStatProfile(const ItemDefinition& definition);
+
+// The stat profile of an item after the bmd import or the item editor changed
+// it, like FollowGroupWeaponKind: while the item has the profile its data gives,
+// has none (as in item files saved before the field) or is new, the profile
+// follows its data; a profile set in the item file that differs from it, also
+// "default", stays as long as it differs.
+std::string FollowStatProfile(const ItemDefinition* previous, const ItemDefinition& updated);
 
 // The attribute's name becomes the neutral (English) name.
 ItemDefinition ToItemDefinition(const ITEM_ATTRIBUTE& attribute, int itemType);

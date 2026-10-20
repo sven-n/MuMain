@@ -1,0 +1,153 @@
+/* Legacy theme for CMiniMap, reproducing the original's Render(): the 85% black fill over the
+   top 430 reference rows, the map texture and its markers (placed by C++ in physical px, see
+   mini_map.rml), the hero arrow, 25 border tiles along the top and bottom, 20 along each side, the
+   four corners and the close button. Sprite rectangles are the texels each RenderImage() call
+   covered (the textures are padded to a power of two: 41.7/64, 17.5/32, 36/64 x 29/64). */
+
+@spritesheet mm-line-sheet { src: "../../../mini_map_ui_line.jpg"; mm-line: 0px 0px 41.7px 8px; }
+@spritesheet mm-corner-sheet { src: "../../../mini_map_ui_corner.tga"; mm-corner: 0px 0px 41.7px 41.7px; }
+@spritesheet mm-hero-sheet { src: "../../../mini_map_ui_cha.tga"; mm-hero: 0px 0px 17.5px 17.5px; }
+@spritesheet mm-npc-sheet { src: "../../../mini_map_ui_npc.tga"; mm-npc: 0px 0px 17.5px 17.5px; }
+@spritesheet mm-portal-sheet { src: "../../../mini_map_ui_portal.tga"; mm-portal: 0px 0px 17.5px 17.5px; }
+@spritesheet mm-close-sheet { src: "../../../mini_map_ui_cancel.tga"; mm-close: 0px 0px 36px 29px; }
+
+body { pointer-events: none; }
+
+.clip {
+	position: absolute;
+	overflow: hidden;
+	/* The map and the markers are transformed and overflow nothing in layout terms: without
+	   clip: always RmlUi would not clip them at all. The .clip itself is untransformed, so this is a
+	   scissor rectangle. */
+	clip: always;
+	pointer-events: none;
+}
+.world {
+	position: absolute;
+	width: 0;
+	height: 0;
+	pointer-events: none;
+}
+
+/* The screen's stretch: reference px, scaled from the window's top-left. */
+.screen {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640px;
+	height: 480px;
+	transform-origin: left top;
+	transform: scale(var(--overlay-scale-x), var(--overlay-scale-y));
+	pointer-events: none;
+}
+
+/* RenderColor(0, 0, 640, 430, 0.85, 1): black at alpha 216 (0.85 * 255, truncated). */
+.dim { position: absolute; left: 0; top: 0; width: 640px; height: 430px; background-color: #000000d8; }
+
+/* The world's map texture, 800 map pixels square, placed by its matrix. */
+.map {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 800px;
+	height: 800px;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+.marker {
+	position: absolute;
+	left: 0;
+	top: 0;
+	transform-origin: left top;
+	decorator: image(mm-npc);
+	pointer-events: none;
+}
+.marker.portal { decorator: image(mm-portal); }
+
+/* RenderImage(cha, 325, 230, 12, 12). */
+.hero { position: absolute; left: 325px; top: 230px; width: 12px; height: 12px; decorator: image(mm-hero); }
+
+/* 35 x 6 tiles: the top row with the texture upside down (v from 1 to 0), the bottom one at
+   430 - 6. */
+.edge-top, .edge-bottom { position: absolute; width: 35px; height: 6px; }
+.edge-top { top: 0; decorator: image(mm-line flip-vertical); }
+.edge-bottom { top: 424px; decorator: image(mm-line); }
+
+/* The side tiles, turned a quarter around their centres by their matrix. */
+.edge-side {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 41.7px;
+	height: 8px;
+	transform-origin: left top;
+	decorator: image(mm-line);
+	pointer-events: none;
+}
+
+/* 35 x 35 corners, mirrored by negative texture widths/heights in the original. */
+.corner { position: absolute; width: 35px; height: 35px; }
+.corner-tl { left: 0; top: 0; decorator: image(mm-corner); }
+.corner-tr { left: 605px; top: 0; decorator: image(mm-corner flip-horizontal); }
+.corner-bl { left: 0; top: 395px; decorator: image(mm-corner flip-vertical); }
+.corner-br { left: 605px; top: 395px; decorator: image(mm-corner rotate-180); }
+
+/* The original's UpdateMouseEvent() kept the pointer over the top 430 rows to itself. */
+.hit { position: absolute; left: 0; top: 0; width: 640px; height: 430px; pointer-events: auto; }
+
+/* m_BtnExit: (640 - 27, 3), 30 x 25; the original's button never changed its picture. */
+.close {
+	position: absolute;
+	left: 613px;
+	top: 3px;
+	width: 30px;
+	height: 25px;
+	decorator: image(mm-close);
+	pointer-events: auto;
+	cursor: pointer;
+}
+
+/* Check_Btn(): the marker's name, white on 70% black, centred in its box. */
+.hint {
+	position: absolute;
+	background-color: #000000b4;
+	pointer-events: none;
+}
+.hint-text {
+	display: block;
+	width: 100%;
+	font-family: "token(font-body)";
+	color: #ffffff;
+	text-align: center;
+	white-space: nowrap;
+}
+
+/* The top and bottom edge tiling: 25 tiles of 35 units each, the decoration the original stepped
+   across the map's own width. The containers take no space. */
+.edges { position: static; }
+.edges .edge-top:nth-child(1), .edges .edge-bottom:nth-child(1) { left: 0px; }
+.edges .edge-top:nth-child(2), .edges .edge-bottom:nth-child(2) { left: 35px; }
+.edges .edge-top:nth-child(3), .edges .edge-bottom:nth-child(3) { left: 70px; }
+.edges .edge-top:nth-child(4), .edges .edge-bottom:nth-child(4) { left: 105px; }
+.edges .edge-top:nth-child(5), .edges .edge-bottom:nth-child(5) { left: 140px; }
+.edges .edge-top:nth-child(6), .edges .edge-bottom:nth-child(6) { left: 175px; }
+.edges .edge-top:nth-child(7), .edges .edge-bottom:nth-child(7) { left: 210px; }
+.edges .edge-top:nth-child(8), .edges .edge-bottom:nth-child(8) { left: 245px; }
+.edges .edge-top:nth-child(9), .edges .edge-bottom:nth-child(9) { left: 280px; }
+.edges .edge-top:nth-child(10), .edges .edge-bottom:nth-child(10) { left: 315px; }
+.edges .edge-top:nth-child(11), .edges .edge-bottom:nth-child(11) { left: 350px; }
+.edges .edge-top:nth-child(12), .edges .edge-bottom:nth-child(12) { left: 385px; }
+.edges .edge-top:nth-child(13), .edges .edge-bottom:nth-child(13) { left: 420px; }
+.edges .edge-top:nth-child(14), .edges .edge-bottom:nth-child(14) { left: 455px; }
+.edges .edge-top:nth-child(15), .edges .edge-bottom:nth-child(15) { left: 490px; }
+.edges .edge-top:nth-child(16), .edges .edge-bottom:nth-child(16) { left: 525px; }
+.edges .edge-top:nth-child(17), .edges .edge-bottom:nth-child(17) { left: 560px; }
+.edges .edge-top:nth-child(18), .edges .edge-bottom:nth-child(18) { left: 595px; }
+.edges .edge-top:nth-child(19), .edges .edge-bottom:nth-child(19) { left: 630px; }
+.edges .edge-top:nth-child(20), .edges .edge-bottom:nth-child(20) { left: 665px; }
+.edges .edge-top:nth-child(21), .edges .edge-bottom:nth-child(21) { left: 700px; }
+.edges .edge-top:nth-child(22), .edges .edge-bottom:nth-child(22) { left: 735px; }
+.edges .edge-top:nth-child(23), .edges .edge-bottom:nth-child(23) { left: 770px; }
+.edges .edge-top:nth-child(24), .edges .edge-bottom:nth-child(24) { left: 805px; }
+.edges .edge-top:nth-child(25), .edges .edge-bottom:nth-child(25) { left: 840px; }

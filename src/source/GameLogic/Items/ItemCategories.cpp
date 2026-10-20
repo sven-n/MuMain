@@ -4,14 +4,15 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 
-// The categories come from the item data (tags, slot and wing tier in
-// Data/Items/*.json); see docs/item-data.md. The lists that are only used for
+// The categories come from the item data (tags, slot, wing tier and weapon
+// kind in Data/Items/*.json); see docs/item-data.md. The lists that are only used for
 // drawing items and for tooltips are still hardcoded, in
 // ItemDisplayCategories.cpp.
 namespace
 {
 using Data::Items::ItemSlot;
 using Data::Items::ItemTag;
+using Data::Items::WeaponKind;
 using Data::Items::WingTier;
 
 bool HasTag(int itemType, ItemTag tag)
@@ -46,14 +47,35 @@ namespace GameLogic::Items
         return HasWingTier(pItem, WingTier::Second) && !HasTag(pItem, ItemTag::Cape);
     }
 
+    bool IsSecondTierWing(const ITEM* pItem)
+    {
+        return HasWingTier(pItem, WingTier::Second);
+    }
+
     bool IsThirdTierWing(const ITEM* pItem)
     {
         return HasWingTier(pItem, WingTier::Third);
     }
 
+    bool IsSecondOrThirdTierWing(const ITEM* pItem)
+    {
+        const WingTier tier = g_ItemDatabase.GetWingTier(pItem->Type);
+        return tier == WingTier::Second || tier == WingTier::Third;
+    }
+
+    bool IsSecondTierCape(const ITEM* pItem)
+    {
+        return HasWingTier(pItem, WingTier::Second) && HasTag(pItem, ItemTag::Cape);
+    }
+
     bool IsSmallWing(const ITEM* pItem)
     {
         return HasWingTier(pItem, WingTier::Small);
+    }
+
+    bool IsPetSlotModel(int modelType)
+    {
+        return g_ItemDatabase.GetSlot(Data::Items::ToItemType(modelType)) == ItemSlot::Pet;
     }
 
     bool IsRideableMount(const ITEM* pItem)
@@ -113,6 +135,16 @@ namespace GameLogic::Items
     bool IsPandaOrSkeletonItem(const ITEM* pItem)
     {
         return HasTag(pItem, ItemTag::PandaOrSkeleton);
+    }
+
+    bool IsPandaOrSkeletonType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::PandaOrSkeleton);
+    }
+
+    bool IsTransformationRingType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::TransformationRing);
     }
 
     bool IsJewelItem(const ITEM* pItem)
@@ -190,6 +222,11 @@ namespace GameLogic::Items
         return HasTag(itemType, ItemTag::ComplexPotion);
     }
 
+    bool IsShieldPotionType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::ShieldPotion);
+    }
+
     bool IsElitePotion(const ITEM* pItem)
     {
         return HasTag(pItem, ItemTag::ElitePotion);
@@ -248,6 +285,11 @@ namespace GameLogic::Items
     bool IsLuckyItemTicket(const ITEM* pItem)
     {
         return HasTag(pItem, ItemTag::LuckyItemTicket);
+    }
+
+    bool IsLuckyItemType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::LuckyItem);
     }
 
     bool IsLuckyItemTicketModel(int modelType)
@@ -333,6 +375,110 @@ namespace GameLogic::Items
     bool IsSummonerBookModel(int modelType)
     {
         return HasTag(Data::Items::ToItemType(modelType), ItemTag::SummonerBook);
+    }
+
+    bool IsSceptreType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::Sceptre);
+    }
+
+    bool IsMagicSwordType(int itemType)
+    {
+        return HasTag(itemType, ItemTag::MagicSword);
+    }
+
+    bool IsBowType(int itemType)
+    {
+        return g_ItemDatabase.GetWeaponKind(itemType) == WeaponKind::Bow;
+    }
+
+    bool IsBowModel(int modelType)
+    {
+        return IsBowType(Data::Items::ToItemType(modelType));
+    }
+
+    bool IsCrossbowType(int itemType)
+    {
+        return g_ItemDatabase.GetWeaponKind(itemType) == WeaponKind::Crossbow;
+    }
+
+    bool IsCrossbowModel(int modelType)
+    {
+        return IsCrossbowType(Data::Items::ToItemType(modelType));
+    }
+
+    bool IsSpearType(int itemType)
+    {
+        return g_ItemDatabase.GetWeaponKind(itemType) == WeaponKind::Spear;
+    }
+
+    bool IsSpearModel(int modelType)
+    {
+        return IsSpearType(Data::Items::ToItemType(modelType));
+    }
+
+    bool IsShieldType(int itemType)
+    {
+        return g_ItemDatabase.GetWeaponKind(itemType) == WeaponKind::Shield;
+    }
+
+    bool IsBowCrossbowOrAmmunition(const ITEM* pItem)
+    {
+        const WeaponKind kind = g_ItemDatabase.GetWeaponKind(pItem->Type);
+        return kind == WeaponKind::Bow || kind == WeaponKind::Crossbow || IsAmmunition(pItem);
+    }
+
+    bool IsSwordOrGloveType(int itemType)
+    {
+        const WeaponKind kind = g_ItemDatabase.GetWeaponKind(itemType);
+        return kind == WeaponKind::Sword || kind == WeaponKind::Glove;
+    }
+
+    bool IsSwordOrGloveModel(int modelType)
+    {
+        return IsSwordOrGloveType(Data::Items::ToItemType(modelType));
+    }
+
+    bool IsSwordAxeMaceOrGloveType(int itemType)
+    {
+        const WeaponKind kind = g_ItemDatabase.GetWeaponKind(itemType);
+        return kind == WeaponKind::Sword || kind == WeaponKind::Axe || kind == WeaponKind::Mace ||
+               kind == WeaponKind::Glove;
+    }
+
+    bool IsStaffType(int itemType)
+    {
+        return g_ItemDatabase.GetWeaponKind(itemType) == WeaponKind::Staff;
+    }
+
+    bool IsStaffOrBookType(int itemType)
+    {
+        const WeaponKind kind = g_ItemDatabase.GetWeaponKind(itemType);
+        return kind == WeaponKind::Staff || kind == WeaponKind::Book;
+    }
+
+    bool IsStaffOrBookModel(int modelType)
+    {
+        return IsStaffOrBookType(Data::Items::ToItemType(modelType));
+    }
+
+    bool IsWeaponOrAmmunition(const ITEM* pItem)
+    {
+        switch (g_ItemDatabase.GetWeaponKind(pItem->Type))
+        {
+        case WeaponKind::Sword:
+        case WeaponKind::Glove:
+        case WeaponKind::Axe:
+        case WeaponKind::Mace:
+        case WeaponKind::Spear:
+        case WeaponKind::Bow:
+        case WeaponKind::Crossbow:
+        case WeaponKind::Staff:
+        case WeaponKind::Book:
+            return true;
+        default:
+            return IsAmmunition(pItem);
+        }
     }
 
     bool IsHighValueItem(const ITEM* pItem)

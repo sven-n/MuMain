@@ -1,0 +1,144 @@
+<rml>
+<head>
+	<title>MU Helper</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="skill_icons.rcss"/>
+	<link type="text/rcss" href="master_skill_icons.rcss"/>
+	<link type="text/rcss" href="mu_helper_common.rcss"/>
+	<link type="text/rcss" href="mu_helper_config.rcss"/>
+</head>
+<body>
+	<!-- Modern theme's own copy of CMuHelperConfigWindow -- the forged-dialog shell and header rail
+	     its right-dock neighbours use, with plain px text that scales with the panel like theirs.
+	     Under the header, the tabs, one scroll pane of native's group boxes and the footer flow in
+	     one column: each group keeps native's size and grows, and each label wraps, when its text
+	     needs more room. Same ids, model fields and event names as ../../mu_helper_config.rml,
+	     which keeps native's positions; keep them in step. -->
+	<div id="panel" data-model="mu_helper_config">
+		<div class="modern-shell-edge"></div>
+		<div class="modern-groove"></div>
+		<div class="modern-header-rail-px docked-header-rail-fill">
+			<div class="modern-joint-px"></div>
+			<div class="docked-rail-accent"></div>
+		</div>
+
+		<span id="title" class="mh-text mh-center mh-bold mh-title">{{labels.title}}</span>
+
+		<div id="mhc_main">
+			<div id="mhc_tabs">
+				<div class="mhc-tab-cell"><div id="tab_0" class="mh-tab" data-class-active="active_tab == 0" data-event-click="muhelper_tab(0)"></div><span id="tab_0_label" class="mh-text mh-center mh-tab-label" data-class-active="active_tab == 0">{{labels.tab_hunting}}</span></div>
+				<div class="mhc-tab-cell"><div id="tab_1" class="mh-tab" data-class-active="active_tab == 1" data-event-click="muhelper_tab(1)"></div><span id="tab_1_label" class="mh-text mh-center mh-tab-label" data-class-active="active_tab == 1">{{labels.tab_obtaining}}</span></div>
+				<div class="mhc-tab-cell"><div id="tab_2" class="mh-tab" data-class-active="active_tab == 2" data-event-click="muhelper_tab(2)"></div><span id="tab_2_label" class="mh-text mh-center mh-tab-label" data-class-active="active_tab == 2">{{labels.tab_other}}</span></div>
+			</div>
+			<div id="mhc_body" class="scroll-pane">
+				<!-- Hunting -->
+				<div class="mhc-page" data-class-hidden="active_tab != 0">
+				<div class="mhc-pair">
+				<div id="box_h_range" class="mh-box mhc-group mhc-range"><div class="b b-fill"></div>
+					<div class="mhc-content">
+						<div class="mhc-range-value"><span id="h_range_label" class="mh-text mhc-range-label">{{labels.range}}</span><span id="h_range_digit" class="mh-text mh-range-digit">{{hunt_range}}</span></div>
+						<div class="mhc-steps"><div id="btn_hunt_add" class="mh-btn-plus modern-btn-px" data-event-click="muhelper_button('hunt_add')"><span class="mh-glyph">+</span></div><div id="btn_hunt_minus" class="mh-btn-minus modern-btn-px" data-event-click="muhelper_button('hunt_minus')"><span class="mh-glyph">&#8722;</span></div></div>
+					</div>
+				</div>
+				<div id="box_h_recovery" class="mh-box mhc-group mhc-recovery"><div class="b b-fill"></div>
+					<div class="mhc-content">
+						<div class="mhc-split"><div class="mhc-col"><div id="cb_potion" class="mh-check"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.potion" data-event-click="muhelper_toggle('potion')"></div><span class="mh-text checkbox-label">{{labels.potion}}</span></div><div id="cb_auto_heal" class="mh-check" data-class-hidden="!features.auto_heal"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.auto_heal" data-event-click="muhelper_toggle('auto_heal')"></div><span class="mh-text checkbox-label">{{labels.auto_heal}}</span></div><div id="cb_drain_life" class="mh-check" data-class-hidden="!features.drain_life"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.drain_life" data-event-click="muhelper_toggle('drain_life')"></div><span class="mh-text checkbox-label">{{labels.drain_life}}</span></div></div><div class="mhc-btn mhc-btn-setting"><div id="btn_potion_setting" class="mh-btn-setting modern-btn-px" data-class-summoner="features.potion_summoner" data-event-click="muhelper_button('potion_setting')"></div><span id="btn_potion_setting_label" class="mh-text mh-center mh-btn-label" data-class-summoner="features.potion_summoner">{{labels.setting}}</span></div></div>
+					</div>
+				</div>
+				</div>
+				<div id="box_h_movement" class="mh-box mhc-group mhc-movement"><div class="b b-fill"></div>
+					<div class="mhc-content">
+						<div id="cb_long_distance" class="mh-check"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.long_distance" data-event-click="muhelper_toggle('long_distance')"></div><span class="mh-text checkbox-label">{{labels.long_distance}}</span></div>
+						<div class="mhc-wrap"><div id="cb_orig_position" class="mh-check"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.orig_position" data-event-click="muhelper_toggle('orig_position')"></div><span class="mh-text checkbox-label">{{labels.orig_position}}</span></div><div class="mhc-inline"><span id="distance_label" class="mh-text">{{labels.distance}}</span><div class="mhc-number"><div id="distance_plate" class="mh-number-plate"></div><input id="distance_time" type="text" class="text-field text-field--numeric mh-field" data-value="distance_time"/></div><span id="distance_unit" class="mh-text">{{labels.seconds}}</span></div></div>
+					</div>
+				</div>
+				<div id="box_h_skills" class="mh-box mhc-group mhc-skills"><div class="b b-fill"></div>
+					<div class="mhc-content">
+						<div class="mhc-skill-row"><div class="mhc-slot-col"><span id="basic_skill_label" class="mh-text">{{labels.basic_skill}}</span><div id="slot_0" class="mh-slot slot slot--filled" data-event-click="muhelper_slot(0)" data-event-mouseup="muhelper_slot_clear(0)"><div class="mh-slot-icon" data-style-decorator="slots.s0"></div></div></div><div class="mhc-slot-col"><span id="activation1_label" class="mh-text">{{labels.activation_skill1}}</span><div id="slot_1" class="mh-slot slot slot--filled" data-event-click="muhelper_slot(1)" data-event-mouseup="muhelper_slot_clear(1)"><div class="mh-slot-icon" data-style-decorator="slots.s1"></div></div></div><div class="mhc-opts"><div class="mhc-wrap"><div id="cb_skill2_delay" class="mh-check"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.skill2_delay" data-event-click="muhelper_toggle('skill2_delay')"></div><span class="mh-text checkbox-label">{{labels.delay}}</span></div><div class="mhc-inline"><div class="mhc-number"><div id="skill2_plate" class="mh-number-plate"></div><input id="skill2_delay" type="text" class="text-field text-field--numeric mh-field" data-value="skill2_delay"/></div><span id="skill2_unit" class="mh-text">{{labels.seconds}}</span></div></div><div class="mhc-wrap"><div id="cb_skill2_condition" class="mh-check"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.skill2_condition" data-event-click="muhelper_toggle('skill2_condition')"></div><span class="mh-text checkbox-label">{{labels.condition}}</span></div><div class="mhc-btn mhc-btn-setting"><div id="btn_skill2_setting" class="mh-btn-setting modern-btn-px" data-event-click="muhelper_button('skill2_setting')"></div><span id="btn_skill2_setting_label" class="mh-text mh-center mh-btn-label">{{labels.setting}}</span></div></div></div></div>
+						<div class="mhc-skill-row"><div class="mhc-class-col"><div id="cb_combo" class="mh-check" data-class-hidden="!features.combo"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.combo" data-event-click="muhelper_toggle('combo')"></div><span class="mh-text checkbox-label">{{labels.combo}}</span></div><div id="cb_use_pet" class="mh-check" data-class-hidden="!features.pet"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.use_pet" data-event-click="muhelper_toggle('use_pet')"></div><span class="mh-text checkbox-label">{{labels.use_pet}}</span></div><div class="mhc-radios" data-class-hidden="!features.pet"><div id="rb_raven_cease" class="mh-check mh-radio" data-class-hidden="!features.pet"><div class="checkbox-box modern-checkbox-px" data-class-checked="raven_mode == 0" data-event-click="muhelper_raven_mode(0)"></div><span class="mh-text checkbox-label">{{labels.raven_cease}}</span></div><div id="rb_raven_auto" class="mh-check mh-radio" data-class-hidden="!features.pet"><div class="checkbox-box modern-checkbox-px" data-class-checked="raven_mode == 1" data-event-click="muhelper_raven_mode(1)"></div><span class="mh-text checkbox-label">{{labels.raven_auto}}</span></div><div id="rb_raven_together" class="mh-check mh-radio" data-class-hidden="!features.pet"><div class="checkbox-box modern-checkbox-px" data-class-checked="raven_mode == 2" data-event-click="muhelper_raven_mode(2)"></div><span class="mh-text checkbox-label">{{labels.raven_together}}</span></div></div><div id="cb_party" class="mh-check" data-class-hidden="!features.party"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.party" data-event-click="muhelper_toggle('party')"></div><span class="mh-text checkbox-label">{{labels.party}}</span></div><div class="mhc-btn mhc-btn-setting" data-class-hidden="!features.party"><div id="btn_party_setting" class="mh-btn-setting modern-btn-px" data-event-click="muhelper_button('party_setting')"></div><span id="btn_party_setting_label" class="mh-text mh-center mh-btn-label">{{labels.setting}}</span></div></div><div class="mhc-slot-col" data-class-hidden="!features.skill3"><span id="activation2_label" class="mh-text" data-class-hidden="!features.skill3">{{labels.activation_skill2}}</span><div id="slot_2" class="mh-slot slot slot--filled" data-class-hidden="!features.skill3" data-event-click="muhelper_slot(2)" data-event-mouseup="muhelper_slot_clear(2)"><div class="mh-slot-icon" data-style-decorator="slots.s2"></div></div></div><div class="mhc-opts" data-class-hidden="!features.skill3"><div class="mhc-wrap"><div id="cb_skill3_delay" class="mh-check" data-class-hidden="!features.skill3"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.skill3_delay" data-event-click="muhelper_toggle('skill3_delay')"></div><span class="mh-text checkbox-label">{{labels.delay}}</span></div><div class="mhc-inline"><div class="mhc-number" data-class-hidden="!features.skill3"><div id="skill3_plate" class="mh-number-plate"></div><input id="skill3_delay" type="text" class="text-field text-field--numeric mh-field" data-value="skill3_delay"/></div><span id="skill3_unit" class="mh-text" data-class-hidden="!features.skill3">{{labels.seconds}}</span></div></div><div class="mhc-wrap"><div id="cb_skill3_condition" class="mh-check" data-class-hidden="!features.skill3"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.skill3_condition" data-event-click="muhelper_toggle('skill3_condition')"></div><span class="mh-text checkbox-label">{{labels.condition}}</span></div><div class="mhc-btn mhc-btn-setting" data-class-hidden="!features.skill3"><div id="btn_skill3_setting" class="mh-btn-setting modern-btn-px" data-event-click="muhelper_button('skill3_setting')"></div><span id="btn_skill3_setting_label" class="mh-text mh-center mh-btn-label">{{labels.setting}}</span></div></div></div></div>
+						<div id="cb_fallback" class="mh-check"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.fallback" data-event-click="muhelper_toggle('fallback')"></div><span class="mh-text checkbox-label">{{labels.fallback}}</span></div>
+					</div>
+				</div>
+				<div id="box_h_buffs" class="mh-box mhc-group mhc-buffs"><div class="b b-fill"></div>
+					<div class="mhc-content">
+						<div id="cb_buff_duration" class="mh-check"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.buff_duration" data-event-click="muhelper_toggle('buff_duration')"></div><span class="mh-text checkbox-label">{{labels.buff_duration}}</span></div>
+						<div class="mhc-slot-row"><div id="slot_3" class="mh-slot slot slot--filled" data-event-click="muhelper_slot(3)" data-event-mouseup="muhelper_slot_clear(3)"><div class="mh-slot-icon" data-style-decorator="slots.s3"></div></div><div id="slot_4" class="mh-slot slot slot--filled" data-event-click="muhelper_slot(4)" data-event-mouseup="muhelper_slot_clear(4)"><div class="mh-slot-icon" data-style-decorator="slots.s4"></div></div><div id="slot_5" class="mh-slot slot slot--filled" data-event-click="muhelper_slot(5)" data-event-mouseup="muhelper_slot_clear(5)"><div class="mh-slot-icon" data-style-decorator="slots.s5"></div></div></div>
+					</div>
+				</div>
+				</div>
+				<!-- Item pick-up -->
+				<div class="mhc-page" data-class-hidden="active_tab != 1">
+				<div class="mhc-pair">
+				<div id="box_o_range" class="mh-box mhc-group mhc-range"><div class="b b-fill"></div>
+					<div class="mhc-content">
+						<div class="mhc-range-value"><span id="o_range_label" class="mh-text mhc-range-label">{{labels.range}}</span><span id="o_range_digit" class="mh-text mh-range-digit">{{pick_range}}</span></div>
+						<div class="mhc-steps"><div id="btn_pick_add" class="mh-btn-plus modern-btn-px" data-event-click="muhelper_button('pick_add')"><span class="mh-glyph">+</span></div><div id="btn_pick_minus" class="mh-btn-minus modern-btn-px" data-event-click="muhelper_button('pick_minus')"><span class="mh-glyph">&#8722;</span></div></div>
+					</div>
+				</div>
+				<div id="box_o_repair" class="mh-box mhc-group mhc-repair"><div class="b b-fill"></div>
+					<div class="mhc-content">
+						<div id="cb_repair" class="mh-check"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.repair" data-event-click="muhelper_toggle('repair')"></div><span class="mh-text checkbox-label">{{labels.repair}}</span></div>
+					</div>
+				</div>
+				</div>
+				<div id="box_o_mode" class="mh-box mhc-group mhc-mode"><div class="b b-fill"></div>
+					<div class="mhc-content">
+						<div id="cb_pick_all" class="mh-check"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.pick_all" data-event-click="muhelper_toggle('pick_all')"></div><span class="mh-text checkbox-label">{{labels.pick_all}}</span></div>
+					</div>
+				</div>
+				<div id="box_o_items" class="mh-box mhc-group mhc-items"><div class="b b-fill"></div>
+					<div class="mhc-content">
+						<div id="cb_pick_selected" class="mh-check"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.pick_selected" data-event-click="muhelper_toggle('pick_selected')"></div><span class="mh-text checkbox-label">{{labels.pick_selected}}</span></div>
+						<div class="mhc-grid"><div id="cb_pick_jewel" class="mh-check"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.pick_jewel" data-event-click="muhelper_toggle('pick_jewel')"></div><span class="mh-text checkbox-label">{{labels.pick_jewel}}</span></div><div id="cb_pick_ancient" class="mh-check"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.pick_ancient" data-event-click="muhelper_toggle('pick_ancient')"></div><span class="mh-text checkbox-label">{{labels.pick_ancient}}</span></div><div id="cb_pick_zen" class="mh-check"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.pick_zen" data-event-click="muhelper_toggle('pick_zen')"></div><span class="mh-text checkbox-label">{{labels.pick_zen}}</span></div><div id="cb_pick_excellent" class="mh-check"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.pick_excellent" data-event-click="muhelper_toggle('pick_excellent')"></div><span class="mh-text checkbox-label">{{labels.pick_excellent}}</span></div></div>
+						<div id="cb_pick_extra" class="mh-check"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.pick_extra" data-event-click="muhelper_toggle('pick_extra')"></div><span class="mh-text checkbox-label">{{labels.pick_extra}}</span></div>
+						<div class="mhc-entry"><div class="mhc-string"><div id="item_plate" class="mh-string-plate"></div><input id="item_name" type="text" class="text-field mh-field" data-value="item_name"/></div><div class="mhc-btn mhc-btn-setting"><div id="btn_add_item" class="mh-btn-setting modern-btn-px" data-event-click="muhelper_button('add_item')"></div><span id="btn_add_item_label" class="mh-text mh-center mh-btn-label">{{labels.add}}</span></div></div>
+						<div id="box_o_list" class="mh-box mhc-group mhc-list"><div class="b b-fill"></div>
+					<div class="mhc-content">
+						<div id="extra_list" class="scroll-pane">
+							<div class="mh-extra-row" data-for="it : extra_items" data-class-selected="it.selected" data-event-click="muhelper_extra_select(it.index)">{{it.name}}</div>
+						</div>
+					</div>
+				</div>
+						<div class="mhc-end"><div class="mhc-btn mhc-btn-setting"><div id="btn_delete_item" class="mh-btn-setting modern-btn-px" data-event-click="muhelper_button('delete_item')"></div><span id="btn_delete_item_label" class="mh-text mh-center mh-btn-label">{{labels.remove}}</span></div></div>
+					</div>
+				</div>
+				</div>
+				<!-- Other settings -->
+				<div class="mhc-page" data-class-hidden="active_tab != 2">
+				<div id="box_x_accept" class="mh-box mhc-group mhc-accept"><div class="b b-fill"></div>
+					<div class="mhc-content">
+						<div id="cb_auto_friend" class="mh-check"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.auto_friend" data-event-click="muhelper_toggle('auto_friend')"></div><span class="mh-text checkbox-label">{{labels.auto_friend}}</span></div>
+						<div id="cb_auto_guild" class="mh-check"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.auto_guild" data-event-click="muhelper_toggle('auto_guild')"></div><span class="mh-text checkbox-label">{{labels.auto_guild}}</span></div>
+					</div>
+				</div>
+				<div id="box_x_defend" class="mh-box mhc-group mhc-defend"><div class="b b-fill"></div>
+					<div class="mhc-content">
+						<div id="cb_auto_defend" class="mh-check"><div class="checkbox-box modern-checkbox-px" data-class-checked="checks.auto_defend" data-event-click="muhelper_toggle('auto_defend')"></div><span class="mh-text checkbox-label">{{labels.auto_defend}}</span></div>
+					</div>
+				</div>
+				</div>
+				<!-- The extension-function note native drew under the second and third tabs. -->
+				<div class="mhc-page" data-class-hidden="active_tab == 0">
+				<div id="box_extension" class="mh-box mhc-group mhc-extension"><div class="b b-fill"></div>
+					<div class="mhc-content">
+						<span id="extension_used" class="mh-text">{{labels.extension_used}}</span>
+						<span id="extension_none" class="mh-text mh-orange">{{labels.extension_none}}</span>
+					</div>
+				</div>
+				</div>
+			</div>
+			<div id="mhc_footer">
+				<div class="mhc-btn mhc-btn-igs"><div id="btn_init" class="mh-btn-igs modern-btn-px" data-event-click="muhelper_button('init')"></div><span id="btn_init_label" class="mh-text mh-center mh-btn-label">{{labels.init}}</span></div>
+				<div class="mhc-btn mhc-btn-igs"><div id="btn_save" class="mh-btn-igs modern-btn-px" data-event-click="muhelper_button('save')"></div><span id="btn_save_label" class="mh-text mh-center mh-btn-label">{{labels.save}}</span></div>
+			</div>
+		</div>
+
+
+		<div id="frame_corner_close" data-event-click="muhelper_button('close')"></div>
+		<div id="btn_exit" class="modern-icon-btn-px" data-event-click="muhelper_button('close')" data-attr-data-hint="labels.close_tip">
+			<span class="modern-icon-btn-glyph-px">&#215;</span>
+		</div>
+	</div>
+</body>
+</rml>

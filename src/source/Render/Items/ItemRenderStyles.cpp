@@ -1416,7 +1416,7 @@ bool RenderSocketSeedSphere(BMD* b, OBJECT* o, int Type, float Alpha, int Render
 
 bool RenderGambleItem(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
 {
-    int _angle = int(b->BodyAngle[1]) % 360;
+    int _angle = int(o->Angle[1]) % 360;
     float _meshLight1;
     if (0 < _angle && _angle <= 180)
     {

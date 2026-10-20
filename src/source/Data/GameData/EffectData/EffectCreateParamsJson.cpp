@@ -49,8 +49,6 @@ constexpr const char* Copy = "copy";
 constexpr const char* CopyLightToDirection = "copyLightToDirection";
 constexpr const char* Variants = "variants";
 constexpr const char* SubType = "subType";
-constexpr const char* Value = "value";
-constexpr const char* TimesFrameFactor = "timesFrameFactor";
 constexpr std::array<const char*, 3> Components = {"x", "y", "z"};
 } // namespace Keys
 
@@ -221,55 +219,8 @@ void WarnIfEmpty(const NestedObject& object, const ReportIssue& report)
     }
 }
 
-// A number, or, in an offset, { "value": n, "timesFrameFactor": true }.
-// Values with errors stay unset.
-void ReadNumberOrFrameFactor(ItemModelValueReader& reader, const std::string& objectKey, const char* key, bool isOffset,
-                             const ReportIssue& report, std::optional<double>& value, bool& timesFrameFactor)
-{
-    const OrderedJson* field = reader.ReadJson(key);
-    if (field == nullptr)
-    {
-        return;
-    }
-    if (!field->is_object())
-    {
-        ReadValue(reader, key, value);
-        return;
-    }
-    if (!isOffset)
-    {
-        reader.Error(key, "must be a number; only offsets can be multiplied by the frame factor");
-        return;
-    }
-    ItemModelValueReader number(*field, objectKey + "." + key, report);
-    if (!number.Has(Keys::Value))
-    {
-        number.Error(Keys::Value, "missing");
-    }
-    std::optional<double> read;
-    ReadValue(number, Keys::Value, read);
-    bool flag = false;
-    const bool flagRead = !number.Has(Keys::TimesFrameFactor) || number.ReadBool(Keys::TimesFrameFactor, flag);
-    number.WarnAboutUnknownKeys();
-    if (read && flagRead)
-    {
-        value = read;
-        timesFrameFactor = flag;
-    }
-}
-
-void ReadComponent(ItemModelValueReader& reader, const std::string& objectKey, size_t index, bool isOffset,
-                   const ReportIssue& report, EffectCreateVector& vector)
-{
-    bool timesFrameFactor = false;
-    ReadNumberOrFrameFactor(reader, objectKey, Keys::Components[index], isOffset, report, vector.components[index],
-                            timesFrameFactor);
-    vector.timesFrameFactor[index] = timesFrameFactor;
-}
-
 // A vector: a list of 3 numbers, or an object with the components it sets.
-// Only the components of offsets can be multiplied by the frame factor.
-void ReadVector(ItemModelValueReader& reader, const std::string& objectKey, const char* key, bool isOffset,
+void ReadVector(ItemModelValueReader& reader, const std::string& objectKey, const char* key,
                 const ReportIssue& report, EffectCreateVector& vector)
 {
     if (!reader.Has(key))
@@ -295,7 +246,7 @@ void ReadVector(ItemModelValueReader& reader, const std::string& objectKey, cons
     ItemModelValueReader components(*object.json, object.objectKey, report);
     for (size_t i = 0; i < Keys::Components.size(); ++i)
     {
-        ReadComponent(components, object.objectKey, i, isOffset, report, vector);
+        ReadValue(components, Keys::Components[i], vector.components[i]);
     }
     components.WarnAboutUnknownKeys();
 }
@@ -311,17 +262,10 @@ void ReadOffsets(ItemModelValueReader& reader, const std::string& objectKey, con
     }
     WarnIfEmpty(offsets, report);
     ItemModelValueReader offsetReader(*offsets.json, offsets.objectKey, report);
-    std::optional<double> lifeTime;
-    bool lifeTimeTimesFrameFactor = false;
-    ReadNumberOrFrameFactor(offsetReader, offsets.objectKey, Keys::LifeTime, true, report, lifeTime,
-                            lifeTimeTimesFrameFactor);
-    if (lifeTime)
-    {
-        params.lifeTimeOffset = EffectCreateNumber{*lifeTime, lifeTimeTimesFrameFactor};
-    }
+    ReadValue(offsetReader, Keys::LifeTime, params.lifeTimeOffset);
     for (const OffsetField& field : OffsetFields)
     {
-        ReadVector(offsetReader, offsets.objectKey, field.key, true, report, params.*field.offset);
+        ReadVector(offsetReader, offsets.objectKey, field.key, report, params.*field.offset);
     }
     offsetReader.WarnAboutUnknownKeys();
 }
@@ -432,22 +376,8 @@ template <typename T> void WriteExact(OrderedJson& json, const char* key, const 
     }
 }
 
-// A number, or { "value": n, "timesFrameFactor": true }.
-OrderedJson WriteNumberOrFrameFactor(double value, bool timesFrameFactor)
-{
-    OrderedJson number = Items::ModelJson::WriteNumber(value);
-    if (!timesFrameFactor)
-    {
-        return number;
-    }
-    OrderedJson object = OrderedJson::object();
-    object[Keys::Value] = std::move(number);
-    object[Keys::TimesFrameFactor] = true;
-    return object;
-}
-
-// A list when all three components are set and none is multiplied by the
-// frame factor, else an object with the components that are set.
+// A list when all three components are set, else an object with the
+// components that are set.
 void WriteVector(OrderedJson& json, const char* key, const EffectCreateVector& vector)
 {
     if (!vector.IsSet())
@@ -455,9 +385,7 @@ void WriteVector(OrderedJson& json, const char* key, const EffectCreateVector& v
         return;
     }
     const bool whole = std::all_of(vector.components.begin(), vector.components.end(),
-                                   [](const std::optional<double>& component) { return component.has_value(); }) &&
-                       std::none_of(vector.timesFrameFactor.begin(), vector.timesFrameFactor.end(),
-                                    [](bool timesFrameFactor) { return timesFrameFactor; });
+                                   [](const std::optional<double>& component) { return component.has_value(); });
     if (whole)
     {
         const std::array<double, 3> values = {*vector.components[0], *vector.components[1], *vector.components[2]};
@@ -471,7 +399,7 @@ void WriteVector(OrderedJson& json, const char* key, const EffectCreateVector& v
         {
             continue;
         }
-        components[Keys::Components[i]] = WriteNumberOrFrameFactor(*vector.components[i], vector.timesFrameFactor[i]);
+        components[Keys::Components[i]] = Items::ModelJson::WriteNumber(*vector.components[i]);
     }
     json[key] = std::move(components);
 }
@@ -503,10 +431,10 @@ void ReadFields(ItemModelValueReader& reader, const std::string& objectKey, cons
     ReadAlpha(reader, Keys::AlphaTarget, params.alphaTarget);
     ReadRenderType(reader, params.renderType);
     ReadInteger(reader, Keys::Animation, 0, LargestAnimation, params.animation);
-    ReadVector(reader, objectKey, Keys::Position, false, report, params.position);
-    ReadVector(reader, objectKey, Keys::Angle, false, report, params.angle);
-    ReadVector(reader, objectKey, Keys::Direction, false, report, params.direction);
-    ReadVector(reader, objectKey, Keys::StartPosition, false, report, params.startPosition);
+    ReadVector(reader, objectKey, Keys::Position, report, params.position);
+    ReadVector(reader, objectKey, Keys::Angle, report, params.angle);
+    ReadVector(reader, objectKey, Keys::Direction, report, params.direction);
+    ReadVector(reader, objectKey, Keys::StartPosition, report, params.startPosition);
     ReadOffsets(reader, objectKey, report, params);
     ReadCopies(reader, objectKey, report, params);
 
@@ -729,8 +657,7 @@ void WriteOffsets(OrderedJson& json, const EffectCreateParams& params)
     OrderedJson offsets = OrderedJson::object();
     if (params.lifeTimeOffset)
     {
-        offsets[Keys::LifeTime] =
-            WriteNumberOrFrameFactor(params.lifeTimeOffset->value, params.lifeTimeOffset->timesFrameFactor);
+        offsets[Keys::LifeTime] = Items::ModelJson::WriteNumber(*params.lifeTimeOffset);
     }
     for (const OffsetField& field : OffsetFields)
     {

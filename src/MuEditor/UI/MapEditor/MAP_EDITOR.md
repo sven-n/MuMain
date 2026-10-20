@@ -9,7 +9,7 @@ screenshot** — saving back to the game's own on-disk formats. It lives inside 
 - **Build:** `MuMain\rebuild_x64_mueditor.cmd` (or `Build Client with MuEditor.cmd`).
   Output: `out\build\windows-x64-mueditor\src\Release\Main.exe`.
 - **Run:** `Main.exe --editor`, or press **F12** in-game to toggle the editor.
-- **Open:** toolbar → **Map Editor**.
+- **Open:** **Windows** menu of the editor window → **Map Editor**.
 
 ---
 
@@ -56,7 +56,7 @@ All under `src/MuEditor/UI/MapEditor/`:
 | File | Change |
 |---|---|
 | `MuEditor/Core/MuEditorCore.h/.cpp` | Added `m_bShowMapEditor`; render the panel each frame; call `CaptureInputForPainting()` in `Update()` (before the game consumes input). |
-| `MuEditor/UI/Common/MuEditorUI.h/.cpp` | Toolbar **Map Editor** button + param. |
+| `MuEditor/UI/Common/MuEditorUI.h/.cpp` | **Map Editor** item in the editor window's **Windows** menu + param. |
 | `Render/Sprites/GlobalBitmap.h` | `RefreshCacheEntry(index)` — invalidate one quick-cache slot (see gotcha #4). |
 | `Camera/FreeFlyCamera.h/.cpp` | Widened `MAX_PITCH` to `-2` (near straight-down); `SnapTopDown()`; `RotateYaw()`. |
 | `Render/Terrain/ZzzLodTerrain.cpp` | `g_bMapEditorFullTerrain` flag; `RenderTerrain()` forces `ResetFrustrumBoundsFullTerrain()` when set. Also `g_bMapEditorAttrOverlay` + `RenderAttributeOverlay()` (tints tiles by their `TerrainWall` bits). |

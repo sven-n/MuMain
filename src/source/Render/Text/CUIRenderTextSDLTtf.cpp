@@ -6,6 +6,7 @@
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "Render/Renderer/Overlay2DRecorder.h"
 #include "Render/Text/SDLTtfColorPack.h"
 #include "Render/Text/SdlTtfFontSet.h"
 #include "Render/Text/SdlTtfGpuTextProperties.h"
@@ -242,6 +243,38 @@ SIZE CUIRenderTextSDLTtf::MeasureText(const wchar_t* text, int length) const
     return size;
 }
 
+int CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole role)
+{
+    const auto transform = UI::Scaling::GetActiveTransform();
+    return static_cast<int>(std::lround(LineHeightPx(role) / transform.scaleY));
+}
+
+float CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole role)
+{
+    auto& renderer = mu::GetRenderer();
+    TTF_Font* font = nullptr;
+    switch (role)
+    {
+    case UI::Scaling::FontRole::Bold:
+        font = renderer.GetTtfFontBold();
+        break;
+    case UI::Scaling::FontRole::Big:
+        font = renderer.GetTtfFontBig();
+        break;
+    case UI::Scaling::FontRole::Fixed:
+        font = renderer.GetTtfFontFixed();
+        break;
+    case UI::Scaling::FontRole::Normal:
+        break;
+    }
+    if (font == nullptr)
+        font = renderer.GetTtfFont();
+    if (font == nullptr)
+        return 0.f;
+
+    return BuildScaledTextMetrics(role, 0, TTF_GetFontHeight(font), 0, 0).height;
+}
+
 void CUIRenderTextSDLTtf::RenderText(int x, int y, const wchar_t* text, int boxWidth, int boxHeight, int sort,
                                      OUT SIZE* textSize)
 {
@@ -277,6 +310,25 @@ void CUIRenderTextSDLTtf::RenderText(int x, int y, const wchar_t* text, int boxW
     {
         textSize->cx = static_cast<LONG>(std::lround(metrics.width / metrics.transform.scaleX));
         textSize->cy = static_cast<LONG>(std::lround(metrics.height / metrics.transform.scaleY));
+    }
+
+    if (Render::Renderer::IOverlay2DRecorder* recorder = Render::Renderer::ActiveOverlay2DRecorder())
+    {
+        Render::Renderer::RecordedText record;
+        record.boxX = layout.renderX;
+        record.boxY = layout.screenY;
+        record.boxWidth = layout.boxWidth;
+        record.boxHeight = layout.boxHeight;
+        record.backColor = m_backColor;
+        record.backBlend = CurrentRecordedBlend();
+        record.textX = layout.renderX + layout.alignmentOffset;
+        record.textPixelSize = static_cast<float>(UI::Scaling::CachedFontPointSize(m_activeRole)) * metrics.scale;
+        record.lineHeight = metrics.height;
+        record.bold = m_activeRole == UI::Scaling::FontRole::Bold;
+        record.textColor = m_textColor;
+        record.utf8 = m_utf8Scratch;
+        recorder->RecordText(record);
+        return;
     }
 
     const int windowHeight = renderer.GetCachedWindowHeight();

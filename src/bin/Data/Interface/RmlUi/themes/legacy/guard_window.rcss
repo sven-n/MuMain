@@ -1,0 +1,161 @@
+/* Legacy theme for CGuardWindow, reproducing its RenderFrame(), tabs and pages: the
+   docked_panel_frame.rcss frame (linked first; newui_item_back01 top), the three newui_guild_tab04
+   tabs (56 x 22, one unit apart from (12, 84); the selected one on its second row, its label white,
+   the others (181, 181, 181)), the texts in their bound fonts and colours, the List tab's
+   newui_item_table03 edges, the backdrops and lines' boxes in their bound colours, the scroll track
+   (newui_scrollbar_up / m / down) and newui_scroll_on thumb (tinted (200, 200, 200) while dragged),
+   the 53 x 23 newui_btn_empty_very_small buttons at x 68 (locked ones tinted (100, 100, 100) with a
+   grey label, never hovered), the exit button at (13, 391). Reference px inside #panel. */
+
+@spritesheet gd-tab-sheet
+{
+	src: "../../../newui_guild_tab04.tga";
+	gd-tab-up: 0px 0px 56px 22px;
+	gd-tab-down: 0px 22px 56px 22px;
+}
+@spritesheet gd-btn-sheet
+{
+	src: "../../../newui_btn_empty_very_small.tga";
+	gd-btn-up: 0px 0px 53px 23px;
+	gd-btn-over: 0px 23px 53px 23px;
+	gd-btn-down: 0px 46px 53px 23px;
+}
+@spritesheet gd-edge-top-sheet { src: "../../../newui_item_table03(Up).tga"; gd-edge-top: 0px 0px 1px 14px; }
+@spritesheet gd-edge-bottom-sheet { src: "../../../newui_item_table03(Dw).tga"; gd-edge-bottom: 0px 0px 1px 14px; }
+@spritesheet gd-edge-left-sheet { src: "../../../newui_item_table03(L).tga"; gd-edge-left: 0px 0px 14px 1px; }
+@spritesheet gd-edge-right-sheet { src: "../../../newui_item_table03(R).tga"; gd-edge-right: 0px 0px 14px 1px; }
+
+.frame-top { decorator: image(docked-bg-top-b); }
+/* RmlUi handles tab clicks; the panel leaves world clicks alone elsewhere. */
+#panel { pointer-events: none; }
+
+.gd-tabs { position: static; }
+.gd-tab { position: absolute; top: 84px; width: 56px; height: 22px; pointer-events: auto; decorator: image(gd-tab-up); }
+.gd-tab:nth-child(1) { left: 12px; }
+.gd-tab:nth-child(2) { left: 69px; }
+.gd-tab:nth-child(3) { left: 126px; }
+.gd-tab.selected { decorator: image(gd-tab-down); }
+.gd-tab .gd-tab-label { left: 0; text-align: center; color: #b5b5b5; }
+.gd-tab.selected .gd-tab-label { color: #ffffff; }
+
+.t-edge-top, .t-edge-bottom, .t-edge-left, .t-edge-right { position: absolute; }
+.t-edge-top { width: 161px; height: 14px; decorator: image(gd-edge-top); }
+.t-edge-bottom { width: 161px; height: 14px; decorator: image(gd-edge-bottom); }
+.t-edge-left { width: 14px; decorator: image(gd-edge-left); }
+.t-edge-right { width: 14px; decorator: image(gd-edge-right); }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; }
+
+/* RenderFrame() and the pages drew every one of these in (220, 220, 220). */
+.gd-heading, .gd-owner, .gd-line { color: #dcdcdc; }
+
+/* The window's own text. Each line is named, so the theme decides where it sits, what colour it
+   is and how it is aligned; only its font size stays bound. Its width is reference px times --root-scale. */
+.gd-heading, .gd-owner, .gd-line { left: 0; text-align: center; }
+.gd-heading { left: 15px; top: 13px; font-weight: bold; }
+.gd-owner { font-weight: bold; }
+#owner_master { top: 50px; }
+#owner_guild { top: 65px; }
+
+.gd-page { position: static; }
+#status_start { top: 125px; }
+#status_end { top: 139px; }
+#status_period { top: 153px; }
+#status_expected_label { top: 188px; }
+#status_expected_time { top: 202px; }
+#status_next_stage { top: 237px; }
+#register_message { top: 125px; }
+#register_message2 { top: 139px; }
+#register_acquired { top: 155px; }
+#register_registered { top: 169px; }
+/* The List tab's own message kept the headers' bold font. */
+#list_message { top: 125px; font-weight: bold; }
+.gd-line.bold { font-weight: bold; }
+
+#btn_proclaim { top: 120px; }
+#btn_register { top: 200px; }
+#btn_give_up { top: 370px; }
+
+.gd-btn { display: block; position: absolute; left: 68px; width: 53px; height: 23px; decorator: image(gd-btn-up); pointer-events: auto; }
+.gd-btn:hover { decorator: image(gd-btn-over); }
+.gd-btn:active { decorator: image(gd-btn-down); }
+.gd-btn.locked, .gd-btn.locked:hover, .gd-btn.locked:active { decorator: image(gd-btn-up); image-color: #646464; }
+.gd-label { left: 0; text-align: center; color: #ffffff; }
+.gd-btn.locked .gd-label { color: #646464; }
+
+#btn_exit { top: 391px; pointer-events: auto; }
+
+/* The guild list's frame, placed here rather than inline in the shared RML. The main box is
+   shorter when the summary row is present, which is what `.with-footer` says. */
+.gd-list-frame { position: static; }
+.gd-list-edge-left   { left: 11px;  top: 111px; height: 255px; }
+.gd-list-edge-right  { left: 166px; top: 111px; height: 255px; }
+.gd-list-edge-top    { left: 14px;  top: 111px; }
+.gd-list-edge-bottom { left: 14px;  top: 357px; }
+.with-footer .gd-list-edge-left,
+.with-footer .gd-list-edge-right  { height: 215px; }
+.with-footer .gd-list-edge-bottom { top: 317px; }
+.gd-foot-edge-left   { left: 11px;  top: 345px; height: 25px; }
+.gd-foot-edge-right  { left: 166px; top: 345px; height: 25px; }
+.gd-foot-edge-top    { left: 14px;  top: 345px; }
+.gd-foot-edge-bottom { left: 14px;  top: 362px; }
+
+/* Guild rows flow inside counter-scaled scroll panes. */
+.gd-list { position: static; }
+.gd-header, .gd-cell { position: absolute; }
+.gd-header { top: 117px; font-weight: bold; }
+.hdr-name { left: 20px; }
+.hdr-mark-count { left: 65px; }
+.hdr-state { left: 113px; }
+.hdr-order { left: 138px; }
+.hdr-side { left: 95px; }
+.hdr-involvement { left: 135px; }
+
+.gd-scroll-pane { position: absolute; left: 15px; top: 129px; transform-origin: left top; overflow: hidden scroll; }
+.gd-row { display: block; position: relative; pointer-events: auto; }
+.gd-row-back { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+.gd-row .gd-cell { position: absolute; top: 23.0769%; white-space: nowrap; pointer-events: none; }
+.cell-name { left: 4.0541%; }
+.cell-mark-count { right: 50%; text-align: right; }
+.cell-state { right: 16.2162%; text-align: right; }
+.cell-order { right: 2.7027%; text-align: right; }
+.cell-side { right: 29.7297%; text-align: right; }
+.cell-involvement { right: 4.7297%; text-align: right; }
+
+.score-label { left: 33px; top: 354px; }
+.score-value { left: 75px; top: 354px; }
+
+/* RenderInterface()'s own boxes: the list's backdrop and the summary row's two halves, all at the
+   colour its SetLineColor() left set. */
+.gd-list-back { position: absolute; left: 14px; top: 128px; width: 161px; height: 237px; background-color: rgba(0, 0, 0, 102); }
+.with-footer .gd-list-back { height: 197px; }
+.gd-foot-back-label { position: absolute; left: 14px; top: 348px; width: 61px; height: 20px; background-color: rgba(146, 134, 121, 102); }
+.gd-foot-back-value { position: absolute; left: 75px; top: 348px; width: 100px; height: 20px; background-color: rgba(0, 0, 0, 102); }
+
+.gd-header { color: #dcdcdc; }
+.gd-cell { color: rgb(230, 220, 200); }
+/* RenderDataLine(): a selected row, and a defending guild's row, carry the same backdrop; only a
+   selected row's text turns black against it. */
+.gd-row.selected .gd-row-back, .gd-row.defending .gd-row-back { background-color: rgba(0, 0, 0, 102); }
+.gd-row.selected .gd-cell { color: #000000; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#heading { width: calc(160px * var(--root-scale)); }
+#owner_master { width: calc(190px * var(--root-scale)); }
+#owner_guild { width: calc(190px * var(--root-scale)); }
+.gd-tab-label { width: calc(56px * var(--root-scale)); }
+#status_start { width: calc(190px * var(--root-scale)); }
+#status_end { width: calc(190px * var(--root-scale)); }
+#status_period { width: calc(190px * var(--root-scale)); }
+#status_expected_label { width: calc(190px * var(--root-scale)); }
+#status_expected_time { width: calc(190px * var(--root-scale)); }
+#status_next_stage { width: calc(190px * var(--root-scale)); }
+#register_message { width: calc(190px * var(--root-scale)); }
+#register_message2 { width: calc(190px * var(--root-scale)); }
+#register_acquired { width: calc(190px * var(--root-scale)); }
+#register_registered { width: calc(190px * var(--root-scale)); }
+#list_message { width: calc(190px * var(--root-scale)); }
+#guard_declare_list { width: calc(160px * var(--root-scale)); height: calc(235px * var(--root-scale)); }
+.gd-row { width: calc(148px * var(--root-scale)); height: calc(13px * var(--root-scale)); }
+#guard_siege_list { width: calc(160px * var(--root-scale)); height: calc(195px * var(--root-scale)); }
+.gd-label { width: calc(53px * var(--root-scale)); }

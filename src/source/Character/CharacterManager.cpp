@@ -7,21 +7,13 @@
 #include "I18N/All.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Engine/Object/ZzzInfomation.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 #include <algorithm>
 #include <array>
-#include <type_traits>
 
 namespace
 {
-    template <typename T, typename U, typename V>
-    constexpr bool InRange(const T value, const U minValue, const V maxValue)
-    {
-        using Common = std::common_type_t<T, U, V>;
-        const Common commonValue = static_cast<Common>(value);
-        return (commonValue >= static_cast<Common>(minValue)) && (commonValue <= static_cast<Common>(maxValue));
-    }
-
     struct ClassTextEntry
     {
         CLASS_TYPE type;
@@ -52,45 +44,6 @@ namespace
         { CLASS_TEMPLENIGHT, 3151 },
     }};
 
-    constexpr bool IsBowModel(int type)
-    {
-        return InRange(type, MODEL_BOW, MODEL_CHAOS_NATURE_BOW) ||
-               type == MODEL_CELESTIAL_BOW ||
-               InRange(type, MODEL_ARROW_VIPER_BOW, MODEL_STINGER_BOW) ||
-               type == MODEL_AIR_LYN_BOW;
-    }
-
-    constexpr bool IsCrossbowModel(int type)
-    {
-        return InRange(type, MODEL_CROSSBOW, MODEL_AQUAGOLD_CROSSBOW) ||
-               type == MODEL_SAINT_CROSSBOW ||
-               InRange(type, MODEL_DIVINE_CB_OF_ARCHANGEL, MODEL_GREAT_REIGN_CROSSBOW);
-    }
-
-    constexpr bool IsGeneralBowItem(int type)
-    {
-        return InRange(type, ITEM_BOW, ITEM_CHAOS_NATURE_BOW) ||
-               type == ITEM_CELESTIAL_BOW ||
-               InRange(type, ITEM_ARROW_VIPER_BOW, ITEM_STINGER_BOW) ||
-               type == ITEM_AIR_LYN_BOW;
-    }
-
-    constexpr bool IsGeneralCrossbowItem(int type)
-    {
-        return InRange(type, ITEM_CROSSBOW, ITEM_AQUAGOLD_CROSSBOW) ||
-               type == ITEM_SAINT_CROSSBOW ||
-               InRange(type, ITEM_DIVINE_CB_OF_ARCHANGEL, ITEM_GREAT_REIGN_CROSSBOW);
-    }
-
-    constexpr bool IsEquippedBowItem(int type)
-    {
-        return IsGeneralBowItem(type);
-    }
-
-    constexpr bool IsEquippedCrossbowItem(int type)
-    {
-        return IsGeneralCrossbowItem(type);
-    }
 }
 
 CCharacterManager gCharacterManager;
@@ -258,11 +211,11 @@ BYTE CCharacterManager::GetStepClass(const CLASS_TYPE byClass)
 
 int CCharacterManager::GetEquipedBowType(CHARACTER* pChar)
 {
-    if (IsBowModel(pChar->Weapon[1].Type))
+    if (GameLogic::Items::IsBowModel(pChar->Weapon[1].Type))
     {
         return BOWTYPE_BOW;
     }
-    if (IsCrossbowModel(pChar->Weapon[0].Type))
+    if (GameLogic::Items::IsCrossbowModel(pChar->Weapon[0].Type))
     {
         return BOWTYPE_CROSSBOW;
     }
@@ -272,13 +225,13 @@ int CCharacterManager::GetEquipedBowType(CHARACTER* pChar)
 int CCharacterManager::GetEquipedBowType()
 {
     const ITEM& left = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
-    if (IsEquippedBowItem(left.Type))
+    if (GameLogic::Items::IsBowType(left.Type))
     {
         return BOWTYPE_BOW;
     }
 
     const ITEM& right = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT];
-    if (IsEquippedCrossbowItem(right.Type))
+    if (GameLogic::Items::IsCrossbowType(right.Type))
     {
         return BOWTYPE_CROSSBOW;
     }
@@ -288,12 +241,12 @@ int CCharacterManager::GetEquipedBowType()
 
 int CCharacterManager::GetEquipedBowType(ITEM* pItem)
 {
-    if (IsGeneralBowItem(pItem->Type))
+    if (GameLogic::Items::IsBowType(pItem->Type))
     {
         return BOWTYPE_BOW;
     }
 
-    if (IsGeneralCrossbowItem(pItem->Type))
+    if (GameLogic::Items::IsCrossbowType(pItem->Type))
     {
         return BOWTYPE_CROSSBOW;
     }
@@ -305,12 +258,12 @@ int CCharacterManager::GetEquipedBowType_Skill()
     const ITEM& left = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
     const ITEM& right = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT];
 
-    if (IsEquippedBowItem(left.Type) && right.Type == ITEM_ARROWS)
+    if (GameLogic::Items::IsBowType(left.Type) && right.Type == ITEM_ARROWS)
     {
         return BOWTYPE_BOW;
     }
 
-    if (IsEquippedCrossbowItem(right.Type) && left.Type == ITEM_BOLT)
+    if (GameLogic::Items::IsCrossbowType(right.Type) && left.Type == ITEM_BOLT)
     {
         return BOWTYPE_CROSSBOW;
     }

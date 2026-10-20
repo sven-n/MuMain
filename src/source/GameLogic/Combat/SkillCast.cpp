@@ -5,7 +5,7 @@
 
 // Includes mirror ZzzInterface.cpp, the unit these were extracted from.
 #include "Core/Platform/Imm.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -34,15 +34,14 @@
 #include "GameLogic/NPCs/npcBreeder.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "Character/CSParts.h"
-#include "UI/Legacy/UIMapName.h"	// rozy
+#include "UI/HUD/UIMapName.h"	// rozy
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Events/Event.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Events/w_CursedTemple.h"
-#include "UI/Legacy/UIControls.h"
 #include "GameLogic/Social/PartyManager.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Dialogs/CommonMessageBox.h"
 #include "GameLogic/Skills/SummonSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "World/MapInfra/w_MapHeaders.h"
@@ -148,21 +147,20 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
         switch (Skill)
         {
         case AT_SKILL_IMPALE:
-            if (!(o->Type == MODEL_PLAYER && Hero->Weapon[0].Type != -1 &&
-                (Hero->Weapon[0].Type >= MODEL_SPEAR && Hero->Weapon[0].Type < MODEL_SPEAR + MAX_ITEM_INDEX)))
+            if (!(o->Type == MODEL_PLAYER && GameLogic::Items::IsSpearModel(Hero->Weapon[0].Type)))
             {
                 return false;
             }
             break;
         case AT_SKILL_DEATHSTAB:
         case AT_SKILL_DEATHSTAB_STR:
-            if (!(Hero->Weapon[0].Type != -1 && (Hero->Weapon[0].Type < MODEL_STAFF || Hero->Weapon[0].Type >= MODEL_STAFF + MAX_ITEM_INDEX)))
+            if (!(Hero->Weapon[0].Type != -1 && !GameLogic::Items::IsStaffOrBookModel(Hero->Weapon[0].Type)))
             {
                 return false;
             }
             break;
         case AT_SKILL_SPIRAL_SLASH:
-            if (Hero->Weapon[0].Type < MODEL_SWORD || Hero->Weapon[0].Type >= MODEL_SWORD + MAX_ITEM_INDEX)
+            if (!GameLogic::Items::IsSwordOrGloveModel(Hero->Weapon[0].Type))
             {
                 return false;
             }
@@ -482,7 +480,7 @@ void UseSkillWizard(CHARACTER* c, OBJECT* o)
 
     if (Skill == AT_SKILL_DEATH_CANNON)
     {
-        if (Hero->Weapon[0].Type < MODEL_STAFF || Hero->Weapon[0].Type >= MODEL_STAFF + MAX_ITEM_INDEX)
+        if (!GameLogic::Items::IsStaffOrBookModel(Hero->Weapon[0].Type))
             return;
     }
 

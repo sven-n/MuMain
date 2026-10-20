@@ -1,0 +1,147 @@
+/* Modern theme for CCharacterInfoWindow -- same forged-dialog chrome recipe as CMyInventory
+   (shell-edge/groove/gradient panel fill, rail-with-rivet header, bordered square icon buttons),
+   not the generic .modern-frame/.modern-frame-crimson treatment: this window docks in the same
+   right-dock row as CMyInventory/CMyQuestInfoWindow/CPetInfoWindow/CPartyInfoWindow and should
+   read as the same family when open side by side. #panel/shell-edge/groove/header-rail chrome now
+   all come from docked_panel_frame.rcss, shared with the other three -- only genuinely
+   window-specific content stays here. */
+
+/* Right-hand pieces are pinned to #panel's edges, so they follow a wider or filled panel. */
+
+#name, #classname, #servername {
+	position: absolute;
+	left: 0;
+	top: 12px;
+	width: 100%;
+	text-align: center;
+	font-weight: bold;
+	font-size: 12px;
+	font-family: "token(font-body)";
+	pointer-events: none;
+	font-effect: shadow(0px 1px #000000);
+}
+#name { color: token(text-warm); }
+#classname, #servername { top: 27px; color: token(text-secondary); font-weight: normal; font-size: 11px; }
+
+.summary-fill {
+	position: absolute;
+	left: 12px;
+	right: 13px;
+	top: 48px;
+	height: 71px;
+	background-color: token(surface-panel);
+	border-radius: token(radius-sm)dp;
+	pointer-events: none;
+}
+
+/* 10px, one line each: the longest lines (a level-400 EXP pair, the fruit counts) fit the 165px
+   summary box; the level-up points get a line of their own (beside the level they overlapped). */
+.level-text, .levelup-point-text, .exp-text, .point-probability-text, .point-text {
+	display: block;
+	position: absolute;
+	left: 18px;
+	font-size: 10px;
+	font-family: "token(font-body)";
+	white-space: nowrap;
+	pointer-events: none;
+}
+.level-text { top: 51px; color: token(accent-gold-hover); font-weight: bold; }
+.levelup-point-text { top: 63px; color: token(accent-gold-hover); font-weight: bold; }
+.exp-text { top: 76px; color: token(text-primary); }
+.point-probability-text { top: 89px; color: token(accent-steel-hover); }
+.point-text { top: 102px; color: token(accent-steel-hover); }
+
+.attr-textbox {
+	position: absolute;
+	left: 11px;
+	right: 9px;
+	height: 21px;
+	background-color: token(surface-control);
+	border-radius: token(radius-sm)dp;
+	pointer-events: none;
+}
+.attr-textbox-str { top: 120px; }
+.attr-textbox-agi { top: 175px; }
+.attr-textbox-vit { top: 240px; }
+.attr-textbox-ene { top: 295px; }
+.attr-textbox-cmd { top: 350px; }
+
+.attr-label, .attr-value {
+	display: block;
+	position: absolute;
+	text-align: center;
+	font-weight: bold;
+	font-size: 12px;
+	font-family: "token(font-body)";
+	pointer-events: none;
+}
+.attr-label { left: 12px; width: 74px; color: token(text-secondary); }
+.attr-value { left: 86px; right: 18px; color: rgb(230, 230, 0); }
+.attr-label-str, .attr-value-str { top: 126px; }
+.attr-label-agi, .attr-value-agi { top: 181px; }
+.attr-label-vit, .attr-value-vit { top: 246px; }
+.attr-label-ene, .attr-value-ene { top: 301px; }
+.attr-label-cmd, .attr-value-cmd { top: 356px; }
+
+.attr-lines { position: absolute; width: 160px; pointer-events: none; }
+.attr-lines span { display: block; line-height: 13px; font-size: 12px; font-family: "token(font-body)"; white-space: nowrap; }
+.attr-lines-str { left: 20px; top: 145px; }
+.attr-lines-agi { left: 20px; top: 199px; }
+.attr-lines-vit { left: 20px; top: 264px; }
+.attr-lines-ene { left: 18px; top: 319px; }
+
+/* Flat "+" button -- a generic affordance, kept simple rather than a full forged-metal square
+   (too small at 16x15 to carry that much chrome); recolored to this window's own metal/border
+   tokens instead of the generic accent-steel so it still reads as part of the same palette. */
+.stat-btn {
+	display: block;
+	position: absolute;
+	right: 14px;
+	width: 16px;
+	height: 15px;
+	background-color: token(metal-dark);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)dp;
+	text-align: center;
+	line-height: 13px;
+	font-weight: bold;
+	font-size: 11px;
+	color: token(text-warm);
+	cursor: pointer;
+	pointer-events: auto;
+}
+.stat-btn:hover { color: token(accent-gold-hover); border-color: token(border-hover); }
+/* data-class-hidden: base.rcss's .hidden has this rule's specificity and loses to its display. */
+.stat-btn.hidden, .levelup-point-text.hidden, .attr-label.hidden, .attr-value.hidden { display: none; }
+.stat-btn-str { top: 122px; }
+.stat-btn-agi { top: 177px; }
+.stat-btn-vit { top: 242px; }
+.stat-btn-ene { top: 297px; }
+.stat-btn-cmd { top: 352px; }
+
+/* Action row: base.rcss's .modern-icon-btn-px at its own default geometry (top:392/37x26) --
+   same shared class CMyInventory's Exit/Repair/My Shop/Expand use, just this window's own left
+   offsets and glyphs. */
+.chainfo-btn-exit        { left: 13px;  color: #d59b79; border-color: #5c382b; }
+.chainfo-btn-quest       { left: 54px; }
+.chainfo-btn-pet         { left: 95px; }
+.chainfo-btn-masterlevel { left: 136px; }
+
+/* Outlaw level, from the model's pk_level -- the original's UI::Chat::SetPlayerColor() palette,
+   which used to arrive as a colour string C++ built. #name's own colour is the fallback. */
+#name.pk-0 { color: rgb(150, 255, 240); }
+#name.pk-1 { color: rgb(100, 120, 255); }
+#name.pk-2 { color: rgb(140, 180, 255); }
+#name.pk-3 { color: rgb(200, 220, 255); }
+#name.pk-4 { color: rgb(255, 150, 60); }
+#name.pk-5 { color: rgb(255, 80, 30); }
+#name.pk-6 { color: rgb(255, 0, 0); }
+
+/* Where an attribute's total comes from, from the model's *_value_source. The original coloured
+   the value for each of the three; the base colour lives on .attr-value above. */
+.attr-value.attr-boosted { color: rgb(100, 150, 255); }
+.attr-value.attr-potion  { color: rgb(255, 120, 0); }
+
+.attr-lines span { color: token(text-primary); }
+.attr-lines span.boosted { color: rgb(100, 150, 255); }
+.attr-lines span.buffed { color: token(accent-gold); }

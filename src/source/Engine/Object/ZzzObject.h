@@ -1,5 +1,5 @@
 #pragma once
-#include "UI/NewUI/Inventory/NewUIItemMng.h"
+#include "UI/Inventory/ItemMng.h"
 #include "Render/Items/ItemEffects.h"
 
 extern OBJECT_BLOCK ObjectBlock[256];
@@ -8,6 +8,10 @@ extern OBJECT Boids[];
 extern OBJECT Fishs[];
 
 extern float EarthQuake;
+
+// Sets EarthQuake from a source near the hero, fading to nothing at about a screen away; returns whether it was in range.
+// Map-wide event shakes write EarthQuake directly.
+bool SetEarthQuakeAt(const vec3_t sourcePosition, float magnitude);
 extern bool EnableShadow;
 extern float AmbientShadowAngle;
 extern float RainTarget;
@@ -85,6 +89,7 @@ void RenderItems();
 void MoveItems();
 int SelectItem();
 int GetScreenWidth();
+int GetScreenLeft();
 void ClearItems();
 
 void RenderCloudLowLevel(int index, int Type);

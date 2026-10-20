@@ -1,0 +1,163 @@
+/* Modern theme for CGensRanking: docked_panel_frame.rcss's forged panel (linked first), the mark on
+   a recessed panel, flat boxes and scroll track in the modern tokens. Geometry is the legacy one
+   (reference px under the dock transform). */
+
+@spritesheet gens-d-sheet
+{
+	src: "../../../Gens_mark_D_new.tga";
+	gens-d-0: 0px 0px 50px 69px;
+	gens-d-1: 50px 0px 50px 69px;
+	gens-d-2: 100px 0px 50px 69px;
+	gens-d-3: 150px 0px 50px 69px;
+	gens-d-4: 200px 0px 50px 69px;
+	gens-d-5: 0px 69px 50px 69px;
+	gens-d-6: 50px 69px 50px 69px;
+	gens-d-7: 100px 69px 50px 69px;
+	gens-d-8: 150px 69px 50px 69px;
+	gens-d-9: 200px 69px 50px 69px;
+	gens-d-10: 0px 138px 50px 69px;
+	gens-d-11: 50px 138px 50px 69px;
+	gens-d-12: 100px 138px 50px 69px;
+	gens-d-13: 150px 138px 50px 69px;
+}
+@spritesheet gens-v-sheet
+{
+	src: "../../../Gens_mark_V_new.tga";
+	gens-v-0: 0px 0px 50px 69px;
+	gens-v-1: 50px 0px 50px 69px;
+	gens-v-2: 100px 0px 50px 69px;
+	gens-v-3: 150px 0px 50px 69px;
+	gens-v-4: 200px 0px 50px 69px;
+	gens-v-5: 0px 69px 50px 69px;
+	gens-v-6: 50px 69px 50px 69px;
+	gens-v-7: 100px 69px 50px 69px;
+	gens-v-8: 150px 69px 50px 69px;
+	gens-v-9: 200px 69px 50px 69px;
+	gens-v-10: 0px 138px 50px 69px;
+	gens-v-11: 50px 138px 50px 69px;
+	gens-v-12: 100px 138px 50px 69px;
+	gens-v-13: 150px 138px 50px 69px;
+}
+
+#panel { pointer-events: none; }
+
+#rank_back { position: absolute; left: 13px; top: 60px; width: 170px; height: 88px; background-color: token(surface-recessed); border-radius: token(radius-sm)px; }
+#mark { position: absolute; left: 30.5px; top: 69.5px; width: 50px; height: 69px; }
+#mark.gens-d-0 { decorator: image(gens-d-0); }
+#mark.gens-d-1 { decorator: image(gens-d-1); }
+#mark.gens-d-2 { decorator: image(gens-d-2); }
+#mark.gens-d-3 { decorator: image(gens-d-3); }
+#mark.gens-d-4 { decorator: image(gens-d-4); }
+#mark.gens-d-5 { decorator: image(gens-d-5); }
+#mark.gens-d-6 { decorator: image(gens-d-6); }
+#mark.gens-d-7 { decorator: image(gens-d-7); }
+#mark.gens-d-8 { decorator: image(gens-d-8); }
+#mark.gens-d-9 { decorator: image(gens-d-9); }
+#mark.gens-d-10 { decorator: image(gens-d-10); }
+#mark.gens-d-11 { decorator: image(gens-d-11); }
+#mark.gens-d-12 { decorator: image(gens-d-12); }
+#mark.gens-d-13 { decorator: image(gens-d-13); }
+#mark.gens-v-0 { decorator: image(gens-v-0); }
+#mark.gens-v-1 { decorator: image(gens-v-1); }
+#mark.gens-v-2 { decorator: image(gens-v-2); }
+#mark.gens-v-3 { decorator: image(gens-v-3); }
+#mark.gens-v-4 { decorator: image(gens-v-4); }
+#mark.gens-v-5 { decorator: image(gens-v-5); }
+#mark.gens-v-6 { decorator: image(gens-v-6); }
+#mark.gens-v-7 { decorator: image(gens-v-7); }
+#mark.gens-v-8 { decorator: image(gens-v-8); }
+#mark.gens-v-9 { decorator: image(gens-v-9); }
+#mark.gens-v-10 { decorator: image(gens-v-10); }
+#mark.gens-v-11 { decorator: image(gens-v-11); }
+#mark.gens-v-12 { decorator: image(gens-v-12); }
+#mark.gens-v-13 { decorator: image(gens-v-13); }
+.text-back { position: absolute; left: 13px; width: 170px; height: 21px; background-color: token(surface-recessed); border-radius: token(radius-sm)px; }
+
+.fill { position: absolute; background-color: token(surface-recessed); }
+.t-edge-top, .t-edge-bottom, .t-edge-left, .t-edge-right, .t-corner { display: none; }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; transform-origin: left top; }
+
+#btn_exit {
+	position: absolute;
+	left: 13px;
+	top: 392px;
+	width: 36px;
+	height: 28px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+#btn_exit:hover { border-color: token(accent-steel-hover); }
+
+/* The rank strip and the description box, piece by piece. */
+.fill-strip { left: 16px; top: 252px; width: 52px; height: 20px; }
+.fill-desc { left: 16px; top: 272px; width: 161px; height: 113px; }
+.corner-strip-tl { left: 13px; top: 250px; }
+.corner-strip-tr { left: 59px; top: 250px; }
+.corner-desc-tr { left: 167px; top: 270px; }
+.corner-bl { left: 13px; top: 376px; }
+.corner-br { left: 167px; top: 376px; }
+.edge-strip-top { left: 19px; top: 250px; width: 48px; }
+.edge-strip-right { left: 59px; top: 256px; height: 14px; }
+.edge-desc-top { left: 68px; top: 270px; width: 102px; }
+.edge-desc-right { left: 167px; top: 276px; height: 106px; }
+.edge-bottom { left: 19px; top: 376px; width: 156px; }
+.edge-left { left: 13px; top: 256px; height: 126px; }
+.text-back-level { top: 151px; }
+.text-back-rank { top: 175px; }
+
+/* The window's own lines. */
+.gr-line, .gr-promo-line { position: absolute; }
+#gr_title { left: 0; top: 15px; text-align: center; font-weight: bold; }
+#gr_gens_label { left: 102px; top: 90px; font-weight: bold; }
+#gr_gens_name { left: 102px; top: 110px; }
+#gr_level_label { left: 100px; top: 134px; }
+#gr_title_name { left: 66px; top: 134px; text-align: center; }
+#gr_rank_label { left: 13px; top: 157px; text-align: center; font-weight: bold; }
+#gr_rank_value { left: 0; top: 157px; text-align: right; }
+#gr_contrib_label { left: 13px; top: 180px; text-align: center; font-weight: bold; }
+#gr_contrib_value { left: 0; top: 180px; text-align: right; }
+#gr_desc_label { left: 13px; top: 258px; text-align: center; font-weight: bold; }
+
+/* The promotion note: up to NUM_LINE_CMB rows 15 units apart from y 200. */
+.gr-promo { position: static; }
+.gr-promo-line { left: 20px; }
+.gr-promo-line:nth-child(1) { top: 200px; }
+.gr-promo-line:nth-child(2) { top: 215px; }
+.gr-promo-line:nth-child(3) { top: 230px; }
+.gr-promo-line:nth-child(4) { top: 245px; }
+.gr-promo-line:nth-child(5) { top: 260px; }
+.gr-promo-line:nth-child(6) { top: 275px; }
+.gr-promo-line:nth-child(7) { top: 290px; }
+
+/* The frame's bottom edge starts at y=376. The pane counters the panel's scale,
+   so its scroll geometry and scrollbar use physical pixels. */
+.gr-desc { position: absolute; left: 20px; top: 280px; transform-origin: left top; overflow: hidden scroll; clip: always; pointer-events: auto; }
+.gr-desc-line { position: relative; display: block; }
+.gr-desc-text { position: absolute; display: block; left: 0; top: 0; white-space: nowrap; pointer-events: none; }
+
+.gr-line, .gr-promo-line, .gr-desc-text { color: token(text-primary); }
+#gr_gens_label { color: token(accent-gold); }
+#gr_rank_label, #gr_contrib_label, #gr_desc_label { color: token(accent-gold); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#gr_title { width: calc(190px * var(--root-scale)); }
+#gr_gens_label { width: calc(190px * var(--root-scale)); }
+#gr_gens_name { width: calc(190px * var(--root-scale)); }
+#gr_level_label { width: calc(190px * var(--root-scale)); }
+#gr_title_name { width: calc(174px * var(--root-scale)); }
+#gr_rank_label { width: calc(74px * var(--root-scale)); }
+#gr_rank_value { width: calc(170px * var(--root-scale)); }
+#gr_contrib_label { width: calc(74px * var(--root-scale)); }
+#gr_contrib_value { width: calc(170px * var(--root-scale)); }
+#gr_desc_label { width: calc(58px * var(--root-scale)); }
+.gr-promo-line { width: calc(180px * var(--root-scale)); }
+.gr-desc.scroll-pane { width: calc(165px * var(--root-scale)); height: calc(96px * var(--root-scale)); }
+/* CTextBox's row pitch: a line height + 2. */
+.gr-desc-line { width: calc(150px * var(--root-scale)); height: calc((var(--line-height) + 2px) * var(--root-scale)); }
+.gr-desc-text { width: calc(150px * var(--root-scale)); }
+
+/* The data-for template row has no step of its own; it inherits this one. */
+.gr-desc { --line-height: 0px; }

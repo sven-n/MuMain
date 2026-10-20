@@ -1,0 +1,309 @@
+/* Modern theme for CTrade's chrome -- header/wallets/checkboxes/buttons are vector forged-metal
+   chrome (matching Login/SysMenu/MyInventory/StorageExt's forged-dialog language). Both trade grids
+   stay fully native (sprite art + live 3D icons), same as legacy -- no RmlUi involvement there.
+
+   Every element below the header keeps the SAME top offset legacy uses (copied from
+   CTrade::RenderBackImage()/RenderText()'s former constants): those gaps are dictated by the two
+   still-native CInventoryCtrl grids' fixed y-offsets (`m_Pos.y + 68` / `m_Pos.y + 274`), which this
+   port does not change, so only the header (above the first grid) and each control's own visual
+   treatment differ from legacy -- not their vertical position. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+}
+
+/* top:6/height:29 -- identical rail budget to StorageExt's .storext-header-rail. Ends at 35px, leaving
+   35..68 for the your-side nickname/level/guild block below, well inside the your-grid's own
+   `m_Pos.y + 68` start. Rivet sits at -2px, still inside the frame's .inv-shell-edge at -3px --
+   same contained relationship as StorageExt/MyInventory. */
+.trade-header-rail {
+	top: 6px;
+	height: 29px;
+}
+
+/* Sits above the native guild-mark emblem (RenderGuildMark(): 16x16 at x+15,y+42), mirroring
+   legacy's own guild-name position -- the old left:11/top:37 overlapped the icon. */
+.guild-name {
+	position: absolute;
+	left: 15px;
+	top: 30px;
+	font-size: 9px;
+	color: #8a8a82;
+	font-family: "token(font-body)";
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+.id-text {
+	position: absolute;
+	color: token(text-warm);
+	font-family: "token(font-body)";
+	font-weight: 500;
+	white-space: nowrap;
+	pointer-events: none;
+	font-effect: shadow(0px 1px #000000);
+}
+/* left:34 (not the shared 11px column) clears the guild-mark emblem's x15..31 span. */
+.id-text-your { left: 34px; top: 48px; font-size: 12px; }
+.id-text-my   { left: 11px; top: 253px; font-size: 12px; }
+
+/* Right edge at 179px; 69px wide so "Lv.About 400" fits (nowrap text overflows to the right). */
+.level-text {
+	position: absolute;
+	left: 110px;
+	top: 48px;
+	width: 69px;
+	text-align: right;
+	font-weight: 500;
+	font-size: 11px;
+	white-space: nowrap;
+	pointer-events: none;
+	font-family: "token(font-body)";
+}
+
+/* Wallet strips: base.rcss's shared .modern-wallet-px/.modern-wallet-value-px family, instantiated
+   TWICE at this window's own two native top offsets (150/356) -- each with its own id, bound to its
+   own C++ field (your_gold_text/color vs my_gold_text/color), not a single shared element. */
+.trade-gold-your       { top: 150px; }
+.trade-gold-your-value { top: 155px; }
+.trade-gold-my         { top: 356px; }
+.trade-gold-my-value   { top: 361px; }
+
+/* Confirm/accept control -- a real circular OK button (.modern-icon-btn-px's recipe, circular +
+   smaller), not the flat checkbox primitive that read as a bare outline square. Centered on the
+   same points the legacy 36x29 accept-button hit-boxes were. */
+.trade-confirm-btn {
+	position: absolute;
+	width: 22px;
+	height: 22px;
+	border-radius: 50%;
+	cursor: pointer;
+	pointer-events: auto;
+	text-align: center;
+	line-height: 22px;
+	color: #514a35;
+	background-color: #13140f;
+	decorator:
+		linear-gradient(to bottom, rgba(255, 255, 255, 11), transparent 40%),
+		linear-gradient(to bottom, #26251d, #15160f 56%, #090a08);
+	border: 1px token(border-frame);
+	box-shadow:
+		0 2px 5px rgba(0, 0, 0, 133),
+		inset 0 1px 0 rgba(232, 215, 168, 18),
+		inset 0 -1px 0 #000000;
+}
+.trade-confirm-btn.checked {
+	color: token(text-warm);
+	border-color: token(border-hover);
+	decorator:
+		linear-gradient(to bottom, rgba(255, 255, 255, 15), transparent 40%),
+		linear-gradient(to bottom, #8f6922, #6b4d18);
+}
+/* Red ring while m_nMyTradeWait > 0, approximating the former RenderImage() red color-multiply
+   cooldown tint -- appended to (not replacing) the button's own resting shadow. */
+.trade-confirm-btn.waiting {
+	box-shadow:
+		0 2px 5px rgba(0, 0, 0, 133),
+		inset 0 1px 0 rgba(232, 215, 168, 18),
+		inset 0 -1px 0 #000000,
+		0 0 0 2px rgba(220, 40, 40, 220);
+}
+.confirm-glyph {
+	/* No explicit color -- see base.rcss's .modern-icon-btn-glyph-px comment: RmlUi inherits it by
+	   default already, and this build's parser doesn't recognize the literal `inherit` keyword. */
+	font-weight: bold;
+	font-size: 11px;
+	font-family: "DejaVu Sans";
+	pointer-events: none;
+}
+.confirm-your {
+	left: 153px;
+	top: 189px;
+	cursor: default;
+	pointer-events: none;
+}
+.confirm-my {
+	left: 153px;
+	top: 393px;
+}
+
+/* Divider between the two players' halves -- same subtle warm accent-line treatment as
+   the frame's own .rail-accent (the header rail's bottom edge), at this window's own former
+   divider position (top:220, matching IMAGE_TRADE_LINE's old placement) instead of hugging the
+   rail. */
+.trade-divider {
+	position: absolute;
+	left: 8px;
+	right: 8px;
+	top: 220px;
+	height: 1px;
+	pointer-events: none;
+	opacity: 0.35;
+	decorator: linear-gradient(to right,
+		transparent,
+		token(metal-warm-edge) 30%,
+		#84754e 50%,
+		token(metal-warm-edge) 70%,
+		transparent);
+}
+
+.trade-btn-exit { left: 13px;  color: #d59b79; border-color: #5c382b; }
+.trade-btn-zen  { left: 104px; }
+
+/* Warning/notice help text -- squeezed into the 22px gap between the your-side confirm checkbox
+   and the divider (198..220), same reasoning as every other px value in this file: the grids around
+   it are fixed, so this band is what's left. "Warning" blinks via warning_opacity (C++ mirrors the
+   old sin(WorldTime)-based alpha pulse); the rest is a fixed warm hint color. */
+.warning-label {
+	position: absolute;
+	left: 11px;
+	top: 198px;
+	color: #e35b5b;
+	font-weight: 500;
+	font-size: 7px;
+	white-space: nowrap;
+	pointer-events: none;
+	font-family: "token(font-body)";
+}
+.notice-line {
+	position: absolute;
+	left: 11px;
+	color: token(text-secondary);
+	font-weight: 500;
+	font-size: 7px;
+	white-space: nowrap;
+	pointer-events: none;
+	font-family: "token(font-body)";
+}
+.notice-line1 { left: 40px; top: 198px; } /* clear of the "Warning" label (11..37px) */
+.notice-line2 { top: 206px; }
+.notice-line3 { top: 213px; }
+
+/* Former RenderWarningArrow()'s "Warning" text badge -- left/top/width come live from C++ per
+   entry (item_warning_badges), since they track a live, variable-length set of flagged item grid
+   cells (including the same sinf() wobble the native arrow glyph still animates with). Renders
+   after both native grids and the native arrow glyph (this main context paints last), matching the
+   original's own draw order (text drawn on top of the arrow within the same native call). */
+.item-warning-badge {
+	position: absolute;
+	background-color: token(semantic-danger);
+	color: token(text-primary);
+	font-weight: bold;
+	font-size: 12px;
+	text-align: center;
+	white-space: nowrap;
+	pointer-events: none;
+	font-family: "token(font-body)";
+}
+
+/* Trade partner's level by bucket (CTrade::ConvertYourLevel(); the RML toggles
+   .level-bucket-<N>). The original client's colors. */
+.level-text.level-bucket-10  { color: #ff0000; }
+.level-text.level-bucket-50  { color: #ff9600; }
+.level-text.level-bucket-100 { color: #00c918; }
+.level-text.level-bucket-200 { color: #d2e6ff; }
+.level-text.level-bucket-300 { color: #ff99ff; }
+.level-text.level-bucket-400 { color: #ff9999; }
+
+/* Native item grids: the first cell's top-left, in #panel's units. */
+.native-anchor { position: absolute; pointer-events: none; }
+#partner_grid, #partner_grid_counts { left: 16px; top: 68px; width: calc(8 * var(--item-cell)); height: calc(4 * var(--item-cell)); }
+#item_grid, #item_grid_counts { left: 16px; top: 274px; width: calc(8 * var(--item-cell)); height: calc(4 * var(--item-cell)); }
+
+/* The frame. */
+.bg-panel {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 190px;
+	height: 429px;
+	pointer-events: none;
+	border-radius: token(radius-sm)px;
+	background-color: #080a08;
+	decorator: linear-gradient(to bottom, #11130f 0%, #080a08 100%);
+	border-width: 1px;
+	border-color: token(border-frame);
+	box-shadow:
+		0 11px 30px rgba(0, 0, 0, 158),
+		0 2px 5px rgba(0, 0, 0, 217),
+		inset 0 0 0 1px #090a08,
+		inset 0 0 0 3px rgba(120, 115, 90, 190);
+}
+
+.inv-shell-edge {
+	position: absolute;
+	left: -3px;
+	right: -3px;
+	top: -3px;
+	bottom: -3px;
+	pointer-events: none;
+	background-color: transparent;
+	border-radius: token(radius-sm)px;
+	border-width: 1px;
+	border-color: rgba(31, 31, 26, 242);
+	box-shadow:
+		inset 1px 0 0 rgba(130, 121, 91, 110),
+		inset -1px 0 0 rgba(0, 0, 0, 204),
+		inset 0 1px 0 rgba(151, 139, 101, 90),
+		inset 0 -1px 0 rgba(0, 0, 0, 230);
+}
+
+.inv-groove {
+	position: absolute;
+	left: 4px;
+	right: 4px;
+	top: 4px;
+	bottom: 4px;
+	pointer-events: none;
+	border-width: 1px;
+	border-color: #24261f;
+	box-shadow:
+		inset 0 0 0 1px rgba(121, 112, 83, 40),
+		inset 0 0 12px rgba(0, 0, 0, 153);
+}
+
+/* Rail fill/accent relocated from the fg's now paint-less .modern-header-rail-px -- see
+   base.rcss's comment on that class. top/height match .trade-header-rail (trade.rcss). */
+.rail-fill {
+	position: absolute;
+	left: 8px;
+	right: 8px;
+	top: 6px;
+	height: 29px;
+	pointer-events: none;
+	background-color: token(metal-dark);
+	decorator:
+		linear-gradient(to bottom, rgba(205, 184, 129, 13), transparent 31%),
+		linear-gradient(to bottom, token(metal-rail), #171813 45%, token(metal-rail-dark));
+	border-width: 1px;
+	border-color: token(border-rail);
+	border-bottom-color: #171812;
+	box-shadow:
+		inset 0 1px 0 rgba(235, 218, 169, 18),
+		inset 0 -1px 0 #000000,
+		0 2px 4px rgba(0, 0, 0, 133);
+}
+/* Nested inside .rail-fill -- its left/right/bottom resolve against that box. */
+.rail-accent {
+	position: absolute;
+	left: 7px;
+	right: 7px;
+	bottom: 2px;
+	height: 1px;
+	pointer-events: none;
+	opacity: 0.35;
+	decorator: linear-gradient(to right,
+		transparent,
+		token(metal-warm-edge) 30%,
+		#84754e 50%,
+		token(metal-warm-edge) 70%,
+		transparent);
+}
+
+/* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
+   controls take their own. */
+#panel.slot-placed { pointer-events: none; }

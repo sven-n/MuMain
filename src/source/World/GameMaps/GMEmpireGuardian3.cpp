@@ -172,7 +172,7 @@ bool GMEmpireGuardian3::MoveObject(OBJECT* o)
         return true;
     case 81:
     {
-        o->BlendMeshTexCoordV += 0.015f;
+        o->BlendMeshTexCoordV += 0.015f * FPS_ANIMATION_FACTOR;
     }
         return true;
     case 36:

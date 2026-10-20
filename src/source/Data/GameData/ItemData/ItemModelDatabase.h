@@ -10,8 +10,8 @@
 namespace Data::Items
 {
 // In-memory table of the item models (Data/Items/Models), indexed by item
-// type like the item database. Built once at startup, before the models are
-// opened.
+// type like the item database. Built at startup, before the models are
+// opened; the item editor moves models with their items (Swap).
 class ItemModelDatabase
 {
 public:
@@ -43,6 +43,10 @@ public:
         return Find(itemType) != nullptr ? &m_glowColors[itemType] : nullptr;
     }
 
+    // Swaps two slots and updates the ids of the moved models, for the item
+    // editor, which moves an item's model with the item.
+    void Swap(int firstItemType, int secondItemType);
+
     // All MAX_ITEM slots, indexed by item type, including empty ones.
     std::span<const ItemModelDefinition> GetAllSlots() const
     {
@@ -54,8 +58,8 @@ public:
         return m_modelCount;
     }
 
-    // Counts the builds; tables taken from the models (e.g. the render
-    // styles) take them again when it changes.
+    // Counts the changes (builds and swaps); tables taken from the models
+    // (e.g. the render styles) take them again when it changes.
     int GetVersion() const
     {
         return m_version;

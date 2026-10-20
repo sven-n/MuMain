@@ -3,7 +3,7 @@
 
 #include "App/Control/ControlTaps.h"
 #include "Network/Server/WSclient.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 
 namespace
 {
@@ -23,17 +23,17 @@ std::wstring SenderLabel(Source source, std::wstring_view displayName)
     }
 }
 
-SEASON3B::MESSAGE_TYPE ScopeMessageType(Scope scope)
+mu::ui::window::MESSAGE_TYPE ScopeMessageType(Scope scope)
 {
     switch (scope)
     {
     case Scope::Guild:
-        return SEASON3B::TYPE_GUILD_MESSAGE;
+        return mu::ui::window::TYPE_GUILD_MESSAGE;
     case Scope::Alliance:
-        return SEASON3B::TYPE_UNION_MESSAGE;
+        return mu::ui::window::TYPE_UNION_MESSAGE;
     case Scope::World:
     default:
-        return SEASON3B::TYPE_CHAT_MESSAGE;
+        return mu::ui::window::TYPE_CHAT_MESSAGE;
     }
 }
 

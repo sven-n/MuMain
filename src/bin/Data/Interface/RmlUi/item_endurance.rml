@@ -1,0 +1,53 @@
+<rml>
+	<!-- bound-geometry: the hovered item's tooltip follows the mouse (clamped to the screen edge) and
+	     the pet bars are lengths from their health -->
+<head>
+	<title>Item endurance (CItemEnduranceInfo)</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="item_endurance.rcss"/>
+</head>
+<body data-model="item_endurance">
+	<!-- The item endurance HUD (CItemEnduranceInfo). Left column: the pet / summon HP frames in the
+	     screen's stretch (#pets, reference px inside; the theme places #pet_column), the elf's
+	     arrow count line at its top and each frame's name, counter-scaled out of the stretch.
+	     Right: the durability warning icons of worn gear on the dock (#icons, reference px inside;
+	     the theme places the column). The hovered icon's tooltip is in window pixels at the
+	     pointer. Behind the other documents of its context (the original drew it at layer depth
+	     3.5, under the panels). Takes no pointer events: C++ hit-tests the drawn frames and icons. -->
+	<div id="pets">
+		<div id="pet_column">
+			<div id="arrows_row" data-if="arrows != ''">
+				<span id="arrows" class="counter-scaled-xy" data-style-font-size="text_px + 'px'"
+				      data-style-line-height="line_height_px + 'px'">{{arrows}}</span>
+			</div>
+			<div class="pet" data-for="pet : pets">
+				<div class="pet-fill"></div>
+				<div class="pet-frame"></div>
+				<!-- The bar shows the texture's left part, it does not stretch it (RenderImage() with a
+				     shorter width): the source rect is as wide as the element, texel for reference px. -->
+				<img class="pet-bar" src="../../../newui_Pet_HpBar.jpg" data-attr-rect="'0 0 ' + pet.bar_width + ' 3'"
+				     data-style-width="pet.bar_width + 'px'"/>
+				<div class="pet-name-box">
+					<span class="pet-name counter-scaled-xy" data-style-font-size="text_px + 'px'"
+					      data-style-line-height="line_height_px + 'px'">{{pet.name}}</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="icons">
+		<!-- The theme packs the cells, two per column filling downwards then leftwards. Both rings
+		     warning at once share one cell, each tinting its own half of the icon. -->
+		<div id="icon_column">
+			<div data-for="icon : icons" data-attr-class="'icon cell-' + icon.cell">
+				<div data-if="icon.image != ''" data-attr-class="'icon-art icon-art--' + icon.image"></div>
+				<div data-attr-class="'icon-tint icon-tint--' + icon.band + (icon.tint_half == '' ? '' : ' half-' + icon.tint_half)"></div>
+			</div>
+		</div>
+	</div>
+	<div class="text-row" data-if="tooltip != ''" data-style-left="(tooltip_centre_x - 300) + 'px'"
+	     data-style-top="tooltip_top + 'px'">
+		<span data-attr-class="'durability-tip durability-tip--' + tooltip_band" data-style-font-size="bold_text_px + 'px'"
+		      data-style-line-height="bold_line_height_px + 'px'">{{tooltip}}</span>
+	</div>
+</body>
+</rml>
