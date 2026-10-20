@@ -37,9 +37,17 @@ bool IsEnglish(std::string_view locale)
     return locale == Data::LocalizedString::NeutralLocale;
 }
 
-template <size_t Size> void CopyToBuffer(char (&buffer)[Size], const std::string& text)
+// Lets ImGui size the std::string it edits to the text, as
+// misc/cpp/imgui_stdlib does, so a name of any length is edited whole.
+int ResizeCellText(ImGuiInputTextCallbackData* data)
 {
-    std::snprintf(buffer, Size, "%s", text.c_str());
+    if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
+    {
+        auto* text = static_cast<std::string*>(data->UserData);
+        text->resize(data->BufTextLen);
+        data->Buf = text->data();
+    }
+    return 0;
 }
 
 std::string MissingLabel(const char* locale, const Data::Items::ItemNameCount& count)
@@ -228,21 +236,22 @@ void CMuItemTranslationsUI::RenderNameCell(int itemType, int column, const char*
 
     ImGui::PushID(column);
     // While the field is active, and once more when it stops being active,
-    // ImGui writes its own text into this buffer; the text from the database
+    // ImGui writes its own text into m_cellText; the text from the database
     // only counts while the field is not being edited.
-    char buffer[NameBufferSize];
-    CopyToBuffer(buffer, Data::Items::GetOwnName(*definition, locale));
+    m_cellText = Data::Items::GetOwnName(*definition, locale);
     const bool wasEditCell = m_editItem == itemType && m_editColumn == column;
     ImGui::SetNextItemWidth(-FLT_MIN);
     // A missing name shows the English one it falls back to, greyed.
-    ImGui::InputTextWithHint("##Name", definition->names.GetNeutral().c_str(), buffer, NameBufferSize);
+    ImGui::InputTextWithHint("##Name", definition->names.GetNeutral().c_str(), m_cellText.data(),
+                             m_cellText.capacity() + 1, ImGuiInputTextFlags_CallbackResize, ResizeCellText,
+                             &m_cellText);
     const bool active = ImGui::IsItemActive();
     if (active)
     {
         m_editItem = itemType;
         m_editColumn = column;
         m_editLocale = locale;
-        m_editText = buffer;
+        m_editText = m_cellText;
         m_editDrawn = true;
     }
     else if (ImGui::IsItemDeactivated())
@@ -251,7 +260,7 @@ void CMuItemTranslationsUI::RenderNameCell(int itemType, int column, const char*
         // edit is stored all the same, and the other cell stays the edited one.
         if (ImGui::IsItemDeactivatedAfterEdit())
         {
-            CommitName(itemType, locale, buffer);
+            CommitName(itemType, locale, m_cellText.c_str());
         }
         if (wasEditCell)
         {

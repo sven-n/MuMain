@@ -22,7 +22,7 @@ public:
     void Render(bool* open);
 
 private:
-    static constexpr int NameBufferSize = 256;
+    static constexpr int SearchBufferSize = 256;
 
     void RenderToolbar();
     void RenderTable();
@@ -40,12 +40,15 @@ private:
     std::vector<Data::Items::ItemNameCount> m_counts;
     int m_countsVersion = -1;
 
-    char m_search[NameBufferSize] = {};
+    char m_search[SearchBufferSize] = {};
     // Index into m_locales of the language whose missing names are listed, or
     // -1 for all items.
     int m_missingLocale = -1;
     CItemListModel m_list;
 
+    // The text of the cell being drawn: one string for all cells, so drawing
+    // allocates only when a longer name comes.
+    std::string m_cellText;
     // The cell being edited, its text so far, and whether it was drawn this
     // frame.
     int m_editItem = -1;
