@@ -19,6 +19,20 @@ class CItemModelPreview
 public:
     void Render(int itemType);
 
+    // The item level and looks the controls chose, for the inventory grid.
+    int GetLevel() const
+    {
+        return m_level;
+    }
+    bool IsExcellent() const
+    {
+        return m_excellent;
+    }
+    bool IsAncient() const
+    {
+        return m_ancient;
+    }
+
     // Between frames: the texture can only be released then.
     void BeforeFrame()
     {

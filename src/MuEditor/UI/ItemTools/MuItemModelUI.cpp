@@ -98,9 +98,11 @@ void CMuItemModelUI::RenderModel(ItemModelDefinition* model, int itemType)
     {
         ModelForms::RenderOwnFile(m_draft, *model);
     }
-    ModelForms::RenderDisplay(m_draft, *model);
-    // A slider moved in this frame: the inventories drawn after it show it.
-    ShowInventoryDisplay(model, itemType);
+    if (ImGui::CollapsingHeader(I18N::Editor::InTheInventory, ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        RenderInventory(*model, itemType);
+    }
+    ModelForms::RenderGround(m_draft, *model);
     ModelForms::RenderGlow(m_draft, *model, m_counts);
     if (ImGui::CollapsingHeader(I18N::Editor::Looks, ImGuiTreeNodeFlags_DefaultOpen))
     {
@@ -109,9 +111,27 @@ void CMuItemModelUI::RenderModel(ItemModelDefinition* model, int itemType)
     RenderRemove(*model);
 }
 
+// The sliders, and beside them the item in an inventory grid.
+void CMuItemModelUI::RenderInventory(ItemModelDefinition& model, int itemType)
+{
+    if (!ImGui::BeginTable("##Inventory", 2, ImGuiTableFlags_SizingFixedFit))
+    {
+        return;
+    }
+    ImGui::TableNextColumn();
+    ModelForms::RenderInventory(m_draft, model.inventory);
+    // A slider moved in this frame: the grid and the inventories drawn after
+    // it show it.
+    ShowInventoryDisplay(&model, itemType);
+    ImGui::TableNextColumn();
+    m_inventoryGrid.Render(itemType, m_preview.GetLevel(), m_preview.IsExcellent(), m_preview.IsAncient());
+    ImGui::EndTable();
+}
+
 void CMuItemModelUI::BeforeFrame()
 {
     m_preview.BeforeFrame();
+    m_inventoryGrid.BeforeFrame();
     Render::Items::Display::ClearInventoryDisplayPreview();
 }
 

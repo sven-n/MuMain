@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "ItemEditDraft.h"
+#include "ItemInventoryGridPreview.h"
 #include "ItemLookUseCounts.h"
 #include "ItemModelFilePicker.h"
 #include "ItemModelPreview.h"
@@ -12,7 +13,8 @@
 
 // The item model and visuals tool (section 9): the selected item's model as
 // it is opened now, its model file (picked from Data/Item and Data/Player) or
-// shared model, texture folders, inventory and ground display, cloth,
+// shared model, texture folders, inventory display (beside the item in an
+// inventory grid) and ground display, cloth,
 // material, glow, and the render style and item effect picked from their
 // lists, each with the other items that use it (D24, D26). A changed file is
 // opened again before the next frame.
@@ -31,11 +33,13 @@ private:
     CMuItemModelUI();
 
     void RenderModel(Data::Items::ItemModelDefinition* model, int itemType);
+    void RenderInventory(Data::Items::ItemModelDefinition& model, int itemType);
     void RenderRemove(const Data::Items::ItemModelDefinition& model);
     void ShowInventoryDisplay(const Data::Items::ItemModelDefinition* model, int itemType);
 
     MuEditor::Items::ItemEditDraft<Data::Items::ItemModelDefinition> m_draft;
     MuEditor::Items::CItemModelPreview m_preview;
+    MuEditor::Items::CItemInventoryGridPreview m_inventoryGrid;
     MuEditor::Items::CItemModelFilePicker m_filePicker;
     MuEditor::Items::CItemSharedModelForm m_sharedForm;
     MuEditor::Items::ItemLookUseCounts m_counts;

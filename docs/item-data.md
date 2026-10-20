@@ -744,8 +744,12 @@ number that has a model but no item:
   are listed with a button that removes them.
 - For a file of its own, the texture folders and none-blend meshes; then
   the inventory display as sliders (a drag is one undo step; Ctrl+click
-  types a value), the ground display, cloth, specular and the glow (levels,
-  colors with their swatches, meshes, excellent).
+  types a value) beside the item in an inventory grid of its size, drawn as
+  the game's inventory draws it at the preview's item level (it turns while
+  the mouse is on it); the ground display, cloth, specular and the glow
+  (levels, colors with their swatches, meshes, excellent). While a slider is
+  dragged, the grid and the game's inventory show the value at once; it is
+  stored when the slider is let go.
 - The render style and the item effect, picked from their lists with how
   many models use each, and the items that use the picked one (a click
   selects one). What a look is made of is drawing code.

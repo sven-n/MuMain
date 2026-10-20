@@ -78,17 +78,6 @@ void Sliders(ModelDraft& draft, const char* label, std::array<double, Count>& va
     ImGui::PopID();
 }
 
-void RenderInventory(ModelDraft& draft, Data::Items::ItemInventoryDisplay& inventory)
-{
-    ImGui::PushID("Inventory");
-    Sliders(draft, I18N::Editor::Anchor, inventory.anchor, AnchorRange);
-    Sliders(draft, I18N::Editor::Offset, inventory.offset, OffsetRange);
-    Sliders(draft, I18N::Editor::Rotation, inventory.rotation, RotationRange);
-    Fields::Slider(draft, I18N::Editor::Scale, inventory.scale, ScaleRange);
-    Fields::Slider(draft, I18N::Editor::BodyHeight, inventory.bodyHeight, BodyHeightRange);
-    ImGui::PopID();
-}
-
 // A number list as text ("1, 3"), stored when it was left and reads as numbers.
 void Numbers(ModelDraft& draft, const char* label, std::vector<int>& numbers)
 {
@@ -274,12 +263,19 @@ void RenderOwnFile(ModelDraft& draft, ItemModelDefinition& model)
     Numbers(draft, I18N::Editor::NoneBlendMeshes, model.noneBlendMeshes);
 }
 
-void RenderDisplay(ModelDraft& draft, ItemModelDefinition& model)
+void RenderInventory(ModelDraft& draft, Data::Items::ItemInventoryDisplay& inventory)
 {
-    if (ImGui::CollapsingHeader(I18N::Editor::InTheInventory, ImGuiTreeNodeFlags_DefaultOpen))
-    {
-        RenderInventory(draft, model.inventory);
-    }
+    ImGui::PushID("Inventory");
+    Sliders(draft, I18N::Editor::Anchor, inventory.anchor, AnchorRange);
+    Sliders(draft, I18N::Editor::Offset, inventory.offset, OffsetRange);
+    Sliders(draft, I18N::Editor::Rotation, inventory.rotation, RotationRange);
+    Fields::Slider(draft, I18N::Editor::Scale, inventory.scale, ScaleRange);
+    Fields::Slider(draft, I18N::Editor::BodyHeight, inventory.bodyHeight, BodyHeightRange);
+    ImGui::PopID();
+}
+
+void RenderGround(ModelDraft& draft, ItemModelDefinition& model)
+{
     if (ImGui::CollapsingHeader(I18N::Editor::OnTheGround))
     {
         ImGui::PushID("Ground");

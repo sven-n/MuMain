@@ -6,6 +6,16 @@
 
 namespace MuEditor::Effects
 {
+// The depth buffer a preview draws with: the one all one-shot captures share
+// (the renderer makes it again when the size changes), or one of its own (a
+// render target, which clears to transparent), for a second picture of
+// another size drawn in the same frames.
+enum class PreviewDepth
+{
+    Shared,
+    Own,
+};
+
 // The texture the effect preview is drawn into. It is made once and drawn
 // into every frame the game draws; a frame it skips keeps the last picture
 // (KeepLastPicture). A texture of another size replaces it only at a frame
@@ -15,6 +25,8 @@ namespace MuEditor::Effects
 class EffectPreviewTarget
 {
 public:
+    explicit EffectPreviewTarget(PreviewDepth depth = PreviewDepth::Shared) : m_depth(depth) {}
+
     // Opens the capture into the texture for this frame; makes the texture
     // the first time. A size other than the texture's waits for the next
     // BeforeFrame when `resizeNow` allows it. Returns the texture, 0 when no
@@ -32,6 +44,7 @@ public:
     void BeforeFrame();
 
 private:
+    PreviewDepth m_depth;
     std::uint32_t m_texture = 0;
     int m_width = 0;
     int m_height = 0;

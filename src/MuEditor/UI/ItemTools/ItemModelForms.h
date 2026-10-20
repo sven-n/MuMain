@@ -17,7 +17,10 @@ namespace MuEditor::Items::ModelForms
 using ModelDraft = ItemEditDraft<Data::Items::ItemModelDefinition>;
 
 void RenderOwnFile(ModelDraft& draft, Data::Items::ItemModelDefinition& model);
-void RenderDisplay(ModelDraft& draft, Data::Items::ItemModelDefinition& model);
+// The inventory display's sliders (without a header).
+void RenderInventory(ModelDraft& draft, Data::Items::ItemInventoryDisplay& inventory);
+// The ground display, the cloth flag and the material.
+void RenderGround(ModelDraft& draft, Data::Items::ItemModelDefinition& model);
 void RenderGlow(ModelDraft& draft, Data::Items::ItemModelDefinition& model, ItemLookUseCounts& counts);
 void RenderLooks(ModelDraft& draft, Data::Items::ItemModelDefinition& model, ItemLookUseCounts& counts);
 } // namespace MuEditor::Items::ModelForms
