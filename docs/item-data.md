@@ -418,6 +418,7 @@ and server share.
 | `renderStyle` | The look of the model when it is more than a plain textured model, see below. Optional. |
 | `itemEffect` | What the model does before it is drawn (sprites and particles on its bones, a pulsing glow mesh, ...), see below. Optional. |
 | `cloth` | `true` for capes that are worn as cloth: when one is put on or taken off, the character's cloth is deleted, so the next cape builds its own. Optional. The flag does not make a cape cloth; which capes are drawn as cloth, and how, is still decided in code. |
+| `material` | `{ "specular": 0.5 }`: the strength of the highlight under Enhanced lighting, 0 (none) to 1; see [enhanced-look.md](enhanced-look.md). Optional. |
 
 `inventory` and `ground` hold these values; a missing value has the
 default, which is the look of items without values of their own:
@@ -626,8 +627,8 @@ A shared model has a `name` of letters and digits and the `file`,
 opened once, by the first of its items, and its textures are loaded once;
 the other items use that data. Everything else (`inventory`, `ground`,
 `glow`, `renderStyle`, `itemEffect`, `cloth`) stays each item's own.
-Changing a shared model changes all its items; the item editor lists them
-(see [Looks](#looks)).
+Changing a shared model changes all its items; the model tool lists them
+first (see [Item Model](#item-model)).
 
 ---
 
@@ -638,44 +639,114 @@ in [translation-system.md → Item names](translation-system.md#item-names).
 
 ## Editing items (MuEditor)
 
-The item editor (editor builds, F12) edits the items of the running game:
+The item tools (editor builds, F12, **Windows → Items**) edit the items of
+the running game. They share one selected item: selecting it in one tool
+shows it in the others.
 
-- **Every change goes into the item database right away**, so the game
-  uses it immediately.
-- **Name changes are stored for the current UI locale.** To edit a
-  translation, switch the language first; to edit the English name,
-  switch to English. The **Item Translations** window edits the names of all
-  languages side by side (see
-  [translation-system.md → In the item editor](translation-system.md#in-the-item-editor)).
-- **Moving an item** to an empty item number (the Index column) takes its
-  model along: the model data in `Data/Items/Models` and the model the game
-  has opened, so the item keeps its looks. A number with a model of its own
-  but no item data (the Looks lists these) is not empty: the console says
-  so, and the item stays where it is.
-- **Save Items** checks the data and writes `Data/Items` next to the game,
-  with the model files in `Data/Items/Models` of the groups whose models
-  were moved; the other model files are not touched. It lists each UI
-  language that misses item names, with how many.
-  With errors nothing is written, and the errors are listed in the
-  editor console. If a file cannot be written (read-only folder, full disk),
-  no file is replaced, the popup says so and the console names the file.
-  A file open in another program can still fail when it is replaced, after
+- **Item Browser**: the items with a search (a name in any language,
+  `group,number` or the item type) and filters: group, tag, a rule flag
+  that is off, items without a model, numbers that have a model but no
+  item, items without a name in a language. It has **Save Items**,
+  **Import from bmd**, **Export as bmd**, **Export as S6E3** and
+  **Export as CSV**, and:
+  - **Add item**: a group, a free number (one with neither an item nor a
+    model entry), the English name, and either the selected item's values
+    or a size and slot of its own (an item that can be worn then starts
+    usable by every class). Its model is linked in **Item Model**.
+  - **Duplicate item**: a copy with its model. A model file of its own
+    becomes a shared model that both items use, so it is opened once.
+  - **Move item**: to a free number, with its model (the model data and the
+    model the game has opened), so the item keeps its looks.
+  - **Remove item**: the item and its model entry.
+
+  Moving and removing first list what uses the item by its number: its
+  tags, its model and shared model, the source lines that name it (read
+  from the sources the editor was built from; without them that part is
+  not known), and an ancient set, add option, buff or pet of the game data.
+  These stay at the number.
+- **Item Basics**: the English name, size, slot, two-handed, wing tier,
+  weapon kind, skill, drop level, potion priority, the stats, the prices,
+  the stat profile and the resistances. Size and slot stay as they are
+  while your character holds the item: the inventory frees the cells by
+  the size an item has when it is taken out.
+- **Item Requirements**: the level and stat requirements, each also by item
+  level (16 values instead of the base value), the class steps (0: the
+  class cannot use the item) and whether excellent options raise the level
+  requirement.
+- **Item Rules**: the rule flags as a table of items; select several rows
+  (Ctrl or Shift click) to allow or forbid a flag for all of them.
+- **Item Categories**: a tag and its items; add the selected item or remove
+  items from it. New tags need code.
+- **Item Model**: see [Item Model](#item-model).
+- **Item Checks**: the checks of a save as a list, errors first. A click on
+  a problem of an item selects it and opens the tool of its field.
+- **Item Translations**: the names in all languages, see
+  [translation-system.md → In the item editor](translation-system.md#in-the-item-editor).
+
+How changes work:
+
+- **Every change goes into the item database right away**, and the game
+  uses it at once. Items in the inventory keep the values computed when
+  they were made until they are made again (e.g. after logging in again).
+- A text or number field is stored when you leave it after a change, a
+  checkbox or list right away. Each is one step of **Undo** and **Redo**
+  (also Ctrl+Z and Ctrl+Y while an item tool has the focus and no field is
+  being typed in), for the whole
+  session and across saves. A step is not undone when the item changed in
+  a way the history did not record. Import from bmd clears the history. The
+  browser's title has a `*` while there are changes that are not saved.
+- The weapon kind and the stat profile follow the item's data (group,
+  slot, classes, requirements) while they are what it gives; a value you
+  pick stays.
+- **Save Items** runs the checks and writes `Data/Items` next to the game,
+  with the model files of the groups whose models changed and
+  `SharedModels.json` when a shared model changed; the other model files
+  are not touched. It lists each UI language that misses item names, with
+  how many. With errors nothing is written, and the errors are listed in
+  the editor console and in **Item Checks**. Warnings (a model file that is
+  missing, a file several items name themselves instead of through a
+  shared model, a render style or item effect that does not exist) do not
+  stop it. If a file cannot be written (read-only folder, full disk), no
+  file is replaced, the popup says so and the console names the file. A
+  file open in another program can still fail when it is replaced, after
   others were. Only files whose content changed are rewritten.
 
 The game runs from the build folder, which has a copy of `src/bin/Data`.
 To keep your changes, copy the changed files from
-`<build folder>/Data/Items` to `src/bin/Data/Items` and commit them.
+`<build folder>/Data/Items` to `src/bin/Data/Items` and commit them. A new
+`.bmd` file or texture has to be copied to `src/bin/Data` too (textures as
+`.OZJ` or `.OZT`).
 
-### Looks
+### Item Model
 
-The **Looks** section above the item table shows the model data of the
-selected item (`Data/Items/Models`), read only: its model file, its shared
-model, its glow values, its render style and its item effect. A shared
-model, a render style or an item effect opens to the list of all items that
-use it; clicking one selects it in the table (the search is cleared when it
-hides that item). Items without item data are listed too; they are not in
-the table, but selecting one shows its looks. Changing the looks is done in
-the model files for now; only moving an item changes them in the editor.
+The model tool edits the selected item's model entry, also the one of a
+number that has a model but no item:
+
+- A preview of the model as the game has it opened, at an item level,
+  excellent or ancient (drag to turn, wheel to zoom, double click to put
+  it back).
+- The model file, picked from the `.bmd` files below `Data/Item` and
+  `Data/Player`. An item without a model gets an entry, with the file's
+  folder as its texture folder. A shared model that opens the same file is
+  offered instead; other items that name the file themselves are counted
+  (a shared model would open it once).
+- The shared model: pick one; for the one the item uses, its items and its
+  name, file, texture folders and none-blend meshes. A change is applied
+  only after a warning that lists every item it reaches. **Make a copy for
+  this item** gives the item a file entry of its own instead (a variant).
+  A shared model that items use cannot be removed.
+- For a file of its own, the texture folders and none-blend meshes; then
+  the inventory and ground display, cloth, specular and the glow (levels,
+  colors with their swatches, meshes, excellent).
+- The render style and the item effect, picked from their lists with how
+  many models use each, and the items that use the picked one (a click
+  selects one). What a look is made of is drawing code.
+
+A changed file, texture folder, mesh list or material is opened again
+before the next frame, so the game draws it at once. Models that the game
+changes in code after loading (the cloth of some pants, the second models
+of the Rage Fighter gloves, the inventory models of the Rage Fighter
+armors) may need a restart to show a new file.
 
 ### Import from bmd / Export as bmd
 

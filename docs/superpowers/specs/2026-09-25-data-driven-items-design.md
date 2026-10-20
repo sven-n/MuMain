@@ -53,7 +53,7 @@ share with items) is planned in the
 | D16 | Unused item bmd copies | Removed on this branch; the game only loads `Item_<lang>.bmd`. |
 | D17 | Translations in phase 2 | Item names moved into phase 2, because the per-language bmd files were the only place the Portuguese and Spanish names existed. Names are `LocalizedString`s imported from all three files; the UI locale (the same setting as the `.resx` texts) picks the shown name, also when it changes at runtime. On disk, each item's `name` is an object of names by language (`{"en": "Blade", "es": "Espada", "pt": "Lâmina"}`, English first) in the item files; separate translation files were tried and dropped as extra maintenance. Phase 5 keeps only the translation tooling. |
 | D18 | Repairing the legacy data | The bmd import recovers names that ran past the 30-byte name field and takes the fields they overwrote from a language whose name did not reach them (defaults when none has them). Names that are not UTF-8 are read as Windows-1252. The changes are listed in the phase 2 PR and in `docs/item-data.md`. |
-| D19 | Editor sync | Every item editor change goes into the database right away (phase 2), so the editor and the database never differ. Moving the editor fully onto the database stays in phase 6. |
+| D19 | Editor sync | Every item editor change goes into the database right away (phase 2), so the editor and the database never differ. Moving the editor fully onto the database stays in phase 6 (done: the item tools edit the database, the item table is gone). |
 | D22 | Model data files | Model and display data (model file, textures, inventory and ground display, cloth, effects) lives in separate files, `Data/Items/Models/GroupNN_*.json`, one per item group, items by `number`. It is client-only: the item files keep what client and server share, and only those take part in the OpenMU exchange. Separate files also keep the item files small and let the model editor and the stats editor change different files. |
 | D23 | Model slots | Two steps. **Own model slots (phase 4a–4c):** every item keeps its own model slot, `MODEL_ITEM + item type`, as today; the data only says which file is loaded into it, so the ~100 places that compute `+ MODEL_ITEM` / `- MODEL_ITEM` stay unchanged. **Shared models (phase 4d, right after them):** models become entries of their own, and items reference them by name, so several items can share one model (loaded once; 4d1, done). Every item keeps a slot of its own, and the conversions between item types and model slots go through one place, `ToModelSlot` / `ToItemType` (4d2), so a moved item can keep its slot (phase 12) and the named slots of items (`MODEL_KRIS`, …) stay valid. One slot per shared model, with objects keeping item types, is not planned: about 240 places identify items by their model slot (see "Item-specific code that is left"), and none of them gains anything while each item has its own slot. Phase 12 (level variants as items of their own) shares models without loading them twice. |
 | D24 | Render effects | The effect code stays code, but which item uses which effect moves into the model data: the glow as values (color names from a glow color list, `Data/Effects/GlowColors.json`, which has the colors of the old `PartObjectColor*` palettes; the meshes it is drawn on; the level it glows like), a render style (`RenderPartObjectBody` recipes; identical recipes share one name) and an item effect (the item branches of `RenderPartObjectEffect`). Effects that depend on the item level (+7 glow, excellent, ancient) stay generic code, and the entries for monsters and NPCs stay in code. The named looks are code for now; D25 moves what they are made of into data. |
@@ -412,7 +412,7 @@ in both repos (as separate PRs, one per repo).
 | 4d | Shared models | Client | MuMain | 4 | Models as entries of their own that items reference by name, so items can share a model (D23, shared models). Two PRs: **4d1** shared model entries, each file opened once; **4d2** the conversions between item types and model slots in one place, and shared model data freed by its last user. |
 | 4e | Clear model loading errors | Client | MuMain | 4 | One message for missing model files and textures of item models that names the item, the model entry, the texture and the searched folders. |
 | 5 | Translation tooling | Client | MuMain | 2 | Translations editor (items × languages), missing names counted in the editor. The names themselves moved to phase 2 (D17). Done before phase 6. |
-| 6 | Editors | Client | MuMain | 2–5 | Focused MuEditor tools (section 9) on the rules of D26, including add/remove items and picking the looks of an item from lists. Takes over phase 5's item list. |
+| 6 | Editors | Client | MuMain | 2–5 | Focused MuEditor tools (section 9) on the rules of D26, including add/remove items and picking the looks of an item from lists. Takes over phase 5's item list. Done. |
 | 7 | Item sync, client side | Client | MuMain | 2, 6 | MuEditor import/export of the item exchange file, with diff. |
 | B | Item sync, server side | Server | OpenMU | 7 (file format) | Admin panel import/export pages for the item exchange file, with diff. |
 | 8 | Data-driven tooltips | Client | MuMain | 2, 5 | Tooltip JSON converted from the `ItemTooltip*` files; `RenderItemInfo()` reads data; tooltip editor. Moved earlier if needed. |
@@ -918,7 +918,8 @@ server with original clients (after phases 6 and B).
      their own in it, also languages without any item names yet; **Missing
      in** lists them, and a filled name keeps its row until refreshed.
      "Same as English" and "Remove translation" in the cell menu; clicking
-     an item number shows it in the item table.
+     an item number shows it in the item table (the item browser since
+     phase 6).
    - A name that is the same in a language is written like the English one
      (`"de": "Kris"`), so it is not counted as missing; the bmd import keeps
      such a name where the item has a name in that language, and leaves a
@@ -936,11 +937,50 @@ server with original clients (after phases 6 and B).
      apart from ImGui, so the item browser builds on it, and
      `CItemDataHandler::SetItemName` edits a name in the item database for
      any language. Importing names from OpenMU belongs to phase 7.
-6. **Editors**: the MuEditor tools from section 9, including add/remove,
-   on the rules of D26 (one selection, "used by", a warning with the list
-   of users before a shared definition changes, copies for variants). The
-   model tool builds on the read-only look view of 4c3 and picks the looks
-   of an item from lists; the looks themselves are edited from phase 13 on.
+6. **Editors (done)**: the MuEditor tools from section 9, including
+   add/remove, on the rules of D26 (one selection, "used by", a warning with
+   the list of users before a shared definition changes, copies for
+   variants). The model tool builds on the read-only look view of 4c3 and
+   picks the looks of an item from lists; the looks themselves are edited
+   from phase 13 on. As built (docs/item-data.md, "Editing items"):
+   - **Item Browser**, **Item Basics**, **Item Requirements**, **Item
+     Rules**, **Item Categories**, **Item Model** and **Item Checks** share
+     one selected item; Item Translations (phase 5) joins them. The item
+     table is gone (D5, D19): the browser took its window and its Save,
+     Import and Export buttons, and every column has a tool. The item tools
+     change the database through the handler (`SetItem`, `AddItem`,
+     `RemoveItem`, `MoveItem`, `SetItemModel`, `SetSharedModel`), which
+     keeps `ItemAttribute` and the model data in step.
+   - Add (a free number has neither an item nor a model entry; the selected
+     item or a size and slot as the start), duplicate (a model file of its
+     own becomes a shared model of both), move (to a free number, with the
+     model data and the opened model) and remove (with its model entry).
+     Moving and removing list what uses the item first: tags, model and
+     shared model, the source lines naming it (from the sources the editor
+     was built from) and the sets, add options, buffs and pets of the game
+     data.
+   - Undo and redo for the session (256 steps, across saves, cleared by the
+     bmd import); a step whose item changed in a way the history did not
+     record is refused. Fields are edited on a copy and stored when left.
+   - Save Items runs the checks first (also shown in Item Checks, each
+     leading to its item and field), then writes the item files, the model
+     files of the changed groups and `SharedModels.json` when it changed. A
+     missing model file, a `.bmd` several items name directly and an unknown
+     render style or item effect are warnings, so data that loads stays
+     saveable.
+   - The model tool: a preview from the effect preview, a file picker over
+     `Data/Item` and `Data/Player`, shared models edited with the D26
+     warning and "Make a copy for this item", a shared model that is used
+     cannot be removed, glow colours, render styles and item effects picked
+     from lists with their users. A changed file, texture folder, mesh list
+     or material is opened again between frames.
+   - Size and slot are refused while the hero holds the item (the inventory
+     frees its cells by the size an item has when it is taken out).
+   - Left out: the custom marker of section 7 (nothing reads it yet; phase
+     7 and Q1), mixes and quests in "used by" (their loaded data has no way
+     to walk it), the last OpenMU import in the remove warning (phase 7),
+     editing the stat profiles of the item stat file (a later tool) and the
+     looks themselves (phase 13).
 7. **Item sync, client side**: MuEditor import/export of the item exchange
    file and diff.
 
