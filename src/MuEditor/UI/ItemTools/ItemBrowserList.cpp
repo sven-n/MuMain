@@ -60,7 +60,7 @@ void RenderRow(int itemType, bool selected, int& clicked)
         // Some items are drawn by code with other models (the Wizard's Ring).
         ImGui::TextDisabled("%s", g_ItemDatabase.Find(itemType) != nullptr && IsDrawnByCodeAtSomeLevel(itemType)
                                       ? I18N::Editor::DrawnByCode
-                                      : I18N::Editor::NoModel);
+                                      : I18N::Editor::WithoutAModel);
     }
 }
 } // namespace
