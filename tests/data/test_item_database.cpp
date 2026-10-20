@@ -266,6 +266,21 @@ TEST_CASE("Editor changes update single items [data][items]")
     CHECK(database.GetExistingItemCount() == 0);
 }
 
+TEST_CASE("A requirement given by level can be taken back [data][items]")
+{
+    RequirementsByLevel byLevel;
+    RequirementByLevel energy{};
+    energy.fill(30);
+    byLevel.Set(ItemRequirement::Energy, energy);
+    byLevel.Set(ItemRequirement::Level, energy);
+    byLevel.Remove(ItemRequirement::Energy);
+    CHECK(byLevel.Find(ItemRequirement::Energy) == nullptr);
+    REQUIRE(byLevel.Find(ItemRequirement::Level) != nullptr);
+    byLevel.Remove(ItemRequirement::Energy);
+    byLevel.Remove(ItemRequirement::Level);
+    CHECK(byLevel == RequirementsByLevel{});
+}
+
 TEST_CASE("Editor changes to many items at once update them and the tag lists [data][items]")
 {
     ItemDatabase database;

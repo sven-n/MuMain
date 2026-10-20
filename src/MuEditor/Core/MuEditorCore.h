@@ -79,6 +79,7 @@ private:
     void UpdateCursorVisibility();
     void ToggleFullscreenOnF11();
     void ReopenChangedItemModels();
+    void RenderItemTools();
     bool IsEditorWindow(SDL_Window* window) const;
     bool FindMouseInEditorWindow() const;
 

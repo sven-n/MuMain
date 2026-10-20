@@ -201,6 +201,8 @@ void CMuEditorUI::RenderWindowsMenu(MuEditor::ToolWindows& windows, SDL_Window* 
     if (ImGui::BeginMenu(I18N::Editor::Items))
     {
         ImGui::MenuItem(I18N::Editor::ItemBrowser, nullptr, &windows.itemBrowser);
+        ImGui::MenuItem(I18N::Editor::ItemBasics, nullptr, &windows.itemBasics);
+        ImGui::MenuItem(I18N::Editor::ItemRequirements, nullptr, &windows.itemRequirements);
         ImGui::MenuItem(I18N::Editor::ItemEditor, nullptr, &windows.itemTable);
         ImGui::MenuItem(I18N::Editor::ItemTranslations, nullptr, &windows.itemTranslations);
         ImGui::EndMenu();

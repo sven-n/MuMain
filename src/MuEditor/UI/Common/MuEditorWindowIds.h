@@ -15,6 +15,12 @@ namespace MuEditor::WindowIds
 inline constexpr char ItemBrowser[] = "###ItemEditor";
 // The item table until the item tools have all its fields.
 inline constexpr char ItemTable[] = "###ItemTable";
+inline constexpr char ItemBasics[] = "###ItemBasics";
+inline constexpr char ItemRequirements[] = "###ItemRequirements";
+inline constexpr char ItemRules[] = "###ItemRules";
+inline constexpr char ItemCategories[] = "###ItemCategories";
+inline constexpr char ItemModel[] = "###ItemModel";
+inline constexpr char ItemChecks[] = "###ItemChecks";
 inline constexpr char SkillEditor[] = "###SkillEditor";
 inline constexpr char DevEditor[] = "###DevEditor";
 inline constexpr char EffectBrowser[] = "###EffectBrowser";

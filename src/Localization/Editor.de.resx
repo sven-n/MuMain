@@ -1096,4 +1096,61 @@
   <data name="Without a model" xml:space="preserve">
     <value>Ohne Modell</value>
   </data>
+  <data name="Item Basics" xml:space="preserve">
+    <value>Gegenstand: Grundwerte</value>
+  </data>
+  <data name="Item Requirements" xml:space="preserve">
+    <value>Gegenstand: Anforderungen</value>
+  </data>
+  <data name="Size and kind" xml:space="preserve">
+    <value>Größe und Art</value>
+  </data>
+  <data name="Your character holds the item: its size and slot stay as they are." xml:space="preserve">
+    <value>Dein Charakter hat den Gegenstand: Größe und Platz bleiben, wie sie sind.</value>
+  </data>
+  <data name="Wing tier" xml:space="preserve">
+    <value>Flügelstufe</value>
+  </data>
+  <data name="Weapon kind" xml:space="preserve">
+    <value>Waffenart</value>
+  </data>
+  <data name="Potion priority" xml:space="preserve">
+    <value>Trankreihenfolge</value>
+  </data>
+  <data name="Stats" xml:space="preserve">
+    <value>Werte</value>
+  </data>
+  <data name="Excellent bonus" xml:space="preserve">
+    <value>Excellent-Bonus</value>
+  </data>
+  <data name="Prices and profile" xml:space="preserve">
+    <value>Preise und Profil</value>
+  </data>
+  <data name="Stat profile" xml:space="preserve">
+    <value>Werteprofil</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>Keins</value>
+  </data>
+  <data name="The profiles are in the item stat file; the number is how many items use one." xml:space="preserve">
+    <value>Die Profile stehen in der Item-Statdatei; die Zahl sagt, wie viele Gegenstände eines nutzen.</value>
+  </data>
+  <data name="Resistances" xml:space="preserve">
+    <value>Widerstände</value>
+  </data>
+  <data name="Requirements" xml:space="preserve">
+    <value>Anforderungen</value>
+  </data>
+  <data name="By item level" xml:space="preserve">
+    <value>Nach Gegenstandsstufe</value>
+  </data>
+  <data name="Classes" xml:space="preserve">
+    <value>Klassen</value>
+  </data>
+  <data name="A class with 0 cannot use the item; otherwise it needs that class step." xml:space="preserve">
+    <value>Eine Klasse mit 0 kann den Gegenstand nicht nutzen; sonst braucht sie diese Klassenstufe.</value>
+  </data>
+  <data name="Excellent options raise the level requirement" xml:space="preserve">
+    <value>Excellent-Optionen erhöhen die Stufenanforderung</value>
+  </data>
 </root>

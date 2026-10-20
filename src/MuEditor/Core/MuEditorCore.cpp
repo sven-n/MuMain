@@ -19,7 +19,9 @@
 #include "../Config/MuEditorConfig.h"
 #include "../MuEditor/UI/Common/MuEditorCenterPaneUI.h"
 #include "../MuEditor/UI/ItemEditor/MuItemEditorUI.h"
+#include "../MuEditor/UI/ItemTools/MuItemBasicsUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemBrowserUI.h"
+#include "../MuEditor/UI/ItemTools/MuItemRequirementsUI.h"
 #include "../MuEditor/UI/SkillEditor/MuSkillEditorUI.h"
 #include "../MuEditor/UI/DevEditor/DevEditorUI.h"
 #include "../MuEditor/UI/MapEditor/MapEditorUI.h"
@@ -549,6 +551,19 @@ void CMuEditorCore::Update()
     }
 }
 
+// The item tools beside the item browser; they show the item it selects.
+void CMuEditorCore::RenderItemTools()
+{
+    if (m_windows.itemBasics)
+    {
+        g_MuItemBasicsUI.Render(&m_windows.itemBasics);
+    }
+    if (m_windows.itemRequirements)
+    {
+        g_MuItemRequirementsUI.Render(&m_windows.itemRequirements);
+    }
+}
+
 void CMuEditorCore::ReopenChangedItemModels()
 {
     if (!g_ItemDataHandler.HasModelsToReopen())
@@ -781,6 +796,7 @@ void CMuEditorCore::Render()
         {
             g_MuItemTranslationsUI.Render(&m_windows.itemTranslations);
         }
+        RenderItemTools();
 
         // Render console (if enabled)
         if (m_windows.console)

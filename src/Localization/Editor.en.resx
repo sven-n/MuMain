@@ -1117,4 +1117,61 @@
   <data name="Without a model" xml:space="preserve">
     <value>Without a model</value>
   </data>
+  <data name="Item Basics" xml:space="preserve">
+    <value>Item Basics</value>
+  </data>
+  <data name="Item Requirements" xml:space="preserve">
+    <value>Item Requirements</value>
+  </data>
+  <data name="Size and kind" xml:space="preserve">
+    <value>Size and kind</value>
+  </data>
+  <data name="Your character holds the item: its size and slot stay as they are." xml:space="preserve">
+    <value>Your character holds the item: its size and slot stay as they are.</value>
+  </data>
+  <data name="Wing tier" xml:space="preserve">
+    <value>Wing tier</value>
+  </data>
+  <data name="Weapon kind" xml:space="preserve">
+    <value>Weapon kind</value>
+  </data>
+  <data name="Potion priority" xml:space="preserve">
+    <value>Potion priority</value>
+  </data>
+  <data name="Stats" xml:space="preserve">
+    <value>Stats</value>
+  </data>
+  <data name="Excellent bonus" xml:space="preserve">
+    <value>Excellent bonus</value>
+  </data>
+  <data name="Prices and profile" xml:space="preserve">
+    <value>Prices and profile</value>
+  </data>
+  <data name="Stat profile" xml:space="preserve">
+    <value>Stat profile</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="The profiles are in the item stat file; the number is how many items use one." xml:space="preserve">
+    <value>The profiles are in the item stat file; the number is how many items use one.</value>
+  </data>
+  <data name="Resistances" xml:space="preserve">
+    <value>Resistances</value>
+  </data>
+  <data name="Requirements" xml:space="preserve">
+    <value>Requirements</value>
+  </data>
+  <data name="By item level" xml:space="preserve">
+    <value>By item level</value>
+  </data>
+  <data name="Classes" xml:space="preserve">
+    <value>Classes</value>
+  </data>
+  <data name="A class with 0 cannot use the item; otherwise it needs that class step." xml:space="preserve">
+    <value>A class with 0 cannot use the item; otherwise it needs that class step.</value>
+  </data>
+  <data name="Excellent options raise the level requirement" xml:space="preserve">
+    <value>Excellent options raise the level requirement</value>
+  </data>
 </root>

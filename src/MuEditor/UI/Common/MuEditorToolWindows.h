@@ -11,6 +11,12 @@ struct ToolWindows
 {
     bool itemBrowser = false;
     bool itemTable = false;
+    bool itemBasics = false;
+    bool itemRequirements = false;
+    bool itemRules = false;
+    bool itemCategories = false;
+    bool itemModel = false;
+    bool itemChecks = false;
     bool itemTranslations = false;
     bool skillEditor = false;
     bool devEditor = false;
