@@ -147,8 +147,7 @@ void ApplyCall(const FrameLightTarget& target, const Lighting::LightCall& call)
     float color[kColorComponents];
     for (int k = 0; k < kColorComponents; ++k)
         color[k] = call.color[k] > 0.f ? call.color[k] * target.dynamicGain : call.color[k];
-    AddDynamicLight(target.grid, *target.frameLights, call.x, call.y, color, call.range, target.height(call.x, call.y),
-                    call.source != Lighting::LightSource::Effect);
+    AddDynamicLight(target.grid, *target.frameLights, call.x, call.y, color, call.range, target.height(call.x, call.y));
 }
 } // namespace
 

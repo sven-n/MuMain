@@ -177,6 +177,9 @@ struct ShadowProjection
     float axisAngle = 0.0f;
     float specialHeight = 0.0f; // the height of TW_HEIGHT cells
     bool terrain = true;        // false in the scenes where RequestTerrainHeight() returns 0
+    // Projected exactly from a point light shearX along the axis and shearHeight up, instead of the
+    // legacy shear (Render::Lighting::ProjectShadow).
+    bool pointLight = false;
 };
 
 // RmlUi port: the current frame's raw SDL_GPU submission context. RmlUi's own vendored

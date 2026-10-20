@@ -26,6 +26,7 @@ cbuffer Shadow : register(b1, space1)
 {
     float4 shadowOrigin;     // xyz: BodyOrigin, w: height of TW_HEIGHT cells
     float4 shadowProjection; // x, y: sx, sy; z: 0 where RequestTerrainHeight() returns 0; w: axis angle
+    float4 shadowShape;      // x: 1 projected from a point light; yzw unused
 };
 
 // The skinned vertex layout; glslang would otherwise number these 0, 1, 2 (dxc ignores vk::location).
@@ -61,8 +62,20 @@ float3 shearShadow(float3 position)
     float3 relative = position - shadowOrigin.xyz;
     // The shear acts along the axis at angle w (0: x, as in Classic).
     const float2 axis = float2(cos(shadowProjection.w), sin(shadowProjection.w));
-    const float along = dot(relative.xy, axis);
-    relative.xy += axis * (relative.z * (along + shadowProjection.x) / (relative.z - shadowProjection.y));
+    // As Render::Lighting::ProjectShadow.
+    if (shadowShape.x > 0.5)
+    {
+        // Exactly from a point light, heights clamped below its own (kMaxShadowHeightRatio).
+        const float height = min(relative.z, 0.9 * shadowProjection.y);
+        const float spread = shadowProjection.y / (shadowProjection.y - height);
+        const float2 light = axis * shadowProjection.x;
+        relative.xy = light + (relative.xy - light) * spread;
+    }
+    else
+    {
+        const float along = dot(relative.xy, axis);
+        relative.xy += axis * (relative.z * ((along + shadowProjection.x) / (relative.z - shadowProjection.y)));
+    }
     return relative + shadowOrigin.xyz;
 }
 

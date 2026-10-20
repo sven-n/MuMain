@@ -441,3 +441,103 @@ TEST_CASE("the dropped-light report runs at most once per minute [render][dynami
     CHECK_FALSE(limiter.ShouldReport(start + seconds(90)));
     CHECK(limiter.ShouldReport(start + seconds(125)));
 }
+
+TEST_CASE(
+    "a point-light shadow lands where the light's ray through the point meets the ground [render][dynamic_lights]")
+{
+    using Render::Lighting::ProjectShadow;
+    const float east[2] = {1.f, 0.f};
+    // Light 300 along the axis, 400 up; points around a character at the origin, off the axis too.
+    constexpr float lightAlong = 300.f;
+    constexpr float lightHeight = 400.f;
+    for (const float across : {-50.f, 0.f, 40.f})
+    {
+        for (const float along : {-40.f, 0.f, 35.f})
+        {
+            for (const float height : {0.f, 90.f, 180.f})
+            {
+                float ground[2] = {along, across};
+                ProjectShadow(ground, height, east, lightAlong, lightHeight, true);
+                // Light, point and ground hit are collinear in 3D: the point lies (1 - height /
+                // lightHeight) of the way from the light to the ground hit.
+                const float t = 1.f - height / lightHeight;
+                CHECK(lightAlong + t * (ground[0] - lightAlong) == doctest::Approx(along).epsilon(1e-4));
+                CHECK(t * ground[1] == doctest::Approx(across).epsilon(1e-4));
+            }
+        }
+    }
+    // Light (300, 0, 400) and point (0, 40, 180): the shadow lands at (-245.45, 72.73), not at y 40.
+    float offAxis[2] = {0.f, 40.f};
+    ProjectShadow(offAxis, 180.f, east, lightAlong, lightHeight, true);
+    CHECK(offAxis[0] == doctest::Approx(-245.4545f));
+    CHECK(offAxis[1] == doctest::Approx(72.7273f));
+    // A point on the ground stays where it is.
+    float onGround[2] = {20.f, -10.f};
+    ProjectShadow(onGround, 0.f, east, lightAlong, lightHeight, true);
+    CHECK(onGround[0] == doctest::Approx(20.f));
+    CHECK(onGround[1] == doctest::Approx(-10.f));
+    // The legacy shear is unchanged: along the axis only.
+    float legacy[2] = {20.f, 30.f};
+    ProjectShadow(legacy, 100.f, east, 2000.f, 4000.f, false);
+    CHECK(legacy[0] == doctest::Approx(20.f + 100.f * 2020.f / (100.f - 4000.f)));
+    CHECK(legacy[1] == 30.f);
+}
+
+TEST_CASE("a point light low beside a character casts a long but finite shadow [render][dynamic_lights]")
+{
+    using namespace Render::Lighting;
+    const float east[2] = {1.f, 0.f};
+    constexpr float floor = kMinLightHeightRatio * kShadowCasterHeight;
+    // High: its own height. At chest height (a skill cast at mid-body): raised to the floor.
+    CHECK(PointLightShadowHeight(1000.f) == 1000.f);
+    CHECK(PointLightShadowHeight(100.f) == floor);
+    // From a light 100 away at the floor, the top of the caster lands 4 times further out.
+    float top[2] = {0.f, 0.f};
+    ProjectShadow(top, kShadowCasterHeight, east, 100.f, floor, true);
+    CHECK(top[0] == doctest::Approx(-400.f));
+    // A model taller than the light is clamped instead of flipping towards the light.
+    float tall[2] = {0.f, 0.f};
+    ProjectShadow(tall, 2.f * floor, east, 100.f, floor, true);
+    float atClamp[2] = {0.f, 0.f};
+    ProjectShadow(atClamp, kMaxShadowHeightRatio * floor, east, 100.f, floor, true);
+    CHECK(tall[0] < 0.f);
+    CHECK(tall[0] == doctest::Approx(atClamp[0]));
+}
+
+TEST_CASE("a point light's shadow carries its distance and height [render][dynamic_lights]")
+{
+    const float hero[3] = {1000.f, 1000.f, 0.f};
+    const std::vector<DynamicLight> lights = {MakeLight(1300.f, 1000.f, 1.f, 1.f, 1.f, 8)};
+    mu::DynamicLightsUniform uniform = Render::Lighting::SelectDynamicLights(lights, hero).uniform;
+    uniform.worldLightCount = uniform.lightCount;
+
+    const Render::Lighting::LightShadowCasters casters = Render::Lighting::SelectLightShadowCasters(uniform, hero, 1);
+
+    REQUIRE(casters.count == 1);
+    CHECK(casters.casters[0].shearX == doctest::Approx(300.f));
+    CHECK(casters.casters[0].shearHeight ==
+          doctest::Approx(Render::Lighting::PointLightShadowHeight(uniform.positionAndRadius[0][2])));
+}
+
+TEST_CASE("a beam's segments cast one shadow with their shares added [render][dynamic_lights]")
+{
+    const float hero[3] = {1000.f, 1000.f, 0.f};
+    // Aqua Beam: lights every 50 units running east from the character, plus a torch to the north.
+    std::vector<DynamicLight> lights;
+    for (int segment = 1; segment <= 6; ++segment)
+    {
+        lights.push_back(MakeLight(1000.f + 50.f * static_cast<float>(segment), 1000.f, 0.2f, 0.2f, 0.2f, 4));
+    }
+    lights.push_back(MakeLight(1000.f, 1250.f, 0.3f, 0.3f, 0.3f, 4));
+    mu::DynamicLightsUniform uniform = Render::Lighting::SelectDynamicLights(lights, hero).uniform;
+    uniform.worldLightCount = uniform.lightCount;
+
+    const Render::Lighting::LightShadowCasters casters = Render::Lighting::SelectLightShadowCasters(uniform, hero, 2);
+
+    REQUIRE(casters.count == 2);
+    // The beam's shadow falls west, with all six segments' share; the torch's falls south.
+    CHECK(std::abs(casters.casters[0].fallAngle) == doctest::Approx(3.14159265f));
+    CHECK(casters.casters[1].fallAngle == doctest::Approx(-3.14159265f / 2.f));
+    CHECK(casters.casters[0].strength + casters.casters[1].strength == doctest::Approx(1.f));
+    CHECK(casters.casters[0].strength > 0.75f);
+}
