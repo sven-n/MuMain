@@ -221,7 +221,10 @@ void GlowLevels(ModelDraft& draft, Data::Items::ItemGlow& glow)
 void RenderOwnFile(ModelDraft& draft, ItemModelDefinition& model)
 {
     ImGui::TextUnformatted(I18N::Editor::TextureFolders);
-    if (ListFields::EditFolders("##Folders", model.textureFolders))
+    // The draft sees a folder being typed in, so a selection that changes
+    // meanwhile stores it first.
+    const auto afterFolder = [&] { draft.AfterField(I18N::Editor::TextureFolders); };
+    if (ListFields::EditFolders("##Folders", model.textureFolders, afterFolder))
     {
         draft.StoreNow(I18N::Editor::TextureFolders);
     }

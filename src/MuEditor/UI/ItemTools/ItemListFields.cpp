@@ -16,7 +16,7 @@ namespace
 constexpr float FolderWidth = 240.0f;
 } // namespace
 
-bool EditFolders(const char* id, std::vector<std::string>& folders)
+bool EditFolders(const char* id, std::vector<std::string>& folders, const std::function<void()>& afterField)
 {
     ImGui::PushID(id);
     bool changed = false;
@@ -25,7 +25,14 @@ bool EditFolders(const char* id, std::vector<std::string>& folders)
         ImGui::PushID(static_cast<int>(index));
         ImGui::SetNextItemWidth(FolderWidth);
         InputString("##Folder", folders[index]);
-        changed = ImGui::IsItemDeactivatedAfterEdit() || changed;
+        if (afterField)
+        {
+            afterField();
+        }
+        else
+        {
+            changed = ImGui::IsItemDeactivatedAfterEdit() || changed;
+        }
         ImGui::SameLine();
         if (ImGui::SmallButton("x"))
         {
