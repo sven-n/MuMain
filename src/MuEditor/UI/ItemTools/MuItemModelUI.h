@@ -23,17 +23,16 @@ public:
 
     void Render(bool* open);
 
-    // Between frames: the preview's texture can only be released then.
-    void BeforeFrame()
-    {
-        m_preview.BeforeFrame();
-    }
+    // Between frames: the preview's texture can only be released then, and
+    // the inventory display shown before it is stored ends.
+    void BeforeFrame();
 
 private:
     CMuItemModelUI();
 
     void RenderModel(Data::Items::ItemModelDefinition* model, int itemType);
     void RenderRemove(const Data::Items::ItemModelDefinition& model);
+    void ShowInventoryDisplay(const Data::Items::ItemModelDefinition* model, int itemType);
 
     MuEditor::Items::ItemEditDraft<Data::Items::ItemModelDefinition> m_draft;
     MuEditor::Items::CItemModelPreview m_preview;

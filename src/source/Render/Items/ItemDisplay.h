@@ -5,6 +5,13 @@
 #include <array>
 #include <optional>
 
+#ifdef _EDITOR
+namespace Data::Items
+{
+struct ItemInventoryDisplay;
+}
+#endif
+
 // How items are placed and turned in the inventory and on the ground. The
 // values of item models come from the item model files (Data/Items/Models);
 // the few other models that are drawn for items (event models of level
@@ -78,4 +85,13 @@ std::optional<float> GetSmallArchangelWeaponScale(int modelType, int level);
 
 // How the model is drawn on the ground.
 GroundDisplay GetGroundDisplay(int modelType);
+
+#ifdef _EDITOR
+// The editor's model tool shows an item's inventory display before it is
+// stored (while a slider is dragged): until ClearInventoryDisplayPreview,
+// GetInventoryAnchor and GetInventoryDisplay give `display` for `itemType`
+// where they would give its stored item model's.
+void PreviewInventoryDisplay(int itemType, const Data::Items::ItemInventoryDisplay& display);
+void ClearInventoryDisplayPreview();
+#endif
 } // namespace Render::Items::Display

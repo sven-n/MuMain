@@ -29,6 +29,25 @@ InventoryDisplay ToInventoryDisplay(const ItemInventoryDisplay& display)
             static_cast<float>(display.bodyHeight)};
 }
 
+#ifdef _EDITOR
+struct InventoryDisplayPreview
+{
+    int itemType;
+    ItemInventoryDisplay display;
+};
+std::optional<InventoryDisplayPreview> g_inventoryDisplayPreview;
+
+// The previewed display of the item whose model slot is `modelType`.
+const ItemInventoryDisplay* FindInventoryDisplayPreview(int modelType)
+{
+    if (g_inventoryDisplayPreview && Data::Items::ToModelSlot(g_inventoryDisplayPreview->itemType) == modelType)
+    {
+        return &g_inventoryDisplayPreview->display;
+    }
+    return nullptr;
+}
+#endif
+
 GroundDisplay ToGroundDisplay(const ItemGroundDisplay& display)
 {
     GroundDisplay result{ToFloats(display.rotation), std::nullopt, static_cast<float>(display.bodyHeight)};
@@ -172,6 +191,13 @@ Anchor GetInventoryAnchor(int itemType, int level)
     {
         return *anchor;
     }
+#ifdef _EDITOR
+    if (g_inventoryDisplayPreview && g_inventoryDisplayPreview->itemType == itemType)
+    {
+        const std::array<double, 2>& anchor = g_inventoryDisplayPreview->display.anchor;
+        return {static_cast<float>(anchor[0]), static_cast<float>(anchor[1])};
+    }
+#endif
 
     const ItemModelDefinition* model = g_ItemModelDatabase.Find(itemType);
     const std::array<double, 2>& anchor =
@@ -212,6 +238,12 @@ InventoryDisplay GetInventoryDisplay(int modelType)
     {
         modelType = Data::Items::ToModelSlot(armor->itemType);
     }
+#ifdef _EDITOR
+    if (const ItemInventoryDisplay* preview = FindInventoryDisplayPreview(modelType))
+    {
+        return ToInventoryDisplay(*preview);
+    }
+#endif
     if (const ItemModelDefinition* model = FindItemModel(modelType))
     {
         return ToInventoryDisplay(model->inventory);
@@ -252,4 +284,16 @@ GroundDisplay GetGroundDisplay(int modelType)
     }
     return ToGroundDisplay(ItemGroundDisplay{});
 }
+
+#ifdef _EDITOR
+void PreviewInventoryDisplay(int itemType, const ItemInventoryDisplay& display)
+{
+    g_inventoryDisplayPreview = InventoryDisplayPreview{itemType, display};
+}
+
+void ClearInventoryDisplayPreview()
+{
+    g_inventoryDisplayPreview.reset();
+}
+#endif
 } // namespace Render::Items::Display

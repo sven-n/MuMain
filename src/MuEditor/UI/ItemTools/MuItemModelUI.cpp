@@ -13,6 +13,7 @@
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
+#include "Render/Items/ItemDisplay.h"
 #include "imgui.h"
 
 #include <optional>
@@ -52,6 +53,7 @@ void CMuItemModelUI::Render(bool* open)
         ToolWindow::RenderUndoRedo();
         const int itemType = g_ItemSelection.GetItemType();
         ItemModelDefinition* model = m_draft.Begin(itemType, ToolWindow::GetDataVersion());
+        ShowInventoryDisplay(model, itemType);
         ImGui::SameLine();
         // Also a number with a model but no item can be edited here.
         ToolWindow::RenderSelectedItem(itemType);
@@ -97,12 +99,30 @@ void CMuItemModelUI::RenderModel(ItemModelDefinition* model, int itemType)
         ModelForms::RenderOwnFile(m_draft, *model);
     }
     ModelForms::RenderDisplay(m_draft, *model);
+    // A slider moved in this frame: the inventories drawn after it show it.
+    ShowInventoryDisplay(model, itemType);
     ModelForms::RenderGlow(m_draft, *model, m_counts);
     if (ImGui::CollapsingHeader(I18N::Editor::Looks, ImGuiTreeNodeFlags_DefaultOpen))
     {
         ModelForms::RenderLooks(m_draft, *model, m_counts);
     }
     RenderRemove(*model);
+}
+
+void CMuItemModelUI::BeforeFrame()
+{
+    m_preview.BeforeFrame();
+    Render::Items::Display::ClearInventoryDisplayPreview();
+}
+
+// The draft's inventory display goes to the game's inventory drawing until the
+// next frame, also before it is stored (a slider being dragged).
+void CMuItemModelUI::ShowInventoryDisplay(const ItemModelDefinition* model, int itemType)
+{
+    if (model != nullptr && Data::Items::IsValidItemType(itemType))
+    {
+        Render::Items::Display::PreviewInventoryDisplay(itemType, model->inventory);
+    }
 }
 
 void CMuItemModelUI::RenderRemove(const ItemModelDefinition& model)

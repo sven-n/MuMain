@@ -994,6 +994,37 @@ TEST_CASE("Level variants keep their place in the inventory slot [data][items]")
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }
 
+#ifdef _EDITOR
+TEST_CASE("The model tool shows an inventory display before it is stored [data][items][editor]")
+{
+    using namespace Render::Items::Display;
+    g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
+    const int kris = MakeItemType(0, 0);
+    const InventoryDisplay stored = GetInventoryDisplay(Data::Items::ToModelSlot(kris));
+    const Anchor storedAnchor = GetInventoryAnchor(kris, 0);
+
+    ItemInventoryDisplay preview;
+    preview.anchor = {0.25, 0.75};
+    preview.rotation = {10.0, 20.0, 30.0};
+    preview.scale = 0.004;
+    PreviewInventoryDisplay(kris, preview);
+    CHECK(GetInventoryAnchor(kris, 0).x == 0.25f);
+    CHECK(GetInventoryAnchor(kris, 0).y == 0.75f);
+    const InventoryDisplay shown = GetInventoryDisplay(Data::Items::ToModelSlot(kris));
+    CHECK(shown.rotation == std::array<float, 3>{10.0f, 20.0f, 30.0f});
+    CHECK(shown.scale == 0.004f);
+    // Other items keep theirs.
+    const int blade = MakeItemType(0, 2);
+    CHECK(GetInventoryDisplay(Data::Items::ToModelSlot(blade)).scale ==
+          static_cast<float>(g_ItemModelDatabase.Find(blade)->inventory.scale));
+
+    ClearInventoryDisplayPreview();
+    CHECK(GetInventoryDisplay(Data::Items::ToModelSlot(kris)).scale == stored.scale);
+    CHECK(GetInventoryAnchor(kris, 0).x == storedAnchor.x);
+    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
+}
+#endif
+
 namespace
 {
 void CheckInventoryDisplay(int modelType, const Render::Items::Display::InventoryDisplay& expected)

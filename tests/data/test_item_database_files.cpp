@@ -1234,6 +1234,8 @@ TEST_CASE("The item tools draw their frames without ImGui errors [data][items][e
         g_ItemSelection.Select(itemType);
         for (int frame = 0; frame < Frames; ++frame)
         {
+            // Between frames, as the editor does.
+            g_MuItemModelUI.BeforeFrame();
             ImGui::NewFrame();
             RenderItemTools();
             ImGui::Render();
@@ -1241,6 +1243,8 @@ TEST_CASE("The item tools draw their frames without ImGui errors [data][items][e
             CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
         }
     }
+    // The model tool's inventory display shown before it is stored ends.
+    g_MuItemModelUI.BeforeFrame();
 }
 
 TEST_CASE("The save warns about an item name in a language the game has no texts for [data][items][editor]")
