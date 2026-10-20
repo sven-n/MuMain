@@ -28,6 +28,10 @@ using RequirementTable = std::array<RequirementRow, Data::Items::ItemLevelCount>
 // /<item name> window shows.
 RequirementTable ComputeRequirementTable(const Data::Items::ItemDefinition& item, const RequirementVariant& variant);
 
+// Whether the option level adds to the item's strength requirement (its stat
+// profile's strength per option level is not 0).
+bool OptionLevelAddsStrength(const Data::Items::ItemDefinition& item);
+
 // The base value of `requirement` with which `item`, without that requirement
 // by level, has `values` at every + level as a normal item: the level and a
 // base kept as it is are the +0 value; a stat the smallest base that gives

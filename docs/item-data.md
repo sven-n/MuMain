@@ -681,7 +681,8 @@ shows it in the others.
   base value gives a normal item at each level, and turning them off finds
   the base value back; excellent and ancient items get no higher stat
   requirement from them, while excellent options still raise a level given
-  by level and the option level still adds strength; a scroll's energy,
+  by level and the option level still adds the strength its stat profile
+  gives per option level; a scroll's energy,
   whose formula takes the level requirement, follows a level given by
   level). Below them, what the game asks at each + level
   (the `/<item name>` window shows the normal item), also as excellent,

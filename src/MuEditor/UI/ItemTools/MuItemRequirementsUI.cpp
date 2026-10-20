@@ -160,7 +160,7 @@ void CMuItemRequirementsUI::RenderByLevel(ItemDefinition& item, ItemRequirement 
         const char* stillAdded = requirement == ItemRequirement::Level
                                      ? I18N::Editor::ExcellentOptionsStillRaiseItIfTheyRaiseTheLevelRequirement
                                      : I18N::Editor::ExcellentAndAncientItemsGetNoHigherRequirementFromIt;
-        if (requirement == ItemRequirement::Strength)
+        if (requirement == ItemRequirement::Strength && OptionLevelAddsStrength(item))
         {
             ImGui::SetTooltip("%s\n%s\n%s", I18N::Editor::StartsAtWhatANormalItemNeedsAtEachLevelAndReplacesTheFormula,
                               stillAdded, I18N::Editor::TheOptionLevelStillAddsToIt);

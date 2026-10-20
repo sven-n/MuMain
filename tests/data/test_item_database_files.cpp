@@ -1270,6 +1270,11 @@ TEST_CASE("Item Requirements shows what the game asks at each level, from the va
     }
     CHECK(ComputeRequirementTable(kris, {true, false, 0})[0][Strength] == 57);
     CHECK(ComputeRequirementTable(kris, {false, false, 4})[0][Strength] == 47);
+    // The weapon profile adds strength per option level, the default one none.
+    CHECK(MuEditor::Items::OptionLevelAddsStrength(kris));
+    ItemDefinition defaultProfile = kris;
+    defaultProfile.statProfile = "default";
+    CHECK_FALSE(MuEditor::Items::OptionLevelAddsStrength(defaultProfile));
 
     // A base value being typed counts at once.
     ItemDefinition stronger = kris;
