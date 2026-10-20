@@ -359,11 +359,15 @@ SDL_Rect WindowRect(SDL_Window* window)
     return rect;
 }
 
+#ifdef _WIN32
 // A window with a title bar that covers its whole monitor has the title bar
 // above the screen and looks full screen without being so: F11 then seems to
 // do nothing. Its place may have been saved while it was full screen (by a
 // session that did not shut down, before HoldSettingsWhileFullscreen). It goes
-// into the monitor's usable area, frame included.
+// into the monitor's usable area, frame included. Windows only: there SDL
+// knows a window's rect and frame as soon as it is placed, while an X11
+// window manager answers later (and a window there has no frame until it is
+// shown), and macOS keeps a title bar below the menu bar itself.
 void KeepTitleBarOnScreen(SDL_Window* window)
 {
     const SDL_WindowFlags flags = SDL_GetWindowFlags(window);
@@ -396,6 +400,7 @@ void KeepTitleBarOnScreen(SDL_Window* window)
     SDL_SetWindowPosition(window, usable.x + left, usable.y + top);
     SDL_SetWindowSize(window, std::max(1, usable.w - left - right), std::max(1, usable.h - top - bottom));
 }
+#endif
 
 void MoveEditorWindow(ImGuiViewport* viewport, ImVec2 position)
 {
@@ -409,11 +414,13 @@ void ResizeEditorWindow(ImGuiViewport* viewport, ImVec2 size)
 {
     LeaveMaximizedOrFullscreen(viewport);
     g_backend.setWindowSize(viewport, size);
+#ifdef _WIN32
     SDL_Window* window = SdlWindowOf(viewport);
     if (window != nullptr && (viewport->Flags & ImGuiViewportFlags_NoDecoration) == 0)
     {
         KeepTitleBarOnScreen(window);
     }
+#endif
 }
 
 // While one of the editor's windows is full screen, ImGui takes its full-screen
@@ -669,13 +676,14 @@ void ToggleFullscreen(SDL_Window* window)
 #endif
     // Full screen on the window's monitor at the desktop's resolution.
     SDL_SetWindowFullscreen(window, enter);
-#ifndef __APPLE__
-    // Back in the place it had before, with the title bar on the screen; SDL
-    // can bring it back elsewhere (macOS brings a window out of its
-    // full-screen Space where it was, below the menu bar).
+#ifdef _WIN32
+    // Out of full screen when SDL_SetWindowFullscreen returns: back in the
+    // place it had before (SDL can bring it back elsewhere), with the title
+    // bar on the screen. Elsewhere the window manager brings it back, later
+    // (X11; moving it before then would ask for full screen again) or below
+    // the menu bar (macOS).
     if (!enter)
     {
-        SDL_SyncWindow(window);
         if (remembered)
         {
             SDL_SetWindowPosition(window, windowed.x, windowed.y);
