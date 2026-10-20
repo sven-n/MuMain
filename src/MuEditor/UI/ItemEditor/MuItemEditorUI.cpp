@@ -137,14 +137,10 @@ void CMuItemEditorUI::Render(bool& showEditor)
             SelectItem(clickedItem);
         }
 
-        // Convert search to lowercase for case-insensitive search
-        std::string searchLower = m_szItemSearchBuffer;
-        std::transform(searchLower.begin(), searchLower.end(), searchLower.begin(), ::tolower);
-
         // Render the item table
         if (m_pTable)
         {
-            m_pTable->Render(searchLower, m_columnVisibility, m_selectedRow, m_bFreezeColumns);
+            m_pTable->Render(m_szItemSearchBuffer, m_columnVisibility, m_selectedRow, m_bFreezeColumns);
         }
 
         // Render all popups
@@ -155,9 +151,7 @@ void CMuItemEditorUI::Render(bool& showEditor)
 
 void CMuItemEditorUI::SelectItem(int itemIndex)
 {
-    std::string searchLower = m_szItemSearchBuffer;
-    std::transform(searchLower.begin(), searchLower.end(), searchLower.begin(), ::tolower);
-    if (!CItemEditorTable::IsListed(itemIndex, searchLower) && CItemEditorTable::IsListed(itemIndex, ""))
+    if (!CItemEditorTable::IsListed(itemIndex, m_szItemSearchBuffer) && CItemEditorTable::IsListed(itemIndex, ""))
     {
         m_szItemSearchBuffer[0] = '\0';
     }

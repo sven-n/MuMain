@@ -20,13 +20,6 @@ char ToLowerAscii(char character)
     return character >= 'A' && character <= 'Z' ? static_cast<char>(character - 'A' + 'a') : character;
 }
 
-bool ContainsIgnoringCase(std::string_view text, std::string_view search)
-{
-    const auto found = std::search(text.begin(), text.end(), search.begin(), search.end(),
-                                   [](char a, char b) { return ToLowerAscii(a) == ToLowerAscii(b); });
-    return found != text.end();
-}
-
 bool ReadWholeNumber(std::string_view text, int& value)
 {
     const auto [end, error] = std::from_chars(text.data(), text.data() + text.size(), value);
@@ -49,6 +42,13 @@ bool MatchesItemNumber(const Data::Items::ItemDefinition& definition, std::strin
            itemType == Data::Items::MakeItemType(definition.group, definition.number);
 }
 } // namespace
+
+bool ContainsIgnoringCase(std::string_view text, std::string_view search)
+{
+    const auto found = std::search(text.begin(), text.end(), search.begin(), search.end(),
+                                   [](char a, char b) { return ToLowerAscii(a) == ToLowerAscii(b); });
+    return found != text.end();
+}
 
 bool MatchesItemSearch(const Data::Items::ItemDefinition& definition, std::string_view search)
 {

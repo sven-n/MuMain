@@ -77,6 +77,16 @@ TEST_CASE("The item list finds items by number, item type and any of their names
     CHECK_FALSE(MatchesItemSearch(Items[1], "kris"));
 }
 
+// The item table's search uses it too.
+TEST_CASE("The item search ignores case only for the letters A to Z [editor][items]")
+{
+    CHECK(ContainsIgnoringCase("Short Sword", "SWORD"));
+    CHECK(ContainsIgnoringCase("Short Sword", ""));
+    CHECK_FALSE(ContainsIgnoringCase("Short Sword", "swords"));
+    CHECK(ContainsIgnoringCase("L\xC3\xA2mina", "l\xC3\xA2MIN"));
+    CHECK_FALSE(ContainsIgnoringCase("L\xC3\xA2mina", "L\xC3\x82MINA"));
+}
+
 TEST_CASE("The item list lists the items without a name in a language [editor][items]")
 {
     GlobalItemsScope scope(Items);

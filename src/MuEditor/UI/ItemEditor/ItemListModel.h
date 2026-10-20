@@ -46,4 +46,8 @@ private:
 // Whether the item matches the search text (see CItemListModel::Filter).
 bool MatchesItemSearch(const Data::Items::ItemDefinition& definition, std::string_view search);
 
+// Whether the UTF-8 text contains the search; only the letters A to Z ignore
+// case. The item searches of the editor share it.
+bool ContainsIgnoringCase(std::string_view text, std::string_view search);
+
 #endif // _EDITOR
