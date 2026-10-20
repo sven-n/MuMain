@@ -342,6 +342,16 @@ void ValidateItemModelsAsWritten(std::span<const ItemModelDefinition> models, st
     }
 }
 
+void ValidateSharedItemModelsAsWritten(std::span<const SharedItemModel> sharedModels,
+                                       std::vector<ItemDataIssue>& issues)
+{
+    std::vector<SharedItemModel> readBack;
+    std::vector<ItemDataIssue> readIssues;
+    ReadSharedItemModelsJson(WriteSharedItemModelsJson(sharedModels), SharedItemModelsFileName, readBack, readIssues);
+    std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
+                 [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Error; });
+}
+
 void ValidateItemModelFilesExist(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues)
 {
     for (const ItemModelDefinition& model : models)

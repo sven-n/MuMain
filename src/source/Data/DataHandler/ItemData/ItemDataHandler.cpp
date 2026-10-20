@@ -515,6 +515,7 @@ void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
     }
     ValidateDirectlySharedModelFiles(models, issues);
     ValidateItemModelsAsWritten(g_ItemModelDatabase.GetAllSlots(), issues);
+    ValidateSharedItemModelsAsWritten(g_ItemModelDatabase.GetSharedModels(), issues);
     ValidateItemModelFilesExist(models, issues);
 }
 

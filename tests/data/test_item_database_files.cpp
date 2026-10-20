@@ -19,6 +19,7 @@
 #include "Data/GameData/ItemData/ItemNames.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
+#include "Data/GameData/ItemData/ItemModelJsonFormat.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/ItemStructs.h"
 #include "Data/GameData/ItemData/ItemType.h"
@@ -1276,6 +1277,28 @@ TEST_CASE("The editor's checks report problems of the item models [data][items][
         g_ItemModelDatabase.Set(kris, g_GlowColors);
         g_ItemDataHandler.Validate(issues);
         CHECK(HasErrors(issues));
+    }
+    SUBCASE("a value of a shared model the reader refuses")
+    {
+        REQUIRE_FALSE(g_ItemModelDatabase.GetSharedModels().empty());
+        SharedItemModel shared = g_ItemModelDatabase.GetSharedModels().front();
+        SUBCASE("a file with backslashes")
+        {
+            shared.file = "Data\\Item\\Sword01.bmd";
+        }
+        SUBCASE("no file")
+        {
+            shared.file.clear();
+        }
+        SUBCASE("a texture folder with a slash at the end")
+        {
+            shared.textureFolders = {"Item/"};
+        }
+        g_ItemModelDatabase.SetSharedModel(shared);
+        g_ItemDataHandler.Validate(issues);
+        CHECK(std::ranges::any_of(
+            issues, [](const ItemDataIssue& issue)
+            { return issue.severity == ItemDataIssueSeverity::Error && issue.source == SharedItemModelsFileName; }));
     }
     SUBCASE("a file that two items name themselves")
     {

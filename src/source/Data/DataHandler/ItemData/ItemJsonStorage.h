@@ -131,6 +131,12 @@ ItemDataSaveResult WriteItemAndModelDataDirectories(const std::filesystem::path&
 // group file.
 void ValidateItemModelsAsWritten(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues);
 
+// The same for the shared models: the group files name them only, so their
+// file, texture folders and meshes are read back from SharedModels.json as the
+// save would write it.
+void ValidateSharedItemModelsAsWritten(std::span<const SharedItemModel> sharedModels,
+                                       std::vector<ItemDataIssue>& issues);
+
 // A model file that is not in the client folder (relative to the working
 // directory): a warning for each model, since the game starts without it and
 // draws nothing for the item.
