@@ -63,7 +63,11 @@ void CItemModelPreview::RenderView(const MuEditor::Effects::EffectPreviewRequest
         return;
     }
     const float scale = g_MuEditorCore.GetUIScale();
-    const float height = std::clamp(width * ViewAspect, MinViewHeight * scale, MaxViewHeight * scale);
+    // The width without the vertical scrollbar, so the height does not make
+    // the scrollbar show and hide by turns (as the effect browser's view).
+    const ImGuiStyle& style = ImGui::GetStyle();
+    const float widthWithoutScrollbar = ImGui::GetWindowWidth() - 2.0f * style.WindowPadding.x - style.ScrollbarSize;
+    const float height = std::clamp(widthWithoutScrollbar * ViewAspect, MinViewHeight * scale, MaxViewHeight * scale);
     ImGui::InvisibleButton("##ModelView", ImVec2(width, height), ImGuiButtonFlags_MouseButtonLeft);
     ImGui::SetItemKeyOwner(ImGuiKey_MouseWheelY);
     HandleViewInput();
