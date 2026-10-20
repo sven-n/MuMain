@@ -363,6 +363,7 @@ static void UpdateMainSceneView()
     CullWorld();
     // The frame's lights, from every light the update added; the draw only shows them.
     AddFrameHistoryLights();
+    Scenes::Lighting::PinWorldDynamicLights();
 }
 
 /**
@@ -591,7 +592,10 @@ static void RenderGameWorldPass(BYTE& byWaterMap, int width, int height)
         if (gMapManager.WorldActive == WD_39KANTURU_3RD)
         {
             if (!g_Direction.m_CKanturu.IsMayaScene())
-                { FRAME_PROFILE(Terrain); RenderTerrain(false); }
+            {
+                FRAME_PROFILE(Terrain);
+                RenderTerrain(false);
+            }
         }
         else
             if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.WorldActive != -1)
@@ -603,7 +607,10 @@ static void RenderGameWorldPass(BYTE& byWaterMap, int width, int height)
                     Render::Drawing::ScopedReorderableDraws reorderable;
                     RenderObjects();
                 }
-                { FRAME_PROFILE(Terrain); RenderTerrain(false); }
+                {
+                    FRAME_PROFILE(Terrain);
+                    RenderTerrain(false);
+                }
             }
     }
 
