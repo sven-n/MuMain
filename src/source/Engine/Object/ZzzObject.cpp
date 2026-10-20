@@ -5723,9 +5723,9 @@ static void HandleItemFalling(OBJECT* o)
 // Helper: Handle item on ground (set angle and camera rotation)
 static void HandleItemOnGround(OBJECT* o)
 {
-    o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
-    if (o->Type >= MODEL_SWORD && o->Type < MODEL_STAFF + MAX_ITEM_INDEX)
-        o->Position[2] += 40.f;
+    o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + Render::Items::Display::DroppedItemHeight;
+    if (Render::Items::Display::IsLiftedOnGround(o->Type))
+        o->Position[2] += Render::Items::Display::DroppedWeaponLift;
 
     // Set default item angle
     ItemAngle(o);

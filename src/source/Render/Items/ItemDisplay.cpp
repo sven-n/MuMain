@@ -226,6 +226,11 @@ std::optional<int> GetItemOfInventoryModel(int modelType)
     return std::nullopt;
 }
 
+bool IsLiftedOnGround(int modelType)
+{
+    return modelType >= MODEL_SWORD && modelType < MODEL_STAFF + MAX_ITEM_INDEX;
+}
+
 bool IsDrawnOnCharacterSkeleton(int modelType)
 {
     return (modelType >= MODEL_HELM && modelType < MODEL_BOOTS + MAX_ITEM_INDEX) ||

@@ -74,6 +74,12 @@ constexpr int GetDrawnModel(int modelType, int level)
 // Armor is drawn on the character skeleton, like when it is worn.
 bool IsDrawnOnCharacterSkeleton(int modelType);
 
+// How high a dropped item lies above the ground, and how much higher the
+// weapons from swords to staffs lie (IsLiftedOnGround).
+constexpr float DroppedItemHeight = 30.0f;
+constexpr float DroppedWeaponLift = 40.0f;
+bool IsLiftedOnGround(int modelType);
+
 // How the model is drawn in the inventory. The inventory models of the Rage
 // Fighter armor have the look of their item.
 InventoryDisplay GetInventoryDisplay(int modelType);
