@@ -434,6 +434,20 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         CHECK_FALSE(g_ItemDataHandler.SetItemName(MakeItemType(0, 500), "en", "Nothing"));
     }
 
+    SUBCASE("an item without an English name gets that first, so it cannot lose its last name")
+    {
+        ItemDefinition untranslated = *g_ItemDatabase.Find(KrisType);
+        untranslated.names = Data::LocalizedString{};
+        untranslated.names.Set("pt", "Cris");
+        g_ItemDatabase.Set(untranslated);
+
+        CHECK_FALSE(g_ItemDataHandler.SetItemName(KrisType, "pt", ""));
+        CHECK_FALSE(g_ItemDataHandler.SetItemName(KrisType, "es", "Daga"));
+        REQUIRE(g_ItemDatabase.Find(KrisType) != nullptr);
+        CHECK(g_ItemDatabase.Find(KrisType)->names.Get("pt") == "Cris");
+        CHECK(g_ItemDataHandler.SetItemName(KrisType, "en", "Kris"));
+    }
+
     SUBCASE("a value change does not turn the English fallback into a translation")
     {
         // No item has a Polish name: the English one is shown.

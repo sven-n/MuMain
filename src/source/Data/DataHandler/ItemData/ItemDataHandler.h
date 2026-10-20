@@ -44,7 +44,7 @@ public:
     // the English name cannot be emptied) in the item database, whole also when
     // it is longer than ITEM_ATTRIBUTE's name; ItemAttribute shows the name in
     // the UI locale. False when the item does not exist or the English name
-    // would be empty.
+    // would be empty, also when the item has none yet.
     bool SetItemName(int itemType, std::string_view locale, std::string text);
     // The item editor swapped two entries of ItemAttribute[]. A moved item
     // takes its model along (the item model database and the opened model

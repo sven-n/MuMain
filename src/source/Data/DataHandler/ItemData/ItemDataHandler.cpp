@@ -258,13 +258,20 @@ void CItemDataHandler::OnItemEdited(int itemType)
 bool CItemDataHandler::SetItemName(int itemType, std::string_view locale, std::string text)
 {
     const ItemDefinition* current = g_ItemDatabase.Find(itemType);
-    if (current == nullptr || (locale == Data::LocalizedString::NeutralLocale && text.empty()))
+    if (current == nullptr)
     {
         return false;
     }
 
     ItemDefinition definition = *current;
     definition.names.Set(locale, std::move(text));
+    // Also for an item without an English name (from a bmd import): removing
+    // its last translation would end the item in the database while
+    // ItemAttribute kept it. Its English name comes first.
+    if (definition.names.GetNeutral().empty())
+    {
+        return false;
+    }
     g_ItemDatabase.Set(definition);
     if (const ItemDefinition* updated = g_ItemDatabase.Find(itemType))
     {
