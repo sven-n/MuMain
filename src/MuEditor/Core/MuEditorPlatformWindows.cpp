@@ -351,16 +351,92 @@ void LeaveMaximizedOrFullscreen(ImGuiViewport* viewport)
     }
 }
 
+SDL_Rect WindowRect(SDL_Window* window)
+{
+    SDL_Rect rect{};
+    SDL_GetWindowPosition(window, &rect.x, &rect.y);
+    SDL_GetWindowSize(window, &rect.w, &rect.h);
+    return rect;
+}
+
+// A window with a title bar that covers its whole monitor has the title bar
+// above the screen and looks full screen without being so: F11 then seems to
+// do nothing. Its place may have been saved while it was full screen (by a
+// session that did not shut down, before HoldSettingsWhileFullscreen). It goes
+// into the monitor's usable area, frame included.
+void KeepTitleBarOnScreen(SDL_Window* window)
+{
+    const SDL_WindowFlags flags = SDL_GetWindowFlags(window);
+    if ((flags & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_MAXIMIZED | SDL_WINDOW_MINIMIZED | SDL_WINDOW_BORDERLESS)) != 0)
+    {
+        return;
+    }
+    const SDL_DisplayID display = SDL_GetDisplayForWindow(window);
+    SDL_Rect bounds{};
+    SDL_Rect usable{};
+    if (display == 0 || !SDL_GetDisplayBounds(display, &bounds) || !SDL_GetDisplayUsableBounds(display, &usable))
+    {
+        return;
+    }
+    const SDL_Rect rect = WindowRect(window);
+    const bool coversDisplay = rect.x <= bounds.x && rect.y <= bounds.y && rect.x + rect.w >= bounds.x + bounds.w &&
+                               rect.y + rect.h >= bounds.y + bounds.h;
+    if (!coversDisplay)
+    {
+        return;
+    }
+    int top = 0;
+    int left = 0;
+    int bottom = 0;
+    int right = 0;
+    if (!SDL_GetWindowBordersSize(window, &top, &left, &bottom, &right))
+    {
+        top = left = bottom = right = 0;
+    }
+    SDL_SetWindowPosition(window, usable.x + left, usable.y + top);
+    SDL_SetWindowSize(window, std::max(1, usable.w - left - right), std::max(1, usable.h - top - bottom));
+}
+
 void MoveEditorWindow(ImGuiViewport* viewport, ImVec2 position)
 {
     LeaveMaximizedOrFullscreen(viewport);
     g_backend.setWindowPos(viewport, position);
 }
 
+// ImGui places a window with its position, then its size (also the place
+// imgui.ini keeps, when the window opens).
 void ResizeEditorWindow(ImGuiViewport* viewport, ImVec2 size)
 {
     LeaveMaximizedOrFullscreen(viewport);
     g_backend.setWindowSize(viewport, size);
+    SDL_Window* window = SdlWindowOf(viewport);
+    if (window != nullptr && (viewport->Flags & ImGuiViewportFlags_NoDecoration) == 0)
+    {
+        KeepTitleBarOnScreen(window);
+    }
+}
+
+// While one of the editor's windows is full screen, ImGui takes its full-screen
+// rect as the window's place. Saved then (imgui.ini, a few seconds after a
+// change), a session that ends without shutting down keeps it, and the window
+// comes back covering its monitor. The save waits until no window is full
+// screen; one closed while full screen keeps its windowed place
+// (DestroyEditorWindow).
+void HoldSettingsWhileFullscreen()
+{
+    const ImGuiPlatformIO& platformIO = ImGui::GetPlatformIO();
+    for (int i = 1; i < platformIO.Viewports.Size; ++i)
+    {
+        if (MuEditor::PlatformWindows::IsFullscreen(SdlWindowOf(platformIO.Viewports[i])))
+        {
+            ImGuiContext& context = *ImGui::GetCurrentContext();
+            if (context.SettingsDirtyTimer > 0.0f)
+            {
+                context.SettingsDirtyTimer = context.IO.IniSavingRate;
+            }
+            return;
+        }
+    }
 }
 
 // Where each window was before ToggleFullscreen took it full screen.
@@ -384,14 +460,6 @@ void ForgetLeftFullscreens()
                       return window == nullptr || (!MuEditor::PlatformWindows::IsFullscreen(window) &&
                                                    now - entry.savedAt > FullscreenEntryTimeoutMs);
                   });
-}
-
-SDL_Rect WindowRect(SDL_Window* window)
-{
-    SDL_Rect rect{};
-    SDL_GetWindowPosition(window, &rect.x, &rect.y);
-    SDL_GetWindowSize(window, &rect.w, &rect.h);
-    return rect;
 }
 
 void RememberWindowedRect(SDL_Window* window)
@@ -492,6 +560,7 @@ void Install()
 void BeforeNewFrame()
 {
     ForgetLeftFullscreens();
+    HoldSettingsWhileFullscreen();
 #ifdef __APPLE__
     KeepInFrontOfGame();
     ReportHoveredWindow();
@@ -579,14 +648,15 @@ void ToggleFullscreen(SDL_Window* window)
         return;
     }
     const bool enter = !IsFullscreen(window);
+    SDL_Rect windowed{};
+    bool remembered = false;
     if (enter)
     {
         RememberWindowedRect(window);
     }
     else
     {
-        SDL_Rect unused{};
-        TakeWindowedRect(window, unused);
+        remembered = TakeWindowedRect(window, windowed);
     }
 #ifdef __APPLE__
     // A full-screen Space takes a window at the normal level; back to
@@ -599,6 +669,23 @@ void ToggleFullscreen(SDL_Window* window)
 #endif
     // Full screen on the window's monitor at the desktop's resolution.
     SDL_SetWindowFullscreen(window, enter);
+#ifndef __APPLE__
+    // Back in the place it had before, with the title bar on the screen; SDL
+    // can bring it back elsewhere (macOS brings a window out of its
+    // full-screen Space where it was, below the menu bar).
+    if (!enter)
+    {
+        SDL_SyncWindow(window);
+        if (remembered)
+        {
+            SDL_SetWindowPosition(window, windowed.x, windowed.y);
+            SDL_SetWindowSize(window, windowed.w, windowed.h);
+        }
+        KeepTitleBarOnScreen(window);
+    }
+#else
+    (void)remembered;
+#endif
 }
 } // namespace MuEditor::PlatformWindows
 

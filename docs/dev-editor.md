@@ -50,7 +50,12 @@ snapping. Closing the editor window closes the editor. A floating tool window
 keeps its tab under the title bar: drag the tab, not the title bar, to dock it
 again. **Windows > Fullscreen** switches the editor window to full screen and
 back; **F11** does the same for whichever of the editor's windows has the
-keyboard (in the game window F11 stays the game's camera reset).
+keyboard (in the game window F11 stays the game's camera reset). Back from
+full screen, a window returns to the place it had before. While a window is
+full screen its places are not saved, so a session that ends then (killed, a
+crash) keeps the window's place from before; a window whose saved place
+covers its whole monitor (the title bar above the screen, from a session
+before this was so) opens and returns in the monitor's usable area instead.
 
 - **Windows:** minimize, maximize and close, and a taskbar button for each
   editor window. Dragging or resizing an editor window by its title bar or
