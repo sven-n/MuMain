@@ -46,8 +46,6 @@ constexpr unsigned int CellColor = 0xFF2A2A30u;
 // The item's cells, tinted as the legacy inventory tints a used cell.
 constexpr unsigned int ItemCellColor = 0xFF2E4A4Au;
 constexpr float CellGapUnits = 1.0f;
-// Added with the glow blend, it sets the alpha to 1 and keeps the colours.
-constexpr unsigned int OpaqueBlack = 0xFF000000u;
 
 // Whether the inventory can draw the item now: its inventory model has
 // meshes and what it is drawn on has actions to place the bones.
@@ -83,43 +81,54 @@ void DrawCells(int columns, int rows)
     }
 }
 
+// What the grid shows: the item, its cells and how it is drawn.
+struct GridItem
+{
+    int itemType;
+    int columns;
+    int rows;
+    int level;
+    bool excellent;
+    bool ancient;
+    bool hovered;
+};
+
+// The cells, then the item in them, in cell units from the box's top left
+// corner: the box is `cellPixels` window pixels a cell from (left, top).
+void DrawCellsAndItem(const GridItem& item, float cellPixels, float left, float top)
+{
+    // Cell units, so the item lands where the original's inventory puts it
+    // (RenderItem3D rounds to them).
+    const float scale = cellPixels / CellUnits;
+    const UI::Scaling::ScopedActiveTransform units({scale, scale, left, top, 1.0f});
+    DisableAlphaBlend();
+    DisableDepthTest();
+    DrawCells(item.columns, item.rows);
+    EnableDepthTest();
+    EnableDepthMask();
+    if (CanDrawInInventory(item.itemType, item.level))
+    {
+        RenderItem3DWithHover(MarginCells * CellUnits, MarginCells * CellUnits, item.columns * CellUnits,
+                              item.rows * CellUnits, item.itemType, item.level, item.excellent ? ExcellentFlags : 0,
+                              item.ancient ? AncientDiscriminator : 0, item.hovered);
+    }
+}
+
 // Into the open capture: the box the cells take at the window's height,
 // centred in the window, under the item camera.
-void DrawGrid(int itemType, int columns, int rows, int level, bool excellent, bool ancient, bool hovered)
+void DrawGrid(const GridItem& item)
 {
     const MuEditor::Effects::SavedGameRenderState savedState;
     const MuEditor::Effects::EffectPoolGuard removeItemEffects;
     // The cell the item camera was made for: the inventory's 20 units at the
     // window's height.
     const float cellPixels = CellUnits * static_cast<float>(WindowHeight) / REFERENCE_HEIGHT;
-    const float width = (columns + 2 * MarginCells) * cellPixels;
-    const float height = (rows + 2 * MarginCells) * cellPixels;
+    const float width = (item.columns + 2 * MarginCells) * cellPixels;
+    const float height = (item.rows + 2 * MarginCells) * cellPixels;
     const float left = (static_cast<float>(WindowWidth) - width) * 0.5f;
     const float top = (static_cast<float>(WindowHeight) - height) * 0.5f;
     UI::Items::DrawUnderItemCamera(left, top, width, height, ItemFieldOfView,
-                                   [&]
-                                   {
-                                       // Cell units from the box's corner, so the item lands where the
-                                       // original's inventory puts it (RenderItem3D rounds to them).
-                                       const float scale = cellPixels / CellUnits;
-                                       const UI::Scaling::ScopedActiveTransform units({scale, scale, left, top, 1.0f});
-                                       DisableAlphaBlend();
-                                       DisableDepthTest();
-                                       DrawCells(columns, rows);
-                                       EnableDepthTest();
-                                       EnableDepthMask();
-                                       if (CanDrawInInventory(itemType, level))
-                                       {
-                                           RenderItem3DWithHover(MarginCells * CellUnits, MarginCells * CellUnits,
-                                                                 columns * CellUnits, rows * CellUnits, itemType, level,
-                                                                 excellent ? ExcellentFlags : 0,
-                                                                 ancient ? AncientDiscriminator : 0, hovered);
-                                       }
-                                       EnableAlphaBlend();
-                                       DisableDepthTest();
-                                       RenderColorQuadARGB(0.0f, 0.0f, (columns + 2 * MarginCells) * CellUnits,
-                                                           (rows + 2 * MarginCells) * CellUnits, OpaqueBlack);
-                                   });
+                                   [&] { DrawCellsAndItem(item, cellPixels, left, top); });
 }
 } // namespace
 
@@ -157,7 +166,7 @@ void CItemInventoryGridPreview::Render(int itemType, int level, bool excellent, 
             return;
         }
         const MuEditor::ScopedOffscreenCapture endCapture;
-        DrawGrid(itemType, columns, rows, level, excellent, ancient, hovered);
+        DrawGrid({itemType, columns, rows, level, excellent, ancient, hovered});
     }
     else
     {
