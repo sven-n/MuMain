@@ -33,6 +33,8 @@
 //   $dynlights shadowlights <n>    dynamic.shadowLights
 //   $bloom falloff <f>             bloom.levelFalloff
 //   $bloom <v>                     bloom.strength
+//   $ao radius <r>                 ao.radius
+//   $ao <v>                        ao.strength
 namespace Render::Look
 {
 

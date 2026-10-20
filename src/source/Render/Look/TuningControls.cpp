@@ -78,6 +78,10 @@ constexpr std::array<ControlSpec, TuningControlCount> Specs = {{
      TuningUnit::None, 1.0, TuningZero::Plain},
     {TuningControlId::GradingStrength, TuningGroup::PostProcessing, false, LookValue::GradingStrength, 0.01,
      TuningUnit::Percent, 100.0, TuningZero::Plain},
+    {TuningControlId::AmbientOcclusionStrength, TuningGroup::PostProcessing, false, LookValue::AmbientOcclusionStrength,
+     0.05, TuningUnit::None, 1.0, TuningZero::Plain},
+    {TuningControlId::AmbientOcclusionRadius, TuningGroup::PostProcessing, false, LookValue::AmbientOcclusionRadius,
+     5.0, TuningUnit::None, 1.0, TuningZero::Plain},
 }};
 
 constexpr bool SpecsFollowIdOrder()

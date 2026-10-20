@@ -338,7 +338,8 @@ void SdlGpuPostProcessing::RenderBloom(SDL_GPUCommandBuffer* commandBuffer, floa
 }
 
 void SdlGpuPostProcessing::DrawComposite(SDL_GPUCommandBuffer* commandBuffer, SDL_GPURenderPass* pass,
-                                         SdlGpuTargetSize size, const PostProcessingLook& look, PostProcessingView view)
+                                         SdlGpuTargetSize size, const PostProcessingLook& look, PostProcessingView view,
+                                         SDL_GPUTexture* ambientOcclusion)
 {
     if (!IsAvailable() || !m_sceneTexture || size.width == 0u || size.height == 0u)
     {
@@ -387,6 +388,8 @@ void SdlGpuPostProcessing::DrawComposite(SDL_GPUCommandBuffer* commandBuffer, SD
         {shown, shownSampler},
         {bloom ? m_bloomLevels[0].texture : m_sceneTexture, m_linearSampler},
         {grading ? m_gradingTexture : m_sceneTexture, m_linearSampler},
+        {ambientOcclusion ? ambientOcclusion : m_sceneTexture, m_linearSampler},
+        {bloomRendered ? m_bloomSourceTexture : m_sceneTexture, m_pointSampler},
     };
 
     const SDL_GPUViewport viewport{0.0f, 0.0f, static_cast<float>(size.width), static_cast<float>(size.height),
@@ -405,7 +408,8 @@ void SdlGpuPostProcessing::DrawComposite(SDL_GPUCommandBuffer* commandBuffer, SD
         gradingStrength,
         hdr ? HdrToneMapKnee : 1.0f,
         hdr ? DitherAmount : 0.0f,
-        {}};
+        ambientOcclusion && view == PostProcessingView::Scene ? look.ambientOcclusionStrength : 0.0f,
+        bloomRendered ? 1.0f : 0.0f};
     SDL_PushGPUFragmentUniformData(commandBuffer, 0, &uniform, sizeof(uniform));
     SDL_DrawGPUPrimitives(pass, FullscreenVertexCount, 1, 0, 0);
 }

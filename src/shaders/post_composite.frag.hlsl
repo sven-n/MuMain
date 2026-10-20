@@ -1,4 +1,5 @@
-// post_composite.frag.hlsl — the processed 3D scene: the scene image (an HDR scene tone mapped),
+// post_composite.frag.hlsl — the processed 3D scene: the scene image darkened by its ambient
+// occlusion (an HDR scene then tone mapped),
 // with its bloom screen-blended on top, colour graded through the map's lookup table and dithered.
 // Draws into the frame's destination before the UI.
 // CompositeUniforms mirrors mu::SdlGpuCompositeUniform.
@@ -8,6 +9,10 @@ Texture2D bloom : register(t1, space2);
 SamplerState bloomSampler : register(s1, space2);   // linear: the bloom is half resolution
 Texture2D grading : register(t2, space2);
 SamplerState gradingSampler : register(s2, space2); // linear: interpolates between table entries
+Texture2D ambientOcclusion : register(t3, space2);
+SamplerState ambientOcclusionSampler : register(s3, space2); // linear: half resolution
+Texture2D bloomSource : register(t4, space2);
+SamplerState bloomSourceSampler : register(s4, space2); // point
 cbuffer CompositeUniforms : register(b0, space3)
 {
     float2 inverseTargetSize;
@@ -15,7 +20,8 @@ cbuffer CompositeUniforms : register(b0, space3)
     float gradingStrength; // 0: ungraded; else blend of the graded colour with the ungraded one
     float toneMapKnee;     // channels above it roll off towards 1; 1: none
     float ditherAmount;    // 0: no dither
-    float2 compositePadding;
+    float ambientOcclusionStrength; // 0: no ambient occlusion
+    float ambientOcclusionEffects;  // 1: the bloom source holds this frame's additive light
 };
 struct FSInput
 {
@@ -30,6 +36,7 @@ static const float kGradingSize = 32.0;
 // Defined after main so the compiled shader declares its textures in binding order (scene,
 // bloom, grading): spirv-cross numbers Metal textures in that order.
 float3 Grade(float3 color);
+float AmbientOcclusion(float2 uv);
 
 // The HDR scene's tone map: unchanged up to the knee, then an exponential shoulder towards 1, so
 // stacked light rolls off instead of clipping. The same curve as skinned_lit.frag's highlight knee.
@@ -49,6 +56,8 @@ float4 main(FSInput input) : SV_Target
 {
     const float2 uv = input.pos.xy * inverseTargetSize;
     float4 color = scene.Sample(sceneSampler, uv);
+    if (ambientOcclusionStrength > 0.0)
+        color.rgb *= AmbientOcclusion(uv);
     if (toneMapKnee < 1.0)
     {
         // Blending over light above 1 (inverse colour) can leave negative values: black.
@@ -87,4 +96,17 @@ float3 Grade(float3 color)
     const float3 lower = grading.Sample(gradingSampler, float2(x + lowerSlice * sliceWidth, y)).rgb;
     const float3 upper = grading.Sample(gradingSampler, float2(x + upperSlice * sliceWidth, y)).rgb;
     return lerp(lower, upper, sliceBlend);
+}
+
+// The share of the scene's light its ambient occlusion leaves. Additive light (effects, glows) is
+// light, not surface: where the bloom source holds it, the occlusion fades out.
+float AmbientOcclusion(float2 uv)
+{
+    float visibility = ambientOcclusion.Sample(ambientOcclusionSampler, uv).r;
+    if (ambientOcclusionEffects > 0.0)
+    {
+        const float effectLight = dot(bloomSource.Sample(bloomSourceSampler, uv).rgb, float3(0.2126, 0.7152, 0.0722));
+        visibility = lerp(visibility, 1.0, saturate(effectLight * 4.0));
+    }
+    return max(1.0 - (1.0 - visibility) * ambientOcclusionStrength, 0.0);
 }
