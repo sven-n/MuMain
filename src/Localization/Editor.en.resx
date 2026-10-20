@@ -955,6 +955,9 @@
   <data name="Name or number" xml:space="preserve">
     <value>Name or number</value>
   </data>
+  <data name="Items" xml:space="preserve">
+    <value>Items</value>
+  </data>
   <data name="Item names missing" xml:space="preserve">
     <value>Item names in {0}: {1} of {2} missing</value>
   </data>

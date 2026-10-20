@@ -2,6 +2,8 @@
 
 #ifdef _EDITOR
 
+#include "MuEditorToolWindows.h"
+
 struct SDL_Window;
 
 class CMuEditorUI
@@ -11,8 +13,7 @@ public:
 
     // With the editor open: the editor window, its menu bar and the dock space
     // of the tool windows. Closed: the Open Editor button over the game.
-    void Render(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor,
-                bool& showMapEditor, bool& showEffectBrowser, bool& showItemTranslations, bool& showConsole);
+    void Render(bool& editorEnabled, MuEditor::ToolWindows& windows);
 
     // Whether the point (in ImGui's coordinates) is on the Open Editor button
     // as it was last drawn.
@@ -23,14 +24,10 @@ private:
     ~CMuEditorUI() = default;
 
     void RenderToolbarOpen(bool& editorEnabled);
-    void RenderEditorWindow(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor,
-                            bool& showMapEditor, bool& showEffectBrowser, bool& showItemTranslations,
-                            bool& showConsole);
+    void RenderEditorWindow(bool& editorEnabled, MuEditor::ToolWindows& windows);
     // editorOsWindow is the editor window's own OS window, null while it is
     // inside the game window.
-    void RenderWindowsMenu(bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor, bool& showMapEditor,
-                           bool& showEffectBrowser, bool& showItemTranslations, bool& showConsole,
-                           SDL_Window* editorOsWindow);
+    void RenderWindowsMenu(MuEditor::ToolWindows& windows, SDL_Window* editorOsWindow);
     void RenderUIScale();
     void RenderLanguageSelector();
     void RenderCloseButton(bool& editorEnabled);

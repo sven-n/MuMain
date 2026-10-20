@@ -934,6 +934,9 @@
   <data name="Name or number" xml:space="preserve">
     <value>Name oder Nummer</value>
   </data>
+  <data name="Items" xml:space="preserve">
+    <value>Gegenstände</value>
+  </data>
   <data name="Item names missing" xml:space="preserve">
     <value>Fehlende Gegenstandsnamen auf {0}: {1} von {2}</value>
   </data>

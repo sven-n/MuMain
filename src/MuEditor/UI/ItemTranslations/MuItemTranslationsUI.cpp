@@ -224,7 +224,7 @@ void CMuItemTranslationsUI::RenderIdCell(int itemType)
     if (ImGui::Selectable(id))
     {
         // The item table in front, with the item listed and selected.
-        g_MuEditorCore.ShowItemEditor();
+        g_MuEditorCore.GetToolWindows().itemEditor = true;
         g_MuItemEditorUI.SelectItem(itemType);
         ImGui::SetWindowFocus(MuEditor::WindowIds::ItemEditor);
     }

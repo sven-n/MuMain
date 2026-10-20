@@ -143,13 +143,6 @@ CMuEditorCore::CMuEditorCore()
     , m_bInitialized(false)
     , m_bFrameStarted(false)
     , m_bDrawDataReady(false)
-    , m_bShowItemEditor(false)
-    , m_bShowSkillEditor(false)
-    , m_bShowDevEditor(false)
-    , m_bShowMapEditor(false)
-    , m_bShowEffectBrowser(false)
-    , m_bShowItemTranslations(false)
-    , m_bShowConsole(true)
     , m_bHoveringUI(false)
     , m_bPreviousFrameHoveringUI(false)
     , m_UIScale(1.0f)
@@ -736,42 +729,41 @@ void CMuEditorCore::Render()
 
     // The editor window when open, else the Open Editor button. Before the
     // tool windows: they dock into the editor window.
-    g_MuEditorUI.Render(m_bEditorMode, m_bShowItemEditor, m_bShowSkillEditor, m_bShowDevEditor, m_bShowMapEditor,
-                        m_bShowEffectBrowser, m_bShowItemTranslations, m_bShowConsole);
+    g_MuEditorUI.Render(m_bEditorMode, m_windows);
 
     if (m_bEditorMode)
     {
         // Render center pane (handles all editor windows and input blocking)
-        g_MuEditorCenterPaneUI.Render(m_bShowItemEditor, m_bShowSkillEditor);
+        g_MuEditorCenterPaneUI.Render(m_windows.itemEditor, m_windows.skillEditor);
 
         // Render Dev Editor
-        if (m_bShowDevEditor)
+        if (m_windows.devEditor)
         {
-            g_DevEditorUI.Render(&m_bShowDevEditor);
+            g_DevEditorUI.Render(&m_windows.devEditor);
         }
 
         // Render Map Editor. Called every frame (not gated on the show flag) so
         // it can restore the game to normal mode the frame after it is closed;
         // it owns EditFlag while its window is open.
-        g_MapEditorUI.Render(&m_bShowMapEditor);
+        g_MapEditorUI.Render(&m_windows.mapEditor);
 
         // After the Map Editor: its object browser starts a thumbnail only
         // while no capture is pending, and the effect preview leaves one
         // pending until the frame ends.
-        if (m_bShowEffectBrowser)
+        if (m_windows.effectBrowser)
         {
-            g_MuEffectBrowserUI.Render(&m_bShowEffectBrowser);
+            g_MuEffectBrowserUI.Render(&m_windows.effectBrowser);
         }
 
-        if (m_bShowItemTranslations)
+        if (m_windows.itemTranslations)
         {
-            g_MuItemTranslationsUI.Render(&m_bShowItemTranslations);
+            g_MuItemTranslationsUI.Render(&m_windows.itemTranslations);
         }
 
         // Render console (if enabled)
-        if (m_bShowConsole)
+        if (m_windows.console)
         {
-            g_MuEditorConsoleUI.Render(&m_bShowConsole);
+            g_MuEditorConsoleUI.Render(&m_windows.console);
         }
     }
     else
@@ -783,7 +775,7 @@ void CMuEditorCore::Render()
 
     // After the game's move and draw, also while the editor is hidden: the
     // effect browser's world preview keeps what it created running.
-    g_MuEffectBrowserUI.AfterRender(m_bShowEffectBrowser);
+    g_MuEffectBrowserUI.AfterRender(m_windows.effectBrowser);
 
     // With the editor open, the mouse over any of its windows in the game
     // window, or holding one of its widgets, is over the editor.

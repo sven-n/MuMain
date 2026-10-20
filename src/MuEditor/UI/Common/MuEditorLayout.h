@@ -25,6 +25,11 @@ void SubmitDockSpace(bool resetLayout);
 // Call right before a tool window's Begin(): floating, it keeps a tab to drag
 // it back into a dock by (under the OS title bar when it is a window of its own).
 void PrepareToolWindow();
+
+// For an item tool that has never been open (no place in imgui.ini): it docks
+// as a tab beside the other item tools, also in a layout made before it
+// existed. Call before PrepareToolWindow and Begin().
+void DockBesideItemTools(const char* windowId);
 } // namespace MuEditor::Layout
 
 #endif // _EDITOR

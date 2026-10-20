@@ -29,8 +29,7 @@ void BuildDefaultLayout(ImGuiID dockSpace, ImVec2 size)
     ImGui::DockBuilderDockWindow(MuEditor::WindowIds::Console, console);
     for (const char* window :
          {MuEditor::WindowIds::ItemEditor, MuEditor::WindowIds::SkillEditor, MuEditor::WindowIds::DevEditor,
-          MuEditor::WindowIds::MapEditor, MuEditor::WindowIds::EffectBrowser,
-          MuEditor::WindowIds::ItemTranslations})
+          MuEditor::WindowIds::MapEditor, MuEditor::WindowIds::EffectBrowser, MuEditor::WindowIds::ItemTranslations})
     {
         ImGui::DockBuilderDockWindow(window, tools);
     }
@@ -88,6 +87,23 @@ void PrepareToolWindow()
     ImGuiWindowClass toolWindow;
     toolWindow.DockingAlwaysTabBar = true;
     ImGui::SetNextWindowClass(&toolWindow);
+}
+
+void DockBesideItemTools(const char* windowId)
+{
+    if (ImGui::FindWindowByName(windowId) != nullptr || ImGui::FindWindowSettingsByID(ImHashStr(windowId)) != nullptr)
+    {
+        return;
+    }
+    for (const char* neighbour : {MuEditor::WindowIds::ItemTranslations, MuEditor::WindowIds::ItemEditor})
+    {
+        const ImGuiWindow* window = ImGui::FindWindowByName(neighbour);
+        if (window != nullptr && window->DockId != 0)
+        {
+            ImGui::SetNextWindowDockID(window->DockId, ImGuiCond_FirstUseEver);
+            return;
+        }
+    }
 }
 } // namespace MuEditor::Layout
 
