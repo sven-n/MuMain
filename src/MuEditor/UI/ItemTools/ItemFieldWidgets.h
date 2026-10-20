@@ -18,6 +18,18 @@ namespace MuEditor::Items::Fields
 {
 // The width of a number field, before the editor UI scale.
 constexpr float NumberWidth = 120.0f;
+// The width of a slider, before the editor UI scale.
+constexpr float SliderWidth = 220.0f;
+
+// What a slider spans and how it shows its value. Ctrl+click types a value,
+// also one outside the span unless the flags clamp it.
+struct SliderRange
+{
+    double min;
+    double max;
+    const char* format;
+    ImGuiSliderFlags flags = ImGuiSliderFlags_None;
+};
 
 float ScaledWidth(float width);
 
@@ -47,6 +59,15 @@ template <typename TDraft> void Double(TDraft& draft, const char* label, double&
     ImGui::SetNextItemWidth(ScaledWidth(NumberWidth));
     ImGui::InputScalar(label, ImGuiDataType_Double, &value, nullptr, nullptr, format);
     draft.AfterField(label);
+}
+
+// A slider for the value: a drag is one undo step, stored when it ends.
+template <typename TDraft>
+void Slider(TDraft& draft, const char* label, double& value, const SliderRange& range, const char* undoLabel = nullptr)
+{
+    ImGui::SetNextItemWidth(ScaledWidth(SliderWidth));
+    ImGui::SliderScalar(label, ImGuiDataType_Double, &value, &range.min, &range.max, range.format, range.flags);
+    draft.AfterField(undoLabel != nullptr ? undoLabel : label);
 }
 
 template <typename TDraft> void Check(TDraft& draft, const char* label, bool& value)

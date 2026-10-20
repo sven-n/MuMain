@@ -19,6 +19,7 @@
 #include "imgui.h"
 
 #include <cstdio>
+#include <iterator>
 #include <optional>
 #include <span>
 #include <string>
@@ -39,11 +40,53 @@ constexpr int MaxGlowLevel = 31;
 constexpr size_t GlowLevelsPerRow = 8;
 constexpr float GlowLevelWidth = 40.0f;
 
+// The spans of the inventory sliders; every shipped value is inside them.
+// The anchor is a share of the slot (a little beyond it, as armor has), the
+// offset is in the inventory camera's units, the rotation in degrees and the
+// body height in model units (helms -170).
+constexpr Fields::SliderRange AnchorRange{-0.25, 1.25, "%.2f"};
+constexpr Fields::SliderRange OffsetRange{-0.25, 0.25, "%.3f"};
+constexpr Fields::SliderRange RotationRange{-360.0, 360.0, "%.0f"};
+// The shipped scales lie between 0.0005 and 0.007; the model file reader
+// takes only scales above 0.
+constexpr Fields::SliderRange ScaleRange{0.0001, 0.05, "%.5f",
+                                         ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_ClampOnInput};
+constexpr Fields::SliderRange BodyHeightRange{-300.0, 100.0, "%.0f"};
+constexpr const char* AxisNames[] = {"x", "y", "z"};
+
 template <size_t Count> void Doubles(ModelDraft& draft, const char* label, std::array<double, Count>& values)
 {
     ImGui::SetNextItemWidth(Fields::ScaledWidth(VectorWidth));
     ImGui::InputScalarN(label, ImGuiDataType_Double, values.data(), static_cast<int>(Count), nullptr, nullptr, "%.3f");
     draft.AfterField(label);
+}
+
+// A slider per value, each on its own line as "<label> x" and so on; a drag
+// of any is one undo step under `label`.
+template <size_t Count>
+void Sliders(ModelDraft& draft, const char* label, std::array<double, Count>& values, const Fields::SliderRange& range)
+{
+    static_assert(Count <= std::size(AxisNames));
+    ImGui::PushID(label);
+    for (size_t index = 0; index < Count; ++index)
+    {
+        ImGui::PushID(static_cast<int>(index));
+        const std::string shown = std::string(label) + " " + AxisNames[index];
+        Fields::Slider(draft, shown.c_str(), values[index], range, label);
+        ImGui::PopID();
+    }
+    ImGui::PopID();
+}
+
+void RenderInventory(ModelDraft& draft, Data::Items::ItemInventoryDisplay& inventory)
+{
+    ImGui::PushID("Inventory");
+    Sliders(draft, I18N::Editor::Anchor, inventory.anchor, AnchorRange);
+    Sliders(draft, I18N::Editor::Offset, inventory.offset, OffsetRange);
+    Sliders(draft, I18N::Editor::Rotation, inventory.rotation, RotationRange);
+    Fields::Slider(draft, I18N::Editor::Scale, inventory.scale, ScaleRange);
+    Fields::Slider(draft, I18N::Editor::BodyHeight, inventory.bodyHeight, BodyHeightRange);
+    ImGui::PopID();
 }
 
 // A number list as text ("1, 3"), stored when it was left and reads as numbers.
@@ -235,13 +278,7 @@ void RenderDisplay(ModelDraft& draft, ItemModelDefinition& model)
 {
     if (ImGui::CollapsingHeader(I18N::Editor::InTheInventory, ImGuiTreeNodeFlags_DefaultOpen))
     {
-        ImGui::PushID("Inventory");
-        Doubles(draft, I18N::Editor::Anchor, model.inventory.anchor);
-        Doubles(draft, I18N::Editor::Offset, model.inventory.offset);
-        Doubles(draft, I18N::Editor::Rotation, model.inventory.rotation);
-        Fields::Double(draft, I18N::Editor::Scale, model.inventory.scale);
-        Fields::Double(draft, I18N::Editor::BodyHeight, model.inventory.bodyHeight, "%.1f");
-        ImGui::PopID();
+        RenderInventory(draft, model.inventory);
     }
     if (ImGui::CollapsingHeader(I18N::Editor::OnTheGround))
     {

@@ -743,7 +743,8 @@ number that has a model but no item:
   A shared model that items use cannot be removed; the ones no item uses
   are listed with a button that removes them.
 - For a file of its own, the texture folders and none-blend meshes; then
-  the inventory and ground display, cloth, specular and the glow (levels,
+  the inventory display as sliders (a drag is one undo step; Ctrl+click
+  types a value), the ground display, cloth, specular and the glow (levels,
   colors with their swatches, meshes, excellent).
 - The render style and the item effect, picked from their lists with how
   many models use each, and the items that use the picked one (a click
