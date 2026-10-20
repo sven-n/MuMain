@@ -5754,9 +5754,10 @@ void MoveItems()
             o->Gravity -= 6.f * FPS_ANIMATION_FACTOR;
 
             // Calculate ground height
-            float groundHeight = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
-            if (o->Type >= MODEL_SWORD && o->Type < MODEL_STAFF + MAX_ITEM_INDEX)
-                groundHeight += 40.f;
+            float groundHeight =
+                RequestTerrainHeight(o->Position[0], o->Position[1]) + Render::Items::Display::DroppedItemHeight;
+            if (Render::Items::Display::IsLiftedOnGround(o->Type))
+                groundHeight += Render::Items::Display::DroppedWeaponLift;
 
             // Check if item is on ground or still falling
             if (o->Position[2] <= groundHeight)
