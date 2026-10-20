@@ -968,6 +968,39 @@ TEST_CASE("The glow of shipped item models is on meshes the models have [data][i
     }
 }
 
+// The item editor offers these lists; every name in them must be one the
+// model loader accepts.
+TEST_CASE("The render style and item effect lists name every look once, sorted [data][items]")
+{
+    for (const std::span<const std::string_view> names :
+         {Render::Items::Styles::GetNames(), Render::Items::ItemEffects::GetNames()})
+    {
+        REQUIRE_FALSE(names.empty());
+        CHECK(std::ranges::is_sorted(names));
+        CHECK(std::ranges::adjacent_find(names) == names.end());
+    }
+    for (const std::string_view name : Render::Items::Styles::GetNames())
+    {
+        CHECK(Render::Items::Styles::Exists(name));
+    }
+    for (const std::string_view name : Render::Items::ItemEffects::GetNames())
+    {
+        CHECK(Render::Items::ItemEffects::Exists(name));
+    }
+    // Every name the shipped models use is in the lists.
+    for (const ItemModelDefinition& model : ShippedModels().models)
+    {
+        if (!model.renderStyle.empty())
+        {
+            CHECK(std::ranges::binary_search(Render::Items::Styles::GetNames(), model.renderStyle));
+        }
+        if (!model.itemEffect.empty())
+        {
+            CHECK(std::ranges::binary_search(Render::Items::ItemEffects::GetNames(), model.itemEffect));
+        }
+    }
+}
+
 TEST_CASE("Shipped item model glow colors are in the glow color list [data][items]")
 {
     CHECK(ShippedGlowColors().issues.empty());

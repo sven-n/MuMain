@@ -20,6 +20,12 @@ public:
     // Returns nullptr for names that are not in the list.
     const GlowColorValue* Find(std::string_view name) const;
 
+    // All colors, in the order of the file (the item editor lists them).
+    std::span<const GlowColor> GetColors() const
+    {
+        return m_colors;
+    }
+
 private:
     std::vector<GlowColor> m_colors;
 };
