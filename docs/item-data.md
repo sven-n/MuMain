@@ -728,7 +728,7 @@ number that has a model but no item:
 
 - A preview of the model as the game has it opened, at an item level,
   excellent or ancient, standing as the inventory turns it or lying as on
-  the ground (drag to turn, drag with the middle mouse button to move,
+  the ground (over a ground plane as high below it as the game drops it) (drag to turn, drag with the middle mouse button to move,
   wheel to zoom, double click to put it back).
 - The model file, picked from the `.bmd` files below `Data/Item` and
   `Data/Player`. An item without a model gets an entry, with the file's

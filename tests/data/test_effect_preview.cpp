@@ -274,6 +274,12 @@ TEST_CASE("The effect preview's quads face the camera, lie flat and cover the vi
     CHECK(flat[3].v > flat[0].v);
 
     const PreviewGeometry::PlaneQuads plane = PreviewGeometry::Plane(800.0f);
+    const PreviewGeometry::PlaneQuads lowered = PreviewGeometry::Plane(800.0f, -70.0f);
+    for (size_t vertex = 0; vertex < lowered.size(); ++vertex)
+    {
+        CHECK(lowered[vertex].z == -70.0f);
+        CHECK(lowered[vertex].x == plane[vertex].x);
+    }
     CHECK(std::all_of(plane.begin(), plane.end(), [](const mu::Vertex3D& vertex)
                       { return vertex.z == 0.0f && std::abs(vertex.x) <= 400.0f && std::abs(vertex.y) <= 400.0f; }));
 

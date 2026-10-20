@@ -29,8 +29,8 @@ Quad Billboard(const PreviewVector& center, const EffectPreviewCamera::Basis& ba
 // as RenderTerrainAlphaBitmap lays it: u along x, v along y.
 Quad GroundQuad(const PreviewVector& center, float size, float angleDegrees, std::uint32_t color);
 
-// A grey checkered square at height 0, `size` across, around the origin.
-PlaneQuads Plane(float size);
+// A grey checkered square at `height`, `size` across, around the origin.
+PlaneQuads Plane(float size, float height = 0.0f);
 
 // A grey cube with edges of `edge`, standing on height 0 around the origin;
 // its faces are shaded differently so its edges show without light.

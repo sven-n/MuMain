@@ -42,6 +42,7 @@ void CItemModelPreview::Render(int itemType)
     request.itemAncient = m_ancient;
     request.turn = m_turn;
     request.itemPose = m_pose;
+    request.itemGroundPlane = true;
     RenderView(request);
 }
 

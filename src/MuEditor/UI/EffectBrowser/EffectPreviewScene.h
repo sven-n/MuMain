@@ -60,6 +60,9 @@ struct EffectPreviewRequest
     bool itemExcellent = false;
     bool itemAncient = false;
     PreviewItemPose itemPose = PreviewItemPose::Ground;
+    // With PreviewItemPose::Ground: the ground under the item, as far below
+    // it as the game lays a dropped item above the terrain.
+    bool itemGroundPlane = false;
     PreviewSpriteBlend spriteBlend = PreviewSpriteBlend::Glow;
     bool turn = true;
 };
@@ -108,6 +111,7 @@ private:
 
     void DrawBase(const EffectPreviewRequest& request, float subjectRadius);
     void DrawItem(const EffectPreviewRequest& request);
+    void DrawGroundUnderItem(int modelType);
     void DrawSubject(const EffectPreviewRequest& request, const EffectPreviewCamera& camera);
     void DrawModel(const PreviewVector& anchor);
     void DrawSprite(const EffectPreviewRequest& request, const PreviewVector& anchor,

@@ -390,6 +390,10 @@ void EffectPreviewScene::DrawItem(const EffectPreviewRequest& request)
         Vector(ground.rotation[0], ground.rotation[1], ground.rotation[2] + m_turnDegrees, o->Angle);
         b.BodyHeight = ground.bodyHeight;
         b.Animation(BoneTransform, 0.0f, 0.0f, 0, o->Angle, o->HeadAngle, false, false);
+        if (request.itemGroundPlane)
+        {
+            DrawGroundUnderItem(models.model);
+        }
     }
 
     vec3_t light = {1.0f, 1.0f, 1.0f};
@@ -397,6 +401,22 @@ void EffectPreviewScene::DrawItem(const EffectPreviewRequest& request)
     RenderPartObject(o, models.model, nullptr, light, o->Alpha, request.itemLevel,
                      request.itemExcellent ? ExcellentFlags : 0, request.itemAncient ? AncientDiscriminator : 0, true,
                      true, true);
+}
+
+// The ground a dropped item lies above (HandleItemOnGround): the item is at
+// the origin, the ground that far below it.
+void EffectPreviewScene::DrawGroundUnderItem(int modelType)
+{
+    float height = Render::Items::Display::DroppedItemHeight;
+    if (Render::Items::Display::IsLiftedOnGround(modelType))
+        height += Render::Items::Display::DroppedWeaponLift;
+    DisableAlphaBlend();
+    DisableTexture();
+    DisableCullFace();
+    EnableDepthTest();
+    const PreviewGeometry::PlaneQuads plane =
+        PreviewGeometry::Plane(std::max(ItemHalfSize * PlaneRadii * 2.0f, MinPlaneSize), -height);
+    mu::GetRenderer().RenderQuad3D(plane, 0u);
 }
 
 void EffectPreviewScene::DrawSubject(const EffectPreviewRequest& request, const EffectPreviewCamera& camera)

@@ -76,7 +76,7 @@ Quad GroundQuad(const PreviewVector& center, float size, float angleDegrees, std
             Vertex(Offset(center, x, -half, y, half), 0.0f, 1.0f, color)};
 }
 
-PlaneQuads Plane(float size)
+PlaneQuads Plane(float size, float height)
 {
     PlaneQuads quads{};
     const float square = size / PlaneSquares;
@@ -88,9 +88,10 @@ PlaneQuads Plane(float size)
             const float x = start + column * square;
             const float y = start + row * square;
             const std::uint32_t color = Grey((row + column) % 2 == 0 ? PlaneDark : PlaneLight);
-            PutQuad(&quads[(row * PlaneSquares + column) * 4],
-                    {{{x, y, 0.0f}, {x + square, y, 0.0f}, {x + square, y + square, 0.0f}, {x, y + square, 0.0f}}},
-                    color);
+            PutQuad(
+                &quads[(row * PlaneSquares + column) * 4],
+                {{{x, y, height}, {x + square, y, height}, {x + square, y + square, height}, {x, y + square, height}}},
+                color);
         }
     }
     return quads;
