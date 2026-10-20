@@ -34,6 +34,8 @@ private:
 
     void RenderModel(Data::Items::ItemModelDefinition* model, int itemType);
     void RenderInventory(Data::Items::ItemModelDefinition& model, int itemType);
+    // The models the game draws the item with by code at some levels.
+    void RenderLevelModels(int itemType);
     void RenderRemove(const Data::Items::ItemModelDefinition& model);
     void ShowInventoryDisplay(const Data::Items::ItemModelDefinition* model, int itemType);
 

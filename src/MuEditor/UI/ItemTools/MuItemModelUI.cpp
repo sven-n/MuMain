@@ -5,12 +5,17 @@
 #include "MuItemModelUI.h"
 
 #include "ItemEdits.h"
+#include "ItemLevelModels.h"
 #include "ItemModelForms.h"
 #include "ItemSelection.h"
 #include "ItemToolWindow.h"
 
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
+#include "Core/Text/Utf8.h"
+#include "Data/DataHandler/LoadData.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
 #include "Render/Items/ItemDisplay.h"
@@ -70,9 +75,17 @@ void CMuItemModelUI::Render(bool* open)
 
 void CMuItemModelUI::RenderModel(ItemModelDefinition* model, int itemType)
 {
-    if (model != nullptr && ImGui::CollapsingHeader(I18N::Editor::Preview, ImGuiTreeNodeFlags_DefaultOpen))
+    // Some items are drawn by code with other models at some levels; the
+    // Wizard's Ring only so, without a model entry.
+    const bool drawnByCode = g_ItemDatabase.Find(itemType) != nullptr && IsDrawnByCodeAtSomeLevel(itemType);
+    if ((model != nullptr || drawnByCode) &&
+        ImGui::CollapsingHeader(I18N::Editor::Preview, ImGuiTreeNodeFlags_DefaultOpen))
     {
         m_preview.Render(itemType);
+    }
+    if (drawnByCode)
+    {
+        RenderLevelModels(itemType);
     }
     if (ImGui::CollapsingHeader(I18N::Editor::ModelFile, ImGuiTreeNodeFlags_DefaultOpen))
     {
@@ -88,6 +101,11 @@ void CMuItemModelUI::RenderModel(ItemModelDefinition* model, int itemType)
     }
     if (model == nullptr)
     {
+        // What the inventory draws by code, without sliders to change it.
+        if (drawnByCode && ImGui::CollapsingHeader(I18N::Editor::InTheInventory, ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            m_inventoryGrid.Render(itemType, m_preview.GetLevel(), m_preview.IsExcellent(), m_preview.IsAncient());
+        }
         return;
     }
     if (ImGui::CollapsingHeader(I18N::Editor::SharedModel, ImGuiTreeNodeFlags_DefaultOpen))
@@ -109,6 +127,46 @@ void CMuItemModelUI::RenderModel(ItemModelDefinition* model, int itemType)
         ModelForms::RenderLooks(m_draft, *model, m_counts);
     }
     RenderRemove(*model);
+}
+
+void CMuItemModelUI::RenderLevelModels(int itemType)
+{
+    if (!ImGui::CollapsingHeader(I18N::Editor::DrawnByCode, ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        return;
+    }
+    ImGui::TextDisabled("%s", I18N::Editor::TheGameChoosesTheseModelsByCodeTheyAreNotEditedHere);
+    const int ownModel = Data::Items::ToModelSlot(itemType);
+    for (const LevelModelRun& run : FindLevelModelRuns(itemType))
+    {
+        std::string levels = "+" + std::to_string(run.firstLevel);
+        if (run.lastLevel != run.firstLevel)
+        {
+            levels += " - +" + std::to_string(run.lastLevel);
+        }
+        if (!run.modelType)
+        {
+            ImGui::BulletText("%s: %s", levels.c_str(), I18N::Editor::NotDrawn);
+            continue;
+        }
+        std::string what = *run.modelType == ownModel
+                               ? std::string(I18N::Editor::ItsModelEntry)
+                               : Core::Text::ToUtf8(gLoadData.GetModelFile(*run.modelType).c_str());
+        // Another item's model: name the item.
+        if (*run.modelType != ownModel && Data::Items::IsItemModelSlot(*run.modelType))
+        {
+            const int other = Data::Items::ToItemType(*run.modelType);
+            if (g_ItemDatabase.Find(other) != nullptr)
+            {
+                what += " (" + I18N::Format(I18N::Editor::TheModelOf0, {g_ItemDatabase.GetLogName(other)}) + ")";
+            }
+        }
+        if (run.small)
+        {
+            what += std::string(", ") + I18N::Editor::DrawnSmall;
+        }
+        ImGui::BulletText("%s: %s", levels.c_str(), what.c_str());
+    }
 }
 
 // The sliders, and beside them the item in an inventory grid.

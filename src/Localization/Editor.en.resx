@@ -1423,4 +1423,19 @@
   <data name="Excellent and ancient items get no higher requirement from it." xml:space="preserve">
     <value>Excellent and ancient items get no higher requirement from it.</value>
   </data>
+  <data name="Drawn by code" xml:space="preserve">
+    <value>Drawn by code</value>
+  </data>
+  <data name="The game chooses these models by code; they are not edited here." xml:space="preserve">
+    <value>The game chooses these models by code; they are not edited here.</value>
+  </data>
+  <data name="Not drawn" xml:space="preserve">
+    <value>Not drawn</value>
+  </data>
+  <data name="The model of {0}" xml:space="preserve">
+    <value>The model of {0}</value>
+  </data>
+  <data name="drawn small" xml:space="preserve">
+    <value>drawn small</value>
+  </data>
 </root>

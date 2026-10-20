@@ -547,11 +547,14 @@ The effects of the event models that level variants are drawn with stay in
 code; they get model entries later.
 
 - All item models are loaded at startup, on the loading screen.
-- An item without a model entry is not drawn. Some items are drawn with
-  the model of another item or with an effect model; that choice, and
-  the look of those effect models, is still made in code. So is the look
-  of items that changes with their level (level variants, e.g. the Box
-  of Luck); they become items of their own later.
+- An item without a model entry is not drawn, unless code draws it at some
+  levels with other models: the Wizard's Ring (event models at +0 and +1
+  to +3) and the Weapon of Archangel (the archangel weapons, small, at +0
+  to +2). Some items are drawn with the model of another item or with an
+  effect model; that choice (`Render::Items::Display::FindInventoryModel`
+  for the inventory), and the look of those effect models, is still made
+  in code. So is the look of items that changes with their level (level
+  variants, e.g. the Box of Luck); they become items of their own later.
 - Models that are not item models (effects, monsters, the character
   bodies) are not in these files.
 - Write paths with the upper and lower case of the files, so the game
@@ -760,6 +763,10 @@ number that has a model but no item:
   (levels, colors with their swatches, meshes, excellent). While a slider is
   dragged, the grid and the game's inventory show the value at once; it is
   stored when the slider is let go.
+- For an item drawn by code with other models at some levels, the list of
+  those models by level (the Box of Luck, the Wizard's Ring, ...); the
+  preview and the inventory grid show them at the chosen level, also for
+  an item without a model entry.
 - The render style and the item effect, picked from their lists with how
   many models use each, and the items that use the picked one (a click
   selects one). What a look is made of is drawing code.

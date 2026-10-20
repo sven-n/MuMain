@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <optional>
 
 namespace MuEditor::Items
 {
@@ -47,11 +48,18 @@ constexpr unsigned int CellColor = 0xFF2A2A30u;
 constexpr unsigned int ItemCellColor = 0xFF2E4A4Au;
 constexpr float CellGapUnits = 1.0f;
 
-// Whether the inventory can draw the item now: its inventory model has
-// meshes and what it is drawn on has actions to place the bones.
+// Whether the inventory draws the item at this level and can now: the model
+// it draws (also a level variant's, FindInventoryModel) has meshes and what
+// it is drawn on has actions to place the bones.
 bool CanDrawInInventory(int itemType, int level)
 {
-    const int model = Render::Items::Display::GetDrawnModel(Render::Items::Display::GetInventoryModel(itemType), level);
+    const std::optional<Render::Items::Display::InventoryModel> drawn =
+        Render::Items::Display::FindInventoryModel(itemType, level);
+    if (!drawn)
+    {
+        return false;
+    }
+    const int model = Render::Items::Display::GetDrawnModel(drawn->modelType, drawn->drawLevel);
     const int skeleton = Render::Items::Display::IsDrawnOnCharacterSkeleton(model) ? MODEL_PLAYER : model;
     if (Models[model].NumMeshs <= 0 || Models[skeleton].NumActions <= 0)
     {

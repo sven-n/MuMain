@@ -12,6 +12,7 @@
 #include "I18N/All.h"
 #include "imgui.h"
 #include "../MuEditor/UI/Common/KeyboardSelection.h"
+#include "ItemLevelModels.h"
 
 #include <algorithm>
 #include <cstdio>
@@ -54,7 +55,10 @@ void RenderRow(int itemType, bool selected, int& clicked)
     }
     else
     {
-        ImGui::TextDisabled("%s", I18N::Editor::NoModel);
+        // Some items are drawn by code with other models (the Wizard's Ring).
+        ImGui::TextDisabled("%s", g_ItemDatabase.Find(itemType) != nullptr && IsDrawnByCodeAtSomeLevel(itemType)
+                                      ? I18N::Editor::DrawnByCode
+                                      : I18N::Editor::NoModel);
     }
 }
 } // namespace

@@ -4,8 +4,12 @@
 
 #ifdef _EDITOR
 
+#include "UI/ItemTools/ItemLevelModels.h"
 #include "UI/ItemTools/ItemModelFiles.h"
 #include "UI/ItemTools/ItemNumberList.h"
+
+#include "Core/Globals/_enum.h"
+#include "Data/GameData/ItemData/ItemType.h"
 
 #include <filesystem>
 #include <fstream>
@@ -79,6 +83,32 @@ TEST_CASE("A model that takes another file follows its folder unless the folders
                                                    "Data/Player/HelmMale01.bmd") == Folders{"Item", "Effect"});
     CHECK(ItemModelFiles::GetTextureFoldersForFile({"Effect"}, "Data/Item/Axe01.bmd", "Data/Player/HelmMale01.bmd") ==
           Folders{"Effect"});
+}
+
+TEST_CASE("The model tool lists the models the game draws an item with by level [editor][items]")
+{
+    using MuEditor::Items::FindLevelModelRuns;
+    using MuEditor::Items::IsDrawnByCodeAtSomeLevel;
+    // The Wizard's Ring has no model entry: two event models, then nothing.
+    const auto ring = FindLevelModelRuns(ITEM_WIZARDS_RING);
+    REQUIRE(ring.size() == 3);
+    CHECK(ring[0].lastLevel == 0);
+    CHECK(ring[0].modelType == MODEL_EVENT + 15);
+    CHECK(ring[1].firstLevel == 1);
+    CHECK(ring[1].lastLevel == 3);
+    CHECK(ring[1].modelType == MODEL_EVENT + 14);
+    CHECK_FALSE(ring[2].modelType.has_value());
+    CHECK(ring[2].lastLevel == 15);
+    CHECK(IsDrawnByCodeAtSomeLevel(ITEM_WIZARDS_RING));
+    // The archangel weapons are drawn small.
+    CHECK(FindLevelModelRuns(ITEM_WEAPON_OF_ARCHANGEL)[0].small);
+    // The heart of (14,12) at +0 and +2 (GetDrawnModel), the Box of Luck.
+    CHECK(IsDrawnByCodeAtSomeLevel(ITEM_POTION + 12));
+    CHECK(IsDrawnByCodeAtSomeLevel(ITEM_BOX_OF_LUCK));
+    // A plain item: its own model at every level.
+    const int kris = Data::Items::MakeItemType(0, 0);
+    CHECK(FindLevelModelRuns(kris).size() == 1);
+    CHECK_FALSE(IsDrawnByCodeAtSomeLevel(kris));
 }
 
 TEST_CASE("The model tool reads and writes mesh numbers as text [editor][items]")

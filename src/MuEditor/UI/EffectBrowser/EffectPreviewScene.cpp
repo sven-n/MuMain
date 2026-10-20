@@ -398,7 +398,7 @@ void EffectPreviewScene::DrawItem(const EffectPreviewRequest& request)
 
     vec3_t light = {1.0f, 1.0f, 1.0f};
     const EffectPoolGuard removeItemEffects;
-    RenderPartObject(o, models.model, nullptr, light, o->Alpha, request.itemLevel,
+    RenderPartObject(o, models.model, nullptr, light, o->Alpha, models.drawLevel,
                      request.itemExcellent ? ExcellentFlags : 0, request.itemAncient ? AncientDiscriminator : 0, true,
                      true, true);
 }
