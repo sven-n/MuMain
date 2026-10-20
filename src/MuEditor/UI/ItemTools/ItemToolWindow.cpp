@@ -12,6 +12,7 @@
 #include "../MuEditor/UI/Common/MuEditorLayout.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include "Core/Text/Utf8.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
@@ -130,13 +131,17 @@ bool RenderSelectedItem(int itemType)
         ImGui::TextDisabled("%s", I18N::Editor::SelectAnItem);
         return false;
     }
-    if (g_ItemDatabase.Find(itemType) == nullptr)
+    const Data::Items::ItemDefinition* item = g_ItemDatabase.Find(itemType);
+    if (item == nullptr)
     {
         ImGui::TextDisabled("(%d,%d) %s", Data::Items::GetItemGroup(itemType), Data::Items::GetItemNumber(itemType),
                             I18N::Editor::NoItemAtThisNumber);
         return false;
     }
-    ImGui::TextUnformatted(g_ItemDatabase.GetLogName(itemType).c_str());
+    // In the UI language, as the item browser shows it and its namesakes are
+    // found.
+    ImGui::Text("%s (%d,%d)", Core::Text::ToUtf8(item->name.c_str()).c_str(), Data::Items::GetItemGroup(itemType),
+                Data::Items::GetItemNumber(itemType));
     RenderNamesakeQualifier(itemType);
     return true;
 }

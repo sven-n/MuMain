@@ -15,7 +15,9 @@ void End();
 // The undo and redo buttons with what they would undo or redo.
 void RenderUndoRedo();
 
-// "Kris (0,0)", or "Select an item"; false when there is no item to edit.
+// "Kris (0,0)" in the UI language, with what tells it apart from items of the
+// same name (ItemNamesakes), or "Select an item"; false when there is no item
+// to edit.
 bool RenderSelectedItem(int itemType);
 
 // The data the tools show changed: the item database or the item models.
