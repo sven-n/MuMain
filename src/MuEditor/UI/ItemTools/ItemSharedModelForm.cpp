@@ -15,7 +15,6 @@
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "I18N/All.h"
 #include "imgui.h"
-#include "../MuEditor/UI/Common/KeyboardSelection.h"
 
 #include <algorithm>
 #include <cstdio>
@@ -54,8 +53,7 @@ void RenderUsers(const char* id, const std::vector<int>& users)
     for (const int user : users)
     {
         ImGui::PushID(user);
-        if (ImGui::Selectable(g_ItemDatabase.GetLogName(user).c_str(), user == g_ItemSelection.GetItemType(),
-                              MuEditor::KeyboardSelection::RowFlags))
+        if (ImGui::Selectable(g_ItemDatabase.GetLogName(user).c_str(), user == g_ItemSelection.GetItemType()))
         {
             g_ItemSelection.Select(user);
         }

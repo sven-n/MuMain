@@ -17,7 +17,6 @@
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
 #include "imgui.h"
-#include "../MuEditor/UI/Common/KeyboardSelection.h"
 
 #include <cstdio>
 #include <iterator>
@@ -129,8 +128,7 @@ void RenderUsers(const char* label, int count, std::vector<int> (*findUsers)(std
         for (const int user : findUsers(look))
         {
             ImGui::PushID(user);
-            if (ImGui::Selectable(g_ItemDatabase.GetLogName(user).c_str(), user == g_ItemSelection.GetItemType(),
-                                  MuEditor::KeyboardSelection::RowFlags))
+            if (ImGui::Selectable(g_ItemDatabase.GetLogName(user).c_str(), user == g_ItemSelection.GetItemType()))
             {
                 g_ItemSelection.Select(user);
             }

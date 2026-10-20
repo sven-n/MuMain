@@ -699,9 +699,11 @@ shows it in the others.
 - **Item Translations**: the names in all languages, see
   [translation-system.md → In the item editor](translation-system.md#in-the-item-editor).
 
-In the browser, Item Rules, Item Categories, Item Checks, Item Translations
-and the lists of users, the arrow keys move the selection (see
-[dev-editor.md](dev-editor.md)).
+In the browser, Item Rules, Item Categories, Item Checks and Item
+Translations, the arrow keys move the selection (see
+[dev-editor.md](dev-editor.md)). In the lists of the items that use a model
+or a look they only move the cursor: selecting one there shows that item's
+form instead, with its own list.
 
 How changes work:
 
