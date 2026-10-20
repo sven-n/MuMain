@@ -13,6 +13,7 @@
 #include "Core/Globals/_struct.h"
 #include "Core/Text/Utf8.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "I18N/All.h"
 #include "Render/Renderer/MuRenderer.h"
@@ -343,16 +344,19 @@ void CEffectPreviewView::RenderItemList()
 }
 
 // The names come from the items as the game has them now; the list is made
-// again when the item editor changes them or the language changes. The item
-// models are all opened on the loading screen and stay, so the list does not
-// change with the map; the models of the chosen level are checked when drawn.
+// again when the item tools change the items or their models, or the language
+// changes. The item models are all opened on the loading screen and stay, so
+// the list does not change with the map; the models of the chosen level are
+// checked when drawn.
 void CEffectPreviewView::RefreshItems()
 {
     const int version = g_ItemDatabase.GetVersion();
+    const int modelVersion = g_ItemModelDatabase.GetVersion();
     const char* locale = I18N::GetCurrentLocale();
-    if (m_itemsVersion == version && m_itemsLocale == locale)
+    if (m_itemsVersion == version && m_itemModelsVersion == modelVersion && m_itemsLocale == locale)
         return;
     m_itemsVersion = version;
+    m_itemModelsVersion = modelVersion;
     m_itemsLocale = locale;
     m_items.Build(
         MAX_ITEM, [](int itemType) { return Core::Text::ToUtf8(ItemAttribute[itemType].Name); }, IsItemDrawable);
