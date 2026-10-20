@@ -9,7 +9,9 @@
 #include "Data/GameData/ItemData/ItemType.h"
 #include "GameLogic/Items/ItemStats.h"
 
+#include <algorithm>
 #include <cstddef>
+#include <cstdlib>
 #include <optional>
 #include <string>
 
@@ -22,6 +24,10 @@ using Data::Items::ItemRequirement;
 using Data::Items::RequirementByLevel;
 
 constexpr int MaxBase = 65535;
+// The bases from the smallest that reaches the +0 value that are tried for all
+// 16 values: a +0 value that hardly grows with the base must not make the
+// search take every base.
+constexpr int MaxCandidates = 1024;
 
 // The profile storing the item would give it (CItemDataHandler::WithDerivedFields).
 const Data::Items::ItemStatProfile& FindProfile(const ItemDefinition& item)
@@ -126,7 +132,7 @@ WORD FindRequirementBase(const ItemDefinition& item, ItemRequirement requirement
         }
     }
     std::optional<int> firstMatch;
-    for (int base = low; base <= MaxBase; ++base)
+    for (int base = low; base <= MaxBase && base < low + MaxCandidates; ++base)
     {
         const RequirementByLevel candidate = ValuesWithBase(withoutLevels, requirement, base);
         if (candidate[0] != first)
@@ -142,7 +148,15 @@ WORD FindRequirementBase(const ItemDefinition& item, ItemRequirement requirement
             firstMatch = base;
         }
     }
-    return static_cast<WORD>(firstMatch.value_or(first));
+    if (firstMatch)
+    {
+        return static_cast<WORD>(*firstMatch);
+    }
+    // No base gives the +0 value: the one whose +0 value is nearest.
+    const int below = std::max(low - 1, 0);
+    const int distanceBelow = std::abs(ValuesWithBase(withoutLevels, requirement, below)[0] - first);
+    const int distanceAbove = std::abs(ValuesWithBase(withoutLevels, requirement, low)[0] - first);
+    return static_cast<WORD>(distanceBelow <= distanceAbove ? below : low);
 }
 } // namespace MuEditor::Items
 

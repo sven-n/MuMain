@@ -1293,6 +1293,20 @@ TEST_CASE("Item Requirements shows what the game asks at each level, from the va
     }
     CHECK(FindRequirementBase(byLevel, ItemRequirement::Strength, values) == kris.requirements.strength);
     CHECK(FindRequirementBase(byLevel, ItemRequirement::Level, RequirementByLevel{12, 12}) == 12);
+
+    // A +0 value no base gives: the base with the nearest one.
+    const ItemDefinition darkBreaker = *g_ItemDatabase.Find(MakeItemType(0, 17));
+    const RequirementTable darkBreakerTable = ComputeRequirementTable(darkBreaker, {});
+    RequirementByLevel typed{};
+    for (size_t level = 0; level < typed.size(); ++level)
+    {
+        typed[level] = static_cast<WORD>(darkBreakerTable[level][Strength]);
+    }
+    // A base step adds about 3 to the +0 value of this sword.
+    typed[0] = static_cast<WORD>(typed[0] + 1);
+    const WORD nearest = FindRequirementBase(darkBreaker, ItemRequirement::Strength, typed);
+    CHECK(nearest >= darkBreaker.requirements.strength);
+    CHECK(nearest <= darkBreaker.requirements.strength + 1);
 }
 
 // A number field is typed into, then its form is not drawn for a frame (its

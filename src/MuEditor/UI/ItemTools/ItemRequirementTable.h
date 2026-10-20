@@ -31,7 +31,8 @@ RequirementTable ComputeRequirementTable(const Data::Items::ItemDefinition& item
 // The base value of `requirement` with which `item`, without that requirement
 // by level, has `values` at every + level as a normal item: the level and a
 // base kept as it is are the +0 value; a stat the smallest base that gives
-// all 16 values, else the smallest that gives the +0 value, else the +0 value.
+// all 16 values, else the smallest that gives the +0 value, else the base
+// whose +0 value is nearest.
 WORD FindRequirementBase(const Data::Items::ItemDefinition& item, Data::Items::ItemRequirement requirement,
                          const Data::Items::RequirementByLevel& values);
 } // namespace MuEditor::Items
