@@ -731,7 +731,8 @@ number that has a model but no item:
   it back).
 - The model file, picked from the `.bmd` files below `Data/Item` and
   `Data/Player`. An item without a model gets an entry, with the file's
-  folder as its texture folder. A shared model that opens the same file is
+  folder as its texture folder; a model whose only texture folder is its
+  old file's folder takes the new file's. A shared model that opens the same file is
   offered instead; other items that name the file themselves are counted
   (a shared model would open it once).
 - The shared model: pick one; for the one the item uses, its items and its

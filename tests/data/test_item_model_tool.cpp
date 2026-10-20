@@ -69,6 +69,18 @@ TEST_CASE("A new model takes the folder of its file as its texture folder [edito
     CHECK(ItemModelFiles::GetTextureFolder("Sword01.bmd").empty());
 }
 
+TEST_CASE("A model that takes another file follows its folder unless the folders were chosen [editor][items]")
+{
+    using Folders = std::vector<std::string>;
+    CHECK(ItemModelFiles::GetTextureFoldersForFile({}, "", "Data/Item/Axe01.bmd") == Folders{"Item"});
+    CHECK(ItemModelFiles::GetTextureFoldersForFile({"Player"}, "Data/Player/HelmMale01.bmd", "Data/Item/Axe01.bmd") ==
+          Folders{"Item"});
+    CHECK(ItemModelFiles::GetTextureFoldersForFile({"Item", "Effect"}, "Data/Item/Axe01.bmd",
+                                                   "Data/Player/HelmMale01.bmd") == Folders{"Item", "Effect"});
+    CHECK(ItemModelFiles::GetTextureFoldersForFile({"Effect"}, "Data/Item/Axe01.bmd", "Data/Player/HelmMale01.bmd") ==
+          Folders{"Effect"});
+}
+
 TEST_CASE("The model tool reads and writes mesh numbers as text [editor][items]")
 {
     CHECK(NumberList::Format({}) == "");

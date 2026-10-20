@@ -88,11 +88,10 @@ void CItemModelFilePicker::Pick(int itemType, const Data::Items::ItemModelDefini
     picked.group = Data::Items::GetItemGroup(itemType);
     picked.number = Data::Items::GetItemNumber(itemType);
     picked.model.clear();
+    // A model from another folder takes its textures from there too, unless
+    // the folders were chosen.
+    picked.textureFolders = ItemModelFiles::GetTextureFoldersForFile(picked.textureFolders, picked.file, file);
     picked.file = std::string(file);
-    if (picked.textureFolders.empty())
-    {
-        picked.textureFolders.push_back(ItemModelFiles::GetTextureFolder(file));
-    }
     g_ItemEdits.SetItemModel(I18N::Editor::ModelFile, picked);
 }
 

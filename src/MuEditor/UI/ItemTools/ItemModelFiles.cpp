@@ -84,6 +84,13 @@ std::string ItemModelFiles::GetTextureFolder(std::string_view file)
     const size_t slash = file.rfind('/');
     return slash == std::string_view::npos ? std::string() : std::string(file.substr(0, slash));
 }
+
+std::vector<std::string> ItemModelFiles::GetTextureFoldersForFile(const std::vector<std::string>& folders,
+                                                                  std::string_view oldFile, std::string_view newFile)
+{
+    const bool followsFile = folders.empty() || (folders.size() == 1 && folders.front() == GetTextureFolder(oldFile));
+    return followsFile ? std::vector<std::string>{GetTextureFolder(newFile)} : folders;
+}
 } // namespace MuEditor::Items
 
 #endif // _EDITOR
