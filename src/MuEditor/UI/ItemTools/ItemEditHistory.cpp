@@ -125,7 +125,7 @@ void ItemEditHistory::Clear()
 {
     m_entries.clear();
     m_done = 0;
-    m_saved = 0;
+    m_saved.reset();
     m_lastChangedItem.reset();
 }
 

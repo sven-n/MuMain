@@ -184,8 +184,11 @@ TEST_CASE("The item edit history keeps a limited number of entries and knows the
     // The saved state was among the entries dropped first.
     CHECK(history.IsModifiedSinceSave());
 
+    // Cleared for data that replaced all items: it is not saved yet.
     history.Clear();
     CHECK_FALSE(history.CanUndo());
+    CHECK(history.IsModifiedSinceSave());
+    history.MarkSaved();
     CHECK_FALSE(history.IsModifiedSinceSave());
 }
 

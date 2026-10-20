@@ -129,6 +129,8 @@ public:
         return m_lastChangedItem;
     }
 
+    // Drops every entry, for data that replaced all items (Import from bmd):
+    // it is not the saved data until MarkSaved.
     void Clear();
     // The data as it is now was saved.
     void MarkSaved();
