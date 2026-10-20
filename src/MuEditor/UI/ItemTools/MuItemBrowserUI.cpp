@@ -17,6 +17,7 @@
 #include "../MuEditor/UI/ItemEditor/ItemEditorPopups.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemEnumNames.h"
+#include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
 #include "imgui.h"
@@ -239,7 +240,10 @@ bool CMuItemBrowserUI::RevealSelection(int selectedItemType)
         return false;
     }
     m_shownSerial = g_ItemSelection.GetSerial();
-    if (!Data::Items::IsValidItemType(selectedItemType))
+    // A number with neither an item nor a model entry (an undone Add) is in no
+    // list: the filters stay.
+    if (!Data::Items::IsValidItemType(selectedItemType) ||
+        (g_ItemDatabase.Find(selectedItemType) == nullptr && g_ItemModelDatabase.Find(selectedItemType) == nullptr))
     {
         return false;
     }
