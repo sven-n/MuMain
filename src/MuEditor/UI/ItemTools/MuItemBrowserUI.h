@@ -27,7 +27,6 @@ private:
 
     void RenderFileActions();
     void RenderFilters();
-    void RenderGroupFilter();
     void RenderTagFilter();
     void RenderRuleFilter();
     void RenderMissingFilter();

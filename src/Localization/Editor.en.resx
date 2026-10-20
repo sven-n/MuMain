@@ -1294,4 +1294,91 @@
   <data name="Remove the model entry" xml:space="preserve">
     <value>Remove the model entry</value>
   </data>
+  <data name="Item Checks" xml:space="preserve">
+    <value>Item Checks</value>
+  </data>
+  <data name="Check" xml:space="preserve">
+    <value>Check</value>
+  </data>
+  <data name="Errors: {0}" xml:space="preserve">
+    <value>Errors: {0}</value>
+  </data>
+  <data name="Warnings: {0}" xml:space="preserve">
+    <value>Warnings: {0}</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="Item" xml:space="preserve">
+    <value>Item</value>
+  </data>
+  <data name="Message" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="No errors or warnings" xml:space="preserve">
+    <value>No errors or warnings</value>
+  </data>
+  <data name="The items changed since the last check; check again." xml:space="preserve">
+    <value>The items changed since the last check; check again.</value>
+  </data>
+  <data name="Save Items refuses data with errors and saves data with warnings." xml:space="preserve">
+    <value>Save Items refuses data with errors and saves data with warnings.</value>
+  </data>
+  <data name="Click a problem of an item to select the item and open the tool of its field." xml:space="preserve">
+    <value>Click a problem of an item to select the item and open the tool of its field.</value>
+  </data>
+  <data name="Item Rules" xml:space="preserve">
+    <value>Item Rules</value>
+  </data>
+  <data name="Selected items: {0}" xml:space="preserve">
+    <value>Selected items: {0}</value>
+  </data>
+  <data name="Select several rows with Ctrl+click or Shift+click." xml:space="preserve">
+    <value>Select several rows with Ctrl+click or Shift+click.</value>
+  </data>
+  <data name="Allow for the selected items" xml:space="preserve">
+    <value>Allow for the selected items</value>
+  </data>
+  <data name="Forbid for the selected items" xml:space="preserve">
+    <value>Forbid for the selected items</value>
+  </data>
+  <data name="Allow for {0} items: {1}" xml:space="preserve">
+    <value>Allow for {0} items: {1}</value>
+  </data>
+  <data name="Forbid for {0} items: {1}" xml:space="preserve">
+    <value>Forbid for {0} items: {1}</value>
+  </data>
+  <data name="Exceptions by item level, durability or GM status are in the code." xml:space="preserve">
+    <value>Exceptions by item level, durability or GM status are in the code.</value>
+  </data>
+  <data name="Item Categories" xml:space="preserve">
+    <value>Item Categories</value>
+  </data>
+  <data name="The selected item's tags:" xml:space="preserve">
+    <value>The selected item's tags:</value>
+  </data>
+  <data name="The selected item has no tags." xml:space="preserve">
+    <value>The selected item has no tags.</value>
+  </data>
+  <data name="Add the selected item" xml:space="preserve">
+    <value>Add the selected item</value>
+  </data>
+  <data name="The selected item already has this tag." xml:space="preserve">
+    <value>The selected item already has this tag.</value>
+  </data>
+  <data name="No item has this tag." xml:space="preserve">
+    <value>No item has this tag.</value>
+  </data>
+  <data name="Add the tag {0}" xml:space="preserve">
+    <value>Add the tag {0}</value>
+  </data>
+  <data name="Remove the tag {0}" xml:space="preserve">
+    <value>Remove the tag {0}</value>
+  </data>
+  <data name="New tags need code that uses them (ItemTag in ItemTagSet.h)." xml:space="preserve">
+    <value>New tags need code that uses them (ItemTag in ItemTagSet.h).</value>
+  </data>
 </root>

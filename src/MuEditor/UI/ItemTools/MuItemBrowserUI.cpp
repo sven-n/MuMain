@@ -5,7 +5,7 @@
 #include "MuItemBrowserUI.h"
 
 #include "ItemEdits.h"
-#include "ItemGroupNames.h"
+#include "ItemGroupFilter.h"
 #include "ItemRuleFlags.h"
 #include "ItemSelection.h"
 #include "ItemTextInput.h"
@@ -89,7 +89,7 @@ void CMuItemBrowserUI::RenderFilters()
     ImGui::SetNextItemWidth(SearchWidth * uiScale);
     InputStringWithHint("##Search", I18N::Editor::NameOrNumber, m_search);
     ImGui::SameLine();
-    RenderGroupFilter();
+    RenderGroupFilter(m_filter.group, FilterWidth * uiScale);
     ImGui::SameLine();
     RenderTagFilter();
     ImGui::SameLine();
@@ -102,28 +102,6 @@ void CMuItemBrowserUI::RenderFilters()
         m_filter = {};
         m_search.clear();
     }
-}
-
-void CMuItemBrowserUI::RenderGroupFilter()
-{
-    ImGui::SetNextItemWidth(FilterWidth * g_MuEditorCore.GetUIScale());
-    const std::string shown = m_filter.group ? GetItemGroupLabel(*m_filter.group) : I18N::Editor::AllGroups;
-    if (!ImGui::BeginCombo("##Group", shown.c_str()))
-    {
-        return;
-    }
-    if (ImGui::Selectable(I18N::Editor::AllGroups, !m_filter.group))
-    {
-        m_filter.group.reset();
-    }
-    for (int group = 0; group < MAX_ITEM_TYPE; ++group)
-    {
-        if (ImGui::Selectable(GetItemGroupLabel(group).c_str(), m_filter.group == group))
-        {
-            m_filter.group = group;
-        }
-    }
-    ImGui::EndCombo();
 }
 
 void CMuItemBrowserUI::RenderTagFilter()

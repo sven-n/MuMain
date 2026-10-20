@@ -21,8 +21,11 @@
 #include "../MuEditor/UI/ItemEditor/MuItemEditorUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemBasicsUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemBrowserUI.h"
+#include "../MuEditor/UI/ItemTools/MuItemCategoriesUI.h"
+#include "../MuEditor/UI/ItemTools/MuItemChecksUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemModelUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemRequirementsUI.h"
+#include "../MuEditor/UI/ItemTools/MuItemRulesUI.h"
 #include "../MuEditor/UI/SkillEditor/MuSkillEditorUI.h"
 #include "../MuEditor/UI/DevEditor/DevEditorUI.h"
 #include "../MuEditor/UI/MapEditor/MapEditorUI.h"
@@ -564,11 +567,23 @@ void CMuEditorCore::RenderItemTools()
     {
         g_MuItemRequirementsUI.Render(&m_windows.itemRequirements);
     }
+    if (m_windows.itemRules)
+    {
+        g_MuItemRulesUI.Render(&m_windows.itemRules);
+    }
+    if (m_windows.itemCategories)
+    {
+        g_MuItemCategoriesUI.Render(&m_windows.itemCategories);
+    }
     // After the Map Editor and the effect browser: its preview opens a capture
     // of its own.
     if (m_windows.itemModel)
     {
         g_MuItemModelUI.Render(&m_windows.itemModel);
+    }
+    if (m_windows.itemChecks)
+    {
+        g_MuItemChecksUI.Render(&m_windows.itemChecks);
     }
 }
 
