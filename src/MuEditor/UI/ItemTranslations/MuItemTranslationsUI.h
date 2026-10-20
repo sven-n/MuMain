@@ -58,11 +58,10 @@ private:
     // The text of the cell being drawn: one string for all cells, so drawing
     // allocates only when a longer name comes.
     std::string m_cellText;
-    // The cell being edited, its text so far, and whether it was drawn this
-    // frame.
+    // The cell being edited (its column indexes m_locales), its text so far,
+    // and whether it was drawn this frame.
     int m_editItem = -1;
     int m_editColumn = -1;
-    std::string m_editLocale;
     std::string m_editText;
     bool m_editDrawn = false;
 };

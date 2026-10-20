@@ -258,7 +258,6 @@ void CMuItemTranslationsUI::RenderNameCell(int itemType, int column, const char*
     {
         m_editItem = itemType;
         m_editColumn = column;
-        m_editLocale = locale;
         m_editText = m_cellText;
         m_editDrawn = true;
     }
@@ -322,7 +321,7 @@ void CMuItemTranslationsUI::CommitEditNotDrawn()
     {
         return;
     }
-    CommitName(m_editItem, m_editLocale.c_str(), m_editText.c_str());
+    CommitName(m_editItem, m_locales[m_editColumn], m_editText.c_str());
     m_editItem = -1;
     m_editColumn = -1;
 }
