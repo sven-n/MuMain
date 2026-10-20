@@ -1009,3 +1009,35 @@ TEST_CASE(
     CHECK(lingering[0].x == Approx(100.f));
     CHECK(lingering[1].x == Approx(5000.f));
 }
+
+TEST_CASE("a light keeps the height of its newest call, and one without a height has none [render][lighthistory]")
+{
+    DynamicLightHistory history;
+    const LightHistorySettings classic;
+    LightCall torch = Call(1000.f, 1000.f, 0.5f, 3, LightSource::Map);
+    torch.z = 320.f;
+    auto lights = Tick(history, {torch, Call(2000.f, 2000.f, 0.5f, 3, LightSource::Map)}, classic);
+    REQUIRE(lights.size() == 2);
+    const auto torchLight = std::find_if(lights.begin(), lights.end(), [](const LightCall& l) { return l.x < 1500.f; });
+    const auto lamp = std::find_if(lights.begin(), lights.end(), [](const LightCall& l) { return l.x > 1500.f; });
+    REQUIRE(torchLight->z.has_value());
+    CHECK(*torchLight->z == Approx(320.f));
+    CHECK_FALSE(lamp->z.has_value());
+
+    torch.z = 310.f;
+    lights = Tick(history, {torch}, classic);
+    REQUIRE(lights.size() == 1);
+    CHECK(*lights[0].z == Approx(310.f));
+}
+
+TEST_CASE("a light without a height shines from its source's default height above the terrain [render][lighthistory]")
+{
+    using Render::Lighting::DefaultLightHeight;
+    CHECK(DefaultLightHeight(LightSource::Map) == 150.f);
+    CHECK(DefaultLightHeight(LightSource::Character) == 100.f);
+    CHECK(DefaultLightHeight(LightSource::Effect) == 100.f);
+    const float white[3] = {1.f, 1.f, 1.f};
+    CHECK(Render::Terrain::LightGrid::MakeDynamicLight(0.f, 0.f, white, 3, 40.f, 270.f).position[2] == 310.f);
+    CHECK(Render::Terrain::LightGrid::MakeDynamicLight(0.f, 0.f, white, 3, 40.f).position[2] ==
+          40.f + Render::Lighting::kDynamicLightHeightAboveTerrain);
+}

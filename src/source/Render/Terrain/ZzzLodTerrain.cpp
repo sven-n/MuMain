@@ -1081,7 +1081,8 @@ void AddFrameHistoryLights()
 
 // Every light added to the frame's dynamic terrain light is also a point light of the frame. The
 // light mood's gain is applied first, so the terrain and the models get the same light.
-void AddTerrainLight(float xf, float yf, vec3_t SourceLight, int Range, vec3_t* Buffer)
+static void AddTerrainLightFrom(float xf, float yf, std::optional<float> z, vec3_t SourceLight, int Range,
+                                vec3_t* Buffer)
 {
     if (Buffer == PrimaryTerrainLight && UseLightHistory())
     {
@@ -1091,6 +1092,7 @@ void AddTerrainLight(float xf, float yf, vec3_t SourceLight, int Range, vec3_t* 
         std::copy(SourceLight, SourceLight + 3, call.color);
         call.range = Range;
         call.source = Render::Lighting::CurrentLightSource();
+        call.z = z;
         Render::Terrain::LightGrid::RecordFrameLight(FrameLightTarget(), call);
         return;
     }
@@ -1101,8 +1103,21 @@ void AddTerrainLight(float xf, float yf, vec3_t SourceLight, int Range, vec3_t* 
         Render::Terrain::LightGrid::AddLight(Buffer, xf, yf, Light, Range);
         return;
     }
+    const float terrainHeight = RequestTerrainHeight(xf, yf);
+    const float aboveTerrain =
+        z ? *z - terrainHeight : Render::Lighting::DefaultLightHeight(Render::Lighting::CurrentLightSource());
     Render::Terrain::LightGrid::AddDynamicLight(Buffer, Render::Lighting::FrameDynamicLights(), xf, yf, Light, Range,
-                                                RequestTerrainHeight(xf, yf));
+                                                terrainHeight, aboveTerrain);
+}
+
+void AddTerrainLight(float xf, float yf, vec3_t SourceLight, int Range, vec3_t* Buffer)
+{
+    AddTerrainLightFrom(xf, yf, std::nullopt, SourceLight, Range, Buffer);
+}
+
+void AddTerrainLightAt(float xf, float yf, float z, vec3_t SourceLight, int Range, vec3_t* Buffer)
+{
+    AddTerrainLightFrom(xf, yf, z, SourceLight, Range, Buffer);
 }
 
 void AddTerrainLightClip(float xf, float yf, vec3_t SourceLight, int Range, vec3_t* Buffer)

@@ -23,6 +23,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <optional>
 #include <span>
 
 #include "Render/Lighting/DynamicLightList.h"
@@ -38,6 +39,13 @@ enum class LightSource : std::uint8_t
     Character,
     Effect,
 };
+
+// How high above the terrain a light without a height of its own (AddTerrainLight) shines from:
+// map lights (lamps, braziers) above head height, characters' and skills' glows at chest height.
+[[nodiscard]] constexpr float DefaultLightHeight(LightSource source)
+{
+    return source == LightSource::Map ? 150.f : 100.f;
+}
 
 // The source of the light calls made while it lives (light calls default to Effect).
 class LightSourceScope
@@ -85,6 +93,8 @@ struct LightCall
     float color[3]{};
     int range = 0;
     LightSource source = LightSource::Effect;
+    // World height of the light (AddTerrainLightAt); without it, DefaultLightHeight of its source.
+    std::optional<float> z;
 };
 
 // Refused history calls since the last clear, and which clear that was (ordered Classic fallback).
@@ -164,6 +174,7 @@ private:
         float y = 0.f;
         int range = 0;
         LightSource source = LightSource::Effect;
+        std::optional<float> z;
         // The colour called this frame (0 if not called), and the colour shown.
         float target[3]{};
         float value[3]{};
