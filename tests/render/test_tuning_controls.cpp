@@ -65,6 +65,8 @@ const SpecRow Spec[] = {
      TuningUnit::None, TuningZero::NoCap},
     {TuningControlId::ShadowOpacity, TuningGroup::DynamicLights, false, LookValue::GroundShadowOpacity, 0, 1, 0.05,
      TuningUnit::Percent, TuningZero::Plain},
+    {TuningControlId::ShadowLights, TuningGroup::DynamicLights, false, LookValue::GroundShadowLights, 0, 4, 1,
+     TuningUnit::None, TuningZero::Plain},
     {TuningControlId::Wrap, TuningGroup::DynamicLights, true, LookValue::DynamicWrap, 0, 0.5, 0.05, TuningUnit::None,
      TuningZero::Plain},
     {TuningControlId::MapSmoothing, TuningGroup::DynamicLights, true, LookValue::DynamicMapSmoothing, 0, 2, 0.05,
@@ -96,9 +98,9 @@ Data::Maps::LookProfileData ShippedLikeProfile()
 }
 } // namespace
 
-TEST_CASE("the 21 tuning controls have the specified bounds, steps, units and placement [render][look][tuning]")
+TEST_CASE("the 22 tuning controls have the specified bounds, steps, units and placement [render][look][tuning]")
 {
-    REQUIRE(Render::Look::TuningControlCount == 21);
+    REQUIRE(Render::Look::TuningControlCount == 22);
     REQUIRE(std::size(Spec) == Render::Look::TuningControlCount);
     std::set<LookValue> covered;
     for (const SpecRow& row : Spec)

@@ -56,6 +56,8 @@ ControlTexts TextsOf(TuningControlId id)
         return {I18N::Game::TuningOverlappingLightCap, I18N::Game::TuningOverlappingLightCapHelp};
     case TuningControlId::ShadowOpacity:
         return {I18N::Game::TuningShadowOpacity, I18N::Game::TuningShadowOpacityHelp};
+    case TuningControlId::ShadowLights:
+        return {I18N::Game::TuningLightShadows, I18N::Game::TuningLightShadowsHelp};
     case TuningControlId::ShadowAngle:
         return {I18N::Game::TuningShadowDirection, I18N::Game::TuningShadowDirectionHelp};
     case TuningControlId::Wrap:

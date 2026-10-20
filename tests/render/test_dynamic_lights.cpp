@@ -4,6 +4,7 @@
 #include "Core/Globals/_define.h"
 #include "Render/Lighting/DynamicLightList.h"
 #include "Render/Lighting/DynamicLightSelection.h"
+#include "Render/Lighting/LightShadowCasters.h"
 #include "Render/Lighting/WorldDynamicLights.h"
 #include "Render/Terrain/TerrainLightGrid.h"
 
@@ -379,9 +380,50 @@ TEST_CASE("the ground's lights are pinned once per frame [render][dynamic_lights
 
     CHECK(world.IsPinned());
     CHECK(world.Selection().uniform.lightCount == 1);
+    CHECK(world.Selection().uniform.worldLightCount == 1);
     CHECK(frameLights.LightsSinceMark().size() == 1);
     world.Clear();
     CHECK_FALSE(world.IsPinned());
+}
+
+TEST_CASE("point lights cast a character's shadow away from them by their share of its light [render][dynamic_lights]")
+{
+    const float hero[3] = {1000.f, 1000.f, 0.f};
+    const std::vector<DynamicLight> lights = {
+        MakeLight(1000.f, 1000.f, 1.f, 1.f, 1.f, 3),      // the character's own light: casts none, still counts
+        MakeLight(1200.f, 1000.f, 1.f, 1.f, 1.f, 3),      // east of it
+        MakeLight(1000.f, 900.f, 0.45f, 0.45f, 0.45f, 3), // south of it, weaker
+    };
+    mu::DynamicLightsUniform uniform = Render::Lighting::SelectDynamicLights(lights, hero).uniform;
+    uniform.worldLightCount = uniform.lightCount;
+
+    const Render::Lighting::LightShadowCasters casters = Render::Lighting::SelectLightShadowCasters(uniform, hero, 4);
+
+    REQUIRE(casters.count == 2);
+    // East light: the shadow falls west. Contributions 3, 3 * 1/3 = 1 and 1.35 * 2/3 = 0.9 of 4.9.
+    CHECK(casters.casters[0].fallAngle == doctest::Approx(3.14159265f));
+    CHECK(casters.casters[0].strength == doctest::Approx(1.f / 4.9f));
+    CHECK(casters.casters[1].fallAngle == doctest::Approx(3.14159265f / 2.f));
+    CHECK(casters.casters[1].strength == doctest::Approx(0.9f / 4.9f));
+    CHECK(Render::Lighting::SelectLightShadowCasters(uniform, hero, 1).count == 1);
+    CHECK(Render::Lighting::SelectLightShadowCasters(uniform, hero, 0).count == 0);
+}
+
+TEST_CASE("skill lights light the ground but cast no character shadow [render][dynamic_lights]")
+{
+    const float hero[3] = {1000.f, 1000.f, 0.f};
+    DynamicLight beam = MakeLight(1200.f, 1000.f, 1.f, 1.f, 1.f, 3);
+    beam.castsShadows = false;
+    const std::vector<DynamicLight> lights = {beam, MakeLight(1000.f, 1200.f, 1.f, 1.f, 1.f, 3)};
+    mu::DynamicLightsUniform uniform = Render::Lighting::SelectDynamicLights(lights, hero).uniform;
+    uniform.worldLightCount = uniform.lightCount;
+
+    const Render::Lighting::LightShadowCasters casters = Render::Lighting::SelectLightShadowCasters(uniform, hero, 4);
+
+    REQUIRE(casters.count == 1);
+    // Only the north light casts, with its half of the light.
+    CHECK(casters.casters[0].fallAngle == doctest::Approx(-3.14159265f / 2.f));
+    CHECK(casters.casters[0].strength == doctest::Approx(0.5f));
 }
 
 TEST_CASE("the dropped-light report runs at most once per minute [render][dynamic_lights]")

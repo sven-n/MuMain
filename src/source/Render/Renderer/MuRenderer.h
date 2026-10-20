@@ -183,6 +183,13 @@ struct SkinningParameters
     float normalMapScale = 0.0f;
 };
 
+// What casts a ground shadow (ScopedGroundShadow).
+enum class GroundShadowSource : std::uint8_t
+{
+    Sun,        // the map's light: darkens the ground's own light
+    PointLight, // a candle, fire or spell light: darkens the point lights
+};
+
 // Where a body shadow lands, as CalcShadowPosition() puts it there.
 struct ShadowProjection
 {
@@ -441,10 +448,11 @@ public:
 
     // Draws between BeginGroundShadow and EndGroundShadow are shadows cast on the ground. In a frame
     // with world-lit ground they darken it through a coverage mask instead (each pixel once, by
-    // DynamicLightsUniform::groundShadowOpacity); otherwise they draw as recorded. Scopes nest; use
-    // ScopedGroundShadow.
-    virtual void BeginGroundShadow() {}
-    virtual void EndGroundShadow() {}
+    // DynamicLightsUniform::groundShadowOpacity): a sun shadow its own light, a point-light shadow
+    // its point light. Otherwise a sun shadow draws as recorded and a point-light shadow not at all.
+    // Scopes nest; use ScopedGroundShadow.
+    virtual void BeginGroundShadow(GroundShadowSource /*source*/) {}
+    virtual void EndGroundShadow(GroundShadowSource /*source*/) {}
     // True while a bloom exclusion is open: what is queued now and drawn later
     // (a character's glow sprites) can be drawn inside one too.
     [[nodiscard]] virtual bool IsBloomExcluded() const
@@ -896,16 +904,19 @@ public:
 class ScopedGroundShadow
 {
 public:
-    ScopedGroundShadow()
+    explicit ScopedGroundShadow(GroundShadowSource source = GroundShadowSource::Sun) : m_source(source)
     {
-        GetRenderer().BeginGroundShadow();
+        GetRenderer().BeginGroundShadow(source);
     }
     ~ScopedGroundShadow()
     {
-        GetRenderer().EndGroundShadow();
+        GetRenderer().EndGroundShadow(m_source);
     }
     ScopedGroundShadow(const ScopedGroundShadow&) = delete;
     ScopedGroundShadow& operator=(const ScopedGroundShadow&) = delete;
+
+private:
+    GroundShadowSource m_source;
 };
 // The draws recorded in its lifetime may be reordered (BeginReorderableDraws).
 class ScopedReorderableDraws
