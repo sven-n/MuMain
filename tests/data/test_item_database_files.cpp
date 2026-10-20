@@ -31,6 +31,17 @@
 #include "UI/ItemTools/ItemEdits.h"
 #include "UI/ItemTools/ItemSelection.h"
 #include "UI/ItemTools/ItemUsage.h"
+#include "UI/ItemTools/MuItemBasicsUI.h"
+#include "UI/ItemTools/MuItemBrowserUI.h"
+#include "UI/ItemTools/MuItemCategoriesUI.h"
+#include "UI/ItemTools/MuItemChecksUI.h"
+#include "UI/ItemTools/MuItemModelUI.h"
+#include "UI/ItemTools/MuItemRequirementsUI.h"
+#include "UI/ItemTools/MuItemRulesUI.h"
+#include "UI/ItemTranslations/MuItemTranslationsUI.h"
+#include "TestModelSlots.h"
+#include "imgui.h"
+#include "imgui_internal.h"
 #endif
 
 #include <algorithm>
@@ -1094,6 +1105,86 @@ TEST_CASE("The usage of an item lists its tags, its model and the code that name
     const MuEditor::Items::ItemUsage nothing = MuEditor::Items::FindItemUsage(MakeItemType(0, 100));
     CHECK_FALSE(nothing.hasModel);
     CHECK(nothing.tags.empty());
+}
+
+namespace
+{
+// An ImGui context of its own for a test, without a window or a renderer.
+class TestImGuiContext
+{
+public:
+    TestImGuiContext() : m_previous(ImGui::GetCurrentContext()), m_context(ImGui::CreateContext())
+    {
+        ImGuiIO& io = ImGui::GetIO();
+        io.DisplaySize = ImVec2(DisplayWidth, DisplayHeight);
+        io.DeltaTime = 1.0f / 60.0f;
+        io.IniFilename = nullptr;
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        // The font atlas is built without a renderer that takes its texture.
+        io.BackendFlags |= ImGuiBackendFlags_RendererHasTextures;
+    }
+
+    ~TestImGuiContext()
+    {
+        ImGui::DestroyContext(m_context);
+        ImGui::SetCurrentContext(m_previous);
+    }
+
+    TestImGuiContext(const TestImGuiContext&) = delete;
+    TestImGuiContext& operator=(const TestImGuiContext&) = delete;
+
+private:
+    static constexpr float DisplayWidth = 1600.0f;
+    static constexpr float DisplayHeight = 1000.0f;
+
+    ImGuiContext* m_previous;
+    ImGuiContext* m_context;
+};
+
+void RenderItemTools()
+{
+    bool open = true;
+    g_MuItemBrowserUI.Render(&open);
+    g_MuItemBasicsUI.Render(&open);
+    g_MuItemRequirementsUI.Render(&open);
+    g_MuItemRulesUI.Render(&open);
+    g_MuItemCategoriesUI.Render(&open);
+    g_MuItemModelUI.Render(&open);
+    g_MuItemChecksUI.Render(&open);
+    g_MuItemTranslationsUI.Render(&open);
+}
+} // namespace
+
+// Draws every item tool for a few frames, with an item that has a model and a
+// number without anything: ImGui counts what the windows get wrong (Begin and
+// End, Push and Pop out of step) as errors of the frame.
+TEST_CASE("The item tools draw their frames without ImGui errors [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    TestModelSlots slots;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    TestImGuiContext context;
+
+    constexpr int Frames = 3;
+    for (const int itemType : {KrisType, MakeItemType(0, 100)})
+    {
+        g_ItemSelection.Select(itemType);
+        for (int frame = 0; frame < Frames; ++frame)
+        {
+            ImGui::NewFrame();
+            RenderItemTools();
+            ImGui::Render();
+            INFO("item type " << itemType << ", frame " << frame);
+            CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+        }
+    }
 }
 
 TEST_CASE("The save warns about an item name in a language the game has no texts for [data][items][editor]")
