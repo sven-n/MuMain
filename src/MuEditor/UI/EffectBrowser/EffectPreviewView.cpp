@@ -12,6 +12,7 @@
 #include "Core/Globals/_define.h"
 #include "Core/Globals/_struct.h"
 #include "Core/Text/Utf8.h"
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
@@ -355,7 +356,11 @@ void CEffectPreviewView::RefreshItems()
     const char* locale = I18N::GetCurrentLocale();
     if (m_itemsVersion == version && m_itemModelsVersion == modelVersion && m_itemsLocale == locale)
         return;
-    m_itemsVersion = version;
+    // Whether an item can be drawn is known once its changed model is opened
+    // again, before the next frame: until then the list is built again each
+    // frame.
+    const bool modelsOpened = !g_ItemDataHandler.HasModelsToReopen();
+    m_itemsVersion = modelsOpened ? version : -1;
     m_itemModelsVersion = modelVersion;
     m_itemsLocale = locale;
     m_items.Build(
