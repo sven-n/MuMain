@@ -21,6 +21,7 @@
 #include "UI/RmlBridge/RmlLevelGauge.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Theme/ThemeSelection.h"
+#include "Integration/Discord/Invite.h"
 #include "Integration/Discord/RichPresence.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 #include "Core/Utilities/StringUtils.h"
@@ -504,12 +505,16 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("discord_presence_index", &model.discordPresenceIndex);
     c.Bind("discord_presence_row_label", &model.discordPresenceRowLabel);
     c.Bind("discord_presence_value_label", &model.discordPresenceValueLabel);
+    c.Bind("discord_has_invite", &model.discordHasInvite);
+    c.Bind("discord_join_label", &model.discordJoinLabel);
     c.Bind("ui_scale_labels", &model.uiScaleLabels);
     c.Bind("ui_scale_index", &model.uiScaleIndex);
     c.Bind("ui_scale_row_label", &model.uiScaleRowLabel);
     c.Bind("ui_scale_value_label", &model.uiScaleValueLabel);
     c.Bind("ui_scale_tooltip", &model.uiScaleTooltip);
 
+    c.BindEventCallback("option_discord_join",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickDiscordJoin(); });
     c.BindEventCallback("option_click_close",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
 
@@ -1345,6 +1350,12 @@ void mu::ui::window::COptionWindow::RmlDiscordPresenceChanged(int index)
     RichPresence::Instance().Reconfigure();
 }
 
+void mu::ui::window::COptionWindow::RmlClickDiscordJoin()
+{
+    Integration::Discord::Invite::Open(GameConfig::GetInstance().GetDiscordInviteUrl());
+    PlayBuffer(SOUND_CLICK01);
+}
+
 void mu::ui::window::COptionWindow::ApplyPendingThemeSwitch()
 {
     if (!m_bPendingThemeSwitch)
@@ -1724,6 +1735,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     syncLabel(model.showDebugInfoLabel, "show_debug_info_label", I18N::Game::ShowDebugInfo);
     syncLabel(model.themeRowLabel, "theme_row_label", I18N::Game::UITheme);
     syncLabel(model.discordPresenceRowLabel, "discord_presence_row_label", I18N::Game::DiscordPresence);
+    syncLabel(model.discordJoinLabel, "discord_join_label", I18N::Game::DiscordJoin);
     syncLabel(model.uiScaleRowLabel, "ui_scale_row_label", I18N::Game::UIScale);
     syncLabel(model.uiScaleTooltip, "ui_scale_tooltip", I18N::Game::UIScaleTooltip);
 
@@ -1886,6 +1898,13 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     }
     syncDropdownValue(model.discordPresenceValueLabel, "discord_presence_value_label", model.discordPresenceLabels,
                       model.discordPresenceIndex);
+    // Checked on every sync, so a typo in config.ini shows no button rather than one that does nothing.
+    const bool hasInvite = Integration::Discord::Invite::Accept(GameConfig::GetInstance().GetDiscordInviteUrl());
+    if (model.discordHasInvite != hasInvite)
+    {
+        model.discordHasInvite = hasInvite;
+        m_RmlView.MarkDirty("discord_has_invite");
+    }
 
     // Built once -- unlike the font/fps-cap/theme lists, no entry is a localized word, so a live
     // language switch can't change any of these labels. The space before the sign is deliberate

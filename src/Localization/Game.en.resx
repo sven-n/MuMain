@@ -13432,6 +13432,9 @@
   <data name="DiscordCastleSiege" xml:space="preserve">
     <value>Castle Siege</value>
   </data>
+  <data name="DiscordJoin" xml:space="preserve">
+    <value>Join</value>
+  </data>
   <data name="W Coin(C)" xml:space="preserve">
     <value>W Coin(C)</value>
   </data>

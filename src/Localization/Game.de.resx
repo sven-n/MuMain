@@ -13153,6 +13153,9 @@
   <data name="DiscordCastleSiege" xml:space="preserve">
     <value>Burgbelagerung</value>
   </data>
+  <data name="DiscordJoin" xml:space="preserve">
+    <value>Beitreten</value>
+  </data>
   <data name="W Coin(C)" xml:space="preserve">
     <value>W Coin(C)</value>
   </data>

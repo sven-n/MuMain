@@ -186,6 +186,10 @@ public:
     {
         return m_discordSmallImageKey;
     }
+    std::wstring GetDiscordInviteUrl() const
+    {
+        return m_discordInviteUrl;
+    }
 
     // Helpers
     static std::wstring BinaryToHex(const BYTE* data, DWORD size);
@@ -249,6 +253,7 @@ private:
     std::wstring m_discordApplicationId;
     std::wstring m_discordLargeImageKey;
     std::wstring m_discordSmallImageKey;
+    std::wstring m_discordInviteUrl;
 
     int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue) const;
     void WriteInt(const wchar_t* section, const wchar_t* key, int value);

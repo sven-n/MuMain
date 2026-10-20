@@ -116,6 +116,7 @@ void GameConfig::Load()
     m_discordApplicationId = ReadString(CfgSectionDiscord, CfgKeyDiscordApplicationId, CfgDefaultDiscordApplicationId);
     m_discordLargeImageKey = ReadString(CfgSectionDiscord, CfgKeyDiscordLargeImageKey, CfgDefaultDiscordImageKey);
     m_discordSmallImageKey = ReadString(CfgSectionDiscord, CfgKeyDiscordSmallImageKey, CfgDefaultDiscordImageKey);
+    m_discordInviteUrl = ReadString(CfgSectionDiscord, CfgKeyDiscordInviteUrl, CfgDefaultDiscordInviteUrl);
 
     // Strip keys/sections we used to write but no longer use, so user config
     // files don't accumulate orphans. Append one line per retired key — no
@@ -168,6 +169,7 @@ void GameConfig::Save()
     WriteString(CfgSectionDiscord, CfgKeyDiscordApplicationId, m_discordApplicationId);
     WriteString(CfgSectionDiscord, CfgKeyDiscordLargeImageKey, m_discordLargeImageKey);
     WriteString(CfgSectionDiscord, CfgKeyDiscordSmallImageKey, m_discordSmallImageKey);
+    WriteString(CfgSectionDiscord, CfgKeyDiscordInviteUrl, m_discordInviteUrl);
     WriteString(CfgSectionRender, CfgKeyLook, GameConfigValidation::FormatLook(m_look));
     WriteInt(CfgSectionRender, CfgKeyAnisotropy, m_anisotropy);
     WriteInt(CfgSectionRender, CfgKeyAntialiasing, m_antialiasing);
