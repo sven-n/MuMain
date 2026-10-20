@@ -22,6 +22,7 @@
 #include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/ItemStructs.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Data/GameData/ItemData/ItemTypeUse.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "I18N/All.h"
 #include "Render/Items/ItemEffects.h"
@@ -856,8 +857,8 @@ TEST_CASE("The item tools add, remove and move items with their models [data][it
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
     const int freeType = MakeItemType(0, 100);
-    REQUIRE(CItemDataHandler::IsFreeItemType(freeType));
-    CHECK_FALSE(CItemDataHandler::IsFreeItemType(KrisType));
+    REQUIRE(IsFreeItemType(freeType));
+    CHECK_FALSE(IsFreeItemType(KrisType));
 
     SUBCASE("a new item takes a free number, with a model")
     {
@@ -882,7 +883,7 @@ TEST_CASE("The item tools add, remove and move items with their models [data][it
         ItemDefinition item;
         item.number = 100;
         CHECK_FALSE(g_ItemDataHandler.AddItem(item, nullptr));
-        CHECK(CItemDataHandler::IsFreeItemType(freeType));
+        CHECK(IsFreeItemType(freeType));
     }
 
     SUBCASE("a removed item frees its number, its model too")
@@ -894,7 +895,7 @@ TEST_CASE("The item tools add, remove and move items with their models [data][it
         CHECK(ItemAttribute[KrisType].Name[0] == L'\0');
         // Nothing is left of its values.
         CHECK(g_ItemDatabase.GetAllSlots()[KrisType].width == 0);
-        CHECK(CItemDataHandler::IsFreeItemType(KrisType));
+        CHECK(IsFreeItemType(KrisType));
         CHECK_FALSE(g_ItemDataHandler.RemoveItem(KrisType));
     }
 

@@ -13,6 +13,7 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
+#include "Data/GameData/ItemData/ItemTypeUse.h"
 #include "Data/GameData/ItemData/ItemNames.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "I18N/All.h"
@@ -276,12 +277,6 @@ void CItemDataHandler::RestoreItems(std::span<const ItemDefinition> definitions)
     {
         RefillItemAttribute(MakeItemType(definition.group, definition.number));
     }
-}
-
-bool CItemDataHandler::IsFreeItemType(int itemType)
-{
-    return IsValidItemType(itemType) && g_ItemDatabase.Find(itemType) == nullptr &&
-           g_ItemModelDatabase.Find(itemType) == nullptr;
 }
 
 bool CItemDataHandler::AddItem(const ItemDefinition& definition, const ItemModelDefinition* model)

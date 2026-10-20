@@ -54,12 +54,9 @@ public:
     // ItemAttribute[].
     void RestoreItems(std::span<const Data::Items::ItemDefinition> definitions);
 
-    // Whether a new item can take the item type: it has neither an item nor a
-    // model entry (a model without an item still belongs to that number).
-    static bool IsFreeItemType(int itemType);
     // Adds the item at its (group, number), and its model entry when `model`
     // has one (its group and number are the item's). False when the item type
-    // is not free or the item has no names.
+    // is not free (Data::Items::IsFreeItemType) or the item has no names.
     bool AddItem(const Data::Items::ItemDefinition& definition, const Data::Items::ItemModelDefinition* model);
     // Removes the item and its model entry; the item type is free again. False
     // when there is no item.

@@ -3,7 +3,10 @@
 #include "doctest.h"
 
 #ifdef _EDITOR
+#include "ItemModelDatabaseScope.h"
+
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "UI/ItemEditor/ItemListModel.h"
 
@@ -114,4 +117,66 @@ TEST_CASE("The item list lists the items without a name in a language [editor][i
     g_ItemDatabase.Set(kris);
     CHECK(list.GetItemTypes({"", "pt"}) == std::vector<int>{MakeItemType(0, 0)});
 }
+TEST_CASE("The item list filters by group, tag, rule flag and missing model [editor][items]")
+{
+    std::vector<ItemDefinition> items = Items;
+    items[1].tags.Set(ItemTag::Valuable);
+    items[2].tradable = false;
+    GlobalItemsScope scope(items);
+    ItemModelDatabaseScope restoreModels;
+    ItemModelDefinition kris;
+    kris.file = "Data/Item/Sword01.bmd";
+    // A model at a number without an item.
+    ItemModelDefinition orphan;
+    orphan.number = 30;
+    orphan.file = "Data/Item/Sword31.bmd";
+    g_ItemModelDatabase.Build(std::vector<ItemModelDefinition>{kris, orphan}, Data::Effects::GlowColorList{});
+    CItemListModel list;
+
+    CItemListModel::Filter filter;
+    filter.group = 14;
+    CHECK(list.GetItemTypes(filter) == std::vector<int>{MakeItemType(14, 13)});
+    filter = {};
+    filter.tag = ItemTag::Valuable;
+    CHECK(list.GetItemTypes(filter) == std::vector<int>{MakeItemType(0, 5)});
+    filter = {};
+    filter.notAllowed = ItemAction::Trade;
+    CHECK(list.GetItemTypes(filter) == std::vector<int>{MakeItemType(14, 13)});
+    filter = {};
+    filter.withoutModel = true;
+    CHECK(list.GetItemTypes(filter) == std::vector<int>{MakeItemType(0, 5), MakeItemType(14, 13)});
+    filter = {};
+    filter.modelsWithoutItem = true;
+    CHECK(list.GetItemTypes(filter) == std::vector<int>{MakeItemType(0, 30)});
+    filter.search = "0,30";
+    CHECK(list.GetItemTypes(filter) == std::vector<int>{MakeItemType(0, 30)});
+
+    // A model change counts as a change of the list.
+    filter = {};
+    filter.withoutModel = true;
+    REQUIRE(list.GetItemTypes(filter).size() == 2);
+    ItemModelDefinition blade;
+    blade.number = 5;
+    blade.file = "Data/Item/Sword06.bmd";
+    g_ItemModelDatabase.Set(blade, Data::Effects::GlowColorList{});
+    CHECK(list.GetItemTypes(filter) == std::vector<int>{MakeItemType(14, 13)});
+}
+
+TEST_CASE("A new item can take a number with neither an item nor a model [editor][items]")
+{
+    GlobalItemsScope scope(Items);
+    ItemModelDatabaseScope restoreModels;
+    ItemModelDefinition orphan;
+    orphan.number = 30;
+    orphan.file = "Data/Item/Sword31.bmd";
+    g_ItemModelDatabase.Build(std::vector<ItemModelDefinition>{orphan}, Data::Effects::GlowColorList{});
+
+    const std::vector<int> free = GetFreeItemNumbers(0);
+    CHECK(free.size() == MAX_ITEM_INDEX - 3);
+    CHECK(std::ranges::find(free, 0) == free.end());
+    CHECK(std::ranges::find(free, 5) == free.end());
+    CHECK(std::ranges::find(free, 30) == free.end());
+    CHECK(std::ranges::find(free, 1) != free.end());
+}
+
 #endif // _EDITOR
