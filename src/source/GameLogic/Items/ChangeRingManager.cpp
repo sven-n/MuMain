@@ -10,6 +10,7 @@
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "Data/DataHandler/LoadData.h"
 #include "Character/CharacterManager.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 #include <algorithm>
 #include <array>
@@ -48,16 +49,11 @@ constexpr std::array<int, 6> kDarkCloakModels{
     MODEL_PANDA,     MODEL_SKELETON_CHANGED,
 };
 
-constexpr std::array<short, 8> kChangeRingTypes{
-    ITEM_TRANSFORMATION_RING,           ITEM_ELITE_TRANSFER_SKELETON_RING,    ITEM_JACK_OLANTERN_TRANSFORMATION_RING,
-    ITEM_CHRISTMAS_TRANSFORMATION_RING, ITEM_GAME_MASTER_TRANSFORMATION_RING, ITEM_SNOWMAN_TRANSFORMATION_RING,
-    ITEM_PANDA_TRANSFORMATION_RING,     ITEM_SKELETON_TRANSFORMATION_RING,
-};
-
-constexpr std::array<short, 6> kIcarusBanRingTypes{
-    ITEM_TRANSFORMATION_RING,           ITEM_ELITE_TRANSFER_SKELETON_RING,    ITEM_JACK_OLANTERN_TRANSFORMATION_RING,
-    ITEM_CHRISTMAS_TRANSFORMATION_RING, ITEM_GAME_MASTER_TRANSFORMATION_RING, ITEM_SNOWMAN_TRANSFORMATION_RING,
-};
+// The panda and skeleton rings may enter Icarus.
+bool IsIcarusBanRing(short ringType)
+{
+    return GameLogic::Items::IsTransformationRingType(ringType) && !GameLogic::Items::IsPandaOrSkeletonType(ringType);
+}
 } // namespace
 
 CChangeRingManager::CChangeRingManager() {}
@@ -79,20 +75,16 @@ bool CChangeRingManager::CheckDarkCloak(CLASS_TYPE iClass, int iType)
 
 bool CChangeRingManager::CheckChangeRing(short RingType)
 {
-    return Contains(kChangeRingTypes, RingType);
-}
-
-bool CChangeRingManager::CheckRepair(int iType)
-{
-    return Contains(kChangeRingTypes, iType);
+    return GameLogic::Items::IsTransformationRingType(RingType);
 }
 
 bool CChangeRingManager::CheckMoveMap(short sLeftRingType, short sRightRingType)
 {
-    return Contains(kChangeRingTypes, sLeftRingType) || Contains(kChangeRingTypes, sRightRingType);
+    return GameLogic::Items::IsTransformationRingType(sLeftRingType) ||
+           GameLogic::Items::IsTransformationRingType(sRightRingType);
 }
 
 bool CChangeRingManager::CheckBanMoveIcarusMap(short sLeftRingType, short sRightRingType)
 {
-    return Contains(kIcarusBanRingTypes, sLeftRingType) || Contains(kIcarusBanRingTypes, sRightRingType);
+    return IsIcarusBanRing(sLeftRingType) || IsIcarusBanRing(sRightRingType);
 }

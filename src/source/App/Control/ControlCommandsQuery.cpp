@@ -4,12 +4,13 @@
 #include "App/Control/ControlEvents.h"
 #include "App/Control/ControlState.h"
 #include "Core/Input/SyntheticInput.h"
+#include "Core/Utilities/Benchmark/BenchRecorder.h"
 #include "Core/Text/Utf8.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Network/Server/WSclient.h"
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
 #include "Scenes/SceneNames.h"
-#include "UI/Legacy/UIControls.h"
 
 #include "MuGitCommit.h"
 #include "json.hpp"
@@ -309,7 +310,7 @@ private:
     std::shared_ptr<ScreenshotState> m_state;
 };
 
-// hotkey / click-ui: answers once the injected press has been released,
+// hotkey / click-ui / type: answers once the injected press has been released,
 // so the caller's next command sees the UI after the game reacted to it.
 class SyntheticInputAct : public Act
 {
@@ -330,6 +331,7 @@ public:
         {
             Core::Input::Synthetic::Reset();
         }
+        Core::Input::Synthetic::ForgetOutcome(m_generation);
     }
 
     [[nodiscard]] std::string_view Name() const override
@@ -351,14 +353,20 @@ public:
 
     [[nodiscard]] Status Tick(std::string& response) override
     {
-        // Once the injector has moved on to another caller's injection, this
-        // one is over: waiting for the injector to be idle would report on a
-        // press that is not ours.
-        if (IsStillMine() && !Core::Input::Synthetic::IsIdle())
+        // A failed owner can be superseded before this reader ticks. Its outcome
+        // survives newer schedules until this act retires.
+        const auto failure = Core::Input::Synthetic::FailureFor(m_generation);
+        if (failure != Core::Input::Synthetic::DeliveryFailure::None)
         {
-            return Status::Running;
+            const char* message = failure == Core::Input::Synthetic::DeliveryFailure::PhysicalOverlap
+                                      ? "physical mouse press cancelled scripted click"
+                                      : "input delivery target disappeared";
+            response = App::Control::EncodeError(EncodedId(), ErrorCode::Failed, message);
         }
-        response = App::Control::EncodeResult(EncodedId(), m_encodedResult);
+        else if (IsStillMine() && !Core::Input::Synthetic::IsIdle())
+            return Status::Running;
+        else
+            response = App::Control::EncodeResult(EncodedId(), m_encodedResult);
         return Status::Finished;
     }
 
@@ -405,6 +413,40 @@ std::string Ping(const Request& request, std::unique_ptr<Act>&)
     result["commit"] = MU_GIT_COMMIT;
     result["commit_changed"] = MU_GIT_COMMIT_CHANGED != 0;
     result["scene"] = CurrentSceneName();
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+// A benchmark run's progress; `$bench run ...` through `console` starts one.
+std::string Bench(const Request& request, std::unique_ptr<Act>&)
+{
+    const Core::Benchmark::Recorder& recorder = Core::Benchmark::Recorder::Instance();
+    json result;
+    result["running"] = recorder.IsRunning();
+    result["status"] = recorder.StatusText();
+    result["last_run"] = recorder.LastOutputPath();
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+// How render's bones compare with the character pre-pass; `start` clears the counts and begins checking.
+std::string Bones(const Request& request, std::unique_ptr<Act>&)
+{
+    bool start = false;
+    if (request.Has("start") && !request.GetBool("start", start))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "start must be a boolean");
+    }
+    if (start)
+    {
+        g_PrepassBoneCheck = PrepassBoneCheck{};
+        g_PrepassBoneCheck.enabled = true;
+    }
+    json result;
+    result["checked"] = g_PrepassBoneCheck.checked;
+    result["players"] = g_PrepassBoneCheck.players;
+    result["mismatched"] = g_PrepassBoneCheck.mismatched;
+    result["max_delta"] = g_PrepassBoneCheck.maxDelta;
+    result["characters"] = g_LastActiveCharacterCount;
+    result["parallel"] = g_LastAnimationWasParallel;
     return EncodeResult(request.EncodedId(), result.dump());
 }
 
@@ -553,29 +595,6 @@ std::string Screenshot(const Request& request, std::unique_ptr<Act>& act)
     return {};
 }
 
-std::string Type(const Request& request, std::unique_ptr<Act>&)
-{
-    std::string text;
-    if (!request.GetString("text", text) || text.empty())
-    {
-        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`type` needs `text`");
-    }
-
-    // What SDL's text-input event does with committed characters
-    // (FeedPortableTextInput in Winmain.cpp): the field with the focus takes
-    // them, as if they were typed.
-    CUITextInputBox* field = CUITextInputBox::GetFocusedPortable();
-    if (field == nullptr)
-    {
-        return EncodeError(request.EncodedId(), ErrorCode::NotOpen, "no text field has the focus");
-    }
-    field->OnTextInput(Core::Text::FromUtf8(text).c_str());
-
-    json result;
-    result["text"] = text;
-    return EncodeResult(request.EncodedId(), result.dump());
-}
-
 std::string Hotkey(const Request& request, std::unique_ptr<Act>& act)
 {
     std::string name;
@@ -593,7 +612,7 @@ std::string Hotkey(const Request& request, std::unique_ptr<Act>& act)
 
     if (!Core::Input::Synthetic::PressKey(*virtualKey))
     {
-        return EncodeError(request.EncodedId(), ErrorCode::Busy, "another key or click is still being injected");
+        return EncodeError(request.EncodedId(), ErrorCode::Busy, "another input is still being injected");
     }
 
     json result;
@@ -636,7 +655,7 @@ std::string ClickUi(const Request& request, std::unique_ptr<Act>& act)
 
     if (!Core::Input::Synthetic::Click(static_cast<float>(windowX), static_cast<float>(windowY), *button))
     {
-        return EncodeError(request.EncodedId(), ErrorCode::Busy, "another key or click is still being injected");
+        return EncodeError(request.EncodedId(), ErrorCode::Busy, "another input is still being injected");
     }
 
     json result;
@@ -644,6 +663,106 @@ std::string ClickUi(const Request& request, std::unique_ptr<Act>& act)
     result["y"] = windowY;
     result["button"] = buttonName;
     act = std::make_unique<SyntheticInputAct>("click-ui", result.dump());
+    return {};
+}
+std::string HoverUi(const Request& request, std::unique_ptr<Act>& act)
+{
+    double windowX = 0.0;
+    double windowY = 0.0;
+    if (!request.GetDouble("x", windowX) || !request.GetDouble("y", windowY))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`hover-ui` needs `x` and `y` window pixels");
+    }
+    // Bounded as `click-ui`'s are: the coordinates are cast to `float` below.
+    if (!(std::abs(windowX) <= MaxWindowPixel && std::abs(windowY) <= MaxWindowPixel))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`x` and `y` are window pixels, at most " +
+                               std::to_string(static_cast<int>(MaxWindowPixel)) + " from the origin");
+    }
+
+    if (!Core::Input::Synthetic::Move(static_cast<float>(windowX), static_cast<float>(windowY)))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Busy, "another input is still being injected");
+    }
+
+    json result;
+    result["x"] = windowX;
+    result["y"] = windowY;
+    act = std::make_unique<SyntheticInputAct>("hover-ui", result.dump());
+    return {};
+}
+
+std::string DragUi(const Request& request, std::unique_ptr<Act>& act)
+{
+    double fromX = 0.0;
+    double fromY = 0.0;
+    double toX = 0.0;
+    double toY = 0.0;
+    if (!request.GetDouble("x", fromX) || !request.GetDouble("y", fromY) || !request.GetDouble("to_x", toX) ||
+        !request.GetDouble("to_y", toY))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`drag-ui` needs `x`, `y`, `to_x` and `to_y` window pixels");
+    }
+    // Bounded as `click-ui`'s are: the coordinates are cast to `float` below.
+    for (const double value : {fromX, fromY, toX, toY})
+    {
+        if (!(std::abs(value) <= MaxWindowPixel))
+        {
+            return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                               "coordinates are window pixels, at most " +
+                                   std::to_string(static_cast<int>(MaxWindowPixel)) + " from the origin");
+        }
+    }
+
+    std::string buttonName = "left";
+    if (request.Has("button") && !request.GetString("button", buttonName))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`button` is `left` or `right`");
+    }
+    const std::optional<Core::Input::Synthetic::MouseButton> button =
+        Core::Input::Synthetic::MouseButtonFromName(buttonName);
+    if (!button)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "unknown button `" + buttonName + "`; known: left, right");
+    }
+
+    if (!Core::Input::Synthetic::Drag(static_cast<float>(fromX), static_cast<float>(fromY), static_cast<float>(toX),
+                                      static_cast<float>(toY), *button))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Busy, "another input is still being injected");
+    }
+
+    json result;
+    result["x"] = fromX;
+    result["y"] = fromY;
+    result["to_x"] = toX;
+    result["to_y"] = toY;
+    result["button"] = buttonName;
+    act = std::make_unique<SyntheticInputAct>("drag-ui", result.dump());
+    return {};
+}
+
+std::string Type(const Request& request, std::unique_ptr<Act>& act)
+{
+    std::string text;
+    if (!request.GetString("text", text) || !Core::Input::Synthetic::ValidText(text))
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`type` needs printable UTF-8 text (1-256 bytes)");
+
+    bool enter = false;
+    if (request.Contains("enter") && !request.GetStrictBool("enter", enter))
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`enter` must be boolean");
+
+    if (!Core::Input::Synthetic::TypeText(text, enter))
+        return EncodeError(request.EncodedId(), ErrorCode::Busy, "another input is still being injected");
+
+    json result;
+    result["bytes"] = text.size();
+    result["enter"] = enter;
+    act = std::make_unique<SyntheticInputAct>("type", result.dump());
     return {};
 }
 } // namespace App::Control::Commands

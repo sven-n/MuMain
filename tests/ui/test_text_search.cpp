@@ -1,6 +1,6 @@
 #include "doctest.h"
 
-#include "UI/Legacy/TextSearch.h"
+#include "UI/Widgets/TextSearch.h"
 
 TEST_CASE("wide text search checks every character boundary")
 {

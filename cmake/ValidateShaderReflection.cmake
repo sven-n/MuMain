@@ -48,15 +48,28 @@ function(mu_expect_resource_bindings shader_name json member expected_count expe
         return()
     endif()
 
+    # SPIRV-Cross lists resources in declaration order, not binding order: the bindings must be
+    # exactly 0..count-1 in the expected set, in any order.
     math(EXPR last_resource "${expected_count} - 1")
+    set(actual_bindings)
+    set(expected_bindings)
     foreach(resource_index RANGE 0 ${last_resource})
         string(JSON actual_set GET "${json}" "${member}" ${resource_index} set)
         string(JSON actual_binding GET "${json}" "${member}" ${resource_index} binding)
-        if(NOT actual_set EQUAL expected_set OR NOT actual_binding EQUAL resource_index)
+        if(NOT actual_set EQUAL expected_set)
             mu_add_shader_validation_error(
-                "${shader_name}: ${member}[${resource_index}] set/binding ${actual_set}/${actual_binding}, expected ${expected_set}/${resource_index}")
+                "${shader_name}: ${member}[${resource_index}] set ${actual_set}, expected ${expected_set}")
         endif()
+        list(APPEND actual_bindings "${actual_binding}")
+        list(APPEND expected_bindings "${resource_index}")
     endforeach()
+    list(SORT actual_bindings COMPARE NATURAL)
+    if(NOT "${actual_bindings}" STREQUAL "${expected_bindings}")
+        list(JOIN actual_bindings "," actual_binding_text)
+        list(JOIN expected_bindings "," expected_binding_text)
+        mu_add_shader_validation_error(
+            "${shader_name}: ${member} bindings ${actual_binding_text}, expected ${expected_binding_text} in set ${expected_set}")
+    endif()
 endfunction()
 
 function(mu_expect_input_locations shader_name json expected_locations)
@@ -108,7 +121,8 @@ function(mu_expect_hlsl_semantics shader_name hlsl expected_locations)
         list(APPEND actual_locations "${semantic_index}")
     endforeach()
     string(REPLACE "," ";" expected_list "${expected_locations}")
-    if(NOT actual_locations STREQUAL expected_list)
+    # Quoted: a shader without vertex inputs compares two empty lists.
+    if(NOT "${actual_locations}" STREQUAL "${expected_list}")
         list(JOIN actual_locations "," actual_location_text)
         list(JOIN expected_list "," expected_location_text)
         mu_add_shader_validation_error(
@@ -190,8 +204,28 @@ function(mu_expect_msl_indices shader_name msl resource_kind expected_count)
     endforeach()
 endfunction()
 
-function(mu_expect_msl_layout shader_name stage msl sampler_count storage_count uniform_count)
-    if(stage STREQUAL "vert" AND NOT msl MATCHES "\\[\\[stage_in\\]\\]")
+# SDL binds fragment texture/sampler slot N to MSL index N, so each MSL texture and sampler
+# must carry its SPIR-V binding as its index. spirv-cross numbers them in declaration order,
+# which can differ from the binding order once a shader has several.
+function(mu_expect_msl_binding_order shader_name json member resource_kind msl)
+    mu_json_array_length(resource_count "${json}" "${member}")
+    if(resource_count LESS 2)
+        return()
+    endif()
+    math(EXPR last_resource "${resource_count} - 1")
+    foreach(resource_index RANGE 0 ${last_resource})
+        string(JSON resource_name GET "${json}" "${member}" ${resource_index} name)
+        string(JSON resource_binding GET "${json}" "${member}" ${resource_index} binding)
+        if(NOT msl MATCHES "[ \t]${resource_name}[ \t]+\\[\\[${resource_kind}\\(${resource_binding}\\)\\]\\]")
+            mu_add_shader_validation_error(
+                "${shader_name}: MSL ${resource_kind} ${resource_name} is not at index ${resource_binding}")
+        endif()
+    endforeach()
+endfunction()
+
+function(mu_expect_msl_layout shader_name stage msl input_locations sampler_count storage_count uniform_count)
+    # A vertex shader without vertex inputs (generated geometry) has no [[stage_in]].
+    if(stage STREQUAL "vert" AND NOT input_locations STREQUAL "" AND NOT msl MATCHES "\\[\\[stage_in\\]\\]")
         mu_add_shader_validation_error("${shader_name}: MSL vertex input does not use [[stage_in]]")
     endif()
 
@@ -228,10 +262,17 @@ set_property(GLOBAL PROPERTY MU_SHADER_VALIDATION_ERRORS "")
 set(shader_specs
     "basic_textured.vert|vert|0,1,2|0|0|1"
     "basic_textured.frag|frag||1|0|1"
+    "basic_textured_fog.frag|frag||1|0|2"
     "basic_colored.vert|vert|0,1|0|0|1"
     "basic_colored.frag|frag||0|0|0"
     "shadow_volume.vert|vert|0|0|0|1"
     "skinned_textured.vert|vert|0,1,2,3,4,5|0|1|1"
+    "skinned_shadow.vert|vert|0,3,4|0|2|2"
+    "skinned_lit.frag|frag||1|0|3"
+    "post_fullscreen.vert|vert||0|0|0"
+    "post_bloom_down.frag|frag||1|0|1"
+    "post_bloom_up.frag|frag||1|0|1"
+    "post_composite.frag|frag||3|0|1"
 )
 
 foreach(shader_spec IN LISTS shader_specs)
@@ -310,7 +351,9 @@ foreach(shader_spec IN LISTS shader_specs)
     mu_expect_resource_bindings("${shader_name}" "${reflection_json}" textures 0 "${resource_set}")
     mu_expect_resource_bindings("${shader_name}" "${reflection_json}" images 0 "${resource_set}")
     mu_expect_renderer_metadata("${shader_name}" "${sampler_count}" "${storage_count}" "${uniform_count}")
-    mu_expect_msl_layout("${shader_name}" "${stage}" "${msl}" "${sampler_count}" "${storage_count}" "${uniform_count}")
+    mu_expect_msl_layout("${shader_name}" "${stage}" "${msl}" "${input_locations}" "${sampler_count}" "${storage_count}" "${uniform_count}")
+    mu_expect_msl_binding_order("${shader_name}" "${reflection_json}" separate_images texture "${msl}")
+    mu_expect_msl_binding_order("${shader_name}" "${reflection_json}" separate_samplers sampler "${msl}")
 endforeach()
 
 get_property(validation_errors GLOBAL PROPERTY MU_SHADER_VALIDATION_ERRORS)
@@ -319,4 +362,5 @@ if(validation_errors)
     message(FATAL_ERROR "Shader reflection validation failed:\n  - ${validation_details}")
 endif()
 
-message(STATUS "Validated SDL_GPU reflection and MSL layout for 6 shaders")
+list(LENGTH shader_specs shader_count)
+message(STATUS "Validated SDL_GPU reflection and MSL layout for ${shader_count} shaders")

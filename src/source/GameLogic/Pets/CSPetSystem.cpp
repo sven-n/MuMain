@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Network/Server/WSclient.h"
 #include "I18N/All.h"
 
 #include <algorithm>
@@ -13,7 +14,7 @@
 #include "CSPetSystem.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Combat/DuelMgr.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -27,6 +28,7 @@
 #include "Scenes/SceneCore.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Audio/DSPlaySound.h"
+#include "Render/Text/CUIRenderText.h"
 
 namespace
 {
@@ -458,7 +460,7 @@ void CSPetDarkSpirit::MovePet(void)
         int speedRandom = 28;
         int CharacterHeight = 250;
 
-        if (m_PetOwner->Helper.Type == ITEM_DARK_HORSE_ITEM || gMapManager.WorldActive == WD_55LOGINSCENE)
+        if (m_PetOwner->Helper.Type == MODEL_DARK_HORSE_ITEM || gMapManager.WorldActive == WD_55LOGINSCENE)
         {
             CharacterHeight = 350;
         }
@@ -467,14 +469,14 @@ void CSPetDarkSpirit::MovePet(void)
         if (o->Position[2] < Height)
         {
             speedRandom = 10;
-            o->Angle[0] -= 2.f;
+            o->Angle[0] -= 2.f * FPS_ANIMATION_FACTOR;
             if (o->Angle[0] < -15.f)
                 o->Angle[0] = -15.f;
         }
         else if (o->Position[2] > Height + 100)
         {
             speedRandom = 20;
-            o->Angle[0] += 2.f;
+            o->Angle[0] += 2.f * FPS_ANIMATION_FACTOR;
             if (o->Angle[0] > 15.f)
                 o->Angle[0] = 15.f;
         }
@@ -523,7 +525,7 @@ void CSPetDarkSpirit::MovePet(void)
 
         if (o->AI == PET_ATTACK)
         {
-            TargetPosition[2] += 50.f * FPS_ANIMATION_FACTOR;
+            TargetPosition[2] += 50.f;
             float Distance = MoveHumming(o->Position, o->Angle, TargetPosition, o->Velocity);
             if (Distance < 20 || o->LifeTime > 20)
             {
@@ -584,7 +586,7 @@ void CSPetDarkSpirit::MovePet(void)
         b->TransformPosition(Owner->BoneTransform[42], p, Pos, true);
 
         float Distance = MoveHumming(o->Position, o->Angle, Pos, o->Velocity);
-        o->Velocity++;
+        o->Velocity += FPS_ANIMATION_FACTOR;
         if (Distance < 50)
         {
             SetAI(PET_STAND);
@@ -598,7 +600,7 @@ void CSPetDarkSpirit::MovePet(void)
             c->AttackTime = 15;
         }
     }
-    if (rand_fps_check(100) && rand_fps_check(60))
+    if (rand_fps_check(100) && rand() % 60 == 0)
     {
         PlayBuffer(SOUND_DSPIRIT_SHOUT, o);
     }
@@ -619,11 +621,6 @@ void CSPetDarkSpirit::MovePet(void)
 }
 
 void CSPetDarkSpirit::CalcPetInformation(const PET_INFO& Petinfo) {}
-
-void CSPetDarkSpirit::RenderPetInventory(void)
-{
-    RenderCmdType();
-}
 
 void CSPetDarkSpirit::RenderPet(int PetState)
 {
@@ -682,55 +679,6 @@ void CSPetDarkSpirit::Eff_LevelDown(void)
     for (int i = 0; i < 15; ++i)
     {
         CreateJoint(BITMAP_FLARE, Position, o->Position, o->Angle, 0, o, 40, 2);
-    }
-}
-
-void CSPetDarkSpirit::RenderCmdType(void)
-{
-    float x, y, Width, Height;
-    float PartyWidth = 0.f;
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(220, 220, 220, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 128);
-
-    if (PartyNumber > 0)
-    {
-        PartyWidth = 50.f;
-    }
-    if ((Hero->Helper.Type >= MODEL_GUARDIAN_ANGEL && Hero->Helper.Type <= MODEL_DARK_HORSE_ITEM) ||
-        Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
-    {
-        PartyWidth += 60.f;
-    }
-
-    int Dur = 255;
-    Width = 50;
-    Height = 2;
-    x = GetScreenWidth() - Width - PartyWidth - 15;
-    y = 4;
-    int Life = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Durability * (int)Width / Dur;
-
-    EnableAlphaTest();
-
-    g_pRenderText->RenderText((int)x + 50, (int)y, I18N::Game::DarkRaven, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
-
-    RenderBar(x, y + 12, Width, Height, (float)Life);
-
-    Width = 20.f;
-    Height = 28.f;
-    x = GetScreenWidth() - Width - PartyWidth - 65.f;
-    y = 5.f;
-    RenderBitmap(BITMAP_SKILL_INTERFACE + 2, (float)x, (float)y, (float)Width - 4, (float)Height - 8,
-                 (((m_byCommand) % 8) * 32 + 6.f) / 256.f, (((m_byCommand) / 8) * Height + 3.f) / 256.f, Width / 256.f,
-                 (Height - 1.f) / 256.f);
-
-    Width -= 8.f;
-    Height -= 8.f;
-
-    if (MouseX >= x && MouseX <= x + Width && MouseY >= y && MouseY <= y + Height)
-    {
-        RenderTipText((int)x, (int)(y + Height), I18N::Game::Lookup(1219 + m_byCommand));
     }
 }
 

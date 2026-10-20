@@ -1,15 +1,16 @@
 #include "stdafx.h"
 #include "Core/Text/TextLineWrap.h"
-#include "Guild/UIGuildInfo.h"
+#include "Guild/GuildTypes.h"
 #include "PersonalShopTitleImp.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "I18N/All.h"
 
-#include "UI/Legacy/UIManager.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/UIManager.h"
+#include "UI/Core/WindowSystem.h"
 #include "Camera/CameraProjection.h"
+#include "Render/Text/CUIRenderText.h"
 
 namespace
 {
@@ -281,7 +282,7 @@ void CPersonalShopTitleImp::Draw()
             CShopTitleDrawObj* pDrawObj = mi->second;
             if (SelectedCharacter != -1
                 && isHighlightTime
-                && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_COMMAND)
+                && g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_COMMAND)
                 && g_pCommandWindow->GetCurCommandType() == COMMAND_PURCHASE)
             {
                 CHARACTER* selectedPlayer = &CharactersClient[SelectedCharacter];
@@ -309,16 +310,10 @@ CPersonalShopTitleImp* CPersonalShopTitleImp::GetObjPtr()
     return &s_Instance;
 }
 
+// Projects with the world's own camera, as the name labels do: the world renders under the docked
+// windows, so a title follows its owner wherever they stand on screen.
 void CPersonalShopTitleImp::UpdatePosition()
 {
-    float Width = GetScreenWidth(), Height = REFERENCE_HEIGHT;
-
-    if (!g_Camera.TopViewEnable)
-        Height = REFERENCE_HEIGHT - 48;
-
-    EndBitmap();
-    BeginOpengl(0, 0, Width, Height);
-
     auto mi = m_listShopTitleDrawObj.begin();
     for (; mi != m_listShopTitleDrawObj.end(); ++mi) {
         CShopTitleDrawObj* pDrawObj = (*mi).second;
@@ -331,9 +326,6 @@ void CPersonalShopTitleImp::UpdatePosition()
 
         pDrawObj->SetBoxPos(pos);
     }
-
-    EndOpengl();
-    BeginBitmap();
 }
 void CPersonalShopTitleImp::RevisionPosition()
 {

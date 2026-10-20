@@ -31,10 +31,49 @@ Two ways:
 - Start the client with `--editor` to launch with the editor enabled (or
   toggle later with F12).
 
-There is also an **on-screen toggle button** in the top-right of the window.
+While the editor is closed, an **Open Editor** button sits in the top-right of
+the game window; **Close Editor** is on the right of the editor window's menu
+bar.
+
+The editor opens in a window of its own, beside the game window where the
+screen has room (else over its right side), and stays in front of the game.
+Its **Windows** menu opens the tool windows: Item, Skill, Dev and Map Editor,
+the Effect Browser and the console. They open as tabs docked in the editor
+window, the console along the bottom. Drag a tab out to float a tool window
+anywhere, over the game window too, or onto another window to dock it there;
+**Windows > Reset Layout** docks them all back. The layout and the windows'
+places are kept between sessions (`imgui.ini` in the game folder).
+
+The editor window, and a tool window floating outside the game window, are
+ordinary windows of the system, with its title bar, buttons and window
+snapping. Closing the editor window closes the editor. A floating tool window
+keeps its tab under the title bar: drag the tab, not the title bar, to dock it
+again. **Windows > Fullscreen** switches the editor window to full screen and
+back; **F11** does the same for whichever of the editor's windows has the
+keyboard (in the game window F11 stays the game's camera reset).
+
+- **Windows:** minimize, maximize and close, and a taskbar button for each
+  editor window. Dragging or resizing an editor window by its title bar or
+  frame pauses the game until the mouse is released, as it does for the game
+  window.
+- **Linux:** editor builds run on X11 so that the editor's windows can leave
+  the game window, through XWayland on a Wayland desktop (the game may look
+  softer there on a scaled screen). The window manager draws the title bar and
+  decides the buttons, the snapping and whether an editor window gets its own
+  taskbar entry. `SDL_VIDEO_DRIVER=wayland` runs on Wayland instead, with the
+  editor inside the game window.
+- **macOS:** close, minimize and the green button (full screen, and tiling on
+  macOS 15). The editor's windows float above the game while MU is the active
+  app, and minimized ones are in the Dock and the Window menu. macOS may keep
+  F11 for itself: the green button or Ctrl+Cmd+F switch full screen too.
+
+With the game in full-screen mode, the editor's windows stay inside the game
+window instead.
 
 The editor is rendered with ImGui and consumes input over the game
-(see `MuInputBlockerCore.cpp` for the input-routing logic).
+(see `MuInputBlockerCore.cpp` for the input-routing logic). Keys go to the
+window that has the keyboard: while one of the editor's own windows has it,
+the game gets none of them (F12 still closes the editor from there).
 
 ---
 
@@ -48,12 +87,13 @@ While FreeFly is active, the gameplay camera continues running in the
 background (the "spectated camera" tracked by `CameraManager`) - toggling back
 puts you exactly where the gameplay camera now is, not where you left off.
 
-The standard in-game hotkeys still work with the editor open:
+The standard in-game hotkeys still work with the editor open, while the game
+window has the keyboard:
 
 - **F9** cycles Default ↔ Orbital.
 - **F10** toggles the zoom lock. F10 is intercepted at the Win32 message
-  layer (`WM_SYSKEYDOWN`) so it fires reliably even when ImGui has
-  keyboard focus.
+  layer (`WM_SYSKEYDOWN`) so it fires reliably even when an editor window
+  over the game has keyboard focus.
 - **F11** resets the active camera (zoom rung for Default, rotation +
   zoom for Orbital).
 
@@ -127,8 +167,8 @@ Read-only diagnostics:
 
 ### 3.3 Map Editor tab
 
-A separate top-level toolbar button (not one of the DevEditor's own tabs) that
-opens an in-client editor for a map's terrain textures, terrain height,
+A tool window of its own (**Windows > Map Editor**, not one of the DevEditor's
+own tabs) that opens an in-client editor for a map's terrain textures, terrain height,
 walkability attributes, and world objects, plus a top-down minimap capture -
 saving back to the game's own on-disk formats. See
 [`src/MuEditor/UI/MapEditor/MAP_EDITOR.md`](../src/MuEditor/UI/MapEditor/MAP_EDITOR.md)

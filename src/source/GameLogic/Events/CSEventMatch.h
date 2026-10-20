@@ -6,10 +6,39 @@
 
 #include <chrono>
 #include <cstdint>
+#include <string>
+#include <vector>
 
 #include "Network/Server/WSclient.h"
 
 using MatchClock = std::chrono::steady_clock;
+
+// One text of an event's result box, in its font (or the one left set) and colour. A box width
+// and height shrink it like the original's RenderText(x, y, text, boxWidth, boxHeight).
+struct MatchResultCell
+{
+    enum class Font
+    {
+        Unchanged,
+        Normal,
+        Bold,
+    };
+
+    std::wstring text;
+    int boxWidth = 0;
+    int boxHeight = 0;
+    Font font = Font::Unchanged;
+    DWORD color = 0; // RGBA()
+};
+
+// One line of an event's result box: what it is (the box's theme spaces and places it by that,
+// "message", "reward", "header", "row", "my-info" or "my-row") and its text, or a ranking table
+// row's columns.
+struct MatchResultLine
+{
+    const char* role = "message";
+    std::vector<MatchResultCell> cells;
+};
 
 class CSBaseMatch
 {
@@ -28,11 +57,8 @@ protected:
     int         m_iMyResult;
     MatchResult m_MatchResult[11];
 
-    POINT		m_PosResult;
-
     bool    getEqualMonster(int addV);
 
-    void    renderOnlyTime(float x, float y, int MatchTime);
 
 public:
     CSBaseMatch()
@@ -60,21 +86,17 @@ public:
     int		GetNumMustKillMonster() { return m_iMaxKillMonster; }
     int		GetNumKillMonster() { return m_iKillMonster; }
 
-    void	SetPosition(int ix, int iy);
     void    StartMatchCountDown(int iType);
     void    SetMatchInfo(std::uint8_t byType, int iMaxTime, int iTime, int iMaxMonster = 0, int iKillMonster = 0);
 
-    void    RenderTime(void);
+    // The entry countdown's line while one runs (30 seconds from StartMatchCountDown()), else empty.
+    std::wstring CountdownText(void);
     virtual void    RenderMatchTimes(void) = 0;
 
     virtual void    SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE data) = 0;
     virtual void    SetMatchResult(const int iNumDevilRank, const int iMyRank, const MatchResult* pMatchResult, const int Success = false) = 0;
-    virtual void    RenderMatchResult(void) = 0;
-    // Height the result box needs on top of its fixed layout.
-    virtual int GetResultExtraHeight() const
-    {
-        return 0;
-    }
+    // The texts of the event's result box (none for an event without one).
+    virtual void CollectMatchResult(std::vector<MatchResultLine>& lines) const {}
 };
 
 class CSDevilSquareMatch : public CSBaseMatch
@@ -89,7 +111,7 @@ public:
 
     virtual void    SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE data);
     virtual void    SetMatchResult(const int iNumDevilRank, const int iMyRank, const MatchResult* pMatchResult, const int Success = false);
-    virtual void    RenderMatchResult(void);
+    virtual void CollectMatchResult(std::vector<MatchResultLine>& lines) const;
 };
 
 class CCursedTempleMatch : public CSBaseMatch
@@ -104,7 +126,6 @@ public:
 
     virtual void    SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE data);
     virtual void    SetMatchResult(const int iNumDevilRank, const int iMyRank, const MatchResult* pMatchResult, const int Success = false);
-    virtual void    RenderMatchResult(void);
 };
 
 class CDoppelGangerMatch : public CSBaseMatch
@@ -119,7 +140,6 @@ public:
 
     virtual void    SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE data) {}
     virtual void    SetMatchResult(const int iNumDevilRank, const int iMyRank, const MatchResult* pMatchResult, const int Success = false) {}
-    virtual void    RenderMatchResult(void) {}
 };
 
 #endif// __CSEVENT_MATCH_H__

@@ -1,0 +1,20 @@
+<rml>
+<head>
+	<title>Help</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="help_window.rcss"/>
+</head>
+<!-- The F1 help window (CHelpWindow): the key page, then the chat page, as RenderTipTextList()
+     laid them out. #panel is the original's screen (.stage); the box, its rows and their text are one
+     counter-scaled layer at the native text size, so the box is as wide as its widest line. -->
+<body data-model="help_window">
+	<div id="panel" class="stage">
+		<div id="help_panel" class="sharp-text"
+		     data-style---line-height="line_height + 'px'" data-style---bold-line-height="bold_line_height + 'px'">
+			<div class="help-line" data-for="line : lines"
+			     data-class-heading="line.heading" data-class-half-spacer="line.half_spacer"><span class="help-text" data-if="!line.half_spacer"
+			       data-style-font-size="(line.heading ? bold_text_px : text_px) + 'px'">{{line.text}}</span></div>
+		</div>
+	</div>
+</body>
+</rml>

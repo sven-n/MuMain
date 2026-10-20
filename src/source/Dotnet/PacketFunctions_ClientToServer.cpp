@@ -194,6 +194,17 @@ void PacketFunctions_ClientToServer::SendPlayerShopCloseOther(uint16_t playerId,
     dotnet_SendPlayerShopCloseOther(this->GetHandle(), playerId, playerName);
 }
 
+void PacketFunctions_ClientToServer::SendPlayerShopSetItemPriceExtended(uint32_t moneyPrice, uint16_t priceItemType, uint16_t requiredItemAmount, BYTE itemSlot)
+{
+    static const auto dotnet_SendPlayerShopSetItemPriceExtended = LoadManagedSymbol<::SendPlayerShopSetItemPriceExtended>("SendPlayerShopSetItemPriceExtended");
+    if (!dotnet_SendPlayerShopSetItemPriceExtended)
+    {
+        return;
+    }
+
+    dotnet_SendPlayerShopSetItemPriceExtended(this->GetHandle(), moneyPrice, priceItemType, requiredItemAmount, itemSlot);
+}
+
 void PacketFunctions_ClientToServer::SendPickupItemRequest(uint16_t itemId)
 {
     static const auto dotnet_SendPickupItemRequest = LoadManagedSymbol<::SendPickupItemRequest>("SendPickupItemRequest");
@@ -480,7 +491,7 @@ void PacketFunctions_ClientToServer::SendCastleSiegeTaxInfoRequest()
     dotnet_SendCastleSiegeTaxInfoRequest(this->GetHandle());
 }
 
-void PacketFunctions_ClientToServer::SendCastleSiegeTaxChangeRequest(BYTE taxType, uint32_t taxRate)
+void PacketFunctions_ClientToServer::SendCastleSiegeTaxChangeRequest(CastleSiegeTaxType taxType, uint32_t taxValue)
 {
     static const auto dotnet_SendCastleSiegeTaxChangeRequest = LoadManagedSymbol<::SendCastleSiegeTaxChangeRequest>("SendCastleSiegeTaxChangeRequest");
     if (!dotnet_SendCastleSiegeTaxChangeRequest)
@@ -488,7 +499,7 @@ void PacketFunctions_ClientToServer::SendCastleSiegeTaxChangeRequest(BYTE taxTyp
         return;
     }
 
-    dotnet_SendCastleSiegeTaxChangeRequest(this->GetHandle(), taxType, taxRate);
+    dotnet_SendCastleSiegeTaxChangeRequest(this->GetHandle(), taxType, taxValue);
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeTaxMoneyWithdraw(uint32_t amount)
@@ -502,7 +513,7 @@ void PacketFunctions_ClientToServer::SendCastleSiegeTaxMoneyWithdraw(uint32_t am
     dotnet_SendCastleSiegeTaxMoneyWithdraw(this->GetHandle(), amount);
 }
 
-void PacketFunctions_ClientToServer::SendToggleCastleGateRequest(BYTE closeState, uint16_t gateId)
+void PacketFunctions_ClientToServer::SendToggleCastleGateRequest(BYTE isOpen, uint16_t gateId)
 {
     static const auto dotnet_SendToggleCastleGateRequest = LoadManagedSymbol<::SendToggleCastleGateRequest>("SendToggleCastleGateRequest");
     if (!dotnet_SendToggleCastleGateRequest)
@@ -510,10 +521,10 @@ void PacketFunctions_ClientToServer::SendToggleCastleGateRequest(BYTE closeState
         return;
     }
 
-    dotnet_SendToggleCastleGateRequest(this->GetHandle(), closeState, gateId);
+    dotnet_SendToggleCastleGateRequest(this->GetHandle(), isOpen, gateId);
 }
 
-void PacketFunctions_ClientToServer::SendCastleGuildCommand(BYTE team, BYTE positionX, BYTE positionY, BYTE command)
+void PacketFunctions_ClientToServer::SendCastleGuildCommand(BYTE team, BYTE positionX, BYTE positionY, CastleSiegeGuildCommandType command)
 {
     static const auto dotnet_SendCastleGuildCommand = LoadManagedSymbol<::SendCastleGuildCommand>("SendCastleGuildCommand");
     if (!dotnet_SendCastleGuildCommand)

@@ -1,0 +1,172 @@
+/* Legacy theme for CGensRanking, reproducing its RenderFrame()/RenderTexts(): the
+   docked_panel_frame.rcss frame (linked first; newui_item_back04 top), newui_gens_rankback
+   (170 x 88) at (13, 60) with the rank's 50 x 69 cell of Gens_mark_D_new / Gens_mark_V_new at
+   (30.5, 69.5), the two newui_cha_textbox02 rows (170 x 21), RenderInfoFrame()'s titled box at
+   (13, 250) (black at alpha 153 behind newui_item_table corners and edges), the scroll bar at
+   (170, 273), 110 tall (newui_scrollbar_up / m / down, newui_scroll_on thumb, newui_scroll_off while
+   inactive), the texts in their bound colours and fonts, the exit button. Reference px inside
+   #panel. */
+
+@spritesheet gens-d-sheet
+{
+	src: "../../../Gens_mark_D_new.tga";
+	gens-d-0: 0px 0px 50px 69px;
+	gens-d-1: 50px 0px 50px 69px;
+	gens-d-2: 100px 0px 50px 69px;
+	gens-d-3: 150px 0px 50px 69px;
+	gens-d-4: 200px 0px 50px 69px;
+	gens-d-5: 0px 69px 50px 69px;
+	gens-d-6: 50px 69px 50px 69px;
+	gens-d-7: 100px 69px 50px 69px;
+	gens-d-8: 150px 69px 50px 69px;
+	gens-d-9: 200px 69px 50px 69px;
+	gens-d-10: 0px 138px 50px 69px;
+	gens-d-11: 50px 138px 50px 69px;
+	gens-d-12: 100px 138px 50px 69px;
+	gens-d-13: 150px 138px 50px 69px;
+}
+@spritesheet gens-v-sheet
+{
+	src: "../../../Gens_mark_V_new.tga";
+	gens-v-0: 0px 0px 50px 69px;
+	gens-v-1: 50px 0px 50px 69px;
+	gens-v-2: 100px 0px 50px 69px;
+	gens-v-3: 150px 0px 50px 69px;
+	gens-v-4: 200px 0px 50px 69px;
+	gens-v-5: 0px 69px 50px 69px;
+	gens-v-6: 50px 69px 50px 69px;
+	gens-v-7: 100px 69px 50px 69px;
+	gens-v-8: 150px 69px 50px 69px;
+	gens-v-9: 200px 69px 50px 69px;
+	gens-v-10: 0px 138px 50px 69px;
+	gens-v-11: 50px 138px 50px 69px;
+	gens-v-12: 100px 138px 50px 69px;
+	gens-v-13: 150px 138px 50px 69px;
+}
+@spritesheet gr-rank-back-sheet { src: "../../../newui_gens_rankback.tga"; gr-rank-back: 0px 0px 170px 88px; }
+@spritesheet gr-text-back-sheet { src: "../../../newui_cha_textbox02.tga"; gr-text-back: 0px 0px 170px 21px; }
+@spritesheet gr-edge-top-sheet { src: "../../../newui_item_table03(Up).tga"; gr-edge-top: 0px 0px 1px 14px; }
+@spritesheet gr-edge-bottom-sheet { src: "../../../newui_item_table03(Dw).tga"; gr-edge-bottom: 0px 0px 1px 14px; }
+@spritesheet gr-edge-left-sheet { src: "../../../newui_item_table03(L).tga"; gr-edge-left: 0px 0px 14px 1px; }
+@spritesheet gr-edge-right-sheet { src: "../../../newui_item_table03(R).tga"; gr-edge-right: 0px 0px 14px 1px; }
+
+.frame-top { decorator: image(docked-bg-top-a); }
+#panel { pointer-events: none; }
+
+#rank_back { position: absolute; left: 13px; top: 60px; width: 170px; height: 88px; decorator: image(gr-rank-back); }
+#mark { position: absolute; left: 30.5px; top: 69.5px; width: 50px; height: 69px; }
+#mark.gens-d-0 { decorator: image(gens-d-0); }
+#mark.gens-d-1 { decorator: image(gens-d-1); }
+#mark.gens-d-2 { decorator: image(gens-d-2); }
+#mark.gens-d-3 { decorator: image(gens-d-3); }
+#mark.gens-d-4 { decorator: image(gens-d-4); }
+#mark.gens-d-5 { decorator: image(gens-d-5); }
+#mark.gens-d-6 { decorator: image(gens-d-6); }
+#mark.gens-d-7 { decorator: image(gens-d-7); }
+#mark.gens-d-8 { decorator: image(gens-d-8); }
+#mark.gens-d-9 { decorator: image(gens-d-9); }
+#mark.gens-d-10 { decorator: image(gens-d-10); }
+#mark.gens-d-11 { decorator: image(gens-d-11); }
+#mark.gens-d-12 { decorator: image(gens-d-12); }
+#mark.gens-d-13 { decorator: image(gens-d-13); }
+#mark.gens-v-0 { decorator: image(gens-v-0); }
+#mark.gens-v-1 { decorator: image(gens-v-1); }
+#mark.gens-v-2 { decorator: image(gens-v-2); }
+#mark.gens-v-3 { decorator: image(gens-v-3); }
+#mark.gens-v-4 { decorator: image(gens-v-4); }
+#mark.gens-v-5 { decorator: image(gens-v-5); }
+#mark.gens-v-6 { decorator: image(gens-v-6); }
+#mark.gens-v-7 { decorator: image(gens-v-7); }
+#mark.gens-v-8 { decorator: image(gens-v-8); }
+#mark.gens-v-9 { decorator: image(gens-v-9); }
+#mark.gens-v-10 { decorator: image(gens-v-10); }
+#mark.gens-v-11 { decorator: image(gens-v-11); }
+#mark.gens-v-12 { decorator: image(gens-v-12); }
+#mark.gens-v-13 { decorator: image(gens-v-13); }
+.text-back { position: absolute; left: 13px; width: 170px; height: 21px; decorator: image(gr-text-back); }
+
+.fill { position: absolute; background-color: rgba(0, 0, 0, 153); }
+.t-edge-top, .t-edge-bottom, .t-edge-left, .t-edge-right, .t-corner { position: absolute; }
+.t-edge-top { height: 14px; decorator: image(gr-edge-top); }
+.t-edge-bottom { height: 14px; decorator: image(gr-edge-bottom); }
+.t-edge-left { width: 14px; decorator: image(gr-edge-left); }
+.t-edge-right { width: 14px; decorator: image(gr-edge-right); }
+.t-corner { width: 14px; height: 14px; }
+.t-tl { decorator: image(docked-corner-tl); }
+.t-tr { decorator: image(docked-corner-tr); }
+.t-bl { decorator: image(docked-corner-bl); }
+.t-br { decorator: image(docked-corner-br); }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; }
+#btn_exit { pointer-events: auto; }
+
+/* The rank strip and the description box, piece by piece. */
+.fill-strip { left: 16px; top: 252px; width: 52px; height: 20px; }
+.fill-desc { left: 16px; top: 272px; width: 161px; height: 113px; }
+.corner-strip-tl { left: 13px; top: 250px; }
+.corner-strip-tr { left: 59px; top: 250px; }
+.corner-desc-tr { left: 167px; top: 270px; }
+.corner-bl { left: 13px; top: 376px; }
+.corner-br { left: 167px; top: 376px; }
+.edge-strip-top { left: 19px; top: 250px; width: 48px; }
+.edge-strip-right { left: 59px; top: 256px; height: 14px; }
+.edge-desc-top { left: 68px; top: 270px; width: 102px; }
+.edge-desc-right { left: 167px; top: 276px; height: 106px; }
+.edge-bottom { left: 19px; top: 376px; width: 156px; }
+.edge-left { left: 13px; top: 256px; height: 126px; }
+.text-back-level { top: 151px; }
+.text-back-rank { top: 175px; }
+
+/* The window's own lines. */
+.gr-line, .gr-promo-line { position: absolute; }
+#gr_title { left: 0; top: 15px; text-align: center; font-weight: bold; }
+#gr_gens_label { left: 102px; top: 90px; font-weight: bold; }
+#gr_gens_name { left: 102px; top: 110px; }
+#gr_level_label { left: 100px; top: 134px; }
+#gr_title_name { left: 66px; top: 134px; text-align: center; }
+#gr_rank_label { left: 13px; top: 157px; text-align: center; font-weight: bold; }
+#gr_rank_value { left: 0; top: 157px; text-align: right; }
+#gr_contrib_label { left: 13px; top: 180px; text-align: center; font-weight: bold; }
+#gr_contrib_value { left: 0; top: 180px; text-align: right; }
+#gr_desc_label { left: 13px; top: 258px; text-align: center; font-weight: bold; }
+
+/* The promotion note: up to NUM_LINE_CMB rows 15 units apart from y 200. */
+.gr-promo { position: static; }
+.gr-promo-line { left: 20px; }
+.gr-promo-line:nth-child(1) { top: 200px; }
+.gr-promo-line:nth-child(2) { top: 215px; }
+.gr-promo-line:nth-child(3) { top: 230px; }
+.gr-promo-line:nth-child(4) { top: 245px; }
+.gr-promo-line:nth-child(5) { top: 260px; }
+.gr-promo-line:nth-child(6) { top: 275px; }
+.gr-promo-line:nth-child(7) { top: 290px; }
+
+/* The frame's bottom edge starts at y=376. The pane counters the panel's scale,
+   so its scroll geometry and scrollbar use physical pixels. */
+.gr-desc { position: absolute; left: 20px; top: 280px; transform-origin: left top; overflow: hidden scroll; clip: always; pointer-events: auto; }
+.gr-desc-line { position: relative; display: block; }
+.gr-desc-text { position: absolute; display: block; left: 0; top: 0; white-space: nowrap; pointer-events: none; }
+
+.gr-line, .gr-promo-line, .gr-desc-text { color: #ffffff; }
+#gr_gens_label { color: rgb(246, 209, 73); }
+#gr_rank_label, #gr_contrib_label, #gr_desc_label { color: rgb(230, 230, 0); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#gr_title { width: calc(190px * var(--root-scale)); }
+#gr_gens_label { width: calc(190px * var(--root-scale)); }
+#gr_gens_name { width: calc(190px * var(--root-scale)); }
+#gr_level_label { width: calc(190px * var(--root-scale)); }
+#gr_title_name { width: calc(174px * var(--root-scale)); }
+#gr_rank_label { width: calc(74px * var(--root-scale)); }
+#gr_rank_value { width: calc(170px * var(--root-scale)); }
+#gr_contrib_label { width: calc(74px * var(--root-scale)); }
+#gr_contrib_value { width: calc(170px * var(--root-scale)); }
+#gr_desc_label { width: calc(58px * var(--root-scale)); }
+.gr-promo-line { width: calc(180px * var(--root-scale)); }
+.gr-desc.scroll-pane { width: calc(165px * var(--root-scale)); height: calc(96px * var(--root-scale)); }
+/* CTextBox's row pitch: a line height + 2. */
+.gr-desc-line { width: calc(150px * var(--root-scale)); height: calc((var(--line-height) + 2px) * var(--root-scale)); }
+.gr-desc-text { width: calc(150px * var(--root-scale)); }
+
+/* The data-for template row has no step of its own; it inherits this one. */
+.gr-desc { --line-height: 0px; }

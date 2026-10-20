@@ -1,0 +1,31 @@
+<rml>
+<head>
+	<title>Battle Soccer</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="battle_soccer_score.rcss"/>
+</head>
+<body data-model="battle_soccer_score">
+	<!-- The battle-soccer / guild-war scoreboard (CBattleSoccerScore) above the bottom HUD's right end:
+	     two lines of score, guild mark and name. Its workspace slot places #panel at the
+	     bottom HUD's scale. Text
+	     does not scale: each value takes the native bold text size and cancels the scale. A guild mark
+	     is its 8 x 8 cells, one reference px each (the original's 8 x 8 emblem texture, nearest
+	     filtered). Takes no pointer events. -->
+	<div class="screen">
+		<div id="panel">
+			<div id="back"></div>
+			<!-- Our guild's war or a spectated match: two teams, or none at all. The theme puts
+			     each on its own row. -->
+			<div class="teams">
+				<div class="team" data-for="team : teams" data-class-red="team.red">
+					<span class="team-text team-score counter-scaled" data-style-font-size="bold_text_px + 'px'">{{team.score}}</span>
+					<div class="mark" data-if="team.mark.size > 0">
+						<div class="mark-cell" data-for="cell : team.mark" data-style-background-color="cell"></div>
+					</div>
+					<span class="team-text team-name counter-scaled" data-style-font-size="bold_text_px + 'px'">{{team.name}}</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</rml>

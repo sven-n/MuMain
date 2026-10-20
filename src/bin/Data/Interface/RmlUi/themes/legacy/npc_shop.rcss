@@ -1,0 +1,103 @@
+/* Legacy theme for CNPCShop's chrome (frame/title/tax-rate line/repair buttons/repair-money
+   strip). The workspace places #panel (its slot's left/top/scale), so coordinates below are
+   plain reference px, not dp. No exit button -- the frame's corner "X" closes it. Button/text positions match NPCShop.cpp's former RenderTexts()/
+   SetButtonInfo()/RenderRepairMoney() constants. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+}
+
+#title {
+	position: absolute;
+	left: 0;
+	top: 11px; /* native y+12 (glyph top) */
+	width: calc(100% * var(--root-scale));
+	text-align: center;
+	color: token(text-label);
+	font-weight: bold;
+	font-size: 1em;
+}
+#tax_rate {
+	position: absolute;
+	left: 0;
+	top: 26px; /* native y+27 */
+	width: calc(100% * var(--root-scale));
+	text-align: center;
+	color: token(text-label);
+	font-weight: bold;
+	font-size: 1em;
+}
+
+/* Both buttons share one sprite -- NPCShop.cpp's former SetButtonInfo() pointed both
+   m_BtnRepair/m_BtnRepairAll at the same IMAGE_NPCSHOP_BTN_REPAIR image, differing only by
+   tooltip text. */
+@spritesheet shop-btn-repair-sheet { src: "../../../newui_repair_00.tga"; shop-btn-repair: 0px 0px 36px 29px; }
+.shop-btn {
+	position: absolute;
+	top: 390px;
+	width: 36px;
+	height: 29px;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(shop-btn-repair);
+}
+.shop-btn:hover { filter: brightness(1.25); }
+.shop-btn.hidden { display: none; }
+
+.shop-btn-repair     { left: 54px; }
+.shop-btn-repair-all { left: 98px; }
+
+@spritesheet repair-money-sheet { src: "../../../newui_item_money2.tga"; repair-money: 0px 0px 170px 24px; }
+.repair-money {
+	position: absolute;
+	left: 10px;
+	top: 355px;
+	width: 170px;
+	height: 24px;
+	pointer-events: none;
+	decorator: image(repair-money);
+}
+.repair-money.hidden { display: none; }
+
+.repair-money-label, .repair-money-value {
+	position: absolute;
+	top: 362px;
+	font-weight: bold;
+	font-size: 1em;
+	white-space: nowrap;
+	pointer-events: none;
+}
+.repair-money-label { left: 20px; color: token(text-label); }
+.repair-money-value { left: 100px; }
+.repair-money-label.hidden, .repair-money-value.hidden { display: none; }
+
+/* Native item grid: the first cell's top-left, in #panel's units. */
+.native-anchor { position: absolute; pointer-events: none; }
+#item_grid, #item_grid_counts { left: 15px; top: 50px; width: calc(8 * var(--item-cell)); height: calc(15 * var(--item-cell)); }
+
+/* The frame. */
+@spritesheet shop-bg-fill-sheet   { src: "../../../newui_msgbox_back.jpg";   shop-bg-fill:   0px 0px 190px 429px; }
+@spritesheet shop-bg-top-sheet    { src: "../../../newui_item_back04.tga";   shop-bg-top:    0px 0px 190px 64px;  }
+@spritesheet shop-bg-left-sheet   { src: "../../../newui_item_back02-L.tga"; shop-bg-left:   0px 0px 21px 320px;  }
+@spritesheet shop-bg-right-sheet  { src: "../../../newui_item_back02-R.tga"; shop-bg-right:  0px 0px 21px 320px;  }
+@spritesheet shop-bg-bottom-sheet { src: "../../../newui_item_back03.tga";   shop-bg-bottom: 0px 0px 190px 45px;  }
+
+.bg-fill, .bg-top, .bg-left, .bg-right, .bg-bottom {
+	position: absolute;
+	pointer-events: none;
+}
+
+.bg-fill   { left: 0;    top: 0;    width: 190px; height: 429px; decorator: image(shop-bg-fill); }
+.bg-top    { left: 0;    top: 0;    width: 190px; height: 64px;  decorator: image(shop-bg-top); }
+.bg-left   { left: 0;    top: 64px; width: 21px;  height: 320px; decorator: image(shop-bg-left); }
+.bg-right  { left: 169px; top: 64px; width: 21px; height: 320px; decorator: image(shop-bg-right); }
+.bg-bottom { left: 0;    top: 384px; width: 190px; height: 45px; decorator: image(shop-bg-bottom); }
+
+/* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
+   controls take their own. */
+#panel.slot-placed { pointer-events: none; }
+#panel { font-size: calc(var(--text-px, 12px) / var(--root-scale)); }

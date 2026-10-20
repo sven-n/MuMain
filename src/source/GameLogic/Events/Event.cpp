@@ -1,7 +1,4 @@
-﻿// Event.cpp: implementation of the CEvent class.
-//
-//////////////////////////////////////////////////////////////////////
-
+﻿
 // common
 #include "stdafx.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -14,7 +11,7 @@
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Models/BoneManager.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "GameLogic/Events/Cinematic/CKANTURUDirection.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "UI/Widgets/UIBaseDef.h"
@@ -300,7 +297,7 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 Vector(1.0f, 0.4f, 0.0f, vLight);
                 CreateParticle(BITMAP_LIGHT + 2, vWorldPos, o->Angle, vLight, 0, 0.28f);
 
-                if (rand_fps_check(2))
+                if (rand() % 2 == 0)
                 {
                     Vector(0.8f, 0.6f, 0.1f, vLight);
                 }
@@ -324,7 +321,7 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
                 for (int i = 0; i < 5; ++i)
                 {
-                    if (rand_fps_check(2))
+                    if (rand() % 2 == 0)
                     {
                         Vector(0.8f, 0.6f, 0.1f, vLight);
                     }
@@ -365,7 +362,7 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             {
                 if (o->AnimationFrame >= 4.5f)
                 {
-                    CreateEffectFpsChecked(o->m_iAnimation, vWorldPos, o->Angle, vLight);
+                    CreateEffect(o->m_iAnimation, vWorldPos, o->Angle, vLight);
                 }
             }
         }

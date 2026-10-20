@@ -1,8 +1,7 @@
 #include "stdafx.h"
 
 #include "ErrorDialog.h"
-#include "IPlatformWindow.h"
-#include "MuPlatform.h"
+#include "GameWindow.h"
 #include "ScopedSystemCursor.h"
 
 #include "Core/Utilities/Log/MuLogger.h"
@@ -46,11 +45,8 @@ std::vector<SDL_MessageBoxButtonData> MakeButtons(bool canContinue)
 // does not have the focus (e.g. during the long loading).
 SDL_Window* GetGameWindow()
 {
-    if (mu::IPlatformWindow* window = mu::MuPlatform::GetWindow())
-    {
-        return static_cast<SDL_Window*>(window->GetNativeHandle());
-    }
-    return SDL_GetKeyboardFocus();
+    SDL_Window* window = Core::Platform::GameWindow();
+    return window != nullptr ? window : SDL_GetKeyboardFocus();
 }
 
 // On Linux the game hands copied text to other programs itself, from its
@@ -68,7 +64,7 @@ Choice Show(const std::string& title, const std::string& message, bool canContin
 {
     const std::vector<SDL_MessageBoxButtonData> buttons = MakeButtons(canContinue);
     const SDL_MessageBoxData data = {SDL_MESSAGEBOX_ERROR | SDL_MESSAGEBOX_BUTTONS_LEFT_TO_RIGHT,
-                                     GetGameWindow(),
+                                     Core::Platform::MessageBoxParent(GetGameWindow()),
                                      title.c_str(),
                                      message.c_str(),
                                      static_cast<int>(buttons.size()),
