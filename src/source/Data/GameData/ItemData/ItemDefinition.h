@@ -256,5 +256,8 @@ struct ItemDefinition
             return true;
         }
     }
+
+    // All fields; the item editor's undo compares definitions with it.
+    bool operator==(const ItemDefinition& other) const = default;
 };
 } // namespace Data::Items
