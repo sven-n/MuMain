@@ -133,8 +133,10 @@ void CMuItemRequirementsUI::RenderByLevel(ItemDefinition& item, ItemRequirement 
         if (byLevel)
         {
             // Every level starts at the requirement the base value gives a
-            // normal item there, so nothing changes for it; the base value is
-            // then not used (the checks warn about one that is kept).
+            // normal item there, so nothing changes for it, except that a stat
+            // whose formula takes the level requirement (a scroll's energy)
+            // then follows the level of each + level. The base value is not
+            // used then (the checks warn about one that is kept).
             const RequirementTable table = ComputeRequirementTable(item, {});
             Data::Items::RequirementByLevel values{};
             for (size_t level = 0; level < values.size(); ++level)
@@ -154,8 +156,20 @@ void CMuItemRequirementsUI::RenderByLevel(ItemDefinition& item, ItemRequirement 
     }
     if (ImGui::IsItemHovered())
     {
-        ImGui::SetTooltip("%s\n%s", I18N::Editor::StartsAtWhatANormalItemNeedsAtEachLevelAndReplacesTheFormula,
-                          I18N::Editor::ExcellentAndAncientItemsGetNoHigherRequirementFromIt);
+        // What the game still adds to the values by level (ItemStats).
+        const char* stillAdded = requirement == ItemRequirement::Level
+                                     ? I18N::Editor::ExcellentOptionsStillRaiseItIfTheyRaiseTheLevelRequirement
+                                     : I18N::Editor::ExcellentAndAncientItemsGetNoHigherRequirementFromIt;
+        if (requirement == ItemRequirement::Strength)
+        {
+            ImGui::SetTooltip("%s\n%s\n%s", I18N::Editor::StartsAtWhatANormalItemNeedsAtEachLevelAndReplacesTheFormula,
+                              stillAdded, I18N::Editor::TheOptionLevelStillAddsToIt);
+        }
+        else
+        {
+            ImGui::SetTooltip("%s\n%s", I18N::Editor::StartsAtWhatANormalItemNeedsAtEachLevelAndReplacesTheFormula,
+                              stillAdded);
+        }
     }
     const Data::Items::RequirementByLevel* found = item.requirementsByLevel.Find(requirement);
     if (found == nullptr)

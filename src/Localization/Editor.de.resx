@@ -1417,4 +1417,10 @@
   <data name="drawn small" xml:space="preserve">
     <value>klein gezeichnet</value>
   </data>
+  <data name="Excellent options still raise it, if they raise the level requirement." xml:space="preserve">
+    <value>Exzellente Optionen erhöhen sie weiterhin, wenn sie die Stufenanforderung erhöhen.</value>
+  </data>
+  <data name="The option level still adds to it." xml:space="preserve">
+    <value>Die Optionsstufe kommt weiterhin hinzu.</value>
+  </data>
 </root>

@@ -1438,4 +1438,10 @@
   <data name="drawn small" xml:space="preserve">
     <value>drawn small</value>
   </data>
+  <data name="Excellent options still raise it, if they raise the level requirement." xml:space="preserve">
+    <value>Excellent options still raise it, if they raise the level requirement.</value>
+  </data>
+  <data name="The option level still adds to it." xml:space="preserve">
+    <value>The option level still adds to it.</value>
+  </data>
 </root>

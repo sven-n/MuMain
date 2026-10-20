@@ -679,7 +679,11 @@ shows it in the others.
   the [item stat file](#item-stats-by-level)'s formula takes; each also by
   item level (16 values that replace the formula; they start at what the
   base value gives a normal item at each level, and turning them off finds
-  the base value back). Below them, what the game asks at each + level
+  the base value back; excellent and ancient items get no higher stat
+  requirement from them, while excellent options still raise a level given
+  by level and the option level still adds strength; a scroll's energy,
+  whose formula takes the level requirement, follows a level given by
+  level). Below them, what the game asks at each + level
   (the `/<item name>` window shows the normal item), also as excellent,
   ancient or with an option level, while a value is still being typed. Then
   the class steps (0: the
