@@ -266,6 +266,32 @@ TEST_CASE("Editor changes update single items [data][items]")
     CHECK(database.GetExistingItemCount() == 0);
 }
 
+TEST_CASE("Editor changes to many items at once update them and the tag lists [data][items]")
+{
+    ItemDatabase database;
+    database.Build(
+        std::vector<ItemDefinition>{MakeItem(SwordGroup, 0, "Kris"), MakeItem(SwordGroup, 1, "Short Sword")});
+    const int version = database.GetVersion();
+
+    std::vector<ItemDefinition> changed = {*database.Find(SwordGroup, 0), *database.Find(SwordGroup, 1),
+                                           MakeItem(SwordGroup, 2, "Rapier")};
+    for (ItemDefinition& definition : changed)
+    {
+        definition.tags.Set(ItemTag::Valuable);
+    }
+    changed[1].names = {};
+    database.SetMany(changed);
+
+    CHECK(database.HasTag(MakeItemType(SwordGroup, 0), ItemTag::Valuable));
+    CHECK(database.Find(SwordGroup, 1) == nullptr);
+    CHECK(database.Find(SwordGroup, 2) != nullptr);
+    CHECK(database.GetExistingItemCount() == 2);
+    const auto valuable = database.GetItemTypesWithTag(ItemTag::Valuable);
+    CHECK(std::vector<int>(valuable.begin(), valuable.end()) ==
+          std::vector<int>{MakeItemType(SwordGroup, 0), MakeItemType(SwordGroup, 2)});
+    CHECK(database.GetVersion() != version);
+}
+
 TEST_CASE("Swapping items moves them with their ids [data][items]")
 {
     ItemDatabase database;

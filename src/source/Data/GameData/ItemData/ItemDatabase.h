@@ -145,6 +145,9 @@ public:
     // Item editor changes. Set replaces the item at the definition's
     // (group, number); an item without names counts as not existing.
     void Set(const ItemDefinition& definition);
+    // Like Set for each definition, with the counts and tag lists built once
+    // at the end (a change to many items at once).
+    void SetMany(std::span<const ItemDefinition> definitions);
     // Swaps two slots and updates the ids of the moved items.
     void Swap(int firstItemType, int secondItemType);
 
