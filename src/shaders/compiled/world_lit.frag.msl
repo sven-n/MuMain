@@ -49,7 +49,7 @@ struct main0_in
     float3 input_worldPosition [[user(locn4)]];
 };
 
-fragment main0_out main0(main0_in in [[stage_in]], constant SceneLighting& _30 [[buffer(0)]], constant DynamicLights& _64 [[buffer(1)]], constant FogUniforms& _214 [[buffer(2)]], texture2d<float> tex [[texture(0)]], texture2d<float> groundShadowMask [[texture(1)]], sampler s [[sampler(0)]], sampler groundShadowSampler [[sampler(1)]], float4 gl_FragCoord [[position]])
+fragment main0_out main0(main0_in in [[stage_in]], constant FogUniforms& _214 [[buffer(0)]], constant SceneLighting& _30 [[buffer(1)]], constant DynamicLights& _64 [[buffer(2)]], texture2d<float> tex [[texture(0)]], texture2d<float> groundShadowMask [[texture(1)]], sampler s [[sampler(0)]], sampler groundShadowSampler [[sampler(1)]], float4 gl_FragCoord [[position]])
 {
     main0_out out = {};
     float4 _334 = tex.sample(s, in.input_uv);
