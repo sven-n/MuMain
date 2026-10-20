@@ -703,7 +703,7 @@ void CMapEditorUI::RenderObjectsTab()
 
     ImGui::Separator();
     ImGui::BeginDisabled(!m_bObjHasUndo);
-    if (ImGui::Button("Undo last object edit") || (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_Z)))
+    if (ImGui::Button("Undo last object edit") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Z))
         UndoObjects();
     ImGui::EndDisabled();
 
@@ -765,7 +765,7 @@ void CMapEditorUI::RenderSelectedObjectPanel()
 
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.3f, 0.3f, 1.0f));
-    if (ImGui::Button("Delete object") || ImGui::IsKeyPressed(ImGuiKey_Delete))
+    if (ImGui::Button("Delete object") || ImGui::Shortcut(ImGuiKey_Delete))
     {
         TakeObjectUndoSnapshot();
         Editor::ObjectPlace::Remove(m_pSelected);
@@ -1132,7 +1132,7 @@ void CMapEditorUI::RenderHeightTab()
     ImGui::Separator();
     ImGui::BeginDisabled(!m_bHeightHasUndo);
     if (ImGui::Button("Undo last height stroke") ||
-        (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_Z)))
+        ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Z))
         UndoHeight();
     ImGui::EndDisabled();
 
