@@ -17,7 +17,8 @@ class ItemNamesakes
 public:
     static ItemNamesakes& GetInstance();
 
-    // "" when no other item has the item's name.
+    // "" when no other item has the item's name, and for the one namesake
+    // whose tags all its namesakes have (the plain item of a lucky set).
     const std::string& GetQualifier(int itemType);
 
 private:
