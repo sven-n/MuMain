@@ -46,6 +46,8 @@
 		      data-style-font-size="title.text_px + 'px'">{{title.text}}</span>
 		<span id="gi_name" class="sharp-text gi-line"
 		      data-style-font-size="guild_name.text_px + 'px'">{{guild_name.text}}</span>
+		<span id="gi_discord" class="sharp-text gi-line"
+		      data-style-font-size="discord_notice.text_px + 'px'">{{discord_notice.text}}</span>
 		<span id="gi_tab_info" class="sharp-text gi-line gi-tab-label"
 		      data-style-font-size="tab_info.text_px + 'px'">{{tab_info.text}}</span>
 		<span id="gi_tab_members" class="sharp-text gi-line gi-tab-label"

@@ -59,8 +59,6 @@ void mu::ui::window::CChatInputBox::Init()
     m_bShowSystemMessages = true;
     m_bShowChatLog = true;
     m_bWhisperSend = true;
-
-    m_bShowMessageElseNormal = false;
 }
 
 bool mu::ui::window::CChatInputBox::Create(
@@ -197,16 +195,7 @@ bool mu::ui::window::CChatInputBox::UpdateKeyEvent()
 {
     if (mu::ui::window::IsPress(VK_F2))
     {
-        m_bShowMessageElseNormal = !m_bShowMessageElseNormal;
-
-        if (m_bShowMessageElseNormal)
-        {
-            m_pNewUIChatLogWnd->ChangeMessage(mu::ui::window::TYPE_WHISPER_MESSAGE);
-        }
-        else
-        {
-            m_pNewUIChatLogWnd->ChangeMessage(mu::ui::window::TYPE_ALL_MESSAGE);
-        }
+        m_pNewUIChatLogWnd->ChangeMessage(m_pNewUIChatLogWnd->GetNextView());
 
         PlayBuffer(SOUND_CLICK01);
         return false;

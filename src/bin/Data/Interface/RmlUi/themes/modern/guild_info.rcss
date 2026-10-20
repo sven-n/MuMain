@@ -70,6 +70,7 @@
 
 #gi_title { left: 0; top: 12px; }
 #gi_name { left: 35px; top: 48px; }
+#gi_discord { left: 0; top: 62px; }
 /* The three tab labels, one TAB_WIDTH apart from TAB_START_X + 1. */
 .gi-tab-label { top: 76px; }
 #gi_tab_info { left: 13px; }
@@ -177,6 +178,8 @@
 
 .gi-line, .gi-note, .gi-figure, .gi-header, .gi-cell { color: token(text-primary); }
 #gi_name { color: token(semantic-success); }
+/* Discord's blurple. */
+#gi_discord { color: rgb(114, 137, 218); }
 #gi_notice_label { color: token(accent-gold); }
 .gi-cell { color: token(text-secondary); }
 .cell-member-server { color: token(accent-gold); }
@@ -247,6 +250,7 @@
 /* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
 #gi_hint_title { width: calc(100% * var(--root-scale)); }
 #gi_title { width: calc(100% * var(--root-scale)); }
+#gi_discord { width: calc(100% * var(--root-scale)); }
 #gi_name { width: calc(120px * var(--root-scale)); }
 #gi_tab_info { width: calc(56px * var(--root-scale)); }
 #gi_tab_members { width: calc(56px * var(--root-scale)); }

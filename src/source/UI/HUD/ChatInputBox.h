@@ -80,7 +80,6 @@ namespace mu::ui::window
         bool m_bShowSystemMessages;
         bool m_bShowChatLog;
         bool m_bWhisperSend;
-        bool m_bShowMessageElseNormal;
 
         void Init();
 

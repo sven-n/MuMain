@@ -14,6 +14,9 @@ enum MESSAGE_TYPE
     TYPE_UNION_MESSAGE,
     TYPE_GENS_MESSAGE,
     TYPE_GM_MESSAGE,
+    // A view, not a message type: the messages from Discord. Each of them
+    // keeps the type of its scope (guild, alliance, chat) for its colours.
+    TYPE_DISCORD_MESSAGE,
 
     NUMBER_OF_TYPES,
     TYPE_UNKNOWN = 0xFFFFFFFF

@@ -78,6 +78,8 @@ struct GuildInfoRmlModel
     // The header every tab shares.
     GuildLine title;
     GuildLine guildName;
+    // Under the guild name: whether the chat of the open tab is mirrored to Discord.
+    GuildLine discordNotice;
     GuildLine tabInfo;
     GuildLine tabMembers;
     GuildLine tabUnion;

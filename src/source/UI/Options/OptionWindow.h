@@ -188,7 +188,7 @@ namespace mu::ui::window
         void RmlToggleShowDebugInfo();
         void RmlThemeChanged(int index);
         void RmlDiscordPresenceChanged(int index);
-        void RmlClickDiscordJoin();
+        void RmlClickDiscordButton();
         void RmlUIScaleChanged(int index);
         void RmlClickClose();
 
@@ -371,9 +371,10 @@ namespace mu::ui::window
             int discordPresenceIndex = 0;
             Rml::String discordPresenceRowLabel;
             Rml::String discordPresenceValueLabel;
-            // Whether config.ini holds a valid invite link; only then is the Join button shown.
-            bool discordHasInvite = false;
-            Rml::String discordJoinLabel;
+            // The Discord button: the account dialog when the server has the Discord integration,
+            // else Join for a valid invite link; hidden without either.
+            bool discordButtonShown = false;
+            Rml::String discordButtonLabel;
             std::vector<Rml::String> uiScaleLabels;
             int uiScaleIndex = 0;
             Rml::String uiScaleRowLabel;

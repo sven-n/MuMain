@@ -27,6 +27,7 @@
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "GameLogic/Discord/ServerIntegration.h"
 #include "Render/Text/CUIRenderText.h"
 #include "Render/Text/TextWrap.h"
 
@@ -81,6 +82,21 @@ namespace
 
 namespace
 {
+// Whether the chat of the open tab is mirrored to Discord - which is also the
+// notice that it leaves the game. A guild master whose chat isn't mirrored is
+// told how to do it; the binding itself happens in Discord. Null for nothing.
+const wchar_t* DiscordNotice(int tab)
+{
+    const auto& server = GameLogic::Discord::ServerIntegration::Instance();
+    if (tab == static_cast<int>(GuildConstants::GuildTab::UNION))
+        return server.IsAllianceChatBridged() ? I18N::Game::DiscordAllianceChatMirrored : nullptr;
+    if (server.IsGuildChatBridged())
+        return I18N::Game::DiscordGuildChatMirrored;
+    if (Hero->GuildStatus == G_MASTER && server.IsAvailable())
+        return I18N::Game::DiscordGuildBindHint;
+    return nullptr;
+}
+
 // The mark cells of a 64-byte guild mark, as CreateGuildMark() builds the texture.
 std::vector<Rml::String> MarkCells(const BYTE* mark)
 {
@@ -405,6 +421,7 @@ void mu::ui::window::CGuildInfoWindow::BindRmlModel(Rml::DataModelConstructor& c
     c.Bind("hint_line3", &model.hintLine3);
     c.Bind("title", &model.title);
     c.Bind("guild_name", &model.guildName);
+    c.Bind("discord_notice", &model.discordNotice);
     c.Bind("tab_info", &model.tabInfo);
     c.Bind("tab_members", &model.tabMembers);
     c.Bind("tab_union", &model.tabUnion);
@@ -528,7 +545,7 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
     std::vector<Rml::String> markCells;
     std::vector<GuildLine> allianceLines;
     GuildLine hintTitle, hintLine1, hintLine2, hintLine3;
-    GuildLine title, guildName, tabInfo, tabMembers, tabUnion;
+    GuildLine title, guildName, discordNotice, tabInfo, tabMembers, tabUnion;
     GuildLine noticeLabel, created, score, memberCount, rival;
     GuildLine headerName, headerPosition, headerServer, headerUnionName, headerUnionMembers;
     GuildActionButton guildOutButton, getPositionButton, freePositionButton, getOutButton;
@@ -551,6 +568,8 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
         title = line(I18N::Game::Guild, false, 190.f);
         mu_swprintf(Text, L"%ls ( Score:%d )", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore);
         guildName = line(Text, false, 120.f);
+        if (const wchar_t* notice = DiscordNotice(m_nCurrentTab))
+            discordNotice = line(notice, false, 190.f);
         tabInfo = line(I18N::Game::Guild, false, tabWidth);
         tabMembers = line(I18N::Game::Members, false, tabWidth);
         tabUnion = line(I18N::Game::Alliance, false, tabWidth);
@@ -648,6 +667,7 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
     SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::hintLine3, "hint_line3", std::move(hintLine3));
     SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::title, "title", std::move(title));
     SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::guildName, "guild_name", std::move(guildName));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::discordNotice, "discord_notice", std::move(discordNotice));
     SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::tabInfo, "tab_info", std::move(tabInfo));
     SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::tabMembers, "tab_members", std::move(tabMembers));
     SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::tabUnion, "tab_union", std::move(tabUnion));

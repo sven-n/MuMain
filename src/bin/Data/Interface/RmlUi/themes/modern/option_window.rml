@@ -441,8 +441,8 @@
 					</div>
 					<div class="opt-row" data-class-hidden="!discord_presence_available">
 						<span class="opt-label">{{discord_presence_row_label}}</span>
-						<!-- Only for a valid invite link in config.ini. -->
-						<div class="opt-tuning-reset" data-if="discord_has_invite" data-event-click="option_discord_join">{{discord_join_label}}</div>
+						<!-- The account dialog when the server has the Discord integration, else Join for a valid invite. -->
+						<div class="opt-tuning-reset" data-if="discord_button_shown" data-event-click="option_discord_button">{{discord_button_label}}</div>
 						<div class="opt-control">
 							<div class="option-dropdown">
 								<div class="option-dropdown-value" data-class-open="open_dropdown == 8" data-event-click="option_toggle_dropdown(8)">{{discord_presence_value_label}}<div class="opt-caret"></div></div>
