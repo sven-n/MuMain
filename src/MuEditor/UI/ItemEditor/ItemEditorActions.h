@@ -41,6 +41,9 @@ public:
 
 private:
     static void LogIssues(const std::vector<Data::Items::ItemDataIssue>& issues);
+    // After a save: each UI language that misses item names, with how many (the
+    // items show the English name there).
+    static void LogMissingItemNames();
     static void LogImportResult(const Data::Items::ItemBmdImportResult& result);
 
     // Helper to convert item name to UTF-8

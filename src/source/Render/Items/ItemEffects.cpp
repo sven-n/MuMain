@@ -335,7 +335,7 @@ Result ApplyWingOfStorm(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
         for (int i = 0; i < 6; ++i)
         {
             b->TransformPosition(BoneTransform[iBoneThunder[i]], vRelativePos, vPos, true);
-            if (rand_fps_check(20))
+            if (rand() % 20 == 0)
             {
                 Vector(0.6f, 0.6f, 0.9f, vLight);
                 CreateEffect(MODEL_FENRIR_THUNDER, vPos, o->Angle, vLight, 1, o);

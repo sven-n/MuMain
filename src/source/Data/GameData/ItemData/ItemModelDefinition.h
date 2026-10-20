@@ -65,7 +65,8 @@ struct ItemGlow
     static constexpr const char* DefaultColor = "orange";
     static constexpr const char* DefaultShineColor = "white";
     static constexpr const char* DefaultAncientColor = "azure";
-    // The item levels 0 to 15.
+    // The item levels 0 to 15, as Data::Items::ItemLevelCount (this header is
+    // used without the game's type definitions that ItemType.h needs).
     static constexpr size_t ItemLevelCount = 16;
 
     // The level the item glows like at each item level instead of its own:
@@ -102,6 +103,15 @@ struct ItemGlowColors
     std::array<float, 3> ancientColor{};
 };
 
+// How the surface of an item model reacts to light under Enhanced lighting.
+struct ItemMaterial
+{
+    // Strength of the view-dependent highlight, 0 (none, the default) to 1.
+    double specular = 0.0;
+
+    bool operator==(const ItemMaterial&) const = default;
+};
+
 // The model of one item: which .bmd file is opened for it, where its
 // textures are and how it is drawn. One entry of the model files
 // (Data/Items/Models). Each item keeps its own model slot (ToModelSlot);
@@ -128,6 +138,7 @@ struct ItemModelDefinition
     // of the character. Which capes are drawn as cloth is decided in code.
     bool cloth = false;
     ItemGlow glow;
+    ItemMaterial material;
     // The look of the model when it is more than a plain textured model: the
     // name of a render style (Render/Items/ItemRenderStyles). Empty: plain.
     std::string renderStyle;

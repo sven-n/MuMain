@@ -170,7 +170,7 @@ namespace Render::Effects::Behaviors
         }
         o->Scale += (sinf(WorldTime * 0.005f) * 2.0f) * FPS_ANIMATION_FACTOR;
         o->Angle[1] += (10.0f) * FPS_ANIMATION_FACTOR;
-        EarthQuake = (float)(rand() % 6 - 6) * 0.5f;
+        SetEarthQuakeAt(o->Position, (float)(rand() % 6 - 6) * 0.5f);
         return true;
     }
 }

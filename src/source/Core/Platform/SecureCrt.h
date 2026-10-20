@@ -60,6 +60,24 @@ inline errno_t wcsncpy_s(wchar_t* dst, size_t count, const wchar_t* src, size_t 
 }
 template <size_t N> inline errno_t wcsncpy_s(wchar_t (&dst)[N], const wchar_t* src, size_t n) { return wcsncpy_s(dst, N, src, n); }
 
+// ---- strncpy_s (supports _TRUNCATE) ------------------------------------------
+inline errno_t strncpy_s(char* dst, size_t count, const char* src, size_t n)
+{
+    if (dst == nullptr || count == 0) return mu__einval();
+    if (src == nullptr) { dst[0] = '\0'; return (n == 0) ? 0 : mu__einval(); }
+    const size_t srclen = strlen(src);
+    size_t tocopy = (n == _TRUNCATE) ? srclen : (n < srclen ? n : srclen);
+    if (tocopy + 1 > count)
+    {
+        if (n == _TRUNCATE) { tocopy = count - 1; }   // truncation explicitly allowed
+        else { dst[0] = '\0'; return mu__erange(); }
+    }
+    memcpy(dst, src, tocopy);
+    dst[tocopy] = '\0';
+    return 0;
+}
+template <size_t N> inline errno_t strncpy_s(char (&dst)[N], const char* src, size_t n) { return strncpy_s(dst, N, src, n); }
+
 // ---- wcscat_s ----------------------------------------------------------------
 inline errno_t wcscat_s(wchar_t* dst, size_t count, const wchar_t* src)
 {

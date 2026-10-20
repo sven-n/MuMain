@@ -1056,7 +1056,7 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
     if (o->Type >= 6 && o->Type <= 12)
     {
-        // DXP-20 inc4: flat IntensityTransform override -- must materialize before overwriting, or
+        // Flat IntensityTransform override -- must materialize before overwriting, or
         // a later lazy EnsureCpuNormals() (e.g. from RenderMesh()'s CPU fallback) would clobber this
         // flat value with freshly computed per-vertex lighting.
         b->EnsureCpuNormals(-1);
@@ -1555,7 +1555,7 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         if (o->CurrentAction == MONSTER01_DIE)
         {
             float fBlendLight = 20.f - o->AnimationFrame;
-            fBlendLight *= pow(1.0f / (15), FPS_ANIMATION_FACTOR);
+            fBlendLight /= 15;
             vec3_t vOriginPos;
             VectorCopy(o->Position, vOriginPos);
 
@@ -1928,7 +1928,8 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 o->m_vPosSword[0] += fDistance * sinf(o->Angle[2] * Q_PI / 180.0f);
                 o->m_vPosSword[1] += -fDistance * cosf(o->Angle[2] * Q_PI / 180.0f);
             }
-            if (6 <= c->AttackTime && c->AttackTime <= 12 && rand_fps_check(2))
+            // One spear every reference frame, as at 25 FPS; rand_fps_check(2) halves the spears for cheaper casts.
+            if (6 <= c->AttackTime && c->AttackTime <= 12 && rand_fps_check(1))
             {
                 vec3_t Position;
                 vec3_t Position2 = {0.0f, 0.0f, 0.0f};
@@ -2180,7 +2181,8 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 o->m_vPosSword[0] += fDistance * sinf(o->Angle[2] * Q_PI / 180.0f);
                 o->m_vPosSword[1] += -fDistance * cosf(o->Angle[2] * Q_PI / 180.0f);
             }
-            if (6 <= c->AttackTime && c->AttackTime <= 12 && rand_fps_check(2))
+            // One spear every reference frame, as at 25 FPS; rand_fps_check(2) halves the spears for cheaper casts.
+            if (6 <= c->AttackTime && c->AttackTime <= 12 && rand_fps_check(1))
             {
                 vec3_t Position;
                 vec3_t Position2 = {0.0f, 0.0f, 0.0f};
@@ -2285,10 +2287,10 @@ void CGM_Raklion::RenderBaseSmoke()
     float WindX2 = (float)((int)WorldTime % 100000) * 0.0006f;
     float WindY2 = -(float)((int)WorldTime % 100000) * 0.0006f;
     RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH,
-                   UI::Scaling::ScreenOverlayContentHeight(WindowWidth, WindowHeight), WindX2, WindY2, 3.0f, 2.0f);
+                   UI::Scaling::ScreenOverlayFullHeight(WindowWidth, WindowHeight), WindX2, WindY2, 3.0f, 2.0f);
     float WindX = (float)((int)WorldTime % 100000) * 0.0001f;
     RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH,
-                   UI::Scaling::ScreenOverlayContentHeight(WindowWidth, WindowHeight), WindX, 0.f, 0.3f, 0.3f);
+                   UI::Scaling::ScreenOverlayFullHeight(WindowWidth, WindowHeight), WindX, 0.f, 0.3f, 0.3f);
 }
 
 bool IsIceCity()

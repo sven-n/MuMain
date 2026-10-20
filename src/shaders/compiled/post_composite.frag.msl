@@ -1,0 +1,58 @@
+#include <metal_stdlib>
+#include <simd/simd.h>
+
+using namespace metal;
+
+struct CompositeUniforms
+{
+    float2 inverseTargetSize;
+    float bloomScale;
+    float gradingStrength;
+};
+
+struct main0_out
+{
+    float4 _entryPointOutput [[color(0)]];
+};
+
+fragment main0_out main0(constant CompositeUniforms& _31 [[buffer(0)]], texture2d<float> scene [[texture(0)]], texture2d<float> bloom [[texture(1)]], texture2d<float> grading [[texture(2)]], sampler sceneSampler [[sampler(0)]], sampler bloomSampler [[sampler(1)]], sampler gradingSampler [[sampler(2)]], float4 gl_FragCoord [[position]])
+{
+    main0_out out = {};
+    float2 _210 = gl_FragCoord.xy * _31.inverseTargetSize;
+    float4 _215 = scene.sample(sceneSampler, _210);
+    float4 _354;
+    if (_31.bloomScale > 0.0)
+    {
+        float3 _241 = float3(1.0) - ((float3(1.0) - _215.xyz) * (float3(1.0) - fast::clamp(bloom.sample(bloomSampler, _210).xyz * _31.bloomScale, float3(0.0), float3(1.0))));
+        float4 _337 = _215;
+        _337.x = _241.x;
+        _337.y = _241.y;
+        _337.z = _241.z;
+        _354 = _337;
+    }
+    else
+    {
+        _354 = _215;
+    }
+    float4 _355;
+    if (_31.gradingStrength > 0.0)
+    {
+        float _282 = _354.z * 31.0;
+        float _284 = floor(_282);
+        float _295 = ((_354.x * 31.0) + 0.5) * 0.0009765625;
+        float _300 = ((_354.y * 31.0) + 0.5) * 0.03125;
+        float3 _261 = mix(_354.xyz, mix(grading.sample(gradingSampler, float2(_295 + (_284 * 0.03125), _300)).xyz, grading.sample(gradingSampler, float2(_295 + (fast::min(_284 + 1.0, 31.0) * 0.03125), _300)).xyz, float3(_282 - _284)), float3(_31.gradingStrength));
+        float4 _346 = _354;
+        _346.x = _261.x;
+        _346.y = _261.y;
+        _346.z = _261.z;
+        _355 = _346;
+    }
+    else
+    {
+        _355 = _354;
+    }
+    out._entryPointOutput = _355;
+    return out;
+}
+

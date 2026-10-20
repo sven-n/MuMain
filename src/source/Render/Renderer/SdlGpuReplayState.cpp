@@ -35,7 +35,7 @@ bool SdlGpuReplayState::SelectPipeline(SDL_GPUGraphicsPipeline* pipeline)
     m_pipeline = pipeline;
     m_pipelineValid = true;
     m_fragmentSamplerValid = false;
-    m_vertexUniformsValid = false;
+    m_vertexUniformsValid.fill(false);
     m_fragmentUniformsValid = false;
     m_vertexStorageBufferValid = false;
     return true;
@@ -52,9 +52,15 @@ bool SdlGpuReplayState::SelectFragmentSampler(SDL_GPUTexture* texture, SDL_GPUSa
     return true;
 }
 
-bool SdlGpuReplayState::SelectVertexUniforms(std::span<const std::byte> bytes)
+bool SdlGpuReplayState::SelectVertexUniforms(Uint32 slot, std::span<const std::byte> bytes)
 {
-    return SelectBytes(bytes, m_vertexUniforms, m_vertexUniformSize, m_vertexUniformsValid);
+    if (slot >= kVertexUniformSlots)
+        return true;
+
+    bool valid = m_vertexUniformsValid[slot];
+    const bool changed = SelectBytes(bytes, m_vertexUniforms[slot], m_vertexUniformSize[slot], valid);
+    m_vertexUniformsValid[slot] = valid;
+    return changed;
 }
 
 bool SdlGpuReplayState::SelectFragmentUniforms(std::span<const std::byte> bytes)
@@ -62,13 +68,42 @@ bool SdlGpuReplayState::SelectFragmentUniforms(std::span<const std::byte> bytes)
     return SelectBytes(bytes, m_fragmentUniforms, m_fragmentUniformSize, m_fragmentUniformsValid);
 }
 
-bool SdlGpuReplayState::SelectVertexStorageBuffer(SDL_GPUBuffer* buffer)
+bool SdlGpuReplayState::SelectVertexStorageBuffers(std::span<SDL_GPUBuffer* const> buffers)
 {
-    if (m_vertexStorageBufferValid && m_vertexStorageBuffer == buffer)
+    if (m_vertexStorageBufferValid && m_vertexStorageBufferCount == buffers.size() &&
+        std::equal(buffers.begin(), buffers.end(), m_vertexStorageBuffers.begin()))
+    {
+        return false;
+    }
+
+    m_vertexStorageBufferValid = buffers.size() <= m_vertexStorageBuffers.size();
+    m_vertexStorageBufferCount = m_vertexStorageBufferValid ? buffers.size() : 0;
+    std::copy_n(buffers.begin(), m_vertexStorageBufferCount, m_vertexStorageBuffers.begin());
+    return true;
+}
+
+bool SdlGpuReplayState::SelectVertexBuffer(SDL_GPUBuffer* buffer, Uint32 stride, Uint32 offset)
+{
+    if (m_vertexBufferValid && m_vertexBuffer == buffer && m_vertexStride == stride && offset >= m_vertexBufferOffset &&
+        (offset - m_vertexBufferOffset) % stride == 0)
+    {
+        return false;
+    }
+
+    m_vertexBuffer = buffer;
+    m_vertexStride = stride;
+    m_vertexBufferOffset = offset;
+    m_vertexBufferValid = true;
+    return true;
+}
+
+bool SdlGpuReplayState::SelectInstanceBuffer(SDL_GPUBuffer* buffer)
+{
+    if (m_instanceBufferValid && m_instanceBuffer == buffer)
         return false;
 
-    m_vertexStorageBuffer = buffer;
-    m_vertexStorageBufferValid = true;
+    m_instanceBuffer = buffer;
+    m_instanceBufferValid = true;
     return true;
 }
 
@@ -118,9 +153,11 @@ void SdlGpuReplayState::Invalidate()
 {
     m_pipelineValid = false;
     m_fragmentSamplerValid = false;
-    m_vertexUniformsValid = false;
+    m_vertexUniformsValid.fill(false);
     m_fragmentUniformsValid = false;
     m_vertexStorageBufferValid = false;
+    m_vertexBufferValid = false;
+    m_instanceBufferValid = false;
     m_indexBufferValid = false;
     m_viewportValid = false;
     m_scissorValid = false;

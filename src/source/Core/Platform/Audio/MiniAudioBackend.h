@@ -67,6 +67,10 @@ private:
     // Convert DirectSound volume (dB * 100, range -10000..0) to linear 0.0..1.0
     static float DbToLinear(long dsVol);
 
+    bool HasFailedMusicTrack(const char* name) const;
+    bool StartMusicStream(const std::string& identity);
+    void ReleaseMusicStream();
+
     ma_engine m_engine{};
 
     // Per-sound polyphonic slots: [ESound index][channel index]
@@ -98,6 +102,8 @@ private:
     bool m_musicLoaded = false;
     // Separators-normalized track name, not the resolved path — see IsSameMusicTrack().
     std::string m_currentMusicName;
+    // Session failures survive stop calls and track changes; enforced playback retries them.
+    std::vector<std::string> m_failedMusicNames;
     bool m_initialized = false;
 };
 

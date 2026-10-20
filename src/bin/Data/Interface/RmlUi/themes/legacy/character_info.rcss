@@ -1,0 +1,205 @@
+/* Legacy theme for CCharacterInfoWindow -- a plain CManager-tier window (no C3DRenderMng, no
+   live-3D icon, no CUITextInputBox), so unlike the inventory family it needed no background-
+   context split: 100% of its chrome/text/buttons move straight to #panel's own foreground
+   document. #panel's frame (fill/top/left/right/bottom sprites, exit button) is
+   shared with my_quest_info/pet_info/party_info via docked_panel_frame.rcss (linked below) -- only
+   window-specific content lives here now. Coordinates below are plain reference px, not dp, same
+   convention as my_quest_info.rcss.
+
+   The summary box reproduces RenderFrame()'s 8-piece frame: the original tiles a 1px-wide (or
+   1px-tall) edge sprite once per pixel along each edge; every tile is identical, so stretching the
+   same sprite across the edge is pixel-equivalent. It keeps its own local corner/fill classes
+   rather than docked_panel_frame.rcss's shared .gbox-* ones -- only the corner sprites themselves
+   (docked-corner-tl/tr/bl/br) come from the partial.
+
+   Text leaves are sized at the native text renderer's physical size and counter-scaled out of
+   #panel's transform from the RML (see character_info.rml's header comment), so no rule here sets
+   a text font-size; transform-origin anchors each leaf to its text alignment.
+
+   Attribute extra-line blocks (str/agi/vit/ene) use normal block flow (each line a
+   display:block span, line-height 13px) instead of individually positioned lines: the original
+   (RenderAttribute()) stacks a variable number of lines per block depending on class/buff state
+   at a constant +13px step, which block flow reproduces for free without hand-computing each
+   line's own top offset in C++. */
+@spritesheet chainfo-textbox-sheet { src: "../../../newui_cha_textbox02.tga"; chainfo-textbox: 0px 0px 170px 21px; }
+@spritesheet chainfo-stat-btn-sheet { src: "../../../newui_chainfo_btn_level.tga"; chainfo-stat-btn: 0px 0px 16px 15px; }
+@spritesheet chainfo-btn-quest-sheet { src: "../../../newui_chainfo_btn_quest.tga"; chainfo-btn-quest: 0px 0px 36px 29px; }
+@spritesheet chainfo-btn-pet-sheet { src: "../../../newui_chainfo_btn_pet.tga"; chainfo-btn-pet: 0px 0px 36px 29px; }
+@spritesheet chainfo-btn-masterlevel-sheet { src: "../../../newui_chainfo_btn_master.tga"; chainfo-btn-masterlevel: 0px 0px 36px 29px; }
+
+.frame-top { decorator: image(docked-bg-top-a); }
+
+/* Right-hand pieces and the action row are pinned to #panel's edges (the original's places in a
+   190x429 panel), so they follow a wider or filled panel; the content stays at the top. */
+
+#name, #classname, #servername {
+	position: absolute;
+	left: 0;
+	top: 12px;
+	width: 190px;
+	text-align: center;
+	transform-origin: center top;
+	font-weight: bold;
+	pointer-events: none;
+}
+#classname, #servername { top: 27px; color: token(text-primary); }
+
+@spritesheet chainfo-table-top-sheet    { src: "../../../newui_item_table03(Up).tga"; chainfo-table-top:    0px 0px 1px 14px; }
+@spritesheet chainfo-table-bottom-sheet { src: "../../../newui_item_table03(Dw).tga"; chainfo-table-bottom: 0px 0px 1px 14px; }
+@spritesheet chainfo-table-left-sheet   { src: "../../../newui_item_table03(L).tga";  chainfo-table-left:   0px 0px 14px 1px; }
+@spritesheet chainfo-table-right-sheet  { src: "../../../newui_item_table03(R).tga";  chainfo-table-right:  0px 0px 14px 1px; }
+
+.summary-fill {
+	position: absolute;
+	left: 12px;
+	right: 18px;
+	top: 48px;
+	height: 66px;
+	background-color: rgba(0, 0, 0, 77);
+	pointer-events: none;
+}
+.summary-corner { position: absolute; width: 14px; height: 14px; pointer-events: none; }
+.corner-tl { left: 12px;  top: 48px; decorator: image(docked-corner-tl); }
+.corner-tr { right: 13px; top: 48px; decorator: image(docked-corner-tr); }
+.corner-bl { left: 12px;  top: 105px; decorator: image(docked-corner-bl); }
+.corner-br { right: 13px; top: 105px; decorator: image(docked-corner-br); }
+
+/* Edge spans are RenderFrame()'s loop bounds: x 26..163 for top/bottom, 14..173 for the separator
+   under the level line, y 62..105 for left/right. */
+.summary-edge { position: absolute; pointer-events: none; }
+.edge-top       { left: 26px;  right: 27px; top: 48px;  height: 14px; decorator: image(chainfo-table-top); }
+.edge-bottom    { left: 26px;  right: 27px; top: 105px; height: 14px; decorator: image(chainfo-table-bottom); }
+.edge-separator { left: 14px;  right: 17px; top: 60px;  height: 14px; decorator: image(chainfo-table-bottom); }
+.edge-left      { left: 12px;  top: 62px;  width: 14px;  height: 43px; decorator: image(chainfo-table-left); }
+.edge-right     { right: 13px; top: 62px;  width: 14px;  height: 43px; decorator: image(chainfo-table-right); }
+
+.level-text, .levelup-point-text, .exp-text, .point-probability-text, .point-text {
+	display: block;
+	position: absolute;
+	left: 18px;
+	transform-origin: left top;
+	white-space: nowrap;
+	pointer-events: none;
+}
+.level-text { top: 58px; color: #e6e600; font-weight: bold; }
+.levelup-point-text { top: 58px; left: 110px; color: #ff8a00; font-weight: bold; }
+.exp-text { top: 75px; color: token(text-primary); }
+.point-probability-text { top: 88px; color: #4cc5fe; }
+.point-text { top: 101px; color: #4cc5fe; }
+
+/* Attribute rows: textbox background (170x21) + centered label/value halves + a variable-length
+   block of extra derived-stat lines below. HEIGHT_STRENGTH/DEXTERITY/VITALITY/ENERGY/CHARISMA
+   (CharacterInfoWindow.h) are 120/175/240/295/350. */
+.attr-textbox {
+	position: absolute;
+	left: 11px;
+	right: 9px;
+	height: 21px;
+	decorator: image(chainfo-textbox);
+	pointer-events: none;
+}
+.attr-textbox-str { top: 120px; }
+.attr-textbox-agi { top: 175px; }
+.attr-textbox-vit { top: 240px; }
+.attr-textbox-ene { top: 295px; }
+.attr-textbox-cmd { top: 350px; }
+
+/* Label and value share the value's color, as RenderAttribute() set one color for both. */
+.attr-label, .attr-value {
+	display: block;
+	position: absolute;
+	text-align: center;
+	transform-origin: center top;
+	font-weight: bold;
+	pointer-events: none;
+}
+.attr-label { left: 12px; width: 74px; color: rgb(230, 230, 0); }
+.attr-value { left: 86px; right: 18px; color: rgb(230, 230, 0); }
+.attr-label-str, .attr-value-str { top: 126px; }
+.attr-label-agi, .attr-value-agi { top: 181px; }
+.attr-label-vit, .attr-value-vit { top: 246px; }
+.attr-label-ene, .attr-value-ene { top: 301px; }
+.attr-label-cmd, .attr-value-cmd { top: 356px; }
+
+/* Extra derived-stat lines: normal block flow, one span per line with a fixed 13 reference px row
+   height (bound in the RML, since the block is counter-scaled) -- reproduces RenderAttribute()'s
+   iY += 13 stacking without per-line C++ offsets (see header comment). A row height rather than a
+   line-height keeps each glyph at the top of its row, where the original drew it; line-height
+   would split the extra space above and below the text. Left/top per block match the original's
+   own RenderText() call sites. */
+.attr-lines { position: absolute; transform-origin: left top; pointer-events: none; }
+.attr-lines span { display: block; white-space: nowrap; }
+.attr-lines-str { left: 20px; top: 145px; }
+.attr-lines-agi { left: 20px; top: 199px; }
+.attr-lines-vit { left: 20px; top: 264px; }
+.attr-lines-ene { left: 18px; top: 319px; }
+
+.stat-btn {
+	position: absolute;
+	right: 14px;
+	width: 16px;
+	height: 15px;
+	decorator: image(chainfo-stat-btn);
+	cursor: pointer;
+	pointer-events: auto;
+}
+.stat-btn:hover { filter: brightness(1.25); }
+.stat-btn-str { top: 122px; }
+.stat-btn-agi { top: 177px; }
+.stat-btn-vit { top: 242px; }
+.stat-btn-ene { top: 297px; }
+.stat-btn-cmd { top: 352px; }
+
+/* Exit is fully shared now (docked_panel_frame.rcss's #btn_exit) -- only Quest/Pet/MasterLevel
+   (this window's own extra shortcuts, not part of the shared frame) stay local. */
+.info-btn {
+	position: absolute;
+	bottom: 8px;
+	width: 36px;
+	height: 29px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.info-btn:hover { filter: brightness(1.25); }
+.info-btn.locked { filter: brightness(0.6); }
+.info-btn-quest { left: 50px; decorator: image(chainfo-btn-quest); }
+.info-btn-pet { left: 87px; decorator: image(chainfo-btn-pet); }
+.info-btn-masterlevel { left: 124px; decorator: image(chainfo-btn-masterlevel); }
+
+/* Exit's sprite already has its own "X" baked in -- the shared label span is redundant here,
+   same convention as my_quest_info.rcss. */
+.btn-exit-label { display: none; }
+
+/* data-class-hidden on display:block leaves: base.rcss's .hidden has the same specificity as the
+   leaf rules above and loses to them, so it is repeated here with the leaf class. */
+.levelup-point-text.hidden, .attr-label.hidden, .attr-value.hidden { display: none; }
+
+/* Outlaw level, from the model's pk_level -- the original's UI::Chat::SetPlayerColor() palette,
+   which used to arrive as a colour string C++ built. #name's own colour is the fallback. */
+#name.pk-0 { color: rgb(150, 255, 240); }
+#name.pk-1 { color: rgb(100, 120, 255); }
+#name.pk-2 { color: rgb(140, 180, 255); }
+#name.pk-3 { color: rgb(200, 220, 255); }
+#name.pk-4 { color: rgb(255, 150, 60); }
+#name.pk-5 { color: rgb(255, 80, 30); }
+#name.pk-6 { color: rgb(255, 0, 0); }
+
+/* Where an attribute's total comes from, from the model's *_value_source. The original coloured
+   the value for each of the three; the base colour lives on .attr-value/.attr-label above. */
+.attr-value.attr-boosted, .attr-label.attr-boosted { color: rgb(100, 150, 255); }
+.attr-value.attr-potion,  .attr-label.attr-potion  { color: rgb(255, 120, 0); }
+
+/* A derived row's own state: RenderAttribute() gave an item or set the same pale blue the primary
+   stats use, and a consumable buff its own colour. */
+.attr-lines span { color: #ffffff; }
+.attr-lines span.boosted { color: rgb(100, 150, 255); }
+.attr-lines span.buffed { color: rgb(255, 0, 240); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#name { width: calc(100% * var(--root-scale)); margin-left: calc(50% - 50% * var(--root-scale)); }
+#classname { width: calc(100% * var(--root-scale)); margin-left: calc(50% - 50% * var(--root-scale)); }
+#servername { width: calc(100% * var(--root-scale)); margin-left: calc(50% - 50% * var(--root-scale)); }
+.attr-lines.attr-lines-str span { height: calc(13px * var(--root-scale)); }
+.attr-lines.attr-lines-agi span { height: calc(13px * var(--root-scale)); }
+.attr-lines.attr-lines-vit span { height: calc(13px * var(--root-scale)); }
+.attr-lines.attr-lines-ene span { height: calc(13px * var(--root-scale)); }

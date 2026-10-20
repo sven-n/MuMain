@@ -1,13 +1,19 @@
 # Extra checks that sven-n/MuMain does not run automatically, to save its
 # Actions minutes: ci.yml builds Windows only on pushes to main and never
-# builds the editor. This workflow covers the rest:
+# builds the editor. On every pull request of a fork, which uses its own
+# minutes, this workflow adds the game's Windows build:
 #
-#   Windows x64 Release   editor OFF and ON
-#   Linux x64 Release     editor ON  (editor OFF: ci.yml)
-#   macOS arm64 Release   editor ON  (editor OFF: ci.yml)
+#   Windows x64 Release   editor OFF  (Linux and macOS, editor OFF: ci.yml)
 #
-# On forks, which use their own minutes, it runs on every pull request. On
-# sven-n/MuMain it only runs when started by hand ("Run workflow").
+# The editor builds run only when started by hand ("Run workflow" with
+# "editor" checked): the game matters more than an always working editor,
+# and on every pull request they would double the fork's Actions usage.
+#
+#   Windows x64 Release   editor ON
+#   Linux x64 Release     editor ON
+#   macOS arm64 Release   editor ON
+#
+# On sven-n/MuMain the whole workflow only runs when started by hand.
 #
 # Editor ON also enables the control socket, like the *-mueditor presets.
 # The jobs only build and run the tests; they upload nothing. The workflow
@@ -24,6 +30,11 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      editor:
+        description: 'Also build and test with the editor ON (Windows, Linux, macOS)'
+        type: boolean
+        default: false
 
 concurrency:
   group: fork-ci-${{ github.ref }}
@@ -41,7 +52,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        editor: ['OFF', 'ON']
+        # Without "Run workflow" there are no inputs, so a pull request builds OFF only.
+        editor: ${{ fromJSON(inputs.editor && '["OFF", "ON"]' || '["OFF"]') }}
 
     steps:
       - name: Checkout repository
@@ -124,7 +136,7 @@ jobs:
 
   linux-editor:
     name: Linux x64 Release, editor ON
-    if: github.repository != 'sven-n/MuMain' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' && inputs.editor
     runs-on: ubuntu-latest
     timeout-minutes: 90
 
@@ -180,7 +192,7 @@ jobs:
 
   macos-editor:
     name: macOS arm64 Release, editor ON
-    if: github.repository != 'sven-n/MuMain' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' && inputs.editor
     runs-on: macos-latest
     timeout-minutes: 90
 

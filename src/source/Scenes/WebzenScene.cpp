@@ -10,8 +10,8 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzOpenData.h"
-#include "UI/Legacy/UIMng.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "Scenes/TitleSceneUI.h"
+#include "UI/Core/WindowSystem.h"
 
 // External declarations
 extern EGameScene SceneFlag;
@@ -106,8 +106,6 @@ static void UnloadTitleBitmaps()
  */
 void WebzenScene(HDC hDC)
 {
-    CUIMng& rUIMng = CUIMng::Instance();
-
     if (!OpenFont())
     {
         return;
@@ -118,7 +116,7 @@ void WebzenScene(HDC hDC)
     BackgroundTheme theme = SelectBackgroundTheme();
     LoadBackgroundTheme(theme);
 
-    rUIMng.CreateTitleSceneUI();
+    TitleSceneUI::CreateSceneUI();
 
     FogEnable = false;
 
@@ -128,10 +126,10 @@ void WebzenScene(HDC hDC)
         const Core::Platform::ScopedSystemCursor cursor;
         OpenBasicData(hDC);
         g_pNewUISystem->LoadMainSceneInterface();
-        CUIMng::Instance().RenderTitleSceneUI(hDC, 11, 11);
+        TitleSceneUI::RenderSceneUI(hDC, 11, 11);
     }
 
-    rUIMng.ReleaseTitleSceneUI();
+    TitleSceneUI::ReleaseSceneUI();
     UnloadTitleBitmaps();
 
     g_ErrorReport.Write(L"> Loading ok.\r\n");

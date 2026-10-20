@@ -11,7 +11,6 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
-#include "UI/Legacy/UIWindows.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
@@ -1325,7 +1324,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
             vec3_t Light;
             float Scale, Angle;
 
-            o->Distance += 0.05f;
+            o->Distance += 0.05f * FPS_ANIMATION_FACTOR;
             Scale = o->Distance;
 
             if (Scale >= 3.0f)

@@ -54,4 +54,25 @@ void ItemModelDatabase::Build(std::span<const ItemModelDefinition> models, const
         m_glowColors[itemType] = FindColors(glowColors, model.glow);
     }
 }
+
+void ItemModelDatabase::Swap(int firstItemType, int secondItemType)
+{
+    if (!IsValidItemType(firstItemType) || !IsValidItemType(secondItemType) || firstItemType == secondItemType)
+    {
+        return;
+    }
+
+    ++m_version;
+    std::swap(m_models[firstItemType], m_models[secondItemType]);
+    std::swap(m_glowColors[firstItemType], m_glowColors[secondItemType]);
+    for (const int itemType : {firstItemType, secondItemType})
+    {
+        ItemModelDefinition& model = m_models[itemType];
+        if (model.Exists())
+        {
+            model.group = GetItemGroup(itemType);
+            model.number = GetItemNumber(itemType);
+        }
+    }
+}
 } // namespace Data::Items

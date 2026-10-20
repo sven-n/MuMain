@@ -1,69 +1,29 @@
-// MsgBoxIGSSendGift.h: interface for the CMsgBoxIGSSendGift class.
-//////////////////////////////////////////////////////////////////////
 
 #pragma once
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-#include "UI/Legacy/UIControls.h"
-#include "UI/NewUI/Dialogs/NewUIMessageBox.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Dialogs/MessageBox.h"
+#include "UI/Dialogs/CommonMessageBox.h"
+#include "GameShop/IgsDialogModel.h"
+#include "UI/RmlBridge/RmlThemedView.h"
+#include "UI/RmlBridge/RmlNativeTextSize.h"
+
+#include <RmlUi/Core/Types.h>
+
+namespace Rml
+{
+class ElementDocument;
+}
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
-class CMsgBoxIGSSendGift : public CNewUIMessageBoxBase
+class CMsgBoxIGSSendGift : public CMessageBoxBase
 {
 public:
-    enum IMAGE_IGS_SEND_GIFT
+    enum
     {
-        IMAGE_IGS_BUTTON = BITMAP_IGS_MSGBOX_BUTTON,
-        IMAGE_IGS_FRAME = BITMAP_IGS_MSGBOX_SEND_GIFT_FRAME,         // Frame
-        IMAGE_IGS_DECO = BITMAP_IGS_MSGBOX_SEND_GIFT_DECO,           // Deco
-        IMAGE_IGS_INPUTTEXT = BITMAP_IGS_MSGBOX_SEND_GIFT_INPUTTEXT, // Input TextBox
-    };
-
-    enum IMAGESIZE_IGS_SEND_GIFT
-    {
-        IMAGE_IGS_WINDOW_WIDTH = 640, // In-game shop background size
-        IMAGE_IGS_WINDOW_HEIGHT = 429,
-        IMAGE_IGS_FRAME_WIDTH = 210, // Message box Size
-        IMAGE_IGS_FRAME_HEIGHT = 267,
-        IMAGE_IGS_DECO_WIDTH = 17, // Deco
-        IMAGE_IGS_DECO_HEIGHT = 19,
-        IMAGE_IGS_ID_INPUT_BOX_WIDTH = 76, // Input TextBox
-        IMAGE_IGS_ID_INPUT_BOX_HEIGHT = 17,
-        IMAGE_IGS_BTN_WIDTH = 52, // Button Size
-        IMAGE_IGS_BTN_HEIGHT = 26,
-    };
-
-    // Relative coordinates on the message box
-    enum IGS_SEND_GIFT_POS
-    {
-        IMAGE_IGS_DECO_POS_X = 10, // Deco
-        IMAGE_IGS_DECO_POS_Y = 82,
-        IMAGE_IGS_ID_INPUT_BOX_POS_X = 118, // ID Input Box
-        IMAGE_IGS_ID_INPUT_BOX_POS_Y = 82,
-        IGS_ID_INPUT_TEXT_POS_X = 120, // ID Input Text
-        IGS_ID_INPUT_TEXT_POS_Y = 87,
-        IGS_ID_INPUT_TEXT_WIDTH = 200,
-        IGS_ID_INPUT_TEXT_HEIGHT = 14,
-        IGS_MESSAGE_INPUT_TEXT_POS_X = 22, // Message Input Text
-        IGS_MESSAGE_INPUT_TEXT_POS_Y = 126,
-        IGS_MESSAGE_INPUT_TEXT_WIDTH = 170,
-        IGS_MESSAGE_INPUT_TEXT_HEIGHT = 65,
-        IGS_MESSAGE_INPUT_TEXT_LINE_HEIGHT = 50,
-        IGS_BTN_OK_POS_X = 35,
-        IGS_BTN_CANCEL_POS_X = 122,
-        IGS_BTN_POS_Y = 230,
-        IGS_TEXT_TITLE_POS_Y = 10,    // Title
-        IGS_TEXT_ID_TITLE_POS_X = 28, // ID Title
-        IGS_TEXT_ID_TITLE_POS_Y = 87,
-        IGS_TEXT_ID_TITLE_WIDTH = 100,
-        IGS_TEXT_MESSAGE_TITLE_POS_Y = 110, // Message Title
-        IGS_TEXT_ITEM_INFO_POS_X = 30,      // ItemInfo
-        IGS_TEXT_ITEM_INFO_NAME_POS_Y = 38,
-        IGS_TEXT_ITEM_INFO_PRICE_POS_Y = 50,
-        IGS_TEXT_ITEM_INFO_PERIOD_POS_Y = 62,
-        IGS_TEXT_ITEM_INFO_WIDTH = 143,
-        IGS_TEXT_NOTICE_POS_Y = 205, // Notice
+        IGS_FRAME_WIDTH = 210,
+        IGS_FRAME_HEIGHT = 267,
         IGS_TEXT_NOTICE_WIDTH = 170,
     };
 
@@ -76,36 +36,47 @@ public:
 
     bool Update();
     bool Render();
+    Rml::Element* GetPanel() const override
+    {
+        return m_RmlView.Document() != nullptr ? m_RmlView.Document()->GetElementById("panel") : nullptr;
+    }
 
-    void Initialize(int iPackageSeq, int iDisplaySeq, int iPriceSeq, DWORD wItemCode, int iCashType, wchar_t* pszName,
-                    wchar_t* pszPrice, wchar_t* pszPeriod);
+    void Initialize(int iPackageSeq, int iDisplaySeq, int iPriceSeq, DWORD wItemCode, int iCashType, const wchar_t* pszName,
+                    const wchar_t* pszPrice, const wchar_t* pszPeriod);
 
-    static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT CancelButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT OKButtonDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT CancelButtonDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
 private:
     void SetAddCallbackFunc();
-    void SetButtonInfo();
 
-    void RenderFrame();
-    void RenderTexts();
-    void RenderButtons();
 
     void ChangeInputBoxFocus();
 
-    void LoadImages();
-    void UnloadImages();
 
     void InitInputBox();
 
 private:
-    // buttons
-    CNewUIMessageBoxButton m_BtnOk;
-    CNewUIMessageBoxButton m_BtnCancel;
+    // igs_send_gift.rml: the dialog, with the recipient and the message as its fields.
+    struct SendGiftRmlModel
+    {
+        float textPx = 0.f;
+        Rml::String recipient;
+        Rml::String message;
+        Rml::String title, recipientLabel, messageLabel;
+        std::vector<Rml::String> itemLines;
+        std::vector<Rml::String> noticeLines;
+        std::vector<GameShop::DialogButton> buttons;
+        std::vector<Rml::String> debugLines;
+    };
+    void BindRmlModel(Rml::DataModelConstructor& c, SendGiftRmlModel& model);
+    UI::RmlBridge::ThemedView<SendGiftRmlModel> m_RmlView{"igs_send_gift",
+        [this](Rml::DataModelConstructor& c, SendGiftRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/igs_send_gift.rml"}}};
 
-    CUITextInputBox m_IDInputBox;
-    CUITextInputBox m_MessageInputBox;
+    void SyncRmlModel();
+    bool FieldHasFocus(const char* id) const;
+    int m_PressedButton = -1;
 
     int m_iPackageSeq;
     int m_iDisplaySeq;

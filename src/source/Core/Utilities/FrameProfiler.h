@@ -1,7 +1,8 @@
 #pragma once
 
-// Per-frame CPU timing and renderer counters for the $glstats overlay.
-// Single render thread only. Reset after every frame's overlays have read the values.
+// Per-frame CPU timing and renderer counters for the $details and $glstats overlays.
+// Single render thread only. Publish after renderer EndFrame; overlays read the completed snapshot.
+// Timings are inclusive CPU elapsed time, never GPU execution time.
 
 #include <array>
 #include <chrono>
@@ -22,17 +23,35 @@ enum class Pass : int
     MoveParticles,
     Skinning,
     UI,
-    Present,
+    RendererBegin,
+    RendererEnd,
+    RendererSubmit,
+    UIUpdate,
+    RmlUiInput,
+    UILayout,
+    RenderFlush,
     Sprites,
     Particles,
     Joints,
     Overlay,
+    RmlUiUpdate,
+    RmlUiRender,
+    // The parts of RendererEnd.
+    RendererOffscreen,
+    RendererStage,
+    RendererReplay,
+    RendererPostUi,
+    // The two halves of a map object inside Objects: its animation and bones, and its draws.
+    ObjectsAnimate,
+    ObjectsDraw,
     Count_
 };
 
 inline constexpr const char* kPassNames[static_cast<int>(Pass::Count_)] = {
-    "Terrain", "Objects", "Chars", "Items", "Effects", "Other", "CharWait", "MoveFx", "MovePart",
-    "Skinning", "UI", "Present", "Sprites", "Particles", "Joints", "Overlay",
+    "Terrain",   "Objects",  "Chars",     "Items",       "Effects",   "Other",   "CharWait", "MoveFx",
+    "MovePart",  "Skinning", "UI",        "RenderBegin", "RenderEnd", "Submit",  "UIUpdate", "RmlInput",
+    "UILayout",  "Flush",    "Sprites",   "Particles",   "Joints",    "Overlay", "RmlUpd",   "RmlRend",
+    "EndOffscr", "EndStage", "EndReplay", "EndPostUI",   "ObjAnim",   "ObjDraw",
 };
 
 enum class Counter : int
@@ -56,8 +75,46 @@ enum class Counter : int
     BatchBreakMatrix,
     BatchBreakDraw,
     BatchBreakOther,
+    // Bone palette bytes uploaded.
+    BonePaletteBytes,
+    PipelineBinds,
+    SamplerBinds,
+    // Skinned draws whose mesh, texture and pipeline no earlier draw in the pass had this frame.
+    DistinctSkinnedDraws,
+    // Joint trail segments and particles not drawn because they lie outside the view frustum.
+    JointSegmentsCulled,
+    ParticlesCulled,
     Count_
 };
+
+inline constexpr const char* kCounterNames[static_cast<int>(Counter::Count_)] = {
+    "DrawCalls",
+    "MergedDraws",
+    "Merged2DDraws",
+    "GlyphUploads",
+    "GpuSkinningSubmissions",
+    "CpuSkinningIneligible",
+    "GpuSkinningFailures",
+    "VertexBytes",
+    "TextureUploads",
+    "BatchDraws",
+    "BatchVertices",
+    "BatchBreakTexture",
+    "BatchBreakBlend",
+    "BatchBreakDepth",
+    "BatchBreakProgram",
+    "BatchBreakUniform",
+    "BatchBreakMatrix",
+    "BatchBreakDraw",
+    "BatchBreakOther",
+    "BonePaletteBytes",
+    "PipelineBinds",
+    "SamplerBinds",
+    "DistinctSkinnedDraws",
+    "JointSegmentsCulled",
+    "ParticlesCulled",
+};
+static_assert(kCounterNames[static_cast<int>(Counter::Count_) - 1] != nullptr, "a counter without a name");
 
 inline bool g_CountersEnabled = false;
 
@@ -103,6 +160,40 @@ inline void ResetCounters()
     }
 }
 
+// Keep the display stable while this frame records more work (including its own overlay).
+inline float g_completedMilliseconds[static_cast<int>(Pass::Count_)]{};
+inline std::uint32_t g_completedCounters[static_cast<int>(Pass::Count_)][static_cast<int>(Counter::Count_)]{};
+inline std::uint32_t g_completedTotals[static_cast<int>(Counter::Count_)]{};
+
+inline float CompletedMs(Pass pass)
+{
+    return g_completedMilliseconds[static_cast<int>(pass)];
+}
+
+inline std::uint32_t CompletedCounter(Pass pass, Counter counter)
+{
+    return g_completedCounters[static_cast<int>(pass)][static_cast<int>(counter)];
+}
+
+inline std::uint32_t CompletedCounter(Counter counter)
+{
+    return g_completedTotals[static_cast<int>(counter)];
+}
+
+inline void CompleteFrame()
+{
+    for (int pass = 0; pass < static_cast<int>(Pass::Count_); ++pass)
+    {
+        g_completedMilliseconds[pass] = AccumulatorMs(static_cast<Pass>(pass));
+        for (int counter = 0; counter < static_cast<int>(Counter::Count_); ++counter)
+            g_completedCounters[pass][counter] = CounterValue(static_cast<Pass>(pass), static_cast<Counter>(counter));
+    }
+    for (int counter = 0; counter < static_cast<int>(Counter::Count_); ++counter)
+        g_completedTotals[counter] = CounterValue(static_cast<Counter>(counter));
+    ResetFrame();
+    ResetCounters();
+}
+
 namespace detail
 {
 inline constexpr std::size_t kMaxPassDepth = 8;
@@ -122,6 +213,13 @@ inline PassState& State()
 }
 }
 
+// A pass seen opening inside another one: its time is already in that pass's.
+inline bool& NestedPass(Pass pass)
+{
+    static bool nested[static_cast<int>(Pass::Count_)]{};
+    return nested[static_cast<int>(pass)];
+}
+
 inline Pass CurrentPass()
 {
     return detail::State().current;
@@ -137,6 +235,10 @@ inline void PushPass(Pass pass)
         return;
     }
 
+    if (state.depth > 0)
+    {
+        NestedPass(pass) = true;
+    }
     state.stack[state.depth++] = state.current;
     state.current = pass;
 }
@@ -181,8 +283,7 @@ public:
     ~Scope()
     {
         const auto elapsed = std::chrono::steady_clock::now() - m_startedAt;
-        const auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed).count();
-        AccumulatorMs(m_pass) += static_cast<float>(nanoseconds) / 1.0e6f;
+        AccumulatorMs(m_pass) += std::chrono::duration<float, std::milli>(elapsed).count();
         PopPass();
     }
 

@@ -1,0 +1,51 @@
+/* Modern theme for CDoppelGangerFrame: the modern panel surface instead of Double_back; the texts,
+   the gauge and the markers keep the legacy geometry and art (see the legacy theme). */
+
+@spritesheet frame-hero-sheet { src: "../../../Double_Baricon04.tga"; frame-hero: 0px 0px 9px 8px; }
+@spritesheet frame-member-sheet { src: "../../../Double_Baricon01.tga"; frame-member: 0px 0px 9px 8px; }
+
+body { pointer-events: none; }
+
+.screen {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640px;
+	height: 480px;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+#panel { position: absolute; width: 227px; height: 87px; font-family: "token(font-body)"; }
+#back { position: absolute; left: 0; top: 0; width: 227px; height: 87px; background-color: token(surface-panel); border: 1px token(border-frame); }
+
+.frame-text {
+	display: block;
+	position: absolute;
+	left: 117px;
+	transform-origin: left top;
+	white-space: nowrap;
+	text-align: center;
+}
+.frame-text.big { font-weight: bold; }
+
+.bar { position: absolute; top: 78px; height: 7px; }
+#icewalker { position: absolute; top: 77px; width: 13px; height: 7px; }
+.marker { position: absolute; top: 79px; width: 9px; height: 8px; decorator: image(frame-member); }
+.marker.hero { decorator: image(frame-hero); }
+
+/* RenderText()'s own rows, and how pressing the monsters-passed line is. */
+#dg_passed { top: 13px; }
+#dg_time_label { top: 38px; }
+#dg_time { top: 50px; }
+.frame-text { color: token(accent-gold); }
+#dg_passed.passed-one { color: token(accent-gold-hover); }
+#dg_passed.passed-several { color: token(semantic-danger); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#dg_passed { width: calc(110px * var(--root-scale)); }
+#dg_time_label { width: calc(110px * var(--root-scale)); }
+#dg_time { width: calc(110px * var(--root-scale)); }
+
+/* The HUD takes no pointer events where it is placed (base.rcss gives a placed panel them). */
+#panel.slot-placed { pointer-events: none; }

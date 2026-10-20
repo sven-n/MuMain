@@ -3,8 +3,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "UI/Legacy/UIWindows.h"
-#include "UI/Legacy/UIManager.h"
+#include "Network/Server/WSclient.h"
+#include "UI/Core/UIManager.h"
 #include "Audio/DSPlaySound.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -600,11 +600,11 @@ namespace battleCastle
         const DWORD smokeColor = RGBA(77, 77, 64, 255);
         float WindX2 = (float)((int)WorldTime % 100000) * 0.0005f;
         RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH,
-            UI::Scaling::ScreenOverlayContentHeight(WindowWidth, WindowHeight), WindX2, 0.f, 3.f, 2.f, smokeColor);
+            UI::Scaling::ScreenOverlayFullHeight(WindowWidth, WindowHeight), WindX2, 0.f, 3.f, 2.f, smokeColor);
         EnableAlphaBlend();
         float WindX = (float)((int)WorldTime % 100000) * 0.0002f;
         RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH,
-            UI::Scaling::ScreenOverlayContentHeight(WindowWidth, WindowHeight), WindX, 0.f, 0.3f, 0.3f, smokeColor);
+            UI::Scaling::ScreenOverlayFullHeight(WindowWidth, WindowHeight), WindX, 0.f, 0.3f, 0.3f, smokeColor);
     }
 
     bool CreateFireSnuff(PARTICLE* o)
@@ -736,23 +736,23 @@ namespace battleCastle
         PlayBuffer(SOUND_BC_AMBIENT);
         if (IsBattleCastleStart() && rand_fps_check(10))
         {
-            if (rand_fps_check(100))
+            if (rand() % 100 == 0)
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE1);
             }
-            if (rand_fps_check(100))
+            if (rand() % 100 == 0)
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE2);
             }
-            if (rand_fps_check(100))
+            if (rand() % 100 == 0)
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE3);
             }
-            if (rand_fps_check(100))
+            if (rand() % 100 == 0)
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE4);
             }
-            if (rand_fps_check(100))
+            if (rand() % 100 == 0)
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE5);
             }

@@ -1,0 +1,58 @@
+/* Modern theme for CGateSwitchWindow: docked_panel_frame.rcss's forged panel (linked first), the
+   gate picture on a recessed panel, a modern button. Geometry is the legacy one (reference px under
+   the dock transform). */
+
+@spritesheet gs-gate-closed-sheet { src: "../../../doorCL.jpg"; gs-gate-closed: 0px 0px 155px 168px; }
+@spritesheet gs-gate-opened-sheet { src: "../../../doorOP.jpg"; gs-gate-opened: 0px 0px 155px 168px; }
+
+#panel { pointer-events: auto; }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: center; pointer-events: none; transform-origin: left top; }
+#title { left: 15px; top: 13px; font-weight: bold; color: token(text-warm); }
+.gs-line { left: -55px; font-weight: bold; color: token(text-primary); }
+.gs-warning { background-color: token(semantic-danger); }
+
+.t-edge-top, .t-edge-bottom, .t-edge-left, .t-edge-right, .t-corner { display: none; }
+#gate { position: absolute; left: 17.5px; top: 120px; width: 155px; height: 168px; decorator: image(gs-gate-closed); border: 1px token(border-frame); }
+#gate.opened { decorator: image(gs-gate-opened); }
+
+#btn_toggle {
+	display: block;
+	position: absolute;
+	left: 41px;
+	top: 320px;
+	width: 108px;
+	height: 28px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+#btn_toggle:hover { border-color: token(accent-steel-hover); }
+#btn_toggle:active { background-color: token(surface-recessed); }
+.gs-label { left: 0; color: token(text-primary); }
+
+#btn_exit {
+	position: absolute;
+	left: 13px;
+	top: 391px;
+	width: 36px;
+	height: 28px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+#btn_exit:hover { border-color: token(accent-steel-hover); }
+
+/* The question's three lines. The table draws no frame here; the panel surface is the table. */
+#gs_line_1 { top: 50px; }
+#gs_line_2 { top: 67px; }
+#gs_line_3 { top: 84px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#title { width: calc(160px * var(--root-scale)); }
+#gs_line_1 { width: calc(300px * var(--root-scale)); }
+#gs_line_2 { width: calc(300px * var(--root-scale)); }
+#gs_line_3 { width: calc(300px * var(--root-scale)); }
+.gs-label { width: calc(108px * var(--root-scale)); }

@@ -17,6 +17,7 @@
 #include <map>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace Data::Items::ModelLoader
@@ -132,6 +133,13 @@ void CheckModel(int itemType, const ItemModelDefinition& model, const LookNames&
     CheckLookName(model, model.itemEffect, lookNames.itemEffect, ItemModelProblemType::ItemEffectUnknown);
 }
 
+// The material values of the item's slot: every slot keeps its own, also one
+// that uses the data of a shared model.
+void ApplyMaterial(int itemType, const ItemModelDefinition& model)
+{
+    Models[ToModelSlot(itemType)].SpecularStrength = static_cast<float>(model.material.specular);
+}
+
 // Whether the file was opened.
 bool OpenModel(int itemType, const ItemModelDefinition& model, const LookNames& lookNames)
 {
@@ -146,6 +154,7 @@ bool OpenModel(int itemType, const ItemModelDefinition& model, const LookNames& 
         return false;
     }
     MarkNoneBlendMeshes(itemType, model);
+    ApplyMaterial(itemType, model);
     CheckModel(itemType, model, lookNames);
     return true;
 }
@@ -173,6 +182,7 @@ void OpenSharedModel(int itemType, const ItemModelDefinition& model, const LookN
         return;
     }
     gLoadData.ShareModel(ToModelSlot(itemType), ToModelSlot(opened->second));
+    ApplyMaterial(itemType, model);
     CheckModel(itemType, model, lookNames);
 }
 
@@ -255,6 +265,20 @@ void OpenTextures()
                 OpenModelTextures(itemType, model);
             }
         });
+}
+
+void SwapOpenedModels(int firstItemType, int secondItemType)
+{
+    if (Models == nullptr || !IsValidItemType(firstItemType) || !IsValidItemType(secondItemType))
+    {
+        return;
+    }
+
+    const int firstSlot = ToModelSlot(firstItemType);
+    const int secondSlot = ToModelSlot(secondItemType);
+    gLoadData.SwapModels(firstSlot, secondSlot);
+    // The material values are the model's (ApplyMaterial), so they move with it.
+    std::swap(Models[firstSlot].SpecularStrength, Models[secondSlot].SpecularStrength);
 }
 
 std::string TakeProblemMessage()
