@@ -21,8 +21,10 @@ private:
 
     void RenderRequirements(Data::Items::ItemDefinition& item);
     // Whether the requirement is given by level, and its 16 values if so.
+    // Turning it on moves `baseValue` into the 16 values, turning it off
+    // takes the first one back.
     void RenderByLevel(Data::Items::ItemDefinition& item, Data::Items::ItemRequirement requirement, const char* label,
-                       WORD baseValue);
+                       WORD& baseValue);
     void RenderClasses(Data::Items::ItemDefinition& item);
 
     MuEditor::Items::ItemEditDraft<Data::Items::ItemDefinition> m_draft;

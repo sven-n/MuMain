@@ -673,7 +673,8 @@ shows it in the others.
   either, an undo step that would change it is refused, and Import from bmd
   keeps its size and slot.
 - **Item Requirements**: the level and stat requirements, each also by item
-  level (16 values instead of the base value), the class steps (0: the
+  level (16 values instead of the base value, which they start from and
+  give back when turned off), the class steps (0: the
   class cannot use the item) and whether excellent options raise the level
   requirement.
 - **Item Rules**: the rule flags as a table of items; select several rows

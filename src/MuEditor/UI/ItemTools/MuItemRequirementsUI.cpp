@@ -117,7 +117,7 @@ void CMuItemRequirementsUI::RenderRequirements(ItemDefinition& item)
 }
 
 void CMuItemRequirementsUI::RenderByLevel(ItemDefinition& item, ItemRequirement requirement, const char* label,
-                                          WORD baseValue)
+                                          WORD& baseValue)
 {
     bool byLevel = item.requirementsByLevel.Find(requirement) != nullptr;
     if (ImGui::Checkbox(I18N::Editor::ByItemLevel, &byLevel))
@@ -125,12 +125,16 @@ void CMuItemRequirementsUI::RenderByLevel(ItemDefinition& item, ItemRequirement 
         if (byLevel)
         {
             Data::Items::RequirementByLevel values{};
-            // Every level starts at the base value it replaces.
+            // Every level starts at the base value it replaces, which is
+            // then not used (the checks warn about one that is kept).
             values.fill(baseValue);
             item.requirementsByLevel.Set(requirement, values);
+            baseValue = 0;
         }
         else
         {
+            // The base value comes back from the first level.
+            baseValue = item.requirementsByLevel.Find(requirement)->front();
             item.requirementsByLevel.Remove(requirement);
         }
         m_draft.AfterChange(true, label);
