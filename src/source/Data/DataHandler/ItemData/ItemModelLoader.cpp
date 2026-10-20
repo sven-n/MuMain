@@ -14,6 +14,7 @@
 #include "Render/Models/ZzzBMD.h"
 
 #include <algorithm>
+#include <iterator>
 #include <map>
 #include <string>
 #include <string_view>
@@ -279,6 +280,47 @@ void SwapOpenedModels(int firstItemType, int secondItemType)
     gLoadData.SwapModels(firstSlot, secondSlot);
     // The material values are the model's (ApplyMaterial), so they move with it.
     std::swap(Models[firstSlot].SpecularStrength, Models[secondSlot].SpecularStrength);
+}
+
+std::vector<ItemModelProblem> ReopenModels(std::span<const int> itemTypes, const LookNames& lookNames)
+{
+    if (Models == nullptr)
+    {
+        return {};
+    }
+
+    const size_t problemsBefore = g_problems.size();
+    std::map<std::string, int, std::less<>> sharedModelsOpenedBy;
+    for (const int itemType : itemTypes)
+    {
+        const ItemModelDefinition* model = g_ItemModelDatabase.Find(itemType);
+        if (model == nullptr)
+        {
+            if (IsValidItemType(itemType))
+            {
+                Models[ToModelSlot(itemType)].Release();
+            }
+            continue;
+        }
+        const bool opens = model->model.empty() || !sharedModelsOpenedBy.contains(model->model);
+        if (model->model.empty())
+        {
+            OpenModel(itemType, *model, lookNames);
+        }
+        else
+        {
+            OpenSharedModel(itemType, *model, lookNames, sharedModelsOpenedBy);
+        }
+        if (opens && Models[ToModelSlot(itemType)].NumMeshs > 0)
+        {
+            OpenModelTextures(itemType, *model);
+        }
+    }
+
+    std::vector<ItemModelProblem> problems(std::make_move_iterator(g_problems.begin() + problemsBefore),
+                                           std::make_move_iterator(g_problems.end()));
+    g_problems.resize(problemsBefore);
+    return problems;
 }
 
 std::string TakeProblemMessage()

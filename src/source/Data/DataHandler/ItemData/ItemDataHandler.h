@@ -11,6 +11,7 @@
 #ifdef _EDITOR
 #include "Data/DataHandler/ItemData/ItemBmdImport.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
+#include "Data/DataHandler/ItemData/ItemModelLoader.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 
@@ -48,6 +49,46 @@ public:
     void SetItem(const Data::Items::ItemDefinition& definition);
     // Like SetItem for several items, with the database lists built once.
     void SetItems(std::span<const Data::Items::ItemDefinition> definitions);
+    // Stores the definitions exactly as they are, nothing derived (the undo of
+    // the item tools puts back what an edit stored), and refills their rows of
+    // ItemAttribute[].
+    void RestoreItems(std::span<const Data::Items::ItemDefinition> definitions);
+
+    // Whether a new item can take the item type: it has neither an item nor a
+    // model entry (a model without an item still belongs to that number).
+    static bool IsFreeItemType(int itemType);
+    // Adds the item at its (group, number), and its model entry when `model`
+    // has one (its group and number are the item's). False when the item type
+    // is not free or the item has no names.
+    bool AddItem(const Data::Items::ItemDefinition& definition, const Data::Items::ItemModelDefinition* model);
+    // Removes the item and its model entry; the item type is free again. False
+    // when there is no item.
+    bool RemoveItem(int itemType);
+    // Moves the item, with its ItemAttribute row and its model, to a free item
+    // type (OnItemsSwapped). False when there is no item or the target is not
+    // free.
+    bool MoveItem(int fromItemType, int toItemType);
+
+    // Sets the model entry at its (group, number); an entry without a file and
+    // a shared model removes it. An entry that names a shared model takes its
+    // file, texture folders and none-blend meshes. Save writes the group's
+    // model file; a change to what is opened (file, folders, meshes, material,
+    // shared model) is opened again by ReopenChangedModels.
+    void SetItemModel(const Data::Items::ItemModelDefinition& model);
+    // Adds or replaces a shared model; `previousName` renames the one of that
+    // name, and its items name the new one. The items that use it take its
+    // file, texture folders and none-blend meshes, and are opened again.
+    void SetSharedModel(const Data::Items::SharedItemModel& sharedModel, std::string_view previousName = {});
+    // Removes a shared model that no item uses; false while one does.
+    bool RemoveSharedModel(std::string_view name);
+    // Opens the models changed since the last call again (ModelLoader::ReopenModels).
+    // For between frames: the editor calls it before the game draws.
+    std::vector<Data::Items::ItemModelProblem>
+    ReopenChangedModels(const Data::Items::ModelLoader::LookNames& lookNames);
+    bool HasModelsToReopen() const
+    {
+        return !m_modelsToReopen.empty();
+    }
 
     // The item editor changed ItemAttribute[itemType]; copies the change
     // into the item database. A changed name is stored for the current UI
@@ -160,6 +201,8 @@ private:
     Data::Items::ItemGroupSet m_changedModelGroups;
     // Whether the editor changed a shared model since LoadModels.
     bool m_sharedModelsChanged = false;
+    // The item types whose opened models no longer match their model entries.
+    std::vector<int> m_modelsToReopen;
 
     struct LookNames
     {

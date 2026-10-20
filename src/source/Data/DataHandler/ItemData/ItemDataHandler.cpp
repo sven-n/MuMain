@@ -174,6 +174,7 @@ bool CItemDataHandler::LoadModels(std::string& errorMessage)
     m_modelMoves.clear();
     m_changedModelGroups.reset();
     m_sharedModelsChanged = false;
+    m_modelsToReopen.clear();
 #endif
     MU_LOG_INFO(mu::log::Get("data"), "Loaded {} item models from {} in {:.1f} ms", g_ItemModelDatabase.GetModelCount(),
                 GetItemModelDataDirectory().string(), MillisecondsSince(loadStart));
@@ -263,6 +264,151 @@ void CItemDataHandler::SetItems(std::span<const ItemDefinition> definitions)
     {
         RefillItemAttribute(MakeItemType(definition.group, definition.number));
     }
+}
+
+void CItemDataHandler::RestoreItems(std::span<const ItemDefinition> definitions)
+{
+    std::vector<ItemDefinition> stored;
+    std::ranges::copy_if(definitions, std::back_inserter(stored), [](const ItemDefinition& definition)
+                         { return IsValidItemId(definition.group, definition.number); });
+    g_ItemDatabase.SetMany(stored);
+    for (const ItemDefinition& definition : stored)
+    {
+        RefillItemAttribute(MakeItemType(definition.group, definition.number));
+    }
+}
+
+bool CItemDataHandler::IsFreeItemType(int itemType)
+{
+    return IsValidItemType(itemType) && g_ItemDatabase.Find(itemType) == nullptr &&
+           g_ItemModelDatabase.Find(itemType) == nullptr;
+}
+
+bool CItemDataHandler::AddItem(const ItemDefinition& definition, const ItemModelDefinition* model)
+{
+    if (!IsValidItemId(definition.group, definition.number) || !definition.Exists() ||
+        !IsFreeItemType(MakeItemType(definition.group, definition.number)))
+    {
+        return false;
+    }
+    SetItem(definition);
+    if (model != nullptr)
+    {
+        ItemModelDefinition placed = *model;
+        placed.group = definition.group;
+        placed.number = definition.number;
+        SetItemModel(placed);
+    }
+    return true;
+}
+
+bool CItemDataHandler::RemoveItem(int itemType)
+{
+    if (g_ItemDatabase.Find(itemType) == nullptr)
+    {
+        return false;
+    }
+    ItemDefinition empty;
+    empty.group = GetItemGroup(itemType);
+    empty.number = GetItemNumber(itemType);
+    RestoreItems(std::span<const ItemDefinition>(&empty, 1));
+    if (g_ItemModelDatabase.Find(itemType) != nullptr)
+    {
+        ItemModelDefinition noModel;
+        noModel.group = empty.group;
+        noModel.number = empty.number;
+        SetItemModel(noModel);
+    }
+    return true;
+}
+
+bool CItemDataHandler::MoveItem(int fromItemType, int toItemType)
+{
+    if (g_ItemDatabase.Find(fromItemType) == nullptr || !IsFreeItemType(toItemType))
+    {
+        return false;
+    }
+    std::swap(ItemAttribute[fromItemType], ItemAttribute[toItemType]);
+    OnItemsSwapped(fromItemType, toItemType);
+    return true;
+}
+
+void CItemDataHandler::SetItemModel(const ItemModelDefinition& model)
+{
+    if (!IsValidItemId(model.group, model.number))
+    {
+        return;
+    }
+
+    const int itemType = MakeItemType(model.group, model.number);
+    ItemModelDefinition stored = model;
+    if (const SharedItemModel* shared = g_ItemModelDatabase.FindSharedModel(stored.model))
+    {
+        stored.file = shared->file;
+        stored.textureFolders = shared->textureFolders;
+        stored.noneBlendMeshes = shared->noneBlendMeshes;
+    }
+    const ItemModelDefinition* before = g_ItemModelDatabase.Find(itemType);
+    const bool opensDifferently = before == nullptr || !stored.Exists() || stored.model != before->model ||
+                                  stored.file != before->file || stored.textureFolders != before->textureFolders ||
+                                  stored.noneBlendMeshes != before->noneBlendMeshes ||
+                                  stored.material != before->material;
+    if (before == nullptr && !stored.Exists())
+    {
+        return;
+    }
+
+    g_ItemModelDatabase.Set(stored, g_GlowColors);
+    m_changedModelGroups.set(static_cast<size_t>(model.group));
+    if (opensDifferently && std::ranges::find(m_modelsToReopen, itemType) == m_modelsToReopen.end())
+    {
+        m_modelsToReopen.push_back(itemType);
+    }
+}
+
+void CItemDataHandler::SetSharedModel(const SharedItemModel& sharedModel, std::string_view previousName)
+{
+    const std::string oldName = previousName.empty() ? sharedModel.name : std::string(previousName);
+    if (oldName != sharedModel.name)
+    {
+        g_ItemModelDatabase.RemoveSharedModel(oldName);
+    }
+    g_ItemModelDatabase.SetSharedModel(sharedModel);
+    m_sharedModelsChanged = true;
+
+    for (const ItemModelDefinition& model : g_ItemModelDatabase.GetAllSlots())
+    {
+        if (model.Exists() && model.model == oldName)
+        {
+            ItemModelDefinition user = model;
+            user.model = sharedModel.name;
+            SetItemModel(user);
+        }
+    }
+}
+
+bool CItemDataHandler::RemoveSharedModel(std::string_view name)
+{
+    const auto slots = g_ItemModelDatabase.GetAllSlots();
+    if (std::ranges::any_of(slots,
+                            [name](const ItemModelDefinition& model) { return model.Exists() && model.model == name; }))
+    {
+        return false;
+    }
+    if (g_ItemModelDatabase.FindSharedModel(name) != nullptr)
+    {
+        g_ItemModelDatabase.RemoveSharedModel(name);
+        m_sharedModelsChanged = true;
+    }
+    return true;
+}
+
+std::vector<ItemModelProblem> CItemDataHandler::ReopenChangedModels(const ModelLoader::LookNames& lookNames)
+{
+    std::vector<int> itemTypes;
+    itemTypes.swap(m_modelsToReopen);
+    std::ranges::sort(itemTypes);
+    return ModelLoader::ReopenModels(itemTypes, lookNames);
 }
 
 void CItemDataHandler::OnItemEdited(int itemType)

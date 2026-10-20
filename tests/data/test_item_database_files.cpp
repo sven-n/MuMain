@@ -840,6 +840,179 @@ TEST_CASE("The item tools set whole items, and the derived fields follow the dat
     }
 }
 
+TEST_CASE("The item tools add, remove and move items with their models [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    const int freeType = MakeItemType(0, 100);
+    REQUIRE(CItemDataHandler::IsFreeItemType(freeType));
+    CHECK_FALSE(CItemDataHandler::IsFreeItemType(KrisType));
+
+    SUBCASE("a new item takes a free number, with a model")
+    {
+        ItemDefinition item = *g_ItemDatabase.Find(KrisType);
+        item.number = 100;
+        item.names = Data::LocalizedString::Parse("Training Kris");
+        ItemModelDefinition model = *g_ItemModelDatabase.Find(KrisType);
+        REQUIRE(g_ItemDataHandler.AddItem(item, &model));
+        REQUIRE(g_ItemDatabase.Find(freeType) != nullptr);
+        CHECK(g_ItemDatabase.Find(freeType)->names.GetNeutral() == "Training Kris");
+        CHECK(std::wstring(ItemAttribute[freeType].Name) == L"Training Kris");
+        REQUIRE(g_ItemModelDatabase.Find(freeType) != nullptr);
+        CHECK(g_ItemModelDatabase.Find(freeType)->number == 100);
+        CHECK(g_ItemModelDatabase.Find(freeType)->file == model.file);
+        CHECK(g_ItemDataHandler.HasModelsToReopen());
+        // The number is taken now.
+        CHECK_FALSE(g_ItemDataHandler.AddItem(item, nullptr));
+    }
+
+    SUBCASE("an item without names is not added")
+    {
+        ItemDefinition item;
+        item.number = 100;
+        CHECK_FALSE(g_ItemDataHandler.AddItem(item, nullptr));
+        CHECK(CItemDataHandler::IsFreeItemType(freeType));
+    }
+
+    SUBCASE("a removed item frees its number, its model too")
+    {
+        REQUIRE(g_ItemModelDatabase.Find(KrisType) != nullptr);
+        REQUIRE(g_ItemDataHandler.RemoveItem(KrisType));
+        CHECK(g_ItemDatabase.Find(KrisType) == nullptr);
+        CHECK(g_ItemModelDatabase.Find(KrisType) == nullptr);
+        CHECK(ItemAttribute[KrisType].Name[0] == L'\0');
+        // Nothing is left of its values.
+        CHECK(g_ItemDatabase.GetAllSlots()[KrisType].width == 0);
+        CHECK(CItemDataHandler::IsFreeItemType(KrisType));
+        CHECK_FALSE(g_ItemDataHandler.RemoveItem(KrisType));
+    }
+
+    SUBCASE("a moved item takes its row and its model to the free number")
+    {
+        REQUIRE(g_ItemDataHandler.MoveItem(KrisType, freeType));
+        CHECK(g_ItemDatabase.Find(KrisType) == nullptr);
+        REQUIRE(g_ItemDatabase.Find(freeType) != nullptr);
+        CHECK(g_ItemDatabase.Find(freeType)->names.GetNeutral() == "Kris");
+        CHECK(std::wstring(ItemAttribute[freeType].Name) == L"Kris");
+        CHECK(g_ItemModelDatabase.Find(freeType) != nullptr);
+        CHECK_FALSE(g_ItemDataHandler.MoveItem(freeType, BladeType));
+    }
+
+    SUBCASE("the undo puts back exactly what was stored")
+    {
+        const ItemDefinition before = *g_ItemDatabase.Find(BladeType);
+        ItemDefinition changed = before;
+        changed.weaponKind = WeaponKind::Glove;
+        g_ItemDataHandler.SetItem(changed);
+        g_ItemDataHandler.RestoreItems(std::span<const ItemDefinition>(&before, 1));
+        CHECK(*g_ItemDatabase.Find(BladeType) == before);
+    }
+}
+
+TEST_CASE("The item tools change models and shared models [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    REQUIRE_FALSE(g_ItemModelDatabase.GetSharedModels().empty());
+    const SharedItemModel shared = g_ItemModelDatabase.GetSharedModels().front();
+    std::vector<int> users;
+    for (const ItemModelDefinition& model : g_ItemModelDatabase.GetAllSlots())
+    {
+        if (model.Exists() && model.model == shared.name)
+        {
+            users.push_back(MakeItemType(model.group, model.number));
+        }
+    }
+    REQUIRE(users.size() > 1);
+
+    SUBCASE("a display value is not opened again, a file is")
+    {
+        ItemModelDefinition kris = *g_ItemModelDatabase.Find(KrisType);
+        kris.inventory.scale = 0.004;
+        g_ItemDataHandler.SetItemModel(kris);
+        CHECK(g_ItemModelDatabase.Find(KrisType)->inventory.scale == 0.004);
+        CHECK_FALSE(g_ItemDataHandler.HasModelsToReopen());
+        kris.file = "Data/Item/Sword02.bmd";
+        g_ItemDataHandler.SetItemModel(kris);
+        CHECK(g_ItemDataHandler.HasModelsToReopen());
+        // The game has no model slots in this test; nothing is opened.
+        CHECK(g_ItemDataHandler.ReopenChangedModels({}).empty());
+        CHECK_FALSE(g_ItemDataHandler.HasModelsToReopen());
+    }
+
+    SUBCASE("an item that names a shared model takes its file")
+    {
+        ItemModelDefinition kris = *g_ItemModelDatabase.Find(KrisType);
+        kris.model = shared.name;
+        kris.file.clear();
+        g_ItemDataHandler.SetItemModel(kris);
+        CHECK(g_ItemModelDatabase.Find(KrisType)->file == shared.file);
+        CHECK(g_ItemModelDatabase.Find(KrisType)->textureFolders == shared.textureFolders);
+    }
+
+    SUBCASE("a changed shared model changes all its items")
+    {
+        SharedItemModel changed = shared;
+        changed.file = "Data/Item/Sword03.bmd";
+        g_ItemDataHandler.SetSharedModel(changed);
+        for (const int user : users)
+        {
+            CHECK(g_ItemModelDatabase.Find(user)->file == "Data/Item/Sword03.bmd");
+        }
+        CHECK(g_ItemModelDatabase.FindSharedModel(shared.name)->file == "Data/Item/Sword03.bmd");
+    }
+
+    SUBCASE("a renamed shared model is named by all its items")
+    {
+        SharedItemModel renamed = shared;
+        renamed.name = "renamedModel";
+        g_ItemDataHandler.SetSharedModel(renamed, shared.name);
+        CHECK(g_ItemModelDatabase.FindSharedModel(shared.name) == nullptr);
+        for (const int user : users)
+        {
+            CHECK(g_ItemModelDatabase.Find(user)->model == "renamedModel");
+        }
+    }
+
+    SUBCASE("a shared model in use is not removed")
+    {
+        CHECK_FALSE(g_ItemDataHandler.RemoveSharedModel(shared.name));
+        CHECK(g_ItemModelDatabase.FindSharedModel(shared.name) != nullptr);
+        SharedItemModel unused{"unusedModel", "Data/Item/Sword04.bmd", {"Item"}, {}};
+        g_ItemDataHandler.SetSharedModel(unused);
+        CHECK(g_ItemDataHandler.RemoveSharedModel("unusedModel"));
+        CHECK(g_ItemModelDatabase.FindSharedModel("unusedModel") == nullptr);
+    }
+
+    SUBCASE("the save writes the changed model group and the shared model file")
+    {
+        SharedItemModel unused{"unusedModel", "Data/Item/Sword04.bmd", {"Item"}, {}};
+        g_ItemDataHandler.SetSharedModel(unused);
+        ItemModelDefinition kris = *g_ItemModelDatabase.Find(KrisType);
+        kris.inventory.scale = 0.004;
+        g_ItemDataHandler.SetItemModel(kris);
+        std::vector<ItemDataIssue> issues;
+        REQUIRE(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+        const std::filesystem::path models = folder.Directory() / GetItemModelDataDirectory();
+        CHECK(TestFiles::ReadWholeFile(models / "SharedModels.json").find("unusedModel") != std::string::npos);
+        CHECK(TestFiles::ReadWholeFile(models / GetItemGroupFileName(0)).find("0.004") != std::string::npos);
+    }
+}
+
 TEST_CASE("The save warns about an item name in a language the game has no texts for [data][items][editor]")
 {
     TemporaryClientFolder folder;

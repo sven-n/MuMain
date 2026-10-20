@@ -603,6 +603,66 @@ TEST_CASE("The item model database keeps the shared models [data][items]")
     CHECK(g_ItemModelDatabase.GetSharedModels().size() == ShippedModels().sharedModels.size());
 }
 
+TEST_CASE("The models of items are opened again as the model database has them now [data][items]")
+{
+    TestItemModelSlots slots;
+    const ItemModelDefinition parchment = MakeSharedModelItem(19, "", "Data/Item/rollofpaper.bmd");
+    const ItemModelDefinition firstUser = MakeSharedModelItem(20, "parchments", "Data/Item/rollofpaper.bmd");
+    const ItemModelDefinition secondUser = MakeSharedModelItem(21, "parchments", "Data/Item/rollofpaper.bmd");
+    g_ItemModelDatabase.Build(std::vector<ItemModelDefinition>{parchment, firstUser, secondUser},
+                              Data::Effects::GlowColorList{});
+    ModelLoader::OpenModels({});
+    const int parchmentType = MakeItemType(15, 19);
+    const BMD& parchmentSlot = Models[ToModelSlot(parchmentType)];
+    REQUIRE(parchmentSlot.NumMeshs > 0);
+    // The textures are looked for below the working folder, which is not the
+    // client folder here; only whether the files open counts.
+    const auto opened = [](const std::vector<ItemModelProblem>& problems)
+    {
+        return std::ranges::none_of(problems, [](const ItemModelProblem& problem)
+                                    { return problem.type == ItemModelProblemType::ModelFileMissing; });
+    };
+
+    SUBCASE("another file")
+    {
+        ItemModelDefinition sword = parchment;
+        sword.file = (ClientDirectory / "Data/Item/Sword01.bmd").generic_string();
+        g_ItemModelDatabase.Set(sword, Data::Effects::GlowColorList{});
+        const int types[] = {parchmentType};
+        CHECK(opened(ModelLoader::ReopenModels(types, {})));
+        CHECK(gLoadData.GetModelFile(ToModelSlot(parchmentType)).find(L"Sword01") != std::wstring::npos);
+        CHECK(parchmentSlot.NumMeshs > 0);
+    }
+
+    SUBCASE("a model removed from the database empties its slot")
+    {
+        g_ItemModelDatabase.Remove(parchmentType);
+        const int types[] = {parchmentType};
+        CHECK(ModelLoader::ReopenModels(types, {}).empty());
+        CHECK(parchmentSlot.NumMeshs == 0);
+    }
+
+    SUBCASE("the items of a shared model share the data again")
+    {
+        const int types[] = {MakeItemType(15, 20), MakeItemType(15, 21)};
+        CHECK(opened(ModelLoader::ReopenModels(types, {})));
+        const BMD& first = Models[ToModelSlot(types[0])];
+        const BMD& second = Models[ToModelSlot(types[1])];
+        CHECK(first.Meshs == second.Meshs);
+        CHECK(second.SharesData());
+    }
+
+    SUBCASE("a missing file is a problem of the reopen, not of the startup message")
+    {
+        ItemModelDefinition missing = parchment;
+        missing.file = (ClientDirectory / "Data/Item/NoSuchModel.bmd").generic_string();
+        g_ItemModelDatabase.Set(missing, Data::Effects::GlowColorList{});
+        const int types[] = {parchmentType};
+        CHECK_FALSE(opened(ModelLoader::ReopenModels(types, {})));
+        CHECK(ModelLoader::TakeProblemMessage().empty());
+    }
+}
+
 TEST_CASE("Moving item models swaps their data and their opened models [data][items]")
 {
     TestItemModelSlots slots;
