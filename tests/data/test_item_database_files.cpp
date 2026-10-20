@@ -1690,7 +1690,12 @@ TEST_CASE("The item tools add glow colors, change them and remove unused ones [d
             CHECK(GlowsWith(user, Yellow));
         }
         // The color keeps its place in the file.
-        CHECK(CurrentGlowColors().size() == shipped.size());
+        const std::vector<GlowColor> changed = CurrentGlowColors();
+        REQUIRE(changed.size() == shipped.size());
+        for (size_t index = 0; index < shipped.size(); ++index)
+        {
+            CHECK(changed[index].name == shipped[index].name);
+        }
 
         REQUIRE(edits.Undo());
         CHECK(CurrentGlowColors() == shipped);
@@ -1710,6 +1715,16 @@ TEST_CASE("The item tools add glow colors, change them and remove unused ones [d
 
         REQUIRE(edits.Undo());
         CHECK(g_GlowColors.Find("unused") != nullptr);
+
+        // With no model left to use them, only the default rule keeps them.
+        g_ItemModelDatabase.Build({}, g_GlowColors);
+        for (const char* name : {Data::Items::ItemGlow::DefaultColor, Data::Items::ItemGlow::DefaultShineColor,
+                                 Data::Items::ItemGlow::DefaultAncientColor})
+        {
+            INFO(name);
+            CHECK_FALSE(g_ItemDataHandler.RemoveGlowColor(name));
+            CHECK(g_GlowColors.Find(name) != nullptr);
+        }
     }
 
     SUBCASE("a name the file would refuse stops the save")
