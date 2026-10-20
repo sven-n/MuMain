@@ -185,6 +185,9 @@ TEST_CASE("Shipped item model files are in the written format [data][items]")
     }
     CHECK(WriteSharedItemModelsJson(ShippedModels().sharedModels) ==
           TestFiles::ReadWholeFile(ModelDirectory / SharedItemModelsFileName));
+    // The item editor writes the glow colors too.
+    CHECK(Data::Effects::WriteGlowColorsJson(ShippedGlowColors().colors) ==
+          TestFiles::ReadWholeFile(DataDirectory / "Effects" / "GlowColors.json"));
 }
 
 // The item editor saves the model files from the item model database, with

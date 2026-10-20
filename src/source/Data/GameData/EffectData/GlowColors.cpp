@@ -3,6 +3,7 @@
 #include "GlowColors.h"
 
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
+#include "Data/GameData/ItemData/ItemModelJsonValues.h"
 
 #include <cmath>
 #include <set>
@@ -133,6 +134,24 @@ void ReadGlowColorsJson(std::string_view text, const std::string& source, std::v
                               "unknown field, ignored"});
         }
     }
+}
+
+std::string WriteGlowColorsJson(std::span<const GlowColor> colors)
+{
+    OrderedJson list = OrderedJson::object();
+    for (const GlowColor& color : colors)
+    {
+        list[color.name] = Items::ModelJson::WriteNumbers(color.value);
+    }
+    OrderedJson root;
+    root[Items::Json::Keys::FormatVersion] = GlowColorsFormatVersion;
+    root[ColorsKey] = std::move(list);
+    std::string text = root.dump(Items::Json::Indent, ' ', false, OrderedJson::error_handler_t::replace);
+    for (const GlowColor& color : colors)
+    {
+        text = Items::Json::PutListsOnOneLine(text, color.name);
+    }
+    return text + "\n";
 }
 
 } // namespace Data::Effects
