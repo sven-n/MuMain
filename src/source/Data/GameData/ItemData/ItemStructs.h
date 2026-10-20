@@ -24,7 +24,7 @@
 typedef struct
 {
     char Name[30];
-    ITEM_ATTRIBUTE_FIELDS
+    ITEM_ATTRIBUTE_FILE_FIELDS
 } ITEM_ATTRIBUTE_FILE_LEGACY;
 
 // Current file format structure with MAX_ITEM_NAME byte name
@@ -32,7 +32,7 @@ typedef struct
 typedef struct
 {
     char Name[MAX_ITEM_NAME];
-    ITEM_ATTRIBUTE_FIELDS
+    ITEM_ATTRIBUTE_FILE_FIELDS
 } ITEM_ATTRIBUTE_FILE;
 
 // Runtime structure with wide-character name
@@ -48,7 +48,9 @@ typedef struct
 // ============================================================================
 
 // Generate field copy statements from X-macro
-#define COPY_FIELD(name, type, arraySize, width, i18nName) (dest).name = (source).name;
+// A Stat narrows to its file byte; check FitsItemFile before writing a file.
+#define COPY_FIELD(name, type, arraySize, width, i18nName)                                                             \
+    (dest).name = static_cast<decltype((dest).name)>((source).name);
 
 // Macro to copy all non-name fields from source to dest
 #define COPY_ITEM_ATTRIBUTE_FIELDS(dest, source) \
@@ -65,6 +67,27 @@ inline void CopyItemAttributeFromSource(ITEM_ATTRIBUTE& dest, const TSource& sou
 {
     CMultiLanguage::ConvertFromUtf8(dest.Name, source.Name, MAX_ITEM_NAME);
     COPY_ITEM_ATTRIBUTE_FIELDS(dest, source);
+}
+
+// Whether the item's values fit the .bmd item files (its Stats in one byte); the first that does not in `field`.
+#define CHECK_FIELD_FITS_Bool(name)
+#define CHECK_FIELD_FITS_Byte(name)
+#define CHECK_FIELD_FITS_Word(name)
+#define CHECK_FIELD_FITS_Int(name)
+#define CHECK_FIELD_FITS_DWord(name)
+#define CHECK_FIELD_FITS_Stat(name)                                                                                    \
+    if (item.name > 0xFF)                                                                                              \
+    {                                                                                                                  \
+        if (field != nullptr)                                                                                          \
+            *field = #name;                                                                                            \
+        return false;                                                                                                  \
+    }
+#define CHECK_FIELD_FITS(name, type, arraySize, width, i18nName) CHECK_FIELD_FITS_##type(name)
+
+inline bool FitsItemFile(const ITEM_ATTRIBUTE& item, const char** field = nullptr)
+{
+    ITEM_FIELDS_SIMPLE(CHECK_FIELD_FITS)
+    return true;
 }
 
 // Helper template to copy from runtime structure to file structure

@@ -101,6 +101,34 @@ TEST_CASE("Item attribute conversion keeps every field [data][items]")
     }
 }
 
+TEST_CASE("Damage and magic power past 255 are kept, but do not fit the bmd item file [data][items]")
+{
+    ItemDefinition definition = MakeItem(SwordGroup, 51, "Later Sword");
+    definition.damageMin = 345;
+    definition.damageMax = 380;
+    definition.magicPower = 276;
+
+    ITEM_ATTRIBUTE attribute{};
+    ToItemAttribute(definition, attribute);
+    CHECK(attribute.DamageMin == 345);
+    CHECK(attribute.DamageMax == 380);
+    CHECK(attribute.MagicPower == 276);
+    CHECK(ToItemDefinition(attribute, MakeItemType(SwordGroup, 51)).damageMax == 380);
+
+    const char* field = nullptr;
+    CHECK_FALSE(FitsItemFile(attribute, &field));
+    CHECK(std::string(field) == "DamageMin");
+
+    attribute.DamageMin = 255;
+    attribute.DamageMax = 255;
+    attribute.MagicPower = 255;
+    CHECK(FitsItemFile(attribute));
+    ITEM_ATTRIBUTE_FILE file{};
+    CopyItemAttributeToDestination(file, attribute);
+    CHECK(file.DamageMax == 255);
+    CHECK(sizeof(file.DamageMax) == 1);
+}
+
 TEST_CASE("A weapon's group gives its weapon kind [data][items]")
 {
     const auto groupWeaponKind = [](int group, ItemSlot slot, bool twoHanded)

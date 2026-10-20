@@ -180,7 +180,7 @@ typedef struct tagITEM
     BYTE  SuccessfulBlocking;
     WORD  Defense;
     WORD  MagicDefense;
-    BYTE  MagicPower;
+    WORD MagicPower;
     BYTE  WeaponSpeed;
     WORD  WalkSpeed;
 

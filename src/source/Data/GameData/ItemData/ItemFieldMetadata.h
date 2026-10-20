@@ -18,9 +18,17 @@ using EItemFieldType = EFieldType;
 // Item field descriptor (specialized from generic FieldDescriptor)
 using ItemFieldDescriptor = FieldDescriptor<ITEM_ATTRIBUTE>;
 
+// The editor edits a Stat (one byte in the files, two in the game) as a Word.
+#define ITEM_EDITOR_FIELD_TYPE_Bool EFieldType::Bool
+#define ITEM_EDITOR_FIELD_TYPE_Byte EFieldType::Byte
+#define ITEM_EDITOR_FIELD_TYPE_Word EFieldType::Word
+#define ITEM_EDITOR_FIELD_TYPE_Int EFieldType::Int
+#define ITEM_EDITOR_FIELD_TYPE_DWord EFieldType::DWord
+#define ITEM_EDITOR_FIELD_TYPE_Stat EFieldType::Word
+
 // Macro to generate item field descriptors
-#define MAKE_SIMPLE_FIELD_DESCRIPTOR(name, type, arraySize, width, i18nName) \
-    { #name, &I18N::Metadata::i18nName, EFieldType::type, offsetof(ITEM_ATTRIBUTE, name), width },
+#define MAKE_SIMPLE_FIELD_DESCRIPTOR(name, type, arraySize, width, i18nName)                                           \
+    {#name, &I18N::Metadata::i18nName, ITEM_EDITOR_FIELD_TYPE_##type, offsetof(ITEM_ATTRIBUTE, name), width},
 
 #define MAKE_ARRAY_FIELD_DESCRIPTOR(nameWithIndex, baseName, index, type, width, i18nName) \
     { #nameWithIndex, &I18N::Metadata::i18nName, EFieldType::type, offsetof(ITEM_ATTRIBUTE, baseName[index]), width },

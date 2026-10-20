@@ -4,6 +4,7 @@
 
 #include "ItemDataExportS6E3.h"
 #include "Data/DataHandler/DataFileIO.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #include "Data/GameData/ItemData/ItemStructs.h"
 #include "Core/Globals/_struct.h"
 #include "Core/Globals/_define.h"
@@ -17,6 +18,18 @@ extern ITEM_ATTRIBUTE* ItemAttribute;
 bool ItemDataExportS6E3::SaveLegacy(wchar_t* fileName)
 {
     const int Size = sizeof(ITEM_ATTRIBUTE_FILE_LEGACY);
+
+    // The file holds damage and magic power in one byte; later items can have more.
+    for (int i = 0; i < MAX_ITEM; i++)
+    {
+        const char* field = nullptr;
+        if (!FitsItemFile(ItemAttribute[i], &field))
+        {
+            MU_LOG_ERROR(mu::log::Get("data"),
+                         "Item {} {} is above 255, which the .bmd item file cannot hold; not exported", i, field);
+            return false;
+        }
+    }
 
     FILE* fp = _wfopen(fileName, L"wb");
     if (fp == NULL)

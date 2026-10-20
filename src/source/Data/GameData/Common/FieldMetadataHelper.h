@@ -26,6 +26,7 @@ enum class EFieldType
 #define FIELD_TYPE_Word WORD
 #define FIELD_TYPE_Int int
 #define FIELD_TYPE_DWord DWORD
+#define FIELD_TYPE_Stat WORD
 
 // ============================================================================
 // GENERIC FIELD DESCRIPTOR
