@@ -436,10 +436,11 @@ void HoldSettingsWhileFullscreen()
     {
         if (MuEditor::PlatformWindows::IsFullscreen(SdlWindowOf(platformIO.Viewports[i])))
         {
+            // NewFrame takes the frame's time off first, however long it was.
             ImGuiContext& context = *ImGui::GetCurrentContext();
             if (context.SettingsDirtyTimer > 0.0f)
             {
-                context.SettingsDirtyTimer = context.IO.IniSavingRate;
+                context.SettingsDirtyTimer = context.IO.IniSavingRate + context.IO.DeltaTime;
             }
             return;
         }
