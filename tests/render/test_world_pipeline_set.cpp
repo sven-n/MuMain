@@ -44,6 +44,21 @@ TEST_CASE("world pipeline set selects depth state before culling [render][world_
     CHECK(filled.set.Select(0, true, true, false)->id == 10);
 }
 
+TEST_CASE("a depth-writing pipeline maps to the read-only pipeline of its blend mode [render][world_pipeline_set]")
+{
+    const FilledSet filled;
+
+    CHECK(filled.set.DepthReadOnlyFor(&filled.culled[1], 1)->id == 31);
+    CHECK(filled.set.DepthReadOnlyFor(&filled.noCull[0], 0)->id == 30);
+    // Another blend mode's pipeline, a state that writes no depth, a foreign or no pipeline: none.
+    CHECK_FALSE(filled.set.DepthReadOnlyFor(&filled.culled[1], 0));
+    CHECK_FALSE(filled.set.DepthReadOnlyFor(&filled.depthOff[0], 0));
+    CHECK_FALSE(filled.set.DepthReadOnlyFor(&filled.depthReadOnly[0], 0));
+    const FakePipeline foreign{99};
+    CHECK_FALSE(filled.set.DepthReadOnlyFor(&foreign, 0));
+    CHECK_FALSE(filled.set.DepthReadOnlyFor(nullptr, 0));
+}
+
 TEST_CASE("world pipeline set is complete only with every state of every blend mode [render][world_pipeline_set]")
 {
     FilledSet filled;

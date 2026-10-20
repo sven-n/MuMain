@@ -109,36 +109,57 @@ string(REGEX MATCHALL "buildRequiredPipeline[ \t\r\n]*\\(" required_calls "${cre
 string(REGEX MATCHALL "buildOptionalPipeline[ \t\r\n]*\\(" optional_calls "${create_source}")
 list(LENGTH required_calls required_call_count)
 list(LENGTH optional_calls optional_call_count)
-# Nine required Classic sets; optional: the 2D depth-on set, the two GPU body-shadow sets, and the four
-# calls of one Enhanced lighting family (buildEnhancedSet), which builds the three Enhanced families.
-if(NOT required_call_count EQUAL 9 OR NOT optional_call_count EQUAL 7)
-    message(FATAL_ERROR "CreatePipelines must build exactly nine required sets and the optional 2D, shadow and Enhanced sets")
+# Required: the 2D depth-off set and the world sets' required build. Optional: the 2D depth-on set,
+# the two GPU body-shadow sets and the world sets' optional build.
+if(NOT required_call_count EQUAL 2 OR NOT optional_call_count EQUAL 4)
+    message(FATAL_ERROR "CreatePipelines must build the required 2D and world sets and the optional 2D, shadow and world sets")
 endif()
-string(REGEX MATCHALL "buildEnhancedSet[ \t\r\n]*\\([ \t\r\n]*s_pipelines[A-Za-z0-9]+" enhanced_calls "${create_source}")
-set(expected_enhanced_calls)
-foreach(enhanced_set IN ITEMS s_pipelines3DEnhancedFog s_pipelinesSkinnedEnhancedFog s_pipelinesSkinnedLit)
-    string(REGEX MATCH "buildEnhancedSet[ \t\r\n]*\\([ \t\r\n]*${enhanced_set}[ \t\r\n]*," enhanced_call "${create_source}")
-    if(NOT enhanced_call)
-        message(FATAL_ERROR "CreatePipelines must build the Enhanced lighting set ${enhanced_set}")
-    endif()
-endforeach()
-list(LENGTH enhanced_calls enhanced_call_count)
-if(NOT enhanced_call_count EQUAL 3)
-    message(FATAL_ERROR "CreatePipelines must build exactly three Enhanced lighting sets")
-endif()
-require_source("${create_source}" "s_enhancedLightingAvailable[ \t\r\n]*=[^;]*IsComplete"
+
+# Every world set is one row of WorldPipelineSets(): its pipelines' name prefix, layout, fragment shader
+# and family. The Classic family is required; Enhanced lighting is one optional family.
+function(require_world_set set name layout fragment family)
+    string(CONCAT pattern
+        "\\{[ \t\r\n]*&${set}[ \t\r\n]*,[ \t\r\n]*\"${name}\"[ \t\r\n]*,[ \t\r\n]*VertexLayout::${layout}[ \t\r\n]*,[ \t\r\n]*"
+        "FragmentShader::${fragment}[ \t\r\n]*,[ \t\r\n]*WorldSetFamily::${family}[ \t\r\n]*\\}")
+    require_source("${renderer_source}" "${pattern}"
+        "${set} must remain the world set ${name} (${layout}, ${fragment}, ${family})")
+endfunction()
+require_world_set(s_pipelines3D "3d" ThreeDimensional Textured Classic)
+require_world_set(s_pipelinesSkinned "skinned" Skinned Textured Classic)
+require_world_set(s_pipelines3DEnhancedFog "3d-enhanced-fog" ThreeDimensional TexturedEnhancedFog EnhancedLighting)
+require_world_set(s_pipelinesSkinnedEnhancedFog "skinned-enhanced-fog" Skinned TexturedEnhancedFog EnhancedLighting)
+require_world_set(s_pipelinesSkinnedLit "skinned-lit" Skinned SkinnedLit EnhancedLighting)
+
+# The four depth/cull states every world set is built in: suffix, depth test, depth write, culling.
+function(require_world_state member suffix depth_test depth_write cull)
+    string(CONCAT pattern
+        "\\{[ \t\r\n]*&WorldPipelines::${member}[ \t\r\n]*,[ \t\r\n]*\"${suffix}\"[ \t\r\n]*,[ \t\r\n]*"
+        "${depth_test}[ \t\r\n]*,[ \t\r\n]*${depth_write}[ \t\r\n]*,[ \t\r\n]*${cull}[ \t\r\n]*\\}")
+    require_source("${renderer_source}" "${pattern}"
+        "the world state ${member} must remain ${suffix} with its exact depth and cull state")
+endfunction()
+require_world_state(culled "culled" true true true)
+require_world_state(noCull "no-cull" true true false)
+require_world_state(depthOff "depth-off" false false false)
+require_world_state(depthReadOnly "depth-read-only" true false false)
+
+require_source("${create_source}"
+    "for[ \t\r\n]*\\([ \t\r\n]*const[ \t\r\n]+WorldPipelineSetSpec&[ \t\r\n]+spec[ \t\r\n]*:[ \t\r\n]*WorldPipelineSets\\(\\)[ \t\r\n]*\\)[ \t\r\n]*\\{[ \t\r\n]*buildWorldSet\\("
+    "CreatePipelines must build every world set of WorldPipelineSets()")
+require_source("${create_source}"
+    "required[ \t\r\n]*=[ \t\r\n]*spec\\.family[ \t\r\n]*==[ \t\r\n]*WorldSetFamily::Classic;"
+    "the Classic world sets must be the required ones")
+require_source("${create_source}"
+    "if[ \t\r\n]*\\([ \t\r\n]*!required[ \t\r\n]*&&[ \t\r\n]*!GetFragmentShader\\(spec\\.fragmentShader\\)[ \t\r\n]*\\)"
+    "an optional world set must be skipped without its fragment shader")
+require_source("${create_source}"
+    "s_enhancedLightingAvailable[ \t\r\n]*=[ \t\r\n]*IsWorldFamilyComplete\\(WorldSetFamily::EnhancedLighting\\)"
     "Enhanced lighting must be available only when every Enhanced set is complete")
+require_source("${renderer_source}" "spec\\.family[ \t\r\n]*!=[ \t\r\n]*family[ \t\r\n]*\\|\\|[ \t\r\n]*spec\\.set->IsComplete\\(\\)"
+    "a world family is complete only when each of its sets is")
 
 require_pipeline_descriptor(buildOptionalPipeline s_pipelines2D "2d-depth-on" true true TwoDimensional false)
 require_pipeline_descriptor(buildRequiredPipeline s_pipelines2DDepthOff "2d-depth-off" false false TwoDimensional false)
-require_pipeline_descriptor(buildRequiredPipeline s_pipelines3D "3d-culled" true true ThreeDimensional true)
-require_pipeline_descriptor(buildRequiredPipeline s_pipelines3DNoCull "3d-no-cull" true true ThreeDimensional false)
-require_pipeline_descriptor(buildRequiredPipeline s_pipelines3DDepthOff "3d-depth-off" false false ThreeDimensional false)
-require_pipeline_descriptor(buildRequiredPipeline s_pipelines3DDepthReadOnly "3d-depth-read-only" true false ThreeDimensional false)
-require_pipeline_descriptor(buildRequiredPipeline s_pipelinesSkinned "skinned-culled" true true Skinned true)
-require_pipeline_descriptor(buildRequiredPipeline s_pipelinesSkinnedNoCull "skinned-no-cull" true true Skinned false)
-require_pipeline_descriptor(buildRequiredPipeline s_pipelinesSkinnedDepthOff "skinned-depth-off" false false Skinned false)
-require_pipeline_descriptor(buildRequiredPipeline s_pipelinesSkinnedDepthReadOnly "skinned-depth-read-only" true false Skinned false)
 require_pipeline_descriptor(buildOptionalPipeline s_pipelinesSkinnedShadow "skinned-shadow" true false SkinnedShadow false)
 require_pipeline_descriptor(buildOptionalPipeline s_pipelinesSkinnedShadowDepthOff "skinned-shadow-depth-off" false false SkinnedShadow false)
 reject_source("${create_source}" "if[ \t\r\n]*\\([ \t\r\n]*s_vertShaderSkinned[ \t\r\n]*\\)"

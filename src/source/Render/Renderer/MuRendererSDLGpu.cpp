@@ -11,7 +11,7 @@
 //   - BeginFrame() / EndFrame() are instance methods called from MuMain.cpp game loop.
 //   - Real HLSL shaders loaded from MU_SHADER_DIR blobs (set by CMake).
 //   - Fog uniform buffer (s_fogUniformBuf) is created in Init() and updated in SetFog().
-//   - Separate 2D/3D pipeline sets: s_pipelines2D / s_pipelines3D.
+//   - Separate 2D/3D pipeline sets: s_pipelines2D / the world sets (WorldPipelineSets()).
 //   - Deferred draw command recording: vertices collected during frame, copied to GPU
 //     in EndFrame() BEFORE the render pass, then draw commands replayed.
 //
@@ -139,7 +139,7 @@ constexpr Uint32 k_FragmentUniformSlotFog = 0u;
 constexpr Uint32 k_FragmentUniformSlotSceneLighting = 1u;
 constexpr Uint32 k_FragmentUniformSlotDynamicLights = 2u;
 
-using EnhancedPipelineSet = Render::WorldPipelineSet<SDL_GPUGraphicsPipeline, k_PipelineCount>;
+using WorldPipelines = Render::WorldPipelineSet<SDL_GPUGraphicsPipeline, k_PipelineCount>;
 
 // skinned_shadow.vert's Shadow cbuffer.
 struct ShadowVertexUniforms
@@ -571,34 +571,27 @@ static void ConfigureD3D12Diagnostics(const char* driverName)
     }
 }
 
-// Separate pipeline sets for 2D (Vertex2D) and 3D (Vertex3D) geometry.
-// DepthReadOnly variants (depth test ON, depth write OFF) support particles.
+// Pipeline sets, one pipeline per blend mode: the index matches BlendMode cast to int; index 8 =
+// disabled (no-blend).
 // s_pipelines2D: depth ON (test+write), Vertex2D layout (pitch=20).
 // s_pipelines2DDepthOff: depth OFF, Vertex2D layout.
-// s_pipelines3D: depth ON (test+write), Vertex3D layout (pitch=40).
-// s_pipelines3DDepthOff: depth OFF, Vertex3D layout.
-// s_pipelines3DDepthReadOnly: depth test ON, write OFF — for transparent/additive particles.
-// Index matches BlendMode enum cast to int; index 8 = disabled (no-blend).
 static SDL_GPUGraphicsPipeline* s_pipelines2D[k_PipelineCount] = {};
 static SDL_GPUGraphicsPipeline* s_pipelines2DDepthOff[k_PipelineCount] = {};
-static SDL_GPUGraphicsPipeline* s_pipelines3D[k_PipelineCount] = {};
-static SDL_GPUGraphicsPipeline* s_pipelines3DNoCull[k_PipelineCount] = {};
-static SDL_GPUGraphicsPipeline* s_pipelines3DDepthOff[k_PipelineCount] = {};
-static SDL_GPUGraphicsPipeline* s_pipelines3DDepthReadOnly[k_PipelineCount] = {};
-static SDL_GPUGraphicsPipeline* s_pipelinesSkinned[k_PipelineCount] = {};
-static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedNoCull[k_PipelineCount] = {};
-static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedDepthOff[k_PipelineCount] = {};
-static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedDepthReadOnly[k_PipelineCount] = {};
 // Body shadows (skinned_shadow.vert): the depth states RenderBodyShadow() draws with.
 static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedShadow[k_PipelineCount] = {};
 static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedShadowDepthOff[k_PipelineCount] = {};
 
+// The world sets: 3D (Vertex3D, pitch=40) and GPU-skinned geometry in the four depth/cull states,
+// depth-read-only for transparent and additive draws such as particles. Every world set is listed
+// once in WorldPipelineSets(), from which they are built, released and enumerated.
+static WorldPipelines s_pipelines3D;
+static WorldPipelines s_pipelinesSkinned;
 // Enhanced lighting: per-pixel exponential fog for 3D and unlit skinned draws, per-pixel lighting
 // for lit skinned draws. Optional — when any is incomplete, Enhanced lighting stays unavailable and
 // every draw keeps the Classic sets above.
-static EnhancedPipelineSet s_pipelines3DEnhancedFog;
-static EnhancedPipelineSet s_pipelinesSkinnedEnhancedFog;
-static EnhancedPipelineSet s_pipelinesSkinnedLit;
+static WorldPipelines s_pipelines3DEnhancedFog;
+static WorldPipelines s_pipelinesSkinnedEnhancedFog;
+static WorldPipelines s_pipelinesSkinnedLit;
 static bool s_enhancedLightingAvailable = false;
 static bool s_enhancedLightingEnabled = false;
 // The frame's scene lighting, pushed once per render pass to fragment uniform slot 1.
@@ -615,11 +608,10 @@ static mu::PostProcessingView s_postProcessingView = mu::PostProcessingView::Sce
 static Render::PostProcessing::SceneBoundary s_sceneBoundary;
 static int s_bloomExclusionDepth = 0;
 
-// Alpha-to-coverage variants of the depth-writing 3D and skinned pipelines,
-// used while anti-aliasing is on by alpha-tested cutout draws (foliage, hair,
-// fences) instead of their alpha test with blending: see ChooseAlphaCoverage.
-// Each variant replaces the set's blending-off and Alpha-blend pipelines; it
-// is built only multisampled.
+// Alpha-to-coverage variants of the depth-writing world pipelines (each world set's culled and
+// no-cull states), used while anti-aliasing is on by alpha-tested cutout draws (foliage, hair,
+// fences) instead of their alpha test with blending: see ChooseAlphaCoverage. Each variant
+// replaces its state's blending-off and Alpha-blend pipelines; they exist only multisampled.
 struct AlphaCoveragePipeline
 {
     SDL_GPUGraphicsPipeline** opaque;
@@ -627,21 +619,7 @@ struct AlphaCoveragePipeline
     SDL_GPUGraphicsPipeline* variant;
 };
 constexpr int k_PipelineAlpha = static_cast<int>(mu::BlendMode::Alpha);
-static AlphaCoveragePipeline s_alphaCoveragePipelines[] = {
-    {&s_pipelines3D[k_PipelineDisabled], &s_pipelines3D[k_PipelineAlpha], nullptr},
-    {&s_pipelines3DNoCull[k_PipelineDisabled], &s_pipelines3DNoCull[k_PipelineAlpha], nullptr},
-    {&s_pipelinesSkinned[k_PipelineDisabled], &s_pipelinesSkinned[k_PipelineAlpha], nullptr},
-    {&s_pipelinesSkinnedNoCull[k_PipelineDisabled], &s_pipelinesSkinnedNoCull[k_PipelineAlpha], nullptr},
-    // Enhanced lighting's sets, when they were built.
-    {&s_pipelines3DEnhancedFog.culled[k_PipelineDisabled], &s_pipelines3DEnhancedFog.culled[k_PipelineAlpha], nullptr},
-    {&s_pipelines3DEnhancedFog.noCull[k_PipelineDisabled], &s_pipelines3DEnhancedFog.noCull[k_PipelineAlpha], nullptr},
-    {&s_pipelinesSkinnedEnhancedFog.culled[k_PipelineDisabled], &s_pipelinesSkinnedEnhancedFog.culled[k_PipelineAlpha],
-     nullptr},
-    {&s_pipelinesSkinnedEnhancedFog.noCull[k_PipelineDisabled], &s_pipelinesSkinnedEnhancedFog.noCull[k_PipelineAlpha],
-     nullptr},
-    {&s_pipelinesSkinnedLit.culled[k_PipelineDisabled], &s_pipelinesSkinnedLit.culled[k_PipelineAlpha], nullptr},
-    {&s_pipelinesSkinnedLit.noCull[k_PipelineDisabled], &s_pipelinesSkinnedLit.noCull[k_PipelineAlpha], nullptr},
-};
+static std::vector<AlphaCoveragePipeline> s_alphaCoveragePipelines;
 
 // Single pre-frame vertex upload.
 // Draws accumulate in growable CPU memory before one GPU upload.
@@ -2290,27 +2268,11 @@ public:
         }
 
         const auto index = static_cast<std::size_t>(command.blendMode);
-        struct DepthWritingSet
+        for (const WorldPipelineSetSpec& spec : WorldPipelineSets())
         {
-            SDL_GPUGraphicsPipeline* culled;
-            SDL_GPUGraphicsPipeline* noCull;
-            SDL_GPUGraphicsPipeline* readOnly;
-        };
-        const DepthWritingSet sets[] = {
-            {s_pipelines3D[index], s_pipelines3DNoCull[index], s_pipelines3DDepthReadOnly[index]},
-            {s_pipelinesSkinned[index], s_pipelinesSkinnedNoCull[index], s_pipelinesSkinnedDepthReadOnly[index]},
-            {s_pipelines3DEnhancedFog.culled[index], s_pipelines3DEnhancedFog.noCull[index],
-             s_pipelines3DEnhancedFog.depthReadOnly[index]},
-            {s_pipelinesSkinnedEnhancedFog.culled[index], s_pipelinesSkinnedEnhancedFog.noCull[index],
-             s_pipelinesSkinnedEnhancedFog.depthReadOnly[index]},
-            {s_pipelinesSkinnedLit.culled[index], s_pipelinesSkinnedLit.noCull[index],
-             s_pipelinesSkinnedLit.depthReadOnly[index]},
-        };
-        for (const DepthWritingSet& set : sets)
-        {
-            if (command.pipeline && (command.pipeline == set.culled || command.pipeline == set.noCull))
+            if (SDL_GPUGraphicsPipeline* readOnly = spec.set->DepthReadOnlyFor(command.pipeline, index))
             {
-                return set.readOnly;
+                return readOnly;
             }
         }
         return nullptr;
@@ -5000,21 +4962,13 @@ private:
 
         const int pipelineIdx = GetActivePipelineIndex();
         const bool cullFaceEnabled = m_cullFaceEnabled && !s_disableD3D12Culling;
-        SDL_GPUGraphicsPipeline* pipeline =
-            m_depthTestEnabled
-                ? (m_depthMaskEnabled
-                       ? (cullFaceEnabled ? s_pipelinesSkinned[pipelineIdx] : s_pipelinesSkinnedNoCull[pipelineIdx])
-                       : s_pipelinesSkinnedDepthReadOnly[pipelineIdx])
-                : s_pipelinesSkinnedDepthOff[pipelineIdx];
         const bool enhanced = !shadow && UsesEnhancedLighting();
         const bool enhancedLit = enhanced && parameters.lightEnabled;
-        if (enhanced)
-        {
-            const EnhancedPipelineSet& enhancedSet =
-                enhancedLit ? s_pipelinesSkinnedLit : s_pipelinesSkinnedEnhancedFog;
-            pipeline = enhancedSet.Select(static_cast<std::size_t>(pipelineIdx), m_depthTestEnabled, m_depthMaskEnabled,
-                                          cullFaceEnabled);
-        }
+        const WorldPipelines& set = !enhanced     ? s_pipelinesSkinned
+                                    : enhancedLit ? s_pipelinesSkinnedLit
+                                                  : s_pipelinesSkinnedEnhancedFog;
+        SDL_GPUGraphicsPipeline* pipeline =
+            set.Select(static_cast<std::size_t>(pipelineIdx), m_depthTestEnabled, m_depthMaskEnabled, cullFaceEnabled);
         // One colour for the whole draw: its alpha is the vertices' alpha.
         const AlphaCoverageChoice coverage =
             shadow ? AlphaCoverageChoice{pipeline, false}
@@ -5230,22 +5184,9 @@ private:
 
     [[nodiscard]] SDL_GPUGraphicsPipeline* GetActive3DPipeline() const
     {
-        const int pipelineIdx = GetActivePipelineIndex();
-        if (UsesEnhancedLighting())
-        {
-            return s_pipelines3DEnhancedFog.Select(static_cast<std::size_t>(pipelineIdx), m_depthTestEnabled,
-                                                   m_depthMaskEnabled, m_cullFaceEnabled && !s_disableD3D12Culling);
-        }
-        if (!m_depthTestEnabled)
-        {
-            return s_pipelines3DDepthOff[pipelineIdx];
-        }
-        if (!m_depthMaskEnabled)
-        {
-            return s_pipelines3DDepthReadOnly[pipelineIdx];
-        }
-        return m_cullFaceEnabled && !s_disableD3D12Culling ? s_pipelines3D[pipelineIdx]
-                                                           : s_pipelines3DNoCull[pipelineIdx];
+        const WorldPipelines& set = UsesEnhancedLighting() ? s_pipelines3DEnhancedFog : s_pipelines3D;
+        return set.Select(static_cast<std::size_t>(GetActivePipelineIndex()), m_depthTestEnabled, m_depthMaskEnabled,
+                          m_cullFaceEnabled && !s_disableD3D12Culling);
     }
 
     // Alpha-to-coverage for an alpha-tested cutout while anti-aliasing is on
@@ -5631,6 +5572,78 @@ private:
         bool alphaToCoverage = false;
     };
 
+    // The world sets built together, and what a failed pipeline means for them.
+    enum class WorldSetFamily
+    {
+        Classic,          // required: a failed pipeline fails the renderer
+        EnhancedLighting, // optional: Enhanced lighting is available only when every set of it is complete
+    };
+
+    // One world set: the four depth/cull states of 3D or skinned world geometry with one fragment
+    // shader. Its pipelines are named "<name>-culled", "<name>-no-cull", "<name>-depth-off" and
+    // "<name>-depth-read-only", its alpha-to-coverage variants "<name>-culled-alpha-coverage" and
+    // "<name>-no-cull-alpha-coverage".
+    struct WorldPipelineSetSpec
+    {
+        WorldPipelines* set;
+        const char* name;
+        VertexLayout vertexLayout;
+        FragmentShader fragmentShader;
+        WorldSetFamily family;
+    };
+
+    // Every world set. Building, releasing, the replay slots, the alpha-to-coverage variants and the
+    // bloom sources all walk this list, so a new world set is one row here.
+    [[nodiscard]] static std::span<const WorldPipelineSetSpec> WorldPipelineSets()
+    {
+        static constexpr WorldPipelineSetSpec sets[] = {
+            {&s_pipelines3D, "3d", VertexLayout::ThreeDimensional, FragmentShader::Textured, WorldSetFamily::Classic},
+            {&s_pipelinesSkinned, "skinned", VertexLayout::Skinned, FragmentShader::Textured, WorldSetFamily::Classic},
+            {&s_pipelines3DEnhancedFog, "3d-enhanced-fog", VertexLayout::ThreeDimensional,
+             FragmentShader::TexturedEnhancedFog, WorldSetFamily::EnhancedLighting},
+            {&s_pipelinesSkinnedEnhancedFog, "skinned-enhanced-fog", VertexLayout::Skinned,
+             FragmentShader::TexturedEnhancedFog, WorldSetFamily::EnhancedLighting},
+            {&s_pipelinesSkinnedLit, "skinned-lit", VertexLayout::Skinned, FragmentShader::SkinnedLit,
+             WorldSetFamily::EnhancedLighting},
+        };
+        return sets;
+    }
+
+    // The depth/cull states of every world set, with their name suffix and pipeline state.
+    struct WorldStateSpec
+    {
+        WorldPipelines::States WorldPipelines::* states;
+        const char* suffix;
+        bool depthTestEnabled;
+        bool depthWriteEnabled;
+        bool cullFaceEnabled;
+    };
+    static constexpr WorldStateSpec kWorldStates[] = {
+        {&WorldPipelines::culled, "culled", true, true, true},
+        {&WorldPipelines::noCull, "no-cull", true, true, false},
+        {&WorldPipelines::depthOff, "depth-off", false, false, false},
+        {&WorldPipelines::depthReadOnly, "depth-read-only", true, false, false},
+    };
+
+    [[nodiscard]] static bool IsWorldFamilyComplete(WorldSetFamily family)
+    {
+        return std::ranges::all_of(WorldPipelineSets(), [family](const WorldPipelineSetSpec& spec)
+                                   { return spec.family != family || spec.set->IsComplete(); });
+    }
+
+    static void ReleaseWorldFamily(WorldSetFamily family)
+    {
+        const auto release = [](SDL_GPUGraphicsPipeline* pipeline)
+        { SDL_ReleaseGPUGraphicsPipeline(s_device, pipeline); };
+        for (const WorldPipelineSetSpec& spec : WorldPipelineSets())
+        {
+            if (spec.family == family)
+            {
+                spec.set->Release(release);
+            }
+        }
+    }
+
     [[nodiscard]] static SDL_GPUShader* GetFragmentShader(FragmentShader shader)
     {
         switch (shader)
@@ -5973,38 +5986,38 @@ private:
             }
         };
 
-        struct EnhancedSetNames
+        // A Classic set is required; an optional family is skipped without its fragment shader.
+        const auto buildWorldSet = [&](const WorldPipelineSetSpec& spec, SDL_GPUColorTargetBlendState blendState,
+                                       int blendIndex, const char* blendName)
         {
-            const char* culled;
-            const char* noCull;
-            const char* depthOff;
-            const char* depthReadOnly;
-        };
-        const auto buildEnhancedSet = [&](EnhancedPipelineSet& set, SDL_GPUColorTargetBlendState blendState,
-                                          int blendIndex, const char* blendName, VertexLayout layout,
-                                          FragmentShader fragment, const EnhancedSetNames& names)
-        {
-            if (!GetFragmentShader(fragment))
+            const bool required = spec.family == WorldSetFamily::Classic;
+            if (!required && !GetFragmentShader(spec.fragmentShader))
             {
                 return;
             }
             const auto index = static_cast<std::size_t>(blendIndex);
-            buildOptionalPipeline(set.culled[index], blendState,
-                                  {names.culled, blendName, blendIndex, true, true, layout, true, fragment});
-            buildOptionalPipeline(set.noCull[index], blendState,
-                                  {names.noCull, blendName, blendIndex, true, true, layout, false, fragment});
-            buildOptionalPipeline(set.depthOff[index], blendState,
-                                  {names.depthOff, blendName, blendIndex, false, false, layout, false, fragment});
-            buildOptionalPipeline(set.depthReadOnly[index], blendState,
-                                  {names.depthReadOnly, blendName, blendIndex, true, false, layout, false, fragment});
+            for (const WorldStateSpec& state : kWorldStates)
+            {
+                const std::string setName = std::string(spec.name) + "-" + state.suffix;
+                const PipelineBuildDescription description{setName.c_str(),
+                                                           blendName,
+                                                           blendIndex,
+                                                           state.depthTestEnabled,
+                                                           state.depthWriteEnabled,
+                                                           spec.vertexLayout,
+                                                           state.cullFaceEnabled,
+                                                           spec.fragmentShader};
+                SDL_GPUGraphicsPipeline*& destination = (spec.set->*state.states)[index];
+                if (required)
+                {
+                    buildRequiredPipeline(destination, blendState, description);
+                }
+                else
+                {
+                    buildOptionalPipeline(destination, blendState, description);
+                }
+            }
         };
-        constexpr EnhancedSetNames k3DEnhancedFogNames{"3d-enhanced-fog-culled", "3d-enhanced-fog-no-cull",
-                                                       "3d-enhanced-fog-depth-off", "3d-enhanced-fog-depth-read-only"};
-        constexpr EnhancedSetNames kSkinnedEnhancedFogNames{
-            "skinned-enhanced-fog-culled", "skinned-enhanced-fog-no-cull", "skinned-enhanced-fog-depth-off",
-            "skinned-enhanced-fog-depth-read-only"};
-        constexpr EnhancedSetNames kSkinnedLitNames{"skinned-lit-culled", "skinned-lit-no-cull",
-                                                    "skinned-lit-depth-off", "skinned-lit-depth-read-only"};
 
         for (int i = 0; i < k_PipelineCount; ++i)
         {
@@ -6022,26 +6035,10 @@ private:
             buildRequiredPipeline(
                 s_pipelines2DDepthOff[i], blendState,
                 {"2d-depth-off", table[i].name, i, false, false, VertexLayout::TwoDimensional, false});
-            buildRequiredPipeline(s_pipelines3D[i], blendState,
-                                  {"3d-culled", table[i].name, i, true, true, VertexLayout::ThreeDimensional, true});
-            buildRequiredPipeline(s_pipelines3DNoCull[i], blendState,
-                                  {"3d-no-cull", table[i].name, i, true, true, VertexLayout::ThreeDimensional, false});
-            buildRequiredPipeline(
-                s_pipelines3DDepthOff[i], blendState,
-                {"3d-depth-off", table[i].name, i, false, false, VertexLayout::ThreeDimensional, false});
-            buildRequiredPipeline(
-                s_pipelines3DDepthReadOnly[i], blendState,
-                {"3d-depth-read-only", table[i].name, i, true, false, VertexLayout::ThreeDimensional, false});
-
-            buildRequiredPipeline(s_pipelinesSkinned[i], blendState,
-                                  {"skinned-culled", table[i].name, i, true, true, VertexLayout::Skinned, true});
-            buildRequiredPipeline(s_pipelinesSkinnedNoCull[i], blendState,
-                                  {"skinned-no-cull", table[i].name, i, true, true, VertexLayout::Skinned, false});
-            buildRequiredPipeline(s_pipelinesSkinnedDepthOff[i], blendState,
-                                  {"skinned-depth-off", table[i].name, i, false, false, VertexLayout::Skinned, false});
-            buildRequiredPipeline(
-                s_pipelinesSkinnedDepthReadOnly[i], blendState,
-                {"skinned-depth-read-only", table[i].name, i, true, false, VertexLayout::Skinned, false});
+            for (const WorldPipelineSetSpec& spec : WorldPipelineSets())
+            {
+                buildWorldSet(spec, blendState, i, table[i].name);
+            }
 
             if (s_vertShaderSkinnedShadow)
             {
@@ -6052,16 +6049,9 @@ private:
                     s_pipelinesSkinnedShadowDepthOff[i], blendState,
                     {"skinned-shadow-depth-off", table[i].name, i, false, false, VertexLayout::SkinnedShadow, false});
             }
-            buildEnhancedSet(s_pipelines3DEnhancedFog, blendState, i, table[i].name, VertexLayout::ThreeDimensional,
-                             FragmentShader::TexturedEnhancedFog, k3DEnhancedFogNames);
-            buildEnhancedSet(s_pipelinesSkinnedEnhancedFog, blendState, i, table[i].name, VertexLayout::Skinned,
-                             FragmentShader::TexturedEnhancedFog, kSkinnedEnhancedFogNames);
-            buildEnhancedSet(s_pipelinesSkinnedLit, blendState, i, table[i].name, VertexLayout::Skinned,
-                             FragmentShader::SkinnedLit, kSkinnedLitNames);
         }
 
-        s_enhancedLightingAvailable = s_pipelines3DEnhancedFog.IsComplete() &&
-                                      s_pipelinesSkinnedEnhancedFog.IsComplete() && s_pipelinesSkinnedLit.IsComplete();
+        s_enhancedLightingAvailable = IsWorldFamilyComplete(WorldSetFamily::EnhancedLighting);
         if (s_enhancedLightingAvailable)
         {
             mu::log::Get("render")->info("SDL_gpu -- Enhanced lighting pipelines ready for driver {}", driverName);
@@ -6085,11 +6075,7 @@ private:
 
     static void DestroyEnhancedPipelines()
     {
-        const auto release = [](SDL_GPUGraphicsPipeline* pipeline)
-        { SDL_ReleaseGPUGraphicsPipeline(s_device, pipeline); };
-        s_pipelines3DEnhancedFog.Release(release);
-        s_pipelinesSkinnedEnhancedFog.Release(release);
-        s_pipelinesSkinnedLit.Release(release);
+        ReleaseWorldFamily(WorldSetFamily::EnhancedLighting);
         s_enhancedLightingAvailable = false;
     }
 
@@ -6098,67 +6084,17 @@ private:
         DestroySingleSamplePipelines();
         s_pipelinesMultisampled = false;
         DestroyEnhancedPipelines();
-        for (int i = 0; i < k_PipelineCount; ++i)
+        ReleaseWorldFamily(WorldSetFamily::Classic);
+        for (SDL_GPUGraphicsPipeline** set :
+             {s_pipelines2D, s_pipelines2DDepthOff, s_pipelinesSkinnedShadow, s_pipelinesSkinnedShadowDepthOff})
         {
-            if (s_pipelines2D[i])
+            for (int i = 0; i < k_PipelineCount; ++i)
             {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelines2D[i]);
-                s_pipelines2D[i] = nullptr;
-            }
-            if (s_pipelines2DDepthOff[i])
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelines2DDepthOff[i]);
-                s_pipelines2DDepthOff[i] = nullptr;
-            }
-            if (s_pipelines3D[i])
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelines3D[i]);
-                s_pipelines3D[i] = nullptr;
-            }
-            if (s_pipelines3DNoCull[i])
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelines3DNoCull[i]);
-                s_pipelines3DNoCull[i] = nullptr;
-            }
-            if (s_pipelines3DDepthOff[i])
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelines3DDepthOff[i]);
-                s_pipelines3DDepthOff[i] = nullptr;
-            }
-            if (s_pipelines3DDepthReadOnly[i])
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelines3DDepthReadOnly[i]);
-                s_pipelines3DDepthReadOnly[i] = nullptr;
-            }
-            if (s_pipelinesSkinned[i])
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelinesSkinned[i]);
-                s_pipelinesSkinned[i] = nullptr;
-            }
-            if (s_pipelinesSkinnedNoCull[i])
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelinesSkinnedNoCull[i]);
-                s_pipelinesSkinnedNoCull[i] = nullptr;
-            }
-            if (s_pipelinesSkinnedDepthOff[i])
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelinesSkinnedDepthOff[i]);
-                s_pipelinesSkinnedDepthOff[i] = nullptr;
-            }
-            if (s_pipelinesSkinnedDepthReadOnly[i])
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelinesSkinnedDepthReadOnly[i]);
-                s_pipelinesSkinnedDepthReadOnly[i] = nullptr;
-            }
-            if (s_pipelinesSkinnedShadow[i])
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelinesSkinnedShadow[i]);
-                s_pipelinesSkinnedShadow[i] = nullptr;
-            }
-            if (s_pipelinesSkinnedShadowDepthOff[i])
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelinesSkinnedShadowDepthOff[i]);
-                s_pipelinesSkinnedShadowDepthOff[i] = nullptr;
+                if (set[i])
+                {
+                    SDL_ReleaseGPUGraphicsPipeline(s_device, set[i]);
+                    set[i] = nullptr;
+                }
             }
         }
         DestroyAlphaCoveragePipelines();
@@ -6307,21 +6243,18 @@ private:
     {
         std::vector<SDL_GPUGraphicsPipeline**> slots;
         for (SDL_GPUGraphicsPipeline** set :
-             {s_pipelines2D, s_pipelines2DDepthOff, s_pipelines3D, s_pipelines3DNoCull, s_pipelines3DDepthOff,
-              s_pipelines3DDepthReadOnly, s_pipelinesSkinned, s_pipelinesSkinnedNoCull, s_pipelinesSkinnedDepthOff,
-              s_pipelinesSkinnedDepthReadOnly, s_pipelinesSkinnedShadow, s_pipelinesSkinnedShadowDepthOff})
+             {s_pipelines2D, s_pipelines2DDepthOff, s_pipelinesSkinnedShadow, s_pipelinesSkinnedShadowDepthOff})
         {
             for (int i = 0; i < k_PipelineCount; ++i)
             {
                 slots.push_back(&set[i]);
             }
         }
-        for (EnhancedPipelineSet* set :
-             {&s_pipelines3DEnhancedFog, &s_pipelinesSkinnedEnhancedFog, &s_pipelinesSkinnedLit})
+        for (const WorldPipelineSetSpec& spec : WorldPipelineSets())
         {
-            for (auto* states : {&set->culled, &set->noCull, &set->depthOff, &set->depthReadOnly})
+            for (const WorldStateSpec& state : kWorldStates)
             {
-                for (SDL_GPUGraphicsPipeline*& pipeline : *states)
+                for (SDL_GPUGraphicsPipeline*& pipeline : spec.set->*state.states)
                 {
                     slots.push_back(&pipeline);
                 }
@@ -6420,39 +6353,11 @@ private:
     // Optional: a variant that fails leaves its draws on the opaque pipeline.
     static void CreateAlphaCoveragePipelines()
     {
+        DestroyAlphaCoveragePipelines();
         if (s_sampleCount == Render::Antialiasing::OffSampleCount)
         {
             return;
         }
-
-        struct VariantDescription
-        {
-            const char* setName;
-            bool depthTestEnabled;
-            bool depthWriteEnabled;
-            VertexLayout vertexLayout;
-            bool cullFaceEnabled;
-            FragmentShader fragmentShader;
-        };
-        // Same order as s_alphaCoveragePipelines.
-        static constexpr VariantDescription descriptions[] = {
-            {"3d-culled-alpha-coverage", true, true, VertexLayout::ThreeDimensional, true, FragmentShader::Textured},
-            {"3d-no-cull-alpha-coverage", true, true, VertexLayout::ThreeDimensional, false, FragmentShader::Textured},
-            {"skinned-culled-alpha-coverage", true, true, VertexLayout::Skinned, true, FragmentShader::Textured},
-            {"skinned-no-cull-alpha-coverage", true, true, VertexLayout::Skinned, false, FragmentShader::Textured},
-            {"3d-enhanced-fog-culled-alpha-coverage", true, true, VertexLayout::ThreeDimensional, true,
-             FragmentShader::TexturedEnhancedFog},
-            {"3d-enhanced-fog-no-cull-alpha-coverage", true, true, VertexLayout::ThreeDimensional, false,
-             FragmentShader::TexturedEnhancedFog},
-            {"skinned-enhanced-fog-culled-alpha-coverage", true, true, VertexLayout::Skinned, true,
-             FragmentShader::TexturedEnhancedFog},
-            {"skinned-enhanced-fog-no-cull-alpha-coverage", true, true, VertexLayout::Skinned, false,
-             FragmentShader::TexturedEnhancedFog},
-            {"skinned-lit-culled-alpha-coverage", true, true, VertexLayout::Skinned, true, FragmentShader::SkinnedLit},
-            {"skinned-lit-no-cull-alpha-coverage", true, true, VertexLayout::Skinned, false,
-             FragmentShader::SkinnedLit},
-        };
-        static_assert(std::size(descriptions) == std::size(s_alphaCoveragePipelines));
 
         SDL_GPUColorTargetBlendState opaque{};
         opaque.src_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
@@ -6466,27 +6371,30 @@ private:
         const char* deviceDriver = SDL_GetGPUDeviceDriver(s_device);
         int built = 0;
         int wanted = 0;
-        for (std::size_t i = 0; i < std::size(descriptions); ++i)
+        for (const WorldPipelineSetSpec& spec : WorldPipelineSets())
         {
-            // A set Enhanced lighting could not build has nothing to replace.
-            if (!*s_alphaCoveragePipelines[i].opaque)
+            for (const WorldStateSpec& state : kWorldStates)
             {
-                continue;
-            }
-            ++wanted;
-            const VariantDescription& variant = descriptions[i];
-            const PipelineBuildResult result =
-                BuildBlendPipeline(opaque, {variant.setName, "disabled", k_PipelineDisabled, variant.depthTestEnabled,
-                                            variant.depthWriteEnabled, variant.vertexLayout, variant.cullFaceEnabled,
-                                            variant.fragmentShader, true});
-            s_alphaCoveragePipelines[i].variant = result.pipeline;
-            if (result.pipeline)
-            {
+                WorldPipelines::States& states = spec.set->*state.states;
+                // Only the depth-writing states draw cutouts; a set that was not built has nothing to replace.
+                if (!state.depthWriteEnabled || !states[k_PipelineDisabled])
+                {
+                    continue;
+                }
+                ++wanted;
+                const std::string setName = std::string(spec.name) + "-" + state.suffix + "-alpha-coverage";
+                const PipelineBuildResult result =
+                    BuildBlendPipeline(opaque, {setName.c_str(), "disabled", k_PipelineDisabled, state.depthTestEnabled,
+                                                state.depthWriteEnabled, spec.vertexLayout, state.cullFaceEnabled,
+                                                spec.fragmentShader, true});
+                if (!result.pipeline)
+                {
+                    LogPipelineFailure(deviceDriver ? deviceDriver : "unknown", result, false);
+                    continue;
+                }
                 ++built;
-            }
-            else
-            {
-                LogPipelineFailure(deviceDriver ? deviceDriver : "unknown", result, false);
+                s_alphaCoveragePipelines.push_back(
+                    {&states[k_PipelineDisabled], &states[k_PipelineAlpha], result.pipeline});
             }
         }
         s_alphaCoverageDrawLogged = false;
@@ -6496,14 +6404,11 @@ private:
 
     static void DestroyAlphaCoveragePipelines()
     {
-        for (AlphaCoveragePipeline& entry : s_alphaCoveragePipelines)
+        for (const AlphaCoveragePipeline& entry : s_alphaCoveragePipelines)
         {
-            if (entry.variant)
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, entry.variant);
-                entry.variant = nullptr;
-            }
+            SDL_ReleaseGPUGraphicsPipeline(s_device, entry.variant);
         }
+        s_alphaCoveragePipelines.clear();
     }
 
     static void ReleaseMultisampleColorTexture()
