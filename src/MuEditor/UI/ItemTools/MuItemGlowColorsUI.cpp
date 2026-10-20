@@ -66,6 +66,12 @@ void RenderUsers(const char* id, const std::vector<int>& users)
     ImGui::EndListBox();
 }
 
+// The value as the color field shows and stores it.
+GlowColorValue AsShown(const GlowColorValue& value)
+{
+    return ToGlowColorValue(ToColorField(value));
+}
+
 // A grey line that wraps at the window's edge.
 void RenderNote(const char* text)
 {
@@ -147,7 +153,9 @@ void CMuItemGlowColorsUI::RenderPicked()
     ImGui::ColorEdit3("##Value", m_edit.data(), ImGuiColorEditFlags_Float);
 
     const std::vector<int> users = FindGlowColorUsers(m_picked);
-    const bool changed = ToGlowColorValue(m_edit) != *value;
+    // As the field shows it: a value with more places than the field keeps
+    // (written by hand) is not a change.
+    const bool changed = ToGlowColorValue(m_edit) != AsShown(*value);
     ImGui::BeginDisabled(!changed);
     if (ImGui::Button(I18N::Editor::ApplyToTheGlowColor))
     {
@@ -167,6 +175,7 @@ void CMuItemGlowColorsUI::RenderPicked()
     if (ImGui::Button(I18N::Editor::Revert))
     {
         m_edit = ToColorField(*value);
+        m_loaded = AsShown(*value);
     }
     ImGui::EndDisabled();
     ImGui::SameLine();
@@ -251,7 +260,7 @@ void CMuItemGlowColorsUI::UpdateEdit(const GlowColorValue& value)
     if (m_editOf != m_picked || (m_editVersion != g_GlowColors.GetVersion() && unchanged))
     {
         m_edit = ToColorField(value);
-        m_loaded = value;
+        m_loaded = AsShown(value);
         m_editOf = m_picked;
     }
     m_editVersion = g_GlowColors.GetVersion();

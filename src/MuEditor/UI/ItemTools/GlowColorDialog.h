@@ -12,7 +12,8 @@
 namespace MuEditor::Items
 {
 // A glow color value as the color fields edit it, rounded to the 3 places the
-// file keeps (ImGui's float would write 0.4699999988 for 0.47).
+// editor writes (ImGui's float would write 0.4699999988 for 0.47); the file
+// takes any.
 Data::Effects::GlowColorValue ToGlowColorValue(const std::array<float, 3>& rgb);
 std::array<float, 3> ToColorField(const Data::Effects::GlowColorValue& value);
 
