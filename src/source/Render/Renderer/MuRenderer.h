@@ -68,6 +68,9 @@ struct PostProcessingLook
     float bloomStrength = 0.0f;
     float bloomLevelFalloff = 0.5f;
     float gradingStrength = 1.0f;
+    // Ambient occlusion: how much it darkens (0: none) and how far it looks, in world units.
+    float ambientOcclusionStrength = 0.0f;
+    float ambientOcclusionRadius = 60.0f;
 };
 
 // ---------------------------------------------------------------------------

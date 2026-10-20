@@ -74,6 +74,10 @@ ControlTexts TextsOf(TuningControlId id)
         return {I18N::Game::TuningBloomSpread, I18N::Game::TuningBloomSpreadHelp};
     case TuningControlId::GradingStrength:
         return {I18N::Game::TuningColourGradingStrength, I18N::Game::TuningColourGradingStrengthHelp};
+    case TuningControlId::AmbientOcclusionStrength:
+        return {I18N::Game::TuningContactShadows, I18N::Game::TuningContactShadowsHelp};
+    case TuningControlId::AmbientOcclusionRadius:
+        return {I18N::Game::TuningContactShadowReach, I18N::Game::TuningContactShadowReachHelp};
     case TuningControlId::Count:
         break;
     }

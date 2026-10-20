@@ -31,6 +31,8 @@ const CommandForm CommandForms[] = {
     {L"$dynlights shadowangle ", {LookValue::GroundShadowAngle}},
     {L"$dynlights shadowlights ", {LookValue::GroundShadowLights}},
     {L"$bloom falloff ", {LookValue::BloomLevelFalloff}},
+    {L"$ao radius ", {LookValue::AmbientOcclusionRadius}},
+    {L"$ao ", {LookValue::AmbientOcclusionStrength}},
     {L"$bloom ", {LookValue::BloomStrength}},
 };
 

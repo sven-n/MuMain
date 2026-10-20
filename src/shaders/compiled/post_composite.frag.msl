@@ -10,7 +10,8 @@ struct CompositeUniforms
     float gradingStrength;
     float toneMapKnee;
     float ditherAmount;
-    float2 compositePadding;
+    float ambientOcclusionStrength;
+    float ambientOcclusionEffects;
 };
 
 struct main0_out
@@ -18,57 +19,76 @@ struct main0_out
     float4 _entryPointOutput [[color(0)]];
 };
 
-fragment main0_out main0(constant CompositeUniforms& _35 [[buffer(0)]], texture2d<float> scene [[texture(0)]], texture2d<float> bloom [[texture(1)]], texture2d<float> grading [[texture(2)]], sampler sceneSampler [[sampler(0)]], sampler bloomSampler [[sampler(1)]], sampler gradingSampler [[sampler(2)]], float4 gl_FragCoord [[position]])
+fragment main0_out main0(constant CompositeUniforms& _38 [[buffer(0)]], texture2d<float> scene [[texture(0)]], texture2d<float> bloom [[texture(1)]], texture2d<float> grading [[texture(2)]], texture2d<float> ambientOcclusion [[texture(3)]], texture2d<float> bloomSource [[texture(4)]], sampler sceneSampler [[sampler(0)]], sampler bloomSampler [[sampler(1)]], sampler gradingSampler [[sampler(2)]], sampler ambientOcclusionSampler [[sampler(3)]], sampler bloomSourceSampler [[sampler(4)]], float4 gl_FragCoord [[position]])
 {
     main0_out out = {};
-    float2 _319 = gl_FragCoord.xy * _35.inverseTargetSize;
-    float4 _305 = scene.sample(sceneSampler, _319);
-    if (_35.toneMapKnee < 1.0)
+    float2 _385 = gl_FragCoord.xy * _38.inverseTargetSize;
+    float4 _370 = scene.sample(sceneSampler, _385);
+    if (_38.ambientOcclusionStrength > 0.0)
     {
-        float4 _329 = _305;
-        float3 _331 = fast::max(_329.xyz, float3(0.0));
-        _305.x = _331.x;
-        _305.y = _331.y;
-        _305.z = _331.z;
-        float _437 = 1.0 - _35.toneMapKnee;
-        float _342 = _305.y;
-        float _463 = 1.0 - _35.toneMapKnee;
-        float _345 = _305.z;
-        float _489 = 1.0 - _35.toneMapKnee;
-        _305.x = (_305.x > _35.toneMapKnee) ? (_35.toneMapKnee + (_437 * (1.0 - exp((-(_305.x - _35.toneMapKnee)) / _437)))) : _305.x;
-        _305.y = (_342 > _35.toneMapKnee) ? (_35.toneMapKnee + (_463 * (1.0 - exp((-(_342 - _35.toneMapKnee)) / _463)))) : _342;
-        _305.z = (_345 > _35.toneMapKnee) ? (_35.toneMapKnee + (_489 * (1.0 - exp((-(_345 - _35.toneMapKnee)) / _489)))) : _345;
+        float4 _522 = ambientOcclusion.sample(ambientOcclusionSampler, _385);
+        float _523 = _522.x;
+        float _699;
+        if (_38.ambientOcclusionEffects > 0.0)
+        {
+            _699 = mix(_523, 1.0, fast::clamp(dot(bloomSource.sample(bloomSourceSampler, _385).xyz, float3(0.2125999927520751953125, 0.715200006961822509765625, 0.072200000286102294921875)) * 4.0, 0.0, 1.0));
+        }
+        else
+        {
+            _699 = _523;
+        }
+        float4 _397 = _370;
+        float3 _399 = _397.xyz * fast::max(1.0 - ((1.0 - _699) * _38.ambientOcclusionStrength), 0.0);
+        _370.x = _399.x;
+        _370.y = _399.y;
+        _370.z = _399.z;
     }
-    if (_35.bloomScale > 0.0)
+    if (_38.toneMapKnee < 1.0)
     {
-        float4 _371 = _305;
-        float3 _380 = float3(1.0) - ((float3(1.0) - _371.xyz) * (float3(1.0) - fast::clamp(bloom.sample(bloomSampler, _319).xyz * _35.bloomScale, float3(0.0), float3(1.0))));
-        _305.x = _380.x;
-        _305.y = _380.y;
-        _305.z = _380.z;
+        float4 _411 = _370;
+        float3 _413 = fast::max(_411.xyz, float3(0.0));
+        _370.x = _413.x;
+        _370.y = _413.y;
+        _370.z = _413.z;
+        float _553 = 1.0 - _38.toneMapKnee;
+        float _424 = _370.y;
+        float _579 = 1.0 - _38.toneMapKnee;
+        float _427 = _370.z;
+        float _605 = 1.0 - _38.toneMapKnee;
+        _370.x = (_370.x > _38.toneMapKnee) ? (_38.toneMapKnee + (_553 * (1.0 - exp((-(_370.x - _38.toneMapKnee)) / _553)))) : _370.x;
+        _370.y = (_424 > _38.toneMapKnee) ? (_38.toneMapKnee + (_579 * (1.0 - exp((-(_424 - _38.toneMapKnee)) / _579)))) : _424;
+        _370.z = (_427 > _38.toneMapKnee) ? (_38.toneMapKnee + (_605 * (1.0 - exp((-(_427 - _38.toneMapKnee)) / _605)))) : _427;
     }
-    if (_35.gradingStrength > 0.0)
+    if (_38.bloomScale > 0.0)
     {
-        float4 _392 = _305;
-        float3 _310 = _392.xyz;
-        float _522 = _310.z * 31.0;
-        float _524 = floor(_522);
-        float _535 = ((_310.x * 31.0) + 0.5) * 0.0009765625;
-        float _540 = ((_310.y * 31.0) + 0.5) * 0.03125;
-        float3 _400 = mix(_392.xyz, mix(grading.sample(gradingSampler, float2(_535 + (_524 * 0.03125), _540)).xyz, grading.sample(gradingSampler, float2(_535 + (fast::min(_524 + 1.0, 31.0) * 0.03125), _540)).xyz, float3(_522 - _524)), float3(_35.gradingStrength));
-        _305.x = _400.x;
-        _305.y = _400.y;
-        _305.z = _400.z;
+        float4 _453 = _370;
+        float3 _462 = float3(1.0) - ((float3(1.0) - _453.xyz) * (float3(1.0) - fast::clamp(bloom.sample(bloomSampler, _385).xyz * _38.bloomScale, float3(0.0), float3(1.0))));
+        _370.x = _462.x;
+        _370.y = _462.y;
+        _370.z = _462.z;
     }
-    if (_35.ditherAmount > 0.0)
+    if (_38.gradingStrength > 0.0)
     {
-        float4 _420 = _305;
-        float3 _423 = _420.xyz + float3((fract(52.98291778564453125 * fract(dot(gl_FragCoord.xy, float2(0.067110560834407806396484375, 0.005837149918079376220703125)))) - 0.5) * _35.ditherAmount);
-        _305.x = _423.x;
-        _305.y = _423.y;
-        _305.z = _423.z;
+        float4 _474 = _370;
+        float3 _376 = _474.xyz;
+        float _638 = _376.z * 31.0;
+        float _640 = floor(_638);
+        float _651 = ((_376.x * 31.0) + 0.5) * 0.0009765625;
+        float _656 = ((_376.y * 31.0) + 0.5) * 0.03125;
+        float3 _482 = mix(_474.xyz, mix(grading.sample(gradingSampler, float2(_651 + (_640 * 0.03125), _656)).xyz, grading.sample(gradingSampler, float2(_651 + (fast::min(_640 + 1.0, 31.0) * 0.03125), _656)).xyz, float3(_638 - _640)), float3(_38.gradingStrength));
+        _370.x = _482.x;
+        _370.y = _482.y;
+        _370.z = _482.z;
     }
-    out._entryPointOutput = _305;
+    if (_38.ditherAmount > 0.0)
+    {
+        float4 _502 = _370;
+        float3 _505 = _502.xyz + float3((fract(52.98291778564453125 * fract(dot(gl_FragCoord.xy, float2(0.067110560834407806396484375, 0.005837149918079376220703125)))) - 0.5) * _38.ditherAmount);
+        _370.x = _505.x;
+        _370.y = _505.y;
+        _370.z = _505.z;
+    }
+    out._entryPointOutput = _370;
     return out;
 }
 

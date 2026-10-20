@@ -1607,6 +1607,18 @@
   <data name="Tuning Colour Grading Strength" xml:space="preserve">
     <value>Colour grading strength</value>
   </data>
+  <data name="Tuning Contact Shadows" xml:space="preserve">
+    <value>Contact shadows</value>
+  </data>
+  <data name="Tuning Contact Shadows Help" xml:space="preserve">
+    <value>Soft darkening where things meet: corners, wall bases, under objects (ambient occlusion). 0 turns it off. Not drawn while anti-aliasing is on.</value>
+  </data>
+  <data name="Tuning Contact Shadow Reach" xml:space="preserve">
+    <value>Contact shadow reach</value>
+  </data>
+  <data name="Tuning Contact Shadow Reach Help" xml:space="preserve">
+    <value>How far from a surface nearby geometry still darkens it, in world units (a terrain cell is 100).</value>
+  </data>
   <data name="Tuning Colour Grading Strength Help" xml:space="preserve">
     <value>How much of the map's colour grading applies. 0 % applies none, while bloom stays on.</value>
   </data>

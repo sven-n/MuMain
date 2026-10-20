@@ -38,6 +38,7 @@
 #include "QuadTopology.h"
 #include "RangeAllocator.h"
 #include "SdlGpuPixelFormat.h"
+#include "SdlGpuAmbientOcclusion.h"
 #include "SdlGpuPostProcessing.h"
 #include "SdlGpuReplayState.h"
 #include "SdlGpuValidation.h"
@@ -1190,6 +1191,11 @@ static SDL_GPUShader* s_vertShaderPostFullscreen = nullptr; // post_fullscreen.v
 static SDL_GPUShader* s_fragShaderBloomDown = nullptr;      // post_bloom_down.frag
 static SDL_GPUShader* s_fragShaderBloomUp = nullptr;        // post_bloom_up.frag
 static SDL_GPUShader* s_fragShaderComposite = nullptr;      // post_composite.frag
+static SDL_GPUShader* s_fragShaderAmbientOcclusion = nullptr;     // post_ao.frag
+static SDL_GPUShader* s_fragShaderAmbientOcclusionBlur = nullptr; // post_ao_blur.frag
+// The scene's ambient occlusion (one sample only), and the scene's projection it reconstructs from.
+static mu::SdlGpuAmbientOcclusion s_ambientOcclusion;
+static float s_sceneProjection[16]{};
 
 // Depth buffer texture for correct 3D depth testing.
 // Created in Init() at swapchain dimensions, recreated on window resize.
@@ -2103,6 +2109,7 @@ public:
         DestroyPipelines();
         ReleaseShaders();
         ReleaseGroundShadowMask();
+        s_ambientOcclusion.Release();
         s_postProcessing.Release();
 
         SDL_ReleaseWindowFromGPUDevice(s_device, s_window);
@@ -2684,6 +2691,14 @@ public:
         }
         s_hdrScenePass = false;
 
+        // Read from the scene's depth, which the scene pass stored; anti-aliased frames have none to read.
+        SDL_GPUTexture* const ambientOcclusion =
+            s_postProcessingLook.ambientOcclusionStrength > 0.0f && !IsMultisampled() &&
+                    s_postProcessingView == mu::PostProcessingView::Scene
+                ? s_ambientOcclusion.Render(s_cmdBuf, s_depthTexture, {s_swapW, s_swapH}, s_sceneProjection,
+                                            s_postProcessingLook.ambientOcclusionRadius)
+                : nullptr;
+
         // The composite covers every pixel: the target's old content is not loaded.
         // A diagnostic view without its image this frame leaves black instead.
         constexpr SDL_FColor black{0.0f, 0.0f, 0.0f, 1.0f};
@@ -2697,7 +2712,7 @@ public:
             return false;
         }
         s_postProcessing.DrawComposite(s_cmdBuf, s_renderPass, {s_swapW, s_swapH}, s_postProcessingLook,
-                                       s_postProcessingView);
+                                       s_postProcessingView, ambientOcclusion);
         ReplayCommands(sceneEnd, s_renderCmds.size(), boneDataReady, ReplaySelection::AllCommands, view);
         EndReplayPass();
         return true;
@@ -5012,8 +5027,10 @@ public:
         fog.color[1] = m_fogUniform.fogColor[1];
         fog.color[2] = m_fogUniform.fogColor[2];
         s_sceneLightingUniform = PackSceneLightingUniform(lighting, fog);
-        // The scene sets its lighting right after its camera, so the model-view is the view.
+        // The scene sets its lighting right after its camera, so the model-view is the view and the
+        // projection the scene's.
         m_worldFromViewMatrix = glm::inverse(m_modelViewMatrix);
+        std::memcpy(s_sceneProjection, glm::value_ptr(m_projMatrix), sizeof(s_sceneProjection));
     }
 
     void SetDynamicLights(const DynamicLightsUniform& lights) override
@@ -5675,8 +5692,14 @@ private:
             createShader("post_bloom_down", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
         s_fragShaderBloomUp =
             createShader("post_bloom_up", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
+        // The composite also reads the ambient occlusion and the bloom source (t3, t4).
         s_fragShaderComposite =
-            createShader("post_composite", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 3, 0, 1, /*fatal=*/false);
+            createShader("post_composite", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 5, 0, 1, /*fatal=*/false);
+        // Ambient occlusion: the depth (t0), and for the blur the occlusion (t1); AmbientOcclusion (b0).
+        s_fragShaderAmbientOcclusion =
+            createShader("post_ao", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/false);
+        s_fragShaderAmbientOcclusionBlur =
+            createShader("post_ao_blur", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 2, 0, 1, /*fatal=*/false);
 
         mu::log::Get("render")->info("SDL_gpu -- shaders loaded for driver: {}", driverName ? driverName : "unknown");
         return true;
@@ -5735,7 +5758,8 @@ private:
         }
         for (SDL_GPUShader** shader :
              {&s_vertShaderWorldLit, &s_fragShaderWorldLit, &s_fragShaderShadowMask, &s_vertShaderPostFullscreen,
-              &s_fragShaderBloomDown, &s_fragShaderBloomUp, &s_fragShaderComposite})
+              &s_fragShaderBloomDown, &s_fragShaderBloomUp, &s_fragShaderComposite, &s_fragShaderAmbientOcclusion,
+              &s_fragShaderAmbientOcclusionBlur})
         {
             if (*shader)
             {
@@ -6725,6 +6749,8 @@ private:
                                              mu::GetSdlGpuSampleCount(s_sampleCount).value_or(SDL_GPU_SAMPLECOUNT_1));
         mu::log::Get("render")->info("SDL_gpu -- post-processing {} at {}x", created ? "available" : "unavailable",
                                      s_sampleCount);
+        (void)s_ambientOcclusion.CreatePipelines(
+            s_device, {s_vertShaderPostFullscreen, s_fragShaderAmbientOcclusion, s_fragShaderAmbientOcclusionBlur});
     }
 
     // The ground shadow mask's pipelines (one sample, whatever s_sampleCount is). Optional: without them

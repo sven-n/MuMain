@@ -275,7 +275,9 @@ set(shader_specs
     "post_fullscreen.vert|vert||0|0|0"
     "post_bloom_down.frag|frag||1|0|1"
     "post_bloom_up.frag|frag||1|0|1"
-    "post_composite.frag|frag||3|0|1"
+    "post_composite.frag|frag||5|0|1"
+    "post_ao.frag|frag||1|0|1"
+    "post_ao_blur.frag|frag||2|0|1"
 )
 
 foreach(shader_spec IN LISTS shader_specs)

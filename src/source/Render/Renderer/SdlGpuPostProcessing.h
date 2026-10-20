@@ -45,7 +45,10 @@ struct SdlGpuCompositeUniform
     float toneMapKnee;
     // Amplitude of the ordered dither added before the 8-bit target; 0 for none.
     float ditherAmount;
-    float padding[2];
+    // How much the ambient occlusion darkens the scene; 0 for none.
+    float ambientOcclusionStrength;
+    // 1 when the bloom source holds this frame's additive light, which the occlusion leaves alone.
+    float ambientOcclusionEffects;
 };
 static_assert(offsetof(SdlGpuCompositeUniform, bloomScale) == 8);
 static_assert(offsetof(SdlGpuCompositeUniform, gradingStrength) == 12);
@@ -95,8 +98,10 @@ public:
     // RenderBloom ran (with the same level falloff), graded through the grading
     // table at the look's grading strength when one is set. The diagnostic
     // views show the bloom source or the bloom instead, ungraded.
+    // `ambientOcclusion` (SdlGpuAmbientOcclusion, or null for none) darkens the scene at the look's
+    // strength.
     void DrawComposite(SDL_GPUCommandBuffer* commandBuffer, SDL_GPURenderPass* pass, SdlGpuTargetSize size,
-                       const PostProcessingLook& look, PostProcessingView view);
+                       const PostProcessingLook& look, PostProcessingView view, SDL_GPUTexture* ambientOcclusion);
 
     // Replaces the grading table (Render::PostProcessing::LoadGradingTable's
     // RGBA8 texels), or empty for none. False (and no table) when it cannot be uploaded.
