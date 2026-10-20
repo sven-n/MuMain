@@ -5,13 +5,13 @@
 #include "MuItemTranslationsUI.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
-#include "../MuEditor/UI/Common/MuEditorLayout.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "../MuEditor/UI/ItemEditor/ItemEditorActions.h"
 #include "../MuEditor/UI/ItemEditor/ItemEditorPopups.h"
+#include "../MuEditor/UI/ItemTools/ItemEdits.h"
 #include "../MuEditor/UI/ItemTools/ItemSelection.h"
-#include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "../MuEditor/UI/ItemTools/ItemToolWindow.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
@@ -68,27 +68,20 @@ void CMuItemTranslationsUI::Render(bool* open)
     m_locales = I18N::GetAvailableLocales();
     m_editDrawn = false;
 
-    char title[MuEditor::WindowIds::TitleCapacity];
-    MuEditor::Layout::PrepareToolWindow();
-    if (ImGui::Begin(
-            MuEditor::WindowIds::Title(title, I18N::Editor::ItemTranslations, MuEditor::WindowIds::ItemTranslations),
-            open, ImGuiWindowFlags_NoCollapse))
+    // One of the item tools: their docking, undo keys and selection.
+    if (MuEditor::Items::ToolWindow::Begin(I18N::Editor::ItemTranslations, MuEditor::WindowIds::ItemTranslations, open))
     {
-        if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByPopup |
-                                   ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) ||
-            ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId))
-        {
-            g_MuEditorCore.SetHoveringUI(true);
-        }
         UpdateCountsAndLabels();
         CItemEditorActions::RenderSaveButton();
         CItemEditorPopups::RenderAll();
+        ImGui::SameLine();
+        MuEditor::Items::ToolWindow::RenderUndoRedo();
         ImGui::SameLine();
         RenderToolbar();
         ImGui::Separator();
         RenderTable();
     }
-    ImGui::End();
+    MuEditor::Items::ToolWindow::End();
     CommitEditNotDrawn();
 }
 
@@ -307,7 +300,8 @@ void CMuItemTranslationsUI::CommitName(int itemType, const char* locale, const c
         g_MuEditorConsoleUI.LogEditor(I18N::Editor::ItemNamesCannotContainTheSeparator);
         return;
     }
-    if (!g_ItemDataHandler.SetItemName(itemType, locale, text))
+    // Through the item tools' history, so the name can be undone like any edit.
+    if (!g_ItemEdits.SetItemName(I18N::GetLanguageDisplayName(locale), itemType, locale, text))
     {
         g_MuEditorConsoleUI.LogEditor(I18N::Editor::TheEnglishNameCannotBeEmpty);
         return;
