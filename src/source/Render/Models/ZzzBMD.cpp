@@ -2950,6 +2950,7 @@ void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int 
     DisableTexture();
     DisableDepthMask();
     BeginRender(1.f);
+    const mu::ScopedGroundShadow groundShadow;
 
     const auto [startMesh, endMesh] = ResolveMeshRange(NumMeshs, startMeshNumber, endMeshNumber);
 

@@ -1550,6 +1550,12 @@
   <data name="Tuning Overlapping Light Cap Help" xml:space="preserve">
     <value>The most light several overlapping skills may add up to. No cap lets them add up freely; it does not switch skill lights off.</value>
   </data>
+  <data name="Tuning Shadow Opacity" xml:space="preserve">
+    <value>Shadow darkness</value>
+  </data>
+  <data name="Tuning Shadow Opacity Help" xml:space="preserve">
+    <value>How dark characters' shadows make the ground. Candle, fire and skill light still lights shadowed ground.</value>
+  </data>
   <data name="Tuning Light Wrap" xml:space="preserve">
     <value>Light wrap</value>
   </data>

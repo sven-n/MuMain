@@ -86,6 +86,8 @@ static_assert(sizeof(SceneLightingUniform) == 8 * kSceneLightingRegisterSize);
 // Point lights on models light a face with saturate(dot(n, l) * (1 - wrap) + wrap): 0 is Lambert,
 // 0.5 (the built-in value) half-Lambert. Up to 0.5 a face turned away from the light gets nothing.
 inline constexpr float kDefaultDynamicWrap = 0.5f;
+// How much a character's shadow darkens the world-lit ground's own light (the built-in value).
+inline constexpr float kDefaultGroundShadowOpacity = 0.6f;
 // CPU mirror of the wrapped diffuse in skinned_lit.frag.hlsl's DynamicLighting(); the shader is the
 // implementation.
 [[nodiscard]] float WrappedDiffuse(float normalDotLight, float wrap);
@@ -102,7 +104,8 @@ struct DynamicLightsUniform
     float wrap = kDefaultDynamicWrap; // see WrappedDiffuse()
     // The first lights, which the ground's vertex colour leaves out (ScopedWorldLitGeometry).
     std::uint32_t worldLightCount = 0;
-    std::uint32_t padding = 0;
+    // How much a ground shadow darkens the ground's own light, 0 to 1 (ScopedGroundShadow).
+    float groundShadowOpacity = 0.f;
     float positionAndRadius[kMaxDynamicLights][4]; // xyz world position, w radius in world units
     float color[kMaxDynamicLights][4];             // rgb, w unused
 };

@@ -19,6 +19,7 @@ set(MU_SHADER_STAGE_NAMES
     skinned_lit.frag
     world_lit.vert
     world_lit.frag
+    shadow_mask.frag
     shadow_volume.vert
     post_fullscreen.vert
     post_bloom_down.frag

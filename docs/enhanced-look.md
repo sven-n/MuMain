@@ -12,7 +12,7 @@ options window, without editing those files (see "Tuning it yourself").
 |---|---|---|
 | Texture filtering | mipmaps and anisotropic filtering for world textures | — |
 | Enhanced lighting | per-pixel model lighting with rim light and, on metal armour, specular highlights | — |
-| Dynamic model lights | candles, fires and spells light characters, monsters, NPCs and world objects per pixel, and the ground as smooth pools instead of patches interpolated between terrain vertices | — |
+| Dynamic model lights | candles, fires and spells light characters, monsters, NPCs and world objects per pixel, and the ground as smooth pools instead of patches interpolated between terrain vertices; characters' shadows on the ground are see-through and merge where they overlap | — |
 | Light mood | darker baked map light, so the light sources stand out | [light-mood.md](light-mood.md) |
 | Post-processing | bloom around light effects and per-map colour grading | [post-processing.md](post-processing.md) |
 | Anti-aliasing | multisampled edges (4 samples, or what `Antialiasing` asks for), alpha-to-coverage for cut-out foliage and fences | — |
@@ -80,6 +80,7 @@ window.
 | Dynamic lights | Skill radius | `dynamic.effectRange` | 0.5–4× | 0.1× | 3× | common |
 | Dynamic lights | Skill fade | `dynamic.effectFade` | 0–2 s | 0.05 s | 0.5 s | common |
 | Dynamic lights | Overlapping-light cap | `dynamic.effectCap` | 0–8 | 0.1 | 2.5 | common |
+| Dynamic lights | Shadow darkness | `dynamic.shadowOpacity` | 0–100 % | 5 % | 60 % | common |
 | Dynamic lights | Light wrap | `dynamic.wrap` | 0–0.5 | 0.05 | 0.3 | More settings |
 | Dynamic lights | Map-light smoothing | `dynamic.mapSmoothing` | 0–2 s | 0.05 s | 0.5 s | More settings |
 | Dynamic lights | Maximum skill radius | `dynamic.effectRangeMax` | 0–16 cells | 1 cell | 8 cells | More settings |
@@ -202,6 +203,7 @@ for the whole file.
 | `dynamic.effectRangeMax` | 8 | 0 (none) | 0–16 | the most terrain cells the range factor may widen a light to |
 | `dynamic.effectFade` | 0.5 | 0 | 0–2 | seconds over which a spell's light fades out after it ends |
 | `dynamic.effectCap` | 2.5 | 0 (none) | 0–8 | the most light overlapping spell lights may add up to |
+| `dynamic.shadowOpacity` | 0.6 | 0.6 | 0–1 | how much characters' shadows darken the ground's own light; overlapping shadows darken it once, and point lights still light shadowed ground |
 | `bloom.strength` | 1.0 (Icarus 0.3) | 0.6 | 0–2 | how strong the halo around light effects is |
 | `bloom.levelFalloff` | 0.6 | 0.5 | 0.25–1 | how wide the halo spreads |
 | `grading.strength` | 1 | 1 | 0–1 | how much of a map's grading table applies; 0 grades nothing while the bloom stays |
@@ -233,7 +235,7 @@ Shorter forms of `$look set`: `$lighting rim <v>`, `$lighting specular <v>`,
 `$lighting diffuse <scale> <ambient> <floor>`, `$lightmood knee <k>`,
 `$dynlights wrap <w>`, `$dynlights smooth <s>`,
 `$dynlights spell <gain> <range> <fade>`, `$dynlights cap <c>`,
-`$dynlights reach <cells>`, `$bloom falloff <f>`, `$bloom <strength>`.
+`$dynlights reach <cells>`, `$dynlights shadow <opacity>`, `$bloom falloff <f>`, `$bloom <strength>`.
 The DevEditor has the same values in its Look panel.
 
 Feature overrides, to compare one feature on and off. They last for the

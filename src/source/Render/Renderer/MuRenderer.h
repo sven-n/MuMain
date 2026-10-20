@@ -365,6 +365,13 @@ public:
     // ScopedWorldLitGeometry.
     virtual void BeginWorldLitGeometry() {}
     virtual void EndWorldLitGeometry() {}
+
+    // Draws between BeginGroundShadow and EndGroundShadow are shadows cast on the ground. In a frame
+    // with world-lit ground they darken it through a coverage mask instead (each pixel once, by
+    // DynamicLightsUniform::groundShadowOpacity); otherwise they draw as recorded. Scopes nest; use
+    // ScopedGroundShadow.
+    virtual void BeginGroundShadow() {}
+    virtual void EndGroundShadow() {}
     // True while a bloom exclusion is open: what is queued now and drawn later
     // (a character's glow sprites) can be drawn inside one too.
     [[nodiscard]] virtual bool IsBloomExcluded() const
@@ -805,6 +812,20 @@ public:
     }
     ScopedWorldLitGeometry(const ScopedWorldLitGeometry&) = delete;
     ScopedWorldLitGeometry& operator=(const ScopedWorldLitGeometry&) = delete;
+};
+class ScopedGroundShadow
+{
+public:
+    ScopedGroundShadow()
+    {
+        GetRenderer().BeginGroundShadow();
+    }
+    ~ScopedGroundShadow()
+    {
+        GetRenderer().EndGroundShadow();
+    }
+    ScopedGroundShadow(const ScopedGroundShadow&) = delete;
+    ScopedGroundShadow& operator=(const ScopedGroundShadow&) = delete;
 };
 // The draws recorded in its lifetime may be reordered (BeginReorderableDraws).
 class ScopedReorderableDraws
