@@ -1,0 +1,244 @@
+#pragma clang diagnostic ignored "-Wmissing-prototypes"
+#pragma clang diagnostic ignored "-Wmissing-braces"
+
+#include <metal_stdlib>
+#include <simd/simd.h>
+
+using namespace metal;
+
+template<typename T, size_t Num>
+struct spvUnsafeArray
+{
+    T elements[Num ? Num : 1];
+    
+    thread T& operator [] (size_t pos) thread
+    {
+        return elements[pos];
+    }
+    constexpr const thread T& operator [] (size_t pos) const thread
+    {
+        return elements[pos];
+    }
+    
+    device T& operator [] (size_t pos) device
+    {
+        return elements[pos];
+    }
+    constexpr const device T& operator [] (size_t pos) const device
+    {
+        return elements[pos];
+    }
+    
+    constexpr const constant T& operator [] (size_t pos) const constant
+    {
+        return elements[pos];
+    }
+    
+    threadgroup T& operator [] (size_t pos) threadgroup
+    {
+        return elements[pos];
+    }
+    constexpr const threadgroup T& operator [] (size_t pos) const threadgroup
+    {
+        return elements[pos];
+    }
+};
+
+struct AmbientOcclusion
+{
+    float4x4 projection;
+    float4x4 inverseProjection;
+    float2 depthTexelSize;
+    float radius;
+    float padding;
+};
+
+constant spvUnsafeArray<float, 16> _247 = spvUnsafeArray<float, 16>({ 0.0, 0.5, 0.125, 0.625, 0.75, 0.25, 0.875, 0.375, 0.1875, 0.6875, 0.0625, 0.5625, 0.9375, 0.4375, 0.8125, 0.3125 });
+constant spvUnsafeArray<float3, 12> _337 = spvUnsafeArray<float3, 12>({ float3(0.20999999344348907470703125, 0.0500000007450580596923828125, 0.100000001490116119384765625), float3(-0.100000001490116119384765625, 0.25, 0.1500000059604644775390625), float3(-0.2800000011920928955078125, -0.119999997317790985107421875, 0.07999999821186065673828125), float3(0.14000000059604644775390625, -0.300000011920928955078125, 0.20000000298023223876953125), float3(0.4199999868869781494140625, 0.2199999988079071044921875, 0.25), float3(-0.3499999940395355224609375, 0.4000000059604644775390625, 0.119999997317790985107421875), float3(-0.300000011920928955078125, -0.449999988079071044921875, 0.3499999940395355224609375), float3(0.37999999523162841796875, -0.36000001430511474609375, 0.4199999868869781494140625), float3(0.699999988079071044921875, 0.100000001490116119384765625, 0.300000011920928955078125), float3(-0.1500000059604644775390625, 0.7200000286102294921875, 0.449999988079071044921875), float3(-0.660000026226043701171875, -0.20000000298023223876953125, 0.550000011920928955078125), float3(0.20000000298023223876953125, -0.62000000476837158203125, 0.699999988079071044921875) });
+
+struct main0_out
+{
+    float4 _entryPointOutput [[color(0)]];
+};
+
+struct main0_in
+{
+    float2 input_uv [[user(locn0)]];
+};
+
+fragment main0_out main0(main0_in in [[stage_in]], constant AmbientOcclusion& _73 [[buffer(0)]], texture2d<float> depthTexture [[texture(0)]], sampler depthSampler [[sampler(0)]], float4 gl_FragCoord [[position]])
+{
+    main0_out out = {};
+    float4 _1039;
+    do
+    {
+        if (depthTexture.sample(depthSampler, in.input_uv, level(0.0)).x >= 1.0)
+        {
+            _1039 = float4(1.0);
+            break;
+        }
+        float2 _653 = (floor((in.input_uv / _73.depthTexelSize) + float2(0.25)) + float2(0.5)) * _73.depthTexelSize;
+        float2 _638 = _653;
+        float4 _681 = _73.inverseProjection * float4((_638.x * 2.0) - 1.0, 1.0 - (_638.y * 2.0), depthTexture.sample(depthSampler, _653, level(0.0)).x, 1.0);
+        float4 _666 = _681;
+        float3 _687 = _681.xyz / float3(_666.w);
+        float2 _785 = (floor(((in.input_uv + float2(_73.depthTexelSize.x, 0.0)) / _73.depthTexelSize) + float2(0.25)) + float2(0.5)) * _73.depthTexelSize;
+        float2 _770 = _785;
+        float4 _813 = _73.inverseProjection * float4((_770.x * 2.0) - 1.0, 1.0 - (_770.y * 2.0), depthTexture.sample(depthSampler, _785, level(0.0)).x, 1.0);
+        float4 _798 = _813;
+        float3 _708 = (_813.xyz / float3(_798.w)) - _687;
+        float3 _688 = _708;
+        float2 _837 = (floor(((in.input_uv - float2(_73.depthTexelSize.x, 0.0)) / _73.depthTexelSize) + float2(0.25)) + float2(0.5)) * _73.depthTexelSize;
+        float2 _822 = _837;
+        float4 _865 = _73.inverseProjection * float4((_822.x * 2.0) - 1.0, 1.0 - (_822.y * 2.0), depthTexture.sample(depthSampler, _837, level(0.0)).x, 1.0);
+        float4 _850 = _865;
+        float3 _716 = _687 - (_865.xyz / float3(_850.w));
+        float3 _690 = _716;
+        float2 _889 = (floor(((in.input_uv + float2(0.0, _73.depthTexelSize.y)) / _73.depthTexelSize) + float2(0.25)) + float2(0.5)) * _73.depthTexelSize;
+        float2 _874 = _889;
+        float4 _917 = _73.inverseProjection * float4((_874.x * 2.0) - 1.0, 1.0 - (_874.y * 2.0), depthTexture.sample(depthSampler, _889, level(0.0)).x, 1.0);
+        float4 _902 = _917;
+        float3 _724 = (_917.xyz / float3(_902.w)) - _687;
+        float3 _692 = _724;
+        float2 _941 = (floor(((in.input_uv - float2(0.0, _73.depthTexelSize.y)) / _73.depthTexelSize) + float2(0.25)) + float2(0.5)) * _73.depthTexelSize;
+        float2 _926 = _941;
+        float4 _969 = _73.inverseProjection * float4((_926.x * 2.0) - 1.0, 1.0 - (_926.y * 2.0), depthTexture.sample(depthSampler, _941, level(0.0)).x, 1.0);
+        float4 _954 = _969;
+        float3 _732 = _687 - (_969.xyz / float3(_954.w));
+        float3 _694 = _732;
+        float3 _758 = fast::normalize(cross(select(_716, _708, bool3(abs(_688.z) < abs(_690.z))), select(_732, _724, bool3(abs(_692.z) < abs(_694.z)))));
+        float3 _767 = select(_758, -_758, bool3(dot(_758, _687) > 0.0));
+        uint2 _468 = uint2(gl_FragCoord.xy) & uint2(3u);
+        float _518 = 6.283185482025146484375 * _247[(_468.y * 4u) + _468.x];
+        float3 _523 = float3(cos(_518), sin(_518), 0.0);
+        float3 _532 = fast::normalize((_523 - (_767 * dot(_523, _767))) + float3(9.9999997473787516355514526367188e-05, 0.0, 0.0));
+        float3 _535 = cross(_767, _532);
+        spvUnsafeArray<float3, 12> _477 = spvUnsafeArray<float3, 12>({ float3(0.20999999344348907470703125, 0.0500000007450580596923828125, 0.100000001490116119384765625), float3(-0.100000001490116119384765625, 0.25, 0.1500000059604644775390625), float3(-0.2800000011920928955078125, -0.119999997317790985107421875, 0.07999999821186065673828125), float3(0.14000000059604644775390625, -0.300000011920928955078125, 0.20000000298023223876953125), float3(0.4199999868869781494140625, 0.2199999988079071044921875, 0.25), float3(-0.3499999940395355224609375, 0.4000000059604644775390625, 0.119999997317790985107421875), float3(-0.300000011920928955078125, -0.449999988079071044921875, 0.3499999940395355224609375), float3(0.37999999523162841796875, -0.36000001430511474609375, 0.4199999868869781494140625), float3(0.699999988079071044921875, 0.100000001490116119384765625, 0.300000011920928955078125), float3(-0.1500000059604644775390625, 0.7200000286102294921875, 0.449999988079071044921875), float3(-0.660000026226043701171875, -0.20000000298023223876953125, 0.550000011920928955078125), float3(0.20000000298023223876953125, -0.62000000476837158203125, 0.699999988079071044921875) });
+        spvUnsafeArray<float3, 12> _478 = spvUnsafeArray<float3, 12>({ float3(0.20999999344348907470703125, 0.0500000007450580596923828125, 0.100000001490116119384765625), float3(-0.100000001490116119384765625, 0.25, 0.1500000059604644775390625), float3(-0.2800000011920928955078125, -0.119999997317790985107421875, 0.07999999821186065673828125), float3(0.14000000059604644775390625, -0.300000011920928955078125, 0.20000000298023223876953125), float3(0.4199999868869781494140625, 0.2199999988079071044921875, 0.25), float3(-0.3499999940395355224609375, 0.4000000059604644775390625, 0.119999997317790985107421875), float3(-0.300000011920928955078125, -0.449999988079071044921875, 0.3499999940395355224609375), float3(0.37999999523162841796875, -0.36000001430511474609375, 0.4199999868869781494140625), float3(0.699999988079071044921875, 0.100000001490116119384765625, 0.300000011920928955078125), float3(-0.1500000059604644775390625, 0.7200000286102294921875, 0.449999988079071044921875), float3(-0.660000026226043701171875, -0.20000000298023223876953125, 0.550000011920928955078125), float3(0.20000000298023223876953125, -0.62000000476837158203125, 0.699999988079071044921875) });
+        spvUnsafeArray<float3, 12> _479 = spvUnsafeArray<float3, 12>({ float3(0.20999999344348907470703125, 0.0500000007450580596923828125, 0.100000001490116119384765625), float3(-0.100000001490116119384765625, 0.25, 0.1500000059604644775390625), float3(-0.2800000011920928955078125, -0.119999997317790985107421875, 0.07999999821186065673828125), float3(0.14000000059604644775390625, -0.300000011920928955078125, 0.20000000298023223876953125), float3(0.4199999868869781494140625, 0.2199999988079071044921875, 0.25), float3(-0.3499999940395355224609375, 0.4000000059604644775390625, 0.119999997317790985107421875), float3(-0.300000011920928955078125, -0.449999988079071044921875, 0.3499999940395355224609375), float3(0.37999999523162841796875, -0.36000001430511474609375, 0.4199999868869781494140625), float3(0.699999988079071044921875, 0.100000001490116119384765625, 0.300000011920928955078125), float3(-0.1500000059604644775390625, 0.7200000286102294921875, 0.449999988079071044921875), float3(-0.660000026226043701171875, -0.20000000298023223876953125, 0.550000011920928955078125), float3(0.20000000298023223876953125, -0.62000000476837158203125, 0.699999988079071044921875) });
+        float4 _481 = _73.projection * float4(_687 + ((((_532 * _477[0u].x) + (_535 * _478[0u].y)) + (_767 * _479[0u].z)) * _73.radius), 1.0);
+        float2 _993 = (floor((float2(((_481.x / _481.w) * 0.5) + 0.5, 0.5 - ((_481.y / _481.w) * 0.5)) / _73.depthTexelSize) + float2(0.25)) + float2(0.5)) * _73.depthTexelSize;
+        float2 _978 = _993;
+        float4 _1021 = _73.inverseProjection * float4((_978.x * 2.0) - 1.0, 1.0 - (_978.y * 2.0), depthTexture.sample(depthSampler, _993, level(0.0)).x, 1.0);
+        float4 _1006 = _1021;
+        float3 _590 = (_1021.xyz / float3(_1006.w)) - _687;
+        float _593 = dot(_590, _590);
+        _477 = _337;
+        _478 = _337;
+        _479 = _337;
+        _481 = _73.projection * float4(_687 + ((((_532 * _477[1u].x) + (_535 * _478[1u].y)) + (_767 * _479[1u].z)) * _73.radius), 1.0);
+        float2 _1096 = (floor((float2(((_481.x / _481.w) * 0.5) + 0.5, 0.5 - ((_481.y / _481.w) * 0.5)) / _73.depthTexelSize) + float2(0.25)) + float2(0.5)) * _73.depthTexelSize;
+        _978 = _1096;
+        float4 _1113 = _73.inverseProjection * float4((_978.x * 2.0) - 1.0, 1.0 - (_978.y * 2.0), depthTexture.sample(depthSampler, _1096, level(0.0)).x, 1.0);
+        _1006 = _1113;
+        float3 _1119 = (_1113.xyz / float3(_1006.w)) - _687;
+        float _1120 = dot(_1119, _1119);
+        _477 = _337;
+        _478 = _337;
+        _479 = _337;
+        _481 = _73.projection * float4(_687 + ((((_532 * _477[2u].x) + (_535 * _478[2u].y)) + (_767 * _479[2u].z)) * _73.radius), 1.0);
+        float2 _1192 = (floor((float2(((_481.x / _481.w) * 0.5) + 0.5, 0.5 - ((_481.y / _481.w) * 0.5)) / _73.depthTexelSize) + float2(0.25)) + float2(0.5)) * _73.depthTexelSize;
+        _978 = _1192;
+        float4 _1209 = _73.inverseProjection * float4((_978.x * 2.0) - 1.0, 1.0 - (_978.y * 2.0), depthTexture.sample(depthSampler, _1192, level(0.0)).x, 1.0);
+        _1006 = _1209;
+        float3 _1215 = (_1209.xyz / float3(_1006.w)) - _687;
+        float _1216 = dot(_1215, _1215);
+        _477 = _337;
+        _478 = _337;
+        _479 = _337;
+        _481 = _73.projection * float4(_687 + ((((_532 * _477[3u].x) + (_535 * _478[3u].y)) + (_767 * _479[3u].z)) * _73.radius), 1.0);
+        float2 _1288 = (floor((float2(((_481.x / _481.w) * 0.5) + 0.5, 0.5 - ((_481.y / _481.w) * 0.5)) / _73.depthTexelSize) + float2(0.25)) + float2(0.5)) * _73.depthTexelSize;
+        _978 = _1288;
+        float4 _1305 = _73.inverseProjection * float4((_978.x * 2.0) - 1.0, 1.0 - (_978.y * 2.0), depthTexture.sample(depthSampler, _1288, level(0.0)).x, 1.0);
+        _1006 = _1305;
+        float3 _1311 = (_1305.xyz / float3(_1006.w)) - _687;
+        float _1312 = dot(_1311, _1311);
+        _477 = _337;
+        _478 = _337;
+        _479 = _337;
+        _481 = _73.projection * float4(_687 + ((((_532 * _477[4u].x) + (_535 * _478[4u].y)) + (_767 * _479[4u].z)) * _73.radius), 1.0);
+        float2 _1384 = (floor((float2(((_481.x / _481.w) * 0.5) + 0.5, 0.5 - ((_481.y / _481.w) * 0.5)) / _73.depthTexelSize) + float2(0.25)) + float2(0.5)) * _73.depthTexelSize;
+        _978 = _1384;
+        float4 _1401 = _73.inverseProjection * float4((_978.x * 2.0) - 1.0, 1.0 - (_978.y * 2.0), depthTexture.sample(depthSampler, _1384, level(0.0)).x, 1.0);
+        _1006 = _1401;
+        float3 _1407 = (_1401.xyz / float3(_1006.w)) - _687;
+        float _1408 = dot(_1407, _1407);
+        float _1424 = ((((fast::clamp((dot(_590, _767) * rsqrt(fast::max(_593, 9.9999999747524270787835121154785e-07))) - 0.1500000059604644775390625, 0.0, 1.0) * fast::clamp(1.0 - (_593 / (_73.radius * _73.radius)), 0.0, 1.0)) + (fast::clamp((dot(_1119, _767) * rsqrt(fast::max(_1120, 9.9999999747524270787835121154785e-07))) - 0.1500000059604644775390625, 0.0, 1.0) * fast::clamp(1.0 - (_1120 / (_73.radius * _73.radius)), 0.0, 1.0))) + (fast::clamp((dot(_1215, _767) * rsqrt(fast::max(_1216, 9.9999999747524270787835121154785e-07))) - 0.1500000059604644775390625, 0.0, 1.0) * fast::clamp(1.0 - (_1216 / (_73.radius * _73.radius)), 0.0, 1.0))) + (fast::clamp((dot(_1311, _767) * rsqrt(fast::max(_1312, 9.9999999747524270787835121154785e-07))) - 0.1500000059604644775390625, 0.0, 1.0) * fast::clamp(1.0 - (_1312 / (_73.radius * _73.radius)), 0.0, 1.0))) + (fast::clamp((dot(_1407, _767) * rsqrt(fast::max(_1408, 9.9999999747524270787835121154785e-07))) - 0.1500000059604644775390625, 0.0, 1.0) * fast::clamp(1.0 - (_1408 / (_73.radius * _73.radius)), 0.0, 1.0));
+        _477 = _337;
+        _478 = _337;
+        _479 = _337;
+        _481 = _73.projection * float4(_687 + ((((_532 * _477[5u].x) + (_535 * _478[5u].y)) + (_767 * _479[5u].z)) * _73.radius), 1.0);
+        float2 _1480 = (floor((float2(((_481.x / _481.w) * 0.5) + 0.5, 0.5 - ((_481.y / _481.w) * 0.5)) / _73.depthTexelSize) + float2(0.25)) + float2(0.5)) * _73.depthTexelSize;
+        _978 = _1480;
+        float4 _1497 = _73.inverseProjection * float4((_978.x * 2.0) - 1.0, 1.0 - (_978.y * 2.0), depthTexture.sample(depthSampler, _1480, level(0.0)).x, 1.0);
+        _1006 = _1497;
+        float3 _1503 = (_1497.xyz / float3(_1006.w)) - _687;
+        float _1504 = dot(_1503, _1503);
+        _477 = _337;
+        _478 = _337;
+        _479 = _337;
+        _481 = _73.projection * float4(_687 + ((((_532 * _477[6u].x) + (_535 * _478[6u].y)) + (_767 * _479[6u].z)) * _73.radius), 1.0);
+        float2 _1576 = (floor((float2(((_481.x / _481.w) * 0.5) + 0.5, 0.5 - ((_481.y / _481.w) * 0.5)) / _73.depthTexelSize) + float2(0.25)) + float2(0.5)) * _73.depthTexelSize;
+        _978 = _1576;
+        float4 _1593 = _73.inverseProjection * float4((_978.x * 2.0) - 1.0, 1.0 - (_978.y * 2.0), depthTexture.sample(depthSampler, _1576, level(0.0)).x, 1.0);
+        _1006 = _1593;
+        float3 _1599 = (_1593.xyz / float3(_1006.w)) - _687;
+        float _1600 = dot(_1599, _1599);
+        _477 = _337;
+        _478 = _337;
+        _479 = _337;
+        _481 = _73.projection * float4(_687 + ((((_532 * _477[7u].x) + (_535 * _478[7u].y)) + (_767 * _479[7u].z)) * _73.radius), 1.0);
+        float2 _1672 = (floor((float2(((_481.x / _481.w) * 0.5) + 0.5, 0.5 - ((_481.y / _481.w) * 0.5)) / _73.depthTexelSize) + float2(0.25)) + float2(0.5)) * _73.depthTexelSize;
+        _978 = _1672;
+        float4 _1689 = _73.inverseProjection * float4((_978.x * 2.0) - 1.0, 1.0 - (_978.y * 2.0), depthTexture.sample(depthSampler, _1672, level(0.0)).x, 1.0);
+        _1006 = _1689;
+        float3 _1695 = (_1689.xyz / float3(_1006.w)) - _687;
+        float _1696 = dot(_1695, _1695);
+        _477 = _337;
+        _478 = _337;
+        _479 = _337;
+        _481 = _73.projection * float4(_687 + ((((_532 * _477[8u].x) + (_535 * _478[8u].y)) + (_767 * _479[8u].z)) * _73.radius), 1.0);
+        float2 _1768 = (floor((float2(((_481.x / _481.w) * 0.5) + 0.5, 0.5 - ((_481.y / _481.w) * 0.5)) / _73.depthTexelSize) + float2(0.25)) + float2(0.5)) * _73.depthTexelSize;
+        _978 = _1768;
+        float4 _1785 = _73.inverseProjection * float4((_978.x * 2.0) - 1.0, 1.0 - (_978.y * 2.0), depthTexture.sample(depthSampler, _1768, level(0.0)).x, 1.0);
+        _1006 = _1785;
+        float3 _1791 = (_1785.xyz / float3(_1006.w)) - _687;
+        float _1792 = dot(_1791, _1791);
+        _477 = _337;
+        _478 = _337;
+        _479 = _337;
+        _481 = _73.projection * float4(_687 + ((((_532 * _477[9u].x) + (_535 * _478[9u].y)) + (_767 * _479[9u].z)) * _73.radius), 1.0);
+        float2 _1864 = (floor((float2(((_481.x / _481.w) * 0.5) + 0.5, 0.5 - ((_481.y / _481.w) * 0.5)) / _73.depthTexelSize) + float2(0.25)) + float2(0.5)) * _73.depthTexelSize;
+        _978 = _1864;
+        float4 _1881 = _73.inverseProjection * float4((_978.x * 2.0) - 1.0, 1.0 - (_978.y * 2.0), depthTexture.sample(depthSampler, _1864, level(0.0)).x, 1.0);
+        _1006 = _1881;
+        float3 _1887 = (_1881.xyz / float3(_1006.w)) - _687;
+        float _1888 = dot(_1887, _1887);
+        float _1904 = ((((_1424 + (fast::clamp((dot(_1503, _767) * rsqrt(fast::max(_1504, 9.9999999747524270787835121154785e-07))) - 0.1500000059604644775390625, 0.0, 1.0) * fast::clamp(1.0 - (_1504 / (_73.radius * _73.radius)), 0.0, 1.0))) + (fast::clamp((dot(_1599, _767) * rsqrt(fast::max(_1600, 9.9999999747524270787835121154785e-07))) - 0.1500000059604644775390625, 0.0, 1.0) * fast::clamp(1.0 - (_1600 / (_73.radius * _73.radius)), 0.0, 1.0))) + (fast::clamp((dot(_1695, _767) * rsqrt(fast::max(_1696, 9.9999999747524270787835121154785e-07))) - 0.1500000059604644775390625, 0.0, 1.0) * fast::clamp(1.0 - (_1696 / (_73.radius * _73.radius)), 0.0, 1.0))) + (fast::clamp((dot(_1791, _767) * rsqrt(fast::max(_1792, 9.9999999747524270787835121154785e-07))) - 0.1500000059604644775390625, 0.0, 1.0) * fast::clamp(1.0 - (_1792 / (_73.radius * _73.radius)), 0.0, 1.0))) + (fast::clamp((dot(_1887, _767) * rsqrt(fast::max(_1888, 9.9999999747524270787835121154785e-07))) - 0.1500000059604644775390625, 0.0, 1.0) * fast::clamp(1.0 - (_1888 / (_73.radius * _73.radius)), 0.0, 1.0));
+        _477 = _337;
+        _478 = _337;
+        _479 = _337;
+        _481 = _73.projection * float4(_687 + ((((_532 * _477[10u].x) + (_535 * _478[10u].y)) + (_767 * _479[10u].z)) * _73.radius), 1.0);
+        float2 _1960 = (floor((float2(((_481.x / _481.w) * 0.5) + 0.5, 0.5 - ((_481.y / _481.w) * 0.5)) / _73.depthTexelSize) + float2(0.25)) + float2(0.5)) * _73.depthTexelSize;
+        _978 = _1960;
+        float4 _1977 = _73.inverseProjection * float4((_978.x * 2.0) - 1.0, 1.0 - (_978.y * 2.0), depthTexture.sample(depthSampler, _1960, level(0.0)).x, 1.0);
+        _1006 = _1977;
+        float3 _1983 = (_1977.xyz / float3(_1006.w)) - _687;
+        float _1984 = dot(_1983, _1983);
+        _477 = _337;
+        _478 = _337;
+        _479 = _337;
+        _481 = _73.projection * float4(_687 + ((((_532 * _477[11u].x) + (_535 * _478[11u].y)) + (_767 * _479[11u].z)) * _73.radius), 1.0);
+        float2 _2056 = (floor((float2(((_481.x / _481.w) * 0.5) + 0.5, 0.5 - ((_481.y / _481.w) * 0.5)) / _73.depthTexelSize) + float2(0.25)) + float2(0.5)) * _73.depthTexelSize;
+        _978 = _2056;
+        float4 _2073 = _73.inverseProjection * float4((_978.x * 2.0) - 1.0, 1.0 - (_978.y * 2.0), depthTexture.sample(depthSampler, _2056, level(0.0)).x, 1.0);
+        _1006 = _2073;
+        float3 _2079 = (_2073.xyz / float3(_1006.w)) - _687;
+        float _2080 = dot(_2079, _2079);
+        _1039 = float4(1.0 - (((_1904 + (fast::clamp((dot(_1983, _767) * rsqrt(fast::max(_1984, 9.9999999747524270787835121154785e-07))) - 0.1500000059604644775390625, 0.0, 1.0) * fast::clamp(1.0 - (_1984 / (_73.radius * _73.radius)), 0.0, 1.0))) + (fast::clamp((dot(_2079, _767) * rsqrt(fast::max(_2080, 9.9999999747524270787835121154785e-07))) - 0.1500000059604644775390625, 0.0, 1.0) * fast::clamp(1.0 - (_2080 / (_73.radius * _73.radius)), 0.0, 1.0))) * 0.083333335816860198974609375));
+        break;
+    } while(false);
+    out._entryPointOutput = _1039;
+    return out;
+}
+

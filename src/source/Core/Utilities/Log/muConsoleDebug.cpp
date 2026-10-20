@@ -126,7 +126,8 @@ bool CheckDeveloperLookCommand(const std::wstring& command)
         return true;
     }
     if (command.starts_with(L"$lightmood ") || command.starts_with(L"$texfilter ") ||
-        command.starts_with(L"$lighting ") || command.starts_with(L"$dynlights ") || command.starts_with(L"$post "))
+        command.starts_with(L"$lighting ") || command.starts_with(L"$dynlights ") || command.starts_with(L"$post ") ||
+        command.starts_with(L"$ao "))
     {
         mu::log::Get("render")->warn("{}: not understood (on or off; $lightmood also takes 0 to 100)",
                                      Core::Text::ToUtf8(command.c_str()));

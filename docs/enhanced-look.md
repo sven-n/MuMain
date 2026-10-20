@@ -90,6 +90,8 @@ window.
 | Bloom and colour grading | Bloom intensity | `bloom.strength` | 0–2 | 0.05 | 1 (Icarus 0.3) | common |
 | Bloom and colour grading | Bloom spread | `bloom.levelFalloff` | 0.25–1 | 0.05 | 0.6 | common |
 | Bloom and colour grading | Colour grading strength | `grading.strength` | 0–100 % | 1 % | 100 % | common |
+| Bloom and colour grading | Contact shadows | `ao.strength` | 0–2 | 0.05 | 0.8 | common |
+| Bloom and colour grading | Contact shadow reach | `ao.radius` | 10–300 | 5 | 60 | common |
 
 The defaults are the shipped look profile's (and each map's own, where it has
 one); they are defaults, not a promise that every combination of extremes looks
@@ -211,6 +213,8 @@ for the whole file.
 | `bloom.strength` | 1.0 (Icarus 0.3) | 0.6 | 0–2 | how strong the halo around light effects is |
 | `bloom.levelFalloff` | 0.6 | 0.5 | 0.25–1 | how wide the halo spreads |
 | `grading.strength` | 1 | 1 | 0–1 | how much of a map's grading table applies; 0 grades nothing while the bloom stays |
+| `ao.strength` | 0.8 | 0 | 0–2 | how much screen-space ambient occlusion darkens corners, wall bases and the ground under objects; additive effects are left alone; not drawn while anti-aliasing is on |
+| `ao.radius` | 60 | 60 | 10–300 | how far, in world units, nearby geometry still darkens a surface |
 
 ## Developer commands
 
@@ -239,7 +243,7 @@ Shorter forms of `$look set`: `$lighting rim <v>`, `$lighting specular <v>`,
 `$lighting diffuse <scale> <ambient> <floor>`, `$lightmood knee <k>`,
 `$dynlights wrap <w>`, `$dynlights smooth <s>`,
 `$dynlights spell <gain> <range> <fade>`, `$dynlights cap <c>`,
-`$dynlights reach <cells>`, `$dynlights shadow <opacity>`, `$dynlights shadowangle <degrees>`, `$dynlights shadowlights <n>`, `$bloom falloff <f>`, `$bloom <strength>`.
+`$dynlights reach <cells>`, `$dynlights shadow <opacity>`, `$dynlights shadowangle <degrees>`, `$dynlights shadowlights <n>`, `$bloom falloff <f>`, `$bloom <strength>`, `$ao <strength>`, `$ao radius <r>`.
 The DevEditor has the same values in its Look panel.
 
 Feature overrides, to compare one feature on and off. They last for the

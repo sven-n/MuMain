@@ -21,7 +21,9 @@
     "dynamic.shadowLights": 2,
     "bloom.strength": 1.0,
     "bloom.levelFalloff": 0.6,
-    "grading.strength": 1
+    "grading.strength": 1,
+    "ao.strength": 0.8,
+    "ao.radius": 60
   },
   "maps": [
     {

@@ -1,0 +1,159 @@
+#include <metal_stdlib>
+#include <simd/simd.h>
+
+using namespace metal;
+
+struct AmbientOcclusion
+{
+    float4x4 projection;
+    float4x4 inverseProjection;
+    float2 depthTexelSize;
+    float radius;
+    float padding;
+};
+
+struct main0_out
+{
+    float4 _entryPointOutput [[color(0)]];
+};
+
+struct main0_in
+{
+    float2 input_uv [[user(locn0)]];
+};
+
+fragment main0_out main0(main0_in in [[stage_in]], constant AmbientOcclusion& _31 [[buffer(0)]], texture2d<float> depthTexture [[texture(0)]], texture2d<float> occlusionTexture [[texture(1)]], sampler depthSampler [[sampler(0)]], sampler occlusionSampler [[sampler(1)]])
+{
+    main0_out out = {};
+    float2 _385 = (floor((in.input_uv / _31.depthTexelSize) + float2(0.25)) + float2(0.5)) * _31.depthTexelSize;
+    float2 _281 = _385;
+    float4 _404 = _31.inverseProjection * float4((_281.x * 2.0) - 1.0, 1.0 - (_281.y * 2.0), depthTexture.sample(depthSampler, _385, level(0.0)).x, 1.0);
+    float4 _371 = _404;
+    float3 _410 = _404.xyz / float3(_371.w);
+    float2 _496 = (floor(((in.input_uv + float2(_31.depthTexelSize.x, 0.0)) / _31.depthTexelSize) + float2(0.25)) + float2(0.5)) * _31.depthTexelSize;
+    float2 _412 = _496;
+    float4 _515 = _31.inverseProjection * float4((_412.x * 2.0) - 1.0, 1.0 - (_412.y * 2.0), depthTexture.sample(depthSampler, _496, level(0.0)).x, 1.0);
+    float4 _482 = _515;
+    float3 _430 = (_515.xyz / float3(_482.w)) - _410;
+    float3 _411 = _430;
+    float2 _537 = (floor(((in.input_uv - float2(_31.depthTexelSize.x, 0.0)) / _31.depthTexelSize) + float2(0.25)) + float2(0.5)) * _31.depthTexelSize;
+    float2 _414 = _537;
+    float4 _556 = _31.inverseProjection * float4((_414.x * 2.0) - 1.0, 1.0 - (_414.y * 2.0), depthTexture.sample(depthSampler, _537, level(0.0)).x, 1.0);
+    float4 _523 = _556;
+    float3 _438 = _410 - (_556.xyz / float3(_523.w));
+    float3 _413 = _438;
+    float2 _578 = (floor(((in.input_uv + float2(0.0, _31.depthTexelSize.y)) / _31.depthTexelSize) + float2(0.25)) + float2(0.5)) * _31.depthTexelSize;
+    float2 _416 = _578;
+    float4 _597 = _31.inverseProjection * float4((_416.x * 2.0) - 1.0, 1.0 - (_416.y * 2.0), depthTexture.sample(depthSampler, _578, level(0.0)).x, 1.0);
+    float4 _564 = _597;
+    float3 _446 = (_597.xyz / float3(_564.w)) - _410;
+    float3 _415 = _446;
+    float2 _619 = (floor(((in.input_uv - float2(0.0, _31.depthTexelSize.y)) / _31.depthTexelSize) + float2(0.25)) + float2(0.5)) * _31.depthTexelSize;
+    float2 _418 = _619;
+    float4 _638 = _31.inverseProjection * float4((_418.x * 2.0) - 1.0, 1.0 - (_418.y * 2.0), depthTexture.sample(depthSampler, _619, level(0.0)).x, 1.0);
+    float4 _605 = _638;
+    float3 _454 = _410 - (_638.xyz / float3(_605.w));
+    float3 _417 = _454;
+    float3 _480 = fast::normalize(cross(select(_438, _430, bool3(abs(_411.z) < abs(_413.z))), select(_454, _446, bool3(abs(_415.z) < abs(_417.z)))));
+    float2 _307 = _31.depthTexelSize * 2.0;
+    float _310 = _31.radius * 0.25;
+    float2 _330 = in.input_uv + (float2(-2.0) * _307);
+    float2 _660 = (floor((_330 / _31.depthTexelSize) + float2(0.25)) + float2(0.5)) * _31.depthTexelSize;
+    float2 _293 = _660;
+    float4 _679 = _31.inverseProjection * float4((_293.x * 2.0) - 1.0, 1.0 - (_293.y * 2.0), depthTexture.sample(depthSampler, _660, level(0.0)).x, 1.0);
+    float4 _646 = _679;
+    float _342 = fast::clamp(1.0 - (abs(dot((_679.xyz / float3(_646.w)) - _410, _480)) / _310), 0.0, 1.0);
+    float2 _718 = in.input_uv + (float2(-1.0, -2.0) * _307);
+    float2 _729 = (floor((_718 / _31.depthTexelSize) + float2(0.25)) + float2(0.5)) * _31.depthTexelSize;
+    _293 = _729;
+    float4 _746 = _31.inverseProjection * float4((_293.x * 2.0) - 1.0, 1.0 - (_293.y * 2.0), depthTexture.sample(depthSampler, _729, level(0.0)).x, 1.0);
+    _646 = _746;
+    float _757 = fast::clamp(1.0 - (abs(dot((_746.xyz / float3(_646.w)) - _410, _480)) / _310), 0.0, 1.0);
+    float2 _780 = in.input_uv + (float2(0.0, -2.0) * _307);
+    float2 _791 = (floor((_780 / _31.depthTexelSize) + float2(0.25)) + float2(0.5)) * _31.depthTexelSize;
+    _293 = _791;
+    float4 _808 = _31.inverseProjection * float4((_293.x * 2.0) - 1.0, 1.0 - (_293.y * 2.0), depthTexture.sample(depthSampler, _791, level(0.0)).x, 1.0);
+    _646 = _808;
+    float _819 = fast::clamp(1.0 - (abs(dot((_808.xyz / float3(_646.w)) - _410, _480)) / _310), 0.0, 1.0);
+    float2 _842 = in.input_uv + (float2(1.0, -2.0) * _307);
+    float2 _853 = (floor((_842 / _31.depthTexelSize) + float2(0.25)) + float2(0.5)) * _31.depthTexelSize;
+    _293 = _853;
+    float4 _870 = _31.inverseProjection * float4((_293.x * 2.0) - 1.0, 1.0 - (_293.y * 2.0), depthTexture.sample(depthSampler, _853, level(0.0)).x, 1.0);
+    _646 = _870;
+    float _881 = fast::clamp(1.0 - (abs(dot((_870.xyz / float3(_646.w)) - _410, _480)) / _310), 0.0, 1.0);
+    float2 _908 = in.input_uv + (float2(-2.0, -1.0) * _307);
+    float2 _919 = (floor((_908 / _31.depthTexelSize) + float2(0.25)) + float2(0.5)) * _31.depthTexelSize;
+    _293 = _919;
+    float4 _936 = _31.inverseProjection * float4((_293.x * 2.0) - 1.0, 1.0 - (_293.y * 2.0), depthTexture.sample(depthSampler, _919, level(0.0)).x, 1.0);
+    _646 = _936;
+    float _947 = fast::clamp(1.0 - (abs(dot((_936.xyz / float3(_646.w)) - _410, _480)) / _310), 0.0, 1.0);
+    float2 _967 = in.input_uv + (float2(-1.0) * _307);
+    float2 _978 = (floor((_967 / _31.depthTexelSize) + float2(0.25)) + float2(0.5)) * _31.depthTexelSize;
+    _293 = _978;
+    float4 _995 = _31.inverseProjection * float4((_293.x * 2.0) - 1.0, 1.0 - (_293.y * 2.0), depthTexture.sample(depthSampler, _978, level(0.0)).x, 1.0);
+    _646 = _995;
+    float _1006 = fast::clamp(1.0 - (abs(dot((_995.xyz / float3(_646.w)) - _410, _480)) / _310), 0.0, 1.0);
+    float2 _1026 = in.input_uv + (float2(0.0, -1.0) * _307);
+    float2 _1037 = (floor((_1026 / _31.depthTexelSize) + float2(0.25)) + float2(0.5)) * _31.depthTexelSize;
+    _293 = _1037;
+    float4 _1054 = _31.inverseProjection * float4((_293.x * 2.0) - 1.0, 1.0 - (_293.y * 2.0), depthTexture.sample(depthSampler, _1037, level(0.0)).x, 1.0);
+    _646 = _1054;
+    float _1065 = fast::clamp(1.0 - (abs(dot((_1054.xyz / float3(_646.w)) - _410, _480)) / _310), 0.0, 1.0);
+    float2 _1085 = in.input_uv + (float2(1.0, -1.0) * _307);
+    float2 _1096 = (floor((_1085 / _31.depthTexelSize) + float2(0.25)) + float2(0.5)) * _31.depthTexelSize;
+    _293 = _1096;
+    float4 _1113 = _31.inverseProjection * float4((_293.x * 2.0) - 1.0, 1.0 - (_293.y * 2.0), depthTexture.sample(depthSampler, _1096, level(0.0)).x, 1.0);
+    _646 = _1113;
+    float _1124 = fast::clamp(1.0 - (abs(dot((_1113.xyz / float3(_646.w)) - _410, _480)) / _310), 0.0, 1.0);
+    float2 _1154 = in.input_uv + (float2(-2.0, 0.0) * _307);
+    float2 _1165 = (floor((_1154 / _31.depthTexelSize) + float2(0.25)) + float2(0.5)) * _31.depthTexelSize;
+    _293 = _1165;
+    float4 _1182 = _31.inverseProjection * float4((_293.x * 2.0) - 1.0, 1.0 - (_293.y * 2.0), depthTexture.sample(depthSampler, _1165, level(0.0)).x, 1.0);
+    _646 = _1182;
+    float _1193 = fast::clamp(1.0 - (abs(dot((_1182.xyz / float3(_646.w)) - _410, _480)) / _310), 0.0, 1.0);
+    float2 _1213 = in.input_uv + (float2(-1.0, 0.0) * _307);
+    float2 _1224 = (floor((_1213 / _31.depthTexelSize) + float2(0.25)) + float2(0.5)) * _31.depthTexelSize;
+    _293 = _1224;
+    float4 _1241 = _31.inverseProjection * float4((_293.x * 2.0) - 1.0, 1.0 - (_293.y * 2.0), depthTexture.sample(depthSampler, _1224, level(0.0)).x, 1.0);
+    _646 = _1241;
+    float _1252 = fast::clamp(1.0 - (abs(dot((_1241.xyz / float3(_646.w)) - _410, _480)) / _310), 0.0, 1.0);
+    float2 _1283 = (floor((in.input_uv / _31.depthTexelSize) + float2(0.25)) + float2(0.5)) * _31.depthTexelSize;
+    _293 = _1283;
+    float4 _1300 = _31.inverseProjection * float4((_293.x * 2.0) - 1.0, 1.0 - (_293.y * 2.0), depthTexture.sample(depthSampler, _1283, level(0.0)).x, 1.0);
+    _646 = _1300;
+    float _1311 = fast::clamp(1.0 - (abs(dot((_1300.xyz / float3(_646.w)) - _410, _480)) / _310), 0.0, 1.0);
+    float _1319 = ((((((((((occlusionTexture.sample(occlusionSampler, _330, level(0.0)).x * (_342 + 0.001000000047497451305389404296875)) + (occlusionTexture.sample(occlusionSampler, _718, level(0.0)).x * (_757 + 0.001000000047497451305389404296875))) + (occlusionTexture.sample(occlusionSampler, _780, level(0.0)).x * (_819 + 0.001000000047497451305389404296875))) + (occlusionTexture.sample(occlusionSampler, _842, level(0.0)).x * (_881 + 0.001000000047497451305389404296875))) + (occlusionTexture.sample(occlusionSampler, _908, level(0.0)).x * (_947 + 0.001000000047497451305389404296875))) + (occlusionTexture.sample(occlusionSampler, _967, level(0.0)).x * (_1006 + 0.001000000047497451305389404296875))) + (occlusionTexture.sample(occlusionSampler, _1026, level(0.0)).x * (_1065 + 0.001000000047497451305389404296875))) + (occlusionTexture.sample(occlusionSampler, _1085, level(0.0)).x * (_1124 + 0.001000000047497451305389404296875))) + (occlusionTexture.sample(occlusionSampler, _1154, level(0.0)).x * (_1193 + 0.001000000047497451305389404296875))) + (occlusionTexture.sample(occlusionSampler, _1213, level(0.0)).x * (_1252 + 0.001000000047497451305389404296875))) + (occlusionTexture.sample(occlusionSampler, in.input_uv, level(0.0)).x * (_1311 + 0.001000000047497451305389404296875));
+    float2 _1331 = in.input_uv + (float2(1.0, 0.0) * _307);
+    float2 _1342 = (floor((_1331 / _31.depthTexelSize) + float2(0.25)) + float2(0.5)) * _31.depthTexelSize;
+    _293 = _1342;
+    float4 _1359 = _31.inverseProjection * float4((_293.x * 2.0) - 1.0, 1.0 - (_293.y * 2.0), depthTexture.sample(depthSampler, _1342, level(0.0)).x, 1.0);
+    _646 = _1359;
+    float _1370 = fast::clamp(1.0 - (abs(dot((_1359.xyz / float3(_646.w)) - _410, _480)) / _310), 0.0, 1.0);
+    float2 _1400 = in.input_uv + (float2(-2.0, 1.0) * _307);
+    float2 _1411 = (floor((_1400 / _31.depthTexelSize) + float2(0.25)) + float2(0.5)) * _31.depthTexelSize;
+    _293 = _1411;
+    float4 _1428 = _31.inverseProjection * float4((_293.x * 2.0) - 1.0, 1.0 - (_293.y * 2.0), depthTexture.sample(depthSampler, _1411, level(0.0)).x, 1.0);
+    _646 = _1428;
+    float _1439 = fast::clamp(1.0 - (abs(dot((_1428.xyz / float3(_646.w)) - _410, _480)) / _310), 0.0, 1.0);
+    float2 _1459 = in.input_uv + (float2(-1.0, 1.0) * _307);
+    float2 _1470 = (floor((_1459 / _31.depthTexelSize) + float2(0.25)) + float2(0.5)) * _31.depthTexelSize;
+    _293 = _1470;
+    float4 _1487 = _31.inverseProjection * float4((_293.x * 2.0) - 1.0, 1.0 - (_293.y * 2.0), depthTexture.sample(depthSampler, _1470, level(0.0)).x, 1.0);
+    _646 = _1487;
+    float _1498 = fast::clamp(1.0 - (abs(dot((_1487.xyz / float3(_646.w)) - _410, _480)) / _310), 0.0, 1.0);
+    float2 _1518 = in.input_uv + (float2(0.0, 1.0) * _307);
+    float2 _1529 = (floor((_1518 / _31.depthTexelSize) + float2(0.25)) + float2(0.5)) * _31.depthTexelSize;
+    _293 = _1529;
+    float4 _1546 = _31.inverseProjection * float4((_293.x * 2.0) - 1.0, 1.0 - (_293.y * 2.0), depthTexture.sample(depthSampler, _1529, level(0.0)).x, 1.0);
+    _646 = _1546;
+    float _1557 = fast::clamp(1.0 - (abs(dot((_1546.xyz / float3(_646.w)) - _410, _480)) / _310), 0.0, 1.0);
+    float2 _1577 = in.input_uv + _307;
+    float2 _1588 = (floor((_1577 / _31.depthTexelSize) + float2(0.25)) + float2(0.5)) * _31.depthTexelSize;
+    _293 = _1588;
+    float4 _1605 = _31.inverseProjection * float4((_293.x * 2.0) - 1.0, 1.0 - (_293.y * 2.0), depthTexture.sample(depthSampler, _1588, level(0.0)).x, 1.0);
+    _646 = _1605;
+    float _1616 = fast::clamp(1.0 - (abs(dot((_1605.xyz / float3(_646.w)) - _410, _480)) / _310), 0.0, 1.0);
+    out._entryPointOutput = float4((((((_1319 + (occlusionTexture.sample(occlusionSampler, _1331, level(0.0)).x * (_1370 + 0.001000000047497451305389404296875))) + (occlusionTexture.sample(occlusionSampler, _1400, level(0.0)).x * (_1439 + 0.001000000047497451305389404296875))) + (occlusionTexture.sample(occlusionSampler, _1459, level(0.0)).x * (_1498 + 0.001000000047497451305389404296875))) + (occlusionTexture.sample(occlusionSampler, _1518, level(0.0)).x * (_1557 + 0.001000000047497451305389404296875))) + (occlusionTexture.sample(occlusionSampler, _1577, level(0.0)).x * (_1616 + 0.001000000047497451305389404296875))) / (0.01600000075995922088623046875 + (((((((((((((((_342 + _757) + _819) + _881) + _947) + _1006) + _1065) + _1124) + _1193) + _1252) + _1311) + _1370) + _1439) + _1498) + _1557) + _1616)));
+    return out;
+}
+
