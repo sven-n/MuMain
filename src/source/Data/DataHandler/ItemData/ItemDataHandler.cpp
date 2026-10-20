@@ -12,11 +12,13 @@
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
+#include "Data/GameData/ItemData/ItemModelJsonFormat.h"
 #include "Data/GameData/ItemData/ItemNames.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "I18N/All.h"
 
 #include <algorithm>
+#include <iterator>
 #include <chrono>
 #include <memory>
 
@@ -335,14 +337,51 @@ void CItemDataHandler::FollowDerivedFieldsAfterMove(const ItemDefinition& before
     }
 }
 
-ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
+void CItemDataHandler::SetLookNames(LookNameExists renderStyleExists, LookNameExists itemEffectExists)
 {
-    // A profile the item stat file does not have would stop the next start. The save checks
-    // the items too and refuses on any error, so everything is reported at once.
+    m_lookNames = LookNames{renderStyleExists, itemEffectExists};
+}
+
+void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
+{
+    // A profile the item stat file does not have would stop the next start.
     ValidateStatProfiles(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(),
                          GetItemStatsFile().generic_string(), issues);
     ValidateNameLocales(g_ItemDatabase.GetAllSlots(), I18N::GetAvailableLocales(), issues);
-    // Only the model files of moved models are written; the others keep what
+    std::vector<ItemDefinition> items;
+    std::ranges::copy_if(g_ItemDatabase.GetAllSlots(), std::back_inserter(items), &ItemDefinition::Exists);
+    ValidateItems(items, issues);
+
+    std::vector<ItemModelDefinition> models;
+    std::ranges::copy_if(g_ItemModelDatabase.GetAllSlots(), std::back_inserter(models), &ItemModelDefinition::Exists);
+    ValidateItemModels(models, issues);
+    std::vector<ItemModelDefinition> sharedUsers = models;
+    ApplySharedItemModels(sharedUsers, g_ItemModelDatabase.GetSharedModels(), SharedItemModelsFileName, issues);
+    // Without a color list (no models loaded) every color would be missing.
+    if (!g_GlowColors.GetColors().empty())
+    {
+        ValidateItemModelGlowColors(models, g_GlowColors.GetColors(), issues);
+    }
+    if (m_lookNames)
+    {
+        ValidateItemModelLooks(models, m_lookNames->renderStyle, m_lookNames->itemEffect, issues);
+    }
+    ValidateDirectlySharedModelFiles(models, issues);
+    ValidateItemModelsAsWritten(g_ItemModelDatabase.GetAllSlots(), issues);
+    ValidateItemModelFilesExist(models, issues);
+}
+
+ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
+{
+    // Everything is checked before anything is written, so all problems are
+    // reported at once.
+    Validate(issues);
+    if (HasErrors(issues))
+    {
+        return ItemDataSaveResult::InvalidData;
+    }
+
+    // Only the model files of changed models are written; the others keep what
     // this client does not read from them.
     ItemModelSave models;
     models.directory = GetItemModelDataDirectory();
@@ -350,7 +389,7 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
     models.groups = m_changedModelGroups;
     models.sharedModels = g_ItemModelDatabase.GetSharedModels();
     models.sharedModelsChanged = m_sharedModelsChanged;
-    return SaveItemAndModelDataDirectories(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(), models, issues);
+    return WriteItemAndModelDataDirectories(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(), models, issues);
 }
 
 ItemBmdImportResult CItemDataHandler::ImportFromBmd()

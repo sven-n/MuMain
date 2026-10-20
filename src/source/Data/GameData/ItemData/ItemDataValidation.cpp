@@ -367,6 +367,45 @@ void ApplySharedItemModels(std::vector<ItemModelDefinition>& models, std::span<c
     }
 }
 
+void ValidateItemModelLooks(std::span<const ItemModelDefinition> models, LookNameExists renderStyleExists,
+                            LookNameExists itemEffectExists, std::vector<ItemDataIssue>& issues)
+{
+    const auto check =
+        [&](const ItemModelDefinition& model, const char* field, const std::string& name, LookNameExists exists)
+    {
+        if (!name.empty() && !exists(name))
+        {
+            issues.push_back({ItemDataIssueSeverity::Warning, "", model.group, model.number, field,
+                              "there is no look named \"" + name + "\"; the model is drawn plainly"});
+        }
+    };
+    for (const ItemModelDefinition& model : models)
+    {
+        check(model, "renderStyle", model.renderStyle, renderStyleExists);
+        check(model, "itemEffect", model.itemEffect, itemEffectExists);
+    }
+}
+
+void ValidateDirectlySharedModelFiles(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues)
+{
+    std::map<std::string, int, std::less<>> entriesByFile;
+    for (const ItemModelDefinition& model : models)
+    {
+        if (model.model.empty() && !model.file.empty())
+        {
+            ++entriesByFile[model.file];
+        }
+    }
+    for (const ItemModelDefinition& model : models)
+    {
+        if (model.model.empty() && !model.file.empty() && entriesByFile[model.file] > 1)
+        {
+            issues.push_back({ItemDataIssueSeverity::Warning, "", model.group, model.number, "file",
+                              "other items name " + model.file + " too; a shared model would open it once"});
+        }
+    }
+}
+
 void ValidateItemModelGlowColors(std::span<const ItemModelDefinition> models,
                                  std::span<const Effects::GlowColor> colors, std::vector<ItemDataIssue>& issues)
 {

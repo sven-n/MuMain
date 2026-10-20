@@ -11,6 +11,9 @@
 #include "Data/DataHandler/ItemData/ItemBmdImport.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
+#include "Data/GameData/ItemData/ItemDataValidation.h"
+
+#include <optional>
 #endif
 
 // Owns loading the item data (Data/Items/*.json) into the item database and
@@ -53,7 +56,18 @@ public:
     // an edit (FollowDerivedFieldsAfterMove).
     void OnItemsSwapped(int firstItemType, int secondItemType);
 
-    // Validates the item database and the item models and writes Data/Items,
+    // The checks of the item data and the item models that Save runs, without
+    // writing anything: unique ids and names, stat profiles, name languages,
+    // shared model names, glow colors, look names (once SetLookNames gave
+    // them), the values the model file reader takes, model files several
+    // items name themselves and model files that are missing. Appends the
+    // problems to `issues`.
+    void Validate(std::vector<Data::Items::ItemDataIssue>& issues) const;
+    // The looks the checks know; they are drawing code, so the editor gives
+    // them. Without them render style and item effect names are not checked.
+    void SetLookNames(Data::Items::LookNameExists renderStyleExists, Data::Items::LookNameExists itemEffectExists);
+
+    // Validates the item database and the item models (Validate) and writes Data/Items,
     // with the model files of Data/Items/Models whose models changed (moved,
     // edited) since they were loaded, and SharedModels.json when a shared
     // model changed. Nothing is written when the data has errors, and no file
@@ -131,6 +145,13 @@ private:
     Data::Items::ItemGroupSet m_changedModelGroups;
     // Whether the editor changed a shared model since LoadModels.
     bool m_sharedModelsChanged = false;
+
+    struct LookNames
+    {
+        Data::Items::LookNameExists renderStyle;
+        Data::Items::LookNameExists itemEffect;
+    };
+    std::optional<LookNames> m_lookNames;
 #endif
 
     bool m_localeObserverRegistered = false;

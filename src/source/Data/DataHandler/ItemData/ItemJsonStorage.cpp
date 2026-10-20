@@ -13,6 +13,10 @@
 #include <fstream>
 #include <optional>
 
+#ifndef _WIN32
+#include "Core/Platform/PathResolve.h"
+#endif
+
 namespace Data::Items
 {
 namespace
@@ -306,17 +310,59 @@ ItemDataSaveResult SaveItemAndModelDataDirectories(const std::filesystem::path& 
                                                    std::span<const ItemDefinition> items, const ItemModelSave& models,
                                                    std::vector<ItemDataIssue>& issues)
 {
-    const std::vector<ItemDefinition> existingItems = GetExistingItems(items);
-    ValidateItems(existingItems, issues);
+    ValidateItems(GetExistingItems(items), issues);
     ValidateExistingItemModels(models.models, issues);
     if (HasErrors(issues))
     {
         return ItemDataSaveResult::InvalidData;
     }
+    return WriteItemAndModelDataDirectories(itemDirectory, items, models, issues);
+}
 
+ItemDataSaveResult WriteItemAndModelDataDirectories(const std::filesystem::path& itemDirectory,
+                                                    std::span<const ItemDefinition> items, const ItemModelSave& models,
+                                                    std::vector<ItemDataIssue>& issues)
+{
     std::vector<FileToSave> files;
-    AddItemGroupFiles(itemDirectory, existingItems, files);
+    AddItemGroupFiles(itemDirectory, GetExistingItems(items), files);
     AddItemModelFiles(models, files);
     return WriteChangedFiles(files, issues);
+}
+
+void ValidateItemModelsAsWritten(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues)
+{
+    for (int group = 0; group < MAX_ITEM_TYPE; ++group)
+    {
+        std::vector<ItemModelDefinition> readBack;
+        std::vector<ItemDataIssue> readIssues;
+        ReadItemModelGroupJson(WriteItemModelGroupJson(group, models), GetItemGroupFileName(group), readBack,
+                               readIssues);
+        std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
+                     [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Error; });
+    }
+}
+
+void ValidateItemModelFilesExist(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues)
+{
+    for (const ItemModelDefinition& model : models)
+    {
+        if (model.file.empty())
+        {
+            continue;
+        }
+#ifdef _WIN32
+        const std::filesystem::path path = std::filesystem::u8path(model.file);
+#else
+        // The data does not always spell the files in the case they have on disk.
+        const std::filesystem::path path = MuResolvePath(model.file.c_str());
+#endif
+        std::error_code ignored;
+        if (!std::filesystem::is_regular_file(path, ignored))
+        {
+            issues.push_back({ItemDataIssueSeverity::Warning, GetItemGroupFileName(model.group), model.group,
+                              model.number, "file",
+                              model.file + " is not in the client folder; the item is drawn without a model"});
+        }
+    }
 }
 } // namespace Data::Items

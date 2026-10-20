@@ -24,6 +24,8 @@
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "I18N/All.h"
+#include "Render/Items/ItemEffects.h"
+#include "Render/Items/ItemRenderStyles.h"
 
 #include <algorithm>
 #include <cstring>
@@ -797,6 +799,87 @@ TEST_CASE("The save warns about an item name in a language the game has no texts
                                   return issue.severity == ItemDataIssueSeverity::Warning && issue.group == 0 &&
                                          issue.number == 5 && issue.message.find("the fr name") != std::string::npos;
                               }));
+}
+
+namespace
+{
+// The issues of the item at (group, number) with this severity and field.
+bool HasIssue(const std::vector<ItemDataIssue>& issues, ItemDataIssueSeverity severity, int group, int number,
+              std::string_view field)
+{
+    return std::ranges::any_of(issues,
+                               [&](const ItemDataIssue& issue)
+                               {
+                                   return issue.severity == severity && issue.group == group &&
+                                          issue.number == number && issue.field == field;
+                               });
+}
+} // namespace
+
+// The checks the item tools show and the save runs before it writes.
+TEST_CASE("The editor's checks report problems of the item models [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    g_ItemDataHandler.SetLookNames(Render::Items::Styles::Exists, Render::Items::ItemEffects::Exists);
+
+    std::vector<ItemDataIssue> issues;
+    g_ItemDataHandler.Validate(issues);
+    REQUIRE_FALSE(HasErrors(issues));
+    // The folder has the data files but not the .bmd files.
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, 0, 0, "file"));
+    issues.clear();
+
+    ItemModelDefinition kris = *g_ItemModelDatabase.Find(KrisType);
+    SUBCASE("a shared model that does not exist")
+    {
+        kris.model = "noSuchModel";
+        g_ItemModelDatabase.Set(kris, g_GlowColors);
+        g_ItemDataHandler.Validate(issues);
+        CHECK(HasIssue(issues, ItemDataIssueSeverity::Error, 0, 0, "model"));
+        std::vector<ItemDataIssue> saveIssues;
+        CHECK(g_ItemDataHandler.Save(saveIssues) == ItemDataSaveResult::InvalidData);
+    }
+    SUBCASE("a look that does not exist")
+    {
+        kris.renderStyle = "noSuchStyle";
+        kris.itemEffect = "noSuchEffect";
+        g_ItemModelDatabase.Set(kris, g_GlowColors);
+        g_ItemDataHandler.Validate(issues);
+        CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, 0, 0, "renderStyle"));
+        CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, 0, 0, "itemEffect"));
+        CHECK_FALSE(HasErrors(issues));
+    }
+    SUBCASE("a value the model file reader refuses")
+    {
+        kris.inventory.scale = 0.0;
+        g_ItemModelDatabase.Set(kris, g_GlowColors);
+        g_ItemDataHandler.Validate(issues);
+        CHECK(HasErrors(issues));
+    }
+    SUBCASE("a glow color that is not in the list")
+    {
+        kris.glow.color = "noSuchColor";
+        g_ItemModelDatabase.Set(kris, g_GlowColors);
+        g_ItemDataHandler.Validate(issues);
+        CHECK(HasErrors(issues));
+    }
+    SUBCASE("a file that two items name themselves")
+    {
+        ItemModelDefinition copy = kris;
+        copy.number = 30;
+        g_ItemModelDatabase.Set(copy, g_GlowColors);
+        g_ItemDataHandler.Validate(issues);
+        CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, 0, 0, "file"));
+        CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, 0, 30, "file"));
+    }
 }
 
 // The bmd import and the editor give items the profile their data gives; a stat file can lack it

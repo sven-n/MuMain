@@ -117,4 +117,22 @@ struct ItemModelSave
 ItemDataSaveResult SaveItemAndModelDataDirectories(const std::filesystem::path& itemDirectory,
                                                    std::span<const ItemDefinition> items, const ItemModelSave& models,
                                                    std::vector<ItemDataIssue>& issues);
+
+// Like SaveItemAndModelDataDirectories without the checks, for data that was
+// already checked; a failed write is reported in `issues`.
+ItemDataSaveResult WriteItemAndModelDataDirectories(const std::filesystem::path& itemDirectory,
+                                                    std::span<const ItemDefinition> items, const ItemModelSave& models,
+                                                    std::vector<ItemDataIssue>& issues);
+
+// The rules the model file reader applies to a value (scales above 0,
+// specular 0 to 1, glow levels, mesh lists, file and folder paths, names):
+// writes the models of every group as the save would and reads them back, so
+// a value the next start would refuse is an error now. The problems name the
+// group file.
+void ValidateItemModelsAsWritten(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues);
+
+// A model file that is not in the client folder (relative to the working
+// directory): a warning for each model, since the game starts without it and
+// draws nothing for the item.
+void ValidateItemModelFilesExist(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues);
 } // namespace Data::Items
