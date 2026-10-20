@@ -41,10 +41,19 @@ struct SdlGpuCompositeUniform
     // 0: ungraded; otherwise the blend of the graded colour with the ungraded one
     // (Render::PostProcessing::CompositeGradingStrength).
     float gradingStrength;
+    // Scene channels above it roll off towards 1 (the HDR scene); 1 leaves the scene as it is.
+    float toneMapKnee;
+    // Amplitude of the ordered dither added before the 8-bit target; 0 for none.
+    float ditherAmount;
+    float padding[2];
 };
 static_assert(offsetof(SdlGpuCompositeUniform, bloomScale) == 8);
 static_assert(offsetof(SdlGpuCompositeUniform, gradingStrength) == 12);
-static_assert(sizeof(SdlGpuCompositeUniform) == 16);
+static_assert(offsetof(SdlGpuCompositeUniform, toneMapKnee) == 16);
+static_assert(sizeof(SdlGpuCompositeUniform) == 32);
+
+// Where the HDR scene's tone map starts rolling channels off: below it the scene is unchanged.
+inline constexpr float HdrToneMapKnee = 0.9f;
 
 // The textures and passes that turn the rendered 3D scene into the processed
 // image the UI is then drawn on: the scene texture the scene pass resolves into,
@@ -69,9 +78,11 @@ public:
     void DestroyPipelines();
     [[nodiscard]] bool IsAvailable() const;
 
-    // The scene, bloom source and bloom chain textures for frames of `size`,
-    // recreated when the size changed.
-    [[nodiscard]] bool EnsureTargets(SdlGpuTargetSize size);
+    // The scene, bloom source and bloom chain textures for frames of `size`, the scene and bloom
+    // source in `sceneFormat` (INVALID: the frame's format; another one makes an HDR scene, which
+    // the composite tone maps and dithers), recreated when either changed.
+    [[nodiscard]] bool EnsureTargets(SdlGpuTargetSize size, SDL_GPUTextureFormat sceneFormat);
+    [[nodiscard]] bool IsHdrScene() const;
     [[nodiscard]] SDL_GPUTexture* GetSceneTexture() const;
     [[nodiscard]] SDL_GPUTexture* GetBloomSourceTexture() const;
 
@@ -111,6 +122,7 @@ private:
     SDL_GPUDevice* m_device = nullptr;
     SDL_GPUTextureFormat m_frameFormat = SDL_GPU_TEXTUREFORMAT_INVALID;
     SDL_GPUTextureFormat m_bloomFormat = SDL_GPU_TEXTUREFORMAT_INVALID;
+    SDL_GPUTextureFormat m_sceneFormat = SDL_GPU_TEXTUREFORMAT_INVALID;
     SDL_GPUGraphicsPipeline* m_bloomDownPipeline = nullptr;
     SDL_GPUGraphicsPipeline* m_bloomUpPipeline = nullptr;
     SDL_GPUGraphicsPipeline* m_compositePipeline = nullptr;

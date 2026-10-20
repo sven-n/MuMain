@@ -203,7 +203,7 @@ TEST_CASE(
     // The strength replaces the former gradingEnabled flag in the last register lane.
     CHECK(offsetof(mu::SdlGpuCompositeUniform, bloomScale) == 8);
     CHECK(offsetof(mu::SdlGpuCompositeUniform, gradingStrength) == 12);
-    CHECK(sizeof(mu::SdlGpuCompositeUniform) == 16);
+    CHECK(sizeof(mu::SdlGpuCompositeUniform) == 32);
 }
 
 TEST_CASE("the developer tuning commands name their look values [render][look]")
