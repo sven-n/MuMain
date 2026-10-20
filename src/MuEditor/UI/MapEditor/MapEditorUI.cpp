@@ -32,6 +32,7 @@
 #include "Core/MuEditorCore.h"             // hover flag for input blocking
 #include "UI/Console/MuEditorConsoleUI.h"
 #include "Core/Utilities/StringUtils.h"    // WideToNarrow (UTF-8 safe, unlike raw truncation)
+#include "../MuEditor/UI/Common/KeyboardSelection.h"
 
 #include <cstring>
 
@@ -455,7 +456,7 @@ void CMapEditorUI::RenderTextureTab()
 
         if (ImGui::IsItemHovered())
             ImGui::SetTooltip("%d: %s", slot, TileSlotName(slot));
-        if (clicked)
+        if (clicked || MuEditor::KeyboardSelection::MovedOnto())
             SelectMapping = slot;
 
         ImGui::PopID();
@@ -687,7 +688,7 @@ void CMapEditorUI::RenderObjectsTab()
                     ImGui::PopStyleColor();
                 if (ImGui::IsItemHovered())
                     ImGui::SetTooltip("%d: %ls", m.type, m.file.c_str());
-                if (clicked)
+                if (clicked || MuEditor::KeyboardSelection::MovedOnto())
                     m_selectedModelType = m.type;
                 ImGui::PopID();
             }

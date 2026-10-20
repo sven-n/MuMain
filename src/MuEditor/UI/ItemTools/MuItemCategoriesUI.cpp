@@ -16,6 +16,7 @@
 #include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
 #include "imgui.h"
+#include "../MuEditor/UI/Common/KeyboardSelection.h"
 
 #include <algorithm>
 #include <string>
@@ -133,7 +134,7 @@ void CMuItemCategoriesUI::RenderTagList()
     for (size_t index = 0; index < tags.size(); ++index)
     {
         const bool picked = tags[index].value == m_tag;
-        if (ImGui::Selectable(m_tagLabels[index].c_str(), picked))
+        if (ImGui::Selectable(m_tagLabels[index].c_str(), picked, MuEditor::KeyboardSelection::RowFlags))
         {
             m_tag = tags[index].value;
         }
@@ -228,7 +229,8 @@ bool CMuItemCategoriesUI::RenderRow(const TagItemRow& row, bool selected)
     ImGui::TableNextRow();
     ImGui::TableSetColumnIndex(NumberColumn);
     const bool clicked = ImGui::Selectable(row.number.c_str(), selected,
-                                           ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap);
+                                           ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap |
+                                               MuEditor::KeyboardSelection::RowFlags);
     ImGui::TableSetColumnIndex(NameColumn);
     ImGui::TextUnformatted(row.name.c_str());
     ImGui::TableSetColumnIndex(RemoveColumn);

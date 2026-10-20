@@ -15,6 +15,7 @@
 #include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
 #include "imgui.h"
+#include "../MuEditor/UI/Common/KeyboardSelection.h"
 
 #include <algorithm>
 #include <string>
@@ -80,9 +81,10 @@ void RenderIssueTooltip(const ItemDataIssue& issue)
     ImGui::EndTooltip();
 }
 
-// Selects the item of the problem and brings the tool of its field to the
-// front; a problem that is not about one item has nothing to open.
-void OpenIssue(const ItemDataIssue& issue)
+// Selects the item of the problem and opens the tool of its field, in front
+// when `bringToFront` (a click; an arrow key keeps the keyboard in the list);
+// a problem that is not about one item has nothing to open.
+void OpenIssue(const ItemDataIssue& issue, bool bringToFront)
 {
     if (!IsAboutAnItem(issue))
     {
@@ -91,7 +93,10 @@ void OpenIssue(const ItemDataIssue& issue)
     g_ItemSelection.Select(Data::Items::MakeItemType(issue.group, issue.number));
     const ItemToolWindowRef tool = GetToolWindow(GetToolForIssue(issue));
     g_MuEditorCore.GetToolWindows().*tool.open = true;
-    ImGui::SetWindowFocus(tool.windowId);
+    if (bringToFront)
+    {
+        ImGui::SetWindowFocus(tool.windowId);
+    }
 }
 
 // The box that shows or hides a kind of problem, with their count. The id
@@ -223,15 +228,17 @@ void CMuItemChecksUI::RenderRow(int issueIndex)
     ImGui::TableSetColumnIndex(0);
     ImGui::PushID(issueIndex);
     ImGui::PushStyleColor(ImGuiCol_Text, error ? ErrorColor : WarningColor);
-    const bool clicked = ImGui::Selectable(error ? I18N::Editor::Error : I18N::Editor::Warning,
-                                           issueIndex == m_clickedIssue, ImGuiSelectableFlags_SpanAllColumns);
+    const bool clicked =
+        ImGui::Selectable(error ? I18N::Editor::Error : I18N::Editor::Warning, issueIndex == m_clickedIssue,
+                          ImGuiSelectableFlags_SpanAllColumns | MuEditor::KeyboardSelection::RowFlags);
+    const bool movedOnto = MuEditor::KeyboardSelection::MovedOnto();
     ImGui::PopStyleColor();
     ImGui::PopID();
     RenderIssueTooltip(issue);
     if (clicked)
     {
         m_clickedIssue = issueIndex;
-        OpenIssue(issue);
+        OpenIssue(issue, !movedOnto);
     }
     ImGui::TableSetColumnIndex(1);
     RenderItemCell(issue);

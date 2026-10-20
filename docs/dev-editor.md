@@ -73,7 +73,14 @@ window instead.
 The editor is rendered with ImGui and consumes input over the game
 (see `MuInputBlockerCore.cpp` for the input-routing logic). Keys go to the
 window that has the keyboard: while one of the editor's own windows has it,
-the game gets none of them (F12 still closes the editor from there).
+the game gets none of them (F12 still closes the editor from there). An
+editor window inside the game window (full screen) takes the keyboard with a
+click and gives it back with a click into the game.
+
+While the editor has the keyboard, the arrow keys (and PageUp, PageDown,
+Home and End) move through its lists and tables, and the row they move onto
+is selected as a click would select it; Ctrl with an arrow only moves the
+cursor. In the Map Editor's thumbnail grids they move in both directions.
 
 ---
 

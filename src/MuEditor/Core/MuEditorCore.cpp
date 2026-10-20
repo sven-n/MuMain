@@ -250,6 +250,10 @@ void CMuEditorCore::Initialize(SDL_Window* window)
     // an editor window.
     ImGui::GetCurrentContext()->ConfigNavWindowingKeyNext = 0;
     ImGui::GetCurrentContext()->ConfigNavWindowingKeyPrev = 0;
+    // The arrow keys move through the editor's lists while the keyboard is the
+    // editor's (UpdateKeyboardNavigation); moving through them alone does not
+    // take the game's keys.
+    io.ConfigNavCaptureKeyboard = false;
 
     fwprintf(stderr, L"[MuEditor] ImGui context created\n");
     fflush(stderr);
@@ -529,6 +533,7 @@ void CMuEditorCore::Update()
         ReopenChangedItemModels();
 
         SelectWindowMode();
+        UpdateKeyboardNavigation();
         // The SDL3 backend fills display size and mouse/keyboard from the SDL
         // events fed via ImGui_ImplSDL3_ProcessEvent, so it works the same
         // whether the editor is open or only the "Open Editor" button is shown
@@ -706,10 +711,28 @@ bool CMuEditorCore::IsKeyboardInEditorWindow() const
     return IsEditorWindow(SDL_GetKeyboardFocus());
 }
 
+bool CMuEditorCore::IsKeyboardWithEditor() const
+{
+    return IsKeyboardInEditorWindow() || (m_bEditorMode && m_bKeyboardOnEditorInGameWindow);
+}
+
+void CMuEditorCore::UpdateKeyboardNavigation()
+{
+    ImGuiIO& io = ImGui::GetIO();
+    if (m_bEditorMode && IsKeyboardWithEditor())
+    {
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    }
+    else
+    {
+        io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;
+    }
+}
+
 bool CMuEditorCore::IsWithEditorWindow(int virtualKey) const
 {
     const bool mouseButton = virtualKey == VK_LBUTTON || virtualKey == VK_RBUTTON || virtualKey == VK_MBUTTON;
-    return mouseButton ? IsMouseInEditorWindow() : IsKeyboardInEditorWindow();
+    return mouseButton ? IsMouseInEditorWindow() : IsKeyboardWithEditor();
 }
 
 bool CMuEditorCore::FindMouseInEditorWindow() const
@@ -747,6 +770,9 @@ bool CMuEditorCore::ClaimsEvent(const SDL_Event& event)
     switch (event.type)
     {
     case SDL_EVENT_MOUSE_BUTTON_DOWN:
+        // An editor window inside the game window takes the keyboard with a
+        // click, the game with a click into it.
+        m_bKeyboardOnEditorInGameWindow = !ofEditorWindow && wantsMouse;
         if (!wantsMouse)
         {
             return false;
@@ -762,12 +788,19 @@ bool CMuEditorCore::ClaimsEvent(const SDL_Event& event)
     }
     case SDL_EVENT_KEY_UP:
         return false;
+    case SDL_EVENT_WINDOW_FOCUS_GAINED:
+        // The game window got the keyboard from another window.
+        if (!ofEditorWindow)
+        {
+            m_bKeyboardOnEditorInGameWindow = false;
+        }
+        return false;
     case SDL_EVENT_MOUSE_WHEEL:
         return wantsMouse;
     case SDL_EVENT_KEY_DOWN:
     case SDL_EVENT_TEXT_INPUT:
     case SDL_EVENT_TEXT_EDITING:
-        return ofEditorWindow || (m_bEditorMode && io.WantCaptureKeyboard);
+        return ofEditorWindow || (m_bEditorMode && (io.WantCaptureKeyboard || m_bKeyboardOnEditorInGameWindow));
     default:
         return ofEditorWindow;
     }

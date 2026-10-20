@@ -692,6 +692,10 @@ shows it in the others.
 - **Item Translations**: the names in all languages, see
   [translation-system.md → In the item editor](translation-system.md#in-the-item-editor).
 
+In the browser, Item Rules, Item Categories, Item Checks, Item Translations
+and the lists of users, the arrow keys move the selection (see
+[dev-editor.md](dev-editor.md)).
+
 How changes work:
 
 - **Every change goes into the item database right away**, and the game

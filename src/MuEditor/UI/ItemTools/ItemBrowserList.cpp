@@ -11,6 +11,7 @@
 #include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
 #include "imgui.h"
+#include "../MuEditor/UI/Common/KeyboardSelection.h"
 
 #include <algorithm>
 #include <cstdio>
@@ -32,7 +33,8 @@ void RenderRow(int itemType, bool selected, int& clicked)
                   Data::Items::GetItemNumber(itemType));
     ImGui::TableNextRow();
     ImGui::TableSetColumnIndex(0);
-    if (ImGui::Selectable(number, selected, ImGuiSelectableFlags_SpanAllColumns))
+    if (ImGui::Selectable(number, selected,
+                          ImGuiSelectableFlags_SpanAllColumns | MuEditor::KeyboardSelection::RowFlags))
     {
         clicked = itemType;
     }

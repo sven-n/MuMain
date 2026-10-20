@@ -16,6 +16,7 @@
 #include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
 #include "imgui.h"
+#include "../MuEditor/UI/Common/KeyboardSelection.h"
 
 #include <algorithm>
 #include <cstdio>
@@ -254,13 +255,17 @@ void CMuItemTranslationsUI::RenderIdCell(int itemType)
 {
     char id[16];
     std::snprintf(id, sizeof(id), "%d,%d", Data::Items::GetItemGroup(itemType), Data::Items::GetItemNumber(itemType));
-    if (ImGui::Selectable(id))
+    if (ImGui::Selectable(id, false, MuEditor::KeyboardSelection::RowFlags))
     {
-        // The item selected for all item tools, the item browser in front.
+        // The item selected for all item tools; a click also brings the item
+        // browser to the front, an arrow key keeps the keyboard here.
         g_ItemSelection.Select(itemType);
         m_shownSerial = g_ItemSelection.GetSerial();
-        g_MuEditorCore.GetToolWindows().itemBrowser = true;
-        ImGui::SetWindowFocus(MuEditor::WindowIds::ItemBrowser);
+        if (!MuEditor::KeyboardSelection::MovedOnto())
+        {
+            g_MuEditorCore.GetToolWindows().itemBrowser = true;
+            ImGui::SetWindowFocus(MuEditor::WindowIds::ItemBrowser);
+        }
     }
     if (ImGui::IsItemHovered())
     {
