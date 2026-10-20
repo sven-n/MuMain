@@ -921,7 +921,8 @@ server with original clients (after phases 6 and B).
      an item number shows it in the item table.
    - A name that is the same in a language is written like the English one
      (`"de": "Kris"`), so it is not counted as missing; the bmd import keeps
-     such names instead of dropping them.
+     such a name where the item has a name in that language, and leaves a
+     missing one (which a bmd file has as the English name) missing.
    - Missing names are counted in the editor and listed per language on
      Save Items, not logged at load. Loading warns about a name in a
      language the game has no UI texts for (it is never shown).

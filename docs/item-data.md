@@ -685,8 +685,10 @@ only item data. The import is there to bring in your own old item files.
 - **Import from bmd** replaces all items with
   `Data/Local/<Eng|Por|Spn>/Item_<lang>.bmd` next to the game; copy your
   files there first. English provides the values and is required,
-  Portuguese and Spanish add their names (also one equal to the English
-  name, which says the name is the same in that language). Items the
+  Portuguese and Spanish add their names. A name equal to the English one
+  stays only where the item has a name of its own in that language now (it
+  is the same there); otherwise it is taken for a missing translation,
+  which a bmd file has as the English name, and stays missing. Items the
   English file does not have keep
   the English name they have now, and every item keeps its tags, wing tier,
   weapon kind, stat fields (`statProfile`, `excellentBonus`,
@@ -703,9 +705,7 @@ only item data. The import is there to bring in your own old item files.
   fixed.
 - **Export as bmd** writes `Item_<lang>.bmd` for English, Portuguese and
   Spanish with the names of each language; a backup of each old file is kept.
-  A missing Portuguese or Spanish name is written as the English one, so
-  importing the files again makes it a name that is the same in that
-  language.
+  A missing Portuguese or Spanish name is written as the English one.
   Files that already have the data stay as they are. Values that the bmd
   format does not have (tags, wing tier, weapon kind, stat fields, rule
   flags) are left out.

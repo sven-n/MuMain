@@ -338,8 +338,9 @@ void ImportItem(const std::vector<LanguageFile>& files, int itemType, ItemBmdImp
     definition.number = GetItemNumber(itemType);
     for (const LanguageRecord& record : records)
     {
-        // Also a name equal to the English one: it says the name is the same
-        // in that language, not that it still needs a translation.
+        // Also a name equal to the English one: the item can have the same
+        // name in that language. The editor's import tells it apart from a
+        // missing name (CItemDataHandler::KeepMissingNamesMissing).
         definition.names.Set(record.file->language->locale, record.name);
         result.recoveredNameCount += record.NameRanOn() ? 1 : 0;
         result.reencodedNameCount += record.reencoded ? 1 : 0;

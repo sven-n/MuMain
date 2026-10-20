@@ -15,6 +15,7 @@
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
+#include "Data/GameData/ItemData/ItemNames.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
@@ -746,6 +747,28 @@ TEST_CASE("Exporting the items as bmd and importing them again gives the same da
         CHECK(WriteItemGroupJson(group, g_ItemDatabase.GetAllSlots()) ==
               TestFiles::ReadWholeFile(DataDirectory / "Items" / GetItemGroupFileName(group)));
     }
+}
+
+// Export as bmd writes a missing name as the English one; the import must not
+// turn it into a name that is the same in that language.
+TEST_CASE("A bmd round trip keeps missing names missing and names that are the same [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.SetItemName(BladeType, "pt", ""));
+    REQUIRE(g_ItemDataHandler.SetItemName(KrisType, "es", "Kris"));
+    std::string changeLog;
+    REQUIRE(g_ItemDataHandler.ExportAsBmd(changeLog));
+
+    const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
+    REQUIRE_FALSE(HasErrors(result.issues));
+    CHECK_FALSE(HasNameIn(*g_ItemDatabase.Find(BladeType), "pt"));
+    CHECK(GetOwnName(*g_ItemDatabase.Find(KrisType), "es") == "Kris");
+    CHECK(HasNameIn(*g_ItemDatabase.Find(BladeType), "es"));
 }
 
 TEST_CASE("The save warns about an item name in a language the game has no texts for [data][items][editor]")

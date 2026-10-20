@@ -12,6 +12,7 @@
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
+#include "Data/GameData/ItemData/ItemNames.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "I18N/All.h"
 
@@ -348,6 +349,7 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
     }
 
     result.keptEnglishNameCount = KeepCurrentEnglishNames(result.items);
+    KeepMissingNamesMissing(result.items, result.importedLocales);
     KeepFieldsNotInBmd(result.items, result.importedLocales, result.validationIssues);
     ValidateItems(result.items, result.validationIssues);
     ValidateStatProfiles(result.items, g_ItemDatabase.GetStatProfiles(), GetItemStatsFile().generic_string(),
@@ -376,6 +378,27 @@ int CItemDataHandler::KeepCurrentEnglishNames(std::vector<ItemDefinition>& items
         ++keptCount;
     }
     return keptCount;
+}
+
+void CItemDataHandler::KeepMissingNamesMissing(std::vector<ItemDefinition>& items,
+                                               const std::vector<std::string>& importedLocales)
+{
+    for (ItemDefinition& item : items)
+    {
+        const ItemDefinition* current = g_ItemDatabase.Find(item.group, item.number);
+        for (const std::string& locale : importedLocales)
+        {
+            if (locale == Data::LocalizedString::NeutralLocale ||
+                Data::Items::GetOwnName(item, locale) != item.names.GetNeutral())
+            {
+                continue;
+            }
+            if (current == nullptr || !Data::Items::HasNameIn(*current, locale))
+            {
+                item.names.Set(locale, "");
+            }
+        }
+    }
 }
 
 void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items,
