@@ -19,7 +19,7 @@ In a build that has it, the client opens the socket only when
 `MU_CONTROL_SOCKET` names a path:
 
 ```sh
-MU_CONTROL_SOCKET=/run/user/1000/clients/default.sock ./Main /u127.0.0.1 /p44405
+MU_CONTROL_SOCKET=/run/user/1000/clients/default.sock ./Main /u127.0.0.1 /p44406
 ```
 
 Without the variable nothing is created, nothing is logged and the client
