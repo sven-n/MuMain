@@ -40,6 +40,7 @@ void CItemModelPreview::Render(int itemType)
     request.itemExcellent = m_excellent;
     request.itemAncient = m_ancient;
     request.turn = m_turn;
+    request.itemPose = m_pose;
     RenderView(request);
 }
 
@@ -53,6 +54,17 @@ void CItemModelPreview::RenderControls()
     ImGui::Checkbox(I18N::Editor::Ancient, &m_ancient);
     ImGui::SameLine();
     ImGui::Checkbox(I18N::Editor::Turn, &m_turn);
+    // The pose of the display values the sections below edit.
+    using MuEditor::Effects::PreviewItemPose;
+    if (ImGui::RadioButton(I18N::Editor::InTheInventory, m_pose == PreviewItemPose::Inventory))
+    {
+        m_pose = PreviewItemPose::Inventory;
+    }
+    ImGui::SameLine();
+    if (ImGui::RadioButton(I18N::Editor::OnTheGround, m_pose == PreviewItemPose::Ground))
+    {
+        m_pose = PreviewItemPose::Ground;
+    }
 }
 
 void CItemModelPreview::RenderView(const MuEditor::Effects::EffectPreviewRequest& request)

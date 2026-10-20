@@ -26,6 +26,8 @@
 #include "UI/EffectBrowser/EffectPreviewObject.h"
 #include "UI/EffectBrowser/EffectPreviewScene.h"
 #include "UI/EffectBrowser/EffectPreviewSubject.h"
+#include "UI/EffectBrowser/PreviewInventoryPose.h"
+#include "Core/Math/ZzzMathLib.h"
 
 #include <algorithm>
 #include <array>
@@ -111,6 +113,61 @@ TEST_CASE("The effect preview's camera looks at the type from the thumbnails' di
     CHECK(camera.Distance() == doctest::Approx(framed).epsilon(Tolerance));
     CHECK(Minus(camera.Eye(), camera.Center())[2] / framed == doctest::Approx(0.8f / diagonal).epsilon(Tolerance));
     CHECK(camera.Near() >= 1.0f);
+}
+
+TEST_CASE("The preview stands an item up as the inventory turns it, facing the camera's first direction "
+          "[effects][editor]")
+{
+    constexpr float Tolerance = 1e-4f;
+    float scene[3][4];
+    InventoryViewToScene(0.0f, scene);
+    const auto map = [&](float x, float y, float z)
+    {
+        const vec3_t in = {x, y, z};
+        vec3_t out;
+        VectorRotate(in, scene, out);
+        return PreviewVector{out[0], out[1], out[2]};
+    };
+
+    // The inventory's up is the scene's up.
+    const PreviewVector up = map(0.0f, 1.0f, 0.0f);
+    CHECK(up[2] == doctest::Approx(1.0f).epsilon(Tolerance));
+    // Its viewer is where the camera first looks from, level; its right is the camera's right.
+    EffectPreviewCamera camera;
+    camera.Frame({0.0f, 0.0f, 0.0f}, 100.0f);
+    const PreviewVector eye = camera.Eye();
+    const float level = std::sqrt(eye[0] * eye[0] + eye[1] * eye[1]);
+    const PreviewVector toward = map(0.0f, 0.0f, 1.0f);
+    CHECK(toward[0] == doctest::Approx(eye[0] / level).epsilon(Tolerance));
+    CHECK(toward[1] == doctest::Approx(eye[1] / level).epsilon(Tolerance));
+    CHECK(toward[2] == doctest::Approx(0.0f).epsilon(Tolerance));
+    const PreviewVector right = map(1.0f, 0.0f, 0.0f);
+    const EffectPreviewCamera::Basis basis = camera.GetBasis();
+    for (int axis = 0; axis < 3; ++axis)
+    {
+        CHECK(right[axis] == doctest::Approx(basis.right[axis]).epsilon(Tolerance));
+    }
+
+    // The turn turns it around the scene's up.
+    InventoryViewToScene(90.0f, scene);
+    const PreviewVector turned = map(0.0f, 0.0f, 1.0f);
+    CHECK(turned[0] == doctest::Approx(-toward[1]).epsilon(Tolerance));
+    CHECK(turned[1] == doctest::Approx(toward[0]).epsilon(Tolerance));
+
+    // An item turned as the Kris is in the inventory: what points up there
+    // points up in the scene.
+    InventoryViewToScene(0.0f, scene);
+    vec3_t krisAngle = {180.0f, 270.0f, 15.0f};
+    float kris[3][4];
+    float root[3][4];
+    AngleMatrix(krisAngle, kris);
+    R_ConcatTransforms(scene, kris, root);
+    const vec3_t screenUp = {0.0f, 1.0f, 0.0f};
+    vec3_t modelUp;
+    VectorIRotate(screenUp, kris, modelUp);
+    vec3_t sceneUp;
+    VectorRotate(modelUp, root, sceneUp);
+    CHECK(sceneUp[2] == doctest::Approx(1.0f).epsilon(Tolerance));
 }
 
 TEST_CASE("The editor's look-at view is gluLookAt's, and the effect preview's camera gives the same view "

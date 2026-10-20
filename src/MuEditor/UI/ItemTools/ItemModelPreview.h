@@ -9,9 +9,10 @@
 namespace MuEditor::Items
 {
 // The model tool's view of the selected item's model as it is opened now,
-// turning, at an item level, excellent or ancient: drawn like the effect
-// browser draws an item (EffectPreviewScene), into a texture. The mouse turns
-// the camera, the wheel zooms, a double click puts it back.
+// turning, at an item level, excellent or ancient, upright as the inventory
+// turns it or as it lies on the ground: drawn like the effect browser draws an
+// item (EffectPreviewScene), into a texture. The mouse turns the camera, the
+// wheel zooms, a double click puts it back.
 class CItemModelPreview
 {
 public:
@@ -36,6 +37,7 @@ private:
     bool m_excellent = false;
     bool m_ancient = false;
     bool m_turn = true;
+    MuEditor::Effects::PreviewItemPose m_pose = MuEditor::Effects::PreviewItemPose::Inventory;
 };
 } // namespace MuEditor::Items
 
