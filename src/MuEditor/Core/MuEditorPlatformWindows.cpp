@@ -397,6 +397,21 @@ void KeepTitleBarOnScreen(SDL_Window* window)
     {
         top = left = bottom = right = 0;
     }
+    // A window that spans monitors can cover one with its title bar on another.
+    const SDL_Rect titleBar{rect.x, rect.y - std::max(top, 1), rect.w, std::max(top, 1)};
+    int displayCount = 0;
+    SDL_DisplayID* displays = SDL_GetDisplays(&displayCount);
+    bool titleBarShown = false;
+    for (int i = 0; displays != nullptr && i < displayCount && !titleBarShown; ++i)
+    {
+        SDL_Rect other{};
+        titleBarShown = SDL_GetDisplayBounds(displays[i], &other) && SDL_HasRectIntersection(&titleBar, &other);
+    }
+    SDL_free(displays);
+    if (titleBarShown)
+    {
+        return;
+    }
     SDL_SetWindowPosition(window, usable.x + left, usable.y + top);
     SDL_SetWindowSize(window, std::max(1, usable.w - left - right), std::max(1, usable.h - top - bottom));
 }
