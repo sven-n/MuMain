@@ -184,6 +184,15 @@ ItemStatValues ComputeItemStats(const ITEM_ATTRIBUTE& attribute, const ItemStatI
     const Data::Items::ItemStatProfile& profile = g_ItemDatabase.GetStatProfile(input.itemType);
     const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(input.itemType);
     const bool wing = g_ItemDatabase.GetSlot(input.itemType) == ItemSlot::Wings;
+    return ComputeItemStats(ItemStatSources{attribute, definition, profile, wing}, input);
+}
+
+ItemStatValues ComputeItemStats(const ItemStatSources& sources, const ItemStatInput& input)
+{
+    const ITEM_ATTRIBUTE& attribute = sources.attribute;
+    const Data::Items::ItemStatProfile& profile = sources.profile;
+    const Data::Items::ItemDefinition* definition = sources.definition;
+    const bool wing = sources.wing;
     const StatContext context{g_ItemDatabase.GetStatProfiles(),
                               input.level,
                               attribute.Level,

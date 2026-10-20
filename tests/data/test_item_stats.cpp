@@ -328,6 +328,63 @@ TEST_CASE("Item requirements come from the item's stat profile [data][items]")
 // The items whose level requirement excellent options do not raise are item data: the
 // Dragon Knight to Sunlight and Storm Blitz armour, six weapons, the lucky items and the Horn
 // of Fenrir.
+// The item editor computes an item it has not stored from its definition: for every
+// shipped item that gives what the game computes from the item database.
+TEST_CASE("Item stats from an item's definition are those from the item database [data][items]")
+{
+    ShippedItemAttributes items;
+    const ItemStatProfiles& profiles = g_ItemDatabase.GetStatProfiles();
+    int compared = 0;
+    for (const ItemDefinition& definition : g_ItemDatabase.GetAllSlots())
+    {
+        if (!definition.Exists())
+        {
+            continue;
+        }
+        const int itemType = MakeItemType(definition.group, definition.number);
+        ITEM_ATTRIBUTE attribute{};
+        ToItemAttribute(definition, attribute);
+        const int profileIndex = profiles.Find(definition.statProfile);
+        const ItemStatProfile& profile = profiles.Get(
+            profileIndex == ItemStatProfiles::UnknownProfile ? ItemStatProfiles::DefaultProfile : profileIndex);
+        const GameLogic::Items::ItemStatSources sources{attribute, &definition, profile,
+                                                        definition.slot == ItemSlot::Wings};
+        for (int level = 0; level < ItemLevelCount; ++level)
+        {
+            for (const BYTE excellentFlags : {BYTE{0}, BYTE{0x01}})
+            {
+                for (const BYTE ancientDiscriminator : {BYTE{0}, BYTE{1}})
+                {
+                    for (const BYTE optionLevel : {BYTE{0}, BYTE{4}})
+                    {
+                        const GameLogic::Items::ItemStatInput input{itemType, level, excellentFlags,
+                                                                    ancientDiscriminator, optionLevel};
+                        const GameLogic::Items::ItemStatValues fromDatabase =
+                            GameLogic::Items::ComputeItemStats(items[itemType], input);
+                        const GameLogic::Items::ItemStatValues fromDefinition =
+                            GameLogic::Items::ComputeItemStats(sources, input);
+                        INFO("(" << definition.group << "," << definition.number << ") +" << level);
+                        REQUIRE(fromDefinition.damageMin == fromDatabase.damageMin);
+                        REQUIRE(fromDefinition.damageMax == fromDatabase.damageMax);
+                        REQUIRE(fromDefinition.magicPower == fromDatabase.magicPower);
+                        REQUIRE(fromDefinition.blockRate == fromDatabase.blockRate);
+                        REQUIRE(fromDefinition.defense == fromDatabase.defense);
+                        REQUIRE(fromDefinition.magicDefense == fromDatabase.magicDefense);
+                        REQUIRE(fromDefinition.requireLevel == fromDatabase.requireLevel);
+                        REQUIRE(fromDefinition.requireStrength == fromDatabase.requireStrength);
+                        REQUIRE(fromDefinition.requireDexterity == fromDatabase.requireDexterity);
+                        REQUIRE(fromDefinition.requireEnergy == fromDatabase.requireEnergy);
+                        REQUIRE(fromDefinition.requireVitality == fromDatabase.requireVitality);
+                        REQUIRE(fromDefinition.requireLeadership == fromDatabase.requireLeadership);
+                    }
+                }
+            }
+        }
+        ++compared;
+    }
+    CHECK(compared > 900);
+}
+
 TEST_CASE("The items excellent options do not raise the level requirement of [data][items]")
 {
     ShippedItemAttributes items;
