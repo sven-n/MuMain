@@ -29,9 +29,14 @@ private:
     void RenderEdit();
     void RenderConfirm();
     void LoadEdit(const Data::Items::SharedItemModel& shared);
+    // Whether the copy is as it was loaded or applied (the user did not
+    // change it since).
+    bool IsEditUnchanged() const;
 
     // The shared model as the user changes it, before it is applied.
     Data::Items::SharedItemModel m_edit;
+    // The shared model as it was last loaded into m_edit or applied from it.
+    Data::Items::SharedItemModel m_loaded;
     std::string m_editOf;
     int m_editVersion = -1;
     std::string m_meshesText;

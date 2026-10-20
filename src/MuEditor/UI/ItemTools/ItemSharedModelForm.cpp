@@ -105,8 +105,9 @@ void CItemSharedModelForm::RenderShared(const Data::Items::ItemModelDefinition& 
         ImGui::TextUnformatted(I18N::Format(I18N::Editor::TheSharedModel0DoesNotExist, {model.model}).c_str());
         return;
     }
-    // The copy follows the shared model until the user changes it.
-    if (m_editOf != model.model || (m_editVersion != g_ItemModelDatabase.GetVersion() && m_edit == *shared))
+    // The copy follows the shared model (an undo, a redo) until the user
+    // changes it.
+    if (m_editOf != model.model || (m_editVersion != g_ItemModelDatabase.GetVersion() && IsEditUnchanged()))
     {
         LoadEdit(*shared);
     }
@@ -183,6 +184,7 @@ void CItemSharedModelForm::RenderConfirm()
     {
         g_ItemEdits.SetSharedModel(I18N::Editor::ChangeASharedModel, m_edit, m_editOf);
         m_editOf = m_edit.name;
+        m_loaded = m_edit;
         ImGui::CloseCurrentPopup();
     }
     ImGui::SameLine();
@@ -196,8 +198,14 @@ void CItemSharedModelForm::RenderConfirm()
 void CItemSharedModelForm::LoadEdit(const Data::Items::SharedItemModel& shared)
 {
     m_edit = shared;
+    m_loaded = shared;
     m_editOf = shared.name;
     m_meshesText = NumberList::Format(shared.noneBlendMeshes);
+}
+
+bool CItemSharedModelForm::IsEditUnchanged() const
+{
+    return m_edit == m_loaded && m_meshesText == NumberList::Format(m_loaded.noneBlendMeshes);
 }
 } // namespace MuEditor::Items
 
