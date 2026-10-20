@@ -1,0 +1,303 @@
+#include "stdafx.h"
+
+#ifdef _EDITOR
+
+#include "ItemModelForms.h"
+
+#include "ItemFieldWidgets.h"
+#include "ItemListFields.h"
+#include "ItemNumberList.h"
+#include "ItemSelection.h"
+#include "ItemTextInput.h"
+#include "ItemUsers.h"
+
+#include "Data/GameData/EffectData/GlowColorList.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
+#include "I18N/All.h"
+#include "Render/Items/ItemEffects.h"
+#include "Render/Items/ItemRenderStyles.h"
+#include "imgui.h"
+
+#include <cstdio>
+#include <optional>
+#include <span>
+#include <string>
+#include <string_view>
+#include <vector>
+
+namespace MuEditor::Items::ModelForms
+{
+namespace
+{
+using Data::Items::ItemModelDefinition;
+
+constexpr float ComboWidth = 220.0f;
+constexpr float VectorWidth = 240.0f;
+constexpr float UserListLines = 5.0f;
+// The highest glow level the model file reader takes (ItemModelGlowJson).
+constexpr int MaxGlowLevel = 31;
+constexpr size_t GlowLevelsPerRow = 8;
+constexpr float GlowLevelWidth = 40.0f;
+
+template <size_t Count> void Doubles(ModelDraft& draft, const char* label, std::array<double, Count>& values)
+{
+    ImGui::SetNextItemWidth(Fields::ScaledWidth(VectorWidth));
+    ImGui::InputScalarN(label, ImGuiDataType_Double, values.data(), static_cast<int>(Count), nullptr, nullptr, "%.3f");
+    draft.AfterField(label);
+}
+
+// A number list as text ("1, 3"), stored when it was left and reads as numbers.
+void Numbers(ModelDraft& draft, const char* label, std::vector<int>& numbers)
+{
+    std::string text = NumberList::Format(numbers);
+    ImGui::SetNextItemWidth(Fields::ScaledWidth(ComboWidth));
+    if (InputString(label, text))
+    {
+        if (const std::optional<std::vector<int>> parsed = NumberList::Parse(text))
+        {
+            numbers = *parsed;
+        }
+    }
+    draft.AfterField(label);
+}
+
+// A value that may be left out: a checkbox, and the value when it is there.
+void OptionalInt(ModelDraft& draft, const char* label, std::optional<int>& value)
+{
+    ImGui::PushID(label);
+    bool present = value.has_value();
+    if (ImGui::Checkbox("##Present", &present))
+    {
+        value = present ? std::optional<int>(0) : std::nullopt;
+        draft.AfterChange(true, label);
+    }
+    ImGui::SameLine();
+    if (value)
+    {
+        Fields::Int(draft, label, *value);
+    }
+    else
+    {
+        ImGui::TextDisabled("%s", label);
+    }
+    ImGui::PopID();
+}
+
+// The items that use a look, clickable; folded until opened, and only then
+// looked for.
+void RenderUsers(const char* label, int count, std::vector<int> (*findUsers)(std::string_view), const std::string& look)
+{
+    if (count == 0 || !ImGui::TreeNode(label, "%s (%d)", I18N::Editor::UsedBy, count))
+    {
+        return;
+    }
+    if (ImGui::BeginListBox("##Users", ImVec2(-FLT_MIN, UserListLines * ImGui::GetTextLineHeightWithSpacing())))
+    {
+        for (const int user : findUsers(look))
+        {
+            ImGui::PushID(user);
+            if (ImGui::Selectable(g_ItemDatabase.GetLogName(user).c_str(), user == g_ItemSelection.GetItemType()))
+            {
+                g_ItemSelection.Select(user);
+            }
+            ImGui::PopID();
+        }
+        ImGui::EndListBox();
+    }
+    ImGui::TreePop();
+}
+
+// A look picked from its names, each with how many models use it; "" is none.
+template <typename TCount>
+void LookCombo(ModelDraft& draft, const char* label, std::string& value, std::span<const std::string_view> names,
+               TCount&& count)
+{
+    ImGui::SetNextItemWidth(Fields::ScaledWidth(ComboWidth));
+    const std::string shown = value.empty() ? I18N::Editor::None : value;
+    if (!ImGui::BeginCombo(label, shown.c_str()))
+    {
+        return;
+    }
+    if (ImGui::Selectable(I18N::Editor::None, value.empty()) && !value.empty())
+    {
+        value.clear();
+        draft.AfterChange(true, label);
+    }
+    for (const std::string_view name : names)
+    {
+        const std::string entry = std::string(name) + " (" + std::to_string(count(name)) + ")";
+        if (ImGui::Selectable(entry.c_str(), name == value) && name != value)
+        {
+            value = std::string(name);
+            draft.AfterChange(true, label);
+        }
+    }
+    ImGui::EndCombo();
+}
+
+void ColorCombo(ModelDraft& draft, const char* label, std::string& value, ItemLookUseCounts& counts)
+{
+    const std::span<const Data::Effects::GlowColor> colors = g_GlowColors.GetColors();
+    const auto swatch = [](const Data::Effects::GlowColorValue& color, const char* id)
+    {
+        ImGui::ColorButton(
+            id, ImVec4(static_cast<float>(color[0]), static_cast<float>(color[1]), static_cast<float>(color[2]), 1.0f),
+            ImGuiColorEditFlags_NoTooltip);
+    };
+    if (const Data::Effects::GlowColorValue* current = g_GlowColors.Find(value))
+    {
+        swatch(*current, "##Current");
+        ImGui::SameLine();
+    }
+    ImGui::SetNextItemWidth(Fields::ScaledWidth(ComboWidth));
+    if (!ImGui::BeginCombo(label, value.c_str()))
+    {
+        return;
+    }
+    for (const Data::Effects::GlowColor& color : colors)
+    {
+        ImGui::PushID(color.name.c_str());
+        swatch(color.value, "##Swatch");
+        ImGui::SameLine();
+        const std::string entry = color.name + " (" + std::to_string(counts.GlowColor(color.name)) + ")";
+        if (ImGui::Selectable(entry.c_str(), color.name == value) && color.name != value)
+        {
+            value = color.name;
+            draft.AfterChange(true, label);
+        }
+        ImGui::PopID();
+    }
+    ImGui::EndCombo();
+}
+
+void GlowMeshes(ModelDraft& draft, const char* onlyLabel, const char* hiddenLabel, Data::Items::ItemGlowMeshes& meshes)
+{
+    Numbers(draft, onlyLabel, meshes.only);
+    OptionalInt(draft, hiddenLabel, meshes.hidden);
+}
+
+void GlowLevels(ModelDraft& draft, Data::Items::ItemGlow& glow)
+{
+    bool own = glow.levels.has_value();
+    if (ImGui::Checkbox(I18N::Editor::GlowsLikeOtherLevels, &own))
+    {
+        if (own)
+        {
+            std::array<int, Data::Items::ItemGlow::ItemLevelCount> levels{};
+            for (size_t level = 0; level < levels.size(); ++level)
+            {
+                levels[level] = static_cast<int>(level);
+            }
+            glow.levels = levels;
+        }
+        else
+        {
+            glow.levels.reset();
+        }
+        draft.AfterChange(true, I18N::Editor::GlowsLikeOtherLevels);
+    }
+    if (!glow.levels)
+    {
+        return;
+    }
+    for (size_t level = 0; level < glow.levels->size(); ++level)
+    {
+        if (level % GlowLevelsPerRow != 0)
+        {
+            ImGui::SameLine();
+        }
+        char label[16];
+        std::snprintf(label, sizeof(label), "+%zu", level);
+        ImGui::SetNextItemWidth(Fields::ScaledWidth(GlowLevelWidth));
+        ImGui::DragInt(label, &(*glow.levels)[level], 0.1f, 0, MaxGlowLevel);
+        draft.AfterField(I18N::Editor::GlowsLikeOtherLevels);
+    }
+}
+} // namespace
+
+void RenderOwnFile(ModelDraft& draft, ItemModelDefinition& model)
+{
+    ImGui::TextUnformatted(I18N::Editor::TextureFolders);
+    if (ListFields::EditFolders("##Folders", model.textureFolders))
+    {
+        draft.StoreNow(I18N::Editor::TextureFolders);
+    }
+    Numbers(draft, I18N::Editor::NoneBlendMeshes, model.noneBlendMeshes);
+}
+
+void RenderDisplay(ModelDraft& draft, ItemModelDefinition& model)
+{
+    if (ImGui::CollapsingHeader(I18N::Editor::InTheInventory, ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        ImGui::PushID("Inventory");
+        Doubles(draft, I18N::Editor::Anchor, model.inventory.anchor);
+        Doubles(draft, I18N::Editor::Offset, model.inventory.offset);
+        Doubles(draft, I18N::Editor::Rotation, model.inventory.rotation);
+        Fields::Double(draft, I18N::Editor::Scale, model.inventory.scale);
+        Fields::Double(draft, I18N::Editor::BodyHeight, model.inventory.bodyHeight, "%.1f");
+        ImGui::PopID();
+    }
+    if (ImGui::CollapsingHeader(I18N::Editor::OnTheGround))
+    {
+        ImGui::PushID("Ground");
+        Doubles(draft, I18N::Editor::Rotation, model.ground.rotation);
+        bool ownScale = model.ground.scale.has_value();
+        if (ImGui::Checkbox(I18N::Editor::OwnScale, &ownScale))
+        {
+            model.ground.scale = ownScale ? std::optional<double>(1.0) : std::nullopt;
+            draft.AfterChange(true, I18N::Editor::OwnScale);
+        }
+        if (model.ground.scale)
+        {
+            ImGui::SameLine();
+            Fields::Double(draft, I18N::Editor::Scale, *model.ground.scale);
+        }
+        Fields::Double(draft, I18N::Editor::BodyHeight, model.ground.bodyHeight, "%.1f");
+        ImGui::PopID();
+    }
+    Fields::Check(draft, I18N::Editor::WornAsCloth, model.cloth);
+    Fields::Double(draft, I18N::Editor::Specular, model.material.specular, "%.2f");
+}
+
+void RenderGlow(ModelDraft& draft, ItemModelDefinition& model, ItemLookUseCounts& counts)
+{
+    if (!ImGui::CollapsingHeader(I18N::Editor::Glow))
+    {
+        return;
+    }
+    Data::Items::ItemGlow& glow = model.glow;
+    ImGui::PushID("Glow");
+    GlowLevels(draft, glow);
+    ColorCombo(draft, I18N::Editor::GlowColor, glow.color, counts);
+    GlowMeshes(draft, I18N::Editor::GlowMeshes, I18N::Editor::AllMeshesButThisOne, glow.meshes);
+    ColorCombo(draft, I18N::Editor::ShineColor, glow.shineColor, counts);
+    Fields::Check(draft, I18N::Editor::ShineWhite, glow.shineWhite);
+    ImGui::PushID("Shine");
+    GlowMeshes(draft, I18N::Editor::ShineMeshes, I18N::Editor::AllMeshesButThisOne, glow.shineMeshes);
+    ImGui::PopID();
+    ColorCombo(draft, I18N::Editor::AncientColor, glow.ancientColor, counts);
+    Fields::Check(draft, I18N::Editor::ExcellentGlow, glow.excellent);
+    OptionalInt(draft, I18N::Editor::ExcellentMesh, glow.excellentMesh);
+    OptionalInt(draft, I18N::Editor::ExcellentMeshWithoutSkin, glow.excellentMeshWithoutSkin);
+    ImGui::PopID();
+}
+
+void RenderLooks(ModelDraft& draft, ItemModelDefinition& model, ItemLookUseCounts& counts)
+{
+    LookCombo(draft, I18N::Editor::RenderStyle, model.renderStyle, Render::Items::Styles::GetNames(),
+              [&](std::string_view name) { return counts.RenderStyle(name); });
+    if (!model.renderStyle.empty())
+    {
+        RenderUsers("##StyleUsers", counts.RenderStyle(model.renderStyle), &FindRenderStyleUsers, model.renderStyle);
+    }
+    LookCombo(draft, I18N::Editor::ItemEffect, model.itemEffect, Render::Items::ItemEffects::GetNames(),
+              [&](std::string_view name) { return counts.ItemEffect(name); });
+    if (!model.itemEffect.empty())
+    {
+        RenderUsers("##EffectUsers", counts.ItemEffect(model.itemEffect), &FindItemEffectUsers, model.itemEffect);
+    }
+    ImGui::TextDisabled("%s", I18N::Editor::TheLooksAreDrawingCodeThisPicksWhichOneTheItemUses);
+}
+} // namespace MuEditor::Items::ModelForms
+
+#endif // _EDITOR

@@ -21,6 +21,7 @@
 #include "../MuEditor/UI/ItemEditor/MuItemEditorUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemBasicsUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemBrowserUI.h"
+#include "../MuEditor/UI/ItemTools/MuItemModelUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemRequirementsUI.h"
 #include "../MuEditor/UI/SkillEditor/MuSkillEditorUI.h"
 #include "../MuEditor/UI/DevEditor/DevEditorUI.h"
@@ -521,6 +522,7 @@ void CMuEditorCore::Update()
         // Between frames: the effect browser's preview releases its texture
         // only before the renderer's frame starts.
         g_MuEffectBrowserUI.BeforeFrame();
+        g_MuItemModelUI.BeforeFrame();
         // Between frames too: item models the item tools changed are opened again.
         ReopenChangedItemModels();
 
@@ -561,6 +563,12 @@ void CMuEditorCore::RenderItemTools()
     if (m_windows.itemRequirements)
     {
         g_MuItemRequirementsUI.Render(&m_windows.itemRequirements);
+    }
+    // After the Map Editor and the effect browser: its preview opens a capture
+    // of its own.
+    if (m_windows.itemModel)
+    {
+        g_MuItemModelUI.Render(&m_windows.itemModel);
     }
 }
 

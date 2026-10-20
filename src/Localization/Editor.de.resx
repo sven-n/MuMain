@@ -1153,4 +1153,124 @@
   <data name="Excellent options raise the level requirement" xml:space="preserve">
     <value>Excellent-Optionen erhöhen die Stufenanforderung</value>
   </data>
+  <data name="Item Model" xml:space="preserve">
+    <value>Gegenstandsmodell</value>
+  </data>
+  <data name="Find a model file" xml:space="preserve">
+    <value>Modelldatei suchen</value>
+  </data>
+  <data name="The shared model {0} opens this file" xml:space="preserve">
+    <value>Das geteilte Modell {0} öffnet diese Datei</value>
+  </data>
+  <data name="Use it" xml:space="preserve">
+    <value>Verwenden</value>
+  </data>
+  <data name="Other items name this file too ({0}); a shared model would open it once." xml:space="preserve">
+    <value>Andere Gegenstände nennen diese Datei auch ({0}); ein geteiltes Modell würde sie einmal öffnen.</value>
+  </data>
+  <data name="Use a shared model" xml:space="preserve">
+    <value>Geteiltes Modell verwenden</value>
+  </data>
+  <data name="The shared model {0} does not exist" xml:space="preserve">
+    <value>Das geteilte Modell {0} gibt es nicht</value>
+  </data>
+  <data name="Apply to the shared model" xml:space="preserve">
+    <value>Auf das geteilte Modell anwenden</value>
+  </data>
+  <data name="Revert" xml:space="preserve">
+    <value>Zurücksetzen</value>
+  </data>
+  <data name="Make a copy for this item" xml:space="preserve">
+    <value>Eigene Kopie für diesen Gegenstand</value>
+  </data>
+  <data name="Shared model name" xml:space="preserve">
+    <value>Name des geteilten Modells</value>
+  </data>
+  <data name="Texture folders" xml:space="preserve">
+    <value>Texturordner</value>
+  </data>
+  <data name="None-blend meshes" xml:space="preserve">
+    <value>Meshes ohne Blending</value>
+  </data>
+  <data name="Change a shared model" xml:space="preserve">
+    <value>Geteiltes Modell ändern</value>
+  </data>
+  <data name="The change reaches these {0} items:" xml:space="preserve">
+    <value>Die Änderung betrifft diese {0} Gegenstände:</value>
+  </data>
+  <data name="A name of letters and digits that no other shared model has" xml:space="preserve">
+    <value>Ein Name aus Buchstaben und Ziffern, den kein anderes geteiltes Modell hat</value>
+  </data>
+  <data name="Add a folder" xml:space="preserve">
+    <value>Ordner hinzufügen</value>
+  </data>
+  <data name="Glows like other levels" xml:space="preserve">
+    <value>Leuchtet wie andere Stufen</value>
+  </data>
+  <data name="In the inventory" xml:space="preserve">
+    <value>Im Inventar</value>
+  </data>
+  <data name="Anchor" xml:space="preserve">
+    <value>Anker</value>
+  </data>
+  <data name="Offset" xml:space="preserve">
+    <value>Versatz</value>
+  </data>
+  <data name="Rotation" xml:space="preserve">
+    <value>Drehung</value>
+  </data>
+  <data name="Scale" xml:space="preserve">
+    <value>Größe</value>
+  </data>
+  <data name="Body height" xml:space="preserve">
+    <value>Körperhöhe</value>
+  </data>
+  <data name="On the ground" xml:space="preserve">
+    <value>Am Boden</value>
+  </data>
+  <data name="Own scale" xml:space="preserve">
+    <value>Eigene Größe</value>
+  </data>
+  <data name="Worn as cloth" xml:space="preserve">
+    <value>Als Stoff getragen</value>
+  </data>
+  <data name="Specular" xml:space="preserve">
+    <value>Glanz</value>
+  </data>
+  <data name="Glow color" xml:space="preserve">
+    <value>Leuchtfarbe</value>
+  </data>
+  <data name="Glow meshes" xml:space="preserve">
+    <value>Leucht-Meshes</value>
+  </data>
+  <data name="All meshes but this one" xml:space="preserve">
+    <value>Alle Meshes außer diesem</value>
+  </data>
+  <data name="Shine color" xml:space="preserve">
+    <value>Schimmerfarbe</value>
+  </data>
+  <data name="Shine white" xml:space="preserve">
+    <value>Weiß schimmern</value>
+  </data>
+  <data name="Shine meshes" xml:space="preserve">
+    <value>Schimmer-Meshes</value>
+  </data>
+  <data name="Ancient color" xml:space="preserve">
+    <value>Ancient-Farbe</value>
+  </data>
+  <data name="Excellent glow" xml:space="preserve">
+    <value>Excellent-Leuchten</value>
+  </data>
+  <data name="Excellent mesh" xml:space="preserve">
+    <value>Excellent-Mesh</value>
+  </data>
+  <data name="Excellent mesh without skin" xml:space="preserve">
+    <value>Excellent-Mesh ohne Haut</value>
+  </data>
+  <data name="The looks are drawing code; this picks which one the item uses." xml:space="preserve">
+    <value>Die Looks sind Zeichencode; hier wird gewählt, welchen der Gegenstand nutzt.</value>
+  </data>
+  <data name="Remove the model entry" xml:space="preserve">
+    <value>Modelleintrag entfernen</value>
+  </data>
 </root>
