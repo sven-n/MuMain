@@ -801,7 +801,8 @@ bool CMuEditorCore::ClaimsEvent(const SDL_Event& event)
         return false;
     case SDL_EVENT_WINDOW_FOCUS_GAINED:
         // The game window got the keyboard from another window; an editor
-        // window's focus stays the editor's, as for every other event of it.
+        // window's focus stays the editor's, as its other events do but for
+        // the key releases.
         if (!ofEditorWindow)
         {
             m_bKeyboardOnEditorInGameWindow = false;
