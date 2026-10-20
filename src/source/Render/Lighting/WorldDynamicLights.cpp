@@ -17,6 +17,7 @@ void WorldDynamicLights::Pin(DynamicLightList& lights, const float (&reference)[
         return;
     }
     m_selection = SelectDynamicLights(lights.Lights(), reference);
+    m_selection.uniform.worldLightCount = m_selection.uniform.lightCount;
     lights.Mark();
     m_pinned = true;
 }

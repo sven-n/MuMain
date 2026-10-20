@@ -68,6 +68,7 @@ enum class TuningControlId : std::uint8_t
     EffectFade,
     EffectCap,
     ShadowOpacity,
+    ShadowLights,
     Wrap,
     MapSmoothing,
     EffectRangeMax,

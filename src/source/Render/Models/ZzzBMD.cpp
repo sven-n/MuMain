@@ -51,6 +51,8 @@
 #include "Scenes/MainScene.h"
 #include "Render/Lighting/LightMoodSetting.h"
 #include "Render/Lighting/DynamicLightsSetting.h"
+#include "Render/Lighting/LightShadowCasters.h"
+#include "Render/Lighting/WorldDynamicLights.h"
 #include "Render/Look/LookProfileSetting.h"
 
 using mu::PackABGR;
@@ -3103,28 +3105,46 @@ void BMD::DrawShadow(const Render::ModelDrawing::ShadowDraw& draw) const
     DisableTexture();
     DisableDepthMask();
     BeginRender(1.f);
-    const mu::ScopedGroundShadow groundShadow;
 
     const auto [startMesh, endMesh] = ResolveMeshRange(NumMeshs, draw.startMesh, draw.endMesh);
 
-    const mu::ShadowProjection projection =
+    mu::ShadowProjection projection =
         BodyShadowProjection(draw.bodyOrigin, gMapManager.InBattleCastle() ? 2500.f : 2000.f, 4000.f);
-    const std::uint32_t shadowColor = PackABGR(0.f, 0.f, 0.f, std::clamp(draw.alpha, 0.f, 1.f));
-
-    if (draw.clothes.empty() && Render::Models::Gltf::SkinnedModelOf(*this))
+    const auto drawShadow = [&](float shadowAlpha)
     {
-        RenderWeightedMeshShadow(draw, startMesh, endMesh, projection, shadowColor);
-    }
-    else if (draw.clothes.empty())
-    {
-        if (!RenderGpuMeshShadow(draw, startMesh, endMesh, projection, shadowColor))
+        const std::uint32_t shadowColor = PackABGR(0.f, 0.f, 0.f, std::clamp(shadowAlpha, 0.f, 1.f));
+        if (!draw.clothes.empty())
+        {
+            AddClothesShadowTriangles(draw.clothes, projection, shadowColor);
+        }
+        else if (Render::Models::Gltf::SkinnedModelOf(*this))
+        {
+            RenderWeightedMeshShadow(draw, startMesh, endMesh, projection, shadowColor);
+        }
+        else if (!RenderGpuMeshShadow(draw, startMesh, endMesh, projection, shadowColor))
         {
             AddMeshShadowTriangles(draw, draw.blendMesh, draw.hiddenMesh, startMesh, endMesh, projection, shadowColor);
         }
-    }
-    else
+    };
     {
-        AddClothesShadowTriangles(draw.clothes, projection, shadowColor);
+        const mu::ScopedGroundShadow groundShadow;
+        drawShadow(draw.alpha);
+    }
+    // The ground's strongest point lights cast one more shadow each, away from the light.
+    const Render::Lighting::WorldDynamicLights& worldLights = Render::Lighting::FrameWorldDynamicLights();
+    if (Render::Lighting::DynamicLightsActive() && worldLights.IsPinned())
+    {
+        const auto maxCasters =
+            static_cast<std::size_t>(Render::Look::Value(Data::Maps::LookValue::GroundShadowLights));
+        const Render::Lighting::LightShadowCasters casters = Render::Lighting::SelectLightShadowCasters(
+            worldLights.Selection().uniform, {draw.bodyOrigin[0], draw.bodyOrigin[1], draw.bodyOrigin[2]}, maxCasters);
+        const mu::ScopedGroundShadow lightShadow(mu::GroundShadowSource::PointLight);
+        for (std::size_t i = 0; i < casters.count; ++i)
+        {
+            constexpr float HalfTurn = 3.14159265358979f;
+            projection.axisAngle = casters.casters[i].fallAngle + HalfTurn;
+            drawShadow(draw.alpha * casters.casters[i].strength);
+        }
     }
 
     EndRender();

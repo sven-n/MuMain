@@ -52,6 +52,7 @@ void PackLight(const DynamicLight& light, std::size_t slot, mu::DynamicLightsUni
         uniform.color[slot][i] = std::max(light.color[i], 0.f);
     }
     uniform.positionAndRadius[slot][3] = light.radius;
+    uniform.color[slot][3] = light.castsShadows ? 1.f : 0.f;
 }
 } // namespace
 

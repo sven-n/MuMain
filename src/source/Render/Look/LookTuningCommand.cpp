@@ -30,6 +30,7 @@ const CommandForm CommandForms[] = {
     {L"$dynlights reach ", {LookValue::DynamicEffectRangeMax}},
     {L"$dynlights shadow ", {LookValue::GroundShadowOpacity}},
     {L"$dynlights shadowangle ", {LookValue::GroundShadowAngle}},
+    {L"$dynlights shadowlights ", {LookValue::GroundShadowLights}},
     {L"$bloom falloff ", {LookValue::BloomLevelFalloff}},
     {L"$bloom ", {LookValue::BloomStrength}},
 };
