@@ -133,7 +133,10 @@ void CItemSharedModelForm::RenderShared(const Data::Items::ItemModelDefinition& 
         m_confirmUsers = users;
         ImGui::OpenPopup(ConfirmPopupId);
     }
+    ImGui::EndDisabled();
     ImGui::SameLine();
+    // Also with a name that cannot be applied: that is when it is needed.
+    ImGui::BeginDisabled(!changed);
     if (ImGui::Button(I18N::Editor::Revert))
     {
         LoadEdit(*shared);
