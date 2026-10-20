@@ -1,7 +1,16 @@
+#pragma clang diagnostic ignored "-Wmissing-prototypes"
+
 #include <metal_stdlib>
 #include <simd/simd.h>
 
 using namespace metal;
+
+struct FSInput
+{
+    float4 pos;
+    float2 uv;
+    float4 color;
+};
 
 struct main0_out
 {
@@ -10,13 +19,25 @@ struct main0_out
 
 struct main0_in
 {
+    float2 input_uv [[user(locn0)]];
     float4 input_color [[user(locn1)]];
 };
 
-fragment main0_out main0(main0_in in [[stage_in]])
+static inline __attribute__((always_inline))
+float4 _main(thread const FSInput& _input)
+{
+    return float4(1.0 - _input.color.w);
+}
+
+fragment main0_out main0(main0_in in [[stage_in]], float4 gl_FragCoord [[position]])
 {
     main0_out out = {};
-    out._entryPointOutput = float4(1.0 - in.input_color.w);
+    FSInput _input;
+    _input.pos = gl_FragCoord;
+    _input.uv = in.input_uv;
+    _input.color = in.input_color;
+    FSInput param = _input;
+    out._entryPointOutput = _main(param);
     return out;
 }
 

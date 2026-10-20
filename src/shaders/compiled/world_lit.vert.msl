@@ -1,7 +1,27 @@
+#pragma clang diagnostic ignored "-Wmissing-prototypes"
+
 #include <metal_stdlib>
 #include <simd/simd.h>
 
 using namespace metal;
+
+struct VSInput
+{
+    float3 pos;
+    float2 uv;
+    float4 color;
+};
+
+struct VSOutput
+{
+    float4 pos;
+    float2 uv;
+    float4 color;
+    float fogFactor;
+    float eyeDepth;
+    float3 worldPosition;
+    float clipDist;
+};
 
 struct Transform
 {
@@ -30,20 +50,38 @@ struct main0_in
     float4 input_color [[attribute(2)]];
 };
 
+static inline __attribute__((always_inline))
+VSOutput _main(thread const VSInput& _input, constant Transform& _32)
+{
+    VSOutput o;
+    o.pos = _32.mvp * float4(_input.pos, 1.0);
+    o.uv = _input.uv;
+    o.color = _input.color;
+    o.clipDist = o.pos.w - 1.0;
+    float dist = abs(o.pos.w);
+    float range = _32.fogEnd - _32.fogStart;
+    o.fogFactor = (range > 0.001000000047497451305389404296875) ? fast::clamp((_32.fogEnd - dist) / range, 0.0, 1.0) : 1.0;
+    o.eyeDepth = dist;
+    o.worldPosition = _input.pos;
+    return o;
+}
+
 vertex main0_out main0(main0_in in [[stage_in]], constant Transform& _32 [[buffer(0)]])
 {
     main0_out out = {};
-    float4 _151 = _32.mvp * float4(in.input_pos, 1.0);
-    float4 _188 = _151;
-    float _165 = abs(_188.w);
-    float _170 = _32.fogEnd - _32.fogStart;
-    out.gl_Position = _151;
-    out._entryPointOutput_uv = in.input_uv;
-    out._entryPointOutput_color = in.input_color;
-    out._entryPointOutput_fogFactor = (_170 > 0.001000000047497451305389404296875) ? fast::clamp((_32.fogEnd - _165) / _170, 0.0, 1.0) : 1.0;
-    out._entryPointOutput_eyeDepth = _165;
-    out._entryPointOutput_worldPosition = in.input_pos;
-    out.gl_ClipDistance[0] = _188.w - 1.0;
+    VSInput _input;
+    _input.pos = in.input_pos;
+    _input.uv = in.input_uv;
+    _input.color = in.input_color;
+    VSInput param = _input;
+    VSOutput flattenTemp = _main(param, _32);
+    out.gl_Position = flattenTemp.pos;
+    out._entryPointOutput_uv = flattenTemp.uv;
+    out._entryPointOutput_color = flattenTemp.color;
+    out._entryPointOutput_fogFactor = flattenTemp.fogFactor;
+    out._entryPointOutput_eyeDepth = flattenTemp.eyeDepth;
+    out._entryPointOutput_worldPosition = flattenTemp.worldPosition;
+    out.gl_ClipDistance[0] = flattenTemp.clipDist;
     out.gl_ClipDistance_0 = out.gl_ClipDistance[0];
     return out;
 }
