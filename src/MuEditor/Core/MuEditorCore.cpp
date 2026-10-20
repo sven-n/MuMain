@@ -19,6 +19,7 @@
 #include "../Config/MuEditorConfig.h"
 #include "../MuEditor/UI/Common/MuEditorCenterPaneUI.h"
 #include "../MuEditor/UI/ItemEditor/MuItemEditorUI.h"
+#include "../MuEditor/UI/ItemTools/MuItemBrowserUI.h"
 #include "../MuEditor/UI/SkillEditor/MuSkillEditorUI.h"
 #include "../MuEditor/UI/DevEditor/DevEditorUI.h"
 #include "../MuEditor/UI/MapEditor/MapEditorUI.h"
@@ -28,6 +29,9 @@
 #include "../UI/Console/MuEditorConsoleUI.h"
 #include "I18N/All.h"
 #include "Core/Utilities/AssetLoadWorld.h"
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Render/Items/ItemEffects.h"
+#include "Render/Items/ItemRenderStyles.h"
 #include "Core/Utilities/WorldClearing.h"
 #include "Core/Utilities/StringUtils.h"
 #include "World/MapInfra/MapManager.h"
@@ -443,6 +447,8 @@ void CMuEditorCore::Initialize(SDL_Window* window)
     // Winmain before we got here; do not touch I18N::SetLocale from editor
     // init or it'll overwrite the game-side selection.
     g_MuEditorConfig.Load();
+    // The item checks know the looks; they are drawing code.
+    g_ItemDataHandler.SetLookNames(Render::Items::Styles::Exists, Render::Items::ItemEffects::Exists);
     g_MuEditorConsoleUI.LogEditor(std::string("Active locale: ") + I18N::GetCurrentLocale());
 
     fwprintf(stderr, L"[MuEditor] Initialize() completed\n");
@@ -513,6 +519,8 @@ void CMuEditorCore::Update()
         // Between frames: the effect browser's preview releases its texture
         // only before the renderer's frame starts.
         g_MuEffectBrowserUI.BeforeFrame();
+        // Between frames too: item models the item tools changed are opened again.
+        ReopenChangedItemModels();
 
         SelectWindowMode();
         // The SDL3 backend fills display size and mouse/keyboard from the SDL
@@ -538,6 +546,20 @@ void CMuEditorCore::Update()
     else
     {
         BlockGameInputOverEditor();
+    }
+}
+
+void CMuEditorCore::ReopenChangedItemModels()
+{
+    if (!g_ItemDataHandler.HasModelsToReopen())
+    {
+        return;
+    }
+    const std::vector<Data::Items::ItemModelProblem> problems =
+        g_ItemDataHandler.ReopenChangedModels({Render::Items::Styles::Exists, Render::Items::ItemEffects::Exists});
+    for (const Data::Items::ItemModelProblem& problem : problems)
+    {
+        g_MuEditorConsoleUI.LogEditor("Item model " + problem.ToLogString());
     }
 }
 
@@ -734,7 +756,7 @@ void CMuEditorCore::Render()
     if (m_bEditorMode)
     {
         // Render center pane (handles all editor windows and input blocking)
-        g_MuEditorCenterPaneUI.Render(m_windows.itemEditor, m_windows.skillEditor);
+        g_MuEditorCenterPaneUI.Render(m_windows.itemBrowser, m_windows.itemTable, m_windows.skillEditor);
 
         // Render Dev Editor
         if (m_windows.devEditor)

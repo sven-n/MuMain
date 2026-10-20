@@ -78,6 +78,7 @@ private:
     void BlockGameInputOverEditor();
     void UpdateCursorVisibility();
     void ToggleFullscreenOnF11();
+    void ReopenChangedItemModels();
     bool IsEditorWindow(SDL_Window* window) const;
     bool FindMouseInEditorWindow() const;
 

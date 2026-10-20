@@ -65,6 +65,9 @@ bool MatchesItemSearch(const Data::Items::ItemDefinition& definition, std::strin
 
 // The numbers of the group a new item can take (Data::Items::IsFreeItemType).
 std::vector<int> GetFreeItemNumbers(int group);
+// The first of them from `from` on, else the first of the group; 0 when the
+// group has none.
+int GetNextFreeItemNumber(int group, int from);
 
 // Whether the UTF-8 text contains the search; only the letters A to Z ignore
 // case. The item searches of the editor share it.

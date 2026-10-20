@@ -130,7 +130,7 @@ void ItemEdits::RecordSlots(std::string label, std::span<const int> itemTypes, T
                                    std::move(after), std::nullopt, std::nullopt});
         }
     }
-    m_history.Record(std::move(entry));
+    Record(std::move(entry));
 }
 
 void ItemEdits::SetItem(std::string label, const ItemDefinition& item)
@@ -184,7 +184,7 @@ bool ItemEdits::MoveItem(std::string label, int fromItemType, int toItemType)
     {
         return false;
     }
-    m_history.Record(
+    Record(
         {std::move(label), {{ItemEditStep::Kind::Move, fromItemType, toItemType, {}, {}, std::nullopt, std::nullopt}}});
     return true;
 }
@@ -219,7 +219,7 @@ void ItemEdits::SetSharedModel(std::string label, const SharedItemModel& sharedM
                                    std::move(after), std::nullopt, std::nullopt});
         }
     }
-    m_history.Record(std::move(entry));
+    Record(std::move(entry));
 }
 
 bool ItemEdits::RemoveSharedModel(std::string label, std::string_view name)
@@ -229,8 +229,55 @@ bool ItemEdits::RemoveSharedModel(std::string label, std::string_view name)
     {
         return false;
     }
-    m_history.Record({std::move(label), {{ItemEditStep::Kind::SharedModel, 0, 0, {}, {}, before, std::nullopt}}});
+    Record({std::move(label), {{ItemEditStep::Kind::SharedModel, 0, 0, {}, {}, before, std::nullopt}}});
     return true;
+}
+
+void ItemEdits::BeginGroup(std::string label)
+{
+    if (!m_group)
+    {
+        m_group = ItemEditEntry{std::move(label), {}};
+    }
+}
+
+void ItemEdits::EndGroup()
+{
+    if (m_group)
+    {
+        ItemEditEntry entry = std::move(*m_group);
+        m_group.reset();
+        m_history.Record(std::move(entry));
+    }
+}
+
+void ItemEdits::Record(ItemEditEntry entry)
+{
+    if (!m_group)
+    {
+        m_history.Record(std::move(entry));
+        return;
+    }
+    // One step per item type: an item changed twice keeps its first "before"
+    // and its last "after".
+    for (ItemEditStep& step : entry.steps)
+    {
+        const auto same = std::ranges::find_if(m_group->steps,
+                                               [&](const ItemEditStep& grouped)
+                                               {
+                                                   return step.kind == ItemEditStep::Kind::Slot &&
+                                                          grouped.kind == ItemEditStep::Kind::Slot &&
+                                                          grouped.itemType == step.itemType;
+                                               });
+        if (same != m_group->steps.end())
+        {
+            same->after = std::move(step.after);
+        }
+        else
+        {
+            m_group->steps.push_back(std::move(step));
+        }
+    }
 }
 
 bool ItemEdits::Undo()

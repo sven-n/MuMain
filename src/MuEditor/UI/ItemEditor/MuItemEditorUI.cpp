@@ -100,7 +100,7 @@ void CMuItemEditorUI::Render(bool& showEditor)
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse;
     char title[MuEditor::WindowIds::TitleCapacity];
     MuEditor::Layout::PrepareToolWindow();
-    if (ImGui::Begin(MuEditor::WindowIds::Title(title, I18N::Editor::ItemEditor, MuEditor::WindowIds::ItemEditor),
+    if (ImGui::Begin(MuEditor::WindowIds::Title(title, I18N::Editor::ItemEditor, MuEditor::WindowIds::ItemTable),
                      &showEditor, flags))
     {
         // Check if hovering this window OR any popup, also while a scrollbar or

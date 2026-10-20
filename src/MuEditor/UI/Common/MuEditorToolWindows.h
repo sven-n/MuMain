@@ -9,7 +9,8 @@ namespace MuEditor
 // the item tools).
 struct ToolWindows
 {
-    bool itemEditor = false;
+    bool itemBrowser = false;
+    bool itemTable = false;
     bool itemTranslations = false;
     bool skillEditor = false;
     bool devEditor = false;

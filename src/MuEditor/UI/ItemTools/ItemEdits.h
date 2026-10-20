@@ -4,6 +4,7 @@
 
 #include "ItemEditHistory.h"
 
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -32,6 +33,11 @@ public:
                         std::string_view previousName = {});
     bool RemoveSharedModel(std::string label, std::string_view name);
 
+    // The changes until EndGroup are one undo step under `label` (an item
+    // duplicated with its model made shared).
+    void BeginGroup(std::string label);
+    void EndGroup();
+
     // Undo and Redo select the item they changed. False when there is
     // nothing to do or the items changed past the history.
     bool Undo();
@@ -50,8 +56,11 @@ private:
 
     // Records the slots of `itemTypes` around `change`, as one entry.
     template <typename TChange> void RecordSlots(std::string label, std::span<const int> itemTypes, TChange&& change);
+    // Into the history, or into the open group.
+    void Record(ItemEditEntry entry);
 
     ItemEditHistory m_history;
+    std::optional<ItemEditEntry> m_group;
 };
 } // namespace MuEditor::Items
 

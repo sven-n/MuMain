@@ -10,7 +10,7 @@
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "../MuEditor/UI/ItemEditor/ItemEditorActions.h"
 #include "../MuEditor/UI/ItemEditor/ItemEditorPopups.h"
-#include "../MuEditor/UI/ItemEditor/MuItemEditorUI.h"
+#include "../MuEditor/UI/ItemTools/ItemSelection.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
@@ -223,10 +223,10 @@ void CMuItemTranslationsUI::RenderIdCell(int itemType)
     std::snprintf(id, sizeof(id), "%d,%d", Data::Items::GetItemGroup(itemType), Data::Items::GetItemNumber(itemType));
     if (ImGui::Selectable(id))
     {
-        // The item table in front, with the item listed and selected.
-        g_MuEditorCore.GetToolWindows().itemEditor = true;
-        g_MuItemEditorUI.SelectItem(itemType);
-        ImGui::SetWindowFocus(MuEditor::WindowIds::ItemEditor);
+        // The item selected for all item tools, the item browser in front.
+        g_ItemSelection.Select(itemType);
+        g_MuEditorCore.GetToolWindows().itemBrowser = true;
+        ImGui::SetWindowFocus(MuEditor::WindowIds::ItemBrowser);
     }
     if (ImGui::IsItemHovered())
     {

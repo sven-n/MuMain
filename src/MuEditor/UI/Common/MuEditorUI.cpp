@@ -200,7 +200,8 @@ void CMuEditorUI::RenderWindowsMenu(MuEditor::ToolWindows& windows, SDL_Window* 
     // The item tools, which share one selected item.
     if (ImGui::BeginMenu(I18N::Editor::Items))
     {
-        ImGui::MenuItem(I18N::Editor::ItemEditor, nullptr, &windows.itemEditor);
+        ImGui::MenuItem(I18N::Editor::ItemBrowser, nullptr, &windows.itemBrowser);
+        ImGui::MenuItem(I18N::Editor::ItemEditor, nullptr, &windows.itemTable);
         ImGui::MenuItem(I18N::Editor::ItemTranslations, nullptr, &windows.itemTranslations);
         ImGui::EndMenu();
     }

@@ -9,6 +9,7 @@
 #include "Data/GameData/ItemData/ItemFieldMetadata.h"
 #include "Data/GameData/ItemData/ItemNames.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include "../MuEditor/UI/ItemTools/ItemEdits.h"
 #include "I18N/All.h"
 #include "imgui.h"
 #include <string>
@@ -141,6 +142,7 @@ void CItemEditorActions::RenderSaveButton()
         {
         case Data::Items::ItemDataSaveResult::Saved:
             g_MuEditorConsoleUI.LogEditor("Items saved to " + Data::Items::GetItemDataDirectory().string());
+            g_ItemEdits.GetHistory().MarkSaved();
             LogMissingItemNames();
             ImGui::OpenPopup("Save Success");
             break;
@@ -175,6 +177,8 @@ bool CItemEditorActions::RenderImportBmdButton()
     }
 
     LogImportResult(result);
+    // The imported items replace all items: no step before them can be undone.
+    g_ItemEdits.GetHistory().Clear();
     ImGui::OpenPopup("Import Bmd Success");
     return true;
 }

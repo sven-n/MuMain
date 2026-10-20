@@ -16,6 +16,8 @@ namespace
 constexpr float EditorWindowWidth = 900.0f;
 // The share of the dock space's height the console takes in the first layout.
 constexpr float ConsoleHeightShare = 0.25f;
+// The share of the tools' width the item browser takes, beside the other tools.
+constexpr float ItemBrowserWidthShare = 0.35f;
 constexpr char DockSpaceName[] = "ToolWindows";
 
 void BuildDefaultLayout(ImGuiID dockSpace, ImVec2 size)
@@ -27,11 +29,16 @@ void BuildDefaultLayout(ImGuiID dockSpace, ImVec2 size)
     ImGuiID tools = 0;
     const ImGuiID console = ImGui::DockBuilderSplitNode(dockSpace, ImGuiDir_Down, ConsoleHeightShare, nullptr, &tools);
     ImGui::DockBuilderDockWindow(MuEditor::WindowIds::Console, console);
+    // The item browser beside the item tools, which show what it selects.
+    ImGuiID otherTools = 0;
+    const ImGuiID browser =
+        ImGui::DockBuilderSplitNode(tools, ImGuiDir_Left, ItemBrowserWidthShare, nullptr, &otherTools);
+    ImGui::DockBuilderDockWindow(MuEditor::WindowIds::ItemBrowser, browser);
     for (const char* window :
-         {MuEditor::WindowIds::ItemEditor, MuEditor::WindowIds::SkillEditor, MuEditor::WindowIds::DevEditor,
-          MuEditor::WindowIds::MapEditor, MuEditor::WindowIds::EffectBrowser, MuEditor::WindowIds::ItemTranslations})
+         {MuEditor::WindowIds::ItemTranslations, MuEditor::WindowIds::SkillEditor, MuEditor::WindowIds::DevEditor,
+          MuEditor::WindowIds::MapEditor, MuEditor::WindowIds::EffectBrowser})
     {
-        ImGui::DockBuilderDockWindow(window, tools);
+        ImGui::DockBuilderDockWindow(window, otherTools);
     }
     ImGui::DockBuilderFinish(dockSpace);
 }
@@ -95,7 +102,7 @@ void DockBesideItemTools(const char* windowId)
     {
         return;
     }
-    for (const char* neighbour : {MuEditor::WindowIds::ItemTranslations, MuEditor::WindowIds::ItemEditor})
+    for (const char* neighbour : {MuEditor::WindowIds::ItemTranslations, MuEditor::WindowIds::ItemBrowser})
     {
         const ImGuiWindow* window = ImGui::FindWindowByName(neighbour);
         if (window != nullptr && window->DockId != 0)

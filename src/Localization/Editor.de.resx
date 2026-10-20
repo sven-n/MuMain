@@ -940,4 +940,160 @@
   <data name="Item names missing" xml:space="preserve">
     <value>Fehlende Gegenstandsnamen auf {0}: {1} von {2}</value>
   </data>
+  <data name="A buff" xml:space="preserve">
+    <value>Ein Buff</value>
+  </data>
+  <data name="A pet" xml:space="preserve">
+    <value>Ein Begleiter</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Hinzufügen</value>
+  </data>
+  <data name="Add item" xml:space="preserve">
+    <value>Gegenstand hinzufügen</value>
+  </data>
+  <data name="All groups" xml:space="preserve">
+    <value>Alle Gruppen</value>
+  </data>
+  <data name="All rules" xml:space="preserve">
+    <value>Alle Regeln</value>
+  </data>
+  <data name="All tags" xml:space="preserve">
+    <value>Alle Tags</value>
+  </data>
+  <data name="An add option" xml:space="preserve">
+    <value>Eine Zusatzoption</value>
+  </data>
+  <data name="An ancient set" xml:space="preserve">
+    <value>Ein Ancient-Set</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="Clear filters" xml:space="preserve">
+    <value>Filter leeren</value>
+  </data>
+  <data name="Copy the selected item" xml:space="preserve">
+    <value>Den ausgewählten Gegenstand kopieren</value>
+  </data>
+  <data name="Droppable" xml:space="preserve">
+    <value>Fallenlassen</value>
+  </data>
+  <data name="Droppable while rented" xml:space="preserve">
+    <value>Gemietet fallenlassen</value>
+  </data>
+  <data name="Duplicate" xml:space="preserve">
+    <value>Duplizieren</value>
+  </data>
+  <data name="Duplicate item" xml:space="preserve">
+    <value>Gegenstand duplizieren</value>
+  </data>
+  <data name="English name" xml:space="preserve">
+    <value>Englischer Name</value>
+  </data>
+  <data name="Group" xml:space="preserve">
+    <value>Gruppe</value>
+  </data>
+  <data name="Item Browser" xml:space="preserve">
+    <value>Gegenstandsliste</value>
+  </data>
+  <data name="Its model entry" xml:space="preserve">
+    <value>Sein Modelleintrag</value>
+  </data>
+  <data name="Its model file becomes a shared model that both items use" xml:space="preserve">
+    <value>Seine Modelldatei wird ein geteiltes Modell, das beide Gegenstände nutzen</value>
+  </data>
+  <data name="Missing a name in {0}" xml:space="preserve">
+    <value>Ohne Namen auf {0}</value>
+  </data>
+  <data name="Models without an item" xml:space="preserve">
+    <value>Modelle ohne Gegenstand</value>
+  </data>
+  <data name="Move item" xml:space="preserve">
+    <value>Gegenstand verschieben</value>
+  </data>
+  <data name="Named in code ({0} lines)" xml:space="preserve">
+    <value>Im Code genannt ({0} Zeilen)</value>
+  </data>
+  <data name="Next free" xml:space="preserve">
+    <value>Nächste freie</value>
+  </data>
+  <data name="No item at this number" xml:space="preserve">
+    <value>Kein Gegenstand unter dieser Nummer</value>
+  </data>
+  <data name="Not: {0}" xml:space="preserve">
+    <value>Nicht: {0}</value>
+  </data>
+  <data name="Nothing uses the item" xml:space="preserve">
+    <value>Nichts nutzt den Gegenstand</value>
+  </data>
+  <data name="Redo" xml:space="preserve">
+    <value>Wiederholen</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Entfernen</value>
+  </data>
+  <data name="Remove item" xml:space="preserve">
+    <value>Gegenstand entfernen</value>
+  </data>
+  <data name="Repairable" xml:space="preserve">
+    <value>Reparierbar</value>
+  </data>
+  <data name="Sellable" xml:space="preserve">
+    <value>Verkaufbar</value>
+  </data>
+  <data name="Sellable in a personal shop" xml:space="preserve">
+    <value>Im eigenen Laden verkaufbar</value>
+  </data>
+  <data name="Sellable in a personal shop while rented" xml:space="preserve">
+    <value>Gemietet im eigenen Laden verkaufbar</value>
+  </data>
+  <data name="Sellable when the rental expired" xml:space="preserve">
+    <value>Nach Mietende verkaufbar</value>
+  </data>
+  <data name="Share the model" xml:space="preserve">
+    <value>Modell teilen</value>
+  </data>
+  <data name="Shared model {0} (also used by {1} items)" xml:space="preserve">
+    <value>Geteiltes Modell {0} (auch von {1} Gegenständen genutzt)</value>
+  </data>
+  <data name="Storable" xml:space="preserve">
+    <value>Lagerbar</value>
+  </data>
+  <data name="Tags" xml:space="preserve">
+    <value>Tags</value>
+  </data>
+  <data name="The item and its model entry are removed." xml:space="preserve">
+    <value>Der Gegenstand und sein Modelleintrag werden entfernt.</value>
+  </data>
+  <data name="The items changed since this step; it is not undone." xml:space="preserve">
+    <value>Die Gegenstände haben sich seit diesem Schritt geändert; er wird nicht rückgängig gemacht.</value>
+  </data>
+  <data name="The new item has no model yet." xml:space="preserve">
+    <value>Der neue Gegenstand hat noch kein Modell.</value>
+  </data>
+  <data name="The sources were not found: code that names the item is not known." xml:space="preserve">
+    <value>Die Quellen wurden nicht gefunden: Code, der den Gegenstand nennt, ist nicht bekannt.</value>
+  </data>
+  <data name="This number is not free" xml:space="preserve">
+    <value>Diese Nummer ist nicht frei</value>
+  </data>
+  <data name="Tradable" xml:space="preserve">
+    <value>Handelbar</value>
+  </data>
+  <data name="Undo" xml:space="preserve">
+    <value>Rückgängig</value>
+  </data>
+  <data name="Uses the shared model {0} too" xml:space="preserve">
+    <value>Nutzt ebenfalls das geteilte Modell {0}</value>
+  </data>
+  <data name="What uses it stays at its number:" xml:space="preserve">
+    <value>Was ihn nutzt, bleibt bei seiner Nummer:</value>
+  </data>
+  <data name="What uses it stays at its old number:" xml:space="preserve">
+    <value>Was ihn nutzt, bleibt bei seiner alten Nummer:</value>
+  </data>
+  <data name="Without a model" xml:space="preserve">
+    <value>Ohne Modell</value>
+  </data>
 </root>

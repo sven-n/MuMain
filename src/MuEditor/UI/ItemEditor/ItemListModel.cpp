@@ -81,6 +81,13 @@ std::vector<int> GetFreeItemNumbers(int group)
     return numbers;
 }
 
+int GetNextFreeItemNumber(int group, int from)
+{
+    const std::vector<int> free = GetFreeItemNumbers(group);
+    const auto next = std::ranges::find_if(free, [from](int number) { return number >= from; });
+    return next != free.end() ? *next : (free.empty() ? 0 : free.front());
+}
+
 bool CItemListModel::Lists(int itemType, const Filter& filter) const
 {
     const Data::Items::ItemDefinition& slot = g_ItemDatabase.GetAllSlots()[itemType];
