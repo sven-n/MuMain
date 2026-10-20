@@ -80,7 +80,7 @@ void CMuItemTranslationsUI::Render(bool* open)
         {
             g_MuEditorCore.SetHoveringUI(true);
         }
-        UpdateCounts();
+        UpdateCountsAndLabels();
         CItemEditorActions::RenderSaveButton();
         CItemEditorPopups::RenderAll();
         ImGui::SameLine();
@@ -92,14 +92,29 @@ void CMuItemTranslationsUI::Render(bool* open)
     CommitEditNotDrawn();
 }
 
-void CMuItemTranslationsUI::UpdateCounts()
+void CMuItemTranslationsUI::UpdateCountsAndLabels()
 {
-    if (m_countsVersion == g_ItemDatabase.GetVersion() && m_counts.size() == m_locales.size())
+    const char* uiLocale = I18N::GetCurrentLocale();
+    if (m_countsVersion == g_ItemDatabase.GetVersion() && m_counts.size() == m_locales.size() &&
+        m_labelsLocale == uiLocale)
     {
         return;
     }
     m_counts = Data::Items::CountItemNames(g_ItemDatabase.GetAllSlots(), m_locales);
     m_countsVersion = g_ItemDatabase.GetVersion();
+    m_labelsLocale = uiLocale;
+
+    m_missingLabels.clear();
+    m_headerLabels.clear();
+    for (size_t index = 0; index < m_locales.size(); ++index)
+    {
+        const char* locale = m_locales[index];
+        m_missingLabels.push_back(IsEnglish(locale) ? std::string(I18N::GetLanguageDisplayName(locale))
+                                                    : MissingLabel(locale, m_counts[index]));
+        // "###" and the language's code keep the header's id the same while its
+        // count changes.
+        m_headerLabels.push_back(m_missingLabels.back() + "###" + locale);
+    }
 }
 
 void CMuItemTranslationsUI::RenderToolbar()
@@ -126,7 +141,7 @@ void CMuItemTranslationsUI::RenderToolbar()
             {
                 continue;
             }
-            if (ImGui::Selectable(MissingLabel(m_locales[index], m_counts[index]).c_str(), m_missingLocale == index))
+            if (ImGui::Selectable(m_missingLabels[index].c_str(), m_missingLocale == index))
             {
                 m_missingLocale = index;
             }
@@ -145,13 +160,10 @@ void CMuItemTranslationsUI::RenderToolbar()
 
 void CMuItemTranslationsUI::RenderTable()
 {
-    CItemListModel::Filter filter;
-    filter.search = m_search;
-    if (m_missingLocale >= 0)
-    {
-        filter.missingLocale = m_locales[m_missingLocale];
-    }
-    const std::vector<int>& itemTypes = m_list.GetItemTypes(filter);
+    // Assigned in place, so the strings keep their memory from frame to frame.
+    m_filter.search.assign(m_search);
+    m_filter.missingLocale.assign(m_missingLocale >= 0 ? m_locales[m_missingLocale] : "");
+    const std::vector<int>& itemTypes = m_list.GetItemTypes(m_filter);
 
     const int columnCount = static_cast<int>(m_locales.size()) + 1;
     constexpr ImGuiTableFlags flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Resizable |
@@ -168,12 +180,8 @@ void CMuItemTranslationsUI::RenderTable()
     for (size_t column = 0; column < m_locales.size(); ++column)
     {
         const bool english = IsEnglish(m_locales[column]);
-        // "###" and the language's code keep the header's id the same while its
-        // count changes.
-        std::string label = english ? std::string(I18N::GetLanguageDisplayName(m_locales[column]))
-                                    : MissingLabel(m_locales[column], m_counts[column]);
-        label += std::string("###") + m_locales[column];
-        ImGui::TableSetupColumn(label.c_str(), english ? ImGuiTableColumnFlags_NoHide : ImGuiTableColumnFlags_None,
+        ImGui::TableSetupColumn(m_headerLabels[column].c_str(),
+                                english ? ImGuiTableColumnFlags_NoHide : ImGuiTableColumnFlags_None,
                                 NameColumnWidth * uiScale);
     }
     ImGui::TableHeadersRow();
