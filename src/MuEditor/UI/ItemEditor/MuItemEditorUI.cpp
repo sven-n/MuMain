@@ -161,6 +161,12 @@ void CMuItemEditorUI::SelectItem(int itemIndex)
     {
         m_szItemSearchBuffer[0] = '\0';
     }
+    // The table builds its rows when the search changes; a name changed since
+    // (in the Item Translations window) can list the item now or no longer.
+    if (m_pTable)
+    {
+        m_pTable->InvalidateFilter();
+    }
     CItemEditorTable::RequestScrollToIndex(itemIndex);
 }
 
