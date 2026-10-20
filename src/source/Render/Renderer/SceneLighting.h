@@ -100,7 +100,9 @@ struct DynamicLightsUniform
 {
     std::uint32_t lightCount = 0;     // lights used
     float wrap = kDefaultDynamicWrap; // see WrappedDiffuse()
-    std::uint32_t padding[2]{};
+    // The first lights, which the ground's vertex colour leaves out (ScopedWorldLitGeometry).
+    std::uint32_t worldLightCount = 0;
+    std::uint32_t padding = 0;
     float positionAndRadius[kMaxDynamicLights][4]; // xyz world position, w radius in world units
     float color[kMaxDynamicLights][4];             // rgb, w unused
 };

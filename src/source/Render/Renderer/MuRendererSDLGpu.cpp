@@ -592,6 +592,8 @@ static WorldPipelines s_pipelinesSkinned;
 static WorldPipelines s_pipelines3DEnhancedFog;
 static WorldPipelines s_pipelinesSkinnedEnhancedFog;
 static WorldPipelines s_pipelinesSkinnedLit;
+// The ground lit per pixel by the frame's first point lights (BeginWorldLitGeometry).
+static WorldPipelines s_pipelinesWorldLit;
 static bool s_enhancedLightingAvailable = false;
 static bool s_enhancedLightingEnabled = false;
 // The frame's scene lighting, pushed once per render pass to fragment uniform slot 1.
@@ -607,6 +609,7 @@ static mu::PostProcessingLook s_postProcessingLook{};
 static mu::PostProcessingView s_postProcessingView = mu::PostProcessingView::Scene;
 static Render::PostProcessing::SceneBoundary s_sceneBoundary;
 static int s_bloomExclusionDepth = 0;
+static int s_worldLitGeometryDepth = 0;
 
 // Alpha-to-coverage variants of the depth-writing world pipelines (each world set's culled and
 // no-cull states), used while anti-aliasing is on by alpha-tested cutout draws (foliage, hair,
@@ -999,8 +1002,8 @@ static void PushReplayFragmentUniforms(const FogUniform& uniforms, Render::SdlGp
     ++s_dbgFragmentUniformPushesThisFrame;
 }
 
-// Classic fragment shaders declare one uniform buffer and never read slots 1 and 2; only
-// skinned_lit.frag reads slot 2.
+// Classic fragment shaders declare one uniform buffer and never read slots 1 and 2; only the
+// skinned_lit and world_lit fragment shaders read slot 2.
 static void PushSceneLightingUniforms()
 {
     SDL_PushGPUFragmentUniformData(s_cmdBuf, k_FragmentUniformSlotSceneLighting, &s_sceneLightingUniform,
@@ -1149,6 +1152,8 @@ static SDL_GPUShader* s_vertShaderSkinned = nullptr; // skinned_textured.vert
 static SDL_GPUShader* s_vertShaderSkinnedShadow = nullptr; // skinned_shadow.vert
 static SDL_GPUShader* s_fragShaderTexFog = nullptr;  // basic_textured_fog.frag (Enhanced, optional)
 static SDL_GPUShader* s_fragShaderLit = nullptr;     // skinned_lit.frag (Enhanced, optional)
+static SDL_GPUShader* s_vertShaderWorldLit = nullptr; // world_lit.vert (Enhanced, optional)
+static SDL_GPUShader* s_fragShaderWorldLit = nullptr; // world_lit.frag (Enhanced, optional)
 // Post-processing (optional): without them post-processing is unavailable.
 static SDL_GPUShader* s_vertShaderPostFullscreen = nullptr; // post_fullscreen.vert
 static SDL_GPUShader* s_fragShaderBloomDown = nullptr;      // post_bloom_down.frag
@@ -2126,6 +2131,7 @@ public:
                                          s_bloomExclusionDepth);
             s_bloomExclusionDepth = 0;
         }
+        s_worldLitGeometryDepth = 0;
 
         s_replayedCmdCount = 0u;
         s_mainColorPassOpenedThisFrame = false;
@@ -3576,6 +3582,19 @@ public:
         if (s_bloomExclusionDepth > 0)
         {
             --s_bloomExclusionDepth;
+        }
+    }
+
+    void BeginWorldLitGeometry() override
+    {
+        ++s_worldLitGeometryDepth;
+    }
+
+    void EndWorldLitGeometry() override
+    {
+        if (s_worldLitGeometryDepth > 0)
+        {
+            --s_worldLitGeometryDepth;
         }
     }
 
@@ -5184,7 +5203,9 @@ private:
 
     [[nodiscard]] SDL_GPUGraphicsPipeline* GetActive3DPipeline() const
     {
-        const WorldPipelines& set = UsesEnhancedLighting() ? s_pipelines3DEnhancedFog : s_pipelines3D;
+        const WorldPipelines& set = !UsesEnhancedLighting()       ? s_pipelines3D
+                                    : s_worldLitGeometryDepth > 0 ? s_pipelinesWorldLit
+                                                                  : s_pipelines3DEnhancedFog;
         return set.Select(static_cast<std::size_t>(GetActivePipelineIndex()), m_depthTestEnabled, m_depthMaskEnabled,
                           m_cullFaceEnabled && !s_disableD3D12Culling);
     }
@@ -5461,6 +5482,10 @@ private:
             createShader("basic_textured_fog", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 2, /*fatal=*/false);
         // skinned_lit.frag also reads the frame's point lights, DynamicLights (b2).
         s_fragShaderLit = createShader("skinned_lit", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 3, /*fatal=*/false);
+        // The ground lit per pixel: the Transform (b0) of basic_textured.vert, and the uniforms of skinned_lit.frag.
+        s_vertShaderWorldLit = createShader("world_lit", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 0, 1, /*fatal=*/false);
+        s_fragShaderWorldLit =
+            createShader("world_lit", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 3, /*fatal=*/false);
 
         // Post-processing — non-fatal: without them post-processing is unavailable.
         // Bloom passes: source texture (t0) and BloomUniforms (b0); composite: scene, bloom and
@@ -5529,8 +5554,8 @@ private:
             SDL_ReleaseGPUShader(s_device, s_fragShaderLit);
             s_fragShaderLit = nullptr;
         }
-        for (SDL_GPUShader** shader :
-             {&s_vertShaderPostFullscreen, &s_fragShaderBloomDown, &s_fragShaderBloomUp, &s_fragShaderComposite})
+        for (SDL_GPUShader** shader : {&s_vertShaderWorldLit, &s_fragShaderWorldLit, &s_vertShaderPostFullscreen,
+                                       &s_fragShaderBloomDown, &s_fragShaderBloomUp, &s_fragShaderComposite})
         {
             if (*shader)
             {
@@ -5548,6 +5573,7 @@ private:
     {
         TwoDimensional,
         ThreeDimensional,
+        ThreeDimensionalWorldLit, // the 3D layout, with world_lit.vert
         Skinned,
         SkinnedShadow, // the skinned layout, with skinned_shadow.vert
     };
@@ -5557,6 +5583,7 @@ private:
         Textured,
         TexturedEnhancedFog,
         SkinnedLit,
+        WorldLit,
     };
 
     struct PipelineBuildDescription
@@ -5605,6 +5632,8 @@ private:
              FragmentShader::TexturedEnhancedFog, WorldSetFamily::EnhancedLighting},
             {&s_pipelinesSkinnedLit, "skinned-lit", VertexLayout::Skinned, FragmentShader::SkinnedLit,
              WorldSetFamily::EnhancedLighting},
+            {&s_pipelinesWorldLit, "world-lit", VertexLayout::ThreeDimensionalWorldLit, FragmentShader::WorldLit,
+             WorldSetFamily::EnhancedLighting},
         };
         return sets;
     }
@@ -5652,6 +5681,8 @@ private:
             return s_fragShaderTexFog;
         case FragmentShader::SkinnedLit:
             return s_fragShaderLit;
+        case FragmentShader::WorldLit:
+            return s_fragShaderWorldLit;
         case FragmentShader::Textured:
             break;
         }
@@ -5666,6 +5697,8 @@ private:
             return "basic_textured_fog.frag";
         case FragmentShader::SkinnedLit:
             return "skinned_lit.frag";
+        case FragmentShader::WorldLit:
+            return "world_lit.frag";
         case FragmentShader::Textured:
             break;
         }
@@ -5740,7 +5773,8 @@ private:
             vtxBufDesc.pitch = sizeof(Vertex2D);
             numAttribs = 3;
         }
-        else if (description.vertexLayout == VertexLayout::ThreeDimensional)
+        else if (description.vertexLayout == VertexLayout::ThreeDimensional ||
+                 description.vertexLayout == VertexLayout::ThreeDimensionalWorldLit)
         {
             // Vertex3D mapped to the 2D shader's input locations:
             //   location 0 (TEXCOORD0 → pos):   float3 pos  — shader reads float2 (x,y), z dropped
@@ -5838,9 +5872,11 @@ private:
         rasterState.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
 
         SDL_GPUGraphicsPipelineCreateInfo pipelineInfo{};
-        pipelineInfo.vertex_shader = description.vertexLayout == VertexLayout::Skinned         ? s_vertShaderSkinned
-                                     : description.vertexLayout == VertexLayout::SkinnedShadow ? s_vertShaderSkinnedShadow
-                                                                                               : s_vertShader2D;
+        pipelineInfo.vertex_shader =
+            description.vertexLayout == VertexLayout::Skinned                    ? s_vertShaderSkinned
+            : description.vertexLayout == VertexLayout::SkinnedShadow            ? s_vertShaderSkinnedShadow
+            : description.vertexLayout == VertexLayout::ThreeDimensionalWorldLit ? s_vertShaderWorldLit
+                                                                                 : s_vertShader2D;
         pipelineInfo.fragment_shader = GetFragmentShader(description.fragmentShader);
         pipelineInfo.vertex_input_state = vtxInputState;
         pipelineInfo.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
@@ -5868,12 +5904,15 @@ private:
     static void LogPipelineFailure(const char* driverName, const PipelineBuildResult& result, bool required)
     {
         const PipelineBuildDescription& description = result.description;
-        const char* layoutName = description.vertexLayout == VertexLayout::TwoDimensional     ? "2D"
-                                 : description.vertexLayout == VertexLayout::ThreeDimensional ? "3D"
-                                                                                              : "skinned";
+        const char* layoutName = description.vertexLayout == VertexLayout::TwoDimensional ? "2D"
+                                 : description.vertexLayout == VertexLayout::ThreeDimensional ||
+                                         description.vertexLayout == VertexLayout::ThreeDimensionalWorldLit
+                                     ? "3D"
+                                     : "skinned";
         const char* vertexShaderName = description.vertexLayout == VertexLayout::Skinned ? "skinned_textured.vert"
-                                       : description.vertexLayout == VertexLayout::SkinnedShadow
-                                           ? "skinned_shadow.vert"
+                                       : description.vertexLayout == VertexLayout::SkinnedShadow ? "skinned_shadow.vert"
+                                       : description.vertexLayout == VertexLayout::ThreeDimensionalWorldLit
+                                           ? "world_lit.vert"
                                            : "basic_textured.vert";
         const char* fragmentShaderName = GetFragmentShaderName(description.fragmentShader);
         const char* cullMode = description.cullFaceEnabled ? "back" : "none";

@@ -416,7 +416,11 @@ bool NewRenderLogInScene(HDC hDC)
 
     if (!g_CreditWin.IsVisible())
     {
-        { FRAME_PROFILE(Terrain); RenderTerrain(false); }
+        {
+            FRAME_PROFILE(Terrain);
+            Scenes::Lighting::PinWorldDynamicLights();
+            RenderTerrain(false);
+        }
         { FRAME_PROFILE(Characters); RenderCharactersClient(); }
         { FRAME_PROFILE(Objects); RenderMount(); }
         {

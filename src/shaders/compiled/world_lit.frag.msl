@@ -1,0 +1,102 @@
+#include <metal_stdlib>
+#include <simd/simd.h>
+
+using namespace metal;
+
+struct SceneLighting
+{
+    float4 sceneLightDirection;
+    float4 sceneLightColor;
+    float4 diffuseCurve;
+    float4 rimParameters;
+    float4 specularParameters;
+    float4 sceneFogColor;
+    float4 sceneFogParameters;
+    float4 cameraPosition;
+};
+
+struct DynamicLights
+{
+    uint dynamicLightCount;
+    float dynamicLightWrap;
+    uint dynamicWorldLightCount;
+    uint dynamicLightPadding;
+    float4 dynamicLightPositionAndRadius[32];
+    float4 dynamicLightColor[32];
+};
+
+struct FogUniforms
+{
+    uint fogEnabled;
+    uint alphaDiscardEnabled;
+    float alphaThreshold;
+    uint alphaToCoverage;
+    float fogStart;
+    float fogEnd;
+    float4 fogColor;
+};
+
+struct main0_out
+{
+    float4 _entryPointOutput [[color(0)]];
+};
+
+struct main0_in
+{
+    float2 input_uv [[user(locn0)]];
+    float4 input_color [[user(locn1)]];
+    float input_eyeDepth [[user(locn3)]];
+    float3 input_worldPosition [[user(locn4)]];
+};
+
+fragment main0_out main0(main0_in in [[stage_in]], constant SceneLighting& _30 [[buffer(0)]], constant DynamicLights& _64 [[buffer(1)]], constant FogUniforms& _169 [[buffer(2)]], texture2d<float> tex [[texture(0)]], sampler s [[sampler(0)]])
+{
+    main0_out out = {};
+    uint _389 = min(min(_64.dynamicWorldLightCount, _64.dynamicLightCount), 32u);
+    float3 _472;
+    _472 = float3(0.0);
+    float3 _474;
+    for (uint _471 = 0u; _471 < _389; _472 = _474, _471++)
+    {
+        float4 _379 = _64.dynamicLightPositionAndRadius[_471];
+        float _406 = length(_64.dynamicLightPositionAndRadius[_471].xy - in.input_worldPosition.xy);
+        if (_406 < _379.w)
+        {
+            _474 = _472 + (_64.dynamicLightColor[_471].xyz * ((_379.w - _406) / _379.w));
+        }
+        else
+        {
+            _474 = _472;
+        }
+    }
+    float4 _296 = tex.sample(s, in.input_uv);
+    float4 _275 = _296;
+    float4 _276 = float4(_296.xyz * fast::clamp(in.input_color.xyz + _472, float3(0.0), float3(1.0)), _275.w * in.input_color.w);
+    if (_169.alphaToCoverage != 0u)
+    {
+        _276.w *= fast::clamp(((_276.w - _169.alphaThreshold) / fast::max(fwidth(_276.w), 9.9999997473787516355514526367188e-05)) + 0.5, 0.0, 1.0);
+        if (_276.w <= 0.0)
+        {
+            discard_fragment();
+        }
+    }
+    else
+    {
+        if ((_169.alphaDiscardEnabled != 0u) && (_276.w <= _169.alphaThreshold))
+        {
+            discard_fragment();
+        }
+    }
+    if ((_169.fogEnabled != 0u) && (_30.sceneFogColor.w > 0.0))
+    {
+        float4 _357 = _276;
+        float _439 = fast::max(in.input_eyeDepth - _30.sceneFogParameters.x, 0.0) * _30.sceneFogParameters.z;
+        float3 _366 = mix(_357.xyz, _30.sceneFogColor.xyz, float3(fast::clamp(1.0 - exp((-_439) * _439), 0.0, 1.0)));
+        _276.x = _366.x;
+        _276.y = _366.y;
+        _276.z = _366.z;
+    }
+    out._entryPointOutput = _276;
+    return out;
+}
+

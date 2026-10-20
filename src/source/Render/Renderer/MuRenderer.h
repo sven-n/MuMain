@@ -358,6 +358,13 @@ public:
     // does in Classic. Scopes nest; use ScopedBloomExclusion.
     virtual void BeginBloomExclusion() {}
     virtual void EndBloomExclusion() {}
+
+    // 3D draws between BeginWorldLitGeometry and EndWorldLitGeometry are ground lit by the
+    // terrain light: with Enhanced lighting, the frame's first DynamicLightsUniform::worldLightCount
+    // point lights are added to their vertex colour per pixel. Scopes nest; use
+    // ScopedWorldLitGeometry.
+    virtual void BeginWorldLitGeometry() {}
+    virtual void EndWorldLitGeometry() {}
     // True while a bloom exclusion is open: what is queued now and drawn later
     // (a character's glow sprites) can be drawn inside one too.
     [[nodiscard]] virtual bool IsBloomExcluded() const
@@ -784,6 +791,20 @@ public:
     }
     ScopedBloomExclusion(const ScopedBloomExclusion&) = delete;
     ScopedBloomExclusion& operator=(const ScopedBloomExclusion&) = delete;
+};
+class ScopedWorldLitGeometry
+{
+public:
+    ScopedWorldLitGeometry()
+    {
+        GetRenderer().BeginWorldLitGeometry();
+    }
+    ~ScopedWorldLitGeometry()
+    {
+        GetRenderer().EndWorldLitGeometry();
+    }
+    ScopedWorldLitGeometry(const ScopedWorldLitGeometry&) = delete;
+    ScopedWorldLitGeometry& operator=(const ScopedWorldLitGeometry&) = delete;
 };
 // The draws recorded in its lifetime may be reordered (BeginReorderableDraws).
 class ScopedReorderableDraws

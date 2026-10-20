@@ -32,6 +32,12 @@ struct DynamicLightSelection
 [[nodiscard]] DynamicLightSelection SelectDynamicLights(std::span<const DynamicLight> lights,
                                                         const float (&reference)[3]);
 
+// The pinned selection's lights first, as its worldLightCount lights, then the selection of the
+// lights added after it in the slots left.
+[[nodiscard]] DynamicLightSelection SelectDynamicLights(const DynamicLightSelection& pinned,
+                                                        std::span<const DynamicLight> laterLights,
+                                                        const float (&reference)[3]);
+
 // Shortest time between two log lines about dropped lights.
 inline constexpr std::chrono::minutes kDroppedLightReportInterval{1};
 

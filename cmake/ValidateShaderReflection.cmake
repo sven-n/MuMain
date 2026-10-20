@@ -269,6 +269,8 @@ set(shader_specs
     "skinned_textured.vert|vert|0,1,2,3,4,5|0|1|1"
     "skinned_shadow.vert|vert|0,3,4|0|2|2"
     "skinned_lit.frag|frag||1|0|3"
+    "world_lit.vert|vert|0,1,2|0|0|1"
+    "world_lit.frag|frag||1|0|3"
     "post_fullscreen.vert|vert||0|0|0"
     "post_bloom_down.frag|frag||1|0|1"
     "post_bloom_up.frag|frag||1|0|1"

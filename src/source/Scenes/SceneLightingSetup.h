@@ -12,4 +12,8 @@ void SubmitSceneLighting();
 // count too; the renderer applies them when it replays the frame.
 void SubmitDynamicLights();
 
+// The point lights the ground applies per pixel (Enhanced dynamic lights), from the lights recorded
+// so far. Call right before the scene draws its terrain.
+void PinWorldDynamicLights();
+
 } // namespace Scenes::Lighting

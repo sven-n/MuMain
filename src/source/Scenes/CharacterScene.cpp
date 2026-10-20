@@ -359,6 +359,7 @@ static void RenderCharacterScene3D()
 {
     // Terrain has a real D3D11 path now -- call unconditionally. RenderObjects() (BMD static world
     // meshes) joins it. RenderCharactersClient()/RenderMount() join it too (see LoginScene.cpp's
+    Scenes::Lighting::PinWorldDynamicLights();
     RenderTerrain(false);
     RenderObjects();
     RenderCharactersClient();

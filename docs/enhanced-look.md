@@ -12,7 +12,7 @@ options window, without editing those files (see "Tuning it yourself").
 |---|---|---|
 | Texture filtering | mipmaps and anisotropic filtering for world textures | — |
 | Enhanced lighting | per-pixel model lighting with rim light and, on metal armour, specular highlights | — |
-| Dynamic model lights | candles, fires and spells light characters, monsters and NPCs | — |
+| Dynamic model lights | candles, fires and spells light characters, monsters, NPCs and world objects per pixel, and the ground as smooth pools instead of patches interpolated between terrain vertices | — |
 | Light mood | darker baked map light, so the light sources stand out | [light-mood.md](light-mood.md) |
 | Post-processing | bloom around light effects and per-map colour grading | [post-processing.md](post-processing.md) |
 | Anti-aliasing | multisampled edges (4 samples, or what `Antialiasing` asks for), alpha-to-coverage for cut-out foliage and fences | — |
