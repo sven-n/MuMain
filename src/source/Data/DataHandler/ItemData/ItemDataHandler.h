@@ -54,9 +54,10 @@ public:
     void OnItemsSwapped(int firstItemType, int secondItemType);
 
     // Validates the item database and the item models and writes Data/Items,
-    // with the model files of Data/Items/Models whose models were moved since
-    // they were loaded. Nothing is written when the data has errors, and no
-    // file is replaced when one of them cannot be written.
+    // with the model files of Data/Items/Models whose models changed (moved,
+    // edited) since they were loaded, and SharedModels.json when a shared
+    // model changed. Nothing is written when the data has errors, and no file
+    // is replaced when one of them cannot be written.
     Data::Items::ItemDataSaveResult Save(std::vector<Data::Items::ItemDataIssue>& issues);
 
     // Replaces all items with the legacy Item_<language>.bmd files. Items the
@@ -125,8 +126,11 @@ private:
 
     // The model swaps of the item editor since LoadModels, in order.
     std::vector<std::pair<int, int>> m_modelMoves;
-    // The groups of the swapped models: Save writes their model files.
-    Data::Items::ItemGroupSet m_movedModelGroups;
+    // The groups of the models the editor moved or changed since LoadModels:
+    // Save writes their model files.
+    Data::Items::ItemGroupSet m_changedModelGroups;
+    // Whether the editor changed a shared model since LoadModels.
+    bool m_sharedModelsChanged = false;
 #endif
 
     bool m_localeObserverRegistered = false;

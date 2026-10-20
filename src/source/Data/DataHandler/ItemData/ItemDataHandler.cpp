@@ -170,7 +170,8 @@ bool CItemDataHandler::LoadModels(std::string& errorMessage)
 #ifdef _EDITOR
     // The models are where their files have them again.
     m_modelMoves.clear();
-    m_movedModelGroups.reset();
+    m_changedModelGroups.reset();
+    m_sharedModelsChanged = false;
 #endif
     MU_LOG_INFO(mu::log::Get("data"), "Loaded {} item models from {} in {:.1f} ms", g_ItemModelDatabase.GetModelCount(),
                 GetItemModelDataDirectory().string(), MillisecondsSince(loadStart));
@@ -302,8 +303,8 @@ void CItemDataHandler::SwapItemModels(int firstItemType, int secondItemType)
 {
     g_ItemModelDatabase.Swap(firstItemType, secondItemType);
     Data::Items::ModelLoader::SwapOpenedModels(firstItemType, secondItemType);
-    m_movedModelGroups.set(static_cast<size_t>(GetItemGroup(firstItemType)));
-    m_movedModelGroups.set(static_cast<size_t>(GetItemGroup(secondItemType)));
+    m_changedModelGroups.set(static_cast<size_t>(GetItemGroup(firstItemType)));
+    m_changedModelGroups.set(static_cast<size_t>(GetItemGroup(secondItemType)));
 }
 
 void CItemDataHandler::TakeBackModelMoves()
@@ -343,9 +344,13 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
     ValidateNameLocales(g_ItemDatabase.GetAllSlots(), I18N::GetAvailableLocales(), issues);
     // Only the model files of moved models are written; the others keep what
     // this client does not read from them.
-    return SaveItemAndModelDataDirectories(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(),
-                                           GetItemModelDataDirectory(), g_ItemModelDatabase.GetAllSlots(),
-                                           m_movedModelGroups, issues);
+    ItemModelSave models;
+    models.directory = GetItemModelDataDirectory();
+    models.models = g_ItemModelDatabase.GetAllSlots();
+    models.groups = m_changedModelGroups;
+    models.sharedModels = g_ItemModelDatabase.GetSharedModels();
+    models.sharedModelsChanged = m_sharedModelsChanged;
+    return SaveItemAndModelDataDirectories(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(), models, issues);
 }
 
 ItemBmdImportResult CItemDataHandler::ImportFromBmd()

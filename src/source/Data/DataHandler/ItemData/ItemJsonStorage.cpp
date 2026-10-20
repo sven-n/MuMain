@@ -187,15 +187,19 @@ void ValidateExistingItemModels(std::span<const ItemModelDefinition> models, std
     ValidateItemModels(existingModels, issues);
 }
 
-void AddItemModelGroupFiles(const std::filesystem::path& directory, std::span<const ItemModelDefinition> models,
-                            const ItemGroupSet& groups, std::vector<FileToSave>& files)
+void AddItemModelFiles(const ItemModelSave& models, std::vector<FileToSave>& files)
 {
     for (int group = 0; group < MAX_ITEM_TYPE; ++group)
     {
-        if (groups.test(static_cast<size_t>(group)))
+        if (models.groups.test(static_cast<size_t>(group)))
         {
-            files.push_back({directory / GetItemGroupFileName(group), WriteItemModelGroupJson(group, models)});
+            files.push_back(
+                {models.directory / GetItemGroupFileName(group), WriteItemModelGroupJson(group, models.models)});
         }
+    }
+    if (models.sharedModelsChanged)
+    {
+        files.push_back({models.directory / SharedItemModelsFileName, WriteSharedItemModelsJson(models.sharedModels)});
     }
 }
 } // namespace
@@ -295,18 +299,16 @@ GlowColorsLoadResult LoadGlowColorsFile(const std::filesystem::path& file)
 ItemDataSaveResult SaveItemDataDirectory(const std::filesystem::path& directory, std::span<const ItemDefinition> items,
                                          std::vector<ItemDataIssue>& issues)
 {
-    return SaveItemAndModelDataDirectories(directory, items, {}, {}, {}, issues);
+    return SaveItemAndModelDataDirectories(directory, items, ItemModelSave{}, issues);
 }
 
 ItemDataSaveResult SaveItemAndModelDataDirectories(const std::filesystem::path& itemDirectory,
-                                                   std::span<const ItemDefinition> items,
-                                                   const std::filesystem::path& modelDirectory,
-                                                   std::span<const ItemModelDefinition> models,
-                                                   const ItemGroupSet& modelGroups, std::vector<ItemDataIssue>& issues)
+                                                   std::span<const ItemDefinition> items, const ItemModelSave& models,
+                                                   std::vector<ItemDataIssue>& issues)
 {
     const std::vector<ItemDefinition> existingItems = GetExistingItems(items);
     ValidateItems(existingItems, issues);
-    ValidateExistingItemModels(models, issues);
+    ValidateExistingItemModels(models.models, issues);
     if (HasErrors(issues))
     {
         return ItemDataSaveResult::InvalidData;
@@ -314,7 +316,7 @@ ItemDataSaveResult SaveItemAndModelDataDirectories(const std::filesystem::path& 
 
     std::vector<FileToSave> files;
     AddItemGroupFiles(itemDirectory, existingItems, files);
-    AddItemModelGroupFiles(modelDirectory, models, modelGroups, files);
+    AddItemModelFiles(models, files);
     return WriteChangedFiles(files, issues);
 }
 } // namespace Data::Items

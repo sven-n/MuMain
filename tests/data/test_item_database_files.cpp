@@ -358,7 +358,7 @@ TEST_CASE("A save that cannot write all its files replaces none of them [data][i
     modelGroups.set(0);
 
     std::vector<ItemDataIssue> issues;
-    CHECK(SaveItemAndModelDataDirectories(itemDirectory, items, blockedModels, models.GetAllSlots(), modelGroups,
+    CHECK(SaveItemAndModelDataDirectories(itemDirectory, items, {blockedModels, models.GetAllSlots(), modelGroups},
                                           issues) == ItemDataSaveResult::WriteFailed);
     CHECK_FALSE(issues.empty());
     const std::string swordFile = GetItemGroupFileName(0);

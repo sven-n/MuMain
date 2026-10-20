@@ -201,8 +201,9 @@ TEST_CASE("Saving the shipped item models from the model database gives the ship
     allGroups.set();
 
     std::vector<ItemDataIssue> issues;
-    CHECK(SaveItemAndModelDataDirectories(folder / "Items", items.items, folder / "Models", database.GetAllSlots(),
-                                          allGroups, issues) == ItemDataSaveResult::Saved);
+    CHECK(SaveItemAndModelDataDirectories(folder / "Items", items.items,
+                                          {folder / "Models", database.GetAllSlots(), allGroups},
+                                          issues) == ItemDataSaveResult::Saved);
     CHECK(issues.empty());
     for (int group = 0; group < MAX_ITEM_TYPE; ++group)
     {
@@ -212,6 +213,28 @@ TEST_CASE("Saving the shipped item models from the model database gives the ship
               TestFiles::ReadWholeFile(ModelDirectory / fileName));
     }
     CHECK_FALSE(std::filesystem::exists(folder / "Models" / SharedItemModelsFileName));
+
+    std::error_code ignored;
+    std::filesystem::remove_all(folder, ignored);
+}
+
+// The item editor writes the shared model file when a shared model changed.
+TEST_CASE("Saving writes the shared model file only when it changed [data][items]")
+{
+    ItemModelDatabase database;
+    database.Build(ShippedModels().models, Data::Effects::GlowColorList{});
+    const std::filesystem::path folder =
+        std::filesystem::temp_directory_path() / ("mu_test_item_models_" + std::to_string(std::random_device{}()));
+    ItemModelSave models{folder / "Models", database.GetAllSlots(), {}, ShippedModels().sharedModels, false};
+
+    std::vector<ItemDataIssue> issues;
+    CHECK(SaveItemAndModelDataDirectories(folder / "Items", {}, models, issues) == ItemDataSaveResult::Saved);
+    CHECK_FALSE(std::filesystem::exists(folder / "Models" / SharedItemModelsFileName));
+
+    models.sharedModelsChanged = true;
+    CHECK(SaveItemAndModelDataDirectories(folder / "Items", {}, models, issues) == ItemDataSaveResult::Saved);
+    CHECK(TestFiles::ReadWholeFile(folder / "Models" / SharedItemModelsFileName) ==
+          TestFiles::ReadWholeFile(ModelDirectory / SharedItemModelsFileName));
 
     std::error_code ignored;
     std::filesystem::remove_all(folder, ignored);
@@ -230,7 +253,7 @@ TEST_CASE("Saving writes only the model files of the given groups [data][items]"
     groups.set(SavedGroup);
 
     std::vector<ItemDataIssue> issues;
-    CHECK(SaveItemAndModelDataDirectories(folder / "Items", {}, folder / "Models", database.GetAllSlots(), groups,
+    CHECK(SaveItemAndModelDataDirectories(folder / "Items", {}, {folder / "Models", database.GetAllSlots(), groups},
                                           issues) == ItemDataSaveResult::Saved);
     for (int group = 0; group < MAX_ITEM_TYPE; ++group)
     {
