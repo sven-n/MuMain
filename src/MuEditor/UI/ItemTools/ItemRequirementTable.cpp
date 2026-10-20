@@ -132,9 +132,8 @@ RequirementTable ComputeRequirementTable(const ItemDefinition& item, const Requi
 
 bool OptionLevelAddsStrength(const ItemDefinition& item)
 {
-    constexpr size_t Strength = static_cast<size_t>(ItemRequirement::Strength);
-    return ComputeRequirementTable(item, {false, false, 1})[0][Strength] !=
-           ComputeRequirementTable(item, {})[0][Strength];
+    // The profile itself: a requirement at 65535 hides the addition.
+    return FindProfile(item).requirements.strengthPerOptionLevel != 0;
 }
 
 WORD FindRequirementBase(const ItemDefinition& item, ItemRequirement requirement, const RequirementByLevel& values)

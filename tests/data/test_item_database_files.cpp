@@ -1298,6 +1298,12 @@ TEST_CASE("Item Requirements shows what the game asks at each level, from the va
     }
     CHECK(FindRequirementBase(byLevel, ItemRequirement::Strength, values) == kris.requirements.strength);
     CHECK(FindRequirementBase(byLevel, ItemRequirement::Level, RequirementByLevel{12, 12}) == 12);
+    // Also with a strength at the highest value, which the addition cannot raise.
+    ItemDefinition capped = byLevel;
+    RequirementByLevel cappedValues = values;
+    cappedValues[0] = 65535;
+    capped.requirementsByLevel.Set(ItemRequirement::Strength, cappedValues);
+    CHECK(MuEditor::Items::OptionLevelAddsStrength(capped));
 
     // A +0 value no base gives: the base with the nearest one.
     const ItemDefinition darkBreaker = *g_ItemDatabase.Find(MakeItemType(0, 17));
