@@ -4,6 +4,7 @@
 
 #include "ItemEditDraft.h"
 #include "ItemRequirementTable.h"
+#include "ItemUsers.h"
 
 #include "Data/GameData/ItemData/ItemDefinition.h"
 
@@ -33,6 +34,7 @@ private:
 
     MuEditor::Items::ItemEditDraft<Data::Items::ItemDefinition> m_draft;
     MuEditor::Items::RequirementVariant m_variant;
+    MuEditor::Items::ItemStatProfileUseCounts m_profileCounts;
 };
 
 #define g_MuItemRequirementsUI CMuItemRequirementsUI::GetInstance()

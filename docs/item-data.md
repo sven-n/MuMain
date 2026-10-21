@@ -719,7 +719,10 @@ shows it in the others.
   and an ancient set, add option, buff or pet of the game data.
 - **Item Basics**: the English name, size, slot, two-handed, wing tier,
   weapon kind, skill, drop level, potion priority, the stats, the prices,
-  the stat profile and the resistances. Below the stats, what the game
+  the stat profile (*By the rules* takes what the
+  [profile rules](#item-stats-by-level) give; beside the list, the rule that
+  gives the item its profile, or that it is picked for the item) and the
+  resistances. Below the stats, what the game
   makes of them at each + level (damage, magic power, defense, magic
   defense, block rate), also as excellent or ancient, while a value is still
   being typed. Size and slot stay as they are
@@ -728,7 +731,8 @@ shows it in the others.
   item has when it is taken out. Such an item is not moved or removed
   either, an undo step that would change it is refused, and Import from bmd
   keeps its size and slot.
-- **Item Requirements**: the level and stat requirements, the base values
+- **Item Requirements**: the stat profile, as in Item Basics, then the level
+  and stat requirements, the base values
   the [item stat file](#item-stats-by-level)'s formula takes; each also by
   item level (16 values that replace the formula; they start at what the
   base value gives a normal item at each level, and turning them off finds

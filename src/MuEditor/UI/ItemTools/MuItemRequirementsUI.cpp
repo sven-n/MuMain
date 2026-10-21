@@ -8,6 +8,7 @@
 #include "ItemFieldWidgets.h"
 #include "ItemRequirementTable.h"
 #include "ItemSelection.h"
+#include "ItemStatProfileWidgets.h"
 #include "ItemToolWindow.h"
 
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
@@ -108,6 +109,8 @@ void CMuItemRequirementsUI::RenderRequirements(ItemDefinition& item)
     {
         return;
     }
+    // The profile gives the formulas the requirements grow by.
+    RenderStatProfileCombo(m_draft, item, m_profileCounts);
     for (const RequirementField& field : RequirementFields())
     {
         ImGui::PushID(static_cast<int>(field.requirement));

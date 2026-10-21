@@ -1486,4 +1486,16 @@
   <data name="The item has no damage, magic power, defense or block rate." xml:space="preserve">
     <value>The item has no damage, magic power, defense or block rate.</value>
   </data>
+  <data name="By the rules: {0}" xml:space="preserve">
+    <value>By the rules: {0}</value>
+  </data>
+  <data name="Given by rule {0}" xml:space="preserve">
+    <value>Given by rule {0}</value>
+  </data>
+  <data name="No rule matches: the default" xml:space="preserve">
+    <value>No rule matches: the default</value>
+  </data>
+  <data name="Picked for the item; the rules give {0}" xml:space="preserve">
+    <value>Picked for the item; the rules give {0}</value>
+  </data>
 </root>
