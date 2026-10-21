@@ -66,6 +66,8 @@ void CMuItemModelUI::Render(bool* open)
             RenderModel(model, itemType);
             ImGui::PopID();
         }
+        // Outside the item's ID scope: the warning's list selects other items.
+        m_sharedForm.RenderConfirm();
         m_draft.End();
     }
     ToolWindow::End();

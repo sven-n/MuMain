@@ -30,6 +30,7 @@
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
 #ifdef _EDITOR
+#include "UI/Common/MuEditorWindowIds.h"
 #include "UI/ItemTools/GlowColorDialog.h"
 #include "UI/ItemTools/ItemEdits.h"
 #include "UI/ItemTools/ItemNamesakes.h"
@@ -1223,6 +1224,52 @@ void RenderItemTools()
     g_MuItemChecksUI.Render(&open);
     g_MuItemTranslationsUI.Render(&open);
 }
+
+void RenderModelTool()
+{
+    bool open = true;
+    g_MuItemModelUI.BeforeFrame();
+    ImGui::NewFrame();
+    g_MuItemModelUI.Render(&open);
+    ImGui::Render();
+    CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+}
+
+// A widget of the shared model form: the tool pushes the selected item's ID,
+// the form's fields "SharedModel" too.
+ImGuiID SharedModelFormId(const char* label, const char* scope = nullptr)
+{
+    const ImGuiWindow* tool = ImGui::FindWindowByName(MuEditor::WindowIds::ItemModel);
+    REQUIRE(tool != nullptr);
+    ImGuiID id = ImGui::GetIDWithSeed(g_ItemSelection.GetItemType(), tool->ID);
+    if (scope != nullptr)
+    {
+        id = ImGui::GetIDWithSeed(scope, nullptr, id);
+    }
+    return ImGui::GetIDWithSeed(label, nullptr, id);
+}
+
+// As a click: pressed in the next frame; a disabled button is not.
+void PressInModelTool(ImGuiID id)
+{
+    ImGui::ActivateItemByID(id);
+    RenderModelTool();
+}
+
+// Activation selects all of the field's text; the typed text replaces it.
+void TypeIntoModelTool(ImGuiID id, const char* text)
+{
+    ImGui::ActivateItemByID(id);
+    RenderModelTool();
+    ImGui::GetIO().AddInputCharactersUTF8(text);
+    RenderModelTool();
+}
+
+ImGuiWindow* OpenPopupWindow()
+{
+    const ImGuiContext& g = *ImGui::GetCurrentContext();
+    return g.OpenPopupStack.empty() ? nullptr : g.OpenPopupStack.back().Window;
+}
 } // namespace
 
 // Draws every item tool for a few frames, with an item that has a model and a
@@ -1268,6 +1315,52 @@ TEST_CASE("The item tools draw their frames without ImGui errors [data][items][e
     }
     // The model tool's inventory display shown before it is stored ends.
     g_MuItemModelUI.BeforeFrame();
+}
+
+// The warning before a shared model changes lists its items; a click on one
+// selects it, and the warning stays open to apply the change.
+TEST_CASE("A click in the shared model warning's list keeps the warning open [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    TestModelSlots slots;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    const SharedItemModel shared = g_ItemModelDatabase.GetSharedModels().front();
+    const std::vector<int> users = MuEditor::Items::FindSharedModelUsers(shared.name);
+    REQUIRE(users.size() > 1);
+    REQUIRE(shared.noneBlendMeshes != std::vector<int>{1, 2});
+
+    TestImGuiContext context;
+    g_ItemSelection.Select(users[0]);
+    for (int frame = 0; frame < 3; ++frame)
+    {
+        RenderModelTool();
+    }
+    TypeIntoModelTool(SharedModelFormId(I18N::Editor::NoneBlendMeshes, "SharedModel"), "1, 2");
+    PressInModelTool(SharedModelFormId(I18N::Editor::ApplyToTheSharedModel));
+    RenderModelTool();
+    REQUIRE(OpenPopupWindow() != nullptr);
+
+    // As a click on the second item in the warning's list does.
+    g_ItemSelection.Select(users[1]);
+    for (int frame = 0; frame < 3; ++frame)
+    {
+        RenderModelTool();
+    }
+    ImGuiWindow* warning = OpenPopupWindow();
+    REQUIRE(warning != nullptr);
+    PressInModelTool(ImGui::GetIDWithSeed(I18N::Editor::ApplyToTheSharedModel, nullptr, warning->ID));
+    CHECK(OpenPopupWindow() == nullptr);
+    CHECK(g_ItemModelDatabase.FindSharedModel(shared.name)->noneBlendMeshes == std::vector<int>{1, 2});
+    CHECK(g_ItemEdits.GetHistory().GetUndoLabel() == I18N::Editor::ChangeASharedModel);
+    g_ItemEdits.GetHistory().Clear();
 }
 
 // Items with the same name: the lucky sets have a tag their namesakes do not,

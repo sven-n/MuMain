@@ -23,12 +23,15 @@ class CItemSharedModelForm
 public:
     // `model` is the item's model entry.
     void Render(const Data::Items::ItemModelDefinition& model, ItemLookUseCounts& counts);
+    // The warning that lists the items a change reaches, before it is applied.
+    // Drawn outside the item's ID scope: a click in its list selects another
+    // item, and the warning stays open.
+    void RenderConfirm();
 
 private:
     void RenderPick(const Data::Items::ItemModelDefinition& model, ItemLookUseCounts& counts);
     void RenderShared(const Data::Items::ItemModelDefinition& model);
     void RenderEdit();
-    void RenderConfirm();
     void RenderUnused(ItemLookUseCounts& counts);
     void LoadEdit(const Data::Items::SharedItemModel& shared);
     // Whether the copy is as it was loaded or applied (the user did not
@@ -43,6 +46,8 @@ private:
     int m_editVersion = -1;
     std::string m_meshesText;
     std::vector<int> m_confirmUsers;
+    // Apply was clicked: RenderConfirm opens the warning in its own ID scope.
+    bool m_openConfirm = false;
 };
 } // namespace MuEditor::Items
 

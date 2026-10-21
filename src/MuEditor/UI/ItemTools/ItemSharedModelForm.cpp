@@ -72,7 +72,6 @@ void CItemSharedModelForm::Render(const Data::Items::ItemModelDefinition& model,
     else
     {
         RenderShared(model);
-        RenderConfirm();
     }
     RenderUnused(counts);
 }
@@ -167,7 +166,7 @@ void CItemSharedModelForm::RenderShared(const Data::Items::ItemModelDefinition& 
     if (ImGui::Button(I18N::Editor::ApplyToTheSharedModel))
     {
         m_confirmUsers = users;
-        ImGui::OpenPopup(ConfirmPopupId);
+        m_openConfirm = true;
     }
     ImGui::EndDisabled();
     ImGui::SameLine();
@@ -213,6 +212,11 @@ void CItemSharedModelForm::RenderEdit()
 // before it is applied.
 void CItemSharedModelForm::RenderConfirm()
 {
+    if (m_openConfirm)
+    {
+        ImGui::OpenPopup(ConfirmPopupId);
+        m_openConfirm = false;
+    }
     char title[128];
     std::snprintf(title, sizeof(title), "%s%s", I18N::Editor::ChangeASharedModel, ConfirmPopupId);
     if (!ImGui::BeginPopupModal(title, nullptr, ImGuiWindowFlags_AlwaysAutoResize))
