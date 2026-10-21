@@ -42,6 +42,7 @@
 #include "UI/ItemTools/ItemHeldByCharacter.h"
 #include "UI/ItemTools/ItemNamesakes.h"
 #include "UI/ItemTools/ItemRequirementTable.h"
+#include "UI/ItemTools/ItemRulesTable.h"
 #include "UI/ItemTools/ItemSelection.h"
 #include "UI/ItemTools/ItemStatFileChange.h"
 #include "UI/ItemTools/ItemUsage.h"
@@ -1960,6 +1961,54 @@ TEST_CASE("An item tool's Ctrl+Z does not undo while the game window has the key
     CHECK(g_ItemEdits.GetHistory().CanUndo());
     CHECK(g_ItemDatabase.Find(KrisType)->damageMax == kris.damageMax);
     g_ItemEdits.GetHistory().Clear();
+}
+
+// ImGui keeps the row a Shift click starts from as an index into the rows: a
+// search that lists other rows moves it to its item's row, or drops it.
+TEST_CASE("The Shift click source of Item Rules follows its item when other rows are listed [data][items][editor]")
+{
+    ClientDataScope client(ShippedClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    std::vector<int> swords;
+    std::vector<int> bows;
+    for (const ItemDefinition& item : g_ItemDatabase.GetAllSlots())
+    {
+        if (item.Exists() && item.group == 0 && swords.size() < 20)
+        {
+            swords.push_back(MakeItemType(item.group, item.number));
+        }
+        if (item.Exists() && item.group == 4)
+        {
+            bows.push_back(MakeItemType(item.group, item.number));
+        }
+    }
+    REQUIRE(swords.size() == 20);
+
+    TestImGuiContext context;
+    MuEditor::Items::CItemRulesTable table;
+    const auto draw = [&](const std::vector<int>& rows)
+    {
+        ImGui::NewFrame();
+        ImGui::SetNextWindowSize(ImVec2(800.0f, 600.0f));
+        ImGui::Begin("Rules");
+        table.Render(rows, -1, false);
+        ImGui::End();
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    draw(swords);
+    ImPool<ImGuiMultiSelectState>& states = ImGui::GetCurrentContext()->MultiSelectStorage;
+    REQUIRE(states.GetAliveCount() == 1);
+    ImGuiMultiSelectState* state = states.GetByIndex(0);
+    // As a click on row 10 leaves it.
+    state->RangeSrcItem = 10;
+    draw(std::vector<int>(swords.begin() + 7, swords.end()));
+    // The same sword, now in row 3.
+    CHECK(state->RangeSrcItem == 3);
+    draw(bows);
+    CHECK(state->RangeSrcItem == ImGuiSelectionUserData_Invalid);
 }
 
 // The warning before a shared model changes lists its items; a click on one

@@ -12,6 +12,7 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
+#include "imgui_internal.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -59,9 +60,27 @@ ImGuiID ItemTypeOfRow(ImGuiSelectionBasicStorage* selection, int row)
     return ToSelectionId((*itemTypes)[row]);
 }
 
-// ImGui keeps the row a Shift click starts from across frames, also when the
-// list got shorter since: a range is cut to the rows there are, so the
-// selection never reads past them.
+// ImGui keeps the row a Shift click starts from as an index into the rows.
+// When other rows are listed (a search, a filter, an item added), the source
+// moves to the row of the same item, or is dropped while that item is not
+// listed: a Shift click then starts at the clicked row. Not by RangeSrcReset:
+// ImGui reads that only while the table has the keyboard focus, and typing a
+// search takes the focus away.
+void FollowRangeSource(ImGuiID scope, const std::vector<int>& before, const std::vector<int>& rows)
+{
+    ImGuiMultiSelectState* state = ImGui::GetMultiSelectState(scope);
+    if (state == nullptr || state->RangeSrcItem < 0)
+    {
+        return;
+    }
+    const auto row = static_cast<size_t>(state->RangeSrcItem);
+    const auto moved = row < before.size() ? std::ranges::find(rows, before[row]) : rows.end();
+    state->RangeSrcItem = moved != rows.end() ? static_cast<ImGuiSelectionUserData>(moved - rows.begin())
+                                              : ImGuiSelectionUserData_Invalid;
+}
+
+// A guard: a range is cut to the rows there are, so the selection never reads
+// past them.
 void KeepRangesInRows(ImGuiMultiSelectIO* selectionIo, int rowCount)
 {
     ImVector<ImGuiSelectionRequest>& requests = selectionIo->Requests;
@@ -182,6 +201,12 @@ int CItemRulesTable::RenderRows(const std::vector<int>& itemTypes, int markedIte
     // ImGui's user data is not const; ItemTypeOfRow only reads the list.
     m_selection.UserData = const_cast<std::vector<int>*>(&itemTypes);
     m_selection.AdapterIndexToStorageId = &ItemTypeOfRow;
+    // BeginMultiSelect's scope is the ID on top of the window's ID stack.
+    if (itemTypes != m_rows)
+    {
+        FollowRangeSource(ImGui::GetCurrentWindow()->IDStack.back(), m_rows, itemTypes);
+        m_rows = itemTypes;
+    }
     ImGuiMultiSelectIO* selectionIo = ImGui::BeginMultiSelect(SelectionFlags, m_selection.Size, rowCount);
     KeepRangesInRows(selectionIo, rowCount);
     m_selection.ApplyRequests(selectionIo);

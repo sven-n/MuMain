@@ -39,6 +39,9 @@ private:
     // Keeps item types, not row indexes, so a selected row stays selected
     // when rows above it come or go.
     ImGuiSelectionBasicStorage m_selection;
+    // The rows as last drawn: ImGui keeps the row a Shift click starts from as
+    // an index into them.
+    std::vector<int> m_rows;
 };
 } // namespace MuEditor::Items
 
