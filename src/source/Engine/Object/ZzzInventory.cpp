@@ -1055,6 +1055,14 @@ int GuildStartX;
 int GuildStartY;
 int SommonTable[] = { 2,7,14,8,9,41 };
 
+// Whether a Transformation Ring of that level turns into that monster type. The rings have a monster up to +5;
+// above, the table has none (reading past it was undefined).
+static bool IsTransformationRingMonster(int ringLevel, int monsterType)
+{
+    return ringLevel >= 0 && ringLevel < static_cast<int>(std::size(SommonTable)) &&
+           SommonTable[ringLevel] == monsterType;
+}
+
 wchar_t ChaosEventName[][100] = {
     L"히돼?고향 여행권",
     L"펜티엄4 컴퓨터",
@@ -1320,7 +1328,7 @@ void GetItemName(int iType, int iLevel, wchar_t* Text)
     {
         for (int i = 0; i < MAX_MONSTER; i++)
         {
-            if (SommonTable[iLevel] == MonsterScript[i].Type)
+            if (IsTransformationRingMonster(iLevel, MonsterScript[i].Type))
             {
                 mu_swprintf(Text, L"%ls %ls", MonsterScript[i].Name, I18N::Game::TransformationRing);
             }
@@ -1604,6 +1612,14 @@ void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int 
 }
 
 // (sx, sy) in the screen's 640x480 stretch, `screen`.
+// A test's measure of description text (SetItemTooltipTextMeasure); nullptr: the game's font.
+static ItemTooltipTextMeasure s_itemTooltipTextMeasure = nullptr;
+
+void SetItemTooltipTextMeasure(ItemTooltipTextMeasure measure)
+{
+    s_itemTooltipTextMeasure = measure;
+}
+
 // What BuildItemTooltipText made of an item.
 enum class ItemTooltipBuild
 {
@@ -1985,7 +2001,7 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     {
         for (int i = 0; i < MAX_MONSTER; i++)
         {
-            if (SommonTable[Level] == MonsterScript[i].Type)
+            if (IsTransformationRingMonster(Level, MonsterScript[i].Type))
             {
                 mu_swprintf(TextList[TextNum], L"%ls %ls", MonsterScript[i].Name, I18N::Game::TransformationRing);
                 break;
@@ -3188,7 +3204,10 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     {
         g_pRenderText->SetFont(g_hFont);
         const auto measure = [](const wchar_t* text, size_t length)
-        { return g_pRenderText->MeasureText(text, static_cast<int>(length)).cx; };
+        {
+            return s_itemTooltipTextMeasure != nullptr ? s_itemTooltipTextMeasure(text, length)
+                                                       : g_pRenderText->MeasureText(text, static_cast<int>(length)).cx;
+        };
         for (const Data::Items::ItemDescriptionLine& line : definition->description)
         {
             if (!line.IsShownAt(Level))
@@ -4297,11 +4316,13 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
 
     if (!bItemTextListBoxUse)
     {
-        bool bThisisEquippedItem = false;
-
-        mu::ui::window::CInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
-        ITEM* pFindItem = pNewInventoryCtrl->FindItemByKey(ip->Key);
-        (pFindItem == NULL) ? bThisisEquippedItem = true : bThisisEquippedItem = false;
+        // An item that is not in the inventory grid is a worn one: the item sets count its options as equipped.
+        // Without the game's windows (the tooltip tests) every item is one.
+        bool bThisisEquippedItem = true;
+        if (mu::ui::window::CMyInventory* inventory = g_pMyInventory)
+        {
+            bThisisEquippedItem = inventory->GetInventoryCtrl()->FindItemByKey(ip->Key) == nullptr;
+        }
 
         TextNum = g_csItemOption.RenderSetOptionListInItem(ip, TextNum, bThisisEquippedItem);
 
@@ -4542,7 +4563,7 @@ static void RenderRepairInfo(const UI::Scaling::Transform& screen, int sx, int s
     {
         for (int i = 0; i < MAX_MONSTER; i++)
         {
-            if (SommonTable[Level] == MonsterScript[i].Type)
+            if (IsTransformationRingMonster(Level, MonsterScript[i].Type))
             {
                 mu_swprintf(TextList[TextNum], L"%ls %ls", MonsterScript[i].Name, I18N::Game::TransformationRing);
                 break;
@@ -5289,7 +5310,7 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     {
         for (int i = 0; i < MAX_MONSTER; i++)
         {
-            if (SommonTable[ItemLevel] == MonsterScript[i].Type)
+            if (IsTransformationRingMonster(ItemLevel, MonsterScript[i].Type))
             {
                 FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", MonsterScript[i].Name, I18N::Game::TransformationRing);
                 break;

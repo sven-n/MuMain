@@ -138,6 +138,46 @@ ITEM* mu::ui::window::CItemMng::CreateItemOld(std::span<const BYTE> pbyItemPacke
                                      pbyItemPacket[3], pbyItemPacket[4], byOption380, byOptionHarmony, bySocketOption);
 }
 
+void FillItemFromParameters(ITEM& item, const ItemCreationParams& parameters)
+{
+    memset(&item, 0, sizeof(ITEM));
+    item.bPeriodItem = parameters.WithExpiration;
+    item.bExpiredPeriod = parameters.IsExpired;
+    // item.lExpireTime is received by another packet? should we integrate that?
+    item.Type = parameters.Group * MAX_ITEM_INDEX + parameters.Number;
+    item.Level = parameters.Level;
+    item.Durability = parameters.Durability;
+    item.HasLuck = parameters.WithLuck;
+    item.HasSkill = parameters.WithSkill;
+    item.OptionType = parameters.OptionType;
+    item.OptionLevel = parameters.OptionLevel;
+    item.ExcellentFlags = parameters.ExcellentFlags;
+    item.AncientDiscriminator = parameters.AncientDiscriminator;
+    item.AncientBonusOption = parameters.AncientBonusOption;
+    item.Jewel_Of_Harmony_Option = parameters.HarmonyOptionType;
+    item.Jewel_Of_Harmony_OptionLevel = parameters.HarmonyOptionLevel;
+    item.option_380 = parameters.HasGuardianOption;
+    item.SocketCount = parameters.SocketCount;
+    item.SocketSeedSetOption = parameters.SocketBonusOption;
+    for (int i = 0; i < MAX_SOCKETS; ++i)
+    {
+        item.bySocketOption[i] = parameters.SocketOptions[i];
+        if (item.bySocketOption[i] == SOCKET_EMPTY)
+        {
+            item.SocketSeedID[i] = SOCKET_EMPTY;
+        }
+        else
+        {
+            item.SocketSeedID[i] = item.bySocketOption[i] % SEASON4A::MAX_SOCKET_OPTION;
+            item.SocketSphereLv[i] = (item.bySocketOption[i] / SEASON4A::MAX_SOCKET_OPTION) + 1;
+        }
+    }
+
+    item.byColorState = ITEM_COLOR_NORMAL;
+
+    SetItemAttributes(&item);
+}
+
 ITEM* mu::ui::window::CItemMng::CreateItemByParameters(const ItemCreationParams* parameters)
 {
     if (parameters == nullptr)
@@ -146,45 +186,9 @@ ITEM* mu::ui::window::CItemMng::CreateItemByParameters(const ItemCreationParams*
     }
 
     ITEM* pNewItem = new ITEM;
-    memset(pNewItem, 0, sizeof(ITEM));
+    FillItemFromParameters(*pNewItem, *parameters);
     pNewItem->RefCount = 1;
-    pNewItem->bPeriodItem = parameters->WithExpiration;
-    pNewItem->bExpiredPeriod = parameters->IsExpired;
-    // pNewItem->lExpireTime is received by another packet? should we integrate that?
     pNewItem->Key = GenerateItemKey();
-    pNewItem->Type = parameters->Group * MAX_ITEM_INDEX + parameters->Number;
-    pNewItem->Level = parameters->Level;
-    pNewItem->Durability = parameters->Durability;
-    pNewItem->HasLuck = parameters->WithLuck;
-    pNewItem->HasSkill = parameters->WithSkill;
-    pNewItem->OptionType = parameters->OptionType;
-    pNewItem->OptionLevel = parameters->OptionLevel;
-    pNewItem->ExcellentFlags = parameters->ExcellentFlags;
-    pNewItem->AncientDiscriminator = parameters->AncientDiscriminator;
-    pNewItem->AncientBonusOption = parameters->AncientBonusOption;
-    pNewItem->Jewel_Of_Harmony_Option = parameters->HarmonyOptionType;
-    pNewItem->Jewel_Of_Harmony_OptionLevel = parameters->HarmonyOptionLevel;
-    pNewItem->option_380 = parameters->HasGuardianOption;
-    pNewItem->SocketCount = parameters->SocketCount;
-    pNewItem->SocketSeedSetOption = parameters->SocketBonusOption;
-    for (int i = 0; i < MAX_SOCKETS; ++i)
-    {
-        pNewItem->bySocketOption[i] = parameters->SocketOptions[i];
-        if (pNewItem->bySocketOption[i] == SOCKET_EMPTY)
-        {
-            pNewItem->SocketSeedID[i] = SOCKET_EMPTY;
-        }
-        else
-        {
-            pNewItem->SocketSeedID[i] = pNewItem->bySocketOption[i] % SEASON4A::MAX_SOCKET_OPTION;
-            pNewItem->SocketSphereLv[i] = (pNewItem->bySocketOption[i] / SEASON4A::MAX_SOCKET_OPTION) + 1;
-        }
-    }
-
-    pNewItem->byColorState = ITEM_COLOR_NORMAL;
-
-    SetItemAttributes(pNewItem);
-    // SetItemAttr(pNewItem, byLevel, byOption1, ancientByte);
 
     m_listItem.push_back(pNewItem);
     return pNewItem;

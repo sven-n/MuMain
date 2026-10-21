@@ -202,6 +202,10 @@ struct ItemTooltipLine
 };
 // The lines of `ip`'s information tooltip, built as RenderItemInfoAtPx builds them but not drawn; none when it shows
 // no tooltip or the pet manager draws its own (the Dark Lord's pets).
+// How the tooltip measures a description piece for wrapping: the game's font (g_pRenderText), unless a test sets
+// a measure of its own, which needs no font; nullptr puts the font back.
+using ItemTooltipTextMeasure = int (*)(const wchar_t* text, size_t length);
+void SetItemTooltipTextMeasure(ItemTooltipTextMeasure measure);
 std::vector<ItemTooltipLine> BuildItemTooltipLines(ITEM* ip, bool Sell, int Inventype = 0,
                                                    bool bItemTextListBoxUse = false);
 void RenderRepairInfoAtPx(float x, float y, ITEM* ip, bool Sell);

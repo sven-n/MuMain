@@ -7,10 +7,7 @@
 #include "Core/Utilities/Benchmark/BenchRecorder.h"
 #include "Core/Text/Utf8.h"
 #include "Engine/Object/ZzzCharacter.h"
-#include "Data/GameData/ItemData/ItemDatabase.h"
-#include "Engine/Object/ZzzInventory.h"
-#include "UI/Core/WindowSystem.h"
-#include "UI/Inventory/ItemMng.h"
+#include "Engine/Object/ItemTooltipSnapshot.h"
 #include "Network/Server/WSclient.h"
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
@@ -481,66 +478,6 @@ std::string State(const Request& request, std::unique_ptr<Act>&)
     return EncodeResult(request.EncodedId(), WorldStateObject());
 }
 
-namespace
-{
-// An item as the server would send it: the fields not set are 0, the durability is full.
-ItemCreationParams FullItem(int group, int number)
-{
-    ItemCreationParams params{};
-    params.Group = group;
-    params.Number = number;
-    params.Durability = static_cast<BYTE>(ItemAttribute[group * MAX_ITEM_INDEX + number].Durability);
-    return params;
-}
-
-// The tooltip lines of such an item and the hero as it is; nothing when the item can't be made.
-std::optional<std::vector<ItemTooltipLine>> TooltipOf(const ItemCreationParams& params)
-{
-    ITEM* item = g_pNewItemMng->CreateItemByParameters(&params);
-    if (item == nullptr)
-    {
-        return std::nullopt;
-    }
-    std::vector<ItemTooltipLine> lines = BuildItemTooltipLines(item, false);
-    g_pNewItemMng->DeleteItem(item);
-    return lines;
-}
-
-// The kinds of item `tooltip-snapshot` records at every level: plain; with luck, skill, the +4 option and every
-// excellent option; ancient (set 1); with a Jewel of Harmony option (option 1 at level 13).
-struct TooltipVariant
-{
-    const char* name;
-    void (*apply)(ItemCreationParams& params);
-};
-constexpr TooltipVariant TooltipVariants[] = {
-    {"plain", [](ItemCreationParams&) {}},
-    {"full",
-     [](ItemCreationParams& params)
-     {
-         params.WithLuck = true;
-         params.WithSkill = true;
-         params.WithOption = true;
-         params.OptionLevel = 4;
-         params.HasExcellentOption = true;
-         params.ExcellentFlags = 63;
-     }},
-    {"ancient",
-     [](ItemCreationParams& params)
-     {
-         params.IsAncient = true;
-         params.AncientDiscriminator = 1;
-     }},
-    {"harmony",
-     [](ItemCreationParams& params)
-     {
-         params.HasHarmonyOption = true;
-         params.HarmonyOptionType = 1;
-         params.HarmonyOptionLevel = 13;
-     }},
-};
-} // namespace
-
 std::string ItemTooltip(const Request& request, std::unique_ptr<Act>&)
 {
     int group = -1;
@@ -552,7 +489,7 @@ std::string ItemTooltip(const Request& request, std::unique_ptr<Act>&)
                            "`tooltip` needs `group` and `number` of an item");
     }
 
-    ItemCreationParams params = FullItem(group, number);
+    ItemCreationParams params = FullItemParameters(group, number);
     int value = 0;
     bool flag = false;
     if (request.GetInt("level", value))
@@ -586,15 +523,11 @@ std::string ItemTooltip(const Request& request, std::unique_ptr<Act>&)
             params.HarmonyOptionLevel = static_cast<BYTE>(value);
     }
 
-    const std::optional<std::vector<ItemTooltipLine>> lines = TooltipOf(params);
-    if (!lines)
-    {
-        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "the item could not be made");
-    }
+    const std::vector<ItemTooltipLine> lines = TooltipOfParameters(params);
 
     json result;
     result["lines"] = json::array();
-    for (const ItemTooltipLine& line : *lines)
+    for (const ItemTooltipLine& line : lines)
     {
         result["lines"].push_back(
             {{"text", Core::Text::ToUtf8(line.text.c_str())}, {"color", line.color}, {"bold", line.bold}});
@@ -623,30 +556,7 @@ std::string ItemTooltipSnapshot(const Request& request, std::unique_ptr<Act>&)
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`group` is an item group, 0 to 15");
     }
 
-    int tooltips = 0;
-    for (const Data::Items::ItemDefinition& definition : g_ItemDatabase.GetAllSlots())
-    {
-        if (!definition.Exists() || (onlyGroup >= 0 && definition.group != onlyGroup))
-        {
-            continue;
-        }
-        for (const TooltipVariant& variant : TooltipVariants)
-        {
-            for (int level = 0; level < Data::Items::ItemLevelCount; ++level)
-            {
-                ItemCreationParams params = FullItem(definition.group, definition.number);
-                params.Level = static_cast<BYTE>(level);
-                variant.apply(params);
-                out << definition.group << '/' << definition.number << ' ' << variant.name << " +" << level << '\n';
-                for (const ItemTooltipLine& line : TooltipOf(params).value_or(std::vector<ItemTooltipLine>{}))
-                {
-                    const std::string text = line.text == L"\n" ? "<blank>" : Core::Text::ToUtf8(line.text.c_str());
-                    out << "  " << line.color << (line.bold ? " bold " : " ") << text << '\n';
-                }
-                ++tooltips;
-            }
-        }
-    }
+    const int tooltips = WriteItemTooltipSnapshot(out, onlyGroup);
 
     json result;
     result["tooltips"] = tooltips;

@@ -53,12 +53,14 @@ mu_add_test(
         test_item_model_files.cpp
         test_item_rules.cpp
         test_item_stats.cpp
+        test_item_tooltips.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
 )
 target_compile_definitions(test_item_database_files PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+    MU_TEST_TOOLTIP_SNAPSHOT="${CMAKE_CURRENT_SOURCE_DIR}/item_tooltip_snapshot.txt"
 )
 
 # Animates the shipped player model the way the character pre-pass does.
