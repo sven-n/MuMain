@@ -56,6 +56,7 @@ mu_add_test(
     SOURCES
         test_item_database_files.cpp
         test_item_model_files.cpp
+        test_item_requirement_weights.cpp
         test_item_rules.cpp
         test_item_stats.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp

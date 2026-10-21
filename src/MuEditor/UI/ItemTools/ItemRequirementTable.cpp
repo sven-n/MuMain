@@ -24,23 +24,21 @@ using Data::Items::RequirementByLevel;
 
 constexpr int MaxBase = 65535;
 
-// The profile storing the item would give it (CItemDataHandler::WithDerivedFields).
-const Data::Items::ItemStatProfile& FindProfile(const ItemDefinition& item)
+std::string OrDefault(std::string name)
 {
-    const ItemDefinition* stored = g_ItemDatabase.Find(item.group, item.number);
-    const Data::Items::ItemStatProfiles& profiles = g_ItemDatabase.GetStatProfiles();
-    std::string name = item.statProfile;
-    if (name.empty())
-    {
-        name = Data::Items::DeriveStatProfile(profiles, item);
-    }
-    else if (stored != nullptr && name == stored->statProfile)
-    {
-        name = Data::Items::FollowStatProfile(profiles, stored, item);
-    }
-    const int index = profiles.Find(name);
-    return profiles.Get(
-        index == Data::Items::ItemStatProfiles::UnknownProfile ? Data::Items::ItemStatProfiles::DefaultProfile : index);
+    return name.empty() ? std::string(Data::Items::StatProfileNames::Default) : name;
+}
+
+GameLogic::Items::ItemStatValues ComputeValuesAt(const ItemDefinition& item, const ITEM_ATTRIBUTE& attribute,
+                                                 const Data::Items::ItemStatProfile& profile,
+                                                 const RequirementVariant& variant, int level)
+{
+    const GameLogic::Items::ItemStatSources sources{attribute, &item, profile,
+                                                    item.slot == Data::Items::ItemSlot::Wings};
+    const GameLogic::Items::ItemStatInput input{
+        Data::Items::MakeItemType(item.group, item.number), level, static_cast<BYTE>(variant.excellent ? 1 : 0),
+        static_cast<BYTE>(variant.ancient ? 1 : 0), static_cast<BYTE>(std::clamp(variant.optionLevel, 0, 255))};
+    return GameLogic::Items::ComputeItemStats(sources, input);
 }
 
 RequirementRow ToRow(const GameLogic::Items::ItemStatValues& values)
@@ -113,21 +111,55 @@ int FindSmallestBaseReaching(const ItemDefinition& item, ItemRequirement require
 }
 } // namespace
 
+StatProfileChoice FindStatProfileChoice(const ItemDefinition& item)
+{
+    const ItemDefinition* stored = g_ItemDatabase.Find(item.group, item.number);
+    const Data::Items::ItemStatProfiles& profiles = g_ItemDatabase.GetStatProfiles();
+    std::string name = item.statProfile;
+    if (name.empty())
+    {
+        name = Data::Items::DeriveStatProfile(profiles, item);
+    }
+    else if (stored != nullptr && name == stored->statProfile)
+    {
+        name = Data::Items::FollowStatProfile(profiles, stored, item);
+    }
+    StatProfileChoice choice;
+    choice.rule = profiles.FindRule(item);
+    const std::string given = profiles.GetRuleProfile(choice.rule);
+    choice.reason = name == given ? StatProfileChoice::Reason::ByRules : StatProfileChoice::Reason::Picked;
+    choice.name = OrDefault(std::move(name));
+    choice.given = OrDefault(given);
+    return choice;
+}
+
+const Data::Items::ItemStatProfile& FindStatProfile(const ItemDefinition& item)
+{
+    const Data::Items::ItemStatProfiles& profiles = g_ItemDatabase.GetStatProfiles();
+    const int index = profiles.Find(FindStatProfileChoice(item).name);
+    return profiles.Get(
+        index == Data::Items::ItemStatProfiles::UnknownProfile ? Data::Items::ItemStatProfiles::DefaultProfile : index);
+}
+
 ItemLevelValues ComputeItemLevelValues(const ItemDefinition& item, const RequirementVariant& variant)
 {
     ITEM_ATTRIBUTE attribute{};
     Data::Items::ToItemAttribute(item, attribute);
-    const GameLogic::Items::ItemStatSources sources{attribute, &item, FindProfile(item),
-                                                    item.slot == Data::Items::ItemSlot::Wings};
+    const Data::Items::ItemStatProfile& profile = FindStatProfile(item);
     ItemLevelValues values{};
     for (int level = 0; level < Data::Items::ItemLevelCount; ++level)
     {
-        const GameLogic::Items::ItemStatInput input{
-            Data::Items::MakeItemType(item.group, item.number), level, static_cast<BYTE>(variant.excellent ? 1 : 0),
-            static_cast<BYTE>(variant.ancient ? 1 : 0), static_cast<BYTE>(std::clamp(variant.optionLevel, 0, 255))};
-        values[static_cast<size_t>(level)] = GameLogic::Items::ComputeItemStats(sources, input);
+        values[static_cast<size_t>(level)] = ComputeValuesAt(item, attribute, profile, variant, level);
     }
     return values;
+}
+
+GameLogic::Items::ItemStatValues ComputeItemValuesAt(const ItemDefinition& item, const RequirementVariant& variant,
+                                                     int level)
+{
+    ITEM_ATTRIBUTE attribute{};
+    Data::Items::ToItemAttribute(item, attribute);
+    return ComputeValuesAt(item, attribute, FindStatProfile(item), variant, level);
 }
 
 RequirementTable ComputeRequirementTable(const ItemDefinition& item, const RequirementVariant& variant)
@@ -144,7 +176,7 @@ RequirementTable ComputeRequirementTable(const ItemDefinition& item, const Requi
 bool OptionLevelAddsStrength(const ItemDefinition& item)
 {
     // The profile itself: a requirement at 65535 hides the addition.
-    return FindProfile(item).requirements.strengthPerOptionLevel != 0;
+    return FindStatProfile(item).requirements.strengthPerOptionLevel != 0;
 }
 
 WORD FindRequirementBase(const ItemDefinition& item, ItemRequirement requirement, const RequirementByLevel& values)

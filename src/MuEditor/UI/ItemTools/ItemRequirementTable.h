@@ -3,9 +3,12 @@
 #ifdef _EDITOR
 
 #include "Data/GameData/ItemData/ItemDefinition.h"
+#include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "GameLogic/Items/ItemStats.h"
 
 #include <array>
+#include <cstdint>
+#include <string>
 
 namespace MuEditor::Items
 {
@@ -17,6 +20,34 @@ struct RequirementVariant
     bool ancient = false;
     int optionLevel = 0;
 };
+
+// The stat profile storing an item gives it (CItemDataHandler::WithDerivedFields)
+// and where it comes from: "" takes what the profile rules give, a name equal
+// to the stored item's follows them while it is what they give, another name
+// is a pick.
+struct StatProfileChoice
+{
+    enum class Reason : uint8_t
+    {
+        // The profile rules give it: `rule`, or no rule matches (the default).
+        ByRules,
+        // Picked for the item, also "default"; the rules give `given`.
+        Picked,
+    };
+
+    // "default" for the default.
+    std::string name;
+    Reason reason = Reason::ByRules;
+    // The rule the item matches, or Data::Items::NoStatProfileRule.
+    int rule = Data::Items::NoStatProfileRule;
+    // What the rules give; "default" for the default.
+    std::string given;
+};
+
+StatProfileChoice FindStatProfileChoice(const Data::Items::ItemDefinition& item);
+// The resolved profile of FindStatProfileChoice; the default for a name the
+// item stat file does not have.
+const Data::Items::ItemStatProfile& FindStatProfile(const Data::Items::ItemDefinition& item);
 
 // An item's requirements at one + level, in the order of ItemRequirement.
 using RequirementRow = std::array<int, Data::Items::ItemRequirementCount>;
@@ -35,6 +66,9 @@ RequirementTable ComputeRequirementTable(const Data::Items::ItemDefinition& item
 // ComputeRequirementTable takes them.
 using ItemLevelValues = std::array<GameLogic::Items::ItemStatValues, Data::Items::ItemLevelCount>;
 ItemLevelValues ComputeItemLevelValues(const Data::Items::ItemDefinition& item, const RequirementVariant& variant);
+// The same at one + level.
+GameLogic::Items::ItemStatValues ComputeItemValuesAt(const Data::Items::ItemDefinition& item,
+                                                     const RequirementVariant& variant, int level);
 
 // Whether the option level adds to the item's strength requirement (its stat
 // profile's strength per option level is not 0).
