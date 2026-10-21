@@ -127,17 +127,22 @@ void SubmitDockSpace(bool resetLayout)
 
 ImGuiWindowFlags ToolWindowBarFlags(const char* windowName)
 {
-    // As the window was last frame: docking happens while it is drawn.
+    // Where the window is docked. Not from DockIsActive: the editor window's
+    // dock space clears it each frame for a window alone in its node, until
+    // the window's Begin(). On the frame a window docks, its node is found by
+    // its DockId.
     ImGuiWindow* window = ImGui::FindWindowByName(windowName);
     if (window == nullptr)
     {
         return ImGuiWindowFlags_None;
     }
-    if (!window->DockIsActive || window->DockNode == nullptr)
+    ImGuiDockNode* dockNode =
+        window->DockNode != nullptr ? window->DockNode : ImGui::DockBuilderGetNode(window->DockId);
+    if (dockNode == nullptr)
     {
         return ImGuiWindowFlags_MenuBar;
     }
-    ImGuiDockNode* node = ImGui::DockNodeGetRootNode(window->DockNode);
+    ImGuiDockNode* node = ImGui::DockNodeGetRootNode(dockNode);
     if (g_dockSpace != 0 && node->ID == g_dockSpace)
     {
         return ImGuiWindowFlags_None;

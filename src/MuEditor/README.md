@@ -43,7 +43,7 @@ stores it when a field is left.
 - **MuItemModelUI** - The model entry with a preview, file picker, shared models and looks (ItemModelPreview, ItemModelFilePicker, ItemSharedModelForm, ItemModelForms)
 - **MuItemGlowColorsUI** - The glow color list: new colors, changed values and unused colors removed (GlowColorDialog, which the model tool's color fields open too)
 - **MuItemChecksUI** - The checks of a save, each leading to its item and field (ItemCheckTargets)
-- **ItemToolWindow** - What every item tool window shares: its title, the selected item, Undo and Redo
+- **ItemToolWindow** - What every item tool window shares: its title, the selected item, and Undo and Redo (shown in the editor's bar)
 
 ### Item Actions (UI/ItemEditor)
 - **ItemEditorActions.h/cpp** - Save, import from bmd and the exports
@@ -180,8 +180,10 @@ Game console captures all standard output automatically via console redirection.
 if (m_windows.myWindow)
 {
     MuEditor::Layout::PrepareToolWindow();  // its tab, also when floating
-    if (ImGui::Begin("My Window", &m_windows.myWindow))
+    // The editor's bar while it floats outside the editor window.
+    if (ImGui::Begin("My Window", &m_windows.myWindow, MuEditor::Layout::ToolWindowBarFlags("My Window")))
     {
+        MuEditor::Layout::RenderToolWindowBar();
         ImGui::Text("Custom content here");
     }
     ImGui::End();
