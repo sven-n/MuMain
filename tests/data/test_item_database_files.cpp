@@ -1910,6 +1910,58 @@ TEST_CASE("The Map Editor's Ctrl+Z and Delete reach it after a click into the wo
     }
 }
 
+// ImGui keeps the focus in an item tool when the game window takes the
+// keyboard back (Alt+Tab with the editor inside a full-screen game): a Ctrl+Z
+// typed while playing does not undo the last item edit.
+TEST_CASE("An item tool's Ctrl+Z does not undo while the game window has the keyboard [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+    ++kris.damageMax;
+    REQUIRE(g_ItemEdits.SetItem("Change the Kris", kris));
+    g_ItemSelection.Select(KrisType);
+
+    TestImGuiContext context;
+    // A test's editor core has no window: the game has the keyboard.
+    REQUIRE_FALSE(g_MuEditorCore.IsKeyboardWithEditor());
+    ImGuiIO& io = ImGui::GetIO();
+    bool ctrlZPressed = false;
+    const auto frame = [&](bool focusTool)
+    {
+        bool open = true;
+        ImGui::NewFrame();
+        if (focusTool)
+        {
+            ImGui::SetWindowFocus(MuEditor::WindowIds::ItemRules);
+        }
+        g_MuItemRulesUI.Render(&open);
+        ctrlZPressed = ctrlZPressed || ImGui::IsKeyChordPressed(ImGuiMod_Ctrl | ImGuiKey_Z);
+        ImGui::Render();
+    };
+    frame(false);
+    frame(true);
+    frame(false);
+    REQUIRE(ImGui::GetCurrentContext()->NavWindow == ImGui::FindWindowByName(MuEditor::WindowIds::ItemRules));
+    io.AddKeyEvent(ImGuiMod_Ctrl, true);
+    io.AddKeyEvent(ImGuiKey_Z, true);
+    frame(false);
+    io.AddKeyEvent(ImGuiKey_Z, false);
+    io.AddKeyEvent(ImGuiMod_Ctrl, false);
+    frame(false);
+
+    // The press arrived, and the step is still there.
+    CHECK(ctrlZPressed);
+    CHECK(g_ItemEdits.GetHistory().CanUndo());
+    CHECK(g_ItemDatabase.Find(KrisType)->damageMax == kris.damageMax);
+    g_ItemEdits.GetHistory().Clear();
+}
+
 // The warning before a shared model changes lists its items; a click on one
 // selects it, and the warning stays open to apply the change.
 TEST_CASE("A click in the shared model warning's list keeps the warning open [data][items][editor]")

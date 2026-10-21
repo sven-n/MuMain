@@ -61,9 +61,16 @@ void Redo()
     }
 }
 
-// Only while this window has the focus; a text field keeps its own Ctrl+Z.
+// Only while the keyboard is the editor's and this window has the focus: ImGui
+// keeps the focus in the window when the game window takes the keyboard back
+// (Alt+Tab with the editor inside the game window). A text field keeps its own
+// Ctrl+Z.
 void HandleUndoKeys()
 {
+    if (!g_MuEditorCore.IsKeyboardWithEditor())
+    {
+        return;
+    }
     if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Z))
     {
         Undo();
