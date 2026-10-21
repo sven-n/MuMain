@@ -216,10 +216,10 @@
     {
       "number": 9,
       "name": {
-        "en": "Orb of Greater Fortitude",
-        "de": "Kugel: Greater Fortitude",
-        "es": "Orbe de Mayor Fortaleza",
-        "pt": "Orbe da sorte maior"
+        "en": "Orb of Greater Defense",
+        "de": "Kugel: Greater Defense",
+        "es": "Orbe de Mayor Defensa",
+        "pt": "Orbe da defesa maior"
       },
       "width": 1,
       "height": 1,
