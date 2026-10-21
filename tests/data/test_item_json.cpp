@@ -293,12 +293,14 @@ TEST_CASE("An item's description is kept through write and read, and checked [da
     jewel.slot = ItemSlot::None;
     jewel.weaponKind = WeaponKind::None;
     jewel.statProfile.clear();
+    // The Jewel of Bless's own tooltip line, as the client's translations have it.
     ItemDescriptionLine first;
-    first.text.Set("en", "Increases the level of an item up to +6.");
-    first.text.Set("de", "Erhöht die Stufe eines Gegenstands bis +6.");
+    first.text.Set("en", "It is used to increase your item level up to 6");
+    first.text.Set("de", "Wird verwendet, um das Gegenstandslevel auf bis zu 6 zu erhöhen");
+    first.text.Set("es", "Se utiliza para aumentar el nivel de tu objeto hasta 6.");
+    first.text.Set("pt", "É usado para aumentar o nível do seu item até 6");
     ItemDescriptionLine blank;
-    ItemDescriptionLine last;
-    last.text.Set("en", "Drop it on the item to use it.");
+    ItemDescriptionLine last = first;
     last.color = ItemTextColor::Blue;
     jewel.description = {first, blank, last};
 
