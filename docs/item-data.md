@@ -228,6 +228,10 @@ defense and magic defense, and how its requirements grow. It is in a folder of i
       "name": "sceptre",
       "magicPower": {"perLevelAfterHalving": 0}
     }
+  ],
+  "profileRules": [
+    {"profile": "default", "tags": ["ammunition"]},
+    {"profile": "sceptre", "tags": ["sceptre"]}
   ]
 }
 ```
@@ -275,6 +279,16 @@ defense and magic defense, and how its requirements grow. It is in a folder of i
 - **Profiles** (`profiles`) write only what differs from the default. A term
   a profile writes replaces the default's as a whole. An item names its
   profile with `statProfile`; an item without one has the default.
+- **Profile rules** (`profileRules`) say which profile an item's data gives
+  it, in order: the first rule the item matches names its `profile`
+  (`"default"` for the default), and an item no rule matches has the default.
+  A rule's conditions are lists of values: `group` (0 to 15), `slot`,
+  `wingTier`, `weaponKind`, `tags`, and `requirements` (the keys of an item's
+  `requirements`: its base value is above 0; a requirement given by level
+  does not count). An item meets a condition when it has one of its values,
+  and a rule without conditions matches every item. The writer keeps the
+  rules in order, one per line. A new condition needs a new `formatVersion`:
+  a reader refuses conditions and values it does not know.
 - Every `/` is a whole-number division, from left to right.
 - What stays code: the order of the terms; which items count as excellent
   (excellent options on wings are wing options, and ancient items get the
@@ -319,7 +333,12 @@ a `table` the file does not have; a term that is neither an object nor
 `"none"`; an `afterLevelBonus` that is not true or false; a requirement
 formula that is neither an object nor `"base"`; a `basis` other than
 `"levelRequirement"`; a caption that is neither a text nor texts by
-language; and `profiles` that are not a list of objects.
+language; `profiles` that are not a list of objects; `profileRules` that are
+not a list of objects; a rule without a `profile`, or one naming a profile
+the file does not have (other than `"default"`); a condition the format does
+not have; and a condition that is not a list of one or more values, or a
+value that is not one of its names (for `group`, a whole number from 0 to
+15).
 **Warnings:** unknown fields, a table no stat uses, and a caption without
 English. An item whose `statProfile` the file does not have is an error, and
 a profile no item names is a warning.

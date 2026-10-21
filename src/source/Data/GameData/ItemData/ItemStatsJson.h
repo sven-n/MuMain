@@ -35,6 +35,11 @@
 //     },
 //     "profiles": [
 //       {"name": "sceptre", "magicPower": {"perLevelAfterHalving": 0}}
+//     ],
+//     "profileRules": [
+//       {"profile": "default", "tags": ["ammunition"]},
+//       {"profile": "armor", "slot": ["helm", "armor", "pants", "gloves", "boots"]},
+//       {"profile": "helper", "group": [13, 14], "requirements": ["level"]}
 //     ]
 //   }
 //
@@ -44,6 +49,14 @@
 // differs from it, and a term it writes replaces the default's as a whole. A
 // left-out number in a term is 0. A requirement formula is an object or "base"
 // (the base value stays). The writer sorts tables and profiles by name.
+//
+// The profile rules give each item the profile its data gives it, in order:
+// the first rule an item matches names it ("default" for the default), and an
+// item no rule matches has the default. A condition lists values ("group",
+// "slot", "wingTier", "weaponKind", "tags", base "requirements" above 0); an
+// item meets it with one of them. The writer keeps the rules in order. An
+// unknown condition or value is an error, so a reader refuses rules it cannot
+// read; a new condition needs a new format version.
 namespace Data::Items
 {
 constexpr int ItemStatsJsonFormatVersion = 1;

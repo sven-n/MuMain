@@ -171,4 +171,8 @@ std::string PutListsOnOneLine(const std::string& text, std::string_view key);
 // Puts every object of `key`, with the lists and objects in it, on one line:
 // "angle": {"y": 0}. A space stays after each comma and colon.
 std::string PutObjectsOnOneLine(const std::string& text, std::string_view key);
+
+// Puts each entry of every list of `key`, with the lists and objects in it, on
+// a line of its own, as the profile rules of the item stat file are written.
+std::string PutListEntriesOnOneLine(const std::string& text, std::string_view key);
 } // namespace Data::Items::Json
