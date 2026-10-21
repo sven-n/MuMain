@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Data/GameData/ItemData/ItemStatTerms.h"
+#include "Data/GameData/ItemData/StatProfileRule.h"
 
 #include <array>
 #include <optional>
@@ -96,6 +97,16 @@ public:
     // The names of the file's profiles, without the default.
     std::vector<std::string> GetProfileNames() const;
 
+    // The first profile rule `item` matches, or NoStatProfileRule.
+    int FindRule(const ItemDefinition& item) const;
+    // The profile a rule names: "" for the default, also for "default" and a
+    // name the file does not have.
+    const std::string& GetRuleProfile(int rule) const;
+    const std::vector<StatProfileRule>& GetRules() const
+    {
+        return m_rules;
+    }
+
     int GetLevelBonus(const StatTerms& terms, int level) const;
     int GetExcellentDropLevelBonus() const
     {
@@ -110,6 +121,8 @@ private:
     std::vector<LevelBonusTable> m_tables;
     std::vector<std::string> m_names;
     std::vector<ItemStatProfile> m_profiles;
+    std::vector<StatProfileRule> m_rules;
+    std::vector<std::string> m_ruleProfiles;
     int m_excellentDropLevelBonus = 0;
     int m_ancientDropLevelBonus = 0;
 };

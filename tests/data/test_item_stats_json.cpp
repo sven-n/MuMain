@@ -246,6 +246,30 @@ TEST_CASE("Item stat profiles lay their terms over the default [data][items]")
     CHECK(profiles.Get(99).Get(ItemStat::MagicPower).perLevelAfterHalving == 2);
 }
 
+TEST_CASE("Item stat profiles keep the profile rules [data][items]")
+{
+    ItemStatFile file = Read(SmallFile).file;
+    StatProfileRule wings{.profile = "default"};
+    wings.slots.set(static_cast<size_t>(ItemSlot::Wings));
+    file.profileRules.push_back(wings);
+    // The constructor does not validate: an unknown profile gives the default.
+    file.profileRules.push_back(StatProfileRule{.profile = "staff"});
+    const ItemStatProfiles profiles(file);
+    REQUIRE(profiles.GetRules().size() == 4);
+    CHECK(profiles.GetRuleProfile(0) == "sceptre");
+    CHECK(profiles.GetRuleProfile(1) == "shield");
+    CHECK(profiles.GetRuleProfile(2).empty());
+    CHECK(profiles.GetRuleProfile(3).empty());
+    CHECK(profiles.GetRuleProfile(NoStatProfileRule).empty());
+
+    ItemDefinition shield;
+    shield.group = 6;
+    shield.weaponKind = WeaponKind::Shield;
+    CHECK(profiles.FindRule(shield) == 1);
+    shield.tags.Set(ItemTag::Sceptre);
+    CHECK(profiles.FindRule(shield) == 0);
+}
+
 TEST_CASE("Item stat profiles without a file keep every stat at its base [data][items]")
 {
     const ItemStatProfiles profiles;
