@@ -11,6 +11,7 @@
 #include "Data/GameData/ItemData/ItemDefinition.h"
 
 #include <optional>
+#include <string>
 
 // The item requirements tool (section 9): the selected item's stat profile, its
 // level and stat requirements (a stat requirement as its +0 value and the
@@ -42,6 +43,10 @@ private:
                        WORD& baseValue, const MuEditor::Items::FormulaLine& formula);
     void RenderLevelTable(const Data::Items::ItemDefinition& item);
     void RenderClasses(Data::Items::ItemDefinition& item);
+    // Stores the draft; a +0 value being typed that needs the weight list
+    // (several weights give it, or none) is dropped instead, since a store
+    // without its field being left cannot ask.
+    void StoreItem(const std::string& label, const Data::Items::ItemDefinition& item);
 
     MuEditor::Items::ItemEditDraft<Data::Items::ItemDefinition> m_draft;
     MuEditor::Items::RequirementVariant m_variant;
@@ -54,6 +59,8 @@ private:
         Data::Items::ItemRequirement requirement = Data::Items::ItemRequirement::Strength;
         int value = 0;
         int weightBefore = 0;
+        // The requirement's label, the undo label its edit is stored under.
+        const char* label = nullptr;
     };
     std::optional<TypedZeroValue> m_typed;
     MuEditor::Items::CRequirementWeightPopup m_weightPopup;

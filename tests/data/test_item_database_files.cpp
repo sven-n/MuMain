@@ -1405,6 +1405,24 @@ void RenderBasicsAndRequirements(const char* typed = nullptr)
     CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
 }
 
+// One item tool for a frame, after the typed text; `draw` false hides it, as
+// F12 hides the editor.
+template <typename TTool> void RenderItemTool(TTool& tool, bool draw, const char* typed = nullptr)
+{
+    if (typed != nullptr)
+    {
+        ImGui::GetIO().AddInputCharactersUTF8(typed);
+    }
+    bool open = true;
+    ImGui::NewFrame();
+    if (draw)
+    {
+        tool.Render(&open);
+    }
+    ImGui::Render();
+    CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+}
+
 // The Add item dialog for a frame; `open` opens it with the selected item.
 void RenderAddDialog(MuEditor::Items::CItemAddDialog& dialog, bool open)
 {
@@ -1574,6 +1592,89 @@ TEST_CASE("A field clicked into while another item tool stores its edit keeps th
 
     CHECK(g_ItemDatabase.Find(KrisType)->durability == 30);
     CHECK(g_ItemDatabase.Find(KrisType)->requirements.level == 42);
+    g_ItemEdits.GetHistory().Clear();
+}
+
+// The checks of a field left also hold for an edit stored without it: the
+// window hidden while the field is typed in.
+TEST_CASE(
+    "Item Basics refuses an English name also when it is stored without its field being left [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    g_ItemSelection.Select(KrisType);
+    const std::string kris = g_ItemDatabase.Find(KrisType)->names.GetNeutral();
+
+    TestImGuiContext context;
+    RenderItemTool(g_MuItemBasicsUI, true);
+    const ImGuiID name = ItemToolFieldId(MuEditor::WindowIds::ItemBasics, {KrisType}, I18N::Editor::EnglishName);
+    ImGui::ActivateItemByID(name);
+    RenderItemTool(g_MuItemBasicsUI, true);
+    REQUIRE(ImGui::GetActiveID() == name);
+    RenderItemTool(g_MuItemBasicsUI, true, "Kr||is");
+
+    SUBCASE("the window hidden, as F12 does")
+    {
+        RenderItemTool(g_MuItemBasicsUI, false);
+        RenderItemTool(g_MuItemBasicsUI, false);
+        RenderItemTool(g_MuItemBasicsUI, true);
+    }
+    SUBCASE("the field left")
+    {
+        ImGui::ActivateItemByID(
+            ItemToolFieldId(MuEditor::WindowIds::ItemBasics, {KrisType}, I18N::Metadata::Durability));
+        RenderItemTool(g_MuItemBasicsUI, true);
+        RenderItemTool(g_MuItemBasicsUI, true);
+    }
+    CHECK(g_ItemDatabase.Find(KrisType)->names.GetNeutral() == kris);
+    CHECK_FALSE(g_ItemEdits.GetHistory().CanUndo());
+    g_ItemEdits.GetHistory().Clear();
+}
+
+// A +0 value that several weights give needs one picked from the list, which
+// a store without its field being left cannot ask: it is dropped.
+TEST_CASE("Item Requirements does not store a +0 value that needs a weight picked when its window is hidden "
+          "[data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    g_ItemSelection.Select(KrisType);
+    const ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+    REQUIRE(MuEditor::Items::HasWeight(kris, ItemRequirement::Strength));
+    int value = MuEditor::Items::ComputeZeroValue(kris, ItemRequirement::Strength) + 1;
+    while (MuEditor::Items::FindWeightsGiving(kris, ItemRequirement::Strength, value).GetCount() < 2)
+    {
+        ++value;
+        REQUIRE(value < 1000);
+    }
+    REQUIRE(MuEditor::Items::ChooseWeight(kris, ItemRequirement::Strength, value, kris.requirements.strength).kind ==
+            MuEditor::Items::WeightChoice::Kind::Pick);
+
+    TestImGuiContext context;
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    const ImGuiID strength =
+        ItemToolFieldId(MuEditor::WindowIds::ItemRequirements, {KrisType, static_cast<int>(ItemRequirement::Strength)},
+                        I18N::Metadata::ReqStrength);
+    ImGui::ActivateItemByID(strength);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    REQUIRE(ImGui::GetActiveID() == strength);
+    RenderItemTool(g_MuItemRequirementsUI, true, std::to_string(value).c_str());
+    RenderItemTool(g_MuItemRequirementsUI, false);
+    RenderItemTool(g_MuItemRequirementsUI, false);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+
+    CHECK(g_ItemDatabase.Find(KrisType)->requirements.strength == kris.requirements.strength);
+    CHECK_FALSE(g_ItemEdits.GetHistory().CanUndo());
     g_ItemEdits.GetHistory().Clear();
 }
 

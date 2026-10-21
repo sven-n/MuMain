@@ -25,7 +25,10 @@ public:
     // The values of the item, nullopt when there is nothing to edit (no item,
     // no model).
     using Load = std::function<std::optional<TValue>(int itemType)>;
-    // Stores the values under the undo label.
+    // Stores the values under the undo label. It also gets an edit stored
+    // without its field being left (the form hidden, the selection changed),
+    // so the form's checks of a field belong here: it stores nothing for an
+    // edit it refuses, and the draft takes the item back as stored.
     using Store = std::function<void(const std::string& label, const TValue& value)>;
 
     ItemEditDraft(Load load, Store store) : m_load(std::move(load)), m_store(std::move(store)) {}

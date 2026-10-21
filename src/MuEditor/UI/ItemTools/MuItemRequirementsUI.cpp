@@ -47,11 +47,6 @@ std::optional<ItemDefinition> LoadItem(int itemType)
     return item != nullptr ? std::optional<ItemDefinition>(*item) : std::nullopt;
 }
 
-void StoreItem(const std::string& label, const ItemDefinition& item)
-{
-    g_ItemEdits.SetItem(label, item);
-}
-
 struct RequirementField
 {
     ItemRequirement requirement;
@@ -103,7 +98,27 @@ CMuItemRequirementsUI& CMuItemRequirementsUI::GetInstance()
     return instance;
 }
 
-CMuItemRequirementsUI::CMuItemRequirementsUI() : m_draft(&LoadItem, &StoreItem) {}
+CMuItemRequirementsUI::CMuItemRequirementsUI()
+    : m_draft(&LoadItem, [this](const std::string& label, const ItemDefinition& item) { StoreItem(label, item); })
+{
+}
+
+void CMuItemRequirementsUI::StoreItem(const std::string& label, const ItemDefinition& item)
+{
+    if (m_typed && m_typed->itemType == Data::Items::MakeItemType(item.group, item.number) && label == m_typed->label)
+    {
+        // Stored without its field being left: there is no list to ask which
+        // weight, so a value several weights give, or none, is dropped.
+        const TypedZeroValue typed = *m_typed;
+        m_typed.reset();
+        const WeightChoice choice = ChooseWeight(item, typed.requirement, typed.value, typed.weightBefore);
+        if (choice.kind == WeightChoice::Kind::Pick || choice.kind == WeightChoice::Kind::Unreachable)
+        {
+            return;
+        }
+    }
+    g_ItemEdits.SetItem(label, item);
+}
 
 void CMuItemRequirementsUI::Render(bool* open)
 {
@@ -185,7 +200,7 @@ void CMuItemRequirementsUI::RenderWeightedRequirement(ItemDefinition& item, Item
     const bool edited = ImGui::InputScalar(label, ImGuiDataType_U16, &shown);
     if (ImGui::IsItemActivated())
     {
-        m_typed = TypedZeroValue{itemType, requirement, zeroValue, weight};
+        m_typed = TypedZeroValue{itemType, requirement, zeroValue, weight, label};
     }
     if (edited && m_typed)
     {
@@ -216,7 +231,9 @@ void CMuItemRequirementsUI::RenderWeightedRequirement(ItemDefinition& item, Item
     // the field is left.
     const bool typed = m_typed && m_typed->itemType == itemType && m_typed->requirement == requirement;
     const int target = typed ? m_typed->value : zeroValue;
-    if (ImGui::IsItemDeactivated())
+    // Also a typed value whose field was let go without being left (its
+    // window hidden): it ends with the field.
+    if (typed && !ImGui::IsItemActive())
     {
         m_typed.reset();
     }

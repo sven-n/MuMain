@@ -40,10 +40,36 @@ std::optional<ItemDefinition> LoadItem(int itemType)
     return item != nullptr ? std::optional<ItemDefinition>(*item) : std::nullopt;
 }
 
+// What refuses the English name the draft changed: empty, or with the
+// separator the save refuses. An item without an English name (from a bmd
+// import) can still be edited.
+const char* RefuseEnglishName(const ItemDefinition& item)
+{
+    const ItemDefinition* stored = g_ItemDatabase.Find(Data::Items::MakeItemType(item.group, item.number));
+    const std::string& english = item.names.GetNeutral();
+    if (stored != nullptr && stored->names.GetNeutral() == english)
+    {
+        return nullptr;
+    }
+    if (english.empty())
+    {
+        return I18N::Editor::TheEnglishNameCannotBeEmpty;
+    }
+    return english.find(Data::LocalizedString::Separator) != std::string::npos
+               ? I18N::Editor::ItemNamesCannotContainTheSeparator
+               : nullptr;
+}
+
+// Also for an edit stored without its field being left (ItemEditDraft): a
+// refused one is logged, and the draft takes the stored item back.
 void StoreItem(const std::string& label, const ItemDefinition& item)
 {
-    // Refused for a size or slot typed in before the game took the item: the
-    // field goes back to the stored item.
+    if (const char* refused = RefuseEnglishName(item))
+    {
+        g_MuEditorConsoleUI.LogEditor(refused);
+        return;
+    }
+    // Refused for a size or slot typed in before the game took the item.
     if (!g_ItemEdits.SetItem(label, item))
     {
         g_MuEditorConsoleUI.LogEditor(I18N::Editor::TheItemIsWornOrInAnItemWindowItsSizeAndSlotStayAsTheyAre);
@@ -126,19 +152,7 @@ void CMuItemBasicsUI::RenderName(ItemDefinition& item)
     {
         item.names.Set(Data::LocalizedString::NeutralLocale, english);
     }
-    if (ImGui::IsItemDeactivatedAfterEdit())
-    {
-        const char* refused = english.empty() ? I18N::Editor::TheEnglishNameCannotBeEmpty
-                              : english.find(Data::LocalizedString::Separator) != std::string::npos
-                                  ? I18N::Editor::ItemNamesCannotContainTheSeparator
-                                  : nullptr;
-        if (refused != nullptr)
-        {
-            g_MuEditorConsoleUI.LogEditor(refused);
-            m_draft.Discard();
-            return;
-        }
-    }
+    // StoreItem refuses an empty name or one with the separator.
     m_draft.AfterField(I18N::Editor::EnglishName);
     ImGui::SameLine();
     if (ImGui::SmallButton(I18N::Editor::ItemTranslations))
