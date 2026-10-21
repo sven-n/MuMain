@@ -3728,8 +3728,8 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }
     }
-    // The item data's description in the UI's language with its placeholders filled in for the item: each line
-    // wrapped to the tooltip's width and at its line breaks, the pieces in the line's color.
+    // The item data's description in the UI's language with its placeholders filled in for the item: the lines of
+    // the item's level, each wrapped to the tooltip's width and at its line breaks, the pieces in the line's color.
     if (const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(ip->Type))
     {
         g_pRenderText->SetFont(g_hFont);
@@ -3737,6 +3737,10 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
         { return g_pRenderText->MeasureText(text, static_cast<int>(length)).cx; };
         for (const Data::Items::ItemDescriptionLine& line : definition->description)
         {
+            if (!line.IsShownAt(Level))
+            {
+                continue;
+            }
             if (line.text.IsEmpty())
             {
                 // A blank line, as the tooltip writes its own.
@@ -3760,134 +3764,7 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
             }
         }
     }
-    if (ip->Type == ITEM_TOWN_PORTAL_SCROLL && Level >= 1 && Level <= 8)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::WarpToTheCorrespondingAreaAfterDSeconds, 3);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-    }
-    if (ip->Type == ITEM_SPIRIT)
-    {
-        TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        switch (Level)
-        {
-        case 0: mu_swprintf(TextList[TextNum], I18N::Game::UsedInDarkHorseResurrection); TextNum++; break;
-        case 1: mu_swprintf(TextList[TextNum], I18N::Game::UsedInDarkRavenResurrection); TextNum++; break;
-        }
-    }
-    else if (ip->Type == ITEM_LOCHS_FEATHER)
-    {
-        TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        switch (Level)
-        {
-        case 0: mu_swprintf(TextList[TextNum], L"%ls", I18N::Game::UsedToUpgradeWings); TextNum++; break;
-        case 1: mu_swprintf(TextList[TextNum], L"%ls", I18N::Game::UsedInCombiningCapeOfLordWarriorSCloak); TextNum++; break;
-        }
-    }
-
-    else if (ip->Type == ITEM_FRUITS)
-    {
-        TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        switch (Level)
-        {
-        case 0:mu_swprintf(TextList[TextNum], L"%ls %ls", I18N::Game::ENG, I18N::Game::Increases13StatPoints); break;
-        case 1:mu_swprintf(TextList[TextNum], L"%ls %ls", I18N::Game::STA, I18N::Game::Increases13StatPoints); break;
-        case 2:mu_swprintf(TextList[TextNum], L"%ls %ls", I18N::Game::AGI, I18N::Game::Increases13StatPoints); break;
-        case 3:mu_swprintf(TextList[TextNum], L"%ls %ls", I18N::Game::STR, I18N::Game::Increases13StatPoints); break;
-        case 4:mu_swprintf(TextList[TextNum], L"%ls %ls", I18N::Game::Command, I18N::Game::Increases13StatPoints); break;
-        }
-        TextNum++;
-        TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        switch (Level)
-        {
-        case 0:mu_swprintf(TextList[TextNum], L"%ls %ls", I18N::Game::ENG, I18N::Game::PossibleToDecreaseStat19Point); break;
-        case 1:mu_swprintf(TextList[TextNum], L"%ls %ls", I18N::Game::STA, I18N::Game::PossibleToDecreaseStat19Point); break;
-        case 2:mu_swprintf(TextList[TextNum], L"%ls %ls", I18N::Game::AGI, I18N::Game::PossibleToDecreaseStat19Point); break;
-        case 3:mu_swprintf(TextList[TextNum], L"%ls %ls", I18N::Game::STR, I18N::Game::PossibleToDecreaseStat19Point); break;
-        case 4:mu_swprintf(TextList[TextNum], L"%ls %ls", I18N::Game::Command, I18N::Game::PossibleToDecreaseStat19Point); break;
-        }
-        TextNum++;
-        TextListColor[TextNum] = TEXT_COLOR_DARKRED;
-        mu_swprintf(TextList[TextNum], I18N::Game::ItCanBeUsedWithItemRemoved);
-
-        if (Level == 4)
-        {
-            TextNum++;
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            mu_swprintf(TextList[TextNum], I18N::Game::CanBeEquippedByS, I18N::Game::DarkLord);
-        }
-        TextNum++;
-    }
-    else if (ip->Type == ITEM_SCROLL_OF_ARCHANGEL)
-    {
-        TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        mu_swprintf(TextList[TextNum], I18N::Game::UsedWhenCreatingACloakOfInvisibility);
-        TextNum++;
-    }
-    else if (ip->Type == ITEM_BLOOD_BONE)
-    {
-        TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        mu_swprintf(TextList[TextNum], I18N::Game::UsedWhenCreatingACloakOfInvisibility);
-        TextNum++;
-    }
-    else if (ip->Type == ITEM_INVISIBILITY_CLOAK)
-    {
-        TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        mu_swprintf(TextList[TextNum], I18N::Game::UsedWhenEnteringBloodCastle);
-        TextNum++;
-        mu_swprintf(TextList[TextNum], L"\n");
-        TextNum++; SkipNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::TheRemainingTimeIsShown);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        TextBold[TextNum] = false;
-        TextNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::WhenYouRightClickOnYourMouse);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        TextBold[TextNum] = false;
-        TextNum++;
-    }
-    else if (ip->Type == ITEM_SIEGE_POTION)
-    {
-        switch (Level)
-        {
-        case 0:
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::Damage20IncreaseEffect); TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
-            mu_swprintf(TextList[TextNum], I18N::Game::Duration60Seconds); TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
-            mu_swprintf(TextList[TextNum], I18N::Game::OnlyApplicableForCastleGateAndStatue); TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
-        }
-        break;
-        case 1:
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::Increase8AGRecoverySpeed); TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
-            mu_swprintf(TextList[TextNum], I18N::Game::IncreaseResistanceOfLightningAndIce); TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
-            mu_swprintf(TextList[TextNum], I18N::Game::AttackingSpeedWillIncrease20); TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
-        }
-        break;
-        }
-    }
-    else if (ip->Type == ITEM_CONTRACT_SUMMON)
-    {
-        switch (Level)
-        {
-        case 0: mu_swprintf(TextList[TextNum], I18N::Game::Archer); break;
-        case 1: mu_swprintf(TextList[TextNum], I18N::Game::Spearman); break;
-        }
-        TextListColor[TextNum] = TEXT_COLOR_YELLOW;
-        TextBold[TextNum] = false;
-        TextNum++;
-    }
-    else if (ip->Type == ITEM_LIFE_STONE_ITEM)
-    {
-        switch (Level)
-        {
-        case 0: mu_swprintf(TextList[TextNum], I18N::Game::ScrollOfGuardian); break;
-        case 1: mu_swprintf(TextList[TextNum], I18N::Game::PlaceLifeStone); break;
-        }
-        TextListColor[TextNum] = TEXT_COLOR_YELLOW;
-        TextBold[TextNum] = false;
-        TextNum++;
-    }
-    else if (ip->Type == ITEM_ARMOR_OF_GUARDSMAN)
+    if (ip->Type == ITEM_ARMOR_OF_GUARDSMAN)
     {
         int startIndex = 0;
         if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK || gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD
@@ -3934,18 +3811,6 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
         SkipNum++;
         mu_swprintf(TextList[TextNum], I18N::Game::RightClickToEnter);
         TextListColor[TextNum] = TEXT_COLOR_DARKBLUE;
-        TextNum++;
-    }
-    else if (ip->Type == ITEM_RENA)
-    {
-        TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        switch (Level)
-        {
-        case 1: mu_swprintf(TextList[TextNum], I18N::Game::UsedInTheOnlineEvent); break;
-        case 2: mu_swprintf(TextList[TextNum], I18N::Game::UsedInTheMyFriendEvent); break;
-        case 3: mu_swprintf(TextList[TextNum], I18N::Game::UseInSiegeRegistration); break;
-        default: break;
-        }
         TextNum++;
     }
     else if (ip->Type == ITEM_LOST_MAP || ip->Type == ITEM_SYMBOL_OF_KUNDUN)
