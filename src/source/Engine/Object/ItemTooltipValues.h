@@ -64,6 +64,8 @@ struct ItemTooltipValues
     bool timed = false;
     // The item's add option (the potions', scrolls' and seals' effects of ItemAddOption): its two values, and how long
     // it lasts as the tooltip writes it ("1 Hour").
+    // The hero's level.
+    int heroLevel = 0;
     int addOptionValue1 = 0;
     int addOptionValue2 = 0;
     std::string addOptionDuration;

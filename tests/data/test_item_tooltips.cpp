@@ -361,6 +361,41 @@ TEST_CASE("The Weapon of Archangel shows its reward weapon's skill mana from the
     CHECK(std::any_of(lines.begin(), lines.end(), [&](const ItemTooltipLine& line) { return line.text == expected; }));
 }
 
+TEST_CASE("An item's lines drawn after its options follow them [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+    const auto indexOf = [](const std::vector<ItemTooltipLine>& lines, std::wstring_view start)
+    {
+        const auto found = std::find_if(lines.begin(), lines.end(),
+                                        [&](const ItemTooltipLine& line) { return line.text.starts_with(start); });
+        return found != lines.end() ? static_cast<int>(found - lines.begin()) : -1;
+    };
+
+    // The Elite Transfer Skeleton Ring's vitality is the hero's level.
+    const std::vector<ItemTooltipLine> ring = TooltipOfParameters(FullItemParameters(13, 39));
+    CHECK(indexOf(ring, L"vitality +" + std::to_wstring(hero.Hero().Level)) >= 0);
+
+    // The Pet Skeleton leaves out the blank line after the options (noBlankAfterOptions): one blank line, its options',
+    // comes before its lines, not two.
+    const std::vector<ItemTooltipLine> pet = TooltipOfParameters(FullItemParameters(13, 123));
+    const int equipping = indexOf(pet, L"Equipping along with a Skeleton");
+    REQUIRE(equipping > 1);
+    CHECK(pet[equipping - 1].text == L"\n");
+    CHECK(pet[equipping - 2].text != L"\n");
+    // The Panda Ring's blank line is there.
+    const std::vector<ItemTooltipLine> panda = TooltipOfParameters(FullItemParameters(13, 76));
+    const int transform = indexOf(panda, L"Transform");
+    REQUIRE(transform > 0);
+    CHECK(panda[transform - 1].text == L"\n");
+    SetItemTooltipTextMeasure(nullptr);
+}
+
 TEST_CASE("A class condition holds for a hero of that class [data][items][tooltip]")
 {
     TooltipHeroScope hero;

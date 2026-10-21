@@ -6829,10 +6829,6 @@
     <value>點擊按鈕重新初始化所有統計點。</value>
     <comment>legacy_id=1886</comment>
   </data>
-  <data name="Register with the NPC to receive various gifts." xml:space="preserve">
-    <value>註冊NPC即可領取各種禮物。</value>
-    <comment>legacy_id=1887</comment>
-  </data>
   <data name="Exchange has been made." xml:space="preserve">
     <value>已進行交換。</value>
     <comment>legacy_id=1888</comment>
@@ -6924,18 +6920,6 @@
   <data name="Fenrir" xml:space="preserve">
     <value>芬裡爾</value>
     <comment>legacy_id=1916</comment>
-  </data>
-  <data name="FragmentOfHornCanBeMade" xml:space="preserve">
-    <value>角碎片可以用女神的神聖保護和盔甲碎片來製作。</value>
-    <comment>legacy_id=1917</comment>
-  </data>
-  <data name="Broken horn can be made using the claw of beast and fragment of horn." xml:space="preserve">
-    <value>破碎的角可以用野獸的爪子和角的碎片來製作。</value>
-    <comment>legacy_id=1918</comment>
-  </data>
-  <data name="Fenrir's horn can be made through item combination." xml:space="preserve">
-    <value>芬裡爾的號角可以透過物品組合來製作。</value>
-    <comment>legacy_id=1919</comment>
   </data>
   <data name="Can summon the Fenrir when equipped." xml:space="preserve">
     <value>裝備後可以召喚芬裡爾。</value>
@@ -7793,10 +7777,6 @@
     <value>煉油廠已啟動。精煉是將物品轉化為強化石的過程的一部分。精煉的物品將會消失，請務必檢查該物品。</value>
     <comment>legacy_id=2224</comment>
   </data>
-  <data name="VitalityD2225" xml:space="preserve">
-    <value>活力+%d</value>
-    <comment>legacy_id=2225</comment>
-  </data>
   <data name="This item is not allowed to use the private store." xml:space="preserve">
     <value>該商品不允許使用私人商店。</value>
     <comment>legacy_id=2226</comment>
@@ -7820,10 +7800,6 @@
   <data name="Defense Power increase +%d" xml:space="preserve">
     <value>防禦力增加+%d</value>
     <comment>legacy_id=2231</comment>
-  </data>
-  <data name="Enjoy Halloween Festival." xml:space="preserve">
-    <value>享受萬聖節節日。</value>
-    <comment>legacy_id=2232</comment>
   </data>
   <data name="Blessing of Jack O'Lantern" xml:space="preserve">
     <value>傑克燈籠的祝福</value>
@@ -7869,10 +7845,6 @@
     <value>聖誕節</value>
     <comment>legacy_id=2243</comment>
   </data>
-  <data name="Fireworks will appear once thrown in the field." xml:space="preserve">
-    <value>一旦丟到田野裡就會出現煙火。</value>
-    <comment>legacy_id=2244</comment>
-  </data>
   <data name="Santa Clause" xml:space="preserve">
     <value>聖誕老公公</value>
     <comment>legacy_id=2245</comment>
@@ -7884,10 +7856,6 @@
   <data name="Snowman" xml:space="preserve">
     <value>雪人</value>
     <comment>legacy_id=2247</comment>
-  </data>
-  <data name="Merry Christmas." xml:space="preserve">
-    <value>聖誕快樂。</value>
-    <comment>legacy_id=2248</comment>
   </data>
   <data name="Stonger effect has taken place." xml:space="preserve">
     <value>更強烈的效果已經發生。</value>
@@ -7904,10 +7872,6 @@
   <data name="Unable to gain experience rate" xml:space="preserve">
     <value>無法獲得經驗值</value>
     <comment>legacy_id=2255</comment>
-  </data>
-  <data name="usable %dtimes" xml:space="preserve">
-    <value>可使用%d次</value>
-    <comment>legacy_id=2260</comment>
   </data>
   <data name="You can achieve special items with combinations." xml:space="preserve">
     <value>您可以透過組合獲得特殊物品。</value>
@@ -8104,10 +8068,6 @@
   <data name="You do not have sufficient points." xml:space="preserve">
     <value>您沒有足夠的積分。</value>
     <comment>legacy_id=2322</comment>
-  </data>
-  <data name="GM has gifted this special box." xml:space="preserve">
-    <value>通用汽車贈送了這個特殊的盒子。</value>
-    <comment>legacy_id=2323</comment>
   </data>
   <data name="GM summon zone" xml:space="preserve">
     <value>GM召喚區</value>
@@ -8749,10 +8709,6 @@
     <value>歡迎來到聖誕老人村。這是給你的禮物。在這裡你總能找到能帶給你財富的東西。</value>
     <comment>legacy_id=2588</comment>
   </data>
-  <data name="Relocate to the Santa's Village by the right-mouse click." xml:space="preserve">
-    <value>透過滑鼠右鍵重新定位到聖誕老人村。</value>
-    <comment>legacy_id=2589</comment>
-  </data>
   <data name="Would you like to move to the Santa's Village?" xml:space="preserve">
     <value>您想搬到聖誕老人村嗎？</value>
     <comment>legacy_id=2590</comment>
@@ -9088,18 +9044,6 @@
   <data name="Select to move." xml:space="preserve">
     <value>選擇移動。</value>
     <comment>legacy_id=2731</comment>
-  </data>
-  <data name="Transform into Panda." xml:space="preserve">
-    <value>變身為熊貓。</value>
-    <comment>legacy_id=2743</comment>
-  </data>
-  <data name="Zen increase 50%%" xml:space="preserve">
-    <value>禪宗增加50%%</value>
-    <comment>legacy_id=2744</comment>
-  </data>
-  <data name="Damage/Wizardry/Curse +30" xml:space="preserve">
-    <value>傷害/魔法/詛咒 +30</value>
-    <comment>legacy_id=2745</comment>
   </data>
   <data name="Lugard" xml:space="preserve">
     <value>盧加德</value>
@@ -10061,26 +10005,6 @@
     <value>在羅倫市場期間，您不能邀請其他人加入您的隊伍。</value>
     <comment>legacy_id=3064</comment>
   </data>
-  <data name="Equip to transform into a Skeleton Warrior." xml:space="preserve">
-    <value>裝備後可以變身為骷髏戰士。</value>
-    <comment>legacy_id=3065</comment>
-  </data>
-  <data name="Damage/Wizardry/Curse +40" xml:space="preserve">
-    <value>傷害/魔法/詛咒 +40</value>
-    <comment>legacy_id=3066</comment>
-  </data>
-  <data name="Equipping along with a Pet Skeleton" xml:space="preserve">
-    <value>與寵物骷髏一起裝備</value>
-    <comment>legacy_id=3067</comment>
-  </data>
-  <data name="Equipping along with a Skeleton Transformation Ring" xml:space="preserve">
-    <value>與骷髏變身戒指一起裝備</value>
-    <comment>legacy_id=3071</comment>
-  </data>
-  <data name="increases EXP by 30%%." xml:space="preserve">
-    <value>經驗值增加 30%%。</value>
-    <comment>legacy_id=3072</comment>
-  </data>
   <data name="Chaos Castle Lv.%lu Guardsman x %lu/%lu" xml:space="preserve">
     <value>混沌城堡 Lv.%lu 守護者 x %lu/%lu</value>
     <comment>legacy_id=3074</comment>
@@ -10124,10 +10048,6 @@
   <data name="+15 Item Creation" xml:space="preserve">
     <value>+15 物品創建</value>
     <comment>legacy_id=3087</comment>
-  </data>
-  <data name="Unable to Equip with a Different Transformation Ring" xml:space="preserve">
-    <value>無法裝備不同的變身戒指</value>
-    <comment>legacy_id=3088</comment>
   </data>
   <data name="Cannot be equipped while another Transformation Ring is equipped." xml:space="preserve">
     <value>裝備有另一個變身戒指時無法裝備。</value>

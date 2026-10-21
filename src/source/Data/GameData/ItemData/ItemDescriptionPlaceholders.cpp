@@ -14,7 +14,7 @@ namespace Data::Items
 namespace
 {
 // {level}, and the values of the tooltip's stat lines, which the game computes (Engine/Object/ItemTooltipValues).
-constexpr std::array<std::string_view, 33> BuiltIns = {
+constexpr std::array<std::string_view, 34> BuiltIns = {
     LevelPlaceholder,    "damageMin",           "damageMax",        "defense",
     "magicDefense",      "blockRate",           "attackSpeed",      "walkSpeed",
     "magicPower",        "durability",          "maxDurability",    "iceResistance",
@@ -23,7 +23,7 @@ constexpr std::array<std::string_view, 33> BuiltIns = {
     "requiredDexterity", "requiredVitality",    "requiredEnergy",   "requiredLeadership",
     "missingLevel",      "missingStrength",     "missingDexterity", "missingVitality",
     "missingEnergy",     "missingLeadership",   "addOptionValue1",  "addOptionValue2",
-    "addOptionDuration",
+    "addOptionDuration", "heroLevel",
 };
 
 // The placeholder of `text` that starts at the "{" at `open`: its name and the position after its "}", or the problem.

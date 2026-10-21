@@ -7125,10 +7125,6 @@
     <value>Click on the button to reinitialize all stat points.</value>
     <comment>legacy_id=1886</comment>
   </data>
-  <data name="Register with the NPC to receive various gifts." xml:space="preserve">
-    <value>Register with the NPC to receive various gifts.</value>
-    <comment>legacy_id=1887</comment>
-  </data>
   <data name="Exchange has been made." xml:space="preserve">
     <value>Exchange has been made.</value>
     <comment>legacy_id=1888</comment>
@@ -7220,18 +7216,6 @@
   <data name="Fenrir" xml:space="preserve">
     <value>Fenrir</value>
     <comment>legacy_id=1916</comment>
-  </data>
-  <data name="FragmentOfHornCanBeMade" xml:space="preserve">
-    <value>Fragment of horn can be made using the Divine protection of Goddess and fragment of armor.</value>
-    <comment>legacy_id=1917</comment>
-  </data>
-  <data name="Broken horn can be made using the claw of beast and fragment of horn." xml:space="preserve">
-    <value>Broken horn can be made using the claw of beast and fragment of horn.</value>
-    <comment>legacy_id=1918</comment>
-  </data>
-  <data name="Fenrir's horn can be made through item combination." xml:space="preserve">
-    <value>Fenrir's horn can be made through item combination.</value>
-    <comment>legacy_id=1919</comment>
   </data>
   <data name="Can summon the Fenrir when equipped." xml:space="preserve">
     <value>Can summon the Fenrir when equipped.</value>
@@ -8089,10 +8073,6 @@
     <value>Refinery has started. Refinery is a part of process to change the item to Refining Stone to be reinforced. Refined item will be disapper, make sure to check the item.</value>
     <comment>legacy_id=2224</comment>
   </data>
-  <data name="VitalityD2225" xml:space="preserve">
-    <value>vitality +%d</value>
-    <comment>legacy_id=2225</comment>
-  </data>
   <data name="This item is not allowed to use the private store." xml:space="preserve">
     <value>This item is not allowed to use the private store.</value>
     <comment>legacy_id=2226</comment>
@@ -8116,10 +8096,6 @@
   <data name="Defense Power increase +%d" xml:space="preserve">
     <value>Defense Power increase +%d</value>
     <comment>legacy_id=2231</comment>
-  </data>
-  <data name="Enjoy Halloween Festival." xml:space="preserve">
-    <value>Enjoy Halloween Festival.</value>
-    <comment>legacy_id=2232</comment>
   </data>
   <data name="Blessing of Jack O'Lantern" xml:space="preserve">
     <value>Blessing of Jack O'Lantern</value>
@@ -8165,10 +8141,6 @@
     <value>Christmas</value>
     <comment>legacy_id=2243</comment>
   </data>
-  <data name="Fireworks will appear once thrown in the field." xml:space="preserve">
-    <value>Fireworks will appear once thrown in the field.</value>
-    <comment>legacy_id=2244</comment>
-  </data>
   <data name="Santa Clause" xml:space="preserve">
     <value>Santa Clause</value>
     <comment>legacy_id=2245</comment>
@@ -8180,10 +8152,6 @@
   <data name="Snowman" xml:space="preserve">
     <value>Snowman</value>
     <comment>legacy_id=2247</comment>
-  </data>
-  <data name="Merry Christmas." xml:space="preserve">
-    <value>Merry Christmas.</value>
-    <comment>legacy_id=2248</comment>
   </data>
   <data name="Stonger effect has taken place." xml:space="preserve">
     <value>Stonger effect has taken place.</value>
@@ -8200,10 +8168,6 @@
   <data name="Unable to gain experience rate" xml:space="preserve">
     <value>Unable to gain experience rate</value>
     <comment>legacy_id=2255</comment>
-  </data>
-  <data name="usable %dtimes" xml:space="preserve">
-    <value>usable %d times</value>
-    <comment>legacy_id=2260</comment>
   </data>
   <data name="You can achieve special items with combinations." xml:space="preserve">
     <value>You can achieve special items with combinations.</value>
@@ -8400,10 +8364,6 @@
   <data name="You do not have sufficient points." xml:space="preserve">
     <value>You do not have sufficient points.</value>
     <comment>legacy_id=2322</comment>
-  </data>
-  <data name="GM has gifted this special box." xml:space="preserve">
-    <value>GM has gifted this special box.</value>
-    <comment>legacy_id=2323</comment>
   </data>
   <data name="GM summon zone" xml:space="preserve">
     <value>GM summon zone</value>
@@ -9045,10 +9005,6 @@
     <value>Welcome to Santa's Village. Here's a gift for you. You will always find something to bring you a fortune here.</value>
     <comment>legacy_id=2588</comment>
   </data>
-  <data name="Relocate to the Santa's Village by the right-mouse click." xml:space="preserve">
-    <value>Relocate to the Santa's Village by the right-mouse click.</value>
-    <comment>legacy_id=2589</comment>
-  </data>
   <data name="Would you like to move to the Santa's Village?" xml:space="preserve">
     <value>Would you like to move to the Santa's Village?</value>
     <comment>legacy_id=2590</comment>
@@ -9384,18 +9340,6 @@
   <data name="Select to move." xml:space="preserve">
     <value>Select to move.</value>
     <comment>legacy_id=2731</comment>
-  </data>
-  <data name="Transform into Panda." xml:space="preserve">
-    <value>Transform into Panda.</value>
-    <comment>legacy_id=2743</comment>
-  </data>
-  <data name="Zen increase 50%%" xml:space="preserve">
-    <value>Zen increase 50%%</value>
-    <comment>legacy_id=2744</comment>
-  </data>
-  <data name="Damage/Wizardry/Curse +30" xml:space="preserve">
-    <value>Damage/Wizardry/Curse +30</value>
-    <comment>legacy_id=2745</comment>
   </data>
   <data name="Lugard" xml:space="preserve">
     <value>Lugard</value>
@@ -10357,26 +10301,6 @@
     <value>You cannot ask others to join your party while in Loren Market.</value>
     <comment>legacy_id=3064</comment>
   </data>
-  <data name="Equip to transform into a Skeleton Warrior." xml:space="preserve">
-    <value>Equip to transform into a Skeleton Warrior.</value>
-    <comment>legacy_id=3065</comment>
-  </data>
-  <data name="Damage/Wizardry/Curse +40" xml:space="preserve">
-    <value>Damage/Wizardry/Curse +40</value>
-    <comment>legacy_id=3066</comment>
-  </data>
-  <data name="Equipping along with a Pet Skeleton" xml:space="preserve">
-    <value>Equipping along with a Pet Skeleton</value>
-    <comment>legacy_id=3067</comment>
-  </data>
-  <data name="Equipping along with a Skeleton Transformation Ring" xml:space="preserve">
-    <value>Equipping along with a Skeleton Transformation Ring</value>
-    <comment>legacy_id=3071</comment>
-  </data>
-  <data name="increases EXP by 30%%." xml:space="preserve">
-    <value>increases EXP by 30%%.</value>
-    <comment>legacy_id=3072</comment>
-  </data>
   <data name="Chaos Castle Lv.%lu Guardsman x %lu/%lu" xml:space="preserve">
     <value>Chaos Castle Lv.%lu Guardsman x %lu/%lu</value>
     <comment>legacy_id=3074</comment>
@@ -10420,10 +10344,6 @@
   <data name="+15 Item Creation" xml:space="preserve">
     <value>+15 Item Creation</value>
     <comment>legacy_id=3087</comment>
-  </data>
-  <data name="Unable to Equip with a Different Transformation Ring" xml:space="preserve">
-    <value>Unable to Equip with a Different Transformation Ring</value>
-    <comment>legacy_id=3088</comment>
   </data>
   <data name="Cannot be equipped while another Transformation Ring is equipped." xml:space="preserve">
     <value>Cannot be equipped while another Transformation Ring is equipped.</value>

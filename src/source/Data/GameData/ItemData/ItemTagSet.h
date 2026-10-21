@@ -58,6 +58,7 @@ enum class ItemTag : uint8_t
     NoDamageLine,
     NoLevelRequirement,
     NoDurabilityLine,
+    NoBlankAfterOptions,
 
     Count
 };

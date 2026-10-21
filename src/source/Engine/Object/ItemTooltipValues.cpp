@@ -134,6 +134,7 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item)
                            (type >= ITEM_WING_OF_STORM && type <= ITEM_WING_OF_DIMENSION) ||
                            (type >= ITEM_CAPE_OF_FIGHTER && type <= ITEM_CAPE_OF_OVERRULE);
     values.timed = item.bPeriodItem;
+    values.heroLevel = CharacterAttribute->Level;
     if (g_pItemAddOptioninfo != nullptr)
     {
         const ITEM_ADD_OPTION& addOption = g_pItemAddOptioninfo->GetItemAddOtioninfo(item.Type);
@@ -184,6 +185,7 @@ std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, std::str
         {"magicPower", &ItemTooltipValues::magicPower},
         {"durability", &ItemTooltipValues::durability},
         {"maxDurability", &ItemTooltipValues::maxDurability},
+        {"heroLevel", &ItemTooltipValues::heroLevel},
         {"addOptionValue1", &ItemTooltipValues::addOptionValue1},
         {"addOptionValue2", &ItemTooltipValues::addOptionValue2},
     };
