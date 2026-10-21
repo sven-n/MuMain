@@ -654,8 +654,8 @@ shows it in the others.
   item, items without a name in a language. An item whose name another
   item has too shows in grey what tells them apart, in the list and above
   each tool: the tags it has that not all its namesakes have (the lucky
-  sets: `luckyItem`), or `#1`, `#2` by number where no tag does (the Divine
-  sets, the tiers of the seed spheres); the one namesake without such a tag
+  sets: `luckyItem`), or `#1`, `#2` by number where no tag does (the Seals of
+  Wealth, the tiers of the seed spheres); the one namesake without such a tag
   (the plain item of a lucky set) shows nothing. Names are compared in the
   UI language. It has **Save Items**,
   **Import from bmd**, **Export as bmd**, **Export as S6E3** and

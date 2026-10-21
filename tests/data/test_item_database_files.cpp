@@ -1256,7 +1256,7 @@ TEST_CASE("The item tools draw their frames without ImGui errors [data][items][e
 }
 
 // Items with the same name: the lucky sets have a tag their namesakes do not,
-// the Divine sets and the seed sphere tiers count up by number.
+// the Seals of Wealth and the seed sphere tiers count up by number.
 TEST_CASE("The item lists tell items with the same name apart [data][items][editor]")
 {
     ClientDataScope client(ShippedClientDirectory);
@@ -1268,17 +1268,20 @@ TEST_CASE("The item lists tell items with the same name apart [data][items][edit
     CHECK(namesakes.GetQualifier(KrisType).empty());
     CHECK(namesakes.GetQualifier(MakeItemType(7, 1)).empty());
     CHECK(namesakes.GetQualifier(MakeItemType(7, 67)) == "luckyItem");
-    CHECK(namesakes.GetQualifier(MakeItemType(7, 19)) == "#1");
-    CHECK(namesakes.GetQualifier(MakeItemType(7, 50)) == "#2");
+    CHECK(namesakes.GetQualifier(MakeItemType(13, 44)) == "#1");
+    CHECK(namesakes.GetQualifier(MakeItemType(13, 116)) == "#2");
+    // The Divine and the Faith set have names of their own.
+    CHECK(namesakes.GetQualifier(MakeItemType(7, 19)).empty());
+    CHECK(namesakes.GetQualifier(MakeItemType(7, 50)).empty());
     CHECK(namesakes.GetQualifier(MakeItemType(12, 100)) == "#1");
     CHECK(namesakes.GetQualifier(MakeItemType(12, 124)) == "#5");
 
     // A renamed item has a namesake no more.
-    ItemDefinition renamed = *g_ItemDatabase.Find(MakeItemType(7, 50));
-    renamed.name = L"Divine Helm of Light";
-    renamed.names.Set("en", "Divine Helm of Light");
+    ItemDefinition renamed = *g_ItemDatabase.Find(MakeItemType(13, 116));
+    renamed.name = L"Seal of Plenty";
+    renamed.names.Set("en", "Seal of Plenty");
     g_ItemDataHandler.SetItem(renamed);
-    CHECK(namesakes.GetQualifier(MakeItemType(7, 19)).empty());
+    CHECK(namesakes.GetQualifier(MakeItemType(13, 44)).empty());
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
 }
 
