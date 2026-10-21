@@ -27,6 +27,7 @@
 #include "Core/Globals/_TextureIndex.h"    // BITMAP_MAPTILE
 #include "Render/Sprites/GlobalBitmap.h"   // Bitmaps[]
 #include "Render/Renderer/MuRenderer.h"    // mu::GetRenderer().GetTexturePointer
+#include "Render/RmlUi/RmlUiRuntime.h"     // a game text field being typed in
 #include "Render/Terrain/ZzzLodTerrain.h"  // CurrentLayer
 #include "World/MapInfra/MapManager.h"     // gMapManager.WorldActive
 #include "Core/MuEditorCore.h"             // hover flag for input blocking
@@ -120,6 +121,19 @@ namespace
 
     // Total terrain cells (256x256), used for undo snapshots.
     constexpr int CELLS = TERRAIN_SIZE * TERRAIN_SIZE;
+}
+
+bool CMapEditorUI::Shortcut(ImGuiKeyChord keyChord)
+{
+    if (g_MuEditorCore.IsKeyboardWithEditor())
+    {
+        return ImGui::Shortcut(keyChord);
+    }
+    if (RmlUiRuntime::Instance().IsTextInputActive())
+    {
+        return false;
+    }
+    return ImGui::Shortcut(keyChord, ImGuiInputFlags_RouteGlobal);
 }
 
 CMapEditorUI& CMapEditorUI::GetInstance()
@@ -709,7 +723,7 @@ void CMapEditorUI::RenderObjectsTab()
 
     ImGui::Separator();
     ImGui::BeginDisabled(!m_bObjHasUndo);
-    if (ImGui::Button("Undo last object edit") || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Z))
+    if (ImGui::Button("Undo last object edit") || Shortcut(ImGuiMod_Ctrl | ImGuiKey_Z))
         UndoObjects();
     ImGui::EndDisabled();
 
@@ -771,7 +785,7 @@ void CMapEditorUI::RenderSelectedObjectPanel()
 
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.3f, 0.3f, 1.0f));
-    if (ImGui::Button("Delete object") || ImGui::Shortcut(ImGuiKey_Delete))
+    if (ImGui::Button("Delete object") || Shortcut(ImGuiKey_Delete))
     {
         TakeObjectUndoSnapshot();
         Editor::ObjectPlace::Remove(m_pSelected);
@@ -1137,8 +1151,7 @@ void CMapEditorUI::RenderHeightTab()
 
     ImGui::Separator();
     ImGui::BeginDisabled(!m_bHeightHasUndo);
-    if (ImGui::Button("Undo last height stroke") ||
-        ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Z))
+    if (ImGui::Button("Undo last height stroke") || Shortcut(ImGuiMod_Ctrl | ImGuiKey_Z))
         UndoHeight();
     ImGui::EndDisabled();
 

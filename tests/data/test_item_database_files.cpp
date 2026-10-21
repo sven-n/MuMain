@@ -32,6 +32,7 @@
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
 #ifdef _EDITOR
+#include "Core/MuEditorCore.h"
 #include "UI/Common/MuEditorWindowIds.h"
 #include "UI/ItemEditor/ItemEditorActions.h"
 #include "UI/ItemTools/GlowColorDialog.h"
@@ -55,6 +56,7 @@
 #include "UI/ItemTools/MuItemRequirementsUI.h"
 #include "UI/ItemTools/MuItemRulesUI.h"
 #include "UI/ItemTranslations/MuItemTranslationsUI.h"
+#include "UI/MapEditor/MapEditorUI.h"
 #include "TestModelSlots.h"
 #include "imgui.h"
 #include "imgui_internal.h"
@@ -1823,6 +1825,89 @@ TEST_CASE("Add item without copying makes an item without a slot [data][items][e
     CHECK(added->weaponKind == WeaponKind::None);
     CHECK(std::ranges::all_of(added->classRequirements, [](BYTE step) { return step == 0; }));
     g_ItemEdits.GetHistory().Clear();
+}
+
+// A click into the world leaves no editor window focused, and the game window
+// has the keyboard: the Map Editor's keys still reach it then, but not while
+// a text field of another window is typed in.
+TEST_CASE("The Map Editor's Ctrl+Z and Delete reach it after a click into the world [editor]")
+{
+    TestImGuiContext context;
+    // A test's editor core has no window: the game has the keyboard.
+    REQUIRE_FALSE(g_MuEditorCore.IsKeyboardWithEditor());
+    ImGuiIO& io = ImGui::GetIO();
+    int undos = 0;
+    int deletes = 0;
+    bool focusText = false;
+    char text[16] = "abc";
+    const auto frame = [&]
+    {
+        ImGui::NewFrame();
+        ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+        ImGui::SetNextWindowSize(ImVec2(300.0f, 200.0f));
+        ImGui::Begin(MuEditor::WindowIds::MapEditor);
+        undos += CMapEditorUI::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Z) ? 1 : 0;
+        deletes += CMapEditorUI::Shortcut(ImGuiKey_Delete) ? 1 : 0;
+        ImGui::End();
+        ImGui::SetNextWindowPos(ImVec2(400.0f, 0.0f));
+        ImGui::SetNextWindowSize(ImVec2(300.0f, 200.0f));
+        ImGui::Begin("Other tool");
+        if (focusText)
+        {
+            ImGui::SetKeyboardFocusHere();
+            focusText = false;
+        }
+        ImGui::InputText("Name", text, sizeof(text));
+        ImGui::End();
+        ImGui::Render();
+    };
+    const auto press = [&](ImGuiKeyChord chord)
+    {
+        const auto key = static_cast<ImGuiKey>(chord & ~ImGuiMod_Mask_);
+        const bool ctrl = (chord & ImGuiMod_Ctrl) != 0;
+        if (ctrl)
+        {
+            io.AddKeyEvent(ImGuiMod_Ctrl, true);
+        }
+        io.AddKeyEvent(key, true);
+        frame();
+        io.AddKeyEvent(key, false);
+        if (ctrl)
+        {
+            io.AddKeyEvent(ImGuiMod_Ctrl, false);
+        }
+        frame();
+    };
+    frame();
+    frame();
+
+    SUBCASE("after a click into the world")
+    {
+        // No window there.
+        io.AddMousePosEvent(1000.0f, 800.0f);
+        io.AddMouseButtonEvent(ImGuiMouseButton_Left, true);
+        frame();
+        io.AddMouseButtonEvent(ImGuiMouseButton_Left, false);
+        frame();
+        frame();
+        REQUIRE(ImGui::GetCurrentContext()->NavWindow == nullptr);
+        press(ImGuiMod_Ctrl | ImGuiKey_Z);
+        press(ImGuiKey_Delete);
+        CHECK(undos == 1);
+        CHECK(deletes == 1);
+    }
+    SUBCASE("not while a text field of another window is typed in")
+    {
+        focusText = true;
+        frame();
+        frame();
+        frame();
+        REQUIRE(ImGui::GetActiveID() != 0);
+        press(ImGuiKey_Delete);
+        press(ImGuiMod_Ctrl | ImGuiKey_Z);
+        CHECK(deletes == 0);
+        CHECK(undos == 0);
+    }
 }
 
 // The warning before a shared model changes lists its items; a click on one
