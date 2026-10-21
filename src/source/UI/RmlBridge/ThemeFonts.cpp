@@ -94,19 +94,29 @@ bool FamilyAvailable(std::string family, Rml::Style::FontStyle style = Rml::Styl
 
 std::optional<std::string> ResolveMapNameFontToken(const ThemeInheritance& theme, const std::string& token)
 {
-    // The optional map-name face is italic-only. Keep its family and style paired,
+    // The optional map-name face may be italic-only. Keep its family and style paired,
     // so a missing system font still uses the bundled regular face.
     constexpr const char* mapNameFamily = "font-map-name";
     constexpr const char* mapNameStyle = "font-map-name-style";
     if (token != mapNameFamily && token != mapNameStyle)
         return std::nullopt;
 
-    const auto family = theme.GetSetting("Tokens", mapNameFamily);
-    const bool italicAvailable = family && FamilyAvailable(family->value, Rml::Style::FontStyle::Italic);
+    for (const auto& directory : theme.Directories())
+    {
+        const auto family = ThemeInheritance::ReadSetting(directory, "Tokens", mapNameFamily);
+        if (!family)
+            continue;
+        for (const auto style : {Rml::Style::FontStyle::Normal, Rml::Style::FontStyle::Italic})
+        {
+            if (!FamilyAvailable(*family, style))
+                continue;
+            if (token == mapNameStyle)
+                return style == Rml::Style::FontStyle::Italic ? "italic" : "normal";
+            return family;
+        }
+    }
     if (token == mapNameStyle)
-        return italicAvailable ? "italic" : "normal";
-    if (italicAvailable)
-        return family->value;
+        return "normal";
     return FamilyAvailable("Liberation Sans") ? std::optional<std::string>("Liberation Sans") : std::nullopt;
 }
 } // namespace

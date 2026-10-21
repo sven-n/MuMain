@@ -543,3 +543,30 @@ TEST_CASE("an empty legacy child preserves real theme resources and layout [ui][
         }
     }
 }
+
+TEST_CASE("map-name font tokens preserve normal families and inherited fallback [ui][map-name]")
+{
+    Fixture fixture;
+    REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/LiberationSans-Regular.ttf"));
+    REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/DejaVuSans.ttf"));
+    const auto parent = fixture.Theme("parent");
+    const auto child = fixture.Theme("child");
+    fixture.Write(child / "theme.ini", "[Theme]\nBase=parent\n");
+    fixture.Write(parent / "tokens.ini", "[Tokens]\nfont-map-name=Liberation Sans\n");
+    fixture.Write(child / "tokens.ini", "[Tokens]\nfont-map-name=DejaVu Sans\n");
+    const auto resolve = [&](const char* token)
+    {
+        return UI::RmlBridge::ResolveThemeFontToken(UI::RmlBridge::ThemeInheritance(child), token);
+    };
+    CHECK(resolve("font-map-name") == std::optional<std::string>("DejaVu Sans"));
+    CHECK(resolve("font-map-name-style") == std::optional<std::string>("normal"));
+
+    fixture.Write(parent / "tokens.ini", "[Tokens]\nfont-map-name=DejaVu Sans\n");
+    fixture.Write(child / "tokens.ini", "[Tokens]\nfont-map-name=Unavailable Test Family\n");
+    CHECK(resolve("font-map-name") == std::optional<std::string>("DejaVu Sans"));
+    CHECK(resolve("font-map-name-style") == std::optional<std::string>("normal"));
+
+    fixture.Write(parent / "tokens.ini", "[Tokens]\nfont-map-name=Unavailable Parent Family\n");
+    CHECK(resolve("font-map-name") == std::optional<std::string>("Liberation Sans"));
+    CHECK(resolve("font-map-name-style") == std::optional<std::string>("normal"));
+}
