@@ -36,7 +36,7 @@ through **ItemEdits** (the handler plus the session's undo history,
 **ItemEditHistory**); a tool edits a copy of the item (**ItemEditDraft**) and
 stores it when a field is left.
 - **MuItemBrowserUI** - The item list with search and filters (ItemBrowserList, ItemGroupFilter), save, import and export, and the add, duplicate, move and remove dialogs (ItemAddDialog, ItemMoveDialog, ItemRemoveDialog) with what uses an item (ItemUsage, ItemUsageView, ItemCodeReferences)
-- **MuItemBasicsUI** - Name, size, slot, stats, prices, stat profile and resistances (ItemFieldWidgets, ItemHeldByCharacter, ItemStatProfileWidgets)
+- **MuItemBasicsUI** - Name, size, slot, stats, prices, stat profile and resistances (ItemFieldWidgets, ItemHeldByCharacter, ItemStatProfileWidgets), with the formula of each value (ItemValueFormulas, ItemValueFormulaText)
 - **MuItemRequirementsUI** - The stat profile, the requirements (a stat requirement as its +0 value and its weight, with the weights that give the same value: ItemRequirementTable, RequirementWeightPopup), also by item level, and the class steps
 - **MuItemRulesUI** - The rule flags of many items at once (ItemRulesTable, ItemRuleFlags)
 - **MuItemCategoriesUI** - The items of a tag

@@ -52,11 +52,14 @@ std::array<const char*, MAX_RESISTANCE + 1> ResistanceLabels()
             I18N::Metadata::WaterResistance, I18N::Metadata::Resistance7};
 }
 
-// A column of the stat table: a value ComputeItemStats gives.
+// A column of the stat table: a value ComputeItemStats gives, and the stat
+// whose formula gives it.
 struct StatColumn
 {
     int GameLogic::Items::ItemStatValues::* value;
     const char* label;
+    Data::Items::ItemStat stat;
+    bool maxDamage = false;
 };
 
 // Pixel width before the editor UI scale.
@@ -64,13 +67,14 @@ constexpr float StatColumnWidth = 90.0f;
 
 std::array<StatColumn, 6> StatColumns()
 {
+    using Data::Items::ItemStat;
     using GameLogic::Items::ItemStatValues;
-    return {{{&ItemStatValues::damageMin, I18N::Metadata::MinDamage},
-             {&ItemStatValues::damageMax, I18N::Metadata::MaxDamage},
-             {&ItemStatValues::magicPower, I18N::Metadata::MagicPower},
-             {&ItemStatValues::defense, I18N::Metadata::Defense},
-             {&ItemStatValues::magicDefense, I18N::Metadata::MagicDefense},
-             {&ItemStatValues::blockRate, I18N::Metadata::BlockRate}}};
+    return {{{&ItemStatValues::damageMin, I18N::Metadata::MinDamage, ItemStat::Damage},
+             {&ItemStatValues::damageMax, I18N::Metadata::MaxDamage, ItemStat::Damage, true},
+             {&ItemStatValues::magicPower, I18N::Metadata::MagicPower, ItemStat::MagicPower},
+             {&ItemStatValues::defense, I18N::Metadata::Defense, ItemStat::Defense},
+             {&ItemStatValues::magicDefense, I18N::Metadata::MagicDefense, ItemStat::MagicDefense},
+             {&ItemStatValues::blockRate, I18N::Metadata::BlockRate, ItemStat::BlockRate}}};
 }
 
 } // namespace
@@ -243,6 +247,14 @@ void CMuItemBasicsUI::RenderStatTable(const ItemDefinition& item)
         }
     }
     ImGui::EndTable();
+
+    // Where the values come from, whatever the checkboxes say.
+    const MuEditor::Items::ExpandedStatProfile profile = MuEditor::Items::ExpandItemStatProfile(item);
+    for (const StatColumn& column : shown)
+    {
+        MuEditor::Items::RenderFormulaLine(
+            column.label, MuEditor::Items::DescribeStatFormula(item, column.stat, column.maxDamage, profile));
+    }
 }
 
 void CMuItemBasicsUI::RenderPrices(ItemDefinition& item)

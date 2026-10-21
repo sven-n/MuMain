@@ -1531,4 +1531,91 @@
   <data name="The weights that give this +0 value" xml:space="preserve">
     <value>Die Gewichte, die diesen Wert auf +0 ergeben, mit dem, was jedes auf +15 und bei exzellenten Gegenständen ergibt.</value>
   </data>
+  <data name="Formula weighted requirement" xml:space="preserve">
+    <value>{0} + {1} × ({2} + {3} × Gegenstandsstufe) × {4} / 100</value>
+  </data>
+  <data name="Formula requirement from the level requirement" xml:space="preserve">
+    <value>{0} + {1} × {2} × {3} / 100 auf jeder Gegenstandsstufe ({2}: die Stufenanforderung)</value>
+  </data>
+  <data name="Formula requirement from the level requirement by level" xml:space="preserve">
+    <value>{0} + {1} × Stufenanforderung × {2} / 100 (die je Gegenstandsstufe angegebene Stufenanforderung)</value>
+  </data>
+  <data name="Formula without a level requirement" xml:space="preserve">
+    <value>{0} (keine Stufenanforderung: aus der Drop-Stufe)</value>
+  </data>
+  <data name="Formula kept as is" xml:space="preserve">
+    <value>{0}, unverändert</value>
+  </data>
+  <data name="Formula none" xml:space="preserve">
+    <value>keine</value>
+  </data>
+  <data name="Formula none with weight 0" xml:space="preserve">
+    <value>keine (Gewicht 0); mit einem Gewicht: {0}</value>
+  </data>
+  <data name="Formula weight" xml:space="preserve">
+    <value>Gewicht</value>
+  </data>
+  <data name="Formula given by item level" xml:space="preserve">
+    <value>je Gegenstandsstufe angegeben: {0}</value>
+  </data>
+  <data name="Formula value at item levels" xml:space="preserve">
+    <value>{0} (+{1} bis +{2})</value>
+  </data>
+  <data name="Formula value at one item level" xml:space="preserve">
+    <value>{0} (+{1})</value>
+  </data>
+  <data name="Formula level growth" xml:space="preserve">
+    <value>{0} + {1} × Gegenstandsstufe</value>
+  </data>
+  <data name="Formula the same at every item level" xml:space="preserve">
+    <value>{0} auf jeder Gegenstandsstufe</value>
+  </data>
+  <data name="Formula excellent plus" xml:space="preserve">
+    <value>exzellent +{0}</value>
+  </data>
+  <data name="Formula excellent options do not raise it" xml:space="preserve">
+    <value>exzellente Optionen erhöhen sie nicht</value>
+  </data>
+  <data name="Formula wing options do not raise it" xml:space="preserve">
+    <value>die exzellenten Optionen eines Flügels sind Flügeloptionen und erhöhen sie nicht</value>
+  </data>
+  <data name="Formula per option level" xml:space="preserve">
+    <value>+ {0} × Optionsstufe</value>
+  </data>
+  <data name="Formula no level bonus" xml:space="preserve">
+    <value>{0}, kein Stufenbonus</value>
+  </data>
+  <data name="Formula excellent part" xml:space="preserve">
+    <value>exzellent +{0} ({1})</value>
+  </data>
+  <data name="Formula excellent part only when ancient" xml:space="preserve">
+    <value>exzellent +{0} ({1}) nur wenn antik: die exzellenten Optionen eines Flügels sind Flügeloptionen</value>
+  </data>
+  <data name="Formula no excellent part" xml:space="preserve">
+    <value>kein Exzellent-Anteil</value>
+  </data>
+  <data name="Formula no excellent part at drop level 0" xml:space="preserve">
+    <value>kein Exzellent-Anteil (Drop-Stufe 0)</value>
+  </data>
+  <data name="Formula ancient part" xml:space="preserve">
+    <value>antik +{0} ({1})</value>
+  </data>
+  <data name="Formula ancient part with the level bonus" xml:space="preserve">
+    <value>antik +({0})</value>
+  </data>
+  <data name="Formula no ancient part" xml:space="preserve">
+    <value>kein Antik-Anteil</value>
+  </data>
+  <data name="Formula halved" xml:space="preserve">
+    <value>({0}) / 2 + {1} × Gegenstandsstufe</value>
+  </data>
+  <data name="Formula at most" xml:space="preserve">
+    <value>{0}, höchstens {1}</value>
+  </data>
+  <data name="Formula source item field" xml:space="preserve">
+    <value>Gegenstand: {0}</value>
+  </data>
+  <data name="Formula drop level bonus" xml:space="preserve">
+    <value>Exzellente Gegenstände zählen {0} Drop-Stufen mehr, antike Gegenstände ohne exzellente Optionen {1} [dropLevelBonus].</value>
+  </data>
 </root>

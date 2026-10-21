@@ -1552,4 +1552,91 @@
   <data name="The weights that give this +0 value" xml:space="preserve">
     <value>The weights that give this +0 value, with what each gives at +15 and for excellent items.</value>
   </data>
+  <data name="Formula weighted requirement" xml:space="preserve">
+    <value>{0} + {1} × ({2} + {3} × item level) × {4} / 100</value>
+  </data>
+  <data name="Formula requirement from the level requirement" xml:space="preserve">
+    <value>{0} + {1} × {2} × {3} / 100 at every item level ({2}: the level requirement)</value>
+  </data>
+  <data name="Formula requirement from the level requirement by level" xml:space="preserve">
+    <value>{0} + {1} × level requirement × {2} / 100 (the level requirement given at each item level)</value>
+  </data>
+  <data name="Formula without a level requirement" xml:space="preserve">
+    <value>{0} (no level requirement: from the drop level)</value>
+  </data>
+  <data name="Formula kept as is" xml:space="preserve">
+    <value>{0}, kept as is</value>
+  </data>
+  <data name="Formula none" xml:space="preserve">
+    <value>none</value>
+  </data>
+  <data name="Formula none with weight 0" xml:space="preserve">
+    <value>none (weight 0); with a weight: {0}</value>
+  </data>
+  <data name="Formula weight" xml:space="preserve">
+    <value>weight</value>
+  </data>
+  <data name="Formula given by item level" xml:space="preserve">
+    <value>given by item level: {0}</value>
+  </data>
+  <data name="Formula value at item levels" xml:space="preserve">
+    <value>{0} (+{1} to +{2})</value>
+  </data>
+  <data name="Formula value at one item level" xml:space="preserve">
+    <value>{0} (+{1})</value>
+  </data>
+  <data name="Formula level growth" xml:space="preserve">
+    <value>{0} + {1} × item level</value>
+  </data>
+  <data name="Formula the same at every item level" xml:space="preserve">
+    <value>{0} at every item level</value>
+  </data>
+  <data name="Formula excellent plus" xml:space="preserve">
+    <value>excellent +{0}</value>
+  </data>
+  <data name="Formula excellent options do not raise it" xml:space="preserve">
+    <value>excellent options do not raise it</value>
+  </data>
+  <data name="Formula wing options do not raise it" xml:space="preserve">
+    <value>a wing's excellent options are wing options and do not raise it</value>
+  </data>
+  <data name="Formula per option level" xml:space="preserve">
+    <value>+ {0} × option level</value>
+  </data>
+  <data name="Formula no level bonus" xml:space="preserve">
+    <value>{0}, no level bonus</value>
+  </data>
+  <data name="Formula excellent part" xml:space="preserve">
+    <value>excellent +{0} ({1})</value>
+  </data>
+  <data name="Formula excellent part only when ancient" xml:space="preserve">
+    <value>excellent +{0} ({1}) only when ancient: a wing's excellent options are wing options</value>
+  </data>
+  <data name="Formula no excellent part" xml:space="preserve">
+    <value>no excellent part</value>
+  </data>
+  <data name="Formula no excellent part at drop level 0" xml:space="preserve">
+    <value>no excellent part (drop level 0)</value>
+  </data>
+  <data name="Formula ancient part" xml:space="preserve">
+    <value>ancient +{0} ({1})</value>
+  </data>
+  <data name="Formula ancient part with the level bonus" xml:space="preserve">
+    <value>ancient +({0})</value>
+  </data>
+  <data name="Formula no ancient part" xml:space="preserve">
+    <value>no ancient part</value>
+  </data>
+  <data name="Formula halved" xml:space="preserve">
+    <value>({0}) / 2 + {1} × item level</value>
+  </data>
+  <data name="Formula at most" xml:space="preserve">
+    <value>{0}, at most {1}</value>
+  </data>
+  <data name="Formula source item field" xml:space="preserve">
+    <value>item: {0}</value>
+  </data>
+  <data name="Formula drop level bonus" xml:space="preserve">
+    <value>Excellent items count {0} more drop levels, ancient items without excellent options {1} [dropLevelBonus].</value>
+  </data>
 </root>

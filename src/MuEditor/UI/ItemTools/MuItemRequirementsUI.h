@@ -5,6 +5,7 @@
 #include "ItemEditDraft.h"
 #include "ItemRequirementTable.h"
 #include "ItemUsers.h"
+#include "ItemValueFormulaText.h"
 #include "RequirementWeightPopup.h"
 
 #include "Data/GameData/ItemData/ItemDefinition.h"
@@ -36,8 +37,9 @@ private:
     // Whether the requirement is given by level, and its 16 values if so.
     // Turning it on fills them with what `baseValue` gives a normal item at
     // each level, turning it off finds the base value that gives them.
+    // Its formula beside it.
     void RenderByLevel(Data::Items::ItemDefinition& item, Data::Items::ItemRequirement requirement, const char* label,
-                       WORD& baseValue);
+                       WORD& baseValue, const MuEditor::Items::FormulaLine& formula);
     void RenderLevelTable(const Data::Items::ItemDefinition& item);
     void RenderClasses(Data::Items::ItemDefinition& item);
 

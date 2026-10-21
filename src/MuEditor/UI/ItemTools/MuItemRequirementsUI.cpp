@@ -134,6 +134,7 @@ void CMuItemRequirementsUI::RenderRequirements(ItemDefinition& item)
     }
     // The profile gives the formulas the requirements grow by.
     RenderStatProfileCombo(m_draft, item, m_profileCounts);
+    const ExpandedStatProfile profile = ExpandItemStatProfile(item);
     for (const RequirementField& field : RequirementFields())
     {
         ImGui::PushID(static_cast<int>(field.requirement));
@@ -152,7 +153,8 @@ void CMuItemRequirementsUI::RenderRequirements(ItemDefinition& item)
             ImGui::EndDisabled();
         }
         ImGui::Indent();
-        RenderByLevel(item, field.requirement, field.label, base);
+        RenderByLevel(item, field.requirement, field.label, base,
+                      DescribeRequirementFormula(item, field.requirement, profile));
         ImGui::Unindent();
         ImGui::PopID();
     }
@@ -248,7 +250,7 @@ void CMuItemRequirementsUI::RenderWeightedRequirement(ItemDefinition& item, Item
 }
 
 void CMuItemRequirementsUI::RenderByLevel(ItemDefinition& item, ItemRequirement requirement, const char* label,
-                                          WORD& baseValue)
+                                          WORD& baseValue, const FormulaLine& formula)
 {
     bool byLevel = item.requirementsByLevel.Find(requirement) != nullptr;
     if (ImGui::Checkbox(I18N::Editor::ByItemLevel, &byLevel))
@@ -294,6 +296,8 @@ void CMuItemRequirementsUI::RenderByLevel(ItemDefinition& item, ItemRequirement 
                               stillAdded);
         }
     }
+    ImGui::SameLine();
+    RenderFormulaLine(nullptr, formula);
     const Data::Items::RequirementByLevel* found = item.requirementsByLevel.Find(requirement);
     if (found == nullptr)
     {

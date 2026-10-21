@@ -4,6 +4,7 @@
 
 #include "ItemEditDraft.h"
 #include "ItemUsers.h"
+#include "ItemValueFormulaText.h"
 
 #include "Data/GameData/ItemData/ItemDefinition.h"
 
@@ -16,6 +17,14 @@ namespace MuEditor::Items
 // the item. A pick is one undo step.
 void RenderStatProfileCombo(ItemEditDraft<Data::Items::ItemDefinition>& draft, Data::Items::ItemDefinition& item,
                             ItemStatProfileUseCounts& counts);
+
+// The terms of the profile storing `item` gives it, from the item stat file the
+// editor has.
+ExpandedStatProfile ExpandItemStatProfile(const Data::Items::ItemDefinition& item);
+
+// A formula line, grey and wrapped at the window's edge, after `label` (none:
+// nullptr), with its tooltip.
+void RenderFormulaLine(const char* label, const FormulaLine& line);
 } // namespace MuEditor::Items
 
 #endif // _EDITOR

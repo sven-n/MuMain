@@ -7,6 +7,7 @@
 #include "ItemFieldWidgets.h"
 #include "ItemRequirementTable.h"
 
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "I18N/All.h"
@@ -79,6 +80,29 @@ void RenderStatProfileCombo(ItemEditDraft<Data::Items::ItemDefinition>& draft, D
     }
     ImGui::SameLine();
     ImGui::TextDisabled("%s", DescribeChoice(choice).c_str());
+}
+
+ExpandedStatProfile ExpandItemStatProfile(const Data::Items::ItemDefinition& item)
+{
+    return ExpandStatProfile(g_ItemDataHandler.GetStatFile(), FindStatProfileChoice(item).name);
+}
+
+void RenderFormulaLine(const char* label, const FormulaLine& line)
+{
+    ImGui::PushTextWrapPos(0.0f);
+    if (label != nullptr)
+    {
+        ImGui::TextDisabled("%s: %s", label, line.text.c_str());
+    }
+    else
+    {
+        ImGui::TextDisabled("%s", line.text.c_str());
+    }
+    ImGui::PopTextWrapPos();
+    if (!line.tooltip.empty() && ImGui::IsItemHovered())
+    {
+        ImGui::SetTooltip("%s", line.tooltip.c_str());
+    }
 }
 } // namespace MuEditor::Items
 

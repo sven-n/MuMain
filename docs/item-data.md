@@ -725,7 +725,9 @@ shows it in the others.
   resistances. Below the stats, what the game
   makes of them at each + level (damage, magic power, defense, magic
   defense, block rate), also as excellent or ancient, while a value is still
-  being typed. Size and slot stay as they are
+  being typed, and under that the formula of each with the item's numbers
+  and where each part comes from: `[default]`, the profile's name, or `[item:
+  excellentBonus]` for a field of the item. Size and slot stay as they are
   while your character wears the item or a window shows it (the inventory,
   the vault, a trade, a shop): an item grid frees the cells by the size an
   item has when it is taken out. Such an item is not moved or removed
@@ -744,7 +746,8 @@ shows it in the others.
   items (or the nearest values some weight gives), and *Pick a weight* opens
   it for the value the item has, to fine tune the weight. The weight can be
   typed too. The level, and a requirement whose formula keeps the base value
-  (`"base"`), take the value itself. Each also by
+  (`"base"`), take the value itself. Beside each, its formula with the item's
+  numbers and where each part comes from, as in Item Basics. Each also by
   item level (16 values that replace the formula; they start at what the
   base value gives a normal item at each level, and turning them off finds
   the base value back; excellent and ancient items get no higher stat
