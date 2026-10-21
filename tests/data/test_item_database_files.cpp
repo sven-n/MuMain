@@ -31,8 +31,10 @@
 #include "Render/Items/ItemRenderStyles.h"
 #ifdef _EDITOR
 #include "UI/Common/MuEditorWindowIds.h"
+#include "UI/ItemEditor/ItemEditorActions.h"
 #include "UI/ItemTools/GlowColorDialog.h"
 #include "UI/ItemTools/ItemEdits.h"
+#include "UI/ItemTools/ItemHeldByCharacter.h"
 #include "UI/ItemTools/ItemNamesakes.h"
 #include "UI/ItemTools/ItemRequirementTable.h"
 #include "UI/ItemTools/ItemSelection.h"
@@ -59,6 +61,8 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <initializer_list>
+#include <memory>
 #include <random>
 #include <span>
 #include <string>
@@ -408,7 +412,81 @@ template <typename TChange> void EditItem(int itemType, TChange&& change)
     change(item);
     g_ItemDataHandler.SetItem(item);
 }
+
+// The character wears items of these types for the scope (IsHeldByCharacter).
+class WornItemsScope
+{
+public:
+    explicit WornItemsScope(std::initializer_list<int> itemTypes)
+        : m_previous(CharacterMachine), m_machine(std::make_unique<CHARACTER_MACHINE>())
+    {
+        // Type 0 is the Kris: every other place holds nothing.
+        for (ITEM& equipped : m_machine->Equipment)
+        {
+            equipped.Type = -1;
+        }
+        size_t index = 0;
+        for (const int itemType : itemTypes)
+        {
+            m_machine->Equipment[index++].Type = static_cast<short>(itemType);
+        }
+        CharacterMachine = m_machine.get();
+    }
+
+    ~WornItemsScope()
+    {
+        CharacterMachine = m_previous;
+    }
+
+    WornItemsScope(const WornItemsScope&) = delete;
+    WornItemsScope& operator=(const WornItemsScope&) = delete;
+
+private:
+    CHARACTER_MACHINE* m_previous;
+    std::unique_ptr<CHARACTER_MACHINE> m_machine;
+};
 } // namespace
+
+// The import keeps the size and slot of a held item; a held type that had no
+// data takes the imported item, since it has no size or slot to keep.
+TEST_CASE("A bmd import keeps the size and slot of the held items that had data [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    std::string changeLog;
+    REQUIRE(g_ItemDataHandler.ExportAsBmd(changeLog));
+    const ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+    ItemDefinition widerBlade = *g_ItemDatabase.Find(BladeType);
+    ++widerBlade.width;
+
+    // Before the import: the Kris has no data, the blade another size.
+    REQUIRE(g_ItemDataHandler.RemoveItem(KrisType));
+    g_ItemDataHandler.SetItem(widerBlade);
+    const WornItemsScope worn({KrisType, BladeType});
+    std::vector<ItemDefinition> held;
+    for (const int itemType : MuEditor::Items::FindHeldItemTypes())
+    {
+        held.push_back(g_ItemDatabase.GetAllSlots()[itemType]);
+    }
+    REQUIRE(held.size() == 2);
+
+    REQUIRE_FALSE(HasErrors(g_ItemDataHandler.ImportFromBmd().issues));
+    CItemEditorActions::KeepHeldItemShapes(held);
+    CHECK(g_ItemDatabase.Find(BladeType)->width == widerBlade.width);
+    const ItemDefinition* imported = g_ItemDatabase.Find(KrisType);
+    REQUIRE(imported != nullptr);
+    CHECK(imported->width == kris.width);
+    CHECK(imported->height == kris.height);
+    CHECK(imported->slot == kris.slot);
+    CHECK(ItemAttribute[KrisType].Width == kris.width);
+}
 
 TEST_CASE("Item editor changes go into the item database [data][items][editor]")
 {

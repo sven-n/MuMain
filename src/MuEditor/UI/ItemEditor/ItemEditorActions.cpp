@@ -87,6 +87,12 @@ void CItemEditorActions::KeepHeldItemShapes(const std::vector<Data::Items::ItemD
     std::vector<Data::Items::ItemDefinition> kept;
     for (const Data::Items::ItemDefinition& old : before)
     {
+        // A type held without data has no size or slot to keep (its
+        // ItemAttribute row is empty, so it takes no grid cells).
+        if (!old.Exists())
+        {
+            continue;
+        }
         const Data::Items::ItemDefinition* imported = g_ItemDatabase.Find(old.group, old.number);
         if (imported != nullptr && imported->width == old.width && imported->height == old.height &&
             imported->slot == old.slot)

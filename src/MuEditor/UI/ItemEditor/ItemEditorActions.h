@@ -26,15 +26,18 @@ public:
     // replaced, so a list of them must be built again.
     static bool RenderAllButtons();
 
+    // After an import: puts back the size and slot (or the whole item, if the
+    // import removed it) of the items the game holds that had data, from
+    // `before`. A held type without data takes no grid cells, so it takes the
+    // imported item as it is.
+    static void KeepHeldItemShapes(const std::vector<Data::Items::ItemDefinition>& before);
+
 private:
     static void LogIssues(const std::vector<Data::Items::ItemDataIssue>& issues);
     // After a save: each UI language that misses item names, with how many (the
     // items show the English name there).
     static void LogMissingItemNames();
     static void LogImportResult(const Data::Items::ItemBmdImportResult& result);
-    // After an import: puts back the size and slot (or the whole item, if the
-    // import removed it) of the items the game holds, from `before`.
-    static void KeepHeldItemShapes(const std::vector<Data::Items::ItemDefinition>& before);
 };
 
 #endif // _EDITOR
