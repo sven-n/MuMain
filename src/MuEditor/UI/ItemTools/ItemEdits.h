@@ -40,6 +40,10 @@ public:
     // CItemDataHandler::RemoveGlowColor for each name, as one step; false
     // when none could be removed.
     bool RemoveGlowColors(std::string label, std::span<const std::string> names);
+    // CItemDataHandler::SetStatFile, with the items in `repointed` stored as
+    // they are (their new stat profile), as one step. `file` must be valid.
+    void SetStatFile(std::string label, const Data::Items::ItemStatFile& file,
+                     std::span<const Data::Items::ItemDefinition> repointed = {});
 
     // The changes until EndGroup are one undo step under `label` (an item
     // duplicated with its model made shared).

@@ -78,6 +78,16 @@ void RestoreGlowColors(std::span<const Data::Effects::GlowColor> colors)
     g_ItemDataHandler.RestoreGlowColors(colors);
 }
 
+Data::Items::ItemStatFile ReadStatFile()
+{
+    return g_ItemDataHandler.GetStatFile();
+}
+
+void RestoreStatFile(const Data::Items::ItemStatFile& file)
+{
+    g_ItemDataHandler.SetStatFile(file);
+}
+
 std::vector<int> SharedModelUsers(std::string_view name)
 {
     std::vector<int> users;
@@ -99,9 +109,9 @@ ItemEdits& ItemEdits::GetInstance()
 }
 
 ItemEdits::ItemEdits()
-    : m_history({&ItemEdits::ReadSlot, &RestoreSlots,
-                 [](int from, int to) { return g_ItemDataHandler.MoveItem(from, to); }, &ReadSharedModel,
-                 &RestoreSharedModel, &IsHeldByCharacter, &ReadGlowColors, &RestoreGlowColors})
+    : m_history({&ItemEdits::ReadSlot, &RestoreSlots, [](int from, int to)
+                 { return g_ItemDataHandler.MoveItem(from, to); }, &ReadSharedModel, &RestoreSharedModel,
+                 &IsHeldByCharacter, &ReadGlowColors, &RestoreGlowColors, &ReadStatFile, &RestoreStatFile})
 {
 }
 
@@ -292,6 +302,42 @@ bool ItemEdits::RemoveGlowColors(std::string label, std::span<const std::string>
     return true;
 }
 
+void ItemEdits::SetStatFile(std::string label, const Data::Items::ItemStatFile& file,
+                            std::span<const ItemDefinition> repointed)
+{
+    auto before = std::make_shared<const Data::Items::ItemStatFile>(g_ItemDataHandler.GetStatFile());
+    std::vector<ItemSlotState> slotsBefore;
+    for (const ItemDefinition& item : repointed)
+    {
+        slotsBefore.push_back(ReadSlot(Data::Items::MakeItemType(item.group, item.number)));
+    }
+
+    // The file first, so the items' new profile names resolve.
+    g_ItemDataHandler.SetStatFile(file);
+    g_ItemDataHandler.RestoreItems(repointed);
+
+    ItemEditEntry entry{std::move(label), {}};
+    auto after = std::make_shared<const Data::Items::ItemStatFile>(g_ItemDataHandler.GetStatFile());
+    if (*after != *before)
+    {
+        ItemEditStep step{ItemEditStep::Kind::StatFile};
+        step.statFileBefore = std::move(before);
+        step.statFileAfter = std::move(after);
+        entry.steps.push_back(std::move(step));
+    }
+    for (size_t index = 0; index < repointed.size(); ++index)
+    {
+        const int itemType = Data::Items::MakeItemType(repointed[index].group, repointed[index].number);
+        ItemSlotState slotAfter = ReadSlot(itemType);
+        if (slotAfter != slotsBefore[index])
+        {
+            entry.steps.push_back({ItemEditStep::Kind::Slot, itemType, 0, std::move(slotsBefore[index]),
+                                   std::move(slotAfter), std::nullopt, std::nullopt});
+        }
+    }
+    Record(std::move(entry));
+}
+
 void ItemEdits::BeginGroup(std::string label)
 {
     if (!m_group)
@@ -317,8 +363,9 @@ void ItemEdits::Record(ItemEditEntry entry)
         m_history.Record(std::move(entry));
         return;
     }
-    // One step per item type and one for the glow colors: what changed twice
-    // keeps its first "before" and its last "after".
+    // One step per item type, one for the glow colors and one for the item
+    // stat file: what changed twice keeps its first "before" and its last
+    // "after".
     for (ItemEditStep& step : entry.steps)
     {
         const auto same = std::ranges::find_if(
@@ -327,7 +374,7 @@ void ItemEdits::Record(ItemEditEntry entry)
             {
                 return grouped.kind == step.kind &&
                        ((step.kind == ItemEditStep::Kind::Slot && grouped.itemType == step.itemType) ||
-                        step.kind == ItemEditStep::Kind::GlowColors);
+                        step.kind == ItemEditStep::Kind::GlowColors || step.kind == ItemEditStep::Kind::StatFile);
             });
         if (same == m_group->steps.end())
         {
@@ -336,6 +383,10 @@ void ItemEdits::Record(ItemEditEntry entry)
         else if (step.kind == ItemEditStep::Kind::GlowColors)
         {
             same->colorsAfter = std::move(step.colorsAfter);
+        }
+        else if (step.kind == ItemEditStep::Kind::StatFile)
+        {
+            same->statFileAfter = std::move(step.statFileAfter);
         }
         else
         {

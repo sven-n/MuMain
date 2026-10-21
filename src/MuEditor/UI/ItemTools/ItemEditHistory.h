@@ -5,10 +5,12 @@
 #include "Data/GameData/EffectData/GlowColors.h"
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
+#include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/SharedItemModel.h"
 
 #include <cstddef>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <span>
 #include <string>
@@ -46,6 +48,8 @@ struct ItemEditStep
         SharedModel,
         // The glow color list went from `colorsBefore` to `colorsAfter`.
         GlowColors,
+        // The item stat file went from `statFileBefore` to `statFileAfter`.
+        StatFile,
     };
 
     Kind kind = Kind::Slot;
@@ -57,6 +61,9 @@ struct ItemEditStep
     std::optional<Data::Items::SharedItemModel> sharedAfter;
     std::vector<Data::Effects::GlowColor> colorsBefore;
     std::vector<Data::Effects::GlowColor> colorsAfter;
+    // Shared, so the other steps do not each carry two stat files.
+    std::shared_ptr<const Data::Items::ItemStatFile> statFileBefore;
+    std::shared_ptr<const Data::Items::ItemStatFile> statFileAfter;
 };
 
 // What one action of a tool changed, undone and redone as a whole: an edited
@@ -96,6 +103,9 @@ public:
         // The glow color list, and putting one back (the items glow with it).
         std::function<std::vector<Data::Effects::GlowColor>()> readGlowColors;
         std::function<void(std::span<const Data::Effects::GlowColor> colors)> restoreGlowColors;
+        // The item stat file, and putting one back (the items take its profiles).
+        std::function<Data::Items::ItemStatFile()> readStatFile;
+        std::function<void(const Data::Items::ItemStatFile& file)> restoreStatFile;
     };
 
     // Why the last Undo or Redo did nothing.
@@ -135,7 +145,8 @@ public:
     }
 
     // The item type the last Undo or Redo changed first, to select it;
-    // nullopt for a change to shared models or glow colors only.
+    // nullopt for a change to shared models, glow colors or the item stat
+    // file only.
     std::optional<int> GetLastChangedItem() const
     {
         return m_lastChangedItem;

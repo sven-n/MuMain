@@ -10,6 +10,7 @@
 #include "Data/GameData/ItemData/ItemType.h"
 
 #include <map>
+#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
@@ -70,11 +71,19 @@ public:
                 {},
                 [this] { return m_colors; },
                 [this](std::span<const Data::Effects::GlowColor> colors)
-                { m_colors.assign(colors.begin(), colors.end()); }};
+                { m_colors.assign(colors.begin(), colors.end()); },
+                [this] { return m_statFile; },
+                [this](const Data::Items::ItemStatFile& file)
+                {
+                    m_statFile = file;
+                    ++m_statFileRestores;
+                }};
     }
 
     std::map<std::string, Data::Items::SharedItemModel> m_shared;
     std::vector<Data::Effects::GlowColor> m_colors;
+    Data::Items::ItemStatFile m_statFile;
+    int m_statFileRestores = 0;
     // The move changes the weapon kind, as a move to another group may.
     static inline bool MoveDerives = false;
 
@@ -216,6 +225,42 @@ TEST_CASE("The item edit history undoes moves and shared model changes [editor][
         items.m_colors.push_back({"gold", {1, 0.7, 0.2}});
         CHECK_FALSE(history.Undo());
         CHECK(history.GetLastRefusal() == ItemEditHistory::Refusal::ItemsChanged);
+    }
+
+    SUBCASE("the item stat file with the items it gave another profile")
+    {
+        Data::Items::ItemStatFile before;
+        before.excellentDropLevelBonus = 25;
+        Data::Items::ItemStatFile after = before;
+        after.excellentDropLevelBonus = 26;
+        items.m_statFile = after;
+        ItemSlotState kris = items.Slot(Kris);
+        ItemSlotState krisAfter = kris;
+        krisAfter.item.statProfile = "blade";
+        items.Slot(Kris) = krisAfter;
+
+        ItemEditStep step{ItemEditStep::Kind::StatFile};
+        step.statFileBefore = std::make_shared<const Data::Items::ItemStatFile>(before);
+        step.statFileAfter = std::make_shared<const Data::Items::ItemStatFile>(after);
+        ItemEditEntry entry = SlotEntry("Change the formulas", Kris, kris, krisAfter);
+        entry.steps.insert(entry.steps.begin(), step);
+        history.Record(entry);
+
+        REQUIRE(history.Undo());
+        CHECK(items.m_statFile == before);
+        CHECK(items.Slot(Kris) == kris);
+        // The item it changed is selected, not the file.
+        CHECK(history.GetLastChangedItem() == Kris);
+        REQUIRE(history.Redo());
+        CHECK(items.m_statFile == after);
+        CHECK(items.Slot(Kris) == krisAfter);
+
+        // A file changed past the history is not overwritten.
+        items.m_statFile.ancientDropLevelBonus = 31;
+        const int restores = items.m_statFileRestores;
+        CHECK_FALSE(history.Undo());
+        CHECK(history.GetLastRefusal() == ItemEditHistory::Refusal::ItemsChanged);
+        CHECK(items.m_statFileRestores == restores);
     }
 }
 

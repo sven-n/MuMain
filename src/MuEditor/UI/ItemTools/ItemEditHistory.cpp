@@ -180,6 +180,12 @@ bool ItemEditHistory::IsAsLeft(const ItemEditEntry& entry, bool undoing) const
                 return false;
             }
             break;
+        case ItemEditStep::Kind::StatFile:
+            if (m_hooks.readStatFile() != *(undoing ? step.statFileAfter : step.statFileBefore))
+            {
+                return false;
+            }
+            break;
         }
     }
     return true;
@@ -214,6 +220,7 @@ bool ItemEditHistory::ChangesHeldItem(const ItemEditEntry& entry, bool undoing) 
             break;
         case ItemEditStep::Kind::SharedModel:
         case ItemEditStep::Kind::GlowColors:
+        case ItemEditStep::Kind::StatFile:
             break;
         }
     }
@@ -239,7 +246,7 @@ void ItemEditHistory::Apply(const ItemEditEntry& entry, bool undoing)
     }
     const auto firstItem = std::ranges::find_if(
         entry.steps, [](const ItemEditStep& step)
-        { return step.kind != ItemEditStep::Kind::SharedModel && step.kind != ItemEditStep::Kind::GlowColors; });
+        { return step.kind == ItemEditStep::Kind::Slot || step.kind == ItemEditStep::Kind::Move; });
     if (firstItem != entry.steps.end())
     {
         m_lastChangedItem =
@@ -276,6 +283,9 @@ void ItemEditHistory::ApplyStep(const ItemEditStep& step, bool undoing)
         break;
     case ItemEditStep::Kind::GlowColors:
         m_hooks.restoreGlowColors(undoing ? step.colorsBefore : step.colorsAfter);
+        break;
+    case ItemEditStep::Kind::StatFile:
+        m_hooks.restoreStatFile(*(undoing ? step.statFileBefore : step.statFileAfter));
         break;
     }
 }
