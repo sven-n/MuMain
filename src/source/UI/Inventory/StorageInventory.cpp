@@ -14,7 +14,7 @@
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/TradeRestrictions.h"
-#include "GameLogic/Items/VaultZenAmount.h"
+#include "GameLogic/Items/ZenAmount.h"
 #include "UI/Inventory/MyInventory.h"
 #include "Scenes/SceneCore.h" // g_iLengthAuthorityCode -- the WEBZEN password field's maxLength below
 
@@ -33,18 +33,16 @@ using namespace mu::ui::window;
 
 namespace
 {
-    // Zen entry dialog capped at `maxZen`, with a "Max" button that fills the field with it.
-    void ShowZenInputDialog(mu::ui::window::GenericDialogConfig cfg, std::int64_t maxZen)
+    std::uint64_t MaxDepositNow()
     {
-        cfg.input->maxValue = static_cast<std::uint64_t>(maxZen);
-        cfg.secondaryLabel = I18N::Game::Max;
-        auto dialogId = std::make_shared<mu::ui::window::CGenericConfirmDialog::DialogId>();
-        cfg.onSecondary = [maxZen, dialogId]
-        {
-            mu::ui::window::g_pGenericConfirmDialog->SetInputText(*dialogId, std::to_wstring(maxZen));
-            mu::ui::window::g_pGenericConfirmDialog->KeepOpen();
-        };
-        *dialogId = mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        return static_cast<std::uint64_t>(
+            GameLogic::Items::MaxVaultDeposit(CharacterMachine->Gold, CharacterMachine->StorageGold));
+    }
+
+    std::uint64_t MaxWithdrawNow()
+    {
+        return static_cast<std::uint64_t>(
+            GameLogic::Items::MaxVaultWithdraw(CharacterMachine->StorageGold, CharacterMachine->Gold));
     }
 
     // Plain 4-digit Mode::NumericKeypad PIN verify. Two call sites: SendRequestItemToMyInven's
@@ -248,6 +246,12 @@ void CStorageInventory::BindRmlModel(Rml::DataModelConstructor& c, StorageRmlMod
     c.BindEventCallback("storage_insert_click",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
         {
+            if (MaxDepositNow() == 0)
+            {
+                mu::ui::window::CreateOkMessageBox(CharacterMachine->Gold == 0
+                    ? I18N::Game::YouAreShortOfZen : I18N::Game::CannotStoreInVault);
+                return;
+            }
             mu::ui::window::GenericDialogConfig cfg;
             cfg.showCancel = true;
             cfg.lines = { { I18N::Game::EnterTheAmountOfZenYouWouldLikeToDeposit, false } };
@@ -255,6 +259,7 @@ void CStorageInventory::BindRmlModel(Rml::DataModelConstructor& c, StorageRmlMod
             cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
             cfg.input->maxLength = GameLogic::Items::kMaxVaultZenDigits;
             cfg.input->numericOnly = true;
+            cfg.input->maxValue = MaxDepositNow;
             cfg.onPrimary = []
             {
                 const std::wstring strText = mu::ui::window::g_pGenericConfirmDialog->GetInputText();
@@ -278,12 +283,17 @@ void CStorageInventory::BindRmlModel(Rml::DataModelConstructor& c, StorageRmlMod
                         VaultMoneyMoveDirection::InventoryToVault, static_cast<int>(iInputZen));
                 }
             };
-            ShowZenInputDialog(std::move(cfg),
-                GameLogic::Items::MaxVaultDeposit(CharacterMachine->Gold, CharacterMachine->StorageGold));
+            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
         });
     c.BindEventCallback("storage_take_click",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
         {
+            if (MaxWithdrawNow() == 0)
+            {
+                mu::ui::window::CreateOkMessageBox(CharacterMachine->StorageGold == 0
+                    ? I18N::Game::YouAreShortOfZen : I18N::Game::ExceededMaximumAmountOfZenYouCanPossess);
+                return;
+            }
             // The insufficient-storage-gold branch chains into
             // ShowVaultPinVerifyDialog() (this file).
             mu::ui::window::GenericDialogConfig cfg;
@@ -293,6 +303,7 @@ void CStorageInventory::BindRmlModel(Rml::DataModelConstructor& c, StorageRmlMod
             cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
             cfg.input->maxLength = GameLogic::Items::kMaxVaultZenDigits;
             cfg.input->numericOnly = true;
+            cfg.input->maxValue = MaxWithdrawNow;
             cfg.onPrimary = []
             {
                 const std::wstring strText = mu::ui::window::g_pGenericConfirmDialog->GetInputText();
@@ -303,7 +314,7 @@ void CStorageInventory::BindRmlModel(Rml::DataModelConstructor& c, StorageRmlMod
                     return;
                 }
                 if (iInputZen <= CharacterMachine->StorageGold
-                    && CharacterMachine->Gold + iInputZen <= GameLogic::Items::kMaxVaultZen)
+                    && CharacterMachine->Gold + iInputZen <= GameLogic::Items::kMaxInventoryZen)
                 {
                     if (!g_pStorageInventory->IsStorageLocked() || g_pStorageInventory->IsCorrectPassword())
                     {
@@ -316,7 +327,7 @@ void CStorageInventory::BindRmlModel(Rml::DataModelConstructor& c, StorageRmlMod
                         ShowVaultPinVerifyDialog();
                     }
                 }
-                else if (CharacterMachine->Gold + iInputZen > GameLogic::Items::kMaxVaultZen)
+                else if (CharacterMachine->Gold + iInputZen > GameLogic::Items::kMaxInventoryZen)
                 {
                     // Silent no-op, matching native -- still closes.
                 }
@@ -325,8 +336,7 @@ void CStorageInventory::BindRmlModel(Rml::DataModelConstructor& c, StorageRmlMod
                     mu::ui::window::CreateOkMessageBox(I18N::Game::YouAreShortOfZen);
                 }
             };
-            ShowZenInputDialog(std::move(cfg),
-                GameLogic::Items::MaxVaultWithdraw(CharacterMachine->StorageGold, CharacterMachine->Gold));
+            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
         });
     c.BindEventCallback("storage_lock_click",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)

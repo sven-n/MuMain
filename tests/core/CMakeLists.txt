@@ -140,7 +140,7 @@ mu_add_test(
 )
 
 mu_add_test(
-    NAME vault_zen_amount_tests
+    NAME zen_amount_tests
     SOURCES
-        test_vault_zen_amount.cpp
+        test_zen_amount.cpp
 )

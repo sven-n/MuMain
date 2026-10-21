@@ -166,12 +166,22 @@ namespace
         return digits;
     }
 
+    bool HasMaxButton(const GenericDialogConfig& cfg)
+    {
+        return cfg.input && cfg.input->maxValue && cfg.input->mode == GenericDialogConfig::InputField::Mode::Text;
+    }
+
 }
 
 CGenericConfirmDialog::DialogId CGenericConfirmDialog::Show(GenericDialogConfig cfg)
 {
     // onSecondary only fires from the secondary button; Cancel and Esc fire onCancel.
     assert(!cfg.onSecondary || cfg.secondaryLabel);
+    if (HasMaxButton(cfg))
+    {
+        assert(!cfg.secondaryLabel);
+        cfg.secondaryLabel = I18N::Game::Max;
+    }
 
     if (cfg.isValid && !cfg.isValid())
         return 0;
@@ -369,25 +379,6 @@ void CGenericConfirmDialog::ApplyInputFieldConfig(const Rml::String& value)
     FocusInputWhenShown();
 }
 
-void CGenericConfirmDialog::ClampInputToMaxValue()
-{
-    if (!m_Active.input || !m_Active.input->maxValue || !m_Active.input->numericOnly
-        || m_Active.input->mode != GenericDialogConfig::InputField::Mode::Text)
-        return;
-
-    const std::uint64_t maxValue = *m_Active.input->maxValue;
-    std::uint64_t value = 0;
-    for (const char digit : UI::RmlBridge::KeepDigitsOnly(m_RmlView.GetModel().inputValue))
-    {
-        value = value * 10 + static_cast<std::uint64_t>(digit - '0');
-        if (value > maxValue)
-        {
-            ApplyInputFieldConfig(std::to_string(maxValue));
-            return;
-        }
-    }
-}
-
 void CGenericConfirmDialog::FocusInputWhenShown()
 {
     if (!m_bFocusInput)
@@ -446,7 +437,6 @@ bool CGenericConfirmDialog::Update()
 
     SyncCanvasTop();
     FocusInputWhenShown();
-    ClampInputToMaxValue();
 
     if (m_Active.progress)
     {
@@ -464,7 +454,10 @@ bool CGenericConfirmDialog::Update()
     {
         m_bSecondaryClicked = false;
         ::PlayBuffer(SOUND_CLICK01);
-        Resolve(ClickResult::Secondary);
+        if (HasMaxButton(m_Active))
+            ApplyInputFieldConfig(std::to_string(m_Active.input->maxValue()));
+        else
+            Resolve(ClickResult::Secondary);
     }
     else if (m_bCancelClicked)
     {
@@ -595,7 +588,7 @@ void CGenericConfirmDialog::SyncRmlModel()
         model.secondaryLabel = secondaryLabel;
         m_RmlView.MarkDirty("secondary_label");
     }
-    const bool secondaryIsStockMax = m_Active.secondaryLabel == I18N::Game::Max;
+    const bool secondaryIsStockMax = HasMaxButton(m_Active);
     if (model.secondaryIsStockMax != secondaryIsStockMax)
     {
         model.secondaryIsStockMax = secondaryIsStockMax;

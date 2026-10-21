@@ -305,7 +305,7 @@
 	msgbox-cancel-hover:  0px 30px 54px 30px;
 	msgbox-cancel-active: 0px 60px 54px 30px;
 }
-/* The stock "Max" label (the vault zen dialogs) uses its own lettered art (newui_button_max.tga, same
+/* An input's Max button (the vault zen dialogs) uses its own lettered art (newui_button_max.tga, same
    layout as the OK/Cancel sheets); any other secondary button keeps the plain button. */
 @spritesheet msgbox-max-sheet
 {
