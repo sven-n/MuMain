@@ -13,8 +13,9 @@ namespace MuEditor::Items
 {
 // The values of the selected item that a tool form edits. The widgets change
 // the draft; a text or number field is stored (one undo step) when it is left
-// after a change, a checkbox or list right when it changes. While no field of
-// the form is being edited, the draft follows the selected item and the data.
+// after a change, a checkbox or list right when it changes. While the draft has
+// no change that is not stored yet (no field being edited, or one only clicked
+// into), it follows the selected item and the data.
 // A selection that changes while a field is edited first stores that edit,
 // to the item it belongs to; so does a form that was not drawn for a frame
 // (its window hidden, the editor closed) while a field was being edited.
@@ -46,7 +47,11 @@ public:
             m_active = false;
             m_reload = true;
         }
-        const bool follow = !m_active || itemType != m_itemType;
+        // Also while a field is active, as long as the draft has no change: a
+        // field clicked into while a field of another tool was left (stored in
+        // the same frame, after this Begin) would store that tool's old values
+        // with its own edit. An active field keeps its own text.
+        const bool follow = !m_active || !m_changed || itemType != m_itemType;
         if (follow && (itemType != m_itemType || dataVersion != m_version || m_reload))
         {
             m_value = m_load(itemType);

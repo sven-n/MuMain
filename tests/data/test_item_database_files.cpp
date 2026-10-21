@@ -1375,6 +1375,36 @@ private:
     ImGuiContext* m_context;
 };
 
+// The id of a field an item tool window draws, inside the ID scopes it pushes
+// (the item type, a requirement), with its label.
+ImGuiID ItemToolFieldId(const char* windowId, std::initializer_list<int> scopes, const char* label)
+{
+    const ImGuiWindow* window = ImGui::FindWindowByName(windowId);
+    REQUIRE(window != nullptr);
+    ImGuiID seed = window->ID;
+    for (const int scope : scopes)
+    {
+        seed = ImGui::GetIDWithSeed(scope, seed);
+    }
+    return ImGui::GetIDWithSeed(label, nullptr, seed);
+}
+
+// Item Basics and Item Requirements for a frame, in the editor's order, after
+// the typed text.
+void RenderBasicsAndRequirements(const char* typed = nullptr)
+{
+    if (typed != nullptr)
+    {
+        ImGui::GetIO().AddInputCharactersUTF8(typed);
+    }
+    bool open = true;
+    ImGui::NewFrame();
+    g_MuItemBasicsUI.Render(&open);
+    g_MuItemRequirementsUI.Render(&open);
+    ImGui::Render();
+    CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+}
+
 // The Add item dialog for a frame; `open` opens it with the selected item.
 void RenderAddDialog(MuEditor::Items::CItemAddDialog& dialog, bool open)
 {
@@ -1501,6 +1531,50 @@ TEST_CASE("The item tools draw their frames without ImGui errors [data][items][e
     }
     // The model tool's inventory display shown before it is stored ends.
     g_MuItemModelUI.BeforeFrame();
+}
+
+// A click into a field of one tool leaves the field of another, which is stored
+// in that frame; the clicked tool takes the stored item, so its own edit does
+// not bring the old values back.
+TEST_CASE("A field clicked into while another item tool stores its edit keeps that edit [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    g_ItemSelection.Select(KrisType);
+    REQUIRE(g_ItemDatabase.Find(KrisType)->requirements.level != 42);
+    REQUIRE(g_ItemDatabase.Find(KrisType)->durability != 30);
+
+    TestImGuiContext context;
+    RenderBasicsAndRequirements();
+    const ImGuiID level =
+        ItemToolFieldId(MuEditor::WindowIds::ItemRequirements, {KrisType, static_cast<int>(ItemRequirement::Level)},
+                        I18N::Metadata::ReqLevel);
+    const ImGuiID durability = ItemToolFieldId(MuEditor::WindowIds::ItemBasics, {KrisType}, I18N::Metadata::Durability);
+    // Activation selects the field's text: the typed text replaces it.
+    ImGui::ActivateItemByID(level);
+    RenderBasicsAndRequirements();
+    REQUIRE(ImGui::GetActiveID() == level);
+    RenderBasicsAndRequirements("42");
+
+    // The click into Durability stores the level.
+    ImGui::ActivateItemByID(durability);
+    RenderBasicsAndRequirements();
+    REQUIRE(ImGui::GetActiveID() == durability);
+    REQUIRE(g_ItemDatabase.Find(KrisType)->requirements.level == 42);
+    RenderBasicsAndRequirements("30");
+    // Left by a click into the level: stored the frame after.
+    ImGui::ActivateItemByID(level);
+    RenderBasicsAndRequirements();
+    RenderBasicsAndRequirements();
+
+    CHECK(g_ItemDatabase.Find(KrisType)->durability == 30);
+    CHECK(g_ItemDatabase.Find(KrisType)->requirements.level == 42);
+    g_ItemEdits.GetHistory().Clear();
 }
 
 // An item added with a size of its own starts without a slot, so no class can
