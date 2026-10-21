@@ -2095,6 +2095,7 @@ TEST_CASE(
     ImGuiID tools = 0;
     ImGuiID console = 0;
     bool browserOpen = true;
+    bool browserSaved = true;
     bool translationsSaved = false;
     const auto frame = [&]
     {
@@ -2110,7 +2111,10 @@ TEST_CASE(
             ImGui::DockBuilderSetNodeSize(dockSpace, ImVec2(1200.0f, 780.0f));
             console = ImGui::DockBuilderSplitNode(dockSpace, ImGuiDir_Down, 0.25f, nullptr, &tools);
             ImGui::DockBuilderDockWindow(MuEditor::WindowIds::Console, console);
-            ImGui::DockBuilderDockWindow(MuEditor::WindowIds::ItemBrowser, tools);
+            if (browserSaved)
+            {
+                ImGui::DockBuilderDockWindow(MuEditor::WindowIds::ItemBrowser, tools);
+            }
             if (translationsSaved)
             {
                 // Saved by phase 5, not open.
@@ -2137,9 +2141,11 @@ TEST_CASE(
     {
         browserOpen = false;
     }
-    SUBCASE("a tool saved beside the browser, not open")
+    SUBCASE("only a tool saved where the browser was, not open")
     {
+        // The browser gives no place: the tool's saved one does.
         browserOpen = false;
+        browserSaved = false;
         translationsSaved = true;
     }
     frame();
