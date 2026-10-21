@@ -1846,4 +1846,7 @@
   <data name="Formula excellent plus where it is above 0" xml:space="preserve">
     <value>exzellent +{0}, wo sie über 0 ist</value>
   </data>
+  <data name="By the group: {0}" xml:space="preserve">
+    <value>Nach der Gruppe: {0}</value>
+  </data>
 </root>

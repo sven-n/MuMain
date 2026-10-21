@@ -2,6 +2,8 @@
 
 #ifdef _EDITOR
 
+#include "Data/GameData/ItemData/ItemDefinition.h"
+
 #include <string>
 
 namespace MuEditor::Items
@@ -44,7 +46,7 @@ private:
     bool m_copySource = false;
     int m_width = 1;
     int m_height = 1;
-    int m_slot = 0;
+    Data::Items::ItemSlot m_slot = Data::Items::ItemSlot::None;
     bool m_shareModel = true;
 };
 } // namespace MuEditor::Items

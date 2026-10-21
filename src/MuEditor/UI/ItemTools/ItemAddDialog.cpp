@@ -5,6 +5,7 @@
 #include "ItemAddDialog.h"
 
 #include "ItemEdits.h"
+#include "ItemFieldWidgets.h"
 #include "ItemGroupNames.h"
 #include "ItemSelection.h"
 #include "ItemTextInput.h"
@@ -98,7 +99,7 @@ void CItemAddDialog::OpenAdd(int templateItemType)
     m_name.clear();
     m_width = 1;
     m_height = 1;
-    m_slot = 0;
+    m_slot = Data::Items::ItemSlot::None;
     m_open = true;
     ImGui::OpenPopup(PopupId);
 }
@@ -201,16 +202,17 @@ void CItemAddDialog::RenderValues()
     ImGui::SliderInt(I18N::Metadata::Width, &m_width, 1, MaxItemSize);
     ImGui::SetNextItemWidth(FieldWidth);
     ImGui::SliderInt(I18N::Metadata::Height, &m_height, 1, MaxItemSize);
-    const auto slots = Data::Items::GetEnumNames(Data::Items::ItemSlot{});
-    m_slot = std::clamp(m_slot, 0, static_cast<int>(slots.size()) - 1);
+    using Data::Items::ItemSlot;
+    const auto slots = Fields::EnumEntries<ItemSlot>({{ItemSlot::None, I18N::Editor::None}});
+    const auto current = std::ranges::find(slots, m_slot, &Data::Items::EnumName<ItemSlot>::value);
     ImGui::SetNextItemWidth(FieldWidth);
-    if (ImGui::BeginCombo(I18N::Metadata::Slot, slots[m_slot].name))
+    if (ImGui::BeginCombo(I18N::Metadata::Slot, current != slots.end() ? current->name : "?"))
     {
-        for (int index = 0; index < static_cast<int>(slots.size()); ++index)
+        for (const auto& slot : slots)
         {
-            if (ImGui::Selectable(slots[index].name, index == m_slot))
+            if (ImGui::Selectable(slot.name, slot.value == m_slot))
             {
-                m_slot = index;
+                m_slot = slot.value;
             }
         }
         ImGui::EndCombo();
@@ -270,8 +272,9 @@ void CItemAddDialog::AddNew()
     {
         item.width = static_cast<BYTE>(m_width);
         item.height = static_cast<BYTE>(m_height);
-        item.slot = Data::Items::GetEnumNames(Data::Items::ItemSlot{})[m_slot].value;
-        // An item that can be worn starts usable by every class, not by none.
+        item.slot = m_slot;
+        // An item that can be worn starts usable by every class; one without
+        // a slot by none.
         if (item.slot != Data::Items::ItemSlot::None)
         {
             item.classRequirements.fill(1);

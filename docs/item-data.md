@@ -704,8 +704,9 @@ shows it in the others.
   **Export as CSV**, and:
   - **Add item**: a group, a free number (one with neither an item nor a
     model entry), the English name, and either the selected item's values
-    or a size and slot of its own (an item that can be worn then starts
-    usable by every class). Its model is linked in **Item Model**.
+    or a size and slot of its own (no slot to start with, for an item that
+    cannot be worn; an item that can be worn starts usable by every class).
+    Its model is linked in **Item Model**.
   - **Duplicate item**: a copy with its model. A model file of its own
     becomes a shared model that both items use, so it is opened once.
   - **Move item**: to a free number, with its model (the model data and the
@@ -717,8 +718,10 @@ shows it in the others.
   number and stays there: the source lines that name it (read from the
   sources the editor was built from; without them that part is not known)
   and an ancient set, add option, buff or pet of the game data.
-- **Item Basics**: the English name, size, slot, two-handed, wing tier,
-  weapon kind, skill, drop level, potion priority, the stats, the prices,
+- **Item Basics**: the English name, size, slot and wing tier (*None* for
+  none), two-handed, weapon kind (*By the group* takes the kind the item's
+  group gives, which then follows its group, slot and classes), skill, drop
+  level, potion priority, the stats, the prices,
   the stat profile (*By the rules* takes what the
   [profile rules](#item-stats-by-level) give; beside the list, the rule that
   gives the item its profile, or that it is picked for the item; **Item

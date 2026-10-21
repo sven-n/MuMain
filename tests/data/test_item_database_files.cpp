@@ -33,7 +33,9 @@
 #include "UI/Common/MuEditorWindowIds.h"
 #include "UI/ItemEditor/ItemEditorActions.h"
 #include "UI/ItemTools/GlowColorDialog.h"
+#include "UI/ItemTools/ItemAddDialog.h"
 #include "UI/ItemTools/ItemEdits.h"
+#include "UI/ItemTools/ItemFieldWidgets.h"
 #include "UI/ItemTools/ItemHeldByCharacter.h"
 #include "UI/ItemTools/ItemNamesakes.h"
 #include "UI/ItemTools/ItemRequirementTable.h"
@@ -446,6 +448,28 @@ private:
     std::unique_ptr<CHARACTER_MACHINE> m_machine;
 };
 } // namespace
+
+// The lists of the item tools: no slot, no wing tier and, for the weapon kind,
+// the kind the group gives (which then follows the data) and none.
+TEST_CASE("The item tool lists offer no slot, no wing tier and the weapon kind the group gives [editor][items]")
+{
+    using MuEditor::Items::Fields::EnumEntries;
+    const auto slots = EnumEntries<ItemSlot>({{ItemSlot::None, "None"}});
+    CHECK(slots.size() == GetEnumNames(ItemSlot{}).size() + 1);
+    CHECK(slots.front().value == ItemSlot::None);
+    CHECK(EnumEntries<WingTier>({{WingTier::None, "None"}}).front().value == WingTier::None);
+
+    const auto sword =
+        EnumEntries<WeaponKind>({{WeaponKind::Sword, "By the group: sword"}, {WeaponKind::None, "None"}});
+    CHECK(sword.size() == GetEnumNames(WeaponKind{}).size() + 1);
+    CHECK(std::string(sword[0].name) == "By the group: sword");
+    CHECK(sword[1].value == WeaponKind::None);
+    CHECK(std::ranges::count(sword, WeaponKind::Sword, &EnumName<WeaponKind>::value) == 1);
+    // A group that gives none: the second none is left out.
+    const auto none = EnumEntries<WeaponKind>({{WeaponKind::None, "By the group: None"}, {WeaponKind::None, "None"}});
+    CHECK(none.size() == GetEnumNames(WeaponKind{}).size() + 1);
+    CHECK(std::string(none[0].name) == "By the group: None");
+}
 
 // A field typed in before the game took the item is stored when it is left or
 // drawn again: the size and slot of the held item stay, other fields change.
@@ -971,6 +995,24 @@ TEST_CASE("The item tools set whole items, and the derived fields follow the dat
         CHECK(g_ItemDatabase.Find(BladeType)->weaponKind == WeaponKind::Glove);
     }
 
+    SUBCASE("a picked weapon kind follows the data again once the group's kind is picked")
+    {
+        blade.weaponKind = WeaponKind::Axe;
+        g_ItemDataHandler.SetItem(blade);
+        ItemDefinition picked = *g_ItemDatabase.Find(BladeType);
+        REQUIRE(picked.weaponKind == WeaponKind::Axe);
+        // Item Basics' "By the group".
+        picked.weaponKind = GetGroupWeaponKind(picked);
+        g_ItemDataHandler.SetItem(picked);
+        ItemDefinition following = *g_ItemDatabase.Find(BladeType);
+        CHECK(following.weaponKind == WeaponKind::Sword);
+        // The slot list's "None": a sword only on its slot.
+        following.slot = ItemSlot::None;
+        g_ItemDataHandler.SetItem(following);
+        CHECK(g_ItemDatabase.Find(BladeType)->slot == ItemSlot::None);
+        CHECK(g_ItemDatabase.Find(BladeType)->weaponKind == WeaponKind::None);
+    }
+
     SUBCASE("the weapon kind follows the classes in group 0 while it is the derived one")
     {
         // Only the Rage Fighter: group 0 makes it a glove.
@@ -1333,6 +1375,27 @@ private:
     ImGuiContext* m_context;
 };
 
+// The Add item dialog for a frame; `open` opens it with the selected item.
+void RenderAddDialog(MuEditor::Items::CItemAddDialog& dialog, bool open)
+{
+    ImGui::NewFrame();
+    if (open)
+    {
+        dialog.OpenAdd(g_ItemSelection.GetItemType());
+    }
+    dialog.Render();
+    ImGui::Render();
+    CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+}
+
+// A widget of the Add item dialog, as a click or a click into a field.
+void ActivateInAddDialog(const char* label)
+{
+    const ImGuiWindow* window = ImGui::FindWindowByName("###ItemAddDialog");
+    REQUIRE(window != nullptr);
+    ImGui::ActivateItemByID(ImGui::GetIDWithSeed(label, nullptr, window->ID));
+}
+
 void RenderItemTools()
 {
     bool open = true;
@@ -1438,6 +1501,51 @@ TEST_CASE("The item tools draw their frames without ImGui errors [data][items][e
     }
     // The model tool's inventory display shown before it is stored ends.
     g_MuItemModelUI.BeforeFrame();
+}
+
+// An item added with a size of its own starts without a slot, so no class can
+// wear it, as most items of groups 12 to 15.
+TEST_CASE("Add item without copying makes an item without a slot [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    // Selected: the dialog adds to its group.
+    const int potionType = MakeItemType(14, 1);
+    REQUIRE(g_ItemDatabase.Find(potionType) != nullptr);
+    g_ItemSelection.Select(potionType);
+
+    TestImGuiContext context;
+    MuEditor::Items::CItemAddDialog dialog;
+    RenderAddDialog(dialog, true);
+    RenderAddDialog(dialog, false);
+    // Unchecked: a size and slot of its own.
+    ActivateInAddDialog(I18N::Editor::CopyTheSelectedItem);
+    RenderAddDialog(dialog, false);
+    ActivateInAddDialog(I18N::Editor::EnglishName);
+    RenderAddDialog(dialog, false);
+    ImGui::GetIO().AddInputCharactersUTF8("Test Potion");
+    RenderAddDialog(dialog, false);
+    ActivateInAddDialog(I18N::Editor::Add);
+    RenderAddDialog(dialog, false);
+
+    // Add selects the new item.
+    REQUIRE(g_ItemSelection.GetItemType() != potionType);
+    const ItemDefinition* added = g_ItemDatabase.Find(g_ItemSelection.GetItemType());
+    REQUIRE(added != nullptr);
+    CHECK(added->names.GetNeutral() == "Test Potion");
+    CHECK(added->group == 14);
+    CHECK(added->slot == ItemSlot::None);
+    CHECK(added->weaponKind == WeaponKind::None);
+    CHECK(std::ranges::all_of(added->classRequirements, [](BYTE step) { return step == 0; }));
+    g_ItemEdits.GetHistory().Clear();
 }
 
 // The warning before a shared model changes lists its items; a click on one

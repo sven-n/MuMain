@@ -17,6 +17,7 @@
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Data/GameData/Common/LocalizedString.h"
+#include "Data/GameData/ItemData/ItemAttributeConversion.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "I18N/All.h"
 #include "imgui.h"
@@ -158,15 +159,23 @@ void CMuItemBasicsUI::RenderShape(ItemDefinition& item, int itemType)
     Fields::Byte(m_draft, I18N::Metadata::Width, item.width);
     ImGui::SameLine();
     Fields::Byte(m_draft, I18N::Metadata::Height, item.height);
-    Fields::Enum(m_draft, I18N::Metadata::Slot, item.slot);
+    Fields::Enum(m_draft, I18N::Metadata::Slot, item.slot, {{Data::Items::ItemSlot::None, I18N::Editor::None}});
     ImGui::EndDisabled();
     if (held)
     {
         ImGui::TextDisabled("%s", I18N::Editor::TheItemIsWornOrInAnItemWindowItsSizeAndSlotStayAsTheyAre);
     }
     Fields::Check(m_draft, I18N::Metadata::TwoHand, item.twoHanded);
-    Fields::Enum(m_draft, I18N::Editor::WingTier, item.wingTier);
-    Fields::Enum(m_draft, I18N::Editor::WeaponKind, item.weaponKind);
+    Fields::Enum(m_draft, I18N::Editor::WingTier, item.wingTier, {{Data::Items::WingTier::None, I18N::Editor::None}});
+    // "By the group" picks the kind the group gives, which then follows the
+    // group, slot and classes again (CItemDataHandler::SetItem); none is a
+    // pick of its own.
+    const Data::Items::WeaponKind given = Data::Items::GetGroupWeaponKind(item);
+    const char* givenName = Data::Items::FindEnumName(given);
+    const std::string byGroup =
+        I18N::Format(I18N::Editor::ByTheGroup0, {givenName != nullptr ? givenName : I18N::Editor::None});
+    Fields::Enum(m_draft, I18N::Editor::WeaponKind, item.weaponKind,
+                 {{given, byGroup.c_str()}, {Data::Items::WeaponKind::None, I18N::Editor::None}});
     Fields::Word(m_draft, I18N::Metadata::Skill, item.skill);
     ImGui::SameLine();
     Fields::Word(m_draft, I18N::Metadata::Level, item.level);

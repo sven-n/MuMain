@@ -10,7 +10,10 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <initializer_list>
 #include <string>
+#include <type_traits>
+#include <vector>
 
 // The fields of the item tool forms: each edits a value of the draft, with
 // the field's label as the undo step's name. A number is stored when the
@@ -94,16 +97,41 @@ template <typename TDraft> void Check(TDraft& draft, const char* label, bool& va
     draft.AfterChange(ImGui::Checkbox(label, &value), label);
 }
 
-// A list of the enum's names in the item files (ItemEnumNames).
-template <typename TDraft, typename TEnum> void Enum(TDraft& draft, const char* label, TEnum& value)
+// The entries of an enum list: `first` (the value the item files write by
+// leaving the field out, TEnum::None, and the one the item's data gives), then
+// the enum's names in the item files (ItemEnumNames); each value once, by its
+// first entry.
+template <typename TEnum>
+std::vector<Data::Items::EnumName<TEnum>>
+EnumEntries(std::initializer_list<Data::Items::EnumName<std::type_identity_t<TEnum>>> first)
 {
-    const char* current = Data::Items::FindEnumName(value);
-    ImGui::SetNextItemWidth(ScaledWidth(NumberWidth * 1.5f));
-    if (!ImGui::BeginCombo(label, current != nullptr ? current : "?"))
+    std::vector<Data::Items::EnumName<TEnum>> entries;
+    const auto add = [&entries](const Data::Items::EnumName<TEnum>& entry)
+    {
+        if (std::ranges::find(entries, entry.value, &Data::Items::EnumName<TEnum>::value) == entries.end())
+        {
+            entries.push_back(entry);
+        }
+    };
+    std::ranges::for_each(first, add);
+    std::ranges::for_each(Data::Items::GetEnumNames(TEnum{}), add);
+    return entries;
+}
+
+// A list of the entries EnumEntries gives; the value shows by its entry ("?"
+// for a value without one).
+template <typename TDraft, typename TEnum>
+void Enum(TDraft& draft, const char* label, TEnum& value,
+          std::initializer_list<Data::Items::EnumName<std::type_identity_t<TEnum>>> first)
+{
+    const std::vector<Data::Items::EnumName<TEnum>> entries = EnumEntries<TEnum>(first);
+    const auto current = std::ranges::find(entries, value, &Data::Items::EnumName<TEnum>::value);
+    ImGui::SetNextItemWidth(ScaledWidth(NumberWidth * 2.0f));
+    if (!ImGui::BeginCombo(label, current != entries.end() ? current->name : "?"))
     {
         return;
     }
-    for (const auto& entry : Data::Items::GetEnumNames(TEnum{}))
+    for (const auto& entry : entries)
     {
         if (ImGui::Selectable(entry.name, entry.value == value) && entry.value != value)
         {
