@@ -133,9 +133,25 @@ ImGuiWindowFlags ToolWindowBarFlags(const char* windowName)
     {
         return ImGuiWindowFlags_None;
     }
-    const bool inEditorWindow = window->DockIsActive && window->DockNode != nullptr && g_dockSpace != 0 &&
-                                ImGui::DockNodeGetRootNode(window->DockNode)->ID == g_dockSpace;
-    return inEditorWindow ? ImGuiWindowFlags_None : ImGuiWindowFlags_MenuBar;
+    if (!window->DockIsActive || window->DockNode == nullptr)
+    {
+        return ImGuiWindowFlags_MenuBar;
+    }
+    ImGuiDockNode* node = ImGui::DockNodeGetRootNode(window->DockNode);
+    if (g_dockSpace != 0 && node->ID == g_dockSpace)
+    {
+        return ImGuiWindowFlags_None;
+    }
+    // One bar for a floating window: on the tab shown at its top left (the
+    // first child of a split is the left or the top one).
+    while (!node->IsLeafNode())
+    {
+        ImGuiDockNode* first = node->ChildNodes[0];
+        node = first != nullptr && first->IsVisible ? first : node->ChildNodes[1];
+    }
+    const bool shown =
+        node->VisibleWindow != nullptr ? node->VisibleWindow == window : node->SelectedTabId == window->TabId;
+    return shown ? ImGuiWindowFlags_MenuBar : ImGuiWindowFlags_None;
 }
 
 void RenderToolWindowBar()
