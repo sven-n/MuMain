@@ -10,6 +10,9 @@
 #include "Render/Models/ZzzBMD.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Inventory/ItemMng.h"
+#include "UI/Social/FriendWindow.h"
+#include "UI/Social/LetterReadWindow.h"
+#include "UI/Social/LetterWriteWindow.h"
 
 #include <algorithm>
 
@@ -57,6 +60,25 @@ void DropWornCloth()
     }
     // The character of the character creation.
     DeleteCloth(&CharacterView);
+    // The photo characters of the letter windows, also of hidden ones.
+    const mu::ui::window::CFriendWindow* friends = g_pWindowMgr;
+    const CUIWindowMgr* windows = friends != nullptr ? friends->GetWindowMgr() : nullptr;
+    if (windows == nullptr)
+    {
+        return;
+    }
+    for (const auto& entry : windows->GetWindows())
+    {
+        CUIBaseWindow* window = entry.second;
+        if (auto* read = dynamic_cast<CUILetterReadWindow*>(window))
+        {
+            DeleteCloth(read->m_Photo.GetPhotoChar());
+        }
+        else if (auto* write = dynamic_cast<CUILetterWriteWindow*>(window))
+        {
+            DeleteCloth(write->m_Photo.GetPhotoChar());
+        }
+    }
 }
 
 void PrepareClothMeshes(std::span<const int> itemTypes)

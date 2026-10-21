@@ -17,8 +17,9 @@ bool IsHeldByCharacter(int itemType);
 // The item types IsHeldByCharacter is true for.
 std::vector<int> FindHeldItemTypes();
 
-// Drops the cloth of what the characters wear (DeleteCloth): the cloth of the
-// pants that have one (RenderPartObject) moves a mesh of its model's slot
+// Drops the cloth of what the characters wear (DeleteCloth: the client's
+// characters, the character creation's and the letters' photo characters):
+// the cloth of the pants that have one (RenderPartObject) moves a mesh of its model's slot
 // every frame and was made from the data the slot had, so it goes before the
 // item tools change an opened model (CItemDataHandler::SetOpenedModelHooks).
 // The game makes it again the next time it draws the part, from the data the
