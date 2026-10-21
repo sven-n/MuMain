@@ -12,7 +12,8 @@ namespace MuEditor::Items::ToolWindow
 bool Begin(const char* title, const char* windowId, bool* open);
 void End();
 
-// The undo and redo buttons with what they would undo or redo.
+// The undo and redo buttons with what they would undo or redo, for the
+// editor's bar; a click does not take the focus from the item tool.
 void RenderUndoRedo();
 
 // "Kris (0,0)" in the UI language, with what tells it apart from items of the

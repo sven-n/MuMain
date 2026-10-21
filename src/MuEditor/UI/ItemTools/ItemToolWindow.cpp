@@ -18,6 +18,7 @@
 #include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
 #include "imgui.h"
+#include "imgui_internal.h"
 
 #include <cstdint>
 #include <string>
@@ -102,6 +103,9 @@ void End()
 
 void RenderUndoRedo()
 {
+    // In the editor's bar: a click leaves the focus in the item tool, where
+    // Ctrl+Z and Ctrl+Y undo and redo.
+    ImGui::PushItemFlag(ImGuiItemFlags_NoFocus, true);
     const ItemEditHistory& history = g_ItemEdits.GetHistory();
     ImGui::BeginDisabled(!history.CanUndo());
     if (ImGui::Button(I18N::Editor::Undo))
@@ -124,6 +128,7 @@ void RenderUndoRedo()
         ImGui::SetTooltip("%s (Ctrl+Y)", history.GetRedoLabel().c_str());
     }
     ImGui::EndDisabled();
+    ImGui::PopItemFlag();
 }
 
 bool RenderSelectedItem(int itemType)
