@@ -636,7 +636,9 @@ server with original clients (after phases 6 and B).
      `CheckRepair` and the lucky set constants are gone. The lucky set
      range also counted 7/71 and 10/72, which have no item data.
    The 38 items named "…-J" (copies of existing items with no model, unknown
-   to OpenMU; what "J" stands for is not known) follow their data. Two lists
+   to OpenMU; what "J" stands for is not known) followed their data; phase 6
+   removed them, since no player could get one (server data marks them not
+   droppable, and no cash shop or lucky ticket list has them). Two lists
    the inventory found wrong are fixed on their own, not in 3b: the
    Illusion Temple team skins (#669) and the trade warning (#671).
 
@@ -679,9 +681,10 @@ server with original clients (after phases 6 and B).
    Lord's defense of 15 as data; its other changes are in main already,
    fixed differently, or wrong (first tier wing steps from 25, Wings of
    Despair as third tier, a second +25 for excellent requirements).
-   - Nine tables, the default and twelve profiles on 604 items: `weapon`
-     119, `armor` 356, `shield` 24, `sceptre` 11, `book` 3, `helper` 31,
-     `scroll` 36, and `firstTierWing`, `secondTierWing`, `secondTierCape`,
+   - Nine tables, the default and twelve profiles on 566 items (604 before
+     the "…-J" items were removed): `weapon` 113, `armor` 327, `shield` 22,
+     `sceptre` 10, `book` 3, `helper` 31, `scroll` 36, and `firstTierWing`,
+     `secondTierWing`, `secondTierCape`,
      `thirdTierWing` and `smallWing` on 24 wings. The Horn of Fenrir names
      `"default"`: its data gives `helper`, but its level requirement does not
      grow. The other items name none and have the default; a left-out profile

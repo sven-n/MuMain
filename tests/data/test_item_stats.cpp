@@ -207,7 +207,7 @@ TEST_CASE("Every shipped item names the stat profile its data gives [data][items
         itemsWithProfile += definition.statProfile.empty() || hornOfFenrir ? 0 : 1;
     }
     CHECK(DeriveStatProfile(*g_ItemDatabase.Find(ITEM_HORN_OF_FENRIR)) == "helper");
-    CHECK(itemsWithProfile == 604);
+    CHECK(itemsWithProfile == 566);
 }
 
 // The fixed excellent bonus of the three chaos weapons is item data.

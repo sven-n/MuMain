@@ -616,63 +616,6 @@
       "classRequirements": {
         "darkLord": 1
       }
-    },
-    {
-      "number": 27,
-      "name": {
-        "en": "Legendary Shield-J",
-        "de": "Legendärer Schild-J",
-        "es": "Escudo Serpiente-J",
-        "pt": "Escudo lendário-J"
-      },
-      "width": 2,
-      "height": 3,
-      "slot": "offHand",
-      "weaponKind": "shield",
-      "statProfile": "shield",
-      "level": 48,
-      "durability": 50,
-      "blockRate": 48,
-      "defense": 9,
-      "attackType": 4,
-      "requirements": {
-        "strength": 90,
-        "dexterity": 25
-      },
-      "classRequirements": {
-        "darkWizard": 1,
-        "fairyElf": 1,
-        "magicGladiator": 1
-      }
-    },
-    {
-      "number": 28,
-      "name": {
-        "en": "Serpent Shield-J",
-        "de": "Schlangenschild-J",
-        "es": "Escudo Legendario-J",
-        "pt": "Escudo da serpente-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "offHand",
-      "weaponKind": "shield",
-      "statProfile": "shield",
-      "skill": 18,
-      "level": 45,
-      "durability": 48,
-      "blockRate": 45,
-      "defense": 14,
-      "attackType": 4,
-      "requirements": {
-        "strength": 130
-      },
-      "classRequirements": {
-        "darkKnight": 1,
-        "fairyElf": 1,
-        "magicGladiator": 1,
-        "darkLord": 1
-      }
     }
   ]
 }
