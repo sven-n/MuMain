@@ -109,6 +109,7 @@ void CopyItemAttributeStats(const ITEM_ATTRIBUTE& attribute, ItemDefinition& def
 void CopyFieldsNotInItemAttribute(const ItemDefinition& source, ItemDefinition& target)
 {
     target.tags = source.tags;
+    target.description = source.description;
     target.wingTier = source.wingTier;
     target.weaponKind = source.weaponKind;
     target.statProfile = source.statProfile;

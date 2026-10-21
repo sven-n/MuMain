@@ -24,6 +24,9 @@ using namespace Json::Keys;
 constexpr const char* Items = "items";
 constexpr const char* Name = "name";
 constexpr const char* Tags = "tags";
+constexpr const char* Description = "description";
+constexpr const char* Text = "text";
+constexpr const char* Color = "color";
 constexpr const char* Requirements = "requirements";
 constexpr const char* RequirementsByLevel = "requirementsByLevel";
 constexpr const char* ClassRequirements = "classRequirements";
@@ -157,6 +160,24 @@ OrderedJson WriteTags(const ItemTagSet& tags)
     return json;
 }
 
+// One object per line: its text (as a name is written; "" for a blank line) and its color unless white.
+OrderedJson WriteDescription(const std::vector<ItemDescriptionLine>& description)
+{
+    OrderedJson json = OrderedJson::array();
+    for (const ItemDescriptionLine& line : description)
+    {
+        OrderedJson entry;
+        // A blank line is a plain empty text, as it is written by hand.
+        entry[Keys::Text] = line.text.IsEmpty() ? OrderedJson("") : Json::WriteLocalizedString(line.text);
+        if (line.color != ItemTextColor::White)
+        {
+            entry[Keys::Color] = WriteValue(line.color);
+        }
+        json.push_back(std::move(entry));
+    }
+    return json;
+}
+
 OrderedJson WriteItem(const ItemDefinition& definition)
 {
     OrderedJson item;
@@ -165,6 +186,10 @@ OrderedJson WriteItem(const ItemDefinition& definition)
     if (!definition.tags.IsEmpty())
     {
         item[Keys::Tags] = WriteTags(definition.tags);
+    }
+    if (!definition.description.empty())
+    {
+        item[Keys::Description] = WriteDescription(definition.description);
     }
 
     const auto writeIfNotDefault = [](OrderedJson& target)
@@ -226,6 +251,7 @@ private:
     bool ReadIdentity(const OrderedJson& json, ItemDefinition& definition);
     bool ReadNames(const OrderedJson& json, LocalizedString& names);
     void ReadTags(const OrderedJson& json, ItemTagSet& tags);
+    void ReadDescription(const OrderedJson& json, std::vector<ItemDescriptionLine>& description);
     void ReadStats(const OrderedJson& json, ItemDefinition& definition);
     void ReadRequirements(const OrderedJson& json, ItemDefinition& definition);
     void ReadRequirementsByLevel(const OrderedJson& json, ItemDefinition& definition);
@@ -368,6 +394,47 @@ void ItemReader::ReadTags(const OrderedJson& json, ItemTagSet& tags)
     }
 }
 
+void ItemReader::ReadDescription(const OrderedJson& json, std::vector<ItemDescriptionLine>& description)
+{
+    const auto list = json.find(Keys::Description);
+    if (list == json.end())
+    {
+        return;
+    }
+    if (!list->is_array())
+    {
+        AddIssue(ItemDataIssueSeverity::Error, Keys::Description, "must be a list of lines");
+        return;
+    }
+
+    for (size_t index = 0; index < list->size(); ++index)
+    {
+        const OrderedJson& entry = (*list)[index];
+        const std::string field = std::string(Keys::Description) + "[" + std::to_string(index) + "]";
+        const auto text = entry.is_object() ? entry.find(Keys::Text) : entry.end();
+        if (!entry.is_object() || text == entry.end())
+        {
+            AddIssue(ItemDataIssueSeverity::Error, field, "must be an object with a text");
+            continue;
+        }
+
+        ItemDescriptionLine line;
+        const bool read = Json::ReadLocalizedString(*text, field + "." + Keys::Text, line.text,
+                                                    [this](const std::string& errorField, const std::string& message)
+                                                    { AddIssue(ItemDataIssueSeverity::Error, errorField, message); });
+        const auto color = entry.find(Keys::Color);
+        if (color != entry.end())
+        {
+            ReadValue(*color, field + "." + Keys::Color, line.color);
+        }
+        WarnAboutUnknownKeys(entry, {Keys::Text, Keys::Color}, field + ".");
+        if (read)
+        {
+            description.push_back(std::move(line));
+        }
+    }
+}
+
 void ItemReader::ReadStats(const OrderedJson& json, ItemDefinition& definition)
 {
     VisitStatFields(definition,
@@ -481,6 +548,7 @@ std::set<std::string, std::less<>> GetKnownItemKeys()
     std::set<std::string, std::less<>> keys{Keys::Number,
                                             Keys::Name,
                                             Keys::Tags,
+                                            Keys::Description,
                                             Keys::Requirements,
                                             Keys::RequirementsByLevel,
                                             Keys::ClassRequirements,
@@ -503,6 +571,7 @@ bool ItemReader::Read(const OrderedJson& json, ItemDefinition& definition)
     }
 
     ReadTags(json, definition.tags);
+    ReadDescription(json, definition.description);
     ReadStats(json, definition);
     ReadRequirements(json, definition);
     ReadRequirementsByLevel(json, definition);

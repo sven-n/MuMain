@@ -18,6 +18,7 @@ std::span<const EnumName<ItemSlot>> GetEnumNames(ItemSlot);
 std::span<const EnumName<WingTier>> GetEnumNames(WingTier);
 std::span<const EnumName<WeaponKind>> GetEnumNames(WeaponKind);
 std::span<const EnumName<ItemTag>> GetEnumNames(ItemTag);
+std::span<const EnumName<ItemTextColor>> GetEnumNames(ItemTextColor);
 
 // nullptr when the value has no name.
 template <typename TEnum> const char* FindEnumName(TEnum value)

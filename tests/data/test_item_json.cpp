@@ -285,6 +285,46 @@ TEST_CASE("Item tags, wing tier, potion priority and rule flags are kept through
     CHECK(read.sellable);
 }
 
+TEST_CASE("An item's description is kept through write and read, and checked [data][items]")
+{
+    ItemDefinition jewel = MakeKris();
+    jewel.group = 14;
+    jewel.number = 13;
+    jewel.slot = ItemSlot::None;
+    jewel.weaponKind = WeaponKind::None;
+    jewel.statProfile.clear();
+    ItemDescriptionLine first;
+    first.text.Set("en", "Increases the level of an item up to +6.");
+    first.text.Set("de", "Erhöht die Stufe eines Gegenstands bis +6.");
+    ItemDescriptionLine blank;
+    ItemDescriptionLine last;
+    last.text.Set("en", "Drop it on the item to use it.");
+    last.color = ItemTextColor::Blue;
+    jewel.description = {first, blank, last};
+
+    const std::string text = WriteItemGroupJson(14, std::vector<ItemDefinition>{jewel});
+    CHECK(text.find("\"color\": \"blue\"") != std::string::npos);
+    const ReadResult result = Read(text);
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items.front().description == jewel.description);
+    CHECK_FALSE(HasErrors(result.issues));
+    CHECK(WriteItemGroupJson(14, result.items) == text);
+
+    std::vector<ItemDataIssue> issues;
+    ValidateItems(std::vector<ItemDefinition>{jewel}, issues);
+    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "description[0]"));
+
+    ItemDefinition tooLong = jewel;
+    tooLong.description[0].text.Set("de", std::string(MaxItemDescriptionLineLength + 1, 'x'));
+    issues.clear();
+    ValidateItems(std::vector<ItemDefinition>{tooLong}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "description[0]"));
+
+    const ReadResult badColor = Read(R"({"formatVersion": 1, "group": 14, "items": [
+        {"number": 13, "name": "Jewel of Bless", "description": [{"text": "x", "color": "pink"}]}]})");
+    CHECK(HasErrors(badColor.issues));
+}
+
 TEST_CASE("An item's stat profile is kept through write and read [data][items]")
 {
     ItemDefinition kris = MakeKris();

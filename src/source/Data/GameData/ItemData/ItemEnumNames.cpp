@@ -82,6 +82,23 @@ constexpr std::array<EnumName<ItemTag>, static_cast<size_t>(ItemTag::Count)> Ite
 }};
 } // namespace
 
+constexpr std::array<EnumName<ItemTextColor>, 14> ItemTextColorNames = {{
+    {ItemTextColor::White, "white"},
+    {ItemTextColor::Blue, "blue"},
+    {ItemTextColor::Red, "red"},
+    {ItemTextColor::Yellow, "yellow"},
+    {ItemTextColor::Green, "green"},
+    {ItemTextColor::DarkRed, "darkRed"},
+    {ItemTextColor::Purple, "purple"},
+    {ItemTextColor::DarkBlue, "darkBlue"},
+    {ItemTextColor::DarkYellow, "darkYellow"},
+    {ItemTextColor::GreenBlue, "greenBlue"},
+    {ItemTextColor::Gray, "gray"},
+    {ItemTextColor::RedPurple, "redPurple"},
+    {ItemTextColor::Violet, "violet"},
+    {ItemTextColor::Orange, "orange"},
+}};
+
 std::span<const EnumName<ItemSlot>> GetEnumNames(ItemSlot)
 {
     return ItemSlotNames;
@@ -100,5 +117,10 @@ std::span<const EnumName<WeaponKind>> GetEnumNames(WeaponKind)
 std::span<const EnumName<ItemTag>> GetEnumNames(ItemTag)
 {
     return ItemTagNames;
+}
+
+std::span<const EnumName<ItemTextColor>> GetEnumNames(ItemTextColor)
+{
+    return ItemTextColorNames;
 }
 } // namespace Data::Items
