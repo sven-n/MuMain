@@ -7,9 +7,11 @@
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/SkillData/SkillDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ItemTooltipSnapshot.h"
+#include "Engine/Object/ItemTooltipValues.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"
@@ -263,4 +265,47 @@ TEST_CASE("Every item's tooltip is as recorded [data][items][tooltip]")
     }
     CHECK(changed == 0);
     CHECK(recorded.size() == hashes.size());
+}
+
+TEST_CASE("Every built-in placeholder but {level} is a value of the tooltip's stat lines [data][items][tooltip]")
+{
+    const ItemTooltipValues values;
+    for (const std::string_view name : Data::Items::GetBuiltInPlaceholders())
+    {
+        INFO(std::string(name));
+        CHECK(GetItemTooltipValue(values, name).has_value() == (name != Data::Items::LevelPlaceholder));
+    }
+    CHECK_FALSE(GetItemTooltipValue(values, "sparkle").has_value());
+}
+
+TEST_CASE("The tooltip's values of an item follow the item and the hero [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeNewDarkWizard(hero.Hero());
+
+    ItemCreationParams params = FullItemParameters(0, 0);
+    params.Level = 7;
+    ITEM kris;
+    FillItemFromParameters(kris, params);
+    const ItemTooltipValues values = ComputeItemTooltipValues(kris);
+    CHECK(values.damageMin == kris.DamageMin);
+    CHECK(values.damageMax == kris.DamageMax);
+    CHECK(values.hasDamage);
+    CHECK_FALSE(values.damageHarmonyBonus);
+    CHECK(values.maxDurability > 0);
+    CHECK(values.strength.required == kris.RequireStrength);
+    CHECK(values.strength.missing == kris.RequireStrength - 18);
+    CHECK_FALSE(values.strength.reduced);
+    CHECK(GetItemTooltipValue(values, "requiredStrength") == values.strength.required);
+    CHECK(GetItemTooltipValue(values, "missingStrength") == values.strength.missing);
+    CHECK(GetItemTooltipValue(values, "maxDurability") == values.maxDurability);
+    CHECK_FALSE(values.excellent);
+
+    // The Blade Master lacks nothing of it.
+    MakeBladeMaster(hero.Hero());
+    CHECK(ComputeItemTooltipValues(kris).strength.missing == 0);
 }

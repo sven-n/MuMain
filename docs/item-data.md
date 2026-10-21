@@ -114,7 +114,18 @@ value of `name` for the hovered item, e.g.
 have no braces of their own, so every brace belongs to a placeholder. A name
 is one of:
 
-- a **built-in value**: `level`, the item's + level;
+- a **built-in value**: `level`, the item's + level, or a value of the tooltip's stat
+  lines, as the game computes them for the item and the hero:
+  `damageMin`, `damageMax` (with the Jewel of Harmony's attack bonus; a skill
+  book's wizardry damage), `defense` (with its defense bonus), `magicDefense`,
+  `blockRate`, `attackSpeed`, `walkSpeed`, `magicPower`, `durability`,
+  `maxDurability`, the resistances `iceResistance`, `poisonResistance`,
+  `lightningResistance`, `fireResistance`, `earthResistance`, `windResistance`,
+  `waterResistance` (the item's level + 1 for a resistance it has), and for
+  `Level`, `Strength`, `Dexterity`, `Vitality`, `Energy` and `Leadership`
+  `required…` (what the item asks, after the Jewel of Harmony's and the sockets'
+  strength and agility reductions) and `missing…` (what the hero lacks of it, 0
+  when nothing);
 - a **level bonus table** of [`Stats/ItemStats.json`](#item-stats-by-level),
   by its name: the table's value at the item's + level (`damageIncreaseWeapons`
   is 3 at +1 and 66 at +15). A new table is a new placeholder.

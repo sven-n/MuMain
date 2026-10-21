@@ -151,11 +151,14 @@ TEST_CASE("A description placeholder is a built-in value or a stat file table [d
     CHECK(typo.front().field == "description[0].text");
     CHECK(typo.front().message == "has the unknown placeholder {wingDamge}; did you mean {wingDamage}?");
 
-    const std::vector<ItemDataIssue> unknown = CheckNames(MakeJewel("Durability {durability}"));
+    const std::vector<ItemDataIssue> unknown = CheckNames(MakeJewel("Sparkle {sparkle}"));
     REQUIRE(unknown.size() == 1);
     CHECK(unknown.front().message ==
-          "has the unknown placeholder {durability}; a placeholder is a built-in value ({level}) or a table of "
+          "has the unknown placeholder {sparkle}; a placeholder is a built-in value (docs/item-data.md) or a table of "
           "ItemStats.json");
+
+    // The stat line values are built in too.
+    CHECK(CheckNames(MakeJewel("Durability {durability}/{maxDurability}, {missingStrength} strength missing")).empty());
 
     // A table no stat uses is for descriptions: a warning when none names it either.
     std::vector<ItemDataIssue> unused;
@@ -167,7 +170,7 @@ TEST_CASE("A description placeholder is a built-in value or a stat file table [d
     CHECK(unused.front().field == "tables.wingDamage");
 
     // A deleted item (no name) is not checked.
-    ItemDefinition deleted = MakeJewel("{durability}");
+    ItemDefinition deleted = MakeJewel("{sparkle}");
     deleted.names = {};
     CHECK(CheckNames(deleted).empty());
 }

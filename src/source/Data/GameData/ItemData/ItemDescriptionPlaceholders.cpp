@@ -6,13 +6,24 @@
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
 
 #include <algorithm>
+#include <functional>
 #include <array>
 
 namespace Data::Items
 {
 namespace
 {
-constexpr std::array<std::string_view, 1> BuiltIns = {LevelPlaceholder};
+// {level}, and the values of the tooltip's stat lines, which the game computes (Engine/Object/ItemTooltipValues).
+constexpr std::array<std::string_view, 30> BuiltIns = {
+    LevelPlaceholder,    "damageMin",           "damageMax",        "defense",
+    "magicDefense",      "blockRate",           "attackSpeed",      "walkSpeed",
+    "magicPower",        "durability",          "maxDurability",    "iceResistance",
+    "poisonResistance",  "lightningResistance", "fireResistance",   "earthResistance",
+    "windResistance",    "waterResistance",     "requiredLevel",    "requiredStrength",
+    "requiredDexterity", "requiredVitality",    "requiredEnergy",   "requiredLeadership",
+    "missingLevel",      "missingStrength",     "missingDexterity", "missingVitality",
+    "missingEnergy",     "missingLeadership",
+};
 
 // The placeholder of `text` that starts at the "{" at `open`: its name and the position after its "}", or the problem.
 struct Placeholder
@@ -111,7 +122,17 @@ std::optional<int> GetPlaceholderValue(std::string_view name, int level, const I
     return std::nullopt;
 }
 
+bool IsBuiltInPlaceholder(std::string_view name)
+{
+    return std::find(BuiltIns.begin(), BuiltIns.end(), name) != BuiltIns.end();
+}
+
 std::string FillPlaceholders(std::string_view text, int level, const ItemStatProfiles& profiles)
+{
+    return FillPlaceholders(text, [&](std::string_view name) { return GetPlaceholderValue(name, level, profiles); });
+}
+
+std::string FillPlaceholders(std::string_view text, const PlaceholderValueOf& valueOf)
 {
     std::string filled;
     filled.reserve(text.size());
@@ -126,7 +147,7 @@ std::string FillPlaceholders(std::string_view text, int level, const ItemStatPro
         filled.append(text.substr(position, brace - position));
         const Placeholder placeholder = text[brace] == '{' ? ReadPlaceholder(text, brace) : Placeholder{};
         const std::optional<int> value = placeholder.error.empty() && placeholder.end != std::string_view::npos
-                                             ? GetPlaceholderValue(placeholder.name, level, profiles)
+                                             ? valueOf(placeholder.name)
                                              : std::nullopt;
         if (!value)
         {
