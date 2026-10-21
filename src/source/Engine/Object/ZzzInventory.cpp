@@ -41,6 +41,7 @@
 #include "Render/Items/ItemDisplay.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Core/Text/TextLineWrap.h"
 #include "Core/Text/Utf8.h"
 #include "UI/Scaling/UITransform.h"
@@ -3727,8 +3728,8 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }
     }
-    // The item data's description in the UI's language: each line wrapped to the tooltip's width and at its line
-    // breaks, the pieces in the line's color.
+    // The item data's description in the UI's language with its placeholders filled in for the item: each line
+    // wrapped to the tooltip's width and at its line breaks, the pieces in the line's color.
     if (const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(ip->Type))
     {
         g_pRenderText->SetFont(g_hFont);
@@ -3746,7 +3747,8 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
                 SkipNum++;
                 continue;
             }
-            const std::wstring text = Core::Text::FromUtf8(line.text.Get(g_ItemDatabase.GetDisplayLocale()));
+            const std::wstring text = Core::Text::FromUtf8(Data::Items::FillPlaceholders(
+                line.text.Get(g_ItemDatabase.GetDisplayLocale()), Level, g_ItemDatabase.GetStatProfiles()));
             for (const std::wstring& piece : WrapTextToWidth(text, Data::Items::ItemDescriptionWrapWidth, measure))
             {
                 if (TextNum >= static_cast<int>(std::size(TextList)))

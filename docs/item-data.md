@@ -81,7 +81,7 @@ read as the English name only; saving writes the object form.
 | Field | Meaning |
 |---|---|
 | `tags` | Categories the game code asks for, e.g. `["mount", "flying"]`; see [Tags](#tags) |
-| `description` | Lines the tooltip shows for the item, after its stats, e.g. the Jewel of Bless's "It is used to increase your item level up to 6". The lines the tooltip code computes from the item (the wings' damage and absorption, the Guardian Angel and the Imp, the Town Portal scroll's delay) are written after the description. Each line is `{"text": ..., "color": ...}`: `text` is written like `name` (a plain English text, or the texts by language), an empty text (`{"text": ""}`) is a blank line, a long line wraps at about the width of the original tooltips' widest lines, and `\n` in a text breaks the line there. `color` is one of the tooltip colors: `white` (left out), `blue`, `red`, `yellow`, `green`, `darkRed`, `purple`, `darkBlue`, `darkYellow`, `greenBlue`, `gray`, `redPurple`, `violet`, `orange`. A client-only field; the bmd import keeps it |
+| `description` | Lines the tooltip shows for the item, after its stats, e.g. the Jewel of Bless's "It is used to increase your item level up to 6". The lines the tooltip code computes from the item (the wings' damage and absorption, the Guardian Angel and the Imp, the Town Portal scroll's delay) are written after the description. A text can have [placeholders](#description-placeholders). Each line is `{"text": ..., "color": ...}`: `text` is written like `name` (a plain English text, or the texts by language), an empty text (`{"text": ""}`) is a blank line, a long line wraps at about the width of the original tooltips' widest lines, and `\n` in a text breaks the line there. `color` is one of the tooltip colors: `white` (left out), `blue`, `red`, `yellow`, `green`, `darkRed`, `purple`, `darkBlue`, `darkYellow`, `greenBlue`, `gray`, `redPurple`, `violet`, `orange`. A client-only field; the bmd import keeps it |
 | `width`, `height` | Size in inventory slots |
 | `slot` | Equipment slot: `mainHand`, `offHand`, `helm`, `armor`, `pants`, `gloves`, `boots`, `wings`, `pet`, `pendant`, `ring`. Left out = not equippable |
 | `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, defense per level, damage increase, absorption) depend on it; excellent second and third tier wings get no extra durability, and the chaos mix knows a wing's tier from it |
@@ -105,6 +105,33 @@ read as the English name only; saving writes the object form.
 | `resistances` | `ice`, `poison`, `lightning`, `fire`, `earth`, `wind`, `water` |
 | `tradable`, `droppable`, `storable`, `sellable`, `personalShopSellable`, `repairable` | What a player may do with the item; see [Rules](#rules). Only `false` is written |
 | `droppableWhileRented`, `personalShopSellableWhileRented`, `sellableWhenRentalExpired` | What changes for a rented item; see [Rules](#rules) |
+
+### Description placeholders
+
+A description text can show values of the item: `{name}` is replaced by the
+value of `name` for the hovered item, e.g.
+`"Increases damage by {damageIncreaseWeapons}% at +{level}"`. Item texts
+have no braces of their own, so every brace belongs to a placeholder. A name
+is one of:
+
+- a **built-in value**: `level`, the item's + level;
+- a **level bonus table** of [`Stats/ItemStats.json`](#item-stats-by-level),
+  by its name: the table's value at the item's + level (`damageIncreaseWeapons`
+  is 3 at +1 and 66 at +15). A new table is a new placeholder.
+
+**Errors** (when the item data loads, in the save checks and in Import from
+bmd):
+
+- a `{` without its `}`, an empty `{}`, a `}` without its `{`, or a name that is
+  not letters and digits, in any language;
+- a translation whose placeholders are not those of the English text (another
+  order is fine);
+- a name that is neither built in nor a table: `has the unknown placeholder
+  {damgeIncreaseWeapons}; did you mean {damageIncreaseWeapons}?`. The stat file
+  may not have a table named like a built-in value.
+
+The shipped data is checked by the tests, so a wrong placeholder fails the
+build's tests.
 
 ### Tags
 

@@ -1,12 +1,14 @@
 #include "stdafx.h"
 
 #include "ItemStatsJson.h"
+#include "ItemDescriptionPlaceholders.h"
 #include "ItemJsonCommon.h"
 #include "ItemStatProfiles.h"
 
 #include <algorithm>
 #include <array>
 #include <set>
+#include <span>
 
 namespace Data::Items
 {
@@ -212,6 +214,15 @@ void ItemStatsReader::ReadTables(const OrderedJson& root, ItemStatFile& file)
         if (!names.insert(table.name).second)
         {
             AddError(field + "." + Keys::Name, "\"" + table.name + "\" is defined more than once");
+            continue;
+        }
+        // Item descriptions name the tables as placeholders, next to the built-in ones.
+        const std::span<const std::string_view> builtIns = GetBuiltInPlaceholders();
+        if (std::find(builtIns.begin(), builtIns.end(), table.name) != builtIns.end())
+        {
+            AddError(field + "." + Keys::Name,
+                     "\"" + table.name +
+                         "\" is a built-in placeholder of the item descriptions; name the table otherwise");
             continue;
         }
         ReadTable(json, std::string(Keys::Tables) + "." + table.name, table);

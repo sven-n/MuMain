@@ -125,6 +125,7 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     {
         statProfiles = ItemStatProfiles(stats.file);
         ValidateStatProfiles(result.items, statProfiles, GetItemStatsFile().generic_string(), result.issues);
+        ValidateDescriptionPlaceholders(result.items, statProfiles, GetItemStatsFile().generic_string(), result.issues);
     }
     Data::LogDataIssues(ItemDataLabel, result.issues);
     if (HasErrors(result.issues))
@@ -339,6 +340,8 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
     // the items too and refuses on any error, so everything is reported at once.
     ValidateStatProfiles(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(),
                          GetItemStatsFile().generic_string(), issues);
+    ValidateDescriptionPlaceholders(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(),
+                                    GetItemStatsFile().generic_string(), issues);
     ValidateNameLocales(g_ItemDatabase.GetAllSlots(), I18N::GetAvailableLocales(), issues);
     // Only the model files of moved models are written; the others keep what
     // this client does not read from them.
@@ -361,6 +364,8 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
     ValidateItems(result.items, result.validationIssues);
     ValidateStatProfiles(result.items, g_ItemDatabase.GetStatProfiles(), GetItemStatsFile().generic_string(),
                          result.validationIssues);
+    ValidateDescriptionPlaceholders(result.items, g_ItemDatabase.GetStatProfiles(), GetItemStatsFile().generic_string(),
+                                    result.validationIssues);
     ValidateNameLocales(result.items, I18N::GetAvailableLocales(), result.validationIssues);
 
     g_ItemDatabase.Build(result.items);

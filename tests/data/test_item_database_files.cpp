@@ -19,6 +19,7 @@
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
+#include "Data/GameData/ItemData/ItemStatsJson.h"
 #include "Data/GameData/ItemData/ItemStructs.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -195,6 +196,20 @@ TEST_CASE("The shipped item names are in languages the game shows [data][items]"
     const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
     std::vector<ItemDataIssue> issues;
     ValidateNameLocales(result.items, I18N::GetAvailableLocales(), issues);
+    for (const ItemDataIssue& issue : issues)
+    {
+        INFO(issue.ToString());
+        CHECK(false);
+    }
+}
+
+TEST_CASE("The shipped descriptions' placeholders are built-in values or stat file tables [data][items]")
+{
+    const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
+    const ItemStatsLoadResult stats = LoadItemStatsFile(DataDirectory / "Items" / "Stats" / ItemStatsFileName);
+    REQUIRE_FALSE(HasErrors(stats.issues));
+    std::vector<ItemDataIssue> issues;
+    ValidateDescriptionPlaceholders(result.items, ItemStatProfiles(stats.file), ItemStatsFileName, issues);
     for (const ItemDataIssue& issue : issues)
     {
         INFO(issue.ToString());
