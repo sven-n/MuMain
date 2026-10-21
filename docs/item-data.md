@@ -82,7 +82,8 @@ read as the English name only; saving writes the object form.
 | Field | Meaning |
 |---|---|
 | `tags` | Categories the game code asks for, e.g. `["mount", "flying"]`; see [Tags](#tags) |
-| `description` | Lines the tooltip shows for the item, after its stats, e.g. the Jewel of Bless's "It is used to increase your item level up to 6". A few lines that read the hero or other tables (the Armor of Guardsman's Chaos Castle table, the Lost Map, the Talisman of Mobility's saved location) are still written by the tooltip code, after the description. A text can have [placeholders](#description-placeholders). Each line is `{"text": ..., "when": [...], "color": ..., "levels": [first, last]}`: `text` is written like `name` (a plain English text, or the texts by language), or `"@name"` for a shared text of the [tooltip file](#tooltip-layouts) (`"@life"`); an empty text (`{"text": ""}`) is a blank line; a long line wraps at about the width of the original tooltips' widest lines, and `\n` in a text breaks the line there. `color` is one of the tooltip colors: `white` (left out), `blue`, `red`, `yellow`, `green`, `darkRed`, `purple`, `darkBlue`, `darkYellow`, `greenBlue`, `gray`, `redPurple`, `violet`, `orange`. `levels` shows the line only at those item levels, both included (`[1, 8]`; left out: every level); a list of two levels from 0 to 15 with the first not above the last. `when` shows the line only when its [conditions](#tooltip-layouts) hold, as a layout line's (`["!timed"]`, `["durability=2"]`). A client-only field; the bmd import keeps it |
+| `levelValues` | Values of the description's own placeholders, one per item level from +0: `{"stat": ["ENG", "STA", ...]}` makes `{stat}` "ENG" at +0 and "STA" at +1. Each value is a text with its translations (written like `name`) or a shared text (`"@name"`), without placeholders. A line that shows one is shown only at levels that have a value. The Fruits' `{stat}` is one. A client-only field; the bmd import keeps it |
+| `description` | Lines the tooltip shows for the item, after its stats, e.g. the Jewel of Bless's "It is used to increase your item level up to 6". A few lines that read the hero or other tables (the Armor of Guardsman's Chaos Castle table, the Lost Map, the Talisman of Mobility's saved location) are still written by the tooltip code, after the description. A text can have [placeholders](#description-placeholders). Each line is `{"text": ..., "values": {...}, "when": [...], "color": ..., "levels": [first, last]}`: `text` is written like `name` (a plain English text, or the texts by language), or `"@name"` for a shared text of the [tooltip file](#tooltip-layouts) (`"@increaseSpeed"`), which is how a text several items show is written once; an empty text (`{"text": ""}`) is a blank line; `values` names the value a placeholder of the text shows on this line, a built-in value or a table (`"values": {"percent": "wingDamageIncrease1st"}` with the shared text "Increase {percent}% of Damage"); a long line wraps at about the width of the original tooltips' widest lines, and `\n` in a text breaks the line there. `color` is one of the tooltip colors: `white` (left out), `blue`, `red`, `yellow`, `green`, `darkRed`, `purple`, `darkBlue`, `darkYellow`, `greenBlue`, `gray`, `redPurple`, `violet`, `orange`. `levels` shows the line only at those item levels, both included (`[1, 8]`; left out: every level); a list of two levels from 0 to 15 with the first not above the last. `when` shows the line only when its [conditions](#tooltip-layouts) hold, as a layout line's (`["!timed"]`, `["durability=2"]`). A client-only field; the bmd import keeps it |
 | `width`, `height` | Size in inventory slots |
 | `slot` | Equipment slot: `mainHand`, `offHand`, `helm`, `armor`, `pants`, `gloves`, `boots`, `wings`, `pet`, `pendant`, `ring`. Left out = not equippable |
 | `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, defense per level, damage increase, absorption) depend on it; excellent second and third tier wings get no extra durability, and the chaos mix knows a wing's tier from it |
@@ -131,9 +132,13 @@ is one of:
   by its name: the table's value at the item's + level (`damageIncreaseWeapons`
   is 3 at +1 and 66 at +15). A new table is a new placeholder.
   The wings, capes and pets show their damage increase and absorption this
-  way: `"Increase {wingDamageIncrease1st}% of Damage"` over the table
+  way: the shared text `"Increase {percent}% of Damage"` with
+  `"values": {"percent": "wingDamageIncrease1st"}` on the line, over the table
   `wingDamageIncrease1st` (`{"values": 12, "perLevel": 2}`, 12 + 2 per level).
   Such tables are only for descriptions: no stat profile names them.
+- a name the line's `values` binds to a built-in value or a table, so one
+  shared text serves items whose numbers come from different tables;
+- one of the item's `levelValues`, a text by item level.
 
 **Errors** (when the item data loads, in the save checks and in Import from
 bmd):
@@ -144,7 +149,12 @@ bmd):
   order is fine);
 - a name that is neither built in nor a table: `has the unknown placeholder
   {damgeIncreaseWeapons}; did you mean {damageIncreaseWeapons}?`. The stat file
-  may not have a table named like a built-in value.
+  may not have a table named like a built-in value;
+- a line's `values` entry that names neither a built-in value nor a table;
+- a level value named like a built-in value or a table, one with placeholders,
+  and a line that shows a level value at a level the value has none for.
+
+A level value no line shows is a warning.
 
 The shipped data is checked by the tests, so a wrong placeholder fails the
 build's tests.

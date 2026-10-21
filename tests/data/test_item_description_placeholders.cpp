@@ -6,6 +6,7 @@
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
+#include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 
 #include <algorithm>
 #include <string>
@@ -59,7 +60,8 @@ std::vector<ItemDataIssue> CheckSyntax(const ItemDefinition& item)
 std::vector<ItemDataIssue> CheckNames(const ItemDefinition& item)
 {
     std::vector<ItemDataIssue> issues;
-    ValidateDescriptionPlaceholders(std::vector<ItemDefinition>{item}, MakeProfiles(), "ItemStats.json", issues);
+    ValidateDescriptionPlaceholders(std::vector<ItemDefinition>{item}, MakeProfiles(), ItemTooltipFile(),
+                                    "ItemStats.json", issues);
     std::erase_if(issues, [](const ItemDataIssue& issue) { return issue.group == ItemDataIssue::NoItem; });
     return issues;
 }
@@ -154,8 +156,8 @@ TEST_CASE("A description placeholder is a built-in value or a stat file table [d
     const std::vector<ItemDataIssue> unknown = CheckNames(MakeJewel("Sparkle {sparkle}"));
     REQUIRE(unknown.size() == 1);
     CHECK(unknown.front().message ==
-          "has the unknown placeholder {sparkle}; a placeholder is a built-in value (docs/item-data.md) or a table of "
-          "ItemStats.json");
+          "has the unknown placeholder {sparkle}; a placeholder is a built-in value (docs/item-data.md), a table of "
+          "ItemStats.json, or one of the line's values or the item's levelValues");
 
     // The stat line values are built in too.
     CHECK(CheckNames(MakeJewel("Durability {durability}/{maxDurability}, {missingStrength} strength missing")).empty());
@@ -163,7 +165,7 @@ TEST_CASE("A description placeholder is a built-in value or a stat file table [d
     // A table no stat uses is for descriptions: a warning when none names it either.
     std::vector<ItemDataIssue> unused;
     ValidateDescriptionPlaceholders(std::vector<ItemDefinition>{MakeJewel("No placeholders")}, MakeProfiles(),
-                                    "ItemStats.json", unused);
+                                    ItemTooltipFile(), "ItemStats.json", unused);
     REQUIRE(unused.size() == 1);
     CHECK(unused.front().severity == ItemDataIssueSeverity::Warning);
     CHECK(unused.front().source == "ItemStats.json");
@@ -173,4 +175,83 @@ TEST_CASE("A description placeholder is a built-in value or a stat file table [d
     ItemDefinition deleted = MakeJewel("{sparkle}");
     deleted.names = {};
     CHECK(CheckNames(deleted).empty());
+}
+
+TEST_CASE("A description line names the value of its own placeholder [data][items]")
+{
+    ItemDefinition wing = MakeJewel("Increase {percent}% of Damage");
+    wing.description[0].values = {{"percent", "wingDamage"}};
+    CHECK(CheckNames(wing).empty());
+
+    // It names a built-in value or a table; a typo suggests the name meant.
+    wing.description[0].values = {{"percent", "wingDamge"}};
+    const std::vector<ItemDataIssue> typo = CheckNames(wing);
+    REQUIRE(typo.size() == 1);
+    CHECK(typo.front().field == "description[0].values.percent");
+    CHECK(typo.front().message.find("did you mean \"wingDamage\"?") != std::string::npos);
+
+    // A placeholder another line binds is not this line's.
+    wing.description.push_back(wing.description[0]);
+    wing.description[0].values = {{"percent", "wingDamage"}};
+    wing.description[1].values = {};
+    const std::vector<ItemDataIssue> unbound = CheckNames(wing);
+    REQUIRE(unbound.size() == 1);
+    CHECK(unbound.front().message.find("unknown placeholder {percent}") != std::string::npos);
+}
+
+TEST_CASE("An item's level values fill its description's placeholders at the levels they have [data][items]")
+{
+    ItemDefinition fruits = MakeJewel("{stat} Increases 1~3 stat points");
+    fruits.description[0].minLevel = 0;
+    fruits.description[0].maxLevel = 1;
+    ItemLevelValues stat;
+    stat.name = "stat";
+    stat.values.resize(2);
+    stat.values[0].text.Set("en", "ENG");
+    stat.values[1].text.Set("en", "STA");
+    fruits.levelValues = {stat};
+    CHECK(CheckNames(fruits).empty());
+
+    // A line shown at a level without a value.
+    fruits.description[0].maxLevel = 4;
+    const std::vector<ItemDataIssue> beyond = CheckNames(fruits);
+    REQUIRE(beyond.size() == 1);
+    CHECK(beyond.front().field == "description[0].levels");
+    CHECK(beyond.front().message.find("only up to +1") != std::string::npos);
+    fruits.description[0].maxLevel = 1;
+
+    // A level value needs its own name, and one no line shows is a warning.
+    fruits.levelValues[0].name = "level";
+    fruits.description[0].text.Set("en", "No placeholder here");
+    const std::vector<ItemDataIssue> builtIn = CheckNames(fruits);
+    REQUIRE(builtIn.size() == 2);
+    CHECK(builtIn[0].severity == ItemDataIssueSeverity::Error);
+    CHECK(builtIn[0].field == "levelValues.level");
+    CHECK(builtIn[1].severity == ItemDataIssueSeverity::Warning);
+    CHECK(builtIn[1].message == "no line of the description shows it");
+}
+
+TEST_CASE("A level value is a text without placeholders, or a shared text the tooltip file has [data][items]")
+{
+    ItemTooltipFile tooltips;
+    tooltips.texts["energy"].Set("en", "ENG");
+    tooltips.texts["withPlaceholder"].Set("en", "+{level}");
+    ItemDefinition fruits = MakeJewel("{stat}");
+    ItemLevelValues stat;
+    stat.name = "stat";
+    stat.values.resize(4);
+    stat.values[0].textName = "energy";
+    stat.values[1].textName = "enrgy";
+    stat.values[2].textName = "withPlaceholder";
+    stat.values[3].text.Set("en", "{level}");
+    fruits.levelValues = {stat};
+    std::vector<ItemDataIssue> issues;
+    ValidateDescriptionTexts(std::vector<ItemDefinition>{fruits}, tooltips, "Tooltip.json", issues);
+    std::erase_if(issues, [](const ItemDataIssue& issue) { return issue.group == ItemDataIssue::NoItem; });
+    REQUIRE(issues.size() == 3);
+    CHECK(issues[0].field == "levelValues.stat[1]");
+    CHECK(issues[0].message.find("did you mean \"@energy\"?") != std::string::npos);
+    CHECK(issues[1].field == "levelValues.stat[2]");
+    CHECK(issues[2].field == "levelValues.stat[3]");
+    CHECK(issues[2].message == "has placeholders, which a level value cannot have");
 }

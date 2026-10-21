@@ -36,20 +36,23 @@ void ValidateItemModels(std::span<const ItemModelDefinition> models, std::vector
 void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
                           const std::string& statFile, std::vector<ItemDataIssue>& issues);
 
-// The placeholders of the items' descriptions against the item stat file (`statFile` names it in messages): a name
-// that is neither a built-in value nor a table of the file is an error, with the nearest known name when it looks like
-// a typo. A table of the file that neither a stat nor a description uses is a warning. The braces and the translations
-// are checked by ValidateItems.
+// The placeholders of the items' descriptions, written in place or in a shared text of `tooltips`, against the item
+// stat file (`statFile` names it in messages). A placeholder is a built-in value, a table of the file, one the line's
+// "values" names, or one of the item's "levelValues"; another name is an error, with the nearest known name when it
+// looks like a typo. A line's "values" names a built-in value or a table; a line that shows a level value is shown only
+// at levels that have one; a level value's name is not a built-in value or a table. A table of the file that neither a
+// stat nor a description uses, and a level value no line shows, are warnings. The braces and the translations are
+// checked by ValidateItems.
 void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
-                                     const std::string& statFile, std::vector<ItemDataIssue>& issues);
+                                     const ItemTooltipFile& tooltips, const std::string& statFile,
+                                     std::vector<ItemDataIssue>& issues);
 
-// The shared texts ("@name") of the items' descriptions against the tooltip file (`tooltipFile` names it in
-// messages): a text the file does not have is an error, with the nearest name when it looks like a typo, and so is a
-// placeholder of a shared text that is neither a built-in value nor a table of `profiles`. A shared text that neither a
-// layout nor a description uses is a warning.
+// The shared texts ("@name") of the items' descriptions and level values against the tooltip file (`tooltipFile`
+// names it in messages): a text the file does not have is an error, with the nearest name when it looks like a typo
+// (their placeholders are checked by ValidateDescriptionPlaceholders). A level value has no placeholders. A shared text
+// that neither a layout nor a description uses is a warning.
 void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemTooltipFile& tooltips,
-                              const ItemStatProfiles& profiles, const std::string& tooltipFile,
-                              std::vector<ItemDataIssue>& issues);
+                              const std::string& tooltipFile, std::vector<ItemDataIssue>& issues);
 
 // Gives the model entries that name a shared model ("model") its file,
 // texture folders and none-blend meshes. A name that is not a shared model

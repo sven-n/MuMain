@@ -633,163 +633,35 @@
       "description": [
         {
           "text": {
-            "en": "ENG Increases 1~3 stat points",
-            "de": "ENG Erhöht 1~3 Statuspunkte",
-            "es": "ESP Aumenta 1~3 puntos de estadísticas",
-            "id": "Bahasa Inggris Meningkatkan 1~3 poin stat",
-            "ja": "エナジー ステータス1～3ポイント生成",
-            "pl": "ENG Zwiększa 1-3 punkty statystyk",
-            "pt": "POR Aumenta 1~3 pontos de estatísticas",
-            "ru": "АНГЛ Увеличивает 1~3 очка характеристик.",
-            "tl": "ENG Tumataas ng 1~3 stat point",
-            "uk": "ENG Збільшує 1–3 очки статистики",
-            "zh-TW": "英語 增加1~3點屬性點"
+            "en": "{stat} Increases 1~3 stat points",
+            "de": "{stat} Erhöht 1~3 Statuspunkte",
+            "es": "{stat} Aumenta 1~3 puntos de estadísticas",
+            "id": "{stat} Meningkatkan 1~3 poin stat",
+            "ja": "{stat} ステータス1～3ポイント生成",
+            "pl": "{stat} Zwiększa 1-3 punkty statystyk",
+            "pt": "{stat} Aumenta 1~3 pontos de estatísticas",
+            "ru": "{stat} Увеличивает 1~3 очка характеристик.",
+            "tl": "{stat} Tumataas ng 1~3 stat point",
+            "uk": "{stat} Збільшує 1–3 очки статистики",
+            "zh-TW": "{stat} 增加1~3點屬性點"
           },
-          "levels": [0, 0]
+          "levels": [0, 4]
         },
         {
           "text": {
-            "en": "ENG Possible to decrease stat 1~9 point",
-            "de": "ENG Verringert einen Wert um 1~9 Punkte",
-            "es": "ESP Es posible disminuir las estadísticas de 1 a 9 puntos.",
-            "id": "Bahasa Inggris Kemungkinan untuk menurunkan stat 1~9 poin",
-            "ja": "エナジー 減少ステータス1～9ポイント可能",
-            "pl": "ENG Możliwe zmniejszenie statystyki o 1~9 punktów",
-            "pt": "POR Possível diminuir estatísticas de 1 a 9 pontos",
-            "ru": "АНГЛ Возможно понижение показателя с 1 по 9.",
-            "tl": "ENG Posibleng bawasan ang stat 1~9 point",
-            "uk": "ENG Можливе зниження характеристики на 1~9 балів",
-            "zh-TW": "英語 可減少屬性1~9點"
+            "en": "{stat} Possible to decrease stat 1~9 point",
+            "de": "{stat} Verringert einen Wert um 1~9 Punkte",
+            "es": "{stat} Es posible disminuir las estadísticas de 1 a 9 puntos.",
+            "id": "{stat} Kemungkinan untuk menurunkan stat 1~9 poin",
+            "ja": "{stat} 減少ステータス1～9ポイント可能",
+            "pl": "{stat} Możliwe zmniejszenie statystyki o 1~9 punktów",
+            "pt": "{stat} Possível diminuir estatísticas de 1 a 9 pontos",
+            "ru": "{stat} Возможно понижение показателя с 1 по 9.",
+            "tl": "{stat} Posibleng bawasan ang stat 1~9 point",
+            "uk": "{stat} Можливе зниження характеристики на 1~9 балів",
+            "zh-TW": "{stat} 可減少屬性1~9點"
           },
-          "levels": [0, 0]
-        },
-        {
-          "text": {
-            "en": "STA Increases 1~3 stat points",
-            "de": "VIT Erhöht 1~3 Statuspunkte",
-            "es": "STA Aumenta 1~3 puntos de estadísticas",
-            "id": "STA Meningkatkan 1~3 poin stat",
-            "ja": "体力 ステータス1～3ポイント生成",
-            "pl": "STA Zwiększa 1-3 punkty statystyk",
-            "pt": "STA Aumenta 1~3 pontos de estatísticas",
-            "ru": "СТА Увеличивает 1~3 очка характеристик.",
-            "tl": "STA Tumataas ng 1~3 stat point",
-            "uk": "STA Збільшує 1–3 очки статистики",
-            "zh-TW": "史塔 增加1~3點屬性點"
-          },
-          "levels": [1, 1]
-        },
-        {
-          "text": {
-            "en": "STA Possible to decrease stat 1~9 point",
-            "de": "VIT Verringert einen Wert um 1~9 Punkte",
-            "es": "STA Es posible disminuir las estadísticas de 1 a 9 puntos.",
-            "id": "STA Kemungkinan untuk menurunkan stat 1~9 poin",
-            "ja": "体力 減少ステータス1～9ポイント可能",
-            "pl": "STA Możliwe zmniejszenie statystyki o 1~9 punktów",
-            "pt": "STA Possível diminuir estatísticas de 1 a 9 pontos",
-            "ru": "СТА Возможно понижение показателя с 1 по 9.",
-            "tl": "STA Posibleng bawasan ang stat 1~9 point",
-            "uk": "STA Можливе зниження характеристики на 1~9 балів",
-            "zh-TW": "史塔 可減少屬性1~9點"
-          },
-          "levels": [1, 1]
-        },
-        {
-          "text": {
-            "en": "AGI Increases 1~3 stat points",
-            "de": "BEW Erhöht 1~3 Statuspunkte",
-            "es": "AGI Aumenta 1~3 puntos de estadísticas",
-            "id": "AGI Meningkatkan 1~3 poin stat",
-            "ja": "敏捷性 ステータス1～3ポイント生成",
-            "pl": "AGI Zwiększa 1-3 punkty statystyk",
-            "pt": "AGI Aumenta 1~3 pontos de estatísticas",
-            "ru": "ОИИ Увеличивает 1~3 очка характеристик.",
-            "tl": "AGI Tumataas ng 1~3 stat point",
-            "uk": "AGI Збільшує 1–3 очки статистики",
-            "zh-TW": "通用人工智慧 增加1~3點屬性點"
-          },
-          "levels": [2, 2]
-        },
-        {
-          "text": {
-            "en": "AGI Possible to decrease stat 1~9 point",
-            "de": "BEW Verringert einen Wert um 1~9 Punkte",
-            "es": "AGI Es posible disminuir las estadísticas de 1 a 9 puntos.",
-            "id": "AGI Kemungkinan untuk menurunkan stat 1~9 poin",
-            "ja": "敏捷性 減少ステータス1～9ポイント可能",
-            "pl": "AGI Możliwe zmniejszenie statystyki o 1~9 punktów",
-            "pt": "AGI Possível diminuir estatísticas de 1 a 9 pontos",
-            "ru": "ОИИ Возможно понижение показателя с 1 по 9.",
-            "tl": "AGI Posibleng bawasan ang stat 1~9 point",
-            "uk": "AGI Можливе зниження характеристики на 1~9 балів",
-            "zh-TW": "通用人工智慧 可減少屬性1~9點"
-          },
-          "levels": [2, 2]
-        },
-        {
-          "text": {
-            "en": "STR Increases 1~3 stat points",
-            "de": "STÄ Erhöht 1~3 Statuspunkte",
-            "es": "FUE Aumenta 1~3 puntos de estadísticas",
-            "id": "STR Meningkatkan 1~3 poin stat",
-            "ja": "力 ステータス1～3ポイント生成",
-            "pl": "STR Zwiększa 1-3 punkty statystyk",
-            "pt": "FOR Aumenta 1~3 pontos de estatísticas",
-            "ru": "СТР Увеличивает 1~3 очка характеристик.",
-            "tl": "STR Tumataas ng 1~3 stat point",
-            "uk": "ВУЛ Збільшує 1–3 очки статистики",
-            "zh-TW": "STR 增加1~3點屬性點"
-          },
-          "levels": [3, 3]
-        },
-        {
-          "text": {
-            "en": "STR Possible to decrease stat 1~9 point",
-            "de": "STÄ Verringert einen Wert um 1~9 Punkte",
-            "es": "FUE Es posible disminuir las estadísticas de 1 a 9 puntos.",
-            "id": "STR Kemungkinan untuk menurunkan stat 1~9 poin",
-            "ja": "力 減少ステータス1～9ポイント可能",
-            "pl": "STR Możliwe zmniejszenie statystyki o 1~9 punktów",
-            "pt": "FOR Possível diminuir estatísticas de 1 a 9 pontos",
-            "ru": "СТР Возможно понижение показателя с 1 по 9.",
-            "tl": "STR Posibleng bawasan ang stat 1~9 point",
-            "uk": "ВУЛ Можливе зниження характеристики на 1~9 балів",
-            "zh-TW": "STR 可減少屬性1~9點"
-          },
-          "levels": [3, 3]
-        },
-        {
-          "text": {
-            "en": "Command Increases 1~3 stat points",
-            "de": "Führung Erhöht 1~3 Statuspunkte",
-            "es": "Dominio Aumenta 1~3 puntos de estadísticas",
-            "id": "Memerintah Meningkatkan 1~3 poin stat",
-            "ja": "統率 ステータス1～3ポイント生成",
-            "pl": "Rozkaz Zwiększa 1-3 punkty statystyk",
-            "pt": "Comando Aumenta 1~3 pontos de estatísticas",
-            "ru": "Команда Увеличивает 1~3 очка характеристик.",
-            "tl": "Utos Tumataas ng 1~3 stat point",
-            "uk": "Команда Збільшує 1–3 очки статистики",
-            "zh-TW": "命令 增加1~3點屬性點"
-          },
-          "levels": [4, 4]
-        },
-        {
-          "text": {
-            "en": "Command Possible to decrease stat 1~9 point",
-            "de": "Führung Verringert einen Wert um 1~9 Punkte",
-            "es": "Dominio Es posible disminuir las estadísticas de 1 a 9 puntos.",
-            "id": "Memerintah Kemungkinan untuk menurunkan stat 1~9 poin",
-            "ja": "統率 減少ステータス1～9ポイント可能",
-            "pl": "Rozkaz Możliwe zmniejszenie statystyki o 1~9 punktów",
-            "pt": "Comando Possível diminuir estatísticas de 1 a 9 pontos",
-            "ru": "Команда Возможно понижение показателя с 1 по 9.",
-            "tl": "Utos Posibleng bawasan ang stat 1~9 point",
-            "uk": "Команда Можливе зниження характеристики на 1~9 балів",
-            "zh-TW": "命令 可減少屬性1~9點"
-          },
-          "levels": [4, 4]
+          "levels": [0, 4]
         },
         {
           "text": {
@@ -825,6 +697,75 @@
           "levels": [4, 4]
         }
       ],
+      "levelValues": {
+        "stat": [
+          {
+            "en": "ENG",
+            "de": "ENG",
+            "es": "ESP",
+            "id": "Bahasa Inggris",
+            "ja": "エナジー",
+            "pl": "ENG",
+            "pt": "POR",
+            "ru": "АНГЛ",
+            "tl": "ENG",
+            "uk": "ENG",
+            "zh-TW": "英語"
+          },
+          {
+            "en": "STA",
+            "de": "VIT",
+            "es": "STA",
+            "id": "STA",
+            "ja": "体力",
+            "pl": "STA",
+            "pt": "STA",
+            "ru": "СТА",
+            "tl": "STA",
+            "uk": "STA",
+            "zh-TW": "史塔"
+          },
+          {
+            "en": "AGI",
+            "de": "BEW",
+            "es": "AGI",
+            "id": "AGI",
+            "ja": "敏捷性",
+            "pl": "AGI",
+            "pt": "AGI",
+            "ru": "ОИИ",
+            "tl": "AGI",
+            "uk": "AGI",
+            "zh-TW": "通用人工智慧"
+          },
+          {
+            "en": "STR",
+            "de": "STÄ",
+            "es": "FUE",
+            "id": "STR",
+            "ja": "力",
+            "pl": "STR",
+            "pt": "FOR",
+            "ru": "СТР",
+            "tl": "STR",
+            "uk": "ВУЛ",
+            "zh-TW": "STR"
+          },
+          {
+            "en": "Command",
+            "de": "Führung",
+            "es": "Dominio",
+            "id": "Memerintah",
+            "ja": "統率",
+            "pl": "Rozkaz",
+            "pt": "Comando",
+            "ru": "Команда",
+            "tl": "Utos",
+            "uk": "Команда",
+            "zh-TW": "命令"
+          }
+        ]
+      },
       "width": 1,
       "height": 1,
       "repairable": false,
@@ -849,19 +790,7 @@
       "tags": ["bloodCastleTicketPart", "noDurabilityLine"],
       "description": [
         {
-          "text": {
-            "en": "Used when creating a Cloak of Invisibility",
-            "de": "Wird beim Erstellen eines Umhangs der Unsichtbarkeit verwendet",
-            "es": "Se utiliza al crear una capa de invisibilidad.",
-            "id": "Digunakan saat membuat Jubah Gaib",
-            "ja": "透明マントを入手するための合成に使われます。",
-            "pl": "Używane podczas tworzenia Cloak of Invisibility",
-            "pt": "Usado ao criar uma Capa de Invisibilidade",
-            "ru": "Используется при создании плаща-невидимки.",
-            "tl": "Ginagamit kapag gumagawa ng Cloak of Invisibility",
-            "uk": "Використовується при створенні Плаща-Невидимки",
-            "zh-TW": "建立隱形斗篷時使用"
-          }
+          "text": "@invisibilityCloakIngredient"
         }
       ],
       "width": 1,
@@ -889,19 +818,7 @@
       "tags": ["bloodCastleTicketPart", "noDurabilityLine"],
       "description": [
         {
-          "text": {
-            "en": "Used when creating a Cloak of Invisibility",
-            "de": "Wird beim Erstellen eines Umhangs der Unsichtbarkeit verwendet",
-            "es": "Se utiliza al crear una capa de invisibilidad.",
-            "id": "Digunakan saat membuat Jubah Gaib",
-            "ja": "透明マントを入手するための合成に使われます。",
-            "pl": "Używane podczas tworzenia Cloak of Invisibility",
-            "pt": "Usado ao criar uma Capa de Invisibilidade",
-            "ru": "Используется при создании плаща-невидимки.",
-            "tl": "Ginagamit kapag gumagawa ng Cloak of Invisibility",
-            "uk": "Використовується при створенні Плаща-Невидимки",
-            "zh-TW": "建立隱形斗篷時使用"
-          }
+          "text": "@invisibilityCloakIngredient"
         }
       ],
       "width": 1,
@@ -947,34 +864,10 @@
           "text": ""
         },
         {
-          "text": {
-            "en": "The remaining time is shown",
-            "de": "Die verbleibende Zeit wird angezeigt",
-            "es": "Se muestra el tiempo restante",
-            "id": "Waktu yang tersisa ditampilkan",
-            "ja": "マウスボタンを右クリックすれば",
-            "pl": "Wyświetlany jest pozostały czas",
-            "pt": "O tempo restante é mostrado",
-            "ru": "Оставшееся время показано",
-            "tl": "Ang natitirang oras ay ipinapakita",
-            "uk": "Показано час, що залишився",
-            "zh-TW": "顯示剩餘時間"
-          }
+          "text": "@remainingTimeShown"
         },
         {
-          "text": {
-            "en": "when you right click on your mouse.",
-            "de": "wenn Sie mit der rechten Maustaste klicken.",
-            "es": "cuando haces clic derecho en tu mouse.",
-            "id": "ketika Anda mengklik kanan pada mouse Anda.",
-            "ja": "残った時間を見ることができます。",
-            "pl": "po kliknięciu prawym przyciskiem myszy.",
-            "pt": "quando você clica com o botão direito do mouse.",
-            "ru": "когда вы щелкаете правой кнопкой мыши.",
-            "tl": "kapag nag-right click ka sa iyong mouse.",
-            "uk": "коли ви клацаєте правою кнопкою миші.",
-            "zh-TW": "當您右鍵單擊滑鼠時。"
-          }
+          "text": "@whenYouRightClick"
         }
       ],
       "width": 2,
@@ -1325,34 +1218,12 @@
       "tags": ["cape", "valuable"],
       "description": [
         {
-          "text": {
-            "en": "Increase {capeDamageIncrease}% of Damage",
-            "de": "Erhöht den Schaden um {capeDamageIncrease}%",
-            "es": "Aumenta el daño de {capeDamageIncrease}% of",
-            "id": "Meningkatkan Kerusakan {capeDamageIncrease}% of",
-            "ja": "ダメージ {capeDamageIncrease}%増加",
-            "pl": "Zwiększa obrażenia o {capeDamageIncrease}%",
-            "pt": "Aumentar o dano de {capeDamageIncrease}% of",
-            "ru": "Увеличение урона {capeDamageIncrease}% of",
-            "tl": "Dagdagan ang {capeDamageIncrease}% of Pinsala",
-            "uk": "Збільшення шкоди на {capeDamageIncrease}% of",
-            "zh-TW": "增加 {capeDamageIncrease}% of 傷害"
-          }
+          "text": "@damageIncrease",
+          "values": {"percent": "capeDamageIncrease"}
         },
         {
-          "text": {
-            "en": "Absorb {capeOfLordDamageAbsorb}% of Damage",
-            "de": "Absorbiert {capeOfLordDamageAbsorb}% des Schadens",
-            "es": "Absorber daño {capeOfLordDamageAbsorb}% of",
-            "id": "Menyerap Kerusakan {capeOfLordDamageAbsorb}% of",
-            "ja": "ダメージ {capeOfLordDamageAbsorb}%吸収",
-            "pl": "Pochłania {capeOfLordDamageAbsorb}% obrażeń",
-            "pt": "Absorver Dano {capeOfLordDamageAbsorb}% of",
-            "ru": "Поглощение {capeOfLordDamageAbsorb}% of урона",
-            "tl": "Isipsip ang {capeOfLordDamageAbsorb}% of Pinsala",
-            "uk": "Поглинання шкоди {capeOfLordDamageAbsorb}% of",
-            "zh-TW": "吸收{capeOfLordDamageAbsorb}% of傷害"
-          }
+          "text": "@damageAbsorb",
+          "values": {"percent": "capeOfLordDamageAbsorb"}
         }
       ],
       "width": 2,
@@ -1430,9 +1301,7 @@
       "tags": ["noDurabilityLine"],
       "description": [
         {
-          "text": {
-            "en": "{durability} / 20"
-          }
+          "text": "@piecesOfTwenty"
         }
       ],
       "width": 1,
@@ -1460,9 +1329,7 @@
       "tags": ["noDurabilityLine"],
       "description": [
         {
-          "text": {
-            "en": "{durability} / 20"
-          }
+          "text": "@piecesOfTwenty"
         }
       ],
       "width": 1,
@@ -1601,19 +1468,7 @@
       },
       "description": [
         {
-          "text": {
-            "en": "Cannot Repair",
-            "de": "Kann nicht repariert werden",
-            "es": "No se puede reparar",
-            "id": "Tidak Dapat Memperbaiki",
-            "ja": "修理不可能",
-            "pl": "Nie można naprawić",
-            "pt": "Não é possível reparar",
-            "ru": "Невозможно восстановить",
-            "tl": "Hindi Maaayos",
-            "uk": "Неможливо відремонтувати",
-            "zh-TW": "無法修復"
-          },
+          "text": "@cannotRepair",
           "color": "red"
         },
         {
@@ -1788,67 +1643,19 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "Increases experience gained.",
-            "de": "Erhöht die erhaltene Erfahrung.",
-            "es": "Aumenta la experiencia adquirida.",
-            "id": "Meningkatkan pengalaman yang diperoleh.",
-            "ja": "経験値獲得量が増加する効果があります。",
-            "pl": "Zwiększa zdobywane doświadczenie.",
-            "pt": "Aumenta a experiência adquirida.",
-            "ru": "Увеличивает получаемый опыт.",
-            "tl": "Nagpapataas ng karanasang natamo.",
-            "uk": "Збільшує отриманий досвід.",
-            "zh-TW": "增加獲得的經驗。"
-          },
+          "text": "@increasesExperience",
           "color": "blue"
         },
         {
-          "text": {
-            "en": "Warp Command Window available.",
-            "de": "Warp-Befehlsfenster verfügbar.",
-            "es": "Ventana de comando Warp disponible.",
-            "id": "Jendela Perintah Warp tersedia.",
-            "ja": "マップ移動ウィンドウが使えます。",
-            "pl": "Dostępne okno poleceń Warp.",
-            "pt": "Janela de comando Warp disponível.",
-            "ru": "Доступно окно управления варпом.",
-            "tl": "Available ang Warp Command Window.",
-            "uk": "Доступне вікно команд Warp.",
-            "zh-TW": "扭曲命令視窗可用。"
-          },
+          "text": "@warpCommandWindow",
           "color": "blue"
         },
         {
-          "text": {
-            "en": "Not applicable to",
-            "de": "Gilt nicht für",
-            "es": "No aplicable a",
-            "id": "Tidak berlaku untuk",
-            "ja": "ご注意 マスターレベルには経験値獲得量増加、",
-            "pl": "Nie dotyczy",
-            "pt": "Não aplicável a",
-            "ru": "Не применимо к",
-            "tl": "Hindi naaangkop sa",
-            "uk": "Не застосовується до",
-            "zh-TW": "不適用於"
-          },
+          "text": "@notApplicableTo",
           "color": "yellow"
         },
         {
-          "text": {
-            "en": "Master Level Characters.",
-            "de": "Charaktere mit Master-Level.",
-            "es": "Personajes de nivel maestro.",
-            "id": "Karakter Tingkat Master.",
-            "ja": "アイテム獲得率増加効果は適用されません。",
-            "pl": "Postacie na poziomie mistrzowskim.",
-            "pt": "Personagens de nível mestre.",
-            "ru": "Персонажи уровня Мастер.",
-            "tl": "Mga Master Level na Character.",
-            "uk": "Персонажі майстерного рівня.",
-            "zh-TW": "大師級人物。"
-          },
+          "text": "@masterLevelCharacters",
           "color": "yellow"
         }
       ],
@@ -1882,67 +1689,19 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "Increases experience gained and item drop rate.",
-            "de": "Erhöht die erhaltene Erfahrung und die Droprate von Gegenständen.",
-            "es": "Aumenta la experiencia obtenida y la tasa de caída de elementos.",
-            "id": "Meningkatkan pengalaman yang diperoleh dan tingkat penurunan item.",
-            "ja": "経験値とアイテム獲得量が増加する効果があります。",
-            "pl": "Zwiększa zdobywane doświadczenie i częstotliwość wypadania przedmiotów.",
-            "pt": "Aumenta a experiência adquirida e a taxa de queda de itens.",
-            "ru": "Увеличивает получаемый опыт и шанс выпадения предметов.",
-            "tl": "Pinapataas ang karanasang natamo at rate ng pagbaba ng item.",
-            "uk": "Збільшує отриманий досвід і швидкість випадання предметів.",
-            "zh-TW": "增加獲得的經驗值和物品掉落率。"
-          },
+          "text": "@increasesExperienceAndDrops",
           "color": "blue"
         },
         {
-          "text": {
-            "en": "Warp Command Window available.",
-            "de": "Warp-Befehlsfenster verfügbar.",
-            "es": "Ventana de comando Warp disponible.",
-            "id": "Jendela Perintah Warp tersedia.",
-            "ja": "マップ移動ウィンドウが使えます。",
-            "pl": "Dostępne okno poleceń Warp.",
-            "pt": "Janela de comando Warp disponível.",
-            "ru": "Доступно окно управления варпом.",
-            "tl": "Available ang Warp Command Window.",
-            "uk": "Доступне вікно команд Warp.",
-            "zh-TW": "扭曲命令視窗可用。"
-          },
+          "text": "@warpCommandWindow",
           "color": "blue"
         },
         {
-          "text": {
-            "en": "Not applicable to",
-            "de": "Gilt nicht für",
-            "es": "No aplicable a",
-            "id": "Tidak berlaku untuk",
-            "ja": "ご注意 マスターレベルには経験値獲得量増加、",
-            "pl": "Nie dotyczy",
-            "pt": "Não aplicável a",
-            "ru": "Не применимо к",
-            "tl": "Hindi naaangkop sa",
-            "uk": "Не застосовується до",
-            "zh-TW": "不適用於"
-          },
+          "text": "@notApplicableTo",
           "color": "yellow"
         },
         {
-          "text": {
-            "en": "Master Level Characters.",
-            "de": "Charaktere mit Master-Level.",
-            "es": "Personajes de nivel maestro.",
-            "id": "Karakter Tingkat Master.",
-            "ja": "アイテム獲得率増加効果は適用されません。",
-            "pl": "Postacie na poziomie mistrzowskim.",
-            "pt": "Personagens de nível mestre.",
-            "ru": "Персонажи уровня Мастер.",
-            "tl": "Mga Master Level na Character.",
-            "uk": "Персонажі майстерного рівня.",
-            "zh-TW": "大師級人物。"
-          },
+          "text": "@masterLevelCharacters",
           "color": "yellow"
         }
       ],
@@ -1992,19 +1751,7 @@
           "color": "blue"
         },
         {
-          "text": {
-            "en": "Warp Command Window available.",
-            "de": "Warp-Befehlsfenster verfügbar.",
-            "es": "Ventana de comando Warp disponible.",
-            "id": "Jendela Perintah Warp tersedia.",
-            "ja": "マップ移動ウィンドウが使えます。",
-            "pl": "Dostępne okno poleceń Warp.",
-            "pt": "Janela de comando Warp disponível.",
-            "ru": "Доступно окно управления варпом.",
-            "tl": "Available ang Warp Command Window.",
-            "uk": "Доступне вікно команд Warp.",
-            "zh-TW": "扭曲命令視窗可用。"
-          },
+          "text": "@warpCommandWindow",
           "color": "blue"
         },
         {
@@ -2268,19 +2015,7 @@
       "tags": ["valuable"],
       "description": [
         {
-          "text": {
-            "en": "Ingredients for the 3rd wing assembly.",
-            "de": "Zutaten für die Herstellung der Flügel der 3. Stufe.",
-            "es": "Ingredientes para el montaje de la 3ª ala.",
-            "id": "Bahan untuk perakitan sayap ke-3.",
-            "ja": "3次羽合成のための材料",
-            "pl": "Składniki na montaż trzeciego skrzydła.",
-            "pt": "Ingredientes para a montagem da 3ª asa.",
-            "ru": "Ингредиенты для сборки третьего крыла.",
-            "tl": "Mga sangkap para sa 3rd wing assembly.",
-            "uk": "Інгредієнти для складання 3-го крила.",
-            "zh-TW": "第三機翼組件的材料。"
-          }
+          "text": "@thirdWingIngredient"
         }
       ],
       "width": 1,
@@ -2306,19 +2041,7 @@
       "tags": ["valuable"],
       "description": [
         {
-          "text": {
-            "en": "Ingredients for the 3rd wing assembly.",
-            "de": "Zutaten für die Herstellung der Flügel der 3. Stufe.",
-            "es": "Ingredientes para el montaje de la 3ª ala.",
-            "id": "Bahan untuk perakitan sayap ke-3.",
-            "ja": "3次羽合成のための材料",
-            "pl": "Składniki na montaż trzeciego skrzydła.",
-            "pt": "Ingredientes para a montagem da 3ª asa.",
-            "ru": "Ингредиенты для сборки третьего крыла.",
-            "tl": "Mga sangkap para sa 3rd wing assembly.",
-            "uk": "Інгредієнти для складання 3-го крила.",
-            "zh-TW": "第三機翼組件的材料。"
-          }
+          "text": "@thirdWingIngredient"
         }
       ],
       "width": 1,
@@ -2702,19 +2425,7 @@
           "color": "blue"
         },
         {
-          "text": {
-            "en": "Increases Attack Speed by 10",
-            "de": "Erhöht die Angriffsgeschwindigkeit um 10",
-            "es": "Aumenta la velocidad de ataque en 10",
-            "id": "Meningkatkan Kecepatan Serangan sebanyak 10",
-            "ja": "攻撃速度+10増加",
-            "pl": "Zwiększa prędkość ataku o 10",
-            "pt": "Aumenta a velocidade de ataque em 10",
-            "ru": "Увеличивает скорость атаки на 10.",
-            "tl": "Pinapataas ng 10 ang Bilis ng Pag-atake",
-            "uk": "Збільшує швидкість атаки на 10",
-            "zh-TW": "攻擊速度提高 10"
-          },
+          "text": "@increasesAttackSpeed10",
           "color": "purple"
         },
         {
@@ -2853,19 +2564,7 @@
       "tags": ["noDurabilityLine"],
       "description": [
         {
-          "text": {
-            "en": "Surrounding Zens are automatically collected.",
-            "de": "Zen in der Umgebung wird automatisch eingesammelt.",
-            "es": "Los Zen circundantes se recopilan automáticamente.",
-            "id": "Zen di sekitarnya dikumpulkan secara otomatis.",
-            "ja": "周辺のゼンを自動的に拾得します。",
-            "pl": "Otaczające Zens są zbierane automatycznie.",
-            "pt": "Os Zens circundantes são coletados automaticamente.",
-            "ru": "Окружающие дзены собираются автоматически.",
-            "tl": "Ang mga nakapalibot na Zen ay awtomatikong kinokolekta.",
-            "uk": "Навколишні дзени збираються автоматично.",
-            "zh-TW": "周圍的禪宗會自動收集。"
-          },
+          "text": "@collectsSurroundingZen",
           "color": "blue"
         },
         {
@@ -3192,19 +2891,7 @@
       "tags": ["pandaOrSkeleton", "valuable", "noDurabilityLine"],
       "description": [
         {
-          "text": {
-            "en": "Auto-collects zen around you.",
-            "de": "Sammelt automatisch Zen in Ihrer Umgebung.",
-            "es": "Recoge automáticamente el zen a tu alrededor.",
-            "id": "Mengumpulkan zen secara otomatis di sekitar Anda.",
-            "ja": "周りのゼンを自動的に拾得してくれます。",
-            "pl": "Automatycznie zbiera zen wokół ciebie.",
-            "pt": "Coleta automaticamente o zen ao seu redor.",
-            "ru": "Автоматически собирает дзен вокруг себя.",
-            "tl": "Auto-collect ng zen sa paligid mo.",
-            "uk": "Автоматично збирає дзен навколо вас.",
-            "zh-TW": "自動收集你周圍的禪宗。"
-          },
+          "text": "@autoCollectsZen",
           "color": "blue"
         },
         {
@@ -3224,19 +2911,7 @@
           "color": "blue"
         },
         {
-          "text": {
-            "en": "Increase Defensive Skill +50",
-            "de": "Verteidigung +50",
-            "es": "Aumentar la habilidad defensiva +50",
-            "id": "Tingkatkan Keterampilan Pertahanan +50",
-            "ja": "防御力+50",
-            "pl": "Zwiększa umiejętność obrony +50",
-            "pt": "Aumente a habilidade defensiva +50",
-            "ru": "Увеличение навыка защиты +50",
-            "tl": "Dagdagan ang Defensive Skill +50",
-            "uk": "Підвищення навичок захисту +50",
-            "zh-TW": "防禦技能增加+50"
-          },
+          "text": "@increaseDefensiveSkill50",
           "color": "blue"
         },
         {
@@ -3842,35 +3517,11 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "Increases experience gained.",
-            "de": "Erhöht die erhaltene Erfahrung.",
-            "es": "Aumenta la experiencia adquirida.",
-            "id": "Meningkatkan pengalaman yang diperoleh.",
-            "ja": "経験値獲得量が増加する効果があります。",
-            "pl": "Zwiększa zdobywane doświadczenie.",
-            "pt": "Aumenta a experiência adquirida.",
-            "ru": "Увеличивает получаемый опыт.",
-            "tl": "Nagpapataas ng karanasang natamo.",
-            "uk": "Збільшує отриманий досвід.",
-            "zh-TW": "增加獲得的經驗。"
-          },
+          "text": "@increasesExperience",
           "color": "blue"
         },
         {
-          "text": {
-            "en": "Warp Command Window available.",
-            "de": "Warp-Befehlsfenster verfügbar.",
-            "es": "Ventana de comando Warp disponible.",
-            "id": "Jendela Perintah Warp tersedia.",
-            "ja": "マップ移動ウィンドウが使えます。",
-            "pl": "Dostępne okno poleceń Warp.",
-            "pt": "Janela de comando Warp disponível.",
-            "ru": "Доступно окно управления варпом.",
-            "tl": "Available ang Warp Command Window.",
-            "uk": "Доступне вікно команд Warp.",
-            "zh-TW": "扭曲命令視窗可用。"
-          },
+          "text": "@warpCommandWindow",
           "color": "blue"
         },
         {
@@ -3919,35 +3570,11 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "Increases experience gained and item drop rate.",
-            "de": "Erhöht die erhaltene Erfahrung und die Droprate von Gegenständen.",
-            "es": "Aumenta la experiencia obtenida y la tasa de caída de elementos.",
-            "id": "Meningkatkan pengalaman yang diperoleh dan tingkat penurunan item.",
-            "ja": "経験値とアイテム獲得量が増加する効果があります。",
-            "pl": "Zwiększa zdobywane doświadczenie i częstotliwość wypadania przedmiotów.",
-            "pt": "Aumenta a experiência adquirida e a taxa de queda de itens.",
-            "ru": "Увеличивает получаемый опыт и шанс выпадения предметов.",
-            "tl": "Pinapataas ang karanasang natamo at rate ng pagbaba ng item.",
-            "uk": "Збільшує отриманий досвід і швидкість випадання предметів.",
-            "zh-TW": "增加獲得的經驗值和物品掉落率。"
-          },
+          "text": "@increasesExperienceAndDrops",
           "color": "blue"
         },
         {
-          "text": {
-            "en": "Warp Command Window available.",
-            "de": "Warp-Befehlsfenster verfügbar.",
-            "es": "Ventana de comando Warp disponible.",
-            "id": "Jendela Perintah Warp tersedia.",
-            "ja": "マップ移動ウィンドウが使えます。",
-            "pl": "Dostępne okno poleceń Warp.",
-            "pt": "Janela de comando Warp disponível.",
-            "ru": "Доступно окно управления варпом.",
-            "tl": "Available ang Warp Command Window.",
-            "uk": "Доступне вікно команд Warp.",
-            "zh-TW": "扭曲命令視窗可用。"
-          },
+          "text": "@warpCommandWindow",
           "color": "blue"
         }
       ],
@@ -4190,19 +3817,7 @@
       "tags": ["cashShop", "noDurabilityLine"],
       "description": [
         {
-          "text": {
-            "en": "Auto-collects zen around you.",
-            "de": "Sammelt automatisch Zen in Ihrer Umgebung.",
-            "es": "Recoge automáticamente el zen a tu alrededor.",
-            "id": "Mengumpulkan zen secara otomatis di sekitar Anda.",
-            "ja": "周りのゼンを自動的に拾得してくれます。",
-            "pl": "Automatycznie zbiera zen wokół ciebie.",
-            "pt": "Coleta automaticamente o zen ao seu redor.",
-            "ru": "Автоматически собирает дзен вокруг себя.",
-            "tl": "Auto-collect ng zen sa paligid mo.",
-            "uk": "Автоматично збирає дзен навколо вас.",
-            "zh-TW": "自動收集你周圍的禪宗。"
-          },
+          "text": "@autoCollectsZen",
           "color": "blue"
         },
         {
@@ -4222,19 +3837,7 @@
           "color": "blue"
         },
         {
-          "text": {
-            "en": "Increase Defensive Skill +50",
-            "de": "Verteidigung +50",
-            "es": "Aumentar la habilidad defensiva +50",
-            "id": "Tingkatkan Keterampilan Pertahanan +50",
-            "ja": "防御力+50",
-            "pl": "Zwiększa umiejętność obrony +50",
-            "pt": "Aumente a habilidade defensiva +50",
-            "ru": "Увеличение навыка защиты +50",
-            "tl": "Dagdagan ang Defensive Skill +50",
-            "uk": "Підвищення навичок захисту +50",
-            "zh-TW": "防禦技能增加+50"
-          },
+          "text": "@increaseDefensiveSkill50",
           "color": "blue"
         },
         {
@@ -4278,19 +3881,7 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "Cannot Repair",
-            "de": "Kann nicht repariert werden",
-            "es": "No se puede reparar",
-            "id": "Tidak Dapat Memperbaiki",
-            "ja": "修理不可能",
-            "pl": "Nie można naprawić",
-            "pt": "Não é possível reparar",
-            "ru": "Невозможно восстановить",
-            "tl": "Hindi Maaayos",
-            "uk": "Неможливо відремонтувати",
-            "zh-TW": "無法修復"
-          },
+          "text": "@cannotRepair",
           "color": "red"
         }
       ],
@@ -4325,19 +3916,7 @@
       "tags": ["cashShop", "gemJewelry", "valuable"],
       "description": [
         {
-          "text": {
-            "en": "Automatic HP recovery 3%",
-            "de": "Automatische HP-Wiederherstellung 3%",
-            "es": "Recuperación automática de HP 3%",
-            "id": "Pemulihan HP otomatis 3%",
-            "ja": "オートヒーリング 3%",
-            "pl": "Automatyczne odzyskiwanie HP 3%",
-            "pt": "Recuperação automática de HP 3%",
-            "ru": "Автоматическое восстановление HP 3%",
-            "tl": "Awtomatikong pagbawi ng HP 3%",
-            "uk": "Автоматичне відновлення HP 3%",
-            "zh-TW": "HP自動恢復 3%"
-          }
+          "text": "@automaticHpRecovery3"
         },
         {
           "text": {
@@ -4385,19 +3964,7 @@
       "tags": ["cashShop", "gemJewelry", "valuable"],
       "description": [
         {
-          "text": {
-            "en": "Automatic HP recovery 3%",
-            "de": "Automatische HP-Wiederherstellung 3%",
-            "es": "Recuperación automática de HP 3%",
-            "id": "Pemulihan HP otomatis 3%",
-            "ja": "オートヒーリング 3%",
-            "pl": "Automatyczne odzyskiwanie HP 3%",
-            "pt": "Recuperação automática de HP 3%",
-            "ru": "Автоматическое восстановление HP 3%",
-            "tl": "Awtomatikong pagbawi ng HP 3%",
-            "uk": "Автоматичне відновлення HP 3%",
-            "zh-TW": "HP自動恢復 3%"
-          }
+          "text": "@automaticHpRecovery3"
         },
         {
           "text": {
@@ -4445,19 +4012,7 @@
       "tags": ["cashShop", "gemJewelry", "valuable"],
       "description": [
         {
-          "text": {
-            "en": "Automatic HP recovery 3%",
-            "de": "Automatische HP-Wiederherstellung 3%",
-            "es": "Recuperación automática de HP 3%",
-            "id": "Pemulihan HP otomatis 3%",
-            "ja": "オートヒーリング 3%",
-            "pl": "Automatyczne odzyskiwanie HP 3%",
-            "pt": "Recuperação automática de HP 3%",
-            "ru": "Автоматическое восстановление HP 3%",
-            "tl": "Awtomatikong pagbawi ng HP 3%",
-            "uk": "Автоматичне відновлення HP 3%",
-            "zh-TW": "HP自動恢復 3%"
-          }
+          "text": "@automaticHpRecovery3"
         },
         {
           "text": {
@@ -4505,19 +4060,7 @@
       "tags": ["cashShop", "gemJewelry", "valuable"],
       "description": [
         {
-          "text": {
-            "en": "Automatic HP recovery 3%",
-            "de": "Automatische HP-Wiederherstellung 3%",
-            "es": "Recuperación automática de HP 3%",
-            "id": "Pemulihan HP otomatis 3%",
-            "ja": "オートヒーリング 3%",
-            "pl": "Automatyczne odzyskiwanie HP 3%",
-            "pt": "Recuperação automática de HP 3%",
-            "ru": "Автоматическое восстановление HP 3%",
-            "tl": "Awtomatikong pagbawi ng HP 3%",
-            "uk": "Автоматичне відновлення HP 3%",
-            "zh-TW": "HP自動恢復 3%"
-          }
+          "text": "@automaticHpRecovery3"
         },
         {
           "text": {
@@ -4565,19 +4108,7 @@
       "tags": ["cashShop", "gemJewelry", "valuable"],
       "description": [
         {
-          "text": {
-            "en": "Automatic HP recovery 3%",
-            "de": "Automatische HP-Wiederherstellung 3%",
-            "es": "Recuperación automática de HP 3%",
-            "id": "Pemulihan HP otomatis 3%",
-            "ja": "オートヒーリング 3%",
-            "pl": "Automatyczne odzyskiwanie HP 3%",
-            "pt": "Recuperação automática de HP 3%",
-            "ru": "Автоматическое восстановление HP 3%",
-            "tl": "Awtomatikong pagbawi ng HP 3%",
-            "uk": "Автоматичне відновлення HP 3%",
-            "zh-TW": "HP自動恢復 3%"
-          }
+          "text": "@automaticHpRecovery3"
         },
         {
           "text": {
@@ -4625,19 +4156,7 @@
       "tags": ["cashShop", "gemJewelry", "valuable"],
       "description": [
         {
-          "text": {
-            "en": "Automatic HP recovery 3%",
-            "de": "Automatische HP-Wiederherstellung 3%",
-            "es": "Recuperación automática de HP 3%",
-            "id": "Pemulihan HP otomatis 3%",
-            "ja": "オートヒーリング 3%",
-            "pl": "Automatyczne odzyskiwanie HP 3%",
-            "pt": "Recuperação automática de HP 3%",
-            "ru": "Автоматическое восстановление HP 3%",
-            "tl": "Awtomatikong pagbawi ng HP 3%",
-            "uk": "Автоматичне відновлення HP 3%",
-            "zh-TW": "HP自動恢復 3%"
-          }
+          "text": "@automaticHpRecovery3"
         },
         {
           "text": {
@@ -4685,19 +4204,7 @@
       "tags": ["cashShop", "gemJewelry", "valuable"],
       "description": [
         {
-          "text": {
-            "en": "Automatic HP recovery 3%",
-            "de": "Automatische HP-Wiederherstellung 3%",
-            "es": "Recuperación automática de HP 3%",
-            "id": "Pemulihan HP otomatis 3%",
-            "ja": "オートヒーリング 3%",
-            "pl": "Automatyczne odzyskiwanie HP 3%",
-            "pt": "Recuperação automática de HP 3%",
-            "ru": "Автоматическое восстановление HP 3%",
-            "tl": "Awtomatikong pagbawi ng HP 3%",
-            "uk": "Автоматичне відновлення HP 3%",
-            "zh-TW": "HP自動恢復 3%"
-          }
+          "text": "@automaticHpRecovery3"
         },
         {
           "text": {
@@ -4941,19 +4448,7 @@
       "tags": ["pandaOrSkeleton", "valuable", "noDurabilityLine"],
       "description": [
         {
-          "text": {
-            "en": "Surrounding Zens are automatically collected.",
-            "de": "Zen in der Umgebung wird automatisch eingesammelt.",
-            "es": "Los Zen circundantes se recopilan automáticamente.",
-            "id": "Zen di sekitarnya dikumpulkan secara otomatis.",
-            "ja": "周辺のゼンを自動的に拾得します。",
-            "pl": "Otaczające Zens są zbierane automatycznie.",
-            "pt": "Os Zens circundantes são coletados automaticamente.",
-            "ru": "Окружающие дзены собираются автоматически.",
-            "tl": "Ang mga nakapalibot na Zen ay awtomatikong kinokolekta.",
-            "uk": "Навколишні дзени збираються автоматично.",
-            "zh-TW": "周圍的禪宗會自動收集。"
-          },
+          "text": "@collectsSurroundingZen",
           "color": "blue"
         },
         {
@@ -4973,19 +4468,7 @@
           "color": "blue"
         },
         {
-          "text": {
-            "en": "Increases Attack Speed by 10",
-            "de": "Erhöht die Angriffsgeschwindigkeit um 10",
-            "es": "Aumenta la velocidad de ataque en 10",
-            "id": "Meningkatkan Kecepatan Serangan sebanyak 10",
-            "ja": "攻撃速度+10増加",
-            "pl": "Zwiększa prędkość ataku o 10",
-            "pt": "Aumenta a velocidade de ataque em 10",
-            "ru": "Увеличивает скорость атаки на 10.",
-            "tl": "Pinapataas ng 10 ang Bilis ng Pag-atake",
-            "uk": "Збільшує швидкість атаки на 10",
-            "zh-TW": "攻擊速度提高 10"
-          },
+          "text": "@increasesAttackSpeed10",
           "color": "blue"
         },
         {
@@ -5351,19 +4834,7 @@
       "tags": ["luckyItemTicket", "noDurabilityLine"],
       "description": [
         {
-          "text": {
-            "en": "You can achieve special items with combinations.",
-            "de": "Durch Kombinationen können Sie besondere Gegenstände erhalten.",
-            "es": "Puedes conseguir objetos especiales con combinaciones.",
-            "id": "Anda dapat memperoleh item khusus dengan kombinasi.",
-            "ja": "パンドラ合成でアイテムを獲得",
-            "pl": "Dzięki kombinacjom możesz zdobyć specjalne przedmioty.",
-            "pt": "Você pode conseguir itens especiais com combinações.",
-            "ru": "Вы можете получить особые предметы с помощью комбинаций.",
-            "tl": "Makakamit mo ang mga espesyal na item na may mga kumbinasyon.",
-            "uk": "Ви можете отримати спеціальні предмети за допомогою комбінацій.",
-            "zh-TW": "您可以透過組合獲得特殊物品。"
-          },
+          "text": "@specialItemsWithCombinations",
           "color": "blue"
         },
         {
@@ -5398,19 +4869,7 @@
       "tags": ["luckyItemTicket", "noDurabilityLine"],
       "description": [
         {
-          "text": {
-            "en": "You can achieve special items with combinations.",
-            "de": "Durch Kombinationen können Sie besondere Gegenstände erhalten.",
-            "es": "Puedes conseguir objetos especiales con combinaciones.",
-            "id": "Anda dapat memperoleh item khusus dengan kombinasi.",
-            "ja": "パンドラ合成でアイテムを獲得",
-            "pl": "Dzięki kombinacjom możesz zdobyć specjalne przedmioty.",
-            "pt": "Você pode conseguir itens especiais com combinações.",
-            "ru": "Вы можете получить особые предметы с помощью комбинаций.",
-            "tl": "Makakamit mo ang mga espesyal na item na may mga kumbinasyon.",
-            "uk": "Ви можете отримати спеціальні предмети за допомогою комбінацій.",
-            "zh-TW": "您可以透過組合獲得特殊物品。"
-          },
+          "text": "@specialItemsWithCombinations",
           "color": "blue"
         },
         {
@@ -5445,19 +4904,7 @@
       "tags": ["luckyItemTicket", "noDurabilityLine"],
       "description": [
         {
-          "text": {
-            "en": "You can achieve special items with combinations.",
-            "de": "Durch Kombinationen können Sie besondere Gegenstände erhalten.",
-            "es": "Puedes conseguir objetos especiales con combinaciones.",
-            "id": "Anda dapat memperoleh item khusus dengan kombinasi.",
-            "ja": "パンドラ合成でアイテムを獲得",
-            "pl": "Dzięki kombinacjom możesz zdobyć specjalne przedmioty.",
-            "pt": "Você pode conseguir itens especiais com combinações.",
-            "ru": "Вы можете получить особые предметы с помощью комбинаций.",
-            "tl": "Makakamit mo ang mga espesyal na item na may mga kumbinasyon.",
-            "uk": "Ви можете отримати спеціальні предмети за допомогою комбінацій.",
-            "zh-TW": "您可以透過組合獲得特殊物品。"
-          },
+          "text": "@specialItemsWithCombinations",
           "color": "blue"
         },
         {
@@ -5492,19 +4939,7 @@
       "tags": ["luckyItemTicket", "noDurabilityLine"],
       "description": [
         {
-          "text": {
-            "en": "You can achieve special items with combinations.",
-            "de": "Durch Kombinationen können Sie besondere Gegenstände erhalten.",
-            "es": "Puedes conseguir objetos especiales con combinaciones.",
-            "id": "Anda dapat memperoleh item khusus dengan kombinasi.",
-            "ja": "パンドラ合成でアイテムを獲得",
-            "pl": "Dzięki kombinacjom możesz zdobyć specjalne przedmioty.",
-            "pt": "Você pode conseguir itens especiais com combinações.",
-            "ru": "Вы можете получить особые предметы с помощью комбинаций.",
-            "tl": "Makakamit mo ang mga espesyal na item na may mga kumbinasyon.",
-            "uk": "Ви можете отримати спеціальні предмети за допомогою комбінацій.",
-            "zh-TW": "您可以透過組合獲得特殊物品。"
-          },
+          "text": "@specialItemsWithCombinations",
           "color": "blue"
         },
         {
@@ -5539,19 +4974,7 @@
       "tags": ["luckyItemTicket", "noDurabilityLine"],
       "description": [
         {
-          "text": {
-            "en": "You can achieve special items with combinations.",
-            "de": "Durch Kombinationen können Sie besondere Gegenstände erhalten.",
-            "es": "Puedes conseguir objetos especiales con combinaciones.",
-            "id": "Anda dapat memperoleh item khusus dengan kombinasi.",
-            "ja": "パンドラ合成でアイテムを獲得",
-            "pl": "Dzięki kombinacjom możesz zdobyć specjalne przedmioty.",
-            "pt": "Você pode conseguir itens especiais com combinações.",
-            "ru": "Вы можете получить особые предметы с помощью комбинаций.",
-            "tl": "Makakamit mo ang mga espesyal na item na may mga kumbinasyon.",
-            "uk": "Ви можете отримати спеціальні предмети за допомогою комбінацій.",
-            "zh-TW": "您可以透過組合獲得特殊物品。"
-          },
+          "text": "@specialItemsWithCombinations",
           "color": "blue"
         },
         {
@@ -5586,19 +5009,7 @@
       "tags": ["luckyItemTicket", "noDurabilityLine"],
       "description": [
         {
-          "text": {
-            "en": "You can achieve special items with combinations.",
-            "de": "Durch Kombinationen können Sie besondere Gegenstände erhalten.",
-            "es": "Puedes conseguir objetos especiales con combinaciones.",
-            "id": "Anda dapat memperoleh item khusus dengan kombinasi.",
-            "ja": "パンドラ合成でアイテムを獲得",
-            "pl": "Dzięki kombinacjom możesz zdobyć specjalne przedmioty.",
-            "pt": "Você pode conseguir itens especiais com combinações.",
-            "ru": "Вы можете получить особые предметы с помощью комбинаций.",
-            "tl": "Makakamit mo ang mga espesyal na item na may mga kumbinasyon.",
-            "uk": "Ви можете отримати спеціальні предмети за допомогою комбінацій.",
-            "zh-TW": "您可以透過組合獲得特殊物品。"
-          },
+          "text": "@specialItemsWithCombinations",
           "color": "blue"
         },
         {
@@ -5633,19 +5044,7 @@
       "tags": ["luckyItemTicket", "noDurabilityLine"],
       "description": [
         {
-          "text": {
-            "en": "You can achieve special items with combinations.",
-            "de": "Durch Kombinationen können Sie besondere Gegenstände erhalten.",
-            "es": "Puedes conseguir objetos especiales con combinaciones.",
-            "id": "Anda dapat memperoleh item khusus dengan kombinasi.",
-            "ja": "パンドラ合成でアイテムを獲得",
-            "pl": "Dzięki kombinacjom możesz zdobyć specjalne przedmioty.",
-            "pt": "Você pode conseguir itens especiais com combinações.",
-            "ru": "Вы можете получить особые предметы с помощью комбинаций.",
-            "tl": "Makakamit mo ang mga espesyal na item na may mga kumbinasyon.",
-            "uk": "Ви можете отримати спеціальні предмети за допомогою комбінацій.",
-            "zh-TW": "您可以透過組合獲得特殊物品。"
-          },
+          "text": "@specialItemsWithCombinations",
           "color": "blue"
         },
         {
@@ -5680,19 +5079,7 @@
       "tags": ["luckyItemTicket", "noDurabilityLine"],
       "description": [
         {
-          "text": {
-            "en": "You can achieve special items with combinations.",
-            "de": "Durch Kombinationen können Sie besondere Gegenstände erhalten.",
-            "es": "Puedes conseguir objetos especiales con combinaciones.",
-            "id": "Anda dapat memperoleh item khusus dengan kombinasi.",
-            "ja": "パンドラ合成でアイテムを獲得",
-            "pl": "Dzięki kombinacjom możesz zdobyć specjalne przedmioty.",
-            "pt": "Você pode conseguir itens especiais com combinações.",
-            "ru": "Вы можете получить особые предметы с помощью комбинаций.",
-            "tl": "Makakamit mo ang mga espesyal na item na may mga kumbinasyon.",
-            "uk": "Ви можете отримати спеціальні предмети за допомогою комбінацій.",
-            "zh-TW": "您可以透過組合獲得特殊物品。"
-          },
+          "text": "@specialItemsWithCombinations",
           "color": "blue"
         },
         {
@@ -5727,19 +5114,7 @@
       "tags": ["luckyItemTicket", "noDurabilityLine"],
       "description": [
         {
-          "text": {
-            "en": "You can achieve special items with combinations.",
-            "de": "Durch Kombinationen können Sie besondere Gegenstände erhalten.",
-            "es": "Puedes conseguir objetos especiales con combinaciones.",
-            "id": "Anda dapat memperoleh item khusus dengan kombinasi.",
-            "ja": "パンドラ合成でアイテムを獲得",
-            "pl": "Dzięki kombinacjom możesz zdobyć specjalne przedmioty.",
-            "pt": "Você pode conseguir itens especiais com combinações.",
-            "ru": "Вы можете получить особые предметы с помощью комбинаций.",
-            "tl": "Makakamit mo ang mga espesyal na item na may mga kumbinasyon.",
-            "uk": "Ви можете отримати спеціальні предмети за допомогою комбінацій.",
-            "zh-TW": "您可以透過組合獲得特殊物品。"
-          },
+          "text": "@specialItemsWithCombinations",
           "color": "blue"
         },
         {
@@ -5774,19 +5149,7 @@
       "tags": ["luckyItemTicket", "noDurabilityLine"],
       "description": [
         {
-          "text": {
-            "en": "You can achieve special items with combinations.",
-            "de": "Durch Kombinationen können Sie besondere Gegenstände erhalten.",
-            "es": "Puedes conseguir objetos especiales con combinaciones.",
-            "id": "Anda dapat memperoleh item khusus dengan kombinasi.",
-            "ja": "パンドラ合成でアイテムを獲得",
-            "pl": "Dzięki kombinacjom możesz zdobyć specjalne przedmioty.",
-            "pt": "Você pode conseguir itens especiais com combinações.",
-            "ru": "Вы можете получить особые предметы с помощью комбинаций.",
-            "tl": "Makakamit mo ang mga espesyal na item na may mga kumbinasyon.",
-            "uk": "Ви можете отримати спеціальні предмети за допомогою комбінацій.",
-            "zh-TW": "您可以透過組合獲得特殊物品。"
-          },
+          "text": "@specialItemsWithCombinations",
           "color": "blue"
         },
         {

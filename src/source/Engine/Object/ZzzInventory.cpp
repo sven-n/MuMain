@@ -1621,6 +1621,42 @@ void SetItemTooltipTextMeasure(ItemTooltipTextMeasure measure)
     s_itemTooltipTextMeasure = measure;
 }
 
+// The value of a placeholder of a tooltip line for the item at `level`: the value the line binds it to (`bound`), the
+// item's level value (`definition`, when given), a built-in value, {level} or a table of the item stat file; nothing
+// for another name.
+static std::optional<std::string> TooltipPlaceholderValue(std::string_view name,
+                                                          std::span<const std::pair<std::string, std::string>> bound,
+                                                          const Data::Items::ItemDefinition* definition, int level,
+                                                          const ItemTooltipValues& values)
+{
+    for (const auto& [placeholder, value] : bound)
+    {
+        if (placeholder == name)
+        {
+            name = value;
+            break;
+        }
+    }
+    if (const Data::Items::ItemLevelValues* levelValues =
+            definition != nullptr ? definition->FindLevelValues(name) : nullptr)
+    {
+        if (level < 0 || level >= static_cast<int>(levelValues->values.size()))
+            return std::nullopt;
+        const Data::Items::ItemLevelValue& value = levelValues->values[level];
+        const Data::LocalizedString* text =
+            value.textName.empty() ? &value.text : g_ItemDatabase.GetTooltipFile().FindText(value.textName);
+        if (text == nullptr)
+            return std::nullopt;
+        return text->Get(g_ItemDatabase.GetDisplayLocale());
+    }
+    if (const std::optional<int> value = GetItemTooltipValue(values, name))
+        return std::to_string(*value);
+    if (const std::optional<int> value =
+            Data::Items::GetPlaceholderValue(name, level, g_ItemDatabase.GetStatProfiles()))
+        return std::to_string(*value);
+    return std::nullopt;
+}
+
 // Writes the lines of the item tooltip layout that come after its section `after`, up to its next section, into
 // TextList, TextListColor and TextBold: those whose conditions hold, with their placeholders filled in.
 static void WriteItemTooltipLayoutLines(const ITEM& item, int level, const ItemTooltipValues& values,
@@ -1656,20 +1692,7 @@ static void WriteItemTooltipLayoutLines(const ITEM& item, int level, const ItemT
         }
         const std::string filled = Data::Items::FillPlaceholders(
             text->Get(g_ItemDatabase.GetDisplayLocale()),
-            [&](std::string_view name)
-            {
-                for (const auto& [placeholder, builtIn] : line->values)
-                {
-                    if (placeholder == name)
-                    {
-                        name = builtIn;
-                        break;
-                    }
-                }
-                if (const std::optional<int> value = GetItemTooltipValue(values, name))
-                    return value;
-                return Data::Items::GetPlaceholderValue(name, level, g_ItemDatabase.GetStatProfiles());
-            });
+            [&](std::string_view name) { return TooltipPlaceholderValue(name, line->values, nullptr, level, values); });
         mu_swprintf(TextList[TextNum], L"%.99ls", Core::Text::FromUtf8(filled).c_str());
         TextListColor[TextNum] = static_cast<int>(GetTooltipLineColor(*line, item.Type, level, values));
         TextBold[TextNum] = line->bold;
@@ -3153,13 +3176,8 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
                 continue;
             }
             const std::wstring text = Core::Text::FromUtf8(Data::Items::FillPlaceholders(
-                lineText->Get(g_ItemDatabase.GetDisplayLocale()),
-                [&](std::string_view name)
-                {
-                    if (const std::optional<int> value = GetItemTooltipValue(values, name))
-                        return value;
-                    return Data::Items::GetPlaceholderValue(name, Level, g_ItemDatabase.GetStatProfiles());
-                }));
+                lineText->Get(g_ItemDatabase.GetDisplayLocale()), [&](std::string_view name)
+                { return TooltipPlaceholderValue(name, line.values, definition, Level, values); }));
             for (const std::wstring& piece : WrapTextToWidth(text, Data::Items::ItemDescriptionWrapWidth, measure))
             {
                 if (TextNum >= static_cast<int>(std::size(TextList)))

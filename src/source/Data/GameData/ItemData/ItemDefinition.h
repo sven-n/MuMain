@@ -11,6 +11,8 @@
 #include <array>
 #include <optional>
 #include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
 
 namespace Data::Items
@@ -91,6 +93,9 @@ struct ItemDescriptionLine
     LocalizedString text;
     // The shared text of Data/Items/Tooltips/Tooltip.json, without its "@"; empty for a text written in place.
     std::string textName;
+    // A placeholder of the text and the value it shows on this line: a built-in value or a table of the item stat
+    // file ({"percent": "wingDamageIncrease1st"}).
+    std::vector<std::pair<std::string, std::string>> values;
     std::vector<TooltipCondition> when;
     ItemTextColor color = ItemTextColor::White;
     int minLevel = 0;
@@ -106,6 +111,25 @@ struct ItemDescriptionLine
     }
 
     bool operator==(const ItemDescriptionLine& other) const = default;
+};
+
+// The values an item gives a placeholder of its description, one per item level from +0: each a text with its
+// translations, or a shared text of the tooltip file. The Fruits' {stat} is "ENG" at +0, "STA" at +1, ...
+struct ItemLevelValue
+{
+    LocalizedString text;
+    // The shared text, without its "@"; empty for a text written in place.
+    std::string textName;
+
+    bool operator==(const ItemLevelValue& other) const = default;
+};
+
+struct ItemLevelValues
+{
+    std::string name;
+    std::vector<ItemLevelValue> values;
+
+    bool operator==(const ItemLevelValues& other) const = default;
 };
 
 // How wide a description line is drawn before it wraps, in the tooltip's text units: about the widest lines of the
@@ -216,6 +240,15 @@ struct ItemDefinition
     // What the tooltip says about the item, line by line, after its own lines (empty for most items; the jewels'
     // texts of the original client are still in the tooltip code).
     std::vector<ItemDescriptionLine> description;
+    // The values of the description's own placeholders by item level ("levelValues").
+    std::vector<ItemLevelValues> levelValues;
+
+    const ItemLevelValues* FindLevelValues(std::string_view name) const
+    {
+        const auto found = std::find_if(levelValues.begin(), levelValues.end(),
+                                        [&](const ItemLevelValues& entry) { return entry.name == name; });
+        return found != levelValues.end() ? &*found : nullptr;
+    }
 
     BYTE width = 0;
     BYTE height = 0;

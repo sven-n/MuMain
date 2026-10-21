@@ -120,19 +120,22 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     ValidateNameLocales(result.items, I18N::GetAvailableLocales(), result.issues);
     ItemStatsLoadResult stats = LoadItemStatsFile(GetItemStatsFile());
     result.issues.insert(result.issues.end(), stats.issues.begin(), stats.issues.end());
+    ItemTooltipLoadResult tooltips = LoadItemTooltipFile(GetItemTooltipFile());
+    result.issues.insert(result.issues.end(), tooltips.issues.begin(), tooltips.issues.end());
     ItemStatProfiles statProfiles;
     if (!HasErrors(stats.issues))
     {
         statProfiles = ItemStatProfiles(stats.file);
         ValidateStatProfiles(result.items, statProfiles, GetItemStatsFile().generic_string(), result.issues);
-        ValidateDescriptionPlaceholders(result.items, statProfiles, GetItemStatsFile().generic_string(), result.issues);
+        if (!HasErrors(tooltips.issues))
+        {
+            ValidateDescriptionPlaceholders(result.items, statProfiles, tooltips.file,
+                                            GetItemStatsFile().generic_string(), result.issues);
+        }
     }
-    ItemTooltipLoadResult tooltips = LoadItemTooltipFile(GetItemTooltipFile());
-    result.issues.insert(result.issues.end(), tooltips.issues.begin(), tooltips.issues.end());
     if (!HasErrors(tooltips.issues))
     {
-        ValidateDescriptionTexts(result.items, tooltips.file, statProfiles, GetItemTooltipFile().generic_string(),
-                                 result.issues);
+        ValidateDescriptionTexts(result.items, tooltips.file, GetItemTooltipFile().generic_string(), result.issues);
     }
     Data::LogDataIssues(ItemDataLabel, result.issues);
     if (HasErrors(result.issues))
@@ -349,9 +352,9 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
     ValidateStatProfiles(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(),
                          GetItemStatsFile().generic_string(), issues);
     ValidateDescriptionPlaceholders(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(),
-                                    GetItemStatsFile().generic_string(), issues);
+                                    g_ItemDatabase.GetTooltipFile(), GetItemStatsFile().generic_string(), issues);
     ValidateDescriptionTexts(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetTooltipFile(),
-                             g_ItemDatabase.GetStatProfiles(), GetItemTooltipFile().generic_string(), issues);
+                             GetItemTooltipFile().generic_string(), issues);
     ValidateNameLocales(g_ItemDatabase.GetAllSlots(), I18N::GetAvailableLocales(), issues);
     // Only the model files of moved models are written; the others keep what
     // this client does not read from them.
@@ -374,10 +377,10 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
     ValidateItems(result.items, result.validationIssues);
     ValidateStatProfiles(result.items, g_ItemDatabase.GetStatProfiles(), GetItemStatsFile().generic_string(),
                          result.validationIssues);
-    ValidateDescriptionPlaceholders(result.items, g_ItemDatabase.GetStatProfiles(), GetItemStatsFile().generic_string(),
-                                    result.validationIssues);
-    ValidateDescriptionTexts(result.items, g_ItemDatabase.GetTooltipFile(), g_ItemDatabase.GetStatProfiles(),
-                             GetItemTooltipFile().generic_string(), result.validationIssues);
+    ValidateDescriptionPlaceholders(result.items, g_ItemDatabase.GetStatProfiles(), g_ItemDatabase.GetTooltipFile(),
+                                    GetItemStatsFile().generic_string(), result.validationIssues);
+    ValidateDescriptionTexts(result.items, g_ItemDatabase.GetTooltipFile(), GetItemTooltipFile().generic_string(),
+                             result.validationIssues);
     ValidateNameLocales(result.items, I18N::GetAvailableLocales(), result.validationIssues);
 
     g_ItemDatabase.Build(result.items);

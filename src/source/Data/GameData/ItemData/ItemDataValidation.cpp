@@ -349,11 +349,14 @@ void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatP
 }
 
 void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
-                                     const std::string& statFile, std::vector<ItemDataIssue>& issues)
+                                     const ItemTooltipFile& tooltips, const std::string& statFile,
+                                     std::vector<ItemDataIssue>& issues)
 {
-    std::vector<std::string> known(GetBuiltInPlaceholders().begin(), GetBuiltInPlaceholders().end());
+    std::vector<std::string> builtIns(GetBuiltInPlaceholders().begin(), GetBuiltInPlaceholders().end());
     const std::vector<std::string> tables = profiles.GetTableNames();
-    known.insert(known.end(), tables.begin(), tables.end());
+    builtIns.insert(builtIns.end(), tables.begin(), tables.end());
+    const auto isValue = [&](std::string_view name)
+    { return IsBuiltInPlaceholder(name) || profiles.FindTable(name) != nullptr; };
     std::set<std::string, std::less<>> named;
     for (const ItemDefinition& definition : items)
     {
@@ -361,26 +364,96 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
         {
             continue;
         }
+        const auto addError = [&](const std::string& field, const std::string& message)
+        { issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number, field, message}); };
+        for (const ItemLevelValues& levelValues : definition.levelValues)
+        {
+            if (isValue(levelValues.name))
+            {
+                addError("levelValues." + levelValues.name,
+                         "is the name of a built-in value or a table of " + statFile + "; a level value needs its own");
+            }
+        }
+        std::set<std::string, std::less<>> shownLevelValues;
         for (size_t line = 0; line < definition.description.size(); ++line)
         {
-            // The translations have the English text's placeholders (ValidateItems checks that).
-            const PlaceholderScan scan = ScanPlaceholders(definition.description[line].text.GetNeutral());
-            named.insert(scan.names.begin(), scan.names.end());
+            const ItemDescriptionLine& entry = definition.description[line];
+            const std::string field = "description[" + std::to_string(line) + "]";
+            std::vector<std::string> known = builtIns;
+            for (const auto& [placeholder, value] : entry.values)
+            {
+                named.insert(value);
+                known.push_back(placeholder);
+                if (!isValue(value))
+                {
+                    const std::string suggestion = SuggestPlaceholder(value, builtIns);
+                    addError(field + ".values." + placeholder,
+                             "\"" + value + "\" is neither a built-in value nor a table of " + statFile +
+                                 (suggestion.empty() ? "" : "; did you mean \"" + suggestion + "\"?"));
+                }
+            }
+            for (const ItemLevelValues& levelValues : definition.levelValues)
+            {
+                known.push_back(levelValues.name);
+            }
+            // The translations have the English text's placeholders (ValidateItems checks that); a shared text the
+            // tooltip file does not have is ValidateDescriptionTexts' error.
+            const LocalizedString* text = entry.textName.empty() ? &entry.text : tooltips.FindText(entry.textName);
+            if (text == nullptr)
+            {
+                continue;
+            }
+            const PlaceholderScan scan = ScanPlaceholders(text->GetNeutral());
             std::set<std::string> reported;
             for (const std::string& name : scan.names)
             {
-                if (IsBuiltInPlaceholder(name) || profiles.FindTable(name) != nullptr || !reported.insert(name).second)
+                if (!reported.insert(name).second)
                 {
                     continue;
                 }
+                const bool bound = std::any_of(entry.values.begin(), entry.values.end(),
+                                               [&](const auto& value) { return value.first == name; });
+                if (bound)
+                {
+                    continue;
+                }
+                if (const ItemLevelValues* levelValues = definition.FindLevelValues(name))
+                {
+                    shownLevelValues.insert(name);
+                    if (entry.maxLevel >= static_cast<int>(levelValues->values.size()))
+                    {
+                        addError(field + ".levels", "the line shows {" + name + "} up to +" +
+                                                        std::to_string(entry.maxLevel) + ", but levelValues." + name +
+                                                        " has values only up to +" +
+                                                        std::to_string(levelValues->values.size() - 1));
+                    }
+                    continue;
+                }
+                if (isValue(name))
+                {
+                    named.insert(name);
+                    continue;
+                }
                 const std::string suggestion = SuggestPlaceholder(name, known);
-                const std::string hint =
-                    suggestion.empty()
-                        ? "a placeholder is a built-in value (docs/item-data.md) or a table of " + statFile
-                        : "did you mean {" + suggestion + "}?";
-                issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number,
-                                  DescriptionTextField(line, LocalizedString::NeutralLocale),
-                                  "has the unknown placeholder {" + name + "}; " + hint});
+                const std::string hint = suggestion.empty()
+                                             ? "a placeholder is a built-in value (docs/item-data.md), a "
+                                               "table of " +
+                                                   statFile +
+                                                   ", or one of the line's values or the "
+                                                   "item's levelValues"
+                                             : "did you mean {" + suggestion + "}?";
+                addError(entry.textName.empty() ? DescriptionTextField(line, LocalizedString::NeutralLocale)
+                                                : field + ".text",
+                         (entry.textName.empty() ? "has" : "\"@" + entry.textName + "\" has") +
+                             std::string(" the unknown placeholder {") + name + "}; " + hint);
+            }
+        }
+        for (const ItemLevelValues& levelValues : definition.levelValues)
+        {
+            if (!shownLevelValues.contains(levelValues.name))
+            {
+                issues.push_back({ItemDataIssueSeverity::Warning, "", definition.group, definition.number,
+                                  "levelValues." + levelValues.name, "no line of the description shows it"});
             }
         }
     }
@@ -395,8 +468,7 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
 }
 
 void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemTooltipFile& tooltips,
-                              const ItemStatProfiles& profiles, const std::string& tooltipFile,
-                              std::vector<ItemDataIssue>& issues)
+                              const std::string& tooltipFile, std::vector<ItemDataIssue>& issues)
 {
     std::vector<std::string> textNames;
     for (const auto& [name, text] : tooltips.texts)
@@ -417,15 +489,9 @@ void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemT
         {
             continue;
         }
-        for (size_t line = 0; line < definition.description.size(); ++line)
+        const auto check = [&](const std::string& name, const std::string& field, bool isLevelValue)
         {
-            const std::string& name = definition.description[line].textName;
-            if (name.empty())
-            {
-                continue;
-            }
             used.insert(name);
-            const std::string field = "description[" + std::to_string(line) + "].text";
             const LocalizedString* text = tooltips.FindText(name);
             if (text == nullptr)
             {
@@ -433,17 +499,34 @@ void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemT
                 issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number, field,
                                   "\"@" + name + "\" is not a text of " + tooltipFile +
                                       (suggestion.empty() ? "" : "; did you mean \"@" + suggestion + "\"?")});
-                continue;
             }
-            for (const std::string& placeholder : ScanPlaceholders(text->GetNeutral()).names)
+            else if (isLevelValue && !ScanPlaceholders(text->GetNeutral()).names.empty())
             {
-                if (!IsBuiltInPlaceholder(placeholder) && profiles.FindTable(placeholder) == nullptr)
+                issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number, field,
+                                  "\"@" + name + "\" has placeholders, which a level value cannot have"});
+            }
+        };
+        for (size_t line = 0; line < definition.description.size(); ++line)
+        {
+            if (!definition.description[line].textName.empty())
+            {
+                check(definition.description[line].textName, "description[" + std::to_string(line) + "].text", false);
+            }
+        }
+        for (const ItemLevelValues& levelValues : definition.levelValues)
+        {
+            for (size_t level = 0; level < levelValues.values.size(); ++level)
+            {
+                const ItemLevelValue& value = levelValues.values[level];
+                const std::string field = "levelValues." + levelValues.name + "[" + std::to_string(level) + "]";
+                if (!value.textName.empty())
+                {
+                    check(value.textName, field, true);
+                }
+                else if (!ScanPlaceholders(value.text.GetNeutral()).names.empty())
                 {
                     issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number, field,
-                                      "\"@" + name + "\" has the placeholder {" + placeholder +
-                                          "}, which a description cannot fill: it is neither a built-in value nor a "
-                                          "table of the item stat file"});
-                    break;
+                                      "has placeholders, which a level value cannot have"});
                 }
             }
         }

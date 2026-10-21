@@ -204,18 +204,79 @@ TEST_CASE("The shipped item names are in languages the game shows [data][items]"
     }
 }
 
-TEST_CASE("The shipped descriptions' placeholders are built-in values or stat file tables [data][items]")
+TEST_CASE("The shipped descriptions' placeholders and shared texts are known [data][items]")
 {
     const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
     const ItemStatsLoadResult stats = LoadItemStatsFile(DataDirectory / "Items" / "Stats" / ItemStatsFileName);
     REQUIRE_FALSE(HasErrors(stats.issues));
+    const ItemTooltipLoadResult tooltips =
+        LoadItemTooltipFile(DataDirectory / "Items" / "Tooltips" / ItemTooltipFileName);
+    REQUIRE_FALSE(HasErrors(tooltips.issues));
     std::vector<ItemDataIssue> issues;
-    ValidateDescriptionPlaceholders(result.items, ItemStatProfiles(stats.file), ItemStatsFileName, issues);
+    ValidateDescriptionPlaceholders(result.items, ItemStatProfiles(stats.file), tooltips.file, ItemStatsFileName,
+                                    issues);
+    ValidateDescriptionTexts(result.items, tooltips.file, ItemTooltipFileName, issues);
     for (const ItemDataIssue& issue : issues)
     {
         INFO(issue.ToString());
         CHECK(false);
     }
+}
+
+// The shipped tooltip file, read once.
+const ItemTooltipFile& ShippedTooltips()
+{
+    static const ItemTooltipFile file =
+        LoadItemTooltipFile(DataDirectory / "Items" / "Tooltips" / ItemTooltipFileName).file;
+    return file;
+}
+
+// A description line's text: its shared text of the tooltip file, or the text written in place.
+const Data::LocalizedString& LineText(const ItemDescriptionLine& line)
+{
+    static const Data::LocalizedString none;
+    if (line.textName.empty())
+    {
+        return line.text;
+    }
+    const Data::LocalizedString* text = ShippedTooltips().FindText(line.textName);
+    return text != nullptr ? *text : none;
+}
+
+// A description line in English as the tooltip fills it for the item at `level`: the values the line binds, the
+// item's level values, {level} and the stat file's tables.
+std::string FilledLine(const ItemDefinition& item, const ItemDescriptionLine& line, int level,
+                       const ItemStatProfiles& profiles)
+{
+    return FillPlaceholders(LineText(line).GetNeutral(),
+                            [&](std::string_view name) -> std::optional<std::string>
+                            {
+                                for (const auto& [placeholder, value] : line.values)
+                                {
+                                    if (placeholder == name)
+                                    {
+                                        name = value;
+                                    }
+                                }
+                                if (const ItemLevelValues* values = item.FindLevelValues(name))
+                                {
+                                    return level < static_cast<int>(values->values.size())
+                                               ? std::optional<std::string>(values->values[level].text.GetNeutral())
+                                               : std::nullopt;
+                                }
+                                if (const std::optional<int> value = GetPlaceholderValue(name, level, profiles))
+                                {
+                                    return std::to_string(*value);
+                                }
+                                return std::nullopt;
+                            });
+}
+
+// The durability lines of the descriptions (step 5b-3b), which came from another part of the old code.
+bool IsDurabilityLine(const ItemDescriptionLine& line)
+{
+    return !line.when.empty() || line.textName == "durability" || line.textName == "numberOfItems" ||
+           line.textName == "life" || line.textName == "usableTimes";
 }
 
 // The lines the tooltip code wrote for the wings, capes and pets before they were their descriptions, as it printed
@@ -289,10 +350,9 @@ TEST_CASE("The wings', capes' and pets' tooltip values come from their data as f
             std::vector<std::string> lines;
             for (const ItemDescriptionLine& line : item.description)
             {
-                // Not the durability lines, which came from another part of the old code.
-                if (line.textName.empty() && line.when.empty())
+                if (!IsDurabilityLine(line))
                 {
-                    lines.push_back(FillPlaceholders(line.text.GetNeutral(), level, profiles));
+                    lines.push_back(FilledLine(item, line, level, profiles));
                 }
             }
             CHECK(lines == OldWingAndPetLines(item.group, item.number, level));
@@ -410,10 +470,9 @@ TEST_CASE("The tooltip texts by item level come from the descriptions as from th
             std::vector<OldLine> lines;
             for (const ItemDescriptionLine& line : found->description)
             {
-                // Not the durability lines, which came from another part of the old code.
-                if (line.IsShownAt(level) && line.textName.empty() && line.when.empty())
+                if (line.IsShownAt(level) && !IsDurabilityLine(line))
                 {
-                    lines.push_back({FillPlaceholders(line.text.GetNeutral(), level, profiles), line.color});
+                    lines.push_back({FilledLine(*found, line, level, profiles), line.color});
                 }
             }
             CHECK(lines == OldLevelLines(group, number, level));
@@ -603,7 +662,7 @@ TEST_CASE("The second item chain's tooltip texts come from the descriptions as f
         for (size_t index = 0; index < old.lines.size(); ++index)
         {
             const ItemDescriptionLine& line = found->description[index];
-            CHECK(OldLine{line.text.GetNeutral(), line.color} == old.lines[index]);
+            CHECK(OldLine{LineText(line).GetNeutral(), line.color} == old.lines[index]);
             CHECK_FALSE(line.HasLevels());
         }
     }
@@ -645,7 +704,7 @@ TEST_CASE("The original items' tooltip texts are in their descriptions [data][it
         REQUIRE(found != result.items.end());
         // The last line: the Moonstone Pendant's "Cannot Repair" of the second item chain comes before it.
         REQUIRE_FALSE(found->description.empty());
-        const Data::LocalizedString& text = found->description.back().text;
+        const Data::LocalizedString& text = LineText(found->description.back());
         CHECK(text.GetNeutral() == item.text);
         CHECK(found->description.back().color == ItemTextColor::White);
         for (const char* locale : I18N::GetAvailableLocales())

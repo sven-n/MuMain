@@ -195,7 +195,8 @@ TEST_CASE("A shared text is used by a layout or an item description [data][items
     pet.description = {life, typo, table};
     const std::vector<ItemDefinition> items = {pet};
     std::vector<ItemDataIssue> issues;
-    ValidateDescriptionTexts(items, tooltips.file, ItemStatProfiles(), "Tooltip.json", issues);
+    ValidateDescriptionPlaceholders(items, ItemStatProfiles(), tooltips.file, "ItemStats.json", issues);
+    ValidateDescriptionTexts(items, tooltips.file, "Tooltip.json", issues);
     const auto has = [&](ItemDataIssueSeverity severity, const std::string& field, const std::string& message)
     {
         return std::any_of(issues.begin(), issues.end(),
