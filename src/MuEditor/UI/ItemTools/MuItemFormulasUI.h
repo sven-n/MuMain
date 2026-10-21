@@ -2,6 +2,7 @@
 
 #ifdef _EDITOR
 
+#include "ItemFormulaEntry.h"
 #include "ItemStatFileChange.h"
 #include "ItemUsers.h"
 
@@ -10,6 +11,7 @@
 
 #include <cstdint>
 #include <string>
+#include <string_view>
 #include <vector>
 
 // The item formulas tool: the whole item stat file (Data/Items/Stats/
@@ -22,23 +24,7 @@ class CMuItemFormulasUI
 {
 public:
     // An entry of the list.
-    struct Entry
-    {
-        enum class Kind : uint8_t
-        {
-            None,
-            DropLevelBonus,
-            Default,
-            Profile,
-            Table,
-            Rules,
-        };
-
-        Kind kind = Kind::None;
-        std::string name;
-
-        bool operator==(const Entry& other) const = default;
-    };
+    using Entry = MuEditor::Items::FormulaEntry;
 
     static CMuItemFormulasUI& GetInstance();
 
@@ -121,5 +107,11 @@ private:
 };
 
 #define g_MuItemFormulasUI CMuItemFormulasUI::GetInstance()
+
+namespace MuEditor::Items
+{
+// Opens Item Formulas at the entry.
+void OpenItemFormulas(const FormulaEntry& entry);
+} // namespace MuEditor::Items
 
 #endif // _EDITOR

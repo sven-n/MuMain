@@ -721,8 +721,8 @@ shows it in the others.
   weapon kind, skill, drop level, potion priority, the stats, the prices,
   the stat profile (*By the rules* takes what the
   [profile rules](#item-stats-by-level) give; beside the list, the rule that
-  gives the item its profile, or that it is picked for the item) and the
-  resistances. Below the stats, what the game
+  gives the item its profile, or that it is picked for the item; **Item
+  Formulas** opens the profile there) and the resistances. Below the stats, what the game
   makes of them at each + level (damage, magic power, defense, magic
   defense, block rate), also as excellent or ancient, while a value is still
   being typed, and under that the formula of each with the item's numbers
@@ -770,7 +770,8 @@ shows it in the others.
 - **Item Formulas**: the item stat file, see [Item Formulas](#item-formulas).
 - **Item Checks**: the checks of a save as a list, errors first. A click on
   a problem of an item selects it and opens the tool of its field; an arrow
-  key onto it only selects the item.
+  key onto it only selects the item. A click on a problem of the item stat
+  file (a profile or a table nothing uses) opens Item Formulas at it.
 - **Item Translations**: the names in all languages, see
   [translation-system.md → In the item editor](translation-system.md#in-the-item-editor).
 

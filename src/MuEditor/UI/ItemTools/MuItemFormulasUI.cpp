@@ -1046,6 +1046,13 @@ void CMuItemFormulasUI::ApplyName(NamePurpose purpose, const std::string& name)
     }
 }
 
+void MuEditor::Items::OpenItemFormulas(const Entry& entry)
+{
+    g_MuEditorCore.GetToolWindows().itemFormulas = true;
+    g_MuItemFormulasUI.Show(entry);
+    ImGui::SetWindowFocus(MuEditor::WindowIds::ItemFormulas);
+}
+
 void CMuItemFormulasUI::UpdateEdit()
 {
     const long long version = g_ItemDatabase.GetVersion();

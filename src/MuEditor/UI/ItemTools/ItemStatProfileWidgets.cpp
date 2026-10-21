@@ -6,6 +6,7 @@
 
 #include "ItemFieldWidgets.h"
 #include "ItemRequirementTable.h"
+#include "MuItemFormulasUI.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
@@ -80,6 +81,13 @@ void RenderStatProfileCombo(ItemEditDraft<Data::Items::ItemDefinition>& draft, D
     }
     ImGui::SameLine();
     ImGui::TextDisabled("%s", DescribeChoice(choice).c_str());
+    ImGui::SameLine();
+    if (ImGui::SmallButton(I18N::Editor::ItemFormulas))
+    {
+        const bool isDefault = choice.name == Data::Items::StatProfileNames::Default;
+        OpenItemFormulas({isDefault ? CMuItemFormulasUI::Entry::Kind::Default : CMuItemFormulasUI::Entry::Kind::Profile,
+                          isDefault ? std::string() : choice.name});
+    }
 }
 
 ExpandedStatProfile ExpandItemStatProfile(const Data::Items::ItemDefinition& item)

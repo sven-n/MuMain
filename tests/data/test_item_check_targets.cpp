@@ -8,6 +8,7 @@
 #include "UI/Common/MuEditorToolWindows.h"
 #include "UI/Common/MuEditorWindowIds.h"
 #include "UI/ItemTools/ItemCheckTargets.h"
+#include "UI/ItemTools/ItemFormulaEntry.h"
 
 #include <cstddef>
 #include <optional>
@@ -185,6 +186,18 @@ TEST_CASE("The item checks open the window of each item tool [editor][items]")
         windows.*window.open = true;
         CHECK(windows.*entry.open);
     }
+}
+
+TEST_CASE("The item checks send a problem of the item stat file to its entry in Item Formulas [editor][items]")
+{
+    using Kind = FormulaEntry::Kind;
+    CHECK(FindFormulaEntryForField("tables.steps[3]") == FormulaEntry{Kind::Table, "steps"});
+    CHECK(FindFormulaEntryForField("tables.linear") == FormulaEntry{Kind::Table, "linear"});
+    CHECK(FindFormulaEntryForField("profiles.shield.defense.ancient") == FormulaEntry{Kind::Profile, "shield"});
+    CHECK(FindFormulaEntryForField("default.damage.table") == FormulaEntry{Kind::Default, ""});
+    CHECK(FindFormulaEntryForField("dropLevelBonus.excellent") == FormulaEntry{Kind::DropLevelBonus, ""});
+    CHECK(FindFormulaEntryForField("profileRules[2].slot") == FormulaEntry{Kind::Rules, ""});
+    CHECK(FindFormulaEntryForField("formatVersion").kind == Kind::None);
 }
 
 #endif // _EDITOR

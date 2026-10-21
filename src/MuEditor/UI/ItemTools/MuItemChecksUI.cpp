@@ -7,6 +7,7 @@
 #include "ItemCheckTargets.h"
 #include "ItemSelection.h"
 #include "ItemToolWindow.h"
+#include "MuItemFormulasUI.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
@@ -88,6 +89,11 @@ void OpenIssue(const ItemDataIssue& issue, bool clicked)
 {
     if (!IsAboutAnItem(issue))
     {
+        // A problem of the item stat file opens Item Formulas at its entry.
+        if (clicked && issue.source == Data::Items::GetItemStatsFile().generic_string())
+        {
+            OpenItemFormulas(FindFormulaEntryForField(issue.field));
+        }
         return;
     }
     g_ItemSelection.Select(Data::Items::MakeItemType(issue.group, issue.number));
