@@ -987,12 +987,11 @@ void SetMaxMessagePerCycle(int messages)
 }
 
 #ifdef _WIN32
-// Transitional bridge (issue #442): SDL owns the window, but the existing
-// WndProc still handles input, IME, the legacy Win32 EDIT-control text boxes,
-// the cursor, and shutdown. SDL invokes this for every Win32 message it pumps;
-// forward to WndProc and return true so SDL continues its own processing (which
-// also dispatches the child EDIT controls). Removed once input/IME are
-// SDL-native and the legacy text boxes are replaced (issue #447).
+// Transitional bridge (issue #442): SDL owns the window and default message
+// processing. Forward only messages with explicit remaining WndProc handlers;
+// forwarding unhandled messages through DefWindowProc before SDL dispatches
+// them can enter Win32 non-client button tracking twice and stall Minimize/Close.
+// SDL still processes every message after this hook (issue #447).
 static bool SDLCALL Win32MessageHook(void* /*userdata*/, MSG* msg)
 {
     // Let SDL own window close. Forwarding WM_CLOSE to WndProc would reach
@@ -1006,7 +1005,23 @@ static bool SDLCALL Win32MessageHook(void* /*userdata*/, MSG* msg)
         return true;
 #endif
 
-    WndProc(msg->hwnd, msg->message, msg->wParam, msg->lParam);
+    // Default and non-client messages belong to SDL. Keep only the legacy
+    // handlers required for system keys, cursor, IME state and shutdown.
+    switch (msg->message)
+    {
+    case WM_SYSKEYDOWN:
+    case WM_NPROTECT_EXIT_TWO:
+    case WM_ERASEBKGND:
+    case WM_PAINT:
+    case WM_DESTROY:
+    case WM_SETCURSOR:
+    case WM_IME_NOTIFY:
+    case WM_CHAR:
+        WndProc(msg->hwnd, msg->message, msg->wParam, msg->lParam);
+        break;
+    default:
+        break;
+    }
     return true;
 }
 #endif
