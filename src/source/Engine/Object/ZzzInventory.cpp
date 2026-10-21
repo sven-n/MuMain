@@ -3124,7 +3124,8 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         }
     }
     // The item data's description in the UI's language with its placeholders filled in for the item: the lines of
-    // the item's level, each wrapped to the tooltip's width and at its line breaks, the pieces in the line's color.
+    // the item's level whose conditions hold, each wrapped to the tooltip's width and at its line breaks, the pieces in
+    // the line's color. A line may be a shared text of the tooltip file.
     if (const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(ip->Type))
     {
         g_pRenderText->SetFont(g_hFont);
@@ -3135,11 +3136,13 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         };
         for (const Data::Items::ItemDescriptionLine& line : definition->description)
         {
-            if (!line.IsShownAt(Level))
+            if (!line.IsShownAt(Level) || !AreTooltipConditionsMet(line.when, ip->Type, Level, values))
             {
                 continue;
             }
-            if (line.text.IsEmpty())
+            const Data::LocalizedString* lineText =
+                line.textName.empty() ? &line.text : g_ItemDatabase.GetTooltipFile().FindText(line.textName);
+            if (lineText == nullptr || lineText->IsEmpty())
             {
                 // A blank line, as the tooltip writes its own.
                 if (TextNum >= static_cast<int>(std::size(TextList)))
@@ -3150,7 +3153,7 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
                 continue;
             }
             const std::wstring text = Core::Text::FromUtf8(Data::Items::FillPlaceholders(
-                line.text.Get(g_ItemDatabase.GetDisplayLocale()),
+                lineText->Get(g_ItemDatabase.GetDisplayLocale()),
                 [&](std::string_view name)
                 {
                     if (const std::optional<int> value = GetItemTooltipValue(values, name))
@@ -3222,218 +3225,13 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         TextNum = RenderHellasItemInfo(ip, TextNum);
     }
 
-    BOOL bDurExist = FALSE;
-    if ((p->Durability || p->MagicDur) &&
-        ((ip->Type < ITEM_WING || ip->Type >= ITEM_HELPER) && ip->Type < ITEM_POTION) ||
-        (ip->Type >= ITEM_WING && ip->Type <= ITEM_WINGS_OF_DARKNESS)
-        || (ip->Type >= ITEM_WING_OF_STORM && ip->Type <= ITEM_WING_OF_DIMENSION)
-        || (ip->Type >= ITEM_CAPE_OF_FIGHTER && ip->Type <= ITEM_CAPE_OF_OVERRULE))
+    // The Talisman of Mobility's saved location, under its description's "Returns to the saved location by a click."
+    if (ip->Type == ITEM_TALISMAN_OF_MOBILITY && ip->Durability == 1 && TextNum < static_cast<int>(std::size(TextList)))
     {
-        bDurExist = TRUE;
-    }
-    if ((bDurExist || ip->Durability) &&
-        (ip->Type<ITEM_LOCHS_FEATHER || ip->Type>ITEM_WEAPON_OF_ARCHANGEL)
-        && !(ip->Type == ITEM_WIZARDS_RING && Level == 1)
-        && !(ip->Type == ITEM_WIZARDS_RING && Level == 2)
-        && !(ip->Type == ITEM_ARMOR_OF_GUARDSMAN)
-        && ip->Type != ITEM_SIEGE_POTION && ip->Type != ITEM_CONTRACT_SUMMON && ip->Type != ITEM_LIFE_STONE_ITEM
-        && ip->Type != ITEM_FRAGMENT_OF_HORN
-        && !GameLogic::Items::IsElitePotion(ip)
-        && !GameLogic::Items::IsResetFruit(ip)
-        && !GameLogic::Items::IsElixir(ip)
-        && !(ip->Type == ITEM_INVITATION_TO_SANTA_VILLAGE)
-        && !GameLogic::Items::IsGambleItem(ip)
-        && !GameLogic::Items::IsCharacterCard(ip)
-        && !(ip->Type == ITEM_HELPER + 99)
-        && !(ip->Type == ITEM_ELITE_SD_POTION)
-        )
-    {
-        int Success = false;
-        int arrow = false;
-        if (ip->Type >= ITEM_POTION && ip->Type <= ITEM_ANTIDOTE)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
-            Success = true;
-        }
-        else if (ip->Type == ITEM_RENA && Level == 3)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
-            Success = true;
-        }
-        else if (GameLogic::Items::IsAmmunition(ip))
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
-            Success = true;
-            arrow = true;
-        }
-        else if (ip->Type >= ITEM_SMALL_SHIELD_POTION && ip->Type <= ITEM_LARGE_COMPLEX_POTION)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
-            Success = true;
-        }
-        else if (ip->Type == ITEM_ELITE_SD_POTION)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
-            Success = true;
-        }
-        else if (ip->Type >= ITEM_JACK_OLANTERN_BLESSINGS && ip->Type <= ITEM_JACK_OLANTERN_DRINK)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
-            Success = true;
-        }
-        else if (ip->Type >= ITEM_STARDUST && ip->Type <= ITEM_BURNT_MURDERERS_CLUB)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
-            Success = true;
-        }
-        else if (ip->Type >= ITEM_SPLINTER_OF_ARMOR && ip->Type <= ITEM_BLESS_OF_GUARDIAN)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::DD, ip->Durability, 20);
-            Success = true;
-        }
-        else if (ip->Type == ITEM_CLAW_OF_BEAST)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::DD, ip->Durability, 10);
-            Success = true;
-        }
-        else if (ip->Type == ITEM_HORN_OF_FENRIR)
-        {
-            if (ip->bPeriodItem == false)
-            {
-                mu_swprintf(TextList[TextNum], I18N::Game::LifeD, ip->Durability);
-                Success = true;
-            }
-        }
-        else if (ip->Type >= ITEM_HELPER && ip->Type <= ITEM_CONTRACT_SUMMON)
-        {
-            if (ip->bPeriodItem == false)
-            {
-                mu_swprintf(TextList[TextNum], I18N::Game::LifeD, ip->Durability);
-                Success = true;
-            }
-        }
-        else if (ip->Type == ITEM_TRANSFORMATION_RING)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::DurabilityD, ip->Durability);
-            Success = true;
-        }
-        else if (GameLogic::Items::IsDemonOrSpiritOfGuardian(ip))
-        {
-            if (ip->bPeriodItem == false)
-            {
-                mu_swprintf(TextList[TextNum], I18N::Game::LifeD, ip->Durability);
-                Success = true;
-            }
-        }
-        else if (ip->Type == ITEM_PET_RUDOLF || ip->Type == ITEM_PET_PANDA
-            || ip->Type == ITEM_PET_UNICORN || ip->Type == ITEM_PET_SKELETON)
-        {
-            if (ip->bPeriodItem == false)
-            {
-                mu_swprintf(TextList[TextNum], I18N::Game::LifeD, ip->Durability);
-                Success = true;
-            }
-        }
-        else if (GameLogic::Items::IsEventTicket(ip))
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::UsableDtimes, ip->Durability);
-            Success = true;
-        }
-        else if (GameLogic::Items::IsDoppelgangerOrVarkaTicket(ip))
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::UsableDtimes, ip->Durability);
-
-            if (ip->Type == ITEM_OPEN_ACCESS_TICKET_TO_VARKA)
-            {
-                TextNum++;
-                mu_swprintf(TextList[TextNum], I18N::Game::CanEnterTheMondaySaturdayMap);
-            }
-            else if (ip->Type == ITEM_OPEN_ACCESS_TICKET_TO_VARKA_7)
-            {
-                TextNum++;
-                mu_swprintf(TextList[TextNum], I18N::Game::CanEnterTheSundayMap);
-            }
-            Success = true;
-        }
-        else if (ip->Type == ITEM_TALISMAN_OF_LUCK)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::DCombinationSuccessRateIncrease, ip->Durability);
-            Success = true;
-        }
-        else if (ip->Type == ITEM_ILLUSION_TEMPLE_TICKET)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::UsableDtimes, ip->Durability);
-            Success = true;
-        }
-        else if (ip->Type == ITEM_POTION + 100)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
-            Success = true;
-        }
-        else if (ip->Type == ITEM_TALISMAN_OF_MOBILITY)
-        {
-            if (ip->Durability == 2)
-            {
-                mu_swprintf(TextList[TextNum], I18N::Game::SavesTheLocationWithTheRightMouseClick);
-                TextListColor[TextNum] = TEXT_COLOR_BLUE;
-                TextBold[TextNum] = false;
-                TextNum++;
-            }
-            else if (ip->Durability == 1)
-            {
-                mu_swprintf(TextList[TextNum], I18N::Game::ReturnsToTheSavedLocationByAClick);
-                TextListColor[TextNum] = TEXT_COLOR_BLUE;
-                TextBold[TextNum] = false;
-                TextNum++;
-                g_PortalMgr.GetPortalPositionText(TextList[TextNum]);
-                TextListColor[TextNum] = TEXT_COLOR_BLUE;
-                TextBold[TextNum] = false;
-                TextNum++;
-            }
-        }
-        else if (GameLogic::Items::IsLuckyItemTicket(ip))
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::YouCanAchieveSpecialItemsWithCombinations);
-            TextListColor[TextNum] = TEXT_COLOR_BLUE;
-            TextBold[TextNum] = false;
-            TextNum++;
-            mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-            Success = true;
-        }
-        else if ((bDurExist) && (ip->bPeriodItem == false))
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::DurabilityDD, values.durability, values.maxDurability);
-            Success = true;
-        }
-        else if (GameLogic::Items::IsWingMixCharm(ip))
-        {
-            mu_swprintf(TextList[TextNum], L"%ls", I18N::Game::Lookup(2732 + (ip->Type - (ITEM_TYPE_CHARM_MIXWING + EWS_BEGIN))));
-
-            Success = true;
-        }
-        else if (ip->Type == ITEM_OPEN_ACCESS_TICKET_TO_CHAOS_CASTLE)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::UsableDtimes, ip->Durability);
-            Success = true;
-        }
-
-        if (Success)
-        {
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            TextBold[TextNum] = false;
-            TextNum++;
-        }
-    }
-    else
-    {
-        if (ip->Type == ITEM_TRANSFORMATION_RING)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::DurabilityD, ip->Durability);
-
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            TextBold[TextNum] = false;
-            TextNum++;
-        }
+        g_PortalMgr.GetPortalPositionText(TextList[TextNum]);
+        TextListColor[TextNum] = TEXT_COLOR_BLUE;
+        TextBold[TextNum] = false;
+        TextNum++;
     }
 
     if (GameLogic::Items::IsAmmunition(ip))

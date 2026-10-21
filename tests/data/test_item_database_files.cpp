@@ -289,7 +289,11 @@ TEST_CASE("The wings', capes' and pets' tooltip values come from their data as f
             std::vector<std::string> lines;
             for (const ItemDescriptionLine& line : item.description)
             {
-                lines.push_back(FillPlaceholders(line.text.GetNeutral(), level, profiles));
+                // Not the durability lines, which came from another part of the old code.
+                if (line.textName.empty() && line.when.empty())
+                {
+                    lines.push_back(FillPlaceholders(line.text.GetNeutral(), level, profiles));
+                }
             }
             CHECK(lines == OldWingAndPetLines(item.group, item.number, level));
             ++compared;
@@ -406,7 +410,8 @@ TEST_CASE("The tooltip texts by item level come from the descriptions as from th
             std::vector<OldLine> lines;
             for (const ItemDescriptionLine& line : found->description)
             {
-                if (line.IsShownAt(level))
+                // Not the durability lines, which came from another part of the old code.
+                if (line.IsShownAt(level) && line.textName.empty() && line.when.empty())
                 {
                     lines.push_back({FillPlaceholders(line.text.GetNeutral(), level, profiles), line.color});
                 }

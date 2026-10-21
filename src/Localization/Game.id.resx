@@ -364,10 +364,6 @@
     <value>Keberuntungan (tingkat kerusakan kritis +5%%)</value>
     <comment>legacy_id=94</comment>
   </data>
-  <data name="Durability: [%d]" xml:space="preserve">
-    <value>Daya Tahan: [%d]</value>
-    <comment>legacy_id=95</comment>
-  </data>
   <data name="Can only be used in moving unit" xml:space="preserve">
     <value>Hanya dapat digunakan pada unit yang bergerak</value>
     <comment>legacy_id=96</comment>
@@ -8089,10 +8085,6 @@
     <value>http://muonline.webzen.com/</value>
     <comment>legacy_id=2295</comment>
   </data>
-  <data name="%d%% Combination success rate increase" xml:space="preserve">
-    <value>%d%% Peningkatan tingkat keberhasilan kombinasi</value>
-    <comment>legacy_id=2296</comment>
-  </data>
   <data name="Hour" xml:space="preserve">
     <value>Jam</value>
     <comment>legacy_id=2299</comment>
@@ -8976,14 +8968,6 @@
   <data name="Move by a right-mouse-click." xml:space="preserve">
     <value>Bergerak dengan klik kanan mouse.</value>
     <comment>legacy_id=2603</comment>
-  </data>
-  <data name="Saves the location with the right-mouse-click." xml:space="preserve">
-    <value>Menyimpan lokasi dengan klik kanan mouse.</value>
-    <comment>legacy_id=2605</comment>
-  </data>
-  <data name="Returns to the saved location by a click." xml:space="preserve">
-    <value>Kembali ke lokasi yang disimpan dengan satu klik.</value>
-    <comment>legacy_id=2606</comment>
   </data>
   <data name="Would you like to save the location?" xml:space="preserve">
     <value>Apakah Anda ingin menyimpan lokasi?</value>
@@ -10488,14 +10472,6 @@
   <data name="GrandDukeDukeMarquisCountViscount" xml:space="preserve">
     <value>Adipati Agung#Duke#Marquis#Hitungan#Viscount#Baron#Komandan Ksatria#Ksatria Unggul#Ksatria#Prefek Penjaga#Petugas#Letnan#Sersan#Prajurit</value>
     <comment>legacy_id=3104</comment>
-  </data>
-  <data name="Can enter the Monday - Saturday map." xml:space="preserve">
-    <value>Bisa masuk ke map Senin - Sabtu.</value>
-    <comment>legacy_id=3105</comment>
-  </data>
-  <data name="Can enter the Sunday map." xml:space="preserve">
-    <value>Bisa masuk ke map hari Minggu.</value>
-    <comment>legacy_id=3106</comment>
   </data>
   <data name="Varka Map 7" xml:space="preserve">
     <value>Peta Varka 7</value>

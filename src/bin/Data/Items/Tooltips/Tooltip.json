@@ -1,6 +1,58 @@
 {
   "formatVersion": 1,
   "texts": {
+    "durability": {
+      "en": "Durability: [{durability}/{maxDurability}]",
+      "de": "Haltbarkeit: [{durability}/{maxDurability}]",
+      "es": "Durabilidad: [{durability}/{maxDurability}]",
+      "id": "Daya Tahan: [{durability}/{maxDurability}]",
+      "ja": "耐久力: [{durability}/{maxDurability}]",
+      "pl": "Trwałość: [{durability}/{maxDurability}]",
+      "pt": "Durabilidade: [{durability}/{maxDurability}]",
+      "ru": "Прочность: [{durability}/{maxDurability}]",
+      "tl": "Katatagan: [{durability}/{maxDurability}]",
+      "uk": "Довговічність: [{durability}/{maxDurability}]",
+      "zh-TW": "耐久性：[{durability}/{maxDurability}]"
+    },
+    "numberOfItems": {
+      "en": "Number of items: {durability}",
+      "de": "Anzahl: {durability}",
+      "es": "Número de artículos: {durability}",
+      "id": "Jumlah item: {durability}",
+      "ja": "個数: {durability}",
+      "pl": "Ilość sztuk: {durability}",
+      "pt": "Número de itens: {durability}",
+      "ru": "Количество предметов: {durability}",
+      "tl": "Bilang ng mga item: {durability}",
+      "uk": "Кількість позицій: {durability}",
+      "zh-TW": "商品數量：{durability}"
+    },
+    "life": {
+      "en": "Life: {durability}",
+      "de": "Leben: {durability}",
+      "es": "Vida: {durability}",
+      "id": "Kehidupan: {durability}",
+      "ja": "生命力: {durability}",
+      "pl": "Życie: {durability}",
+      "pt": "Vida: {durability}",
+      "ru": "Жизнь: {durability}",
+      "tl": "Buhay: {durability}",
+      "uk": "Життя: {durability}",
+      "zh-TW": "壽命：{durability}"
+    },
+    "usableTimes": {
+      "en": "usable {durability}times",
+      "de": "{durability}-mal verwendbar",
+      "es": "utilizable {durability}veces",
+      "id": "waktu {durability} yang dapat digunakan",
+      "ja": "{durability}回利用可能",
+      "pl": "użyteczny {durability}razy",
+      "pt": "{durability} vezes utilizáveis",
+      "ru": "годный к употреблению {durability}times",
+      "tl": "magagamit {durability}times",
+      "uk": "можна використовувати {durability} разів",
+      "zh-TW": "可使用{durability}次"
+    },
     "oneHandedDamage": {
       "en": "One-Handed Damage: {damageMin} ~ {damageMax}",
       "de": "Einhandschaden: {damageMin} ~ {damageMax}",
@@ -341,6 +393,7 @@
         {"text": "@attackSpeed", "when": ["attackSpeed"]},
         {"text": "@walkSpeed", "when": ["walkSpeed"]},
         {"section": "description"},
+        {"text": "@durability", "when": ["hasDurability", "!timed", "!tag:noDurabilityLine"]},
         {"text": "@iceResistance", "when": ["iceResistance"]},
         {"text": "@poisonResistance", "when": ["poisonResistance"]},
         {"text": "@lightningResistance", "when": ["lightningResistance"]},

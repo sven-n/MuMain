@@ -5,6 +5,7 @@
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
+#include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 #include "Data/GameData/ItemData/SharedItemModel.h"
 
 #include <span>
@@ -41,6 +42,14 @@ void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatP
 // are checked by ValidateItems.
 void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
                                      const std::string& statFile, std::vector<ItemDataIssue>& issues);
+
+// The shared texts ("@name") of the items' descriptions against the tooltip file (`tooltipFile` names it in
+// messages): a text the file does not have is an error, with the nearest name when it looks like a typo, and so is a
+// placeholder of a shared text that is neither a built-in value nor a table of `profiles`. A shared text that neither a
+// layout nor a description uses is a warning.
+void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemTooltipFile& tooltips,
+                              const ItemStatProfiles& profiles, const std::string& tooltipFile,
+                              std::vector<ItemDataIssue>& issues);
 
 // Gives the model entries that name a shared model ("model") its file,
 // texture folders and none-blend meshes. A name that is not a shared model

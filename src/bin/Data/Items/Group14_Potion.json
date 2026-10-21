@@ -11,6 +11,12 @@
         "pt": "Maçã"
       },
       "tags": ["healingPotion"],
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "potionPriority": 1,
@@ -27,6 +33,12 @@
         "pt": "Pequena poção de cura"
       },
       "tags": ["healingPotion"],
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "potionPriority": 2,
@@ -43,6 +55,12 @@
         "pt": "Poção de cura"
       },
       "tags": ["healingPotion"],
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "potionPriority": 3,
@@ -59,6 +77,12 @@
         "pt": "Grande poção de cura"
       },
       "tags": ["healingPotion"],
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "potionPriority": 4,
@@ -75,6 +99,12 @@
         "pt": "Pequena poção de mana"
       },
       "tags": ["manaPotion"],
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "potionPriority": 1,
@@ -91,6 +121,12 @@
         "pt": "Poção de mana"
       },
       "tags": ["manaPotion"],
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "potionPriority": 2,
@@ -107,6 +143,12 @@
         "pt": "Grande poção de mana"
       },
       "tags": ["manaPotion"],
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "potionPriority": 3,
@@ -239,6 +281,12 @@
         "es": "Antídoto",
         "pt": "Antídoto"
       },
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 10,
@@ -595,6 +643,11 @@
             "zh-TW": "用於攻城登記"
           },
           "levels": [3, 3]
+        },
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"],
+          "levels": [3, 3]
         }
       ],
       "width": 1,
@@ -803,6 +856,12 @@
         "pt": "Pequena poção de SD"
       },
       "tags": ["shieldPotion"],
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "potionPriority": 1,
@@ -818,6 +877,12 @@
         "pt": "Poção de SD"
       },
       "tags": ["shieldPotion"],
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "potionPriority": 2,
@@ -833,6 +898,12 @@
         "pt": "Grande poção de SD"
       },
       "tags": ["shieldPotion"],
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "potionPriority": 3,
@@ -848,6 +919,12 @@
         "pt": "Pequena poção complexa"
       },
       "tags": ["complexPotion"],
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "potionPriority": 1,
@@ -864,6 +941,12 @@
         "pt": "Poção complexa"
       },
       "tags": ["complexPotion"],
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "potionPriority": 2,
@@ -880,6 +963,12 @@
         "pt": "Grande poção complexa"
       },
       "tags": ["complexPotion"],
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "potionPriority": 3,
@@ -1036,6 +1125,12 @@
         "es": "Bendiciones de Jack O'Lantern",
         "pt": "Bênçãos do Jack O'Lantern"
       },
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 2,
       "repairable": false
@@ -1048,6 +1143,12 @@
         "es": "Ira de Jack O'Lantern",
         "pt": "Ira do Jack O'Lantern"
       },
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 2,
       "repairable": false
@@ -1060,6 +1161,12 @@
         "es": "Grito de Jack O'Lantern",
         "pt": "Grito do Jack O'Lantern"
       },
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 2,
       "repairable": false
@@ -1072,6 +1179,12 @@
         "es": "Alimento de Jack O'Lantern",
         "pt": "Comida do Jack O'Lantern"
       },
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -1084,6 +1197,12 @@
         "es": "Trago de Jack O'Lantern",
         "pt": "Bebida do Jack O'Lantern"
       },
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -1138,6 +1257,22 @@
             "zh-TW": "增加組合速率，但僅達最大速率。"
           },
           "color": "blue"
+        },
+        {
+          "text": {
+            "en": "{durability}% Combination success rate increase",
+            "de": "Kombinationserfolgsrate +{durability}%",
+            "es": "{durability}% Aumento de la tasa de éxito de la combinación",
+            "id": "{durability}% Peningkatan tingkat keberhasilan kombinasi",
+            "ja": "{durability}% 合成成功確率上昇",
+            "pl": "{durability}% Wzrost współczynnika powodzenia kombinacji",
+            "pt": "{durability}% Aumento da taxa de sucesso da combinação",
+            "ru": "{durability}% Увеличение шанса успешной комбинации",
+            "tl": "{durability}% Pagtaas ng rate ng tagumpay ng kumbinasyon",
+            "uk": "{durability}% Збільшення рівня успіху комбінації",
+            "zh-TW": "{durability}% 組合成功率提升"
+          },
+          "when": ["durability"]
         }
       ],
       "width": 1,
@@ -2064,6 +2199,12 @@
         "es": "Moneda de la Suerte",
         "pt": "Moeda da sorte"
       },
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -3333,6 +3474,12 @@
         "es": "Polvo estelar",
         "pt": "Poeira estelar"
       },
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "sellValue": 60,
@@ -3346,6 +3493,12 @@
         "es": "Piedra Kalt",
         "pt": "Pedra Kalt"
       },
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "sellValue": 60,
@@ -3359,6 +3512,12 @@
         "es": "Armadura de Tantalos",
         "pt": "Armadura de Tântalos"
       },
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 2,
       "height": 2,
       "sellValue": 60,
@@ -3372,6 +3531,12 @@
         "es": "Garrote de Asesinos Calcinados",
         "pt": "Porrete de Assassino Queimado"
       },
+      "description": [
+        {
+          "text": "@numberOfItems",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 3,
       "sellValue": 60,

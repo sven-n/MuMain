@@ -364,10 +364,6 @@
     <value>Glück (kritische Schadensrate +5%%)</value>
     <comment>legacy_id=94</comment>
   </data>
-  <data name="Durability: [%d]" xml:space="preserve">
-    <value>Haltbarkeit: [%d]</value>
-    <comment>legacy_id=95</comment>
-  </data>
   <data name="Can only be used in moving unit" xml:space="preserve">
     <value>Kann nur auf einem Reittier verwendet werden</value>
     <comment>legacy_id=96</comment>
@@ -8109,10 +8105,6 @@
     <value>http://muonline.webzen.com/</value>
     <comment>legacy_id=2295</comment>
   </data>
-  <data name="%d%% Combination success rate increase" xml:space="preserve">
-    <value>Kombinationserfolgsrate +%d%%</value>
-    <comment>legacy_id=2296</comment>
-  </data>
   <data name="Hour" xml:space="preserve">
     <value>Stunde</value>
     <comment>legacy_id=2299</comment>
@@ -8996,14 +8988,6 @@
   <data name="Move by a right-mouse-click." xml:space="preserve">
     <value>Per Rechtsklick dorthin wechseln.</value>
     <comment>legacy_id=2603</comment>
-  </data>
-  <data name="Saves the location with the right-mouse-click." xml:space="preserve">
-    <value>Speichert den Ort per Rechtsklick.</value>
-    <comment>legacy_id=2605</comment>
-  </data>
-  <data name="Returns to the saved location by a click." xml:space="preserve">
-    <value>Kehrt per Klick zum gespeicherten Ort zurück.</value>
-    <comment>legacy_id=2606</comment>
   </data>
   <data name="Would you like to save the location?" xml:space="preserve">
     <value>Möchten Sie den Ort speichern?</value>
@@ -10508,14 +10492,6 @@
   <data name="GrandDukeDukeMarquisCountViscount" xml:space="preserve">
     <value>Großherzog#Herzog#Marquis#Graf#Vizegraf#Baron#Ritterkommandant#Oberritter#Ritter#Wachpräfekt#Offizier#Leutnant#Feldwebel#Gefreiter</value>
     <comment>legacy_id=3104</comment>
-  </data>
-  <data name="Can enter the Monday - Saturday map." xml:space="preserve">
-    <value>Kann die Karte für Montag bis Samstag betreten.</value>
-    <comment>legacy_id=3105</comment>
-  </data>
-  <data name="Can enter the Sunday map." xml:space="preserve">
-    <value>Kann die Karte für Sonntag betreten.</value>
-    <comment>legacy_id=3106</comment>
   </data>
   <data name="Varka Map 7" xml:space="preserve">
     <value>Varka Karte 7</value>

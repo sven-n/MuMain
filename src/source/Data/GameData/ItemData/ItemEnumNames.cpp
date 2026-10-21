@@ -81,6 +81,7 @@ constexpr std::array<EnumName<ItemTag>, static_cast<size_t>(ItemTag::Count)> Ite
     {ItemTag::Valuable, "valuable"},
     {ItemTag::NoDamageLine, "noDamageLine"},
     {ItemTag::NoLevelRequirement, "noLevelRequirement"},
+    {ItemTag::NoDurabilityLine, "noDurabilityLine"},
 }};
 } // namespace
 

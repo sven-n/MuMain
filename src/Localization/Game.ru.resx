@@ -364,10 +364,6 @@
     <value>Удача (коэффициент критического урона +5%%)</value>
     <comment>legacy_id=94</comment>
   </data>
-  <data name="Durability: [%d]" xml:space="preserve">
-    <value>Прочность: [%d]</value>
-    <comment>legacy_id=95</comment>
-  </data>
   <data name="Can only be used in moving unit" xml:space="preserve">
     <value>Может использоваться только в движущемся блоке.</value>
     <comment>legacy_id=96</comment>
@@ -8089,10 +8085,6 @@
     <value>http://muonline.webzen.com/</value>
     <comment>legacy_id=2295</comment>
   </data>
-  <data name="%d%% Combination success rate increase" xml:space="preserve">
-    <value>%d%% Увеличение шанса успешной комбинации</value>
-    <comment>legacy_id=2296</comment>
-  </data>
   <data name="Hour" xml:space="preserve">
     <value>Час</value>
     <comment>legacy_id=2299</comment>
@@ -8976,14 +8968,6 @@
   <data name="Move by a right-mouse-click." xml:space="preserve">
     <value>Перемещение осуществляется щелчком правой кнопки мыши.</value>
     <comment>legacy_id=2603</comment>
-  </data>
-  <data name="Saves the location with the right-mouse-click." xml:space="preserve">
-    <value>Сохраняет местоположение щелчком правой кнопки мыши.</value>
-    <comment>legacy_id=2605</comment>
-  </data>
-  <data name="Returns to the saved location by a click." xml:space="preserve">
-    <value>Возвращается в сохраненное место по клику.</value>
-    <comment>legacy_id=2606</comment>
   </data>
   <data name="Would you like to save the location?" xml:space="preserve">
     <value>Хотите сохранить местоположение?</value>
@@ -10488,14 +10472,6 @@
   <data name="GrandDukeDukeMarquisCountViscount" xml:space="preserve">
     <value>Великий герцог#Герцог#Маркиз#Граф#Виконт#Барон#Рыцарь-командир#Высший рыцарь#Рыцарь#Префект гвардии#Офицер#Лейтенант#Сержант#Рядовой</value>
     <comment>legacy_id=3104</comment>
-  </data>
-  <data name="Can enter the Monday - Saturday map." xml:space="preserve">
-    <value>Можно войти на карту понедельник-суббота.</value>
-    <comment>legacy_id=3105</comment>
-  </data>
-  <data name="Can enter the Sunday map." xml:space="preserve">
-    <value>Можно войти в воскресную карту.</value>
-    <comment>legacy_id=3106</comment>
   </data>
   <data name="Varka Map 7" xml:space="preserve">
     <value>Карта Варки 7</value>

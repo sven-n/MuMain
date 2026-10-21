@@ -213,7 +213,12 @@
         "es": "Rayo",
         "pt": "Dardo"
       },
-      "tags": ["ammunition"],
+      "tags": ["ammunition", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@numberOfItems"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "offHand",
@@ -434,7 +439,12 @@
         "es": "Flecha",
         "pt": "Flecha"
       },
-      "tags": ["ammunition"],
+      "tags": ["ammunition", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@numberOfItems"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "mainHand",

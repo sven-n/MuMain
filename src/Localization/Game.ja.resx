@@ -364,10 +364,6 @@
     <value>幸運 (クリティカルダメージ確率 +5%%)</value>
     <comment>legacy_id=94</comment>
   </data>
-  <data name="Durability: [%d]" xml:space="preserve">
-    <value>耐久力: [ %d ]</value>
-    <comment>legacy_id=95</comment>
-  </data>
   <data name="Can only be used in moving unit" xml:space="preserve">
     <value>移動ユニットを乗っているときに使用可能</value>
     <comment>legacy_id=96</comment>
@@ -7955,10 +7951,6 @@
     <value>http://www.muonline.jp/game_buy.asp</value>
     <comment>legacy_id=2295</comment>
   </data>
-  <data name="%d%% Combination success rate increase" xml:space="preserve">
-    <value>%d%% 合成成功確率上昇</value>
-    <comment>legacy_id=2296</comment>
-  </data>
   <data name="Hour" xml:space="preserve">
     <value>時間</value>
     <comment>legacy_id=2299</comment>
@@ -8686,14 +8678,6 @@
   <data name="Move by a right-mouse-click." xml:space="preserve">
     <value>右クリックすると移動します。</value>
     <comment>legacy_id=2603</comment>
-  </data>
-  <data name="Saves the location with the right-mouse-click." xml:space="preserve">
-    <value>右クリックすると場所が記憶されます。</value>
-    <comment>legacy_id=2605</comment>
-  </data>
-  <data name="Returns to the saved location by a click." xml:space="preserve">
-    <value>クリックすると記憶した場所へ移動します。</value>
-    <comment>legacy_id=2606</comment>
   </data>
   <data name="Would you like to save the location?" xml:space="preserve">
     <value>該当場所へ移動しますか？</value>
@@ -10170,14 +10154,6 @@
   <data name="GrandDukeDukeMarquisCountViscount" xml:space="preserve">
     <value>総司令官#副司令官#参謀長#軍団長#師団長#アーティクルマスター#コンバットマスター#クォーターマスター#騎士団長#近衛騎士#上級騎士#一等騎士#二等騎士#傭兵</value>
     <comment>legacy_id=3104</comment>
-  </data>
-  <data name="Can enter the Monday - Saturday map." xml:space="preserve">
-    <value>バルカ要塞の第1～6要塞に入場できます。</value>
-    <comment>legacy_id=3105</comment>
-  </data>
-  <data name="Can enter the Sunday map." xml:space="preserve">
-    <value>バルカ要塞の第7要塞に入場できます。</value>
-    <comment>legacy_id=3106</comment>
   </data>
   <data name="Varka Map 7" xml:space="preserve">
     <value>バルカ要塞 第7要塞</value>

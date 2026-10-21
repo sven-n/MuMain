@@ -3,7 +3,7 @@
 #include "Data/GameData/Common/LocalizedString.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemDefinition.h"
-#include "Data/GameData/ItemData/ItemTagSet.h"
+#include "Data/GameData/ItemData/ItemTooltipConditions.h"
 
 #include <map>
 #include <span>
@@ -39,8 +39,7 @@
 //     ]
 //   }
 //
-// A line shows when every entry of its "when" holds: a built-in value that is not 0 ("defense"), a state
-// ("excellent"), or an item tag ("tag:sceptre"); a "!" in front turns an entry around. Its color is that of the
+// A line shows when every entry of its "when" holds (ItemTooltipConditions.h). Its color is that of the
 // first rule of "colors" whose "when" holds, else "color" (white when left out). Its text is a shared text
 // ("@name"), a text written in place, or "" for a blank line; "values" names the built-in value of a placeholder
 // of the text for this line. A section is a part of the tooltip the code still writes; each layout has every
@@ -66,27 +65,6 @@ enum class TooltipSection : BYTE
     Options,
 };
 std::string_view GetTooltipSectionName(TooltipSection section);
-
-// The states a condition can name besides the built-in values: what the game knows of the item and the hero
-// (Engine/Object/ItemTooltipValues), listed in docs/item-data.md.
-std::span<const std::string_view> GetTooltipStates();
-bool IsTooltipState(std::string_view name);
-
-struct TooltipCondition
-{
-    enum class Kind : BYTE
-    {
-        Value, // a built-in value that is not 0
-        State,
-        Tag,
-    };
-    Kind kind = Kind::Value;
-    std::string name; // of the value or state
-    ItemTag tag = ItemTag::Count;
-    bool negated = false;
-
-    bool operator==(const TooltipCondition& other) const = default;
-};
 
 struct TooltipColorRule
 {
@@ -129,7 +107,7 @@ struct ItemTooltipFile
 };
 
 // Reads the file into `file` and adds its problems to `issues`; with errors the file must not be used. `source`
-// names the file in messages.
+// names the file in messages. Whether every shared text is used is checked with the items (ValidateDescriptionTexts).
 void ReadItemTooltipJson(std::string_view text, const std::string& source, ItemTooltipFile& file,
                          std::vector<ItemDataIssue>& issues);
 } // namespace Data::Items

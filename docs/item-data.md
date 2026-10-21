@@ -82,7 +82,7 @@ read as the English name only; saving writes the object form.
 | Field | Meaning |
 |---|---|
 | `tags` | Categories the game code asks for, e.g. `["mount", "flying"]`; see [Tags](#tags) |
-| `description` | Lines the tooltip shows for the item, after its stats, e.g. the Jewel of Bless's "It is used to increase your item level up to 6". A few lines that read the hero or other tables (the Armor of Guardsman's Chaos Castle table, the Lost Map) are still written by the tooltip code, after the description. A text can have [placeholders](#description-placeholders). Each line is `{"text": ..., "color": ..., "levels": [first, last]}`: `text` is written like `name` (a plain English text, or the texts by language), an empty text (`{"text": ""}`) is a blank line, a long line wraps at about the width of the original tooltips' widest lines, and `\n` in a text breaks the line there. `color` is one of the tooltip colors: `white` (left out), `blue`, `red`, `yellow`, `green`, `darkRed`, `purple`, `darkBlue`, `darkYellow`, `greenBlue`, `gray`, `redPurple`, `violet`, `orange`. `levels` shows the line only at those item levels, both included (`[1, 8]`; left out: every level); a list of two levels from 0 to 15 with the first not above the last. A client-only field; the bmd import keeps it |
+| `description` | Lines the tooltip shows for the item, after its stats, e.g. the Jewel of Bless's "It is used to increase your item level up to 6". A few lines that read the hero or other tables (the Armor of Guardsman's Chaos Castle table, the Lost Map, the Talisman of Mobility's saved location) are still written by the tooltip code, after the description. A text can have [placeholders](#description-placeholders). Each line is `{"text": ..., "when": [...], "color": ..., "levels": [first, last]}`: `text` is written like `name` (a plain English text, or the texts by language), or `"@name"` for a shared text of the [tooltip file](#tooltip-layouts) (`"@life"`); an empty text (`{"text": ""}`) is a blank line; a long line wraps at about the width of the original tooltips' widest lines, and `\n` in a text breaks the line there. `color` is one of the tooltip colors: `white` (left out), `blue`, `red`, `yellow`, `green`, `darkRed`, `purple`, `darkBlue`, `darkYellow`, `greenBlue`, `gray`, `redPurple`, `violet`, `orange`. `levels` shows the line only at those item levels, both included (`[1, 8]`; left out: every level); a list of two levels from 0 to 15 with the first not above the last. `when` shows the line only when its [conditions](#tooltip-layouts) hold, as a layout line's (`["!timed"]`, `["durability=2"]`). A client-only field; the bmd import keeps it |
 | `width`, `height` | Size in inventory slots |
 | `slot` | Equipment slot: `mainHand`, `offHand`, `helm`, `armor`, `pants`, `gloves`, `boots`, `wings`, `pet`, `pendant`, `ring`. Left out = not equippable |
 | `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, defense per level, damage increase, absorption) depend on it; excellent second and third tier wings get no extra durability, and the chaos mix knows a wing's tier from it |
@@ -184,6 +184,7 @@ can have several tags; the file lists them in the order below.
 | `valuable` | The game asks for confirmation before the item is sold or dropped |
 | `noDamageLine` | The tooltip shows no damage line, though the item has damage (the Scrolls of Teleport, Teleport Ally and Soul Barrier) |
 | `noLevelRequirement` | The tooltip shows no level requirement, though the item has one (Loch's Feather) |
+| `noDurabilityLine` | The tooltip shows no standard durability line, though the item has a durability: it shows none, or its description has its own (a pet's "Life", a stack's "Number of items", a ticket's "usable … times") |
 
 Wings need no tag: an item is a wing when its `slot` is `wings`.
 
@@ -210,6 +211,7 @@ layout `default` for now.
         {"section": "name"},
         {"text": "@defense", "when": ["defense"], "colors": [{"when": ["defenseHarmonyBonus"], "color": "yellow"}, {"when": ["armour", "excellent"], "color": "blue"}]},
         {"section": "description"},
+        {"text": "@durability", "when": ["hasDurability", "!timed", "!tag:noDurabilityLine"]},
         {"text": "@requiredLevel", "when": ["requiredLevel", "!tag:noLevelRequirement"], "colors": [{"when": ["missingLevel"], "color": "red"}]},
         {"text": "@lacking", "values": {"missing": "missingLevel"}, "when": ["requiredLevel", "!tag:noLevelRequirement", "missingLevel"], "color": "red"},
         {"section": "classes"},
@@ -230,7 +232,8 @@ A layout line has:
   and the stat file's tables.
 - **`when`**: the line shows only when every entry holds. An entry is
   - a built-in value, which holds when it is not 0 (`"defense"`,
-    `"missingStrength"`);
+    `"missingStrength"`), or a built-in value compared with a whole number by
+    `=`, `!=`, `<`, `<=`, `>` or `>=` (`"durability=2"`, `"level!=1"`);
   - a state (below);
   - `"tag:<tag>"`, which holds when the item has that [tag](#tags).
 
@@ -256,6 +259,8 @@ The **states** a condition can name:
 | `strengthReduced`, `dexterityReduced` | A Jewel of Harmony option or a socket lowers that requirement |
 | `armour` | A helm, armor, pants, gloves or boots (groups 7 to 11) |
 | `wizardryWeapon` | A staff, a book, or a Magic Gladiator's sword with magic power |
+| `hasDurability` | The item keeps a durability: an item of groups 0 to 11 or 13 with a `durability` or `magicDurability`, or the wings and capes 12/0–6, 12/36–43 and 12/49–50 |
+| `timed` | A timed item, one that expires |
 
 A **section** is a part of the tooltip the code still writes, and the lines
 of a layout go between them:
@@ -263,20 +268,22 @@ of a layout go between them:
 | Section | What the code writes there |
 |---|---|
 | `name` | Everything up to the item's name, and the name |
-| `description` | The item's own texts: the code's texts for particular items, the item's [description](#fields), durability |
+| `description` | The item's own texts: the code's texts for particular items, the item's [description](#fields) |
 | `classes` | The classes that can use the item, and the boots' and gloves' texts from +5 |
 | `options` | The excellent, set, socket, Jewel of Harmony and other options, to the end of the tooltip |
 
 Each layout has the four sections once each, in this order: it starts with
 `name` and ends with `options`.
 
-**Errors** when the item data loads: a `@name` that is not a shared text, an
-entry of `when` that is neither a value, a state nor a known tag, an unknown
+**Errors** when the item data loads: a `@name` that is not a shared text (in
+a layout or a description), an entry of `when` that is neither a value, a
+comparison of a value with a whole number, a state nor a known tag, an unknown
 color, a placeholder that is neither built in nor named by the line's
 `values`, a translation whose placeholders are not those of the English
 text, a `values` entry that names no built-in value, missing or misplaced
 sections, and no layout `default`. The messages suggest the name meant for a
-typo. **Warnings**: a shared text no layout uses, a `values` entry the text
+typo. **Warnings**: a shared text that neither a layout nor a description
+uses, a `values` entry the text
 does not have, and a layout other than `default` (nothing uses it yet).
 
 ### Flight equipment

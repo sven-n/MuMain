@@ -129,6 +129,11 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     }
     ItemTooltipLoadResult tooltips = LoadItemTooltipFile(GetItemTooltipFile());
     result.issues.insert(result.issues.end(), tooltips.issues.begin(), tooltips.issues.end());
+    if (!HasErrors(tooltips.issues))
+    {
+        ValidateDescriptionTexts(result.items, tooltips.file, statProfiles, GetItemTooltipFile().generic_string(),
+                                 result.issues);
+    }
     Data::LogDataIssues(ItemDataLabel, result.issues);
     if (HasErrors(result.issues))
     {
@@ -345,6 +350,8 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
                          GetItemStatsFile().generic_string(), issues);
     ValidateDescriptionPlaceholders(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(),
                                     GetItemStatsFile().generic_string(), issues);
+    ValidateDescriptionTexts(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetTooltipFile(),
+                             g_ItemDatabase.GetStatProfiles(), GetItemTooltipFile().generic_string(), issues);
     ValidateNameLocales(g_ItemDatabase.GetAllSlots(), I18N::GetAvailableLocales(), issues);
     // Only the model files of moved models are written; the others keep what
     // this client does not read from them.
@@ -369,6 +376,8 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
                          result.validationIssues);
     ValidateDescriptionPlaceholders(result.items, g_ItemDatabase.GetStatProfiles(), GetItemStatsFile().generic_string(),
                                     result.validationIssues);
+    ValidateDescriptionTexts(result.items, g_ItemDatabase.GetTooltipFile(), g_ItemDatabase.GetStatProfiles(),
+                             GetItemTooltipFile().generic_string(), result.validationIssues);
     ValidateNameLocales(result.items, I18N::GetAvailableLocales(), result.validationIssues);
 
     g_ItemDatabase.Build(result.items);

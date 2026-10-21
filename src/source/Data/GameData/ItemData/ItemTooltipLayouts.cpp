@@ -32,16 +32,9 @@ constexpr const char* Values = "values";
 } // namespace Keys
 
 constexpr std::string_view TextReference = "@";
-constexpr std::string_view Negation = "!";
-constexpr std::string_view TagPrefix = "tag:";
 
 // Same order as TooltipSection, after None.
 constexpr std::array<std::string_view, 4> SectionNames = {"name", "description", "classes", "options"};
-
-constexpr std::array<std::string_view, 11> States = {
-    "hasDamage",           "skillBook", "twoHanded",       "excellent",        "ancient",        "damageHarmonyBonus",
-    "defenseHarmonyBonus", "armour",    "strengthReduced", "dexterityReduced", "wizardryWeapon",
-};
 
 using Json::KeySet;
 
@@ -110,7 +103,6 @@ private:
 
     const std::string& m_source;
     std::vector<ItemDataIssue>& m_issues;
-    std::set<std::string, std::less<>> m_usedTexts;
 };
 
 bool ItemTooltipReader::ReadText(const OrderedJson& json, const std::string& field, LocalizedString& text)
@@ -178,41 +170,13 @@ void ItemTooltipReader::ReadTexts(const OrderedJson& root, ItemTooltipFile& file
 
 bool ItemTooltipReader::ReadCondition(const std::string& entry, const std::string& field, TooltipCondition& condition)
 {
-    std::string_view name = entry;
-    condition.negated = name.starts_with(Negation);
-    if (condition.negated)
+    std::string error;
+    if (!ReadTooltipCondition(entry, condition, error))
     {
-        name.remove_prefix(Negation.size());
+        AddError(field, error);
+        return false;
     }
-    if (name.starts_with(TagPrefix))
-    {
-        name.remove_prefix(TagPrefix.size());
-        condition.kind = TooltipCondition::Kind::Tag;
-        if (!FindEnumValue(name, condition.tag))
-        {
-            AddError(field, "\"" + entry + "\" names no item tag (docs/item-data.md, \"Tags\")");
-            return false;
-        }
-        return true;
-    }
-    condition.name = name;
-    if (IsTooltipState(name))
-    {
-        condition.kind = TooltipCondition::Kind::State;
-        return true;
-    }
-    if (IsBuiltInPlaceholder(name))
-    {
-        condition.kind = TooltipCondition::Kind::Value;
-        return true;
-    }
-    std::vector<std::string> known(GetBuiltInPlaceholders().begin(), GetBuiltInPlaceholders().end());
-    known.insert(known.end(), States.begin(), States.end());
-    const std::string suggestion = SuggestPlaceholder(name, known);
-    AddError(field,
-             "\"" + entry + "\" is neither a built-in value, a state nor \"tag:<tag>\"" +
-                 (suggestion.empty() ? std::string(" (docs/item-data.md)") : "; did you mean " + suggestion + "?"));
-    return false;
+    return true;
 }
 
 void ItemTooltipReader::ReadConditions(const OrderedJson& json, const std::string& field,
@@ -368,7 +332,6 @@ void ItemTooltipReader::ReadLine(const OrderedJson& json, const std::string& fie
     if (text->is_string() && text->get<std::string>().starts_with(TextReference))
     {
         line.textName = text->get<std::string>().substr(TextReference.size());
-        m_usedTexts.insert(line.textName);
         if (file.FindText(line.textName) == nullptr)
         {
             std::vector<std::string> names;
@@ -527,29 +490,12 @@ void ItemTooltipReader::Read(const OrderedJson& root, ItemTooltipFile& file)
     WarnAboutUnknownKeys(root, RootKeys, "");
     ReadTexts(root, file);
     ReadLayouts(root, file);
-    for (const auto& [name, text] : file.texts)
-    {
-        if (!m_usedTexts.contains(name))
-        {
-            AddIssue(ItemDataIssueSeverity::Warning, std::string(Keys::Texts) + "." + name, "no layout uses this text");
-        }
-    }
 }
 } // namespace
 
 std::string_view GetTooltipSectionName(TooltipSection section)
 {
     return section == TooltipSection::None ? std::string_view() : SectionNames[static_cast<size_t>(section) - 1];
-}
-
-std::span<const std::string_view> GetTooltipStates()
-{
-    return States;
-}
-
-bool IsTooltipState(std::string_view name)
-{
-    return std::find(States.begin(), States.end(), name) != States.end();
 }
 
 const LocalizedString* ItemTooltipFile::FindText(std::string_view name) const
