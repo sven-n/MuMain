@@ -19,6 +19,8 @@ std::span<const EnumName<ItemSlot>> GetEnumNames(ItemSlot);
 std::span<const EnumName<WingTier>> GetEnumNames(WingTier);
 std::span<const EnumName<WeaponKind>> GetEnumNames(WeaponKind);
 std::span<const EnumName<ItemTag>> GetEnumNames(ItemTag);
+// The keys of "requirements" in the item files.
+std::span<const EnumName<ItemRequirement>> GetEnumNames(ItemRequirement);
 
 // nullptr when the value has no name.
 template <typename TEnum> const char* FindEnumName(TEnum value)

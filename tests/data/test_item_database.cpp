@@ -4,6 +4,7 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Data/GameData/ItemData/StatProfileRule.h"
 
 #include "Core/Globals/_enum.h"
 
@@ -540,6 +541,93 @@ TEST_CASE("An edited item's stat profile follows its data while it is the derive
     // An item without a profile, as in item files saved before the field, takes the derived one.
     shield.statProfile = "";
     CHECK(FollowStatProfile(&shield, shield) == "shield");
+}
+
+TEST_CASE("A stat profile rule matches an item that has one of the values of each condition it has [data][items]")
+{
+    ItemDefinition helm = MakeItem(7, 0, "Bronze Helm");
+    helm.slot = ItemSlot::Helm;
+
+    StatProfileRule rule{.profile = "armor"};
+    // Without conditions it matches every item.
+    CHECK(Matches(rule, helm));
+
+    rule.slots.set(static_cast<size_t>(ItemSlot::Helm));
+    rule.slots.set(static_cast<size_t>(ItemSlot::Boots));
+    CHECK(Matches(rule, helm));
+    helm.slot = ItemSlot::Pants;
+    CHECK_FALSE(Matches(rule, helm));
+    // An item without a slot meets no slot condition.
+    helm.slot = ItemSlot::None;
+    CHECK_FALSE(Matches(rule, helm));
+    helm.slot = ItemSlot::Boots;
+
+    // Every condition the rule has must hold.
+    rule.groups.set(7);
+    CHECK(Matches(rule, helm));
+    helm.group = 8;
+    CHECK_FALSE(Matches(rule, helm));
+    helm.group = 7;
+
+    rule.tags.Set(ItemTag::Cape);
+    rule.tags.Set(ItemTag::LuckyItem);
+    CHECK_FALSE(Matches(rule, helm));
+    helm.tags.Set(ItemTag::LuckyItem);
+    CHECK(Matches(rule, helm));
+
+    rule.wingTiers.set(static_cast<size_t>(WingTier::Second));
+    CHECK_FALSE(Matches(rule, helm));
+    helm.wingTier = WingTier::Second;
+    CHECK(Matches(rule, helm));
+
+    rule.weaponKinds.set(static_cast<size_t>(WeaponKind::Shield));
+    CHECK_FALSE(Matches(rule, helm));
+    helm.weaponKind = WeaponKind::Shield;
+    CHECK(Matches(rule, helm));
+}
+
+TEST_CASE("A stat profile rule's requirement condition counts base values above 0 only [data][items]")
+{
+    ItemDefinition orb = MakeItem(12, 11, "Orb of Summoning");
+    StatProfileRule rule{.profile = "scroll"};
+    rule.requirements.set(static_cast<size_t>(ItemRequirement::Energy));
+    rule.requirements.set(static_cast<size_t>(ItemRequirement::Leadership));
+    CHECK_FALSE(Matches(rule, orb));
+
+    // A requirement given by level is no base value.
+    RequirementByLevel energy{};
+    energy.fill(100);
+    orb.requirementsByLevel.Set(ItemRequirement::Energy, energy);
+    CHECK_FALSE(Matches(rule, orb));
+
+    orb.requirements.level = 10;
+    CHECK_FALSE(Matches(rule, orb));
+    orb.requirements.leadership = 1;
+    CHECK(Matches(rule, orb));
+}
+
+TEST_CASE("The first stat profile rule an item matches is the one it follows [data][items]")
+{
+    const std::vector<StatProfileRule> rules = []
+    {
+        std::vector<StatProfileRule> list(3);
+        list[0].profile = "default";
+        list[0].tags.Set(ItemTag::Ammunition);
+        list[1].profile = "weapon";
+        list[1].groups.set(4);
+        list[2].profile = "other";
+        return list;
+    }();
+
+    ItemDefinition bolt = MakeItem(4, 7, "Bolt");
+    bolt.tags.Set(ItemTag::Ammunition);
+    CHECK(FindMatchingRule(rules, bolt) == 0);
+    ItemDefinition bow = MakeItem(4, 0, "Short Bow");
+    CHECK(FindMatchingRule(rules, bow) == 1);
+    ItemDefinition potion = MakeItem(14, 0, "Apple");
+    CHECK(FindMatchingRule(rules, potion) == 2);
+
+    CHECK(FindMatchingRule(std::span(rules).first(2), potion) == NoStatProfileRule);
 }
 
 TEST_CASE("Item tag sets test several tags at once [data][items]")
