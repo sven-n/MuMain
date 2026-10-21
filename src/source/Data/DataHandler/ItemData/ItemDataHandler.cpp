@@ -63,25 +63,6 @@ std::unique_ptr<ITEM_ATTRIBUTE[]> BuildItemAttributes(std::string_view locale)
     return attributes;
 }
 
-#ifdef _EDITOR
-// The stat profile FollowStatProfile gives, if the item stat file has it. One the file
-// lacks (renamed or removed) would stop the next start, and the editor cannot change it,
-// so the item keeps the default and `issues` gets a warning; loading warns about the item
-// until an edit, a move or a bmd import gives it the profile, once the file has it again.
-std::string FollowKnownStatProfile(const ItemDefinition* previous, const ItemDefinition& updated,
-                                   std::vector<ItemDataIssue>& issues)
-{
-    std::string profile = FollowStatProfile(g_ItemDatabase.GetStatProfiles(), previous, updated);
-    if (g_ItemDatabase.GetStatProfiles().Find(profile) != ItemStatProfiles::UnknownProfile)
-    {
-        return profile;
-    }
-    issues.push_back({ItemDataIssueSeverity::Warning, "", updated.group, updated.number, "statProfile",
-                      "its data gives \"" + profile + "\", which " + GetItemStatsFile().generic_string() +
-                          " does not have; it keeps the default"});
-    return "";
-}
-#endif
 } // namespace
 
 CItemDataHandler::CItemDataHandler()
@@ -228,15 +209,11 @@ ItemDefinition CItemDataHandler::WithDerivedFields(const ItemDefinition& definit
     if (definition.statProfile.empty())
     {
         // "Follow the data" was picked: also over a profile picked before.
-        std::vector<ItemDataIssue> issues;
-        result.statProfile = FollowKnownStatProfile(nullptr, result, issues);
-        Data::LogDataIssues(ItemDataLabel, issues);
+        result.statProfile = FollowStatProfile(g_ItemDatabase.GetStatProfiles(), nullptr, result);
     }
     else if (previous == nullptr || definition.statProfile == previous->statProfile)
     {
-        std::vector<ItemDataIssue> issues;
-        result.statProfile = FollowKnownStatProfile(previous, result, issues);
-        Data::LogDataIssues(ItemDataLabel, issues);
+        result.statProfile = FollowStatProfile(g_ItemDatabase.GetStatProfiles(), previous, result);
     }
     return result;
 }
@@ -523,9 +500,7 @@ void CItemDataHandler::FollowDerivedFieldsAfterMove(const ItemDefinition& before
 
     ItemDefinition changed = *moved;
     changed.weaponKind = FollowGroupWeaponKind(&before, changed);
-    std::vector<ItemDataIssue> issues;
-    changed.statProfile = FollowKnownStatProfile(&before, changed, issues);
-    Data::LogDataIssues(ItemDataLabel, issues);
+    changed.statProfile = FollowStatProfile(g_ItemDatabase.GetStatProfiles(), &before, changed);
     if (changed.weaponKind != moved->weaponKind || changed.statProfile != moved->statProfile)
     {
         g_ItemDatabase.Set(changed);
@@ -602,7 +577,7 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
 
     result.keptEnglishNameCount = KeepCurrentEnglishNames(result.items);
     KeepMissingNamesMissing(result.items, result.importedLocales);
-    KeepFieldsNotInBmd(result.items, result.importedLocales, result.validationIssues);
+    KeepFieldsNotInBmd(result.items, result.importedLocales);
     ValidateItems(result.items, result.validationIssues);
     ValidateStatProfiles(result.items, g_ItemDatabase.GetStatProfiles(), GetItemStatsFile().generic_string(),
                          result.validationIssues);
@@ -654,8 +629,7 @@ void CItemDataHandler::KeepMissingNamesMissing(std::vector<ItemDefinition>& item
 }
 
 void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items,
-                                          const std::vector<std::string>& importedLocales,
-                                          std::vector<ItemDataIssue>& issues)
+                                          const std::vector<std::string>& importedLocales)
 {
     const auto imported = [&](std::string_view locale)
     { return std::find(importedLocales.begin(), importedLocales.end(), locale) != importedLocales.end(); };
@@ -674,7 +648,7 @@ void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items,
             }
         }
         item.weaponKind = FollowGroupWeaponKind(current, item);
-        item.statProfile = FollowKnownStatProfile(current, item, issues);
+        item.statProfile = FollowStatProfile(g_ItemDatabase.GetStatProfiles(), current, item);
     }
 }
 

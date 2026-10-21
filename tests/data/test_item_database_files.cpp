@@ -1601,10 +1601,9 @@ TEST_CASE("The editor's checks report problems of the item models [data][items][
     }
 }
 
-// The bmd import and the editor give items the profile their data gives; a stat file can lack it
-// (renamed or removed). The item then keeps the default with a warning; an item that still names
-// the profile is an error on save.
-TEST_CASE("A derived stat profile the item stat file does not have keeps the default [data][items][editor]")
+// A stat file that lacks a profile items name (removed outside the editor) stops the save of
+// the items, together with the other errors of the item checks.
+TEST_CASE("An item that names a profile the item stat file does not have blocks the save [data][items][editor]")
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
@@ -1612,56 +1611,35 @@ TEST_CASE("A derived stat profile the item stat file does not have keeps the def
     I18N::SetLocale("en");
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
-    std::string changeLog;
-    REQUIRE(g_ItemDataHandler.ExportAsBmd(changeLog));
 
     ItemStatsLoadResult stats = LoadItemStatsFile(folder.Directory() / GetItemStatsFile());
     REQUIRE_FALSE(HasErrors(stats.issues));
     std::erase_if(stats.file.profiles, [](const WrittenStatProfile& profile) { return profile.name == "shield"; });
+    std::erase_if(stats.file.profileRules, [](const StatProfileRule& rule) { return rule.profile == "shield"; });
     ItemStatProfilesScope restoreProfiles;
     g_ItemDatabase.SetStatProfiles(ItemStatProfiles(stats.file));
-    const auto namesShield = [](ItemDataIssueSeverity severity)
-    {
-        return [severity](const ItemDataIssue& issue)
-        {
-            return issue.severity == severity && issue.field == "statProfile" &&
-                   issue.message.find("\"shield\"") != std::string::npos;
-        };
-    };
 
-    SUBCASE("the import")
-    {
-        const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
-        REQUIRE_FALSE(HasErrors(result.issues));
-        CHECK_FALSE(HasErrors(result.validationIssues));
-        CHECK(std::ranges::any_of(result.validationIssues, namesShield(ItemDataIssueSeverity::Warning)));
-        CHECK(g_ItemDatabase.Find(ITEM_SMALL_SHIELD)->statProfile.empty());
-    }
+    // An item without an English name is an error of the item checks.
+    ItemDefinition untranslated = *g_ItemDatabase.Find(KrisType);
+    untranslated.names = Data::LocalizedString{};
+    untranslated.names.Set("pt", "Cris");
+    g_ItemDatabase.Set(untranslated);
 
-    SUBCASE("an edit")
-    {
-        EditItem(ITEM_SMALL_SHIELD, [](ItemDefinition&) {});
-        CHECK(g_ItemDatabase.Find(ITEM_SMALL_SHIELD)->statProfile.empty());
-    }
-
-    SUBCASE("the save of items that still name it, with the item checks")
-    {
-        // An item without an English name is an error of the item checks.
-        ItemDefinition untranslated = *g_ItemDatabase.Find(KrisType);
-        untranslated.names = Data::LocalizedString{};
-        untranslated.names.Set("pt", "Cris");
-        g_ItemDatabase.Set(untranslated);
-
-        std::vector<ItemDataIssue> issues;
-        CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::InvalidData);
-        CHECK(std::ranges::any_of(issues, namesShield(ItemDataIssueSeverity::Error)));
-        CHECK(std::ranges::any_of(issues,
-                                  [](const ItemDataIssue& issue)
-                                  {
-                                      return issue.severity == ItemDataIssueSeverity::Error && issue.group == 0 &&
-                                             issue.number == 0 && issue.field != "statProfile";
-                                  }));
-    }
+    std::vector<ItemDataIssue> issues;
+    CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::InvalidData);
+    CHECK(std::ranges::any_of(issues,
+                              [](const ItemDataIssue& issue)
+                              {
+                                  return issue.severity == ItemDataIssueSeverity::Error &&
+                                         issue.field == "statProfile" &&
+                                         issue.message.find("\"shield\"") != std::string::npos;
+                              }));
+    CHECK(std::ranges::any_of(issues,
+                              [](const ItemDataIssue& issue)
+                              {
+                                  return issue.severity == ItemDataIssueSeverity::Error && issue.group == 0 &&
+                                         issue.number == 0 && issue.field != "statProfile";
+                              }));
 }
 
 TEST_CASE("Exporting unchanged bmd files is not a failure [data][items][editor]")

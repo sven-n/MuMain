@@ -44,7 +44,7 @@ public:
     // Puts the item into the item database at its (group, number) and refills
     // its row of ItemAttribute[]: the item in the UI locale, or an empty row
     // when it no longer exists (no names). The weapon kind and the stat
-    // profile follow the data (FollowGroupWeaponKind, FollowKnownStatProfile)
+    // profile follow the data (FollowGroupWeaponKind, FollowStatProfile)
     // unless the definition changes them itself: then they are the user's pick.
     // An empty stat profile is no pick: it follows the data.
     void SetItem(const Data::Items::ItemDefinition& definition);
@@ -177,16 +177,13 @@ private:
     // languages whose item.bmd was not read: the ones without one (e.g.
     // German) and the ones whose file is missing. A weapon kind that its group
     // gives follows the imported slot (FollowGroupWeaponKind), and so does the
-    // stat profile its data gives (FollowStatProfile) if the item stat file has
-    // it; otherwise the item keeps the default and `issues` gets a warning.
+    // stat profile the profile rules give (FollowStatProfile).
     static void KeepFieldsNotInBmd(std::vector<Data::Items::ItemDefinition>& items,
-                                   const std::vector<std::string>& importedLocales,
-                                   std::vector<Data::Items::ItemDataIssue>& issues);
+                                   const std::vector<std::string>& importedLocales);
     // Gives the item a swap moved to newItemType the weapon kind of its new
     // group if it had the one of its old group (FollowGroupWeaponKind), and the
     // stat profile its data then gives if it had the derived one or none
-    // (FollowStatProfile), as long as the item stat file has that profile;
-    // otherwise the default, with a warning in the log.
+    // (FollowStatProfile).
     static void FollowDerivedFieldsAfterMove(const Data::Items::ItemDefinition& before, int newItemType);
     // Swaps the models of two item types: their entries in the item model
     // database and their opened model slots.
