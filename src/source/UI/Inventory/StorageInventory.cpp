@@ -313,27 +313,23 @@ void CStorageInventory::BindRmlModel(Rml::DataModelConstructor& c, StorageRmlMod
                     mu::ui::window::g_pGenericConfirmDialog->KeepOpen();
                     return;
                 }
-                if (iInputZen <= CharacterMachine->StorageGold
-                    && CharacterMachine->Gold + iInputZen <= GameLogic::Items::kMaxInventoryZen)
+                if (iInputZen > CharacterMachine->StorageGold)
                 {
-                    if (!g_pStorageInventory->IsStorageLocked() || g_pStorageInventory->IsCorrectPassword())
-                    {
-                        SocketClient->ToGameServer()->SendVaultMoveMoneyRequest(
-                            VaultMoneyMoveDirection::VaultToInventory, static_cast<int>(iInputZen));
-                    }
-                    else
-                    {
-                        g_pStorageInventory->SetBackupTakeZen(static_cast<int>(iInputZen));
-                        ShowVaultPinVerifyDialog();
-                    }
+                    mu::ui::window::CreateOkMessageBox(I18N::Game::YouAreShortOfZen);
                 }
                 else if (CharacterMachine->Gold + iInputZen > GameLogic::Items::kMaxInventoryZen)
                 {
-                    // Silent no-op, matching native -- still closes.
+                    mu::ui::window::CreateOkMessageBox(I18N::Game::ExceededMaximumAmountOfZenYouCanPossess);
+                }
+                else if (!g_pStorageInventory->IsStorageLocked() || g_pStorageInventory->IsCorrectPassword())
+                {
+                    SocketClient->ToGameServer()->SendVaultMoveMoneyRequest(
+                        VaultMoneyMoveDirection::VaultToInventory, static_cast<int>(iInputZen));
                 }
                 else
                 {
-                    mu::ui::window::CreateOkMessageBox(I18N::Game::YouAreShortOfZen);
+                    g_pStorageInventory->SetBackupTakeZen(static_cast<int>(iInputZen));
+                    ShowVaultPinVerifyDialog();
                 }
             };
             mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));

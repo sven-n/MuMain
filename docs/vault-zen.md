@@ -17,8 +17,9 @@ The client checks two limits before it sends a move to the server:
 - **Vault: 2,100,000,000 zen.** A deposit that would take the vault above it
   is refused with "Cannot store in vault".
 - **Inventory: 2,000,000,000 zen**, the same limit the NPC shop uses. A
-  withdrawal that would take the inventory above it is dropped without a
-  message, as in the original client.
+  withdrawal that would take the inventory above it is refused with "Exceeded
+  maximum amount of Zen you can possess". The original client dropped it
+  without a message.
 
 The server has its own limits, `MaximumVaultMoney` and `MaximumInventoryMoney`
 in OpenMU's game configuration (both 2,147,483,647 by default), and refuses
