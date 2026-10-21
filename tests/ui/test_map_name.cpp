@@ -240,7 +240,12 @@ TEST_CASE("map-name text wraps above a shared lower ornament across themes and s
             CHECK_FALSE(UI::RmlBridge::IsPointerOver(frame));
             CHECK(text->GetComputedValues().font_size() > 0.f);
             CHECK(text->GetComputedValues().font_weight() == Rml::Style::FontWeight::Normal);
-            CHECK(text->GetComputedValues().color() == Rml::Colourb(184, 182, 170));
+            CHECK(text->GetComputedValues().color() == Rml::Colourb(240, 236, 226));
+            const auto* effectProperty = text->GetProperty(Rml::PropertyId::FontEffect);
+            REQUIRE(effectProperty != nullptr);
+            const auto effects = effectProperty->Get<Rml::FontEffectsPtr>();
+            REQUIRE(effects != nullptr);
+            CHECK(effects->list.size() == 2);
         }
     }
 }

@@ -147,8 +147,8 @@ or decoration; long names wrap above the single lower ornament. A custom theme c
 shared ornament with its own locally supplied artwork without changing the map names.
 
 The map banner optionally loads Monotype Corsiva from the local Windows font folder;
-its file is not distributed. It uses the face's italic style at normal weight and a
-single lower ornament. Without that font, bundled Liberation Sans remains readable.
+its file is not distributed. It uses the face's italic style at normal weight, a bright
+silver fill with dark outline and shadow, and one classic MU ornament below the name. Without that font, bundled Liberation Sans remains readable.
 `font-map-name` selects the dedicated family; `font-map-name-style` resolves its matching
 style automatically. Other UI fonts follow their existing settings.
 
