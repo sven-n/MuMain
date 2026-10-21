@@ -123,6 +123,10 @@
 	min-height: 20dp;
 	margin-bottom: 6dp;
 }
+/* .hidden ties with .option-row's display at equal specificity, so it is restated. */
+.option-row.hidden {
+	display: none;
+}
 /* A part of the row above it: indented under its label, its control still in the column. */
 .option-sub-row .option-row-label {
 	margin-right: -12dp;

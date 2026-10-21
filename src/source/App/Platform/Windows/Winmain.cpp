@@ -7,6 +7,7 @@
 #include "Core/Platform/GameWindow.h"
 #include "Core/Input/UiInputRouter.h"
 #include "App/Control/ControlServer.h"
+#include "Integration/Discord/RichPresence.h"
 #include "Core/Text/Utf8.h"
 #include "App/Platform/DiagnosticFrameCaptureSchedule.h"
 #include "App/Platform/DiagnosticFrameCaptureWriter.h"
@@ -1587,6 +1588,10 @@ MSG MainLoop()
         // when the socket was never opened.
         App::Control::ControlServer::Instance().Poll();
 
+        // Keep the Discord presence in step with the game (once a second;
+        // the talking to Discord happens on its own thread).
+        Integration::Discord::RichPresence::Instance().Update();
+
         if (CheckRenderNextFrame())
         {
             if (g_bUseWindowMode || g_bWndActive || g_HasInactiveFpsOverride)
@@ -1895,6 +1900,9 @@ static void ShutdownRuntime(std::thread& cpuUsageRecorder, std::optional<Core::L
     // Closes the control socket and removes its file, so a later client with
     // the same name does not find a live-looking socket.
     App::Control::ControlServer::Instance().Stop();
+    // Stops the presence worker; closing its pipe makes Discord drop the
+    // presence at once.
+    Integration::Discord::RichPresence::Instance().Stop();
     if (cpuUsageRecorder.joinable())
     {
         cpuUsageRecorder.join();

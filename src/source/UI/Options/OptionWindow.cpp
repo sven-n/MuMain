@@ -21,6 +21,7 @@
 #include "UI/RmlBridge/RmlLevelGauge.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Theme/ThemeSelection.h"
+#include "Integration/Discord/RichPresence.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 #include "Core/Utilities/StringUtils.h"
 #include "Scenes/SceneManager.h"
@@ -286,6 +287,20 @@ Rml::String TuningStateClass(UI::Options::TuningRowState state)
     }
     return "inherited";
 }
+
+const wchar_t* DiscordPresenceLabel(Integration::Discord::PresenceMode mode)
+{
+    switch (mode)
+    {
+    case Integration::Discord::PresenceMode::HideDetails:
+        return I18N::Game::DiscordPresenceHideDetails;
+    case Integration::Discord::PresenceMode::Off:
+        return I18N::Game::DiscordPresenceOff;
+    case Integration::Discord::PresenceMode::On:
+    default:
+        return I18N::Game::DiscordPresenceOn;
+    }
+}
 } // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -322,6 +337,7 @@ mu::ui::window::COptionWindow::COptionWindow()
 
     m_iThemeIndex = -1;
     m_iUIScaleIndex = FindCurrentUIScaleIndex();
+    m_iDiscordPresenceIndex = FindCurrentDiscordPresenceIndex();
 }
 
 mu::ui::window::COptionWindow::~COptionWindow()
@@ -483,6 +499,11 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("theme_index", &model.themeIndex);
     c.Bind("theme_row_label", &model.themeRowLabel);
     c.Bind("theme_value_label", &model.themeValueLabel);
+    c.Bind("discord_presence_available", &model.discordPresenceAvailable);
+    c.Bind("discord_presence_labels", &model.discordPresenceLabels);
+    c.Bind("discord_presence_index", &model.discordPresenceIndex);
+    c.Bind("discord_presence_row_label", &model.discordPresenceRowLabel);
+    c.Bind("discord_presence_value_label", &model.discordPresenceValueLabel);
     c.Bind("ui_scale_labels", &model.uiScaleLabels);
     c.Bind("ui_scale_index", &model.uiScaleIndex);
     c.Bind("ui_scale_row_label", &model.uiScaleRowLabel);
@@ -778,6 +799,7 @@ void mu::ui::window::COptionWindow::OpenningProcess()
 
     RefreshThemeChoices();
     m_iUIScaleIndex = FindCurrentUIScaleIndex();
+    m_iDiscordPresenceIndex = FindCurrentDiscordPresenceIndex();
 }
 
 void mu::ui::window::COptionWindow::ClosingProcess()
@@ -817,7 +839,7 @@ void mu::ui::window::COptionWindow::SyncImpliedEffectRows(OptionRmlModel& model)
 
 void mu::ui::window::COptionWindow::RmlToggleDropdown(int dropdownId)
 {
-    if (dropdownId < 0 || dropdownId > 7)
+    if (dropdownId < 0 || dropdownId > 8)
         return;
     // Toggle: clicking the currently-open one's own value box closes it; clicking any other
     // (including a different dropdown's) overwrites m_iOpenDropdown, which closes whatever else
@@ -855,6 +877,9 @@ void mu::ui::window::COptionWindow::RmlDropdownOptionClick(int dropdownId, int o
         break;
     case 7:
         RmlAnisotropyChanged(optionIndex);
+        break;
+    case 8:
+        RmlDiscordPresenceChanged(optionIndex);
         break;
     default:
         break;
@@ -1305,6 +1330,21 @@ void mu::ui::window::COptionWindow::RmlThemeChanged(int index)
     m_bPendingThemeSwitch = true;
 }
 
+void mu::ui::window::COptionWindow::RmlDiscordPresenceChanged(int index)
+{
+    using namespace Integration::Discord;
+    // See RmlResolutionChanged's own comment -- same settle-frame guard applies here.
+    if (m_rmlSyncCount < kRmlSelectSettleFrames)
+        return;
+    if (index < 0 || index >= static_cast<int>(PresenceModes.size()) || index == m_iDiscordPresenceIndex)
+        return;
+    m_iDiscordPresenceIndex = index;
+
+    GameConfig::GetInstance().SetDiscordPresence(PresenceModeName(PresenceModes[static_cast<size_t>(index)]));
+    GameConfig::GetInstance().Save();
+    RichPresence::Instance().Reconfigure();
+}
+
 void mu::ui::window::COptionWindow::ApplyPendingThemeSwitch()
 {
     if (!m_bPendingThemeSwitch)
@@ -1523,6 +1563,18 @@ int mu::ui::window::COptionWindow::FindCurrentThemeIndex()
     return -1;
 }
 
+int mu::ui::window::COptionWindow::FindCurrentDiscordPresenceIndex()
+{
+    using namespace Integration::Discord;
+    const PresenceMode current = ParsePresenceMode(GameConfig::GetInstance().GetDiscordPresence());
+    for (size_t i = 0; i < PresenceModes.size(); ++i)
+    {
+        if (PresenceModes[i] == current)
+            return static_cast<int>(i);
+    }
+    return 0;
+}
+
 void mu::ui::window::COptionWindow::RefreshThemeChoices()
 {
     m_themeNames = UI::RmlBridge::DiscoverAvailableThemes();
@@ -1671,6 +1723,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     syncLabel(model.showFpsCounterLabel, "show_fps_counter_label", I18N::Game::ShowFPSCounter);
     syncLabel(model.showDebugInfoLabel, "show_debug_info_label", I18N::Game::ShowDebugInfo);
     syncLabel(model.themeRowLabel, "theme_row_label", I18N::Game::UITheme);
+    syncLabel(model.discordPresenceRowLabel, "discord_presence_row_label", I18N::Game::DiscordPresence);
     syncLabel(model.uiScaleRowLabel, "ui_scale_row_label", I18N::Game::UIScale);
     syncLabel(model.uiScaleTooltip, "ui_scale_tooltip", I18N::Game::UIScaleTooltip);
 
@@ -1810,6 +1863,29 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     m_iThemeIndex = FindCurrentThemeIndex();
     if (model.themeIndex != m_iThemeIndex) { model.themeIndex = m_iThemeIndex; m_RmlView.MarkDirty("theme_index"); }
     syncDropdownValue(model.themeValueLabel, "theme_value_label", model.themeLabels, model.themeIndex);
+
+    // Localized words, so rebuilt for a live language switch like the FPS Limit list.
+    if (model.discordPresenceAvailable != Integration::Discord::RichPresence::IsAvailable)
+    {
+        model.discordPresenceAvailable = Integration::Discord::RichPresence::IsAvailable;
+        m_RmlView.MarkDirty("discord_presence_available");
+    }
+    std::vector<Rml::String> newDiscordPresenceLabels;
+    newDiscordPresenceLabels.reserve(Integration::Discord::PresenceModes.size());
+    for (const Integration::Discord::PresenceMode mode : Integration::Discord::PresenceModes)
+        newDiscordPresenceLabels.push_back(StringUtils::WideToNarrow(DiscordPresenceLabel(mode)));
+    if (newDiscordPresenceLabels != model.discordPresenceLabels)
+    {
+        model.discordPresenceLabels = std::move(newDiscordPresenceLabels);
+        m_RmlView.MarkDirty("discord_presence_labels");
+    }
+    if (model.discordPresenceIndex != m_iDiscordPresenceIndex)
+    {
+        model.discordPresenceIndex = m_iDiscordPresenceIndex;
+        m_RmlView.MarkDirty("discord_presence_index");
+    }
+    syncDropdownValue(model.discordPresenceValueLabel, "discord_presence_value_label", model.discordPresenceLabels,
+                      model.discordPresenceIndex);
 
     // Built once -- unlike the font/fps-cap/theme lists, no entry is a localized word, so a live
     // language switch can't change any of these labels. The space before the sign is deliberate

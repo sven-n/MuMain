@@ -12,6 +12,7 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/Inventory/MyInventory.h"
 #include "UI/RmlBridge/RmlThemedView.h"
+#include "Integration/Discord/PresenceMode.h"
 
 namespace Rml { class ElementDocument; class Element; class Event; }
 
@@ -97,6 +98,7 @@ namespace mu::ui::window
 
         void RefreshThemeChoices();
         int FindCurrentThemeIndex();
+        int FindCurrentDiscordPresenceIndex();
 
         // Interface/UI tab's UI Scale row -- indexes UI::Options::UIScalePercentChoices() against
         // GameConfig::GetUIScalePercent().
@@ -122,7 +124,7 @@ namespace mu::ui::window
         void RmlClickSelectTab(int nTab);
         // Custom-dropdown mechanism (option_window.rml's own .option-dropdown family; RmlUi's
         // native <select> isn't used here) -- dropdownId is 0=resolution,1=fpsCap,2=theme,
-        // 3=language,4=font,5=uiScale,6=antialiasing,7=anisotropy, matching model.openDropdown's
+        // 3=language,4=font,5=uiScale,6=antialiasing,7=anisotropy,8=discordPresence, matching model.openDropdown's
         // own comment (OptionWindow.h).
         // RmlDropdownOptionClick dispatches to RmlResolutionChanged()/RmlFpsCapChanged()/etc. per
         // dropdownId.
@@ -185,6 +187,7 @@ namespace mu::ui::window
         void RmlToggleShowFpsCounter();
         void RmlToggleShowDebugInfo();
         void RmlThemeChanged(int index);
+        void RmlDiscordPresenceChanged(int index);
         void RmlUIScaleChanged(int index);
         void RmlClickClose();
 
@@ -236,7 +239,7 @@ namespace mu::ui::window
             // field rather than one bool per dropdown gives exclusivity for free -- opening one
             // overwrites whichever other id was here, no separate "close the others" step needed.
             // 0=resolution, 1=fpsCap, 2=theme, 3=language, 4=font, 5=uiScale, 6=antialiasing,
-            // 7=anisotropy (RmlToggleDropdown()/
+            // 7=anisotropy, 8=discordPresence (RmlToggleDropdown()/
             // RmlDropdownOptionClick()'s own ids). Replaces RmlUi's native <select>/<option>
             // (WidgetDropDown) entirely -- see option_window.rml's own history for why: that
             // widget's own generated selectbox/selectvalue/selectarrow sub-elements need CSS this
@@ -361,6 +364,12 @@ namespace mu::ui::window
             int themeIndex = 0;
             Rml::String themeRowLabel;
             Rml::String themeValueLabel;
+            // Only builds with the Discord presence show this row.
+            bool discordPresenceAvailable = false;
+            std::vector<Rml::String> discordPresenceLabels;
+            int discordPresenceIndex = 0;
+            Rml::String discordPresenceRowLabel;
+            Rml::String discordPresenceValueLabel;
             std::vector<Rml::String> uiScaleLabels;
             int uiScaleIndex = 0;
             Rml::String uiScaleRowLabel;
@@ -438,6 +447,8 @@ namespace mu::ui::window
         // GameConfig backing).
         int m_iThemeIndex;
         std::vector<std::string> m_themeNames;
+        // Indexes Integration::Discord::PresenceModes.
+        int m_iDiscordPresenceIndex;
         // Indexes UI::Options::UIScalePercentChoices(); seeded from GameConfig::GetUIScalePercent()
         // (and re-seeded in OpenningProcess(), so a scale set from outside this window -- e.g. a
         // hand-edited config.ini -- shows up on the next open).

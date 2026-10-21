@@ -188,6 +188,10 @@
 .opt-row:hover {
 	background-color: rgba(255, 255, 255, 12);
 }
+/* .hidden ties with .opt-row's display at equal specificity, so it is restated. */
+.opt-row.hidden {
+	display: none;
+}
 .opt-toggle-row {
 	cursor: pointer;
 }

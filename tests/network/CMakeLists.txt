@@ -63,6 +63,17 @@ else()
             -P "${CMAKE_CURRENT_SOURCE_DIR}/test_control_leak.cmake")
 endif()
 
+# Discord Rich Presence (docs/discord.md), in builds that include it.
+if(ENABLE_DISCORD)
+    mu_add_test(
+        NAME test_discord_presence
+        SOURCES
+            test_discord_presence.cpp
+        LINK_LIBS
+            MuClient
+    )
+endif()
+
 mu_add_test(
     NAME test_chat_command_catalog
     SOURCES

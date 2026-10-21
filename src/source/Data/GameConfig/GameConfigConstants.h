@@ -10,6 +10,7 @@ namespace CfgSections
     inline constexpr wchar_t CfgSectionConnectionSettings[] = L"CONNECTION SETTINGS";
     inline constexpr wchar_t CfgSectionCamera[] = L"Camera";
     inline constexpr wchar_t CfgSectionRender[] = L"Render";
+    inline constexpr wchar_t CfgSectionDiscord[] = L"Discord";
 }
 
 namespace CfgKeys
@@ -84,6 +85,12 @@ namespace CfgKeys
     // User-chosen FPS cap when VSync is off; -1 = uncapped. Same promotion story as the toggles
     // above, this time for the console-only `$fps <N>` diagnostic.
     inline constexpr wchar_t CfgKeyFpsCap[] = L"FpsCap";
+
+    // Discord Rich Presence (docs/discord.md)
+    inline constexpr wchar_t CfgKeyDiscordPresence[] = L"Presence";
+    inline constexpr wchar_t CfgKeyDiscordApplicationId[] = L"ApplicationId";
+    inline constexpr wchar_t CfgKeyDiscordLargeImageKey[] = L"LargeImageKey";
+    inline constexpr wchar_t CfgKeyDiscordSmallImageKey[] = L"SmallImageKey";
 }
 
 namespace CfgDefaults
@@ -160,4 +167,12 @@ namespace CfgDefaults
     // "vulkan", "direct3d12" (alias "d3d12"), "metal" -- forces that SDL_gpu driver on any
     // platform, falling back to auto-pick with a warning log if it's unavailable.
     inline constexpr wchar_t CfgDefaultRenderBackend[] = L"default";
+
+    // On, HideDetails or Off (Integration/Discord/PresenceMode.h). The
+    // character's level and class only go to Discord when the player asks for
+    // it. The application and its images belong to the server operator, so
+    // none is built in: without an application id the presence stays off.
+    inline constexpr wchar_t CfgDefaultDiscordPresence[] = L"HideDetails";
+    inline constexpr wchar_t CfgDefaultDiscordApplicationId[] = L"";
+    inline constexpr wchar_t CfgDefaultDiscordImageKey[] = L"";
 }

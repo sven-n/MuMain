@@ -166,6 +166,27 @@ public:
     // [UI] EnableAnimationTaskPool: manual config.ini edit only, like the two above.
     bool GetEnableAnimationTaskPool() const { return m_enableAnimationTaskPool; }
 
+    // Discord Rich Presence. The presence mode is the PresenceMode name
+    // ("On", "HideDetails", "Off"); the rest is the server's Discord
+    // application, set by whoever ships the client.
+    std::wstring GetDiscordPresence() const
+    {
+        return m_discordPresence;
+    }
+    void SetDiscordPresence(const std::wstring& presence);
+    std::wstring GetDiscordApplicationId() const
+    {
+        return m_discordApplicationId;
+    }
+    std::wstring GetDiscordLargeImageKey() const
+    {
+        return m_discordLargeImageKey;
+    }
+    std::wstring GetDiscordSmallImageKey() const
+    {
+        return m_discordSmallImageKey;
+    }
+
     // Helpers
     static std::wstring BinaryToHex(const BYTE* data, DWORD size);
     static std::vector<BYTE> HexToBinary(const std::wstring& hex);
@@ -223,6 +244,11 @@ private:
     bool m_disableWingShadow;
     bool m_disableBodyShadows;
     int m_fpsCap;
+
+    std::wstring m_discordPresence;
+    std::wstring m_discordApplicationId;
+    std::wstring m_discordLargeImageKey;
+    std::wstring m_discordSmallImageKey;
 
     int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue) const;
     void WriteInt(const wchar_t* section, const wchar_t* key, int value);
