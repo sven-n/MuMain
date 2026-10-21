@@ -82,6 +82,41 @@ RequirementByLevel ValuesWithBase(ItemDefinition item, ItemRequirement requireme
     return values;
 }
 
+// The requirement at `level` of `item` with this weight and without the
+// requirement by level. The profile follows the weight as storing the item
+// would make it (a rule may ask for a base requirement above 0).
+int ValueAt(ItemDefinition item, ItemRequirement requirement, int weight, int level,
+            const RequirementVariant& variant = {})
+{
+    BaseOf(item.requirements, requirement) = static_cast<WORD>(weight);
+    item.requirementsByLevel.Remove(requirement);
+    return ToRow(ComputeItemValuesAt(item, variant, level))[static_cast<size_t>(requirement)];
+}
+
+// The smallest weight whose +0 value is at least `value`, or nullopt.
+std::optional<int> FindSmallestWeightReaching(const ItemDefinition& item, ItemRequirement requirement, int value)
+{
+    if (ValueAt(item, requirement, MaxBase, 0) < value)
+    {
+        return std::nullopt;
+    }
+    int low = 0;
+    int high = MaxBase;
+    while (low < high)
+    {
+        const int middle = low + (high - low) / 2;
+        if (ValueAt(item, requirement, middle, 0) < value)
+        {
+            low = middle + 1;
+        }
+        else
+        {
+            high = middle;
+        }
+    }
+    return low;
+}
+
 // The smallest base whose values reach `values` at the first `levels` + levels;
 // each value grows with the base.
 int FindSmallestBaseReaching(const ItemDefinition& item, ItemRequirement requirement, const RequirementByLevel& values,
@@ -206,6 +241,84 @@ WORD FindRequirementBase(const ItemDefinition& item, ItemRequirement requirement
     const int below = std::max(low - 1, 0);
     const int distanceBelow = std::abs(ValuesWithBase(withoutLevels, requirement, below)[0] - first);
     return static_cast<WORD>(distanceBelow <= std::abs(atLow - first) ? below : low);
+}
+bool HasWeight(const ItemDefinition& item, ItemRequirement requirement)
+{
+    if (requirement == ItemRequirement::Level || requirement == ItemRequirement::Count)
+    {
+        return false;
+    }
+    const auto stat = static_cast<Data::Items::ItemRequirementStat>(static_cast<int>(requirement) - 1);
+    return !FindStatProfile(item).requirements.Get(stat).keepBase;
+}
+
+int ComputeZeroValue(const ItemDefinition& item, ItemRequirement requirement)
+{
+    return ToRow(ComputeItemValuesAt(item, {}, 0))[static_cast<size_t>(requirement)];
+}
+
+WeightRange FindWeightsGiving(const ItemDefinition& item, ItemRequirement requirement, int value)
+{
+    const std::optional<int> first = FindSmallestWeightReaching(item, requirement, value);
+    if (!first || ValueAt(item, requirement, *first, 0) != value)
+    {
+        return {};
+    }
+    const std::optional<int> above = FindSmallestWeightReaching(item, requirement, value + 1);
+    return {*first, above ? *above - 1 : MaxBase};
+}
+
+WeightValues ComputeWeightValues(const ItemDefinition& item, ItemRequirement requirement, int weight)
+{
+    const RequirementVariant excellent{true, false, 0};
+    return {weight, ValueAt(item, requirement, weight, Data::Items::ItemLevelCount - 1),
+            ValueAt(item, requirement, weight, 0, excellent),
+            ValueAt(item, requirement, weight, Data::Items::ItemLevelCount - 1, excellent)};
+}
+
+NearestZeroValues FindNearestZeroValues(const ItemDefinition& item, ItemRequirement requirement, int value)
+{
+    const auto reachable = [&](int weight)
+    {
+        const int reached = ValueAt(item, requirement, weight, 0);
+        return ReachableValue{reached, FindWeightsGiving(item, requirement, reached)};
+    };
+    NearestZeroValues nearest;
+    const std::optional<int> first = FindSmallestWeightReaching(item, requirement, value);
+    if (!first)
+    {
+        nearest.below = reachable(MaxBase);
+        return nearest;
+    }
+    nearest.above = reachable(*first);
+    if (*first > 0)
+    {
+        nearest.below = reachable(*first - 1);
+    }
+    return nearest;
+}
+
+WeightChoice ChooseWeight(const ItemDefinition& item, ItemRequirement requirement, int value, int currentWeight)
+{
+    WeightChoice choice;
+    choice.weights = FindWeightsGiving(item, requirement, value);
+    if (choice.weights.IsEmpty())
+    {
+        choice.kind = WeightChoice::Kind::Unreachable;
+        choice.weight = currentWeight;
+        choice.nearest = FindNearestZeroValues(item, requirement, value);
+    }
+    else if (choice.weights.Contains(currentWeight))
+    {
+        choice.kind = WeightChoice::Kind::Unchanged;
+        choice.weight = currentWeight;
+    }
+    else
+    {
+        choice.kind = choice.weights.GetCount() == 1 ? WeightChoice::Kind::Take : WeightChoice::Kind::Pick;
+        choice.weight = choice.weights.first;
+    }
+    return choice;
 }
 } // namespace MuEditor::Items
 

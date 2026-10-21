@@ -8,6 +8,7 @@
 
 #include <array>
 #include <cstdint>
+#include <optional>
 #include <string>
 
 namespace MuEditor::Items
@@ -81,6 +82,99 @@ bool OptionLevelAddsStrength(const Data::Items::ItemDefinition& item);
 // whose +0 value is nearest.
 WORD FindRequirementBase(const Data::Items::ItemDefinition& item, Data::Items::ItemRequirement requirement,
                          const Data::Items::RequirementByLevel& values);
+
+// The weight of a stat requirement is its base value, which the item stat
+// file's formula takes. Several weights can give the same requirement at +0,
+// as the formula rounds down; they differ at higher + levels and for excellent
+// items. The functions below work on the item without the requirement by
+// level, as FindRequirementBase does.
+
+// The weights first to last; empty when last < first.
+struct WeightRange
+{
+    int first = 0;
+    int last = -1;
+
+    bool IsEmpty() const
+    {
+        return last < first;
+    }
+    int GetCount() const
+    {
+        return IsEmpty() ? 0 : last - first + 1;
+    }
+    bool Contains(int weight) const
+    {
+        return weight >= first && weight <= last;
+    }
+    bool operator==(const WeightRange& other) const = default;
+};
+
+// Whether the requirement grows by a formula from its base value: a stat
+// requirement whose formula does not keep the base ("base"). The level has
+// none.
+bool HasWeight(const Data::Items::ItemDefinition& item, Data::Items::ItemRequirement requirement);
+// What a normal item needs at +0 without an option level, as the game's
+// /<item name> window shows it; also for a requirement given by level.
+int ComputeZeroValue(const Data::Items::ItemDefinition& item, Data::Items::ItemRequirement requirement);
+// The weights whose +0 value is `value`: one range, as the +0 value never
+// falls when the weight grows (weight 0 gives 0).
+WeightRange FindWeightsGiving(const Data::Items::ItemDefinition& item, Data::Items::ItemRequirement requirement,
+                              int value);
+
+// What a weight gives at +15, and for an excellent item at +0 and +15.
+struct WeightValues
+{
+    int weight = 0;
+    int plus15 = 0;
+    int excellent = 0;
+    int excellentPlus15 = 0;
+
+    bool operator==(const WeightValues& other) const = default;
+};
+WeightValues ComputeWeightValues(const Data::Items::ItemDefinition& item, Data::Items::ItemRequirement requirement,
+                                 int weight);
+
+// A +0 value some weights give.
+struct ReachableValue
+{
+    int value = 0;
+    WeightRange weights;
+
+    bool operator==(const ReachableValue& other) const = default;
+};
+// The +0 values nearest to one no weight gives: the highest below it and the
+// lowest above it, where there are such.
+struct NearestZeroValues
+{
+    std::optional<ReachableValue> below;
+    std::optional<ReachableValue> above;
+};
+NearestZeroValues FindNearestZeroValues(const Data::Items::ItemDefinition& item,
+                                        Data::Items::ItemRequirement requirement, int value);
+
+// What a typed +0 value does with the weight.
+struct WeightChoice
+{
+    enum class Kind : uint8_t
+    {
+        // The current weight gives it.
+        Unchanged,
+        // Only `weight` gives it.
+        Take,
+        // `weights` give it, the smallest is `weight`: one has to be picked.
+        Pick,
+        // No weight gives it; `nearest` has the values next to it.
+        Unreachable,
+    };
+
+    Kind kind = Kind::Unchanged;
+    int weight = 0;
+    WeightRange weights;
+    NearestZeroValues nearest;
+};
+WeightChoice ChooseWeight(const Data::Items::ItemDefinition& item, Data::Items::ItemRequirement requirement, int value,
+                          int currentWeight);
 } // namespace MuEditor::Items
 
 #endif // _EDITOR
