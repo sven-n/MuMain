@@ -41,15 +41,15 @@
       "zh-TW": "壽命：{durability}"
     },
     "usableTimes": {
-      "en": "usable {durability}times",
+      "en": "usable {durability} times",
       "de": "{durability}-mal verwendbar",
-      "es": "utilizable {durability}veces",
-      "id": "waktu {durability} yang dapat digunakan",
+      "es": "utilizable {durability} veces",
+      "id": "dapat digunakan {durability} kali",
       "ja": "{durability}回利用可能",
-      "pl": "użyteczny {durability}razy",
+      "pl": "do użycia {durability} razy",
       "pt": "{durability} vezes utilizáveis",
-      "ru": "годный к употреблению {durability}times",
-      "tl": "magagamit {durability}times",
+      "ru": "можно использовать {durability} раз",
+      "tl": "magagamit nang {durability} beses",
       "uk": "можна використовувати {durability} разів",
       "zh-TW": "可使用{durability}次"
     },
