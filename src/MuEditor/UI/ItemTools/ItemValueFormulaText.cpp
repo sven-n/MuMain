@@ -302,9 +302,15 @@ FormulaLine DescribeRequirementFormula(const ItemDefinition& item, ItemRequireme
     std::vector<Part> parts;
     if (requirement == ItemRequirement::Level)
     {
+        // Excellent options raise only a level requirement above 0.
+        const size_t above0 = byLevel != nullptr ? CountAbove0(*byLevel) : 0;
         if (byLevel != nullptr)
         {
             parts.push_back({DescribeByLevel(*byLevel), ItemField("requirementsByLevel")});
+            if (above0 == 0)
+            {
+                return {Join(parts), {}};
+            }
         }
         else if (base == 0)
         {
@@ -328,7 +334,10 @@ FormulaLine DescribeRequirementFormula(const ItemDefinition& item, ItemRequireme
         }
         else if (terms.excellentLevelAdd.value > 0)
         {
-            parts.push_back({I18N::Format(I18N::Editor::FormulaExcellentPlus, {Number(terms.excellentLevelAdd.value)}),
+            const bool everyLevel = byLevel == nullptr || above0 == byLevel->size();
+            parts.push_back({I18N::Format(everyLevel ? I18N::Editor::FormulaExcellentPlus
+                                                     : I18N::Editor::FormulaExcellentPlusWhereItIsAbove0,
+                                          {Number(terms.excellentLevelAdd.value)}),
                              terms.excellentLevelAdd.source});
         }
         return {Join(parts), {}};

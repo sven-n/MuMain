@@ -1843,4 +1843,7 @@
   <data name="Formula level requirement or drop level" xml:space="preserve">
     <value>{0}; wo die Stufenanforderung 0 ist: {1}</value>
   </data>
+  <data name="Formula excellent plus where it is above 0" xml:space="preserve">
+    <value>exzellent +{0}, wo sie über 0 ist</value>
+  </data>
 </root>

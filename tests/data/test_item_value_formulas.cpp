@@ -182,6 +182,20 @@ TEST_CASE("The item tools show the formula of each value of an item [data][items
     CHECK(DescribeRequirementFormula(poison, ItemRequirement::Energy, ExpandItemStatProfile(poison)).text ==
           "20 + 100 × level requirement × 4 / 100 (the level requirement given at each item level) [scroll]");
 
+    // Excellent options raise only a level requirement above 0.
+    ItemDefinition krisByLevel = *g_ItemDatabase.Find(MakeItemType(0, 0));
+    RequirementByLevel level{};
+    krisByLevel.requirementsByLevel.Set(ItemRequirement::Level, level);
+    CHECK(DescribeRequirementFormula(krisByLevel, ItemRequirement::Level, ExpandItemStatProfile(krisByLevel)).text ==
+          "given by item level: 0 (+0 to +15) [item: requirementsByLevel]");
+    level.fill(50);
+    level[0] = 0;
+    level[1] = 0;
+    krisByLevel.requirementsByLevel.Set(ItemRequirement::Level, level);
+    CHECK(DescribeRequirementFormula(krisByLevel, ItemRequirement::Level, ExpandItemStatProfile(krisByLevel)).text ==
+          "given by item level: 0 (+0 to +1), 50 (+2 to +15) [item: requirementsByLevel]; excellent +20 where it is "
+          "above 0 [default]");
+
     // A draft follows what is typed.
     ItemDefinition kris = *g_ItemDatabase.Find(MakeItemType(0, 0));
     kris.requirements.strength = 41;
