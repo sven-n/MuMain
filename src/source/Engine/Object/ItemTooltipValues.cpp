@@ -2,10 +2,15 @@
 
 #include "Engine/Object/ItemTooltipValues.h"
 
+#include "Character/CharacterManager.h"
+#include "Core/Text/Utf8.h"
+#include "Core/Utilities/_GlobalFunctions.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "GameLogic/Items/ItemAddOptioninfo.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "Network/Server/SocketSystem.h"
 #include "UI/Core/UIManager.h"
@@ -129,6 +134,15 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item)
                            (type >= ITEM_WING_OF_STORM && type <= ITEM_WING_OF_DIMENSION) ||
                            (type >= ITEM_CAPE_OF_FIGHTER && type <= ITEM_CAPE_OF_OVERRULE);
     values.timed = item.bPeriodItem;
+    if (g_pItemAddOptioninfo != nullptr)
+    {
+        const ITEM_ADD_OPTION& addOption = g_pItemAddOptioninfo->GetItemAddOtioninfo(item.Type);
+        values.addOptionValue1 = addOption.m_byValue1;
+        values.addOptionValue2 = addOption.m_byValue2;
+        std::wstring duration;
+        g_StringTime(addOption.m_Time, duration, true);
+        values.addOptionDuration = Core::Text::ToUtf8(duration.c_str());
+    }
     ComputeDamage(item, values);
 
     const StrengthenCapability harmony = HarmonyBonus(item, 2);
@@ -160,11 +174,18 @@ std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, std::str
         int ItemTooltipValues::* value;
     };
     static constexpr Named Plain[] = {
-        {"damageMin", &ItemTooltipValues::damageMin},   {"damageMax", &ItemTooltipValues::damageMax},
-        {"defense", &ItemTooltipValues::defense},       {"magicDefense", &ItemTooltipValues::magicDefense},
-        {"blockRate", &ItemTooltipValues::blockRate},   {"attackSpeed", &ItemTooltipValues::attackSpeed},
-        {"walkSpeed", &ItemTooltipValues::walkSpeed},   {"magicPower", &ItemTooltipValues::magicPower},
-        {"durability", &ItemTooltipValues::durability}, {"maxDurability", &ItemTooltipValues::maxDurability},
+        {"damageMin", &ItemTooltipValues::damageMin},
+        {"damageMax", &ItemTooltipValues::damageMax},
+        {"defense", &ItemTooltipValues::defense},
+        {"magicDefense", &ItemTooltipValues::magicDefense},
+        {"blockRate", &ItemTooltipValues::blockRate},
+        {"attackSpeed", &ItemTooltipValues::attackSpeed},
+        {"walkSpeed", &ItemTooltipValues::walkSpeed},
+        {"magicPower", &ItemTooltipValues::magicPower},
+        {"durability", &ItemTooltipValues::durability},
+        {"maxDurability", &ItemTooltipValues::maxDurability},
+        {"addOptionValue1", &ItemTooltipValues::addOptionValue1},
+        {"addOptionValue2", &ItemTooltipValues::addOptionValue2},
     };
     for (const Named& named : Plain)
     {
@@ -205,6 +226,15 @@ std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, std::str
         {
             return (values.*named.requirement).missing;
         }
+    }
+    return std::nullopt;
+}
+
+std::optional<std::string> GetItemTooltipText(const ItemTooltipValues& values, std::string_view name)
+{
+    if (name == "addOptionDuration")
+    {
+        return values.addOptionDuration;
     }
     return std::nullopt;
 }
@@ -268,6 +298,8 @@ bool AreTooltipConditionsMet(std::span<const Data::Items::TooltipCondition> cond
             return GetItemTooltipState(values, condition.name);
         case TooltipCondition::Kind::Tag:
             return g_ItemDatabase.HasTag(type, condition.tag);
+        case TooltipCondition::Kind::Class:
+            return Hero != nullptr && gCharacterManager.GetBaseClass(Hero->Class) == condition.number;
         }
         return false;
     };
@@ -275,15 +307,22 @@ bool AreTooltipConditionsMet(std::span<const Data::Items::TooltipCondition> cond
                        [&](const TooltipCondition& condition) { return holds(condition) != condition.negated; });
 }
 
-Data::Items::ItemTextColor GetTooltipLineColor(const Data::Items::TooltipLayoutLine& line, int type, int level,
-                                               const ItemTooltipValues& values)
+Data::Items::ItemTextColor GetTooltipColor(std::span<const Data::Items::TooltipColorRule> rules,
+                                           Data::Items::ItemTextColor color, int type, int level,
+                                           const ItemTooltipValues& values)
 {
-    for (const Data::Items::TooltipColorRule& rule : line.colors)
+    for (const Data::Items::TooltipColorRule& rule : rules)
     {
         if (AreTooltipConditionsMet(rule.when, type, level, values))
         {
             return rule.color;
         }
     }
-    return line.color;
+    return color;
+}
+
+Data::Items::ItemTextColor GetTooltipLineColor(const Data::Items::TooltipLayoutLine& line, int type, int level,
+                                               const ItemTooltipValues& values)
+{
+    return GetTooltipColor(line.colors, line.color, type, level, values);
 }

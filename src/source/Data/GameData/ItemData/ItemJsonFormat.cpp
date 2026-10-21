@@ -31,6 +31,8 @@ constexpr const char* Levels = "levels";
 constexpr const char* When = "when";
 constexpr const char* Values = "values";
 constexpr const char* LevelValues = "levelValues";
+constexpr const char* Colors = "colors";
+constexpr const char* Bold = "bold";
 constexpr const char* Requirements = "requirements";
 constexpr const char* RequirementsByLevel = "requirementsByLevel";
 constexpr const char* ClassRequirements = "classRequirements";
@@ -198,6 +200,24 @@ OrderedJson WriteDescription(const std::vector<ItemDescriptionLine>& description
         {
             entry[Keys::Color] = WriteValue(line.color);
         }
+        if (!line.colors.empty())
+        {
+            OrderedJson colors = OrderedJson::array();
+            for (const TooltipColorRule& rule : line.colors)
+            {
+                OrderedJson when = OrderedJson::array();
+                for (const TooltipCondition& condition : rule.when)
+                {
+                    when.push_back(WriteTooltipCondition(condition));
+                }
+                colors.push_back(OrderedJson{{Keys::When, std::move(when)}, {Keys::Color, WriteValue(rule.color)}});
+            }
+            entry[Keys::Colors] = std::move(colors);
+        }
+        if (line.bold)
+        {
+            entry[Keys::Bold] = true;
+        }
         if (line.HasLevels())
         {
             entry[Keys::Levels] = OrderedJson::array({line.minLevel, line.maxLevel});
@@ -305,6 +325,8 @@ private:
     void ReadDescriptionLevels(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line);
     void ReadDescriptionConditions(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line);
     void ReadDescriptionValues(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line);
+    void ReadDescriptionColors(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line);
+    bool ReadConditionList(const OrderedJson& json, const std::string& field, std::vector<TooltipCondition>& when);
     void ReadLevelValues(const OrderedJson& json, std::vector<ItemLevelValues>& levelValues);
     void ReadStats(const OrderedJson& json, ItemDefinition& definition);
     void ReadRequirements(const OrderedJson& json, ItemDefinition& definition);
@@ -498,12 +520,29 @@ void ItemReader::ReadDescription(const OrderedJson& json, std::vector<ItemDescri
         {
             ReadValue(*color, field + "." + Keys::Color, line.color);
         }
+        if (const auto colors = entry.find(Keys::Colors); colors != entry.end())
+        {
+            ReadDescriptionColors(*colors, field + "." + Keys::Colors, line);
+        }
+        if (const auto bold = entry.find(Keys::Bold); bold != entry.end())
+        {
+            if (bold->is_boolean())
+            {
+                line.bold = bold->get<bool>();
+            }
+            else
+            {
+                AddIssue(ItemDataIssueSeverity::Error, field + "." + Keys::Bold, "must be true or false");
+            }
+        }
         const auto levels = entry.find(Keys::Levels);
         if (levels != entry.end())
         {
             ReadDescriptionLevels(*levels, field + "." + Keys::Levels, line);
         }
-        WarnAboutUnknownKeys(entry, {Keys::Text, Keys::Values, Keys::When, Keys::Color, Keys::Levels}, field + ".");
+        WarnAboutUnknownKeys(
+            entry, {Keys::Text, Keys::Values, Keys::When, Keys::Color, Keys::Colors, Keys::Bold, Keys::Levels},
+            field + ".");
         if (read)
         {
             description.push_back(std::move(line));
@@ -583,14 +622,15 @@ void ItemReader::ReadLevelValues(const OrderedJson& json, std::vector<ItemLevelV
     }
 }
 
-// The conditions a description line is shown on, all of them: a list of texts such as "durability" or "!timed".
-void ItemReader::ReadDescriptionConditions(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line)
+// A list of conditions, such as ["durability", "!timed"]; false (with the problem added) when it is not a list.
+bool ItemReader::ReadConditionList(const OrderedJson& json, const std::string& field,
+                                   std::vector<TooltipCondition>& when)
 {
     if (!json.is_array())
     {
         AddIssue(ItemDataIssueSeverity::Error, field,
                  "must be a list of conditions, such as [\"durability\", \"!timed\"]");
-        return;
+        return false;
     }
     for (size_t index = 0; index < json.size(); ++index)
     {
@@ -607,8 +647,47 @@ void ItemReader::ReadDescriptionConditions(const OrderedJson& json, const std::s
         }
         else
         {
-            line.when.push_back(std::move(condition));
+            when.push_back(std::move(condition));
         }
+    }
+    return true;
+}
+
+// The conditions a description line is shown on, all of them.
+void ItemReader::ReadDescriptionConditions(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line)
+{
+    ReadConditionList(json, field, line.when);
+}
+
+// The line's color rules, [{"when": [...], "color": ...}, ...], as a layout line's.
+void ItemReader::ReadDescriptionColors(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line)
+{
+    if (!json.is_array())
+    {
+        AddIssue(ItemDataIssueSeverity::Error, field, "must be a list of {\"when\": [...], \"color\": ...}");
+        return;
+    }
+    for (size_t index = 0; index < json.size(); ++index)
+    {
+        const OrderedJson& entry = json[index];
+        const std::string entryField = field + "[" + std::to_string(index) + "]";
+        const auto when = entry.is_object() ? entry.find(Keys::When) : entry.end();
+        const auto color = entry.is_object() ? entry.find(Keys::Color) : entry.end();
+        if (when == entry.end() || color == entry.end())
+        {
+            AddIssue(ItemDataIssueSeverity::Error, entryField, "must be {\"when\": [...], \"color\": ...}");
+            continue;
+        }
+        TooltipColorRule rule;
+        ReadConditionList(*when, entryField + "." + Keys::When, rule.when);
+        if (rule.when.empty())
+        {
+            AddIssue(ItemDataIssueSeverity::Error, entryField + "." + Keys::When,
+                     "a color rule needs a condition; the line's \"color\" is the color when no rule holds");
+        }
+        ReadValue(*color, entryField + "." + Keys::Color, rule.color);
+        WarnAboutUnknownKeys(entry, {Keys::When, Keys::Color}, entryField + ".");
+        line.colors.push_back(std::move(rule));
     }
 }
 
@@ -807,6 +886,11 @@ void ReadItemGroupJson(std::string_view text, const std::string& source, std::ve
             items.push_back(std::move(definition));
         }
     }
+}
+
+std::span<const char* const> GetClassKeys()
+{
+    return ClassKeys;
 }
 
 std::string WriteItemGroupJson(int group, std::span<const ItemDefinition> items)

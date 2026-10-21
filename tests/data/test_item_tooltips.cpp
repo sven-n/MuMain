@@ -268,15 +268,20 @@ TEST_CASE("Every item's tooltip is as recorded [data][items][tooltip]")
     CHECK(recorded.size() == hashes.size());
 }
 
-TEST_CASE("Every built-in placeholder but {level} is a value of the tooltip's stat lines [data][items][tooltip]")
+TEST_CASE("Every built-in placeholder but {level} is a value the game computes for the item [data][items][tooltip]")
 {
     const ItemTooltipValues values;
     for (const std::string_view name : Data::Items::GetBuiltInPlaceholders())
     {
         INFO(std::string(name));
-        CHECK(GetItemTooltipValue(values, name).has_value() == (name != Data::Items::LevelPlaceholder));
+        // A number, or a text ({addOptionDuration}), and only one of them.
+        const bool number = GetItemTooltipValue(values, name).has_value();
+        const bool text = GetItemTooltipText(values, name).has_value();
+        CHECK((number || text) == (name != Data::Items::LevelPlaceholder));
+        CHECK_FALSE((number && text));
     }
     CHECK_FALSE(GetItemTooltipValue(values, "sparkle").has_value());
+    CHECK_FALSE(GetItemTooltipText(values, "sparkle").has_value());
 }
 
 TEST_CASE("The tooltip's values of an item follow the item and the hero [data][items][tooltip]")
@@ -311,3 +316,46 @@ TEST_CASE("The tooltip's values of an item follow the item and the hero [data][i
     CHECK(ComputeItemTooltipValues(kris).strength.missing == 0);
 }
 
+TEST_CASE("An item's add option values come from its add option [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeNewDarkWizard(hero.Hero());
+
+    // The Seal of Healing (13/62): its experience rate and life recovery, and how long it lasts.
+    ITEM seal;
+    FillItemFromParameters(seal, FullItemParameters(13, 62));
+    const ITEM_ADD_OPTION& addOption = g_pItemAddOptioninfo->GetItemAddOtioninfo(seal.Type);
+    REQUIRE(addOption.m_byValue1 != 0);
+    const ItemTooltipValues values = ComputeItemTooltipValues(seal);
+    CHECK(values.addOptionValue1 == addOption.m_byValue1);
+    CHECK(values.addOptionValue2 == addOption.m_byValue2);
+    CHECK(GetItemTooltipValue(values, "addOptionValue1") == static_cast<int>(addOption.m_byValue1));
+    CHECK_FALSE(values.addOptionDuration.empty());
+    CHECK(GetItemTooltipText(values, "addOptionDuration") == values.addOptionDuration);
+}
+
+TEST_CASE("A class condition holds for a hero of that class [data][items][tooltip]")
+{
+    TooltipHeroScope hero;
+    Data::Items::TooltipCondition darkLord;
+    std::string error;
+    REQUIRE(Data::Items::ReadTooltipCondition("class:darkLord", darkLord, error));
+    CHECK(Data::Items::WriteTooltipCondition(darkLord) == "class:darkLord");
+    CHECK_FALSE(Data::Items::ReadTooltipCondition("class:darkLrod", darkLord, error));
+    CHECK(error.find("names no class") != std::string::npos);
+    REQUIRE(Data::Items::ReadTooltipCondition("class:darkLord", darkLord, error));
+
+    const ItemTooltipValues values;
+    const std::vector<Data::Items::TooltipCondition> conditions = {darkLord};
+    ::Hero->Class = CLASS_DARK_LORD;
+    CHECK(AreTooltipConditionsMet(conditions, 0, 0, values));
+    ::Hero->Class = CLASS_WIZARD;
+    CHECK_FALSE(AreTooltipConditionsMet(conditions, 0, 0, values));
+    // A Lord Emperor is a Dark Lord too.
+    ::Hero->Class = CLASS_LORDEMPEROR;
+    CHECK(AreTooltipConditionsMet(conditions, 0, 0, values));
+}

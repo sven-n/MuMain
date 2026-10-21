@@ -264,10 +264,6 @@
     <value>Rate ng depensa: %d</value>
     <comment>legacy_id=67,2045</comment>
   </data>
-  <data name="Number of items: %d" xml:space="preserve">
-    <value>Bilang ng mga item: %d</value>
-    <comment>legacy_id=69</comment>
-  </data>
   <data name="Life: %d" xml:space="preserve">
     <value>Buhay: %d</value>
     <comment>legacy_id=70</comment>
@@ -455,10 +451,6 @@
   <data name="Moon Cookie" xml:space="preserve">
     <value>Moon Cookie</value>
     <comment>legacy_id=118</comment>
-  </data>
-  <data name="You can register by giving it to the NPC" xml:space="preserve">
-    <value>Maaari kang magparehistro sa pamamagitan ng pagbibigay nito sa NPC</value>
-    <comment>legacy_id=119</comment>
   </data>
   <data name="Key Function" xml:space="preserve">
     <value>Pangunahing Pag-andar</value>
@@ -3365,17 +3357,9 @@
     <value>Maaari mong ihulog ang singsing kapag naabot mo ang antas na %d.</value>
     <comment>legacy_id=923</comment>
   </data>
-  <data name="Can be dropped after level %d" xml:space="preserve">
-    <value>Maaaring i-drop pagkatapos ng level %d</value>
-    <comment>legacy_id=924</comment>
-  </data>
   <data name="Ring of Wizard" xml:space="preserve">
     <value>Singsing ng Wizard</value>
     <comment>legacy_id=925</comment>
-  </data>
-  <data name="Cannot Repair" xml:space="preserve">
-    <value>Hindi Maaayos</value>
-    <comment>legacy_id=926</comment>
   </data>
   <data name="Close (%s)" xml:space="preserve">
     <value>Isara (%s)</value>
@@ -7933,21 +7917,9 @@
     <value>Araw</value>
     <comment>legacy_id=2252,2298</comment>
   </data>
-  <data name="Experience rate is increased %d%%" xml:space="preserve">
-    <value>Tumaas ang rate ng karanasan %d%%</value>
-    <comment>legacy_id=2253</comment>
-  </data>
-  <data name="Item drop rate is increased %d%%" xml:space="preserve">
-    <value>Ang rate ng pagbaba ng item ay tumaas %d%%</value>
-    <comment>legacy_id=2254</comment>
-  </data>
   <data name="Unable to gain experience rate" xml:space="preserve">
     <value>Hindi makuha ang rate ng karanasan</value>
     <comment>legacy_id=2255</comment>
-  </data>
-  <data name="Enables entrance into %s." xml:space="preserve">
-    <value>Pinapagana ang pagpasok sa %s.</value>
-    <comment>legacy_id=2259</comment>
   </data>
   <data name="usable %dtimes" xml:space="preserve">
     <value>magagamit nang %d beses</value>
@@ -7984,10 +7956,6 @@
   <data name="You have achieve %s item." xml:space="preserve">
     <value>Nakamit mo ang %s item.</value>
     <comment>legacy_id=2268</comment>
-  </data>
-  <data name="You will be assigned to a stage according to your level." xml:space="preserve">
-    <value>Itatalaga ka sa isang yugto ayon sa iyong antas.</value>
-    <comment>legacy_id=2270</comment>
   </data>
   <data name="Display general items." xml:space="preserve">
     <value>Ipakita ang mga pangkalahatang item.</value>
@@ -8096,10 +8064,6 @@
   <data name="Second" xml:space="preserve">
     <value>Pangalawa</value>
     <comment>legacy_id=2301</comment>
-  </data>
-  <data name="Available" xml:space="preserve">
-    <value>Available</value>
-    <comment>legacy_id=2302</comment>
   </data>
   <data name="Preparing." xml:space="preserve">
     <value>Naghahanda.</value>
@@ -8661,42 +8625,6 @@
     <value>8 Master Master</value>
     <comment>legacy_id=2464</comment>
   </data>
-  <data name="Restores HP by 100%% immediately." xml:space="preserve">
-    <value>Ibinabalik ang HP nang 100%% i kaagad.</value>
-    <comment>legacy_id=2500</comment>
-  </data>
-  <data name="Restores Mana by 100%% immediately." xml:space="preserve">
-    <value>Ibinabalik ang Mana ng 100%% i kaagad.</value>
-    <comment>legacy_id=2501</comment>
-  </data>
-  <data name="You may continue to use the strengthener power." xml:space="preserve">
-    <value>Maaari mong patuloy na gamitin ang lakas ng pampalakas.</value>
-    <comment>legacy_id=2502</comment>
-  </data>
-  <data name="Increases Attack Speed by %d" xml:space="preserve">
-    <value>Pinapataas ng %d ang Bilis ng Pag-atake</value>
-    <comment>legacy_id=2503</comment>
-  </data>
-  <data name="Increases Defense by %d" xml:space="preserve">
-    <value>Pinapataas ang Depensa ng %d</value>
-    <comment>legacy_id=2504</comment>
-  </data>
-  <data name="Increases Attack Power by %d" xml:space="preserve">
-    <value>Pinapataas ng %d ang Attack Power</value>
-    <comment>legacy_id=2505</comment>
-  </data>
-  <data name="Increases Wizardry by %d" xml:space="preserve">
-    <value>Pinapataas ang Wizardry ng %d</value>
-    <comment>legacy_id=2506</comment>
-  </data>
-  <data name="Increases HP by %d" xml:space="preserve">
-    <value>Tumataas ang HP ng %d</value>
-    <comment>legacy_id=2507</comment>
-  </data>
-  <data name="Increases Mana by %d" xml:space="preserve">
-    <value>Pinapataas ang Mana ng %d</value>
-    <comment>legacy_id=2508</comment>
-  </data>
   <data name="Resets the status." xml:space="preserve">
     <value>Nire-reset ang katayuan.</value>
     <comment>legacy_id=2510</comment>
@@ -8704,34 +8632,6 @@
   <data name="Reset point: %d" xml:space="preserve">
     <value>I-reset ang punto: %d</value>
     <comment>legacy_id=2511</comment>
-  </data>
-  <data name="Strength increment +%d" xml:space="preserve">
-    <value>Pagtaas ng lakas +%d</value>
-    <comment>legacy_id=2512</comment>
-  </data>
-  <data name="Quickness increment +%d" xml:space="preserve">
-    <value>Pagtaas ng bilis +%d</value>
-    <comment>legacy_id=2513</comment>
-  </data>
-  <data name="stamina increment +%d" xml:space="preserve">
-    <value>pagtaas ng tibay +%d</value>
-    <comment>legacy_id=2514</comment>
-  </data>
-  <data name="Energy increment +%d" xml:space="preserve">
-    <value>Pagtaas ng enerhiya +%d</value>
-    <comment>legacy_id=2515</comment>
-  </data>
-  <data name="Control increment +%d" xml:space="preserve">
-    <value>Kontrolin ang pagtaas +%d</value>
-    <comment>legacy_id=2516</comment>
-  </data>
-  <data name="Status for the set period" xml:space="preserve">
-    <value>Katayuan para sa itinakdang panahon</value>
-    <comment>legacy_id=2517</comment>
-  </data>
-  <data name="There's an increase effect to it." xml:space="preserve">
-    <value>Mayroong pagtaas ng epekto dito.</value>
-    <comment>legacy_id=2518</comment>
   </data>
   <data name="Reduction point: %d" xml:space="preserve">
     <value>Puntos ng pagbabawas: %d</value>
@@ -8781,17 +8681,9 @@
     <value>Ang item na ito ay hindi mabibili.</value>
     <comment>legacy_id=2531</comment>
   </data>
-  <data name="Attack power increment +40" xml:space="preserve">
-    <value>Pagtaas ng lakas ng pag-atake +40</value>
-    <comment>legacy_id=2532</comment>
-  </data>
   <data name="Duration period: %s" xml:space="preserve">
     <value>Tagal ng tagal: %s</value>
     <comment>legacy_id=2533</comment>
-  </data>
-  <data name="Collect Cherry Blossoms and take it to the spirit for item compensation." xml:space="preserve">
-    <value>Kolektahin ang Cherry Blossoms at dalhin ito sa espiritu para sa kabayaran sa item.</value>
-    <comment>legacy_id=2534</comment>
   </data>
   <data name="You'll be compensated for the Cherry Blossoms branches you bring back." xml:space="preserve">
     <value>Mababayaran ka para sa mga sanga ng Cherry Blossoms na ibinalik mo.</value>
@@ -8817,18 +8709,6 @@
     <value>Cherry Blossoms sanga produksyon</value>
     <comment>legacy_id=2545</comment>
   </data>
-  <data name="700 Maximum Mana increment" xml:space="preserve">
-    <value>700 Maximum Mana increment</value>
-    <comment>legacy_id=2549</comment>
-  </data>
-  <data name="700 Maximum Life increment" xml:space="preserve">
-    <value>700 Maximum Life increment</value>
-    <comment>legacy_id=2550</comment>
-  </data>
-  <data name="Restores HP by 65%% immediately." xml:space="preserve">
-    <value>Ibinabalik ang HP nang 65%% i kaagad.</value>
-    <comment>legacy_id=2559</comment>
-  </data>
   <data name="Cherry Blossoms branches assembly" xml:space="preserve">
     <value>Pagpupulong ng mga sanga ng Cherry Blossoms</value>
     <comment>legacy_id=2560</comment>
@@ -8853,37 +8733,9 @@
     <value>255 Golden Cherry Blossom Branch</value>
     <comment>legacy_id=2565</comment>
   </data>
-  <data name="Master Level EXP cannot be achieved during the item usage." xml:space="preserve">
-    <value>Ang Master Level EXP ay hindi makakamit sa panahon ng paggamit ng item.</value>
-    <comment>legacy_id=2566</comment>
-  </data>
-  <data name="Automatic Life Recover increment %d%%" xml:space="preserve">
-    <value>Ang Awtomatikong Life Recover na pagtaas %d%%</value>
-    <comment>legacy_id=2569</comment>
-  </data>
-  <data name="EXP achievement and the automatic life recovery rate increases." xml:space="preserve">
-    <value>EXP achievement at ang awtomatikong pagtaas ng rate ng pagbawi sa buhay.</value>
-    <comment>legacy_id=2570</comment>
-  </data>
-  <data name="Automatic Mana recovery increment in %d%% rate" xml:space="preserve">
-    <value>Awtomatikong pagtaas ng Mana recovery sa %d%% rate</value>
-    <comment>legacy_id=2571</comment>
-  </data>
-  <data name="Item achievement and the automatic Mana recovery increases onward." xml:space="preserve">
-    <value>Ang pagkamit ng item at ang awtomatikong pagbawi ng Mana ay tumataas.</value>
-    <comment>legacy_id=2572</comment>
-  </data>
   <data name="Maximum Mana +50" xml:space="preserve">
     <value>Pinakamataas na Mana +50</value>
     <comment>legacy_id=2579</comment>
-  </data>
-  <data name="Increases Critical Damage by 20%%" xml:space="preserve">
-    <value>Pinapataas ng 20%% ang Kritikal na Pinsala</value>
-    <comment>legacy_id=2580</comment>
-  </data>
-  <data name="Increses Excellent Damage by 20%%" xml:space="preserve">
-    <value>Pinapataas ng 20%% ang Napakahusay na Pinsala</value>
-    <comment>legacy_id=2581</comment>
   </data>
   <data name="Carrier" xml:space="preserve">
     <value>Tagapagdala</value>
@@ -9245,54 +9097,6 @@
     <value>Masyadong maraming tao sa colossum.</value>
     <comment>legacy_id=2707</comment>
   </data>
-  <data name="item/skill/luck/option will be randomly added." xml:space="preserve">
-    <value>item/kasanayan/swerte/opsyon ay random na idadagdag.</value>
-    <comment>legacy_id=2709</comment>
-  </data>
-  <data name="Increases your luck to create wing of your wish." xml:space="preserve">
-    <value>Pinapataas ang iyong kapalaran upang lumikha ng pakpak ng iyong nais.</value>
-    <comment>legacy_id=2717</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Satan." xml:space="preserve">
-    <value>Pinapataas ang iyong kapalaran upang lumikha ng Wings of Satan.</value>
-    <comment>legacy_id=2718</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Dragon." xml:space="preserve">
-    <value>Pinapataas ang iyong suwerte upang lumikha ng Wings of Dragon.</value>
-    <comment>legacy_id=2719</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Heaven." xml:space="preserve">
-    <value>Pinapataas ang iyong kapalaran upang lumikha ng Wings of Heaven.</value>
-    <comment>legacy_id=2720</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Soul." xml:space="preserve">
-    <value>Pinapataas ang iyong suwerte upang lumikha ng Wings of Soul.</value>
-    <comment>legacy_id=2721</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Elf." xml:space="preserve">
-    <value>Pinapataas ang iyong suwerte upang lumikha ng Wings of Elf.</value>
-    <comment>legacy_id=2722</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Spirits." xml:space="preserve">
-    <value>Pinapataas ang iyong suwerte upang lumikha ng Wings of Spirits.</value>
-    <comment>legacy_id=2723</comment>
-  </data>
-  <data name="Increases your luck to create Wing of Curse." xml:space="preserve">
-    <value>Pinapataas ang iyong suwerte upang lumikha ng Wing of Curse.</value>
-    <comment>legacy_id=2724</comment>
-  </data>
-  <data name="Increases your luck to create Wing of Despair." xml:space="preserve">
-    <value>Pinapataas ang iyong kapalaran upang lumikha ng Wing of Despair.</value>
-    <comment>legacy_id=2725</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Darkness." xml:space="preserve">
-    <value>Pinapataas ang iyong suwerte upang lumikha ng Wings of Darkness.</value>
-    <comment>legacy_id=2726</comment>
-  </data>
-  <data name="Increases your luck to create Cape of Emperor." xml:space="preserve">
-    <value>Pinapataas ang iyong kapalaran upang lumikha ng Cape of Emperor.</value>
-    <comment>legacy_id=2727</comment>
-  </data>
   <data name="Only increases Master level exp." xml:space="preserve">
     <value>Pinapataas lang ang Master level exp.</value>
     <comment>legacy_id=2728</comment>
@@ -9300,50 +9104,6 @@
   <data name="Select to move." xml:space="preserve">
     <value>Piliin upang ilipat.</value>
     <comment>legacy_id=2731</comment>
-  </data>
-  <data name="Talisman of Wings of Satan" xml:space="preserve">
-    <value>Talisman of Wings of Satanas</value>
-    <comment>legacy_id=2732</comment>
-  </data>
-  <data name="Talisman of Wings of Heaven" xml:space="preserve">
-    <value>Talisman of Wings of Heaven</value>
-    <comment>legacy_id=2733</comment>
-  </data>
-  <data name="Talisman of Wings of Elf" xml:space="preserve">
-    <value>Talisman ng Wings of Elf</value>
-    <comment>legacy_id=2734</comment>
-  </data>
-  <data name="Talisman of Wing of Curse" xml:space="preserve">
-    <value>Talisman ng Wing of Curse</value>
-    <comment>legacy_id=2735</comment>
-  </data>
-  <data name="Talisman of Cape of Emperor" xml:space="preserve">
-    <value>Talisman ng Cape of Emperor</value>
-    <comment>legacy_id=2736</comment>
-  </data>
-  <data name="Talisman of Wings of Dragon" xml:space="preserve">
-    <value>Talisman ng Wings of Dragon</value>
-    <comment>legacy_id=2737</comment>
-  </data>
-  <data name="Talisman of Wings of Soul" xml:space="preserve">
-    <value>Talisman ng Wings of Soul</value>
-    <comment>legacy_id=2738</comment>
-  </data>
-  <data name="Talisman of Wings of Spirits" xml:space="preserve">
-    <value>Talisman of Wings of Spirits</value>
-    <comment>legacy_id=2739</comment>
-  </data>
-  <data name="Talisman of Wing of Despair" xml:space="preserve">
-    <value>Talisman of Wing of Despair</value>
-    <comment>legacy_id=2740</comment>
-  </data>
-  <data name="Talisman of Wings of Darkness" xml:space="preserve">
-    <value>Talisman of Wings of Darkness</value>
-    <comment>legacy_id=2741</comment>
-  </data>
-  <data name="Attack rate and defense rate increase." xml:space="preserve">
-    <value>Attack rate at defense rate increase.</value>
-    <comment>legacy_id=2742</comment>
   </data>
   <data name="Transform into Panda." xml:space="preserve">
     <value>Transform sa Panda.</value>
@@ -9441,45 +9201,17 @@
     <value>Utos ni Gaion</value>
     <comment>legacy_id=2783</comment>
   </data>
-  <data name="It contains Gaion's plans for the destruction of the empire" xml:space="preserve">
-    <value>Naglalaman ito ng mga plano ni Gaion para sa pagkawasak ng imperyo</value>
-    <comment>legacy_id=2784</comment>
-  </data>
-  <data name="and orders for the Empire Guardians." xml:space="preserve">
-    <value>at mga order para sa Empire Guardians.</value>
-    <comment>legacy_id=2785</comment>
-  </data>
-  <data name="You may enter the Fortress of Empire Guardians." xml:space="preserve">
-    <value>Maaari kang pumasok sa Fortress of Empire Guardians.</value>
-    <comment>legacy_id=2786</comment>
-  </data>
   <data name="Suspicious Scrap of Paper" xml:space="preserve">
     <value>Kahina-hinalang Scrap of Paper</value>
     <comment>legacy_id=2787</comment>
-  </data>
-  <data name="It's a worn piece of paper containing incomprehensible text." xml:space="preserve">
-    <value>Isa itong pagod na papel na naglalaman ng hindi maintindihang teksto.</value>
-    <comment>legacy_id=2788</comment>
   </data>
   <data name="No. %d Secromicon Fragment" xml:space="preserve">
     <value>Hindi. %d Secromicon Fragment</value>
     <comment>legacy_id=2789</comment>
   </data>
-  <data name="It's part of a Complete Secromicon." xml:space="preserve">
-    <value>Ito ay bahagi ng isang Kumpletong Secromicon.</value>
-    <comment>legacy_id=2790</comment>
-  </data>
   <data name="Complete Secromicon" xml:space="preserve">
     <value>Kumpletuhin ang Secromicon</value>
     <comment>legacy_id=2791</comment>
-  </data>
-  <data name="Indestructible Metal Secromicon" xml:space="preserve">
-    <value>Hindi Masisirang Metal Secromicon</value>
-    <comment>legacy_id=2792</comment>
-  </data>
-  <data name="Contains information about Grand Wizard Etramu Lenos' research." xml:space="preserve">
-    <value>Naglalaman ng impormasyon tungkol sa pananaliksik ni Grand Wizard Etramu Lenos.</value>
-    <comment>legacy_id=2793</comment>
   </data>
   <data name="Jerint the Assistant" xml:space="preserve">
     <value>Jerint ang Assistant</value>
@@ -10501,14 +10233,6 @@
     <value>Ang impormasyon ay hindi tama.</value>
     <comment>legacy_id=3113</comment>
   </data>
-  <data name="Dark Lord use only." xml:space="preserve">
-    <value>Dark Lord gamitin lang.</value>
-    <comment>legacy_id=3115</comment>
-  </data>
-  <data name="You can enter to Gold Channel." xml:space="preserve">
-    <value>Maaari kang pumasok sa Gold Channel.</value>
-    <comment>legacy_id=3116</comment>
-  </data>
   <data name="TheGameClientIsLoadedOnly" xml:space="preserve">
     <value>Ang kliyente ng laro ay na-load lamang sa pamamagitan ng opisyal na Website. Ang pagsasara ng application mangyaring subukang muli.</value>
     <comment>legacy_id=3117</comment>
@@ -10548,10 +10272,6 @@
   <data name="Item Drop Rate increase +%d%%" xml:space="preserve">
     <value>Pagtaas ng Item Drop Rate +%d%%</value>
     <comment>legacy_id=3126</comment>
-  </data>
-  <data name="7 Days until Expiration" xml:space="preserve">
-    <value>7 Araw bago ang Expiration</value>
-    <comment>legacy_id=3127</comment>
   </data>
   <data name="You cannot purchase this item more than once." xml:space="preserve">
     <value>Hindi mo mabibili ang item na ito nang higit sa isang beses.</value>
@@ -10740,10 +10460,6 @@
   <data name="Expired Item" xml:space="preserve">
     <value>Nag-expire na Item</value>
     <comment>legacy_id=3266</comment>
-  </data>
-  <data name="Restores SD by 65%% immediately." xml:space="preserve">
-    <value>Ibinabalik kaagad ang SD nang 65%% i.</value>
-    <comment>legacy_id=3267</comment>
   </data>
   <data name="Click the item to see the quest information again." xml:space="preserve">
     <value>I-click ang item upang makita muli ang impormasyon sa paghahanap.</value>

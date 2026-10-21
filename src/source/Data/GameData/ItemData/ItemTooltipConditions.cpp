@@ -3,6 +3,7 @@
 #include "ItemTooltipConditions.h"
 #include "ItemDescriptionPlaceholders.h"
 #include "ItemEnumNames.h"
+#include "ItemJsonFormat.h"
 
 #include <algorithm>
 #include <array>
@@ -14,6 +15,7 @@ namespace
 {
 constexpr std::string_view Negation = "!";
 constexpr std::string_view TagPrefix = "tag:";
+constexpr std::string_view ClassPrefix = "class:";
 
 struct ComparisonName
 {
@@ -93,6 +95,23 @@ bool ReadTooltipCondition(std::string_view text, TooltipCondition& condition, st
         }
         return true;
     }
+    if (name.starts_with(ClassPrefix))
+    {
+        name.remove_prefix(ClassPrefix.size());
+        condition.kind = TooltipCondition::Kind::Class;
+        condition.name = name;
+        const std::span<const char* const> classes = GetClassKeys();
+        const auto found = std::find(classes.begin(), classes.end(), name);
+        if (found == classes.end())
+        {
+            error = "\"" + std::string(text) +
+                    "\" names no class: a class is written as in \"classRequirements\" "
+                    "(darkWizard, darkKnight, fairyElf, magicGladiator, darkLord, summoner, rageFighter)";
+            return false;
+        }
+        condition.number = static_cast<int>(found - classes.begin());
+        return true;
+    }
     const size_t nameEnd =
         std::find_if(name.begin(), name.end(), [](char c) { return !std::isalnum(static_cast<unsigned char>(c)); }) -
         name.begin();
@@ -143,6 +162,10 @@ std::string WriteTooltipCondition(const TooltipCondition& condition)
     {
         const char* tag = FindEnumName(condition.tag);
         return text + std::string(TagPrefix) + (tag != nullptr ? tag : "");
+    }
+    if (condition.kind == TooltipCondition::Kind::Class)
+    {
+        return text + std::string(ClassPrefix) + condition.name;
     }
     text += condition.name;
     for (const ComparisonName& entry : Comparisons)

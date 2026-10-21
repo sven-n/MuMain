@@ -5,6 +5,7 @@
 #include <array>
 #include <optional>
 #include <span>
+#include <string>
 #include <string_view>
 
 // The values the item tooltip's stat lines show for an item and the hero, each computed as RenderItemInfo always has:
@@ -61,6 +62,11 @@ struct ItemTooltipValues
     bool hasDurability = false;
     // A timed item (one that expires).
     bool timed = false;
+    // The item's add option (the potions', scrolls' and seals' effects of ItemAddOption): its two values, and how long
+    // it lasts as the tooltip writes it ("1 Hour").
+    int addOptionValue1 = 0;
+    int addOptionValue2 = 0;
+    std::string addOptionDuration;
 };
 
 // The values of `item` for the hero as he is (CharacterAttribute).
@@ -69,6 +75,9 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item);
 // The value of a built-in placeholder (ItemDescriptionPlaceholders' names, without {level}), or nothing for another
 // name.
 std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, std::string_view name);
+
+// The value of a built-in placeholder that is a text ({addOptionDuration}), or nothing for another name.
+std::optional<std::string> GetItemTooltipText(const ItemTooltipValues& values, std::string_view name);
 
 // The state of that name (Data::Items::GetTooltipStates); false for another name.
 bool GetItemTooltipState(const ItemTooltipValues& values, std::string_view name);
@@ -79,6 +88,11 @@ bool GetItemTooltipState(const ItemTooltipValues& values, std::string_view name)
 bool AreTooltipConditionsMet(std::span<const Data::Items::TooltipCondition> conditions, int type, int level,
                              const ItemTooltipValues& values);
 
-// The color of a layout line: that of its first color rule whose conditions hold, else its color.
+// The color of a tooltip line: that of its first color rule whose conditions hold, else `color`.
+Data::Items::ItemTextColor GetTooltipColor(std::span<const Data::Items::TooltipColorRule> rules,
+                                           Data::Items::ItemTextColor color, int type, int level,
+                                           const ItemTooltipValues& values);
+
+// The color of a layout line (GetTooltipColor of its rules and color).
 Data::Items::ItemTextColor GetTooltipLineColor(const Data::Items::TooltipLayoutLine& line, int type, int level,
                                                const ItemTooltipValues& values);
