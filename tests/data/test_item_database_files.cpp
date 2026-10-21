@@ -2034,6 +2034,68 @@ TEST_CASE("An item tool's edit is stored when its form stops being drawn [editor
     CHECK(stored == 7);
 }
 
+// The arrow of a header closes its section on mouse down, before ImGui reports
+// the field in it left; the closed section does not draw the field to report
+// it. SetNextItemOpen(false) closes it as the arrow does.
+TEST_CASE("An item tool's edit is stored when its section is closed while it is typed [editor][items]")
+{
+    TestImGuiContext context;
+    int stored = 0;
+    int storedTimes = 0;
+    MuEditor::Items::ItemEditDraft<int> draft([&](int) { return std::optional<int>(stored); },
+                                              [&](const std::string&, const int& value)
+                                              {
+                                                  stored = value;
+                                                  ++storedTimes;
+                                              });
+    const auto drawForm = [&](bool sectionOpen, bool typeDigit)
+    {
+        if (typeDigit)
+        {
+            ImGui::GetIO().AddInputCharacter('7');
+        }
+        ImGui::NewFrame();
+        ImGui::Begin("Form");
+        int* value = draft.Begin(0, 0);
+        REQUIRE(value != nullptr);
+        ImGui::SetNextItemOpen(sectionOpen);
+        if (ImGui::CollapsingHeader("Section"))
+        {
+            if (ImGui::GetFrameCount() == 1)
+            {
+                ImGui::SetKeyboardFocusHere();
+            }
+            ImGui::InputInt("Value", value);
+            draft.AfterField("Value");
+        }
+        draft.End();
+        ImGui::End();
+        ImGui::Render();
+    };
+    drawForm(true, false);
+    drawForm(true, false);
+    drawForm(true, true);
+    REQUIRE(storedTimes == 0);
+
+    drawForm(false, false);
+    CHECK(storedTimes == 1);
+    CHECK(stored == 7);
+    SUBCASE("the section stays closed")
+    {
+        for (int frame = 0; frame < 3; ++frame)
+        {
+            drawForm(false, false);
+        }
+        drawForm(true, false);
+    }
+    SUBCASE("the section opens while ImGui still reports the field as left")
+    {
+        drawForm(true, false);
+    }
+    // Stored once.
+    CHECK(storedTimes == 1);
+}
+
 TEST_CASE("The save warns about an item name in a language the game has no texts for [data][items][editor]")
 {
     TemporaryClientFolder folder;

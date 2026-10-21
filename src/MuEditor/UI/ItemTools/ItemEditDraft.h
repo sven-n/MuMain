@@ -18,7 +18,8 @@ namespace MuEditor::Items
 // into), it follows the selected item and the data.
 // A selection that changes while a field is edited first stores that edit,
 // to the item it belongs to; so does a form that was not drawn for a frame
-// (its window hidden, the editor closed) while a field was being edited.
+// (its window hidden, the editor closed) or a field that was not drawn (its
+// section closed) while it was being edited.
 template <typename TValue> class ItemEditDraft
 {
 public:
@@ -26,8 +27,8 @@ public:
     // no model).
     using Load = std::function<std::optional<TValue>(int itemType)>;
     // Stores the values under the undo label. It also gets an edit stored
-    // without its field being left (the form hidden, the selection changed),
-    // so the form's checks of a field belong here: it stores nothing for an
+    // without its field being left (the form hidden, the selection changed,
+    // the field's section closed), so the form's checks of a field belong here: it stores nothing for an
     // edit it refuses, and the draft takes the item back as stored.
     using Store = std::function<void(const std::string& label, const TValue& value)>;
 
@@ -122,6 +123,14 @@ public:
     // Call after the form.
     void End()
     {
+        // The field being edited was not drawn: a click on the arrow of its
+        // section's header closes the section on mouse down, before ImGui
+        // reports the field left, and the closed section does not draw it to
+        // report it. Its edit is stored as when it is left.
+        if (m_active && !m_anyActive && m_changed)
+        {
+            StoreNow(m_activeLabel);
+        }
         m_active = m_anyActive;
         m_lastEndFrame = ImGui::GetFrameCount();
     }
