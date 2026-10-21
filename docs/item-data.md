@@ -81,7 +81,7 @@ read as the English name only; saving writes the object form.
 | Field | Meaning |
 |---|---|
 | `tags` | Categories the game code asks for, e.g. `["mount", "flying"]`; see [Tags](#tags) |
-| `description` | Lines the tooltip shows for the item, after its stats, e.g. the Jewel of Bless's "It is used to increase your item level up to 6". The lines the tooltip code computes from the item (the wings' damage and absorption, the Guardian Angel and the Imp, the Town Portal scroll's delay) are written after the description. A text can have [placeholders](#description-placeholders). Each line is `{"text": ..., "color": ...}`: `text` is written like `name` (a plain English text, or the texts by language), an empty text (`{"text": ""}`) is a blank line, a long line wraps at about the width of the original tooltips' widest lines, and `\n` in a text breaks the line there. `color` is one of the tooltip colors: `white` (left out), `blue`, `red`, `yellow`, `green`, `darkRed`, `purple`, `darkBlue`, `darkYellow`, `greenBlue`, `gray`, `redPurple`, `violet`, `orange`. A client-only field; the bmd import keeps it |
+| `description` | Lines the tooltip shows for the item, after its stats, e.g. the Jewel of Bless's "It is used to increase your item level up to 6". The Town Portal scroll's delay and a few other lines are still written by the tooltip code, after the description. A text can have [placeholders](#description-placeholders). Each line is `{"text": ..., "color": ...}`: `text` is written like `name` (a plain English text, or the texts by language), an empty text (`{"text": ""}`) is a blank line, a long line wraps at about the width of the original tooltips' widest lines, and `\n` in a text breaks the line there. `color` is one of the tooltip colors: `white` (left out), `blue`, `red`, `yellow`, `green`, `darkRed`, `purple`, `darkBlue`, `darkYellow`, `greenBlue`, `gray`, `redPurple`, `violet`, `orange`. A client-only field; the bmd import keeps it |
 | `width`, `height` | Size in inventory slots |
 | `slot` | Equipment slot: `mainHand`, `offHand`, `helm`, `armor`, `pants`, `gloves`, `boots`, `wings`, `pet`, `pendant`, `ring`. Left out = not equippable |
 | `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, defense per level, damage increase, absorption) depend on it; excellent second and third tier wings get no extra durability, and the chaos mix knows a wing's tier from it |
@@ -118,6 +118,10 @@ is one of:
 - a **level bonus table** of [`Stats/ItemStats.json`](#item-stats-by-level),
   by its name: the table's value at the item's + level (`damageIncreaseWeapons`
   is 3 at +1 and 66 at +15). A new table is a new placeholder.
+  The wings, capes and pets show their damage increase and absorption this
+  way: `"Increase {wingDamageIncrease1st}% of Damage"` over the table
+  `wingDamageIncrease1st` (`{"values": 12, "perLevel": 2}`, 12 + 2 per level).
+  Such tables are only for descriptions: no stat profile names them.
 
 **Errors** (when the item data loads, in the save checks and in Import from
 bmd):
@@ -348,7 +352,8 @@ a `table` the file does not have; a term that is neither an object nor
 formula that is neither an object nor `"base"`; a `basis` other than
 `"levelRequirement"`; a caption that is neither a text nor texts by
 language; and `profiles` that are not a list of objects.
-**Warnings:** unknown fields, a table no stat uses, and a caption without
+**Warnings:** unknown fields, a table that neither a stat nor a
+[description placeholder](#description-placeholders) uses, and a caption without
 English. An item whose `statProfile` the file does not have is an error, and
 a profile no item names is a warning.
 

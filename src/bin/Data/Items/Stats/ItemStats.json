@@ -3,6 +3,30 @@
   "dropLevelBonus": {"excellent": 25, "ancient": 30},
   "tables": [
     {
+      "name": "capeDamageAbsorb3rd",
+      "caption": {"en": "Damage Absorption in % (3rd Capes)"},
+      "values": 24,
+      "perLevel": 2
+    },
+    {
+      "name": "capeDamageIncrease",
+      "caption": {"en": "Damage Increase in % (Capes of Fighter and Lord, Small Capes)"},
+      "values": 20,
+      "perLevel": 2
+    },
+    {
+      "name": "capeOfFighterDamageAbsorb",
+      "caption": {"en": "Damage Absorption in % (Cape of Fighter)"},
+      "values": 10,
+      "perLevel": 2
+    },
+    {
+      "name": "capeOfLordDamageAbsorb",
+      "caption": {"en": "Damage Absorption in % (Cape of Lord)"},
+      "values": 10,
+      "perLevel": 1
+    },
+    {
       "name": "damageIncreaseWeapons",
       "caption": {"en": "Damage Increase (Weapons)"},
       "values": [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 31, 36, 42, 49, 57, 66]
@@ -46,6 +70,48 @@
       "name": "magicPowerIncrease",
       "caption": {"en": "Magic Power Increase"},
       "values": [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 31, 36, 42, 49, 57, 66]
+    },
+    {
+      "name": "smallCapeDamageAbsorb",
+      "caption": {"en": "Damage Absorption in % (Small Capes)"},
+      "values": 20,
+      "perLevel": 2
+    },
+    {
+      "name": "wingDamageAbsorb1st",
+      "caption": {"en": "Damage Absorption in % (1st and Small Wings)"},
+      "values": 12,
+      "perLevel": 2
+    },
+    {
+      "name": "wingDamageAbsorb2nd",
+      "caption": {"en": "Damage Absorption in % (2nd Wings)"},
+      "values": 25,
+      "perLevel": 2
+    },
+    {
+      "name": "wingDamageAbsorb3rd",
+      "caption": {"en": "Damage Absorption in % (3rd Wings)"},
+      "values": 39,
+      "perLevel": 2
+    },
+    {
+      "name": "wingDamageIncrease1st",
+      "caption": {"en": "Damage Increase in % (1st and Small Wings)"},
+      "values": 12,
+      "perLevel": 2
+    },
+    {
+      "name": "wingDamageIncrease2nd",
+      "caption": {"en": "Damage Increase in % (2nd Wings)"},
+      "values": 32,
+      "perLevel": 1
+    },
+    {
+      "name": "wingDamageIncrease3rd",
+      "caption": {"en": "Damage Increase in % (3rd Wings and Capes)"},
+      "values": 39,
+      "perLevel": 2
     }
   ],
   "default": {

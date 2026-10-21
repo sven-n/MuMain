@@ -117,7 +117,6 @@ private:
                           WrittenRequirementSection& section);
     void ReadRequirementFormula(const OrderedJson& json, const std::string& field,
                                 std::optional<RequirementFormula>& formula);
-    void WarnAboutUnusedTables(const ItemStatFile& file);
 
     const std::string& m_source;
     std::vector<ItemDataIssue>& m_issues;
@@ -161,7 +160,6 @@ void ItemStatsReader::Read(const OrderedJson& root, ItemStatFile& file)
     ReadTables(root, file);
     ReadDefaults(root, file);
     ReadProfiles(root, file);
-    WarnAboutUnusedTables(file);
 }
 
 void ItemStatsReader::ReadDropLevelBonus(const OrderedJson& root, ItemStatFile& file)
@@ -555,34 +553,6 @@ void ItemStatsReader::ReadRequirementFormula(const OrderedJson& json, const std:
         }
     }
     formula = values;
-}
-
-void ItemStatsReader::WarnAboutUnusedTables(const ItemStatFile& file)
-{
-    std::set<std::string, std::less<>> used;
-    const auto collect = [&used](const std::array<WrittenStatSection, ItemStatCount>& sections)
-    {
-        for (const WrittenStatSection& section : sections)
-        {
-            if (section.table)
-            {
-                used.insert(*section.table);
-            }
-        }
-    };
-    collect(file.defaults);
-    for (const WrittenStatProfile& profile : file.profiles)
-    {
-        collect(profile.stats);
-    }
-    for (const LevelBonusTable& table : file.tables)
-    {
-        if (!used.contains(table.name))
-        {
-            AddIssue(ItemDataIssueSeverity::Warning, std::string(Keys::Tables) + "." + table.name,
-                     "no stat uses this table");
-        }
-    }
 }
 
 // ---------------------------------------------------------------- writing

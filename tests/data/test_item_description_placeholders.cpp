@@ -55,10 +55,12 @@ std::vector<ItemDataIssue> CheckSyntax(const ItemDefinition& item)
     return issues;
 }
 
+// The issues of the item, without the stat file's.
 std::vector<ItemDataIssue> CheckNames(const ItemDefinition& item)
 {
     std::vector<ItemDataIssue> issues;
     ValidateDescriptionPlaceholders(std::vector<ItemDefinition>{item}, MakeProfiles(), "ItemStats.json", issues);
+    std::erase_if(issues, [](const ItemDataIssue& issue) { return issue.group == ItemDataIssue::NoItem; });
     return issues;
 }
 } // namespace
@@ -154,6 +156,15 @@ TEST_CASE("A description placeholder is a built-in value or a stat file table [d
     CHECK(unknown.front().message ==
           "has the unknown placeholder {durability}; a placeholder is a built-in value ({level}) or a table of "
           "ItemStats.json");
+
+    // A table no stat uses is for descriptions: a warning when none names it either.
+    std::vector<ItemDataIssue> unused;
+    ValidateDescriptionPlaceholders(std::vector<ItemDefinition>{MakeJewel("No placeholders")}, MakeProfiles(),
+                                    "ItemStats.json", unused);
+    REQUIRE(unused.size() == 1);
+    CHECK(unused.front().severity == ItemDataIssueSeverity::Warning);
+    CHECK(unused.front().source == "ItemStats.json");
+    CHECK(unused.front().field == "tables.wingDamage");
 
     // A deleted item (no name) is not checked.
     ItemDefinition deleted = MakeJewel("{durability}");

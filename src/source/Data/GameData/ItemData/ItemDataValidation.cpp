@@ -354,6 +354,7 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
     std::vector<std::string> known(GetBuiltInPlaceholders().begin(), GetBuiltInPlaceholders().end());
     const std::vector<std::string> tables = profiles.GetTableNames();
     known.insert(known.end(), tables.begin(), tables.end());
+    std::set<std::string, std::less<>> named;
     for (const ItemDefinition& definition : items)
     {
         if (!definition.Exists())
@@ -364,6 +365,7 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
         {
             // The translations have the English text's placeholders (ValidateItems checks that).
             const PlaceholderScan scan = ScanPlaceholders(definition.description[line].text.GetNeutral());
+            named.insert(scan.names.begin(), scan.names.end());
             std::set<std::string> reported;
             for (const std::string& name : scan.names)
             {
@@ -380,6 +382,14 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
                                   DescriptionTextField(line, LocalizedString::NeutralLocale),
                                   "has the unknown placeholder {" + name + "}; " + hint});
             }
+        }
+    }
+    for (const std::string& table : tables)
+    {
+        if (!profiles.IsTableUsedByStats(table) && !named.contains(table))
+        {
+            issues.push_back({ItemDataIssueSeverity::Warning, statFile, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
+                              "tables." + table, "neither a stat nor an item description uses this table"});
         }
     }
 }

@@ -14,6 +14,7 @@
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
 #include "Data/GameData/ItemData/ItemNames.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
@@ -215,6 +216,87 @@ TEST_CASE("The shipped descriptions' placeholders are built-in values or stat fi
         INFO(issue.ToString());
         CHECK(false);
     }
+}
+
+// The lines the tooltip code wrote for the wings, capes and pets before they were their descriptions, as it printed
+// them in English: the old formulas, to compare the data with.
+std::vector<std::string> OldWingAndPetLines(int group, int number, int level)
+{
+    const auto increase = [](int value) { return "Increase " + std::to_string(value) + "% of Damage"; };
+    const auto absorb = [](int value) { return "Absorb " + std::to_string(value) + "% of Damage"; };
+    const std::string speed = "Increase speed";
+    const auto in = [&](std::initializer_list<int> numbers)
+    { return std::find(numbers.begin(), numbers.end(), number) != numbers.end(); };
+    if (group == 12 && in({0, 1, 2, 41, 131, 132, 133, 134}))
+    {
+        return {increase(12 + level * 2), absorb(12 + level * 2), speed};
+    }
+    if (group == 12 && in({3, 4, 5, 6, 42}))
+    {
+        return {increase(32 + level), absorb(25 + level * 2), speed};
+    }
+    if (group == 12 && in({36, 37, 38, 39, 43}))
+    {
+        return {increase(39 + level * 2), absorb(39 + level * 2), speed};
+    }
+    if (group == 12 && in({40, 50}))
+    {
+        return {increase(39 + level * 2), absorb(24 + level * 2), speed};
+    }
+    if (group == 12 && in({130, 135}))
+    {
+        return {increase(20 + level * 2), absorb(20 + level * 2), speed};
+    }
+    if (group == 12 && number == 49)
+    {
+        return {increase(20 + level * 2), absorb(10 + level * 2)};
+    }
+    if (group == 13 && number == 30)
+    {
+        return {increase(20 + level * 2), absorb(10 + level)};
+    }
+    if (group == 13 && number == 3)
+    {
+        return {increase(15), absorb(10)};
+    }
+    if (group == 13 && number == 0)
+    {
+        return {absorb(20), "Max HP +50 increased"};
+    }
+    if (group == 13 && number == 1)
+    {
+        return {"Increase 30% of attacking & Wizardry Dmg"};
+    }
+    return {};
+}
+
+TEST_CASE("The wings', capes' and pets' tooltip values come from their data as from the old formulas [data][items]")
+{
+    const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
+    const ItemStatsLoadResult stats = LoadItemStatsFile(DataDirectory / "Items" / "Stats" / ItemStatsFileName);
+    REQUIRE_FALSE(HasErrors(stats.issues));
+    const ItemStatProfiles profiles(stats.file);
+    int compared = 0;
+    for (const ItemDefinition& item : result.items)
+    {
+        if (OldWingAndPetLines(item.group, item.number, 0).empty())
+        {
+            continue;
+        }
+        for (int level = 0; level < ItemLevelCount; ++level)
+        {
+            INFO(item.group << "/" << item.number << " +" << level);
+            std::vector<std::string> lines;
+            for (const ItemDescriptionLine& line : item.description)
+            {
+                lines.push_back(FillPlaceholders(line.text.GetNeutral(), level, profiles));
+            }
+            CHECK(lines == OldWingAndPetLines(item.group, item.number, level));
+            ++compared;
+        }
+    }
+    // 24 wings and capes, Horn of Dinorant, Guardian Angel and Imp, at each level.
+    CHECK(compared == 27 * ItemLevelCount);
 }
 
 // The texts the tooltip code wrote for these items are their descriptions now, in every UI language.
