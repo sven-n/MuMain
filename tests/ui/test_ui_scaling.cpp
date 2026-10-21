@@ -22,7 +22,6 @@
 #include "UI/Social/SocialWorkspace.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "UI/Social/SocialWindowBase.h"
-#include "UI/HUD/UIMapName.h"
 #include "UI/Dialogs/ChatCommandWindow.h"
 #include "UI/HUD/CommandWindow.h"
 #include "UI/Inventory/InventoryCtrl.h"
@@ -454,14 +453,6 @@ TEST_CASE("managed windows run in the manager's units and leave the pointer alon
     MouseY = previousMouseY;
     g_fWindowMouseX = previousWindowMouseX;
     g_fWindowMouseY = previousWindowMouseY;
-}
-
-TEST_CASE("map splash centers in physical window pixels [ui][scaling]")
-{
-    CHECK(UI::MapName::ImageWidth == doctest::Approx(166.0f));
-    CHECK(UI::MapName::ImageHeight == doctest::Approx(90.0f));
-    CHECK(UI::MapName::PhysicalLeft(1280) == doctest::Approx(557.0f));
-    CHECK(UI::MapName::PhysicalLeft(1920) == doctest::Approx(877.0f));
 }
 
 TEST_CASE("world viewport spans the window while docks remain at the rounded HUD top [ui][scaling]")

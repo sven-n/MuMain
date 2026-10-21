@@ -3,24 +3,6 @@
 #include "UI/HUD/MapNameRmlModel.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 
-namespace Rml
-{
-class ElementDocument;
-}
-
-typedef std::map<int, std::wstring> ImgPathMap;
-
-namespace UI::MapName
-{
-    inline constexpr float ImageWidth = 166.0f;
-    inline constexpr float ImageHeight = 90.0f;
-
-    inline float PhysicalLeft(int windowWidth)
-    {
-        return (static_cast<float>(windowWidth) - ImageWidth) * 0.5f;
-    }
-}
-
 class CUIMapName
 {
     enum SHOW_STATE
@@ -32,8 +14,6 @@ class CUIMapName
     };
 
 protected:
-    ImgPathMap m_mapImgPath;
-    short m_nOldWorld;
     SHOW_STATE m_eState;
     DWORD m_dwOldTime;
     DWORD m_dwDeltaTickSum;
@@ -52,14 +32,12 @@ public:
     void Render();
 
 protected:
-    void InitImgPathMap();
-
-    // The banner in RmlUi (map_name.rml): behind every window, as the original drew it before
-    // them. Render() fills it; the native drawing is the fallback
-    // when RmlUi is not available.
+    // RmlUi owns this presentation, including recovery after a missing document.
+    // There is no native/per-map bitmap fallback.
     void BuildRmlUi();
     void SyncView();
-    void RenderNative();
+    void RefreshName();
+    static void OnLocaleChanged(void* context) noexcept;
 
     void BindRmlModel(Rml::DataModelConstructor& c, UI::MapName::MapNameRmlModel& model);
     UI::RmlBridge::ThemedView<UI::MapName::MapNameRmlModel> m_RmlView{"map_name",

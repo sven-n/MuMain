@@ -42,7 +42,7 @@ set(MU_TEST_CASE_TIMEOUT_SECONDS 120)
 # Registers each TEST_CASE inside the binary as its own CTest entry, so
 # failures point at the specific case in CI logs.
 function(mu_add_test)
-    cmake_parse_arguments(MAT "" "NAME" "SOURCES;LINK_LIBS" ${ARGN})
+    cmake_parse_arguments(MAT "" "NAME" "SOURCES;LINK_LIBS;PROPERTIES" ${ARGN})
     add_executable(${MAT_NAME} ${MAT_SOURCES})
     target_link_libraries(${MAT_NAME} PRIVATE mu_test_main ${MAT_LINK_LIBS})
     target_include_directories(${MAT_NAME} PRIVATE
@@ -52,7 +52,7 @@ function(mu_add_test)
     if(MSVC)
         target_compile_options(${MAT_NAME} PRIVATE /utf-8)
     endif()
-    doctest_discover_tests(${MAT_NAME} PROPERTIES TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS})
+    doctest_discover_tests(${MAT_NAME} PROPERTIES TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS} ${MAT_PROPERTIES})
 endfunction()
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)

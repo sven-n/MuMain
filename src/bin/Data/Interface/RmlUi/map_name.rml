@@ -5,12 +5,13 @@
 	<link type="text/rcss" href="map_name.rcss"/>
 </head>
 <body data-model="map_name">
-	<!-- The map name image and optional Gens strife banner fade together. The theme owns their
-	     size and position; the background context keeps them behind other windows. The game loads
-	     each art padded to a power of two; the rects crop it to the art, as the original did. -->
+	<!-- Shared decoration, plain localized text and the optional Gens warning fade together.
+	     This HUD stays behind game windows and lets pointer input pass through. -->
 	<div id="banner" class="center-x" data-style-opacity="alpha">
-		<img id="strife" data-if="strife" data-attr-src="strife_source" rect="0 0 166 28"/>
-		<img id="name" data-attr-src="image_source" rect="0 0 166 90"/>
+		<img id="strife" class="center-x" data-if="strife" data-attr-src="strife_source" rect="0 0 166 28"/>
+		<div id="ornament_top"/>
+		<div id="name"><span id="name_text">{{map_name}}</span></div>
+		<div id="ornament_bottom"/>
 	</div>
 </body>
 </rml>

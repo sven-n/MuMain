@@ -137,6 +137,15 @@ and inheritance cycles make a theme unavailable for selection.
 5. Relaunch (if you edited `config.ini`). No rebuild needed either way — this is a pure data/config
    change.
 
+## Map-name banner
+
+The world-entry banner shows localized map names in both maintained themes, with a shared
+ornament already included in the client data. Adding a map name no longer needs an individual
+name image. Unrecognized maps display “Unknown map”. The Gens warning still appears on eligible
+battle maps. Edit a theme's `map_name.rcss` to change the font, color, width, wrapping, placement
+or decoration; long names grow the space between the ornaments. A custom theme can replace the
+shared ornament with its own locally supplied artwork without changing the map names.
+
 ## Switching themes without relaunching
 
 `$theme <name>` (typed into the chat box, handled locally by `CmuConsoleDebug::CheckCommand` —
