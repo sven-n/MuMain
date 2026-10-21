@@ -15,12 +15,14 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"
+#include "GameLogic/Skills/SkillManager.h"
 #include "Network/Server/SocketSystem.h"
 #include "Core/Utilities/_GlobalFunctions.h"
 #include "UI/Core/UIManager.h"
 #include "UI/Inventory/UIJewelHarmony.h"
 #include "UI/Inventory/ItemMng.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -336,6 +338,27 @@ TEST_CASE("An item's add option values come from its add option [data][items][to
     CHECK(GetItemTooltipValue(values, "addOptionValue1") == static_cast<int>(addOption.m_byValue1));
     CHECK_FALSE(values.addOptionDuration.empty());
     CHECK(GetItemTooltipText(values, "addOptionDuration") == values.addOptionDuration);
+}
+
+TEST_CASE("The Weapon of Archangel shows its reward weapon's skill mana from the skill data [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeNewDarkWizard(hero.Hero());
+    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+
+    int mana = 0;
+    gSkillManager.GetSkillInformation(AT_SKILL_CYCLONE, 1, nullptr, &mana, nullptr);
+    REQUIRE(mana > 0);
+    ItemCreationParams params = FullItemParameters(13, 19);
+    params.Level = 1;
+    const std::vector<ItemTooltipLine> lines = TooltipOfParameters(params);
+    SetItemTooltipTextMeasure(nullptr);
+    const std::wstring expected = L"Cyclone Cutting skill (Mana:" + std::to_wstring(mana) + L")";
+    CHECK(std::any_of(lines.begin(), lines.end(), [&](const ItemTooltipLine& line) { return line.text == expected; }));
 }
 
 TEST_CASE("A class condition holds for a hero of that class [data][items][tooltip]")

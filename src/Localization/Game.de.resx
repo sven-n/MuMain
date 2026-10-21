@@ -156,18 +156,6 @@
     <value>Devil Square</value>
     <comment>legacy_id=39,1145</comment>
   </data>
-  <data name="One-Handed Damage" xml:space="preserve">
-    <value>Einhandschaden</value>
-    <comment>legacy_id=40</comment>
-  </data>
-  <data name="Two-Handed Damage" xml:space="preserve">
-    <value>Zweihandschaden</value>
-    <comment>legacy_id=41</comment>
-  </data>
-  <data name="Wizardry Damage" xml:space="preserve">
-    <value>Zaubereischaden</value>
-    <comment>legacy_id=42</comment>
-  </data>
   <data name="Very Slow" xml:space="preserve">
     <value>Sehr langsam</value>
     <comment>legacy_id=43</comment>
@@ -295,10 +283,6 @@
   <data name="Increases moving speed" xml:space="preserve">
     <value>Erhöht die Bewegungsgeschwindigkeit</value>
     <comment>legacy_id=78</comment>
-  </data>
-  <data name="Wizardry Dmg %d%% rise" xml:space="preserve">
-    <value>Zaubereischaden +%d%%</value>
-    <comment>legacy_id=79</comment>
   </data>
   <data name="Defend skill (Mana:%d)" xml:space="preserve">
     <value>Fähigkeit Defend (Mana:%d)</value>

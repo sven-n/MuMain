@@ -123,6 +123,22 @@ std::optional<int> GetPlaceholderValue(std::string_view name, int level, const I
     return std::nullopt;
 }
 
+std::optional<int> ReadSkillManaValue(std::string_view name)
+{
+    if (!name.starts_with(SkillManaPrefix))
+    {
+        return std::nullopt;
+    }
+    const std::string_view number = name.substr(SkillManaPrefix.size());
+    if (number.empty() || number.size() > 4 ||
+        !std::all_of(number.begin(), number.end(), [](char c) { return c >= '0' && c <= '9'; }))
+    {
+        return std::nullopt;
+    }
+    const int skill = std::stoi(std::string(number));
+    return skill < MAX_SKILLS ? std::optional<int>(skill) : std::nullopt;
+}
+
 bool IsBuiltInPlaceholder(std::string_view name)
 {
     return std::find(BuiltIns.begin(), BuiltIns.end(), name) != BuiltIns.end();

@@ -22,6 +22,12 @@ inline constexpr std::string_view LevelPlaceholder = "level";
 std::span<const std::string_view> GetBuiltInPlaceholders();
 bool IsBuiltInPlaceholder(std::string_view name);
 
+// A value a line's "values" can name besides the built-in values and tables: "skillMana:<skill>", the mana a skill
+// costs (its number, as an item's "skill" writes it). The skill's number, or nothing for another name or a number that
+// is no skill's.
+inline constexpr std::string_view SkillManaPrefix = "skillMana:";
+std::optional<int> ReadSkillManaValue(std::string_view name);
+
 // The placeholders of a text in their order (a repeated one each time), or the first problem of its braces.
 struct PlaceholderScan
 {

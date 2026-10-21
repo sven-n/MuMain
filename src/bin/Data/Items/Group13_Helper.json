@@ -900,6 +900,477 @@
         "pt": "Arma absoluta do arcanjo"
       },
       "tags": ["valuable", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@questItem"
+        },
+        {
+          "text": {
+            "en": "Reward received when returned to the Archangel",
+            "de": "Belohnung bei Rückgabe an den Erzengel",
+            "es": "Recompensa recibida al regresar al Arcángel",
+            "id": "Hadiah diterima saat dikembalikan ke Malaikat Agung",
+            "ja": "大天使に持っていくと報奨がもらえます。",
+            "pl": "Nagroda otrzymana po powrocie do Archanioła",
+            "pt": "Recompensa recebida quando devolvida ao Arcanjo",
+            "ru": "Награда, полученная при возвращении в Архангельск",
+            "tl": "Natanggap ang gantimpala nang ibalik sa Arkanghel",
+            "uk": "Нагорода отримана після повернення до Архангела",
+            "zh-TW": "回到大天使身邊時獲得的獎勵"
+          },
+          "color": "darkRed"
+        },
+        {
+          "text": ""
+        },
+        {
+          "text": {
+            "en": "Wizardry Damage: 107 ~ 110",
+            "de": "Zaubereischaden: 107 ~ 110",
+            "es": "Daño mágico: 107 ~ 110",
+            "id": "Kerusakan Sihir: 107 ~ 110",
+            "ja": "魔法の攻撃力: 107 ~ 110",
+            "pl": "Czarodziejskie obrażenia: 107 ~ 110",
+            "pt": "Dano de Magia: 107 ~ 110",
+            "ru": "Волшебный урон: 107 ~ 110",
+            "tl": "Pinsala ng Wizardry: 107 ~ 110",
+            "uk": "Пошкодження магії: 107 ~ 110",
+            "zh-TW": "魔法傷害: 107 ~ 110"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "One-Handed Damage: 110 ~ 120",
+            "de": "Einhandschaden: 110 ~ 120",
+            "es": "Daño con una mano: 110 ~ 120",
+            "id": "Kerusakan Satu Tangan: 110 ~ 120",
+            "ja": "片手の攻撃力: 110 ~ 120",
+            "pl": "Obrażenia jedną ręką: 110 ~ 120",
+            "pt": "Dano com uma mão: 110 ~ 120",
+            "ru": "Урон одной рукой: 110 ~ 120",
+            "tl": "Pinsala ng Isang Kamay: 110 ~ 120",
+            "uk": "Пошкодження однією рукою: 110 ~ 120",
+            "zh-TW": "單手傷害: 110 ~ 120"
+          },
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Two-Handed Damage: 120 ~ 140",
+            "de": "Zweihandschaden: 120 ~ 140",
+            "es": "Daño a dos manos: 120 ~ 140",
+            "id": "Kerusakan Dua Tangan: 120 ~ 140",
+            "ja": "両手の攻撃力: 120 ~ 140",
+            "pl": "Obrażenia dwuręczne: 120 ~ 140",
+            "pt": "Dano com duas mãos: 120 ~ 140",
+            "ru": "Двуручный урон: 120 ~ 140",
+            "tl": "Pinsala ng Dalawang Kamay: 120 ~ 140",
+            "uk": "Пошкодження двома руками: 120 ~ 140",
+            "zh-TW": "雙手傷害: 120 ~ 140"
+          },
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "Attack speed: 20",
+            "de": "Angriffsgeschwindigkeit: 20",
+            "es": "Velocidad de ataque: 20",
+            "id": "Kecepatan serangan: 20",
+            "ja": "攻撃速度: 20",
+            "pl": "Szybkość ataku: 20",
+            "pt": "Velocidade de ataque: 20",
+            "ru": "Скорость атаки: 20",
+            "tl": "Bilis ng pag-atake: 20",
+            "uk": "Швидкість атаки: 20",
+            "zh-TW": "攻擊速度：20"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Attack speed: 35",
+            "de": "Angriffsgeschwindigkeit: 35",
+            "es": "Velocidad de ataque: 35",
+            "id": "Kecepatan serangan: 35",
+            "ja": "攻撃速度: 35",
+            "pl": "Szybkość ataku: 35",
+            "pt": "Velocidade de ataque: 35",
+            "ru": "Скорость атаки: 35",
+            "tl": "Bilis ng pag-atake: 35",
+            "uk": "Швидкість атаки: 35",
+            "zh-TW": "攻擊速度：35"
+          },
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Attack speed: 35",
+            "de": "Angriffsgeschwindigkeit: 35",
+            "es": "Velocidad de ataque: 35",
+            "id": "Kecepatan serangan: 35",
+            "ja": "攻撃速度: 35",
+            "pl": "Szybkość ataku: 35",
+            "pt": "Velocidade de ataque: 35",
+            "ru": "Скорость атаки: 35",
+            "tl": "Bilis ng pag-atake: 35",
+            "uk": "Швидкість атаки: 35",
+            "zh-TW": "攻擊速度：35"
+          },
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "Strength Requirement: 132",
+            "de": "Benötigte Stärke: 132",
+            "es": "Requisito de fuerza: 132",
+            "id": "Persyaratan Kekuatan: 132",
+            "ja": "使用可能な力: 132",
+            "pl": "Wymagana siła: 132",
+            "pt": "Requisito de força: 132",
+            "ru": "Требование к прочности: 132",
+            "tl": "Kinakailangan ng Lakas: 132",
+            "uk": "Вимоги до міцності: 132",
+            "zh-TW": "強度要求：132"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Strength Requirement: 381",
+            "de": "Benötigte Stärke: 381",
+            "es": "Requisito de fuerza: 381",
+            "id": "Persyaratan Kekuatan: 381",
+            "ja": "使用可能な力: 381",
+            "pl": "Wymagana siła: 381",
+            "pt": "Requisito de força: 381",
+            "ru": "Требование к прочности: 381",
+            "tl": "Kinakailangan ng Lakas: 381",
+            "uk": "Вимоги до міцності: 381",
+            "zh-TW": "強度要求：381"
+          },
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Strength Requirement: 140",
+            "de": "Benötigte Stärke: 140",
+            "es": "Requisito de fuerza: 140",
+            "id": "Persyaratan Kekuatan: 140",
+            "ja": "使用可能な力: 140",
+            "pl": "Wymagana siła: 140",
+            "pt": "Requisito de força: 140",
+            "ru": "Требование к прочности: 140",
+            "tl": "Kinakailangan ng Lakas: 140",
+            "uk": "Вимоги до міцності: 140",
+            "zh-TW": "強度要求：140"
+          },
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "Agility Requirement: 32",
+            "de": "Benötigte Beweglichkeit: 32",
+            "es": "Requisito de agilidad: 32",
+            "id": "Persyaratan Ketangkasan: 32",
+            "ja": "使用可能な敏捷性: 32",
+            "pl": "Wymagania dotyczące zwinności: 32",
+            "pt": "Requisito de agilidade: 32",
+            "ru": "Требование к ловкости: 32",
+            "tl": "Kinakailangan sa Liksi: 32",
+            "uk": "Вимоги до спритності: 32",
+            "zh-TW": "敏捷性需求：32"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Agility Requirement: 149",
+            "de": "Benötigte Beweglichkeit: 149",
+            "es": "Requisito de agilidad: 149",
+            "id": "Persyaratan Ketangkasan: 149",
+            "ja": "使用可能な敏捷性: 149",
+            "pl": "Wymagania dotyczące zwinności: 149",
+            "pt": "Requisito de agilidade: 149",
+            "ru": "Требование к ловкости: 149",
+            "tl": "Kinakailangan sa Liksi: 149",
+            "uk": "Вимоги до спритності: 149",
+            "zh-TW": "敏捷性需求：149"
+          },
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Agility Requirement: 350",
+            "de": "Benötigte Beweglichkeit: 350",
+            "es": "Requisito de agilidad: 350",
+            "id": "Persyaratan Ketangkasan: 350",
+            "ja": "使用可能な敏捷性: 350",
+            "pl": "Wymagania dotyczące zwinności: 350",
+            "pt": "Requisito de agilidade: 350",
+            "ru": "Требование к ловкости: 350",
+            "tl": "Kinakailangan sa Liksi: 350",
+            "uk": "Вимоги до спритності: 350",
+            "zh-TW": "敏捷性需求：350"
+          },
+          "levels": [2, 2]
+        },
+        {
+          "text": ""
+        },
+        {
+          "text": {
+            "en": "Luck (success rate of Jewel of Soul +25%)",
+            "de": "Glück (Erfolgsrate von Juwel der Seele +25%)",
+            "es": "Suerte (tasa de éxito de Jewel of Soul +25%)",
+            "id": "Keberuntungan (tingkat keberhasilan Permata Jiwa +25%)",
+            "ja": "幸運 (霊魂の宝石　成功確率 +25%)",
+            "pl": "Szczęście (wskaźnik sukcesu Jewel of Soul +25%)",
+            "pt": "Sorte (taxa de sucesso da Jóia da Alma +25%)",
+            "ru": "Удача (шанс успеха «Драгоценности души» +25%)",
+            "tl": "Suwerte (rate ng tagumpay ng Jewel of Soul +25%)",
+            "uk": "Удача (швидкість успіху Jewel of Soul +25%)",
+            "zh-TW": "幸運（靈魂寶石成功率+25%）"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Luck (critical damage rate +5%)",
+            "de": "Glück (kritische Schadensrate +5%)",
+            "es": "Suerte (tasa de daño crítico +5%)",
+            "id": "Keberuntungan (tingkat kerusakan kritis +5%)",
+            "ja": "幸運 (クリティカルダメージ確率 +5%)",
+            "pl": "Szczęście (wskaźnik obrażeń krytycznych +5%)",
+            "pt": "Sorte (taxa de dano crítico +5%)",
+            "ru": "Удача (коэффициент критического урона +5%)",
+            "tl": "Swerte (critical damage rate +5%)",
+            "uk": "Удача (рівень критичної шкоди +5%)",
+            "zh-TW": "幸運（暴擊傷害率+5%）"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Wizardry Dmg 53% rise",
+            "de": "Zaubereischaden +53%",
+            "es": "Wizardry Dmg 53% aumento",
+            "id": "Sihir Dmg 53% meningkat",
+            "ja": "魔力 53%プラス",
+            "pl": "Zwiększenie obrażeń Wizardry 53%.",
+            "pt": "Magia Dmg 53% aumento",
+            "ru": "Волшебный урон 53% увеличивается",
+            "tl": "Wizardry Dmg 53% tumaas",
+            "uk": "Wizardry Dmg 53% зростання",
+            "zh-TW": "魔法傷害 53% 上漲"
+          },
+          "color": "blue",
+          "bold": true,
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Increase Wizardry Dmg +level/20",
+            "de": "Erhöht Zaubereischaden +Level/20",
+            "es": "Aumentar el daño de hechicería +nivel/20",
+            "id": "Meningkatkan Dmg Sihir +level/20",
+            "ja": "魔力増加 +レベル/20",
+            "pl": "Zwiększa obrażenia czarodziejstwa +poziom/20",
+            "pt": "Aumenta Dano de Magia +nível/20",
+            "ru": "Увеличение магического урона +уровень/20",
+            "tl": "Taasan ang Wizardry Dmg +level/20",
+            "uk": "Збільшити Wizardry Dmg +level/20",
+            "zh-TW": "增加魔法傷害+level/20"
+          },
+          "color": "blue",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Increase Wizardry Dmg +2%",
+            "de": "Erhöht Zaubereischaden +2%",
+            "es": "Aumentar daño mágico +2%",
+            "id": "Meningkatkan Dmg Sihir +2%",
+            "ja": "魔力増加 +2%",
+            "pl": "Zwiększ obrażenia czarodziejstwa +2%",
+            "pt": "Aumenta Dano de Magia +2%",
+            "ru": "Увеличение урона от волшебства +2%",
+            "tl": "Dagdagan ang Wizardry Dmg +2%",
+            "uk": "Збільшити шкоду магії +2%",
+            "zh-TW": "增加魔法傷害+2%"
+          },
+          "color": "blue",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Cyclone Cutting skill (Mana:{mana})",
+            "de": "Fähigkeit Cyclone Cutting (Mana:{mana})",
+            "es": "Habilidad de corte de ciclón (Mana:{mana})",
+            "id": "Keterampilan Pemotongan Topan (Mana: {mana})",
+            "ja": "真空斬りスキル (マナ:{mana})",
+            "pl": "Umiejętność Cięcia Cyklonu (Mana: {mana})",
+            "pt": "Habilidade de Corte Ciclone (Mana:{mana})",
+            "ru": "Навык циклонной резки (Мана:{mana})",
+            "tl": "Kasanayan sa Cyclone Cutting (Mana:{mana})",
+            "uk": "Навички Cyclone Cutting (Мана:{mana})",
+            "zh-TW": "旋風切割技能（法力：{mana}）"
+          },
+          "values": {"mana": "skillMana:22"},
+          "color": "blue",
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Increase Damage +level/20",
+            "de": "Erhöht Schaden +Level/20",
+            "es": "Aumentar daño +nivel/20",
+            "id": "Meningkatkan Kerusakan +level/20",
+            "ja": "攻撃力増加 +レベル/20",
+            "pl": "Zwiększa obrażenia + poziom/20",
+            "pt": "Aumentar Dano +nível/20",
+            "ru": "Увеличение урона +уровень/20",
+            "tl": "Taasan ang Damage +level/20",
+            "uk": "Збільшення шкоди + рівень/20",
+            "zh-TW": "傷害增加+level/20"
+          },
+          "color": "blue",
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Increase Damage +2%",
+            "de": "Erhöht Schaden +2%",
+            "es": "Aumentar daño +2%",
+            "id": "Meningkatkan Kerusakan +2%",
+            "ja": "攻撃力増加 +2%",
+            "pl": "Zwiększ obrażenia +2%",
+            "pt": "Aumentar Dano +2%",
+            "ru": "Увеличение урона +2%",
+            "tl": "Palakihin ang Pinsala +2%",
+            "uk": "Збільшення шкоди +2%",
+            "zh-TW": "增加傷害+2%"
+          },
+          "color": "blue",
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Triple Shot skill (Mana:{mana})",
+            "de": "Fähigkeit Triple Shot (Mana:{mana})",
+            "es": "Habilidad Triple Disparo (Mana:{mana})",
+            "id": "Keterampilan Tembakan Tiga Kali (Mana: {mana})",
+            "ja": "乱れ撃ちスキル (マナ:{mana})",
+            "pl": "Umiejętność Potrójnego Strzału (Mana: {mana})",
+            "pt": "Habilidade de Tiro Triplo (Mana:{mana})",
+            "ru": "Навык «Тройной выстрел» (Мана:{mana})",
+            "tl": "Triple Shot skill (Mana:{mana})",
+            "uk": "Навичка «Потрійний постріл» (мана:{mana})",
+            "zh-TW": "三重射擊技能（法力：{mana}）"
+          },
+          "values": {"mana": "skillMana:24"},
+          "color": "blue",
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "Increase Damage +level/20",
+            "de": "Erhöht Schaden +Level/20",
+            "es": "Aumentar daño +nivel/20",
+            "id": "Meningkatkan Kerusakan +level/20",
+            "ja": "攻撃力増加 +レベル/20",
+            "pl": "Zwiększa obrażenia + poziom/20",
+            "pt": "Aumentar Dano +nível/20",
+            "ru": "Увеличение урона +уровень/20",
+            "tl": "Taasan ang Damage +level/20",
+            "uk": "Збільшення шкоди + рівень/20",
+            "zh-TW": "傷害增加+level/20"
+          },
+          "color": "blue",
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "Increase Damage +2%",
+            "de": "Erhöht Schaden +2%",
+            "es": "Aumentar daño +2%",
+            "id": "Meningkatkan Kerusakan +2%",
+            "ja": "攻撃力増加 +2%",
+            "pl": "Zwiększ obrażenia +2%",
+            "pt": "Aumentar Dano +2%",
+            "ru": "Увеличение урона +2%",
+            "tl": "Palakihin ang Pinsala +2%",
+            "uk": "Збільшення шкоди +2%",
+            "zh-TW": "增加傷害+2%"
+          },
+          "color": "blue",
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "Excellent Damage rate +10%",
+            "de": "Exzellente Schadensrate +10%",
+            "es": "Excelente tasa de daño +10%",
+            "id": "Tingkat Kerusakan Luar Biasa +10%",
+            "ja": "エクセレントダメージ確率 +10%",
+            "pl": "Doskonały współczynnik obrażeń +10%",
+            "pt": "Excelente taxa de dano +10%",
+            "ru": "Отличный урон +10%",
+            "tl": "Napakahusay na Damage rate +10%",
+            "uk": "Відмінний рівень шкоди +10%",
+            "zh-TW": "優 破損率+10%"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Increase Attacking(Wizardry)speed +7",
+            "de": "Erhöht Angriffsgeschwindigkeit (Zauberei) +7",
+            "es": "Aumentar la velocidad de ataque (hechicería) +7",
+            "id": "Meningkatkan kecepatan Menyerang (Sihir) +7",
+            "ja": "攻撃(魔法)速度増加 +7",
+            "pl": "Zwiększ prędkość ataku (czarodziejskiego) +7",
+            "pt": "Aumenta a velocidade de ataque (feitiçaria) +7",
+            "ru": "Увеличение скорости атаки (волшебства) +7",
+            "tl": "Dagdagan ang bilis ng Pag-atake(Wizardry) +7",
+            "uk": "Збільшити швидкість атаки (чарівництво) +7",
+            "zh-TW": "增加攻擊（魔法）速度+7"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Increases acquisition rate of Life after hunting monsters +life/8",
+            "de": "Erhöht die Lebensregeneration beim Jagen von Monstern +Leben/8",
+            "es": "Aumenta la tasa de adquisición de vida después de cazar monstruos +vida/8",
+            "id": "Meningkatkan tingkat perolehan Nyawa setelah berburu monster +nyawa/8",
+            "ja": "獲得する生命増加 +生命/8",
+            "pl": "Zwiększa tempo zdobywania życia po upolowaniu potworów +życie/8",
+            "pt": "Aumenta a taxa de aquisição de Vida após caçar monstros +vida/8",
+            "ru": "Увеличивает скорость получения жизни после охоты на монстров +жизнь/8.",
+            "tl": "Pinapataas ang rate ng pagkuha ng Buhay pagkatapos manghuli ng mga halimaw +buhay/8",
+            "uk": "Збільшує швидкість отримання життя після полювання на монстрів + життя/8",
+            "zh-TW": "狩獵怪物後生命獲得率增加+life/8"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Increases acquisition rate of Mana after hunting monsters +Mana/8",
+            "de": "Erhöht die Manaregeneration beim Jagen von Monstern +Mana/8",
+            "es": "Aumenta la tasa de adquisición de Mana después de cazar monstruos +Mana/8",
+            "id": "Meningkatkan tingkat perolehan Mana setelah berburu monster +Mana/8",
+            "ja": "獲得するマナ増加 +マナ/8",
+            "pl": "Zwiększa szybkość zdobywania many po polowaniu na potwory +Mana/8",
+            "pt": "Aumenta a taxa de aquisição de Mana após caçar monstros +Mana/8",
+            "ru": "Увеличивает скорость получения маны после охоты на монстров +Мана/8.",
+            "tl": "Pinapataas ang rate ng pagkuha ng Mana pagkatapos manghuli ng mga halimaw +Mana/8",
+            "uk": "Збільшує швидкість отримання мани після полювання на монстрів +Мана/8",
+            "zh-TW": "狩獵怪物後魔力獲取率增加+魔力/8"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 2,
       "durability": 255,

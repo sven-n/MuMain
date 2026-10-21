@@ -2,6 +2,7 @@
 
 #include "ItemJsonFormat.h"
 #include "ItemEnumNames.h"
+#include "ItemDescriptionPlaceholders.h"
 #include "ItemJsonCommon.h"
 #include "ItemType.h"
 
@@ -561,7 +562,8 @@ void ItemReader::ReadDescriptionValues(const OrderedJson& json, const std::strin
     }
     for (const auto& [placeholder, value] : json.items())
     {
-        if (!Json::IsName(placeholder) || !value.is_string() || !Json::IsName(value.get<std::string>()))
+        if (!Json::IsName(placeholder) || !value.is_string() ||
+            (!Json::IsName(value.get<std::string>()) && !value.get<std::string>().starts_with(SkillManaPrefix)))
         {
             AddIssue(ItemDataIssueSeverity::Error, field + "." + placeholder,
                      "must be a placeholder name and the name of the value it shows, both of letters and digits");

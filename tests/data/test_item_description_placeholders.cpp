@@ -255,3 +255,20 @@ TEST_CASE("A level value is a text without placeholders, or a shared text the to
     CHECK(issues[2].field == "levelValues.stat[3]");
     CHECK(issues[2].message == "has placeholders, which a level value cannot have");
 }
+
+TEST_CASE("A description line can show a skill's mana [data][items]")
+{
+    ItemDefinition weapon = MakeJewel("Cyclone Cutting skill (Mana:{mana})");
+    weapon.description[0].values = {{"mana", "skillMana:22"}};
+    CHECK(CheckNames(weapon).empty());
+    CHECK(ReadSkillManaValue("skillMana:22") == 22);
+    CHECK_FALSE(ReadSkillManaValue("skillMana:").has_value());
+    CHECK_FALSE(ReadSkillManaValue("skillMana:cyclone").has_value());
+
+    // A number that is no skill's.
+    weapon.description[0].values = {{"mana", "skillMana:9999"}};
+    const std::vector<ItemDataIssue> unknown = CheckNames(weapon);
+    REQUIRE(unknown.size() == 1);
+    CHECK(unknown.front().field == "description[0].values.mana");
+    CHECK(unknown.front().message.find("names no skill") != std::string::npos);
+}

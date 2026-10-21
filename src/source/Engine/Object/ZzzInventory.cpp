@@ -1637,6 +1637,12 @@ static std::optional<std::string> TooltipPlaceholderValue(std::string_view name,
             break;
         }
     }
+    if (const std::optional<int> skill = Data::Items::ReadSkillManaValue(name))
+    {
+        int mana = 0;
+        gSkillManager.GetSkillInformation(*skill, 1, nullptr, &mana, nullptr);
+        return std::to_string(mana);
+    }
     if (const Data::Items::ItemLevelValues* levelValues =
             definition != nullptr ? definition->FindLevelValues(name) : nullptr)
     {
@@ -2264,82 +2270,6 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
 
     TextListColor[TextNum] = Color; TextBold[TextNum] = true; TextNum++;
     mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-
-    if (ip->Type == ITEM_WEAPON_OF_ARCHANGEL)
-    {
-        // Set by the + level up to +2 only; from +3 the lines show 0 (they printed uninitialized values).
-        int iMana = 0;
-        int iWeaponSpeed = 0;
-        int iNeedStrength = 0;
-        int iNeedDex = 0;
-
-        TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        mu_swprintf(TextList[TextNum], I18N::Game::QuestItem); TextBold[TextNum] = false; TextNum++;
-
-        TextListColor[TextNum] = TEXT_COLOR_DARKRED;
-        mu_swprintf(TextList[TextNum], I18N::Game::RewardReceivedWhenReturnedToTheArchangel); TextBold[TextNum] = false; TextNum++;
-        mu_swprintf(TextList[TextNum], L"\n"); TextBold[TextNum] = false; TextNum++; SkipNum++;
-
-        switch (Level)
-        {
-        case 0:
-            mu_swprintf(TextList[TextNum], L"%ls: %d ~ %d", I18N::Game::WizardryDamage, 107, 110);  TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-            iWeaponSpeed = 20;
-            iNeedStrength = 132;
-            iNeedDex = 32;
-            break;
-        case 1:
-            mu_swprintf(TextList[TextNum], L"%ls: %d ~ %d", I18N::Game::OneHandedDamage, 110, 120);  TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-            iWeaponSpeed = 35;
-            iNeedStrength = 381;
-            iNeedDex = 149;
-            break;
-        case 2:
-            mu_swprintf(TextList[TextNum], L"%ls: %d ~ %d", I18N::Game::TwoHandedDamage, 120, 140);  TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-            iWeaponSpeed = 35;
-            iNeedStrength = 140;
-            iNeedDex = 350;
-            break;
-        }
-
-        mu_swprintf(TextList[TextNum], I18N::Game::AttackSpeedD, iWeaponSpeed); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::StrengthRequirementD, iNeedStrength); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::AgilityRequirementD, iNeedDex);     TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        mu_swprintf(TextList[TextNum], L"\n"); TextBold[TextNum] = false; TextNum++; SkipNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::LuckSuccessRateOfJewelOfSoul25);     TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::LuckCriticalDamageRate5, 20); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-
-        switch (Level)
-        {
-        case 0:
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::WizardryDmgDRise, 53); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = true; TextNum++;
-            mu_swprintf(TextList[TextNum], I18N::Game::IncreaseWizardryDmgLevel20); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-            mu_swprintf(TextList[TextNum], I18N::Game::IncreaseWizardryDmgD, 2); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-        }
-        break;
-        case 1:
-        {
-            gSkillManager.GetSkillInformation(AT_SKILL_CYCLONE, 1, NULL, &iMana, NULL);
-            mu_swprintf(TextList[TextNum], I18N::Game::CycloneCuttingSkillManaD, iMana); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-            mu_swprintf(TextList[TextNum], I18N::Game::IncreaseDamageLevel20); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-            mu_swprintf(TextList[TextNum], I18N::Game::IncreaseDamageD, 2); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-        }
-        break;
-        case 2:
-        {
-            gSkillManager.GetSkillInformation(AT_SKILL_TRIPLE_SHOT, 1, NULL, &iMana, NULL);
-            mu_swprintf(TextList[TextNum], I18N::Game::TripleShotSkillManaD, iMana); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-            mu_swprintf(TextList[TextNum], I18N::Game::IncreaseDamageLevel20); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-            mu_swprintf(TextList[TextNum], I18N::Game::IncreaseDamageD, 2); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-        }
-        break;
-        }
-        mu_swprintf(TextList[TextNum], I18N::Game::ExcellentDamageRate10); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::IncreaseAttackingWizardrySpeedD, 7); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::IncreasesAcquisitionRateOfLifeAfterHuntingMonstersLife8); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::IncreasesAcquisitionRateOfManaAfterHuntingMonstersMana8); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-    }
 
     // The item cases whose lines need the game (the reset points, the saved revive position, the socket system,
     // the signs still needed); the others' lines are their descriptions.
