@@ -284,6 +284,20 @@ void RenderNote(const char* text)
     ImGui::PopTextWrapPos();
 }
 
+// A small button that is off while the picked entry has unapplied changes,
+// which its change of the stored file would drop.
+bool SmallButtonUnlessUnapplied(const char* label, bool unapplied)
+{
+    ImGui::BeginDisabled(unapplied);
+    const bool clicked = ImGui::SmallButton(label);
+    ImGui::EndDisabled();
+    if (unapplied && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+    {
+        ImGui::SetTooltip("%s", I18N::Editor::ApplyOrRevertTheChangesFirst);
+    }
+    return clicked;
+}
+
 // The items as a list; a click selects one.
 void RenderUsers(const char* id, const std::vector<int>& users)
 {
@@ -410,10 +424,11 @@ void CMuItemFormulasUI::RenderUnused()
             tables.push_back(table.name);
         }
     }
+    const bool unapplied = HasUnappliedChanges();
     if (!profiles.empty())
     {
         RenderNote(I18N::Format(I18N::Editor::NoItemOrRuleUsesTheseProfiles0, {JoinNames(profiles)}).c_str());
-        if (ImGui::SmallButton((std::string(I18N::Editor::RemoveThem) + "##Profiles").c_str()))
+        if (SmallButtonUnlessUnapplied((std::string(I18N::Editor::RemoveThem) + "##Profiles").c_str(), unapplied))
         {
             ItemStatFile file = stored;
             std::erase_if(file.profiles, [&](const WrittenStatProfile& profile)
@@ -424,7 +439,7 @@ void CMuItemFormulasUI::RenderUnused()
     if (!tables.empty())
     {
         RenderNote(I18N::Format(I18N::Editor::NoStatUsesTheseTables0, {JoinNames(tables)}).c_str());
-        if (ImGui::SmallButton((std::string(I18N::Editor::RemoveThem) + "##Tables").c_str()))
+        if (SmallButtonUnlessUnapplied((std::string(I18N::Editor::RemoveThem) + "##Tables").c_str(), unapplied))
         {
             ItemStatFile file = stored;
             std::erase_if(file.tables, [&](const LevelBonusTable& table)
@@ -437,6 +452,7 @@ void CMuItemFormulasUI::RenderUnused()
 void CMuItemFormulasUI::RenderList()
 {
     const ItemStatFile& stored = Stored();
+    const bool unapplied = HasUnappliedChanges();
     const auto row = [this](const std::string& label, const Entry& entry, bool unused)
     {
         if (unused)
@@ -460,7 +476,7 @@ void CMuItemFormulasUI::RenderList()
         {Entry::Kind::Default, {}}, false);
 
     ImGui::SeparatorText(I18N::Editor::Profiles);
-    if (ImGui::SmallButton(I18N::Editor::NewStatProfile))
+    if (SmallButtonUnlessUnapplied(I18N::Editor::NewStatProfile, unapplied))
     {
         OpenNameDialog(NamePurpose::NewProfile, {});
     }
@@ -481,7 +497,7 @@ void CMuItemFormulasUI::RenderList()
     }
 
     ImGui::SeparatorText(I18N::Editor::Tables);
-    if (ImGui::SmallButton(I18N::Editor::NewLevelBonusTable))
+    if (SmallButtonUnlessUnapplied(I18N::Editor::NewLevelBonusTable, unapplied))
     {
         OpenNameDialog(NamePurpose::NewTable, {});
     }
@@ -537,7 +553,7 @@ void CMuItemFormulasUI::RenderPicked()
 void CMuItemFormulasUI::RenderApplyButtons()
 {
     const ItemStatFile& stored = Stored();
-    const bool changed = Compose(stored, m_edit, m_picked) != stored;
+    const bool changed = HasUnappliedChanges();
     ImGui::BeginDisabled(!changed);
     if (ImGui::Button(I18N::Editor::ApplyToTheFormulas))
     {
@@ -562,6 +578,18 @@ void CMuItemFormulasUI::RenderApplyButtons()
         ImGui::TextColored(ErrorColor, "%s", issue.ToString().c_str());
         ImGui::PopTextWrapPos();
     }
+}
+
+bool CMuItemFormulasUI::HasUnappliedChanges() const
+{
+    // Before UpdateEdit in a frame the edit can still be of the entry picked
+    // before.
+    if (m_picked.kind == Entry::Kind::None || m_editOf != m_picked)
+    {
+        return false;
+    }
+    const ItemStatFile& stored = Stored();
+    return Compose(stored, m_edit, m_picked) != stored;
 }
 
 void CMuItemFormulasUI::RenderDropLevelBonus(ItemStatFile& file)
@@ -606,12 +634,14 @@ void CMuItemFormulasUI::RenderProfile(ItemStatFile& file)
     const int rules = m_counts.Rules(profile->name);
     ImGui::TextUnformatted(profile->name.c_str());
     ImGui::SameLine();
-    if (ImGui::SmallButton(I18N::Editor::Rename))
+    // Remove takes the changes along with the profile.
+    const bool unapplied = HasUnappliedChanges();
+    if (SmallButtonUnlessUnapplied(I18N::Editor::Rename, unapplied))
     {
         OpenNameDialog(NamePurpose::RenameProfile, profile->name);
     }
     ImGui::SameLine();
-    if (ImGui::SmallButton(I18N::Editor::Copy))
+    if (SmallButtonUnlessUnapplied(I18N::Editor::Copy, unapplied))
     {
         OpenNameDialog(NamePurpose::CopyProfile, profile->name);
     }
@@ -655,12 +685,13 @@ void CMuItemFormulasUI::RenderTable(ItemStatFile& file)
     const int users = CountTableUsers(Stored(), table->name);
     ImGui::TextUnformatted(table->name.c_str());
     ImGui::SameLine();
-    if (ImGui::SmallButton(I18N::Editor::Rename))
+    const bool unapplied = HasUnappliedChanges();
+    if (SmallButtonUnlessUnapplied(I18N::Editor::Rename, unapplied))
     {
         OpenNameDialog(NamePurpose::RenameTable, table->name);
     }
     ImGui::SameLine();
-    if (ImGui::SmallButton(I18N::Editor::Copy))
+    if (SmallButtonUnlessUnapplied(I18N::Editor::Copy, unapplied))
     {
         OpenNameDialog(NamePurpose::CopyTable, table->name);
     }

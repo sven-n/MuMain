@@ -892,7 +892,9 @@ it: the file is checked first (written and read back, as Save Items does),
 and when the change reaches items (other values, or another profile when a
 profile is renamed) they are listed before it is applied, as for a shared
 model. Every change is one step of the undo history, and Save Items writes
-`Stats/ItemStats.json`.
+`Stats/ItemStats.json`. While the picked entry has changes that are not
+applied, **New stat profile**, **New level bonus table**, **Copy**,
+**Rename** and **Remove them** wait until they are applied or reverted.
 
 - **Drop level bonus**: what excellent and ancient items add to their drop
   level for their requirements and the ancient part of their stats.

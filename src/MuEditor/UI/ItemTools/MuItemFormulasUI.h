@@ -58,6 +58,9 @@ private:
     void RenderRules(Data::Items::ItemStatFile& file);
     void RenderRuleConditions(Data::Items::StatProfileRule& rule);
     void RenderApplyButtons();
+    // The picked entry has changes that are not applied: a change made from
+    // the stored file (New, Copy, Rename, Remove them) would drop them.
+    bool HasUnappliedChanges() const;
     void RenderConfirm();
     void RenderNameDialog();
     void OpenNameDialog(NamePurpose purpose, std::string from);

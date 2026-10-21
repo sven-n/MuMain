@@ -1870,4 +1870,7 @@
   <data name="By the group: {0}" xml:space="preserve">
     <value>By the group: {0}</value>
   </data>
+  <data name="Apply or revert the changes first." xml:space="preserve">
+    <value>Apply or revert the changes first.</value>
+  </data>
 </root>
