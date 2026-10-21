@@ -91,8 +91,9 @@ struct ItemDescriptionLine
     bool operator==(const ItemDescriptionLine& other) const = default;
 };
 
-// The longest description line the tooltip holds (its lines are 100 characters, the terminator included).
-constexpr size_t MaxItemDescriptionLineLength = 99;
+// How wide a description line is drawn before it wraps, in the tooltip's text units: about the widest lines of the
+// original tooltips.
+constexpr int ItemDescriptionWrapWidth = 200;
 
 // What a player may do with an item. See the rule flags in ItemDefinition.
 enum class ItemAction : BYTE

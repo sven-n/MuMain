@@ -285,7 +285,7 @@ TEST_CASE("Item tags, wing tier, potion priority and rule flags are kept through
     CHECK(read.sellable);
 }
 
-TEST_CASE("An item's description is kept through write and read, and checked [data][items]")
+TEST_CASE("An item's description is kept through write and read [data][items]")
 {
     ItemDefinition jewel = MakeKris();
     jewel.group = 14;
@@ -312,15 +312,13 @@ TEST_CASE("An item's description is kept through write and read, and checked [da
     CHECK_FALSE(HasErrors(result.issues));
     CHECK(WriteItemGroupJson(14, result.items) == text);
 
-    std::vector<ItemDataIssue> issues;
-    ValidateItems(std::vector<ItemDefinition>{jewel}, issues);
-    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "description[0]"));
-
-    ItemDefinition tooLong = jewel;
-    tooLong.description[0].text.Set("de", std::string(MaxItemDescriptionLineLength + 1, 'x'));
-    issues.clear();
-    ValidateItems(std::vector<ItemDefinition>{tooLong}, issues);
-    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "description[0]"));
+    // A line break in a text is kept; the tooltip starts a new line there.
+    ItemDefinition twoLines = jewel;
+    twoLines.description = {first};
+    twoLines.description[0].text.Set("en", "It is used to increase\nyour item level up to 6");
+    const ReadResult broken = Read(WriteItemGroupJson(14, std::vector<ItemDefinition>{twoLines}));
+    REQUIRE(broken.items.size() == 1);
+    CHECK(broken.items.front().description == twoLines.description);
 
     const ReadResult badColor = Read(R"({"formatVersion": 1, "group": 14, "items": [
         {"number": 13, "name": "Jewel of Bless", "description": [{"text": "x", "color": "pink"}]}]})");

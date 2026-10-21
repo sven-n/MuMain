@@ -24,12 +24,6 @@ void AddIssue(std::vector<ItemDataIssue>& issues, ItemDataIssueSeverity severity
     issues.push_back({severity, "", definition.group, definition.number, field, message});
 }
 
-void AddIssue(std::vector<ItemDataIssue>& issues, ItemDataIssueSeverity severity, const ItemDefinition& definition,
-              const std::string& message, const std::string& field)
-{
-    issues.push_back({severity, "", definition.group, definition.number, field, message});
-}
-
 bool ContainsSeparator(const std::string& text)
 {
     return text.find(LocalizedString::Separator) != std::string::npos;
@@ -208,28 +202,6 @@ void ValidatePotionPriority(const ItemDefinition& definition, std::vector<ItemDa
                  "potionPriority");
     }
 }
-// A description line longer than the tooltip's lines is cut there.
-void ValidateDescription(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
-{
-    const auto characters = [](const std::string& text)
-    { return static_cast<size_t>(std::count_if(text.begin(), text.end(), [](char c) { return (c & 0xC0) != 0x80; })); };
-    for (size_t index = 0; index < definition.description.size(); ++index)
-    {
-        const LocalizedString& text = definition.description[index].text;
-        bool tooLong = characters(text.GetNeutral()) > MaxItemDescriptionLineLength;
-        for (const auto& [locale, translation] : text.GetTranslations())
-        {
-            tooLong = tooLong || characters(translation) > MaxItemDescriptionLineLength;
-        }
-        if (tooLong)
-        {
-            AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
-                     "has a line longer than " + std::to_string(MaxItemDescriptionLineLength) +
-                         " characters; the tooltip cuts it",
-                     "description[" + std::to_string(index) + "]");
-        }
-    }
-}
 } // namespace
 
 void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIssue>& issues)
@@ -257,7 +229,6 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
         ValidateExcellentBonus(definition, issues);
         ValidateExcellentRaisesLevel(definition, issues);
         ValidateRequirementsByLevel(definition, issues);
-        ValidateDescription(definition, issues);
     }
 }
 

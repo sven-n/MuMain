@@ -41,6 +41,7 @@
 #include "Render/Items/ItemDisplay.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Core/Text/TextLineWrap.h"
 #include "Core/Text/Utf8.h"
 #include "UI/Scaling/UITransform.h"
 #include "GameLogic/Items/ShopRestrictions.h"
@@ -3726,26 +3727,35 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }
     }
-    // The item data's description, line by line in the UI's language.
+    // The item data's description in the UI's language: each line wrapped to the tooltip's width and at its line
+    // breaks, the pieces in the line's color.
     if (const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(ip->Type))
     {
+        g_pRenderText->SetFont(g_hFont);
+        const auto measure = [](const wchar_t* text, size_t length)
+        { return g_pRenderText->MeasureText(text, static_cast<int>(length)).cx; };
         for (const Data::Items::ItemDescriptionLine& line : definition->description)
         {
-            if (TextNum >= static_cast<int>(std::size(TextList)))
-                break;
             if (line.text.IsEmpty())
             {
                 // A blank line, as the tooltip writes its own.
+                if (TextNum >= static_cast<int>(std::size(TextList)))
+                    break;
                 mu_swprintf(TextList[TextNum], L"\n");
                 TextNum++;
                 SkipNum++;
                 continue;
             }
             const std::wstring text = Core::Text::FromUtf8(line.text.Get(g_ItemDatabase.GetDisplayLocale()));
-            mu_swprintf(TextList[TextNum], L"%.99ls", text.c_str());
-            TextListColor[TextNum] = static_cast<int>(line.color);
-            TextBold[TextNum] = false;
-            TextNum++;
+            for (const std::wstring& piece : WrapTextToWidth(text, Data::Items::ItemDescriptionWrapWidth, measure))
+            {
+                if (TextNum >= static_cast<int>(std::size(TextList)))
+                    break;
+                mu_swprintf(TextList[TextNum], L"%.99ls", piece.c_str());
+                TextListColor[TextNum] = static_cast<int>(line.color);
+                TextBold[TextNum] = false;
+                TextNum++;
+            }
         }
     }
     if (ip->Type == ITEM_JEWEL_OF_BLESS)
