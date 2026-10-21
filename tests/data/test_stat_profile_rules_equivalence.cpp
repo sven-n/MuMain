@@ -10,17 +10,22 @@
 #include "doctest.h"
 
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
+#include "Data/GameData/ItemData/ItemAttributeConversion.h"
+#include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
 
+#include <algorithm>
 #include <array>
 #include <filesystem>
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include "stat_profile_rules_old.inl"
 
 using namespace Data::Items;
 using OldStatProfiles::OldDeriveStatProfile;
+using OldStatProfiles::OldFollowStatProfile;
 
 namespace
 {
@@ -143,4 +148,79 @@ TEST_CASE("Phase 6 one-time: the profile rules give the profile the code gave fo
         }
     }
     CHECK(mismatches == 0);
+}
+
+TEST_CASE("Phase 6 one-time: an edited item follows the profile rules as it followed the code [data][items]")
+{
+    const ItemStatProfiles profiles = LoadShippedProfiles();
+    const ItemDataLoadResult items = LoadItemDataDirectory(DataDirectory / "Items");
+    size_t compared = 0;
+    for (const ItemDefinition& shipped : items.items)
+    {
+        CAPTURE(shipped.group);
+        CAPTURE(shipped.number);
+        for (const char* profile : {"", "default", "custom"})
+        {
+            // The item with its shipped profile is the previous item of the second check below.
+            ItemDefinition previous = shipped;
+            previous.statProfile = profile;
+            std::vector<ItemDefinition> updates(5, previous);
+            updates[1].weaponKind = WeaponKind::None;
+            updates[2].slot = ItemSlot::Helm;
+            updates[3].tags = ItemTagSet{};
+            updates[4].group = (previous.group + 1) % MAX_ITEM_TYPE;
+            for (const ItemDefinition& updated : updates)
+            {
+                ++compared;
+                CHECK(DeriveStatProfile(profiles, updated) == OldDeriveStatProfile(updated));
+                CHECK(FollowStatProfile(profiles, &previous, updated) == OldFollowStatProfile(&previous, updated));
+                CHECK(FollowStatProfile(profiles, &shipped, updated) == OldFollowStatProfile(&shipped, updated));
+                CHECK(FollowStatProfile(profiles, nullptr, updated) == OldFollowStatProfile(nullptr, updated));
+            }
+        }
+    }
+    CHECK(compared == 911 * 3 * 5);
+}
+
+TEST_CASE("Phase 6 one-time: the warning about an item without the profile its data gives is the same [data][items]")
+{
+    const ItemStatProfiles profiles = LoadShippedProfiles();
+    const ItemDataLoadResult shipped = LoadItemDataDirectory(DataDirectory / "Items");
+    std::vector<ItemDefinition> cleared = shipped.items;
+    for (ItemDefinition& item : cleared)
+    {
+        item.statProfile.clear();
+    }
+
+    using Warning = std::tuple<int, int, std::string>;
+    const std::vector<ItemDefinition>* const lists[] = {&shipped.items, &cleared};
+    for (const std::vector<ItemDefinition>* items : lists)
+    {
+        std::vector<Warning> expected;
+        for (const ItemDefinition& item : *items)
+        {
+            const std::string derived = OldDeriveStatProfile(item);
+            if (item.statProfile.empty() && !derived.empty())
+            {
+                expected.emplace_back(item.group, item.number,
+                                      "has no stat profile, but its data gives \"" + derived +
+                                          "\" (\"default\" keeps the default)");
+            }
+        }
+        std::vector<ItemDataIssue> issues;
+        ValidateStatProfiles(*items, profiles, "ItemStats.json", issues);
+        std::vector<Warning> actual;
+        for (const ItemDataIssue& issue : issues)
+        {
+            if (issue.field == "statProfile" && issue.severity == ItemDataIssueSeverity::Warning)
+            {
+                actual.emplace_back(issue.group, issue.number, issue.message);
+            }
+        }
+        std::sort(expected.begin(), expected.end());
+        std::sort(actual.begin(), actual.end());
+        CHECK(actual == expected);
+        // Cleared: the 566 items with a profile and the Horn of Fenrir, whose data gives "helper".
+        CHECK(expected.size() == (items == &cleared ? 567 : 0));
+    }
 }

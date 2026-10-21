@@ -28,16 +28,16 @@ constexpr int MaxBase = 65535;
 const Data::Items::ItemStatProfile& FindProfile(const ItemDefinition& item)
 {
     const ItemDefinition* stored = g_ItemDatabase.Find(item.group, item.number);
+    const Data::Items::ItemStatProfiles& profiles = g_ItemDatabase.GetStatProfiles();
     std::string name = item.statProfile;
     if (name.empty())
     {
-        name = Data::Items::DeriveStatProfile(item);
+        name = Data::Items::DeriveStatProfile(profiles, item);
     }
     else if (stored != nullptr && name == stored->statProfile)
     {
-        name = Data::Items::FollowStatProfile(stored, item);
+        name = Data::Items::FollowStatProfile(profiles, stored, item);
     }
-    const Data::Items::ItemStatProfiles& profiles = g_ItemDatabase.GetStatProfiles();
     const int index = profiles.Find(name);
     return profiles.Get(
         index == Data::Items::ItemStatProfiles::UnknownProfile ? Data::Items::ItemStatProfiles::DefaultProfile : index);

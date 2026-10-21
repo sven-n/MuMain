@@ -17,24 +17,12 @@ namespace Data::Items
 {
 struct ItemStatFile;
 
-// The profiles the item data gives an item (DeriveStatProfile); the stat file
-// must have those its items name. Default names the default, which an item file
-// writes for an item that keeps it although its data gives a profile.
+// The one profile name of the formats: "default" names the default, in an item
+// file for an item that keeps it although its data gives a profile, and in a
+// profile rule; no profile may be called so. The other names are data.
 namespace StatProfileNames
 {
 constexpr const char* Default = "default";
-constexpr const char* Weapon = "weapon";
-constexpr const char* Armor = "armor";
-constexpr const char* Shield = "shield";
-constexpr const char* Sceptre = "sceptre";
-constexpr const char* Book = "book";
-constexpr const char* Helper = "helper";
-constexpr const char* Scroll = "scroll";
-constexpr const char* SmallWing = "smallWing";
-constexpr const char* FirstTierWing = "firstTierWing";
-constexpr const char* SecondTierWing = "secondTierWing";
-constexpr const char* SecondTierCape = "secondTierCape";
-constexpr const char* ThirdTierWing = "thirdTierWing";
 } // namespace StatProfileNames
 
 // The terms of one stat with the profile laid over the default.

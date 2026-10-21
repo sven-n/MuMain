@@ -71,7 +71,7 @@ std::unique_ptr<ITEM_ATTRIBUTE[]> BuildItemAttributes(std::string_view locale)
 std::string FollowKnownStatProfile(const ItemDefinition* previous, const ItemDefinition& updated,
                                    std::vector<ItemDataIssue>& issues)
 {
-    std::string profile = FollowStatProfile(previous, updated);
+    std::string profile = FollowStatProfile(g_ItemDatabase.GetStatProfiles(), previous, updated);
     if (g_ItemDatabase.GetStatProfiles().Find(profile) != ItemStatProfiles::UnknownProfile)
     {
         return profile;

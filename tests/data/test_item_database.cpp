@@ -28,6 +28,20 @@ ItemDefinition MakeItem(int group, int number, const std::string& names)
     return definition;
 }
 
+// The profiles `names` (without terms of their own) and the profile rules `rules`.
+ItemStatProfiles MakeStatProfiles(const std::vector<std::string>& names, std::vector<StatProfileRule> rules)
+{
+    ItemStatFile file;
+    for (const std::string& name : names)
+    {
+        WrittenStatProfile profile;
+        profile.name = name;
+        file.profiles.push_back(profile);
+    }
+    file.profileRules = std::move(rules);
+    return ItemStatProfiles(file);
+}
+
 void SetName(ITEM_ATTRIBUTE& attribute, const std::wstring& name)
 {
     name.copy(attribute.Name, name.size());
@@ -455,73 +469,35 @@ TEST_CASE("Item database resolves the stat profile of every item [data][items]")
     CHECK(defenseBonus(krisType, 7) == 7);
 }
 
-TEST_CASE("The stat profile an item's data gives [data][items]")
+TEST_CASE("The stat profile an item's data gives is the one of the first profile rule it matches [data][items]")
 {
-    ItemDefinition item = MakeItem(2, 8, "Battle Scepter");
-    item.weaponKind = WeaponKind::Mace;
-    CHECK(DeriveStatProfile(item) == "weapon");
-    item.tags.Set(ItemTag::Sceptre);
-    CHECK(DeriveStatProfile(item) == "sceptre");
-
-    ItemDefinition shield = MakeItem(6, 0, "Small Shield");
-    shield.slot = ItemSlot::OffHand;
-    shield.weaponKind = WeaponKind::Shield;
-    CHECK(DeriveStatProfile(shield) == "shield");
-
-    ItemDefinition wing = MakeItem(12, 0, "Wings of Elf");
-    wing.slot = ItemSlot::Wings;
-    const std::pair<WingTier, const char*> tiers[] = {{WingTier::None, ""},
-                                                      {WingTier::Small, "smallWing"},
-                                                      {WingTier::First, "firstTierWing"},
-                                                      {WingTier::Second, "secondTierWing"},
-                                                      {WingTier::Third, "thirdTierWing"}};
-    for (const auto& [tier, profile] : tiers)
-    {
-        wing.wingTier = tier;
-        CHECK(DeriveStatProfile(wing) == profile);
-    }
-    wing.wingTier = WingTier::Second;
-    wing.tags.Set(ItemTag::Cape);
-    CHECK(DeriveStatProfile(wing) == "secondTierCape");
-    // A wing tier counts only on the wings slot.
-    wing.slot = ItemSlot::Helm;
-    CHECK(DeriveStatProfile(wing) == "armor");
-}
-
-TEST_CASE("The stat profiles of weapons, armour, books, helpers and scrolls [data][items]")
-{
-    ItemDefinition kris = MakeItem(0, 0, "Kris");
-    kris.slot = ItemSlot::MainHand;
-    kris.weaponKind = WeaponKind::Sword;
-    CHECK(DeriveStatProfile(kris) == "weapon");
-
-    ItemDefinition book = MakeItem(5, 21, "Book of Samut");
-    book.weaponKind = WeaponKind::Book;
-    book.tags.Set(ItemTag::SummonerBook);
-    CHECK(DeriveStatProfile(book) == "book");
+    StatProfileRule ammunition{.profile = "default"};
+    ammunition.tags.Set(ItemTag::Ammunition);
+    StatProfileRule bows{.profile = "bow"};
+    bows.groups.set(4);
+    StatProfileRule staffs{.profile = "missing"};
+    staffs.groups.set(5);
+    const ItemStatProfiles profiles = MakeStatProfiles({"bow"}, {ammunition, bows, staffs});
 
     ItemDefinition bolt = MakeItem(4, 7, "Bolt");
     bolt.tags.Set(ItemTag::Ammunition);
-    CHECK(DeriveStatProfile(bolt).empty());
-
-    ItemDefinition helm = MakeItem(7, 0, "Bronze Helm");
-    helm.slot = ItemSlot::Helm;
-    CHECK(DeriveStatProfile(helm) == "armor");
-
-    ItemDefinition ring = MakeItem(13, 8, "Ring of Ice");
-    ring.slot = ItemSlot::Ring;
-    CHECK(DeriveStatProfile(ring).empty());
-    ring.requirements.level = 20;
-    CHECK(DeriveStatProfile(ring) == "helper");
-
-    ItemDefinition scroll = MakeItem(15, 0, "Scroll of Poison");
-    CHECK(DeriveStatProfile(scroll).empty());
-    scroll.requirements.energy = 100;
-    CHECK(DeriveStatProfile(scroll) == "scroll");
+    // A rule for the default gives no profile, as an item that has the default names none.
+    CHECK(DeriveStatProfile(profiles, bolt).empty());
+    const ItemDefinition bow = MakeItem(4, 0, "Short Bow");
+    CHECK(DeriveStatProfile(profiles, bow) == "bow");
+    // A profile the file does not have gives the default.
+    CHECK(DeriveStatProfile(profiles, MakeItem(5, 0, "Skull Staff")).empty());
+    // No rule matches.
+    CHECK(DeriveStatProfile(profiles, MakeItem(14, 0, "Apple")).empty());
+    CHECK(DeriveStatProfile(ItemStatProfiles(), bow).empty());
 }
 
-TEST_CASE("An edited item's stat profile follows its data while it is the derived one [data][items]")
+TEST_CASE("An edited item's stat profile follows the profile rules while it is the one they give [data][items]")
 {
+    StatProfileRule shields{.profile = "shield"};
+    shields.weaponKinds.set(static_cast<size_t>(WeaponKind::Shield));
+    const ItemStatProfiles profiles = MakeStatProfiles({"custom", "shield"}, {shields});
+
     ItemDefinition shield = MakeItem(6, 0, "Small Shield");
     shield.slot = ItemSlot::OffHand;
     shield.weaponKind = WeaponKind::Shield;
@@ -529,18 +505,18 @@ TEST_CASE("An edited item's stat profile follows its data while it is the derive
 
     ItemDefinition edited = shield;
     edited.weaponKind = WeaponKind::None;
-    CHECK(FollowStatProfile(&shield, edited).empty());
-    CHECK(FollowStatProfile(nullptr, shield) == "shield");
+    CHECK(FollowStatProfile(profiles, &shield, edited).empty());
+    CHECK(FollowStatProfile(profiles, nullptr, shield) == "shield");
 
-    // A profile the file sets that differs from the derived one stays, also "default".
+    // A profile the file sets that differs from the one the rules give stays, also "default".
     shield.statProfile = "custom";
-    CHECK(FollowStatProfile(&shield, edited) == "custom");
+    CHECK(FollowStatProfile(profiles, &shield, edited) == "custom");
     shield.statProfile = "default";
-    CHECK(FollowStatProfile(&shield, edited) == "default");
+    CHECK(FollowStatProfile(profiles, &shield, edited) == "default");
 
-    // An item without a profile, as in item files saved before the field, takes the derived one.
+    // An item without a profile, as in item files saved before the field, takes the rules' one.
     shield.statProfile = "";
-    CHECK(FollowStatProfile(&shield, shield) == "shield");
+    CHECK(FollowStatProfile(profiles, &shield, shield) == "shield");
 }
 
 TEST_CASE("A stat profile rule matches an item that has one of the values of each condition it has [data][items]")
