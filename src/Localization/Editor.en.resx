@@ -1480,4 +1480,10 @@
   <data name="Remove unused glow colors" xml:space="preserve">
     <value>Remove unused glow colors</value>
   </data>
+  <data name="Stats by item level" xml:space="preserve">
+    <value>Stats by item level</value>
+  </data>
+  <data name="The item has no damage, magic power, defense or block rate." xml:space="preserve">
+    <value>The item has no damage, magic power, defense or block rate.</value>
+  </data>
 </root>

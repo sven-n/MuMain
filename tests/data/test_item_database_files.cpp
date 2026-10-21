@@ -1285,6 +1285,51 @@ TEST_CASE("The item lists tell items with the same name apart [data][items][edit
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
 }
 
+// The stats a weapon, a staff, a shield, a helm and wings have at each level,
+// normal, excellent and ancient, as the game computes them for the stored item.
+TEST_CASE("Item Basics shows the stats at each level, from the values being typed [data][items][editor]")
+{
+    ClientDataScope client(ShippedClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    using MuEditor::Items::ComputeItemLevelValues;
+    using MuEditor::Items::ItemLevelValues;
+    using MuEditor::Items::RequirementVariant;
+
+    for (const int itemType : {KrisType, static_cast<int>(ITEM_SKULL_STAFF), static_cast<int>(ITEM_SMALL_SHIELD),
+                               static_cast<int>(ITEM_DRAGON_HELM), static_cast<int>(ITEM_WINGS_OF_ELF)})
+    {
+        const ItemDefinition item = *g_ItemDatabase.Find(itemType);
+        for (const RequirementVariant variant :
+             {RequirementVariant{}, RequirementVariant{true, false, 0}, RequirementVariant{false, true, 0}})
+        {
+            const ItemLevelValues values = ComputeItemLevelValues(item, variant);
+            for (int level = 0; level < Data::Items::ItemLevelCount; ++level)
+            {
+                const GameLogic::Items::ItemStatValues game = GameLogic::Items::ComputeItemStats(
+                    ItemAttribute[itemType], {itemType, level, static_cast<BYTE>(variant.excellent ? 1 : 0),
+                                              static_cast<BYTE>(variant.ancient ? 1 : 0), 0});
+                const GameLogic::Items::ItemStatValues& shown = values[static_cast<size_t>(level)];
+                INFO(g_ItemDatabase.GetLogName(itemType)
+                     << " +" << level << " excellent " << variant.excellent << " ancient " << variant.ancient);
+                CHECK(shown.damageMin == game.damageMin);
+                CHECK(shown.damageMax == game.damageMax);
+                CHECK(shown.magicPower == game.magicPower);
+                CHECK(shown.defense == game.defense);
+                CHECK(shown.magicDefense == game.magicDefense);
+                CHECK(shown.blockRate == game.blockRate);
+            }
+        }
+    }
+
+    // A base value being typed counts at once.
+    ItemDefinition stronger = *g_ItemDatabase.Find(KrisType);
+    const int before = ComputeItemLevelValues(stronger, {})[5].damageMax;
+    stronger.damageMax = static_cast<BYTE>(stronger.damageMax + 10);
+    CHECK(ComputeItemLevelValues(stronger, {})[5].damageMax == before + 10);
+}
+
 TEST_CASE("Item Requirements shows what the game asks at each level, from the values being typed "
           "[data][items][editor]")
 {

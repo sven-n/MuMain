@@ -677,7 +677,10 @@ shows it in the others.
   and an ancient set, add option, buff or pet of the game data.
 - **Item Basics**: the English name, size, slot, two-handed, wing tier,
   weapon kind, skill, drop level, potion priority, the stats, the prices,
-  the stat profile and the resistances. Size and slot stay as they are
+  the stat profile and the resistances. Below the stats, what the game
+  makes of them at each + level (damage, magic power, defense, magic
+  defense, block rate), also as excellent or ancient, while a value is still
+  being typed. Size and slot stay as they are
   while your character wears the item or a window shows it (the inventory,
   the vault, a trade, a shop): an item grid frees the cells by the size an
   item has when it is taken out. Such an item is not moved or removed

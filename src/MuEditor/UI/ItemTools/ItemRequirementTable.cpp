@@ -113,19 +113,30 @@ int FindSmallestBaseReaching(const ItemDefinition& item, ItemRequirement require
 }
 } // namespace
 
-RequirementTable ComputeRequirementTable(const ItemDefinition& item, const RequirementVariant& variant)
+ItemLevelValues ComputeItemLevelValues(const ItemDefinition& item, const RequirementVariant& variant)
 {
     ITEM_ATTRIBUTE attribute{};
     Data::Items::ToItemAttribute(item, attribute);
     const GameLogic::Items::ItemStatSources sources{attribute, &item, FindProfile(item),
                                                     item.slot == Data::Items::ItemSlot::Wings};
-    RequirementTable table{};
+    ItemLevelValues values{};
     for (int level = 0; level < Data::Items::ItemLevelCount; ++level)
     {
         const GameLogic::Items::ItemStatInput input{
             Data::Items::MakeItemType(item.group, item.number), level, static_cast<BYTE>(variant.excellent ? 1 : 0),
             static_cast<BYTE>(variant.ancient ? 1 : 0), static_cast<BYTE>(std::clamp(variant.optionLevel, 0, 255))};
-        table[static_cast<size_t>(level)] = ToRow(GameLogic::Items::ComputeItemStats(sources, input));
+        values[static_cast<size_t>(level)] = GameLogic::Items::ComputeItemStats(sources, input);
+    }
+    return values;
+}
+
+RequirementTable ComputeRequirementTable(const ItemDefinition& item, const RequirementVariant& variant)
+{
+    const ItemLevelValues values = ComputeItemLevelValues(item, variant);
+    RequirementTable table{};
+    for (size_t level = 0; level < table.size(); ++level)
+    {
+        table[level] = ToRow(values[level]);
     }
     return table;
 }

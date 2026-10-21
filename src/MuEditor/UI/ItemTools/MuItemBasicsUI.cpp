@@ -24,6 +24,7 @@
 #include <array>
 #include <optional>
 #include <string>
+#include <vector>
 
 using namespace MuEditor::Items;
 using Data::Items::ItemDefinition;
@@ -49,6 +50,27 @@ std::array<const char*, MAX_RESISTANCE + 1> ResistanceLabels()
     return {I18N::Metadata::IceResistance,   I18N::Metadata::PoisonResistance, I18N::Metadata::LightningResistance,
             I18N::Metadata::FireResistance,  I18N::Metadata::EarthResistance,  I18N::Metadata::WindResistance,
             I18N::Metadata::WaterResistance, I18N::Metadata::Resistance7};
+}
+
+// A column of the stat table: a value ComputeItemStats gives.
+struct StatColumn
+{
+    int GameLogic::Items::ItemStatValues::* value;
+    const char* label;
+};
+
+// Pixel width before the editor UI scale.
+constexpr float StatColumnWidth = 90.0f;
+
+std::array<StatColumn, 6> StatColumns()
+{
+    using GameLogic::Items::ItemStatValues;
+    return {{{&ItemStatValues::damageMin, I18N::Metadata::MinDamage},
+             {&ItemStatValues::damageMax, I18N::Metadata::MaxDamage},
+             {&ItemStatValues::magicPower, I18N::Metadata::MagicPower},
+             {&ItemStatValues::defense, I18N::Metadata::Defense},
+             {&ItemStatValues::magicDefense, I18N::Metadata::MagicDefense},
+             {&ItemStatValues::blockRate, I18N::Metadata::BlockRate}}};
 }
 
 // The profile with how many items use it: "weapon (186)".
@@ -84,6 +106,7 @@ void CMuItemBasicsUI::Render(bool* open)
             RenderName(*item);
             RenderShape(*item, itemType);
             RenderStats(*item);
+            RenderStatTable(*item);
             RenderPrices(*item);
             RenderResistances(*item);
             ImGui::PopID();
@@ -173,6 +196,61 @@ void CMuItemBasicsUI::RenderStats(ItemDefinition& item)
     Fields::Byte(m_draft, I18N::Metadata::BlockRate, item.blockRate);
     ImGui::SameLine();
     Fields::Byte(m_draft, I18N::Editor::ExcellentBonus, item.excellentBonus);
+}
+
+void CMuItemBasicsUI::RenderStatTable(const ItemDefinition& item)
+{
+    if (!ImGui::CollapsingHeader(I18N::Editor::StatsByItemLevel, ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        return;
+    }
+    ImGui::Checkbox(I18N::Editor::Excellent, &m_statVariant.excellent);
+    ImGui::SameLine();
+    ImGui::Checkbox(I18N::Editor::Ancient, &m_statVariant.ancient);
+
+    const MuEditor::Items::ItemLevelValues values = MuEditor::Items::ComputeItemLevelValues(item, m_statVariant);
+    // The stats the item has at some level.
+    std::vector<StatColumn> shown;
+    for (const StatColumn& column : StatColumns())
+    {
+        for (const GameLogic::Items::ItemStatValues& level : values)
+        {
+            if (level.*column.value > 0)
+            {
+                shown.push_back(column);
+                break;
+            }
+        }
+    }
+    if (shown.empty())
+    {
+        ImGui::TextDisabled("%s", I18N::Editor::TheItemHasNoDamageMagicPowerDefenseOrBlockRate);
+        return;
+    }
+    const float columnWidth = Fields::ScaledWidth(StatColumnWidth);
+    if (!ImGui::BeginTable("##StatTable", static_cast<int>(shown.size()) + 1,
+                           ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingFixedFit))
+    {
+        return;
+    }
+    ImGui::TableSetupColumn("+", ImGuiTableColumnFlags_None, columnWidth * 0.5f);
+    for (const StatColumn& column : shown)
+    {
+        ImGui::TableSetupColumn(column.label, ImGuiTableColumnFlags_None, columnWidth);
+    }
+    ImGui::TableHeadersRow();
+    for (size_t level = 0; level < values.size(); ++level)
+    {
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::Text("+%d", static_cast<int>(level));
+        for (size_t index = 0; index < shown.size(); ++index)
+        {
+            ImGui::TableSetColumnIndex(static_cast<int>(index) + 1);
+            ImGui::Text("%d", values[level].*shown[index].value);
+        }
+    }
+    ImGui::EndTable();
 }
 
 void CMuItemBasicsUI::RenderPrices(ItemDefinition& item)

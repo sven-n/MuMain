@@ -1459,4 +1459,10 @@
   <data name="Remove unused glow colors" xml:space="preserve">
     <value>Ungenutzte Leuchtfarben entfernen</value>
   </data>
+  <data name="Stats by item level" xml:space="preserve">
+    <value>Werte je Gegenstandsstufe</value>
+  </data>
+  <data name="The item has no damage, magic power, defense or block rate." xml:space="preserve">
+    <value>Der Gegenstand hat keinen Schaden, keine magische Kraft, keine Verteidigung und keine Blockrate.</value>
+  </data>
 </root>

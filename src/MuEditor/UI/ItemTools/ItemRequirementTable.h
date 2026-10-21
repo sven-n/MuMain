@@ -3,12 +3,14 @@
 #ifdef _EDITOR
 
 #include "Data/GameData/ItemData/ItemDefinition.h"
+#include "GameLogic/Items/ItemStats.h"
 
 #include <array>
 
 namespace MuEditor::Items
 {
-// What the game adds to an item's requirements besides its + level.
+// What the game adds to an item's requirements and stats besides its + level
+// (the option level only to the strength requirement).
 struct RequirementVariant
 {
     bool excellent = false;
@@ -27,6 +29,12 @@ using RequirementTable = std::array<RequirementRow, Data::Items::ItemLevelCount>
 // what its data gives). The normal variant at option level 0 is what the game's
 // /<item name> window shows.
 RequirementTable ComputeRequirementTable(const Data::Items::ItemDefinition& item, const RequirementVariant& variant);
+
+// All the values the game computes for `item` at each + level (damage, magic
+// power, defense, magic defense, block rate and the requirements), as
+// ComputeRequirementTable takes them.
+using ItemLevelValues = std::array<GameLogic::Items::ItemStatValues, Data::Items::ItemLevelCount>;
+ItemLevelValues ComputeItemLevelValues(const Data::Items::ItemDefinition& item, const RequirementVariant& variant);
 
 // Whether the option level adds to the item's strength requirement (its stat
 // profile's strength per option level is not 0).
