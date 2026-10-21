@@ -447,6 +447,51 @@ private:
 };
 } // namespace
 
+// A field typed in before the game took the item is stored when it is left or
+// drawn again: the size and slot of the held item stay, other fields change.
+TEST_CASE("The item tools keep the size and slot of an item the game holds [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    const ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+    const ItemDefinition blade = *g_ItemDatabase.Find(BladeType);
+    ItemDefinition wider = kris;
+    ++wider.width;
+    ItemDefinition ring = kris;
+    ring.slot = ItemSlot::Ring;
+    ItemDefinition widerBlade = blade;
+    ++widerBlade.width;
+    {
+        const WornItemsScope worn({KrisType});
+        CHECK_FALSE(g_ItemEdits.SetItem("Width", wider));
+        CHECK_FALSE(g_ItemEdits.SetItem("Slot", ring));
+        // Nothing of a step that reaches a held item is stored.
+        const ItemDefinition both[] = {widerBlade, wider};
+        CHECK_FALSE(g_ItemEdits.SetItems("Width", both));
+        CHECK(g_ItemDatabase.Find(BladeType)->width == blade.width);
+        CHECK(g_ItemDatabase.Find(KrisType)->width == kris.width);
+        CHECK(g_ItemDatabase.Find(KrisType)->slot == kris.slot);
+        CHECK(ItemAttribute[KrisType].Width == kris.width);
+        CHECK_FALSE(g_ItemEdits.GetHistory().CanUndo());
+
+        ItemDefinition stronger = kris;
+        stronger.damageMax = 99;
+        CHECK(g_ItemEdits.SetItem("Damage", stronger));
+        CHECK(g_ItemDatabase.Find(KrisType)->damageMax == 99);
+    }
+    // Not held any more.
+    ItemDefinition widened = *g_ItemDatabase.Find(KrisType);
+    ++widened.width;
+    CHECK(g_ItemEdits.SetItem("Width", widened));
+    CHECK(g_ItemDatabase.Find(KrisType)->width == widened.width);
+    g_ItemEdits.GetHistory().Clear();
+}
+
 // The import keeps the size and slot of a held item; a held type that had no
 // data takes the imported item, since it has no size or slot to keep.
 TEST_CASE("A bmd import keeps the size and slot of the held items that had data [data][items][editor]")

@@ -20,13 +20,12 @@ std::string SharedModelName(const ItemEditStep& step, bool undoing)
     const std::optional<Data::Items::SharedItemModel>& other = undoing ? step.sharedBefore : step.sharedAfter;
     return current ? current->name : other->name;
 }
+} // namespace
 
-// Whether an item keeps the cells it takes in an item grid.
 bool KeepsShape(const Data::Items::ItemDefinition& from, const Data::Items::ItemDefinition& to)
 {
     return from.Exists() == to.Exists() && from.width == to.width && from.height == to.height && from.slot == to.slot;
 }
-} // namespace
 
 ItemEditHistory::ItemEditHistory(Hooks hooks) : m_hooks(std::move(hooks)) {}
 

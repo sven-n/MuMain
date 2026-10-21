@@ -20,8 +20,10 @@ class ItemEdits
 public:
     static ItemEdits& GetInstance();
 
-    void SetItem(std::string label, const Data::Items::ItemDefinition& item);
-    void SetItems(std::string label, std::span<const Data::Items::ItemDefinition> items);
+    // False, with nothing changed, when it would change the size or slot of an
+    // item the game holds (IsHeldByCharacter), as its undo would be refused.
+    bool SetItem(std::string label, const Data::Items::ItemDefinition& item);
+    bool SetItems(std::string label, std::span<const Data::Items::ItemDefinition> items);
     // CItemDataHandler::SetItemName; false when it refused the name.
     bool SetItemName(std::string label, int itemType, std::string_view locale, std::string text);
     bool AddItem(std::string label, const Data::Items::ItemDefinition& item,

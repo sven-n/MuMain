@@ -41,7 +41,12 @@ std::optional<ItemDefinition> LoadItem(int itemType)
 
 void StoreItem(const std::string& label, const ItemDefinition& item)
 {
-    g_ItemEdits.SetItem(label, item);
+    // Refused for a size or slot typed in before the game took the item: the
+    // field goes back to the stored item.
+    if (!g_ItemEdits.SetItem(label, item))
+    {
+        g_MuEditorConsoleUI.LogEditor(I18N::Editor::TheItemIsWornOrInAnItemWindowItsSizeAndSlotStayAsTheyAre);
+    }
 }
 
 // The resistance names in the order of ItemDefinition::resistances.

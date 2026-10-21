@@ -157,24 +157,35 @@ void ItemEdits::RecordSlots(std::string label, std::span<const int> itemTypes, T
     Record(std::move(entry));
 }
 
-void ItemEdits::SetItem(std::string label, const ItemDefinition& item)
+bool ItemEdits::SetItem(std::string label, const ItemDefinition& item)
 {
-    SetItems(std::move(label), std::span<const ItemDefinition>(&item, 1));
+    return SetItems(std::move(label), std::span<const ItemDefinition>(&item, 1));
 }
 
-void ItemEdits::SetItems(std::string label, std::span<const ItemDefinition> items)
+bool ItemEdits::SetItems(std::string label, std::span<const ItemDefinition> items)
 {
     std::vector<int> itemTypes;
     for (const ItemDefinition& item : items)
     {
+        if (!Data::Items::IsValidItemId(item.group, item.number))
+        {
+            continue;
+        }
         const int itemType = Data::Items::MakeItemType(item.group, item.number);
-        if (Data::Items::IsValidItemId(item.group, item.number) &&
-            std::ranges::find(itemTypes, itemType) == itemTypes.end())
+        // A form disables these fields for a held item, but a field typed in
+        // before the item was taken is still stored when it is left or drawn
+        // again. The whole change is refused, as an undo refuses a whole entry.
+        if (!KeepsShape(g_ItemDatabase.GetAllSlots()[itemType], item) && IsHeldByCharacter(itemType))
+        {
+            return false;
+        }
+        if (std::ranges::find(itemTypes, itemType) == itemTypes.end())
         {
             itemTypes.push_back(itemType);
         }
     }
     RecordSlots(std::move(label), itemTypes, [&] { g_ItemDataHandler.SetItems(items); });
+    return true;
 }
 
 bool ItemEdits::SetItemName(std::string label, int itemType, std::string_view locale, std::string text)

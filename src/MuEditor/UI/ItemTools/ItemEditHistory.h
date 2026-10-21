@@ -76,6 +76,10 @@ struct ItemEditEntry
     std::vector<ItemEditStep> steps;
 };
 
+// Whether an item keeps the cells it takes in an item grid and its slot, which
+// must not change while the game holds it (Hooks::isHeld).
+bool KeepsShape(const Data::Items::ItemDefinition& from, const Data::Items::ItemDefinition& to);
+
 // The undo history of the item tools for the session. Entries are applied
 // back through the hooks (the editor's go through CItemDataHandler), so the
 // item database, ItemAttribute and the opened models stay in step. An entry
