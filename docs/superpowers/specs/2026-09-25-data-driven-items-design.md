@@ -725,11 +725,14 @@ server with original clients (after phases 6 and B).
      1, 4 and 15, item types without data and values the editor can give;
      the help table too. The one difference: item types without data in
      groups 0 to 11 no longer get the option level's strength.
-   - Left for later: which item gets which profile is code
-     (`DeriveStatProfile`) that names the profiles, while the profiles are
-     data; each profile could name in the stat file what it is for (tags,
-     slots, weapon kinds, groups). The stat file's writer has no caller
-     outside the tests yet; an editor for the stat file would use it.
+   - Done in phase 6: which item gets which profile was code
+     (`DeriveStatProfile`) that named the profiles; it is now the ordered
+     profile rules of the stat file (`profileRules`: conditions on group,
+     slot, wing tier, weapon kind, tags and base requirements, the first
+     match giving the profile). A one-time comparison checked the 14 shipped
+     rules against the code for all 911 items, 844,800 combinations of the
+     fields it read, the follow logic and the load warning. The writer is
+     used by Item Formulas and Save Items.
 4. **Models into data**: model and display data in their own files,
    `Data/Items/Models/GroupNN_*.json` (D22):
 
@@ -987,11 +990,38 @@ server with original clients (after phases 6 and B).
      is taken out); such an item is not moved or removed, an undo step that
      would change it is refused, and the bmd import keeps its size and
      slot.
+   - **Item Formulas** edits the item stat file: the drop level bonus, the
+     default, the profiles (each term inherited or written), the level bonus
+     tables and the profile rules, with the D26 list of the items a change
+     reaches, as one undo step; Save Items writes `Stats/ItemStats.json`.
+     New, copied, renamed (taking the rules and the items that name a
+     profile along) and removed (only unused) profiles and tables; no
+     profile name is fixed by code, only `default` as the base layer.
+   - Item Basics and Item Requirements show where an item's profile comes
+     from (its rule, or a pick) and the formula of each value with the
+     item's numbers and the source of each part. A stat requirement shows
+     its +0 value and its weight (the stored base value) with the weights
+     that give the same +0 value; a typed +0 value takes the weight that
+     gives it, or lists the candidates with their +15 and excellent values
+     (the formula rounds down, so low drop levels have several).
    - Left out: the custom marker of section 7 (nothing reads it yet; phase
      7 and Q1), mixes and quests in "used by" (their loaded data has no way
      to walk it), the last OpenMU import in the remove warning (phase 7),
-     editing the stat profiles of the item stat file (a later tool) and the
-     looks themselves (phase 13).
+     the looks themselves (phase 13), and whether an item can be excellent,
+     ancient or how high its + level goes (OpenMU has `PossibleItemOptions`,
+     item sets and `MaximumItemLevel`; maybe a phase after 12, once level
+     variants are items of their own).
+   - Formula sync with OpenMU comes later: only the level bonus tables have
+     data there today (`ItemLevelBonusTable`); the requirement formula, the
+     excellent and ancient bonuses and the drop level bonus are C# code
+     (`ItemExtensions.GetRequirement`, `ItemPowerUpFactory`). A formula
+     exchange file of its own, close to `ItemStats.json` and keyed by stable
+     names, and an OpenMU change that makes the requirement formula data
+     (defaults equal to today's code) would let both sides share them. The
+     client's profile rules stay client-side; the exchange expands profiles
+     per item. Found while checking: 70 items have other drop levels in the
+     client than in OpenMU (e.g. the Lilium armour, 131 against 113), so
+     their requirements already differ between the two.
 7. **Item sync, client side**: MuEditor import/export of the item exchange
    file and diff.
 
