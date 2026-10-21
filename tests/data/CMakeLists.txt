@@ -59,6 +59,7 @@ mu_add_test(
         test_item_requirement_weights.cpp
         test_item_rules.cpp
         test_item_stats.cpp
+        test_item_value_formulas.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
