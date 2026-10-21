@@ -1713,6 +1713,43 @@ TEST_CASE("Save Items writes the item stat file when the editor changed it [data
     }
 }
 
+// A stat file written by hand need not have its profiles in name order; the
+// editor keeps it in the writer's order, so the undo history matches it.
+TEST_CASE("A change of a stat file whose profiles are not in name order is undone and redone [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    const std::filesystem::path statsFile = folder.Directory() / GetItemStatsFile();
+    std::string text = TestFiles::ReadWholeFile(statsFile);
+    // armor is the first profile and weapon the last, with the same terms:
+    // swapping their names puts the profiles out of order without changing them.
+    const size_t armor = text.find(R"("name": "armor")");
+    const size_t weapon = text.rfind(R"("name": "weapon")");
+    REQUIRE(armor != std::string::npos);
+    REQUIRE(weapon != std::string::npos);
+    text.replace(weapon, std::string(R"("name": "weapon")").size(), R"("name": "armor")");
+    text.replace(armor, std::string(R"("name": "armor")").size(), R"("name": "weapon")");
+    std::ofstream(statsFile, std::ios::binary) << text;
+
+    ClientDataScope client(folder.Directory());
+    ItemStatProfilesScope restoreProfiles;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    CHECK(g_ItemDataHandler.GetStatFile().profiles.front().name == "armor");
+    MuEditor::Items::ItemEdits& edits = g_ItemEdits;
+    edits.GetHistory().Clear();
+
+    ItemStatFile changed = g_ItemDataHandler.GetStatFile();
+    changed.excellentDropLevelBonus = 26;
+    edits.SetStatFile("Change the item formulas", changed);
+    REQUIRE(edits.Undo());
+    CHECK(g_ItemDataHandler.GetStatFile().excellentDropLevelBonus == 25);
+    CHECK(edits.Redo());
+    CHECK(g_ItemDataHandler.GetStatFile().excellentDropLevelBonus == 26);
+    edits.GetHistory().Clear();
+}
+
 TEST_CASE("A change of the profile rules gives the items that follow them the new profile, as one undo step "
           "[data][items][editor]")
 {

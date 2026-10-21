@@ -63,6 +63,17 @@ std::unique_ptr<ITEM_ATTRIBUTE[]> BuildItemAttributes(std::string_view locale)
     return attributes;
 }
 
+#ifdef _EDITOR
+// The tables and profiles in the writer's order (by name), so a file read as it
+// was written and one the editor stored compare equal (the undo history).
+ItemStatFile InWriterOrder(ItemStatFile file)
+{
+    const auto byName = [](const auto& left, const auto& right) { return left.name < right.name; };
+    std::ranges::stable_sort(file.tables, byName);
+    std::ranges::stable_sort(file.profiles, byName);
+    return file;
+}
+#endif
 } // namespace
 
 CItemDataHandler::CItemDataHandler()
@@ -118,7 +129,7 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     }
     const double loadMilliseconds = MillisecondsSince(loadStart);
 #ifdef _EDITOR
-    m_statFile = std::move(stats.file);
+    m_statFile = InWriterOrder(std::move(stats.file));
     m_statFileChanged = false;
 #endif
 
@@ -581,10 +592,7 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
 
 void CItemDataHandler::SetStatFile(const ItemStatFile& file)
 {
-    m_statFile = file;
-    const auto byName = [](const auto& left, const auto& right) { return left.name < right.name; };
-    std::ranges::stable_sort(m_statFile.tables, byName);
-    std::ranges::stable_sort(m_statFile.profiles, byName);
+    m_statFile = InWriterOrder(file);
     m_statFileChanged = true;
     g_ItemDatabase.SetStatProfiles(ItemStatProfiles(m_statFile));
 }
