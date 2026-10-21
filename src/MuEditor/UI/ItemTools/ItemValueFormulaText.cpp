@@ -7,6 +7,7 @@
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "I18N/All.h"
 
+#include <algorithm>
 #include <optional>
 #include <string>
 #include <vector>
@@ -127,22 +128,34 @@ int BaseOf(const Data::Items::ItemRequirements& requirements, ItemRequirement re
     }
 }
 
+// How many of the values are above 0.
+size_t CountAbove0(const Data::Items::RequirementByLevel& values)
+{
+    return static_cast<size_t>(std::count_if(values.begin(), values.end(), [](WORD value) { return value > 0; }));
+}
+
 std::string RequirementFormulaText(const ItemDefinition& item, const Data::Items::RequirementFormula& formula,
                                    const std::string& weight)
 {
     const std::string add = Number(formula.add);
     const std::string percent = Number(formula.percent);
-    if (formula.levelRequirementBasis && item.requirementsByLevel.Find(ItemRequirement::Level) != nullptr)
+    const std::string weighted = I18N::Format(I18N::Editor::FormulaWeightedRequirement,
+                                              {add, weight, Number(item.level), Number(formula.levelWeight), percent});
+    const Data::Items::RequirementByLevel* levelByLevel = item.requirementsByLevel.Find(ItemRequirement::Level);
+    // The level requirement counts where it is above 0; elsewhere the drop level does.
+    if (formula.levelRequirementBasis && levelByLevel != nullptr && CountAbove0(*levelByLevel) > 0)
     {
-        return I18N::Format(I18N::Editor::FormulaRequirementFromTheLevelRequirementByLevel, {add, weight, percent});
+        const std::string byLevel =
+            I18N::Format(I18N::Editor::FormulaRequirementFromTheLevelRequirementByLevel, {add, weight, percent});
+        return CountAbove0(*levelByLevel) == levelByLevel->size()
+                   ? byLevel
+                   : I18N::Format(I18N::Editor::FormulaLevelRequirementOrDropLevel, {byLevel, weighted});
     }
-    if (formula.levelRequirementBasis && item.requirements.level > 0)
+    if (formula.levelRequirementBasis && levelByLevel == nullptr && item.requirements.level > 0)
     {
         return I18N::Format(I18N::Editor::FormulaRequirementFromTheLevelRequirement,
                             {add, weight, Number(item.requirements.level), percent});
     }
-    const std::string weighted = I18N::Format(I18N::Editor::FormulaWeightedRequirement,
-                                              {add, weight, Number(item.level), Number(formula.levelWeight), percent});
     return formula.levelRequirementBasis ? I18N::Format(I18N::Editor::FormulaWithoutALevelRequirement, {weighted})
                                          : weighted;
 }

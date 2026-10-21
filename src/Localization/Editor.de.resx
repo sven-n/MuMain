@@ -1840,4 +1840,7 @@
   <data name="How the profile rules work" xml:space="preserve">
     <value>Die erste Regel, deren Bedingungen ein Gegenstand erfüllt, gibt ihm sein Werteprofil (ein Gegenstand erfüllt eine Bedingung, wenn er einen ihrer Werte hat); ein Gegenstand, der keine erfüllt, hat den Standard. Ein für einen Gegenstand gewähltes Profil (Gegenstand: Grundwerte) bleibt. Die markierte Regel ist die des gewählten Gegenstands.</value>
   </data>
+  <data name="Formula level requirement or drop level" xml:space="preserve">
+    <value>{0}; wo die Stufenanforderung 0 ist: {1}</value>
+  </data>
 </root>

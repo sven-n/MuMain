@@ -1861,4 +1861,7 @@
   <data name="How the profile rules work" xml:space="preserve">
     <value>The first rule whose conditions an item meets gives it its stat profile (an item meets a condition when it has one of its values); an item that meets none has the default. A profile picked for an item (Item Basics) stays. The marked rule is the selected item's.</value>
   </data>
+  <data name="Formula level requirement or drop level" xml:space="preserve">
+    <value>{0}; where the level requirement is 0: {1}</value>
+  </data>
 </root>
