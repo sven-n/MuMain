@@ -2,6 +2,7 @@
 
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
+#include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 #include "Data/GameData/ItemData/ItemType.h"
 
 #include <array>
@@ -97,6 +98,17 @@ public:
         return m_statProfiles;
     }
 
+    // The shared texts and layouts of the item tooltips (Data/Items/Tooltips/Tooltip.json).
+    void SetTooltipFile(ItemTooltipFile file)
+    {
+        m_tooltipFile = std::move(file);
+    }
+
+    const ItemTooltipFile& GetTooltipFile() const
+    {
+        return m_tooltipFile;
+    }
+
     // The item's stat profile laid over the default; the default for empty
     // slots and invalid ids.
     const ItemStatProfile& GetStatProfile(int itemType) const
@@ -183,6 +195,7 @@ private:
     std::vector<ItemDefinition> m_definitions;
     std::vector<RuleData> m_ruleData;
     ItemStatProfiles m_statProfiles;
+    ItemTooltipFile m_tooltipFile;
     // GetItemTypesWithTag's lists, one per tag.
     std::array<std::vector<int>, static_cast<size_t>(ItemTag::Count)> m_itemTypesByTag;
     // GetItemTypesWithTagInUseOrder's lists, one per tag.

@@ -260,17 +260,9 @@
     <value>Depensa: %d</value>
     <comment>legacy_id=65,209</comment>
   </data>
-  <data name="Spell resistance: %d" xml:space="preserve">
-    <value>Paglaban sa spell: %d</value>
-    <comment>legacy_id=66</comment>
-  </data>
   <data name="Defense rate: %d" xml:space="preserve">
     <value>Rate ng depensa: %d</value>
     <comment>legacy_id=67,2045</comment>
-  </data>
-  <data name="Moving speed: %d" xml:space="preserve">
-    <value>Bilis ng paggalaw: %d</value>
-    <comment>legacy_id=68</comment>
   </data>
   <data name="Number of items: %d" xml:space="preserve">
     <value>Bilang ng mga item: %d</value>
@@ -283,10 +275,6 @@
   <data name="Durability: [%d/%d]" xml:space="preserve">
     <value>Katatagan: [%d/%d]</value>
     <comment>legacy_id=71</comment>
-  </data>
-  <data name="%s Resistance: %d" xml:space="preserve">
-    <value>%s Paglaban: %d</value>
-    <comment>legacy_id=72</comment>
   </data>
   <data name="Strength Requirement: %d" xml:space="preserve">
     <value>Kinakailangan ng Lakas: %d</value>
@@ -4529,10 +4517,6 @@
     <value>Walang %s.</value>
     <comment>legacy_id=1233</comment>
   </data>
-  <data name="Increase pet attack as %d%%" xml:space="preserve">
-    <value>Dagdagan ang pag-atake ng alagang hayop bilang %d%%</value>
-    <comment>legacy_id=1234</comment>
-  </data>
   <data name="Crest of monarch" xml:space="preserve">
     <value>Crest of monarch</value>
     <comment>legacy_id=1235</comment>
@@ -6193,10 +6177,6 @@
     <value>Ang malakas na kaisipan at mahusay na pananaw ay lumilikha ng pinakamalakas na spell ng sumpa. Gayundin ang item na ito ay kumukuha ng isa pang summoner sa mundo at ginagamit ang nakapipinsalang pangkukulam laban sa kanila.</value>
     <comment>legacy_id=1690</comment>
   </data>
-  <data name="Curse Spell increment %d%%" xml:space="preserve">
-    <value>Pagtaas ng Curse Spell %d%%</value>
-    <comment>legacy_id=1691</comment>
-  </data>
   <data name="Curse Spell: %d ~ %d" xml:space="preserve">
     <value>Spell ng Sumpa: %d ~ %d</value>
     <comment>legacy_id=1692</comment>
@@ -7032,10 +7012,6 @@
   <data name="Skills will improve through upgrading." xml:space="preserve">
     <value>Mapapabuti ang mga kasanayan sa pamamagitan ng pag-upgrade.</value>
     <comment>legacy_id=1929</comment>
-  </data>
-  <data name="Stamina Requirement: %d" xml:space="preserve">
-    <value>Kinakailangan ng Stamina: %d</value>
-    <comment>legacy_id=1930</comment>
   </data>
   <data name="Req LV" xml:space="preserve">
     <value>Req LV</value>

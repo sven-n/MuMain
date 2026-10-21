@@ -260,17 +260,9 @@
     <value>Obrona: %d</value>
     <comment>legacy_id=65,209</comment>
   </data>
-  <data name="Spell resistance: %d" xml:space="preserve">
-    <value>Odporność na zaklęcia: %d</value>
-    <comment>legacy_id=66</comment>
-  </data>
   <data name="Defense rate: %d" xml:space="preserve">
     <value>Współczynnik obrony: %d</value>
     <comment>legacy_id=67,2045</comment>
-  </data>
-  <data name="Moving speed: %d" xml:space="preserve">
-    <value>Prędkość ruchu: %d</value>
-    <comment>legacy_id=68</comment>
   </data>
   <data name="Number of items: %d" xml:space="preserve">
     <value>Ilość sztuk: %d</value>
@@ -283,10 +275,6 @@
   <data name="Durability: [%d/%d]" xml:space="preserve">
     <value>Trwałość: [%d/%d]</value>
     <comment>legacy_id=71</comment>
-  </data>
-  <data name="%s Resistance: %d" xml:space="preserve">
-    <value>%s Opór: %d</value>
-    <comment>legacy_id=72</comment>
   </data>
   <data name="Strength Requirement: %d" xml:space="preserve">
     <value>Wymagana siła: %d</value>
@@ -4529,10 +4517,6 @@
     <value>Brak %s.</value>
     <comment>legacy_id=1233</comment>
   </data>
-  <data name="Increase pet attack as %d%%" xml:space="preserve">
-    <value>Zwiększ atak zwierzaka jako %d%%</value>
-    <comment>legacy_id=1234</comment>
-  </data>
   <data name="Crest of monarch" xml:space="preserve">
     <value>Herb monarchy</value>
     <comment>legacy_id=1235</comment>
@@ -6193,10 +6177,6 @@
     <value>Silna mentalność i doskonały wgląd tworzą najpotężniejsze zaklęcie klątwy. Również ten przedmiot przyciąga przywoływaczy z innego świata i używa przeciwko nim szkodliwej magii.</value>
     <comment>legacy_id=1690</comment>
   </data>
-  <data name="Curse Spell increment %d%%" xml:space="preserve">
-    <value>Przyrost zaklęcia klątwy %d%%</value>
-    <comment>legacy_id=1691</comment>
-  </data>
   <data name="Curse Spell: %d ~ %d" xml:space="preserve">
     <value>Zaklęcie klątwy: %d ~ %d</value>
     <comment>legacy_id=1692</comment>
@@ -7032,10 +7012,6 @@
   <data name="Skills will improve through upgrading." xml:space="preserve">
     <value>Umiejętności będą doskonalone poprzez ulepszanie.</value>
     <comment>legacy_id=1929</comment>
-  </data>
-  <data name="Stamina Requirement: %d" xml:space="preserve">
-    <value>Wymagania dotyczące wytrzymałości: %d</value>
-    <comment>legacy_id=1930</comment>
   </data>
   <data name="Req LV" xml:space="preserve">
     <value>Wymagane LV</value>

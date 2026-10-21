@@ -53,6 +53,7 @@ mu_add_test(
         test_item_model_files.cpp
         test_item_rules.cpp
         test_item_stats.cpp
+        test_item_tooltip_layouts.cpp
         test_item_tooltips.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS

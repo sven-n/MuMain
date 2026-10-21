@@ -2,8 +2,11 @@
 
 #include "Engine/Object/ItemTooltipValues.h"
 
+#include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "GameLogic/Items/ItemCategories.h"
 #include "Network/Server/SocketSystem.h"
 #include "UI/Core/UIManager.h"
 #include "UI/Inventory/UIJewelHarmony.h"
@@ -13,13 +16,6 @@
 
 namespace
 {
-// The teleport scrolls have damage in their data but no damage line.
-bool HasNoDamageLine(int type)
-{
-    return type == ITEM_SCROLL_OF_TELEPORT || type == ITEM_SCROLL_OF_TELEPORT_ALLY ||
-           type == ITEM_SCROLL_OF_SOUL_BARRIER;
-}
-
 // The Jewel of Harmony's bonus of the item, of one kind (StrengthenCapability: 0 requirements, 1 attack, 2 defense).
 StrengthenCapability HarmonyBonus(const ITEM& item, int kind)
 {
@@ -50,12 +46,7 @@ void ComputeDamage(const ITEM& item, ItemTooltipValues& values)
     values.damageHarmonyBonus = minBonus != 0 || maxBonus != 0;
     values.damageMin = damageMin;
     values.damageMax = damageMax;
-    if (item.Type >> 4 == 15 || HasNoDamageLine(item.Type))
-    {
-        values.hasDamage = damageMin > 0;
-        return;
-    }
-    if (item.Type >= ITEM_ETC && item.Type < ITEM_ETC + MAX_ITEM_INDEX)
+    if (values.skillBook)
     {
         // A skill book shows its skill's wizardry damage.
         const ActionSkillType skillIndex = GetSkillByBook(item.Type);
@@ -126,6 +117,11 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item)
 {
     ITEM_ATTRIBUTE* attribute = &ItemAttribute[item.Type];
     ItemTooltipValues values;
+    values.skillBook = item.Type >= ITEM_ETC && item.Type < ITEM_ETC + MAX_ITEM_INDEX;
+    values.twoHanded = attribute->TwoHand;
+    values.armour = item.Type >= ITEM_HELM && item.Type < ITEM_BOOTS + MAX_ITEM_INDEX;
+    values.wizardryWeapon =
+        GameLogic::Items::IsStaffOrBookType(item.Type) || GameLogic::Items::IsMagicSwordType(item.Type);
     ComputeDamage(item, values);
 
     const StrengthenCapability harmony = HarmonyBonus(item, 2);
@@ -204,4 +200,81 @@ std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, std::str
         }
     }
     return std::nullopt;
+}
+
+bool GetItemTooltipState(const ItemTooltipValues& values, std::string_view name)
+{
+    struct Named
+    {
+        std::string_view name;
+        bool ItemTooltipValues::* state;
+    };
+    static constexpr Named States[] = {
+        {"hasDamage", &ItemTooltipValues::hasDamage},
+        {"skillBook", &ItemTooltipValues::skillBook},
+        {"twoHanded", &ItemTooltipValues::twoHanded},
+        {"excellent", &ItemTooltipValues::excellent},
+        {"ancient", &ItemTooltipValues::ancient},
+        {"damageHarmonyBonus", &ItemTooltipValues::damageHarmonyBonus},
+        {"defenseHarmonyBonus", &ItemTooltipValues::defenseHarmonyBonus},
+        {"armour", &ItemTooltipValues::armour},
+        {"wizardryWeapon", &ItemTooltipValues::wizardryWeapon},
+    };
+    for (const Named& named : States)
+    {
+        if (named.name == name)
+        {
+            return values.*named.state;
+        }
+    }
+    if (name == "strengthReduced")
+    {
+        return values.strength.reduced;
+    }
+    if (name == "dexterityReduced")
+    {
+        return values.dexterity.reduced;
+    }
+    return false;
+}
+
+bool AreTooltipConditionsMet(std::span<const Data::Items::TooltipCondition> conditions, int type, int level,
+                             const ItemTooltipValues& values)
+{
+    using Data::Items::TooltipCondition;
+    const auto holds = [&](const TooltipCondition& condition)
+    {
+        switch (condition.kind)
+        {
+        case TooltipCondition::Kind::Value:
+        {
+            std::optional<int> value = GetItemTooltipValue(values, condition.name);
+            if (!value)
+            {
+                value = Data::Items::GetPlaceholderValue(condition.name, level, g_ItemDatabase.GetStatProfiles());
+            }
+            return value.value_or(0) != 0;
+        }
+        case TooltipCondition::Kind::State:
+            return GetItemTooltipState(values, condition.name);
+        case TooltipCondition::Kind::Tag:
+            return g_ItemDatabase.HasTag(type, condition.tag);
+        }
+        return false;
+    };
+    return std::all_of(conditions.begin(), conditions.end(),
+                       [&](const TooltipCondition& condition) { return holds(condition) != condition.negated; });
+}
+
+Data::Items::ItemTextColor GetTooltipLineColor(const Data::Items::TooltipLayoutLine& line, int type, int level,
+                                               const ItemTooltipValues& values)
+{
+    for (const Data::Items::TooltipColorRule& rule : line.colors)
+    {
+        if (AreTooltipConditionsMet(rule.when, type, level, values))
+        {
+            return rule.color;
+        }
+    }
+    return line.color;
 }

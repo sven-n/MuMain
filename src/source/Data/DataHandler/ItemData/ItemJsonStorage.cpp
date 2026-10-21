@@ -273,6 +273,25 @@ ItemStatsLoadResult LoadItemStatsFile(const std::filesystem::path& file)
     return result;
 }
 
+std::filesystem::path GetItemTooltipFile()
+{
+    return GetItemDataDirectory() / "Tooltips" / ItemTooltipFileName;
+}
+
+ItemTooltipLoadResult LoadItemTooltipFile(const std::filesystem::path& file)
+{
+    ItemTooltipLoadResult result;
+    const std::string source = file.generic_string();
+    const std::optional<std::string> text = ReadTextFile(file);
+    if (!text)
+    {
+        AddError(result.issues, source, "could not be read");
+        return result;
+    }
+    ReadItemTooltipJson(*text, source, result.file, result.issues);
+    return result;
+}
+
 std::filesystem::path GetGlowColorsFile()
 {
     return std::filesystem::path(Effects::GlowColorsFile);

@@ -260,17 +260,9 @@
     <value>Pertahanan: %d</value>
     <comment>legacy_id=65,209</comment>
   </data>
-  <data name="Spell resistance: %d" xml:space="preserve">
-    <value>Ketahanan mantra: %d</value>
-    <comment>legacy_id=66</comment>
-  </data>
   <data name="Defense rate: %d" xml:space="preserve">
     <value>Tingkat pertahanan: %d</value>
     <comment>legacy_id=67,2045</comment>
-  </data>
-  <data name="Moving speed: %d" xml:space="preserve">
-    <value>Kecepatan bergerak: %d</value>
-    <comment>legacy_id=68</comment>
   </data>
   <data name="Number of items: %d" xml:space="preserve">
     <value>Jumlah item: %d</value>
@@ -283,10 +275,6 @@
   <data name="Durability: [%d/%d]" xml:space="preserve">
     <value>Daya Tahan: [%d/%d]</value>
     <comment>legacy_id=71</comment>
-  </data>
-  <data name="%s Resistance: %d" xml:space="preserve">
-    <value>Resistensi %s: %d</value>
-    <comment>legacy_id=72</comment>
   </data>
   <data name="Strength Requirement: %d" xml:space="preserve">
     <value>Persyaratan Kekuatan: %d</value>
@@ -4529,10 +4517,6 @@
     <value>Tidak ada %s.</value>
     <comment>legacy_id=1233</comment>
   </data>
-  <data name="Increase pet attack as %d%%" xml:space="preserve">
-    <value>Tingkatkan serangan hewan peliharaan sebagai %d%%</value>
-    <comment>legacy_id=1234</comment>
-  </data>
   <data name="Crest of monarch" xml:space="preserve">
     <value>Lambang raja</value>
     <comment>legacy_id=1235</comment>
@@ -6193,10 +6177,6 @@
     <value>Mentalitas yang kuat dan wawasan yang luar biasa menciptakan mantra kutukan yang paling kuat. Juga item ini menarik pemanggil dunia lain dan menggunakan sihir yang merugikan untuk melawan mereka.</value>
     <comment>legacy_id=1690</comment>
   </data>
-  <data name="Curse Spell increment %d%%" xml:space="preserve">
-    <value>Peningkatan Mantra Kutukan %d%%</value>
-    <comment>legacy_id=1691</comment>
-  </data>
   <data name="Curse Spell: %d ~ %d" xml:space="preserve">
     <value>Mantra Kutukan: %d ~ %d</value>
     <comment>legacy_id=1692</comment>
@@ -7032,10 +7012,6 @@
   <data name="Skills will improve through upgrading." xml:space="preserve">
     <value>Keterampilan akan meningkat melalui peningkatan.</value>
     <comment>legacy_id=1929</comment>
-  </data>
-  <data name="Stamina Requirement: %d" xml:space="preserve">
-    <value>Persyaratan Stamina: %d</value>
-    <comment>legacy_id=1930</comment>
   </data>
   <data name="Req LV" xml:space="preserve">
     <value>Persyaratan LV</value>

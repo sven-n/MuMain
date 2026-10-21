@@ -260,17 +260,9 @@
     <value>Защита: %d</value>
     <comment>legacy_id=65,209</comment>
   </data>
-  <data name="Spell resistance: %d" xml:space="preserve">
-    <value>Сопротивление заклинаниям: %d</value>
-    <comment>legacy_id=66</comment>
-  </data>
   <data name="Defense rate: %d" xml:space="preserve">
     <value>Уровень защиты: %d</value>
     <comment>legacy_id=67,2045</comment>
-  </data>
-  <data name="Moving speed: %d" xml:space="preserve">
-    <value>Скорость движения: %d</value>
-    <comment>legacy_id=68</comment>
   </data>
   <data name="Number of items: %d" xml:space="preserve">
     <value>Количество предметов: %d</value>
@@ -283,10 +275,6 @@
   <data name="Durability: [%d/%d]" xml:space="preserve">
     <value>Прочность: [%d/%d]</value>
     <comment>legacy_id=71</comment>
-  </data>
-  <data name="%s Resistance: %d" xml:space="preserve">
-    <value>%s Сопротивление: %d</value>
-    <comment>legacy_id=72</comment>
   </data>
   <data name="Strength Requirement: %d" xml:space="preserve">
     <value>Требование к прочности: %d</value>
@@ -4529,10 +4517,6 @@
     <value>Нет %s.</value>
     <comment>legacy_id=1233</comment>
   </data>
-  <data name="Increase pet attack as %d%%" xml:space="preserve">
-    <value>Увеличение атаки питомца на %d%%</value>
-    <comment>legacy_id=1234</comment>
-  </data>
   <data name="Crest of monarch" xml:space="preserve">
     <value>Герб монарха</value>
     <comment>legacy_id=1235</comment>
@@ -6193,10 +6177,6 @@
     <value>Сильный менталитет и отличная проницательность создают мощнейшие заклинания проклятия. Также этот предмет вытаскивает призывателей из другого мира и использует против них пагубное колдовство.</value>
     <comment>legacy_id=1690</comment>
   </data>
-  <data name="Curse Spell increment %d%%" xml:space="preserve">
-    <value>Приращение заклинания проклятия %d%%</value>
-    <comment>legacy_id=1691</comment>
-  </data>
   <data name="Curse Spell: %d ~ %d" xml:space="preserve">
     <value>Заклинание проклятия: %d ~ %d</value>
     <comment>legacy_id=1692</comment>
@@ -7032,10 +7012,6 @@
   <data name="Skills will improve through upgrading." xml:space="preserve">
     <value>Навыки будут улучшаться посредством обновления.</value>
     <comment>legacy_id=1929</comment>
-  </data>
-  <data name="Stamina Requirement: %d" xml:space="preserve">
-    <value>Требование к выносливости: %d</value>
-    <comment>legacy_id=1930</comment>
   </data>
   <data name="Req LV" xml:space="preserve">
     <value>Требование низкого напряжения</value>

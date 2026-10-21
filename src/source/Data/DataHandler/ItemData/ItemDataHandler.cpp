@@ -127,6 +127,8 @@ bool CItemDataHandler::Load(std::string& errorMessage)
         ValidateStatProfiles(result.items, statProfiles, GetItemStatsFile().generic_string(), result.issues);
         ValidateDescriptionPlaceholders(result.items, statProfiles, GetItemStatsFile().generic_string(), result.issues);
     }
+    ItemTooltipLoadResult tooltips = LoadItemTooltipFile(GetItemTooltipFile());
+    result.issues.insert(result.issues.end(), tooltips.issues.begin(), tooltips.issues.end());
     Data::LogDataIssues(ItemDataLabel, result.issues);
     if (HasErrors(result.issues))
     {
@@ -138,6 +140,7 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     const auto buildStart = std::chrono::steady_clock::now();
     g_ItemDatabase.SetDisplayLocale(I18N::GetCurrentLocale());
     g_ItemDatabase.SetStatProfiles(std::move(statProfiles));
+    g_ItemDatabase.SetTooltipFile(std::move(tooltips.file));
     g_ItemDatabase.Build(result.items);
     FillItemAttributes();
     RegisterLocaleObserver();
