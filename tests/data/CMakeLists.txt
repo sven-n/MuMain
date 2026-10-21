@@ -14,6 +14,7 @@ mu_add_test(
         test_item_model_problems.cpp
         test_item_model_tool.cpp
         test_item_names.cpp
+        test_item_stat_file_change.cpp
         test_item_stats_json.cpp
         test_item_users.cpp
         test_localized_string.cpp

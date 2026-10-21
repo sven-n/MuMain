@@ -25,6 +25,7 @@
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Data/GameData/ItemData/ItemTypeUse.h"
 #include "Engine/Object/ZzzInfomation.h"
+#include "GameLogic/Items/ItemStats.h"
 #include "I18N/All.h"
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
@@ -34,6 +35,7 @@
 #include "UI/ItemTools/ItemNamesakes.h"
 #include "UI/ItemTools/ItemRequirementTable.h"
 #include "UI/ItemTools/ItemSelection.h"
+#include "UI/ItemTools/ItemStatFileChange.h"
 #include "UI/ItemTools/ItemUsage.h"
 #include "UI/ItemTools/ItemUsers.h"
 #include "UI/ItemTools/MuItemBasicsUI.h"
@@ -1698,6 +1700,102 @@ TEST_CASE("Save Items writes the item stat file when the editor changed it [data
                                   }));
         CHECK(TestFiles::ReadWholeFile(statsFile) == shippedText);
     }
+}
+
+TEST_CASE("A change of the profile rules gives the items that follow them the new profile, as one undo step "
+          "[data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    ItemStatProfilesScope restoreProfiles;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    MuEditor::Items::ItemEdits& edits = g_ItemEdits;
+    edits.GetHistory().Clear();
+    const ItemStatFile shipped = g_ItemDataHandler.GetStatFile();
+
+    // A boots item picked as a weapon keeps its pick.
+    const int pickedBoots = MakeItemType(11, 0);
+    EditItem(pickedBoots, [](ItemDefinition& boots) { boots.statProfile = "weapon"; });
+    REQUIRE(g_ItemDatabase.Find(pickedBoots)->statProfile == "weapon");
+    std::vector<int> boots;
+    for (const ItemDefinition& item : g_ItemDatabase.GetAllSlots())
+    {
+        if (item.Exists() && item.slot == ItemSlot::Boots && item.statProfile == "armor")
+        {
+            boots.push_back(MakeItemType(item.group, item.number));
+        }
+    }
+    REQUIRE(boots.size() > 10);
+
+    SUBCASE("the boots leave the armour rule")
+    {
+        ItemStatFile changed = shipped;
+        const auto armor = std::ranges::find_if(changed.profileRules,
+                                                [](const StatProfileRule& rule) { return rule.profile == "armor"; });
+        REQUIRE(armor != changed.profileRules.end());
+        armor->slots.reset(static_cast<size_t>(ItemSlot::Boots));
+        const std::vector<MuEditor::Items::StatProfileChange> changes = MuEditor::Items::FindStatProfileChanges(
+            g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(), ItemStatProfiles(changed));
+        REQUIRE(changes.size() == boots.size());
+        edits.SetStatFile("Change the profile rules", changed,
+                          MuEditor::Items::ApplyStatProfileChanges(g_ItemDatabase.GetAllSlots(), changes));
+        for (const int itemType : boots)
+        {
+            CHECK(g_ItemDatabase.Find(itemType)->statProfile.empty());
+        }
+        CHECK(g_ItemDatabase.Find(pickedBoots)->statProfile == "weapon");
+        CHECK(g_ItemDatabase.Find(ITEM_HORN_OF_FENRIR)->statProfile == "default");
+
+        REQUIRE(edits.Undo());
+        CHECK(g_ItemDataHandler.GetStatFile() == shipped);
+        for (const int itemType : boots)
+        {
+            CHECK(g_ItemDatabase.Find(itemType)->statProfile == "armor");
+        }
+        REQUIRE(edits.Redo());
+        CHECK(g_ItemDatabase.Find(boots.front())->statProfile.empty());
+
+        // An item edited after the change refuses the undo.
+        EditItem(boots.front(), [](ItemDefinition& item) { item.durability = 99; });
+        CHECK_FALSE(edits.GetHistory().Undo());
+    }
+
+    SUBCASE("a renamed profile renames the rules and the items that name it")
+    {
+        const GameLogic::Items::ItemStatInput input{KrisType, 9, 1, 0, 4};
+        const GameLogic::Items::ItemStatValues krisBefore =
+            GameLogic::Items::ComputeItemStats(*g_ItemDataHandler.GetItemAttribute(KrisType), input);
+
+        ItemStatFile renamed = shipped;
+        MuEditor::Items::RenameStatProfile(renamed, "weapon", "blade");
+        const std::vector<MuEditor::Items::StatProfileChange> changes =
+            MuEditor::Items::FindStatProfileChanges(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(),
+                                                    ItemStatProfiles(renamed), "weapon", "blade");
+        // The 113 weapons and the boots picked as a weapon.
+        CHECK(changes.size() == 114);
+        edits.SetStatFile("Rename the stat profile", renamed,
+                          MuEditor::Items::ApplyStatProfileChanges(g_ItemDatabase.GetAllSlots(), changes));
+        CHECK(g_ItemDatabase.Find(KrisType)->statProfile == "blade");
+        CHECK(g_ItemDatabase.Find(pickedBoots)->statProfile == "blade");
+        const GameLogic::Items::ItemStatValues krisAfter =
+            GameLogic::Items::ComputeItemStats(*g_ItemDataHandler.GetItemAttribute(KrisType), input);
+        CHECK(krisAfter.damageMin == krisBefore.damageMin);
+        CHECK(krisAfter.damageMax == krisBefore.damageMax);
+        CHECK(krisAfter.requireStrength == krisBefore.requireStrength);
+        CHECK(krisAfter.requireDexterity == krisBefore.requireDexterity);
+
+        std::vector<ItemDataIssue> issues;
+        g_ItemDataHandler.Validate(issues);
+        CHECK_FALSE(HasErrors(issues));
+
+        REQUIRE(edits.Undo());
+        CHECK(g_ItemDatabase.Find(KrisType)->statProfile == "weapon");
+        CHECK(g_ItemDataHandler.GetStatFile() == shipped);
+    }
+    edits.GetHistory().Clear();
 }
 
 TEST_CASE("Exporting unchanged bmd files is not a failure [data][items][editor]")
