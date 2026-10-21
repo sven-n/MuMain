@@ -18,6 +18,7 @@
 #include "Core/Input/SyntheticInput.h"
 #include "../Config/MuEditorConfig.h"
 #include "../MuEditor/UI/Common/MuEditorCenterPaneUI.h"
+#include "../MuEditor/UI/ItemTools/ItemHeldByCharacter.h"
 #include "../MuEditor/UI/ItemTools/MuItemBasicsUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemBrowserUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemCategoriesUI.h"
@@ -37,12 +38,16 @@
 #include "I18N/All.h"
 #include "Core/Utilities/AssetLoadWorld.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Engine/Object/ZzzOpenData.h"
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
 #include "Core/Utilities/WorldClearing.h"
 #include "Core/Utilities/StringUtils.h"
 #include "World/MapInfra/MapManager.h"
 #include "Render/Renderer/MuRenderer.h"
+
+#include <algorithm>
+#include <span>
 
 namespace mu
 {
@@ -476,6 +481,9 @@ void CMuEditorCore::ConnectGameHooks()
     Core::WorldClearing::SetListener([] { g_MuEffectBrowserUI.OnWorldClearing(); });
     // The game's key reads leave out what is pressed in the editor's own windows.
     Core::Input::SetOtherWindowQuery([](int virtualKey) { return g_MuEditorCore.IsWithEditorWindow(virtualKey); });
+    // The cloth of worn pants keeps data of its model's slot: it goes before
+    // the item tools change an opened item model, and the game makes it again.
+    g_ItemDataHandler.SetOpenedModelsChanging(&MuEditor::Items::DropWornCloth);
 }
 
 void CMuEditorCore::Shutdown()
@@ -607,8 +615,17 @@ void CMuEditorCore::ReopenChangedItemModels()
     {
         return;
     }
+    // OpenItems makes mesh 2 of the Grand Soul pants the grid of their cloth;
+    // a model opened again is as its file has it. (Read before the reopen,
+    // which empties the list.)
+    const std::span<const int> reopening = g_ItemDataHandler.GetModelsToReopen();
+    const bool grandSoulPants = std::ranges::find(reopening, ITEM_GRAND_SOUL_PANTS) != reopening.end();
     const std::vector<Data::Items::ItemModelProblem> problems =
         g_ItemDataHandler.ReopenChangedModels({Render::Items::Styles::Exists, Render::Items::ItemEffects::Exists});
+    if (grandSoulPants)
+    {
+        PrepareGrandSoulPantsClothMesh();
+    }
     for (const Data::Items::ItemModelProblem& problem : problems)
     {
         g_MuEditorConsoleUI.LogEditor("Item model " + problem.ToLogString());

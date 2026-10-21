@@ -4,6 +4,7 @@
 
 #include "ItemHeldByCharacter.h"
 
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Inventory/ItemMng.h"
@@ -37,6 +38,21 @@ std::vector<int> FindHeldItemTypes()
         }
     }
     return held;
+}
+
+void DropWornCloth()
+{
+    if (CharactersClient != nullptr)
+    {
+        // Also the spare last one, which CreateCharacter hands out when all
+        // are taken.
+        for (int index = 0; index <= MAX_CHARACTERS_CLIENT; ++index)
+        {
+            DeleteCloth(&CharactersClient[index]);
+        }
+    }
+    // The character of the character creation.
+    DeleteCloth(&CharacterView);
 }
 } // namespace MuEditor::Items
 

@@ -18,7 +18,9 @@
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemTextureFiles.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
+#include "Engine/Object/ZzzOpenData.h"
 #include "GameLogic/Social/MonkSystem.h"
 #include "Render/Items/ItemDisplay.h"
 #include "Render/Items/ItemEffects.h"
@@ -533,6 +535,48 @@ TEST_CASE("The first item of a shared model opens its file and the others share 
     CHECK(message.find("(15,22)") != std::string::npos);
     CHECK(message.find("(15,19)") == std::string::npos);
     CHECK(message.find("(15,20)") == std::string::npos);
+}
+
+// OpenItems makes mesh 2 of the Grand Soul pants the grid their cloth moves; a
+// model opened again is as its file has it, and the item editor makes it the
+// grid again (CMuEditorCore::ReopenChangedItemModels).
+TEST_CASE("The Grand Soul pants' mesh is the cloth grid again after their model is opened again [data][items]")
+{
+    TestItemModelSlots slots;
+    ItemModelDefinition grandSoul;
+    grandSoul.group = 9;
+    grandSoul.number = 18;
+    grandSoul.file = (ClientDirectory / "Data/Player/t_PantMale19.bmd").generic_string();
+    grandSoul.textureFolders = {"Player"};
+    g_ItemModelDatabase.Build(std::vector<ItemModelDefinition>{grandSoul}, Data::Effects::GlowColorList{});
+    ModelLoader::OpenModels({});
+    const BMD& pants = Models[MODEL_GRAND_SOUL_PANTS];
+    REQUIRE(pants.NumMeshs > 2);
+    REQUIRE(pants.Meshs[2].NumTriangles > 1);
+    const auto triangle = [&](int index)
+    {
+        const short* vertices = pants.Meshs[2].Triangles[index].VertexIndex;
+        return std::array<short, 3>{vertices[0], vertices[1], vertices[2]};
+    };
+    // The first quad of the cloth's 5 by 8 grid (CPhysicsClothMesh::Create).
+    const auto isGrid = [&]
+    { return triangle(0) == std::array<short, 3>{0, 1, 5} && triangle(1) == std::array<short, 3>{1, 6, 5}; };
+    REQUIRE_FALSE(isGrid());
+    const std::array<short, 3> fileTriangle = triangle(0);
+
+    // The cloth it makes to rebuild the mesh hangs on the hero.
+    CHARACTER* const previousHero = Hero;
+    const std::unique_ptr<CHARACTER> hero = std::make_unique<CHARACTER>();
+    Hero = hero.get();
+    PrepareGrandSoulPantsClothMesh();
+    CHECK(isGrid());
+
+    const int itemTypes[] = {ITEM_GRAND_SOUL_PANTS};
+    ModelLoader::ReopenModels(itemTypes, {});
+    CHECK(triangle(0) == fileTriangle);
+    PrepareGrandSoulPantsClothMesh();
+    CHECK(isGrid());
+    Hero = previousHero;
 }
 
 // The item editor moves an item's model with the item: the model data and the

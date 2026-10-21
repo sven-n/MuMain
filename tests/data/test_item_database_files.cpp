@@ -24,7 +24,9 @@
 #include "Data/GameData/ItemData/ItemStructs.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Data/GameData/ItemData/ItemTypeUse.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
+#include "Engine/Physics/PhysicsManager.h"
 #include "GameLogic/Items/ItemStats.h"
 #include "I18N/All.h"
 #include "Render/Items/ItemEffects.h"
@@ -447,7 +449,107 @@ private:
     CHARACTER_MACHINE* m_previous;
     std::unique_ptr<CHARACTER_MACHINE> m_machine;
 };
+
+// The game's characters for the scope, with the editor's hook that drops what
+// they wear of cloth (CMuEditorCore::ConnectGameHooks).
+class WornClothScope
+{
+public:
+    WornClothScope() : m_previous(CharactersClient), m_characters(new CHARACTER[MAX_CHARACTERS_CLIENT + 1]{})
+    {
+        CharactersClient = m_characters.get();
+        g_ItemDataHandler.SetOpenedModelsChanging(&MuEditor::Items::DropWornCloth);
+    }
+
+    ~WornClothScope()
+    {
+        g_ItemDataHandler.SetOpenedModelsChanging(nullptr);
+        MuEditor::Items::DropWornCloth();
+        CharactersClient = m_previous;
+    }
+
+    WornClothScope(const WornClothScope&) = delete;
+    WornClothScope& operator=(const WornClothScope&) = delete;
+
+    CHARACTER& GetCharacter(int index)
+    {
+        return m_characters[index];
+    }
+
+    // The character wears the pants with a cloth, as RenderPartObject makes it.
+    static const PART_t& Wear(CHARACTER& character, int modelType)
+    {
+        PART_t& pants = character.BodyPart[BODYPART_PANTS];
+        pants.Type = static_cast<short>(modelType);
+        pants.m_pCloth[0] = new CPhysicsClothMesh;
+        pants.m_byNumCloth = 1;
+        return pants;
+    }
+
+private:
+    CHARACTER* m_previous;
+    std::unique_ptr<CHARACTER[]> m_characters;
+};
 } // namespace
+
+// The cloth of worn pants moves a mesh of its model's slot every frame and was
+// made from the data the slot had: it goes before the slot opens other data,
+// and the game makes it again.
+TEST_CASE("Changing an opened item model drops the cloth the characters wear [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    REQUIRE_FALSE(g_ItemDataHandler.HasModelsToReopen());
+    ItemModelDefinition divine = *g_ItemModelDatabase.Find(ITEM_DIVINE_PANTS);
+
+    WornClothScope characters;
+    // Another player, and the character of the character creation.
+    const PART_t& player = WornClothScope::Wear(characters.GetCharacter(7), MODEL_DIVINE_PANTS);
+    const PART_t& created = WornClothScope::Wear(CharacterView, MODEL_DIVINE_PANTS);
+    const auto clothDropped = [&] { return player.m_pCloth[0] == nullptr && created.m_pCloth[0] == nullptr; };
+
+    SUBCASE("a model opened again")
+    {
+        divine.material.specular += 0.25;
+        g_ItemDataHandler.SetItemModel(divine);
+        REQUIRE(g_ItemDataHandler.HasModelsToReopen());
+        // The editor opens it again between frames.
+        CHECK_FALSE(clothDropped());
+        g_ItemDataHandler.ReopenChangedModels({});
+        CHECK(clothDropped());
+    }
+    SUBCASE("a removed model entry")
+    {
+        ItemModelDefinition none;
+        none.group = divine.group;
+        none.number = divine.number;
+        g_ItemDataHandler.SetItemModel(none);
+        g_ItemDataHandler.ReopenChangedModels({});
+        CHECK(clothDropped());
+    }
+    SUBCASE("a moved item, whose opened model moves at once")
+    {
+        const int freeType = MakeItemType(9, 100);
+        REQUIRE(IsFreeItemType(freeType));
+        REQUIRE(g_ItemDataHandler.MoveItem(ITEM_DIVINE_PANTS, freeType));
+        CHECK(clothDropped());
+    }
+    SUBCASE("a display value keeps the cloth")
+    {
+        divine.inventory.scale += 0.001;
+        g_ItemDataHandler.SetItemModel(divine);
+        CHECK_FALSE(g_ItemDataHandler.HasModelsToReopen());
+        g_ItemDataHandler.ReopenChangedModels({});
+        CHECK_FALSE(clothDropped());
+    }
+}
 
 // The lists of the item tools: no slot, no wing tier and, for the weapon kind,
 // the kind the group gives (which then follows the data) and none.

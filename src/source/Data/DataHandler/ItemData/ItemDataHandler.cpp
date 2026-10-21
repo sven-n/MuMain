@@ -443,6 +443,10 @@ std::vector<ItemModelProblem> CItemDataHandler::ReopenChangedModels(const ModelL
     std::vector<int> itemTypes;
     itemTypes.swap(m_modelsToReopen);
     std::ranges::sort(itemTypes);
+    if (!itemTypes.empty() && m_openedModelsChanging != nullptr)
+    {
+        m_openedModelsChanging();
+    }
     return ModelLoader::ReopenModels(itemTypes, lookNames);
 }
 
@@ -491,6 +495,10 @@ void CItemDataHandler::OnItemsSwapped(int firstItemType, int secondItemType)
 void CItemDataHandler::SwapItemModels(int firstItemType, int secondItemType)
 {
     g_ItemModelDatabase.Swap(firstItemType, secondItemType);
+    if (m_openedModelsChanging != nullptr)
+    {
+        m_openedModelsChanging();
+    }
     Data::Items::ModelLoader::SwapOpenedModels(firstItemType, secondItemType);
     m_changedModelGroups.set(static_cast<size_t>(GetItemGroup(firstItemType)));
     m_changedModelGroups.set(static_cast<size_t>(GetItemGroup(secondItemType)));

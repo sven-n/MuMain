@@ -99,6 +99,19 @@ public:
     {
         return !m_modelsToReopen.empty();
     }
+    // The item types ReopenChangedModels opens again next.
+    std::span<const int> GetModelsToReopen() const
+    {
+        return m_modelsToReopen;
+    }
+    // Runs before the opened data of model slots changes: a move swaps it
+    // (OnItemsSwapped, TakeBackModelMoves), and ReopenChangedModels opens it
+    // again. What keeps data of a slot (the cloth of worn pants) is game code,
+    // so the editor gives it; without one nothing runs.
+    void SetOpenedModelsChanging(void (*changing)())
+    {
+        m_openedModelsChanging = changing;
+    }
 
     // Sets the item's name in `locale` (an empty text removes the translation;
     // the English name cannot be emptied) in the item database, whole also when
@@ -224,6 +237,7 @@ private:
     bool m_statFileChanged = false;
     // The item types whose opened models no longer match their model entries.
     std::vector<int> m_modelsToReopen;
+    void (*m_openedModelsChanging)() = nullptr;
 
     struct LookNames
     {
