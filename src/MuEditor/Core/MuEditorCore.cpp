@@ -801,11 +801,13 @@ bool CMuEditorCore::ClaimsEvent(const SDL_Event& event)
         // click, the game with a click into it, also one that only closes a
         // popup. While a popup is open the tool windows count the whole
         // window as the editor's (so that click stays out of the game); then
-        // what ImGui would capture without the popup decides.
+        // what ImGui would capture without the popup decides. The Open Editor
+        // button of the closed editor takes no keyboard: the editor opens
+        // leaving it with the game, as with F12.
         m_bKeyboardOnEditorInGameWindow =
-            !ofEditorWindow &&
+            !ofEditorWindow && m_bEditorMode &&
             ((m_bHoveringUI && !ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel)) ||
-             (m_bEditorMode && io.WantCaptureMouseUnlessPopupClose));
+             io.WantCaptureMouseUnlessPopupClose);
         if (!wantsMouse)
         {
             return false;
