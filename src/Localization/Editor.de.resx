@@ -1618,4 +1618,190 @@
   <data name="Formula drop level bonus" xml:space="preserve">
     <value>Exzellente Gegenstände zählen {0} Drop-Stufen mehr, antike Gegenstände ohne exzellente Optionen {1} [dropLevelBonus].</value>
   </data>
+  <data name="Item Formulas" xml:space="preserve">
+    <value>Gegenstandsformeln</value>
+  </data>
+  <data name="Damage" xml:space="preserve">
+    <value>Schaden</value>
+  </data>
+  <data name="Profiles" xml:space="preserve">
+    <value>Profile</value>
+  </data>
+  <data name="Tables" xml:space="preserve">
+    <value>Tabellen</value>
+  </data>
+  <data name="New stat profile" xml:space="preserve">
+    <value>Neues Werteprofil</value>
+  </data>
+  <data name="New level bonus table" xml:space="preserve">
+    <value>Neue Stufenbonus-Tabelle</value>
+  </data>
+  <data name="Copy a stat profile" xml:space="preserve">
+    <value>Werteprofil kopieren</value>
+  </data>
+  <data name="Rename a stat profile" xml:space="preserve">
+    <value>Werteprofil umbenennen</value>
+  </data>
+  <data name="Remove a stat profile" xml:space="preserve">
+    <value>Werteprofil entfernen</value>
+  </data>
+  <data name="Copy a level bonus table" xml:space="preserve">
+    <value>Stufenbonus-Tabelle kopieren</value>
+  </data>
+  <data name="Rename a level bonus table" xml:space="preserve">
+    <value>Stufenbonus-Tabelle umbenennen</value>
+  </data>
+  <data name="Remove a level bonus table" xml:space="preserve">
+    <value>Stufenbonus-Tabelle entfernen</value>
+  </data>
+  <data name="Remove unused stat profiles" xml:space="preserve">
+    <value>Ungenutzte Werteprofile entfernen</value>
+  </data>
+  <data name="Remove unused level bonus tables" xml:space="preserve">
+    <value>Ungenutzte Stufenbonus-Tabellen entfernen</value>
+  </data>
+  <data name="Drop level bonus ({0}, {1})" xml:space="preserve">
+    <value>Drop-Stufen-Bonus ({0}, {1})</value>
+  </data>
+  <data name="Drop level bonus" xml:space="preserve">
+    <value>Drop-Stufen-Bonus</value>
+  </data>
+  <data name="Default ({0})" xml:space="preserve">
+    <value>Standard ({0})</value>
+  </data>
+  <data name="Used by {0} items and {1} rules" xml:space="preserve">
+    <value>Verwendet von {0} Gegenständen und {1} Regeln</value>
+  </data>
+  <data name="Named by {0} stats" xml:space="preserve">
+    <value>Von {0} Werten genannt</value>
+  </data>
+  <data name="Pick an entry in the list." xml:space="preserve">
+    <value>Wählen Sie einen Eintrag in der Liste.</value>
+  </data>
+  <data name="Apply to the formulas" xml:space="preserve">
+    <value>Auf die Formeln anwenden</value>
+  </data>
+  <data name="Change the item formulas" xml:space="preserve">
+    <value>Gegenstandsformeln ändern</value>
+  </data>
+  <data name="Not applied" xml:space="preserve">
+    <value>Nicht angewendet</value>
+  </data>
+  <data name="No item or rule uses these profiles: {0}" xml:space="preserve">
+    <value>Kein Gegenstand und keine Regel nutzt diese Profile: {0}</value>
+  </data>
+  <data name="No stat uses these tables: {0}" xml:space="preserve">
+    <value>Kein Wert nutzt diese Tabellen: {0}</value>
+  </data>
+  <data name="Rename" xml:space="preserve">
+    <value>Umbenennen</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Kopieren</value>
+  </data>
+  <data name="Caption" xml:space="preserve">
+    <value>Beschriftung</value>
+  </data>
+  <data name="Bonus at each item level" xml:space="preserve">
+    <value>Bonus je Gegenstandsstufe</value>
+  </data>
+  <data name="Added per level" xml:space="preserve">
+    <value>Je Stufe hinzu</value>
+  </data>
+  <data name="Removed only while no item and no rule uses it." xml:space="preserve">
+    <value>Wird nur entfernt, solange kein Gegenstand und keine Regel es nutzt.</value>
+  </data>
+  <data name="Removed only while no stat names it." xml:space="preserve">
+    <value>Wird nur entfernt, solange kein Wert sie nennt.</value>
+  </data>
+  <data name="Override" xml:space="preserve">
+    <value>Überschreiben</value>
+  </data>
+  <data name="Reset to default" xml:space="preserve">
+    <value>Auf den Standard zurücksetzen</value>
+  </data>
+  <data name="Inherited: {0}" xml:space="preserve">
+    <value>Geerbt: {0}</value>
+  </data>
+  <data name="Values" xml:space="preserve">
+    <value>Werte</value>
+  </data>
+  <data name="Times" xml:space="preserve">
+    <value>Mal</value>
+  </data>
+  <data name="Plus" xml:space="preserve">
+    <value>Plus</value>
+  </data>
+  <data name="Drop level divisor" xml:space="preserve">
+    <value>Drop-Stufe geteilt durch</value>
+  </data>
+  <data name="After the level bonus" xml:space="preserve">
+    <value>Nach dem Stufenbonus</value>
+  </data>
+  <data name="Level bonus table" xml:space="preserve">
+    <value>Stufenbonus-Tabelle</value>
+  </data>
+  <data name="Excellent part" xml:space="preserve">
+    <value>Exzellent-Anteil</value>
+  </data>
+  <data name="Ancient part" xml:space="preserve">
+    <value>Antik-Anteil</value>
+  </data>
+  <data name="Per level after halving" xml:space="preserve">
+    <value>Je Stufe nach dem Halbieren</value>
+  </data>
+  <data name="Level requirement per item level" xml:space="preserve">
+    <value>Stufenanforderung je Gegenstandsstufe</value>
+  </data>
+  <data name="Level added for excellent options" xml:space="preserve">
+    <value>Stufe mehr bei exzellenten Optionen</value>
+  </data>
+  <data name="Strength per option level" xml:space="preserve">
+    <value>Stärke je Optionsstufe</value>
+  </data>
+  <data name="Base value" xml:space="preserve">
+    <value>Grundwert</value>
+  </data>
+  <data name="Weight formula" xml:space="preserve">
+    <value>Gewichtsformel</value>
+  </data>
+  <data name="From the level requirement" xml:space="preserve">
+    <value>Aus der Stufenanforderung</value>
+  </data>
+  <data name="Level weight" xml:space="preserve">
+    <value>Stufengewicht</value>
+  </data>
+  <data name="Percent" xml:space="preserve">
+    <value>Prozent</value>
+  </data>
+  <data name="Times {0}, plus {1}" xml:space="preserve">
+    <value>Mal {0}, plus {1}</value>
+  </data>
+  <data name="Drop level divided by {0}" xml:space="preserve">
+    <value>Drop-Stufe geteilt durch {0}</value>
+  </data>
+  <data name="Plus {0}, level weight {1}, percent {2}" xml:space="preserve">
+    <value>Plus {0}, Stufengewicht {1}, Prozent {2}</value>
+  </data>
+  <data name="The server keeps its own formulas" xml:space="preserve">
+    <value>Der Server (OpenMU) behält seine eigenen Formeln, bis sie abgeglichen werden: Was er prüft und berechnet, kann von dem abweichen, was diese ergeben.</value>
+  </data>
+  <data name="Items keep their values until made again" xml:space="preserve">
+    <value>Gegenstände, die Ihr Charakter schon hat, behalten ihre Werte, bis sie neu erzeugt werden (z. B. nach erneutem Einloggen).</value>
+  </data>
+  <data name="What the drop level bonus is" xml:space="preserve">
+    <value>Kommt für die Anforderungen zur Drop-Stufe von Gegenständen mit exzellenten Optionen hinzu, und zu der antiker Gegenstände für den Antik-Anteil ihrer Werte und, ohne exzellente Optionen, für ihre Anforderungen.</value>
+  </data>
+  <data name="The default writes every term" xml:space="preserve">
+    <value>Der Standard schreibt jeden Term; ein Profil geht von ihm aus und schreibt nur, was abweicht.</value>
+  </data>
+  <data name="A profile writes only what differs from the default" xml:space="preserve">
+    <value>Ein Profil schreibt nur, was vom Standard abweicht: Überschreiben nimmt einen Term ins Profil, Auf den Standard zurücksetzen nimmt ihn wieder heraus.</value>
+  </data>
+  <data name="Added for every level, also above +15" xml:space="preserve">
+    <value>Kommt je Gegenstandsstufe hinzu, auch über +15, wo der Wert von +15 der Liste bleibt.</value>
+  </data>
+  <data name="A free name of letters and digits" xml:space="preserve">
+    <value>Ein Name aus Buchstaben und Ziffern, den kein anderes Profil bzw. keine andere Tabelle hat (nicht "default").</value>
+  </data>
 </root>

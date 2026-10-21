@@ -1639,4 +1639,190 @@
   <data name="Formula drop level bonus" xml:space="preserve">
     <value>Excellent items count {0} more drop levels, ancient items without excellent options {1} [dropLevelBonus].</value>
   </data>
+  <data name="Item Formulas" xml:space="preserve">
+    <value>Item Formulas</value>
+  </data>
+  <data name="Damage" xml:space="preserve">
+    <value>Damage</value>
+  </data>
+  <data name="Profiles" xml:space="preserve">
+    <value>Profiles</value>
+  </data>
+  <data name="Tables" xml:space="preserve">
+    <value>Tables</value>
+  </data>
+  <data name="New stat profile" xml:space="preserve">
+    <value>New stat profile</value>
+  </data>
+  <data name="New level bonus table" xml:space="preserve">
+    <value>New level bonus table</value>
+  </data>
+  <data name="Copy a stat profile" xml:space="preserve">
+    <value>Copy a stat profile</value>
+  </data>
+  <data name="Rename a stat profile" xml:space="preserve">
+    <value>Rename a stat profile</value>
+  </data>
+  <data name="Remove a stat profile" xml:space="preserve">
+    <value>Remove a stat profile</value>
+  </data>
+  <data name="Copy a level bonus table" xml:space="preserve">
+    <value>Copy a level bonus table</value>
+  </data>
+  <data name="Rename a level bonus table" xml:space="preserve">
+    <value>Rename a level bonus table</value>
+  </data>
+  <data name="Remove a level bonus table" xml:space="preserve">
+    <value>Remove a level bonus table</value>
+  </data>
+  <data name="Remove unused stat profiles" xml:space="preserve">
+    <value>Remove unused stat profiles</value>
+  </data>
+  <data name="Remove unused level bonus tables" xml:space="preserve">
+    <value>Remove unused level bonus tables</value>
+  </data>
+  <data name="Drop level bonus ({0}, {1})" xml:space="preserve">
+    <value>Drop level bonus ({0}, {1})</value>
+  </data>
+  <data name="Drop level bonus" xml:space="preserve">
+    <value>Drop level bonus</value>
+  </data>
+  <data name="Default ({0})" xml:space="preserve">
+    <value>Default ({0})</value>
+  </data>
+  <data name="Used by {0} items and {1} rules" xml:space="preserve">
+    <value>Used by {0} items and {1} rules</value>
+  </data>
+  <data name="Named by {0} stats" xml:space="preserve">
+    <value>Named by {0} stats</value>
+  </data>
+  <data name="Pick an entry in the list." xml:space="preserve">
+    <value>Pick an entry in the list.</value>
+  </data>
+  <data name="Apply to the formulas" xml:space="preserve">
+    <value>Apply to the formulas</value>
+  </data>
+  <data name="Change the item formulas" xml:space="preserve">
+    <value>Change the item formulas</value>
+  </data>
+  <data name="Not applied" xml:space="preserve">
+    <value>Not applied</value>
+  </data>
+  <data name="No item or rule uses these profiles: {0}" xml:space="preserve">
+    <value>No item or rule uses these profiles: {0}</value>
+  </data>
+  <data name="No stat uses these tables: {0}" xml:space="preserve">
+    <value>No stat uses these tables: {0}</value>
+  </data>
+  <data name="Rename" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="Caption" xml:space="preserve">
+    <value>Caption</value>
+  </data>
+  <data name="Bonus at each item level" xml:space="preserve">
+    <value>Bonus at each item level</value>
+  </data>
+  <data name="Added per level" xml:space="preserve">
+    <value>Added per level</value>
+  </data>
+  <data name="Removed only while no item and no rule uses it." xml:space="preserve">
+    <value>Removed only while no item and no rule uses it.</value>
+  </data>
+  <data name="Removed only while no stat names it." xml:space="preserve">
+    <value>Removed only while no stat names it.</value>
+  </data>
+  <data name="Override" xml:space="preserve">
+    <value>Override</value>
+  </data>
+  <data name="Reset to default" xml:space="preserve">
+    <value>Reset to default</value>
+  </data>
+  <data name="Inherited: {0}" xml:space="preserve">
+    <value>Inherited: {0}</value>
+  </data>
+  <data name="Values" xml:space="preserve">
+    <value>Values</value>
+  </data>
+  <data name="Times" xml:space="preserve">
+    <value>Times</value>
+  </data>
+  <data name="Plus" xml:space="preserve">
+    <value>Plus</value>
+  </data>
+  <data name="Drop level divisor" xml:space="preserve">
+    <value>Drop level divisor</value>
+  </data>
+  <data name="After the level bonus" xml:space="preserve">
+    <value>After the level bonus</value>
+  </data>
+  <data name="Level bonus table" xml:space="preserve">
+    <value>Level bonus table</value>
+  </data>
+  <data name="Excellent part" xml:space="preserve">
+    <value>Excellent part</value>
+  </data>
+  <data name="Ancient part" xml:space="preserve">
+    <value>Ancient part</value>
+  </data>
+  <data name="Per level after halving" xml:space="preserve">
+    <value>Per level after halving</value>
+  </data>
+  <data name="Level requirement per item level" xml:space="preserve">
+    <value>Level requirement per item level</value>
+  </data>
+  <data name="Level added for excellent options" xml:space="preserve">
+    <value>Level added for excellent options</value>
+  </data>
+  <data name="Strength per option level" xml:space="preserve">
+    <value>Strength per option level</value>
+  </data>
+  <data name="Base value" xml:space="preserve">
+    <value>Base value</value>
+  </data>
+  <data name="Weight formula" xml:space="preserve">
+    <value>Weight formula</value>
+  </data>
+  <data name="From the level requirement" xml:space="preserve">
+    <value>From the level requirement</value>
+  </data>
+  <data name="Level weight" xml:space="preserve">
+    <value>Level weight</value>
+  </data>
+  <data name="Percent" xml:space="preserve">
+    <value>Percent</value>
+  </data>
+  <data name="Times {0}, plus {1}" xml:space="preserve">
+    <value>Times {0}, plus {1}</value>
+  </data>
+  <data name="Drop level divided by {0}" xml:space="preserve">
+    <value>Drop level divided by {0}</value>
+  </data>
+  <data name="Plus {0}, level weight {1}, percent {2}" xml:space="preserve">
+    <value>Plus {0}, level weight {1}, percent {2}</value>
+  </data>
+  <data name="The server keeps its own formulas" xml:space="preserve">
+    <value>The server (OpenMU) keeps its own formulas until they are synced: what it checks and computes can differ from what these give.</value>
+  </data>
+  <data name="Items keep their values until made again" xml:space="preserve">
+    <value>Items your character already has keep their values until they are made again (e.g. after logging in again).</value>
+  </data>
+  <data name="What the drop level bonus is" xml:space="preserve">
+    <value>Added to the drop level of items with excellent options for their requirements, and of ancient items for the ancient part of their stats and, without excellent options, for their requirements.</value>
+  </data>
+  <data name="The default writes every term" xml:space="preserve">
+    <value>The default writes every term; a profile starts from it and writes only what differs.</value>
+  </data>
+  <data name="A profile writes only what differs from the default" xml:space="preserve">
+    <value>A profile writes only what differs from the default: Override takes a term into the profile, Reset to default takes it out again.</value>
+  </data>
+  <data name="Added for every level, also above +15" xml:space="preserve">
+    <value>Added for every item level, also above +15, where the +15 value of the list stays.</value>
+  </data>
+  <data name="A free name of letters and digits" xml:space="preserve">
+    <value>A name of letters and digits that no other profile or table of its kind has (not "default").</value>
+  </data>
 </root>

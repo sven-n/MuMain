@@ -42,6 +42,7 @@
 #include "UI/ItemTools/MuItemBrowserUI.h"
 #include "UI/ItemTools/MuItemCategoriesUI.h"
 #include "UI/ItemTools/MuItemChecksUI.h"
+#include "UI/ItemTools/MuItemFormulasUI.h"
 #include "UI/ItemTools/MuItemGlowColorsUI.h"
 #include "UI/ItemTools/MuItemModelUI.h"
 #include "UI/ItemTools/MuItemRequirementsUI.h"
@@ -1218,6 +1219,7 @@ void RenderItemTools()
     g_MuItemCategoriesUI.Render(&open);
     g_MuItemModelUI.Render(&open);
     g_MuItemGlowColorsUI.Render(&open);
+    g_MuItemFormulasUI.Render(&open);
     g_MuItemChecksUI.Render(&open);
     g_MuItemTranslationsUI.Render(&open);
 }
@@ -1241,11 +1243,19 @@ TEST_CASE("The item tools draw their frames without ImGui errors [data][items][e
     TestImGuiContext context;
 
     constexpr int Frames = 3;
+    // Item Formulas with each kind of entry picked.
+    using FormulaEntry = CMuItemFormulasUI::Entry;
+    const FormulaEntry entries[] = {{FormulaEntry::Kind::DropLevelBonus, {}},
+                                    {FormulaEntry::Kind::Default, {}},
+                                    {FormulaEntry::Kind::Profile, "shield"},
+                                    {FormulaEntry::Kind::Table, "defenseIncreaseShields"}};
+    size_t entry = 0;
     for (const int itemType : {KrisType, MakeItemType(0, 100)})
     {
         g_ItemSelection.Select(itemType);
         for (int frame = 0; frame < Frames; ++frame)
         {
+            g_MuItemFormulasUI.Show(entries[entry++ % std::size(entries)]);
             // Between frames, as the editor does.
             g_MuItemModelUI.BeforeFrame();
             ImGui::NewFrame();

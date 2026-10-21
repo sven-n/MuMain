@@ -223,6 +223,7 @@ void CMuEditorUI::RenderWindowsMenu(MuEditor::ToolWindows& windows, SDL_Window* 
         ImGui::MenuItem(I18N::Editor::ItemCategories, nullptr, &windows.itemCategories);
         ImGui::MenuItem(I18N::Editor::ItemModel, nullptr, &windows.itemModel);
         ImGui::MenuItem(I18N::Editor::GlowColors, nullptr, &windows.itemGlowColors);
+        ImGui::MenuItem(I18N::Editor::ItemFormulas, nullptr, &windows.itemFormulas);
         ImGui::MenuItem(I18N::Editor::ItemChecks, nullptr, &windows.itemChecks);
         ImGui::MenuItem(I18N::Editor::ItemTranslations, nullptr, &windows.itemTranslations);
         ImGui::EndMenu();

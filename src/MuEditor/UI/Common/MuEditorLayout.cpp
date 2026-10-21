@@ -23,10 +23,10 @@ constexpr char DockSpaceName[] = "ToolWindows";
 // The editor window's dock space, as last submitted; 0 before.
 ImGuiID g_dockSpace = 0;
 // The tools that show the item the browser selects, in their tab order.
-constexpr const char* ItemToolWindows[] = {MuEditor::WindowIds::ItemBasics, MuEditor::WindowIds::ItemRequirements,
-                                           MuEditor::WindowIds::ItemRules,  MuEditor::WindowIds::ItemCategories,
-                                           MuEditor::WindowIds::ItemModel,  MuEditor::WindowIds::ItemGlowColors,
-                                           MuEditor::WindowIds::ItemChecks, MuEditor::WindowIds::ItemTranslations};
+constexpr const char* ItemToolWindows[] = {
+    MuEditor::WindowIds::ItemBasics,     MuEditor::WindowIds::ItemRequirements, MuEditor::WindowIds::ItemRules,
+    MuEditor::WindowIds::ItemCategories, MuEditor::WindowIds::ItemModel,        MuEditor::WindowIds::ItemGlowColors,
+    MuEditor::WindowIds::ItemFormulas,   MuEditor::WindowIds::ItemChecks,       MuEditor::WindowIds::ItemTranslations};
 
 void BuildDefaultLayout(ImGuiID dockSpace, ImVec2 size)
 {

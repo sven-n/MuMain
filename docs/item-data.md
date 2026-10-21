@@ -767,6 +767,7 @@ shows it in the others.
   items from it. New tags need code.
 - **Item Model**: see [Item Model](#item-model).
 - **Glow Colors**: the glow color list, see [Glow Colors](#glow-colors).
+- **Item Formulas**: the item stat file, see [Item Formulas](#item-formulas).
 - **Item Checks**: the checks of a save as a list, errors first. A click on
   a problem of an item selects it and opens the tool of its field; an arrow
   key onto it only selects the item.
@@ -875,6 +876,37 @@ shared model. A color no item uses is removed (**Remove**, or **Remove
 them** for all of them); the defaults (`orange`, `white`, `azure`) stay,
 since items without colors of their own glow with them. Every change is a
 step of the undo history; renaming a color is left out.
+
+### Item Formulas
+
+The [item stat file](#item-stats-by-level): its drop level bonus, the
+default, the profiles and the level bonus tables, each in the list with how
+many items use it (a table: how many stats name it; unused ones are grey).
+The picked entry is changed on a copy and **Apply to the formulas** takes
+it: the file is checked first (written and read back, as Save Items does),
+and when the change reaches items (other values, or another profile when a
+profile is renamed) they are listed before it is applied, as for a shared
+model. Every change is one step of the undo history, and Save Items writes
+`Stats/ItemStats.json`.
+
+- **Drop level bonus**: what excellent and ancient items add to their drop
+  level for their requirements and the ancient part of their stats.
+- **Default**: every term of every stat and the requirement formulas.
+- **A profile**: each term it writes, and the ones it inherits from the
+  default (grey, with **Override** to write the term in the profile; **Reset
+  to default** takes a written term out again). **New stat profile**,
+  **Copy** and **Rename** take a name of letters and digits no other profile
+  has (not `default`); a rename renames the profile in the profile rules and
+  in every item that names it. **Remove** works while no item and no rule
+  uses the profile, **Remove them** for all such profiles.
+- **A table**: the bonus at each item level 0 to 15, what it adds for every
+  level (also above +15) and its English caption. New, copied, renamed (in
+  every stat that names it) and removed tables work like profiles; a table
+  is removed while no stat names it.
+
+The server keeps its own formulas until they are synced, so what it checks
+and computes can differ from what changed formulas give. Items your
+character already has keep their values until they are made again.
 
 ### Import from bmd / Export as bmd
 
