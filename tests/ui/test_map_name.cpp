@@ -14,6 +14,8 @@
 
 #include <RmlUi/Core/ComputedValues.h>
 #include <RmlUi/Core/FontEngineInterface.h>
+#include <RmlUi/Core/FontEffect.h>
+#include <RmlUi/Core/FontGlyph.h>
 #include <array>
 #include <climits>
 #include <filesystem>
@@ -80,6 +82,33 @@ void CheckName(int mapId, const wchar_t* expected)
 {
     CAPTURE(mapId);
     CHECK(std::wstring(gMapManager.GetMapName(mapId)) == expected);
+}
+
+void CheckTextEffects(Rml::Element& text)
+{
+    const auto* property = text.GetProperty(Rml::PropertyId::FontEffect);
+    REQUIRE(property != nullptr);
+    const auto effects = property->Get<Rml::FontEffectsPtr>();
+    REQUIRE(effects != nullptr);
+    REQUIRE(effects->list.size() == 2);
+    constexpr int probeSize = 10;
+    constexpr int edgeWidth = 2;
+    Rml::FontGlyph glyph;
+    for (const auto& effect : effects->list)
+    {
+        Rml::Vector2i origin(0, 0), dimensions(probeSize, probeSize);
+        REQUIRE(effect->GetGlyphMetrics(origin, dimensions, glyph));
+        if (effect->HasUniqueTexture())
+        {
+            CHECK(origin == Rml::Vector2i(-edgeWidth, -edgeWidth));
+            CHECK(dimensions == Rml::Vector2i(probeSize + 2 * edgeWidth, probeSize + 2 * edgeWidth));
+        }
+        else
+        {
+            CHECK(origin == Rml::Vector2i(edgeWidth, edgeWidth));
+            CHECK(dimensions == Rml::Vector2i(probeSize, probeSize));
+        }
+    }
 }
 
 void CheckBounds(Rml::Element& child, Rml::Element& parent)
@@ -241,11 +270,7 @@ TEST_CASE("map-name text wraps above a shared lower ornament across themes and s
             CHECK(text->GetComputedValues().font_size() > 0.f);
             CHECK(text->GetComputedValues().font_weight() == Rml::Style::FontWeight::Normal);
             CHECK(text->GetComputedValues().color() == Rml::Colourb(240, 236, 226));
-            const auto* effectProperty = text->GetProperty(Rml::PropertyId::FontEffect);
-            REQUIRE(effectProperty != nullptr);
-            const auto effects = effectProperty->Get<Rml::FontEffectsPtr>();
-            REQUIRE(effects != nullptr);
-            CHECK(effects->list.size() == 2);
+            CheckTextEffects(*text);
         }
     }
 }

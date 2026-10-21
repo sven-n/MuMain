@@ -14,7 +14,7 @@ body { pointer-events: none; }
     min-height: 24dp;
     display: flex; align-items: center; justify-content: center;
     font-family: token(font-map-name); font-size: 21dp; font-weight: normal; font-style: token(font-map-name-style); line-height: 1.1;
-    color: #f0ece2; font-effect: outline(1.25dp #100e0b), shadow(1.25dp 1.25dp #000000);
+    color: #f0ece2; font-effect: outline(2px #100e0b), shadow(2px 2px #000000);
     text-align: center;
 }
 #name_text { max-width: 100%; word-break: break-word; }
