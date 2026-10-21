@@ -31,6 +31,7 @@ public:
             Default,
             Profile,
             Table,
+            Rules,
         };
 
         Kind kind = Kind::None;
@@ -67,6 +68,9 @@ private:
     void RenderDefault(Data::Items::ItemStatFile& file);
     void RenderProfile(Data::Items::ItemStatFile& file);
     void RenderTable(Data::Items::ItemStatFile& file);
+    // The profile rules in order, the picked one's conditions below.
+    void RenderRules(Data::Items::ItemStatFile& file);
+    void RenderRuleConditions(Data::Items::StatProfileRule& rule);
     void RenderApplyButtons();
     void RenderConfirm();
     void RenderNameDialog();
@@ -112,6 +116,8 @@ private:
     bool m_openName = false;
 
     MuEditor::Items::ItemStatProfileUseCounts m_counts;
+    // The rule picked in the rules pane; -1 for none.
+    int m_pickedRule = -1;
 };
 
 #define g_MuItemFormulasUI CMuItemFormulasUI::GetInstance()

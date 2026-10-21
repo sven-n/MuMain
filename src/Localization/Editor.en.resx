@@ -1825,4 +1825,40 @@
   <data name="A free name of letters and digits" xml:space="preserve">
     <value>A name of letters and digits that no other profile or table of its kind has (not "default").</value>
   </data>
+  <data name="Profile rules" xml:space="preserve">
+    <value>Profile rules</value>
+  </data>
+  <data name="Profile rules ({0})" xml:space="preserve">
+    <value>Profile rules ({0})</value>
+  </data>
+  <data name="Conditions" xml:space="preserve">
+    <value>Conditions</value>
+  </data>
+  <data name="Every item" xml:space="preserve">
+    <value>Every item</value>
+  </data>
+  <data name="New rule" xml:space="preserve">
+    <value>New rule</value>
+  </data>
+  <data name="Move up" xml:space="preserve">
+    <value>Move up</value>
+  </data>
+  <data name="Move down" xml:space="preserve">
+    <value>Move down</value>
+  </data>
+  <data name="Remove the rule" xml:space="preserve">
+    <value>Remove the rule</value>
+  </data>
+  <data name="Rule {0}" xml:space="preserve">
+    <value>Rule {0}</value>
+  </data>
+  <data name="Base requirement above 0" xml:space="preserve">
+    <value>Base requirement above 0</value>
+  </data>
+  <data name="Matches {0} items" xml:space="preserve">
+    <value>Matches {0} items</value>
+  </data>
+  <data name="How the profile rules work" xml:space="preserve">
+    <value>The first rule whose conditions an item meets gives it its stat profile (an item meets a condition when it has one of its values); an item that meets none has the default. A profile picked for an item (Item Basics) stays. The marked rule is the selected item's.</value>
+  </data>
 </root>

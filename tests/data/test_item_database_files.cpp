@@ -1242,13 +1242,14 @@ TEST_CASE("The item tools draw their frames without ImGui errors [data][items][e
     REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
     TestImGuiContext context;
 
-    constexpr int Frames = 3;
+    constexpr int Frames = 5;
     // Item Formulas with each kind of entry picked.
     using FormulaEntry = CMuItemFormulasUI::Entry;
     const FormulaEntry entries[] = {{FormulaEntry::Kind::DropLevelBonus, {}},
                                     {FormulaEntry::Kind::Default, {}},
                                     {FormulaEntry::Kind::Profile, "shield"},
-                                    {FormulaEntry::Kind::Table, "defenseIncreaseShields"}};
+                                    {FormulaEntry::Kind::Table, "defenseIncreaseShields"},
+                                    {FormulaEntry::Kind::Rules, {}}};
     size_t entry = 0;
     for (const int itemType : {KrisType, MakeItemType(0, 100)})
     {

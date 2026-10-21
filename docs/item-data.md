@@ -880,7 +880,8 @@ step of the undo history; renaming a color is left out.
 ### Item Formulas
 
 The [item stat file](#item-stats-by-level): its drop level bonus, the
-default, the profiles and the level bonus tables, each in the list with how
+default, the profiles, the level bonus tables and the profile rules, each in
+the list with how
 many items use it (a table: how many stats name it; unused ones are grey).
 The picked entry is changed on a copy and **Apply to the formulas** takes
 it: the file is checked first (written and read back, as Save Items does),
@@ -903,6 +904,16 @@ model. Every change is one step of the undo history, and Save Items writes
   level (also above +15) and its English caption. New, copied, renamed (in
   every stat that names it) and removed tables work like profiles; a table
   is removed while no stat names it.
+- **Profile rules**: the rules in order, each with its profile, its
+  conditions and how many items it gives their profile (the selected item's
+  rule is marked). **New rule** adds a copy of the picked rule below it (or a
+  rule for the default at the end), **Move up** and **Move down** change the
+  order, **Remove the rule** takes it out; the picked rule's conditions are
+  lists to tick values in (none ticked: any). Applying lists the items that
+  follow the rules and take another profile with the change; a profile picked
+  for an item stays. A rule changed by hand in the file takes no item along:
+  the items keep the profile they name, and those it no longer gives count as
+  picked.
 
 The server keeps its own formulas until they are synced, so what it checks
 and computes can differ from what changed formulas give. Items your

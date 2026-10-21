@@ -6,6 +6,7 @@
 
 #include "ItemEdits.h"
 #include "ItemFieldWidgets.h"
+#include "ItemGroupNames.h"
 #include "ItemSelection.h"
 #include "ItemStatTermFields.h"
 #include "ItemTextInput.h"
@@ -17,6 +18,7 @@
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemEnumNames.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "I18N/All.h"
@@ -31,6 +33,7 @@ using namespace MuEditor::Items;
 using Data::Items::ItemStat;
 using Data::Items::ItemStatFile;
 using Data::Items::LevelBonusTable;
+using Data::Items::StatProfileRule;
 using Data::Items::WrittenStatProfile;
 using Data::Items::WrittenStatSection;
 using Entry = CMuItemFormulasUI::Entry;
@@ -109,6 +112,16 @@ void RenameTable(ItemStatFile& file, std::string_view from, const std::string& t
     }
 }
 
+std::string JoinNames(const std::vector<std::string>& names)
+{
+    std::string text;
+    for (const std::string& name : names)
+    {
+        text += (text.empty() ? "" : ", ") + name;
+    }
+    return text;
+}
+
 // The stored file with the picked entry as edited.
 ItemStatFile Compose(const ItemStatFile& stored, const ItemStatFile& edit, const Entry& entry)
 {
@@ -141,20 +154,126 @@ ItemStatFile Compose(const ItemStatFile& stored, const ItemStatFile& edit, const
             }
         }
         break;
+    case Entry::Kind::Rules:
+        file.profileRules = edit.profileRules;
+        break;
     case Entry::Kind::None:
         break;
     }
     return file;
 }
 
-std::string JoinNames(const std::vector<std::string>& names)
+bool HasValue(const Data::Items::ItemTagSet& values, Data::Items::ItemTag tag)
 {
-    std::string text;
-    for (const std::string& name : names)
+    return values.Has(tag);
+}
+
+void SetValue(Data::Items::ItemTagSet& values, Data::Items::ItemTag tag, bool on)
+{
+    values.Set(tag, on);
+}
+
+template <size_t Size, typename TEnum> bool HasValue(const std::bitset<Size>& values, TEnum value)
+{
+    const auto index = static_cast<size_t>(value);
+    return index < Size && values.test(index);
+}
+
+template <size_t Size, typename TEnum> void SetValue(std::bitset<Size>& values, TEnum value, bool on)
+{
+    values.set(static_cast<size_t>(value), on);
+}
+
+// The names of the values a condition has, in the order of the enum's names.
+template <typename TEnum, typename TSet> std::string DescribeValues(const TSet& values)
+{
+    std::vector<std::string> names;
+    for (const Data::Items::EnumName<TEnum>& entry : Data::Items::GetEnumNames(TEnum{}))
     {
-        text += (text.empty() ? "" : ", ") + name;
+        if (HasValue(values, entry.value))
+        {
+            names.push_back(entry.name);
+        }
+    }
+    return JoinNames(names);
+}
+
+std::string DescribeGroups(const std::bitset<MAX_ITEM_TYPE>& groups)
+{
+    std::vector<std::string> names;
+    for (size_t group = 0; group < groups.size(); ++group)
+    {
+        if (groups.test(group))
+        {
+            names.push_back(std::to_string(group));
+        }
+    }
+    return JoinNames(names);
+}
+
+// "slot: helm, boots; group: 15", or that it matches every item.
+std::string DescribeConditions(const StatProfileRule& rule)
+{
+    std::vector<std::string> parts;
+    const auto add = [&parts](const char* label, const std::string& values)
+    {
+        if (!values.empty())
+        {
+            parts.push_back(std::string(label) + ": " + values);
+        }
+    };
+    add(I18N::Editor::Group, DescribeGroups(rule.groups));
+    add(I18N::Metadata::Slot, DescribeValues<Data::Items::ItemSlot>(rule.slots));
+    add(I18N::Editor::WingTier, DescribeValues<Data::Items::WingTier>(rule.wingTiers));
+    add(I18N::Editor::WeaponKind, DescribeValues<Data::Items::WeaponKind>(rule.weaponKinds));
+    add(I18N::Editor::Tags, DescribeValues<Data::Items::ItemTag>(rule.tags));
+    add(I18N::Editor::BaseRequirementAbove0, DescribeValues<Data::Items::ItemRequirement>(rule.requirements));
+    if (parts.empty())
+    {
+        return I18N::Editor::EveryItem;
+    }
+    std::string text;
+    for (const std::string& part : parts)
+    {
+        text += (text.empty() ? "" : "; ") + part;
     }
     return text;
+}
+
+// A condition as a list to tick its values in; true when it changed.
+template <typename TEnum, typename TSet> bool ConditionCombo(const char* label, TSet& values)
+{
+    bool changed = false;
+    const std::string preview = DescribeValues<TEnum>(values);
+    ImGui::SetNextItemWidth(Fields::ScaledWidth(Fields::NumberWidth * 3.0f));
+    if (ImGui::BeginCombo(label, preview.empty() ? I18N::Editor::Any : preview.c_str()))
+    {
+        for (const Data::Items::EnumName<TEnum>& entry : Data::Items::GetEnumNames(TEnum{}))
+        {
+            const bool on = HasValue(values, entry.value);
+            if (ImGui::Selectable(entry.name, on, ImGuiSelectableFlags_NoAutoClosePopups))
+            {
+                SetValue(values, entry.value, !on);
+                changed = true;
+            }
+        }
+        ImGui::EndCombo();
+    }
+    return changed;
+}
+
+// The item types of the stored items that match `rule` first in `rules`.
+std::vector<int> FindRuleItems(std::span<const StatProfileRule> rules, int rule)
+{
+    std::vector<int> items;
+    for (const Data::Items::ItemDefinition& item : g_ItemDatabase.GetAllSlots())
+    {
+        if (item.Exists() && Data::Items::FindMatchingRule(rules, item) == rule)
+        {
+            items.push_back(Data::Items::MakeItemType(item.group, item.number));
+        }
+    }
+    return items;
 }
 
 // A grey line that wraps at the window's edge.
@@ -377,6 +496,10 @@ void CMuItemFormulasUI::RenderList()
         }
         ImGui::PopID();
     }
+
+    ImGui::SeparatorText(I18N::Editor::ProfileRules);
+    row(I18N::Format(I18N::Editor::ProfileRules0, {std::to_string(stored.profileRules.size())}) + "###Rules",
+        {Entry::Kind::Rules, {}}, false);
 }
 
 void CMuItemFormulasUI::RenderPicked()
@@ -402,6 +525,9 @@ void CMuItemFormulasUI::RenderPicked()
         break;
     case Entry::Kind::Table:
         RenderTable(m_edit);
+        break;
+    case Entry::Kind::Rules:
+        RenderRules(m_edit);
         break;
     case Entry::Kind::None:
         break;
@@ -587,6 +713,141 @@ void CMuItemFormulasUI::RenderTable(ItemStatFile& file)
     {
         ImGui::SetTooltip("%s", I18N::Editor::AddedForEveryLevelAlsoAbove15);
     }
+}
+
+void CMuItemFormulasUI::RenderRules(ItemStatFile& file)
+{
+    std::vector<StatProfileRule>& rules = file.profileRules;
+    RenderNote(I18N::Editor::HowTheProfileRulesWork);
+    const int selectedRule = [&]
+    {
+        const Data::Items::ItemDefinition* selected = g_ItemDatabase.Find(g_ItemSelection.GetItemType());
+        return selected != nullptr ? Data::Items::FindMatchingRule(rules, *selected) : Data::Items::NoStatProfileRule;
+    }();
+    if (ImGui::BeginTable("##Rules", 4,
+                          ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingFixedFit))
+    {
+        ImGui::TableSetupColumn("#");
+        ImGui::TableSetupColumn(I18N::Editor::StatProfile);
+        ImGui::TableSetupColumn(I18N::Editor::Conditions, ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableSetupColumn(I18N::Editor::Items);
+        ImGui::TableHeadersRow();
+        std::vector<std::string> profiles = {Data::Items::StatProfileNames::Default};
+        for (const WrittenStatProfile& profile : file.profiles)
+        {
+            profiles.push_back(profile.name);
+        }
+        for (size_t index = 0; index < rules.size(); ++index)
+        {
+            StatProfileRule& rule = rules[index];
+            ImGui::PushID(static_cast<int>(index));
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            // The selected item's rule is marked.
+            const std::string number =
+                std::to_string(index + 1) + (static_cast<int>(index) == selectedRule ? " <" : "");
+            if (ImGui::Selectable(number.c_str(), m_pickedRule == static_cast<int>(index),
+                                  MuEditor::KeyboardSelection::RowFlags))
+            {
+                m_pickedRule = static_cast<int>(index);
+            }
+            ImGui::TableSetColumnIndex(1);
+            ImGui::SetNextItemWidth(Fields::ScaledWidth(Fields::NumberWidth * 1.4f));
+            if (ImGui::BeginCombo("##Profile", rule.profile.c_str()))
+            {
+                for (const std::string& profile : profiles)
+                {
+                    if (ImGui::Selectable(profile.c_str(), profile == rule.profile))
+                    {
+                        rule.profile = profile;
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::TableSetColumnIndex(2);
+            ImGui::PushTextWrapPos(0.0f);
+            ImGui::TextUnformatted(DescribeConditions(rule).c_str());
+            ImGui::PopTextWrapPos();
+            ImGui::TableSetColumnIndex(3);
+            ImGui::Text("%d", static_cast<int>(FindRuleItems(rules, static_cast<int>(index)).size()));
+            ImGui::PopID();
+        }
+        ImGui::EndTable();
+    }
+
+    const bool picked = m_pickedRule >= 0 && static_cast<size_t>(m_pickedRule) < rules.size();
+    if (ImGui::Button(I18N::Editor::NewRule))
+    {
+        // A copy of the picked rule below it, else a rule for the default at the end.
+        const size_t at = picked ? static_cast<size_t>(m_pickedRule) + 1 : rules.size();
+        rules.insert(rules.begin() + static_cast<std::ptrdiff_t>(at),
+                     picked ? rules[static_cast<size_t>(m_pickedRule)]
+                            : StatProfileRule{.profile = Data::Items::StatProfileNames::Default});
+        m_pickedRule = static_cast<int>(at);
+        return;
+    }
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!picked || m_pickedRule == 0);
+    if (ImGui::Button(I18N::Editor::MoveUp))
+    {
+        std::swap(rules[static_cast<size_t>(m_pickedRule)], rules[static_cast<size_t>(m_pickedRule) - 1]);
+        --m_pickedRule;
+    }
+    ImGui::EndDisabled();
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!picked || static_cast<size_t>(m_pickedRule) + 1 >= rules.size());
+    if (ImGui::Button(I18N::Editor::MoveDown))
+    {
+        std::swap(rules[static_cast<size_t>(m_pickedRule)], rules[static_cast<size_t>(m_pickedRule) + 1]);
+        ++m_pickedRule;
+    }
+    ImGui::EndDisabled();
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!picked);
+    const bool remove = ImGui::Button(I18N::Editor::RemoveTheRule);
+    ImGui::EndDisabled();
+    if (remove)
+    {
+        rules.erase(rules.begin() + m_pickedRule);
+        m_pickedRule = -1;
+        return;
+    }
+    if (picked)
+    {
+        ImGui::SeparatorText(I18N::Format(I18N::Editor::Rule0, {std::to_string(m_pickedRule + 1)}).c_str());
+        RenderRuleConditions(rules[static_cast<size_t>(m_pickedRule)]);
+        const std::vector<int> items = FindRuleItems(rules, m_pickedRule);
+        if (ImGui::TreeNode("##RuleItems", "%s",
+                            I18N::Format(I18N::Editor::Matches0Items, {std::to_string(items.size())}).c_str()))
+        {
+            RenderUsers("##RuleItemList", items);
+            ImGui::TreePop();
+        }
+    }
+}
+
+void CMuItemFormulasUI::RenderRuleConditions(StatProfileRule& rule)
+{
+    std::string groups = DescribeGroups(rule.groups);
+    ImGui::SetNextItemWidth(Fields::ScaledWidth(Fields::NumberWidth * 3.0f));
+    if (ImGui::BeginCombo(I18N::Editor::Group, groups.empty() ? I18N::Editor::Any : groups.c_str()))
+    {
+        for (int group = 0; group < MAX_ITEM_TYPE; ++group)
+        {
+            const bool on = rule.groups.test(static_cast<size_t>(group));
+            if (ImGui::Selectable(MuEditor::Items::GetItemGroupLabel(group).c_str(), on,
+                                  ImGuiSelectableFlags_NoAutoClosePopups))
+            {
+                rule.groups.set(static_cast<size_t>(group), !on);
+            }
+        }
+        ImGui::EndCombo();
+    }
+    ConditionCombo<Data::Items::ItemSlot>(I18N::Metadata::Slot, rule.slots);
+    ConditionCombo<Data::Items::WingTier>(I18N::Editor::WingTier, rule.wingTiers);
+    ConditionCombo<Data::Items::WeaponKind>(I18N::Editor::WeaponKind, rule.weaponKinds);
+    ConditionCombo<Data::Items::ItemTag>(I18N::Editor::Tags, rule.tags);
+    ConditionCombo<Data::Items::ItemRequirement>(I18N::Editor::BaseRequirementAbove0, rule.requirements);
 }
 
 void CMuItemFormulasUI::Apply(ItemStatFile file, std::string label, std::string renamedFrom, std::string renamedTo)

@@ -42,7 +42,7 @@ stores it when a field is left.
 - **MuItemCategoriesUI** - The items of a tag
 - **MuItemModelUI** - The model entry with a preview, file picker, shared models and looks (ItemModelPreview, ItemModelFilePicker, ItemSharedModelForm, ItemModelForms)
 - **MuItemGlowColorsUI** - The glow color list: new colors, changed values and unused colors removed (GlowColorDialog, which the model tool's color fields open too)
-- **MuItemFormulasUI** - The item stat file: drop level bonus, default, profiles and level bonus tables, changed on a copy and applied after the list of the items it reaches (ItemStatTermFields, ItemStatFileChange)
+- **MuItemFormulasUI** - The item stat file: drop level bonus, default, profiles, level bonus tables and profile rules, changed on a copy and applied after the list of the items it reaches (ItemStatTermFields, ItemStatFileChange)
 - **MuItemChecksUI** - The checks of a save, each leading to its item and field (ItemCheckTargets)
 - **ItemToolWindow** - What every item tool window shares: its title, the selected item, and Undo and Redo (shown in the editor's bar)
 
