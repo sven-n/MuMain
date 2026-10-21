@@ -40,6 +40,15 @@ constexpr TooltipVariant TooltipVariants[] = {
          params.HarmonyOptionType = 1;
          params.HarmonyOptionLevel = 13;
      }},
+    // Not at full durability: a stack's count, a pet's life.
+    {"count", [](ItemCreationParams& params) { params.Durability = 3; }},
+    // An expired timed item (one that is not expired shows the time it expires).
+    {"timed",
+     [](ItemCreationParams& params)
+     {
+         params.WithExpiration = true;
+         params.IsExpired = true;
+     }},
 };
 } // namespace
 

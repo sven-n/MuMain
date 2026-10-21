@@ -199,8 +199,9 @@ std::map<std::string, std::string> HashesByItem(const std::string& hero, const s
 }
 } // namespace
 
-// Every item's tooltip at every level 0 to 15, as plain, full, ancient and harmony items (WriteItemTooltipSnapshot),
-// for the two heroes, against the hashes recorded in item_tooltip_snapshot.txt: a tooltip that changes shows here.
+// Every item's tooltip at every level 0 to 15, as plain, full, ancient, harmony, count and timed items
+// (WriteItemTooltipSnapshot), for the two heroes, against the hashes recorded in item_tooltip_snapshot.txt: a tooltip
+// that changes shows here.
 // After a change that is meant, run the test with MU_TOOLTIP_SNAPSHOT_UPDATE=1 to record the new hashes; the control
 // socket's `tooltip-snapshot` writes the full lines in the game to compare with.
 TEST_CASE("Every item's tooltip is as recorded [data][items][tooltip]")
@@ -222,7 +223,7 @@ TEST_CASE("Every item's tooltip is as recorded [data][items][tooltip]")
         ::Hero->Class = hero.Hero().Class;
         ::Hero->Level = hero.Hero().Level;
         std::ostringstream snapshot;
-        CHECK(WriteItemTooltipSnapshot(snapshot) == 949 * 4 * 16);
+        CHECK(WriteItemTooltipSnapshot(snapshot) == 949 * 6 * 16);
         const std::map<std::string, std::string> heroHashes = HashesByItem(name, snapshot.str(), tooltips);
         hashes.insert(heroHashes.begin(), heroHashes.end());
     }
@@ -309,3 +310,4 @@ TEST_CASE("The tooltip's values of an item follow the item and the hero [data][i
     MakeBladeMaster(hero.Hero());
     CHECK(ComputeItemTooltipValues(kris).strength.missing == 0);
 }
+
