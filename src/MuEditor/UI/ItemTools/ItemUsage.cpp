@@ -56,7 +56,11 @@ void FindGameData(int itemType, ItemUsage& usage)
 {
     if (CSItemOption::IsInitialized())
     {
-        usage.inAncientSet = g_csItemOption.IsChangeSetItem(itemType) != 0;
+        // GetSetItemName reads set number 0 and 255 as no set; IsChangeSetItem
+        // only 255, while the shipped set file writes 0.
+        wchar_t setName[MAX_ITEM_SET_NAME + 2]{};
+        usage.inAncientSet =
+            g_csItemOption.GetSetItemName(setName, itemType, 1) || g_csItemOption.GetSetItemName(setName, itemType, 2);
     }
     if (g_pItemAddOptioninfo != nullptr)
     {

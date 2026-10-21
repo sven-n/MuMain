@@ -1164,6 +1164,8 @@ TEST_CASE("The usage of an item lists its tags, its model and the code that name
     // The editor was built from these sources, and the code names the Kris.
     REQUIRE(kris.codeKnown);
     CHECK_FALSE(kris.code.empty());
+    // No set file is loaded here, so the set numbers are all 0: no set.
+    CHECK_FALSE(kris.inAncientSet);
 
     const MuEditor::Items::ItemUsage nothing = MuEditor::Items::FindItemUsage(MakeItemType(0, 100));
     CHECK_FALSE(nothing.hasModel);
