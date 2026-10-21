@@ -210,6 +210,34 @@ TEST_CASE("Every shipped item names the stat profile its data gives [data][items
     CHECK(itemsWithProfile == 566);
 }
 
+// The shipped profile rules give the profiles that the code before them gave; how many
+// items each rule reaches pins them.
+TEST_CASE("The items each shipped profile rule gives its profile [data][items]")
+{
+    ShippedItemAttributes items;
+    const ItemStatProfiles& profiles = g_ItemDatabase.GetStatProfiles();
+    const std::vector<int> expected = {2, 10, 3, 22, 113, 327, 6, 4, 2, 5, 7, 0, 36, 32};
+    REQUIRE(profiles.GetRules().size() == expected.size());
+    std::vector<int> counts(expected.size());
+    int withoutRule = 0;
+    for (const ItemDefinition& definition : g_ItemDatabase.GetAllSlots())
+    {
+        if (!definition.Exists())
+        {
+            continue;
+        }
+        const int rule = profiles.FindRule(definition);
+        if (rule == NoStatProfileRule)
+        {
+            ++withoutRule;
+            continue;
+        }
+        ++counts[static_cast<size_t>(rule)];
+    }
+    CHECK(counts == expected);
+    CHECK(withoutRule == 342);
+}
+
 // The fixed excellent bonus of the three chaos weapons is item data.
 TEST_CASE("The chaos weapons' fixed excellent bonus is item data [data][items]")
 {

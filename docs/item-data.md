@@ -318,6 +318,28 @@ or with `"default"` (arrows and bolts, jewels, potions, the orbs, crystals
 and scrolls of group 12, the Horn of Fenrir, …) have the default: their
 level requirement does not grow.
 
+The shipped profile rules, in order, with the items each gives its profile:
+
+| # | Profile | Conditions | Items |
+|---|---|---|---|
+| 1 | `default` | tags `ammunition` (arrows and bolts) | 2 |
+| 2 | `sceptre` | tags `sceptre` | 10 |
+| 3 | `book` | tags `summonerBook` | 3 |
+| 4 | `shield` | weapon kind `shield` | 22 |
+| 5 | `weapon` | every other weapon kind | 113 |
+| 6 | `armor` | slot `helm`, `armor`, `pants`, `gloves` or `boots` | 327 |
+| 7 | `smallWing` | slot `wings`, wing tier `small` | 6 |
+| 8 | `firstTierWing` | slot `wings`, wing tier `first` | 4 |
+| 9 | `secondTierCape` | slot `wings`, wing tier `second`, tags `cape` | 2 |
+| 10 | `secondTierWing` | slot `wings`, wing tier `second` | 5 |
+| 11 | `thirdTierWing` | slot `wings`, wing tier `third` | 7 |
+| 12 | `default` | slot `wings` (wings without a tier) | 0 |
+| 13 | `scroll` | group 15, any base requirement | 36 |
+| 14 | `helper` | groups 13 and 14, a base level requirement | 32 |
+
+The other 342 items match no rule and have the default. Rule 14 reaches the
+Horn of Fenrir, which names `"default"`.
+
 **Errors** in the file stop the start like errors in the item files: a file
 that cannot be read, invalid JSON, a top level that is not an object, a
 missing or unsupported `formatVersion`; a missing `dropLevelBonus` (with
