@@ -82,4 +82,19 @@ TEST_CASE("The item tools find the items of a stat profile, the default by eithe
     CHECK(FindStatProfileUsers("default") == FindStatProfileUsers(""));
 }
 
+TEST_CASE("The stat profile counts are those of the users lists and follow changes [editor][items]")
+{
+    ItemsScope items({MakeItem(0, ""), MakeItem(1, "default"), MakeItem(2, "weapon")});
+    ItemStatProfileUseCounts counts;
+    CHECK(counts.Items("weapon") == 1);
+    CHECK(counts.Items("") == 2);
+    CHECK(counts.Items("default") == 2);
+    CHECK(counts.Items("armor") == 0);
+    CHECK(counts.Rules("weapon") == 0);
+
+    g_ItemDatabase.Set(MakeItem(3, "weapon"));
+    CHECK(counts.Items("weapon") == 2);
+    CHECK(static_cast<size_t>(counts.Items("weapon")) == FindStatProfileUsers("weapon").size());
+}
+
 #endif // _EDITOR

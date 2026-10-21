@@ -4,6 +4,7 @@
 
 #include "ItemEditDraft.h"
 #include "ItemRequirementTable.h"
+#include "ItemUsers.h"
 
 #include "Data/GameData/ItemData/ItemDefinition.h"
 
@@ -26,10 +27,10 @@ private:
     // excellent or ancient, while a value is still being typed.
     void RenderStatTable(const Data::Items::ItemDefinition& item);
     void RenderPrices(Data::Items::ItemDefinition& item);
-    void RenderStatProfile(Data::Items::ItemDefinition& item);
     void RenderResistances(Data::Items::ItemDefinition& item);
 
     MuEditor::Items::ItemEditDraft<Data::Items::ItemDefinition> m_draft;
+    MuEditor::Items::ItemStatProfileUseCounts m_profileCounts;
     MuEditor::Items::RequirementVariant m_statVariant;
 };
 

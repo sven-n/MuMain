@@ -8,6 +8,7 @@
 #include "ItemFieldWidgets.h"
 #include "ItemHeldByCharacter.h"
 #include "ItemSelection.h"
+#include "ItemStatProfileWidgets.h"
 #include "ItemTextInput.h"
 #include "ItemToolWindow.h"
 #include "ItemUsers.h"
@@ -17,7 +18,6 @@
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Data/GameData/Common/LocalizedString.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
-#include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "I18N/All.h"
 #include "imgui.h"
 
@@ -73,12 +73,6 @@ std::array<StatColumn, 6> StatColumns()
              {&ItemStatValues::blockRate, I18N::Metadata::BlockRate}}};
 }
 
-// The profile with how many items use it: "weapon (186)".
-std::string ProfileLabel(const std::string& name)
-{
-    const std::string shown = name.empty() ? I18N::Editor::None : name;
-    return shown + " (" + std::to_string(MuEditor::Items::FindStatProfileUsers(name).size()) + ")";
-}
 } // namespace
 
 CMuItemBasicsUI& CMuItemBasicsUI::GetInstance()
@@ -260,36 +254,7 @@ void CMuItemBasicsUI::RenderPrices(ItemDefinition& item)
     Fields::Byte(m_draft, I18N::Metadata::SellValue, item.sellValue);
     ImGui::SameLine();
     Fields::Int(m_draft, I18N::Metadata::BuyPrice, item.buyPrice);
-    RenderStatProfile(item);
-}
-
-void CMuItemBasicsUI::RenderStatProfile(ItemDefinition& item)
-{
-    ImGui::SetNextItemWidth(Fields::ScaledWidth(NameWidth));
-    const std::string shown = item.statProfile.empty() ? I18N::Editor::None : item.statProfile;
-    if (ImGui::BeginCombo(I18N::Editor::StatProfile, shown.c_str()))
-    {
-        // The default by its two names: "" follows the data, "default" keeps
-        // the default also where the data gives a profile.
-        std::vector<std::string> names = {"", Data::Items::StatProfileNames::Default};
-        for (const std::string& name : g_ItemDatabase.GetStatProfiles().GetProfileNames())
-        {
-            names.push_back(name);
-        }
-        for (const std::string& name : names)
-        {
-            if (ImGui::Selectable(ProfileLabel(name).c_str(), name == item.statProfile) && name != item.statProfile)
-            {
-                item.statProfile = name;
-                m_draft.AfterChange(true, I18N::Editor::StatProfile);
-            }
-        }
-        ImGui::EndCombo();
-    }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::SetTooltip("%s", I18N::Editor::TheProfilesAreInTheItemStatFileTheNumberIsHowManyItemsUseOne);
-    }
+    MuEditor::Items::RenderStatProfileCombo(m_draft, item, m_profileCounts);
 }
 
 void CMuItemBasicsUI::RenderResistances(ItemDefinition& item)

@@ -2,6 +2,10 @@
 
 #ifdef _EDITOR
 
+#include "Data/GameData/ItemData/ItemDefinition.h"
+
+#include <map>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -17,9 +21,33 @@ std::vector<int> FindItemEffectUsers(std::string_view name);
 // The items with the color in any of their glow colors (glow, shine,
 // ancient), also as the default they leave out.
 std::vector<int> FindGlowColorUsers(std::string_view name);
-// The items whose stat profile it is; "" and "default" both name the
+// Whether `name` is the item's stat profile; "" and "default" both name the
 // default profile.
+bool UsesStatProfile(const Data::Items::ItemDefinition& item, std::string_view name);
+// The items whose stat profile it is (UsesStatProfile).
 std::vector<int> FindStatProfileUsers(std::string_view name);
+// The profile rules of the item stat file that give it (their indexes); ""
+// and "default" both name the default profile.
+std::vector<int> FindStatProfileRules(std::string_view name);
+
+// How many items and profile rules name each stat profile ("" and "default"
+// together), for the lists that show the count beside each name. Counted in
+// one pass, again when the item data changed.
+class ItemStatProfileUseCounts
+{
+public:
+    int Items(std::string_view name);
+    int Rules(std::string_view name);
+
+private:
+    using Counts = std::map<std::string, int, std::less<>>;
+
+    void Update();
+
+    Counts m_items;
+    Counts m_rules;
+    int m_version = -1;
+};
 } // namespace MuEditor::Items
 
 #endif // _EDITOR
