@@ -1604,25 +1604,27 @@ void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int 
 }
 
 // (sx, sy) in the screen's 640x480 stretch, `screen`.
-static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy, ITEM* ip, bool Sell, int Inventype,
-                           bool bItemTextListBoxUse)
+// What BuildItemTooltipText made of an item.
+enum class ItemTooltipBuild
 {
-    // Unconditional: the early returns below (and the pet-item delegation further down, which
-    // renders its own tooltip via giPetManager::RenderPetItemInfo() instead) used to mean "this
-    // frame draws nothing" under the old per-frame native draw -- already equivalent to "hidden"
-    // for that item. The shared tooltip document is persistent, so this replicates that; the real
-    // Show() call near the end of this function makes it visible again once actually reached.
-    UI::Tooltip::HideLegacyTextList();
+    Nothing,     // no tooltip for it
+    DarkLordPet, // the pet manager draws its own
+    Lines,       // TextList, TextListColor and TextBold hold its TextNum lines
+};
 
+// Writes the lines of an item's tooltip into TextList, TextListColor and TextBold (TextNum, SkipNum), without drawing
+// them; RenderItemInfo draws them.
+static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype, bool bItemTextListBoxUse)
+{
     if (ip->Type == -1)
-        return;
+        return ItemTooltipBuild::Nothing;
 
     tm* ExpireTime;
     if (ip->bPeriodItem == true && ip->bExpiredPeriod == false)
     {
         _tzset();
         if (ip->lExpireTime == 0)
-            return;
+            return ItemTooltipBuild::Nothing;
 
         ExpireTime = localtime((time_t*)&(ip->lExpireTime));
     }
@@ -1639,28 +1641,7 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
 
     if (!Sell && (GameLogic::Items::IsDarkLordPet(ip)))
     {
-        static DebouncedAction debouncedPetInfoRequest([ip, Inventype]()
-            {
-                PetType PetType = PetType::DarkRaven;
-                if (ip->Type == ITEM_DARK_HORSE_ITEM)
-                {
-                    PetType = PetType::DarkHorse;
-
-                    if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_HELPER) 
-                    {
-                        SocketClient->ToGameServer()->SendPetInfoRequest(PetType, static_cast<StorageType>(Inventype), EQUIPMENT_HELPER);
-                    }
-                }
-                else if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_WEAPON_LEFT) 
-                {
-                    SocketClient->ToGameServer()->SendPetInfoRequest(PetType, static_cast<StorageType>(Inventype), EQUIPMENT_WEAPON_LEFT);
-                }
-            }, 1000); // 1-second intervals
-
-        debouncedPetInfoRequest.invoke();
-
-        giPetManager::RenderPetItemInfo(screen, sx, sy, ip, Inventype);
-        return;
+        return ItemTooltipBuild::DarkLordPet;
     }
 
     mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
@@ -4325,7 +4306,72 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
         TextNum = g_csItemOption.RenderSetOptionListInItem(ip, TextNum, bThisisEquippedItem);
 
         TextNum = g_SocketItemMgr.AttachToolTipForSocketItem(ip, TextNum);
+    }
 
+    return ItemTooltipBuild::Lines;
+}
+
+std::vector<ItemTooltipLine> BuildItemTooltipLines(ITEM* ip, bool Sell, int Inventype, bool bItemTextListBoxUse)
+{
+    std::vector<ItemTooltipLine> lines;
+    if (BuildItemTooltipText(ip, Sell, Inventype, bItemTextListBoxUse) != ItemTooltipBuild::Lines)
+    {
+        return lines;
+    }
+    lines.reserve(TextNum);
+    for (int index = 0; index < TextNum; ++index)
+    {
+        lines.push_back({TextList[index], TextListColor[index], TextBold[index] != 0});
+    }
+    return lines;
+}
+
+static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy, ITEM* ip, bool Sell, int Inventype,
+                           bool bItemTextListBoxUse)
+{
+    // Unconditional: the early returns below (and the pet-item delegation further down, which
+    // renders its own tooltip via giPetManager::RenderPetItemInfo() instead) used to mean "this
+    // frame draws nothing" under the old per-frame native draw -- already equivalent to "hidden"
+    // for that item. The shared tooltip document is persistent, so this replicates that; the real
+    // Show() call near the end of this function makes it visible again once actually reached.
+    UI::Tooltip::HideLegacyTextList();
+
+    const ItemTooltipBuild build = BuildItemTooltipText(ip, Sell, Inventype, bItemTextListBoxUse);
+    if (build == ItemTooltipBuild::Nothing)
+        return;
+    if (build == ItemTooltipBuild::DarkLordPet)
+    {
+        static DebouncedAction debouncedPetInfoRequest(
+            [ip, Inventype]()
+            {
+                PetType PetType = PetType::DarkRaven;
+                if (ip->Type == ITEM_DARK_HORSE_ITEM)
+                {
+                    PetType = PetType::DarkHorse;
+
+                    if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_HELPER)
+                    {
+                        SocketClient->ToGameServer()->SendPetInfoRequest(PetType, static_cast<StorageType>(Inventype),
+                                                                         EQUIPMENT_HELPER);
+                    }
+                }
+                else if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_WEAPON_LEFT)
+                {
+                    SocketClient->ToGameServer()->SendPetInfoRequest(PetType, static_cast<StorageType>(Inventype),
+                                                                     EQUIPMENT_WEAPON_LEFT);
+                }
+            },
+            1000); // 1-second intervals
+
+        debouncedPetInfoRequest.invoke();
+
+        giPetManager::RenderPetItemInfo(screen, sx, sy, ip, Inventype);
+        return;
+    }
+
+    ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
+    if (!bItemTextListBoxUse)
+    {
         SIZE TextSize = { 0, 0 };
         int	Height = 0;
         int	EmptyLine = 0;

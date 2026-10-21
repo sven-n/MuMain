@@ -1,6 +1,9 @@
 #ifndef __ZZZINVENTORY_H__
 #define __ZZZINVENTORY_H__
 
+#include <string>
+#include <vector>
+
 enum _COLUMN_TYPE
 {
     _COLUMN_TYPE_LEVEL = 0,
@@ -189,6 +192,18 @@ void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int 
 // The item's information and repair tooltips, anchored in window pixels: their layout runs in the
 // screen's 640x480 stretch, the space the original computed it in, whichever window asks.
 void RenderItemInfoAtPx(float x, float y, ITEM* ip, bool Sell, int Inventype = 0, bool bItemTextListBoxUse = false);
+// One line of an item's information tooltip as RenderItemInfoAtPx builds it: its text ("\n" for a blank line), its
+// TEXT_COLOR_* and whether it is bold.
+struct ItemTooltipLine
+{
+    std::wstring text;
+    int color = 0;
+    bool bold = false;
+};
+// The lines of `ip`'s information tooltip, built as RenderItemInfoAtPx builds them but not drawn; none when it shows
+// no tooltip or the pet manager draws its own (the Dark Lord's pets).
+std::vector<ItemTooltipLine> BuildItemTooltipLines(ITEM* ip, bool Sell, int Inventype = 0,
+                                                   bool bItemTextListBoxUse = false);
 void RenderRepairInfoAtPx(float x, float y, ITEM* ip, bool Sell);
 void RenderSkillInfo(int sx, int sy, int Type, int SkillNum = 0, int iRenderPoint = STRP_NONE);
 void RequireClass(ITEM_ATTRIBUTE* p);
