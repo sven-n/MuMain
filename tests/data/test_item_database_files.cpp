@@ -1784,6 +1784,59 @@ TEST_CASE("Item Requirements does not store a +0 value that needs a weight picke
     g_ItemEdits.GetHistory().Clear();
 }
 
+// The click from the weight field into the +0 field of the same requirement
+// leaves the weight field, which stores under the same label: a +0 value
+// typed next that several weights give still asks which.
+TEST_CASE(
+    "A +0 value typed right after the weight field of its requirement still asks for its weight [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    g_ItemSelection.Select(KrisType);
+    const int typedWeight = g_ItemDatabase.Find(KrisType)->requirements.strength + 10;
+
+    TestImGuiContext context;
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    const std::initializer_list<int> strengthScope = {KrisType, static_cast<int>(ItemRequirement::Strength)};
+    const ImGuiID weight = ItemToolFieldId(MuEditor::WindowIds::ItemRequirements, strengthScope, I18N::Editor::Weight);
+    const ImGuiID zeroValue =
+        ItemToolFieldId(MuEditor::WindowIds::ItemRequirements, strengthScope, I18N::Metadata::ReqStrength);
+    ImGui::ActivateItemByID(weight);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    REQUIRE(ImGui::GetActiveID() == weight);
+    RenderItemTool(g_MuItemRequirementsUI, true, std::to_string(typedWeight).c_str());
+    ImGui::ActivateItemByID(zeroValue);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    REQUIRE(ImGui::GetActiveID() == zeroValue);
+    REQUIRE(g_ItemDatabase.Find(KrisType)->requirements.strength == typedWeight);
+
+    // A +0 value several other weights give.
+    const ItemDefinition weighted = *g_ItemDatabase.Find(KrisType);
+    int value = MuEditor::Items::ComputeZeroValue(weighted, ItemRequirement::Strength) + 1;
+    while (MuEditor::Items::FindWeightsGiving(weighted, ItemRequirement::Strength, value).GetCount() < 2)
+    {
+        ++value;
+        REQUIRE(value < 2000);
+    }
+    REQUIRE(MuEditor::Items::ChooseWeight(weighted, ItemRequirement::Strength, value, typedWeight).kind ==
+            MuEditor::Items::WeightChoice::Kind::Pick);
+    RenderItemTool(g_MuItemRequirementsUI, true, std::to_string(value).c_str());
+    // Left by a click into the weight field.
+    ImGui::ActivateItemByID(weight);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+
+    // The weight list asks; nothing is stored until one is taken.
+    CHECK(OpenPopupWindow() != nullptr);
+    CHECK(g_ItemDatabase.Find(KrisType)->requirements.strength == typedWeight);
+    g_ItemEdits.GetHistory().Clear();
+}
+
 // An item added with a size of its own starts without a slot, so no class can
 // wear it, as most items of groups 12 to 15.
 TEST_CASE("Add item without copying makes an item without a slot [data][items][editor]")

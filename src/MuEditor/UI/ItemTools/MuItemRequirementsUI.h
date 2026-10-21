@@ -44,8 +44,8 @@ private:
     void RenderLevelTable(const Data::Items::ItemDefinition& item);
     void RenderClasses(Data::Items::ItemDefinition& item);
     // Stores the draft; a +0 value being typed that needs the weight list
-    // (several weights give it, or none) is dropped instead, since a store
-    // without its field being left cannot ask.
+    // (several weights give it, or none) is dropped instead when it is stored
+    // without its field being left, which cannot ask.
     void StoreItem(const std::string& label, const Data::Items::ItemDefinition& item);
 
     MuEditor::Items::ItemEditDraft<Data::Items::ItemDefinition> m_draft;
@@ -63,6 +63,11 @@ private:
         const char* label = nullptr;
     };
     std::optional<TypedZeroValue> m_typed;
+    // Between the draft's Begin and End: a store then comes from a field. The
+    // +0 field drops a value that needs the weight list itself; the other
+    // fields of its requirement (the weight, By item level) store under the
+    // same label, and their store is not the +0 value's.
+    bool m_drawingFields = false;
     MuEditor::Items::CRequirementWeightPopup m_weightPopup;
 };
 

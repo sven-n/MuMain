@@ -105,10 +105,12 @@ CMuItemRequirementsUI::CMuItemRequirementsUI()
 
 void CMuItemRequirementsUI::StoreItem(const std::string& label, const ItemDefinition& item)
 {
-    if (m_typed && m_typed->itemType == Data::Items::MakeItemType(item.group, item.number) && label == m_typed->label)
+    if (!m_drawingFields && m_typed && m_typed->itemType == Data::Items::MakeItemType(item.group, item.number) &&
+        label == m_typed->label)
     {
-        // Stored without its field being left: there is no list to ask which
-        // weight, so a value several weights give, or none, is dropped.
+        // Stored without its field being left (the form hidden, the selection
+        // changed, the section closed): there is no list to ask which weight,
+        // so a value several weights give, or none, is dropped.
         const TypedZeroValue typed = *m_typed;
         m_typed.reset();
         const WeightChoice choice = ChooseWeight(item, typed.requirement, typed.value, typed.weightBefore);
@@ -127,6 +129,7 @@ void CMuItemRequirementsUI::Render(bool* open)
         const int itemType = g_ItemSelection.GetItemType();
         ItemDefinition* item = m_draft.Begin(itemType, ToolWindow::GetDataVersion());
         ToolWindow::RenderSelectedItem(itemType);
+        m_drawingFields = true;
         if (item != nullptr)
         {
             ImGui::PushID(itemType);
@@ -136,6 +139,7 @@ void CMuItemRequirementsUI::Render(bool* open)
             Fields::Check(m_draft, I18N::Editor::ExcellentOptionsRaiseTheLevelRequirement, item->excellentRaisesLevel);
             ImGui::PopID();
         }
+        m_drawingFields = false;
         m_draft.End();
     }
     ToolWindow::End();
