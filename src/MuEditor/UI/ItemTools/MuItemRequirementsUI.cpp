@@ -212,6 +212,10 @@ void CMuItemRequirementsUI::RenderWeightedRequirement(ItemDefinition& item, Item
         }
     }
     m_draft.AfterField(label);
+    // The value the weights below are for: the typed one, also on the frame
+    // the field is left.
+    const bool typed = m_typed && m_typed->itemType == itemType && m_typed->requirement == requirement;
+    const int target = typed ? m_typed->value : zeroValue;
     if (ImGui::IsItemDeactivated())
     {
         m_typed.reset();
@@ -231,7 +235,6 @@ void CMuItemRequirementsUI::RenderWeightedRequirement(ItemDefinition& item, Item
         return;
     }
 
-    const int target = typing ? m_typed->value : zeroValue;
     const WeightRange weights = FindWeightsGiving(item, requirement, target);
     ImGui::SameLine();
     ImGui::TextDisabled("%s", DescribeWeights(weights, target).c_str());
