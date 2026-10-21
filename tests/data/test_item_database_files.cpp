@@ -405,7 +405,8 @@ std::vector<OldLine> OldLevelLines(int group, int number, int level)
                                       {"It can be used with item removed.", DarkRed}};
         if (level == 4)
         {
-            lines.push_back({"Can be equipped by Dark Lord"});
+            // White for a Dark Lord only, as every class line (step 5c-1); the old code had it white for everyone.
+            lines.push_back({"Can be equipped by Dark Lord", DarkRed});
         }
         return lines;
     }

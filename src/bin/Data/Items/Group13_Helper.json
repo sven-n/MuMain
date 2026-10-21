@@ -694,6 +694,13 @@
             "uk": "Може бути оснащений Темний Лорд",
             "zh-TW": "可由黑暗領主配備"
           },
+          "color": "darkRed",
+          "colors": [
+            {
+              "when": ["class:darkLord"],
+              "color": "white"
+            }
+          ],
           "levels": [4, 4]
         }
       ],
