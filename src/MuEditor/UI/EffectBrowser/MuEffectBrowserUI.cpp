@@ -52,11 +52,12 @@ void CMuEffectBrowserUI::Render(bool* open)
     MuEditor::Layout::PrepareToolWindow();
     if (!ImGui::Begin(
             MuEditor::WindowIds::Title(title, I18N::Editor::EffectBrowser, MuEditor::WindowIds::EffectBrowser), open,
-            ImGuiWindowFlags_NoCollapse))
+            ImGuiWindowFlags_NoCollapse | MuEditor::Layout::ToolWindowBarFlags(MuEditor::WindowIds::EffectBrowser)))
     {
         ImGui::End();
         return;
     }
+    MuEditor::Layout::RenderToolWindowBar();
     // The lists and the combos count as the window, so clicks there do not
     // reach the game.
     if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))

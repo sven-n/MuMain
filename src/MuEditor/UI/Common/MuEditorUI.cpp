@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <cstring>
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include "../MuEditor/UI/ItemTools/ItemToolWindow.h"
 
 // Layout of the Open Editor strip over the game while the editor is closed. The
 // pixel sizes are multiplied by the editor UI scale so the strip grows with it
@@ -174,9 +175,7 @@ void CMuEditorUI::RenderEditorWindow(bool& editorEnabled, MuEditor::ToolWindows&
     }
     if (ImGui::BeginMenuBar())
     {
-        RenderWindowsMenu(windows, MuEditor::PlatformWindows::WindowOf(ImGui::GetWindowViewport()));
-        RenderUIScale();
-        RenderLanguageSelector();
+        RenderBar(windows);
         RenderCloseButton(editorEnabled);
         ImGui::EndMenuBar();
     }
@@ -191,7 +190,24 @@ void CMuEditorUI::RenderEditorWindow(bool& editorEnabled, MuEditor::ToolWindows&
     }
 }
 
-void CMuEditorUI::RenderWindowsMenu(MuEditor::ToolWindows& windows, SDL_Window* editorOsWindow)
+void CMuEditorUI::RenderToolWindowBar()
+{
+    if (ImGui::BeginMenuBar())
+    {
+        RenderBar(g_MuEditorCore.GetToolWindows());
+        ImGui::EndMenuBar();
+    }
+}
+
+void CMuEditorUI::RenderBar(MuEditor::ToolWindows& windows)
+{
+    RenderWindowsMenu(windows, MuEditor::PlatformWindows::WindowOf(ImGui::GetWindowViewport()));
+    MuEditor::Items::ToolWindow::RenderUndoRedo();
+    RenderUIScale();
+    RenderLanguageSelector();
+}
+
+void CMuEditorUI::RenderWindowsMenu(MuEditor::ToolWindows& windows, SDL_Window* osWindow)
 {
     if (!ImGui::BeginMenu("Windows"))
     {
@@ -221,12 +237,11 @@ void CMuEditorUI::RenderWindowsMenu(MuEditor::ToolWindows& windows, SDL_Window* 
     {
         m_bResetLayout = true;
     }
-    // The editor window full screen (F11 in any of the editor's own windows);
-    // not while it is inside the game window.
-    if (ImGui::MenuItem("Fullscreen", "F11", MuEditor::PlatformWindows::IsFullscreen(editorOsWindow),
-                        editorOsWindow != nullptr))
+    // The window the menu is in full screen (F11 in any of the editor's own
+    // windows); not while it is inside the game window.
+    if (ImGui::MenuItem("Fullscreen", "F11", MuEditor::PlatformWindows::IsFullscreen(osWindow), osWindow != nullptr))
     {
-        MuEditor::PlatformWindows::ToggleFullscreen(editorOsWindow);
+        MuEditor::PlatformWindows::ToggleFullscreen(osWindow);
     }
     ImGui::EndMenu();
 }

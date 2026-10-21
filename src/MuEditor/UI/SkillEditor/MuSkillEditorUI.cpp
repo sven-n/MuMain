@@ -87,8 +87,9 @@ void CMuSkillEditorUI::Render(bool& showEditor)
     char title[MuEditor::WindowIds::TitleCapacity];
     MuEditor::Layout::PrepareToolWindow();
     if (ImGui::Begin(MuEditor::WindowIds::Title(title, I18N::Editor::SkillEditor, MuEditor::WindowIds::SkillEditor),
-                     &showEditor, flags))
+                     &showEditor, flags | MuEditor::Layout::ToolWindowBarFlags(MuEditor::WindowIds::SkillEditor)))
     {
+        MuEditor::Layout::RenderToolWindowBar();
         // Check if hovering this window OR any popup, also while a scrollbar or
         // slider of it is held
         bool isHovering =

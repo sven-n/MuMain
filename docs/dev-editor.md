@@ -44,6 +44,12 @@ anywhere, over the game window too, or onto another window to dock it there;
 **Windows > Reset Layout** docks them all back. The layout and the windows'
 places are kept between sessions (`imgui.ini` in the game folder).
 
+The editor window's bar has the **Windows** menu, **Undo** and **Redo** of the
+item tools, the UI scale and the language. A tool window that is not docked in
+the editor window (floating on its own or with other tool windows) has the same
+bar, so it can be worked with from another monitor; its **Windows >
+Fullscreen** switches that window to full screen.
+
 The editor window, and a tool window floating outside the game window, are
 ordinary windows of the system, with its title bar, buttons and window
 snapping. Closing the editor window closes the editor. A floating tool window

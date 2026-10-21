@@ -85,10 +85,8 @@ void CMuItemRequirementsUI::Render(bool* open)
 {
     if (ToolWindow::Begin(I18N::Editor::ItemRequirements, MuEditor::WindowIds::ItemRequirements, open))
     {
-        ToolWindow::RenderUndoRedo();
         const int itemType = g_ItemSelection.GetItemType();
         ItemDefinition* item = m_draft.Begin(itemType, ToolWindow::GetDataVersion());
-        ImGui::SameLine();
         ToolWindow::RenderSelectedItem(itemType);
         if (item != nullptr)
         {

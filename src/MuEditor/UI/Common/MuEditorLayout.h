@@ -26,6 +26,14 @@ void SubmitDockSpace(bool resetLayout);
 // it back into a dock by (under the OS title bar when it is a window of its own).
 void PrepareToolWindow();
 
+// The flags a tool window adds to its Begin() for the editor's bar: a menu bar
+// while it is not docked in the editor window (floating on its own or with
+// other tool windows), where the editor window's bar is not at hand.
+ImGuiWindowFlags ToolWindowBarFlags(const char* windowName);
+// Right after a tool window's Begin() returned true: the editor window's bar
+// in its menu bar, when it has one (ToolWindowBarFlags).
+void RenderToolWindowBar();
+
 // For an item tool that has never been open (no place in imgui.ini): it docks
 // as a tab beside the other item tools, also in a layout made before it
 // existed. Call before PrepareToolWindow and Begin().

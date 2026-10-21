@@ -80,8 +80,6 @@ void CMuItemBrowserUI::RenderFileActions()
         m_list.Refresh();
     }
     CItemEditorPopups::RenderAll();
-    ImGui::SameLine();
-    ToolWindow::RenderUndoRedo();
 }
 
 void CMuItemBrowserUI::RenderFilters()

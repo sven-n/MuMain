@@ -55,11 +55,9 @@ void CMuItemModelUI::Render(bool* open)
 {
     if (ToolWindow::Begin(I18N::Editor::ItemModel, MuEditor::WindowIds::ItemModel, open))
     {
-        ToolWindow::RenderUndoRedo();
         const int itemType = g_ItemSelection.GetItemType();
         ItemModelDefinition* model = m_draft.Begin(itemType, ToolWindow::GetDataVersion());
         ShowInventoryDisplay(model, itemType);
-        ImGui::SameLine();
         // Also a number with a model but no item can be edited here.
         ToolWindow::RenderSelectedItem(itemType);
         if (Data::Items::IsValidItemType(itemType))

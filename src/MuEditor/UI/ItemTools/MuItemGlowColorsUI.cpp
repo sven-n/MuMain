@@ -91,8 +91,6 @@ void CMuItemGlowColorsUI::Render(bool* open)
 {
     if (ToolWindow::Begin(I18N::Editor::GlowColors, MuEditor::WindowIds::ItemGlowColors, open))
     {
-        ToolWindow::RenderUndoRedo();
-        ImGui::SameLine();
         if (ImGui::Button(I18N::Editor::NewGlowColor))
         {
             m_dialog.Open(m_picked);

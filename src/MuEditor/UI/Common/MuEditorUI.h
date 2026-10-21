@@ -19,15 +19,23 @@ public:
     // as it was last drawn.
     bool IsOnOpenButton(float x, float y) const;
 
+    // The editor window's bar in the current window's menu bar, for a tool
+    // window that floats (MuEditor::Layout::ToolWindowBarFlags); nothing for a
+    // window without a menu bar.
+    void RenderToolWindowBar();
+
 private:
     CMuEditorUI() = default;
     ~CMuEditorUI() = default;
 
     void RenderToolbarOpen(bool& editorEnabled);
+    // In a menu bar: the Windows menu, Undo and Redo of the item tools, the UI
+    // scale and the language.
+    void RenderBar(MuEditor::ToolWindows& windows);
     void RenderEditorWindow(bool& editorEnabled, MuEditor::ToolWindows& windows);
-    // editorOsWindow is the editor window's own OS window, null while it is
-    // inside the game window.
-    void RenderWindowsMenu(MuEditor::ToolWindows& windows, SDL_Window* editorOsWindow);
+    // osWindow is the OS window of the window the menu is in (Fullscreen), null
+    // while it is inside the game window.
+    void RenderWindowsMenu(MuEditor::ToolWindows& windows, SDL_Window* osWindow);
     void RenderUIScale();
     void RenderLanguageSelector();
     void RenderCloseButton(bool& editorEnabled);

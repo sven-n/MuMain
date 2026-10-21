@@ -93,11 +93,12 @@ void CDevEditorUI::Render(bool* p_open)
     char title[MuEditor::WindowIds::TitleCapacity];
     MuEditor::Layout::PrepareToolWindow();
     if (!ImGui::Begin(MuEditor::WindowIds::Title(title, I18N::Editor::DevEditor, MuEditor::WindowIds::DevEditor),
-                      p_open))
+                      p_open, MuEditor::Layout::ToolWindowBarFlags(MuEditor::WindowIds::DevEditor)))
     {
         ImGui::End();
         return;
     }
+    MuEditor::Layout::RenderToolWindowBar();
 
     // Tab bar
     if (ImGui::BeginTabBar("DevEditorTabs"))

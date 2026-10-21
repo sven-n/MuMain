@@ -726,7 +726,8 @@ How changes work:
   they were made until they are made again (e.g. after logging in again).
 - A text or number field is stored when you leave it after a change, a
   checkbox or list right away. Each is one step of **Undo** and **Redo**
-  (also Ctrl+Z and Ctrl+Y while an item tool has the focus and no field is
+  (in the editor's bar, see [dev-editor.md](dev-editor.md); also Ctrl+Z
+  and Ctrl+Y while an item tool has the focus and no field is
   being typed in): the last 256 steps, for the whole session and across
   saves. A step is not undone when the item changed in a way the history
   did not record. Import from bmd clears the history. The browser's title

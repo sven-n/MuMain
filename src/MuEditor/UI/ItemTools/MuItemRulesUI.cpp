@@ -51,8 +51,6 @@ void CMuItemRulesUI::Render(bool* open)
     if (ToolWindow::Begin(I18N::Editor::ItemRules, MuEditor::WindowIds::ItemRules, open))
     {
         const int selected = g_ItemSelection.GetItemType();
-        ToolWindow::RenderUndoRedo();
-        ImGui::SameLine();
         RenderFilters();
         // The flags are not the whole rule (docs/item-data.md, Rules).
         RenderNote(I18N::Editor::ExceptionsByItemLevelDurabilityOrGMStatusAreInTheCode);

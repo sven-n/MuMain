@@ -79,10 +79,12 @@ bool Begin(const char* title, const char* windowId, bool* open)
     char fullTitle[MuEditor::WindowIds::TitleCapacity];
     MuEditor::Layout::DockBesideItemTools(windowId);
     MuEditor::Layout::PrepareToolWindow();
-    if (!ImGui::Begin(MuEditor::WindowIds::Title(fullTitle, title, windowId), open, ImGuiWindowFlags_NoCollapse))
+    if (!ImGui::Begin(MuEditor::WindowIds::Title(fullTitle, title, windowId), open,
+                      ImGuiWindowFlags_NoCollapse | MuEditor::Layout::ToolWindowBarFlags(windowId)))
     {
         return false;
     }
+    MuEditor::Layout::RenderToolWindowBar();
     if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByPopup |
                                ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) ||
         ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId))

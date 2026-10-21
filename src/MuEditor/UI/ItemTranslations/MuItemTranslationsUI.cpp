@@ -78,8 +78,6 @@ void CMuItemTranslationsUI::Render(bool* open)
         CItemEditorActions::RenderSaveButton();
         CItemEditorPopups::RenderAll();
         ImGui::SameLine();
-        MuEditor::Items::ToolWindow::RenderUndoRedo();
-        ImGui::SameLine();
         RenderToolbar();
         ImGui::Separator();
         RenderTable();

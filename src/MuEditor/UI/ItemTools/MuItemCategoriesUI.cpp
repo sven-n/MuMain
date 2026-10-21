@@ -74,8 +74,6 @@ void CMuItemCategoriesUI::Render(bool* open)
     if (ToolWindow::Begin(I18N::Editor::ItemCategories, MuEditor::WindowIds::ItemCategories, open))
     {
         const int selected = g_ItemSelection.GetItemType();
-        ToolWindow::RenderUndoRedo();
-        ImGui::SameLine();
         ToolWindow::RenderSelectedItem(selected);
         RenderSelectedItemTags(selected);
         // The tags are fixed: code asks for each of them (docs/item-data.md).

@@ -4,6 +4,7 @@
 
 #include "MuEditorLayout.h"
 
+#include "MuEditorUI.h"
 #include "MuEditorWindowIds.h"
 #include "../MuEditor/Core/MuEditorPlatformWindows.h"
 #include "imgui_internal.h"
@@ -19,6 +20,8 @@ constexpr float ConsoleHeightShare = 0.25f;
 // The share of the tools' width the item browser takes, beside the other tools.
 constexpr float ItemBrowserWidthShare = 0.35f;
 constexpr char DockSpaceName[] = "ToolWindows";
+// The editor window's dock space, as last submitted; 0 before.
+ImGuiID g_dockSpace = 0;
 // The tools that show the item the browser selects, in their tab order.
 constexpr const char* ItemToolWindows[] = {MuEditor::WindowIds::ItemBasics, MuEditor::WindowIds::ItemRequirements,
                                            MuEditor::WindowIds::ItemRules,  MuEditor::WindowIds::ItemCategories,
@@ -113,12 +116,31 @@ WindowRect FirstEditorWindowRect(float uiScale)
 void SubmitDockSpace(bool resetLayout)
 {
     const ImGuiID dockSpace = ImGui::GetID(DockSpaceName);
+    g_dockSpace = dockSpace;
     if (resetLayout || ImGui::DockBuilderGetNode(dockSpace) == nullptr)
     {
         // Never empty, also when the editor window is down to its menu bar.
         BuildDefaultLayout(dockSpace, ImMax(ImGui::GetContentRegionAvail(), ImVec2(1.0f, 1.0f)));
     }
     ImGui::DockSpace(dockSpace);
+}
+
+ImGuiWindowFlags ToolWindowBarFlags(const char* windowName)
+{
+    // As the window was last frame: docking happens while it is drawn.
+    ImGuiWindow* window = ImGui::FindWindowByName(windowName);
+    if (window == nullptr)
+    {
+        return ImGuiWindowFlags_None;
+    }
+    const bool inEditorWindow = window->DockIsActive && window->DockNode != nullptr && g_dockSpace != 0 &&
+                                ImGui::DockNodeGetRootNode(window->DockNode)->ID == g_dockSpace;
+    return inEditorWindow ? ImGuiWindowFlags_None : ImGuiWindowFlags_MenuBar;
+}
+
+void RenderToolWindowBar()
+{
+    g_MuEditorUI.RenderToolWindowBar();
 }
 
 void PrepareToolWindow()

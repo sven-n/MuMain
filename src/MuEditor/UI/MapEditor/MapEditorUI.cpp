@@ -243,7 +243,12 @@ void CMapEditorUI::Render(bool* p_open)
 
     ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
     MuEditor::Layout::PrepareToolWindow();
-    const bool panelDrawn = ImGui::Begin(MuEditor::WindowIds::MapEditor, p_open);
+    const bool panelDrawn = ImGui::Begin(MuEditor::WindowIds::MapEditor, p_open,
+                                         MuEditor::Layout::ToolWindowBarFlags(MuEditor::WindowIds::MapEditor));
+    if (panelDrawn)
+    {
+        MuEditor::Layout::RenderToolWindowBar();
+    }
     // Docked behind another tab or in a minimized editor window, the panel is
     // out of sight as if closed; it takes the world again when it shows. Not
     // drawn for a frame while its dock node gets its window: keep edit mode
