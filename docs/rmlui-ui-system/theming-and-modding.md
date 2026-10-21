@@ -146,6 +146,12 @@ battle maps. Edit a theme's `map_name.rcss` to change the font, color, width, wr
 or decoration; long names grow the space between the ornaments. A custom theme can replace the
 shared ornament with its own locally supplied artwork without changing the map names.
 
+The map banner optionally loads Monotype Corsiva from the local Windows font folder;
+its file is not distributed. It uses the face's italic style at normal weight and a
+single lower ornament. Without that font, bundled Liberation Sans remains readable.
+`font-map-name` selects the dedicated family; `font-map-name-style` resolves its matching
+style automatically. Other UI fonts follow their existing settings.
+
 ## Switching themes without relaunching
 
 `$theme <name>` (typed into the chat box, handled locally by `CmuConsoleDebug::CheckCommand` —

@@ -8,9 +8,12 @@
 #include "UI/RmlBridge/RmlElementBox.h"
 #include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/ThemeFonts.h"
+#include "UI/RmlBridge/ThemeInheritance.h"
 #include "World/MapInfra/MapManager.h"
 
 #include <RmlUi/Core/ComputedValues.h>
+#include <RmlUi/Core/FontEngineInterface.h>
 #include <array>
 #include <climits>
 #include <filesystem>
@@ -48,6 +51,7 @@ public:
           m_NonPvp(g_ServerListManager->m_byNonPvP)
     {
         std::filesystem::current_path(MU_BIN_DIR);
+        UI::RmlBridge::ClearThemeFontCache();
         UI::RmlBridge::SetContextResolver([this](std::string_view) { return context; });
         REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/NotoSansTC-Regular.otf", true));
         I18N::SetLocale("en");
@@ -181,7 +185,7 @@ TEST_CASE("map-name live binding survives locale and theme changes as plain text
     }
 }
 
-TEST_CASE("map-name text wraps between shared ornaments across themes and scales [ui][map-name]")
+TEST_CASE("map-name text wraps above a shared lower ornament across themes and scales [ui][map-name]")
 {
     MapNameFixture fixture;
     MapNameProbe banner;
@@ -217,7 +221,7 @@ TEST_CASE("map-name text wraps between shared ornaments across themes and scales
             CheckBounds(*frame, *document);
             CheckBounds(*text, *middle);
             CheckBounds(*middle, *frame);
-            CheckBounds(*document->GetElementById("ornament_top"), *frame);
+            CHECK(document->GetElementById("ornament_top") == nullptr);
             CheckBounds(*document->GetElementById("ornament_bottom"), *frame);
             Rml::Vector2f position, size;
             REQUIRE(UI::RmlBridge::DrawnBox(*frame, Rml::BoxArea::Border, position, size));
@@ -235,8 +239,55 @@ TEST_CASE("map-name text wraps between shared ornaments across themes and scales
                                              static_cast<int>(position.y + size.y / 2.f), 0);
             CHECK_FALSE(UI::RmlBridge::IsPointerOver(frame));
             CHECK(text->GetComputedValues().font_size() > 0.f);
-            CHECK(text->GetComputedValues().font_weight() == Rml::Style::FontWeight::Bold);
+            CHECK(text->GetComputedValues().font_weight() == Rml::Style::FontWeight::Normal);
             CHECK(text->GetComputedValues().color() == Rml::Colourb(184, 182, 170));
         }
+    }
+}
+
+TEST_CASE("map-name italic-only optional family and missing-font fallback stay paired [ui][map-name]")
+{
+    MapNameFixture fixture;
+    const UI::RmlBridge::ThemeInheritance theme("Data/Interface/RmlUi/themes/legacy");
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-map-name") ==
+          std::optional<std::string>("Liberation Sans"));
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-map-name-style") ==
+          std::optional<std::string>("normal"));
+
+    // Emulate an italic-only installed face with a redistributable fixture font.
+    // This regression runs on machines without the optional commercial font.
+    REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/LiberationSans-Regular.ttf",
+        "Monotype Corsiva", Rml::Style::FontStyle::Italic, Rml::Style::FontWeight::Normal));
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-map-name") ==
+          std::optional<std::string>("Monotype Corsiva"));
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-map-name-style") ==
+          std::optional<std::string>("italic"));
+}
+
+TEST_CASE("map-name configured optional file uses its real style or bundled fallback [ui][map-name]")
+{
+    MapNameFixture fixture;
+    const UI::RmlBridge::ThemeInheritance theme("Data/Interface/RmlUi/themes/legacy");
+    UI::RmlBridge::LoadThemeFonts(theme);
+    const auto family = UI::RmlBridge::ResolveThemeFontToken(theme, "font-map-name");
+    const auto style = UI::RmlBridge::ResolveThemeFontToken(theme, "font-map-name-style");
+    auto* engine = Rml::GetFontEngineInterface();
+    REQUIRE(engine != nullptr);
+    if (family == std::optional<std::string>("Monotype Corsiva"))
+    {
+        CHECK(style == std::optional<std::string>("italic"));
+        CHECK(engine->GetFontFaceHandle("monotype corsiva", Rml::Style::FontStyle::Italic,
+            Rml::Style::FontWeight::Normal, 18) != 0);
+        CHECK(engine->GetFontFaceHandle("monotype corsiva", Rml::Style::FontStyle::Normal,
+            Rml::Style::FontWeight::Normal, 18) == 0);
+        MESSAGE("Configured file loaded: Monotype Corsiva, italic, weight400 (not a substituted fixture font)");
+    }
+    else
+    {
+        CHECK(family == std::optional<std::string>("Liberation Sans"));
+        CHECK(style == std::optional<std::string>("normal"));
+        CHECK(engine->GetFontFaceHandle("liberation sans", Rml::Style::FontStyle::Normal,
+            Rml::Style::FontWeight::Normal, 18) != 0);
+        MESSAGE("Optional font absent: bundled Liberation Sans, normal, weight400");
     }
 }

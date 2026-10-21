@@ -1,5 +1,5 @@
 /* Centered entry HUD at the original 220/480 viewport-height anchor.
-   A compact text field grows vertically for long names. The existing quest divider
+   A compact text field grows vertically for long names. The lower quest divider
    is shared by every map and fits its slots without changing its aspect ratio. */
 @spritesheet map-name-decoration
 {
@@ -9,12 +9,11 @@
 
 body { pointer-events: none; }
 #banner { top: 45.8333%; width: 163.75dp; max-width: 90%; pointer-events: none; }
-#ornament_top { display: block; width: 127.5dp; max-width: 100%; margin: 0 auto; height: 23.75dp; decorator: image(map-name-rule contain); }
 #ornament_bottom { display: block; width: 127.5dp; max-width: 100%; margin: 0 auto; height: 22.5dp; decorator: image(map-name-rule contain); }
 #name {
     min-height: 26.25dp;
     display: flex; align-items: center; justify-content: center;
-    font-family: token(font-title); font-size: 15dp; font-weight: bold; line-height: 1.1;
+    font-family: token(font-map-name); font-size: 18dp; font-weight: normal; font-style: token(font-map-name-style); line-height: 1.1;
     color: #b8b6aa; font-effect: shadow(0.625dp 0.625dp #000000);
     text-align: center;
 }
