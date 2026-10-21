@@ -28,6 +28,9 @@
 #include "Render/Items/ItemModelLookup.h"
 #include "Render/Items/ItemRenderStyles.h"
 #include "Render/Models/ZzzBMD.h"
+#ifdef _EDITOR
+#include "UI/ItemTools/ItemHeldByCharacter.h"
+#endif
 
 #include <algorithm>
 #include <array>
@@ -539,7 +542,7 @@ TEST_CASE("The first item of a shared model opens its file and the others share 
 
 // OpenItems makes mesh 2 of the Grand Soul pants the grid their cloth moves; a
 // model opened again is as its file has it, and the item editor makes it the
-// grid again (CMuEditorCore::ReopenChangedItemModels).
+// grid again after their slot took other data (PrepareClothMeshes).
 TEST_CASE("The Grand Soul pants' mesh is the cloth grid again after their model is opened again [data][items]")
 {
     TestItemModelSlots slots;
@@ -574,7 +577,15 @@ TEST_CASE("The Grand Soul pants' mesh is the cloth grid again after their model 
     const int itemTypes[] = {ITEM_GRAND_SOUL_PANTS};
     ModelLoader::ReopenModels(itemTypes, {});
     CHECK(triangle(0) == fileTriangle);
+#ifdef _EDITOR
+    // Only when their slot is among the changed ones.
+    const int otherTypes[] = {ITEM_DIVINE_PANTS, MakeItemType(9, 100)};
+    MuEditor::Items::PrepareClothMeshes(otherTypes);
+    CHECK(triangle(0) == fileTriangle);
+    MuEditor::Items::PrepareClothMeshes(itemTypes);
+#else
     PrepareGrandSoulPantsClothMesh();
+#endif
     CHECK(isGrid());
     Hero = previousHero;
 }

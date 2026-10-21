@@ -6,8 +6,12 @@
 
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
+#include "Engine/Object/ZzzOpenData.h"
+#include "Render/Models/ZzzBMD.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Inventory/ItemMng.h"
+
+#include <algorithm>
 
 namespace MuEditor::Items
 {
@@ -53,6 +57,19 @@ void DropWornCloth()
     }
     // The character of the character creation.
     DeleteCloth(&CharacterView);
+}
+
+void PrepareClothMeshes(std::span<const int> itemTypes)
+{
+    if (Models == nullptr || std::ranges::find(itemTypes, ITEM_GRAND_SOUL_PANTS) == itemTypes.end())
+    {
+        return;
+    }
+    // Not for a slot left without a model (the pants moved away or removed).
+    if (Models[MODEL_GRAND_SOUL_PANTS].NumMeshs > 0)
+    {
+        PrepareGrandSoulPantsClothMesh();
+    }
 }
 } // namespace MuEditor::Items
 

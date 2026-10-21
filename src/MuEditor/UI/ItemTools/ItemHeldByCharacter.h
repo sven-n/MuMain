@@ -2,6 +2,7 @@
 
 #ifdef _EDITOR
 
+#include <span>
 #include <vector>
 
 namespace MuEditor::Items
@@ -19,10 +20,16 @@ std::vector<int> FindHeldItemTypes();
 // Drops the cloth of what the characters wear (DeleteCloth): the cloth of the
 // pants that have one (RenderPartObject) moves a mesh of its model's slot
 // every frame and was made from the data the slot had, so it goes before the
-// item tools change an opened model (CItemDataHandler::
-// SetOpenedModelsChanging). The game makes it again the next time it draws the
-// part, from the data the slot has then.
+// item tools change an opened model (CItemDataHandler::SetOpenedModelHooks).
+// The game makes it again the next time it draws the part, from the data the
+// slot has then.
 void DropWornCloth();
+
+// After model slots took other data (CItemDataHandler::SetOpenedModelHooks):
+// mesh 2 of the Grand Soul pants is made the grid their cloth moves again, as
+// OpenItems makes it, when their slot is among them (opened again, or data
+// moved into it).
+void PrepareClothMeshes(std::span<const int> itemTypes);
 } // namespace MuEditor::Items
 
 #endif // _EDITOR

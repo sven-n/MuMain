@@ -443,11 +443,20 @@ std::vector<ItemModelProblem> CItemDataHandler::ReopenChangedModels(const ModelL
     std::vector<int> itemTypes;
     itemTypes.swap(m_modelsToReopen);
     std::ranges::sort(itemTypes);
-    if (!itemTypes.empty() && m_openedModelsChanging != nullptr)
+    if (itemTypes.empty())
     {
-        m_openedModelsChanging();
+        return {};
     }
-    return ModelLoader::ReopenModels(itemTypes, lookNames);
+    if (m_openedModelHooks.changing != nullptr)
+    {
+        m_openedModelHooks.changing();
+    }
+    std::vector<ItemModelProblem> problems = ModelLoader::ReopenModels(itemTypes, lookNames);
+    if (m_openedModelHooks.changed != nullptr)
+    {
+        m_openedModelHooks.changed(itemTypes);
+    }
+    return problems;
 }
 
 bool CItemDataHandler::SetItemName(int itemType, std::string_view locale, std::string text)
@@ -495,11 +504,16 @@ void CItemDataHandler::OnItemsSwapped(int firstItemType, int secondItemType)
 void CItemDataHandler::SwapItemModels(int firstItemType, int secondItemType)
 {
     g_ItemModelDatabase.Swap(firstItemType, secondItemType);
-    if (m_openedModelsChanging != nullptr)
+    if (m_openedModelHooks.changing != nullptr)
     {
-        m_openedModelsChanging();
+        m_openedModelHooks.changing();
     }
     Data::Items::ModelLoader::SwapOpenedModels(firstItemType, secondItemType);
+    if (m_openedModelHooks.changed != nullptr)
+    {
+        const int itemTypes[] = {firstItemType, secondItemType};
+        m_openedModelHooks.changed(itemTypes);
+    }
     m_changedModelGroups.set(static_cast<size_t>(GetItemGroup(firstItemType)));
     m_changedModelGroups.set(static_cast<size_t>(GetItemGroup(secondItemType)));
 }

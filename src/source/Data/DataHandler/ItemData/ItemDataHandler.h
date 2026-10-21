@@ -99,18 +99,21 @@ public:
     {
         return !m_modelsToReopen.empty();
     }
-    // The item types ReopenChangedModels opens again next.
-    std::span<const int> GetModelsToReopen() const
+    // What keeps or rebuilds data of opened model slots (the cloth of worn
+    // pants, the cloth grid of the Grand Soul pants) is game code, so the
+    // editor gives it; without hooks nothing runs.
+    struct OpenedModelHooks
     {
-        return m_modelsToReopen;
-    }
-    // Runs before the opened data of model slots changes: a move swaps it
-    // (OnItemsSwapped, TakeBackModelMoves), and ReopenChangedModels opens it
-    // again. What keeps data of a slot (the cloth of worn pants) is game code,
-    // so the editor gives it; without one nothing runs.
-    void SetOpenedModelsChanging(void (*changing)())
+        // Before the opened data of model slots changes: a move swaps it
+        // (OnItemsSwapped, TakeBackModelMoves), and ReopenChangedModels opens
+        // it again.
+        void (*changing)() = nullptr;
+        // After it changed, with the item types whose slots took other data.
+        void (*changed)(std::span<const int> itemTypes) = nullptr;
+    };
+    void SetOpenedModelHooks(const OpenedModelHooks& hooks)
     {
-        m_openedModelsChanging = changing;
+        m_openedModelHooks = hooks;
     }
 
     // Sets the item's name in `locale` (an empty text removes the translation;
@@ -237,7 +240,7 @@ private:
     bool m_statFileChanged = false;
     // The item types whose opened models no longer match their model entries.
     std::vector<int> m_modelsToReopen;
-    void (*m_openedModelsChanging)() = nullptr;
+    OpenedModelHooks m_openedModelHooks;
 
     struct LookNames
     {

@@ -455,21 +455,30 @@ private:
 };
 
 // The game's characters for the scope, with the editor's hook that drops what
-// they wear of cloth (CMuEditorCore::ConnectGameHooks).
+// they wear of cloth (CMuEditorCore::ConnectGameHooks) and one that keeps the
+// item types whose opened model slots took other data.
 class WornClothScope
 {
 public:
     WornClothScope() : m_previous(CharactersClient), m_characters(new CHARACTER[MAX_CHARACTERS_CLIENT + 1]{})
     {
         CharactersClient = m_characters.get();
-        g_ItemDataHandler.SetOpenedModelsChanging(&MuEditor::Items::DropWornCloth);
+        GetChangedSlots().clear();
+        g_ItemDataHandler.SetOpenedModelHooks({&MuEditor::Items::DropWornCloth, &KeepChangedSlots});
     }
 
     ~WornClothScope()
     {
-        g_ItemDataHandler.SetOpenedModelsChanging(nullptr);
+        g_ItemDataHandler.SetOpenedModelHooks({});
         MuEditor::Items::DropWornCloth();
         CharactersClient = m_previous;
+    }
+
+    // The item types of the last change of opened model slots.
+    static std::vector<int>& GetChangedSlots()
+    {
+        static std::vector<int> itemTypes;
+        return itemTypes;
     }
 
     WornClothScope(const WornClothScope&) = delete;
@@ -491,6 +500,11 @@ public:
     }
 
 private:
+    static void KeepChangedSlots(std::span<const int> itemTypes)
+    {
+        GetChangedSlots().assign(itemTypes.begin(), itemTypes.end());
+    }
+
     CHARACTER* m_previous;
     std::unique_ptr<CHARACTER[]> m_characters;
 };
@@ -528,6 +542,7 @@ TEST_CASE("Changing an opened item model drops the cloth the characters wear [da
         CHECK_FALSE(clothDropped());
         g_ItemDataHandler.ReopenChangedModels({});
         CHECK(clothDropped());
+        CHECK(WornClothScope::GetChangedSlots() == std::vector<int>{ITEM_DIVINE_PANTS});
     }
     SUBCASE("a removed model entry")
     {
@@ -544,6 +559,10 @@ TEST_CASE("Changing an opened item model drops the cloth the characters wear [da
         REQUIRE(IsFreeItemType(freeType));
         REQUIRE(g_ItemDataHandler.MoveItem(ITEM_DIVINE_PANTS, freeType));
         CHECK(clothDropped());
+        // Both slots took other data.
+        std::vector<int> changed = WornClothScope::GetChangedSlots();
+        std::ranges::sort(changed);
+        CHECK(changed == std::vector<int>{ITEM_DIVINE_PANTS, freeType});
     }
     SUBCASE("a display value keeps the cloth")
     {
@@ -552,6 +571,7 @@ TEST_CASE("Changing an opened item model drops the cloth the characters wear [da
         CHECK_FALSE(g_ItemDataHandler.HasModelsToReopen());
         g_ItemDataHandler.ReopenChangedModels({});
         CHECK_FALSE(clothDropped());
+        CHECK(WornClothScope::GetChangedSlots().empty());
     }
 }
 
