@@ -9,9 +9,9 @@
 
 body { pointer-events: none; }
 #banner { top: 45.8333%; width: 163.75dp; max-width: 90%; pointer-events: none; }
-#ornament_bottom { display: block; width: 127.5dp; max-width: 100%; margin: 0 auto; height: 22.5dp; decorator: image(map-name-rule contain); }
+#ornament_bottom { display: block; width: 127.5dp; max-width: 100%; margin: 0 auto; height: 14.242dp; decorator: image(map-name-rule contain); }
 #name {
-    min-height: 26.25dp;
+    min-height: 20dp;
     display: flex; align-items: center; justify-content: center;
     font-family: token(font-map-name); font-size: 18dp; font-weight: normal; font-style: token(font-map-name-style); line-height: 1.1;
     color: #b8b6aa; font-effect: shadow(0.625dp 0.625dp #000000);
