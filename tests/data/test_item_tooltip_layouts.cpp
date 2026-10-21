@@ -300,7 +300,7 @@ TEST_CASE("Every tooltip state is one the game sets [data][items][tooltip]")
     ItemTooltipValues values;
     values.hasDamage = values.skillBook = values.twoHanded = values.excellent = values.ancient = true;
     values.damageHarmonyBonus = values.defenseHarmonyBonus = values.armour = values.wizardryWeapon = true;
-    values.strength.reduced = values.dexterity.reduced = values.hasDurability = values.timed = true;
+    values.strength.reduced = values.dexterity.reduced = values.hasDurability = values.timed = values.hasOptions = true;
     for (const std::string_view state : GetTooltipStates())
     {
         INFO(state);

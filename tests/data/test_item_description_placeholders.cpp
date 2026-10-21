@@ -261,11 +261,40 @@ TEST_CASE("A description line can show a skill's mana [data][items]")
     ItemDefinition weapon = MakeJewel("Cyclone Cutting skill (Mana:{mana})");
     weapon.description[0].values = {{"mana", "skillMana:22"}};
     CHECK(CheckNames(weapon).empty());
-    CHECK(ReadSkillManaValue("skillMana:22") == 22);
-    CHECK_FALSE(ReadSkillManaValue("skillMana:").has_value());
-    CHECK_FALSE(ReadSkillManaValue("skillMana:cyclone").has_value());
+    const std::optional<GameDataValue> mana = ReadGameDataValue("skillMana:22");
+    REQUIRE(mana.has_value());
+    CHECK(mana->kind == GameDataValueKind::SkillMana);
+    CHECK(mana->number == 22);
+    CHECK_FALSE(ReadGameDataValue("skillMana:").has_value());
+    CHECK_FALSE(ReadGameDataValue("skillMana:cyclone").has_value());
+    CHECK(ReadGameDataValue("skillName:30")->kind == GameDataValueKind::SkillName);
+    CHECK(ReadGameDataValue("monsterName:41")->kind == GameDataValueKind::MonsterName);
+    CHECK_FALSE(ReadGameDataValue("monsterName:99999").has_value());
+    CHECK(HasGameDataValuePrefix("monsterName:x"));
+    CHECK_FALSE(HasGameDataValuePrefix("monster"));
 
     // A number that is no skill's.
+    weapon.description[0].values = {{"mana", "skillMana:9999"}};
+    const std::vector<ItemDataIssue> unknownMana = CheckNames(weapon);
+    REQUIRE(unknownMana.size() == 1);
+    weapon.description[0].values = {{"mana", "skillMana:22"}};
+
+    // Name lines are checked as description lines are: their placeholders, and their texts' braces.
+    ItemNameLine ring;
+    ring.hasText = true;
+    ring.text.Set("en", "{monster} Transformation Ring");
+    ring.values = {{"monster", "monsterName:2"}};
+    weapon.nameLines = {ring};
+    CHECK(CheckNames(weapon).empty());
+    weapon.nameLines[0].values = {{"monster", "monsterName:9999"}};
+    const std::vector<ItemDataIssue> noMonster = CheckNames(weapon);
+    REQUIRE(noMonster.size() == 1);
+    CHECK(noMonster.front().field == "nameLines[0].values.monster");
+    CHECK(noMonster.front().message.find("names no skill or monster") != std::string::npos);
+    weapon.nameLines[0].text.Set("en", "{name +{level}");
+    CHECK_FALSE(IssuesOf(CheckSyntax(weapon), "nameLines[0].text").empty());
+    weapon.nameLines.clear();
+
     weapon.description[0].values = {{"mana", "skillMana:9999"}};
     const std::vector<ItemDataIssue> unknown = CheckNames(weapon);
     REQUIRE(unknown.size() == 1);

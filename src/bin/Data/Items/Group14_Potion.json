@@ -268,6 +268,40 @@
           "levels": [1, 1]
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "Potion of bless",
+            "de": "Trank des Segens",
+            "es": "Poción de bendición",
+            "id": "Ramuan berkah",
+            "ja": "祝福のポーション",
+            "pl": "Mikstura błogosławieństwa",
+            "pt": "Poção de bênção",
+            "ru": "Зелье благословения",
+            "tl": "Gayuma ng pagpapala",
+            "uk": "Зілля благословення",
+            "zh-TW": "祝福藥水"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Potion of soul",
+            "de": "Trank der Seele",
+            "es": "Poción de alma",
+            "id": "Ramuan jiwa",
+            "ja": "霊魂のポーション",
+            "pl": "Napój duszy",
+            "pt": "Poção da alma",
+            "ru": "Зелье души",
+            "tl": "Gayuma ng kaluluwa",
+            "uk": "Зілля душі",
+            "zh-TW": "靈魂藥水"
+          },
+          "levels": [1, 1]
+        }
+      ],
       "width": 1,
       "height": 1,
       "sellValue": 30,
@@ -301,6 +335,18 @@
         "es": "Cerveza",
         "pt": "Cerveja"
       },
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": "@oliveOfLove",
+          "levels": [1, 1]
+        }
+      ],
       "width": 1,
       "height": 2,
       "level": 15,
@@ -347,6 +393,242 @@
         "es": "Caja de la Suerte",
         "pt": "Caixa da sorte"
       },
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Star of Sacred Birth",
+            "de": "Stern der Heiligen Geburt",
+            "es": "Estrella del Sagrado Nacimiento",
+            "id": "Bintang Kelahiran Suci",
+            "ja": "聖誕の星",
+            "pl": "Gwiazda Świętego Narodzin",
+            "pt": "Estrela do Nascimento Sagrado",
+            "ru": "Звезда Священного Рождения",
+            "tl": "Bituin ng Sagradong Kapanganakan",
+            "uk": "Зірка священного народження",
+            "zh-TW": "神聖誕生之星"
+          },
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Firecracker",
+            "de": "Knallkörper",
+            "es": "Petardo",
+            "id": "Petasan",
+            "ja": "花火",
+            "pl": "Petarda",
+            "pt": "Fogo de artifício",
+            "ru": "Петарда",
+            "tl": "Paputok",
+            "uk": "петарда",
+            "zh-TW": "鞭炮"
+          },
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "Heart of love",
+            "de": "Herz der Liebe",
+            "es": "corazon de amor",
+            "id": "Hati cinta",
+            "ja": "愛のハート",
+            "pl": "Serce miłości",
+            "pt": "Coração de amor",
+            "ru": "Сердце любви",
+            "tl": "Puso ng pag-ibig",
+            "uk": "Серце кохання",
+            "zh-TW": "愛的心"
+          },
+          "levels": [3, 3]
+        },
+        {
+          "text": "@oliveOfLove",
+          "levels": [4, 4]
+        },
+        {
+          "text": {
+            "en": "Silver medal",
+            "de": "Silbermedaille",
+            "es": "Medalla de plata",
+            "id": "Medali perak",
+            "ja": "銀の勲章",
+            "pl": "Srebrny medal",
+            "pt": "Medalha de prata",
+            "ru": "Серебряная медаль",
+            "tl": "medalyang pilak",
+            "uk": "Срібна медаль",
+            "zh-TW": "銀牌"
+          },
+          "levels": [5, 5]
+        },
+        {
+          "text": {
+            "en": "Gold medal",
+            "de": "Goldmedaille",
+            "es": "Medalla de oro",
+            "id": "Medali emas",
+            "ja": "金の勲章",
+            "pl": "Złoty medal",
+            "pt": "Medalha de ouro",
+            "ru": "Золотая медаль",
+            "tl": "Gintong medalya",
+            "uk": "Золота медаль",
+            "zh-TW": "金牌"
+          },
+          "levels": [6, 6]
+        },
+        {
+          "text": {
+            "en": "Box of Heaven",
+            "de": "Box des Himmels",
+            "es": "caja del cielo",
+            "id": "Kotak Surga",
+            "ja": "天空の箱",
+            "pl": "Box of Heaven",
+            "pt": "Caixa do Céu",
+            "ru": "Коробка Небес",
+            "tl": "Kahon ng Langit",
+            "uk": "Скринька Неба",
+            "zh-TW": "天堂之盒"
+          },
+          "levels": [7, 7]
+        },
+        {
+          "text": {
+            "en": "Box of Kundun +1",
+            "de": "Box des Kundun +1",
+            "es": "Caja de Kundún +1",
+            "id": "Kotak Kundun +1",
+            "ja": "クンドンの箱 +1",
+            "pl": "Box of Kundun +1",
+            "pt": "Caixa de Kundun +1",
+            "ru": "Коробка Кундуна +1",
+            "tl": "Kahon ng Kundun +1",
+            "uk": "Коробка Кундуна +1",
+            "zh-TW": "昆頓之盒 +1"
+          },
+          "levels": [8, 8]
+        },
+        {
+          "text": {
+            "en": "Box of Kundun +2",
+            "de": "Box des Kundun +2",
+            "es": "Caja de Kundún +2",
+            "id": "Kotak Kundun +2",
+            "ja": "クンドンの箱 +2",
+            "pl": "Box of Kundun +2",
+            "pt": "Caixa de Kundun +2",
+            "ru": "Коробка Кундуна +2",
+            "tl": "Kahon ng Kundun +2",
+            "uk": "Коробка Кундуна +2",
+            "zh-TW": "昆頓之盒 +2"
+          },
+          "levels": [9, 9]
+        },
+        {
+          "text": {
+            "en": "Box of Kundun +3",
+            "de": "Box des Kundun +3",
+            "es": "Caja de Kundún +3",
+            "id": "Kotak Kundun +3",
+            "ja": "クンドンの箱 +3",
+            "pl": "Box of Kundun +3",
+            "pt": "Caixa de Kundun +3",
+            "ru": "Коробка Кундуна +3",
+            "tl": "Kahon ng Kundun +3",
+            "uk": "Коробка Кундуна +3",
+            "zh-TW": "昆頓之盒 +3"
+          },
+          "levels": [10, 10]
+        },
+        {
+          "text": {
+            "en": "Box of Kundun +4",
+            "de": "Box des Kundun +4",
+            "es": "Caja de Kundún +4",
+            "id": "Kotak Kundun +4",
+            "ja": "クンドンの箱 +4",
+            "pl": "Box of Kundun +4",
+            "pt": "Caixa de Kundun +4",
+            "ru": "Коробка Кундуна +4",
+            "tl": "Kahon ng Kundun +4",
+            "uk": "Коробка Кундуна +4",
+            "zh-TW": "昆頓之盒 +4"
+          },
+          "levels": [11, 11]
+        },
+        {
+          "text": {
+            "en": "Box of Kundun +5",
+            "de": "Box des Kundun +5",
+            "es": "Caja de Kundún +5",
+            "id": "Kotak Kundun +5",
+            "ja": "クンドンの箱 +5",
+            "pl": "Box of Kundun +5",
+            "pt": "Caixa de Kundun +5",
+            "ru": "Коробка Кундуна +5",
+            "tl": "Kahon ng Kundun +5",
+            "uk": "Коробка Кундуна +5",
+            "zh-TW": "昆頓之盒 +5"
+          },
+          "levels": [12, 12]
+        },
+        {
+          "text": {
+            "en": "Heart of Dark Lord",
+            "de": "Herz des Dunklen Lords",
+            "es": "Corazón del Señor Oscuro",
+            "id": "Hati Pangeran Kegelapan",
+            "ja": "英雄のマーク",
+            "pl": "Serce Dark Lorda",
+            "pt": "Coração do Lorde das Trevas",
+            "ru": "Сердце Темного Лорда",
+            "tl": "Puso ng Dark Lord",
+            "uk": "Серце Темного Лорда",
+            "zh-TW": "黑暗領主之心"
+          },
+          "levels": [13, 13]
+        },
+        {
+          "text": {
+            "en": "Blue lucky pouch",
+            "de": "Blauer Glücksbeutel",
+            "es": "Bolsa de la suerte azul",
+            "id": "Kantong keberuntungan berwarna biru",
+            "ja": "青い福袋",
+            "pl": "Blue lucky pouch",
+            "pt": "Bolsa azul da sorte",
+            "ru": "Синий счастливый мешочек",
+            "tl": "Blue lucky pouch",
+            "uk": "Синій мішечок на щастя",
+            "zh-TW": "藍色福袋"
+          },
+          "levels": [14, 14]
+        },
+        {
+          "text": {
+            "en": "Red lucky pouch",
+            "de": "Roter Glücksbeutel",
+            "es": "Bolsa de la suerte roja",
+            "id": "Kantong keberuntungan merah",
+            "ja": "赤い福袋",
+            "pl": "Red lucky pouch",
+            "pt": "Bolsa vermelha da sorte",
+            "ru": "Красный счастливый мешочек",
+            "tl": "Pulang lucky pouch",
+            "uk": "Червоний щасливчик",
+            "zh-TW": "紅色福袋"
+          },
+          "levels": [15, 15]
+        }
+      ],
       "width": 1,
       "height": 1,
       "sellable": false,
@@ -376,6 +658,110 @@
             "zh-TW": "交給NPC即可註冊"
           },
           "levels": [0, 1]
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "Zen",
+            "de": "Zen",
+            "es": "zen",
+            "id": "Zen",
+            "ja": "ゼン",
+            "pl": "Zen",
+            "pt": "zen",
+            "ru": "Дзен",
+            "tl": "Zen",
+            "uk": "Дзен",
+            "zh-TW": "禪"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Heart",
+            "de": "Herz",
+            "es": "Corazón",
+            "id": "Jantung",
+            "ja": "ハート",
+            "pl": "Serce",
+            "pt": "Coração",
+            "ru": "Сердце",
+            "tl": "Puso",
+            "uk": "серце",
+            "zh-TW": "心"
+          },
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "히돼?고향 여행권"
+          },
+          "when": ["durability=0"],
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "펜티엄4 컴퓨터"
+          },
+          "when": ["durability=1"],
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "디지탈카메라"
+          },
+          "when": ["durability=2"],
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "로지텍 무선 마우스+키보드 세트"
+          },
+          "when": ["durability=3"],
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "256M 램"
+          },
+          "when": ["durability=4"],
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "6개?잡지 구독권"
+          },
+          "when": ["durability=5"],
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "문화상품권(만원)"
+          },
+          "when": ["durability=6"],
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "뮤 머그컵"
+          },
+          "when": ["durability=7"],
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "뮤 T셔츠"
+          },
+          "when": ["durability=8"],
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "뮤 10시간 무료이용권"
+          },
+          "when": ["durability=9"],
+          "levels": [2, 2]
         }
       ],
       "width": 1,
@@ -408,6 +794,11 @@
           }
         }
       ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -438,6 +829,11 @@
             "uk": "Використовується для підвищення рівня вашого предмета до 7,8,9",
             "zh-TW": "它用於將您的物品等級提高到7、8、9"
           }
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -484,6 +880,11 @@
           }
         }
       ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 72,
@@ -502,6 +903,11 @@
           "text": "@devilSquareInvitationIngredient"
         }
       ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -518,6 +924,11 @@
       "description": [
         {
           "text": "@devilSquareInvitationIngredient"
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -539,6 +950,11 @@
         },
         {
           "text": "@whenYouRightClick"
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -620,6 +1036,69 @@
           "levels": [3, 3]
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Stone",
+            "de": "Stein",
+            "es": "Piedra",
+            "id": "Batu",
+            "ja": "ストーン",
+            "pl": "Kamień",
+            "pt": "Pedra",
+            "ru": "Камень",
+            "tl": "Bato",
+            "uk": "Камінь",
+            "zh-TW": "結石"
+          },
+          "color": "yellow",
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Stone of Friendship",
+            "de": "Stein der Freundschaft",
+            "es": "Piedra de la amistad",
+            "id": "Batu Persahabatan",
+            "ja": "友情の石",
+            "pl": "Stone of Friendship",
+            "pt": "Pedra da Amizade",
+            "ru": "Камень Дружбы",
+            "tl": "Bato ng Pagkakaibigan",
+            "uk": "Камінь Дружби",
+            "zh-TW": "友誼之石"
+          },
+          "color": "yellow",
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "Sign of lord",
+            "de": "Zeichen des Lords",
+            "es": "signo de señor",
+            "id": "Tanda tuan",
+            "ja": "城主のエンブレム",
+            "pl": "Znak Pana",
+            "pt": "Sinal do senhor",
+            "ru": "Знак лорда",
+            "tl": "Tanda ng panginoon",
+            "uk": "Знак владики",
+            "zh-TW": "主的標誌"
+          },
+          "color": "yellow",
+          "levels": [3, 3]
+        },
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -653,6 +1132,11 @@
           }
         }
       ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 78,
@@ -678,6 +1162,35 @@
         {
           "text": "@cannotBeTraded",
           "color": "red"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Ring of Honor",
+            "de": "Ehrenring",
+            "es": "Anillo de honor",
+            "id": "Cincin Kehormatan",
+            "ja": "栄光の指輪",
+            "pl": "Pierścień Honoru",
+            "pt": "Anel de Honra",
+            "ru": "Кольцо Почета",
+            "tl": "Ring of Honor",
+            "uk": "Перстень Пошани",
+            "zh-TW": "榮譽戒指"
+          },
+          "color": "yellow",
+          "levels": [1, 1]
+        },
+        {
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -710,6 +1223,35 @@
           "color": "red"
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Dark Stone",
+            "de": "Dunkler Stein",
+            "es": "Piedra Oscura",
+            "id": "Batu Hitam",
+            "ja": "ダークストーン",
+            "pl": "Dark Stone",
+            "pt": "Pedra Negra",
+            "ru": "Темный камень",
+            "tl": "Madilim na Bato",
+            "uk": "Темний камінь",
+            "zh-TW": "暗黑石"
+          },
+          "color": "yellow",
+          "levels": [1, 1]
+        },
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 2,
       "tradable": false,
@@ -738,6 +1280,14 @@
         {
           "text": "@cannotBeTraded",
           "color": "red"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -770,6 +1320,14 @@
           "color": "red"
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -786,6 +1344,14 @@
         "es": "Mapa Perdido",
         "pt": "Mapa perdido"
       },
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -798,6 +1364,23 @@
         "es": "Símbolo de Kundun",
         "pt": "Símbolo de Kundun"
       },
+      "nameLines": [
+        {
+          "text": {
+            "en": "Kundun mark +{level} level",
+            "de": "Zeichen von Kundun +{level}",
+            "es": "Marca Kundun + nivel {level}",
+            "id": "Tanda Kundun +tingkat {level}",
+            "ja": "+{level}クンドンの印",
+            "pl": "Znak Kundun + poziom {level}",
+            "pt": "Marca Kundun + nível {level}",
+            "ru": "Знак Кундун +уровень {level}",
+            "tl": "Kundun mark +{level} level",
+            "uk": "Знак Кундун + рівень {level}",
+            "zh-TW": "昆頓標誌+{level}等級"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -828,6 +1411,11 @@
           }
         }
       ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "sellValue": 75,
@@ -841,6 +1429,30 @@
         "es": "Caja de Chocolate Rosa",
         "pt": "Caixa de chocolate rosa"
       },
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Lilac candy box",
+            "de": "Lila Bonbonschachtel",
+            "es": "Caja de dulces lila",
+            "id": "Kotak permen ungu",
+            "ja": "紫のキャンディー箱",
+            "pl": "Liliowe pudełko na cukierki",
+            "pt": "Caixa de doces lilás",
+            "ru": "Коробка конфет сиреневого цвета",
+            "tl": "Lilac na kahon ng kendi",
+            "uk": "Бузкова цукерниця",
+            "zh-TW": "紫丁香糖果盒"
+          },
+          "levels": [1, 1]
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -853,6 +1465,30 @@
         "es": "Caja de Chocolate Roja",
         "pt": "Caixa de chocolate vermelha"
       },
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Orange candy box",
+            "de": "Orangefarbene Bonbonschachtel",
+            "es": "Caja de dulces naranja",
+            "id": "Kotak permen jeruk",
+            "ja": "赤のキャンディー箱",
+            "pl": "Pomarańczowe pudełko na cukierki",
+            "pt": "Caixa de doces laranja",
+            "ru": "Коробочка апельсиновых конфет",
+            "tl": "Kahon ng orange na kendi",
+            "uk": "Помаранчева цукерниця",
+            "zh-TW": "橘色糖果盒"
+          },
+          "levels": [1, 1]
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -865,6 +1501,30 @@
         "es": "Caja de Chocolate Azul",
         "pt": "Caixa de chocolate azul"
       },
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Navy candy box",
+            "de": "Marineblaue Bonbonschachtel",
+            "es": "Caja de dulces azul marino",
+            "id": "Kotak permen angkatan laut",
+            "ja": "紺のキャンディー箱",
+            "pl": "Granatowe pudełko na cukierki",
+            "pt": "Caixa de doces da Marinha",
+            "ru": "Коробка конфет темно-синего цвета",
+            "tl": "Navy na kahon ng kendi",
+            "uk": "Темно-синя цукерниця",
+            "zh-TW": "海軍藍糖果盒"
+          },
+          "levels": [1, 1]
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -1024,6 +1684,14 @@
           }
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -1042,6 +1710,14 @@
       "description": [
         {
           "text": "@reinforcementJewel"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -1064,6 +1740,14 @@
           "text": "@grantPowerToReinforcedItem"
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -1084,6 +1768,14 @@
           "text": "@grantPowerToReinforcedItem"
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -1098,6 +1790,13 @@
         "es": "Calabaza de la Suerte",
         "pt": "Abóbora da sorte"
       },
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -1115,6 +1814,13 @@
         {
           "text": "@numberOfItems",
           "when": ["durability"]
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          }
         }
       ],
       "width": 1,
@@ -1135,6 +1841,13 @@
           "when": ["durability"]
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          }
+        }
+      ],
       "width": 1,
       "height": 2,
       "repairable": false
@@ -1151,6 +1864,13 @@
         {
           "text": "@numberOfItems",
           "when": ["durability"]
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          }
         }
       ],
       "width": 1,
@@ -1171,6 +1891,13 @@
           "when": ["durability"]
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -1187,6 +1914,13 @@
         {
           "text": "@numberOfItems",
           "when": ["durability"]
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          }
         }
       ],
       "width": 1,
@@ -1543,6 +2277,11 @@
           "color": "red"
         }
       ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -1571,6 +2310,11 @@
         {
           "text": "@cannotBeTraded",
           "color": "red"
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -1603,6 +2347,11 @@
           "color": "red"
         }
       ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 2,
       "tradable": false,
@@ -1631,6 +2380,11 @@
         {
           "text": "@cannotBeTraded",
           "color": "red"
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -2771,6 +3525,11 @@
           "after": "options"
         }
       ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -2803,6 +3562,14 @@
             "uk": "Це потертий аркуш паперу з незрозумілим текстом.",
             "zh-TW": "這是一張破舊的紙，上面寫著難以理解的文字。"
           }
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -2865,6 +3632,14 @@
           }
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -2880,6 +3655,14 @@
       "description": [
         {
           "text": "@itSPartOfACompleteSecromicon"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -2899,6 +3682,14 @@
           "text": "@itSPartOfACompleteSecromicon"
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -2914,6 +3705,14 @@
       "description": [
         {
           "text": "@itSPartOfACompleteSecromicon"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -2933,6 +3732,14 @@
           "text": "@itSPartOfACompleteSecromicon"
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -2950,6 +3757,14 @@
           "text": "@itSPartOfACompleteSecromicon"
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -2965,6 +3780,14 @@
       "description": [
         {
           "text": "@itSPartOfACompleteSecromicon"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -3009,6 +3832,14 @@
             "uk": "Містить інформацію про дослідження великого чарівника Етраму Леноса.",
             "zh-TW": "包含大巫師埃特拉姆·萊諾斯研究的資訊。"
           }
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -3068,6 +3899,14 @@
             "zh-TW": "進入分身區域。"
           },
           "color": "darkBlue"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -3740,6 +4579,11 @@
           "text": "@throwForZenOrItems"
         }
       ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -3755,6 +4599,11 @@
       "description": [
         {
           "text": "@throwForZenOrItems"
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -3774,6 +4623,11 @@
           "text": "@throwForZenOrItems"
         }
       ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -3789,6 +4643,11 @@
       "description": [
         {
           "text": "@throwForZenOrItems"
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -4097,6 +4956,11 @@
           }
         }
       ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -4115,6 +4979,11 @@
       "description": [
         {
           "text": "@reinforcementJewel"
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
         }
       ],
       "width": 1,

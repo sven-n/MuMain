@@ -1108,6 +1108,71 @@
       "tl": "I-drop ito upang matanggap ang regalo.",
       "uk": "Киньте його, щоб отримати подарунок.",
       "zh-TW": "放下它即可收到禮物。"
+    },
+    "archer": {
+      "en": "Archer",
+      "de": "Bogenschütze",
+      "es": "Arquero",
+      "id": "Pemanah",
+      "ja": "コマンドアーチャー",
+      "pl": "Łucznik",
+      "pt": "Arqueiro",
+      "ru": "Лучник",
+      "tl": "mamamana",
+      "uk": "лучник",
+      "zh-TW": "射手"
+    },
+    "spearman": {
+      "en": "Spearman",
+      "de": "Speerkämpfer",
+      "es": "Lancero",
+      "id": "Tombak",
+      "ja": "コマンドスピアー",
+      "pl": "Włócznik",
+      "pt": "Lanceiro",
+      "ru": "Копейщик",
+      "tl": "Spearman",
+      "uk": "Списоносець",
+      "zh-TW": "斯皮爾曼"
+    },
+    "scrollOfGuardian": {
+      "en": "Scroll of Guardian",
+      "de": "Schriftrolle des Wächters",
+      "es": "Pergamino de guardián",
+      "id": "Gulir Penjaga",
+      "ja": "ガーディアン注文書",
+      "pl": "Scroll of Guardian",
+      "pt": "Pergaminho do Guardião",
+      "ru": "Свиток Стража",
+      "tl": "Scroll ng Tagapangalaga",
+      "uk": "Сувій Охоронця",
+      "zh-TW": "守護者捲軸"
+    },
+    "placeLifeStone": {
+      "en": "Place Life Stone",
+      "de": "Lebensstein platzieren",
+      "es": "Colocar piedra de vida",
+      "id": "Tempatkan Batu Kehidupan",
+      "ja": "ライフストーン",
+      "pl": "Umieść Life Stone",
+      "pt": "Coloque a Pedra da Vida",
+      "ru": "Поместите Камень Жизни",
+      "tl": "Place Life Stone",
+      "uk": "Помістіть камінь життя",
+      "zh-TW": "放置生命石"
+    },
+    "oliveOfLove": {
+      "en": "Olive of love",
+      "de": "Olive der Liebe",
+      "es": "oliva del amor",
+      "id": "Zaitun cinta",
+      "ja": "愛のオリーブ",
+      "pl": "Oliwka miłości",
+      "pt": "Oliveira do amor",
+      "ru": "Оливка любви",
+      "tl": "Olibo ng pag-ibig",
+      "uk": "Оливка кохання",
+      "zh-TW": "愛的橄欖"
     }
   },
   "layouts": [

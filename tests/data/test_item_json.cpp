@@ -369,6 +369,49 @@ TEST_CASE("A description line's item levels are kept through write and read, and
     }
 }
 
+TEST_CASE("An item's name lines are kept through write and read, with or without a text and a color [data][items]")
+{
+    ItemDefinition horn = MakeKris();
+    horn.group = 13;
+    horn.number = 37;
+    horn.slot = ItemSlot::None;
+    horn.weaponKind = WeaponKind::None;
+    horn.statProfile.clear();
+    // The Horn of Fenrir's Destroy kind, then its plain name; a jewel keeps the standard name in yellow.
+    ItemNameLine destroy;
+    destroy.hasText = destroy.hasColor = true;
+    destroy.text.Set("en", "{name} +Destroy");
+    destroy.color = ItemTextColor::Blue;
+    TooltipCondition kind;
+    kind.name = "excellentFlags";
+    kind.comparison = TooltipCondition::Comparison::Equal;
+    kind.number = 1;
+    destroy.when = {kind};
+    ItemNameLine plain;
+    plain.hasText = plain.hasColor = true;
+    plain.text.Set("en", "{name}");
+    plain.color = ItemTextColor::White;
+    ItemNameLine colorOnly;
+    colorOnly.hasColor = true;
+    colorOnly.color = ItemTextColor::Yellow;
+    colorOnly.minLevel = 1;
+    colorOnly.maxLevel = 3;
+    horn.nameLines = {destroy, plain, colorOnly};
+
+    const std::string text = WriteItemGroupJson(13, std::vector<ItemDefinition>{horn});
+    // A white name line writes its color, which keeps a standard color off it.
+    CHECK(text.find("\"color\": \"white\"") != std::string::npos);
+    const ReadResult result = Read(text);
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items.front().nameLines == horn.nameLines);
+    CHECK_FALSE(HasErrors(result.issues));
+    CHECK(WriteItemGroupJson(13, result.items) == text);
+
+    const ReadResult notObject = Read(R"({"formatVersion": 1, "group": 13, "items": [
+        {"number": 37, "name": "Horn of Fenrir", "nameLines": ["{name}"]}]})");
+    CHECK(HasIssue(notObject.issues, ItemDataIssueSeverity::Error, "nameLines[0]"));
+}
+
 TEST_CASE("An item's stat profile is kept through write and read [data][items]")
 {
     ItemDefinition kris = MakeKris();

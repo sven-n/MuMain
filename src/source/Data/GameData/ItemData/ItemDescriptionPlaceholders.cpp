@@ -14,7 +14,7 @@ namespace Data::Items
 namespace
 {
 // {level}, and the values of the tooltip's stat lines, which the game computes (Engine/Object/ItemTooltipValues).
-constexpr std::array<std::string_view, 34> BuiltIns = {
+constexpr std::array<std::string_view, 37> BuiltIns = {
     LevelPlaceholder,    "damageMin",           "damageMax",        "defense",
     "magicDefense",      "blockRate",           "attackSpeed",      "walkSpeed",
     "magicPower",        "durability",          "maxDurability",    "iceResistance",
@@ -23,7 +23,8 @@ constexpr std::array<std::string_view, 34> BuiltIns = {
     "requiredDexterity", "requiredVitality",    "requiredEnergy",   "requiredLeadership",
     "missingLevel",      "missingStrength",     "missingDexterity", "missingVitality",
     "missingEnergy",     "missingLeadership",   "addOptionValue1",  "addOptionValue2",
-    "addOptionDuration", "heroLevel",
+    "addOptionDuration", "heroLevel",           "levelPlusOne",     "name",
+    "excellentFlags",
 };
 
 // The placeholder of `text` that starts at the "{" at `open`: its name and the position after its "}", or the problem.
@@ -123,20 +124,45 @@ std::optional<int> GetPlaceholderValue(std::string_view name, int level, const I
     return std::nullopt;
 }
 
-std::optional<int> ReadSkillManaValue(std::string_view name)
+namespace
 {
-    if (!name.starts_with(SkillManaPrefix))
+struct GameDataValuePrefix
+{
+    GameDataValueKind kind;
+    std::string_view prefix;
+    int limit; // numbers below it
+};
+constexpr GameDataValuePrefix GameDataValuePrefixes[] = {
+    {GameDataValueKind::SkillMana, "skillMana:", MAX_SKILLS},
+    {GameDataValueKind::SkillName, "skillName:", MAX_SKILLS},
+    {GameDataValueKind::MonsterName, "monsterName:", MAX_MONSTER},
+};
+} // namespace
+
+bool HasGameDataValuePrefix(std::string_view name)
+{
+    return std::any_of(std::begin(GameDataValuePrefixes), std::end(GameDataValuePrefixes),
+                       [&](const GameDataValuePrefix& entry) { return name.starts_with(entry.prefix); });
+}
+
+std::optional<GameDataValue> ReadGameDataValue(std::string_view name)
+{
+    for (const GameDataValuePrefix& entry : GameDataValuePrefixes)
     {
-        return std::nullopt;
+        if (!name.starts_with(entry.prefix))
+        {
+            continue;
+        }
+        const std::string_view number = name.substr(entry.prefix.size());
+        if (number.empty() || number.size() > 4 ||
+            !std::all_of(number.begin(), number.end(), [](char c) { return c >= '0' && c <= '9'; }))
+        {
+            return std::nullopt;
+        }
+        const int value = std::stoi(std::string(number));
+        return value < entry.limit ? std::optional<GameDataValue>(GameDataValue{entry.kind, value}) : std::nullopt;
     }
-    const std::string_view number = name.substr(SkillManaPrefix.size());
-    if (number.empty() || number.size() > 4 ||
-        !std::all_of(number.begin(), number.end(), [](char c) { return c >= '0' && c <= '9'; }))
-    {
-        return std::nullopt;
-    }
-    const int skill = std::stoi(std::string(number));
-    return skill < MAX_SKILLS ? std::optional<int>(skill) : std::nullopt;
+    return std::nullopt;
 }
 
 bool IsBuiltInPlaceholder(std::string_view name)

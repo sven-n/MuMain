@@ -4159,10 +4159,6 @@
     <value>ゲートの使用者とパーティーメンバーだけが入場可能です。</value>
     <comment>legacy_id=1179</comment>
   </data>
-  <data name="Kundun mark +%d level" xml:space="preserve">
-    <value>+%dクンドンの印</value>
-    <comment>legacy_id=1180</comment>
-  </data>
   <data name="%d / %d" xml:space="preserve">
     <value>%d個/ %d個</value>
     <comment>legacy_id=1181</comment>
@@ -6626,10 +6622,6 @@
   <data name="Would you like to repair Fenrir's horn?" xml:space="preserve">
     <value>フェンリルの角笛を修理しますか?</value>
     <comment>legacy_id=1865</comment>
-  </data>
-  <data name="+Illusion" xml:space="preserve">
-    <value>+幻影</value>
-    <comment>legacy_id=1866</comment>
   </data>
   <data name="Added %d of Life" xml:space="preserve">
     <value>生命 %d 増加</value>

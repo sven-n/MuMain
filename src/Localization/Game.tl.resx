@@ -4277,10 +4277,6 @@
     <value>Tanging ang may-ari ng magic stone at mga miyembro ng partido ang maaaring pumasok</value>
     <comment>legacy_id=1179</comment>
   </data>
-  <data name="Kundun mark +%d level" xml:space="preserve">
-    <value>Kundun mark +%d level</value>
-    <comment>legacy_id=1180</comment>
-  </data>
   <data name="%d / %d" xml:space="preserve">
     <value>%d / %d</value>
     <comment>legacy_id=1181</comment>
@@ -6744,10 +6740,6 @@
   <data name="Would you like to repair Fenrir's horn?" xml:space="preserve">
     <value>Gusto mo bang ayusin ang sungay ni Fenrir?</value>
     <comment>legacy_id=1865</comment>
-  </data>
-  <data name="+Illusion" xml:space="preserve">
-    <value>+Ilusyon</value>
-    <comment>legacy_id=1866</comment>
   </data>
   <data name="Added %d of Life" xml:space="preserve">
     <value>Idinagdag ang %d ng Buhay</value>

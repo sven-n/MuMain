@@ -4297,10 +4297,6 @@
     <value>Nur der Besitzer des Zaubersteins und Partymitglieder haben Zutritt</value>
     <comment>legacy_id=1179</comment>
   </data>
-  <data name="Kundun mark +%d level" xml:space="preserve">
-    <value>Zeichen von Kundun +%d</value>
-    <comment>legacy_id=1180</comment>
-  </data>
   <data name="%d / %d" xml:space="preserve">
     <value>%d / %d</value>
     <comment>legacy_id=1181</comment>
@@ -6764,10 +6760,6 @@
   <data name="Would you like to repair Fenrir's horn?" xml:space="preserve">
     <value>Möchten Sie das Horn des Fenrir reparieren?</value>
     <comment>legacy_id=1865</comment>
-  </data>
-  <data name="+Illusion" xml:space="preserve">
-    <value>+Illusion</value>
-    <comment>legacy_id=1866</comment>
   </data>
   <data name="Added %d of Life" xml:space="preserve">
     <value>Leben +%d</value>

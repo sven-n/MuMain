@@ -137,6 +137,41 @@
           "text": "@increaseSpeed"
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
+        }
+      ],
       "width": 5,
       "height": 3,
       "slot": "wings",
@@ -172,6 +207,41 @@
         },
         {
           "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
         }
       ],
       "width": 5,
@@ -211,6 +281,41 @@
           "text": "@increaseSpeed"
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
+        }
+      ],
       "width": 3,
       "height": 3,
       "slot": "wings",
@@ -246,6 +351,41 @@
         },
         {
           "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
         }
       ],
       "width": 4,
@@ -352,6 +492,127 @@
         "es": "Orbe de Invocación",
         "pt": "Orbe da invocação"
       },
+      "nameLines": [
+        {
+          "text": {
+            "en": "{skill} Jewel",
+            "de": "{skill} Juwel",
+            "es": "{skill} Joya",
+            "id": "{skill} Permata",
+            "ja": "{skill} 玉",
+            "pl": "{skill} Jewel",
+            "pt": "{skill} Jóia",
+            "ru": "{skill} Драгоценность",
+            "tl": "{skill} Jewel",
+            "uk": "{skill} Коштовність",
+            "zh-TW": "{skill} 寶石"
+          },
+          "values": {"skill": "skillName:30"},
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{skill} Jewel",
+            "de": "{skill} Juwel",
+            "es": "{skill} Joya",
+            "id": "{skill} Permata",
+            "ja": "{skill} 玉",
+            "pl": "{skill} Jewel",
+            "pt": "{skill} Jóia",
+            "ru": "{skill} Драгоценность",
+            "tl": "{skill} Jewel",
+            "uk": "{skill} Коштовність",
+            "zh-TW": "{skill} 寶石"
+          },
+          "values": {"skill": "skillName:31"},
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "{skill} Jewel",
+            "de": "{skill} Juwel",
+            "es": "{skill} Joya",
+            "id": "{skill} Permata",
+            "ja": "{skill} 玉",
+            "pl": "{skill} Jewel",
+            "pt": "{skill} Jóia",
+            "ru": "{skill} Драгоценность",
+            "tl": "{skill} Jewel",
+            "uk": "{skill} Коштовність",
+            "zh-TW": "{skill} 寶石"
+          },
+          "values": {"skill": "skillName:32"},
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "{skill} Jewel",
+            "de": "{skill} Juwel",
+            "es": "{skill} Joya",
+            "id": "{skill} Permata",
+            "ja": "{skill} 玉",
+            "pl": "{skill} Jewel",
+            "pt": "{skill} Jóia",
+            "ru": "{skill} Драгоценность",
+            "tl": "{skill} Jewel",
+            "uk": "{skill} Коштовність",
+            "zh-TW": "{skill} 寶石"
+          },
+          "values": {"skill": "skillName:33"},
+          "levels": [3, 3]
+        },
+        {
+          "text": {
+            "en": "{skill} Jewel",
+            "de": "{skill} Juwel",
+            "es": "{skill} Joya",
+            "id": "{skill} Permata",
+            "ja": "{skill} 玉",
+            "pl": "{skill} Jewel",
+            "pt": "{skill} Jóia",
+            "ru": "{skill} Драгоценность",
+            "tl": "{skill} Jewel",
+            "uk": "{skill} Коштовність",
+            "zh-TW": "{skill} 寶石"
+          },
+          "values": {"skill": "skillName:34"},
+          "levels": [4, 4]
+        },
+        {
+          "text": {
+            "en": "{skill} Jewel",
+            "de": "{skill} Juwel",
+            "es": "{skill} Joya",
+            "id": "{skill} Permata",
+            "ja": "{skill} 玉",
+            "pl": "{skill} Jewel",
+            "pt": "{skill} Jóia",
+            "ru": "{skill} Драгоценность",
+            "tl": "{skill} Jewel",
+            "uk": "{skill} Коштовність",
+            "zh-TW": "{skill} 寶石"
+          },
+          "values": {"skill": "skillName:35"},
+          "levels": [5, 5]
+        },
+        {
+          "text": {
+            "en": "{skill} Jewel",
+            "de": "{skill} Juwel",
+            "es": "{skill} Joya",
+            "id": "{skill} Permata",
+            "ja": "{skill} 玉",
+            "pl": "{skill} Jewel",
+            "pt": "{skill} Jóia",
+            "ru": "{skill} Драгоценность",
+            "tl": "{skill} Jewel",
+            "uk": "{skill} Коштовність",
+            "zh-TW": "{skill} 寶石"
+          },
+          "values": {"skill": "skillName:36"},
+          "levels": [6, 6]
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -447,6 +708,11 @@
             "uk": "Використовується для комбінування предметів Хаосу",
             "zh-TW": "它用於組合混沌物品"
           }
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -648,6 +914,24 @@
         "pt": "feixe da Joia da bênção"
       },
       "tags": ["valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "Jewel of Bless +{levelPlusOne}",
+            "de": "Juwel des Segens +{levelPlusOne}",
+            "es": "Joya de bendición +{levelPlusOne}",
+            "id": "Permata Berkat +{levelPlusOne}",
+            "ja": "祝福の宝石 +{levelPlusOne}",
+            "pl": "Jewel of Bless +{levelPlusOne}",
+            "pt": "Jóia da Abençoação +{levelPlusOne}",
+            "ru": "Драгоценный камень благословения +{levelPlusOne}",
+            "tl": "Hiyas ng Pagpapala +{levelPlusOne}",
+            "uk": "Jewel of Bless +{levelPlusOne}",
+            "zh-TW": "祝福寶石 +{levelPlusOne}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -669,6 +953,24 @@
         "pt": "feixe da Joia da alma"
       },
       "tags": ["valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "Jewel of Soul +{levelPlusOne}",
+            "de": "Juwel der Seele +{levelPlusOne}",
+            "es": "joya del alma +{levelPlusOne}",
+            "id": "Permata Jiwa +{levelPlusOne}",
+            "ja": "霊魂の宝石 +{levelPlusOne}",
+            "pl": "Jewel of Soul +{levelPlusOne}",
+            "pt": "Jóia da Alma +{levelPlusOne}",
+            "ru": "Драгоценность души +{levelPlusOne}",
+            "tl": "Hiyas ng Kaluluwa +{levelPlusOne}",
+            "uk": "Перлина душі +{levelPlusOne}",
+            "zh-TW": "靈魂寶石 +{levelPlusOne}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 30,
@@ -689,6 +991,13 @@
         "es": "caja de moño rojo",
         "pt": "caixa de fita vermelha"
       },
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "classRequirements": {
@@ -708,6 +1017,13 @@
         "es": "caja de moño verde",
         "pt": "caixa de fita verde"
       },
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "classRequirements": {
@@ -727,6 +1043,13 @@
         "es": "caja de moño azul",
         "pt": "caixa de fita azul"
       },
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "classRequirements": {
@@ -746,6 +1069,13 @@
         "es": "Rollo de Alarido de Fuego",
         "pt": "Pergaminho de grito de fogo"
       },
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          }
+        }
+      ],
       "width": 1,
       "height": 2,
       "level": 102,
@@ -778,6 +1108,41 @@
         },
         {
           "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
         }
       ],
       "width": 4,
@@ -817,6 +1182,41 @@
           "text": "@increaseSpeed"
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
+        }
+      ],
       "width": 4,
       "height": 3,
       "slot": "wings",
@@ -852,6 +1252,41 @@
         },
         {
           "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
         }
       ],
       "width": 4,
@@ -891,6 +1326,41 @@
           "text": "@increaseSpeed"
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
+        }
+      ],
       "width": 4,
       "height": 3,
       "slot": "wings",
@@ -926,6 +1396,41 @@
         },
         {
           "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
         }
       ],
       "width": 2,
@@ -1002,6 +1507,41 @@
           "text": "@increaseSpeed"
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
+        }
+      ],
       "width": 4,
       "height": 3,
       "slot": "wings",
@@ -1037,6 +1577,41 @@
         },
         {
           "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
         }
       ],
       "width": 4,
@@ -1170,6 +1745,41 @@
           "values": {"percent": "capeOfFighterDamageAbsorb"}
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "wings",
@@ -1207,6 +1817,41 @@
           "text": "@increaseSpeed"
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "wings",
@@ -1231,6 +1876,14 @@
         "pt": "Semente (Fogo)"
       },
       "tags": ["socketSeed"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -1254,6 +1907,14 @@
         "pt": "Semente (Água)"
       },
       "tags": ["socketSeed"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -1277,6 +1938,14 @@
         "pt": "Semente (Gelo)"
       },
       "tags": ["socketSeed"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -1300,6 +1969,14 @@
         "pt": "Semente (Vento)"
       },
       "tags": ["socketSeed"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -1323,6 +2000,14 @@
         "pt": "Semente (Relâmpago)"
       },
       "tags": ["socketSeed"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -1346,6 +2031,14 @@
         "pt": "Semente (Terra)"
       },
       "tags": ["socketSeed"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -1369,6 +2062,14 @@
         "pt": "Esfera (Mono)"
       },
       "tags": ["socketSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 102,
@@ -1392,6 +2093,14 @@
         "pt": "Esfera (Di)"
       },
       "tags": ["socketSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 122,
@@ -1415,6 +2124,14 @@
         "pt": "Esfera (Tri)"
       },
       "tags": ["socketSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 132,
@@ -1438,6 +2155,14 @@
         "pt": "Esfera de semente (Fogo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -1461,6 +2186,14 @@
         "pt": "Esfera de semente (Água)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -1484,6 +2217,14 @@
         "pt": "Esfera de semente (Gelo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -1507,6 +2248,14 @@
         "pt": "Esfera de semente (Vento)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -1530,6 +2279,14 @@
         "pt": "Esfera Semente (Relâmpago)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -1553,6 +2310,14 @@
         "pt": "Esfera de semente (Terra)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -1576,6 +2341,14 @@
         "pt": "Esfera de semente (Fogo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -1599,6 +2372,14 @@
         "pt": "Esfera de semente (Água)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -1622,6 +2403,14 @@
         "pt": "Esfera de semente (Gelo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -1645,6 +2434,14 @@
         "pt": "Esfera de semente (Vento)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -1668,6 +2465,14 @@
         "pt": "Esfera Semente (Relâmpago)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -1691,6 +2496,14 @@
         "pt": "Esfera de semente (Terra)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -1714,6 +2527,14 @@
         "pt": "Esfera de semente (Fogo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -1737,6 +2558,14 @@
         "pt": "Esfera de semente (Água)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -1760,6 +2589,14 @@
         "pt": "Esfera de semente (Gelo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -1783,6 +2620,14 @@
         "pt": "Esfera de semente (Vento)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -1806,6 +2651,14 @@
         "pt": "Esfera Semente (Relâmpago)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -1829,6 +2682,14 @@
         "pt": "Esfera de semente (Terra)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -1852,6 +2713,14 @@
         "pt": "Esfera de semente (Fogo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -1863,6 +2732,14 @@
         "pt": "Esfera de semente (Água)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -1874,6 +2751,14 @@
         "pt": "Esfera de semente (Gelo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -1885,6 +2770,14 @@
         "pt": "Esfera de semente (Vento)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -1896,6 +2789,14 @@
         "pt": "Esfera Semente (Relâmpago)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -1907,6 +2808,14 @@
         "pt": "Esfera de semente (Terra)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -1918,6 +2827,14 @@
         "pt": "Esfera de semente (Fogo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -1929,6 +2846,14 @@
         "pt": "Esfera de semente (Água)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -1940,6 +2865,14 @@
         "pt": "Esfera de semente (Gelo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -1951,6 +2884,14 @@
         "pt": "Esfera de semente (Vento)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -1962,6 +2903,14 @@
         "pt": "Esfera Semente (Relâmpago)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -1973,6 +2922,14 @@
         "pt": "Esfera de semente (Terra)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -2244,6 +3201,24 @@
         "pt": "Joia do Lote da Vida"
       },
       "tags": ["valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "Jewel of Life +{levelPlusOne}",
+            "de": "Juwel des Lebens +{levelPlusOne}",
+            "es": "joya de la vida +{levelPlusOne}",
+            "id": "Permata Kehidupan +{levelPlusOne}",
+            "ja": "生命の宝石 +{levelPlusOne}",
+            "pl": "Jewel of Life +{levelPlusOne}",
+            "pt": "Jóia da Vida +{levelPlusOne}",
+            "ru": "Жемчужина жизни +{levelPlusOne}",
+            "tl": "Hiyas ng Buhay +{levelPlusOne}",
+            "uk": "Перлина життя +{levelPlusOne}",
+            "zh-TW": "生命寶石 +{levelPlusOne}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 72,
@@ -2266,6 +3241,24 @@
         "pt": "Joia do Lote da Criação"
       },
       "tags": ["valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "Jewel of Creation +{levelPlusOne}",
+            "de": "Juwel der Schöpfung +{levelPlusOne}",
+            "es": "Joya de la creación +{levelPlusOne}",
+            "id": "Permata Penciptaan +{levelPlusOne}",
+            "ja": "創造の宝石 +{levelPlusOne}",
+            "pl": "Jewel of Creation +{levelPlusOne}",
+            "pt": "Jóia da Criação +{levelPlusOne}",
+            "ru": "Драгоценность творения +{levelPlusOne}",
+            "tl": "Hiyas ng Paglikha +{levelPlusOne}",
+            "uk": "Перлина Творіння +{levelPlusOne}",
+            "zh-TW": "創造寶石 +{levelPlusOne}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 78,
@@ -2288,6 +3281,24 @@
         "pt": "Joia do Lote Guardião"
       },
       "tags": ["valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "Jewel of Guardian +{levelPlusOne}",
+            "de": "Juwel des Wächters +{levelPlusOne}",
+            "es": "Joya del guardián +{levelPlusOne}",
+            "id": "Permata Penjaga +{levelPlusOne}",
+            "ja": "守護の宝石 +{levelPlusOne}",
+            "pl": "Jewel of Guardian +{levelPlusOne}",
+            "pt": "Jóia do Guardião +{levelPlusOne}",
+            "ru": "Сокровище Хранителя +{levelPlusOne}",
+            "tl": "Hiyas ng Tagapangalaga +{levelPlusOne}",
+            "uk": "Jewel of Guardian +{levelPlusOne}",
+            "zh-TW": "守護者寶石 +{levelPlusOne}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 75,
@@ -2310,6 +3321,24 @@
         "pt": "Lote de Pedra Preciosa"
       },
       "tags": ["valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "Jewel stone +{levelPlusOne}",
+            "de": "Juwelenstein +{levelPlusOne}",
+            "es": "piedra joya +{levelPlusOne}",
+            "id": "Batu permata +{levelPlusOne}",
+            "ja": "調和の原石 +{levelPlusOne}",
+            "pl": "Jewel stone +{levelPlusOne}",
+            "pt": "Pedra joia +{levelPlusOne}",
+            "ru": "Драгоценный камень +{levelPlusOne}",
+            "tl": "Bato ng hiyas +{levelPlusOne}",
+            "uk": "Коштовний камінь +{levelPlusOne}",
+            "zh-TW": "寶石石 +{levelPlusOne}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -2332,6 +3361,24 @@
         "pt": "Joia do Lote da Harmonia"
       },
       "tags": ["valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "Jewel of Harmony +{levelPlusOne}",
+            "de": "Juwel der Harmonie +{levelPlusOne}",
+            "es": "Joya de la armonía +{levelPlusOne}",
+            "id": "Permata Harmoni +{levelPlusOne}",
+            "ja": "調和の宝石の使い方 +{levelPlusOne}",
+            "pl": "Jewel of Harmony +{levelPlusOne}",
+            "pt": "Jóia da Harmonia +{levelPlusOne}",
+            "ru": "Жемчужина гармонии +{levelPlusOne}",
+            "tl": "Jewel of Harmony +{levelPlusOne}",
+            "uk": "Перлина гармонії +{levelPlusOne}",
+            "zh-TW": "和諧寶石 +{levelPlusOne}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -2354,6 +3401,24 @@
         "pt": "Joia do Lote do Caos"
       },
       "tags": ["valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "Jewel of Chaos +{levelPlusOne}",
+            "de": "Juwel des Chaos +{levelPlusOne}",
+            "es": "joya del caos +{levelPlusOne}",
+            "id": "Permata Kekacauan +{levelPlusOne}",
+            "ja": "混沌の宝石 +{levelPlusOne}",
+            "pl": "Jewel of Chaos +{levelPlusOne}",
+            "pt": "Jóia do Caos +{levelPlusOne}",
+            "ru": "Жемчужина хаоса +{levelPlusOne}",
+            "tl": "Hiyas ng Chaos +{levelPlusOne}",
+            "uk": "Перлина Хаосу +{levelPlusOne}",
+            "zh-TW": "混沌寶石 +{levelPlusOne}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 12,
@@ -2376,6 +3441,24 @@
         "pt": "Lote de Joias de Baixo Polimento"
       },
       "tags": ["valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "Lower Refining Stone +{levelPlusOne}",
+            "de": "Niederer Verfeinerungsstein +{levelPlusOne}",
+            "es": "Piedra de refinación inferior +{levelPlusOne}",
+            "id": "Batu Pemurnian Bawah +{levelPlusOne}",
+            "ja": "下級製錬石 +{levelPlusOne}",
+            "pl": "Niższy Refining Stone +{levelPlusOne}",
+            "pt": "Pedra de Refino Inferior +{levelPlusOne}",
+            "ru": "Нижний очищающий камень +{levelPlusOne}",
+            "tl": "Lower Refining Stone +{levelPlusOne}",
+            "uk": "Нижній очисний камінь +{levelPlusOne}",
+            "zh-TW": "下層精煉石 +{levelPlusOne}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -2398,6 +3481,24 @@
         "pt": "Lote de Joias de Alto Polimento"
       },
       "tags": ["valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "Higher Refining Stone +{levelPlusOne}",
+            "de": "Höherer Verfeinerungsstein +{levelPlusOne}",
+            "es": "Piedra de mayor refinamiento +{levelPlusOne}",
+            "id": "Batu Pemurnian Tinggi +{levelPlusOne}",
+            "ja": "上級製錬石 +{levelPlusOne}",
+            "pl": "Wyższy Refining Stone +{levelPlusOne}",
+            "pt": "Pedra de alto refino +{levelPlusOne}",
+            "ru": "Камень высшей очистки +{levelPlusOne}",
+            "tl": "Higher Refining Stone +{levelPlusOne}",
+            "uk": "Вищий очисний камінь +{levelPlusOne}",
+            "zh-TW": "高等精煉石 +{levelPlusOne}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 25,

@@ -127,6 +127,17 @@ struct ItemDescriptionLine
     bool operator==(const ItemDescriptionLine& other) const = default;
 };
 
+// A rule for the item's name in its tooltip: the first of an item's name lines whose levels and conditions hold gives
+// the name (its text, written as a description line's) and its color. A line without a text keeps the standard name
+// (the set's name, "Excellent", " +level"); one without a color or color rules keeps the standard color.
+struct ItemNameLine : ItemDescriptionLine
+{
+    bool hasText = false;
+    bool hasColor = false;
+
+    bool operator==(const ItemNameLine& other) const = default;
+};
+
 // The values an item gives a placeholder of its description, one per item level from +0: each a text with its
 // translations, or a shared text of the tooltip file. The Fruits' {stat} is "ENG" at +0, "STA" at +1, ...
 struct ItemLevelValue
@@ -254,6 +265,8 @@ struct ItemDefinition
     // What the tooltip says about the item, line by line, after its own lines (empty for most items; the jewels'
     // texts of the original client are still in the tooltip code).
     std::vector<ItemDescriptionLine> description;
+    // How the tooltip names the item, by level and condition (empty: the standard name and color).
+    std::vector<ItemNameLine> nameLines;
     // The values of the description's own placeholders by item level ("levelValues").
     std::vector<ItemLevelValues> levelValues;
 

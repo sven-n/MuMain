@@ -287,37 +287,23 @@
       "tags": ["noDurabilityLine"],
       "description": [
         {
-          "text": {
-            "en": "Archer",
-            "de": "Bogenschütze",
-            "es": "Arquero",
-            "id": "Pemanah",
-            "ja": "コマンドアーチャー",
-            "pl": "Łucznik",
-            "pt": "Arqueiro",
-            "ru": "Лучник",
-            "tl": "mamamana",
-            "uk": "лучник",
-            "zh-TW": "射手"
-          },
+          "text": "@archer",
           "color": "yellow",
           "levels": [0, 0]
         },
         {
-          "text": {
-            "en": "Spearman",
-            "de": "Speerkämpfer",
-            "es": "Lancero",
-            "id": "Tombak",
-            "ja": "コマンドスピアー",
-            "pl": "Włócznik",
-            "pt": "Lanceiro",
-            "ru": "Копейщик",
-            "tl": "Spearman",
-            "uk": "Списоносець",
-            "zh-TW": "斯皮爾曼"
-          },
+          "text": "@spearman",
           "color": "yellow",
+          "levels": [1, 1]
+        }
+      ],
+      "nameLines": [
+        {
+          "text": "@archer",
+          "levels": [0, 0]
+        },
+        {
+          "text": "@spearman",
           "levels": [1, 1]
         }
       ],
@@ -428,6 +414,110 @@
           "after": "options"
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{monster} Transformation Ring",
+            "de": "{monster} Verwandlungsring",
+            "es": "{monster} Anillo de transformación",
+            "id": "{monster} Cincin Transformasi",
+            "ja": "{monster} 変化の指輪",
+            "pl": "{monster} Pierścień Transformacji",
+            "pt": "{monster} Anel de Transformação",
+            "ru": "{monster} Кольцо Трансформации",
+            "tl": "{monster} Singsing ng Pagbabago",
+            "uk": "{monster} Перстень трансформації",
+            "zh-TW": "{monster} 變身戒指"
+          },
+          "values": {"monster": "monsterName:2"},
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{monster} Transformation Ring",
+            "de": "{monster} Verwandlungsring",
+            "es": "{monster} Anillo de transformación",
+            "id": "{monster} Cincin Transformasi",
+            "ja": "{monster} 変化の指輪",
+            "pl": "{monster} Pierścień Transformacji",
+            "pt": "{monster} Anel de Transformação",
+            "ru": "{monster} Кольцо Трансформации",
+            "tl": "{monster} Singsing ng Pagbabago",
+            "uk": "{monster} Перстень трансформації",
+            "zh-TW": "{monster} 變身戒指"
+          },
+          "values": {"monster": "monsterName:7"},
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "{monster} Transformation Ring",
+            "de": "{monster} Verwandlungsring",
+            "es": "{monster} Anillo de transformación",
+            "id": "{monster} Cincin Transformasi",
+            "ja": "{monster} 変化の指輪",
+            "pl": "{monster} Pierścień Transformacji",
+            "pt": "{monster} Anel de Transformação",
+            "ru": "{monster} Кольцо Трансформации",
+            "tl": "{monster} Singsing ng Pagbabago",
+            "uk": "{monster} Перстень трансформації",
+            "zh-TW": "{monster} 變身戒指"
+          },
+          "values": {"monster": "monsterName:14"},
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "{monster} Transformation Ring",
+            "de": "{monster} Verwandlungsring",
+            "es": "{monster} Anillo de transformación",
+            "id": "{monster} Cincin Transformasi",
+            "ja": "{monster} 変化の指輪",
+            "pl": "{monster} Pierścień Transformacji",
+            "pt": "{monster} Anel de Transformação",
+            "ru": "{monster} Кольцо Трансформации",
+            "tl": "{monster} Singsing ng Pagbabago",
+            "uk": "{monster} Перстень трансформації",
+            "zh-TW": "{monster} 變身戒指"
+          },
+          "values": {"monster": "monsterName:8"},
+          "levels": [3, 3]
+        },
+        {
+          "text": {
+            "en": "{monster} Transformation Ring",
+            "de": "{monster} Verwandlungsring",
+            "es": "{monster} Anillo de transformación",
+            "id": "{monster} Cincin Transformasi",
+            "ja": "{monster} 変化の指輪",
+            "pl": "{monster} Pierścień Transformacji",
+            "pt": "{monster} Anel de Transformação",
+            "ru": "{monster} Кольцо Трансформации",
+            "tl": "{monster} Singsing ng Pagbabago",
+            "uk": "{monster} Перстень трансформації",
+            "zh-TW": "{monster} 變身戒指"
+          },
+          "values": {"monster": "monsterName:9"},
+          "levels": [4, 4]
+        },
+        {
+          "text": {
+            "en": "{monster} Transformation Ring",
+            "de": "{monster} Verwandlungsring",
+            "es": "{monster} Anillo de transformación",
+            "id": "{monster} Cincin Transformasi",
+            "ja": "{monster} 変化の指輪",
+            "pl": "{monster} Pierścień Transformacji",
+            "pt": "{monster} Anel de Transformação",
+            "ru": "{monster} Кольцо Трансформации",
+            "tl": "{monster} Singsing ng Pagbabago",
+            "uk": "{monster} Перстень трансформації",
+            "zh-TW": "{monster} 變身戒指"
+          },
+          "values": {"monster": "monsterName:41"},
+          "levels": [5, 5]
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -455,37 +545,23 @@
       "tags": ["noDurabilityLine"],
       "description": [
         {
-          "text": {
-            "en": "Scroll of Guardian",
-            "de": "Schriftrolle des Wächters",
-            "es": "Pergamino de guardián",
-            "id": "Gulir Penjaga",
-            "ja": "ガーディアン注文書",
-            "pl": "Scroll of Guardian",
-            "pt": "Pergaminho do Guardião",
-            "ru": "Свиток Стража",
-            "tl": "Scroll ng Tagapangalaga",
-            "uk": "Сувій Охоронця",
-            "zh-TW": "守護者捲軸"
-          },
+          "text": "@scrollOfGuardian",
           "color": "yellow",
           "levels": [0, 0]
         },
         {
-          "text": {
-            "en": "Place Life Stone",
-            "de": "Lebensstein platzieren",
-            "es": "Colocar piedra de vida",
-            "id": "Tempatkan Batu Kehidupan",
-            "ja": "ライフストーン",
-            "pl": "Umieść Life Stone",
-            "pt": "Coloque a Pedra da Vida",
-            "ru": "Поместите Камень Жизни",
-            "tl": "Place Life Stone",
-            "uk": "Помістіть камінь життя",
-            "zh-TW": "放置生命石"
-          },
+          "text": "@placeLifeStone",
           "color": "yellow",
+          "levels": [1, 1]
+        }
+      ],
+      "nameLines": [
+        {
+          "text": "@scrollOfGuardian",
+          "levels": [0, 0]
+        },
+        {
+          "text": "@placeLifeStone",
           "levels": [1, 1]
         }
       ],
@@ -606,6 +682,35 @@
             "zh-TW": "用於組合領主斗篷和戰士斗篷"
           },
           "levels": [1, 1]
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Crest of monarch",
+            "de": "Crest of Monarch",
+            "es": "Cresta del monarca",
+            "id": "Lambang raja",
+            "ja": "君主の紋章",
+            "pl": "Herb monarchy",
+            "pt": "Crista do monarca",
+            "ru": "Герб монарха",
+            "tl": "Crest of monarch",
+            "uk": "Герб монарха",
+            "zh-TW": "君主的紋章"
+          },
+          "color": "yellow",
+          "levels": [1, 1]
+        },
+        {
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -778,6 +883,18 @@
           }
         ]
       },
+      "nameLines": [
+        {
+          "text": {
+            "en": "{stat} {name}"
+          },
+          "color": "yellow",
+          "levels": [0, 4]
+        },
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false,
@@ -803,6 +920,11 @@
       "description": [
         {
           "text": "@invisibilityCloakIngredient"
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -831,6 +953,11 @@
       "description": [
         {
           "text": "@invisibilityCloakIngredient"
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -1340,6 +1467,62 @@
           "color": "blue"
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "Absolute Staff of Archangel",
+            "de": "Absoluter Stab des Erzengels",
+            "es": "Bastón Absoluto de Arcángel",
+            "id": "Staf Absolut Malaikat Agung",
+            "ja": "アークエンジェルスタッフ",
+            "pl": "Absolutna Laska Archanioła",
+            "pt": "Cajado Absoluto do Arcanjo",
+            "ru": "Абсолютный Посох Архангела",
+            "tl": "Ganap na Staff ng Arkanghel",
+            "uk": "Абсолютний посох Архангела",
+            "zh-TW": "大天使的絕對法杖"
+          },
+          "color": "yellow",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Absolute Sword of Archangel",
+            "de": "Absolutes Schwert des Erzengels",
+            "es": "Espada Absoluta del Arcángel",
+            "id": "Pedang Malaikat Tertinggi",
+            "ja": "アークエンジェルソード",
+            "pl": "Absolutny Miecz Archanioła",
+            "pt": "Espada Absoluta do Arcanjo",
+            "ru": "Абсолютный Меч Архангела",
+            "tl": "Ganap na Espada ng Arkanghel",
+            "uk": "Абсолютний Меч Архангела",
+            "zh-TW": "絕對大天使之劍"
+          },
+          "color": "yellow",
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Absolute Crossbow of Archangel",
+            "de": "Absolute Armbrust des Erzengels",
+            "es": "Ballesta Absoluta de Arcángel",
+            "id": "Panah Mutlak Malaikat Agung",
+            "ja": "アークエンジェルボウ",
+            "pl": "Absolutna Kusza Archanioła",
+            "pt": "Besta Absoluta do Arcanjo",
+            "ru": "Абсолютный арбалет Архангела",
+            "tl": "Ganap na Crossbow ng Arkanghel",
+            "uk": "Абсолютний арбалет Архангела",
+            "zh-TW": "大天使的絕對弩"
+          },
+          "color": "yellow",
+          "levels": [2, 2]
+        },
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 2,
       "durability": 255,
@@ -1436,6 +1619,52 @@
         {
           "text": "@durability",
           "when": ["!timed", "level!=1", "level!=2"]
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Ring of Warrior",
+            "de": "Ring des Kriegers",
+            "es": "Anillo de guerrero",
+            "id": "Cincin Prajurit",
+            "ja": "勇士の指輪",
+            "pl": "Pierścień Wojownika",
+            "pt": "Anel do Guerreiro",
+            "ru": "Кольцо Воина",
+            "tl": "Singsing ng mandirigma",
+            "uk": "Перстень Воїна",
+            "zh-TW": "戰士之戒"
+          },
+          "color": "yellow",
+          "levels": [1, 2]
+        },
+        {
+          "text": {
+            "en": "Ring of glory",
+            "de": "Ring des Ruhms",
+            "es": "anillo de gloria",
+            "id": "Cincin kemuliaan",
+            "ja": "栄誉の指輪",
+            "pl": "Ring of Glory",
+            "pt": "Anel da glória",
+            "ru": "Кольцо славы",
+            "tl": "Singsing ng kaluwalhatian",
+            "uk": "Перстень слави",
+            "zh-TW": "榮耀之戒"
+          },
+          "color": "yellow",
+          "levels": [3, 3]
+        },
+        {
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -1738,6 +1967,41 @@
           "values": {"percent": "capeOfLordDamageAbsorb"}
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "wings",
@@ -1796,6 +2060,40 @@
           "levels": [1, 1]
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} of Dark horse",
+            "de": "{name} (Dunkles Pferd)",
+            "es": "{name} (caballo oscuro)",
+            "id": "{name} (Kuda hitam)",
+            "ja": "{name} (ダークホース)",
+            "pl": "{name} (Dark Horse)",
+            "pt": "{name} (Cavalo negro)",
+            "ru": "{name} (Темная лошадка)",
+            "tl": "{name} (Maitim na kabayo)",
+            "uk": "{name} (Темна конячка)",
+            "zh-TW": "{name} (黑馬)"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} of Dark Raven",
+            "de": "{name} (Dunkler Rabe)",
+            "es": "{name} (Cuervo oscuro)",
+            "id": "{name} (gagak gelap)",
+            "ja": "{name} (ダークスピリット)",
+            "pl": "{name} (Ciemny Kruk)",
+            "pt": "{name} (Corvo Negro)",
+            "ru": "{name} (Темный ворон)",
+            "tl": "{name} (Dark Raven)",
+            "uk": "{name} (Темний ворон)",
+            "zh-TW": "{name} (暗鴉)"
+          },
+          "levels": [1, 1]
+        }
+      ],
       "width": 1,
       "height": 1,
       "classRequirements": {
@@ -1831,6 +2129,14 @@
           },
           "color": "yellow",
           "after": "options"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white"
         }
       ],
       "width": 1,
@@ -1878,6 +2184,14 @@
           "after": "options"
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 1,
@@ -1913,6 +2227,14 @@
           "after": "options"
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 1,
@@ -1941,6 +2263,14 @@
           "text": "@brokenHornCanBeMadeUsingTheClawOfBeastAndFragmentOfHorn",
           "color": "yellow",
           "after": "options"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white"
         }
       ],
       "width": 1,
@@ -1985,6 +2315,14 @@
           "after": "options"
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white"
+        }
+      ],
       "width": 2,
       "height": 2,
       "durability": 1,
@@ -2012,6 +2350,65 @@
         {
           "text": "@life",
           "when": ["!timed"]
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} +Destroy",
+            "de": "{name} +Zerstören",
+            "es": "{name} +Destruir",
+            "id": "{name} +Hancurkan",
+            "ja": "{name} +破壊",
+            "pl": "{name} +Zniszcz",
+            "pt": "{name} +Destruir",
+            "ru": "{name} +Уничтожить",
+            "tl": "{name} + Wasakin",
+            "uk": "{name} +Знищити",
+            "zh-TW": "{name} +摧毀"
+          },
+          "when": ["excellentFlags=1"],
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "{name} +Protect",
+            "de": "{name} +Schützen",
+            "es": "{name} +Proteger",
+            "id": "{name} + Lindungi",
+            "ja": "{name} +守護",
+            "pl": "{name} +Chroń",
+            "pt": "{name} +Proteger",
+            "ru": "{name} +Защитить",
+            "tl": "{name} +Protektahan",
+            "uk": "{name} +Захистити",
+            "zh-TW": "{name} +保護"
+          },
+          "when": ["excellentFlags=2"],
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "{name} +Illusion",
+            "de": "{name} +Illusion",
+            "es": "{name} +Ilusión",
+            "id": "{name} +Ilusi",
+            "ja": "{name} +幻影",
+            "pl": "{name} +Iluzja",
+            "pt": "{name} +Ilusão",
+            "ru": "{name} +Иллюзия",
+            "tl": "{name} +Ilusyon",
+            "uk": "{name} +Ілюзія",
+            "zh-TW": "{name} +幻象"
+          },
+          "when": ["excellentFlags=4"],
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "blue"
         }
       ],
       "width": 2,
@@ -2062,6 +2459,14 @@
             "uk": "І.Д. головного наукового співробітника Кантур. Ви можете увійти до вежі нафтопереробного заводу.",
             "zh-TW": "ID。坎圖爾首席科學家。您可以進入煉油塔。"
           }
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -2900,6 +3305,11 @@
           "text": "@thirdWingIngredient"
         }
       ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 2,
       "classRequirements": {
@@ -2924,6 +3334,11 @@
       "description": [
         {
           "text": "@thirdWingIngredient"
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -4915,6 +5330,14 @@
           "color": "red"
         }
       ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -6088,6 +6511,11 @@
           "text": ""
         }
       ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -6121,6 +6549,11 @@
         },
         {
           "text": ""
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -6158,6 +6591,11 @@
           "text": ""
         }
       ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -6191,6 +6629,11 @@
         },
         {
           "text": ""
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -6228,6 +6671,11 @@
           "text": ""
         }
       ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -6261,6 +6709,11 @@
         },
         {
           "text": ""
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -6298,6 +6751,11 @@
           "text": ""
         }
       ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -6331,6 +6789,11 @@
         },
         {
           "text": ""
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -6368,6 +6831,11 @@
           "text": ""
         }
       ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -6401,6 +6869,11 @@
         },
         {
           "text": ""
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
         }
       ],
       "width": 1,
