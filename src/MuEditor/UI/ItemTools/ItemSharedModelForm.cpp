@@ -231,6 +231,9 @@ void CItemSharedModelForm::RenderConfirm()
         g_ItemEdits.SetSharedModel(I18N::Editor::ChangeASharedModel, m_edit, m_editOf);
         m_editOf = m_edit.name;
         m_loaded = m_edit;
+        // As LoadEdit writes it: the applied copy is unchanged and follows an
+        // undo or redo.
+        m_meshesText = NumberList::Format(m_edit.noneBlendMeshes);
         ImGui::CloseCurrentPopup();
     }
     ImGui::SameLine();

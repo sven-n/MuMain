@@ -1363,6 +1363,50 @@ TEST_CASE("A click in the shared model warning's list keeps the warning open [da
     g_ItemEdits.GetHistory().Clear();
 }
 
+// The meshes typed without the spaces the field writes are applied as numbers;
+// the form follows the undo of that change.
+TEST_CASE("The shared model form follows an undo of meshes typed without spaces [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    TestModelSlots slots;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    const SharedItemModel shared = g_ItemModelDatabase.GetSharedModels().front();
+    const std::vector<int> users = MuEditor::Items::FindSharedModelUsers(shared.name);
+    REQUIRE(users.size() > 1);
+    REQUIRE(shared.noneBlendMeshes != std::vector<int>{1, 2});
+
+    TestImGuiContext context;
+    g_ItemSelection.Select(users[0]);
+    for (int frame = 0; frame < 3; ++frame)
+    {
+        RenderModelTool();
+    }
+    TypeIntoModelTool(SharedModelFormId(I18N::Editor::NoneBlendMeshes, "SharedModel"), "1,2");
+    PressInModelTool(SharedModelFormId(I18N::Editor::ApplyToTheSharedModel));
+    RenderModelTool();
+    ImGuiWindow* warning = OpenPopupWindow();
+    REQUIRE(warning != nullptr);
+    PressInModelTool(ImGui::GetIDWithSeed(I18N::Editor::ApplyToTheSharedModel, nullptr, warning->ID));
+    REQUIRE(g_ItemModelDatabase.FindSharedModel(shared.name)->noneBlendMeshes == std::vector<int>{1, 2});
+
+    // What Ctrl+Z does.
+    REQUIRE(g_ItemEdits.Undo());
+    RenderModelTool();
+    CHECK(g_ItemModelDatabase.FindSharedModel(shared.name)->noneBlendMeshes == shared.noneBlendMeshes);
+    // The form shows the undone model, so there is nothing to apply.
+    PressInModelTool(SharedModelFormId(I18N::Editor::ApplyToTheSharedModel));
+    CHECK(OpenPopupWindow() == nullptr);
+    g_ItemEdits.GetHistory().Clear();
+}
+
 // Items with the same name: the lucky sets have a tag their namesakes do not,
 // the Seals of Wealth and the seed sphere tiers count up by number.
 TEST_CASE("The item lists tell items with the same name apart [data][items][editor]")
