@@ -732,8 +732,19 @@ shows it in the others.
   either, an undo step that would change it is refused, and Import from bmd
   keeps its size and slot.
 - **Item Requirements**: the stat profile, as in Item Basics, then the level
-  and stat requirements, the base values
-  the [item stat file](#item-stats-by-level)'s formula takes; each also by
+  and stat requirements. A stat requirement whose profile gives it a formula
+  shows its value at +0 (what a normal item needs without an option level,
+  as the game's `/<item name>` window shows it) and its weight, the base
+  value the [item stat file](#item-stats-by-level)'s formula takes and the
+  item file stores, with the weights that give the same +0 value beside it
+  ("Weights 39 to 44 give 27"): the formula rounds down, so several weights
+  can give one +0 value and differ at higher levels and for excellent items.
+  Typing a +0 value takes the weight that gives it; when several do, or none
+  does, a list shows them with what each gives at +15 and for excellent
+  items (or the nearest values some weight gives), and *Pick a weight* opens
+  it for the value the item has, to fine tune the weight. The weight can be
+  typed too. The level, and a requirement whose formula keeps the base value
+  (`"base"`), take the value itself. Each also by
   item level (16 values that replace the formula; they start at what the
   base value gives a normal item at each level, and turning them off finds
   the base value back; excellent and ancient items get no higher stat

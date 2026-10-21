@@ -1477,4 +1477,58 @@
   <data name="Picked for the item; the rules give {0}" xml:space="preserve">
     <value>Für den Gegenstand gewählt; die Regeln geben {0}</value>
   </data>
+  <data name="Weight" xml:space="preserve">
+    <value>Gewicht</value>
+  </data>
+  <data name="Weights {0} to {1} give {2}" xml:space="preserve">
+    <value>Gewichte {0} bis {1} ergeben {2}</value>
+  </data>
+  <data name="Only weight {0} gives {1}" xml:space="preserve">
+    <value>Nur Gewicht {0} ergibt {1}</value>
+  </data>
+  <data name="No weight gives {0}" xml:space="preserve">
+    <value>Kein Gewicht ergibt {0}</value>
+  </data>
+  <data name="Weight 0: the item has no such requirement" xml:space="preserve">
+    <value>Gewicht 0: Der Gegenstand hat diese Anforderung nicht</value>
+  </data>
+  <data name="Pick a weight" xml:space="preserve">
+    <value>Gewicht wählen</value>
+  </data>
+  <data name="The weights {0} to {1} all give {2} at +0." xml:space="preserve">
+    <value>Die Gewichte {0} bis {1} ergeben alle {2} auf +0.</value>
+  </data>
+  <data name="They differ at higher item levels and for excellent items." xml:space="preserve">
+    <value>Sie unterscheiden sich auf höheren Gegenstandsstufen und bei exzellenten Gegenständen.</value>
+  </data>
+  <data name="Excellent +0" xml:space="preserve">
+    <value>Exzellent +0</value>
+  </data>
+  <data name="Excellent +15" xml:space="preserve">
+    <value>Exzellent +15</value>
+  </data>
+  <data name="{0} (current)" xml:space="preserve">
+    <value>{0} (aktuell)</value>
+  </data>
+  <data name="Take this weight" xml:space="preserve">
+    <value>Dieses Gewicht nehmen</value>
+  </data>
+  <data name="No weight gives {0} at +0. The nearest values:" xml:space="preserve">
+    <value>Kein Gewicht ergibt {0} auf +0. Die nächsten Werte:</value>
+  </data>
+  <data name="{0} (weight {1})" xml:space="preserve">
+    <value>{0} (Gewicht {1})</value>
+  </data>
+  <data name="{0} (weights {1} to {2})" xml:space="preserve">
+    <value>{0} (Gewichte {1} bis {2})</value>
+  </data>
+  <data name="What a normal item needs at +0" xml:space="preserve">
+    <value>Was ein normaler Gegenstand auf +0 ohne Optionsstufe braucht, wie es das Fenster /&lt;Gegenstandsname&gt; des Spiels zeigt. Ein eingegebener Wert setzt das Gewicht, das ihn ergibt; ergeben ihn mehrere, wählen Sie eines.</value>
+  </data>
+  <data name="What the weight is" xml:space="preserve">
+    <value>Der Grundwert, den die Formel der Item-Statdatei nimmt. Die Gewichte daneben ergeben denselben Wert auf +0 und unterscheiden sich auf höheren Gegenstandsstufen und bei exzellenten Gegenständen.</value>
+  </data>
+  <data name="The weights that give this +0 value" xml:space="preserve">
+    <value>Die Gewichte, die diesen Wert auf +0 ergeben, mit dem, was jedes auf +15 und bei exzellenten Gegenständen ergibt.</value>
+  </data>
 </root>
