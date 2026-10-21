@@ -65,17 +65,38 @@ ImGuiDockNode* FirstLeaf(ImGuiDockNode* node)
     return node;
 }
 
-// Beside the item browser: the node next to the browser's, so the browser
-// stays in view.
-ImGuiDockNode* BesideBrowser(const ImGuiWindow& browser)
+// The dock node a window is in; for a window that is closed or not open yet
+// this session, the one imgui.ini keeps for it. nullptr while it floats.
+ImGuiDockNode* FindDockNode(const char* windowId)
 {
-    const ImGuiDockNode* node = browser.DockNode;
-    if (node == nullptr || node->ParentNode == nullptr)
+    ImGuiID dockId = 0;
+    if (const ImGuiWindow* window = ImGui::FindWindowByName(windowId))
+    {
+        if (window->DockNode != nullptr)
+        {
+            return window->DockNode;
+        }
+        dockId = window->DockId;
+    }
+    else if (const ImGuiWindowSettings* settings = ImGui::FindWindowSettingsByID(ImHashStr(windowId)))
+    {
+        dockId = settings->DockId;
+    }
+    return dockId != 0 ? ImGui::DockBuilderGetNode(dockId) : nullptr;
+}
+
+// Beside the item browser: the node next to the browser's, so the browser
+// stays in view. In a layout from before the item tools the console is the
+// browser's neighbour (the tools were above it): then the browser's own node.
+ImGuiDockNode* BesideBrowser(ImGuiDockNode* browser)
+{
+    if (browser == nullptr || browser->ParentNode == nullptr)
     {
         return nullptr;
     }
-    ImGuiDockNode* parent = node->ParentNode;
-    return FirstLeaf(parent->ChildNodes[0] == node ? parent->ChildNodes[1] : parent->ChildNodes[0]);
+    ImGuiDockNode* parent = browser->ParentNode;
+    ImGuiDockNode* beside = FirstLeaf(parent->ChildNodes[0] == browser ? parent->ChildNodes[1] : parent->ChildNodes[0]);
+    return beside == FindDockNode(MuEditor::WindowIds::Console) ? browser : beside;
 }
 } // namespace
 
@@ -177,17 +198,16 @@ void DockBesideItemTools(const char* windowId)
     {
         return;
     }
+    // A neighbour also by its place in imgui.ini, while it is not open.
     for (const char* neighbour : ItemToolWindows)
     {
-        const ImGuiWindow* window = ImGui::FindWindowByName(neighbour);
-        if (window != nullptr && window->DockId != 0)
+        if (const ImGuiDockNode* node = FindDockNode(neighbour))
         {
-            ImGui::SetNextWindowDockID(window->DockId, ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowDockID(node->ID, ImGuiCond_FirstUseEver);
             return;
         }
     }
-    const ImGuiWindow* browser = ImGui::FindWindowByName(MuEditor::WindowIds::ItemBrowser);
-    if (const ImGuiDockNode* beside = browser != nullptr ? BesideBrowser(*browser) : nullptr)
+    if (const ImGuiDockNode* beside = BesideBrowser(FindDockNode(MuEditor::WindowIds::ItemBrowser)))
     {
         ImGui::SetNextWindowDockID(beside->ID, ImGuiCond_FirstUseEver);
     }

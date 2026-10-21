@@ -33,6 +33,7 @@
 #include "Render/Items/ItemRenderStyles.h"
 #ifdef _EDITOR
 #include "Core/MuEditorCore.h"
+#include "UI/Common/MuEditorLayout.h"
 #include "UI/Common/MuEditorWindowIds.h"
 #include "UI/ItemEditor/ItemEditorActions.h"
 #include "UI/ItemTools/GlowColorDialog.h"
@@ -2009,6 +2010,70 @@ TEST_CASE("The Shift click source of Item Rules follows its item when other rows
     CHECK(state->RangeSrcItem == 3);
     draw(bows);
     CHECK(state->RangeSrcItem == ImGuiSelectionUserData_Invalid);
+}
+
+// A layout saved before the item tools: the item table (now the browser) in
+// the tools above the console. An item tool opened the first time docks with
+// the browser, not into the console.
+TEST_CASE(
+    "An item tool opened the first time in a layout from before the item tools docks with the browser [editor][items]")
+{
+    TestImGuiContext context;
+    ImGuiID tools = 0;
+    ImGuiID console = 0;
+    bool browserOpen = true;
+    bool translationsSaved = false;
+    const auto frame = [&]
+    {
+        ImGui::NewFrame();
+        ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+        ImGui::SetNextWindowSize(ImVec2(1200.0f, 800.0f));
+        ImGui::Begin("Editor", nullptr, ImGuiWindowFlags_NoDocking);
+        // As BuildDefaultLayout made it before the item tools.
+        const ImGuiID dockSpace = ImGui::GetID("ToolWindows");
+        if (ImGui::DockBuilderGetNode(dockSpace) == nullptr)
+        {
+            ImGui::DockBuilderAddNode(dockSpace, ImGuiDockNodeFlags_DockSpace);
+            ImGui::DockBuilderSetNodeSize(dockSpace, ImVec2(1200.0f, 780.0f));
+            console = ImGui::DockBuilderSplitNode(dockSpace, ImGuiDir_Down, 0.25f, nullptr, &tools);
+            ImGui::DockBuilderDockWindow(MuEditor::WindowIds::Console, console);
+            ImGui::DockBuilderDockWindow(MuEditor::WindowIds::ItemBrowser, tools);
+            if (translationsSaved)
+            {
+                // Saved by phase 5, not open.
+                ImGui::DockBuilderDockWindow(MuEditor::WindowIds::ItemTranslations, tools);
+            }
+            ImGui::DockBuilderFinish(dockSpace);
+        }
+        // The node is there: it is not built again.
+        MuEditor::Layout::SubmitDockSpace(false);
+        ImGui::End();
+        if (browserOpen)
+        {
+            ImGui::Begin(MuEditor::WindowIds::ItemBrowser);
+            ImGui::End();
+        }
+        MuEditor::Layout::DockBesideItemTools(MuEditor::WindowIds::ItemBasics);
+        ImGui::Begin(MuEditor::WindowIds::ItemBasics);
+        ImGui::End();
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    SUBCASE("the browser open") {}
+    SUBCASE("the browser not open")
+    {
+        browserOpen = false;
+    }
+    SUBCASE("a tool saved beside the browser, not open")
+    {
+        browserOpen = false;
+        translationsSaved = true;
+    }
+    frame();
+    frame();
+    const ImGuiWindow* basics = ImGui::FindWindowByName(MuEditor::WindowIds::ItemBasics);
+    REQUIRE(basics != nullptr);
+    CHECK(basics->DockId == tools);
 }
 
 // The warning before a shared model changes lists its items; a click on one
