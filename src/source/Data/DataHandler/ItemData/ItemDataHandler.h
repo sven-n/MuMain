@@ -107,6 +107,17 @@ public:
     // would be empty (also when the item has none yet) or when the text has
     // LocalizedString::Separator, which the item checks refuse.
     bool SetItemName(int itemType, std::string_view locale, std::string text);
+
+    // The item stat file as loaded, with the changes of the item editor.
+    const Data::Items::ItemStatFile& GetStatFile() const
+    {
+        return m_statFile;
+    }
+    // Takes `file` as the item stat file, with its tables and profiles in the
+    // writer's order (by name), and gives the item database its profiles; Save
+    // writes it. `file` must be valid (ValidateItemStatsAsWritten). Items keep
+    // the profile they name.
+    void SetStatFile(const Data::Items::ItemStatFile& file);
     // The item editor swapped two entries of ItemAttribute[]. A moved item
     // takes its model along (the item model database and the opened model
     // slot), and its weapon kind and stat profile follow its new group like
@@ -126,9 +137,9 @@ public:
 
     // Validates the item database and the item models (Validate) and writes Data/Items,
     // with the model files of Data/Items/Models whose models changed (moved,
-    // edited) since they were loaded, and SharedModels.json when a shared
-    // model changed. Nothing is written when the data has errors, and no file
-    // is replaced when one of them cannot be written.
+    // edited) since they were loaded, SharedModels.json when a shared model
+    // changed and Stats/ItemStats.json when the item stat file changed. Nothing is written when the data has errors,
+    // and no file is replaced when one of them cannot be written.
     Data::Items::ItemDataSaveResult Save(std::vector<Data::Items::ItemDataIssue>& issues);
 
     // Replaces all items with the legacy Item_<language>.bmd files. Items the
@@ -208,6 +219,9 @@ private:
     bool m_sharedModelsChanged = false;
     // Whether the editor changed the glow color list since LoadModels.
     bool m_glowColorsChanged = false;
+    // The item stat file as Load read it, and whether the editor changed it since.
+    Data::Items::ItemStatFile m_statFile;
+    bool m_statFileChanged = false;
     // The item types whose opened models no longer match their model entries.
     std::vector<int> m_modelsToReopen;
 

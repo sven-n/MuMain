@@ -117,6 +117,10 @@ bool CItemDataHandler::Load(std::string& errorMessage)
         return false;
     }
     const double loadMilliseconds = MillisecondsSince(loadStart);
+#ifdef _EDITOR
+    m_statFile = std::move(stats.file);
+    m_statFileChanged = false;
+#endif
 
     const auto buildStart = std::chrono::steady_clock::now();
     g_ItemDatabase.SetDisplayLocale(I18N::GetCurrentLocale());
@@ -521,6 +525,11 @@ void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
     std::vector<ItemDefinition> items;
     std::ranges::copy_if(g_ItemDatabase.GetAllSlots(), std::back_inserter(items), &ItemDefinition::Exists);
     ValidateItems(items, issues);
+    // The file as Load read it was checked then.
+    if (m_statFileChanged)
+    {
+        ValidateItemStatsAsWritten(m_statFile, issues);
+    }
 
     std::vector<ItemModelDefinition> models;
     std::ranges::copy_if(g_ItemModelDatabase.GetAllSlots(), std::back_inserter(models), &ItemModelDefinition::Exists);
@@ -564,7 +573,20 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
     models.glowColorsFile = GetGlowColorsFile();
     models.glowColors = g_GlowColors.GetColors();
     models.glowColorsChanged = m_glowColorsChanged;
+    models.statsFile = GetItemStatsFile();
+    models.stats = &m_statFile;
+    models.statsChanged = m_statFileChanged;
     return WriteItemAndModelDataDirectories(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(), models, issues);
+}
+
+void CItemDataHandler::SetStatFile(const ItemStatFile& file)
+{
+    m_statFile = file;
+    const auto byName = [](const auto& left, const auto& right) { return left.name < right.name; };
+    std::ranges::stable_sort(m_statFile.tables, byName);
+    std::ranges::stable_sort(m_statFile.profiles, byName);
+    m_statFileChanged = true;
+    g_ItemDatabase.SetStatProfiles(ItemStatProfiles(m_statFile));
 }
 
 ItemBmdImportResult CItemDataHandler::ImportFromBmd()

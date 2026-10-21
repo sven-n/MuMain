@@ -779,8 +779,9 @@ How changes work:
   profile the profile rules of the item stat file; a value you pick stays.
 - **Save Items** runs the checks and writes `Data/Items` next to the game,
   with the model files of the groups whose models changed,
-  `SharedModels.json` when a shared model changed and
-  `Data/Effects/GlowColors.json` when a glow color changed; the other model
+  `SharedModels.json` when a shared model changed,
+  `Data/Effects/GlowColors.json` when a glow color changed and
+  `Stats/ItemStats.json` when the item formulas changed; the other model
   files are not touched. It lists each UI language that misses item names, with
   how many. With errors nothing is written, and the errors are listed in
   the editor console and in **Item Checks**. Warnings (a model file that is

@@ -112,6 +112,12 @@ struct ItemModelSave
     std::filesystem::path glowColorsFile;
     std::span<const Effects::GlowColor> glowColors;
     bool glowColorsChanged = false;
+#ifdef _EDITOR
+    // Written to statsFile (GetItemStatsFile) when statsChanged.
+    std::filesystem::path statsFile;
+    const ItemStatFile* stats = nullptr;
+    bool statsChanged = false;
+#endif
 };
 
 // Like SaveItemDataDirectory, and the models are checked and written with the
@@ -144,6 +150,12 @@ void ValidateSharedItemModelsAsWritten(std::span<const SharedItemModel> sharedMo
 // The same for the glow colors (a name or value the item editor gave one),
 // read back from GlowColors.json as the save would write it.
 void ValidateGlowColorsAsWritten(std::span<const Effects::GlowColor> colors, std::vector<ItemDataIssue>& issues);
+
+#ifdef _EDITOR
+// The same for the item stat file (the changes of Item Formulas), read back
+// from ItemStats.json as the save would write it.
+void ValidateItemStatsAsWritten(const ItemStatFile& file, std::vector<ItemDataIssue>& issues);
+#endif
 
 // A model file that is not in the client folder (relative to the working
 // directory): a warning for each model, since the game starts without it and

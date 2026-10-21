@@ -1642,6 +1642,64 @@ TEST_CASE("An item that names a profile the item stat file does not have blocks 
                               }));
 }
 
+TEST_CASE("Save Items writes the item stat file when the editor changed it [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    ItemStatProfilesScope restoreProfiles;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    const std::filesystem::path statsFile = folder.Directory() / GetItemStatsFile();
+    const std::string shippedText = TestFiles::ReadWholeFile(statsFile);
+    const ItemStatsLoadResult shipped = LoadItemStatsFile(statsFile);
+    REQUIRE(shipped.issues.empty());
+    CHECK(g_ItemDataHandler.GetStatFile() == shipped.file);
+
+    SUBCASE("unchanged, it is left as it is")
+    {
+        std::vector<ItemDataIssue> issues;
+        REQUIRE(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+        CHECK(TestFiles::ReadWholeFile(statsFile) == shippedText);
+    }
+
+    SUBCASE("changed, it is written and reads back the same")
+    {
+        ItemStatFile changed = shipped.file;
+        changed.excellentDropLevelBonus = 26;
+        // The handler keeps the writer's order.
+        std::swap(changed.profiles.front(), changed.profiles.back());
+        g_ItemDataHandler.SetStatFile(changed);
+        CHECK(g_ItemDatabase.GetStatProfiles().GetExcellentDropLevelBonus() == 26);
+        CHECK(g_ItemDataHandler.GetStatFile().profiles.front().name == shipped.file.profiles.front().name);
+
+        std::vector<ItemDataIssue> issues;
+        REQUIRE(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+        const ItemStatsLoadResult saved = LoadItemStatsFile(statsFile);
+        CHECK(saved.issues.empty());
+        CHECK(saved.file == g_ItemDataHandler.GetStatFile());
+        CHECK(TestFiles::ReadWholeFile(statsFile) != shippedText);
+    }
+
+    SUBCASE("invalid, it stops the save")
+    {
+        ItemStatFile invalid = shipped.file;
+        invalid.tables.front().name = "no name";
+        g_ItemDataHandler.SetStatFile(invalid);
+
+        std::vector<ItemDataIssue> issues;
+        CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::InvalidData);
+        CHECK(std::ranges::any_of(issues,
+                                  [](const ItemDataIssue& issue)
+                                  {
+                                      return issue.severity == ItemDataIssueSeverity::Error &&
+                                             issue.source == GetItemStatsFile().generic_string();
+                                  }));
+        CHECK(TestFiles::ReadWholeFile(statsFile) == shippedText);
+    }
+}
+
 TEST_CASE("Exporting unchanged bmd files is not a failure [data][items][editor]")
 {
     TemporaryClientFolder folder;

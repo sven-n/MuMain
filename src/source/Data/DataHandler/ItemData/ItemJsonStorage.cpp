@@ -209,6 +209,12 @@ void AddItemModelFiles(const ItemModelSave& models, std::vector<FileToSave>& fil
     {
         files.push_back({models.glowColorsFile, Effects::WriteGlowColorsJson(models.glowColors)});
     }
+#ifdef _EDITOR
+    if (models.statsChanged && models.stats != nullptr)
+    {
+        files.push_back({models.statsFile, WriteItemStatsJson(*models.stats)});
+    }
+#endif
 }
 } // namespace
 
@@ -364,6 +370,17 @@ void ValidateGlowColorsAsWritten(std::span<const Effects::GlowColor> colors, std
     std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
                  [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Error; });
 }
+
+#ifdef _EDITOR
+void ValidateItemStatsAsWritten(const ItemStatFile& file, std::vector<ItemDataIssue>& issues)
+{
+    ItemStatFile readBack;
+    std::vector<ItemDataIssue> readIssues;
+    ReadItemStatsJson(WriteItemStatsJson(file), GetItemStatsFile().generic_string(), readBack, readIssues);
+    std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
+                 [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Error; });
+}
+#endif
 
 void ValidateItemModelFilesExist(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues)
 {
