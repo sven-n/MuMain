@@ -1,8 +1,11 @@
 mu_add_test(
     NAME test_item_database
     SOURCES
+        test_item_check_targets.cpp
+        test_item_code_references.cpp
         test_item_database.cpp
         test_item_description_placeholders.cpp
+        test_item_edit_history.cpp
         test_item_json.cpp
         test_item_list_model.cpp
         test_item_model_json.cpp
@@ -10,8 +13,11 @@ mu_add_test(
         test_item_model_glow_json.cpp
         test_item_model_material_json.cpp
         test_item_model_problems.cpp
+        test_item_model_tool.cpp
         test_item_names.cpp
+        test_item_stat_file_change.cpp
         test_item_stats_json.cpp
+        test_item_users.cpp
         test_localized_string.cpp
     LINK_LIBS
         MuClient
@@ -51,9 +57,11 @@ mu_add_test(
     SOURCES
         test_item_database_files.cpp
         test_item_model_files.cpp
+        test_item_requirement_weights.cpp
         test_item_rules.cpp
         test_item_stats.cpp
         test_item_tooltips.cpp
+        test_item_value_formulas.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
