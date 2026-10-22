@@ -80,6 +80,33 @@ void ValidateName(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
         check(locale, text);
     }
 }
+// A description line's text is written like a name: an English text, and translations under language codes. A blank
+// line has no text in any language.
+void ValidateDescription(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
+{
+    for (size_t index = 0; index < definition.description.size(); ++index)
+    {
+        const LocalizedString& text = definition.description[index].text;
+        if (text.IsEmpty())
+        {
+            continue;
+        }
+        const std::string field = "description[" + std::to_string(index) + "].text";
+        if (text.GetNeutral().empty())
+        {
+            AddIssue(issues, ItemDataIssueSeverity::Error, definition, "the English text is missing", field.c_str());
+        }
+        for (const auto& [locale, translation] : text.GetTranslations())
+        {
+            if (!IsValidLocaleCode(locale))
+            {
+                AddIssue(issues, ItemDataIssueSeverity::Error, definition,
+                         "\"" + locale + "\" is not a language code (letters, digits and \"-\" only)", field.c_str());
+            }
+        }
+    }
+}
+
 // The slot of each weapon kind: the left hand (offHand) for bows, shields and
 // books, the right hand (mainHand) for the others. The code looks for a bow or
 // a shield only in the left hand and for a crossbow or a spear only in the
@@ -284,6 +311,7 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
         }
 
         ValidateName(definition, issues);
+        ValidateDescription(definition, issues);
         ValidateSlot(definition, issues);
         ValidatePotionPriority(definition, issues);
         ValidateExcellentBonus(definition, issues);
@@ -404,14 +432,30 @@ void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const 
         {
             continue;
         }
+        const auto isShown = [&](const std::string& locale)
+        {
+            return std::any_of(uiLocales.begin(), uiLocales.end(),
+                               [&](const char* uiLocale) { return locale == uiLocale; });
+        };
         for (const auto& [locale, text] : definition.names.GetTranslations())
         {
-            const bool shown = std::any_of(uiLocales.begin(), uiLocales.end(),
-                                           [&](const char* uiLocale) { return locale == uiLocale; });
-            if (!shown)
+            if (!isShown(locale))
             {
                 AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
                          "the " + locale + " name is never shown: the game has no texts in that language");
+            }
+        }
+        for (size_t index = 0; index < definition.description.size(); ++index)
+        {
+            for (const auto& [locale, text] : definition.description[index].text.GetTranslations())
+            {
+                if (!isShown(locale))
+                {
+                    const std::string field = "description[" + std::to_string(index) + "].text";
+                    AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
+                             "the " + locale + " text is never shown: the game has no texts in that language",
+                             field.c_str());
+                }
             }
         }
     }
