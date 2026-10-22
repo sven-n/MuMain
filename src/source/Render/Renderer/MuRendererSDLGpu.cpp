@@ -333,7 +333,7 @@ static SDL_GPUCommandBuffer* s_cmdBuf = nullptr;
 static SDL_GPURenderPass* s_renderPass = nullptr;
 static SDL_GPUTexture* s_swapchainTexture = nullptr;
 
-// Swapchain dimensions in physical pixels (from SDL_AcquireGPUSwapchainTexture).
+// Swapchain dimensions in physical pixels (from SDL_WaitAndAcquireGPUSwapchainTexture).
 // Used for viewport calculations — distinct from logical window size on HiDPI/Retina.
 static Uint32 s_swapW = 0u;
 static Uint32 s_swapH = 0u;
@@ -2075,6 +2075,19 @@ public:
         mu::log::Get("render")->info("SDL_gpu -- Shutdown complete");
     }
 
+    // Waits on the same frame-in-flight fence as BeginFrame's acquire, so the acquire after it returns at once.
+    void WaitForSwapchain() override
+    {
+        if (!s_device || !s_window)
+        {
+            return;
+        }
+        if (!SDL_WaitForGPUSwapchain(s_device, s_window))
+        {
+            mu::log::Get("render")->error("SDL_gpu -- SDL_WaitForGPUSwapchain failed: {}", SDL_GetError());
+        }
+    }
+
     // -----------------------------------------------------------------------
     // BeginFrame: Acquire command buffer, swapchain texture, and begin render pass.
     // Called once per frame before any draw calls.
@@ -2176,22 +2189,27 @@ public:
         s_swapH = 0u;
         s_swapchainTexture = nullptr;
 
-        if (!SDL_AcquireGPUSwapchainTexture(s_cmdBuf, s_window, &s_swapchainTexture, &s_swapW, &s_swapH))
+        // Waits until a swapchain texture is free: with VSync on and no lower FPS cap, that wait is what holds the
+        // game loop to the display's refresh rate. SDL_AcquireGPUSwapchainTexture returns no texture instead while
+        // the frames in flight are full, and the loop ran on without drawing, several times per displayed frame on
+        // Vulkan and Direct3D 12 alike. The game loop already waited in WaitForSwapchain, before reading input, so
+        // this returns at once there; it still paces the frames drawn outside it (the title and loading screens).
+        if (!SDL_WaitAndAcquireGPUSwapchainTexture(s_cmdBuf, s_window, &s_swapchainTexture, &s_swapW, &s_swapH))
         {
-            mu::log::Get("render")->error("SDL_gpu -- SDL_AcquireGPUSwapchainTexture failed: {}", SDL_GetError());
+            mu::log::Get("render")->error("SDL_gpu -- SDL_WaitAndAcquireGPUSwapchainTexture failed: {}",
+                                          SDL_GetError());
             SDL_CancelGPUCommandBuffer(s_cmdBuf);
             s_cmdBuf = nullptr;
             FailPendingFrameReadback();
             return;
         }
 
-        // If swapchain texture is null, window is minimized/occluded — skip frame.
+        // If swapchain texture is null, skip the frame: a hidden window, or on Vulkan a minimized one whose
+        // surface the driver reports as 0x0 (Direct3D 12 keeps rendering a minimized window).
         if (!s_swapchainTexture)
         {
-            // Debug-level only — this happens normally when window is minimized,
-            // and now and then for a visible window while too many frames are in
-            // flight. A requested readback stays pending for the next frame that
-            // renders; its consumer decides how long to wait.
+            // A requested readback stays pending for the next frame that renders;
+            // its consumer decides how long to wait.
             SDL_CancelGPUCommandBuffer(s_cmdBuf);
             s_cmdBuf = nullptr;
             return;
