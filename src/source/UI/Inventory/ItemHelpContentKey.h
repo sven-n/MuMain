@@ -5,13 +5,15 @@
 namespace mu::ui::window
 {
 // What the item help window's lines and table are built from: the item and its data (the item
-// editor and a reload raise the item database's version), the language, and the hero's class,
-// level and stats. The window builds them again only when this changes.
+// editor and a reload raise the item database's version), the language, the language of the item
+// names (English while translated item names are off), and the hero's class, level and stats. The
+// window builds them again only when this changes.
 struct ItemHelpContentKey
 {
     int itemType = -1;
     int itemDataVersion = 0;
     int localeIndex = 0;
+    int itemNameLocaleIndex = 0;
     CLASS_TYPE heroClass{};
     ItemInfoHeroStats heroStats{};
 

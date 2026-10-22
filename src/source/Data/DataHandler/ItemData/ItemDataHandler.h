@@ -21,11 +21,16 @@
 // Owns loading the item data (Data/Items/*.json) into the item database and
 // the item models (Data/Items/Models/*.json) into the item model database, and
 // keeps ItemAttribute[], the table most game code still reads, filled from
-// the database. Item names follow the UI locale.
+// the database. Item names follow the UI locale, or stay English when the
+// player turned translated item names off ([UI] TranslateItemNames).
 class CItemDataHandler
 {
 public:
     static CItemDataHandler& GetInstance();
+
+    // Shows the item names in the language the UI locale and the
+    // TranslateItemNames setting give, after either changed.
+    void RefreshItemNames();
 
     // Data/Local/<language>/Item_<language>.bmd (legacy item files).
     static std::wstring GetItemFilePath(const std::wstring& language);

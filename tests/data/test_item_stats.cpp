@@ -924,6 +924,12 @@ TEST_CASE("The item help window builds its content again only when what it shows
     I18N::SetLocale("en");
     CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) == shown);
 
+    // Translated item names turned on or off: only the item names change language.
+    g_ItemDatabase.SetDisplayLocale("pt");
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != shown);
+    g_ItemDatabase.SetDisplayLocale("en");
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) == shown);
+
     // An item editor change, which stores the item in the item database.
     g_ItemDatabase.Set(*g_ItemDatabase.Find(ITEM_BONE_BLADE));
     CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != shown);

@@ -7,6 +7,7 @@
 #include "Core/Text/Utf8.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Data/DataHandler/DataIssueReport.h"
+#include "Data/GameConfig/GameConfig.h"
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
@@ -61,6 +62,11 @@ std::unique_ptr<ITEM_ATTRIBUTE[]> BuildItemAttributes(std::string_view locale)
         ToItemAttribute(definition, attributes[MakeItemType(slot.group, slot.number)]);
     }
     return attributes;
+}
+
+std::string_view ItemNameLocale()
+{
+    return GetItemNameLocale(I18N::GetCurrentLocale(), GameConfig::GetInstance().GetTranslateItemNames());
 }
 
 #ifdef _EDITOR
@@ -134,7 +140,7 @@ bool CItemDataHandler::Load(std::string& errorMessage)
 #endif
 
     const auto buildStart = std::chrono::steady_clock::now();
-    g_ItemDatabase.SetDisplayLocale(I18N::GetCurrentLocale());
+    g_ItemDatabase.SetDisplayLocale(ItemNameLocale());
     g_ItemDatabase.SetStatProfiles(std::move(statProfiles));
     g_ItemDatabase.Build(result.items);
     FillItemAttributes();
@@ -208,9 +214,13 @@ void CItemDataHandler::RegisterLocaleObserver()
 
 void CItemDataHandler::OnLocaleChanged(void* context) noexcept
 {
-    auto* handler = static_cast<CItemDataHandler*>(context);
-    g_ItemDatabase.SetDisplayLocale(I18N::GetCurrentLocale());
-    handler->FillItemAttributes();
+    static_cast<CItemDataHandler*>(context)->RefreshItemNames();
+}
+
+void CItemDataHandler::RefreshItemNames()
+{
+    g_ItemDatabase.SetDisplayLocale(ItemNameLocale());
+    FillItemAttributes();
 }
 
 #ifdef _EDITOR
