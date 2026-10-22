@@ -1873,4 +1873,91 @@
   <data name="Apply or revert the changes first." xml:space="preserve">
     <value>Apply or revert the changes first.</value>
   </data>
+  <data name="Server List" xml:space="preserve">
+    <value>Server List</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Reads {0} again; unsaved changes are lost." xml:space="preserve">
+    <value>Reads {0} again; unsaved changes are lost.</value>
+  </data>
+  <data name="Unsaved changes" xml:space="preserve">
+    <value>Unsaved changes</value>
+  </data>
+  <data name="Saved to {0}" xml:space="preserve">
+    <value>Saved to {0}</value>
+  </data>
+  <data name="Not saved, see the problems below." xml:space="preserve">
+    <value>Not saved, see the problems below.</value>
+  </data>
+  <data name="Problems in {0}:" xml:space="preserve">
+    <value>Problems in {0}:</value>
+  </data>
+  <data name="New Group" xml:space="preserve">
+    <value>New Group</value>
+  </data>
+  <data name="Group ID" xml:space="preserve">
+    <value>Group ID</value>
+  </data>
+  <data name="Servers {0} to {1}" xml:space="preserve">
+    <value>Servers {0} to {1}</value>
+  </data>
+  <data name="Another group has the ID {0}." xml:space="preserve">
+    <value>Another group has the ID {0}.</value>
+  </data>
+  <data name="A group needs a name." xml:space="preserve">
+    <value>A group needs a name.</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Description note" xml:space="preserve">
+    <value>Shown below the channels while the group is selected.</value>
+  </data>
+  <data name="Test server" xml:space="preserve">
+    <value>Test server</value>
+  </data>
+  <data name="Test server note" xml:space="preserve">
+    <value>Shown first; the login screen shows only the first test server group.</value>
+  </data>
+  <data name="Channel" xml:space="preserve">
+    <value>Channel</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="On the login screen" xml:space="preserve">
+    <value>On the login screen</value>
+  </data>
+  <data name="Connect server" xml:space="preserve">
+    <value>Connect server</value>
+  </data>
+  <data name="Normal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="Non-PvP" xml:space="preserve">
+    <value>Non-PvP</value>
+  </data>
+  <data name="Gold PvP" xml:space="preserve">
+    <value>Gold PvP</value>
+  </data>
+  <data name="Gold" xml:space="preserve">
+    <value>Gold</value>
+  </data>
+  <data name="Sent, {0}% load" xml:space="preserve">
+    <value>Sent, {0}% load</value>
+  </data>
+  <data name="Groups the list does not have" xml:space="preserve">
+    <value>The connect server sent servers of groups the list does not have; the login screen does not show them:</value>
+  </data>
+  <data name="Group {0}: servers {1}" xml:space="preserve">
+    <value>Group {0}: servers {1}</value>
+  </data>
+  <data name="Pick a group in the list." xml:space="preserve">
+    <value>Pick a group in the list.</value>
+  </data>
+  <data name="Server list order note" xml:space="preserve">
+    <value>The order of the list is the order of the buttons on the login screen, which shows each change right away. Save writes {0}.</value>
+  </data>
 </root>

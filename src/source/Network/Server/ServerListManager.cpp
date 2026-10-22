@@ -49,6 +49,9 @@ CServerListManager* CServerListManager::GetInstance()
 
 void CServerListManager::Release()
 {
+#ifdef _EDITOR
+    m_receivedServers.clear();
+#endif
     auto iterServerGroup = m_mapServerGroup.begin();
     for (; iterServerGroup != m_mapServerGroup.end(); iterServerGroup++)
     {
@@ -83,6 +86,20 @@ void CServerListManager::SetServerGroups(std::span<const Data::ServerList::Serve
     }
 }
 
+#ifdef _EDITOR
+void CServerListManager::RebuildServerGroups()
+{
+    const std::vector<ReceivedServer> servers = m_receivedServers;
+    const int totalServer = m_iTotalServer;
+    Release();
+    SetTotalServer(totalServer);
+    for (const ReceivedServer& server : servers)
+    {
+        InsertServerGroup(server.connectIndex, server.percent);
+    }
+}
+#endif
+
 const SServerGroupInfo* CServerListManager::GetServerGroupInfoInScript(int iServerGroupIndex)
 {
     ServerListScriptMap::const_iterator iter = m_mapServerListScript.find(iServerGroupIndex);
@@ -94,6 +111,9 @@ const SServerGroupInfo* CServerListManager::GetServerGroupInfoInScript(int iServ
 
 void CServerListManager::InsertServerGroup(int iConnectIndex, int iServerPercent)
 {
+#ifdef _EDITOR
+    m_receivedServers.push_back({iConnectIndex, iServerPercent});
+#endif
     CServerGroup* pServerGroup = NULL;
 
     auto iterServerGroup = m_mapServerGroup.begin();

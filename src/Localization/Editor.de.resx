@@ -1852,4 +1852,91 @@
   <data name="Apply or revert the changes first." xml:space="preserve">
     <value>Erst die Änderungen anwenden oder zurücksetzen.</value>
   </data>
+  <data name="Server List" xml:space="preserve">
+    <value>Serverliste</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Speichern</value>
+  </data>
+  <data name="Reads {0} again; unsaved changes are lost." xml:space="preserve">
+    <value>Liest {0} neu ein; ungespeicherte Änderungen gehen verloren.</value>
+  </data>
+  <data name="Unsaved changes" xml:space="preserve">
+    <value>Ungespeicherte Änderungen</value>
+  </data>
+  <data name="Saved to {0}" xml:space="preserve">
+    <value>In {0} gespeichert</value>
+  </data>
+  <data name="Not saved, see the problems below." xml:space="preserve">
+    <value>Nicht gespeichert, siehe die Probleme unten.</value>
+  </data>
+  <data name="Problems in {0}:" xml:space="preserve">
+    <value>Probleme in {0}:</value>
+  </data>
+  <data name="New Group" xml:space="preserve">
+    <value>Neue Gruppe</value>
+  </data>
+  <data name="Group ID" xml:space="preserve">
+    <value>Gruppen-ID</value>
+  </data>
+  <data name="Servers {0} to {1}" xml:space="preserve">
+    <value>Server {0} bis {1}</value>
+  </data>
+  <data name="Another group has the ID {0}." xml:space="preserve">
+    <value>Eine andere Gruppe hat die ID {0}.</value>
+  </data>
+  <data name="A group needs a name." xml:space="preserve">
+    <value>Eine Gruppe braucht einen Namen.</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Beschreibung</value>
+  </data>
+  <data name="Description note" xml:space="preserve">
+    <value>Steht unter den Kanälen, solange die Gruppe gewählt ist.</value>
+  </data>
+  <data name="Test server" xml:space="preserve">
+    <value>Testserver</value>
+  </data>
+  <data name="Test server note" xml:space="preserve">
+    <value>Steht oben; der Anmeldebildschirm zeigt nur die erste Testserver-Gruppe.</value>
+  </data>
+  <data name="Channel" xml:space="preserve">
+    <value>Kanal</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Art</value>
+  </data>
+  <data name="On the login screen" xml:space="preserve">
+    <value>Auf dem Anmeldebildschirm</value>
+  </data>
+  <data name="Connect server" xml:space="preserve">
+    <value>Connect-Server</value>
+  </data>
+  <data name="Normal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="Non-PvP" xml:space="preserve">
+    <value>Kein PvP</value>
+  </data>
+  <data name="Gold PvP" xml:space="preserve">
+    <value>Gold-PvP</value>
+  </data>
+  <data name="Gold" xml:space="preserve">
+    <value>Gold</value>
+  </data>
+  <data name="Sent, {0}% load" xml:space="preserve">
+    <value>Gemeldet, {0} % Last</value>
+  </data>
+  <data name="Groups the list does not have" xml:space="preserve">
+    <value>Der Connect-Server meldet Server von Gruppen, die die Liste nicht hat; der Anmeldebildschirm zeigt sie nicht:</value>
+  </data>
+  <data name="Group {0}: servers {1}" xml:space="preserve">
+    <value>Gruppe {0}: Server {1}</value>
+  </data>
+  <data name="Pick a group in the list." xml:space="preserve">
+    <value>Wählen Sie eine Gruppe in der Liste.</value>
+  </data>
+  <data name="Server list order note" xml:space="preserve">
+    <value>Die Reihenfolge der Liste ist die der Schaltflächen auf dem Anmeldebildschirm, der jede Änderung sofort zeigt. Speichern schreibt {0}.</value>
+  </data>
 </root>

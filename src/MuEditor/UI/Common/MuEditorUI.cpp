@@ -228,6 +228,7 @@ void CMuEditorUI::RenderWindowsMenu(MuEditor::ToolWindows& windows, SDL_Window* 
         ImGui::MenuItem(I18N::Editor::ItemTranslations, nullptr, &windows.itemTranslations);
         ImGui::EndMenu();
     }
+    ImGui::MenuItem(I18N::Editor::ServerList, nullptr, &windows.serverList);
     ImGui::MenuItem("Skill Editor", nullptr, &windows.skillEditor);
     ImGui::MenuItem("Dev Editor", nullptr, &windows.devEditor);
     ImGui::MenuItem("Map Editor", nullptr, &windows.mapEditor);

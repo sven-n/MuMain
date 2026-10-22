@@ -8,6 +8,7 @@
 
 #include <span>
 #include <string>
+#include <vector>
 
 // A group of Data/Local/ServerList.json, with its place in the list.
 struct SServerGroupInfo
@@ -51,6 +52,23 @@ public:
     void SetTotalServer(int iTotalServer);
     int GetTotalServer();
 
+#ifdef _EDITOR
+    // A server of the last list the connect server sent.
+    struct ReceivedServer
+    {
+        int connectIndex = 0;
+        int percent = 0;
+    };
+
+    const std::vector<ReceivedServer>& GetReceivedServers() const
+    {
+        return m_receivedServers;
+    }
+    // Builds the groups of the last list the connect server sent again, with
+    // the groups SetServerGroups set since.
+    void RebuildServerGroups();
+#endif
+
 protected:
     const SServerGroupInfo* GetServerGroupInfoInScript(int iServerGroupIndex);
     bool MakeServerGroup(IN int iServerGroupIndex, OUT CServerGroup* pServerGroup);
@@ -67,6 +85,9 @@ public:
 
 protected:
     ServerListScriptMap m_mapServerListScript;
+#ifdef _EDITOR
+    std::vector<ReceivedServer> m_receivedServers;
+#endif
 };
 
 #define g_ServerListManager CServerListManager::GetInstance()
