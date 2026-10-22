@@ -33,17 +33,17 @@ using namespace mu::ui::window;
 
 namespace
 {
-    std::uint64_t MaxDepositNow()
-    {
-        return static_cast<std::uint64_t>(
-            GameLogic::Items::MaxVaultDeposit(CharacterMachine->Gold, CharacterMachine->StorageGold));
-    }
+std::uint64_t MaxDepositNow()
+{
+    return static_cast<std::uint64_t>(
+        GameLogic::Items::MaxVaultDeposit(CharacterMachine->Gold, CharacterMachine->StorageGold));
+}
 
-    std::uint64_t MaxWithdrawNow()
-    {
-        return static_cast<std::uint64_t>(
-            GameLogic::Items::MaxVaultWithdraw(CharacterMachine->StorageGold, CharacterMachine->Gold));
-    }
+std::uint64_t MaxWithdrawNow()
+{
+    return static_cast<std::uint64_t>(
+        GameLogic::Items::MaxVaultWithdraw(CharacterMachine->StorageGold, CharacterMachine->Gold));
+}
 
     // Plain 4-digit Mode::NumericKeypad PIN verify. Two call sites: SendRequestItemToMyInven's
     // locked-vault guard below, and the insufficient-storage-gold zen-payment onPrimary further
@@ -243,13 +243,14 @@ void CStorageInventory::BindRmlModel(Rml::DataModelConstructor& c, StorageRmlMod
     c.Bind("take_tooltip", &model.takeTooltip);
     c.Bind("lock_tooltip", &model.lockTooltip);
 
-    c.BindEventCallback("storage_insert_click",
+    c.BindEventCallback(
+        "storage_insert_click",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
         {
             if (MaxDepositNow() == 0)
             {
-                mu::ui::window::CreateOkMessageBox(CharacterMachine->Gold == 0
-                    ? I18N::Game::YouAreShortOfZen : I18N::Game::CannotStoreInVault);
+                mu::ui::window::CreateOkMessageBox(CharacterMachine->Gold == 0 ? I18N::Game::YouAreShortOfZen
+                                                                               : I18N::Game::CannotStoreInVault);
                 return;
             }
             mu::ui::window::GenericDialogConfig cfg;
@@ -279,19 +280,21 @@ void CStorageInventory::BindRmlModel(Rml::DataModelConstructor& c, StorageRmlMod
                 }
                 else
                 {
-                    SocketClient->ToGameServer()->SendVaultMoveMoneyRequest(
-                        VaultMoneyMoveDirection::InventoryToVault, static_cast<int>(iInputZen));
+                    SocketClient->ToGameServer()->SendVaultMoveMoneyRequest(VaultMoneyMoveDirection::InventoryToVault,
+                                                                            static_cast<int>(iInputZen));
                 }
             };
             mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
         });
-    c.BindEventCallback("storage_take_click",
+    c.BindEventCallback(
+        "storage_take_click",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
         {
             if (MaxWithdrawNow() == 0)
             {
                 mu::ui::window::CreateOkMessageBox(CharacterMachine->StorageGold == 0
-                    ? I18N::Game::YouAreShortOfZen : I18N::Game::ExceededMaximumAmountOfZenYouCanPossess);
+                                                       ? I18N::Game::YouAreShortOfZen
+                                                       : I18N::Game::ExceededMaximumAmountOfZenYouCanPossess);
                 return;
             }
             // The insufficient-storage-gold branch chains into
@@ -323,8 +326,8 @@ void CStorageInventory::BindRmlModel(Rml::DataModelConstructor& c, StorageRmlMod
                 }
                 else if (!g_pStorageInventory->IsStorageLocked() || g_pStorageInventory->IsCorrectPassword())
                 {
-                    SocketClient->ToGameServer()->SendVaultMoveMoneyRequest(
-                        VaultMoneyMoveDirection::VaultToInventory, static_cast<int>(iInputZen));
+                    SocketClient->ToGameServer()->SendVaultMoveMoneyRequest(VaultMoneyMoveDirection::VaultToInventory,
+                                                                            static_cast<int>(iInputZen));
                 }
                 else
                 {

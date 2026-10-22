@@ -170,7 +170,6 @@ namespace
     {
         return cfg.input && cfg.input->maxValue && cfg.input->mode == GenericDialogConfig::InputField::Mode::Text;
     }
-
 }
 
 CGenericConfirmDialog::DialogId CGenericConfirmDialog::Show(GenericDialogConfig cfg)
