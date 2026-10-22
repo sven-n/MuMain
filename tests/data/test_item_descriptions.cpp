@@ -182,3 +182,29 @@ TEST_CASE("A description is in the UI's language also when the item names stay E
     REQUIRE_FALSE(rows.empty());
     CHECK(rows[0].starts_with(L"Wird verwendet"));
 }
+
+TEST_CASE("A level value is in the UI's language also when the item names stay English [data][items]")
+{
+    ItemDefinition fruit = MakeJewel();
+    ItemLevelValues stat;
+    stat.name = "stat";
+    ItemLevelValue energy;
+    energy.text.Set("en", "ENG");
+    energy.text.Set("de", "ENE");
+    stat.values = {energy};
+    fruit.levelValues = {stat};
+    ItemDescriptionLine line = Line("{stat} +1");
+    line.text.Set("de", "{stat} +1");
+    fruit.description = {line};
+
+    const std::string itemNameLocale = g_ItemDatabase.GetDisplayLocale();
+    const std::string uiLocale = I18N::GetCurrentLocale();
+    g_ItemDatabase.SetDisplayLocale("en");
+    I18N::SetLocale("de");
+    const std::vector<std::wstring> rows = WriteRows(fruit);
+    I18N::SetLocale(uiLocale.c_str());
+    g_ItemDatabase.SetDisplayLocale(itemNameLocale);
+
+    REQUIRE(rows.size() == 1);
+    CHECK(rows[0] == L"ENE +1");
+}

@@ -1651,12 +1651,12 @@ void SetItemTooltipTextMeasure(ItemTooltipTextMeasure measure)
 }
 
 // The value of a placeholder of a tooltip line for the item at `level`: the value the line binds it to (`bound`), the
-// item's level value (`definition`, when given), a built-in value, {level} or a table of the item stat file; nothing
-// for another name.
+// item's level value (`definition`, when given; in `locale`, the line's language), a built-in value, {level} or a
+// table of the item stat file; nothing for another name.
 static std::optional<std::string> TooltipPlaceholderValue(std::string_view name,
                                                           std::span<const std::pair<std::string, std::string>> bound,
                                                           const Data::Items::ItemDefinition* definition, int level,
-                                                          const ItemTooltipValues& values)
+                                                          const ItemTooltipValues& values, std::string_view locale)
 {
     for (const auto& [placeholder, value] : bound)
     {
@@ -1676,7 +1676,7 @@ static std::optional<std::string> TooltipPlaceholderValue(std::string_view name,
             value.textName.empty() ? &value.text : g_ItemDatabase.GetTooltipFile().FindText(value.textName);
         if (text == nullptr)
             return std::nullopt;
-        return text->Get(g_ItemDatabase.GetDisplayLocale());
+        return text->Get(locale);
     }
     if (const std::optional<int> value = GetItemTooltipValue(values, name))
         return std::to_string(*value);
@@ -1701,12 +1701,15 @@ void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, in
         const Data::LocalizedString* lineText =
             line.textName.empty() ? &line.text : g_ItemDatabase.GetTooltipFile().FindText(line.textName);
         // In the UI's language, also when the item names stay English ("Translate item names" off).
-        const std::wstring text =
-            lineText == nullptr
-                ? std::wstring()
-                : Core::Text::FromUtf8(Data::Items::FillPlaceholders(
-                      lineText->Get(I18N::GetCurrentLocale()), [&](std::string_view name)
-                      { return TooltipPlaceholderValue(name, line.values, &definition, level, values); }));
+        const std::wstring text = lineText == nullptr
+                                      ? std::wstring()
+                                      : Core::Text::FromUtf8(Data::Items::FillPlaceholders(
+                                            lineText->Get(I18N::GetCurrentLocale()),
+                                            [&](std::string_view name)
+                                            {
+                                                return TooltipPlaceholderValue(name, line.values, &definition, level,
+                                                                               values, I18N::GetCurrentLocale());
+                                            }));
         // A blank line is one blank piece. So is a blank line inside a text (`\n\n`, or a text that starts with
         // `\n`): a row left empty would end the tooltip there.
         const std::vector<std::wstring> pieces =
@@ -1769,8 +1772,8 @@ static void WriteItemTooltipLayoutLines(const ITEM& item, int level, const ItemT
         }
         // In the UI's language, also when the item names stay English ("Translate item names" off).
         const std::string filled = Data::Items::FillPlaceholders(
-            text->Get(I18N::GetCurrentLocale()),
-            [&](std::string_view name) { return TooltipPlaceholderValue(name, line->values, nullptr, level, values); });
+            text->Get(I18N::GetCurrentLocale()), [&](std::string_view name)
+            { return TooltipPlaceholderValue(name, line->values, nullptr, level, values, I18N::GetCurrentLocale()); });
         if (filled.empty())
         {
             // No text in the UI's language: a row left empty would end the tooltip there.
