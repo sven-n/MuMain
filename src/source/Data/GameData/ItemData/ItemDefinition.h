@@ -247,7 +247,8 @@ struct ItemDefinition
     // All names of the item, English first. Logs always use the English
     // name (names.GetNeutral()), never a translation.
     LocalizedString names;
-    // The name in the current UI locale, shown to the player. Filled by
+    // The name in the item name language (the UI language, or English while
+    // translated item names are off), shown to the player. Filled by
     // ItemDatabase from names.
     std::wstring name;
 

@@ -1386,6 +1386,9 @@
   <data name="Language" xml:space="preserve">
     <value>Język</value>
   </data>
+  <data name="Translate Item Names" xml:space="preserve">
+    <value>Tłumacz nazwy przedmiotów</value>
+  </data>
   <data name="Windowed mode" xml:space="preserve">
     <value>Tryb okienkowy</value>
   </data>
@@ -8480,6 +8483,9 @@
   <data name="Maximum" xml:space="preserve">
     <value>Maksymalny</value>
     <comment>legacy_id=2342</comment>
+  </data>
+  <data name="Max" xml:space="preserve">
+    <value>Maks.</value>
   </data>
   <data name="Rate increase" xml:space="preserve">
     <value>Wzrost szansy</value>

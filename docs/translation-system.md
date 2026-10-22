@@ -326,7 +326,10 @@ Item names are not in the `.resx` files. They are part of the item data
 `src/bin/Data/Items/*.json` holds the names by language code, using the same
 codes as the UI texts. The game shows the name for the active locale and
 falls back to English, like the UI texts; switching the locale at runtime
-updates item names too.
+updates item names too. Players who know the items by their English names can
+untick **Translate item names** under the language in the options window
+(Interface tab): item names then stay English, also in the item editor, while
+every other text follows the language.
 
 ### In the JSON files
 
