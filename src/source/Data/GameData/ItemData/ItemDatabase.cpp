@@ -94,6 +94,19 @@ void ItemDatabase::Set(const ItemDefinition& definition)
     BuildItemTypesByTag();
 }
 
+void ItemDatabase::SetMany(std::span<const ItemDefinition> definitions)
+{
+    for (const ItemDefinition& definition : definitions)
+    {
+        if (IsValidItemId(definition.group, definition.number))
+        {
+            Store(MakeItemType(definition.group, definition.number), definition);
+        }
+    }
+    CountExistingItems();
+    BuildItemTypesByTag();
+}
+
 void ItemDatabase::Swap(int firstItemType, int secondItemType)
 {
     if (!IsValidItemType(firstItemType) || !IsValidItemType(secondItemType))

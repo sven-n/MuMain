@@ -2,6 +2,12 @@
 
 #include "Data/GameData/ItemData/ItemStructs.h"
 
+namespace Data::Items
+{
+struct ItemDefinition;
+struct ItemStatProfile;
+} // namespace Data::Items
+
 namespace GameLogic::Items
 {
 // What an item has of the stats and requirements the item stat file
@@ -46,4 +52,19 @@ struct ItemStatInput
 // counts (the excellent drop level bonus before the ancient one), and the level
 // requirement of a wing does not grow with excellent options.
 [[nodiscard]] ItemStatValues ComputeItemStats(const ITEM_ATTRIBUTE& attribute, const ItemStatInput& input);
+
+// What ComputeItemStats takes from the item database, given instead: for an item as the
+// item editor has it before it is stored. `definition` may be null (no requirements by
+// level, excellent options raise the level requirement, no fixed excellent bonus).
+struct ItemStatSources
+{
+    const ITEM_ATTRIBUTE& attribute;
+    const Data::Items::ItemDefinition* definition;
+    const Data::Items::ItemStatProfile& profile;
+    bool wing = false;
+};
+
+// ComputeItemStats with the item's data from `sources`; the item stat file's drop level
+// bonuses still come from the item database. `input.itemType` is not read.
+[[nodiscard]] ItemStatValues ComputeItemStats(const ItemStatSources& sources, const ItemStatInput& input);
 } // namespace GameLogic::Items

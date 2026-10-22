@@ -91,19 +91,6 @@ template <typename TDefinition, typename TVisitor> void VisitStatFields(TDefinit
     visit("sellableWhenRentalExpired", definition.sellableWhenRentalExpired, false);
 }
 
-// Lists the names of an enum for error messages: "a", "b" or "c".
-template <typename TEnum> std::string JoinEnumNames()
-{
-    std::string text;
-    const auto names = GetEnumNames(TEnum{});
-    for (size_t i = 0; i < names.size(); ++i)
-    {
-        text += i == 0 ? "" : (i + 1 == names.size() ? " or " : ", ");
-        text += std::string("\"") + names[i].name + "\"";
-    }
-    return text;
-}
-
 // Same order as ItemRequirement and VisitRequirementFields.
 constexpr std::array<const char*, ItemRequirementCount> RequirementKeys = {"level",  "strength", "dexterity",
                                                                            "energy", "vitality", "leadership"};

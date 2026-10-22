@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <string_view>
+#include <vector>
 
 namespace Render::Items::Styles
 {
@@ -1922,6 +1923,21 @@ ItemModelTable<const RenderStyle*> g_itemStyles{[](const Data::Items::ItemModelD
 bool Exists(std::string_view name)
 {
     return FindStyle(name) != nullptr;
+}
+
+std::span<const std::string_view> GetNames()
+{
+    static const std::vector<std::string_view> names = []
+    {
+        std::vector<std::string_view> sorted;
+        for (const RenderStyle& style : RenderStyles)
+        {
+            sorted.emplace_back(style.name);
+        }
+        std::ranges::sort(sorted);
+        return sorted;
+    }();
+    return names;
 }
 
 bool Render(BMD* b, OBJECT* o, int modelType, float alpha, int renderType)

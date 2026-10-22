@@ -14,6 +14,7 @@
 #include <map>
 #include <span>
 #include <string>
+#include <system_error>
 #include <vector>
 
 namespace
@@ -63,7 +64,8 @@ std::filesystem::path MakeFixtureDir(const char* name)
     std::filesystem::create_directories(path);
     return path;
 }
-void WriteTga(const std::filesystem::path& path)
+// `shade` is added to every channel, so two files can be told apart by their pixels.
+void WriteTga(const std::filesystem::path& path, std::uint8_t shade = 0)
 {
     // OZT has sixteen prefix bytes followed by width/height, depth and pixels.
     std::array<std::uint8_t, 22 + 16> bytes{};
@@ -72,11 +74,12 @@ void WriteTga(const std::filesystem::path& path)
     bytes[20] = 32;
     for (std::size_t i = 0; i < 4; ++i)
     {
-        bytes[22 + i * 4] = static_cast<std::uint8_t>(10 + i);
-        bytes[23 + i * 4] = static_cast<std::uint8_t>(20 + i);
-        bytes[24 + i * 4] = static_cast<std::uint8_t>(30 + i);
-        bytes[25 + i * 4] = static_cast<std::uint8_t>(40 + i);
+        bytes[22 + i * 4] = static_cast<std::uint8_t>(shade + 10 + i);
+        bytes[23 + i * 4] = static_cast<std::uint8_t>(shade + 20 + i);
+        bytes[24 + i * 4] = static_cast<std::uint8_t>(shade + 30 + i);
+        bytes[25 + i * 4] = static_cast<std::uint8_t>(shade + 40 + i);
     }
+    std::filesystem::create_directories(path.parent_path());
     std::ofstream out(path, std::ios::binary);
     out.write(reinterpret_cast<const char*>(bytes.data()), bytes.size());
 }
@@ -97,6 +100,7 @@ void WriteJpeg(const std::filesystem::path& path)
     unsigned char* compressed = nullptr;
     unsigned long length = 0;
     REQUIRE(tjCompress2(handle, rgb.data(), 2, 0, 2, TJPF_RGB, &compressed, &length, TJSAMP_444, 100, 0) == 0);
+    std::filesystem::create_directories(path.parent_path());
     std::ofstream out(path, std::ios::binary);
     std::array<char, 24> prefix{};
     out.write(prefix.data(), prefix.size());
@@ -104,6 +108,53 @@ void WriteJpeg(const std::filesystem::path& path)
     tjFree(compressed);
     tjDestroy(handle);
 }
+
+// Runs a test from inside its fixture folder, as the game runs from the client
+// folder: texture paths start with Data.
+class ClientFolderScope
+{
+public:
+    explicit ClientFolderScope(const std::filesystem::path& folder) : m_previous(std::filesystem::current_path())
+    {
+        std::filesystem::current_path(folder);
+    }
+    ~ClientFolderScope()
+    {
+        std::filesystem::current_path(m_previous);
+    }
+    ClientFolderScope(const ClientFolderScope&) = delete;
+    ClientFolderScope& operator=(const ClientFolderScope&) = delete;
+
+private:
+    std::filesystem::path m_previous;
+};
+
+// A fixture folder for one test, emptied first and removed afterwards.
+struct FixtureFolder
+{
+    explicit FixtureFolder(const char* name) : path(MakeFixtureDir(name))
+    {
+        std::filesystem::remove_all(path);
+        std::filesystem::create_directories(path);
+    }
+    ~FixtureFolder()
+    {
+        std::error_code error;
+        std::filesystem::remove_all(path, error);
+    }
+    FixtureFolder(const FixtureFolder&) = delete;
+    FixtureFolder& operator=(const FixtureFolder&) = delete;
+
+    std::filesystem::path path;
+};
+
+// The pixel the TGA fixture uploads first (see the success test), for a file
+// written with this shade.
+constexpr std::uint8_t FirstPixel(std::uint8_t shade)
+{
+    return static_cast<std::uint8_t>(shade + 32);
+}
+constexpr std::uint8_t PackShade = 100;
 } // namespace
 
 namespace mu
@@ -332,4 +383,106 @@ TEST_CASE("bitmap loader uploads marked files mipmapped at their original size")
     bitmaps.UnloadAllImages();
     CHECK(bitmaps.GetUsedTextureMemory() == 0);
     std::filesystem::remove_all(dir);
+}
+
+TEST_CASE("the loader reads a texture's copy in the active pack first [texture_pack]")
+{
+    record = {};
+    const FixtureFolder fixture("pack_copy");
+    const auto& dir = fixture.path;
+    WriteTga(dir / "Data" / "Interface" / "frame.OZT");
+    WriteTga(dir / "Data" / "TexturePacks" / "test" / "Interface" / "frame.OZT", PackShade);
+    const ClientFolderScope client(dir);
+    CGlobalBitmap bitmaps;
+    bitmaps.SetTexturePack(L"test");
+    constexpr std::uint32_t id = 510u;
+
+    REQUIRE(bitmaps.LoadImage(id, L"Data\\Interface\\frame.tga"));
+    REQUIRE(record.pixels.size() == 16);
+    CHECK(record.pixels[0] == FirstPixel(PackShade));
+    CHECK(bitmaps.FindTexture(id)->fromTexturePack);
+    bitmaps.UnloadAllImages();
+}
+
+TEST_CASE("a texture the pack lacks is read from Data [texture_pack]")
+{
+    record = {};
+    const FixtureFolder fixture("pack_missing");
+    const auto& dir = fixture.path;
+    WriteTga(dir / "Data" / "Interface" / "frame.OZT");
+    WriteTga(dir / "Data" / "TexturePacks" / "test" / "Interface" / "other.OZT", PackShade);
+    const ClientFolderScope client(dir);
+    CGlobalBitmap bitmaps;
+    bitmaps.SetTexturePack(L"test");
+    constexpr std::uint32_t id = 511u;
+
+    REQUIRE(bitmaps.LoadImage(id, L"Data\\Interface\\frame.tga"));
+    CHECK(record.pixels[0] == FirstPixel(0));
+    CHECK_FALSE(bitmaps.FindTexture(id)->fromTexturePack);
+    bitmaps.UnloadAllImages();
+}
+
+TEST_CASE("a pack copy that does not load falls back to the original [texture_pack]")
+{
+    record = {};
+    const FixtureFolder fixture("pack_broken");
+    const auto& dir = fixture.path;
+    const auto packFolder = dir / "Data" / "TexturePacks" / "test" / "Interface";
+    WriteTga(dir / "Data" / "Interface" / "frame.OZT");
+    WriteTga(packFolder / "frame.OZT", PackShade);
+    std::filesystem::resize_file(packFolder / "frame.OZT", 10);
+    WriteJpeg(dir / "Data" / "Interface" / "photo.OZJ");
+    WriteJpeg(packFolder / "photo.OZJ");
+    std::filesystem::resize_file(packFolder / "photo.OZJ", 30);
+    const ClientFolderScope client(dir);
+    CGlobalBitmap bitmaps;
+    bitmaps.SetTexturePack(L"test");
+    constexpr std::uint32_t tgaId = 512u;
+    constexpr std::uint32_t jpegId = 513u;
+
+    REQUIRE(bitmaps.LoadImage(tgaId, L"Data\\Interface\\frame.tga"));
+    CHECK(record.pixels[0] == FirstPixel(0));
+    CHECK_FALSE(bitmaps.FindTexture(tgaId)->fromTexturePack);
+    REQUIRE(bitmaps.LoadImage(jpegId, L"Data\\Interface\\photo.jpg"));
+    CHECK_FALSE(bitmaps.FindTexture(jpegId)->fromTexturePack);
+    CHECK(record.calls == 2);
+    bitmaps.UnloadAllImages();
+}
+
+TEST_CASE("pack files match the requested path in any case [texture_pack]")
+{
+    record = {};
+    const FixtureFolder fixture("pack_case");
+    const auto& dir = fixture.path;
+    WriteTga(dir / "Data" / "Interface" / "frame.OZT");
+    WriteTga(dir / "Data" / "TexturePacks" / "test" / "interface" / "FRAME.ozt", PackShade);
+    const ClientFolderScope client(dir);
+    CGlobalBitmap bitmaps;
+    bitmaps.SetTexturePack(L"test");
+    constexpr std::uint32_t id = 514u;
+
+    REQUIRE(bitmaps.LoadImage(id, L"Data\\Interface\\frame.tga"));
+    CHECK(record.pixels[0] == FirstPixel(PackShade));
+    bitmaps.UnloadAllImages();
+}
+
+TEST_CASE("without a pack, or with a missing one, textures come from Data [texture_pack]")
+{
+    record = {};
+    const FixtureFolder fixture("pack_none");
+    const auto& dir = fixture.path;
+    WriteTga(dir / "Data" / "Interface" / "frame.OZT");
+    WriteTga(dir / "Data" / "TexturePacks" / "test" / "Interface" / "frame.OZT", PackShade);
+    const ClientFolderScope client(dir);
+    CGlobalBitmap bitmaps;
+    constexpr std::uint32_t id = 515u;
+
+    REQUIRE(bitmaps.LoadImage(id, L"Data\\Interface\\frame.tga"));
+    CHECK(record.pixels[0] == FirstPixel(0));
+    bitmaps.UnloadImage(id, true);
+
+    bitmaps.SetTexturePack(L"missing");
+    REQUIRE(bitmaps.LoadImage(id, L"Data\\Interface\\frame.tga"));
+    CHECK(record.pixels[0] == FirstPixel(0));
+    bitmaps.UnloadAllImages();
 }
