@@ -84,7 +84,7 @@ read as the English name only; saving writes the object form.
 | `tags` | Categories the game code asks for, e.g. `["mount", "flying"]`; see [Tags](#tags) |
 | `levelValues` | Values of the description's own placeholders, one per item level from +0: `{"stat": ["ENG", "STA", ...]}` makes `{stat}` "ENG" at +0 and "STA" at +1. Each value is a text with its translations (written like `name`) or a shared text (`"@name"`), without placeholders. A line that shows one is shown only at levels that have a value. The Fruits' `{stat}` is one. A client-only field; the bmd import keeps it |
 | `description` | Lines the tooltip shows for the item, after its stats, e.g. the Jewel of Bless's "It is used to increase your item level up to 6". A few lines that read the hero or other tables (the Armor of Guardsman's Chaos Castle table, the Lost Map, the Talisman of Mobility's saved location) are still written by the tooltip code, after the description, and a few before it (the reset fruits' reset points, the Talisman of Resurrection's saved place, the socket seeds and spheres, the Sign of Dimensions). A text can have [placeholders](#description-placeholders). Each line is `{"text": ..., "values": {...}, "when": [...], "color": ..., "colors": [...], "bold": true, "levels": [first, last], "after": "options"}`: `text` is written like `name` (a plain English text, or the texts by language), or `"@name"` for a shared text of the [tooltip file](#tooltip-layouts) (`"@increaseSpeed"`), which is how a text several items show is written once; an empty text (`{"text": ""}`) is a blank line; `values` names the value a placeholder of the text shows on this line, a built-in value, a table (`"values": {"percent": "wingDamageIncrease1st"}` with the shared text "Increase {percent}% of Damage"), or a [game data value](#description-placeholders) such as `skillMana:<skill>`, the mana a skill costs, by its number as `skill` writes it (`"values": {"mana": "skillMana:22"}`); a long line wraps at about the width of the original tooltips' widest lines, and `\n` in a text breaks the line there. `color` is one of the tooltip colors: `white` (left out), `blue`, `red`, `yellow`, `green`, `darkRed`, `purple`, `darkBlue`, `darkYellow`, `greenBlue`, `gray`, `redPurple`, `violet`, `orange`. `levels` shows the line only at those item levels, both included (`[1, 8]`; left out: every level); a list of two levels from 0 to 15 with the first not above the last. `when` shows the line only when its [conditions](#tooltip-layouts) hold, and `colors` gives it the color of its first rule that holds, as a layout line's (`["!timed"]`, `["durability=2"]`, `[{"when": ["class:darkLord"], "color": "white"}]`); `bold` draws it bold. `"after": "options"` draws the line after the item's options (excellent, luck, skill), at the end of the tooltip, instead of with the description: the transformation rings' effects and "Unable to Equip with a Different Transformation Ring", for example. A client-only field; the bmd import keeps it |
-| `nameLines` | How the tooltip names the item and the name's color, when not the standard name and color (see [Name lines](#name-lines)). Each is written like a `description` line, and its `text` and `color` may be left out. A client-only field; the bmd import keeps it |
+| `nameLines` | How the game names the item (its tooltip, the repair window, windows, messages and ground labels) and the tooltip's name color, when not the standard name and color (see [Name lines](#name-lines)). Each is written like a `description` line, and its `text` and `color` may be left out. A client-only field; the bmd import keeps it |
 | `width`, `height` | Size in inventory slots |
 | `slot` | Equipment slot: `mainHand`, `offHand`, `helm`, `armor`, `pants`, `gloves`, `boots`, `wings`, `pet`, `pendant`, `ring`. Left out = not equippable |
 | `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, defense per level, damage increase, absorption) depend on it; excellent second and third tier wings get no extra durability, and the chaos mix knows a wing's tier from it |
@@ -124,6 +124,15 @@ in (left out: the standard name), and the color, its `color` (left out: the
 standard color) and then its first `colors` rule that holds. Without such a
 line, the standard name and color. The NPC shop's price line has the name's
 color.
+
+The repair window writes the same name in the same color. Elsewhere the name
+lines give only the text: the mix and quest windows, the server's messages,
+the control socket and the ground labels (which keep their own colors) write
+the line's text, and where no line holds, the item's `name` with " +level"
+above +0 (the ground labels add the set's name and the options themselves).
+There may be no item there, only its type and level: a condition on the
+item's durability or options then reads 0 (the Horn of Fenrir is plain
+"Horn of Fenrir").
 
 ```json
 "nameLines": [

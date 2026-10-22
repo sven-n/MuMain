@@ -417,3 +417,39 @@ TEST_CASE("A class condition holds for a hero of that class [data][items][toolti
     ::Hero->Class = CLASS_LORDEMPEROR;
     CHECK(AreTooltipConditionsMet(conditions, 0, 0, values));
 }
+
+TEST_CASE("The item names of windows and ground labels come from the name lines [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+
+    // Without name lines: the name, " +level" above +0, and no "Excellent" or set name.
+    CHECK(GetItemNameText(ITEM_SWORD, 0) == L"Kris");
+    CHECK(GetItemNameText(ITEM_SWORD, 5) == L"Kris +5");
+    ITEM kris;
+    FillItemFromParameters(kris, FullItemParameters(0, 0));
+    kris.ExcellentFlags = 1;
+    CHECK(GetItemNameText(kris.Type, kris.Level, &kris) == L"Kris");
+
+    // A name line's text at its levels; the standard name where none holds.
+    CHECK(GetItemNameText(ITEM_BOX_OF_LUCK, 4) == L"Olive of love");
+    CHECK(GetItemNameText(ITEM_LOST_MAP, 0) == L"Lost Map");
+    CHECK(GetItemNameText(ITEM_LOST_MAP, 3) == L"Lost Map +3");
+    CHECK(GetItemNameText(ITEM_SPIRIT, 0) == L"Spirit of Dark horse");
+
+    // A line's condition on the item: without the item, its options read 0.
+    CHECK(GetItemNameText(ITEM_HORN_OF_FENRIR, 0) == L"Horn of Fenrir");
+    ITEM horn;
+    FillItemFromParameters(horn, FullItemParameters(13, 37));
+    horn.ExcellentFlags = 1;
+    CHECK(GetItemNameText(horn.Type, 0, &horn) == L"Horn of Fenrir +Destroy");
+
+    wchar_t name[64] = L"";
+    GetItemName(ITEM_BOX_OF_LUCK, 4, name);
+    CHECK(std::wstring(name) == L"Olive of love");
+    CHECK(GetItemNameText(-1, 0).empty());
+}

@@ -3981,10 +3981,6 @@
     <value>sa</value>
     <comment>legacy_id=1096</comment>
   </data>
-  <data name="Stone of Friendship" xml:space="preserve">
-    <value>Bato ng Pagkakaibigan</value>
-    <comment>legacy_id=1098</comment>
-  </data>
   <data name="Do you want to buy an item?" xml:space="preserve">
     <value>Gusto mo bang bumili ng item?</value>
     <comment>legacy_id=1100</comment>
@@ -4477,10 +4473,6 @@
     <value>Walang %s.</value>
     <comment>legacy_id=1233</comment>
   </data>
-  <data name="Crest of monarch" xml:space="preserve">
-    <value>Crest of monarch</value>
-    <comment>legacy_id=1235</comment>
-  </data>
   <data name="Check the details in pet information window" xml:space="preserve">
     <value>Suriin ang mga detalye sa window ng impormasyon ng alagang hayop</value>
     <comment>legacy_id=1237</comment>
@@ -4656,10 +4648,6 @@
   <data name="Prevent equipment drop" xml:space="preserve">
     <value>Pigilan ang pagbagsak ng kagamitan</value>
     <comment>legacy_id=1288</comment>
-  </data>
-  <data name="Sign of lord" xml:space="preserve">
-    <value>Tanda ng panginoon</value>
-    <comment>legacy_id=1290</comment>
   </data>
   <data name="Move to vault" xml:space="preserve">
     <value>Ilipat sa vault</value>
@@ -5129,10 +5117,6 @@
     <value>Bato ng Buhay</value>
     <comment>legacy_id=1415</comment>
   </data>
-  <data name="Scroll of Guardian" xml:space="preserve">
-    <value>Scroll ng Tagapangalaga</value>
-    <comment>legacy_id=1416</comment>
-  </data>
   <data name="No. of signs" xml:space="preserve">
     <value>Bilang ng mga palatandaan</value>
     <comment>legacy_id=1420</comment>
@@ -5268,18 +5252,6 @@
   <data name="Failed to fire the siege weapon" xml:space="preserve">
     <value>Nabigong magpaputok ng armas sa pagkubkob</value>
     <comment>legacy_id=1459</comment>
-  </data>
-  <data name="Archer" xml:space="preserve">
-    <value>mamamana</value>
-    <comment>legacy_id=1460</comment>
-  </data>
-  <data name="Spearman" xml:space="preserve">
-    <value>Spearman</value>
-    <comment>legacy_id=1461</comment>
-  </data>
-  <data name="Place Life Stone" xml:space="preserve">
-    <value>Place Life Stone</value>
-    <comment>legacy_id=1462</comment>
   </data>
   <data name="Attacking speed +25 increase effect" xml:space="preserve">
     <value>Bilis ng pag-atake +25 pagtaas ng epekto</value>
@@ -5976,14 +5948,6 @@
   <data name="be upon you." xml:space="preserve">
     <value>maging sa iyo.</value>
     <comment>legacy_id=1649</comment>
-  </data>
-  <data name="Blue lucky pouch" xml:space="preserve">
-    <value>Blue lucky pouch</value>
-    <comment>legacy_id=1650</comment>
-  </data>
-  <data name="Red lucky pouch" xml:space="preserve">
-    <value>Pulang lucky pouch</value>
-    <comment>legacy_id=1651</comment>
   </data>
   <data name="Free entrance to Kalima" xml:space="preserve">
     <value>Libreng pasukan sa Kalima</value>
@@ -7164,18 +7128,6 @@
   <data name="Drop it to receive the gift." xml:space="preserve">
     <value>I-drop ito upang matanggap ang regalo.</value>
     <comment>legacy_id=2011</comment>
-  </data>
-  <data name="Lilac candy box" xml:space="preserve">
-    <value>Lilac na kahon ng kendi</value>
-    <comment>legacy_id=2012</comment>
-  </data>
-  <data name="Orange candy box" xml:space="preserve">
-    <value>Kahon ng orange na kendi</value>
-    <comment>legacy_id=2013</comment>
-  </data>
-  <data name="Navy candy box" xml:space="preserve">
-    <value>Navy na kahon ng kendi</value>
-    <comment>legacy_id=2014</comment>
   </data>
   <data name="Would you like to receive the item?" xml:space="preserve">
     <value>Gusto mo bang matanggap ang item?</value>
