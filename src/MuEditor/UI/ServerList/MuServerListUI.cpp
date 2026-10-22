@@ -536,10 +536,13 @@ void CMuServerListUI::ShowInGame()
     {
         return;
     }
+    // The login screen knows its open group by its button, which a group
+    // moved or removed in the list changes; it is found again by its ID.
+    const int openGroupId = g_ServerSelWin.GetOpenGroupId();
     g_ServerListManager->RebuildServerGroups();
     // Also while the server select window is hidden (after a server was
     // picked): it keeps a pointer to the open group, which the rebuild deleted.
-    g_ServerSelWin.UpdateDisplay();
+    g_ServerSelWin.ShowRebuiltGroups(openGroupId);
 }
 
 void CMuServerListUI::Select(int index)
