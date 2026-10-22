@@ -134,8 +134,7 @@ bool TakesPart(const std::string& path, bool incomingHasIt, const SyncOptions& o
     {
         return false;
     }
-    return options.direction != SyncDirection::Import ||
-           std::ranges::find(options.uiLocales, locale) != options.uiLocales.end();
+    return std::ranges::find(options.uiLocales, locale) != options.uiLocales.end();
 }
 
 std::map<ItemKey, const ItemDefinition*> IndexItems(const ItemExchangeFile& file)
@@ -150,8 +149,7 @@ std::map<ItemKey, const ItemDefinition*> IndexItems(const ItemExchangeFile& file
 
 bool IsHeld(const SyncOptions& options, const ItemKey& key)
 {
-    return options.direction == SyncDirection::Import && options.isHeld &&
-           options.isHeld(Data::Items::MakeItemType(key.first, key.second));
+    return options.isHeld && options.isHeld(Data::Items::MakeItemType(key.first, key.second));
 }
 
 void MarkField(SyncField& field, const ItemKey& key, const ItemExchangeFile& incoming, const Fields& current,
@@ -162,8 +160,7 @@ void MarkField(SyncField& field, const ItemKey& key, const ItemExchangeFile& inc
     {
         field.locked = I18N::Editor::TheItemIsWornOrInAnItemWindowItsSizeAndSlotStayAsTheyAre;
     }
-    if (field.field == LevelField && options.direction == SyncDirection::Import &&
-        incoming.source == Data::Items::ItemExchangeSourceOpenMU)
+    if (field.field == LevelField && incoming.source == Data::Items::ItemExchangeSourceOpenMU)
     {
         const auto client = current.find(LevelField);
         const auto server = incomingFields.find(LevelField);
@@ -452,14 +449,9 @@ void CompareFormulas(const Data::Items::ItemStatFile& current, const Data::Items
 void ApplyFormulas(const ItemExchangeFile& source, ItemExchangeFile& target, const ItemSyncDiff& diff,
                    std::vector<ItemDataIssue>& issues)
 {
-    if (!source.formulas || std::ranges::none_of(diff.formulas, [](const SyncFormula& row) { return row.checked; }))
+    if (!source.formulas || !target.formulas ||
+        std::ranges::none_of(diff.formulas, [](const SyncFormula& row) { return row.checked; }))
     {
-        return;
-    }
-    if (!target.formulas)
-    {
-        // Only the row of all of them.
-        target.formulas = source.formulas;
         return;
     }
     const Fields from = FlattenFormulas(*source.formulas);
@@ -601,21 +593,13 @@ std::string WriteKnownDifferencesJson(const KnownDifferences& known)
 ItemSyncDiff BuildItemSyncDiff(const ItemExchangeFile& client, const ItemExchangeFile& file, const SyncOptions& options)
 {
     ItemSyncDiff diff;
-    diff.direction = options.direction;
-    if (options.direction == SyncDirection::Import)
-    {
-        diff.takenLocales.assign(options.uiLocales.begin(), options.uiLocales.end());
-    }
-    const ItemExchangeFile& current = options.direction == SyncDirection::Import ? client : file;
-    const ItemExchangeFile& incoming = options.direction == SyncDirection::Import ? file : client;
+    diff.takenLocales.assign(options.uiLocales.begin(), options.uiLocales.end());
+    const ItemExchangeFile& current = client;
+    const ItemExchangeFile& incoming = file;
     const std::map<ItemKey, const ItemDefinition*> currentItems = IndexItems(current);
     const std::map<ItemKey, const ItemDefinition*> incomingItems = IndexItems(incoming);
-    // An item an imported file has more than once: an error row that neither side applies.
-    std::set<ItemKey> repeated;
-    if (options.direction == SyncDirection::Import)
-    {
-        repeated.insert(file.repeatedItems.begin(), file.repeatedItems.end());
-    }
+    // An item the file has more than once: an error row that is not applied.
+    const std::set<ItemKey> repeated(file.repeatedItems.begin(), file.repeatedItems.end());
     std::set<ItemKey> keys = repeated;
     for (const auto& [key, item] : currentItems)
     {
@@ -656,24 +640,14 @@ ItemSyncDiff BuildItemSyncDiff(const ItemExchangeFile& client, const ItemExchang
     {
         CompareFormulas(*current.formulas, *incoming.formulas, options, diff);
     }
-    else if (incoming.formulas)
-    {
-        // A file without formulas, e.g. a new one: they come in as a whole.
-        SyncFormula all;
-        all.entry = AllFormulasEntry;
-        all.incoming = ToText(Data::Items::WriteItemStatFormulasJson(*incoming.formulas));
-        all.checked = true;
-        diff.formulas.push_back(std::move(all));
-    }
     return diff;
 }
 
 ItemExchangeFile ApplyItemSyncDiff(const ItemExchangeFile& client, const ItemExchangeFile& file,
                                    const ItemSyncDiff& diff, std::vector<ItemDataIssue>& issues)
 {
-    const bool import = diff.direction == SyncDirection::Import;
-    ItemExchangeFile target = import ? client : file;
-    const ItemExchangeFile& source = import ? file : client;
+    ItemExchangeFile target = client;
+    const ItemExchangeFile& source = file;
     const std::map<ItemKey, const ItemDefinition*> sourceItems = IndexItems(source);
     std::map<ItemKey, ItemDefinition> targetItems;
     for (const ItemDefinition& item : target.items)

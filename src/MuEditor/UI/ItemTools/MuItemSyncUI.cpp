@@ -39,11 +39,14 @@ constexpr float FieldColumnWidth = 220.0f;
 constexpr float KnownColumnWidth = 60.0f;
 constexpr float ItemListHeight = 260.0f;
 constexpr float FieldListHeight = 220.0f;
+constexpr float PopupTextWidth = 480.0f;
 constexpr const char* NoValue = "-";
 constexpr const char* ExchangeFileName = "ItemExchange.json";
 // The name of the checkbox column: a header takes the ID of its label under PushID(column), so
 // it must differ from the rows' "##Checked" under PushID(row), or row 0 has the header's ID.
 constexpr const char* CheckColumn = "##CheckColumn";
+constexpr const char* ApplyPopupId = "###ItemSyncApply";
+constexpr const char* ExportPopupId = "###ItemSyncExport";
 
 constexpr ImVec4 ErrorColor{1.0f, 0.4f, 0.4f, 1.0f};
 constexpr ImVec4 WarningColor{1.0f, 0.8f, 0.3f, 1.0f};
@@ -67,12 +70,13 @@ float Scaled(float width)
     return width * g_MuEditorCore.GetUIScale();
 }
 
+// What the row does to the client's data.
 const char* ChangeName(SyncChange change)
 {
     switch (change)
     {
     case SyncChange::New:
-        return I18N::Editor::New;
+        return I18N::Editor::Added;
     case SyncChange::Removed:
         return I18N::Editor::Removed;
     default:
@@ -223,6 +227,7 @@ void CMuItemSyncUI::Render(bool* open)
         }
         TakeChosenFile();
         RenderButtons();
+        RenderExportResult();
         // An Apply whose comparison afterwards could not read the file still says what it did.
         if (!m_diff && !m_result.empty())
         {
@@ -246,6 +251,8 @@ void CMuItemSyncUI::Render(bool* open)
             }
         }
         RenderMessages();
+        RenderApplyPopup();
+        RenderExportPopup();
     }
     ToolWindow::End();
 }
@@ -259,24 +266,34 @@ void CMuItemSyncUI::ChooseFile(std::string path)
 void CMuItemSyncUI::TakeChosenFile()
 {
     std::optional<std::string> path;
+    FileAction action = FileAction::Import;
     {
         const std::scoped_lock lock(m_chosenMutex);
         path.swap(m_chosenPath);
+        action = m_chosenAction;
     }
-    if (path)
+    if (!path)
     {
-        Compare(m_chosenDirection, ToPath(*path));
+        return;
+    }
+    if (action == FileAction::Export)
+    {
+        Export(ToPath(*path));
+    }
+    else
+    {
+        Compare(ToPath(*path));
     }
 }
 
-void CMuItemSyncUI::OpenFileDialog(SyncDirection direction)
+void CMuItemSyncUI::OpenFileDialog(FileAction action)
 {
     static const SDL_DialogFileFilter Filters[] = {{I18N::Editor::ItemExchangeFiles, "json"}};
     {
         const std::scoped_lock lock(m_chosenMutex);
-        m_chosenDirection = direction;
+        m_chosenAction = action;
     }
-    if (direction == SyncDirection::Import)
+    if (action == FileAction::Import)
     {
         SDL_ShowOpenFileDialog(&OnFileChosen, nullptr, nullptr, Filters, 1, nullptr, false);
     }
@@ -290,35 +307,44 @@ void CMuItemSyncUI::RenderButtons()
 {
     if (ImGui::Button(I18N::Editor::Import))
     {
-        OpenFileDialog(SyncDirection::Import);
+        OpenFileDialog(FileAction::Import);
     }
     ImGui::SameLine();
     if (ImGui::Button(I18N::Editor::Export))
     {
-        OpenFileDialog(SyncDirection::Export);
+        OpenFileDialog(FileAction::Export);
     }
     ImGui::PushTextWrapPos(0.0f);
     ImGui::TextDisabled("%s", I18N::Editor::WhatImportAndExportDo);
     ImGui::PopTextWrapPos();
 
-    // The path can be typed too, e.g. where no file dialog is at hand.
+    // The path of an import can be typed too, e.g. where no file dialog is at hand.
     ImGui::SetNextItemWidth(-Scaled(FieldColumnWidth));
     InputString(I18N::Editor::ExchangeFile, m_path);
     ImGui::SameLine();
     ImGui::BeginDisabled(m_path.empty());
     if (ImGui::Button(I18N::Editor::CompareAgain))
     {
-        Compare(m_direction, ToPath(m_path));
+        Compare(ToPath(m_path));
     }
     ImGui::EndDisabled();
 }
 
-void CMuItemSyncUI::Compare(SyncDirection direction, const std::filesystem::path& path)
+void CMuItemSyncUI::RenderExportResult()
 {
-    m_direction = direction;
+    if (m_exportResult.empty())
+    {
+        return;
+    }
+    ImGui::PushTextWrapPos(0.0f);
+    ImGui::TextColored(m_exportFailed ? ErrorColor : SuccessColor, "%s", m_exportResult.c_str());
+    ImGui::PopTextWrapPos();
+}
+
+void CMuItemSyncUI::Compare(const std::filesystem::path& path)
+{
     m_path = ToText(path);
     m_comparedPath = m_path;
-    m_fileIsNew = false;
     m_result.clear();
     m_messages.clear();
     m_messagesAreErrors = false;
@@ -328,30 +354,21 @@ void CMuItemSyncUI::Compare(SyncDirection direction, const std::filesystem::path
     m_file = {};
 
     std::vector<ItemDataIssue> issues;
-    std::error_code error;
-    const bool exists = std::filesystem::exists(path, error);
     if (const std::optional<std::string> text = Data::Items::Json::ReadTextFile(path))
     {
         ReadItemExchangeJson(*text, m_path, m_file, issues);
     }
-    else if (direction == SyncDirection::Import || exists)
-    {
-        // An export does not write over a file it cannot read.
-        issues.push_back({Data::Items::ItemDataIssueSeverity::Error, m_path, ItemDataIssue::NoItem,
-                          ItemDataIssue::NoItem, "", "could not be read"});
-    }
     else
     {
-        m_fileIsNew = true;
+        issues.push_back({Data::Items::ItemDataIssueSeverity::Error, m_path, ItemDataIssue::NoItem,
+                          ItemDataIssue::NoItem, "", "could not be read"});
     }
     for (const ItemDataIssue& issue : issues)
     {
         m_messages.push_back(issue.ToString());
     }
-    // An item an imported file has twice is a row the diff locks; an export would lose it.
-    const bool usable = direction == SyncDirection::Import ? Data::Items::CanImportItemExchange(m_file, issues)
-                                                           : !Data::Items::HasErrors(issues);
-    if (!usable)
+    // An item the file has twice is a row the diff locks.
+    if (!Data::Items::CanImportItemExchange(m_file, issues))
     {
         m_messagesAreErrors = true;
         return;
@@ -362,7 +379,7 @@ void CMuItemSyncUI::Compare(SyncDirection direction, const std::filesystem::path
     {
         locales.emplace_back(locale);
     }
-    const SyncOptions options{direction, &m_known, locales, [](int itemType) { return IsHeldByCharacter(itemType); }};
+    const SyncOptions options{&m_known, locales, [](int itemType) { return IsHeldByCharacter(itemType); }};
     m_diff = BuildItemSyncDiff(BuildClientExchange(), m_file, options);
     m_diffVersion = g_ItemDatabase.GetVersion();
 }
@@ -373,7 +390,7 @@ CMuItemSyncUI::ApplyBlocker CMuItemSyncUI::GetApplyBlocker() const
     {
         return ApplyBlocker::OtherPath;
     }
-    // An export would write the client's data as it is now, not as the diff shows it.
+    // The diff shows the client's data as it was when it was made.
     if (g_ItemDatabase.GetVersion() != m_diffVersion)
     {
         return ApplyBlocker::DataChanged;
@@ -383,6 +400,36 @@ CMuItemSyncUI::ApplyBlocker CMuItemSyncUI::GetApplyBlocker() const
     return anyChecked ? ApplyBlocker::None : ApplyBlocker::NothingChecked;
 }
 
+CMuItemSyncUI::CheckedChanges CMuItemSyncUI::CountCheckedChanges() const
+{
+    CheckedChanges changes;
+    if (!m_diff)
+    {
+        return changes;
+    }
+    for (const SyncItem& row : m_diff->items)
+    {
+        if (!AppliesSomething(row))
+        {
+            continue;
+        }
+        switch (row.change)
+        {
+        case SyncChange::New:
+            ++changes.added;
+            break;
+        case SyncChange::Changed:
+            ++changes.changed;
+            break;
+        case SyncChange::Removed:
+            ++changes.removed;
+            break;
+        }
+    }
+    changes.formulaEntries = static_cast<int>(std::ranges::count_if(m_diff->formulas, &SyncFormula::checked));
+    return changes;
+}
+
 bool CMuItemSyncUI::Apply()
 {
     if (!m_diff || GetApplyBlocker() != ApplyBlocker::None)
@@ -390,16 +437,10 @@ bool CMuItemSyncUI::Apply()
         return false;
     }
     // What is applied, for the line that reports it.
-    const auto items = std::ranges::count_if(m_diff->items, AppliesSomething);
-    const auto formulaEntries = std::ranges::count_if(m_diff->formulas, &SyncFormula::checked);
-    const bool allFormulas = std::ranges::any_of(m_diff->formulas, [](const SyncFormula& row)
-                                                 { return row.checked && row.entry == AllFormulasEntry; });
+    const CheckedChanges changes = CountCheckedChanges();
 
     std::vector<ItemDataIssue> issues;
-    const bool applied = m_direction == SyncDirection::Import
-                             ? ApplyItemSyncImport(*m_diff, m_file, issues)
-                             : ApplyItemSyncExport(*m_diff, m_file, ToPath(m_comparedPath), issues);
-    if (!applied)
+    if (!ApplyItemSyncImport(*m_diff, m_file, issues))
     {
         m_result.clear();
         m_messages.clear();
@@ -419,32 +460,83 @@ bool CMuItemSyncUI::Apply()
         m_messagesAreErrors = true;
         return false;
     }
-    std::string done;
-    if (m_direction == SyncDirection::Import)
-    {
-        done = I18N::Format(I18N::Editor::Applied0ItemsAnd1FormulaEntries,
-                            {std::to_string(items), std::to_string(formulaEntries)});
-    }
-    else if (allFormulas)
-    {
-        done = I18N::Format(I18N::Editor::Written0ItemsAndAllFormulas, {std::to_string(items)});
-    }
-    else
-    {
-        done = I18N::Format(I18N::Editor::Written0ItemsAnd1FormulaEntries,
-                            {std::to_string(items), std::to_string(formulaEntries)});
-    }
+    const std::string done = I18N::Format(
+        I18N::Editor::Applied0ItemsAnd1FormulaEntries,
+        {std::to_string(changes.added + changes.changed + changes.removed), std::to_string(changes.formulaEntries)});
     const std::string path = m_comparedPath;
     g_MuEditorConsoleUI.LogEditor(path + ": " + done);
     // The differences that are left; what was not checked stays unchecked, so a second click
     // does not take it after all.
     const UncheckedRows unchecked = FindUnchecked(*m_diff);
-    Compare(m_direction, ToPath(path));
+    Compare(ToPath(path));
     if (m_diff)
     {
         KeepUnchecked(*m_diff, unchecked);
     }
     m_result = done;
+    return true;
+}
+
+void CMuItemSyncUI::Export(const std::filesystem::path& path)
+{
+    m_exportPath = ToText(path);
+    m_exportResult.clear();
+    m_exportFailed = false;
+    m_pendingExport.reset();
+    const ItemSyncExportPreview preview = PreviewItemSyncExport(path);
+    if (!preview.fileExists)
+    {
+        WriteExport();
+        return;
+    }
+    if (preview.ChangesNothing())
+    {
+        m_exportResult = I18N::Format(I18N::Editor::TheFileAlreadyHasTheClientData, {m_exportPath});
+        return;
+    }
+    // A file that is there is replaced only after the confirmation.
+    m_pendingExport = preview;
+    m_openExportPopup = true;
+}
+
+bool CMuItemSyncUI::ConfirmExport()
+{
+    if (!m_pendingExport)
+    {
+        return false;
+    }
+    m_pendingExport.reset();
+    return WriteExport();
+}
+
+void CMuItemSyncUI::CancelExport()
+{
+    m_pendingExport.reset();
+}
+
+bool CMuItemSyncUI::WriteExport()
+{
+    std::vector<ItemDataIssue> issues;
+    size_t writtenItems = 0;
+    if (!WriteItemSyncExport(ToPath(m_exportPath), writtenItems, issues))
+    {
+        m_exportFailed = true;
+        m_exportResult = I18N::Editor::TheExportCouldNotBeWritten;
+        for (const ItemDataIssue& issue : issues)
+        {
+            m_exportResult += "\n" + issue.ToString();
+            g_MuEditorConsoleUI.LogEditor(issue.ToString());
+        }
+        return false;
+    }
+    m_exportFailed = false;
+    m_exportResult = I18N::Format(I18N::Editor::Exported0ItemsTo1, {std::to_string(writtenItems), m_exportPath});
+    g_MuEditorConsoleUI.LogEditor(m_exportResult);
+    // An import comparison of that file shows what it held before.
+    if (m_diff && m_comparedPath == m_exportPath)
+    {
+        Compare(ToPath(m_exportPath));
+    }
     return true;
 }
 
@@ -462,8 +554,7 @@ void CMuItemSyncUI::SetAllChecked(bool checked)
 
 void CMuItemSyncUI::RenderSummary()
 {
-    const char* format = m_direction == SyncDirection::Import ? I18N::Editor::ImportFrom0 : I18N::Editor::ExportInto0;
-    ImGui::TextUnformatted(I18N::Format(format, {m_comparedPath}).c_str());
+    ImGui::TextUnformatted(I18N::Format(I18N::Editor::ImportFrom0, {m_comparedPath}).c_str());
     if (m_file.source == Data::Items::ItemExchangeSourceOpenMU)
     {
         ImGui::TextDisabled("%s", I18N::Format(I18N::Editor::FromOpenMUServer0,
@@ -471,10 +562,6 @@ void CMuItemSyncUI::RenderSummary()
                                       .c_str());
     }
     ImGui::PushTextWrapPos(0.0f);
-    if (m_fileIsNew)
-    {
-        ImGui::TextDisabled("%s", I18N::Editor::TheFileIsNotThereYet);
-    }
     // What the last Apply did comes before what it left.
     if (!m_result.empty())
     {
@@ -482,8 +569,7 @@ void CMuItemSyncUI::RenderSummary()
     }
     if (m_diff->IsEmpty())
     {
-        // E.g. right after an export: the file now has what the client has. The client always has
-        // formulas, so they were compared when the file has them too.
+        // The client always has formulas, so they were compared when the file has them too.
         ImGui::TextColored(SuccessColor, "%s",
                            m_file.formulas ? I18N::Editor::TheFileMatchesTheClient
                                            : I18N::Editor::TheFileMatchesTheClientInAllItems);
@@ -606,7 +692,7 @@ void CMuItemSyncUI::RenderItems()
     {
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableSetupColumn(CheckColumn, ImGuiTableColumnFlags_WidthFixed, ImGui::GetFrameHeight());
-        ImGui::TableSetupColumn(I18N::Editor::Change, ImGuiTableColumnFlags_WidthFixed, Scaled(ChangeColumnWidth));
+        ImGui::TableSetupColumn(I18N::Editor::InTheClient, ImGuiTableColumnFlags_WidthFixed, Scaled(ChangeColumnWidth));
         ImGui::TableSetupColumn(I18N::Editor::Item);
         ImGui::TableSetupColumn(I18N::Editor::Fields, ImGuiTableColumnFlags_WidthFixed, Scaled(ChangeColumnWidth));
         ImGui::TableHeadersRow();
@@ -643,8 +729,7 @@ void CMuItemSyncUI::RenderItems()
                     {
                         g_ItemSelection.Select(itemType);
                     }
-                    const bool removedHere = row.change == SyncChange::Removed && m_direction == SyncDirection::Import;
-                    m_shownUsage = removedHere ? FindItemUsage(itemType) : ItemUsage{};
+                    m_shownUsage = row.change == SyncChange::Removed ? FindItemUsage(itemType) : ItemUsage{};
                 }
                 if (row.known)
                 {
@@ -671,7 +756,7 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
         ImGui::TextColored(WarningColor, "%s", row.locked.c_str());
     }
     // What Remove item lists before it removes an item.
-    if (row.change == SyncChange::Removed && m_direction == SyncDirection::Import)
+    if (row.change == SyncChange::Removed)
     {
         ImGui::TextUnformatted(I18N::Editor::TheItemAndItsModelEntryAreRemoved);
         if (m_shownUsage.GoesWithItem())
@@ -682,7 +767,7 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
         ImGui::TextUnformatted(I18N::Editor::WhatUsesItStaysAtItsNumber);
         UsageView::RenderUsesAtNumber(m_shownUsage);
     }
-    if (row.change == SyncChange::New && m_direction == SyncDirection::Import)
+    if (row.change == SyncChange::New)
     {
         const auto incoming = std::ranges::find_if(m_file.items, [&](const Data::Items::ItemDefinition& item)
                                                    { return item.group == row.group && item.number == row.number; });
@@ -724,8 +809,7 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
     {
         ImGui::TableSetupColumn(I18N::Editor::Now);
     }
-    ImGui::TableSetupColumn(m_direction == SyncDirection::Import ? I18N::Editor::FromTheFile
-                                                                 : I18N::Editor::FromTheClient);
+    ImGui::TableSetupColumn(I18N::Editor::FromTheFile);
     if (changed)
     {
         ImGui::TableSetupColumn(I18N::Editor::Note);
@@ -781,9 +865,8 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
 
 void CMuItemSyncUI::RenderFormulas()
 {
-    // A file without formulas: an import leaves the client's as they are, an export writes all
-    // of them (one row).
-    if (!m_file.formulas && m_direction == SyncDirection::Import)
+    // A file without formulas leaves the client's as they are.
+    if (!m_file.formulas)
     {
         ImGui::PushTextWrapPos(0.0f);
         ImGui::TextDisabled("%s", I18N::Editor::FormulasNotComparedTheFileHasNone);
@@ -801,10 +884,8 @@ void CMuItemSyncUI::RenderFormulas()
         return;
     }
     const std::string header =
-        (m_file.formulas
-             ? I18N::Format(I18N::Editor::FormulaEntriesThatDiffer0Of1,
-                            {std::to_string(m_diff->formulas.size()), std::to_string(m_diff->comparedFormulaEntries)})
-             : std::string(I18N::Editor::FormulasThatDifferAllTheFileHasNone)) +
+        I18N::Format(I18N::Editor::FormulaEntriesThatDiffer0Of1,
+                     {std::to_string(m_diff->formulas.size()), std::to_string(m_diff->comparedFormulaEntries)}) +
         "###SyncFormulas";
     if (!ImGui::CollapsingHeader(header.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
     {
@@ -820,8 +901,7 @@ void CMuItemSyncUI::RenderFormulas()
     ImGui::TableSetupColumn(CheckColumn, ImGuiTableColumnFlags_WidthFixed, ImGui::GetFrameHeight());
     ImGui::TableSetupColumn(I18N::Editor::Entry, ImGuiTableColumnFlags_WidthFixed, Scaled(FieldColumnWidth));
     ImGui::TableSetupColumn(I18N::Editor::Now);
-    ImGui::TableSetupColumn(m_direction == SyncDirection::Import ? I18N::Editor::FromTheFile
-                                                                 : I18N::Editor::FromTheClient);
+    ImGui::TableSetupColumn(I18N::Editor::FromTheFile);
     ImGui::TableSetupColumn(I18N::Editor::Known, ImGuiTableColumnFlags_WidthFixed, Scaled(KnownColumnWidth));
     ImGui::TableHeadersRow();
     for (size_t index = 0; index < m_diff->formulas.size(); ++index)
@@ -832,24 +912,20 @@ void CMuItemSyncUI::RenderFormulas()
         ImGui::TableNextColumn();
         ImGui::Checkbox("##Checked", &row.checked);
         ImGui::TableNextColumn();
-        ImGui::TextUnformatted(row.entry == AllFormulasEntry ? I18N::Editor::AllFormulas : row.entry.c_str());
+        ImGui::TextUnformatted(row.entry.c_str());
         ImGui::TableNextColumn();
         RenderValue(row.current);
         ImGui::TableNextColumn();
         RenderValue(row.incoming);
         ImGui::TableNextColumn();
-        // All formulas come in at once into a file without them; they are not a known difference.
-        if (row.entry != AllFormulasEntry)
+        bool known = row.known;
+        if (ImGui::Checkbox("##Known", &known))
         {
-            bool known = row.known;
-            if (ImGui::Checkbox("##Known", &known))
-            {
-                SetKnownFormula(row.entry, known);
-            }
-            if (ImGui::IsItemHovered())
-            {
-                ImGui::SetTooltip("%s", I18N::Editor::WhatAKnownDifferenceIs);
-            }
+            SetKnownFormula(row.entry, known);
+        }
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::SetTooltip("%s", I18N::Editor::WhatAKnownDifferenceIs);
         }
         ImGui::PopID();
     }
@@ -859,19 +935,18 @@ void CMuItemSyncUI::RenderFormulas()
 void CMuItemSyncUI::RenderApply()
 {
     const ApplyBlocker blocker = GetApplyBlocker();
-    const bool import = m_direction == SyncDirection::Import;
     ImGui::BeginDisabled(blocker != ApplyBlocker::None);
-    if (ImGui::Button(import ? I18N::Editor::ApplyTheCheckedChanges : I18N::Editor::WriteTheCheckedChangesIntoTheFile))
+    // It asks first (RenderApplyPopup).
+    if (ImGui::Button(I18N::Editor::ApplyTheCheckedChanges))
     {
-        Apply();
+        m_openApplyPopup = true;
     }
     ImGui::EndDisabled();
     ImGui::PushTextWrapPos(0.0f);
     switch (blocker)
     {
     case ApplyBlocker::None:
-        ImGui::TextDisabled("%s", import ? I18N::Editor::AfterApplyingTheWindowComparesAgain
-                                         : I18N::Editor::AfterWritingTheWindowComparesAgain);
+        ImGui::TextDisabled("%s", I18N::Editor::AfterApplyingTheWindowComparesAgain);
         break;
     case ApplyBlocker::OtherPath:
         ImGui::TextColored(WarningColor, "%s", I18N::Editor::ThePathIsNotTheComparedFile);
@@ -884,6 +959,94 @@ void CMuItemSyncUI::RenderApply()
         break;
     }
     ImGui::PopTextWrapPos();
+}
+
+void CMuItemSyncUI::RenderApplyPopup()
+{
+    if (m_openApplyPopup)
+    {
+        ImGui::OpenPopup(ApplyPopupId);
+        m_openApplyPopup = false;
+    }
+    const std::string title = std::string(I18N::Editor::ApplyTheImport) + ApplyPopupId;
+    if (!ImGui::BeginPopupModal(title.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        return;
+    }
+    const CheckedChanges changes = CountCheckedChanges();
+    ImGui::PushTextWrapPos(Scaled(PopupTextWidth));
+    ImGui::TextUnformatted(I18N::Format(I18N::Editor::TheImportChanges,
+                                        {m_comparedPath, std::to_string(changes.added), std::to_string(changes.changed),
+                                         std::to_string(changes.removed), std::to_string(changes.formulaEntries)})
+                               .c_str());
+    ImGui::TextDisabled("%s", I18N::Editor::WhatTheImportLeaves);
+    ImGui::PopTextWrapPos();
+    ImGui::BeginDisabled(GetApplyBlocker() != ApplyBlocker::None);
+    if (ImGui::Button(I18N::Editor::Apply))
+    {
+        Apply();
+        ImGui::CloseCurrentPopup();
+    }
+    ImGui::EndDisabled();
+    ImGui::SameLine();
+    if (ImGui::Button(I18N::Editor::Cancel))
+    {
+        ImGui::CloseCurrentPopup();
+    }
+    ImGui::EndPopup();
+}
+
+void CMuItemSyncUI::RenderExportPopup()
+{
+    if (m_openExportPopup)
+    {
+        ImGui::OpenPopup(ExportPopupId);
+        m_openExportPopup = false;
+    }
+    const std::string title = std::string(I18N::Editor::ReplaceTheExchangeFile) + ExportPopupId;
+    if (!ImGui::BeginPopupModal(title.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        return;
+    }
+    if (!m_pendingExport)
+    {
+        ImGui::CloseCurrentPopup();
+        ImGui::EndPopup();
+        return;
+    }
+    const ItemSyncExportPreview& preview = *m_pendingExport;
+    std::string text;
+    if (!preview.readable)
+    {
+        text = I18N::Format(I18N::Editor::TheFileCannotBeReadReplaceIt, {m_exportPath});
+    }
+    else if (preview.fileHasFormulas)
+    {
+        text = I18N::Format(I18N::Editor::TheExportChanges,
+                            {m_exportPath, std::to_string(preview.added), std::to_string(preview.changed),
+                             std::to_string(preview.removed), std::to_string(preview.formulaEntries)});
+    }
+    else
+    {
+        text = I18N::Format(I18N::Editor::TheExportChangesTheFormulasAreAdded,
+                            {m_exportPath, std::to_string(preview.added), std::to_string(preview.changed),
+                             std::to_string(preview.removed)});
+    }
+    ImGui::PushTextWrapPos(Scaled(PopupTextWidth));
+    ImGui::TextUnformatted(text.c_str());
+    ImGui::PopTextWrapPos();
+    if (ImGui::Button(I18N::Editor::Replace))
+    {
+        ConfirmExport();
+        ImGui::CloseCurrentPopup();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button(I18N::Editor::Cancel))
+    {
+        CancelExport();
+        ImGui::CloseCurrentPopup();
+    }
+    ImGui::EndPopup();
 }
 
 void CMuItemSyncUI::RenderMessages()

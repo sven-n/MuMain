@@ -14,6 +14,7 @@
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
@@ -22,6 +23,8 @@
 #include <iterator>
 #include <map>
 #include <optional>
+#include <set>
+#include <system_error>
 #include <utility>
 
 namespace MuEditor::Items
@@ -267,17 +270,66 @@ bool ApplyItemSyncImport(const ItemSyncDiff& diff, const ItemExchangeFile& file,
     return true;
 }
 
-bool ApplyItemSyncExport(const ItemSyncDiff& diff, const ItemExchangeFile& file, const std::filesystem::path& path,
-                         std::vector<ItemDataIssue>& issues)
+ItemSyncExportPreview PreviewItemSyncExport(const std::filesystem::path& path)
 {
-    ItemExchangeFile written = ApplyItemSyncDiff(BuildClientExchange(), file, diff, issues);
-    if (Data::Items::HasErrors(issues))
+    ItemSyncExportPreview preview;
+    std::error_code error;
+    preview.fileExists = std::filesystem::exists(path, error);
+    const std::optional<std::string> text = preview.fileExists ? Data::Items::Json::ReadTextFile(path) : std::nullopt;
+    if (!text)
     {
-        return false;
+        return preview;
     }
-    written.source = Data::Items::ItemExchangeSourceMuMain;
-    written.server.clear();
-    return Data::Items::WriteItemTextFile(path, Data::Items::WriteItemExchangeJson(written), issues) ==
+    ItemExchangeFile file;
+    std::vector<ItemDataIssue> issues;
+    Data::Items::ReadItemExchangeJson(*text, path.generic_string(), file, issues);
+    if (!Data::Items::CanImportItemExchange(file, issues))
+    {
+        return preview;
+    }
+    preview.readable = true;
+    preview.fileHasFormulas = file.formulas.has_value();
+
+    const ItemExchangeFile client = BuildClientExchange();
+    std::map<std::pair<int, int>, const ItemDefinition*> fileItems;
+    for (const ItemDefinition& item : file.items)
+    {
+        fileItems[{item.group, item.number}] = &item;
+    }
+    // An item the file has twice is not among its items, but the file has it.
+    std::set<std::pair<int, int>> fileKeys(file.repeatedItems.begin(), file.repeatedItems.end());
+    for (const auto& [key, item] : fileItems)
+    {
+        fileKeys.insert(key);
+    }
+    for (const ItemDefinition& item : client.items)
+    {
+        const std::pair<int, int> key{item.group, item.number};
+        if (!fileKeys.contains(key))
+        {
+            ++preview.added;
+            continue;
+        }
+        const auto found = fileItems.find(key);
+        if (found == fileItems.end() || !(*found->second == item))
+        {
+            ++preview.changed;
+        }
+        fileKeys.erase(key);
+    }
+    preview.removed = static_cast<int>(fileKeys.size());
+    if (file.formulas)
+    {
+        preview.formulaEntries = static_cast<int>(BuildItemSyncDiff(client, file, SyncOptions{}).formulas.size());
+    }
+    return preview;
+}
+
+bool WriteItemSyncExport(const std::filesystem::path& path, size_t& writtenItems, std::vector<ItemDataIssue>& issues)
+{
+    const ItemExchangeFile client = BuildClientExchange();
+    writtenItems = client.items.size();
+    return Data::Items::WriteItemTextFile(path, Data::Items::WriteItemExchangeJson(client), issues) ==
            Data::Items::ItemDataSaveResult::Saved;
 }
 } // namespace MuEditor::Items

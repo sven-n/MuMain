@@ -16,24 +16,15 @@
 #include <tuple>
 #include <vector>
 
-// The diff of the Item Sync window (phase 7): the client's items and item formulas against an
-// item exchange file, field by field, and the side that changes with the checked rows taken
-// from the other. The fields are named by their keys in the item files ("width",
+// The diff of the Item Sync window's import (phase 7): the client's items and item formulas
+// against an item exchange file, field by field, and the client's data with the checked rows
+// taken from the file. The fields are named by their keys in the item files ("width",
 // "requirements.strength", "name.de", "tags.ammunition") and in the item stat file
 // ("dropLevelBonus.excellent", "tables.damageIncreaseWeapons", "default.damage.excellent",
-// "profiles.weapon.requirements.strength"; "profiles.weapon" for a profile as a whole, and
-// "formulas" for all of them, into a file that has none).
+// "profiles.weapon.requirements.strength"; "profiles.weapon" for a profile as a whole). An
+// export writes the client's data without a diff (ItemSyncApply.h).
 namespace MuEditor::Items
 {
-// Which side takes the other's values.
-enum class SyncDirection : uint8_t
-{
-    // The file's values into the client's data (Import, Update from server).
-    Import,
-    // The client's values into the file (Export).
-    Export,
-};
-
 // The items' fields and formula entries meant to differ between the client and a server
 // (Data/Items/Sync/KnownDifferences.json): the diff shows them unchecked.
 struct KnownDifferences
@@ -46,9 +37,6 @@ struct KnownDifferences
     bool Contains(const std::string& formula) const;
     bool operator==(const KnownDifferences& other) const = default;
 };
-
-// The entry of all the formulas, for a file that has none (SyncFormula::entry).
-inline constexpr char AllFormulasEntry[] = "formulas";
 
 std::filesystem::path GetKnownDifferencesFile();
 // Nothing known when the file is not there.
@@ -82,9 +70,9 @@ struct SyncItem
     int group = 0;
     int number = 0;
     SyncChange change = SyncChange::Changed;
-    // The English name of the side that has the item (the incoming one when both have it).
+    // The English name of the side that has the item (the file's when both have it).
     std::string name;
-    // Changed: the fields that differ; New: the fields of the incoming item.
+    // Changed: the fields that differ; New: the fields of the file's item.
     std::vector<SyncField> fields;
     // New and Removed rows. Changed rows apply their checked fields.
     bool checked = false;
@@ -103,10 +91,9 @@ struct SyncFormula
 
 struct ItemSyncDiff
 {
-    SyncDirection direction = SyncDirection::Import;
     std::vector<SyncItem> items;
     std::vector<SyncFormula> formulas;
-    // Import: the languages names are taken in (the client's UI languages).
+    // The languages names are taken in (the client's UI languages).
     std::vector<std::string> takenLocales;
     // What was compared, as the window shows it: the items of both sides (each group and
     // number once) and how many of them are the same; the formula entries likewise, while both
@@ -124,24 +111,24 @@ struct ItemSyncDiff
 
 struct SyncOptions
 {
-    SyncDirection direction = SyncDirection::Import;
     const KnownDifferences* known = nullptr;
-    // Import: names in other languages are not taken from a file.
+    // Names in other languages are not taken from the file.
     std::span<const std::string> uiLocales;
-    // Import: an item the game holds keeps its size and slot and is not removed.
+    // An item the game holds keeps its size and slot, is not removed, and a new one of its type
+    // is not added.
     std::function<bool(int itemType)> isHeld;
 };
 
 // The differences between the client's data (`client`, BuildItemExchange) and `file`. Checked
-// by default: what the incoming side changes; unchecked: removals, known differences, inexact
-// and locked fields. A language one side lacks stays as it is on the other. An item an imported
-// file has more than once (its repeatedItems) is a locked row without fields.
+// by default: what the file changes; unchecked: removals, known differences, inexact and locked
+// fields. A language one side lacks stays as it is on the other. An item the file has more than
+// once (its repeatedItems) is a locked row without fields. The formulas are compared while both
+// sides have them.
 ItemSyncDiff BuildItemSyncDiff(const Data::Items::ItemExchangeFile& client, const Data::Items::ItemExchangeFile& file,
                                const SyncOptions& options);
 
-// The side that changes (the client for an import, the file for an export) with the checked
-// rows taken from the other. Formulas the item stat file's checks refuse are left as they were,
-// with their problems in `issues`.
+// The client's data with the checked rows taken from the file. Formulas the item stat file's
+// checks refuse are left as they were, with their problems in `issues`.
 Data::Items::ItemExchangeFile ApplyItemSyncDiff(const Data::Items::ItemExchangeFile& client,
                                                 const Data::Items::ItemExchangeFile& file, const ItemSyncDiff& diff,
                                                 std::vector<Data::Items::ItemDataIssue>& issues);

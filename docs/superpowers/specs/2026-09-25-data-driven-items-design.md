@@ -38,7 +38,7 @@ share with items) is planned in the
 | D1 | Data format | JSON files as the source of truth, loaded once at startup into flat tables. Runtime speed must be as close to hardcoded as possible; a binary cache is added only if startup parsing is measurably too slow. Chosen over a database or SQL text files; see section 2. |
 | D2 | Exchange format with OpenMU | JSON keyed by `(Group, Number)`, not SQL `UPDATE` statements (SQL would break whenever OpenMU's database schema changes). |
 | D3 | Server rules | Check what OpenMU already enforces (see "Server-side checks today"), then extend OpenMU's tables or add new ones following OpenMU's usual workflow. |
-| D4 | Sync | File-based import and export on **both** sides, each with a diff the user checks by hand, plus a read-only Update from server in MuEditor (phase 7, section 6). The client never writes to the server. |
+| D4 | Sync | File-based import and export on **both** sides, each import with a diff the user checks by hand (an export writes its side's data), plus a read-only Update from server in MuEditor (phase 7, section 6). The client never writes to the server. |
 | D5 | Editors | Several focused editors instead of one big table. |
 | D6 | Add/remove | Items can be created and removed on client and server; MuEditor tools link a new item to its model data. |
 | D7 | File layout | One JSON file per item group. Splitting the mixed groups 12–15 into category files was dropped: with new groups (D21) the group *is* the category, so the file layout is decided together with phase 12. |
@@ -330,10 +330,12 @@ Each field belongs to one of two groups:
 - **What moves:** the item fields both sides have, and the item formulas:
   everything in `Stats/ItemStats.json` except the profile rules, so a
   formula OpenMU changes reaches the client too.
-- **Every import shows a diff** (new, changed and removed items and formula
-  entries, field by field) that the user checks by hand; only the checked
-  rows are applied. The same holds for an export into an existing file and
-  for OpenMU's import page.
+- **Every import shows a diff** (added, changed and removed items and
+  formula entries, field by field) that the user checks by hand; only the
+  checked rows are applied, after a confirmation that says what changes.
+  The same holds for OpenMU's import page. An export shows no diff: it
+  writes the client's data, and the side that imports the file shows what
+  it changes (a diff there and one at export only confused).
 - Item sets, drop settings and option definitions get exchange files of
   their own later (D11, D14).
 - Phase 7 has five steps, one PR each: **1** the exchange file with Export
@@ -418,11 +420,16 @@ nearest one, with a note, when none gives a value exactly).
 **The Item Sync window** (MuEditor, `_EDITOR` builds only; the Item Sync
 tool of section 9):
 
-- **Export…**: a save dialog picks the file. The diff compares the client's
-  data with what the file holds (nothing for a new file); the checked rows
-  are written into it, the others keep the file's content.
+- **Export…**: a save dialog picks the file, and the client's items and
+  formulas are written into it, without a diff. A file that is there is
+  replaced after a confirmation with what changes in it (items added,
+  changed and removed, formula entries that change; or that it cannot be
+  read as an exchange file); a file that has the client's data already is
+  left as it is.
 - **Import…**: an open dialog picks the file; the diff compares it with the
-  client's data, and the checked rows are applied to the client.
+  client's data, and the checked rows are applied to the client after a
+  confirmation with what they change (items added, changed and removed,
+  formula entries; what is not checked or not listed stays as it is).
 - **Update from server** (step 4) downloads the server's file and goes on as
   Import.
 - The file dialogs are SDL3's (`SDL_ShowOpenFileDialog`,
@@ -463,8 +470,8 @@ tool of section 9):
   item window) is not removed, and its size and slot stay; a new item of a
   type the game holds (the client had no data for it) is not added. The
   import checks this again when it is applied.
-- **Apply:** the changed items and the changed item stat file are checked
-  first, with the checks of a save: a row with an error is unchecked and
+- **Apply** (after its confirmation): the changed items and the changed item
+  stat file are checked first, with the checks of a save: a row with an error is unchecked and
   shows the message. Then everything checked is one step of the undo
   history: the item stat file first, so the items' profiles follow the new
   rules, then the items. The size and slot of a held item are left out of
@@ -593,7 +600,7 @@ table:
 | **Model and visuals** | Model file picker for `Data\Item\*.bmd` with 3D preview, texture folder, inventory and ground display values, cloth flag, and glow, render style and effects chosen from lists (D24), each with the list of the other items that use the same look. |
 | **Look editor** (phase 13) | The shared look editor of the [roadmap](2026-09-29-data-driven-content-roadmap-design.md), opened for the looks of the selected item: its building blocks with a live preview, bone picking, the items that use a look and the warning before a shared look changes. |
 | **Item Translations** | Items × languages grid (every UI language, English first), the missing names counted per language, a filter for them, "same as English" for names that do not change. Built in phase 5, before the other tools. |
-| **Item Sync** (phase 7) | Export, Import and Update from server of the exchange file, each with a diff checked by hand (section 6). |
+| **Item Sync** (phase 7) | Export, Import and Update from server of the exchange file; Import and Update from server with a diff checked by hand (section 6). |
 
 Common features: validation before saving (duplicate ids, missing English
 name, missing model file), and undo for the current session.
@@ -617,7 +624,7 @@ in both repos (as separate PRs, one per repo).
 | 4e | Clear model loading errors | Client | MuMain | 4 | One message for missing model files and textures of item models that names the item, the model entry, the texture and the searched folders. |
 | 5 | Translation tooling | Client | MuMain | 2 | Translations editor (items × languages), missing names counted in the editor. The names themselves moved to phase 2 (D17). Done before phase 6. |
 | 6 | Editors | Client | MuMain | 2–5 | Focused MuEditor tools (section 9) on the rules of D26, including add/remove items and picking the looks of an item from lists. Takes over phase 5's item list. Done. |
-| 7 | Item sync, client side | Client | MuMain | 2, 6 | The exchange file of items and item formulas; MuEditor's Export, Import (step 1) and Update from server (step 4), each with a diff (section 6). The client-only fields of the item files (tags at first, `description`) are left out. |
+| 7 | Item sync, client side | Client | MuMain | 2, 6 | The exchange file of items and item formulas; MuEditor's Export, Import (step 1) and Update from server (step 4), the imports with a diff (section 6). The client-only fields of the item files (tags at first, `description`) are left out. |
 | B | Item sync, server side | Server | OpenMU | 7 (file format) | The item formulas as data (step 2), the read-only export endpoint (step 3) and the import page (step 5), as steps of phase 7 (section 6). |
 | 8 | Data-driven tooltips | Client | MuMain | 2, 5 | Tooltip JSON converted from the `ItemTooltip*` files; `RenderItemInfo()` reads data; tooltip editor. Moved earlier if needed. In steps (#815): an item's own texts go into its item file (`description`, D15), shared texts and layouts into a tooltip file. |
 | 9 | Item option definitions | Both | MuMain + C | 2 | Option groups in their own JSON files matching OpenMU's `ItemOptionDefinition`; exchange file and editor. |

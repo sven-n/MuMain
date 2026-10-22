@@ -2135,19 +2135,16 @@
     <value>Compare again</value>
   </data>
   <data name="What Import and Export do" xml:space="preserve">
-    <value>Import takes the checked values of the file into the client's data; Export writes the checked values of the client into the file. Both list only what differs: what is the same on both sides is left out.</value>
+    <value>Import lists how a file differs from the client's items and formulas and takes the checked values into the client. Export writes the client's items and formulas into a file; OpenMU's import page shows what it changes there. Only what differs is listed: what is the same on both sides is left out.</value>
   </data>
   <data name="Import from {0}" xml:space="preserve">
     <value>Import from {0}</value>
-  </data>
-  <data name="Export into {0}" xml:space="preserve">
-    <value>Export into {0}</value>
   </data>
   <data name="From OpenMU, server {0}" xml:space="preserve">
     <value>From OpenMU, server {0}</value>
   </data>
   <data name="The diff counts" xml:space="preserve">
-    <value>{0} new, {1} changed, {2} removed items; {3} formula entries</value>
+    <value>{0} added, {1} changed, {2} removed items; {3} formula entries</value>
   </data>
   <data name="Check all" xml:space="preserve">
     <value>Check all</value>
@@ -2164,17 +2161,11 @@
   <data name="Uncheck them" xml:space="preserve">
     <value>Uncheck them</value>
   </data>
-  <data name="New" xml:space="preserve">
-    <value>New</value>
-  </data>
   <data name="Changed" xml:space="preserve">
     <value>Changed</value>
   </data>
   <data name="Removed" xml:space="preserve">
     <value>Removed</value>
-  </data>
-  <data name="Change" xml:space="preserve">
-    <value>Change</value>
   </data>
   <data name="Fields" xml:space="preserve">
     <value>Fields</value>
@@ -2184,9 +2175,6 @@
   </data>
   <data name="From the file" xml:space="preserve">
     <value>From the file</value>
-  </data>
-  <data name="From the client" xml:space="preserve">
-    <value>From the client</value>
   </data>
   <data name="Note" xml:space="preserve">
     <value>Note</value>
@@ -2212,17 +2200,11 @@
   <data name="Apply the checked changes" xml:space="preserve">
     <value>Apply the checked changes</value>
   </data>
-  <data name="Write the checked changes into the file" xml:space="preserve">
-    <value>Write the checked changes into the file</value>
-  </data>
   <data name="Import items" xml:space="preserve">
     <value>Import items</value>
   </data>
   <data name="The checks refuse the change" xml:space="preserve">
     <value>The checks refuse the change; the rows of the items with errors are unchecked:</value>
-  </data>
-  <data name="All formulas" xml:space="preserve">
-    <value>All formulas</value>
   </data>
   <data name="Fields of {0}" xml:space="preserve">
     <value>Fields of {0}</value>
@@ -2251,9 +2233,6 @@
   <data name="Formula entries that differ ({0} of {1})" xml:space="preserve">
     <value>Formula entries that differ ({0} of {1})</value>
   </data>
-  <data name="Formulas that differ (all: the file has none)" xml:space="preserve">
-    <value>Formulas that differ (all: the file has none)</value>
-  </data>
   <data name="Items: all {0} are the same" xml:space="preserve">
     <value>Items: all {0} are the same in the client and the file.</value>
   </data>
@@ -2263,20 +2242,11 @@
   <data name="Formulas: not compared, the file has none" xml:space="preserve">
     <value>Formulas: not compared, the file has none. The client's formulas stay as they are.</value>
   </data>
-  <data name="Written: {0} items and all formulas" xml:space="preserve">
-    <value>Written: {0} items and all formulas. What was written no longer differs.</value>
-  </data>
-  <data name="Written: {0} items and {1} formula entries" xml:space="preserve">
-    <value>Written: {0} items and {1} formula entries. What was written no longer differs.</value>
-  </data>
   <data name="Applied: {0} items and {1} formula entries" xml:space="preserve">
     <value>Applied as one step of the undo history: {0} items and {1} formula entries. What was applied no longer differs.</value>
   </data>
   <data name="Still listed below: the rows that were not checked" xml:space="preserve">
     <value>Still listed below, unchecked: what was not checked or cannot be applied.</value>
-  </data>
-  <data name="After writing, the window compares again" xml:space="preserve">
-    <value>After writing, the window compares again: what was written no longer differs and leaves the list.</value>
   </data>
   <data name="After applying, the window compares again" xml:space="preserve">
     <value>After applying, the window compares again: what was applied no longer differs and leaves the list.</value>
@@ -2287,10 +2257,49 @@
   <data name="The path is not the compared file" xml:space="preserve">
     <value>The path in the field is not the compared file: compare again.</value>
   </data>
-  <data name="The file is not there yet" xml:space="preserve">
-    <value>The file is not there yet: writing creates it.</value>
-  </data>
   <data name="The item is worn or in an item window, it is not added" xml:space="preserve">
     <value>The item is worn or in an item window: it is not added while it is.</value>
+  </data>
+  <data name="Added" xml:space="preserve">
+    <value>Added</value>
+  </data>
+  <data name="In the client" xml:space="preserve">
+    <value>In the client</value>
+  </data>
+  <data name="Apply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="Replace" xml:space="preserve">
+    <value>Replace</value>
+  </data>
+  <data name="Apply the import" xml:space="preserve">
+    <value>Apply the import</value>
+  </data>
+  <data name="The import changes" xml:space="preserve">
+    <value>This changes the client's items and formulas with the checked rows of {0}: {1} items added, {2} changed, {3} removed; {4} formula entries change.</value>
+  </data>
+  <data name="What the import leaves" xml:space="preserve">
+    <value>Everything that is not checked or not listed stays as it is. Undo takes back the whole import.</value>
+  </data>
+  <data name="Replace the exchange file" xml:space="preserve">
+    <value>Replace the exchange file</value>
+  </data>
+  <data name="The export changes" xml:space="preserve">
+    <value>{0} gets the client's items and formulas: {1} items added, {2} changed, {3} removed; {4} formula entries change.</value>
+  </data>
+  <data name="The export changes, the formulas are added" xml:space="preserve">
+    <value>{0} gets the client's items and formulas: {1} items added, {2} changed, {3} removed; the formulas are added.</value>
+  </data>
+  <data name="The file cannot be read, replace it" xml:space="preserve">
+    <value>{0} cannot be read as an item exchange file. Replace it with the client's items and formulas?</value>
+  </data>
+  <data name="The file already has the client data" xml:space="preserve">
+    <value>{0} already has the client's items and formulas: nothing to write.</value>
+  </data>
+  <data name="The export could not be written" xml:space="preserve">
+    <value>The export could not be written:</value>
+  </data>
+  <data name="Exported {0} items to {1}" xml:space="preserve">
+    <value>Exported {0} items and all formulas to {1}.</value>
   </data>
 </root>

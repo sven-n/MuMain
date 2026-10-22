@@ -1070,37 +1070,41 @@ the client never writes to it. (OpenMU's export and import of the file, and
 Update from server, which downloads it, are later steps of phase 7; see the
 [design](superpowers/specs/2026-09-25-data-driven-items-design.md).)
 
-- **Import…** opens a file and lists how it differs from the client's data.
-  **Apply the checked changes** takes the checked rows into the client as
-  one step of the undo history; Save Items writes the files, as for any
-  edit.
-- **Export…** picks the file to write and lists how the client's data
-  differs from what the file holds (all of it for a new file, which the
-  window says is not there yet). **Write the checked changes into the
-  file** writes the checked rows; for the other rows the file keeps what it
-  has. The written file says `"source": "MuMain"`. A file that is there but
-  cannot be read is not written over.
-- Only what differs is listed. The lists say how much of what was compared
-  differs ("Items that differ (3 of 911)"), and when nothing does, how many
-  are the same ("Items: all 911 are the same in the client and the file").
-  When the file has exactly the client's data, the window says so in green
-  ("The file matches the client: nothing differs."), e.g. right after an
-  export; change an item or the file, or pick another file, to see
-  differences again. "The same" means that there is nothing to take: a
-  name in a language only one side has is not compared (no language is
-  removed), nor on an import one in a language the client's UI does not
-  show.
+- **Import…** opens a file and lists how it differs from the client's
+  items and formulas: what the import would add to the client, change in
+  it or remove from it. **Apply the checked changes** first says what it
+  changes ("3 items added, 5 changed, 1 removed; 2 formula entries
+  change"; what is not checked or not listed stays as it is), then takes
+  the checked rows into the client as one step of the undo history; Save
+  Items writes the files, as for any edit.
+- **Export…** writes the client's items and formulas into the file it
+  picks, without a diff: OpenMU's import page shows what the file changes
+  on the server, and Import shows what one changes in the client. A new
+  file is written right away ("Exported 911 items and all formulas to
+  …"). A file that is there is replaced after a confirmation that says what
+  changes in it ("3 items added, 5 changed, 1 removed; 2 formula entries
+  change"), or that it cannot be read as an exchange file; a file that has
+  the client's data already is left as it is. The written file says
+  `"source": "MuMain"`.
+- An import lists only what differs. The lists say how much of what was
+  compared differs ("Items that differ (3 of 911)"), and when nothing does,
+  how many are the same ("Items: all 911 are the same in the client and the
+  file"). When the file has exactly the client's data, the window says so
+  in green ("The file matches the client: nothing differs."), e.g. for a
+  file you just exported; change an item or the file, or pick another
+  file, to see differences again. "The same" means that there is nothing to
+  take: a name in a language the file lacks, or one the client's UI does
+  not show, is not compared (no language is removed).
 - After applying, the window compares again: what was applied no longer
-  differs and leaves the list. A green line above says what was written or
-  applied ("Written: 911 items and all formulas. What was written no longer
-  differs."); what was not checked stays listed and unchecked. An import is
-  refused when an item it would add, resize, give another slot or remove is
-  worn or in an item window by then (compare again).
-- The path can also be typed into **Exchange file**; **Compare again**
-  compares with it. The apply or write button is off while nothing is
-  checked, while the path field holds another file than the one compared,
-  and while the client's items or formulas changed since the comparison
-  (the window says which; compare again).
+  differs and leaves the list. A green line above says what was applied;
+  what was not checked stays listed and unchecked. An import is refused
+  when an item it would add, resize, give another slot or remove is worn or
+  in an item window by then (compare again).
+- The path of an import can also be typed into **Exchange file**;
+  **Compare again** compares with it. **Apply the checked changes** is off
+  while nothing is checked, while the path field holds another file than
+  the one compared, and while the client's items or formulas changed since
+  the comparison (the window says which; compare again).
 
 **The file** has the layout of the item files: items sorted by group and
 number, fields with their default value left out, LF line endings.
@@ -1143,29 +1147,28 @@ number, fields with their default value left out, LF line endings.
   attack type, magic defense and the rental flags. A file with such a field
   is read with a warning and the field is left out.
 
-**The diff**:
+**The diff of an import**:
 
-- The **Items** list has the new, changed and removed items. The box of a
-  new or removed item checks the whole item, the box of a changed one all
-  its fields. A click on a row shows its fields (and selects the item in the
+- The **Items** list says for each item what the import does to it in the
+  client (Added, Changed, Removed). The box of an added or removed item
+  checks the whole item, the box of a changed one all its fields. A click on a row shows its fields (and selects the item in the
   item tools): each field (`width`, `requirements.strength`, `name.de`,
-  `tags.ammunition`, …) with its value now and the incoming one, and a box
-  of its own.
+  `tags.ammunition`, …) with its value now and the file's, and a box of its
+  own.
 - The **Formulas** list has the drop level bonus, each table, each term of
   the default and of each profile (`default.damage.table`,
   `profiles.scroll.requirements.energy`, …) and a profile only one side
-  has. Into a file without formulas they all come in at once; an import of
-  a file without formulas compares none and leaves the client's as they
-  are.
-- Checked at first: what the incoming side changes. Unchecked: removals,
+  has. A file without formulas compares none and leaves the client's as
+  they are.
+- Checked at first: what the file changes. Unchecked: removals,
   known differences (grey) and fields with a note: the size and slot of an
   item your character wears or an item window shows (they stay; such an
   item is not removed either, nor added when the client has no data for it
   yet), and a drop level above 255, which OpenMU keeps in a byte.
 - **Check all** and **Check none** take every row; **A field in all items**
   checks or unchecks one field in every changed item.
-- **Names**: an import takes only the client's UI languages from the file;
-  a language the file lacks stays as it is, and no language is removed.
+- **Names**: only the client's UI languages are taken from the file; a
+  language the file lacks stays as it is, and no language is removed.
 - **Stat profile**: a file's profile that the item's profile rules give
   leaves the item following its rules; another one becomes a pick (see
   Item Basics).
@@ -1179,10 +1182,9 @@ number, fields with their default value left out, LF line endings.
 - **Removed items** go with their model entry, as Remove item does; the row
   lists what goes with the item and what uses it at its number.
 - An item a file has more than once (OpenMU does not keep the group and
-  number unique) is a locked row: the import leaves it as it is. An export
-  does not write into such a file.
-- Before an import is applied, the data as it would be gets the checks of a
-  save. With errors nothing changes; the errors are listed and the rows of
+  number unique) is a locked row: the import leaves it as it is.
+- Before the import is applied, the data as it would be gets the checks of
+  a save. With errors nothing changes; the errors are listed and the rows of
   their items are unchecked.
 
 **Known differences** are fields and formula entries meant to differ

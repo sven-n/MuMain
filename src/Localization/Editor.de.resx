@@ -2114,19 +2114,16 @@
     <value>Neu vergleichen</value>
   </data>
   <data name="What Import and Export do" xml:space="preserve">
-    <value>Importieren übernimmt die angehakten Werte der Datei in die Daten des Clients; Exportieren schreibt die angehakten Werte des Clients in die Datei. Beide listen nur auf, was sich unterscheidet: Was auf beiden Seiten gleich ist, fehlt in der Liste.</value>
+    <value>Importieren listet auf, wie sich eine Datei von den Items und Formeln des Clients unterscheidet, und übernimmt die angehakten Werte in den Client. Exportieren schreibt die Items und Formeln des Clients in eine Datei; die Import-Seite von OpenMU zeigt, was sie dort ändert. Nur Unterschiede werden aufgelistet: Was auf beiden Seiten gleich ist, fehlt in der Liste.</value>
   </data>
   <data name="Import from {0}" xml:space="preserve">
     <value>Import aus {0}</value>
-  </data>
-  <data name="Export into {0}" xml:space="preserve">
-    <value>Export nach {0}</value>
   </data>
   <data name="From OpenMU, server {0}" xml:space="preserve">
     <value>Von OpenMU, Server {0}</value>
   </data>
   <data name="The diff counts" xml:space="preserve">
-    <value>{0} neue, {1} geänderte, {2} entfernte Items; {3} Formeleinträge</value>
+    <value>{0} hinzugefügte, {1} geänderte, {2} entfernte Items; {3} Formeleinträge</value>
   </data>
   <data name="Check all" xml:space="preserve">
     <value>Alle anhaken</value>
@@ -2143,17 +2140,11 @@
   <data name="Uncheck them" xml:space="preserve">
     <value>Haken entfernen</value>
   </data>
-  <data name="New" xml:space="preserve">
-    <value>Neu</value>
-  </data>
   <data name="Changed" xml:space="preserve">
     <value>Geändert</value>
   </data>
   <data name="Removed" xml:space="preserve">
     <value>Entfernt</value>
-  </data>
-  <data name="Change" xml:space="preserve">
-    <value>Änderung</value>
   </data>
   <data name="Fields" xml:space="preserve">
     <value>Felder</value>
@@ -2163,9 +2154,6 @@
   </data>
   <data name="From the file" xml:space="preserve">
     <value>Aus der Datei</value>
-  </data>
-  <data name="From the client" xml:space="preserve">
-    <value>Aus dem Client</value>
   </data>
   <data name="Note" xml:space="preserve">
     <value>Hinweis</value>
@@ -2191,17 +2179,11 @@
   <data name="Apply the checked changes" xml:space="preserve">
     <value>Angehakte Änderungen übernehmen</value>
   </data>
-  <data name="Write the checked changes into the file" xml:space="preserve">
-    <value>Angehakte Änderungen in die Datei schreiben</value>
-  </data>
   <data name="Import items" xml:space="preserve">
     <value>Items importieren</value>
   </data>
   <data name="The checks refuse the change" xml:space="preserve">
     <value>Die Prüfungen lehnen die Änderung ab; die Zeilen der Items mit Fehlern haben keinen Haken mehr:</value>
-  </data>
-  <data name="All formulas" xml:space="preserve">
-    <value>Alle Formeln</value>
   </data>
   <data name="Fields of {0}" xml:space="preserve">
     <value>Felder von {0}</value>
@@ -2230,9 +2212,6 @@
   <data name="Formula entries that differ ({0} of {1})" xml:space="preserve">
     <value>Formeleinträge mit Unterschieden ({0} von {1})</value>
   </data>
-  <data name="Formulas that differ (all: the file has none)" xml:space="preserve">
-    <value>Formeln mit Unterschieden (alle: die Datei hat keine)</value>
-  </data>
   <data name="Items: all {0} are the same" xml:space="preserve">
     <value>Items: alle {0} sind im Client und in der Datei gleich.</value>
   </data>
@@ -2242,20 +2221,11 @@
   <data name="Formulas: not compared, the file has none" xml:space="preserve">
     <value>Formeln: nicht verglichen, die Datei hat keine. Die Formeln des Clients bleiben, wie sie sind.</value>
   </data>
-  <data name="Written: {0} items and all formulas" xml:space="preserve">
-    <value>Geschrieben: {0} Items und alle Formeln. Was geschrieben wurde, unterscheidet sich nicht mehr.</value>
-  </data>
-  <data name="Written: {0} items and {1} formula entries" xml:space="preserve">
-    <value>Geschrieben: {0} Items und {1} Formeleinträge. Was geschrieben wurde, unterscheidet sich nicht mehr.</value>
-  </data>
   <data name="Applied: {0} items and {1} formula entries" xml:space="preserve">
     <value>Als ein Schritt des Rückgängig-Verlaufs übernommen: {0} Items und {1} Formeleinträge. Was übernommen wurde, unterscheidet sich nicht mehr.</value>
   </data>
   <data name="Still listed below: the rows that were not checked" xml:space="preserve">
     <value>Weiter unten noch aufgeführt, ohne Haken: was nicht angehakt war oder nicht übernommen werden kann.</value>
-  </data>
-  <data name="After writing, the window compares again" xml:space="preserve">
-    <value>Nach dem Schreiben vergleicht das Fenster neu: Was geschrieben wurde, unterscheidet sich nicht mehr und verschwindet aus der Liste.</value>
   </data>
   <data name="After applying, the window compares again" xml:space="preserve">
     <value>Nach dem Übernehmen vergleicht das Fenster neu: Was übernommen wurde, unterscheidet sich nicht mehr und verschwindet aus der Liste.</value>
@@ -2266,10 +2236,49 @@
   <data name="The path is not the compared file" xml:space="preserve">
     <value>Der Pfad im Feld ist nicht die verglichene Datei: neu vergleichen.</value>
   </data>
-  <data name="The file is not there yet" xml:space="preserve">
-    <value>Die Datei gibt es noch nicht: Schreiben legt sie an.</value>
-  </data>
   <data name="The item is worn or in an item window, it is not added" xml:space="preserve">
     <value>Das Item wird getragen oder ist in einem Item-Fenster: Es wird nicht hinzugefügt, solange das so ist.</value>
+  </data>
+  <data name="Added" xml:space="preserve">
+    <value>Hinzugefügt</value>
+  </data>
+  <data name="In the client" xml:space="preserve">
+    <value>Im Client</value>
+  </data>
+  <data name="Apply" xml:space="preserve">
+    <value>Übernehmen</value>
+  </data>
+  <data name="Replace" xml:space="preserve">
+    <value>Ersetzen</value>
+  </data>
+  <data name="Apply the import" xml:space="preserve">
+    <value>Import übernehmen</value>
+  </data>
+  <data name="The import changes" xml:space="preserve">
+    <value>Das ändert die Items und Formeln des Clients mit den angehakten Zeilen aus {0}: {1} Items hinzugefügt, {2} geändert, {3} entfernt; {4} Formeleinträge ändern sich.</value>
+  </data>
+  <data name="What the import leaves" xml:space="preserve">
+    <value>Alles, was nicht angehakt oder nicht aufgeführt ist, bleibt, wie es ist. Rückgängig nimmt den ganzen Import zurück.</value>
+  </data>
+  <data name="Replace the exchange file" xml:space="preserve">
+    <value>Austauschdatei ersetzen</value>
+  </data>
+  <data name="The export changes" xml:space="preserve">
+    <value>{0} bekommt die Items und Formeln des Clients: {1} Items hinzugefügt, {2} geändert, {3} entfernt; {4} Formeleinträge ändern sich.</value>
+  </data>
+  <data name="The export changes, the formulas are added" xml:space="preserve">
+    <value>{0} bekommt die Items und Formeln des Clients: {1} Items hinzugefügt, {2} geändert, {3} entfernt; die Formeln kommen hinzu.</value>
+  </data>
+  <data name="The file cannot be read, replace it" xml:space="preserve">
+    <value>{0} lässt sich nicht als Item-Austauschdatei lesen. Durch die Items und Formeln des Clients ersetzen?</value>
+  </data>
+  <data name="The file already has the client data" xml:space="preserve">
+    <value>{0} hat schon die Items und Formeln des Clients: nichts zu schreiben.</value>
+  </data>
+  <data name="The export could not be written" xml:space="preserve">
+    <value>Der Export konnte nicht geschrieben werden:</value>
+  </data>
+  <data name="Exported {0} items to {1}" xml:space="preserve">
+    <value>{0} Items und alle Formeln nach {1} exportiert.</value>
   </data>
 </root>
