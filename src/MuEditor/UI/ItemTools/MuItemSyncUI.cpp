@@ -642,14 +642,18 @@ void CMuItemSyncUI::RenderFormulas()
         ImGui::TableNextColumn();
         RenderValue(row.incoming);
         ImGui::TableNextColumn();
-        bool known = row.known;
-        if (row.entry != AllFormulasEntry && ImGui::Checkbox("##Known", &known))
+        // All formulas come in at once into a file without them; they are not a known difference.
+        if (row.entry != AllFormulasEntry)
         {
-            SetKnownFormula(row.entry, known);
-        }
-        if (ImGui::IsItemHovered())
-        {
-            ImGui::SetTooltip("%s", I18N::Editor::WhatAKnownDifferenceIs);
+            bool known = row.known;
+            if (ImGui::Checkbox("##Known", &known))
+            {
+                SetKnownFormula(row.entry, known);
+            }
+            if (ImGui::IsItemHovered())
+            {
+                ImGui::SetTooltip("%s", I18N::Editor::WhatAKnownDifferenceIs);
+            }
         }
         ImGui::PopID();
     }
