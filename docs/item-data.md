@@ -1081,8 +1081,9 @@ Update from server, which downloads it, are later steps of phase 7; see the
   "MuMain"`.
 - The path can also be typed into **Exchange file**; **Compare again**
   compares with it. After applying, the window compares again and lists
-  what is left. When the client's data changes after a comparison, the
-  window says so.
+  what is left: right after an export nothing, as the file then has the
+  client's data (change an item or the file to see differences again).
+  When the client's data changes after a comparison, the window says so.
 
 **The file** has the layout of the item files: items sorted by group and
 number, fields with their default value left out, LF line endings.
