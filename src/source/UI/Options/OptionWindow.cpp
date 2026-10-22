@@ -6,6 +6,7 @@
 #include "Render/Textures/TexturePack.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Audio/DSPlaySound.h"
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Data/GameConfig/GameConfigConstants.h"
 #include "Render/Look/LookPresetSetting.h"
@@ -307,6 +308,7 @@ mu::ui::window::COptionWindow::COptionWindow()
     m_iResolutionIndex = 0;
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
     m_iLanguageIndex = FindCurrentLanguageIndex();
+    m_bTranslateItemNames = GameConfig::GetInstance().GetTranslateItemNames();
     m_iFontIndex = FindCurrentFontIndex();
 
     m_iActiveTab = 0;
@@ -398,6 +400,8 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("language_index", &model.languageIndex);
     c.Bind("language_row_label", &model.languageRowLabel);
     c.Bind("language_value_label", &model.languageValueLabel);
+    c.Bind("translate_item_names", &model.translateItemNames);
+    c.Bind("translate_item_names_label", &model.translateItemNamesLabel);
     c.Bind("font_labels", &model.fontLabels);
     c.Bind("font_index", &model.fontIndex);
     c.Bind("font_row_label", &model.fontRowLabel);
@@ -517,6 +521,9 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleRenderAllEffects(); });
     c.BindEventCallback("option_toggle_windowed_mode",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleWindowedMode(); });
+    c.BindEventCallback("option_toggle_translate_item_names",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { RmlToggleTranslateItemNames(); });
 
     c.BindEventCallback("option_gauge",
         [this](Rml::DataModelHandle, Rml::Event& ev, const Rml::VariantList& args)
@@ -771,6 +778,7 @@ void mu::ui::window::COptionWindow::OpenningProcess()
     // exposed through, so opening this window always reflects the current live truth.
     InitResolutionCombo();
     m_iLanguageIndex = FindCurrentLanguageIndex();
+    m_bTranslateItemNames = GameConfig::GetInstance().GetTranslateItemNames();
     m_iFontIndex = FindCurrentFontIndex();
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
 
@@ -972,6 +980,29 @@ void mu::ui::window::COptionWindow::RmlLanguageChanged(int index)
         return;
     m_iLanguageIndex = index;
     ApplyLanguage();
+}
+
+void mu::ui::window::COptionWindow::RmlToggleTranslateItemNames()
+{
+    m_bTranslateItemNames = !m_bTranslateItemNames;
+    GameConfig::GetInstance().SetTranslateItemNames(m_bTranslateItemNames);
+    GameConfig::GetInstance().Save();
+    CItemDataHandler::GetInstance().RefreshItemNames();
+}
+
+void mu::ui::window::COptionWindow::SyncTranslateItemNamesRow(OptionRmlModel& model)
+{
+    const Rml::String label = StringUtils::WideToNarrow(I18N::Game::TranslateItemNames);
+    if (model.translateItemNamesLabel != label)
+    {
+        model.translateItemNamesLabel = label;
+        m_RmlView.MarkDirty("translate_item_names_label");
+    }
+    if (model.translateItemNames != m_bTranslateItemNames)
+    {
+        model.translateItemNames = m_bTranslateItemNames;
+        m_RmlView.MarkDirty("translate_item_names");
+    }
 }
 
 void mu::ui::window::COptionWindow::RmlFontChanged(int index)
@@ -1769,6 +1800,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     }
     if (model.languageIndex != m_iLanguageIndex) { model.languageIndex = m_iLanguageIndex; m_RmlView.MarkDirty("language_index"); }
     syncDropdownValue(model.languageValueLabel, "language_value_label", model.languageLabels, model.languageIndex);
+    SyncTranslateItemNamesRow(model);
 
     // Rebuilt every sync (not just once) so the localized "Default" entry follows a live language
     // switch, same as native's own GetFontLabels().

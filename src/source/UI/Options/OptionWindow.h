@@ -164,6 +164,8 @@ namespace mu::ui::window
         void RmlGaugeEvent(Rml::Event& event, int gauge);
         void RmlResolutionChanged(int index);
         void RmlLanguageChanged(int index);
+        // The checkbox under the language: item names in the UI language, or English.
+        void RmlToggleTranslateItemNames();
         void RmlFontChanged(int index);
         // Graphics tab -- DXP-23's per-system effect-cost toggles (MainScene.h), promoted from
         // console-only ($effects ...) diagnostics to a persisted, in-game-options setting.
@@ -299,6 +301,8 @@ namespace mu::ui::window
             int languageIndex = 0;
             Rml::String languageRowLabel;
             Rml::String languageValueLabel;
+            bool translateItemNames = true;
+            Rml::String translateItemNamesLabel;
             std::vector<Rml::String> fontLabels;
             int fontIndex = 0;
             Rml::String fontRowLabel;
@@ -401,6 +405,7 @@ namespace mu::ui::window
         };
         void BindRmlModel(Rml::DataModelConstructor& c, OptionRmlModel& model);
         void SyncImpliedEffectRows(OptionRmlModel& model);
+        void SyncTranslateItemNamesRow(OptionRmlModel& model);
         void SyncTuningModel(OptionRmlModel& model);
         void OnRmlBuilt();
         UI::RmlBridge::ThemedView<OptionRmlModel> m_RmlView{"option_window",
@@ -428,6 +433,7 @@ namespace mu::ui::window
         int m_iResolutionIndex;
         bool m_bWindowedMode;
         int m_iLanguageIndex;
+        bool m_bTranslateItemNames;
         int m_iFontIndex;
 
         std::vector<UI::Options::DisplayResolution> m_resolutions;
