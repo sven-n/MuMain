@@ -41,6 +41,9 @@ constexpr float ItemListHeight = 260.0f;
 constexpr float FieldListHeight = 220.0f;
 constexpr const char* NoValue = "-";
 constexpr const char* ExchangeFileName = "ItemExchange.json";
+// The name of the checkbox column: a header takes the ID of its label under PushID(column), so
+// it must differ from the rows' "##Checked" under PushID(row), or row 0 has the header's ID.
+constexpr const char* CheckColumn = "##CheckColumn";
 
 constexpr ImVec4 ErrorColor{1.0f, 0.4f, 0.4f, 1.0f};
 constexpr ImVec4 WarningColor{1.0f, 0.8f, 0.3f, 1.0f};
@@ -602,7 +605,7 @@ void CMuItemSyncUI::RenderItems()
     if (ImGui::BeginTable("##SyncItems", 4, Flags, ImVec2(0.0f, Scaled(ItemListHeight))))
     {
         ImGui::TableSetupScrollFreeze(0, 1);
-        ImGui::TableSetupColumn("##Checked", ImGuiTableColumnFlags_WidthFixed, ImGui::GetFrameHeight());
+        ImGui::TableSetupColumn(CheckColumn, ImGuiTableColumnFlags_WidthFixed, ImGui::GetFrameHeight());
         ImGui::TableSetupColumn(I18N::Editor::Change, ImGuiTableColumnFlags_WidthFixed, Scaled(ChangeColumnWidth));
         ImGui::TableSetupColumn(I18N::Editor::Item);
         ImGui::TableSetupColumn(I18N::Editor::Fields, ImGuiTableColumnFlags_WidthFixed, Scaled(ChangeColumnWidth));
@@ -715,7 +718,7 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
         return;
     }
     ImGui::TableSetupScrollFreeze(0, 1);
-    ImGui::TableSetupColumn("##Checked", ImGuiTableColumnFlags_WidthFixed, ImGui::GetFrameHeight());
+    ImGui::TableSetupColumn(CheckColumn, ImGuiTableColumnFlags_WidthFixed, ImGui::GetFrameHeight());
     ImGui::TableSetupColumn(I18N::Editor::Field, ImGuiTableColumnFlags_WidthFixed, Scaled(FieldColumnWidth));
     if (changed)
     {
@@ -814,7 +817,7 @@ void CMuItemSyncUI::RenderFormulas()
         return;
     }
     ImGui::TableSetupScrollFreeze(0, 1);
-    ImGui::TableSetupColumn("##Checked", ImGuiTableColumnFlags_WidthFixed, ImGui::GetFrameHeight());
+    ImGui::TableSetupColumn(CheckColumn, ImGuiTableColumnFlags_WidthFixed, ImGui::GetFrameHeight());
     ImGui::TableSetupColumn(I18N::Editor::Entry, ImGuiTableColumnFlags_WidthFixed, Scaled(FieldColumnWidth));
     ImGui::TableSetupColumn(I18N::Editor::Now);
     ImGui::TableSetupColumn(m_direction == SyncDirection::Import ? I18N::Editor::FromTheFile
