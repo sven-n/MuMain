@@ -1229,10 +1229,10 @@
     {
       "number": 50,
       "name": {
-        "en": "Divine Boots",
+        "en": "Faith Boots",
         "de": "Glaubensstiefel",
-        "es": "Botas Divinas",
-        "pt": "Botas divinas"
+        "es": "Botas de Fe",
+        "pt": "Botas da fé"
       },
       "width": 2,
       "height": 2,
@@ -1499,8 +1499,8 @@
     {
       "number": 66,
       "name": {
-        "en": "Dark Soul Boots",
-        "de": "Dunkelseelenstiefel",
+        "en": "Adamantine Boots",
+        "de": "Adamantstiefel",
         "es": "Botas Adamantinas",
         "pt": "Botas de adamantina"
       },
@@ -1729,152 +1729,6 @@
         "level": 380,
         "strength": 97,
         "vitality": 85
-      },
-      "classRequirements": {
-        "rageFighter": 1
-      }
-    },
-    {
-      "number": 78,
-      "name": {
-        "en": "Dragon Boots-J",
-        "de": "Drachenstiefel-J",
-        "es": "Botas Dragón-J",
-        "pt": "Botas do dragão-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "boots",
-      "statProfile": "armor",
-      "level": 54,
-      "durability": 68,
-      "defense": 17,
-      "walkSpeed": 2,
-      "attackType": 4,
-      "requirements": {
-        "strength": 120,
-        "dexterity": 30
-      },
-      "classRequirements": {
-        "darkKnight": 1,
-        "magicGladiator": 1
-      }
-    },
-    {
-      "number": 79,
-      "name": {
-        "en": "Legendary Boots-J",
-        "de": "Legendäre Stiefel-J",
-        "es": "Botas Legendario-J",
-        "pt": "Botas lendário-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "boots",
-      "statProfile": "armor",
-      "level": 46,
-      "durability": 42,
-      "defense": 14,
-      "attackType": 4,
-      "requirements": {
-        "strength": 30
-      },
-      "classRequirements": {
-        "darkWizard": 1,
-        "magicGladiator": 1
-      }
-    },
-    {
-      "number": 80,
-      "name": {
-        "en": "Guardian Boots-J",
-        "de": "Wächterstiefel-J",
-        "es": "Botas Guardián-J",
-        "pt": "Botas do guardião-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "boots",
-      "statProfile": "armor",
-      "level": 52,
-      "durability": 45,
-      "defense": 18,
-      "attackType": 4,
-      "requirements": {
-        "strength": 40,
-        "dexterity": 80
-      },
-      "classRequirements": {
-        "fairyElf": 1
-      }
-    },
-    {
-      "number": 81,
-      "name": {
-        "en": "Light Plate Boots-J",
-        "de": "Leichtplattenstiefel-J",
-        "es": "Botas Plata de Luz-J",
-        "pt": "Botas de placa leve-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "boots",
-      "statProfile": "armor",
-      "level": 45,
-      "durability": 42,
-      "defense": 15,
-      "attackType": 4,
-      "requirements": {
-        "strength": 70,
-        "dexterity": 20
-      },
-      "classRequirements": {
-        "darkLord": 1
-      }
-    },
-    {
-      "number": 82,
-      "name": {
-        "en": "Red Wing Boots-J",
-        "de": "Rotschwingenstiefel-J",
-        "es": "Botas Ala Roja-J",
-        "pt": "Botas da asa vermelha-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "boots",
-      "statProfile": "armor",
-      "level": 46,
-      "durability": 42,
-      "defense": 17,
-      "attackType": 4,
-      "requirements": {
-        "strength": 25,
-        "dexterity": 4
-      },
-      "classRequirements": {
-        "summoner": 1
-      }
-    },
-    {
-      "number": 83,
-      "name": {
-        "en": "Sacred Fire Boots-J",
-        "de": "Heiligfeuerstiefel-J",
-        "es": "Botas de Fuego Sagrado-J",
-        "pt": "Botas de Fogo Sagrado-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "boots",
-      "statProfile": "armor",
-      "level": 50,
-      "durability": 52,
-      "defense": 22,
-      "attackType": 2,
-      "requirements": {
-        "strength": 85,
-        "vitality": 75
       },
       "classRequirements": {
         "rageFighter": 1
