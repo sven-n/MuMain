@@ -362,8 +362,8 @@ committing).
 
 ### In the item editor
 
-The **Item Translations** window (editor builds, **Windows → Item Translations**)
-shows the item names as a grid: one row per item, one column per UI
+The **Item Translations** window (editor builds, **Windows → Items → Item
+Translations**) shows the item names as a grid: one row per item, one column per UI
 language, English first.
 
 - Each language's column header says how many items have no name of their
@@ -375,8 +375,10 @@ language, English first.
 - Right-click a cell: **Same as English** writes the English name for a name
   that is the same in that language; **Remove translation** removes it.
 - The search finds an item by any of its names (A to Z in either case), by
-  `group,number` or by its item type. Clicking the number shows the item in
-  the item table.
+  `group,number` or by its item type. Clicking the number selects the item
+  in the other item tools and shows the **Item Browser**. The item the
+  tools show is marked, and an item selected in another tool is scrolled
+  to (the search and filter are cleared when they hide it).
 - Columns can be hidden from the header's right-click menu. A name cannot
   contain `||` (the item checks refuse it). The English name
   cannot be emptied, and the names are stored whole, also when they are
@@ -384,16 +386,15 @@ language, English first.
 - **Save Items** writes the files and lists each language that misses item
   names, with how many.
 
-The item table edits the name in the current UI language: switch the
-language (in the game's options window or the editor's language menu), then
-edit the Name column; clearing a translated name removes the translation.
+**Item Basics** edits the English name. Each name change is one step of
+the item tools' Undo and Redo.
 
 ### Translating items into a language the game already has
 
 The game's UI languages are `en`, `de`, `es`, `id`, `ja`, `pl`, `pt`, `ru`,
 `tl`, `uk` and `zh-TW`. Items currently have German (`de`), Portuguese (`pt`)
 and Spanish (`es`) names. To translate items into another of these languages,
-add names with that code (by hand or in the item editor); nothing else is
+add names with that code (by hand or in the Item Translations window); nothing else is
 needed. The names show as soon as a player picks that language.
 
 ### Adding a new language

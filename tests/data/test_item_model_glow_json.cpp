@@ -170,6 +170,31 @@ TEST_CASE("The glow color list names colors [data][effects]")
     CHECK(colors == expected);
 }
 
+TEST_CASE("The glow color list is written as it is read [data][effects]")
+{
+    const std::vector<Data::Effects::GlowColor> colors{{"orange", {1, 0.5, 0}}, {"sage", {0.47, 0.67, 0.6}}};
+    const std::string text = Data::Effects::WriteGlowColorsJson(colors);
+    // One color a line, whole numbers without a fraction, in the list's order.
+    CHECK(text == "{\n"
+                  "  \"formatVersion\": 1,\n"
+                  "  \"colors\": {\n"
+                  "    \"orange\": [1, 0.5, 0],\n"
+                  "    \"sage\": [0.47, 0.67, 0.6]\n"
+                  "  }\n"
+                  "}\n");
+
+    std::vector<Data::Effects::GlowColor> readBack;
+    std::vector<ItemDataIssue> issues;
+    Data::Effects::ReadGlowColorsJson(text, "GlowColors.json", readBack, issues);
+    CHECK(issues.empty());
+    CHECK(readBack == colors);
+
+    readBack.clear();
+    Data::Effects::ReadGlowColorsJson(Data::Effects::WriteGlowColorsJson({}), "GlowColors.json", readBack, issues);
+    CHECK(issues.empty());
+    CHECK(readBack.empty());
+}
+
 TEST_CASE("The glow color list is checked [data][effects]")
 {
     const auto errorsOf = [](const std::string& text)

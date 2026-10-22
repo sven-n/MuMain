@@ -219,6 +219,12 @@ public:
         m_entries.insert(position, {requirement, values});
     }
 
+    // The requirement is no longer given by level (the item editor).
+    void Remove(ItemRequirement requirement)
+    {
+        std::erase_if(m_entries, [requirement](const Entry& entry) { return entry.requirement == requirement; });
+    }
+
     bool operator==(const RequirementsByLevel& other) const = default;
 
 private:
@@ -369,5 +375,8 @@ struct ItemDefinition
             return true;
         }
     }
+
+    // All fields; the item editor's undo compares definitions with it.
+    bool operator==(const ItemDefinition& other) const = default;
 };
 } // namespace Data::Items
