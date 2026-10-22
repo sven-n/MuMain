@@ -85,10 +85,31 @@ extern int AllRepairGold;
 //////////////////////////////////////////////////////////////////////////
 // text 관련
 //////////////////////////////////////////////////////////////////////////
-extern wchar_t TextList[50][100];
-extern int TextListColor[50];
-extern int TextBold[50];
-extern SIZE Size[50];
+// The rows an item's description may write into a tooltip, on top of the original client's 50: the description
+// gets rows of its own, so it never takes the room the rest of the tooltip needs.
+constexpr int MaxItemDescriptionRows = 32;
+constexpr int MaxTextListRows = 50 + MaxItemDescriptionRows;
+
+extern wchar_t TextList[MaxTextListRows][100];
+extern int TextListColor[MaxTextListRows];
+extern int TextBold[MaxTextListRows];
+extern SIZE Size[MaxTextListRows];
+
+namespace Data::Items
+{
+struct ItemDefinition;
+}
+struct ItemTooltipValues;
+
+// How wide a text is in the tooltip's text units.
+using ItemTooltipTextMeasure = int (*)(const wchar_t* text, size_t length);
+// Writes the item data's description in the UI's language, with its placeholders filled in for the item (`values`,
+// and the stat file's tables at `level`), into TextList, TextListColor and TextBold from TextNum on: the lines of that
+// level whose conditions hold (a line may be a shared text of the tooltip file), each wrapped to the tooltip's width
+// and at its line breaks, the pieces in the line's color, a blank line or piece as the tooltip's own blank rows. At
+// most MaxItemDescriptionRows rows.
+void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, int level,
+                               const ItemTooltipValues& values, ItemTooltipTextMeasure measure);
 
 ///////////////////////////////////////////////////////////////////////////////
 // party
@@ -204,7 +225,6 @@ struct ItemTooltipLine
 // no tooltip or the pet manager draws its own (the Dark Lord's pets).
 // How the tooltip measures a description piece for wrapping: the game's font (g_pRenderText), unless a test sets
 // a measure of its own, which needs no font; nullptr puts the font back.
-using ItemTooltipTextMeasure = int (*)(const wchar_t* text, size_t length);
 void SetItemTooltipTextMeasure(ItemTooltipTextMeasure measure);
 std::vector<ItemTooltipLine> BuildItemTooltipLines(ITEM* ip, bool Sell, int Inventype = 0,
                                                    bool bItemTextListBoxUse = false);
