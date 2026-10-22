@@ -52,6 +52,7 @@ constexpr std::array<LookValueInfo, LookValueCount> Infos = {{
     {LookValue::SunShadowStrength, "sun.shadow", 0.0, 0.0, 1.0},
     {LookValue::SunShadowSoftness, "sun.softness", 1.0, 0.0, 2.0},
     {LookValue::SunShadowResolution, "sun.resolution", 2048.0, 1024.0, 4096.0},
+    {LookValue::FlatSunShadow, "dynamic.flatSunShadow", 1.0, 0.0, 1.0},
 }};
 
 constexpr bool InfosFollowLookValueOrder()

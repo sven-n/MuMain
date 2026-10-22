@@ -54,6 +54,7 @@ enum class LookValue : std::uint8_t
     SunShadowStrength,
     SunShadowSoftness,
     SunShadowResolution,
+    FlatSunShadow,
     Count,
 };
 

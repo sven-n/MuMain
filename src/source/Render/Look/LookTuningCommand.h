@@ -38,6 +38,7 @@
 //   $sun softness <f>              sun.softness
 //   $sun resolution <texels>       sun.resolution
 //   $sun <v>                       sun.shadow
+//   $dynlights flatsun <f>         dynamic.flatSunShadow
 namespace Render::Look
 {
 

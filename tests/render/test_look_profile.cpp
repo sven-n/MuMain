@@ -240,6 +240,7 @@ TEST_CASE("the developer tuning commands name their look values [render][look]")
     single(L"$sun softness 1.5", LookValue::SunShadowSoftness, 1.5);
     single(L"$sun resolution 4096", LookValue::SunShadowResolution, 4096.0);
     single(L"$sun 0.5", LookValue::SunShadowStrength, 0.5);
+    single(L"$dynlights flatsun 0.5", LookValue::FlatSunShadow, 0.5);
 
     const std::optional<Render::Look::LookTuningCommand> diffuse =
         ParseLookTuningCommand(L"$lighting diffuse 1.0 0.3 0.15");

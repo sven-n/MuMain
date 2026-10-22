@@ -286,4 +286,12 @@ TEST_CASE("the shipped look profile holds the tuned Enhanced values [data][look]
     // Icarus: less bloom, which widened its fog clouds.
     CHECK(loaded.data.ForWorld(Icarus)[LookValue::BloomStrength] == doctest::Approx(0.3));
     CHECK(loaded.data.ForWorld(Lorencia)[LookValue::BloomStrength] == doctest::Approx(1.0));
+    // Indoor and underground maps: no sun, and no flat sun shadow under characters.
+    for (const int world : {1, 4, 38, 39})
+    {
+        CAPTURE(world);
+        CHECK(loaded.data.ForWorld(world)[LookValue::SunShadowStrength] == 0.0);
+        CHECK(loaded.data.ForWorld(world)[LookValue::FlatSunShadow] == 0.0);
+    }
+    CHECK(loaded.data.ForWorld(Lorencia)[LookValue::FlatSunShadow] == 1.0);
 }
