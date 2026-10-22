@@ -11,6 +11,7 @@
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MuEditorLayout.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
+#include "../MuEditor/UI/Common/UndoTarget.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Core/Text/Utf8.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
@@ -45,7 +46,7 @@ void LogRefusal()
     }
 }
 
-void Undo()
+void UndoItemEdit()
 {
     if (g_ItemEdits.GetHistory().CanUndo() && !g_ItemEdits.Undo())
     {
@@ -53,13 +54,43 @@ void Undo()
     }
 }
 
-void Redo()
+void RedoItemEdit()
 {
     if (g_ItemEdits.GetHistory().CanRedo() && !g_ItemEdits.Redo())
     {
         LogRefusal();
     }
 }
+
+// The item edit history, for the editor bar's Undo and Redo.
+class ItemUndoTarget final : public UndoTarget
+{
+public:
+    bool CanUndo() const override
+    {
+        return g_ItemEdits.GetHistory().CanUndo();
+    }
+    bool CanRedo() const override
+    {
+        return g_ItemEdits.GetHistory().CanRedo();
+    }
+    std::string GetUndoLabel() const override
+    {
+        return g_ItemEdits.GetHistory().GetUndoLabel();
+    }
+    std::string GetRedoLabel() const override
+    {
+        return g_ItemEdits.GetHistory().GetRedoLabel();
+    }
+    void Undo() override
+    {
+        UndoItemEdit();
+    }
+    void Redo() override
+    {
+        RedoItemEdit();
+    }
+};
 
 // Only while the keyboard is the editor's and this window has the focus: ImGui
 // keeps the focus in the window when the game window takes the keyboard back
@@ -73,11 +104,11 @@ void HandleUndoKeys()
     }
     if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Z))
     {
-        Undo();
+        UndoItemEdit();
     }
     if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Y) || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiMod_Shift | ImGuiKey_Z))
     {
-        Redo();
+        RedoItemEdit();
     }
 }
 } // namespace
@@ -91,6 +122,11 @@ bool Begin(const char* title, const char* windowId, bool* open)
                       ImGuiWindowFlags_NoCollapse | MuEditor::Layout::ToolWindowBarFlags(windowId)))
     {
         return false;
+    }
+    // Before the bar: in this window's own bar it shows the item undo then.
+    if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
+    {
+        UndoTargets::Activate(GetUndoTarget());
     }
     MuEditor::Layout::RenderToolWindowBar();
     if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByPopup |
@@ -108,34 +144,10 @@ void End()
     ImGui::End();
 }
 
-void RenderUndoRedo()
+UndoTarget& GetUndoTarget()
 {
-    // In the editor's bar: a click leaves the focus in the item tool, where
-    // Ctrl+Z and Ctrl+Y undo and redo.
-    ImGui::PushItemFlag(ImGuiItemFlags_NoFocus, true);
-    const ItemEditHistory& history = g_ItemEdits.GetHistory();
-    ImGui::BeginDisabled(!history.CanUndo());
-    if (ImGui::Button(I18N::Editor::Undo))
-    {
-        Undo();
-    }
-    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled) && history.CanUndo())
-    {
-        ImGui::SetTooltip("%s (Ctrl+Z)", history.GetUndoLabel().c_str());
-    }
-    ImGui::EndDisabled();
-    ImGui::SameLine();
-    ImGui::BeginDisabled(!history.CanRedo());
-    if (ImGui::Button(I18N::Editor::Redo))
-    {
-        Redo();
-    }
-    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled) && history.CanRedo())
-    {
-        ImGui::SetTooltip("%s (Ctrl+Y)", history.GetRedoLabel().c_str());
-    }
-    ImGui::EndDisabled();
-    ImGui::PopItemFlag();
+    static ItemUndoTarget target;
+    return target;
 }
 
 bool RenderSelectedItem(int itemType)

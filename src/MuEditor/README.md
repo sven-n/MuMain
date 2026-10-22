@@ -22,6 +22,7 @@ The MU Editor is a C++ ImGui-based in-game editor that provides real-time game e
 - **MuEditor.h/cpp** - Main editor class, initialization, lifecycle management
 - **MuEditorUI.h/cpp** - The editor window and its menu bar, or the Open Editor button while closed
 - **MuEditorLayout.h/cpp** - Where the editor window first opens, and the first layout of its tool windows
+- **UndoTarget.h/cpp** - The editor bar's Undo and Redo, for the tool worked in last (the item tools or the Server List window)
 - **MuEditorWindowIds.h** - The names the tool windows are docked by
 - **MuEditorPlatformWindows.h/cpp** - The editor's own OS windows on Windows, Linux (X11) and macOS
 - **MuEditorCursor.h/cpp** - The OS cursor's shape over the editor off Windows
@@ -44,7 +45,7 @@ stores it when a field is left.
 - **MuItemGlowColorsUI** - The glow color list: new colors, changed values and unused colors removed (GlowColorDialog, which the model tool's color fields open too)
 - **MuItemFormulasUI** - The item stat file: drop level bonus, default, profiles, level bonus tables and profile rules, changed on a copy and applied after the list of the items it reaches (ItemStatTermFields, ItemStatFileChange)
 - **MuItemChecksUI** - The checks of a save, each leading to its item and field (ItemCheckTargets)
-- **ItemToolWindow** - What every item tool window shares: its title, the selected item, and Undo and Redo (shown in the editor's bar)
+- **ItemToolWindow** - What every item tool window shares: its title, the selected item, and the item edit history as the editor bar's undo target
 
 ### Item Actions (UI/ItemEditor)
 - **ItemEditorActions.h/cpp** - Save, import from bmd and the exports
@@ -55,7 +56,7 @@ stores it when a field is left.
 
 ### Server List (UI/ServerList)
 - **MuServerListUI.h/cpp** - The server groups of the login screen (Data/Local/ServerList.json): order, names, test server and channel types, shown on the login screen right away (docs/server-list.md)
-- **ServerListEdits.h/cpp** - The groups being changed, what the file has, and the window's undo
+- **ServerListEdits.h/cpp** - The groups being changed, what the file has, and their undo history (the editor bar's Undo and Redo while the window was used last)
 
 ### Input Management
 - **MuInputBlocker.h/cpp** - Blocks game input when hovering over ImGui UI

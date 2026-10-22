@@ -4,6 +4,7 @@
 
 #include "ServerListEdits.h"
 
+#include "../MuEditor/UI/Common/UndoTarget.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 
 #include <map>
@@ -12,8 +13,9 @@
 
 // The Server List window: the server groups of the login screen
 // (Data/Local/ServerList.json), their names, order and channel types. The login
-// screen shows each change right away; Save writes the file.
-class CMuServerListUI
+// screen shows each change right away; Save writes the file. The editor bar's
+// Undo and Redo act on its changes while it is the tool worked in last.
+class CMuServerListUI final : public MuEditor::UndoTarget
 {
 public:
     // The load of each server the connect server last sent, by group ID and
@@ -24,12 +26,25 @@ public:
 
     void Render(bool* open);
 
+    // MuEditor::UndoTarget
+    bool CanUndo() const override;
+    bool CanRedo() const override;
+    std::string GetUndoLabel() const override;
+    std::string GetRedoLabel() const override;
+    void Undo() override;
+    void Redo() override;
+
 private:
     void LoadFile();
     void Save();
-    // Each Render* that changes the groups returns true.
-    bool RenderToolbar();
+    // Ctrl+Z and Ctrl+Y (or Ctrl+Shift+Z) while this window has the focus.
+    void HandleUndoKeys();
+    // After an undo or redo: the selection stays in the list, and the login
+    // screen shows the groups.
+    void AfterHistoryStep();
+    void RenderToolbar();
     void RenderStatus();
+    // Each of these that changes the groups returns true.
     bool RenderGroupList();
     bool RenderListButtons();
     bool RenderGroupsNotInList();

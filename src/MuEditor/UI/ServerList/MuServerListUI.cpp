@@ -110,19 +110,26 @@ void CMuServerListUI::Render(bool* open)
         ImGui::End();
         return;
     }
+    // Before the bar: in this window's own bar it shows the Server List's undo then.
+    if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
+    {
+        MuEditor::UndoTargets::Activate(*this);
+    }
     MuEditor::Layout::RenderToolWindowBar();
     if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
     {
         g_MuEditorCore.SetHoveringUI(true);
     }
+    HandleUndoKeys();
 
     if (m_sentVersion != g_ServerListManager->GetReceivedServersVersion())
     {
         m_sent = FindSentChannels();
         m_sentVersion = g_ServerListManager->GetReceivedServersVersion();
     }
-    bool changed = RenderToolbar();
+    RenderToolbar();
     RenderStatus();
+    bool changed = false;
     ImGui::Separator();
 
     const ImVec2 listSize(GroupListWidth * g_MuEditorCore.GetUIScale(), 0.0f);
@@ -189,7 +196,7 @@ void CMuServerListUI::Save()
     m_statusIsError = false;
 }
 
-bool CMuServerListUI::RenderToolbar()
+void CMuServerListUI::RenderToolbar()
 {
     // A save after a read with errors would remove the groups the read left out.
     ImGui::BeginDisabled(!m_edits.IsComplete());
@@ -203,7 +210,6 @@ bool CMuServerListUI::RenderToolbar()
         ImGui::SetTooltip("%s", I18N::Editor::SaveOffAfterReadErrors);
     }
     ImGui::SameLine();
-    bool changed = false;
     if (ImGui::Button(I18N::Editor::Revert))
     {
         LoadFile();
@@ -214,44 +220,71 @@ bool CMuServerListUI::RenderToolbar()
             "%s",
             I18N::Format(I18N::Editor::Reads0AgainUnsavedChangesAreLost, {Data::ServerList::ServerListFile}).c_str());
     }
-    ImGui::SameLine();
-    // Ctrl+Z and Ctrl+Y (or Ctrl+Shift+Z) while this window has the focus and
-    // the keyboard is the editor's: ImGui keeps the focus here when the game
-    // takes the keyboard back, e.g. to type into the login screen. A text field
-    // being edited takes them first.
-    const bool editorKeys = g_MuEditorCore.IsKeyboardWithEditor();
-    const bool canUndo = m_edits.CanUndo() || m_uncommitted;
-    ImGui::BeginDisabled(!canUndo);
-    const bool undo = ImGui::Button(I18N::Editor::Undo);
-    ImGui::EndDisabled();
-    if (canUndo && (undo || (editorKeys && ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Z))))
-    {
-        m_edits.Undo();
-        changed = true;
-    }
-    ImGui::SameLine();
-    const bool canRedo = m_edits.CanRedo();
-    ImGui::BeginDisabled(!canRedo);
-    const bool redo = ImGui::Button(I18N::Editor::Redo);
-    ImGui::EndDisabled();
-    const bool redoKeys = editorKeys && (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Y) ||
-                                         ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiMod_Shift | ImGuiKey_Z));
-    if (canRedo && (redo || redoKeys))
-    {
-        m_edits.Redo();
-        changed = true;
-    }
     if (m_edits.HasUnsavedChanges())
     {
         ImGui::SameLine();
         ImGui::TextUnformatted(I18N::Editor::UnsavedChanges);
     }
-    if (changed)
+}
+
+bool CMuServerListUI::CanUndo() const
+{
+    return m_edits.CanUndo() || m_uncommitted;
+}
+
+bool CMuServerListUI::CanRedo() const
+{
+    return m_edits.CanRedo();
+}
+
+std::string CMuServerListUI::GetUndoLabel() const
+{
+    return I18N::Editor::ServerList;
+}
+
+std::string CMuServerListUI::GetRedoLabel() const
+{
+    return I18N::Editor::ServerList;
+}
+
+void CMuServerListUI::Undo()
+{
+    m_edits.Undo();
+    AfterHistoryStep();
+}
+
+void CMuServerListUI::Redo()
+{
+    m_edits.Redo();
+    AfterHistoryStep();
+}
+
+void CMuServerListUI::AfterHistoryStep()
+{
+    m_uncommitted = false;
+    m_takenId = -1;
+    Select(std::min(m_selected, static_cast<int>(m_edits.GetGroups().size()) - 1));
+    ShowInGame();
+}
+
+void CMuServerListUI::HandleUndoKeys()
+{
+    // Only while the keyboard is the editor's: ImGui keeps the focus here when
+    // the game takes the keyboard back, e.g. to type into the login screen. A
+    // text field being edited takes the keys first.
+    if (!g_MuEditorCore.IsKeyboardWithEditor())
     {
-        m_takenId = -1;
-        Select(std::min(m_selected, static_cast<int>(m_edits.GetGroups().size()) - 1));
+        return;
     }
-    return changed;
+    if (CanUndo() && ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Z))
+    {
+        Undo();
+    }
+    if (CanRedo() &&
+        (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Y) || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiMod_Shift | ImGuiKey_Z)))
+    {
+        Redo();
+    }
 }
 
 void CMuServerListUI::RenderStatus()
