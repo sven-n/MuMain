@@ -26,6 +26,9 @@ struct PreviewItemModels
 {
     int model = -1;
     int skeleton = -1;
+    // The level the model is drawn at: the archangel weapons the Weapon of
+    // Archangel shows are drawn at level 0.
+    int drawLevel = 0;
 
     // Whether both are loaded now: the model has meshes and the skeleton has
     // actions to place the bones. The character skeleton has no meshes.

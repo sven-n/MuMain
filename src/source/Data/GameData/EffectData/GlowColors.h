@@ -3,6 +3,7 @@
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 
 #include <array>
+#include <span>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -33,4 +34,8 @@ constexpr const char* GlowColorsFile = "Data/Effects/GlowColors.json";
 // Reads the colors of the file into `colors`.
 void ReadGlowColorsJson(std::string_view text, const std::string& source, std::vector<GlowColor>& colors,
                         std::vector<Items::ItemDataIssue>& issues);
+
+// The text of the file with these colors, in their order, one color a line,
+// as the file is written by hand.
+std::string WriteGlowColorsJson(std::span<const GlowColor> colors);
 } // namespace Data::Effects

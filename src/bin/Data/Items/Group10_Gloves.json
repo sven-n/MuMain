@@ -1257,10 +1257,10 @@
     {
       "number": 50,
       "name": {
-        "en": "Divine Gloves",
+        "en": "Faith Gloves",
         "de": "Glaubenshandschuhe",
-        "es": "Guantes Divinos",
-        "pt": "Luvas divinas"
+        "es": "Guantes de Fe",
+        "pt": "Luvas da fé"
       },
       "width": 2,
       "height": 2,
@@ -1461,8 +1461,8 @@
     {
       "number": 66,
       "name": {
-        "en": "Dark Soul Gloves",
-        "de": "Dunkelseelenhandschuhe",
+        "en": "Adamantine Gloves",
+        "de": "Adamanthandschuhe",
         "es": "Guantes Adamantinos",
         "pt": "Luvas de adamantina"
       },
@@ -1643,131 +1643,6 @@
       },
       "classRequirements": {
         "magicGladiator": 1
-      }
-    },
-    {
-      "number": 78,
-      "name": {
-        "en": "Dragon Gloves-J",
-        "de": "Drachenhandschuhe-J",
-        "es": "Guantes Dragón-J",
-        "pt": "Luvas do dragão-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "gloves",
-      "statProfile": "armor",
-      "level": 52,
-      "durability": 68,
-      "defense": 16,
-      "attackSpeed": 6,
-      "attackType": 4,
-      "requirements": {
-        "strength": 120,
-        "dexterity": 30
-      },
-      "classRequirements": {
-        "darkKnight": 1,
-        "magicGladiator": 1
-      }
-    },
-    {
-      "number": 79,
-      "name": {
-        "en": "Legendary Gloves-J",
-        "de": "Legendäre Handschuhe-J",
-        "es": "Guantes Legendario-J",
-        "pt": "Luvas lendário-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "gloves",
-      "statProfile": "armor",
-      "level": 44,
-      "durability": 42,
-      "defense": 13,
-      "attackType": 4,
-      "requirements": {
-        "strength": 20
-      },
-      "classRequirements": {
-        "darkWizard": 1,
-        "magicGladiator": 1
-      }
-    },
-    {
-      "number": 80,
-      "name": {
-        "en": "Guardian Gloves-J",
-        "de": "Wächterhandschuhe-J",
-        "es": "Guantes Guardián-J",
-        "pt": "Luvas do guardião-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "gloves",
-      "statProfile": "armor",
-      "level": 50,
-      "durability": 45,
-      "defense": 17,
-      "attackSpeed": 6,
-      "attackType": 4,
-      "requirements": {
-        "strength": 40,
-        "dexterity": 80
-      },
-      "classRequirements": {
-        "fairyElf": 1
-      }
-    },
-    {
-      "number": 81,
-      "name": {
-        "en": "Light Plate Gloves-J",
-        "de": "Leichtplattenhandschuhe-J",
-        "es": "Guantes Plata de Luz-J",
-        "pt": "Luvas de placa leve-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "gloves",
-      "statProfile": "armor",
-      "level": 42,
-      "durability": 42,
-      "defense": 14,
-      "attackSpeed": 7,
-      "attackType": 4,
-      "requirements": {
-        "strength": 70,
-        "dexterity": 20
-      },
-      "classRequirements": {
-        "darkLord": 1
-      }
-    },
-    {
-      "number": 82,
-      "name": {
-        "en": "Red Wing Gloves-J",
-        "de": "Rotschwingenhandschuhe-J",
-        "es": "Guantes Ala Roja-J",
-        "pt": "Luvas da asa vermelha-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "gloves",
-      "statProfile": "armor",
-      "level": 44,
-      "durability": 42,
-      "defense": 15,
-      "attackSpeed": 8,
-      "attackType": 4,
-      "requirements": {
-        "strength": 18,
-        "dexterity": 4
-      },
-      "classRequirements": {
-        "summoner": 1
       }
     }
   ]
