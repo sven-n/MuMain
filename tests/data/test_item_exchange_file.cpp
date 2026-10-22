@@ -149,6 +149,7 @@ TEST_CASE("The exchange file reader refuses what cannot be exchanged [data][item
         const ItemExchangeFile file = ReadExchange(FileWithItem(R"({"number": 0, "name": "Kris"})"), issues);
         CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Error, "group"));
         CHECK(file.items.empty());
+        CHECK_FALSE(CanImportItemExchange(file, issues));
     }
     SUBCASE("an item that is there twice")
     {
@@ -157,6 +158,9 @@ TEST_CASE("The exchange file reader refuses what cannot be exchanged [data][item
         CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Error, "2 times"));
         REQUIRE(file.items.size() == 1);
         CHECK(file.items[0].number == 1);
+        CHECK(file.repeatedItems == std::vector<std::pair<int, int>>{{0, 0}});
+        // The rest of the file can be imported.
+        CHECK(CanImportItemExchange(file, issues));
     }
 }
 

@@ -9,6 +9,7 @@
 #include "ItemSyncApply.h"
 #include "ItemTextInput.h"
 #include "ItemToolWindow.h"
+#include "ItemUsageView.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
@@ -234,6 +235,7 @@ void CMuItemSyncUI::Compare(SyncDirection direction, const std::filesystem::path
     m_messagesAreErrors = false;
     m_diff.reset();
     m_shownItem = -1;
+    m_shownUsage = {};
     m_file = {};
 
     std::vector<ItemDataIssue> issues;
@@ -250,7 +252,10 @@ void CMuItemSyncUI::Compare(SyncDirection direction, const std::filesystem::path
     {
         m_messages.push_back(issue.ToString());
     }
-    if (Data::Items::HasErrors(issues))
+    // An item an imported file has twice is a row the diff locks; an export would lose it.
+    const bool usable = direction == SyncDirection::Import ? Data::Items::CanImportItemExchange(m_file, issues)
+                                                           : !Data::Items::HasErrors(issues);
+    if (!usable)
     {
         m_messagesAreErrors = true;
         return;
@@ -465,6 +470,8 @@ void CMuItemSyncUI::RenderItems()
                     {
                         g_ItemSelection.Select(itemType);
                     }
+                    const bool removedHere = row.change == SyncChange::Removed && m_direction == SyncDirection::Import;
+                    m_shownUsage = removedHere ? FindItemUsage(itemType) : ItemUsage{};
                 }
                 if (row.known)
                 {
@@ -489,6 +496,18 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
     if (!row.locked.empty())
     {
         ImGui::TextColored(WarningColor, "%s", row.locked.c_str());
+    }
+    // What Remove item lists before it removes an item.
+    if (row.change == SyncChange::Removed && m_direction == SyncDirection::Import)
+    {
+        ImGui::TextUnformatted(I18N::Editor::TheItemAndItsModelEntryAreRemoved);
+        if (m_shownUsage.GoesWithItem())
+        {
+            ImGui::TextUnformatted(I18N::Editor::RemovedWithIt);
+            UsageView::RenderGoingWithItem(m_shownUsage);
+        }
+        ImGui::TextUnformatted(I18N::Editor::WhatUsesItStaysAtItsNumber);
+        UsageView::RenderUsesAtNumber(m_shownUsage);
     }
     if (row.change == SyncChange::New && m_direction == SyncDirection::Import)
     {

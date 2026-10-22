@@ -10,6 +10,7 @@
 #include <span>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 // The item exchange file with OpenMU (phase 7, the items design's section 6): the item data
@@ -46,6 +47,9 @@ struct ItemExchangeFile
     std::optional<ItemStatFile> formulas;
     // The shared fields only (ToExchangeItem).
     std::vector<ItemDefinition> items;
+    // Read from a file: the (group, number) pairs it has more than once (OpenMU does not keep
+    // them unique). None of those items is in `items`.
+    std::vector<std::pair<int, int>> repeatedItems;
 };
 
 // The item as the exchange file has it: the shared fields, the client-only ones at their
@@ -56,11 +60,16 @@ ItemDefinition ToExchangeItem(const ItemDefinition& item);
 ItemExchangeFile BuildItemExchange(std::span<const ItemDefinition> items, const ItemStatFile& formulas);
 
 // Reads the file into `file` and adds its problems to `issues`; with errors it must not be
-// used. A (group, number) that is there twice is an error, and neither item is read. Fields
+// used, except for an item that is there twice: an error of that item, which then is in
+// `repeatedItems` and not read, while the rest of the file can be used. Fields
 // the exchange file has not got are left out with a warning. `source` names the file in
 // messages.
 void ReadItemExchangeJson(std::string_view text, const std::string& source, ItemExchangeFile& file,
                           std::vector<ItemDataIssue>& issues);
+
+// Whether a file read with `issues` can be imported: its only errors are those of its repeated
+// items.
+bool CanImportItemExchange(const ItemExchangeFile& file, std::span<const ItemDataIssue> issues);
 
 std::string WriteItemExchangeJson(const ItemExchangeFile& file);
 } // namespace Data::Items

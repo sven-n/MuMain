@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "ItemSyncDiff.h"
+#include "ItemUsage.h"
 
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemExchangeFile.h"
@@ -68,8 +69,10 @@ private:
     bool m_knownLoaded = false;
     // ToolWindow::GetDataVersion() when the diff was made.
     long long m_diffVersion = 0;
-    // The row of m_diff->items whose fields are shown, or -1.
+    // The row of m_diff->items whose fields are shown, or -1, and what uses the item when the
+    // import removes it.
     int m_shownItem = -1;
+    MuEditor::Items::ItemUsage m_shownUsage;
     std::string m_toggleField;
     std::vector<std::string> m_messages;
     bool m_messagesAreErrors = false;

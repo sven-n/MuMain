@@ -2248,4 +2248,7 @@
   <data name="The client data changed since the comparison" xml:space="preserve">
     <value>The client's data changed since the comparison: compare again.</value>
   </data>
+  <data name="It is in the file more than once" xml:space="preserve">
+    <value>It is in the file more than once: it stays as it is in the client</value>
+  </data>
 </root>

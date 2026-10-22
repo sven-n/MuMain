@@ -127,7 +127,8 @@ struct SyncOptions
 
 // The differences between the client's data (`client`, BuildItemExchange) and `file`. Checked
 // by default: what the incoming side changes; unchecked: removals, known differences, inexact
-// and locked fields. A language one side lacks stays as it is on the other.
+// and locked fields. A language one side lacks stays as it is on the other. An item an imported
+// file has more than once (its repeatedItems) is a locked row without fields.
 ItemSyncDiff BuildItemSyncDiff(const Data::Items::ItemExchangeFile& client, const Data::Items::ItemExchangeFile& file,
                                const SyncOptions& options);
 

@@ -599,7 +599,13 @@ ItemSyncDiff BuildItemSyncDiff(const ItemExchangeFile& client, const ItemExchang
     const ItemExchangeFile& incoming = options.direction == SyncDirection::Import ? file : client;
     const std::map<ItemKey, const ItemDefinition*> currentItems = IndexItems(current);
     const std::map<ItemKey, const ItemDefinition*> incomingItems = IndexItems(incoming);
-    std::set<ItemKey> keys;
+    // An item an imported file has more than once: an error row that neither side applies.
+    std::set<ItemKey> repeated;
+    if (options.direction == SyncDirection::Import)
+    {
+        repeated.insert(file.repeatedItems.begin(), file.repeatedItems.end());
+    }
+    std::set<ItemKey> keys = repeated;
     for (const auto& [key, item] : currentItems)
     {
         keys.insert(key);
@@ -611,6 +617,17 @@ ItemSyncDiff BuildItemSyncDiff(const ItemExchangeFile& client, const ItemExchang
     for (const ItemKey& key : keys)
     {
         const auto was = currentItems.find(key);
+        if (repeated.contains(key))
+        {
+            SyncItem row;
+            row.group = key.first;
+            row.number = key.second;
+            row.change = was != currentItems.end() ? SyncChange::Changed : SyncChange::New;
+            row.name = was != currentItems.end() ? was->second->names.GetNeutral() : std::string();
+            row.locked = I18N::Editor::ItIsInTheFileMoreThanOnce;
+            diff.items.push_back(std::move(row));
+            continue;
+        }
         const auto becomes = incomingItems.find(key);
         SyncItem row = CompareItem(key, was != currentItems.end() ? was->second : nullptr,
                                    becomes != incomingItems.end() ? becomes->second : nullptr, incoming, options);

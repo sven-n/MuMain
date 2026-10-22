@@ -479,6 +479,41 @@ TEST_CASE("Item Sync exports the client's data into a new file [data][items][edi
     CHECK(g_MuItemSyncUI.GetDiff()->IsEmpty());
 }
 
+// OpenMU does not keep (group, number) unique: an item a file has twice is a locked row that
+// the import leaves as it is, while the rest of the file is imported. An export does not write
+// into such a file, as both copies would be lost.
+TEST_CASE("An item the file has twice is a locked row of the import [data][items][editor]")
+{
+    Sides sides;
+    g_ItemEdits.GetHistory().Clear();
+    const ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+    const BYTE shortSwordWidth = g_ItemDatabase.Find(ShortSwordType)->width;
+    ItemDefinition copy = sides.FileItem(KrisType);
+    ++copy.width;
+    sides.file.items.push_back(copy);
+    ++sides.FileItem(ShortSwordType).width;
+    TemporaryFolder folder;
+    const std::filesystem::path file = folder.Path() / "ItemExchange.json";
+    WriteFile(file, WriteItemExchangeJson(sides.file));
+
+    g_MuItemSyncUI.Compare(SyncDirection::Import, file);
+    REQUIRE(g_MuItemSyncUI.GetDiff());
+    const SyncItem* row = FindRow(*g_MuItemSyncUI.GetDiff(), KrisType);
+    REQUIRE(row != nullptr);
+    CHECK(row->change == SyncChange::Changed);
+    CHECK(row->fields.empty());
+    CHECK_FALSE(row->locked.empty());
+    CHECK(g_MuItemSyncUI.GetMessages().size() == 1);
+    REQUIRE(g_MuItemSyncUI.Apply());
+    CHECK(*g_ItemDatabase.Find(KrisType) == kris);
+    CHECK(g_ItemDatabase.Find(ShortSwordType)->width == shortSwordWidth + 1);
+
+    REQUIRE(g_ItemEdits.Undo());
+    g_ItemEdits.GetHistory().Clear();
+    g_MuItemSyncUI.Compare(SyncDirection::Export, file);
+    CHECK_FALSE(g_MuItemSyncUI.GetDiff());
+}
+
 TEST_CASE("The known differences are written and read back [data][items][editor]")
 {
     KnownDifferences known;

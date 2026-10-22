@@ -151,6 +151,7 @@ void ExchangeReader::ReadItems(const OrderedJson& root, ItemExchangeFile& file)
         {
             AddIssue(ItemDataIssueSeverity::Error, key.first, key.second, "",
                      "is in the file " + std::to_string(count) + " times; none of them is read");
+            file.repeatedItems.push_back(key);
         }
     }
     std::erase_if(items, [&](const ItemDefinition& item) { return counts[{item.group, item.number}] > 1; });
@@ -306,6 +307,17 @@ std::string WriteItemExchangeJson(const ItemExchangeFile& file)
     // Names are UTF-8 already; anything that is not is replaced, as in the item files.
     const std::string text = root.dump(Json::Indent, ' ', false, OrderedJson::error_handler_t::replace);
     return LayOutItemStatsText(LayOutItemJsonText(text)) + "\n";
+}
+
+bool CanImportItemExchange(const ItemExchangeFile& file, std::span<const ItemDataIssue> issues)
+{
+    return std::ranges::none_of(issues,
+                                [&](const ItemDataIssue& issue)
+                                {
+                                    const std::pair<int, int> key{issue.group, issue.number};
+                                    return issue.severity == ItemDataIssueSeverity::Error &&
+                                           std::ranges::find(file.repeatedItems, key) == file.repeatedItems.end();
+                                });
 }
 } // namespace Data::Items
 
