@@ -44,13 +44,25 @@ anywhere, over the game window too, or onto another window to dock it there;
 **Windows > Reset Layout** docks them all back. The layout and the windows'
 places are kept between sessions (`imgui.ini` in the game folder).
 
+The editor window's bar has the **Windows** menu, **Undo** and **Redo** of the
+item tools, the UI scale and the language. A window of tool windows floating
+outside the editor window has the same bar once, on the tab shown at its top
+left when several are docked in it, so it can be worked with from another
+monitor; its **Windows > Fullscreen** switches that window to full screen.
+
 The editor window, and a tool window floating outside the game window, are
 ordinary windows of the system, with its title bar, buttons and window
 snapping. Closing the editor window closes the editor. A floating tool window
 keeps its tab under the title bar: drag the tab, not the title bar, to dock it
 again. **Windows > Fullscreen** switches the editor window to full screen and
 back; **F11** does the same for whichever of the editor's windows has the
-keyboard (in the game window F11 stays the game's camera reset).
+keyboard (in the game window F11 stays the game's camera reset). Back from
+full screen, a window returns to the place it had before. While a window is
+full screen its places are not saved, so a session that ends then (killed, a
+crash) keeps the window's place from before. On Windows a window whose saved
+place covers its whole monitor (the title bar above the screen, from a
+session before this was so) opens and returns in the monitor's usable area
+instead; elsewhere the window manager keeps the title bar on the screen.
 
 - **Windows:** minimize, maximize and close, and a taskbar button for each
   editor window. Dragging or resizing an editor window by its title bar or
@@ -73,7 +85,14 @@ window instead.
 The editor is rendered with ImGui and consumes input over the game
 (see `MuInputBlockerCore.cpp` for the input-routing logic). Keys go to the
 window that has the keyboard: while one of the editor's own windows has it,
-the game gets none of them (F12 still closes the editor from there).
+the game gets none of them (F12 still closes the editor from there). An
+editor window inside the game window (full screen) takes the keyboard with a
+click and gives it back with a click into the game.
+
+While the editor has the keyboard, the arrow keys (and PageUp, PageDown,
+Home and End) move through its lists and tables, and the row they move onto
+is selected as a click would select it; Ctrl with an arrow only moves the
+cursor. In the Map Editor's thumbnail grids they move in both directions.
 
 ---
 

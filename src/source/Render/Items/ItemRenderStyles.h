@@ -2,6 +2,7 @@
 
 #include <array>
 #include <optional>
+#include <span>
 #include <string_view>
 
 class BMD;
@@ -16,6 +17,9 @@ namespace Render::Items::Styles
 // Whether there is a render style of this name. The model loader checks the
 // names of the model entries with it.
 bool Exists(std::string_view name);
+
+// The names of all render styles, sorted, for the item editor's lists.
+std::span<const std::string_view> GetNames();
 
 // Draws the model with the render style of its item (the styles are taken
 // from the item model database after each build of it). False when the item
