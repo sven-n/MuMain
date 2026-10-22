@@ -86,8 +86,3 @@
     BYTE RequireClass[MAX_CLASS];                                                                                      \
     BYTE Resistance[MAX_RESISTANCE + 1];
 
-// ============================================================================
-// EDITOR METADATA - Defined in ItemFieldMetadata.h (after ITEM_ATTRIBUTE is defined)
-// ============================================================================
-// Note: Editor-specific types (EItemFieldType, FieldDescriptor, etc.) are defined
-// in ItemFieldMetadata.h to avoid circular dependencies
