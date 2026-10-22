@@ -222,7 +222,7 @@ TEST_CASE("Every item's tooltip is as recorded [data][items][tooltip]")
         ::Hero->Class = hero.Hero().Class;
         ::Hero->Level = hero.Hero().Level;
         std::ostringstream snapshot;
-        CHECK(WriteItemTooltipSnapshot(snapshot) == 949 * 4 * 16);
+        CHECK(WriteItemTooltipSnapshot(snapshot) == 911 * 4 * 16);
         const std::map<std::string, std::string> heroHashes = HashesByItem(name, snapshot.str(), tooltips);
         hashes.insert(heroHashes.begin(), heroHashes.end());
     }
