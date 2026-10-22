@@ -987,7 +987,7 @@ void mu::ui::window::COptionWindow::RmlToggleTranslateItemNames()
     m_bTranslateItemNames = !m_bTranslateItemNames;
     GameConfig::GetInstance().SetTranslateItemNames(m_bTranslateItemNames);
     GameConfig::GetInstance().Save();
-    CItemDataHandler::GetInstance().RefreshItemNames();
+    g_ItemDataHandler.SetTranslateItemNames(m_bTranslateItemNames);
 }
 
 void mu::ui::window::COptionWindow::SyncTranslateItemNamesRow(OptionRmlModel& model)

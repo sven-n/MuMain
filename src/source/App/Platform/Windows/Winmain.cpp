@@ -26,6 +26,7 @@
 #include <utility>
 #include <vector>
 #include "Core/Platform/WinIni.h" // private-profile (.ini) API
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -2300,6 +2301,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         std::string uiLocale(uiLocaleW.begin(), uiLocaleW.end());
         I18N::SetLocale(uiLocale.c_str());
     }
+    g_ItemDataHandler.SetTranslateItemNames(GameConfig::GetInstance().GetTranslateItemNames());
 
 #ifdef _EDITOR
     // Initialize MU Editor with the live SDL GPU window.

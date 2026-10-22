@@ -7,7 +7,6 @@
 #include "Core/Text/Utf8.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Data/DataHandler/DataIssueReport.h"
-#include "Data/GameConfig/GameConfig.h"
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
@@ -62,11 +61,6 @@ std::unique_ptr<ITEM_ATTRIBUTE[]> BuildItemAttributes(std::string_view locale)
         ToItemAttribute(definition, attributes[MakeItemType(slot.group, slot.number)]);
     }
     return attributes;
-}
-
-std::string_view ItemNameLocale()
-{
-    return GetItemNameLocale(I18N::GetCurrentLocale(), GameConfig::GetInstance().GetTranslateItemNames());
 }
 
 #ifdef _EDITOR
@@ -144,6 +138,7 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     g_ItemDatabase.SetStatProfiles(std::move(statProfiles));
     g_ItemDatabase.Build(result.items);
     FillItemAttributes();
+    m_loaded = true;
     RegisterLocaleObserver();
 
     MU_LOG_INFO(mu::log::Get("data"), "Loaded {} items from {} in {:.1f} ms (item database build {:.2f} ms)",
@@ -215,6 +210,20 @@ void CItemDataHandler::RegisterLocaleObserver()
 void CItemDataHandler::OnLocaleChanged(void* context) noexcept
 {
     static_cast<CItemDataHandler*>(context)->RefreshItemNames();
+}
+
+void CItemDataHandler::SetTranslateItemNames(bool translate)
+{
+    m_translateItemNames = translate;
+    if (m_loaded)
+    {
+        RefreshItemNames();
+    }
+}
+
+std::string_view CItemDataHandler::ItemNameLocale() const
+{
+    return Data::Items::GetItemNameLocale(I18N::GetCurrentLocale(), m_translateItemNames);
 }
 
 void CItemDataHandler::RefreshItemNames()
