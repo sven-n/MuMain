@@ -1,5 +1,6 @@
 ﻿
 #include "stdafx.h"
+#include "Engine/Object/ZzzInventory.h"
 #include "w_CursedTemple.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -21,8 +22,6 @@
 
 
 extern int TextNum;
-extern wchar_t TextList[50][100];
-extern int  TextListColor[50];
 
 
 using namespace SEASON3A;

@@ -2,6 +2,7 @@
 //  GMHellas.cpp
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "Engine/Object/ZzzInventory.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -24,9 +25,6 @@
 #include "Render/Text/CUIRenderText.h"
 
 extern  int  WaterTextureNumber;
-extern	wchar_t TextList[50][100];
-extern  int  TextListColor[50];
-extern	int  TextBold[50];
 
 static  CSWaterTerrain* g_pCSWaterTerrain = NULL;
 static  std::queue<ObjectDescript> g_qObjDes;

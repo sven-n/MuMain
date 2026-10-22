@@ -30,15 +30,6 @@ bool ContainsSeparator(const std::string& text)
     return text.find(LocalizedString::Separator) != std::string::npos;
 }
 
-// Locale codes like "pt" or "zh-TW". Anything else (empty, "=", "||") would
-// break the LocalizedString format used for the OpenMU exchange.
-bool IsValidLocaleCode(const std::string& locale)
-{
-    return !locale.empty() &&
-           std::all_of(locale.begin(), locale.end(), [](char character)
-                       { return std::isalnum(static_cast<unsigned char>(character)) || character == '-'; });
-}
-
 // The game shows names through the MAX_ITEM_NAME-sized ITEM_ATTRIBUTE name.
 bool IsTooLongForGame(const std::string& text)
 {
@@ -80,6 +71,51 @@ void ValidateName(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
         check(locale, text);
     }
 }
+// An item's own text (a description line's, a name line's, a level value's) is written like a name: an English text,
+// and translations under language codes. A blank one has no text in any language.
+void ValidateItemText(const ItemDefinition& definition, const LocalizedString& text, const std::string& field,
+                      std::vector<ItemDataIssue>& issues)
+{
+    if (text.IsEmpty())
+    {
+        return;
+    }
+    if (text.GetNeutral().empty())
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Error, definition, "the English text is missing", field.c_str());
+    }
+    for (const auto& [locale, translation] : text.GetTranslations())
+    {
+        if (!IsValidLocaleCode(locale))
+        {
+            AddIssue(issues, ItemDataIssueSeverity::Error, definition,
+                     "\"" + locale + "\" is not a language code (letters, digits and \"-\" only)", field.c_str());
+        }
+    }
+}
+
+void ValidateDescription(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
+{
+    for (size_t index = 0; index < definition.description.size(); ++index)
+    {
+        ValidateItemText(definition, definition.description[index].text,
+                         "description[" + std::to_string(index) + "].text", issues);
+    }
+    for (size_t index = 0; index < definition.nameLines.size(); ++index)
+    {
+        ValidateItemText(definition, definition.nameLines[index].text, "nameLines[" + std::to_string(index) + "].text",
+                         issues);
+    }
+    for (const ItemLevelValues& levelValues : definition.levelValues)
+    {
+        for (size_t level = 0; level < levelValues.values.size(); ++level)
+        {
+            ValidateItemText(definition, levelValues.values[level].text,
+                             "levelValues." + levelValues.name + "[" + std::to_string(level) + "]", issues);
+        }
+    }
+}
+
 // The slot of each weapon kind: the left hand (offHand) for bows, shields and
 // books, the right hand (mainHand) for the others. The code looks for a bow or
 // a shield only in the left hand and for a crossbow or a spear only in the
@@ -287,6 +323,15 @@ void ValidateDescriptionPlaceholderSyntax(const ItemDefinition& definition, std:
     }
 }
 
+// Locale codes like "pt" or "zh-TW". Anything else (empty, "=", "||") would
+// break the LocalizedString format used for the OpenMU exchange.
+bool IsValidLocaleCode(const std::string& locale)
+{
+    return !locale.empty() &&
+           std::all_of(locale.begin(), locale.end(), [](char character)
+                       { return std::isalnum(static_cast<unsigned char>(character)) || character == '-'; });
+}
+
 void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIssue>& issues)
 {
     std::set<int> seenItemTypes;
@@ -306,6 +351,7 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
         }
 
         ValidateName(definition, issues);
+        ValidateDescription(definition, issues);
         ValidateSlot(definition, issues);
         ValidatePotionPriority(definition, issues);
         ValidateExcellentBonus(definition, issues);
@@ -583,14 +629,45 @@ void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const 
         {
             continue;
         }
+        const auto isShown = [&](const std::string& locale)
+        {
+            return std::any_of(uiLocales.begin(), uiLocales.end(),
+                               [&](const char* uiLocale) { return locale == uiLocale; });
+        };
         for (const auto& [locale, text] : definition.names.GetTranslations())
         {
-            const bool shown = std::any_of(uiLocales.begin(), uiLocales.end(),
-                                           [&](const char* uiLocale) { return locale == uiLocale; });
-            if (!shown)
+            if (!isShown(locale))
             {
                 AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
                          "the " + locale + " name is never shown: the game has no texts in that language");
+            }
+        }
+        const auto warnAbout = [&](const LocalizedString& text, const std::string& field)
+        {
+            for (const auto& [locale, translation] : text.GetTranslations())
+            {
+                if (!isShown(locale))
+                {
+                    AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
+                             "the " + locale + " text is never shown: the game has no texts in that language",
+                             field.c_str());
+                }
+            }
+        };
+        for (size_t index = 0; index < definition.description.size(); ++index)
+        {
+            warnAbout(definition.description[index].text, "description[" + std::to_string(index) + "].text");
+        }
+        for (size_t index = 0; index < definition.nameLines.size(); ++index)
+        {
+            warnAbout(definition.nameLines[index].text, "nameLines[" + std::to_string(index) + "].text");
+        }
+        for (const ItemLevelValues& levelValues : definition.levelValues)
+        {
+            for (size_t level = 0; level < levelValues.values.size(); ++level)
+            {
+                warnAbout(levelValues.values[level].text,
+                          "levelValues." + levelValues.name + "[" + std::to_string(level) + "]");
             }
         }
     }
