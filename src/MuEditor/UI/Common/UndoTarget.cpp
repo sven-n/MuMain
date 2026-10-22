@@ -37,7 +37,8 @@ void Activate(UndoTarget& target)
 
 void RenderBarButtons(UndoTarget& fallback)
 {
-    UndoTarget& target = g_activeTarget != nullptr ? *g_activeTarget : fallback;
+    const bool activeIsOpen = g_activeTarget != nullptr && g_activeTarget->IsOpen();
+    UndoTarget& target = activeIsOpen ? *g_activeTarget : fallback;
     // A click leaves the focus in the tool, where Ctrl+Z and Ctrl+Y work.
     ImGui::PushItemFlag(ImGuiItemFlags_NoFocus, true);
     const bool canUndo = target.CanUndo();

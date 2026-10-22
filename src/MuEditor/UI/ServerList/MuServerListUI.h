@@ -27,6 +27,7 @@ public:
     void Render(bool* open);
 
     // MuEditor::UndoTarget
+    bool IsOpen() const override;
     bool CanUndo() const override;
     bool CanRedo() const override;
     std::string GetUndoLabel() const override;

@@ -310,6 +310,11 @@ void CMuServerListUI::RenderToolbar()
     }
 }
 
+bool CMuServerListUI::IsOpen() const
+{
+    return g_MuEditorCore.GetToolWindows().serverList;
+}
+
 bool CMuServerListUI::CanUndo() const
 {
     return m_edits.CanUndo() || m_uncommitted;

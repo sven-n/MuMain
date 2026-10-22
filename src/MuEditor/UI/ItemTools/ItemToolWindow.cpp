@@ -66,6 +66,12 @@ void RedoItemEdit()
 class ItemUndoTarget final : public UndoTarget
 {
 public:
+    // The fallback of the bar: item edits stay undoable with the item tools
+    // closed, as they always were.
+    bool IsOpen() const override
+    {
+        return true;
+    }
     bool CanUndo() const override
     {
         return g_ItemEdits.GetHistory().CanUndo();
