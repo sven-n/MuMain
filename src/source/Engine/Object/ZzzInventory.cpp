@@ -1635,7 +1635,8 @@ void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, It
     const int lastRow = std::min(TextNum + MaxItemDescriptionRows, static_cast<int>(std::size(TextList)));
     for (const Data::Items::ItemDescriptionLine& line : definition.description)
     {
-        const std::wstring text = Core::Text::FromUtf8(line.text.Get(g_ItemDatabase.GetDisplayLocale()));
+        // In the UI's language, also when the item names stay English ("Translate item names" off).
+        const std::wstring text = Core::Text::FromUtf8(line.text.Get(I18N::GetCurrentLocale()));
         // A blank line is one blank piece. So is a blank line inside a text (`\n\n`, or a text that starts with
         // `\n`): a row left empty would end the tooltip there.
         const std::vector<std::wstring> pieces =
