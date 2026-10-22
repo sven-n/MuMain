@@ -5,6 +5,7 @@
 #include "ClientDataScope.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "I18N/All.h"
 #include "Data/DataHandler/SkillData/SkillDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
@@ -416,4 +417,41 @@ TEST_CASE("A class condition holds for a hero of that class [data][items][toolti
     // A Lord Emperor is a Dark Lord too.
     ::Hero->Class = CLASS_LORDEMPEROR;
     CHECK(AreTooltipConditionsMet(conditions, 0, 0, values));
+}
+
+TEST_CASE("With translated item names off, the names are English and the rest of the tooltip is translated "
+          "[data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+    const std::string uiLocale = I18N::GetCurrentLocale();
+    const bool translateItemNames = g_ItemDataHandler.GetTranslateItemNames();
+    g_ItemDataHandler.SetTranslateItemNames(false);
+    I18N::SetLocale("de");
+    const auto has = [](const std::vector<ItemTooltipLine>& lines, std::wstring_view start)
+    {
+        return std::any_of(lines.begin(), lines.end(),
+                           [&](const ItemTooltipLine& line) { return line.text.starts_with(start); });
+    };
+
+    // The Wings of Elf: the standard name, the stat lines of the tooltip file.
+    const std::vector<ItemTooltipLine> wings = TooltipOfParameters(FullItemParameters(12, 0));
+    // A name line's text, here the +0 Transformation Ring's.
+    const std::vector<ItemTooltipLine> ring = TooltipOfParameters(FullItemParameters(13, 10));
+
+    I18N::SetLocale(uiLocale.c_str());
+    g_ItemDataHandler.SetTranslateItemNames(translateItemNames);
+    SetItemTooltipTextMeasure(nullptr);
+
+    CHECK(has(wings, L"Wings of Elf"));
+    CHECK(has(wings, L"Verteidigung:"));
+    CHECK(has(wings, L"Haltbarkeit:"));
+    CHECK_FALSE(has(wings, L"Defense:"));
+    CHECK(std::any_of(ring.begin(), ring.end(),
+                      [](const ItemTooltipLine& line) { return line.text.ends_with(L"Transformation Ring"); }));
 }
