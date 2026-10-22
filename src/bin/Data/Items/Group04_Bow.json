@@ -729,35 +729,6 @@
       "classRequirements": {
         "fairyElf": 2
       }
-    },
-    {
-      "number": 27,
-      "name": {
-        "en": "Silver Bow-J",
-        "de": "Silberbogen-J",
-        "es": "Arco Plateado-J",
-        "pt": "Arco de prata-J"
-      },
-      "width": 2,
-      "height": 4,
-      "slot": "offHand",
-      "weaponKind": "bow",
-      "statProfile": "weapon",
-      "twoHanded": true,
-      "skill": 24,
-      "level": 56,
-      "durability": 48,
-      "damageMin": 59,
-      "damageMax": 71,
-      "attackSpeed": 45,
-      "attackType": 2,
-      "requirements": {
-        "strength": 30,
-        "dexterity": 100
-      },
-      "classRequirements": {
-        "fairyElf": 1
-      }
     }
   ]
 }
