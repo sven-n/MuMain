@@ -9,7 +9,7 @@
 
 body { pointer-events: none; }
 #banner { top: 45.8333%; width: 163.75dp; max-width: 90%; pointer-events: none; }
-#ornament_bottom { display: block; width: 100dp; max-width: 100%; margin: 0 auto; height: 25.3012dp; decorator: image(map-name-rule contain); }
+#ornament_bottom { display: block; width: 100dp; max-width: 100%; margin: -4dp auto 0; height: 25.3012dp; decorator: image(map-name-rule contain); }
 #name {
     min-height: 24dp;
     display: flex; align-items: center; justify-content: center;
