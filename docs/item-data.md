@@ -142,7 +142,8 @@ variants or option words. An online keyword need not select the same items offli
 ### Name lines
 
 The tooltip's first line is the item's name. Its **standard name** is the
-item's `name` in the UI's language, after its set's name for an ancient item
+item's `name` in the item names' language (the UI's, or English with the
+options' "Translate item names" off), after its set's name for an ancient item
 and "Excellent" for an excellent one, with " +level" above +0; its
 **standard color** is green-blue for an ancient item, violet for a socket
 item, green for an excellent item with options, yellow from +7, blue for an
@@ -200,7 +201,7 @@ is one of:
   charms' effect in the game's ItemAddOption data): `addOptionValue1`,
   `addOptionValue2` and `addOptionDuration`, a text such as "1 Hour"; the
   hero's `heroLevel`; and for the [name lines](#name-lines) the item's `name`
-  (its `name` in the UI's language), `levelPlusOne` (a packed jewel's count)
+  (its `name` in the item names' language), `levelPlusOne` (a packed jewel's count)
   and `excellentFlags` (its excellent options, 0 to 63; the Horn of Fenrir's
   1, 2 and 4 are its Destroy, Protect and Illusion kinds);
 - a **level bonus table** of [`Stats/ItemStats.json`](#item-stats-by-level),
