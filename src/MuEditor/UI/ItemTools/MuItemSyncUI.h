@@ -29,7 +29,20 @@ public:
     // Compares the client's data with the file at `path` for `direction`, as the buttons do
     // after their file dialog. An export into a file that is not there yet compares with nothing.
     void Compare(MuEditor::Items::SyncDirection direction, const std::filesystem::path& path);
-    // Applies the checked rows (the Apply button); false when nothing changed.
+    // Why the checked rows cannot be applied now.
+    enum class ApplyBlocker
+    {
+        None,
+        // The path field holds another file than the one compared.
+        OtherPath,
+        // The client's items or formulas changed since the comparison.
+        DataChanged,
+        NothingChecked,
+    };
+    ApplyBlocker GetApplyBlocker() const;
+
+    // Applies the checked rows (the Apply button); false when nothing changed, also while a
+    // blocker holds.
     bool Apply();
     // Takes the path a file dialog chose, on the dialog's thread; the window compares it in
     // its next frame.
@@ -42,6 +55,11 @@ public:
     const std::vector<std::string>& GetMessages() const
     {
         return m_messages;
+    }
+    // What the last Apply did, shown above the diff it left; empty after any other comparison.
+    const std::string& GetResult() const
+    {
+        return m_result;
     }
 
 private:
@@ -56,19 +74,24 @@ private:
     void RenderItems();
     void RenderItemFields(MuEditor::Items::SyncItem& row);
     void RenderFormulas();
+    void RenderApply();
     void RenderMessages();
     void SetKnown(int group, int number, const std::string& field, bool known);
     void SetKnownFormula(const std::string& entry, bool known);
     void SaveKnownDifferences();
 
     MuEditor::Items::SyncDirection m_direction = MuEditor::Items::SyncDirection::Import;
+    // The path field, and the file the diff is of: Apply uses that one.
     std::string m_path;
+    std::string m_comparedPath;
+    // Export: the file is not there yet, so every item is new.
+    bool m_fileIsNew = false;
     Data::Items::ItemExchangeFile m_file;
     std::optional<MuEditor::Items::ItemSyncDiff> m_diff;
     MuEditor::Items::KnownDifferences m_known;
     bool m_knownLoaded = false;
-    // ToolWindow::GetDataVersion() when the diff was made.
-    long long m_diffVersion = 0;
+    // g_ItemDatabase.GetVersion() when the diff was made (a formula change counts there too).
+    int m_diffVersion = 0;
     // The row of m_diff->items whose fields are shown, or -1, and what uses the item when the
     // import removes it.
     int m_shownItem = -1;
@@ -76,6 +99,7 @@ private:
     std::string m_toggleField;
     std::vector<std::string> m_messages;
     bool m_messagesAreErrors = false;
+    std::string m_result;
 
     // The file dialogs answer on their own thread: the path waits here for the next frame.
     std::mutex m_chosenMutex;

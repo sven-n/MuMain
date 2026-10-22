@@ -4,7 +4,9 @@
 
 #include "ItemSyncApply.h"
 
+#include "ItemEditHistory.h"
 #include "ItemEdits.h"
+#include "ItemHeldByCharacter.h"
 #include "ItemStatFileChange.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
@@ -170,6 +172,37 @@ bool ApplyItemSyncImport(const ItemSyncDiff& diff, const ItemExchangeFile& file,
             continue;
         }
         items.push_back(ToClientItem(current, *exchange, profiles));
+    }
+
+    // What the game holds keeps its size and slot and stays (ItemEdits refuses the whole change
+    // otherwise); the character may have taken the item since the comparison.
+    std::vector<ItemDataIssue> heldIssues;
+    for (const ItemDefinition& item : items)
+    {
+        // The slot, also an empty one: an item the client has no data for can be held too.
+        const int itemType = Data::Items::MakeItemType(item.group, item.number);
+        const ItemDefinition& slot = g_ItemDatabase.GetAllSlots()[static_cast<size_t>(itemType)];
+        if (!KeepsShape(slot, item) && IsHeldByCharacter(itemType))
+        {
+            heldIssues.push_back({Data::Items::ItemDataIssueSeverity::Error, "", item.group, item.number, "",
+                                  slot.Exists()
+                                      ? "is worn or in an item window now, so its size and slot stay: compare again"
+                                      : "is worn or in an item window now, so it is not added: compare again"});
+        }
+    }
+    for (const int itemType : removed)
+    {
+        if (IsHeldByCharacter(itemType))
+        {
+            heldIssues.push_back({Data::Items::ItemDataIssueSeverity::Error, "", Data::Items::GetItemGroup(itemType),
+                                  Data::Items::GetItemNumber(itemType), "",
+                                  "is worn or in an item window now, so it is not removed: compare again"});
+        }
+    }
+    if (!heldIssues.empty())
+    {
+        issues.insert(issues.end(), heldIssues.begin(), heldIssues.end());
+        return false;
     }
 
     // The checks of a save, on the data as it would be.

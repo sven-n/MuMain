@@ -2135,7 +2135,7 @@
     <value>Compare again</value>
   </data>
   <data name="What Import and Export do" xml:space="preserve">
-    <value>Import takes the checked values of the file into the client's data; Export writes the checked values of the client into the file. Both show the differences first.</value>
+    <value>Import takes the checked values of the file into the client's data; Export writes the checked values of the client into the file. Both list only what differs: what is the same on both sides is left out.</value>
   </data>
   <data name="Import from {0}" xml:space="preserve">
     <value>Import from {0}</value>
@@ -2148,9 +2148,6 @@
   </data>
   <data name="The diff counts" xml:space="preserve">
     <value>{0} new, {1} changed, {2} removed items; {3} formula entries</value>
-  </data>
-  <data name="No differences" xml:space="preserve">
-    <value>No differences: the file has the same items and formulas as the client.</value>
   </data>
   <data name="Check all" xml:space="preserve">
     <value>Check all</value>
@@ -2166,12 +2163,6 @@
   </data>
   <data name="Uncheck them" xml:space="preserve">
     <value>Uncheck them</value>
-  </data>
-  <data name="Items ({0})" xml:space="preserve">
-    <value>Items ({0})</value>
-  </data>
-  <data name="Formulas ({0})" xml:space="preserve">
-    <value>Formulas ({0})</value>
   </data>
   <data name="New" xml:space="preserve">
     <value>New</value>
@@ -2227,12 +2218,6 @@
   <data name="Import items" xml:space="preserve">
     <value>Import items</value>
   </data>
-  <data name="Applied as one step of the undo history" xml:space="preserve">
-    <value>Applied as one step of the undo history</value>
-  </data>
-  <data name="Written to {0}" xml:space="preserve">
-    <value>Written to {0}</value>
-  </data>
   <data name="The checks refuse the change" xml:space="preserve">
     <value>The checks refuse the change; the rows of the items with errors are unchecked:</value>
   </data>
@@ -2253,5 +2238,59 @@
   </data>
   <data name="How to see differences" xml:space="preserve">
     <value>To see differences, change an item in the editor or in the file, or pick another file, then compare again.</value>
+  </data>
+  <data name="The file matches the client" xml:space="preserve">
+    <value>The file matches the client: nothing differs.</value>
+  </data>
+  <data name="The file matches the client in all items" xml:space="preserve">
+    <value>The file matches the client in all items; it has no formulas to compare.</value>
+  </data>
+  <data name="Items that differ ({0} of {1})" xml:space="preserve">
+    <value>Items that differ ({0} of {1})</value>
+  </data>
+  <data name="Formula entries that differ ({0} of {1})" xml:space="preserve">
+    <value>Formula entries that differ ({0} of {1})</value>
+  </data>
+  <data name="Formulas that differ (all: the file has none)" xml:space="preserve">
+    <value>Formulas that differ (all: the file has none)</value>
+  </data>
+  <data name="Items: all {0} are the same" xml:space="preserve">
+    <value>Items: all {0} are the same in the client and the file.</value>
+  </data>
+  <data name="Formula entries: all {0} are the same" xml:space="preserve">
+    <value>Formula entries: all {0} are the same in the client and the file.</value>
+  </data>
+  <data name="Formulas: not compared, the file has none" xml:space="preserve">
+    <value>Formulas: not compared, the file has none. The client's formulas stay as they are.</value>
+  </data>
+  <data name="Written: {0} items and all formulas" xml:space="preserve">
+    <value>Written: {0} items and all formulas. What was written no longer differs.</value>
+  </data>
+  <data name="Written: {0} items and {1} formula entries" xml:space="preserve">
+    <value>Written: {0} items and {1} formula entries. What was written no longer differs.</value>
+  </data>
+  <data name="Applied: {0} items and {1} formula entries" xml:space="preserve">
+    <value>Applied as one step of the undo history: {0} items and {1} formula entries. What was applied no longer differs.</value>
+  </data>
+  <data name="Still listed below: the rows that were not checked" xml:space="preserve">
+    <value>Still listed below, unchecked: what was not checked or cannot be applied.</value>
+  </data>
+  <data name="After writing, the window compares again" xml:space="preserve">
+    <value>After writing, the window compares again: what was written no longer differs and leaves the list.</value>
+  </data>
+  <data name="After applying, the window compares again" xml:space="preserve">
+    <value>After applying, the window compares again: what was applied no longer differs and leaves the list.</value>
+  </data>
+  <data name="Nothing is checked" xml:space="preserve">
+    <value>Nothing is checked.</value>
+  </data>
+  <data name="The path is not the compared file" xml:space="preserve">
+    <value>The path in the field is not the compared file: compare again.</value>
+  </data>
+  <data name="The file is not there yet" xml:space="preserve">
+    <value>The file is not there yet: writing creates it.</value>
+  </data>
+  <data name="The item is worn or in an item window, it is not added" xml:space="preserve">
+    <value>The item is worn or in an item window: it is not added while it is.</value>
   </data>
 </root>

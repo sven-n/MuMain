@@ -460,7 +460,9 @@ tool of section 9):
   code).
 - **Removed items** remove the item and its model entry, as Remove item
   does, with its "used by" list. An item the game holds (worn or in an
-  item window) is not removed, and its size and slot stay.
+  item window) is not removed, and its size and slot stay; a new item of a
+  type the game holds (the client had no data for it) is not added. The
+  import checks this again when it is applied.
 - **Apply:** the changed items and the changed item stat file are checked
   first, with the checks of a save: a row with an error is unchecked and
   shows the message. Then everything checked is one step of the undo

@@ -108,6 +108,13 @@ struct ItemSyncDiff
     std::vector<SyncFormula> formulas;
     // Import: the languages names are taken in (the client's UI languages).
     std::vector<std::string> takenLocales;
+    // What was compared, as the window shows it: the items of both sides (each group and
+    // number once) and how many of them are the same; the formula entries likewise, while both
+    // sides have formulas. The same ones are not rows.
+    int comparedItems = 0;
+    int sameItems = 0;
+    int comparedFormulaEntries = 0;
+    int sameFormulaEntries = 0;
 
     bool IsEmpty() const
     {

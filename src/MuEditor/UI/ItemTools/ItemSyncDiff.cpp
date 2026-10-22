@@ -197,7 +197,13 @@ SyncItem CompareItem(const ItemKey& key, const ItemDefinition* current, const It
                 row.fields.push_back({path, std::nullopt, ToText(value)});
             }
         }
-        row.checked = !row.known;
+        // An item of a type the client has no data for yet can be held too (the server sent
+        // it): its size would change under the item grid (ItemEdits refuses it).
+        if (IsHeld(options, key))
+        {
+            row.locked = I18N::Editor::TheItemIsWornOrInAnItemWindowItIsNotAdded;
+        }
+        row.checked = !row.known && row.locked.empty();
         return row;
     }
     if (incoming == nullptr)
@@ -379,7 +385,7 @@ std::string PartsOf(const Fields& fields, const std::string& profile)
 }
 
 void CompareFormulas(const Data::Items::ItemStatFile& current, const Data::Items::ItemStatFile& incoming,
-                     const SyncOptions& options, std::vector<SyncFormula>& rows)
+                     const SyncOptions& options, ItemSyncDiff& diff)
 {
     const Fields currentFields = FlattenFormulas(current);
     const Fields incomingFields = FlattenFormulas(incoming);
@@ -412,6 +418,7 @@ void CompareFormulas(const Data::Items::ItemStatFile& current, const Data::Items
             {
                 continue;
             }
+            ++diff.comparedFormulaEntries;
             row.entry = path;
             if (currentFields.contains(path))
             {
@@ -424,17 +431,21 @@ void CompareFormulas(const Data::Items::ItemStatFile& current, const Data::Items
         }
         else
         {
+            // The entry of a profile both sides have only says that it is there.
+            const bool isEntry = !profile || *profile != path;
             row.entry = path;
             row.current = TextOf(currentFields, path);
             row.incoming = TextOf(incomingFields, path);
+            diff.comparedFormulaEntries += isEntry ? 1 : 0;
             if (row.current == row.incoming)
             {
+                diff.sameFormulaEntries += isEntry ? 1 : 0;
                 continue;
             }
         }
         row.known = options.known != nullptr && options.known->Contains(row.entry);
         row.checked = !row.known;
-        rows.push_back(std::move(row));
+        diff.formulas.push_back(std::move(row));
     }
 }
 
@@ -614,6 +625,7 @@ ItemSyncDiff BuildItemSyncDiff(const ItemExchangeFile& client, const ItemExchang
     {
         keys.insert(key);
     }
+    diff.comparedItems = static_cast<int>(keys.size());
     for (const ItemKey& key : keys)
     {
         const auto was = currentItems.find(key);
@@ -635,10 +647,14 @@ ItemSyncDiff BuildItemSyncDiff(const ItemExchangeFile& client, const ItemExchang
         {
             diff.items.push_back(std::move(row));
         }
+        else
+        {
+            ++diff.sameItems;
+        }
     }
     if (current.formulas && incoming.formulas)
     {
-        CompareFormulas(*current.formulas, *incoming.formulas, options, diff.formulas);
+        CompareFormulas(*current.formulas, *incoming.formulas, options, diff);
     }
     else if (incoming.formulas)
     {
@@ -683,14 +699,19 @@ ItemExchangeFile ApplyItemSyncDiff(const ItemExchangeFile& client, const ItemExc
         const Fields sourceFields = FlattenItem(*from->second);
         if (row.change == SyncChange::New)
         {
-            if (!row.checked)
+            if (!row.checked || !row.locked.empty())
             {
                 continue;
             }
             Fields fields;
             for (const SyncField& field : row.fields)
             {
-                fields[field.field] = sourceFields.at(field.field);
+                // A field the source no longer has (its data changed since the comparison) keeps
+                // its default.
+                if (const auto value = sourceFields.find(field.field); value != sourceFields.end())
+                {
+                    fields[field.field] = value->second;
+                }
             }
             targetItems[key] = UnflattenItem(row.group, row.number, fields, issues);
             continue;

@@ -1075,15 +1075,32 @@ Update from server, which downloads it, are later steps of phase 7; see the
   one step of the undo history; Save Items writes the files, as for any
   edit.
 - **Export…** picks the file to write and lists how the client's data
-  differs from what the file holds (all of it for a new file). **Write the
-  checked changes into the file** writes the checked rows; for the other
-  rows the file keeps what it has. The written file says `"source":
-  "MuMain"`.
+  differs from what the file holds (all of it for a new file, which the
+  window says is not there yet). **Write the checked changes into the
+  file** writes the checked rows; for the other rows the file keeps what it
+  has. The written file says `"source": "MuMain"`. A file that is there but
+  cannot be read is not written over.
+- Only what differs is listed. The lists say how much of what was compared
+  differs ("Items that differ (3 of 911)"), and when nothing does, how many
+  are the same ("Items: all 911 are the same in the client and the file").
+  When the file has exactly the client's data, the window says so in green
+  ("The file matches the client: nothing differs."), e.g. right after an
+  export; change an item or the file, or pick another file, to see
+  differences again. "The same" means that there is nothing to take: a
+  name in a language only one side has is not compared (no language is
+  removed), nor on an import one in a language the client's UI does not
+  show.
+- After applying, the window compares again: what was applied no longer
+  differs and leaves the list. A green line above says what was written or
+  applied ("Written: 911 items and all formulas. What was written no longer
+  differs."); what was not checked stays listed and unchecked. An import is
+  refused when an item it would add, resize, give another slot or remove is
+  worn or in an item window by then (compare again).
 - The path can also be typed into **Exchange file**; **Compare again**
-  compares with it. After applying, the window compares again and lists
-  what is left: right after an export nothing, as the file then has the
-  client's data (change an item or the file to see differences again).
-  When the client's data changes after a comparison, the window says so.
+  compares with it. The apply or write button is off while nothing is
+  checked, while the path field holds another file than the one compared,
+  and while the client's items or formulas changed since the comparison
+  (the window says which; compare again).
 
 **The file** has the layout of the item files: items sorted by group and
 number, fields with their default value left out, LF line endings.
@@ -1137,12 +1154,14 @@ number, fields with their default value left out, LF line endings.
 - The **Formulas** list has the drop level bonus, each table, each term of
   the default and of each profile (`default.damage.table`,
   `profiles.scroll.requirements.energy`, …) and a profile only one side
-  has. Into a file without formulas they all come in at once.
+  has. Into a file without formulas they all come in at once; an import of
+  a file without formulas compares none and leaves the client's as they
+  are.
 - Checked at first: what the incoming side changes. Unchecked: removals,
   known differences (grey) and fields with a note: the size and slot of an
   item your character wears or an item window shows (they stay; such an
-  item is not removed either), and a drop level above 255, which OpenMU
-  keeps in a byte.
+  item is not removed either, nor added when the client has no data for it
+  yet), and a drop level above 255, which OpenMU keeps in a byte.
 - **Check all** and **Check none** take every row; **A field in all items**
   checks or unchecks one field in every changed item.
 - **Names**: an import takes only the client's UI languages from the file;

@@ -2114,7 +2114,7 @@
     <value>Neu vergleichen</value>
   </data>
   <data name="What Import and Export do" xml:space="preserve">
-    <value>Importieren übernimmt die angehakten Werte der Datei in die Daten des Clients; Exportieren schreibt die angehakten Werte des Clients in die Datei. Beide zeigen zuerst die Unterschiede.</value>
+    <value>Importieren übernimmt die angehakten Werte der Datei in die Daten des Clients; Exportieren schreibt die angehakten Werte des Clients in die Datei. Beide listen nur auf, was sich unterscheidet: Was auf beiden Seiten gleich ist, fehlt in der Liste.</value>
   </data>
   <data name="Import from {0}" xml:space="preserve">
     <value>Import aus {0}</value>
@@ -2127,9 +2127,6 @@
   </data>
   <data name="The diff counts" xml:space="preserve">
     <value>{0} neue, {1} geänderte, {2} entfernte Items; {3} Formeleinträge</value>
-  </data>
-  <data name="No differences" xml:space="preserve">
-    <value>Keine Unterschiede: Die Datei hat dieselben Items und Formeln wie der Client.</value>
   </data>
   <data name="Check all" xml:space="preserve">
     <value>Alle anhaken</value>
@@ -2145,12 +2142,6 @@
   </data>
   <data name="Uncheck them" xml:space="preserve">
     <value>Haken entfernen</value>
-  </data>
-  <data name="Items ({0})" xml:space="preserve">
-    <value>Items ({0})</value>
-  </data>
-  <data name="Formulas ({0})" xml:space="preserve">
-    <value>Formeln ({0})</value>
   </data>
   <data name="New" xml:space="preserve">
     <value>Neu</value>
@@ -2206,12 +2197,6 @@
   <data name="Import items" xml:space="preserve">
     <value>Items importieren</value>
   </data>
-  <data name="Applied as one step of the undo history" xml:space="preserve">
-    <value>Als ein Schritt des Rückgängig-Verlaufs übernommen</value>
-  </data>
-  <data name="Written to {0}" xml:space="preserve">
-    <value>Geschrieben nach {0}</value>
-  </data>
   <data name="The checks refuse the change" xml:space="preserve">
     <value>Die Prüfungen lehnen die Änderung ab; die Zeilen der Items mit Fehlern haben keinen Haken mehr:</value>
   </data>
@@ -2232,5 +2217,59 @@
   </data>
   <data name="How to see differences" xml:space="preserve">
     <value>Um Unterschiede zu sehen, ein Item im Editor oder in der Datei ändern oder eine andere Datei wählen und dann neu vergleichen.</value>
+  </data>
+  <data name="The file matches the client" xml:space="preserve">
+    <value>Die Datei stimmt mit dem Client überein: nichts unterscheidet sich.</value>
+  </data>
+  <data name="The file matches the client in all items" xml:space="preserve">
+    <value>Die Datei stimmt in allen Items mit dem Client überein; sie hat keine Formeln zum Vergleichen.</value>
+  </data>
+  <data name="Items that differ ({0} of {1})" xml:space="preserve">
+    <value>Items mit Unterschieden ({0} von {1})</value>
+  </data>
+  <data name="Formula entries that differ ({0} of {1})" xml:space="preserve">
+    <value>Formeleinträge mit Unterschieden ({0} von {1})</value>
+  </data>
+  <data name="Formulas that differ (all: the file has none)" xml:space="preserve">
+    <value>Formeln mit Unterschieden (alle: die Datei hat keine)</value>
+  </data>
+  <data name="Items: all {0} are the same" xml:space="preserve">
+    <value>Items: alle {0} sind im Client und in der Datei gleich.</value>
+  </data>
+  <data name="Formula entries: all {0} are the same" xml:space="preserve">
+    <value>Formeleinträge: alle {0} sind im Client und in der Datei gleich.</value>
+  </data>
+  <data name="Formulas: not compared, the file has none" xml:space="preserve">
+    <value>Formeln: nicht verglichen, die Datei hat keine. Die Formeln des Clients bleiben, wie sie sind.</value>
+  </data>
+  <data name="Written: {0} items and all formulas" xml:space="preserve">
+    <value>Geschrieben: {0} Items und alle Formeln. Was geschrieben wurde, unterscheidet sich nicht mehr.</value>
+  </data>
+  <data name="Written: {0} items and {1} formula entries" xml:space="preserve">
+    <value>Geschrieben: {0} Items und {1} Formeleinträge. Was geschrieben wurde, unterscheidet sich nicht mehr.</value>
+  </data>
+  <data name="Applied: {0} items and {1} formula entries" xml:space="preserve">
+    <value>Als ein Schritt des Rückgängig-Verlaufs übernommen: {0} Items und {1} Formeleinträge. Was übernommen wurde, unterscheidet sich nicht mehr.</value>
+  </data>
+  <data name="Still listed below: the rows that were not checked" xml:space="preserve">
+    <value>Weiter unten noch aufgeführt, ohne Haken: was nicht angehakt war oder nicht übernommen werden kann.</value>
+  </data>
+  <data name="After writing, the window compares again" xml:space="preserve">
+    <value>Nach dem Schreiben vergleicht das Fenster neu: Was geschrieben wurde, unterscheidet sich nicht mehr und verschwindet aus der Liste.</value>
+  </data>
+  <data name="After applying, the window compares again" xml:space="preserve">
+    <value>Nach dem Übernehmen vergleicht das Fenster neu: Was übernommen wurde, unterscheidet sich nicht mehr und verschwindet aus der Liste.</value>
+  </data>
+  <data name="Nothing is checked" xml:space="preserve">
+    <value>Nichts ist angehakt.</value>
+  </data>
+  <data name="The path is not the compared file" xml:space="preserve">
+    <value>Der Pfad im Feld ist nicht die verglichene Datei: neu vergleichen.</value>
+  </data>
+  <data name="The file is not there yet" xml:space="preserve">
+    <value>Die Datei gibt es noch nicht: Schreiben legt sie an.</value>
+  </data>
+  <data name="The item is worn or in an item window, it is not added" xml:space="preserve">
+    <value>Das Item wird getragen oder ist in einem Item-Fenster: Es wird nicht hinzugefügt, solange das so ist.</value>
   </data>
 </root>
