@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "ItemTooltipLayouts.h"
+#include "ItemDataValidation.h"
 #include "ItemDescriptionPlaceholders.h"
 #include "ItemEnumNames.h"
 #include "ItemJsonCommon.h"
@@ -105,11 +106,27 @@ private:
     std::vector<ItemDataIssue>& m_issues;
 };
 
+// A text is written like an item name and checked like one: an English text (unless it is a blank line), and
+// translations under language codes.
 bool ItemTooltipReader::ReadText(const OrderedJson& json, const std::string& field, LocalizedString& text)
 {
-    return Json::ReadLocalizedString(json, field, text,
-                                     [this](const std::string& errorField, const std::string& message)
-                                     { AddError(errorField, message); });
+    if (!Json::ReadLocalizedString(json, field, text, [this](const std::string& errorField, const std::string& message)
+                                   { AddError(errorField, message); }))
+    {
+        return false;
+    }
+    if (!text.IsEmpty() && text.GetNeutral().empty())
+    {
+        AddError(field, "the English text is missing");
+    }
+    for (const auto& [locale, translation] : text.GetTranslations())
+    {
+        if (!IsValidLocaleCode(locale))
+        {
+            AddError(field, "\"" + locale + "\" is not a language code (letters, digits and \"-\" only)");
+        }
+    }
+    return true;
 }
 
 // The braces of every language, and the translations have the English text's placeholders.
@@ -521,4 +538,34 @@ void ReadItemTooltipJson(std::string_view text, const std::string& source, ItemT
     }
     ItemTooltipReader(source, issues).Read(root, file);
 }
+void ValidateTooltipTextLocales(const ItemTooltipFile& file, std::span<const char* const> uiLocales,
+                                const std::string& source, std::vector<ItemDataIssue>& issues)
+{
+    const auto warn = [&](const LocalizedString& text, const std::string& field)
+    {
+        for (const auto& [locale, translation] : text.GetTranslations())
+        {
+            const bool shown = std::any_of(uiLocales.begin(), uiLocales.end(),
+                                           [&](const char* uiLocale) { return locale == uiLocale; });
+            if (!shown)
+            {
+                issues.push_back({ItemDataIssueSeverity::Warning, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
+                                  field,
+                                  "the " + locale + " text is never shown: the game has no texts in that language"});
+            }
+        }
+    };
+    for (const auto& [name, text] : file.texts)
+    {
+        warn(text, std::string(Keys::Texts) + "." + name);
+    }
+    for (const TooltipLayout& layout : file.layouts)
+    {
+        for (size_t index = 0; index < layout.lines.size(); ++index)
+        {
+            warn(layout.lines[index].text, "layouts." + layout.name + ".lines[" + std::to_string(index) + "].text");
+        }
+    }
+}
+
 } // namespace Data::Items
