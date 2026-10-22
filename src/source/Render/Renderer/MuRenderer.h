@@ -388,6 +388,10 @@ public:
         return false;
     }
 
+    // Waits until the window can take another frame (the GPU has finished an
+    // earlier one). The game loop calls it before reading input, so with VSync
+    // the loop waits there and not in BeginFrame, after the input was read.
+    virtual void WaitForSwapchain() {}
     // Per-frame lifecycle. Called from the MuMain.cpp game loop.
     virtual void BeginFrame() {}
     virtual void EndFrame() {}

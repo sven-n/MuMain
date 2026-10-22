@@ -236,6 +236,25 @@ TEST_CASE("Item names follow the display locale with English fallback [data][ite
     CHECK(potion->name == L"Large Healing Potion");
 }
 
+TEST_CASE("Another language of the item names raises the name version but not the item version [data][items]")
+{
+    ItemDatabase database;
+    database.Build(std::vector<ItemDefinition>{MakeItem(SwordGroup, 0, "Kris||pt=Cris")});
+    const int version = database.GetVersion();
+    const int nameVersion = database.GetNameVersion();
+
+    database.SetDisplayLocale("en");
+    CHECK(database.GetNameVersion() == nameVersion);
+
+    database.SetDisplayLocale("pt");
+    CHECK(database.GetNameVersion() != nameVersion);
+    CHECK(database.GetVersion() == version);
+
+    const int ptNameVersion = database.GetNameVersion();
+    database.Set(*database.Find(SwordGroup, 0));
+    CHECK(database.GetNameVersion() != ptNameVersion);
+}
+
 TEST_CASE("Item log names use English names and the item id [data][items]")
 {
     const std::vector<ItemDefinition> items = {

@@ -54,8 +54,8 @@ private:
     int m_labelsVersion = -1;
     std::vector<TagItemRow> m_rows;
     Data::Items::ItemTag m_rowsTag{};
-    std::string m_rowsLocale;
     int m_rowsVersion = -1;
+    int m_rowsNameVersion = -1;
     int m_shownSerial = -1;
 };
 

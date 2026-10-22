@@ -152,8 +152,8 @@ bool RenderSelectedItem(int itemType)
                             I18N::Editor::NoItemAtThisNumber);
         return false;
     }
-    // In the UI language, as the item browser shows it and its namesakes are
-    // found.
+    // In the item name language, as the item browser shows it and its
+    // namesakes are found.
     ImGui::Text("%s (%d,%d)", Core::Text::ToUtf8(item->name.c_str()).c_str(), Data::Items::GetItemGroup(itemType),
                 Data::Items::GetItemNumber(itemType));
     RenderNamesakeQualifier(itemType);

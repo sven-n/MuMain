@@ -28,8 +28,9 @@ public:
     // definitions with invalid ids are skipped (validation reports them).
     void Build(std::span<const ItemDefinition> definitions);
 
-    // Fills ItemDefinition::name from the names for this UI locale, falling
-    // back to English.
+    // Fills ItemDefinition::name from the names in the item name language:
+    // the UI language, or English while translated item names are off. A
+    // missing translation falls back to English.
     void SetDisplayLocale(std::string_view locale);
     const std::string& GetDisplayLocale() const
     {
@@ -142,6 +143,15 @@ public:
         return m_version;
     }
 
+    // Counts the changes of the item names shown: a stored item or another
+    // language of the names (SetDisplayLocale). Views that keep item names
+    // take them again when it changes. Unlike GetVersion, a language change
+    // leaves the item tools' open edits alone.
+    int GetNameVersion() const
+    {
+        return m_nameVersion;
+    }
+
     // Item editor changes. Set replaces the item at the definition's
     // (group, number); an item without names counts as not existing.
     void Set(const ItemDefinition& definition);
@@ -193,6 +203,7 @@ private:
     std::string m_displayLocale{LocalizedString::NeutralLocale};
     int m_existingItemCount = 0;
     int m_version = 0;
+    int m_nameVersion = 0;
 };
 } // namespace Data::Items
 

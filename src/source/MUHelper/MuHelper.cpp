@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "GameLogic/Automation/Attack.h"
+#include "GameLogic/Automation/HelperPickupFilter.h"
 #include "GameLogic/Automation/Movement.h"
 #include "GameLogic/Automation/Pickup.h"
 #include "GameLogic/Automation/Skill.h"
@@ -21,7 +22,6 @@
 #include "GameLogic/Social/PartyManager.h"
 #include "World/MapInfra/MapManager.h"
 #include "Network/Server/WSclient.h"
-#include "GameLogic/Items/ItemCategories.h"
 
 #include "MuHelper.h"
 
@@ -1025,32 +1025,7 @@ namespace MUHelper
 
     bool CMuHelper::ShouldObtainItem(int iItemId)
     {
-        ITEM_t* pDrop = &Items[iItemId];
-        ITEM* pItem = &pDrop->Item;
-
-        if ((m_config.bPickZen && IsMoneyItem(pItem))
-            || (m_config.bPickJewel && GameLogic::Items::IsJewelItem(pItem))
-            || (m_config.bPickAncient && IsAncientItem(pItem))
-            || (m_config.bPickExcellent && IsExcellentItem(pItem)))
-        {
-            return true;
-        }
-
-        if (m_config.bPickExtraItems)
-        {
-            std::wstring strDisplayName = GetItemDisplayName(pItem);
-
-            for (const auto& str : m_config.aExtraItems)
-            {
-                // Check if the search keyword is in the item's display name
-                if (strDisplayName.find(str) != std::wstring::npos)
-                {
-                    return true;
-                }
-            }
-        }
-
-        return m_config.bPickAllItems;
+        return GameLogic::Automation::ShouldPickUpHelperItem(m_config, &Items[iItemId].Item);
     }
 
     void CMuHelper::AddItem(int iItemId, POINT posWhere)
