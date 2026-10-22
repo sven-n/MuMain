@@ -8,6 +8,7 @@
 #include "Core/Globals/_enum.h"
 #include "Core/Utilities/StringUtils.h"
 #include "Engine/Object/ZzzInventory.h" // RenderItem3D
+#include "I18N/All.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Core/WindowCommon.h"
 #include "UI/Core/WindowManager.h"
@@ -57,6 +58,7 @@ void CGenericConfirmDialog::BindRmlModel(Rml::DataModelConstructor& c, GenericDi
     c.Bind("primary_is_stock_ok", &model.primaryIsStockOk);
     c.Bind("has_secondary", &model.hasSecondary);
     c.Bind("secondary_label", &model.secondaryLabel);
+    c.Bind("secondary_is_stock_max", &model.secondaryIsStockMax);
     c.Bind("show_cancel", &model.showCancel);
     c.Bind("cancel_label", &model.cancelLabel);
     c.Bind("cancel_is_stock_cancel", &model.cancelIsStockCancel);
@@ -164,12 +166,21 @@ namespace
         return digits;
     }
 
+    bool HasMaxButton(const GenericDialogConfig& cfg)
+    {
+        return cfg.input && cfg.input->maxValue && cfg.input->mode == GenericDialogConfig::InputField::Mode::Text;
+    }
 }
 
 CGenericConfirmDialog::DialogId CGenericConfirmDialog::Show(GenericDialogConfig cfg)
 {
     // onSecondary only fires from the secondary button; Cancel and Esc fire onCancel.
     assert(!cfg.onSecondary || cfg.secondaryLabel);
+    if (HasMaxButton(cfg))
+    {
+        assert(!cfg.secondaryLabel);
+        cfg.secondaryLabel = I18N::Game::Max;
+    }
 
     if (cfg.isValid && !cfg.isValid())
         return 0;
@@ -442,7 +453,10 @@ bool CGenericConfirmDialog::Update()
     {
         m_bSecondaryClicked = false;
         ::PlayBuffer(SOUND_CLICK01);
-        Resolve(ClickResult::Secondary);
+        if (HasMaxButton(m_Active))
+            ApplyInputFieldConfig(std::to_string(m_Active.input->maxValue()));
+        else
+            Resolve(ClickResult::Secondary);
     }
     else if (m_bCancelClicked)
     {
@@ -572,6 +586,12 @@ void CGenericConfirmDialog::SyncRmlModel()
     {
         model.secondaryLabel = secondaryLabel;
         m_RmlView.MarkDirty("secondary_label");
+    }
+    const bool secondaryIsStockMax = HasMaxButton(m_Active);
+    if (model.secondaryIsStockMax != secondaryIsStockMax)
+    {
+        model.secondaryIsStockMax = secondaryIsStockMax;
+        m_RmlView.MarkDirty("secondary_is_stock_max");
     }
 
     if (model.showCancel != m_Active.showCancel)
