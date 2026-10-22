@@ -6390,35 +6390,57 @@ bool IsMoneyItem(ITEM* pItem)
     return pItem->Type == ITEM_ZEN;
 }
 
+namespace
+{
+constexpr std::size_t ItemDisplayNameCapacity = 128;
+
+void AppendItemOptionKeywords(const ITEM& item, std::wstring& options)
+{
+    if (item.HasSkill)
+    {
+        options += L"+Skill"; // TODO: Use I18N::Game::Skill
+    }
+    if (item.OptionLevel)
+    {
+        options += L"+Option"; // TODO: Use I18N::Game::Option
+    }
+    if (item.HasLuck)
+    {
+        options += L"+Luck"; // TODO: Use I18N::Game::Luck
+    }
+}
+} // namespace
+
 std::wstring GetItemDisplayName(ITEM* pItem)
 {
-    // NOTE: 
-    // There may be already another function for this (the one being used for displaying dropped items).
-    // This version currently only applies to ascii names of items
-
-    ITEM_ATTRIBUTE* pAttr = &ItemAttribute[pItem->Type];
-
-    auto nNameLen = wcsnlen(pAttr->Name, MAX_ITEM_NAME);
-    std::wstring strDisplayName(pAttr->Name, nNameLen);
+    wchar_t name[ItemDisplayNameCapacity]{};
+    GetItemName(pItem->Type, pItem->Level, name);
+    std::wstring strDisplayName(name);
     std::wstring strOptions;
 
     if (pItem->Level)
     {
-        strOptions += L"+" + std::to_wstring(pItem->Level);
+        strOptions = L"+" + std::to_wstring(pItem->Level);
+        const auto nameLength = strDisplayName.size();
+        const auto levelLength = strOptions.size();
+        // Keep ordinary equipment keywords contiguous without treating variant levels as upgrades.
+        if (nameLength > levelLength && strDisplayName.ends_with(strOptions) &&
+            strDisplayName[nameLength - levelLength - 1] == L' ')
+        {
+            strDisplayName.resize(nameLength - levelLength - 1);
+        }
+        else
+        {
+            strOptions.clear();
+        }
     }
-    if (pItem->HasSkill)
+    AppendItemOptionKeywords(*pItem, strOptions);
+    if (!strOptions.empty())
     {
-        strOptions += L"+Skill"; // TODO: Use I18N::Game::Skill
+        strDisplayName += L" ";
+        strDisplayName += strOptions;
     }
-    if (pItem->OptionLevel)
-    {
-        strOptions += L"+Option"; // TODO: Use I18N::Game::Option
-    }
-    if (pItem->HasLuck) {
-        strOptions += L"+Luck"; // TODO: Use I18N::Game::Luck
-    }
-
-    return strDisplayName + (strOptions.empty() ? L"" : L" " + strOptions);
+    return strDisplayName;
 }
 
 OBJECT ObjectSelect;

@@ -76,6 +76,19 @@ read as the English name only; saving writes the object form.
 - Logs always use the English name and the item id, e.g.
   `Short Sword (0,1)`, never a translation.
 
+### MU Helper pickup filters
+
+**Pick All** collects every eligible drop. **Selected** applies the enabled
+categories and Extra Items; with neither mode selected, retained filters collect
+nothing. Selected takes precedence if an older save has both modes set.
+
+Extra Items uses case-sensitive substrings of the visible item name in the current
+UI language, including names selected by level. For example, `Box of Luck` does
+not match Heart of Love, medals or Kundun boxes that share its item id. A language
+change may require updating saved keywords. Ordinary equipment keeps contiguous
+option keywords such as `+7+Skill+Option+Luck`. The Zen category selects money;
+other enabled categories and extra keywords remain independent.
+
 ### Fields
 
 | Field | Meaning |
