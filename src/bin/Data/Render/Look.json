@@ -26,13 +26,38 @@
     "ao.radius": 60,
     "sun.shadow": 1,
     "sun.softness": 1,
-    "sun.resolution": 2048
+    "sun.resolution": 2048,
+    "dynamic.flatSunShadow": 1
   },
   "maps": [
+    {
+      "world": 1,
+      "name": "Dungeon",
+      "sun.shadow": 0,
+      "dynamic.flatSunShadow": 0
+    },
+    {
+      "world": 4,
+      "name": "Lost Tower",
+      "sun.shadow": 0,
+      "dynamic.flatSunShadow": 0
+    },
     {
       "world": 10,
       "name": "Icarus",
       "bloom.strength": 0.3
+    },
+    {
+      "world": 38,
+      "name": "Kanturu Relics",
+      "sun.shadow": 0,
+      "dynamic.flatSunShadow": 0
+    },
+    {
+      "world": 39,
+      "name": "Refinery Tower",
+      "sun.shadow": 0,
+      "dynamic.flatSunShadow": 0
     }
   ]
 }

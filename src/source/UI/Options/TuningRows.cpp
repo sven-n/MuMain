@@ -62,6 +62,8 @@ ControlTexts TextsOf(TuningControlId id)
         return {I18N::Game::TuningShadowDirection, I18N::Game::TuningShadowDirectionHelp};
     case TuningControlId::SunShadowStrength:
         return {I18N::Game::TuningSunShadows, I18N::Game::TuningSunShadowsHelp};
+    case TuningControlId::FlatSunShadow:
+        return {I18N::Game::TuningFlatSunShadow, I18N::Game::TuningFlatSunShadowHelp};
     case TuningControlId::SunShadowSoftness:
         return {I18N::Game::TuningSunShadowSoftness, I18N::Game::TuningSunShadowSoftnessHelp};
     case TuningControlId::SunShadowResolution:
