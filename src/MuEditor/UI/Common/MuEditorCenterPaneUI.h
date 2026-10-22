@@ -7,7 +7,7 @@ class CMuEditorCenterPaneUI
 public:
     static CMuEditorCenterPaneUI& GetInstance();
 
-    void Render(bool& showItemEditor, bool& showSkillEditor);
+    void Render(bool& showItemBrowser, bool& showSkillEditor);
 
 private:
     CMuEditorCenterPaneUI() = default;
