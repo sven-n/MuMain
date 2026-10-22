@@ -158,8 +158,7 @@ void CUIMapName::SyncView()
     using UI::MapName::MapNameRmlModel;
     SyncField(m_RmlView.Binder(), &MapNameRmlModel::alpha, "alpha", std::clamp(m_fAlpha, 0.0f, 1.0f));
 #ifdef ASG_ADD_GENS_SYSTEM
-    if (m_RmlView.GetModel().strife != m_bStrife ||
-        (m_bStrife && m_RmlView.GetModel().strifeSource.empty()))
+    if (m_RmlView.GetModel().strife != m_bStrife || (m_bStrife && m_RmlView.GetModel().strifeSource.empty()))
     {
         SyncField(m_RmlView.Binder(), &MapNameRmlModel::strife, "strife", m_bStrife);
         SyncField(m_RmlView.Binder(), &MapNameRmlModel::strifeSource, "strife_source",

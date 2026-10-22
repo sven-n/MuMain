@@ -1691,11 +1691,9 @@ constexpr int SecondDevilSquareMapId = 32;
 
 const wchar_t* EventMapName(int mapId)
 {
-    if ((mapId >= WD_11BLOODCASTLE1 && mapId <= WD_11BLOODCASTLE_END) ||
-        mapId == WD_52BLOODCASTLE_MASTER_LEVEL)
+    if ((mapId >= WD_11BLOODCASTLE1 && mapId <= WD_11BLOODCASTLE_END) || mapId == WD_52BLOODCASTLE_MASTER_LEVEL)
         return I18N::Game::BloodCastle;
-    if ((mapId >= WD_18CHAOS_CASTLE && mapId <= WD_18CHAOS_CASTLE_END) ||
-        mapId == WD_53CAOSCASTLE_MASTER_LEVEL)
+    if ((mapId >= WD_18CHAOS_CASTLE && mapId <= WD_18CHAOS_CASTLE_END) || mapId == WD_53CAOSCASTLE_MASTER_LEVEL)
         return I18N::Game::ChaosCastle;
     if (mapId >= WD_24HELLAS && mapId <= WD_24HELLAS_END)
         return I18N::Game::Kalima;
@@ -1716,39 +1714,71 @@ const wchar_t* CMapManager::GetMapName(int iMap)
 
     switch (iMap)
     {
-    case WD_0LORENCIA: return I18N::Game::Lorencia;
-    case WD_1DUNGEON: return I18N::Game::Dungeon;
-    case WD_2DEVIAS: return I18N::Game::Devias;
-    case WD_3NORIA: return I18N::Game::Noria;
-    case WD_4LOSTTOWER: return I18N::Game::LostTower;
-    case WD_5UNKNOWN: return I18N::Game::APlaceOfExile;
-    case WD_6STADIUM: return I18N::Game::Arena;
-    case WD_7ATLANSE: return I18N::Game::Atlans;
-    case WD_8TARKAN: return I18N::Game::Tarkan;
+    case WD_0LORENCIA:
+        return I18N::Game::Lorencia;
+    case WD_1DUNGEON:
+        return I18N::Game::Dungeon;
+    case WD_2DEVIAS:
+        return I18N::Game::Devias;
+    case WD_3NORIA:
+        return I18N::Game::Noria;
+    case WD_4LOSTTOWER:
+        return I18N::Game::LostTower;
+    case WD_5UNKNOWN:
+        return I18N::Game::APlaceOfExile;
+    case WD_6STADIUM:
+        return I18N::Game::Arena;
+    case WD_7ATLANSE:
+        return I18N::Game::Atlans;
+    case WD_8TARKAN:
+        return I18N::Game::Tarkan;
     case WD_9DEVILSQUARE:
-    case SecondDevilSquareMapId: return I18N::Game::DevilSquare;
-    case WD_10HEAVEN: return I18N::Game::Icarus;
-    case WD_30BATTLECASTLE: return I18N::Game::ValleyOfLoren;
-    case WD_31HUNTING_GROUND: return I18N::Game::LandOfTrials;
-    case WD_33AIDA: return I18N::Game::Aida;
-    case WD_34CRYWOLF_1ST: return I18N::Game::CrywolfFortress;
-    case WD_24HELLAS_7: return I18N::Game::LostKalima;
-    case WD_37KANTURU_1ST: return I18N::Game::Kanturu;
-    case WD_38KANTURU_2ND: return I18N::Game::Kanturu3;
-    case WD_39KANTURU_3RD: return I18N::Game::RefineryTower;
-    case WD_40AREA_FOR_GM: return I18N::Game::GMSummonZone;
-    case WD_41CHANGEUP3RD_1ST: return I18N::Game::BalgassBarrack;
-    case WD_42CHANGEUP3RD_2ND: return I18N::Game::BalgassRestingPlace;
-    case WD_51HOME_6TH_CHAR: return I18N::Game::Elveland;
-    case WD_56MAP_SWAMP_OF_QUIET: return I18N::Game::SwampOfPeace;
-    case WD_57ICECITY: return I18N::Game::LaCleon;
-    case WD_58ICECITY_BOSS: return I18N::Game::Hatchery;
-    case WD_62SANTA_TOWN: return I18N::Game::SantaSVillage;
-    case WD_63PK_FIELD: return I18N::Game::Vulcanus;
-    case WD_64DUELARENA: return I18N::Game::Colosseum;
-    case WD_79UNITEDMARKETPLACE: return I18N::Game::LorenMarket;
+    case SecondDevilSquareMapId:
+        return I18N::Game::DevilSquare;
+    case WD_10HEAVEN:
+        return I18N::Game::Icarus;
+    case WD_30BATTLECASTLE:
+        return I18N::Game::ValleyOfLoren;
+    case WD_31HUNTING_GROUND:
+        return I18N::Game::LandOfTrials;
+    case WD_33AIDA:
+        return I18N::Game::Aida;
+    case WD_34CRYWOLF_1ST:
+        return I18N::Game::CrywolfFortress;
+    case WD_24HELLAS_7:
+        return I18N::Game::LostKalima;
+    case WD_37KANTURU_1ST:
+        return I18N::Game::Kanturu;
+    case WD_38KANTURU_2ND:
+        return I18N::Game::Kanturu3;
+    case WD_39KANTURU_3RD:
+        return I18N::Game::RefineryTower;
+    case WD_40AREA_FOR_GM:
+        return I18N::Game::GMSummonZone;
+    case WD_41CHANGEUP3RD_1ST:
+        return I18N::Game::BalgassBarrack;
+    case WD_42CHANGEUP3RD_2ND:
+        return I18N::Game::BalgassRestingPlace;
+    case WD_51HOME_6TH_CHAR:
+        return I18N::Game::Elveland;
+    case WD_56MAP_SWAMP_OF_QUIET:
+        return I18N::Game::SwampOfPeace;
+    case WD_57ICECITY:
+        return I18N::Game::LaCleon;
+    case WD_58ICECITY_BOSS:
+        return I18N::Game::Hatchery;
+    case WD_62SANTA_TOWN:
+        return I18N::Game::SantaSVillage;
+    case WD_63PK_FIELD:
+        return I18N::Game::Vulcanus;
+    case WD_64DUELARENA:
+        return I18N::Game::Colosseum;
+    case WD_79UNITEDMARKETPLACE:
+        return I18N::Game::LorenMarket;
     case WD_80KARUTAN1:
-    case WD_81KARUTAN2: return I18N::Game::Karutan;
-    default: return I18N::Game::UnknownMap;
+    case WD_81KARUTAN2:
+        return I18N::Game::Karutan;
+    default:
+        return I18N::Game::UnknownMap;
     }
 }

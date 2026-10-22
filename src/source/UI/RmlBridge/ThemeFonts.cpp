@@ -88,8 +88,7 @@ bool FamilyAvailable(std::string family, Rml::Style::FontStyle style = Rml::Styl
     std::transform(family.begin(), family.end(), family.begin(),
         [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
     constexpr int probeSize = 16;
-    return fonts->GetFontFaceHandle(family, style,
-                                    Rml::Style::FontWeight::Normal, probeSize) != 0;
+    return fonts->GetFontFaceHandle(family, style, Rml::Style::FontWeight::Normal, probeSize) != 0;
 }
 
 std::optional<std::string> ResolveMapNameFontToken(const ThemeInheritance& theme, const std::string& token)
