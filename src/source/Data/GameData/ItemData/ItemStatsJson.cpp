@@ -927,6 +927,22 @@ std::string WriteItemStatsJson(const ItemStatFile& file)
 {
     OrderedJson root;
     root[Keys::FormatVersion] = ItemStatsJsonFormatVersion;
+    OrderedJson formulas = WriteItemStatFormulasJson(file);
+    for (auto& [key, value] : formulas.items())
+    {
+        root[key] = std::move(value);
+    }
+    root[Keys::ProfileRules] = OrderedJson::array();
+    for (const StatProfileRule& rule : file.profileRules)
+    {
+        root[Keys::ProfileRules].push_back(WriteProfileRule(rule));
+    }
+    return LayOutItemStatsText(root.dump(Json::Indent, ' ', false, OrderedJson::error_handler_t::replace)) + "\n";
+}
+
+OrderedJson WriteItemStatFormulasJson(const ItemStatFile& file)
+{
+    OrderedJson root;
     root[Keys::DropLevelBonus][Keys::Excellent] = file.excellentDropLevelBonus;
     root[Keys::DropLevelBonus][Keys::Ancient] = file.ancientDropLevelBonus;
 
@@ -963,14 +979,28 @@ std::string WriteItemStatsJson(const ItemStatFile& file)
         }
         root[Keys::Profiles].push_back(std::move(json));
     }
+    return root;
+}
 
-    root[Keys::ProfileRules] = OrderedJson::array();
-    for (const StatProfileRule& rule : file.profileRules)
+void ReadItemStatFormulasJson(const OrderedJson& json, const std::string& source, ItemStatFile& file,
+                              std::vector<ItemDataIssue>& issues)
+{
+    if (!json.is_object())
     {
-        root[Keys::ProfileRules].push_back(WriteProfileRule(rule));
+        Json::AddFileIssue(issues, source, ItemDataIssue::NoItem, "", "the formulas must be an object");
+        return;
     }
+    ItemStatsReader(source, issues).Read(json, file);
+    if (json.contains(Keys::ProfileRules))
+    {
+        issues.push_back({ItemDataIssueSeverity::Warning, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
+                          Keys::ProfileRules, "the profile rules stay with the client, ignored"});
+        file.profileRules.clear();
+    }
+}
 
-    std::string text = root.dump(Json::Indent, ' ', false, OrderedJson::error_handler_t::replace);
+std::string LayOutItemStatsText(std::string text)
+{
     text = Json::PutListEntriesOnOneLine(text, Keys::ProfileRules);
     text = Json::PutObjectsOnOneLine(text, Keys::DropLevelBonus);
     text = Json::PutObjectsOnOneLine(text, Keys::Caption);
@@ -983,6 +1013,6 @@ std::string WriteItemStatsJson(const ItemStatFile& file)
         text = Json::PutObjectsOnOneLine(text, requirementKey);
     }
     text = Json::PutListsOnOneLine(text, Keys::Values);
-    return text + "\n";
+    return text;
 }
 } // namespace Data::Items

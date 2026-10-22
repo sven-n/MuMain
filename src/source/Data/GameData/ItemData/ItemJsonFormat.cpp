@@ -171,7 +171,7 @@ OrderedJson WriteDescription(const std::vector<ItemDescriptionLine>& description
     return json;
 }
 
-OrderedJson WriteItem(const ItemDefinition& definition)
+OrderedJson WriteItemObject(const ItemDefinition& definition)
 {
     OrderedJson item;
     item[Keys::Number] = definition.number;
@@ -650,14 +650,30 @@ std::string WriteItemGroupJson(int group, std::span<const ItemDefinition> items)
     root[Keys::Items] = OrderedJson::array();
     for (const ItemDefinition* definition : groupItems)
     {
-        root[Keys::Items].push_back(WriteItem(*definition));
+        root[Keys::Items].push_back(WriteItemObject(*definition));
     }
 
     // Names are UTF-8 already; replace (instead of throwing on) anything that
     // is not, so a bad name can never stop a save half-way.
-    std::string text =
-        Json::PutListsOnOneLine(root.dump(Json::Indent, ' ', false, OrderedJson::error_handler_t::replace), Keys::Tags);
-    text = Json::PutListsOnOneLine(text, Keys::Levels);
-    return Json::PutObjectsOnOneLine(text, Keys::RequirementsByLevel) + "\n";
+    return LayOutItemJsonText(root.dump(Json::Indent, ' ', false, OrderedJson::error_handler_t::replace)) + "\n";
+}
+
+OrderedJson WriteItemJson(const ItemDefinition& definition)
+{
+    return WriteItemObject(definition);
+}
+
+bool ReadItemJson(const OrderedJson& json, const std::string& source, int group, ItemDefinition& definition,
+                  std::vector<ItemDataIssue>& issues)
+{
+    ItemReader reader(source, group, issues);
+    return reader.Read(json, definition);
+}
+
+std::string LayOutItemJsonText(const std::string& text)
+{
+    std::string laidOut = Json::PutListsOnOneLine(text, Keys::Tags);
+    laidOut = Json::PutListsOnOneLine(laidOut, Keys::Levels);
+    return Json::PutObjectsOnOneLine(laidOut, Keys::RequirementsByLevel);
 }
 } // namespace Data::Items
