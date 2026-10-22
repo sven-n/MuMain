@@ -116,7 +116,11 @@ void CMuServerListUI::Render(bool* open)
         g_MuEditorCore.SetHoveringUI(true);
     }
 
-    m_sent = FindSentChannels();
+    if (m_sentVersion != g_ServerListManager->GetReceivedServersVersion())
+    {
+        m_sent = FindSentChannels();
+        m_sentVersion = g_ServerListManager->GetReceivedServersVersion();
+    }
     bool changed = RenderToolbar();
     RenderStatus();
     ImGui::Separator();

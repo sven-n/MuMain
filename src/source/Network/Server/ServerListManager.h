@@ -64,6 +64,12 @@ public:
     {
         return m_receivedServers;
     }
+    // Changes each time the received servers change, so a view of them is
+    // built again only then.
+    int GetReceivedServersVersion() const
+    {
+        return m_receivedServersVersion;
+    }
     // Builds the groups of the last list the connect server sent again, with
     // the groups SetServerGroups set since.
     void RebuildServerGroups();
@@ -87,6 +93,7 @@ protected:
     ServerListScriptMap m_mapServerListScript;
 #ifdef _EDITOR
     std::vector<ReceivedServer> m_receivedServers;
+    int m_receivedServersVersion = 0;
 #endif
 };
 

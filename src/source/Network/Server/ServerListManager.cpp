@@ -43,6 +43,7 @@ void CServerListManager::Release()
 {
 #ifdef _EDITOR
     m_receivedServers.clear();
+    ++m_receivedServersVersion;
 #endif
     auto iterServerGroup = m_mapServerGroup.begin();
     for (; iterServerGroup != m_mapServerGroup.end(); iterServerGroup++)
@@ -105,6 +106,7 @@ void CServerListManager::InsertServerGroup(int iConnectIndex, int iServerPercent
 {
 #ifdef _EDITOR
     m_receivedServers.push_back({iConnectIndex, iServerPercent});
+    ++m_receivedServersVersion;
 #endif
     CServerGroup* pServerGroup = NULL;
 

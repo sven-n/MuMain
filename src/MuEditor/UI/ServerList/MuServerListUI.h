@@ -52,8 +52,10 @@ private:
     std::vector<Data::Items::ItemDataIssue> m_issues;
     std::string m_status;
     bool m_statusIsError = false;
-    // Found again each frame the window is drawn.
+    // Found again when the connect server sent a new list
+    // (CServerListManager::GetReceivedServersVersion).
     SentChannels m_sent;
+    int m_sentVersion = -1;
 };
 
 #define g_MuServerListUI CMuServerListUI::GetInstance()
