@@ -277,6 +277,43 @@ TEST_CASE("A lightning bolt built in one move keeps its authored segment count a
     FPS_ANIMATION_FACTOR = savedFactor;
 }
 
+TEST_CASE("A spear flare moves until its life time is a multiple of 12, without recursing [render][timing]")
+{
+    const float savedFactor = FPS_ANIMATION_FACTOR;
+    static OBJECT owner;
+    owner.Live = true;
+    Vector(1000.f, 1000.f, 100.f, owner.Position);
+    for (const float factor : {1.f, 0.4f, 1e-4f})
+    {
+        CAPTURE(factor);
+        for (int i = 0; i < MAX_JOINTS; ++i)
+        {
+            Joints[i].Live = false;
+        }
+        FPS_ANIMATION_FACTOR = factor;
+        vec3_t angle = {0.f, 0.f, 0.f};
+        // Death Stab's flare (MoveSpear); before, a frame this short nested ~40000 calls of MoveJoint.
+        CreateJoint(BITMAP_FLARE, owner.Position, owner.Position, angle, 12, &owner, 100.f);
+        JOINT* joint = std::find_if(Joints, Joints + MAX_JOINTS, [](const JOINT& j) { return j.Live; });
+        REQUIRE(joint != Joints + MAX_JOINTS);
+        const float lifeTime = joint->LifeTime;
+        REQUIRE(static_cast<int>(lifeTime) % 12 != 0);
+        MoveJoints();
+        CHECK(joint->Live);
+        if (factor >= 0.4f)
+        {
+            CHECK(static_cast<int>(joint->LifeTime) % 12 == 0);
+        }
+        else
+        {
+            // Capped at 256 moves a frame.
+            CHECK(lifeTime - joint->LifeTime == doctest::Approx(256 * factor).epsilon(0.01));
+        }
+        joint->Live = false;
+    }
+    FPS_ANIMATION_FACTOR = savedFactor;
+}
+
 TEST_CASE("Monster lightning collects at most one target per TargetIndex entry [render]")
 {
     for (int i = 0; i < MAX_JOINTS; ++i)

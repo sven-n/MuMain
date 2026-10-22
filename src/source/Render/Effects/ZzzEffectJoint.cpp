@@ -6946,19 +6946,18 @@ void MoveJoint(JOINT* o, int iIndex)
     {
         o->Live = false;
     }
-    else if (0 != (((int)o->LifeTime) % 12))
-    {
-        switch (o->Type)
-        {
-        case BITMAP_FLARE:
-        case BITMAP_FLARE_BLUE:
-            if (o->SubType == 4 || o->SubType == 12)
-            {
-                MoveJoint(o, iIndex);
-            }
-            break;
-        }
-    }
+}
+
+// The spear flares (subtypes 4 and 12: Impale, Death Stab and the Raklion Iron Knights) move again within a frame
+// until their life time reaches a multiple of 12. Each move takes FPS_ANIMATION_FACTOR off it, so a very short frame
+// asks for thousands of moves: MoveJoint used to call itself for each and overflowed the stack. The repeats are a loop
+// now, capped; a frame needs at most 12 / FPS_ANIMATION_FACTOR of them, so the cap only binds above ~530 FPS.
+static constexpr int MAX_SPEAR_FLARE_MOVES = 256;
+
+static bool MovesAgainThisFrame(const JOINT* o)
+{
+    return o->Live && (o->Type == BITMAP_FLARE || o->Type == BITMAP_FLARE_BLUE) &&
+           (o->SubType == 4 || o->SubType == 12) && static_cast<int>(o->LifeTime) % 12 != 0;
 }
 
 void MoveJoints()
@@ -6969,6 +6968,10 @@ void MoveJoints()
         if (o->Live)
         {
             MoveJoint(o, i);
+            for (int moves = 1; moves < MAX_SPEAR_FLARE_MOVES && MovesAgainThisFrame(o); ++moves)
+            {
+                MoveJoint(o, i);
+            }
         }
     }
 }
