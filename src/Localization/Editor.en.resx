@@ -1919,7 +1919,7 @@
     <value>Test server</value>
   </data>
   <data name="Test server note" xml:space="preserve">
-    <value>Shown first; the login screen shows only the first test server group.</value>
+    <value>The login screen shows only the first test server group, at its place in the list.</value>
   </data>
   <data name="Channel" xml:space="preserve">
     <value>Channel</value>

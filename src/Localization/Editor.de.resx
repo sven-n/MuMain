@@ -1898,7 +1898,7 @@
     <value>Testserver</value>
   </data>
   <data name="Test server note" xml:space="preserve">
-    <value>Steht oben; der Anmeldebildschirm zeigt nur die erste Testserver-Gruppe.</value>
+    <value>Der Anmeldebildschirm zeigt nur die erste Testserver-Gruppe, an ihrem Platz in der Liste.</value>
   </data>
   <data name="Channel" xml:space="preserve">
     <value>Kanal</value>

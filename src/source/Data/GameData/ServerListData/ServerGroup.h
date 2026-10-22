@@ -39,7 +39,8 @@ struct ServerGroup
     int id = 0;
     std::string name;        // UTF-8
     std::string description; // UTF-8, shown below the channels of the selected group
-    // A test server group: shown first, and only one of them.
+    // A test server group: the login screen shows only the first one, at its
+    // place in the list.
     bool testServer = false;
     // Index: channel number - 1.
     std::array<ChannelType, MaxChannelsPerGroup> channels{};

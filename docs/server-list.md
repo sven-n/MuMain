@@ -20,8 +20,8 @@ admin panel; to put a server into a second group, give it an ID from 20 to 39.
 
 - **Groups:** one button per group, in the order of the list. A server whose
   group is not in the list is not shown at all.
-- **Test server:** a group marked as test server is shown at the top. The
-  login screen shows only the first one.
+- **Test server:** of the groups marked as test server, the login screen
+  shows only the first, at its place in the list; the others are hidden.
 - **Channels:** each channel is shown as `<group name>-<channel>`, followed by
   its type:
 
@@ -68,7 +68,7 @@ admin panel; to put a server into a second group, give it an ID from 20 to 39.
 | `id`          | The group: server ID / 20, from 0 to 3276. Each group once.               |
 | `name`        | The button text and the start of each channel name; up to 32 characters. |
 | `description` | Optional; up to 254 characters.                                           |
-| `testServer`  | Optional; `true` puts the group at the top.                               |
+| `testServer`  | Optional; `true` marks a test server group: only the first is shown.      |
 | `channels`    | Optional; the type of a channel by its number (1 to 20). Channels not listed are `normal`. |
 
 A name or description that is too long is cut (a warning in the log). Most
@@ -96,7 +96,8 @@ the name the login screen gives it.
 ## Compared to the original client
 
 `ServerList.bmd` held the same groups, encrypted, with channel types for the
-first 15 channels only and a left or right position for each button. The login
-screen now lists all groups in one column, so only the test server position
-is kept. The original loader read each group's description but never kept it,
+first 15 channels only and a left, right or center position for each button.
+The original screen drew the center one, a test server, as a button of its
+own; the login screen now lists all groups in one column in the list's order,
+so only "test server" is kept, for the rule that only the first is shown. The original loader read each group's description but never kept it,
 so the login screen showed none; the JSON description is shown.
