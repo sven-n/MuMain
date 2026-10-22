@@ -3,6 +3,7 @@
 #include "doctest.h"
 
 #include "ClientDataScope.h"
+#include "ItemModelDatabaseScope.h"
 #include "ItemStatProfilesScope.h"
 #include "TestFiles.h"
 
@@ -19,18 +20,61 @@
 #include "Data/GameData/ItemData/ItemNames.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
+#include "Data/GameData/ItemData/ItemModelJsonFormat.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/ItemStatsJson.h"
 #include "Data/GameData/ItemData/ItemStructs.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Data/GameData/ItemData/ItemTypeUse.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
+#include "Engine/Physics/PhysicsManager.h"
+#include "GameLogic/Items/ItemStats.h"
 #include "I18N/All.h"
+#include "Render/Items/ItemEffects.h"
+#include "Render/Items/ItemRenderStyles.h"
+#ifdef _EDITOR
+#include "Core/MuEditorCore.h"
+#include "UI/Common/MuEditorLayout.h"
+#include "UI/Common/MuEditorWindowIds.h"
+#include "UI/ItemEditor/ItemEditorActions.h"
+#include "UI/ItemTools/GlowColorDialog.h"
+#include "UI/ItemTools/ItemAddDialog.h"
+#include "UI/ItemTools/ItemEdits.h"
+#include "UI/ItemTools/ItemFieldWidgets.h"
+#include "UI/ItemTools/ItemHeldByCharacter.h"
+#include "UI/ItemTools/ItemNamesakes.h"
+#include "UI/ItemTools/ItemRequirementTable.h"
+#include "UI/ItemTools/ItemRulesTable.h"
+#include "UI/ItemTools/ItemSelection.h"
+#include "UI/ItemTools/ItemStatFileChange.h"
+#include "UI/ItemTools/ItemUsage.h"
+#include "UI/ItemTools/ItemUsers.h"
+#include "UI/ItemTools/MuItemBasicsUI.h"
+#include "UI/ItemTools/MuItemBrowserUI.h"
+#include "UI/ItemTools/MuItemCategoriesUI.h"
+#include "UI/ItemTools/MuItemChecksUI.h"
+#include "UI/ItemTools/MuItemFormulasUI.h"
+#include "UI/ItemTools/MuItemGlowColorsUI.h"
+#include "UI/ItemTools/MuItemModelUI.h"
+#include "UI/ItemTools/MuItemRequirementsUI.h"
+#include "UI/ItemTools/MuItemRulesUI.h"
+#include "UI/ItemTranslations/MuItemTranslationsUI.h"
+#include "UI/MapEditor/MapEditorUI.h"
+#include "TestModelSlots.h"
+#include "imgui.h"
+#include "imgui_internal.h"
+#endif
 
 #include <algorithm>
+#include <array>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <initializer_list>
+#include <memory>
 #include <random>
+#include <span>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -113,21 +157,6 @@ public:
 
 private:
     std::filesystem::path m_directory;
-};
-
-// Empties the item model database when the test ends, also when a check
-// stops it, so the next test starts without models.
-class ItemModelDatabaseScope
-{
-public:
-    ItemModelDatabaseScope() = default;
-    ~ItemModelDatabaseScope()
-    {
-        g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
-    }
-
-    ItemModelDatabaseScope(const ItemModelDatabaseScope&) = delete;
-    ItemModelDatabaseScope& operator=(const ItemModelDatabaseScope&) = delete;
 };
 
 // A legacy Item_<language>.bmd with 30-byte names, as the original client
@@ -890,7 +919,7 @@ TEST_CASE("A save that cannot write all its files replaces none of them [data][i
     modelGroups.set(0);
 
     std::vector<ItemDataIssue> issues;
-    CHECK(SaveItemAndModelDataDirectories(itemDirectory, items, blockedModels, models.GetAllSlots(), modelGroups,
+    CHECK(SaveItemAndModelDataDirectories(itemDirectory, items, {blockedModels, models.GetAllSlots(), modelGroups},
                                           issues) == ItemDataSaveResult::WriteFailed);
     CHECK_FALSE(issues.empty());
     const std::string swordFile = GetItemGroupFileName(0);
@@ -900,6 +929,278 @@ TEST_CASE("A save that cannot write all its files replaces none of them [data][i
 }
 
 #ifdef _EDITOR
+namespace
+{
+// An item tool's edit: the item as it is, changed, set back (SetItem).
+template <typename TChange> void EditItem(int itemType, TChange&& change)
+{
+    ItemDefinition item = *g_ItemDatabase.Find(itemType);
+    change(item);
+    g_ItemDataHandler.SetItem(item);
+}
+
+// The character wears items of these types for the scope (IsHeldByCharacter).
+class WornItemsScope
+{
+public:
+    explicit WornItemsScope(std::initializer_list<int> itemTypes)
+        : m_previous(CharacterMachine), m_machine(std::make_unique<CHARACTER_MACHINE>())
+    {
+        // Type 0 is the Kris: every other place holds nothing.
+        for (ITEM& equipped : m_machine->Equipment)
+        {
+            equipped.Type = -1;
+        }
+        size_t index = 0;
+        for (const int itemType : itemTypes)
+        {
+            m_machine->Equipment[index++].Type = static_cast<short>(itemType);
+        }
+        CharacterMachine = m_machine.get();
+    }
+
+    ~WornItemsScope()
+    {
+        CharacterMachine = m_previous;
+    }
+
+    WornItemsScope(const WornItemsScope&) = delete;
+    WornItemsScope& operator=(const WornItemsScope&) = delete;
+
+private:
+    CHARACTER_MACHINE* m_previous;
+    std::unique_ptr<CHARACTER_MACHINE> m_machine;
+};
+
+// The game's characters for the scope, with the editor's hook that drops what
+// they wear of cloth (CMuEditorCore::ConnectGameHooks) and one that keeps the
+// item types whose opened model slots took other data.
+class WornClothScope
+{
+public:
+    WornClothScope() : m_previous(CharactersClient), m_characters(new CHARACTER[MAX_CHARACTERS_CLIENT + 1]{})
+    {
+        CharactersClient = m_characters.get();
+        GetChangedSlots().clear();
+        g_ItemDataHandler.SetOpenedModelHooks({&MuEditor::Items::DropWornCloth, &KeepChangedSlots});
+    }
+
+    ~WornClothScope()
+    {
+        g_ItemDataHandler.SetOpenedModelHooks({});
+        MuEditor::Items::DropWornCloth();
+        CharactersClient = m_previous;
+    }
+
+    // The item types of the last change of opened model slots.
+    static std::vector<int>& GetChangedSlots()
+    {
+        static std::vector<int> itemTypes;
+        return itemTypes;
+    }
+
+    WornClothScope(const WornClothScope&) = delete;
+    WornClothScope& operator=(const WornClothScope&) = delete;
+
+    CHARACTER& GetCharacter(int index)
+    {
+        return m_characters[index];
+    }
+
+    // The character wears the pants with a cloth, as RenderPartObject makes it.
+    static const PART_t& Wear(CHARACTER& character, int modelType)
+    {
+        PART_t& pants = character.BodyPart[BODYPART_PANTS];
+        pants.Type = static_cast<short>(modelType);
+        pants.m_pCloth[0] = new CPhysicsClothMesh;
+        pants.m_byNumCloth = 1;
+        return pants;
+    }
+
+private:
+    static void KeepChangedSlots(std::span<const int> itemTypes)
+    {
+        GetChangedSlots().assign(itemTypes.begin(), itemTypes.end());
+    }
+
+    CHARACTER* m_previous;
+    std::unique_ptr<CHARACTER[]> m_characters;
+};
+} // namespace
+
+// The cloth of worn pants moves a mesh of its model's slot every frame and was
+// made from the data the slot had: it goes before the slot opens other data,
+// and the game makes it again.
+TEST_CASE("Changing an opened item model drops the cloth the characters wear [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    REQUIRE_FALSE(g_ItemDataHandler.HasModelsToReopen());
+    ItemModelDefinition divine = *g_ItemModelDatabase.Find(ITEM_DIVINE_PANTS);
+
+    WornClothScope characters;
+    // Another player, and the character of the character creation.
+    const PART_t& player = WornClothScope::Wear(characters.GetCharacter(7), MODEL_DIVINE_PANTS);
+    const PART_t& created = WornClothScope::Wear(CharacterView, MODEL_DIVINE_PANTS);
+    const auto clothDropped = [&] { return player.m_pCloth[0] == nullptr && created.m_pCloth[0] == nullptr; };
+
+    SUBCASE("a model opened again")
+    {
+        divine.material.specular += 0.25;
+        g_ItemDataHandler.SetItemModel(divine);
+        REQUIRE(g_ItemDataHandler.HasModelsToReopen());
+        // The editor opens it again between frames.
+        CHECK_FALSE(clothDropped());
+        g_ItemDataHandler.ReopenChangedModels({});
+        CHECK(clothDropped());
+        CHECK(WornClothScope::GetChangedSlots() == std::vector<int>{ITEM_DIVINE_PANTS});
+    }
+    SUBCASE("a removed model entry")
+    {
+        ItemModelDefinition none;
+        none.group = divine.group;
+        none.number = divine.number;
+        g_ItemDataHandler.SetItemModel(none);
+        g_ItemDataHandler.ReopenChangedModels({});
+        CHECK(clothDropped());
+    }
+    SUBCASE("a moved item, whose opened model moves at once")
+    {
+        const int freeType = MakeItemType(9, 100);
+        REQUIRE(IsFreeItemType(freeType));
+        REQUIRE(g_ItemDataHandler.MoveItem(ITEM_DIVINE_PANTS, freeType));
+        CHECK(clothDropped());
+        // Both slots took other data.
+        std::vector<int> changed = WornClothScope::GetChangedSlots();
+        std::ranges::sort(changed);
+        CHECK(changed == std::vector<int>{ITEM_DIVINE_PANTS, freeType});
+    }
+    SUBCASE("a display value keeps the cloth")
+    {
+        divine.inventory.scale += 0.001;
+        g_ItemDataHandler.SetItemModel(divine);
+        CHECK_FALSE(g_ItemDataHandler.HasModelsToReopen());
+        g_ItemDataHandler.ReopenChangedModels({});
+        CHECK_FALSE(clothDropped());
+        CHECK(WornClothScope::GetChangedSlots().empty());
+    }
+}
+
+// The lists of the item tools: no slot, no wing tier and, for the weapon kind,
+// the kind the group gives (which then follows the data) and none.
+TEST_CASE("The item tool lists offer no slot, no wing tier and the weapon kind the group gives [editor][items]")
+{
+    using MuEditor::Items::Fields::EnumEntries;
+    const auto slots = EnumEntries<ItemSlot>({{ItemSlot::None, "None"}});
+    CHECK(slots.size() == GetEnumNames(ItemSlot{}).size() + 1);
+    CHECK(slots.front().value == ItemSlot::None);
+    CHECK(EnumEntries<WingTier>({{WingTier::None, "None"}}).front().value == WingTier::None);
+
+    const auto sword =
+        EnumEntries<WeaponKind>({{WeaponKind::Sword, "By the group: sword"}, {WeaponKind::None, "None"}});
+    CHECK(sword.size() == GetEnumNames(WeaponKind{}).size() + 1);
+    CHECK(std::string(sword[0].name) == "By the group: sword");
+    CHECK(sword[1].value == WeaponKind::None);
+    CHECK(std::ranges::count(sword, WeaponKind::Sword, &EnumName<WeaponKind>::value) == 1);
+    // A group that gives none: the second none is left out.
+    const auto none = EnumEntries<WeaponKind>({{WeaponKind::None, "By the group: None"}, {WeaponKind::None, "None"}});
+    CHECK(none.size() == GetEnumNames(WeaponKind{}).size() + 1);
+    CHECK(std::string(none[0].name) == "By the group: None");
+}
+
+// A field typed in before the game took the item is stored when it is left or
+// drawn again: the size and slot of the held item stay, other fields change.
+TEST_CASE("The item tools keep the size and slot of an item the game holds [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    const ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+    const ItemDefinition blade = *g_ItemDatabase.Find(BladeType);
+    ItemDefinition wider = kris;
+    ++wider.width;
+    ItemDefinition ring = kris;
+    ring.slot = ItemSlot::Ring;
+    ItemDefinition widerBlade = blade;
+    ++widerBlade.width;
+    {
+        const WornItemsScope worn({KrisType});
+        CHECK_FALSE(g_ItemEdits.SetItem("Width", wider));
+        CHECK_FALSE(g_ItemEdits.SetItem("Slot", ring));
+        // Nothing of a step that reaches a held item is stored.
+        const ItemDefinition both[] = {widerBlade, wider};
+        CHECK_FALSE(g_ItemEdits.SetItems("Width", both));
+        CHECK(g_ItemDatabase.Find(BladeType)->width == blade.width);
+        CHECK(g_ItemDatabase.Find(KrisType)->width == kris.width);
+        CHECK(g_ItemDatabase.Find(KrisType)->slot == kris.slot);
+        CHECK(ItemAttribute[KrisType].Width == kris.width);
+        CHECK_FALSE(g_ItemEdits.GetHistory().CanUndo());
+
+        ItemDefinition stronger = kris;
+        stronger.damageMax = 99;
+        CHECK(g_ItemEdits.SetItem("Damage", stronger));
+        CHECK(g_ItemDatabase.Find(KrisType)->damageMax == 99);
+    }
+    // Not held any more.
+    ItemDefinition widened = *g_ItemDatabase.Find(KrisType);
+    ++widened.width;
+    CHECK(g_ItemEdits.SetItem("Width", widened));
+    CHECK(g_ItemDatabase.Find(KrisType)->width == widened.width);
+    g_ItemEdits.GetHistory().Clear();
+}
+
+// The import keeps the size and slot of a held item; a held type that had no
+// data takes the imported item, since it has no size or slot to keep.
+TEST_CASE("A bmd import keeps the size and slot of the held items that had data [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    std::string changeLog;
+    REQUIRE(g_ItemDataHandler.ExportAsBmd(changeLog));
+    const ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+    ItemDefinition widerBlade = *g_ItemDatabase.Find(BladeType);
+    ++widerBlade.width;
+
+    // Before the import: the Kris has no data, the blade another size.
+    REQUIRE(g_ItemDataHandler.RemoveItem(KrisType));
+    g_ItemDataHandler.SetItem(widerBlade);
+    const WornItemsScope worn({KrisType, BladeType});
+    std::vector<ItemDefinition> held;
+    for (const int itemType : MuEditor::Items::FindHeldItemTypes())
+    {
+        held.push_back(g_ItemDatabase.GetAllSlots()[itemType]);
+    }
+    REQUIRE(held.size() == 2);
+
+    REQUIRE_FALSE(HasErrors(g_ItemDataHandler.ImportFromBmd().issues));
+    CItemEditorActions::KeepHeldItemShapes(held);
+    CHECK(g_ItemDatabase.Find(BladeType)->width == widerBlade.width);
+    const ItemDefinition* imported = g_ItemDatabase.Find(KrisType);
+    REQUIRE(imported != nullptr);
+    CHECK(imported->width == kris.width);
+    CHECK(imported->height == kris.height);
+    CHECK(imported->slot == kris.slot);
+    CHECK(ItemAttribute[KrisType].Width == kris.width);
+}
+
 TEST_CASE("Item editor changes go into the item database [data][items][editor]")
 {
     ClientDataScope client(ShippedClientDirectory);
@@ -907,25 +1208,15 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
 
-    SUBCASE("a changed value is copied")
+    SUBCASE("a changed value goes into the database and ItemAttribute, the names stay")
     {
-        ItemAttribute[BladeType].Width = 2;
-        g_ItemDataHandler.OnItemEdited(BladeType);
+        ItemDefinition blade = *g_ItemDatabase.Find(BladeType);
+        blade.width = 2;
+        g_ItemDataHandler.SetItem(blade);
 
         CHECK(g_ItemDatabase.Find(BladeType)->width == 2);
+        CHECK(ItemAttribute[BladeType].Width == 2);
         CHECK(g_ItemDatabase.Find(BladeType)->names.Get("pt") == "L\xC3\xA2mina");
-    }
-
-    SUBCASE("a changed name is stored for the current UI locale")
-    {
-        I18N::SetLocale("pt");
-        const std::wstring newName = L"Lâmina Nova";
-        std::fill(std::begin(ItemAttribute[BladeType].Name), std::end(ItemAttribute[BladeType].Name), L'\0');
-        newName.copy(ItemAttribute[BladeType].Name, newName.size());
-        g_ItemDataHandler.OnItemEdited(BladeType);
-
-        CHECK(g_ItemDatabase.Find(BladeType)->names.Get("pt") == "L\xC3\xA2mina Nova");
-        CHECK(g_ItemDatabase.Find(BladeType)->names.GetNeutral() == "Blade");
     }
 
     SUBCASE("a name set for another language goes into the database, not into the shown name")
@@ -974,73 +1265,89 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         CHECK(g_ItemDataHandler.SetItemName(KrisType, "en", "Kris"));
     }
 
-    SUBCASE("a value change does not turn the English fallback into a translation")
-    {
-        // No item has a Polish name: the English one is shown.
-        I18N::SetLocale("pl");
-        REQUIRE(client.Name(KrisType) == L"Kris");
-        ItemAttribute[KrisType].Width = 2;
-        g_ItemDataHandler.OnItemEdited(KrisType);
-
-        CHECK_FALSE(g_ItemDatabase.Find(KrisType)->names.GetTranslations().contains("pl"));
-    }
-
-    SUBCASE("a value change keeps a name longer than ITEM_ATTRIBUTE can hold")
-    {
-        const std::string longName(MAX_ITEM_NAME + 10, 'x');
-        ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
-        kris.names.Set("en", longName);
-        g_ItemDatabase.Set(kris);
-        ToItemAttribute(*g_ItemDatabase.Find(KrisType), ItemAttribute[KrisType]);
-
-        ItemAttribute[KrisType].Width = 2;
-        g_ItemDataHandler.OnItemEdited(KrisType);
-
-        CHECK(g_ItemDatabase.Find(KrisType)->names.GetNeutral() == longName);
-        CHECK(g_ItemDatabase.Find(KrisType)->width == 2);
-    }
-
     SUBCASE("a new weapon gets its group's weapon kind")
     {
-        const int newSpearType = MakeItemType(3, 100);
-        REQUIRE(g_ItemDatabase.Find(newSpearType) == nullptr);
-        const std::wstring name = L"New Spear";
-        std::fill(std::begin(ItemAttribute[newSpearType].Name), std::end(ItemAttribute[newSpearType].Name), L'\0');
-        name.copy(ItemAttribute[newSpearType].Name, name.size());
-        ItemAttribute[newSpearType].m_byItemSlot = static_cast<BYTE>(ItemSlot::MainHand);
-        g_ItemDataHandler.OnItemEdited(newSpearType);
+        ItemDefinition spear;
+        spear.group = 3;
+        spear.number = 100;
+        spear.names = Data::LocalizedString::Parse("New Spear");
+        spear.slot = ItemSlot::MainHand;
+        REQUIRE(g_ItemDataHandler.AddItem(spear, nullptr));
+        CHECK(g_ItemDatabase.GetWeaponKind(MakeItemType(3, 100)) == WeaponKind::Spear);
+    }
 
-        REQUIRE(g_ItemDatabase.Find(newSpearType) != nullptr);
-        CHECK(g_ItemDatabase.GetWeaponKind(newSpearType) == WeaponKind::Spear);
+    SUBCASE("a copy keeps a weapon kind and a stat profile its source picked")
+    {
+        // Horn of Fenrir: its data gives "helper", it names "default".
+        const ItemDefinition* fenrir = g_ItemDatabase.Find(13, 37);
+        REQUIRE(fenrir != nullptr);
+        REQUIRE(fenrir->statProfile == "default");
+        ItemDefinition copy = *fenrir;
+        copy.number = 300;
+        REQUIRE(g_ItemDataHandler.AddItem(copy, nullptr, fenrir));
+        CHECK(g_ItemDatabase.Find(13, 300)->statProfile == "default");
+
+        ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+        kris.weaponKind = WeaponKind::Axe;
+        g_ItemDataHandler.SetItem(kris);
+        REQUIRE(g_ItemDatabase.GetWeaponKind(KrisType) == WeaponKind::Axe);
+        const ItemDefinition krisSource = *g_ItemDatabase.Find(KrisType);
+        ItemDefinition krisCopy = krisSource;
+        krisCopy.number = 200;
+        REQUIRE(g_ItemDataHandler.AddItem(krisCopy, nullptr, &krisSource));
+        CHECK(g_ItemDatabase.GetWeaponKind(MakeItemType(0, 200)) == WeaponKind::Axe);
+
+        // Without the source, a new item follows its data.
+        ItemDefinition fresh = *fenrir;
+        fresh.number = 301;
+        REQUIRE(g_ItemDataHandler.AddItem(fresh, nullptr));
+        CHECK(g_ItemDatabase.Find(13, 301)->statProfile == "helper");
+    }
+
+    SUBCASE("picking no stat profile follows the data at once")
+    {
+        ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+        REQUIRE(kris.statProfile == "weapon");
+        kris.statProfile = "default";
+        g_ItemDataHandler.SetItem(kris);
+        REQUIRE(g_ItemDatabase.Find(KrisType)->statProfile == "default");
+        kris = *g_ItemDatabase.Find(KrisType);
+        kris.statProfile.clear();
+        g_ItemDataHandler.SetItem(kris);
+        CHECK(g_ItemDatabase.Find(KrisType)->statProfile == "weapon");
     }
 
     SUBCASE("a new bow is a bow once it is two-handed and on offHand, in any order")
     {
         const int newBowType = MakeItemType(4, 100);
-        REQUIRE(g_ItemDatabase.Find(newBowType) == nullptr);
-        const std::wstring name = L"New Bow";
-        std::fill(std::begin(ItemAttribute[newBowType].Name), std::end(ItemAttribute[newBowType].Name), L'\0');
-        name.copy(ItemAttribute[newBowType].Name, name.size());
-        ItemAttribute[newBowType].m_byItemSlot = static_cast<BYTE>(ItemSlot::MainHand);
-        g_ItemDataHandler.OnItemEdited(newBowType);
-        ItemAttribute[newBowType].TwoHand = true;
-        g_ItemDataHandler.OnItemEdited(newBowType);
+        ItemDefinition bow;
+        bow.group = 4;
+        bow.number = 100;
+        bow.names = Data::LocalizedString::Parse("New Bow");
+        bow.slot = ItemSlot::MainHand;
+        REQUIRE(g_ItemDataHandler.AddItem(bow, nullptr));
+        bow = *g_ItemDatabase.Find(newBowType);
+        bow.twoHanded = true;
+        g_ItemDataHandler.SetItem(bow);
         CHECK(g_ItemDatabase.GetWeaponKind(newBowType) == WeaponKind::Crossbow);
 
-        ItemAttribute[newBowType].m_byItemSlot = static_cast<BYTE>(ItemSlot::OffHand);
-        g_ItemDataHandler.OnItemEdited(newBowType);
+        bow = *g_ItemDatabase.Find(newBowType);
+        bow.slot = ItemSlot::OffHand;
+        g_ItemDataHandler.SetItem(bow);
         CHECK(g_ItemDatabase.GetWeaponKind(newBowType) == WeaponKind::Bow);
 
         // The other order: on offHand first, then two-handed.
         const int otherBowType = MakeItemType(4, 101);
-        REQUIRE(g_ItemDatabase.Find(otherBowType) == nullptr);
-        std::fill(std::begin(ItemAttribute[otherBowType].Name), std::end(ItemAttribute[otherBowType].Name), L'\0');
-        name.copy(ItemAttribute[otherBowType].Name, name.size());
-        ItemAttribute[otherBowType].m_byItemSlot = static_cast<BYTE>(ItemSlot::OffHand);
-        g_ItemDataHandler.OnItemEdited(otherBowType);
+        ItemDefinition other;
+        other.group = 4;
+        other.number = 101;
+        other.names = Data::LocalizedString::Parse("New Bow");
+        other.slot = ItemSlot::OffHand;
+        REQUIRE(g_ItemDataHandler.AddItem(other, nullptr));
         CHECK(g_ItemDatabase.GetWeaponKind(otherBowType) == WeaponKind::None);
-        ItemAttribute[otherBowType].TwoHand = true;
-        g_ItemDataHandler.OnItemEdited(otherBowType);
+        other = *g_ItemDatabase.Find(otherBowType);
+        other.twoHanded = true;
+        g_ItemDataHandler.SetItem(other);
         CHECK(g_ItemDatabase.GetWeaponKind(otherBowType) == WeaponKind::Bow);
     }
 
@@ -1063,39 +1370,37 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
     SUBCASE("a sword is a glove while only the Rage Fighter may use it")
     {
         REQUIRE(g_ItemDatabase.GetWeaponKind(KrisType) == WeaponKind::Sword);
-        const ITEM_ATTRIBUTE kris = ItemAttribute[KrisType];
-        for (int characterClass = 0; characterClass < MAX_CLASS; ++characterClass)
-        {
-            ItemAttribute[KrisType].RequireClass[characterClass] = characterClass == CLASS_RAGEFIGHTER ? 1 : 0;
-        }
-        g_ItemDataHandler.OnItemEdited(KrisType);
+        const ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+        EditItem(KrisType,
+                 [](ItemDefinition& item)
+                 {
+                     for (int characterClass = 0; characterClass < MAX_CLASS; ++characterClass)
+                     {
+                         item.classRequirements[characterClass] = characterClass == CLASS_RAGEFIGHTER ? 1 : 0;
+                     }
+                 });
         CHECK(g_ItemDatabase.GetWeaponKind(KrisType) == WeaponKind::Glove);
 
-        ItemAttribute[KrisType] = kris;
-        g_ItemDataHandler.OnItemEdited(KrisType);
+        g_ItemDataHandler.SetItem(kris);
         CHECK(g_ItemDatabase.GetWeaponKind(KrisType) == WeaponKind::Sword);
     }
 
     SUBCASE("a staff is a book while it is on offHand")
     {
         REQUIRE(g_ItemDatabase.GetWeaponKind(ITEM_STAFF) == WeaponKind::Staff);
-        ItemAttribute[ITEM_STAFF].m_byItemSlot = static_cast<BYTE>(ItemSlot::OffHand);
-        g_ItemDataHandler.OnItemEdited(ITEM_STAFF);
+        EditItem(ITEM_STAFF, [](ItemDefinition& item) { item.slot = ItemSlot::OffHand; });
         CHECK(g_ItemDatabase.GetWeaponKind(ITEM_STAFF) == WeaponKind::Book);
 
-        ItemAttribute[ITEM_STAFF].m_byItemSlot = static_cast<BYTE>(ItemSlot::MainHand);
-        g_ItemDataHandler.OnItemEdited(ITEM_STAFF);
+        EditItem(ITEM_STAFF, [](ItemDefinition& item) { item.slot = ItemSlot::MainHand; });
         CHECK(g_ItemDatabase.GetWeaponKind(ITEM_STAFF) == WeaponKind::Staff);
     }
 
     SUBCASE("an undone edit undoes the weapon kind")
     {
-        ItemAttribute[ITEM_BOLT].TwoHand = true;
-        g_ItemDataHandler.OnItemEdited(ITEM_BOLT);
+        EditItem(ITEM_BOLT, [](ItemDefinition& item) { item.twoHanded = true; });
         CHECK(g_ItemDatabase.GetWeaponKind(ITEM_BOLT) == WeaponKind::Bow);
 
-        ItemAttribute[ITEM_BOLT].TwoHand = false;
-        g_ItemDataHandler.OnItemEdited(ITEM_BOLT);
+        EditItem(ITEM_BOLT, [](ItemDefinition& item) { item.twoHanded = false; });
         CHECK(g_ItemDatabase.GetWeaponKind(ITEM_BOLT) == WeaponKind::None);
     }
 
@@ -1112,10 +1417,8 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
     SUBCASE("the Horn of Fenrir keeps the default its file names")
     {
         REQUIRE(g_ItemDatabase.Find(ITEM_HORN_OF_FENRIR)->statProfile == "default");
-        ItemAttribute[ITEM_HORN_OF_FENRIR].RequireLevel = 0;
-        g_ItemDataHandler.OnItemEdited(ITEM_HORN_OF_FENRIR);
-        ItemAttribute[ITEM_HORN_OF_FENRIR].RequireLevel = 300;
-        g_ItemDataHandler.OnItemEdited(ITEM_HORN_OF_FENRIR);
+        EditItem(ITEM_HORN_OF_FENRIR, [](ItemDefinition& item) { item.requirements.level = 0; });
+        EditItem(ITEM_HORN_OF_FENRIR, [](ItemDefinition& item) { item.requirements.level = 300; });
         CHECK(g_ItemDatabase.Find(ITEM_HORN_OF_FENRIR)->statProfile == "default");
     }
 
@@ -1124,19 +1427,17 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         ItemDefinition shield = *g_ItemDatabase.Find(ITEM_SMALL_SHIELD);
         shield.statProfile.clear();
         g_ItemDatabase.Set(shield);
-        g_ItemDataHandler.OnItemEdited(ITEM_SMALL_SHIELD);
+        EditItem(ITEM_SMALL_SHIELD, [](ItemDefinition&) {});
         CHECK(g_ItemDatabase.Find(ITEM_SMALL_SHIELD)->statProfile == "shield");
     }
 
     SUBCASE("a wing's stat profile follows its slot")
     {
         REQUIRE(g_ItemDatabase.Find(ITEM_WINGS_OF_ELF)->statProfile == "firstTierWing");
-        ItemAttribute[ITEM_WINGS_OF_ELF].m_byItemSlot = static_cast<BYTE>(ItemSlot::Helm);
-        g_ItemDataHandler.OnItemEdited(ITEM_WINGS_OF_ELF);
+        EditItem(ITEM_WINGS_OF_ELF, [](ItemDefinition& item) { item.slot = ItemSlot::Helm; });
         CHECK(g_ItemDatabase.Find(ITEM_WINGS_OF_ELF)->statProfile == "armor");
 
-        ItemAttribute[ITEM_WINGS_OF_ELF].m_byItemSlot = static_cast<BYTE>(ItemSlot::Wings);
-        g_ItemDataHandler.OnItemEdited(ITEM_WINGS_OF_ELF);
+        EditItem(ITEM_WINGS_OF_ELF, [](ItemDefinition& item) { item.slot = ItemSlot::Wings; });
         CHECK(g_ItemDatabase.Find(ITEM_WINGS_OF_ELF)->statProfile == "firstTierWing");
     }
 
@@ -1311,6 +1612,1440 @@ TEST_CASE("A bmd round trip keeps missing names missing and names that are the s
     CHECK(HasNameIn(*g_ItemDatabase.Find(BladeType), "es"));
 }
 
+TEST_CASE("The item tools set whole items, and the derived fields follow the data unless set [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    ItemDefinition blade = *g_ItemDatabase.Find(BladeType);
+
+    SUBCASE("a value change reaches the database and ItemAttribute")
+    {
+        blade.damageMax = 99;
+        blade.tags.Set(ItemTag::Valuable);
+        g_ItemDataHandler.SetItem(blade);
+        CHECK(g_ItemDatabase.Find(BladeType)->damageMax == 99);
+        CHECK(g_ItemDatabase.HasTag(BladeType, ItemTag::Valuable));
+        CHECK(ItemAttribute[BladeType].DamageMax == 99);
+    }
+
+    SUBCASE("a weapon kind the user picks stays")
+    {
+        blade.weaponKind = WeaponKind::Glove;
+        g_ItemDataHandler.SetItem(blade);
+        CHECK(g_ItemDatabase.Find(BladeType)->weaponKind == WeaponKind::Glove);
+    }
+
+    SUBCASE("a picked weapon kind follows the data again once the group's kind is picked")
+    {
+        blade.weaponKind = WeaponKind::Axe;
+        g_ItemDataHandler.SetItem(blade);
+        ItemDefinition picked = *g_ItemDatabase.Find(BladeType);
+        REQUIRE(picked.weaponKind == WeaponKind::Axe);
+        // Item Basics' "By the group".
+        picked.weaponKind = GetGroupWeaponKind(picked);
+        g_ItemDataHandler.SetItem(picked);
+        ItemDefinition following = *g_ItemDatabase.Find(BladeType);
+        CHECK(following.weaponKind == WeaponKind::Sword);
+        // The slot list's "None": a sword only on its slot.
+        following.slot = ItemSlot::None;
+        g_ItemDataHandler.SetItem(following);
+        CHECK(g_ItemDatabase.Find(BladeType)->slot == ItemSlot::None);
+        CHECK(g_ItemDatabase.Find(BladeType)->weaponKind == WeaponKind::None);
+    }
+
+    SUBCASE("the weapon kind follows the classes in group 0 while it is the derived one")
+    {
+        // Only the Rage Fighter: group 0 makes it a glove.
+        const WeaponKind before = blade.weaponKind;
+        blade.classRequirements.fill(0);
+        blade.classRequirements[CLASS_RAGEFIGHTER] = 1;
+        g_ItemDataHandler.SetItem(blade);
+        CHECK(g_ItemDatabase.Find(BladeType)->weaponKind != before);
+        CHECK(g_ItemDatabase.Find(BladeType)->weaponKind == WeaponKind::Glove);
+    }
+
+    SUBCASE("an item without names leaves the database and empties its row")
+    {
+        blade.names = Data::LocalizedString{};
+        g_ItemDataHandler.SetItem(blade);
+        CHECK(g_ItemDatabase.Find(BladeType) == nullptr);
+        CHECK(ItemAttribute[BladeType].Name[0] == L'\0');
+        CHECK(ItemAttribute[BladeType].Width == 0);
+    }
+
+    SUBCASE("several items at once")
+    {
+        ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+        kris.tradable = false;
+        blade.tradable = false;
+        const std::vector<ItemDefinition> changed = {kris, blade};
+        g_ItemDataHandler.SetItems(changed);
+        CHECK_FALSE(g_ItemDatabase.Find(KrisType)->tradable);
+        CHECK_FALSE(g_ItemDatabase.Find(BladeType)->tradable);
+    }
+}
+
+TEST_CASE("The item tools add, remove and move items with their models [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    const int freeType = MakeItemType(0, 100);
+    REQUIRE(IsFreeItemType(freeType));
+    CHECK_FALSE(IsFreeItemType(KrisType));
+
+    SUBCASE("a new item takes a free number, with a model")
+    {
+        ItemDefinition item = *g_ItemDatabase.Find(KrisType);
+        item.number = 100;
+        item.names = Data::LocalizedString::Parse("Training Kris");
+        ItemModelDefinition model = *g_ItemModelDatabase.Find(KrisType);
+        REQUIRE(g_ItemDataHandler.AddItem(item, &model));
+        REQUIRE(g_ItemDatabase.Find(freeType) != nullptr);
+        CHECK(g_ItemDatabase.Find(freeType)->names.GetNeutral() == "Training Kris");
+        CHECK(std::wstring(ItemAttribute[freeType].Name) == L"Training Kris");
+        REQUIRE(g_ItemModelDatabase.Find(freeType) != nullptr);
+        CHECK(g_ItemModelDatabase.Find(freeType)->number == 100);
+        CHECK(g_ItemModelDatabase.Find(freeType)->file == model.file);
+        CHECK(g_ItemDataHandler.HasModelsToReopen());
+        // The number is taken now.
+        CHECK_FALSE(g_ItemDataHandler.AddItem(item, nullptr));
+    }
+
+    SUBCASE("an item without names is not added")
+    {
+        ItemDefinition item;
+        item.number = 100;
+        CHECK_FALSE(g_ItemDataHandler.AddItem(item, nullptr));
+        CHECK(IsFreeItemType(freeType));
+    }
+
+    SUBCASE("a removed item frees its number, its model too")
+    {
+        REQUIRE(g_ItemModelDatabase.Find(KrisType) != nullptr);
+        REQUIRE(g_ItemDataHandler.RemoveItem(KrisType));
+        CHECK(g_ItemDatabase.Find(KrisType) == nullptr);
+        CHECK(g_ItemModelDatabase.Find(KrisType) == nullptr);
+        CHECK(ItemAttribute[KrisType].Name[0] == L'\0');
+        // Nothing is left of its values.
+        CHECK(g_ItemDatabase.GetAllSlots()[KrisType].width == 0);
+        CHECK(IsFreeItemType(KrisType));
+        CHECK_FALSE(g_ItemDataHandler.RemoveItem(KrisType));
+    }
+
+    SUBCASE("a moved item takes its row and its model to the free number")
+    {
+        REQUIRE(g_ItemDataHandler.MoveItem(KrisType, freeType));
+        CHECK(g_ItemDatabase.Find(KrisType) == nullptr);
+        REQUIRE(g_ItemDatabase.Find(freeType) != nullptr);
+        CHECK(g_ItemDatabase.Find(freeType)->names.GetNeutral() == "Kris");
+        CHECK(std::wstring(ItemAttribute[freeType].Name) == L"Kris");
+        CHECK(g_ItemModelDatabase.Find(freeType) != nullptr);
+        CHECK_FALSE(g_ItemDataHandler.MoveItem(freeType, BladeType));
+    }
+
+    SUBCASE("the undo puts back exactly what was stored")
+    {
+        const ItemDefinition before = *g_ItemDatabase.Find(BladeType);
+        ItemDefinition changed = before;
+        changed.weaponKind = WeaponKind::Glove;
+        g_ItemDataHandler.SetItem(changed);
+        g_ItemDataHandler.RestoreItems(std::span<const ItemDefinition>(&before, 1));
+        CHECK(*g_ItemDatabase.Find(BladeType) == before);
+    }
+}
+
+TEST_CASE("The item tools change models and shared models [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    REQUIRE_FALSE(g_ItemModelDatabase.GetSharedModels().empty());
+    const SharedItemModel shared = g_ItemModelDatabase.GetSharedModels().front();
+    std::vector<int> users;
+    for (const ItemModelDefinition& model : g_ItemModelDatabase.GetAllSlots())
+    {
+        if (model.Exists() && model.model == shared.name)
+        {
+            users.push_back(MakeItemType(model.group, model.number));
+        }
+    }
+    REQUIRE(users.size() > 1);
+
+    SUBCASE("a display value is not opened again, a file is")
+    {
+        ItemModelDefinition kris = *g_ItemModelDatabase.Find(KrisType);
+        kris.inventory.scale = 0.004;
+        g_ItemDataHandler.SetItemModel(kris);
+        CHECK(g_ItemModelDatabase.Find(KrisType)->inventory.scale == 0.004);
+        CHECK_FALSE(g_ItemDataHandler.HasModelsToReopen());
+        kris.file = "Data/Item/Sword02.bmd";
+        g_ItemDataHandler.SetItemModel(kris);
+        CHECK(g_ItemDataHandler.HasModelsToReopen());
+        // The game has no model slots in this test; nothing is opened.
+        CHECK(g_ItemDataHandler.ReopenChangedModels({}).empty());
+        CHECK_FALSE(g_ItemDataHandler.HasModelsToReopen());
+    }
+
+    SUBCASE("an item that names a shared model takes its file")
+    {
+        ItemModelDefinition kris = *g_ItemModelDatabase.Find(KrisType);
+        kris.model = shared.name;
+        kris.file.clear();
+        g_ItemDataHandler.SetItemModel(kris);
+        CHECK(g_ItemModelDatabase.Find(KrisType)->file == shared.file);
+        CHECK(g_ItemModelDatabase.Find(KrisType)->textureFolders == shared.textureFolders);
+    }
+
+    SUBCASE("a changed shared model changes all its items")
+    {
+        SharedItemModel changed = shared;
+        changed.file = "Data/Item/Sword03.bmd";
+        g_ItemDataHandler.SetSharedModel(changed);
+        for (const int user : users)
+        {
+            CHECK(g_ItemModelDatabase.Find(user)->file == "Data/Item/Sword03.bmd");
+        }
+        CHECK(g_ItemModelDatabase.FindSharedModel(shared.name)->file == "Data/Item/Sword03.bmd");
+    }
+
+    SUBCASE("a renamed shared model is named by all its items")
+    {
+        SharedItemModel renamed = shared;
+        renamed.name = "renamedModel";
+        g_ItemDataHandler.SetSharedModel(renamed, shared.name);
+        CHECK(g_ItemModelDatabase.FindSharedModel(shared.name) == nullptr);
+        for (const int user : users)
+        {
+            CHECK(g_ItemModelDatabase.Find(user)->model == "renamedModel");
+        }
+    }
+
+    SUBCASE("a shared model in use is not removed")
+    {
+        CHECK_FALSE(g_ItemDataHandler.RemoveSharedModel(shared.name));
+        CHECK(g_ItemModelDatabase.FindSharedModel(shared.name) != nullptr);
+        SharedItemModel unused{"unusedModel", "Data/Item/Sword04.bmd", {"Item"}, {}};
+        g_ItemDataHandler.SetSharedModel(unused);
+        CHECK(g_ItemDataHandler.RemoveSharedModel("unusedModel"));
+        CHECK(g_ItemModelDatabase.FindSharedModel("unusedModel") == nullptr);
+    }
+
+    SUBCASE("the save writes the changed model group and the shared model file")
+    {
+        SharedItemModel unused{"unusedModel", "Data/Item/Sword04.bmd", {"Item"}, {}};
+        g_ItemDataHandler.SetSharedModel(unused);
+        ItemModelDefinition kris = *g_ItemModelDatabase.Find(KrisType);
+        kris.inventory.scale = 0.004;
+        g_ItemDataHandler.SetItemModel(kris);
+        std::vector<ItemDataIssue> issues;
+        REQUIRE(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+        const std::filesystem::path models = folder.Directory() / GetItemModelDataDirectory();
+        CHECK(TestFiles::ReadWholeFile(models / "SharedModels.json").find("unusedModel") != std::string::npos);
+        CHECK(TestFiles::ReadWholeFile(models / GetItemGroupFileName(0)).find("0.004") != std::string::npos);
+    }
+}
+
+TEST_CASE("The item tools' changes can be undone and redone [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    MuEditor::Items::ItemEdits& edits = g_ItemEdits;
+    edits.GetHistory().Clear();
+    const MuEditor::Items::ItemSlotState kris = MuEditor::Items::ItemEdits::ReadSlot(KrisType);
+
+    SUBCASE("a field")
+    {
+        ItemDefinition changed = kris.item;
+        changed.damageMax = 99;
+        edits.SetItem("Damage", changed);
+        REQUIRE(edits.Undo());
+        CHECK(MuEditor::Items::ItemEdits::ReadSlot(KrisType) == kris);
+        CHECK(ItemAttribute[KrisType].DamageMax == kris.item.damageMax);
+        CHECK(g_ItemSelection.GetItemType() == KrisType);
+        REQUIRE(edits.Redo());
+        CHECK(g_ItemDatabase.Find(KrisType)->damageMax == 99);
+    }
+
+    SUBCASE("a removed item comes back with its model")
+    {
+        REQUIRE(edits.RemoveItem("Remove", KrisType));
+        REQUIRE(edits.Undo());
+        CHECK(MuEditor::Items::ItemEdits::ReadSlot(KrisType) == kris);
+        CHECK(std::wstring(ItemAttribute[KrisType].Name) == L"Kris");
+    }
+
+    SUBCASE("a name")
+    {
+        REQUIRE(edits.SetItemName("Name", KrisType, "de", "Dolch"));
+        REQUIRE(edits.Undo());
+        CHECK(GetOwnName(*g_ItemDatabase.Find(KrisType), "de") != "Dolch");
+        CHECK(MuEditor::Items::ItemEdits::ReadSlot(KrisType) == kris);
+    }
+
+    SUBCASE("a move")
+    {
+        const int target = MakeItemType(0, 100);
+        REQUIRE(edits.MoveItem("Move", KrisType, target));
+        REQUIRE(edits.Undo());
+        CHECK(g_ItemDatabase.Find(KrisType) != nullptr);
+        CHECK(g_ItemDatabase.Find(target) == nullptr);
+        CHECK(g_ItemModelDatabase.Find(KrisType) != nullptr);
+    }
+
+    SUBCASE("a move to another group and back keeps a picked weapon kind")
+    {
+        ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+        kris.weaponKind = WeaponKind::Axe;
+        edits.SetItem("Weapon kind", kris);
+        const int target = MakeItemType(1, 100);
+        REQUIRE(edits.MoveItem("Move", KrisType, target));
+        REQUIRE(edits.Undo());
+        CHECK(g_ItemDatabase.GetWeaponKind(KrisType) == WeaponKind::Axe);
+        // The step before the move is still as it left the item.
+        REQUIRE(edits.Undo());
+        CHECK(g_ItemDatabase.GetWeaponKind(KrisType) == WeaponKind::Sword);
+    }
+
+    SUBCASE("a renamed shared model")
+    {
+        const SharedItemModel shared = g_ItemModelDatabase.GetSharedModels().front();
+        SharedItemModel renamed = shared;
+        renamed.name = "renamedModel";
+        edits.SetSharedModel("Rename", renamed, shared.name);
+        REQUIRE(edits.Undo());
+        REQUIRE(g_ItemModelDatabase.FindSharedModel(shared.name) != nullptr);
+        CHECK(*g_ItemModelDatabase.FindSharedModel(shared.name) == shared);
+        CHECK(g_ItemModelDatabase.FindSharedModel("renamedModel") == nullptr);
+        for (const ItemModelDefinition& model : g_ItemModelDatabase.GetAllSlots())
+        {
+            CHECK(model.model != "renamedModel");
+        }
+    }
+
+    SUBCASE("a change past the history is not overwritten")
+    {
+        ItemDefinition changed = kris.item;
+        changed.damageMax = 99;
+        edits.SetItem("Damage", changed);
+        changed.damageMax = 50;
+        g_ItemDataHandler.SetItem(changed);
+        CHECK_FALSE(edits.Undo());
+        CHECK(g_ItemDatabase.Find(KrisType)->damageMax == 50);
+    }
+    edits.GetHistory().Clear();
+}
+
+TEST_CASE("The usage of an item lists its tags, its model and the code that names it [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+
+    const MuEditor::Items::ItemUsage kris = MuEditor::Items::FindItemUsage(KrisType);
+    CHECK(kris.hasModel);
+    CHECK(kris.IsUsed());
+    // The editor was built from these sources, and the code names the Kris.
+    REQUIRE(kris.codeKnown);
+    CHECK_FALSE(kris.code.empty());
+    // No set file is loaded here, so the set numbers are all 0: no set.
+    CHECK_FALSE(kris.inAncientSet);
+
+    const MuEditor::Items::ItemUsage nothing = MuEditor::Items::FindItemUsage(MakeItemType(0, 100));
+    CHECK_FALSE(nothing.hasModel);
+    CHECK(nothing.tags.empty());
+}
+
+namespace
+{
+// An ImGui context of its own for a test, without a window or a renderer.
+class TestImGuiContext
+{
+public:
+    TestImGuiContext() : m_previous(ImGui::GetCurrentContext()), m_context(ImGui::CreateContext())
+    {
+        ImGuiIO& io = ImGui::GetIO();
+        io.DisplaySize = ImVec2(DisplayWidth, DisplayHeight);
+        io.DeltaTime = 1.0f / 60.0f;
+        io.IniFilename = nullptr;
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        // The font atlas is built without a renderer that takes its texture.
+        io.BackendFlags |= ImGuiBackendFlags_RendererHasTextures;
+    }
+
+    ~TestImGuiContext()
+    {
+        ImGui::DestroyContext(m_context);
+        ImGui::SetCurrentContext(m_previous);
+    }
+
+    TestImGuiContext(const TestImGuiContext&) = delete;
+    TestImGuiContext& operator=(const TestImGuiContext&) = delete;
+
+private:
+    static constexpr float DisplayWidth = 1600.0f;
+    static constexpr float DisplayHeight = 1000.0f;
+
+    ImGuiContext* m_previous;
+    ImGuiContext* m_context;
+};
+
+// The id of a field an item tool window draws, inside the ID scopes it pushes
+// (the item type, a requirement), with its label.
+ImGuiID ItemToolFieldId(const char* windowId, std::initializer_list<int> scopes, const char* label)
+{
+    const ImGuiWindow* window = ImGui::FindWindowByName(windowId);
+    REQUIRE(window != nullptr);
+    ImGuiID seed = window->ID;
+    for (const int scope : scopes)
+    {
+        seed = ImGui::GetIDWithSeed(scope, seed);
+    }
+    return ImGui::GetIDWithSeed(label, nullptr, seed);
+}
+
+// Item Basics and Item Requirements for a frame, in the editor's order, after
+// the typed text.
+void RenderBasicsAndRequirements(const char* typed = nullptr)
+{
+    if (typed != nullptr)
+    {
+        ImGui::GetIO().AddInputCharactersUTF8(typed);
+    }
+    bool open = true;
+    ImGui::NewFrame();
+    g_MuItemBasicsUI.Render(&open);
+    g_MuItemRequirementsUI.Render(&open);
+    ImGui::Render();
+    CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+}
+
+// One item tool for a frame, after the typed text; `draw` false hides it, as
+// F12 hides the editor.
+template <typename TTool> void RenderItemTool(TTool& tool, bool draw, const char* typed = nullptr)
+{
+    if (typed != nullptr)
+    {
+        ImGui::GetIO().AddInputCharactersUTF8(typed);
+    }
+    bool open = true;
+    ImGui::NewFrame();
+    if (draw)
+    {
+        tool.Render(&open);
+    }
+    ImGui::Render();
+    CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+}
+
+// The Add item dialog for a frame; `open` opens it with the selected item.
+void RenderAddDialog(MuEditor::Items::CItemAddDialog& dialog, bool open)
+{
+    ImGui::NewFrame();
+    if (open)
+    {
+        dialog.OpenAdd(g_ItemSelection.GetItemType());
+    }
+    dialog.Render();
+    ImGui::Render();
+    CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+}
+
+// A widget of the Add item dialog, as a click or a click into a field.
+void ActivateInAddDialog(const char* label)
+{
+    const ImGuiWindow* window = ImGui::FindWindowByName("###ItemAddDialog");
+    REQUIRE(window != nullptr);
+    ImGui::ActivateItemByID(ImGui::GetIDWithSeed(label, nullptr, window->ID));
+}
+
+void RenderItemTools()
+{
+    bool open = true;
+    g_MuItemBrowserUI.Render(&open);
+    g_MuItemBasicsUI.Render(&open);
+    g_MuItemRequirementsUI.Render(&open);
+    g_MuItemRulesUI.Render(&open);
+    g_MuItemCategoriesUI.Render(&open);
+    g_MuItemModelUI.Render(&open);
+    g_MuItemGlowColorsUI.Render(&open);
+    g_MuItemFormulasUI.Render(&open);
+    g_MuItemChecksUI.Render(&open);
+    g_MuItemTranslationsUI.Render(&open);
+}
+
+void RenderModelTool()
+{
+    bool open = true;
+    g_MuItemModelUI.BeforeFrame();
+    ImGui::NewFrame();
+    g_MuItemModelUI.Render(&open);
+    ImGui::Render();
+    CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+}
+
+// A widget of the shared model form: the tool pushes the selected item's ID,
+// the form's fields "SharedModel" too.
+ImGuiID SharedModelFormId(const char* label, const char* scope = nullptr)
+{
+    const ImGuiWindow* tool = ImGui::FindWindowByName(MuEditor::WindowIds::ItemModel);
+    REQUIRE(tool != nullptr);
+    ImGuiID id = ImGui::GetIDWithSeed(g_ItemSelection.GetItemType(), tool->ID);
+    if (scope != nullptr)
+    {
+        id = ImGui::GetIDWithSeed(scope, nullptr, id);
+    }
+    return ImGui::GetIDWithSeed(label, nullptr, id);
+}
+
+// As a click: pressed in the next frame; a disabled button is not.
+void PressInModelTool(ImGuiID id)
+{
+    ImGui::ActivateItemByID(id);
+    RenderModelTool();
+}
+
+// Activation selects all of the field's text; the typed text replaces it.
+void TypeIntoModelTool(ImGuiID id, const char* text)
+{
+    ImGui::ActivateItemByID(id);
+    RenderModelTool();
+    ImGui::GetIO().AddInputCharactersUTF8(text);
+    RenderModelTool();
+}
+
+ImGuiWindow* OpenPopupWindow()
+{
+    const ImGuiContext& g = *ImGui::GetCurrentContext();
+    return g.OpenPopupStack.empty() ? nullptr : g.OpenPopupStack.back().Window;
+}
+} // namespace
+
+// Draws every item tool for a few frames, with an item that has a model and a
+// number without anything: ImGui counts what the windows get wrong (Begin and
+// End, Push and Pop out of step) as errors of the frame.
+TEST_CASE("The item tools draw their frames without ImGui errors [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    TestModelSlots slots;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    TestImGuiContext context;
+
+    constexpr int Frames = 5;
+    // Item Formulas with each kind of entry picked.
+    using FormulaEntry = CMuItemFormulasUI::Entry;
+    const FormulaEntry entries[] = {{FormulaEntry::Kind::DropLevelBonus, {}},
+                                    {FormulaEntry::Kind::Default, {}},
+                                    {FormulaEntry::Kind::Profile, "shield"},
+                                    {FormulaEntry::Kind::Table, "defenseIncreaseShields"},
+                                    {FormulaEntry::Kind::Rules, {}}};
+    size_t entry = 0;
+    for (const int itemType : {KrisType, MakeItemType(0, 100)})
+    {
+        g_ItemSelection.Select(itemType);
+        for (int frame = 0; frame < Frames; ++frame)
+        {
+            g_MuItemFormulasUI.Show(entries[entry++ % std::size(entries)]);
+            // Between frames, as the editor does.
+            g_MuItemModelUI.BeforeFrame();
+            ImGui::NewFrame();
+            RenderItemTools();
+            ImGui::Render();
+            INFO("item type " << itemType << ", frame " << frame);
+            CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+        }
+    }
+    // The model tool's inventory display shown before it is stored ends.
+    g_MuItemModelUI.BeforeFrame();
+}
+
+// A click into a field of one tool leaves the field of another, which is stored
+// in that frame; the clicked tool takes the stored item, so its own edit does
+// not bring the old values back.
+TEST_CASE("A field clicked into while another item tool stores its edit keeps that edit [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    g_ItemSelection.Select(KrisType);
+    REQUIRE(g_ItemDatabase.Find(KrisType)->requirements.level != 42);
+    REQUIRE(g_ItemDatabase.Find(KrisType)->durability != 30);
+
+    TestImGuiContext context;
+    RenderBasicsAndRequirements();
+    const ImGuiID level =
+        ItemToolFieldId(MuEditor::WindowIds::ItemRequirements, {KrisType, static_cast<int>(ItemRequirement::Level)},
+                        I18N::Metadata::ReqLevel);
+    const ImGuiID durability = ItemToolFieldId(MuEditor::WindowIds::ItemBasics, {KrisType}, I18N::Metadata::Durability);
+    // Activation selects the field's text: the typed text replaces it.
+    ImGui::ActivateItemByID(level);
+    RenderBasicsAndRequirements();
+    REQUIRE(ImGui::GetActiveID() == level);
+    RenderBasicsAndRequirements("42");
+
+    // The click into Durability stores the level.
+    ImGui::ActivateItemByID(durability);
+    RenderBasicsAndRequirements();
+    REQUIRE(ImGui::GetActiveID() == durability);
+    REQUIRE(g_ItemDatabase.Find(KrisType)->requirements.level == 42);
+    RenderBasicsAndRequirements("30");
+    // Left by a click into the level: stored the frame after.
+    ImGui::ActivateItemByID(level);
+    RenderBasicsAndRequirements();
+    RenderBasicsAndRequirements();
+
+    CHECK(g_ItemDatabase.Find(KrisType)->durability == 30);
+    CHECK(g_ItemDatabase.Find(KrisType)->requirements.level == 42);
+    g_ItemEdits.GetHistory().Clear();
+}
+
+// The checks of a field left also hold for an edit stored without it: the
+// window hidden while the field is typed in.
+TEST_CASE(
+    "Item Basics refuses an English name also when it is stored without its field being left [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    g_ItemSelection.Select(KrisType);
+    const std::string kris = g_ItemDatabase.Find(KrisType)->names.GetNeutral();
+
+    TestImGuiContext context;
+    RenderItemTool(g_MuItemBasicsUI, true);
+    const ImGuiID name = ItemToolFieldId(MuEditor::WindowIds::ItemBasics, {KrisType}, I18N::Editor::EnglishName);
+    ImGui::ActivateItemByID(name);
+    RenderItemTool(g_MuItemBasicsUI, true);
+    REQUIRE(ImGui::GetActiveID() == name);
+    RenderItemTool(g_MuItemBasicsUI, true, "Kr||is");
+
+    SUBCASE("the window hidden, as F12 does")
+    {
+        RenderItemTool(g_MuItemBasicsUI, false);
+        RenderItemTool(g_MuItemBasicsUI, false);
+        RenderItemTool(g_MuItemBasicsUI, true);
+    }
+    SUBCASE("the field left")
+    {
+        ImGui::ActivateItemByID(
+            ItemToolFieldId(MuEditor::WindowIds::ItemBasics, {KrisType}, I18N::Metadata::Durability));
+        RenderItemTool(g_MuItemBasicsUI, true);
+        RenderItemTool(g_MuItemBasicsUI, true);
+    }
+    CHECK(g_ItemDatabase.Find(KrisType)->names.GetNeutral() == kris);
+    CHECK_FALSE(g_ItemEdits.GetHistory().CanUndo());
+    g_ItemEdits.GetHistory().Clear();
+}
+
+// A +0 value that several weights give needs one picked from the list, which
+// a store without its field being left cannot ask: it is dropped.
+TEST_CASE("Item Requirements does not store a +0 value that needs a weight picked when its window is hidden "
+          "[data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    g_ItemSelection.Select(KrisType);
+    const ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+    REQUIRE(MuEditor::Items::HasWeight(kris, ItemRequirement::Strength));
+    int value = MuEditor::Items::ComputeZeroValue(kris, ItemRequirement::Strength) + 1;
+    while (MuEditor::Items::FindWeightsGiving(kris, ItemRequirement::Strength, value).GetCount() < 2)
+    {
+        ++value;
+        REQUIRE(value < 1000);
+    }
+    REQUIRE(MuEditor::Items::ChooseWeight(kris, ItemRequirement::Strength, value, kris.requirements.strength).kind ==
+            MuEditor::Items::WeightChoice::Kind::Pick);
+
+    TestImGuiContext context;
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    const ImGuiID strength =
+        ItemToolFieldId(MuEditor::WindowIds::ItemRequirements, {KrisType, static_cast<int>(ItemRequirement::Strength)},
+                        I18N::Metadata::ReqStrength);
+    ImGui::ActivateItemByID(strength);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    REQUIRE(ImGui::GetActiveID() == strength);
+    RenderItemTool(g_MuItemRequirementsUI, true, std::to_string(value).c_str());
+    RenderItemTool(g_MuItemRequirementsUI, false);
+    RenderItemTool(g_MuItemRequirementsUI, false);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+
+    CHECK(g_ItemDatabase.Find(KrisType)->requirements.strength == kris.requirements.strength);
+    CHECK_FALSE(g_ItemEdits.GetHistory().CanUndo());
+    g_ItemEdits.GetHistory().Clear();
+}
+
+// The click from the weight field into the +0 field of the same requirement
+// leaves the weight field, which stores under the same label: a +0 value
+// typed next that several weights give still asks which.
+TEST_CASE(
+    "A +0 value typed right after the weight field of its requirement still asks for its weight [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    g_ItemSelection.Select(KrisType);
+    const int typedWeight = g_ItemDatabase.Find(KrisType)->requirements.strength + 10;
+
+    TestImGuiContext context;
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    const std::initializer_list<int> strengthScope = {KrisType, static_cast<int>(ItemRequirement::Strength)};
+    const ImGuiID weight = ItemToolFieldId(MuEditor::WindowIds::ItemRequirements, strengthScope, I18N::Editor::Weight);
+    const ImGuiID zeroValue =
+        ItemToolFieldId(MuEditor::WindowIds::ItemRequirements, strengthScope, I18N::Metadata::ReqStrength);
+    ImGui::ActivateItemByID(weight);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    REQUIRE(ImGui::GetActiveID() == weight);
+    RenderItemTool(g_MuItemRequirementsUI, true, std::to_string(typedWeight).c_str());
+    ImGui::ActivateItemByID(zeroValue);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    REQUIRE(ImGui::GetActiveID() == zeroValue);
+    REQUIRE(g_ItemDatabase.Find(KrisType)->requirements.strength == typedWeight);
+
+    // A +0 value several other weights give.
+    const ItemDefinition weighted = *g_ItemDatabase.Find(KrisType);
+    int value = MuEditor::Items::ComputeZeroValue(weighted, ItemRequirement::Strength) + 1;
+    while (MuEditor::Items::FindWeightsGiving(weighted, ItemRequirement::Strength, value).GetCount() < 2)
+    {
+        ++value;
+        REQUIRE(value < 2000);
+    }
+    REQUIRE(MuEditor::Items::ChooseWeight(weighted, ItemRequirement::Strength, value, typedWeight).kind ==
+            MuEditor::Items::WeightChoice::Kind::Pick);
+    RenderItemTool(g_MuItemRequirementsUI, true, std::to_string(value).c_str());
+    // Left by a click into the weight field.
+    ImGui::ActivateItemByID(weight);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+
+    // The weight list asks; nothing is stored until one is taken.
+    CHECK(OpenPopupWindow() != nullptr);
+    CHECK(g_ItemDatabase.Find(KrisType)->requirements.strength == typedWeight);
+    g_ItemEdits.GetHistory().Clear();
+}
+
+// An item added with a size of its own starts without a slot, so no class can
+// wear it, as most items of groups 12 to 15.
+TEST_CASE("Add item without copying makes an item without a slot [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    // Selected: the dialog adds to its group.
+    const int potionType = MakeItemType(14, 1);
+    REQUIRE(g_ItemDatabase.Find(potionType) != nullptr);
+    g_ItemSelection.Select(potionType);
+
+    TestImGuiContext context;
+    MuEditor::Items::CItemAddDialog dialog;
+    RenderAddDialog(dialog, true);
+    RenderAddDialog(dialog, false);
+    // Unchecked: a size and slot of its own.
+    ActivateInAddDialog(I18N::Editor::CopyTheSelectedItem);
+    RenderAddDialog(dialog, false);
+    ActivateInAddDialog(I18N::Editor::EnglishName);
+    RenderAddDialog(dialog, false);
+    ImGui::GetIO().AddInputCharactersUTF8("Test Potion");
+    RenderAddDialog(dialog, false);
+    ActivateInAddDialog(I18N::Editor::Add);
+    RenderAddDialog(dialog, false);
+
+    // Add selects the new item.
+    REQUIRE(g_ItemSelection.GetItemType() != potionType);
+    const ItemDefinition* added = g_ItemDatabase.Find(g_ItemSelection.GetItemType());
+    REQUIRE(added != nullptr);
+    CHECK(added->names.GetNeutral() == "Test Potion");
+    CHECK(added->group == 14);
+    CHECK(added->slot == ItemSlot::None);
+    CHECK(added->weaponKind == WeaponKind::None);
+    CHECK(std::ranges::all_of(added->classRequirements, [](BYTE step) { return step == 0; }));
+    g_ItemEdits.GetHistory().Clear();
+}
+
+// A click into the world leaves no editor window focused, and the game window
+// has the keyboard: the Map Editor's keys still reach it then, but not while
+// a text field of another window is typed in.
+TEST_CASE("The Map Editor's Ctrl+Z and Delete reach it after a click into the world [editor]")
+{
+    TestImGuiContext context;
+    // A test's editor core has no window: the game has the keyboard.
+    REQUIRE_FALSE(g_MuEditorCore.IsKeyboardWithEditor());
+    ImGuiIO& io = ImGui::GetIO();
+    int undos = 0;
+    int deletes = 0;
+    bool focusText = false;
+    char text[16] = "abc";
+    const auto frame = [&]
+    {
+        ImGui::NewFrame();
+        ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+        ImGui::SetNextWindowSize(ImVec2(300.0f, 200.0f));
+        ImGui::Begin(MuEditor::WindowIds::MapEditor);
+        undos += CMapEditorUI::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Z) ? 1 : 0;
+        deletes += CMapEditorUI::Shortcut(ImGuiKey_Delete) ? 1 : 0;
+        ImGui::End();
+        ImGui::SetNextWindowPos(ImVec2(400.0f, 0.0f));
+        ImGui::SetNextWindowSize(ImVec2(300.0f, 200.0f));
+        ImGui::Begin("Other tool");
+        if (focusText)
+        {
+            ImGui::SetKeyboardFocusHere();
+            focusText = false;
+        }
+        ImGui::InputText("Name", text, sizeof(text));
+        ImGui::End();
+        ImGui::Render();
+    };
+    const auto press = [&](ImGuiKeyChord chord)
+    {
+        const auto key = static_cast<ImGuiKey>(chord & ~ImGuiMod_Mask_);
+        const bool ctrl = (chord & ImGuiMod_Ctrl) != 0;
+        if (ctrl)
+        {
+            io.AddKeyEvent(ImGuiMod_Ctrl, true);
+        }
+        io.AddKeyEvent(key, true);
+        frame();
+        io.AddKeyEvent(key, false);
+        if (ctrl)
+        {
+            io.AddKeyEvent(ImGuiMod_Ctrl, false);
+        }
+        frame();
+    };
+    frame();
+    frame();
+
+    SUBCASE("after a click into the world")
+    {
+        // No window there.
+        io.AddMousePosEvent(1000.0f, 800.0f);
+        io.AddMouseButtonEvent(ImGuiMouseButton_Left, true);
+        frame();
+        io.AddMouseButtonEvent(ImGuiMouseButton_Left, false);
+        frame();
+        frame();
+        REQUIRE(ImGui::GetCurrentContext()->NavWindow == nullptr);
+        press(ImGuiMod_Ctrl | ImGuiKey_Z);
+        press(ImGuiKey_Delete);
+        CHECK(undos == 1);
+        CHECK(deletes == 1);
+    }
+    SUBCASE("not while a text field of another window is typed in")
+    {
+        focusText = true;
+        frame();
+        frame();
+        frame();
+        REQUIRE(ImGui::GetActiveID() != 0);
+        press(ImGuiKey_Delete);
+        press(ImGuiMod_Ctrl | ImGuiKey_Z);
+        CHECK(deletes == 0);
+        CHECK(undos == 0);
+    }
+}
+
+// ImGui keeps the focus in an item tool when the game window takes the
+// keyboard back (Alt+Tab with the editor inside a full-screen game): a Ctrl+Z
+// typed while playing does not undo the last item edit.
+TEST_CASE("An item tool's Ctrl+Z does not undo while the game window has the keyboard [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+    ++kris.damageMax;
+    REQUIRE(g_ItemEdits.SetItem("Change the Kris", kris));
+    g_ItemSelection.Select(KrisType);
+
+    TestImGuiContext context;
+    // A test's editor core has no window: the game has the keyboard.
+    REQUIRE_FALSE(g_MuEditorCore.IsKeyboardWithEditor());
+    ImGuiIO& io = ImGui::GetIO();
+    bool ctrlZPressed = false;
+    const auto frame = [&](bool focusTool)
+    {
+        bool open = true;
+        ImGui::NewFrame();
+        if (focusTool)
+        {
+            ImGui::SetWindowFocus(MuEditor::WindowIds::ItemRules);
+        }
+        g_MuItemRulesUI.Render(&open);
+        ctrlZPressed = ctrlZPressed || ImGui::IsKeyChordPressed(ImGuiMod_Ctrl | ImGuiKey_Z);
+        ImGui::Render();
+    };
+    frame(false);
+    frame(true);
+    frame(false);
+    REQUIRE(ImGui::GetCurrentContext()->NavWindow == ImGui::FindWindowByName(MuEditor::WindowIds::ItemRules));
+    io.AddKeyEvent(ImGuiMod_Ctrl, true);
+    io.AddKeyEvent(ImGuiKey_Z, true);
+    frame(false);
+    io.AddKeyEvent(ImGuiKey_Z, false);
+    io.AddKeyEvent(ImGuiMod_Ctrl, false);
+    frame(false);
+
+    // The press arrived, and the step is still there.
+    CHECK(ctrlZPressed);
+    CHECK(g_ItemEdits.GetHistory().CanUndo());
+    CHECK(g_ItemDatabase.Find(KrisType)->damageMax == kris.damageMax);
+    g_ItemEdits.GetHistory().Clear();
+}
+
+// ImGui keeps the row a Shift click starts from as an index into the rows: a
+// search that lists other rows moves it to its item's row, or drops it.
+TEST_CASE("The Shift click source of Item Rules follows its item when other rows are listed [data][items][editor]")
+{
+    ClientDataScope client(ShippedClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    std::vector<int> swords;
+    std::vector<int> bows;
+    for (const ItemDefinition& item : g_ItemDatabase.GetAllSlots())
+    {
+        if (item.Exists() && item.group == 0 && swords.size() < 20)
+        {
+            swords.push_back(MakeItemType(item.group, item.number));
+        }
+        if (item.Exists() && item.group == 4)
+        {
+            bows.push_back(MakeItemType(item.group, item.number));
+        }
+    }
+    REQUIRE(swords.size() == 20);
+
+    TestImGuiContext context;
+    MuEditor::Items::CItemRulesTable table;
+    const auto draw = [&](const std::vector<int>& rows)
+    {
+        ImGui::NewFrame();
+        ImGui::SetNextWindowSize(ImVec2(800.0f, 600.0f));
+        ImGui::Begin("Rules");
+        table.Render(rows, -1, false);
+        ImGui::End();
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    draw(swords);
+    ImPool<ImGuiMultiSelectState>& states = ImGui::GetCurrentContext()->MultiSelectStorage;
+    REQUIRE(states.GetAliveCount() == 1);
+    ImGuiMultiSelectState* state = states.GetByIndex(0);
+    // As a click on row 10 leaves it.
+    state->RangeSrcItem = 10;
+    draw(std::vector<int>(swords.begin() + 7, swords.end()));
+    // The same sword, now in row 3.
+    CHECK(state->RangeSrcItem == 3);
+    draw(bows);
+    CHECK(state->RangeSrcItem == ImGuiSelectionUserData_Invalid);
+}
+
+// A layout saved before the item tools: the item table (now the browser) in
+// the tools above the console. An item tool opened the first time docks with
+// the browser, not into the console.
+TEST_CASE(
+    "An item tool opened the first time in a layout from before the item tools docks with the browser [editor][items]")
+{
+    TestImGuiContext context;
+    ImGuiID tools = 0;
+    ImGuiID console = 0;
+    bool browserOpen = true;
+    bool browserSaved = true;
+    bool translationsSaved = false;
+    const auto frame = [&]
+    {
+        ImGui::NewFrame();
+        ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+        ImGui::SetNextWindowSize(ImVec2(1200.0f, 800.0f));
+        ImGui::Begin("Editor", nullptr, ImGuiWindowFlags_NoDocking);
+        // As BuildDefaultLayout made it before the item tools.
+        const ImGuiID dockSpace = ImGui::GetID("ToolWindows");
+        if (ImGui::DockBuilderGetNode(dockSpace) == nullptr)
+        {
+            ImGui::DockBuilderAddNode(dockSpace, ImGuiDockNodeFlags_DockSpace);
+            ImGui::DockBuilderSetNodeSize(dockSpace, ImVec2(1200.0f, 780.0f));
+            console = ImGui::DockBuilderSplitNode(dockSpace, ImGuiDir_Down, 0.25f, nullptr, &tools);
+            ImGui::DockBuilderDockWindow(MuEditor::WindowIds::Console, console);
+            if (browserSaved)
+            {
+                ImGui::DockBuilderDockWindow(MuEditor::WindowIds::ItemBrowser, tools);
+            }
+            if (translationsSaved)
+            {
+                // Saved by phase 5, not open.
+                ImGui::DockBuilderDockWindow(MuEditor::WindowIds::ItemTranslations, tools);
+            }
+            ImGui::DockBuilderFinish(dockSpace);
+        }
+        // The node is there: it is not built again.
+        MuEditor::Layout::SubmitDockSpace(false);
+        ImGui::End();
+        if (browserOpen)
+        {
+            ImGui::Begin(MuEditor::WindowIds::ItemBrowser);
+            ImGui::End();
+        }
+        MuEditor::Layout::DockBesideItemTools(MuEditor::WindowIds::ItemBasics);
+        ImGui::Begin(MuEditor::WindowIds::ItemBasics);
+        ImGui::End();
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    SUBCASE("the browser open") {}
+    SUBCASE("the browser not open")
+    {
+        browserOpen = false;
+    }
+    SUBCASE("only a tool saved where the browser was, not open")
+    {
+        // The browser gives no place: the tool's saved one does.
+        browserOpen = false;
+        browserSaved = false;
+        translationsSaved = true;
+    }
+    frame();
+    frame();
+    const ImGuiWindow* basics = ImGui::FindWindowByName(MuEditor::WindowIds::ItemBasics);
+    REQUIRE(basics != nullptr);
+    CHECK(basics->DockId == tools);
+}
+
+// The warning before a shared model changes lists its items; a click on one
+// selects it, and the warning stays open to apply the change.
+TEST_CASE("A click in the shared model warning's list keeps the warning open [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    TestModelSlots slots;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    const SharedItemModel shared = g_ItemModelDatabase.GetSharedModels().front();
+    const std::vector<int> users = MuEditor::Items::FindSharedModelUsers(shared.name);
+    REQUIRE(users.size() > 1);
+    REQUIRE(shared.noneBlendMeshes != std::vector<int>{1, 2});
+
+    TestImGuiContext context;
+    g_ItemSelection.Select(users[0]);
+    for (int frame = 0; frame < 3; ++frame)
+    {
+        RenderModelTool();
+    }
+    TypeIntoModelTool(SharedModelFormId(I18N::Editor::NoneBlendMeshes, "SharedModel"), "1, 2");
+    PressInModelTool(SharedModelFormId(I18N::Editor::ApplyToTheSharedModel));
+    RenderModelTool();
+    REQUIRE(OpenPopupWindow() != nullptr);
+
+    // As a click on the second item in the warning's list does.
+    g_ItemSelection.Select(users[1]);
+    for (int frame = 0; frame < 3; ++frame)
+    {
+        RenderModelTool();
+    }
+    ImGuiWindow* warning = OpenPopupWindow();
+    REQUIRE(warning != nullptr);
+    PressInModelTool(ImGui::GetIDWithSeed(I18N::Editor::ApplyToTheSharedModel, nullptr, warning->ID));
+    CHECK(OpenPopupWindow() == nullptr);
+    CHECK(g_ItemModelDatabase.FindSharedModel(shared.name)->noneBlendMeshes == std::vector<int>{1, 2});
+    CHECK(g_ItemEdits.GetHistory().GetUndoLabel() == I18N::Editor::ChangeASharedModel);
+    g_ItemEdits.GetHistory().Clear();
+}
+
+// The meshes typed without the spaces the field writes are applied as numbers;
+// the form follows the undo of that change.
+TEST_CASE("The shared model form follows an undo of meshes typed without spaces [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    TestModelSlots slots;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    const SharedItemModel shared = g_ItemModelDatabase.GetSharedModels().front();
+    const std::vector<int> users = MuEditor::Items::FindSharedModelUsers(shared.name);
+    REQUIRE(users.size() > 1);
+    REQUIRE(shared.noneBlendMeshes != std::vector<int>{1, 2});
+
+    TestImGuiContext context;
+    g_ItemSelection.Select(users[0]);
+    for (int frame = 0; frame < 3; ++frame)
+    {
+        RenderModelTool();
+    }
+    TypeIntoModelTool(SharedModelFormId(I18N::Editor::NoneBlendMeshes, "SharedModel"), "1,2");
+    PressInModelTool(SharedModelFormId(I18N::Editor::ApplyToTheSharedModel));
+    RenderModelTool();
+    ImGuiWindow* warning = OpenPopupWindow();
+    REQUIRE(warning != nullptr);
+    PressInModelTool(ImGui::GetIDWithSeed(I18N::Editor::ApplyToTheSharedModel, nullptr, warning->ID));
+    REQUIRE(g_ItemModelDatabase.FindSharedModel(shared.name)->noneBlendMeshes == std::vector<int>{1, 2});
+
+    // What Ctrl+Z does.
+    REQUIRE(g_ItemEdits.Undo());
+    RenderModelTool();
+    CHECK(g_ItemModelDatabase.FindSharedModel(shared.name)->noneBlendMeshes == shared.noneBlendMeshes);
+    // The form shows the undone model, so there is nothing to apply.
+    PressInModelTool(SharedModelFormId(I18N::Editor::ApplyToTheSharedModel));
+    CHECK(OpenPopupWindow() == nullptr);
+    g_ItemEdits.GetHistory().Clear();
+}
+
+// Items with the same name: the lucky sets have a tag their namesakes do not,
+// the Seals of Wealth and the seed sphere tiers count up by number.
+TEST_CASE("The item lists tell items with the same name apart [data][items][editor]")
+{
+    ClientDataScope client(ShippedClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    MuEditor::Items::ItemNamesakes& namesakes = g_ItemNamesakes;
+
+    CHECK(namesakes.GetQualifier(KrisType).empty());
+    CHECK(namesakes.GetQualifier(MakeItemType(7, 1)).empty());
+    CHECK(namesakes.GetQualifier(MakeItemType(7, 67)) == "luckyItem");
+    CHECK(namesakes.GetQualifier(MakeItemType(13, 44)) == "#1");
+    CHECK(namesakes.GetQualifier(MakeItemType(13, 116)) == "#2");
+    // The Divine and the Faith set have names of their own.
+    CHECK(namesakes.GetQualifier(MakeItemType(7, 19)).empty());
+    CHECK(namesakes.GetQualifier(MakeItemType(7, 50)).empty());
+    CHECK(namesakes.GetQualifier(MakeItemType(12, 100)) == "#1");
+    CHECK(namesakes.GetQualifier(MakeItemType(12, 124)) == "#5");
+
+    // A renamed item has a namesake no more.
+    ItemDefinition renamed = *g_ItemDatabase.Find(MakeItemType(13, 116));
+    renamed.name = L"Seal of Plenty";
+    renamed.names.Set("en", "Seal of Plenty");
+    g_ItemDataHandler.SetItem(renamed);
+    CHECK(namesakes.GetQualifier(MakeItemType(13, 44)).empty());
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+}
+
+// The stats a weapon, a staff, a shield, a helm and wings have at each level,
+// normal, excellent and ancient, as the game computes them for the stored item.
+TEST_CASE("Item Basics shows the stats at each level, from the values being typed [data][items][editor]")
+{
+    ClientDataScope client(ShippedClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    using MuEditor::Items::ComputeItemLevelValues;
+    using MuEditor::Items::ItemLevelValues;
+    using MuEditor::Items::RequirementVariant;
+
+    for (const int itemType : {KrisType, static_cast<int>(ITEM_SKULL_STAFF), static_cast<int>(ITEM_SMALL_SHIELD),
+                               static_cast<int>(ITEM_DRAGON_HELM), static_cast<int>(ITEM_WINGS_OF_ELF)})
+    {
+        const ItemDefinition item = *g_ItemDatabase.Find(itemType);
+        for (const RequirementVariant variant :
+             {RequirementVariant{}, RequirementVariant{true, false, 0}, RequirementVariant{false, true, 0}})
+        {
+            const ItemLevelValues values = ComputeItemLevelValues(item, variant);
+            for (int level = 0; level < Data::Items::ItemLevelCount; ++level)
+            {
+                const GameLogic::Items::ItemStatValues game = GameLogic::Items::ComputeItemStats(
+                    ItemAttribute[itemType], {itemType, level, static_cast<BYTE>(variant.excellent ? 1 : 0),
+                                              static_cast<BYTE>(variant.ancient ? 1 : 0), 0});
+                const GameLogic::Items::ItemStatValues& shown = values[static_cast<size_t>(level)];
+                INFO(g_ItemDatabase.GetLogName(itemType)
+                     << " +" << level << " excellent " << variant.excellent << " ancient " << variant.ancient);
+                CHECK(shown.damageMin == game.damageMin);
+                CHECK(shown.damageMax == game.damageMax);
+                CHECK(shown.magicPower == game.magicPower);
+                CHECK(shown.defense == game.defense);
+                CHECK(shown.magicDefense == game.magicDefense);
+                CHECK(shown.blockRate == game.blockRate);
+            }
+        }
+    }
+
+    // A base value being typed counts at once.
+    ItemDefinition stronger = *g_ItemDatabase.Find(KrisType);
+    const int before = ComputeItemLevelValues(stronger, {})[5].damageMax;
+    stronger.damageMax = static_cast<BYTE>(stronger.damageMax + 10);
+    CHECK(ComputeItemLevelValues(stronger, {})[5].damageMax == before + 10);
+}
+
+TEST_CASE("Item Requirements shows what the game asks at each level, from the values being typed "
+          "[data][items][editor]")
+{
+    ClientDataScope client(ShippedClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    using MuEditor::Items::ComputeRequirementTable;
+    using MuEditor::Items::FindRequirementBase;
+    using MuEditor::Items::RequirementTable;
+    constexpr size_t Strength = static_cast<size_t>(ItemRequirement::Strength);
+
+    ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+    // As the game's /Kris window shows it: 20 + 40 * (6 + 3 * level) * 3 / 100.
+    const RequirementTable normal = ComputeRequirementTable(kris, {});
+    const int expected[] = {27, 30, 34, 38, 41, 45, 48, 52, 56, 59, 63, 66, 70, 74, 77, 81};
+    for (size_t level = 0; level < normal.size(); ++level)
+    {
+        CHECK(normal[level][Strength] == expected[level]);
+    }
+    CHECK(ComputeRequirementTable(kris, {true, false, 0})[0][Strength] == 57);
+    CHECK(ComputeRequirementTable(kris, {false, false, 4})[0][Strength] == 47);
+    // The weapon profile adds strength per option level, the default one none.
+    CHECK(MuEditor::Items::OptionLevelAddsStrength(kris));
+    ItemDefinition defaultProfile = kris;
+    defaultProfile.statProfile = "default";
+    CHECK_FALSE(MuEditor::Items::OptionLevelAddsStrength(defaultProfile));
+
+    // A base value being typed counts at once.
+    ItemDefinition stronger = kris;
+    stronger.requirements.strength = 80;
+    CHECK(ComputeRequirementTable(stronger, {})[0][Strength] > normal[0][Strength]);
+
+    // By item level: the values a normal item has, so nothing changes for it;
+    // turning it off finds the base value back.
+    RequirementByLevel values{};
+    for (size_t level = 0; level < values.size(); ++level)
+    {
+        values[level] = static_cast<WORD>(normal[level][Strength]);
+    }
+    ItemDefinition byLevel = kris;
+    byLevel.requirementsByLevel.Set(ItemRequirement::Strength, values);
+    byLevel.requirements.strength = 0;
+    const RequirementTable fromLevels = ComputeRequirementTable(byLevel, {});
+    for (size_t level = 0; level < fromLevels.size(); ++level)
+    {
+        CHECK(fromLevels[level][Strength] == normal[level][Strength]);
+    }
+    CHECK(FindRequirementBase(byLevel, ItemRequirement::Strength, values) == kris.requirements.strength);
+    CHECK(FindRequirementBase(byLevel, ItemRequirement::Level, RequirementByLevel{12, 12}) == 12);
+    // Also with a strength at the highest value, which the addition cannot raise.
+    ItemDefinition capped = byLevel;
+    RequirementByLevel cappedValues = values;
+    cappedValues[0] = 65535;
+    capped.requirementsByLevel.Set(ItemRequirement::Strength, cappedValues);
+    CHECK(MuEditor::Items::OptionLevelAddsStrength(capped));
+
+    // A +0 value no base gives: the base with the nearest one.
+    const ItemDefinition darkBreaker = *g_ItemDatabase.Find(MakeItemType(0, 17));
+    const RequirementTable darkBreakerTable = ComputeRequirementTable(darkBreaker, {});
+    RequirementByLevel typed{};
+    for (size_t level = 0; level < typed.size(); ++level)
+    {
+        typed[level] = static_cast<WORD>(darkBreakerTable[level][Strength]);
+    }
+    // A base step adds about 3 to the +0 value of this sword (581 at 180, 584
+    // at 181), so 582 is nearest to the base it has.
+    typed[0] = static_cast<WORD>(typed[0] + 1);
+    CHECK(FindRequirementBase(darkBreaker, ItemRequirement::Strength, typed) == darkBreaker.requirements.strength);
+
+    // With drop level 0 every base above 0 gives the same +0 value; the other
+    // levels still find the base back.
+    ItemDefinition dropLevelZero = kris;
+    dropLevelZero.level = 0;
+    dropLevelZero.requirements.strength = 1500;
+    const RequirementTable dropLevelZeroTable = ComputeRequirementTable(dropLevelZero, {});
+    RequirementByLevel fromDropLevelZero{};
+    for (size_t level = 0; level < fromDropLevelZero.size(); ++level)
+    {
+        fromDropLevelZero[level] = static_cast<WORD>(dropLevelZeroTable[level][Strength]);
+    }
+    ItemDefinition weakest = dropLevelZero;
+    weakest.requirements.strength = 1;
+    CHECK(ComputeRequirementTable(weakest, {})[0][Strength] == dropLevelZeroTable[0][Strength]);
+    CHECK(FindRequirementBase(dropLevelZero, ItemRequirement::Strength, fromDropLevelZero) == 1500);
+}
+
+// A number field is typed into, then its form is not drawn for a frame (its
+// window hidden, the editor closed): the edit is stored, as when it is left.
+TEST_CASE("An item tool's edit is stored when its form stops being drawn [editor][items]")
+{
+    TestImGuiContext context;
+    int stored = 0;
+    int storedTimes = 0;
+    MuEditor::Items::ItemEditDraft<int> draft([&](int) { return std::optional<int>(stored); },
+                                              [&](const std::string&, const int& value)
+                                              {
+                                                  stored = value;
+                                                  ++storedTimes;
+                                              });
+    const auto drawForm = [&](bool typeDigit)
+    {
+        if (typeDigit)
+        {
+            ImGui::GetIO().AddInputCharacter('7');
+        }
+        ImGui::NewFrame();
+        ImGui::Begin("Form");
+        int* value = draft.Begin(0, 0);
+        REQUIRE(value != nullptr);
+        if (ImGui::GetFrameCount() == 1)
+        {
+            ImGui::SetKeyboardFocusHere();
+        }
+        ImGui::InputInt("Value", value);
+        draft.AfterField("Value");
+        draft.End();
+        ImGui::End();
+        ImGui::Render();
+    };
+    const auto skipFrames = [](int frames)
+    {
+        for (int frame = 0; frame < frames; ++frame)
+        {
+            ImGui::NewFrame();
+            ImGui::Render();
+        }
+    };
+    drawForm(false);
+    drawForm(false);
+    drawForm(true);
+    REQUIRE(storedTimes == 0);
+
+    SUBCASE("for frames")
+    {
+        skipFrames(3);
+    }
+    SUBCASE("for one frame, after which ImGui still reports the field as left")
+    {
+        skipFrames(1);
+    }
+    drawForm(false);
+    CHECK(storedTimes == 1);
+    CHECK(stored == 7);
+}
+
+// The arrow of a header closes its section on mouse down, before ImGui reports
+// the field in it left; the closed section does not draw the field to report
+// it. SetNextItemOpen(false) closes it as the arrow does.
+TEST_CASE("An item tool's edit is stored when its section is closed while it is typed [editor][items]")
+{
+    TestImGuiContext context;
+    int stored = 0;
+    int storedTimes = 0;
+    MuEditor::Items::ItemEditDraft<int> draft([&](int) { return std::optional<int>(stored); },
+                                              [&](const std::string&, const int& value)
+                                              {
+                                                  stored = value;
+                                                  ++storedTimes;
+                                              });
+    const auto drawForm = [&](bool sectionOpen, bool typeDigit)
+    {
+        if (typeDigit)
+        {
+            ImGui::GetIO().AddInputCharacter('7');
+        }
+        ImGui::NewFrame();
+        ImGui::Begin("Form");
+        int* value = draft.Begin(0, 0);
+        REQUIRE(value != nullptr);
+        ImGui::SetNextItemOpen(sectionOpen);
+        if (ImGui::CollapsingHeader("Section"))
+        {
+            if (ImGui::GetFrameCount() == 1)
+            {
+                ImGui::SetKeyboardFocusHere();
+            }
+            ImGui::InputInt("Value", value);
+            draft.AfterField("Value");
+        }
+        draft.End();
+        ImGui::End();
+        ImGui::Render();
+    };
+    drawForm(true, false);
+    drawForm(true, false);
+    drawForm(true, true);
+    REQUIRE(storedTimes == 0);
+
+    drawForm(false, false);
+    CHECK(storedTimes == 1);
+    CHECK(stored == 7);
+    SUBCASE("the section stays closed")
+    {
+        for (int frame = 0; frame < 3; ++frame)
+        {
+            drawForm(false, false);
+        }
+        drawForm(true, false);
+    }
+    SUBCASE("the section opens while ImGui still reports the field as left")
+    {
+        drawForm(true, false);
+    }
+    // Stored once.
+    CHECK(storedTimes == 1);
+}
+
 TEST_CASE("The save warns about an item name in a language the game has no texts for [data][items][editor]")
 {
     TemporaryClientFolder folder;
@@ -1331,10 +3066,112 @@ TEST_CASE("The save warns about an item name in a language the game has no texts
                               }));
 }
 
-// The bmd import and the editor give items the profile their data gives; a stat file can lack it
-// (renamed or removed). The item then keeps the default with a warning; an item that still names
-// the profile is an error on save.
-TEST_CASE("A derived stat profile the item stat file does not have keeps the default [data][items][editor]")
+namespace
+{
+// The issues of the item at (group, number) with this severity and field.
+bool HasIssue(const std::vector<ItemDataIssue>& issues, ItemDataIssueSeverity severity, int group, int number,
+              std::string_view field)
+{
+    return std::ranges::any_of(issues,
+                               [&](const ItemDataIssue& issue)
+                               {
+                                   return issue.severity == severity && issue.group == group &&
+                                          issue.number == number && issue.field == field;
+                               });
+}
+} // namespace
+
+// The checks the item tools show and the save runs before it writes.
+TEST_CASE("The editor's checks report problems of the item models [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    g_ItemDataHandler.SetLookNames(Render::Items::Styles::Exists, Render::Items::ItemEffects::Exists);
+
+    std::vector<ItemDataIssue> issues;
+    g_ItemDataHandler.Validate(issues);
+    REQUIRE_FALSE(HasErrors(issues));
+    // The folder has the data files but not the .bmd files.
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, 0, 0, "file"));
+    issues.clear();
+
+    ItemModelDefinition kris = *g_ItemModelDatabase.Find(KrisType);
+    SUBCASE("a shared model that does not exist")
+    {
+        kris.model = "noSuchModel";
+        g_ItemModelDatabase.Set(kris, g_GlowColors);
+        g_ItemDataHandler.Validate(issues);
+        CHECK(HasIssue(issues, ItemDataIssueSeverity::Error, 0, 0, "model"));
+        std::vector<ItemDataIssue> saveIssues;
+        CHECK(g_ItemDataHandler.Save(saveIssues) == ItemDataSaveResult::InvalidData);
+    }
+    SUBCASE("a look that does not exist")
+    {
+        kris.renderStyle = "noSuchStyle";
+        kris.itemEffect = "noSuchEffect";
+        g_ItemModelDatabase.Set(kris, g_GlowColors);
+        g_ItemDataHandler.Validate(issues);
+        CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, 0, 0, "renderStyle"));
+        CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, 0, 0, "itemEffect"));
+        CHECK_FALSE(HasErrors(issues));
+    }
+    SUBCASE("a value the model file reader refuses")
+    {
+        kris.inventory.scale = 0.0;
+        g_ItemModelDatabase.Set(kris, g_GlowColors);
+        g_ItemDataHandler.Validate(issues);
+        CHECK(HasErrors(issues));
+    }
+    SUBCASE("a glow color that is not in the list")
+    {
+        kris.glow.color = "noSuchColor";
+        g_ItemModelDatabase.Set(kris, g_GlowColors);
+        g_ItemDataHandler.Validate(issues);
+        CHECK(HasErrors(issues));
+    }
+    SUBCASE("a value of a shared model the reader refuses")
+    {
+        REQUIRE_FALSE(g_ItemModelDatabase.GetSharedModels().empty());
+        SharedItemModel shared = g_ItemModelDatabase.GetSharedModels().front();
+        SUBCASE("a file with backslashes")
+        {
+            shared.file = "Data\\Item\\Sword01.bmd";
+        }
+        SUBCASE("no file")
+        {
+            shared.file.clear();
+        }
+        SUBCASE("a texture folder with a slash at the end")
+        {
+            shared.textureFolders = {"Item/"};
+        }
+        g_ItemModelDatabase.SetSharedModel(shared);
+        g_ItemDataHandler.Validate(issues);
+        CHECK(std::ranges::any_of(
+            issues, [](const ItemDataIssue& issue)
+            { return issue.severity == ItemDataIssueSeverity::Error && issue.source == SharedItemModelsFileName; }));
+    }
+    SUBCASE("a file that two items name themselves")
+    {
+        ItemModelDefinition copy = kris;
+        copy.number = 30;
+        g_ItemModelDatabase.Set(copy, g_GlowColors);
+        g_ItemDataHandler.Validate(issues);
+        CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, 0, 0, "file"));
+        CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, 0, 30, "file"));
+    }
+}
+
+// A stat file that lacks a profile items name (removed outside the editor) stops the save of
+// the items, together with the other errors of the item checks.
+TEST_CASE("An item that names a profile the item stat file does not have blocks the save [data][items][editor]")
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
@@ -1342,56 +3179,226 @@ TEST_CASE("A derived stat profile the item stat file does not have keeps the def
     I18N::SetLocale("en");
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
-    std::string changeLog;
-    REQUIRE(g_ItemDataHandler.ExportAsBmd(changeLog));
 
     ItemStatsLoadResult stats = LoadItemStatsFile(folder.Directory() / GetItemStatsFile());
     REQUIRE_FALSE(HasErrors(stats.issues));
     std::erase_if(stats.file.profiles, [](const WrittenStatProfile& profile) { return profile.name == "shield"; });
+    std::erase_if(stats.file.profileRules, [](const StatProfileRule& rule) { return rule.profile == "shield"; });
     ItemStatProfilesScope restoreProfiles;
     g_ItemDatabase.SetStatProfiles(ItemStatProfiles(stats.file));
-    const auto namesShield = [](ItemDataIssueSeverity severity)
-    {
-        return [severity](const ItemDataIssue& issue)
-        {
-            return issue.severity == severity && issue.field == "statProfile" &&
-                   issue.message.find("\"shield\"") != std::string::npos;
-        };
-    };
 
-    SUBCASE("the import")
+    // An item without an English name is an error of the item checks.
+    ItemDefinition untranslated = *g_ItemDatabase.Find(KrisType);
+    untranslated.names = Data::LocalizedString{};
+    untranslated.names.Set("pt", "Cris");
+    g_ItemDatabase.Set(untranslated);
+
+    std::vector<ItemDataIssue> issues;
+    CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::InvalidData);
+    CHECK(std::ranges::any_of(issues,
+                              [](const ItemDataIssue& issue)
+                              {
+                                  return issue.severity == ItemDataIssueSeverity::Error &&
+                                         issue.field == "statProfile" &&
+                                         issue.message.find("\"shield\"") != std::string::npos;
+                              }));
+    CHECK(std::ranges::any_of(issues,
+                              [](const ItemDataIssue& issue)
+                              {
+                                  return issue.severity == ItemDataIssueSeverity::Error && issue.group == 0 &&
+                                         issue.number == 0 && issue.field != "statProfile";
+                              }));
+}
+
+TEST_CASE("Save Items writes the item stat file when the editor changed it [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    ItemStatProfilesScope restoreProfiles;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    const std::filesystem::path statsFile = folder.Directory() / GetItemStatsFile();
+    const std::string shippedText = TestFiles::ReadWholeFile(statsFile);
+    const ItemStatsLoadResult shipped = LoadItemStatsFile(statsFile);
+    REQUIRE(shipped.issues.empty());
+    CHECK(g_ItemDataHandler.GetStatFile() == shipped.file);
+
+    SUBCASE("unchanged, it is left as it is")
     {
-        const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
-        REQUIRE_FALSE(HasErrors(result.issues));
-        CHECK_FALSE(HasErrors(result.validationIssues));
-        CHECK(std::ranges::any_of(result.validationIssues, namesShield(ItemDataIssueSeverity::Warning)));
-        CHECK(g_ItemDatabase.Find(ITEM_SMALL_SHIELD)->statProfile.empty());
+        std::vector<ItemDataIssue> issues;
+        REQUIRE(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+        CHECK(TestFiles::ReadWholeFile(statsFile) == shippedText);
     }
 
-    SUBCASE("an edit")
+    SUBCASE("changed, it is written and reads back the same")
     {
-        g_ItemDataHandler.OnItemEdited(ITEM_SMALL_SHIELD);
-        CHECK(g_ItemDatabase.Find(ITEM_SMALL_SHIELD)->statProfile.empty());
+        ItemStatFile changed = shipped.file;
+        changed.excellentDropLevelBonus = 26;
+        // The handler keeps the writer's order.
+        std::swap(changed.profiles.front(), changed.profiles.back());
+        g_ItemDataHandler.SetStatFile(changed);
+        CHECK(g_ItemDatabase.GetStatProfiles().GetExcellentDropLevelBonus() == 26);
+        CHECK(g_ItemDataHandler.GetStatFile().profiles.front().name == shipped.file.profiles.front().name);
+
+        std::vector<ItemDataIssue> issues;
+        REQUIRE(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+        const ItemStatsLoadResult saved = LoadItemStatsFile(statsFile);
+        CHECK(saved.issues.empty());
+        CHECK(saved.file == g_ItemDataHandler.GetStatFile());
+        CHECK(TestFiles::ReadWholeFile(statsFile) != shippedText);
     }
 
-    SUBCASE("the save of items that still name it, with the item checks")
+    SUBCASE("invalid, it stops the save")
     {
-        // An item without an English name is an error of the item checks.
-        ItemDefinition untranslated = *g_ItemDatabase.Find(KrisType);
-        untranslated.names = Data::LocalizedString{};
-        untranslated.names.Set("pt", "Cris");
-        g_ItemDatabase.Set(untranslated);
+        ItemStatFile invalid = shipped.file;
+        invalid.tables.front().name = "no name";
+        g_ItemDataHandler.SetStatFile(invalid);
 
         std::vector<ItemDataIssue> issues;
         CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::InvalidData);
-        CHECK(std::ranges::any_of(issues, namesShield(ItemDataIssueSeverity::Error)));
         CHECK(std::ranges::any_of(issues,
                                   [](const ItemDataIssue& issue)
                                   {
-                                      return issue.severity == ItemDataIssueSeverity::Error && issue.group == 0 &&
-                                             issue.number == 0 && issue.field != "statProfile";
+                                      return issue.severity == ItemDataIssueSeverity::Error &&
+                                             issue.source == GetItemStatsFile().generic_string();
                                   }));
+        CHECK(TestFiles::ReadWholeFile(statsFile) == shippedText);
     }
+}
+
+// A stat file written by hand need not have its profiles in name order; the
+// editor keeps it in the writer's order, so the undo history matches it.
+TEST_CASE("A change of a stat file whose profiles are not in name order is undone and redone [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    const std::filesystem::path statsFile = folder.Directory() / GetItemStatsFile();
+    std::string text = TestFiles::ReadWholeFile(statsFile);
+    // armor is the first profile and weapon the last, with the same terms:
+    // swapping their names puts the profiles out of order without changing them.
+    const size_t armor = text.find(R"("name": "armor")");
+    const size_t weapon = text.rfind(R"("name": "weapon")");
+    REQUIRE(armor != std::string::npos);
+    REQUIRE(weapon != std::string::npos);
+    text.replace(weapon, std::string(R"("name": "weapon")").size(), R"("name": "armor")");
+    text.replace(armor, std::string(R"("name": "armor")").size(), R"("name": "weapon")");
+    std::ofstream(statsFile, std::ios::binary) << text;
+
+    ClientDataScope client(folder.Directory());
+    ItemStatProfilesScope restoreProfiles;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    CHECK(g_ItemDataHandler.GetStatFile().profiles.front().name == "armor");
+    MuEditor::Items::ItemEdits& edits = g_ItemEdits;
+    edits.GetHistory().Clear();
+
+    ItemStatFile changed = g_ItemDataHandler.GetStatFile();
+    changed.excellentDropLevelBonus = 26;
+    edits.SetStatFile("Change the item formulas", changed);
+    REQUIRE(edits.Undo());
+    CHECK(g_ItemDataHandler.GetStatFile().excellentDropLevelBonus == 25);
+    CHECK(edits.Redo());
+    CHECK(g_ItemDataHandler.GetStatFile().excellentDropLevelBonus == 26);
+    edits.GetHistory().Clear();
+}
+
+TEST_CASE("A change of the profile rules gives the items that follow them the new profile, as one undo step "
+          "[data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    ItemStatProfilesScope restoreProfiles;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    MuEditor::Items::ItemEdits& edits = g_ItemEdits;
+    edits.GetHistory().Clear();
+    const ItemStatFile shipped = g_ItemDataHandler.GetStatFile();
+
+    // A boots item picked as a weapon keeps its pick.
+    const int pickedBoots = MakeItemType(11, 0);
+    EditItem(pickedBoots, [](ItemDefinition& boots) { boots.statProfile = "weapon"; });
+    REQUIRE(g_ItemDatabase.Find(pickedBoots)->statProfile == "weapon");
+    std::vector<int> boots;
+    for (const ItemDefinition& item : g_ItemDatabase.GetAllSlots())
+    {
+        if (item.Exists() && item.slot == ItemSlot::Boots && item.statProfile == "armor")
+        {
+            boots.push_back(MakeItemType(item.group, item.number));
+        }
+    }
+    REQUIRE(boots.size() > 10);
+
+    SUBCASE("the boots leave the armour rule")
+    {
+        ItemStatFile changed = shipped;
+        const auto armor = std::ranges::find_if(changed.profileRules,
+                                                [](const StatProfileRule& rule) { return rule.profile == "armor"; });
+        REQUIRE(armor != changed.profileRules.end());
+        armor->slots.reset(static_cast<size_t>(ItemSlot::Boots));
+        const std::vector<MuEditor::Items::StatProfileChange> changes = MuEditor::Items::FindStatProfileChanges(
+            g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(), ItemStatProfiles(changed));
+        REQUIRE(changes.size() == boots.size());
+        edits.SetStatFile("Change the profile rules", changed,
+                          MuEditor::Items::ApplyStatProfileChanges(g_ItemDatabase.GetAllSlots(), changes));
+        for (const int itemType : boots)
+        {
+            CHECK(g_ItemDatabase.Find(itemType)->statProfile.empty());
+        }
+        CHECK(g_ItemDatabase.Find(pickedBoots)->statProfile == "weapon");
+        CHECK(g_ItemDatabase.Find(ITEM_HORN_OF_FENRIR)->statProfile == "default");
+
+        REQUIRE(edits.Undo());
+        CHECK(g_ItemDataHandler.GetStatFile() == shipped);
+        for (const int itemType : boots)
+        {
+            CHECK(g_ItemDatabase.Find(itemType)->statProfile == "armor");
+        }
+        REQUIRE(edits.Redo());
+        CHECK(g_ItemDatabase.Find(boots.front())->statProfile.empty());
+
+        // An item edited after the change refuses the undo.
+        EditItem(boots.front(), [](ItemDefinition& item) { item.durability = 99; });
+        CHECK_FALSE(edits.GetHistory().Undo());
+    }
+
+    SUBCASE("a renamed profile renames the rules and the items that name it")
+    {
+        const GameLogic::Items::ItemStatInput input{KrisType, 9, 1, 0, 4};
+        const GameLogic::Items::ItemStatValues krisBefore =
+            GameLogic::Items::ComputeItemStats(*g_ItemDataHandler.GetItemAttribute(KrisType), input);
+
+        ItemStatFile renamed = shipped;
+        MuEditor::Items::RenameStatProfile(renamed, "weapon", "blade");
+        const std::vector<MuEditor::Items::StatProfileChange> changes =
+            MuEditor::Items::FindStatProfileChanges(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(),
+                                                    ItemStatProfiles(renamed), "weapon", "blade");
+        // The 113 weapons and the boots picked as a weapon.
+        CHECK(changes.size() == 114);
+        edits.SetStatFile("Rename the stat profile", renamed,
+                          MuEditor::Items::ApplyStatProfileChanges(g_ItemDatabase.GetAllSlots(), changes));
+        CHECK(g_ItemDatabase.Find(KrisType)->statProfile == "blade");
+        CHECK(g_ItemDatabase.Find(pickedBoots)->statProfile == "blade");
+        const GameLogic::Items::ItemStatValues krisAfter =
+            GameLogic::Items::ComputeItemStats(*g_ItemDataHandler.GetItemAttribute(KrisType), input);
+        CHECK(krisAfter.damageMin == krisBefore.damageMin);
+        CHECK(krisAfter.damageMax == krisBefore.damageMax);
+        CHECK(krisAfter.requireStrength == krisBefore.requireStrength);
+        CHECK(krisAfter.requireDexterity == krisBefore.requireDexterity);
+
+        std::vector<ItemDataIssue> issues;
+        g_ItemDataHandler.Validate(issues);
+        CHECK_FALSE(HasErrors(issues));
+
+        REQUIRE(edits.Undo());
+        CHECK(g_ItemDatabase.Find(KrisType)->statProfile == "weapon");
+        CHECK(g_ItemDataHandler.GetStatFile() == shipped);
+    }
+    edits.GetHistory().Clear();
 }
 
 TEST_CASE("Exporting unchanged bmd files is not a failure [data][items][editor]")
@@ -1407,5 +3414,145 @@ TEST_CASE("Exporting unchanged bmd files is not a failure [data][items][editor]"
 
     std::string secondChangeLog;
     CHECK(g_ItemDataHandler.ExportAsBmd(secondChangeLog));
+}
+
+namespace
+{
+using Data::Effects::GlowColor;
+
+std::vector<GlowColor> CurrentGlowColors()
+{
+    const std::span<const GlowColor> colors = g_GlowColors.GetColors();
+    return {colors.begin(), colors.end()};
+}
+
+// Whether one of the item's glow colors (glow, shine, ancient) is this one.
+bool GlowsWith(int itemType, const std::array<float, 3>& color)
+{
+    const ItemGlowColors* colors = g_ItemModelDatabase.FindGlowColors(itemType);
+    return colors != nullptr &&
+           (colors->color == color || colors->shineColor == color || colors->ancientColor == color);
+}
+} // namespace
+
+// D26 for the glow colors: a new color an item picks, a changed value that
+// reaches every item that uses it, and only unused colors removed.
+TEST_CASE("The item tools add glow colors, change them and remove unused ones [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    const std::vector<GlowColor> shipped = CurrentGlowColors();
+    const std::filesystem::path colorsFile = folder.Directory() / GetGlowColorsFile();
+    const std::string shippedText = TestFiles::ReadWholeFile(colorsFile);
+    MuEditor::Items::ItemEdits& edits = g_ItemEdits;
+    edits.GetHistory().Clear();
+    constexpr std::array<float, 3> Teal{0.0f, 0.5f, 0.5f};
+
+    SUBCASE("a new color an item picks is saved, and undone with the pick")
+    {
+        const MuEditor::Items::ItemSlotState kris = MuEditor::Items::ItemEdits::ReadSlot(KrisType);
+        // As the model tool adds it from a color field.
+        edits.BeginGroup("New glow color");
+        edits.SetGlowColor("New glow color", {"teal", {0, 0.5, 0.5}});
+        ItemModelDefinition model = *g_ItemModelDatabase.Find(KrisType);
+        model.glow.color = "teal";
+        edits.SetItemModel("Glow color", model);
+        edits.EndGroup();
+        CHECK(g_GlowColors.GetColors().back() == GlowColor{"teal", {0, 0.5, 0.5}});
+        CHECK(g_ItemModelDatabase.FindGlowColors(KrisType)->color == Teal);
+        CHECK(MuEditor::Items::FindGlowColorUsers("teal") == std::vector<int>{KrisType});
+
+        std::vector<ItemDataIssue> issues;
+        REQUIRE(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+        const GlowColorsLoadResult saved = LoadGlowColorsFile(colorsFile);
+        CHECK(saved.issues.empty());
+        CHECK(saved.colors == CurrentGlowColors());
+
+        REQUIRE(edits.Undo());
+        CHECK(MuEditor::Items::ItemEdits::ReadSlot(KrisType) == kris);
+        CHECK(CurrentGlowColors() == shipped);
+        REQUIRE(edits.Redo());
+        CHECK(g_ItemModelDatabase.FindGlowColors(KrisType)->color == Teal);
+
+        // The next start reads it back.
+        REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+        CHECK(g_ItemModelDatabase.Find(KrisType)->glow.color == "teal");
+        CHECK(g_ItemModelDatabase.FindGlowColors(KrisType)->color == Teal);
+    }
+
+    SUBCASE("a changed value reaches every item that uses the color")
+    {
+        // Nothing changed: the save leaves the file as it is.
+        std::vector<ItemDataIssue> issues;
+        REQUIRE(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+        CHECK(TestFiles::ReadWholeFile(colorsFile) == shippedText);
+
+        const std::vector<int> users = MuEditor::Items::FindGlowColorUsers("gold");
+        REQUIRE(users.size() > 1);
+        const std::array<float, 3> gold = MuEditor::Items::ToColorField(*g_GlowColors.Find("gold"));
+        constexpr std::array<float, 3> Yellow{1.0f, 1.0f, 0.0f};
+        edits.SetGlowColor("Change a glow color", {"gold", {1, 1, 0}});
+        for (const int user : users)
+        {
+            INFO("item type " << user);
+            CHECK(GlowsWith(user, Yellow));
+        }
+        // The color keeps its place in the file.
+        const std::vector<GlowColor> changed = CurrentGlowColors();
+        REQUIRE(changed.size() == shipped.size());
+        for (size_t index = 0; index < shipped.size(); ++index)
+        {
+            CHECK(changed[index].name == shipped[index].name);
+        }
+
+        REQUIRE(edits.Undo());
+        CHECK(CurrentGlowColors() == shipped);
+        CHECK(GlowsWith(users.front(), gold));
+    }
+
+    SUBCASE("only colors no item uses are removed, never the default colors")
+    {
+        edits.SetGlowColor("New glow color", {"unused", {0.2, 0.2, 0.2}});
+        const std::string names[] = {"unused", Data::Items::ItemGlow::DefaultColor, "gold"};
+        REQUIRE(edits.RemoveGlowColors("Remove unused glow colors", names));
+        CHECK(g_GlowColors.Find("unused") == nullptr);
+        CHECK(g_GlowColors.Find(Data::Items::ItemGlow::DefaultColor) != nullptr);
+        CHECK(g_GlowColors.Find("gold") != nullptr);
+        const std::string used[] = {"gold"};
+        CHECK_FALSE(edits.RemoveGlowColors("Remove a glow color", used));
+
+        REQUIRE(edits.Undo());
+        CHECK(g_GlowColors.Find("unused") != nullptr);
+
+        // With no model left to use them, only the default rule keeps them.
+        g_ItemModelDatabase.Build({}, g_GlowColors);
+        for (const char* name : {Data::Items::ItemGlow::DefaultColor, Data::Items::ItemGlow::DefaultShineColor,
+                                 Data::Items::ItemGlow::DefaultAncientColor})
+        {
+            INFO(name);
+            CHECK_FALSE(g_ItemDataHandler.RemoveGlowColor(name));
+            CHECK(g_GlowColors.Find(name) != nullptr);
+        }
+    }
+
+    SUBCASE("a name the file would refuse stops the save")
+    {
+        g_ItemDataHandler.SetGlowColor({"light blue", {0, 0, 1}});
+        std::vector<ItemDataIssue> issues;
+        CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::InvalidData);
+        CHECK(
+            std::ranges::any_of(issues, [](const ItemDataIssue& issue) { return issue.field == "colors.light blue"; }));
+        CHECK(TestFiles::ReadWholeFile(colorsFile) == shippedText);
+    }
+
+    edits.GetHistory().Clear();
+    g_GlowColors.Build(shipped);
 }
 #endif

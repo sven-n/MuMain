@@ -1026,64 +1026,6 @@
       "classRequirements": {
         "rageFighter": 1
       }
-    },
-    {
-      "number": 39,
-      "name": {
-        "en": "Lighting Sword-J",
-        "de": "Blitzschwert-J",
-        "es": "Espada Lumínica-J",
-        "pt": "Espada de luz-J"
-      },
-      "width": 1,
-      "height": 3,
-      "slot": "mainHand",
-      "weaponKind": "sword",
-      "statProfile": "weapon",
-      "skill": 22,
-      "level": 59,
-      "durability": 50,
-      "damageMin": 59,
-      "damageMax": 67,
-      "attackSpeed": 35,
-      "attackType": 1,
-      "requirements": {
-        "strength": 90,
-        "dexterity": 50
-      },
-      "classRequirements": {
-        "darkKnight": 1,
-        "fairyElf": 1,
-        "magicGladiator": 1
-      }
-    },
-    {
-      "number": 40,
-      "name": {
-        "en": "Sacred Glove-J",
-        "de": "Heiliger Handschuh-J",
-        "es": "Guantes Sagrados-J",
-        "pt": "Luvas Sagradas-J"
-      },
-      "width": 1,
-      "height": 2,
-      "slot": "mainHand",
-      "weaponKind": "glove",
-      "statProfile": "weapon",
-      "skill": 260,
-      "level": 52,
-      "durability": 65,
-      "damageMin": 52,
-      "damageMax": 58,
-      "attackSpeed": 30,
-      "attackType": 1,
-      "requirements": {
-        "strength": 85,
-        "dexterity": 35
-      },
-      "classRequirements": {
-        "rageFighter": 1
-      }
     }
   ]
 }
