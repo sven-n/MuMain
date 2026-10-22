@@ -98,8 +98,8 @@ bool ReadId(const OrderedJson& json, const std::string& field, int& id, IssueLis
 }
 
 // A text of the group; one longer than maxUnits UTF-16 units is cut.
-bool ReadText(const OrderedJson& json, const std::string& field, const char* key, size_t maxUnits,
-              std::string& text, IssueList& issues)
+bool ReadText(const OrderedJson& json, const std::string& field, const char* key, size_t maxUnits, std::string& text,
+              IssueList& issues)
 {
     const auto value = json.find(key);
     if (value == json.end())
