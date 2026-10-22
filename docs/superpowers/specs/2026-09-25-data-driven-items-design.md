@@ -49,7 +49,7 @@ share with items) is planned in the
 | D12 | Id ranges | No reserved number ranges for custom items, and no range checks (`type >= X && type <= Y`) in new code; everything an item "is" comes from its data. OpenMU must keep supporting the original Season 6 client **and** this client (see section 7). |
 | D13 | Other item files | `ItemAddOption`, `SocketItem`, `Mix`, `pet` and set options are decided later, when we know more. |
 | D14 | Item options | The item file only holds **links** to the option groups an item can have (Luck, additional option, excellent, wing, harmony, guardian, socket, …). The option definitions (values, chances, levels) live in their own files. Related data stays together in one file, e.g. an option definition with all its levels and values. |
-| D15 | Tooltips | Tooltips become data-driven with JSON data, converted from `ItemTooltip*` / `ItemLevelTooltip` (see "Unused item files in the repo"). Phase 8, after the item phases; moved earlier if the item changes turn out to need it. The tooltip bmd files stay in the repo until then. |
+| D15 | Tooltips | Tooltips become data-driven with JSON data, converted from `ItemTooltip*` / `ItemLevelTooltip` (see "Unused item files in the repo"). Phase 8, after the item phases; moved earlier if the item changes turn out to need it. The tooltip bmd files stayed in the repo until then; they were removed once the item data held the tooltips and the names by level (#815). |
 | D16 | Unused item bmd copies | Removed on this branch; the game only loads `Item_<lang>.bmd`. |
 | D17 | Translations in phase 2 | Item names moved into phase 2, because the per-language bmd files were the only place the Portuguese and Spanish names existed. Names are `LocalizedString`s imported from all three files; the UI locale (the same setting as the `.resx` texts) picks the shown name, also when it changes at runtime. On disk, each item's `name` is an object of names by language (`{"en": "Blade", "es": "Espada", "pt": "Lâmina"}`, English first) in the item files; separate translation files were tried and dropped as extra maintenance. Phase 5 keeps only the translation tooling. |
 | D18 | Repairing the legacy data | The bmd import recovers names that ran past the 30-byte name field and takes the fields they overwrote from a language whose name did not reach them (defaults when none has them). Names that are not UTF-8 are read as Windows-1252. The changes are listed in the phase 2 PR and in `docs/item-data.md`. |
@@ -81,8 +81,9 @@ share with items) is planned in the
 
 ### Unused item files in the repo
 
-No code in the repo loads these files, and `git log -S` finds no loader
-in the history either. They use the usual bmd encoding (`BuxConvert` XOR
+No code in the repo loaded these files, and `git log -S` finds no loader
+in the history either. They were removed once the item data held what
+they describe (#815, step 5); the git history keeps them. They use the usual bmd encoding (`BuxConvert` XOR
 `FC CF AB`, restarted for every record), followed by a 4-byte trailer
 (probably a checksum). They exist for `Eng`, `Por` and `Spn`.
 
