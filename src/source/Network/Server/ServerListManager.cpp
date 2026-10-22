@@ -6,6 +6,8 @@
 #include "ServerListManager.h"
 #include "I18N/All.h"
 
+#include <memory>
+
 CServerListManager::CServerListManager()
 {
     m_iTotalServer = 0;
@@ -120,11 +122,12 @@ void CServerListManager::InsertServerGroup(int iConnectIndex, int iServerPercent
     }
     else
     {
-        pServerGroup = new CServerGroup;
-
-        if (MakeServerGroup(iConnectIndex / MAX_SERVER_PER_GROUP, pServerGroup) == false)
+        // A server of a group the list does not have is not shown.
+        auto pNewServerGroup = std::make_unique<CServerGroup>();
+        if (MakeServerGroup(iConnectIndex / MAX_SERVER_PER_GROUP, pNewServerGroup.get()) == false)
             return;
 
+        pServerGroup = pNewServerGroup.release();
         m_mapServerGroup.insert(type_mapServerGroup::value_type(pServerGroup->m_iSequence, pServerGroup));
     }
 
