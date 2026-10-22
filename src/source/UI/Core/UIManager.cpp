@@ -31,16 +31,16 @@ extern int TextNum;
 
 namespace mu::ui::window
 {
-	int& MouseY = ::MouseY;
-	int& g_iCancelSkillTarget = ::g_iCancelSkillTarget;
-    wchar_t (&TextList)[MaxTextListRows][100] = ::TextList;
-    int (&TextListColor)[MaxTextListRows] = ::TextListColor;
-    int (&TextBold)[MaxTextListRows] = ::TextBold;
-    int& TextNum = ::TextNum;
-	int& ItemHelp = ::ItemHelp;
-	JewelHarmonyInfo*& g_pUIJewelHarmonyinfo = ::g_pUIJewelHarmonyinfo;
-	int& SelectedCharacter = ::SelectedCharacter;
-}
+int& MouseY = ::MouseY;
+int& g_iCancelSkillTarget = ::g_iCancelSkillTarget;
+wchar_t (&TextList)[MaxTextListRows][100] = ::TextList;
+int (&TextListColor)[MaxTextListRows] = ::TextListColor;
+int (&TextBold)[MaxTextListRows] = ::TextBold;
+int& TextNum = ::TextNum;
+int& ItemHelp = ::ItemHelp;
+JewelHarmonyInfo*& g_pUIJewelHarmonyinfo = ::g_pUIJewelHarmonyinfo;
+int& SelectedCharacter = ::SelectedCharacter;
+} // namespace mu::ui::window
 
 extern int   ShopInventoryStartX;
 extern int   ShopInventoryStartY;
