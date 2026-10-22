@@ -123,6 +123,8 @@ bool CItemDataHandler::Load(std::string& errorMessage)
         ValidateDescriptionPlaceholders(result.items, statProfiles, GetItemStatsFile().generic_string(), result.issues);
     }
     ItemTooltipLoadResult tooltips = LoadItemTooltipFile(GetItemTooltipFile());
+    ValidateTooltipTextLocales(tooltips.file, I18N::GetAvailableLocales(), GetItemTooltipFile().generic_string(),
+                               tooltips.issues);
     result.issues.insert(result.issues.end(), tooltips.issues.begin(), tooltips.issues.end());
     if (!HasErrors(tooltips.issues))
     {
