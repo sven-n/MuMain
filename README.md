@@ -122,6 +122,7 @@ Missing keys take the defaults below. The options window writes most of them; se
 | **`[Render]`**              | `Backend`                                                                                             | `default`            | SDL GPU driver: `default`, `vulkan`, `direct3d12` (or `d3d12`), `metal`. Falls back to SDL's choice with a logged warning when unavailable. Edited by hand only. |
 | **`[Render]`**              | `DisableEffects`, `DisableParticles`, `DisableSkillEffectModels`, `DisableBoids`, `DisableWingShadow`, `DisableBodyShadows` | `0`                  | Rendering-cost reductions for low-end PCs, also in the options window and `$effects`.                                                                            |
 | **`[Render]`**              | `SortParticleDraws`                                                                                   | `0`                  | Opt-in depth sorting of particle draws.                                                                                                                          |
+| **`[Render]`**              | `TexturePack`                                                                                         | empty                | Active [texture pack](docs/texture-packs.md), a folder in `Data/TexturePacks/`; empty uses the original textures. Read at startup; set in the options window.    |
 | **`[ChatCommands]`**        | `Favourite<N>`, `Template<N>`                                                                         | none                 | Written by the [chat commands window](docs/chat-commands.md).                                                                                                    |
 
 A new install starts from `src/bin/config.ini.template`. Retired keys, such as
@@ -180,6 +181,9 @@ Developer diagnostics, read at startup:
 - [Options window and config](docs/options-window.md) - runtime
   resolution / windowed toggle, slider rounding, and what the options
   window stores in `config.ini`.
+- [Texture packs](docs/texture-packs.md) - installing, choosing and removing
+  packs of replacement or 2x/4x textures in `Data/TexturePacks/`, and how to
+  make one.
 - [Build guide](docs/build/README.md) - platform-specific build notes.
 - [In-game tests](docs/in-game-tests.md) - the tester next to developer
   builds that plays test scenarios with real clients against a fresh OpenMU

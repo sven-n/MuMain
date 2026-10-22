@@ -343,8 +343,9 @@ world (below) is for that.
   it. A sprite's SubType is its blend: the four blends are offered (0 glow,
   1 subtract, 2 alpha test, 3 luminance), and the formation mark's SubType
   picks its frame (0 to 7) instead.
-- **The view**: drag to turn the camera, the wheel zooms, a double click or
-  **Reset view** puts it back; **Turn** turns the type slowly.
+- **The view**: drag to turn the camera, drag with the middle mouse button
+  to move the picture, the wheel zooms, a double click or **Reset view**
+  puts it back; **Turn** turns the type slowly.
 - **Notes** under the view say what the preview cannot show: an empty slot,
   a texture the code chooses, a model the game never draws itself, an effect
   whose values start it transparent or at size 0 (the preview shows it

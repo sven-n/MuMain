@@ -157,24 +157,6 @@ WeaponKind GetStaffGroupWeaponKind(ItemSlot slot)
         return WeaponKind::None;
     }
 }
-
-// The stat profile of a wing's tier; none without a tier.
-std::string GetWingStatProfile(const ItemDefinition& definition)
-{
-    switch (definition.wingTier)
-    {
-    case WingTier::Small:
-        return StatProfileNames::SmallWing;
-    case WingTier::First:
-        return StatProfileNames::FirstTierWing;
-    case WingTier::Second:
-        return definition.tags.Has(ItemTag::Cape) ? StatProfileNames::SecondTierCape : StatProfileNames::SecondTierWing;
-    case WingTier::Third:
-        return StatProfileNames::ThirdTierWing;
-    default:
-        return "";
-    }
-}
 } // namespace
 
 WeaponKind GetGroupWeaponKind(const ItemDefinition& definition)
@@ -221,65 +203,20 @@ WeaponKind GetGroupWeaponKind(const ItemDefinition& definition)
     }
 }
 
-std::string DeriveStatProfile(const ItemDefinition& definition)
+std::string DeriveStatProfile(const ItemStatProfiles& profiles, const ItemDefinition& definition)
 {
-    constexpr int HelperGroup = 13;
-    constexpr int PotionGroup = 14;
-    constexpr int EtcGroup = 15;
-
-    if (definition.tags.Has(ItemTag::Ammunition))
-    {
-        return "";
-    }
-    if (definition.tags.Has(ItemTag::Sceptre))
-    {
-        return StatProfileNames::Sceptre;
-    }
-    if (definition.tags.Has(ItemTag::SummonerBook))
-    {
-        return StatProfileNames::Book;
-    }
-    if (definition.weaponKind == WeaponKind::Shield)
-    {
-        return StatProfileNames::Shield;
-    }
-    if (definition.weaponKind != WeaponKind::None)
-    {
-        return StatProfileNames::Weapon;
-    }
-    switch (definition.slot)
-    {
-    case ItemSlot::Helm:
-    case ItemSlot::Armor:
-    case ItemSlot::Pants:
-    case ItemSlot::Gloves:
-    case ItemSlot::Boots:
-        return StatProfileNames::Armor;
-    default:
-        break;
-    }
-    if (definition.slot == ItemSlot::Wings)
-    {
-        return GetWingStatProfile(definition);
-    }
-    if (definition.group == EtcGroup && definition.requirements != ItemRequirements{})
-    {
-        return StatProfileNames::Scroll;
-    }
-    if ((definition.group == HelperGroup || definition.group == PotionGroup) && definition.requirements.level > 0)
-    {
-        return StatProfileNames::Helper;
-    }
-    return "";
+    return profiles.GetRuleProfile(profiles.FindRule(definition));
 }
 
-std::string FollowStatProfile(const ItemDefinition* previous, const ItemDefinition& updated)
+std::string FollowStatProfile(const ItemStatProfiles& profiles, const ItemDefinition* previous,
+                              const ItemDefinition& updated)
 {
-    if (previous != nullptr && !previous->statProfile.empty() && previous->statProfile != DeriveStatProfile(*previous))
+    if (previous != nullptr && !previous->statProfile.empty() &&
+        previous->statProfile != DeriveStatProfile(profiles, *previous))
     {
         return previous->statProfile;
     }
-    return DeriveStatProfile(updated);
+    return DeriveStatProfile(profiles, updated);
 }
 
 WeaponKind FollowGroupWeaponKind(const ItemDefinition* previous, const ItemDefinition& updated)
