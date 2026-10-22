@@ -140,6 +140,21 @@ TEST_CASE("ServerListEdits: saved groups are not unsaved changes")
     CHECK(edits.HasUnsavedChanges());
 }
 
+TEST_CASE("ServerListEdits: groups from a read with errors are not complete until a clean read")
+{
+    ServerListEdits edits;
+    edits.Reset({Group(0, "Valhalla")}, false);
+    CHECK_FALSE(edits.IsComplete());
+
+    edits.EditGroups()[0].name = "Asgard";
+    edits.Commit();
+    edits.MarkSaved();
+    CHECK_FALSE(edits.IsComplete());
+
+    edits.Reset({Group(0, "Valhalla"), Group(1, "Helheim")});
+    CHECK(edits.IsComplete());
+}
+
 TEST_CASE("ServerListEdits: a new group gets the smallest free ID at the end")
 {
     ServerListEdits edits;

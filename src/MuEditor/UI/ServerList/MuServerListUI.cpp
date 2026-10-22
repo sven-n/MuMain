@@ -172,7 +172,7 @@ void CMuServerListUI::LoadFile()
 {
     Data::ServerList::ServerListLoadResult loaded =
         Data::ServerList::LoadServerListFile(Data::ServerList::ServerListFile);
-    m_edits.Reset(std::move(loaded.groups));
+    m_edits.Reset(std::move(loaded.groups), !Data::Items::HasErrors(loaded.issues));
     m_issues = std::move(loaded.issues);
     m_status.clear();
     m_statusIsError = false;
@@ -186,6 +186,10 @@ void CMuServerListUI::LoadFile()
 
 void CMuServerListUI::Save()
 {
+    if (!m_edits.IsComplete())
+    {
+        return;
+    }
     m_edits.Commit();
     m_issues.clear();
     if (!Data::ServerList::SaveServerListFile(Data::ServerList::ServerListFile, m_edits.GetGroups(), m_issues))
@@ -201,9 +205,16 @@ void CMuServerListUI::Save()
 
 bool CMuServerListUI::RenderToolbar()
 {
+    // A save after a read with errors would remove the groups the read left out.
+    ImGui::BeginDisabled(!m_edits.IsComplete());
     if (ImGui::Button(I18N::Editor::Save))
     {
         Save();
+    }
+    ImGui::EndDisabled();
+    if (!m_edits.IsComplete() && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+    {
+        ImGui::SetTooltip("%s", I18N::Editor::SaveOffAfterReadErrors);
     }
     ImGui::SameLine();
     bool changed = false;
@@ -270,6 +281,10 @@ void CMuServerListUI::RenderStatus()
         {
             ImGui::TextUnformatted(m_status.c_str());
         }
+    }
+    if (!m_edits.IsComplete())
+    {
+        RenderError(I18N::Editor::SaveOffAfterReadErrors);
     }
     if (m_issues.empty())
     {

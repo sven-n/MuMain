@@ -20,8 +20,9 @@ class ServerListEdits
 public:
     static constexpr size_t MaxUndoSteps = 256;
 
-    // The groups of the file, just read or saved: nothing to undo, nothing changed.
-    void Reset(std::vector<ServerGroup> groups);
+    // The groups of the file, just read or saved: nothing to undo, nothing
+    // changed. `complete` is false when the read left groups out (errors).
+    void Reset(std::vector<ServerGroup> groups, bool complete = true);
 
     const std::vector<ServerGroup>& GetGroups() const
     {
@@ -57,6 +58,12 @@ public:
     {
         m_saved = m_groups;
     }
+    // Whether the groups are all the file has. After a read with errors they
+    // are not, and a save would remove the groups left out from the file.
+    bool IsComplete() const
+    {
+        return m_complete;
+    }
 
     // Adds a group named `name` with the smallest free ID, or `id` when given
     // (and free), at the end of the list. Returns its index; nothing when no
@@ -76,6 +83,7 @@ private:
     std::vector<ServerGroup> m_saved;
     std::vector<std::vector<ServerGroup>> m_undo;
     std::vector<std::vector<ServerGroup>> m_redo;
+    bool m_complete = true;
 };
 } // namespace MuEditor::ServerList
 

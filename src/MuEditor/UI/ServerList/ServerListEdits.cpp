@@ -9,8 +9,9 @@
 
 namespace MuEditor::ServerList
 {
-void ServerListEdits::Reset(std::vector<ServerGroup> groups)
+void ServerListEdits::Reset(std::vector<ServerGroup> groups, bool complete)
 {
+    m_complete = complete;
     m_groups = std::move(groups);
     m_committed = m_groups;
     m_saved = m_groups;
