@@ -316,6 +316,39 @@ TEST_CASE("Loading item data fills ItemAttribute in the UI locale [data][items]"
     CHECK(client.Name(KrisType) == L"Kris");
 }
 
+// Turns translated item names back on when the test ends, as the other tests
+// expect them.
+class TranslatedItemNamesScope
+{
+public:
+    ~TranslatedItemNamesScope()
+    {
+        g_ItemDataHandler.SetTranslateItemNames(true);
+    }
+};
+
+TEST_CASE("Item names stay English while translated item names are off, also after a language change [data][items]")
+{
+    ClientDataScope client(ShippedClientDirectory);
+    TranslatedItemNamesScope translatedNames;
+    I18N::SetLocale("pt");
+    g_ItemDataHandler.SetTranslateItemNames(false);
+
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    CHECK(client.Name(BladeType) == L"Blade");
+
+    I18N::SetLocale("de");
+    CHECK(client.Name(BladeType) == L"Blade");
+
+    g_ItemDataHandler.SetTranslateItemNames(true);
+    CHECK(client.Name(BladeType) == L"Klinge");
+
+    g_ItemDataHandler.SetTranslateItemNames(false);
+    CHECK(client.Name(BladeType) == L"Blade");
+    CHECK(g_ItemDatabase.Find(BladeType)->name == L"Blade");
+}
+
 TEST_CASE("Item data errors stop loading [data][items]")
 {
     TemporaryClientFolder folder;
