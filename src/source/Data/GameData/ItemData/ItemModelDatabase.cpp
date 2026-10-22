@@ -55,6 +55,83 @@ void ItemModelDatabase::Build(std::span<const ItemModelDefinition> models, const
     }
 }
 
+#ifdef _EDITOR
+void ItemModelDatabase::ResolveGlowColors(const Effects::GlowColorList& glowColors)
+{
+    ++m_version;
+    for (size_t itemType = 0; itemType < m_models.size(); ++itemType)
+    {
+        if (m_models[itemType].Exists())
+        {
+            m_glowColors[itemType] = FindColors(glowColors, m_models[itemType].glow);
+        }
+    }
+}
+#endif
+
+void ItemModelDatabase::Set(const ItemModelDefinition& model, const Effects::GlowColorList& glowColors)
+{
+    if (!IsValidItemId(model.group, model.number))
+    {
+        return;
+    }
+    if (!model.Exists())
+    {
+        Remove(MakeItemType(model.group, model.number));
+        return;
+    }
+
+    const int itemType = MakeItemType(model.group, model.number);
+    ++m_version;
+    m_modelCount += m_models[itemType].Exists() ? 0 : 1;
+    m_models[itemType] = model;
+    m_glowColors[itemType] = FindColors(glowColors, model.glow);
+}
+
+void ItemModelDatabase::Remove(int itemType)
+{
+    if (!IsValidItemType(itemType) || !m_models[itemType].Exists())
+    {
+        return;
+    }
+    ++m_version;
+    --m_modelCount;
+    m_models[itemType] = ItemModelDefinition{};
+    m_glowColors[itemType] = ItemGlowColors{};
+}
+
+void ItemModelDatabase::SetSharedModels(std::span<const SharedItemModel> sharedModels)
+{
+    ++m_version;
+    m_sharedModels.assign(sharedModels.begin(), sharedModels.end());
+}
+
+const SharedItemModel* ItemModelDatabase::FindSharedModel(std::string_view name) const
+{
+    const auto found = std::ranges::find(m_sharedModels, name, &SharedItemModel::name);
+    return found != m_sharedModels.end() ? &*found : nullptr;
+}
+
+void ItemModelDatabase::SetSharedModel(const SharedItemModel& sharedModel)
+{
+    ++m_version;
+    const auto found = std::ranges::find(m_sharedModels, sharedModel.name, &SharedItemModel::name);
+    if (found != m_sharedModels.end())
+    {
+        *found = sharedModel;
+        return;
+    }
+    m_sharedModels.push_back(sharedModel);
+}
+
+void ItemModelDatabase::RemoveSharedModel(std::string_view name)
+{
+    if (std::erase_if(m_sharedModels, [name](const SharedItemModel& model) { return model.name == name; }) > 0)
+    {
+        ++m_version;
+    }
+}
+
 void ItemModelDatabase::Swap(int firstItemType, int secondItemType)
 {
     if (!IsValidItemType(firstItemType) || !IsValidItemType(secondItemType) || firstItemType == secondItemType)
