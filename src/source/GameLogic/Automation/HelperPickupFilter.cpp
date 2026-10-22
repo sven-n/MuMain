@@ -3,15 +3,20 @@
 
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "MUHelper/MuHelperData.h"
 
 namespace GameLogic::Automation
 {
 bool ShouldPickUpHelperItem(const MUHelper::ConfigData& config, ITEM* item)
 {
-    // Selected also takes precedence for older saves containing both mode bits.
+    // Preserve legacy and offline behavior for saves containing both mode bits.
+    if (config.bPickAllItems)
+    {
+        return true;
+    }
     if (!config.bPickSelectItems)
     {
-        return config.bPickAllItems;
+        return false;
     }
 
     if ((config.bPickZen && IsMoneyItem(item)) || (config.bPickJewel && GameLogic::Items::IsJewelItem(item)) ||

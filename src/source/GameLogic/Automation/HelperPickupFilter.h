@@ -1,6 +1,10 @@
 #pragma once
 
-#include "MUHelper/MuHelperData.h"
+namespace MUHelper
+{
+struct _PetAttackConfig;
+using ConfigData = _PetAttackConfig;
+} // namespace MUHelper
 
 typedef struct tagITEM ITEM;
 

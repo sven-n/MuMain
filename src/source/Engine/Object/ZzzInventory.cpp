@@ -1375,6 +1375,30 @@ void GetItemName(int iType, int iLevel, wchar_t* Text)
     }
 }
 
+std::wstring GetItemName(int iType, int iLevel)
+{
+    if (iType < 0 || iType >= MAX_ITEM)
+    {
+        return {};
+    }
+
+    constexpr std::size_t ItemNameCapacity = 128;
+    wchar_t name[ItemNameCapacity]{};
+    GetItemName(iType, iLevel, name);
+    if (name[0] != L'\0')
+    {
+        return name;
+    }
+
+    // Alternate-name switches may not cover every source level.
+    std::wstring fallback(ItemAttribute[iType].Name, wcsnlen(ItemAttribute[iType].Name, MAX_ITEM_NAME));
+    if (iLevel)
+    {
+        fallback += L" +" + std::to_wstring(iLevel);
+    }
+    return fallback;
+}
+
 void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int iMana)
 {
     switch (Option)
@@ -6392,46 +6416,36 @@ bool IsMoneyItem(ITEM* pItem)
 
 namespace
 {
-constexpr std::size_t ItemDisplayNameCapacity = 128;
-
 void AppendItemOptionKeywords(const ITEM& item, std::wstring& options)
 {
     if (item.HasSkill)
     {
-        options += L"+Skill"; // TODO: Use I18N::Game::Skill
+        options += I18N::Game::Skill;
     }
     if (item.OptionLevel)
     {
-        options += L"+Option"; // TODO: Use I18N::Game::Option
+        options += I18N::Game::Option;
     }
     if (item.HasLuck)
     {
-        options += L"+Luck"; // TODO: Use I18N::Game::Luck
+        options += I18N::Game::Luck;
     }
 }
 } // namespace
 
 std::wstring GetItemDisplayName(ITEM* pItem)
 {
-    wchar_t name[ItemDisplayNameCapacity]{};
-    GetItemName(pItem->Type, pItem->Level, name);
-    std::wstring strDisplayName(name);
+    std::wstring strDisplayName = GetItemName(pItem->Type, pItem->Level);
     std::wstring strOptions;
 
     if (pItem->Level)
     {
-        strOptions = L"+" + std::to_wstring(pItem->Level);
-        const auto nameLength = strDisplayName.size();
-        const auto levelLength = strOptions.size();
+        const std::wstring levelSuffix = L" +" + std::to_wstring(pItem->Level);
         // Keep ordinary equipment keywords contiguous without treating variant levels as upgrades.
-        if (nameLength > levelLength && strDisplayName.ends_with(strOptions) &&
-            strDisplayName[nameLength - levelLength - 1] == L' ')
+        if (strDisplayName.ends_with(levelSuffix))
         {
-            strDisplayName.resize(nameLength - levelLength - 1);
-        }
-        else
-        {
-            strOptions.clear();
+            strDisplayName.resize(strDisplayName.size() - levelSuffix.size());
+            strOptions = levelSuffix.substr(1);
         }
     }
     AppendItemOptionKeywords(*pItem, strOptions);

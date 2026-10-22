@@ -80,14 +80,31 @@ read as the English name only; saving writes the object form.
 
 **Pick All** collects every eligible drop. **Selected** applies the enabled
 categories and Extra Items; with neither mode selected, retained filters collect
-nothing. Selected takes precedence if an older save has both modes set.
+nothing. Pick All takes precedence if an older save has both modes set, matching
+the original client and OpenMU's offline leveling.
 
-Extra Items uses case-sensitive substrings of the visible item name in the current
-UI language, including names selected by level. For example, `Box of Luck` does
-not match Heart of Love, medals or Kundun boxes that share its item id. A language
-change may require updating saved keywords. Ordinary equipment keeps contiguous
-option keywords such as `+7+Skill+Option+Luck`. The Zen category selects money;
-other enabled categories and extra keywords remain independent.
+Extra Items uses case-sensitive substrings of the localized inventory-style name,
+including names selected by level. For example, `Box of Luck` does not match
+`Heart of love`, medals or Kundun boxes that share its item id. This is not always
+the ground label: summoned creatures and spirits can use different word order or
+names, ancient set prefixes are omitted, and money uses `Zen +amount`. A language
+change may require updating saved keywords; option words follow the UI language
+too. Ordinary equipment keeps contiguous keywords such as `+7+Skill` in English.
+`+N` matches the displayed name's number, not necessarily the raw source level:
+Kundun tiers and jewel bundles use their displayed numbers, while seeds and some
+quest items omit their source level. Unmapped variant levels fall back to the base
+name and `+level`.
+
+A saved keyword holds **at most 14 encoded bytes** (14 single-byte characters,
+fewer when characters need multiple bytes); longer or unencodable keywords are
+discarded when saving and will be absent after relog. Use short substrings such as
+`Heart`, `Kundun`, `Crest` or `+7+Skill`, rather than a long full name or combined
+option string. The Zen category selects money; other enabled categories and extra
+keywords remain independent.
+
+OpenMU's offline leveling reads the same saved list but uses its own rules:
+case-insensitive server item-definition names, without these localized level
+variants or option words. An online keyword need not select the same items offline.
 
 ### Fields
 
