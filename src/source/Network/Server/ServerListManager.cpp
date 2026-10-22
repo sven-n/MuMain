@@ -6,7 +6,28 @@
 #include "ServerListManager.h"
 #include "I18N/All.h"
 
+#include "Core/Text/Utf8.h"
+#include "Data/DataHandler/DataIssueReport.h"
+#include "Data/GameData/ServerListData/ServerListJson.h"
+
+#include <algorithm>
+#include <cwchar>
+#include <filesystem>
 #include <memory>
+
+namespace
+{
+constexpr const char* ServerListName = "server list";
+// The bit of a channel type that turns PvP off.
+constexpr BYTE NonPvpBit = 0x01;
+
+template <size_t Capacity> void CopyText(wchar_t (&destination)[Capacity], const std::wstring& source)
+{
+    const size_t length = std::min(source.size(), Capacity - 1);
+    std::wmemcpy(destination, source.c_str(), length);
+    destination[length] = L'\0';
+}
+} // namespace
 
 CServerListManager::CServerListManager()
 {
@@ -38,60 +59,33 @@ void CServerListManager::Release()
     m_iTotalServer = 0;
 }
 
-void CServerListManager::LoadServerListScript()
+bool CServerListManager::LoadServerListScript(std::string& errorMessage)
 {
-    FILE* fp = ::_wfopen(L"Data\\Local\\ServerList.bmd", L"rb");
-
-    if (fp == NULL)
+    const std::filesystem::path file = Data::ServerList::ServerListFile;
+    Data::ServerList::ServerListLoadResult result = Data::ServerList::LoadServerListFile(file);
+    Data::LogDataIssues("Server list:", result.issues);
+    if (Data::Items::HasErrors(result.issues))
     {
-        wchar_t szMessage[256];
-        ::mu_swprintf(szMessage, L"Data\\Local\\ServerList.bmd file not found.\r\n");
-        g_ErrorReport.Write(szMessage);
-        ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
-        ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
-        return;
+        errorMessage = Data::DescribeDataErrors(ServerListName, file, result.issues);
+        return false;
     }
-
-#pragma pack(push, 1)
-    typedef struct _SERVER_GROUP_INFO
-    {
-        WORD	m_wIndex;
-        char	m_szName[SLM_MAX_SERVER_NAME_LENGTH];
-        BYTE	m_byPos;
-        BYTE	m_bySequence;
-        BYTE	m_abyNonPVP[SLM_MAX_SERVER_COUNT];
-        short	m_nDescriptLen;
-    } SERVER_GROUP_INFO;
-#pragma pack(pop)
-
-    int nSize = sizeof(SERVER_GROUP_INFO);
-    SERVER_GROUP_INFO sServerGroupScript;
-    char szDescript[1024];
-    SServerGroupInfo sServerGroupInfo;
-    int i;
-
-    while (0 != ::fread(&sServerGroupScript, nSize, 1, fp))
-    {
-        BuxConvert((BYTE*)&sServerGroupScript, nSize);
-        ::fread(szDescript, sServerGroupScript.m_nDescriptLen, 1, fp);
-        BuxConvert((BYTE*)szDescript, sServerGroupScript.m_nDescriptLen);
-
-        CMultiLanguage::ConvertFromUtf8(sServerGroupInfo.m_szName, sServerGroupScript.m_szName);
-
-        sServerGroupInfo.m_byPos = sServerGroupScript.m_byPos;
-        sServerGroupInfo.m_bySequence = sServerGroupScript.m_bySequence;
-        for (i = 0; i < SLM_MAX_SERVER_COUNT; ++i)
-            sServerGroupInfo.m_abyNonPVP[i] = sServerGroupScript.m_abyNonPVP[i];
-
-        m_mapServerListScript.insert(std::make_pair(sServerGroupScript.m_wIndex, sServerGroupInfo));
-    }
-
-    ::fclose(fp);
+    SetServerGroups(result.groups);
+    return true;
 }
 
-const SServerGroupInfo* CServerListManager::GetServerGroupInfoInScript(WORD wServerGroupIndex)
+void CServerListManager::SetServerGroups(std::span<const Data::ServerList::ServerGroup> groups)
 {
-    ServerListScriptMap::const_iterator iter = m_mapServerListScript.find(wServerGroupIndex);
+    m_mapServerListScript.clear();
+    int sequence = 0;
+    for (const Data::ServerList::ServerGroup& group : groups)
+    {
+        m_mapServerListScript[group.id] = {group, ++sequence};
+    }
+}
+
+const SServerGroupInfo* CServerListManager::GetServerGroupInfoInScript(int iServerGroupIndex)
+{
+    ServerListScriptMap::const_iterator iter = m_mapServerListScript.find(iServerGroupIndex);
     if (iter == m_mapServerListScript.end())
         return NULL;
 
@@ -142,21 +136,19 @@ bool CServerListManager::MakeServerGroup(IN int iServerGroupIndex, OUT CServerGr
     if (NULL == pServerGroupInfo)
         return false;
 
-    ::wcscpy(pServerGroup->m_szName, pServerGroupInfo->m_szName);
-    ::wcscpy(pServerGroup->m_szDescription, pServerGroupInfo->m_strDescript.c_str());
-    pServerGroup->m_iSequence = (int)pServerGroupInfo->m_bySequence;
-    pServerGroup->m_iWidthPos = (int)pServerGroupInfo->m_byPos;
+    const Data::ServerList::ServerGroup& group = pServerGroupInfo->group;
+    CopyText(pServerGroup->m_szName, Core::Text::FromUtf8(group.name));
+    CopyText(pServerGroup->m_szDescription, Core::Text::FromUtf8(group.description));
+    pServerGroup->m_iSequence = pServerGroupInfo->sequence;
+    pServerGroup->m_iWidthPos = group.testServer ? CServerGroup::SBP_CENTER : CServerGroup::SBP_LEFT;
     pServerGroup->m_iServerIndex = iServerGroupIndex;
     pServerGroup->m_bPvPServer = true;
-    int i;
-    for (i = 0; i < SLM_MAX_SERVER_COUNT; ++i)
+    for (int i = 0; i < MAX_SERVER_PER_GROUP; ++i)
     {
-        pServerGroup->m_abyNonPvpServer[i] = pServerGroupInfo->m_abyNonPVP[i];
-        if (0x01 & pServerGroup->m_abyNonPvpServer[i])
+        pServerGroup->m_abyNonPvpServer[i] = static_cast<BYTE>(group.channels[i]);
+        if (NonPvpBit & pServerGroup->m_abyNonPvpServer[i])
             pServerGroup->m_bPvPServer = false;
     }
-    for (; i < MAX_SERVER_PER_GROUP; ++i)
-        pServerGroup->m_abyNonPvpServer[i] = 0;
 
     return true;
 }
@@ -268,7 +260,6 @@ int CServerListManager::GetSelectServerIndex()
     return m_iSelectServerIndex;
 }
 
-
 BYTE CServerListManager::GetNonPVPInfo()
 {
     return m_byNonPvP;
@@ -276,7 +267,7 @@ BYTE CServerListManager::GetNonPVPInfo()
 
 bool CServerListManager::IsNonPvP()
 {
-    return bool(0x01 & GetNonPVPInfo());
+    return bool(NonPvpBit & GetNonPVPInfo());
 }
 
 void CServerListManager::SetTotalServer(int iTotalServer)
