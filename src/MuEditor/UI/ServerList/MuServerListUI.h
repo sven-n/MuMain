@@ -43,6 +43,13 @@ private:
     // After the widgets: the login screen shows a change, and a finished edit
     // becomes one undo step.
     void AfterEdits(bool changed);
+    // What changed since the last undo step becomes one: before a button, box
+    // or list changes the groups, so that what was typed before stays a step
+    // of its own.
+    void CommitPending();
+    // Right after a text field: leaving it ends its edit, which becomes one
+    // undo step.
+    void CommitWhenFieldLeft();
     void LoadFile();
     void Save();
     // Ctrl+Z and Ctrl+Y (or Ctrl+Shift+Z) while this window has the focus.

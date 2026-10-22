@@ -95,9 +95,11 @@ the name the login screen gives it.
   the file is fixed and **Revert** reads it again.
 - **Revert** reads the file again.
 - **Undo** and **Redo** in the editor bar (or Ctrl+Z and Ctrl+Y in the window)
-  work through the changes of the session. The bar's buttons act on the tool
-  used last: after a click into the Server List window they undo server list
-  changes, after a click into an item tool item edits.
+  work through the changes of the session. Each change is one step: a group
+  added, removed or moved, a box or channel type changed, and what was typed
+  into a field until it is left. The bar's buttons act on the tool used last:
+  after a click into the Server List window they undo server list changes,
+  after a click into an item tool item edits.
 
 ## Compared to the original client
 
