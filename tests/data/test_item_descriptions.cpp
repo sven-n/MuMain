@@ -1,0 +1,185 @@
+#include "stdafx.h"
+
+#include "doctest.h"
+
+#include "Data/GameData/ItemData/ItemDataValidation.h"
+#include "Engine/Object/ItemTooltipValues.h"
+#include "Engine/Object/ZzzInventory.h"
+
+#include <algorithm>
+#include <string>
+#include <vector>
+
+extern int TextNum;
+extern int SkipNum;
+
+using namespace Data::Items;
+
+namespace
+{
+// Five units a letter: the description wraps at 200, so 40 letters fit a row.
+int FiveUnitsPerLetter(const wchar_t*, size_t length)
+{
+    return static_cast<int>(length) * 5;
+}
+
+ItemDescriptionLine Line(const char* english, ItemTextColor color = ItemTextColor::White)
+{
+    ItemDescriptionLine line;
+    line.text.Set("en", english);
+    line.color = color;
+    return line;
+}
+
+// The tooltip rows the description writes, from an empty list.
+std::vector<std::wstring> WriteRows(const ItemDefinition& definition)
+{
+    TextNum = 0;
+    SkipNum = 0;
+    int rowsLeft = MaxItemDescriptionRows;
+    WriteItemDescriptionLines(definition, 0, ItemTooltipValues{}, false, rowsLeft, FiveUnitsPerLetter);
+    return {std::begin(TextList), std::begin(TextList) + TextNum};
+}
+
+std::vector<ItemDataIssue> DescriptionIssues(const ItemDefinition& definition, std::span<const char* const> uiLocales)
+{
+    std::vector<ItemDataIssue> issues;
+    ValidateItems(std::vector<ItemDefinition>{definition}, issues);
+    ValidateNameLocales(std::vector<ItemDefinition>{definition}, uiLocales, issues);
+    std::erase_if(issues, [](const ItemDataIssue& issue) { return !issue.field.starts_with("description"); });
+    return issues;
+}
+
+ItemDefinition MakeJewel()
+{
+    ItemDefinition jewel;
+    jewel.group = 14;
+    jewel.number = 13;
+    jewel.names.Set("en", "Jewel of Bless");
+    return jewel;
+}
+} // namespace
+
+TEST_CASE("A blank line inside a description text is a blank tooltip row, not the tooltip's end [data][items]")
+{
+    ItemDefinition jewel = MakeJewel();
+    jewel.description = {Line("Line one\n\nLine two"), Line("\nLeading break"), Line("")};
+
+    const std::vector<std::wstring> rows = WriteRows(jewel);
+
+    // An empty row would end the tooltip there: a blank one is "\n", as the tooltip writes its own.
+    const std::vector<std::wstring> expected = {L"Line one", L"\n", L"Line two", L"\n", L"Leading break", L"\n"};
+    CHECK(rows == expected);
+    CHECK(std::none_of(rows.begin(), rows.end(), [](const std::wstring& row) { return row.empty(); }));
+    CHECK(SkipNum == 3);
+}
+
+TEST_CASE("A description wraps to the tooltip's width in its line's color [data][items]")
+{
+    ItemDefinition jewel = MakeJewel();
+    jewel.description = {
+        Line("It is used to increase your item level up to 6 with a little more", ItemTextColor::Blue)};
+
+    const std::vector<std::wstring> rows = WriteRows(jewel);
+
+    REQUIRE(rows.size() == 2);
+    CHECK(rows[0] == L"It is used to increase your item level");
+    CHECK(rows[1] == L"up to 6 with a little more");
+    CHECK(TextListColor[0] == TEXT_COLOR_BLUE);
+    CHECK(TextListColor[1] == TEXT_COLOR_BLUE);
+}
+
+TEST_CASE("A description writes at most its own rows, leaving the tooltip's rows to the rest [data][items]")
+{
+    ItemDefinition jewel = MakeJewel();
+    jewel.description.assign(MaxItemDescriptionRows + 10, Line("A line"));
+
+    TextNum = 5;
+    int rowsLeft = MaxItemDescriptionRows;
+    WriteItemDescriptionLines(jewel, 0, ItemTooltipValues{}, false, rowsLeft, FiveUnitsPerLetter);
+    CHECK(TextNum == 5 + MaxItemDescriptionRows);
+    CHECK(rowsLeft == 0);
+
+    // Near the end of the list it stops at the list's end.
+    TextNum = MaxTextListRows - 3;
+    rowsLeft = MaxItemDescriptionRows;
+    WriteItemDescriptionLines(jewel, 0, ItemTooltipValues{}, false, rowsLeft, FiveUnitsPerLetter);
+    CHECK(TextNum == MaxTextListRows);
+}
+
+TEST_CASE("A description's parts before and after the options share its rows [data][items]")
+{
+    ItemDefinition ring = MakeJewel();
+    ItemDescriptionLine after = Line("After the options");
+    after.afterOptions = true;
+    ring.description.assign(20, Line("Before the options"));
+    ring.description.insert(ring.description.end(), 20, after);
+
+    TextNum = 0;
+    int rowsLeft = MaxItemDescriptionRows;
+    WriteItemDescriptionLines(ring, 0, ItemTooltipValues{}, false, rowsLeft, FiveUnitsPerLetter);
+    CHECK(TextNum == 20);
+    CHECK(rowsLeft == MaxItemDescriptionRows - 20);
+    WriteItemDescriptionLines(ring, 0, ItemTooltipValues{}, true, rowsLeft, FiveUnitsPerLetter);
+    CHECK(TextNum == MaxItemDescriptionRows);
+    CHECK(rowsLeft == 0);
+    CHECK(std::wstring(TextList[MaxItemDescriptionRows - 1]) == L"After the options");
+}
+
+TEST_CASE("Description texts are checked like item names [data][items]")
+{
+    const char* uiLocales[] = {"en", "de"};
+
+    ItemDefinition jewel = MakeJewel();
+    ItemDescriptionLine noEnglish;
+    noEnglish.text.Set("de", "Nur Deutsch");
+    ItemDescriptionLine badCode = Line("A text");
+    badCode.text.Set("d e", "Ein Text");
+    ItemDescriptionLine unknownLanguage = Line("A text");
+    unknownLanguage.text.Set("xx", "Ein Text");
+    jewel.description = {Line(""), noEnglish, badCode, unknownLanguage};
+
+    const std::vector<ItemDataIssue> issues = DescriptionIssues(jewel, uiLocales);
+
+    // The blank line has none; "d e" is no language code and, like "xx", no language the game shows.
+    REQUIRE(issues.size() == 4);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Error);
+    CHECK(issues[0].field == "description[1].text");
+    CHECK(issues[0].message == "the English text is missing");
+    CHECK(issues[1].severity == ItemDataIssueSeverity::Error);
+    CHECK(issues[1].field == "description[2].text");
+    CHECK(issues[2].severity == ItemDataIssueSeverity::Warning);
+    CHECK(issues[2].field == "description[2].text");
+    CHECK(issues[3].severity == ItemDataIssueSeverity::Warning);
+    CHECK(issues[3].field == "description[3].text");
+}
+
+TEST_CASE("Level values written in place are checked like description texts [data][items]")
+{
+    const char* uiLocales[] = {"en", "de"};
+
+    ItemDefinition fruit = MakeJewel();
+    ItemLevelValues stat;
+    stat.name = "stat";
+    ItemLevelValue english;
+    english.text.Set("en", "ENG");
+    ItemLevelValue noEnglish;
+    noEnglish.text.Set("de", "ENE");
+    ItemLevelValue unknownLanguage;
+    unknownLanguage.text.Set("en", "STR");
+    unknownLanguage.text.Set("xx", "FUE");
+    stat.values = {english, noEnglish, unknownLanguage};
+    fruit.levelValues = {stat};
+
+    std::vector<ItemDataIssue> issues;
+    ValidateItems(std::vector<ItemDefinition>{fruit}, issues);
+    ValidateNameLocales(std::vector<ItemDefinition>{fruit}, uiLocales, issues);
+    std::erase_if(issues, [](const ItemDataIssue& issue) { return !issue.field.starts_with("levelValues"); });
+
+    REQUIRE(issues.size() == 2);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Error);
+    CHECK(issues[0].field == "levelValues.stat[1]");
+    CHECK(issues[0].message == "the English text is missing");
+    CHECK(issues[1].severity == ItemDataIssueSeverity::Warning);
+    CHECK(issues[1].field == "levelValues.stat[2]");
+}
