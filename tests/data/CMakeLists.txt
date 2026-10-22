@@ -56,6 +56,7 @@ mu_add_test(
     NAME test_item_database_files
     SOURCES
         test_item_database_files.cpp
+        test_item_descriptions.cpp
         test_item_model_files.cpp
         test_item_requirement_weights.cpp
         test_item_rules.cpp
