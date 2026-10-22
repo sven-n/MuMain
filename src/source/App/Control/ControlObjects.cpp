@@ -55,17 +55,7 @@ Events::ObjectDescription DescribeGameObject(int key)
 
 std::wstring ItemDisplayName(int itemType, int itemLevel)
 {
-    // The empty marker is -1; type 0 is a real item (the Dark Knight's
-    // starting Kris), so it must not be treated as an empty slot.
-    if (itemType < 0)
-    {
-        return {};
-    }
-
-    // Longest name the item tables hold, plus room for the terminator.
-    wchar_t name[128] = {};
-    GetItemName(itemType, itemLevel, name);
-    return name;
+    return GetItemName(itemType, itemLevel);
 }
 
 std::wstring DropName(int itemSlot)
