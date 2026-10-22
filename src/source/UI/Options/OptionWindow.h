@@ -405,7 +405,8 @@ namespace mu::ui::window
         };
         void BindRmlModel(Rml::DataModelConstructor& c, OptionRmlModel& model);
         void SyncImpliedEffectRows(OptionRmlModel& model);
-        void SyncTranslateItemNamesRow(OptionRmlModel& model);
+        // The model's copy of a UI text, marked dirty when the text changed.
+        void SyncLabel(Rml::String& field, const char* fieldName, const wchar_t* text);
         void SyncTuningModel(OptionRmlModel& model);
         void OnRmlBuilt();
         UI::RmlBridge::ThemedView<OptionRmlModel> m_RmlView{"option_window",
