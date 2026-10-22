@@ -16,6 +16,7 @@ ServerIP=localhost
 ServerPort=44406
 [UI]
 Locale=en
+TranslateItemNames=1
 Font=
 RmlTheme=legacy
 UIScalePercent=100

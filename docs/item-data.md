@@ -77,14 +77,44 @@ read as the English name only; saving writes the object form.
 - Logs always use the English name and the item id, e.g.
   `Short Sword (0,1)`, never a translation.
 
+### MU Helper pickup filters
+
+**Pick All** collects every eligible drop. **Selected** applies the enabled
+categories and Extra Items; with neither mode selected, retained filters collect
+nothing. Pick All takes precedence if an older save has both modes set, matching
+the original client and OpenMU's offline leveling.
+
+Extra Items uses case-sensitive substrings of the localized inventory-style name,
+including names selected by level. For example, `Box of Luck` does not match
+`Heart of love`, medals or Kundun boxes that share its item id. This is not always
+the ground label: summoned creatures and spirits can use different word order or
+names, ancient set prefixes are omitted, and money uses `Zen +amount`. A language
+change may require updating saved keywords; option words follow the UI language
+too. Ordinary equipment keeps contiguous keywords such as `+7+Skill` in English.
+`+N` matches the displayed name's number, not necessarily the raw source level:
+Kundun tiers and jewel bundles use their displayed numbers, while seeds and some
+quest items omit their source level. Unmapped variant levels fall back to the base
+name and `+level`.
+
+A saved keyword holds **at most 14 encoded bytes** (14 single-byte characters,
+fewer when characters need multiple bytes); longer or unencodable keywords are
+discarded when saving and will be absent after relog. Use short substrings such as
+`Heart`, `Kundun`, `Crest` or `+7+Skill`, rather than a long full name or combined
+option string. The Zen category selects money; other enabled categories and extra
+keywords remain independent.
+
+OpenMU's offline leveling reads the same saved list but uses its own rules:
+case-insensitive server item-definition names, without these localized level
+variants or option words. An online keyword need not select the same items offline.
+
 ### Fields
 
 | Field | Meaning |
 |---|---|
 | `tags` | Categories the game code asks for, e.g. `["mount", "flying"]`; see [Tags](#tags) |
 | `levelValues` | Values of the description's own placeholders, one per item level from +0: `{"stat": ["ENG", "STA", ...]}` makes `{stat}` "ENG" at +0 and "STA" at +1. Each value is a text with its translations (written like `name`) or a shared text (`"@name"`), without placeholders. A line that shows one is shown only at levels that have a value. The Fruits' `{stat}` is one. A client-only field; the bmd import keeps it |
-| `description` | Lines the tooltip shows for the item, after its damage, defense and speed lines and before its durability, requirements and options, e.g. the Jewel of Bless's "It is used to increase your item level up to 6". A few lines that read the hero or other tables (the Armor of Guardsman's Chaos Castle table, the Lost Map, the Talisman of Mobility's saved location) are still written by the tooltip code, after the description, and a few before it (the reset fruits' reset points, the Talisman of Resurrection's saved place, the socket seeds and spheres, the Sign of Dimensions). A text can have [placeholders](#description-placeholders). The Dark Horse and the Dark Raven show it only in shops: elsewhere the pet window writes their tooltip. Each line is `{"text": ..., "values": {...}, "when": [...], "color": ..., "colors": [...], "bold": true, "levels": [first, last], "after": "options"}`: `text` is written like `name` (a plain English text, or the texts by language) and checked like it (the English text is required, a language code has only letters, digits and `-`, and a language the game has no texts in is a warning), or `"@name"` for a shared text of the [tooltip file](#tooltip-layouts) (`"@increaseSpeed"`), which is how a text several items show is written once; an empty text (`{"text": ""}`) is a blank line; `values` names the value a placeholder of the text shows on this line, a built-in value, a table (`"values": {"percent": "wingDamageIncrease1st"}` with the shared text "Increase {percent}% of Damage"), or a [game data value](#description-placeholders) such as `skillMana:<skill>`, the mana a skill costs, by its number as `skill` writes it (`"values": {"mana": "skillMana:22"}`); a long line wraps at about the width of the original tooltips' widest lines, and `\n` in a text breaks the line there (`\n\n` leaves a blank line). The description draws at most 32 rows, which it has to itself, so a long one never takes the room of the tooltip's other lines. `color` is one of the tooltip colors: `white` (left out), `blue`, `red`, `yellow`, `green`, `darkRed`, `purple`, `darkBlue`, `darkYellow`, `greenBlue`, `gray`, `redPurple`, `violet`, `orange`. `levels` shows the line only at those item levels, both included (`[1, 8]`; left out: every level); a list of two levels from 0 to 15 with the first not above the last. `when` shows the line only when its [conditions](#tooltip-layouts) hold, and `colors` gives it the color of its first rule that holds, as a layout line's (`["!timed"]`, `["durability=2"]`, `[{"when": ["class:darkLord"], "color": "white"}]`); `bold` draws it bold. `"after": "options"` draws the line after the item's options (excellent, luck, skill), at the end of the tooltip, instead of with the description: the transformation rings' effects and "Unable to Equip with a Different Transformation Ring", for example. A client-only field; the bmd import keeps it |
-| `nameLines` | How the game names the item (its tooltip, the repair window, windows, messages and ground labels) and the tooltip's name color, when not the standard name and color (see [Name lines](#name-lines)). Each is written like a `description` line, its text is checked like one, and its `text` and `color` may be left out. A text that is empty in the UI's language keeps the standard name. A client-only field; the bmd import keeps it |
+| `description` | Lines the tooltip shows for the item, after its damage, defense and speed lines and before its durability, requirements and options, e.g. the Jewel of Bless's "It is used to increase your item level up to 6". A few lines that read the hero or other tables (the Armor of Guardsman's Chaos Castle table, the Lost Map, the Talisman of Mobility's saved location) are still written by the tooltip code, after the description, and a few before it (the reset fruits' reset points, the Talisman of Resurrection's saved place, the socket seeds and spheres, the Sign of Dimensions). A text can have [placeholders](#description-placeholders). The Dark Horse and the Dark Raven show it only in shops: elsewhere the pet window writes their tooltip. Its texts are in the UI's language, also when the item names stay English ("Translate item names" off). Each line is `{"text": ..., "values": {...}, "when": [...], "color": ..., "colors": [...], "bold": true, "levels": [first, last], "after": "options"}`: `text` is written like `name` (a plain English text, or the texts by language) and checked like it (the English text is required, a language code has only letters, digits and `-`, and a language the game has no texts in is a warning), or `"@name"` for a shared text of the [tooltip file](#tooltip-layouts) (`"@increaseSpeed"`), which is how a text several items show is written once; an empty text (`{"text": ""}`) is a blank line; `values` names the value a placeholder of the text shows on this line, a built-in value, a table (`"values": {"percent": "wingDamageIncrease1st"}` with the shared text "Increase {percent}% of Damage"), or a [game data value](#description-placeholders) such as `skillMana:<skill>`, the mana a skill costs, by its number as `skill` writes it (`"values": {"mana": "skillMana:22"}`); a long line wraps at about the width of the original tooltips' widest lines, and `\n` in a text breaks the line there (`\n\n` leaves a blank line). The description draws at most 32 rows, which it has to itself, so a long one never takes the room of the tooltip's other lines. `color` is one of the tooltip colors: `white` (left out), `blue`, `red`, `yellow`, `green`, `darkRed`, `purple`, `darkBlue`, `darkYellow`, `greenBlue`, `gray`, `redPurple`, `violet`, `orange`. `levels` shows the line only at those item levels, both included (`[1, 8]`; left out: every level); a list of two levels from 0 to 15 with the first not above the last. `when` shows the line only when its [conditions](#tooltip-layouts) hold, and `colors` gives it the color of its first rule that holds, as a layout line's (`["!timed"]`, `["durability=2"]`, `[{"when": ["class:darkLord"], "color": "white"}]`); `bold` draws it bold. `"after": "options"` draws the line after the item's options (excellent, luck, skill), at the end of the tooltip, instead of with the description: the transformation rings' effects and "Unable to Equip with a Different Transformation Ring", for example. A client-only field; the bmd import keeps it |
+| `nameLines` | How the game names the item (its tooltip, the repair window, windows, messages and ground labels) and the tooltip's name color, when not the standard name and color (see [Name lines](#name-lines)). Each is written like a `description` line, its text is checked like one, and its `text` and `color` may be left out. Name lines are in the item names' language (English with the options' "Translate item names" off), and a text that is empty in it keeps the standard name. A client-only field; the bmd import keeps it |
 | `width`, `height` | Size in inventory slots |
 | `slot` | Equipment slot: `mainHand`, `offHand`, `helm`, `armor`, `pants`, `gloves`, `boots`, `wings`, `pet`, `pendant`, `ring`. Left out = not equippable |
 | `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, defense per level, damage increase, absorption) depend on it; excellent second and third tier wings get no extra durability, and the chaos mix knows a wing's tier from it |
@@ -112,7 +142,8 @@ read as the English name only; saving writes the object form.
 ### Name lines
 
 The tooltip's first line is the item's name. Its **standard name** is the
-item's `name` in the UI's language, after its set's name for an ancient item
+item's `name` in the item names' language (the UI's, or English with the
+options' "Translate item names" off), after its set's name for an ancient item
 and "Excellent" for an excellent one, with " +level" above +0; its
 **standard color** is green-blue for an ancient item, violet for a socket
 item, green for an excellent item with options, yellow from +7, blue for an
