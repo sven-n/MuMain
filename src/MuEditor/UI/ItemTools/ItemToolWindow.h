@@ -16,7 +16,7 @@ void End();
 // editor's bar; a click does not take the focus from the item tool.
 void RenderUndoRedo();
 
-// "Kris (0,0)" in the UI language, with what tells it apart from items of the
+// "Kris (0,0)" in the item name language, with what tells it apart from items of the
 // same name (ItemNamesakes), or "Select an item"; false when there is no item
 // to edit.
 bool RenderSelectedItem(int itemType);

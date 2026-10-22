@@ -46,6 +46,11 @@ void ItemDatabase::Build(std::span<const ItemDefinition> definitions)
 
 void ItemDatabase::SetDisplayLocale(std::string_view locale)
 {
+    if (m_displayLocale == locale)
+    {
+        return;
+    }
+    ++m_nameVersion;
     m_displayLocale = std::string(locale);
     for (ItemDefinition& definition : m_definitions)
     {
@@ -178,6 +183,7 @@ void ItemDatabase::UpdateDisplayName(ItemDefinition& definition) const
 void ItemDatabase::Store(int itemType, ItemDefinition definition)
 {
     ++m_version;
+    ++m_nameVersion;
     definition.group = GetItemGroup(itemType);
     definition.number = GetItemNumber(itemType);
     UpdateDisplayName(definition);

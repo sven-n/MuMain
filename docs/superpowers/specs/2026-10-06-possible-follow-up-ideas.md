@@ -74,3 +74,42 @@ catalogue.
 generated index of the code's call sites would add the code that uses it.
 The world preview's list of the game's calls already reads the create calls
 from the sources at run time.
+
+## From the data-driven items (phase 7)
+
+From the [data-driven items design](2026-09-25-data-driven-items-design.md).
+
+### Item data update at game start or in the launcher
+
+**What is wanted.** The players' clients get the server's item data at game
+start, or from the launcher before it, instead of only with a new client
+build. A change the server makes to its items (stats, requirements, new
+items) then reaches the players without new item files being shipped. Phase
+7 does this for the developer only: MuEditor's Update from server reads the
+server's data, shows the diff and saves the item files, which are then
+shipped as now.
+
+**Why not now.** Phase 7's editor button is a rare developer action and costs
+the server nothing worth noting. A download for every player at every start
+is a load on whatever serves it, at the busiest times.
+
+**What it would take** (to be checked when starting):
+
+- A service of its own, which can be hosted apart from the game, at best on a
+  machine of its own, so it never slows the game servers down: neither the
+  game server nor the admin panel serve the players' downloads. It serves
+  the data the server exported, with a version or hash, so a client only
+  downloads what changed and skips the download when nothing did.
+- The client or the launcher checks the version before the game loads its
+  items and takes the newer data; the game then loads it as it loads the
+  shipped files. OpenMU's launcher (`src/ClientLauncher`) is one place that
+  could do the check.
+- What the client keeps for itself (models, looks, translations, tooltips)
+  stays with the client build, or comes through the same service as files.
+- Original clients do not take part: they read their own bmd files.
+
+**When starting.** Its design decides what is downloaded (the item files, or
+the exchange file the client converts), how the client knows the data is the
+server's (signing), what an item the data adds but the client has no model
+for shows, the cache and a start without the service, and how game servers
+of different versions are told apart.

@@ -8171,6 +8171,9 @@
     <value>以下</value>
     <comment>legacy_id=2342</comment>
   </data>
+  <data name="Max" xml:space="preserve">
+    <value>最大</value>
+  </data>
   <data name="Rate increase" xml:space="preserve">
     <value>確率増加</value>
     <comment>legacy_id=2344</comment>
@@ -10980,5 +10983,8 @@
   </data>
   <data name="QuestRequirementBuff" xml:space="preserve">
     <value>Bonus: %ls</value>
+  </data>
+  <data name="Translate Item Names" xml:space="preserve">
+    <value>アイテム名を翻訳する</value>
   </data>
 </root>

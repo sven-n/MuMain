@@ -22,6 +22,11 @@ bool HasNameIn(const ItemDefinition& definition, std::string_view locale)
     return !GetOwnName(definition, locale).empty();
 }
 
+std::string_view GetItemNameLocale(std::string_view uiLocale, bool translateItemNames)
+{
+    return translateItemNames ? uiLocale : LocalizedString::NeutralLocale;
+}
+
 std::vector<ItemNameCount> CountItemNames(std::span<const ItemDefinition> items, std::span<const char* const> locales)
 {
     std::vector<ItemNameCount> counts;

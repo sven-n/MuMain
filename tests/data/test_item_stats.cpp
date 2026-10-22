@@ -919,12 +919,21 @@ TEST_CASE("The item help window builds its content again only when what it shows
     CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != shown);
     help.HeroCharacter().Class = CLASS_WIZARD;
 
+    // Another language changes the texts and the item names. Back in English
+    // the names were taken again; the content then stays until something changes.
     I18N::SetLocale("pt");
     CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != shown);
     I18N::SetLocale("en");
-    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) == shown);
+    const auto backInEnglish = GetItemHelpContentKey(ITEM_BONE_BLADE);
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) == backInEnglish);
 
     // An item editor change, which stores the item in the item database.
     g_ItemDatabase.Set(*g_ItemDatabase.Find(ITEM_BONE_BLADE));
-    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != shown);
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != backInEnglish);
+
+    // Translated item names turned on or off: only the item names change language.
+    const auto namesInEnglish = GetItemHelpContentKey(ITEM_BONE_BLADE);
+    g_ItemDatabase.SetDisplayLocale("pt");
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != namesInEnglish);
+    g_ItemDatabase.SetDisplayLocale("en");
 }
