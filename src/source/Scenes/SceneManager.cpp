@@ -283,10 +283,10 @@ static int g_screenshotQuality = BestScreenshotQuality;
 // The readback is only ready on a later frame than the one that asked for it,
 // and a request may arrive either before or after this frame's consume pass
 // (Print Screen comes from the scene update, a scripted capture from the
-// control socket's poll). A frame the renderer skips (no swapchain image: a
-// minimized window, or too many frames in flight) delivers nothing and leaves
-// the request for the next one, so the wait allows for a few skipped frames:
-// about a second at 60 frames per second.
+// control socket's poll). A frame the renderer skips (no swapchain image, as
+// for a minimized window) delivers nothing and leaves the request for the next
+// one, so the wait allows for a few skipped frames: about a second at 60
+// frames per second.
 constexpr int MaxScreenshotConsumeAttempts = 60;
 static int g_screenshotConsumeAttempts = 0;
 
