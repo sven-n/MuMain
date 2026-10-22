@@ -2119,4 +2119,133 @@
   <data name="Monster checks click note" xml:space="preserve">
     <value>Click a problem of a monster to select the monster and open the tool of its field.</value>
   </data>
+  <data name="Item Sync" xml:space="preserve">
+    <value>Item Sync</value>
+  </data>
+  <data name="Import..." xml:space="preserve">
+    <value>Import…</value>
+  </data>
+  <data name="Export..." xml:space="preserve">
+    <value>Export…</value>
+  </data>
+  <data name="Exchange file" xml:space="preserve">
+    <value>Exchange file</value>
+  </data>
+  <data name="Compare again" xml:space="preserve">
+    <value>Compare again</value>
+  </data>
+  <data name="What Import and Export do" xml:space="preserve">
+    <value>Import takes the checked values of the file into the client's data; Export writes the checked values of the client into the file. Both show the differences first.</value>
+  </data>
+  <data name="Import from {0}" xml:space="preserve">
+    <value>Import from {0}</value>
+  </data>
+  <data name="Export into {0}" xml:space="preserve">
+    <value>Export into {0}</value>
+  </data>
+  <data name="From OpenMU, server {0}" xml:space="preserve">
+    <value>From OpenMU, server {0}</value>
+  </data>
+  <data name="The diff counts" xml:space="preserve">
+    <value>{0} new, {1} changed, {2} removed items; {3} formula entries</value>
+  </data>
+  <data name="No differences" xml:space="preserve">
+    <value>No differences</value>
+  </data>
+  <data name="Check all" xml:space="preserve">
+    <value>Check all</value>
+  </data>
+  <data name="Check none" xml:space="preserve">
+    <value>Check none</value>
+  </data>
+  <data name="A field in all items" xml:space="preserve">
+    <value>A field in all items</value>
+  </data>
+  <data name="Check them" xml:space="preserve">
+    <value>Check them</value>
+  </data>
+  <data name="Uncheck them" xml:space="preserve">
+    <value>Uncheck them</value>
+  </data>
+  <data name="Items ({0})" xml:space="preserve">
+    <value>Items ({0})</value>
+  </data>
+  <data name="Formulas ({0})" xml:space="preserve">
+    <value>Formulas ({0})</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="Changed" xml:space="preserve">
+    <value>Changed</value>
+  </data>
+  <data name="Removed" xml:space="preserve">
+    <value>Removed</value>
+  </data>
+  <data name="Change" xml:space="preserve">
+    <value>Change</value>
+  </data>
+  <data name="Fields" xml:space="preserve">
+    <value>Fields</value>
+  </data>
+  <data name="Now" xml:space="preserve">
+    <value>Now</value>
+  </data>
+  <data name="From the file" xml:space="preserve">
+    <value>From the file</value>
+  </data>
+  <data name="From the client" xml:space="preserve">
+    <value>From the client</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="Entry" xml:space="preserve">
+    <value>Entry</value>
+  </data>
+  <data name="Known" xml:space="preserve">
+    <value>Known</value>
+  </data>
+  <data name="What a known difference is" xml:space="preserve">
+    <value>A known difference: meant to differ between the client and the server, so it stays unchecked. Kept in Data/Items/Sync/KnownDifferences.json.</value>
+  </data>
+  <data name="OpenMU keeps the drop level in a byte (at most 255)" xml:space="preserve">
+    <value>OpenMU keeps the drop level in a byte (at most 255)</value>
+  </data>
+  <data name="It has no model yet" xml:space="preserve">
+    <value>It has no model yet</value>
+  </data>
+  <data name="Its profile rules give {0}, the file {1}" xml:space="preserve">
+    <value>Its profile rules give {0}, the file {1}: a wing tier or a tag may be missing</value>
+  </data>
+  <data name="Apply the checked changes" xml:space="preserve">
+    <value>Apply the checked changes</value>
+  </data>
+  <data name="Write the checked changes into the file" xml:space="preserve">
+    <value>Write the checked changes into the file</value>
+  </data>
+  <data name="Import items" xml:space="preserve">
+    <value>Import items</value>
+  </data>
+  <data name="Applied as one step of the undo history" xml:space="preserve">
+    <value>Applied as one step of the undo history</value>
+  </data>
+  <data name="Written to {0}" xml:space="preserve">
+    <value>Written to {0}</value>
+  </data>
+  <data name="The checks refuse the change" xml:space="preserve">
+    <value>The checks refuse the change; the rows of the items with errors are unchecked:</value>
+  </data>
+  <data name="All formulas" xml:space="preserve">
+    <value>All formulas</value>
+  </data>
+  <data name="Fields of {0}" xml:space="preserve">
+    <value>Fields of {0}</value>
+  </data>
+  <data name="Item exchange files" xml:space="preserve">
+    <value>Item exchange files</value>
+  </data>
+  <data name="The client data changed since the comparison" xml:space="preserve">
+    <value>The client's data changed since the comparison: compare again.</value>
+  </data>
 </root>

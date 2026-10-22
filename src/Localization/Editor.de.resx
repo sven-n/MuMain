@@ -2098,4 +2098,133 @@
   <data name="Monster checks click note" xml:space="preserve">
     <value>Ein Klick auf das Problem eines Monsters wählt es aus und öffnet das Werkzeug seines Felds.</value>
   </data>
+  <data name="Item Sync" xml:space="preserve">
+    <value>Item-Abgleich</value>
+  </data>
+  <data name="Import..." xml:space="preserve">
+    <value>Importieren…</value>
+  </data>
+  <data name="Export..." xml:space="preserve">
+    <value>Exportieren…</value>
+  </data>
+  <data name="Exchange file" xml:space="preserve">
+    <value>Austauschdatei</value>
+  </data>
+  <data name="Compare again" xml:space="preserve">
+    <value>Neu vergleichen</value>
+  </data>
+  <data name="What Import and Export do" xml:space="preserve">
+    <value>Importieren übernimmt die angehakten Werte der Datei in die Daten des Clients; Exportieren schreibt die angehakten Werte des Clients in die Datei. Beide zeigen zuerst die Unterschiede.</value>
+  </data>
+  <data name="Import from {0}" xml:space="preserve">
+    <value>Import aus {0}</value>
+  </data>
+  <data name="Export into {0}" xml:space="preserve">
+    <value>Export nach {0}</value>
+  </data>
+  <data name="From OpenMU, server {0}" xml:space="preserve">
+    <value>Von OpenMU, Server {0}</value>
+  </data>
+  <data name="The diff counts" xml:space="preserve">
+    <value>{0} neue, {1} geänderte, {2} entfernte Items; {3} Formeleinträge</value>
+  </data>
+  <data name="No differences" xml:space="preserve">
+    <value>Keine Unterschiede</value>
+  </data>
+  <data name="Check all" xml:space="preserve">
+    <value>Alle anhaken</value>
+  </data>
+  <data name="Check none" xml:space="preserve">
+    <value>Keinen anhaken</value>
+  </data>
+  <data name="A field in all items" xml:space="preserve">
+    <value>Ein Feld in allen Items</value>
+  </data>
+  <data name="Check them" xml:space="preserve">
+    <value>Anhaken</value>
+  </data>
+  <data name="Uncheck them" xml:space="preserve">
+    <value>Haken entfernen</value>
+  </data>
+  <data name="Items ({0})" xml:space="preserve">
+    <value>Items ({0})</value>
+  </data>
+  <data name="Formulas ({0})" xml:space="preserve">
+    <value>Formeln ({0})</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>Neu</value>
+  </data>
+  <data name="Changed" xml:space="preserve">
+    <value>Geändert</value>
+  </data>
+  <data name="Removed" xml:space="preserve">
+    <value>Entfernt</value>
+  </data>
+  <data name="Change" xml:space="preserve">
+    <value>Änderung</value>
+  </data>
+  <data name="Fields" xml:space="preserve">
+    <value>Felder</value>
+  </data>
+  <data name="Now" xml:space="preserve">
+    <value>Jetzt</value>
+  </data>
+  <data name="From the file" xml:space="preserve">
+    <value>Aus der Datei</value>
+  </data>
+  <data name="From the client" xml:space="preserve">
+    <value>Aus dem Client</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Hinweis</value>
+  </data>
+  <data name="Entry" xml:space="preserve">
+    <value>Eintrag</value>
+  </data>
+  <data name="Known" xml:space="preserve">
+    <value>Bekannt</value>
+  </data>
+  <data name="What a known difference is" xml:space="preserve">
+    <value>Ein bekannter Unterschied: zwischen Client und Server gewollt, er bleibt daher ohne Haken. Gespeichert in Data/Items/Sync/KnownDifferences.json.</value>
+  </data>
+  <data name="OpenMU keeps the drop level in a byte (at most 255)" xml:space="preserve">
+    <value>OpenMU speichert die Drop-Stufe in einem Byte (höchstens 255)</value>
+  </data>
+  <data name="It has no model yet" xml:space="preserve">
+    <value>Es hat noch kein Modell</value>
+  </data>
+  <data name="Its profile rules give {0}, the file {1}" xml:space="preserve">
+    <value>Seine Profilregeln geben {0}, die Datei {1}: eine Flügelstufe oder ein Tag fehlt vielleicht</value>
+  </data>
+  <data name="Apply the checked changes" xml:space="preserve">
+    <value>Angehakte Änderungen übernehmen</value>
+  </data>
+  <data name="Write the checked changes into the file" xml:space="preserve">
+    <value>Angehakte Änderungen in die Datei schreiben</value>
+  </data>
+  <data name="Import items" xml:space="preserve">
+    <value>Items importieren</value>
+  </data>
+  <data name="Applied as one step of the undo history" xml:space="preserve">
+    <value>Als ein Schritt des Rückgängig-Verlaufs übernommen</value>
+  </data>
+  <data name="Written to {0}" xml:space="preserve">
+    <value>Geschrieben nach {0}</value>
+  </data>
+  <data name="The checks refuse the change" xml:space="preserve">
+    <value>Die Prüfungen lehnen die Änderung ab; die Zeilen der Items mit Fehlern haben keinen Haken mehr:</value>
+  </data>
+  <data name="All formulas" xml:space="preserve">
+    <value>Alle Formeln</value>
+  </data>
+  <data name="Fields of {0}" xml:space="preserve">
+    <value>Felder von {0}</value>
+  </data>
+  <data name="Item exchange files" xml:space="preserve">
+    <value>Item-Austauschdateien</value>
+  </data>
+  <data name="The client data changed since the comparison" xml:space="preserve">
+    <value>Die Daten des Clients haben sich seit dem Vergleich geändert: neu vergleichen.</value>
+  </data>
 </root>

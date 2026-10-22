@@ -63,6 +63,7 @@
 #include "UI/ItemTools/MuItemModelUI.h"
 #include "UI/ItemTools/MuItemRequirementsUI.h"
 #include "UI/ItemTools/MuItemRulesUI.h"
+#include "UI/ItemTools/MuItemSyncUI.h"
 #include "UI/ItemTranslations/MuItemTranslationsUI.h"
 #include "UI/MapEditor/MapEditorUI.h"
 #include "TestModelSlots.h"
@@ -2419,6 +2420,7 @@ void RenderItemTools()
     g_MuItemCategoriesUI.Render(&open);
     g_MuItemModelUI.Render(&open);
     g_MuItemGlowColorsUI.Render(&open);
+    g_MuItemSyncUI.Render(&open);
     g_MuItemFormulasUI.Render(&open);
     g_MuItemChecksUI.Render(&open);
     g_MuItemTranslationsUI.Render(&open);

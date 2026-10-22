@@ -21,7 +21,8 @@
 // from the other. The fields are named by their keys in the item files ("width",
 // "requirements.strength", "name.de", "tags.ammunition") and in the item stat file
 // ("dropLevelBonus.excellent", "tables.damageIncreaseWeapons", "default.damage.excellent",
-// "profiles.weapon.requirements.strength"; "profiles.weapon" for a profile as a whole).
+// "profiles.weapon.requirements.strength"; "profiles.weapon" for a profile as a whole, and
+// "formulas" for all of them, into a file that has none).
 namespace MuEditor::Items
 {
 // Which side takes the other's values.
@@ -45,6 +46,9 @@ struct KnownDifferences
     bool Contains(const std::string& formula) const;
     bool operator==(const KnownDifferences& other) const = default;
 };
+
+// The entry of all the formulas, for a file that has none (SyncFormula::entry).
+inline constexpr char AllFormulasEntry[] = "formulas";
 
 std::filesystem::path GetKnownDifferencesFile();
 // Nothing known when the file is not there.

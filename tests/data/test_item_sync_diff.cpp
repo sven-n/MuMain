@@ -6,10 +6,13 @@
 
 #include "ClientDataScope.h"
 
+#include "UI/ItemTools/ItemEdits.h"
 #include "UI/ItemTools/ItemSyncDiff.h"
+#include "UI/ItemTools/MuItemSyncUI.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
 
@@ -90,6 +93,40 @@ const SyncFormula* FindFormula(const ItemSyncDiff& diff, const std::string& entr
 {
     const auto found = std::ranges::find(diff.formulas, entry, &SyncFormula::entry);
     return found != diff.formulas.end() ? &*found : nullptr;
+}
+
+// A folder of its own for a test's files.
+class TemporaryFolder
+{
+public:
+    TemporaryFolder()
+        : m_directory(std::filesystem::temp_directory_path() /
+                      ("mu_test_item_sync_" + std::to_string(std::random_device{}())))
+    {
+        std::filesystem::create_directories(m_directory);
+    }
+
+    ~TemporaryFolder()
+    {
+        std::error_code ignored;
+        std::filesystem::remove_all(m_directory, ignored);
+    }
+
+    TemporaryFolder(const TemporaryFolder&) = delete;
+    TemporaryFolder& operator=(const TemporaryFolder&) = delete;
+
+    const std::filesystem::path& Path() const
+    {
+        return m_directory;
+    }
+
+private:
+    std::filesystem::path m_directory;
+};
+
+void WriteFile(const std::filesystem::path& file, const std::string& text)
+{
+    std::ofstream(file, std::ios::binary) << text;
 }
 } // namespace
 
@@ -335,6 +372,111 @@ TEST_CASE("Formulas the item stat file's checks refuse are not taken [data][item
     const ItemExchangeFile applied = ApplyItemSyncDiff(sides.client, sides.file, diff, issues);
     CHECK(HasErrors(issues));
     CHECK(*applied.formulas == *sides.client.formulas);
+}
+
+// The window's Import: the checked rows change the client's data as one step of the undo
+// history, which undoes them all.
+TEST_CASE("Item Sync imports the checked rows of a file as one undo step [data][items][editor]")
+{
+    Sides sides;
+    g_ItemEdits.GetHistory().Clear();
+    const ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+    const ItemStatFile statFile = g_ItemDataHandler.GetStatFile();
+    ++sides.FileItem(KrisType).width;
+    ItemDefinition added = sides.FileItem(KrisType);
+    added.number = 100;
+    added.names = Data::LocalizedString::Parse("New Sword");
+    added.width = 2;
+    sides.file.items.push_back(added);
+    std::erase_if(sides.file.items,
+                  [](const ItemDefinition& item) { return MakeItemType(item.group, item.number) == ShortSwordType; });
+    sides.file.formulas->excellentDropLevelBonus = 30;
+    TemporaryFolder folder;
+    const std::filesystem::path file = folder.Path() / "ItemExchange.json";
+    WriteFile(file, WriteItemExchangeJson(sides.file));
+
+    g_MuItemSyncUI.Compare(SyncDirection::Import, file);
+    REQUIRE(g_MuItemSyncUI.GetDiff());
+    CHECK(g_MuItemSyncUI.GetDiff()->items.size() == 3);
+    CHECK(g_MuItemSyncUI.GetDiff()->formulas.size() == 1);
+    REQUIRE(g_MuItemSyncUI.Apply());
+
+    CHECK(g_ItemDatabase.Find(KrisType)->width == kris.width + 1);
+    // Its client-only fields stay.
+    CHECK(g_ItemDatabase.Find(KrisType)->weaponKind == kris.weaponKind);
+    const ItemDefinition* newSword = g_ItemDatabase.Find(MakeItemType(0, 100));
+    REQUIRE(newSword != nullptr);
+    CHECK(newSword->twoHanded);
+    CHECK(newSword->weaponKind == WeaponKind::Sword);
+    CHECK(newSword->statProfile == "weapon");
+    // The removal was not checked.
+    CHECK(g_ItemDatabase.Find(ShortSwordType) != nullptr);
+    CHECK(g_ItemDataHandler.GetStatFile().excellentDropLevelBonus == 30);
+    CHECK(g_ItemDataHandler.GetStatFile().profileRules == statFile.profileRules);
+    CHECK(g_ItemEdits.GetHistory().GetUndoLabel() == I18N::Editor::ImportItems);
+    // What is left: the removal.
+    REQUIRE(g_MuItemSyncUI.GetDiff());
+    REQUIRE(g_MuItemSyncUI.GetDiff()->items.size() == 1);
+    CHECK(g_MuItemSyncUI.GetDiff()->items[0].change == SyncChange::Removed);
+
+    REQUIRE(g_ItemEdits.Undo());
+    CHECK(g_ItemDatabase.Find(KrisType)->width == kris.width);
+    CHECK(g_ItemDatabase.Find(MakeItemType(0, 100)) == nullptr);
+    CHECK(g_ItemDataHandler.GetStatFile() == statFile);
+    g_ItemEdits.GetHistory().Clear();
+}
+
+// The checks of a save run on the data as it would be: an item that names a profile the
+// formulas have not got refuses the import, and nothing changes.
+TEST_CASE("Item Sync refuses an import the checks of a save refuse [data][items][editor]")
+{
+    Sides sides;
+    g_ItemEdits.GetHistory().Clear();
+    const ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+    ItemDefinition& fileKris = sides.FileItem(KrisType);
+    fileKris.statProfile = "rune";
+    ++fileKris.width;
+    TemporaryFolder folder;
+    const std::filesystem::path file = folder.Path() / "ItemExchange.json";
+    WriteFile(file, WriteItemExchangeJson(sides.file));
+
+    g_MuItemSyncUI.Compare(SyncDirection::Import, file);
+    REQUIRE(g_MuItemSyncUI.GetDiff());
+    CHECK_FALSE(g_MuItemSyncUI.Apply());
+    CHECK(*g_ItemDatabase.Find(KrisType) == kris);
+    CHECK_FALSE(g_ItemEdits.GetHistory().CanUndo());
+    // The item's row is unchecked.
+    const SyncItem* row = FindRow(*g_MuItemSyncUI.GetDiff(), KrisType);
+    REQUIRE(row != nullptr);
+    CHECK(std::ranges::none_of(row->fields, [](const SyncField& field) { return field.checked; }));
+    CHECK(g_MuItemSyncUI.GetMessages().size() > 1);
+}
+
+// The window's Export into a file that is not there yet: all items and the formulas.
+TEST_CASE("Item Sync exports the client's data into a new file [data][items][editor]")
+{
+    Sides sides;
+    TemporaryFolder folder;
+    const std::filesystem::path file = folder.Path() / "ItemExchange.json";
+    g_MuItemSyncUI.Compare(SyncDirection::Export, file);
+    REQUIRE(g_MuItemSyncUI.GetDiff());
+    CHECK(g_MuItemSyncUI.GetDiff()->items.size() == sides.client.items.size());
+    REQUIRE(g_MuItemSyncUI.GetDiff()->formulas.size() == 1);
+    CHECK(g_MuItemSyncUI.GetDiff()->formulas[0].entry == AllFormulasEntry);
+    REQUIRE(g_MuItemSyncUI.Apply());
+
+    const std::optional<std::string> text = Data::Items::Json::ReadTextFile(file);
+    REQUIRE(text);
+    std::vector<ItemDataIssue> issues;
+    ItemExchangeFile written;
+    ReadItemExchangeJson(*text, file.generic_string(), written, issues);
+    CHECK(issues.empty());
+    CHECK(written.source == ItemExchangeSourceMuMain);
+    CHECK(written.items == sides.client.items);
+    CHECK(written.formulas == sides.client.formulas);
+    // Nothing is left to export.
+    REQUIRE(g_MuItemSyncUI.GetDiff());
+    CHECK(g_MuItemSyncUI.GetDiff()->IsEmpty());
 }
 
 TEST_CASE("The known differences are written and read back [data][items][editor]")

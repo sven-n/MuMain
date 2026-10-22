@@ -9,6 +9,7 @@
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
 #include "Data/GameData/ItemData/ItemStatsJson.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "I18N/All.h"
 
 #include <algorithm>
 #include <map>
@@ -159,7 +160,7 @@ void MarkField(SyncField& field, const ItemKey& key, const ItemExchangeFile& inc
     field.known = options.known != nullptr && options.known->Contains(key.first, key.second, field.field);
     if (IsHeld(options, key) && std::ranges::find(HeldFields, field.field) != std::end(HeldFields))
     {
-        field.locked = "the game holds the item: its size and slot stay";
+        field.locked = I18N::Editor::TheItemIsWornOrInAnItemWindowItsSizeAndSlotStayAsTheyAre;
     }
     if (field.field == LevelField && options.direction == SyncDirection::Import &&
         incoming.source == Data::Items::ItemExchangeSourceOpenMU)
@@ -169,7 +170,7 @@ void MarkField(SyncField& field, const ItemKey& key, const ItemExchangeFile& inc
         if (client != current.end() && client->second.get<int>() > OpenMUMaxDropLevel &&
             server != incomingFields.end() && server->second.get<int>() == OpenMUMaxDropLevel)
         {
-            field.inexact = "OpenMU keeps the drop level in a byte (at most 255)";
+            field.inexact = I18N::Editor::OpenMUKeepsTheDropLevelInAByteAtMost255;
         }
     }
     field.checked = !field.known && field.locked.empty() && field.inexact.empty();
@@ -204,7 +205,7 @@ SyncItem CompareItem(const ItemKey& key, const ItemDefinition* current, const It
         row.change = SyncChange::Removed;
         if (IsHeld(options, key))
         {
-            row.locked = "the game holds the item: it is not removed";
+            row.locked = I18N::Editor::TheItemIsWornOrInAnItemWindowItIsNotMovedOrRemoved;
         }
         return row;
     }
@@ -440,9 +441,14 @@ void CompareFormulas(const Data::Items::ItemStatFile& current, const Data::Items
 void ApplyFormulas(const ItemExchangeFile& source, ItemExchangeFile& target, const ItemSyncDiff& diff,
                    std::vector<ItemDataIssue>& issues)
 {
-    if (!source.formulas || !target.formulas ||
-        std::ranges::none_of(diff.formulas, [](const SyncFormula& row) { return row.checked; }))
+    if (!source.formulas || std::ranges::none_of(diff.formulas, [](const SyncFormula& row) { return row.checked; }))
     {
+        return;
+    }
+    if (!target.formulas)
+    {
+        // Only the row of all of them.
+        target.formulas = source.formulas;
         return;
     }
     const Fields from = FlattenFormulas(*source.formulas);
@@ -616,6 +622,15 @@ ItemSyncDiff BuildItemSyncDiff(const ItemExchangeFile& client, const ItemExchang
     if (current.formulas && incoming.formulas)
     {
         CompareFormulas(*current.formulas, *incoming.formulas, options, diff.formulas);
+    }
+    else if (incoming.formulas)
+    {
+        // A file without formulas, e.g. a new one: they come in as a whole.
+        SyncFormula all;
+        all.entry = AllFormulasEntry;
+        all.incoming = ToText(Data::Items::WriteItemStatFormulasJson(*incoming.formulas));
+        all.checked = true;
+        diff.formulas.push_back(std::move(all));
     }
     return diff;
 }
