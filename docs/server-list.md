@@ -103,7 +103,8 @@ the name the login screen gives it.
 
 `ServerList.bmd` held the same groups, encrypted, with channel types for the
 first 15 channels only and a left, right or center position for each button.
-The original screen drew the center one, a test server, as a button of its
-own; the login screen now lists all groups in one column in the list's order,
-so only "test server" is kept, for the rule that only the first is shown. The original loader read each group's description but never kept it,
-so the login screen showed none; the JSON description is shown.
+The original screen drew the center one, a test server, as a button of its own;
+the login screen now lists all groups in one column in the list's order, so
+only "test server" is kept, for the rule that only the first is shown. The
+original loader read each group's description but never kept it, so the login
+screen showed none; the JSON description is shown.
