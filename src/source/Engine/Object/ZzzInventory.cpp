@@ -1865,9 +1865,15 @@ static ItemTooltipName GetItemTooltipName(const ITEM& item, int level, const Ite
                 line.textName.empty() ? &line.text : g_ItemDatabase.GetTooltipFile().FindText(line.textName);
             if (text != nullptr)
             {
-                name.text = Core::Text::FromUtf8(Data::Items::FillPlaceholders(
+                const std::wstring filled = Core::Text::FromUtf8(Data::Items::FillPlaceholders(
                     text->Get(g_ItemDatabase.GetDisplayLocale()), [&](std::string_view placeholder)
                     { return TooltipPlaceholderValue(placeholder, line.values, definition, level, values); }));
+                // No text in the UI's language keeps the standard name: an empty first row would leave the tooltip
+                // empty.
+                if (!filled.empty())
+                {
+                    name.text = filled;
+                }
             }
         }
         const auto base = line.hasColor ? line.color : static_cast<Data::Items::ItemTextColor>(name.color);

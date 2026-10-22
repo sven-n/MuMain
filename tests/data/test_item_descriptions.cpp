@@ -183,3 +183,33 @@ TEST_CASE("Level values written in place are checked like description texts [dat
     CHECK(issues[1].severity == ItemDataIssueSeverity::Warning);
     CHECK(issues[1].field == "levelValues.stat[2]");
 }
+
+TEST_CASE("Name line texts written in place are checked like description texts [data][items]")
+{
+    const char* uiLocales[] = {"en", "de"};
+
+    ItemDefinition ring = MakeJewel();
+    ItemNameLine noEnglish;
+    noEnglish.text.Set("de", "Ring");
+    noEnglish.hasText = true;
+    ItemNameLine unknownLanguage;
+    unknownLanguage.text.Set("en", "{name}");
+    unknownLanguage.text.Set("xx", "{name}");
+    unknownLanguage.hasText = true;
+    ItemNameLine colorOnly;
+    colorOnly.color = ItemTextColor::Yellow;
+    colorOnly.hasColor = true;
+    ring.nameLines = {noEnglish, unknownLanguage, colorOnly};
+
+    std::vector<ItemDataIssue> issues;
+    ValidateItems(std::vector<ItemDefinition>{ring}, issues);
+    ValidateNameLocales(std::vector<ItemDefinition>{ring}, uiLocales, issues);
+    std::erase_if(issues, [](const ItemDataIssue& issue) { return !issue.field.starts_with("nameLines"); });
+
+    // A line without a text keeps the standard name and has nothing to check.
+    REQUIRE(issues.size() == 2);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Error);
+    CHECK(issues[0].field == "nameLines[0].text");
+    CHECK(issues[1].severity == ItemDataIssueSeverity::Warning);
+    CHECK(issues[1].field == "nameLines[1].text");
+}

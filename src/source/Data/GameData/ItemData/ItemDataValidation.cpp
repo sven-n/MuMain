@@ -71,8 +71,8 @@ void ValidateName(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
         check(locale, text);
     }
 }
-// An item's own text (a description line's, a level value's) is written like a name: an English text, and
-// translations under language codes. A blank one has no text in any language.
+// An item's own text (a description line's, a name line's, a level value's) is written like a name: an English text,
+// and translations under language codes. A blank one has no text in any language.
 void ValidateItemText(const ItemDefinition& definition, const LocalizedString& text, const std::string& field,
                       std::vector<ItemDataIssue>& issues)
 {
@@ -100,6 +100,11 @@ void ValidateDescription(const ItemDefinition& definition, std::vector<ItemDataI
     {
         ValidateItemText(definition, definition.description[index].text,
                          "description[" + std::to_string(index) + "].text", issues);
+    }
+    for (size_t index = 0; index < definition.nameLines.size(); ++index)
+    {
+        ValidateItemText(definition, definition.nameLines[index].text, "nameLines[" + std::to_string(index) + "].text",
+                         issues);
     }
     for (const ItemLevelValues& levelValues : definition.levelValues)
     {
@@ -652,6 +657,10 @@ void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const 
         for (size_t index = 0; index < definition.description.size(); ++index)
         {
             warnAbout(definition.description[index].text, "description[" + std::to_string(index) + "].text");
+        }
+        for (size_t index = 0; index < definition.nameLines.size(); ++index)
+        {
+            warnAbout(definition.nameLines[index].text, "nameLines[" + std::to_string(index) + "].text");
         }
         for (const ItemLevelValues& levelValues : definition.levelValues)
         {
