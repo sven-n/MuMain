@@ -9,6 +9,7 @@
 
 #include <span>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace Data::Items
@@ -46,4 +47,19 @@ void ApplySharedItemModels(std::vector<ItemModelDefinition>& models, std::span<c
 // the glow color list. Appends the problems to `issues`.
 void ValidateItemModelGlowColors(std::span<const ItemModelDefinition> models,
                                  std::span<const Effects::GlowColor> colors, std::vector<ItemDataIssue>& issues);
+
+// Whether a look of this name exists; the looks are drawing code
+// (Render::Items::Styles::Exists, Render::Items::ItemEffects::Exists).
+using LookNameExists = bool (*)(std::string_view name);
+
+// A render style or item effect that no look of that name has: a warning for
+// each, since the model is then drawn plainly (the model loader reports the
+// same when it opens the models).
+void ValidateItemModelLooks(std::span<const ItemModelDefinition> models, LookNameExists renderStyleExists,
+                            LookNameExists itemEffectExists, std::vector<ItemDataIssue>& issues);
+
+// A .bmd file that several model entries name themselves instead of through
+// a shared model: a warning for each of them, since each opens the file again
+// (a shared model opens it once).
+void ValidateDirectlySharedModelFiles(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues);
 } // namespace Data::Items

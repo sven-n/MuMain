@@ -141,5 +141,21 @@
         "strengthPerOptionLevel": 5
       }
     }
+  ],
+  "profileRules": [
+    {"profile": "default", "tags": ["ammunition"]},
+    {"profile": "sceptre", "tags": ["sceptre"]},
+    {"profile": "book", "tags": ["summonerBook"]},
+    {"profile": "shield", "weaponKind": ["shield"]},
+    {"profile": "weapon", "weaponKind": ["spear", "bow", "crossbow", "sword", "axe", "mace", "staff", "glove", "book"]},
+    {"profile": "armor", "slot": ["helm", "armor", "pants", "gloves", "boots"]},
+    {"profile": "smallWing", "slot": ["wings"], "wingTier": ["small"]},
+    {"profile": "firstTierWing", "slot": ["wings"], "wingTier": ["first"]},
+    {"profile": "secondTierCape", "slot": ["wings"], "wingTier": ["second"], "tags": ["cape"]},
+    {"profile": "secondTierWing", "slot": ["wings"], "wingTier": ["second"]},
+    {"profile": "thirdTierWing", "slot": ["wings"], "wingTier": ["third"]},
+    {"profile": "default", "slot": ["wings"]},
+    {"profile": "scroll", "group": [15], "requirements": ["level", "strength", "dexterity", "energy", "vitality", "leadership"]},
+    {"profile": "helper", "group": [13, 14], "requirements": ["level"]}
   ]
 }
