@@ -210,11 +210,13 @@ void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int L
 void RenderItem3DWithHover(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags, int ancientDiscriminator, bool hovered);
 void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancientDiscriminator, vec3_t Target, int Select, bool PickUp);
 bool GetAttackDamage(int* iMinDamage, int* iMaxDamage);
-// The item's name in the UI's language, as windows, messages and ground labels write it: the text of the first of its
+// The item's name in the item names' language (the UI's, or English with "Translate item names" off), as windows,
+// messages and ground labels write it: the text of the first of its
 // name lines whose levels and conditions hold (the item data's nameLines), else its name with " +level" above +0.
 // Without `item`, one of the type at the level, whose durability and options are 0.
 std::wstring GetItemNameText(int type, int level, const ITEM* item = nullptr);
 void GetItemName(int iType, int iLevel, wchar_t* Text);
+std::wstring GetItemName(int iType, int iLevel);
 std::wstring GetItemDisplayName(ITEM* pItem);
 void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int iMana);
 // The item's information and repair tooltips, anchored in window pixels: their layout runs in the

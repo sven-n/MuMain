@@ -138,3 +138,9 @@ mu_add_test(
         test_gold_amount_tier.cpp
         ${CMAKE_SOURCE_DIR}/src/source/GameLogic/Items/GoldAmountTier.cpp
 )
+
+mu_add_test(
+    NAME zen_amount_tests
+    SOURCES
+        test_zen_amount.cpp
+)
