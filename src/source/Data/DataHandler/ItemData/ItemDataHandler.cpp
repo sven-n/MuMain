@@ -512,7 +512,9 @@ void CItemDataHandler::SwapItemModels(int firstItemType, int secondItemType)
     if (m_openedModelHooks.changed != nullptr)
     {
         const int itemTypes[] = {firstItemType, secondItemType};
-        m_openedModelHooks.changed(itemTypes);
+        // A call through a function pointer: GCC lets the array decay to a
+        // pointer instead of making a span of it.
+        m_openedModelHooks.changed(std::span<const int>(itemTypes));
     }
     m_changedModelGroups.set(static_cast<size_t>(GetItemGroup(firstItemType)));
     m_changedModelGroups.set(static_cast<size_t>(GetItemGroup(secondItemType)));
