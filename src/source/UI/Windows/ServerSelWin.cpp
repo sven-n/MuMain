@@ -337,8 +337,6 @@ bool CServerSelWin::Render()
     return true;
 }
 
-// Called only at the point of an actual state change, not polled from Render() every frame --
-// this window's state only ever changes from its own click handlers.
 #ifdef _EDITOR
 int CServerSelWin::GetOpenGroupId() const
 {
@@ -372,6 +370,9 @@ void CServerSelWin::ShowRebuiltGroups(int openGroupId)
 }
 #endif
 
+// Called only at the point of an actual state change, not polled from Render() every frame --
+// this window's state only changes from its own click handlers and, in editor builds, from
+// ShowRebuiltGroups after the Server List window built the groups again.
 void CServerSelWin::SyncRmlModel()
 {
     if (!m_RmlView.Document()) return;
