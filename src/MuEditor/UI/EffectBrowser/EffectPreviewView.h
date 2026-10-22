@@ -81,8 +81,7 @@ private:
     MuEditor::Effects::EffectPreviewItems m_items;
     int m_itemsVersion = -1;
     int m_itemModelsVersion = -1;
-    // The language the item names are in (a pointer into I18N's locales).
-    const char* m_itemsLocale = nullptr;
+    int m_itemNamesVersion = -1;
     char m_itemSearch[64] = {};
     std::vector<int> m_itemMatches;
     bool m_itemMatchesValid = false;

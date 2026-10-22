@@ -144,11 +144,12 @@ bool CItemDataHandler::Load(std::string& errorMessage)
 #endif
 
     const auto buildStart = std::chrono::steady_clock::now();
-    g_ItemDatabase.SetDisplayLocale(I18N::GetCurrentLocale());
+    g_ItemDatabase.SetDisplayLocale(ItemNameLocale());
     g_ItemDatabase.SetStatProfiles(std::move(statProfiles));
     g_ItemDatabase.SetTooltipFile(std::move(tooltips.file));
     g_ItemDatabase.Build(result.items);
     FillItemAttributes();
+    m_loaded = true;
     RegisterLocaleObserver();
 
     MU_LOG_INFO(mu::log::Get("data"), "Loaded {} items from {} in {:.1f} ms (item database build {:.2f} ms)",
@@ -219,9 +220,27 @@ void CItemDataHandler::RegisterLocaleObserver()
 
 void CItemDataHandler::OnLocaleChanged(void* context) noexcept
 {
-    auto* handler = static_cast<CItemDataHandler*>(context);
-    g_ItemDatabase.SetDisplayLocale(I18N::GetCurrentLocale());
-    handler->FillItemAttributes();
+    static_cast<CItemDataHandler*>(context)->RefreshItemNames();
+}
+
+void CItemDataHandler::SetTranslateItemNames(bool translate)
+{
+    m_translateItemNames = translate;
+    if (m_loaded)
+    {
+        RefreshItemNames();
+    }
+}
+
+std::string_view CItemDataHandler::ItemNameLocale() const
+{
+    return Data::Items::GetItemNameLocale(I18N::GetCurrentLocale(), m_translateItemNames);
+}
+
+void CItemDataHandler::RefreshItemNames()
+{
+    g_ItemDatabase.SetDisplayLocale(ItemNameLocale());
+    FillItemAttributes();
 }
 
 #ifdef _EDITOR
@@ -523,7 +542,9 @@ void CItemDataHandler::SwapItemModels(int firstItemType, int secondItemType)
     if (m_openedModelHooks.changed != nullptr)
     {
         const int itemTypes[] = {firstItemType, secondItemType};
-        m_openedModelHooks.changed(itemTypes);
+        // A call through a function pointer: GCC lets the array decay to a
+        // pointer instead of making a span of it.
+        m_openedModelHooks.changed(std::span<const int>(itemTypes));
     }
     m_changedModelGroups.set(static_cast<size_t>(GetItemGroup(firstItemType)));
     m_changedModelGroups.set(static_cast<size_t>(GetItemGroup(secondItemType)));
@@ -742,11 +763,11 @@ bool CItemDataHandler::ExportAsBmd(std::string& changeLog)
 
 bool CItemDataHandler::ExportAsS6E3(wchar_t* fileName)
 {
-    return ItemDataExportS6E3::SaveLegacy(fileName);
+    return ItemDataExportS6E3::SaveLegacy(fileName, BuildItemAttributes(I18N::GetCurrentLocale()).get());
 }
 
 bool CItemDataHandler::ExportToCsv(wchar_t* fileName)
 {
-    return ItemDataExportAsCSV::ExportToCsv(fileName);
+    return ItemDataExportAsCSV::ExportToCsv(fileName, BuildItemAttributes(I18N::GetCurrentLocale()).get());
 }
 #endif
