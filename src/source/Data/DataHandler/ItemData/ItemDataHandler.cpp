@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "ItemDataHandler.h"
+#include "ItemBmdImport.h"
 #include "ItemJsonStorage.h"
 #include "ItemModelLoader.h"
 #include "Core/Globals/_struct.h"
@@ -11,6 +12,7 @@
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemEnumNames.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
 #include "Data/GameData/ItemData/ItemTypeUse.h"
@@ -63,6 +65,40 @@ std::unique_ptr<ITEM_ATTRIBUTE[]> BuildItemAttributes(std::string_view locale)
     }
     return attributes;
 }
+
+#ifdef _EDITOR
+// The orbs', crystals' and scrolls' requirements as the bmd files hold them, weights
+// (ToBmdRequirementWeights), with a line of `notes` for each one no weight gives exactly.
+void WriteBmdRequirementWeights(const ItemDefinition& definition, ITEM_ATTRIBUTE& attribute, std::string& notes)
+{
+    if (!HasRequirementWeightsInBmd(definition))
+    {
+        return;
+    }
+    for (const ItemRequirement requirement : ToBmdRequirementWeights(definition, attribute))
+    {
+        notes += g_ItemDatabase.GetLogName(MakeItemType(definition.group, definition.number)) +
+                 ": no weight gives its " + FindEnumName(requirement) +
+                 " requirement exactly, the nearest one is written\n";
+    }
+}
+
+// The records as the bmd files hold them: with the item names of `locale`, and the
+// requirements WriteBmdRequirementWeights turns into weights.
+std::unique_ptr<ITEM_ATTRIBUTE[]> BuildBmdItemAttributes(std::string_view locale, std::string& notes)
+{
+    auto attributes = BuildItemAttributes(locale);
+    for (const ItemDefinition& definition : g_ItemDatabase.GetAllSlots())
+    {
+        if (definition.Exists())
+        {
+            WriteBmdRequirementWeights(definition, attributes[MakeItemType(definition.group, definition.number)],
+                                       notes);
+        }
+    }
+    return attributes;
+}
+#endif
 
 #ifdef _EDITOR
 // The tables and profiles in the writer's order (by name), so a file read as it
@@ -748,9 +784,12 @@ bool CItemDataHandler::ExportAsBmd(std::string& changeLog)
     }
 
     bool success = true;
+    // The same for every language.
+    std::string weightNotes;
     for (const ItemBmdLanguage& language : GetItemBmdLanguages())
     {
-        const auto attributes = BuildItemAttributes(language.locale);
+        weightNotes.clear();
+        const auto attributes = BuildBmdItemAttributes(language.locale, weightNotes);
         std::string languageChangeLog;
         const bool saved =
             ItemDataSaver::Save(GetItemFilePath(language.folder).c_str(), attributes.get(), &languageChangeLog);
@@ -759,12 +798,14 @@ bool CItemDataHandler::ExportAsBmd(std::string& changeLog)
         success = (saved || unchanged) && success;
         changeLog += languageChangeLog;
     }
+    changeLog += weightNotes;
     return success;
 }
 
-bool CItemDataHandler::ExportAsS6E3(wchar_t* fileName, std::string& problems)
+bool CItemDataHandler::ExportAsS6E3(wchar_t* fileName, std::string& problems, std::string& notes)
 {
-    return ItemDataExportS6E3::SaveLegacy(fileName, BuildItemAttributes(I18N::GetCurrentLocale()).get(), &problems);
+    return ItemDataExportS6E3::SaveLegacy(fileName, BuildBmdItemAttributes(I18N::GetCurrentLocale(), notes).get(),
+                                          &problems);
 }
 
 bool CItemDataHandler::ExportToCsv(wchar_t* fileName)

@@ -117,7 +117,7 @@ variants or option words. An online keyword need not select the same items offli
 | `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, defense per level, damage increase, absorption) depend on it; excellent second and third tier wings get no extra durability, and the chaos mix knows a wing's tier from it |
 | `weaponKind` | Only for weapons and shields: `sword`, `glove`, `axe`, `mace`, `spear`, `bow`, `crossbow`, `staff`, `book`, `shield`, as OpenMU's item groups 0 to 6: swords and the Rage Fighter's gloves (group 0; gloves are the items only the Rage Fighter may use), axes (1), maces and sceptres (2), spears (3), bows and crossbows (4: bows have the slot `offHand`, crossbows `mainHand`; arrows and bolts have no weapon kind), staffs, sticks and books (5: books have the slot `offHand`) and shields (6). While an item has the weapon kind its group gives, the bmd import and the item editor (also when it moves an item to another number) keep it matching the group, the slot and, in group 0, the class requirements (a group gives its kind only on that kind's slot, and in group 4 only to two-handed items), so a new weapon gets one too; a kind written in the file that differs from the group's stays as long as it differs. Which bow or crossbow a character holds (its animations, arrows and damage), the elf's arrows-only rule, a spear's reach and Impale, the shield defense set option, the bonus of leveled arrows and bolts, a staff's damage (it counts for the left hand), which right-hand weapons a summoner may hold in the left hand (not staffs or books), the character window's wizardry line, the tooltip's magic power line, the knight skills that need a weapon without a staff or book, Death Stab, Death Cannon and Spiral Slash, the weapon in the left hand that adds its magic options, the dual wield of Dark Knights, Magic Gladiators and Rage Fighters, and the weapon that moves into an empty right hand depend on it |
 | `potionPriority` | Only for potions with the `healingPotion`, `manaPotion`, `complexPotion` or `shieldPotion` tag: which one of a kind the game takes first, the higher the earlier (0 or left out = last; equal ones take the higher group and number first). The shipped potions count up with their size, so the largest is taken first. A client-only field (OpenMU has none); the bmd import keeps it |
-| `statProfile` | The item's profile in the [item stat file](#item-stats-by-level): what its + level, excellent options, ancient set and option level add to its stats and requirements. `"default"` names the default. The [profile rules](#item-stats-by-level) of the item stat file say which profile an item's data gives it: in the shipped file `sceptre` for the items with the `sceptre` tag, `book` for summoner books, `shield` for shields, `weapon` for the other items with a weapon kind (not arrows and bolts), `armor` for helms, armour, pants, gloves and boots, `scroll` for the items of group 15 with requirements, `helper` for the items of groups 13 and 14 with a base level requirement (`requirements.level`; the Transformation Ring's comes from `requirementsByLevel`, so it has the default), and a wing tier's profile for wings (`firstTierWing`, `secondTierWing`, `secondTierCape` for the second tier capes, `thirdTierWing`, `smallWing`). While an item has the profile its data gives, the bmd import and the item editor keep it matching (also when it moves an item to another number); a profile written in the file that differs from it stays as long as it differs: the Horn of Fenrir's data gives `helper`, and it names `"default"`. A left-out profile always follows the data; while the data gives one, the item has the default and loading warns about it, as for item files saved before the field. An item whose data stops giving its profile loses the profile's terms: a bow made one-handed, which is then no bow, loses the `weapon` profile's strength per option level |
+| `statProfile` | The item's profile in the [item stat file](#item-stats-by-level): what its + level, excellent options, ancient set and option level add to its stats and requirements. `"default"` names the default. The [profile rules](#item-stats-by-level) of the item stat file say which profile an item's data gives it: in the shipped file `sceptre` for the items with the `sceptre` tag, `book` for summoner books, `shield` for shields, `weapon` for the other items with a weapon kind (not arrows and bolts), `armor` for helms, armour, pants, gloves and boots, `scroll` for the items of group 15 with requirements, `orb` for the items of group 12 with stat requirements (the orbs, crystals and the Dark Lord's scrolls), `helper` for the items of groups 13 and 14 with a base level requirement (`requirements.level`; the Transformation Ring's comes from `requirementsByLevel`, so it has the default), and a wing tier's profile for wings (`firstTierWing`, `secondTierWing`, `secondTierCape` for the second tier capes, `thirdTierWing`, `smallWing`). While an item has the profile its data gives, the bmd import and the item editor keep it matching (also when it moves an item to another number); a profile written in the file that differs from it stays as long as it differs: the Horn of Fenrir's data gives `helper`, and it names `"default"`. A left-out profile always follows the data; while the data gives one, the item has the default and loading warns about it, as for item files saved before the field. An item whose data stops giving its profile loses the profile's terms: a bow made one-handed, which is then no bow, loses the `weapon` profile's strength per option level |
 | `twoHanded` | Weapon needs both hands |
 | `skill` | Skill the item gives |
 | `level` | Item level (the drop level); also used in price and damage calculations |
@@ -129,7 +129,7 @@ variants or option words. An online keyword need not select the same items offli
 | `attackType` | Attack type used by the client |
 | `sellValue` | Value factor used by the price calculation of some items |
 | `buyPrice` | Fixed price; when set, it replaces the calculated price |
-| `requirements` | `level`, `strength`, `dexterity`, `energy`, `vitality`, `leadership` |
+| `requirements` | `level`, `strength`, `dexterity`, `energy`, `vitality`, `leadership`. The stat requirements of the orbs, crystals and scrolls (groups 12 and 15, without a slot) are the values the game asks for, as OpenMU stores them: their profiles keep them as they are. The original client's bmd files hold weights for them, which Import from bmd turns into the values and Export as bmd and Export as S6E3 turn back (the smallest weight that gives each value) |
 | `requirementsByLevel` | A requirement for each item level 0 to 15 (one number for all of them, or 16), instead of the [item stat file's](#item-stats-by-level) formula; above +15 the +15 value counts. The Orb of Summoning has `{"energy": [30, 60, 90, 130, 170, 210, 300, 500, 0, ...]}` and the Transformation Ring `{"level": [20, 20, 20, 50, ...]}`. The base value of that requirement is not used. The bmd import keeps it |
 | `classRequirements` | Per class (`darkWizard`, `darkKnight`, `fairyElf`, `magicGladiator`, `darkLord`, `summoner`, `rageFighter`): 0 = cannot use, otherwise the class level needed |
 | `resistances` | `ice`, `poison`, `lightning`, `fire`, `earth`, `wind`, `water` |
@@ -433,7 +433,8 @@ The shipped profiles:
 | `armor` | 5 strength per option level: helms, armour, pants, gloves and boots |
 | `book` | Energy `20 + base * (drop level + item level) * 3 / 100`; 5 strength per option level: summoner books |
 | `helper` | Level requirement +4 per level: the items of groups 13 and 14 with a base level requirement (in the shipped data the rings, pendants, pets and Loch's Feather of group 13); the Horn of Fenrir names `"default"` |
-| `scroll` | Level requirement +4 per level; energy from the level requirement (`20 + base * level requirement * 4 / 100`) when the item has one: the skill scrolls and parchments of group 15 |
+| `scroll` | Level requirement +4 per level; the stat requirements as stored (`"base"`): the skill scrolls and parchments of group 15 |
+| `orb` | The stat requirements as stored (`"base"`): the orbs, crystals and the Dark Lord's scrolls of group 12 |
 | `sceptre` | No magic power per level after halving; 5 strength per option level: the Dark Lord's sceptres |
 | `shield` | Defense +1 per level (`defenseIncreaseShields`), no excellent part, ancient part `(defense + level) * 20 / d + 2` |
 | `firstTierWing` | Defense from `defenseBonus1stWings`; level requirement +4 per level |
@@ -443,9 +444,8 @@ The shipped profiles:
 | `thirdTierWing` | Defense from `defenseBonus3rdWings`: 4 per level up to +9, then 5 to 10 more per level |
 
 The shield also adds 5 strength per option level. Items without a profile
-or with `"default"` (arrows and bolts, jewels, potions, the orbs, crystals
-and scrolls of group 12, the Horn of Fenrir, …) have the default: their
-level requirement does not grow.
+or with `"default"` (arrows and bolts, jewels, potions, the Horn of Fenrir,
+…) have the default: their level requirement does not grow.
 
 The shipped profile rules, in order, with the items each gives its profile:
 
@@ -463,10 +463,11 @@ The shipped profile rules, in order, with the items each gives its profile:
 | 10 | `secondTierWing` | slot `wings`, wing tier `second` | 5 |
 | 11 | `thirdTierWing` | slot `wings`, wing tier `third` | 7 |
 | 12 | `default` | slot `wings` (wings without a tier) | 0 |
-| 13 | `scroll` | group 15, any base requirement | 36 |
-| 14 | `helper` | groups 13 and 14, a base level requirement | 32 |
+| 13 | `orb` | group 12, a base stat requirement | 12 |
+| 14 | `scroll` | group 15, any base requirement | 36 |
+| 15 | `helper` | groups 13 and 14, a base level requirement | 32 |
 
-The other 342 items match no rule and have the default. Rule 14 reaches the
+The other 330 items match no rule and have the default. Rule 15 reaches the
 Horn of Fenrir, which names `"default"`.
 
 **Errors** in the file stop the start like errors in the item files: a file
@@ -886,9 +887,8 @@ shows it in the others.
   the base value back; excellent and ancient items get no higher stat
   requirement from them, while excellent options still raise a level given
   by level and the option level still adds the strength its stat profile
-  gives per option level; a scroll's energy,
-  whose formula takes the level requirement, follows a level given by
-  level). Below them, what the game asks at each + level
+  gives per option level; a stat requirement whose formula takes the level
+  requirement, follows a level given by level). Below them, what the game asks at each + level
   (the `/<item name>` window shows the normal item), also as excellent,
   ancient or with an option level, while a value is still being typed. Then
   the class steps (0: the

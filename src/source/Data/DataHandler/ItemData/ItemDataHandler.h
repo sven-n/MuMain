@@ -184,8 +184,9 @@ public:
     bool ExportAsBmd(std::string& changeLog);
 
     // Writes the S6E3 legacy file, with the item names of the UI locale, also while translated item names are off;
-    // an item with a value the file cannot hold is named in `problems` instead.
-    bool ExportAsS6E3(wchar_t* fileName, std::string& problems);
+    // an item with a value the file cannot hold is named in `problems` instead. `notes` gets a line for each
+    // requirement the bmd cannot hold exactly (ToBmdRequirementWeights); so does ExportAsBmd's change log.
+    bool ExportAsS6E3(wchar_t* fileName, std::string& problems, std::string& notes);
     bool ExportToCsv(wchar_t* fileName);
 #endif
 

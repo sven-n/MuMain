@@ -3,6 +3,7 @@
 #include "Data/DataHandler/LegacyLanguages.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemDefinition.h"
+#include "Data/GameData/ItemData/ItemStructs.h"
 
 #include <span>
 #include <string>
@@ -27,6 +28,18 @@ using ItemBmdLanguage = LegacyLanguage;
 // The original client's languages (GetLegacyLanguages). English first: it
 // provides the stats.
 std::span<const ItemBmdLanguage> GetItemBmdLanguages();
+
+// The orbs, crystals and scrolls (items without a slot in groups 12 and 15) keep their stat
+// requirements as the values the game asks for, as OpenMU does. The original client's bmd files
+// hold weights for them, which its code grew like any item's: 20 + weight * drop level * 3 / 100
+// (energy * 4), and a scroll's energy (group 15) from its level requirement where it has one:
+// 20 + weight * level requirement * 4 / 100. Leadership is the value in both.
+bool HasRequirementWeightsInBmd(const ItemDefinition& definition);
+// Import from bmd: the weights of such an item become the values.
+void ToRequirementValues(ItemDefinition& definition);
+// Export as bmd: the smallest weight that gives each value of such an item, written into
+// `attribute`. Returns the requirements no weight gives exactly; they get the nearest one.
+std::vector<ItemRequirement> ToBmdRequirementWeights(const ItemDefinition& definition, ITEM_ATTRIBUTE& attribute);
 
 // A field whose value was replaced because a name ran into it.
 struct ItemBmdRepair
