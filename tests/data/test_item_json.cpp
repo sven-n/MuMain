@@ -619,22 +619,33 @@ TEST_CASE("Item validation checks slots, wing tiers and weapon kinds [data][item
     CHECK(issues.empty());
 }
 
-TEST_CASE("Item validation warns about an item without the stat profile its data gives [data][items]")
+TEST_CASE("Item validation warns about an item without the stat profile the profile rules give [data][items]")
 {
+    ItemStatFile file;
+    file.profiles.push_back({"shield", {}});
+    StatProfileRule shields{.profile = "shield"};
+    shields.weaponKinds.set(static_cast<size_t>(WeaponKind::Shield));
+    file.profileRules.push_back(shields);
+    const ItemStatProfiles profiles(file);
+
     // A shield in an item file saved before the stat profiles.
     ItemDefinition shield = MakeKris();
     shield.slot = ItemSlot::OffHand;
     shield.weaponKind = WeaponKind::Shield;
 
     std::vector<ItemDataIssue> issues;
-    ValidateItems(std::vector<ItemDefinition>{shield}, issues);
+    ValidateStatProfiles(std::vector<ItemDefinition>{shield}, profiles, "ItemStats.json", issues);
     CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "statProfile"));
     CHECK_FALSE(HasErrors(issues));
-
-    shield.statProfile = "default";
+    // The item checks run before the stat file is read; they leave it to the stat profile checks.
     issues.clear();
     ValidateItems(std::vector<ItemDefinition>{shield}, issues);
     CHECK(issues.empty());
+
+    shield.statProfile = "default";
+    issues.clear();
+    ValidateStatProfiles(std::vector<ItemDefinition>{shield}, profiles, "ItemStats.json", issues);
+    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "statProfile"));
 }
 
 TEST_CASE("Rental rules are kept through write and read [data][items]")

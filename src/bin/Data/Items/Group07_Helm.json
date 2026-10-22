@@ -1037,10 +1037,10 @@
     {
       "number": 50,
       "name": {
-        "en": "Divine Helm",
+        "en": "Faith Helm",
         "de": "Glaubenshelm",
-        "es": "Yelmo Divino",
-        "pt": "Elmo divino"
+        "es": "Yelmo de Fe",
+        "pt": "Elmo da fé"
       },
       "width": 2,
       "height": 2,
@@ -1303,10 +1303,10 @@
     {
       "number": 66,
       "name": {
-        "en": "Dark Soul Helm",
-        "de": "Dunkelseelenhelm",
-        "es": "Casco de Alma Oscura",
-        "pt": "Elmo de Alma Sombria"
+        "en": "Adamantine Mask",
+        "de": "Adamantmaske",
+        "es": "Máscara Adamantina",
+        "pt": "Máscara de adamantina"
       },
       "tags": ["luckyItem"],
       "width": 2,
@@ -1499,149 +1499,6 @@
         "level": 380,
         "strength": 97,
         "vitality": 85
-      },
-      "classRequirements": {
-        "rageFighter": 1
-      }
-    },
-    {
-      "number": 78,
-      "name": {
-        "en": "Dragon Helm-J",
-        "de": "Drachenhelm-J",
-        "es": "Yelmo Dragón-J",
-        "pt": "Elmo do dragão-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "helm",
-      "statProfile": "armor",
-      "level": 57,
-      "durability": 68,
-      "defense": 26,
-      "attackType": 4,
-      "requirements": {
-        "strength": 120,
-        "dexterity": 30
-      },
-      "classRequirements": {
-        "darkKnight": 1
-      }
-    },
-    {
-      "number": 79,
-      "name": {
-        "en": "Legendary Helm-J",
-        "de": "Legendärer Helm-J",
-        "es": "Yelmo Legendario-J",
-        "pt": "Elmo lendário-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "helm",
-      "statProfile": "armor",
-      "level": 50,
-      "durability": 42,
-      "defense": 20,
-      "attackType": 4,
-      "requirements": {
-        "strength": 30
-      },
-      "classRequirements": {
-        "darkWizard": 1
-      }
-    },
-    {
-      "number": 80,
-      "name": {
-        "en": "Guardian Helm-J",
-        "de": "Wächterhelm-J",
-        "es": "Yelmo Guardián-J",
-        "pt": "Elmo do guardião-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "helm",
-      "statProfile": "armor",
-      "level": 53,
-      "durability": 45,
-      "defense": 25,
-      "attackType": 4,
-      "requirements": {
-        "strength": 40,
-        "dexterity": 80
-      },
-      "classRequirements": {
-        "fairyElf": 1
-      }
-    },
-    {
-      "number": 81,
-      "name": {
-        "en": "Light Plate Mask-J",
-        "de": "Leichtplattenmaske-J",
-        "es": "Máscara Plata de Luz-J",
-        "pt": "Máscara de placa leve-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "helm",
-      "statProfile": "armor",
-      "level": 46,
-      "durability": 42,
-      "defense": 22,
-      "attackType": 4,
-      "requirements": {
-        "strength": 70,
-        "dexterity": 20
-      },
-      "classRequirements": {
-        "darkLord": 1
-      }
-    },
-    {
-      "number": 82,
-      "name": {
-        "en": "Red Wing Helm-J",
-        "de": "Rotschwingenhelm-J",
-        "es": "Yelmo Ala Roja-J",
-        "pt": "Elmo da asa vermelha-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "helm",
-      "statProfile": "armor",
-      "level": 50,
-      "durability": 42,
-      "defense": 20,
-      "attackType": 4,
-      "requirements": {
-        "strength": 26,
-        "dexterity": 4
-      },
-      "classRequirements": {
-        "summoner": 1
-      }
-    },
-    {
-      "number": 83,
-      "name": {
-        "en": "Sacred Fire Helm-J",
-        "de": "Heiligfeuerhelm-J",
-        "es": "Casco de Fuego Sagrado-J",
-        "pt": "Elmo de Fogo Sagrado-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "helm",
-      "statProfile": "armor",
-      "level": 54,
-      "durability": 52,
-      "defense": 26,
-      "attackType": 2,
-      "requirements": {
-        "strength": 85,
-        "vitality": 75
       },
       "classRequirements": {
         "rageFighter": 1

@@ -90,7 +90,7 @@ ItemStatProfile LayProfile(const ItemStatProfile& below, const std::array<Writte
 ItemStatProfiles::ItemStatProfiles() : m_names{""}, m_profiles(1) {}
 
 ItemStatProfiles::ItemStatProfiles(const ItemStatFile& file)
-    : m_tables(file.tables), m_excellentDropLevelBonus(file.excellentDropLevelBonus),
+    : m_tables(file.tables), m_rules(file.profileRules), m_excellentDropLevelBonus(file.excellentDropLevelBonus),
       m_ancientDropLevelBonus(file.ancientDropLevelBonus)
 {
     m_names.push_back("");
@@ -99,6 +99,10 @@ ItemStatProfiles::ItemStatProfiles(const ItemStatFile& file)
     {
         m_names.push_back(profile.name);
         m_profiles.push_back(LayProfile(m_profiles[DefaultProfile], profile.stats, profile.requirements, m_tables));
+    }
+    for (const StatProfileRule& rule : m_rules)
+    {
+        m_ruleProfiles.push_back(Find(rule.profile) > DefaultProfile ? rule.profile : std::string());
     }
 }
 
@@ -130,6 +134,21 @@ const ItemStatProfile& ItemStatProfiles::Get(int index) const
 std::vector<std::string> ItemStatProfiles::GetProfileNames() const
 {
     return std::vector<std::string>(m_names.begin() + 1, m_names.end());
+}
+
+int ItemStatProfiles::FindRule(const ItemDefinition& item) const
+{
+    return FindMatchingRule(m_rules, item);
+}
+
+const std::string& ItemStatProfiles::GetRuleProfile(int rule) const
+{
+    static const std::string defaultProfile;
+    if (rule < 0 || static_cast<size_t>(rule) >= m_ruleProfiles.size())
+    {
+        return defaultProfile;
+    }
+    return m_ruleProfiles[static_cast<size_t>(rule)];
 }
 
 int ItemStatProfiles::GetLevelBonus(const StatTerms& terms, int level) const

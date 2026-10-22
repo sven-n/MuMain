@@ -1685,6 +1685,15 @@
   <data name="UI Scale Tooltip" xml:space="preserve">
     <value>Multiplier on top of the automatic fit to the window size</value>
   </data>
+  <data name="Texture Pack" xml:space="preserve">
+    <value>Texture Pack</value>
+  </data>
+  <data name="Original Textures" xml:space="preserve">
+    <value>Original</value>
+  </data>
+  <data name="Texture Pack Tooltip" xml:space="preserve">
+    <value>Folders in Data/TexturePacks; a change takes effect after restarting the game</value>
+  </data>
   <data name="Legacy" xml:space="preserve">
     <value>Legacy</value>
   </data>
