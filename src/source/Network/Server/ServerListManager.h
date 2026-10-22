@@ -4,7 +4,7 @@
 #pragma once
 #include "ServerGroup.h"
 
-#include "Data/GameData/ServerListData/ServerGroup.h"
+#include "Data/GameData/ServerListData/ServerListGroup.h"
 
 #include <span>
 #include <string>

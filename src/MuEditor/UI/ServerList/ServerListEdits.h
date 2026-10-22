@@ -2,7 +2,7 @@
 
 #ifdef _EDITOR
 
-#include "Data/GameData/ServerListData/ServerGroup.h"
+#include "Data/GameData/ServerListData/ServerListGroup.h"
 
 #include <cstddef>
 #include <optional>
