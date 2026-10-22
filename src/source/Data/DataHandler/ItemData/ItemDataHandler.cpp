@@ -116,6 +116,8 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     ItemStatsLoadResult stats = LoadItemStatsFile(GetItemStatsFile());
     result.issues.insert(result.issues.end(), stats.issues.begin(), stats.issues.end());
     ItemTooltipLoadResult tooltips = LoadItemTooltipFile(GetItemTooltipFile());
+    ValidateTooltipTextLocales(tooltips.file, I18N::GetAvailableLocales(), GetItemTooltipFile().generic_string(),
+                               tooltips.issues);
     result.issues.insert(result.issues.end(), tooltips.issues.begin(), tooltips.issues.end());
     ItemStatProfiles statProfiles;
     if (!HasErrors(stats.issues))

@@ -83,7 +83,9 @@ enum class ItemTextColor : BYTE
     RedPurple = TEXT_COLOR_REDPURPLE,
     Violet = TEXT_COLOR_VIOLET,
     Orange = TEXT_COLOR_ORANGE,
+    Count
 };
+constexpr size_t ItemTextColorCount = static_cast<size_t>(ItemTextColor::Count);
 
 // A color rule of a tooltip line: the color when every condition holds.
 struct TooltipColorRule
@@ -143,10 +145,6 @@ struct ItemLevelValues
 
     bool operator==(const ItemLevelValues& other) const = default;
 };
-
-// How wide a description line is drawn before it wraps, in the tooltip's text units: about the widest lines of the
-// original tooltips.
-constexpr int ItemDescriptionWrapWidth = 200;
 
 // What a player may do with an item. See the rule flags in ItemDefinition.
 enum class ItemAction : BYTE

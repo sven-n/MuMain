@@ -102,4 +102,7 @@ struct ItemTooltipFile
 // names the file in messages. Whether every shared text is used is checked with the items (ValidateDescriptionTexts).
 void ReadItemTooltipJson(std::string_view text, const std::string& source, ItemTooltipFile& file,
                          std::vector<ItemDataIssue>& issues);
+// Warns about the texts' translations in languages the game has no texts in (`uiLocales`), as for item names.
+void ValidateTooltipTextLocales(const ItemTooltipFile& file, std::span<const char* const> uiLocales,
+                                const std::string& source, std::vector<ItemDataIssue>& issues);
 } // namespace Data::Items

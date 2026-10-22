@@ -17,6 +17,8 @@ namespace Data::Items
 {
 // Checks rules across items that a single file cannot check: unique ids,
 // the required English name, and names that fit the LocalizedString format.
+// A language code like "pt" or "zh-TW": letters, digits and "-" only.
+bool IsValidLocaleCode(const std::string& locale);
 // Appends the problems to `issues`.
 void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIssue>& issues);
 
