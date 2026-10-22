@@ -2,6 +2,7 @@
 
 #include "ItemStatsJson.h"
 #include "ItemDescriptionPlaceholders.h"
+#include "ItemEnumNames.h"
 #include "ItemJsonCommon.h"
 #include "ItemStatProfiles.h"
 
@@ -42,6 +43,13 @@ constexpr const char* StrengthPerOptionLevel = "strengthPerOptionLevel";
 constexpr const char* LevelWeight = "levelWeight";
 constexpr const char* Percent = "percent";
 constexpr const char* Basis = "basis";
+constexpr const char* ProfileRules = "profileRules";
+constexpr const char* Profile = "profile";
+constexpr const char* Group = "group";
+constexpr const char* Slot = "slot";
+constexpr const char* WingTier = "wingTier";
+constexpr const char* WeaponKind = "weaponKind";
+constexpr const char* Tags = "tags";
 } // namespace Keys
 
 constexpr const char* NoneValue = "none";
@@ -63,7 +71,8 @@ constexpr int MaxDropLevelBonus = 1000;
 
 using Json::KeySet;
 
-const KeySet RootKeys = {Keys::FormatVersion, Keys::DropLevelBonus, Keys::Tables, Keys::Default, Keys::Profiles};
+const KeySet RootKeys = {Keys::FormatVersion, Keys::DropLevelBonus, Keys::Tables,
+                         Keys::Default,       Keys::Profiles,       Keys::ProfileRules};
 const KeySet DropLevelBonusKeys = {Keys::Excellent, Keys::Ancient};
 const KeySet TableKeys = {Keys::Name, Keys::Caption, Keys::Values, Keys::PerLevel};
 const KeySet SectionKeys = {Keys::Table, Keys::Excellent, Keys::Ancient};
@@ -117,6 +126,13 @@ private:
                           WrittenRequirementSection& section);
     void ReadRequirementFormula(const OrderedJson& json, const std::string& field,
                                 std::optional<RequirementFormula>& formula);
+    void ReadProfileRules(const OrderedJson& root, ItemStatFile& file);
+    bool ReadRule(const OrderedJson& json, const std::string& field, const ItemStatFile& file, StatProfileRule& rule);
+    // A condition's list of values: the names of `TEnum`, `what` being their kind
+    // ("slot") for messages.
+    template <typename TEnum, typename TSet>
+    bool ReadCondition(const OrderedJson& json, const std::string& field, const char* what, TSet& values);
+    bool ReadGroups(const OrderedJson& json, const std::string& field, std::bitset<MAX_ITEM_TYPE>& groups);
 
     const std::string& m_source;
     std::vector<ItemDataIssue>& m_issues;
@@ -160,6 +176,7 @@ void ItemStatsReader::Read(const OrderedJson& root, ItemStatFile& file)
     ReadTables(root, file);
     ReadDefaults(root, file);
     ReadProfiles(root, file);
+    ReadProfileRules(root, file);
 }
 
 void ItemStatsReader::ReadDropLevelBonus(const OrderedJson& root, ItemStatFile& file)
@@ -555,6 +572,159 @@ void ItemStatsReader::ReadRequirementFormula(const OrderedJson& json, const std:
     formula = values;
 }
 
+void AddValue(ItemTagSet& values, ItemTag tag)
+{
+    values.Set(tag);
+}
+
+template <size_t Size, typename TEnum> void AddValue(std::bitset<Size>& values, TEnum value)
+{
+    values.set(static_cast<size_t>(value));
+}
+
+template <typename TEnum, typename TSet>
+bool ItemStatsReader::ReadCondition(const OrderedJson& json, const std::string& field, const char* what, TSet& values)
+{
+    if (!json.is_array() || json.empty())
+    {
+        AddError(field, std::string("must be a list of one or more ") + what + "s");
+        return false;
+    }
+    bool valid = true;
+    for (size_t index = 0; index < json.size(); ++index)
+    {
+        const OrderedJson& entry = json[index];
+        TEnum value{};
+        if (!entry.is_string() || !FindEnumValue(entry.get_ref<const std::string&>(), value))
+        {
+            AddError(field + "[" + std::to_string(index) + "]",
+                     entry.dump() + " is not a " + what + "; " + what + "s are " + JoinEnumNames<TEnum>());
+            valid = false;
+            continue;
+        }
+        AddValue(values, value);
+    }
+    return valid;
+}
+
+bool ItemStatsReader::ReadGroups(const OrderedJson& json, const std::string& field, std::bitset<MAX_ITEM_TYPE>& groups)
+{
+    if (!json.is_array() || json.empty())
+    {
+        AddError(field, "must be a list of one or more groups");
+        return false;
+    }
+    bool valid = true;
+    for (size_t index = 0; index < json.size(); ++index)
+    {
+        int group = 0;
+        if (!ReadNumber(json[index], field + "[" + std::to_string(index) + "]", 0, MAX_ITEM_TYPE - 1, group))
+        {
+            valid = false;
+            continue;
+        }
+        groups.set(static_cast<size_t>(group));
+    }
+    return valid;
+}
+
+bool ItemStatsReader::ReadRule(const OrderedJson& json, const std::string& field, const ItemStatFile& file,
+                               StatProfileRule& rule)
+{
+    bool valid = true;
+    const auto profile = json.find(Keys::Profile);
+    if (profile == json.end() || !profile->is_string() || !Json::IsName(profile->get_ref<const std::string&>()))
+    {
+        AddError(field + "." + Keys::Profile, "missing or not a name of letters and digits");
+        valid = false;
+    }
+    else
+    {
+        rule.profile = profile->get<std::string>();
+        const bool known = rule.profile == StatProfileNames::Default ||
+                           std::any_of(file.profiles.begin(), file.profiles.end(),
+                                       [&rule](const WrittenStatProfile& p) { return p.name == rule.profile; });
+        if (!known)
+        {
+            AddError(field + "." + Keys::Profile, "\"" + rule.profile + "\" is not a profile of \"" + Keys::Profiles +
+                                                      "\" or \"" + StatProfileNames::Default + "\"");
+            valid = false;
+        }
+    }
+    // An unknown condition is an error: leaving it out would widen the rule.
+    for (const auto& [key, value] : json.items())
+    {
+        const std::string conditionField = field + "." + key;
+        if (key == Keys::Profile)
+        {
+            continue;
+        }
+        bool read = true;
+        if (key == Keys::Group)
+        {
+            read = ReadGroups(value, conditionField, rule.groups);
+        }
+        else if (key == Keys::Slot)
+        {
+            read = ReadCondition<ItemSlot>(value, conditionField, "slot", rule.slots);
+        }
+        else if (key == Keys::WingTier)
+        {
+            read = ReadCondition<WingTier>(value, conditionField, "wing tier", rule.wingTiers);
+        }
+        else if (key == Keys::WeaponKind)
+        {
+            read = ReadCondition<WeaponKind>(value, conditionField, "weapon kind", rule.weaponKinds);
+        }
+        else if (key == Keys::Tags)
+        {
+            read = ReadCondition<ItemTag>(value, conditionField, "tag", rule.tags);
+        }
+        else if (key == Keys::Requirements)
+        {
+            read = ReadCondition<ItemRequirement>(value, conditionField, "requirement", rule.requirements);
+        }
+        else
+        {
+            AddError(conditionField, std::string("is not a condition; the conditions are \"") + Keys::Group + "\", \"" +
+                                         Keys::Slot + "\", \"" + Keys::WingTier + "\", \"" + Keys::WeaponKind +
+                                         "\", \"" + Keys::Tags + "\" and \"" + Keys::Requirements + "\"");
+            read = false;
+        }
+        valid = valid && read;
+    }
+    return valid;
+}
+
+void ItemStatsReader::ReadProfileRules(const OrderedJson& root, ItemStatFile& file)
+{
+    const auto rules = root.find(Keys::ProfileRules);
+    if (rules == root.end())
+    {
+        return;
+    }
+    if (!rules->is_array())
+    {
+        AddError(Keys::ProfileRules, "must be a list");
+        return;
+    }
+    for (size_t index = 0; index < rules->size(); ++index)
+    {
+        const std::string field = std::string(Keys::ProfileRules) + "[" + std::to_string(index) + "]";
+        const OrderedJson& json = (*rules)[index];
+        if (!json.is_object())
+        {
+            AddError(field, "a rule must be an object");
+            continue;
+        }
+        StatProfileRule rule;
+        if (ReadRule(json, field, file, rule))
+        {
+            file.profileRules.push_back(std::move(rule));
+        }
+    }
+}
+
 // ---------------------------------------------------------------- writing
 
 OrderedJson WriteTable(const LevelBonusTable& table)
@@ -677,6 +847,70 @@ OrderedJson WriteRequirements(const WrittenRequirementSection& section)
     return json;
 }
 
+bool HasValue(const ItemTagSet& values, ItemTag tag)
+{
+    return values.Has(tag);
+}
+
+template <size_t Size, typename TEnum> bool HasValue(const std::bitset<Size>& values, TEnum value)
+{
+    const auto index = static_cast<size_t>(value);
+    return index < Size && values.test(index);
+}
+
+// The names of the values, in the order of the enum's names.
+template <typename TEnum, typename TSet> OrderedJson WriteCondition(const TSet& values)
+{
+    OrderedJson json = OrderedJson::array();
+    for (const EnumName<TEnum>& entry : GetEnumNames(TEnum{}))
+    {
+        if (HasValue(values, entry.value))
+        {
+            json.push_back(entry.name);
+        }
+    }
+    return json;
+}
+
+OrderedJson WriteProfileRule(const StatProfileRule& rule)
+{
+    OrderedJson json;
+    json[Keys::Profile] = rule.profile;
+    if (rule.groups.any())
+    {
+        OrderedJson groups = OrderedJson::array();
+        for (size_t group = 0; group < rule.groups.size(); ++group)
+        {
+            if (rule.groups.test(group))
+            {
+                groups.push_back(group);
+            }
+        }
+        json[Keys::Group] = std::move(groups);
+    }
+    if (rule.slots.any())
+    {
+        json[Keys::Slot] = WriteCondition<ItemSlot>(rule.slots);
+    }
+    if (rule.wingTiers.any())
+    {
+        json[Keys::WingTier] = WriteCondition<WingTier>(rule.wingTiers);
+    }
+    if (rule.weaponKinds.any())
+    {
+        json[Keys::WeaponKind] = WriteCondition<WeaponKind>(rule.weaponKinds);
+    }
+    if (!rule.tags.IsEmpty())
+    {
+        json[Keys::Tags] = WriteCondition<ItemTag>(rule.tags);
+    }
+    if (rule.requirements.any())
+    {
+        json[Keys::Requirements] = WriteCondition<ItemRequirement>(rule.requirements);
+    }
+    return json;
+}
+
 template <typename T> std::vector<const T*> SortedByName(const std::vector<T>& entries)
 {
     std::vector<const T*> sorted;
@@ -741,7 +975,14 @@ std::string WriteItemStatsJson(const ItemStatFile& file)
         root[Keys::Profiles].push_back(std::move(json));
     }
 
+    root[Keys::ProfileRules] = OrderedJson::array();
+    for (const StatProfileRule& rule : file.profileRules)
+    {
+        root[Keys::ProfileRules].push_back(WriteProfileRule(rule));
+    }
+
     std::string text = root.dump(Json::Indent, ' ', false, OrderedJson::error_handler_t::replace);
+    text = Json::PutListEntriesOnOneLine(text, Keys::ProfileRules);
     text = Json::PutObjectsOnOneLine(text, Keys::DropLevelBonus);
     text = Json::PutObjectsOnOneLine(text, Keys::Caption);
     for (const char* statKey : StatKeys)

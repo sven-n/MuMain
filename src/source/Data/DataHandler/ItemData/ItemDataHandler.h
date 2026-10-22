@@ -2,6 +2,7 @@
 
 #include "Data/GameData/ItemData/ItemStructs.h"
 
+#include <span>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -10,7 +11,11 @@
 #ifdef _EDITOR
 #include "Data/DataHandler/ItemData/ItemBmdImport.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
+#include "Data/DataHandler/ItemData/ItemModelLoader.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
+#include "Data/GameData/ItemData/ItemDataValidation.h"
+
+#include <optional>
 #endif
 
 // Owns loading the item data (Data/Items/*.json) into the item database and
@@ -36,10 +41,81 @@ public:
     bool LoadModels(std::string& errorMessage);
 
 #ifdef _EDITOR
-    // The item editor changed ItemAttribute[itemType]; copies the change
-    // into the item database. A changed name is stored for the current UI
-    // locale.
-    void OnItemEdited(int itemType);
+    // Puts the item into the item database at its (group, number) and refills
+    // its row of ItemAttribute[]: the item in the UI locale, or an empty row
+    // when it no longer exists (no names). The weapon kind and the stat
+    // profile follow the data (FollowGroupWeaponKind, FollowStatProfile)
+    // unless the definition changes them itself: then they are the user's pick.
+    // An empty stat profile is no pick: it follows the data.
+    void SetItem(const Data::Items::ItemDefinition& definition);
+    // Like SetItem for several items, with the database lists built once.
+    void SetItems(std::span<const Data::Items::ItemDefinition> definitions);
+    // Stores the definitions exactly as they are, nothing derived (the undo of
+    // the item tools puts back what an edit stored), and refills their rows of
+    // ItemAttribute[].
+    void RestoreItems(std::span<const Data::Items::ItemDefinition> definitions);
+
+    // Adds the item at its (group, number), and its model entry when `model`
+    // has one (its group and number are the item's). False when the item type
+    // is not free (Data::Items::IsFreeItemType) or the item has no names.
+    // `copiedFrom` is the item a copy was made of (Duplicate, or Add with the
+    // selected item's values): a weapon kind or stat profile picked there stays
+    // a pick; otherwise they follow the new item's data.
+    bool AddItem(const Data::Items::ItemDefinition& definition, const Data::Items::ItemModelDefinition* model,
+                 const Data::Items::ItemDefinition* copiedFrom = nullptr);
+    // Removes the item and its model entry; the item type is free again. False
+    // when there is no item.
+    bool RemoveItem(int itemType);
+    // Moves the item, with its ItemAttribute row and its model, to a free item
+    // type (OnItemsSwapped). False when there is no item or the target is not
+    // free.
+    bool MoveItem(int fromItemType, int toItemType);
+
+    // Sets the model entry at its (group, number); an entry without a file and
+    // a shared model removes it. An entry that names a shared model takes its
+    // file, texture folders and none-blend meshes. Save writes the group's
+    // model file; a change to what is opened (file, folders, meshes, material,
+    // shared model) is opened again by ReopenChangedModels.
+    void SetItemModel(const Data::Items::ItemModelDefinition& model);
+    // Adds or replaces a shared model; `previousName` renames the one of that
+    // name, and its items name the new one. The items that use it take its
+    // file, texture folders and none-blend meshes, and are opened again.
+    void SetSharedModel(const Data::Items::SharedItemModel& sharedModel, std::string_view previousName = {});
+    // Removes a shared model that no item uses; false while one does.
+    bool RemoveSharedModel(std::string_view name);
+    // Adds a glow color or changes the value of the one of its name; the
+    // items that use it glow with it. Save writes Data/Effects/GlowColors.json.
+    void SetGlowColor(const Data::Effects::GlowColor& color);
+    // Removes a glow color no item uses; false while one does and for the
+    // default colors (ItemGlow), which items without colors of their own use.
+    bool RemoveGlowColor(std::string_view name);
+    // Makes the glow color list this one (an undo).
+    void RestoreGlowColors(std::span<const Data::Effects::GlowColor> colors);
+    // Opens the models changed since the last call again (ModelLoader::ReopenModels).
+    // For between frames: the editor calls it before the game draws.
+    std::vector<Data::Items::ItemModelProblem>
+    ReopenChangedModels(const Data::Items::ModelLoader::LookNames& lookNames);
+    bool HasModelsToReopen() const
+    {
+        return !m_modelsToReopen.empty();
+    }
+    // What keeps or rebuilds data of opened model slots (the cloth of worn
+    // pants, the cloth grid of the Grand Soul pants) is game code, so the
+    // editor gives it; without hooks nothing runs.
+    struct OpenedModelHooks
+    {
+        // Before the opened data of model slots changes: a move swaps it
+        // (OnItemsSwapped, TakeBackModelMoves), and ReopenChangedModels opens
+        // it again.
+        void (*changing)() = nullptr;
+        // After it changed, with the item types whose slots took other data.
+        void (*changed)(std::span<const int> itemTypes) = nullptr;
+    };
+    void SetOpenedModelHooks(const OpenedModelHooks& hooks)
+    {
+        m_openedModelHooks = hooks;
+    }
+
     // Sets the item's name in `locale` (an empty text removes the translation;
     // the English name cannot be emptied) in the item database, whole also when
     // it is longer than ITEM_ATTRIBUTE's name; ItemAttribute shows the name in
@@ -47,16 +123,39 @@ public:
     // would be empty (also when the item has none yet) or when the text has
     // LocalizedString::Separator, which the item checks refuse.
     bool SetItemName(int itemType, std::string_view locale, std::string text);
+
+    // The item stat file as loaded, with the changes of the item editor.
+    const Data::Items::ItemStatFile& GetStatFile() const
+    {
+        return m_statFile;
+    }
+    // Takes `file` as the item stat file, with its tables and profiles in the
+    // writer's order (by name), and gives the item database its profiles; Save
+    // writes it. `file` must be valid (ValidateItemStatsAsWritten). Items keep
+    // the profile they name.
+    void SetStatFile(const Data::Items::ItemStatFile& file);
     // The item editor swapped two entries of ItemAttribute[]. A moved item
     // takes its model along (the item model database and the opened model
     // slot), and its weapon kind and stat profile follow its new group like
     // an edit (FollowDerivedFieldsAfterMove).
     void OnItemsSwapped(int firstItemType, int secondItemType);
 
-    // Validates the item database and the item models and writes Data/Items,
-    // with the model files of Data/Items/Models whose models were moved since
-    // they were loaded. Nothing is written when the data has errors, and no
-    // file is replaced when one of them cannot be written.
+    // The checks of the item data and the item models that Save runs, without
+    // writing anything: unique ids and names, stat profiles, name languages,
+    // shared model names, glow colors, look names (once SetLookNames gave
+    // them), the values the model file reader takes, model files several
+    // items name themselves and model files that are missing. Appends the
+    // problems to `issues`.
+    void Validate(std::vector<Data::Items::ItemDataIssue>& issues) const;
+    // The looks the checks know; they are drawing code, so the editor gives
+    // them. Without them render style and item effect names are not checked.
+    void SetLookNames(Data::Items::LookNameExists renderStyleExists, Data::Items::LookNameExists itemEffectExists);
+
+    // Validates the item database and the item models (Validate) and writes Data/Items,
+    // with the model files of Data/Items/Models whose models changed (moved,
+    // edited) since they were loaded, SharedModels.json when a shared model
+    // changed and Stats/ItemStats.json when the item stat file changed. Nothing is written when the data has errors,
+    // and no file is replaced when one of them cannot be written.
     Data::Items::ItemDataSaveResult Save(std::vector<Data::Items::ItemDataIssue>& issues);
 
     // Replaces all items with the legacy Item_<language>.bmd files. Items the
@@ -105,16 +204,13 @@ private:
     // languages whose item.bmd was not read: the ones without one (e.g.
     // German) and the ones whose file is missing. A weapon kind that its group
     // gives follows the imported slot (FollowGroupWeaponKind), and so does the
-    // stat profile its data gives (FollowStatProfile) if the item stat file has
-    // it; otherwise the item keeps the default and `issues` gets a warning.
+    // stat profile the profile rules give (FollowStatProfile).
     static void KeepFieldsNotInBmd(std::vector<Data::Items::ItemDefinition>& items,
-                                   const std::vector<std::string>& importedLocales,
-                                   std::vector<Data::Items::ItemDataIssue>& issues);
+                                   const std::vector<std::string>& importedLocales);
     // Gives the item a swap moved to newItemType the weapon kind of its new
     // group if it had the one of its old group (FollowGroupWeaponKind), and the
     // stat profile its data then gives if it had the derived one or none
-    // (FollowStatProfile), as long as the item stat file has that profile;
-    // otherwise the default, with a warning in the log.
+    // (FollowStatProfile).
     static void FollowDerivedFieldsAfterMove(const Data::Items::ItemDefinition& before, int newItemType);
     // Swaps the models of two item types: their entries in the item model
     // database and their opened model slots.
@@ -122,11 +218,36 @@ private:
     // Swaps the models the editor moved since LoadModels back, last move
     // first.
     void TakeBackModelMoves();
+    // The definition SetItem stores: the weapon kind and the stat profile
+    // follow the data unless `definition` changes them from `previous` (the
+    // item as it is, or the one a new item copies; nullptr: none).
+    static Data::Items::ItemDefinition WithDerivedFields(const Data::Items::ItemDefinition& definition,
+                                                         const Data::Items::ItemDefinition* previous);
+    // ItemAttribute[itemType] from the item database: the item, or all zero.
+    static void RefillItemAttribute(int itemType);
 
     // The model swaps of the item editor since LoadModels, in order.
     std::vector<std::pair<int, int>> m_modelMoves;
-    // The groups of the swapped models: Save writes their model files.
-    Data::Items::ItemGroupSet m_movedModelGroups;
+    // The groups of the models the editor moved or changed since LoadModels:
+    // Save writes their model files.
+    Data::Items::ItemGroupSet m_changedModelGroups;
+    // Whether the editor changed a shared model since LoadModels.
+    bool m_sharedModelsChanged = false;
+    // Whether the editor changed the glow color list since LoadModels.
+    bool m_glowColorsChanged = false;
+    // The item stat file as Load read it, and whether the editor changed it since.
+    Data::Items::ItemStatFile m_statFile;
+    bool m_statFileChanged = false;
+    // The item types whose opened models no longer match their model entries.
+    std::vector<int> m_modelsToReopen;
+    OpenedModelHooks m_openedModelHooks;
+
+    struct LookNames
+    {
+        Data::Items::LookNameExists renderStyle;
+        Data::Items::LookNameExists itemEffect;
+    };
+    std::optional<LookNames> m_lookNames;
 #endif
 
     bool m_localeObserverRegistered = false;

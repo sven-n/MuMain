@@ -88,7 +88,7 @@ read as the English name only; saving writes the object form.
 | `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, defense per level, damage increase, absorption) depend on it; excellent second and third tier wings get no extra durability, and the chaos mix knows a wing's tier from it |
 | `weaponKind` | Only for weapons and shields: `sword`, `glove`, `axe`, `mace`, `spear`, `bow`, `crossbow`, `staff`, `book`, `shield`, as OpenMU's item groups 0 to 6: swords and the Rage Fighter's gloves (group 0; gloves are the items only the Rage Fighter may use), axes (1), maces and sceptres (2), spears (3), bows and crossbows (4: bows have the slot `offHand`, crossbows `mainHand`; arrows and bolts have no weapon kind), staffs, sticks and books (5: books have the slot `offHand`) and shields (6). While an item has the weapon kind its group gives, the bmd import and the item editor (also when it moves an item to another number) keep it matching the group, the slot and, in group 0, the class requirements (a group gives its kind only on that kind's slot, and in group 4 only to two-handed items), so a new weapon gets one too; a kind written in the file that differs from the group's stays as long as it differs. Which bow or crossbow a character holds (its animations, arrows and damage), the elf's arrows-only rule, a spear's reach and Impale, the shield defense set option, the bonus of leveled arrows and bolts, a staff's damage (it counts for the left hand), which right-hand weapons a summoner may hold in the left hand (not staffs or books), the character window's wizardry line, the tooltip's magic power line, the knight skills that need a weapon without a staff or book, Death Stab, Death Cannon and Spiral Slash, the weapon in the left hand that adds its magic options, the dual wield of Dark Knights, Magic Gladiators and Rage Fighters, and the weapon that moves into an empty right hand depend on it |
 | `potionPriority` | Only for potions with the `healingPotion`, `manaPotion`, `complexPotion` or `shieldPotion` tag: which one of a kind the game takes first, the higher the earlier (0 or left out = last; equal ones take the higher group and number first). The shipped potions count up with their size, so the largest is taken first. A client-only field (OpenMU has none); the bmd import keeps it |
-| `statProfile` | The item's profile in the [item stat file](#item-stats-by-level): what its + level, excellent options, ancient set and option level add to its stats and requirements. `"default"` names the default. The shipped data gives `sceptre` to the items with the `sceptre` tag, `book` to summoner books, `shield` to shields, `weapon` to the other items with a weapon kind (not arrows and bolts), `armor` to helms, armour, pants, gloves and boots, `scroll` to the items of group 15 with requirements, `helper` to the items of groups 13 and 14 with a base level requirement (`requirements.level`; the Transformation Ring's comes from `requirementsByLevel`, so it has the default), and a wing tier's profile to wings (`firstTierWing`, `secondTierWing`, `secondTierCape` for the second tier capes, `thirdTierWing`, `smallWing`). While an item has the profile its data gives, the bmd import and the item editor keep it matching (also when it moves an item to another number); a profile written in the file that differs from it stays as long as it differs: the Horn of Fenrir's data gives `helper`, and it names `"default"`. A left-out profile always follows the data; while the data gives one, the item has the default and loading warns about it, as for item files saved before the field. A profile the data gives that the item stat file does not have (renamed or removed) is not taken: the item keeps the default, and the import or the editor warns about it. An item whose data stops giving its profile loses the profile's terms: a bow made one-handed, which is then no bow, loses the `weapon` profile's strength per option level |
+| `statProfile` | The item's profile in the [item stat file](#item-stats-by-level): what its + level, excellent options, ancient set and option level add to its stats and requirements. `"default"` names the default. The [profile rules](#item-stats-by-level) of the item stat file say which profile an item's data gives it: in the shipped file `sceptre` for the items with the `sceptre` tag, `book` for summoner books, `shield` for shields, `weapon` for the other items with a weapon kind (not arrows and bolts), `armor` for helms, armour, pants, gloves and boots, `scroll` for the items of group 15 with requirements, `helper` for the items of groups 13 and 14 with a base level requirement (`requirements.level`; the Transformation Ring's comes from `requirementsByLevel`, so it has the default), and a wing tier's profile for wings (`firstTierWing`, `secondTierWing`, `secondTierCape` for the second tier capes, `thirdTierWing`, `smallWing`). While an item has the profile its data gives, the bmd import and the item editor keep it matching (also when it moves an item to another number); a profile written in the file that differs from it stays as long as it differs: the Horn of Fenrir's data gives `helper`, and it names `"default"`. A left-out profile always follows the data; while the data gives one, the item has the default and loading warns about it, as for item files saved before the field. An item whose data stops giving its profile loses the profile's terms: a bow made one-handed, which is then no bow, loses the `weapon` profile's strength per option level |
 | `twoHanded` | Weapon needs both hands |
 | `skill` | Skill the item gives |
 | `level` | Item level (the drop level); also used in price and damage calculations |
@@ -366,6 +366,10 @@ defense and magic defense, and how its requirements grow. It is in a folder of i
       "name": "sceptre",
       "magicPower": {"perLevelAfterHalving": 0}
     }
+  ],
+  "profileRules": [
+    {"profile": "default", "tags": ["ammunition"]},
+    {"profile": "sceptre", "tags": ["sceptre"]}
   ]
 }
 ```
@@ -413,6 +417,16 @@ defense and magic defense, and how its requirements grow. It is in a folder of i
 - **Profiles** (`profiles`) write only what differs from the default. A term
   a profile writes replaces the default's as a whole. An item names its
   profile with `statProfile`; an item without one has the default.
+- **Profile rules** (`profileRules`) say which profile an item's data gives
+  it, in order: the first rule the item matches names its `profile`
+  (`"default"` for the default), and an item no rule matches has the default.
+  A rule's conditions are lists of values: `group` (0 to 15), `slot`,
+  `wingTier`, `weaponKind`, `tags`, and `requirements` (the keys of an item's
+  `requirements`: its base value is above 0; a requirement given by level
+  does not count). An item meets a condition when it has one of its values,
+  and a rule without conditions matches every item. The writer keeps the
+  rules in order, one per line. A new condition needs a new `formatVersion`:
+  a reader refuses conditions and values it does not know.
 - Every `/` is a whole-number division, from left to right.
 - What stays code: the order of the terms; which items count as excellent
   (excellent options on wings are wing options, and ancient items get the
@@ -442,6 +456,28 @@ or with `"default"` (arrows and bolts, jewels, potions, the orbs, crystals
 and scrolls of group 12, the Horn of Fenrir, …) have the default: their
 level requirement does not grow.
 
+The shipped profile rules, in order, with the items each gives its profile:
+
+| # | Profile | Conditions | Items |
+|---|---|---|---|
+| 1 | `default` | tags `ammunition` (arrows and bolts) | 2 |
+| 2 | `sceptre` | tags `sceptre` | 10 |
+| 3 | `book` | tags `summonerBook` | 3 |
+| 4 | `shield` | weapon kind `shield` | 22 |
+| 5 | `weapon` | every other weapon kind | 113 |
+| 6 | `armor` | slot `helm`, `armor`, `pants`, `gloves` or `boots` | 327 |
+| 7 | `smallWing` | slot `wings`, wing tier `small` | 6 |
+| 8 | `firstTierWing` | slot `wings`, wing tier `first` | 4 |
+| 9 | `secondTierCape` | slot `wings`, wing tier `second`, tags `cape` | 2 |
+| 10 | `secondTierWing` | slot `wings`, wing tier `second` | 5 |
+| 11 | `thirdTierWing` | slot `wings`, wing tier `third` | 7 |
+| 12 | `default` | slot `wings` (wings without a tier) | 0 |
+| 13 | `scroll` | group 15, any base requirement | 36 |
+| 14 | `helper` | groups 13 and 14, a base level requirement | 32 |
+
+The other 342 items match no rule and have the default. Rule 14 reaches the
+Horn of Fenrir, which names `"default"`.
+
 **Errors** in the file stop the start like errors in the item files: a file
 that cannot be read, invalid JSON, a top level that is not an object, a
 missing or unsupported `formatVersion`; a missing `dropLevelBonus` (with
@@ -457,7 +493,12 @@ a `table` the file does not have; a term that is neither an object nor
 `"none"`; an `afterLevelBonus` that is not true or false; a requirement
 formula that is neither an object nor `"base"`; a `basis` other than
 `"levelRequirement"`; a caption that is neither a text nor texts by
-language; and `profiles` that are not a list of objects.
+language; `profiles` that are not a list of objects; `profileRules` that are
+not a list of objects; a rule without a `profile`, or one naming a profile
+the file does not have (other than `"default"`); a condition the format does
+not have; and a condition that is not a list of one or more values, or a
+value that is not one of its names (for `group`, a whole number from 0 to
+15).
 **Warnings:** unknown fields, a table that neither a stat nor a
 [description placeholder](#description-placeholders) uses, and a caption without
 English. An item whose `statProfile` the file does not have is an error, and
@@ -508,9 +549,10 @@ the field (**Copy text** copies it). All problems are also written to
 - `excellentRaisesLevel: false` on an item without a level requirement
 - a `requirementsByLevel` entry next to a base value of the same requirement
 - a name in a language the game has no UI texts for (it is never shown)
-- no `statProfile` on an item whose data gives one, as in item files saved
-  before the field: the item has the default until an edit or a bmd import
-  gives it the profile (`"default"` keeps the default without a warning)
+- no `statProfile` on an item the profile rules give one, as in item files
+  saved before the field: the item has the default until an edit or a bmd
+  import gives it the profile (`"default"` keeps the default without a
+  warning)
 - a `slot` written as a number, as files saved before tags existed have
   it; the number is read, and saving writes the name
 
@@ -557,6 +599,7 @@ and server share.
 | `renderStyle` | The look of the model when it is more than a plain textured model, see below. Optional. |
 | `itemEffect` | What the model does before it is drawn (sprites and particles on its bones, a pulsing glow mesh, ...), see below. Optional. |
 | `cloth` | `true` for capes that are worn as cloth: when one is put on or taken off, the character's cloth is deleted, so the next cape builds its own. Optional. The flag does not make a cape cloth; which capes are drawn as cloth, and how, is still decided in code. |
+| `material` | `{ "specular": 0.5 }`: the strength of the highlight under Enhanced lighting, 0 (none) to 1; see [enhanced-look.md](enhanced-look.md). Optional. |
 
 `inventory` and `ground` hold these values; a missing value has the
 default, which is the look of items without values of their own:
@@ -610,7 +653,9 @@ red, green and blue from 0 to 1:
 A name has only letters and digits. A new color is added to the list and
 can then be used by any item; a name that is not in the list stops the
 start with a message, and so does a list without the defaults (`orange`,
-`white`, `azure`).
+`white`, `azure`). The item editor adds colors, changes their values and
+removes the ones no item uses ([Glow Colors](#glow-colors)), and Save Items
+writes the file in this form, one color a line.
 
 The glow of monsters, and of the event models that level variants are
 drawn with, is still set in code; changing the list does not change them.
@@ -685,11 +730,14 @@ The effects of the event models that level variants are drawn with stay in
 code; they get model entries later.
 
 - All item models are loaded at startup, on the loading screen.
-- An item without a model entry is not drawn. Some items are drawn with
-  the model of another item or with an effect model; that choice, and
-  the look of those effect models, is still made in code. So is the look
-  of items that changes with their level (level variants, e.g. the Box
-  of Luck); they become items of their own later.
+- An item without a model entry is not drawn, unless code draws it at some
+  levels with other models: the Wizard's Ring (event models at +0 and +1
+  to +3) and the Weapon of Archangel (the archangel weapons, small, at +0
+  to +2). Some items are drawn with the model of another item or with an
+  effect model; that choice (`Render::Items::Display::FindInventoryModel`
+  for the inventory), and the look of those effect models, is still made
+  in code. So is the look of items that changes with their level (level
+  variants, e.g. the Box of Luck); they become items of their own later.
 - Models that are not item models (effects, monsters, the character
   bodies) are not in these files.
 - Write paths with the upper and lower case of the files, so the game
@@ -765,8 +813,8 @@ A shared model has a `name` of letters and digits and the `file`,
 opened once, by the first of its items, and its textures are loaded once;
 the other items use that data. Everything else (`inventory`, `ground`,
 `glow`, `renderStyle`, `itemEffect`, `cloth`) stays each item's own.
-Changing a shared model changes all its items; the item editor lists them
-(see [Looks](#looks)).
+Changing a shared model changes all its items; the model tool lists them
+first (see [Item Model](#item-model)).
 
 ---
 
@@ -777,44 +825,244 @@ in [translation-system.md → Item names](translation-system.md#item-names).
 
 ## Editing items (MuEditor)
 
-The item editor (editor builds, F12) edits the items of the running game:
+The item tools (editor builds, F12, **Windows → Items**) edit the items of
+the running game. They share one selected item: selecting it in one tool
+shows it in the others.
 
-- **Every change goes into the item database right away**, so the game
-  uses it immediately.
-- **Name changes are stored for the current UI locale.** To edit a
-  translation, switch the language first; to edit the English name,
-  switch to English. The **Item Translations** window edits the names of all
-  languages side by side (see
-  [translation-system.md → In the item editor](translation-system.md#in-the-item-editor)).
-- **Moving an item** to an empty item number (the Index column) takes its
-  model along: the model data in `Data/Items/Models` and the model the game
-  has opened, so the item keeps its looks. A number with a model of its own
-  but no item data (the Looks lists these) is not empty: the console says
-  so, and the item stays where it is.
-- **Save Items** checks the data and writes `Data/Items` next to the game,
-  with the model files in `Data/Items/Models` of the groups whose models
-  were moved; the other model files are not touched. It lists each UI
-  language that misses item names, with how many.
-  With errors nothing is written, and the errors are listed in the
-  editor console. If a file cannot be written (read-only folder, full disk),
-  no file is replaced, the popup says so and the console names the file.
-  A file open in another program can still fail when it is replaced, after
+- **Item Browser**: the items with a search (a name in any language,
+  `group,number` or the item type) and filters: group, tag, a rule flag
+  that is off, items without a model, numbers that have a model but no
+  item, items without a name in a language. An item whose name another
+  item has too shows in grey what tells them apart, in the list and above
+  each tool: the tags it has that not all its namesakes have (the lucky
+  sets: `luckyItem`), or `#1`, `#2` by number where no tag does (the Seals of
+  Wealth, the tiers of the seed spheres); the one namesake without such a tag
+  (the plain item of a lucky set) shows nothing. Names are compared in the
+  UI language. It has **Save Items**,
+  **Import from bmd**, **Export as bmd**, **Export as S6E3** and
+  **Export as CSV**, and:
+  - **Add item**: a group, a free number (one with neither an item nor a
+    model entry), the English name, and either the selected item's values
+    or a size and slot of its own (no slot to start with, for an item that
+    cannot be worn; an item that can be worn starts usable by every class).
+    Its model is linked in **Item Model**.
+  - **Duplicate item**: a copy with its model. A model file of its own
+    becomes a shared model that both items use, so it is opened once.
+  - **Move item**: to a free number, with its model (the model data and the
+    model the game has opened), so the item keeps its looks.
+  - **Remove item**: the item and its model entry.
+
+  Moving and removing first list what goes with the item (its tags, its
+  model entry and the shared model it names) and what uses it by its
+  number and stays there: the source lines that name it (read from the
+  sources the editor was built from; without them that part is not known)
+  and an ancient set, add option, buff or pet of the game data.
+- **Item Basics**: the English name, size, slot and wing tier (*None* for
+  none), two-handed, weapon kind (*By the group* takes the kind the item's
+  group gives, which then follows its group, slot and classes), skill, drop
+  level, potion priority, the stats, the prices,
+  the stat profile (*By the rules* takes what the
+  [profile rules](#item-stats-by-level) give; beside the list, the rule that
+  gives the item its profile, or that it is picked for the item; **Item
+  Formulas** opens the profile there) and the resistances. Below the stats, what the game
+  makes of them at each + level (damage, magic power, defense, magic
+  defense, block rate), also as excellent or ancient, while a value is still
+  being typed, and under that the formula of each with the item's numbers
+  and where each part comes from: `[default]`, the profile's name, or `[item:
+  excellentBonus]` for a field of the item. Size and slot stay as they are
+  while your character wears the item or a window shows it (the inventory,
+  the vault, a trade, a shop): an item grid frees the cells by the size an
+  item has when it is taken out. Such an item is not moved or removed
+  either, an undo step that would change it is refused, and Import from bmd
+  keeps its size and slot.
+- **Item Requirements**: the stat profile, as in Item Basics, then the level
+  and stat requirements. A stat requirement whose profile gives it a formula
+  shows its value at +0 (what a normal item needs without an option level,
+  as the game's `/<item name>` window shows it) and its weight, the base
+  value the [item stat file](#item-stats-by-level)'s formula takes and the
+  item file stores, with the weights that give the same +0 value beside it
+  ("Weights 39 to 44 give 27"): the formula rounds down, so several weights
+  can give one +0 value and differ at higher levels and for excellent items.
+  Typing a +0 value takes the weight that gives it; when several do, or none
+  does, a list shows them with what each gives at +15 and for excellent
+  items (or the nearest values some weight gives), and *Pick a weight* opens
+  it for the value the item has, to fine tune the weight. The weight can be
+  typed too. The level, and a requirement whose formula keeps the base value
+  (`"base"`), take the value itself. Beside each, its formula with the item's
+  numbers and where each part comes from, as in Item Basics. Each also by
+  item level (16 values that replace the formula; they start at what the
+  base value gives a normal item at each level, and turning them off finds
+  the base value back; excellent and ancient items get no higher stat
+  requirement from them, while excellent options still raise a level given
+  by level and the option level still adds the strength its stat profile
+  gives per option level; a scroll's energy,
+  whose formula takes the level requirement, follows a level given by
+  level). Below them, what the game asks at each + level
+  (the `/<item name>` window shows the normal item), also as excellent,
+  ancient or with an option level, while a value is still being typed. Then
+  the class steps (0: the
+  class cannot use the item) and whether excellent options raise the level
+  requirement.
+- **Item Rules**: the rule flags as a table of items; select several rows
+  (Ctrl or Shift click) to allow or forbid a flag for all of them.
+- **Item Categories**: a tag and its items; add the selected item or remove
+  items from it. New tags need code.
+- **Item Model**: see [Item Model](#item-model).
+- **Glow Colors**: the glow color list, see [Glow Colors](#glow-colors).
+- **Item Formulas**: the item stat file, see [Item Formulas](#item-formulas).
+- **Item Checks**: the checks of a save as a list, errors first. A click on
+  a problem of an item selects it and opens the tool of its field; an arrow
+  key onto it only selects the item. A click on a problem of the item stat
+  file (a profile or a table nothing uses) opens Item Formulas at it.
+- **Item Translations**: the names in all languages, see
+  [translation-system.md → In the item editor](translation-system.md#in-the-item-editor).
+
+In the browser, Item Rules, Item Categories, Item Checks and Item
+Translations, the arrow keys move the selection (see
+[dev-editor.md](dev-editor.md)). In the lists of the items that use a model
+or a look they only move the cursor: selecting one there shows that item's
+form instead, with its own list.
+
+How changes work:
+
+- **Every change goes into the item database right away**, and the game
+  uses it at once. Items in the inventory keep the values computed when
+  they were made until they are made again (e.g. after logging in again).
+- A text or number field is stored when you leave it after a change, a
+  checkbox or list right away. Each is one step of **Undo** and **Redo**
+  (in the editor's bar, see [dev-editor.md](dev-editor.md); also Ctrl+Z
+  and Ctrl+Y while an item tool has the focus and no field is
+  being typed in): the last 256 steps, for the whole session and across
+  saves. A step is not undone when the item changed in a way the history
+  did not record. Import from bmd clears the history. The browser's title
+  has a `*` while there are changes that are not saved.
+- The weapon kind and the stat profile follow the item's data while they
+  are what it gives: the weapon kind its group, slot and classes, the stat
+  profile the profile rules of the item stat file; a value you pick stays.
+- **Save Items** runs the checks and writes `Data/Items` next to the game,
+  with the model files of the groups whose models changed,
+  `SharedModels.json` when a shared model changed,
+  `Data/Effects/GlowColors.json` when a glow color changed and
+  `Stats/ItemStats.json` when the item formulas changed; the other model
+  files are not touched. It lists each UI language that misses item names, with
+  how many. With errors nothing is written, and the errors are listed in
+  the editor console and in **Item Checks**. Warnings (a model file that is
+  missing, a file several items name themselves instead of through a
+  shared model, a render style or item effect that does not exist) do not
+  stop it. If a file cannot be written (read-only folder, full disk), no
+  file is replaced, the popup says so and the console names the file. A
+  file open in another program can still fail when it is replaced, after
   others were. Only files whose content changed are rewritten.
 
 The game runs from the build folder, which has a copy of `src/bin/Data`.
 To keep your changes, copy the changed files from
-`<build folder>/Data/Items` to `src/bin/Data/Items` and commit them.
+`<build folder>/Data/Items` to `src/bin/Data/Items` (and
+`<build folder>/Data/Effects/GlowColors.json` to `src/bin/Data/Effects`) and
+commit them. A new
+`.bmd` file or texture has to be copied to `src/bin/Data` too (textures as
+`.OZJ` or `.OZT`).
 
-### Looks
+### Item Model
 
-The **Looks** section above the item table shows the model data of the
-selected item (`Data/Items/Models`), read only: its model file, its shared
-model, its glow values, its render style and its item effect. A shared
-model, a render style or an item effect opens to the list of all items that
-use it; clicking one selects it in the table (the search is cleared when it
-hides that item). Items without item data are listed too; they are not in
-the table, but selecting one shows its looks. Changing the looks is done in
-the model files for now; only moving an item changes them in the editor.
+The model tool edits the selected item's model entry, also the one of a
+number that has a model but no item:
+
+- A preview of the model as the game has it opened, at an item level,
+  excellent or ancient, standing as the inventory turns it or lying as on
+  the ground (over a ground plane as high below it as the game drops it) (drag to turn, drag with the middle mouse button to move,
+  wheel to zoom, double click to put it back).
+- The model file, picked from the `.bmd` files below `Data/Item` and
+  `Data/Player`. An item without a model gets an entry, with the file's
+  folder as its texture folder; a model whose only texture folder is its
+  old file's folder takes the new file's. A shared model that opens the same file is
+  offered instead; other items that name the file themselves are counted
+  (a shared model would open it once).
+- The shared model: pick one; for the one the item uses, its items and its
+  name, file, texture folders and none-blend meshes. A change is applied
+  only after a warning that lists every item it reaches. **Make a copy for
+  this item** gives the item a file entry of its own instead (a variant).
+  A shared model that items use cannot be removed; the ones no item uses
+  are listed with a button that removes them.
+- For a file of its own, the texture folders and none-blend meshes; then
+  the inventory display as sliders, each with a number field to type the
+  value (a drag is one undo step) beside the item in an inventory grid of
+  its size, drawn as
+  the game's inventory draws it at the preview's item level (it turns while
+  the mouse is on it); the ground display, cloth, specular and the glow
+  (levels, colors with their swatches, meshes, excellent). The **+** beside
+  each glow color adds a new color to the list, starting as a copy of the
+  field's color, and picks it, as one undo step. While a slider is
+  dragged, the grid and the game's inventory show the value at once; it is
+  stored when the slider is let go.
+- For an item drawn by code with other models at some levels, the list of
+  those models by level (the Box of Luck, the Wizard's Ring, ...); the
+  preview and the inventory grid show them at the chosen level, also for
+  an item without a model entry.
+- The render style and the item effect, picked from their lists with how
+  many models use each, and the items that use the picked one (a click
+  selects one). What a look is made of is drawing code.
+
+A changed file, texture folder, mesh list or material is opened again
+before the next frame, so the game draws it at once. Models that the game
+changes in code after loading (the cloth of some pants, the second models
+of the Rage Fighter gloves, the inventory models of the Rage Fighter
+armors) may need a restart to show a new file.
+
+### Glow Colors
+
+The colors of the glow color list, each with how many models use it (also
+as the default they leave out). **New glow color** adds one: a name of
+letters and digits no other color has, and its red, green and blue. A
+picked color's value is changed with the color field and **Apply to the
+glow color**; when items use it, the change lists them first, as for a
+shared model. A color no item uses is removed (**Remove**, or **Remove
+them** for all of them); the defaults (`orange`, `white`, `azure`) stay,
+since items without colors of their own glow with them. Every change is a
+step of the undo history; renaming a color is left out.
+
+### Item Formulas
+
+The [item stat file](#item-stats-by-level): its drop level bonus, the
+default, the profiles, the level bonus tables and the profile rules, each in
+the list with how
+many items use it (a table: how many stats name it; unused ones are grey).
+The picked entry is changed on a copy and **Apply to the formulas** takes
+it: the file is checked first (written and read back, as Save Items does),
+and when the change reaches items (other values, or another profile when a
+profile is renamed) they are listed before it is applied, as for a shared
+model. Every change is one step of the undo history, and Save Items writes
+`Stats/ItemStats.json`. While the picked entry has changes that are not
+applied, **New stat profile**, **New level bonus table**, **Copy**,
+**Rename** and **Remove them** wait until they are applied or reverted.
+
+- **Drop level bonus**: what excellent and ancient items add to their drop
+  level for their requirements and the ancient part of their stats.
+- **Default**: every term of every stat and the requirement formulas.
+- **A profile**: each term it writes, and the ones it inherits from the
+  default (grey, with **Override** to write the term in the profile; **Reset
+  to default** takes a written term out again). **New stat profile**,
+  **Copy** and **Rename** take a name of letters and digits no other profile
+  has (not `default`); a rename renames the profile in the profile rules and
+  in every item that names it. **Remove** works while no item and no rule
+  uses the profile, **Remove them** for all such profiles.
+- **A table**: the bonus at each item level 0 to 15, what it adds for every
+  level (also above +15) and its English caption. New, copied, renamed (in
+  every stat that names it) and removed tables work like profiles; a table
+  is removed while no stat names it.
+- **Profile rules**: the rules in order, each with its profile, its
+  conditions and how many items it gives their profile (the selected item's
+  rule is marked). **New rule** adds a copy of the picked rule below it (or a
+  rule for the default at the end), **Move up** and **Move down** change the
+  order, **Remove the rule** takes it out; the picked rule's conditions are
+  lists to tick values in (none ticked: any). Applying lists the items that
+  follow the rules and take another profile with the change; a profile picked
+  for an item stays. A rule changed by hand in the file takes no item along:
+  the items keep the profile they name, and those it no longer gives count as
+  picked.
+
+The server keeps its own formulas until they are synced, so what it checks
+and computes can differ from what changed formulas give. Items your
+character already has keep their values until they are made again.
 
 ### Import from bmd / Export as bmd
 
@@ -834,7 +1082,7 @@ only item data. The import is there to bring in your own old item files.
   `excellentRaisesLevel`, `requirementsByLevel`) and rule flags (the bmd
   format has none). A weapon kind that its group gives follows the imported
   slot (in group 0 also the class requirements), so a new weapon gets one
-  too; a stat profile that its data gives follows the same way. The values
+  too; a stat profile that the profile rules give follows the same way. The values
   come from the files: the original ones have no defense for the Cape of
   Lord (the client set its 15 in code until phase 3c), so it then has none.
   The imported items are at their bmd numbers, so the models of items you

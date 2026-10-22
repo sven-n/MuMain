@@ -2,6 +2,7 @@
 
 #include "doctest.h"
 
+#include "ItemModelDatabaseScope.h"
 #include "TestFiles.h"
 #include "TestModelSlots.h"
 
@@ -17,7 +18,9 @@
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemTextureFiles.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
+#include "Engine/Object/ZzzOpenData.h"
 #include "GameLogic/Social/MonkSystem.h"
 #include "Render/Items/ItemDisplay.h"
 #include "Render/Items/ItemEffects.h"
@@ -25,6 +28,9 @@
 #include "Render/Items/ItemModelLookup.h"
 #include "Render/Items/ItemRenderStyles.h"
 #include "Render/Models/ZzzBMD.h"
+#ifdef _EDITOR
+#include "UI/ItemTools/ItemHeldByCharacter.h"
+#endif
 
 #include <algorithm>
 #include <array>
@@ -184,6 +190,9 @@ TEST_CASE("Shipped item model files are in the written format [data][items]")
     }
     CHECK(WriteSharedItemModelsJson(ShippedModels().sharedModels) ==
           TestFiles::ReadWholeFile(ModelDirectory / SharedItemModelsFileName));
+    // The item editor writes the glow colors too.
+    CHECK(Data::Effects::WriteGlowColorsJson(ShippedGlowColors().colors) ==
+          TestFiles::ReadWholeFile(DataDirectory / "Effects" / "GlowColors.json"));
 }
 
 // The item editor saves the model files from the item model database, with
@@ -200,8 +209,9 @@ TEST_CASE("Saving the shipped item models from the model database gives the ship
     allGroups.set();
 
     std::vector<ItemDataIssue> issues;
-    CHECK(SaveItemAndModelDataDirectories(folder / "Items", items.items, folder / "Models", database.GetAllSlots(),
-                                          allGroups, issues) == ItemDataSaveResult::Saved);
+    CHECK(SaveItemAndModelDataDirectories(folder / "Items", items.items,
+                                          {folder / "Models", database.GetAllSlots(), allGroups},
+                                          issues) == ItemDataSaveResult::Saved);
     CHECK(issues.empty());
     for (int group = 0; group < MAX_ITEM_TYPE; ++group)
     {
@@ -211,6 +221,28 @@ TEST_CASE("Saving the shipped item models from the model database gives the ship
               TestFiles::ReadWholeFile(ModelDirectory / fileName));
     }
     CHECK_FALSE(std::filesystem::exists(folder / "Models" / SharedItemModelsFileName));
+
+    std::error_code ignored;
+    std::filesystem::remove_all(folder, ignored);
+}
+
+// The item editor writes the shared model file when a shared model changed.
+TEST_CASE("Saving writes the shared model file only when it changed [data][items]")
+{
+    ItemModelDatabase database;
+    database.Build(ShippedModels().models, Data::Effects::GlowColorList{});
+    const std::filesystem::path folder =
+        std::filesystem::temp_directory_path() / ("mu_test_item_models_" + std::to_string(std::random_device{}()));
+    ItemModelSave models{folder / "Models", database.GetAllSlots(), {}, ShippedModels().sharedModels, false};
+
+    std::vector<ItemDataIssue> issues;
+    CHECK(SaveItemAndModelDataDirectories(folder / "Items", {}, models, issues) == ItemDataSaveResult::Saved);
+    CHECK_FALSE(std::filesystem::exists(folder / "Models" / SharedItemModelsFileName));
+
+    models.sharedModelsChanged = true;
+    CHECK(SaveItemAndModelDataDirectories(folder / "Items", {}, models, issues) == ItemDataSaveResult::Saved);
+    CHECK(TestFiles::ReadWholeFile(folder / "Models" / SharedItemModelsFileName) ==
+          TestFiles::ReadWholeFile(ModelDirectory / SharedItemModelsFileName));
 
     std::error_code ignored;
     std::filesystem::remove_all(folder, ignored);
@@ -229,7 +261,7 @@ TEST_CASE("Saving writes only the model files of the given groups [data][items]"
     groups.set(SavedGroup);
 
     std::vector<ItemDataIssue> issues;
-    CHECK(SaveItemAndModelDataDirectories(folder / "Items", {}, folder / "Models", database.GetAllSlots(), groups,
+    CHECK(SaveItemAndModelDataDirectories(folder / "Items", {}, {folder / "Models", database.GetAllSlots(), groups},
                                           issues) == ItemDataSaveResult::Saved);
     for (int group = 0; group < MAX_ITEM_TYPE; ++group)
     {
@@ -508,8 +540,202 @@ TEST_CASE("The first item of a shared model opens its file and the others share 
     CHECK(message.find("(15,20)") == std::string::npos);
 }
 
+// OpenItems makes mesh 2 of the Grand Soul pants the grid their cloth moves; a
+// model opened again is as its file has it, and the item editor makes it the
+// grid again after their slot took other data (PrepareClothMeshes).
+TEST_CASE("The Grand Soul pants' mesh is the cloth grid again after their model is opened again [data][items]")
+{
+    TestItemModelSlots slots;
+    ItemModelDefinition grandSoul;
+    grandSoul.group = 9;
+    grandSoul.number = 18;
+    grandSoul.file = (ClientDirectory / "Data/Player/t_PantMale19.bmd").generic_string();
+    grandSoul.textureFolders = {"Player"};
+    g_ItemModelDatabase.Build(std::vector<ItemModelDefinition>{grandSoul}, Data::Effects::GlowColorList{});
+    ModelLoader::OpenModels({});
+    const BMD& pants = Models[MODEL_GRAND_SOUL_PANTS];
+    REQUIRE(pants.NumMeshs > 2);
+    REQUIRE(pants.Meshs[2].NumTriangles > 1);
+    const auto triangle = [&](int index)
+    {
+        const short* vertices = pants.Meshs[2].Triangles[index].VertexIndex;
+        return std::array<short, 3>{vertices[0], vertices[1], vertices[2]};
+    };
+    // The first quad of the cloth's 5 by 8 grid (CPhysicsClothMesh::Create).
+    const auto isGrid = [&]
+    { return triangle(0) == std::array<short, 3>{0, 1, 5} && triangle(1) == std::array<short, 3>{1, 6, 5}; };
+    REQUIRE_FALSE(isGrid());
+    const std::array<short, 3> fileTriangle = triangle(0);
+
+    // The cloth it makes to rebuild the mesh hangs on the hero.
+    CHARACTER* const previousHero = Hero;
+    const std::unique_ptr<CHARACTER> hero = std::make_unique<CHARACTER>();
+    Hero = hero.get();
+    PrepareGrandSoulPantsClothMesh();
+    CHECK(isGrid());
+
+    const int itemTypes[] = {ITEM_GRAND_SOUL_PANTS};
+    ModelLoader::ReopenModels(itemTypes, {});
+    CHECK(triangle(0) == fileTriangle);
+#ifdef _EDITOR
+    // Only when their slot is among the changed ones.
+    const int otherTypes[] = {ITEM_DIVINE_PANTS, MakeItemType(9, 100)};
+    MuEditor::Items::PrepareClothMeshes(otherTypes);
+    CHECK(triangle(0) == fileTriangle);
+    MuEditor::Items::PrepareClothMeshes(itemTypes);
+#else
+    PrepareGrandSoulPantsClothMesh();
+#endif
+    CHECK(isGrid());
+    Hero = previousHero;
+}
+
 // The item editor moves an item's model with the item: the model data and the
 // opened model change slots, nothing is opened again.
+TEST_CASE("The item model database sets and removes single models [data][items]")
+{
+    ItemModelDatabaseScope restoreModels;
+    Data::Effects::GlowColorList colors;
+    const std::vector<Data::Effects::GlowColor> colorList = {{"red", {1.0, 0.0, 0.0}}};
+    colors.Build(colorList);
+    g_ItemModelDatabase.Build({}, colors);
+    const int version = g_ItemModelDatabase.GetVersion();
+
+    ItemModelDefinition sword;
+    sword.group = 0;
+    sword.number = 7;
+    sword.file = "Data/Item/Sword08.bmd";
+    sword.glow.color = "red";
+    g_ItemModelDatabase.Set(sword, colors);
+    const int swordType = MakeItemType(0, 7);
+    REQUIRE(g_ItemModelDatabase.Find(swordType) != nullptr);
+    CHECK(*g_ItemModelDatabase.Find(swordType) == sword);
+    CHECK(g_ItemModelDatabase.FindGlowColors(swordType)->color == std::array<float, 3>{1.0f, 0.0f, 0.0f});
+    CHECK(g_ItemModelDatabase.GetModelCount() == 1);
+    CHECK(g_ItemModelDatabase.GetVersion() != version);
+
+    // Setting it again replaces it and does not count it twice.
+    sword.file = "Data/Item/Sword09.bmd";
+    g_ItemModelDatabase.Set(sword, colors);
+    CHECK(g_ItemModelDatabase.Find(swordType)->file == "Data/Item/Sword09.bmd");
+    CHECK(g_ItemModelDatabase.GetModelCount() == 1);
+
+    // An entry without a file and a shared model empties the slot.
+    ItemModelDefinition empty;
+    empty.group = 0;
+    empty.number = 7;
+    g_ItemModelDatabase.Set(empty, colors);
+    CHECK(g_ItemModelDatabase.Find(swordType) == nullptr);
+    CHECK(g_ItemModelDatabase.GetModelCount() == 0);
+
+    g_ItemModelDatabase.Set(sword, colors);
+    g_ItemModelDatabase.Remove(swordType);
+    CHECK(g_ItemModelDatabase.Find(swordType) == nullptr);
+    CHECK(g_ItemModelDatabase.FindGlowColors(swordType) == nullptr);
+    CHECK(g_ItemModelDatabase.GetModelCount() == 0);
+}
+
+TEST_CASE("The item model database keeps the shared models [data][items]")
+{
+    ItemModelDatabaseScope restoreModels;
+    g_ItemModelDatabase.SetSharedModels(ShippedModels().sharedModels);
+    REQUIRE(g_ItemModelDatabase.GetSharedModels().size() == ShippedModels().sharedModels.size());
+    const SharedItemModel& first = ShippedModels().sharedModels.front();
+    REQUIRE(g_ItemModelDatabase.FindSharedModel(first.name) != nullptr);
+    CHECK(*g_ItemModelDatabase.FindSharedModel(first.name) == first);
+    CHECK(g_ItemModelDatabase.FindSharedModel("noSuchModel") == nullptr);
+
+    const int version = g_ItemModelDatabase.GetVersion();
+    SharedItemModel changed = first;
+    changed.file = "Data/Item/Other.bmd";
+    g_ItemModelDatabase.SetSharedModel(changed);
+    CHECK(g_ItemModelDatabase.FindSharedModel(first.name)->file == "Data/Item/Other.bmd");
+    CHECK(g_ItemModelDatabase.GetSharedModels().size() == ShippedModels().sharedModels.size());
+    CHECK(g_ItemModelDatabase.GetVersion() != version);
+
+    SharedItemModel added{"newModel", "Data/Item/New.bmd", {"Item"}, {}};
+    g_ItemModelDatabase.SetSharedModel(added);
+    CHECK(g_ItemModelDatabase.GetSharedModels().size() == ShippedModels().sharedModels.size() + 1);
+    g_ItemModelDatabase.RemoveSharedModel("newModel");
+    CHECK(g_ItemModelDatabase.FindSharedModel("newModel") == nullptr);
+    CHECK(g_ItemModelDatabase.GetSharedModels().size() == ShippedModels().sharedModels.size());
+}
+
+TEST_CASE("The models of items are opened again as the model database has them now [data][items]")
+{
+    TestItemModelSlots slots;
+    const ItemModelDefinition parchment = MakeSharedModelItem(19, "", "Data/Item/rollofpaper.bmd");
+    const ItemModelDefinition firstUser = MakeSharedModelItem(20, "parchments", "Data/Item/rollofpaper.bmd");
+    const ItemModelDefinition secondUser = MakeSharedModelItem(21, "parchments", "Data/Item/rollofpaper.bmd");
+    g_ItemModelDatabase.Build(std::vector<ItemModelDefinition>{parchment, firstUser, secondUser},
+                              Data::Effects::GlowColorList{});
+    ModelLoader::OpenModels({});
+    const int parchmentType = MakeItemType(15, 19);
+    const BMD& parchmentSlot = Models[ToModelSlot(parchmentType)];
+    REQUIRE(parchmentSlot.NumMeshs > 0);
+    // The textures are looked for below the working folder, which is not the
+    // client folder here; only whether the files open counts.
+    const auto opened = [](const std::vector<ItemModelProblem>& problems)
+    {
+        return std::ranges::none_of(problems, [](const ItemModelProblem& problem)
+                                    { return problem.type == ItemModelProblemType::ModelFileMissing; });
+    };
+
+    SUBCASE("another file")
+    {
+        ItemModelDefinition sword = parchment;
+        sword.file = (ClientDirectory / "Data/Item/Sword01.bmd").generic_string();
+        g_ItemModelDatabase.Set(sword, Data::Effects::GlowColorList{});
+        const int types[] = {parchmentType};
+        CHECK(opened(ModelLoader::ReopenModels(types, {})));
+        CHECK(gLoadData.GetModelFile(ToModelSlot(parchmentType)).find(L"Sword01") != std::wstring::npos);
+        CHECK(parchmentSlot.NumMeshs > 0);
+    }
+
+    SUBCASE("a model removed from the database empties its slot")
+    {
+        g_ItemModelDatabase.Remove(parchmentType);
+        const int types[] = {parchmentType};
+        CHECK(ModelLoader::ReopenModels(types, {}).empty());
+        CHECK(parchmentSlot.NumMeshs == 0);
+    }
+
+    SUBCASE("the items of a shared model share the data again")
+    {
+        const int types[] = {MakeItemType(15, 20), MakeItemType(15, 21)};
+        CHECK(opened(ModelLoader::ReopenModels(types, {})));
+        const BMD& first = Models[ToModelSlot(types[0])];
+        const BMD& second = Models[ToModelSlot(types[1])];
+        CHECK(first.Meshs == second.Meshs);
+        CHECK(second.SharesData());
+    }
+
+    SUBCASE("the items of a shared model whose file does not open are all without a model")
+    {
+        const int types[] = {MakeItemType(15, 20), MakeItemType(15, 21)};
+        for (const int itemType : types)
+        {
+            ItemModelDefinition user = *g_ItemModelDatabase.Find(itemType);
+            user.file = (ClientDirectory / "Data/Item/NoSuchModel.bmd").generic_string();
+            g_ItemModelDatabase.Set(user, Data::Effects::GlowColorList{});
+        }
+        CHECK_FALSE(opened(ModelLoader::ReopenModels(types, {})));
+        CHECK(Models[ToModelSlot(types[0])].NumMeshs == 0);
+        CHECK(Models[ToModelSlot(types[1])].NumMeshs == 0);
+        CHECK(parchmentSlot.NumMeshs > 0);
+    }
+
+    SUBCASE("a missing file is a problem of the reopen, not of the startup message")
+    {
+        ItemModelDefinition missing = parchment;
+        missing.file = (ClientDirectory / "Data/Item/NoSuchModel.bmd").generic_string();
+        g_ItemModelDatabase.Set(missing, Data::Effects::GlowColorList{});
+        const int types[] = {parchmentType};
+        CHECK_FALSE(opened(ModelLoader::ReopenModels(types, {})));
+        CHECK(ModelLoader::TakeProblemMessage().empty());
+    }
+}
+
 TEST_CASE("Moving item models swaps their data and their opened models [data][items]")
 {
     TestItemModelSlots slots;
@@ -826,6 +1052,37 @@ TEST_CASE("Level variants keep their place in the inventory slot [data][items]")
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }
 
+#ifdef _EDITOR
+TEST_CASE("The model tool shows an inventory display before it is stored [data][items][editor]")
+{
+    using namespace Render::Items::Display;
+    g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
+    const int kris = MakeItemType(0, 0);
+    const InventoryDisplay stored = GetInventoryDisplay(Data::Items::ToModelSlot(kris));
+    const Anchor storedAnchor = GetInventoryAnchor(kris, 0);
+
+    ItemInventoryDisplay preview;
+    preview.anchor = {0.25, 0.75};
+    preview.rotation = {10.0, 20.0, 30.0};
+    preview.scale = 0.004;
+    PreviewInventoryDisplay(kris, preview);
+    CHECK(GetInventoryAnchor(kris, 0).x == 0.25f);
+    CHECK(GetInventoryAnchor(kris, 0).y == 0.75f);
+    const InventoryDisplay shown = GetInventoryDisplay(Data::Items::ToModelSlot(kris));
+    CHECK(shown.rotation == std::array<float, 3>{10.0f, 20.0f, 30.0f});
+    CHECK(shown.scale == 0.004f);
+    // Other items keep theirs.
+    const int blade = MakeItemType(0, 2);
+    CHECK(GetInventoryDisplay(Data::Items::ToModelSlot(blade)).scale ==
+          static_cast<float>(g_ItemModelDatabase.Find(blade)->inventory.scale));
+
+    ClearInventoryDisplayPreview();
+    CHECK(GetInventoryDisplay(Data::Items::ToModelSlot(kris)).scale == stored.scale);
+    CHECK(GetInventoryAnchor(kris, 0).x == storedAnchor.x);
+    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
+}
+#endif
+
 namespace
 {
 void CheckInventoryDisplay(int modelType, const Render::Items::Display::InventoryDisplay& expected)
@@ -847,6 +1104,209 @@ void CheckGroundDisplay(int modelType, const Render::Items::Display::GroundDispl
     CHECK(display.bodyHeight == expected.bodyHeight);
 }
 } // namespace
+
+namespace
+{
+struct Drawn
+{
+    int modelType;
+    int level;
+};
+
+// The chain is the old code as it was; its constants and branches are kept.
+// The choice of RenderItem3DAt before FindInventoryModel, as it was: the
+// model and level it drew with, or nothing.
+std::optional<Drawn> OldInventoryModel(int Type, int Level)
+{
+    if (Type == ITEM_BOX_OF_LUCK && Level == 1)
+    {
+        return Drawn{MODEL_EVENT + 4, Level};
+    }
+    else if (Type == ITEM_BOX_OF_LUCK && Level == 2)
+    {
+        return Drawn{MODEL_EVENT + 5, Level};
+    }
+    else if (Type == ITEM_BOX_OF_LUCK && Level == 3)
+    {
+        return Drawn{MODEL_EVENT + 6, Level};
+    }
+    else if (Type == ITEM_BOX_OF_LUCK && Level == 5)
+    {
+        return Drawn{MODEL_EVENT + 8, Level};
+    }
+    else if (Type == ITEM_BOX_OF_LUCK && Level == 6)
+    {
+        return Drawn{MODEL_EVENT + 9, Level};
+    }
+    else if (Type == ITEM_BOX_OF_LUCK && 8 <= Level && Level <= 12)
+    {
+        return Drawn{MODEL_EVENT + 10, Level};
+    }
+    else if (Type == ITEM_BOX_OF_LUCK && Level == 13)
+    {
+        return Drawn{MODEL_EVENT + 6, Level};
+    }
+    else if (Type == ITEM_BOX_OF_LUCK && (Level == 14 || Level == 15))
+    {
+        return Drawn{MODEL_EVENT + 5, Level};
+    }
+    else if (Type == ITEM_LOCHS_FEATHER && Level == 1)
+    {
+        return Drawn{MODEL_EVENT + 16, Level};
+    }
+    else if (Type == ITEM_ALE && Level == 1)
+    {
+        return Drawn{MODEL_EVENT + 7, Level};
+    }
+    else if (Type == ITEM_RENA)
+    {
+        switch (Level)
+        {
+        case 1:
+            return Drawn{MODEL_EVENT + 11, Level};
+        case 2:
+            return Drawn{MODEL_EVENT + 11, Level};
+        case 3:
+            return Drawn{Data::Items::ToModelSlot(Type), Level};
+        default:
+            return Drawn{Data::Items::ToModelSlot(Type), Level};
+        }
+    }
+    else if (Type == ITEM_PUMPKIN_OF_LUCK)
+    {
+        return Drawn{MODEL_PUMPKIN_OF_LUCK, Level};
+    }
+    else if (Type >= ITEM_JACK_OLANTERN_BLESSINGS && Type <= ITEM_JACK_OLANTERN_CRY)
+    {
+        return Drawn{MODEL_JACK_OLANTERN_BLESSINGS, Level};
+    }
+    else if (Type == ITEM_JACK_OLANTERN_FOOD)
+    {
+        return Drawn{MODEL_JACK_OLANTERN_FOOD, Level};
+    }
+    else if (Type == ITEM_JACK_OLANTERN_DRINK)
+    {
+        return Drawn{MODEL_JACK_OLANTERN_DRINK, Level};
+    }
+    else if (Type == ITEM_PINK_CHOCOLATE_BOX)
+    {
+        switch (Level)
+        {
+        case 0:
+            return Drawn{MODEL_PINK_CHOCOLATE_BOX, Level};
+        case 1:
+            return Drawn{MODEL_EVENT + 21, Level};
+        }
+    }
+    else if (Type == ITEM_RED_CHOCOLATE_BOX)
+    {
+        switch (Level)
+        {
+        case 0:
+            return Drawn{MODEL_RED_CHOCOLATE_BOX, Level};
+        case 1:
+            return Drawn{MODEL_EVENT + 22, Level};
+        }
+    }
+    else if (Type == ITEM_BLUE_CHOCOLATE_BOX)
+    {
+        switch (Level)
+        {
+        case 0:
+            return Drawn{MODEL_BLUE_CHOCOLATE_BOX, Level};
+        case 1:
+            return Drawn{MODEL_EVENT + 23, Level};
+        }
+    }
+    else if (Type == ITEM_WEAPON_OF_ARCHANGEL)
+    {
+        switch (Level)
+        {
+        case 0:
+            return Drawn{MODEL_DIVINE_STAFF_OF_ARCHANGEL, -1};
+        case 1:
+            return Drawn{MODEL_DIVINE_SWORD_OF_ARCHANGEL, -1};
+        case 2:
+            return Drawn{MODEL_DIVINE_CB_OF_ARCHANGEL, -1};
+        }
+    }
+    else if (Type == ITEM_SCROLL_OF_EMPEROR_RING_OF_HONOR)
+    {
+        switch (Level)
+        {
+        case 0:
+            return Drawn{Data::Items::ToModelSlot(Type), Level};
+        case 1:
+            return Drawn{MODEL_EVENT + 12, -1};
+        }
+    }
+    else if (Type == ITEM_BROKEN_SWORD_DARK_STONE)
+    {
+        switch (Level)
+        {
+        case 0:
+            return Drawn{Data::Items::ToModelSlot(Type), Level};
+        case 1:
+            return Drawn{MODEL_EVENT + 13, -1};
+        }
+    }
+    else if (Type == ITEM_WIZARDS_RING)
+    {
+        switch (Level)
+        {
+        case 0:
+            return Drawn{MODEL_EVENT + 15, Level};
+        case 1:
+        case 2:
+        case 3:
+            return Drawn{MODEL_EVENT + 14, Level};
+        }
+    }
+    else if (Type == ITEM_LIFE_STONE_ITEM && Level == 1)
+    {
+        return Drawn{MODEL_EVENT + 18, Level};
+    }
+    else if (Type == ITEM_POTION + 100)
+    {
+        return Drawn{MODEL_POTION + 100, Level};
+    }
+    else
+    {
+        return Drawn{Render::Items::Display::GetInventoryModel(Type), Level};
+    }
+    return std::nullopt;
+}
+} // namespace
+
+// The inventory chose the model of a level variant in RenderItem3DAt; the choice
+// moved into FindInventoryModel, which the editor reads too. For every item type
+// and level both give the same.
+TEST_CASE("The inventory draws each item at each level with the model it drew before [data][items]")
+{
+    g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
+    for (int itemType = 0; itemType < MAX_ITEM; ++itemType)
+    {
+        for (int level = -1; level <= 20; ++level)
+        {
+            const std::optional<Drawn> old = OldInventoryModel(itemType, level);
+            const std::optional<Render::Items::Display::InventoryModel> now =
+                Render::Items::Display::FindInventoryModel(itemType, level);
+            INFO("item type " << itemType << " level " << level);
+            REQUIRE(now.has_value() == old.has_value());
+            if (old)
+            {
+                CHECK(now->modelType == old->modelType);
+                CHECK(now->drawLevel == old->level);
+            }
+        }
+    }
+    // The Wizard's Ring: its own models at +0 and +1 to +3, nothing above.
+    using Render::Items::Display::FindInventoryModel;
+    CHECK(FindInventoryModel(ITEM_WIZARDS_RING, 0)->modelType == MODEL_EVENT + 15);
+    CHECK(FindInventoryModel(ITEM_WIZARDS_RING, 3)->modelType == MODEL_EVENT + 14);
+    CHECK_FALSE(FindInventoryModel(ITEM_WIZARDS_RING, 4).has_value());
+    g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
+}
 
 // Spot checks of the models that are drawn for items but are not item
 // models, with the values of the old drawing code.
@@ -964,6 +1424,39 @@ TEST_CASE("The glow of shipped item models is on meshes the models have [data][i
         {
             INFO("(" << model.group << "," << model.number << ") " << field << " " << mesh);
             CHECK(mesh < bmd->NumMeshs);
+        }
+    }
+}
+
+// The item editor offers these lists; every name in them must be one the
+// model loader accepts.
+TEST_CASE("The render style and item effect lists name every look once, sorted [data][items]")
+{
+    for (const std::span<const std::string_view> names :
+         {Render::Items::Styles::GetNames(), Render::Items::ItemEffects::GetNames()})
+    {
+        REQUIRE_FALSE(names.empty());
+        CHECK(std::ranges::is_sorted(names));
+        CHECK(std::ranges::adjacent_find(names) == names.end());
+    }
+    for (const std::string_view name : Render::Items::Styles::GetNames())
+    {
+        CHECK(Render::Items::Styles::Exists(name));
+    }
+    for (const std::string_view name : Render::Items::ItemEffects::GetNames())
+    {
+        CHECK(Render::Items::ItemEffects::Exists(name));
+    }
+    // Every name the shipped models use is in the lists.
+    for (const ItemModelDefinition& model : ShippedModels().models)
+    {
+        if (!model.renderStyle.empty())
+        {
+            CHECK(std::ranges::binary_search(Render::Items::Styles::GetNames(), model.renderStyle));
+        }
+        if (!model.itemEffect.empty())
+        {
+            CHECK(std::ranges::binary_search(Render::Items::ItemEffects::GetNames(), model.itemEffect));
         }
     }
 }

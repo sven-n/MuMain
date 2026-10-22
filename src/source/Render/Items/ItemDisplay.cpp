@@ -29,6 +29,25 @@ InventoryDisplay ToInventoryDisplay(const ItemInventoryDisplay& display)
             static_cast<float>(display.bodyHeight)};
 }
 
+#ifdef _EDITOR
+struct InventoryDisplayPreview
+{
+    int itemType;
+    ItemInventoryDisplay display;
+};
+std::optional<InventoryDisplayPreview> g_inventoryDisplayPreview;
+
+// The previewed display of the item whose model slot is `modelType`.
+const ItemInventoryDisplay* FindInventoryDisplayPreview(int modelType)
+{
+    if (g_inventoryDisplayPreview && Data::Items::ToModelSlot(g_inventoryDisplayPreview->itemType) == modelType)
+    {
+        return &g_inventoryDisplayPreview->display;
+    }
+    return nullptr;
+}
+#endif
+
 GroundDisplay ToGroundDisplay(const ItemGroundDisplay& display)
 {
     GroundDisplay result{ToFloats(display.rotation), std::nullopt, static_cast<float>(display.bodyHeight)};
@@ -172,6 +191,13 @@ Anchor GetInventoryAnchor(int itemType, int level)
     {
         return *anchor;
     }
+#ifdef _EDITOR
+    if (g_inventoryDisplayPreview && g_inventoryDisplayPreview->itemType == itemType)
+    {
+        const std::array<double, 2>& anchor = g_inventoryDisplayPreview->display.anchor;
+        return {static_cast<float>(anchor[0]), static_cast<float>(anchor[1])};
+    }
+#endif
 
     const ItemModelDefinition* model = g_ItemModelDatabase.Find(itemType);
     const std::array<double, 2>& anchor =
@@ -191,6 +217,87 @@ int GetInventoryModel(int itemType)
     return Data::Items::ToModelSlot(itemType);
 }
 
+std::optional<InventoryModel> FindInventoryModel(int itemType, int level)
+{
+    const auto drawn = [level](int modelType)
+    { return std::optional<InventoryModel>(InventoryModel{modelType, level}); };
+    // Drawn with level -1 (GetSmallArchangelWeaponScale makes the archangel weapons small with it).
+    const auto levelMinusOne = [](int modelType)
+    { return std::optional<InventoryModel>(InventoryModel{modelType, -1}); };
+    constexpr std::optional<InventoryModel> nothing;
+    switch (itemType)
+    {
+    case ITEM_BOX_OF_LUCK:
+        if (level == 1)
+            return drawn(MODEL_EVENT + 4);
+        if (level == 2)
+            return drawn(MODEL_EVENT + 5);
+        if (level == 3)
+            return drawn(MODEL_EVENT + 6);
+        if (level == 5)
+            return drawn(MODEL_EVENT + 8);
+        if (level == 6)
+            return drawn(MODEL_EVENT + 9);
+        if (8 <= level && level <= 12)
+            return drawn(MODEL_EVENT + 10);
+        if (level == 13)
+            return drawn(MODEL_EVENT + 6);
+        if (level == 14 || level == 15)
+            return drawn(MODEL_EVENT + 5);
+        break;
+    case ITEM_LOCHS_FEATHER:
+        if (level == 1)
+            return drawn(MODEL_EVENT + 16);
+        break;
+    case ITEM_ALE:
+        if (level == 1)
+            return drawn(MODEL_EVENT + 7);
+        break;
+    case ITEM_RENA:
+        if (level == 1 || level == 2)
+            return drawn(MODEL_EVENT + 11);
+        return drawn(Data::Items::ToModelSlot(itemType));
+    case ITEM_PUMPKIN_OF_LUCK:
+        return drawn(MODEL_PUMPKIN_OF_LUCK);
+    case ITEM_JACK_OLANTERN_FOOD:
+        return drawn(MODEL_JACK_OLANTERN_FOOD);
+    case ITEM_JACK_OLANTERN_DRINK:
+        return drawn(MODEL_JACK_OLANTERN_DRINK);
+    case ITEM_PINK_CHOCOLATE_BOX:
+        return level == 0 ? drawn(MODEL_PINK_CHOCOLATE_BOX) : level == 1 ? drawn(MODEL_EVENT + 21) : nothing;
+    case ITEM_RED_CHOCOLATE_BOX:
+        return level == 0 ? drawn(MODEL_RED_CHOCOLATE_BOX) : level == 1 ? drawn(MODEL_EVENT + 22) : nothing;
+    case ITEM_BLUE_CHOCOLATE_BOX:
+        return level == 0 ? drawn(MODEL_BLUE_CHOCOLATE_BOX) : level == 1 ? drawn(MODEL_EVENT + 23) : nothing;
+    case ITEM_WEAPON_OF_ARCHANGEL:
+        return level == 0   ? levelMinusOne(MODEL_DIVINE_STAFF_OF_ARCHANGEL)
+               : level == 1 ? levelMinusOne(MODEL_DIVINE_SWORD_OF_ARCHANGEL)
+               : level == 2 ? levelMinusOne(MODEL_DIVINE_CB_OF_ARCHANGEL)
+                            : nothing;
+    case ITEM_SCROLL_OF_EMPEROR_RING_OF_HONOR:
+        return level == 0   ? drawn(Data::Items::ToModelSlot(itemType))
+               : level == 1 ? levelMinusOne(MODEL_EVENT + 12)
+                            : nothing;
+    case ITEM_BROKEN_SWORD_DARK_STONE:
+        return level == 0   ? drawn(Data::Items::ToModelSlot(itemType))
+               : level == 1 ? levelMinusOne(MODEL_EVENT + 13)
+                            : nothing;
+    case ITEM_WIZARDS_RING:
+        return level == 0 ? drawn(MODEL_EVENT + 15) : (1 <= level && level <= 3) ? drawn(MODEL_EVENT + 14) : nothing;
+    case ITEM_LIFE_STONE_ITEM:
+        if (level == 1)
+            return drawn(MODEL_EVENT + 18);
+        break;
+    case ITEM_POTION + 100:
+        return drawn(MODEL_POTION + 100);
+    default:
+        if (itemType >= ITEM_JACK_OLANTERN_BLESSINGS && itemType <= ITEM_JACK_OLANTERN_CRY)
+            return drawn(MODEL_JACK_OLANTERN_BLESSINGS);
+        break;
+    }
+    return drawn(GetInventoryModel(itemType));
+}
+
 std::optional<int> GetItemOfInventoryModel(int modelType)
 {
     if (const ArmorInventoryModel* armor = FindArmorInventoryModel(modelType))
@@ -198,6 +305,11 @@ std::optional<int> GetItemOfInventoryModel(int modelType)
         return armor->itemType;
     }
     return std::nullopt;
+}
+
+bool IsLiftedOnGround(int modelType)
+{
+    return modelType >= MODEL_SWORD && modelType < MODEL_STAFF + MAX_ITEM_INDEX;
 }
 
 bool IsDrawnOnCharacterSkeleton(int modelType)
@@ -212,6 +324,12 @@ InventoryDisplay GetInventoryDisplay(int modelType)
     {
         modelType = Data::Items::ToModelSlot(armor->itemType);
     }
+#ifdef _EDITOR
+    if (const ItemInventoryDisplay* preview = FindInventoryDisplayPreview(modelType))
+    {
+        return ToInventoryDisplay(*preview);
+    }
+#endif
     if (const ItemModelDefinition* model = FindItemModel(modelType))
     {
         return ToInventoryDisplay(model->inventory);
@@ -252,4 +370,16 @@ GroundDisplay GetGroundDisplay(int modelType)
     }
     return ToGroundDisplay(ItemGroundDisplay{});
 }
+
+#ifdef _EDITOR
+void PreviewInventoryDisplay(int itemType, const ItemInventoryDisplay& display)
+{
+    g_inventoryDisplayPreview = InventoryDisplayPreview{itemType, display};
+}
+
+void ClearInventoryDisplayPreview()
+{
+    g_inventoryDisplayPreview.reset();
+}
+#endif
 } // namespace Render::Items::Display
