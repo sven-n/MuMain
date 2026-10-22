@@ -28,8 +28,9 @@ public:
     // definitions with invalid ids are skipped (validation reports them).
     void Build(std::span<const ItemDefinition> definitions);
 
-    // Fills ItemDefinition::name from the names for this UI locale, falling
-    // back to English.
+    // Fills ItemDefinition::name from the names in the item name language:
+    // the UI language, or English while translated item names are off. A
+    // missing translation falls back to English.
     void SetDisplayLocale(std::string_view locale);
     const std::string& GetDisplayLocale() const
     {

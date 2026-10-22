@@ -52,7 +52,7 @@ public:
 
 #ifdef _EDITOR
     // Puts the item into the item database at its (group, number) and refills
-    // its row of ItemAttribute[]: the item in the UI locale, or an empty row
+    // its row of ItemAttribute[]: the item in the item name language, or an empty row
     // when it no longer exists (no names). The weapon kind and the stat
     // profile follow the data (FollowGroupWeaponKind, FollowStatProfile)
     // unless the definition changes them itself: then they are the user's pick.
@@ -129,7 +129,7 @@ public:
     // Sets the item's name in `locale` (an empty text removes the translation;
     // the English name cannot be emptied) in the item database, whole also when
     // it is longer than ITEM_ATTRIBUTE's name; ItemAttribute shows the name in
-    // the UI locale. False when the item does not exist, when the English name
+    // the item name language. False when the item does not exist, when the English name
     // would be empty (also when the item has none yet) or when the text has
     // LocalizedString::Separator, which the item checks refuse.
     bool SetItemName(int itemType, std::string_view locale, std::string text);

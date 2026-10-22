@@ -7,7 +7,7 @@
 
 namespace MuEditor::Items
 {
-// Items whose name (in the UI language) another item has too, e.g. the lucky
+// Items whose name (as the game shows it) another item has too, e.g. the lucky
 // sets and the tiers of the seed spheres: a short text that tells them apart
 // in the item lists. It names the tags an item has that not all its
 // namesakes have ("luckyItem"); namesakes that no tag tells apart count up

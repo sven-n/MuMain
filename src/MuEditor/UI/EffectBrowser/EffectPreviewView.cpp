@@ -347,9 +347,10 @@ void CEffectPreviewView::RenderItemList()
 
 // The names come from the items as the game has them now; the list is made
 // again when the item tools change the items or their models, or the item
-// names change (another UI language, translated item names turned on or off). The item models are all opened on the loading screen and stay, so
-// the list does not change with the map; the models of the chosen level are
-// checked when drawn.
+// names change (another UI language, translated item names turned on or off).
+// The item models are all opened on the loading screen and stay, so the list
+// does not change with the map; the models of the chosen level are checked
+// when drawn.
 void CEffectPreviewView::RefreshItems()
 {
     const int version = g_ItemDatabase.GetVersion();
