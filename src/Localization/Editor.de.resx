@@ -2129,7 +2129,7 @@
     <value>{0} neue, {1} geänderte, {2} entfernte Items; {3} Formeleinträge</value>
   </data>
   <data name="No differences" xml:space="preserve">
-    <value>Keine Unterschiede</value>
+    <value>Keine Unterschiede: Die Datei hat dieselben Items und Formeln wie der Client.</value>
   </data>
   <data name="Check all" xml:space="preserve">
     <value>Alle anhaken</value>
@@ -2229,5 +2229,8 @@
   </data>
   <data name="It is in the file more than once" xml:space="preserve">
     <value>Es ist mehrmals in der Datei: im Client bleibt es, wie es ist</value>
+  </data>
+  <data name="How to see differences" xml:space="preserve">
+    <value>Um Unterschiede zu sehen, ein Item im Editor oder in der Datei ändern oder eine andere Datei wählen und dann neu vergleichen.</value>
   </data>
 </root>

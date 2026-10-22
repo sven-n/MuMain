@@ -149,14 +149,19 @@ void CMuItemSyncUI::Render(bool* open)
         {
             ImGui::Separator();
             RenderSummary();
-            RenderFieldToggle();
-            RenderItems();
-            RenderFormulas();
-            const char* apply = m_direction == SyncDirection::Import ? I18N::Editor::ApplyTheCheckedChanges
-                                                                     : I18N::Editor::WriteTheCheckedChangesIntoTheFile;
-            if (ImGui::Button(apply))
+            // Nothing to check or apply while both sides have the same data.
+            if (!m_diff->IsEmpty())
             {
-                Apply();
+                RenderFieldToggle();
+                RenderItems();
+                RenderFormulas();
+                const char* apply = m_direction == SyncDirection::Import
+                                        ? I18N::Editor::ApplyTheCheckedChanges
+                                        : I18N::Editor::WriteTheCheckedChangesIntoTheFile;
+                if (ImGui::Button(apply))
+                {
+                    Apply();
+                }
             }
         }
         RenderMessages();
@@ -343,7 +348,11 @@ void CMuItemSyncUI::RenderSummary()
     }
     if (m_diff->IsEmpty())
     {
+        // E.g. right after an export: the file now has what the client has.
+        ImGui::PushTextWrapPos(0.0f);
         ImGui::TextUnformatted(I18N::Editor::NoDifferences);
+        ImGui::TextDisabled("%s", I18N::Editor::HowToSeeDifferences);
+        ImGui::PopTextWrapPos();
     }
     else
     {
@@ -355,6 +364,10 @@ void CMuItemSyncUI::RenderSummary()
     if (ToolWindow::GetDataVersion() != m_diffVersion)
     {
         ImGui::TextColored(WarningColor, "%s", I18N::Editor::TheClientDataChangedSinceTheComparison);
+    }
+    if (m_diff->IsEmpty())
+    {
+        return;
     }
     if (ImGui::SmallButton(I18N::Editor::CheckAll))
     {
