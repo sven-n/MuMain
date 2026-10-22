@@ -394,7 +394,8 @@ Each field belongs to one of two groups:
     power's rounding (OpenMU halves each part, the client the sum), the
     `@src` and `@stamp` parts of OpenMU's names and its `;` level variant
     names (three items), and a (group, number) that exists twice on the
-    server (an error row; neither side applies it).
+    server (a locked row of the import, which neither side applies; an
+    export does not write into such a file, as it would lose both).
 - A field left out has its default, as in the item files. A reader warns
   about keys it does not know and refuses a `formatVersion` it does not
   know; the version only goes up for a change that older readers would

@@ -7,7 +7,7 @@ group; the item models are in `src/bin/Data/Items/Models/` (see
 database; `Item_<lang>.bmd` is no longer read by the game.
 
 The data matches OpenMU's `ItemDefinition` where both sides have the same
-fields, so it can later be exchanged with the server.
+fields, so it can be exchanged with the server (see [Item Sync](#item-sync)).
 
 ---
 
@@ -17,6 +17,7 @@ fields, so it can later be exchanged with the server.
 |---|---|
 | `Group00_Sword.json` … `Group15_Etc.json` | 0–15, named after the `ITEM_GROUP_*` constants |
 | `Stats/ItemStats.json` | What the + level, excellent options, ancient sets and option level add to the stats and requirements; see [Item stats by level](#item-stats-by-level) |
+| `Sync/KnownDifferences.json` | Not read by the game: the differences from the server that MuEditor's Item Sync leaves unchecked; see [Item Sync](#item-sync) |
 
 The file name is only a convention; the group comes from the file content.
 
@@ -905,6 +906,8 @@ shows it in the others.
   a problem of an item selects it and opens the tool of its field; an arrow
   key onto it only selects the item. A click on a problem of the item stat
   file (a profile or a table nothing uses) opens Item Formulas at it.
+- **Item Sync**: Export and Import of the items and item formulas with an
+  OpenMU server, see [Item Sync](#item-sync).
 - **Item Translations**: the names in all languages, see
   [translation-system.md → In the item editor](translation-system.md#in-the-item-editor).
 
@@ -1054,9 +1057,133 @@ applied, **New stat profile**, **New level bonus table**, **Copy**,
   the items keep the profile they name, and those it no longer gives count as
   picked.
 
-The server keeps its own formulas until they are synced, so what it checks
-and computes can differ from what changed formulas give. Items your
-character already has keep their values until they are made again.
+The server keeps its own formulas until they are synced (see
+[Item Sync](#item-sync)), so what it checks and computes can differ from
+what changed formulas give. Items your character already has keep their
+values until they are made again.
+
+### Item Sync
+
+Item Sync exchanges the items and the item formulas with an OpenMU server
+through a file, the *item exchange file*. The server stays authoritative:
+the client never writes to it. (OpenMU's export and import of the file, and
+Update from server, which downloads it, are later steps of phase 7; see the
+[design](superpowers/specs/2026-09-25-data-driven-items-design.md).)
+
+- **Import…** opens a file and lists how it differs from the client's data.
+  **Apply the checked changes** takes the checked rows into the client as
+  one step of the undo history; Save Items writes the files, as for any
+  edit.
+- **Export…** picks the file to write and lists how the client's data
+  differs from what the file holds (all of it for a new file). **Write the
+  checked changes into the file** writes the checked rows; for the other
+  rows the file keeps what it has. The written file says `"source":
+  "MuMain"`.
+- The path can also be typed into **Exchange file**; **Compare again**
+  compares with it. After applying, the window compares again and lists
+  what is left. When the client's data changes after a comparison, the
+  window says so.
+
+**The file** has the layout of the item files: items sorted by group and
+number, fields with their default value left out, LF line endings.
+
+```json
+{
+  "formatVersion": 1,
+  "source": "OpenMU",
+  "server": "…",
+  "gameVersion": "season6",
+  "formulas": {
+    "dropLevelBonus": {"excellent": 25, "ancient": 30},
+    "tables": […],
+    "default": {…},
+    "profiles": […]
+  },
+  "items": [
+    {"group": 0, "number": 0, "name": {"en": "Kris", …}, "width": 1, "height": 2, …, "statProfile": "weapon"}
+  ]
+}
+```
+
+- `source` is `MuMain` or `OpenMU`; `server`, only in a file from OpenMU,
+  names the server's installation.
+- Only `season6` data is exchanged; a file of another `gameVersion` is
+  refused, as is a `formatVersion` the client does not know.
+- `formulas` is the [item stat file](#item-stats-by-level) without its
+  `formatVersion` and its profile rules, which stay with the client.
+- `items` has the fields both sides have, with the keys and meanings of the
+  item files: the group and number, the names, size, slot, skill, drop
+  level, durability and magic durability, damage, attack and walk speed,
+  magic power, defense, block rate, resistances, the requirements (also by
+  level), the class requirements, the prices, the [rule flags](#rules)
+  without the rental ones, the tags `ammunition`, `secondClassQuestItem`
+  and `thirdClassQuestItem`, and `statProfile` (always written: the profile
+  the item uses, `default` for the default), `excellentBonus` and
+  `excellentRaisesLevel`.
+- What only the client has is not in it: the model and display data, the
+  other tags, the wing tier, weapon kind, two-handed flag, potion priority,
+  attack type, magic defense and the rental flags. A file with such a field
+  is read with a warning and the field is left out.
+
+**The diff**:
+
+- The **Items** list has the new, changed and removed items. The box of a
+  new or removed item checks the whole item, the box of a changed one all
+  its fields. A click on a row shows its fields (and selects the item in the
+  item tools): each field (`width`, `requirements.strength`, `name.de`,
+  `tags.ammunition`, …) with its value now and the incoming one, and a box
+  of its own.
+- The **Formulas** list has the drop level bonus, each table, each term of
+  the default and of each profile (`default.damage.table`,
+  `profiles.scroll.requirements.energy`, …) and a profile only one side
+  has. Into a file without formulas they all come in at once.
+- Checked at first: what the incoming side changes. Unchecked: removals,
+  known differences (grey) and fields with a note: the size and slot of an
+  item your character wears or an item window shows (they stay; such an
+  item is not removed either), and a drop level above 255, which OpenMU
+  keeps in a byte.
+- **Check all** and **Check none** take every row; **A field in all items**
+  checks or unchecks one field in every changed item.
+- **Names**: an import takes only the client's UI languages from the file;
+  a language the file lacks stays as it is, and no language is removed.
+- **Stat profile**: a file's profile that the item's profile rules give
+  leaves the item following its rules; another one becomes a pick (see
+  Item Basics).
+- **New items** get the client-only fields at their defaults; the
+  two-handed flag follows the rule of the shipped items (groups 0 to 5, a
+  hand slot, two cells wide or more) and the weapon kind follows the group,
+  as for Add item. The row says when the item has no model entry yet (link
+  one in Item Model; the browser's "without a model" filter lists it) and
+  when its profile rules give another profile than the file (a wing tier
+  or a tag such as `cape` may be missing).
+- **Removed items** go with their model entry, as Remove item does; the row
+  lists what goes with the item and what uses it at its number.
+- An item a file has more than once (OpenMU does not keep the group and
+  number unique) is a locked row: the import leaves it as it is. An export
+  does not write into such a file.
+- Before an import is applied, the data as it would be gets the checks of a
+  save. With errors nothing changes; the errors are listed and the rows of
+  their items are unchecked.
+
+**Known differences** are fields and formula entries meant to differ
+between the client and the server. Ticking **Known** on a field, on a new
+or removed item or on a formula entry leaves it unchecked and grey in
+every comparison. They are kept in `Data/Items/Sync/KnownDifferences.json`
+next to the game, written when one is ticked; copy it to
+`src/bin/Data/Items/Sync` with the item files to share it. `""` stands for
+the whole item:
+
+```json
+{
+  "formatVersion": 1,
+  "items": [
+    {"group": 13, "number": 4, "fields": ["", "repairable"]}
+  ],
+  "formulas": [
+    "default.requirements.leadership"
+  ]
+}
+```
 
 ### Import from bmd / Export as bmd
 
