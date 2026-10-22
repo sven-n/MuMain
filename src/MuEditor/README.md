@@ -5,7 +5,7 @@ The MU Editor is a C++ ImGui-based in-game editor that provides real-time game e
 - **Editor Window**: Its own window beside the game window, in front of it, with a menu bar (tool windows, UI scale, language, Close Editor)
 - **Tool Windows**: Docked as tabs in the editor window; drag one out to float it anywhere, also over the game
 - **Console**: Split view with Editor Console (left) and Game Console (right), docked along the bottom at first
-- **Item Editor**: Edit item attributes in real-time
+- **Item Tools**: Browse, add, duplicate, move and remove items and edit their data and models while the game runs, with undo and checks before saving (docs/item-data.md, "Editing items")
 - **Item Translations**: Item names in every language side by side
 
 ## Key Features
@@ -30,8 +30,24 @@ The MU Editor is a C++ ImGui-based in-game editor that provides real-time game e
 - **MuEditorConsole.h/cpp** - Console rendering and logging (split Editor/Game consoles)
 - **MuEditorConsoleRedirect.h** - Redirects wprintf/fwprintf to ImGui console
 
-### Item Editor
-- **MuItemEditor.h/cpp** - Item attribute editor with live editing capabilities
+### Item Tools (UI/ItemTools)
+One selected item (**ItemSelection**) is shown by every item tool. Changes go
+through **ItemEdits** (the handler plus the session's undo history,
+**ItemEditHistory**); a tool edits a copy of the item (**ItemEditDraft**) and
+stores it when a field is left.
+- **MuItemBrowserUI** - The item list with search and filters (ItemBrowserList, ItemGroupFilter), save, import and export, and the add, duplicate, move and remove dialogs (ItemAddDialog, ItemMoveDialog, ItemRemoveDialog) with what uses an item (ItemUsage, ItemUsageView, ItemCodeReferences)
+- **MuItemBasicsUI** - Name, size, slot, stats, prices, stat profile and resistances (ItemFieldWidgets, ItemHeldByCharacter, ItemStatProfileWidgets), with the formula of each value (ItemValueFormulas, ItemValueFormulaText)
+- **MuItemRequirementsUI** - The stat profile, the requirements (a stat requirement as its +0 value and its weight, with the weights that give the same value: ItemRequirementTable, RequirementWeightPopup), also by item level, and the class steps
+- **MuItemRulesUI** - The rule flags of many items at once (ItemRulesTable, ItemRuleFlags)
+- **MuItemCategoriesUI** - The items of a tag
+- **MuItemModelUI** - The model entry with a preview, file picker, shared models and looks (ItemModelPreview, ItemModelFilePicker, ItemSharedModelForm, ItemModelForms)
+- **MuItemGlowColorsUI** - The glow color list: new colors, changed values and unused colors removed (GlowColorDialog, which the model tool's color fields open too)
+- **MuItemFormulasUI** - The item stat file: drop level bonus, default, profiles, level bonus tables and profile rules, changed on a copy and applied after the list of the items it reaches (ItemStatTermFields, ItemStatFileChange)
+- **MuItemChecksUI** - The checks of a save, each leading to its item and field (ItemCheckTargets)
+- **ItemToolWindow** - What every item tool window shares: its title, the selected item, and Undo and Redo (shown in the editor's bar)
+
+### Item Actions (UI/ItemEditor)
+- **ItemEditorActions.h/cpp** - Save, import from bmd and the exports
 - **ItemListModel.h/cpp** - The items the item tools list (search over all names, missing-name filter), apart from ImGui
 
 ### Item Translations
@@ -141,7 +157,7 @@ main.exe --editor
 ### Current Features
 - **Editor Window** - Menu bar to open the tool windows, docked as tabs; Close Editor
 - **Console** - Dual-panel console with auto-scroll and copy/clear
-- **Item Editor** - Live editing of item attributes
+- **Item Tools** - Live editing of items and their models
 - **Input Blocking** - Game input blocked when hovering UI
 - **No Separate Console** - All output in ImGui, no Windows console window
 
@@ -160,12 +176,15 @@ Game console captures all standard output automatically via console redirection.
 
 ### 3. Add New Editor Window
 ```cpp
-// In CMuEditorCore::Render(), after g_MuEditorUI.Render(...)
-if (m_bShowMyWindow)
+// In CMuEditorCore::Render(), after g_MuEditorUI.Render(...);
+// myWindow is a new flag in struct ToolWindows (MuEditorToolWindows.h)
+if (m_windows.myWindow)
 {
     MuEditor::Layout::PrepareToolWindow();  // its tab, also when floating
-    if (ImGui::Begin("My Window", &m_bShowMyWindow))
+    // The editor's bar while it floats outside the editor window.
+    if (ImGui::Begin("My Window", &m_windows.myWindow, MuEditor::Layout::ToolWindowBarFlags("My Window")))
     {
+        MuEditor::Layout::RenderToolWindowBar();
         ImGui::Text("Custom content here");
     }
     ImGui::End();
@@ -174,7 +193,8 @@ if (m_bShowMyWindow)
 To open it as a tab of the editor window like the other tool windows, add its
 name to `MuEditorWindowIds.h` (with a `###` id if the title is translated),
 Begin it with that name, add the name to the first layout in
-`MuEditorLayout.cpp` and a `MenuItem` to the Windows menu in `MuEditorUI.cpp`.
+`MuEditorLayout.cpp` (BuildDefaultLayout, which Reset Layout builds too) and a
+`MenuItem` to the Windows menu in `MuEditorUI.cpp`.
 
 ### 4. Access Game State
 ```cpp
@@ -183,7 +203,7 @@ Begin it with that name, add the name to the first layout in
 if (g_MuEditor.IsEnabled())
 {
     g_MuEditorConsole.LogGame("Player HP: " + std::to_string(PlayerHP));
-    ItemAttribute[index].Durability = 255;  // Modify in real-time
+    Hero->Object.Position[2] += 100.0f;  // Modify in real-time
 }
 #endif
 ```
@@ -196,7 +216,7 @@ CMuEditor (main editor singleton)
 ├── CMuEditorUI (the editor window and its menu bar, or the Open Editor button)
 ├── CMuEditorConsole (console rendering & logging)
 │   └── ConsoleStreamBuf (C++ stream redirection for cout/cerr)
-├── CMuItemEditor (item editor window)
+├── the item tools (UI/ItemTools) and CMuItemTranslationsUI
 └── CMuInputBlocker (input blocking when hovering UI)
 ```
 

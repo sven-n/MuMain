@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Data/GameData/ItemData/ItemStatTerms.h"
+#include "Data/GameData/ItemData/StatProfileRule.h"
 
 #include <array>
 #include <cstdint>
@@ -9,7 +10,8 @@
 #include <vector>
 
 // The item stat file (Data/Items/Stats/ItemStats.json) as written: named level
-// bonus tables, a default term set and named profiles that differ from it.
+// bonus tables, a default term set, named profiles that differ from it and the
+// rules that give items their profile.
 // ItemStatsJson reads and writes it; ItemStatProfiles resolves it. See
 // docs/item-data.md.
 namespace Data::Items
@@ -80,6 +82,8 @@ struct ItemStatFile
     std::array<WrittenStatSection, ItemStatCount> defaults;
     WrittenRequirementSection defaultRequirements;
     std::vector<WrittenStatProfile> profiles;
+    // In order: the first rule an item matches gives its profile.
+    std::vector<StatProfileRule> profileRules;
 
     bool operator==(const ItemStatFile& other) const = default;
 };

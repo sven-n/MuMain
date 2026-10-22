@@ -9,6 +9,7 @@
 #include "EffectPreviewGeometry.h"
 #include "EffectPreviewItems.h"
 #include "EffectPreviewObject.h"
+#include "PreviewInventoryPose.h"
 #include "SavedGameRenderState.h"
 #include "Core/Globals/_TextureIndex.h"
 #include "Core/Globals/_define.h"
@@ -343,8 +344,9 @@ void EffectPreviewScene::DrawBase(const EffectPreviewRequest& request, float sub
 }
 
 // As the inventory draws an item (RenderObjectScreen), at the origin and with
-// the turn and scale it has on the ground. The item's own sprites, particles
-// and effects are removed again.
+// the scale it has on the ground: turned as it lies on the ground, or upright
+// as the inventory turns it, facing the camera. The item's own sprites,
+// particles and effects are removed again.
 void EffectPreviewScene::DrawItem(const EffectPreviewRequest& request)
 {
     const PreviewItemModels models = GetPreviewItemModels(request.itemType, request.itemLevel);
@@ -365,17 +367,56 @@ void EffectPreviewScene::DrawItem(const EffectPreviewRequest& request)
     item.Class = CLASS_ELF;
     if (ground.scale)
         o->Scale = *ground.scale;
-    Vector(ground.rotation[0], ground.rotation[1], ground.rotation[2] + m_turnDegrees, o->Angle);
     Vector(0.0f, 0.0f, 0.0f, o->Position);
     b.CurrentAction = 0;
-    b.BodyHeight = ground.bodyHeight;
-    b.Animation(BoneTransform, 0.0f, 0.0f, 0, o->Angle, o->HeadAngle, false, false);
+    if (request.itemPose == PreviewItemPose::Inventory)
+    {
+        // The inventory's turn under the matrix that stands its view up in
+        // the scene.
+        const Render::Items::Display::InventoryDisplay inventory =
+            Render::Items::Display::GetInventoryDisplay(models.model);
+        vec3_t inventoryAngle = {inventory.rotation[0], inventory.rotation[1], inventory.rotation[2]};
+        float inventoryMatrix[3][4];
+        float sceneMatrix[3][4];
+        float root[3][4];
+        AngleMatrix(inventoryAngle, inventoryMatrix);
+        InventoryViewToScene(m_turnDegrees, sceneMatrix);
+        R_ConcatTransforms(sceneMatrix, inventoryMatrix, root);
+        b.BodyHeight = inventory.bodyHeight;
+        b.Animation(BoneTransform, 0.0f, 0.0f, 0, o->Angle, o->HeadAngle, true, false, root);
+    }
+    else
+    {
+        Vector(ground.rotation[0], ground.rotation[1], ground.rotation[2] + m_turnDegrees, o->Angle);
+        b.BodyHeight = ground.bodyHeight;
+        b.Animation(BoneTransform, 0.0f, 0.0f, 0, o->Angle, o->HeadAngle, false, false);
+        if (request.itemGroundPlane)
+        {
+            DrawGroundUnderItem(models.model);
+        }
+    }
 
     vec3_t light = {1.0f, 1.0f, 1.0f};
     const EffectPoolGuard removeItemEffects;
-    RenderPartObject(o, models.model, nullptr, light, o->Alpha, request.itemLevel,
+    RenderPartObject(o, models.model, nullptr, light, o->Alpha, models.drawLevel,
                      request.itemExcellent ? ExcellentFlags : 0, request.itemAncient ? AncientDiscriminator : 0, true,
                      true, true);
+}
+
+// The ground a dropped item lies above (HandleItemOnGround): the item is at
+// the origin, the ground that far below it.
+void EffectPreviewScene::DrawGroundUnderItem(int modelType)
+{
+    float height = Render::Items::Display::DroppedItemHeight;
+    if (Render::Items::Display::IsLiftedOnGround(modelType))
+        height += Render::Items::Display::DroppedWeaponLift;
+    DisableAlphaBlend();
+    DisableTexture();
+    DisableCullFace();
+    EnableDepthTest();
+    const PreviewGeometry::PlaneQuads plane =
+        PreviewGeometry::Plane(std::max(ItemHalfSize * PlaneRadii * 2.0f, MinPlaneSize), -height);
+    mu::GetRenderer().RenderQuad3D(plane, 0u);
 }
 
 void EffectPreviewScene::DrawSubject(const EffectPreviewRequest& request, const EffectPreviewCamera& camera)

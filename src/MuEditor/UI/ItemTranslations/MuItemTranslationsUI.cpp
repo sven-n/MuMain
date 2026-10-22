@@ -5,17 +5,18 @@
 #include "MuItemTranslationsUI.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
-#include "../MuEditor/UI/Common/MuEditorLayout.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "../MuEditor/UI/ItemEditor/ItemEditorActions.h"
 #include "../MuEditor/UI/ItemEditor/ItemEditorPopups.h"
-#include "../MuEditor/UI/ItemEditor/MuItemEditorUI.h"
-#include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "../MuEditor/UI/ItemTools/ItemEdits.h"
+#include "../MuEditor/UI/ItemTools/ItemSelection.h"
+#include "../MuEditor/UI/ItemTools/ItemToolWindow.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
 #include "imgui.h"
+#include "../MuEditor/UI/Common/KeyboardSelection.h"
 
 #include <algorithm>
 #include <cstdio>
@@ -29,6 +30,8 @@ constexpr float NameColumnWidth = 190.0f;
 constexpr float SearchWidth = 220.0f;
 constexpr float MissingComboWidth = 220.0f;
 constexpr int FrozenColumns = 2;
+// The row of the item the tools show, as in the other item tools.
+constexpr ImVec4 MarkedRowColor(0.9f, 0.7f, 0.0f, 0.25f);
 
 using Data::Items::ItemDefinition;
 
@@ -68,18 +71,9 @@ void CMuItemTranslationsUI::Render(bool* open)
     m_locales = I18N::GetAvailableLocales();
     m_editDrawn = false;
 
-    char title[MuEditor::WindowIds::TitleCapacity];
-    MuEditor::Layout::PrepareToolWindow();
-    if (ImGui::Begin(
-            MuEditor::WindowIds::Title(title, I18N::Editor::ItemTranslations, MuEditor::WindowIds::ItemTranslations),
-            open, ImGuiWindowFlags_NoCollapse))
+    // One of the item tools: their docking, undo keys and selection.
+    if (MuEditor::Items::ToolWindow::Begin(I18N::Editor::ItemTranslations, MuEditor::WindowIds::ItemTranslations, open))
     {
-        if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByPopup |
-                                   ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) ||
-            ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId))
-        {
-            g_MuEditorCore.SetHoveringUI(true);
-        }
         UpdateCountsAndLabels();
         CItemEditorActions::RenderSaveButton();
         CItemEditorPopups::RenderAll();
@@ -88,7 +82,7 @@ void CMuItemTranslationsUI::Render(bool* open)
         ImGui::Separator();
         RenderTable();
     }
-    ImGui::End();
+    MuEditor::Items::ToolWindow::End();
     CommitEditNotDrawn();
 }
 
@@ -158,8 +152,32 @@ void CMuItemTranslationsUI::RenderToolbar()
     }
 }
 
+bool CMuItemTranslationsUI::RevealSelection(int selectedItemType)
+{
+    if (g_ItemSelection.GetSerial() == m_shownSerial)
+    {
+        return false;
+    }
+    m_shownSerial = g_ItemSelection.GetSerial();
+    if (g_ItemDatabase.Find(selectedItemType) == nullptr)
+    {
+        return false;
+    }
+    m_filter.search.assign(m_search);
+    m_filter.missingLocale.assign(m_missingLocale >= 0 ? m_locales[m_missingLocale] : "");
+    const std::vector<int>& listed = m_list.GetItemTypes(m_filter);
+    if (std::find(listed.begin(), listed.end(), selectedItemType) == listed.end())
+    {
+        m_search[0] = '\0';
+        m_missingLocale = -1;
+    }
+    return true;
+}
+
 void CMuItemTranslationsUI::RenderTable()
 {
+    const int selected = g_ItemSelection.GetItemType();
+    const bool reveal = RevealSelection(selected);
     // Assigned in place, so the strings keep their memory from frame to frame.
     m_filter.search.assign(m_search);
     m_filter.missingLocale.assign(m_missingLocale >= 0 ? m_locales[m_missingLocale] : "");
@@ -195,6 +213,12 @@ void CMuItemTranslationsUI::RenderTable()
     {
         clipper.IncludeItemByIndex(static_cast<int>(editing - itemTypes.begin()));
     }
+    const auto selectedRow = std::find(itemTypes.begin(), itemTypes.end(), selected);
+    const bool scrollToSelected = reveal && selectedRow != itemTypes.end();
+    if (scrollToSelected)
+    {
+        clipper.IncludeItemByIndex(static_cast<int>(selectedRow - itemTypes.begin()));
+    }
     while (clipper.Step())
     {
         for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; ++row)
@@ -202,7 +226,15 @@ void CMuItemTranslationsUI::RenderTable()
             const int itemType = itemTypes[row];
             ImGui::PushID(itemType);
             ImGui::TableNextRow();
+            if (itemType == selected)
+            {
+                ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, ImGui::GetColorU32(MarkedRowColor));
+            }
             ImGui::TableSetColumnIndex(0);
+            if (itemType == selected && scrollToSelected)
+            {
+                ImGui::SetScrollHereY();
+            }
             RenderIdCell(itemType);
             for (size_t column = 0; column < m_locales.size(); ++column)
             {
@@ -221,16 +253,21 @@ void CMuItemTranslationsUI::RenderIdCell(int itemType)
 {
     char id[16];
     std::snprintf(id, sizeof(id), "%d,%d", Data::Items::GetItemGroup(itemType), Data::Items::GetItemNumber(itemType));
-    if (ImGui::Selectable(id))
+    if (ImGui::Selectable(id, false, MuEditor::KeyboardSelection::RowFlags))
     {
-        // The item table in front, with the item listed and selected.
-        g_MuEditorCore.ShowItemEditor();
-        g_MuItemEditorUI.SelectItem(itemType);
-        ImGui::SetWindowFocus(MuEditor::WindowIds::ItemEditor);
+        // The item selected for all item tools; a click also brings the item
+        // browser to the front, an arrow key keeps the keyboard here.
+        g_ItemSelection.Select(itemType);
+        m_shownSerial = g_ItemSelection.GetSerial();
+        if (!MuEditor::KeyboardSelection::MovedOnto())
+        {
+            g_MuEditorCore.GetToolWindows().itemBrowser = true;
+            ImGui::SetWindowFocus(MuEditor::WindowIds::ItemBrowser);
+        }
     }
     if (ImGui::IsItemHovered())
     {
-        ImGui::SetTooltip("%s", I18N::Editor::ShowInTheItemTable);
+        ImGui::SetTooltip("%s", I18N::Editor::SelectTheItemAndShowTheItemBrowser);
     }
 }
 
@@ -307,7 +344,8 @@ void CMuItemTranslationsUI::CommitName(int itemType, const char* locale, const c
         g_MuEditorConsoleUI.LogEditor(I18N::Editor::ItemNamesCannotContainTheSeparator);
         return;
     }
-    if (!g_ItemDataHandler.SetItemName(itemType, locale, text))
+    // Through the item tools' history, so the name can be undone like any edit.
+    if (!g_ItemEdits.SetItemName(I18N::GetLanguageDisplayName(locale), itemType, locale, text))
     {
         g_MuEditorConsoleUI.LogEditor(I18N::Editor::TheEnglishNameCannotBeEmpty);
         return;

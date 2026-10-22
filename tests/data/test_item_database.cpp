@@ -4,6 +4,7 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Data/GameData/ItemData/StatProfileRule.h"
 
 #include "Core/Globals/_enum.h"
 
@@ -25,6 +26,20 @@ ItemDefinition MakeItem(int group, int number, const std::string& names)
     definition.number = number;
     definition.names = Data::LocalizedString::Parse(names);
     return definition;
+}
+
+// The profiles `names` (without terms of their own) and the profile rules `rules`.
+ItemStatProfiles MakeStatProfiles(const std::vector<std::string>& names, std::vector<StatProfileRule> rules)
+{
+    ItemStatFile file;
+    for (const std::string& name : names)
+    {
+        WrittenStatProfile profile;
+        profile.name = name;
+        file.profiles.push_back(profile);
+    }
+    file.profileRules = std::move(rules);
+    return ItemStatProfiles(file);
 }
 
 void SetName(ITEM_ATTRIBUTE& attribute, const std::wstring& name)
@@ -266,6 +281,47 @@ TEST_CASE("Editor changes update single items [data][items]")
     CHECK(database.GetExistingItemCount() == 0);
 }
 
+TEST_CASE("A requirement given by level can be taken back [data][items]")
+{
+    RequirementsByLevel byLevel;
+    RequirementByLevel energy{};
+    energy.fill(30);
+    byLevel.Set(ItemRequirement::Energy, energy);
+    byLevel.Set(ItemRequirement::Level, energy);
+    byLevel.Remove(ItemRequirement::Energy);
+    CHECK(byLevel.Find(ItemRequirement::Energy) == nullptr);
+    REQUIRE(byLevel.Find(ItemRequirement::Level) != nullptr);
+    byLevel.Remove(ItemRequirement::Energy);
+    byLevel.Remove(ItemRequirement::Level);
+    CHECK(byLevel == RequirementsByLevel{});
+}
+
+TEST_CASE("Editor changes to many items at once update them and the tag lists [data][items]")
+{
+    ItemDatabase database;
+    database.Build(
+        std::vector<ItemDefinition>{MakeItem(SwordGroup, 0, "Kris"), MakeItem(SwordGroup, 1, "Short Sword")});
+    const int version = database.GetVersion();
+
+    std::vector<ItemDefinition> changed = {*database.Find(SwordGroup, 0), *database.Find(SwordGroup, 1),
+                                           MakeItem(SwordGroup, 2, "Rapier")};
+    for (ItemDefinition& definition : changed)
+    {
+        definition.tags.Set(ItemTag::Valuable);
+    }
+    changed[1].names = {};
+    database.SetMany(changed);
+
+    CHECK(database.HasTag(MakeItemType(SwordGroup, 0), ItemTag::Valuable));
+    CHECK(database.Find(SwordGroup, 1) == nullptr);
+    CHECK(database.Find(SwordGroup, 2) != nullptr);
+    CHECK(database.GetExistingItemCount() == 2);
+    const auto valuable = database.GetItemTypesWithTag(ItemTag::Valuable);
+    CHECK(std::vector<int>(valuable.begin(), valuable.end()) ==
+          std::vector<int>{MakeItemType(SwordGroup, 0), MakeItemType(SwordGroup, 2)});
+    CHECK(database.GetVersion() != version);
+}
+
 TEST_CASE("Swapping items moves them with their ids [data][items]")
 {
     ItemDatabase database;
@@ -413,73 +469,35 @@ TEST_CASE("Item database resolves the stat profile of every item [data][items]")
     CHECK(defenseBonus(krisType, 7) == 7);
 }
 
-TEST_CASE("The stat profile an item's data gives [data][items]")
+TEST_CASE("The stat profile an item's data gives is the one of the first profile rule it matches [data][items]")
 {
-    ItemDefinition item = MakeItem(2, 8, "Battle Scepter");
-    item.weaponKind = WeaponKind::Mace;
-    CHECK(DeriveStatProfile(item) == "weapon");
-    item.tags.Set(ItemTag::Sceptre);
-    CHECK(DeriveStatProfile(item) == "sceptre");
-
-    ItemDefinition shield = MakeItem(6, 0, "Small Shield");
-    shield.slot = ItemSlot::OffHand;
-    shield.weaponKind = WeaponKind::Shield;
-    CHECK(DeriveStatProfile(shield) == "shield");
-
-    ItemDefinition wing = MakeItem(12, 0, "Wings of Elf");
-    wing.slot = ItemSlot::Wings;
-    const std::pair<WingTier, const char*> tiers[] = {{WingTier::None, ""},
-                                                      {WingTier::Small, "smallWing"},
-                                                      {WingTier::First, "firstTierWing"},
-                                                      {WingTier::Second, "secondTierWing"},
-                                                      {WingTier::Third, "thirdTierWing"}};
-    for (const auto& [tier, profile] : tiers)
-    {
-        wing.wingTier = tier;
-        CHECK(DeriveStatProfile(wing) == profile);
-    }
-    wing.wingTier = WingTier::Second;
-    wing.tags.Set(ItemTag::Cape);
-    CHECK(DeriveStatProfile(wing) == "secondTierCape");
-    // A wing tier counts only on the wings slot.
-    wing.slot = ItemSlot::Helm;
-    CHECK(DeriveStatProfile(wing) == "armor");
-}
-
-TEST_CASE("The stat profiles of weapons, armour, books, helpers and scrolls [data][items]")
-{
-    ItemDefinition kris = MakeItem(0, 0, "Kris");
-    kris.slot = ItemSlot::MainHand;
-    kris.weaponKind = WeaponKind::Sword;
-    CHECK(DeriveStatProfile(kris) == "weapon");
-
-    ItemDefinition book = MakeItem(5, 21, "Book of Samut");
-    book.weaponKind = WeaponKind::Book;
-    book.tags.Set(ItemTag::SummonerBook);
-    CHECK(DeriveStatProfile(book) == "book");
+    StatProfileRule ammunition{.profile = "default"};
+    ammunition.tags.Set(ItemTag::Ammunition);
+    StatProfileRule bows{.profile = "bow"};
+    bows.groups.set(4);
+    StatProfileRule staffs{.profile = "missing"};
+    staffs.groups.set(5);
+    const ItemStatProfiles profiles = MakeStatProfiles({"bow"}, {ammunition, bows, staffs});
 
     ItemDefinition bolt = MakeItem(4, 7, "Bolt");
     bolt.tags.Set(ItemTag::Ammunition);
-    CHECK(DeriveStatProfile(bolt).empty());
-
-    ItemDefinition helm = MakeItem(7, 0, "Bronze Helm");
-    helm.slot = ItemSlot::Helm;
-    CHECK(DeriveStatProfile(helm) == "armor");
-
-    ItemDefinition ring = MakeItem(13, 8, "Ring of Ice");
-    ring.slot = ItemSlot::Ring;
-    CHECK(DeriveStatProfile(ring).empty());
-    ring.requirements.level = 20;
-    CHECK(DeriveStatProfile(ring) == "helper");
-
-    ItemDefinition scroll = MakeItem(15, 0, "Scroll of Poison");
-    CHECK(DeriveStatProfile(scroll).empty());
-    scroll.requirements.energy = 100;
-    CHECK(DeriveStatProfile(scroll) == "scroll");
+    // A rule for the default gives no profile, as an item that has the default names none.
+    CHECK(DeriveStatProfile(profiles, bolt).empty());
+    const ItemDefinition bow = MakeItem(4, 0, "Short Bow");
+    CHECK(DeriveStatProfile(profiles, bow) == "bow");
+    // A profile the file does not have gives the default.
+    CHECK(DeriveStatProfile(profiles, MakeItem(5, 0, "Skull Staff")).empty());
+    // No rule matches.
+    CHECK(DeriveStatProfile(profiles, MakeItem(14, 0, "Apple")).empty());
+    CHECK(DeriveStatProfile(ItemStatProfiles(), bow).empty());
 }
 
-TEST_CASE("An edited item's stat profile follows its data while it is the derived one [data][items]")
+TEST_CASE("An edited item's stat profile follows the profile rules while it is the one they give [data][items]")
 {
+    StatProfileRule shields{.profile = "shield"};
+    shields.weaponKinds.set(static_cast<size_t>(WeaponKind::Shield));
+    const ItemStatProfiles profiles = MakeStatProfiles({"custom", "shield"}, {shields});
+
     ItemDefinition shield = MakeItem(6, 0, "Small Shield");
     shield.slot = ItemSlot::OffHand;
     shield.weaponKind = WeaponKind::Shield;
@@ -487,18 +505,105 @@ TEST_CASE("An edited item's stat profile follows its data while it is the derive
 
     ItemDefinition edited = shield;
     edited.weaponKind = WeaponKind::None;
-    CHECK(FollowStatProfile(&shield, edited).empty());
-    CHECK(FollowStatProfile(nullptr, shield) == "shield");
+    CHECK(FollowStatProfile(profiles, &shield, edited).empty());
+    CHECK(FollowStatProfile(profiles, nullptr, shield) == "shield");
 
-    // A profile the file sets that differs from the derived one stays, also "default".
+    // A profile the file sets that differs from the one the rules give stays, also "default".
     shield.statProfile = "custom";
-    CHECK(FollowStatProfile(&shield, edited) == "custom");
+    CHECK(FollowStatProfile(profiles, &shield, edited) == "custom");
     shield.statProfile = "default";
-    CHECK(FollowStatProfile(&shield, edited) == "default");
+    CHECK(FollowStatProfile(profiles, &shield, edited) == "default");
 
-    // An item without a profile, as in item files saved before the field, takes the derived one.
+    // An item without a profile, as in item files saved before the field, takes the rules' one.
     shield.statProfile = "";
-    CHECK(FollowStatProfile(&shield, shield) == "shield");
+    CHECK(FollowStatProfile(profiles, &shield, shield) == "shield");
+}
+
+TEST_CASE("A stat profile rule matches an item that has one of the values of each condition it has [data][items]")
+{
+    ItemDefinition helm = MakeItem(7, 0, "Bronze Helm");
+    helm.slot = ItemSlot::Helm;
+
+    StatProfileRule rule{.profile = "armor"};
+    // Without conditions it matches every item.
+    CHECK(Matches(rule, helm));
+
+    rule.slots.set(static_cast<size_t>(ItemSlot::Helm));
+    rule.slots.set(static_cast<size_t>(ItemSlot::Boots));
+    CHECK(Matches(rule, helm));
+    helm.slot = ItemSlot::Pants;
+    CHECK_FALSE(Matches(rule, helm));
+    // An item without a slot meets no slot condition.
+    helm.slot = ItemSlot::None;
+    CHECK_FALSE(Matches(rule, helm));
+    helm.slot = ItemSlot::Boots;
+
+    // Every condition the rule has must hold.
+    rule.groups.set(7);
+    CHECK(Matches(rule, helm));
+    helm.group = 8;
+    CHECK_FALSE(Matches(rule, helm));
+    helm.group = 7;
+
+    rule.tags.Set(ItemTag::Cape);
+    rule.tags.Set(ItemTag::LuckyItem);
+    CHECK_FALSE(Matches(rule, helm));
+    helm.tags.Set(ItemTag::LuckyItem);
+    CHECK(Matches(rule, helm));
+
+    rule.wingTiers.set(static_cast<size_t>(WingTier::Second));
+    CHECK_FALSE(Matches(rule, helm));
+    helm.wingTier = WingTier::Second;
+    CHECK(Matches(rule, helm));
+
+    rule.weaponKinds.set(static_cast<size_t>(WeaponKind::Shield));
+    CHECK_FALSE(Matches(rule, helm));
+    helm.weaponKind = WeaponKind::Shield;
+    CHECK(Matches(rule, helm));
+}
+
+TEST_CASE("A stat profile rule's requirement condition counts base values above 0 only [data][items]")
+{
+    ItemDefinition orb = MakeItem(12, 11, "Orb of Summoning");
+    StatProfileRule rule{.profile = "scroll"};
+    rule.requirements.set(static_cast<size_t>(ItemRequirement::Energy));
+    rule.requirements.set(static_cast<size_t>(ItemRequirement::Leadership));
+    CHECK_FALSE(Matches(rule, orb));
+
+    // A requirement given by level is no base value.
+    RequirementByLevel energy{};
+    energy.fill(100);
+    orb.requirementsByLevel.Set(ItemRequirement::Energy, energy);
+    CHECK_FALSE(Matches(rule, orb));
+
+    orb.requirements.level = 10;
+    CHECK_FALSE(Matches(rule, orb));
+    orb.requirements.leadership = 1;
+    CHECK(Matches(rule, orb));
+}
+
+TEST_CASE("The first stat profile rule an item matches is the one it follows [data][items]")
+{
+    const std::vector<StatProfileRule> rules = []
+    {
+        std::vector<StatProfileRule> list(3);
+        list[0].profile = "default";
+        list[0].tags.Set(ItemTag::Ammunition);
+        list[1].profile = "weapon";
+        list[1].groups.set(4);
+        list[2].profile = "other";
+        return list;
+    }();
+
+    ItemDefinition bolt = MakeItem(4, 7, "Bolt");
+    bolt.tags.Set(ItemTag::Ammunition);
+    CHECK(FindMatchingRule(rules, bolt) == 0);
+    ItemDefinition bow = MakeItem(4, 0, "Short Bow");
+    CHECK(FindMatchingRule(rules, bow) == 1);
+    ItemDefinition potion = MakeItem(14, 0, "Apple");
+    CHECK(FindMatchingRule(rules, potion) == 2);
+
+    CHECK(FindMatchingRule(std::span(rules).first(2), potion) == NoStatProfileRule);
 }
 
 TEST_CASE("Item tag sets test several tags at once [data][items]")
