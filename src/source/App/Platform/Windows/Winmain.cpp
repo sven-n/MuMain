@@ -1472,6 +1472,10 @@ MSG MainLoop()
         SDL_Event event;
         int messageProcessed = 0;
 
+        // Wait for the GPU before reading input, not after: with VSync the frame then uses input as fresh as
+        // the CPU work allows, and the wait isn't counted as the renderer's CPU time.
+        mu::GetRenderer().WaitForSwapchain();
+
         // Per-frame mouse-state reset (was done per-message in WndProc): clear a
         // stale double-click and a pop whose position the cursor has moved off.
         MouseLButtonDBClick = false;
