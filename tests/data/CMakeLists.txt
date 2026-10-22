@@ -55,6 +55,7 @@ target_compile_definitions(look_profile_data_tests PRIVATE
 mu_add_test(
     NAME test_item_database_files
     SOURCES
+        test_helper_pickup_filters.cpp
         test_item_database_files.cpp
         test_item_descriptions.cpp
         test_item_model_files.cpp

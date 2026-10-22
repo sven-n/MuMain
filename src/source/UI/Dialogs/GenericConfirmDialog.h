@@ -83,6 +83,9 @@ namespace mu::ui::window
             bool masked = false;       // password-style masking (Text mode only -- NumericKeypad
                                        // is unconditionally masked)
             bool numericOnly = false;  // Text mode only; NumericKeypad is always digits-only
+            // Text mode only: shows a "Max" button in the secondary slot (so `secondaryLabel` must
+            // stay unset) that fills the field with this value, read on each click. Unset = no button.
+            std::function<std::uint64_t()> maxValue;
             std::wstring initialText;
         };
         std::optional<InputField> input;
@@ -221,6 +224,8 @@ namespace mu::ui::window
 
             bool hasSecondary = false;
             Rml::String secondaryLabel;
+            // The secondary button is the input's Max button: a theme may draw its lettered art.
+            bool secondaryIsStockMax = false;
 
             bool showCancel = false;
             Rml::String cancelLabel;
