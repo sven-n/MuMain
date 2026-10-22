@@ -3,6 +3,8 @@
 #include "doctest.h"
 
 #include "Data/GameData/ItemData/ItemDataValidation.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
+#include "I18N/All.h"
 #include "Engine/Object/ItemTooltipValues.h"
 #include "Engine/Object/ZzzInventory.h"
 
@@ -159,4 +161,24 @@ TEST_CASE("Level values written in place are checked like description texts [dat
     CHECK(issues[0].message == "the English text is missing");
     CHECK(issues[1].severity == ItemDataIssueSeverity::Warning);
     CHECK(issues[1].field == "levelValues.stat[2]");
+}
+
+TEST_CASE("A description is in the UI's language also when the item names stay English [data][items]")
+{
+    ItemDefinition jewel = MakeJewel();
+    ItemDescriptionLine line = Line("It is used to increase your item level up to 6");
+    line.text.Set("de", "Wird verwendet, um das Gegenstandslevel auf bis zu 6 zu erhöhen");
+    jewel.description = {line};
+
+    // "Translate item names" off: the item names are English, the UI German.
+    const std::string itemNameLocale = g_ItemDatabase.GetDisplayLocale();
+    const std::string uiLocale = I18N::GetCurrentLocale();
+    g_ItemDatabase.SetDisplayLocale("en");
+    I18N::SetLocale("de");
+    const std::vector<std::wstring> rows = WriteRows(jewel);
+    I18N::SetLocale(uiLocale.c_str());
+    g_ItemDatabase.SetDisplayLocale(itemNameLocale);
+
+    REQUIRE_FALSE(rows.empty());
+    CHECK(rows[0].starts_with(L"Wird verwendet"));
 }

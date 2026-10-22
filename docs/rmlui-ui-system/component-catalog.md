@@ -204,9 +204,11 @@ Primary. Esc invokes Cancel when configured, otherwise Primary; it never invokes
 Timed progress dialogs hide buttons and do not accept Esc dismissal.
 
 Callbacks can call `KeepOpen()` to veto resolution, including Cancel. Read entered text through
-`GetInputText()` and validate it before accepting. Requests can carry an `isValid` predicate;
-expired requests dismiss without callbacks. IDs support pending checks and cancellation, while
-tags support automation answers. Exact fields and contracts remain in the header.
+`GetInputText()` and validate it before accepting. A text field with a `maxValue` gets a Max
+button in the Secondary slot that fills in that value, read on each click; typing is not clamped
+to it. Requests can carry an `isValid` predicate; expired requests dismiss without callbacks. IDs
+support pending checks and cancellation, while tags support automation answers. Exact fields and
+contracts remain in the header.
 
 The current component owns one model/document view. Live item previews use `ItemCameraTarget`
 inside that document. References: `GenericConfirmDialog.cpp`, `generic_confirm_dialog.rml`,
