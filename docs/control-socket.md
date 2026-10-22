@@ -71,7 +71,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `events` (`since`, `follow`) | recorded events, or a live stream of them |
 | `wait-for` (`event`, `match`, `timeout`) | block until a matching event arrives |
 | `screenshot` (`out`, `quality`) | capture the next frame as a JPEG to a path; without `out` it names itself, uniquely per capture; `quality` 1 to 100, default 100 |
-| `hotkey` (`key`) | press one game key for a frame: `esc`, `i`, `home`, `f1`, … |
+| `hotkey` (`key`) | press one game key for a frame: `esc`, `i`, `home`, `f1`, `alt` (shows every drop's name until pressed again), … |
 | `click-ui` (`x`, `y`, `button`) | click a window pixel (`left` by default) |
 | `hover-ui` (`x`, `y`) | move the pointer to a window pixel with no button, as physical motion: RmlUi hover and the game's own pointer (native hover, tooltips) both follow it |
 | `drag-ui` (`x`, `y`, `to_x`, `to_y`, `button`) | press at one window pixel, move to the other over eight frames with the button held, release there |
@@ -81,6 +81,9 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `bones` | in the world: how render's bones compare with the character animation pre-pass. `{"start":true}` clears the counts and starts checking; each answer gives `checked` (characters drawn), `players` (of those, player models), `mismatched` (any bone off by more than 0.01), `max_delta`, and the pre-pass's last `characters` count and whether it ran `parallel` |
 | `ui` | the open windows by name — `inventory`, `inventory_extension`, `character`, `trade`, `storage`, `storage_extension`, `mix`, `npc_shop`, `lucky_item`, `chat_input`, `party`, `command`, `my_shop`, `purchase_shop`, `npc_quest` (the quest dialog of Sebina, Marlon and Devin), and `message_box` while a dialog waits for Enter or Esc — and the window pixels of the named elements that are shown: `trade.confirm`, `trade.zen`, `inventory.repair`, `inventory.my_shop`, `npc_shop.repair`, `npc_shop.repair_all`, `my_shop.title`, `my_shop.open`, `my_shop.close`, `command.trade`, `command.purchase`, `command.party`, `npc_quest.answer.0` and on (the rows of the quest dialog's answers), `npc_quest.complete`, `npc_quest.close`, `character.stat.strength` (`agility`, `vitality`, `energy`, `command`: the character window's "+" buttons, while there are level-up points) |
 | `slot-pixel` (`grid`, `slot`) | the window pixel of a slot's square: `inventory` and `equipment` (the slot numbers `state` reports), `trade`, `trade_partner`, `storage`, `mix`, `npc_shop`, and the personal shops `my_shop` and `purchase_shop` (slots 204 and up, as `state` and the server number them); `not_open` while that window is closed, `bad_request` for a slot the grid does not have |
+| `item-name` (`group`, `number`, `level`) | an item's `name` at a level (0 when left out), as the item windows, messages and quests name it |
+| `item-name-snapshot` (`out`, `group`) | writes the name of every item (of `group` only, when given) at every level 0 to 15 to the text file `out`, a line `<group>/<number> +<level> <name>` each, to compare with any diff tool before and after a change of the names; replies `names`, the count |
+| `repair-tooltip` (`group`, `number`, `level`, `durability`, `excellent`) | the lines of an item's repair tooltip (inventory repair mode, or an NPC that repairs), built for an item made from these fields (left out: level 0, full durability, no excellent options) without drawing them: `lines`, each with `text` (a lone line break for a blank line), `color` (the `TEXT_COLOR_*` number) and `bold`; no lines for an item that can't be repaired. The cost is what the open window charges, as in the game: an NPC that repairs, or the inventory (self-repair); 0 with neither open |
 | `login` (`account`, `password`, `server`) | server selection, credentials, character list |
 | `select-char` (`name` or `slot`) | enter the world with that character |
 | `logout`, `quit` | back to the character list; close the client |
@@ -138,7 +141,10 @@ has not told the client that object's health — a threshold test has to allow
 for the null rather than read it as zero. A player, monster or NPC also
 carries `pixel`, the window pixel `{x, y}` at the middle of the box the mouse
 picks it by, or `null` while it is not drawn: `click-ui` there talks to an NPC
-or targets a player the way a player's click does. The pixel is taken from the
+or targets a player the way a player's click does. A drop carries `pixel` too
+(`hover-ui` there shows its name and lights it, `click-ui` picks it up), and
+`label`, the name it shows on the ground: `text`, `color` and `background` as
+`#rrggbb`, and `bold`. The pixel is taken from the
 last rendered frame, so it lags a moving object by a frame, and a window drawn
 over it catches the click instead.
 
@@ -154,7 +160,7 @@ panel. The older `CInput` widgets still hit-test the OS cursor and cannot be
 clicked remotely; use their keyboard navigation instead. Keys are
 case-insensitive: letters, digits, `esc`, `enter`, `tab`, `space`, `backspace`,
 `home`, `end`, `insert`, `delete`, `pageup`, `pagedown`, arrows,
-`printscreen` and `f1`–`f12`.
+`printscreen`, `f1`–`f12` and `alt`.
 
 Focus a text field with a supported UI click or keyboard navigation before
 `type`. For example, `{"cmd":"type","text":"hello"}` inserts committed text;

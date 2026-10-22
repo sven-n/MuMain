@@ -190,6 +190,18 @@ void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int 
 // screen's 640x480 stretch, the space the original computed it in, whichever window asks.
 void RenderItemInfoAtPx(float x, float y, ITEM* ip, bool Sell, int Inventype = 0, bool bItemTextListBoxUse = false);
 void RenderRepairInfoAtPx(float x, float y, ITEM* ip, bool Sell);
+// Fills TextList, TextListColor and TextBold with the repair tooltip's lines for the item, as RenderRepairInfoAtPx
+// shows them; the count of lines, or 0 when the item shows no repair tooltip.
+int BuildRepairInfoText(ITEM* ip);
+// A drop's name on the ground (Alt, or the pointer over it): its text, colors and whether its font is bold.
+struct GroundItemLabel
+{
+    std::wstring text;
+    DWORD textColor;
+    DWORD backgroundColor;
+    bool bold;
+};
+GroundItemLabel DescribeGroundItemLabel(OBJECT* o, ITEM* ip);
 void RenderSkillInfo(int sx, int sy, int Type, int SkillNum = 0, int iRenderPoint = STRP_NONE);
 void RequireClass(ITEM_ATTRIBUTE* p);
 bool IsRequireClassRenderItem(const short sType);
