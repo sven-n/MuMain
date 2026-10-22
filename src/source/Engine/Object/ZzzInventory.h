@@ -203,6 +203,7 @@ void RenderItem3DWithHover(float sx, float sy, float Width, float Height, int Ty
 void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancientDiscriminator, vec3_t Target, int Select, bool PickUp);
 bool GetAttackDamage(int* iMinDamage, int* iMaxDamage);
 void GetItemName(int iType, int iLevel, wchar_t* Text);
+std::wstring GetItemName(int iType, int iLevel);
 std::wstring GetItemDisplayName(ITEM* pItem);
 void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int iMana);
 // The item's information and repair tooltips, anchored in window pixels: their layout runs in the
