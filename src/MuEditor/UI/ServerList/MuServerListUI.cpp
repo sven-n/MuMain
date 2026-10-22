@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <array>
 #include <map>
+#include <optional>
 #include <string>
 
 using Data::ServerList::ChannelType;
@@ -83,30 +84,32 @@ bool BeginChannelTable()
     return true;
 }
 
-bool RenderChannelTypeCombo(ChannelType& type)
+// The type picked in the combo, when it is another one than `type`.
+std::optional<ChannelType> PickChannelType(ChannelType type)
 {
     ImGui::SetNextItemWidth(TypeComboWidth * g_MuEditorCore.GetUIScale());
     if (!ImGui::BeginCombo("##Type", GetChannelTypeLabel(type)))
     {
-        return false;
+        return std::nullopt;
     }
-    bool changed = false;
+    std::optional<ChannelType> picked;
     for (int value = 0; value < Data::ServerList::ChannelTypeCount; ++value)
     {
         const ChannelType option = static_cast<ChannelType>(value);
         if (ImGui::Selectable(GetChannelTypeLabel(option), option == type) && option != type)
         {
-            type = option;
-            changed = true;
+            picked = option;
         }
     }
     ImGui::EndCombo();
-    return changed;
+    return picked;
 }
 
 // One channel: its number, type, name on the login screen and the load the
-// connect server sent for it (sentChannels: the group's, or nullptr).
-bool RenderChannelRow(ServerGroup& group, int channel, const std::map<int, int>* sentChannels)
+// connect server sent for it (sentChannels: the group's, or nullptr). Returns
+// the type picked for it; the caller sets it.
+std::optional<ChannelType> RenderChannelRow(const ServerGroup& group, int channel,
+                                            const std::map<int, int>* sentChannels)
 {
     ImGui::PushID(channel);
     ImGui::TableNextRow();
@@ -114,8 +117,8 @@ bool RenderChannelRow(ServerGroup& group, int channel, const std::map<int, int>*
     ImGui::Text("%d", channel + 1);
 
     ImGui::TableNextColumn();
-    ChannelType& type = group.channels[static_cast<size_t>(channel)];
-    const bool changed = RenderChannelTypeCombo(type);
+    const std::optional<ChannelType> picked = PickChannelType(group.channels[static_cast<size_t>(channel)]);
+    const ChannelType type = picked.value_or(group.channels[static_cast<size_t>(channel)]);
 
     ImGui::TableNextColumn();
     ImGui::TextDisabled("%s-%d%s", group.name.c_str(), channel + 1, Data::ServerList::GetChannelSuffix(type));
@@ -130,7 +133,7 @@ bool RenderChannelRow(ServerGroup& group, int channel, const std::map<int, int>*
         }
     }
     ImGui::PopID();
-    return changed;
+    return picked;
 }
 
 CMuServerListUI::SentChannels FindSentChannels()
@@ -236,11 +239,28 @@ void CMuServerListUI::AfterEdits(bool changed)
         m_uncommitted = true;
         ShowInGame();
     }
-    // A text field changes the groups with each key; its whole edit is one step.
+    // A text field changes the groups with each key; its whole edit is one
+    // step, taken when it is left (CommitWhenFieldLeft) or, should it go away
+    // unseen, once nothing is active.
     if (m_uncommitted && !ImGui::IsAnyItemActive())
     {
-        m_edits.Commit();
-        m_uncommitted = false;
+        CommitPending();
+    }
+}
+
+void CMuServerListUI::CommitPending()
+{
+    m_edits.Commit();
+    m_uncommitted = false;
+}
+
+void CMuServerListUI::CommitWhenFieldLeft()
+{
+    // Also when a button or box took the activation from the field: it
+    // changes the groups only after this, on its release.
+    if (ImGui::IsItemDeactivatedAfterEdit())
+    {
+        CommitPending();
     }
 }
 
@@ -439,6 +459,7 @@ bool CMuServerListUI::RenderListButtons()
     bool changed = false;
     if (ImGui::Button(I18N::Editor::Add))
     {
+        CommitPending();
         if (const std::optional<size_t> added = m_edits.AddGroup(I18N::Editor::NewGroup))
         {
             Select(static_cast<int>(*added));
@@ -450,24 +471,33 @@ bool CMuServerListUI::RenderListButtons()
     ImGui::BeginDisabled(!hasSelection);
     if (ImGui::Button(I18N::Editor::Remove))
     {
+        CommitPending();
         m_edits.RemoveGroup(static_cast<size_t>(m_selected));
         Select(std::min(m_selected, static_cast<int>(m_edits.GetGroups().size()) - 1));
         changed = true;
     }
     ImGui::EndDisabled();
     ImGui::BeginDisabled(!hasSelection || m_selected == 0);
-    if (ImGui::Button(I18N::Editor::MoveUp) && m_edits.MoveGroup(static_cast<size_t>(m_selected), -1))
+    if (ImGui::Button(I18N::Editor::MoveUp))
     {
-        Select(m_selected - 1);
-        changed = true;
+        CommitPending();
+        if (m_edits.MoveGroup(static_cast<size_t>(m_selected), -1))
+        {
+            Select(m_selected - 1);
+            changed = true;
+        }
     }
     ImGui::EndDisabled();
     ImGui::SameLine();
     ImGui::BeginDisabled(!hasSelection || m_selected + 1 >= static_cast<int>(m_edits.GetGroups().size()));
-    if (ImGui::Button(I18N::Editor::MoveDown) && m_edits.MoveGroup(static_cast<size_t>(m_selected), 1))
+    if (ImGui::Button(I18N::Editor::MoveDown))
     {
-        Select(m_selected + 1);
-        changed = true;
+        CommitPending();
+        if (m_edits.MoveGroup(static_cast<size_t>(m_selected), 1))
+        {
+            Select(m_selected + 1);
+            changed = true;
+        }
     }
     ImGui::EndDisabled();
     return changed;
@@ -496,6 +526,7 @@ bool CMuServerListUI::RenderGroupsNotInList()
         ImGui::SameLine();
         if (ImGui::SmallButton(I18N::Editor::Add))
         {
+            CommitPending();
             if (const std::optional<size_t> added = m_edits.AddGroup(I18N::Editor::NewGroup, groupId))
             {
                 Select(static_cast<int>(*added));
@@ -541,6 +572,7 @@ bool CMuServerListUI::RenderGroupId(ServerGroup& group)
             group.id = id;
         }
     }
+    CommitWhenFieldLeft();
     const int firstServer = group.id * Data::ServerList::MaxChannelsPerGroup;
     ImGui::SameLine();
     ImGui::TextDisabled("%s", I18N::Format(I18N::Editor::Servers0To1,
@@ -564,6 +596,7 @@ bool CMuServerListUI::RenderGroupFields(ServerGroup& group)
         Data::ServerList::CutToUtf16Length(group.name, Data::ServerList::MaxServerGroupNameLength);
         changed = true;
     }
+    CommitWhenFieldLeft();
     if (group.name.empty())
     {
         RenderError(I18N::Editor::AGroupNeedsAName);
@@ -574,8 +607,15 @@ bool CMuServerListUI::RenderGroupFields(ServerGroup& group)
         Data::ServerList::CutToUtf16Length(group.description, Data::ServerList::MaxServerGroupDescriptionLength);
         changed = true;
     }
+    CommitWhenFieldLeft();
     RenderNote(I18N::Editor::DescriptionNote);
-    changed |= ImGui::Checkbox(I18N::Editor::TestServer, &group.testServer);
+    bool testServer = group.testServer;
+    if (ImGui::Checkbox(I18N::Editor::TestServer, &testServer))
+    {
+        CommitPending();
+        group.testServer = testServer;
+        changed = true;
+    }
     RenderNote(I18N::Editor::TestServerNote);
     return changed;
 }
@@ -591,7 +631,12 @@ bool CMuServerListUI::RenderChannels(ServerGroup& group)
     bool changed = false;
     for (int channel = 0; channel < Data::ServerList::MaxChannelsPerGroup; ++channel)
     {
-        changed |= RenderChannelRow(group, channel, sentChannels);
+        if (const std::optional<ChannelType> picked = RenderChannelRow(group, channel, sentChannels))
+        {
+            CommitPending();
+            group.channels[static_cast<size_t>(channel)] = *picked;
+            changed = true;
+        }
     }
     ImGui::EndTable();
     return changed;
