@@ -327,12 +327,12 @@ bool CMuServerListUI::CanRedo() const
 
 std::string CMuServerListUI::GetUndoLabel() const
 {
-    return I18N::Editor::ServerList;
+    return m_edits.GetUndoLabel();
 }
 
 std::string CMuServerListUI::GetRedoLabel() const
 {
-    return I18N::Editor::ServerList;
+    return m_edits.GetRedoLabel();
 }
 
 void CMuServerListUI::Undo()

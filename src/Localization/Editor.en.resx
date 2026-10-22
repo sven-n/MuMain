@@ -1963,4 +1963,28 @@
   <data name="Save off after read errors" xml:space="preserve">
     <value>The file had errors when it was read, so the list has only the groups that could be read. Save is off until the file is fixed and Revert reads it again; it would remove the other groups from the file.</value>
   </data>
+  <data name="Step add" xml:space="preserve">
+    <value>Add {0}</value>
+  </data>
+  <data name="Step remove" xml:space="preserve">
+    <value>Remove {0}</value>
+  </data>
+  <data name="Step move" xml:space="preserve">
+    <value>Move {0}</value>
+  </data>
+  <data name="Step name" xml:space="preserve">
+    <value>{0}: name</value>
+  </data>
+  <data name="Step ID" xml:space="preserve">
+    <value>{0}: ID</value>
+  </data>
+  <data name="Step description" xml:space="preserve">
+    <value>{0}: description</value>
+  </data>
+  <data name="Step test server" xml:space="preserve">
+    <value>{0}: test server</value>
+  </data>
+  <data name="Step channel" xml:space="preserve">
+    <value>{0}: channel {1}</value>
+  </data>
 </root>

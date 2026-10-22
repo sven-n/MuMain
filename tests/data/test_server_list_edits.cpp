@@ -4,6 +4,7 @@
 
 #ifdef _EDITOR
 
+#include "I18N/All.h"
 #include "UI/ServerList/ServerListEdits.h"
 
 #include <string>
@@ -192,6 +193,58 @@ TEST_CASE("ServerListEdits: remove and move")
     CHECK(Names(edits) == std::vector<std::string>{"Midgard", "Helheim"});
     edits.RemoveGroup(9);
     CHECK(edits.GetGroups().size() == 2);
+}
+
+TEST_CASE("ServerListEdits: each step is named for the editor bar")
+{
+    I18N::SetLocale("en");
+    ServerListEdits edits = ThreeGroups();
+    CHECK(edits.GetUndoLabel().empty());
+
+    edits.EditGroups()[0].channels[2] = ChannelType::Gold;
+    // Not committed yet (a field being typed in): named all the same.
+    CHECK(edits.GetUndoLabel() == "Valhalla: channel 3");
+    edits.Commit();
+    CHECK(edits.GetUndoLabel() == "Valhalla: channel 3");
+
+    edits.EditGroups()[1].name = "Asgard";
+    edits.Commit();
+    CHECK(edits.GetUndoLabel() == "Helheim: name");
+
+    edits.MoveGroup(2, -1);
+    edits.Commit();
+    CHECK(edits.GetUndoLabel() == "Move Midgard");
+
+    edits.RemoveGroup(0);
+    edits.Commit();
+    CHECK(edits.GetUndoLabel() == "Remove Valhalla");
+
+    edits.AddGroup("New Group");
+    edits.Commit();
+    CHECK(edits.GetUndoLabel() == "Add New Group");
+
+    // A step keeps its name when it is undone and redone.
+    edits.Undo();
+    CHECK(edits.GetRedoLabel() == "Add New Group");
+    CHECK(edits.GetUndoLabel() == "Remove Valhalla");
+    edits.Redo();
+    CHECK(edits.GetUndoLabel() == "Add New Group");
+    CHECK(edits.GetRedoLabel().empty());
+}
+
+TEST_CASE("ServerListEdits: field changes are named by the group as it was")
+{
+    I18N::SetLocale("en");
+    ServerListEdits edits = ThreeGroups();
+
+    edits.EditGroups()[2].id = 7;
+    CHECK(edits.GetUndoLabel() == "Midgard: ID");
+    edits.Commit();
+    edits.EditGroups()[2].description = "New";
+    CHECK(edits.GetUndoLabel() == "Midgard: description");
+    edits.Commit();
+    edits.EditGroups()[2].testServer = true;
+    CHECK(edits.GetUndoLabel() == "Midgard: test server");
 }
 
 TEST_CASE("ServerListEdits: IDs in use")

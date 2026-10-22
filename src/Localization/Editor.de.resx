@@ -1942,4 +1942,28 @@
   <data name="Save off after read errors" xml:space="preserve">
     <value>Die Datei hatte beim Lesen Fehler, daher enthält die Liste nur die Gruppen, die gelesen werden konnten. Speichern bleibt aus, bis die Datei korrigiert ist und Zurücksetzen sie neu einliest; es würde die anderen Gruppen aus der Datei entfernen.</value>
   </data>
+  <data name="Step add" xml:space="preserve">
+    <value>{0} hinzufügen</value>
+  </data>
+  <data name="Step remove" xml:space="preserve">
+    <value>{0} entfernen</value>
+  </data>
+  <data name="Step move" xml:space="preserve">
+    <value>{0} verschieben</value>
+  </data>
+  <data name="Step name" xml:space="preserve">
+    <value>{0}: Name</value>
+  </data>
+  <data name="Step ID" xml:space="preserve">
+    <value>{0}: ID</value>
+  </data>
+  <data name="Step description" xml:space="preserve">
+    <value>{0}: Beschreibung</value>
+  </data>
+  <data name="Step test server" xml:space="preserve">
+    <value>{0}: Testserver</value>
+  </data>
+  <data name="Step channel" xml:space="preserve">
+    <value>{0}: Kanal {1}</value>
+  </data>
 </root>

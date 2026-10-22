@@ -47,6 +47,10 @@ public:
     }
     void Undo();
     void Redo();
+    // What Undo or Redo would take back or do again ("Remove Helheim",
+    // "Valhalla: channel 3"); empty when there is nothing.
+    std::string GetUndoLabel() const;
+    std::string GetRedoLabel() const;
 
     // Whether the groups differ from the file.
     bool HasUnsavedChanges() const
@@ -77,12 +81,25 @@ public:
     std::optional<int> FindFreeId() const;
 
 private:
+    // The groups on the other side of a step, and what the step did.
+    struct Step
+    {
+        std::vector<ServerGroup> groups;
+        std::string label;
+    };
+
+    // What the groups changed since the last step would be called.
+    std::string GetPendingLabel() const;
+
     std::vector<ServerGroup> m_groups;
     // The groups as the last undo step left them.
     std::vector<ServerGroup> m_committed;
     std::vector<ServerGroup> m_saved;
-    std::vector<std::vector<ServerGroup>> m_undo;
-    std::vector<std::vector<ServerGroup>> m_redo;
+    std::vector<Step> m_undo;
+    std::vector<Step> m_redo;
+    // Set by AddGroup, RemoveGroup and MoveGroup until the next Commit; a
+    // change of fields is described by comparing the groups instead.
+    std::string m_pendingLabel;
     bool m_complete = true;
 };
 } // namespace MuEditor::ServerList
