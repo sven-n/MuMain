@@ -537,10 +537,9 @@ void CMuServerListUI::ShowInGame()
         return;
     }
     g_ServerListManager->RebuildServerGroups();
-    if (g_ServerSelWin.IsVisible())
-    {
-        g_ServerSelWin.UpdateDisplay();
-    }
+    // Also while the server select window is hidden (after a server was
+    // picked): it keeps a pointer to the open group, which the rebuild deleted.
+    g_ServerSelWin.UpdateDisplay();
 }
 
 void CMuServerListUI::Select(int index)
