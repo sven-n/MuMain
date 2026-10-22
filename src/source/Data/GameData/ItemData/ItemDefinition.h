@@ -183,7 +183,7 @@ struct ItemDefinition
 
     BYTE durability = 0;
     BYTE magicDurability = 0;
-    // Damage and magic power pass 255 for later items (the .bmd item files hold one byte; see FitsItemFile).
+    // Damage and magic power pass 255 for later items (the .bmd item files hold one byte; see FindItemFileMisfits).
     WORD damageMin = 0;
     WORD damageMax = 0;
     BYTE blockRate = 0;

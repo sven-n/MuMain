@@ -43,12 +43,26 @@ typedef struct
     ITEM_ATTRIBUTE_FIELDS
 } ITEM_ATTRIBUTE;
 
+// The .bmd item files hold MAX_ITEM records of these sizes, and the loader tells the two formats apart by file size: a
+// field type change in the file structures (FILE_FIELD_TYPE_*) must not change them.
+static_assert(sizeof(ITEM_ATTRIBUTE_FILE_LEGACY) == 84, "the legacy .bmd item record is 84 bytes");
+static_assert(sizeof(ITEM_ATTRIBUTE_FILE) == 104, "the .bmd item record is 104 bytes");
+
+#undef ITEM_ATTRIBUTE_FILE_FIELDS
+#undef DECLARE_FILE_FIELD
+#undef FILE_FIELD_TYPE_Bool
+#undef FILE_FIELD_TYPE_Byte
+#undef FILE_FIELD_TYPE_Word
+#undef FILE_FIELD_TYPE_Int
+#undef FILE_FIELD_TYPE_DWord
+#undef FILE_FIELD_TYPE_ByteInFile
+
 // ============================================================================
 // COPY HELPERS (replaces ItemAttributeHelpers.h)
 // ============================================================================
 
 // Generate field copy statements from X-macro
-// A Stat narrows to its file byte; check FitsItemFile before writing a file.
+// A ByteInFile field narrows to its file byte: the writers refuse items that do not fit first (FindItemFileMisfits).
 #define COPY_FIELD(name, type, arraySize, width, i18nName)                                                             \
     (dest).name = static_cast<decltype((dest).name)>((source).name);
 
@@ -67,27 +81,6 @@ inline void CopyItemAttributeFromSource(ITEM_ATTRIBUTE& dest, const TSource& sou
 {
     CMultiLanguage::ConvertFromUtf8(dest.Name, source.Name, MAX_ITEM_NAME);
     COPY_ITEM_ATTRIBUTE_FIELDS(dest, source);
-}
-
-// Whether the item's values fit the .bmd item files (its Stats in one byte); the first that does not in `field`.
-#define CHECK_FIELD_FITS_Bool(name)
-#define CHECK_FIELD_FITS_Byte(name)
-#define CHECK_FIELD_FITS_Word(name)
-#define CHECK_FIELD_FITS_Int(name)
-#define CHECK_FIELD_FITS_DWord(name)
-#define CHECK_FIELD_FITS_Stat(name)                                                                                    \
-    if (item.name > 0xFF)                                                                                              \
-    {                                                                                                                  \
-        if (field != nullptr)                                                                                          \
-            *field = #name;                                                                                            \
-        return false;                                                                                                  \
-    }
-#define CHECK_FIELD_FITS(name, type, arraySize, width, i18nName) CHECK_FIELD_FITS_##type(name)
-
-inline bool FitsItemFile(const ITEM_ATTRIBUTE& item, const char** field = nullptr)
-{
-    ITEM_FIELDS_SIMPLE(CHECK_FIELD_FITS)
-    return true;
 }
 
 // Helper template to copy from runtime structure to file structure

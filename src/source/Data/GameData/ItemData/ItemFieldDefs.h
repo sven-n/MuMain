@@ -13,8 +13,8 @@
     X(m_wSkillIndex, Word, 1, 60.0f, Skill)                                                                            \
     X(Width, Byte, 1, 60.0f, Width)                                                                                    \
     X(Height, Byte, 1, 60.0f, Height)                                                                                  \
-    X(DamageMin, Stat, 1, 70.0f, MinDamage)                                                                            \
-    X(DamageMax, Stat, 1, 70.0f, MaxDamage)                                                                            \
+    X(DamageMin, ByteInFile, 1, 70.0f, MinDamage)                                                                      \
+    X(DamageMax, ByteInFile, 1, 70.0f, MaxDamage)                                                                      \
     X(SuccessfulBlocking, Byte, 1, 70.0f, BlockRate)                                                                   \
     X(Defense, Byte, 1, 70.0f, Defense)                                                                                \
     X(MagicDefense, Byte, 1, 80.0f, MagicDefense)                                                                      \
@@ -22,7 +22,7 @@
     X(WalkSpeed, Byte, 1, 80.0f, MoveSpeed)                                                                            \
     X(Durability, Byte, 1, 70.0f, Durability)                                                                          \
     X(MagicDur, Byte, 1, 90.0f, MagicDurability)                                                                       \
-    X(MagicPower, Stat, 1, 80.0f, MagicPower)                                                                          \
+    X(MagicPower, ByteInFile, 1, 80.0f, MagicPower)                                                                    \
     X(RequireStrength, Word, 1, 80.0f, ReqStrength)                                                                    \
     X(RequireDexterity, Word, 1, 80.0f, ReqDexterity)                                                                  \
     X(RequireEnergy, Word, 1, 80.0f, ReqEnergy)                                                                        \
@@ -58,9 +58,8 @@
 #define FIELD_TYPE_Word WORD
 #define FIELD_TYPE_Int int
 #define FIELD_TYPE_DWord DWORD
-// A Stat is an item stat the game keeps in two bytes but the .bmd item files in one (damage and magic power: later
-// items pass 255). ITEM_ATTRIBUTE has the two bytes, the file structures the one.
-#define FIELD_TYPE_Stat WORD
+// Two bytes in the game, one in the .bmd item files (damage and magic power: later items pass 255).
+#define FIELD_TYPE_ByteInFile WORD
 
 // The types of the .bmd item file structures.
 #define FILE_FIELD_TYPE_Bool bool
@@ -68,7 +67,7 @@
 #define FILE_FIELD_TYPE_Word WORD
 #define FILE_FIELD_TYPE_Int int
 #define FILE_FIELD_TYPE_DWord DWORD
-#define FILE_FIELD_TYPE_Stat BYTE
+#define FILE_FIELD_TYPE_ByteInFile BYTE
 
 // Generate struct field declarations from X-macro. The i18nName parameter
 // only matters for descriptor generation; the struct layout ignores it.

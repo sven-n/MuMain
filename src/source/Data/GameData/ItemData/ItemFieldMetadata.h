@@ -18,13 +18,13 @@ using EItemFieldType = EFieldType;
 // Item field descriptor (specialized from generic FieldDescriptor)
 using ItemFieldDescriptor = FieldDescriptor<ITEM_ATTRIBUTE>;
 
-// The editor edits a Stat (one byte in the files, two in the game) as a Word.
+// The editor edits a ByteInFile field (one byte in the files, two in the game) as a Word.
 #define ITEM_EDITOR_FIELD_TYPE_Bool EFieldType::Bool
 #define ITEM_EDITOR_FIELD_TYPE_Byte EFieldType::Byte
 #define ITEM_EDITOR_FIELD_TYPE_Word EFieldType::Word
 #define ITEM_EDITOR_FIELD_TYPE_Int EFieldType::Int
 #define ITEM_EDITOR_FIELD_TYPE_DWord EFieldType::DWord
-#define ITEM_EDITOR_FIELD_TYPE_Stat EFieldType::Word
+#define ITEM_EDITOR_FIELD_TYPE_ByteInFile EFieldType::Word
 
 // Macro to generate item field descriptors
 #define MAKE_SIMPLE_FIELD_DESCRIPTOR(name, type, arraySize, width, i18nName)                                           \
@@ -42,6 +42,15 @@ namespace ItemFieldMetadataInternal
         ITEM_FIELDS_ARRAYS(MAKE_ARRAY_FIELD_DESCRIPTOR)
     };
 }
+
+#undef MAKE_SIMPLE_FIELD_DESCRIPTOR
+#undef MAKE_ARRAY_FIELD_DESCRIPTOR
+#undef ITEM_EDITOR_FIELD_TYPE_Bool
+#undef ITEM_EDITOR_FIELD_TYPE_Byte
+#undef ITEM_EDITOR_FIELD_TYPE_Word
+#undef ITEM_EDITOR_FIELD_TYPE_Int
+#undef ITEM_EDITOR_FIELD_TYPE_DWord
+#undef ITEM_EDITOR_FIELD_TYPE_ByteInFile
 
 // Get pointer to field descriptor array
 inline const ItemFieldDescriptor* GetFieldDescriptors()

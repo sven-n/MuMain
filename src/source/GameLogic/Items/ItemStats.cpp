@@ -200,7 +200,7 @@ ItemStatValues ComputeItemStats(const ITEM_ATTRIBUTE& attribute, const ItemStatI
     if (attribute.MagicPower > 0)
     {
         const int sum = AddUpStat(magicPower, attribute.MagicPower, attribute.MagicPower, true, context);
-        values.magicPower = std::min(sum / 2 + magicPower.perLevelAfterHalving * input.level, MaxByteStat);
+        values.magicPower = LimitToItemValue(sum / 2 + WideValue{magicPower.perLevelAfterHalving} * input.level);
     }
     values.blockRate = std::min(AddUpStat(profile.Get(ItemStat::BlockRate), attribute.SuccessfulBlocking,
                                           attribute.SuccessfulBlocking, false, context),

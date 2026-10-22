@@ -69,10 +69,13 @@ public:
 
     // Writes Item_<language>.bmd for every legacy language, with the names
     // of that language. Files that already have the data are left as they
-    // are and do not count as a failure.
+    // are and do not count as a failure. Items with a value the files cannot
+    // hold (damage or magic power above 255) are named in the change log and
+    // nothing is written.
     bool ExportAsBmd(std::string& changeLog);
 
-    bool ExportAsS6E3(wchar_t* fileName);
+    // Writes the S6E3 legacy file; an item with a value the file cannot hold is named in `problems` instead.
+    bool ExportAsS6E3(wchar_t* fileName, std::string& problems);
     bool ExportToCsv(wchar_t* fileName);
 #endif
 

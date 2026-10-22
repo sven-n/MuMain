@@ -18,7 +18,7 @@
 #include "Data/DataHandler/ItemData/ItemComparisonMetadata.h"
 #include "UI/Console/MuEditorConsoleUI.h"
 #include "Core/Utilities/StringUtils.h"
-#include "Core/Utilities/Log/MuLogger.h"
+#include "Data/GameData/ItemData/ItemFileFit.h"
 
 // Comparison function - uses field metadata (NO MACROS!)
 static void CompareItems(const ITEM_ATTRIBUTE& oldItem, const ITEM_ATTRIBUTE& newItem,
@@ -66,16 +66,13 @@ static std::string GetItemNameUtf8(int index, const ITEM_ATTRIBUTE& item)
 
 bool ItemDataSaver::Save(const wchar_t* fileName, const ITEM_ATTRIBUTE* items, std::string* outChangeLog)
 {
-    // The file holds damage and magic power in one byte; later items can have more.
-    for (int i = 0; i < MAX_ITEM; i++)
+    if (const std::vector<ItemFileMisfit> misfits = FindItemFileMisfits(items, MAX_ITEM); !misfits.empty())
     {
-        const char* field = nullptr;
-        if (!FitsItemFile(items[i], &field))
+        if (outChangeLog != nullptr)
         {
-            MU_LOG_ERROR(mu::log::Get("data"),
-                         "Item {} {} is above 255, which the .bmd item file cannot hold; not saved", i, field);
-            return false;
+            *outChangeLog += DescribeItemFileMisfits(misfits);
         }
+        return false;
     }
 
     // Create standard save config with item-specific parameters

@@ -531,7 +531,7 @@ TEST_CASE("Wing defense adds up above +9, from 5 for the third tier wings [data]
     CHECK(ComputeItem(ITEM_CAPE_OF_LORD, 15).Defense == 72);
 }
 
-TEST_CASE("Magic power and defense rate past 255 are not wrapped around [data][items]")
+TEST_CASE("Magic power passes 255 and defense rate stops there [data][items]")
 {
     ShippedItemAttributes items;
     // Values the editor can give an item; no shipped item gets this high.
@@ -542,6 +542,10 @@ TEST_CASE("Magic power and defense rate past 255 are not wrapped around [data][i
 
     // 200 + 67 (excellent) + 66 (+15) = 333, halved, + 30.
     CHECK(ComputeItem(ITEM_LEGENDARY_STAFF, 15, 0x01).MagicPower == 196);
+    // A later staff: 345 + 66 (excellent: 345 * 25 / 140 + 5) + 66 (+15) = 477, halved, + 30.
+    items[ITEM_LEGENDARY_STAFF].MagicPower = 345;
+    items[ITEM_LEGENDARY_STAFF].Level = 140;
+    CHECK(ComputeItem(ITEM_LEGENDARY_STAFF, 15, 0x01).MagicPower == 268);
     // 170 + 47 (excellent) + 66 (+15) = 283.
     CHECK(ComputeItem(DragonShieldType, 15, 0x01).SuccessfulBlocking == 255);
 

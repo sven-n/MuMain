@@ -162,6 +162,28 @@ TEST_CASE("Item values must fit their type [data][items]")
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Error, "twoHanded"));
 }
 
+TEST_CASE("Damage and magic power past 255 are kept through write and read [data][items]")
+{
+    // A later-season weapon and staff.
+    ItemDefinition sword = MakeKris();
+    sword.damageMin = 345;
+    sword.damageMax = 380;
+    sword.magicPower = 400;
+
+    const std::string text = WriteItemGroupJson(0, std::vector<ItemDefinition>{sword});
+    CHECK(text.find(R"("damageMin": 345)") != std::string::npos);
+    const ReadResult result = Read(text);
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.issues.empty());
+    CHECK(result.items.front().damageMin == 345);
+    CHECK(result.items.front().damageMax == 380);
+    CHECK(result.items.front().magicPower == 400);
+
+    // Up to what the field holds.
+    const ReadResult tooHigh = Read(GroupFile(0, R"({"number": 0, "name": "Kris", "damageMax": 65536})"));
+    CHECK(HasIssue(tooHigh.issues, ItemDataIssueSeverity::Error, "damageMax"));
+}
+
 TEST_CASE("Unknown item fields are warnings [data][items]")
 {
     const ReadResult result =

@@ -19,14 +19,14 @@ namespace
 constexpr size_t LegacyNameFieldSize = sizeof(ITEM_ATTRIBUTE_FILE_LEGACY::Name);
 constexpr size_t NameFieldSize = sizeof(ITEM_ATTRIBUTE_FILE::Name);
 
-// Where a field lives in a file record and in ITEM_ATTRIBUTE, and its size in each (a Stat is one byte in the file
-// and two in ITEM_ATTRIBUTE).
+// Where a field lives in a file record and in ITEM_ATTRIBUTE, and its size in each (a ByteInFile field is one byte in
+// the file and two in ITEM_ATTRIBUTE).
 struct FieldLayout
 {
     std::string name;
     size_t fileOffset = 0;
     size_t attributeOffset = 0;
-    size_t size = 0;
+    size_t fileSize = 0;
     size_t attributeSize = 0;
 };
 
@@ -79,7 +79,7 @@ struct LanguageRecord
     // True when the name (or its terminating null byte) overwrote the field.
     bool IsDamaged(const FieldLayout& field) const
     {
-        return NameRanOn() && field.fileOffset <= nameEnd && field.fileOffset + field.size > file->nameFieldSize;
+        return NameRanOn() && field.fileOffset <= nameEnd && field.fileOffset + field.fileSize > file->nameFieldSize;
     }
 };
 
@@ -217,7 +217,7 @@ std::optional<LanguageRecord> ReadRecord(const LanguageFile& file, int itemType)
 long long ReadFieldValue(const LanguageRecord& record, const FieldLayout& field)
 {
     unsigned long long value = 0;
-    std::memcpy(&value, record.bytes + field.fileOffset, field.size);
+    std::memcpy(&value, record.bytes + field.fileOffset, field.fileSize);
     return static_cast<long long>(value);
 }
 
@@ -249,7 +249,7 @@ void CopyField(const LanguageRecord* source, const FieldLayout& sourceField, con
     unsigned long long value = 0;
     if (source != nullptr)
     {
-        std::memcpy(&value, source->bytes + sourceField.fileOffset, sourceField.size);
+        std::memcpy(&value, source->bytes + sourceField.fileOffset, sourceField.fileSize);
     }
     else
     {
