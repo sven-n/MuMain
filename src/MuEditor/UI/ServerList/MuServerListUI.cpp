@@ -50,24 +50,6 @@ const char* GetChannelTypeLabel(ChannelType type)
     }
 }
 
-// What the login screen writes after the group name and channel number
-// (CServerListManager::InsertServer).
-const char* GetLoginScreenSuffix(ChannelType type)
-{
-    switch (type)
-    {
-    case ChannelType::NonPvp:
-        return "(Non-PVP)";
-    case ChannelType::GoldPvp:
-        return "(Gold PVP)";
-    case ChannelType::Gold:
-        return "(Gold)";
-    case ChannelType::Normal:
-    default:
-        return "";
-    }
-}
-
 // A grey line that wraps at the window's edge.
 void RenderNote(const char* text)
 {
@@ -514,7 +496,7 @@ bool CMuServerListUI::RenderChannels(ServerGroup& group)
         }
 
         ImGui::TableNextColumn();
-        ImGui::TextDisabled("%s-%d%s", group.name.c_str(), channel + 1, GetLoginScreenSuffix(type));
+        ImGui::TextDisabled("%s-%d%s", group.name.c_str(), channel + 1, Data::ServerList::GetChannelSuffix(type));
 
         ImGui::TableNextColumn();
         if (sentGroup != m_sent.end())

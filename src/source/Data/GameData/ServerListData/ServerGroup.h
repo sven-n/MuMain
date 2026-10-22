@@ -20,6 +20,23 @@ enum class ChannelType : std::uint8_t
 
 inline constexpr int ChannelTypeCount = 4;
 
+// What the login screen writes after "<group name>-<channel>" for the type.
+constexpr const char* GetChannelSuffix(ChannelType type)
+{
+    switch (type)
+    {
+    case ChannelType::NonPvp:
+        return "(Non-PVP)";
+    case ChannelType::GoldPvp:
+        return "(Gold PVP)";
+    case ChannelType::Gold:
+        return "(Gold)";
+    case ChannelType::Normal:
+    default:
+        return "";
+    }
+}
+
 // A server sends its ID; the group is ID / MAX_SERVER_PER_GROUP and the
 // channel ID % MAX_SERVER_PER_GROUP + 1.
 inline constexpr int MaxChannelsPerGroup = MAX_SERVER_PER_GROUP;

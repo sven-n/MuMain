@@ -14,6 +14,7 @@
 #include <cwchar>
 #include <filesystem>
 #include <memory>
+#include <string_view>
 
 namespace
 {
@@ -196,28 +197,12 @@ void CServerListManager::InsertServer(CServerGroup* pServerGroup, int iConnectIn
         iTextIndex = 562;
     }
 
-    switch (pServerInfo->m_byNonPvP)
-    {
-    case 0:
-        mu_swprintf(pServerInfo->m_bName, L"%ls-%d %ls", pServerGroup->m_szName,
-            pServerInfo->m_iIndex, I18N::Game::Lookup(iTextIndex));
-        break;
-
-    case 1:
-        mu_swprintf(pServerInfo->m_bName, L"%ls-%d(Non-PVP) %ls", pServerGroup->m_szName,
-            pServerInfo->m_iIndex, I18N::Game::Lookup(iTextIndex));
-        break;
-
-    case 2:
-        mu_swprintf(pServerInfo->m_bName, L"%ls-%d(Gold PVP) %ls", pServerGroup->m_szName,
-            pServerInfo->m_iIndex, I18N::Game::Lookup(iTextIndex));
-        break;
-
-    case 3:
-        mu_swprintf(pServerInfo->m_bName, L"%ls-%d(Gold) %ls", pServerGroup->m_szName,
-            pServerInfo->m_iIndex, I18N::Game::Lookup(iTextIndex));
-        break;
-    }
+    // The suffix is ASCII, so each char is its wchar_t.
+    const std::string_view suffix =
+        Data::ServerList::GetChannelSuffix(static_cast<Data::ServerList::ChannelType>(pServerInfo->m_byNonPvP));
+    const std::wstring wideSuffix(suffix.begin(), suffix.end());
+    mu_swprintf(pServerInfo->m_bName, L"%ls-%d%ls %ls", pServerGroup->m_szName, pServerInfo->m_iIndex,
+                wideSuffix.c_str(), I18N::Game::Lookup(iTextIndex));
 
     pServerGroup->InsertServerInfo(pServerInfo);
 }
