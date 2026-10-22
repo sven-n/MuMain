@@ -8429,6 +8429,9 @@
     <value>最大限度</value>
     <comment>legacy_id=2342</comment>
   </data>
+  <data name="Max" xml:space="preserve">
+    <value>最大</value>
+  </data>
   <data name="Rate increase" xml:space="preserve">
     <value>加息</value>
     <comment>legacy_id=2344</comment>
