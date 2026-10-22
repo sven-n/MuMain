@@ -744,11 +744,11 @@ bool CItemDataHandler::ExportAsBmd(std::string& changeLog)
 
 bool CItemDataHandler::ExportAsS6E3(wchar_t* fileName)
 {
-    return ItemDataExportS6E3::SaveLegacy(fileName);
+    return ItemDataExportS6E3::SaveLegacy(fileName, BuildItemAttributes(I18N::GetCurrentLocale()).get());
 }
 
 bool CItemDataHandler::ExportToCsv(wchar_t* fileName)
 {
-    return ItemDataExportAsCSV::ExportToCsv(fileName);
+    return ItemDataExportAsCSV::ExportToCsv(fileName, BuildItemAttributes(I18N::GetCurrentLocale()).get());
 }
 #endif

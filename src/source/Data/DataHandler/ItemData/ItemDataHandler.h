@@ -181,6 +181,8 @@ public:
     // are and do not count as a failure.
     bool ExportAsBmd(std::string& changeLog);
 
+    // The S6E3 item.bmd and the CSV table have the item names of the UI
+    // locale, also while translated item names are off.
     bool ExportAsS6E3(wchar_t* fileName);
     bool ExportToCsv(wchar_t* fileName);
 #endif
