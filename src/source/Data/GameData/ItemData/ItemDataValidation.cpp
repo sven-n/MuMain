@@ -71,29 +71,42 @@ void ValidateName(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
         check(locale, text);
     }
 }
-// A description line's text is written like a name: an English text, and translations under language codes. A blank
-// line has no text in any language.
+// An item's own text (a description line's, a level value's) is written like a name: an English text, and
+// translations under language codes. A blank one has no text in any language.
+void ValidateItemText(const ItemDefinition& definition, const LocalizedString& text, const std::string& field,
+                      std::vector<ItemDataIssue>& issues)
+{
+    if (text.IsEmpty())
+    {
+        return;
+    }
+    if (text.GetNeutral().empty())
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Error, definition, "the English text is missing", field.c_str());
+    }
+    for (const auto& [locale, translation] : text.GetTranslations())
+    {
+        if (!IsValidLocaleCode(locale))
+        {
+            AddIssue(issues, ItemDataIssueSeverity::Error, definition,
+                     "\"" + locale + "\" is not a language code (letters, digits and \"-\" only)", field.c_str());
+        }
+    }
+}
+
 void ValidateDescription(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
 {
     for (size_t index = 0; index < definition.description.size(); ++index)
     {
-        const LocalizedString& text = definition.description[index].text;
-        if (text.IsEmpty())
+        ValidateItemText(definition, definition.description[index].text,
+                         "description[" + std::to_string(index) + "].text", issues);
+    }
+    for (const ItemLevelValues& levelValues : definition.levelValues)
+    {
+        for (size_t level = 0; level < levelValues.values.size(); ++level)
         {
-            continue;
-        }
-        const std::string field = "description[" + std::to_string(index) + "].text";
-        if (text.GetNeutral().empty())
-        {
-            AddIssue(issues, ItemDataIssueSeverity::Error, definition, "the English text is missing", field.c_str());
-        }
-        for (const auto& [locale, translation] : text.GetTranslations())
-        {
-            if (!IsValidLocaleCode(locale))
-            {
-                AddIssue(issues, ItemDataIssueSeverity::Error, definition,
-                         "\"" + locale + "\" is not a language code (letters, digits and \"-\" only)", field.c_str());
-            }
+            ValidateItemText(definition, levelValues.values[level].text,
+                             "levelValues." + levelValues.name + "[" + std::to_string(level) + "]", issues);
         }
     }
 }
@@ -592,17 +605,28 @@ void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const 
                          "the " + locale + " name is never shown: the game has no texts in that language");
             }
         }
-        for (size_t index = 0; index < definition.description.size(); ++index)
+        const auto warnAbout = [&](const LocalizedString& text, const std::string& field)
         {
-            for (const auto& [locale, text] : definition.description[index].text.GetTranslations())
+            for (const auto& [locale, translation] : text.GetTranslations())
             {
                 if (!isShown(locale))
                 {
-                    const std::string field = "description[" + std::to_string(index) + "].text";
                     AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
                              "the " + locale + " text is never shown: the game has no texts in that language",
                              field.c_str());
                 }
+            }
+        };
+        for (size_t index = 0; index < definition.description.size(); ++index)
+        {
+            warnAbout(definition.description[index].text, "description[" + std::to_string(index) + "].text");
+        }
+        for (const ItemLevelValues& levelValues : definition.levelValues)
+        {
+            for (size_t level = 0; level < levelValues.values.size(); ++level)
+            {
+                warnAbout(levelValues.values[level].text,
+                          "levelValues." + levelValues.name + "[" + std::to_string(level) + "]");
             }
         }
     }
