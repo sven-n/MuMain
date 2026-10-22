@@ -1728,8 +1728,9 @@ static void WriteItemTooltipLayoutLines(const ITEM& item, int level, const ItemT
             SkipNum++;
             continue;
         }
+        // In the UI's language, also when the item names stay English ("Translate item names" off).
         const std::string filled = Data::Items::FillPlaceholders(
-            text->Get(g_ItemDatabase.GetDisplayLocale()),
+            text->Get(I18N::GetCurrentLocale()),
             [&](std::string_view name)
             {
                 for (const auto& [placeholder, builtIn] : line->values)
