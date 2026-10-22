@@ -568,36 +568,6 @@
       "classRequirements": {
         "darkLord": 1
       }
-    },
-    {
-      "number": 21,
-      "name": {
-        "en": "Master Scepter-J",
-        "de": "Meisterzepter-J",
-        "es": "Cetro Maestro-J",
-        "pt": "Cetro do mestre-J"
-      },
-      "tags": ["sceptre"],
-      "width": 1,
-      "height": 3,
-      "slot": "mainHand",
-      "weaponKind": "mace",
-      "statProfile": "sceptre",
-      "skill": 66,
-      "level": 72,
-      "durability": 45,
-      "damageMin": 57,
-      "damageMax": 68,
-      "attackSpeed": 50,
-      "magicPower": 20,
-      "attackType": 1,
-      "requirements": {
-        "strength": 87,
-        "dexterity": 18
-      },
-      "classRequirements": {
-        "darkLord": 1
-      }
     }
   ]
 }

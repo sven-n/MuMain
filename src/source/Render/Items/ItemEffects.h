@@ -1,5 +1,6 @@
 #pragma once
 
+#include <span>
 #include <string_view>
 
 class BMD;
@@ -15,6 +16,9 @@ namespace Render::Items::ItemEffects
 // Whether there is an effect of this name. The model loader checks the names
 // of the model entries with it.
 bool Exists(std::string_view name);
+
+// The names of all item effects, sorted, for the item editor's lists.
+std::span<const std::string_view> GetNames();
 
 enum class Result
 {

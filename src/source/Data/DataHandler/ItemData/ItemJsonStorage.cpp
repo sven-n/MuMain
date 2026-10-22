@@ -13,6 +13,10 @@
 #include <fstream>
 #include <optional>
 
+#ifndef _WIN32
+#include "Core/Platform/PathResolve.h"
+#endif
+
 namespace Data::Items
 {
 namespace
@@ -187,16 +191,30 @@ void ValidateExistingItemModels(std::span<const ItemModelDefinition> models, std
     ValidateItemModels(existingModels, issues);
 }
 
-void AddItemModelGroupFiles(const std::filesystem::path& directory, std::span<const ItemModelDefinition> models,
-                            const ItemGroupSet& groups, std::vector<FileToSave>& files)
+void AddItemModelFiles(const ItemModelSave& models, std::vector<FileToSave>& files)
 {
     for (int group = 0; group < MAX_ITEM_TYPE; ++group)
     {
-        if (groups.test(static_cast<size_t>(group)))
+        if (models.groups.test(static_cast<size_t>(group)))
         {
-            files.push_back({directory / GetItemGroupFileName(group), WriteItemModelGroupJson(group, models)});
+            files.push_back(
+                {models.directory / GetItemGroupFileName(group), WriteItemModelGroupJson(group, models.models)});
         }
     }
+    if (models.sharedModelsChanged)
+    {
+        files.push_back({models.directory / SharedItemModelsFileName, WriteSharedItemModelsJson(models.sharedModels)});
+    }
+    if (models.glowColorsChanged)
+    {
+        files.push_back({models.glowColorsFile, Effects::WriteGlowColorsJson(models.glowColors)});
+    }
+#ifdef _EDITOR
+    if (models.statsChanged && models.stats != nullptr)
+    {
+        files.push_back({models.statsFile, WriteItemStatsJson(*models.stats)});
+    }
+#endif
 }
 } // namespace
 
@@ -314,26 +332,96 @@ GlowColorsLoadResult LoadGlowColorsFile(const std::filesystem::path& file)
 ItemDataSaveResult SaveItemDataDirectory(const std::filesystem::path& directory, std::span<const ItemDefinition> items,
                                          std::vector<ItemDataIssue>& issues)
 {
-    return SaveItemAndModelDataDirectories(directory, items, {}, {}, {}, issues);
+    return SaveItemAndModelDataDirectories(directory, items, ItemModelSave{}, issues);
 }
 
 ItemDataSaveResult SaveItemAndModelDataDirectories(const std::filesystem::path& itemDirectory,
-                                                   std::span<const ItemDefinition> items,
-                                                   const std::filesystem::path& modelDirectory,
-                                                   std::span<const ItemModelDefinition> models,
-                                                   const ItemGroupSet& modelGroups, std::vector<ItemDataIssue>& issues)
+                                                   std::span<const ItemDefinition> items, const ItemModelSave& models,
+                                                   std::vector<ItemDataIssue>& issues)
 {
-    const std::vector<ItemDefinition> existingItems = GetExistingItems(items);
-    ValidateItems(existingItems, issues);
-    ValidateExistingItemModels(models, issues);
+    ValidateItems(GetExistingItems(items), issues);
+    ValidateExistingItemModels(models.models, issues);
     if (HasErrors(issues))
     {
         return ItemDataSaveResult::InvalidData;
     }
+    return WriteItemAndModelDataDirectories(itemDirectory, items, models, issues);
+}
 
+ItemDataSaveResult WriteItemAndModelDataDirectories(const std::filesystem::path& itemDirectory,
+                                                    std::span<const ItemDefinition> items, const ItemModelSave& models,
+                                                    std::vector<ItemDataIssue>& issues)
+{
     std::vector<FileToSave> files;
-    AddItemGroupFiles(itemDirectory, existingItems, files);
-    AddItemModelGroupFiles(modelDirectory, models, modelGroups, files);
+    AddItemGroupFiles(itemDirectory, GetExistingItems(items), files);
+    AddItemModelFiles(models, files);
     return WriteChangedFiles(files, issues);
+}
+
+void ValidateItemModelsAsWritten(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues)
+{
+    for (int group = 0; group < MAX_ITEM_TYPE; ++group)
+    {
+        std::vector<ItemModelDefinition> readBack;
+        std::vector<ItemDataIssue> readIssues;
+        ReadItemModelGroupJson(WriteItemModelGroupJson(group, models), GetItemGroupFileName(group), readBack,
+                               readIssues);
+        std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
+                     [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Error; });
+    }
+}
+
+void ValidateSharedItemModelsAsWritten(std::span<const SharedItemModel> sharedModels,
+                                       std::vector<ItemDataIssue>& issues)
+{
+    std::vector<SharedItemModel> readBack;
+    std::vector<ItemDataIssue> readIssues;
+    ReadSharedItemModelsJson(WriteSharedItemModelsJson(sharedModels), SharedItemModelsFileName, readBack, readIssues);
+    std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
+                 [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Error; });
+}
+
+void ValidateGlowColorsAsWritten(std::span<const Effects::GlowColor> colors, std::vector<ItemDataIssue>& issues)
+{
+    std::vector<Effects::GlowColor> readBack;
+    std::vector<ItemDataIssue> readIssues;
+    Effects::ReadGlowColorsJson(Effects::WriteGlowColorsJson(colors), Effects::GlowColorsFile, readBack, readIssues);
+    std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
+                 [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Error; });
+}
+
+#ifdef _EDITOR
+void ValidateItemStatsAsWritten(const ItemStatFile& file, std::vector<ItemDataIssue>& issues)
+{
+    ItemStatFile readBack;
+    std::vector<ItemDataIssue> readIssues;
+    ReadItemStatsJson(WriteItemStatsJson(file), GetItemStatsFile().generic_string(), readBack, readIssues);
+    std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
+                 [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Error; });
+}
+#endif
+
+void ValidateItemModelFilesExist(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues)
+{
+    for (const ItemModelDefinition& model : models)
+    {
+        if (model.file.empty())
+        {
+            continue;
+        }
+#ifdef _WIN32
+        const std::filesystem::path path = std::filesystem::u8path(model.file);
+#else
+        // The data does not always spell the files in the case they have on disk.
+        const std::filesystem::path path = MuResolvePath(model.file.c_str());
+#endif
+        std::error_code ignored;
+        if (!std::filesystem::is_regular_file(path, ignored))
+        {
+            issues.push_back({ItemDataIssueSeverity::Warning, GetItemGroupFileName(model.group), model.group,
+                              model.number, "file",
+                              model.file + " is not in the client folder; the item is drawn without a model"});
+        }
+    }
 }
 } // namespace Data::Items

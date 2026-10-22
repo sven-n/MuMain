@@ -27,11 +27,13 @@
 #include "Core/Globals/_TextureIndex.h"    // BITMAP_MAPTILE
 #include "Render/Sprites/GlobalBitmap.h"   // Bitmaps[]
 #include "Render/Renderer/MuRenderer.h"    // mu::GetRenderer().GetTexturePointer
+#include "Render/RmlUi/RmlUiRuntime.h"     // a game text field being typed in
 #include "Render/Terrain/ZzzLodTerrain.h"  // CurrentLayer
 #include "World/MapInfra/MapManager.h"     // gMapManager.WorldActive
 #include "Core/MuEditorCore.h"             // hover flag for input blocking
 #include "UI/Console/MuEditorConsoleUI.h"
 #include "Core/Utilities/StringUtils.h"    // WideToNarrow (UTF-8 safe, unlike raw truncation)
+#include "../MuEditor/UI/Common/KeyboardSelection.h"
 
 #include <cstring>
 
@@ -119,6 +121,19 @@ namespace
 
     // Total terrain cells (256x256), used for undo snapshots.
     constexpr int CELLS = TERRAIN_SIZE * TERRAIN_SIZE;
+}
+
+bool CMapEditorUI::Shortcut(ImGuiKeyChord keyChord)
+{
+    if (g_MuEditorCore.IsKeyboardWithEditor())
+    {
+        return ImGui::Shortcut(keyChord);
+    }
+    if (RmlUiRuntime::Instance().IsTextInputActive())
+    {
+        return false;
+    }
+    return ImGui::Shortcut(keyChord, ImGuiInputFlags_RouteGlobal);
 }
 
 CMapEditorUI& CMapEditorUI::GetInstance()
@@ -242,7 +257,12 @@ void CMapEditorUI::Render(bool* p_open)
 
     ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
     MuEditor::Layout::PrepareToolWindow();
-    const bool panelDrawn = ImGui::Begin(MuEditor::WindowIds::MapEditor, p_open);
+    const bool panelDrawn = ImGui::Begin(MuEditor::WindowIds::MapEditor, p_open,
+                                         MuEditor::Layout::ToolWindowBarFlags(MuEditor::WindowIds::MapEditor));
+    if (panelDrawn)
+    {
+        MuEditor::Layout::RenderToolWindowBar();
+    }
     // Docked behind another tab or in a minimized editor window, the panel is
     // out of sight as if closed; it takes the world again when it shows. Not
     // drawn for a frame while its dock node gets its window: keep edit mode
@@ -455,7 +475,7 @@ void CMapEditorUI::RenderTextureTab()
 
         if (ImGui::IsItemHovered())
             ImGui::SetTooltip("%d: %s", slot, TileSlotName(slot));
-        if (clicked)
+        if (clicked || MuEditor::KeyboardSelection::MovedOnto())
             SelectMapping = slot;
 
         ImGui::PopID();
@@ -687,7 +707,7 @@ void CMapEditorUI::RenderObjectsTab()
                     ImGui::PopStyleColor();
                 if (ImGui::IsItemHovered())
                     ImGui::SetTooltip("%d: %ls", m.type, m.file.c_str());
-                if (clicked)
+                if (clicked || MuEditor::KeyboardSelection::MovedOnto())
                     m_selectedModelType = m.type;
                 ImGui::PopID();
             }
@@ -703,7 +723,7 @@ void CMapEditorUI::RenderObjectsTab()
 
     ImGui::Separator();
     ImGui::BeginDisabled(!m_bObjHasUndo);
-    if (ImGui::Button("Undo last object edit") || (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_Z)))
+    if (ImGui::Button("Undo last object edit") || Shortcut(ImGuiMod_Ctrl | ImGuiKey_Z))
         UndoObjects();
     ImGui::EndDisabled();
 
@@ -765,7 +785,7 @@ void CMapEditorUI::RenderSelectedObjectPanel()
 
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.3f, 0.3f, 1.0f));
-    if (ImGui::Button("Delete object") || ImGui::IsKeyPressed(ImGuiKey_Delete))
+    if (ImGui::Button("Delete object") || Shortcut(ImGuiKey_Delete))
     {
         TakeObjectUndoSnapshot();
         Editor::ObjectPlace::Remove(m_pSelected);
@@ -1131,8 +1151,7 @@ void CMapEditorUI::RenderHeightTab()
 
     ImGui::Separator();
     ImGui::BeginDisabled(!m_bHeightHasUndo);
-    if (ImGui::Button("Undo last height stroke") ||
-        (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_Z)))
+    if (ImGui::Button("Undo last height stroke") || Shortcut(ImGuiMod_Ctrl | ImGuiKey_Z))
         UndoHeight();
     ImGui::EndDisabled();
 
