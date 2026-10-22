@@ -80,6 +80,15 @@ constexpr std::array<EnumName<ItemTag>, static_cast<size_t>(ItemTag::Count)> Ite
     {ItemTag::LuckyItemTicket, "luckyItemTicket"},
     {ItemTag::Valuable, "valuable"},
 }};
+
+constexpr std::array<EnumName<ItemRequirement>, ItemRequirementCount> ItemRequirementNames = {{
+    {ItemRequirement::Level, "level"},
+    {ItemRequirement::Strength, "strength"},
+    {ItemRequirement::Dexterity, "dexterity"},
+    {ItemRequirement::Energy, "energy"},
+    {ItemRequirement::Vitality, "vitality"},
+    {ItemRequirement::Leadership, "leadership"},
+}};
 } // namespace
 
 constexpr std::array<EnumName<ItemTextColor>, 14> ItemTextColorNames = {{
@@ -122,5 +131,10 @@ std::span<const EnumName<ItemTag>> GetEnumNames(ItemTag)
 std::span<const EnumName<ItemTextColor>> GetEnumNames(ItemTextColor)
 {
     return ItemTextColorNames;
+}
+
+std::span<const EnumName<ItemRequirement>> GetEnumNames(ItemRequirement)
+{
+    return ItemRequirementNames;
 }
 } // namespace Data::Items
