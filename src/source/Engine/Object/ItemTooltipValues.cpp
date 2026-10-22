@@ -106,7 +106,9 @@ void ComputeRequirements(const ITEM& item, ItemTooltipValues& values)
         }
     }
 
-    const CHARACTER_ATTRIBUTE& hero = *CharacterAttribute;
+    // No hero yet (an item named before one exists): one with no level and no stats.
+    static const CHARACTER_ATTRIBUTE NoHero{};
+    const CHARACTER_ATTRIBUTE& hero = CharacterAttribute != nullptr ? *CharacterAttribute : NoHero;
     values.level = HeroRequirement(item.RequireLevel, hero.Level, 0);
     values.strength =
         HeroRequirement(item.RequireStrength, static_cast<WORD>(hero.Strength + hero.AddStrength), strengthReduction);
@@ -135,7 +137,7 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item)
                            (type >= ITEM_CAPE_OF_FIGHTER && type <= ITEM_CAPE_OF_OVERRULE);
     values.timed = item.bPeriodItem;
     values.hasOptions = item.SpecialNum > 0;
-    values.heroLevel = CharacterAttribute->Level;
+    values.heroLevel = CharacterAttribute != nullptr ? CharacterAttribute->Level : 0;
     values.name = Core::Text::ToUtf8(attribute->Name);
     values.levelPlusOne = item.Level + 1;
     values.excellentFlags = item.ExcellentFlags & 63;
