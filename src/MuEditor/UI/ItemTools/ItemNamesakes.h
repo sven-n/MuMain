@@ -24,12 +24,12 @@ public:
 private:
     ItemNamesakes() = default;
 
-    // Again when the items or the UI language changed.
+    // Again when the items or their names changed.
     void Update();
 
     std::vector<std::string> m_qualifiers;
     int m_version = -1;
-    std::string m_locale;
+    int m_nameVersion = -1;
 };
 
 // Draws the qualifier after the item's name on the same line, greyed out;

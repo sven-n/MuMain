@@ -11,7 +11,7 @@ mu::ui::window::ItemHelpContentKey mu::ui::window::GetItemHelpContentKey(int ite
     return {itemType,
             g_ItemDatabase.GetVersion(),
             I18N::LocaleIndex(I18N::GetCurrentLocale()),
-            I18N::LocaleIndex(g_ItemDatabase.GetDisplayLocale().c_str()),
+            g_ItemDatabase.GetNameVersion(),
             Hero->Class,
             GetItemInfoHeroStats()};
 }
