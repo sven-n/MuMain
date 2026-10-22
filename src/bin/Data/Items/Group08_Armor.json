@@ -1216,10 +1216,10 @@
     {
       "number": 50,
       "name": {
-        "en": "Divine Armor",
+        "en": "Faith Armor",
         "de": "Glaubensrüstung",
-        "es": "Armadura Divina",
-        "pt": "Armadura divina"
+        "es": "Armadura de Fe",
+        "pt": "Armadura da fé"
       },
       "width": 2,
       "height": 2,
@@ -1484,8 +1484,8 @@
     {
       "number": 66,
       "name": {
-        "en": "Dark Soul Armor",
-        "de": "Dunkelseelenrüstung",
+        "en": "Adamantine Armor",
+        "de": "Adamantrüstung",
         "es": "Armadura Adamantina",
         "pt": "Armadura de adamantina"
       },
@@ -1712,151 +1712,6 @@
         "level": 380,
         "strength": 97,
         "vitality": 85
-      },
-      "classRequirements": {
-        "rageFighter": 1
-      }
-    },
-    {
-      "number": 78,
-      "name": {
-        "en": "Dragon Armor-J",
-        "de": "Drachenrüstung-J",
-        "es": "Armadura Dragón-J",
-        "pt": "Armadura do dragão-J"
-      },
-      "width": 2,
-      "height": 3,
-      "slot": "armor",
-      "statProfile": "armor",
-      "level": 59,
-      "durability": 68,
-      "defense": 39,
-      "attackType": 4,
-      "requirements": {
-        "strength": 120,
-        "dexterity": 30
-      },
-      "classRequirements": {
-        "darkKnight": 1,
-        "magicGladiator": 1
-      }
-    },
-    {
-      "number": 79,
-      "name": {
-        "en": "Legendary Armor-J",
-        "de": "Legendäre Rüstung-J",
-        "es": "Armadura Legendario-J",
-        "pt": "Armadura lendário-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "armor",
-      "statProfile": "armor",
-      "level": 56,
-      "durability": 42,
-      "defense": 24,
-      "attackType": 4,
-      "requirements": {
-        "strength": 40
-      },
-      "classRequirements": {
-        "darkWizard": 1,
-        "magicGladiator": 1
-      }
-    },
-    {
-      "number": 80,
-      "name": {
-        "en": "Guardian Armor-J",
-        "de": "Wächterrüstung-J",
-        "es": "Armadura Guardián-J",
-        "pt": "Armadura do guardião-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "armor",
-      "statProfile": "armor",
-      "level": 57,
-      "durability": 45,
-      "defense": 31,
-      "attackType": 4,
-      "requirements": {
-        "strength": 40,
-        "dexterity": 80
-      },
-      "classRequirements": {
-        "fairyElf": 1
-      }
-    },
-    {
-      "number": 81,
-      "name": {
-        "en": "Light Plate Armor-J",
-        "de": "Leichtplattenrüstung-J",
-        "es": "Armadura Plata de Luz-J",
-        "pt": "Armadura de placa leve-J"
-      },
-      "width": 2,
-      "height": 3,
-      "slot": "armor",
-      "statProfile": "armor",
-      "level": 62,
-      "durability": 42,
-      "defense": 27,
-      "attackType": 4,
-      "requirements": {
-        "strength": 70,
-        "dexterity": 20
-      },
-      "classRequirements": {
-        "darkLord": 1
-      }
-    },
-    {
-      "number": 82,
-      "name": {
-        "en": "Red Wing Armor-J",
-        "de": "Rotschwingenrüstung-J",
-        "es": "Armadura Ala Roja-J",
-        "pt": "Armadura da asa vermelha-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "armor",
-      "statProfile": "armor",
-      "level": 56,
-      "durability": 42,
-      "defense": 30,
-      "attackType": 4,
-      "requirements": {
-        "strength": 35,
-        "dexterity": 8
-      },
-      "classRequirements": {
-        "summoner": 1
-      }
-    },
-    {
-      "number": 83,
-      "name": {
-        "en": "Sacred Fire Armor-J",
-        "de": "Heiligfeuerrüstung-J",
-        "es": "Armadura de Fuego Sagrado-J",
-        "pt": "Armadura de Fogo Sagrado-J"
-      },
-      "width": 2,
-      "height": 3,
-      "slot": "armor",
-      "statProfile": "armor",
-      "level": 66,
-      "durability": 52,
-      "defense": 45,
-      "attackType": 1,
-      "requirements": {
-        "strength": 85,
-        "vitality": 75
       },
       "classRequirements": {
         "rageFighter": 1

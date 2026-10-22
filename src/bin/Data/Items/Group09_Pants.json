@@ -1216,10 +1216,10 @@
     {
       "number": 50,
       "name": {
-        "en": "Divine Pants",
+        "en": "Faith Pants",
         "de": "Glaubenshose",
-        "es": "Pantalones Divinos",
-        "pt": "Calças divinas"
+        "es": "Pantalones de Fe",
+        "pt": "Calças da fé"
       },
       "width": 2,
       "height": 2,
@@ -1484,8 +1484,8 @@
     {
       "number": 66,
       "name": {
-        "en": "Dark Soul Pants",
-        "de": "Dunkelseelenhose",
+        "en": "Adamantine Pants",
+        "de": "Adamanthose",
         "es": "Pantalones Adamantinos",
         "pt": "Calças de adamantina"
       },
@@ -1712,151 +1712,6 @@
         "level": 380,
         "strength": 97,
         "vitality": 85
-      },
-      "classRequirements": {
-        "rageFighter": 1
-      }
-    },
-    {
-      "number": 78,
-      "name": {
-        "en": "Dragon Pants-J",
-        "de": "Drachenhose-J",
-        "es": "Pantalones Dragón-J",
-        "pt": "Calças do dragão-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "pants",
-      "statProfile": "armor",
-      "level": 55,
-      "durability": 68,
-      "defense": 28,
-      "attackType": 4,
-      "requirements": {
-        "strength": 120,
-        "dexterity": 30
-      },
-      "classRequirements": {
-        "darkKnight": 1,
-        "magicGladiator": 1
-      }
-    },
-    {
-      "number": 79,
-      "name": {
-        "en": "Legendary Pants-J",
-        "de": "Legendäre Hose-J",
-        "es": "Pantalones Legendario-J",
-        "pt": "Calças lendário-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "pants",
-      "statProfile": "armor",
-      "level": 53,
-      "durability": 42,
-      "defense": 22,
-      "attackType": 4,
-      "requirements": {
-        "strength": 40
-      },
-      "classRequirements": {
-        "darkWizard": 1,
-        "magicGladiator": 1
-      }
-    },
-    {
-      "number": 80,
-      "name": {
-        "en": "Guardian Pants-J",
-        "de": "Wächterhose-J",
-        "es": "Pantalones Guardián-J",
-        "pt": "Calças do guardião-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "pants",
-      "statProfile": "armor",
-      "level": 54,
-      "durability": 45,
-      "defense": 27,
-      "attackType": 4,
-      "requirements": {
-        "strength": 40,
-        "dexterity": 80
-      },
-      "classRequirements": {
-        "fairyElf": 1
-      }
-    },
-    {
-      "number": 81,
-      "name": {
-        "en": "Light Plate Pants-J",
-        "de": "Leichtplattenhose-J",
-        "es": "Pantalones Plata de Luz-J",
-        "pt": "Calças de placa leve-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "pants",
-      "statProfile": "armor",
-      "level": 50,
-      "durability": 42,
-      "defense": 23,
-      "attackType": 4,
-      "requirements": {
-        "strength": 70,
-        "dexterity": 20
-      },
-      "classRequirements": {
-        "darkLord": 1
-      }
-    },
-    {
-      "number": 82,
-      "name": {
-        "en": "Red Wing Pants-J",
-        "de": "Rotschwingenhose-J",
-        "es": "Pantalones Ala Roja-J",
-        "pt": "Calças da asa vermelha-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "pants",
-      "statProfile": "armor",
-      "level": 53,
-      "durability": 42,
-      "defense": 24,
-      "attackType": 4,
-      "requirements": {
-        "strength": 35,
-        "dexterity": 7
-      },
-      "classRequirements": {
-        "summoner": 1
-      }
-    },
-    {
-      "number": 83,
-      "name": {
-        "en": "Sacred Fire Pants-J",
-        "de": "Heiligfeuerhose-J",
-        "es": "Pantalones de Fuego Sagrado-J",
-        "pt": "Calças de Fogo Sagrado-J"
-      },
-      "width": 2,
-      "height": 2,
-      "slot": "pants",
-      "statProfile": "armor",
-      "level": 62,
-      "durability": 52,
-      "defense": 35,
-      "attackType": 2,
-      "requirements": {
-        "strength": 85,
-        "vitality": 75
       },
       "classRequirements": {
         "rageFighter": 1
