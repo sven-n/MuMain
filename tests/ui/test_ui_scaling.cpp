@@ -3,6 +3,11 @@
 #include <doctest.h>
 
 #include <algorithm>
+#include <array>
+#include <filesystem>
+#include <fstream>
+#include <iterator>
+#include <string>
 #include <utility>
 
 #include "Character/CharSelMainWin.h"
@@ -11,6 +16,9 @@
 #include "Core/Globals/_enum.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Data/GameConfig/GameConfigConstants.h"
+#include "Data/GameConfig/GameConfigValidation.h"
+#include "Core/Platform/WinIni.h"
+#include "Render/Look/LookPreset.h"
 #include "UI/Social/SocialWorkspace.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "UI/Social/SocialWindowBase.h"
@@ -767,3 +775,280 @@ TEST_CASE("every transform sizes native text by the one typography scale [ui][sc
     }
 }
 
+TEST_CASE("anisotropy defaults to 8x and reads its ini key [config][render][mipmap]")
+{
+    CHECK(CfgDefaults::CfgDefaultAnisotropy == 8);
+
+    // The key as config.ini spells it, read the way GameConfig::Load reads it.
+    const std::filesystem::path file = std::filesystem::temp_directory_path() / "mu_anisotropy_test.ini";
+    const auto readAnisotropy = [&file]()
+    {
+        return GameConfigValidation::ValidateAnisotropy(
+            static_cast<int>(GetPrivateProfileIntW(CfgSections::CfgSectionRender, CfgKeys::CfgKeyAnisotropy,
+                                                   CfgDefaults::CfgDefaultAnisotropy, file.wstring().c_str())));
+    };
+
+    {
+        std::ofstream ini(file, std::ios::trunc);
+        ini << "[Render]\nVSync=1\n";
+    }
+    CHECK(readAnisotropy() == 8);
+
+    {
+        std::ofstream ini(file, std::ios::trunc);
+        ini << "[Render]\nAnisotropy=4\n";
+    }
+    CHECK(readAnisotropy() == 4);
+
+    {
+        std::ofstream ini(file, std::ios::trunc);
+        ini << "[render]\nanisotropy=-3\n";
+    }
+    CHECK(readAnisotropy() == 1);
+    std::filesystem::remove(file);
+
+    auto& config = GameConfig::GetInstance();
+    const int previousAnisotropy = config.GetAnisotropy();
+    config.SetAnisotropy(0);
+    CHECK(config.GetAnisotropy() == 1);
+    // The upper bound is the GPU's and is applied by the renderer.
+    config.SetAnisotropy(32);
+    CHECK(config.GetAnisotropy() == 32);
+    config.SetAnisotropy(previousAnisotropy);
+}
+
+TEST_CASE("the look preset reads Classic or Enhanced and defaults to CfgDefaultLook [config][render][look]")
+{
+    const LookPreset defaultLook = *GameConfigValidation::ParseLook(CfgDefaults::CfgDefaultLook);
+    CHECK(defaultLook == LookPreset::Classic);
+    CHECK(GameConfigValidation::ParseLook(L"Enhanced") == LookPreset::Enhanced);
+    CHECK(GameConfigValidation::ParseLook(L" enhanced ") == LookPreset::Enhanced);
+    CHECK(GameConfigValidation::ParseLook(L"CLASSIC") == LookPreset::Classic);
+    CHECK_FALSE(GameConfigValidation::ParseLook(L"Custom").has_value());
+    CHECK_FALSE(GameConfigValidation::ParseLook(L"").has_value());
+    CHECK(std::wstring(GameConfigValidation::FormatLook(LookPreset::Enhanced)) == L"Enhanced");
+    CHECK(GameConfigValidation::ParseLook(GameConfigValidation::FormatLook(LookPreset::Classic)) ==
+          LookPreset::Classic);
+
+    const std::filesystem::path file = std::filesystem::temp_directory_path() / "mu_look_preset_test.ini";
+    const auto write = [&file](const char* text)
+    {
+        std::ofstream ini(file, std::ios::trunc);
+        ini << text;
+    };
+
+    // A fresh configuration (no file, or no Look): the default.
+    std::filesystem::remove(file);
+    CHECK(ReadLookPreset(file) == defaultLook);
+    write("[Render]\nVSync=1\n");
+    CHECK(ReadLookPreset(file) == defaultLook);
+
+    write("[Render]\nLook=Enhanced\n");
+    CHECK(ReadLookPreset(file) == LookPreset::Enhanced);
+    write("[Render]\nLook=Classic\n");
+    CHECK(ReadLookPreset(file) == LookPreset::Classic);
+
+    // An invalid value counts as the default.
+    write("[Render]\nLook=Shiny\n");
+    CHECK(ReadLookPreset(file) == defaultLook);
+    std::filesystem::remove(file);
+}
+
+TEST_CASE("anti-aliasing and anisotropy changes keep the look preset [config][render][look]")
+{
+    auto& config = GameConfig::GetInstance();
+    const LookPreset previousLook = config.GetLook();
+    const int previousSamples = config.GetAntialiasing();
+    const int previousAnisotropy = config.GetAnisotropy();
+    config.SetLook(LookPreset::Enhanced);
+    config.SetAntialiasing(8);
+    config.SetAnisotropy(2);
+    CHECK(config.GetLook() == LookPreset::Enhanced);
+    config.SetLook(LookPreset::Classic);
+    config.SetAntialiasing(0);
+    CHECK(config.GetLook() == LookPreset::Classic);
+    config.SetLook(previousLook);
+    config.SetAntialiasing(previousSamples);
+    config.SetAnisotropy(previousAnisotropy);
+}
+
+namespace
+{
+// GameConfig loads and saves config.ini beside the executable; this puts the file back as it was
+// and reloads it.
+class ExecutableConfigFile
+{
+public:
+    ExecutableConfigFile()
+    {
+        wchar_t executable[MAX_PATH] = {};
+        GetModuleFileNameW(nullptr, executable, MAX_PATH);
+        m_path = std::filesystem::path(executable).parent_path() / L"config.ini";
+        std::ifstream file(m_path, std::ios::binary);
+        m_existed = file.is_open();
+        m_content.assign(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
+    }
+    ~ExecutableConfigFile()
+    {
+        if (m_existed)
+        {
+            std::ofstream file(m_path, std::ios::binary | std::ios::trunc);
+            file << m_content;
+        }
+        else
+        {
+            std::error_code ignored;
+            std::filesystem::remove(m_path, ignored);
+        }
+        GameConfig::GetInstance().Load();
+    }
+    ExecutableConfigFile(const ExecutableConfigFile&) = delete;
+    ExecutableConfigFile& operator=(const ExecutableConfigFile&) = delete;
+
+    void Write(const std::string& text) const
+    {
+        std::ofstream file(m_path, std::ios::trunc);
+        file << text;
+    }
+    // 2 when the key is missing.
+    [[nodiscard]] int ReadRender(const std::string& key) const
+    {
+        const std::wstring wideKey(key.begin(), key.end());
+        return static_cast<int>(GetPrivateProfileIntW(L"Render", wideKey.c_str(), 2, m_path.wstring().c_str()));
+    }
+
+private:
+    std::filesystem::path m_path;
+    bool m_existed = false;
+    std::string m_content;
+};
+} // namespace
+
+TEST_CASE("each Enhanced feature switch loads and saves through its own config.ini key [config][render][look]")
+{
+    struct Switch
+    {
+        std::string key;
+        bool (GameConfig::*get)() const;
+        void (GameConfig::*set)(bool);
+    };
+    const std::array<Switch, 4> switches{{
+        {"EnhancedLighting", &GameConfig::GetEnhancedLighting, &GameConfig::SetEnhancedLighting},
+        {"DynamicLights", &GameConfig::GetDynamicLights, &GameConfig::SetDynamicLights},
+        {"LightMood", &GameConfig::GetLightMood, &GameConfig::SetLightMood},
+        {"PostProcessing", &GameConfig::GetPostProcessing, &GameConfig::SetPostProcessing},
+    }};
+    const ExecutableConfigFile file;
+    GameConfig& config = GameConfig::GetInstance();
+
+    // Without the keys every switch is on.
+    file.Write("[Render]\nVSync=1\n");
+    config.Load();
+    for (const Switch& each : switches)
+    {
+        CAPTURE(each.key);
+        CHECK((config.*each.get)());
+    }
+
+    for (const Switch& off : switches)
+    {
+        CAPTURE(off.key);
+        // Loading: the key the file sets to 0 turns off its switch and no other.
+        file.Write("[Render]\n" + off.key + "=0\n");
+        config.Load();
+        for (const Switch& each : switches)
+        {
+            CAPTURE(each.key);
+            CHECK((config.*each.get)() == (&each != &off));
+        }
+
+        // Saving: every switch flips, so each setter must move its own member, and each switch
+        // writes its new value under its own key.
+        for (const Switch& each : switches)
+        {
+            (config.*each.set)(&each == &off);
+        }
+        config.Save();
+        for (const Switch& each : switches)
+        {
+            CAPTURE(each.key);
+            CHECK(file.ReadRender(each.key) == (&each == &off ? 1 : 0));
+        }
+    }
+}
+
+TEST_CASE(
+    "anti-aliasing defaults to CfgDefaultAntialiasing and keeps only off, 2, 4 and 8 [config][render][antialiasing]")
+{
+    CHECK(CfgDefaults::CfgDefaultAntialiasing == 4);
+
+    // The key as config.ini spells it, read the way GameConfig::Load reads it.
+    const std::filesystem::path file = std::filesystem::temp_directory_path() / "mu_antialiasing_test.ini";
+    const auto readAntialiasing = [&file]()
+    {
+        return GameConfigValidation::ValidateAntialiasing(
+            static_cast<int>(GetPrivateProfileIntW(CfgSections::CfgSectionRender, CfgKeys::CfgKeyAntialiasing,
+                                                   CfgDefaults::CfgDefaultAntialiasing, file.wstring().c_str())));
+    };
+
+    {
+        std::ofstream ini(file, std::ios::trunc);
+        ini << "[Render]\nVSync=1\n";
+    }
+    CHECK(readAntialiasing() == CfgDefaults::CfgDefaultAntialiasing);
+
+    {
+        std::ofstream ini(file, std::ios::trunc);
+        ini << "[Render]\nAntialiasing=2\n";
+    }
+    CHECK(readAntialiasing() == 2);
+
+    {
+        std::ofstream ini(file, std::ios::trunc);
+        ini << "[Render]\nAntialiasing=0\n";
+    }
+    CHECK(readAntialiasing() == 0);
+
+    {
+        std::ofstream ini(file, std::ios::trunc);
+        ini << "[render]\nantialiasing=16\n";
+    }
+    CHECK(readAntialiasing() == 8);
+    std::filesystem::remove(file);
+
+    CHECK(GameConfigValidation::ValidateAntialiasing(-1) == 0);
+    CHECK(GameConfigValidation::ValidateAntialiasing(1) == 0);
+    CHECK(GameConfigValidation::ValidateAntialiasing(3) == 2);
+    CHECK(GameConfigValidation::ValidateAntialiasing(7) == 4);
+
+    auto& config = GameConfig::GetInstance();
+    const int previous = config.GetAntialiasing();
+    config.SetAntialiasing(8);
+    CHECK(config.GetAntialiasing() == 8);
+    config.SetAntialiasing(5);
+    CHECK(config.GetAntialiasing() == 4);
+    config.SetAntialiasing(0);
+    CHECK(config.GetAntialiasing() == 0);
+    config.SetAntialiasing(previous);
+}
+
+TEST_CASE(
+    "the Enhanced preset switches on all five features and anti-aliasing at full mood strength [config][render][look]")
+{
+    const Render::Look::LookFeatures enhanced = Render::Look::PresetFeatures(LookPreset::Enhanced);
+    CHECK(enhanced.textureFiltering);
+    CHECK(enhanced.enhancedLighting);
+    CHECK(enhanced.dynamicLights);
+    CHECK(enhanced.lightMood);
+    CHECK(enhanced.postProcessing);
+    CHECK(enhanced.lightMoodStrength == 100);
+    CHECK(enhanced.antialiasing);
+
+    const Render::Look::LookFeatures classic = Render::Look::PresetFeatures(LookPreset::Classic);
+    CHECK_FALSE(classic.textureFiltering);
+    CHECK_FALSE(classic.enhancedLighting);
+    CHECK_FALSE(classic.dynamicLights);
+    CHECK_FALSE(classic.lightMood);
+    CHECK_FALSE(classic.postProcessing);
+    CHECK_FALSE(classic.antialiasing);
+}

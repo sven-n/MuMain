@@ -1,15 +1,51 @@
 mu_add_test(
     NAME test_item_database
     SOURCES
+        test_item_check_targets.cpp
+        test_item_code_references.cpp
         test_item_database.cpp
+        test_item_edit_history.cpp
         test_item_json.cpp
+        test_item_list_model.cpp
         test_item_model_json.cpp
         test_item_model_display_json.cpp
         test_item_model_glow_json.cpp
+        test_item_model_material_json.cpp
         test_item_model_problems.cpp
+        test_item_model_tool.cpp
+        test_item_names.cpp
+        test_item_stat_file_change.cpp
+        test_item_stats_json.cpp
+        test_item_users.cpp
         test_localized_string.cpp
     LINK_LIBS
         MuClient
+)
+
+# The light mood of the world maps (Data/Maps/LightMood.json).
+mu_add_test(
+    NAME light_mood_data_tests
+    SOURCES
+        test_light_mood_json.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(light_mood_data_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
+# The look profile of the Enhanced rendering features (Data/Render/Look.json) and the player's own
+# tuning of it ([EnhancedTuning] of config.ini).
+mu_add_test(
+    NAME look_profile_data_tests
+    SOURCES
+        test_look_profile_json.cpp
+        test_personal_tuning.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(look_profile_data_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
 # Reads the item and item model files shipped in src/bin/Data through the real
@@ -20,12 +56,28 @@ mu_add_test(
     SOURCES
         test_item_database_files.cpp
         test_item_model_files.cpp
+        test_item_requirement_weights.cpp
         test_item_rules.cpp
+        test_item_stats.cpp
+        test_item_value_formulas.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
 )
 target_compile_definitions(test_item_database_files PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
+# Animates the shipped player model the way the character pre-pass does.
+mu_add_test(
+    NAME test_character_bones
+    SOURCES
+        test_character_bones.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(test_character_bones PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 

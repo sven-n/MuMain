@@ -1,4 +1,8 @@
 // GPU bone skinning for BMD rest-pose geometry.
+// palette.w selects the lighting: 0 unlit, 1 Classic per-vertex lighting, 2 Enhanced lighting (the
+// vertex colour stays unlit and skinned_lit.frag lights each pixel from the normal, view vector and
+// light direction outputs), 3 Enhanced lighting plus the frame's point lights (world-space
+// outputs). Other fragment shaders ignore the Enhanced outputs.
 #ifdef MU_D3D12_RAW_STORAGE_BUFFER
 ByteAddressBuffer boneRows : register(t0, space0);
 static const uint BoneRowSizeBytes = 16;
@@ -12,12 +16,41 @@ cbuffer Skinning : register(b0, space1)
     float4 bodyOriginAndScale;
     float4 boneScaleAndRestPoseScale;
     uint4 palette;
-    float4 lightDirection;
+    float4 lightDirection; // xyz: the model light vector; w: the highlight knee
     float4 fogParameters;
     uint4 textureCoordinateMode;
     float4 chromeParameters;
     float4 textureCoordinateParameters;
+    // xyz: camera position in this draw's vertex space; w: specular strength.
+    float4 eyePositionAndSpecular;
+    // Enhanced lighting: rows of the affine transform from this draw's vertex space to world space.
+    float4 vertexToWorldRows[3];
 };
+
+static const uint LightingClassic = 1;
+static const uint LightingEnhancedDynamic = 3;
+
+// The light mood's highlight shoulder (Render::Lighting::LightMood::RollOffHighlight): a lit
+// colour channel above the knee approaches 1 smoothly instead of being cut off there. Only a knee
+// between 0 and 1 rolls off; the callers keep the Classic cut-off expression verbatim otherwise,
+// so that the driver compiles the Classic path to the same arithmetic as before.
+bool RollsOffHighlight(float knee)
+{
+    return knee > 0.0 && knee < 1.0;
+}
+
+float RollOffChannel(float value, float knee)
+{
+    const float range = 1.0 - knee;
+    return value > knee ? knee + range * (1.0 - exp(-max(value - knee, 0.0) / range)) : value;
+}
+
+float3 RollOffHighlight(float3 color, float knee)
+{
+    return saturate(float3(RollOffChannel(color.r, knee), RollOffChannel(color.g, knee),
+                           RollOffChannel(color.b, knee)));
+}
+
 
 struct VSInput
 {
@@ -35,6 +68,12 @@ struct VSOutput
     float2 uv : TEXCOORD0;
     float4 color : TEXCOORD1;
     float fogFactor : TEXCOORD2;
+    float eyeDepth : TEXCOORD3;
+    float3 normal : TEXCOORD4;
+    float3 viewVector : TEXCOORD5;
+    nointerpolation float4 lightDirectionAndSpecular : TEXCOORD6;
+    float4 worldPositionAndDynamicLights : TEXCOORD7; // w: 1 when the point lights apply
+    float3 worldNormal : TEXCOORD8;
     float clipDist : SV_ClipDistance0;
 };
 
@@ -164,10 +203,12 @@ VSOutput main(VSInput input)
     output.uv = getTextureCoordinates(input.uv, skinnedNormal);
     output.color = input.color;
 
-    if (palette.w != 0)
+    if (palette.w == LightingClassic)
     {
         const float luminosity = max(dot(skinnedNormal, lightDirection.xyz) * 0.8 + 0.4, 0.2);
         output.color.rgb = saturate(output.color.rgb * luminosity);
+        if (RollsOffHighlight(lightDirection.w))
+            output.color.rgb = RollOffHighlight(input.color.rgb * luminosity, lightDirection.w);
     }
 
     output.clipDist = output.pos.w - 1.0;
@@ -175,5 +216,16 @@ VSOutput main(VSInput input)
     output.fogFactor = range > 0.001
         ? saturate((fogParameters.y - abs(output.pos.w)) / range)
         : 1.0;
+    output.eyeDepth = abs(output.pos.w);
+    output.normal = skinnedNormal;
+    output.viewVector = eyePositionAndSpecular.xyz - skinnedPosition;
+    output.lightDirectionAndSpecular = float4(lightDirection.xyz, eyePositionAndSpecular.w);
+    const float4 position = float4(skinnedPosition, 1.0);
+    output.worldPositionAndDynamicLights =
+        float4(dot(vertexToWorldRows[0], position), dot(vertexToWorldRows[1], position),
+               dot(vertexToWorldRows[2], position), palette.w == LightingEnhancedDynamic ? 1.0 : 0.0);
+    output.worldNormal = float3(dot(vertexToWorldRows[0].xyz, skinnedNormal),
+                                dot(vertexToWorldRows[1].xyz, skinnedNormal),
+                                dot(vertexToWorldRows[2].xyz, skinnedNormal));
     return output;
 }

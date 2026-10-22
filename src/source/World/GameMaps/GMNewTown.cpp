@@ -103,12 +103,12 @@ bool GMNewTown::MoveObject(OBJECT* pObject)
         break;
     case 2:
     {
-        pObject->BlendMeshTexCoordV += 0.015f;
+        pObject->BlendMeshTexCoordV += 0.015f * FPS_ANIMATION_FACTOR;
     }
     break;
     case 53:
     {
-        pObject->BlendMeshTexCoordV += 0.015f;
+        pObject->BlendMeshTexCoordV += 0.015f * FPS_ANIMATION_FACTOR;
     }
     break;
     case 54:
@@ -116,7 +116,7 @@ bool GMNewTown::MoveObject(OBJECT* pObject)
         break;
     case 55:
     {
-        pObject->BlendMeshTexCoordV += 0.015f;
+        pObject->BlendMeshTexCoordV += 0.015f * FPS_ANIMATION_FACTOR;
     }
     break;
     case 56:
@@ -141,7 +141,7 @@ bool GMNewTown::MoveObject(OBJECT* pObject)
         break;
     case 89:
     {
-        pObject->BlendMeshTexCoordV += 0.005f;
+        pObject->BlendMeshTexCoordV += 0.005f * FPS_ANIMATION_FACTOR;
     }
     break;
     case 62:

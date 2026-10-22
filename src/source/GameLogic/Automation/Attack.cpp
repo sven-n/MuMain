@@ -6,6 +6,7 @@
 #include "Engine/Object/PlayerActionState.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 #include <algorithm>
 
@@ -77,7 +78,7 @@ static void ApproachAlong(const PATH_t& path)
 static float EquippedAttackRange()
 {
     const int rightHand = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
-    const bool spear = rightHand >= ITEM_SPEAR && rightHand < ITEM_SPEAR + MAX_ITEM_INDEX;
+    const bool spear = GameLogic::Items::IsSpearType(rightHand);
     const bool bow = gCharacterManager.GetEquipedBowType() != BOWTYPE_NONE;
     return BasicAttackRange(spear, bow);
 }

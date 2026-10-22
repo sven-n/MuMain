@@ -206,8 +206,7 @@ TEST_CASE("Effect entries are read with vectors, offsets and copies [data][effec
         {"name": "dragon", "code": "MODEL_DRAGON", "create": {"lightEnable": false, "alphaEnable": true,
          "kind": 255, "skill": 65535, "pkKey": -1, "timer": 0.5, "distance": 2, "collisionRange": 1,
          "position": {"z": 100}, "angle": [0, 0, 45], "direction": {"x": 1, "y": -35},
-         "offset": {"position": {"y": {"value": 200, "timesFrameFactor": true}, "z": 3400},
-                    "angle": {"x": {"value": 20, "timesFrameFactor": false}}, "startPosition": [1, 2, 3]},
+         "offset": {"position": {"y": 200, "z": 3400}, "angle": {"x": 20}, "startPosition": [1, 2, 3]},
          "copy": {"startPosition": "position", "headTargetAngle": "callLight", "scale": "callScale"}}}]})",
                                    EffectKind::Effect);
     CHECK(result.issues.empty());
@@ -225,7 +224,7 @@ TEST_CASE("Effect entries are read with vectors, offsets and copies [data][effec
     CHECK(params.position == EffectCreateVector{{std::nullopt, std::nullopt, 100.0}});
     CHECK(params.angle == EffectCreateVector{{0.0, 0.0, 45.0}});
     CHECK(params.direction == EffectCreateVector{{1.0, -35.0, std::nullopt}});
-    CHECK(params.positionOffset == EffectCreateVector{{std::nullopt, 200.0, 3400.0}, {false, true, false}});
+    CHECK(params.positionOffset == EffectCreateVector{{std::nullopt, 200.0, 3400.0}});
     CHECK(params.angleOffset == EffectCreateVector{{20.0, std::nullopt, std::nullopt}});
     CHECK(params.startPositionOffset == EffectCreateVector{{1.0, 2.0, 3.0}});
     CHECK_FALSE(params.copyLightToDirection);
@@ -239,10 +238,9 @@ TEST_CASE("Wrong vectors, offsets and copies are errors, unknown parts warnings 
     const ReadResult result = Read(R"({"formatVersion": 1, "kind": "effect", "types": [
         {"name": "dragon", "code": "MODEL_DRAGON", "create": {"lifeTime": 2, "lightEnable": 1, "kind": 256,
          "skill": -1, "timer": 1e39, "position": [1, 2], "angle": 5,
-         "direction": {"y": {"value": 1, "timesFrameFactor": true}, "w": 1},
-         "offset": {"position": {"x": {"timesFrameFactor": true}, "y": {"value": "far"}, "z": "up"},
-                    "angle": {}, "startPosition": {"y": {"value": 1, "timesFrameFactor": "yes"}},
-                    "scale": {"x": 1}},
+         "direction": {"y": {"value": 1}, "w": 1},
+         "offset": {"position": {"x": {"value": 1, "timesFrameFactor": true}, "y": "far", "z": "up"},
+                    "angle": {}, "startPosition": {"y": [1]}, "scale": {"x": 1}},
          "copy": {"startPosition": "angle", "headTargetAngle": 1, "light": "direction"}}},
         {"name": "ghost", "code": "MODEL_CUNDUN_GHOST", "create": {"offset": 5, "copy": []}},
         {"name": "blood", "code": "MODEL_BLOOD", "create": {"scale": 1, "direction": [0, 1, 0], "offset": {},
@@ -251,8 +249,8 @@ TEST_CASE("Wrong vectors, offsets and copies are errors, unknown parts warnings 
          "copyLightToDirection": true}}]})",
                                    EffectKind::Effect);
     for (const char* field : {"lightEnable", "kind", "skill", "timer", "position", "angle", "direction.y",
-                              "offset.position.x.value", "offset.position.y.value", "offset.position.z",
-                              "offset.startPosition.y.timesFrameFactor", "copy.startPosition", "copy.headTargetAngle"})
+                              "offset.position.x", "offset.position.y", "offset.position.z", "offset.startPosition.y",
+                              "copy.startPosition", "copy.headTargetAngle"})
     {
         INFO(std::string(field));
         CHECK(HasError(result.issues, std::string("types[0].create.") + field));
@@ -335,7 +333,7 @@ TEST_CASE("Variants are read and merged over the row field by field [data][effec
         {"name": "flare", "code": "BITMAP_FLARE", "create": {"lifeTime": 30, "scale": 1, "angle": [1, 2, 3],
          "copy": {"direction": "light"}, "variants": [
            {"subTypes": [3, 1], "lifeTime": 60, "angle": {"y": 5},
-            "offset": {"position": {"z": {"value": 100, "timesFrameFactor": true}}}},
+            "offset": {"position": {"z": 100}}},
            {"subType": 2, "direction": [4, 5, 6], "copy": {"scale": "callScale", "startPosition": "position"}}]}}]})",
                                    EffectKind::Effect);
     CHECK(result.issues.empty());
@@ -351,7 +349,7 @@ TEST_CASE("Variants are read and merged over the row field by field [data][effec
     CHECK(first.lifeTime == 60.0);
     CHECK(first.scale == 1.0);
     CHECK(first.angle == EffectCreateVector{{1.0, 5.0, 3.0}});
-    CHECK(first.positionOffset == EffectCreateVector{{std::nullopt, std::nullopt, 100.0}, {false, false, true}});
+    CHECK(first.positionOffset == EffectCreateVector{{std::nullopt, std::nullopt, 100.0}});
     CHECK(first.copyLightToDirection);
     CHECK(first.variants.empty());
 
@@ -373,7 +371,7 @@ TEST_CASE(
     const ReadResult result = Read(R"({"formatVersion": 1, "kind": "effect", "types": [
         {"name": "skull", "code": "BITMAP_SKULL", "create": {"lifeTime": 1000, "alphaTarget": 0.75,
          "renderType": "alphaBlendMinus", "animation": 0, "startPosition": {"x": 4.5, "y": 4.5},
-         "offset": {"lifeTime": {"value": -60, "timesFrameFactor": true}, "startPosition": {"x": 1}},
+         "offset": {"lifeTime": -60, "startPosition": {"x": 1}},
          "copy": {"direction": "callAngle", "eyeRight": "light", "deadPosition": "callAngle"}}},
         {"name": "piercing2", "code": "MODEL_PIERCING2", "create": {"renderType": "dark",
          "copy": {"startPosition": "callPosition"}}}]})",
@@ -386,7 +384,7 @@ TEST_CASE(
     CHECK(skull.renderType == Data::Effects::EffectRenderType::AlphaBlendMinus);
     CHECK(skull.animation == 0);
     CHECK(skull.startPosition == EffectCreateVector{{4.5, 4.5, std::nullopt}});
-    CHECK(skull.lifeTimeOffset == EffectCreateNumber{-60.0, true});
+    CHECK(skull.lifeTimeOffset == -60.0);
     // An offset of a component of the start position the row sets is no warning.
     CHECK(skull.startPositionOffset == EffectCreateVector{{1.0, std::nullopt, std::nullopt}});
     CHECK(skull.copyCallAngleToDirection);
@@ -551,8 +549,8 @@ TEST_CASE("Creation values are written in a fixed order, unset ones left out [da
     CHECK(WriteEffectTypesJson(EffectKind::Particle, particles).find("create") == std::string::npos);
 }
 
-// A vector is a list when all its components are set and none is multiplied
-// by the frame factor, else an object of the components; both on one line.
+// A vector is a list when all its components are set, else an object of the
+// components; both on one line.
 TEST_CASE("Vectors, offsets and copies are written in a fixed order, vectors on one line [data][effects]")
 {
     EffectTypeEntry dragon{"dragon", "MODEL_DRAGON"};
@@ -570,8 +568,8 @@ TEST_CASE("Vectors, offsets and copies are written in a fixed order, vectors on 
                            .position = EffectCreateVector{{std::nullopt, std::nullopt, 100.0}},
                            .angle = EffectCreateVector{{0.0, std::nullopt, std::nullopt}},
                            .direction = EffectCreateVector{{0.0, -35.0, 0.5}},
-                           .positionOffset = EffectCreateVector{{std::nullopt, 200.0, 3400.0}, {false, true, false}},
-                           .angleOffset = EffectCreateVector{{20.0, 0.0, 0.0}, {true, true, true}},
+                           .positionOffset = EffectCreateVector{{std::nullopt, 200.0, 3400.0}},
+                           .angleOffset = EffectCreateVector{{20.0, 0.0, 0.0}},
                            .startPositionOffset = EffectCreateVector{{std::nullopt, std::nullopt, 800.0}},
                            .copyPositionToStartPosition = true,
                            .copyCallLightToHeadTargetAngle = true,
@@ -601,9 +599,8 @@ TEST_CASE("Vectors, offsets and copies are written in a fixed order, vectors on 
                   "        \"angle\": {\"x\": 0},\n"
                   "        \"direction\": [0, -35, 0.5],\n"
                   "        \"offset\": {\n"
-                  "          \"position\": {\"y\": {\"value\": 200, \"timesFrameFactor\": true}, \"z\": 3400},\n"
-                  "          \"angle\": {\"x\": {\"value\": 20, \"timesFrameFactor\": true}, \"y\": {\"value\": 0, "
-                  "\"timesFrameFactor\": true}, \"z\": {\"value\": 0, \"timesFrameFactor\": true}},\n"
+                  "          \"position\": {\"y\": 200, \"z\": 3400},\n"
+                  "          \"angle\": [20, 0, 0],\n"
                   "          \"startPosition\": {\"z\": 800}\n"
                   "        },\n"
                   "        \"copy\": {\n"
@@ -629,7 +626,7 @@ TEST_CASE("Render type, start position, the lifeTime offset and more copies are 
                                       .renderType = Data::Effects::EffectRenderType::AlphaBlendMinus,
                                       .animation = 0,
                                       .startPosition = EffectCreateVector{{4.5, 4.5, std::nullopt}},
-                                      .lifeTimeOffset = EffectCreateNumber{-60.0, true},
+                                      .lifeTimeOffset = -60.0,
                                       .copyCallAngleToDirection = true,
                                       .copyLightToEyeRight = true,
                                       .copyCallAngleToDeadPosition = true};
@@ -650,7 +647,7 @@ TEST_CASE("Render type, start position, the lifeTime offset and more copies are 
                   "        \"animation\": 0,\n"
                   "        \"startPosition\": {\"x\": 4.5, \"y\": 4.5},\n"
                   "        \"offset\": {\n"
-                  "          \"lifeTime\": {\"value\": -60, \"timesFrameFactor\": true}\n"
+                  "          \"lifeTime\": -60\n"
                   "        },\n"
                   "        \"copy\": {\n"
                   "          \"direction\": \"callAngle\",\n"
@@ -917,7 +914,7 @@ TEST_CASE("The effect registry converts and applies vectors, offsets and copies 
                            .position = EffectCreateVector{{std::nullopt, std::nullopt, 100.0}},
                            .angle = EffectCreateVector{{std::nullopt, 0.0, std::nullopt}},
                            .direction = EffectCreateVector{{1.0, 2.0, 3.0}},
-                           .positionOffset = EffectCreateVector{{10.0, std::nullopt, 3400.0}, {false, false, true}},
+                           .positionOffset = EffectCreateVector{{10.0, std::nullopt, 3400.0}},
                            .angleOffset = EffectCreateVector{{std::nullopt, std::nullopt, 90.0}},
                            .startPositionOffset = EffectCreateVector{{std::nullopt, 800.0, std::nullopt}},
                            .copyPositionToStartPosition = true,
@@ -932,7 +929,6 @@ TEST_CASE("The effect registry converts and applies vectors, offsets and copies 
     CHECK(params.skill == 22);
     CHECK(params.position.components == 0b100);
     CHECK(params.positionOffset.values == std::array<float, 3>{10.f, 0.f, 3400.f});
-    CHECK(params.positionOffset.timesFrameFactor == 0b100);
 
     const float frameFactor = FPS_ANIMATION_FACTOR;
     FPS_ANIMATION_FACTOR = 0.5f;
@@ -954,10 +950,10 @@ TEST_CASE("The effect registry converts and applies vectors, offsets and copies 
     CHECK(blood.Timer == 24.f);
     CHECK(blood.Distance == 25.f);
     CHECK(blood.CollisionRange == 26.f);
-    // Position: z set to 100, then 3400 times the frame factor added; x offset.
+    // Position: z set to 100, then 3400 added whatever the frame factor; x offset.
     CHECK(blood.Position[0] == 1010.f);
     CHECK(blood.Position[1] == 2000.f);
-    CHECK(blood.Position[2] == 1800.f);
+    CHECK(blood.Position[2] == 3500.f);
     CHECK(blood.Angle[0] == 11.f);
     CHECK(blood.Angle[1] == 0.f);
     CHECK(blood.Angle[2] == 123.f);
@@ -966,7 +962,7 @@ TEST_CASE("The effect registry converts and applies vectors, offsets and copies 
     // The start position is the position after its offsets, plus its own offset.
     CHECK(blood.StartPosition[0] == 1010.f);
     CHECK(blood.StartPosition[1] == 2800.f);
-    CHECK(blood.StartPosition[2] == 1800.f);
+    CHECK(blood.StartPosition[2] == 3500.f);
     CHECK(blood.HeadTargetAngle[0] == 0.25f);
     CHECK(blood.HeadTargetAngle[2] == 0.75f);
     // The call's scale as it was passed, also 0.
@@ -1046,7 +1042,7 @@ TEST_CASE("Every creation field is applied when it is the only one a row or a va
          [](const OBJECT& o) { return o.m_iAnimation == 3; }},
         {"startPosition", [](EffectCreateParams& p) { p.startPosition.components[0] = 4.5; },
          [](const OBJECT& o) { return o.StartPosition[0] == 4.5f && o.StartPosition[1] == -2.f; }},
-        {"offset.lifeTime", [](EffectCreateParams& p) { p.lifeTimeOffset = EffectCreateNumber{5.0, false}; },
+        {"offset.lifeTime", [](EffectCreateParams& p) { p.lifeTimeOffset = 5.0; },
          [](const OBJECT& o) { return o.LifeTime == 6.f; }},
         {"copy.direction from callAngle", [](EffectCreateParams& p) { p.copyCallAngleToDirection = true; },
          [](const OBJECT& o) { return o.Direction[0] == 4.f && o.Direction[2] == 6.f; }},

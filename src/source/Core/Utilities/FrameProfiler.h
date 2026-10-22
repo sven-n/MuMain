@@ -41,15 +41,17 @@ enum class Pass : int
     RendererStage,
     RendererReplay,
     RendererPostUi,
+    // The two halves of a map object inside Objects: its animation and bones, and its draws.
+    ObjectsAnimate,
+    ObjectsDraw,
     Count_
 };
 
 inline constexpr const char* kPassNames[static_cast<int>(Pass::Count_)] = {
-    "Terrain", "Objects", "Chars", "Items", "Effects", "Other", "CharWait", "MoveFx", "MovePart",
-    "Skinning", "UI", "RenderBegin", "RenderEnd", "Submit", "UIUpdate", "RmlInput", "UILayout", "Flush",
-    "Sprites", "Particles", "Joints", "Overlay",
-    "RmlUpd", "RmlRend",
-    "EndOffscr", "EndStage", "EndReplay", "EndPostUI",
+    "Terrain",   "Objects",  "Chars",     "Items",       "Effects",   "Other",   "CharWait", "MoveFx",
+    "MovePart",  "Skinning", "UI",        "RenderBegin", "RenderEnd", "Submit",  "UIUpdate", "RmlInput",
+    "UILayout",  "Flush",    "Sprites",   "Particles",   "Joints",    "Overlay", "RmlUpd",   "RmlRend",
+    "EndOffscr", "EndStage", "EndReplay", "EndPostUI",   "ObjAnim",   "ObjDraw",
 };
 
 enum class Counter : int
@@ -73,8 +75,46 @@ enum class Counter : int
     BatchBreakMatrix,
     BatchBreakDraw,
     BatchBreakOther,
+    // Bone palette bytes uploaded.
+    BonePaletteBytes,
+    PipelineBinds,
+    SamplerBinds,
+    // Skinned draws whose mesh, texture and pipeline no earlier draw in the pass had this frame.
+    DistinctSkinnedDraws,
+    // Joint trail segments and particles not drawn because they lie outside the view frustum.
+    JointSegmentsCulled,
+    ParticlesCulled,
     Count_
 };
+
+inline constexpr const char* kCounterNames[static_cast<int>(Counter::Count_)] = {
+    "DrawCalls",
+    "MergedDraws",
+    "Merged2DDraws",
+    "GlyphUploads",
+    "GpuSkinningSubmissions",
+    "CpuSkinningIneligible",
+    "GpuSkinningFailures",
+    "VertexBytes",
+    "TextureUploads",
+    "BatchDraws",
+    "BatchVertices",
+    "BatchBreakTexture",
+    "BatchBreakBlend",
+    "BatchBreakDepth",
+    "BatchBreakProgram",
+    "BatchBreakUniform",
+    "BatchBreakMatrix",
+    "BatchBreakDraw",
+    "BatchBreakOther",
+    "BonePaletteBytes",
+    "PipelineBinds",
+    "SamplerBinds",
+    "DistinctSkinnedDraws",
+    "JointSegmentsCulled",
+    "ParticlesCulled",
+};
+static_assert(kCounterNames[static_cast<int>(Counter::Count_) - 1] != nullptr, "a counter without a name");
 
 inline bool g_CountersEnabled = false;
 
@@ -173,6 +213,13 @@ inline PassState& State()
 }
 }
 
+// A pass seen opening inside another one: its time is already in that pass's.
+inline bool& NestedPass(Pass pass)
+{
+    static bool nested[static_cast<int>(Pass::Count_)]{};
+    return nested[static_cast<int>(pass)];
+}
+
 inline Pass CurrentPass()
 {
     return detail::State().current;
@@ -188,6 +235,10 @@ inline void PushPass(Pass pass)
         return;
     }
 
+    if (state.depth > 0)
+    {
+        NestedPass(pass) = true;
+    }
     state.stack[state.depth++] = state.current;
     state.current = pass;
 }

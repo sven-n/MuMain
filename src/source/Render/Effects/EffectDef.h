@@ -19,21 +19,11 @@ class OBJECT;
 namespace Render::Effects
 {
 // A vector of creation values: the components in `components` (bit 0 x, bit 1
-// y, bit 2 z) get `values`. An offset multiplies the components in
-// `timesFrameFactor` by FPS_ANIMATION_FACTOR, as the old creation code did.
+// y, bit 2 z) get `values`.
 struct CreateVector
 {
     std::array<float, 3> values{};
     std::uint8_t components = 0;
-    std::uint8_t timesFrameFactor = 0;
-};
-
-// A number of an offset; multiplied by FPS_ANIMATION_FACTOR when
-// timesFrameFactor is set.
-struct CreateNumber
-{
-    float value = 0.f;
-    bool timesFrameFactor = false;
 };
 
 // The arguments of the CreateEffect call that creation values can copy.
@@ -109,7 +99,7 @@ struct CreateParams
     CreateVector startPosition;
 
     // Offsets
-    std::optional<CreateNumber> lifeTimeOffset;
+    std::optional<float> lifeTimeOffset;
     CreateVector positionOffset;
     CreateVector angleOffset;
     CreateVector startPositionOffset;

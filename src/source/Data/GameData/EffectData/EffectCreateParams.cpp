@@ -23,7 +23,6 @@ void OverrideComponents(EffectCreateVector& vector, const EffectCreateVector& va
         if (variant.components[i])
         {
             vector.components[i] = variant.components[i];
-            vector.timesFrameFactor[i] = variant.timesFrameFactor[i];
         }
     }
 }

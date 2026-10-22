@@ -165,9 +165,10 @@ bool mu::ui::window::CManager::UpdateKeyEvent()
 
     auto vecUI = m_vecUI;
 
-    // A RmlUi field never takes Win32 focus. While the player types in one, only the window that
-    // claims its document receives keys, so typing never triggers another window's hotkeys.
-    const Rml::ElementDocument* typingIn = RmlUiRuntime::Instance().GetTypingDocument();
+    // A RmlUi field never takes Win32 focus. While the player types in one, or a control that takes
+    // keys is focused, only the window that claims its document receives keys, so those keys never
+    // trigger another window's hotkeys.
+    const Rml::ElementDocument* typingIn = RmlUiRuntime::Instance().GetKeyOwningDocument();
     const HWND hFocus = GetFocus();
 
     auto vi = vecUI.begin();

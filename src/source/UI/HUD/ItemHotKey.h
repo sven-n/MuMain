@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <span>
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Inventory/ItemCameraTarget.h"
@@ -18,6 +19,33 @@ namespace mu::ui::window
         HOTKEY_R,
         HOTKEY_COUNT
     };
+
+    // The item types a hotkey takes, in the order it looks for them in the inventory: one
+    // item type, or a list of the item database (valid until the items change). Keeps no
+    // pointer to itself, so it can be copied.
+    class HotKeyItemTypes
+    {
+    public:
+        explicit HotKeyItemTypes(std::span<const int> itemTypes) : m_itemTypes(itemTypes) {}
+        explicit HotKeyItemTypes(int itemType) : m_singleType(itemType), m_isSingle(true) {}
+
+        const int* begin() const
+        {
+            return m_isSingle ? &m_singleType : m_itemTypes.data();
+        }
+        const int* end() const
+        {
+            return begin() + (m_isSingle ? 1 : m_itemTypes.size());
+        }
+
+    private:
+        std::span<const int> m_itemTypes;
+        int m_singleType = 0;
+        bool m_isSingle = false;
+    };
+
+    // The item types a hotkey bound to boundType (at the item level boundLevel) takes.
+    HotKeyItemTypes GetHotKeyItemTypes(int hotKey, int boundType, int boundLevel);
 
     class CItemHotKey
     {
@@ -50,7 +78,6 @@ namespace mu::ui::window
 
     private:
         int GetHotKeyItemIndex(int iType, bool bItemCount = false);
-        bool GetHotKeyCommonItem(IN int iHotKey, OUT int& iStart, OUT int& iEnd);
         int GetHotKeyItemCount(int iType);
         ITEM* GetSlotItem(int iSlotIndex);
         // A target's drawer: one frame of the slot's item, framed for `width` x `height`.

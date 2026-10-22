@@ -11,6 +11,7 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/Inventory/InventoryActionController.h"
 #include "GameLogic/Items/IInventoryActionContext.h"
+#include "Data/GameData/ItemData/ItemTagSet.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Inventory/ItemCameraTarget.h"
 #include "UI/Inventory/ItemGridModel.h"
@@ -202,7 +203,6 @@ namespace mu::ui::window
         int   FindManaItemIndex() const;
         int   FindHealingItemIndex() const;
 
-
         void  SetStandbyItemKey(DWORD dwItemKey);
         DWORD GetStandbyItemKey() const;
         int   GetStandbyItemIndex() const;
@@ -230,6 +230,10 @@ namespace mu::ui::window
     private:
         void LoadImages() const;
         void UnloadImages();
+
+        // The inventory index of an item with the tag, in the order the game takes them
+        // (ItemDatabase::GetItemTypesWithTagInUseOrder); -1 if there is none.
+        int FindItemIndexWithTagInUseOrder(Data::Items::ItemTag tag) const;
 
         bool EquipmentWindowProcess();
         // The pointer over the drawn panel.

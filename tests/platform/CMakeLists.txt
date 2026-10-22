@@ -40,11 +40,14 @@ mu_add_test(
         test_secure_crt.cpp
 )
 
+# Font sizing uses the real UI scaling layer. Supply its application-owned globals and
+# preferences through the same entry-point glue as ui_scaling_tests, including editor builds.
 mu_add_test(
     NAME bundled_font_role_tests
     SOURCES
         test_bundled_font_roles.cpp
         test_translation_glyph_coverage.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient SDL3_ttf::SDL3_ttf SDL3::SDL3
 )
 target_compile_definitions(bundled_font_role_tests PRIVATE

@@ -4,12 +4,48 @@
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/ElementUtilities.h>
 #include <RmlUi/Core/Event.h>
+#include <RmlUi/Core/Input.h>
 #include <RmlUi/Core/Rectangle.h>
 
 #include <algorithm>
 
 namespace UI::RmlBridge
 {
+std::optional<LevelGaugeKeyMove> LevelGaugeKey(Rml::Event& event)
+{
+    if (event.GetId() != Rml::EventId::Keydown)
+        return std::nullopt;
+    using To = LevelGaugeKeyMove::To;
+    LevelGaugeKeyMove move;
+    switch (static_cast<Rml::Input::KeyIdentifier>(event.GetParameter<int>("key_identifier", 0)))
+    {
+    case Rml::Input::KI_LEFT:
+    case Rml::Input::KI_DOWN:
+        move.steps = -1;
+        break;
+    case Rml::Input::KI_RIGHT:
+    case Rml::Input::KI_UP:
+        move.steps = 1;
+        break;
+    case Rml::Input::KI_PRIOR:
+        move.steps = kLevelGaugePageSteps;
+        break;
+    case Rml::Input::KI_NEXT:
+        move.steps = -kLevelGaugePageSteps;
+        break;
+    case Rml::Input::KI_HOME:
+        move.to = To::Min;
+        break;
+    case Rml::Input::KI_END:
+        move.to = To::Max;
+        break;
+    default:
+        return std::nullopt;
+    }
+    event.StopPropagation();
+    return move;
+}
+
     std::optional<int> ApplyLevelGaugeEvent(Rml::Event& event, int level, int maxLevel,
                                             const LevelFromPointer& fromPointer)
     {
@@ -48,6 +84,16 @@ namespace UI::RmlBridge
             // unprojected pointer with where the bar is drawn, in the bar's own units.
             const float scale = drawn.Width() / width;
             next = fromPointer((event.GetUnprojectedMouseScreenPos().x - drawn.Left()) / scale, width);
+            break;
+        }
+        case Rml::EventId::Keydown:
+        {
+            const std::optional<LevelGaugeKeyMove> move = LevelGaugeKey(event);
+            if (!move)
+                return std::nullopt;
+            next = move->to == LevelGaugeKeyMove::To::Min   ? 0
+                   : move->to == LevelGaugeKeyMove::To::Max ? maxLevel
+                                                            : level + move->steps;
             break;
         }
         default:

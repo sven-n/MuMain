@@ -32,6 +32,27 @@ void MoveCharacterClient(CHARACTER* cc);
 void MoveCharactersClient();
 void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters);
 void WaitCharactersAnimation();
+void AnimateCharacterBones(OBJECT* o);
+
+extern size_t g_LastActiveCharacterCount;
+extern bool g_LastAnimationWasParallel;
+
+#ifdef MU_ENABLE_CONTROL_SOCKET
+// Render's recompute against the pre-pass bones of each drawn client character, while enabled.
+struct PrepassBoneCheck
+{
+    bool enabled = false;
+    int checked = 0;
+    int players = 0;
+    int mismatched = 0;
+    float maxDelta = 0.f;
+};
+extern PrepassBoneCheck g_PrepassBoneCheck;
+void RecordPrepassBones(const float (*prepass)[3][4], const float (*rendered)[3][4], int numBones, bool player);
+// Around render's Animation() call: Begin keeps the pre-pass bones, End compares render's with them.
+bool BeginPrepassBoneCheck(const OBJECT* o, int numBones);
+void EndPrepassBoneCheck(const OBJECT* o, int numBones);
+#endif
 
 void MoveEye(OBJECT* o, BMD* b, int Right, int Left, int Right2 = -1, int Left2 = -1, int Right3 = -1, int Left3 = -1);
 void DeleteCloth(CHARACTER* c, OBJECT* o = NULL, PART_t* p2 = NULL);

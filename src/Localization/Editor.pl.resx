@@ -14,10 +14,10 @@
   </resheader>
 
   <data name="Save Items" xml:space="preserve">
-    <value>Zapisz Przedmioty</value>
+    <value>Zapisz przedmioty</value>
   </data>
   <data name="Save Skills" xml:space="preserve">
-    <value>Zapisz Umiejętności</value>
+    <value>Zapisz umiejętności</value>
   </data>
   <data name="Export as S6E3" xml:space="preserve">
     <value>Eksportuj jako S6E3</value>
@@ -26,16 +26,16 @@
     <value>Eksportuj jako CSV</value>
   </data>
   <data name="Export Skills as CSV" xml:space="preserve">
-    <value>Eksportuj Umiejętności jako CSV</value>
+    <value>Eksportuj umiejętności jako CSV</value>
   </data>
   <data name="Columns" xml:space="preserve">
     <value>Kolumny</value>
   </data>
   <data name="Select All" xml:space="preserve">
-    <value>Zaznacz Wszystkie</value>
+    <value>Zaznacz wszystkie</value>
   </data>
   <data name="Unselect All" xml:space="preserve">
-    <value>Odznacz Wszystkie</value>
+    <value>Odznacz wszystkie</value>
   </data>
   <data name="OK" xml:space="preserve">
     <value>OK</value>
@@ -65,7 +65,7 @@
     <value>Nie udało się wyeksportować do CSV!</value>
   </data>
   <data name="Skills exported as CSV successfully!" xml:space="preserve">
-    <value>Umiejętności wyeksportowane jako CSV pomyślnie!</value>
+    <value>Umiejętności wyeksportowano jako CSV!</value>
   </data>
   <data name="Failed to export skills as CSV!" xml:space="preserve">
     <value>Nie udało się wyeksportować umiejętności do CSV!</value>
@@ -79,32 +79,35 @@
   <data name="Error: Index {0} already in use!" xml:space="preserve">
     <value>Błąd: Indeks {0} jest już używany!</value>
   </data>
+  <data name="Error: Index {0} has its own model!" xml:space="preserve">
+    <value>Błąd: Indeks {0} ma własny model!</value>
+  </data>
   <data name="Search:" xml:space="preserve">
     <value>Szukaj:</value>
   </data>
   <data name="Freeze Index/Name" xml:space="preserve">
-    <value>Zamroź Indeks/Nazwę</value>
+    <value>Zamroź indeks/nazwę</value>
   </data>
   <data name="No columns selected. Click 'Columns' to show columns." xml:space="preserve">
-    <value>Nie wybrano kolumn. Kliknij 'Kolumny', aby pokazać kolumny.</value>
+    <value>Nie wybrano kolumn. Kliknij „Kolumny”, aby je pokazać.</value>
   </data>
   <data name="Index" xml:space="preserve">
     <value>Indeks</value>
   </data>
   <data name="Toggle Column Visibility:" xml:space="preserve">
-    <value>Przełącz Widoczność Kolumn:</value>
+    <value>Widoczność kolumn:</value>
   </data>
   <data name="Items saved successfully!" xml:space="preserve">
     <value>Przedmioty zapisane pomyślnie!</value>
   </data>
   <data name="Exported as legacy format successfully!" xml:space="preserve">
-    <value>Pomyślnie wyeksportowano jako format starszego typu!</value>
+    <value>Pomyślnie wyeksportowano do starszego formatu!</value>
   </data>
   <data name="Failed to export as legacy format!" xml:space="preserve">
-    <value>Nie udało się wyeksportować jako format starszego typu!</value>
+    <value>Nie udało się wyeksportować do starszego formatu!</value>
   </data>
   <data name="Items exported as CSV successfully!" xml:space="preserve">
-    <value>Przedmioty wyeksportowane jako CSV pomyślnie!</value>
+    <value>Przedmioty wyeksportowano jako CSV!</value>
   </data>
   <data name="Failed to export item attributes as CSV!" xml:space="preserve">
     <value>Nie udało się wyeksportować atrybutów przedmiotów do CSV!</value>
@@ -113,16 +116,16 @@
     <value>Nie udało się wyeksportować atrybutów umiejętności do CSV!</value>
   </data>
   <data name="Skill Editor" xml:space="preserve">
-    <value>Edytor Umiejętności</value>
+    <value>Edytor umiejętności</value>
   </data>
   <data name="Search Skills:" xml:space="preserve">
-    <value>Szukaj Umiejętności:</value>
+    <value>Szukaj umiejętności:</value>
   </data>
   <data name="Item Editor" xml:space="preserve">
-    <value>Edytor Przedmiotów</value>
+    <value>Edytor przedmiotów</value>
   </data>
   <data name="Dev Editor" xml:space="preserve">
-    <value>Edytor Dewelopera</value>
+    <value>Edytor deweloperski</value>
   </data>
   <data name="Scenes" xml:space="preserve">
     <value>Sceny</value>
@@ -131,13 +134,13 @@
     <value>Grafika</value>
   </data>
   <data name="Login Scene" xml:space="preserve">
-    <value>Scena Logowania</value>
+    <value>Scena logowania</value>
   </data>
   <data name="Character Scene" xml:space="preserve">
-    <value>Scena Postaci</value>
+    <value>Scena postaci</value>
   </data>
   <data name="Game Scene" xml:space="preserve">
-    <value>Scena Gry</value>
+    <value>Scena gry</value>
   </data>
   <data name="Debug" xml:space="preserve">
     <value>Debug</value>
@@ -149,7 +152,7 @@
     <value>Przełącz na FreeFly</value>
   </data>
   <data name="Switch to Game Camera" xml:space="preserve">
-    <value>Przełącz na Kamerę Gry</value>
+    <value>Przełącz na kamerę gry</value>
   </data>
   <data name="FreeFly" xml:space="preserve">
     <value>FreeFly</value>
@@ -158,7 +161,7 @@
     <value>Obserwowanie</value>
   </data>
   <data name="Snap to Spectated" xml:space="preserve">
-    <value>Przeskocz do Obserwowanego</value>
+    <value>Przeskocz do obserwowanego</value>
   </data>
   <data name="Arrows/PgUp/PgDn=Move  RMB=Look  Shift=Fast" xml:space="preserve">
     <value>Strzałki/PgUp/PgDn=Ruch  PPM=Patrz  Shift=Szybko</value>
@@ -179,7 +182,7 @@
     <value>Odchylenie</value>
   </data>
   <data name="Reset Offsets" xml:space="preserve">
-    <value>Reset Przesunięć</value>
+    <value>Resetuj przesunięcia</value>
   </data>
   <data name="Resume" xml:space="preserve">
     <value>Wznów</value>
@@ -191,40 +194,40 @@
     <value>Restart</value>
   </data>
   <data name="Start Tour" xml:space="preserve">
-    <value>Rozpocznij Trasę</value>
+    <value>Rozpocznij trasę</value>
   </data>
   <data name="Render Distances:" xml:space="preserve">
-    <value>Odległości Renderowania:</value>
+    <value>Odległości renderowania:</value>
   </data>
   <data name="Terrain ViewFar" xml:space="preserve">
-    <value>Daleki Widok Terenu</value>
+    <value>Daleki widok terenu</value>
   </data>
   <data name="Object Distance" xml:space="preserve">
-    <value>Odległość Obiektów</value>
+    <value>Odległość obiektów</value>
   </data>
   <data name="Reset Distances" xml:space="preserve">
-    <value>Reset Odległości</value>
+    <value>Resetuj odległości</value>
   </data>
   <data name="Switch to (or spectate) Default or Orbital to edit overrides." xml:space="preserve">
     <value>Przełącz na (lub obserwuj) Default lub Orbital, aby edytować nadpisania.</value>
   </data>
   <data name="Override Default Camera Config" xml:space="preserve">
-    <value>Nadpisz Konfigurację Default</value>
+    <value>Nadpisz konfigurację kamery Default</value>
   </data>
   <data name="Hero-relative camera with hardcoded 2D trapezoid culling." xml:space="preserve">
-    <value>Kamera względna bohatera z zakodowanym odrzucaniem trapezu 2D.</value>
+    <value>Kamera względem bohatera, ze stałym odrzucaniem trapezowym 2D.</value>
   </data>
   <data name="View Frustum" xml:space="preserve">
-    <value>Frustum Widoku</value>
+    <value>Frustum widoku</value>
   </data>
   <data name="Far Plane" xml:space="preserve">
-    <value>Płaszczyzna Daleka</value>
+    <value>Daleka płaszczyzna</value>
   </data>
   <data name="Camera Offset (world units, from hero)" xml:space="preserve">
-    <value>Przesunięcie Kamery (jednostki świata, od bohatera)</value>
+    <value>Przesunięcie kamery (jednostki świata, od bohatera)</value>
   </data>
   <data name="2D Culling Trapezoid Width" xml:space="preserve">
-    <value>Szerokość Trapezu Odrzucania 2D</value>
+    <value>Szerokość trapezu odrzucania 2D</value>
   </data>
   <data name="Bottom (near) x" xml:space="preserve">
     <value>Dół (blisko) x</value>
@@ -236,10 +239,10 @@
     <value>Mgła</value>
   </data>
   <data name="Override Fog" xml:space="preserve">
-    <value>Nadpisz Mgłę</value>
+    <value>Nadpisz mgłę</value>
   </data>
   <data name="Fog On" xml:space="preserve">
-    <value>Mgła Wł.</value>
+    <value>Mgła wł.</value>
   </data>
   <data name="ON" xml:space="preserve">
     <value>WŁ</value>
@@ -248,22 +251,22 @@
     <value>WYŁ</value>
   </data>
   <data name="Fog Start %" xml:space="preserve">
-    <value>Początek Mgły %</value>
+    <value>Początek mgły %</value>
   </data>
   <data name="Fog End %" xml:space="preserve">
-    <value>Koniec Mgły %</value>
+    <value>Koniec mgły %</value>
   </data>
   <data name="Reset to Camera Defaults" xml:space="preserve">
-    <value>Reset do Domyślnych Kamery</value>
+    <value>Przywróć domyślne ustawienia kamery</value>
   </data>
   <data name="Override Orbital Camera Config" xml:space="preserve">
-    <value>Nadpisz Konfigurację Orbital</value>
+    <value>Nadpisz konfigurację kamery Orbital</value>
   </data>
   <data name="Tunes the 2D terrain-cull hull; does not touch FOV / far clip." xml:space="preserve">
-    <value>Reguluje skorupę odrzucania terenu 2D; nie zmienia FOV / dalekiego clipa.</value>
+    <value>Reguluje otoczkę odrzucania terenu 2D; nie zmienia FOV ani dalekiej płaszczyzny odcięcia.</value>
   </data>
   <data name="2D Culling Trapezoid (world units)" xml:space="preserve">
-    <value>Trapez Odrzucania 2D (jednostki świata)</value>
+    <value>Trapez odrzucania 2D (jednostki świata)</value>
   </data>
   <data name="Far distance" xml:space="preserve">
     <value>Odległość daleka</value>
@@ -281,25 +284,25 @@
     <value>Wyrównane do widoku: śledzi odchylenie + pochylenie kamery (śledzi to, na co patrzysz).</value>
   </data>
   <data name="Reset to Natural Pyramid" xml:space="preserve">
-    <value>Reset do Naturalnej Piramidy</value>
+    <value>Przywróć naturalną piramidę</value>
   </data>
   <data name="Debug Visualization:" xml:space="preserve">
-    <value>Wizualizacja Debugu:</value>
+    <value>Wizualizacja debugowania:</value>
   </data>
   <data name="Character Pick Boxes" xml:space="preserve">
-    <value>Pudełka Wyboru Postaci</value>
+    <value>Obszary zaznaczania postaci</value>
   </data>
   <data name="Item Pick Boxes" xml:space="preserve">
-    <value>Pudełka Wyboru Przedmiotów</value>
+    <value>Obszary zaznaczania przedmiotów</value>
   </data>
   <data name="Item Cull Sphere" xml:space="preserve">
-    <value>Sfera Odrzucania Przedmiotów</value>
+    <value>Sfera odrzucania przedmiotów</value>
   </data>
   <data name="Tile Grid" xml:space="preserve">
-    <value>Siatka Kafelków</value>
+    <value>Siatka kafelków</value>
   </data>
   <data name="Item Cull Radius" xml:space="preserve">
-    <value>Promień Odrzucania Przedmiotów</value>
+    <value>Promień odrzucania przedmiotów</value>
   </data>
   <data name="Rendering:" xml:space="preserve">
     <value>Renderowanie:</value>
@@ -308,25 +311,25 @@
     <value>Teren</value>
   </data>
   <data name="Static Objects" xml:space="preserve">
-    <value>Obiekty Statyczne</value>
+    <value>Obiekty statyczne</value>
   </data>
   <data name="Effects" xml:space="preserve">
     <value>Efekty</value>
   </data>
   <data name="Dropped Items" xml:space="preserve">
-    <value>Upuszczone Przedmioty</value>
+    <value>Upuszczone przedmioty</value>
   </data>
   <data name="Weather" xml:space="preserve">
     <value>Pogoda</value>
   </data>
   <data name="Item Labels" xml:space="preserve">
-    <value>Etykiety Przedmiotów</value>
+    <value>Etykiety przedmiotów</value>
   </data>
   <data name="All ON" xml:space="preserve">
-    <value>Wszystkie WŁ</value>
+    <value>Wszystkie wł.</value>
   </data>
   <data name="All OFF" xml:space="preserve">
-    <value>Wszystkie WYŁ</value>
+    <value>Wszystkie wył.</value>
   </data>
   <data name="TODO - Not Working:" xml:space="preserve">
     <value>TODO - Nie działa:</value>
@@ -335,10 +338,10 @@
     <value>Shadery</value>
   </data>
   <data name="Skill Effects" xml:space="preserve">
-    <value>Efekty Umiejętności</value>
+    <value>Efekty umiejętności</value>
   </data>
   <data name="Equipped Items" xml:space="preserve">
-    <value>Przedmioty Założone</value>
+    <value>Założone przedmioty</value>
   </data>
   <data name="UI" xml:space="preserve">
     <value>Interfejs</value>
@@ -356,16 +359,16 @@
     <value>Potwory</value>
   </data>
   <data name="Graphics Debug Info" xml:space="preserve">
-    <value>Info Debugu Grafiki</value>
+    <value>Informacje debugowania grafiki</value>
   </data>
   <data name="WARNING: Window size mismatch detected!" xml:space="preserve">
     <value>OSTRZEŻENIE: Wykryto niezgodność rozmiaru okna!</value>
   </data>
   <data name="Copy Debug Info to Clipboard" xml:space="preserve">
-    <value>Kopiuj Info Debugu do Schowka</value>
+    <value>Kopiuj informacje debugowania do schowka</value>
   </data>
   <data name="(Paste in Discord/notepad)" xml:space="preserve">
-    <value>(Wklej w Discord/notatniku)</value>
+    <value>(Wklej w Discordzie/notatniku)</value>
   </data>
   <data name="Default" xml:space="preserve">
     <value>Domyślny</value>
@@ -413,30 +416,513 @@
     <value>Cel Orbital</value>
   </data>
   <data name="Current Resolution" xml:space="preserve">
-    <value>Aktualna Rozdzielczość</value>
+    <value>Aktualna rozdzielczość</value>
   </data>
   <data name="OpenGL Viewport" xml:space="preserve">
     <value>Viewport OpenGL</value>
   </data>
   <data name="Screen Rate" xml:space="preserve">
-    <value>Współczynnik Ekranu</value>
+    <value>Współczynnik ekranu</value>
   </data>
   <data name="Window Mode" xml:space="preserve">
-    <value>Tryb Okna</value>
+    <value>Tryb okna</value>
   </data>
   <data name="Windowed" xml:space="preserve">
-    <value>Okno</value>
+    <value>W oknie</value>
   </data>
   <data name="Fullscreen" xml:space="preserve">
-    <value>Pełny Ekran</value>
+    <value>Pełny ekran</value>
   </data>
   <data name="Actual Window Client" xml:space="preserve">
-    <value>Rzeczywisty Klient Okna</value>
+    <value>Rzeczywisty obszar roboczy okna</value>
   </data>
   <data name="Calculated Scale from Client" xml:space="preserve">
-    <value>Obliczona Skala z Klienta</value>
+    <value>Skala obliczona z obszaru roboczego</value>
   </data>
   <data name="Debug info copied to clipboard" xml:space="preserve">
     <value>Info debugu skopiowane do schowka</value>
+  </data>
+  <data name="Import from bmd" xml:space="preserve">
+    <value>Importuj z bmd</value>
+  </data>
+  <data name="Export as bmd" xml:space="preserve">
+    <value>Eksportuj jako bmd</value>
+  </data>
+  <data name="Items imported from bmd" xml:space="preserve">
+    <value>Przedmioty zaimportowano z plików bmd. Sprawdź konsolę, potem zapisz.</value>
+  </data>
+  <data name="Failed to import items from bmd" xml:space="preserve">
+    <value>Nie udało się zaimportować przedmiotów z plików bmd. Zobacz konsolę.</value>
+  </data>
+  <data name="Items exported as bmd" xml:space="preserve">
+    <value>Przedmioty wyeksportowano jako pliki bmd.</value>
+  </data>
+  <data name="Failed to export items as bmd" xml:space="preserve">
+    <value>Nie udało się wyeksportować przedmiotów jako plików bmd.</value>
+  </data>
+  <data name="Item data has errors" xml:space="preserve">
+    <value>Dane przedmiotów zawierają błędy i nie zostały zapisane. Zobacz konsolę.</value>
+  </data>
+  <data name="Item data could not be written" xml:space="preserve">
+    <value>Nie udało się zapisać plików danych przedmiotów. Zobacz konsolę.</value>
+  </data>
+  <data name="Look Profile" xml:space="preserve">
+    <value>Profil wyglądu</value>
+  </data>
+  <data name="Look Loaded From" xml:space="preserve">
+    <value>Wczytano z</value>
+  </data>
+  <data name="Look Scope Default" xml:space="preserve">
+    <value>Domyślny</value>
+  </data>
+  <data name="Look Scope Current Map" xml:space="preserve">
+    <value>Bieżąca mapa</value>
+  </data>
+  <data name="Look Reset" xml:space="preserve">
+    <value>Resetuj</value>
+  </data>
+  <data name="Look Reset All" xml:space="preserve">
+    <value>Resetuj wszystko</value>
+  </data>
+  <data name="Look Save" xml:space="preserve">
+    <value>Zapisz</value>
+  </data>
+  <data name="Looks" xml:space="preserve">
+    <value>Wygląd</value>
+  </data>
+  <data name="Model file" xml:space="preserve">
+    <value>Plik modelu</value>
+  </data>
+  <data name="Shared model" xml:space="preserve">
+    <value>Wspólny model</value>
+  </data>
+  <data name="Glow" xml:space="preserve">
+    <value>Poświata</value>
+  </data>
+  <data name="Render style" xml:space="preserve">
+    <value>Styl renderowania</value>
+  </data>
+  <data name="Item effect" xml:space="preserve">
+    <value>Efekt przedmiotu</value>
+  </data>
+  <data name="Used by" xml:space="preserve">
+    <value>używany przez</value>
+  </data>
+  <data name="Select an item" xml:space="preserve">
+    <value>Wybierz przedmiot w tabeli, aby zobaczyć jego wygląd.</value>
+  </data>
+  <data name="No model" xml:space="preserve">
+    <value>Wybrany przedmiot nie ma modelu.</value>
+  </data>
+  <data name="Effect Browser" xml:space="preserve">
+    <value>Przeglądarka efektów</value>
+  </data>
+  <data name="Effect types not loaded" xml:space="preserve">
+    <value>Typy efektów nie są jeszcze wczytane; wczytuje je ekran ładowania.</value>
+  </data>
+  <data name="Current map" xml:space="preserve">
+    <value>Mapa</value>
+  </data>
+  <data name="Refresh" xml:space="preserve">
+    <value>Odśwież</value>
+  </data>
+  <data name="Refresh assets" xml:space="preserve">
+    <value>Ponownie odczytuje, co zawiera slot każdego typu.</value>
+  </data>
+  <data name="Slots keep models" xml:space="preserve">
+    <value>Slot może nadal zawierać model z wcześniej odwiedzonej mapy.</value>
+  </data>
+  <data name="Particles" xml:space="preserve">
+    <value>Cząsteczki</value>
+  </data>
+  <data name="Lightning and trails" xml:space="preserve">
+    <value>Błyskawice i smugi</value>
+  </data>
+  <data name="Sprites" xml:space="preserve">
+    <value>Sprite'y</value>
+  </data>
+  <data name="Creation" xml:space="preserve">
+    <value>Tworzenie</value>
+  </data>
+  <data name="Move" xml:space="preserve">
+    <value>Ruch</value>
+  </data>
+  <data name="Drawing" xml:space="preserve">
+    <value>Rysowanie</value>
+  </data>
+  <data name="Any" xml:space="preserve">
+    <value>Dowolny</value>
+  </data>
+  <data name="Loaded now" xml:space="preserve">
+    <value>Wczytane teraz</value>
+  </data>
+  <data name="Listed" xml:space="preserve">
+    <value>Na liście</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Nazwa</value>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>Kod</value>
+  </data>
+  <data name="Number" xml:space="preserve">
+    <value>Numer</value>
+  </data>
+  <data name="Stage data" xml:space="preserve">
+    <value>dane</value>
+  </data>
+  <data name="Stage hook" xml:space="preserve">
+    <value>hook</value>
+  </data>
+  <data name="Stage data then hook" xml:space="preserve">
+    <value>dane, potem hook</value>
+  </data>
+  <data name="Stage switch" xml:space="preserve">
+    <value>switch</value>
+  </data>
+  <data name="Stage setup only" xml:space="preserve">
+    <value>tylko wspólna konfiguracja</value>
+  </data>
+  <data name="Stage handler" xml:space="preserve">
+    <value>handler</value>
+  </data>
+  <data name="Stage shared code only" xml:space="preserve">
+    <value>tylko wspólny kod</value>
+  </data>
+  <data name="Stage drawn as model" xml:space="preserve">
+    <value>rysowany jako model</value>
+  </data>
+  <data name="Stage on the ground" xml:space="preserve">
+    <value>na ziemi</value>
+  </data>
+  <data name="Also on the ground" xml:space="preserve">
+    <value>+ na ziemi</value>
+  </data>
+  <data name="Also after the characters" xml:space="preserve">
+    <value>+ po postaciach</value>
+  </data>
+  <data name="Stage not drawn" xml:space="preserve">
+    <value>nie jest rysowany</value>
+  </data>
+  <data name="Variants" xml:space="preserve">
+    <value>warianty</value>
+  </data>
+  <data name="Select an effect type" xml:space="preserve">
+    <value>Wybierz typ na liście, aby zobaczyć szczegóły.</value>
+  </data>
+  <data name="Kind" xml:space="preserve">
+    <value>Rodzaj</value>
+  </data>
+  <data name="Defined in" xml:space="preserve">
+    <value>Zdefiniowano w</value>
+  </data>
+  <data name="Same number" xml:space="preserve">
+    <value>Ten sam numer</value>
+  </data>
+  <data name="No other kind" xml:space="preserve">
+    <value>Żaden inny rodzaj nie ma typu o tym numerze.</value>
+  </data>
+  <data name="Asset" xml:space="preserve">
+    <value>Zasób</value>
+  </data>
+  <data name="Slot model" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="Slot texture" xml:space="preserve">
+    <value>Tekstura</value>
+  </data>
+  <data name="Slot default texture" xml:space="preserve">
+    <value>Kod SubType może wybrać inną teksturę.</value>
+  </data>
+  <data name="Slot texture chosen in code" xml:space="preserve">
+    <value>Jego kod wybiera teksturę</value>
+  </data>
+  <data name="Nothing loaded" xml:space="preserve">
+    <value>Na tej mapie nic nie wczytano</value>
+  </data>
+  <data name="World object slot" xml:space="preserve">
+    <value>Ten slot zawiera obiekt bieżącej mapy.</value>
+  </data>
+  <data name="Stages" xml:space="preserve">
+    <value>Etapy</value>
+  </data>
+  <data name="Same move handler" xml:space="preserve">
+    <value>Ten sam handler ruchu</value>
+  </data>
+  <data name="Same creation hook" xml:space="preserve">
+    <value>Ten sam hook tworzenia</value>
+  </data>
+  <data name="Creation values" xml:space="preserve">
+    <value>Wartości tworzenia</value>
+  </data>
+  <data name="No creation values" xml:space="preserve">
+    <value>Brak wartości tworzenia w danych.</value>
+  </data>
+  <data name="Field" xml:space="preserve">
+    <value>Pole</value>
+  </data>
+  <data name="All SubTypes" xml:space="preserve">
+    <value>Wszystkie SubType</value>
+  </data>
+  <data name="Other SubTypes" xml:space="preserve">
+    <value>Inne SubType</value>
+  </data>
+  <data name="SubType" xml:space="preserve">
+    <value>SubType</value>
+  </data>
+  <data name="Used by data" xml:space="preserve">
+    <value>Używany przez dane</value>
+  </data>
+  <data name="Named by its creation values" xml:space="preserve">
+    <value>jego wartości tworzenia</value>
+  </data>
+  <data name="Named by no data" xml:space="preserve">
+    <value>Żadne dane jeszcze nie nazywają tego typu.</value>
+  </data>
+  <data name="Particle code" xml:space="preserve">
+    <value>Cząsteczki są tworzone, przesuwane i rysowane przez swój kod; nie mają rejestru.</value>
+  </data>
+  <data name="Joint code" xml:space="preserve">
+    <value>Błyskawice i smugi są tworzone, przesuwane i rysowane przez swój kod; nie mają rejestru.</value>
+  </data>
+  <data name="Sprite code" xml:space="preserve">
+    <value>Sprite'y rysują teksturę o swoim numerze; SubType oznacza mieszanie.</value>
+  </data>
+  <data name="Preview" xml:space="preserve">
+    <value>Podgląd</value>
+  </data>
+  <data name="Show on" xml:space="preserve">
+    <value>Pokaż na</value>
+  </data>
+  <data name="Show on nothing" xml:space="preserve">
+    <value>Nic</value>
+  </data>
+  <data name="Show on plane" xml:space="preserve">
+    <value>Płaszczyzna</value>
+  </data>
+  <data name="Show on cube" xml:space="preserve">
+    <value>Sześcian</value>
+  </data>
+  <data name="Show on item" xml:space="preserve">
+    <value>Przedmiot</value>
+  </data>
+  <data name="Blend" xml:space="preserve">
+    <value>Mieszanie</value>
+  </data>
+  <data name="Blend glow" xml:space="preserve">
+    <value>Poświata (0)</value>
+  </data>
+  <data name="Blend subtract" xml:space="preserve">
+    <value>Odejmowanie (1)</value>
+  </data>
+  <data name="Blend alpha test" xml:space="preserve">
+    <value>Test alfa (2)</value>
+  </data>
+  <data name="Blend luminance" xml:space="preserve">
+    <value>Luminancja (3)</value>
+  </data>
+  <data name="Turn" xml:space="preserve">
+    <value>Obrót</value>
+  </data>
+  <data name="Reset view" xml:space="preserve">
+    <value>Resetuj widok</value>
+  </data>
+  <data name="Find an item" xml:space="preserve">
+    <value>Znajdź przedmiot</value>
+  </data>
+  <data name="Level" xml:space="preserve">
+    <value>Poziom</value>
+  </data>
+  <data name="Excellent" xml:space="preserve">
+    <value>Doskonały</value>
+  </data>
+  <data name="Ancient" xml:space="preserve">
+    <value>Starożytny</value>
+  </data>
+  <data name="Preview controls" xml:space="preserve">
+    <value>Przeciągnij, aby obrócić, kółkiem przybliżaj, dwuklik resetuje widok.</value>
+  </data>
+  <data name="Preview not drawn by game" xml:space="preserve">
+    <value>Gra sama nie rysuje tego modelu: nie ma kodu rysowania.</value>
+  </data>
+  <data name="Preview starts invisible" xml:space="preserve">
+    <value>Wartości tworzenia zaczynają od przezroczystości lub rozmiaru 0, a kod ruchu go rozjaśnia lub powiększa; podgląd to pokazuje.</value>
+  </data>
+  <data name="Preview hidden model" xml:space="preserve">
+    <value>Wartości tworzenia ukrywają cały model.</value>
+  </data>
+  <data name="Preview no animation" xml:space="preserve">
+    <value>Model nie ma animacji, która ustawiłaby jego kości, więc podgląd go nie rysuje.</value>
+  </data>
+  <data name="Preview item effects left out" xml:space="preserve">
+    <value>Własne sprite'y i cząsteczki przedmiotu nie są pokazywane.</value>
+  </data>
+  <data name="Preview item not loaded" xml:space="preserve">
+    <value>Model, którym ten przedmiot jest rysowany na tym poziomie, nie jest wczytany, więc podgląd nie rysuje przedmiotu.</value>
+  </data>
+  <data name="In the world" xml:space="preserve">
+    <value>W świecie</value>
+  </data>
+  <data name="Create in world" xml:space="preserve">
+    <value>Utwórz</value>
+  </data>
+  <data name="Create in world tooltip" xml:space="preserve">
+    <value>Tworzy typ dwa pola przed postacią, używając wywołania samej gry. Jego właścicielem jest kopia postaci, która za nią podąża, więc kod typu nie może zmienić postaci. Każde kliknięcie tworzy go ponownie. Wymaga postaci na mapie.</value>
+  </data>
+  <data name="Stop preview" xml:space="preserve">
+    <value>Zatrzymaj</value>
+  </data>
+  <data name="Repeat preview" xml:space="preserve">
+    <value>Powtarzaj</value>
+  </data>
+  <data name="Repeat preview tooltip" xml:space="preserve">
+    <value>Tworzy typ ponownie wkrótce po tym, jak skończy się to, co utworzył.</value>
+  </data>
+  <data name="Mute sounds" xml:space="preserve">
+    <value>Wycisz dźwięki</value>
+  </data>
+  <data name="Mute sounds tooltip" xml:space="preserve">
+    <value>Podczas podglądu gra nie uruchamia efektów dźwiękowych. Muzyka, dźwięki zapętlone i już odtwarzane grają dalej.</value>
+  </data>
+  <data name="Sprite every frame" xml:space="preserve">
+    <value>Sprite trwa jedną klatkę; podgląd tworzy go ponownie w każdej klatce.</value>
+  </data>
+  <data name="World not in game" xml:space="preserve">
+    <value>Tworzenie w świecie wymaga postaci na mapie.</value>
+  </data>
+  <data name="World effects off" xml:space="preserve">
+    <value>Wszystkie efekty są wyłączone w opcjach, więc gra nie tworzy cząsteczek ani sprite'ów.</value>
+  </data>
+  <data name="World effects hidden" xml:space="preserve">
+    <value>Efekty są ukryte w Edytorze deweloperskim, więc nie są rysowane.</value>
+  </data>
+  <data name="World nothing created" xml:space="preserve">
+    <value>Wywołanie gry nic nie utworzyło: typ może wymagać celu, umiejętności lub stanu postaci, efekty mogą być wyłączone w opcjach albo jego pula jest pełna.</value>
+  </data>
+  <data name="World ended at once" xml:space="preserve">
+    <value>To, co utworzyło wywołanie, skończyło się w pierwszej klatce: typ może wymagać celu, umiejętności lub innych wartości wywołania.</value>
+  </data>
+  <data name="World refused" xml:space="preserve">
+    <value>Kod tego typu z tym SubType zmienia postać lub informuje serwer (kamienie katapulty odrzucają postać, zmiana klasy ją zatrzymuje, Lagul zapisuje do swojego właściciela), więc podgląd go nie tworzy.</value>
+  </data>
+  <data name="Call values" xml:space="preserve">
+    <value>Wartości wywołania</value>
+  </data>
+  <data name="Call distance" xml:space="preserve">
+    <value>Odległość</value>
+  </data>
+  <data name="Call distance tooltip" xml:space="preserve">
+    <value>Jak daleko przed postacią wywołanie uruchamia typ; 0 to miejsce, w którym stoi.</value>
+  </data>
+  <data name="Call height" xml:space="preserve">
+    <value>Wysokość</value>
+  </data>
+  <data name="Call size" xml:space="preserve">
+    <value>Rozmiar</value>
+  </data>
+  <data name="Call size tooltip" xml:space="preserve">
+    <value>Skala wywołania; 0 bierze wartość domyślną funkcji tworzącej (efekty 0,9, cząsteczki i sprite'y 1, błyskawice 10).</value>
+  </data>
+  <data name="Call light" xml:space="preserve">
+    <value>Światło</value>
+  </data>
+  <data name="Call colour tooltip" xml:space="preserve">
+    <value>Błyskawice: wywołanie przekazuje światło jako kolor. Większość wywołań gry nie przekazuje żadnego; niektóre typy wybierają wtedy kolor według SubType.</value>
+  </data>
+  <data name="Call random angle" xml:space="preserve">
+    <value>Losowy kąt</value>
+  </data>
+  <data name="Call target" xml:space="preserve">
+    <value>Cel</value>
+  </data>
+  <data name="Call owner" xml:space="preserve">
+    <value>Właściciel</value>
+  </data>
+  <data name="Call target character" xml:space="preserve">
+    <value>Postać (kopia)</value>
+  </data>
+  <data name="Call target none" xml:space="preserve">
+    <value>Brak</value>
+  </data>
+  <data name="Call target nearest" xml:space="preserve">
+    <value>Najbliższy potwór lub NPC (kopia)</value>
+  </data>
+  <data name="Call target none tooltip" xml:space="preserve">
+    <value>Żadne wywołanie gry nie tworzy tego typu z tym SubType bez właściciela, a jego kod może go potrzebować.</value>
+  </data>
+  <data name="Call target none no sources" xml:space="preserve">
+    <value>Nie udało się odczytać wywołań gry (nie znaleziono źródeł), więc opcja Brak nie jest dostępna.</value>
+  </data>
+  <data name="Call pk" xml:space="preserve">
+    <value>PK</value>
+  </data>
+  <data name="Call skill index" xml:space="preserve">
+    <value>SkillIndex</value>
+  </data>
+  <data name="Call pk tooltip" xml:space="preserve">
+    <value>Niektóre SubType błyskawic odczytują czas życia i prędkość z PK i SkillIndex.</value>
+  </data>
+  <data name="Game calls" xml:space="preserve">
+    <value>Wywołania gry</value>
+  </data>
+  <data name="Use call" xml:space="preserve">
+    <value>Użyj</value>
+  </data>
+  <data name="Game calls not found" xml:space="preserve">
+    <value>Nie znaleziono źródeł gry, z których zbudowano edytor, więc nie można wyświetlić wywołań gry.</value>
+  </data>
+  <data name="No game calls" xml:space="preserve">
+    <value>Kod gry nie tworzy tego typu po jego nazwie.</value>
+  </data>
+  <data name="Call random types" xml:space="preserve">
+    <value>jeden z %d losowo</value>
+  </data>
+  <data name="World no character near" xml:space="preserve">
+    <value>Przy postaci nie stoi żaden potwór ani NPC, więc celem jest kopia postaci.</value>
+  </data>
+  <data name="World own place" xml:space="preserve">
+    <value>Kod typu przesunął to, co utworzył, z miejsca wskazanego przez wywołanie, więc nie jest dokładnie w ustawionej Odległości i Wysokości.</value>
+  </data>
+  <data name="World follows owner" xml:space="preserve">
+    <value>To, co utworzył typ, przesuwa się do właściciela, więc pojawia się przy celu, a nie w Odległości i Wysokości.</value>
+  </data>
+  <data name="World own size" xml:space="preserve">
+    <value>Kod typu zmienia rozmiar nadany przez wywołanie, więc to, co utworzył, nie ma dokładnie ustawionego Rozmiaru.</value>
+  </data>
+  <data name="World own light" xml:space="preserve">
+    <value>Kod typu zmienia światło nadane przez wywołanie, więc to, co utworzył, nie ma dokładnie ustawionego Światła.</value>
+  </data>
+  <data name="Assets all" xml:space="preserve">
+    <value>Wszystkie</value>
+  </data>
+  <data name="Loaded at start" xml:space="preserve">
+    <value>Wczytane na starcie</value>
+  </data>
+  <data name="Loaded by this map" xml:space="preserve">
+    <value>Wczytane przez tę mapę</value>
+  </data>
+  <data name="Origin loading screen" xml:space="preserve">
+    <value>Wczytane na starcie (ekran ładowania).</value>
+  </data>
+  <data name="Origin this map" xml:space="preserve">
+    <value>Wczytane przez tę mapę.</value>
+  </data>
+  <data name="Origin earlier map" xml:space="preserve">
+    <value>Wczytane przez wcześniej odwiedzoną mapę:</value>
+  </data>
+  <data name="Origin unknown" xml:space="preserve">
+    <value>Wczytane; nie wiadomo, co je wczytało.</value>
+  </data>
+  <data name="Map object elsewhere" xml:space="preserve">
+    <value>Ten slot zawiera obiekt tej mapy, a nie model tego efektu. Efekt rysuje własny model tylko na:</value>
+  </data>
+  <data name="Map object here" xml:space="preserve">
+    <value>Obiekt tej mapy, który rysuje ten efekt.</value>
+  </data>
+  <data name="Belongs to map" xml:space="preserve">
+    <value>Rysuje obiekt mapy:</value>
+  </data>
+  <data name="Preview not its model" xml:space="preserve">
+    <value>Slot tej mapy zawiera inny obiekt, nie model tego efektu (zobacz Zasób).</value>
   </data>
 </root>

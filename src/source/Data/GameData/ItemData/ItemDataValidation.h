@@ -4,10 +4,12 @@
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
+#include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "Data/GameData/ItemData/SharedItemModel.h"
 
 #include <span>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace Data::Items
@@ -17,8 +19,22 @@ namespace Data::Items
 // Appends the problems to `issues`.
 void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIssue>& issues);
 
+// A translation of an item name in a language the game has no texts for is
+// never shown: a warning for each. `uiLocales` are the game's languages
+// (I18N::GetAvailableLocales).
+void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const char* const> uiLocales,
+                         std::vector<ItemDataIssue>& issues);
+
 // Checks that no item has more than one model. Appends the problems to `issues`.
 void ValidateItemModels(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues);
+
+// The stat profiles of the items that exist against the item stat file
+// (`statFile` names it in messages): a profile the file does not have is an
+// error; a profile of the file that no item names, and an excellent bonus where
+// the item's profile has no excellent term for its damage or magic power, are
+// warnings.
+void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
+                          const std::string& statFile, std::vector<ItemDataIssue>& issues);
 
 // Gives the model entries that name a shared model ("model") its file,
 // texture folders and none-blend meshes. A name that is not a shared model
@@ -31,4 +47,19 @@ void ApplySharedItemModels(std::vector<ItemModelDefinition>& models, std::span<c
 // the glow color list. Appends the problems to `issues`.
 void ValidateItemModelGlowColors(std::span<const ItemModelDefinition> models,
                                  std::span<const Effects::GlowColor> colors, std::vector<ItemDataIssue>& issues);
+
+// Whether a look of this name exists; the looks are drawing code
+// (Render::Items::Styles::Exists, Render::Items::ItemEffects::Exists).
+using LookNameExists = bool (*)(std::string_view name);
+
+// A render style or item effect that no look of that name has: a warning for
+// each, since the model is then drawn plainly (the model loader reports the
+// same when it opens the models).
+void ValidateItemModelLooks(std::span<const ItemModelDefinition> models, LookNameExists renderStyleExists,
+                            LookNameExists itemEffectExists, std::vector<ItemDataIssue>& issues);
+
+// A .bmd file that several model entries name themselves instead of through
+// a shared model: a warning for each of them, since each opens the file again
+// (a shared model opens it once).
+void ValidateDirectlySharedModelFiles(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues);
 } // namespace Data::Items

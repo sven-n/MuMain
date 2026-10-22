@@ -166,7 +166,7 @@ bool CreateDevilSquareRain(PARTICLE* o, int Index)
     }
 
     vec3_t Velocity;
-    Vector(0.f, 0.f, -((Random::RangeFloat(0, 39) + RainSpeed) * FPS_ANIMATION_FACTOR), Velocity);
+    Vector(0.f, 0.f, -(Random::RangeFloat(0, 39) + RainSpeed), Velocity);
     float Matrix[3][4];
     AngleMatrix(o->Angle, Matrix);
     VectorRotate(Velocity, Matrix, o->Velocity);
@@ -211,7 +211,7 @@ bool CreateChaosCastleRain(PARTICLE* o, int Index)
         Vector(-(Random::RangeFloat(30, 49) + RainAngle), 0.f, 0.f, o->Angle);
     }
     vec3_t Velocity;
-    Vector(0.f, 0.f, -((Random::RangeFloat(0, 39) + RainSpeed + 20) * FPS_ANIMATION_FACTOR), Velocity);
+    Vector(0.f, 0.f, -(Random::RangeFloat(0, 39) + RainSpeed + 20), Velocity);
     float Matrix[3][4];
     AngleMatrix(o->Angle, Matrix);
     VectorRotate(Velocity, Matrix, o->Velocity);
@@ -470,8 +470,8 @@ bool MoveLeaves()
     else if (RainCurrent < RainTarget)
         RainCurrent += FPS_ANIMATION_FACTOR;
 
-    RainSpeed = ((int)sinf(WorldTime * 0.001f) * 10 + 30) * FPS_ANIMATION_FACTOR;
-    RainAngle = (int)sinf(WorldTime * 0.0005f + 50.f) * 20 * FPS_ANIMATION_FACTOR;
+    RainSpeed = (int)sinf(WorldTime * 0.001f) * 10 + 30;
+    RainAngle = (int)sinf(WorldTime * 0.0005f + 50.f) * 20;
     RainPosition += 20.f * FPS_ANIMATION_FACTOR;
     RainPosition = fmodf(RainPosition, 2000.f);
 

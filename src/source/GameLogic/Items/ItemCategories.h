@@ -3,16 +3,23 @@
 typedef struct tagITEM ITEM;
 
 // Item categories. The ones in the first part come from the item data
-// (tags, slot and wing tier in Data/Items); see docs/item-data.md.
+// (tags, slot, wing tier and weapon kind in Data/Items); see docs/item-data.md.
 namespace GameLogic::Items
 {
     // Wings
     bool IsWingItem(const ITEM* pItem);
     bool IsSecondTierWingExceptCape(const ITEM* pItem);
+    // Every second tier wing, the Capes of Lord and Fighter included.
+    bool IsSecondTierWing(const ITEM* pItem);
     bool IsThirdTierWing(const ITEM* pItem);
+    bool IsSecondOrThirdTierWing(const ITEM* pItem);
+    // The Capes of Lord and Fighter.
+    bool IsSecondTierCape(const ITEM* pItem);
     bool IsSmallWing(const ITEM* pItem);
 
     // Mounts and pets
+    // The model of an item that goes into the pet slot (helpers, mounts, pets).
+    bool IsPetSlotModel(int modelType);
     bool IsRideableMount(const ITEM* pItem);
     bool IsRideableMountModel(int modelType);
     bool IsHornMountModel(int modelType);
@@ -25,6 +32,8 @@ namespace GameLogic::Items
     bool IsDemonOrSpiritOfGuardianType(int itemType);
     bool IsDemonOrSpiritOfGuardianModel(int modelType);
     bool IsPandaOrSkeletonItem(const ITEM* pItem);
+    bool IsPandaOrSkeletonType(int itemType);
+    bool IsTransformationRingType(int itemType);
 
     // Crafting materials
     bool IsJewelItem(const ITEM* pItem);
@@ -44,6 +53,7 @@ namespace GameLogic::Items
     bool IsManaPotionType(int itemType);
     bool IsComplexPotion(const ITEM* pItem);
     bool IsComplexPotionType(int itemType);
+    bool IsShieldPotionType(int itemType);
     bool IsElitePotion(const ITEM* pItem);
     bool IsElitePotionType(int itemType);
     bool IsElixir(const ITEM* pItem);
@@ -59,6 +69,8 @@ namespace GameLogic::Items
     // Tickets and cash shop items
     bool IsLuckyItemTicket(const ITEM* pItem);
     bool IsLuckyItemTicketModel(int modelType);
+    // The lucky set armour the lucky item tickets give.
+    bool IsLuckyItemType(int itemType);
     bool IsGemJewelry(const ITEM* pItem);
     bool IsGambleItem(const ITEM* pItem);
     bool IsGambleItemType(int itemType);
@@ -79,6 +91,30 @@ namespace GameLogic::Items
     bool IsSummonerBook(const ITEM* pItem);
     bool IsSummonerBookType(int itemType);
     bool IsSummonerBookModel(int modelType);
+    bool IsSceptreType(int itemType);
+    // The Magic Gladiator's swords with magic power.
+    bool IsMagicSwordType(int itemType);
+
+    // Weapons
+    bool IsBowType(int itemType);
+    bool IsBowModel(int modelType);
+    bool IsCrossbowType(int itemType);
+    bool IsCrossbowModel(int modelType);
+    bool IsSpearType(int itemType);
+    bool IsSpearModel(int modelType);
+    bool IsShieldType(int itemType);
+    // A bow, a crossbow, arrows or bolts.
+    bool IsBowCrossbowOrAmmunition(const ITEM* pItem);
+    bool IsSwordOrGloveType(int itemType);
+    bool IsSwordOrGloveModel(int modelType);
+    bool IsSwordAxeMaceOrGloveType(int itemType);
+    // A staff or a stick.
+    bool IsStaffType(int itemType);
+    // A staff, a stick or a book.
+    bool IsStaffOrBookType(int itemType);
+    bool IsStaffOrBookModel(int modelType);
+    // A sword, glove, axe, mace, spear, bow, crossbow, staff or book, or arrows or bolts.
+    bool IsWeaponOrAmmunition(const ITEM* pItem);
 
     // Item value
     bool IsHighValueItem(const ITEM* pItem);

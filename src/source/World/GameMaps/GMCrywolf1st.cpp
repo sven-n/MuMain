@@ -1790,7 +1790,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         BoneManager::GetBonePosition(o, L"Monster94_zx01", Position);
         Vector(0.1f, 0.0f, 0.6f, Light);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.8f, Light, o, Rot);
-        if (rand_fps_check(2))
+        if (rand() % 2 == 0)
         {
             Vector(0.7f, 0.7f, 1.0f, Light);
             CreateSprite(BITMAP_SHINY + 1, Position, 0.8f, Light, o, 360.f - Rot);
@@ -2101,9 +2101,9 @@ bool M34CryWolf1st::CreateMist(PARTICLE* pParticleObj)
             vec3_t Velocity, Direction;
             Vector(0.f, -45.f * CharacterMoveSpeed(Hero), 0.f, Velocity);
             VectorRotate(Velocity, Matrix, Direction);
-            VectorAddScaled(TargetPosition, Direction, TargetPosition, FPS_ANIMATION_FACTOR);
+            VectorAdd(TargetPosition, Direction, TargetPosition);
         }
-        if (Hero->Movement || (rand_fps_check(2)))
+        if (Hero->Movement || (rand() % 2 == 0))
         {
             CreateParticle(BITMAP_CLOUD, TargetPosition, TargetAngle, Light, 8, 0.4f);
         }

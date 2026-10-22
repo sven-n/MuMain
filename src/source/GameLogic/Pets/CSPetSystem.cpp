@@ -460,7 +460,7 @@ void CSPetDarkSpirit::MovePet(void)
         int speedRandom = 28;
         int CharacterHeight = 250;
 
-        if (m_PetOwner->Helper.Type == ITEM_DARK_HORSE_ITEM || gMapManager.WorldActive == WD_55LOGINSCENE)
+        if (m_PetOwner->Helper.Type == MODEL_DARK_HORSE_ITEM || gMapManager.WorldActive == WD_55LOGINSCENE)
         {
             CharacterHeight = 350;
         }
@@ -469,14 +469,14 @@ void CSPetDarkSpirit::MovePet(void)
         if (o->Position[2] < Height)
         {
             speedRandom = 10;
-            o->Angle[0] -= 2.f;
+            o->Angle[0] -= 2.f * FPS_ANIMATION_FACTOR;
             if (o->Angle[0] < -15.f)
                 o->Angle[0] = -15.f;
         }
         else if (o->Position[2] > Height + 100)
         {
             speedRandom = 20;
-            o->Angle[0] += 2.f;
+            o->Angle[0] += 2.f * FPS_ANIMATION_FACTOR;
             if (o->Angle[0] > 15.f)
                 o->Angle[0] = 15.f;
         }
@@ -525,7 +525,7 @@ void CSPetDarkSpirit::MovePet(void)
 
         if (o->AI == PET_ATTACK)
         {
-            TargetPosition[2] += 50.f * FPS_ANIMATION_FACTOR;
+            TargetPosition[2] += 50.f;
             float Distance = MoveHumming(o->Position, o->Angle, TargetPosition, o->Velocity);
             if (Distance < 20 || o->LifeTime > 20)
             {
@@ -586,7 +586,7 @@ void CSPetDarkSpirit::MovePet(void)
         b->TransformPosition(Owner->BoneTransform[42], p, Pos, true);
 
         float Distance = MoveHumming(o->Position, o->Angle, Pos, o->Velocity);
-        o->Velocity++;
+        o->Velocity += FPS_ANIMATION_FACTOR;
         if (Distance < 50)
         {
             SetAI(PET_STAND);
@@ -600,7 +600,7 @@ void CSPetDarkSpirit::MovePet(void)
             c->AttackTime = 15;
         }
     }
-    if (rand_fps_check(100) && rand_fps_check(60))
+    if (rand_fps_check(100) && rand() % 60 == 0)
     {
         PlayBuffer(SOUND_DSPIRIT_SHOUT, o);
     }

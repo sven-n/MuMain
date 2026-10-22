@@ -8,8 +8,12 @@ for a long time, surfacing only as unrelated-looking runtime symptoms in
 whichever windows happen to load it. This script catches what the real parser
 won't tell you about, ahead of time:
 
-- RML: unterminated/nested `<!-- -->` comments, and balanced element nesting.
-- RCSS: balanced `{`/`}`, and unterminated/nested `/* */` comments.
+- RML: unterminated/nested `<!-- -->` comments, balanced element nesting, and
+  self-closed `data-for` elements (each item would log "Missing or invalid RML
+  contents").
+- RCSS: balanced `{`/`}`, unterminated/nested `/* */` comments, and values RmlUi
+  drops with a syntax error (CSS-wide keywords such as `inherit`,
+  `line-height: normal`).
 
 Both comment syntaxes share the same trap: they don't nest. `/* ... "/* x */"
 ... */` (or the `<!-- -->` equivalent) closes at the FIRST close-marker, not
@@ -88,6 +92,11 @@ VOID_ELEMENTS = frozenset(
 )
 
 TAG_RE = re.compile(r"""<(/?)([a-zA-Z][\w-]*)((?:[^>"']|"[^"]*"|'[^']*')*?)(/?)>""", re.S)
+DATA_FOR_RE = re.compile(r"""(?:^|\s)data-for\s*=""")
+# Values RmlUi does not parse: it drops the declaration with a warning. It has no CSS-wide keywords, and
+# its line-height takes a number or a length only.
+UNSUPPORTED_VALUE_RE = re.compile(
+    r"""(?<![\w-])([\w-]+\s*:\s*(?:inherit|initial|unset|revert)|line-height\s*:\s*normal)\s*(?=[;}]|$)""", re.M)
 
 
 def _line_indent(text: str, pos: int) -> str | None:
@@ -109,9 +118,15 @@ def check_rml_nesting(path: pathlib.Path, text: str) -> list[str]:
     suspects: list[str] = []
     for match in TAG_RE.finditer(stripped):
         closing, tag, _attrs, selfclose = match.groups()
+        line = stripped.count("\n", 0, match.start()) + 1
+        if selfclose and DATA_FOR_RE.search(_attrs):
+            errors.append(
+                f"{path}:{line}: '<{tag}>' with data-for is self-closed -- RmlUi builds each item "
+                f"from the element's inner RML and a self-closed one has none, so every item logs "
+                f"'Missing or invalid RML contents'. Write '<{tag} ...></{tag}>'"
+            )
         if tag.lower() in VOID_ELEMENTS or selfclose:
             continue
-        line = stripped.count("\n", 0, match.start()) + 1
         indent = _line_indent(stripped, match.start())
         if not closing:
             stack.append((tag, line, indent))
@@ -195,6 +210,15 @@ def check_rcss(path: pathlib.Path) -> list[str]:
         errors.append(f"{path}: unterminated comment opened at line {comment_start_line}")
     if brace_depth > 0:
         errors.append(f"{path}: {brace_depth} unclosed '{{' by end of file")
+    # Comments blanked, line numbers kept.
+    code = re.sub(r"/\*.*?\*/", lambda m: "\n" * m.group(0).count("\n"), text, flags=re.S)
+    for match in UNSUPPORTED_VALUE_RE.finditer(code):
+        line = code.count("\n", 0, match.start()) + 1
+        errors.append(
+            f"{path}:{line}: '{match.group(1)}' -- RmlUi does not parse this value, so it drops the "
+            "declaration and logs a syntax error; leave it out (an inherited property inherits anyway) or "
+            "give a value it takes"
+        )
     return errors
 
 

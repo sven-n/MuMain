@@ -12,7 +12,6 @@
 #include "Engine/Object/ZzzInterface.h"
 
 extern int TextNum;
-extern int g_iItemInfo[16][17];
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -110,6 +109,15 @@ void mu::ui::window::CItemExplanationWindow::SyncContent()
         return;
     }
 
+    // The content changes only with what the key holds; until then the document keeps it.
+    const ItemHelpContentKey content = GetItemHelpContentKey(ItemHelp);
+    if (m_ShownContent == content)
+    {
+        m_View.SyncShown();
+        return;
+    }
+    m_ShownContent = content;
+
     ITEM_ATTRIBUTE* p = &ItemAttribute[ItemHelp];
     ComputeItemInfo(ItemHelp);
 
@@ -129,6 +137,21 @@ void mu::ui::window::CItemExplanationWindow::SyncContent()
     TextNum++;
     std::vector<ItemHelpLineEntry> lines = ItemHelpView::TextListLines(TextNum);
 
+    ItemHelpView::Table table = BuildLevelsTable(etc);
+
+    // Under the table: which classes can equip it, and the closing half line.
+    TextNum = 0;
+    RequireClass(p);
+    mu_swprintf(TextList[TextNum], L"\n");
+    TextNum++;
+    std::vector<ItemHelpLineEntry> tail = ItemHelpView::TextListLines(TextNum);
+    TextNum = 0;
+
+    m_View.Sync(true, std::move(lines), std::move(table), std::move(tail));
+}
+
+ItemHelpView::Table mu::ui::window::CItemExplanationWindow::BuildLevelsTable(bool etc)
+{
     // RenderHelpCategory() / RenderHelpLine()'s columns, in the original's order and on its
     // conditions: a heading and a value per level, white where the hero can equip the item and red
     // where not, the attack damage as min~max. The theme lays them out as a table.
@@ -166,8 +189,10 @@ void mu::ui::window::CItemExplanationWindow::SyncContent()
     }
     if (g_iItemInfo[0][_COLUMN_TYPE_MAGIC] > 0)
         column(I18N::Game::WIZDmg, number(_COLUMN_TYPE_MAGIC, L"%d%%"));
+    // The original showed the curse without %, but it is a percent like WIZDmg: the tooltip reads
+    // "Curse Spell increment %d%%".
     if (g_iItemInfo[0][_COLUMN_TYPE_CURSE] > 0)
-        column(I18N::Game::Curse, number(_COLUMN_TYPE_CURSE, L"%d"));
+        column(I18N::Game::Curse, number(_COLUMN_TYPE_CURSE, L"%d%%"));
     if (g_iItemInfo[0][_COLUMN_TYPE_PET_ATTACK] > 0)
         column(I18N::Game::Attack, number(_COLUMN_TYPE_PET_ATTACK, L"%d%%"));
     if (g_iItemInfo[0][_COLUMN_TYPE_DEFENCE] > 0)
@@ -185,15 +210,7 @@ void mu::ui::window::CItemExplanationWindow::SyncContent()
     if (g_iItemInfo[0][_COLUMN_TYPE_REQCHA] > 0)
         column(I18N::Game::Command, number(_COLUMN_TYPE_REQCHA, L"%d"));
 
-    // Under the table: which classes can equip it, and the closing half line.
-    TextNum = 0;
-    RequireClass(p);
-    mu_swprintf(TextList[TextNum], L"\n");
-    TextNum++;
-    std::vector<ItemHelpLineEntry> tail = ItemHelpView::TextListLines(TextNum);
-    TextNum = 0;
-
-    m_View.Sync(true, std::move(lines), std::move(table), std::move(tail));
+    return table;
 }
 
 float mu::ui::window::CItemExplanationWindow::GetLayerDepth()

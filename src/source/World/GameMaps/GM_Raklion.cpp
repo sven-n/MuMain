@@ -1555,7 +1555,7 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         if (o->CurrentAction == MONSTER01_DIE)
         {
             float fBlendLight = 20.f - o->AnimationFrame;
-            fBlendLight *= pow(1.0f / (15), FPS_ANIMATION_FACTOR);
+            fBlendLight /= 15;
             vec3_t vOriginPos;
             VectorCopy(o->Position, vOriginPos);
 
@@ -1928,7 +1928,8 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 o->m_vPosSword[0] += fDistance * sinf(o->Angle[2] * Q_PI / 180.0f);
                 o->m_vPosSword[1] += -fDistance * cosf(o->Angle[2] * Q_PI / 180.0f);
             }
-            if (6 <= c->AttackTime && c->AttackTime <= 12 && rand_fps_check(2))
+            // One spear every reference frame, as at 25 FPS; rand_fps_check(2) halves the spears for cheaper casts.
+            if (6 <= c->AttackTime && c->AttackTime <= 12 && rand_fps_check(1))
             {
                 vec3_t Position;
                 vec3_t Position2 = {0.0f, 0.0f, 0.0f};
@@ -2180,7 +2181,8 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 o->m_vPosSword[0] += fDistance * sinf(o->Angle[2] * Q_PI / 180.0f);
                 o->m_vPosSword[1] += -fDistance * cosf(o->Angle[2] * Q_PI / 180.0f);
             }
-            if (6 <= c->AttackTime && c->AttackTime <= 12 && rand_fps_check(2))
+            // One spear every reference frame, as at 25 FPS; rand_fps_check(2) halves the spears for cheaper casts.
+            if (6 <= c->AttackTime && c->AttackTime <= 12 && rand_fps_check(1))
             {
                 vec3_t Position;
                 vec3_t Position2 = {0.0f, 0.0f, 0.0f};

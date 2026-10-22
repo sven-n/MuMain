@@ -155,22 +155,7 @@ void AnimationTaskPool::DispatchCharacters(std::span<CHARACTER* const> activeCha
                 OBJECT* o = &c->Object;
                 if (!o->Live || !o->Visible) continue;
 
-                BMD* model = &Models[o->Type];
-                if (!model || model->NumBones <= 0) continue;
-
-                model->Animation(
-                    o->BoneTransform,
-                    o->AnimationFrame,
-                    o->PriorAnimationFrame,
-                    o->PriorAction,
-                    o->Angle,
-                    o->HeadAngle,
-                    false,
-                    true,
-                    nullptr,
-                    o->CurrentAction
-                );
-                o->EnableBoneMatrix = true;
+                AnimateCharacterBones(o);
             }
         };
 

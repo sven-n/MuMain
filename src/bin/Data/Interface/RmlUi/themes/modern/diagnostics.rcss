@@ -44,17 +44,23 @@ body { pointer-events: none; }
 
 /* The passes side by side, half each, so the table stays above the HUD. */
 #panel .pass-columns { display: flex; margin-top: 2dp; margin-bottom: 2dp; }
-#panel .pass-column { margin-right: 12dp; }
+/* Definite widths: a flex item sized by its content is laid out to measure it and again to place it,
+   at every level, which made each refresh of the table take tens of milliseconds. A column is its
+   row's cells (50 + 3 x 32 + 40), the section both columns and the gap between them. */
+#counters { width: 384dp; }
+#panel .pass-column { width: 186dp; margin-right: 12dp; }
 #panel .pass-column:last-child { margin-right: 0; }
 #panel .pass-row { display: flex; white-space: nowrap; }
 .pass-row span { display: block; box-sizing: border-box; width: 32dp; padding-left: 4dp; text-align: right; }
 .pass-row span:first-child { width: 50dp; padding-left: 0; text-align: left; }
 .pass-row span:last-child { width: 40dp; }
 .pass-head { font-weight: bold; }
+/* Each cell holds a whole column, a line per pass. */
+#panel .pass-lines span { white-space: pre; }
 
 #panel { color: token(text-primary); }
 /* As see-through as the legacy panel: the game stays visible behind the numbers. */
-.section > .section-back { background-color: rgba(10, 10, 12, 130); }
+.section > .section-back { background-color: rgba(10, 10, 12, 100); }
 .title, .heading, .pass-head { color: token(accent-gold); }
 .note, .metric .label { color: token(text-secondary); }
 #graph progress fill { background-color: #40d050; }

@@ -32,20 +32,13 @@ void SetComponents(vec3_t target, const CreateVector& vector)
     }
 }
 
-// One statement per component, in the form the old cases had (`x += v *
-// FPS_ANIMATION_FACTOR`), so a compiler that contracts it into a fused
-// multiply-add does so for both.
 void AddComponents(vec3_t target, const CreateVector& vector)
 {
     if (vector.components == 0)
         return;
     for (int i = 0; i < 3; ++i)
     {
-        if (!(vector.components & (1 << i)))
-            continue;
-        if (vector.timesFrameFactor & (1 << i))
-            target[i] += vector.values[i] * FPS_ANIMATION_FACTOR;
-        else
+        if (vector.components & (1 << i))
             target[i] += vector.values[i];
     }
 }
@@ -113,13 +106,7 @@ void ApplyVectors(OBJECT* o, const CreateParams& params)
 void ApplyOffsets(OBJECT* o, const CreateParams& params)
 {
     if (params.lifeTimeOffset)
-    {
-        // In the form of the old cases, as AddComponents.
-        if (params.lifeTimeOffset->timesFrameFactor)
-            o->LifeTime += params.lifeTimeOffset->value * FPS_ANIMATION_FACTOR;
-        else
-            o->LifeTime += params.lifeTimeOffset->value;
-    }
+        o->LifeTime += *params.lifeTimeOffset;
     AddComponents(o->Position, params.positionOffset);
     AddComponents(o->Angle, params.angleOffset);
 }
@@ -227,8 +214,6 @@ CreateVector ToCreateVector(const Data::Effects::EffectCreateVector& vector)
             continue;
         converted.values[i] = static_cast<float>(*vector.components[i]);
         converted.components |= static_cast<std::uint8_t>(1 << i);
-        if (vector.timesFrameFactor[i])
-            converted.timesFrameFactor |= static_cast<std::uint8_t>(1 << i);
     }
     return converted;
 }
@@ -308,8 +293,7 @@ CreateParams ToCreateParams(const Data::Effects::EffectCreateParams& values)
     params.direction = ToCreateVector(values.direction);
     params.startPosition = ToCreateVector(values.startPosition);
     if (values.lifeTimeOffset)
-        params.lifeTimeOffset =
-            CreateNumber{static_cast<float>(values.lifeTimeOffset->value), values.lifeTimeOffset->timesFrameFactor};
+        params.lifeTimeOffset = static_cast<float>(*values.lifeTimeOffset);
     params.positionOffset = ToCreateVector(values.positionOffset);
     params.angleOffset = ToCreateVector(values.angleOffset);
     params.startPositionOffset = ToCreateVector(values.startPositionOffset);

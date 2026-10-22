@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ItemDataHandler.h"
 #include "ItemJsonStorage.h"
+#include "ItemModelLoader.h"
 #include "Core/Globals/_struct.h"
 #include "Core/Globals/_define.h"
 #include "Core/Text/Utf8.h"
@@ -11,10 +12,14 @@
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
+#include "Data/GameData/ItemData/ItemModelJsonFormat.h"
+#include "Data/GameData/ItemData/ItemTypeUse.h"
+#include "Data/GameData/ItemData/ItemNames.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "I18N/All.h"
 
 #include <algorithm>
+#include <iterator>
 #include <chrono>
 #include <memory>
 
@@ -57,6 +62,18 @@ std::unique_ptr<ITEM_ATTRIBUTE[]> BuildItemAttributes(std::string_view locale)
     }
     return attributes;
 }
+
+#ifdef _EDITOR
+// The tables and profiles in the writer's order (by name), so a file read as it
+// was written and one the editor stored compare equal (the undo history).
+ItemStatFile InWriterOrder(ItemStatFile file)
+{
+    const auto byName = [](const auto& left, const auto& right) { return left.name < right.name; };
+    std::ranges::stable_sort(file.tables, byName);
+    std::ranges::stable_sort(file.profiles, byName);
+    return file;
+}
+#endif
 } // namespace
 
 CItemDataHandler::CItemDataHandler()
@@ -95,6 +112,15 @@ bool CItemDataHandler::Load(std::string& errorMessage)
 {
     const auto loadStart = std::chrono::steady_clock::now();
     ItemDataLoadResult result = LoadItemDataDirectory(GetItemDataDirectory());
+    ValidateNameLocales(result.items, I18N::GetAvailableLocales(), result.issues);
+    ItemStatsLoadResult stats = LoadItemStatsFile(GetItemStatsFile());
+    result.issues.insert(result.issues.end(), stats.issues.begin(), stats.issues.end());
+    ItemStatProfiles statProfiles;
+    if (!HasErrors(stats.issues))
+    {
+        statProfiles = ItemStatProfiles(stats.file);
+        ValidateStatProfiles(result.items, statProfiles, GetItemStatsFile().generic_string(), result.issues);
+    }
     Data::LogDataIssues(ItemDataLabel, result.issues);
     if (HasErrors(result.issues))
     {
@@ -102,9 +128,14 @@ bool CItemDataHandler::Load(std::string& errorMessage)
         return false;
     }
     const double loadMilliseconds = MillisecondsSince(loadStart);
+#ifdef _EDITOR
+    m_statFile = InWriterOrder(std::move(stats.file));
+    m_statFileChanged = false;
+#endif
 
     const auto buildStart = std::chrono::steady_clock::now();
     g_ItemDatabase.SetDisplayLocale(I18N::GetCurrentLocale());
+    g_ItemDatabase.SetStatProfiles(std::move(statProfiles));
     g_ItemDatabase.Build(result.items);
     FillItemAttributes();
     RegisterLocaleObserver();
@@ -134,6 +165,15 @@ bool CItemDataHandler::LoadModels(std::string& errorMessage)
 
     g_GlowColors.Build(colors.colors);
     g_ItemModelDatabase.Build(result.models, g_GlowColors);
+    g_ItemModelDatabase.SetSharedModels(result.sharedModels);
+#ifdef _EDITOR
+    // The models are where their files have them again.
+    m_modelMoves.clear();
+    m_changedModelGroups.reset();
+    m_sharedModelsChanged = false;
+    m_glowColorsChanged = false;
+    m_modelsToReopen.clear();
+#endif
     MU_LOG_INFO(mu::log::Get("data"), "Loaded {} item models from {} in {:.1f} ms", g_ItemModelDatabase.GetModelCount(),
                 GetItemModelDataDirectory().string(), MillisecondsSince(loadStart));
     return true;
@@ -174,53 +214,409 @@ void CItemDataHandler::OnLocaleChanged(void* context) noexcept
 }
 
 #ifdef _EDITOR
-void CItemDataHandler::OnItemEdited(int itemType)
+ItemDefinition CItemDataHandler::WithDerivedFields(const ItemDefinition& definition, const ItemDefinition* previous)
 {
-    if (!IsValidItemType(itemType))
+    ItemDefinition result = definition;
+    if (previous == nullptr || definition.weaponKind == previous->weaponKind)
+    {
+        result.weaponKind = FollowGroupWeaponKind(previous, definition);
+    }
+    if (definition.statProfile.empty())
+    {
+        // "Follow the data" was picked: also over a profile picked before.
+        result.statProfile = FollowStatProfile(g_ItemDatabase.GetStatProfiles(), nullptr, result);
+    }
+    else if (previous == nullptr || definition.statProfile == previous->statProfile)
+    {
+        result.statProfile = FollowStatProfile(g_ItemDatabase.GetStatProfiles(), previous, result);
+    }
+    return result;
+}
+
+void CItemDataHandler::RefillItemAttribute(int itemType)
+{
+    if (const ItemDefinition* definition = g_ItemDatabase.Find(itemType))
+    {
+        ToItemAttribute(*definition, ItemAttribute[itemType]);
+        return;
+    }
+    ItemAttribute[itemType] = ITEM_ATTRIBUTE{};
+}
+
+void CItemDataHandler::SetItem(const ItemDefinition& definition)
+{
+    SetItems(std::span<const ItemDefinition>(&definition, 1));
+}
+
+void CItemDataHandler::SetItems(std::span<const ItemDefinition> definitions)
+{
+    std::vector<ItemDefinition> stored;
+    stored.reserve(definitions.size());
+    for (const ItemDefinition& definition : definitions)
+    {
+        if (IsValidItemId(definition.group, definition.number))
+        {
+            stored.push_back(WithDerivedFields(definition, g_ItemDatabase.Find(definition.group, definition.number)));
+        }
+    }
+    g_ItemDatabase.SetMany(stored);
+    for (const ItemDefinition& definition : stored)
+    {
+        RefillItemAttribute(MakeItemType(definition.group, definition.number));
+    }
+}
+
+void CItemDataHandler::RestoreItems(std::span<const ItemDefinition> definitions)
+{
+    std::vector<ItemDefinition> stored;
+    std::ranges::copy_if(definitions, std::back_inserter(stored), [](const ItemDefinition& definition)
+                         { return IsValidItemId(definition.group, definition.number); });
+    g_ItemDatabase.SetMany(stored);
+    for (const ItemDefinition& definition : stored)
+    {
+        RefillItemAttribute(MakeItemType(definition.group, definition.number));
+    }
+}
+
+bool CItemDataHandler::AddItem(const ItemDefinition& definition, const ItemModelDefinition* model,
+                               const ItemDefinition* copiedFrom)
+{
+    if (!IsValidItemId(definition.group, definition.number) || !definition.Exists() ||
+        !IsFreeItemType(MakeItemType(definition.group, definition.number)))
+    {
+        return false;
+    }
+    const ItemDefinition stored = WithDerivedFields(definition, copiedFrom);
+    RestoreItems(std::span<const ItemDefinition>(&stored, 1));
+    if (model != nullptr)
+    {
+        ItemModelDefinition placed = *model;
+        placed.group = definition.group;
+        placed.number = definition.number;
+        SetItemModel(placed);
+    }
+    return true;
+}
+
+bool CItemDataHandler::RemoveItem(int itemType)
+{
+    if (g_ItemDatabase.Find(itemType) == nullptr)
+    {
+        return false;
+    }
+    ItemDefinition empty;
+    empty.group = GetItemGroup(itemType);
+    empty.number = GetItemNumber(itemType);
+    RestoreItems(std::span<const ItemDefinition>(&empty, 1));
+    if (g_ItemModelDatabase.Find(itemType) != nullptr)
+    {
+        ItemModelDefinition noModel;
+        noModel.group = empty.group;
+        noModel.number = empty.number;
+        SetItemModel(noModel);
+    }
+    return true;
+}
+
+bool CItemDataHandler::MoveItem(int fromItemType, int toItemType)
+{
+    if (g_ItemDatabase.Find(fromItemType) == nullptr || !IsFreeItemType(toItemType))
+    {
+        return false;
+    }
+    std::swap(ItemAttribute[fromItemType], ItemAttribute[toItemType]);
+    OnItemsSwapped(fromItemType, toItemType);
+    return true;
+}
+
+void CItemDataHandler::SetItemModel(const ItemModelDefinition& model)
+{
+    if (!IsValidItemId(model.group, model.number))
     {
         return;
     }
 
-    ITEM_ATTRIBUTE& attribute = ItemAttribute[itemType];
-    ItemDefinition definition = g_ItemDatabase.GetAllSlots()[itemType];
-    definition.group = GetItemGroup(itemType);
-    definition.number = GetItemNumber(itemType);
-    CopyItemAttributeStats(attribute, definition);
-
-    // Only a changed name is stored; otherwise every stat edit would turn the
-    // shown English fallback into a translation. ITEM_ATTRIBUTE holds a cut
-    // name, so compare against the cut name, or a stat edit would store the
-    // cut version of a long name.
-    const std::wstring editedName = ReadItemAttributeName(attribute);
-    if (editedName != CutToItemAttributeName(definition.name))
+    const int itemType = MakeItemType(model.group, model.number);
+    ItemModelDefinition stored = model;
+    if (const SharedItemModel* shared = g_ItemModelDatabase.FindSharedModel(stored.model))
     {
-        const std::string editedNameUtf8 = Core::Text::ToUtf8(editedName.c_str());
-        definition.names.Set(g_ItemDatabase.GetDisplayLocale(), editedNameUtf8);
-        if (definition.names.GetNeutral().empty())
+        stored.file = shared->file;
+        stored.textureFolders = shared->textureFolders;
+        stored.noneBlendMeshes = shared->noneBlendMeshes;
+    }
+    const ItemModelDefinition* before = g_ItemModelDatabase.Find(itemType);
+    const bool opensDifferently = before == nullptr || !stored.Exists() || stored.model != before->model ||
+                                  stored.file != before->file || stored.textureFolders != before->textureFolders ||
+                                  stored.noneBlendMeshes != before->noneBlendMeshes ||
+                                  stored.material != before->material;
+    if (before == nullptr && !stored.Exists())
+    {
+        return;
+    }
+
+    g_ItemModelDatabase.Set(stored, g_GlowColors);
+    m_changedModelGroups.set(static_cast<size_t>(model.group));
+    if (opensDifferently && std::ranges::find(m_modelsToReopen, itemType) == m_modelsToReopen.end())
+    {
+        m_modelsToReopen.push_back(itemType);
+    }
+}
+
+void CItemDataHandler::SetSharedModel(const SharedItemModel& sharedModel, std::string_view previousName)
+{
+    const std::string oldName = previousName.empty() ? sharedModel.name : std::string(previousName);
+    if (oldName != sharedModel.name)
+    {
+        g_ItemModelDatabase.RemoveSharedModel(oldName);
+    }
+    g_ItemModelDatabase.SetSharedModel(sharedModel);
+    m_sharedModelsChanged = true;
+
+    for (const ItemModelDefinition& model : g_ItemModelDatabase.GetAllSlots())
+    {
+        if (model.Exists() && model.model == oldName)
         {
-            // A new item needs an English name.
-            definition.names.Set(Data::LocalizedString::NeutralLocale, editedNameUtf8);
+            ItemModelDefinition user = model;
+            user.model = sharedModel.name;
+            SetItemModel(user);
         }
     }
+}
 
-    g_ItemDatabase.Set(definition);
-
-    // A removed translation shows the English name again.
-    const ItemDefinition* updated = g_ItemDatabase.Find(itemType);
-    if (updated != nullptr && CutToItemAttributeName(updated->name) != editedName)
+bool CItemDataHandler::RemoveSharedModel(std::string_view name)
+{
+    const auto slots = g_ItemModelDatabase.GetAllSlots();
+    if (std::ranges::any_of(slots,
+                            [name](const ItemModelDefinition& model) { return model.Exists() && model.model == name; }))
     {
-        ToItemAttribute(*updated, attribute);
+        return false;
     }
+    if (g_ItemModelDatabase.FindSharedModel(name) != nullptr)
+    {
+        g_ItemModelDatabase.RemoveSharedModel(name);
+        m_sharedModelsChanged = true;
+    }
+    return true;
+}
+
+void CItemDataHandler::SetGlowColor(const Data::Effects::GlowColor& color)
+{
+    g_GlowColors.Set(color);
+    m_glowColorsChanged = true;
+    g_ItemModelDatabase.ResolveGlowColors(g_GlowColors);
+}
+
+bool CItemDataHandler::RemoveGlowColor(std::string_view name)
+{
+    if (name == ItemGlow::DefaultColor || name == ItemGlow::DefaultShineColor || name == ItemGlow::DefaultAncientColor)
+    {
+        return false;
+    }
+    const auto slots = g_ItemModelDatabase.GetAllSlots();
+    if (std::ranges::any_of(slots,
+                            [name](const ItemModelDefinition& model)
+                            {
+                                return model.Exists() && (model.glow.color == name || model.glow.shineColor == name ||
+                                                          model.glow.ancientColor == name);
+                            }))
+    {
+        return false;
+    }
+    if (g_GlowColors.Find(name) != nullptr)
+    {
+        g_GlowColors.Remove(name);
+        m_glowColorsChanged = true;
+        g_ItemModelDatabase.ResolveGlowColors(g_GlowColors);
+    }
+    return true;
+}
+
+void CItemDataHandler::RestoreGlowColors(std::span<const Data::Effects::GlowColor> colors)
+{
+    g_GlowColors.Build(colors);
+    m_glowColorsChanged = true;
+    g_ItemModelDatabase.ResolveGlowColors(g_GlowColors);
+}
+
+std::vector<ItemModelProblem> CItemDataHandler::ReopenChangedModels(const ModelLoader::LookNames& lookNames)
+{
+    std::vector<int> itemTypes;
+    itemTypes.swap(m_modelsToReopen);
+    std::ranges::sort(itemTypes);
+    if (itemTypes.empty())
+    {
+        return {};
+    }
+    if (m_openedModelHooks.changing != nullptr)
+    {
+        m_openedModelHooks.changing();
+    }
+    std::vector<ItemModelProblem> problems = ModelLoader::ReopenModels(itemTypes, lookNames);
+    if (m_openedModelHooks.changed != nullptr)
+    {
+        m_openedModelHooks.changed(itemTypes);
+    }
+    return problems;
+}
+
+bool CItemDataHandler::SetItemName(int itemType, std::string_view locale, std::string text)
+{
+    const ItemDefinition* current = g_ItemDatabase.Find(itemType);
+    if (current == nullptr || text.find(Data::LocalizedString::Separator) != std::string::npos)
+    {
+        return false;
+    }
+
+    ItemDefinition definition = *current;
+    definition.names.Set(locale, std::move(text));
+    // Also for an item without an English name (from a bmd import): removing
+    // its last translation would end the item in the database while
+    // ItemAttribute kept it. Its English name comes first.
+    if (definition.names.GetNeutral().empty())
+    {
+        return false;
+    }
+    g_ItemDatabase.Set(definition);
+    if (const ItemDefinition* updated = g_ItemDatabase.Find(itemType))
+    {
+        ToItemAttribute(*updated, ItemAttribute[itemType]);
+    }
+    return true;
 }
 
 void CItemDataHandler::OnItemsSwapped(int firstItemType, int secondItemType)
 {
+    if (!IsValidItemType(firstItemType) || !IsValidItemType(secondItemType))
+    {
+        return;
+    }
+
+    const ItemDefinition first = g_ItemDatabase.GetAllSlots()[firstItemType];
+    const ItemDefinition second = g_ItemDatabase.GetAllSlots()[secondItemType];
     g_ItemDatabase.Swap(firstItemType, secondItemType);
+    // Each item keeps the model slot of its item type, so the model moves too.
+    SwapItemModels(firstItemType, secondItemType);
+    m_modelMoves.emplace_back(firstItemType, secondItemType);
+    FollowDerivedFieldsAfterMove(first, secondItemType);
+    FollowDerivedFieldsAfterMove(second, firstItemType);
+}
+
+void CItemDataHandler::SwapItemModels(int firstItemType, int secondItemType)
+{
+    g_ItemModelDatabase.Swap(firstItemType, secondItemType);
+    if (m_openedModelHooks.changing != nullptr)
+    {
+        m_openedModelHooks.changing();
+    }
+    Data::Items::ModelLoader::SwapOpenedModels(firstItemType, secondItemType);
+    if (m_openedModelHooks.changed != nullptr)
+    {
+        const int itemTypes[] = {firstItemType, secondItemType};
+        m_openedModelHooks.changed(itemTypes);
+    }
+    m_changedModelGroups.set(static_cast<size_t>(GetItemGroup(firstItemType)));
+    m_changedModelGroups.set(static_cast<size_t>(GetItemGroup(secondItemType)));
+}
+
+void CItemDataHandler::TakeBackModelMoves()
+{
+    for (auto move = m_modelMoves.rbegin(); move != m_modelMoves.rend(); ++move)
+    {
+        SwapItemModels(move->first, move->second);
+    }
+    m_modelMoves.clear();
+}
+
+void CItemDataHandler::FollowDerivedFieldsAfterMove(const ItemDefinition& before, int newItemType)
+{
+    const ItemDefinition* moved = g_ItemDatabase.Find(newItemType);
+    if (moved == nullptr)
+    {
+        return;
+    }
+
+    ItemDefinition changed = *moved;
+    changed.weaponKind = FollowGroupWeaponKind(&before, changed);
+    changed.statProfile = FollowStatProfile(g_ItemDatabase.GetStatProfiles(), &before, changed);
+    if (changed.weaponKind != moved->weaponKind || changed.statProfile != moved->statProfile)
+    {
+        g_ItemDatabase.Set(changed);
+    }
+}
+
+void CItemDataHandler::SetLookNames(LookNameExists renderStyleExists, LookNameExists itemEffectExists)
+{
+    m_lookNames = LookNames{renderStyleExists, itemEffectExists};
+}
+
+void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
+{
+    // A profile the item stat file does not have would stop the next start.
+    ValidateStatProfiles(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(),
+                         GetItemStatsFile().generic_string(), issues);
+    ValidateNameLocales(g_ItemDatabase.GetAllSlots(), I18N::GetAvailableLocales(), issues);
+    std::vector<ItemDefinition> items;
+    std::ranges::copy_if(g_ItemDatabase.GetAllSlots(), std::back_inserter(items), &ItemDefinition::Exists);
+    ValidateItems(items, issues);
+    // The file as Load read it was checked then.
+    if (m_statFileChanged)
+    {
+        ValidateItemStatsAsWritten(m_statFile, issues);
+    }
+
+    std::vector<ItemModelDefinition> models;
+    std::ranges::copy_if(g_ItemModelDatabase.GetAllSlots(), std::back_inserter(models), &ItemModelDefinition::Exists);
+    ValidateItemModels(models, issues);
+    std::vector<ItemModelDefinition> sharedUsers = models;
+    ApplySharedItemModels(sharedUsers, g_ItemModelDatabase.GetSharedModels(), SharedItemModelsFileName, issues);
+    // Without a color list (no models loaded) every color would be missing.
+    if (!g_GlowColors.GetColors().empty())
+    {
+        ValidateItemModelGlowColors(models, g_GlowColors.GetColors(), issues);
+        ValidateGlowColorsAsWritten(g_GlowColors.GetColors(), issues);
+    }
+    if (m_lookNames)
+    {
+        ValidateItemModelLooks(models, m_lookNames->renderStyle, m_lookNames->itemEffect, issues);
+    }
+    ValidateDirectlySharedModelFiles(models, issues);
+    ValidateItemModelsAsWritten(g_ItemModelDatabase.GetAllSlots(), issues);
+    ValidateSharedItemModelsAsWritten(g_ItemModelDatabase.GetSharedModels(), issues);
+    ValidateItemModelFilesExist(models, issues);
 }
 
 ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
 {
-    return SaveItemDataDirectory(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(), issues);
+    // Everything is checked before anything is written, so all problems are
+    // reported at once.
+    Validate(issues);
+    if (HasErrors(issues))
+    {
+        return ItemDataSaveResult::InvalidData;
+    }
+
+    // Only the model files of changed models are written; the others keep what
+    // this client does not read from them.
+    ItemModelSave models;
+    models.directory = GetItemModelDataDirectory();
+    models.models = g_ItemModelDatabase.GetAllSlots();
+    models.groups = m_changedModelGroups;
+    models.sharedModels = g_ItemModelDatabase.GetSharedModels();
+    models.sharedModelsChanged = m_sharedModelsChanged;
+    models.glowColorsFile = GetGlowColorsFile();
+    models.glowColors = g_GlowColors.GetColors();
+    models.glowColorsChanged = m_glowColorsChanged;
+    models.statsFile = GetItemStatsFile();
+    models.stats = &m_statFile;
+    models.statsChanged = m_statFileChanged;
+    return WriteItemAndModelDataDirectories(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(), models, issues);
+}
+
+void CItemDataHandler::SetStatFile(const ItemStatFile& file)
+{
+    m_statFile = InWriterOrder(file);
+    m_statFileChanged = true;
+    g_ItemDatabase.SetStatProfiles(ItemStatProfiles(m_statFile));
 }
 
 ItemBmdImportResult CItemDataHandler::ImportFromBmd()
@@ -232,11 +628,18 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
     }
 
     result.keptEnglishNameCount = KeepCurrentEnglishNames(result.items);
+    KeepMissingNamesMissing(result.items, result.importedLocales);
     KeepFieldsNotInBmd(result.items, result.importedLocales);
     ValidateItems(result.items, result.validationIssues);
+    ValidateStatProfiles(result.items, g_ItemDatabase.GetStatProfiles(), GetItemStatsFile().generic_string(),
+                         result.validationIssues);
+    ValidateNameLocales(result.items, I18N::GetAvailableLocales(), result.validationIssues);
 
     g_ItemDatabase.Build(result.items);
     FillItemAttributes();
+    // The bmd files have the items at their old numbers; their models go back
+    // there too.
+    TakeBackModelMoves();
     return result;
 }
 
@@ -256,6 +659,27 @@ int CItemDataHandler::KeepCurrentEnglishNames(std::vector<ItemDefinition>& items
     return keptCount;
 }
 
+void CItemDataHandler::KeepMissingNamesMissing(std::vector<ItemDefinition>& items,
+                                               const std::vector<std::string>& importedLocales)
+{
+    for (ItemDefinition& item : items)
+    {
+        const ItemDefinition* current = g_ItemDatabase.Find(item.group, item.number);
+        for (const std::string& locale : importedLocales)
+        {
+            if (locale == Data::LocalizedString::NeutralLocale ||
+                Data::Items::GetOwnName(item, locale) != item.names.GetNeutral())
+            {
+                continue;
+            }
+            if (current == nullptr || !Data::Items::HasNameIn(*current, locale))
+            {
+                item.names.Set(locale, "");
+            }
+        }
+    }
+}
+
 void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items,
                                           const std::vector<std::string>& importedLocales)
 {
@@ -263,7 +687,8 @@ void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items,
     { return std::find(importedLocales.begin(), importedLocales.end(), locale) != importedLocales.end(); };
     for (ItemDefinition& item : items)
     {
-        if (const ItemDefinition* current = g_ItemDatabase.Find(item.group, item.number))
+        const ItemDefinition* current = g_ItemDatabase.Find(item.group, item.number);
+        if (current != nullptr)
         {
             CopyFieldsNotInItemAttribute(*current, item);
             for (const auto& [locale, text] : current->names.GetTranslations())
@@ -274,6 +699,8 @@ void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items,
                 }
             }
         }
+        item.weaponKind = FollowGroupWeaponKind(current, item);
+        item.statProfile = FollowStatProfile(g_ItemDatabase.GetStatProfiles(), current, item);
     }
 }
 

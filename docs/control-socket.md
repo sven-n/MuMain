@@ -19,7 +19,7 @@ In a build that has it, the client opens the socket only when
 `MU_CONTROL_SOCKET` names a path:
 
 ```sh
-MU_CONTROL_SOCKET=/run/user/1000/clients/default.sock ./Main /u127.0.0.1 /p44405
+MU_CONTROL_SOCKET=/run/user/1000/clients/default.sock ./Main /u127.0.0.1 /p44406
 ```
 
 Without the variable nothing is created, nothing is logged and the client
@@ -76,6 +76,9 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `hover-ui` (`x`, `y`) | move the pointer to a window pixel with no button, as physical motion: RmlUi hover and the game's own pointer (native hover, tooltips) both follow it |
 | `drag-ui` (`x`, `y`, `to_x`, `to_y`, `button`) | press at one window pixel, move to the other over eight frames with the button held, release there |
 | `type` (`text`, `enter`) | deliver committed UTF-8 to the focused field; optional boolean `enter` submits on a later frame |
+| `console` (`text`) | run one `$` developer command (`$fps 60`, …) as if typed into the chat box, without opening it, so nothing typed shows in the frame; `bad_request` when the text is not a `$` command the client knows, or its arguments are missing or malformed |
+| `bench` | the benchmark's progress: `running`, its `status` line, and `last_run`, the folder the last finished run was written to. Start a run with `console` and `$bench run <pattern>`; see [benchmark.md](benchmark.md) |
+| `bones` | in the world: how render's bones compare with the character animation pre-pass. `{"start":true}` clears the counts and starts checking; each answer gives `checked` (characters drawn), `players` (of those, player models), `mismatched` (any bone off by more than 0.01), `max_delta`, and the pre-pass's last `characters` count and whether it ran `parallel` |
 | `ui` | the open windows by name — `inventory`, `inventory_extension`, `character`, `trade`, `storage`, `storage_extension`, `mix`, `npc_shop`, `lucky_item`, `chat_input`, `party`, `command`, `my_shop`, `purchase_shop`, `npc_quest` (the quest dialog of Sebina, Marlon and Devin), and `message_box` while a dialog waits for Enter or Esc — and the window pixels of the named elements that are shown: `trade.confirm`, `trade.zen`, `inventory.repair`, `inventory.my_shop`, `npc_shop.repair`, `npc_shop.repair_all`, `my_shop.title`, `my_shop.open`, `my_shop.close`, `command.trade`, `command.purchase`, `command.party`, `npc_quest.answer.0` and on (the rows of the quest dialog's answers), `npc_quest.complete`, `npc_quest.close`, `character.stat.strength` (`agility`, `vitality`, `energy`, `command`: the character window's "+" buttons, while there are level-up points) |
 | `slot-pixel` (`grid`, `slot`) | the window pixel of a slot's square: `inventory` and `equipment` (the slot numbers `state` reports), `trade`, `trade_partner`, `storage`, `mix`, `npc_shop`, and the personal shops `my_shop` and `purchase_shop` (slots 204 and up, as `state` and the server number them); `not_open` while that window is closed, `bad_request` for a slot the grid does not have |
 | `login` (`account`, `password`, `server`) | server selection, credentials, character list |

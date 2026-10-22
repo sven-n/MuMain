@@ -639,7 +639,7 @@ void mu::ui::window::CCursedTempleSystem::UpdateScore()
     {
     case 0:
     {
-        m_ScoreEffectAlph += 0.015f;
+        m_ScoreEffectAlph += 0.015f * FPS_ANIMATION_FACTOR;
         if (1.0f < m_ScoreEffectAlph)
         {
             m_ScoreEffectState = 1;
@@ -659,7 +659,7 @@ void mu::ui::window::CCursedTempleSystem::UpdateScore()
     break;
     case 2:
     {
-        m_ScoreEffectAlph -= 0.015f;
+        m_ScoreEffectAlph -= 0.015f * FPS_ANIMATION_FACTOR;
         if (0.0f > m_ScoreEffectAlph)
         {
             EndScoreEffect();

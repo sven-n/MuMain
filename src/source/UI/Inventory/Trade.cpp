@@ -392,6 +392,8 @@ void CTrade::SyncRmlModel()
     m_ItemTarget.Sync(m_RmlView.Document() ? m_RmlView.Document()->GetElementById("item_view") : nullptr, IsVisible());
     if (!m_RmlView.Document()) return;
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
+    if (!IsVisible())
+        return;
 
     if (m_pYourInvenCtrl)
         m_pYourInvenCtrl->FollowGridPx(m_RmlView.Document(), "partner_grid");
@@ -649,7 +651,7 @@ void CTrade::ProcessCloseBtn()
 bool CTrade::ProcessBtns()
 {
     if (m_nMyTradeWait > 0)
-        --m_nMyTradeWait;
+        m_nMyTradeWait -= REFERENCE_FRAME_STEP;
 
     return false;
 }

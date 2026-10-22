@@ -1433,6 +1433,9 @@
   <data name="Windowed mode" xml:space="preserve">
     <value>Windowed mode</value>
   </data>
+  <data name="Enhanced graphics" xml:space="preserve">
+    <value>Enhanced graphics</value>
+  </data>
   <data name="Gameplay" xml:space="preserve">
     <value>Gameplay</value>
   </data>
@@ -1447,6 +1450,201 @@
   </data>
   <data name="UI" xml:space="preserve">
     <value>UI</value>
+  </data>
+  <data name="Display" xml:space="preserve">
+    <value>Display</value>
+  </data>
+  <data name="Interface" xml:space="preserve">
+    <value>Interface</value>
+  </data>
+  <data name="Quality" xml:space="preserve">
+    <value>Quality</value>
+  </data>
+  <data name="Effects" xml:space="preserve">
+    <value>Effects</value>
+  </data>
+  <data name="Shadows" xml:space="preserve">
+    <value>Shadows</value>
+  </data>
+  <data name="Enhanced Lighting" xml:space="preserve">
+    <value>Enhanced lighting</value>
+  </data>
+  <data name="Dynamic Lights" xml:space="preserve">
+    <value>Dynamic lights</value>
+  </data>
+  <data name="Light Mood" xml:space="preserve">
+    <value>Darker map light</value>
+  </data>
+  <data name="Bloom And Colour Grading" xml:space="preserve">
+    <value>Bloom and colour grading</value>
+  </data>
+  <data name="Tuning Directional Light" xml:space="preserve">
+    <value>Directional light</value>
+  </data>
+  <data name="Tuning Directional Light Help" xml:space="preserve">
+    <value>How strongly the sun lights the side of a character, monster or NPC that faces it.</value>
+  </data>
+  <data name="Tuning Rim Intensity" xml:space="preserve">
+    <value>Rim intensity</value>
+  </data>
+  <data name="Tuning Rim Intensity Help" xml:space="preserve">
+    <value>Light along a model's outline, which sets it apart from the background.</value>
+  </data>
+  <data name="Tuning Metallic Shine" xml:space="preserve">
+    <value>Metallic shine</value>
+  </data>
+  <data name="Tuning Metallic Shine Help" xml:space="preserve">
+    <value>Highlights on the metal armour sets that have a shine.</value>
+  </data>
+  <data name="Tuning Ambient Fill" xml:space="preserve">
+    <value>Ambient fill</value>
+  </data>
+  <data name="Tuning Ambient Fill Help" xml:space="preserve">
+    <value>Light every side of a model gets, also the side turned away from the sun.</value>
+  </data>
+  <data name="Tuning Minimum Light" xml:space="preserve">
+    <value>Minimum light</value>
+  </data>
+  <data name="Tuning Minimum Light Help" xml:space="preserve">
+    <value>The darkest the shaded side of a model may become.</value>
+  </data>
+  <data name="Tuning Highlight Knee" xml:space="preserve">
+    <value>Highlight knee</value>
+  </data>
+  <data name="Tuning Highlight Knee Help" xml:space="preserve">
+    <value>Where bright model colours start to roll off towards white instead of turning flat white. Lower is softer.</value>
+  </data>
+  <data name="Tuning Rim Concentration" xml:space="preserve">
+    <value>Rim concentration</value>
+  </data>
+  <data name="Tuning Rim Concentration Help" xml:space="preserve">
+    <value>How narrow the outline light is. Higher is a thinner rim.</value>
+  </data>
+  <data name="Tuning Shine Concentration" xml:space="preserve">
+    <value>Shine concentration</value>
+  </data>
+  <data name="Tuning Shine Concentration Help" xml:space="preserve">
+    <value>How small the metal highlight is. Higher is a smaller, sharper highlight.</value>
+  </data>
+  <data name="Tuning Skill Intensity" xml:space="preserve">
+    <value>Skill intensity</value>
+  </data>
+  <data name="Tuning Skill Intensity Help" xml:space="preserve">
+    <value>Brightness of the light skills and effects cast on models and the ground, not of the skill sprites themselves: 0 removes only their light. Map lights and the darker map light also add to the total.</value>
+  </data>
+  <data name="Tuning Skill Radius" xml:space="preserve">
+    <value>Skill radius</value>
+  </data>
+  <data name="Tuning Skill Radius Help" xml:space="preserve">
+    <value>How far a skill's light reaches, as a multiple of its original radius. Maximum skill radius limits the result.</value>
+  </data>
+  <data name="Tuning Skill Fade" xml:space="preserve">
+    <value>Skill fade</value>
+  </data>
+  <data name="Tuning Skill Fade Help" xml:space="preserve">
+    <value>Seconds a skill's light takes to fade out after the skill ends. Immediate ends it at once.</value>
+  </data>
+  <data name="Tuning Overlapping Light Cap" xml:space="preserve">
+    <value>Overlapping-light cap</value>
+  </data>
+  <data name="Tuning Overlapping Light Cap Help" xml:space="preserve">
+    <value>The most light several overlapping skills may add up to. No cap lets them add up freely; it does not switch skill lights off.</value>
+  </data>
+  <data name="Tuning Light Wrap" xml:space="preserve">
+    <value>Light wrap</value>
+  </data>
+  <data name="Tuning Light Wrap Help" xml:space="preserve">
+    <value>How far a candle, fire or skill light reaches around the side of a model.</value>
+  </data>
+  <data name="Tuning Map Light Smoothing" xml:space="preserve">
+    <value>Map-light smoothing</value>
+  </data>
+  <data name="Tuning Map Light Smoothing Help" xml:space="preserve">
+    <value>Seconds over which flickering candles, fires and character lights ease to their new brightness. Immediate follows every flicker.</value>
+  </data>
+  <data name="Tuning Maximum Skill Radius" xml:space="preserve">
+    <value>Maximum skill radius</value>
+  </data>
+  <data name="Tuning Maximum Skill Radius Help" xml:space="preserve">
+    <value>The widest a skill's light may reach after Skill radius, in terrain cells. No cap removes the limit; it does not switch skill lights off.</value>
+  </data>
+  <data name="Tuning Mood Strength" xml:space="preserve">
+    <value>Mood strength</value>
+  </data>
+  <data name="Tuning Mood Strength Help" xml:space="preserve">
+    <value>How much of each map's darker light applies. 0 % is the map's original light while the rest of the Enhanced look stays on. It also scales how much the darker light strengthens candles, fires and skill lights.</value>
+  </data>
+  <data name="Tuning Bloom Intensity" xml:space="preserve">
+    <value>Bloom intensity</value>
+  </data>
+  <data name="Tuning Bloom Intensity Help" xml:space="preserve">
+    <value>How strong the glow around bright effects is. 0 removes the glow.</value>
+  </data>
+  <data name="Tuning Bloom Spread" xml:space="preserve">
+    <value>Bloom spread</value>
+  </data>
+  <data name="Tuning Bloom Spread Help" xml:space="preserve">
+    <value>How wide the glow spreads around bright effects.</value>
+  </data>
+  <data name="Tuning Colour Grading Strength" xml:space="preserve">
+    <value>Colour grading strength</value>
+  </data>
+  <data name="Tuning Colour Grading Strength Help" xml:space="preserve">
+    <value>How much of the map's colour grading applies. 0 % applies none, while bloom stays on.</value>
+  </data>
+  <data name="Tuning More Settings" xml:space="preserve">
+    <value>More settings</value>
+  </data>
+  <data name="Tuning Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="Tuning Reset Group" xml:space="preserve">
+    <value>Reset these settings</value>
+  </data>
+  <data name="Tuning Reset All" xml:space="preserve">
+    <value>Reset all tuning</value>
+  </data>
+  <data name="Tuning Map Default" xml:space="preserve">
+    <value>Defaults</value>
+  </data>
+  <data name="Tuning Custom" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="Tuning Not Saved" xml:space="preserve">
+    <value>Not saved</value>
+  </data>
+  <data name="Tuning No Cap" xml:space="preserve">
+    <value>No cap</value>
+  </data>
+  <data name="Tuning Immediate" xml:space="preserve">
+    <value>Immediate</value>
+  </data>
+  <data name="Tuning Seconds Unit" xml:space="preserve">
+    <value>s</value>
+  </data>
+  <data name="Tuning Cells Unit" xml:space="preserve">
+    <value>cells</value>
+  </data>
+  <data name="Tuning Locked Classic" xml:space="preserve">
+    <value>Tick Enhanced graphics to use these settings. Your values are kept.</value>
+  </data>
+  <data name="Tuning Locked Off" xml:space="preserve">
+    <value>Switch this feature on to use these settings. Your values are kept.</value>
+  </data>
+  <data name="Tuning Locked Needs Lighting" xml:space="preserve">
+    <value>Needs Enhanced lighting. Your values are kept.</value>
+  </data>
+  <data name="Tuning Locked Unavailable" xml:space="preserve">
+    <value>Not available on this graphics device.</value>
+  </data>
+  <data name="Tuning Locked Session" xml:space="preserve">
+    <value>Switched off for this session by a developer command.</value>
+  </data>
+  <data name="Tuning Locked Session Value" xml:space="preserve">
+    <value>Set for this session by a developer command.</value>
+  </data>
+  <data name="Tuning Save Failed" xml:space="preserve">
+    <value>Your graphics tuning could not be saved; the change is shown but not saved:</value>
   </data>
   <data name="VSync" xml:space="preserve">
     <value>VSync</value>
@@ -1469,6 +1667,9 @@
   <data name="Disable Wing Shadow" xml:space="preserve">
     <value>Disable Wing Shadow</value>
   </data>
+  <data name="Disable Shadows" xml:space="preserve">
+    <value>Disable Shadows</value>
+  </data>
   <data name="Show FPS Counter" xml:space="preserve">
     <value>Show FPS Counter</value>
   </data>
@@ -1484,6 +1685,15 @@
   <data name="UI Scale Tooltip" xml:space="preserve">
     <value>Multiplier on top of the automatic fit to the window size</value>
   </data>
+  <data name="Texture Pack" xml:space="preserve">
+    <value>Texture Pack</value>
+  </data>
+  <data name="Original Textures" xml:space="preserve">
+    <value>Original</value>
+  </data>
+  <data name="Texture Pack Tooltip" xml:space="preserve">
+    <value>Folders in Data/TexturePacks; a change takes effect after restarting the game</value>
+  </data>
   <data name="Legacy" xml:space="preserve">
     <value>Legacy</value>
   </data>
@@ -1492,6 +1702,21 @@
   </data>
   <data name="Uncapped" xml:space="preserve">
     <value>Uncapped</value>
+  </data>
+  <data name="Off" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="Anti-aliasing" xml:space="preserve">
+    <value>Anti-aliasing</value>
+  </data>
+  <data name="Anti-aliasing Tooltip" xml:space="preserve">
+    <value>Smooths edges in the Enhanced look; Classic always renders without it</value>
+  </data>
+  <data name="Anisotropic filtering" xml:space="preserve">
+    <value>Anisotropic filtering</value>
+  </data>
+  <data name="Anisotropic Filtering Tooltip" xml:space="preserve">
+    <value>Keeps textures sharp at a slant: world textures in the Enhanced look, upscaled textures in both looks</value>
   </data>
   <data name="Close388" xml:space="preserve">
     <value>Close</value>

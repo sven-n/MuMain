@@ -14,6 +14,7 @@ bool RenderMainScene();
 // via $effects on/off (muConsoleDebug.cpp) -- not gated behind _EDITOR since the report came from a
 // Release NoEditor build.
 void SetDisableEffects(bool disabled);
+bool IsEffectsDisabledDebug();
 
 // DXP-23 diagnostic, finer-grained bisection: `$effects off` (above) confirmed effect rendering is
 // the dominant GPU cost during a multi-caster fight, but not WHICH effect system inside it -- these
@@ -59,6 +60,10 @@ bool IsBodyShadowsDisabledDebug();
 // resubmitted every single render frame, not just once per tick.
 void SetDisableJoints(bool disabled);
 bool IsJointsDisabledDebug();
+
+// Joint trail segments and particles outside the view frustum are not drawn; this draws them anyway.
+void SetDisableEffectCulling(bool disabled);
+bool IsEffectCullingDisabledDebug();
 
 // DXP-23 diagnostic: MODEL_WING_OF_RUIN's own body render (RenderPartObjectBody(), ZzzObject.cpp
 // ~6997-7008) draws its mesh THREE separate times per frame -- a base texture pass, an animated-

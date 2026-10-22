@@ -12,6 +12,7 @@
 #endif
 #include <math.h>
 #include <iterator>
+#include <vector>
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "ZzzLodTerrain.h"
@@ -25,7 +26,18 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/RenderUtils.h"
 #include "Render/Terrain/TerrainHeightGrid.h"
+#include "Render/Lighting/DynamicLightHistory.h"
+#include "Render/Lighting/DynamicLightList.h"
+#include "Render/Lighting/DynamicLightsSetting.h"
+#include "Render/Lighting/LightMoodSetting.h"
+#include "Render/Look/LookProfileSetting.h"
+#include "Render/Terrain/TerrainLightGrid.h"
+#include "Scenes/SceneCore.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #include "I18N/All.h"
+
+#include <algorithm>
+#include <chrono>
 
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "GameLogic/Events/Cinematic/CMVP1stDirection.h"
@@ -524,6 +536,57 @@ void CreateTerrainNormal_Part(int xi, int yi)
     }
 }
 
+// How much of each cell keeps its Classic brightness under the light mood (its
+// bright weight, the same in all three channels so the grid sampler reads it).
+static vec3_t StaticLightBrightWeight[TERRAIN_SIZE * TERRAIN_SIZE];
+static vec3_t FigureStaticTerrainLight[TERRAIN_SIZE * TERRAIN_SIZE];
+
+// The static light of one cell: the baked light, shaded by the slope towards
+// the sun and darkened by the map's light mood: by its base where the baked
+// light is dark, less towards its shadow keep.
+static void CreateStaticLightCell(int Index, const vec3_t Sun, const Render::Lighting::LightMood::Scales& scales)
+{
+    float Luminosity = VectorDotProduct(TerrainNormal[Index], Sun) + 0.5f;
+    if (Luminosity < 0.f)
+        Luminosity = 0.f;
+    else if (Luminosity > 1.f)
+        Luminosity = 1.f;
+    vec3_t undarkened;
+    for (int i = 0; i < 3; i++)
+    {
+        undarkened[i] = TerrainLight[Index][i] * Luminosity;
+    }
+    const float luminance = 0.299f * undarkened[0] + 0.587f * undarkened[1] + 0.114f * undarkened[2];
+    const float weight = Render::Lighting::LightMood::BrightWeight(scales, luminance);
+    float factor[3];
+    Render::Lighting::LightMood::StaticFactor(scales, weight, factor);
+    for (int i = 0; i < 3; i++)
+    {
+        BackTerrainLight[Index][i] = undarkened[i] * factor[i];
+    }
+    Vector(weight, weight, weight, StaticLightBrightWeight[Index]);
+    VectorCopy(BackTerrainLight[Index], FigureStaticTerrainLight[Index]);
+    Render::Lighting::LightMood::CorrectFigureLight(scales, undarkened, FigureStaticTerrainLight[Index], weight);
+}
+
+void RequestFigureStaticCorrection(float xf, float yf, vec3_t correction)
+{
+    vec3_t terrainStatic;
+    Render::Terrain::LightGrid::SampleStatic(FigureStaticTerrainLight, Render::Lighting::FrameDynamicLights().Lights(),
+                                             xf, yf, correction);
+    Render::Terrain::LightGrid::SampleStatic(BackTerrainLight, Render::Lighting::FrameDynamicLights().Lights(), xf, yf,
+                                             terrainStatic);
+    for (int i = 0; i < 3; ++i)
+        correction[i] -= terrainStatic[i];
+}
+
+float RequestStaticLightBrightWeight(float xf, float yf)
+{
+    vec3_t weight;
+    Render::Terrain::LightGrid::Sample(StaticLightBrightWeight, xf, yf, weight);
+    return weight[0];
+}
+
 void CreateTerrainLight()
 {
     vec3_t Light;
@@ -535,20 +598,12 @@ void CreateTerrainLight()
     {
         Vector(0.5f, -0.5f, 0.5f, Light);
     }
+    const Render::Lighting::LightMood::Scales& scales = Render::Lighting::LightMood::Active();
     for (int y = 0; y < TERRAIN_SIZE; y++)
     {
         for (int x = 0; x < TERRAIN_SIZE; x++)
         {
-            int Index = TERRAIN_INDEX(x, y);
-            float Luminosity = VectorDotProduct(TerrainNormal[Index], Light) + 0.5f;
-            if (Luminosity < 0.f)
-                Luminosity = 0.f;
-            else if (Luminosity > 1.f)
-                Luminosity = 1.f;
-            for (int i = 0; i < 3; i++)
-            {
-                BackTerrainLight[Index][i] = TerrainLight[Index][i] * Luminosity;
-            }
+            CreateStaticLightCell(TERRAIN_INDEX(x, y), Light, scales);
         }
     }
 }
@@ -563,16 +618,12 @@ void CreateTerrainLight_Part(int xi, int yi)
 
     vec3_t Light;
     Vector(0.5f, -0.5f, 0.5f, Light);
+    const Render::Lighting::LightMood::Scales& scales = Render::Lighting::LightMood::Active();
     for (int y = yi - 4; y < yi + 4; y++)
     {
         for (int x = xi - 4; x < xi + 4; x++)
         {
-            int Index = TERRAIN_INDEX(x, y);
-            float Luminosity = VectorDotProduct(TerrainNormal[Index], Light) + 0.5f;
-            if (Luminosity < 0.f) Luminosity = 0.f;
-            else if (Luminosity > 1.f) Luminosity = 1.f;
-            for (int i = 0; i < 3; i++)
-                BackTerrainLight[Index][i] = TerrainLight[Index][i] * Luminosity;
+            CreateStaticLightCell(TERRAIN_INDEX(x, y), Light, scales);
         }
     }
 }
@@ -598,6 +649,7 @@ void OpenTerrainLight(wchar_t* FileName)
 
     CreateTerrainNormal();
     CreateTerrainLight();
+    Render::Lighting::LightMood::LogMapLight();
 
     /*
     #ifdef BATTLE_CASTLE
@@ -819,7 +871,7 @@ bool SaveTerrainHeight(wchar_t* name)
 bool OpenTerrainHeightNew(const wchar_t* strFilename)
 {
     wchar_t FileName[256];
-    wchar_t NewFileName[256];
+    wchar_t NewFileName[256] = {};
 
     for (int i = 0; i < (int)wcslen(strFilename); ++i)
     {
@@ -970,42 +1022,90 @@ void SetTerrainLight(float xf, float yf, vec3_t Light, int Range, vec3_t* Buffer
     }
 }
 
-void AddTerrainLight(float xf, float yf, vec3_t Light, int Range, vec3_t* Buffer)
+// A dynamic light added to the frame's terrain light gets the light mood's
+// gain; lights baked into other buffers (the editor's) do not.
+static void ApplyDynamicGain(const vec3_t Light, const vec3_t* Buffer, vec3_t Scaled)
 {
-    auto rf = (float)Range;
-
-    xf = (xf / TERRAIN_SCALE);
-    yf = (yf / TERRAIN_SCALE);
-    int   xi = (int)xf;
-    int   yi = (int)yf;
-    int   syi = yi - Range;
-    int   eyi = yi + Range;
-    auto syf = (float)(syi);
-    for (; syi <= eyi; syi++, syf += 1.f)
+    const float gain = Buffer == PrimaryTerrainLight ? Render::Lighting::LightMood::Active().dynamicGain : 1.f;
+    for (int i = 0; i < 3; i++)
     {
-        int   sxi = xi - Range;
-        int   exi = xi + Range;
-        auto sxf = (float)(sxi);
-        for (; sxi <= exi; sxi++, sxf += 1.f)
-        {
-            float xd = xf - sxf;
-            float yd = yf - syf;
-            float lf = (rf - sqrtf(xd * xd + yd * yd)) / rf;
-            if (lf > 0.f)
-            {
-                float* b = &Buffer[TERRAIN_INDEX_REPEAT(sxi, syi)][0];
-                for (int i = 0; i < 3; i++)
-                {
-                    b[i] += Light[i] * lf;
-                    if (b[i] < 0.f) b[i] = 0.f;
-                }
-            }
-        }
+        Scaled[i] = Render::Lighting::LightMood::ScaleDynamicLight(Light[i], gain);
     }
 }
 
-void AddTerrainLightClip(float xf, float yf, vec3_t Light, int Range, vec3_t* Buffer)
+// With Enhanced dynamic lights in the world, the frame's dynamic terrain lights go through the
+// light history (smoothed map lights, fading effect lights, lights added while drawing kept).
+static bool UseLightHistory()
 {
+    return SceneFlag == MAIN_SCENE && Render::Lighting::DynamicLightsActive();
+}
+
+// The primary terrain light of the active world, for the light history.
+static Render::Terrain::LightGrid::FrameLightTarget FrameLightTarget()
+{
+    Render::Terrain::LightGrid::FrameLightTarget target;
+    target.grid = PrimaryTerrainLight;
+    target.frameLights = &Render::Lighting::FrameDynamicLights();
+    target.history = &Render::Lighting::FrameLightHistory();
+    target.world = gMapManager.WorldActive;
+    target.dynamicGain = Render::Lighting::LightMood::Active().dynamicGain;
+    target.height = RequestTerrainHeight;
+    return target;
+}
+
+void AddFrameHistoryLights()
+{
+    if (!UseLightHistory())
+    {
+        return;
+    }
+    Render::Lighting::DynamicLightHistory& history = Render::Lighting::FrameLightHistory();
+    using Clock = std::chrono::steady_clock;
+    static Clock::time_point last = Clock::now();
+    const Clock::time_point now = Clock::now();
+    static const Clock::time_point start = now;
+    static Render::Lighting::DropReporter drops;
+    if (const std::size_t dropped = drops.Due(history.Drops(), std::chrono::duration<float>(now - start).count());
+        dropped > 0)
+    {
+        mu::log::Get("render")->warn("Light history full: {} refused calls (ordered Classic fallback)", dropped);
+    }
+    constexpr float LongestStep = 0.25f;
+    const float seconds = std::clamp(std::chrono::duration<float>(now - last).count(), 0.f, LongestStep);
+    last = now;
+    Render::Terrain::LightGrid::ReplayFrameLights(FrameLightTarget(), seconds, Render::Look::LightHistorySettings());
+}
+
+// Every light added to the frame's dynamic terrain light is also a point light of the frame. The
+// light mood's gain is applied first, so the terrain and the models get the same light.
+void AddTerrainLight(float xf, float yf, vec3_t SourceLight, int Range, vec3_t* Buffer)
+{
+    if (Buffer == PrimaryTerrainLight && UseLightHistory())
+    {
+        Render::Lighting::LightCall call;
+        call.x = xf;
+        call.y = yf;
+        std::copy(SourceLight, SourceLight + 3, call.color);
+        call.range = Range;
+        call.source = Render::Lighting::CurrentLightSource();
+        Render::Terrain::LightGrid::RecordFrameLight(FrameLightTarget(), call);
+        return;
+    }
+    vec3_t Light;
+    ApplyDynamicGain(SourceLight, Buffer, Light);
+    if (Buffer != PrimaryTerrainLight)
+    {
+        Render::Terrain::LightGrid::AddLight(Buffer, xf, yf, Light, Range);
+        return;
+    }
+    Render::Terrain::LightGrid::AddDynamicLight(Buffer, Render::Lighting::FrameDynamicLights(), xf, yf, Light, Range,
+                                                RequestTerrainHeight(xf, yf));
+}
+
+void AddTerrainLightClip(float xf, float yf, vec3_t SourceLight, int Range, vec3_t* Buffer)
+{
+    vec3_t Light;
+    ApplyDynamicGain(SourceLight, Buffer, Light);
     auto rf = (float)Range;
 
     xf = (xf / TERRAIN_SCALE);
@@ -1039,38 +1139,61 @@ void AddTerrainLightClip(float xf, float yf, vec3_t Light, int Range, vec3_t* Bu
     }
 }
 
+static bool HasTerrainLight()
+{
+    return SceneFlag != SERVER_LIST_SCENE && SceneFlag != WEBZEN_SCENE && SceneFlag != LOADING_SCENE && ActiveTerrain;
+}
+
 void RequestTerrainLight(float xf, float yf, vec3_t Light)
 {
-    if (SceneFlag == SERVER_LIST_SCENE
-        || SceneFlag == WEBZEN_SCENE
-        || SceneFlag == LOADING_SCENE
-        || ActiveTerrain == false)
+    if (!HasTerrainLight())
     {
         Vector(0.f, 0.f, 0.f, Light);
         return;
     }
+    Render::Terrain::LightGrid::Sample(PrimaryTerrainLight, xf, yf, Light);
+}
 
-    xf = xf / TERRAIN_SCALE;
-    yf = yf / TERRAIN_SCALE;
-    int xi = (int)xf;
-    int yi = (int)yf;
-    if (xi<0 || yi<0 || xi>TERRAIN_SIZE_MASK - 1 || yi>TERRAIN_SIZE_MASK - 1)
+void RequestBackTerrainLight(float xf, float yf, vec3_t Light)
+{
+    if (!HasTerrainLight())
     {
         Vector(0.f, 0.f, 0.f, Light);
         return;
     }
-    int Index1 = ((xi)+(yi)*TERRAIN_SIZE);
-    int Index2 = ((xi + 1) + (yi)*TERRAIN_SIZE);
-    int Index3 = ((xi + 1) + (yi + 1) * TERRAIN_SIZE);
-    int Index4 = ((xi)+(yi + 1) * TERRAIN_SIZE);
-    float xd = xf - (float)xi;
-    float yd = yf - (float)yi;
-    for (int i = 0; i < 3; i++)
+    Render::Terrain::LightGrid::Sample(BackTerrainLight, xf, yf, Light);
+}
+
+void RequestStaticTerrainLight(float xf, float yf, vec3_t Light)
+{
+    if (!HasTerrainLight())
     {
-        float left = PrimaryTerrainLight[Index1][i] + (PrimaryTerrainLight[Index4][i] - PrimaryTerrainLight[Index1][i]) * yd;
-        float right = PrimaryTerrainLight[Index2][i] + (PrimaryTerrainLight[Index3][i] - PrimaryTerrainLight[Index2][i]) * yd;
-        Light[i] = (left + (right - left) * xd);
+        Vector(0.f, 0.f, 0.f, Light);
+        return;
     }
+    Render::Terrain::LightGrid::SampleStatic(BackTerrainLight, Render::Lighting::FrameDynamicLights().Lights(), xf, yf,
+                                             Light);
+}
+
+void RequestModelTerrainLight(float xf, float yf, vec3_t Light)
+{
+    if (Render::Lighting::DynamicLightsActive())
+    {
+        RequestStaticTerrainLight(xf, yf, Light);
+        return;
+    }
+    RequestTerrainLight(xf, yf, Light);
+}
+
+void AddVertexLitDynamicLight(float xf, float yf, vec3_t Light)
+{
+    if (!Render::Lighting::DynamicLightsActive() || !HasTerrainLight())
+    {
+        return;
+    }
+    vec3_t brightening;
+    Render::Terrain::LightGrid::SampleBrightening(Render::Lighting::FrameDynamicLights().Lights(), xf, yf, brightening);
+    VectorAdd(Light, brightening, Light);
 }
 
 void CreateLodBuffer()
@@ -1194,17 +1317,14 @@ void PrefixTerrainHeight()
                     InterpolationHeight(lod, x * 4, y * 4, 2, BackTerrainHeight);
                     InterpolationWidth(lod, x * 4, y * 4, 2, BackTerrainHeight);
                 }
-                if (lod >= 2)
-                {
-                    InterpolationHeight(lod, x * 4, y * 4, 1, BackTerrainHeight);
-                    InterpolationWidth(lod, x * 4, y * 4, 1, BackTerrainHeight);
-                    InterpolationHeight(lod, x * 4, y * 4, 3, BackTerrainHeight);
-                    InterpolationWidth(lod, x * 4, y * 4, 3, BackTerrainHeight);
-                    /*InterpolationCross(1,x*4+1,y*4+1);
-                    InterpolationCross(1,x*4+1,y*4+3);
-                    InterpolationCross(1,x*4+3,y*4+1);
-                    InterpolationCross(1,x*4+3,y*4+3);*/
-                }
+                InterpolationHeight(lod, x * 4, y * 4, 1, BackTerrainHeight);
+                InterpolationWidth(lod, x * 4, y * 4, 1, BackTerrainHeight);
+                InterpolationHeight(lod, x * 4, y * 4, 3, BackTerrainHeight);
+                InterpolationWidth(lod, x * 4, y * 4, 3, BackTerrainHeight);
+                /*InterpolationCross(1,x*4+1,y*4+1);
+                InterpolationCross(1,x*4+1,y*4+3);
+                InterpolationCross(1,x*4+3,y*4+1);
+                InterpolationCross(1,x*4+3,y*4+3);*/
             }
         }
     }
@@ -1366,11 +1486,35 @@ void RenderFace_After(int Texture, int mx, int my)
     mu::GetRenderer().RenderQuad3D(vertices, 0u);
 }
 
+// The layers blended over the ground, drawn after all of it so the ground and each layer draw in runs
+// of one texture instead of alternating per tile.
+struct LayerFace
+{
+    int texture;
+    bool blend;
+    mu::Vertex3D vertices[4];
+};
+static std::vector<LayerFace> s_layerFaces;
+
+static void RenderLayerFaces()
+{
+    // Depth-tested without writing, so a layer stays on its own ground (same vertices, less or equal)
+    // and nearer ground drawn before it still hides it.
+    EnableDepthTest();
+    for (const LayerFace& face : s_layerFaces)
+    {
+        if (face.blend)
+            EnableAlphaBlend();
+        else
+            EnableAlphaBlend3();
+        BindTexture(BITMAP_MAPTILE + face.texture);
+        mu::GetRenderer().RenderQuad3D(face.vertices, 0u);
+    }
+    s_layerFaces.clear();
+}
+
 void RenderFaceAlpha(int Texture, int mx, int my)
 {
-    DisableDepthTest();
-    EnableAlphaBlend3();
-    BindTexture(BITMAP_MAPTILE + Texture);
     auto MakeVert = [](const float* pos, const float* tc, const float* light, float alpha) -> mu::Vertex3D
     {
         return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, tc[0], tc[1],
@@ -1380,15 +1524,11 @@ void RenderFaceAlpha(int Texture, int mx, int my)
     const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], PrimaryTerrainLight[TerrainIndex2], TerrainMappingAlpha[TerrainIndex2]);
     const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], PrimaryTerrainLight[TerrainIndex3], TerrainMappingAlpha[TerrainIndex3]);
     const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], PrimaryTerrainLight[TerrainIndex4], TerrainMappingAlpha[TerrainIndex4]);
-    const mu::Vertex3D vertices[4] = {v0, v1, v2, v3};
-    mu::GetRenderer().RenderQuad3D(vertices, 0u);
-    EnableDepthTest();
+    s_layerFaces.push_back({Texture, false, {v0, v1, v2, v3}});
 }
 
 void RenderFaceBlend(int Texture, int mx, int my)
 {
-    EnableAlphaBlend();
-    BindTexture(BITMAP_MAPTILE + Texture);
     auto MakeVert = [](const float* pos, const float* tc, float light) -> mu::Vertex3D
     {
         return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, tc[0], tc[1], mu::PackABGR(light, light, light, 1.f)};
@@ -1397,8 +1537,7 @@ void RenderFaceBlend(int Texture, int mx, int my)
     const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], TerrainMappingAlpha[TerrainIndex2]);
     const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], TerrainMappingAlpha[TerrainIndex3]);
     const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], TerrainMappingAlpha[TerrainIndex4]);
-    const mu::Vertex3D vertices[4] = {v0, v1, v2, v3};
-    mu::GetRenderer().RenderQuad3D(vertices, 0u);
+    s_layerFaces.push_back({Texture, true, {v0, v1, v2, v3}});
 }
 
 void FaceTexture(int Texture, float xf, float yf, bool Water, bool Scale)
@@ -1867,7 +2006,7 @@ void RenderTerrainAlphaBitmap(int Texture, float xf, float yf, float SizeX, floa
     float TexU = (((float)mxi - mxf) + 0.5f * Size);
     float TexV = (((float)myi - myf) + 0.5f * Size);
     float TexScaleU = 1.f / Size;
-    float TexScaleV = 1.f / Size;
+    float TexScaleV = TexScaleU;
     Size = (float)((int)Size + 1);
     float Aspect = SizeX / SizeY;
     for (float y = -Size; y <= Size; y += 1.f)
@@ -2664,6 +2803,16 @@ extern int EnableEvent;
 
 void InitTerrainLight()
 {
+    Render::Lighting::FrameDynamicLights().Clear();
+    if (UseLightHistory())
+    {
+        Render::Lighting::FrameLightHistory().BeginTick();
+    }
+    else
+    {
+        Render::Lighting::FrameLightHistory().Clear();
+    }
+
     int xi, yi;
     yi = FrustrumBoundMinY;
     for (; yi <= FrustrumBoundMaxY + 3; yi += 1)
@@ -3142,6 +3291,8 @@ void RenderTerrain(bool EditFlag)
 
     if (!EditFlag)
     {
+        // The ground, its layers and the grass all rely on it; earlier 2D passes may leave it off.
+        EnableDepthTest();
         DisableAlphaBlend();
     }
     else
@@ -3152,6 +3303,7 @@ void RenderTerrain(bool EditFlag)
 
     TerrainFlag = TERRAIN_MAP_NORMAL;
     RenderTerrainFrustrum(EditFlag);
+    RenderLayerFaces();
     //
     if (EditFlag && SelectFlag)
     {

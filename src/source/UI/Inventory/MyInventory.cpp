@@ -32,6 +32,7 @@ extern bool SelectFlag;
 #include "GameLogic/Social/MonkSystem.h"
 #include "Character/CharacterManager.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "UI/Scaling/UITransform.h"
@@ -388,7 +389,7 @@ bool CMyInventory::IsEquipable(int iIndex, ITEM* pItem) const
 #endif //PBG_FIX_EQUIP_TWOHANDSWORD
         }
         else if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_SUMMONER &&
-            !(pItem->Type >= ITEM_STAFF && pItem->Type <= ITEM_STAFF + MAX_ITEM_INDEX))
+                 !GameLogic::Items::IsStaffOrBookType(pItem->Type))
             bEquipable = true;
     }
     else if (pItemAttr->m_byItemSlot == EQUIPMENT_RING_RIGHT && iIndex == EQUIPMENT_RING_LEFT)
@@ -397,8 +398,9 @@ bool CMyInventory::IsEquipable(int iIndex, ITEM* pItem) const
     if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF)
     {
         const ITEM* l = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
-        if (iIndex == EQUIPMENT_WEAPON_RIGHT && l->Type != ITEM_BOLT
-            && (l->Type >= ITEM_BOW && l->Type < ITEM_BOW + MAX_ITEM_INDEX))
+        // With a bow in the left hand only arrows go in the right. As before, a crossbow or arrows
+        // there count too, though only the server could put them in an elf's left hand.
+        if (iIndex == EQUIPMENT_WEAPON_RIGHT && l->Type != ITEM_BOLT && GameLogic::Items::IsBowCrossbowOrAmmunition(l))
         {
             if (pItem->Type != ITEM_ARROWS)
                 bEquipable = false;
@@ -499,7 +501,7 @@ bool CMyInventory::IsEquipable(int iIndex, ITEM* pItem) const
     if (gMapManager.InChaosCastle() || (Get_State_Only_Elf()
         && g_isCharacterBuff((&Hero->Object), eBuff_CrywolfHeroContracted)))
     {
-        if ((pItem->Type >= ITEM_HORN_OF_UNIRIA && pItem->Type <= ITEM_DARK_RAVEN_ITEM) || pItem->Type == ITEM_HORN_OF_FENRIR)
+        if (GameLogic::Items::IsRideableMount(pItem) || GameLogic::Items::IsDarkLordPet(pItem))
             return false;
     }
     else if (GameLogic::Items::IsRideableMount(pItem)
@@ -867,6 +869,11 @@ void CMyInventory::SyncRmlModel()
     m_ItemTarget.Sync(m_RmlView.Document() ? m_RmlView.Document()->GetElementById("item_view") : nullptr, IsVisible());
     if (!m_RmlView.Document()) return;
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
+    if (!IsVisible())
+    {
+        UI::RmlBridge::Tooltip::Hide(this);
+        return;
+    }
 
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     SyncNativeLayout();
@@ -1818,23 +1825,19 @@ int CMyInventory::GetPointedItemIndex() const
 
 int CMyInventory::FindManaItemIndex() const
 {
-    for (int i = ITEM_LARGE_MANA_POTION; i >= ITEM_SMALL_MANA_POTION; i--)
-    {
-        const int iIndex = FindItemReverseIndex(i);
-        if (iIndex != -1)
-        {
-            return iIndex;
-        }
-    }
-
-    return -1;
+    return FindItemIndexWithTagInUseOrder(Data::Items::ItemTag::ManaPotion);
 }
 
 int CMyInventory::FindHealingItemIndex() const
 {
-    for (int i = ITEM_LARGE_HEALING_POTION; i >= ITEM_APPLE; i--)
+    return FindItemIndexWithTagInUseOrder(Data::Items::ItemTag::HealingPotion);
+}
+
+int CMyInventory::FindItemIndexWithTagInUseOrder(Data::Items::ItemTag tag) const
+{
+    for (const int itemType : g_ItemDatabase.GetItemTypesWithTagInUseOrder(tag))
     {
-        const int iIndex = FindItemReverseIndex(i);
+        const int iIndex = FindItemReverseIndex(itemType);
         if (iIndex != -1)
         {
             return iIndex;

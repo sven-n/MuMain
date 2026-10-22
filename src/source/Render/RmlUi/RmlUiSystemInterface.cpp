@@ -1,8 +1,7 @@
 #include "stdafx.h"
 #include "RmlUiSystemInterface.h"
 
-#include "Core/Utilities/Log/ErrorReport.h"
-#include "Core/Utilities/StringUtils.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #include <SDL3/SDL.h>
 #include <chrono>
 
@@ -23,17 +22,15 @@ double RmlUiSystemInterface::GetElapsedTime()
 
 bool RmlUiSystemInterface::LogMessage(Rml::Log::Type type, const Rml::String& message)
 {
-    const wchar_t* tag = L"[RmlUi]";
+    const auto logger = mu::log::Get("ui");
     switch (type)
     {
-        case Rml::Log::LT_ERROR:   tag = L"[RmlUi][Error]";   break;
-        case Rml::Log::LT_ASSERT:  tag = L"[RmlUi][Assert]";  break;
-        case Rml::Log::LT_WARNING: tag = L"[RmlUi][Warning]"; break;
-        case Rml::Log::LT_INFO:    tag = L"[RmlUi][Info]";    break;
-        case Rml::Log::LT_DEBUG:   tag = L"[RmlUi][Debug]";   break;
-        default: break;
+        case Rml::Log::LT_ERROR:
+        case Rml::Log::LT_ASSERT:  MU_LOG_ERROR(logger, "[RmlUi] {}", message); break;
+        case Rml::Log::LT_WARNING: MU_LOG_WARN(logger, "[RmlUi] {}", message);  break;
+        case Rml::Log::LT_DEBUG:   MU_LOG_DEBUG(logger, "[RmlUi] {}", message); break;
+        default:                   MU_LOG_INFO(logger, "[RmlUi] {}", message);  break;
     }
-    g_ErrorReport.Write(L"%ls %ls\r\n", tag, StringUtils::NarrowToWide(message).c_str());
     return true; // continue execution -- never break into the debugger from here
 }
 

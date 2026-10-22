@@ -46,12 +46,12 @@ bool M33Aida::MoveAidaObject(OBJECT* pObject)
     {
     case 25:
     {
-        pObject->BlendMeshTexCoordV -= 0.015f;
+        pObject->BlendMeshTexCoordV -= 0.015f * FPS_ANIMATION_FACTOR;
     }
     break;
     case 28:
     {
-        pObject->BlendMeshTexCoordV -= 0.015f;
+        pObject->BlendMeshTexCoordV -= 0.015f * FPS_ANIMATION_FACTOR;
     }
     break;
     case 30:

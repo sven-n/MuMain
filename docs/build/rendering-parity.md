@@ -22,6 +22,17 @@ a successful build or a macOS run is not evidence for Linux or Windows.
 - GPU skinning shaders and pipelines are required. An eligible submission
   failure is counted and rejected; it does not silently switch to CPU skinning.
 
+## Bitmap upload staging and upscaled textures
+
+Bitmap uploads go through three persistent 4 MiB RGBA8 slots (12 MiB requested
+staging, before driver overhead), sized for the 1024 × 1024 limit of original
+images. Upscaled art (`Render/Textures/UpscaleMarker.h`) is accepted up to its
+marked scale times that limit, at most 4096 × 4096. A level larger than one slot
+is staged in bands of rows, one submission per slot, so the staging allocation
+stays fixed whatever the image size: a 4096 px image takes 16 bands of 256 rows.
+Smaller mip levels share a slot. Growing the slots would only cut the number of
+submissions; measure load times with the real asset pack before changing them.
+
 ## RmlUi multisampling
 
 RmlUi UI layers default to one sample (`RMLUI_SDL_GPU_NUM_MSAA_SAMPLES=1`)

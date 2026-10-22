@@ -59,8 +59,8 @@ and HLSL shaders compiled for the active SDL GPU backend.
 
 ## Runtime configuration
 
-- SDL GPU is the only renderer. The legacy `[Render] CoreProfile` key is not
-  read; it cannot request either an OpenGL Core or Compatibility context.
+- SDL GPU is the only renderer. The legacy `[Render] CoreProfile` key is
+  removed from `config.ini` when it loads.
 - `[Render] SortParticleDraws=1` groups safe additive particle stretches by
   texture before SDL GPU submission. Default `0` preserves slot order until
   effects are visually checked on target hardware.

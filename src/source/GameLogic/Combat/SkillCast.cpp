@@ -147,21 +147,20 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
         switch (Skill)
         {
         case AT_SKILL_IMPALE:
-            if (!(o->Type == MODEL_PLAYER && Hero->Weapon[0].Type != -1 &&
-                (Hero->Weapon[0].Type >= MODEL_SPEAR && Hero->Weapon[0].Type < MODEL_SPEAR + MAX_ITEM_INDEX)))
+            if (!(o->Type == MODEL_PLAYER && GameLogic::Items::IsSpearModel(Hero->Weapon[0].Type)))
             {
                 return false;
             }
             break;
         case AT_SKILL_DEATHSTAB:
         case AT_SKILL_DEATHSTAB_STR:
-            if (!(Hero->Weapon[0].Type != -1 && (Hero->Weapon[0].Type < MODEL_STAFF || Hero->Weapon[0].Type >= MODEL_STAFF + MAX_ITEM_INDEX)))
+            if (!(Hero->Weapon[0].Type != -1 && !GameLogic::Items::IsStaffOrBookModel(Hero->Weapon[0].Type)))
             {
                 return false;
             }
             break;
         case AT_SKILL_SPIRAL_SLASH:
-            if (Hero->Weapon[0].Type < MODEL_SWORD || Hero->Weapon[0].Type >= MODEL_SWORD + MAX_ITEM_INDEX)
+            if (!GameLogic::Items::IsSwordOrGloveModel(Hero->Weapon[0].Type))
             {
                 return false;
             }
@@ -481,7 +480,7 @@ void UseSkillWizard(CHARACTER* c, OBJECT* o)
 
     if (Skill == AT_SKILL_DEATH_CANNON)
     {
-        if (Hero->Weapon[0].Type < MODEL_STAFF || Hero->Weapon[0].Type >= MODEL_STAFF + MAX_ITEM_INDEX)
+        if (!GameLogic::Items::IsStaffOrBookModel(Hero->Weapon[0].Type))
             return;
     }
 

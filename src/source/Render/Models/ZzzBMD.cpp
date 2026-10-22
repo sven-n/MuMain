@@ -3,11 +3,15 @@
 
 #include "stdafx.h"
 #include <cstdint>
+// u_char is used below. On glibc it arrives transitively through other
+// headers; musl targets (Emscripten) need its declaring header explicitly.
+#include <sys/types.h>
 #include <cstring>
 #include <cmath>
 #include <cassert>
 #include <climits>
 #include <map>
+#include <optional>
 #include <set>
 #include <tuple>
 #include <utility>
@@ -34,6 +38,7 @@
 #include "Render/Terrain/TerrainHeightGrid.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Scenes/MainScene.h"
+#include "Render/Lighting/LightMoodSetting.h"
 
 using mu::PackABGR;
 
@@ -46,6 +51,9 @@ vec3_t BoundingMin[MAX_BONES];
 vec3_t BoundingMax[MAX_BONES];
 
 float  BoneTransform[MAX_BONES][3][4];
+// BoneTransform's slots from here on are identity; Animation's tail fill only rewrites what lies
+// below it. Starts at MAX_BONES: the zero-initialised array is not identity.
+static int s_boneTransformWrittenEnd = MAX_BONES;
 const float (*g_pActiveBoneTransform)[3][4] = nullptr;
 unsigned int g_BoneTransformVersion = 0;
 
@@ -156,7 +164,6 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
     if (PriorAction >= NumActions) PriorAction = 0;
     if (currentAction >= NumActions) currentAction = 0;
 
-    vec4_t boneQuaternion[MAX_BONES] = {};
 
     float currentAnimation = AnimationFrame;
     int currentAnimationFrame = (int)AnimationFrame;
@@ -276,17 +283,18 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
             q2 = bm2->Quaternion[currentAnimationFrame];
         }
 
+        vec4_t boneQuaternion;
         if (!QuaternionCompare(q1, q2))
         {
-            QuaternionNLERP(q1, q2, s1, boneQuaternion[i]);
+            QuaternionNLERP(q1, q2, s1, boneQuaternion);
         }
         else
         {
-            QuaternionCopy(q1, boneQuaternion[i]);
+            QuaternionCopy(q1, boneQuaternion);
         }
 
         float Matrix[3][4];
-        QuaternionMatrix(boneQuaternion[i], Matrix);
+        QuaternionMatrix(boneQuaternion, Matrix);
         const float* Position1 = bm1->Position[PriorAnimationFrame];
         const float* Position2 = bm2->Position[currentAnimationFrame];
 
@@ -335,7 +343,15 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
     // declared buffer capacity -- NOT MAX_BONES -- because several internal callers pass
     // NumBones-sized heap scratch buffers (AnimationTransformWithAttachHighModel* /
     // AnimationTransformOnlySelf), which a MAX_BONES-bound loop would overflow.
-    for (int i = NumBones; i < BoneMatrixCapacity; i++)
+    // The shared BoneTransform tracks how far the last models wrote, so the tail fill stops there
+    // instead of rewriting slots that are already identity.
+    const bool sharedPalette = BoneMatrix == BoneTransform && BoneMatrixCapacity == MAX_BONES;
+    const int fillEnd = sharedPalette ? std::max<int>(NumBones, s_boneTransformWrittenEnd) : BoneMatrixCapacity;
+    if (sharedPalette)
+    {
+        s_boneTransformWrittenEnd = NumBones;
+    }
+    for (int i = NumBones; i < fillEnd; i++)
     {
         BoneMatrix[i][0][0] = 1.f;
         BoneMatrix[i][0][1] = 0.f;
@@ -357,6 +373,19 @@ extern float g_fSpecialHeight;
 extern int EditFlag;
 
 bool HighLight = true;
+
+// The light mood's highlight shoulder on a CPU-lit model colour; a knee of 1 (Classic) leaves it.
+static void RollOffModelLight(vec3_t light, float knee)
+{
+    if (knee >= 1.f)
+    {
+        return;
+    }
+    for (int i = 0; i < 3; ++i)
+    {
+        light[i] = Render::Lighting::LightMood::RollOffHighlight(light[i], knee);
+    }
+}
 float BoneScale = 1.f;
 
 void BMD::ClaimSkinStamp() const
@@ -418,6 +447,8 @@ void BMD::TransformCheap(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_
             Vector(0.f, -1.5f, 0.f, Position);
         }
 
+        // The light mood's sun scales the directional part of the model light.
+        Render::Lighting::LightMood::ScaleSunDirection(Render::Lighting::LightMood::Active(), Position);
         AngleMatrix(ShadowAngle, Matrix);
         VectorIRotate(Position, Matrix, m_LastLightPosition); // for RenderMesh's GPU-skinned in-shader lighting
     }
@@ -855,6 +886,7 @@ void BMD::AnimationTransformWithAttachHighModel_usingGlobalTM(OBJECT* oHighHiera
 
     Animation(arrBonesTMLocal, 0, 0, 0, Temp, Temp, false, false, nullptr, -1, NumBones);
 
+    s_boneTransformWrittenEnd = std::max<int>(s_boneTransformWrittenEnd, NumBones);
     for (int i_ = 0; i_ < NumBones; ++i_)
     {
         R_ConcatTransforms(tmBoneHierarchicalObject, arrBonesTMLocal[i_], BoneTransform[i_]);
@@ -1381,6 +1413,8 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
 
     int finalRenderFlags = renderFlags;
     bool useBlendMeshColor = false;
+    // A chrome pass reflects light off the surface and is no bloom source; held until the mesh is drawn.
+    std::optional<mu::ScopedBloomExclusion> chromePass;
     if ((renderFlags & RENDER_COLOR) == RENDER_COLOR)
     {
         finalRenderFlags = RENDER_COLOR;
@@ -1427,6 +1461,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
         if (m->NoneBlendMesh)
             return;
 
+        chromePass.emplace();
         finalRenderFlags = RENDER_CHROME;
         if ((renderFlags & RENDER_CHROME4) == RENDER_CHROME4)
         {
@@ -1600,9 +1635,15 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
 
         if (usesCpuLighting)
         {
+            // Lit per vertex here, so the point lights the base light leaves out come back as a whole.
+            vec3_t light;
+            VectorCopy(BodyLight, light);
+            AddVertexLitDynamicLight(BodyOrigin[0], BodyOrigin[1], light);
+            const float knee = Render::Lighting::LightMood::Active().highlightKnee;
             for (int j = 0; j < m->NumNormals; ++j)
             {
-                VectorScale(BodyLight, IntensityTransform[meshIndex][j], LightTransform[meshIndex][j]);
+                VectorScale(light, IntensityTransform[meshIndex][j], LightTransform[meshIndex][j]);
+                RollOffModelLight(LightTransform[meshIndex][j], knee);
             }
         }
 
@@ -1715,6 +1756,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             .boneScale = m_LastBoneScale,
             .restPoseScale = m_LastSkinScale,
             .lightDirection = {m_LastLightPosition[0], m_LastLightPosition[1], m_LastLightPosition[2]},
+            .highlightKnee = Render::Lighting::LightMood::Active().highlightKnee,
             .textureCoordinateOffset = {blendMeshTextureCoordU, blendMeshTextureCoordV},
             .chromeWave = wave,
             .chromeWave2 = static_cast<int>(WorldTime) % 5000 * 0.00024f - 0.4f,
@@ -1723,6 +1765,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             .textureCoordinates = textureCoordinates,
             .translate = m_LastTranslate,
             .lightEnabled = usesCpuLighting,
+            .specularStrength = texture->IsSkin || texture->IsHair ? 0.0f : SpecularStrength,
         };
         auto& renderer = mu::GetRenderer();
         if (!waveTextureCoordinates &&
@@ -1885,14 +1928,18 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
     }
     else if (EnableLight)
     {
+        const float knee = Render::Lighting::LightMood::Active().highlightKnee;
         for (int j = 0; j < m->NumNormals; j++)
         {
             VectorScale(BodyLight, IntensityTransform[i][j], LightTransform[i][j]);
+            RollOffModelLight(LightTransform[i][j], knee);
         }
     }
 
     int Render = RenderFlag;
     bool useBlendMeshColor = false;
+    // A chrome pass reflects light off the surface and is no bloom source; held until the mesh is drawn.
+    std::optional<mu::ScopedBloomExclusion> chromePass;
     if ((RenderFlag & RENDER_COLOR) == RENDER_COLOR)
     {
         Render = RENDER_COLOR;
@@ -1930,6 +1977,7 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
         }
         if (m->NoneBlendMesh)
             return;
+        chromePass.emplace();
         Render = RENDER_CHROME;
         if ((RenderFlag & RENDER_CHROME4) == RENDER_CHROME4)
         {
@@ -2449,14 +2497,18 @@ void BMD::RenderMeshTranslate(int i, int RenderFlag, float Alpha, int BlendMesh,
     }
     else if (EnableLight)
     {
+        const float knee = Render::Lighting::LightMood::Active().highlightKnee;
         for (int j = 0; j < m->NumNormals; j++)
         {
             VectorScale(BodyLight, IntensityTransform[i][j], LightTransform[i][j]);
+            RollOffModelLight(LightTransform[i][j], knee);
         }
     }
 
     int Render = RenderFlag;
     bool useBlendMeshColor = false;
+    // A chrome pass reflects light off the surface and is no bloom source; held until the mesh is drawn.
+    std::optional<mu::ScopedBloomExclusion> chromePass;
     if ((RenderFlag & RENDER_COLOR) == RENDER_COLOR)
     {
         Render = RENDER_COLOR;
@@ -2480,6 +2532,7 @@ void BMD::RenderMeshTranslate(int i, int RenderFlag, float Alpha, int BlendMesh,
         }
         if (m->NoneBlendMesh)
             return;
+        chromePass.emplace();
         Render = RENDER_CHROME;
 
         float Wave2 = (int)WorldTime % 5000 * 0.00024f - 0.4f;
@@ -3064,6 +3117,30 @@ void BMD::ShareFrom(BMD& owner)
     m_bCompletedAlloc = true;
 }
 
+void BMD::SwapData(BMD& other)
+{
+    if (&other == this)
+    {
+        return;
+    }
+    // They were built from the meshes each slot had.
+    ReleaseShadowStreams();
+    other.ReleaseShadowStreams();
+    std::swap(Name, other.Name);
+    std::swap(Version, other.Version);
+    std::swap(NumMeshs, other.NumMeshs);
+    std::swap(NumBones, other.NumBones);
+    std::swap(NumActions, other.NumActions);
+    std::swap(Meshs, other.Meshs);
+    std::swap(Bones, other.Bones);
+    std::swap(Actions, other.Actions);
+    std::swap(Textures, other.Textures);
+    std::swap(IndexTexture, other.IndexTexture);
+    std::swap(m_bSharedData, other.m_bSharedData);
+    std::swap(m_sharedDataUsers, other.m_sharedDataUsers);
+    std::swap(m_bCompletedAlloc, other.m_bCompletedAlloc);
+}
+
 long BMD::GetDataUserCount() const
 {
     if (m_sharedDataUsers)
@@ -3073,7 +3150,7 @@ long BMD::GetDataUserCount() const
     return Meshs != nullptr ? 1 : 0;
 }
 
-void BMD::Release()
+void BMD::ReleaseShadowStreams()
 {
     auto& shadowStreams = ShadowStreams();
     const auto self = reinterpret_cast<std::uintptr_t>(this);
@@ -3083,6 +3160,11 @@ void BMD::Release()
         mu::GetRenderer().ReleaseSkinnedMesh(&*stream);
         stream = shadowStreams.erase(stream);
     }
+}
+
+void BMD::Release()
+{
+    ReleaseShadowStreams();
 
     const bool othersUseTheData = m_sharedDataUsers && m_sharedDataUsers.use_count() > 1;
     m_sharedDataUsers.reset();

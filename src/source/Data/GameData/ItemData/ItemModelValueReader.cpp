@@ -152,6 +152,30 @@ bool ItemModelValueReader::ReadIndexes(const char* key, std::vector<int>& values
     return true;
 }
 
+bool ItemModelValueReader::ReadPerLevelIndexes(const char* key, std::array<int, ItemLevelCount>& values, int maxValue)
+{
+    const OrderedJson* field = Find(key);
+    if (field == nullptr)
+    {
+        return false;
+    }
+    bool valid = true;
+    const auto readIndex = [&](const OrderedJson& entry, const std::string& entryField, int& value)
+    {
+        const std::optional<int> index = ToIndex(entry, maxValue);
+        if (!index)
+        {
+            Error(entryField.c_str(), "must be a whole number from 0 to " + std::to_string(maxValue));
+            valid = false;
+            return;
+        }
+        value = *index;
+    };
+    const auto addError = [this](const std::string& errorField, const std::string& message)
+    { Error(errorField.c_str(), message); };
+    return Json::ReadPerLevelValues(*field, key, values, readIndex, addError) && valid;
+}
+
 bool ItemModelValueReader::ReadBool(const char* key, bool& value)
 {
     const OrderedJson* field = Find(key);
@@ -182,12 +206,6 @@ bool ItemModelValueReader::ReadName(const char* key, std::string& value)
     }
     value = field->get<std::string>();
     return true;
-}
-
-bool ItemModelValueReader::IsNumber(const char* key) const
-{
-    const auto field = m_json.find(key);
-    return field != m_json.end() && field->is_number();
 }
 
 void ItemModelValueReader::Error(const char* key, const std::string& message)

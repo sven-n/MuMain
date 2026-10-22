@@ -24,7 +24,9 @@ void SetBuildIdentifier(std::string identifier);
 
 // Query family.
 std::string Ping(const Request& request, std::unique_ptr<Act>& act);
+std::string Bench(const Request& request, std::unique_ptr<Act>& act);
 std::string Scene(const Request& request, std::unique_ptr<Act>& act);
+std::string Bones(const Request& request, std::unique_ptr<Act>& act);
 std::string State(const Request& request, std::unique_ptr<Act>& act);
 std::string Nearby(const Request& request, std::unique_ptr<Act>& act);
 std::string EventsSince(const Request& request, std::unique_ptr<Act>& act);
@@ -35,6 +37,9 @@ std::string ClickUi(const Request& request, std::unique_ptr<Act>& act);
 std::string HoverUi(const Request& request, std::unique_ptr<Act>& act);
 std::string DragUi(const Request& request, std::unique_ptr<Act>& act);
 std::string Type(const Request& request, std::unique_ptr<Act>& act);
+// Runs one `$` developer command as if typed into the chat box, without
+// opening it, so nothing typed shows up in the frame.
+std::string Console(const Request& request, std::unique_ptr<Act>& act);
 
 // Ui family: where the open item windows are.
 std::string Ui(const Request& request, std::unique_ptr<Act>& act);

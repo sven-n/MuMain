@@ -469,6 +469,42 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
     c->SkillSuccess = true;
 }
 
+namespace
+{
+// The knight skills that work without a weapon in the right hand, or with a staff.
+bool NeedsNoMeleeWeapon(ActionSkillType skill)
+{
+    switch (skill)
+    {
+    case AT_SKILL_SWELL_LIFE:
+    case AT_SKILL_SWELL_LIFE_STR:
+    case AT_SKILL_SWELL_LIFE_PROFICIENCY:
+    case AT_SKILL_ADD_CRITICAL:
+    case AT_SKILL_ADD_CRITICAL_STR1:
+    case AT_SKILL_ADD_CRITICAL_STR2:
+    case AT_SKILL_ADD_CRITICAL_STR3:
+    case AT_SKILL_PARTY_TELEPORT:
+    case AT_SKILL_THUNDER_STRIKE:
+    case AT_SKILL_EARTHSHAKE:
+    case AT_SKILL_EARTHSHAKE_STR:
+    case AT_SKILL_EARTHSHAKE_MASTERY:
+    case AT_SKILL_BRAND_OF_SKILL:
+    case AT_SKILL_PLASMA_STORM_FENRIR:
+    case AT_SKILL_FIRE_SCREAM:
+    case AT_SKILL_FIRE_SCREAM_STR:
+    case AT_SKILL_GIGANTIC_STORM:
+    case AT_SKILL_CHAOTIC_DISEIER:
+    case AT_SKILL_TWISTING_SLASH:
+    case AT_SKILL_TWISTING_SLASH_STR:
+    case AT_SKILL_TWISTING_SLASH_STR_MG:
+    case AT_SKILL_TWISTING_SLASH_MASTERY:
+        return true;
+    default:
+        return false;
+    }
+}
+} // namespace
+
 void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
 {
     OBJECT* o = &c->Object;
@@ -481,32 +517,9 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
     int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
     int iTypeR = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
 
-    if (((iTypeR != -1 &&
-        (iTypeR < ITEM_STAFF || iTypeR >= ITEM_STAFF + MAX_ITEM_INDEX) &&
-        (iTypeL < ITEM_STAFF || iTypeL >= ITEM_STAFF + MAX_ITEM_INDEX))
-        || Skill == AT_SKILL_SWELL_LIFE
-        || Skill == AT_SKILL_SWELL_LIFE_STR
-        || Skill == AT_SKILL_SWELL_LIFE_PROFICIENCY
-        || Skill == AT_SKILL_ADD_CRITICAL
-        || Skill == AT_SKILL_ADD_CRITICAL_STR1
-        || Skill == AT_SKILL_ADD_CRITICAL_STR2
-        || Skill == AT_SKILL_ADD_CRITICAL_STR3
-        || Skill == AT_SKILL_PARTY_TELEPORT
-        || Skill == AT_SKILL_THUNDER_STRIKE
-        || Skill == AT_SKILL_EARTHSHAKE
-        || Skill == AT_SKILL_EARTHSHAKE_STR
-        || Skill == AT_SKILL_EARTHSHAKE_MASTERY
-        || Skill == AT_SKILL_BRAND_OF_SKILL
-        || Skill == AT_SKILL_PLASMA_STORM_FENRIR
-        || Skill == AT_SKILL_FIRE_SCREAM
-        || Skill == AT_SKILL_FIRE_SCREAM_STR
-        || Skill == AT_SKILL_GIGANTIC_STORM
-        || Skill == AT_SKILL_CHAOTIC_DISEIER
-        || Skill == AT_SKILL_TWISTING_SLASH
-        || Skill == AT_SKILL_TWISTING_SLASH_STR
-        || Skill == AT_SKILL_TWISTING_SLASH_STR_MG
-        || Skill == AT_SKILL_TWISTING_SLASH_MASTERY
-        ))
+    const bool hasMeleeWeapon =
+        iTypeR != -1 && !GameLogic::Items::IsStaffOrBookType(iTypeR) && !GameLogic::Items::IsStaffOrBookType(iTypeL);
+    if (hasMeleeWeapon || NeedsNoMeleeWeapon(Skill))
     {
         bool Success = true;
 
@@ -656,7 +669,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                 break;
             case AT_SKILL_POWER_SLASH:
             case AT_SKILL_POWER_SLASH_STR:
-                if (c->Helper.Type<MODEL_HORN_OF_UNIRIA || c->Helper.Type>MODEL_DARK_HORSE_ITEM && c->Helper.Type != MODEL_HORN_OF_FENRIR)
+                if (!GameLogic::Items::IsRideableMountModel(c->Helper.Type))
                 {
                     o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 

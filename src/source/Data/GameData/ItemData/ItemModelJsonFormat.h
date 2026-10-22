@@ -45,9 +45,9 @@ constexpr const char* SharedItemModelsFileName = "SharedModels.json";
 void ReadItemModelGroupJson(std::string_view text, const std::string& source, std::vector<ItemModelDefinition>& models,
                             std::vector<ItemDataIssue>& issues);
 
-// Writes the models of `group` (other models are ignored). Nothing in the
-// client saves model files yet; the tests use it to check that the shipped
-// files are in this format.
+// Writes the models of `group` (other models and empty slots are ignored).
+// The item editor saves the model files with it (an item it moves takes its
+// model along).
 std::string WriteItemModelGroupJson(int group, std::span<const ItemModelDefinition> models);
 
 // Reads the shared model file. Appends the models it could read to `models`

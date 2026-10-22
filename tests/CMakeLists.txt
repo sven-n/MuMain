@@ -62,6 +62,7 @@ add_test(
             "${CMAKE_CURRENT_SOURCE_DIR}/test_windows_workflow_contract.py"
             "${CMAKE_SOURCE_DIR}"
 )
+add_subdirectory(benchmark)
 
 add_subdirectory(text)
 add_subdirectory(effects)

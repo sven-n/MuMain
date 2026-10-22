@@ -130,13 +130,13 @@ TEST_CASE("The effect recorder gives the same record when a call is repeated [ef
     }
 }
 
-TEST_CASE("The frame factor and the slot pattern show in the record [effects][recorder]")
+TEST_CASE("The slot pattern shows in the record, the frame factor does not [effects][recorder]")
 {
     BuildShippedRegistry();
-    // MODEL_GHOST multiplies random offsets by the frame factor.
+    // MODEL_GHOST's random spawn offsets are distances, the same at any frame rate.
     const Record full = RecordCall(CallOf(MODEL_GHOST), {1.f, SlotPattern::A});
     const Record half = RecordCall(CallOf(MODEL_GHOST), {0.5f, SlotPattern::A});
-    CHECK_FALSE(Compare(full, half).empty());
+    CHECK(Compare(full, half).empty());
 
     // BITMAP_SPARK + 1 sets only LifeTime: Gravity, Timer, ... keep what the slot had.
     const Record a = RecordCall(CallOf(BITMAP_SPARK + 1), {1.f, SlotPattern::A});
@@ -159,10 +159,10 @@ TEST_CASE("The effect recorder counts the values rand() and Random:: give [effec
     CHECK(Find(record, "draws.rand") == "3");
     CHECK(Find(record, "draws.Random") == "0");
 
-    // rand_fps_check(2), which takes two values of Random::, then nine rand().
+    // A rand() pick of its variant, then nine rand().
     record = RecordCall(CallOf(MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_GREEN), {});
-    CHECK(Find(record, "draws.rand") == "9");
-    CHECK(Find(record, "draws.Random") == "2");
+    CHECK(Find(record, "draws.rand") == "10");
+    CHECK(Find(record, "draws.Random") == "0");
 }
 
 TEST_CASE("A skill effect of the hero goes into the skill effect pool [effects][recorder]")
@@ -519,26 +519,15 @@ TEST_CASE("The types of FX1.4 create from the catalogue what their cases set [ef
     piece.pkKey = 37;
     CHECK(Find(RecordCall(piece, {}), "Effects[0].PKKey") == "-1");
 
-    // Offsets times the frame factor, at 25/60 where the products round; the
-    // expected values are computed in the form of the old cases. volatile
-    // keeps the compiler from computing them while compiling, in another way.
-    volatile float frameFactor = 25.f / 60.f;
-    const Conditions frameRate{frameFactor, SlotPattern::A};
+    // Offsets, whole at 25/60 as at any frame rate.
+    const Conditions frameRate{25.f / 60.f, SlotPattern::A};
     const Record staff = RecordCall(CallOf(MODEL_STAFF_OF_DESTRUCTION), frameRate);
-    float z = 140.75f;
-    z += (280.f) * frameFactor;
-    float pitch = 11.f;
-    pitch += (20.f) * frameFactor;
-    CHECK(RecordedFloat(staff, "Effects[0].Position[2]") == z);
-    CHECK(RecordedFloat(staff, "Effects[0].Angle[0]") == pitch);
+    CHECK(RecordedFloat(staff, "Effects[0].Position[2]") == 420.75f);
+    CHECK(RecordedFloat(staff, "Effects[0].Angle[0]") == 31.f);
 
     const Record cloud = RecordCall(CallOf(MODEL_CLOUD), frameRate);
-    float y = 12480.5f;
-    y += (200.f) * frameFactor;
-    z = 140.75f;
-    z -= (190.f) * frameFactor;
-    CHECK(RecordedFloat(cloud, "Effects[0].Position[1]") == y);
-    CHECK(RecordedFloat(cloud, "Effects[0].Position[2]") == z);
+    CHECK(RecordedFloat(cloud, "Effects[0].Position[1]") == 12680.5f);
+    CHECK(RecordedFloat(cloud, "Effects[0].Position[2]") == -49.25f);
     // The flags of pattern A are false already.
     CHECK(Find(RecordCall(CallOf(MODEL_CLOUD), {1.f, SlotPattern::B}), "Effects[0].LightEnable") == "false");
 
@@ -581,13 +570,13 @@ TEST_CASE("The types of FX1.5 create from the catalogue what their cases chose b
     CHECK_FALSE(Find(record(BITMAP_FIRE_CURSEDLICH, 4), "Effects[0].LifeTime").has_value());
     CHECK_FALSE(Find(record(MODEL_CHAIN_LIGHTNING, 3), "Effects[0].LifeTime").has_value());
 
-    // A variant with an offset times the frame factor (at 0.5, so the factor
-    // shows), one with other values.
+    // A variant with an offset (at the frame factor 0.5, which it does not
+    // take), one with other values.
     EffectCall swordForceCall = CallOf(MODEL_SWORD_FORCE);
     swordForceCall.subType = 2;
     const Record swordForce = RecordCall(swordForceCall, {0.5f, SlotPattern::A});
     CHECK(Find(swordForce, "Effects[0].Scale") == "0");
-    CHECK(Find(swordForce, "Effects[0].Position[2]") == "190.75");
+    CHECK(Find(swordForce, "Effects[0].Position[2]") == "240.75");
     CHECK(Find(swordForce, "Effects[0].Velocity") == "0.25");
     CHECK(Find(record(MODEL_SWORD_FORCE, 3), "Effects[0].Scale") == "3.5");
 
@@ -617,8 +606,8 @@ TEST_CASE("The types of FX1.5b create from the catalogue what their cases set [e
         return RecordCall(call, {frameFactor, SlotPattern::A});
     };
 
-    // 1000 minus 60 times the frame factor.
-    CHECK(Find(record(BITMAP_SKULL, 1, 0.5f), "Effects[0].LifeTime") == "970");
+    // 1000 minus 60, also at the frame factor 0.5.
+    CHECK(Find(record(BITMAP_SKULL, 1, 0.5f), "Effects[0].LifeTime") == "940");
     CHECK(Find(record(BITMAP_SKULL, 5), "Effects[0].LifeTime") == "1000");
 
     CHECK(Find(record(BITMAP_OUR_INFLUENCE_GROUND, 0), "Effects[0].AlphaTarget") == "0.75");

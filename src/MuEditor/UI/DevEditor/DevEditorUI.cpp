@@ -13,6 +13,7 @@
 #include "Camera/CameraMove.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Data/GameConfig/GameConfig.h"
+#include "Render/Look/LookTuning.h"
 #include "UI/Console/MuEditorConsoleUI.h"
 #include "UI/Common/MuEditorWindowIds.h"
 #include "UI/Common/MuEditorLayout.h"
@@ -92,11 +93,12 @@ void CDevEditorUI::Render(bool* p_open)
     char title[MuEditor::WindowIds::TitleCapacity];
     MuEditor::Layout::PrepareToolWindow();
     if (!ImGui::Begin(MuEditor::WindowIds::Title(title, I18N::Editor::DevEditor, MuEditor::WindowIds::DevEditor),
-                      p_open))
+                      p_open, MuEditor::Layout::ToolWindowBarFlags(MuEditor::WindowIds::DevEditor)))
     {
         ImGui::End();
         return;
     }
+    MuEditor::Layout::RenderToolWindowBar();
 
     // Tab bar
     if (ImGui::BeginTabBar("DevEditorTabs"))
@@ -581,6 +583,60 @@ void CDevEditorUI::RenderGraphicsTab()
     ImGui::Separator();
 
     RenderGraphicsDebugInfo();
+
+    ImGui::Spacing();
+    RenderLookPanel();
+}
+
+// The look profile and the light mood, live: a slider per value in its range, applied to the
+// default profile or the current map's entry (the same values as `$look set`).
+void CDevEditorUI::RenderLookPanel()
+{
+    if (!ImGui::CollapsingHeader(I18N::Editor::LookProfile))
+    {
+        return;
+    }
+    ImGui::Text("%s: %s", I18N::Editor::LookLoadedFrom, Render::Look::LiveSource().c_str());
+    ImGui::RadioButton(I18N::Editor::LookScopeDefault, &m_LookScopeMap, 0);
+    ImGui::SameLine();
+    ImGui::RadioButton(I18N::Editor::LookScopeCurrentMap, &m_LookScopeMap, 1);
+    if (ImGui::Button(I18N::Editor::LookResetAll))
+    {
+        (void)Render::Look::ResetLive(std::nullopt);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button(I18N::Editor::LookSave))
+    {
+        (void)Render::Look::SaveLive();
+    }
+    ImGui::Separator();
+
+    for (const Render::Look::LookValueState& state : Render::Look::DescribeLive())
+    {
+        ImGui::PushID(state.name.c_str());
+        float value = m_LookEditedName == state.name ? m_LookEditedValue : static_cast<float>(state.value);
+        ImGui::SetNextItemWidth(220.0f);
+        if (ImGui::SliderFloat("##value", &value, static_cast<float>(state.min), static_cast<float>(state.max), "%.3f"))
+        {
+            m_LookEditedName = state.name;
+            m_LookEditedValue = value;
+        }
+        // One edit per drag: a mood value rebuilds the static map light.
+        if (ImGui::IsItemDeactivatedAfterEdit())
+        {
+            const Render::Look::LookEdit edit{state.name, value};
+            (void)Render::Look::SetLive(std::span<const Render::Look::LookEdit>(&edit, 1), m_LookScopeMap != 0);
+            m_LookEditedName.clear();
+        }
+        ImGui::SameLine();
+        ImGui::Text("%s (%s)", state.name.c_str(), Render::Look::ToString(state.source));
+        ImGui::SameLine();
+        if (ImGui::SmallButton(I18N::Editor::LookReset))
+        {
+            (void)Render::Look::ResetLive(state.name);
+        }
+        ImGui::PopID();
+    }
 }
 
 void CDevEditorUI::RenderGraphicsDebugInfo()
