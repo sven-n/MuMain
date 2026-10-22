@@ -35,6 +35,13 @@ public:
     void Redo() override;
 
 private:
+    // Begins the window with the editor's bar; false (and ended) while hidden.
+    bool BeginWindow(bool* open);
+    // The group list and the selected group; true when the groups changed.
+    bool RenderPanes();
+    // After the widgets: the login screen shows a change, and a finished edit
+    // becomes one undo step.
+    void AfterEdits(bool changed);
     void LoadFile();
     void Save();
     // Ctrl+Z and Ctrl+Y (or Ctrl+Shift+Z) while this window has the focus.

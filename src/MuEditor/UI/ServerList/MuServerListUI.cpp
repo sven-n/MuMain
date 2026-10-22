@@ -67,6 +67,72 @@ void RenderError(const char* text)
     ImGui::PopStyleColor();
 }
 
+bool BeginChannelTable()
+{
+    constexpr ImGuiTableFlags TableFlags =
+        ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingFixedFit;
+    if (!ImGui::BeginTable("##Channels", ChannelTableColumns, TableFlags))
+    {
+        return false;
+    }
+    ImGui::TableSetupColumn(I18N::Editor::Channel);
+    ImGui::TableSetupColumn(I18N::Editor::Type);
+    ImGui::TableSetupColumn(I18N::Editor::OnTheLoginScreen);
+    ImGui::TableSetupColumn(I18N::Editor::ConnectServer);
+    ImGui::TableHeadersRow();
+    return true;
+}
+
+bool RenderChannelTypeCombo(ChannelType& type)
+{
+    ImGui::SetNextItemWidth(TypeComboWidth * g_MuEditorCore.GetUIScale());
+    if (!ImGui::BeginCombo("##Type", GetChannelTypeLabel(type)))
+    {
+        return false;
+    }
+    bool changed = false;
+    for (int value = 0; value < Data::ServerList::ChannelTypeCount; ++value)
+    {
+        const ChannelType option = static_cast<ChannelType>(value);
+        if (ImGui::Selectable(GetChannelTypeLabel(option), option == type) && option != type)
+        {
+            type = option;
+            changed = true;
+        }
+    }
+    ImGui::EndCombo();
+    return changed;
+}
+
+// One channel: its number, type, name on the login screen and the load the
+// connect server sent for it (sentChannels: the group's, or nullptr).
+bool RenderChannelRow(ServerGroup& group, int channel, const std::map<int, int>* sentChannels)
+{
+    ImGui::PushID(channel);
+    ImGui::TableNextRow();
+    ImGui::TableNextColumn();
+    ImGui::Text("%d", channel + 1);
+
+    ImGui::TableNextColumn();
+    ChannelType& type = group.channels[static_cast<size_t>(channel)];
+    const bool changed = RenderChannelTypeCombo(type);
+
+    ImGui::TableNextColumn();
+    ImGui::TextDisabled("%s-%d%s", group.name.c_str(), channel + 1, Data::ServerList::GetChannelSuffix(type));
+
+    ImGui::TableNextColumn();
+    if (sentChannels != nullptr)
+    {
+        const auto load = sentChannels->find(channel);
+        if (load != sentChannels->end())
+        {
+            ImGui::TextUnformatted(I18N::Format(I18N::Editor::Sent0Load, {std::to_string(load->second)}).c_str());
+        }
+    }
+    ImGui::PopID();
+    return changed;
+}
+
 CMuServerListUI::SentChannels FindSentChannels()
 {
     CMuServerListUI::SentChannels sent;
@@ -101,6 +167,25 @@ void CMuServerListUI::Render(bool* open)
     {
         LoadFile();
     }
+    if (!BeginWindow(open))
+    {
+        return;
+    }
+    if (m_sentVersion != g_ServerListManager->GetReceivedServersVersion())
+    {
+        m_sent = FindSentChannels();
+        m_sentVersion = g_ServerListManager->GetReceivedServersVersion();
+    }
+    RenderToolbar();
+    RenderStatus();
+    ImGui::Separator();
+    const bool changed = RenderPanes();
+    ImGui::End();
+    AfterEdits(changed);
+}
+
+bool CMuServerListUI::BeginWindow(bool* open)
+{
     char title[MuEditor::WindowIds::TitleCapacity];
     MuEditor::Layout::PrepareToolWindow();
     if (!ImGui::Begin(
@@ -108,7 +193,7 @@ void CMuServerListUI::Render(bool* open)
             ImGuiWindowFlags_NoCollapse | MuEditor::Layout::ToolWindowBarFlags(MuEditor::WindowIds::ServerList)))
     {
         ImGui::End();
-        return;
+        return false;
     }
     // Before the bar: in this window's own bar it shows the Server List's undo then.
     if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
@@ -121,17 +206,12 @@ void CMuServerListUI::Render(bool* open)
         g_MuEditorCore.SetHoveringUI(true);
     }
     HandleUndoKeys();
+    return true;
+}
 
-    if (m_sentVersion != g_ServerListManager->GetReceivedServersVersion())
-    {
-        m_sent = FindSentChannels();
-        m_sentVersion = g_ServerListManager->GetReceivedServersVersion();
-    }
-    RenderToolbar();
-    RenderStatus();
+bool CMuServerListUI::RenderPanes()
+{
     bool changed = false;
-    ImGui::Separator();
-
     const ImVec2 listSize(GroupListWidth * g_MuEditorCore.GetUIScale(), 0.0f);
     if (ImGui::BeginChild("##Groups", listSize, ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
     {
@@ -146,8 +226,11 @@ void CMuServerListUI::Render(bool* open)
         changed |= RenderSelectedGroup();
     }
     ImGui::EndChild();
-    ImGui::End();
+    return changed;
+}
 
+void CMuServerListUI::AfterEdits(bool changed)
+{
     if (changed)
     {
         m_uncommitted = true;
@@ -494,57 +577,16 @@ bool CMuServerListUI::RenderGroupFields(ServerGroup& group)
 
 bool CMuServerListUI::RenderChannels(ServerGroup& group)
 {
-    constexpr ImGuiTableFlags TableFlags =
-        ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingFixedFit;
-    if (!ImGui::BeginTable("##Channels", ChannelTableColumns, TableFlags))
+    if (!BeginChannelTable())
     {
         return false;
     }
-    ImGui::TableSetupColumn(I18N::Editor::Channel);
-    ImGui::TableSetupColumn(I18N::Editor::Type);
-    ImGui::TableSetupColumn(I18N::Editor::OnTheLoginScreen);
-    ImGui::TableSetupColumn(I18N::Editor::ConnectServer);
-    ImGui::TableHeadersRow();
-
     const auto sentGroup = m_sent.find(group.id);
+    const std::map<int, int>* sentChannels = sentGroup != m_sent.end() ? &sentGroup->second : nullptr;
     bool changed = false;
     for (int channel = 0; channel < Data::ServerList::MaxChannelsPerGroup; ++channel)
     {
-        ImGui::PushID(channel);
-        ImGui::TableNextRow();
-        ImGui::TableNextColumn();
-        ImGui::Text("%d", channel + 1);
-
-        ImGui::TableNextColumn();
-        ChannelType& type = group.channels[static_cast<size_t>(channel)];
-        ImGui::SetNextItemWidth(TypeComboWidth * g_MuEditorCore.GetUIScale());
-        if (ImGui::BeginCombo("##Type", GetChannelTypeLabel(type)))
-        {
-            for (int value = 0; value < Data::ServerList::ChannelTypeCount; ++value)
-            {
-                const ChannelType option = static_cast<ChannelType>(value);
-                if (ImGui::Selectable(GetChannelTypeLabel(option), option == type) && option != type)
-                {
-                    type = option;
-                    changed = true;
-                }
-            }
-            ImGui::EndCombo();
-        }
-
-        ImGui::TableNextColumn();
-        ImGui::TextDisabled("%s-%d%s", group.name.c_str(), channel + 1, Data::ServerList::GetChannelSuffix(type));
-
-        ImGui::TableNextColumn();
-        if (sentGroup != m_sent.end())
-        {
-            const auto load = sentGroup->second.find(channel);
-            if (load != sentGroup->second.end())
-            {
-                ImGui::TextUnformatted(I18N::Format(I18N::Editor::Sent0Load, {std::to_string(load->second)}).c_str());
-            }
-        }
-        ImGui::PopID();
+        changed |= RenderChannelRow(group, channel, sentChannels);
     }
     ImGui::EndTable();
     return changed;
