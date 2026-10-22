@@ -10,8 +10,6 @@
 #include "Data/DataHandler/DataIssueReport.h"
 #include "Data/GameData/ServerListData/ServerListJson.h"
 
-#include <algorithm>
-#include <cwchar>
 #include <filesystem>
 #include <memory>
 #include <string_view>
@@ -21,13 +19,6 @@ namespace
 constexpr const char* ServerListName = "server list";
 // The bit of a channel type that turns PvP off.
 constexpr BYTE NonPvpBit = 0x01;
-
-template <size_t Capacity> void CopyText(wchar_t (&destination)[Capacity], const std::wstring& source)
-{
-    const size_t length = std::min(source.size(), Capacity - 1);
-    std::wmemcpy(destination, source.c_str(), length);
-    destination[length] = L'\0';
-}
 } // namespace
 
 CServerListManager::CServerListManager()
@@ -158,8 +149,10 @@ bool CServerListManager::MakeServerGroup(IN int iServerGroupIndex, OUT CServerGr
         return false;
 
     const Data::ServerList::ServerGroup& group = pServerGroupInfo->group;
-    CopyText(pServerGroup->m_szName, Core::Text::FromUtf8(group.name));
-    CopyText(pServerGroup->m_szDescription, Core::Text::FromUtf8(group.description));
+    const std::wstring name = Core::Text::FromUtf8(group.name);
+    const std::wstring description = Core::Text::FromUtf8(group.description);
+    wcsncpy_s(pServerGroup->m_szName, name.c_str(), _TRUNCATE);
+    wcsncpy_s(pServerGroup->m_szDescription, description.c_str(), _TRUNCATE);
     pServerGroup->m_iSequence = pServerGroupInfo->sequence;
     pServerGroup->m_iWidthPos = group.testServer ? CServerGroup::SBP_CENTER : CServerGroup::SBP_LEFT;
     pServerGroup->m_iServerIndex = iServerGroupIndex;
