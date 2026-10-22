@@ -93,9 +93,8 @@ constexpr std::array<EnumName<ItemRequirement>, ItemRequirementCount> ItemRequir
     {ItemRequirement::Vitality, "vitality"},
     {ItemRequirement::Leadership, "leadership"},
 }};
-} // namespace
 
-constexpr std::array<EnumName<ItemTextColor>, 14> ItemTextColorNames = {{
+constexpr std::array<EnumName<ItemTextColor>, ItemTextColorCount> ItemTextColorNames = {{
     {ItemTextColor::White, "white"},
     {ItemTextColor::Blue, "blue"},
     {ItemTextColor::Red, "red"},
@@ -111,6 +110,22 @@ constexpr std::array<EnumName<ItemTextColor>, 14> ItemTextColorNames = {{
     {ItemTextColor::Violet, "violet"},
     {ItemTextColor::Orange, "orange"},
 }};
+
+// One entry per color, in the order of their values: a color added to ItemTextColor without a name here fails to
+// compile, instead of being saved as a number that reading the file then refuses.
+constexpr bool NamesEveryTextColor()
+{
+    for (size_t index = 0; index < ItemTextColorNames.size(); ++index)
+    {
+        if (ItemTextColorNames[index].name == nullptr || static_cast<size_t>(ItemTextColorNames[index].value) != index)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+static_assert(NamesEveryTextColor(), "every ItemTextColor needs its name in ItemTextColorNames");
+} // namespace
 
 std::span<const EnumName<ItemSlot>> GetEnumNames(ItemSlot)
 {
