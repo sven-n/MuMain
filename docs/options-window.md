@@ -50,7 +50,7 @@ The window has five tabs:
 | Graphics | Quality: Enhanced graphics, anti-aliasing, anisotropic filtering, render level. Effects: the effect toggles. Shadows: the shadow toggles |
 | Audio | Sound and music volume, whisper sound |
 | Gameplay | Auto attack, slide help |
-| Interface | Language, font, UI theme, FPS counter, debug info |
+| Interface | Language, translate item names, font, UI theme, FPS counter, debug info |
 
 Each setting is a row with its name on the left and its control on the
 right, aligned in two columns. A tab's settings scroll when they don't fit,
@@ -113,7 +113,10 @@ window writes to these sections:
   own, through a temporary file, when a slider is let go; see "Tuning it
   yourself" in [`enhanced-look.md`](enhanced-look.md).
 - `[UI]` - `Locale`, `Font`, `RmlTheme` and `UIScalePercent` from the Display and
-  Interface tabs. `EnableAnimationTaskPool` (`0`/`1`, set by hand only, like the
+  Interface tabs. `TranslateItemNames` (default `1`): the "Translate item names"
+  checkbox under the language, applied at once; unticked, item names stay
+  English while the rest of the UI is in the chosen language.
+  `EnableAnimationTaskPool` (`0`/`1`, set by hand only, like the
   `--enable-taskpool` command-line flag) animates characters on worker
   threads.
 - `[Audio]` - volumes.
