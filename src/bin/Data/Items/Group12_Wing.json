@@ -910,14 +910,14 @@
       "name": {
         "en": "Bundle of Jewel of Bless",
         "de": "Bündel Juwelen des Segens",
-        "es": "manojo de Joyas de Bendición",
-        "pt": "feixe da Joia da bênção"
+        "es": "Fardo de Joyas de Bendición",
+        "pt": "Lote de Joias da bênção"
       },
       "tags": ["valuable"],
       "nameLines": [
         {
           "text": {
-            "en": "{name} +{levelPlusOne}"
+            "en": "{name} x{bundleCount}"
           },
           "color": "yellow"
         }
@@ -939,14 +939,14 @@
       "name": {
         "en": "Bundle of Jewel of Soul",
         "de": "Bündel Juwelen der Seele",
-        "es": "manojo de Joyas de Alma",
-        "pt": "feixe da Joia da alma"
+        "es": "Fardo de Joyas de Alma",
+        "pt": "Lote de Joias da alma"
       },
       "tags": ["valuable"],
       "nameLines": [
         {
           "text": {
-            "en": "{name} +{levelPlusOne}"
+            "en": "{name} x{bundleCount}"
           },
           "color": "yellow"
         }
@@ -3175,16 +3175,16 @@
     {
       "number": 136,
       "name": {
-        "en": "Jewel of Life Bundle",
+        "en": "Bundle of Jewel of Life",
         "de": "Bündel Juwelen des Lebens",
-        "es": "Fardo de Joyas de la Vida",
-        "pt": "Joia do Lote da Vida"
+        "es": "Fardo de Joyas de Vida",
+        "pt": "Lote de Joias da vida"
       },
       "tags": ["valuable"],
       "nameLines": [
         {
           "text": {
-            "en": "{name} +{levelPlusOne}"
+            "en": "{name} x{bundleCount}"
           },
           "color": "yellow"
         }
@@ -3205,16 +3205,16 @@
     {
       "number": 137,
       "name": {
-        "en": "Jewel of Creation Bundle",
+        "en": "Bundle of Jewel of Creation",
         "de": "Bündel Juwelen der Schöpfung",
         "es": "Fardo de Joyas de la Creación",
-        "pt": "Joia do Lote da Criação"
+        "pt": "Lote de Joias da criação"
       },
       "tags": ["valuable"],
       "nameLines": [
         {
           "text": {
-            "en": "{name} +{levelPlusOne}"
+            "en": "{name} x{bundleCount}"
           },
           "color": "yellow"
         }
@@ -3235,16 +3235,16 @@
     {
       "number": 138,
       "name": {
-        "en": "Jewel of Guardian Bundle",
+        "en": "Bundle of Jewel of Guardian",
         "de": "Bündel Juwelen des Wächters",
-        "es": "Fardo de Joyas Guardián",
-        "pt": "Joia do Lote Guardião"
+        "es": "Fardo de Joyas de Guardián",
+        "pt": "Lote de Joias do guardião"
       },
       "tags": ["valuable"],
       "nameLines": [
         {
           "text": {
-            "en": "{name} +{levelPlusOne}"
+            "en": "{name} x{bundleCount}"
           },
           "color": "yellow"
         }
@@ -3265,16 +3265,16 @@
     {
       "number": 139,
       "name": {
-        "en": "Gemstone Bundle",
+        "en": "Bundle of Gemstone",
         "de": "Bündel Edelsteine",
         "es": "Fardo de Gemas",
-        "pt": "Lote de Pedra Preciosa"
+        "pt": "Lote de Pedras preciosas"
       },
       "tags": ["valuable"],
       "nameLines": [
         {
           "text": {
-            "en": "{name} +{levelPlusOne}"
+            "en": "{name} x{bundleCount}"
           },
           "color": "yellow"
         }
@@ -3295,16 +3295,16 @@
     {
       "number": 140,
       "name": {
-        "en": "Jewel of Harmony Bundle",
+        "en": "Bundle of Jewel of Harmony",
         "de": "Bündel Juwelen der Harmonie",
         "es": "Fardo de Joyas de la Armonía",
-        "pt": "Joia do Lote da Harmonia"
+        "pt": "Lote de Joias da harmonia"
       },
       "tags": ["valuable"],
       "nameLines": [
         {
           "text": {
-            "en": "{name} +{levelPlusOne}"
+            "en": "{name} x{bundleCount}"
           },
           "color": "yellow"
         }
@@ -3325,16 +3325,16 @@
     {
       "number": 141,
       "name": {
-        "en": "Jewel of Chaos Bundle",
+        "en": "Bundle of Jewel of Chaos",
         "de": "Bündel Juwelen des Chaos",
-        "es": "Fardo de Joyas del Caos",
-        "pt": "Joia do Lote do Caos"
+        "es": "Fardo de Joyas de Caos",
+        "pt": "Lote de Joias do caos"
       },
       "tags": ["valuable"],
       "nameLines": [
         {
           "text": {
-            "en": "{name} +{levelPlusOne}"
+            "en": "{name} x{bundleCount}"
           },
           "color": "yellow"
         }
@@ -3355,16 +3355,16 @@
     {
       "number": 142,
       "name": {
-        "en": "Lower Refining Stone Bundle",
+        "en": "Bundle of Lower Refining Stone",
         "de": "Bündel niederer Verfeinerungssteine",
-        "es": "Fardo de Joyas de Bajo Pulido",
-        "pt": "Lote de Joias de Baixo Polimento"
+        "es": "Fardo de Piedras de Más Baja Refinación",
+        "pt": "Lote de Pedras refinadas inferiores"
       },
       "tags": ["valuable"],
       "nameLines": [
         {
           "text": {
-            "en": "{name} +{levelPlusOne}"
+            "en": "{name} x{bundleCount}"
           },
           "color": "yellow"
         }
@@ -3385,16 +3385,16 @@
     {
       "number": 143,
       "name": {
-        "en": "Higher Refining Stone Bundle",
+        "en": "Bundle of Higher Refining Stone",
         "de": "Bündel höherer Verfeinerungssteine",
-        "es": "Fardo de Joyas de Alto Pulido",
-        "pt": "Lote de Joias de Alto Polimento"
+        "es": "Fardo de Piedras de Más Alta Refinación",
+        "pt": "Lote de Pedras refinadas superiores"
       },
       "tags": ["valuable"],
       "nameLines": [
         {
           "text": {
-            "en": "{name} +{levelPlusOne}"
+            "en": "{name} x{bundleCount}"
           },
           "color": "yellow"
         }

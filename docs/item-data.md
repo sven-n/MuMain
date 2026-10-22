@@ -170,7 +170,7 @@ is one of:
   charms' effect in the game's ItemAddOption data): `addOptionValue1`,
   `addOptionValue2` and `addOptionDuration`, a text such as "1 Hour"; the
   hero's `heroLevel`; and for the [name lines](#name-lines) the item's `name`
-  (its `name` in the UI's language), `levelPlusOne` (a packed jewel's count)
+  (its `name` in the UI's language), `levelPlusOne` (its level + 1)
   and `excellentFlags` (its excellent options, 0 to 63; the Horn of Fenrir's
   1, 2 and 4 are its Destroy, Protect and Illusion kinds);
 - a **level bonus table** of [`Stats/ItemStats.json`](#item-stats-by-level),

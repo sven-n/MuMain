@@ -3,6 +3,12 @@
   "dropLevelBonus": {"excellent": 25, "ancient": 30},
   "tables": [
     {
+      "name": "bundleCount",
+      "caption": {"en": "Items in a Bundle (Jewel and Stone Bundles)"},
+      "values": 10,
+      "perLevel": 10
+    },
+    {
       "name": "capeDamageAbsorb3rd",
       "caption": {"en": "Damage Absorption in % (3rd Capes)"},
       "values": 24,
