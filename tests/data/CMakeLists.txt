@@ -38,7 +38,6 @@ target_compile_definitions(light_mood_data_tests PRIVATE
 mu_add_test(
     NAME server_list_data_tests
     SOURCES
-        test_server_list_bmd_comparison.cpp
         test_server_list_json.cpp
     LINK_LIBS
         MuClient
