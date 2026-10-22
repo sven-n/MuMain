@@ -89,7 +89,10 @@ the name the login screen gives it.
   their load.
 - **Save** writes `Data/Local/ServerList.json` in the folder the game runs
   from. It refuses a list with errors (a group without a name, an ID used
-  twice) and lists them.
+  twice) and lists them. When the file itself had errors as it was read
+  (changed by hand while the game ran), the window has only the groups that
+  could be read: Save stays off then, so it cannot remove the others, until
+  the file is fixed and **Revert** reads it again.
 - **Revert** reads the file again.
 - **Undo** and **Redo** in the editor bar (or Ctrl+Z and Ctrl+Y in the window)
   work through the changes of the session. The bar's buttons act on the tool
