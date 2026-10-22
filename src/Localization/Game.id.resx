@@ -1430,6 +1430,9 @@
   <data name="Language" xml:space="preserve">
     <value>Bahasa</value>
   </data>
+  <data name="Translate Item Names" xml:space="preserve">
+    <value>Terjemahkan nama barang</value>
+  </data>
   <data name="Windowed mode" xml:space="preserve">
     <value>Mode jendela</value>
   </data>

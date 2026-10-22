@@ -11112,4 +11112,7 @@
   <data name="QuestRequirementBuff" xml:space="preserve">
     <value>Bonus: %ls</value>
   </data>
+  <data name="Translate Item Names" xml:space="preserve">
+    <value>アイテム名を翻訳する</value>
+  </data>
 </root>
