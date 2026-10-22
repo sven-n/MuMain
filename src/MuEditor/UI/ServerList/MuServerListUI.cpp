@@ -218,13 +218,16 @@ bool CMuServerListUI::RenderToolbar()
             I18N::Format(I18N::Editor::Reads0AgainUnsavedChangesAreLost, {Data::ServerList::ServerListFile}).c_str());
     }
     ImGui::SameLine();
-    // Ctrl+Z and Ctrl+Y while this window has the focus; a text field being
-    // edited takes them first.
+    // Ctrl+Z and Ctrl+Y (or Ctrl+Shift+Z) while this window has the focus and
+    // the keyboard is the editor's: ImGui keeps the focus here when the game
+    // takes the keyboard back, e.g. to type into the login screen. A text field
+    // being edited takes them first.
+    const bool editorKeys = g_MuEditorCore.IsKeyboardWithEditor();
     const bool canUndo = m_edits.CanUndo() || m_uncommitted;
     ImGui::BeginDisabled(!canUndo);
     const bool undo = ImGui::Button(I18N::Editor::Undo);
     ImGui::EndDisabled();
-    if (canUndo && (undo || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Z)))
+    if (canUndo && (undo || (editorKeys && ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Z))))
     {
         m_edits.Undo();
         changed = true;
@@ -234,7 +237,9 @@ bool CMuServerListUI::RenderToolbar()
     ImGui::BeginDisabled(!canRedo);
     const bool redo = ImGui::Button(I18N::Editor::Redo);
     ImGui::EndDisabled();
-    if (canRedo && (redo || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Y)))
+    const bool redoKeys = editorKeys && (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Y) ||
+                                         ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiMod_Shift | ImGuiKey_Z));
+    if (canRedo && (redo || redoKeys))
     {
         m_edits.Redo();
         changed = true;
