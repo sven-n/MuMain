@@ -34,6 +34,7 @@
       "number": 1,
       "name": {
         "en": "Imp",
+        "de": "Imp",
         "es": "Diablillo",
         "pt": "Diabrete"
       },
@@ -2430,6 +2431,7 @@
       "name": {
         "en": "Magic Gladiator Character Card",
         "de": "Charakterkarte: Magischer Gladiator",
+        "es": "Tarjeta de Personaje del Gladiador Mago",
         "pt": "Carta de Personagem - Gladiador Mágico"
       },
       "tradable": false,
@@ -2441,6 +2443,7 @@
       "name": {
         "en": "Dark Lord Character Card",
         "de": "Charakterkarte: Dunkler Lord",
+        "es": "Tarjeta de Personaje del Señor Oscuro",
         "pt": "Carta de Personagem - Lorde Sombrio"
       },
       "tradable": false,
@@ -2452,6 +2455,7 @@
       "name": {
         "en": "Character Slot Key",
         "de": "Charakterplatz-Schlüssel",
+        "es": "Clave de Ranura de Personaje",
         "pt": "Fenda de Chave de Personagem"
       },
       "slot": "mainHand",

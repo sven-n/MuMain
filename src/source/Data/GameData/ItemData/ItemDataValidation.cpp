@@ -149,9 +149,10 @@ void ValidateExcellentBonus(const ItemDefinition& definition, std::vector<ItemDa
 
 // Item files saved before the stat profiles have none; the item then has the
 // default until an edit or a bmd import gives it the profile its data gives.
-void ValidateStatProfileGiven(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
+void ValidateStatProfileGiven(const ItemDefinition& definition, const ItemStatProfiles& profiles,
+                              std::vector<ItemDataIssue>& issues)
 {
-    const std::string derived = DeriveStatProfile(definition);
+    const std::string derived = DeriveStatProfile(profiles, definition);
     if (definition.statProfile.empty() && !derived.empty())
     {
         AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
@@ -225,7 +226,6 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
         ValidateName(definition, issues);
         ValidateSlot(definition, issues);
         ValidatePotionPriority(definition, issues);
-        ValidateStatProfileGiven(definition, issues);
         ValidateExcellentBonus(definition, issues);
         ValidateExcellentRaisesLevel(definition, issues);
         ValidateRequirementsByLevel(definition, issues);
@@ -272,6 +272,7 @@ void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatP
             continue;
         }
         ValidateExcellentBonusTerms(definition, profiles.Get(profile), issues);
+        ValidateStatProfileGiven(definition, profiles, issues);
         if (!definition.statProfile.empty())
         {
             used.insert(definition.statProfile);
@@ -283,6 +284,28 @@ void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatP
         {
             issues.push_back({ItemDataIssueSeverity::Warning, statFile, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
                               "profiles." + name, "no item names this profile"});
+        }
+    }
+}
+
+void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const char* const> uiLocales,
+                         std::vector<ItemDataIssue>& issues)
+{
+    for (const ItemDefinition& definition : items)
+    {
+        if (!definition.Exists())
+        {
+            continue;
+        }
+        for (const auto& [locale, text] : definition.names.GetTranslations())
+        {
+            const bool shown = std::any_of(uiLocales.begin(), uiLocales.end(),
+                                           [&](const char* uiLocale) { return locale == uiLocale; });
+            if (!shown)
+            {
+                AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
+                         "the " + locale + " name is never shown: the game has no texts in that language");
+            }
         }
     }
 }
@@ -341,6 +364,45 @@ void ApplySharedItemModels(std::vector<ItemModelDefinition>& models, std::span<c
         {
             issues.push_back({ItemDataIssueSeverity::Warning, sharedModelsSource, ItemDataIssue::NoItem,
                               ItemDataIssue::NoItem, name, "no item uses the shared model"});
+        }
+    }
+}
+
+void ValidateItemModelLooks(std::span<const ItemModelDefinition> models, LookNameExists renderStyleExists,
+                            LookNameExists itemEffectExists, std::vector<ItemDataIssue>& issues)
+{
+    const auto check =
+        [&](const ItemModelDefinition& model, const char* field, const std::string& name, LookNameExists exists)
+    {
+        if (!name.empty() && !exists(name))
+        {
+            issues.push_back({ItemDataIssueSeverity::Warning, "", model.group, model.number, field,
+                              "there is no look named \"" + name + "\"; the model is drawn plainly"});
+        }
+    };
+    for (const ItemModelDefinition& model : models)
+    {
+        check(model, "renderStyle", model.renderStyle, renderStyleExists);
+        check(model, "itemEffect", model.itemEffect, itemEffectExists);
+    }
+}
+
+void ValidateDirectlySharedModelFiles(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues)
+{
+    std::map<std::string, int, std::less<>> entriesByFile;
+    for (const ItemModelDefinition& model : models)
+    {
+        if (model.model.empty() && !model.file.empty())
+        {
+            ++entriesByFile[model.file];
+        }
+    }
+    for (const ItemModelDefinition& model : models)
+    {
+        if (model.model.empty() && !model.file.empty() && entriesByFile[model.file] > 1)
+        {
+            issues.push_back({ItemDataIssueSeverity::Warning, "", model.group, model.number, "file",
+                              "other items name " + model.file + " too; a shared model would open it once"});
         }
     }
 }

@@ -44,7 +44,7 @@ share with items) is planned in the
 | D7 | File layout | One JSON file per item group. Splitting the mixed groups 12–15 into category files was dropped: with new groups (D21) the group *is* the category, so the file layout is decided together with phase 12. |
 | D8 | Target version | Season 6 only for now. Other versions are easier to add once the data-driven setup exists. |
 | D9 | Identity | `(group, number)` only, no readable string key. Logs always show the English name next to it. Once rules read data instead of hardcoded ids, a readable key has no extra benefit. |
-| D10 | bmd files | The JSON files are the **only** source of truth for items in the game. The game no longer reads `Item_<lang>.bmd`. MuEditor gets "Import from bmd" and "Export as bmd"; fields the bmd format does not have are left out on export and keep their current or default values on import. **Update (2026-09-26):** the repo no longer ships `Item_<lang>.bmd`, and the editor's bmd import was removed; only "Export as bmd" is left. |
+| D10 | bmd files | The JSON files are the **only** source of truth for items in the game. The game no longer reads `Item_<lang>.bmd`. MuEditor gets "Import from bmd" and "Export as bmd"; fields the bmd format does not have are left out on export and keep their current or default values on import. **Update (2026-09-26):** the repo no longer ships `Item_<lang>.bmd`. The editor keeps "Import from bmd" for your own old files and "Export as bmd". |
 | D11 | Exchange scope | Item sets and drop settings are separate exchange files, not part of the item file. |
 | D12 | Id ranges | No reserved number ranges for custom items, and no range checks (`type >= X && type <= Y`) in new code; everything an item "is" comes from its data. OpenMU must keep supporting the original Season 6 client **and** this client (see section 7). |
 | D13 | Other item files | `ItemAddOption`, `SocketItem`, `Mix`, `pet` and set options are decided later, when we know more. |
@@ -53,7 +53,7 @@ share with items) is planned in the
 | D16 | Unused item bmd copies | Removed on this branch; the game only loads `Item_<lang>.bmd`. |
 | D17 | Translations in phase 2 | Item names moved into phase 2, because the per-language bmd files were the only place the Portuguese and Spanish names existed. Names are `LocalizedString`s imported from all three files; the UI locale (the same setting as the `.resx` texts) picks the shown name, also when it changes at runtime. On disk, each item's `name` is an object of names by language (`{"en": "Blade", "es": "Espada", "pt": "Lâmina"}`, English first) in the item files; separate translation files were tried and dropped as extra maintenance. Phase 5 keeps only the translation tooling. |
 | D18 | Repairing the legacy data | The bmd import recovers names that ran past the 30-byte name field and takes the fields they overwrote from a language whose name did not reach them (defaults when none has them). Names that are not UTF-8 are read as Windows-1252. The changes are listed in the phase 2 PR and in `docs/item-data.md`. |
-| D19 | Editor sync | Every item editor change goes into the database right away (phase 2), so the editor and the database never differ. Moving the editor fully onto the database stays in phase 6. |
+| D19 | Editor sync | Every item editor change goes into the database right away (phase 2), so the editor and the database never differ. Moving the editor fully onto the database stays in phase 6 (done: the item tools edit the database, the item table is gone). |
 | D22 | Model data files | Model and display data (model file, textures, inventory and ground display, cloth, effects) lives in separate files, `Data/Items/Models/GroupNN_*.json`, one per item group, items by `number`. It is client-only: the item files keep what client and server share, and only those take part in the OpenMU exchange. Separate files also keep the item files small and let the model editor and the stats editor change different files. |
 | D23 | Model slots | Two steps. **Own model slots (phase 4a–4c):** every item keeps its own model slot, `MODEL_ITEM + item type`, as today; the data only says which file is loaded into it, so the ~100 places that compute `+ MODEL_ITEM` / `- MODEL_ITEM` stay unchanged. **Shared models (phase 4d, right after them):** models become entries of their own, and items reference them by name, so several items can share one model (loaded once; 4d1, done). Every item keeps a slot of its own, and the conversions between item types and model slots go through one place, `ToModelSlot` / `ToItemType` (4d2), so a moved item can keep its slot (phase 12) and the named slots of items (`MODEL_KRIS`, …) stay valid. One slot per shared model, with objects keeping item types, is not planned: about 240 places identify items by their model slot (see "Item-specific code that is left"), and none of them gains anything while each item has its own slot. Phase 12 (level variants as items of their own) shares models without loading them twice. |
 | D24 | Render effects | The effect code stays code, but which item uses which effect moves into the model data: the glow as values (color names from a glow color list, `Data/Effects/GlowColors.json`, which has the colors of the old `PartObjectColor*` palettes; the meshes it is drawn on; the level it glows like), a render style (`RenderPartObjectBody` recipes; identical recipes share one name) and an item effect (the item branches of `RenderPartObjectEffect`). Effects that depend on the item level (+7 glow, excellent, ancient) stay generic code, and the entries for monsters and NPCs stay in code. The named looks are code for now; D25 moves what they are made of into data. |
@@ -256,8 +256,12 @@ Warnings (data works, but is probably wrong):
 
 - unknown fields (ignored by the game)
 - a name longer than 49 characters (cut in the game)
-- later phases: missing model files or model links (phase 4), missing
-  translations (phase 5), combinations that do not make sense
+- a name in a language the game has no UI texts for (phase 5: it is never
+  shown)
+- later phases: combinations that do not make sense
+
+Missing translations are not warnings at load: the translations tool of the
+editor counts them, and Save Items lists them per language (phase 5).
 
 Behavior:
 
@@ -384,7 +388,7 @@ table:
 | **Categories** | Tag-centered view: pick a tag, see and change its items. |
 | **Model and visuals** | Model file picker for `Data\Item\*.bmd` with 3D preview, texture folder, inventory and ground display values, cloth flag, and glow, render style and effects chosen from lists (D24), each with the list of the other items that use the same look. |
 | **Look editor** (phase 13) | The shared look editor of the [roadmap](2026-09-29-data-driven-content-roadmap-design.md), opened for the looks of the selected item: its building blocks with a live preview, bone picking, the items that use a look and the warning before a shared look changes. |
-| **Translations** | Items × languages grid, filter for missing translations. |
+| **Item Translations** | Items × languages grid (every UI language, English first), the missing names counted per language, a filter for them, "same as English" for names that do not change. Built in phase 5, before the other tools. |
 | **OpenMU sync** | Import, diff and export of the exchange file. |
 
 Common features: validation before saving (duplicate ids, missing English
@@ -407,8 +411,8 @@ in both repos (as separate PRs, one per repo).
 | 4 | Models into data | Client | MuMain | 2 | Model files per item group (D22), model slots stay `MODEL_ITEM + type` (D23, own model slots). One PR per part: **4a** model files and textures (`OpenItems()` / `OpenItemTextures()`), **4b** inventory and ground display, **4c** render effects (D24) in three parts: **4c1** glow, **4c2** render styles, **4c3** item effects. |
 | 4d | Shared models | Client | MuMain | 4 | Models as entries of their own that items reference by name, so items can share a model (D23, shared models). Two PRs: **4d1** shared model entries, each file opened once; **4d2** the conversions between item types and model slots in one place, and shared model data freed by its last user. |
 | 4e | Clear model loading errors | Client | MuMain | 4 | One message for missing model files and textures of item models that names the item, the model entry, the texture and the searched folders. |
-| 5 | Translation tooling | Client | MuMain | 2, 6 | Translations editor (items × languages), missing-translation warnings. The names themselves moved to phase 2 (D17). |
-| 6 | Editors | Client | MuMain | 2–5 | Focused MuEditor tools (section 9) on the rules of D26, including add/remove items and picking the looks of an item from lists. |
+| 5 | Translation tooling | Client | MuMain | 2 | Translations editor (items × languages), missing names counted in the editor. The names themselves moved to phase 2 (D17). Done before phase 6. |
+| 6 | Editors | Client | MuMain | 2–5 | Focused MuEditor tools (section 9) on the rules of D26, including add/remove items and picking the looks of an item from lists. Takes over phase 5's item list. Done. |
 | 7 | Item sync, client side | Client | MuMain | 2, 6 | MuEditor import/export of the item exchange file, with diff. |
 | B | Item sync, server side | Server | OpenMU | 7 (file format) | Admin panel import/export pages for the item exchange file, with diff. |
 | 8 | Data-driven tooltips | Client | MuMain | 2, 5 | Tooltip JSON converted from the `ItemTooltip*` files; `RenderItemInfo()` reads data; tooltip editor. Moved earlier if needed. |
@@ -420,7 +424,9 @@ in both repos (as separate PRs, one per repo).
 | D | Legacy item ids, server side *(to discuss again)* | Server | OpenMU | 12 | Legacy id on item definitions, mapping tool, Season 6 serializer sends legacy ids, serializer for the new client. |
 | FX1 | Effect catalogue *([roadmap](2026-09-29-data-driven-content-roadmap-design.md))* | Client | MuMain | 4c | Every effect, particle, lightning and sprite type gets a name and its creation values in `Data/Effects/`; behavior stays code. |
 | 13 | Looks in data | Client | MuMain | 4c, 6, FX1 | What the named render styles and effects are made of moves from code into `Data/Effects/` as building blocks (D25), with the look editor in MuEditor (preview, bones, the items that use a look). |
-| 14 | Cleanup | Client | MuMain | all item phases | The glow of the Phoenix Soul inventory model; what later areas still need moves to the roadmap; then remove this document. |
+| 14 | UI text translations | Client | MuMain | 5 | A MuEditor window for the `.resx` UI texts (Game, Dialog, Editor, Metadata): keys × languages with the missing texts counted per language and file, written back to `src/Localization`, with placeholder checks. Builds on the Item Translations window. |
+| 15 | Adding a language | Client | MuMain | 14 | Add a UI language from MuEditor: its code and its name in its own language. Creates its `.resx` files; the game's language list and the language names come from the texts instead of code, so after the next build the language is in the game, the editor and the translation windows. |
+| 16 | Cleanup | Client | MuMain | all item phases | The glow of the Phoenix Soul inventory model; what later areas still need moves to the roadmap; then remove this document. |
 
 The deferred question Q1 (custom items on the original client) is a
 **Server** topic and must be decided before custom items are used on a
@@ -630,7 +636,9 @@ server with original clients (after phases 6 and B).
      `CheckRepair` and the lucky set constants are gone. The lucky set
      range also counted 7/71 and 10/72, which have no item data.
    The 38 items named "…-J" (copies of existing items with no model, unknown
-   to OpenMU; what "J" stands for is not known) follow their data. Two lists
+   to OpenMU; what "J" stands for is not known) followed their data; phase 6
+   removed them, since no player could get one (server data marks them not
+   droppable, and no cash shop or lucky ticket list has them). Two lists
    the inventory found wrong are fixed on their own, not in 3b: the
    Illusion Temple team skins (#669) and the trade warning (#671).
 
@@ -673,9 +681,10 @@ server with original clients (after phases 6 and B).
    Lord's defense of 15 as data; its other changes are in main already,
    fixed differently, or wrong (first tier wing steps from 25, Wings of
    Despair as third tier, a second +25 for excellent requirements).
-   - Nine tables, the default and twelve profiles on 604 items: `weapon`
-     119, `armor` 356, `shield` 24, `sceptre` 11, `book` 3, `helper` 31,
-     `scroll` 36, and `firstTierWing`, `secondTierWing`, `secondTierCape`,
+   - Nine tables, the default and twelve profiles on 566 items (604 before
+     the "…-J" items were removed): `weapon` 113, `armor` 327, `shield` 22,
+     `sceptre` 10, `book` 3, `helper` 31, `scroll` 36, and `firstTierWing`,
+     `secondTierWing`, `secondTierCape`,
      `thirdTierWing` and `smallWing` on 24 wings. The Horn of Fenrir names
      `"default"`: its data gives `helper`, but its level requirement does not
      grow. The other items name none and have the default; a left-out profile
@@ -716,11 +725,14 @@ server with original clients (after phases 6 and B).
      1, 4 and 15, item types without data and values the editor can give;
      the help table too. The one difference: item types without data in
      groups 0 to 11 no longer get the option level's strength.
-   - Left for later: which item gets which profile is code
-     (`DeriveStatProfile`) that names the profiles, while the profiles are
-     data; each profile could name in the stat file what it is for (tags,
-     slots, weapon kinds, groups). The stat file's writer has no caller
-     outside the tests yet; an editor for the stat file would use it.
+   - Done in phase 6: which item gets which profile was code
+     (`DeriveStatProfile`) that named the profiles; it is now the ordered
+     profile rules of the stat file (`profileRules`: conditions on group,
+     slot, wing tier, weapon kind, tags and base requirements, the first
+     match giving the profile). A one-time comparison checked the 14 shipped
+     rules against the code for all 911 items, 844,800 combinations of the
+     fields it read, the follow logic and the load warning. The writer is
+     used by Item Formulas and Save Items.
 4. **Models into data**: model and display data in their own files,
    `Data/Items/Models/GroupNN_*.json` (D22):
 
@@ -734,13 +746,13 @@ server with original clients (after phases 6 and B).
 
    Every item keeps its model slot `MODEL_ITEM + item type` (D23, own model slots). Three
    PRs:
-   - **4a Model files and textures:** `OpenItems()` / `OpenItemTextures()`
+   - **4a Model files and textures (done):** `OpenItems()` / `OpenItemTextures()`
      become one loop over the item data. Models that aren't items (e.g.
      `MODEL_EVENT + …`, body parts) and the extra effect bitmaps stay in
      code. `textureFolders` is a search list: each texture comes from the
      first folder that has it (the old code loaded folder after folder and
      sometimes relied on textures another model had loaded before).
-   - **4b Display:** the inventory transform (`RenderItem3D()` slot
+   - **4b Display (done):** the inventory transform (`RenderItem3D()` slot
      anchor, `RenderObjectScreen()` offset, rotation, scale and body
      height) and the ground transform (`ItemAngle()`, `ItemHeight()`) come
      from the data; `"cloth": true` marks capes worn as cloth (their cloth
@@ -751,7 +763,7 @@ server with original clients (after phases 6 and B).
      cases that depend on the item level stay in code until phase 12, and
      so does the look of the event models drawn for level variants, a small
      table in `Render/Items/ItemDisplay.cpp`.
-   - **4c Render effects (D24)**, three PRs because the drawing code is
+   - **4c Render effects (D24) (done)**, three PRs because the drawing code is
      large (about 3,500 lines):
      - **4c1 Glow:** `"glow"` holds the level an item glows like (jewels +8,
        wings +0, or one per item level for arrows, bolts and Devil's Square
@@ -832,7 +844,7 @@ server with original clients (after phases 6 and B).
    Loading models only when an item is first drawn would be a separate step
    later.
 
-   **4d Shared models (D23)**, in two parts:
+   **4d Shared models (D23) (done)**, in two parts:
 
    - **4d1 Shared model entries (done):** the model files that several
      items use (34 files, 145 items: the skill parchments, the socket
@@ -851,7 +863,7 @@ server with original clients (after phases 6 and B).
      first, which used up numbers). A test checks that every file several
      items use is a shared model. The Looks view of MuEditor shows the
      shared model and lists its items.
-   - **4d2 Model slots in one place:** every conversion between an item
+   - **4d2 Model slots in one place (done):** every conversion between an item
      type and its model slot goes through `Data::Items::ToModelSlot`,
      `ToItemType` and `IsItemModelSlot` (`ItemModelSlots.h`) instead of
      `+ MODEL_ITEM` / `- MODEL_ITEM` in about 120 lines. They return what
@@ -890,7 +902,7 @@ server with original clients (after phases 6 and B).
      - No test covers the texture references a sharing slot gives back
        when it lets go last (it needs loaded textures).
 
-   **4e Clear model loading errors:** a missing model file or texture of an
+   **4e Clear model loading errors (done):** a missing model file or texture of an
    item model shows one message after loading instead of one popup per
    texture. Each line names the item (name, group, number), its entry in
    the model files, the `.bmd` file and mesh, the texture (with the
@@ -902,14 +914,114 @@ server with original clients (after phases 6 and B).
    the `.bmd` file instead of the path in the model. The error dialogs
    have a **Copy text** button and show the mouse cursor, which the
    loading screen hides.
-5. **Translation tooling**: a translations editor (items × languages, with
-   a filter for missing translations) and missing-translation warnings.
-   The names themselves are part of phase 2 (D17).
-6. **Editors**: the MuEditor tools from section 9, including add/remove,
-   on the rules of D26 (one selection, "used by", a warning with the list
-   of users before a shared definition changes, copies for variants). The
-   model tool builds on the read-only look view of 4c3 and picks the looks
-   of an item from lists; the looks themselves are edited from phase 13 on.
+5. **Translation tooling (done)**: the names themselves are part of phase 2
+   (D17); this phase added the tooling. It came before phase 6, which builds
+   on its item list:
+   - The **Item Translations** window of MuEditor: the item names as a grid of
+     items and the UI languages (English first), edited in place for any
+     language and stored whole (also beyond the 49 characters the game
+     shows). Each language's header counts the items without a name of
+     their own in it, also languages without any item names yet; **Missing
+     in** lists them, and a filled name keeps its row until refreshed.
+     "Same as English" and "Remove translation" in the cell menu; clicking
+     an item number shows it in the item table (the item browser since
+     phase 6).
+   - A name that is the same in a language is written like the English one
+     (`"de": "Kris"`), so it is not counted as missing; the bmd import keeps
+     such a name where the item has a name in that language, and leaves a
+     missing one (which a bmd file has as the English name) missing.
+   - Missing names are counted in the editor and listed per language on
+     Save Items, not logged at load. Loading warns about a name in a
+     language the game has no UI texts for (it is never shown).
+   - The shipped data: the names that are the same in a language are
+     written explicitly, seven missing Portuguese and Spanish names come
+     from the original client's `ItemTooltip_<lang>.bmd`, and the Spanish
+     names of the Capes of Fighter and Overrule (Korean read as Latin-1)
+     became *Capa del Guerrero* and *Capa Reinante*.
+   - For phase 6: the item list (`CItemListModel`: search over all names,
+     `group,number` and the item type, the missing-name filter) is kept
+     apart from ImGui, so the item browser builds on it, and
+     `CItemDataHandler::SetItemName` edits a name in the item database for
+     any language. Importing names from OpenMU belongs to phase 7.
+6. **Editors (done)**: the MuEditor tools from section 9, including
+   add/remove, on the rules of D26 (one selection, "used by", a warning with
+   the list of users before a shared definition changes, copies for
+   variants). The model tool builds on the read-only look view of 4c3 and
+   picks the looks of an item from lists; the looks themselves are edited
+   from phase 13 on. As built (docs/item-data.md, "Editing items"):
+   - **Item Browser**, **Item Basics**, **Item Requirements**, **Item
+     Rules**, **Item Categories**, **Item Model** and **Item Checks** share
+     one selected item; Item Translations (phase 5) joins them. The item
+     table is gone (D5, D19): the browser took its window and its Save,
+     Import and Export buttons, and every column has a tool. The item tools
+     change the database through the handler (`SetItem`, `AddItem`,
+     `RemoveItem`, `MoveItem`, `SetItemModel`, `SetSharedModel`), which
+     keeps `ItemAttribute` and the model data in step.
+   - Add (a free number has neither an item nor a model entry; the selected
+     item or a size and slot as the start), duplicate (a model file of its
+     own becomes a shared model of both), move (to a free number, with the
+     model data and the opened model) and remove (with its model entry).
+     Moving and removing list first what goes with the item (tags, model
+     entry, shared model) and what stays at its number: the source lines
+     naming it (from the sources the editor was built from) and the sets,
+     add options, buffs and pets of the game data.
+   - Undo and redo for the session (256 steps, across saves, cleared by the
+     bmd import); a step whose item changed in a way the history did not
+     record is refused. Fields are edited on a copy and stored when left.
+   - Save Items runs the checks first (also shown in Item Checks, each
+     leading to its item and field), then writes the item files, the model
+     files of the changed groups, `SharedModels.json` and
+     `Data/Effects/GlowColors.json` when they changed. A
+     missing model file, a `.bmd` several items name directly and an unknown
+     render style or item effect are warnings, so data that loads stays
+     saveable.
+   - The model tool: a preview from the effect preview, a file picker over
+     `Data/Item` and `Data/Player`, shared models edited with the D26
+     warning and "Make a copy for this item", a shared model that is used
+     cannot be removed, glow colours, render styles and item effects picked
+     from lists with their users. A changed file, texture folder, mesh list
+     or material is opened again between frames.
+   - The glow colour tool (D26 for the colours): new colours (also from a
+     colour field of the model tool, which then picks it), a changed value
+     listing the items it reaches first, and the colours no item uses
+     removed; the three defaults stay. Renaming a colour is left out.
+   - Size and slot are refused while the hero wears the item or a window
+     shows it (an item grid frees its cells by the size an item has when it
+     is taken out); such an item is not moved or removed, an undo step that
+     would change it is refused, and the bmd import keeps its size and
+     slot.
+   - **Item Formulas** edits the item stat file: the drop level bonus, the
+     default, the profiles (each term inherited or written), the level bonus
+     tables and the profile rules, with the D26 list of the items a change
+     reaches, as one undo step; Save Items writes `Stats/ItemStats.json`.
+     New, copied, renamed (taking the rules and the items that name a
+     profile along) and removed (only unused) profiles and tables; no
+     profile name is fixed by code, only `default` as the base layer.
+   - Item Basics and Item Requirements show where an item's profile comes
+     from (its rule, or a pick) and the formula of each value with the
+     item's numbers and the source of each part. A stat requirement shows
+     its +0 value and its weight (the stored base value) with the weights
+     that give the same +0 value; a typed +0 value takes the weight that
+     gives it, or lists the candidates with their +15 and excellent values
+     (the formula rounds down, so low drop levels have several).
+   - Left out: the custom marker of section 7 (nothing reads it yet; phase
+     7 and Q1), mixes and quests in "used by" (their loaded data has no way
+     to walk it), the last OpenMU import in the remove warning (phase 7),
+     the looks themselves (phase 13), and whether an item can be excellent,
+     ancient or how high its + level goes (OpenMU has `PossibleItemOptions`,
+     item sets and `MaximumItemLevel`; maybe a phase after 12, once level
+     variants are items of their own).
+   - Formula sync with OpenMU comes later: only the level bonus tables have
+     data there today (`ItemLevelBonusTable`); the requirement formula, the
+     excellent and ancient bonuses and the drop level bonus are C# code
+     (`ItemExtensions.GetRequirement`, `ItemPowerUpFactory`). A formula
+     exchange file of its own, close to `ItemStats.json` and keyed by stable
+     names, and an OpenMU change that makes the requirement formula data
+     (defaults equal to today's code) would let both sides share them. The
+     client's profile rules stay client-side; the exchange expands profiles
+     per item. Found while checking: 70 items have other drop levels in the
+     client than in OpenMU (e.g. the Lilium armour, 131 against 113), so
+     their requirements already differ between the two.
 7. **Item sync, client side**: MuEditor import/export of the item exchange
    file and diff.
 
@@ -1044,7 +1156,59 @@ server with original clients (after phases 6 and B).
     like phase 4c: every look draws and spawns the same things with the same
     values as its code did, per item and level. The look editor of section 9
     comes with it.
-14. **Cleanup**, once the work has landed:
+14. **UI text translations**: the UI texts are not item data, but they
+    are translated the same way and the tool builds on phase 5's Item
+    Translations window, so it comes before the cleanup. Today they are
+    edited by hand in `src/Localization/<Group>.<locale>.resx` (Game,
+    Dialog, Editor, Metadata), and `tools/ResxGen` compiles them into the
+    game (`docs/translation-system.md`). Measured on 2026-10-20 against
+    English, by key: Game misses 92 German texts, 116 Polish, 123 in each
+    of es, id, pt, ru, tl, uk and zh-TW, and 606 Japanese; Dialog has no
+    file for id, ja, ru, tl, uk and zh-TW (233 texts each) and misses one
+    Spanish and one Portuguese text; Editor misses 7 German texts and 170
+    in each other language, and has no Japanese file (313 texts); Metadata
+    is complete but has no Japanese file (59 texts). `Game.en.resx` has the
+    key `Connecting to the server` twice.
+    - A MuEditor window (editor builds) with the texts as a grid of keys and
+      languages, English first, grouped by file: the missing texts counted
+      per language and file, a filter for them and a search over keys and
+      texts, like the Item Translations window.
+    - Edits are written to the `.resx` files of the source tree, not to the
+      game folder, so the editor has to find `src/Localization`. The game
+      reads the texts compiled in, so an edit shows after the next build,
+      unless the window also changes the loaded texts for a preview (to
+      decide).
+    - Checks: a translation keeps the placeholders of the English text
+      (`{0}`, `%s`, `%ls`, `%%`), and a file has each key once; the German
+      terms of `translation-system.md` can be shown as hints.
+    - Planned like phase 5: an inventory of the files and the generator,
+      then the decisions (preview, which files, adding a missing file such
+      as Dialog for a language), then the window.
+15. **Adding a language**: today a language is added by hand
+    (`docs/translation-system.md`, "Adding a new locale"): its
+    `<Group>.<locale>.resx` files, its name in `KnownLanguageDisplayNames`
+    of `tools/ResxGen`, and an entry in the game's language list
+    (`s_Languages` in `src/source/UI/Options/OptionWindow.cpp`), then a
+    build. Item names in it can then be filled in the Item Translations
+    window; until it has texts, the item data warns about names in it.
+    - An **Add language** action in the translation windows (phase 14 and
+      Item Translations): the code (checked like the item data's language
+      codes, and not one there already) and the language's name in its own
+      language. It creates the language's `.resx` files in
+      `src/Localization` for every group.
+    - One place for the language list and the names: the game's language
+      list shows `GetAvailableLocales` instead of a list of its own, and
+      the name comes from the language's texts (for example a key of the
+      Metadata group, which Japanese has no file for yet) instead of
+      `ResxGen`'s code. To decide in the phase.
+    - The game reads the texts compiled in, so the new language shows in
+      the game and as a column of the windows after the next build, like
+      the text edits of phase 14.
+    - A language whose letters the fonts lack (the editor loads Latin,
+      Cyrillic, Greek and the CJK ranges; the game's font row) is pointed
+      out when it is added.
+    - Removing a language stays by hand.
+16. **Cleanup**, once the work has landed:
     - The glow of the inventory model of the Phoenix Soul Armor
       (`MODEL_ARMORINVEN_74`) moves into data. It is the only model drawn
       for an item that glows differently from its item: only on its first

@@ -14,7 +14,8 @@ namespace
 {
 constexpr const char* Source = "ItemStats.json";
 
-// A small file in the written format: two tables, the default and two profiles.
+// A small file in the written format: two tables, the default, two profiles and
+// two profile rules.
 constexpr const char* SmallFile = R"({
   "formatVersion": 1,
   "dropLevelBonus": {"excellent": 25, "ancient": 30},
@@ -61,6 +62,10 @@ constexpr const char* SmallFile = R"({
         "strengthPerOptionLevel": 5
       }
     }
+  ],
+  "profileRules": [
+    {"profile": "sceptre", "tags": ["sceptre"]},
+    {"profile": "shield", "group": [6], "weaponKind": ["shield"]}
   ]
 }
 )";
@@ -117,6 +122,52 @@ TEST_CASE("The item stat file reads and writes back the same [data][items]")
     REQUIRE(result.file.profiles.size() == 2);
     CHECK(result.file.profiles[1].stats[static_cast<size_t>(ItemStat::Defense)].excellent.state ==
           WrittenStatTerm::State::None);
+    REQUIRE(result.file.profileRules.size() == 2);
+    CHECK(result.file.profileRules[0].profile == "sceptre");
+    CHECK(result.file.profileRules[0].tags == ItemTagSet{ItemTag::Sceptre});
+    CHECK(result.file.profileRules[1].groups.test(6));
+    CHECK(result.file.profileRules[1].groups.count() == 1);
+    CHECK(result.file.profileRules[1].weaponKinds.test(static_cast<size_t>(WeaponKind::Shield)));
+}
+
+TEST_CASE("The item stat writer keeps the order of the profile rules, one rule per line [data][items]")
+{
+    ItemStatFile file = Read(SmallFile).file;
+    std::swap(file.profileRules[0], file.profileRules[1]);
+    // Values are written in the order of their names, groups from the lowest.
+    StatProfileRule armor{.profile = "default"};
+    armor.slots.set(static_cast<size_t>(ItemSlot::Boots));
+    armor.slots.set(static_cast<size_t>(ItemSlot::Helm));
+    armor.groups.set(11);
+    armor.groups.set(7);
+    armor.requirements.set(static_cast<size_t>(ItemRequirement::Energy));
+    armor.requirements.set(static_cast<size_t>(ItemRequirement::Level));
+    file.profileRules.push_back(armor);
+
+    const std::string text = WriteItemStatsJson(file);
+    CHECK(text.find(R"({"profile": "shield", "group": [6], "weaponKind": ["shield"]},)") <
+          text.find(R"({"profile": "sceptre", "tags": ["sceptre"]},)"));
+    CHECK(
+        text.find(
+            R"({"profile": "default", "group": [7, 11], "slot": ["helm", "boots"], "requirements": ["level", "energy"]})") !=
+        std::string::npos);
+
+    const ReadResult reread = Read(text);
+    CHECK(reread.issues.empty());
+    CHECK(reread.file.profileRules == file.profileRules);
+}
+
+TEST_CASE("An item stat file without profile rules has none [data][items]")
+{
+    const ReadResult result = Read(Changed(R"(,
+  "profileRules": [
+    {"profile": "sceptre", "tags": ["sceptre"]},
+    {"profile": "shield", "group": [6], "weaponKind": ["shield"]}
+  ])",
+                                           ""));
+    CHECK(result.issues.empty());
+    CHECK(result.file.profileRules.empty());
+    CHECK(WriteItemStatsJson(result.file).find(R"("profileRules": [])") != std::string::npos);
 }
 
 TEST_CASE("The item stat writer sorts by name and keeps one value for every level as one number [data][items]")
@@ -195,6 +246,30 @@ TEST_CASE("Item stat profiles lay their terms over the default [data][items]")
     CHECK(profiles.Get(99).Get(ItemStat::MagicPower).perLevelAfterHalving == 2);
 }
 
+TEST_CASE("Item stat profiles keep the profile rules [data][items]")
+{
+    ItemStatFile file = Read(SmallFile).file;
+    StatProfileRule wings{.profile = "default"};
+    wings.slots.set(static_cast<size_t>(ItemSlot::Wings));
+    file.profileRules.push_back(wings);
+    // The constructor does not validate: an unknown profile gives the default.
+    file.profileRules.push_back(StatProfileRule{.profile = "staff"});
+    const ItemStatProfiles profiles(file);
+    REQUIRE(profiles.GetRules().size() == 4);
+    CHECK(profiles.GetRuleProfile(0) == "sceptre");
+    CHECK(profiles.GetRuleProfile(1) == "shield");
+    CHECK(profiles.GetRuleProfile(2).empty());
+    CHECK(profiles.GetRuleProfile(3).empty());
+    CHECK(profiles.GetRuleProfile(NoStatProfileRule).empty());
+
+    ItemDefinition shield;
+    shield.group = 6;
+    shield.weaponKind = WeaponKind::Shield;
+    CHECK(profiles.FindRule(shield) == 1);
+    shield.tags.Set(ItemTag::Sceptre);
+    CHECK(profiles.FindRule(shield) == 0);
+}
+
 TEST_CASE("Item stat profiles without a file keep every stat at its base [data][items]")
 {
     const ItemStatProfiles profiles;
@@ -260,6 +335,30 @@ TEST_CASE("Item stat file errors [data][items]")
     CHECK(HasIssue(Read(Changed(R"("afterLevelBonus": true)", R"("afterLevelBonus": 1)")).issues, Severity::Error,
                    "profiles.shield.defense.ancient.afterLevelBonus"));
     CHECK(HasIssue(Read(R"({"formatVersion": 2})").issues, Severity::Error, "formatVersion"));
+
+    // Profile rules
+    const std::string sceptreRule = R"({"profile": "sceptre", "tags": ["sceptre"]})";
+    const std::string shieldRule = R"({"profile": "shield", "group": [6], "weaponKind": ["shield"]})";
+    CHECK(HasIssue(Read(Changed(R"("profileRules": [)", R"("profileRules": 5, "unused": [)")).issues, Severity::Error,
+                   "profileRules"));
+    CHECK(HasIssue(Read(Changed(sceptreRule, "7")).issues, Severity::Error, "profileRules[0]"));
+    CHECK(HasIssue(Read(Changed(sceptreRule, R"({"tags": ["sceptre"]})")).issues, Severity::Error,
+                   "profileRules[0].profile"));
+    CHECK(HasIssue(Read(Changed(sceptreRule, R"({"profile": "staff", "tags": ["sceptre"]})")).issues, Severity::Error,
+                   "profileRules[0].profile"));
+    CHECK(HasIssue(Read(Changed(sceptreRule, R"({"profile": "sceptre", "colour": ["red"]})")).issues, Severity::Error,
+                   "profileRules[0].colour"));
+    CHECK(HasIssue(Read(Changed(shieldRule, R"({"profile": "shield", "weaponKind": []})")).issues, Severity::Error,
+                   "profileRules[1].weaponKind"));
+    CHECK(HasIssue(Read(Changed(shieldRule, R"({"profile": "shield", "weaponKind": ["shields"]})")).issues,
+                   Severity::Error, "profileRules[1].weaponKind[0]"));
+    CHECK(HasIssue(Read(Changed(shieldRule, R"({"profile": "shield", "group": [6, 16]})")).issues, Severity::Error,
+                   "profileRules[1].group[1]"));
+    CHECK(HasIssue(Read(Changed(shieldRule, R"({"profile": "shield", "requirements": ["luck"]})")).issues,
+                   Severity::Error, "profileRules[1].requirements[0]"));
+    // "default" names the default; a rule for it needs no profile.
+    const ReadResult defaultRule = Read(Changed(sceptreRule, R"({"profile": "default", "slot": ["wings"]})"));
+    CHECK(defaultRule.issues.empty());
 }
 
 TEST_CASE("Item stat file warnings [data][items]")

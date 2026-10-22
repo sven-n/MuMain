@@ -90,6 +90,9 @@ All under `src/MuEditor/UI/MapEditor/`:
 - **Select & edit:** left-click ray-picks a visible object (`CollisionDetectObjects`);
   drag to move (grab-offset so a click doesn't jump it); Pos/Angle/Scale fields;
   **Delete**. Moving re-blocks the object if it crosses a 16×16 grid cell.
+- Delete and Ctrl+Z (undo, also of a height stroke) work while the Map Editor
+  has the focus and after a click into the world, not while another editor
+  window or the game's chat has the keyboard.
 - The selected object is outlined in the 3D view (reuses the engine's debug
   bounding-box wireframe) so it's easy to tell which object the panel is editing,
   and the outline follows you to other tabs until the selection changes.

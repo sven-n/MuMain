@@ -98,7 +98,10 @@
     {
       "number": 3,
       "name": {
-        "en": "Tomahawk"
+        "en": "Tomahawk",
+        "de": "Tomahawk",
+        "es": "Tomahawk",
+        "pt": "Machadinha"
       },
       "width": 1,
       "height": 3,

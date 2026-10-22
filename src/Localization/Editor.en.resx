@@ -740,7 +740,7 @@
     <value>Ancient</value>
   </data>
   <data name="Preview controls" xml:space="preserve">
-    <value>Drag to turn, use the wheel to zoom, double-click to reset the view.</value>
+    <value>Drag to turn, drag with the middle mouse button to move, use the wheel to zoom, double-click to reset the view.</value>
   </data>
   <data name="Preview not drawn by game" xml:space="preserve">
     <value>The game does not draw this model itself: it has no drawing code.</value>
@@ -924,5 +924,953 @@
   </data>
   <data name="Preview not its model" xml:space="preserve">
     <value>This map's slot holds another object, not this effect's model (see Asset).</value>
+  </data>
+  <data name="Item Translations" xml:space="preserve">
+    <value>Item Translations</value>
+  </data>
+  <data name="Missing in" xml:space="preserve">
+    <value>Missing in:</value>
+  </data>
+  <data name="All items" xml:space="preserve">
+    <value>All items</value>
+  </data>
+  <data name="Count missing" xml:space="preserve">
+    <value>{0} missing</value>
+  </data>
+  <data name="Same as English" xml:space="preserve">
+    <value>Same as English</value>
+  </data>
+  <data name="Remove translation" xml:space="preserve">
+    <value>Remove translation</value>
+  </data>
+  <data name="The English name cannot be empty" xml:space="preserve">
+    <value>The English name cannot be empty.</value>
+  </data>
+  <data name="Item names cannot contain the separator" xml:space="preserve">
+    <value>An item name cannot contain "||".</value>
+  </data>
+  <data name="Name or number" xml:space="preserve">
+    <value>Name or number</value>
+  </data>
+  <data name="Items" xml:space="preserve">
+    <value>Items</value>
+  </data>
+  <data name="Item names missing" xml:space="preserve">
+    <value>Item names in {0}: {1} of {2} missing</value>
+  </data>
+  <data name="A buff" xml:space="preserve">
+    <value>A buff</value>
+  </data>
+  <data name="A pet" xml:space="preserve">
+    <value>A pet</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="Add item" xml:space="preserve">
+    <value>Add item</value>
+  </data>
+  <data name="All groups" xml:space="preserve">
+    <value>All groups</value>
+  </data>
+  <data name="All rules" xml:space="preserve">
+    <value>All rules</value>
+  </data>
+  <data name="All tags" xml:space="preserve">
+    <value>All tags</value>
+  </data>
+  <data name="An add option" xml:space="preserve">
+    <value>An add option</value>
+  </data>
+  <data name="An ancient set" xml:space="preserve">
+    <value>An ancient set</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Clear filters" xml:space="preserve">
+    <value>Clear filters</value>
+  </data>
+  <data name="Copy the selected item" xml:space="preserve">
+    <value>Copy the selected item</value>
+  </data>
+  <data name="Droppable" xml:space="preserve">
+    <value>Droppable</value>
+  </data>
+  <data name="Droppable while rented" xml:space="preserve">
+    <value>Droppable while rented</value>
+  </data>
+  <data name="Duplicate" xml:space="preserve">
+    <value>Duplicate</value>
+  </data>
+  <data name="Duplicate item" xml:space="preserve">
+    <value>Duplicate item</value>
+  </data>
+  <data name="English name" xml:space="preserve">
+    <value>English name</value>
+  </data>
+  <data name="Group" xml:space="preserve">
+    <value>Group</value>
+  </data>
+  <data name="Item Browser" xml:space="preserve">
+    <value>Item Browser</value>
+  </data>
+  <data name="Its model entry" xml:space="preserve">
+    <value>Its model entry</value>
+  </data>
+  <data name="Its model file becomes a shared model that both items use" xml:space="preserve">
+    <value>Its model file becomes a shared model that both items use</value>
+  </data>
+  <data name="Missing a name in {0}" xml:space="preserve">
+    <value>Missing a name in {0}</value>
+  </data>
+  <data name="Models without an item" xml:space="preserve">
+    <value>Models without an item</value>
+  </data>
+  <data name="Move item" xml:space="preserve">
+    <value>Move item</value>
+  </data>
+  <data name="Named in code ({0} lines)" xml:space="preserve">
+    <value>Named in code ({0} lines)</value>
+  </data>
+  <data name="Next free" xml:space="preserve">
+    <value>Next free</value>
+  </data>
+  <data name="No item at this number" xml:space="preserve">
+    <value>No item at this number</value>
+  </data>
+  <data name="Not: {0}" xml:space="preserve">
+    <value>Not: {0}</value>
+  </data>
+  <data name="Nothing uses the item" xml:space="preserve">
+    <value>Nothing uses the item</value>
+  </data>
+  <data name="Redo" xml:space="preserve">
+    <value>Redo</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Remove item" xml:space="preserve">
+    <value>Remove item</value>
+  </data>
+  <data name="Repairable" xml:space="preserve">
+    <value>Repairable</value>
+  </data>
+  <data name="Sellable" xml:space="preserve">
+    <value>Sellable</value>
+  </data>
+  <data name="Sellable in a personal shop" xml:space="preserve">
+    <value>Sellable in a personal shop</value>
+  </data>
+  <data name="Sellable in a personal shop while rented" xml:space="preserve">
+    <value>Sellable in a personal shop while rented</value>
+  </data>
+  <data name="Sellable when the rental expired" xml:space="preserve">
+    <value>Sellable when the rental expired</value>
+  </data>
+  <data name="Share the model" xml:space="preserve">
+    <value>Share the model</value>
+  </data>
+  <data name="Shared model {0} (also used by {1} items)" xml:space="preserve">
+    <value>Shared model {0} (also used by {1} items)</value>
+  </data>
+  <data name="Storable" xml:space="preserve">
+    <value>Storable</value>
+  </data>
+  <data name="Tags" xml:space="preserve">
+    <value>Tags</value>
+  </data>
+  <data name="The item and its model entry are removed." xml:space="preserve">
+    <value>The item and its model entry are removed.</value>
+  </data>
+  <data name="The items changed since this step; it is not undone." xml:space="preserve">
+    <value>The items changed since this step; it is not undone.</value>
+  </data>
+  <data name="The new item has no model yet." xml:space="preserve">
+    <value>The new item has no model yet.</value>
+  </data>
+  <data name="The sources were not found: code that names the item is not known." xml:space="preserve">
+    <value>The sources were not found: code that names the item is not known.</value>
+  </data>
+  <data name="This number is not free" xml:space="preserve">
+    <value>This number is not free</value>
+  </data>
+  <data name="Tradable" xml:space="preserve">
+    <value>Tradable</value>
+  </data>
+  <data name="Undo" xml:space="preserve">
+    <value>Undo</value>
+  </data>
+  <data name="Uses the shared model {0} too" xml:space="preserve">
+    <value>Uses the shared model {0} too</value>
+  </data>
+  <data name="What uses it stays at its number:" xml:space="preserve">
+    <value>What uses it stays at its number:</value>
+  </data>
+  <data name="What uses it stays at its old number:" xml:space="preserve">
+    <value>What uses it stays at its old number:</value>
+  </data>
+  <data name="Without a model" xml:space="preserve">
+    <value>Without a model</value>
+  </data>
+  <data name="Item Basics" xml:space="preserve">
+    <value>Item Basics</value>
+  </data>
+  <data name="Item Requirements" xml:space="preserve">
+    <value>Item Requirements</value>
+  </data>
+  <data name="Size and kind" xml:space="preserve">
+    <value>Size and kind</value>
+  </data>
+  <data name="Wing tier" xml:space="preserve">
+    <value>Wing tier</value>
+  </data>
+  <data name="Weapon kind" xml:space="preserve">
+    <value>Weapon kind</value>
+  </data>
+  <data name="Potion priority" xml:space="preserve">
+    <value>Potion priority</value>
+  </data>
+  <data name="Stats" xml:space="preserve">
+    <value>Stats</value>
+  </data>
+  <data name="Excellent bonus" xml:space="preserve">
+    <value>Excellent bonus</value>
+  </data>
+  <data name="Prices and profile" xml:space="preserve">
+    <value>Prices and profile</value>
+  </data>
+  <data name="Stat profile" xml:space="preserve">
+    <value>Stat profile</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="The profiles are in the item stat file; the number is how many items use one." xml:space="preserve">
+    <value>The profiles are in the item stat file; the number is how many items use one.</value>
+  </data>
+  <data name="Resistances" xml:space="preserve">
+    <value>Resistances</value>
+  </data>
+  <data name="Requirements" xml:space="preserve">
+    <value>Requirements</value>
+  </data>
+  <data name="By item level" xml:space="preserve">
+    <value>By item level</value>
+  </data>
+  <data name="Classes" xml:space="preserve">
+    <value>Classes</value>
+  </data>
+  <data name="A class with 0 cannot use the item; otherwise it needs that class step." xml:space="preserve">
+    <value>A class with 0 cannot use the item; otherwise it needs that class step.</value>
+  </data>
+  <data name="Excellent options raise the level requirement" xml:space="preserve">
+    <value>Excellent options raise the level requirement</value>
+  </data>
+  <data name="Item Model" xml:space="preserve">
+    <value>Item Model</value>
+  </data>
+  <data name="Find a model file" xml:space="preserve">
+    <value>Find a model file</value>
+  </data>
+  <data name="The shared model {0} opens this file" xml:space="preserve">
+    <value>The shared model {0} opens this file</value>
+  </data>
+  <data name="Use it" xml:space="preserve">
+    <value>Use it</value>
+  </data>
+  <data name="Other items name this file too ({0}); a shared model would open it once." xml:space="preserve">
+    <value>Other items name this file too ({0}); a shared model would open it once.</value>
+  </data>
+  <data name="Use a shared model" xml:space="preserve">
+    <value>Use a shared model</value>
+  </data>
+  <data name="The shared model {0} does not exist" xml:space="preserve">
+    <value>The shared model {0} does not exist</value>
+  </data>
+  <data name="Apply to the shared model" xml:space="preserve">
+    <value>Apply to the shared model</value>
+  </data>
+  <data name="Revert" xml:space="preserve">
+    <value>Revert</value>
+  </data>
+  <data name="Make a copy for this item" xml:space="preserve">
+    <value>Make a copy for this item</value>
+  </data>
+  <data name="Shared model name" xml:space="preserve">
+    <value>Shared model name</value>
+  </data>
+  <data name="Texture folders" xml:space="preserve">
+    <value>Texture folders</value>
+  </data>
+  <data name="None-blend meshes" xml:space="preserve">
+    <value>None-blend meshes</value>
+  </data>
+  <data name="Change a shared model" xml:space="preserve">
+    <value>Change a shared model</value>
+  </data>
+  <data name="The change reaches these {0} items:" xml:space="preserve">
+    <value>The change reaches these {0} items:</value>
+  </data>
+  <data name="A name of letters and digits that no other shared model has" xml:space="preserve">
+    <value>A name of letters and digits that no other shared model has</value>
+  </data>
+  <data name="Add a folder" xml:space="preserve">
+    <value>Add a folder</value>
+  </data>
+  <data name="Glows like other levels" xml:space="preserve">
+    <value>Glows like other levels</value>
+  </data>
+  <data name="In the inventory" xml:space="preserve">
+    <value>In the inventory</value>
+  </data>
+  <data name="Anchor" xml:space="preserve">
+    <value>Anchor</value>
+  </data>
+  <data name="Offset" xml:space="preserve">
+    <value>Offset</value>
+  </data>
+  <data name="Rotation" xml:space="preserve">
+    <value>Rotation</value>
+  </data>
+  <data name="Scale" xml:space="preserve">
+    <value>Scale</value>
+  </data>
+  <data name="Body height" xml:space="preserve">
+    <value>Body height</value>
+  </data>
+  <data name="On the ground" xml:space="preserve">
+    <value>On the ground</value>
+  </data>
+  <data name="Own scale" xml:space="preserve">
+    <value>Own scale</value>
+  </data>
+  <data name="Worn as cloth" xml:space="preserve">
+    <value>Worn as cloth</value>
+  </data>
+  <data name="Specular" xml:space="preserve">
+    <value>Specular</value>
+  </data>
+  <data name="Glow color" xml:space="preserve">
+    <value>Glow color</value>
+  </data>
+  <data name="Glow meshes" xml:space="preserve">
+    <value>Glow meshes</value>
+  </data>
+  <data name="All meshes but this one" xml:space="preserve">
+    <value>All meshes but this one</value>
+  </data>
+  <data name="Shine color" xml:space="preserve">
+    <value>Shine color</value>
+  </data>
+  <data name="Shine white" xml:space="preserve">
+    <value>Shine white</value>
+  </data>
+  <data name="Shine meshes" xml:space="preserve">
+    <value>Shine meshes</value>
+  </data>
+  <data name="Ancient color" xml:space="preserve">
+    <value>Ancient color</value>
+  </data>
+  <data name="Excellent glow" xml:space="preserve">
+    <value>Excellent glow</value>
+  </data>
+  <data name="Excellent mesh" xml:space="preserve">
+    <value>Excellent mesh</value>
+  </data>
+  <data name="Excellent mesh without skin" xml:space="preserve">
+    <value>Excellent mesh without skin</value>
+  </data>
+  <data name="The looks are drawing code; this picks which one the item uses." xml:space="preserve">
+    <value>The looks are drawing code; this picks which one the item uses.</value>
+  </data>
+  <data name="Remove the model entry" xml:space="preserve">
+    <value>Remove the model entry</value>
+  </data>
+  <data name="Item Checks" xml:space="preserve">
+    <value>Item Checks</value>
+  </data>
+  <data name="Check" xml:space="preserve">
+    <value>Check</value>
+  </data>
+  <data name="Errors: {0}" xml:space="preserve">
+    <value>Errors: {0}</value>
+  </data>
+  <data name="Warnings: {0}" xml:space="preserve">
+    <value>Warnings: {0}</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="Item" xml:space="preserve">
+    <value>Item</value>
+  </data>
+  <data name="Message" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="No errors or warnings" xml:space="preserve">
+    <value>No errors or warnings</value>
+  </data>
+  <data name="The items changed since the last check; check again." xml:space="preserve">
+    <value>The items changed since the last check; check again.</value>
+  </data>
+  <data name="Save Items refuses data with errors and saves data with warnings." xml:space="preserve">
+    <value>Save Items refuses data with errors and saves data with warnings.</value>
+  </data>
+  <data name="Click a problem of an item to select the item and open the tool of its field." xml:space="preserve">
+    <value>Click a problem of an item to select the item and open the tool of its field.</value>
+  </data>
+  <data name="Item Rules" xml:space="preserve">
+    <value>Item Rules</value>
+  </data>
+  <data name="Selected items: {0}" xml:space="preserve">
+    <value>Selected items: {0}</value>
+  </data>
+  <data name="Select several rows with Ctrl+click or Shift+click." xml:space="preserve">
+    <value>Select several rows with Ctrl+click or Shift+click.</value>
+  </data>
+  <data name="Allow for the selected items" xml:space="preserve">
+    <value>Allow for the selected items</value>
+  </data>
+  <data name="Forbid for the selected items" xml:space="preserve">
+    <value>Forbid for the selected items</value>
+  </data>
+  <data name="Allow for {0} items: {1}" xml:space="preserve">
+    <value>Allow for {0} items: {1}</value>
+  </data>
+  <data name="Forbid for {0} items: {1}" xml:space="preserve">
+    <value>Forbid for {0} items: {1}</value>
+  </data>
+  <data name="Exceptions by item level, durability or GM status are in the code." xml:space="preserve">
+    <value>Exceptions by item level, durability or GM status are in the code.</value>
+  </data>
+  <data name="Item Categories" xml:space="preserve">
+    <value>Item Categories</value>
+  </data>
+  <data name="The selected item's tags:" xml:space="preserve">
+    <value>The selected item's tags:</value>
+  </data>
+  <data name="The selected item has no tags." xml:space="preserve">
+    <value>The selected item has no tags.</value>
+  </data>
+  <data name="Add the selected item" xml:space="preserve">
+    <value>Add the selected item</value>
+  </data>
+  <data name="The selected item already has this tag." xml:space="preserve">
+    <value>The selected item already has this tag.</value>
+  </data>
+  <data name="No item has this tag." xml:space="preserve">
+    <value>No item has this tag.</value>
+  </data>
+  <data name="Add the tag {0}" xml:space="preserve">
+    <value>Add the tag {0}</value>
+  </data>
+  <data name="Remove the tag {0}" xml:space="preserve">
+    <value>Remove the tag {0}</value>
+  </data>
+  <data name="New tags need code that uses them (ItemTag in ItemTagSet.h)." xml:space="preserve">
+    <value>New tags need code that uses them (ItemTag in ItemTagSet.h).</value>
+  </data>
+  <data name="The item is worn or in an item window: its size and slot stay as they are." xml:space="preserve">
+    <value>The item is worn or in an item window: its size and slot stay as they are.</value>
+  </data>
+  <data name="The item is worn or in an item window: it is not moved or removed." xml:space="preserve">
+    <value>The item is worn or in an item window: it is not moved or removed.</value>
+  </data>
+  <data name="kept its size and slot: it is worn or in an item window." xml:space="preserve">
+    <value>kept its size and slot: it is worn or in an item window.</value>
+  </data>
+  <data name="Not done: the step would change an item that is worn or in an item window." xml:space="preserve">
+    <value>Not done: the step would change an item that is worn or in an item window.</value>
+  </data>
+  <data name="No item uses these shared models: {0}" xml:space="preserve">
+    <value>No item uses these shared models: {0}</value>
+  </data>
+  <data name="Remove them" xml:space="preserve">
+    <value>Remove them</value>
+  </data>
+  <data name="Remove unused shared models" xml:space="preserve">
+    <value>Remove unused shared models</value>
+  </data>
+  <data name="Moves with it:" xml:space="preserve">
+    <value>Moves with it:</value>
+  </data>
+  <data name="Removed with it:" xml:space="preserve">
+    <value>Removed with it:</value>
+  </data>
+  <data name="Select the item and show the Item Browser" xml:space="preserve">
+    <value>Select the item and show the Item Browser</value>
+  </data>
+  <data name="Requirements by item level" xml:space="preserve">
+    <value>Requirements by item level</value>
+  </data>
+  <data name="Option level" xml:space="preserve">
+    <value>Option level</value>
+  </data>
+  <data name="Given by level" xml:space="preserve">
+    <value>Given by level</value>
+  </data>
+  <data name="The item has no requirements." xml:space="preserve">
+    <value>The item has no requirements.</value>
+  </data>
+  <data name="Starts at what a normal item needs at each level and replaces the formula." xml:space="preserve">
+    <value>Starts at what a normal item needs at each level and replaces the formula.</value>
+  </data>
+  <data name="Excellent and ancient items get no higher requirement from it." xml:space="preserve">
+    <value>Excellent and ancient items get no higher requirement from it.</value>
+  </data>
+  <data name="Drawn by code" xml:space="preserve">
+    <value>Drawn by code</value>
+  </data>
+  <data name="The game chooses these models by code; they are not edited here." xml:space="preserve">
+    <value>The game chooses these models by code; they are not edited here.</value>
+  </data>
+  <data name="Not drawn" xml:space="preserve">
+    <value>Not drawn</value>
+  </data>
+  <data name="The model of {0}" xml:space="preserve">
+    <value>The model of {0}</value>
+  </data>
+  <data name="drawn small" xml:space="preserve">
+    <value>drawn small</value>
+  </data>
+  <data name="Excellent options still raise it, if they raise the level requirement." xml:space="preserve">
+    <value>Excellent options still raise it, if they raise the level requirement.</value>
+  </data>
+  <data name="The option level still adds to it." xml:space="preserve">
+    <value>The option level still adds to it.</value>
+  </data>
+  <data name="New glow color" xml:space="preserve">
+    <value>New glow color</value>
+  </data>
+  <data name="A name of letters and digits that no other glow color has" xml:space="preserve">
+    <value>A name of letters and digits that no other glow color has</value>
+  </data>
+  <data name="Glow Colors" xml:space="preserve">
+    <value>Glow Colors</value>
+  </data>
+  <data name="The item models name these colors; the model tool picks an item's colors." xml:space="preserve">
+    <value>The item models name these colors; the model tool picks an item's colors.</value>
+  </data>
+  <data name="Pick a color in the list." xml:space="preserve">
+    <value>Pick a color in the list.</value>
+  </data>
+  <data name="Apply to the glow color" xml:space="preserve">
+    <value>Apply to the glow color</value>
+  </data>
+  <data name="Change a glow color" xml:space="preserve">
+    <value>Change a glow color</value>
+  </data>
+  <data name="Remove a glow color" xml:space="preserve">
+    <value>Remove a glow color</value>
+  </data>
+  <data name="A default color: items without colors of their own glow with it." xml:space="preserve">
+    <value>A default color: items without colors of their own glow with it.</value>
+  </data>
+  <data name="Used by {0} items:" xml:space="preserve">
+    <value>Used by {0} items:</value>
+  </data>
+  <data name="No item uses these glow colors: {0}" xml:space="preserve">
+    <value>No item uses these glow colors: {0}</value>
+  </data>
+  <data name="Remove unused glow colors" xml:space="preserve">
+    <value>Remove unused glow colors</value>
+  </data>
+  <data name="Stats by item level" xml:space="preserve">
+    <value>Stats by item level</value>
+  </data>
+  <data name="The item has no damage, magic power, defense or block rate." xml:space="preserve">
+    <value>The item has no damage, magic power, defense or block rate.</value>
+  </data>
+  <data name="By the rules: {0}" xml:space="preserve">
+    <value>By the rules: {0}</value>
+  </data>
+  <data name="Given by rule {0}" xml:space="preserve">
+    <value>Given by rule {0}</value>
+  </data>
+  <data name="No rule matches: the default" xml:space="preserve">
+    <value>No rule matches: the default</value>
+  </data>
+  <data name="Picked for the item; the rules give {0}" xml:space="preserve">
+    <value>Picked for the item; the rules give {0}</value>
+  </data>
+  <data name="Weight" xml:space="preserve">
+    <value>Weight</value>
+  </data>
+  <data name="Weights {0} to {1} give {2}" xml:space="preserve">
+    <value>Weights {0} to {1} give {2}</value>
+  </data>
+  <data name="Only weight {0} gives {1}" xml:space="preserve">
+    <value>Only weight {0} gives {1}</value>
+  </data>
+  <data name="No weight gives {0}" xml:space="preserve">
+    <value>No weight gives {0}</value>
+  </data>
+  <data name="Weight 0: the item has no such requirement" xml:space="preserve">
+    <value>Weight 0: the item has no such requirement</value>
+  </data>
+  <data name="Pick a weight" xml:space="preserve">
+    <value>Pick a weight</value>
+  </data>
+  <data name="The weights {0} to {1} all give {2} at +0." xml:space="preserve">
+    <value>The weights {0} to {1} all give {2} at +0.</value>
+  </data>
+  <data name="They differ at higher item levels and for excellent items." xml:space="preserve">
+    <value>They differ at higher item levels and for excellent items.</value>
+  </data>
+  <data name="Excellent +0" xml:space="preserve">
+    <value>Excellent +0</value>
+  </data>
+  <data name="Excellent +15" xml:space="preserve">
+    <value>Excellent +15</value>
+  </data>
+  <data name="{0} (current)" xml:space="preserve">
+    <value>{0} (current)</value>
+  </data>
+  <data name="Take this weight" xml:space="preserve">
+    <value>Take this weight</value>
+  </data>
+  <data name="No weight gives {0} at +0. The nearest values:" xml:space="preserve">
+    <value>No weight gives {0} at +0. The nearest values:</value>
+  </data>
+  <data name="{0} (weight {1})" xml:space="preserve">
+    <value>{0} (weight {1})</value>
+  </data>
+  <data name="{0} (weights {1} to {2})" xml:space="preserve">
+    <value>{0} (weights {1} to {2})</value>
+  </data>
+  <data name="What a normal item needs at +0" xml:space="preserve">
+    <value>What a normal item needs at +0 without an option level, as the game's /&lt;item name&gt; window shows it. A typed value sets the weight that gives it; when several do, you pick one.</value>
+  </data>
+  <data name="What the weight is" xml:space="preserve">
+    <value>The base value the item stat file's formula takes. The weights beside it give the same +0 value and differ at higher item levels and for excellent items.</value>
+  </data>
+  <data name="The weights that give this +0 value" xml:space="preserve">
+    <value>The weights that give this +0 value, with what each gives at +15 and for excellent items.</value>
+  </data>
+  <data name="Formula weighted requirement" xml:space="preserve">
+    <value>{0} + {1} × ({2} + {3} × item level) × {4} / 100</value>
+  </data>
+  <data name="Formula requirement from the level requirement" xml:space="preserve">
+    <value>{0} + {1} × {2} × {3} / 100 at every item level ({2}: the level requirement)</value>
+  </data>
+  <data name="Formula requirement from the level requirement by level" xml:space="preserve">
+    <value>{0} + {1} × level requirement × {2} / 100 (the level requirement given at each item level)</value>
+  </data>
+  <data name="Formula without a level requirement" xml:space="preserve">
+    <value>{0} (no level requirement: from the drop level)</value>
+  </data>
+  <data name="Formula kept as is" xml:space="preserve">
+    <value>{0}, kept as is</value>
+  </data>
+  <data name="Formula none" xml:space="preserve">
+    <value>none</value>
+  </data>
+  <data name="Formula none with weight 0" xml:space="preserve">
+    <value>none (weight 0); with a weight: {0}</value>
+  </data>
+  <data name="Formula weight" xml:space="preserve">
+    <value>weight</value>
+  </data>
+  <data name="Formula given by item level" xml:space="preserve">
+    <value>given by item level: {0}</value>
+  </data>
+  <data name="Formula value at item levels" xml:space="preserve">
+    <value>{0} (+{1} to +{2})</value>
+  </data>
+  <data name="Formula value at one item level" xml:space="preserve">
+    <value>{0} (+{1})</value>
+  </data>
+  <data name="Formula level growth" xml:space="preserve">
+    <value>{0} + {1} × item level</value>
+  </data>
+  <data name="Formula the same at every item level" xml:space="preserve">
+    <value>{0} at every item level</value>
+  </data>
+  <data name="Formula excellent plus" xml:space="preserve">
+    <value>excellent +{0}</value>
+  </data>
+  <data name="Formula excellent options do not raise it" xml:space="preserve">
+    <value>excellent options do not raise it</value>
+  </data>
+  <data name="Formula wing options do not raise it" xml:space="preserve">
+    <value>a wing's excellent options are wing options and do not raise it</value>
+  </data>
+  <data name="Formula per option level" xml:space="preserve">
+    <value>+ {0} × option level</value>
+  </data>
+  <data name="Formula no level bonus" xml:space="preserve">
+    <value>{0}, no level bonus</value>
+  </data>
+  <data name="Formula excellent part" xml:space="preserve">
+    <value>excellent +{0} ({1})</value>
+  </data>
+  <data name="Formula excellent part only when ancient" xml:space="preserve">
+    <value>excellent +{0} ({1}) only when ancient: a wing's excellent options are wing options</value>
+  </data>
+  <data name="Formula no excellent part" xml:space="preserve">
+    <value>no excellent part</value>
+  </data>
+  <data name="Formula no excellent part at drop level 0" xml:space="preserve">
+    <value>no excellent part (drop level 0)</value>
+  </data>
+  <data name="Formula ancient part" xml:space="preserve">
+    <value>ancient +{0} ({1})</value>
+  </data>
+  <data name="Formula ancient part with the level bonus" xml:space="preserve">
+    <value>ancient +({0})</value>
+  </data>
+  <data name="Formula no ancient part" xml:space="preserve">
+    <value>no ancient part</value>
+  </data>
+  <data name="Formula halved" xml:space="preserve">
+    <value>({0}) / 2 + {1} × item level</value>
+  </data>
+  <data name="Formula at most" xml:space="preserve">
+    <value>{0}, at most {1}</value>
+  </data>
+  <data name="Formula source item field" xml:space="preserve">
+    <value>item: {0}</value>
+  </data>
+  <data name="Formula drop level bonus" xml:space="preserve">
+    <value>Excellent items count {0} more drop levels, ancient items without excellent options {1} [dropLevelBonus].</value>
+  </data>
+  <data name="Item Formulas" xml:space="preserve">
+    <value>Item Formulas</value>
+  </data>
+  <data name="Damage" xml:space="preserve">
+    <value>Damage</value>
+  </data>
+  <data name="Profiles" xml:space="preserve">
+    <value>Profiles</value>
+  </data>
+  <data name="Tables" xml:space="preserve">
+    <value>Tables</value>
+  </data>
+  <data name="New stat profile" xml:space="preserve">
+    <value>New stat profile</value>
+  </data>
+  <data name="New level bonus table" xml:space="preserve">
+    <value>New level bonus table</value>
+  </data>
+  <data name="Copy a stat profile" xml:space="preserve">
+    <value>Copy a stat profile</value>
+  </data>
+  <data name="Rename a stat profile" xml:space="preserve">
+    <value>Rename a stat profile</value>
+  </data>
+  <data name="Remove a stat profile" xml:space="preserve">
+    <value>Remove a stat profile</value>
+  </data>
+  <data name="Copy a level bonus table" xml:space="preserve">
+    <value>Copy a level bonus table</value>
+  </data>
+  <data name="Rename a level bonus table" xml:space="preserve">
+    <value>Rename a level bonus table</value>
+  </data>
+  <data name="Remove a level bonus table" xml:space="preserve">
+    <value>Remove a level bonus table</value>
+  </data>
+  <data name="Remove unused stat profiles" xml:space="preserve">
+    <value>Remove unused stat profiles</value>
+  </data>
+  <data name="Remove unused level bonus tables" xml:space="preserve">
+    <value>Remove unused level bonus tables</value>
+  </data>
+  <data name="Drop level bonus ({0}, {1})" xml:space="preserve">
+    <value>Drop level bonus ({0}, {1})</value>
+  </data>
+  <data name="Drop level bonus" xml:space="preserve">
+    <value>Drop level bonus</value>
+  </data>
+  <data name="Default ({0})" xml:space="preserve">
+    <value>Default ({0})</value>
+  </data>
+  <data name="Used by {0} items and {1} rules" xml:space="preserve">
+    <value>Used by {0} items and {1} rules</value>
+  </data>
+  <data name="Named by {0} stats" xml:space="preserve">
+    <value>Named by {0} stats</value>
+  </data>
+  <data name="Pick an entry in the list." xml:space="preserve">
+    <value>Pick an entry in the list.</value>
+  </data>
+  <data name="Apply to the formulas" xml:space="preserve">
+    <value>Apply to the formulas</value>
+  </data>
+  <data name="Change the item formulas" xml:space="preserve">
+    <value>Change the item formulas</value>
+  </data>
+  <data name="Not applied" xml:space="preserve">
+    <value>Not applied</value>
+  </data>
+  <data name="No item or rule uses these profiles: {0}" xml:space="preserve">
+    <value>No item or rule uses these profiles: {0}</value>
+  </data>
+  <data name="No stat uses these tables: {0}" xml:space="preserve">
+    <value>No stat uses these tables: {0}</value>
+  </data>
+  <data name="Rename" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="Caption" xml:space="preserve">
+    <value>Caption</value>
+  </data>
+  <data name="Bonus at each item level" xml:space="preserve">
+    <value>Bonus at each item level</value>
+  </data>
+  <data name="Added per level" xml:space="preserve">
+    <value>Added per level</value>
+  </data>
+  <data name="Removed only while no item and no rule uses it." xml:space="preserve">
+    <value>Removed only while no item and no rule uses it.</value>
+  </data>
+  <data name="Removed only while no stat names it." xml:space="preserve">
+    <value>Removed only while no stat names it.</value>
+  </data>
+  <data name="Override" xml:space="preserve">
+    <value>Override</value>
+  </data>
+  <data name="Reset to default" xml:space="preserve">
+    <value>Reset to default</value>
+  </data>
+  <data name="Inherited: {0}" xml:space="preserve">
+    <value>Inherited: {0}</value>
+  </data>
+  <data name="Values" xml:space="preserve">
+    <value>Values</value>
+  </data>
+  <data name="Times" xml:space="preserve">
+    <value>Times</value>
+  </data>
+  <data name="Plus" xml:space="preserve">
+    <value>Plus</value>
+  </data>
+  <data name="Drop level divisor" xml:space="preserve">
+    <value>Drop level divisor</value>
+  </data>
+  <data name="After the level bonus" xml:space="preserve">
+    <value>After the level bonus</value>
+  </data>
+  <data name="Level bonus table" xml:space="preserve">
+    <value>Level bonus table</value>
+  </data>
+  <data name="Excellent part" xml:space="preserve">
+    <value>Excellent part</value>
+  </data>
+  <data name="Ancient part" xml:space="preserve">
+    <value>Ancient part</value>
+  </data>
+  <data name="Per level after halving" xml:space="preserve">
+    <value>Per level after halving</value>
+  </data>
+  <data name="Level requirement per item level" xml:space="preserve">
+    <value>Level requirement per item level</value>
+  </data>
+  <data name="Level added for excellent options" xml:space="preserve">
+    <value>Level added for excellent options</value>
+  </data>
+  <data name="Strength per option level" xml:space="preserve">
+    <value>Strength per option level</value>
+  </data>
+  <data name="Base value" xml:space="preserve">
+    <value>Base value</value>
+  </data>
+  <data name="Weight formula" xml:space="preserve">
+    <value>Weight formula</value>
+  </data>
+  <data name="From the level requirement" xml:space="preserve">
+    <value>From the level requirement</value>
+  </data>
+  <data name="Level weight" xml:space="preserve">
+    <value>Level weight</value>
+  </data>
+  <data name="Percent" xml:space="preserve">
+    <value>Percent</value>
+  </data>
+  <data name="Times {0}, plus {1}" xml:space="preserve">
+    <value>Times {0}, plus {1}</value>
+  </data>
+  <data name="Drop level divided by {0}" xml:space="preserve">
+    <value>Drop level divided by {0}</value>
+  </data>
+  <data name="Plus {0}, level weight {1}, percent {2}" xml:space="preserve">
+    <value>Plus {0}, level weight {1}, percent {2}</value>
+  </data>
+  <data name="The server keeps its own formulas" xml:space="preserve">
+    <value>The server (OpenMU) keeps its own formulas until they are synced: what it checks and computes can differ from what these give.</value>
+  </data>
+  <data name="Items keep their values until made again" xml:space="preserve">
+    <value>Items your character already has keep their values until they are made again (e.g. after logging in again).</value>
+  </data>
+  <data name="What the drop level bonus is" xml:space="preserve">
+    <value>Added to the drop level of items with excellent options for their requirements, and of ancient items for the ancient part of their stats and, without excellent options, for their requirements.</value>
+  </data>
+  <data name="The default writes every term" xml:space="preserve">
+    <value>The default writes every term; a profile starts from it and writes only what differs.</value>
+  </data>
+  <data name="A profile writes only what differs from the default" xml:space="preserve">
+    <value>A profile writes only what differs from the default: Override takes a term into the profile, Reset to default takes it out again.</value>
+  </data>
+  <data name="Added for every level, also above +15" xml:space="preserve">
+    <value>Added for every item level, also above +15, where the +15 value of the list stays.</value>
+  </data>
+  <data name="A free name of letters and digits" xml:space="preserve">
+    <value>A name of letters and digits that no other profile or table of its kind has (not "default").</value>
+  </data>
+  <data name="Profile rules" xml:space="preserve">
+    <value>Profile rules</value>
+  </data>
+  <data name="Profile rules ({0})" xml:space="preserve">
+    <value>Profile rules ({0})</value>
+  </data>
+  <data name="Conditions" xml:space="preserve">
+    <value>Conditions</value>
+  </data>
+  <data name="Every item" xml:space="preserve">
+    <value>Every item</value>
+  </data>
+  <data name="New rule" xml:space="preserve">
+    <value>New rule</value>
+  </data>
+  <data name="Move up" xml:space="preserve">
+    <value>Move up</value>
+  </data>
+  <data name="Move down" xml:space="preserve">
+    <value>Move down</value>
+  </data>
+  <data name="Remove the rule" xml:space="preserve">
+    <value>Remove the rule</value>
+  </data>
+  <data name="Rule {0}" xml:space="preserve">
+    <value>Rule {0}</value>
+  </data>
+  <data name="Base requirement above 0" xml:space="preserve">
+    <value>Base requirement above 0</value>
+  </data>
+  <data name="Matches {0} items" xml:space="preserve">
+    <value>Matches {0} items</value>
+  </data>
+  <data name="How the profile rules work" xml:space="preserve">
+    <value>The first rule whose conditions an item meets gives it its stat profile (an item meets a condition when it has one of its values); an item that meets none has the default. A profile picked for an item (Item Basics) stays. The marked rule is the selected item's.</value>
+  </data>
+  <data name="Formula level requirement or drop level" xml:space="preserve">
+    <value>{0}; where the level requirement is 0: {1}</value>
+  </data>
+  <data name="Formula excellent plus where it is above 0" xml:space="preserve">
+    <value>excellent +{0} where it is above 0</value>
+  </data>
+  <data name="By the group: {0}" xml:space="preserve">
+    <value>By the group: {0}</value>
+  </data>
+  <data name="Apply or revert the changes first." xml:space="preserve">
+    <value>Apply or revert the changes first.</value>
   </data>
 </root>

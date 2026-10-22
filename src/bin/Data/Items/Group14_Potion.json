@@ -227,7 +227,10 @@
     {
       "number": 15,
       "name": {
-        "en": "Zen"
+        "en": "Zen",
+        "de": "Zen",
+        "es": "Zen",
+        "pt": "Zen"
       },
       "width": 1,
       "height": 1,
@@ -300,7 +303,10 @@
     {
       "number": 21,
       "name": {
-        "en": "Rena"
+        "en": "Rena",
+        "de": "Rena",
+        "es": "Rena",
+        "pt": "Rena"
       },
       "width": 1,
       "height": 1,

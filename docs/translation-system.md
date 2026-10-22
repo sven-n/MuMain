@@ -312,7 +312,7 @@ names stay English; items that teach a skill name it after a colon
    `tools/ResxGen/CppEmitter.cs#KnownLanguageDisplayNames` so the language
    dropdown shows it in its own language (e.g. `["fr"] = "Français"`).
 3. Add it to the game's language dropdown: the `s_Languages` list in
-   `src/source/UI/NewUI/Options/NewUIOptionWindow.cpp`. The editor's language
+   `src/source/UI/Options/OptionWindow.cpp`. The editor's language
    menu lists every locale from `GetAvailableLocales` by itself.
 4. Build. `ResxGen` picks up the new locale automatically from the filename;
    `GetAvailableLocales` will include it next run.
@@ -345,8 +345,9 @@ Each item's `name` lists its names by language code:
 - **Add a translation:** add a line `"<code>": "<name>"`, e.g. `"pl": "Ostrze"`.
 - **Remove a translation:** delete its line; the game then shows the English
   name for that language.
-- `en` is required and must stay. A translation that is the same as the
-  English name is not needed.
+- `en` is required and must stay. A name that is the same in a language
+  (*Kris*, *Zen*) is written like the English one (`"de": "Kris"`), so it
+  is not counted as missing.
 - The order of the lines does not matter when editing by hand; the item
   editor's **Save Items** writes English first and the rest sorted by code.
 - Write the files as UTF-8. Accented and non-Latin letters can be typed as
@@ -361,23 +362,39 @@ committing).
 
 ### In the item editor
 
-Item names in the item editor are shown and edited in the current UI
-language:
+The **Item Translations** window (editor builds, **Windows → Items → Item
+Translations**) shows the item names as a grid: one row per item, one column per UI
+language, English first.
 
-1. Switch the language: in the game's options window, or in the editor's
-   language menu.
-2. Edit the name in the item table. The change is stored for that language
-   only; to change the English name, switch to English first.
-3. Clearing a translated name removes the translation; the English name is
-   shown again.
-4. **Save Items** writes the files.
+- Each language's column header says how many items have no name of their
+  own in it; **Missing in** lists only those items. A filled name keeps its
+  row until **Refresh** or another filter, so the list can be worked
+  through.
+- Edit a cell and leave it (click elsewhere, Tab or Enter) to store the
+  name. An empty cell shows the English name it falls back to, greyed.
+- Right-click a cell: **Same as English** writes the English name for a name
+  that is the same in that language; **Remove translation** removes it.
+- The search finds an item by any of its names (A to Z in either case), by
+  `group,number` or by its item type. Clicking the number selects the item
+  in the other item tools and shows the **Item Browser**. The item the
+  tools show is marked, and an item selected in another tool is scrolled
+  to (the search and filter are cleared when they hide it).
+- Columns can be hidden from the header's right-click menu. A name cannot
+  contain `||` (the item checks refuse it). The English name
+  cannot be emptied, and the names are stored whole, also when they are
+  longer than the 49 characters the game shows.
+- **Save Items** writes the files and lists each language that misses item
+  names, with how many.
+
+**Item Basics** edits the English name. Each name change is one step of
+the item tools' Undo and Redo.
 
 ### Translating items into a language the game already has
 
 The game's UI languages are `en`, `de`, `es`, `id`, `ja`, `pl`, `pt`, `ru`,
 `tl`, `uk` and `zh-TW`. Items currently have German (`de`), Portuguese (`pt`)
 and Spanish (`es`) names. To translate items into another of these languages,
-add names with that code (by hand or in the item editor); nothing else is
+add names with that code (by hand or in the Item Translations window); nothing else is
 needed. The names show as soon as a player picks that language.
 
 ### Adding a new language
@@ -388,8 +405,8 @@ language first:
 1. Add the UI language as described in [Adding a new locale](#adding-a-new-locale).
 2. Add item names with the same code.
 
-Item names for a code that is not a UI language load without errors, but
-are never shown. Import from bmd and Export as bmd only cover English,
+Item names for a code that is not a UI language are never shown; loading
+warns about them. Import from bmd and Export as bmd only cover English,
 Portuguese and Spanish (`Data/Local/Eng`, `Por`, `Spn`); names in other
 languages exist only in the JSON files.
 

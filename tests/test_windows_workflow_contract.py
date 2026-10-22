@@ -37,27 +37,6 @@ MINGW_TOOLCHAINS = (
     ROOT / "cmake/toolchains/mingw-w64-x86_64.cmake",
 )
 
-EXPECTED_SHADERS = {
-    "basic_colored.frag.dxil",
-    "basic_colored.frag.msl",
-    "basic_colored.frag.spv",
-    "basic_colored.vert.dxil",
-    "basic_colored.vert.msl",
-    "basic_colored.vert.spv",
-    "basic_textured.frag.dxil",
-    "basic_textured.frag.msl",
-    "basic_textured.frag.spv",
-    "basic_textured.vert.dxil",
-    "basic_textured.vert.msl",
-    "basic_textured.vert.spv",
-    "shadow_volume.vert.dxil",
-    "shadow_volume.vert.msl",
-    "shadow_volume.vert.spv",
-    "skinned_textured.vert.dxil",
-    "skinned_textured.vert.msl",
-    "skinned_textured.vert.spv",
-}
-
 EXPECTED_WINDOWS_OS_DLLS = {
     "advapi32.dll",
     "avrt.dll",
@@ -329,10 +308,16 @@ for required in (
 ):
     check(required in native_validation, f"Main Windows validation missing {required}")
 check("14C machine" not in native_validation, "Main Windows validation must not retain x86 logic")
-native_shaders = manifest(native_validation, "$expectedShaders")
+# The shader list lives only in cmake/ValidateShaderBlobs.cmake; a second
+# copy in the workflow fell behind when shaders were added.
+for required in (
+    '"-DMU_SHADER_BLOB_DIR=$shaderDirectory" -P cmake/ValidateShaderBlobs.cmake',
+    "Unexpected entries in the runtime shader directory",
+):
+    check(required in native_validation, f"Main Windows shader validation missing {required}")
 check(
-    len(native_shaders) == 18 and set(native_shaders) == EXPECTED_SHADERS,
-    "Main Windows shader manifest must equal the reviewed 18-file set",
+    "$expectedShaders" not in native_validation,
+    "Main Windows shader validation must take its list from cmake/ValidateShaderBlobs.cmake",
 )
 windows_os_dlls = manifest(native_validation, "$windowsOsDlls")
 check(

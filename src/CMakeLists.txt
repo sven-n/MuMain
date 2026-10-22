@@ -700,9 +700,10 @@ target_compile_definitions(MuClient PUBLIC
   $<$<BOOL:${ENABLE_CONTROL_SOCKET}>:MU_ENABLE_CONTROL_SOCKET>  # Developer control socket
 )
 
-# The effect browser lists the game's create calls of a type, read from the
-# sources the editor was built from. Only its view reads the folder, from a
-# generated header, so the flags of the other files do not hold the path.
+# The effect browser lists the game's create calls of a type, and the item
+# tools the lines that name an item, read from the sources the editor was built
+# from. Only the files that load them read the folder, from a generated header,
+# so the flags of the other files do not hold the path.
 if(ENABLE_EDITOR)
   set(MU_EDITOR_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/source")
   file(CONFIGURE OUTPUT "${CMAKE_BINARY_DIR}/Generated/MuEditorSourceDir.h"
