@@ -1719,7 +1719,16 @@ static void WriteItemTooltipLayoutLines(const ITEM& item, int level, const ItemT
                     return value;
                 return Data::Items::GetPlaceholderValue(name, level, g_ItemDatabase.GetStatProfiles());
             });
-        mu_swprintf(TextList[TextNum], L"%.99ls", Core::Text::FromUtf8(filled).c_str());
+        if (filled.empty())
+        {
+            // No text in the UI's language: a row left empty would end the tooltip there.
+            mu_swprintf(TextList[TextNum], L"\n");
+            TextNum++;
+            SkipNum++;
+            continue;
+        }
+        mu_swprintf(TextList[TextNum], L"%.*ls", static_cast<int>(std::size(TextList[0]) - 1),
+                    Core::Text::FromUtf8(filled).c_str());
         TextListColor[TextNum] = static_cast<int>(GetTooltipLineColor(*line, item.Type, level, values));
         TextBold[TextNum] = line->bold;
         TextNum++;

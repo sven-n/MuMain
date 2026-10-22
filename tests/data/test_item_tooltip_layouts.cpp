@@ -229,3 +229,24 @@ TEST_CASE("Every tooltip state is one the game sets [data][items][tooltip]")
     }
     CHECK_FALSE(GetItemTooltipState(values, "unknownState"));
 }
+
+TEST_CASE("A tooltip file's texts are checked like item names [data][items][tooltip]")
+{
+    const ReadResult result = Read(
+        TooltipFile(R"("onlyGerman": {"de": "Nur Deutsch"}, "badCode": {"en": "A text", "d e": "Ein Text"},)"
+                    R"("unknown": {"en": "A text", "xx": "Ein Text"}, "blank": "")",
+                    R"({"text": "@onlyGerman"}, {"text": "@badCode"}, {"text": "@unknown"}, {"text": "@blank"},)"));
+
+    CHECK(result.Has(ItemDataIssueSeverity::Error, "texts.onlyGerman", "the English text is missing"));
+    CHECK(result.Has(ItemDataIssueSeverity::Error, "texts.badCode", "\"d e\" is not a language code"));
+    CHECK_FALSE(result.Has(ItemDataIssueSeverity::Error, "texts.blank", "English"));
+
+    const char* uiLocales[] = {"en", "de"};
+    std::vector<ItemDataIssue> issues;
+    ValidateTooltipTextLocales(result.file, uiLocales, "Tooltip.json", issues);
+    REQUIRE(issues.size() == 2);
+    CHECK(issues[0].field == "texts.badCode");
+    CHECK(issues[1].field == "texts.unknown");
+    CHECK(issues[1].severity == ItemDataIssueSeverity::Warning);
+    CHECK(issues[1].message == "the xx text is never shown: the game has no texts in that language");
+}
