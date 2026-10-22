@@ -314,10 +314,14 @@ bool CMuServerListUI::RenderGroupList()
         ImGui::PushID(index);
         const std::string label = (group.name.empty() ? std::string("?") : group.name) + " (" +
                                   std::to_string(group.id) + ")" + (group.testServer ? " *" : "");
-        if (ImGui::Selectable(label.c_str(), index == m_selected, MuEditor::KeyboardSelection::RowFlags))
+        // The name is drawn as plain text: as the row's label, a "##" in it
+        // would start the ImGui ID and hide the rest.
+        const ImVec2 textPosition = ImGui::GetCursorScreenPos();
+        if (ImGui::Selectable("##Group", index == m_selected, MuEditor::KeyboardSelection::RowFlags))
         {
             Select(index);
         }
+        ImGui::GetWindowDrawList()->AddText(textPosition, ImGui::GetColorU32(ImGuiCol_Text), label.c_str());
         ImGui::PopID();
     }
     return false;
