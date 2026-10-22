@@ -464,7 +464,7 @@ constexpr float GrandSoulClothHeight = 85.0f;
 // The cloth of the Grand Soul pants is drawn on mesh 2 of their model.
 // Creating the cloth once rebuilds the triangles and texture coordinates of
 // that mesh as a cloth grid; the cloth itself is not needed.
-static void PrepareGrandSoulPantsClothMesh()
+void PrepareGrandSoulPantsClothMesh()
 {
     if (!CPhysicsClothMesh::CanCreate(MODEL_GRAND_SOUL_PANTS, GrandSoulClothMesh, GrandSoulClothColumns,
                                       GrandSoulClothRows))

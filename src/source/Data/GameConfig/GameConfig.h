@@ -159,6 +159,14 @@ public:
     int GetFpsCap() const { return m_fpsCap; }
     void SetFpsCap(int fps);
 
+    // Active texture pack (a folder in Data/TexturePacks), empty for the original textures. The
+    // loader reads it once at startup, so a change takes effect after a restart.
+    std::wstring GetTexturePack() const
+    {
+        return m_texturePack;
+    }
+    void SetTexturePack(const std::wstring& pack);
+
     // GPU backend override -- "default"/"vulkan"/"direct3d12"/"metal". Manual config.ini edit
     // only, same as GetSortParticleDraws() above: no setter, no in-game options-window exposure.
     std::wstring GetRenderBackend() const { return m_renderBackend; }
@@ -223,6 +231,7 @@ private:
     bool m_disableWingShadow;
     bool m_disableBodyShadows;
     int m_fpsCap;
+    std::wstring m_texturePack;
 
     int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue) const;
     void WriteInt(const wchar_t* section, const wchar_t* key, int value);

@@ -203,6 +203,14 @@ public:
     {
         return m_bRenderFrame;
     }
+#ifdef _EDITOR
+    // The windows of the family, also hidden ones: the item editor drops the
+    // cloth of the letters' photo characters before an opened model changes.
+    const WndMap& GetWindows() const
+    {
+        return m_WindowMap;
+    }
+#endif
 
 protected:
     void HandleMessage();
