@@ -36,14 +36,17 @@ std::optional<ChannelType> FindChannelType(std::string_view name);
 
 // Reads the groups of the file into `groups`, in their order. A group with an
 // error is left out; a name or description that is too long is cut (a warning).
+// Lengths are counted in UTF-16 units, as the client's wide strings hold them on
+// Windows: an emoji counts as two.
 void ReadServerListJson(std::string_view text, const std::string& source, std::vector<ServerGroup>& groups,
                         std::vector<Items::ItemDataIssue>& issues);
 
 // The text of the file with these groups, in their order.
 std::string WriteServerListJson(std::span<const ServerGroup> groups);
 
-// Cuts UTF-8 text after maxCharacters characters; false when it is not longer.
-bool CutToCharacters(std::string& text, size_t maxCharacters);
+// Cuts UTF-8 text to at most maxUnits UTF-16 units, never inside a
+// character; false when it is not longer.
+bool CutToUtf16Length(std::string& text, size_t maxUnits);
 
 struct ServerListLoadResult
 {

@@ -30,9 +30,14 @@ constexpr const char* TemporaryExtension = ".tmp";
 // In the order of the ChannelType values.
 constexpr std::array<const char*, ChannelTypeCount> ChannelTypeNames = {"normal", "nonPvp", "goldPvp", "gold"};
 
-// The bits of a UTF-8 byte that tell whether it continues a character.
+// The bits of a UTF-8 byte that tell whether it continues a character, and
+// whether it starts one of four bytes.
 constexpr unsigned char Utf8ContinuationMask = 0xC0;
 constexpr unsigned char Utf8ContinuationBits = 0x80;
+constexpr unsigned char Utf8FourByteMask = 0xF8;
+constexpr unsigned char Utf8FourByteBits = 0xF0;
+// A character outside the Basic Multilingual Plane takes two UTF-16 units.
+constexpr size_t SurrogatePairUnits = 2;
 
 class IssueList
 {
@@ -70,6 +75,13 @@ bool IsContinuationByte(char byte)
     return (static_cast<unsigned char>(byte) & Utf8ContinuationMask) == Utf8ContinuationBits;
 }
 
+// The UTF-16 units of the character a UTF-8 lead byte starts: a four-byte
+// character (most emoji) is outside the Basic Multilingual Plane.
+size_t Utf16UnitsOf(char leadByte)
+{
+    return (static_cast<unsigned char>(leadByte) & Utf8FourByteMask) == Utf8FourByteBits ? SurrogatePairUnits : 1;
+}
+
 bool ReadId(const OrderedJson& json, const std::string& field, int& id, IssueList& issues)
 {
     const auto value = json.find(IdKey);
@@ -85,8 +97,8 @@ bool ReadId(const OrderedJson& json, const std::string& field, int& id, IssueLis
     return true;
 }
 
-// A text of the group; one longer than maxCharacters is cut.
-bool ReadText(const OrderedJson& json, const std::string& field, const char* key, size_t maxCharacters,
+// A text of the group; one longer than maxUnits UTF-16 units is cut.
+bool ReadText(const OrderedJson& json, const std::string& field, const char* key, size_t maxUnits,
               std::string& text, IssueList& issues)
 {
     const auto value = json.find(key);
@@ -100,9 +112,10 @@ bool ReadText(const OrderedJson& json, const std::string& field, const char* key
         return false;
     }
     text = value->get<std::string>();
-    if (CutToCharacters(text, maxCharacters))
+    if (CutToUtf16Length(text, maxUnits))
     {
-        issues.Warning(Field(field, key), "longer than " + std::to_string(maxCharacters) + " characters, cut");
+        issues.Warning(Field(field, key),
+                       "longer than " + std::to_string(maxUnits) + " characters (an emoji counts as two), cut");
     }
     return true;
 }
@@ -264,12 +277,17 @@ OrderedJson WriteGroup(const ServerGroup& group)
 }
 } // namespace
 
-bool CutToCharacters(std::string& text, size_t maxCharacters)
+bool CutToUtf16Length(std::string& text, size_t maxUnits)
 {
-    size_t characters = 0;
+    size_t units = 0;
     for (size_t i = 0; i < text.size(); ++i)
     {
-        if (!IsContinuationByte(text[i]) && characters++ == maxCharacters)
+        if (IsContinuationByte(text[i]))
+        {
+            continue;
+        }
+        units += Utf16UnitsOf(text[i]);
+        if (units > maxUnits)
         {
             text.resize(i);
             return true;

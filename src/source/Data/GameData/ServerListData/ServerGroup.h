@@ -25,7 +25,10 @@ inline constexpr int ChannelTypeCount = 4;
 inline constexpr int MaxChannelsPerGroup = MAX_SERVER_PER_GROUP;
 // Server IDs are 16 bit.
 inline constexpr int MaxServerGroupId = 0xFFFF / MAX_SERVER_PER_GROUP;
-// The width of the group buttons on the login screen.
+// In UTF-16 units, as the client's wide strings hold them on Windows (an emoji
+// takes two): the name goes into fixed wide buffers, e.g. the screenshot
+// message's 64 with the character name. 32 is also the width of the group
+// buttons on the login screen.
 inline constexpr int MaxServerGroupNameLength = 32;
 inline constexpr int MaxServerGroupDescriptionLength = MAX_TEXT_LENGTH - 1;
 

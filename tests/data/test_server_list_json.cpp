@@ -195,7 +195,7 @@ TEST_CASE("ServerListJson: a name or description that is too long is cut")
     CHECK(read.groups[0].description.size() == 254);
 }
 
-TEST_CASE("ServerListJson: names are counted in characters, not bytes")
+TEST_CASE("ServerListJson: names are counted in UTF-16 units, not bytes")
 {
     // 32 two-byte characters fit; the cut never splits one.
     std::string name;
@@ -207,6 +207,31 @@ TEST_CASE("ServerListJson: names are counted in characters, not bytes")
 
     REQUIRE(read.groups.size() == 1);
     CHECK(read.groups[0].name == name.substr(0, 64));
+}
+
+TEST_CASE("ServerListJson: an emoji counts as two UTF-16 units")
+{
+    const std::string emoji = "\xF0\x9F\x98\x80"; // U+1F600, a surrogate pair in UTF-16
+    std::string emojis;
+    for (int i = 0; i < 17; ++i)
+    {
+        emojis += emoji;
+    }
+    const ReadResult onlyEmoji = Read(GroupFile(R"({ "id": 0, "name": ")" + emojis + R"(" })"));
+    REQUIRE(onlyEmoji.groups.size() == 1);
+    CHECK(onlyEmoji.groups[0].name == emojis.substr(0, 16 * emoji.size()));
+
+    // 31 letters and an emoji are 33 units: the emoji goes, whole.
+    const std::string mixed = std::string(31, 'x') + emoji;
+    const ReadResult cut = Read(GroupFile(R"({ "id": 0, "name": ")" + mixed + R"(" })"));
+    REQUIRE(cut.groups.size() == 1);
+    CHECK(cut.groups[0].name == std::string(31, 'x'));
+    CHECK(HasIssueAbout(cut.issues, "groups[0].name", "an emoji counts as two"));
+
+    // 30 letters and an emoji are exactly 32.
+    std::string fits = std::string(30, 'x') + emoji;
+    CHECK_FALSE(Data::ServerList::CutToUtf16Length(fits, Data::ServerList::MaxServerGroupNameLength));
+    CHECK(fits == std::string(30, 'x') + emoji);
 }
 
 TEST_CASE("ServerListJson: unknown fields and a second test server are warnings")

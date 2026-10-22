@@ -71,7 +71,8 @@ admin panel; to put a server into a second group, give it an ID from 20 to 39.
 | `testServer`  | Optional; `true` puts the group at the top.                               |
 | `channels`    | Optional; the type of a channel by its number (1 to 20). Channels not listed are `normal`. |
 
-A name or description that is too long is cut (a warning in the log).
+A name or description that is too long is cut (a warning in the log). Most
+emoji count as two characters, as the client stores them on Windows.
 
 ## Editing in MU Editor
 

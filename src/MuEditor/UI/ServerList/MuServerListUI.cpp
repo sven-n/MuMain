@@ -450,7 +450,7 @@ bool CMuServerListUI::RenderGroupFields(ServerGroup& group)
     bool changed = false;
     if (MuEditor::Items::InputString(I18N::Editor::Name, group.name))
     {
-        Data::ServerList::CutToCharacters(group.name, Data::ServerList::MaxServerGroupNameLength);
+        Data::ServerList::CutToUtf16Length(group.name, Data::ServerList::MaxServerGroupNameLength);
         changed = true;
     }
     if (group.name.empty())
@@ -460,7 +460,7 @@ bool CMuServerListUI::RenderGroupFields(ServerGroup& group)
     ImGui::SetNextItemWidth(TextFieldWidth * scale);
     if (MuEditor::Items::InputString(I18N::Editor::Description, group.description))
     {
-        Data::ServerList::CutToCharacters(group.description, Data::ServerList::MaxServerGroupDescriptionLength);
+        Data::ServerList::CutToUtf16Length(group.description, Data::ServerList::MaxServerGroupDescriptionLength);
         changed = true;
     }
     RenderNote(I18N::Editor::DescriptionNote);
