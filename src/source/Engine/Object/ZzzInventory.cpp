@@ -190,10 +190,10 @@ int getLevelGeneration(int level, unsigned int* color)
     return lvl;
 }
 
-wchar_t TextList[50][100];
-int  TextListColor[50];
-int  TextBold[50];
-SIZE Size[50];
+wchar_t TextList[MaxTextListRows][100];
+int TextListColor[MaxTextListRows];
+int TextBold[MaxTextListRows];
+SIZE Size[MaxTextListRows];
 
 int RenderTextList(int sx, int sy, int TextNum, int Tab, int iSort = RT3_SORT_CENTER)
 {
@@ -1599,6 +1599,43 @@ void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int 
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         mu_swprintf(Text, I18N::Game::BeastUppercutManaD, iMana);
         break;
+    }
+}
+
+// How wide a description line is drawn before it wraps, in the tooltip's text units: about the widest lines of the
+// original tooltips.
+static constexpr int ItemDescriptionWrapWidth = 200;
+
+void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, ItemTooltipTextMeasure measure)
+{
+    const int lastRow = std::min(TextNum + MaxItemDescriptionRows, static_cast<int>(std::size(TextList)));
+    for (const Data::Items::ItemDescriptionLine& line : definition.description)
+    {
+        const std::wstring text = Core::Text::FromUtf8(line.text.Get(g_ItemDatabase.GetDisplayLocale()));
+        // A blank line is one blank piece. So is a blank line inside a text (`\n\n`, or a text that starts with
+        // `\n`): a row left empty would end the tooltip there.
+        const std::vector<std::wstring> pieces =
+            text.empty() ? std::vector<std::wstring>(1) : WrapTextToWidth(text, ItemDescriptionWrapWidth, measure);
+        for (const std::wstring& piece : pieces)
+        {
+            if (TextNum >= lastRow)
+            {
+                return;
+            }
+            if (piece.empty())
+            {
+                // As the tooltip writes its own blank rows.
+                mu_swprintf(TextList[TextNum], L"\n");
+                SkipNum++;
+            }
+            else
+            {
+                mu_swprintf(TextList[TextNum], L"%.*ls", static_cast<int>(std::size(TextList[0]) - 1), piece.c_str());
+            }
+            TextListColor[TextNum] = static_cast<int>(line.color);
+            TextBold[TextNum] = false;
+            TextNum++;
+        }
     }
 }
 
@@ -3727,36 +3764,11 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }
     }
-    // The item data's description in the UI's language: each line wrapped to the tooltip's width and at its line
-    // breaks, the pieces in the line's color.
     if (const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(ip->Type))
     {
         g_pRenderText->SetFont(g_hFont);
-        const auto measure = [](const wchar_t* text, size_t length)
-        { return g_pRenderText->MeasureText(text, static_cast<int>(length)).cx; };
-        for (const Data::Items::ItemDescriptionLine& line : definition->description)
-        {
-            if (line.text.IsEmpty())
-            {
-                // A blank line, as the tooltip writes its own.
-                if (TextNum >= static_cast<int>(std::size(TextList)))
-                    break;
-                mu_swprintf(TextList[TextNum], L"\n");
-                TextNum++;
-                SkipNum++;
-                continue;
-            }
-            const std::wstring text = Core::Text::FromUtf8(line.text.Get(g_ItemDatabase.GetDisplayLocale()));
-            for (const std::wstring& piece : WrapTextToWidth(text, Data::Items::ItemDescriptionWrapWidth, measure))
-            {
-                if (TextNum >= static_cast<int>(std::size(TextList)))
-                    break;
-                mu_swprintf(TextList[TextNum], L"%.99ls", piece.c_str());
-                TextListColor[TextNum] = static_cast<int>(line.color);
-                TextBold[TextNum] = false;
-                TextNum++;
-            }
-        }
+        WriteItemDescriptionLines(*definition, [](const wchar_t* text, size_t length) -> int
+                                  { return g_pRenderText->MeasureText(text, static_cast<int>(length)).cx; });
     }
     if (ip->Type == ITEM_JEWEL_OF_BLESS)
     {
