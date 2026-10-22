@@ -14,17 +14,30 @@ namespace
 {
 UndoTarget* g_activeTarget = nullptr;
 
-void RenderButton(const char* label, const char* keys, bool enabled, const std::string& step, void (UndoTarget::*act)(),
-                  UndoTarget& target)
+// What the Undo or the Redo button asks of its target.
+struct ButtonActions
 {
-    ImGui::BeginDisabled(!enabled);
+    bool (UndoTarget::*can)() const;
+    std::string (UndoTarget::*describe)() const;
+    void (UndoTarget::*act)();
+};
+
+const ButtonActions UndoButton{&UndoTarget::CanUndo, &UndoTarget::GetUndoLabel, &UndoTarget::Undo};
+const ButtonActions RedoButton{&UndoTarget::CanRedo, &UndoTarget::GetRedoLabel, &UndoTarget::Redo};
+
+// The step is described only while its tooltip shows: the bar is drawn every
+// frame, the tooltip rarely.
+void RenderButton(const char* label, const char* keys, const ButtonActions& actions, UndoTarget& target)
+{
+    ImGui::BeginDisabled(!(target.*actions.can)());
     if (ImGui::Button(label))
     {
-        (target.*act)();
+        (target.*actions.act)();
     }
-    if (enabled && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+    // Asked again: after a click there may be no step left.
+    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled) && (target.*actions.can)())
     {
-        ImGui::SetTooltip("%s (%s)", step.c_str(), keys);
+        ImGui::SetTooltip("%s (%s)", (target.*actions.describe)().c_str(), keys);
     }
     ImGui::EndDisabled();
 }
@@ -41,13 +54,9 @@ void RenderBarButtons(UndoTarget& fallback)
     UndoTarget& target = activeIsOpen ? *g_activeTarget : fallback;
     // A click leaves the focus in the tool, where Ctrl+Z and Ctrl+Y work.
     ImGui::PushItemFlag(ImGuiItemFlags_NoFocus, true);
-    const bool canUndo = target.CanUndo();
-    RenderButton(I18N::Editor::Undo, "Ctrl+Z", canUndo, canUndo ? target.GetUndoLabel() : std::string(),
-                 &UndoTarget::Undo, target);
+    RenderButton(I18N::Editor::Undo, "Ctrl+Z", UndoButton, target);
     ImGui::SameLine();
-    const bool canRedo = target.CanRedo();
-    RenderButton(I18N::Editor::Redo, "Ctrl+Y", canRedo, canRedo ? target.GetRedoLabel() : std::string(),
-                 &UndoTarget::Redo, target);
+    RenderButton(I18N::Editor::Redo, "Ctrl+Y", RedoButton, target);
     ImGui::PopItemFlag();
 }
 } // namespace MuEditor::UndoTargets
