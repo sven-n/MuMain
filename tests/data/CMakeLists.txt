@@ -40,6 +40,7 @@ mu_add_test(
     SOURCES
         test_server_list_edits.cpp
         test_server_list_json.cpp
+        test_server_list_manager.cpp
     LINK_LIBS
         MuClient
 )
