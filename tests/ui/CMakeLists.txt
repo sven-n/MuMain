@@ -3,6 +3,19 @@ add_test(
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/test_rml_contracts.py"
 )
 
+# The mistakes RmlUi only reports at runtime, or not at all, in every shipped document and stylesheet.
+add_test(
+    NAME rml_rcss_syntax
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/check_rml_rcss_syntax.py"
+)
+
+add_test(
+    NAME rml_preview
+    COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/test_rml_preview.py"
+            "${CMAKE_SOURCE_DIR}"
+)
+
 mu_add_test(
     NAME rml_image_crop_tests
     SOURCES test_rml_image_crop.cpp
@@ -68,6 +81,16 @@ mu_add_test(
     NAME help_pages_tests
     SOURCES test_help_pages.cpp
     LINK_LIBS MuClient
+)
+
+# The options window's tuning rows of the Enhanced look, and their markup in both bundled themes.
+mu_add_test(
+    NAME tuning_rows_tests
+    SOURCES test_tuning_rows.cpp
+    LINK_LIBS MuClient
+)
+target_compile_definitions(tuning_rows_tests PRIVATE
+    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
 )
 
 mu_add_test(
@@ -170,7 +193,9 @@ add_test(
     NAME display_settings_contract
     COMMAND "${CMAKE_COMMAND}"
         "-DMU_CONFIG_CONSTANTS=${CMAKE_SOURCE_DIR}/src/source/Data/GameConfig/GameConfigConstants.h"
+        "-DMU_CONFIG_HEADER=${CMAKE_SOURCE_DIR}/src/source/Data/GameConfig/GameConfig.h"
         "-DMU_CONFIG_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Data/GameConfig/GameConfig.cpp"
+        "-DMU_LOOK_SETTING_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Look/LookPresetSetting.cpp"
         "-DMU_WINMAIN_SOURCE=${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp"
         "-DMU_CONSOLE_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Core/Utilities/Log/muConsoleDebug.cpp"
         -P "${CMAKE_CURRENT_SOURCE_DIR}/test_display_settings_contract.cmake"
@@ -229,6 +254,14 @@ mu_add_test(
     NAME rml_themed_view_tests
     SOURCES
         test_rml_themed_view.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME world_label_layer_tests
+    SOURCES
+        test_world_label_layer.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
 )

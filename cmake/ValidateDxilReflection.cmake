@@ -17,10 +17,17 @@ set_property(GLOBAL PROPERTY MU_DXIL_VALIDATION_ERRORS "")
 set(shader_specs
     "basic_textured.vert|cb0,space1"
     "basic_textured.frag|cb0,space3+s0,space2+t0,space2"
+    "basic_textured_fog.frag|cb0,space3+cb1,space3+s0,space2+t0,space2"
     "basic_colored.vert|cb0,space1"
     "basic_colored.frag|-"
     "shadow_volume.vert|cb0,space1"
     "skinned_textured.vert|cb0,space1+t0,space0"
+    "skinned_shadow.vert|cb0,space1+cb1,space1+t0,space0+t1,space0"
+    "skinned_lit.frag|cb0,space3+cb1,space3+cb2,space3+s0,space2+t0,space2"
+    "post_fullscreen.vert|-"
+    "post_bloom_down.frag|cb0,space3+s0,space2+t0,space2"
+    "post_bloom_up.frag|cb0,space3+s0,space2+t0,space2"
+    "post_composite.frag|cb0,space3+s0,space2+s1,space2+s2,space2+t0,space2+t1,space2+t2,space2"
 )
 
 foreach(shader_spec IN LISTS shader_specs)
@@ -49,16 +56,23 @@ foreach(shader_spec IN LISTS shader_specs)
     endif()
     math(EXPR binding_table_length "${binding_table_end} - ${binding_table_start}")
     string(SUBSTRING "${dump_output}" ${binding_table_start} ${binding_table_length} binding_table)
-    if(shader_name STREQUAL "skinned_textured.vert")
-        string(REGEX MATCH
-            "boneRows[ \t]+texture[ \t]+byte[ \t]+r/o"
-            raw_bone_binding
-            "${binding_table}")
-        if(NOT raw_bone_binding)
-            mu_add_dxil_validation_error(
-                "${shader_name}: boneRows must be a raw ByteAddressBuffer for SDL D3D12")
-        endif()
+    set(raw_buffers)
+    if(shader_name MATCHES "^skinned_.*\\.vert$")
+        list(APPEND raw_buffers boneRows)
     endif()
+    if(shader_name STREQUAL "skinned_shadow.vert")
+        list(APPEND raw_buffers terrainWords)
+    endif()
+    foreach(raw_buffer IN LISTS raw_buffers)
+        string(REGEX MATCH
+            "${raw_buffer}[ \t]+texture[ \t]+byte[ \t]+r/o"
+            raw_binding
+            "${binding_table}")
+        if(NOT raw_binding)
+            mu_add_dxil_validation_error(
+                "${shader_name}: ${raw_buffer} must be a raw ByteAddressBuffer for SDL D3D12")
+        endif()
+    endforeach()
     string(REGEX MATCHALL "(cb|[stu])[0-9]+(,space[0-9]+)?" actual_bindings "${binding_table}")
     set(normalized_bindings)
     foreach(actual_binding IN LISTS actual_bindings)
@@ -90,4 +104,5 @@ if(validation_errors)
     message(FATAL_ERROR "DXIL reflection validation failed:\n  - ${validation_details}")
 endif()
 
-message(STATUS "Validated DXIL resource bindings for 6 shaders")
+list(LENGTH shader_specs shader_count)
+message(STATUS "Validated DXIL resource bindings for ${shader_count} shaders")

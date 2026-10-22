@@ -346,7 +346,7 @@ bool MoveHellasObjectSetting(int& objCount, int object)
 
         CreateParticle(BITMAP_LIGHT, Position, Hero->Object.Angle, Light, 7, 1.f, &Hero->Object);
 
-        if (rand_fps_check(15))
+        if (rand() % 15 == 0)
         {
             vec3_t Angle = { 0.f, 0.f, 0.f };
             Position[2] = Hero->Object.Position[2] + 800.f;
@@ -553,7 +553,7 @@ bool RenderHellasObjectMesh(OBJECT* o, BMD* b)
     {
         Vector(1.0f, 1.0f, 1.0f, b->BodyLight);
         if (o->AnimationFrame > 3 && o->Alpha > 0.2f)
-            o->Alpha -= 0.02f;
+            o->Alpha -= 0.02f * FPS_ANIMATION_FACTOR;
         b->RenderBody(RENDER_TEXTURE | RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         b->RenderBody(RENDER_TEXTURE | RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         Vector(0.0f, 0.0f, 0.0f, b->BodyLight);
@@ -1436,7 +1436,7 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
             Vector(2.f, 30.f, 0.f, p);
             b->TransformPosition(o->BoneTransform[6], p, Position, true);
             Vector(1.0f, 0.2f, 0.0f, Light);
-            CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 17);
+            CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 17);
         }
         return true;
 
@@ -1468,7 +1468,7 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
                 {
                     Vector(0.0f, 0.3f, 1.0f, Light);
                 }
-                CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 17);
+                CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 17);
             }
         }
         return true;
@@ -1596,22 +1596,26 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 if (o->CurrentAction == MONSTER01_SHOCK)
                 {
                     if (o->AnimationFrame > 10.0f && o->PKKey > 10)
-                        o->PKKey -= 1;
+                        o->PKKey -= REFERENCE_FRAME_STEP;
                     else if (o->AnimationFrame > 4.0f)
-                        o->PKKey += 1;
+                        o->PKKey += REFERENCE_FRAME_STEP;
                     else o->PKKey = 10;
 
                     fRoar = o->PKKey * 0.15f;
                     if (o->AnimationFrame > 4.0f && o->AnimationFrame < 6.0f)
                     {
-                        if (o->AnimationFrame < 5.0f) o->Skill += 3;
-                        else if (o->Skill > 3) o->Skill -= 3;
+                        if (o->AnimationFrame < 5.0f)
+                            o->Skill += 3 * REFERENCE_FRAME_STEP;
+                        else if (o->Skill > 3)
+                            o->Skill -= 3 * REFERENCE_FRAME_STEP;
                         fRoar += o->Skill * 0.15f;
                     }
                     else if (o->AnimationFrame > 8.0f && o->AnimationFrame < 10.0f)
                     {
-                        if (o->AnimationFrame < 9.0f) o->Skill += 3;
-                        else if (o->Skill > 3) o->Skill -= 3;
+                        if (o->AnimationFrame < 9.0f)
+                            o->Skill += 3 * REFERENCE_FRAME_STEP;
+                        else if (o->Skill > 3)
+                            o->Skill -= 3 * REFERENCE_FRAME_STEP;
                         fRoar += o->Skill * 0.15f;
                     }
                     else

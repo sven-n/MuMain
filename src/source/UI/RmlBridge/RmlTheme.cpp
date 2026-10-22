@@ -455,4 +455,11 @@ namespace UI::RmlBridge
                 entry.callback();
         }
     }
+
+    void ApplySelectedFontFamily(const std::string& family)
+    {
+        SetSelectedFontFamily(family);
+        Rml::Factory::ClearStyleSheetCache();
+        ReloadAllThemedDocuments();
+    }
 }

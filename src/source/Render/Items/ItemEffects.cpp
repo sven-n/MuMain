@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <string_view>
+#include <vector>
 
 namespace Render::Items::ItemEffects
 {
@@ -335,7 +336,7 @@ Result ApplyWingOfStorm(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
         for (int i = 0; i < 6; ++i)
         {
             b->TransformPosition(BoneTransform[iBoneThunder[i]], vRelativePos, vPos, true);
-            if (rand_fps_check(20))
+            if (rand() % 20 == 0)
             {
                 Vector(0.6f, 0.6f, 0.9f, vLight);
                 CreateEffect(MODEL_FENRIR_THUNDER, vPos, o->Angle, vLight, 1, o);
@@ -576,6 +577,21 @@ ItemModelTable<const ItemEffect*> g_itemEffects{[](const Data::Items::ItemModelD
 bool Exists(std::string_view name)
 {
     return FindEffect(name) != nullptr;
+}
+
+std::span<const std::string_view> GetNames()
+{
+    static const std::vector<std::string_view> names = []
+    {
+        std::vector<std::string_view> sorted;
+        for (const ItemEffect& effect : ItemEffects)
+        {
+            sorted.emplace_back(effect.name);
+        }
+        std::ranges::sort(sorted);
+        return sorted;
+    }();
+    return names;
 }
 
 Result Apply(BMD* b, OBJECT* o, int modelType, float alpha, int& level)

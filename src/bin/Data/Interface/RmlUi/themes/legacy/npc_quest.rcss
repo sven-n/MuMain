@@ -79,7 +79,6 @@
 /* Rows inside text layers (npc_quest.rml) take the layer's bound line height as their pitch. */
 .nq-condition-row {
 	display: block;
-	line-height: inherit; /* 32px */
 	font-weight: bold;
 	font-size: 1em;
 	white-space: nowrap;
@@ -161,14 +160,12 @@
 /* Native advances every message and answer line 18 reference px and never wraps them. */
 .nq-message-line {
 	display: block;
-	line-height: inherit; /* 18px */
 	white-space: nowrap;
 	color: token(text-narrative);
 	font-size: 1em;
 }
 .nq-answer-row {
 	display: block;
-	line-height: inherit; /* 18px */
 	white-space: nowrap;
 	color: #dfbf67;
 	font-weight: bold;

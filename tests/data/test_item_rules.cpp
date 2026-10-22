@@ -14,6 +14,7 @@
 #include "World/MapInfra/MapManager.h"
 
 #include <filesystem>
+#include <vector>
 
 extern CHARACTER* Hero;
 
@@ -260,7 +261,27 @@ TEST_CASE("Item categories come from the item data [data][items][rules]")
     CHECK_FALSE(IsWingItem(&kris));
     CHECK(IsSecondTierWingExceptCape(&wingsOfSpirits));
     CHECK_FALSE(IsSecondTierWingExceptCape(&capeOfLord));
+    const ITEM wingOfStorm = MakeItem(ITEM_WING_OF_STORM);
+    const ITEM capeOfEmperor = MakeItem(ITEM_CAPE_OF_EMPEROR);
+    const ITEM smallCapeOfLord = MakeItem(ITEM_SMALL_CAPE_OF_LORD);
+    CHECK(IsSecondOrThirdTierWing(&wingsOfSpirits));
+    CHECK(IsSecondOrThirdTierWing(&capeOfLord));
+    CHECK(IsSecondOrThirdTierWing(&wingOfStorm));
+    CHECK_FALSE(IsSecondOrThirdTierWing(&wingsOfElf));
+    CHECK_FALSE(IsSecondOrThirdTierWing(&smallCapeOfLord));
+    CHECK(IsSecondTierWing(&wingsOfSpirits));
+    CHECK(IsSecondTierWing(&capeOfLord));
+    CHECK_FALSE(IsSecondTierWing(&wingOfStorm));
+    CHECK_FALSE(IsSecondTierWing(&wingsOfElf));
+    CHECK_FALSE(IsSecondTierWing(&smallCapeOfLord));
+    CHECK(IsSecondTierCape(&capeOfLord));
+    CHECK_FALSE(IsSecondTierCape(&wingsOfSpirits));
+    CHECK_FALSE(IsSecondTierCape(&capeOfEmperor));
+    CHECK_FALSE(IsSecondTierCape(&smallCapeOfLord));
 
+    CHECK(IsPetSlotModel(MODEL_ITEM + ITEM_HELPER));
+    CHECK(IsPetSlotModel(MODEL_ITEM + ITEM_HORN_OF_FENRIR));
+    CHECK_FALSE(IsPetSlotModel(MODEL_ITEM + KrisType));
     CHECK(IsRideableMount(&uniria));
     CHECK(IsHornMountModel(MODEL_ITEM + ITEM_HORN_OF_UNIRIA));
     CHECK_FALSE(IsHornMountModel(MODEL_ITEM + ITEM_DARK_HORSE_ITEM));
@@ -274,6 +295,152 @@ TEST_CASE("Item categories come from the item data [data][items][rules]")
     // Model ids outside the item range are no items.
     CHECK_FALSE(IsRideableMountModel(-1));
     CHECK_FALSE(IsRideableMountModel(MODEL_ITEM + MAX_ITEM));
+    CHECK_FALSE(IsPetSlotModel(-1));
+    CHECK_FALSE(IsPetSlotModel(MODEL_ITEM + MAX_ITEM));
+}
+
+TEST_CASE("Weapon kinds come from the item data [data][items][rules]")
+{
+    ShippedItemsScope items;
+    // Numbers without item data in the bow and shield groups.
+    const int noBow = ITEM_BOW + 27;
+    const int noShield = ITEM_SHIELD + 27;
+    const ITEM smallShield = MakeItem(ITEM_SHIELD);
+    const ITEM shortBow = MakeItem(ITEM_BOW);
+    const ITEM crossbow = MakeItem(ITEM_CROSSBOW);
+    const ITEM arrows = MakeItem(ITEM_ARROWS);
+    const ITEM bolt = MakeItem(ITEM_BOLT);
+    const ITEM kris = MakeItem(KrisType);
+
+    // Bows have the slot offHand, crossbows mainHand; arrows and bolts are neither.
+    CHECK(IsBowType(ITEM_BOW));
+    CHECK(IsBowType(ITEM_CELESTIAL_BOW));
+    CHECK_FALSE(IsBowType(noBow));
+    CHECK_FALSE(IsBowType(ITEM_CROSSBOW));
+    CHECK_FALSE(IsBowType(ITEM_BOLT));
+    CHECK(IsCrossbowType(ITEM_CROSSBOW));
+    CHECK(IsCrossbowType(ITEM_DIVINE_CB_OF_ARCHANGEL));
+    CHECK_FALSE(IsCrossbowType(ITEM_BOW));
+    CHECK_FALSE(IsCrossbowType(ITEM_ARROWS));
+    CHECK(IsBowModel(MODEL_ITEM + ITEM_BOW));
+    CHECK(IsCrossbowModel(MODEL_ITEM + ITEM_CROSSBOW));
+
+    CHECK(IsSpearType(ITEM_SPEAR));
+    CHECK(IsSpearModel(MODEL_ITEM + ITEM_SPEAR));
+    CHECK_FALSE(IsSpearType(KrisType));
+
+    CHECK(IsShieldType(ITEM_SHIELD));
+    CHECK_FALSE(IsShieldType(noShield));
+    CHECK_FALSE(IsShieldType(KrisType));
+
+    CHECK(IsBowCrossbowOrAmmunition(&shortBow));
+    CHECK(IsBowCrossbowOrAmmunition(&crossbow));
+    CHECK(IsBowCrossbowOrAmmunition(&arrows));
+    CHECK(IsBowCrossbowOrAmmunition(&bolt));
+    CHECK_FALSE(IsBowCrossbowOrAmmunition(&kris));
+    CHECK_FALSE(IsBowCrossbowOrAmmunition(&smallShield));
+
+    // Model ids outside the item range are no weapons.
+    CHECK_FALSE(IsSpearModel(-1));
+    CHECK_FALSE(IsBowModel(MODEL_ITEM + MAX_ITEM));
+}
+
+TEST_CASE("Swords, gloves, staffs, books, sceptres and magic swords come from the item data [data][items][rules]")
+{
+    ShippedItemsScope items;
+    // Numbers without item data in the sword, staff and mace groups.
+    const int noGlove = MakeItemType(0, 40);
+    const int noBook = MakeItemType(5, 40);
+    const int noSceptre = MakeItemType(2, 21);
+    const ITEM kris = MakeItem(KrisType);
+    const ITEM bolt = MakeItem(ITEM_BOLT);
+    const ITEM bookOfSahamutt = MakeItem(ITEM_BOOK_OF_SAHAMUTT);
+    const ITEM smallShield = MakeItem(ITEM_SHIELD);
+    const ITEM apple = MakeItem(ITEM_APPLE);
+
+    CHECK(IsSwordOrGloveModel(MODEL_ITEM + KrisType));
+    CHECK(IsSwordOrGloveModel(MODEL_ITEM + ITEM_SACRED_GLOVE));
+    CHECK_FALSE(IsSwordOrGloveModel(MODEL_ITEM + ITEM_AXE));
+
+    CHECK(IsSwordAxeMaceOrGloveType(KrisType));
+    CHECK(IsSwordAxeMaceOrGloveType(ITEM_AXE));
+    CHECK(IsSwordAxeMaceOrGloveType(ITEM_FROST_MACE));
+    CHECK_FALSE(IsSwordAxeMaceOrGloveType(noGlove));
+    CHECK_FALSE(IsSwordAxeMaceOrGloveType(ITEM_SPEAR));
+    CHECK_FALSE(IsSwordAxeMaceOrGloveType(ITEM_STAFF));
+
+    CHECK(IsStaffOrBookType(ITEM_STAFF));
+    CHECK(IsStaffOrBookType(ITEM_BOOK_OF_SAHAMUTT));
+    CHECK_FALSE(IsStaffOrBookType(noBook));
+    CHECK_FALSE(IsStaffOrBookType(KrisType));
+    CHECK(IsStaffOrBookModel(MODEL_ITEM + ITEM_STAFF));
+
+    CHECK(IsWeaponOrAmmunition(&kris));
+    CHECK(IsWeaponOrAmmunition(&bolt));
+    CHECK(IsWeaponOrAmmunition(&bookOfSahamutt));
+    CHECK_FALSE(IsWeaponOrAmmunition(&smallShield));
+    CHECK_FALSE(IsWeaponOrAmmunition(&apple));
+
+    CHECK(IsSceptreType(ITEM_BATTLE_SCEPTER));
+    CHECK_FALSE(IsSceptreType(noSceptre));
+    CHECK_FALSE(IsSceptreType(ITEM_FROST_MACE));
+
+    CHECK(IsMagicSwordType(ITEM_DARK_REIGN_BLADE));
+    CHECK_FALSE(IsMagicSwordType(ITEM_BONE_BLADE));
+}
+
+TEST_CASE("Lucky items, shield potions and transformation rings come from the item data [data][items][rules]")
+{
+    ShippedItemsScope items;
+    const int scaleHelmLucky = MakeItemType(7, 62);
+    const int stormJahadBootsLucky = MakeItemType(11, 72);
+    const int phoenixSoulHelm = MakeItemType(7, 73);
+
+    CHECK(IsLuckyItemType(scaleHelmLucky));
+    CHECK(IsLuckyItemType(stormJahadBootsLucky));
+    CHECK_FALSE(IsLuckyItemType(phoenixSoulHelm));
+    CHECK_FALSE(IsLuckyItemType(ITEM_HELM));
+
+    CHECK(IsShieldPotionType(ITEM_SMALL_SHIELD_POTION));
+    CHECK(IsShieldPotionType(ITEM_LARGE_SHIELD_POTION));
+    CHECK_FALSE(IsShieldPotionType(ITEM_ELITE_SD_POTION));
+    CHECK_FALSE(IsShieldPotionType(ITEM_SMALL_COMPLEX_POTION));
+
+    CHECK(IsTransformationRingType(ITEM_TRANSFORMATION_RING));
+    CHECK(IsTransformationRingType(ITEM_SNOWMAN_TRANSFORMATION_RING));
+    CHECK(IsTransformationRingType(ITEM_PANDA_TRANSFORMATION_RING));
+    CHECK_FALSE(IsTransformationRingType(ITEM_RING_OF_ICE));
+    CHECK(IsPandaOrSkeletonType(ITEM_PANDA_TRANSFORMATION_RING));
+    CHECK_FALSE(IsPandaOrSkeletonType(ITEM_TRANSFORMATION_RING));
+}
+
+TEST_CASE("The shipped potions are taken largest first [data][items][rules]")
+{
+    ShippedItemsScope items;
+    const auto inUseOrder = [](ItemTag tag)
+    {
+        const auto itemTypes = g_ItemDatabase.GetItemTypesWithTagInUseOrder(tag);
+        return std::vector<int>(itemTypes.begin(), itemTypes.end());
+    };
+
+    CHECK(inUseOrder(ItemTag::HealingPotion) == std::vector<int>{ITEM_LARGE_HEALING_POTION, ITEM_MEDIUM_HEALING_POTION,
+                                                                 ITEM_SMALL_HEALING_POTION, ITEM_APPLE});
+    CHECK(inUseOrder(ItemTag::ManaPotion) ==
+          std::vector<int>{ITEM_LARGE_MANA_POTION, ITEM_MEDIUM_MANA_POTION, ITEM_SMALL_MANA_POTION});
+    CHECK(inUseOrder(ItemTag::ShieldPotion) ==
+          std::vector<int>{ITEM_LARGE_SHIELD_POTION, ITEM_MEDIUM_SHIELD_POTION, ITEM_SMALL_SHIELD_POTION});
+    CHECK(inUseOrder(ItemTag::ComplexPotion) ==
+          std::vector<int>{ITEM_LARGE_COMPLEX_POTION, ITEM_MEDIUM_COMPLEX_POTION, ITEM_SMALL_COMPLEX_POTION});
+}
+
+TEST_CASE("The item types with a tag come lowest first [data][items][rules]")
+{
+    ShippedItemsScope items;
+
+    const auto manaPotions = g_ItemDatabase.GetItemTypesWithTag(ItemTag::ManaPotion);
+    CHECK(std::vector<int>(manaPotions.begin(), manaPotions.end()) ==
+          std::vector<int>{ITEM_SMALL_MANA_POTION, ITEM_MEDIUM_MANA_POTION, ITEM_LARGE_MANA_POTION});
+    CHECK(g_ItemDatabase.GetItemTypesWithTag(ItemTag::Ammunition).size() == 2);
 }
 
 TEST_CASE("Wings, the Dinorant, the Dark Horse and the Fenrir are flight equipment [data][items][rules]")

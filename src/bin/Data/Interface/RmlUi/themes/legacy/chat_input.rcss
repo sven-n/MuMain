@@ -78,7 +78,7 @@
 	top: 32dp;
 	width: 50dp;
 	height: 14dp;
-	font-size: 11dp;
+	font-size: 1rem;
 	color: rgb(200, 200, 200);
 	background-color: rgba(0, 0, 0, 25);
 	border: 0 transparent;
@@ -89,7 +89,7 @@
 	top: 32dp;
 	width: 176dp;
 	height: 14dp;
-	font-size: 11dp;
+	font-size: 1rem;
 	color: rgb(255, 230, 210);
 	background-color: rgba(0, 0, 0, 25);
 	border: 0 transparent;

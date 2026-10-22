@@ -5,7 +5,10 @@
 #pragma once
 
 #include "UI/Core/WindowManager.h"
+#include "UI/Inventory/ItemHelpContentKey.h"
 #include "UI/Inventory/ItemHelpView.h"
+
+#include <optional>
 
 namespace mu::ui::window
 {
@@ -35,10 +38,14 @@ public:
 private:
     // What the original's Render() drew with RenderTipTextList(), for item_explanation.rml.
     void SyncContent();
+    // The levels table of the item ComputeItemInfo computed last; etc items show only +0.
+    static ItemHelpView::Table BuildLevelsTable(bool etc);
 
     CManager* m_pNewUIMng;
 
     ItemHelpView m_View{"item_explanation", "Data/Interface/RmlUi/item_explanation.rml"};
+    // What the content m_View has was built from.
+    std::optional<ItemHelpContentKey> m_ShownContent;
 };
 } // namespace mu::ui::window
 

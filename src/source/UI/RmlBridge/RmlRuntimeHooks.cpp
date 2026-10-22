@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "UI/RmlBridge/RmlRuntimeHooks.h"
 
+#include "Core/Utilities/StringUtils.h"
+#include "Data/GameConfig/GameConfig.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Diagnostics/DiagnosticsOverlay.h"
 #include "UI/RmlBridge/RmlDocumentHints.h"
@@ -32,7 +34,12 @@ void InstallRuntimeHooks()
         ApplyScaleInputs(context);
         ApplyNativeTextSize(context);
     };
-    hooks.afterCreate = [] { LoadActiveThemeFonts(); UI::Diagnostics::Initialize(); };
+    hooks.afterCreate = []
+    {
+        SetSelectedFontFamily(StringUtils::WideToNarrow(GameConfig::GetInstance().GetFontSelection().c_str()));
+        LoadActiveThemeFonts();
+        UI::Diagnostics::Initialize();
+    };
     hooks.beforeDestroy = [] { UI::Diagnostics::Release(); ClearThemeFontCache(); };
     hooks.beforeUpdate = []
     {

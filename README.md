@@ -88,7 +88,7 @@ Release or RelWithDebInfo; see [build options](docs/build/README.md#build-option
 ## Running the client
 
 Run `Main.exe` from its output directory. It connects to the server in `config.ini`
-(`[CONNECTION SETTINGS]`, localhost port `44405` by default); `Main.exe connect /u<IP> /p<PORT>`
+(`[CONNECTION SETTINGS]`, localhost port `44406` by default); `Main.exe connect /u<IP> /p<PORT>`
 overrides it for that run, for example `Main.exe connect /u192.168.0.20 /p55902`. The
 [OpenMU launcher](https://github.com/MUnique/OpenMU/releases) passes the same arguments.
 The client identifies itself with version `2.04d` and serial `k1Pk2jcET48mxL3b`.
@@ -106,7 +106,7 @@ Missing keys take the defaults below. The options window writes most of them; se
 | **`[Audio]`**               | `SoundVolume`, `MusicVolume`                                                                          | `5`                  | `0` mutes.                                                                                                                                                       |
 | **`[LOGIN]`**               | `Language`                                                                                            | `Eng`                | Game data language: the `Data/Local/<Language>/` folder (item names, map name art).                                                                              |
 | **`[LOGIN]`**               | `RememberMe`, `SavePassword`                                                                          | `0`                  | Remember the account name, and the password too. Both are stored encrypted for this machine and user (`EncryptedUsername`, `EncryptedPassword`).                 |
-| **`[CONNECTION SETTINGS]`** | `ServerIP`, `ServerPort`                                                                              | `localhost`, `44405` | Server to connect to when no `connect` argument is given.                                                                                                        |
+| **`[CONNECTION SETTINGS]`** | `ServerIP`, `ServerPort`                                                                              | `localhost`, `44406` | Server to connect to when no `connect` argument is given.                                                                                                        |
 | **`[UI]`**                  | `Locale`                                                                                              | `en`                 | UI language (`en`, `de`, `es`, `id`, `ja`, `pl`, `pt`, `ru`, `tl`, `uk`, `zh-TW`). Switchable at runtime in the options window.                                  |
 | **`[UI]`**                  | `Font`                                                                                                | empty                | UI font family; empty uses the platform's default.                                                                                                               |
 | **`[UI]`**                  | `RmlTheme`                                                                                            | `legacy`             | UI theme: `legacy` (the original look) or `modern`. `$theme <name>` switches it for the session.                                                                 |
@@ -115,13 +115,18 @@ Missing keys take the defaults below. The options window writes most of them; se
 | **`[Camera]`**              | `Zoom`                                                                                                | `1735`               | Persisted Orbital-camera distance.                                                                                                                               |
 | **`[Render]`**              | `VSync`                                                                                               | `1`                  | `0` disables VSync across restarts and resolution changes. `$vsync on` / `$vsync off` update it.                                                                 |
 | **`[Render]`**              | `FpsCap`                                                                                              | `-1`                 | Frame cap while VSync is off; `-1` is uncapped. `$fps <value>` updates it.                                                                                       |
+| **`[Render]`**              | `Look`                                                                                                | `Classic`            | `Enhanced` turns on the Enhanced look ([docs](docs/enhanced-look.md)); the options window's "Enhanced graphics" checkbox and `$look` update it.                  |
+| **`[Render]`**              | `Antialiasing`                                                                                        | `4`                  | Samples of the Enhanced look: `0` (off), `2`, `4`, `8`. Classic renders without. The options window and `$msaa` update it.                                       |
+| **`[Render]`**              | `Anisotropy`                                                                                          | `8`                  | Anisotropic filtering (`1` is off, up to `16`) of every texture with mip levels. Set in the options window.                                                      |
+| **`[Render]`**              | `EnhancedLighting`, `DynamicLights`, `LightMood`, `PostProcessing` | `1` | `0` switches that feature of the Enhanced look off; also the rows under "Enhanced graphics" in the options window. |
 | **`[Render]`**              | `Backend`                                                                                             | `default`            | SDL GPU driver: `default`, `vulkan`, `direct3d12` (or `d3d12`), `metal`. Falls back to SDL's choice with a logged warning when unavailable. Edited by hand only. |
-| **`[Render]`**              | `DisableEffects`, `DisableParticles`, `DisableSkillEffectModels`, `DisableBoids`, `DisableWingShadow` | `0`                  | Rendering-cost reductions for low-end PCs, also in the options window and `$effects`.                                                                            |
+| **`[Render]`**              | `DisableEffects`, `DisableParticles`, `DisableSkillEffectModels`, `DisableBoids`, `DisableWingShadow`, `DisableBodyShadows` | `0`                  | Rendering-cost reductions for low-end PCs, also in the options window and `$effects`.                                                                            |
 | **`[Render]`**              | `SortParticleDraws`                                                                                   | `0`                  | Opt-in depth sorting of particle draws.                                                                                                                          |
+| **`[Render]`**              | `TexturePack`                                                                                         | empty                | Active [texture pack](docs/texture-packs.md), a folder in `Data/TexturePacks/`; empty uses the original textures. Read at startup; set in the options window.    |
 | **`[ChatCommands]`**        | `Favourite<N>`, `Template<N>`                                                                         | none                 | Written by the [chat commands window](docs/chat-commands.md).                                                                                                    |
 
-The retired `[Render] CoreProfile` key is ignored, and keys the client no longer uses are
-removed from the file when it loads.
+A new install starts from `src/bin/config.ini.template`. Retired keys, such as
+`[Render] CoreProfile`, are removed from the file when it loads.
 
 ### Command-line flags and options
 
@@ -176,6 +181,9 @@ Developer diagnostics, read at startup:
 - [Options window and config](docs/options-window.md) - runtime
   resolution / windowed toggle, slider rounding, and what the options
   window stores in `config.ini`.
+- [Texture packs](docs/texture-packs.md) - installing, choosing and removing
+  packs of replacement or 2x/4x textures in `Data/TexturePacks/`, and how to
+  make one.
 - [Build guide](docs/build/README.md) - platform-specific build notes.
 - [In-game tests](docs/in-game-tests.md) - the tester next to developer
   builds that plays test scenarios with real clients against a fresh OpenMU

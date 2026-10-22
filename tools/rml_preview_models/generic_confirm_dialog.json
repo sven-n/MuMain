@@ -1,0 +1,47 @@
+{
+  "states": {
+    "ok_cancel": {
+      "lines": [
+        { "text": "Do you want to sell this item?", "bold": false, "color": "" }
+      ],
+      "primary_label": "OK",
+      "primary_is_stock_ok": true,
+      "show_cancel": true,
+      "cancel_label": "Cancel",
+      "cancel_is_stock_cancel": true
+    },
+    "title_and_input": {
+      "has_title": true,
+      "title": "Personal Shop",
+      "lines": [
+        { "text": "Enter selling price.", "bold": false, "color": "" }
+      ],
+      "has_input": true,
+      "input_value": "1000000",
+      "primary_label": "OK",
+      "primary_is_stock_ok": true,
+      "show_cancel": true,
+      "cancel_label": "Cancel",
+      "cancel_is_stock_cancel": true
+    },
+    "three_buttons": {
+      "lines": [
+        { "text": "Use the fruit?", "bold": false, "color": "" },
+        { "text": "Strength +1", "bold": true, "color": "#ffd23c" }
+      ],
+      "primary_label": "Create",
+      "has_secondary": true,
+      "secondary_label": "Decrease",
+      "show_cancel": true,
+      "cancel_label": "Cancel",
+      "cancel_is_stock_cancel": true
+    },
+    "progress": {
+      "lines": [
+        { "text": "Connecting to the server...", "bold": false, "color": "" }
+      ],
+      "has_progress": true,
+      "progress_fraction": 0.4
+    }
+  }
+}

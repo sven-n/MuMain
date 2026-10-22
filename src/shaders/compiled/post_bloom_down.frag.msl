@@ -1,0 +1,30 @@
+#include <metal_stdlib>
+#include <simd/simd.h>
+
+using namespace metal;
+
+struct BloomUniforms
+{
+    float2 sourceTexelSize;
+    float levelWeight;
+    float padding;
+};
+
+struct main0_out
+{
+    float4 _entryPointOutput [[color(0)]];
+};
+
+struct main0_in
+{
+    float2 input_uv [[user(locn0)]];
+};
+
+fragment main0_out main0(main0_in in [[stage_in]], constant BloomUniforms& _19 [[buffer(0)]], texture2d<float> source [[texture(0)]], sampler linearSampler [[sampler(0)]])
+{
+    main0_out out = {};
+    float2 _137 = _19.sourceTexelSize * 0.5;
+    out._entryPointOutput = float4((((((source.sample(linearSampler, in.input_uv).xyz * 4.0) + source.sample(linearSampler, (in.input_uv - _137)).xyz) + source.sample(linearSampler, (in.input_uv + _137)).xyz) + source.sample(linearSampler, (in.input_uv + float2(_137.x, -_137.y))).xyz) + source.sample(linearSampler, (in.input_uv - float2(_137.x, -_137.y))).xyz) * float3(0.125), 1.0);
+    return out;
+}
+

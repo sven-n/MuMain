@@ -16,7 +16,7 @@ and HLSL shaders compiled for the active SDL GPU backend.
    their downstream SDL GPU equivalents.
 2. [GPU skinning architecture](gpu-skinning-architecture.md) describes
    rest-pose vertices, packed 3x4 bone palettes, shader inputs, palette
-   deduplication, and CPU fallbacks.
+   deduplication, body shadows, and CPU fallbacks.
 3. [Core Profile migration mapping](core-profile-migration.md) explains how
    fixed-function and Core Profile concepts map to the renderer-neutral API.
 4. [Immediate renderer mapping](immediate-renderer-architecture.md) documents
@@ -37,6 +37,8 @@ and HLSL shaders compiled for the active SDL GPU backend.
   preventing stale reuse when a memory address is recycled.
 - Mesh, chrome, oil, and metal texture-coordinate modes are generated in the
   skinned vertex shader.
+- Projected body shadows draw the cached mesh with `skinned_shadow.vert.hlsl`,
+  which places each vertex on a GPU copy of the terrain heights.
 - CPU skinning remains the fallback for unsupported draws. Cloth, shadow-volume,
   shadow-map, and vertex-wave paths retain their required CPU behavior.
 - Legacy GL-shaped helpers remain compatibility APIs only. The build guard
@@ -49,15 +51,16 @@ and HLSL shaders compiled for the active SDL GPU backend.
 | Renderer contract | [`MuRenderer.h`](../../src/source/Render/Renderer/MuRenderer.h) |
 | SDL GPU backend | [`MuRendererSDLGpu.cpp`](../../src/source/Render/Renderer/MuRendererSDLGpu.cpp) |
 | BMD submission and CPU fallback | [`ZzzBMD.cpp`](../../src/source/Render/Models/ZzzBMD.cpp), [`ZzzBMD.h`](../../src/source/Render/Models/ZzzBMD.h) |
-| Skinning shader | [`skinned_textured.vert.hlsl`](../../src/shaders/skinned_textured.vert.hlsl) |
+| Skinning shaders | [`skinned_textured.vert.hlsl`](../../src/shaders/skinned_textured.vert.hlsl), [`skinned_shadow.vert.hlsl`](../../src/shaders/skinned_shadow.vert.hlsl) |
+| Terrain heights for shadows | [`TerrainHeightGrid.h`](../../src/source/Render/Terrain/TerrainHeightGrid.h) |
 | Compatibility wrappers | [`ZzzOpenglUtil.cpp`](../../src/source/Render/Textures/ZzzOpenglUtil.cpp), [`GLCompatShim.cpp`](../../src/source/Render/Renderer/GLCompatShim.cpp) |
 | Guard | [`check_gl_wrapper_monopoly.py`](../../tools/check_gl_wrapper_monopoly.py) |
 | Regression coverage | [`tests/render`](../../tests/render) |
 
 ## Runtime configuration
 
-- SDL GPU is the only renderer. The legacy `[Render] CoreProfile` key is not
-  read; it cannot request either an OpenGL Core or Compatibility context.
+- SDL GPU is the only renderer. The legacy `[Render] CoreProfile` key is
+  removed from `config.ini` when it loads.
 - `[Render] SortParticleDraws=1` groups safe additive particle stretches by
   texture before SDL GPU submission. Default `0` preserves slot order until
   effects are visually checked on target hardware.

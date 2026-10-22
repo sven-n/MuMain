@@ -2,6 +2,7 @@
 
 #include "Data/GameData/ItemData/ItemModelJsonValues.h"
 
+#include <array>
 #include <set>
 #include <span>
 #include <string>
@@ -25,11 +26,13 @@ public:
     bool ReadInteger(const char* key, int& value, int minValue, int maxValue);
     // Reads a list of at least one whole number from 0 to maxValue.
     bool ReadIndexes(const char* key, std::vector<int>& values, int maxValue);
+    // Reads one whole number from 0 to maxValue for every item level, or a list
+    // of one for each item level 0 to 15.
+    bool ReadPerLevelIndexes(const char* key, std::array<int, ItemLevelCount>& values, int maxValue);
     bool ReadBool(const char* key, bool& value);
     // Reads a name of letters and digits.
     bool ReadName(const char* key, std::string& value);
 
-    bool IsNumber(const char* key) const;
     // Marks the key as read and returns its value, or null when the object
     // does not have it; for values the Read functions above do not cover.
     const Json::OrderedJson* ReadJson(const char* key);

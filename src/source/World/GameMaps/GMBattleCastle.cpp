@@ -736,23 +736,23 @@ namespace battleCastle
         PlayBuffer(SOUND_BC_AMBIENT);
         if (IsBattleCastleStart() && rand_fps_check(10))
         {
-            if (rand_fps_check(100))
+            if (rand() % 100 == 0)
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE1);
             }
-            if (rand_fps_check(100))
+            if (rand() % 100 == 0)
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE2);
             }
-            if (rand_fps_check(100))
+            if (rand() % 100 == 0)
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE3);
             }
-            if (rand_fps_check(100))
+            if (rand() % 100 == 0)
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE4);
             }
-            if (rand_fps_check(100))
+            if (rand() % 100 == 0)
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE5);
             }

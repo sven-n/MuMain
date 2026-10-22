@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "ItemAttributeConversion.h"
+#include "ItemStatProfiles.h"
 #include "ItemType.h"
 #include "Core/Text/Utf8.h"
 
@@ -109,6 +110,12 @@ void CopyFieldsNotInItemAttribute(const ItemDefinition& source, ItemDefinition& 
 {
     target.tags = source.tags;
     target.wingTier = source.wingTier;
+    target.weaponKind = source.weaponKind;
+    target.statProfile = source.statProfile;
+    target.excellentBonus = source.excellentBonus;
+    target.excellentRaisesLevel = source.excellentRaisesLevel;
+    target.requirementsByLevel = source.requirementsByLevel;
+    target.potionPriority = source.potionPriority;
     target.tradable = source.tradable;
     target.droppable = source.droppable;
     target.storable = source.storable;
@@ -118,6 +125,106 @@ void CopyFieldsNotInItemAttribute(const ItemDefinition& source, ItemDefinition& 
     target.droppableWhileRented = source.droppableWhileRented;
     target.personalShopSellableWhileRented = source.personalShopSellableWhileRented;
     target.sellableWhenRentalExpired = source.sellableWhenRentalExpired;
+}
+
+namespace
+{
+// Only the Rage Fighter may use the item: in group 0 that is one of his gloves.
+bool IsForRageFighterOnly(const ItemDefinition& definition)
+{
+    for (size_t characterClass = 0; characterClass < definition.classRequirements.size(); ++characterClass)
+    {
+        const bool required = definition.classRequirements[characterClass] > 0;
+        if (required != (characterClass == static_cast<size_t>(CLASS_RAGEFIGHTER)))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Group 5 holds the staffs and sticks (mainHand) and the books (offHand).
+WeaponKind GetStaffGroupWeaponKind(ItemSlot slot)
+{
+    switch (slot)
+    {
+    case ItemSlot::MainHand:
+        return WeaponKind::Staff;
+    case ItemSlot::OffHand:
+        return WeaponKind::Book;
+    default:
+        return WeaponKind::None;
+    }
+}
+} // namespace
+
+WeaponKind GetGroupWeaponKind(const ItemDefinition& definition)
+{
+    constexpr int SwordGroup = 0;
+    constexpr int AxeGroup = 1;
+    constexpr int MaceGroup = 2;
+    constexpr int SpearGroup = 3;
+    constexpr int BowGroup = 4;
+    constexpr int StaffGroup = 5;
+    constexpr int ShieldGroup = 6;
+
+    const bool mainHand = definition.slot == ItemSlot::MainHand;
+    switch (definition.group)
+    {
+    case SwordGroup:
+        if (!mainHand)
+        {
+            return WeaponKind::None;
+        }
+        return IsForRageFighterOnly(definition) ? WeaponKind::Glove : WeaponKind::Sword;
+    case AxeGroup:
+        return mainHand ? WeaponKind::Axe : WeaponKind::None;
+    case MaceGroup:
+        return mainHand ? WeaponKind::Mace : WeaponKind::None;
+    case StaffGroup:
+        return GetStaffGroupWeaponKind(definition.slot);
+    case SpearGroup:
+        return mainHand ? WeaponKind::Spear : WeaponKind::None;
+    case ShieldGroup:
+        return definition.slot == ItemSlot::OffHand ? WeaponKind::Shield : WeaponKind::None;
+    case BowGroup:
+        if (!definition.twoHanded)
+        {
+            return WeaponKind::None;
+        }
+        if (definition.slot == ItemSlot::OffHand)
+        {
+            return WeaponKind::Bow;
+        }
+        return definition.slot == ItemSlot::MainHand ? WeaponKind::Crossbow : WeaponKind::None;
+    default:
+        return WeaponKind::None;
+    }
+}
+
+std::string DeriveStatProfile(const ItemStatProfiles& profiles, const ItemDefinition& definition)
+{
+    return profiles.GetRuleProfile(profiles.FindRule(definition));
+}
+
+std::string FollowStatProfile(const ItemStatProfiles& profiles, const ItemDefinition* previous,
+                              const ItemDefinition& updated)
+{
+    if (previous != nullptr && !previous->statProfile.empty() &&
+        previous->statProfile != DeriveStatProfile(profiles, *previous))
+    {
+        return previous->statProfile;
+    }
+    return DeriveStatProfile(profiles, updated);
+}
+
+WeaponKind FollowGroupWeaponKind(const ItemDefinition* previous, const ItemDefinition& updated)
+{
+    if (previous != nullptr && previous->weaponKind != GetGroupWeaponKind(*previous))
+    {
+        return previous->weaponKind;
+    }
+    return GetGroupWeaponKind(updated);
 }
 
 ItemDefinition ToItemDefinition(const ITEM_ATTRIBUTE& attribute, int itemType)

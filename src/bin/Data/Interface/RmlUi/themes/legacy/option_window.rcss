@@ -1,64 +1,47 @@
 /* Legacy theme's option (settings) window content -- frame/header/positioning come from
-   window_shell.rcss; this file only lays out the rows spliced into its #content slot.
+   window_shell.rcss; this file lays out the rows spliced into its #content slot.
 
    Lives here (themes/legacy/), NOT at the RmlUi/ root -- option_window.rml's own
    <link href="option_window.rcss"/> resolves against LoadThemedDocument()'s sourceUrl
    (RmlTheme.cpp), which is always "Data/Interface/RmlUi/themes/<theme>/<name>.rml" regardless of
-   which path the RML's own bytes were actually read from. A root-level copy is never reachable by
-   that link for the legacy theme. login.rml's own "shared markup, no themed override needed"
-   shortcut only applies to falling back to the .rml file itself; it does NOT extend to where a
-   <link>'s href then resolves from.
+   which path the RML's own bytes were actually read from.
 
-   #panel is a genuine real-dp size, NOT native COptionWindow's own reference-resolution rect
-   (190x419) -- this template assumes no resolution-based rescaling, so copying native's
-   reference-pixel constants here would produce a wildly oversized panel once combined with
-   window_shell's own chrome.
-
-   Width is 230dp, NOT an arbitrary/bigger guess -- window_shell.rcss's msgbox sprite chrome
-   (top/middle/bottom caps + back-fill) is fixed sprite art authored at exactly this width
-   (generic_menu_dialog.rcss's own #panel matches it too, "native's own MSGBOX_WIDTH"); the caps'
-   left/right border art gets visibly stretched/distorted at any other width. .window-shell-sprite-
-   middle is a single stretched flat fill by design (its own comment), so height is free to vary
-   with content -- only WIDTH must stay locked to the sprite's real size. Positioning is pure CSS
-   (.center-both) now that dragging is off, so this file alone owns the panel's size.
-
-   Height (276dp) is sized for the tallest tab (Graphics, 6 checkbox rows: 6*24dp=144dp, at the
-   18dp row height below + 6dp margin-bottom) plus the tab bar (~28dp) and the always-visible close
-   button block (~38dp), inside window_shell.rcss's own titled-panel insets (35dp top + 28dp bottom
-   = 63dp): 144+28+38+63=273dp minimum, +3dp buffer. Content splits across tabs, so only one tab's
-   rows need to fit at a time. */
-/* font-family/size/color set here, not per-row -- every sibling legacy document does the same
-   (login.rcss, generic_menu_dialog.rcss's own #panel rule) because base.rcss's own .checkbox-label
-   sets no font of its own, unlike the modern theme's copy (which does) -- without this, checkbox
-   labels rendered at RmlUi's uncontrolled default size/font instead of something sized to fit the
-   row heights below, overlapping/misaligning against the checkbox glyph and neighboring rows.
-   10dp -- this theme's other windows (my_quest_info/generic_menu_dialog/login all use 11-12px/dp
-   for their own primary body text; base.rcss's 9dp is that shared baseline's SMALL-control size --
-   checkbox/button labels -- not what a dialog's own readable content should inherit). Not raised
-   all the way to 11-12dp: #panel stays locked at 230dp (sprite-constrained, see its own comment
-   below), and this
-   window's label column already runs close to that width's limit with its longer setting names
-   (see .option-row-label's own comment) -- 10dp is the largest step that didn't need also
-   shortening more label text than the two already trimmed in Game.en.resx. */
+   The panel is wider than the shell's 230dp msgbox art: five tabs, a label column that can hold a
+   translated setting name, and a control column wide enough for a resolution or a language. Its
+   height is one fixed size for every tab, so switching tabs never moves the window; it fits the
+   tallest tab (Video) with room for labels that wrap to a second line, and is capped to the
+   screen, where the settings area scrolls instead (.option-tab-scroll). */
 #panel {
-	width: 230dp;
-	height: 276dp;
+	width: 440dp;
+	height: 310dp;
+	max-height: 96%;
 	font-family: "token(font-body)";
 	font-size: 1rem;
 	color: token(text-input);
 }
 
-/* Widens the control column from window_shell.rcss's own shared 32dp/side margin (166dp well,
-   leaving only 88dp for a slider/select control after the 78dp label column -- too narrow for
-   dropdown text like a language name or "1920 x 1080"). An ID selector, not a re-declared
-   .window-shell-content, so it wins regardless of <link> merge order between this file and
-   window_shell.rcss's own (both are plain class-selector rules at equal specificity otherwise).
-   #panel stays locked at 230dp (see its own comment) -- this reclaims width from the shared
-   margin instead of growing the sprite-constrained frame. 10dp/side so the control column below
-   can start nearer the row's own center, not just "wide enough" -- new well width: 230-20=210dp. */
+/* window_shell.rcss draws the msgbox caps with image(), which only fits its 230dp art. Here the same
+   sprites are ninepatches (the slices chat_room.rcss uses), so the corners and border thickness keep
+   their size at this width, and the back fill repeats its texture instead of stretching it. Scoped
+   to this document. */
+@spritesheet option-cap-top-sheet    { src: "../../../newui_msgbox_top.tga";    option-cap-top:    0px 0px 230px 67px; option-cap-top-inner:    12px 12px 206px 43px; }
+@spritesheet option-cap-middle-sheet { src: "../../../newui_msgbox_middle.tga"; option-cap-middle: 0px 0px 230px 15px; option-cap-middle-inner: 12px  4px 206px  7px; }
+@spritesheet option-cap-bottom-sheet { src: "../../../newui_msgbox_bottom.tga"; option-cap-bottom: 0px 0px 230px 50px; option-cap-bottom-inner: 12px 12px 206px 26px; }
+@spritesheet option-back-sheet       { src: "../../../newui_msgbox_back.jpg";   option-back:       0px 0px 222px 250px; }
+.window-shell-sprite-back   { decorator: image(option-back repeat left top); }
+.window-shell-sprite-top    { decorator: ninepatch(option-cap-top, option-cap-top-inner); }
+.window-shell-sprite-middle { decorator: ninepatch(option-cap-middle, option-cap-middle-inner); }
+.window-shell-sprite-bottom { decorator: ninepatch(option-cap-bottom, option-cap-bottom-inner); }
+
+/* The content well: the tab row at its top and the settings area below it
+   (.option-tab-scroll). An ID selector, so it wins over window_shell.rcss's own
+   .window-shell-content insets regardless of link order. */
 #content {
-	left: 10dp;
-	right: 10dp;
+	left: 18dp;
+	right: 18dp;
+	top: 30dp;
+	bottom: 18dp;
+	display: block;
 }
 
 /* One row of tab buttons -- reuses my_quest_info.rcss's own tab sprite family
@@ -77,17 +60,19 @@
 @spritesheet option-tab-back-sheet   { src: "../../../Quest_tab01.tga"; option-tab-back:   0px 0px 166px 22px; option-tab-back-inner:   6px 4px 154px 14px; }
 @spritesheet option-tab-active-sheet { src: "../../../Quest_tab02.tga"; option-tab-active: 0px 0px 48px 22px;  option-tab-active-inner: 4px 4px 40px 14px; }
 .option-tab-row {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
 	display: flex;
-	width: 100%;
 	height: 22dp;
-	margin-bottom: 8dp;
 	decorator: ninepatch(option-tab-back, option-tab-back-inner);
 }
-/* Sized by their labels (not six equal cells): "Gameplay" and "Graphics" need more room than
+/* Sized by their labels (not equal cells): "Gameplay" and "Graphics" need more room than
    "UI", and equal cells cut them off. */
 .option-tab-btn {
 	flex: 1 1 auto;
-	padding: 0 2dp;
+	padding: 0 4dp;
 	height: 22dp;
 	line-height: 22dp;
 	text-align: center;
@@ -106,34 +91,56 @@
 	decorator: ninepatch(option-tab-active, option-tab-active-inner);
 }
 
-/* Each tab's row group -- a flex column of its own, same as #content itself, so its own rows
-   still stack top-to-bottom once spliced in. Needs the .hidden override below: this file loads
-   after base.rcss, so its own display:flex would otherwise tie with (and silently beat) base.rcss's
-   global .hidden{display:none} at equal specificity, leaving a "hidden" tab visibly rendered --
-   the exact bug window_shell.rcss's own .window-shell-header-rail.hidden rule already fixed once
-   for its header rail; same fix, same reason. */
+/* The settings of the active tab, below the tab row. It scrolls with the chat log's scrollbar
+   (base.rcss's .scroll-pane) when its rows don't fit; the tabs and the close cross stay where they
+   are. A tab's last dropdown opens its list upwards (.option-opens-up), so it stays inside this area. */
+.option-tab-scroll {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 30dp;
+	bottom: 0;
+}
+
+/* One tab's rows, top to bottom. The .hidden override is needed because this display:flex would
+   otherwise tie with base.rcss's .hidden{display:none} and win by load order. */
 .option-tab-panel {
 	display: flex;
 	flex-direction: column;
-	width: 100%;
+	padding: 2dp 10dp 0 4dp;
 }
 .option-tab-panel.hidden {
 	display: none;
 }
 
-/* Each settings row is a small flex line inside window_shell's own flex-column #content -- native
-   used fixed per-row px offsets; this reproduces the same top-to-bottom order via normal flow
-   instead, keeping row order traceable from the markup rather than from literal numbers. */
+/* A label column and a control column. A row is as tall as its label, which wraps when a
+   translation or a larger font needs a second line, and at least as tall as its control. */
 .option-row {
 	position: relative;
-	width: 100%;
 	display: flex;
 	align-items: center;
 	flex-shrink: 0;
+	min-height: 20dp;
 	margin-bottom: 6dp;
 }
+/* A part of the row above it: indented under its label, its control still in the column. */
+.option-sub-row .option-row-label {
+	margin-right: -12dp;
+	padding-left: 12dp;
+}
+
+/* A heading over a group of rows. */
+.option-section {
+	flex-shrink: 0;
+	margin: 6dp 0 6dp;
+	padding-bottom: 2dp;
+	border-bottom: 1dp #5a4a2a;
+	color: token(text-primary);
+}
+.option-section:first-child {
+	margin-top: 0;
+}
 .option-checkbox-row {
-	height: 18dp;
 	cursor: pointer;
 	pointer-events: auto;
 }
@@ -150,25 +157,14 @@
 	display: none;
 }
 
-/* 116dp -- widened from 100dp alongside the 9dp->10dp font bump above, both to keep the control
-   column starting near the row's own horizontal center (well width 210dp, see #content's own
-   comment) and to give the longer Graphics-tab labels room at the bigger size. The two longest
-   labels in this window ("Disable Skill Effect Models"/"Disable Ambient Wildlife") were shortened
-   in Game.en.resx to "Disable Skill Effects"/"Disable Wildlife" (value only -- the resx `name`,
-   and therefore the generated I18N::Game::* identifier, is unchanged) since even 116dp couldn't
-   fit their original full length at 10dp without either shrinking the control column to
-   uselessness or wrapping to two lines (no per-row auto-height support here, see .option-row's own
-   comment). New control width: 210-116=94dp. */
+/* The label column: 44% of the row, the controls start where it ends in every row. */
 .option-row-label {
-	width: 116dp;
+	width: 44%;
 	flex-shrink: 0;
-	white-space: nowrap;
+	padding-right: 8dp;
+	white-space: normal;
+	line-height: 1.3em;
 	color: token(text-input);
-}
-
-.option-select-row,
-.option-gauge-row {
-	height: 20dp;
 }
 
 /* Volume and effect-limit gauges: base.rcss's .level-gauge at native's sizes (the volume bars
@@ -176,9 +172,9 @@
    units before the bar. */
 .option-gauge {
 	position: relative;
+	flex-shrink: 0;
 	width: 124dp;
-	height: 16dp;
-	margin-left: auto;
+	height: 14dp;
 }
 .option-gauge.effect-gauge {
 	width: 70dp;
@@ -206,7 +202,8 @@
    position:absolute (below) resolves against ITS box. */
 .option-dropdown {
 	position: relative;
-	flex-grow: 1;
+	flex: 1 1 auto;
+	max-width: 200dp;
 	height: 18dp;
 }
 /* border-box: width 100% plus the padding and border ran past the frame's right edge. */
@@ -301,26 +298,34 @@
 	background-color: #8f6922;
 }
 
-/* The UI Scale row carries a hint (data-hint), shown while the pointer is anywhere on the row, so
-   the row takes the pointer itself: body's pointer-events: none would leave only its dropdown
-   hoverable. It is the last row of its tab, so its list opens upwards, over the rows above,
-   rather than over the panel's bottom frame and close button. */
+/* A row with a hint (data-hint) takes the pointer itself, so the hint shows anywhere on the row:
+   body's pointer-events: none would leave only its control hoverable. */
 .option-row-tipped {
 	pointer-events: auto;
 }
-.option-row-tipped .option-dropdown-list {
+/* A tab's last dropdown opens its list upwards, over the rows above. */
+.option-opens-up .option-dropdown-list {
 	top: auto;
 	bottom: 100%;
 }
 
-/* The close button sits at the bottom of #content, which window_shell.rcss gives a fixed box
-   (left/right/top/bottom all set), so this stays put as the active tab's row count changes.
-   bottom:0 lands on the same line the shell's own footer occupies; left:50% plus the transform
-   centres it the way .center-both does. */
+/* Close is the window-control cross the friend and chat windows use, in the frame's top-right corner
+   (#content's top-right, pulled out over its inset). Drawn larger than its 9px art, in proportion to
+   this wider frame: a ninepatch whose inner rect is the whole sprite scales it evenly, where image()
+   would not stretch it. */
+@spritesheet option-close-sheet { src: "../../../win_size.jpg"; option-close: 0px 9px 9px 9px; option-close-inner: 0px 9px 9px 9px; }
 .option-close-btn {
-	left: 50%;
-	bottom: 0;
-	transform: translateX(-50%);
+	position: absolute;
+	right: -5dp;
+	top: -18dp;
+	width: 14dp;
+	height: 14dp;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: ninepatch(option-close, option-close-inner);
+}
+.option-close-btn:hover {
+	image-color: rgba(255, 255, 255, 220);
 }
 
 /* The original's options window has no title banner, only the plain top cap: the shell's title
@@ -328,3 +333,176 @@
    (its font was an unsubstituted token in window_shell.rcss). */
 .window-shell-header-rail,
 .window-shell-header-title { display: none; }
+
+/* A setting another one already covers (OptionWindow.h's OptionRmlModel): shown ticked, dimmed, and
+   not clickable. */
+.option-checkbox-row.locked {
+	opacity: 0.45;
+	cursor: default;
+}
+
+/* The player's tuning of each Enhanced feature (OptionWindow.h's tuning rows), under the feature's
+   row. The feature's label and chevron expand its sliders; only the checkbox switches the feature.
+   A locked feature dims its checkbox, not its label, which still expands the tuning. */
+.option-tuning-group-row {
+	cursor: default;
+}
+.option-tuning-group-row.locked {
+	opacity: 1;
+}
+.option-tuning-group-row.locked .checkbox-box {
+	opacity: 0.45;
+}
+.option-tuning-group-row .checkbox-box {
+	cursor: pointer;
+}
+.option-tuning-group-label {
+	cursor: pointer;
+}
+.option-tuning-group-label:hover {
+	color: token(text-primary);
+}
+/* A small arrow before the label: pointing right while collapsed, down while expanded. */
+.option-tuning-chevron {
+	display: inline-block;
+	width: 5dp;
+	height: 5dp;
+	margin: 0 6dp 1dp -10dp;
+	border-right: 1dp token(text-secondary);
+	border-bottom: 1dp token(text-secondary);
+	transform: rotate(-45deg);
+}
+.option-tuning-chevron.expanded {
+	transform: rotate(45deg);
+}
+/* .hidden ties with these rules' display at equal specificity, so it is restated. */
+.option-tuning-group,
+.option-tuning-more,
+.option-tuning-rows {
+	display: block;
+	flex-shrink: 0;
+}
+.option-tuning-group {
+	margin: -2dp 0 8dp 12dp;
+	padding-left: 6dp;
+	border-left: 1dp #5a4a2a;
+}
+.option-tuning-group.hidden,
+.option-tuning-more.hidden,
+.option-tuning-reason.hidden,
+.option-tuning-error.hidden {
+	display: none;
+}
+.option-tuning-reason {
+	display: block;
+	margin-bottom: 4dp;
+	color: token(semantic-warning);
+}
+.option-tuning-row {
+	display: block;
+	margin-bottom: 6dp;
+}
+.option-tuning-head {
+	display: flex;
+	align-items: center;
+}
+.option-tuning-label {
+	flex: 1 1 auto;
+	color: token(text-input);
+}
+.option-tuning-value {
+	flex: 0 0 auto;
+	margin-left: 6dp;
+	color: token(text-primary);
+}
+.option-tuning-state {
+	flex: 0 0 auto;
+	margin-left: 6dp;
+	color: token(text-muted);
+}
+.option-tuning-state.custom {
+	color: token(accent-gold);
+}
+.option-tuning-state.unsaved {
+	color: token(semantic-warning);
+}
+.option-tuning-reset {
+	flex: 0 0 auto;
+	margin-left: 6dp;
+	padding: 0 4dp;
+	cursor: pointer;
+	pointer-events: auto;
+	color: token(text-muted);
+	border-width: 1dp;
+	border-color: token(border-control);
+	background-color: token(surface-control);
+}
+.option-tuning-reset:hover {
+	color: token(text-primary);
+}
+.option-tuning-track {
+	display: flex;
+	align-items: center;
+	margin-top: 2dp;
+}
+.option-tuning-bound {
+	flex: 0 0 auto;
+	width: 52dp;
+	white-space: nowrap;
+	color: token(text-muted);
+}
+.option-tuning-track .option-tuning-bound:last-child {
+	text-align: right;
+}
+/* The volume gauge's art: its rail, and its full fill at its own size, cut off at the value as
+   native draws it (scale-none crops the image to the fill's width). */
+.option-tuning-slider {
+	margin: 0 6dp;
+}
+.option-tuning-fill {
+	decorator: image(level-gauge-fill-10 scale-none left center);
+}
+.option-tuning-hit {
+	left: -6dp;
+	right: -6dp;
+	top: -5dp;
+	bottom: -5dp;
+}
+.option-tuning-hit:focus {
+	border-width: 1dp;
+	border-color: token(accent-gold);
+}
+.option-tuning-group.locked .option-tuning-track {
+	opacity: 0.45;
+}
+.option-tuning-group.locked .option-tuning-hit {
+	cursor: default;
+}
+.option-tuning-more-head {
+	display: block;
+	margin: 2dp 0 6dp;
+	cursor: pointer;
+	pointer-events: auto;
+	color: token(text-secondary);
+}
+.option-tuning-more-head .option-tuning-chevron {
+	margin-left: 0;
+}
+.option-tuning-more-head:hover {
+	color: token(text-primary);
+}
+.option-tuning-actions {
+	display: flex;
+	flex-shrink: 0;
+	justify-content: flex-end;
+	margin-bottom: 4dp;
+}
+.option-tuning-all {
+	margin: 0 0 8dp;
+}
+.option-tuning-error {
+	display: block;
+	flex-shrink: 0;
+	margin-bottom: 8dp;
+	color: token(semantic-danger);
+}

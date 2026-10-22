@@ -5,12 +5,17 @@
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
+#include "Data/GameData/ItemData/ItemStatsJson.h"
 
 #include <algorithm>
 #include <array>
 #include <cctype>
 #include <fstream>
 #include <optional>
+
+#ifndef _WIN32
+#include "Core/Platform/PathResolve.h"
+#endif
 
 namespace Data::Items
 {
@@ -79,29 +84,42 @@ void ReadJsonFiles(const std::filesystem::path& directory, const char* noFilesMe
     }
 }
 
-bool WriteFileIfChanged(const std::filesystem::path& path, const std::string& text, std::vector<ItemDataIssue>& issues)
+// A file a save writes, with its new content.
+struct FileToSave
 {
-    const std::optional<std::string> current = ReadTextFile(path);
-    if (current == text)
-    {
-        return true;
-    }
+    std::filesystem::path path;
+    std::string text;
+};
 
+std::filesystem::path GetTemporaryPath(const std::filesystem::path& path)
+{
     std::filesystem::path temporaryPath = path;
     temporaryPath += TemporaryExtension;
-    {
-        std::ofstream file(temporaryPath, std::ios::binary | std::ios::trunc);
-        file << text;
-        // Closing flushes; checking only afterwards also catches a failing
-        // final write (e.g. a full disk) before the old file is replaced.
-        file.close();
-        if (!file)
-        {
-            AddError(issues, temporaryPath.string(), "could not be written");
-            return false;
-        }
-    }
+    return temporaryPath;
+}
 
+bool WriteTemporaryFile(const FileToSave& file, std::vector<ItemDataIssue>& issues)
+{
+    const std::filesystem::path temporaryPath = GetTemporaryPath(file.path);
+    std::error_code error;
+    std::filesystem::create_directories(file.path.parent_path(), error);
+    std::ofstream stream(temporaryPath, std::ios::binary | std::ios::trunc);
+    stream << file.text;
+    // Closing flushes; checking only afterwards also catches a failing final
+    // write (e.g. a full disk) before any old file is replaced.
+    stream.close();
+    if (!stream)
+    {
+        AddError(issues, temporaryPath.string(), "could not be written");
+        std::filesystem::remove(temporaryPath, error);
+        return false;
+    }
+    return true;
+}
+
+bool ReplaceWithTemporaryFile(const std::filesystem::path& path, std::vector<ItemDataIssue>& issues)
+{
+    const std::filesystem::path temporaryPath = GetTemporaryPath(path);
     std::error_code error;
     std::filesystem::rename(temporaryPath, path, error);
     if (error)
@@ -111,6 +129,92 @@ bool WriteFileIfChanged(const std::filesystem::path& path, const std::string& te
         return false;
     }
     return true;
+}
+
+// Writes the files whose content changed. No old file is replaced before all
+// the new ones are written, so a failed write changes nothing.
+ItemDataSaveResult WriteChangedFiles(std::span<const FileToSave> files, std::vector<ItemDataIssue>& issues)
+{
+    std::vector<const FileToSave*> changedFiles;
+    for (const FileToSave& file : files)
+    {
+        if (ReadTextFile(file.path) != file.text)
+        {
+            changedFiles.push_back(&file);
+        }
+    }
+
+    for (size_t index = 0; index < changedFiles.size(); ++index)
+    {
+        if (WriteTemporaryFile(*changedFiles[index], issues))
+        {
+            continue;
+        }
+        std::error_code error;
+        for (size_t written = 0; written < index; ++written)
+        {
+            std::filesystem::remove(GetTemporaryPath(changedFiles[written]->path), error);
+        }
+        return ItemDataSaveResult::WriteFailed;
+    }
+
+    bool success = true;
+    for (const FileToSave* file : changedFiles)
+    {
+        success = ReplaceWithTemporaryFile(file->path, issues) && success;
+    }
+    return success ? ItemDataSaveResult::Saved : ItemDataSaveResult::WriteFailed;
+}
+
+std::vector<ItemDefinition> GetExistingItems(std::span<const ItemDefinition> items)
+{
+    std::vector<ItemDefinition> existingItems;
+    std::copy_if(items.begin(), items.end(), std::back_inserter(existingItems),
+                 [](const ItemDefinition& definition) { return definition.Exists(); });
+    return existingItems;
+}
+
+void AddItemGroupFiles(const std::filesystem::path& directory, std::span<const ItemDefinition> existingItems,
+                       std::vector<FileToSave>& files)
+{
+    for (int group = 0; group < MAX_ITEM_TYPE; ++group)
+    {
+        files.push_back({directory / GetItemGroupFileName(group), WriteItemGroupJson(group, existingItems)});
+    }
+}
+
+void ValidateExistingItemModels(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues)
+{
+    std::vector<ItemModelDefinition> existingModels;
+    std::copy_if(models.begin(), models.end(), std::back_inserter(existingModels),
+                 [](const ItemModelDefinition& model) { return model.Exists(); });
+    ValidateItemModels(existingModels, issues);
+}
+
+void AddItemModelFiles(const ItemModelSave& models, std::vector<FileToSave>& files)
+{
+    for (int group = 0; group < MAX_ITEM_TYPE; ++group)
+    {
+        if (models.groups.test(static_cast<size_t>(group)))
+        {
+            files.push_back(
+                {models.directory / GetItemGroupFileName(group), WriteItemModelGroupJson(group, models.models)});
+        }
+    }
+    if (models.sharedModelsChanged)
+    {
+        files.push_back({models.directory / SharedItemModelsFileName, WriteSharedItemModelsJson(models.sharedModels)});
+    }
+    if (models.glowColorsChanged)
+    {
+        files.push_back({models.glowColorsFile, Effects::WriteGlowColorsJson(models.glowColors)});
+    }
+#ifdef _EDITOR
+    if (models.statsChanged && models.stats != nullptr)
+    {
+        files.push_back({models.statsFile, WriteItemStatsJson(*models.stats)});
+    }
+#endif
 }
 } // namespace
 
@@ -168,6 +272,25 @@ ItemModelDataLoadResult LoadItemModelDataDirectory(const std::filesystem::path& 
     return result;
 }
 
+std::filesystem::path GetItemStatsFile()
+{
+    return GetItemDataDirectory() / "Stats" / ItemStatsFileName;
+}
+
+ItemStatsLoadResult LoadItemStatsFile(const std::filesystem::path& file)
+{
+    ItemStatsLoadResult result;
+    const std::string source = file.generic_string();
+    const std::optional<std::string> text = ReadTextFile(file);
+    if (!text)
+    {
+        AddError(result.issues, source, "could not be read");
+        return result;
+    }
+    ReadItemStatsJson(*text, source, result.file, result.issues);
+    return result;
+}
+
 std::filesystem::path GetGlowColorsFile()
 {
     return std::filesystem::path(Effects::GlowColorsFile);
@@ -190,25 +313,96 @@ GlowColorsLoadResult LoadGlowColorsFile(const std::filesystem::path& file)
 ItemDataSaveResult SaveItemDataDirectory(const std::filesystem::path& directory, std::span<const ItemDefinition> items,
                                          std::vector<ItemDataIssue>& issues)
 {
-    std::vector<ItemDefinition> existingItems;
-    std::copy_if(items.begin(), items.end(), std::back_inserter(existingItems),
-                 [](const ItemDefinition& definition) { return definition.Exists(); });
+    return SaveItemAndModelDataDirectories(directory, items, ItemModelSave{}, issues);
+}
 
-    ValidateItems(existingItems, issues);
+ItemDataSaveResult SaveItemAndModelDataDirectories(const std::filesystem::path& itemDirectory,
+                                                   std::span<const ItemDefinition> items, const ItemModelSave& models,
+                                                   std::vector<ItemDataIssue>& issues)
+{
+    ValidateItems(GetExistingItems(items), issues);
+    ValidateExistingItemModels(models.models, issues);
     if (HasErrors(issues))
     {
         return ItemDataSaveResult::InvalidData;
     }
+    return WriteItemAndModelDataDirectories(itemDirectory, items, models, issues);
+}
 
-    std::error_code error;
-    std::filesystem::create_directories(directory, error);
+ItemDataSaveResult WriteItemAndModelDataDirectories(const std::filesystem::path& itemDirectory,
+                                                    std::span<const ItemDefinition> items, const ItemModelSave& models,
+                                                    std::vector<ItemDataIssue>& issues)
+{
+    std::vector<FileToSave> files;
+    AddItemGroupFiles(itemDirectory, GetExistingItems(items), files);
+    AddItemModelFiles(models, files);
+    return WriteChangedFiles(files, issues);
+}
 
-    bool success = true;
+void ValidateItemModelsAsWritten(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues)
+{
     for (int group = 0; group < MAX_ITEM_TYPE; ++group)
     {
-        const std::string text = WriteItemGroupJson(group, existingItems);
-        success = WriteFileIfChanged(directory / GetItemGroupFileName(group), text, issues) && success;
+        std::vector<ItemModelDefinition> readBack;
+        std::vector<ItemDataIssue> readIssues;
+        ReadItemModelGroupJson(WriteItemModelGroupJson(group, models), GetItemGroupFileName(group), readBack,
+                               readIssues);
+        std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
+                     [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Error; });
     }
-    return success ? ItemDataSaveResult::Saved : ItemDataSaveResult::WriteFailed;
+}
+
+void ValidateSharedItemModelsAsWritten(std::span<const SharedItemModel> sharedModels,
+                                       std::vector<ItemDataIssue>& issues)
+{
+    std::vector<SharedItemModel> readBack;
+    std::vector<ItemDataIssue> readIssues;
+    ReadSharedItemModelsJson(WriteSharedItemModelsJson(sharedModels), SharedItemModelsFileName, readBack, readIssues);
+    std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
+                 [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Error; });
+}
+
+void ValidateGlowColorsAsWritten(std::span<const Effects::GlowColor> colors, std::vector<ItemDataIssue>& issues)
+{
+    std::vector<Effects::GlowColor> readBack;
+    std::vector<ItemDataIssue> readIssues;
+    Effects::ReadGlowColorsJson(Effects::WriteGlowColorsJson(colors), Effects::GlowColorsFile, readBack, readIssues);
+    std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
+                 [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Error; });
+}
+
+#ifdef _EDITOR
+void ValidateItemStatsAsWritten(const ItemStatFile& file, std::vector<ItemDataIssue>& issues)
+{
+    ItemStatFile readBack;
+    std::vector<ItemDataIssue> readIssues;
+    ReadItemStatsJson(WriteItemStatsJson(file), GetItemStatsFile().generic_string(), readBack, readIssues);
+    std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
+                 [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Error; });
+}
+#endif
+
+void ValidateItemModelFilesExist(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues)
+{
+    for (const ItemModelDefinition& model : models)
+    {
+        if (model.file.empty())
+        {
+            continue;
+        }
+#ifdef _WIN32
+        const std::filesystem::path path = std::filesystem::u8path(model.file);
+#else
+        // The data does not always spell the files in the case they have on disk.
+        const std::filesystem::path path = MuResolvePath(model.file.c_str());
+#endif
+        std::error_code ignored;
+        if (!std::filesystem::is_regular_file(path, ignored))
+        {
+            issues.push_back({ItemDataIssueSeverity::Warning, GetItemGroupFileName(model.group), model.group,
+                              model.number, "file",
+                              model.file + " is not in the client folder; the item is drawn without a model"});
+        }
+    }
 }
 } // namespace Data::Items

@@ -440,7 +440,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             BoneManager::GetBonePosition(pObject, L"Monster82_Back", Position);
             CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 21, 0.8f);
 
-            if (rand_fps_check(20))
+            if (rand() % 20 == 0)
             {
                 PlayBuffer(static_cast<ESound>(SOUND_BC_FIREGOLEM_MOVE1 + rand() % 2));
             }
@@ -582,7 +582,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             Vector(-55.f, sinf(WorldTime * 0.03f) * 45.f, pObject->Angle[2], Angle);
             if (rand_fps_check(2))
             {
-                if (rand_fps_check(2))
+                if (rand() % 2 == 0)
                     BoneManager::GetBonePosition(pObject, L"Monster84_PoisonRight", Position);
                 else
                     BoneManager::GetBonePosition(pObject, L"Monster84_PoisonLeft", Position);
@@ -1054,9 +1054,9 @@ bool M31HuntingGround::CreateMist(PARTICLE* pParticleObj)
             vec3_t Velocity, Direction;
             Vector(0.f, -45.f * CharacterMoveSpeed(Hero), 0.f, Velocity);
             VectorRotate(Velocity, Matrix, Direction);
-            VectorAddScaled(TargetPosition, Direction, TargetPosition, FPS_ANIMATION_FACTOR);
+            VectorAdd(TargetPosition, Direction, TargetPosition);
         }
-        if (Hero->Movement || (rand_fps_check(2)))
+        if (Hero->Movement || (rand() % 2 == 0))
         {
             TargetPosition[2] = (rand() % 20) + RequestTerrainHeight(TargetPosition[0], TargetPosition[1]);
             CreateParticle(BITMAP_CLOUD, TargetPosition, TargetAngle, Light, 8, 0.4f);

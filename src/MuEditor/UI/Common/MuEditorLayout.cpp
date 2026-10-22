@@ -4,6 +4,7 @@
 
 #include "MuEditorLayout.h"
 
+#include "MuEditorUI.h"
 #include "MuEditorWindowIds.h"
 #include "../MuEditor/Core/MuEditorPlatformWindows.h"
 #include "imgui_internal.h"
@@ -16,7 +17,16 @@ namespace
 constexpr float EditorWindowWidth = 900.0f;
 // The share of the dock space's height the console takes in the first layout.
 constexpr float ConsoleHeightShare = 0.25f;
+// The share of the tools' width the item browser takes, beside the other tools.
+constexpr float ItemBrowserWidthShare = 0.35f;
 constexpr char DockSpaceName[] = "ToolWindows";
+// The editor window's dock space, as last submitted; 0 before.
+ImGuiID g_dockSpace = 0;
+// The tools that show the item the browser selects, in their tab order.
+constexpr const char* ItemToolWindows[] = {
+    MuEditor::WindowIds::ItemBasics,     MuEditor::WindowIds::ItemRequirements, MuEditor::WindowIds::ItemRules,
+    MuEditor::WindowIds::ItemCategories, MuEditor::WindowIds::ItemModel,        MuEditor::WindowIds::ItemGlowColors,
+    MuEditor::WindowIds::ItemFormulas,   MuEditor::WindowIds::ItemChecks,       MuEditor::WindowIds::ItemTranslations};
 
 void BuildDefaultLayout(ImGuiID dockSpace, ImVec2 size)
 {
@@ -27,13 +37,66 @@ void BuildDefaultLayout(ImGuiID dockSpace, ImVec2 size)
     ImGuiID tools = 0;
     const ImGuiID console = ImGui::DockBuilderSplitNode(dockSpace, ImGuiDir_Down, ConsoleHeightShare, nullptr, &tools);
     ImGui::DockBuilderDockWindow(MuEditor::WindowIds::Console, console);
-    for (const char* window :
-         {MuEditor::WindowIds::ItemEditor, MuEditor::WindowIds::SkillEditor, MuEditor::WindowIds::DevEditor,
-          MuEditor::WindowIds::MapEditor, MuEditor::WindowIds::EffectBrowser})
+    // The item browser beside the item tools, which show what it selects.
+    ImGuiID otherTools = 0;
+    const ImGuiID browser =
+        ImGui::DockBuilderSplitNode(tools, ImGuiDir_Left, ItemBrowserWidthShare, nullptr, &otherTools);
+    ImGui::DockBuilderDockWindow(MuEditor::WindowIds::ItemBrowser, browser);
+    // Also the windows that are closed: they open in their place.
+    for (const char* window : ItemToolWindows)
     {
-        ImGui::DockBuilderDockWindow(window, tools);
+        ImGui::DockBuilderDockWindow(window, otherTools);
+    }
+    for (const char* window : {MuEditor::WindowIds::SkillEditor, MuEditor::WindowIds::DevEditor,
+                               MuEditor::WindowIds::MapEditor, MuEditor::WindowIds::EffectBrowser})
+    {
+        ImGui::DockBuilderDockWindow(window, otherTools);
     }
     ImGui::DockBuilderFinish(dockSpace);
+}
+
+// The first leaf of a dock node: the node itself, or the first of its splits.
+ImGuiDockNode* FirstLeaf(ImGuiDockNode* node)
+{
+    while (node != nullptr && node->ChildNodes[0] != nullptr)
+    {
+        node = node->ChildNodes[0];
+    }
+    return node;
+}
+
+// The dock node a window is in; for a window that is closed or not open yet
+// this session, the one imgui.ini keeps for it. nullptr while it floats.
+ImGuiDockNode* FindDockNode(const char* windowId)
+{
+    ImGuiID dockId = 0;
+    if (const ImGuiWindow* window = ImGui::FindWindowByName(windowId))
+    {
+        if (window->DockNode != nullptr)
+        {
+            return window->DockNode;
+        }
+        dockId = window->DockId;
+    }
+    else if (const ImGuiWindowSettings* settings = ImGui::FindWindowSettingsByID(ImHashStr(windowId)))
+    {
+        dockId = settings->DockId;
+    }
+    return dockId != 0 ? ImGui::DockBuilderGetNode(dockId) : nullptr;
+}
+
+// Beside the item browser: the node next to the browser's, so the browser
+// stays in view. In a layout from before the item tools the console is the
+// browser's neighbour (the tools were above it): then the browser's own node.
+ImGuiDockNode* BesideBrowser(ImGuiDockNode* browser)
+{
+    if (browser == nullptr || browser->ParentNode == nullptr)
+    {
+        return nullptr;
+    }
+    ImGuiDockNode* parent = browser->ParentNode;
+    ImGuiDockNode* beside = FirstLeaf(parent->ChildNodes[0] == browser ? parent->ChildNodes[1] : parent->ChildNodes[0]);
+    return beside == FindDockNode(MuEditor::WindowIds::Console) ? browser : beside;
 }
 } // namespace
 
@@ -74,6 +137,7 @@ WindowRect FirstEditorWindowRect(float uiScale)
 void SubmitDockSpace(bool resetLayout)
 {
     const ImGuiID dockSpace = ImGui::GetID(DockSpaceName);
+    g_dockSpace = dockSpace;
     if (resetLayout || ImGui::DockBuilderGetNode(dockSpace) == nullptr)
     {
         // Never empty, also when the editor window is down to its menu bar.
@@ -82,11 +146,71 @@ void SubmitDockSpace(bool resetLayout)
     ImGui::DockSpace(dockSpace);
 }
 
+ImGuiWindowFlags ToolWindowBarFlags(const char* windowName)
+{
+    // Where the window is docked. Not from DockIsActive: the editor window's
+    // dock space clears it each frame for a window alone in its node, until
+    // the window's Begin(). On the frame a window docks, its node is found by
+    // its DockId.
+    ImGuiWindow* window = ImGui::FindWindowByName(windowName);
+    if (window == nullptr)
+    {
+        return ImGuiWindowFlags_None;
+    }
+    ImGuiDockNode* dockNode =
+        window->DockNode != nullptr ? window->DockNode : ImGui::DockBuilderGetNode(window->DockId);
+    if (dockNode == nullptr)
+    {
+        return ImGuiWindowFlags_MenuBar;
+    }
+    ImGuiDockNode* node = ImGui::DockNodeGetRootNode(dockNode);
+    if (g_dockSpace != 0 && node->ID == g_dockSpace)
+    {
+        return ImGuiWindowFlags_None;
+    }
+    // One bar for a floating window: on the tab shown at its top left (the
+    // first child of a split is the left or the top one).
+    while (!node->IsLeafNode())
+    {
+        ImGuiDockNode* first = node->ChildNodes[0];
+        node = first != nullptr && first->IsVisible ? first : node->ChildNodes[1];
+    }
+    const bool shown =
+        node->VisibleWindow != nullptr ? node->VisibleWindow == window : node->SelectedTabId == window->TabId;
+    return shown ? ImGuiWindowFlags_MenuBar : ImGuiWindowFlags_None;
+}
+
+void RenderToolWindowBar()
+{
+    g_MuEditorUI.RenderToolWindowBar();
+}
+
 void PrepareToolWindow()
 {
     ImGuiWindowClass toolWindow;
     toolWindow.DockingAlwaysTabBar = true;
     ImGui::SetNextWindowClass(&toolWindow);
+}
+
+void DockBesideItemTools(const char* windowId)
+{
+    if (ImGui::FindWindowByName(windowId) != nullptr || ImGui::FindWindowSettingsByID(ImHashStr(windowId)) != nullptr)
+    {
+        return;
+    }
+    // A neighbour also by its place in imgui.ini, while it is not open.
+    for (const char* neighbour : ItemToolWindows)
+    {
+        if (const ImGuiDockNode* node = FindDockNode(neighbour))
+        {
+            ImGui::SetNextWindowDockID(node->ID, ImGuiCond_FirstUseEver);
+            return;
+        }
+    }
+    if (const ImGuiDockNode* beside = BesideBrowser(FindDockNode(MuEditor::WindowIds::ItemBrowser)))
+    {
+        ImGui::SetNextWindowDockID(beside->ID, ImGuiCond_FirstUseEver);
+    }
 }
 } // namespace MuEditor::Layout
 

@@ -448,40 +448,22 @@ jobs:
             throw "Missing runtime imports:`n$($missingImports -join "`n")"
           }
 
-          $expectedShaders = @(
-            "basic_colored.frag.dxil"
-            "basic_colored.frag.msl"
-            "basic_colored.frag.spv"
-            "basic_colored.vert.dxil"
-            "basic_colored.vert.msl"
-            "basic_colored.vert.spv"
-            "basic_textured.frag.dxil"
-            "basic_textured.frag.msl"
-            "basic_textured.frag.spv"
-            "basic_textured.vert.dxil"
-            "basic_textured.vert.msl"
-            "basic_textured.vert.spv"
-            "shadow_volume.vert.dxil"
-            "shadow_volume.vert.msl"
-            "shadow_volume.vert.spv"
-            "skinned_textured.vert.dxil"
-            "skinned_textured.vert.msl"
-            "skinned_textured.vert.spv"
+          # The shader list lives in cmake/ValidateShaderBlobs.cmake, which the
+          # build already runs on its own shader output. Running it on the
+          # runtime copy checks that every listed .spv, .msl and .dxil blob is
+          # there and valid and that no unlisted one is.
+          $shaderDirectory = (Resolve-Path -LiteralPath "$runtimeDirectory/shaders").Path.Replace('\', '/')
+          cmake "-DMU_SHADER_BLOB_DIR=$shaderDirectory" -P cmake/ValidateShaderBlobs.cmake
+          if ($LASTEXITCODE -ne 0) {
+            throw "Runtime shaders do not match cmake/ValidateShaderBlobs.cmake (exit code $LASTEXITCODE)."
+          }
+          $otherShaderEntries = @(
+            Get-ChildItem -LiteralPath $shaderDirectory -Force -Recurse |
+              Where-Object { $_.PSIsContainer -or $_.Extension -notin @(".spv", ".msl", ".dxil") } |
+              ForEach-Object { $_.FullName }
           )
-          $shaderDirectory = "$runtimeDirectory/shaders"
-          $actualShaders = @(
-            Get-ChildItem -LiteralPath $shaderDirectory -Force -File -Recurse |
-              ForEach-Object {
-                [IO.Path]::GetRelativePath($shaderDirectory, $_.FullName).Replace('\', '/')
-              } |
-              Sort-Object
-          )
-          $shaderDifference = @(
-            Compare-Object -ReferenceObject $expectedShaders -DifferenceObject $actualShaders
-          )
-          if ($shaderDifference.Count -ne 0) {
-            Write-Host ($shaderDifference | Format-Table -AutoSize | Out-String)
-            throw "Runtime shader manifest differs from the exact 18-file manifest."
+          if ($otherShaderEntries.Count -ne 0) {
+            throw "Unexpected entries in the runtime shader directory:`n$($otherShaderEntries -join "`n")"
           }
 
           Write-Host "Validated native x64 runtime directory: $runtimeDirectory"
@@ -719,8 +701,6 @@ jobs:
         uses: cycjimmy/semantic-release-action@v4
         with:
           extra_plugins: |
-            @semantic-release/changelog
-            @semantic-release/git
             conventional-changelog-conventionalcommits@8.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

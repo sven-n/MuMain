@@ -79,6 +79,9 @@
   <data name="Error: Index {0} already in use!" xml:space="preserve">
     <value>Error: Indeks {0} sudah digunakan!</value>
   </data>
+  <data name="Error: Index {0} has its own model!" xml:space="preserve">
+    <value>Error: Indeks {0} memiliki model sendiri!</value>
+  </data>
   <data name="Search:" xml:space="preserve">
     <value>Cari:</value>
   </data>

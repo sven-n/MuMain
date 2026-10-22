@@ -32,7 +32,7 @@
 				<img class="sprite" data-for="s : sprites" data-attr-src="s.src" data-attr-rect="s.rect"
 				     data-style-left="s.left + 'px'" data-style-top="s.top + 'px'"
 				     data-style-width="s.width + 'px'" data-style-height="s.height + 'px'"
-				     data-style-opacity="s.opacity"/>
+				     data-style-opacity="s.opacity"></img>
 			</div>
 			<!-- The panels' area, which holds the pointer; the skill panel's hover zones (the skill,
 			     the kill points it needs, the ones the hero has); the buttons. -->
@@ -47,39 +47,39 @@
 			     The original drew the time twice over itself. -->
 			<div class="ct-run ct-time-minutes" data-style---n="minute_digits.size">
 				<img class="ct-digit" src="../../../newui_number1.tga" data-for="cell, i : minute_digits"
-				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"/>
+				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"></img>
 			</div>
 			<div class="ct-run ct-time-seconds" data-style---n="second_digits.size">
 				<img class="ct-digit" src="../../../newui_number1.tga" data-for="cell, i : second_digits"
-				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"/>
+				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"></img>
 			</div>
 			<div class="ct-run ct-time-minutes" data-style---n="minute_digits.size">
 				<img class="ct-digit" src="../../../newui_number1.tga" data-for="cell, i : minute_digits"
-				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"/>
+				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"></img>
 			</div>
 			<div class="ct-run ct-time-seconds" data-style---n="second_digits.size">
 				<img class="ct-digit" src="../../../newui_number1.tga" data-for="cell, i : second_digits"
-				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"/>
+				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"></img>
 			</div>
 			<div class="ct-run" id="ct_alpha" data-style---n="alpha_digits.size">
 				<img class="ct-digit" src="../../../FontTest.tga" data-for="cell, i : alpha_digits"
-				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"/>
+				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"></img>
 			</div>
 			<div class="ct-run" id="ct_allied" data-style---n="allied_digits.size">
 				<img class="ct-digit" src="../../../FontTest.tga" data-for="cell, i : allied_digits"
-				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"/>
+				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"></img>
 			</div>
 			<div class="ct-run" id="ct_illusion" data-style---n="illusion_digits.size">
 				<img class="ct-digit" src="../../../FontTest.tga" data-for="cell, i : illusion_digits"
-				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"/>
+				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"></img>
 			</div>
 			<div class="ct-run" id="ct_kills_needed" data-style---n="kills_needed_digits.size">
 				<img class="ct-digit" src="../../../newui_number1.tga" data-for="cell, i : kills_needed_digits"
-				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"/>
+				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"></img>
 			</div>
 			<div class="ct-run" id="ct_kills" data-style---n="kills_digits.size">
 				<img class="ct-digit" src="../../../newui_number1.tga" data-for="cell, i : kills_digits"
-				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"/>
+				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"></img>
 			</div>
 		</div>
 		</div>

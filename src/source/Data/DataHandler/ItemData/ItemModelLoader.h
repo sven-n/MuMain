@@ -1,7 +1,11 @@
 #pragma once
 
+#include "Data/DataHandler/ItemData/ItemModelProblem.h"
+
+#include <span>
 #include <string>
 #include <string_view>
+#include <vector>
 
 // Opens the item models of the item model database (Data/Items/Models) into
 // the model slots of their items (ToModelSlot), and loads their textures. The
@@ -33,6 +37,20 @@ void OpenModels(const LookNames& lookNames);
 // Loads the textures of every item model from its texture folders (those of
 // a shared model once).
 void OpenTextures();
+
+// The item editor moved two items, and with them their models
+// (ItemModelDatabase::Swap): their model slots swap the opened data
+// (CLoadData::SwapModels) and the material values of the models. Nothing
+// happens before the game has its model slots.
+void SwapOpenedModels(int firstItemType, int secondItemType);
+
+// Opens the models of these items again into their model slots, with their
+// textures, as the item model database has them now; the slot of an item
+// without a model is emptied. Of the items of one shared model the first
+// opens the file and the others share its data. For the item editor, which
+// changes model files; the problems are returned, not kept for
+// TakeProblemMessage. Nothing happens before the game has its model slots.
+std::vector<ItemModelProblem> ReopenModels(std::span<const int> itemTypes, const LookNames& lookNames);
 
 // The message for the player about the missing model files and textures
 // that OpenModels and OpenTextures found (all problems are already in the

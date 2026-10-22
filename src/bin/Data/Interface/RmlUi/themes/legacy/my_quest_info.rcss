@@ -80,7 +80,7 @@
 	font-size: 1em;
 	text-align: left;
 }
-.quest-empty-msg span { display: block; line-height: inherit; }
+.quest-empty-msg span { display: block; }
 
 .quest-list {
 	position: absolute;
@@ -185,7 +185,7 @@
 	font-size: 1em;
 }
 .jobchange-contents { position: absolute; top: 15px; }
-.jobchange-contents span { display: block; line-height: inherit; }
+.jobchange-contents span { display: block; }
 /* Native: status rows left-aligned at x+23 from y+283, 18 apart. */
 .jobchange-state {
 	position: absolute;
@@ -195,7 +195,7 @@
 	color: token(text-heading);
 	font-weight: bold;
 }
-.jobchange-state span { display: block; line-height: inherit; }
+.jobchange-state span { display: block; }
 .jobchange-divider { top: 122px; }
 .castletemple-divider { top: 150px; }
 

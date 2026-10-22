@@ -76,7 +76,7 @@
    no scale transform, so it rasterizes at the displayed size directly. */
 #text {
 	position: absolute;
-	font-family: "DejaVu Sans";
+	font-family: "token(font-body)";
 	font-size: 1rem;
 	line-height: 9dp;
 	left: 10dp;

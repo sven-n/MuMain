@@ -664,7 +664,13 @@ void DefaultCamera::SetCameraAngle()
         m_State.Angle[0] = -48.5f;
     }
 
-    m_State.Angle[0] += EarthQuake;
+    // Effects roll a new shake every rendered frame; take one per reference frame, as at 25 FPS.
+    static float s_earthQuake = 0.f;
+    if (REFERENCE_FRAME_STEP > 0)
+    {
+        s_earthQuake = EarthQuake;
+    }
+    m_State.Angle[0] += s_earthQuake;
 }
 
 void DefaultCamera::UpdateCustomCameraDistance()

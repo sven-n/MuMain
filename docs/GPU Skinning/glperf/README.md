@@ -25,7 +25,8 @@ milliseconds are claimed.
 
 ## Scaled diagnostic overlays
 
-`$details on` shows the compact FPS/frame/CPU summary, active SDL GPU driver, UI/RmlUi
+`$details on` shows the compact FPS/frame/CPU summary, the build, OS, processor, memory and GPU,
+active SDL GPU driver, UI/RmlUi
 timings, renderer timings, and frame-time history. `$glstats on` adds the per-pass table;
 placement-layout, input, flush, and overlay measurements live there. `$fpscounter on` shows just FPS.
 The overlays are RmlUi documents, follow UI scale, reload with the theme, and pass mouse
@@ -98,12 +99,15 @@ its last individual submission.
 
 Upstream GL terrain could reorder base-plus-overlay tiles because one shader draw
 handled both layers with compatible depth behavior. Downstream renders the base
-and blended overlay separately, and the overlay may disable depth testing.
-Reordering by texture pair can therefore change pixels.
+and the blended overlay as separate draws, so it does not sort by texture pair.
 
-MuMain keeps submission order. Only adjacent commands with identical captured
-state merge. This retains the batching intent without changing blended terrain
-semantics.
+MuMain keeps submission order, with one exception: terrain draws every ground
+quad first and then every overlay, each in its original order
+(`RenderLayerFaces()` in `ZzzLodTerrain.cpp`). The overlays stay depth-tested with
+depth writes off, so each passes over its own coplanar ground under the read-only
+pipeline's `LESS_OR_EQUAL` compare while nearer ground still hides it; that is
+what makes the split safe. Within each pass, only adjacent commands with identical
+captured state merge.
 
 ## Buffer and state lifetime
 

@@ -555,7 +555,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
             {
                 float fLumi = (rand() % 10) * 0.007f + 0.03f;
                 Vector(54.f / 256.f * fLumi, 177.f / 256.f * fLumi, 150.f / 256.f * fLumi, Light);
-                CreateParticleFpsChecked(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
+                CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
             }
         }
         return true;
@@ -565,7 +565,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
             {
                 float fLumi = (rand() % 10) * 0.007f + 0.03f;
                 Vector(221.f / 256.f * fLumi, 121.f / 256.f * fLumi, 201.f / 256.f * fLumi, Light);
-                CreateParticleFpsChecked(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
+                CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
             }
         }
         return true;
@@ -575,9 +575,9 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
             {
                 float fLumi = (rand() % 10) * 0.007f + 0.03f;
                 Vector(54.f / 256.f * fLumi, 177.f / 256.f * fLumi, 150.f / 256.f * fLumi, Light);
-                CreateParticleFpsChecked(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
+                CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
                 Vector(221.f / 256.f * fLumi, 121.f / 256.f * fLumi, 201.f / 256.f * fLumi, Light);
-                CreateParticleFpsChecked(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
+                CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
             }
         }
         return true;
@@ -587,7 +587,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
             {
                 float fLumi = (rand() % 10) * 0.002f + 0.03f;
                 Vector(1.2f * fLumi, 1.2f * fLumi, 1.2f * fLumi, Light);
-                CreateParticleFpsChecked(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
+                CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
             }
         }
         return true;
@@ -596,7 +596,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
             if (rand_fps_check(2))
             {
                 Vector(0.f, 0.f, 0.f, Light);
-                CreateParticleFpsChecked(BITMAP_CLOUD, o->Position, o->Angle, Light, 16, o->Scale, o);
+                CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 16, o->Scale, o);
             }
         }
         return true;

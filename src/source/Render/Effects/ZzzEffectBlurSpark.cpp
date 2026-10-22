@@ -120,20 +120,40 @@ void RenderFlagFace(OBJECT* object, const vec3_t light, int texture, const float
     mu::GetRenderer().RenderQuad3D(vertices, 0u);
 }
 
+// Callers submit several interpolated poses per frame. Only a reference frame ages the trail, so until
+// then each frame's poses replace the previous frame's instead of piling up behind them.
+template <typename BlurType> void AddBlurSample(BlurType& blur, vec3_t p1, vec3_t p2, int maxTails)
+{
+    if (blur.Frame != RENDERED_FRAME)
+    {
+        const int replaced = blur.FrameSamples;
+        for (int i = 0; i + replaced < blur.Number; ++i)
+        {
+            VectorCopy(blur.P1[i + replaced], blur.P1[i]);
+            VectorCopy(blur.P2[i + replaced], blur.P2[i]);
+        }
+        blur.Number -= replaced;
+        blur.Frame = RENDERED_FRAME;
+        blur.FrameSamples = 0;
+    }
+    for (int i = blur.Number - 1; i >= 0; --i)
+    {
+        VectorCopy(blur.P1[i], blur.P1[i + 1]);
+        VectorCopy(blur.P2[i], blur.P2[i + 1]);
+    }
+    VectorCopy(p1, blur.P1[0]);
+    VectorCopy(p2, blur.P2[0]);
+    blur.Number = std::min<int>(blur.Number + 1, maxTails - 1);
+    blur.FrameSamples = std::min<int>(blur.FrameSamples + 1, blur.Number);
+}
+
 } // namespace
 
 void AddBlur(Blur* b, vec3_t p1, vec3_t p2, vec3_t Light, int Type)
 {
     b->Type = Type;
     VectorCopy(Light, b->Light);
-    for (int i = b->Number - 1; i >= 0; --i)
-    {
-        VectorCopy(b->P1[i], b->P1[i + 1]);
-        VectorCopy(b->P2[i], b->P2[i + 1]);
-    }
-    VectorCopy(p1, b->P1[0]);
-    VectorCopy(p2, b->P2[0]);
-    b->Number = std::min<int>(b->Number + 1, MAX_BLUR_TAILS - 1);
+    AddBlurSample(*b, p1, p2, MAX_BLUR_TAILS);
 }
 
 void CreateBlur(CHARACTER* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, bool Short, int SubType)
@@ -164,6 +184,7 @@ void CreateBlur(CHARACTER* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, 
         freeBlur->Live = true;
         freeBlur->Owner = Owner;
         freeBlur->Number = 0;
+        freeBlur->FrameSamples = 0;
         freeBlur->LifeTime = Short ? 15 : MAX_BLUR_LIFETIME;
         freeBlur->SubType = SubType;
         AddBlur(freeBlur, p1, p2, Light, Type);
@@ -172,6 +193,10 @@ void CreateBlur(CHARACTER* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, 
 
 void MoveBlurs()
 {
+    if (REFERENCE_FRAME_STEP == 0)
+    {
+        return;
+    }
     for (auto& blur : g_blurs)
     {
         if (!blur.Live)
@@ -179,6 +204,7 @@ void MoveBlurs()
             continue;
         }
 
+        blur.FrameSamples = 0;
         blur.LifeTime--;
         blur.Number = std::max<int>(blur.Number - 1, 0);
 
@@ -272,15 +298,7 @@ void AddObjectBlur(ObjectBlur* b, vec3_t p1, vec3_t p2, vec3_t Light, int Type)
 {
     b->Type = Type;
     VectorCopy(Light, b->Light);
-
-    for (int i = b->Number - 1; i >= 0; --i)
-    {
-        VectorCopy(b->P1[i], b->P1[i + 1]);
-        VectorCopy(b->P2[i], b->P2[i + 1]);
-    }
-    VectorCopy(p1, b->P1[0]);
-    VectorCopy(p2, b->P2[0]);
-    b->Number = std::min<int>(b->Number + 1, MAX_OBJECT_BLUR_TAILS - 1);
+    AddBlurSample(*b, p1, p2, MAX_OBJECT_BLUR_TAILS);
 }
 
 void CreateObjectBlur(OBJECT* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, bool Short, int SubType, int iLimitLifeTime)
@@ -311,6 +329,7 @@ void CreateObjectBlur(OBJECT* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Typ
         freeBlur->Live = true;
         freeBlur->Owner = Owner;
         freeBlur->Number = 0;
+        freeBlur->FrameSamples = 0;
         if (iLimitLifeTime > -1)
         {
             freeBlur->LifeTime = iLimitLifeTime;
@@ -329,6 +348,10 @@ void CreateObjectBlur(OBJECT* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Typ
 
 void MoveObjectBlurs()
 {
+    if (REFERENCE_FRAME_STEP == 0)
+    {
+        return;
+    }
     for (auto& blur : g_objectBlurs)
     {
         if (!blur.Live)
@@ -336,6 +359,7 @@ void MoveObjectBlurs()
             continue;
         }
 
+        blur.FrameSamples = 0;
         blur.LifeTime--;
         blur.Number = std::max<int>(blur.Number - 1, 0);
 

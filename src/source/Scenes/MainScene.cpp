@@ -37,6 +37,9 @@
 #include "UI/HUD/UIMapName.h"
 #include "UI/Scaling/UITransform.h"
 #include "Camera/CameraProjection.h"
+#include "Scenes/SceneLightingSetup.h"
+#include "Scenes/ScenePostProcessing.h"
+#include "Render/Lighting/DynamicLightHistory.h"
 #include "Camera/CameraManager.h"
 #include "Camera/CameraMode.h"
 #include "Core/Input/ImeInput.h"
@@ -200,7 +203,11 @@ static void InitializeMainScene()
  */
 static void InitializeSceneFrame()
 {
-    EarthQuake *= 0.2f;
+    // Decays per reference frame, like DefaultCamera samples it.
+    if (REFERENCE_FRAME_STEP > 0)
+    {
+        EarthQuake *= 0.2f;
+    }
     InitTerrainLight();
 
     CheckInventory = NULL;
@@ -271,7 +278,10 @@ static void UpdateUIAndInput()
  */
 static void UpdateGameEntities()
 {
-    MoveObjects();
+    {
+        Render::Lighting::LightSourceScope mapLights(Render::Lighting::LightSource::Map);
+        MoveObjects();
+    }
 
     if (!g_Camera.TopViewEnable)
         MoveItems();
@@ -285,8 +295,11 @@ static void UpdateGameEntities()
     MoveFishs();
     UI::Chat::MoveChat();
     UpdatePersonalShopTitleImp();
-    MoveHero();
-    MoveCharactersClient();
+    {
+        Render::Lighting::LightSourceScope characterLights(Render::Lighting::LightSource::Character);
+        MoveHero();
+        MoveCharactersClient();
+    }
     MoveMounts();
     ThePetProcess().UpdatePets();
     MovePoints();
@@ -388,6 +401,7 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
         }
         // Don't disable fog - let BeginOpengl() handle it based on FogEnable
     }
+    Scenes::Lighting::SubmitSceneLighting();
     CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
     App::Control::Frames::RecordWorldCamera();
 }
@@ -398,6 +412,11 @@ static bool g_bDisableEffectsDebug = false;
 void SetDisableEffects(bool disabled)
 {
     g_bDisableEffectsDebug = disabled;
+}
+
+bool IsEffectsDisabledDebug()
+{
+    return g_bDisableEffectsDebug;
 }
 
 // Diagnostic toggles, finer-grained bisection -- see MainScene.h doc comments.
@@ -449,6 +468,16 @@ bool IsWingShadowDisabledDebug()
     return g_bDisableWingShadowDebug;
 }
 
+static bool g_bDisableBodyShadowsDebug = false;
+void SetDisableBodyShadows(bool disabled)
+{
+    g_bDisableBodyShadowsDebug = disabled;
+}
+bool IsBodyShadowsDisabledDebug()
+{
+    return g_bDisableBodyShadowsDebug;
+}
+
 static bool g_bDisableJointsDebug = false;
 void SetDisableJoints(bool disabled)
 {
@@ -457,6 +486,16 @@ void SetDisableJoints(bool disabled)
 bool IsJointsDisabledDebug()
 {
     return g_bDisableJointsDebug;
+}
+
+static bool g_bDisableEffectCullingDebug = false;
+void SetDisableEffectCulling(bool disabled)
+{
+    g_bDisableEffectCullingDebug = disabled;
+}
+bool IsEffectCullingDisabledDebug()
+{
+    return g_bDisableEffectCullingDebug;
 }
 
 static bool g_bDisableWingExtraLayersDebug = false;
@@ -505,14 +544,22 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
             {
                 if ((gMapManager.IsPKField() || IsDoppelGanger2()) && renderStatic)
                 {
-                    FRAME_PROFILE(Objects); RenderObjects();
+                    FRAME_PROFILE(Objects);
+                    Render::Lighting::LightSourceScope mapLights(Render::Lighting::LightSource::Map);
+                    mu::ScopedReorderableDraws reorderable;
+                    RenderObjects();
                 }
                 { FRAME_PROFILE(Terrain); RenderTerrain(false); }
             }
     }
 
     if (!gMapManager.IsPKField() && !IsDoppelGanger2() && renderStatic)
-        { FRAME_PROFILE(Objects); RenderObjects(); }
+    {
+        FRAME_PROFILE(Objects);
+        Render::Lighting::LightSourceScope mapLights(Render::Lighting::LightSource::Map);
+        mu::ScopedReorderableDraws reorderable;
+        RenderObjects();
+    }
 
     if (renderEffects)
     {
@@ -536,13 +583,17 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         RenderLeaves();
 
     if (!gMapManager.InChaosCastle())
-        ThePetProcess().RenderPets();
+        Scenes::PostProcessing::RenderPetsWithoutBloom();
 
     if (renderEffects)
         RenderBoids(true);
 
     if (renderStatic)
-        { FRAME_PROFILE(Objects); RenderObjects_AfterCharacter(); }
+    {
+        FRAME_PROFILE(Objects);
+        mu::ScopedReorderableDraws reorderable;
+        RenderObjects_AfterCharacter();
+    }
 
     { FRAME_PROFILE(Joints); RenderJoints(byWaterMap); }
 
@@ -723,6 +774,7 @@ bool RenderMainScene()
     }
 
     SetupMainSceneViewport(width, height, byWaterMap, cameraPos);
+    AddFrameHistoryLights();
     RenderGameWorld(byWaterMap, width, height);
 
 #ifdef _EDITOR
@@ -737,6 +789,8 @@ bool RenderMainScene()
             RenderFrustumWireframe(spectated->GetFrustum());
     }
 #endif
+
+    Scenes::PostProcessing::EndSceneGeometry();
 
     {
         FRAME_PROFILE(UI);

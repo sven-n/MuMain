@@ -13,6 +13,8 @@ struct VSOutput
     float2 uv : TEXCOORD0;
     float4 color : TEXCOORD1;
     float fogFactor : TEXCOORD2;
+    // Eye-space depth for per-pixel (Enhanced) fog; basic_textured.frag ignores it.
+    float eyeDepth : TEXCOORD3;
     float clipDist : SV_ClipDistance0;
 };
 VSOutput main(VSInput input)
@@ -32,5 +34,6 @@ VSOutput main(VSInput input)
     float dist = abs(o.pos.w);
     float range = fogEnd - fogStart;
     o.fogFactor = (range > 0.001) ? saturate((fogEnd - dist) / range) : 1.0;
+    o.eyeDepth = dist;
     return o;
 }

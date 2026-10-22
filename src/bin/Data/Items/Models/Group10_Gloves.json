@@ -14,6 +14,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "material": {
+        "specular": 0.6
       }
     },
     {
@@ -31,6 +34,9 @@
       },
       "glow": {
         "color": "red"
+      },
+      "material": {
+        "specular": 0.6
       }
     },
     {
@@ -112,6 +118,9 @@
       },
       "glow": {
         "color": "lime"
+      },
+      "material": {
+        "specular": 0.6
       }
     },
     {
@@ -140,6 +149,9 @@
       "ground": {
         "rotation": [270, 0, -45],
         "bodyHeight": -70
+      },
+      "material": {
+        "specular": 0.6
       }
     },
     {
@@ -158,6 +170,9 @@
       "glow": {
         "color": "blue",
         "ancientColor": "gold"
+      },
+      "material": {
+        "specular": 0.6
       },
       "renderStyle": "helperNpcPlate"
     },
@@ -258,6 +273,9 @@
         "color": "lavender",
         "shineColor": "orange"
       },
+      "material": {
+        "specular": 0.6
+      },
       "renderStyle": "stormCrow"
     },
     {
@@ -275,6 +293,9 @@
       },
       "glow": {
         "color": "sand"
+      },
+      "material": {
+        "specular": 0.6
       }
     },
     {
@@ -294,6 +315,9 @@
         "color": "steelBlue",
         "shineColor": "orange",
         "ancientColor": "gold"
+      },
+      "material": {
+        "specular": 0.6
       }
     },
     {
@@ -348,6 +372,9 @@
       "glow": {
         "color": "steelBlue"
       },
+      "material": {
+        "specular": 0.6
+      },
       "renderStyle": "thunderHawk"
     },
     {
@@ -366,6 +393,9 @@
       "glow": {
         "color": "copper",
         "shineWhite": true
+      },
+      "material": {
+        "specular": 0.6
       }
     },
     {
@@ -401,6 +431,9 @@
       "glow": {
         "color": "slate"
       },
+      "material": {
+        "specular": 0.6
+      },
       "renderStyle": "hurricane"
     },
     {
@@ -435,6 +468,9 @@
       },
       "glow": {
         "color": "slate"
+      },
+      "material": {
+        "specular": 0.6
       }
     },
     {
@@ -452,6 +488,9 @@
       },
       "glow": {
         "color": "sage"
+      },
+      "material": {
+        "specular": 0.6
       }
     },
     {
@@ -469,6 +508,9 @@
       },
       "glow": {
         "color": "sand"
+      },
+      "material": {
+        "specular": 0.6
       }
     },
     {
@@ -486,6 +528,9 @@
       },
       "glow": {
         "color": "denim"
+      },
+      "material": {
+        "specular": 0.6
       }
     },
     {
@@ -503,6 +548,9 @@
       },
       "glow": {
         "color": "brown"
+      },
+      "material": {
+        "specular": 0.6
       }
     },
     {
@@ -554,6 +602,9 @@
       },
       "glow": {
         "color": "violet"
+      },
+      "material": {
+        "specular": 0.6
       }
     },
     {
@@ -571,6 +622,9 @@
       },
       "glow": {
         "color": "olive"
+      },
+      "material": {
+        "specular": 0.6
       }
     },
     {
@@ -588,6 +642,9 @@
       },
       "glow": {
         "color": "ochre"
+      },
+      "material": {
+        "specular": 0.6
       }
     },
     {
@@ -640,6 +697,9 @@
       },
       "glow": {
         "color": "mist"
+      },
+      "material": {
+        "specular": 0.6
       }
     },
     {
@@ -657,6 +717,9 @@
       },
       "glow": {
         "color": "olive"
+      },
+      "material": {
+        "specular": 0.6
       }
     },
     {
@@ -783,6 +846,9 @@
       },
       "glow": {
         "color": "periwinkle"
+      },
+      "material": {
+        "specular": 0.6
       }
     },
     {
@@ -800,6 +866,9 @@
       },
       "glow": {
         "color": "darkOrange"
+      },
+      "material": {
+        "specular": 0.6
       }
     },
     {
@@ -885,6 +954,9 @@
       },
       "glow": {
         "color": "crimson"
+      },
+      "material": {
+        "specular": 0.6
       }
     },
     {

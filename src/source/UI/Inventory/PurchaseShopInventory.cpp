@@ -251,6 +251,8 @@ void mu::ui::window::CPurchaseShopInventory::SyncRmlModel()
     m_ItemTarget.Sync(m_RmlView.Document() ? m_RmlView.Document()->GetElementById("item_view") : nullptr, IsVisible());
     if (!m_RmlView.Document()) return;
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
+    if (!IsVisible())
+        return;
 
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->FollowGridPx(m_RmlView.Document(), "item_grid");

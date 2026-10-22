@@ -74,7 +74,7 @@
 	left: 4dp;
 	top: 5dp;
 	right: 4dp;
-	font-size: 11dp;
+	font-size: 1rem;
 	display: flex;
 	flex-direction: column;
 	/* Lines hug their own text rather than stretching to the pane: native passed no box width to

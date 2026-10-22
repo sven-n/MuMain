@@ -16,6 +16,7 @@
 #include "Network/Server/WSclient.h"
 #include "World/MapInfra/MapManager.h"
 #include "UI/Core/WindowSystem.h"
+#include "Core/Utilities/FrameProfiler.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Effects/ParticleDrawOrder.h"
 #include "Data/GameConfig/GameConfig.h"
@@ -129,20 +130,20 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->Scale = (float)(rand() % 5 + 20) * 0.1f;
 
                     o->Position[0] = Position[0] + (float)(rand() % 80 - 40);
-                    o->Position[2] -= (100.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] -= 100.f;
                 }
                 else if (o->SubType == 5)
                 {
                     o->TexType = BITMAP_EXT_LOG_IN + 2;
                     o->Scale = (float)(rand() % 10 + 20) * 0.01f * 1.3f;
                     o->Gravity = (float)(rand() % 10 + 20) * 0.05f * 1.3f;
-                    o->Position[2] -= (100.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] -= 100.f;
                 }
                 else if (o->SubType == 6)
                 {
                     o->Gravity = (float)(rand() % 20 + 80) * 0.1f;
                     o->Scale = (float)(rand() % 5 + 20) * 0.1f;
-                    o->Position[2] -= (200.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] -= 200.f;
                 }
                 else if (o->SubType == 7)
                 {
@@ -150,7 +151,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->Scale = (float)(rand() % 10 + 20) * 0.01f;
                     o->Gravity = (float)(rand() % 20 + 80) * 0.1f;
 
-                    o->Position[2] -= (100.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] -= 100.f;
                 }
                 break;
 
@@ -271,7 +272,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 o->Scale = 1.8f;
                 o->Angle[0] = 30.f;
                 Vector((float)(rand() % 4 + 6) * 0.1f, (float)(rand() % 4 + 6) * 0.1f, (float)(rand() % 4 + 6) * 0.1f, o->Light);
-                o->Position[2] += (260.f) * FPS_ANIMATION_FACTOR;
+                o->Position[2] += 260.f;
                 break;
             case BITMAP_CHROME_ENERGY2:
                 o->LifeTime = 8;
@@ -291,9 +292,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 }
                 else if (o->SubType == 1)
                 {
-                    o->Position[0] += ((rand() % 10 - 5) * 0.2f) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((rand() % 10 - 5) * 0.2f) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((rand() % 10 - 5) * 0.2f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (rand() % 10 - 5) * 0.2f;
+                    o->Position[1] += (rand() % 10 - 5) * 0.2f;
+                    o->Position[2] += (rand() % 10 - 5) * 0.2f;
                     o->LifeTime = (rand() % 28 + 4);
                     Vector(0.f, 0.f, 0.f, o->Velocity);
                     o->Scale = (float)(rand() % 5 + 50) * 0.016f;
@@ -553,9 +554,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 }
                 else if (o->SubType == 8)
                 {
-                    o->Position[0] += ((float)(rand() % 20 - 10)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 20 - 10)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 20 - 10)) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 20 - 10);
+                    o->Position[1] += (float)(rand() % 20 - 10);
+                    o->Position[2] += (float)(rand() % 20 - 10);
                     o->LifeTime = 32;
                     o->Rotation = (float)(rand() % 360);
                     o->Gravity = (float)(rand() % 5 + 5) / 5.0f;
@@ -596,18 +597,18 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->Scale = -(float)(rand() % 20) / 100.0f + o->Scale;
                     o->Rotation = (float)(rand() % 360) - 180.0f;
                     o->StartPosition[0] = o->Position[0];
-                    o->Position[0] += (((float)(rand() % 2) / 2.0f - 0.0f) * o->Scale) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += ((float)(rand() % 2) / 2.0f - 0.0f) * o->Scale;
                     o->Gravity = ((float)(rand() % 100) / 100.0f + 1.8f) * o->Scale;
                     float fTemp = 0.0f;
                     if (rand() % 10 >= 3)
                         fTemp = ((float)(rand() % 20) / 10.0f - 1.0f) * o->Scale;
                     Vector(0.0f, fTemp, 0.0f, o->Velocity);
-                    o->Position[1] += (o->Position[0] - o->StartPosition[0]) * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += o->Position[0] - o->StartPosition[0];
                 }
                 break;
                 case 1:
                     o->LifeTime = 15;
-                    o->Scale += (float)(rand() % 32 + 32) * 0.01f * FPS_ANIMATION_FACTOR;
+                    o->Scale += (float)(rand() % 32 + 32) * 0.01f;
                     Vector(0.f, (float)(rand() % 4 + 4) * 0.15f, 0.f, o->Velocity);
                     break;
                 case 5:
@@ -619,7 +620,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     float Luminosity;
 
                     o->LifeTime = 10;
-                    o->Scale += (float)(rand() % 32 + 32) * 0.01f * FPS_ANIMATION_FACTOR;
+                    o->Scale += (float)(rand() % 32 + 32) * 0.01f;
 
                     float inter = Light[0] * (rand() % 80) / 100.0f;
                     Vector(0.f, inter, 0.f, o->Velocity);
@@ -639,7 +640,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     float Luminosity;
 
                     o->LifeTime = 10;
-                    o->Scale += (float)(rand() % 32 + 32) * 0.01f * FPS_ANIMATION_FACTOR;
+                    o->Scale += (float)(rand() % 32 + 32) * 0.01f;
                     Vector(0.f, 0.f, 0.f, o->Velocity);
 
                     Luminosity = (float)sinf(WorldTime * 0.002f) * 0.3f + 0.7f;
@@ -651,7 +652,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     float Luminosity;
 
                     o->LifeTime = 5;
-                    o->Scale += (float)(rand() % 32 + 32) * 0.01f * FPS_ANIMATION_FACTOR;
+                    o->Scale += (float)(rand() % 32 + 32) * 0.01f;
                     o->Gravity = 10.f;
                     VectorCopy(o->Target->Position, o->StartPosition);
 
@@ -662,10 +663,10 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 case 9:
                 {
                     o->LifeTime = 40;
-                    o->Scale += -(float)(rand() % 20) / 100.0f * FPS_ANIMATION_FACTOR;
+                    o->Scale = -(float)(rand() % 20) / 100.0f + o->Scale;
                     o->Rotation = (float)(rand() % 360) - 180.0f;
                     o->StartPosition[0] = o->Position[0];
-                    o->Position[0] += (((float)(rand() % 2) / 2.0f - 0.0f) * o->Scale) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += ((float)(rand() % 2) / 2.0f - 0.0f) * o->Scale;
                     o->Gravity = ((float)(rand() % 100) / 100.0f + 1.8f) * o->Scale + 2.0f;
                     float fTemp = 0.0f;
                     if (rand() % 10 >= 3)
@@ -673,7 +674,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                         fTemp = ((float)(rand() % 20) / 10.0f - 1.0f) * o->Scale;
                     }
                     Vector(0.0f, fTemp * 2.0f, 0.0f, o->Velocity);
-                    o->Position[1] += (o->Position[0] - o->StartPosition[0]) * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += o->Position[0] - o->StartPosition[0];
                 }
                 break;
                 case 10:
@@ -709,9 +710,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 o->Scale = (rand() % 6 + 8) * 0.1f;
                 if (o->Type == BITMAP_RAIN_CIRCLE + 1 || o->SubType == 1)
                 {
-                    o->Position[0] += ((rand() % 10 - 5) * 1.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((rand() % 10 - 5) * 1.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((rand() % 10 - 5) * 1.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (rand() % 10 - 5) * 1.f;
+                    o->Position[1] += (rand() % 10 - 5) * 1.f;
+                    o->Position[2] += (rand() % 10 - 5) * 1.f;
                 }
                 if (o->SubType == 1)
                 {
@@ -817,7 +818,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 if (o->SubType == 0)
                 {
                     o->LifeTime = 16;
-                    o->Scale += (float)(rand() % 32 + 48) * 0.01f * FPS_ANIMATION_FACTOR;
+                    o->Scale += (float)(rand() % 32 + 48) * 0.01f;
                     o->Angle[0] = (float)(rand() % 360);
                     o->Rotation = (float)((int)WorldTime % 360);
                 }
@@ -825,16 +826,16 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 {
                     o->TexType = BITMAP_SMOKE;
                     o->LifeTime = 20;
-                    o->Scale += (float)(rand() % 10 + 10) * 0.01f * FPS_ANIMATION_FACTOR;
+                    o->Scale += (float)(rand() % 10 + 10) * 0.01f;
                     o->Angle[0] = (float)(rand() % 360);
                     o->Rotation = (float)((int)WorldTime % 360);
                     o->Gravity = (float)(rand() % 10 + 40) * 0.04f;
-                    o->Position[1] += (10.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += 10.f;
                 }
                 else if (o->SubType == 2)
                 {
                     o->LifeTime = 10;
-                    o->Scale -= (float)(rand() % 40 + 48) * 0.008f * FPS_ANIMATION_FACTOR;
+                    o->Scale -= (float)(rand() % 40 + 48) * 0.008f;
                     o->Angle[0] = (float)(rand() % 360);
                     o->Rotation = (float)((int)WorldTime % 360);
                     o->Gravity = 0.0f;
@@ -842,7 +843,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 else if (o->SubType == 3)
                 {
                     o->LifeTime = 20;
-                    o->Scale += (float)(rand() % 32 + 48) * 0.008f * FPS_ANIMATION_FACTOR;
+                    o->Scale += (float)(rand() % 32 + 48) * 0.008f;
                     o->Angle[0] = (float)(rand() % 360);
                     o->Rotation = (float)((int)WorldTime % 360);
                     VectorCopy(o->Target->Position, o->StartPosition);
@@ -850,7 +851,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 else if (o->SubType == 4)
                 {
                     o->LifeTime = 16;
-                    o->Scale += (float)(rand() % 32 + 48) * 0.01f * FPS_ANIMATION_FACTOR;
+                    o->Scale += (float)(rand() % 32 + 48) * 0.01f;
                     o->Angle[0] = (float)(rand() % 360);
                     o->Rotation = (float)((int)WorldTime % 360);
                 }
@@ -872,7 +873,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->Velocity[2] = 0;
 
                     o->LifeTime = 21;
-                    o->Scale = (float)(rand() % 4 + 8) * 0.01f * FPS_ANIMATION_FACTOR;
+                    o->Scale = (float)(rand() % 4 + 8) * 0.01f;
                     o->Gravity = (float)(rand() % 1 + 4) * 0.1f;
 
                     o->Angle[2] = (float)(rand() % 360);
@@ -880,7 +881,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     Vector(0.f, (float)(rand() % 2 + 60) * 0.1f, 0.f, p1);
                     VectorRotate(p1, Matrix, o->TurningForce);
 
-                    o->TurningForce[2] += (4.0f) * FPS_ANIMATION_FACTOR;
+                    o->TurningForce[2] += 4.0f;
                     o->Rotation = (float)((int)WorldTime % 360);
                     o->Alpha = 1.0f;
                 }
@@ -896,7 +897,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     Vector(0.f, (float)(rand() % 2 + 60) * 0.1f, 0.f, p1);
                     VectorRotate(p1, Matrix, o->TurningForce);
 
-                    o->TurningForce[2] += (2.0f) * FPS_ANIMATION_FACTOR;
+                    o->TurningForce[2] += 2.0f;
                     o->Rotation = (float)((int)WorldTime % 360);
                     o->Alpha = 1.0f;
 
@@ -916,7 +917,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     Vector(0.f, (float)(rand() % 2 + 60) * 0.1f, 0.f, p1);
                     VectorRotate(p1, Matrix, o->TurningForce);
 
-                    o->TurningForce[2] += (2.0f) * FPS_ANIMATION_FACTOR;
+                    o->TurningForce[2] += 2.0f;
                     o->Rotation = (float)((int)WorldTime % 360);
                     o->Alpha = 1.0f;
 
@@ -927,7 +928,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 break;
             case BITMAP_MAGIC + 1:
                 o->LifeTime = 10;
-                o->Scale += (float)(rand() % 32 + 48) * 0.001f * FPS_ANIMATION_FACTOR;
+                o->Scale += (float)(rand() % 32 + 48) * 0.001f;
                 o->Angle[0] = (float)(rand() % 360);
                 o->Rotation = (float)((int)WorldTime % 360);
                 break;
@@ -945,7 +946,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->Scale = (float)(rand() % 64 + 64) * 0.01f;
                     o->Rotation = (float)(rand() % 360);
                     o->Gravity = (float)(rand() % 32 + 60) * 0.1f;
-                    o->Position[2] -= (45.00f) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] -= 45.00f;
                     o->TexType = BITMAP_POUNDING_BALL;
                     break;
                 }
@@ -960,17 +961,17 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->LifeTime = 40;
                     o->Scale = (float)(rand() % 20 + 250) * 0.01f;
                     o->Rotation = (float)(rand() % 360);
-                    o->Position[0] += ((float)(rand() % 20 - 10)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 20 - 10)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] -= (20.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 20 - 10);
+                    o->Position[1] += (float)(rand() % 20 - 10);
+                    o->Position[2] -= 20.f;
                     o->Gravity = (float)(rand() % 10 + 5) * 0.1f;
                 }
                 else if (o->SubType == 1)
                 {
                     o->LifeTime = 12;
-                    o->Scale += (float)(rand() % 30) * 0.01f * FPS_ANIMATION_FACTOR;
+                    o->Scale += (float)(rand() % 30) * 0.01f;
                     o->Rotation = (float)(rand() % 360);
-                    o->Position[2] += (30.0f) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += 30.0f;
                 }
                 else if (o->SubType == 3)
                 {
@@ -979,9 +980,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->LifeTime = 50;
                     o->Scale = Scale + (float)(rand() % 10 + 10) * 0.01f;
                     o->Rotation = (float)(rand() % 360);
-                    o->Position[0] += ((float)(rand() % 20 - 10)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 20 - 10)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] -= (20.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 20 - 10);
+                    o->Position[1] += (float)(rand() % 20 - 10);
+                    o->Position[2] -= 20.f;
                     o->Gravity = (float)(rand() % 10 + 5) * 0.1f;
                 }
                 else if (o->SubType == 4)
@@ -991,9 +992,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->LifeTime = 4;
                     o->Scale = Scale + (float)(rand() % 10 + 10) * 0.01f;
                     o->Rotation = (float)(rand() % 360);
-                    o->Position[0] += ((float)(rand() % 20 - 10)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 20 - 10)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] -= (20.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 20 - 10);
+                    o->Position[1] += (float)(rand() % 20 - 10);
+                    o->Position[2] -= 20.f;
                     o->Gravity = (float)(rand() % 10 + 5) * 0.1f;
                 }
                 else if (o->SubType == 5)
@@ -1003,9 +1004,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->LifeTime = 50;
                     o->Scale = Scale + (float)(rand() % 10 + 10) * 0.01f;
                     o->Rotation = (float)(rand() % 360);
-                    o->Position[0] += ((float)(rand() % 20 - 10)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 20 - 10)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] -= (20.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 20 - 10);
+                    o->Position[1] += (float)(rand() % 20 - 10);
+                    o->Position[2] -= 20.f;
                     o->Gravity = (float)(rand() % 10 + 5) * 0.1f;
                 }
                 else if (o->SubType == 6)	// ◎
@@ -1025,7 +1026,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->Velocity[0] = (float)(rand() % 20 - 10) * 0.1f;
                     o->Velocity[1] = (float)(rand() % 20 - 10) * 0.1f;
                     //o->Velocity[2] = (float)(rand()%20-10)*0.2f;
-                    o->Position[2] += (80.0f) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += 80.0f;
                     o->Gravity = 0;
                     o->Alpha = 0.5f;
                 }
@@ -1035,7 +1036,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->Velocity[0] = (float)(rand() % 20 - 10) * 0.1f;
                     o->Velocity[1] = (float)(rand() % 20 - 10) * 0.1f;
                     //o->Velocity[2] = (float)(rand()%20-10)*0.2f;
-                    o->Position[2] += (80.0f) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += 80.0f;
                     o->Gravity = 0;
                     o->Alpha = 0.5f;
                 }
@@ -1046,7 +1047,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->LifeTime = 40;
                     o->Alpha = 0.5f;
                     float fIntervalScale = Scale * 0.1f;
-                    o->Scale += ((float((rand() % 20) - 10) / 2.0f) * ((fIntervalScale / 2.f))) * FPS_ANIMATION_FACTOR;
+                    o->Scale += ((float((rand() % 20) - 10) / 2.0f) * ((fIntervalScale / 2.f)));
                     o->Rotation = (float)(rand() % 360);
                     o->Velocity[0] = (float)(rand() % 20 - 10) * 0.03f;
                     o->Velocity[1] = (float)(rand() % 20 - 10) * 0.03f;
@@ -1055,9 +1056,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 }
                 else if (o->SubType == 10)	// BITMAP_FIRE_CURSEDLICH o->SubType == 1과 비슷.
                 {
-                    o->Position[0] += ((rand() % 10 - 5) * 0.2f) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((rand() % 10 - 5) * 0.2f) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((rand() % 10 - 5) * 0.2f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (rand() % 10 - 5) * 0.2f;
+                    o->Position[1] += (rand() % 10 - 5) * 0.2f;
+                    o->Position[2] += (rand() % 10 - 5) * 0.2f;
                     o->LifeTime = (rand() % 28 + 4);
                     Vector(0.f, 0.f, 0.f, o->Velocity);
                     o->Scale = (float)(rand() % 5 + 70) * 0.016f;
@@ -1073,9 +1074,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->LifeTime = 30;
                     o->Scale = Scale;
                     o->Rotation = (float)(rand() % 360);
-                    o->Position[0] += ((float)(rand() % 20 - 10)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 20 - 10)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 20 - 10)) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 20 - 10);
+                    o->Position[1] += (float)(rand() % 20 - 10);
+                    o->Position[2] += (float)(rand() % 20 - 10);
                     o->Gravity = -1.5f;
                 }
             }
@@ -1087,17 +1088,17 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->LifeTime = rand() % 10 + 140;
                     o->Gravity = rand() % 10 + 5.0f;
                     o->Scale = (rand() % 20 + 20.f) / 100.f * Scale;
-                    o->Position[0] += ((float)(rand() % 100 - 50)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 100 - 50)) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 100 - 50);
+                    o->Position[1] += (float)(rand() % 100 - 50);
                 }
                 else if (o->SubType == 1)
                 {
                     o->Scale = 0.1f;
                     o->StartPosition[0] = o->Scale;
                     o->LifeTime = rand() % 10 + 20;
-                    o->Position[0] += ((float)(rand() % 50 - 25)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 50 - 25)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 50 - 25)) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 50 - 25);
+                    o->Position[1] += (float)(rand() % 50 - 25);
+                    o->Position[2] += (float)(rand() % 50 - 25);
 
                     o->Gravity = 1.0f;
 
@@ -1119,25 +1120,25 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 {
                     o->LifeTime = 50 + rand() % 10;
                     o->Scale = (float)(rand() % 32 + 140) * 0.01f;
-                    o->Position[0] += ((float)(rand() % 120 - 60)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 100 - 50)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 100)) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 120 - 60);
+                    o->Position[1] += (float)(rand() % 100 - 50);
+                    o->Position[2] += (float)(rand() % 100);
                 }
                 else if (o->SubType == 1)
                 {
                     o->LifeTime = 20 + rand() % 10;
                     o->Scale = (float)(rand() % 32 + 50) * 0.01f;
-                    o->Position[0] += ((float)(rand() % 80 - 40)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 80 - 40)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 80)) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 80 - 40);
+                    o->Position[1] += (float)(rand() % 80 - 40);
+                    o->Position[2] += (float)(rand() % 80);
                 }
                 else if (o->SubType == 2)
                 {
                     o->LifeTime = 60 + rand() % 10;
                     o->Scale = (float)(rand() % 32 + 50) * 0.02f;
-                    o->Position[0] += ((float)(rand() % 40 - 20)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 40 - 20)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 40)) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 40 - 20);
+                    o->Position[1] += (float)(rand() % 40 - 20);
+                    o->Position[2] += (float)(rand() % 40);
                 }
                 o->Angle[0] = (float)(rand() % 360);
                 o->Angle[2] = (float)(rand() % 360);
@@ -1178,8 +1179,8 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     if (o->SubType == 37)
                     {
                         VectorCopy(o->Light, o->TurningForce);
-                        o->Position[2] -= (15.0f * o->TurningForce[2]) * FPS_ANIMATION_FACTOR;
-                        o->Position[1] -= (15.0f * o->TurningForce[1]) * FPS_ANIMATION_FACTOR;
+                        o->Position[2] -= 15.0f * o->TurningForce[2];
+                        o->Position[1] -= 15.0f * o->TurningForce[1];
                         Vector(1.0f, 1.0f, 1.0f, o->Light);
                     }
                     else
@@ -1257,9 +1258,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 case 11:
                 case 14:
                     o->LifeTime = 50;
-                    o->Position[0] += ((float)(rand() % 64 - 32)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 64 - 32)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 64 + 32)) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 64 - 32);
+                    o->Position[1] += (float)(rand() % 64 - 32);
+                    o->Position[2] += (float)(rand() % 64 + 32);
                     o->Angle[0] = (float)(rand() % 90 - 45);
                     o->Angle[2] = (float)(rand() % 360);
                     o->Rotation = (float)(rand() % 360);
@@ -1276,9 +1277,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 case 1:
                     o->LifeTime = 50;
                     o->Scale = (float)(rand() % 32 + 80) * 0.01f;
-                    o->Position[0] += ((float)(rand() % 64 - 32)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 64 - 32)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 64 + 32)) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 64 - 32);
+                    o->Position[1] += (float)(rand() % 64 - 32);
+                    o->Position[2] += (float)(rand() % 64 + 32);
                     o->Angle[0] = (float)(rand() % 90 - 45);
                     o->Angle[2] = (float)(rand() % 360);
                     Vector(0.f, -(float)(rand() % 8 + 40), 0.f, o->Velocity);
@@ -1305,9 +1306,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->LifeTime = 30;
                     o->Gravity = (float)(rand() % 1000);
                     o->Scale = (float)(rand() % 20 + 180) * 0.01f;
-                    o->Position[0] += ((float)(rand() % 200 - 100) * Scale) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 200 - 100) * Scale) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 20 + 20)) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 200 - 100) * Scale;
+                    o->Position[1] += (float)(rand() % 200 - 100) * Scale;
+                    o->Position[2] += (float)(rand() % 20 + 20);
                     o->Rotation = o->Position[2];
                     Vector(0.f, 0.f, 0.f, o->Velocity);
                     break;
@@ -1396,8 +1397,8 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->Gravity = 15.0f;
                     o->Rotation = (float)(rand() % 360);
                     o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 15;
-                    o->Position[0] += ((float)sinf(WorldTime) * 5.0f) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)sinf(WorldTime) * 5.0f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)sinf(WorldTime) * 5.0f;
+                    o->Position[1] += (float)sinf(WorldTime) * 5.0f;
                     break;
                 case 31:
                     o->LifeTime = 15;
@@ -1409,9 +1410,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 {
                     o->LifeTime = 50;
                     o->Scale = (float)(rand() % 32 + 80) * 0.01f;
-                    o->Position[0] += ((float)(rand() % 64 - 32)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 64 - 32)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 64 + 32)) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 64 - 32);
+                    o->Position[1] += (float)(rand() % 64 - 32);
+                    o->Position[2] += (float)(rand() % 64 + 32);
                     o->Angle[0] = (float)(rand() % 90 - 45);
                     o->Angle[2] = (float)(rand() % 360);
                     Vector(0.f, -(float)(rand() % 8 + 40), 0.f, o->Velocity);
@@ -1421,9 +1422,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 {
                     o->LifeTime = 50;
                     o->Scale = (float)(rand() % 32 + 80) * 0.01f;
-                    o->Position[0] += ((float)(rand() % 64 - 32)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 64 - 32)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 64 + 32)) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 64 - 32);
+                    o->Position[1] += (float)(rand() % 64 - 32);
+                    o->Position[2] += (float)(rand() % 64 + 32);
                     o->Angle[0] = (float)(rand() % 90 - 45);
                     o->Angle[2] = (float)(rand() % 360);
                     Vector(0.f, -(float)(rand() % 8 + 40), 0.f, o->Velocity);
@@ -1442,10 +1443,10 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 case 44:
                 {
                     o->LifeTime = 60;
-                    o->Scale += (float)(rand() % 10) / 2.0f * FPS_ANIMATION_FACTOR;
-                    o->Position[0] += ((float)(rand() % 500) - 250.0f) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 700) - 350.0f) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 100) + 150.0f) * FPS_ANIMATION_FACTOR;
+                    o->Scale += (float)(rand() % 10) / 2.0f;
+                    o->Position[0] += (float)(rand() % 500) - 250.0f;
+                    o->Position[1] += (float)(rand() % 700) - 350.0f;
+                    o->Position[2] += (float)(rand() % 100) + 150.0f;
                     o->Rotation = (float)(rand() % 360);
                     o->Gravity = (float)(rand() % 50) - 25.0f;
                     Vector(0.1f, 0.2f, 0.3f, o->Light);
@@ -1455,17 +1456,17 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 {
                     o->TexType = BITMAP_LIGHT + 2;
                     o->LifeTime = 15;
-                    o->Scale += (float)(rand() % 10) / 20.0f * FPS_ANIMATION_FACTOR;
-                    o->Position[0] += ((float)(rand() % 40) - 20.0f) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 40) - 20.0f) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 40) - 20.0f) * FPS_ANIMATION_FACTOR;
+                    o->Scale += (float)(rand() % 10) / 20.0f;
+                    o->Position[0] += (float)(rand() % 40) - 20.0f;
+                    o->Position[1] += (float)(rand() % 40) - 20.0f;
+                    o->Position[2] += (float)(rand() % 40) - 20.0f;
                 }
                 break;
                 case 46:
                 {
                     //o->TexType = BITMAP_CLOUD;
                     o->LifeTime = 60 + (int)(o->Scale * 10.0f);
-                    o->Scale += (float)(rand() % 50) * 0.01f * FPS_ANIMATION_FACTOR;
+                    o->Scale += (float)(rand() % 50) * 0.01f;
                     o->Rotation = (float)(rand() % 360);
                     o->Gravity = (float)(rand() % 30 + 50) * 0.05f;
                 }
@@ -1474,7 +1475,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 {
                     o->TexType = BITMAP_MAGIC + 1;
                     o->LifeTime = 5;
-                    o->Scale += (float)(rand() % 50) * 0.01f * FPS_ANIMATION_FACTOR;
+                    o->Scale += (float)(rand() % 50) * 0.01f;
                     o->Rotation = (float)(rand() % 360);
                 }
                 break;
@@ -1491,7 +1492,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->LifeTime = rand() % 50 + 100;
                     o->Rotation = (float)(rand() % 360);
                     o->Scale = Scale * 0.4f;
-                    if (rand_fps_check(2))
+                    if (rand() % 2 == 0)
                         o->Angle[0] = 1.0f;
                     else
                         o->Angle[0] = -1.0f;
@@ -1532,7 +1533,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 {
                     //o->TexType = BITMAP_CLOUD;
                     o->LifeTime = (int)(o->Scale * 8.0f);
-                    o->Scale += (float)(rand() % 50) * 0.01f * FPS_ANIMATION_FACTOR;
+                    o->Scale += (float)(rand() % 50) * 0.01f;
                     o->Rotation = (float)(rand() % 360);
                     o->Gravity = (float)(rand() % 30 + 50) * 0.05f;
                 }
@@ -1548,9 +1549,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 case 58:
                     o->LifeTime = 50;
                     o->Scale = (float)(rand() % 32 + 80) * 0.01f;
-                    o->Position[0] += ((float)(rand() % 64 - 32)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 64 - 32)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 64 + 32)) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 64 - 32);
+                    o->Position[1] += (float)(rand() % 64 - 32);
+                    o->Position[2] += (float)(rand() % 64 + 32);
                     o->Angle[0] = (float)(rand() % 90 - 45);
                     o->Angle[2] = (float)(rand() % 360);
                     Vector(0.f, -(float)(rand() % 8 + 40), 0.f, o->Velocity);
@@ -1571,8 +1572,8 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     //	Vector(0.9f,0.4f,0.1f,o->Light);
                     //	o->Scale = (float)(rand()%32+80)*0.01f;
                     o->Scale = o->Scale;
-                    o->Position[0] += ((float)(rand() % 64 - 32)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 64 - 32)) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 64 - 32);
+                    o->Position[1] += (float)(rand() % 64 - 32);
                     o->Angle[0] = (float)(rand() % 90 - 45);
                     o->Angle[2] = (float)(rand() % 360);
                     Vector(0.f, -(float)(rand() % 8), 0.f, o->Velocity);
@@ -1615,7 +1616,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 {
                     //o->TexType = BITMAP_CLOUD;
                     o->LifeTime = (int)(o->Scale * 30.0f);
-                    o->Scale += (float)(rand() % 50) * 0.01f * FPS_ANIMATION_FACTOR;
+                    o->Scale += (float)(rand() % 50) * 0.01f;
                     o->Rotation = (float)(rand() % 360);
                     o->Gravity = (float)(rand() % 30 + 50) * 0.01f;
                     int iAngle = rand() % 360;
@@ -1665,8 +1666,8 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
             case BITMAP_SMOKE + 1:
             case BITMAP_SMOKE + 4:
                 o->LifeTime = 32;
-                o->Position[0] += ((float)(rand() % 16 - 8)) * FPS_ANIMATION_FACTOR;
-                o->Position[1] += ((float)(rand() % 16 - 8)) * FPS_ANIMATION_FACTOR;
+                o->Position[0] += (float)(rand() % 16 - 8);
+                o->Position[1] += (float)(rand() % 16 - 8);
 
                 if (o->Type == BITMAP_SMOKE + 4)
                 {
@@ -1696,13 +1697,13 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 {
                     o->LifeTime = 40;
                     Vector(0.f, 0.0f, 0.0f, o->Velocity);
-                    o->Position[2] += ((float)(rand() % 16 - 8)) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += (float)(rand() % 16 - 8);
                 }
                 else if (SubType == 6)
                 {
                     o->LifeTime = 40;
                     Vector(0.f, 0.0f, 0.0f, o->Velocity);
-                    o->Position[2] += ((float)(rand() % 16 - 8)) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += (float)(rand() % 16 - 8);
                 }
                 break;
             case BITMAP_SMOKE + 2:
@@ -1745,9 +1746,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->LifeTime = 60;
                     o->Scale *= (float)(rand() % 64 + 64) * 0.02f;
                     o->Rotation = (float)(rand() % 360);
-                    o->Position[0] += ((float)(rand() % 250 - 125)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 250 - 125)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] -= ((float)(rand() % 45)) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 250 - 125);
+                    o->Position[1] += (float)(rand() % 250 - 125);
+                    o->Position[2] -= (float)(rand() % 45);
                     o->Gravity = (float)(rand() % 100 - 50) * 0.1f;
                     Vector(1.0f, 1.0f, 1.0f, o->Light);
                     break;
@@ -1756,9 +1757,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->LifeTime = 30;
                     o->Scale *= (float)(rand() % 64 + 64) * 0.02f;
                     o->Rotation = (float)(rand() % 360);
-                    o->Position[0] += ((float)(rand() % 250 - 125)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 250 - 125)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] -= ((float)(rand() % 45)) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 250 - 125);
+                    o->Position[1] += (float)(rand() % 250 - 125);
+                    o->Position[2] -= (float)(rand() % 45);
                     o->Gravity = (float)(rand() % 100 - 50) * 0.1f;
                     Vector(1.0f, 1.0f, 1.0f, o->Light);
                     break;
@@ -1811,9 +1812,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 }
                 else if (o->SubType == 4)
                 {
-                    o->Position[0] += ((float)(rand() % 20 - 10) * 2.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 20 - 10) * 2.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 20 - 10) * 2.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 20 - 10) * 2.f;
+                    o->Position[1] += (float)(rand() % 20 - 10) * 2.f;
+                    o->Position[2] += (float)(rand() % 20 - 10) * 2.f;
 
                     o->Scale = o->Scale + ((float)(rand() % 20 - 10) * (o->Scale * 0.03f));
                     o->LifeTime = 45;
@@ -1995,7 +1996,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 else if (o->SubType == 2)
                 {
                     o->LifeTime = 19;
-                    o->Position[1] += (-30.0f + (float)(rand() % 60)) * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += -30.0f + (float)(rand() % 60);
                 }
                 else if (o->SubType == 3)
                 {
@@ -2114,7 +2115,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
 
                     if (o->SubType == 7)
                     {
-                        o->Scale += Scale * FPS_ANIMATION_FACTOR;
+                        o->Scale += Scale;
                     }
                 }
                 break;
@@ -2155,7 +2156,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     VectorRotate(p, Matrix, o->Velocity);
                     break;
                 case 6:
-                    if (rand_fps_check(50))
+                    if (rand() % 50 == 0)
                     {
                         o->LifeTime = 50;
                         o->Gravity = 1.0f + (float)(rand() % 20) / 5.f;
@@ -2166,9 +2167,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     break;
                 case 7:
                     o->Alpha = 1.0f;
-                    o->Position[0] += (-30.0f + (float)(rand() % 60)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += (-30.0f + (float)(rand() % 60)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += (-30.0f + (float)(rand() % 60)) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += -30.0f + (float)(rand() % 60);
+                    o->Position[1] += -30.0f + (float)(rand() % 60);
+                    o->Position[2] += -30.0f + (float)(rand() % 60);
                     o->LifeTime = 30;
                     o->Gravity = 1.3f;
                     o->Scale = (float)(rand() % 5) / 10.0f + 1.0f;
@@ -2212,20 +2213,20 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     Vector(0.f, -100.f, 0.f, p1);
                     AngleMatrix(o->Angle, Matrix);
                     VectorRotate(p1, Matrix, p2);
-                    VectorAddScaled(o->Position, p2, o->Position, FPS_ANIMATION_FACTOR);
+                    VectorAdd(o->Position, p2, o->Position);
 
-                    o->Position[0] += (-8.0f + (float)(rand() % 16)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += (-8.0f + (float)(rand() % 16)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += (150.0f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += -8.0f + (float)(rand() % 16);
+                    o->Position[1] += -8.0f + (float)(rand() % 16);
+                    o->Position[2] += 150.0f;
 
                     o->Velocity[0] = -1.0f + (float)(rand() % 20) / 10.f;
                     o->Velocity[1] = -1.0f + (float)(rand() % 20) / 10.f;
                     o->Velocity[2] = -(float)(rand() % 3) - 3.0f;
                     o->LifeTime = 40;
-                    o->Scale += -(float)(rand() % 15) / 10.0f * FPS_ANIMATION_FACTOR;
+                    o->Scale = -(float)(rand() % 15) / 10.0f + Scale;
                     break;
                 case 14:
-                    if (rand_fps_check(2))
+                    if (rand() % 2 == 0)
                     {
                         o->Alpha = 1.0f;
                         o->Velocity[0] = -4.0f + (float)(rand() % 4);
@@ -2236,7 +2237,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     }
                     break;
                 case 15:
-                    if (rand_fps_check(3))
+                    if (rand() % 3 == 0)
                     {
                         o->Alpha = 1.0f;
                         o->LifeTime = 35;
@@ -2267,7 +2268,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     Vector(o->Velocity[0] * 10.0f, o->Velocity[1] * 10.0f, o->Velocity[2] * 10.0f + 100.0f, p1);
                     AngleMatrix(o->Angle, Matrix);
                     VectorRotate(p1, Matrix, p2);
-                    VectorAddScaled(o->Position, p2, o->Position, FPS_ANIMATION_FACTOR);
+                    VectorAdd(o->Position, p2, o->Position);
 
                     o->Gravity = 3.5f;
                 }
@@ -2275,7 +2276,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 case 17:
                 {
                     o->LifeTime = 200;
-                    o->Scale += (float)(rand() % 3) * 0.1f * FPS_ANIMATION_FACTOR;
+                    o->Scale += (float)(rand() % 3) * 0.1f;
                     o->Gravity = (float)(rand() % 5) * 0.3f + 2.0f;
                     o->Rotation = (float)(rand() % 20) * 0.0001f + 0.002f;
                     o->Alpha = (float)(rand() % 10) * 0.1f + 0.5f;
@@ -2447,9 +2448,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 {
                     o->LifeTime = 16;
                     o->Scale = Scale + (float)(rand() % 10 - 5) * 0.03f;
-                    o->Position[0] += ((float)(rand() % 10 - 5)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 10 - 5)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 10 - 5)) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 10 - 5);
+                    o->Position[1] += (float)(rand() % 10 - 5);
+                    o->Position[2] += (float)(rand() % 10 - 5);
                 }
                 else if (o->SubType == 1)
                 {
@@ -2537,9 +2538,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 else if (o->SubType == 5)
                 {
                     o->LifeTime = rand() % 10 + 10;
-                    o->Scale += (rand() % 10) * 0.02f * FPS_ANIMATION_FACTOR;
-                    o->Position[0] += ((float)(rand() % 10 - 5)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 10 - 5)) * FPS_ANIMATION_FACTOR;
+                    o->Scale = Scale + (rand() % 10) * 0.02f;
+                    o->Position[0] += (float)(rand() % 10 - 5);
+                    o->Position[1] += (float)(rand() % 10 - 5);
                     o->Gravity = -(float)(rand() % 10) * 0.3f;
                 }
                 else if (o->SubType == 6)
@@ -2564,9 +2565,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->Scale = 0.1f;//(float)(rand()%5)/6.0f+0.5f;
                     o->StartPosition[0] = o->Scale;
                     o->LifeTime = rand() % 10 + 20;
-                    o->Position[0] += ((float)(rand() % 50 - 25)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 50 - 25)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 50 - 25)) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 50 - 25);
+                    o->Position[1] += (float)(rand() % 50 - 25);
+                    o->Position[2] += (float)(rand() % 50 - 25);
 
                     o->Gravity = 1.0f;
 
@@ -2708,12 +2709,12 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 if (o->SubType == 0)
                 {
                     o->Alpha = 1.0f;
-                    o->Position[0] += (-5.0f + (float)(rand() % 10)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += (-5.0f + (float)(rand() % 10)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += (-5.0f + (float)(rand() % 10)) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += -5.0f + (float)(rand() % 10);
+                    o->Position[1] += -5.0f + (float)(rand() % 10);
+                    o->Position[2] += -5.0f + (float)(rand() % 10);
                     o->LifeTime = 30;
                     o->Gravity = 1.3f;
-                    o->Scale += (float)(rand() % 3) / 10.0f * FPS_ANIMATION_FACTOR;
+                    o->Scale += (float)(rand() % 3) / 10.0f;
                 }
                 else if (o->SubType == 1)
                 {
@@ -2721,9 +2722,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->LifeTime = rand() % 3 + 10;
                     o->Scale = 0.3f;
 
-                    o->Position[0] += ((float)(rand() % 50 - 25)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 50 - 25)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 50 - 25)) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 50 - 25);
+                    o->Position[1] += (float)(rand() % 50 - 25);
+                    o->Position[2] += (float)(rand() % 50 - 25);
                     o->Rotation = rand() % 20 - 10;
                 }
                 break;
@@ -2731,13 +2732,13 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 o->Alpha = 1.0f;
 
                 {
-                    o->Position[0] += (-5.0f + (float)(rand() % 10)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += (-5.0f + (float)(rand() % 10)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += (-5.0f + (float)(rand() % 10)) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += -5.0f + (float)(rand() % 10);
+                    o->Position[1] += -5.0f + (float)(rand() % 10);
+                    o->Position[2] += -5.0f + (float)(rand() % 10);
                 }
                 o->LifeTime = 30;
                 o->Gravity = 10.0f;
-                o->Scale += (float)((rand() % 5) / 10.0f) * FPS_ANIMATION_FACTOR;
+                o->Scale += (float)(rand() % 5) / 10.0f;
                 if (o->SubType == 2)
                 {
                     o->Gravity = -5.0f;
@@ -2828,9 +2829,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                         o->Gravity = (float)(rand() % 1000);
                         o->Alpha = 0.1f;
 
-                        o->Position[0] += ((float)(rand() % 500 - 250)) * FPS_ANIMATION_FACTOR;
-                        o->Position[1] += ((float)(rand() % 500 - 250)) * FPS_ANIMATION_FACTOR;
-                        o->Position[2] += ((float)(rand() % 20 - 20)) * FPS_ANIMATION_FACTOR;
+                        o->Position[0] += (float)(rand() % 500 - 250);
+                        o->Position[1] += (float)(rand() % 500 - 250);
+                        o->Position[2] += (float)(rand() % 20 - 20);
 
                         o->StartPosition[1] = (rand() % 100) / 100.f;
                         o->StartPosition[2] = o->Position[2];
@@ -2845,9 +2846,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                         o->Gravity = (float)(rand() % 1000);
                         o->Alpha = 0.1f;
 
-                        o->Position[0] += ((float)(rand() % 500 - 250)) * FPS_ANIMATION_FACTOR;
-                        o->Position[1] += ((float)(rand() % 500 - 250)) * FPS_ANIMATION_FACTOR;
-                        o->Position[2] += ((float)(rand() % 20 - 20)) * FPS_ANIMATION_FACTOR;
+                        o->Position[0] += (float)(rand() % 500 - 250);
+                        o->Position[1] += (float)(rand() % 500 - 250);
+                        o->Position[2] += (float)(rand() % 20 - 20);
 
                         o->StartPosition[1] = (rand() % 100) / 100.f;
                         o->StartPosition[2] = o->Position[2];
@@ -2860,9 +2861,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     {
                         Vector(0.0f, 0.0f, 0.0f, o->Light);
                         o->LifeTime = 500;
-                        o->Position[0] += ((float)(rand() % 400 - 200)) * FPS_ANIMATION_FACTOR;
-                        o->Position[1] += ((float)(rand() % 400 - 200)) * FPS_ANIMATION_FACTOR;
-                        o->Position[2] += ((float)(rand() % 400 - 200)) * FPS_ANIMATION_FACTOR;
+                        o->Position[0] += (float)(rand() % 400 - 200);
+                        o->Position[1] += (float)(rand() % 400 - 200);
+                        o->Position[2] += (float)(rand() % 400 - 200);
                         VectorCopy(o->Position, o->StartPosition);
                         o->Scale = (float)(rand() % 15 + 10) / 15.0f + Scale;
                         float fTemp = (float)(rand() % 10 + 5) * 0.12f;
@@ -2873,9 +2874,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     else if (o->SubType == 11)
                     {
                         o->LifeTime = 500;
-                        o->Position[0] += ((float)(rand() % 400 - 200)) * FPS_ANIMATION_FACTOR;
-                        o->Position[1] += ((float)(rand() % 400 - 200)) * FPS_ANIMATION_FACTOR;
-                        o->Position[2] += ((float)(rand() % 400 - 200)) * FPS_ANIMATION_FACTOR;
+                        o->Position[0] += (float)(rand() % 400 - 200);
+                        o->Position[1] += (float)(rand() % 400 - 200);
+                        o->Position[2] += (float)(rand() % 400 - 200);
                         VectorCopy(o->Position, o->StartPosition);
                         o->Scale = (float)(rand() % 15 + 15) / 30.0f + Scale;
                         float fTemp = (float)(rand() % 10 + 5) * 0.12f;
@@ -2888,9 +2889,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                         o->LifeTime = 30;
                         o->Gravity = (float)(rand() % 1000);
 
-                        o->Position[0] += ((float)(rand() % 500 - 250) * FPS_ANIMATION_FACTOR);//*Scale);
-                        o->Position[1] += ((float)(rand() % 500 - 250) * FPS_ANIMATION_FACTOR);//*Scale);
-                        o->Position[2] += ((float)(rand() % 20 + 20)) * FPS_ANIMATION_FACTOR;
+                        o->Position[0] += (float)(rand() % 500 - 250);//*Scale;
+                        o->Position[1] += (float)(rand() % 500 - 250);//*Scale;
+                        o->Position[2] += (float)(rand() % 20 + 20);
 
                         o->StartPosition[1] = (rand() % 100) / 100.f;
                         o->StartPosition[2] = o->Position[2];
@@ -2919,9 +2920,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     {
                         o->LifeTime = 500;
 
-                        o->Position[0] += ((float)(rand() % 400 - 200)) * FPS_ANIMATION_FACTOR;
-                        o->Position[1] += ((float)(rand() % 400 - 200)) * FPS_ANIMATION_FACTOR;
-                        o->Position[2] += ((float)(rand() % 400 - 200)) * FPS_ANIMATION_FACTOR;
+                        o->Position[0] += (float)(rand() % 400 - 200);
+                        o->Position[1] += (float)(rand() % 400 - 200);
+                        o->Position[2] += (float)(rand() % 400 - 200);
                         VectorCopy(o->Position, o->StartPosition);
 
                         o->Rotation = rand() % 360;
@@ -2944,9 +2945,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
 
                         o->LifeTime = 500;
 
-                        o->Position[0] += ((float)(rand() % 400 - 200)) * FPS_ANIMATION_FACTOR;
-                        o->Position[1] += ((float)(rand() % 400 - 200)) * FPS_ANIMATION_FACTOR;
-                        o->Position[2] += ((float)(rand() % 400 - 200)) * FPS_ANIMATION_FACTOR;
+                        o->Position[0] += (float)(rand() % 400 - 200);
+                        o->Position[1] += (float)(rand() % 400 - 200);
+                        o->Position[2] += (float)(rand() % 400 - 200);
                         VectorCopy(o->Position, o->StartPosition);
 
                         o->Rotation = rand() % 360;
@@ -2963,9 +2964,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                         o->TexType = BITMAP_EVENT_CLOUD;
                         o->LifeTime = 500;
 
-                        o->Position[0] += ((float)(rand() % 900 - 450)) * FPS_ANIMATION_FACTOR;
-                        o->Position[1] += ((float)(rand() % 900 - 450)) * FPS_ANIMATION_FACTOR;
-                        o->Position[2] += ((float)(rand() % 20 + 50)) * FPS_ANIMATION_FACTOR;
+                        o->Position[0] += (float)(rand() % 900 - 450);
+                        o->Position[1] += (float)(rand() % 900 - 450);
+                        o->Position[2] += (float)(rand() % 20 + 50);
                         VectorCopy(o->Position, o->StartPosition);
 
                         o->Rotation = rand() % 360;
@@ -2992,7 +2993,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                         o->Gravity = (float)(rand() % 1000);
 
                         VectorCopy(Position, o->Position);
-                        o->Position[2] += ((float)(rand() % 80)) * FPS_ANIMATION_FACTOR;
+                        o->Position[2] += (float)(rand() % 80);
                         o->Rotation = rand() % 360;
 
                         o->StartPosition[0] = (rand() % 200 - 10) / 10.0f;
@@ -3013,9 +3014,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                         o->Light[2] = 0.f;
                         o->Gravity = (float)(rand() % 1000);
 
-                        o->Position[0] += ((float)(rand() % 500 - 250) * FPS_ANIMATION_FACTOR);//*Scale)
-                        o->Position[1] += ((float)(rand() % 500 - 250) * FPS_ANIMATION_FACTOR);//*Scale)
-                        o->Position[2] += ((float)(rand() % 20 + 20)) * FPS_ANIMATION_FACTOR;
+                        o->Position[0] += (float)(rand() % 500 - 250);//*Scale;
+                        o->Position[1] += (float)(rand() % 500 - 250);//*Scale;
+                        o->Position[2] += (float)(rand() % 20 + 20);
                         o->Rotation = rand() % 360;
 
                         o->StartPosition[1] = (rand() % 100) / 100.f;
@@ -3031,9 +3032,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                         o->Gravity = (float)(rand() % 1000);
                         o->Alpha = 0.1f;
 
-                        o->Position[0] += ((float)(rand() % 500 - 250)) * FPS_ANIMATION_FACTOR;
-                        o->Position[1] += ((float)(rand() % 500 - 250)) * FPS_ANIMATION_FACTOR;
-                        o->Position[2] += ((float)(rand() % 20 - 20)) * FPS_ANIMATION_FACTOR;
+                        o->Position[0] += (float)(rand() % 500 - 250);
+                        o->Position[1] += (float)(rand() % 500 - 250);
+                        o->Position[2] += (float)(rand() % 20 - 20);
 
                         o->StartPosition[1] = (rand() % 100) / 100.f;
                         o->StartPosition[2] = o->Position[2];
@@ -3048,9 +3049,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                         o->Gravity = (float)(rand() % 1000);
                         o->Alpha = 0.6f;
 
-                        o->Position[0] += ((float)(rand() % 200 - 100)) * FPS_ANIMATION_FACTOR;
-                        o->Position[1] += ((float)(rand() % 200 - 100)) * FPS_ANIMATION_FACTOR;
-                        o->Position[2] += ((float)(rand() % 20 - 20)) * FPS_ANIMATION_FACTOR;
+                        o->Position[0] += (float)(rand() % 200 - 100);
+                        o->Position[1] += (float)(rand() % 200 - 100);
+                        o->Position[2] += (float)(rand() % 20 - 20);
 
                         o->StartPosition[1] = (rand() % 100) / 100.f;
                         o->StartPosition[2] = o->Position[2];
@@ -3065,9 +3066,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                         o->Gravity = (float)(rand() % 1000);
                         o->Alpha = 0.1f;
 
-                        o->Position[0] += ((float)(rand() % 20 - 10)) * FPS_ANIMATION_FACTOR;
-                        o->Position[1] += ((float)(rand() % 20 - 10)) * FPS_ANIMATION_FACTOR;
-                        o->Position[2] += ((float)(rand() % 20 - 20)) * FPS_ANIMATION_FACTOR;
+                        o->Position[0] += (float)(rand() % 20 - 10);
+                        o->Position[1] += (float)(rand() % 20 - 10);
+                        o->Position[2] += (float)(rand() % 20 - 20);
 
                         o->Scale = (((float)(rand() % 20 + 50) * 0.003f) * o->Scale);
                         Vector(0.f, 0.f, 0.f, o->TurningForce);
@@ -3086,13 +3087,13 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                         o->Gravity = (float)(rand() % 1000);
                         o->Alpha = 0.1f;
 
-                        o->Position[0] += ((float)(rand() % 6 - 3)) * FPS_ANIMATION_FACTOR;
-                        o->Position[1] += ((float)(rand() % 6 - 3)) * FPS_ANIMATION_FACTOR;
-                        o->Position[2] += ((float)(rand() % 6 - 3)) * FPS_ANIMATION_FACTOR;
+                        o->Position[0] += (float)(rand() % 6 - 3);
+                        o->Position[1] += (float)(rand() % 6 - 3);
+                        o->Position[2] += (float)(rand() % 6 - 3);
 
                         o->Scale = 0;//(((float)(rand()%20+20)*0.001f) * o->Scale);
                         Vector(0.f, 0.f, 0.f, o->TurningForce);
-                        o->TurningForce[0] = (rand_fps_check(2) ? 1.0f : -1.0f);
+                        o->TurningForce[0] = ((rand() % 2 == 0) ? 1.0f : -1.0f);
 
                         float fAngle = o->Angle[2] + 90 + (rand() % 40) - 20;
                         vec3_t vAngle, vDirection;
@@ -3107,9 +3108,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                         o->LifeTime = 30;
                         o->Gravity = (float)(rand() % 1000);
 
-                        o->Position[0] += ((float)(rand() % 500 - 250)) * FPS_ANIMATION_FACTOR;//*Scale)
-                        o->Position[1] += ((float)(rand() % 500 - 250)) * FPS_ANIMATION_FACTOR;//*Scale)
-                        o->Position[2] += ((float)(rand() % 20 + 20)) * FPS_ANIMATION_FACTOR;
+                        o->Position[0] += (float)(rand() % 500 - 250);//*Scale;
+                        o->Position[1] += (float)(rand() % 500 - 250);//*Scale;
+                        o->Position[2] += (float)(rand() % 20 + 20);
 
                         o->StartPosition[1] = (rand() % 100) / 100.f;
                         o->StartPosition[2] = o->Position[2];
@@ -3124,9 +3125,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 o->LifeTime = rand() % 5 + 60;
                 o->Scale = (float)(rand() % 30 + 30) * 0.02f + Scale / 3.f;
 
-                o->Position[0] += ((float)(rand() % 4 - 2) * 0.25f) * FPS_ANIMATION_FACTOR;
-                o->Position[1] += ((float)(rand() % 4 - 2) * 0.25f) * FPS_ANIMATION_FACTOR;
-                o->Position[2] += ((float)(rand() % 10 - 5)) * FPS_ANIMATION_FACTOR;
+                o->Position[0] += (float)(rand() % 4 - 2) * 0.25f;
+                o->Position[1] += (float)(rand() % 4 - 2) * 0.25f;
+                o->Position[2] += (float)(rand() % 10 - 5);
 
                 o->Gravity = (float)(rand() % 2 + 10) * 0.5f;
             }
@@ -3138,10 +3139,10 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 if (o->SubType == 0)
                 {
                     o->LifeTime = 500;
-                    o->Position[0] += ((float)(rand() % 400 - 200)) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 400 - 200);
 
-                    o->Position[1] += ((float)(rand() % 400 - 200)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 400 - 200)) * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += (float)(rand() % 400 - 200);
+                    o->Position[2] += (float)(rand() % 400 - 200);
                     VectorCopy(o->Position, o->StartPosition);
                     o->Scale = (float)(rand() % 15 + 15) / 30.0f + Scale;
                     float fTemp = (float)(rand() % 10 + 5) * 0.08f;
@@ -3340,9 +3341,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 {
                     o->Scale = Scale + (float)(rand() % 30) / 100.f;
                     o->LifeTime = 15;
-                    o->Position[0] += ((float)(rand() % 10) / 10.f - 0.5f) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 10) / 10.f - 0.5f) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 10) / 10.f - 0.5f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(rand() % 10) / 10.f - 0.5f;
+                    o->Position[1] += (float)(rand() % 10) / 10.f - 0.5f;
+                    o->Position[2] += (float)(rand() % 10) / 10.f - 0.5f;
                 }
                 else if (o->SubType == 5)
                     o->LifeTime = 20;
@@ -3419,14 +3420,14 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->LifeTime = 20;
                     o->Rotation = (float)(rand() % 360);
                     o->Scale = 1.f;
-                    o->Position[2] += (50.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += 50.f;
                 }
                 else if (o->SubType == 2)
                 {
                     o->LifeTime = 20;
                     o->Rotation = (float)(rand() % 360);
                     o->Scale = 0.5f;
-                    o->Position[2] += (50.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += 50.f;
                     o->Velocity[2] = (float)((rand() % 5 + 10));
                 }
                 else if (o->SubType == 3)
@@ -3465,7 +3466,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 }
                 else if (o->SubType == 7)
                 {
-                    o->TexType = rand_fps_check(2) ? BITMAP_WATERFALL_4 : BITMAP_WATERFALL_5;
+                    o->TexType = (rand() % 2 == 0) ? BITMAP_WATERFALL_4 : BITMAP_WATERFALL_5;
                     o->LifeTime = 30;
                     o->Rotation = (float)(rand() % 360);
                     o->Scale = (float)(rand() % 50) * 0.05f + Scale;
@@ -3477,7 +3478,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 {
                     o->LifeTime = 30;
                     o->Velocity[2] = rand() % 3 + 1;
-                    o->Scale += (rand() % 5 + 5) * 0.05f * FPS_ANIMATION_FACTOR;
+                    o->Scale = (rand() % 5 + 5) * 0.05f + Scale;
                 }
                 else if (o->SubType == 9)
                 {
@@ -3493,9 +3494,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
             case BITMAP_PLUS:
                 o->LifeTime = 20;
                 o->Scale = Scale;
-                o->Position[0] += (rand() % 30 - 15.f) * FPS_ANIMATION_FACTOR;
-                o->Position[1] += (rand() % 30 - 15.f) * FPS_ANIMATION_FACTOR;
-                o->Position[2] += (240.f) * FPS_ANIMATION_FACTOR;
+                o->Position[0] += rand() % 30 - 15.f;
+                o->Position[1] += rand() % 30 - 15.f;
+                o->Position[2] += 240.f;
                 break;
 
             case BITMAP_WATERFALL_2:
@@ -3528,9 +3529,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     Vector(0.4f, 0.4f, 0.4f, o->Light);
                 }
 
-                o->Position[0] += (rand() % 20 - 10.f) * FPS_ANIMATION_FACTOR;
-                o->Position[1] += (rand() % 20 - 10.f) * FPS_ANIMATION_FACTOR;
-                o->Position[2] += (rand() % 40 - 20.f) * FPS_ANIMATION_FACTOR;
+                o->Position[0] += rand() % 20 - 10.f;
+                o->Position[1] += rand() % 20 - 10.f;
+                o->Position[2] += rand() % 40 - 20.f;
 
                 if (o->SubType == 1)
                 {
@@ -3547,9 +3548,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->Scale = (rand() % 3 + 3) * 0.18f;
                     o->Velocity[2] = 2.0f;
 
-                    o->Position[0] += (rand() % 20 - 10.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += (rand() % 20 - 10.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += (rand() % 40 - 20.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += rand() % 20 - 10.f;
+                    o->Position[1] += rand() % 20 - 10.f;
+                    o->Position[2] += rand() % 40 - 20.f;
                 }
                 if (o->SubType == 4)
                 {
@@ -3565,9 +3566,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->Velocity[0] = -(rand() % 2 + 2);
                     o->Velocity[1] = -(rand() % 2 + 2);
                     o->Velocity[2] = (rand() % 2 + 1);
-                    o->Position[0] += (rand() % 60 - 30.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += (rand() % 60 - 30.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += (rand() % 10) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += rand() % 60 - 30.f;
+                    o->Position[1] += rand() % 60 - 30.f;
+                    o->Position[2] += rand() % 10;
                     break;
                 }
                 if (o->SubType == 11)
@@ -3605,8 +3606,8 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->Velocity[2] = -1.0f;
                     o->Scale *= (rand() % 10 + 15) * 0.02f;
                     o->Rotation = (float)(rand() % 360);
-                    o->Position[0] += (rand() % 40 - 20.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += (rand() % 25 - 10.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += rand() % 40 - 20.f;
+                    o->Position[2] += rand() % 25 - 10.f;
                     break;
                 }
                 else if (o->SubType == 12)
@@ -3614,10 +3615,10 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->Rotation = (float)(rand() % 360);
                     o->LifeTime = (rand() % 2 - 1) + 5;
                     float fIntervalScale = Scale * 0.3f;
-                    o->Scale += ((float((rand() % 20) - 10) / 2.0f) * ((fIntervalScale / 2.f)) * FPS_ANIMATION_FACTOR);
-                    o->Position[0] += ((float)(rand() % 20) - 10.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 20) - 10.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 20) - 10.f) * FPS_ANIMATION_FACTOR;
+                    o->Scale += ((float((rand() % 20) - 10) / 2.0f) * ((fIntervalScale / 2.f)));
+                    o->Position[0] += (float)(rand() % 20) - 10.f;
+                    o->Position[1] += (float)(rand() % 20) - 10.f;
+                    o->Position[2] += (float)(rand() % 20) - 10.f;
 
                     break;
                 }
@@ -3647,9 +3648,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->Gravity = ((rand() % 100) / 100.f) * 2.f;
                     o->Scale = (rand() % 10 + 10) * 0.02f + Scale;
                     o->Rotation = (float)(rand() % 360);
-                    o->Position[0] += (rand() % 40 - 20.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += (rand() % 40 - 20.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] -= (50.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += rand() % 40 - 20.f;
+                    o->Position[1] += rand() % 40 - 20.f;
+                    o->Position[2] -= 50.f;
                     break;
                 }
                 else if (o->SubType == 7)
@@ -3658,8 +3659,8 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->Velocity[2] = (rand() % 4) * 0.1f + 0.8f;
                     o->Scale *= (rand() % 10 + 15) * 0.02f;
                     o->Rotation = (float)(rand() % 360);
-                    o->Position[0] += (rand() % 18 - 9.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += (rand() % 18 - 9.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += rand() % 18 - 9.f;
+                    o->Position[2] += rand() % 18 - 9.f;
                     break;
                 }
                 else if (o->SubType == 8)
@@ -3719,14 +3720,14 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->Gravity = ((rand() % 100) / 100.f) * 2.f;
                     o->Scale = (rand() % 10 + 10) * 0.02f + Scale;
                     o->Rotation = (float)(rand() % 360);
-                    o->Position[0] += (rand() % 40 - 20.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += (rand() % 40 - 20.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] -= (50.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += rand() % 40 - 20.f;
+                    o->Position[1] += rand() % 40 - 20.f;
+                    o->Position[2] -= 50.f;
                     break;
                 }
-                o->Position[0] += (rand() % 40 - 20.f) * FPS_ANIMATION_FACTOR;
-                o->Position[1] += (rand() % 40 - 20.f) * FPS_ANIMATION_FACTOR;
-                o->Position[2] += (rand() % 20 - 10.f) * FPS_ANIMATION_FACTOR;
+                o->Position[0] += rand() % 40 - 20.f;
+                o->Position[1] += rand() % 40 - 20.f;
+                o->Position[2] += rand() % 20 - 10.f;
                 break;
             case BITMAP_SHOCK_WAVE:
                 if (o->SubType == 3)
@@ -3827,7 +3828,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
             {
                 o->LifeTime = 15;
                 o->Scale = Scale * 0.9f + (rand() % 2 + 2) * 0.1f;
-                o->Position[2] += (80.0f + rand() % 20) * FPS_ANIMATION_FACTOR;
+                o->Position[2] += 80.0f + rand() % 20;
             }
             break;
             }
@@ -4147,14 +4148,14 @@ void MoveParticles()
                 switch (o->SubType)
                 {
                 case 0:
-                    o->Frame++;
+                    o->Frame += REFERENCE_FRAME_STEP;
                     o->Position[0] += (float)(rand() % 20 - 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
                     o->Position[1] += (float)(rand() % 20 - 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
                     o->Position[2] += (float)(rand() % 20 + 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
                     break;
 
                 case 1:
-                    o->Frame++;
+                    o->Frame += REFERENCE_FRAME_STEP;
                     o->Position[0] += (float)(rand() % 30 - 15) * 1.f * o->Scale * FPS_ANIMATION_FACTOR;
                     o->Position[1] += (float)(rand() % 30 - 15) * 1.f * o->Scale * FPS_ANIMATION_FACTOR;
                     o->Position[2] += (float)(rand() % 20 + 10) * 0.3f * o->Scale * FPS_ANIMATION_FACTOR;
@@ -4169,7 +4170,7 @@ void MoveParticles()
                     break;
 
                 case 3:
-                    o->Frame++;
+                    o->Frame += REFERENCE_FRAME_STEP;
                     o->Position[0] += (float)(rand() % 20 - 10) * 2.5f * o->Gravity * FPS_ANIMATION_FACTOR;
                     o->Position[1] += (float)(rand() % 20 - 10) * 2.5f * o->Gravity * FPS_ANIMATION_FACTOR;
                     o->Position[2] += (float)(rand() % 20 + 10) * 2.5f * o->Gravity * FPS_ANIMATION_FACTOR;
@@ -4186,7 +4187,7 @@ void MoveParticles()
                     }
                     break;
                 case 5:
-                    o->Frame++;
+                    o->Frame += REFERENCE_FRAME_STEP;
                     o->Position[0] += (float)(rand() % 20 - 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
                     o->Position[1] += (float)(rand() % 20 - 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
                     o->Position[2] += (float)(rand() % 20 + 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
@@ -4681,10 +4682,10 @@ void MoveParticles()
                     o->Gravity += (0.004f) * FPS_ANIMATION_FACTOR;
                     Luminosity = (float)(o->LifeTime) / 24.f;
                     o->Scale += o->Gravity * FPS_ANIMATION_FACTOR;
-                    VectorScale(o->Velocity, 0.98f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.98f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Frame = (23 - o->LifeTime) / 6;
                     o->Position[2] += o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
-                    VectorScale(o->Light, 0.95f, o->Light);
+                    VectorScale(o->Light, powf(0.95f, FPS_ANIMATION_FACTOR), o->Light);
                 }
                 break;
                 default:
@@ -4692,7 +4693,7 @@ void MoveParticles()
                     o->Gravity += (0.004f) * FPS_ANIMATION_FACTOR;
                     Luminosity = (float)(o->LifeTime) / 24.f;
                     o->Scale += o->Gravity * FPS_ANIMATION_FACTOR;
-                    VectorScale(o->Velocity, 0.98f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.98f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Frame = (23 - o->LifeTime) / 6;
                     o->Position[2] += o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
                 }
@@ -4704,7 +4705,7 @@ void MoveParticles()
                 {
                     //					o->Gravity += 0.02f;
                     //					o->Scale += o->Gravity;
-                    VectorScale(o->Velocity, 1.05f, o->Velocity);
+                    VectorScale(o->Velocity, powf(1.05f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Position[2] += o->Gravity * 20.f * FPS_ANIMATION_FACTOR;
                     Luminosity = (float)(o->LifeTime) * 0.2f;
                     Vector(Luminosity, Luminosity, Luminosity, o->Light);
@@ -4713,7 +4714,7 @@ void MoveParticles()
                 {
                     //					o->Gravity += 0.02f;
                     //					o->Scale += o->Gravity;
-                    //     				VectorScale(o->Velocity,1.05f,o->Velocity);
+                    //     				VectorScale(o->Velocity, powf(1.05f, FPS_ANIMATION_FACTOR), o->Velocity);
                     //					o->Position[2] += (o->Gravity*20.f) * FPS_ANIMATION_FACTOR;
                     Luminosity = (float)(o->LifeTime) * 0.2f;
                     Vector(Luminosity, Luminosity, Luminosity, o->Light);
@@ -4722,7 +4723,7 @@ void MoveParticles()
                 {
                     o->Gravity += (0.02f) * FPS_ANIMATION_FACTOR;
                     o->Scale += o->Gravity * FPS_ANIMATION_FACTOR;
-                    VectorScale(o->Velocity, 1.05f, o->Velocity);
+                    VectorScale(o->Velocity, powf(1.05f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Position[2] += o->Gravity * 20.f * FPS_ANIMATION_FACTOR;
                     Luminosity = (float)(o->LifeTime) * 0.2f;
                     Vector(Luminosity, Luminosity, Luminosity, o->Light);
@@ -4754,7 +4755,7 @@ void MoveParticles()
                 }
                 else if (o->SubType == 7)
                 {
-                    VectorScale(o->Velocity, 1.05f, o->Velocity);
+                    VectorScale(o->Velocity, powf(1.05f, FPS_ANIMATION_FACTOR), o->Velocity);
                     Luminosity = (float)(o->LifeTime) * 0.2f;
                     Vector(Luminosity, Luminosity, Luminosity, o->Light);
                 }
@@ -4770,7 +4771,7 @@ void MoveParticles()
                 {
                     o->Gravity += (0.02f) * FPS_ANIMATION_FACTOR;
                     o->Scale += o->Gravity * FPS_ANIMATION_FACTOR;
-                    VectorScale(o->Velocity, 1.05f, o->Velocity);
+                    VectorScale(o->Velocity, powf(1.05f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Position[2] += o->Gravity * 20.f * FPS_ANIMATION_FACTOR;
                     Luminosity = (float)(o->LifeTime) * 0.2f;
                     Vector(Luminosity, Luminosity, Luminosity, o->Light);
@@ -4980,7 +4981,7 @@ void MoveParticles()
                 }
                 else if (o->SubType == 7)
                 {
-                    VectorScale(o->Light, 0.97f, o->Light);
+                    VectorScale(o->Light, powf(0.97f, FPS_ANIMATION_FACTOR), o->Light);
                 }
             }
             break;
@@ -5177,7 +5178,7 @@ void MoveParticles()
                     if (o->LifeTime < 10)
                     {
                         o->Alpha -= FPS_ANIMATION_FACTOR * 0.1f;
-                        VectorScale(o->Light, 0.9f, o->Light);
+                        VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
                     }
                     else if (o->Alpha < 1.0f)
                     {
@@ -5192,7 +5193,7 @@ void MoveParticles()
                     if (o->LifeTime < 10)
                     {
                         o->Alpha -= FPS_ANIMATION_FACTOR * 0.1f;
-                        VectorScale(o->Light, 0.9f, o->Light);
+                        VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
                     }
                     else if (o->Alpha < 1.0f)
                     {
@@ -5310,14 +5311,14 @@ void MoveParticles()
                 case 33:
                     Luminosity = (float)(o->LifeTime) / 8.f;
                     Vector(Luminosity * 0.4f, Luminosity * 0.4f, Luminosity, o->Light);
-                    VectorScale(o->Velocity, 0.001f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.001f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += (0.01f * 2) * FPS_ANIMATION_FACTOR;
                     o->Position[2] += (o->Scale) * FPS_ANIMATION_FACTOR;
                     break;
                 case 32:
                     Luminosity = (float)(o->LifeTime) / 8.f;
                     Vector(Luminosity * 0.8f, Luminosity * 0.8f, Luminosity, o->Light);
-                    VectorScale(o->Velocity, 0.4f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.4f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += FPS_ANIMATION_FACTOR * 0.1f;
                     break;
                 case 23:
@@ -5330,14 +5331,14 @@ void MoveParticles()
                 case 3:
                     Luminosity = (float)(o->LifeTime) / 8.f;
                     Vector(Luminosity * 0.8f, Luminosity * 0.8f, Luminosity, o->Light);
-                    VectorScale(o->Velocity, 0.4f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.4f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += FPS_ANIMATION_FACTOR * 0.1f;
                     break;
                 case 11:
                 case 14:
                     Luminosity = (float)(o->LifeTime) / 50.f;
                     Vector(Luminosity * o->TurningForce[0], Luminosity * o->TurningForce[1], Luminosity * o->TurningForce[2], o->Light);
-                    VectorScale(o->Velocity, 0.4f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.4f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += FPS_ANIMATION_FACTOR * 0.05f;
                     o->Position[2] -= (1.f) * FPS_ANIMATION_FACTOR;
                     break;
@@ -5362,7 +5363,7 @@ void MoveParticles()
                 case 1:
                     Luminosity = (float)(o->LifeTime) / 50.f;
                     Vector(Luminosity * 0.5f, Luminosity * 1.f, Luminosity * 0.8f, o->Light);
-                    VectorScale(o->Velocity, 0.4f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.4f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += FPS_ANIMATION_FACTOR * 0.05f;
                     break;
                 case 2:
@@ -5440,10 +5441,10 @@ void MoveParticles()
                         o->Scale += o->Gravity * FPS_ANIMATION_FACTOR;
                         o->Position[2] += o->Gravity * 20.f * FPS_ANIMATION_FACTOR;
 
-                        VectorScale(o->Velocity, 1.05f, o->Velocity);
+                        VectorScale(o->Velocity, powf(1.05f, FPS_ANIMATION_FACTOR), o->Velocity);
                         Luminosity = (float)(o->LifeTime) / 24.f;
                         Vector(Luminosity, Luminosity, Luminosity, o->Light);
-                        VectorScale(o->Velocity, 0.4f, o->Velocity);
+                        VectorScale(o->Velocity, powf(0.4f, FPS_ANIMATION_FACTOR), o->Velocity);
                     }
                     else
                     {
@@ -5561,7 +5562,7 @@ void MoveParticles()
                 {
                     Luminosity = (float)(o->LifeTime) / 50.f;
                     Vector(Luminosity * 0.5f, Luminosity * 0.5f, Luminosity * 1.0f, o->Light);
-                    VectorScale(o->Velocity, 0.4f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.4f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += FPS_ANIMATION_FACTOR * 0.05f;
                 }
                 break;
@@ -5569,7 +5570,7 @@ void MoveParticles()
                 {
                     Luminosity = (float)(o->LifeTime) / 50.f;
                     Vector(Luminosity * 0.5f, Luminosity * 1.f, Luminosity * 0.8f, o->Light);
-                    VectorScale(o->Velocity, 0.4f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.4f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += FPS_ANIMATION_FACTOR * 0.05f;
                     o->Gravity += (0.2f) * FPS_ANIMATION_FACTOR;
                     o->Position[2] += o->Gravity * FPS_ANIMATION_FACTOR;
@@ -5671,7 +5672,7 @@ void MoveParticles()
                     if (o->Light[0] <= 0.01f)
                         o->LifeTime = 0;
 
-                    VectorScale(o->Velocity, 0.001f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.001f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += (rand() % 15 + 4) * (0.001f) * FPS_ANIMATION_FACTOR;
                     o->Position[2] += (o->Scale * 6.0f) * FPS_ANIMATION_FACTOR;
                     o->Rotation += ((rand() % 10 + 10) * 0.1f * o->Angle[0]) * FPS_ANIMATION_FACTOR;
@@ -5716,7 +5717,7 @@ void MoveParticles()
                 case 53:
                     Luminosity = (float)(o->LifeTime) / 50.f;
                     Vector(Luminosity * 1.f, Luminosity * 1.f, Luminosity * 1.f, o->Light);
-                    VectorScale(o->Velocity, 0.4f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.4f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += FPS_ANIMATION_FACTOR * 0.05f;
                     break;
                 case 54:
@@ -5747,7 +5748,7 @@ void MoveParticles()
                 case 56:
                     Luminosity = (float)(o->LifeTime) / 50.f;
                     Vector(Luminosity * 0.5f, Luminosity * 0.1f, Luminosity * 0.8f, o->Light);
-                    VectorScale(o->Velocity, 0.4f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.4f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += FPS_ANIMATION_FACTOR * 0.05f;
                     break;
                 case 57:
@@ -5761,7 +5762,7 @@ void MoveParticles()
                     Luminosity = (float)(o->LifeTime) / 50.f;
                     Vector(Luminosity * o->StartPosition[0], Luminosity * o->StartPosition[1],
                         Luminosity * o->StartPosition[2], o->Light);
-                    VectorScale(o->Velocity, 0.4f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.4f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += FPS_ANIMATION_FACTOR * 0.05f;
                     break;
                 case 60:
@@ -5787,7 +5788,7 @@ void MoveParticles()
                     Luminosity = (float)(o->LifeTime) / 50.f;
                     //Vector(Luminosity*0.9f,Luminosity*0.4f,Luminosity*0.1f,o->Light);
                     Vector(Luminosity * 0.9f, Luminosity * 0.9f, Luminosity * 0.9f, o->Light);
-                    VectorScale(o->Velocity, 0.001f, o->Velocity);
+                    VectorScale(o->Velocity, powf(0.001f, FPS_ANIMATION_FACTOR), o->Velocity);
                     o->Scale += FPS_ANIMATION_FACTOR * 0.03f;
                 }
                 break;
@@ -6552,7 +6553,7 @@ void MoveParticles()
                 o->Frame = (12 - o->LifeTime) / 3;
                 //o->Position[2] += o->Gravity * FPS_ANIMATION_FACTOR;
                 //o->Gravity -= 1.5f;
-                VectorScale(o->Velocity, 0.95f, o->Velocity);
+                VectorScale(o->Velocity, powf(0.95f, FPS_ANIMATION_FACTOR), o->Velocity);
                 VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
                 break;
             case BITMAP_SPARK:
@@ -7022,9 +7023,9 @@ void MoveParticles()
                     {
                         vec3_t vPos;
                         VectorCopy(o->Position, vPos);
-                        vPos[0] += ((float)(rand() % 100 - 50)) * FPS_ANIMATION_FACTOR;
-                        vPos[1] += ((float)(rand() % 100 - 50)) * FPS_ANIMATION_FACTOR;
-                        vPos[2] += ((float)(rand() % 100 - 50)) * FPS_ANIMATION_FACTOR;
+                        vPos[0] += ((float)(rand() % 100 - 50));
+                        vPos[1] += ((float)(rand() % 100 - 50));
+                        vPos[2] += ((float)(rand() % 100 - 50));
                         CreateBomb(vPos, true);
                     }
                 }
@@ -7060,7 +7061,7 @@ void MoveParticles()
                 o->Scale += FPS_ANIMATION_FACTOR * 0.08f;
                 //o->Angle[0] += (4.f) * FPS_ANIMATION_FACTOR;
                 VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
-                VectorScale(o->Velocity, 0.9f, o->Velocity);
+                VectorScale(o->Velocity, powf(0.9f, FPS_ANIMATION_FACTOR), o->Velocity);
 
                 if (o->SubType == 6)
                 {
@@ -7348,7 +7349,7 @@ void MoveParticles()
                 else if (o->SubType == 2)
                 {
                     o->Scale *= powf(1.1f, FPS_ANIMATION_FACTOR);
-                    VectorScale(o->Light, 0.9f, o->Light);
+                    VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
                 }
                 break;
             case BITMAP_SHINY + 6:
@@ -8037,17 +8038,17 @@ void MoveParticles()
                 }
                 else if (1 == o->SubType)
                 {
-                    VectorScale(o->Light, 0.9f, o->Light);
+                    VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
                     o->Scale *= powf(0.95f, FPS_ANIMATION_FACTOR);
                 }
                 else if (5 == o->SubType)
                 {
-                    VectorScale(o->Light, 0.9f, o->Light);
+                    VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
                     o->Scale *= powf(0.95f, FPS_ANIMATION_FACTOR);
                 }
                 else if (3 == o->SubType)
                 {
-                    VectorScale(o->Light, 0.9f, o->Light);
+                    VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
                     o->Scale *= powf(0.85f, FPS_ANIMATION_FACTOR);
                     o->Gravity += (5.f) * FPS_ANIMATION_FACTOR;
 
@@ -8133,7 +8134,7 @@ void MoveParticles()
                 }
                 else if (o->SubType == 14)
                 {
-                    VectorScale(o->Light, 0.98f, o->Light);
+                    VectorScale(o->Light, powf(0.98f, FPS_ANIMATION_FACTOR), o->Light);
                     o->Scale *= powf(0.95f, FPS_ANIMATION_FACTOR);
                 }
                 else if (o->SubType == 15)
@@ -8378,7 +8379,7 @@ void MoveParticles()
                     {
                         Vector(0.5f, 0.5f, 0.5f, o->Light);
                     }
-                    o->Rotation++;
+                    o->Rotation += FPS_ANIMATION_FACTOR;
                     o->Scale += FPS_ANIMATION_FACTOR * 0.01f;
                     o->Velocity[2] -= (0.4f) * FPS_ANIMATION_FACTOR;
                 }
@@ -8821,17 +8822,17 @@ void MoveParticles()
                 if (o->SubType == 0)
                 {
                     o->Scale *= powf(1.05f, FPS_ANIMATION_FACTOR);
-                    Temp_Pos[2] -= (10.0f) * FPS_ANIMATION_FACTOR;
+                    Temp_Pos[2] -= 10.0f;
                 }
                 else if (o->SubType == 1)
                 {
                     o->Scale *= powf(1.02f, FPS_ANIMATION_FACTOR);
-                    Temp_Pos[2] += (10.0f) * FPS_ANIMATION_FACTOR;
+                    Temp_Pos[2] += 10.0f;
                 }
                 else if (o->SubType == 2)
                 {
                     o->Scale *= powf(1.03f, FPS_ANIMATION_FACTOR);
-                    Temp_Pos[2] += (25.0f) * FPS_ANIMATION_FACTOR;
+                    Temp_Pos[2] += 25.0f;
                 }
                 VectorCopy(Temp_Pos, o->Position);
 
@@ -8855,7 +8856,7 @@ void MoveParticles()
             case BITMAP_DAMAGE1:
             {
                 o->Scale *= powf(1.2f, FPS_ANIMATION_FACTOR);
-                VectorScale(o->Light, 0.8f, o->Light);
+                VectorScale(o->Light, powf(0.8f, FPS_ANIMATION_FACTOR), o->Light);
             }
             break;
             case BITMAP_SWORD_EFFECT_MONO:
@@ -8882,13 +8883,13 @@ void MoveParticles()
                     }
                 }
 
-                VectorScale(o->Light, 0.94f, o->Light);
+                VectorScale(o->Light, powf(0.94f, FPS_ANIMATION_FACTOR), o->Light);
             }
             break;
             case BITMAP_DAMAGE2:
             {
                 o->Scale *= powf(1.2f, FPS_ANIMATION_FACTOR);
-                VectorScale(o->Light, 0.55f, o->Light);
+                VectorScale(o->Light, powf(0.55f, FPS_ANIMATION_FACTOR), o->Light);
             }
             break;
             }
@@ -8969,6 +8970,7 @@ void RenderParticles(BYTE byRenderOneMore)
     static Entry drawOrder[MAX_PARTICLES];
     static Entry drawOrderScratch[MAX_PARTICLES];
 
+    const bool cullOffscreen = !IsEffectCullingDisabledDebug();
     const bool sortDraws = GameConfig::GetInstance().GetSortParticleDraws();
     std::size_t drawCount = MAX_PARTICLES;
     if (sortDraws)
@@ -8995,6 +8997,27 @@ void RenderParticles(BYTE byRenderOneMore)
             BITMAP_t* pBitmap = Bitmaps.GetTexture(o->TexType);
             float Width = pBitmap->Width * o->Scale;
             float Height = pBitmap->Height * o->Scale;
+
+            // The depth test these two set stays for the particles after them, so they set it
+            // whether or not they are drawn.
+            if (o->Type == BITMAP_LIGHT && o->SubType == 6)
+            {
+                EnableDepthTest();
+            }
+            if (o->Type == BITMAP_EXPLOTION && o->SubType == 5)
+            {
+                DisableDepthTest();
+            }
+            // The margin covers the few types drawn a little off their position. Damage numbers
+            // brighten on every draw and firecrackers trail far behind theirs, so those always draw.
+            if (cullOffscreen && o->Type != BITMAP_DAMAGE1 && o->Type != BITMAP_FIRECRACKER &&
+                !TestFrustrum(o->Position, std::max(Width, Height) + 50.f))
+            {
+                FrameProfiler::Count(FrameProfiler::Counter::ParticlesCulled);
+                if (o->LifeTime < 0)
+                    o->LifeTime = 0;
+                continue;
+            }
             if (pBitmap->Components == 3)
             {
                 EnableAlphaBlend();
@@ -9004,14 +9027,6 @@ void RenderParticles(BYTE byRenderOneMore)
                 EnableAlphaTest(false);
             }
 
-            if (o->Type == BITMAP_LIGHT && o->SubType == 6)
-            {
-                EnableDepthTest();
-            }
-            if (o->Type == BITMAP_EXPLOTION && o->SubType == 5)
-            {
-                DisableDepthTest();
-            }
             int Frame;
             switch (o->Type)
             {
@@ -9061,7 +9076,7 @@ void RenderParticles(BYTE byRenderOneMore)
                 for (int i = 0; i < 3; ++i)
                 {
                     RenderSprite(o->Type, vPos, Width, Height, o->Light, o->Rotation);
-                    vPos[2] -= 10.f * FPS_ANIMATION_FACTOR;
+                    vPos[2] -= 10.f;
                 }
             }
             break;
@@ -9325,7 +9340,7 @@ void RenderParticles(BYTE byRenderOneMore)
             {
                 vec3_t vPos;
                 VectorCopy(o->Position, vPos);
-                vPos[2] += (31.0f * o->Scale) * FPS_ANIMATION_FACTOR;
+                vPos[2] += (31.0f * o->Scale);
                 RenderSprite(o->TexType, vPos, Width * 0.9f, Height * 1.1f, o->Light, o->Rotation);
             }
             break;

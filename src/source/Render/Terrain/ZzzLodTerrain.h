@@ -63,6 +63,23 @@ void SetTerrainLight(float xf, float yf, vec3_t Light, int Range, vec3_t* Buffer
 void AddTerrainLight(float xf, float yf, vec3_t Light, int Range, vec3_t* Buffer);
 void AddTerrainLightClip(float xf, float yf, vec3_t Light, int Range, vec3_t* Buffer);
 void RequestTerrainLight(float xf, float yf, vec3_t Light);
+// The static terrain light plus this frame's darkening lights, without the brightening ones.
+void RequestStaticTerrainLight(float xf, float yf, vec3_t Light);
+// A lit model's base light: RequestStaticTerrainLight when Enhanced dynamic lights apply the
+// brightening lights per pixel, RequestTerrainLight otherwise.
+void RequestModelTerrainLight(float xf, float yf, vec3_t Light);
+// For a model lit per vertex although Enhanced dynamic lights are on: adds the brightening lights
+// RequestModelTerrainLight left out of its base light. Does nothing otherwise.
+void AddVertexLitDynamicLight(float xf, float yf, vec3_t Light);
+// The static light only (BackTerrainLight), without this frame's dynamic lights.
+void RequestBackTerrainLight(float xf, float yf, vec3_t Light);
+// The light mood's bright weight of the static light at (x, y): 0 in the shade, 1 where it keeps Classic brightness.
+float RequestStaticLightBrightWeight(float xf, float yf);
+// Sample the correction computed from original static light independently at each grid cell.
+void RequestFigureStaticCorrection(float xf, float yf, vec3_t correction);
+// Adds the frame's lights from the light history (Enhanced dynamic lights in the world); call once
+// per frame before the terrain is drawn.
+void AddFrameHistoryLights();
 void OpenTerrainLight(wchar_t* FileName);
 void SaveTerrainLight(wchar_t* FileName);
 
@@ -78,6 +95,10 @@ void ResetFrustrumBoundsFullTerrain();  // Set bounds to cover entire terrain (f
 void CreateLodBuffer();
 
 float RequestTerrainHeight(float xf, float yf);
+// Changes whenever BackTerrainHeight or a cell's TW_HEIGHT bit may have changed.
+unsigned int TerrainHeightVersion();
+// For code that writes BackTerrainHeight or TerrainWall directly instead of through the functions here.
+void MarkTerrainHeightsChanged();
 
 // Debug visualization
 void RenderDebugSphere(const vec3_t center, float radius, float r, float g, float b);

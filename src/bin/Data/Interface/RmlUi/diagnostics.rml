@@ -24,7 +24,7 @@
                 <div id="graph">
                     <progress data-for="sample : history" direction="top" max="33.3"
                         data-attr-value="sample" data-class-slow="sample &gt;= 25"
-                        data-class-medium="sample &gt;= 16.67 &amp;&amp; sample &lt; 25"/>
+                        data-class-medium="sample &gt;= 16.67 &amp;&amp; sample &lt; 25"></progress>
                 </div>
                 <div class="note">Inclusive: a pass contains the passes it calls.</div>
                 <div class="info-line" data-for="line : info">{{line}}</div>
@@ -37,19 +37,11 @@
             <div class="pass-columns">
                 <div class="pass-column">
                     <div class="pass-row pass-head"><span>Pass</span><span>ms</span><span>Draw</span><span>Merge</span><span>KB</span></div>
-                    <div data-for="pass, i : passes">
-                        <div class="pass-row" data-if="i * 2 &lt; passes.size">
-                            <span>{{pass.name}}</span><span>{{pass.ms | fixed}}</span><span>{{pass.draws}}</span><span>{{pass.merged}}</span><span>{{pass.vertex_kb | fixed}}</span>
-                        </div>
-                    </div>
+                    <div class="pass-row pass-lines"><span>{{passes_left.names}}</span><span>{{passes_left.ms}}</span><span>{{passes_left.draws}}</span><span>{{passes_left.merged}}</span><span>{{passes_left.vertex_kb}}</span></div>
                 </div>
                 <div class="pass-column">
                     <div class="pass-row pass-head"><span>Pass</span><span>ms</span><span>Draw</span><span>Merge</span><span>KB</span></div>
-                    <div data-for="pass, i : passes">
-                        <div class="pass-row" data-if="i * 2 &gt;= passes.size">
-                            <span>{{pass.name}}</span><span>{{pass.ms | fixed}}</span><span>{{pass.draws}}</span><span>{{pass.merged}}</span><span>{{pass.vertex_kb | fixed}}</span>
-                        </div>
-                    </div>
+                    <div class="pass-row pass-lines"><span>{{passes_right.names}}</span><span>{{passes_right.ms}}</span><span>{{passes_right.draws}}</span><span>{{passes_right.merged}}</span><span>{{passes_right.vertex_kb}}</span></div>
                 </div>
             </div>
             <div class="metric"><span class="label">Draws</span><span class="value pair">requested {{requested}}</span><span class="value pair">submitted {{submitted}}</span><span class="value pair">commands {{commands}}</span></div>

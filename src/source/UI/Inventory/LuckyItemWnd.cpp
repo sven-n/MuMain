@@ -99,7 +99,7 @@ void CLuckyItemWnd::RenderMixEffect()
     }
     else
     {
-        --m_nMixEffectTimer;
+        m_nMixEffectTimer -= REFERENCE_FRAME_STEP;
     }
 
     EnableAlphaBlend();
@@ -383,13 +383,7 @@ bool CLuckyItemWnd::Check_LuckyItem_Trade(ITEM* _pItem)
 
 bool CLuckyItemWnd::Check_LuckyItem_Refinery(ITEM* _pItem)
 {
-    if (_pItem->Type >= ITEM_ARMOR + 62 && _pItem->Type <= ITEM_ARMOR + 72)		return true;
-    else if (_pItem->Type >= ITEM_HELM + 62 && _pItem->Type <= ITEM_HELM + 72)		return true;
-    else if (_pItem->Type >= ITEM_BOOTS + 62 && _pItem->Type <= ITEM_BOOTS + 72)		return true;
-    else if (_pItem->Type >= ITEM_GLOVES + 62 && _pItem->Type <= ITEM_GLOVES + 72)	return true;
-    else if (_pItem->Type >= ITEM_PANTS + 62 && _pItem->Type <= ITEM_PANTS + 72)		return true;
-
-    return false;
+    return GameLogic::Items::IsLuckyItemType(_pItem->Type);
 }
 
 bool CLuckyItemWnd::Process_InventoryCtrl(void)
@@ -544,6 +538,8 @@ void CLuckyItemWnd::SyncRmlModel()
     m_ItemTarget.Sync(m_RmlView.Document() ? m_RmlView.Document()->GetElementById("item_view") : nullptr, IsVisible());
     if (!m_RmlView.Document()) return;
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
+    if (!IsVisible())
+        return;
 
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->FollowGridPx(m_RmlView.Document(), "item_grid");

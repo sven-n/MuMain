@@ -25,8 +25,8 @@ constexpr std::array<std::string_view, 2> ObjectsOfFields = {"offset", "copy"};
 using FieldValues = std::vector<std::pair<std::string, std::string>>;
 
 // A space after each ':' and ',' outside strings, as the data file writes the
-// lists and objects it puts on one line ({"value": -60, "timesFrameFactor":
-// true}); it also lets a narrow column wrap the text.
+// lists and objects it puts on one line ({"y": 200, "z": -190}); it also lets
+// a narrow column wrap the text.
 std::string WithSpaces(const std::string& compact)
 {
     std::string text;
