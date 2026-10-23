@@ -22,6 +22,8 @@
 #include "UI/Inventory/UIJewelHarmony.h"
 #include "UI/Inventory/ItemMng.h"
 
+#include <algorithm>
+#include <iterator>
 #include <clocale>
 #include <cstdint>
 #include <cstdio>
@@ -328,6 +330,14 @@ TEST_CASE("The tooltip's values of an item follow the item and the hero [data][i
     CHECK(GetItemTooltipValue(values, "missingStrength") == values.strength.missing);
     CHECK(GetItemTooltipValue(values, "maxDurability") == values.maxDurability);
     CHECK_FALSE(values.excellent);
+
+    // A socket count past the item's sockets reads only its sockets: the strength socket's seed in the next field
+    // isn't taken for a sixth socket.
+    ITEM corrupted = kris;
+    corrupted.SocketCount = 255;
+    std::fill(std::begin(corrupted.SocketSeedID), std::end(corrupted.SocketSeedID), BYTE{0});
+    std::fill(std::begin(corrupted.SocketSphereLv), std::end(corrupted.SocketSphereLv), BYTE{38});
+    CHECK_FALSE(ComputeItemTooltipValues(corrupted).strength.reduced);
 
     // The Blade Master lacks nothing of it.
     MakeBladeMaster(hero.Hero());
