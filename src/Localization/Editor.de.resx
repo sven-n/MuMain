@@ -1969,4 +1969,22 @@
   <data name="Step channel" xml:space="preserve">
     <value>{0}: Kanal {1}</value>
   </data>
+  <data name="Monster Browser" xml:space="preserve">
+    <value>Monsterliste</value>
+  </data>
+  <data name="Monster Translations" xml:space="preserve">
+    <value>Monsterübersetzungen</value>
+  </data>
+  <data name="Monster Checks" xml:space="preserve">
+    <value>Monsterprüfung</value>
+  </data>
+  <data name="Select a monster" xml:space="preserve">
+    <value>Wählen Sie ein Monster aus</value>
+  </data>
+  <data name="No monster at this number" xml:space="preserve">
+    <value>Kein Monster unter dieser Nummer</value>
+  </data>
+  <data name="The monsters changed since this step; it is not undone." xml:space="preserve">
+    <value>Die Monster haben sich seit diesem Schritt geändert; er wird nicht rückgängig gemacht.</value>
+  </data>
 </root>

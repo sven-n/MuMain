@@ -19,9 +19,9 @@ struct ToolWindowEntry
     bool ToolWindows::* open;
 };
 
-// Tools that share one selection (the item tools): they dock as tabs beside
-// each other, next to their browser, and have one sub-menu in the Windows
-// menu.
+// Tools that share one selection (the item tools, the monster tools): they
+// dock as tabs beside each other, next to their browser, and have one sub-menu
+// in the Windows menu.
 struct ToolGroup
 {
     const char* const* menuTitle;
@@ -36,6 +36,8 @@ struct ToolGroup
 };
 
 const ToolGroup& GetItemTools();
+// Docks with the item tools until a monster tool has a place of its own.
+const ToolGroup& GetMonsterTools();
 } // namespace MuEditor
 
 #endif // _EDITOR

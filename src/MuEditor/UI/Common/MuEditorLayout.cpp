@@ -11,6 +11,7 @@
 #include "imgui_internal.h"
 
 #include <algorithm>
+#include <string_view>
 
 namespace
 {
@@ -48,6 +49,14 @@ void BuildDefaultLayout(ImGuiID dockSpace, ImVec2 size)
           MuEditor::WindowIds::EffectBrowser, MuEditor::WindowIds::ServerList})
     {
         ImGui::DockBuilderDockWindow(window, otherTools);
+    }
+    // The monster browser as a tab beside the item browser, the monster tools
+    // after the other tools.
+    const MuEditor::ToolGroup& monsterTools = MuEditor::GetMonsterTools();
+    ImGui::DockBuilderDockWindow(monsterTools.browser.windowId, browser);
+    for (const MuEditor::ToolWindowEntry& tool : monsterTools.tools)
+    {
+        ImGui::DockBuilderDockWindow(tool.windowId, otherTools);
     }
     ImGui::DockBuilderFinish(dockSpace);
 }
@@ -199,6 +208,16 @@ void DockInGroup(const char* windowId, const ToolGroup& group)
     if (ImGui::FindWindowByName(windowId) != nullptr || ImGui::FindWindowSettingsByID(ImHashStr(windowId)) != nullptr)
     {
         return;
+    }
+    // The browser of a group that docks with another one goes beside that
+    // group's browser, as in the first layout.
+    if (group.dockFallback != nullptr && std::string_view(windowId) == group.browser.windowId)
+    {
+        if (const ImGuiDockNode* browser = FindDockNode(group.dockFallback->browser.windowId))
+        {
+            ImGui::SetNextWindowDockID(browser->ID, ImGuiCond_FirstUseEver);
+            return;
+        }
     }
     // A neighbour also by its place in imgui.ini, while it is not open.
     for (const ToolWindowEntry& neighbour : group.tools)

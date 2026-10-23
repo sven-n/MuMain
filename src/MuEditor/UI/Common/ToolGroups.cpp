@@ -25,6 +25,11 @@ const std::array<ToolWindowEntry, 9> ItemToolEntries = {{
     {WindowIds::ItemChecks, &I18N::Editor::ItemChecks, &ToolWindows::itemChecks},
     {WindowIds::ItemTranslations, &I18N::Editor::ItemTranslations, &ToolWindows::itemTranslations},
 }};
+
+const std::array<ToolWindowEntry, 2> MonsterToolEntries = {{
+    {WindowIds::MonsterTranslations, &I18N::Editor::MonsterTranslations, &ToolWindows::monsterTranslations},
+    {WindowIds::MonsterChecks, &I18N::Editor::MonsterChecks, &ToolWindows::monsterChecks},
+}};
 } // namespace
 
 bool ToolGroup::IsAnyOpen(const ToolWindows& windows) const
@@ -48,6 +53,16 @@ const ToolGroup& GetItemTools()
     static const ToolGroup group{&I18N::Editor::Items,
                                  {WindowIds::ItemBrowser, &I18N::Editor::ItemBrowser, &ToolWindows::itemBrowser},
                                  ItemToolEntries};
+    return group;
+}
+
+const ToolGroup& GetMonsterTools()
+{
+    static const ToolGroup group{
+        &I18N::Editor::Monsters,
+        {WindowIds::MonsterBrowser, &I18N::Editor::MonsterBrowser, &ToolWindows::monsterBrowser},
+        MonsterToolEntries,
+        &GetItemTools()};
     return group;
 }
 } // namespace MuEditor

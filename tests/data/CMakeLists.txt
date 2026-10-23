@@ -53,9 +53,9 @@ target_compile_definitions(server_list_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
-# The monster list (Data/Monsters/Monsters.json), its table and the format of
-# the original client's name files. The table needs the client globals of
-# Winmain.cpp.
+# The monster list (Data/Monsters/Monsters.json), its table, the format of
+# the original client's name files and the editor's monster tools. The table
+# needs the client globals of Winmain.cpp.
 mu_add_test(
     NAME monster_data_tests
     SOURCES
@@ -63,8 +63,10 @@ mu_add_test(
         test_monster_data_edits.cpp
         test_monster_data_files.cpp
         test_monster_database.cpp
+        test_monster_edit_history.cpp
         test_monster_json.cpp
         test_monster_names.cpp
+        test_monster_tool_windows.cpp
         test_names_grid.cpp
         test_npc_name_text.cpp
         test_transformation_ring.cpp

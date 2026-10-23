@@ -46,7 +46,8 @@ void RenderToolWindowBar();
 void DockBesideItemTools(const char* windowId);
 
 // The same for a tool of any group: beside the group's tools, else beside its
-// browser, else where its fallback group docks.
+// browser, else where its fallback group docks. The browser of a group with a
+// fallback docks beside the fallback's browser first.
 void DockInGroup(const char* windowId, const ToolGroup& group);
 } // namespace MuEditor::Layout
 

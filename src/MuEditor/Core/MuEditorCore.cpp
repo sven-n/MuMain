@@ -33,6 +33,9 @@
 #include "../MuEditor/UI/MapEditor/MapEditorUI.h"
 #include "../MuEditor/UI/EffectBrowser/MuEffectBrowserUI.h"
 #include "../MuEditor/UI/ItemTranslations/MuItemTranslationsUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterBrowserUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterChecksUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterTranslationsUI.h"
 #include "../MuEditor/UI/ServerList/MuServerListUI.h"
 #include "../UI/Common/MuEditorUI.h"
 #include "../UI/Console/MuEditorConsoleUI.h"
@@ -607,6 +610,24 @@ void CMuEditorCore::RenderItemTools()
     }
 }
 
+// The monster browser and the monster tools beside it; they show the monster
+// it selects.
+void CMuEditorCore::RenderMonsterTools()
+{
+    if (m_windows.monsterBrowser)
+    {
+        g_MuMonsterBrowserUI.Render(&m_windows.monsterBrowser);
+    }
+    if (m_windows.monsterTranslations)
+    {
+        g_MuMonsterTranslationsUI.Render(&m_windows.monsterTranslations);
+    }
+    if (m_windows.monsterChecks)
+    {
+        g_MuMonsterChecksUI.Render(&m_windows.monsterChecks);
+    }
+}
+
 void CMuEditorCore::ReopenChangedItemModels()
 {
     if (!g_ItemDataHandler.HasModelsToReopen())
@@ -882,6 +903,7 @@ void CMuEditorCore::Render()
             g_MuServerListUI.Render(&m_windows.serverList);
         }
         RenderItemTools();
+        RenderMonsterTools();
 
         // Render console (if enabled)
         if (m_windows.console)
