@@ -426,7 +426,8 @@ std::set<std::string> FindDescriptionTables(const ItemDefinition& definition)
     std::set<std::string> tables;
     for (const ItemDescriptionLine& line : definition.description)
     {
-        for (const std::string& name : ScanPlaceholders(line.text.GetNeutral()).names)
+        const PlaceholderScan scan = ScanPlaceholders(line.text.GetNeutral());
+        for (const std::string& name : scan.names)
         {
             if (const std::string_view table = GetPlaceholderTable(name); !table.empty())
             {
@@ -454,7 +455,7 @@ std::string ListTables(const std::set<std::string>& tables)
 // The wings of a tier (with or without the cape tag, in a group) show the same lines: the tooltip code chose them by
 // the tier before they were data. The tables most of the others name, or nothing when they agree on none.
 std::optional<std::set<std::string>> FindTierTables(const std::vector<const ItemDefinition*>& wings,
-                                                     const ItemDefinition& wing)
+                                                    const ItemDefinition& wing)
 {
     std::map<std::set<std::string>, int> counts;
     for (const ItemDefinition* other : wings)
@@ -464,8 +465,8 @@ std::optional<std::set<std::string>> FindTierTables(const std::vector<const Item
             ++counts[FindDescriptionTables(*other)];
         }
     }
-    const auto most = std::max_element(counts.begin(), counts.end(),
-                                       [](const auto& first, const auto& second) { return first.second < second.second; });
+    const auto most = std::max_element(counts.begin(), counts.end(), [](const auto& first, const auto& second)
+                                       { return first.second < second.second; });
     if (most == counts.end() || most->first.empty())
     {
         return std::nullopt;

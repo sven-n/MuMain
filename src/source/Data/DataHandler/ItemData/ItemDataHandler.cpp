@@ -664,7 +664,7 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
     ValidateDescriptionPlaceholders(result.items, g_ItemDatabase.GetStatProfiles(), GetItemStatsFile().generic_string(),
                                     result.validationIssues);
     ValidateTableUses(result.items, g_ItemDatabase.GetStatProfiles(), GetItemStatsFile().generic_string(),
-                                    result.validationIssues);
+                      result.validationIssues);
     ValidateNameLocales(result.items, I18N::GetAvailableLocales(), result.validationIssues);
 
     g_ItemDatabase.Build(result.items);
