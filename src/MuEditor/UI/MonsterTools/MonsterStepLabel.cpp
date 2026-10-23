@@ -27,6 +27,11 @@ std::string Kind(const Data::Monsters::MonsterDefinition& monster)
 {
     return I18N::Format(I18N::Editor::StepKind, {LogName(monster)});
 }
+
+std::string Name(const Data::Monsters::MonsterDefinition& monster, const char* locale)
+{
+    return I18N::Format(I18N::Editor::StepMonsterName, {LogName(monster), I18N::GetLanguageDisplayName(locale)});
+}
 } // namespace MuEditor::Monsters::StepLabel
 
 #endif // _EDITOR

@@ -2074,4 +2074,43 @@
   <data name="Dialogues of the quest system {0}" xml:space="preserve">
     <value>Dialogue states of the quest system: {0}</value>
   </data>
+  <data name="Monster names cannot contain the separator" xml:space="preserve">
+    <value>A monster name cannot contain "||".</value>
+  </data>
+  <data name="Select the monster and show the Monster Browser" xml:space="preserve">
+    <value>Select the monster and show the Monster Browser</value>
+  </data>
+  <data name="Step monster name" xml:space="preserve">
+    <value>{0}: name ({1})</value>
+  </data>
+  <data name="Import names from NpcName txt" xml:space="preserve">
+    <value>Import names from NpcName txt</value>
+  </data>
+  <data name="Export as NpcName txt" xml:space="preserve">
+    <value>Export as NpcName txt</value>
+  </data>
+  <data name="Import NpcName txt note" xml:space="preserve">
+    <value>Reads {0} and sets the names of the monsters that have an entry; Undo takes back the whole import at once. The Kalima gates (152-158) and numbers without an entry are skipped. An empty name removes a translation; an English name is never emptied. A name equal to the English one stays missing where the monster has no name of its own in that language, as Export writes the English name there.</value>
+  </data>
+  <data name="Export NpcName txt note" xml:space="preserve">
+    <value>Writes the names of all monsters to {0}, in English where a language has no name of its own. A file that changes is backed up first.</value>
+  </data>
+  <data name="NpcName import line" xml:space="preserve">
+    <value>{0}: {1} names read, {2} changed, {3} skipped, {4} cut</value>
+  </data>
+  <data name="NpcName export line" xml:space="preserve">
+    <value>{0}: {1} names written, {2} of them in English</value>
+  </data>
+  <data name="NpcName export unchanged" xml:space="preserve">
+    <value>{0}: has these names already; not written</value>
+  </data>
+  <data name="Monster names imported" xml:space="preserve">
+    <value>Names imported: {0} changed. See the console.</value>
+  </data>
+  <data name="Monster names exported" xml:space="preserve">
+    <value>Names exported to {0}. See the console.</value>
+  </data>
+  <data name="Monster names not exported" xml:space="preserve">
+    <value>Not every file was written. See the console.</value>
+  </data>
 </root>

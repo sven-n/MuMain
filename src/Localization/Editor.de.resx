@@ -2053,4 +2053,43 @@
   <data name="Dialogues of the quest system {0}" xml:space="preserve">
     <value>Dialogzustände des Questsystems: {0}</value>
   </data>
+  <data name="Monster names cannot contain the separator" xml:space="preserve">
+    <value>Ein Monstername darf kein "||" enthalten.</value>
+  </data>
+  <data name="Select the monster and show the Monster Browser" xml:space="preserve">
+    <value>Das Monster auswählen und die Monsterliste zeigen</value>
+  </data>
+  <data name="Step monster name" xml:space="preserve">
+    <value>{0}: Name ({1})</value>
+  </data>
+  <data name="Import names from NpcName txt" xml:space="preserve">
+    <value>Namen aus NpcName-txt importieren</value>
+  </data>
+  <data name="Export as NpcName txt" xml:space="preserve">
+    <value>Als NpcName-txt exportieren</value>
+  </data>
+  <data name="Import NpcName txt note" xml:space="preserve">
+    <value>Liest {0} und setzt die Namen der Monster, die einen Eintrag haben; Rückgängig nimmt den ganzen Import auf einmal zurück. Die Kalima-Tore (152-158) und Nummern ohne Eintrag werden übersprungen. Ein leerer Name entfernt eine Übersetzung; ein englischer Name wird nie geleert. Ein Name gleich dem englischen bleibt fehlend, wo das Monster in der Sprache keinen eigenen Namen hat, denn der Export schreibt dort den englischen Namen.</value>
+  </data>
+  <data name="Export NpcName txt note" xml:space="preserve">
+    <value>Schreibt die Namen aller Monster nach {0}, auf Englisch, wo eine Sprache keinen eigenen Namen hat. Eine Datei, die sich ändert, wird vorher gesichert.</value>
+  </data>
+  <data name="NpcName import line" xml:space="preserve">
+    <value>{0}: {1} Namen gelesen, {2} geändert, {3} übersprungen, {4} gekürzt</value>
+  </data>
+  <data name="NpcName export line" xml:space="preserve">
+    <value>{0}: {1} Namen geschrieben, davon {2} auf Englisch</value>
+  </data>
+  <data name="NpcName export unchanged" xml:space="preserve">
+    <value>{0}: enthält diese Namen schon; nicht geschrieben</value>
+  </data>
+  <data name="Monster names imported" xml:space="preserve">
+    <value>Namen importiert: {0} geändert. Siehe Konsole.</value>
+  </data>
+  <data name="Monster names exported" xml:space="preserve">
+    <value>Namen nach {0} exportiert. Siehe Konsole.</value>
+  </data>
+  <data name="Monster names not exported" xml:space="preserve">
+    <value>Nicht jede Datei wurde geschrieben. Siehe Konsole.</value>
+  </data>
 </root>
