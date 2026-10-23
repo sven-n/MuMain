@@ -87,7 +87,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `move` (`x`, `y`) | walk there with the client's own path finder |
 | `warp` (`gate`) | use a warp-list entry by name |
 | `teleport` (`x`, `y`, `map`) | the game master's own move command; `map` is an index, the current map when omitted |
-| `attack` (`target`, `times`, `interval`) | plain attacks on an id or character name |
+| `attack` (`target`, `times`, `interval`) | plain attacks on a `target` |
 | `skill` (`skill`, `target`) | cast a skill the character owns — with `target` it is aimed at that object, without one it is cast where the character stands |
 | `pickup` (`item`) | walk to a drop and take it, by the id `nearby` reports for it |
 | `use` (`slot`), `equip` (`slot`, `target_slot`) | inventory actions |
@@ -95,6 +95,11 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `party` (`action`, `target`) | `invite`, `accept`, `decline`, `leave` |
 | `trade` (`action`, `target`) | `request` a trade with another player at most one tile away (`not_allowed` otherwise), or `cancel` the open one; the partner accepts with the Enter key, and items go in with `click-ui` |
 | `halt` | stop the walk or repeated attack in progress |
+
+A `target` is an object id (the `id` of `nearby`), a character name, or
+`{"monster": <number>}`: the nearest living monster or NPC with that monster
+number. Summons and transformed players are not found by their number; a trade
+needs a player either way.
 
 `state` reports the scene and account on every screen, and in the world adds:
 character name, class, level, experience, zen, HP/mana/SD/AG with their
