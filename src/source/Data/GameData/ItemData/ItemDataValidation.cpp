@@ -10,8 +10,10 @@
 #include <algorithm>
 #include <cctype>
 #include <map>
+#include <optional>
 #include <set>
 #include <string>
+#include <tuple>
 
 namespace Data::Items
 {
@@ -368,13 +370,10 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
                                      const std::string& statFile, std::vector<ItemDataIssue>& issues)
 {
     std::vector<std::string> known(GetBuiltInPlaceholders().begin(), GetBuiltInPlaceholders().end());
-    const std::vector<std::string> tables = profiles.GetTableNames();
-    for (const std::string& table : tables)
+    for (const std::string& table : profiles.GetTableNames())
     {
         known.push_back(MakeTablePlaceholder(table));
     }
-    // The tables the descriptions name.
-    std::set<std::string, std::less<>> named;
     for (const ItemDefinition& definition : items)
     {
         if (!definition.Exists())
@@ -385,13 +384,6 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
         {
             // The translations have the English text's placeholders (ValidateItems checks that).
             const PlaceholderScan scan = ScanPlaceholders(definition.description[line].text.GetNeutral());
-            for (const std::string& name : scan.names)
-            {
-                if (const std::string_view table = GetPlaceholderTable(name); !table.empty())
-                {
-                    named.emplace(table);
-                }
-            }
             std::set<std::string> reported;
             for (const std::string& name : scan.names)
             {
@@ -400,11 +392,20 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
                 {
                     continue;
                 }
-                // A table written without "table:" is suggested with it.
-                std::string suggestion = SuggestPlaceholder(name, known);
-                if (suggestion.empty() && GetPlaceholderTable(name).empty())
+                // A table written without "table:" is suggested with it. Its own name comes first, also when it is
+                // close to a built-in value: {levels} for the table "levels" is not {level}.
+                std::string suggestion;
+                if (GetPlaceholderTable(name).empty() && profiles.FindTable(name) != nullptr)
                 {
-                    suggestion = SuggestPlaceholder(MakeTablePlaceholder(name), known);
+                    suggestion = MakeTablePlaceholder(name);
+                }
+                else
+                {
+                    suggestion = SuggestPlaceholder(name, known);
+                    if (suggestion.empty() && GetPlaceholderTable(name).empty())
+                    {
+                        suggestion = SuggestPlaceholder(MakeTablePlaceholder(name), known);
+                    }
                 }
                 const std::string hint = suggestion.empty()
                                              ? "a placeholder is a built-in value (docs/item-data.md) or a table of " +
@@ -416,12 +417,106 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
             }
         }
     }
+}
+
+namespace
+{
+// The tables an item's description names, by the English texts (the translations have their placeholders).
+std::set<std::string> FindDescriptionTables(const ItemDefinition& definition)
+{
+    std::set<std::string> tables;
+    for (const ItemDescriptionLine& line : definition.description)
+    {
+        const PlaceholderScan scan = ScanPlaceholders(line.text.GetNeutral());
+        for (const std::string& name : scan.names)
+        {
+            if (const std::string_view table = GetPlaceholderTable(name); !table.empty())
+            {
+                tables.emplace(table);
+            }
+        }
+    }
+    return tables;
+}
+
+std::string ListTables(const std::set<std::string>& tables)
+{
+    if (tables.empty())
+    {
+        return "no table";
+    }
+    std::string list;
     for (const std::string& table : tables)
+    {
+        list += (list.empty() ? "{" : ", {") + MakeTablePlaceholder(table) + "}";
+    }
+    return list;
+}
+
+// The wings of a tier (with or without the cape tag, in a group) show the same lines: the tooltip code chose them by
+// the tier before they were data. The tables most of the others name, or nothing when they agree on none.
+std::optional<std::set<std::string>> FindTierTables(const std::vector<const ItemDefinition*>& wings,
+                                                    const ItemDefinition& wing)
+{
+    std::map<std::set<std::string>, int> counts;
+    for (const ItemDefinition* other : wings)
+    {
+        if (other != &wing)
+        {
+            ++counts[FindDescriptionTables(*other)];
+        }
+    }
+    const auto most = std::max_element(counts.begin(), counts.end(), [](const auto& first, const auto& second)
+                                       { return first.second < second.second; });
+    if (most == counts.end() || most->first.empty())
+    {
+        return std::nullopt;
+    }
+    return most->first;
+}
+} // namespace
+
+void ValidateTableUses(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
+                       const std::string& statFile, std::vector<ItemDataIssue>& issues)
+{
+    std::set<std::string, std::less<>> named;
+    // The wings by tier, cape tag and group.
+    std::map<std::tuple<WingTier, bool, int>, std::vector<const ItemDefinition*>> wings;
+    for (const ItemDefinition& definition : items)
+    {
+        if (!definition.Exists())
+        {
+            continue;
+        }
+        const std::set<std::string> tables = FindDescriptionTables(definition);
+        named.insert(tables.begin(), tables.end());
+        if (definition.wingTier != WingTier::None)
+        {
+            wings[{definition.wingTier, definition.tags.Has(ItemTag::Cape), definition.group}].push_back(&definition);
+        }
+    }
+    for (const std::string& table : profiles.GetTableNames())
     {
         if (!profiles.IsTableUsedByStats(table) && !named.contains(table))
         {
             issues.push_back({ItemDataIssueSeverity::Warning, statFile, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
                               "tables." + table, "neither a stat nor an item description uses this table"});
+        }
+    }
+    for (const auto& [kind, tierWings] : wings)
+    {
+        const auto& [tier, cape, group] = kind;
+        for (const ItemDefinition* wing : tierWings)
+        {
+            const std::optional<std::set<std::string>> expected = FindTierTables(tierWings, *wing);
+            const std::set<std::string> tables = FindDescriptionTables(*wing);
+            if (expected && tables != *expected)
+            {
+                issues.push_back({ItemDataIssueSeverity::Warning, "", wing->group, wing->number, "description",
+                                  "names " + ListTables(tables) + " for its wing lines; the other " +
+                                      FindEnumName(tier) + "-tier " + (cape ? "capes" : "wings") + " of group " +
+                                      std::to_string(group) + " name " + ListTables(*expected)});
+            }
         }
     }
 }

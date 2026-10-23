@@ -14,16 +14,19 @@
 
 namespace Data::Items
 {
-// Checks rules across items that a single file cannot check: unique ids,
-// the required English name, and names that fit the LocalizedString format.
 // A language code like "pt" or "zh-TW": letters, digits and "-" only.
 bool IsValidLocaleCode(const std::string& locale);
-// Appends the problems to `issues`.
+
+// Checks rules across items that a single file cannot check: unique ids,
+// the required English name, and names that fit the LocalizedString format.
+// Also the description texts: the English text, the language codes, the
+// braces in every language, and the English text's placeholders in each
+// translation. Appends the problems to `issues`.
 void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIssue>& issues);
 
-// A translation of an item name in a language the game has no texts for is
-// never shown: a warning for each. `uiLocales` are the game's languages
-// (I18N::GetAvailableLocales).
+// A translation of an item name or a description text in a language the game
+// has no texts for is never shown: a warning for each. `uiLocales` are the
+// game's languages (I18N::GetAvailableLocales).
 void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const char* const> uiLocales,
                          std::vector<ItemDataIssue>& issues);
 
@@ -40,10 +43,16 @@ void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatP
 
 // The placeholders of the items' descriptions against the item stat file (`statFile` names it in messages): a name
 // that is neither a built-in value nor "table:" and a table of the file is an error, with the nearest known name when
-// it looks like a typo. A table of the file that neither a stat nor a description uses is a warning. The braces and
-// the translations are checked by ValidateItems.
+// it looks like a typo. The braces and the translations are checked by ValidateItems.
 void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
                                      const std::string& statFile, std::vector<ItemDataIssue>& issues);
+
+// The tables of the item stat file the items use (`statFile` names it in messages). A table that neither a stat nor a
+// description names is a warning. So is a wing (an item with a wing tier) whose description names other tables than
+// most of the other wings of its tier, cape tag and group: the tooltip code chose the wings' damage and absorption
+// lines by the tier, so a new or re-tiered wing that misses them, or keeps another tier's, is pointed out.
+void ValidateTableUses(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
+                       const std::string& statFile, std::vector<ItemDataIssue>& issues);
 
 // Gives the model entries that name a shared model ("model") its file,
 // texture folders and none-blend meshes. A name that is not a shared model
