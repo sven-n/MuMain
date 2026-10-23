@@ -882,32 +882,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {capeDamageIncrease}% of Damage",
-            "de": "Erhöht den Schaden um {capeDamageIncrease}%",
-            "es": "Aumenta el daño de {capeDamageIncrease}% of",
-            "id": "Meningkatkan Kerusakan {capeDamageIncrease}% of",
-            "ja": "ダメージ {capeDamageIncrease}%増加",
-            "pl": "Zwiększa obrażenia o {capeDamageIncrease}%",
-            "pt": "Aumentar o dano de {capeDamageIncrease}% of",
-            "ru": "Увеличение урона {capeDamageIncrease}% of",
-            "tl": "Dagdagan ang {capeDamageIncrease}% of Pinsala",
-            "uk": "Збільшення шкоди на {capeDamageIncrease}% of",
-            "zh-TW": "增加 {capeDamageIncrease}% of 傷害"
+            "en": "Increase {table:capeDamageIncrease}% of Damage",
+            "de": "Erhöht den Schaden um {table:capeDamageIncrease}%",
+            "es": "Aumenta el daño de {table:capeDamageIncrease}% of",
+            "id": "Meningkatkan Kerusakan {table:capeDamageIncrease}% of",
+            "ja": "ダメージ {table:capeDamageIncrease}%増加",
+            "pl": "Zwiększa obrażenia o {table:capeDamageIncrease}%",
+            "pt": "Aumentar o dano de {table:capeDamageIncrease}% of",
+            "ru": "Увеличение урона {table:capeDamageIncrease}% of",
+            "tl": "Dagdagan ang {table:capeDamageIncrease}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:capeDamageIncrease}% of",
+            "zh-TW": "增加 {table:capeDamageIncrease}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {capeOfLordDamageAbsorb}% of Damage",
-            "de": "Absorbiert {capeOfLordDamageAbsorb}% des Schadens",
-            "es": "Absorber daño {capeOfLordDamageAbsorb}% of",
-            "id": "Menyerap Kerusakan {capeOfLordDamageAbsorb}% of",
-            "ja": "ダメージ {capeOfLordDamageAbsorb}%吸収",
-            "pl": "Pochłania {capeOfLordDamageAbsorb}% obrażeń",
-            "pt": "Absorver Dano {capeOfLordDamageAbsorb}% of",
-            "ru": "Поглощение {capeOfLordDamageAbsorb}% of урона",
-            "tl": "Isipsip ang {capeOfLordDamageAbsorb}% of Pinsala",
-            "uk": "Поглинання шкоди {capeOfLordDamageAbsorb}% of",
-            "zh-TW": "吸收{capeOfLordDamageAbsorb}% of傷害"
+            "en": "Absorb {table:capeOfLordDamageAbsorb}% of Damage",
+            "de": "Absorbiert {table:capeOfLordDamageAbsorb}% des Schadens",
+            "es": "Absorber daño {table:capeOfLordDamageAbsorb}% of",
+            "id": "Menyerap Kerusakan {table:capeOfLordDamageAbsorb}% of",
+            "ja": "ダメージ {table:capeOfLordDamageAbsorb}%吸収",
+            "pl": "Pochłania {table:capeOfLordDamageAbsorb}% obrażeń",
+            "pt": "Absorver Dano {table:capeOfLordDamageAbsorb}% of",
+            "ru": "Поглощение {table:capeOfLordDamageAbsorb}% of урона",
+            "tl": "Isipsip ang {table:capeOfLordDamageAbsorb}% of Pinsala",
+            "uk": "Поглинання шкоди {table:capeOfLordDamageAbsorb}% of",
+            "zh-TW": "吸收{table:capeOfLordDamageAbsorb}% of傷害"
           }
         }
       ],
