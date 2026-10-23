@@ -2105,11 +2105,11 @@
     <comment>legacy_id=575</comment>
   </data>
   <data name="Increase %d%% of Damage" xml:space="preserve">
-    <value>Dagdagan ang %d%% of Pinsala</value>
+    <value>Dagdagan ang Pinsala nang %d%%</value>
     <comment>legacy_id=577</comment>
   </data>
   <data name="Absorb %d%% of Damage" xml:space="preserve">
-    <value>Isipsip ang %d%% of Pinsala</value>
+    <value>Isipsip ang %d%% ng Pinsala</value>
     <comment>legacy_id=578</comment>
   </data>
   <data name="Increase speed" xml:space="preserve">
