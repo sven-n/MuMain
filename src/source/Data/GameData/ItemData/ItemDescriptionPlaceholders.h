@@ -12,8 +12,9 @@ namespace Data::Items
 class ItemStatProfiles;
 
 // Placeholders in the texts of an item's description: "{name}" is a value the tooltip fills in for the item. A name is
-// letters and digits: a built-in item value, or a level bonus table of the item stat file, at the item's + level. Item
-// texts have no braces of their own, so every brace belongs to a placeholder.
+// letters and digits, a built-in item value, or "table:" and the name of a level bonus table of the item stat file, at
+// the item's + level. The tables are written apart, so a table never takes the name of a built-in value, also of one
+// a later version adds. Item texts have no braces of their own, so every brace belongs to a placeholder.
 
 // The built-in values: "level" is the item's + level; the others are the values of the tooltip's stat lines
 // ("damageMin", "requiredStrength", "missingStrength", ...), which the game computes for the item and the hero
@@ -21,6 +22,13 @@ class ItemStatProfiles;
 inline constexpr std::string_view LevelPlaceholder = "level";
 std::span<const std::string_view> GetBuiltInPlaceholders();
 bool IsBuiltInPlaceholder(std::string_view name);
+
+// "table:<name>" names a level bonus table.
+inline constexpr std::string_view TablePlaceholderPrefix = "table:";
+// The placeholder of the table (without its braces): "table:<table>".
+std::string MakeTablePlaceholder(std::string_view table);
+// The table a placeholder names, or empty for another placeholder.
+std::string_view GetPlaceholderTable(std::string_view name);
 
 // The values a line's "values" can name besides the built-in values and tables: values of other game data, by number.
 // "skillMana:<skill>" is the mana a skill costs and "skillName:<skill>" its name (the skill's number, as an item's
@@ -62,4 +70,9 @@ std::string FillPlaceholders(std::string_view text, const PlaceholderValueOf& va
 
 // The known name nearest to `name` when it is at most two letters away (a typo), else empty.
 std::string SuggestPlaceholder(std::string_view name, std::span<const std::string> known);
+
+// Whether the text names the table as a placeholder.
+bool NamesTable(std::string_view text, std::string_view table);
+// The text with every placeholder of the table `from` naming the table `to` instead.
+std::string RenameTablePlaceholders(std::string_view text, std::string_view from, std::string_view to);
 } // namespace Data::Items

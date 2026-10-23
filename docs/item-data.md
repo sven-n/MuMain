@@ -139,106 +139,6 @@ variants or option words. An online keyword need not select the same items offli
 | `tradable`, `droppable`, `storable`, `sellable`, `personalShopSellable`, `repairable` | What a player may do with the item; see [Rules](#rules). Only `false` is written |
 | `droppableWhileRented`, `personalShopSellableWhileRented`, `sellableWhenRentalExpired` | What changes for a rented item; see [Rules](#rules) |
 
-### Name lines
-
-The tooltip's first line is the item's name. Its **standard name** is the
-item's `name` in the item names' language (the UI's, or English with the
-options' "Translate item names" off), after its set's name for an ancient item
-and "Excellent" for an excellent one, with " +level" above +0; its
-**standard color** is green-blue for an ancient item, violet for a socket
-item, green for an excellent item with options, yellow from +7, blue for an
-item with options, else white.
-
-`nameLines` changes them: the first line whose `levels` and `when` hold gives
-the name, its `text` with its [placeholders](#description-placeholders) filled
-in (left out: the standard name), and the color, its `color` (left out: the
-standard color) and then its first `colors` rule that holds. Without such a
-line, the standard name and color. The NPC shop's price line has the name's
-color.
-
-The repair window writes the same name in the same color. Elsewhere the name
-lines give only the text: the mix and quest windows, the server's messages,
-the control socket and the ground labels (which keep their own colors) write
-the line's text, and where no line holds, the item's `name` with " +level"
-above +0 (the ground labels add the set's name and the options themselves).
-There may be no item there, only its type and level: a condition on the
-item's durability or options then reads 0 (the Horn of Fenrir is plain
-"Horn of Fenrir").
-
-```json
-"nameLines": [
-  {"text": "{name}", "color": "white", "levels": [0, 0], "colors": [{"when": ["level>=7"], "color": "yellow"}, {"when": ["hasOptions"], "color": "blue"}]},
-  {"text": "{name} +{level}", "color": "white", "colors": [{"when": ["level>=7"], "color": "yellow"}, {"when": ["hasOptions"], "color": "blue"}]}
-]
-```
-
-are the wings' and capes': no "Excellent", yellow from +7, else blue with
-options. `[{"color": "yellow"}]` keeps the standard name in yellow (the
-jewels); `{"text": "{monster} Transformation Ring", "values": {"monster":
-"monsterName:2"}, "levels": [0, 0]}` names a +0 Transformation Ring after the
-Budge Dragon.
-
-### Description placeholders
-
-A description or name text can show values of the item: `{value}` is replaced
-by that value for the hovered item, e.g.
-`"Increases damage by {damageIncreaseWeapons}% at +{level}"`. Item texts
-have no braces of their own, so every brace belongs to a placeholder. A name
-is one of:
-
-- a **built-in value**: `level`, the item's + level, or a value of the tooltip's stat
-  lines, as the game computes them for the item and the hero:
-  `damageMin`, `damageMax` (with the Jewel of Harmony's attack bonus; a skill
-  book's wizardry damage), `defense` (with its defense bonus), `magicDefense`,
-  `blockRate`, `attackSpeed`, `walkSpeed`, `magicPower`, `durability`,
-  `maxDurability`, the resistances `iceResistance`, `poisonResistance`,
-  `lightningResistance`, `fireResistance`, `earthResistance`, `windResistance`,
-  `waterResistance` (the item's level + 1 for a resistance it has), and for
-  `Level`, `Strength`, `Dexterity`, `Vitality`, `Energy` and `Leadership`
-  `required…` (what the item asks, after the Jewel of Harmony's and the sockets'
-  strength and agility reductions) and `missing…` (what the hero lacks of it, 0
-  when nothing), and the item's add option (the potions', scrolls', seals' and
-  charms' effect in the game's ItemAddOption data): `addOptionValue1`,
-  `addOptionValue2` and `addOptionDuration`, a text such as "1 Hour"; the
-  hero's `heroLevel`; and for the [name lines](#name-lines) the item's `name`
-  (its `name` in the item names' language), `levelPlusOne` (a packed jewel's count)
-  and `excellentFlags` (its excellent options, 0 to 63; the Horn of Fenrir's
-  1, 2 and 4 are its Destroy, Protect and Illusion kinds);
-- a **level bonus table** of [`Stats/ItemStats.json`](#item-stats-by-level),
-  by its name: the table's value at the item's + level (`damageIncreaseWeapons`
-  is 3 at +1 and 66 at +15). A new table is a new placeholder.
-  The wings, capes and pets show their damage increase and absorption this
-  way: the shared text `"Increase {percent}% of Damage"` with
-  `"values": {"percent": "wingDamageIncrease1st"}` on the line, over the table
-  `wingDamageIncrease1st` (`{"values": 12, "perLevel": 2}`, 12 + 2 per level).
-  Such tables are only for descriptions: no stat profile names them.
-- a name the line's `values` binds to a built-in value, a table or a value of
-  other game data, so one shared text serves items whose numbers come from
-  different tables; the game data values are `skillMana:<skill>` (the mana a
-  skill costs), `skillName:<skill>` (its name), by its number as `skill`
-  writes it, and `monsterName:<monster>` (a monster's name, by its number in
-  the monster data);
-- one of the item's `levelValues`, a text by item level.
-
-**Errors** (when the item data loads, in the save checks and in Import from
-bmd):
-
-- a `{` without its `}`, an empty `{}`, a `}` without its `{`, or a name that is
-  not letters and digits, in any language;
-- a translation whose placeholders are not those of the English text (another
-  order is fine);
-- a name that is neither built in nor a table: `has the unknown placeholder
-  {damgeIncreaseWeapons}; did you mean {damageIncreaseWeapons}?`. The stat file
-  may not have a table named like a built-in value;
-- a line's `values` entry that names neither a built-in value nor a table;
-- a level value named like a built-in value or a table, one with placeholders,
-  and a line that shows a level value at a level the value has none for.
-
-A level value no line shows is a warning.
-
-The shipped data is checked by the tests, so a wrong placeholder fails the
-build's tests.
-
 ### Tags
 
 A tag puts an item into a category that the game code asks for. An item
@@ -426,10 +326,10 @@ Each line is `{"text": ..., "values": {...}, "when": [...], "color": ...,
   text several items show is written once. A text can have
   [placeholders](#description-placeholders).
 - **`values`** names the value a placeholder of the text shows on this line:
-  a built-in value, a table (`"values": {"percent":
-  "wingDamageIncrease1st"}` with the shared text "Increase {percent}% of
-  Damage"), or a [game data value](#description-placeholders) such as
-  `skillMana:<skill>`, the mana a skill costs, by its number as `skill`
+  a built-in value, a table as `table:` and its name (`"values":
+  {"percent": "table:wingDamageIncrease1st"}` with the shared text "Increase
+  {percent}% of Damage"), or a [game data value](#description-placeholders)
+  such as `skillMana:<skill>`, the mana a skill costs, by its number as `skill`
   writes it (`"values": {"mana": "skillMana:22"}`).
 - **An empty text** (`{"text": ""}`) is a blank line.
 - **Long lines** wrap at about the width of the original tooltips' widest
@@ -465,6 +365,113 @@ In the tooltip:
   one never takes the room of the tooltip's other lines.
 - **Dark Horse and Dark Raven:** they show it only in shops; elsewhere the
   pet window writes their tooltip.
+
+### Name lines
+
+The tooltip's first line is the item's name. Its **standard name** is the
+item's `name` in the item names' language (the UI's, or English with the
+options' "Translate item names" off), after its set's name for an ancient item
+and "Excellent" for an excellent one, with " +level" above +0; its
+**standard color** is green-blue for an ancient item, violet for a socket
+item, green for an excellent item with options, yellow from +7, blue for an
+item with options, else white.
+
+`nameLines` changes them: the first line whose `levels` and `when` hold gives
+the name, its `text` with its [placeholders](#description-placeholders) filled
+in (left out: the standard name), and the color, its `color` (left out: the
+standard color) and then its first `colors` rule that holds. Without such a
+line, the standard name and color. The NPC shop's price line has the name's
+color.
+
+The repair window writes the same name in the same color. Elsewhere the name
+lines give only the text: the mix and quest windows, the server's messages,
+the control socket and the ground labels (which keep their own colors) write
+the line's text, and where no line holds, the item's `name` with " +level"
+above +0 (the ground labels add the set's name and the options themselves).
+There may be no item there, only its type and level: a condition on the
+item's durability or options then reads 0 (the Horn of Fenrir is plain
+"Horn of Fenrir").
+
+```json
+"nameLines": [
+  {"text": "{name}", "color": "white", "levels": [0, 0], "colors": [{"when": ["level>=7"], "color": "yellow"}, {"when": ["hasOptions"], "color": "blue"}]},
+  {"text": "{name} +{level}", "color": "white", "colors": [{"when": ["level>=7"], "color": "yellow"}, {"when": ["hasOptions"], "color": "blue"}]}
+]
+```
+
+are the wings' and capes': no "Excellent", yellow from +7, else blue with
+options. `[{"color": "yellow"}]` keeps the standard name in yellow (the
+jewels); `{"text": "{monster} Transformation Ring", "values": {"monster":
+"monsterName:2"}, "levels": [0, 0]}` names a +0 Transformation Ring after the
+Budge Dragon.
+
+### Description placeholders
+
+A description or name text can show values of the item: `{value}` is replaced
+by that value for the hovered item, e.g.
+`"Increases damage by {table:damageIncreaseWeapons} at +{level}"`. Item texts
+have no braces of their own, so every brace belongs to a placeholder. A
+placeholder is one of:
+
+- a **built-in value**, by its name: `{level}`, the item's + level, or a value of the tooltip's stat
+  lines, as the game computes them for the item and the hero:
+  `damageMin`, `damageMax` (with the Jewel of Harmony's attack bonus; a skill
+  book's wizardry damage), `defense` (with its defense bonus), `magicDefense`,
+  `blockRate`, `attackSpeed`, `walkSpeed`, `magicPower`, `durability`,
+  `maxDurability`, the resistances `iceResistance`, `poisonResistance`,
+  `lightningResistance`, `fireResistance`, `earthResistance`, `windResistance`,
+  `waterResistance` (the item's level + 1 for a resistance it has), and for
+  `Level`, `Strength`, `Dexterity`, `Vitality`, `Energy` and `Leadership`
+  `required…` (what the item asks, after the Jewel of Harmony's and the sockets'
+  strength and agility reductions) and `missing…` (what the hero lacks of it, 0
+  when nothing), and the item's add option (the potions', scrolls', seals' and
+  charms' effect in the game's ItemAddOption data): `addOptionValue1`,
+  `addOptionValue2` and `addOptionDuration`, a text such as "1 Hour"; the
+  hero's `heroLevel`; and for the [name lines](#name-lines) the item's `name`
+  (its `name` in the item names' language), `levelPlusOne` (a packed jewel's count)
+  and `excellentFlags` (its excellent options, 0 to 63; the Horn of Fenrir's
+  1, 2 and 4 are its Destroy, Protect and Illusion kinds);
+- a **level bonus table** of [`Stats/ItemStats.json`](#item-stats-by-level),
+  as `table:` and its name: the table's value at the item's + level
+  (`{table:damageIncreaseWeapons}` is 3 at +1 and 66 at +15, the damage a
+  weapon gains). A new table is a new placeholder.
+  The wings, capes and pets show their damage increase and absorption this
+  way: the shared text `"Increase {percent}% of Damage"` with
+  `"values": {"percent": "table:wingDamageIncrease1st"}` on the line, over the
+  table `wingDamageIncrease1st` (`{"values": 12, "perLevel": 2}`, 12 + 2 per
+  level). Such tables are only for descriptions: no stat profile names them.
+- a name the line's `values` binds to a built-in value, a table
+  (`"table:<name>"`) or a value of other game data, so one shared text serves
+  items whose numbers come from different tables; the game data values are
+  `skillMana:<skill>` (the mana a skill costs), `skillName:<skill>` (its name),
+  by its number as `skill` writes it, and `monsterName:<monster>` (a monster's
+  name, by its number in the monster data);
+- one of the item's `levelValues`, a text by item level.
+
+The tables are written apart from the built-in values, so a table may have
+any name, also one a later version gives a built-in value: `{level}` and
+`{table:level}` are not the same. The names of a line's `values` and the item's
+`levelValues` are the item's own: one named like a built-in value is the
+item's, on its lines.
+
+**Errors** (when the item data loads, in the save checks and in Import from
+bmd):
+
+- a `{` without its `}`, an empty `{}`, a `}` without its `{`, or a name that is
+  not letters and digits (after `table:` for a table), in any language;
+- a translation whose placeholders are not those of the English text (another
+  order is fine);
+- a name that is neither built in nor a table: `has the unknown placeholder
+  {table:damgeIncreaseWeapons}; did you mean {table:damageIncreaseWeapons}?`.
+  A table written without `table:` gets the same hint;
+- a line's `values` entry that names neither a built-in value nor a table;
+- a level value with placeholders, and a line that shows a level value at a
+  level the value has none for.
+
+A level value no line shows is a warning.
+
+The shipped data is checked by the tests, so a wrong placeholder fails the
+build's tests.
 
 ### Rules
 
@@ -1193,7 +1200,8 @@ step of the undo history; renaming a color is left out.
 The [item stat file](#item-stats-by-level): its drop level bonus, the
 default, the profiles, the level bonus tables and the profile rules, each in
 the list with how
-many items use it (a table: how many stats name it; unused ones are grey).
+many items use it (a table: how many stats and item descriptions name it;
+unused ones are grey).
 The picked entry is changed on a copy and **Apply to the formulas** takes
 it: the file is checked first (written and read back, as Save Items does),
 and when the change reaches items (other values, or another profile when a
@@ -1214,9 +1222,11 @@ applied, **New stat profile**, **New level bonus table**, **Copy**,
   in every item that names it. **Remove** works while no item and no rule
   uses the profile, **Remove them** for all such profiles.
 - **A table**: the bonus at each item level 0 to 15, what it adds for every
-  level (also above +15) and its English caption. New, copied, renamed (in
-  every stat that names it) and removed tables work like profiles; a table
-  is removed while no stat names it.
+  level (also above +15), its English caption and the items whose
+  descriptions name it. New, copied, renamed (in every stat and every item
+  description that names it, in every language) and removed tables work like
+  profiles; a table is removed while no stat and no item description names
+  it.
 - **Profile rules**: the rules in order, each with its profile, its
   conditions and how many items it gives their profile (the selected item's
   rule is marked). **New rule** adds a copy of the picked rule below it (or a
