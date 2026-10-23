@@ -337,8 +337,42 @@ bool CServerSelWin::Render()
     return true;
 }
 
+#ifdef _EDITOR
+int CServerSelWin::GetOpenGroupId() const
+{
+    if (m_iSelectServerBtnIndex == -1)
+        return -1;
+
+    // By its button, not m_pSelectServerGroup: that can be left on a deleted group.
+    const CServerGroup* pServerGroup = g_ServerListManager->GetServerGroupByBtnPos(m_iSelectServerBtnIndex);
+    return pServerGroup != nullptr ? pServerGroup->m_iServerIndex : -1;
+}
+
+void CServerSelWin::ShowRebuiltGroups(int openGroupId)
+{
+    // The first pass gives the rebuilt groups their buttons.
+    m_iSelectServerBtnIndex = -1;
+    UpdateDisplay();
+    if (openGroupId < 0)
+        return;
+
+    CServerGroup* pServerGroup = nullptr;
+    g_ServerListManager->SetFirst();
+    while (g_ServerListManager->GetNext(pServerGroup))
+    {
+        if (pServerGroup->m_iServerIndex == openGroupId && pServerGroup->m_iBtnPos >= 0)
+        {
+            m_iSelectServerBtnIndex = pServerGroup->m_iBtnPos;
+            UpdateDisplay();
+            return;
+        }
+    }
+}
+#endif
+
 // Called only at the point of an actual state change, not polled from Render() every frame --
-// this window's state only ever changes from its own click handlers.
+// this window's state only changes from its own click handlers and, in editor builds, from
+// ShowRebuiltGroups after the Server List window built the groups again.
 void CServerSelWin::SyncRmlModel()
 {
     if (!m_RmlView.Document()) return;
