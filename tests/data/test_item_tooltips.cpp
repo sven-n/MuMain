@@ -298,7 +298,8 @@ TEST_CASE("Every item's tooltip is as recorded [data][items][tooltip]")
 
 namespace
 {
-// The tooltip's line formatted as the game formats it, e.g. from an I18N::Game format.
+// The tooltip's line formatted as the game formats it. The tests write the English texts out, so they hold wherever
+// the game keeps them (the .resx or the item data).
 template <typename... Args> std::wstring Formatted(const wchar_t* format, Args... args)
 {
     wchar_t text[256];
@@ -313,7 +314,7 @@ bool HasLine(const std::vector<ItemTooltipLine>& lines, const std::wstring& text
 }
 } // namespace
 
-// The lines that depend on the durability or the expiry, which the snapshot's full items don't show apart.
+// The lines that depend on the durability or the expiry, which the snapshot's full items don't show apart, in English.
 TEST_CASE("A tooltip's durability, count and expiry lines follow the item [data][items][tooltip]")
 {
     ProcessLocaleScope locale;
@@ -334,23 +335,23 @@ TEST_CASE("A tooltip's durability, count and expiry lines follow the item [data]
         INFO(durability);
         kris.Durability = static_cast<BYTE>(durability);
         const std::vector<ItemTooltipLine> lines = TooltipOfParameters(kris);
-        CHECK(HasLine(lines, Formatted(I18N::Game::DurabilityDD, durability, maxDurability)));
+        CHECK(HasLine(lines, Formatted(L"Durability: [%d/%d]", durability, maxDurability)));
     }
 
     // A stack's count.
     ItemCreationParams apples = FullItemParameters(14, 0);
     apples.Durability = 3;
-    CHECK(HasLine(TooltipOfParameters(apples), Formatted(I18N::Game::NumberOfItemsD, 3)));
+    CHECK(HasLine(TooltipOfParameters(apples), Formatted(L"Number of items: %d", 3)));
     apples.Durability = 1;
-    CHECK(HasLine(TooltipOfParameters(apples), Formatted(I18N::Game::NumberOfItemsD, 1)));
+    CHECK(HasLine(TooltipOfParameters(apples), Formatted(L"Number of items: %d", 1)));
 
     // An expired item says so, in red, and shows no durability.
     kris.Durability = static_cast<BYTE>(maxDurability);
     kris.WithExpiration = true;
     kris.IsExpired = true;
     const std::vector<ItemTooltipLine> expired = TooltipOfParameters(kris);
-    CHECK(HasLine(expired, Formatted(I18N::Game::ExpiredItem), TEXT_COLOR_RED));
-    CHECK_FALSE(HasLine(expired, Formatted(I18N::Game::DurabilityDD, maxDurability, maxDurability)));
+    CHECK(HasLine(expired, L"Expired Item", TEXT_COLOR_RED));
+    CHECK_FALSE(HasLine(expired, Formatted(L"Durability: [%d/%d]", maxDurability, maxDurability)));
 
     // A timed item shows when it ends, in the local time, and no durability either.
     kris.IsExpired = false;
@@ -361,12 +362,12 @@ TEST_CASE("A tooltip's durability, count and expiry lines follow the item [data]
     time_t expireTime = timed.lExpireTime;
     const tm* local = localtime(&expireTime);
     REQUIRE(local != nullptr);
-    CHECK(HasLine(timedLines, Formatted(I18N::Game::ExpirationDay), TEXT_COLOR_ORANGE));
+    CHECK(HasLine(timedLines, L"Expiration Day", TEXT_COLOR_ORANGE));
     CHECK(HasLine(timedLines,
                   Formatted(L"%d-%02d-%02d  %02d:%02d", local->tm_year + 1900, local->tm_mon + 1, local->tm_mday,
                             local->tm_hour, local->tm_min),
                   TEXT_COLOR_BLUE));
-    CHECK_FALSE(HasLine(timedLines, Formatted(I18N::Game::DurabilityDD, maxDurability, maxDurability)));
+    CHECK_FALSE(HasLine(timedLines, Formatted(L"Durability: [%d/%d]", maxDurability, maxDurability)));
     // Without its end date (the server sends it apart), it shows no tooltip.
     timed.lExpireTime = 0;
     CHECK(BuildItemTooltipLines(&timed, false).empty());
