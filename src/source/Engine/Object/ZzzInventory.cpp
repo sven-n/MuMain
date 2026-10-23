@@ -3224,9 +3224,8 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         case ITEM_RED_CHOCOLATE_BOX:
             if (Level == 0)
                 TextListColor[TextNum] = TEXT_COLOR_RED;
-            else
-                if (Level == 1)
-                    TextListColor[TextNum] = TEXT_COLOR_RED;
+            else if (Level == 1)
+                TextListColor[TextNum] = TEXT_COLOR_RED;
             break;
         case ITEM_BLUE_CHOCOLATE_BOX:
             if (Level == 0)
