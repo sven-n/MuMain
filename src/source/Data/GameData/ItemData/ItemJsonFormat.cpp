@@ -437,18 +437,21 @@ void ItemReader::ReadDescription(const OrderedJson& json, std::vector<ItemDescri
 // [first, last]: the item levels a description line is shown at, both included.
 void ItemReader::ReadDescriptionLevels(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line)
 {
-    const auto isLevel = [](const OrderedJson& value)
-    { return value.is_number_integer() && value.get<int>() >= 0 && value.get<int>() < ItemLevelCount; };
-    if (!json.is_array() || json.size() != 2 || !isLevel(json[0]) || !isLevel(json[1]) ||
-        json[0].get<int>() > json[1].get<int>())
+    // Read as a whole number first: a number outside int's range would wrap into a level.
+    const auto readLevel = [](const OrderedJson& value, long long& level)
+    { return ReadWholeNumber(value, level) && level >= 0 && level < ItemLevelCount; };
+    long long first = 0;
+    long long last = 0;
+    if (!json.is_array() || json.size() != 2 || !readLevel(json[0], first) || !readLevel(json[1], last) ||
+        first > last)
     {
         AddIssue(ItemDataIssueSeverity::Error, field,
                  "must be [first, last], two item levels from 0 to " + std::to_string(ItemLevelCount - 1) +
                      " with the first not above the last");
         return;
     }
-    line.minLevel = json[0].get<int>();
-    line.maxLevel = json[1].get<int>();
+    line.minLevel = static_cast<int>(first);
+    line.maxLevel = static_cast<int>(last);
 }
 
 void ItemReader::ReadStats(const OrderedJson& json, ItemDefinition& definition)
