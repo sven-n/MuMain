@@ -139,6 +139,13 @@ TEST_CASE("The exchange file reader refuses what cannot be exchanged [data][item
         ReadExchange(FileWithItem(kris, R"("source": "Other", "gameVersion": "season6")"), issues);
         CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Error, "MuMain"));
     }
+    SUBCASE("an empty server is as if there were none")
+    {
+        const ItemExchangeFile file = ReadExchange(
+            R"({"formatVersion": 1, "source": "OpenMU", "server": "", "gameVersion": "season6", "items": []})", issues);
+        CHECK_FALSE(HasErrors(issues));
+        CHECK(file.server.empty());
+    }
     SUBCASE("a newer format")
     {
         ReadExchange(R"({"formatVersion": 2, "source": "OpenMU", "gameVersion": "season6", "items": []})", issues);

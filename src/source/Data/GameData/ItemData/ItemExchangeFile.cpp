@@ -78,9 +78,18 @@ bool ExchangeReader::ReadText(const OrderedJson& root, const char* key, bool req
         }
         return false;
     }
-    if (!field->is_string() || field->get_ref<const std::string&>().empty())
+    if (!field->is_string())
     {
         AddIssue(ItemDataIssueSeverity::Error, ItemDataIssue::NoItem, ItemDataIssue::NoItem, key, "must be a text");
+        return false;
+    }
+    if (field->get_ref<const std::string&>().empty())
+    {
+        // An empty optional text is as if it were not there (the writer leaves it out).
+        if (required)
+        {
+            AddIssue(ItemDataIssueSeverity::Error, ItemDataIssue::NoItem, ItemDataIssue::NoItem, key, "must be a text");
+        }
         return false;
     }
     value = field->get<std::string>();
