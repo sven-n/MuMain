@@ -69,9 +69,10 @@ private:
 
     // Checks `file` and applies it as one undo step under `label`, after the
     // list of the items it reaches when there are any. A rename takes the
-    // items that name the profile along.
+    // items that name the profile along, or with `renamedTable` the items
+    // whose descriptions name the table.
     void Apply(Data::Items::ItemStatFile file, std::string label, std::string renamedFrom = {},
-               std::string renamedTo = {});
+               std::string renamedTo = {}, bool renamedTable = false);
     void Commit();
     // The edit follows the stored file (an undo, a redo) until it is changed.
     void UpdateEdit();
@@ -90,6 +91,7 @@ private:
         std::string label;
         std::string renamedFrom;
         std::string renamedTo;
+        bool renamedTable = false;
         std::vector<int> reached;
         // The entry to pick once it is applied (a new or renamed one).
         Entry pickAfter;
