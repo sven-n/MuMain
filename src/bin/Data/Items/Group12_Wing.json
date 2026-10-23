@@ -917,7 +917,7 @@
       "nameLines": [
         {
           "text": {
-            "en": "{name} x{bundleCount}"
+            "en": "{name} x{table:bundleCount}"
           },
           "color": "yellow"
         }
@@ -946,7 +946,7 @@
       "nameLines": [
         {
           "text": {
-            "en": "{name} x{bundleCount}"
+            "en": "{name} x{table:bundleCount}"
           },
           "color": "yellow"
         }
@@ -3184,7 +3184,7 @@
       "nameLines": [
         {
           "text": {
-            "en": "{name} x{bundleCount}"
+            "en": "{name} x{table:bundleCount}"
           },
           "color": "yellow"
         }
@@ -3214,7 +3214,7 @@
       "nameLines": [
         {
           "text": {
-            "en": "{name} x{bundleCount}"
+            "en": "{name} x{table:bundleCount}"
           },
           "color": "yellow"
         }
@@ -3244,7 +3244,7 @@
       "nameLines": [
         {
           "text": {
-            "en": "{name} x{bundleCount}"
+            "en": "{name} x{table:bundleCount}"
           },
           "color": "yellow"
         }
@@ -3274,7 +3274,7 @@
       "nameLines": [
         {
           "text": {
-            "en": "{name} x{bundleCount}"
+            "en": "{name} x{table:bundleCount}"
           },
           "color": "yellow"
         }
@@ -3304,7 +3304,7 @@
       "nameLines": [
         {
           "text": {
-            "en": "{name} x{bundleCount}"
+            "en": "{name} x{table:bundleCount}"
           },
           "color": "yellow"
         }
@@ -3334,7 +3334,7 @@
       "nameLines": [
         {
           "text": {
-            "en": "{name} x{bundleCount}"
+            "en": "{name} x{table:bundleCount}"
           },
           "color": "yellow"
         }
@@ -3364,7 +3364,7 @@
       "nameLines": [
         {
           "text": {
-            "en": "{name} x{bundleCount}"
+            "en": "{name} x{table:bundleCount}"
           },
           "color": "yellow"
         }
@@ -3394,7 +3394,7 @@
       "nameLines": [
         {
           "text": {
-            "en": "{name} x{bundleCount}"
+            "en": "{name} x{table:bundleCount}"
           },
           "color": "yellow"
         }
