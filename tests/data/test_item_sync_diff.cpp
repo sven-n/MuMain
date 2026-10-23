@@ -748,6 +748,24 @@ TEST_CASE("Applying a diff takes a new item that lost a field since the comparis
     CHECK(Sides::Find(applied, addedType).durability == 0);
 }
 
+// A changed row whose item the client no longer has (its data changed since the diff) is left out
+// instead of failing.
+TEST_CASE("Applying a diff leaves out a changed item the client no longer has [data][items][editor]")
+{
+    Sides sides;
+    ++sides.FileItem(KrisType).width;
+    const ItemSyncDiff diff = sides.Diff();
+    REQUIRE(FindRow(diff, KrisType) != nullptr);
+    std::erase_if(sides.client.items,
+                  [](const ItemDefinition& item) { return MakeItemType(item.group, item.number) == KrisType; });
+
+    std::vector<ItemDataIssue> issues;
+    ItemExchangeFile applied;
+    CHECK_NOTHROW(applied = ApplyItemSyncDiff(sides.client, sides.file, diff, issues));
+    CHECK(std::ranges::none_of(applied.items, [](const ItemDefinition& item)
+                               { return MakeItemType(item.group, item.number) == KrisType; }));
+}
+
 // OpenMU does not keep (group, number) unique: an item a file has twice is a locked row that
 // the import leaves as it is, while the rest of the file is imported.
 TEST_CASE("An item the file has twice is a locked row of the import [data][items][editor]")

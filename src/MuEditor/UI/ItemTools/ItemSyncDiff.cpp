@@ -723,7 +723,13 @@ ItemExchangeFile ApplyItemSyncDiff(const ItemExchangeFile& client, const ItemExc
             targetItems[key] = UnflattenItem(row.group, row.number, fields, issues);
             continue;
         }
-        Fields fields = FlattenItem(targetItems.at(key));
+        // An item the client no longer has (its data changed since the diff) is left out.
+        const auto target = targetItems.find(key);
+        if (target == targetItems.end())
+        {
+            continue;
+        }
+        Fields fields = FlattenItem(target->second);
         bool changed = false;
         for (const SyncField& field : row.fields)
         {
