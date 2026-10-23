@@ -17,6 +17,7 @@
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
+#include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
 #include "Data/GameData/ItemData/ItemNames.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
@@ -800,7 +801,114 @@ TEST_CASE("The second item chain's tooltip texts come from the descriptions as f
     CHECK(OldChainLines().size() == 72);
 }
 
+// The translations of those texts are the ones the old code showed: item_chain_texts_before.json records them from the
+// .resx before the texts moved (a format filled in with the item's values), by the English text.
+TEST_CASE("The second item chain's tooltip texts keep their translations [data][items]")
+{
+    const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
+    std::ifstream file(std::filesystem::path(MU_TEST_CHAIN_TEXTS_BEFORE));
+    REQUIRE(file);
+    const nlohmann::json before = nlohmann::json::parse(file).at("texts");
+    int checked = 0;
+    for (const OldChainItem& old : OldChainLines())
+    {
+        const auto found = std::find_if(result.items.begin(), result.items.end(), [&](const ItemDefinition& item)
+                                        { return item.group == old.group && item.number == old.number; });
+        REQUIRE(found != result.items.end());
+        for (size_t index = 0; index < old.lines.size(); ++index)
+        {
+            const std::string english = found->description[index].text.GetNeutral();
+            const auto recorded = before.find(english);
+            if (recorded == before.end())
+            {
+                continue;
+            }
+            for (const auto& [locale, translation] : recorded->items())
+            {
+                INFO(old.group << "/" << old.number << " line " << index << " " << locale);
+                CHECK(found->description[index].text.Get(locale) == translation.get<std::string>());
+                ++checked;
+            }
+        }
+    }
+    CHECK(checked > 600);
+}
+
 // The texts the tooltip code wrote for these items are their descriptions now, in every UI language.
+// The damage texts without the English "of" and the Fruits' stat words, as #828 fixed them: rendered with 12 in each
+// language they had wrong, and no translation of the two texts keeps "% of".
+TEST_CASE("The damage texts and the Fruits' stat words read right in every language [data][items]")
+{
+    ClientDataScope client(ShippedClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    const Data::Items::ItemTooltipFile& tooltips = g_ItemDatabase.GetTooltipFile();
+    const Data::LocalizedString* increase = tooltips.FindText("damageIncrease");
+    const Data::LocalizedString* absorb = tooltips.FindText("damageAbsorb");
+    REQUIRE(increase != nullptr);
+    REQUIRE(absorb != nullptr);
+    const auto twelve = [](std::string_view text)
+    { return Data::Items::FillPlaceholders(text, [](std::string_view) { return std::optional<std::string>("12"); }); };
+
+    struct Damage
+    {
+        const char* locale;
+        const char* increase;
+        const char* absorb;
+    };
+    const Damage damages[] = {
+        {"es", "Aumenta el da\u00f1o un 12%", "Absorbe el 12% del da\u00f1o"},
+        {"pt", "Aumenta o dano em 12%", "Absorve 12% do dano"},
+        {"ru", "\u0423\u0432\u0435\u043b\u0438\u0447\u0435\u043d\u0438\u0435 \u0443\u0440\u043e\u043d\u0430 \u043d\u0430 12%", "\u041f\u043e\u0433\u043b\u043e\u0449\u0435\u043d\u0438\u0435 12% \u0443\u0440\u043e\u043d\u0430"},
+        {"uk", "\u0417\u0431\u0456\u043b\u044c\u0448\u0435\u043d\u043d\u044f \u0448\u043a\u043e\u0434\u0438 \u043d\u0430 12%", "\u041f\u043e\u0433\u043b\u0438\u043d\u0430\u043d\u043d\u044f 12% \u0448\u043a\u043e\u0434\u0438"},
+        {"id", "Meningkatkan Kerusakan 12%", "Menyerap 12% Kerusakan"},
+        {"tl", "Dagdagan ang Pinsala nang 12%", "Isipsip ang 12% ng Pinsala"},
+        {"zh-TW", "\u589e\u52a0 12% \u50b7\u5bb3", "\u5438\u653612%\u50b7\u5bb3"},
+    };
+    for (const Damage& damage : damages)
+    {
+        INFO(damage.locale);
+        CHECK(twelve(increase->Get(damage.locale)) == damage.increase);
+        CHECK(twelve(absorb->Get(damage.locale)) == damage.absorb);
+    }
+    for (const Data::LocalizedString* text : {increase, absorb})
+    {
+        for (const auto& [locale, translation] : text->GetTranslations())
+        {
+            INFO(locale);
+            CHECK(translation.find("% of") == std::string::npos);
+        }
+    }
+
+    // The Command Fruit's {stat} at +0 to +4: ENG, STA, AGI, STR and Command.
+    const Data::Items::ItemDefinition* fruit = g_ItemDatabase.Find(13 * MAX_ITEM_INDEX + 15);
+    REQUIRE(fruit != nullptr);
+    REQUIRE(fruit->levelValues.size() == 1);
+    const std::vector<Data::Items::ItemLevelValue>& words = fruit->levelValues.front().values;
+    REQUIRE(words.size() == 5);
+    struct Stats
+    {
+        const char* locale;
+        std::array<const char*, 5> words;
+    };
+    const Stats stats[] = {
+        {"es", {"ENE", "VIT", "AGI", "FUE", "Dominio"}},
+        {"pt", {"ENE", "VIT", "AGI", "FOR", "Comando"}},
+        {"ru", {"\u042d\u041d\u0415", "\u0412\u042b\u041d", "\u041b\u0412\u041a", "\u0421\u0418\u041b", "\u041a\u043e\u043c\u0430\u043d\u0434\u043e\u0432\u0430\u043d\u0438\u0435"}},
+        {"uk", {"\u0415\u041d\u0415", "\u0412\u0418\u0422", "\u0421\u041f\u0420", "\u0421\u0418\u041b", "\u041a\u043e\u043c\u0430\u043d\u0434\u0443\u0432\u0430\u043d\u043d\u044f"}},
+        {"zh-TW", {"\u80fd\u91cf", "\u9ad4\u529b", "\u654f\u6377", "\u529b\u91cf", "\u7d71\u7387"}},
+        {"id", {"ENG", "STA", "AGI", "STR", "Kepemimpinan"}},
+    };
+    for (const Stats& stat : stats)
+    {
+        for (size_t level = 0; level < words.size(); ++level)
+        {
+            INFO(stat.locale << " +" << level);
+            CHECK(words[level].text.Get(stat.locale) == stat.words[level]);
+        }
+    }
+}
+
 TEST_CASE("The original items' tooltip texts are in their descriptions [data][items]")
 {
     struct DescribedItem
