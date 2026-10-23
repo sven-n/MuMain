@@ -979,6 +979,23 @@
         "es": "Pendiente de Piedra Lunar",
         "pt": "Pingente da pedra da lua"
       },
+      "description": [
+        {
+          "text": {
+            "en": "I.D. of Kantur Chief Scientist. You can enter the Refinery Tower.",
+            "de": "Ausweis des Chefwissenschaftlers von Kantur. Sie können den Raffinerieturm betreten.",
+            "es": "IDENTIFICACIÓN. del científico jefe de Kantur. Puedes ingresar a la Torre de la Refinería.",
+            "id": "PENGENAL. dari Kepala Ilmuwan Kantur. Anda bisa memasuki Menara Kilang.",
+            "ja": "カントルの首席研究員たちの入出許可証。精製の塔へ入ることが出来ます。",
+            "pl": "Identyfikator głównego naukowca Kantur. Pozwala wejść do Refinery Tower.",
+            "pt": "EU IA. do Cientista Chefe Kantur. Você pode entrar na Torre da Refinaria.",
+            "ru": "ИДЕНТИФИКАТОР. главного научного сотрудника Кантура. Вы можете войти в Башню нефтеперерабатывающего завода.",
+            "tl": "I.D. ng Kantur Chief Scientist. Maaari kang pumasok sa Refinery Tower.",
+            "uk": "І.Д. головного наукового співробітника Кантур. Ви можете увійти до вежі нафтопереробного заводу.",
+            "zh-TW": "ID。坎圖爾首席科學家。您可以進入煉油塔。"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",

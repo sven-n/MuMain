@@ -232,6 +232,54 @@ TEST_CASE("The shipped item names are in languages the game shows [data][items]"
     }
 }
 
+// The texts the tooltip code wrote for these items are their descriptions now, in every UI language.
+TEST_CASE("The original items' tooltip texts are in their descriptions [data][items]")
+{
+    struct DescribedItem
+    {
+        int group;
+        int number;
+        std::string_view text;
+    };
+    constexpr DescribedItem described[] = {
+        {12, 15, "It is used to combine Chaos items"},
+        {13, 38, "I.D. of Kantur Chief Scientist. You can enter the Refinery Tower."},
+        {14, 13, "It is used to increase your item level up to 6"},
+        {14, 14, "It is used to increase your item level up to 7,8,9"},
+        {14, 16, "Increases item option by 1 level"},
+        {14, 17, "It is used to combine items for a Devil Square Invitation"},
+        {14, 18, "It is used to combine items for a Devil Square Invitation"},
+        {14, 22, "Used to create fruits that increase stats"},
+        {14, 31, "Create and improve items for siege"},
+        {14, 41, "Jewel with impurities"},
+        {14, 42, "Jewel for item reinforcement"},
+        {14, 43, "Grant actual power to reinforced item."},
+        {14, 44, "Grant actual power to reinforced item."},
+        {14, 160, "Jewel used for repairing a Lucky Item."},
+        {14, 161, "Jewel for item reinforcement"},
+    };
+    const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
+    for (const DescribedItem& item : described)
+    {
+        INFO(item.group << "/" << item.number);
+        const ItemDefinition* found = FindItem(result.items, MakeItemType(item.group, item.number));
+        REQUIRE(found != nullptr);
+        REQUIRE(found->description.size() == 1);
+        const Data::LocalizedString& text = found->description.front().text;
+        CHECK(text.GetNeutral() == item.text);
+        CHECK(found->description.front().color == ItemTextColor::White);
+        for (const char* locale : I18N::GetAvailableLocales())
+        {
+            INFO(locale);
+            CHECK_FALSE(text.Get(locale).empty());
+            if (std::string_view(locale) != Data::LocalizedString::NeutralLocale)
+            {
+                CHECK(text.GetTranslations().contains(locale));
+            }
+        }
+    }
+}
+
 TEST_CASE("Loading item data fills ItemAttribute in the UI locale [data][items]")
 {
     ClientDataScope client(ShippedClientDirectory);

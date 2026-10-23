@@ -3795,44 +3795,9 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
         WriteItemDescriptionLines(*definition, [](const wchar_t* text, size_t length) -> int
                                   { return g_pRenderText->MeasureText(text, static_cast<int>(length)).cx; });
     }
-    if (ip->Type == ITEM_JEWEL_OF_BLESS)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::ItIsUsedToIncreaseYourItemLevelUpTo6);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-    }
-    if (ip->Type == ITEM_JEWEL_OF_SOUL)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::ItIsUsedToIncreaseYourItemLevelUpTo789);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-    }
-    if (ip->Type == ITEM_JEWEL_OF_LIFE)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::IncreasesItemOptionBy1Level);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-    }
-    if (ip->Type == ITEM_DEVILS_EYE || ip->Type == ITEM_DEVILS_KEY)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::ItIsUsedToCombineItemsForADevilSquareInvitation);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-    }
     if (ip->Type == ITEM_TOWN_PORTAL_SCROLL && Level >= 1 && Level <= 8)
     {
         mu_swprintf(TextList[TextNum], I18N::Game::WarpToTheCorrespondingAreaAfterDSeconds, 3);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-    }
-    if (ip->Type == ITEM_JEWEL_OF_CHAOS)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::ItIsUsedToCombineChaosItems);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-    }
-    if (ip->Type == ITEM_JEWEL_OF_CREATION)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::UsedToCreateFruitsThatIncreaseStats);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-    }
-    if (ip->Type == ITEM_JEWEL_OF_GUARDIAN)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::CreateAndImproveItemsForSiege);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     if (ip->Type == ITEM_GUARDIAN_ANGEL) //
@@ -3854,43 +3819,6 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
         mu_swprintf(TextList[TextNum], I18N::Game::AbsorbDOfDamage, 12 + Level * 2);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         mu_swprintf(TextList[TextNum], I18N::Game::IncreaseSpeed);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-    }
-    else if (ip->Type == ITEM_MOONSTONE_PENDANT)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::IDOfKanturChiefScientistYouCanEnterTheRefineryTower);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-    }
-    else if (ip->Type == ITEM_GEMSTONE)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::JewelWithImpurities);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-    }
-    else if (ip->Type == ITEM_JEWEL_OF_HARMONY)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::JewelForItemReinforcement);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-    }
-    else if (ip->Type == ITEM_LOWER_REFINE_STONE)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::GrantActualPowerToReinforcedItem);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-    }
-    else if (ip->Type == ITEM_HIGHER_REFINE_STONE)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::GrantActualPowerToReinforcedItem);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-    }
-    else if (ip->Type == ITEM_POTION + 160)
-    {
-        // 연장의 보석
-        mu_swprintf(TextList[TextNum], I18N::Game::JewelUsedForRepairingALuckyItem);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-    }
-    else if (ip->Type == ITEM_POTION + 161)
-    {
-        // 상승의 보석
-        mu_swprintf(TextList[TextNum], I18N::Game::JewelForItemReinforcement);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     else if (GameLogic::Items::IsSecondTierWingExceptCape(ip)) //날개

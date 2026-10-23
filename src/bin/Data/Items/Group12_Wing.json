@@ -341,6 +341,23 @@
         "pt": "Joia do caos"
       },
       "tags": ["jewel", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "It is used to combine Chaos items",
+            "de": "Wird verwendet, um Chaos-Gegenstände zu kombinieren",
+            "es": "Se utiliza para combinar elementos del Caos.",
+            "id": "Digunakan untuk menggabungkan item Chaos",
+            "ja": "カオス合成時に使用",
+            "pl": "Służy do łączenia przedmiotów Chaosu",
+            "pt": "É usado para combinar itens do Caos",
+            "ru": "Используется для объединения предметов Хаоса.",
+            "tl": "Ito ay ginagamit upang pagsamahin ang Chaos item",
+            "uk": "Використовується для комбінування предметів Хаосу",
+            "zh-TW": "它用於組合混沌物品"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 12,

@@ -203,6 +203,23 @@
         "pt": "Joia da bênção"
       },
       "tags": ["jewel", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "It is used to increase your item level up to 6",
+            "de": "Wird verwendet, um das Gegenstandslevel auf bis zu 6 zu erhöhen",
+            "es": "Se utiliza para aumentar el nivel de tu objeto hasta 6.",
+            "id": "Ini digunakan untuk meningkatkan level item Anda hingga 6",
+            "ja": "アイテムレベル6にUP時に使用",
+            "pl": "Służy do podniesienia poziomu przedmiotu do 6",
+            "pt": "É usado para aumentar o nível do seu item até 6",
+            "ru": "Используется для повышения уровня вашего предмета до 6.",
+            "tl": "Ginagamit ito upang taasan ang antas ng iyong item hanggang 6",
+            "uk": "Він використовується для підвищення рівня вашого предмета до 6",
+            "zh-TW": "它用於將您的物品等級提高到 6"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -218,6 +235,23 @@
         "pt": "Joia da alma"
       },
       "tags": ["jewel", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "It is used to increase your item level up to 7,8,9",
+            "de": "Wird verwendet, um das Gegenstandslevel auf 7, 8 oder 9 zu erhöhen",
+            "es": "Se utiliza para aumentar el nivel de tu objeto hasta 7,8,9.",
+            "id": "Ini digunakan untuk meningkatkan level item Anda hingga 7,8,9",
+            "ja": "アイテムレベル7、8、9にUP時使用",
+            "pl": "Służy do podniesienia poziomu przedmiotu do 7,8,9",
+            "pt": "É usado para aumentar o nível do seu item até 7,8,9",
+            "ru": "Используется для повышения уровня вашего предмета до 7,8,9.",
+            "tl": "Ginagamit ito upang mapataas ang antas ng iyong item hanggang 7,8,9",
+            "uk": "Використовується для підвищення рівня вашого предмета до 7,8,9",
+            "zh-TW": "它用於將您的物品等級提高到7、8、9"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 30,
@@ -245,6 +279,23 @@
         "pt": "Joia da vida"
       },
       "tags": ["jewel", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increases item option by 1 level",
+            "de": "Erhöht die Gegenstandsoption um 1 Stufe",
+            "es": "Aumenta la opción de artículo en 1 nivel.",
+            "id": "Meningkatkan opsi item sebanyak 1 level",
+            "ja": "アイテム追加オプションが一段階増加",
+            "pl": "Zwiększa opcję przedmiotu o 1 poziom",
+            "pt": "Aumenta a opção de item em 1 nível",
+            "ru": "Увеличивает выбор предмета на 1 уровень.",
+            "tl": "Pinapataas ng 1 level ang opsyon sa item",
+            "uk": "Збільшує опцію предмета на 1 рівень",
+            "zh-TW": "將物品選項增加 1 級"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 72,
@@ -258,6 +309,23 @@
         "es": "Ojo del Diablo",
         "pt": "Olho do diabo"
       },
+      "description": [
+        {
+          "text": {
+            "en": "It is used to combine items for a Devil Square Invitation",
+            "de": "Wird verwendet, um Gegenstände zu einer Einladung für Devil Square zu kombinieren",
+            "es": "Se utiliza para combinar elementos para una invitación de Devil Square.",
+            "id": "Ini digunakan untuk menggabungkan item untuk Undangan Kotak Setan",
+            "ja": "合成すると悪魔の招待状を入手できます",
+            "pl": "Służy do łączenia przedmiotów w Zaproszenie na Devil Square",
+            "pt": "É usado para combinar itens para um convite Devil Square",
+            "ru": "Используется для объединения предметов для приглашения на площадь Дьявола.",
+            "tl": "Ito ay ginagamit upang pagsamahin ang mga item para sa isang Devil Square Invitation",
+            "uk": "Він використовується для комбінування предметів для запрошення Devil Square",
+            "zh-TW": "它用於組合惡魔廣場邀請函的項目"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -271,6 +339,23 @@
         "es": "Llave del Diablo",
         "pt": "Chave do diabo"
       },
+      "description": [
+        {
+          "text": {
+            "en": "It is used to combine items for a Devil Square Invitation",
+            "de": "Wird verwendet, um Gegenstände zu einer Einladung für Devil Square zu kombinieren",
+            "es": "Se utiliza para combinar elementos para una invitación de Devil Square.",
+            "id": "Ini digunakan untuk menggabungkan item untuk Undangan Kotak Setan",
+            "ja": "合成すると悪魔の招待状を入手できます",
+            "pl": "Służy do łączenia przedmiotów w Zaproszenie na Devil Square",
+            "pt": "É usado para combinar itens para um convite Devil Square",
+            "ru": "Используется для объединения предметов для приглашения на площадь Дьявола.",
+            "tl": "Ito ay ginagamit upang pagsamahin ang mga item para sa isang Devil Square Invitation",
+            "uk": "Він використовується для комбінування предметів для запрошення Devil Square",
+            "zh-TW": "它用於組合惡魔廣場邀請函的項目"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -324,6 +409,23 @@
         "pt": "Joia da criação"
       },
       "tags": ["jewel", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Used to create fruits that increase stats",
+            "de": "Wird zur Herstellung von Früchten verwendet, die Werte erhöhen",
+            "es": "Se utiliza para crear frutas que aumentan las estadísticas.",
+            "id": "Digunakan untuk membuat buah yang meningkatkan statistik",
+            "ja": "ステータスを上げる果実を作るときに使用",
+            "pl": "Służy do tworzenia Fruit zwiększających statystyki",
+            "pt": "Usado para criar frutas que aumentam as estatísticas",
+            "ru": "Используется для создания фруктов, повышающих характеристики.",
+            "tl": "Ginagamit upang lumikha ng mga prutas na nagpapataas ng mga istatistika",
+            "uk": "Використовується для створення фруктів, які підвищують характеристики",
+            "zh-TW": "用於製造增加屬性的水果"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 78,
@@ -430,6 +532,23 @@
         "pt": "Joia do guardião"
       },
       "tags": ["jewel", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Create and improve items for siege",
+            "de": "Erstellen und verbessern Sie Gegenstände für die Belagerung",
+            "es": "Crea y mejora elementos para el asedio.",
+            "id": "Buat dan tingkatkan item untuk pengepungan",
+            "ja": "城強化のために使用",
+            "pl": "Twórz i ulepszaj przedmioty do oblężenia",
+            "pt": "Crie e melhore itens para cerco",
+            "ru": "Создавайте и улучшайте предметы для осады",
+            "tl": "Gumawa at pagbutihin ang mga item para sa pagkubkob",
+            "uk": "Створюйте та покращуйте предмети для облоги",
+            "zh-TW": "創建和改進攻城物品"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "sellValue": 75,
@@ -573,6 +692,23 @@
         "pt": "Pedra preciosa"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Jewel with impurities",
+            "de": "Juwel mit Verunreinigungen",
+            "es": "Joya con impurezas",
+            "id": "Permata dengan kotoran",
+            "ja": "不純物が混ざっているために、持っている力が発揮できない宝石",
+            "pl": "Jewel with impurities",
+            "pt": "Joia com impurezas",
+            "ru": "Драгоценность с примесями",
+            "tl": "Hiyas na may mga dumi",
+            "uk": "Коштовний камінь з домішками",
+            "zh-TW": "含有雜質的寶石"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -588,6 +724,23 @@
         "pt": "Joia da harmonia"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Jewel for item reinforcement",
+            "de": "Juwel zur Gegenstandsverstärkung",
+            "es": "Joya para refuerzo de artículos.",
+            "id": "Permata untuk penguatan item",
+            "ja": "アイテムをエンチャントする時使われる宝石",
+            "pl": "Jewel for item reinforcement",
+            "pt": "Joia para reforço de itens",
+            "ru": "Самоцвет для усиления предмета",
+            "tl": "Hiyas para sa pagpapatibay ng item",
+            "uk": "Коштовність для посилення предметів",
+            "zh-TW": "強化物品的寶石"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -603,6 +756,23 @@
         "pt": "Pedra refinada inferior"
       },
       "tags": ["refineStone", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Grant actual power to reinforced item.",
+            "de": "Verleiht einem verstärkten Gegenstand echte Kraft.",
+            "es": "Otorga poder real al elemento reforzado.",
+            "id": "Berikan kekuatan sebenarnya pada item yang diperkuat.",
+            "ja": "エンチャントされたアイテムに、実際の力が付与されます。",
+            "pl": "Nadaje wzmocnionemu przedmiotowi pełną moc.",
+            "pt": "Conceda poder real ao item reforçado.",
+            "ru": "Предоставьте реальную силу усиленному предмету.",
+            "tl": "Bigyan ng aktwal na kapangyarihan ang reinforced item.",
+            "uk": "Надати фактичну силу посиленому предмету.",
+            "zh-TW": "賦予強化物品實際力量。"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -618,6 +788,23 @@
         "pt": "Pedra refinada superior"
       },
       "tags": ["refineStone", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Grant actual power to reinforced item.",
+            "de": "Verleiht einem verstärkten Gegenstand echte Kraft.",
+            "es": "Otorga poder real al elemento reforzado.",
+            "id": "Berikan kekuatan sebenarnya pada item yang diperkuat.",
+            "ja": "エンチャントされたアイテムに、実際の力が付与されます。",
+            "pl": "Nadaje wzmocnionemu przedmiotowi pełną moc.",
+            "pt": "Conceda poder real ao item reforçado.",
+            "ru": "Предоставьте реальную силу усиленному предмету.",
+            "tl": "Bigyan ng aktwal na kapangyarihan ang reinforced item.",
+            "uk": "Надати фактичну силу посиленому предмету.",
+            "zh-TW": "賦予強化物品實際力量。"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -2338,6 +2525,23 @@
         "es": "Joya de Extensión",
         "pt": "Jóia de Extensão"
       },
+      "description": [
+        {
+          "text": {
+            "en": "Jewel used for repairing a Lucky Item.",
+            "de": "Juwel, das zum Reparieren eines Glücksgegenstands verwendet wird.",
+            "es": "Joya utilizada para reparar un artículo de la suerte.",
+            "id": "Permata yang digunakan untuk memperbaiki Barang Keberuntungan.",
+            "ja": "ラッキーアイテムの耐久度修理に使用される宝石",
+            "pl": "Klejnot do naprawy Lucky Item.",
+            "pt": "Joia usada para reparar um Item da Sorte.",
+            "ru": "Драгоценный камень, используемый для ремонта счастливого предмета.",
+            "tl": "Jewel na ginamit sa pag-aayos ng Lucky Item.",
+            "uk": "Коштовний камінь, який використовується для ремонту щасливого предмета.",
+            "zh-TW": "用於修復幸運物品的寶石。"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -2353,6 +2557,23 @@
         "es": "Joya de Elevación",
         "pt": "Jóia de Elevação"
       },
+      "description": [
+        {
+          "text": {
+            "en": "Jewel for item reinforcement",
+            "de": "Juwel zur Gegenstandsverstärkung",
+            "es": "Joya para refuerzo de artículos.",
+            "id": "Permata untuk penguatan item",
+            "ja": "アイテムをエンチャントする時使われる宝石",
+            "pl": "Jewel for item reinforcement",
+            "pt": "Joia para reforço de itens",
+            "ru": "Самоцвет для усиления предмета",
+            "tl": "Hiyas para sa pagpapatibay ng item",
+            "uk": "Коштовність для посилення предметів",
+            "zh-TW": "強化物品的寶石"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
