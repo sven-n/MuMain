@@ -1,8 +1,8 @@
 #include "stdafx.h"
 
 #include "ItemJsonFormat.h"
-#include "ItemEnumNames.h"
 #include "ItemDescriptionPlaceholders.h"
+#include "ItemEnumNames.h"
 #include "ItemJsonCommon.h"
 #include "ItemType.h"
 
@@ -538,8 +538,8 @@ void ItemReader::ReadDescription(const OrderedJson& json, std::vector<ItemDescri
     }
 }
 
-// A placeholder of a description line's text and the value it shows on the line: {"percent": "wingDamageIncrease1st"}.
-// ValidateDescriptionPlaceholders checks the values' names.
+// A placeholder of a description line's text and the value it shows on the line: {"percent":
+// "table:wingDamageIncrease1st"}. ValidateDescriptionPlaceholders checks the values' names.
 void ItemReader::ReadDescriptionValues(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line)
 {
     if (!json.is_object())
@@ -549,11 +549,15 @@ void ItemReader::ReadDescriptionValues(const OrderedJson& json, const std::strin
     }
     for (const auto& [placeholder, value] : json.items())
     {
+        // The value is a built-in value's name, "table:" and a table's name, or "skillMana:<skill>".
+        const std::string name = value.is_string() ? value.get<std::string>() : std::string();
+        const std::string_view table = GetPlaceholderTable(name);
         if (!Json::IsName(placeholder) || !value.is_string() ||
-            (!Json::IsName(value.get<std::string>()) && !value.get<std::string>().starts_with(SkillManaPrefix)))
+            (!Json::IsName(table.empty() ? name : table) && !name.starts_with(SkillManaPrefix)))
         {
             AddIssue(ItemDataIssueSeverity::Error, field + "." + placeholder,
-                     "must be a placeholder name and the name of the value it shows, both of letters and digits");
+                     "must be a placeholder name and the name of the value it shows, both of letters and digits (a "
+                     "table's as \"table:<name>\")");
             continue;
         }
         line.values.emplace_back(placeholder, value.get<std::string>());

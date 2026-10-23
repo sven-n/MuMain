@@ -307,8 +307,9 @@ TEST_CASE("Item stat file errors [data][items]")
         HasIssue(Read(Changed(R"("name": "linear")", R"("name": "steps")")).issues, Severity::Error, "tables[1].name"));
     CHECK(HasIssue(Read(Changed(R"("name": "linear")", R"("name": "lin ear")")).issues, Severity::Error,
                    "tables[0].name"));
-    // Item descriptions name the tables as placeholders, so a table can't take a built-in one's name.
-    CHECK(
+    // Item descriptions write a table as {table:<name>}, apart from the built-in values, so a table may be named like
+    // one.
+    CHECK_FALSE(
         HasIssue(Read(Changed(R"("name": "linear")", R"("name": "level")")).issues, Severity::Error, "tables[0].name"));
     CHECK(HasIssue(Read(Changed(R"("perLevel": 1)", R"("caption2": 1)")).issues, Severity::Error, "tables.linear"));
     CHECK(HasIssue(Read(Changed("[0, 3, 6, 9, 12, 15,", "[0, 3, 6, 9, 12,")).issues, Severity::Error,
