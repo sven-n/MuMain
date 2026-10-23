@@ -19,6 +19,7 @@
 
 #include "Engine/Object/ZzzInfomation.h"
 #include "ZzzBMD.h"
+#include "Render/Models/AnimationSampling.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -164,23 +165,19 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
     if (PriorAction >= NumActions) PriorAction = 0;
     if (currentAction >= NumActions) currentAction = 0;
 
-
-    float currentAnimation = AnimationFrame;
-    int currentAnimationFrame = (int)AnimationFrame;
-    float s1 = (currentAnimation - currentAnimationFrame);
-    float s2 = 1.f - s1;
-    auto PriorAnimationFrame = (int)PriorFrame;
-    if (NumActions > 0)
+    // Which keys of which action the pose is made of (the playback rule, see
+    // AnimationSampling.h): MU's blend of key floor(PriorFrame) into key
+    // floor(AnimationFrame) except for skipped keys and an action change.
+    namespace Sampling = Render::Models::AnimationSampling;
+    const auto timelineOf = [this](unsigned short action)
     {
-        if (PriorAnimationFrame < 0)
-            PriorAnimationFrame = 0;
-        if (currentAnimationFrame < 0)
-            currentAnimationFrame = 0;
-        if (PriorAnimationFrame >= Actions[PriorAction].NumAnimationKeys)
-            PriorAnimationFrame = 0;
-        if (currentAnimationFrame >= Actions[currentAction].NumAnimationKeys)
-            currentAnimationFrame = 0;
-    }
+        const Action_t& a = Actions[action];
+        return Sampling::ActionTimeline{a.NumAnimationKeys, a.LockPositions, a.PlaySpeed, a.Loop};
+    };
+    const Sampling::PosePlan pose = Sampling::PlanPose(timelineOf(PriorAction), PriorAction, PriorFrame,
+                                                       timelineOf(currentAction), currentAction, AnimationFrame);
+    const float s1 = pose.weight;
+    const float s2 = 1.f - s1;
 
     // Pre-calculate localParentMatrix ONCE outside bone loop for thread-safe root transforms
     float localParentMatrix[3][4];
@@ -210,31 +207,69 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
         }
     }
 
-    // Pre-calculate Head bone quaternions ONCE outside loop
+    // Pre-calculate Head bone quaternions ONCE outside loop. HeadAngle turns every
+    // sampled key before it becomes a quaternion.
     vec4_t headQ1, headQ2;
     const bool hasHeadBone = (BoneHead >= 0 && BoneHead < NumBones && !Bones[BoneHead].Dummy);
     if (hasHeadBone)
     {
-        const Bone_t* hb = &Bones[BoneHead];
-        const BoneMatrix_t* hbm1 = &hb->BoneMatrixes[PriorAction];
-        const BoneMatrix_t* hbm2 = &hb->BoneMatrixes[currentAction];
-
-        vec3_t Angle1, Angle2;
-        VectorCopy(hbm1->Rotation[PriorAnimationFrame], Angle1);
-        VectorCopy(hbm2->Rotation[currentAnimationFrame], Angle2);
-
         constexpr float radFactor = 1.0f / (180.f / Q_PI);
         const float HeadAngleX = HeadAngle[0] * radFactor;
         const float HeadAngleY = HeadAngle[1] * radFactor;
-
-        Angle1[0] -= HeadAngleX;
-        Angle2[0] -= HeadAngleX;
-        Angle1[2] -= HeadAngleY;
-        Angle2[2] -= HeadAngleY;
-
-        AngleQuaternion(Angle1, headQ1);
-        AngleQuaternion(Angle2, headQ2);
+        const Bone_t* hb = &Bones[BoneHead];
+        const auto headKey = [&](const Sampling::KeySample& sample, int key, vec4_t out)
+        {
+            vec3_t angle;
+            VectorCopy(hb->BoneMatrixes[sample.action].Rotation[key], angle);
+            angle[0] -= HeadAngleX;
+            angle[2] -= HeadAngleY;
+            AngleQuaternion(angle, out);
+        };
+        const auto headSample = [&](const Sampling::KeySample& sample, vec4_t out)
+        {
+            headKey(sample, sample.key0, out);
+            if (sample.fraction == 0.f || sample.key0 == sample.key1)
+                return;
+            vec4_t next, from;
+            headKey(sample, sample.key1, next);
+            QuaternionCopy(out, from);
+            if (!QuaternionCompare(from, next))
+                QuaternionNLERP(from, next, sample.fraction, out);
+        };
+        headSample(pose.from, headQ1);
+        headSample(pose.to, headQ2);
     }
+
+    // One action's rotation and position of a bone at a sample: the key itself,
+    // or its two keys blended by the fraction.
+    const auto sampleRotation = [](const Bone_t* bone, const Sampling::KeySample& sample,
+                                   vec4_t scratch) -> const float*
+    {
+        const BoneMatrix_t* bm = &bone->BoneMatrixes[sample.action];
+        const float* q0 = bm->Quaternion[sample.key0];
+        if (sample.fraction == 0.f || sample.key0 == sample.key1)
+            return q0;
+        const float* q1 = bm->Quaternion[sample.key1];
+        if (QuaternionCompare(q0, q1))
+            return q0;
+        QuaternionNLERP(q0, q1, sample.fraction, scratch);
+        return scratch;
+    };
+    const auto samplePosition = [](const Bone_t* bone, const Sampling::KeySample& sample,
+                                   vec3_t scratch) -> const float*
+    {
+        const BoneMatrix_t* bm = &bone->BoneMatrixes[sample.action];
+        const float* p0 = bm->Position[sample.key0];
+        if (sample.fraction == 0.f || sample.key0 == sample.key1)
+            return p0;
+        const float* p1 = bm->Position[sample.key1];
+        const float t1 = sample.fraction;
+        const float t0 = 1.f - t1;
+        scratch[0] = p0[0] * t0 + p1[0] * t1;
+        scratch[1] = p0[1] * t0 + p1[1] * t1;
+        scratch[2] = p0[2] * t0 + p1[2] * t1;
+        return scratch;
+    };
 
     const bool bLockPositions = (Actions[PriorAction].LockPositions || Actions[currentAction].LockPositions);
 
@@ -266,9 +301,8 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
             BoneMatrix[i][2][3] = 0.f;
             continue;
         }
-        const BoneMatrix_t* bm1 = &b->BoneMatrixes[PriorAction];
-        const BoneMatrix_t* bm2 = &b->BoneMatrixes[currentAction];
-
+        vec4_t rotationScratch1, rotationScratch2;
+        vec3_t positionScratch1, positionScratch2;
         const float* q1;
         const float* q2;
 
@@ -279,9 +313,11 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
         }
         else
         {
-            q1 = bm1->Quaternion[PriorAnimationFrame];
-            q2 = bm2->Quaternion[currentAnimationFrame];
+            q1 = sampleRotation(b, pose.from, rotationScratch1);
+            q2 = sampleRotation(b, pose.to, rotationScratch2);
         }
+        const float* Position1 = samplePosition(b, pose.from, positionScratch1);
+        const float* Position2 = samplePosition(b, pose.to, positionScratch2);
 
         vec4_t boneQuaternion;
         if (!QuaternionCompare(q1, q2))
@@ -295,13 +331,12 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
 
         float Matrix[3][4];
         QuaternionMatrix(boneQuaternion, Matrix);
-        const float* Position1 = bm1->Position[PriorAnimationFrame];
-        const float* Position2 = bm2->Position[currentAnimationFrame];
 
         if (i == 0 && bLockPositions)
         {
-            Matrix[0][3] = bm2->Position[0][0];
-            Matrix[1][3] = bm2->Position[0][1];
+            // A locked root keeps x and y of the current action's key 0.
+            Matrix[0][3] = b->BoneMatrixes[currentAction].Position[0][0];
+            Matrix[1][3] = b->BoneMatrixes[currentAction].Position[0][1];
             Matrix[2][3] = Position1[2] * s2 + Position2[2] * s1 + BodyHeight;
         }
         else

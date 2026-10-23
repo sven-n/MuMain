@@ -158,6 +158,25 @@ mu_add_test(
         test_gpu_skinning_path.cpp
 )
 
+# The playback rule: the plan per case, and BMD::Animation against MU's pose
+# code on a synthetic skeleton. BMD::Animation comes with the client globals
+# of Winmain.cpp.
+mu_add_test(
+    NAME animation_sampling_tests
+    SOURCES
+        test_animation_sampling.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Models/AnimationSampling.cpp
+)
+
+mu_add_test(
+    NAME animation_playback_rule_tests
+    SOURCES
+        test_animation_playback_rule.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
 mu_add_test(
     NAME dynamic_lights_tests
     SOURCES
