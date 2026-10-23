@@ -58,6 +58,17 @@ const std::string& LocalizedString::Get(std::string_view locale) const
     return translation != m_translations.end() ? translation->second : m_neutral;
 }
 
+const std::string& LocalizedString::GetOwn(std::string_view locale) const
+{
+    static const std::string none;
+    if (locale == NeutralLocale)
+    {
+        return m_neutral;
+    }
+    const auto translation = m_translations.find(locale);
+    return translation != m_translations.end() ? translation->second : none;
+}
+
 void LocalizedString::Set(std::string_view locale, std::string text)
 {
     if (locale == NeutralLocale)

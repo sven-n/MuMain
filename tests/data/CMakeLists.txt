@@ -64,6 +64,7 @@ mu_add_test(
         test_monster_database.cpp
         test_monster_json.cpp
         test_monster_names.cpp
+        test_names_grid.cpp
         test_npc_name_text.cpp
         test_transformation_ring.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp

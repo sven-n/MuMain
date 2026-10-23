@@ -67,3 +67,17 @@ TEST_CASE("A text with the separator would split when parsed [data]")
     CHECK(LocalizedString::ContainsSeparator("Kris||Cris"));
     CHECK_FALSE(LocalizedString::ContainsSeparator("Kris | Cris"));
 }
+
+TEST_CASE("A locale's own text is empty without a translation [data]")
+{
+    Data::LocalizedString names;
+    names.Set("en", "Budge Dragon");
+    names.Set("pt", "Budge Dragon");
+
+    CHECK(names.GetOwn("en") == "Budge Dragon");
+    CHECK(names.GetOwn("pt") == "Budge Dragon");
+    CHECK(names.GetOwn("es").empty());
+    CHECK(names.Get("es") == "Budge Dragon");
+    CHECK(names.HasOwn("pt"));
+    CHECK_FALSE(names.HasOwn("es"));
+}
