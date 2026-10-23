@@ -314,6 +314,66 @@ TEST_CASE("A spear flare moves until its life time is a multiple of 12, without 
     FPS_ANIMATION_FACTOR = savedFactor;
 }
 
+TEST_CASE("At a very high frame rate a spear flare moves on frame after frame until it dies [render][timing]")
+{
+    const float savedFactor = FPS_ANIMATION_FACTOR;
+    static OBJECT owner;
+    owner.Live = true;
+    Vector(1000.f, 1000.f, 100.f, owner.Position);
+    // ~25000 FPS, where the 256-move cap binds (12 / 0.001 moves), and 250 FPS, where it doesn't (120 moves).
+    for (const float factor : {1e-3f, 0.1f})
+    {
+        CAPTURE(factor);
+        for (int i = 0; i < MAX_JOINTS; ++i)
+        {
+            Joints[i].Live = false;
+        }
+        FPS_ANIMATION_FACTOR = factor;
+        vec3_t angle = {0.f, 0.f, 0.f};
+        CreateJoint(BITMAP_FLARE, owner.Position, owner.Position, angle, 12, &owner, 100.f);
+        JOINT* joint = std::find_if(Joints, Joints + MAX_JOINTS, [](const JOINT& j) { return j.Live; });
+        REQUIRE(joint != Joints + MAX_JOINTS);
+        const float lifeTime = joint->LifeTime;
+
+        // Every frame moves it at least once and at most 256 times, so it never stalls and dies in between.
+        const int mostFrames = static_cast<int>(std::ceil(lifeTime / factor)) + 1;
+        int frames = 0;
+        float before = joint->LifeTime;
+        while (joint->Live && frames <= mostFrames)
+        {
+            MoveJoints();
+            ++frames;
+            const float moves = (before - joint->LifeTime) / factor;
+            CHECK(moves >= doctest::Approx(1.f).epsilon(0.01));
+            CHECK(moves <= doctest::Approx(256.f).epsilon(0.01));
+            // Between moves the life time stops only at a multiple of 12 or at the cap, never short of either.
+            if (joint->Live && moves < 255.5f)
+            {
+                CHECK(static_cast<int>(joint->LifeTime) % 12 == 0);
+            }
+            before = joint->LifeTime;
+        }
+        CHECK_FALSE(joint->Live);
+        CHECK(frames >= static_cast<int>(lifeTime / (256.f * factor)));
+    }
+
+    // A flare that dies in its frame's first move is not moved again.
+    for (int i = 0; i < MAX_JOINTS; ++i)
+    {
+        Joints[i].Live = false;
+    }
+    FPS_ANIMATION_FACTOR = 1e-3f;
+    vec3_t angle = {0.f, 0.f, 0.f};
+    CreateJoint(BITMAP_FLARE, owner.Position, owner.Position, angle, 12, &owner, 100.f);
+    JOINT* dying = std::find_if(Joints, Joints + MAX_JOINTS, [](const JOINT& j) { return j.Live; });
+    REQUIRE(dying != Joints + MAX_JOINTS);
+    dying->LifeTime = 0.0005f;
+    MoveJoints();
+    CHECK_FALSE(dying->Live);
+    CHECK(dying->LifeTime == doctest::Approx(0.0005f - 1e-3f));
+    FPS_ANIMATION_FACTOR = savedFactor;
+}
+
 TEST_CASE("Monster lightning collects at most one target per TargetIndex entry [render]")
 {
     for (int i = 0; i < MAX_JOINTS; ++i)
