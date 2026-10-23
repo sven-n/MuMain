@@ -3,10 +3,13 @@
 #include "doctest.h"
 
 #include "ClientDataScope.h"
+#include "ItemStatProfilesScope.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemStatFile.h"
+#include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "I18N/All.h"
 #include "Engine/Object/ZzzInventory.h"
 
@@ -93,6 +96,36 @@ TEST_CASE("A description wraps to the tooltip's width in its line's color [data]
     CHECK(rows[1] == L"up to 6 with a little more");
     CHECK(TextListColor[0] == TEXT_COLOR_BLUE);
     CHECK(TextListColor[1] == TEXT_COLOR_BLUE);
+}
+
+TEST_CASE("A description's placeholders are filled in for the item's level before the line wraps [data][items]")
+{
+    ItemStatFile file;
+    LevelBonusTable table;
+    table.name = "b";
+    table.values[15] = 2000000000;
+    file.tables.push_back(table);
+    const ItemStatProfilesScope profiles;
+    g_ItemDatabase.SetStatProfiles(ItemStatProfiles(file));
+
+    ItemDefinition jewel;
+    jewel.names.Set("en", "Jewel");
+    jewel.description = {Line("+{level}: {table:b} more")};
+    TextNum = 0;
+    SkipNum = 0;
+    WriteItemDescriptionLines(jewel, 15, FiveUnitsPerLetter);
+    REQUIRE(TextNum == 1);
+    CHECK(std::wstring(TextList[0]) == L"+15: 2000000000 more");
+
+    // 40 letters fit a row. As written the line has 40; with the value at +15 it has 41 and wraps, at +0 it has 32.
+    const std::string text = "{table:b} " + std::string(30, 'a');
+    jewel.description = {Line(text.c_str())};
+    TextNum = 0;
+    WriteItemDescriptionLines(jewel, 15, FiveUnitsPerLetter);
+    CHECK(TextNum == 2);
+    TextNum = 0;
+    WriteItemDescriptionLines(jewel, 0, FiveUnitsPerLetter);
+    CHECK(TextNum == 1);
 }
 
 TEST_CASE("A description writes at most its own rows, leaving the tooltip's rows to the rest [data][items]")
