@@ -138,10 +138,10 @@ TEST_CASE("The item tools show the formula of each value of an item [data][items
     // Skull Staff and Battle Scepter: magic power is halved.
     CHECK(stat(5, 0, ItemStat::MagicPower) ==
           "(6 + magicPowerIncrease; excellent +30 (6 × 25 / 6 + 5); ancient +2 (2 + 36 / 60) [default]) / 2 + 2 × "
-          "item level [default], at most 255");
+          "item level [default]");
     CHECK(stat(2, 8, ItemStat::MagicPower) ==
           "(3 + magicPowerIncrease; excellent +6 (3 × 25 / 54 + 5); ancient +3 (2 + 84 / 60) [default]) / 2 "
-          "[sceptre], at most 255");
+          "[sceptre]");
     // Ring of Ice, the Lucky Dragon Helm and the Transformation Ring
     CHECK(requirement(13, 8, ItemRequirement::Level) == "20 + 4 × item level [helper]; excellent +20 [default]");
     CHECK(requirement(7, 67, ItemRequirement::Level) ==
