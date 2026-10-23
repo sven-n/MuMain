@@ -3228,7 +3228,9 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         else if (Level == 14)
         {
             mu_swprintf(TextList[TextNum], I18N::Game::FreeEntranceToKalima);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE;
+            TextBold[TextNum] = false;
+            TextNum++;
             mu_swprintf(TextList[TextNum], I18N::Game::IncreaseStamina);
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
             TextBold[TextNum] = false;
