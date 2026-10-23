@@ -6621,18 +6621,9 @@ void MoveJoint(JOINT* o, int iIndex)
                         VectorRotate(p, Matrix, Position);
                         VectorAdd(o->StartPosition, Position, o->StartPosition);
 
-                        if (o->SubType == 2 || o->SubType == 4)
-                        {
-                            o->TargetPosition[1] -= (20.f) * FPS_ANIMATION_FACTOR;
-                        }
-                        else if (o->SubType >= 11 || o->SubType <= 13)
-                        {
-                            o->TargetPosition[1] -= (20.f) * FPS_ANIMATION_FACTOR;
-                        }
-                        else
-                        {
-                            o->TargetPosition[1] += (20.f) * FPS_ANIMATION_FACTOR;
-                        }
+                        // Every sub type bends the same way: the original code tested "SubType >= 11 || SubType <= 13"
+                        // for the others, which holds for every number, so its "+=" branch never ran.
+                        o->TargetPosition[1] -= (20.f) * FPS_ANIMATION_FACTOR;
                         Vector(0.f, o->TargetPosition[1], o->Angle[2], Angle);
                         AngleMatrix(Angle, Matrix);
                         Vector(0.f, 0.f, o->TargetPosition[0], p);
