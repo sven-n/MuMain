@@ -378,7 +378,10 @@ void CMuItemSyncUI::TakeChosenFile()
 
 void CMuItemSyncUI::OpenFileDialog(FileAction action)
 {
-    static const SDL_DialogFileFilter Filters[] = {{I18N::Editor::ItemExchangeFiles, "json"}};
+    // SDL reads the filters until the dialog answers, so they stay; the label follows the editor's
+    // language.
+    static SDL_DialogFileFilter Filters[] = {{nullptr, "json"}};
+    Filters[0].name = I18N::Editor::ItemExchangeFiles;
     if (action == FileAction::Export)
     {
         SDL_ShowSaveFileDialog(&OnFileChosen, ToUserData(action), nullptr, Filters, 1, ExchangeFileName);
