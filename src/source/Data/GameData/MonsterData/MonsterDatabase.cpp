@@ -87,6 +87,34 @@ void MonsterDatabase::FillNames(std::size_t number)
     CopyName(m_englishNames[number], names.GetNeutral());
 }
 
+#ifdef _EDITOR
+void MonsterDatabase::Set(const MonsterDefinition& monster)
+{
+    if (monster.number < 0 || monster.number >= MonsterNumberCount)
+    {
+        return;
+    }
+    const auto number = static_cast<std::size_t>(monster.number);
+    m_monsters[number] = monster;
+    m_exists.set(number);
+    FillNames(number);
+    ++m_version;
+}
+
+void MonsterDatabase::Remove(int number)
+{
+    if (number < 0 || number >= MonsterNumberCount)
+    {
+        return;
+    }
+    const auto slot = static_cast<std::size_t>(number);
+    m_monsters[slot] = MonsterDefinition{};
+    m_exists.reset(slot);
+    FillNames(slot);
+    ++m_version;
+}
+#endif
+
 const wchar_t* MonsterDatabase::FindDisplayName(int number) const
 {
     return Find(number) != nullptr ? m_displayNames[static_cast<std::size_t>(number)].data() : nullptr;

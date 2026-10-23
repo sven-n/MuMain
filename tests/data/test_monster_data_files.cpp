@@ -3,6 +3,8 @@
 #include "doctest.h"
 
 #include "ClientDataScope.h"
+#include "TemporaryMonsterFolder.h"
+
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/DataHandler/TextFile.h"
@@ -13,7 +15,6 @@
 
 #include <algorithm>
 #include <filesystem>
-#include <random>
 #include <string>
 #include <vector>
 
@@ -42,39 +43,6 @@ const MonsterDefinition* FindMonster(const std::vector<MonsterDefinition>& monst
                                     [&](const MonsterDefinition& monster) { return monster.number == number; });
     return found == monsters.end() ? nullptr : &*found;
 }
-
-// A client folder of its own, for a test that writes or breaks the monster
-// list. CTest runs the cases as parallel processes, so each gets a new name.
-class TemporaryClientFolder
-{
-public:
-    TemporaryClientFolder()
-        : m_path(std::filesystem::temp_directory_path() /
-                 ("mu-monster-data-" + std::to_string(std::random_device{}())))
-    {
-        std::filesystem::create_directories(m_path / "Data" / "Monsters");
-    }
-
-    ~TemporaryClientFolder()
-    {
-        std::error_code error;
-        std::filesystem::remove_all(m_path, error);
-    }
-
-    const std::filesystem::path& Path() const
-    {
-        return m_path;
-    }
-
-    void WriteMonsters(const std::string& text) const
-    {
-        std::string error;
-        REQUIRE(Data::WriteTextFile(m_path / Data::Monsters::GetMonstersFile(), text, error));
-    }
-
-private:
-    std::filesystem::path m_path;
-};
 } // namespace
 
 TEST_CASE("Shipped monster list: loads, with only the warning about 252's empty name [data][monsters]")
@@ -179,7 +147,7 @@ TEST_CASE("Monster data: the game's load fills the table, errors stop it [data][
     }
     SUBCASE("a broken file")
     {
-        TemporaryClientFolder folder;
+        TemporaryMonsterFolder folder;
         folder.WriteMonsters(R"({ "formatVersion": 1, "monsters": [ { "number": 7, "name": "X", "kind": "boss" } ] })");
         ClientDataScope scope(folder.Path());
         std::string error;
@@ -189,7 +157,7 @@ TEST_CASE("Monster data: the game's load fills the table, errors stop it [data][
     }
     SUBCASE("a missing file")
     {
-        TemporaryClientFolder folder;
+        TemporaryMonsterFolder folder;
         ClientDataScope scope(folder.Path());
         std::string error;
 
@@ -200,8 +168,8 @@ TEST_CASE("Monster data: the game's load fills the table, errors stop it [data][
 
 TEST_CASE("Monster data: saving writes what loads back, and refuses errors [data][monsters]")
 {
-    TemporaryClientFolder folder;
-    const std::filesystem::path file = folder.Path() / Data::Monsters::GetMonstersFile();
+    TemporaryMonsterFolder folder;
+    const std::filesystem::path file = folder.MonstersFile();
     MonsterDefinition monster;
     monster.number = 2;
     monster.names.Set("en", "Budge Dragon");

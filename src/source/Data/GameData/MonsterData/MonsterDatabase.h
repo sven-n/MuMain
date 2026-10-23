@@ -48,6 +48,14 @@ public:
     // The English name, for logs ("<English name> (<number>)"); nullptr like Find.
     const wchar_t* FindEnglishName(int number) const;
 
+#ifdef _EDITOR
+    // The monster editor's changes of one number, in place like Build: its
+    // names are filled again and the version counts the change. A number
+    // outside 0-1023 changes nothing.
+    void Set(const MonsterDefinition& monster);
+    void Remove(int number);
+#endif
+
     // Counts the changes of the table and its names, so a cache can tell it is
     // out of date.
     int GetVersion() const
