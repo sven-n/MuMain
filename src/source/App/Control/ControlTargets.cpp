@@ -51,11 +51,22 @@ bool ReadMonsterNumber(const std::map<std::string, std::string>& fields, int& nu
     {
         return false;
     }
+    // The fields hold a JSON number as written out (251, or 251.0 for a
+    // float) and a JSON string as it is, so "251" counts as well.
     const std::string& text = fields.at("monster");
+    const char* const last = text.data() + text.size();
     int parsed = 0;
-    const auto [end, error] = std::from_chars(text.data(), text.data() + text.size(), parsed);
-    if (error != std::errc{} || end != text.data() + text.size() || parsed < 0 ||
-        parsed >= Data::Monsters::MonsterNumberCount)
+    auto [end, error] = std::from_chars(text.data(), last, parsed);
+    if (error != std::errc{})
+    {
+        return false;
+    }
+    // A whole number written as a float: only zeros after the point.
+    if (end != last && *end == '.' && end + 1 != last)
+    {
+        end = std::find_if(end + 1, last, [](char digit) { return digit != '0'; });
+    }
+    if (end != last || parsed < 0 || parsed >= Data::Monsters::MonsterNumberCount)
     {
         return false;
     }

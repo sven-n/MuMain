@@ -27,7 +27,9 @@ enum class TargetLookup : std::uint8_t
 [[nodiscard]] TargetLookup ResolveTarget(const Request& request, int& key);
 
 // The monster number of a target written as {"monster": <number>}: false
-// unless `monster` is the only field and a whole number from 0 to 1023.
+// unless `monster` is the only field and a whole number from 0 to 1023
+// (251 or 251.0; the fields cannot tell the string "251" from the number, so it
+// counts too).
 [[nodiscard]] bool ReadMonsterNumber(const std::map<std::string, std::string>& fields, int& number);
 
 // The error a lookup that did not find an object deserves, or an empty

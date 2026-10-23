@@ -37,6 +37,12 @@ TEST_CASE("Control targets read a monster number [network][control-targets]")
     CHECK(number == 0);
     CHECK(ReadMonsterNumber(TargetFields(R"({"cmd":"attack","target":{"monster":1023}})"), number));
     CHECK(number == 1023);
+    // Python's json writes a float like this; the id form (GetInt) takes it too.
+    CHECK(ReadMonsterNumber(TargetFields(R"({"cmd":"attack","target":{"monster":251.0}})"), number));
+    CHECK(number == 251);
+    // The fields keep a JSON string as it is, so it reads like the number.
+    CHECK(ReadMonsterNumber(TargetFields(R"({"cmd":"attack","target":{"monster":"235"}})"), number));
+    CHECK(number == 235);
 }
 
 TEST_CASE("Control targets refuse anything else as a monster number [network][control-targets]")
@@ -46,6 +52,8 @@ TEST_CASE("Control targets refuse anything else as a monster number [network][co
              R"({"cmd":"attack","target":{"monster":1024}})",
              R"({"cmd":"attack","target":{"monster":-1}})",
              R"({"cmd":"attack","target":{"monster":251.5}})",
+             R"({"cmd":"attack","target":{"monster":"251."}})",
+             R"({"cmd":"attack","target":{"monster":"251x"}})",
              R"({"cmd":"attack","target":{"monster":"Hanzo"}})",
              R"({"cmd":"attack","target":{"monster":null}})",
              R"({"cmd":"attack","target":{"monster":251,"name":"Hanzo"}})",
