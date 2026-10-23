@@ -2113,4 +2113,16 @@
   <data name="Monster names not exported" xml:space="preserve">
     <value>Not every file was written. See the console.</value>
   </data>
+  <data name="Monster" xml:space="preserve">
+    <value>Monster</value>
+  </data>
+  <data name="The monsters changed since the last check; check again." xml:space="preserve">
+    <value>The monsters changed since the last check; check again.</value>
+  </data>
+  <data name="Save Monsters refuses data with errors and saves data with warnings." xml:space="preserve">
+    <value>Save Monsters refuses data with errors and saves data with warnings.</value>
+  </data>
+  <data name="Monster checks click note" xml:space="preserve">
+    <value>Click a problem of a monster to select the monster and open the tool of its field.</value>
+  </data>
 </root>

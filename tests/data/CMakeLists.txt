@@ -61,6 +61,8 @@ mu_add_test(
     SOURCES
         test_legacy_monster_kind.cpp
         test_monster_browser_window.cpp
+        test_monster_check_targets.cpp
+        test_monster_checks_window.cpp
         test_monster_code_references.cpp
         test_monster_data_edits.cpp
         test_monster_data_files.cpp

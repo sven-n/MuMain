@@ -2092,4 +2092,16 @@
   <data name="Monster names not exported" xml:space="preserve">
     <value>Nicht jede Datei wurde geschrieben. Siehe Konsole.</value>
   </data>
+  <data name="Monster" xml:space="preserve">
+    <value>Monster</value>
+  </data>
+  <data name="The monsters changed since the last check; check again." xml:space="preserve">
+    <value>Die Monster haben sich seit der letzten Prüfung geändert; prüfen Sie erneut.</value>
+  </data>
+  <data name="Save Monsters refuses data with errors and saves data with warnings." xml:space="preserve">
+    <value>Monster speichern verweigert Daten mit Fehlern und speichert Daten mit Warnungen.</value>
+  </data>
+  <data name="Monster checks click note" xml:space="preserve">
+    <value>Ein Klick auf das Problem eines Monsters wählt es aus und öffnet das Werkzeug seines Felds.</value>
+  </data>
 </root>
