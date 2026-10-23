@@ -1172,7 +1172,7 @@ number, fields with their default value left out, LF line endings.
 - **Stat profile**: a file's profile that the item's profile rules give
   leaves the item following its rules; another one becomes a pick (see
   Item Basics).
-- **New items** get the client-only fields at their defaults; the
+- **Added items** get the client-only fields at their defaults; the
   two-handed flag follows the rule of the shipped items (groups 0 to 5, a
   hand slot, two cells wide or more) and the weapon kind follows the group,
   as for Add item. The row says when the item has no model entry yet (link
@@ -1188,8 +1188,8 @@ number, fields with their default value left out, LF line endings.
   their items are unchecked.
 
 **Known differences** are fields and formula entries meant to differ
-between the client and the server. Ticking **Known** on a field, on a new
-or removed item or on a formula entry leaves it unchecked and grey in
+between the client and the server. Ticking **Known** on a field, on an
+added or removed item or on a formula entry leaves it unchecked and grey in
 every comparison. They are kept in `Data/Items/Sync/KnownDifferences.json`
 next to the game, written when one is ticked; copy it to
 `src/bin/Data/Items/Sync` with the item files to share it. `""` stands for

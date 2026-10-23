@@ -396,8 +396,8 @@ Each field belongs to one of two groups:
     power's rounding (OpenMU halves each part, the client the sum), the
     `@src` and `@stamp` parts of OpenMU's names and its `;` level variant
     names (three items), and a (group, number) that exists twice on the
-    server (a locked row of the import, which neither side applies; an
-    export does not write into such a file, as it would lose both).
+    server (a locked row of the import, which leaves it as it is; an
+    export replaces such a file after its confirmation).
 - A field left out has its default, as in the item files. A reader warns
   about keys it does not know and refuses a `formatVersion` it does not
   know; the version only goes up for a change that older readers would
@@ -436,7 +436,7 @@ tool of section 9):
   `SDL_ShowSaveFileDialog`), on every platform. Their callback can run on
   another thread, so it only hands the path to the window, which reads it
   in its next frame. On Linux they need the desktop portal or zenity.
-- **The diff** lists, for items, the new ones, the changed ones with their
+- **The diff** lists, for items, the added ones, the changed ones with their
   fields (client value, file value) and the removed ones; for the formulas,
   the drop level bonus, each term of the default and of each profile, and
   each table. A checkbox per field, with a toggle per item and per column.
@@ -455,7 +455,7 @@ tool of section 9):
   item following its rules (also when the rules give the default; only a
   pick is stored as `"default"`); another one becomes a pick (section 9).
   Export writes the profile the item uses.
-- **New items:** `twoHanded` follows the rule all shipped items follow
+- **Added items:** `twoHanded` follows the rule all shipped items follow
   (groups 0 to 5, a hand slot, width 2 or more), the weapon kind follows the
   group as for Add item, then the profile is compared with the rules. The
   row flags what the rules need and the file cannot give: a wing tier, or

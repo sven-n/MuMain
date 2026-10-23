@@ -76,9 +76,15 @@ public:
         return m_exportResult;
     }
 
+    // The button whose file dialog answers.
+    enum class FileAction : uint8_t
+    {
+        Import,
+        Export,
+    };
     // Takes the path a file dialog chose, on the dialog's thread; the window uses it in its next
-    // frame.
-    void ChooseFile(std::string path);
+    // frame without a confirmation open.
+    void ChooseFile(std::string path, FileAction action);
     // The diff shown, for its checkboxes.
     std::optional<MuEditor::Items::ItemSyncDiff>& GetDiff()
     {
@@ -95,13 +101,6 @@ public:
     }
 
 private:
-    // The button whose file dialog answers.
-    enum class FileAction : uint8_t
-    {
-        Import,
-        Export,
-    };
-
     CMuItemSyncUI() = default;
 
     void TakeChosenFile();
@@ -140,17 +139,19 @@ private:
     std::vector<std::string> m_messages;
     bool m_messagesAreErrors = false;
     std::string m_result;
-    bool m_openApplyPopup = false;
+    // Apply was clicked: the confirmation is open (again, should ImGui close it otherwise) until
+    // it is answered.
+    bool m_confirmApply = false;
 
-    // The export: the file it writes, what changes in it while the confirmation waits, and what
-    // the last one did.
+    // The export: the file it writes, what changes in it while the confirmation waits (which is
+    // open while it does), and what the last one did.
     std::string m_exportPath;
     std::optional<MuEditor::Items::ItemSyncExportPreview> m_pendingExport;
-    bool m_openExportPopup = false;
     std::string m_exportResult;
     bool m_exportFailed = false;
 
-    // The file dialogs answer on their own thread: the path waits here for the next frame.
+    // The file dialogs answer on their own thread: the path waits here, with the action of the
+    // dialog that chose it.
     std::mutex m_chosenMutex;
     std::optional<std::string> m_chosenPath;
     FileAction m_chosenAction = FileAction::Import;

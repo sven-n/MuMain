@@ -2135,7 +2135,7 @@
     <value>Compare again</value>
   </data>
   <data name="What Import and Export do" xml:space="preserve">
-    <value>Import lists how a file differs from the client's items and formulas and takes the checked values into the client. Export writes the client's items and formulas into a file; OpenMU's import page shows what it changes there. Only what differs is listed: what is the same on both sides is left out.</value>
+    <value>Import lists how a file differs from the client's items and formulas, only what differs (what is the same on both sides is left out), and takes the checked values into the client. Export writes the client's items and formulas into a file.</value>
   </data>
   <data name="Import from {0}" xml:space="preserve">
     <value>Import from {0}</value>

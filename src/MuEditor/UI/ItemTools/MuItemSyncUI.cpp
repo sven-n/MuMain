@@ -24,8 +24,10 @@
 #include <SDL3/SDL_dialog.h>
 
 #include <algorithm>
+#include <cstdint>
 #include <set>
 #include <string>
+#include <system_error>
 #include <tuple>
 
 using namespace MuEditor::Items;
@@ -34,7 +36,7 @@ using Data::Items::ItemDataIssue;
 namespace
 {
 // Pixel widths before the editor UI scale.
-constexpr float ChangeColumnWidth = 80.0f;
+constexpr float FieldsColumnWidth = 80.0f;
 constexpr float FieldColumnWidth = 220.0f;
 constexpr float KnownColumnWidth = 60.0f;
 constexpr float ItemListHeight = 260.0f;
@@ -195,13 +197,39 @@ void RenderValue(const std::optional<std::string>& value)
     ImGui::PopTextWrapPos();
 }
 
-void SDLCALL OnFileChosen(void*, const char* const* files, int)
+// The dialog's action is its userdata, so a dialog answers for its own button.
+void* ToUserData(CMuItemSyncUI::FileAction action)
+{
+    return reinterpret_cast<void*>(static_cast<std::uintptr_t>(action));
+}
+
+void SDLCALL OnFileChosen(void* userdata, const char* const* files, int)
 {
     // Nothing on an error, an empty list when the dialog was cancelled.
     if (files != nullptr && files[0] != nullptr)
     {
-        g_MuItemSyncUI.ChooseFile(files[0]);
+        const auto action = static_cast<CMuItemSyncUI::FileAction>(reinterpret_cast<std::uintptr_t>(userdata));
+        g_MuItemSyncUI.ChooseFile(files[0], action);
     }
+}
+
+// The width of the column that says what a row does in the client: its widest text.
+float ChangeColumnWidth()
+{
+    float width = 0.0f;
+    for (const char* text :
+         {I18N::Editor::InTheClient, I18N::Editor::Added, I18N::Editor::Changed, I18N::Editor::Removed})
+    {
+        width = std::max(width, ImGui::CalcTextSize(text).x);
+    }
+    return width;
+}
+
+// Whether both paths name one file (also when written differently); false while one is not there.
+bool IsSameFile(const std::string& first, const std::string& second)
+{
+    std::error_code error;
+    return !first.empty() && !second.empty() && std::filesystem::equivalent(ToPath(first), ToPath(second), error);
 }
 } // namespace
 
@@ -257,14 +285,20 @@ void CMuItemSyncUI::Render(bool* open)
     ToolWindow::End();
 }
 
-void CMuItemSyncUI::ChooseFile(std::string path)
+void CMuItemSyncUI::ChooseFile(std::string path, FileAction action)
 {
     const std::scoped_lock lock(m_chosenMutex);
     m_chosenPath = std::move(path);
+    m_chosenAction = action;
 }
 
 void CMuItemSyncUI::TakeChosenFile()
 {
+    // A confirmation is answered first: the file waits, so the confirmation keeps its diff.
+    if (m_confirmApply || m_pendingExport)
+    {
+        return;
+    }
     std::optional<std::string> path;
     FileAction action = FileAction::Import;
     {
@@ -289,17 +323,13 @@ void CMuItemSyncUI::TakeChosenFile()
 void CMuItemSyncUI::OpenFileDialog(FileAction action)
 {
     static const SDL_DialogFileFilter Filters[] = {{I18N::Editor::ItemExchangeFiles, "json"}};
-    {
-        const std::scoped_lock lock(m_chosenMutex);
-        m_chosenAction = action;
-    }
     if (action == FileAction::Import)
     {
-        SDL_ShowOpenFileDialog(&OnFileChosen, nullptr, nullptr, Filters, 1, nullptr, false);
+        SDL_ShowOpenFileDialog(&OnFileChosen, ToUserData(action), nullptr, Filters, 1, nullptr, false);
     }
     else
     {
-        SDL_ShowSaveFileDialog(&OnFileChosen, nullptr, nullptr, Filters, 1, ExchangeFileName);
+        SDL_ShowSaveFileDialog(&OnFileChosen, ToUserData(action), nullptr, Filters, 1, ExchangeFileName);
     }
 }
 
@@ -494,9 +524,8 @@ void CMuItemSyncUI::Export(const std::filesystem::path& path)
         m_exportResult = I18N::Format(I18N::Editor::TheFileAlreadyHasTheClientData, {m_exportPath});
         return;
     }
-    // A file that is there is replaced only after the confirmation.
+    // A file that is there is replaced only after the confirmation (RenderExportPopup).
     m_pendingExport = preview;
-    m_openExportPopup = true;
 }
 
 bool CMuItemSyncUI::ConfirmExport()
@@ -532,10 +561,11 @@ bool CMuItemSyncUI::WriteExport()
     m_exportFailed = false;
     m_exportResult = I18N::Format(I18N::Editor::Exported0ItemsTo1, {std::to_string(writtenItems), m_exportPath});
     g_MuEditorConsoleUI.LogEditor(m_exportResult);
-    // An import comparison of that file shows what it held before.
-    if (m_diff && m_comparedPath == m_exportPath)
+    // An import comparison of that file (also one that could not read it) shows what it held
+    // before.
+    if (IsSameFile(m_comparedPath, m_exportPath))
     {
-        Compare(ToPath(m_exportPath));
+        Compare(ToPath(m_comparedPath));
     }
     return true;
 }
@@ -692,9 +722,9 @@ void CMuItemSyncUI::RenderItems()
     {
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableSetupColumn(CheckColumn, ImGuiTableColumnFlags_WidthFixed, ImGui::GetFrameHeight());
-        ImGui::TableSetupColumn(I18N::Editor::InTheClient, ImGuiTableColumnFlags_WidthFixed, Scaled(ChangeColumnWidth));
+        ImGui::TableSetupColumn(I18N::Editor::InTheClient, ImGuiTableColumnFlags_WidthFixed, ChangeColumnWidth());
         ImGui::TableSetupColumn(I18N::Editor::Item);
-        ImGui::TableSetupColumn(I18N::Editor::Fields, ImGuiTableColumnFlags_WidthFixed, Scaled(ChangeColumnWidth));
+        ImGui::TableSetupColumn(I18N::Editor::Fields, ImGuiTableColumnFlags_WidthFixed, Scaled(FieldsColumnWidth));
         ImGui::TableHeadersRow();
         ImGuiListClipper clipper;
         clipper.Begin(static_cast<int>(m_diff->items.size()));
@@ -939,7 +969,7 @@ void CMuItemSyncUI::RenderApply()
     // It asks first (RenderApplyPopup).
     if (ImGui::Button(I18N::Editor::ApplyTheCheckedChanges))
     {
-        m_openApplyPopup = true;
+        m_confirmApply = true;
     }
     ImGui::EndDisabled();
     ImGui::PushTextWrapPos(0.0f);
@@ -963,10 +993,14 @@ void CMuItemSyncUI::RenderApply()
 
 void CMuItemSyncUI::RenderApplyPopup()
 {
-    if (m_openApplyPopup)
+    // Open while it waits for its answer, also when ImGui closed it (e.g. the editor was hidden).
+    if (m_confirmApply && !m_diff)
+    {
+        m_confirmApply = false;
+    }
+    if (m_confirmApply && !ImGui::IsPopupOpen(ApplyPopupId))
     {
         ImGui::OpenPopup(ApplyPopupId);
-        m_openApplyPopup = false;
     }
     const std::string title = std::string(I18N::Editor::ApplyTheImport) + ApplyPopupId;
     if (!ImGui::BeginPopupModal(title.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
@@ -984,6 +1018,7 @@ void CMuItemSyncUI::RenderApplyPopup()
     ImGui::BeginDisabled(GetApplyBlocker() != ApplyBlocker::None);
     if (ImGui::Button(I18N::Editor::Apply))
     {
+        m_confirmApply = false;
         Apply();
         ImGui::CloseCurrentPopup();
     }
@@ -991,6 +1026,7 @@ void CMuItemSyncUI::RenderApplyPopup()
     ImGui::SameLine();
     if (ImGui::Button(I18N::Editor::Cancel))
     {
+        m_confirmApply = false;
         ImGui::CloseCurrentPopup();
     }
     ImGui::EndPopup();
@@ -998,10 +1034,10 @@ void CMuItemSyncUI::RenderApplyPopup()
 
 void CMuItemSyncUI::RenderExportPopup()
 {
-    if (m_openExportPopup)
+    // Open while the export waits for its answer, also when ImGui closed it.
+    if (m_pendingExport && !ImGui::IsPopupOpen(ExportPopupId))
     {
         ImGui::OpenPopup(ExportPopupId);
-        m_openExportPopup = false;
     }
     const std::string title = std::string(I18N::Editor::ReplaceTheExchangeFile) + ExportPopupId;
     if (!ImGui::BeginPopupModal(title.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))

@@ -2114,7 +2114,7 @@
     <value>Neu vergleichen</value>
   </data>
   <data name="What Import and Export do" xml:space="preserve">
-    <value>Importieren listet auf, wie sich eine Datei von den Items und Formeln des Clients unterscheidet, und übernimmt die angehakten Werte in den Client. Exportieren schreibt die Items und Formeln des Clients in eine Datei; die Import-Seite von OpenMU zeigt, was sie dort ändert. Nur Unterschiede werden aufgelistet: Was auf beiden Seiten gleich ist, fehlt in der Liste.</value>
+    <value>Importieren listet auf, wie sich eine Datei von den Items und Formeln des Clients unterscheidet, nur die Unterschiede (was auf beiden Seiten gleich ist, fehlt), und übernimmt die angehakten Werte in den Client. Exportieren schreibt die Items und Formeln des Clients in eine Datei.</value>
   </data>
   <data name="Import from {0}" xml:space="preserve">
     <value>Import aus {0}</value>
