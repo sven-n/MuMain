@@ -1714,6 +1714,20 @@ static std::optional<std::string> TooltipPlaceholderValue(std::string_view name,
     return std::nullopt;
 }
 
+std::optional<PetInfoRequest> GetPetInfoRequest(int itemType, int pointedIndex, int inventype)
+{
+    const StorageType storage = static_cast<StorageType>(inventype);
+    if (itemType == ITEM_DARK_HORSE_ITEM)
+    {
+        return pointedIndex == EQUIPMENT_HELPER
+                   ? std::optional<PetInfoRequest>(PetInfoRequest{PetType::DarkHorse, storage, EQUIPMENT_HELPER})
+                   : std::nullopt;
+    }
+    return pointedIndex == EQUIPMENT_WEAPON_LEFT
+               ? std::optional<PetInfoRequest>(PetInfoRequest{PetType::DarkRaven, storage, EQUIPMENT_WEAPON_LEFT})
+               : std::nullopt;
+}
+
 void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, int level,
                                const ItemTooltipValues& values, bool afterOptions, int& rowsLeft,
                                ItemTooltipTextMeasure measure)
@@ -2827,24 +2841,19 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
         return;
     if (build == ItemTooltipBuild::DarkLordPet)
     {
+        // The request is made once a second at most, for the pet whose tooltip is drawn then: the callback lives on,
+        // so it reads the item of this call, not one it was made with.
+        static int petItemType = -1;
+        static int petInventype = 0;
+        petItemType = ip->Type;
+        petInventype = Inventype;
         static DebouncedAction debouncedPetInfoRequest(
-            [ip, Inventype]()
+            []()
             {
-                PetType PetType = PetType::DarkRaven;
-                if (ip->Type == ITEM_DARK_HORSE_ITEM)
+                if (const std::optional<PetInfoRequest> request =
+                        GetPetInfoRequest(petItemType, g_pMyInventory->GetPointedItemIndex(), petInventype))
                 {
-                    PetType = PetType::DarkHorse;
-
-                    if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_HELPER)
-                    {
-                        SocketClient->ToGameServer()->SendPetInfoRequest(PetType, static_cast<StorageType>(Inventype),
-                                                                         EQUIPMENT_HELPER);
-                    }
-                }
-                else if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_WEAPON_LEFT)
-                {
-                    SocketClient->ToGameServer()->SendPetInfoRequest(PetType, static_cast<StorageType>(Inventype),
-                                                                     EQUIPMENT_WEAPON_LEFT);
+                    SocketClient->ToGameServer()->SendPetInfoRequest(request->pet, request->storage, request->slot);
                 }
             },
             1000); // 1-second intervals
