@@ -206,6 +206,16 @@ void ExchangeReader::ReadItem(const OrderedJson& json, size_t index, std::vector
 }
 } // namespace
 
+ExchangeItemIndex IndexExchangeItems(const ItemExchangeFile& file)
+{
+    ExchangeItemIndex items;
+    for (const ItemDefinition& item : file.items)
+    {
+        items[{item.group, item.number}] = &item;
+    }
+    return items;
+}
+
 void CopyExchangeFields(const ItemDefinition& from, ItemDefinition& to)
 {
     to.names = from.names;

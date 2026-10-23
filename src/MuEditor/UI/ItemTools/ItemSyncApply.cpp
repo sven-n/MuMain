@@ -48,12 +48,6 @@ std::string RuleName(const std::string& profile)
     return profile == Data::Items::StatProfileNames::Default ? std::string() : profile;
 }
 
-const ItemDefinition* FindItem(const ItemExchangeFile& file, int group, int number)
-{
-    const auto item = std::ranges::find_if(file.items, [&](const ItemDefinition& entry)
-                                           { return entry.group == group && entry.number == number; });
-    return item != file.items.end() ? &*item : nullptr;
-}
 } // namespace
 
 ItemExchangeFile BuildClientExchange()
@@ -122,6 +116,7 @@ bool ApplyItemSyncImport(const ItemSyncDiff& diff, const ItemExchangeFile& file,
 
     std::vector<ItemDefinition> items;
     std::vector<int> removed;
+    const Data::Items::ExchangeItemIndex appliedItems = Data::Items::IndexExchangeItems(applied);
     for (const SyncItem& row : diff.items)
     {
         const int itemType = Data::Items::MakeItemType(row.group, row.number);
@@ -133,7 +128,8 @@ bool ApplyItemSyncImport(const ItemSyncDiff& diff, const ItemExchangeFile& file,
             }
             continue;
         }
-        const ItemDefinition* exchange = FindItem(applied, row.group, row.number);
+        const auto found = appliedItems.find({row.group, row.number});
+        const ItemDefinition* exchange = found != appliedItems.end() ? found->second : nullptr;
         const ItemDefinition* current = g_ItemDatabase.Find(itemType);
         if (exchange == nullptr || (current != nullptr && Data::Items::ToExchangeItem(*current) == *exchange))
         {
@@ -257,11 +253,7 @@ ItemSyncExportPreview PreviewItemSyncExport(const std::filesystem::path& path)
     preview.fileHasFormulas = file.formulas.has_value();
 
     const ItemExchangeFile client = BuildClientExchange();
-    std::map<std::pair<int, int>, const ItemDefinition*> fileItems;
-    for (const ItemDefinition& item : file.items)
-    {
-        fileItems[{item.group, item.number}] = &item;
-    }
+    const Data::Items::ExchangeItemIndex fileItems = Data::Items::IndexExchangeItems(file);
     // An item the file has twice is not among its items, but the file has it.
     std::set<std::pair<int, int>> fileKeys(file.repeatedItems.begin(), file.repeatedItems.end());
     for (const auto& [key, item] : fileItems)

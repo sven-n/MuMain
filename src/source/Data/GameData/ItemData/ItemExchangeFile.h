@@ -6,6 +6,7 @@
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
 
+#include <map>
 #include <optional>
 #include <span>
 #include <string>
@@ -61,6 +62,10 @@ inline constexpr ItemTag ExchangeTags[] = {ItemTag::Ammunition, ItemTag::SecondC
 // the stat profile (each direction treats those itself); the other fields of `to` stay. The one
 // list of them, for the export (ToExchangeItem) and the import (ToClientItem).
 void CopyExchangeFields(const ItemDefinition& from, ItemDefinition& to);
+
+// The file's items by (group, number), each once.
+using ExchangeItemIndex = std::map<std::pair<int, int>, const ItemDefinition*>;
+ExchangeItemIndex IndexExchangeItems(const ItemExchangeFile& file);
 
 // The item as the exchange file has it: the shared fields, the client-only ones at their
 // defaults. `statProfile` names the profile the item uses ("default" for the default).

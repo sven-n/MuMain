@@ -138,16 +138,6 @@ bool TakesPart(const std::string& path, bool incomingHasIt, const SyncOptions& o
     return std::ranges::find(options.uiLocales, locale) != options.uiLocales.end();
 }
 
-std::map<ItemKey, const ItemDefinition*> IndexItems(const ItemExchangeFile& file)
-{
-    std::map<ItemKey, const ItemDefinition*> items;
-    for (const ItemDefinition& item : file.items)
-    {
-        items[{item.group, item.number}] = &item;
-    }
-    return items;
-}
-
 bool IsHeld(const SyncOptions& options, const ItemKey& key)
 {
     return options.isHeld && options.isHeld(Data::Items::MakeItemType(key.first, key.second));
@@ -607,8 +597,8 @@ ItemSyncDiff BuildItemSyncDiff(const ItemExchangeFile& client, const ItemExchang
     diff.takenLocales.assign(options.uiLocales.begin(), options.uiLocales.end());
     const ItemExchangeFile& current = client;
     const ItemExchangeFile& incoming = file;
-    const std::map<ItemKey, const ItemDefinition*> currentItems = IndexItems(current);
-    const std::map<ItemKey, const ItemDefinition*> incomingItems = IndexItems(incoming);
+    const Data::Items::ExchangeItemIndex currentItems = Data::Items::IndexExchangeItems(current);
+    const Data::Items::ExchangeItemIndex incomingItems = Data::Items::IndexExchangeItems(incoming);
     // An item a side has more than once (a file read with repeatedItems; the client's data never
     // has one): an error row that is not applied.
     const std::set<ItemKey> currentRepeated(client.repeatedItems.begin(), client.repeatedItems.end());
@@ -688,7 +678,7 @@ ItemExchangeFile ApplyItemSyncDiff(const ItemExchangeFile& client, const ItemExc
 {
     ItemExchangeFile target = client;
     const ItemExchangeFile& source = file;
-    const std::map<ItemKey, const ItemDefinition*> sourceItems = IndexItems(source);
+    const Data::Items::ExchangeItemIndex sourceItems = Data::Items::IndexExchangeItems(source);
     std::map<ItemKey, ItemDefinition> targetItems;
     for (const ItemDefinition& item : target.items)
     {
