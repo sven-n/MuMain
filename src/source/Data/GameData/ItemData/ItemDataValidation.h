@@ -60,8 +60,8 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
 void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemTooltipFile& tooltips,
                               const std::string& tooltipFile, std::vector<ItemDataIssue>& issues);
 
-// The tables of the item stat file the items use (`statFile` names it in messages), in their descriptions' texts
-// (written in place or shared in `tooltips`) and lines' "values". A table that neither a stat nor a description names
+// The tables of the item stat file the items use (`statFile` names it in messages), in their description and name
+// lines' texts (written in place or shared in `tooltips`) and "values". A table that neither a stat nor a description names
 // is a warning. So is a wing (an item with a wing tier) whose description names other tables than most of the other
 // wings of its tier, cape tag and group: the tooltip code chose the wings' damage and absorption lines by the tier, so
 // a new or re-tiered wing that misses them, or keeps another tier's, is pointed out.

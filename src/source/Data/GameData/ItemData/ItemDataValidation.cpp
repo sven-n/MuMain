@@ -545,8 +545,8 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
 
 namespace
 {
-// The tables an item's description names: in its texts, written in place or shared in `tooltips` (the English texts;
-// the translations have their placeholders), and in its lines' "values".
+// The tables an item's description and name lines name: in their texts, written in place or shared in `tooltips`
+// (the English texts; the translations have their placeholders), and in their "values".
 std::set<std::string> FindDescriptionTables(const ItemDefinition& definition, const ItemTooltipFile& tooltips)
 {
     std::set<std::string> tables;
@@ -557,13 +557,13 @@ std::set<std::string> FindDescriptionTables(const ItemDefinition& definition, co
             tables.emplace(table);
         }
     };
-    for (const ItemDescriptionLine& line : definition.description)
+    for (const auto& [line, field] : TooltipLinesOf(definition))
     {
-        for (const auto& [placeholder, value] : line.values)
+        for (const auto& [placeholder, value] : line->values)
         {
             add(value);
         }
-        const LocalizedString* text = line.textName.empty() ? &line.text : tooltips.FindText(line.textName);
+        const LocalizedString* text = line->textName.empty() ? &line->text : tooltips.FindText(line->textName);
         if (text == nullptr)
         {
             continue;
