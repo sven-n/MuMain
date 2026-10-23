@@ -310,4 +310,3 @@ TEST_CASE("The tooltip's values of an item follow the item and the hero [data][i
     MakeBladeMaster(hero.Hero());
     CHECK(ComputeItemTooltipValues(kris).strength.missing == 0);
 }
-

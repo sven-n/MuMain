@@ -1186,7 +1186,11 @@ void GetItemName(int iType, int iLevel, wchar_t* Text)
         {
         case 0: mu_swprintf(Text, L"%ls", I18N::Game::Zen); break;
         case 1: mu_swprintf(Text, L"%ls", I18N::Game::Heart); break;
-        case 2: mu_swprintf(Text, L"%ls", ChaosEventName[p->Durability]); break;
+        case 2:
+            // The prize by the item's durability; none past the list, so the caller's fallback names the item.
+            if (p->Durability < std::size(ChaosEventName))
+                mu_swprintf(Text, L"%ls", ChaosEventName[p->Durability]);
+            break;
         }
     }
     else if (iType == ITEM_BOX_OF_LUCK)
@@ -2032,7 +2036,17 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         {
         case 0:mu_swprintf(TextList[TextNum], I18N::Game::Zen); break;
         case 1:mu_swprintf(TextList[TextNum], I18N::Game::Heart); break;
-        case 2:mu_swprintf(TextList[TextNum], L"%ls", ChaosEventName[ip->Durability]); break;
+        case 2:
+            // The prize by the item's durability; its own name for one past the list (the tooltip snapshot's item
+            // has its full durability).
+            mu_swprintf(TextList[TextNum], L"%ls",
+                        ip->Durability < std::size(ChaosEventName) ? ChaosEventName[ip->Durability] : p->Name);
+            break;
+        // The item exists at +0 to +2; at another level (the tooltip snapshot draws every level) its own name, not the
+        // row an earlier tooltip left.
+        default:
+            mu_swprintf(TextList[TextNum], L"%ls", p->Name);
+            break;
         }
     }
     else if (ip->Type == ITEM_BOX_OF_LUCK)
@@ -2070,7 +2084,17 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         {
         case 0:mu_swprintf(TextList[TextNum], I18N::Game::Zen); break;
         case 1:mu_swprintf(TextList[TextNum], I18N::Game::Heart); break;
-        case 2:mu_swprintf(TextList[TextNum], L"%ls", ChaosEventName[ip->Durability]); break;
+        case 2:
+            // The prize by the item's durability; its own name for one past the list (the tooltip snapshot's item
+            // has its full durability).
+            mu_swprintf(TextList[TextNum], L"%ls",
+                        ip->Durability < std::size(ChaosEventName) ? ChaosEventName[ip->Durability] : p->Name);
+            break;
+        // The item exists at +0 to +2; at another level (the tooltip snapshot draws every level) its own name, not the
+        // row an earlier tooltip left.
+        default:
+            mu_swprintf(TextList[TextNum], L"%ls", p->Name);
+            break;
         }
     }
     else if (ip->Type == ITEM_FRUITS)
@@ -3050,7 +3074,8 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
             TextBold[TextNum] = false;
             TextNum++;
-        }break;
+        }
+        break;
         case ITEM_COMPLETE_SECROMICON:
         {
             mu_swprintf(TextList[TextNum], I18N::Game::IndestructibleMetalSecromicon);
@@ -3061,7 +3086,8 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
             TextBold[TextNum] = false;
             TextNum++;
-        }break;
+        }
+        break;
         }
     }
     else if (ITEM_OPEN_ACCESS_TICKET_TO_CHAOS_CASTLE == ip->Type)
@@ -3188,35 +3214,47 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         case ITEM_BLUE_CHOCOLATE_BOX:
             if (Level == 0)
                 TextListColor[TextNum] = TEXT_COLOR_BLUE;
-            else
-                if (Level == 1)
-                    TextListColor[TextNum] = TEXT_COLOR_BLUE;
+            else if (Level == 1)
+                TextListColor[TextNum] = TEXT_COLOR_BLUE;
             break;
         }
-        TextBold[TextNum] = false; TextNum++;
+        TextBold[TextNum] = false;
+        TextNum++;
     }
     if (ip->Type == ITEM_BOX_OF_LUCK)
     {
         if (Level == 7)
         {
             mu_swprintf(TextList[TextNum], I18N::Game::WhenYouDropItOnTheGround);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE;
+            TextBold[TextNum] = false;
+            TextNum++;
             mu_swprintf(TextList[TextNum], I18N::Game::RenaZenJewelItem);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE;
+            TextBold[TextNum] = false;
+            TextNum++;
             mu_swprintf(TextList[TextNum], I18N::Game::YouWillGetOneOfTheAboveItems);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE;
+            TextBold[TextNum] = false;
+            TextNum++;
         }
         else if (Level == 14)
         {
             mu_swprintf(TextList[TextNum], I18N::Game::FreeEntranceToKalima);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE;
+            TextBold[TextNum] = false;
+            TextNum++;
             mu_swprintf(TextList[TextNum], I18N::Game::IncreaseStamina);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE;
+            TextBold[TextNum] = false;
+            TextNum++;
         }
         else
         {
             mu_swprintf(TextList[TextNum], I18N::Game::ThrowItAndYouMayReceiveSomeZenOrItems);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE;
+            TextBold[TextNum] = false;
+            TextNum++;
         }
         mu_swprintf(TextList[TextNum], I18N::Game::CannotBeSold);
         TextListColor[TextNum] = TEXT_COLOR_RED;
@@ -3233,13 +3271,18 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     char tCount = COMGEM::CalcCompiledCount(ip);
     if (tCount > 0)
     {
-        int	nJewelIndex = COMGEM::Check_Jewel_Com(ip->Type);
+        int nJewelIndex = COMGEM::Check_Jewel_Com(ip->Type);
         if (nJewelIndex != COMGEM::NOGEM)
         {
-            mu_swprintf(TextList[TextNum], I18N::Game::DSIsCombined, tCount, I18N::Game::Lookup(COMGEM::GetJewelIndex(nJewelIndex, COMGEM::eGEM_NAME)));
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+            mu_swprintf(TextList[TextNum], I18N::Game::DSIsCombined, tCount,
+                        I18N::Game::Lookup(COMGEM::GetJewelIndex(nJewelIndex, COMGEM::eGEM_NAME)));
+            TextListColor[TextNum] = TEXT_COLOR_WHITE;
+            TextBold[TextNum] = false;
+            TextNum++;
             mu_swprintf(TextList[TextNum], I18N::Game::CanBeUsedAfterDismantling);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE;
+            TextBold[TextNum] = false;
+            TextNum++;
         }
     }
     if (const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(ip->Type))
@@ -3256,9 +3299,9 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     if (ip->Type == ITEM_ARMOR_OF_GUARDSMAN)
     {
         int startIndex = 0;
-        if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK || gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD
-            || gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER
-            )
+        if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK ||
+            gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD ||
+            gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER)
         {
             startIndex = 6;
         }
@@ -3266,14 +3309,22 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         int HeroLevel = CharacterAttribute->Level;
 
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        mu_swprintf(TextList[TextNum], L"%ls %ls    %ls      %ls    ", I18N::Game::ChaosCastle, I18N::Game::Level, I18N::Game::MinLevel, I18N::Game::Cost); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+        mu_swprintf(TextList[TextNum], L"%ls %ls    %ls      %ls    ", I18N::Game::ChaosCastle, I18N::Game::Level,
+                    I18N::Game::MinLevel, I18N::Game::Cost);
+        TextListColor[TextNum] = TEXT_COLOR_WHITE;
+        TextBold[TextNum] = false;
+        TextNum++;
 
         for (int i = 0; i < 6; i++)
         {
             int Zen = g_iChaosCastleZen[i];
 
-            mu_swprintf(TextList[TextNum], L"        %d             %3d~%3d     %3d,000", i + 1, g_iChaosCastleLevel[startIndex + i][0], std::min<int>(400, g_iChaosCastleLevel[startIndex + i][1]), Zen);
-            if ((HeroLevel >= g_iChaosCastleLevel[startIndex + i][0] && HeroLevel <= g_iChaosCastleLevel[startIndex + i][1]) && gCharacterManager.IsMasterLevel(Hero->Class) == false)
+            mu_swprintf(TextList[TextNum], L"        %d             %3d~%3d     %3d,000", i + 1,
+                        g_iChaosCastleLevel[startIndex + i][0],
+                        std::min<int>(400, g_iChaosCastleLevel[startIndex + i][1]), Zen);
+            if ((HeroLevel >= g_iChaosCastleLevel[startIndex + i][0] &&
+                 HeroLevel <= g_iChaosCastleLevel[startIndex + i][1]) &&
+                gCharacterManager.IsMasterLevel(Hero->Class) == false)
             {
                 TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
             }
@@ -3281,7 +3332,8 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
             {
                 TextListColor[TextNum] = TEXT_COLOR_WHITE;
             }
-            TextBold[TextNum] = false; TextNum++;
+            TextBold[TextNum] = false;
+            TextNum++;
         }
         mu_swprintf(TextList[TextNum], L"         %d          %ls   %3d,000", 7, I18N::Game::MasterLevel, 1000);
         if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
