@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <cctype>
 #include <map>
-#include <optional>
 #include <set>
 #include <string>
 #include <tuple>
@@ -452,26 +451,122 @@ std::string ListTables(const std::set<std::string>& tables)
     return list;
 }
 
-// The wings of a tier (with or without the cape tag, in a group) show the same lines: the tooltip code chose them by
-// the tier before they were data. The tables most of the others name, or nothing when they agree on none.
-std::optional<std::set<std::string>> FindTierTables(const std::vector<const ItemDefinition*>& wings,
-                                                    const ItemDefinition& wing)
+// A wing's lines as the wing check compares them: each line's English text (its tables included).
+std::vector<std::string> WingLines(const ItemDefinition& wing)
 {
-    std::map<std::set<std::string>, int> counts;
-    for (const ItemDefinition* other : wings)
+    std::vector<std::string> lines;
+    for (const ItemDescriptionLine& line : wing.description)
     {
-        if (other != &wing)
+        lines.push_back(line.text.GetNeutral());
+    }
+    return lines;
+}
+
+std::string DescribeWingLines(const ItemDefinition& wing)
+{
+    const size_t count = wing.description.size();
+    return std::to_string(count) + (count == 1 ? " line" : " lines") + " naming " +
+           ListTables(FindDescriptionTables(wing));
+}
+
+std::string DescribeWingKind(WingTier tier, bool cape)
+{
+    return std::string(FindEnumName(tier)) + "-tier " + (cape ? "capes" : "wings");
+}
+
+// The wings of a kind: those that have each set of lines, most first.
+using WingsByLines = std::vector<std::vector<const ItemDefinition*>>;
+WingsByLines SortByLines(const std::vector<const ItemDefinition*>& wings)
+{
+    std::map<std::vector<std::string>, std::vector<const ItemDefinition*>> byLines;
+    for (const ItemDefinition* wing : wings)
+    {
+        byLines[WingLines(*wing)].push_back(wing);
+    }
+    WingsByLines sorted;
+    for (auto& [lines, having] : byLines)
+    {
+        sorted.push_back(std::move(having));
+    }
+    std::stable_sort(sorted.begin(), sorted.end(),
+                     [](const auto& first, const auto& second) { return first.size() > second.size(); });
+    return sorted;
+}
+
+// The lines most of the wings have, or nothing when two sets of lines are as common.
+const ItemDefinition* FindMostLines(const WingsByLines& sorted)
+{
+    if (sorted.empty() || (sorted.size() > 1 && sorted[0].size() == sorted[1].size()))
+    {
+        return nullptr;
+    }
+    return sorted[0].front();
+}
+
+using WingKey = std::tuple<WingTier, bool, int>;
+
+// The wings of a tier show the same lines: the tooltip code chose them by the tier (and the cape tag) before they were
+// data. The wings are compared within their tier, cape tag and group; a wing alone there is compared with the wings of
+// its tier and cape tag in the other groups that have more than one, so Cape of Fighter (12) and Cape of Lord (13),
+// which the code wrote apart, are not compared with each other.
+void ValidateWingLines(const std::map<WingKey, std::vector<const ItemDefinition*>>& wings,
+                       std::vector<ItemDataIssue>& issues)
+{
+    const auto warn = [&](const ItemDefinition& wing, const std::string& message)
+    { issues.push_back({ItemDataIssueSeverity::Warning, "", wing.group, wing.number, "description", message}); };
+    for (const auto& [key, kindWings] : wings)
+    {
+        const auto& [tier, cape, group] = key;
+        if (kindWings.size() == 1)
         {
-            ++counts[FindDescriptionTables(*other)];
+            std::vector<const ItemDefinition*> others;
+            for (const auto& [otherKey, otherWings] : wings)
+            {
+                if (std::get<0>(otherKey) == tier && std::get<1>(otherKey) == cape && std::get<2>(otherKey) != group &&
+                    otherWings.size() > 1)
+                {
+                    others.insert(others.end(), otherWings.begin(), otherWings.end());
+                }
+            }
+            const ItemDefinition* most = FindMostLines(SortByLines(others));
+            const ItemDefinition& wing = *kindWings.front();
+            if (most != nullptr && WingLines(wing) != WingLines(*most))
+            {
+                warn(wing, "its wing lines are not those of the " + DescribeWingKind(tier, cape) +
+                               " of the other groups: it has " + DescribeWingLines(wing) + ", they have " +
+                               DescribeWingLines(*most));
+            }
+            continue;
+        }
+        const WingsByLines sorted = SortByLines(kindWings);
+        if (sorted.size() == 1)
+        {
+            continue;
+        }
+        const ItemDefinition* most = FindMostLines(sorted);
+        if (most == nullptr)
+        {
+            // A tie: no set of lines is the one the others differ from.
+            std::string counts;
+            for (const auto& having : sorted)
+            {
+                counts += (counts.empty() ? "" : ", ") + std::to_string(having.size()) + " have " +
+                          DescribeWingLines(*having.front());
+            }
+            warn(*kindWings.front(), "the " + DescribeWingKind(tier, cape) + " of group " + std::to_string(group) +
+                                         " don't agree on their wing lines: " + counts);
+            continue;
+        }
+        for (const ItemDefinition* wing : kindWings)
+        {
+            if (WingLines(*wing) != WingLines(*most))
+            {
+                warn(*wing, "its wing lines are not those of the other " + DescribeWingKind(tier, cape) + " of group " +
+                                std::to_string(group) + ": it has " + DescribeWingLines(*wing) + ", they have " +
+                                DescribeWingLines(*most));
+            }
         }
     }
-    const auto most = std::max_element(counts.begin(), counts.end(), [](const auto& first, const auto& second)
-                                       { return first.second < second.second; });
-    if (most == counts.end() || most->first.empty())
-    {
-        return std::nullopt;
-    }
-    return most->first;
 }
 } // namespace
 
@@ -480,7 +575,7 @@ void ValidateTableUses(std::span<const ItemDefinition> items, const ItemStatProf
 {
     std::set<std::string, std::less<>> named;
     // The wings by tier, cape tag and group.
-    std::map<std::tuple<WingTier, bool, int>, std::vector<const ItemDefinition*>> wings;
+    std::map<WingKey, std::vector<const ItemDefinition*>> wings;
     for (const ItemDefinition& definition : items)
     {
         if (!definition.Exists())
@@ -502,22 +597,7 @@ void ValidateTableUses(std::span<const ItemDefinition> items, const ItemStatProf
                               "tables." + table, "neither a stat nor an item description uses this table"});
         }
     }
-    for (const auto& [kind, tierWings] : wings)
-    {
-        const auto& [tier, cape, group] = kind;
-        for (const ItemDefinition* wing : tierWings)
-        {
-            const std::optional<std::set<std::string>> expected = FindTierTables(tierWings, *wing);
-            const std::set<std::string> tables = FindDescriptionTables(*wing);
-            if (expected && tables != *expected)
-            {
-                issues.push_back({ItemDataIssueSeverity::Warning, "", wing->group, wing->number, "description",
-                                  "names " + ListTables(tables) + " for its wing lines; the other " +
-                                      FindEnumName(tier) + "-tier " + (cape ? "capes" : "wings") + " of group " +
-                                      std::to_string(group) + " name " + ListTables(*expected)});
-            }
-        }
-    }
+    ValidateWingLines(wings, issues);
 }
 
 void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const char* const> uiLocales,
