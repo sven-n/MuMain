@@ -5,6 +5,7 @@
 #include "ClientDataScope.h"
 
 #include "Core/Platform/ProcessLocale.h"
+#include "Core/Text/Utf8.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "I18N/All.h"
 #include "Data/DataHandler/SkillData/SkillDataHandler.h"
@@ -37,7 +38,6 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include "Core/Text/Utf8.h"
 
 namespace
 {
