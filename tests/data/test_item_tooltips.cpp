@@ -581,7 +581,8 @@ TEST_CASE("A transformation ring's restriction comes after its option lines [dat
     MakeBladeMaster(hero.Hero());
     SetItemTooltipTextMeasure(&FixedWidthMeasure);
 
-    const std::wstring restriction = L"Unable to Equip with a Different Transformation Ring";
+    // Its start: the line wraps at the tooltip's width.
+    const std::wstring restriction = L"Unable to Equip with a Different";
     for (const int number : {10, 39, 41, 68, 76, 122})
     {
         INFO("13/" << number);
@@ -596,14 +597,18 @@ TEST_CASE("A transformation ring's restriction comes after its option lines [dat
         const std::vector<ItemTooltipLine> lines = TooltipOfParameters(full);
 
         const auto at = std::find_if(lines.begin(), lines.end(),
-                                     [&](const ItemTooltipLine& line) { return line.text == restriction; });
+                                     [&](const ItemTooltipLine& line) { return line.text.starts_with(restriction); });
         std::string shown;
         for (const ItemTooltipLine& line : lines)
         {
             shown += Core::Text::ToUtf8(line.text.c_str()) + " | ";
         }
         INFO(shown);
-        REQUIRE(at != lines.end());
+        if (at == lines.end())
+        {
+            CHECK(at != lines.end());
+            continue;
+        }
         int lastOption = -1;
         for (int index = 0; index < static_cast<int>(lines.size()); ++index)
         {
