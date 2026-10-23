@@ -221,7 +221,8 @@ A layout line has:
 - **`when`**: the line shows only when every entry holds. An entry is
   - a built-in value, which holds when it is not 0 (`"defense"`,
     `"missingStrength"`), or a built-in value compared with a whole number by
-    `=`, `!=`, `<`, `<=`, `>` or `>=` (`"durability=2"`, `"level!=1"`);
+    `=`, `!=`, `<`, `<=`, `>` or `>=` (`"durability=2"`, `"level!=1"`); the
+    number is an `int`, from -2147483648 to 2147483647, with an optional `-`;
   - a state (below);
   - `"tag:<tag>"`, which holds when the item has that [tag](#tags).
 
