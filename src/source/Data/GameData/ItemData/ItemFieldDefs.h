@@ -85,4 +85,3 @@
     ITEM_FIELDS_SIMPLE(DECLARE_FILE_FIELD)                                                                             \
     BYTE RequireClass[MAX_CLASS];                                                                                      \
     BYTE Resistance[MAX_RESISTANCE + 1];
-
