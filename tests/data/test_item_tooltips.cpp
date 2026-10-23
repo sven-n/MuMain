@@ -566,8 +566,7 @@ TEST_CASE("A transformation ring's restriction comes after its option lines [dat
         {
             const bool inPlain = std::any_of(plain.begin(), plain.end(), [&](const ItemTooltipLine& line)
                                              { return line.text == lines[index].text; });
-            if (!inPlain && lines[index].text != L"
-")
+            if (!inPlain && lines[index].text != L"\n")
             {
                 lastOption = index;
             }
