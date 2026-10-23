@@ -3213,7 +3213,9 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         else
         {
             mu_swprintf(TextList[TextNum], I18N::Game::ThrowItAndYouMayReceiveSomeZenOrItems);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE;
+            TextBold[TextNum] = false;
+            TextNum++;
         }
         mu_swprintf(TextList[TextNum], I18N::Game::CannotBeSold);
         TextListColor[TextNum] = TEXT_COLOR_RED;
@@ -3230,13 +3232,18 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     char tCount = COMGEM::CalcCompiledCount(ip);
     if (tCount > 0)
     {
-        int	nJewelIndex = COMGEM::Check_Jewel_Com(ip->Type);
+        int nJewelIndex = COMGEM::Check_Jewel_Com(ip->Type);
         if (nJewelIndex != COMGEM::NOGEM)
         {
-            mu_swprintf(TextList[TextNum], I18N::Game::DSIsCombined, tCount, I18N::Game::Lookup(COMGEM::GetJewelIndex(nJewelIndex, COMGEM::eGEM_NAME)));
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+            mu_swprintf(TextList[TextNum], I18N::Game::DSIsCombined, tCount,
+                        I18N::Game::Lookup(COMGEM::GetJewelIndex(nJewelIndex, COMGEM::eGEM_NAME)));
+            TextListColor[TextNum] = TEXT_COLOR_WHITE;
+            TextBold[TextNum] = false;
+            TextNum++;
             mu_swprintf(TextList[TextNum], I18N::Game::CanBeUsedAfterDismantling);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE;
+            TextBold[TextNum] = false;
+            TextNum++;
         }
     }
     if (const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(ip->Type))
