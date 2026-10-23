@@ -47,6 +47,13 @@ public:
 
     bool operator==(const LocalizedString& other) const = default;
 
+    // A text holding the separator would split into two parts when parsed.
+    static bool ContainsSeparator(std::string_view text);
+
+    // Locale codes like "pt" or "zh-TW". Anything else (empty, "=", "||")
+    // would break the format.
+    static bool IsValidLocaleCode(std::string_view locale);
+
 private:
     std::string m_neutral;
     std::map<std::string, std::string, std::less<>> m_translations;
