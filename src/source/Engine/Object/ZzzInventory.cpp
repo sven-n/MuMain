@@ -2122,6 +2122,11 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         case 0: mu_swprintf(TextList[TextNum], I18N::Game::AbsoluteStaffOfArchangel); break;
         case 1: mu_swprintf(TextList[TextNum], I18N::Game::AbsoluteSwordOfArchangel); break;
         case 2: mu_swprintf(TextList[TextNum], I18N::Game::AbsoluteCrossbowOfArchangel); break;
+        // The item exists at +0 to +2; at another level (the tooltip snapshot draws every level) its own name, not the
+        // row an earlier tooltip left.
+        default:
+            mu_swprintf(TextList[TextNum], L"%ls", p->Name);
+            break;
         }
     }
     else if (ip->Type == ITEM_WIZARDS_RING)
