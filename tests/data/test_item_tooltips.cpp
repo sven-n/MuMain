@@ -622,7 +622,7 @@ TEST_CASE("The Command Fruit's class line and the Wizard's Ring's lines follow t
 }
 
 // The standard name's color, by precedence: ancient, socket, excellent with an option, +7 and above, an option, else
-// white. The name is the tooltip's first line.
+// white. The name is the tooltip's first line that isn't blank.
 TEST_CASE("A tooltip's name color goes by the item's kind, level and options in their order [data][items][tooltip]")
 {
     ClientDataScope client(ClientDirectory);
@@ -642,8 +642,10 @@ TEST_CASE("A tooltip's name color goes by the item's kind, level and options in 
         kris.IsAncient = ancient;
         kris.AncientDiscriminator = ancient ? 1 : 0;
         const std::vector<ItemTooltipLine> lines = TooltipOfParameters(kris);
-        REQUIRE_FALSE(lines.empty());
-        return lines.front();
+        const auto name = std::find_if(lines.begin(), lines.end(),
+                                       [](const ItemTooltipLine& line) { return line.text != L"\n"; });
+        REQUIRE(name != lines.end());
+        return *name;
     };
 
     const ItemTooltipLine plain = name(0, false, false, false);
