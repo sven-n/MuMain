@@ -302,6 +302,9 @@ TEST_CASE("A level value is in the UI's language also when the item names stay E
     line.text.Set("de", "{stat} +1");
     fruit.description = {line};
 
+    // Once a test has loaded the item data, switching the UI language refills ItemAttribute, so the switch needs an
+    // item table of its own.
+    ClientDataScope client(ShippedClientDirectory);
     const std::string itemNameLocale = g_ItemDatabase.GetDisplayLocale();
     const std::string uiLocale = I18N::GetCurrentLocale();
     g_ItemDatabase.SetDisplayLocale("en");
