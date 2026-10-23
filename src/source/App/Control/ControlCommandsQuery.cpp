@@ -8,6 +8,7 @@
 #include "Core/Text/Utf8.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemType.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Inventory/ItemMng.h"
@@ -558,16 +559,15 @@ std::string ItemTooltip(const Request& request, std::unique_ptr<Act>&)
                            "`tooltip` needs `group` and `number` of an item");
     }
 
-    ItemCreationParams params = FullItem(group, number);
     // The item's fields hold these values (as the item packet has them); a value they can't hold is a `bad_request`,
-    // not a wrapped one.
-    int level = params.Level;
-    int durability = params.Durability;
+    // not a wrapped one. Checked before the item is made from the item data. -1: left out.
+    int level = -1;
+    int durability = -1;
     int option = 0;
     int excellent = 0;
     int ancient = 0;
     int harmony = 0;
-    int harmonyLevel = params.HarmonyOptionLevel;
+    int harmonyLevel = -1;
     if (!ReadBounded(request, "level", Data::Items::ItemLevelCount - 1, level) ||
         !ReadBounded(request, "durability", 255, durability) || !ReadBounded(request, "option", 15, option) ||
         !ReadBounded(request, "excellent", 63, excellent) || !ReadBounded(request, "ancient", 255, ancient) ||
@@ -577,8 +577,12 @@ std::string ItemTooltip(const Request& request, std::unique_ptr<Act>&)
                            "`level`, `option`, `harmony` and `harmony_level` are 0 to 15, `excellent` the excellent "
                            "options' bits 0 to 63, `durability` and `ancient` 0 to 255");
     }
-    params.Level = static_cast<BYTE>(level);
-    params.Durability = static_cast<BYTE>(durability);
+
+    ItemCreationParams params = FullItem(group, number);
+    if (level >= 0)
+        params.Level = static_cast<BYTE>(level);
+    if (durability >= 0)
+        params.Durability = static_cast<BYTE>(durability);
     bool flag = false;
     if (request.GetBool("luck", flag))
         params.WithLuck = flag;
@@ -603,7 +607,8 @@ std::string ItemTooltip(const Request& request, std::unique_ptr<Act>&)
     {
         params.HasHarmonyOption = true;
         params.HarmonyOptionType = static_cast<BYTE>(harmony);
-        params.HarmonyOptionLevel = static_cast<BYTE>(harmonyLevel);
+        if (harmonyLevel >= 0)
+            params.HarmonyOptionLevel = static_cast<BYTE>(harmonyLevel);
     }
 
     const std::optional<std::vector<ItemTooltipLine>> lines = TooltipOf(params);
