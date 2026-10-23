@@ -395,7 +395,8 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
             std::set<std::string> reported;
             for (const std::string& name : scan.names)
             {
-                if (IsBuiltInPlaceholder(name) || GetPlaceholderValue(name, 0, profiles) || !reported.insert(name).second)
+                if (IsBuiltInPlaceholder(name) || GetPlaceholderValue(name, 0, profiles) ||
+                    !reported.insert(name).second)
                 {
                     continue;
                 }
