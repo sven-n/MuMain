@@ -547,7 +547,7 @@ void SetItemAttributes(ITEM* ip)
         *p, {ip->Type, ip->Level, ip->ExcellentFlags, ip->AncientDiscriminator, ip->OptionLevel});
     ip->DamageMin = static_cast<WORD>(stats.damageMin);
     ip->DamageMax = static_cast<WORD>(stats.damageMax);
-    ip->MagicPower = static_cast<BYTE>(stats.magicPower);
+    ip->MagicPower = static_cast<WORD>(stats.magicPower);
     ip->SuccessfulBlocking = static_cast<BYTE>(stats.blockRate);
     ip->Defense = static_cast<WORD>(stats.defense);
     ip->MagicDefense = static_cast<WORD>(stats.magicDefense);

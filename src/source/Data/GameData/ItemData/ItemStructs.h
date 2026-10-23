@@ -24,7 +24,7 @@
 typedef struct
 {
     char Name[30];
-    ITEM_ATTRIBUTE_FIELDS
+    ITEM_ATTRIBUTE_FILE_FIELDS
 } ITEM_ATTRIBUTE_FILE_LEGACY;
 
 // Current file format structure with MAX_ITEM_NAME byte name
@@ -32,7 +32,7 @@ typedef struct
 typedef struct
 {
     char Name[MAX_ITEM_NAME];
-    ITEM_ATTRIBUTE_FIELDS
+    ITEM_ATTRIBUTE_FILE_FIELDS
 } ITEM_ATTRIBUTE_FILE;
 
 // Runtime structure with wide-character name
@@ -43,12 +43,28 @@ typedef struct
     ITEM_ATTRIBUTE_FIELDS
 } ITEM_ATTRIBUTE;
 
+// The .bmd item files hold MAX_ITEM records of these sizes, and the loader tells the two formats apart by file size: a
+// field type change in the file structures (FILE_FIELD_TYPE_*) must not change them.
+static_assert(sizeof(ITEM_ATTRIBUTE_FILE_LEGACY) == 84, "the legacy .bmd item record is 84 bytes");
+static_assert(sizeof(ITEM_ATTRIBUTE_FILE) == 104, "the .bmd item record is 104 bytes");
+
+#undef ITEM_ATTRIBUTE_FILE_FIELDS
+#undef DECLARE_FILE_FIELD
+#undef FILE_FIELD_TYPE_Bool
+#undef FILE_FIELD_TYPE_Byte
+#undef FILE_FIELD_TYPE_Word
+#undef FILE_FIELD_TYPE_Int
+#undef FILE_FIELD_TYPE_DWord
+#undef FILE_FIELD_TYPE_ByteInFile
+
 // ============================================================================
 // COPY HELPERS (replaces ItemAttributeHelpers.h)
 // ============================================================================
 
 // Generate field copy statements from X-macro
-#define COPY_FIELD(name, type, arraySize, width, i18nName) (dest).name = (source).name;
+// A ByteInFile field narrows to its file byte: the writers refuse items that do not fit first (FindItemFileMisfits).
+#define COPY_FIELD(name, type, arraySize, width, i18nName)                                                             \
+    (dest).name = static_cast<decltype((dest).name)>((source).name);
 
 // Macro to copy all non-name fields from source to dest
 #define COPY_ITEM_ATTRIBUTE_FIELDS(dest, source) \

@@ -18,8 +18,8 @@ struct ItemStatValues
 {
     int damageMin = 0;
     int damageMax = 0;
-    // Magic power and defense rate are BYTEs in the item and stop at 255.
     int magicPower = 0;
+    // Defense rate is a BYTE in the item and stops at 255.
     int blockRate = 0;
     int defense = 0;
     int magicDefense = 0;
