@@ -6,6 +6,7 @@
 #include "ItemModelDatabaseScope.h"
 #include "ItemStatProfilesScope.h"
 #include "TestFiles.h"
+#include "TestImGuiContext.h"
 
 #include "Core/Globals/_crypt.h"
 #include "Core/Utilities/Log/MuLogger.h"
@@ -729,9 +730,8 @@ TEST_CASE("The original items' tooltip texts are in their descriptions [data][it
     for (const DescribedItem& item : described)
     {
         INFO(item.group << "/" << item.number);
-        const auto found = std::find_if(result.items.begin(), result.items.end(), [&](const ItemDefinition& definition)
-                                        { return definition.group == item.group && definition.number == item.number; });
-        REQUIRE(found != result.items.end());
+        const ItemDefinition* found = FindItem(result.items, MakeItemType(item.group, item.number));
+        REQUIRE(found != nullptr);
         // The last line: the Moonstone Pendant's "Cannot Repair" of the second item chain comes before it.
         REQUIRE_FALSE(found->description.empty());
         const Data::LocalizedString& text = LineText(found->description.back());
@@ -2020,38 +2020,6 @@ TEST_CASE("The usage of an item lists its tags, its model and the code that name
 
 namespace
 {
-// An ImGui context of its own for a test, without a window or a renderer.
-class TestImGuiContext
-{
-public:
-    TestImGuiContext() : m_previous(ImGui::GetCurrentContext()), m_context(ImGui::CreateContext())
-    {
-        ImGuiIO& io = ImGui::GetIO();
-        io.DisplaySize = ImVec2(DisplayWidth, DisplayHeight);
-        io.DeltaTime = 1.0f / 60.0f;
-        io.IniFilename = nullptr;
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-        // The font atlas is built without a renderer that takes its texture.
-        io.BackendFlags |= ImGuiBackendFlags_RendererHasTextures;
-    }
-
-    ~TestImGuiContext()
-    {
-        ImGui::DestroyContext(m_context);
-        ImGui::SetCurrentContext(m_previous);
-    }
-
-    TestImGuiContext(const TestImGuiContext&) = delete;
-    TestImGuiContext& operator=(const TestImGuiContext&) = delete;
-
-private:
-    static constexpr float DisplayWidth = 1600.0f;
-    static constexpr float DisplayHeight = 1000.0f;
-
-    ImGuiContext* m_previous;
-    ImGuiContext* m_context;
-};
-
 // The id of a field an item tool window draws, inside the ID scopes it pushes
 // (the item type, a requirement), with its label.
 ImGuiID ItemToolFieldId(const char* windowId, std::initializer_list<int> scopes, const char* label)

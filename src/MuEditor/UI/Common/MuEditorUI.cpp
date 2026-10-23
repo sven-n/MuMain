@@ -17,6 +17,7 @@
 #include <cstring>
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "../MuEditor/UI/ItemTools/ItemToolWindow.h"
+#include "UndoTarget.h"
 
 // Layout of the Open Editor strip over the game while the editor is closed. The
 // pixel sizes are multiplied by the editor UI scale so the strip grows with it
@@ -202,7 +203,7 @@ void CMuEditorUI::RenderToolWindowBar()
 void CMuEditorUI::RenderBar(MuEditor::ToolWindows& windows)
 {
     RenderWindowsMenu(windows, MuEditor::PlatformWindows::WindowOf(ImGui::GetWindowViewport()));
-    MuEditor::Items::ToolWindow::RenderUndoRedo();
+    MuEditor::UndoTargets::RenderBarButtons(MuEditor::Items::ToolWindow::GetUndoTarget());
     RenderUIScale();
     RenderLanguageSelector();
 }
@@ -228,6 +229,7 @@ void CMuEditorUI::RenderWindowsMenu(MuEditor::ToolWindows& windows, SDL_Window* 
         ImGui::MenuItem(I18N::Editor::ItemTranslations, nullptr, &windows.itemTranslations);
         ImGui::EndMenu();
     }
+    ImGui::MenuItem(I18N::Editor::ServerList, nullptr, &windows.serverList);
     ImGui::MenuItem("Skill Editor", nullptr, &windows.skillEditor);
     ImGui::MenuItem("Dev Editor", nullptr, &windows.devEditor);
     ImGui::MenuItem("Map Editor", nullptr, &windows.mapEditor);
