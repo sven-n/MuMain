@@ -205,13 +205,13 @@ void CMuItemBasicsUI::RenderStats(ItemDefinition& item)
     Fields::Byte(m_draft, I18N::Metadata::Durability, item.durability);
     ImGui::SameLine();
     Fields::Byte(m_draft, I18N::Metadata::MagicDurability, item.magicDurability);
-    Fields::Byte(m_draft, I18N::Metadata::MinDamage, item.damageMin);
+    Fields::Word(m_draft, I18N::Metadata::MinDamage, item.damageMin);
     ImGui::SameLine();
-    Fields::Byte(m_draft, I18N::Metadata::MaxDamage, item.damageMax);
+    Fields::Word(m_draft, I18N::Metadata::MaxDamage, item.damageMax);
     Fields::Byte(m_draft, I18N::Metadata::AttackSpeed, item.attackSpeed);
     ImGui::SameLine();
     Fields::Byte(m_draft, I18N::Metadata::MoveSpeed, item.walkSpeed);
-    Fields::Byte(m_draft, I18N::Metadata::MagicPower, item.magicPower);
+    Fields::Word(m_draft, I18N::Metadata::MagicPower, item.magicPower);
     ImGui::SameLine();
     Fields::Byte(m_draft, I18N::Metadata::AttackType, item.attackType);
     Fields::Byte(m_draft, I18N::Metadata::Defense, item.defense);

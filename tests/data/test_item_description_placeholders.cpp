@@ -28,6 +28,17 @@ ItemStatProfiles MakeProfiles()
     return ItemStatProfiles(file);
 }
 
+// A stat file with one table of `name` that is `value` at every level.
+ItemStatProfiles MakeProfilesWithTable(const std::string& name, int value)
+{
+    ItemStatFile file;
+    LevelBonusTable table;
+    table.name = name;
+    table.values.fill(value);
+    file.tables.push_back(table);
+    return ItemStatProfiles(file);
+}
+
 ItemDefinition MakeJewel(const std::string& english)
 {
     ItemDefinition jewel;
@@ -56,13 +67,11 @@ std::vector<ItemDataIssue> CheckSyntax(const ItemDefinition& item)
     return issues;
 }
 
-// The issues of the item, without the stat file's.
-std::vector<ItemDataIssue> CheckNames(const ItemDefinition& item)
+std::vector<ItemDataIssue> CheckNames(const ItemDefinition& item, const ItemStatProfiles& profiles = MakeProfiles())
 {
     std::vector<ItemDataIssue> issues;
-    ValidateDescriptionPlaceholders(std::vector<ItemDefinition>{item}, MakeProfiles(), ItemTooltipFile(),
-                                    "ItemStats.json", issues);
-    std::erase_if(issues, [](const ItemDataIssue& issue) { return issue.group == ItemDataIssue::NoItem; });
+    ValidateDescriptionPlaceholders(std::vector<ItemDefinition>{item}, profiles, ItemTooltipFile(), "ItemStats.json",
+                                    issues);
     return issues;
 }
 } // namespace
@@ -165,6 +174,16 @@ TEST_CASE("A translation has the placeholders of the English text [data][items]"
     CHECK(IssuesOf(issues, "description[0].text.pt").size() == 1);
 }
 
+TEST_CASE("A table may be named like a built-in value [data][items]")
+{
+    // {level} stays the item's + level; {table:level} is the table.
+    const ItemStatProfiles profiles = MakeProfilesWithTable("level", 5);
+    CHECK(GetPlaceholderValue("level", 9, profiles) == 9);
+    CHECK(GetPlaceholderValue("table:level", 9, profiles) == 5);
+    CHECK(FillPlaceholders("+{level}: {table:level}", 9, profiles) == "+9: 5");
+    CHECK(CheckNames(MakeJewel("+{level}: {table:level}"), profiles).empty());
+}
+
 TEST_CASE("A description placeholder is a built-in value or a stat file table [data][items]")
 {
     CHECK(CheckNames(MakeJewel("Increases damage by {table:wingDamage} at +{level}")).empty());
@@ -181,6 +200,11 @@ TEST_CASE("A description placeholder is a built-in value or a stat file table [d
     const std::vector<ItemDataIssue> bare = CheckNames(MakeJewel("Increases damage by {wingDamage}"));
     REQUIRE(bare.size() == 1);
     CHECK(bare.front().message.find("{table:wingDamage}") != std::string::npos);
+    // Also when the table's name is close to a built-in value: {levels} is the table "levels", not {level}.
+    const std::vector<ItemDataIssue> nearBuiltIn =
+        CheckNames(MakeJewel("+{levels}"), MakeProfilesWithTable("levels", 5));
+    REQUIRE(nearBuiltIn.size() == 1);
+    CHECK(nearBuiltIn.front().message == "has the unknown placeholder {levels}; did you mean {table:levels}?");
 
     const std::vector<ItemDataIssue> unknown = CheckNames(MakeJewel("Sparkle {sparkle}"));
     REQUIRE(unknown.size() == 1);
@@ -190,15 +214,6 @@ TEST_CASE("A description placeholder is a built-in value or a stat file table [d
 
     // The stat line values are built in too.
     CHECK(CheckNames(MakeJewel("Durability {durability}/{maxDurability}, {missingStrength} strength missing")).empty());
-
-    // A table no stat uses is for descriptions: a warning when none names it either.
-    std::vector<ItemDataIssue> unused;
-    ValidateDescriptionPlaceholders(std::vector<ItemDefinition>{MakeJewel("No placeholders")}, MakeProfiles(),
-                                    ItemTooltipFile(), "ItemStats.json", unused);
-    REQUIRE(unused.size() == 1);
-    CHECK(unused.front().severity == ItemDataIssueSeverity::Warning);
-    CHECK(unused.front().source == "ItemStats.json");
-    CHECK(unused.front().field == "tables.wingDamage");
 
     // A deleted item (no name) is not checked.
     ItemDefinition deleted = MakeJewel("{sparkle}");
@@ -290,4 +305,65 @@ TEST_CASE("A level value is a text without placeholders, or a shared text the to
     CHECK(issues[1].field == "levelValues.stat[2]");
     CHECK(issues[2].field == "levelValues.stat[3]");
     CHECK(issues[2].message == "has placeholders, which a level value cannot have");
+}
+
+namespace
+{
+std::vector<ItemDataIssue> CheckTableUses(const std::vector<ItemDefinition>& items)
+{
+    std::vector<ItemDataIssue> issues;
+    ValidateTableUses(items, MakeProfiles(), ItemTooltipFile(), "ItemStats.json", issues);
+    return issues;
+}
+
+ItemDefinition MakeWing(short number, WingTier tier, const std::string& english)
+{
+    ItemDefinition wing = MakeJewel(english);
+    wing.group = 12;
+    wing.number = number;
+    wing.names.Set("en", "Wing " + std::to_string(number));
+    wing.wingTier = tier;
+    return wing;
+}
+} // namespace
+
+TEST_CASE("A table that neither a stat nor a description names is a warning [data][items]")
+{
+    // A table no stat uses is for descriptions: a warning when none names it either.
+    const std::vector<ItemDataIssue> unused = CheckTableUses({MakeJewel("No placeholders")});
+    REQUIRE(unused.size() == 1);
+    CHECK(unused.front().severity == ItemDataIssueSeverity::Warning);
+    CHECK(unused.front().source == "ItemStats.json");
+    CHECK(unused.front().field == "tables.wingDamage");
+    CHECK(CheckTableUses({MakeJewel("Increase {table:wingDamage}% of Damage")}).empty());
+}
+
+TEST_CASE("A wing names the tables the other wings of its tier name [data][items]")
+{
+    const std::string lines = "Increase {table:wingDamage}% of Damage";
+    std::vector<ItemDefinition> wings = {MakeWing(36, WingTier::Third, lines), MakeWing(37, WingTier::Third, lines),
+                                         MakeWing(38, WingTier::Third, lines)};
+    CHECK(CheckTableUses(wings).empty());
+
+    // A new third-tier wing without the lines.
+    wings.push_back(MakeWing(200, WingTier::Third, "Increase speed"));
+    const std::vector<ItemDataIssue> missing = CheckTableUses(wings);
+    REQUIRE(missing.size() == 1);
+    CHECK(missing.front().severity == ItemDataIssueSeverity::Warning);
+    CHECK(missing.front().number == 200);
+    CHECK(missing.front().field == "description");
+    CHECK(missing.front().message ==
+          "names no table for its wing lines; the other third-tier wings of group 12 name {table:wingDamage}");
+
+    // A wing moved to another tier keeps the tables of its old one.
+    wings.back() = MakeWing(200, WingTier::Third, "Increase {table:otherDamage}% of Damage");
+    REQUIRE(CheckTableUses(wings).size() == 1);
+
+    // A cape, or a wing of another group, is compared with its own kind; one of a kind has nothing to compare with.
+    wings.back() = MakeWing(200, WingTier::Third, "Increase {table:otherDamage}% of Damage");
+    wings.back().tags.Set(ItemTag::Cape);
+    CHECK(CheckTableUses(wings).empty());
+    wings.back().tags = {};
+    wings.back().group = 13;
+    CHECK(CheckTableUses(wings).empty());
 }
