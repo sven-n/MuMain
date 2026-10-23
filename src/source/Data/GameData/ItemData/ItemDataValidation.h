@@ -37,8 +37,8 @@ void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatP
                           const std::string& statFile, std::vector<ItemDataIssue>& issues);
 
 // The placeholders of the items' descriptions against the item stat file (`statFile` names it in messages): a name
-// that is neither a built-in value nor a table of the file is an error, with the nearest known name when it looks like
-// a typo. The braces and the translations are checked by ValidateItems.
+// that is neither a built-in value nor "table:" and a table of the file is an error, with the nearest known name when
+// it looks like a typo. The braces and the translations are checked by ValidateItems.
 void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
                                      const std::string& statFile, std::vector<ItemDataIssue>& issues);
 
