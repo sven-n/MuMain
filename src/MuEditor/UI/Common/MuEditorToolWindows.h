@@ -19,6 +19,7 @@ struct ToolWindows
     bool itemFormulas = false;
     bool itemChecks = false;
     bool itemTranslations = false;
+    bool serverList = false;
     bool skillEditor = false;
     bool devEditor = false;
     bool mapEditor = false;
