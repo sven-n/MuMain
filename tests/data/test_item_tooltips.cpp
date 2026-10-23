@@ -509,6 +509,53 @@ TEST_CASE("An item's lines drawn after its options follow them [data][items][too
     SetItemTooltipTextMeasure(nullptr);
 }
 
+// The option lines are the lines the full item has and the plain one doesn't (luck, skill, the option, the excellent
+// options); an item's restriction drawn after its options comes after the last of them.
+TEST_CASE("A transformation ring's restriction comes after its option lines [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+
+    const std::wstring restriction = L"Unable to Equip with a Different Transformation Ring";
+    for (const int number : {10, 39, 41, 68, 76, 122})
+    {
+        INFO("13/" << number);
+        const std::vector<ItemTooltipLine> plain = TooltipOfParameters(FullItemParameters(13, number));
+        ItemCreationParams full = FullItemParameters(13, number);
+        full.WithLuck = true;
+        full.WithSkill = true;
+        full.WithOption = true;
+        full.OptionLevel = 4;
+        full.HasExcellentOption = true;
+        full.ExcellentFlags = 63;
+        const std::vector<ItemTooltipLine> lines = TooltipOfParameters(full);
+
+        const auto at = std::find_if(lines.begin(), lines.end(),
+                                     [&](const ItemTooltipLine& line) { return line.text == restriction; });
+        REQUIRE(at != lines.end());
+        int lastOption = -1;
+        for (int index = 0; index < static_cast<int>(lines.size()); ++index)
+        {
+            const bool inPlain = std::any_of(plain.begin(), plain.end(), [&](const ItemTooltipLine& line)
+                                             { return line.text == lines[index].text; });
+            if (!inPlain && lines[index].text != L"
+")
+            {
+                lastOption = index;
+            }
+        }
+        CHECK(lastOption >= 0);
+        CHECK(at - lines.begin() > lastOption);
+    }
+
+    SetItemTooltipTextMeasure(nullptr);
+}
+
 TEST_CASE("A class condition holds for a hero of that class [data][items][tooltip]")
 {
     TooltipHeroScope hero;
