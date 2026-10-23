@@ -70,9 +70,9 @@ TEST_CASE("A tornado spins the monsters and the targeted player in its range, as
 {
     TornadoScope scope;
     scope.Attribute().Skill[0] = AT_SKILL_STORM;
-    CHARACTER& near = scope.Place(0, KIND_MONSTER, 100.f);
+    CHARACTER& inRange = scope.Place(0, KIND_MONSTER, 100.f);
     CHARACTER& edge = scope.Place(1, KIND_MONSTER, TornadoRange);
-    CHARACTER& far = scope.Place(2, KIND_MONSTER, TornadoRange + 1.f);
+    CHARACTER& outOfRange = scope.Place(2, KIND_MONSTER, TornadoRange + 1.f);
     CHARACTER& npc = scope.Place(3, KIND_NPC, 50.f);
     CHARACTER& target = scope.Place(4, KIND_PLAYER, 50.f);
     target.Key = TargetedPlayerKey;
@@ -90,10 +90,10 @@ TEST_CASE("A tornado spins the monsters and the targeted player in its range, as
     // It never sends a request: the server calculates the hits.
     CHECK_FALSE(AttackCharacterRange(0, center, TornadoRange, 0, TargetedPlayerKey));
 
-    CHECK(near.StormTime > 0.f);
+    CHECK(inRange.StormTime > 0.f);
     CHECK(edge.StormTime > 0.f);
     CHECK(target.StormTime > 0.f);
-    CHECK(far.StormTime == 0.f);
+    CHECK(outOfRange.StormTime == 0.f);
     CHECK(npc.StormTime == 0.f);
     CHECK(bystander.StormTime == 0.f);
     CHECK(gate.StormTime == 0.f);
