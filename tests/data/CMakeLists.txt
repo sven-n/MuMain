@@ -74,6 +74,7 @@ mu_add_test(
     NAME test_item_database_files
     SOURCES
         test_helper_pickup_filters.cpp
+        test_dark_lord_pet_tooltip.cpp
         test_item_database_files.cpp
         test_item_descriptions.cpp
         test_item_model_files.cpp
