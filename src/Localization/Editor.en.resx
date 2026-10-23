@@ -2302,4 +2302,52 @@
   <data name="Exported {0} items to {1}" xml:space="preserve">
     <value>Exported {0} items and all formulas to {1}.</value>
   </data>
+  <data name="Compare two files" xml:space="preserve">
+    <value>Compare two files</value>
+  </data>
+  <data name="What comparing files does" xml:space="preserve">
+    <value>Compares two exchange files, e.g. a client export with a server export: what changes from file A to file B, in every language. Nothing is applied; a difference can be marked as known.</value>
+  </data>
+  <data name="File A" xml:space="preserve">
+    <value>File A</value>
+  </data>
+  <data name="File B" xml:space="preserve">
+    <value>File B</value>
+  </data>
+  <data name="Pick..." xml:space="preserve">
+    <value>Pick…</value>
+  </data>
+  <data name="Swap" xml:space="preserve">
+    <value>Swap</value>
+  </data>
+  <data name="Compare the files" xml:space="preserve">
+    <value>Compare the files</value>
+  </data>
+  <data name="File A: {0}" xml:space="preserve">
+    <value>File A: {0}</value>
+  </data>
+  <data name="File B: {0}" xml:space="preserve">
+    <value>File B: {0}</value>
+  </data>
+  <data name="The files match" xml:space="preserve">
+    <value>The files have the same items and formulas.</value>
+  </data>
+  <data name="The files match in all items" xml:space="preserve">
+    <value>The files have the same items; the formulas were not compared, a file has none.</value>
+  </data>
+  <data name="The file diff counts" xml:space="preserve">
+    <value>From file A to file B: {0} added, {1} changed, {2} removed items; {3} formula entries</value>
+  </data>
+  <data name="From A to B" xml:space="preserve">
+    <value>From A to B</value>
+  </data>
+  <data name="Items: all {0} are the same in both files" xml:space="preserve">
+    <value>Items: all {0} are the same in both files.</value>
+  </data>
+  <data name="Formula entries: all {0} are the same in both files" xml:space="preserve">
+    <value>Formula entries: all {0} are the same in both files.</value>
+  </data>
+  <data name="Formulas: not compared, a file has none" xml:space="preserve">
+    <value>Formulas: not compared, a file has none.</value>
+  </data>
 </root>

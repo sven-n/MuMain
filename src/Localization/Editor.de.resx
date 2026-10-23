@@ -2281,4 +2281,52 @@
   <data name="Exported {0} items to {1}" xml:space="preserve">
     <value>{0} Items und alle Formeln nach {1} exportiert.</value>
   </data>
+  <data name="Compare two files" xml:space="preserve">
+    <value>Zwei Dateien vergleichen</value>
+  </data>
+  <data name="What comparing files does" xml:space="preserve">
+    <value>Vergleicht zwei Austauschdateien, z. B. einen Client-Export mit einem Server-Export: was sich von Datei A zu Datei B ändert, in jeder Sprache. Nichts wird übernommen; ein Unterschied kann als bekannt markiert werden.</value>
+  </data>
+  <data name="File A" xml:space="preserve">
+    <value>Datei A</value>
+  </data>
+  <data name="File B" xml:space="preserve">
+    <value>Datei B</value>
+  </data>
+  <data name="Pick..." xml:space="preserve">
+    <value>Wählen…</value>
+  </data>
+  <data name="Swap" xml:space="preserve">
+    <value>Tauschen</value>
+  </data>
+  <data name="Compare the files" xml:space="preserve">
+    <value>Dateien vergleichen</value>
+  </data>
+  <data name="File A: {0}" xml:space="preserve">
+    <value>Datei A: {0}</value>
+  </data>
+  <data name="File B: {0}" xml:space="preserve">
+    <value>Datei B: {0}</value>
+  </data>
+  <data name="The files match" xml:space="preserve">
+    <value>Die Dateien haben dieselben Items und Formeln.</value>
+  </data>
+  <data name="The files match in all items" xml:space="preserve">
+    <value>Die Dateien haben dieselben Items; die Formeln wurden nicht verglichen, eine Datei hat keine.</value>
+  </data>
+  <data name="The file diff counts" xml:space="preserve">
+    <value>Von Datei A zu Datei B: {0} hinzugefügte, {1} geänderte, {2} entfernte Items; {3} Formeleinträge</value>
+  </data>
+  <data name="From A to B" xml:space="preserve">
+    <value>Von A nach B</value>
+  </data>
+  <data name="Items: all {0} are the same in both files" xml:space="preserve">
+    <value>Items: alle {0} sind in beiden Dateien gleich.</value>
+  </data>
+  <data name="Formula entries: all {0} are the same in both files" xml:space="preserve">
+    <value>Formeleinträge: alle {0} sind in beiden Dateien gleich.</value>
+  </data>
+  <data name="Formulas: not compared, a file has none" xml:space="preserve">
+    <value>Formeln: nicht verglichen, eine Datei hat keine.</value>
+  </data>
 </root>

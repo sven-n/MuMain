@@ -432,6 +432,12 @@ tool of section 9):
   formula entries; what is not checked or not listed stays as it is).
 - **Update from server** (step 4) downloads the server's file and goes on as
   Import.
+- **Compare two files**: a read-only diff of two exchange files (e.g. a
+  client export and a server export), what changes from file A to file B,
+  in every language; its rows can be marked as known differences. Only the
+  client has it: OpenMU's import page compares a file with its live data,
+  the client's Import a file with the client's data, and a comparison of
+  two files is a tool for the one who edits the items.
 - The file dialogs are SDL3's (`SDL_ShowOpenFileDialog`,
   `SDL_ShowSaveFileDialog`), on every platform. Their callback can run on
   another thread, so it only hands the path to the window, which reads it

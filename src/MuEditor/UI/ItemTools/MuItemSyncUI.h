@@ -22,7 +22,9 @@
 // one step of the undo history. The known differences (Data/Items/Sync/KnownDifferences.json)
 // stay unchecked; a row can be added to them or taken out. Export writes the client's items and
 // formulas into a file without a diff (OpenMU's import page shows one); a file that is there is
-// replaced after a confirmation that says what changes in it.
+// replaced after a confirmation that says what changes in it. Compare two files lists, read-only,
+// what changes from one exchange file to another (e.g. a client export and a server export); its
+// rows can be marked as known differences too.
 class CMuItemSyncUI
 {
 public:
@@ -32,6 +34,13 @@ public:
 
     // Compares the client's data with the file at `path`, as Import does after its dialog.
     void Compare(const std::filesystem::path& path);
+    // Compares two exchange files (Compare the files): what changes from `a` to `b`, in every
+    // language, read-only.
+    void CompareFiles(const std::filesystem::path& a, const std::filesystem::path& b);
+    bool IsComparingFiles() const
+    {
+        return m_comparingFiles;
+    }
 
     // Why the checked rows cannot be applied now.
     enum class ApplyBlocker
@@ -81,6 +90,9 @@ public:
     {
         Import,
         Export,
+        // The two files of Compare two files.
+        CompareA,
+        CompareB,
     };
     // Takes the path a file dialog chose, on the dialog's thread; the window uses it in its next
     // frame without a confirmation open.
@@ -107,6 +119,7 @@ private:
     void SetAllChecked(bool checked);
     void OpenFileDialog(FileAction action);
     void RenderButtons();
+    void RenderCompareFiles();
     void RenderExportResult();
     void RenderSummary();
     void RenderFieldToggle();
@@ -125,7 +138,16 @@ private:
     // The path field, and the file the diff is of: Apply uses that one.
     std::string m_path;
     std::string m_comparedPath;
+    // The file an import compares with the client, or file B of a comparison of two files.
     Data::Items::ItemExchangeFile m_file;
+    // A comparison of two files is shown instead of an import: its path fields, the files it is
+    // of, and file A.
+    bool m_comparingFiles = false;
+    std::string m_pathA;
+    std::string m_pathB;
+    std::string m_comparedA;
+    std::string m_comparedB;
+    Data::Items::ItemExchangeFile m_fileA;
     std::optional<MuEditor::Items::ItemSyncDiff> m_diff;
     MuEditor::Items::KnownDifferences m_known;
     bool m_knownLoaded = false;

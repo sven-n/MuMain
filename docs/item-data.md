@@ -1086,6 +1086,14 @@ Update from server, which downloads it, are later steps of phase 7; see the
   change"), or that it cannot be read as an exchange file; a file that has
   the client's data already is left as it is. The written file says
   `"source": "MuMain"`.
+- **Compare two files** (folded under the path field) compares two exchange
+  files, e.g. a client export with a server export, without the client's
+  data: pick file A and file B (**Swap** swaps them), then **Compare the
+  files**. The lists say what changes from file A to file B (Added,
+  Changed, Removed under "From A to B", the values under "File A" and
+  "File B"), in every language, also one only one file has. Nothing can be
+  applied, but a row can be marked as a known difference. An import or a
+  comparison of two files replaces the other in the window.
 - An import lists only what differs. The lists say how much of what was
   compared differs ("Items that differ (3 of 911)"), and when nothing does,
   how many are the same ("Items: all 911 are the same in the client and the

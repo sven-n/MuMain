@@ -507,6 +507,54 @@ TEST_CASE("Item Sync exports the client's items and formulas [data][items][edito
     }
 }
 
+// Compare two files lists, read-only, what changes from file A to file B, in every language (also
+// one only file A has); nothing can be applied, and an import shows the import again.
+TEST_CASE("Item Sync compares two files read-only [data][items][editor]")
+{
+    Sides sides;
+    const ItemDefinition clientKris = *g_ItemDatabase.Find(KrisType);
+    TemporaryFolder folder;
+    const std::filesystem::path a = folder.Path() / "Client.json";
+    const std::filesystem::path b = folder.Path() / "Server.json";
+    ItemExchangeFile fileA = sides.client;
+    ItemExchangeFile fileB = sides.client;
+    fileB.source = ItemExchangeSourceOpenMU;
+    ++Sides::Find(fileB, KrisType).width;
+    Sides::Find(fileA, ShortSwordType).names.Set("zh-CN", "Short Sword (zh)");
+    ItemDefinition added = Sides::Find(fileB, KrisType);
+    added.number = 100;
+    added.names = Data::LocalizedString::Parse("New Sword");
+    fileB.items.push_back(added);
+    fileB.formulas->excellentDropLevelBonus = 30;
+    WriteFile(a, WriteItemExchangeJson(fileA));
+    WriteFile(b, WriteItemExchangeJson(fileB));
+
+    g_MuItemSyncUI.CompareFiles(a, b);
+    CHECK(g_MuItemSyncUI.IsComparingFiles());
+    REQUIRE(g_MuItemSyncUI.GetDiff());
+    const ItemSyncDiff& diff = *g_MuItemSyncUI.GetDiff();
+    CHECK(diff.items.size() == 3);
+    const SyncItem* kris = FindRow(diff, KrisType);
+    REQUIRE(kris != nullptr);
+    CHECK(kris->change == SyncChange::Changed);
+    CHECK(FindField(*kris, "width") != nullptr);
+    const SyncItem* shortSword = FindRow(diff, ShortSwordType);
+    REQUIRE(shortSword != nullptr);
+    const SyncField* name = FindField(*shortSword, "name.zh-CN");
+    REQUIRE(name != nullptr);
+    CHECK(name->current.has_value());
+    CHECK_FALSE(name->incoming.has_value());
+    const SyncItem* newSword = FindRow(diff, MakeItemType(0, 100));
+    REQUIRE(newSword != nullptr);
+    CHECK(newSword->change == SyncChange::New);
+    CHECK(FindFormula(diff, "dropLevelBonus.excellent") != nullptr);
+
+    CHECK_FALSE(g_MuItemSyncUI.Apply());
+    CHECK(*g_ItemDatabase.Find(KrisType) == clientKris);
+    g_MuItemSyncUI.Compare(b);
+    CHECK_FALSE(g_MuItemSyncUI.IsComparingFiles());
+}
+
 // The import is refused while nothing is checked, and while the client's data changed since the
 // comparison: the diff shows the data as it was.
 TEST_CASE("Item Sync applies nothing while nothing is checked or the client's data changed [data][items][editor]")

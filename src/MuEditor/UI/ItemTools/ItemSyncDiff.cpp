@@ -122,11 +122,12 @@ bool IsNamePath(const std::string& path, std::string& locale)
 }
 
 // Whether `path` of the incoming side takes part: a language the incoming side lacks stays,
-// and an import takes names only in the client's UI languages.
+// and an import takes names only in the client's UI languages. A comparison of two files
+// (everyLanguage) takes every one.
 bool TakesPart(const std::string& path, bool incomingHasIt, const SyncOptions& options)
 {
     std::string locale;
-    if (!IsNamePath(path, locale))
+    if (!IsNamePath(path, locale) || options.everyLanguage)
     {
         return true;
     }
@@ -598,8 +599,10 @@ ItemSyncDiff BuildItemSyncDiff(const ItemExchangeFile& client, const ItemExchang
     const ItemExchangeFile& incoming = file;
     const std::map<ItemKey, const ItemDefinition*> currentItems = IndexItems(current);
     const std::map<ItemKey, const ItemDefinition*> incomingItems = IndexItems(incoming);
-    // An item the file has more than once: an error row that is not applied.
-    const std::set<ItemKey> repeated(file.repeatedItems.begin(), file.repeatedItems.end());
+    // An item a side has more than once (a file read with repeatedItems): an error row that is
+    // not applied.
+    std::set<ItemKey> repeated(file.repeatedItems.begin(), file.repeatedItems.end());
+    repeated.insert(client.repeatedItems.begin(), client.repeatedItems.end());
     std::set<ItemKey> keys = repeated;
     for (const auto& [key, item] : currentItems)
     {
