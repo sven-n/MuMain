@@ -111,6 +111,16 @@ if(ENABLE_CONTROL_SOCKET)
         LINK_LIBS
             MuClient
     )
+
+    # The item commands' argument checks, which return before they need item data.
+    mu_add_test(
+        NAME test_control_item_commands
+        SOURCES
+            test_control_item_commands.cpp
+            ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        LINK_LIBS
+            MuClient
+    )
 endif()
 
 mu_add_test(

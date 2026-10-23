@@ -484,6 +484,9 @@ std::string State(const Request& request, std::unique_ptr<Act>&)
 
 namespace
 {
+// The six excellent options, as bits 0 to 5 of an item's excellent flags.
+constexpr int MaxExcellentFlags = 63;
+
 // Reads `group` and `number` (and `level`, 0 when left out) into an item type; false when they name no item slot.
 bool ReadItemType(const Request& request, int& type, int& level)
 {
@@ -553,6 +556,12 @@ std::string ItemNameSnapshot(const Request& request, std::unique_ptr<Act>&)
             ++names;
         }
     }
+    // A full disk or a failed write leaves the file short: not a snapshot.
+    out.flush();
+    if (!out)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Failed, "the file could not be written completely");
+    }
 
     json result;
     result["names"] = names;
@@ -570,19 +579,30 @@ std::string RepairTooltip(const Request& request, std::unique_ptr<Act>&)
                            "`repair-tooltip` needs `group` and `number` of an item, and a `level` of 0 to 15");
     }
 
+    // The item's byte fields: a value they can't hold is a `bad_request`, not a wrapped one.
+    int durability = -1;
+    if (request.Has("durability") && (!request.GetInt("durability", durability) || durability < 0 || durability > 255))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`durability` is 0 to 255");
+    }
+    int excellent = 0;
+    if (request.Has("excellent") &&
+        (!request.GetInt("excellent", excellent) || excellent < 0 || excellent > MaxExcellentFlags))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`excellent` is the excellent options' bits, 0 to " + std::to_string(MaxExcellentFlags));
+    }
+
     // An item as the server would send it: full durability unless `durability` says otherwise.
     ItemCreationParams params{};
     params.Group = type / MAX_ITEM_INDEX;
     params.Number = type % MAX_ITEM_INDEX;
     params.Level = static_cast<BYTE>(level);
-    params.Durability = static_cast<BYTE>(ItemAttribute[type].Durability);
-    int value = 0;
-    if (request.GetInt("durability", value))
-        params.Durability = static_cast<BYTE>(value);
-    if (request.GetInt("excellent", value) && value > 0)
+    params.Durability = static_cast<BYTE>(durability >= 0 ? durability : ItemAttribute[type].Durability);
+    if (excellent > 0)
     {
         params.HasExcellentOption = true;
-        params.ExcellentFlags = static_cast<BYTE>(value);
+        params.ExcellentFlags = static_cast<BYTE>(excellent);
     }
     ITEM* item = g_pNewItemMng->CreateItemByParameters(&params);
     if (item == nullptr)
