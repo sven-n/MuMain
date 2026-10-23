@@ -389,11 +389,20 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
                 {
                     continue;
                 }
-                // A table written without "table:" is suggested with it.
-                std::string suggestion = SuggestPlaceholder(name, known);
-                if (suggestion.empty() && GetPlaceholderTable(name).empty())
+                // A table written without "table:" is suggested with it. Its own name comes first, also when it is
+                // close to a built-in value: {levels} for the table "levels" is not {level}.
+                std::string suggestion;
+                if (GetPlaceholderTable(name).empty() && profiles.FindTable(name) != nullptr)
                 {
-                    suggestion = SuggestPlaceholder(MakeTablePlaceholder(name), known);
+                    suggestion = MakeTablePlaceholder(name);
+                }
+                else
+                {
+                    suggestion = SuggestPlaceholder(name, known);
+                    if (suggestion.empty() && GetPlaceholderTable(name).empty())
+                    {
+                        suggestion = SuggestPlaceholder(MakeTablePlaceholder(name), known);
+                    }
                 }
                 const std::string hint = suggestion.empty() ? "a placeholder is a built-in value ({" +
                                                                   std::string(LevelPlaceholder) + "}) or a table of " +

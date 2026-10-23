@@ -27,6 +27,17 @@ ItemStatProfiles MakeProfiles()
     return ItemStatProfiles(file);
 }
 
+// A stat file with one table of `name` that is `value` at every level.
+ItemStatProfiles MakeProfilesWithTable(const std::string& name, int value)
+{
+    ItemStatFile file;
+    LevelBonusTable table;
+    table.name = name;
+    table.values.fill(value);
+    file.tables.push_back(table);
+    return ItemStatProfiles(file);
+}
+
 ItemDefinition MakeJewel(const std::string& english)
 {
     ItemDefinition jewel;
@@ -55,10 +66,10 @@ std::vector<ItemDataIssue> CheckSyntax(const ItemDefinition& item)
     return issues;
 }
 
-std::vector<ItemDataIssue> CheckNames(const ItemDefinition& item)
+std::vector<ItemDataIssue> CheckNames(const ItemDefinition& item, const ItemStatProfiles& profiles = MakeProfiles())
 {
     std::vector<ItemDataIssue> issues;
-    ValidateDescriptionPlaceholders(std::vector<ItemDefinition>{item}, MakeProfiles(), "ItemStats.json", issues);
+    ValidateDescriptionPlaceholders(std::vector<ItemDefinition>{item}, profiles, "ItemStats.json", issues);
     return issues;
 }
 } // namespace
@@ -177,6 +188,11 @@ TEST_CASE("A description placeholder is a built-in value or a stat file table [d
     const std::vector<ItemDataIssue> bare = CheckNames(MakeJewel("Increases damage by {wingDamage}"));
     REQUIRE(bare.size() == 1);
     CHECK(bare.front().message.find("{table:wingDamage}") != std::string::npos);
+    // Also when the table's name is close to a built-in value: {levels} is the table "levels", not {level}.
+    const std::vector<ItemDataIssue> nearBuiltIn =
+        CheckNames(MakeJewel("+{levels}"), MakeProfilesWithTable("levels", 5));
+    REQUIRE(nearBuiltIn.size() == 1);
+    CHECK(nearBuiltIn.front().message == "has the unknown placeholder {levels}; did you mean {table:levels}?");
 
     const std::vector<ItemDataIssue> unknown = CheckNames(MakeJewel("Durability {durability}"));
     REQUIRE(unknown.size() == 1);
