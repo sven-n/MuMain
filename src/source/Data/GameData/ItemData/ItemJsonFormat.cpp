@@ -442,8 +442,7 @@ void ItemReader::ReadDescriptionLevels(const OrderedJson& json, const std::strin
     { return ReadWholeNumber(value, level) && level >= 0 && level < ItemLevelCount; };
     long long first = 0;
     long long last = 0;
-    if (!json.is_array() || json.size() != 2 || !readLevel(json[0], first) || !readLevel(json[1], last) ||
-        first > last)
+    if (!json.is_array() || json.size() != 2 || !readLevel(json[0], first) || !readLevel(json[1], last) || first > last)
     {
         AddIssue(ItemDataIssueSeverity::Error, field,
                  "must be [first, last], two item levels from 0 to " + std::to_string(ItemLevelCount - 1) +
