@@ -2,6 +2,9 @@
 
 #include "doctest.h"
 
+#include "ClientDataScope.h"
+
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "I18N/All.h"
@@ -9,6 +12,7 @@
 #include "Engine/Object/ZzzInventory.h"
 
 #include <algorithm>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -19,6 +23,8 @@ using namespace Data::Items;
 
 namespace
 {
+const std::filesystem::path ShippedClientDirectory = std::filesystem::path(MU_TEST_DATA_DIR).parent_path();
+
 // Five units a letter: the description wraps at 200, so 40 letters fit a row.
 int FiveUnitsPerLetter(const wchar_t*, size_t length)
 {
@@ -140,15 +146,25 @@ TEST_CASE("A description is in the UI's language also when the item names stay E
     line.text.Set("de", "Wird verwendet, um das Gegenstandslevel auf bis zu 6 zu erhöhen");
     jewel.description = {line};
 
-    // "Translate item names" off: the item names are English, the UI German.
+    // Once a test has loaded the item data, switching the UI language refills ItemAttribute, so the switch needs an
+    // item table of its own.
+    ClientDataScope client(ShippedClientDirectory);
+
+    // "Translate item names" off: the item names are English, the UI German. The option keeps the names English
+    // also when the loaded item data follows the language switch.
+    const bool translateItemNames = g_ItemDataHandler.GetTranslateItemNames();
     const std::string itemNameLocale = g_ItemDatabase.GetDisplayLocale();
     const std::string uiLocale = I18N::GetCurrentLocale();
+    g_ItemDataHandler.SetTranslateItemNames(false);
     g_ItemDatabase.SetDisplayLocale("en");
     I18N::SetLocale("de");
+    const std::string namesLocale = g_ItemDatabase.GetDisplayLocale();
     const std::vector<std::wstring> rows = WriteRows(jewel);
     I18N::SetLocale(uiLocale.c_str());
+    g_ItemDataHandler.SetTranslateItemNames(translateItemNames);
     g_ItemDatabase.SetDisplayLocale(itemNameLocale);
 
+    CHECK(namesLocale == "en");
     REQUIRE_FALSE(rows.empty());
     CHECK(rows[0].starts_with(L"Wird verwendet"));
 }
