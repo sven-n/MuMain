@@ -594,7 +594,6 @@ std::string WriteKnownDifferencesJson(const KnownDifferences& known)
 ItemSyncDiff BuildItemSyncDiff(const ItemExchangeFile& client, const ItemExchangeFile& file, const SyncOptions& options)
 {
     ItemSyncDiff diff;
-    diff.takenLocales.assign(options.uiLocales.begin(), options.uiLocales.end());
     const ItemExchangeFile& current = client;
     const ItemExchangeFile& incoming = file;
     const Data::Items::ExchangeItemIndex currentItems = Data::Items::IndexExchangeItems(current);
