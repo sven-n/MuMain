@@ -16,6 +16,12 @@ constexpr unsigned char Utf8ContinuationMask = 0xC0;
 constexpr unsigned char Utf8ContinuationBits = 0x80;
 constexpr unsigned char Utf8FourByteMask = 0xF8;
 constexpr unsigned char Utf8FourByteBits = 0xF0;
+// The lead bytes of one-, two- and three-byte characters.
+constexpr unsigned char Utf8SingleByteEnd = 0x80;
+constexpr unsigned char Utf8TwoByteMask = 0xE0;
+constexpr unsigned char Utf8TwoByteBits = 0xC0;
+constexpr unsigned char Utf8ThreeByteMask = 0xF0;
+constexpr unsigned char Utf8ThreeByteBits = 0xE0;
 // A character outside the Basic Multilingual Plane takes two UTF-16 units.
 constexpr std::size_t SurrogatePairUnits = 2;
 
@@ -29,6 +35,30 @@ bool IsContinuationByte(char byte)
 std::size_t Utf16UnitsOf(char leadByte)
 {
     return (static_cast<unsigned char>(leadByte) & Utf8FourByteMask) == Utf8FourByteBits ? SurrogatePairUnits : 1;
+}
+
+// The bytes of the UTF-8 character that `leadByte` starts, or 0 when it cannot
+// start one.
+std::size_t Utf8LengthOf(char leadByte)
+{
+    const auto lead = static_cast<unsigned char>(leadByte);
+    if (lead < Utf8SingleByteEnd)
+    {
+        return 1;
+    }
+    if ((lead & Utf8TwoByteMask) == Utf8TwoByteBits)
+    {
+        return 2;
+    }
+    if ((lead & Utf8ThreeByteMask) == Utf8ThreeByteBits)
+    {
+        return 3;
+    }
+    if ((lead & Utf8FourByteMask) == Utf8FourByteBits)
+    {
+        return 4;
+    }
+    return 0;
 }
 } // namespace
 
@@ -95,4 +125,26 @@ bool Core::Text::CutToUtf16Length(std::string& text, std::size_t maxUnits)
         }
     }
     return false;
+}
+
+bool Core::Text::IsValidUtf8(std::string_view text)
+{
+    std::size_t i = 0;
+    while (i < text.size())
+    {
+        const std::size_t length = Utf8LengthOf(text[i]);
+        if (length == 0 || i + length > text.size())
+        {
+            return false;
+        }
+        for (std::size_t j = 1; j < length; ++j)
+        {
+            if (!IsContinuationByte(text[i + j]))
+            {
+                return false;
+            }
+        }
+        i += length;
+    }
+    return true;
 }

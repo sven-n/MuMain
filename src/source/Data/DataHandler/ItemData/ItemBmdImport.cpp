@@ -85,56 +85,6 @@ struct LanguageRecord
 
 // ------------------------------------------------------------ name decoding
 
-// Number of bytes of the UTF-8 sequence that starts with `lead`, or 0 when
-// `lead` cannot start one.
-size_t GetUtf8SequenceLength(unsigned char lead)
-{
-    if (lead < 0x80)
-    {
-        return 1;
-    }
-    if ((lead & 0xE0) == 0xC0)
-    {
-        return 2;
-    }
-    if ((lead & 0xF0) == 0xE0)
-    {
-        return 3;
-    }
-    if ((lead & 0xF8) == 0xF0)
-    {
-        return 4;
-    }
-    return 0;
-}
-
-bool IsUtf8ContinuationByte(char character)
-{
-    return (static_cast<unsigned char>(character) & 0xC0) == 0x80;
-}
-
-bool IsValidUtf8(std::string_view text)
-{
-    size_t i = 0;
-    while (i < text.size())
-    {
-        const size_t length = GetUtf8SequenceLength(static_cast<unsigned char>(text[i]));
-        if (length == 0 || i + length > text.size())
-        {
-            return false;
-        }
-        for (size_t j = 1; j < length; ++j)
-        {
-            if (!IsUtf8ContinuationByte(text[i + j]))
-            {
-                return false;
-            }
-        }
-        i += length;
-    }
-    return true;
-}
-
 // Windows-1252 differs from Latin-1 only in 0x80-0x9F.
 constexpr std::array<char32_t, 32> Windows1252HighControls = {
     0x20AC, 0xFFFD, 0x201A, 0x0192, 0x201E, 0x2026, 0x2020, 0x2021, 0x02C6, 0x2030, 0x0160,
@@ -191,7 +141,7 @@ std::string ReplaceKoreanQuotes(std::string_view text)
 
 std::string DecodeName(std::string_view raw, bool& reencoded)
 {
-    reencoded = !IsValidUtf8(raw);
+    reencoded = !Core::Text::IsValidUtf8(raw);
     return reencoded ? Windows1252ToUtf8(ReplaceKoreanQuotes(raw)) : std::string(raw);
 }
 
