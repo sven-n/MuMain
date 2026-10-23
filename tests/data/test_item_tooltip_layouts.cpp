@@ -227,7 +227,8 @@ TEST_CASE("A condition compares a value with a whole number [data][items][toolti
     CHECK(durabilityIsTwo.comparison == TooltipCondition::Comparison::Equal);
     CHECK(durabilityIsTwo.number == 2);
     CHECK(WriteTooltipCondition(durabilityIsTwo) == "durability=2");
-    for (const std::string_view text : {"level!=1", "level<=3", "level>=-1", "!durability>4", "level<10"})
+    for (const std::string_view text :
+         {"level!=1", "level<=3", "level>=-1", "!durability>4", "level<10", "durability>=2147483647", "level>-2147483648"})
     {
         INFO(text);
         const auto [read_, condition, error] = read(text);
@@ -236,6 +237,14 @@ TEST_CASE("A condition compares a value with a whole number [data][items][toolti
     }
     CHECK(std::get<2>(read("timed=1")).find("compares a state") != std::string::npos);
     CHECK(std::get<2>(read("durability=two")).find("no comparison with a whole number") != std::string::npos);
+    // Past int's range, signs other than one "-", spaces and anything after the number.
+    for (const std::string_view text : {"durability=2147483648", "durability>-2147483649", "durability=99999999999",
+                                        "durability=+2", "durability=--2", "durability=-", "durability=", "durability= 2",
+                                        "durability=2 ", "durability=2x", "durability=1.5"})
+    {
+        INFO(text);
+        CHECK(std::get<2>(read(text)).find("no comparison with a whole number") != std::string::npos);
+    }
     CHECK(std::get<2>(read("durabilty=2")).find("compares no built-in value") != std::string::npos);
 
     TooltipCondition condition = durabilityIsTwo;

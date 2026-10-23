@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <charconv>
 
 namespace Data::Items
 {
@@ -39,19 +40,17 @@ bool ReadComparison(std::string_view text, TooltipCondition& condition)
         {
             continue;
         }
-        std::string_view number = text.substr(entry.text.size());
-        const bool negative = number.starts_with('-');
-        if (negative)
-        {
-            number.remove_prefix(1);
-        }
-        if (number.empty() || number.size() > 9 ||
-            !std::all_of(number.begin(), number.end(), [](char c) { return c >= '0' && c <= '9'; }))
+        // Any int, from INT_MIN to INT_MAX: the whole rest is the number, with no sign but an optional "-".
+        const std::string_view number = text.substr(entry.text.size());
+        const char* const end = number.data() + number.size();
+        int value = 0;
+        const auto [parsed, error] = std::from_chars(number.data(), end, value);
+        if (error != std::errc{} || parsed != end)
         {
             return false;
         }
         condition.comparison = entry.comparison;
-        condition.number = std::stoi(std::string(number)) * (negative ? -1 : 1);
+        condition.number = value;
         return true;
     }
     return false;

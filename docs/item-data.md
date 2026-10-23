@@ -222,7 +222,8 @@ A layout line has:
 - **`when`**: the line shows only when every entry holds. An entry is
   - a built-in value, which holds when it is not 0 (`"defense"`,
     `"missingStrength"`), or a built-in value compared with a whole number by
-    `=`, `!=`, `<`, `<=`, `>` or `>=` (`"durability=2"`, `"level!=1"`);
+    `=`, `!=`, `<`, `<=`, `>` or `>=` (`"durability=2"`, `"level!=1"`); the
+    number is an `int`, from -2147483648 to 2147483647, with an optional `-`;
   - a state (below);
   - `"tag:<tag>"`, which holds when the item has that [tag](#tags).
 
@@ -417,7 +418,9 @@ A level value no line shows is a warning.
   groups that have more than one; Cape of Fighter (12) and Cape of Lord (13),
   each alone and written apart by the old code, are not compared with each
   other. Wings of a group that split evenly get one warning that they don't
-  agree, without blaming either side.
+  agree, without blaming either side. Wings without lines never set the
+  lines the others are compared with, so new wings imported without them are
+  pointed out, also when they are more than the wings with lines.
 
 The shipped data is checked by the tests, so a wrong placeholder fails the
 build's tests.
