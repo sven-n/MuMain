@@ -139,8 +139,9 @@ with its `text` and `action`: `next` turns the page, `accept` takes the quest,
 An object's `kind` is `player`, `monster`, `npc`, `trap` or `other` (the
 Cherry Blossom Tree, and the players of the castle siege preview), `item` for
 a drop, and `unknown` for anything else. Monster, npc, trap and other are the
-kinds of the monster list (`Data/Monsters/Monsters.json`); summons and
-transformed players are `player`.
+kinds of the monster list (`Data/Monsters/Monsters.json`, see
+[monster-data.md](monster-data.md#kinds)); summons and transformed players are
+`player`.
 
 A character also carries `monster`, the monster number the server created it
 with (the `number` in the monster list), or `null` for a player. Summons and
