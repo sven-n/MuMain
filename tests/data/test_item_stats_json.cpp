@@ -308,9 +308,14 @@ TEST_CASE("Item stat file errors [data][items]")
     CHECK(HasIssue(Read(Changed(R"("name": "linear")", R"("name": "lin ear")")).issues, Severity::Error,
                    "tables[0].name"));
     // Item descriptions write a table as {table:<name>}, apart from the built-in values, so a table may be named like
-    // one.
-    CHECK_FALSE(
-        HasIssue(Read(Changed(R"("name": "linear")", R"("name": "level")")).issues, Severity::Error, "tables[0].name"));
+    // one: the file reads without errors, with the table and the profile that names it.
+    std::string levelTable = Changed(R"("name": "linear")", R"("name": "level")");
+    const std::string linearUse = R"("table": "linear")";
+    levelTable.replace(levelTable.find(linearUse), linearUse.size(), R"("table": "level")");
+    const ReadResult level = Read(levelTable);
+    CHECK_FALSE(HasErrors(level.issues));
+    REQUIRE_FALSE(level.file.tables.empty());
+    CHECK(level.file.tables[0].name == "level");
     CHECK(HasIssue(Read(Changed(R"("perLevel": 1)", R"("caption2": 1)")).issues, Severity::Error, "tables.linear"));
     CHECK(HasIssue(Read(Changed("[0, 3, 6, 9, 12, 15,", "[0, 3, 6, 9, 12,")).issues, Severity::Error,
                    "tables.steps.values"));

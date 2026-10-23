@@ -172,6 +172,16 @@ TEST_CASE("A translation has the placeholders of the English text [data][items]"
     CHECK(IssuesOf(issues, "description[0].text.pt").size() == 1);
 }
 
+TEST_CASE("A table may be named like a built-in value [data][items]")
+{
+    // {level} stays the item's + level; {table:level} is the table.
+    const ItemStatProfiles profiles = MakeProfilesWithTable("level", 5);
+    CHECK(GetPlaceholderValue("level", 9, profiles) == 9);
+    CHECK(GetPlaceholderValue("table:level", 9, profiles) == 5);
+    CHECK(FillPlaceholders("+{level}: {table:level}", 9, profiles) == "+9: 5");
+    CHECK(CheckNames(MakeJewel("+{level}: {table:level}"), profiles).empty());
+}
+
 TEST_CASE("A description placeholder is a built-in value or a stat file table [data][items]")
 {
     CHECK(CheckNames(MakeJewel("Increases damage by {table:wingDamage} at +{level}")).empty());
