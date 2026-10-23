@@ -2065,4 +2065,13 @@
   <data name="Monster code references limit" xml:space="preserve">
     <value>Not found: code that uses the number in other ways, such as a case label, a function argument or a variable whose name does not end in MonsterIndex.</value>
   </data>
+  <data name="NPC of the quests {0}" xml:space="preserve">
+    <value>The NPC of the quests: {0}</value>
+  </data>
+  <data name="Killed in the quests {0}" xml:space="preserve">
+    <value>To be killed in the quests: {0}</value>
+  </data>
+  <data name="Dialogues of the quest system {0}" xml:space="preserve">
+    <value>Dialogue states of the quest system: {0}</value>
+  </data>
 </root>

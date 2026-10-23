@@ -2044,4 +2044,13 @@
   <data name="Monster code references limit" xml:space="preserve">
     <value>Nicht gefunden wird Code, der die Nummer anders nutzt, etwa als case-Marke, als Funktionsargument oder mit einer Variable, deren Name nicht auf MonsterIndex endet.</value>
   </data>
+  <data name="NPC of the quests {0}" xml:space="preserve">
+    <value>Der NPC der Quests: {0}</value>
+  </data>
+  <data name="Killed in the quests {0}" xml:space="preserve">
+    <value>Zu besiegen in den Quests: {0}</value>
+  </data>
+  <data name="Dialogues of the quest system {0}" xml:space="preserve">
+    <value>Dialogzustände des Questsystems: {0}</value>
+  </data>
 </root>

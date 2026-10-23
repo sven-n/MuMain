@@ -64,6 +64,7 @@ mu_add_test(
         test_monster_code_references.cpp
         test_monster_data_edits.cpp
         test_monster_data_files.cpp
+        test_monster_data_users.cpp
         test_monster_database.cpp
         test_monster_edit_history.cpp
         test_monster_json.cpp
