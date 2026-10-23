@@ -30,6 +30,7 @@
 #include "json.hpp"
 
 #include <spdlog/sinks/ringbuffer_sink.h>
+#include <SDL3/SDL_surface.h>
 
 #include <algorithm>
 #include <atomic>
@@ -1334,6 +1335,48 @@ TEST_CASE("glb_model: the image a model file carries is the mesh's texture and d
     garbage.bytes.resize(8);
     CHECK_FALSE(Render::Models::Gltf::DecodeEmbeddedImage(garbage, decoded, reason));
     CHECK(reason.find("PNG") != std::string::npos);
+}
+
+namespace
+{
+// An embedded PNG image of `width` x `height` opaque texels.
+Render::Models::Gltf::EmbeddedImage EmbeddedPng(int width, int height)
+{
+    SDL_Surface* surface = SDL_CreateSurface(width, height, SDL_PIXELFORMAT_RGB24);
+    REQUIRE(surface != nullptr);
+    const auto path = std::filesystem::temp_directory_path() /
+                      ("glb_model_png_" + std::to_string(width) + "x" + std::to_string(height) + ".png");
+    const bool saved = SDL_SavePNG(surface, path.string().c_str());
+    SDL_DestroySurface(surface);
+    REQUIRE(saved);
+    Render::Models::Gltf::EmbeddedImage image;
+    image.name = path.filename().string();
+    image.mimeType = "image/png";
+    image.bytes = ReadBytes(path);
+    std::filesystem::remove(path);
+    return image;
+}
+} // namespace
+
+TEST_CASE("glb_model: an embedded image up to 2048x2048 decodes, one texel above is refused with its size")
+{
+    Render::Models::Gltf::DecodedImage decoded;
+    std::string reason;
+    const bool atLimit = Render::Models::Gltf::DecodeEmbeddedImage(EmbeddedPng(2048, 2048), decoded, reason);
+    INFO(reason);
+    REQUIRE(atLimit);
+    CHECK(decoded.width == 2048);
+    CHECK(decoded.height == 2048);
+    CHECK(decoded.rgba.size() == std::size_t{2048} * 2048u * 4u);
+
+    for (const auto [width, height] : {std::pair{2049, 2048}, std::pair{2048, 2049}})
+    {
+        const std::string size = std::to_string(width) + "x" + std::to_string(height);
+        CAPTURE(size);
+        reason.clear();
+        CHECK_FALSE(Render::Models::Gltf::DecodeEmbeddedImage(EmbeddedPng(width, height), decoded, reason));
+        CHECK(reason == "it is " + size + ", above the 2048x2048 texture limit");
+    }
 }
 
 // ---------------------------------------------------------------- sockets by name

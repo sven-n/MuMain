@@ -45,11 +45,12 @@ bool DecodeEmbeddedImage(const EmbeddedImage& image, DecodedImage& decoded, std:
         reason = std::string("it is no readable PNG: ") + SDL_GetError();
         return false;
     }
-    if (loaded->w > Render::Sprites::kBitmapMaximumWidth || loaded->h > Render::Sprites::kBitmapMaximumHeight)
+    if (loaded->w > Render::Sprites::kModelTextureMaximumWidth ||
+        loaded->h > Render::Sprites::kModelTextureMaximumHeight)
     {
         reason = "it is " + std::to_string(loaded->w) + "x" + std::to_string(loaded->h) + ", above the " +
-                 std::to_string(Render::Sprites::kBitmapMaximumWidth) + "x" +
-                 std::to_string(Render::Sprites::kBitmapMaximumHeight) + " texture limit";
+                 std::to_string(Render::Sprites::kModelTextureMaximumWidth) + "x" +
+                 std::to_string(Render::Sprites::kModelTextureMaximumHeight) + " texture limit";
         return false;
     }
     const SurfacePointer rgba{SDL_ConvertSurface(loaded.get(), SDL_PIXELFORMAT_RGBA32)};
