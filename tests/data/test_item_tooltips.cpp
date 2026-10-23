@@ -37,6 +37,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include "Core/Text/Utf8.h"
 
 namespace
 {
@@ -704,6 +705,56 @@ TEST_CASE("A tooltip's name color goes by the item's kind, level and options in 
     CHECK(portuguese == L"Cris +9");
 
     SetItemTooltipTextMeasure(nullptr);
+}
+
+// The quests, the mixes, the server's messages and the ground labels name an item with GetItemName: for every item at
+// every level, the name is the tooltip's first line, which the recorded snapshot covers.
+TEST_CASE("Every item's name at every level is its tooltip's name [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+
+    int names = 0;
+    int different = 0;
+    for (const Data::Items::ItemDefinition& definition : g_ItemDatabase.GetAllSlots())
+    {
+        if (!definition.Exists())
+        {
+            continue;
+        }
+        for (int level = 0; level < Data::Items::ItemLevelCount; ++level)
+        {
+            ItemCreationParams params = FullItemParameters(definition.group, definition.number);
+            params.Level = static_cast<BYTE>(level);
+            const std::vector<ItemTooltipLine> lines = TooltipOfParameters(params);
+            if (lines.empty())
+            {
+                continue;
+            }
+            const int type = definition.group * MAX_ITEM_INDEX + definition.number;
+            const std::wstring name = GetItemNameText(type, level);
+            wchar_t buffer[128] = L"";
+            GetItemName(type, level, buffer);
+            ++names;
+            if (name != lines.front().text || std::wstring(buffer) != name)
+            {
+                if (++different <= 5)
+                {
+                    INFO(definition.group << "/" << definition.number << " +" << level);
+                    CHECK(Core::Text::ToUtf8(name) == Core::Text::ToUtf8(lines.front().text));
+                    CHECK(Core::Text::ToUtf8(buffer) == Core::Text::ToUtf8(name));
+                }
+            }
+        }
+    }
+    SetItemTooltipTextMeasure(nullptr);
+    CHECK(names > 911 * 10);
+    CHECK(different == 0);
 }
 
 TEST_CASE("With translated item names off, the names are English and the rest of the tooltip is translated "
