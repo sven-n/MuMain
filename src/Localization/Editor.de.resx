@@ -1672,8 +1672,11 @@
   <data name="Used by {0} items and {1} rules" xml:space="preserve">
     <value>Verwendet von {0} Gegenständen und {1} Regeln</value>
   </data>
-  <data name="Named by {0} stats" xml:space="preserve">
-    <value>Von {0} Werten genannt</value>
+  <data name="Named by {0} stats and {1} item descriptions" xml:space="preserve">
+    <value>Von {0} Werten und {1} Gegenstandsbeschreibungen genannt</value>
+  </data>
+  <data name="Item descriptions that name it" xml:space="preserve">
+    <value>Gegenstandsbeschreibungen, die sie nennen</value>
   </data>
   <data name="Pick an entry in the list." xml:space="preserve">
     <value>Wählen Sie einen Eintrag in der Liste.</value>
@@ -1690,8 +1693,8 @@
   <data name="No item or rule uses these profiles: {0}" xml:space="preserve">
     <value>Kein Gegenstand und keine Regel nutzt diese Profile: {0}</value>
   </data>
-  <data name="No stat uses these tables: {0}" xml:space="preserve">
-    <value>Kein Wert nutzt diese Tabellen: {0}</value>
+  <data name="No stat or item description uses these tables: {0}" xml:space="preserve">
+    <value>Kein Wert und keine Gegenstandsbeschreibung nutzt diese Tabellen: {0}</value>
   </data>
   <data name="Rename" xml:space="preserve">
     <value>Umbenennen</value>
@@ -1711,8 +1714,8 @@
   <data name="Removed only while no item and no rule uses it." xml:space="preserve">
     <value>Wird nur entfernt, solange kein Gegenstand und keine Regel es nutzt.</value>
   </data>
-  <data name="Removed only while no stat names it." xml:space="preserve">
-    <value>Wird nur entfernt, solange kein Wert sie nennt.</value>
+  <data name="Removed only while no stat and no item description names it." xml:space="preserve">
+    <value>Wird nur entfernt, solange kein Wert und keine Gegenstandsbeschreibung sie nennt.</value>
   </data>
   <data name="Override" xml:space="preserve">
     <value>Überschreiben</value>
