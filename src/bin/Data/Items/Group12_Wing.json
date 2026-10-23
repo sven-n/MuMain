@@ -14,32 +14,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {wingDamageIncrease1st}% of Damage",
-            "de": "Erhöht den Schaden um {wingDamageIncrease1st}%",
-            "es": "Aumenta el daño de {wingDamageIncrease1st}% of",
-            "id": "Meningkatkan Kerusakan {wingDamageIncrease1st}% of",
-            "ja": "ダメージ {wingDamageIncrease1st}%増加",
-            "pl": "Zwiększa obrażenia o {wingDamageIncrease1st}%",
-            "pt": "Aumentar o dano de {wingDamageIncrease1st}% of",
-            "ru": "Увеличение урона {wingDamageIncrease1st}% of",
-            "tl": "Dagdagan ang {wingDamageIncrease1st}% of Pinsala",
-            "uk": "Збільшення шкоди на {wingDamageIncrease1st}% of",
-            "zh-TW": "增加 {wingDamageIncrease1st}% of 傷害"
+            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
+            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {wingDamageAbsorb1st}% of Damage",
-            "de": "Absorbiert {wingDamageAbsorb1st}% des Schadens",
-            "es": "Absorber daño {wingDamageAbsorb1st}% of",
-            "id": "Menyerap Kerusakan {wingDamageAbsorb1st}% of",
-            "ja": "ダメージ {wingDamageAbsorb1st}%吸収",
-            "pl": "Pochłania {wingDamageAbsorb1st}% obrażeń",
-            "pt": "Absorver Dano {wingDamageAbsorb1st}% of",
-            "ru": "Поглощение {wingDamageAbsorb1st}% of урона",
-            "tl": "Isipsip ang {wingDamageAbsorb1st}% of Pinsala",
-            "uk": "Поглинання шкоди {wingDamageAbsorb1st}% of",
-            "zh-TW": "吸收{wingDamageAbsorb1st}% of傷害"
+            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
           }
         },
         {
@@ -85,32 +85,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {wingDamageIncrease1st}% of Damage",
-            "de": "Erhöht den Schaden um {wingDamageIncrease1st}%",
-            "es": "Aumenta el daño de {wingDamageIncrease1st}% of",
-            "id": "Meningkatkan Kerusakan {wingDamageIncrease1st}% of",
-            "ja": "ダメージ {wingDamageIncrease1st}%増加",
-            "pl": "Zwiększa obrażenia o {wingDamageIncrease1st}%",
-            "pt": "Aumentar o dano de {wingDamageIncrease1st}% of",
-            "ru": "Увеличение урона {wingDamageIncrease1st}% of",
-            "tl": "Dagdagan ang {wingDamageIncrease1st}% of Pinsala",
-            "uk": "Збільшення шкоди на {wingDamageIncrease1st}% of",
-            "zh-TW": "增加 {wingDamageIncrease1st}% of 傷害"
+            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
+            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {wingDamageAbsorb1st}% of Damage",
-            "de": "Absorbiert {wingDamageAbsorb1st}% des Schadens",
-            "es": "Absorber daño {wingDamageAbsorb1st}% of",
-            "id": "Menyerap Kerusakan {wingDamageAbsorb1st}% of",
-            "ja": "ダメージ {wingDamageAbsorb1st}%吸収",
-            "pl": "Pochłania {wingDamageAbsorb1st}% obrażeń",
-            "pt": "Absorver Dano {wingDamageAbsorb1st}% of",
-            "ru": "Поглощение {wingDamageAbsorb1st}% of урона",
-            "tl": "Isipsip ang {wingDamageAbsorb1st}% of Pinsala",
-            "uk": "Поглинання шкоди {wingDamageAbsorb1st}% of",
-            "zh-TW": "吸收{wingDamageAbsorb1st}% of傷害"
+            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
           }
         },
         {
@@ -157,32 +157,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {wingDamageIncrease1st}% of Damage",
-            "de": "Erhöht den Schaden um {wingDamageIncrease1st}%",
-            "es": "Aumenta el daño de {wingDamageIncrease1st}% of",
-            "id": "Meningkatkan Kerusakan {wingDamageIncrease1st}% of",
-            "ja": "ダメージ {wingDamageIncrease1st}%増加",
-            "pl": "Zwiększa obrażenia o {wingDamageIncrease1st}%",
-            "pt": "Aumentar o dano de {wingDamageIncrease1st}% of",
-            "ru": "Увеличение урона {wingDamageIncrease1st}% of",
-            "tl": "Dagdagan ang {wingDamageIncrease1st}% of Pinsala",
-            "uk": "Збільшення шкоди на {wingDamageIncrease1st}% of",
-            "zh-TW": "增加 {wingDamageIncrease1st}% of 傷害"
+            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
+            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {wingDamageAbsorb1st}% of Damage",
-            "de": "Absorbiert {wingDamageAbsorb1st}% des Schadens",
-            "es": "Absorber daño {wingDamageAbsorb1st}% of",
-            "id": "Menyerap Kerusakan {wingDamageAbsorb1st}% of",
-            "ja": "ダメージ {wingDamageAbsorb1st}%吸収",
-            "pl": "Pochłania {wingDamageAbsorb1st}% obrażeń",
-            "pt": "Absorver Dano {wingDamageAbsorb1st}% of",
-            "ru": "Поглощение {wingDamageAbsorb1st}% of урона",
-            "tl": "Isipsip ang {wingDamageAbsorb1st}% of Pinsala",
-            "uk": "Поглинання шкоди {wingDamageAbsorb1st}% of",
-            "zh-TW": "吸收{wingDamageAbsorb1st}% of傷害"
+            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
           }
         },
         {
@@ -229,32 +229,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {wingDamageIncrease2nd}% of Damage",
-            "de": "Erhöht den Schaden um {wingDamageIncrease2nd}%",
-            "es": "Aumenta el daño de {wingDamageIncrease2nd}% of",
-            "id": "Meningkatkan Kerusakan {wingDamageIncrease2nd}% of",
-            "ja": "ダメージ {wingDamageIncrease2nd}%増加",
-            "pl": "Zwiększa obrażenia o {wingDamageIncrease2nd}%",
-            "pt": "Aumentar o dano de {wingDamageIncrease2nd}% of",
-            "ru": "Увеличение урона {wingDamageIncrease2nd}% of",
-            "tl": "Dagdagan ang {wingDamageIncrease2nd}% of Pinsala",
-            "uk": "Збільшення шкоди на {wingDamageIncrease2nd}% of",
-            "zh-TW": "增加 {wingDamageIncrease2nd}% of 傷害"
+            "en": "Increase {table:wingDamageIncrease2nd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease2nd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease2nd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease2nd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease2nd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease2nd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease2nd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease2nd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease2nd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease2nd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease2nd}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {wingDamageAbsorb2nd}% of Damage",
-            "de": "Absorbiert {wingDamageAbsorb2nd}% des Schadens",
-            "es": "Absorber daño {wingDamageAbsorb2nd}% of",
-            "id": "Menyerap Kerusakan {wingDamageAbsorb2nd}% of",
-            "ja": "ダメージ {wingDamageAbsorb2nd}%吸収",
-            "pl": "Pochłania {wingDamageAbsorb2nd}% obrażeń",
-            "pt": "Absorver Dano {wingDamageAbsorb2nd}% of",
-            "ru": "Поглощение {wingDamageAbsorb2nd}% of урона",
-            "tl": "Isipsip ang {wingDamageAbsorb2nd}% of Pinsala",
-            "uk": "Поглинання шкоди {wingDamageAbsorb2nd}% of",
-            "zh-TW": "吸收{wingDamageAbsorb2nd}% of傷害"
+            "en": "Absorb {table:wingDamageAbsorb2nd}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb2nd}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb2nd}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb2nd}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb2nd}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb2nd}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb2nd}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb2nd}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb2nd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb2nd}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb2nd}% of傷害"
           }
         },
         {
@@ -300,32 +300,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {wingDamageIncrease2nd}% of Damage",
-            "de": "Erhöht den Schaden um {wingDamageIncrease2nd}%",
-            "es": "Aumenta el daño de {wingDamageIncrease2nd}% of",
-            "id": "Meningkatkan Kerusakan {wingDamageIncrease2nd}% of",
-            "ja": "ダメージ {wingDamageIncrease2nd}%増加",
-            "pl": "Zwiększa obrażenia o {wingDamageIncrease2nd}%",
-            "pt": "Aumentar o dano de {wingDamageIncrease2nd}% of",
-            "ru": "Увеличение урона {wingDamageIncrease2nd}% of",
-            "tl": "Dagdagan ang {wingDamageIncrease2nd}% of Pinsala",
-            "uk": "Збільшення шкоди на {wingDamageIncrease2nd}% of",
-            "zh-TW": "增加 {wingDamageIncrease2nd}% of 傷害"
+            "en": "Increase {table:wingDamageIncrease2nd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease2nd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease2nd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease2nd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease2nd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease2nd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease2nd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease2nd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease2nd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease2nd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease2nd}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {wingDamageAbsorb2nd}% of Damage",
-            "de": "Absorbiert {wingDamageAbsorb2nd}% des Schadens",
-            "es": "Absorber daño {wingDamageAbsorb2nd}% of",
-            "id": "Menyerap Kerusakan {wingDamageAbsorb2nd}% of",
-            "ja": "ダメージ {wingDamageAbsorb2nd}%吸収",
-            "pl": "Pochłania {wingDamageAbsorb2nd}% obrażeń",
-            "pt": "Absorver Dano {wingDamageAbsorb2nd}% of",
-            "ru": "Поглощение {wingDamageAbsorb2nd}% of урона",
-            "tl": "Isipsip ang {wingDamageAbsorb2nd}% of Pinsala",
-            "uk": "Поглинання шкоди {wingDamageAbsorb2nd}% of",
-            "zh-TW": "吸收{wingDamageAbsorb2nd}% of傷害"
+            "en": "Absorb {table:wingDamageAbsorb2nd}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb2nd}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb2nd}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb2nd}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb2nd}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb2nd}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb2nd}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb2nd}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb2nd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb2nd}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb2nd}% of傷害"
           }
         },
         {
@@ -371,32 +371,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {wingDamageIncrease2nd}% of Damage",
-            "de": "Erhöht den Schaden um {wingDamageIncrease2nd}%",
-            "es": "Aumenta el daño de {wingDamageIncrease2nd}% of",
-            "id": "Meningkatkan Kerusakan {wingDamageIncrease2nd}% of",
-            "ja": "ダメージ {wingDamageIncrease2nd}%増加",
-            "pl": "Zwiększa obrażenia o {wingDamageIncrease2nd}%",
-            "pt": "Aumentar o dano de {wingDamageIncrease2nd}% of",
-            "ru": "Увеличение урона {wingDamageIncrease2nd}% of",
-            "tl": "Dagdagan ang {wingDamageIncrease2nd}% of Pinsala",
-            "uk": "Збільшення шкоди на {wingDamageIncrease2nd}% of",
-            "zh-TW": "增加 {wingDamageIncrease2nd}% of 傷害"
+            "en": "Increase {table:wingDamageIncrease2nd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease2nd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease2nd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease2nd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease2nd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease2nd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease2nd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease2nd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease2nd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease2nd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease2nd}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {wingDamageAbsorb2nd}% of Damage",
-            "de": "Absorbiert {wingDamageAbsorb2nd}% des Schadens",
-            "es": "Absorber daño {wingDamageAbsorb2nd}% of",
-            "id": "Menyerap Kerusakan {wingDamageAbsorb2nd}% of",
-            "ja": "ダメージ {wingDamageAbsorb2nd}%吸収",
-            "pl": "Pochłania {wingDamageAbsorb2nd}% obrażeń",
-            "pt": "Absorver Dano {wingDamageAbsorb2nd}% of",
-            "ru": "Поглощение {wingDamageAbsorb2nd}% of урона",
-            "tl": "Isipsip ang {wingDamageAbsorb2nd}% of Pinsala",
-            "uk": "Поглинання шкоди {wingDamageAbsorb2nd}% of",
-            "zh-TW": "吸收{wingDamageAbsorb2nd}% of傷害"
+            "en": "Absorb {table:wingDamageAbsorb2nd}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb2nd}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb2nd}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb2nd}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb2nd}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb2nd}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb2nd}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb2nd}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb2nd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb2nd}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb2nd}% of傷害"
           }
         },
         {
@@ -442,32 +442,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {wingDamageIncrease2nd}% of Damage",
-            "de": "Erhöht den Schaden um {wingDamageIncrease2nd}%",
-            "es": "Aumenta el daño de {wingDamageIncrease2nd}% of",
-            "id": "Meningkatkan Kerusakan {wingDamageIncrease2nd}% of",
-            "ja": "ダメージ {wingDamageIncrease2nd}%増加",
-            "pl": "Zwiększa obrażenia o {wingDamageIncrease2nd}%",
-            "pt": "Aumentar o dano de {wingDamageIncrease2nd}% of",
-            "ru": "Увеличение урона {wingDamageIncrease2nd}% of",
-            "tl": "Dagdagan ang {wingDamageIncrease2nd}% of Pinsala",
-            "uk": "Збільшення шкоди на {wingDamageIncrease2nd}% of",
-            "zh-TW": "增加 {wingDamageIncrease2nd}% of 傷害"
+            "en": "Increase {table:wingDamageIncrease2nd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease2nd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease2nd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease2nd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease2nd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease2nd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease2nd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease2nd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease2nd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease2nd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease2nd}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {wingDamageAbsorb2nd}% of Damage",
-            "de": "Absorbiert {wingDamageAbsorb2nd}% des Schadens",
-            "es": "Absorber daño {wingDamageAbsorb2nd}% of",
-            "id": "Menyerap Kerusakan {wingDamageAbsorb2nd}% of",
-            "ja": "ダメージ {wingDamageAbsorb2nd}%吸収",
-            "pl": "Pochłania {wingDamageAbsorb2nd}% obrażeń",
-            "pt": "Absorver Dano {wingDamageAbsorb2nd}% of",
-            "ru": "Поглощение {wingDamageAbsorb2nd}% of урона",
-            "tl": "Isipsip ang {wingDamageAbsorb2nd}% of Pinsala",
-            "uk": "Поглинання шкоди {wingDamageAbsorb2nd}% of",
-            "zh-TW": "吸收{wingDamageAbsorb2nd}% of傷害"
+            "en": "Absorb {table:wingDamageAbsorb2nd}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb2nd}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb2nd}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb2nd}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb2nd}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb2nd}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb2nd}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb2nd}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb2nd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb2nd}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb2nd}% of傷害"
           }
         },
         {
@@ -1008,32 +1008,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {wingDamageIncrease3rd}% of Damage",
-            "de": "Erhöht den Schaden um {wingDamageIncrease3rd}%",
-            "es": "Aumenta el daño de {wingDamageIncrease3rd}% of",
-            "id": "Meningkatkan Kerusakan {wingDamageIncrease3rd}% of",
-            "ja": "ダメージ {wingDamageIncrease3rd}%増加",
-            "pl": "Zwiększa obrażenia o {wingDamageIncrease3rd}%",
-            "pt": "Aumentar o dano de {wingDamageIncrease3rd}% of",
-            "ru": "Увеличение урона {wingDamageIncrease3rd}% of",
-            "tl": "Dagdagan ang {wingDamageIncrease3rd}% of Pinsala",
-            "uk": "Збільшення шкоди на {wingDamageIncrease3rd}% of",
-            "zh-TW": "增加 {wingDamageIncrease3rd}% of 傷害"
+            "en": "Increase {table:wingDamageIncrease3rd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease3rd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease3rd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease3rd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease3rd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease3rd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease3rd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease3rd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease3rd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease3rd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease3rd}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {wingDamageAbsorb3rd}% of Damage",
-            "de": "Absorbiert {wingDamageAbsorb3rd}% des Schadens",
-            "es": "Absorber daño {wingDamageAbsorb3rd}% of",
-            "id": "Menyerap Kerusakan {wingDamageAbsorb3rd}% of",
-            "ja": "ダメージ {wingDamageAbsorb3rd}%吸収",
-            "pl": "Pochłania {wingDamageAbsorb3rd}% obrażeń",
-            "pt": "Absorver Dano {wingDamageAbsorb3rd}% of",
-            "ru": "Поглощение {wingDamageAbsorb3rd}% of урона",
-            "tl": "Isipsip ang {wingDamageAbsorb3rd}% of Pinsala",
-            "uk": "Поглинання шкоди {wingDamageAbsorb3rd}% of",
-            "zh-TW": "吸收{wingDamageAbsorb3rd}% of傷害"
+            "en": "Absorb {table:wingDamageAbsorb3rd}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb3rd}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb3rd}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb3rd}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb3rd}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb3rd}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb3rd}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb3rd}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb3rd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb3rd}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb3rd}% of傷害"
           }
         },
         {
@@ -1079,32 +1079,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {wingDamageIncrease3rd}% of Damage",
-            "de": "Erhöht den Schaden um {wingDamageIncrease3rd}%",
-            "es": "Aumenta el daño de {wingDamageIncrease3rd}% of",
-            "id": "Meningkatkan Kerusakan {wingDamageIncrease3rd}% of",
-            "ja": "ダメージ {wingDamageIncrease3rd}%増加",
-            "pl": "Zwiększa obrażenia o {wingDamageIncrease3rd}%",
-            "pt": "Aumentar o dano de {wingDamageIncrease3rd}% of",
-            "ru": "Увеличение урона {wingDamageIncrease3rd}% of",
-            "tl": "Dagdagan ang {wingDamageIncrease3rd}% of Pinsala",
-            "uk": "Збільшення шкоди на {wingDamageIncrease3rd}% of",
-            "zh-TW": "增加 {wingDamageIncrease3rd}% of 傷害"
+            "en": "Increase {table:wingDamageIncrease3rd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease3rd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease3rd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease3rd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease3rd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease3rd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease3rd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease3rd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease3rd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease3rd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease3rd}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {wingDamageAbsorb3rd}% of Damage",
-            "de": "Absorbiert {wingDamageAbsorb3rd}% des Schadens",
-            "es": "Absorber daño {wingDamageAbsorb3rd}% of",
-            "id": "Menyerap Kerusakan {wingDamageAbsorb3rd}% of",
-            "ja": "ダメージ {wingDamageAbsorb3rd}%吸収",
-            "pl": "Pochłania {wingDamageAbsorb3rd}% obrażeń",
-            "pt": "Absorver Dano {wingDamageAbsorb3rd}% of",
-            "ru": "Поглощение {wingDamageAbsorb3rd}% of урона",
-            "tl": "Isipsip ang {wingDamageAbsorb3rd}% of Pinsala",
-            "uk": "Поглинання шкоди {wingDamageAbsorb3rd}% of",
-            "zh-TW": "吸收{wingDamageAbsorb3rd}% of傷害"
+            "en": "Absorb {table:wingDamageAbsorb3rd}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb3rd}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb3rd}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb3rd}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb3rd}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb3rd}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb3rd}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb3rd}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb3rd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb3rd}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb3rd}% of傷害"
           }
         },
         {
@@ -1150,32 +1150,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {wingDamageIncrease3rd}% of Damage",
-            "de": "Erhöht den Schaden um {wingDamageIncrease3rd}%",
-            "es": "Aumenta el daño de {wingDamageIncrease3rd}% of",
-            "id": "Meningkatkan Kerusakan {wingDamageIncrease3rd}% of",
-            "ja": "ダメージ {wingDamageIncrease3rd}%増加",
-            "pl": "Zwiększa obrażenia o {wingDamageIncrease3rd}%",
-            "pt": "Aumentar o dano de {wingDamageIncrease3rd}% of",
-            "ru": "Увеличение урона {wingDamageIncrease3rd}% of",
-            "tl": "Dagdagan ang {wingDamageIncrease3rd}% of Pinsala",
-            "uk": "Збільшення шкоди на {wingDamageIncrease3rd}% of",
-            "zh-TW": "增加 {wingDamageIncrease3rd}% of 傷害"
+            "en": "Increase {table:wingDamageIncrease3rd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease3rd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease3rd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease3rd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease3rd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease3rd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease3rd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease3rd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease3rd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease3rd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease3rd}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {wingDamageAbsorb3rd}% of Damage",
-            "de": "Absorbiert {wingDamageAbsorb3rd}% des Schadens",
-            "es": "Absorber daño {wingDamageAbsorb3rd}% of",
-            "id": "Menyerap Kerusakan {wingDamageAbsorb3rd}% of",
-            "ja": "ダメージ {wingDamageAbsorb3rd}%吸収",
-            "pl": "Pochłania {wingDamageAbsorb3rd}% obrażeń",
-            "pt": "Absorver Dano {wingDamageAbsorb3rd}% of",
-            "ru": "Поглощение {wingDamageAbsorb3rd}% of урона",
-            "tl": "Isipsip ang {wingDamageAbsorb3rd}% of Pinsala",
-            "uk": "Поглинання шкоди {wingDamageAbsorb3rd}% of",
-            "zh-TW": "吸收{wingDamageAbsorb3rd}% of傷害"
+            "en": "Absorb {table:wingDamageAbsorb3rd}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb3rd}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb3rd}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb3rd}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb3rd}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb3rd}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb3rd}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb3rd}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb3rd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb3rd}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb3rd}% of傷害"
           }
         },
         {
@@ -1221,32 +1221,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {wingDamageIncrease3rd}% of Damage",
-            "de": "Erhöht den Schaden um {wingDamageIncrease3rd}%",
-            "es": "Aumenta el daño de {wingDamageIncrease3rd}% of",
-            "id": "Meningkatkan Kerusakan {wingDamageIncrease3rd}% of",
-            "ja": "ダメージ {wingDamageIncrease3rd}%増加",
-            "pl": "Zwiększa obrażenia o {wingDamageIncrease3rd}%",
-            "pt": "Aumentar o dano de {wingDamageIncrease3rd}% of",
-            "ru": "Увеличение урона {wingDamageIncrease3rd}% of",
-            "tl": "Dagdagan ang {wingDamageIncrease3rd}% of Pinsala",
-            "uk": "Збільшення шкоди на {wingDamageIncrease3rd}% of",
-            "zh-TW": "增加 {wingDamageIncrease3rd}% of 傷害"
+            "en": "Increase {table:wingDamageIncrease3rd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease3rd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease3rd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease3rd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease3rd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease3rd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease3rd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease3rd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease3rd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease3rd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease3rd}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {wingDamageAbsorb3rd}% of Damage",
-            "de": "Absorbiert {wingDamageAbsorb3rd}% des Schadens",
-            "es": "Absorber daño {wingDamageAbsorb3rd}% of",
-            "id": "Menyerap Kerusakan {wingDamageAbsorb3rd}% of",
-            "ja": "ダメージ {wingDamageAbsorb3rd}%吸収",
-            "pl": "Pochłania {wingDamageAbsorb3rd}% obrażeń",
-            "pt": "Absorver Dano {wingDamageAbsorb3rd}% of",
-            "ru": "Поглощение {wingDamageAbsorb3rd}% of урона",
-            "tl": "Isipsip ang {wingDamageAbsorb3rd}% of Pinsala",
-            "uk": "Поглинання шкоди {wingDamageAbsorb3rd}% of",
-            "zh-TW": "吸收{wingDamageAbsorb3rd}% of傷害"
+            "en": "Absorb {table:wingDamageAbsorb3rd}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb3rd}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb3rd}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb3rd}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb3rd}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb3rd}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb3rd}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb3rd}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb3rd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb3rd}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb3rd}% of傷害"
           }
         },
         {
@@ -1292,32 +1292,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {wingDamageIncrease3rd}% of Damage",
-            "de": "Erhöht den Schaden um {wingDamageIncrease3rd}%",
-            "es": "Aumenta el daño de {wingDamageIncrease3rd}% of",
-            "id": "Meningkatkan Kerusakan {wingDamageIncrease3rd}% of",
-            "ja": "ダメージ {wingDamageIncrease3rd}%増加",
-            "pl": "Zwiększa obrażenia o {wingDamageIncrease3rd}%",
-            "pt": "Aumentar o dano de {wingDamageIncrease3rd}% of",
-            "ru": "Увеличение урона {wingDamageIncrease3rd}% of",
-            "tl": "Dagdagan ang {wingDamageIncrease3rd}% of Pinsala",
-            "uk": "Збільшення шкоди на {wingDamageIncrease3rd}% of",
-            "zh-TW": "增加 {wingDamageIncrease3rd}% of 傷害"
+            "en": "Increase {table:wingDamageIncrease3rd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease3rd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease3rd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease3rd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease3rd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease3rd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease3rd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease3rd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease3rd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease3rd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease3rd}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {capeDamageAbsorb3rd}% of Damage",
-            "de": "Absorbiert {capeDamageAbsorb3rd}% des Schadens",
-            "es": "Absorber daño {capeDamageAbsorb3rd}% of",
-            "id": "Menyerap Kerusakan {capeDamageAbsorb3rd}% of",
-            "ja": "ダメージ {capeDamageAbsorb3rd}%吸収",
-            "pl": "Pochłania {capeDamageAbsorb3rd}% obrażeń",
-            "pt": "Absorver Dano {capeDamageAbsorb3rd}% of",
-            "ru": "Поглощение {capeDamageAbsorb3rd}% of урона",
-            "tl": "Isipsip ang {capeDamageAbsorb3rd}% of Pinsala",
-            "uk": "Поглинання шкоди {capeDamageAbsorb3rd}% of",
-            "zh-TW": "吸收{capeDamageAbsorb3rd}% of傷害"
+            "en": "Absorb {table:capeDamageAbsorb3rd}% of Damage",
+            "de": "Absorbiert {table:capeDamageAbsorb3rd}% des Schadens",
+            "es": "Absorber daño {table:capeDamageAbsorb3rd}% of",
+            "id": "Menyerap Kerusakan {table:capeDamageAbsorb3rd}% of",
+            "ja": "ダメージ {table:capeDamageAbsorb3rd}%吸収",
+            "pl": "Pochłania {table:capeDamageAbsorb3rd}% obrażeń",
+            "pt": "Absorver Dano {table:capeDamageAbsorb3rd}% of",
+            "ru": "Поглощение {table:capeDamageAbsorb3rd}% of урона",
+            "tl": "Isipsip ang {table:capeDamageAbsorb3rd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:capeDamageAbsorb3rd}% of",
+            "zh-TW": "吸收{table:capeDamageAbsorb3rd}% of傷害"
           }
         },
         {
@@ -1363,32 +1363,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {wingDamageIncrease1st}% of Damage",
-            "de": "Erhöht den Schaden um {wingDamageIncrease1st}%",
-            "es": "Aumenta el daño de {wingDamageIncrease1st}% of",
-            "id": "Meningkatkan Kerusakan {wingDamageIncrease1st}% of",
-            "ja": "ダメージ {wingDamageIncrease1st}%増加",
-            "pl": "Zwiększa obrażenia o {wingDamageIncrease1st}%",
-            "pt": "Aumentar o dano de {wingDamageIncrease1st}% of",
-            "ru": "Увеличение урона {wingDamageIncrease1st}% of",
-            "tl": "Dagdagan ang {wingDamageIncrease1st}% of Pinsala",
-            "uk": "Збільшення шкоди на {wingDamageIncrease1st}% of",
-            "zh-TW": "增加 {wingDamageIncrease1st}% of 傷害"
+            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
+            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {wingDamageAbsorb1st}% of Damage",
-            "de": "Absorbiert {wingDamageAbsorb1st}% des Schadens",
-            "es": "Absorber daño {wingDamageAbsorb1st}% of",
-            "id": "Menyerap Kerusakan {wingDamageAbsorb1st}% of",
-            "ja": "ダメージ {wingDamageAbsorb1st}%吸収",
-            "pl": "Pochłania {wingDamageAbsorb1st}% obrażeń",
-            "pt": "Absorver Dano {wingDamageAbsorb1st}% of",
-            "ru": "Поглощение {wingDamageAbsorb1st}% of урона",
-            "tl": "Isipsip ang {wingDamageAbsorb1st}% of Pinsala",
-            "uk": "Поглинання шкоди {wingDamageAbsorb1st}% of",
-            "zh-TW": "吸收{wingDamageAbsorb1st}% of傷害"
+            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
           }
         },
         {
@@ -1434,32 +1434,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {wingDamageIncrease2nd}% of Damage",
-            "de": "Erhöht den Schaden um {wingDamageIncrease2nd}%",
-            "es": "Aumenta el daño de {wingDamageIncrease2nd}% of",
-            "id": "Meningkatkan Kerusakan {wingDamageIncrease2nd}% of",
-            "ja": "ダメージ {wingDamageIncrease2nd}%増加",
-            "pl": "Zwiększa obrażenia o {wingDamageIncrease2nd}%",
-            "pt": "Aumentar o dano de {wingDamageIncrease2nd}% of",
-            "ru": "Увеличение урона {wingDamageIncrease2nd}% of",
-            "tl": "Dagdagan ang {wingDamageIncrease2nd}% of Pinsala",
-            "uk": "Збільшення шкоди на {wingDamageIncrease2nd}% of",
-            "zh-TW": "增加 {wingDamageIncrease2nd}% of 傷害"
+            "en": "Increase {table:wingDamageIncrease2nd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease2nd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease2nd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease2nd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease2nd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease2nd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease2nd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease2nd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease2nd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease2nd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease2nd}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {wingDamageAbsorb2nd}% of Damage",
-            "de": "Absorbiert {wingDamageAbsorb2nd}% des Schadens",
-            "es": "Absorber daño {wingDamageAbsorb2nd}% of",
-            "id": "Menyerap Kerusakan {wingDamageAbsorb2nd}% of",
-            "ja": "ダメージ {wingDamageAbsorb2nd}%吸収",
-            "pl": "Pochłania {wingDamageAbsorb2nd}% obrażeń",
-            "pt": "Absorver Dano {wingDamageAbsorb2nd}% of",
-            "ru": "Поглощение {wingDamageAbsorb2nd}% of урона",
-            "tl": "Isipsip ang {wingDamageAbsorb2nd}% of Pinsala",
-            "uk": "Поглинання шкоди {wingDamageAbsorb2nd}% of",
-            "zh-TW": "吸收{wingDamageAbsorb2nd}% of傷害"
+            "en": "Absorb {table:wingDamageAbsorb2nd}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb2nd}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb2nd}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb2nd}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb2nd}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb2nd}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb2nd}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb2nd}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb2nd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb2nd}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb2nd}% of傷害"
           }
         },
         {
@@ -1505,32 +1505,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {wingDamageIncrease3rd}% of Damage",
-            "de": "Erhöht den Schaden um {wingDamageIncrease3rd}%",
-            "es": "Aumenta el daño de {wingDamageIncrease3rd}% of",
-            "id": "Meningkatkan Kerusakan {wingDamageIncrease3rd}% of",
-            "ja": "ダメージ {wingDamageIncrease3rd}%増加",
-            "pl": "Zwiększa obrażenia o {wingDamageIncrease3rd}%",
-            "pt": "Aumentar o dano de {wingDamageIncrease3rd}% of",
-            "ru": "Увеличение урона {wingDamageIncrease3rd}% of",
-            "tl": "Dagdagan ang {wingDamageIncrease3rd}% of Pinsala",
-            "uk": "Збільшення шкоди на {wingDamageIncrease3rd}% of",
-            "zh-TW": "增加 {wingDamageIncrease3rd}% of 傷害"
+            "en": "Increase {table:wingDamageIncrease3rd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease3rd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease3rd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease3rd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease3rd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease3rd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease3rd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease3rd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease3rd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease3rd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease3rd}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {wingDamageAbsorb3rd}% of Damage",
-            "de": "Absorbiert {wingDamageAbsorb3rd}% des Schadens",
-            "es": "Absorber daño {wingDamageAbsorb3rd}% of",
-            "id": "Menyerap Kerusakan {wingDamageAbsorb3rd}% of",
-            "ja": "ダメージ {wingDamageAbsorb3rd}%吸収",
-            "pl": "Pochłania {wingDamageAbsorb3rd}% obrażeń",
-            "pt": "Absorver Dano {wingDamageAbsorb3rd}% of",
-            "ru": "Поглощение {wingDamageAbsorb3rd}% of урона",
-            "tl": "Isipsip ang {wingDamageAbsorb3rd}% of Pinsala",
-            "uk": "Поглинання шкоди {wingDamageAbsorb3rd}% of",
-            "zh-TW": "吸收{wingDamageAbsorb3rd}% of傷害"
+            "en": "Absorb {table:wingDamageAbsorb3rd}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb3rd}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb3rd}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb3rd}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb3rd}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb3rd}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb3rd}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb3rd}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb3rd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb3rd}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb3rd}% of傷害"
           }
         },
         {
@@ -1673,32 +1673,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {capeDamageIncrease}% of Damage",
-            "de": "Erhöht den Schaden um {capeDamageIncrease}%",
-            "es": "Aumenta el daño de {capeDamageIncrease}% of",
-            "id": "Meningkatkan Kerusakan {capeDamageIncrease}% of",
-            "ja": "ダメージ {capeDamageIncrease}%増加",
-            "pl": "Zwiększa obrażenia o {capeDamageIncrease}%",
-            "pt": "Aumentar o dano de {capeDamageIncrease}% of",
-            "ru": "Увеличение урона {capeDamageIncrease}% of",
-            "tl": "Dagdagan ang {capeDamageIncrease}% of Pinsala",
-            "uk": "Збільшення шкоди на {capeDamageIncrease}% of",
-            "zh-TW": "增加 {capeDamageIncrease}% of 傷害"
+            "en": "Increase {table:capeDamageIncrease}% of Damage",
+            "de": "Erhöht den Schaden um {table:capeDamageIncrease}%",
+            "es": "Aumenta el daño de {table:capeDamageIncrease}% of",
+            "id": "Meningkatkan Kerusakan {table:capeDamageIncrease}% of",
+            "ja": "ダメージ {table:capeDamageIncrease}%増加",
+            "pl": "Zwiększa obrażenia o {table:capeDamageIncrease}%",
+            "pt": "Aumentar o dano de {table:capeDamageIncrease}% of",
+            "ru": "Увеличение урона {table:capeDamageIncrease}% of",
+            "tl": "Dagdagan ang {table:capeDamageIncrease}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:capeDamageIncrease}% of",
+            "zh-TW": "增加 {table:capeDamageIncrease}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {capeOfFighterDamageAbsorb}% of Damage",
-            "de": "Absorbiert {capeOfFighterDamageAbsorb}% des Schadens",
-            "es": "Absorber daño {capeOfFighterDamageAbsorb}% of",
-            "id": "Menyerap Kerusakan {capeOfFighterDamageAbsorb}% of",
-            "ja": "ダメージ {capeOfFighterDamageAbsorb}%吸収",
-            "pl": "Pochłania {capeOfFighterDamageAbsorb}% obrażeń",
-            "pt": "Absorver Dano {capeOfFighterDamageAbsorb}% of",
-            "ru": "Поглощение {capeOfFighterDamageAbsorb}% of урона",
-            "tl": "Isipsip ang {capeOfFighterDamageAbsorb}% of Pinsala",
-            "uk": "Поглинання шкоди {capeOfFighterDamageAbsorb}% of",
-            "zh-TW": "吸收{capeOfFighterDamageAbsorb}% of傷害"
+            "en": "Absorb {table:capeOfFighterDamageAbsorb}% of Damage",
+            "de": "Absorbiert {table:capeOfFighterDamageAbsorb}% des Schadens",
+            "es": "Absorber daño {table:capeOfFighterDamageAbsorb}% of",
+            "id": "Menyerap Kerusakan {table:capeOfFighterDamageAbsorb}% of",
+            "ja": "ダメージ {table:capeOfFighterDamageAbsorb}%吸収",
+            "pl": "Pochłania {table:capeOfFighterDamageAbsorb}% obrażeń",
+            "pt": "Absorver Dano {table:capeOfFighterDamageAbsorb}% of",
+            "ru": "Поглощение {table:capeOfFighterDamageAbsorb}% of урона",
+            "tl": "Isipsip ang {table:capeOfFighterDamageAbsorb}% of Pinsala",
+            "uk": "Поглинання шкоди {table:capeOfFighterDamageAbsorb}% of",
+            "zh-TW": "吸收{table:capeOfFighterDamageAbsorb}% of傷害"
           }
         }
       ],
@@ -1729,32 +1729,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {wingDamageIncrease3rd}% of Damage",
-            "de": "Erhöht den Schaden um {wingDamageIncrease3rd}%",
-            "es": "Aumenta el daño de {wingDamageIncrease3rd}% of",
-            "id": "Meningkatkan Kerusakan {wingDamageIncrease3rd}% of",
-            "ja": "ダメージ {wingDamageIncrease3rd}%増加",
-            "pl": "Zwiększa obrażenia o {wingDamageIncrease3rd}%",
-            "pt": "Aumentar o dano de {wingDamageIncrease3rd}% of",
-            "ru": "Увеличение урона {wingDamageIncrease3rd}% of",
-            "tl": "Dagdagan ang {wingDamageIncrease3rd}% of Pinsala",
-            "uk": "Збільшення шкоди на {wingDamageIncrease3rd}% of",
-            "zh-TW": "增加 {wingDamageIncrease3rd}% of 傷害"
+            "en": "Increase {table:wingDamageIncrease3rd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease3rd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease3rd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease3rd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease3rd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease3rd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease3rd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease3rd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease3rd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease3rd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease3rd}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {capeDamageAbsorb3rd}% of Damage",
-            "de": "Absorbiert {capeDamageAbsorb3rd}% des Schadens",
-            "es": "Absorber daño {capeDamageAbsorb3rd}% of",
-            "id": "Menyerap Kerusakan {capeDamageAbsorb3rd}% of",
-            "ja": "ダメージ {capeDamageAbsorb3rd}%吸収",
-            "pl": "Pochłania {capeDamageAbsorb3rd}% obrażeń",
-            "pt": "Absorver Dano {capeDamageAbsorb3rd}% of",
-            "ru": "Поглощение {capeDamageAbsorb3rd}% of урона",
-            "tl": "Isipsip ang {capeDamageAbsorb3rd}% of Pinsala",
-            "uk": "Поглинання шкоди {capeDamageAbsorb3rd}% of",
-            "zh-TW": "吸收{capeDamageAbsorb3rd}% of傷害"
+            "en": "Absorb {table:capeDamageAbsorb3rd}% of Damage",
+            "de": "Absorbiert {table:capeDamageAbsorb3rd}% des Schadens",
+            "es": "Absorber daño {table:capeDamageAbsorb3rd}% of",
+            "id": "Menyerap Kerusakan {table:capeDamageAbsorb3rd}% of",
+            "ja": "ダメージ {table:capeDamageAbsorb3rd}%吸収",
+            "pl": "Pochłania {table:capeDamageAbsorb3rd}% obrażeń",
+            "pt": "Absorver Dano {table:capeDamageAbsorb3rd}% of",
+            "ru": "Поглощение {table:capeDamageAbsorb3rd}% of урона",
+            "tl": "Isipsip ang {table:capeDamageAbsorb3rd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:capeDamageAbsorb3rd}% of",
+            "zh-TW": "吸收{table:capeDamageAbsorb3rd}% of傷害"
           }
         },
         {
@@ -2553,32 +2553,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {capeDamageIncrease}% of Damage",
-            "de": "Erhöht den Schaden um {capeDamageIncrease}%",
-            "es": "Aumenta el daño de {capeDamageIncrease}% of",
-            "id": "Meningkatkan Kerusakan {capeDamageIncrease}% of",
-            "ja": "ダメージ {capeDamageIncrease}%増加",
-            "pl": "Zwiększa obrażenia o {capeDamageIncrease}%",
-            "pt": "Aumentar o dano de {capeDamageIncrease}% of",
-            "ru": "Увеличение урона {capeDamageIncrease}% of",
-            "tl": "Dagdagan ang {capeDamageIncrease}% of Pinsala",
-            "uk": "Збільшення шкоди на {capeDamageIncrease}% of",
-            "zh-TW": "增加 {capeDamageIncrease}% of 傷害"
+            "en": "Increase {table:capeDamageIncrease}% of Damage",
+            "de": "Erhöht den Schaden um {table:capeDamageIncrease}%",
+            "es": "Aumenta el daño de {table:capeDamageIncrease}% of",
+            "id": "Meningkatkan Kerusakan {table:capeDamageIncrease}% of",
+            "ja": "ダメージ {table:capeDamageIncrease}%増加",
+            "pl": "Zwiększa obrażenia o {table:capeDamageIncrease}%",
+            "pt": "Aumentar o dano de {table:capeDamageIncrease}% of",
+            "ru": "Увеличение урона {table:capeDamageIncrease}% of",
+            "tl": "Dagdagan ang {table:capeDamageIncrease}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:capeDamageIncrease}% of",
+            "zh-TW": "增加 {table:capeDamageIncrease}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {smallCapeDamageAbsorb}% of Damage",
-            "de": "Absorbiert {smallCapeDamageAbsorb}% des Schadens",
-            "es": "Absorber daño {smallCapeDamageAbsorb}% of",
-            "id": "Menyerap Kerusakan {smallCapeDamageAbsorb}% of",
-            "ja": "ダメージ {smallCapeDamageAbsorb}%吸収",
-            "pl": "Pochłania {smallCapeDamageAbsorb}% obrażeń",
-            "pt": "Absorver Dano {smallCapeDamageAbsorb}% of",
-            "ru": "Поглощение {smallCapeDamageAbsorb}% of урона",
-            "tl": "Isipsip ang {smallCapeDamageAbsorb}% of Pinsala",
-            "uk": "Поглинання шкоди {smallCapeDamageAbsorb}% of",
-            "zh-TW": "吸收{smallCapeDamageAbsorb}% of傷害"
+            "en": "Absorb {table:smallCapeDamageAbsorb}% of Damage",
+            "de": "Absorbiert {table:smallCapeDamageAbsorb}% des Schadens",
+            "es": "Absorber daño {table:smallCapeDamageAbsorb}% of",
+            "id": "Menyerap Kerusakan {table:smallCapeDamageAbsorb}% of",
+            "ja": "ダメージ {table:smallCapeDamageAbsorb}%吸収",
+            "pl": "Pochłania {table:smallCapeDamageAbsorb}% obrażeń",
+            "pt": "Absorver Dano {table:smallCapeDamageAbsorb}% of",
+            "ru": "Поглощение {table:smallCapeDamageAbsorb}% of урона",
+            "tl": "Isipsip ang {table:smallCapeDamageAbsorb}% of Pinsala",
+            "uk": "Поглинання шкоди {table:smallCapeDamageAbsorb}% of",
+            "zh-TW": "吸收{table:smallCapeDamageAbsorb}% of傷害"
           }
         },
         {
@@ -2630,32 +2630,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {wingDamageIncrease1st}% of Damage",
-            "de": "Erhöht den Schaden um {wingDamageIncrease1st}%",
-            "es": "Aumenta el daño de {wingDamageIncrease1st}% of",
-            "id": "Meningkatkan Kerusakan {wingDamageIncrease1st}% of",
-            "ja": "ダメージ {wingDamageIncrease1st}%増加",
-            "pl": "Zwiększa obrażenia o {wingDamageIncrease1st}%",
-            "pt": "Aumentar o dano de {wingDamageIncrease1st}% of",
-            "ru": "Увеличение урона {wingDamageIncrease1st}% of",
-            "tl": "Dagdagan ang {wingDamageIncrease1st}% of Pinsala",
-            "uk": "Збільшення шкоди на {wingDamageIncrease1st}% of",
-            "zh-TW": "增加 {wingDamageIncrease1st}% of 傷害"
+            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
+            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {wingDamageAbsorb1st}% of Damage",
-            "de": "Absorbiert {wingDamageAbsorb1st}% des Schadens",
-            "es": "Absorber daño {wingDamageAbsorb1st}% of",
-            "id": "Menyerap Kerusakan {wingDamageAbsorb1st}% of",
-            "ja": "ダメージ {wingDamageAbsorb1st}%吸収",
-            "pl": "Pochłania {wingDamageAbsorb1st}% obrażeń",
-            "pt": "Absorver Dano {wingDamageAbsorb1st}% of",
-            "ru": "Поглощение {wingDamageAbsorb1st}% of урона",
-            "tl": "Isipsip ang {wingDamageAbsorb1st}% of Pinsala",
-            "uk": "Поглинання шкоди {wingDamageAbsorb1st}% of",
-            "zh-TW": "吸收{wingDamageAbsorb1st}% of傷害"
+            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
           }
         },
         {
@@ -2707,32 +2707,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {wingDamageIncrease1st}% of Damage",
-            "de": "Erhöht den Schaden um {wingDamageIncrease1st}%",
-            "es": "Aumenta el daño de {wingDamageIncrease1st}% of",
-            "id": "Meningkatkan Kerusakan {wingDamageIncrease1st}% of",
-            "ja": "ダメージ {wingDamageIncrease1st}%増加",
-            "pl": "Zwiększa obrażenia o {wingDamageIncrease1st}%",
-            "pt": "Aumentar o dano de {wingDamageIncrease1st}% of",
-            "ru": "Увеличение урона {wingDamageIncrease1st}% of",
-            "tl": "Dagdagan ang {wingDamageIncrease1st}% of Pinsala",
-            "uk": "Збільшення шкоди на {wingDamageIncrease1st}% of",
-            "zh-TW": "增加 {wingDamageIncrease1st}% of 傷害"
+            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
+            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {wingDamageAbsorb1st}% of Damage",
-            "de": "Absorbiert {wingDamageAbsorb1st}% des Schadens",
-            "es": "Absorber daño {wingDamageAbsorb1st}% of",
-            "id": "Menyerap Kerusakan {wingDamageAbsorb1st}% of",
-            "ja": "ダメージ {wingDamageAbsorb1st}%吸収",
-            "pl": "Pochłania {wingDamageAbsorb1st}% obrażeń",
-            "pt": "Absorver Dano {wingDamageAbsorb1st}% of",
-            "ru": "Поглощение {wingDamageAbsorb1st}% of урона",
-            "tl": "Isipsip ang {wingDamageAbsorb1st}% of Pinsala",
-            "uk": "Поглинання шкоди {wingDamageAbsorb1st}% of",
-            "zh-TW": "吸收{wingDamageAbsorb1st}% of傷害"
+            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
           }
         },
         {
@@ -2784,32 +2784,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {wingDamageIncrease1st}% of Damage",
-            "de": "Erhöht den Schaden um {wingDamageIncrease1st}%",
-            "es": "Aumenta el daño de {wingDamageIncrease1st}% of",
-            "id": "Meningkatkan Kerusakan {wingDamageIncrease1st}% of",
-            "ja": "ダメージ {wingDamageIncrease1st}%増加",
-            "pl": "Zwiększa obrażenia o {wingDamageIncrease1st}%",
-            "pt": "Aumentar o dano de {wingDamageIncrease1st}% of",
-            "ru": "Увеличение урона {wingDamageIncrease1st}% of",
-            "tl": "Dagdagan ang {wingDamageIncrease1st}% of Pinsala",
-            "uk": "Збільшення шкоди на {wingDamageIncrease1st}% of",
-            "zh-TW": "增加 {wingDamageIncrease1st}% of 傷害"
+            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
+            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {wingDamageAbsorb1st}% of Damage",
-            "de": "Absorbiert {wingDamageAbsorb1st}% des Schadens",
-            "es": "Absorber daño {wingDamageAbsorb1st}% of",
-            "id": "Menyerap Kerusakan {wingDamageAbsorb1st}% of",
-            "ja": "ダメージ {wingDamageAbsorb1st}%吸収",
-            "pl": "Pochłania {wingDamageAbsorb1st}% obrażeń",
-            "pt": "Absorver Dano {wingDamageAbsorb1st}% of",
-            "ru": "Поглощение {wingDamageAbsorb1st}% of урона",
-            "tl": "Isipsip ang {wingDamageAbsorb1st}% of Pinsala",
-            "uk": "Поглинання шкоди {wingDamageAbsorb1st}% of",
-            "zh-TW": "吸收{wingDamageAbsorb1st}% of傷害"
+            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
           }
         },
         {
@@ -2862,32 +2862,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {wingDamageIncrease1st}% of Damage",
-            "de": "Erhöht den Schaden um {wingDamageIncrease1st}%",
-            "es": "Aumenta el daño de {wingDamageIncrease1st}% of",
-            "id": "Meningkatkan Kerusakan {wingDamageIncrease1st}% of",
-            "ja": "ダメージ {wingDamageIncrease1st}%増加",
-            "pl": "Zwiększa obrażenia o {wingDamageIncrease1st}%",
-            "pt": "Aumentar o dano de {wingDamageIncrease1st}% of",
-            "ru": "Увеличение урона {wingDamageIncrease1st}% of",
-            "tl": "Dagdagan ang {wingDamageIncrease1st}% of Pinsala",
-            "uk": "Збільшення шкоди на {wingDamageIncrease1st}% of",
-            "zh-TW": "增加 {wingDamageIncrease1st}% of 傷害"
+            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
+            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {wingDamageAbsorb1st}% of Damage",
-            "de": "Absorbiert {wingDamageAbsorb1st}% des Schadens",
-            "es": "Absorber daño {wingDamageAbsorb1st}% of",
-            "id": "Menyerap Kerusakan {wingDamageAbsorb1st}% of",
-            "ja": "ダメージ {wingDamageAbsorb1st}%吸収",
-            "pl": "Pochłania {wingDamageAbsorb1st}% obrażeń",
-            "pt": "Absorver Dano {wingDamageAbsorb1st}% of",
-            "ru": "Поглощение {wingDamageAbsorb1st}% of урона",
-            "tl": "Isipsip ang {wingDamageAbsorb1st}% of Pinsala",
-            "uk": "Поглинання шкоди {wingDamageAbsorb1st}% of",
-            "zh-TW": "吸收{wingDamageAbsorb1st}% of傷害"
+            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
           }
         },
         {
@@ -2940,32 +2940,32 @@
       "description": [
         {
           "text": {
-            "en": "Increase {capeDamageIncrease}% of Damage",
-            "de": "Erhöht den Schaden um {capeDamageIncrease}%",
-            "es": "Aumenta el daño de {capeDamageIncrease}% of",
-            "id": "Meningkatkan Kerusakan {capeDamageIncrease}% of",
-            "ja": "ダメージ {capeDamageIncrease}%増加",
-            "pl": "Zwiększa obrażenia o {capeDamageIncrease}%",
-            "pt": "Aumentar o dano de {capeDamageIncrease}% of",
-            "ru": "Увеличение урона {capeDamageIncrease}% of",
-            "tl": "Dagdagan ang {capeDamageIncrease}% of Pinsala",
-            "uk": "Збільшення шкоди на {capeDamageIncrease}% of",
-            "zh-TW": "增加 {capeDamageIncrease}% of 傷害"
+            "en": "Increase {table:capeDamageIncrease}% of Damage",
+            "de": "Erhöht den Schaden um {table:capeDamageIncrease}%",
+            "es": "Aumenta el daño de {table:capeDamageIncrease}% of",
+            "id": "Meningkatkan Kerusakan {table:capeDamageIncrease}% of",
+            "ja": "ダメージ {table:capeDamageIncrease}%増加",
+            "pl": "Zwiększa obrażenia o {table:capeDamageIncrease}%",
+            "pt": "Aumentar o dano de {table:capeDamageIncrease}% of",
+            "ru": "Увеличение урона {table:capeDamageIncrease}% of",
+            "tl": "Dagdagan ang {table:capeDamageIncrease}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:capeDamageIncrease}% of",
+            "zh-TW": "增加 {table:capeDamageIncrease}% of 傷害"
           }
         },
         {
           "text": {
-            "en": "Absorb {smallCapeDamageAbsorb}% of Damage",
-            "de": "Absorbiert {smallCapeDamageAbsorb}% des Schadens",
-            "es": "Absorber daño {smallCapeDamageAbsorb}% of",
-            "id": "Menyerap Kerusakan {smallCapeDamageAbsorb}% of",
-            "ja": "ダメージ {smallCapeDamageAbsorb}%吸収",
-            "pl": "Pochłania {smallCapeDamageAbsorb}% obrażeń",
-            "pt": "Absorver Dano {smallCapeDamageAbsorb}% of",
-            "ru": "Поглощение {smallCapeDamageAbsorb}% of урона",
-            "tl": "Isipsip ang {smallCapeDamageAbsorb}% of Pinsala",
-            "uk": "Поглинання шкоди {smallCapeDamageAbsorb}% of",
-            "zh-TW": "吸收{smallCapeDamageAbsorb}% of傷害"
+            "en": "Absorb {table:smallCapeDamageAbsorb}% of Damage",
+            "de": "Absorbiert {table:smallCapeDamageAbsorb}% des Schadens",
+            "es": "Absorber daño {table:smallCapeDamageAbsorb}% of",
+            "id": "Menyerap Kerusakan {table:smallCapeDamageAbsorb}% of",
+            "ja": "ダメージ {table:smallCapeDamageAbsorb}%吸収",
+            "pl": "Pochłania {table:smallCapeDamageAbsorb}% obrażeń",
+            "pt": "Absorver Dano {table:smallCapeDamageAbsorb}% of",
+            "ru": "Поглощение {table:smallCapeDamageAbsorb}% of урона",
+            "tl": "Isipsip ang {table:smallCapeDamageAbsorb}% of Pinsala",
+            "uk": "Поглинання шкоди {table:smallCapeDamageAbsorb}% of",
+            "zh-TW": "吸收{table:smallCapeDamageAbsorb}% of傷害"
           }
         },
         {
