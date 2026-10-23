@@ -6,6 +6,7 @@
 
 #include "MuEditorUI.h"
 #include "MuEditorWindowIds.h"
+#include "ToolGroups.h"
 #include "../MuEditor/Core/MuEditorPlatformWindows.h"
 #include "imgui_internal.h"
 
@@ -22,12 +23,6 @@ constexpr float ItemBrowserWidthShare = 0.35f;
 constexpr char DockSpaceName[] = "ToolWindows";
 // The editor window's dock space, as last submitted; 0 before.
 ImGuiID g_dockSpace = 0;
-// The tools that show the item the browser selects, in their tab order.
-constexpr const char* ItemToolWindows[] = {
-    MuEditor::WindowIds::ItemBasics,     MuEditor::WindowIds::ItemRequirements, MuEditor::WindowIds::ItemRules,
-    MuEditor::WindowIds::ItemCategories, MuEditor::WindowIds::ItemModel,        MuEditor::WindowIds::ItemGlowColors,
-    MuEditor::WindowIds::ItemFormulas,   MuEditor::WindowIds::ItemChecks,       MuEditor::WindowIds::ItemTranslations};
-
 void BuildDefaultLayout(ImGuiID dockSpace, ImVec2 size)
 {
     ImGui::DockBuilderRemoveNode(dockSpace);
@@ -41,11 +36,12 @@ void BuildDefaultLayout(ImGuiID dockSpace, ImVec2 size)
     ImGuiID otherTools = 0;
     const ImGuiID browser =
         ImGui::DockBuilderSplitNode(tools, ImGuiDir_Left, ItemBrowserWidthShare, nullptr, &otherTools);
-    ImGui::DockBuilderDockWindow(MuEditor::WindowIds::ItemBrowser, browser);
+    const MuEditor::ToolGroup& itemTools = MuEditor::GetItemTools();
+    ImGui::DockBuilderDockWindow(itemTools.browser.windowId, browser);
     // Also the windows that are closed: they open in their place.
-    for (const char* window : ItemToolWindows)
+    for (const MuEditor::ToolWindowEntry& tool : itemTools.tools)
     {
-        ImGui::DockBuilderDockWindow(window, otherTools);
+        ImGui::DockBuilderDockWindow(tool.windowId, otherTools);
     }
     for (const char* window :
          {MuEditor::WindowIds::SkillEditor, MuEditor::WindowIds::DevEditor, MuEditor::WindowIds::MapEditor,
@@ -195,22 +191,32 @@ void PrepareToolWindow()
 
 void DockBesideItemTools(const char* windowId)
 {
+    DockInGroup(windowId, GetItemTools());
+}
+
+void DockInGroup(const char* windowId, const ToolGroup& group)
+{
     if (ImGui::FindWindowByName(windowId) != nullptr || ImGui::FindWindowSettingsByID(ImHashStr(windowId)) != nullptr)
     {
         return;
     }
     // A neighbour also by its place in imgui.ini, while it is not open.
-    for (const char* neighbour : ItemToolWindows)
+    for (const ToolWindowEntry& neighbour : group.tools)
     {
-        if (const ImGuiDockNode* node = FindDockNode(neighbour))
+        if (const ImGuiDockNode* node = FindDockNode(neighbour.windowId))
         {
             ImGui::SetNextWindowDockID(node->ID, ImGuiCond_FirstUseEver);
             return;
         }
     }
-    if (const ImGuiDockNode* beside = BesideBrowser(FindDockNode(MuEditor::WindowIds::ItemBrowser)))
+    if (const ImGuiDockNode* beside = BesideBrowser(FindDockNode(group.browser.windowId)))
     {
         ImGui::SetNextWindowDockID(beside->ID, ImGuiCond_FirstUseEver);
+        return;
+    }
+    if (group.dockFallback != nullptr)
+    {
+        DockInGroup(windowId, *group.dockFallback);
     }
 }
 } // namespace MuEditor::Layout
