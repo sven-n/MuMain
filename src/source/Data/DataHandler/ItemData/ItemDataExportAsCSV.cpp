@@ -22,6 +22,7 @@
 #define PRINT_FIELD_Byte(item, name) fprintf(csvFp, ",%d", (item).name)
 #define PRINT_FIELD_Word(item, name) fprintf(csvFp, ",%d", (item).name)
 #define PRINT_FIELD_Int(item, name) fprintf(csvFp, ",%d", (item).name)
+#define PRINT_FIELD_ByteInFile(item, name) fprintf(csvFp, ",%d", (item).name)
 
 #define CSV_PRINT_SIMPLE(name, type, arraySize, width, i18nName) PRINT_FIELD_##type(item, name);
 #define CSV_PRINT_ARRAY(nameWithIndex, baseName, index, type, width, i18nName) fprintf(csvFp, ",%d", item.baseName[index]);
