@@ -40,10 +40,26 @@ constexpr TooltipVariant TooltipVariants[] = {
          params.HarmonyOptionType = 1;
          params.HarmonyOptionLevel = 13;
      }},
-    // Not at full durability: a stack's count, a pet's life.
-    {"count", [](ItemCreationParams& params) { params.Durability = 3; }},
-    // An expired timed item (one that is not expired shows the time it expires).
-    {"timed",
+    // Each of the full item's parts alone, since a line can depend on one of them only.
+    {"luck", [](ItemCreationParams& params) { params.WithLuck = true; }},
+    {"skill", [](ItemCreationParams& params) { params.WithSkill = true; }},
+    {"option",
+     [](ItemCreationParams& params)
+     {
+         params.WithOption = true;
+         params.OptionLevel = 1;
+     }},
+    {"excellent",
+     [](ItemCreationParams& params)
+     {
+         params.HasExcellentOption = true;
+         params.ExcellentFlags = 1;
+     }},
+    // A worn and a broken item; for a stack, its count (one, none).
+    {"durability 1", [](ItemCreationParams& params) { params.Durability = 1; }},
+    {"durability 0", [](ItemCreationParams& params) { params.Durability = 0; }},
+    // A timed item that isn't expired shows its end date, which depends on the time zone; the tests check it apart.
+    {"expired",
      [](ItemCreationParams& params)
      {
          params.WithExpiration = true;

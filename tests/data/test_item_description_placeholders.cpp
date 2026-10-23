@@ -400,7 +400,19 @@ TEST_CASE("Wings of a tier that split evenly are told they disagree, none of the
         CHECK(issues.front().message.starts_with("the third-tier wings of group 12 don't agree on their wing lines: "));
     }
 
-    // Wings without lines count as a set of lines too: two new second-tier capes without them, next to one with them.
+    // Wings without lines don't take a side in a tie of the others.
+    std::vector<ItemDefinition> withLineless = {wing(36, "Increase {table:wingDamage}%"),
+                                                wing(37, "Increase {table:other}%"), wing(200, "x")};
+    withLineless.back().description.clear();
+    const std::vector<ItemDataIssue> tie = CheckTableUses(withLineless);
+    REQUIRE(tie.size() == 1);
+    CHECK(tie.front().message.starts_with("the third-tier wings of group 12 don't agree on their wing lines: "));
+}
+
+TEST_CASE("Wings without lines never set the lines of their tier [data][items]")
+{
+    // Two new second-tier capes without lines, next to Cape of Fighter with them: the new ones are pointed out, though
+    // they are more.
     auto cape = [](short number, const char* text)
     {
         ItemDefinition item = MakeWing(number, WingTier::Second, text);
@@ -411,8 +423,25 @@ TEST_CASE("Wings of a tier that split evenly are told they disagree, none of the
     capes[1].description.clear();
     capes[2].description.clear();
     const std::vector<ItemDataIssue> capeIssues = CheckTableUses(capes);
-    REQUIRE(capeIssues.size() == 1);
-    CHECK(capeIssues.front().number == 49);
+    REQUIRE(capeIssues.size() == 2);
+    CHECK(capeIssues[0].number == 201);
+    CHECK(capeIssues[1].number == 202);
+
+    // The same for a whole batch: three new third-tier wings without lines next to two with them.
+    const std::string lines = "Increase {table:wingDamage}% of Damage";
+    std::vector<ItemDefinition> wings = {MakeWing(36, WingTier::Third, lines), MakeWing(37, WingTier::Third, lines)};
+    for (short number = 300; number < 303; ++number)
+    {
+        wings.push_back(MakeWing(number, WingTier::Third, "x"));
+        wings.back().description.clear();
+    }
+    const std::vector<ItemDataIssue> issues = CheckTableUses(wings);
+    REQUIRE(issues.size() == 3);
+    for (const ItemDataIssue& issue : issues)
+    {
+        CHECK(issue.number >= 300);
+        CHECK(issue.message.find("it has 0 lines naming no table") != std::string::npos);
+    }
 }
 
 TEST_CASE("A wing alone in its tier and group is compared with the other groups' wings of its tier [data][items]")
