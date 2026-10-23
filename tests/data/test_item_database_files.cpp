@@ -831,7 +831,7 @@ TEST_CASE("The second item chain's tooltip texts keep their translations [data][
             }
         }
     }
-    CHECK(checked > 600);
+    CHECK(checked >= 1050);
 }
 
 // The texts the tooltip code wrote for these items are their descriptions now, in every UI language.
