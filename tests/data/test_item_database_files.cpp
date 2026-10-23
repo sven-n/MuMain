@@ -446,6 +446,9 @@ TEST_CASE("The wings', capes' and pets' tooltip values come from their data as f
     const ItemStatsLoadResult stats = LoadItemStatsFile(DataDirectory / "Items" / "Stats" / ItemStatsFileName);
     REQUIRE_FALSE(HasErrors(stats.issues));
     const ItemStatProfiles profiles(stats.file);
+    // The test switches the UI language, and once a test has loaded the item data every switch refills
+    // ItemAttribute: it needs an item table of its own.
+    ClientDataScope client(ShippedClientDirectory);
     int compared = 0;
     for (const ItemDefinition& item : result.items)
     {
