@@ -31,13 +31,16 @@ std::vector<int> FindStatProfileUsers(std::string_view name);
 std::vector<int> FindStatProfileRules(std::string_view name);
 
 // How many items and profile rules name each stat profile ("" and "default"
-// together), for the lists that show the count beside each name. Counted in
-// one pass, again when the item data changed.
+// together), and which items' descriptions name each level bonus table, for
+// the lists that show the count beside each name. Counted again when the item
+// data changed.
 class ItemStatProfileUseCounts
 {
 public:
     int Items(std::string_view name);
     int Rules(std::string_view name);
+    // The item types whose descriptions name the table, in item type order.
+    const std::vector<int>& DescriptionUsers(std::string_view table);
 
 private:
     using Counts = std::map<std::string, int, std::less<>>;
@@ -46,6 +49,7 @@ private:
 
     Counts m_items;
     Counts m_rules;
+    std::map<std::string, std::vector<int>, std::less<>> m_descriptionUsers;
     int m_version = -1;
 };
 } // namespace MuEditor::Items

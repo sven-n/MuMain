@@ -5,6 +5,7 @@
 #include "ItemStatFileChange.h"
 
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
+#include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Data/GameData/ItemData/ItemType.h"
 
 #include <algorithm>
@@ -57,6 +58,21 @@ bool SameTerms(const ItemStatProfiles& before, const ItemStatProfile& old, const
         }
     }
     return SameRequirementTerms(old.requirements, changed.requirements);
+}
+
+bool DescriptionNamesTable(const ItemDefinition& item, std::string_view table)
+{
+    return std::ranges::any_of(item.description,
+                               [&](const Data::Items::ItemDescriptionLine& line)
+                               {
+                                   if (Data::Items::NamesTable(line.text.GetNeutral(), table))
+                                   {
+                                       return true;
+                                   }
+                                   return std::ranges::any_of(
+                                       line.text.GetTranslations(), [&](const auto& translation)
+                                       { return Data::Items::NamesTable(translation.second, table); });
+                               });
 }
 
 // "" for the default, also when an item names "default".
@@ -134,6 +150,46 @@ void RenameStatProfile(Data::Items::ItemStatFile& file, std::string_view from, c
         if (rule.profile == from)
         {
             rule.profile = to;
+        }
+    }
+}
+
+std::vector<int> FindTableDescriptionUsers(std::span<const ItemDefinition> slots, std::string_view table)
+{
+    std::vector<int> items;
+    for (const ItemDefinition& item : slots)
+    {
+        if (item.Exists() && DescriptionNamesTable(item, table))
+        {
+            items.push_back(Data::Items::MakeItemType(item.group, item.number));
+        }
+    }
+    std::ranges::sort(items);
+    return items;
+}
+
+void RenameTableInDescriptions(std::span<const ItemDefinition> slots, std::vector<ItemDefinition>& changed,
+                               std::string_view from, std::string_view to)
+{
+    for (const ItemDefinition& item : slots)
+    {
+        if (!item.Exists() || !DescriptionNamesTable(item, from))
+        {
+            continue;
+        }
+        const auto found = std::ranges::find_if(changed, [&](const ItemDefinition& entry)
+                                                { return entry.group == item.group && entry.number == item.number; });
+        ItemDefinition& renamed = found != changed.end() ? *found : changed.emplace_back(item);
+        for (Data::Items::ItemDescriptionLine& line : renamed.description)
+        {
+            Data::LocalizedString text;
+            text.Set(Data::LocalizedString::NeutralLocale,
+                     Data::Items::RenameTablePlaceholders(line.text.GetNeutral(), from, to));
+            for (const auto& [locale, translation] : line.text.GetTranslations())
+            {
+                text.Set(locale, Data::Items::RenameTablePlaceholders(translation, from, to));
+            }
+            line.text = std::move(text);
         }
     }
 }
