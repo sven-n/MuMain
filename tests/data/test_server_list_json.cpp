@@ -2,6 +2,7 @@
 
 #include "doctest.h"
 
+#include "Core/Text/Utf8.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/ServerListData/ServerListJson.h"
 
@@ -230,7 +231,7 @@ TEST_CASE("ServerListJson: an emoji counts as two UTF-16 units")
 
     // 30 letters and an emoji are exactly 32.
     std::string fits = std::string(30, 'x') + emoji;
-    CHECK_FALSE(Data::ServerList::CutToUtf16Length(fits, Data::ServerList::MaxServerGroupNameLength));
+    CHECK_FALSE(Core::Text::CutToUtf16Length(fits, Data::ServerList::MaxServerGroupNameLength));
     CHECK(fits == std::string(30, 'x') + emoji);
 }
 

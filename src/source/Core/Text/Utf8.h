@@ -16,4 +16,9 @@ namespace Core::Text
 // The other direction, for text that arrives from outside the game (a
 // file path a script asked a screenshot to be written to, for example).
 [[nodiscard]] std::wstring FromUtf8(const std::string& text);
+
+// Cuts UTF-8 text to at most maxUnits UTF-16 units, never inside a
+// character; false when it is not longer. Counted as the client's wide strings
+// hold the text on Windows, the same on every platform: an emoji counts as two.
+bool CutToUtf16Length(std::string& text, std::size_t maxUnits);
 } // namespace Core::Text
