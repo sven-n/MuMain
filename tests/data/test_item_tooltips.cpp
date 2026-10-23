@@ -746,8 +746,8 @@ TEST_CASE("Every item's name at every level is its tooltip's name [data][items][
                 if (++different <= 5)
                 {
                     INFO(definition.group << "/" << definition.number << " +" << level);
-                    CHECK(Core::Text::ToUtf8(name) == Core::Text::ToUtf8(lines.front().text));
-                    CHECK(Core::Text::ToUtf8(buffer) == Core::Text::ToUtf8(name));
+                    CHECK(Core::Text::ToUtf8(name.c_str()) == Core::Text::ToUtf8(lines.front().text.c_str()));
+                    CHECK(Core::Text::ToUtf8(buffer) == Core::Text::ToUtf8(name.c_str()));
                 }
             }
         }
