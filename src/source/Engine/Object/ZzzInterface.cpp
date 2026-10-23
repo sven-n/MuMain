@@ -1448,6 +1448,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
             break;
         case AT_SKILL_TWISTING_SLASH:
         case AT_SKILL_TWISTING_SLASH_STR:
+        case AT_SKILL_TWISTING_SLASH_STR_MG:
         case AT_SKILL_TWISTING_SLASH_MASTERY:
         case AT_SKILL_FIRE_SLASH:
         case AT_SKILL_FIRE_SLASH_STR:
