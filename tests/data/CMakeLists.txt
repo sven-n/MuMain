@@ -58,6 +58,7 @@ target_compile_definitions(server_list_data_tests PRIVATE
 mu_add_test(
     NAME monster_data_tests
     SOURCES
+        test_legacy_monster_kind.cpp
         test_monster_json.cpp
         test_npc_name_text.cpp
     LINK_LIBS
