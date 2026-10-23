@@ -437,7 +437,8 @@ The game shows the name in the UI language and falls back to English. When
 the language changes, the monsters and NPCs on screen are renamed at once.
 Names made of a monster and a player keep theirs until they appear again:
 summons ("Budge Dragon of <owner>"), transformed players and the Kalima gates.
-**Translate item names** does not change monster names.
+**Translate item names** does not change monster names; it only changes the
+monster's name inside a transformation ring's item name.
 
 The original client read the names from `Data/Local/<Language>/NpcName_<Language>.txt`
 in the `[LOGIN] Language`, apart from the UI language.

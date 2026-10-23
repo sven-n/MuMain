@@ -2,6 +2,7 @@
 
 #include "GameLogic/Items/TransformationRing.h"
 
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 
 #include <array>
@@ -21,6 +22,10 @@ const wchar_t* MonsterName(int ringLevel)
     {
         return nullptr;
     }
-    return g_MonsterDatabase.FindDisplayName(FormByLevel[static_cast<std::size_t>(ringLevel)]);
+    const int form = FormByLevel[static_cast<std::size_t>(ringLevel)];
+    // The monster's name is part of an item name, so it follows Translate
+    // item names like the rest of it.
+    return g_ItemDataHandler.GetTranslateItemNames() ? g_MonsterDatabase.FindDisplayName(form)
+                                                     : g_MonsterDatabase.FindEnglishName(form);
 }
 } // namespace GameLogic::Items::TransformationRing

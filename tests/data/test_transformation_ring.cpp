@@ -2,6 +2,7 @@
 
 #include "doctest.h"
 
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "GameLogic/Items/TransformationRing.h"
 
@@ -37,6 +38,20 @@ TEST_CASE("Transformation ring: each level names its form from the monster list 
     CHECK(std::wstring(MonsterName(5)) == L"Death Cow");
     CHECK(MonsterName(6) == nullptr);
     CHECK(MonsterName(-1) == nullptr);
+}
+
+TEST_CASE("Transformation ring: the monster's name follows Translate item names [data][monsters]")
+{
+    MonsterDefinition dragon = Monster(2, "Budge Dragon");
+    dragon.names.Set("pt", "Dragão Lento");
+    const std::vector<MonsterDefinition> monsters = {dragon};
+    g_MonsterDatabase.Build(monsters, "pt");
+
+    using GameLogic::Items::TransformationRing::MonsterName;
+    CHECK(std::wstring(MonsterName(0)) == L"Dragão Lento");
+    g_ItemDataHandler.SetTranslateItemNames(false);
+    CHECK(std::wstring(MonsterName(0)) == L"Budge Dragon");
+    g_ItemDataHandler.SetTranslateItemNames(true);
 }
 
 TEST_CASE("Transformation ring: a form the monster list has no entry for has no name [data][monsters]")
