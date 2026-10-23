@@ -40,10 +40,16 @@ void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatP
 
 // The placeholders of the items' descriptions against the item stat file (`statFile` names it in messages): a name
 // that is neither a built-in value nor "table:" and a table of the file is an error, with the nearest known name when
-// it looks like a typo. A table of the file that neither a stat nor a description uses is a warning. The braces and
-// the translations are checked by ValidateItems.
+// it looks like a typo. The braces and the translations are checked by ValidateItems.
 void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
                                      const std::string& statFile, std::vector<ItemDataIssue>& issues);
+
+// The tables of the item stat file the items use (`statFile` names it in messages). A table that neither a stat nor a
+// description names is a warning. So is a wing (an item with a wing tier) whose description names other tables than
+// most of the other wings of its tier, cape tag and group: the tooltip code chose the wings' damage and absorption
+// lines by the tier, so a new or re-tiered wing that misses them, or keeps another tier's, is pointed out.
+void ValidateTableUses(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
+                       const std::string& statFile, std::vector<ItemDataIssue>& issues);
 
 // Gives the model entries that name a shared model ("model") its file,
 // texture folders and none-blend meshes. A name that is not a shared model
