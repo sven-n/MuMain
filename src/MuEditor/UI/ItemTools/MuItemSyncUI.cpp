@@ -470,6 +470,7 @@ void CMuItemSyncUI::RenderExportResult()
 void CMuItemSyncUI::Compare(const std::filesystem::path& path)
 {
     m_comparingFiles = false;
+    m_toggleFields.clear();
     m_path = ToText(path);
     m_comparedPath = m_path;
     m_result.clear();
@@ -500,11 +501,24 @@ void CMuItemSyncUI::Compare(const std::filesystem::path& path)
     const SyncOptions options{&m_known, locales, [](int itemType) { return IsHeldByCharacter(itemType); }};
     m_diff = BuildItemSyncDiff(BuildClientExchange(), m_file, options);
     m_diffVersion = g_ItemDatabase.GetVersion();
+    std::set<std::string> names;
+    for (const SyncItem& row : m_diff->items)
+    {
+        if (row.change == SyncChange::Changed)
+        {
+            for (const SyncField& field : row.fields)
+            {
+                names.insert(field.field);
+            }
+        }
+    }
+    m_toggleFields.assign(names.begin(), names.end());
 }
 
 void CMuItemSyncUI::CompareFiles(const std::filesystem::path& a, const std::filesystem::path& b)
 {
     m_comparingFiles = true;
+    m_toggleFields.clear();
     m_pathA = ToText(a);
     m_pathB = ToText(b);
     m_comparedA = m_pathA;
@@ -795,29 +809,18 @@ void CMuItemSyncUI::RenderSummary()
 
 void CMuItemSyncUI::RenderFieldToggle()
 {
-    std::set<std::string> names;
-    for (const SyncItem& row : m_diff->items)
-    {
-        if (row.change == SyncChange::Changed)
-        {
-            for (const SyncField& field : row.fields)
-            {
-                names.insert(field.field);
-            }
-        }
-    }
-    if (names.empty())
+    if (m_toggleFields.empty())
     {
         return;
     }
-    if (!names.contains(m_toggleField))
+    if (std::ranges::find(m_toggleFields, m_toggleField) == m_toggleFields.end())
     {
-        m_toggleField = *names.begin();
+        m_toggleField = m_toggleFields.front();
     }
     ImGui::SetNextItemWidth(Scaled(FieldColumnWidth));
     if (ImGui::BeginCombo(I18N::Editor::AFieldInAllItems, m_toggleField.c_str()))
     {
-        for (const std::string& name : names)
+        for (const std::string& name : m_toggleFields)
         {
             if (ImGui::Selectable(name.c_str(), name == m_toggleField))
             {

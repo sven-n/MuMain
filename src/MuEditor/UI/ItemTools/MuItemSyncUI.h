@@ -157,6 +157,9 @@ private:
     // import removes it.
     int m_shownItem = -1;
     MuEditor::Items::ItemUsage m_shownUsage;
+    // The fields of the changed items, for "A field in all items" (built with the diff), and the
+    // one picked there.
+    std::vector<std::string> m_toggleFields;
     std::string m_toggleField;
     std::vector<std::string> m_messages;
     bool m_messagesAreErrors = false;
