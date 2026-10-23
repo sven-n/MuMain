@@ -266,7 +266,7 @@ set(shader_specs
     "basic_colored.vert|vert|0,1|0|0|1"
     "basic_colored.frag|frag||0|0|0"
     "shadow_volume.vert|vert|0|0|0|1"
-    "skinned_textured.vert|vert|0,1,2,3,4,5|0|1|1"
+    "skinned_textured.vert|vert|0,1,2,3,4,5,6,7|0|1|1"
     "skinned_shadow.vert|vert|0,3,4|0|2|2"
     "skinned_lit.frag|frag||1|0|3"
     "post_fullscreen.vert|vert||0|0|0"

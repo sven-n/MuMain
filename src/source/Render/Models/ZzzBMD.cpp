@@ -13,6 +13,7 @@
 #include <map>
 #include <optional>
 #include <set>
+#include <span>
 #include <tuple>
 #include <utility>
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -20,6 +21,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "ZzzBMD.h"
 #include "Render/Models/AnimationSampling.h"
+#include "Render/Models/Gltf/SkinnedModel.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -28,12 +30,14 @@
 #include "SMD.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Core/Utilities/Log/ErrorReport.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #include "Camera/CameraState.h"
 
 #include "Camera/CameraMove.h"
 #include "Engine/Physics/PhysicsManager.h"
 #include "UI/Core/WindowSystem.h"
 #include "Render/Models/GpuSkinningPath.h"
+#include "Render/Models/SkinnedVertexPacking.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/RenderUtils.h"
 #include "Render/Terrain/TerrainHeightGrid.h"
@@ -133,6 +137,44 @@ bool CanGpuSkinMesh(int finalRenderFlags, int renderFlags, const float (*boneMat
     return boneMatrices && supportedMaterial && !(renderFlags & (RENDER_SHADOWMAP | RENDER_WAVE));
 }
 
+// The bone palette of a GPU-skinned draw and the version the renderer's upload cache keys on.
+struct SkinPalette
+{
+    std::span<const float> matrices;
+    std::uint32_t version = 0;
+};
+
+// The weighted palette of a glTF model's current bones, rebuilt only when the
+// bones or scales changed since the last draw (one body draws several meshes).
+SkinPalette CurrentWeightedSkinPalette(const Render::Models::Gltf::SkinnedModel& model,
+                                       const float (*boneMatrices)[3][4], float boneScale, float restPoseScale)
+{
+    static thread_local struct
+    {
+        const Render::Models::Gltf::SkinnedModel* model = nullptr;
+        const float (*boneMatrices)[3][4] = nullptr;
+        unsigned int boneVersion = 0;
+        float boneScale = 0.f;
+        float restPoseScale = 0.f;
+        std::vector<float> palette;
+        std::uint32_t version = 0;
+    } cache;
+    const bool current = cache.model == &model && cache.boneMatrices == boneMatrices &&
+                         cache.boneVersion == g_BoneTransformVersion && cache.boneScale == boneScale &&
+                         cache.restPoseScale == restPoseScale && !cache.palette.empty();
+    if (!current)
+    {
+        Render::Models::BuildWeightedSkinPalette(model, boneMatrices, boneScale, restPoseScale, cache.palette);
+        cache.model = &model;
+        cache.boneMatrices = boneMatrices;
+        cache.boneVersion = g_BoneTransformVersion;
+        cache.boneScale = boneScale;
+        cache.restPoseScale = restPoseScale;
+        ++cache.version;
+    }
+    return {cache.palette, cache.version};
+}
+
 std::pair<int, int> ResolveMeshRange(int meshCount, int requestedStart, int requestedEnd)
 {
     return {requestedStart == -1 ? 0 : requestedStart, requestedEnd == -1 ? meshCount : requestedEnd};
@@ -155,6 +197,32 @@ thread_local float ParentMatrix[3][4];
 static vec3_t LightVector = { 0.f, -0.1f, -0.8f };
 static vec3_t LightVector2 = { 0.f, -0.5f, -0.8f };
 
+// A joint's local pose in a model from a glTF binary at one sample of the
+// playback rule: MU key time t of the action is clip time t / K x cycle.
+static void GltfSample(const Render::Models::Gltf::SkinnedModel& gltf, const Action_t* Actions, int joint,
+                       const Render::Models::AnimationSampling::KeySample& sample,
+                       Render::Models::Gltf::JointPose& pose)
+{
+    const Action_t& action = Actions[sample.action];
+    const int intervals = Render::Models::Gltf::SkinnedModel::ClipKeyIntervals(action.NumAnimationKeys,
+                                                                               action.LockPositions, action.Loop);
+    gltf.SampleJoint(joint, sample.action, sample.time, intervals, pose);
+}
+
+// The key time of the crossfade into `action` that the model file sets, or
+// nothing (a BMD, or the playback rule's fade).
+static std::optional<float> GltfCrossfadeKeyTime(const BMD& model, unsigned short action)
+{
+    const auto* gltf = Render::Models::Gltf::SkinnedModelOf(model);
+    if (!gltf || action >= gltf->actionCrossfades.size() || !gltf->actionCrossfades[action])
+    {
+        return std::nullopt;
+    }
+    const Action_t& a = model.Actions[action];
+    return Render::Models::AnimationSampling::CrossfadeKeyTime(
+        {a.NumAnimationKeys, a.LockPositions, a.PlaySpeed, a.Loop}, *gltf->actionCrossfades[action]);
+}
+
 void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float PriorFrame, unsigned short PriorAction,
                     vec3_t Angle, vec3_t HeadAngle, bool Parent, bool Translate, const float (*ExtParentMatrix)[4],
                     short CurrentActionArg, int BoneMatrixCapacity)
@@ -174,8 +242,24 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
         const Action_t& a = Actions[action];
         return Sampling::ActionTimeline{a.NumAnimationKeys, a.LockPositions, a.PlaySpeed, a.Loop};
     };
-    const Sampling::PosePlan pose = Sampling::PlanPose(timelineOf(PriorAction), PriorAction, PriorFrame,
-                                                       timelineOf(currentAction), currentAction, AnimationFrame);
+    Sampling::PosePlan pose = Sampling::PlanPose(timelineOf(PriorAction), PriorAction, PriorFrame,
+                                                 timelineOf(currentAction), currentAction, AnimationFrame);
+    // A model file may set the crossfade's length (Data/Models/ModelFiles.json).
+    if (const auto fade = GltfCrossfadeKeyTime(*this, currentAction))
+    {
+        Sampling::SetCrossfadeLength(pose, AnimationFrame, *fade);
+    }
+    // A model from a glTF binary samples MU's blend of neighbouring keys at the
+    // continuous key time it stands for, so detail between its keys shows.
+    if (Render::Models::Gltf::SkinnedModelOf(*this))
+    {
+        if (const auto phase = Sampling::MuBlendPhase(timelineOf(currentAction), pose))
+        {
+            pose.from = *phase;
+            pose.to = *phase;
+            pose.weight = 0.f;
+        }
+    }
     const float s1 = pose.weight;
     const float s2 = 1.f - s1;
 
@@ -211,11 +295,13 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
     // sampled key before it becomes a quaternion.
     vec4_t headQ1, headQ2;
     const bool hasHeadBone = (BoneHead >= 0 && BoneHead < NumBones && !Bones[BoneHead].Dummy);
-    if (hasHeadBone)
+    constexpr float radFactor = 1.0f / (180.f / Q_PI);
+    const float HeadAngleX = HeadAngle[0] * radFactor;
+    const float HeadAngleY = HeadAngle[1] * radFactor;
+    // A model from a glTF binary samples its clips at the same points (see GltfSample).
+    const auto* gltf = Render::Models::Gltf::SkinnedModelOf(*this);
+    if (hasHeadBone && !gltf)
     {
-        constexpr float radFactor = 1.0f / (180.f / Q_PI);
-        const float HeadAngleX = HeadAngle[0] * radFactor;
-        const float HeadAngleY = HeadAngle[1] * radFactor;
         const Bone_t* hb = &Bones[BoneHead];
         const auto headKey = [&](const Sampling::KeySample& sample, int key, vec4_t out)
         {
@@ -305,19 +391,55 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
         vec3_t positionScratch1, positionScratch2;
         const float* q1;
         const float* q2;
+        const float* Position1;
+        const float* Position2;
+        // A locked root keeps x and y of the current action's key 0.
+        vec3_t lockedRoot;
 
-        if (i == BoneHead)
+        if (gltf)
         {
-            q1 = headQ1;
-            q2 = headQ2;
+            Render::Models::Gltf::JointPose from, to;
+            GltfSample(*gltf, Actions, i, pose.from, from);
+            GltfSample(*gltf, Actions, i, pose.to, to);
+            if (i == BoneHead && hasHeadBone)
+            {
+                Render::Models::Gltf::SkinnedModel::TurnHead(from.rotation, HeadAngleX, HeadAngleY);
+                Render::Models::Gltf::SkinnedModel::TurnHead(to.rotation, HeadAngleX, HeadAngleY);
+            }
+            QuaternionCopy(from.rotation.data(), rotationScratch1);
+            QuaternionCopy(to.rotation.data(), rotationScratch2);
+            VectorCopy(from.position.data(), positionScratch1);
+            VectorCopy(to.position.data(), positionScratch2);
+            q1 = rotationScratch1;
+            q2 = rotationScratch2;
+            Position1 = positionScratch1;
+            Position2 = positionScratch2;
+            if (i == 0 && bLockPositions)
+            {
+                Render::Models::Gltf::JointPose key0;
+                GltfSample(*gltf, Actions, i, Sampling::KeyAt(currentAction, 0), key0);
+                VectorCopy(key0.position.data(), lockedRoot);
+            }
         }
         else
         {
-            q1 = sampleRotation(b, pose.from, rotationScratch1);
-            q2 = sampleRotation(b, pose.to, rotationScratch2);
+            if (i == BoneHead)
+            {
+                q1 = headQ1;
+                q2 = headQ2;
+            }
+            else
+            {
+                q1 = sampleRotation(b, pose.from, rotationScratch1);
+                q2 = sampleRotation(b, pose.to, rotationScratch2);
+            }
+            Position1 = samplePosition(b, pose.from, positionScratch1);
+            Position2 = samplePosition(b, pose.to, positionScratch2);
+            if (i == 0 && bLockPositions)
+            {
+                VectorCopy(b->BoneMatrixes[currentAction].Position[0], lockedRoot);
+            }
         }
-        const float* Position1 = samplePosition(b, pose.from, positionScratch1);
-        const float* Position2 = samplePosition(b, pose.to, positionScratch2);
 
         vec4_t boneQuaternion;
         if (!QuaternionCompare(q1, q2))
@@ -334,9 +456,8 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
 
         if (i == 0 && bLockPositions)
         {
-            // A locked root keeps x and y of the current action's key 0.
-            Matrix[0][3] = b->BoneMatrixes[currentAction].Position[0][0];
-            Matrix[1][3] = b->BoneMatrixes[currentAction].Position[0][1];
+            Matrix[0][3] = lockedRoot[0];
+            Matrix[1][3] = lockedRoot[1];
             Matrix[2][3] = Position1[2] * s2 + Position2[2] * s1 + BodyHeight;
         }
         else
@@ -513,6 +634,18 @@ void BMD::SkinVertex(int mesh, int vertexIndex, float (*BoneMatrix)[3][4], bool 
 {
     const Vertex_t* v = &Meshs[mesh].Vertices[vertexIndex];
 
+    // A model from a glTF binary: up to four joints per vertex, same arithmetic per joint.
+    if (const auto* gltf = Render::Models::Gltf::SkinnedModelOf(*this))
+    {
+        gltf->SkinPosition(mesh, vertexIndex, BoneMatrix, m_LastBoneScale, _Scale, out);
+        if (Translate)
+        {
+            VectorScale(out, BodyScale, out);
+            VectorAdd(out, BodyOrigin, out);
+        }
+        return;
+    }
+
     // Reads the BoneScale snapshotted at TransformCheap() time, not the live global --
     // this makes SkinVertex()/SkinVertices() safe to call from a deferred EnsureCpuVertices(), where
     // the global may already have been reset/reused by a later object. Behavior-identical for the
@@ -589,11 +722,15 @@ void BMD::EnsureCpuNormals(int mesh) const
         return;
 
     const Mesh_t* m = &Meshs[mesh];
+    const auto* gltf = Render::Models::Gltf::SkinnedModelOf(*this);
     for (int j = 0; j < m->NumNormals; j++)
     {
         const Normal_t* sn = &m->Normals[j];
         float* tn = NormalTransform[mesh][j];
-        VectorRotate(sn->Normal, m_pCurrentBoneTransform[sn->Node], tn);
+        if (gltf)
+            gltf->SkinNormal(mesh, j, m_pCurrentBoneTransform, tn);
+        else
+            VectorRotate(sn->Normal, m_pCurrentBoneTransform[sn->Node], tn);
         if (LightEnable)
         {
             float Luminosity = VectorDotProduct(tn, m_LastLightPosition) * 0.8f + 0.4f;
@@ -640,6 +777,7 @@ void BMD::Transform(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t Bou
         Vector(999999.f, 999999.f, 999999.f, BoundingMin);
         Vector(-999999.f, -999999.f, -999999.f, BoundingMax);
     }
+    const auto* gltf = Render::Models::Gltf::SkinnedModelOf(*this);
     for (int i = 0; i < NumMeshs; i++)
     {
         Mesh_t* m = &Meshs[i];
@@ -648,7 +786,13 @@ void BMD::Transform(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t Bou
             Vertex_t* v = &m->Vertices[j];
             float* vp = VertexTransform[i][j];
 
-            if (BoneScale == 1.f)
+            if (gltf)
+            {
+                gltf->SkinPosition(i, j, BoneMatrix, BoneScale, _Scale, vp);
+                if (Translate)
+                    VectorScale(vp, BodyScale, vp);
+            }
+            else if (BoneScale == 1.f)
             {
                 if (_Scale)
                 {
@@ -690,7 +834,10 @@ void BMD::Transform(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t Bou
         {
             Normal_t* sn = &m->Normals[j];
             float* tn = NormalTransform[i][j];
-            VectorRotate(sn->Normal, BoneMatrix[sn->Node], tn);
+            if (gltf)
+                gltf->SkinNormal(i, j, BoneMatrix, tn);
+            else
+                VectorRotate(sn->Normal, BoneMatrix[sn->Node], tn);
             if (LightEnable)
             {
                 float Luminosity;
@@ -833,7 +980,11 @@ bool BMD::PlayAnimation(float* AnimationFrame, float* PriorAnimationFrame, unsig
 
     const auto priorAnimationFrame = (int)*AnimationFrame;
     *AnimationFrame += Speed * FPS_ANIMATION_FACTOR;
-    if (priorAnimationFrame != (int)*AnimationFrame)
+    // A crossfade of a set length keeps the prior action until it has run (see SetCrossfadeLength).
+    const auto fade = *PriorAction != CurrentAction ? GltfCrossfadeKeyTime(*this, CurrentAction) : std::nullopt;
+    const bool crossfadeContinues =
+        fade && Render::Models::AnimationSampling::CrossfadeContinues(*AnimationFrame, *fade);
+    if (priorAnimationFrame != (int)*AnimationFrame && !crossfadeContinues)
     {
         *PriorAction = CurrentAction;
         *PriorAnimationFrame = (float)priorAnimationFrame;
@@ -1745,6 +1896,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
     };
 
     const std::size_t maxVertexCount = static_cast<std::size_t>(m->NumTriangles) * 3;
+    const Render::Models::Gltf::SkinnedModel* gltfModel = Render::Models::Gltf::SkinnedModelOf(*this);
     const bool gpuSkinningEligible = CanGpuSkinMesh(finalRenderFlags, renderFlags, m_pCurrentBoneTransform);
     bool gpuSkinningSubmitted = false;
     if (gpuSkinningEligible)
@@ -1763,29 +1915,31 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
                 const auto* triangle = &m->Triangles[j];
                 for (int k = 0; k < triangle->Polygon; ++k)
                 {
-                    const auto& vertex = m->Vertices[triangle->VertexIndex[k]];
+                    const int vertexIndex = triangle->VertexIndex[k];
+                    const auto& vertex = m->Vertices[vertexIndex];
                     const auto& normal = m->Normals[triangle->NormalIndex[k]];
                     const auto& texCoord = m->TexCoords[triangle->TexCoordIndex[k]];
                     const float u = texCoord.TexCoordU + (waveTextureCoordinates ? blendMeshTextureCoordU : 0.0f);
                     const float v = texCoord.TexCoordV + (waveTextureCoordinates ? blendMeshTextureCoordV : 0.0f);
-                    skinnedVertices[skinnedVertexCount++] = {vertex.Position[0],
-                                                             vertex.Position[1],
-                                                             vertex.Position[2],
-                                                             normal.Normal[0],
-                                                             normal.Normal[1],
-                                                             normal.Normal[2],
-                                                             u,
-                                                             v,
-                                                             vertex.Node,
-                                                             normal.Node};
+                    // A model from a glTF binary blends up to four joints per vertex.
+                    skinnedVertices[skinnedVertexCount++] =
+                        gltfModel ? Render::Models::PackWeightedSkinnedVertex(
+                                        gltfModel->meshVertices[meshIndex][vertexIndex], u, v)
+                                  : Render::Models::PackBmdSkinnedVertex(vertex.Position, vertex.Node, normal.Normal,
+                                                                         normal.Node, u, v);
                 }
             }
             return skinnedVertices.first(skinnedVertexCount);
         };
 
+        const SkinPalette palette =
+            gltfModel
+                ? CurrentWeightedSkinPalette(*gltfModel, m_pCurrentBoneTransform, m_LastBoneScale, m_LastSkinScale)
+                : SkinPalette{{&m_pCurrentBoneTransform[0][0][0], static_cast<std::size_t>(MAX_BONES) * 12u},
+                              g_BoneTransformVersion};
         mu::SkinningParameters skinning{
-            .boneMatrices = {&m_pCurrentBoneTransform[0][0][0], MAX_BONES * 12u},
-            .paletteVersion = g_BoneTransformVersion,
+            .boneMatrices = palette.matrices,
+            .paletteVersion = palette.version,
             .bodyOrigin = {BodyOrigin[0], BodyOrigin[1], BodyOrigin[2]},
             .bodyScale = BodyScale,
             .boneScale = m_LastBoneScale,
@@ -2882,7 +3036,9 @@ void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, cons
 bool BMD::RenderGpuMeshShadow(const int blendMesh, const int hiddenMesh, const int startMesh, const int endMesh,
     const float sx, const float sy, const std::uint32_t color) const
 {
-    if (!m_pCurrentBoneTransform || startMesh < 0 || endMesh > NumMeshs || endMesh > MAX_MESH)
+    // A model file's vertices blend up to four joints; this stream follows one bone per vertex.
+    if (!m_pCurrentBoneTransform || startMesh < 0 || endMesh > NumMeshs || endMesh > MAX_MESH ||
+        Render::Models::Gltf::SkinnedModelOf(*this))
     {
         return false;
     }
@@ -3144,6 +3300,7 @@ void BMD::ShareFrom(BMD& owner)
     Actions = owner.Actions;
     Textures = owner.Textures;
     IndexTexture = owner.IndexTexture;
+    GltfModel = owner.GltfModel;
     m_bSharedData = true;
     // What Init sets for this slot; the bounding boxes of the bones are the owner's.
     renderCount = 0;
@@ -3171,6 +3328,13 @@ void BMD::SwapData(BMD& other)
     std::swap(Actions, other.Actions);
     std::swap(Textures, other.Textures);
     std::swap(IndexTexture, other.IndexTexture);
+    std::swap(GltfModel, other.GltfModel);
+    m_boneLookup.clear();
+    m_boneLookupBones = nullptr;
+    m_boneLookupBoneCount = 0;
+    other.m_boneLookup.clear();
+    other.m_boneLookupBones = nullptr;
+    other.m_boneLookupBoneCount = 0;
     std::swap(m_bSharedData, other.m_bSharedData);
     std::swap(m_sharedDataUsers, other.m_sharedDataUsers);
     std::swap(m_bCompletedAlloc, other.m_bCompletedAlloc);
@@ -3203,6 +3367,10 @@ void BMD::Release()
 
     const bool othersUseTheData = m_sharedDataUsers && m_sharedDataUsers.use_count() > 1;
     m_sharedDataUsers.reset();
+    GltfModel.reset();
+    m_boneLookup.clear();
+    m_boneLookupBones = nullptr;
+    m_boneLookupBoneCount = 0;
     if (othersUseTheData)
     {
         // The last slot that uses the data frees it.
@@ -3732,6 +3900,61 @@ void BMD::Init(bool Dummy)
     BoneHead = -1;
     StreamMesh = -1;
     CreateBoundingBox();
+}
+
+BMD::BoneLookupEntry& BMD::LookupBone(std::string_view name) const
+{
+    if (m_boneLookupBones != Bones || m_boneLookupBoneCount != NumBones)
+    {
+        m_boneLookup.clear();
+        m_boneLookupBones = Bones;
+        m_boneLookupBoneCount = NumBones;
+    }
+    for (BoneLookupEntry& entry : m_boneLookup)
+    {
+        if (entry.name == name)
+        {
+            return entry;
+        }
+    }
+
+    int found = -1;
+    for (int i = 0; i < NumBones && Bones != nullptr; ++i)
+    {
+        const Bone_t& bone = Bones[i];
+        if (bone.Dummy)
+        {
+            continue;
+        }
+        const std::string_view boneName(bone.Name, strnlen(bone.Name, sizeof(bone.Name)));
+        if (boneName == name)
+        {
+            found = i;
+            break;
+        }
+    }
+    return m_boneLookup.emplace_back(BoneLookupEntry{std::string(name), found, false});
+}
+
+int BMD::FindBone(std::string_view name) const
+{
+    return LookupBone(name).index;
+}
+
+int BMD::FindBoneOrRoot(std::string_view name) const
+{
+    BoneLookupEntry& entry = LookupBone(name);
+    if (entry.index >= 0)
+    {
+        return entry.index;
+    }
+    if (!entry.missLogged)
+    {
+        entry.missLogged = true;
+        MU_LOG_WARN(mu::log::Get("render"), "Model {} has no bone \"{}\"; the root bone stands in for it.",
+                    std::string_view(Name, strnlen(Name, sizeof(Name))), name);
+    }
+    return 0;
 }
 
 void BMD::CreateBoundingBox()

@@ -1,4 +1,7 @@
-// GPU bone skinning for BMD rest-pose geometry.
+// GPU bone skinning for BMD rest-pose geometry and four-weight skinning for glTF models.
+// A vertex with weights (weights.x > 0: the largest weight comes first) blends up to four
+// palette joints by weight from bind space; a BMD vertex has no weights and follows its
+// position and normal bone alone, with the arithmetic it always had.
 // palette.w selects the lighting: 0 unlit, 1 Classic per-vertex lighting, 2 Enhanced lighting (the
 // vertex colour stays unlit and skinned_lit.frag lights each pixel from the normal, view vector and
 // light direction outputs), 3 Enhanced lighting plus the frame's point lights (world-space
@@ -60,6 +63,8 @@ struct VSInput
     float4 color : TEXCOORD3;
     int positionBoneIndex : TEXCOORD4;
     int normalBoneIndex : TEXCOORD5;
+    uint4 joints : TEXCOORD6;
+    float4 weights : TEXCOORD7;
 };
 
 struct VSOutput
@@ -84,6 +89,29 @@ float4 loadBoneRow(uint row)
 }
 #endif
 
+void loadBone(uint boneIndex, out float4 row0, out float4 row1, out float4 row2)
+{
+    const uint row = palette.x + boneIndex * 3;
+#ifdef MU_D3D12_RAW_STORAGE_BUFFER
+    row0 = loadBoneRow(row);
+    row1 = loadBoneRow(row + 1);
+    row2 = loadBoneRow(row + 2);
+#else
+    row0 = boneRows[row];
+    row1 = boneRows[row + 1];
+    row2 = boneRows[row + 2];
+#endif
+}
+
+float3 placeBody(float3 transformed)
+{
+    if (palette.z != 0)
+    {
+        transformed = bodyOriginAndScale.xyz + transformed * bodyOriginAndScale.w;
+    }
+    return transformed;
+}
+
 float3 transformPosition(float3 position, int boneIndex)
 {
     if (boneIndex < 0 || boneIndex >= int(palette.y))
@@ -91,16 +119,10 @@ float3 transformPosition(float3 position, int boneIndex)
         return position;
     }
 
-    const uint row = palette.x + uint(boneIndex) * 3;
-#ifdef MU_D3D12_RAW_STORAGE_BUFFER
-    const float4 row0 = loadBoneRow(row);
-    const float4 row1 = loadBoneRow(row + 1);
-    const float4 row2 = loadBoneRow(row + 2);
-#else
-    const float4 row0 = boneRows[row];
-    const float4 row1 = boneRows[row + 1];
-    const float4 row2 = boneRows[row + 2];
-#endif
+    float4 row0;
+    float4 row1;
+    float4 row2;
+    loadBone(uint(boneIndex), row0, row1, row2);
     float3 transformed;
 
     if (boneScaleAndRestPoseScale.x == 1.0)
@@ -115,9 +137,54 @@ float3 transformPosition(float3 position, int boneIndex)
         transformed = transformed * boneScaleAndRestPoseScale.x + float3(row0.w, row1.w, row2.w);
     }
 
-    if (palette.z != 0)
+    return placeBody(transformed);
+}
+
+// The palette of a weighted draw already holds each joint's bone matrix times its inverse bind
+// matrix with the bone and rest-pose scales applied (Render::Models::BuildWeightedSkinPalette).
+float3 skinWeightedPosition(float3 position, uint4 joints, float4 weights)
+{
+    const float4 bindPosition = float4(position, 1.0);
+    float3 transformed = float3(0.0, 0.0, 0.0);
+    [unroll]
+    for (uint k = 0; k < 4; ++k)
     {
-        transformed = bodyOriginAndScale.xyz + transformed * bodyOriginAndScale.w;
+        if (weights[k] > 0.0 && joints[k] < palette.y)
+        {
+            float4 row0;
+            float4 row1;
+            float4 row2;
+            loadBone(joints[k], row0, row1, row2);
+            transformed += weights[k] * float3(dot(row0, bindPosition), dot(row1, bindPosition), dot(row2, bindPosition));
+        }
+    }
+    return placeBody(transformed);
+}
+
+float3 skinWeightedNormal(float3 normal, uint4 joints, float4 weights)
+{
+    float3 transformed = float3(0.0, 0.0, 0.0);
+    [unroll]
+    for (uint k = 0; k < 4; ++k)
+    {
+        if (weights[k] > 0.0 && joints[k] < palette.y)
+        {
+            float4 row0;
+            float4 row1;
+            float4 row2;
+            loadBone(joints[k], row0, row1, row2);
+            transformed += weights[k] * float3(dot(row0.xyz, normal), dot(row1.xyz, normal), dot(row2.xyz, normal));
+        }
+    }
+    // The palette carries the skinning scale, which a normal does not take; a blend of joints
+    // is normalised, a single joint keeps the length its bone matrix gives (as for a BMD).
+    const float restScale = boneScaleAndRestPoseScale.y != 0.0 ? boneScaleAndRestPoseScale.y : 1.0;
+    const float skinScale = boneScaleAndRestPoseScale.x == 1.0 ? restScale : boneScaleAndRestPoseScale.x;
+    transformed /= skinScale;
+    if (weights.y > 0.0)
+    {
+        const float lengthSquared = dot(transformed, transformed);
+        transformed = lengthSquared > 1e-24 ? transformed * rsqrt(lengthSquared) : transformed;
     }
     return transformed;
 }
@@ -129,16 +196,11 @@ float3 transformNormal(float3 normal, int boneIndex)
         return normal;
     }
 
-    const uint row = palette.x + uint(boneIndex) * 3;
-#ifdef MU_D3D12_RAW_STORAGE_BUFFER
-    return float3(dot(loadBoneRow(row).xyz, normal),
-                  dot(loadBoneRow(row + 1).xyz, normal),
-                  dot(loadBoneRow(row + 2).xyz, normal));
-#else
-    return float3(dot(boneRows[row].xyz, normal),
-                  dot(boneRows[row + 1].xyz, normal),
-                  dot(boneRows[row + 2].xyz, normal));
-#endif
+    float4 row0;
+    float4 row1;
+    float4 row2;
+    loadBone(uint(boneIndex), row0, row1, row2);
+    return float3(dot(row0.xyz, normal), dot(row1.xyz, normal), dot(row2.xyz, normal));
 }
 
 float2 getTextureCoordinates(float2 restCoordinates, float3 normal)
@@ -197,8 +259,18 @@ float2 getTextureCoordinates(float2 restCoordinates, float3 normal)
 VSOutput main(VSInput input)
 {
     VSOutput output;
-    const float3 skinnedPosition = transformPosition(input.pos, input.positionBoneIndex);
-    const float3 skinnedNormal = transformNormal(input.normal, input.normalBoneIndex);
+    float3 skinnedPosition;
+    float3 skinnedNormal;
+    if (input.weights.x > 0.0)
+    {
+        skinnedPosition = skinWeightedPosition(input.pos, input.joints, input.weights);
+        skinnedNormal = skinWeightedNormal(input.normal, input.joints, input.weights);
+    }
+    else
+    {
+        skinnedPosition = transformPosition(input.pos, input.positionBoneIndex);
+        skinnedNormal = transformNormal(input.normal, input.normalBoneIndex);
+    }
     output.pos = mul(mvp, float4(skinnedPosition, 1.0));
     output.uv = getTextureCoordinates(input.uv, skinnedNormal);
     output.color = input.color;

@@ -139,3 +139,19 @@ mu_add_test(
     LINK_LIBS
         MuClient
 )
+
+# The model files that replace a model's BMD (Data/Models/ModelFiles.json) and
+# the developer overlay (MU_DATA_OVERLAY). The table the game reads at start
+# (ReadModelFileTable) comes with the client globals of Winmain.cpp.
+mu_add_test(
+    NAME model_files_data_tests
+    SOURCES
+        test_model_files.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(model_files_data_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+    MU_TEST_ENUM_HEADER="${CMAKE_SOURCE_DIR}/src/source/Core/Globals/_enum.h"
+)

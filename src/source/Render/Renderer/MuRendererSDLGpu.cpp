@@ -5725,7 +5725,7 @@ private:
         colorTargetDesc.format = swapchainFmt;
         colorTargetDesc.blend_state = blendState;
 
-        SDL_GPUVertexAttribute vertexAttribs[6];
+        SDL_GPUVertexAttribute vertexAttribs[8];
         Uint32 numAttribs = 0;
         SDL_GPUVertexBufferDescription vtxBufDescs[2]{};
         SDL_GPUVertexBufferDescription& vtxBufDesc = vtxBufDescs[0];
@@ -5830,8 +5830,20 @@ private:
             vertexAttribs[5].format = SDL_GPU_VERTEXELEMENTFORMAT_INT;
             vertexAttribs[5].offset = static_cast<Uint32>(offsetof(SkinnedVertex3D, normalBoneIndex));
 
+            vertexAttribs[6] = {};
+            vertexAttribs[6].location = 6;
+            vertexAttribs[6].buffer_slot = 0;
+            vertexAttribs[6].format = SDL_GPU_VERTEXELEMENTFORMAT_UBYTE4;
+            vertexAttribs[6].offset = static_cast<Uint32>(offsetof(SkinnedVertex3D, joints));
+
+            vertexAttribs[7] = {};
+            vertexAttribs[7].location = 7;
+            vertexAttribs[7].buffer_slot = 0;
+            vertexAttribs[7].format = SDL_GPU_VERTEXELEMENTFORMAT_UBYTE4_NORM;
+            vertexAttribs[7].offset = static_cast<Uint32>(offsetof(SkinnedVertex3D, weights));
+
             vtxBufDesc.pitch = sizeof(SkinnedVertex3D);
-            numAttribs = 6;
+            numAttribs = 8;
         }
 
         SDL_GPUVertexInputState vtxInputState{};

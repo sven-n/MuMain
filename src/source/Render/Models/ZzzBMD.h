@@ -4,6 +4,8 @@
 #include <vector>
 #include <cstdint>
 #include <memory>
+#include <string>
+#include <string_view>
 #include "Render/Sprites/TextureScript.h"
 
 extern const float (*g_pActiveBoneTransform)[3][4];
@@ -229,6 +231,13 @@ public:
     // one that opened it and those that share it): the last of them to let go
     // frees the data. Empty while the data is this slot's alone.
     std::shared_ptr<const void> m_sharedDataUsers;
+    // Set when the bones and meshes come from a glTF binary
+    // (Render::Models::Gltf::LoadGlbIntoBmd): its Render::Models::Gltf::SkinnedModel
+    // (clips, skin, joints), read through Render::Models::Gltf::SkinnedModelOf.
+    // The actions stay the BMD's. Type-erased because declaring namespace
+    // Render::Models in this header would hide the global Models[] from code
+    // inside namespace Render.
+    std::shared_ptr<const void> GltfModel;
 
     float (*m_pCurrentBoneTransform)[3][4]; // Active bone matrix palette stored during Transform()
     bool m_LastTranslate;       // Set by Transform(): true=Translate mode (BodyOrigin/BodyScale shift world pos),
@@ -299,6 +308,14 @@ public:
     // while the data is its own alone, 0 without data.
     long GetDataUserCount() const;
     void CreateBoundingBox();
+
+    // The index of the bone named `name` (exactly Bone_t::Name), -1 when the
+    // model has none. Looked up once per model and name: the answer is cached
+    // until the model's bones change.
+    int FindBone(std::string_view name) const;
+    // FindBone, or the root bone 0 when the model has no bone of that name;
+    // the first miss of a name per model logs one line.
+    int FindBoneOrRoot(std::string_view name) const;
 
     bool PlayAnimation(float* AnimationFrame, float* PriorAnimationFrame, unsigned short* PriorAction, float Speed, vec3_t Origin, vec3_t Angle);
     // BoneMatrixCapacity: element count of the caller's BoneTransform buffer. The DXP-24 stale-slot
@@ -413,6 +430,19 @@ private:
     BMD(const BMD& b);
 
     void ClaimSkinStamp() const;
+    // A name FindBone looked up: its bone (-1: none) and whether FindBoneOrRoot logged the miss.
+    struct BoneLookupEntry
+    {
+        std::string name;
+        int index = -1;
+        bool missLogged = false;
+    };
+    BoneLookupEntry& LookupBone(std::string_view name) const;
+
+    // FindBone's cache, valid for the bones it was made from.
+    mutable const Bone_t* m_boneLookupBones = nullptr;
+    mutable short m_boneLookupBoneCount = 0;
+    mutable std::vector<BoneLookupEntry> m_boneLookup;
     // The shadow streams the renderer keeps for the meshes of this slot.
     void ReleaseShadowStreams();
 

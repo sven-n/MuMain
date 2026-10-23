@@ -31,6 +31,7 @@
 #include "Data/DataHandler/SkillData/SkillDataHandler.h"
 
 #include "Data/DataHandler/EffectData/EffectDataHandler.h"
+#include "Data/DataHandler/ModelData/ModelFileDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemModelLoader.h"
 #include "Data/GameData/EffectData/EffectTypeCatalogue.h"
@@ -406,6 +407,18 @@ static void OpenEffectTypeData()
         return;
     }
     Render::Effects::BuildRegistry(g_EffectTypeCatalogue.GetCreateParams());
+}
+
+// Reads the model file table (Data/Models/ModelFiles.json, MU_DATA_OVERLAY
+// first); errors stop the game, as for the effect data. A missing table names
+// no model file.
+static void OpenModelFileData()
+{
+    std::string errorMessage;
+    if (!Data::Models::LoadModelFileTable(errorMessage))
+    {
+        StopOnDataError("Model file data error", errorMessage);
+    }
 }
 
 // Loads the item models (Data/Items/Models); without them no item could be
@@ -1325,6 +1338,20 @@ static const wchar_t* GetMonsterModelName(EMonsterModelType Type)
     return s_names[Type];
 }
 
+// The folder below Data\ a monster model's textures are opened from.
+static std::wstring MonsterTextureFolder(EMonsterModelType Type)
+{
+    if (gMapManager.InChaosCastle() == true && Type >= 70 && Type <= 72)
+    {
+        return L"Npc\\";
+    }
+    if (gMapManager.InBattleCastle() == true && Type == 74)
+    {
+        return L"Object31\\";
+    }
+    return L"Monster\\";
+}
+
 void OpenMonsterModel(EMonsterModelType Type)
 {
     g_ConsoleDebug->Write(MCD_RECEIVE, L"OpenMonsterModel(%ls = %d)", GetMonsterModelName(Type), Type);
@@ -1341,17 +1368,18 @@ void OpenMonsterModel(EMonsterModelType Type)
 
     if (b->NumMeshs == 0) return;
 
-    if (gMapManager.InChaosCastle() == true && Type >= 70 && Type <= 72)
+    // A model the model file table names is drawn from its glTF binary (with
+    // the BMD's actions); otherwise, or when the file is refused, from the BMD.
+    const Data::Models::ModelFiles& modelFiles = Data::Models::GetModelFileTable();
+    const bool fromModelFile = Data::Models::ApplyModelFile(*b, Index, modelFiles);
+    const std::wstring textureFolder = MonsterTextureFolder(Type);
+    if (fromModelFile)
     {
-        gLoadData.OpenTexture(Index, L"Npc\\");
-    }
-    else if (gMapManager.InBattleCastle() == true && Type == 74)
-    {
-        gLoadData.OpenTexture(Index, L"Object31\\");
+        Data::Models::OpenModelFileTextures(Index, textureFolder, modelFiles);
     }
     else
     {
-        gLoadData.OpenTexture(Index, L"Monster\\");
+        gLoadData.OpenTexture(Index, textureFolder.c_str());
     }
 
     switch (Type)
@@ -4387,6 +4415,7 @@ void OpenBasicData(HDC hDC)
 
     OpenItems();
     OpenEffectTypeData();
+    OpenModelFileData();
     TitleSceneUI::RenderSceneUI(hDC, 4, 11);
 
     OpenItemTextures();

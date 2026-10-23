@@ -108,6 +108,9 @@ struct Vertex3D
 };
 
 // Rest-pose model vertex for GPU bone skinning. The colour is per draw, not per vertex.
+// A BMD vertex follows one bone (positionBoneIndex, normalBoneIndex; its weights
+// stay 0); a vertex with weights (glTF models) is in bind space and blends up to
+// four palette joints by weight (unorm, summing to 255, the largest first).
 struct SkinnedVertex3D
 {
     float x, y, z;
@@ -115,6 +118,8 @@ struct SkinnedVertex3D
     float u, v;
     std::int32_t positionBoneIndex;
     std::int32_t normalBoneIndex;
+    std::uint8_t joints[4];
+    std::uint8_t weights[4];
 };
 
 enum class SkinningTextureCoordinates : std::uint32_t
