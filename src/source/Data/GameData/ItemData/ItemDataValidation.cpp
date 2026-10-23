@@ -464,7 +464,8 @@ void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemT
                                       (suggestion.empty() ? "" : "; did you mean \"@" + suggestion + "\"?")});
                 continue;
             }
-            for (const std::string& placeholder : ScanPlaceholders(text->GetNeutral()).names)
+            const PlaceholderScan scan = ScanPlaceholders(text->GetNeutral());
+            for (const std::string& placeholder : scan.names)
             {
                 if (!IsBuiltInPlaceholder(placeholder) && profiles.FindTable(placeholder) == nullptr)
                 {
