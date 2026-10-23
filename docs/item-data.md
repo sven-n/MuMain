@@ -422,6 +422,21 @@ bmd):
 
 A level value no line shows is a warning.
 
+**Warnings:**
+
+- a table of the stat file that neither a stat nor a description names;
+- a wing (an item with a `wingTier`) whose description lines are not those of
+  most of the other wings of its tier, `cape` tag and group: the tooltip code
+  chose the wings' lines by the tier, so a new wing without them, or one moved
+  to another tier that keeps its old tier's tables, is pointed out
+  (`its wing lines are not those of the other third-tier wings of group 12:
+  it has 1 line naming no table, they have 3 lines naming …`). A wing alone
+  there is compared with the wings of its tier and `cape` tag in the other
+  groups that have more than one; Cape of Fighter (12) and Cape of Lord (13),
+  each alone and written apart by the old code, are not compared with each
+  other. Wings of a group that split evenly get one warning that they don't
+  agree, without blaming either side.
+
 The shipped data is checked by the tests, so a wrong placeholder fails the
 build's tests.
 
@@ -627,8 +642,8 @@ not have; and a condition that is not a list of one or more values, or a
 value that is not one of its names (for `group`, a whole number from 0 to
 15).
 **Warnings:** unknown fields, a table that neither a stat nor a
-[description placeholder](#description-placeholders) uses, and a caption without
-English. An item whose `statProfile` the file does not have is an error, and
+[description placeholder](#description-placeholders) uses (see there for the
+wings' tables too), and a caption without English. An item whose `statProfile` the file does not have is an error, and
 a profile no item names is a warning.
 
 ---
