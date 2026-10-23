@@ -159,16 +159,16 @@
       "zh-TW": "EXP率50% i增加"
     },
     "Enables entrance into Illusion Temple.": {
-      "de": "Ermöglicht den Zugang zu Illusion Temple.",
-      "es": "Permite la entrada a Illusion Temple.",
-      "id": "Memungkinkan masuk ke Illusion Temple.",
-      "ja": "Illusion Temple 入場時、決まった回数だけ使えます。",
+      "de": "Ermöglicht den Zugang zu Illusionstempel.",
+      "es": "Permite la entrada a Templo de la ilusión.",
+      "id": "Memungkinkan masuk ke Kuil Ilusi.",
+      "ja": "テンプル 入場時、決まった回数だけ使えます。",
       "pl": "Umożliwia wejście do Illusion Temple.",
-      "pt": "Permite a entrada em Illusion Temple.",
-      "ru": "Позволяет войти в Illusion Temple.",
-      "tl": "Pinapagana ang pagpasok sa Illusion Temple.",
-      "uk": "Дозволяє вхід у Illusion Temple.",
-      "zh-TW": "允許進入 Illusion Temple。"
+      "pt": "Permite a entrada em Templo da Ilusão.",
+      "ru": "Позволяет войти в Храм иллюзий.",
+      "tl": "Pinapagana ang pagpasok sa Templo ng Ilusyon.",
+      "uk": "Дозволяє вхід у Храм ілюзій.",
+      "zh-TW": "允許進入 幻像神殿。"
     },
     "Excellent Damage rate +10%": {
       "de": "Exzellente Schadensrate +10%",
