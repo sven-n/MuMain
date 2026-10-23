@@ -1,6 +1,7 @@
 #include "BmdModulusCipher.h"
 
 #include <cryptopp/3way.h>
+#include <cryptopp/cryptlib.h>
 #include <cryptopp/cast.h>
 #include <cryptopp/gost.h>
 #include <cryptopp/idea.h>
@@ -78,6 +79,10 @@ void DecryptBlocks(const CryptoPP::BlockTransformation& cipher, std::uint8_t* da
 void DecryptFirstStage(std::uint8_t* payload, std::size_t size)
 {
     const auto cipher = CreateDecryption(payload[1], FirstStageKey);
+    if (cipher == nullptr)
+    {
+        return;
+    }
     const std::size_t dataSize = size - Render::Models::BmdModulusCipher::BodyOffset;
     const std::size_t chunkSize = FirstStageChunkSize - FirstStageChunkSize % cipher->BlockSize();
     if (dataSize > MiddleChunkThreshold * chunkSize)
@@ -100,8 +105,21 @@ bool Render::Models::BmdModulusCipher::DecryptInPlace(std::uint8_t* payload, std
         return false;
     }
 
-    DecryptFirstStage(payload, size);
-    const auto cipher = CreateDecryption(payload[0], payload + SecondKeyOffset);
-    DecryptBlocks(*cipher, payload + BodyOffset, size - BodyOffset);
+    // The file picks the ciphers and gives the second key, so a corrupt file must not throw out of model loading:
+    // Crypto++ reports a bad key or state with an exception.
+    try
+    {
+        DecryptFirstStage(payload, size);
+        const auto cipher = CreateDecryption(payload[0], payload + SecondKeyOffset);
+        if (cipher == nullptr)
+        {
+            return false;
+        }
+        DecryptBlocks(*cipher, payload + BodyOffset, size - BodyOffset);
+    }
+    catch (const CryptoPP::Exception&)
+    {
+        return false;
+    }
     return true;
 }

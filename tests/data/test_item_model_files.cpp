@@ -1876,3 +1876,37 @@ TEST_CASE("The item effect of a model is the one of its item, or of its event mo
 
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }
+
+TEST_CASE("A model file cut short or with a broken version 14 size fails to open [data][items][models]")
+{
+    const std::filesystem::path folder =
+        std::filesystem::temp_directory_path() / ("mu_test_bmd_" + std::to_string(std::random_device{}()));
+    std::filesystem::create_directories(folder);
+    const auto opens = [&](const std::string& name, const std::vector<unsigned char>& bytes)
+    {
+        std::ofstream(folder / name, std::ios::binary)
+            .write(reinterpret_cast<const char*>(bytes.data()), static_cast<std::streamsize>(bytes.size()));
+        BMD bmd;
+        const std::wstring directory = folder.wstring() + L"/";
+        return bmd.Open2(directory.c_str(), std::filesystem::path(name).wstring().c_str());
+    };
+    const auto version14 = [](std::int32_t payloadSize, std::size_t payloadBytes)
+    {
+        std::vector<unsigned char> bytes = {'B', 'M', 'D', 0x0E};
+        const auto* size = reinterpret_cast<const unsigned char*>(&payloadSize);
+        bytes.insert(bytes.end(), size, size + sizeof(payloadSize));
+        bytes.resize(bytes.size() + payloadBytes, 0x5A);
+        return bytes;
+    };
+
+    CHECK_FALSE(opens("empty.bmd", {}));
+    CHECK_FALSE(opens("header.bmd", {'B', 'M', 'D'}));
+    // Version 14 without its payload size, with a negative one, one past the file, and one too short for the keys.
+    CHECK_FALSE(opens("nosize.bmd", {'B', 'M', 'D', 0x0E, 0x10}));
+    CHECK_FALSE(opens("negative.bmd", version14(-1, 64)));
+    CHECK_FALSE(opens("pastend.bmd", version14(4096, 64)));
+    CHECK_FALSE(opens("short.bmd", version14(20, 20)));
+
+    std::error_code ignored;
+    std::filesystem::remove_all(folder, ignored);
+}

@@ -3427,11 +3427,13 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
         return false;
     }
 
-    fread(fileData.get(), 1, dataSize, fp);
+    const size_t bytesRead = fread(fileData.get(), 1, dataSize, fp);
     fclose(fp);
 
-    // *** Check the "BMD" header ***
-    if (!(fileData[0] == 'B' && fileData[1] == 'M' && fileData[2] == 'D'))
+    // *** Check the "BMD" header *** (and its version byte); a file cut short has neither.
+    constexpr int HeaderSize = 4;
+    if (dataSize < HeaderSize || bytesRead != static_cast<size_t>(dataSize) ||
+        !(fileData[0] == 'B' && fileData[1] == 'M' && fileData[2] == 'D'))
     {
         wprintf(L"[Open2] ERROR: Invalid file header (expected 'BMD') in file %.64s\n", ModelPath);
         m_bCompletedAlloc = false;

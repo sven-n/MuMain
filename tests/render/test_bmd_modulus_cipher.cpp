@@ -174,3 +174,28 @@ TEST_CASE("a payload too short for a model is rejected [render][bmd]")
     CHECK_FALSE(DecryptInPlace(payload.data(), payload.size()));
     CHECK_FALSE(DecryptInPlace(nullptr, 0));
 }
+
+TEST_CASE("a corrupt version 14 payload decrypts without throwing, whichever ciphers it picks [render][bmd]")
+{
+    // The algorithm bytes are the file's, so every value (also with the bits the cipher choice ignores) and payload
+    // sizes around the chunk rules; the key and data bytes are whatever a damaged file holds.
+    constexpr std::array<std::size_t, 6> PayloadSizes = {BodyOffset + 1, BodyOffset + 7, 1024, 1025, 4200, 9001};
+    for (const std::size_t size : PayloadSizes)
+    {
+        for (int second = 0; second < 256; second += 37)
+        {
+            for (int first = 0; first < 256; first += 29)
+            {
+                CAPTURE(size);
+                CAPTURE(second);
+                CAPTURE(first);
+                std::vector<std::uint8_t> payload = MakeBody(size);
+                payload[0] = static_cast<std::uint8_t>(second);
+                payload[1] = static_cast<std::uint8_t>(first);
+                bool decrypted = false;
+                CHECK_NOTHROW(decrypted = DecryptInPlace(payload.data(), payload.size()));
+                CHECK(decrypted);
+            }
+        }
+    }
+}
