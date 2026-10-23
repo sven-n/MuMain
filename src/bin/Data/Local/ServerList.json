@@ -1,0 +1,20 @@
+{
+  "formatVersion": 1,
+  "groups": [
+    {
+      "id": 0,
+      "name": "Valhalla",
+      "channels": {"1": "gold", "2": "gold", "3": "gold", "4": "gold", "5": "goldPvp", "6": "nonPvp", "7": "nonPvp", "8": "nonPvp"}
+    },
+    {
+      "id": 1,
+      "name": "Helheim",
+      "channels": {"1": "gold", "2": "gold", "3": "gold", "4": "gold", "5": "goldPvp", "6": "nonPvp", "7": "nonPvp", "8": "nonPvp"}
+    },
+    {
+      "id": 2,
+      "name": "Midgard",
+      "channels": {"1": "gold", "2": "gold", "3": "gold", "4": "gold", "5": "goldPvp", "6": "nonPvp", "7": "nonPvp", "8": "nonPvp"}
+    }
+  ]
+}
