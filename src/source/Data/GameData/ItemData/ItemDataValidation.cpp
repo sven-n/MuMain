@@ -469,7 +469,7 @@ void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemT
             const PlaceholderScan scan = ScanPlaceholders(text->GetNeutral());
             for (const std::string& placeholder : scan.names)
             {
-                if (!IsBuiltInPlaceholder(placeholder) && profiles.FindTable(placeholder) == nullptr)
+                if (!IsBuiltInPlaceholder(placeholder) && !GetPlaceholderValue(placeholder, 0, profiles))
                 {
                     issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number, field,
                                       "\"@" + name + "\" has the placeholder {" + placeholder +
