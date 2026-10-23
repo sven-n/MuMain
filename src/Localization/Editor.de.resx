@@ -2027,7 +2027,7 @@
     <value>Der Monstereintrag wird entfernt.</value>
   </data>
   <data name="Monster without entry in game" xml:space="preserve">
-    <value>Ohne Eintrag zeigt das Spiel für diese Nummer den Namen "()" und gibt ihr die Art der alten Nummernregeln: {0}.</value>
+    <value>Ohne Eintrag bekommt ein Monster dieser Nummer, das erscheint, den Namen, den sein Code ihm gibt (oft einen alten koreanischen Namen), oder keinen, und die Art der alten Nummernregeln: {0}. Die Questfenster nennen es "()".</value>
   </data>
   <data name="Removed monster in game" xml:space="preserve">
     <value>Monster und NPCs dieser Nummer, die im Spiel sind, behalten ihren Namen und ihre Art, bis sie wieder erscheinen.</value>

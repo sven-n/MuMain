@@ -98,8 +98,8 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 
 A `target` is an object id (the `id` of `nearby`), a character name, or
 `{"monster": <number>}`: the nearest living monster or NPC with that monster
-number. Summons and transformed players are not found by their number; a trade
-needs a player either way.
+number. Summons, Kalima gates and transformed players are not found by their
+number; a trade needs a player either way.
 
 `state` reports the scene and account on every screen, and in the world adds:
 character name, class, level, experience, zen, HP/mana/SD/AG with their
@@ -140,12 +140,12 @@ An object's `kind` is `player`, `monster`, `npc`, `trap` or `other` (the
 Cherry Blossom Tree, and the players of the castle siege preview), `item` for
 a drop, and `unknown` for anything else. Monster, npc, trap and other are the
 kinds of the monster list (`Data/Monsters/Monsters.json`, see
-[monster-data.md](monster-data.md#kinds)); summons and transformed players are
-`player`.
+[monster-data.md](monster-data.md#kinds)); summons, Kalima gates and
+transformed players are `player`.
 
 A character also carries `monster`, the monster number the server created it
-with (the `number` in the monster list), or `null` for a player. Summons and
-transformed players have one too, with the kind `player`. Monster and NPC
+with (the `number` in the monster list), or `null` for a player. Summons,
+Kalima gates and transformed players have one too, with the kind `player`. Monster and NPC
 `name`s are in the client's language, so a script finds an NPC by its
 `monster` number rather than by its name.
 

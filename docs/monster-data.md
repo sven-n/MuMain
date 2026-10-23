@@ -105,9 +105,10 @@ character's kind when the character appears:
 | `trap` | Cannot be clicked: no outline, no name. It casts no shadow, and the client's path finding walks over its tile (other characters block theirs) |
 | `other` | Cannot be clicked: it is neither attacked nor talked to. In the shipped list only the Cherry Blossom Tree (451) has it |
 
-Summons and transformed players are players in the game, whatever their
-entry says: the server's packets that create them make them players. They
-keep their monster number (the control socket reports it).
+Summons, the Kalima gates (152–158) and transformed players are players in
+the game, whatever their entry says: the server's packets that create them
+make them players. They keep their monster number (the control socket reports
+it).
 
 The original client decided the kind by the number alone. The shipped list
 has those kinds, except for Mercenary Guild Manager Tercia (566) and
@@ -134,9 +135,10 @@ to `MuError.log`:
   579 are NPCs (e.g. Apostle Devin, 406, and Wandering Merchant Zyro, 568).
   The list is in `src/source/Data/GameData/MonsterData/LegacyMonsterKind.cpp`.
 - No name comes from the list: the windows that name a monster by its number
-  (the quest windows) show `()`, and a character of that number keeps the
-  name its code gives it (often an old Korean name) or the one its slot had
-  before.
+  (the quest windows) show `()`, and a character of that number that appears
+  gets the name its code gives it (often an old Korean name) or none. A
+  character already on screen whose entry is removed in the editor keeps its
+  name until it appears again.
 
 ## Loading and errors
 
@@ -303,6 +305,6 @@ whole path.
 The [control socket](control-socket.md) reports each character's monster
 number as `monster` (in `nearby` and in the objects of the `hit`, `killed`
 and `view_*` events) and the kinds of this list (`monster`, `npc`, `trap`,
-`other`; summons and transformed players are `player`). A `target` can be
-`{"monster": <number>}`. Since monster and NPC names follow the UI language,
+`other`; summons, Kalima gates and transformed players are `player`). A
+`target` can be `{"monster": <number>}`. Since monster and NPC names follow the UI language,
 scripts find NPCs by their number, not by their name.

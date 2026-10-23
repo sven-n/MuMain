@@ -15,8 +15,8 @@ namespace App::Control::Targets
 namespace
 {
 // The nearest living monster or NPC with this monster number, by tiles from
-// the hero; the first one in the character table on a tie. Summons and
-// transformed players carry a monster number too, but are players.
+// the hero; the first one in the character table on a tie. Summons, Kalima
+// gates and transformed players carry a monster number too, but are players.
 bool FindNearestMonster(int number, int& key)
 {
     if (CharactersClient == nullptr)

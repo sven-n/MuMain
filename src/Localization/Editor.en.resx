@@ -2048,7 +2048,7 @@
     <value>The monster entry is removed.</value>
   </data>
   <data name="Monster without entry in game" xml:space="preserve">
-    <value>Without an entry the game shows the name "()" for this number and gives it the kind of the old number rules: {0}.</value>
+    <value>Without an entry a monster of this number that appears gets the name its code gives it (often an old Korean name) or none, and the kind of the old number rules: {0}. The quest windows name it "()".</value>
   </data>
   <data name="Removed monster in game" xml:space="preserve">
     <value>Monsters and NPCs of this number that are in the game keep their name and kind until they appear again.</value>
