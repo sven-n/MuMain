@@ -2943,7 +2943,8 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
             TextBold[TextNum] = false;
             TextNum++;
-        }break;
+        }
+        break;
         case ITEM_GAIONS_ORDER:
         {
             mu_swprintf(TextList[TextNum], I18N::Game::ItContainsGaionSPlansForTheDestructionOfTheEmpire);
