@@ -261,9 +261,8 @@ TEST_CASE("The original items' tooltip texts are in their descriptions [data][it
     for (const DescribedItem& item : described)
     {
         INFO(item.group << "/" << item.number);
-        const auto found = std::find_if(result.items.begin(), result.items.end(), [&](const ItemDefinition& definition)
-                                        { return definition.group == item.group && definition.number == item.number; });
-        REQUIRE(found != result.items.end());
+        const ItemDefinition* found = FindItem(result.items, MakeItemType(item.group, item.number));
+        REQUIRE(found != nullptr);
         REQUIRE(found->description.size() == 1);
         const Data::LocalizedString& text = found->description.front().text;
         CHECK(text.GetNeutral() == item.text);
