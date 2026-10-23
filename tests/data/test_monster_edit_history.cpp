@@ -305,7 +305,7 @@ TEST_CASE("The monster edits refuse an undo after a change past them [editor][mo
     CHECK(g_MonsterDatabase.Find(2)->names.GetNeutral() == "Budge Dragon 3");
 }
 
-TEST_CASE("Saving the monster edits marks them saved; a revert drops them [editor][monsters]")
+TEST_CASE("Saving the monster edits marks them saved, a revert drops them [editor][monsters]")
 {
     TemporaryMonsterFolder folder;
     ClientDataScope scope(folder.Path());
