@@ -5,6 +5,7 @@
 #include "ClientDataScope.h"
 
 #include "Core/Platform/ProcessLocale.h"
+#include "Core/Text/Utf8.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "I18N/All.h"
 #include "Data/DataHandler/SkillData/SkillDataHandler.h"
@@ -560,6 +561,12 @@ TEST_CASE("A transformation ring's restriction comes after its option lines [dat
 
         const auto at = std::find_if(lines.begin(), lines.end(),
                                      [&](const ItemTooltipLine& line) { return line.text == restriction; });
+        std::string shown;
+        for (const ItemTooltipLine& line : lines)
+        {
+            shown += Core::Text::ToUtf8(line.text.c_str()) + " | ";
+        }
+        INFO(shown);
         REQUIRE(at != lines.end());
         int lastOption = -1;
         for (int index = 0; index < static_cast<int>(lines.size()); ++index)
