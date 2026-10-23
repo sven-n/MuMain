@@ -260,7 +260,8 @@ bool ApplyItemSyncImport(const ItemSyncDiff& diff, const ItemExchangeFile& file,
     }
     if (!items.empty())
     {
-        g_ItemEdits.SetItems(label, items);
+        // ToClientItem decided each item's profile: "" follows the rules, another one is a pick.
+        g_ItemEdits.SetItems(label, items, Data::Items::StatProfileStore::AsGiven);
     }
     for (const int itemType : removed)
     {

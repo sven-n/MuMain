@@ -162,7 +162,8 @@ bool ItemEdits::SetItem(std::string label, const ItemDefinition& item)
     return SetItems(std::move(label), std::span<const ItemDefinition>(&item, 1));
 }
 
-bool ItemEdits::SetItems(std::string label, std::span<const ItemDefinition> items)
+bool ItemEdits::SetItems(std::string label, std::span<const ItemDefinition> items,
+                         Data::Items::StatProfileStore profiles)
 {
     std::vector<int> itemTypes;
     for (const ItemDefinition& item : items)
@@ -184,7 +185,7 @@ bool ItemEdits::SetItems(std::string label, std::span<const ItemDefinition> item
             itemTypes.push_back(itemType);
         }
     }
-    RecordSlots(std::move(label), itemTypes, [&] { g_ItemDataHandler.SetItems(items); });
+    RecordSlots(std::move(label), itemTypes, [&] { g_ItemDataHandler.SetItems(items, profiles); });
     return true;
 }
 

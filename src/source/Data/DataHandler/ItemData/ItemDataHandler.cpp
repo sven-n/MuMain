@@ -272,7 +272,8 @@ void CItemDataHandler::RefreshItemNames()
 }
 
 #ifdef _EDITOR
-ItemDefinition CItemDataHandler::WithDerivedFields(const ItemDefinition& definition, const ItemDefinition* previous)
+ItemDefinition CItemDataHandler::WithDerivedFields(const ItemDefinition& definition, const ItemDefinition* previous,
+                                                   StatProfileStore profiles)
 {
     ItemDefinition result = definition;
     if (previous == nullptr || definition.weaponKind == previous->weaponKind)
@@ -284,7 +285,8 @@ ItemDefinition CItemDataHandler::WithDerivedFields(const ItemDefinition& definit
         // "Follow the data" was picked: also over a profile picked before.
         result.statProfile = FollowStatProfile(g_ItemDatabase.GetStatProfiles(), nullptr, result);
     }
-    else if (previous == nullptr || definition.statProfile == previous->statProfile)
+    else if (profiles == StatProfileStore::Follow &&
+             (previous == nullptr || definition.statProfile == previous->statProfile))
     {
         result.statProfile = FollowStatProfile(g_ItemDatabase.GetStatProfiles(), previous, result);
     }
@@ -306,7 +308,7 @@ void CItemDataHandler::SetItem(const ItemDefinition& definition)
     SetItems(std::span<const ItemDefinition>(&definition, 1));
 }
 
-void CItemDataHandler::SetItems(std::span<const ItemDefinition> definitions)
+void CItemDataHandler::SetItems(std::span<const ItemDefinition> definitions, StatProfileStore profiles)
 {
     std::vector<ItemDefinition> stored;
     stored.reserve(definitions.size());
@@ -314,7 +316,8 @@ void CItemDataHandler::SetItems(std::span<const ItemDefinition> definitions)
     {
         if (IsValidItemId(definition.group, definition.number))
         {
-            stored.push_back(WithDerivedFields(definition, g_ItemDatabase.Find(definition.group, definition.number)));
+            stored.push_back(
+                WithDerivedFields(definition, g_ItemDatabase.Find(definition.group, definition.number), profiles));
         }
     }
     g_ItemDatabase.SetMany(stored);

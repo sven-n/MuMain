@@ -383,6 +383,12 @@ TEST_CASE("Item Sync imports the checked rows of a file as one undo step [data][
     added.names = Data::LocalizedString::Parse("New Sword");
     added.width = 2;
     sides.file.items.push_back(added);
+    // A new item whose file names a profile its rules do not give: the import keeps it as a pick.
+    ItemDefinition picked = added;
+    picked.number = 101;
+    picked.names = Data::LocalizedString::Parse("Picked Sword");
+    picked.statProfile = "sceptre";
+    sides.file.items.push_back(picked);
     std::erase_if(sides.file.items,
                   [](const ItemDefinition& item) { return MakeItemType(item.group, item.number) == ShortSwordType; });
     sides.file.formulas->excellentDropLevelBonus = 30;
@@ -392,7 +398,7 @@ TEST_CASE("Item Sync imports the checked rows of a file as one undo step [data][
 
     g_MuItemSyncUI.Compare(file);
     REQUIRE(g_MuItemSyncUI.GetDiff());
-    CHECK(g_MuItemSyncUI.GetDiff()->items.size() == 3);
+    CHECK(g_MuItemSyncUI.GetDiff()->items.size() == 4);
     CHECK(g_MuItemSyncUI.GetDiff()->formulas.size() == 1);
     REQUIRE(g_MuItemSyncUI.Apply());
 
@@ -404,6 +410,9 @@ TEST_CASE("Item Sync imports the checked rows of a file as one undo step [data][
     CHECK(newSword->twoHanded);
     CHECK(newSword->weaponKind == WeaponKind::Sword);
     CHECK(newSword->statProfile == "weapon");
+    const ItemDefinition* pickedSword = g_ItemDatabase.Find(MakeItemType(0, 101));
+    REQUIRE(pickedSword != nullptr);
+    CHECK(pickedSword->statProfile == "sceptre");
     // The removal was not checked.
     CHECK(g_ItemDatabase.Find(ShortSwordType) != nullptr);
     CHECK(g_ItemDataHandler.GetStatFile().excellentDropLevelBonus == 30);
@@ -417,6 +426,7 @@ TEST_CASE("Item Sync imports the checked rows of a file as one undo step [data][
     REQUIRE(g_ItemEdits.Undo());
     CHECK(g_ItemDatabase.Find(KrisType)->width == kris.width);
     CHECK(g_ItemDatabase.Find(MakeItemType(0, 100)) == nullptr);
+    CHECK(g_ItemDatabase.Find(MakeItemType(0, 101)) == nullptr);
     CHECK(g_ItemDataHandler.GetStatFile() == statFile);
     g_ItemEdits.GetHistory().Clear();
 }
