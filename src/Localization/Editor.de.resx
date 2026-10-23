@@ -1987,4 +1987,61 @@
   <data name="The monsters changed since this step; it is not undone." xml:space="preserve">
     <value>Die Monster haben sich seit diesem Schritt geändert; er wird nicht rückgängig gemacht.</value>
   </data>
+  <data name="Save Monsters" xml:space="preserve">
+    <value>Monster speichern</value>
+  </data>
+  <data name="Add monster" xml:space="preserve">
+    <value>Monster hinzufügen</value>
+  </data>
+  <data name="Copy monster" xml:space="preserve">
+    <value>Monster kopieren</value>
+  </data>
+  <data name="Remove monster" xml:space="preserve">
+    <value>Monster entfernen</value>
+  </data>
+  <data name="All kinds" xml:space="preserve">
+    <value>Alle Arten</value>
+  </data>
+  <data name="All monsters" xml:space="preserve">
+    <value>Alle Monster</value>
+  </data>
+  <data name="Kind monster" xml:space="preserve">
+    <value>Monster</value>
+  </data>
+  <data name="Kind NPC" xml:space="preserve">
+    <value>NPC</value>
+  </data>
+  <data name="Kind trap" xml:space="preserve">
+    <value>Falle</value>
+  </data>
+  <data name="Kind other" xml:space="preserve">
+    <value>Sonstiges</value>
+  </data>
+  <data name="Step kind" xml:space="preserve">
+    <value>{0}: Art</value>
+  </data>
+  <data name="Copy monster note" xml:space="preserve">
+    <value>Eine Kopie von {0} nur mit dem englischen Namen, ohne die Übersetzungen.</value>
+  </data>
+  <data name="The monster entry is removed." xml:space="preserve">
+    <value>Der Monstereintrag wird entfernt.</value>
+  </data>
+  <data name="Monster without entry in game" xml:space="preserve">
+    <value>Ohne Eintrag zeigt das Spiel für diese Nummer den Namen "()" und gibt ihr die Art der alten Nummernregeln: {0}.</value>
+  </data>
+  <data name="Removed monster in game" xml:space="preserve">
+    <value>Monster und NPCs dieser Nummer, die im Spiel sind, behalten ihren Namen und ihre Art, bis sie wieder erscheinen.</value>
+  </data>
+  <data name="Kind change in game" xml:space="preserve">
+    <value>Monster und NPCs dieser Nummer, die im Spiel sind, behalten ihre Art, bis sie wieder erscheinen.</value>
+  </data>
+  <data name="Nothing uses the monster" xml:space="preserve">
+    <value>Nichts nutzt das Monster</value>
+  </data>
+  <data name="The sources were not found: code that names the monster is not known." xml:space="preserve">
+    <value>Die Quellen wurden nicht gefunden: Code, der das Monster nennt, ist nicht bekannt.</value>
+  </data>
+  <data name="Monster code references limit" xml:space="preserve">
+    <value>Nicht gefunden wird Code, der die Nummer anders nutzt, etwa als case-Marke, als Funktionsargument oder mit einer Variable, deren Name nicht auf MonsterIndex endet.</value>
+  </data>
 </root>
