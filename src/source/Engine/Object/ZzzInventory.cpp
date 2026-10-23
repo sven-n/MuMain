@@ -1184,7 +1184,11 @@ void GetItemName(int iType, int iLevel, wchar_t* Text)
         {
         case 0: mu_swprintf(Text, L"%ls", I18N::Game::Zen); break;
         case 1: mu_swprintf(Text, L"%ls", I18N::Game::Heart); break;
-        case 2: mu_swprintf(Text, L"%ls", ChaosEventName[p->Durability]); break;
+        case 2:
+            // The prize by the item's durability; none past the list, so the caller's fallback names the item.
+            if (p->Durability < std::size(ChaosEventName))
+                mu_swprintf(Text, L"%ls", ChaosEventName[p->Durability]);
+            break;
         }
     }
     else if (iType == ITEM_BOX_OF_LUCK)
@@ -1929,7 +1933,17 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         {
         case 0:mu_swprintf(TextList[TextNum], I18N::Game::Zen); break;
         case 1:mu_swprintf(TextList[TextNum], I18N::Game::Heart); break;
-        case 2:mu_swprintf(TextList[TextNum], L"%ls", ChaosEventName[ip->Durability]); break;
+        case 2:
+            // The prize by the item's durability; its own name for one past the list (the tooltip snapshot's item
+            // has its full durability).
+            mu_swprintf(TextList[TextNum], L"%ls",
+                        ip->Durability < std::size(ChaosEventName) ? ChaosEventName[ip->Durability] : p->Name);
+            break;
+        // The item exists at +0 to +2; at another level (the tooltip snapshot draws every level) its own name, not the
+        // row an earlier tooltip left.
+        default:
+            mu_swprintf(TextList[TextNum], L"%ls", p->Name);
+            break;
         }
     }
     else if (ip->Type == ITEM_BOX_OF_LUCK)
@@ -1967,7 +1981,17 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         {
         case 0:mu_swprintf(TextList[TextNum], I18N::Game::Zen); break;
         case 1:mu_swprintf(TextList[TextNum], I18N::Game::Heart); break;
-        case 2:mu_swprintf(TextList[TextNum], L"%ls", ChaosEventName[ip->Durability]); break;
+        case 2:
+            // The prize by the item's durability; its own name for one past the list (the tooltip snapshot's item
+            // has its full durability).
+            mu_swprintf(TextList[TextNum], L"%ls",
+                        ip->Durability < std::size(ChaosEventName) ? ChaosEventName[ip->Durability] : p->Name);
+            break;
+        // The item exists at +0 to +2; at another level (the tooltip snapshot draws every level) its own name, not the
+        // row an earlier tooltip left.
+        default:
+            mu_swprintf(TextList[TextNum], L"%ls", p->Name);
+            break;
         }
     }
     else if (ip->Type == ITEM_FRUITS)
