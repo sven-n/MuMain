@@ -676,6 +676,13 @@ ItemSyncDiff BuildItemSyncDiff(const ItemExchangeFile& client, const ItemExchang
     return diff;
 }
 
+int CountFormulaDifferences(const Data::Items::ItemStatFile& current, const Data::Items::ItemStatFile& incoming)
+{
+    ItemSyncDiff diff;
+    CompareFormulas(current, incoming, SyncOptions{}, diff);
+    return static_cast<int>(diff.formulas.size());
+}
+
 ItemExchangeFile ApplyItemSyncDiff(const ItemExchangeFile& client, const ItemExchangeFile& file,
                                    const ItemSyncDiff& diff, std::vector<ItemDataIssue>& issues)
 {

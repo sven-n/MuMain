@@ -284,9 +284,9 @@ ItemSyncExportPreview PreviewItemSyncExport(const std::filesystem::path& path)
         fileKeys.erase(key);
     }
     preview.removed = static_cast<int>(fileKeys.size());
-    if (file.formulas)
+    if (file.formulas && client.formulas)
     {
-        preview.formulaEntries = static_cast<int>(BuildItemSyncDiff(client, file, SyncOptions{}).formulas.size());
+        preview.formulaEntries = CountFormulaDifferences(*file.formulas, *client.formulas);
     }
     return preview;
 }

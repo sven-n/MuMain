@@ -130,6 +130,9 @@ struct SyncOptions
 ItemSyncDiff BuildItemSyncDiff(const Data::Items::ItemExchangeFile& client, const Data::Items::ItemExchangeFile& file,
                                const SyncOptions& options);
 
+// How many formula entries differ between two item stat files: the formula rows a diff lists.
+int CountFormulaDifferences(const Data::Items::ItemStatFile& current, const Data::Items::ItemStatFile& incoming);
+
 // The client's data with the checked rows taken from the file. Formulas the item stat file's
 // checks refuse are left as they were, with their problems in `issues`.
 Data::Items::ItemExchangeFile ApplyItemSyncDiff(const Data::Items::ItemExchangeFile& client,
