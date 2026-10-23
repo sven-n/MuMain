@@ -13,7 +13,6 @@
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "I18N/All.h"
-#include "imgui.h"
 
 #include <string>
 
@@ -85,25 +84,6 @@ UndoTarget& GetUndoTarget()
 {
     static MonsterUndoTarget target;
     return target;
-}
-
-bool RenderSelectedMonster(int number)
-{
-    if (number < 0 || number >= Data::Monsters::MonsterNumberCount)
-    {
-        ImGui::TextDisabled("%s", I18N::Editor::SelectAMonster);
-        return false;
-    }
-    const Data::Monsters::MonsterDefinition* monster = g_MonsterDatabase.Find(number);
-    if (monster == nullptr)
-    {
-        ImGui::TextDisabled("(%d) %s", number, I18N::Editor::NoMonsterAtThisNumber);
-        return false;
-    }
-    // In the UI language, as the browser shows it. The name is an argument,
-    // never the format: names may hold a "%".
-    ImGui::Text("%s (%d)", monster->names.Get(I18N::GetCurrentLocale()).c_str(), number);
-    return true;
 }
 
 int GetDataVersion()

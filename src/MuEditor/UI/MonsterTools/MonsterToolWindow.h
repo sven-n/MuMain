@@ -8,8 +8,7 @@ class UndoTarget;
 }
 
 // What every monster tool window does: where it docks, that the editor counts
-// the mouse over it, the undo and redo keys, and the line that names the
-// selected monster.
+// the mouse over it, and the undo and redo keys.
 namespace MuEditor::Monsters::ToolWindow
 {
 // Begins the window (always call End). `title` is the translated title,
@@ -21,10 +20,6 @@ void End();
 // a monster tool is the tool worked in last and a monster tool is open
 // (UndoTargets).
 UndoTarget& GetUndoTarget();
-
-// "Budge Dragon (2)" in the UI language, "Select a monster", or "(76) No
-// monster at this number"; false when there is no monster to edit.
-bool RenderSelectedMonster(int number);
 
 // The data the tools show changed: the monster table.
 int GetDataVersion();

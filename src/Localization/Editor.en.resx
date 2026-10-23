@@ -1999,12 +1999,6 @@
   <data name="Monster Checks" xml:space="preserve">
     <value>Monster Checks</value>
   </data>
-  <data name="Select a monster" xml:space="preserve">
-    <value>Select a monster</value>
-  </data>
-  <data name="No monster at this number" xml:space="preserve">
-    <value>No monster at this number</value>
-  </data>
   <data name="The monsters changed since this step; it is not undone." xml:space="preserve">
     <value>The monsters changed since this step; it is not undone.</value>
   </data>
