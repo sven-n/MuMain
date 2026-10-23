@@ -433,8 +433,8 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
                         suggestion = SuggestPlaceholder(MakeTablePlaceholder(value), builtIns);
                     }
                     addError(field + ".values." + placeholder,
-                             "\"" + value + "\" is neither a built-in value nor a table of " + statFile +
-                                 " (\"" + MakeTablePlaceholder("name") + "\")" +
+                             "\"" + value + "\" is neither a built-in value nor a table of " + statFile + " (\"" +
+                                 MakeTablePlaceholder("name") + "\")" +
                                  (suggestion.empty() ? "" : "; did you mean \"" + suggestion + "\"?"));
                 }
             }
