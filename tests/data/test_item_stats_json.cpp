@@ -392,9 +392,12 @@ TEST_CASE("Item stat file warnings [data][items]")
                      R"("excellent": {"times": 12, "add": 4, "dropLevelDivisor": 5, "afterLevelBonus": true})"));
     CHECK(HasIssue(excellentAfter.issues, Severity::Warning, "default.defense.excellent.afterLevelBonus"));
 
+    // A table no stat uses can be one for item descriptions, so the file alone does not warn about it
+    // (ValidateTableUses does, with the items).
     const ReadResult unusedTable = Read(Changed(R"("defense": {"table": "linear", )", R"("defense": {)"));
-    CHECK(warningsOnly(unusedTable.issues));
-    CHECK(HasIssue(unusedTable.issues, Severity::Warning, "tables.linear"));
+    CHECK(unusedTable.issues.empty());
+    CHECK_FALSE(ItemStatProfiles(unusedTable.file).IsTableUsedByStats("linear"));
+    CHECK(ItemStatProfiles(unusedTable.file).IsTableUsedByStats("steps"));
 
     const ReadResult noEnglish = Read(Changed(R"({"en": "Steps"})", R"({"de": "Stufen"})"));
     CHECK(HasIssue(noEnglish.issues, Severity::Warning, "tables.steps.caption"));

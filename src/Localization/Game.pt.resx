@@ -2148,10 +2148,6 @@
     <value>Absorva 30% de dano % of</value>
     <comment>legacy_id=575</comment>
   </data>
-  <data name="Increase 30%% of attacking &amp; Wizardry Dmg" xml:space="preserve">
-    <value>Aumenta em 30% o dano de ataque e magia de % of</value>
-    <comment>legacy_id=576</comment>
-  </data>
   <data name="Increase %d%% of Damage" xml:space="preserve">
     <value>Aumentar o dano de %d%% of</value>
     <comment>legacy_id=577</comment>
@@ -2779,10 +2775,6 @@
   <data name="Summon" xml:space="preserve">
     <value>Convocar</value>
     <comment>legacy_id=738</comment>
-  </data>
-  <data name="Max HP +%d increased" xml:space="preserve">
-    <value>HP máximo +%d aumentado</value>
-    <comment>legacy_id=739</comment>
   </data>
   <data name="HP +%d increased" xml:space="preserve">
     <value>HP +%d aumentado</value>

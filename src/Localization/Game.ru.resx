@@ -2148,10 +2148,6 @@
     <value>Поглощает 30%% of урона</value>
     <comment>legacy_id=575</comment>
   </data>
-  <data name="Increase 30%% of attacking &amp; Wizardry Dmg" xml:space="preserve">
-    <value>Увеличение на 30% % of урона от атак и волшебства.</value>
-    <comment>legacy_id=576</comment>
-  </data>
   <data name="Increase %d%% of Damage" xml:space="preserve">
     <value>Увеличение урона %d%% of</value>
     <comment>legacy_id=577</comment>
@@ -2779,10 +2775,6 @@
   <data name="Summon" xml:space="preserve">
     <value>Вызвать</value>
     <comment>legacy_id=738</comment>
-  </data>
-  <data name="Max HP +%d increased" xml:space="preserve">
-    <value>Макс. HP +%d увеличен.</value>
-    <comment>legacy_id=739</comment>
   </data>
   <data name="HP +%d increased" xml:space="preserve">
     <value>HP +%d увеличено.</value>

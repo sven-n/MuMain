@@ -220,9 +220,8 @@ Each line is `{"text": ..., "color": ...}`:
 In the tooltip:
 
 - **Place:** after the item's damage, defense and speed lines, and before
-  its durability, requirements and options. The lines the tooltip code
-  computes from the item (the wings' damage and absorption, the Guardian
-  Angel and the Imp, the Town Portal scroll's delay) come after the
+  its durability, requirements and options. The Town Portal scroll's delay
+  and a few other lines are still written by the tooltip code, after the
   description.
 - **Language:** the UI's language, also when the item names stay English
   ("Translate item names" off).
@@ -244,6 +243,10 @@ placeholder is one of:
   as `table:` and its name: the table's value at the item's + level
   (`{table:damageIncreaseWeapons}` is 3 at +1 and 66 at +15, the damage a
   weapon gains). A new table is a new placeholder.
+  The wings, capes and pets show their damage increase and absorption this
+  way: `"Increase {table:wingDamageIncrease1st}% of Damage"` over the table
+  `wingDamageIncrease1st` (`{"values": 12, "perLevel": 2}`, 12 + 2 per level).
+  Such tables are only for descriptions: no stat profile names them.
 
 The tables are written apart from the built-in values, so a table may have
 any name, also one a later version gives a built-in value: `{level}` and
@@ -259,6 +262,23 @@ bmd):
 - a name that is neither built in nor a table: `has the unknown placeholder
   {table:damgeIncreaseWeapons}; did you mean {table:damageIncreaseWeapons}?`.
   A table written without `table:` gets the same hint.
+
+**Warnings:**
+
+- a table of the stat file that neither a stat nor a description names;
+- a wing (an item with a `wingTier`) whose description lines are not those of
+  most of the other wings of its tier, `cape` tag and group: the tooltip code
+  chose the wings' lines by the tier, so a new wing without them, or one moved
+  to another tier that keeps its old tier's tables, is pointed out
+  (`its wing lines are not those of the other third-tier wings of group 12:
+  it has 1 line naming no table, they have 3 lines naming …`). A wing alone
+  there is compared with the wings of its tier and `cape` tag in the other
+  groups that have more than one; Cape of Fighter (12) and Cape of Lord (13),
+  each alone and written apart by the old code, are not compared with each
+  other. Wings of a group that split evenly get one warning that they don't
+  agree, without blaming either side. Wings without lines never set the
+  lines the others are compared with, so new wings imported without them are
+  pointed out, also when they are more than the wings with lines.
 
 The shipped data is checked by the tests, so a wrong placeholder fails the
 build's tests.
@@ -464,8 +484,9 @@ the file does not have (other than `"default"`); a condition the format does
 not have; and a condition that is not a list of one or more values, or a
 value that is not one of its names (for `group`, a whole number from 0 to
 15).
-**Warnings:** unknown fields, a table no stat uses, and a caption without
-English. An item whose `statProfile` the file does not have is an error, and
+**Warnings:** unknown fields, a table that neither a stat nor a
+[description placeholder](#description-placeholders) uses (see there for the
+wings' tables too), and a caption without English. An item whose `statProfile` the file does not have is an error, and
 a profile no item names is a warning.
 
 ---

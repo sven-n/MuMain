@@ -2168,10 +2168,6 @@
     <value>Absorbiert 30%% des Schadens</value>
     <comment>legacy_id=575</comment>
   </data>
-  <data name="Increase 30%% of attacking &amp; Wizardry Dmg" xml:space="preserve">
-    <value>Erhöht Angriffs- und Zaubereischaden um 30%%</value>
-    <comment>legacy_id=576</comment>
-  </data>
   <data name="Increase %d%% of Damage" xml:space="preserve">
     <value>Erhöht den Schaden um %d%%</value>
     <comment>legacy_id=577</comment>
@@ -2799,10 +2795,6 @@
   <data name="Summon" xml:space="preserve">
     <value>Beschwörung</value>
     <comment>legacy_id=738</comment>
-  </data>
-  <data name="Max HP +%d increased" xml:space="preserve">
-    <value>Max. HP +%d erhöht</value>
-    <comment>legacy_id=739</comment>
   </data>
   <data name="HP +%d increased" xml:space="preserve">
     <value>HP +%d erhöht</value>

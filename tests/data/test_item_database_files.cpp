@@ -16,6 +16,7 @@
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
 #include "Data/GameData/ItemData/ItemNames.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
@@ -30,6 +31,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Physics/PhysicsManager.h"
 #include "GameLogic/Items/ItemStats.h"
+#include "Core/Text/Utf8.h"
 #include "I18N/All.h"
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
@@ -73,6 +75,7 @@
 #include <fstream>
 #include <initializer_list>
 #include <memory>
+#include <optional>
 #include <random>
 #include <span>
 #include <string>
@@ -240,11 +243,184 @@ TEST_CASE("The shipped descriptions' placeholders are built-in values or stat fi
     REQUIRE_FALSE(HasErrors(stats.issues));
     std::vector<ItemDataIssue> issues;
     ValidateDescriptionPlaceholders(result.items, ItemStatProfiles(stats.file), ItemStatsFileName, issues);
+    ValidateTableUses(result.items, ItemStatProfiles(stats.file), ItemStatsFileName, issues);
     for (const ItemDataIssue& issue : issues)
     {
         INFO(issue.ToString());
         CHECK(false);
     }
+}
+
+// A line the tooltip code wrote for the wings, capes and pets before it was their descriptions: one of the game's
+// texts that other code still prints ("Increase %d%% of Damage", "Absorb %d%% of Damage", "Increase speed") with its
+// value, or another text, in English.
+struct OldWingLine
+{
+    enum class Kind
+    {
+        Increase,
+        Absorb,
+        Speed,
+        Other,
+    };
+    Kind kind;
+    int value = 0;
+    std::string english;
+
+    bool operator==(const OldWingLine&) const = default;
+};
+
+// The old formulas, to compare the data with.
+std::vector<OldWingLine> OldWingAndPetLines(int group, int number, int level)
+{
+    const auto increase = [](int value) { return OldWingLine{OldWingLine::Kind::Increase, value}; };
+    const auto absorb = [](int value) { return OldWingLine{OldWingLine::Kind::Absorb, value}; };
+    const OldWingLine speed{OldWingLine::Kind::Speed};
+    const auto other = [](const char* english) { return OldWingLine{OldWingLine::Kind::Other, 0, english}; };
+    const auto in = [&](std::initializer_list<int> numbers)
+    { return std::find(numbers.begin(), numbers.end(), number) != numbers.end(); };
+    if (group == 12 && in({0, 1, 2, 41, 131, 132, 133, 134}))
+    {
+        return {increase(12 + level * 2), absorb(12 + level * 2), speed};
+    }
+    if (group == 12 && in({3, 4, 5, 6, 42}))
+    {
+        return {increase(32 + level), absorb(25 + level * 2), speed};
+    }
+    if (group == 12 && in({36, 37, 38, 39, 43}))
+    {
+        return {increase(39 + level * 2), absorb(39 + level * 2), speed};
+    }
+    if (group == 12 && in({40, 50}))
+    {
+        return {increase(39 + level * 2), absorb(24 + level * 2), speed};
+    }
+    if (group == 12 && in({130, 135}))
+    {
+        return {increase(20 + level * 2), absorb(20 + level * 2), speed};
+    }
+    if (group == 12 && number == 49)
+    {
+        return {increase(20 + level * 2), absorb(10 + level * 2)};
+    }
+    if (group == 13 && number == 30)
+    {
+        return {increase(20 + level * 2), absorb(10 + level)};
+    }
+    if (group == 13 && number == 3)
+    {
+        return {increase(15), absorb(10)};
+    }
+    if (group == 13 && number == 0)
+    {
+        return {absorb(20), other("Max HP +50 increased")};
+    }
+    if (group == 13 && number == 1)
+    {
+        return {other("Increase 30% of attacking & Wizardry Dmg")};
+    }
+    return {};
+}
+
+// What the old code printed for the line in the UI's language: the game's text with its value, as printf fills
+// "%d" and "%%" (the only conversions these texts have); another text only in English.
+std::optional<std::string> PrintOldWingLine(const OldWingLine& line)
+{
+    const wchar_t* format = nullptr;
+    switch (line.kind)
+    {
+    case OldWingLine::Kind::Increase:
+        format = I18N::Game::IncreaseDOfDamage;
+        break;
+    case OldWingLine::Kind::Absorb:
+        format = I18N::Game::AbsorbDOfDamage;
+        break;
+    case OldWingLine::Kind::Speed:
+        format = I18N::Game::IncreaseSpeed;
+        break;
+    case OldWingLine::Kind::Other:
+        return std::nullopt;
+    }
+    const std::string text = Core::Text::ToUtf8(format);
+    std::string printed;
+    for (size_t position = 0; position < text.size(); ++position)
+    {
+        if (text.compare(position, 2, "%%") == 0)
+        {
+            printed += '%';
+            ++position;
+        }
+        else if (text.compare(position, 2, "%d") == 0)
+        {
+            printed += std::to_string(line.value);
+            ++position;
+        }
+        else
+        {
+            printed += text[position];
+        }
+    }
+    return printed;
+}
+
+std::string EnglishOldWingLine(const OldWingLine& line)
+{
+    switch (line.kind)
+    {
+    case OldWingLine::Kind::Increase:
+        return "Increase " + std::to_string(line.value) + "% of Damage";
+    case OldWingLine::Kind::Absorb:
+        return "Absorb " + std::to_string(line.value) + "% of Damage";
+    case OldWingLine::Kind::Speed:
+        return "Increase speed";
+    case OldWingLine::Kind::Other:
+        break;
+    }
+    return line.english;
+}
+
+TEST_CASE("The wings', capes' and pets' tooltip values come from their data as from the old formulas [data][items]")
+{
+    const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
+    const ItemStatsLoadResult stats = LoadItemStatsFile(DataDirectory / "Items" / "Stats" / ItemStatsFileName);
+    REQUIRE_FALSE(HasErrors(stats.issues));
+    const ItemStatProfiles profiles(stats.file);
+    // The test switches the UI language, and once a test has loaded the item data every switch refills
+    // ItemAttribute: it needs an item table of its own.
+    ClientDataScope client(ShippedClientDirectory);
+    int compared = 0;
+    for (const ItemDefinition& item : result.items)
+    {
+        if (OldWingAndPetLines(item.group, item.number, 0).empty())
+        {
+            continue;
+        }
+        for (int level = 0; level < ItemLevelCount; ++level)
+        {
+            INFO(item.group << "/" << item.number << " +" << level);
+            const std::vector<OldWingLine> old = OldWingAndPetLines(item.group, item.number, level);
+            REQUIRE(item.description.size() == old.size());
+            for (size_t index = 0; index < old.size(); ++index)
+            {
+                const Data::LocalizedString& text = item.description[index].text;
+                CHECK(FillPlaceholders(text.GetNeutral(), level, profiles) == EnglishOldWingLine(old[index]));
+                // In every language, as the game's texts that other code still prints have it.
+                for (const char* locale : I18N::GetAvailableLocales())
+                {
+                    INFO(locale);
+                    I18N::SetLocale(locale);
+                    if (const std::optional<std::string> printed = PrintOldWingLine(old[index]))
+                    {
+                        CHECK(FillPlaceholders(text.Get(locale), level, profiles) == *printed);
+                    }
+                }
+                I18N::SetLocale("en");
+            }
+            ++compared;
+        }
+    }
+    // 24 wings and capes, Horn of Dinorant, Guardian Angel and Imp, at each level.
+    CHECK(compared == 27 * ItemLevelCount);
 }
 
 // The texts the tooltip code wrote for these items are their descriptions now, in every UI language.

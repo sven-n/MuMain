@@ -2453,10 +2453,6 @@
     <value>Absorb 30%% of damage</value>
     <comment>legacy_id=575</comment>
   </data>
-  <data name="Increase 30%% of attacking &amp; Wizardry Dmg" xml:space="preserve">
-    <value>Increase 30%% of attacking &amp; Wizardry Dmg</value>
-    <comment>legacy_id=576</comment>
-  </data>
   <data name="Increase %d%% of Damage" xml:space="preserve">
     <value>Increase %d%% of Damage</value>
     <comment>legacy_id=577</comment>
@@ -3084,10 +3080,6 @@
   <data name="Summon" xml:space="preserve">
     <value>Summon</value>
     <comment>legacy_id=738</comment>
-  </data>
-  <data name="Max HP +%d increased" xml:space="preserve">
-    <value>Max HP +%d increased</value>
-    <comment>legacy_id=739</comment>
   </data>
   <data name="HP +%d increased" xml:space="preserve">
     <value>HP +%d increased</value>

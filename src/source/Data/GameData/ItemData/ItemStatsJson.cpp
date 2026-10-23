@@ -124,7 +124,6 @@ private:
                           WrittenRequirementSection& section);
     void ReadRequirementFormula(const OrderedJson& json, const std::string& field,
                                 std::optional<RequirementFormula>& formula);
-    void WarnAboutUnusedTables(const ItemStatFile& file);
     void ReadProfileRules(const OrderedJson& root, ItemStatFile& file);
     bool ReadRule(const OrderedJson& json, const std::string& field, const ItemStatFile& file, StatProfileRule& rule);
     // A condition's list of values: the names of `TEnum`, `what` being their kind
@@ -176,7 +175,6 @@ void ItemStatsReader::Read(const OrderedJson& root, ItemStatFile& file)
     ReadDefaults(root, file);
     ReadProfiles(root, file);
     ReadProfileRules(root, file);
-    WarnAboutUnusedTables(file);
 }
 
 void ItemStatsReader::ReadDropLevelBonus(const OrderedJson& root, ItemStatFile& file)
@@ -561,34 +559,6 @@ void ItemStatsReader::ReadRequirementFormula(const OrderedJson& json, const std:
         }
     }
     formula = values;
-}
-
-void ItemStatsReader::WarnAboutUnusedTables(const ItemStatFile& file)
-{
-    std::set<std::string, std::less<>> used;
-    const auto collect = [&used](const std::array<WrittenStatSection, ItemStatCount>& sections)
-    {
-        for (const WrittenStatSection& section : sections)
-        {
-            if (section.table)
-            {
-                used.insert(*section.table);
-            }
-        }
-    };
-    collect(file.defaults);
-    for (const WrittenStatProfile& profile : file.profiles)
-    {
-        collect(profile.stats);
-    }
-    for (const LevelBonusTable& table : file.tables)
-    {
-        if (!used.contains(table.name))
-        {
-            AddIssue(ItemDataIssueSeverity::Warning, std::string(Keys::Tables) + "." + table.name,
-                     "no stat uses this table");
-        }
-    }
 }
 
 void AddValue(ItemTagSet& values, ItemTag tag)

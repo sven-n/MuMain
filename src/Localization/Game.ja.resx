@@ -2051,10 +2051,6 @@
     <value>ダメ―ジ 30%%吸収</value>
     <comment>legacy_id=575</comment>
   </data>
-  <data name="Increase 30%% of attacking &amp; Wizardry Dmg" xml:space="preserve">
-    <value>攻撃力、力 30%%増加</value>
-    <comment>legacy_id=576</comment>
-  </data>
   <data name="Increase %d%% of Damage" xml:space="preserve">
     <value>ダメージ %d%%増加</value>
     <comment>legacy_id=577</comment>
@@ -2670,10 +2666,6 @@
   <data name="Summon" xml:space="preserve">
     <value>召喚</value>
     <comment>legacy_id=738</comment>
-  </data>
-  <data name="Max HP +%d increased" xml:space="preserve">
-    <value>最大生命力 +%d増加</value>
-    <comment>legacy_id=739</comment>
   </data>
   <data name="HP +%d increased" xml:space="preserve">
     <value>生命 +%d増加</value>

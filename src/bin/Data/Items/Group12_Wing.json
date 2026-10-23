@@ -11,6 +11,53 @@
         "pt": "Asas do elfo"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
+            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Increase speed",
+            "de": "Erhöht die Geschwindigkeit",
+            "es": "aumentar la velocidad",
+            "id": "Tingkatkan kecepatan",
+            "ja": "移動速度向上",
+            "pl": "Zwiększa prędkość",
+            "pt": "Aumentar a velocidade",
+            "ru": "Увеличить скорость",
+            "tl": "Dagdagan ang bilis",
+            "uk": "Збільште швидкість",
+            "zh-TW": "提高速度"
+          }
+        }
+      ],
       "width": 3,
       "height": 2,
       "slot": "wings",
@@ -35,6 +82,53 @@
         "pt": "Asas do paraíso"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
+            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Increase speed",
+            "de": "Erhöht die Geschwindigkeit",
+            "es": "aumentar la velocidad",
+            "id": "Tingkatkan kecepatan",
+            "ja": "移動速度向上",
+            "pl": "Zwiększa prędkość",
+            "pt": "Aumentar a velocidade",
+            "ru": "Увеличить скорость",
+            "tl": "Dagdagan ang bilis",
+            "uk": "Збільште швидкість",
+            "zh-TW": "提高速度"
+          }
+        }
+      ],
       "width": 5,
       "height": 3,
       "slot": "wings",
@@ -60,6 +154,53 @@
         "pt": "Asas de Satã"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
+            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Increase speed",
+            "de": "Erhöht die Geschwindigkeit",
+            "es": "aumentar la velocidad",
+            "id": "Tingkatkan kecepatan",
+            "ja": "移動速度向上",
+            "pl": "Zwiększa prędkość",
+            "pt": "Aumentar a velocidade",
+            "ru": "Увеличить скорость",
+            "tl": "Dagdagan ang bilis",
+            "uk": "Збільште швидкість",
+            "zh-TW": "提高速度"
+          }
+        }
+      ],
       "width": 5,
       "height": 2,
       "slot": "wings",
@@ -85,6 +226,53 @@
         "pt": "Asas dos espíritos"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase {table:wingDamageIncrease2nd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease2nd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease2nd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease2nd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease2nd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease2nd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease2nd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease2nd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease2nd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease2nd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease2nd}% of 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb {table:wingDamageAbsorb2nd}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb2nd}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb2nd}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb2nd}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb2nd}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb2nd}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb2nd}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb2nd}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb2nd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb2nd}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb2nd}% of傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Increase speed",
+            "de": "Erhöht die Geschwindigkeit",
+            "es": "aumentar la velocidad",
+            "id": "Tingkatkan kecepatan",
+            "ja": "移動速度向上",
+            "pl": "Zwiększa prędkość",
+            "pt": "Aumentar a velocidade",
+            "ru": "Увеличить скорость",
+            "tl": "Dagdagan ang bilis",
+            "uk": "Збільште швидкість",
+            "zh-TW": "提高速度"
+          }
+        }
+      ],
       "width": 5,
       "height": 3,
       "slot": "wings",
@@ -109,6 +297,53 @@
         "pt": "Asas da alma"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase {table:wingDamageIncrease2nd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease2nd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease2nd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease2nd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease2nd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease2nd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease2nd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease2nd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease2nd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease2nd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease2nd}% of 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb {table:wingDamageAbsorb2nd}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb2nd}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb2nd}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb2nd}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb2nd}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb2nd}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb2nd}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb2nd}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb2nd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb2nd}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb2nd}% of傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Increase speed",
+            "de": "Erhöht die Geschwindigkeit",
+            "es": "aumentar la velocidad",
+            "id": "Tingkatkan kecepatan",
+            "ja": "移動速度向上",
+            "pl": "Zwiększa prędkość",
+            "pt": "Aumentar a velocidade",
+            "ru": "Увеличить скорость",
+            "tl": "Dagdagan ang bilis",
+            "uk": "Збільште швидкість",
+            "zh-TW": "提高速度"
+          }
+        }
+      ],
       "width": 5,
       "height": 3,
       "slot": "wings",
@@ -133,6 +368,53 @@
         "pt": "Asas do dragão"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase {table:wingDamageIncrease2nd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease2nd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease2nd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease2nd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease2nd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease2nd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease2nd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease2nd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease2nd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease2nd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease2nd}% of 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb {table:wingDamageAbsorb2nd}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb2nd}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb2nd}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb2nd}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb2nd}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb2nd}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb2nd}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb2nd}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb2nd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb2nd}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb2nd}% of傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Increase speed",
+            "de": "Erhöht die Geschwindigkeit",
+            "es": "aumentar la velocidad",
+            "id": "Tingkatkan kecepatan",
+            "ja": "移動速度向上",
+            "pl": "Zwiększa prędkość",
+            "pt": "Aumentar a velocidade",
+            "ru": "Увеличить скорость",
+            "tl": "Dagdagan ang bilis",
+            "uk": "Збільште швидкість",
+            "zh-TW": "提高速度"
+          }
+        }
+      ],
       "width": 3,
       "height": 3,
       "slot": "wings",
@@ -157,6 +439,53 @@
         "pt": "Asas da escuridão"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase {table:wingDamageIncrease2nd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease2nd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease2nd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease2nd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease2nd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease2nd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease2nd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease2nd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease2nd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease2nd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease2nd}% of 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb {table:wingDamageAbsorb2nd}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb2nd}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb2nd}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb2nd}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb2nd}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb2nd}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb2nd}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb2nd}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb2nd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb2nd}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb2nd}% of傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Increase speed",
+            "de": "Erhöht die Geschwindigkeit",
+            "es": "aumentar la velocidad",
+            "id": "Tingkatkan kecepatan",
+            "ja": "移動速度向上",
+            "pl": "Zwiększa prędkość",
+            "pt": "Aumentar a velocidade",
+            "ru": "Увеличить скорость",
+            "tl": "Dagdagan ang bilis",
+            "uk": "Збільште швидкість",
+            "zh-TW": "提高速度"
+          }
+        }
+      ],
       "width": 4,
       "height": 2,
       "slot": "wings",
@@ -676,6 +1005,53 @@
         "pt": "Asa da Tempestade"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase {table:wingDamageIncrease3rd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease3rd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease3rd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease3rd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease3rd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease3rd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease3rd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease3rd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease3rd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease3rd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease3rd}% of 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb {table:wingDamageAbsorb3rd}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb3rd}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb3rd}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb3rd}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb3rd}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb3rd}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb3rd}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb3rd}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb3rd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb3rd}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb3rd}% of傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Increase speed",
+            "de": "Erhöht die Geschwindigkeit",
+            "es": "aumentar la velocidad",
+            "id": "Tingkatkan kecepatan",
+            "ja": "移動速度向上",
+            "pl": "Zwiększa prędkość",
+            "pt": "Aumentar a velocidade",
+            "ru": "Увеличить скорость",
+            "tl": "Dagdagan ang bilis",
+            "uk": "Збільште швидкість",
+            "zh-TW": "提高速度"
+          }
+        }
+      ],
       "width": 4,
       "height": 3,
       "slot": "wings",
@@ -700,6 +1076,53 @@
         "pt": "Asa da eternidade"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase {table:wingDamageIncrease3rd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease3rd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease3rd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease3rd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease3rd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease3rd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease3rd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease3rd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease3rd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease3rd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease3rd}% of 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb {table:wingDamageAbsorb3rd}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb3rd}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb3rd}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb3rd}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb3rd}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb3rd}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb3rd}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb3rd}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb3rd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb3rd}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb3rd}% of傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Increase speed",
+            "de": "Erhöht die Geschwindigkeit",
+            "es": "aumentar la velocidad",
+            "id": "Tingkatkan kecepatan",
+            "ja": "移動速度向上",
+            "pl": "Zwiększa prędkość",
+            "pt": "Aumentar a velocidade",
+            "ru": "Увеличить скорость",
+            "tl": "Dagdagan ang bilis",
+            "uk": "Збільште швидкість",
+            "zh-TW": "提高速度"
+          }
+        }
+      ],
       "width": 4,
       "height": 3,
       "slot": "wings",
@@ -724,6 +1147,53 @@
         "pt": "Asa da ilusão"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase {table:wingDamageIncrease3rd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease3rd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease3rd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease3rd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease3rd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease3rd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease3rd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease3rd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease3rd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease3rd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease3rd}% of 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb {table:wingDamageAbsorb3rd}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb3rd}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb3rd}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb3rd}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb3rd}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb3rd}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb3rd}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb3rd}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb3rd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb3rd}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb3rd}% of傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Increase speed",
+            "de": "Erhöht die Geschwindigkeit",
+            "es": "aumentar la velocidad",
+            "id": "Tingkatkan kecepatan",
+            "ja": "移動速度向上",
+            "pl": "Zwiększa prędkość",
+            "pt": "Aumentar a velocidade",
+            "ru": "Увеличить скорость",
+            "tl": "Dagdagan ang bilis",
+            "uk": "Збільште швидкість",
+            "zh-TW": "提高速度"
+          }
+        }
+      ],
       "width": 4,
       "height": 3,
       "slot": "wings",
@@ -748,6 +1218,53 @@
         "pt": "Asa da ruína"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase {table:wingDamageIncrease3rd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease3rd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease3rd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease3rd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease3rd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease3rd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease3rd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease3rd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease3rd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease3rd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease3rd}% of 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb {table:wingDamageAbsorb3rd}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb3rd}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb3rd}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb3rd}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb3rd}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb3rd}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb3rd}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb3rd}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb3rd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb3rd}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb3rd}% of傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Increase speed",
+            "de": "Erhöht die Geschwindigkeit",
+            "es": "aumentar la velocidad",
+            "id": "Tingkatkan kecepatan",
+            "ja": "移動速度向上",
+            "pl": "Zwiększa prędkość",
+            "pt": "Aumentar a velocidade",
+            "ru": "Увеличить скорость",
+            "tl": "Dagdagan ang bilis",
+            "uk": "Збільште швидкість",
+            "zh-TW": "提高速度"
+          }
+        }
+      ],
       "width": 4,
       "height": 3,
       "slot": "wings",
@@ -772,6 +1289,53 @@
         "pt": "Capa do Imperador"
       },
       "tags": ["cape", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase {table:wingDamageIncrease3rd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease3rd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease3rd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease3rd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease3rd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease3rd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease3rd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease3rd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease3rd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease3rd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease3rd}% of 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb {table:capeDamageAbsorb3rd}% of Damage",
+            "de": "Absorbiert {table:capeDamageAbsorb3rd}% des Schadens",
+            "es": "Absorber daño {table:capeDamageAbsorb3rd}% of",
+            "id": "Menyerap Kerusakan {table:capeDamageAbsorb3rd}% of",
+            "ja": "ダメージ {table:capeDamageAbsorb3rd}%吸収",
+            "pl": "Pochłania {table:capeDamageAbsorb3rd}% obrażeń",
+            "pt": "Absorver Dano {table:capeDamageAbsorb3rd}% of",
+            "ru": "Поглощение {table:capeDamageAbsorb3rd}% of урона",
+            "tl": "Isipsip ang {table:capeDamageAbsorb3rd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:capeDamageAbsorb3rd}% of",
+            "zh-TW": "吸收{table:capeDamageAbsorb3rd}% of傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Increase speed",
+            "de": "Erhöht die Geschwindigkeit",
+            "es": "aumentar la velocidad",
+            "id": "Tingkatkan kecepatan",
+            "ja": "移動速度向上",
+            "pl": "Zwiększa prędkość",
+            "pt": "Aumentar a velocidade",
+            "ru": "Увеличить скорость",
+            "tl": "Dagdagan ang bilis",
+            "uk": "Збільште швидкість",
+            "zh-TW": "提高速度"
+          }
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "wings",
@@ -796,6 +1360,53 @@
         "pt": "Asa da maldição"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
+            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Increase speed",
+            "de": "Erhöht die Geschwindigkeit",
+            "es": "aumentar la velocidad",
+            "id": "Tingkatkan kecepatan",
+            "ja": "移動速度向上",
+            "pl": "Zwiększa prędkość",
+            "pt": "Aumentar a velocidade",
+            "ru": "Увеличить скорость",
+            "tl": "Dagdagan ang bilis",
+            "uk": "Збільште швидкість",
+            "zh-TW": "提高速度"
+          }
+        }
+      ],
       "width": 4,
       "height": 2,
       "slot": "wings",
@@ -820,6 +1431,53 @@
         "pt": "Asa do desespero"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase {table:wingDamageIncrease2nd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease2nd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease2nd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease2nd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease2nd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease2nd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease2nd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease2nd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease2nd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease2nd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease2nd}% of 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb {table:wingDamageAbsorb2nd}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb2nd}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb2nd}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb2nd}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb2nd}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb2nd}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb2nd}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb2nd}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb2nd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb2nd}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb2nd}% of傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Increase speed",
+            "de": "Erhöht die Geschwindigkeit",
+            "es": "aumentar la velocidad",
+            "id": "Tingkatkan kecepatan",
+            "ja": "移動速度向上",
+            "pl": "Zwiększa prędkość",
+            "pt": "Aumentar a velocidade",
+            "ru": "Увеличить скорость",
+            "tl": "Dagdagan ang bilis",
+            "uk": "Збільште швидкість",
+            "zh-TW": "提高速度"
+          }
+        }
+      ],
       "width": 4,
       "height": 3,
       "slot": "wings",
@@ -844,6 +1502,53 @@
         "pt": "Asa da dimensão"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase {table:wingDamageIncrease3rd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease3rd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease3rd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease3rd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease3rd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease3rd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease3rd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease3rd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease3rd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease3rd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease3rd}% of 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb {table:wingDamageAbsorb3rd}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb3rd}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb3rd}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb3rd}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb3rd}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb3rd}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb3rd}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb3rd}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb3rd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb3rd}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb3rd}% of傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Increase speed",
+            "de": "Erhöht die Geschwindigkeit",
+            "es": "aumentar la velocidad",
+            "id": "Tingkatkan kecepatan",
+            "ja": "移動速度向上",
+            "pl": "Zwiększa prędkość",
+            "pt": "Aumentar a velocidade",
+            "ru": "Увеличить скорость",
+            "tl": "Dagdagan ang bilis",
+            "uk": "Збільште швидкість",
+            "zh-TW": "提高速度"
+          }
+        }
+      ],
       "width": 4,
       "height": 3,
       "slot": "wings",
@@ -965,6 +1670,38 @@
         "pt": "Manto do Guerreiro"
       },
       "tags": ["cape", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase {table:capeDamageIncrease}% of Damage",
+            "de": "Erhöht den Schaden um {table:capeDamageIncrease}%",
+            "es": "Aumenta el daño de {table:capeDamageIncrease}% of",
+            "id": "Meningkatkan Kerusakan {table:capeDamageIncrease}% of",
+            "ja": "ダメージ {table:capeDamageIncrease}%増加",
+            "pl": "Zwiększa obrażenia o {table:capeDamageIncrease}%",
+            "pt": "Aumentar o dano de {table:capeDamageIncrease}% of",
+            "ru": "Увеличение урона {table:capeDamageIncrease}% of",
+            "tl": "Dagdagan ang {table:capeDamageIncrease}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:capeDamageIncrease}% of",
+            "zh-TW": "增加 {table:capeDamageIncrease}% of 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb {table:capeOfFighterDamageAbsorb}% of Damage",
+            "de": "Absorbiert {table:capeOfFighterDamageAbsorb}% des Schadens",
+            "es": "Absorber daño {table:capeOfFighterDamageAbsorb}% of",
+            "id": "Menyerap Kerusakan {table:capeOfFighterDamageAbsorb}% of",
+            "ja": "ダメージ {table:capeOfFighterDamageAbsorb}%吸収",
+            "pl": "Pochłania {table:capeOfFighterDamageAbsorb}% obrażeń",
+            "pt": "Absorver Dano {table:capeOfFighterDamageAbsorb}% of",
+            "ru": "Поглощение {table:capeOfFighterDamageAbsorb}% of урона",
+            "tl": "Isipsip ang {table:capeOfFighterDamageAbsorb}% of Pinsala",
+            "uk": "Поглинання шкоди {table:capeOfFighterDamageAbsorb}% of",
+            "zh-TW": "吸收{table:capeOfFighterDamageAbsorb}% of傷害"
+          }
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "wings",
@@ -989,6 +1726,53 @@
         "pt": "Manto Reinante"
       },
       "tags": ["cape", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase {table:wingDamageIncrease3rd}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease3rd}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease3rd}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease3rd}% of",
+            "ja": "ダメージ {table:wingDamageIncrease3rd}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease3rd}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease3rd}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease3rd}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease3rd}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease3rd}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease3rd}% of 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb {table:capeDamageAbsorb3rd}% of Damage",
+            "de": "Absorbiert {table:capeDamageAbsorb3rd}% des Schadens",
+            "es": "Absorber daño {table:capeDamageAbsorb3rd}% of",
+            "id": "Menyerap Kerusakan {table:capeDamageAbsorb3rd}% of",
+            "ja": "ダメージ {table:capeDamageAbsorb3rd}%吸収",
+            "pl": "Pochłania {table:capeDamageAbsorb3rd}% obrażeń",
+            "pt": "Absorver Dano {table:capeDamageAbsorb3rd}% of",
+            "ru": "Поглощение {table:capeDamageAbsorb3rd}% of урона",
+            "tl": "Isipsip ang {table:capeDamageAbsorb3rd}% of Pinsala",
+            "uk": "Поглинання шкоди {table:capeDamageAbsorb3rd}% of",
+            "zh-TW": "吸收{table:capeDamageAbsorb3rd}% of傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Increase speed",
+            "de": "Erhöht die Geschwindigkeit",
+            "es": "aumentar la velocidad",
+            "id": "Tingkatkan kecepatan",
+            "ja": "移動速度向上",
+            "pl": "Zwiększa prędkość",
+            "pt": "Aumentar a velocidade",
+            "ru": "Увеличить скорость",
+            "tl": "Dagdagan ang bilis",
+            "uk": "Збільште швидкість",
+            "zh-TW": "提高速度"
+          }
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "wings",
@@ -1766,6 +2550,53 @@
         "pt": "Pequena capa do Lorde"
       },
       "tags": ["cape", "cashShop", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase {table:capeDamageIncrease}% of Damage",
+            "de": "Erhöht den Schaden um {table:capeDamageIncrease}%",
+            "es": "Aumenta el daño de {table:capeDamageIncrease}% of",
+            "id": "Meningkatkan Kerusakan {table:capeDamageIncrease}% of",
+            "ja": "ダメージ {table:capeDamageIncrease}%増加",
+            "pl": "Zwiększa obrażenia o {table:capeDamageIncrease}%",
+            "pt": "Aumentar o dano de {table:capeDamageIncrease}% of",
+            "ru": "Увеличение урона {table:capeDamageIncrease}% of",
+            "tl": "Dagdagan ang {table:capeDamageIncrease}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:capeDamageIncrease}% of",
+            "zh-TW": "增加 {table:capeDamageIncrease}% of 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb {table:smallCapeDamageAbsorb}% of Damage",
+            "de": "Absorbiert {table:smallCapeDamageAbsorb}% des Schadens",
+            "es": "Absorber daño {table:smallCapeDamageAbsorb}% of",
+            "id": "Menyerap Kerusakan {table:smallCapeDamageAbsorb}% of",
+            "ja": "ダメージ {table:smallCapeDamageAbsorb}%吸収",
+            "pl": "Pochłania {table:smallCapeDamageAbsorb}% obrażeń",
+            "pt": "Absorver Dano {table:smallCapeDamageAbsorb}% of",
+            "ru": "Поглощение {table:smallCapeDamageAbsorb}% of урона",
+            "tl": "Isipsip ang {table:smallCapeDamageAbsorb}% of Pinsala",
+            "uk": "Поглинання шкоди {table:smallCapeDamageAbsorb}% of",
+            "zh-TW": "吸收{table:smallCapeDamageAbsorb}% of傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Increase speed",
+            "de": "Erhöht die Geschwindigkeit",
+            "es": "aumentar la velocidad",
+            "id": "Tingkatkan kecepatan",
+            "ja": "移動速度向上",
+            "pl": "Zwiększa prędkość",
+            "pt": "Aumentar a velocidade",
+            "ru": "Увеличить скорость",
+            "tl": "Dagdagan ang bilis",
+            "uk": "Збільште швидкість",
+            "zh-TW": "提高速度"
+          }
+        }
+      ],
       "width": 2,
       "height": 2,
       "slot": "wings",
@@ -1796,6 +2627,53 @@
         "pt": "Pequenas asas da maldição"
       },
       "tags": ["cashShop", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
+            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Increase speed",
+            "de": "Erhöht die Geschwindigkeit",
+            "es": "aumentar la velocidad",
+            "id": "Tingkatkan kecepatan",
+            "ja": "移動速度向上",
+            "pl": "Zwiększa prędkość",
+            "pt": "Aumentar a velocidade",
+            "ru": "Увеличить скорость",
+            "tl": "Dagdagan ang bilis",
+            "uk": "Збільште швидкість",
+            "zh-TW": "提高速度"
+          }
+        }
+      ],
       "width": 3,
       "height": 2,
       "slot": "wings",
@@ -1826,6 +2704,53 @@
         "pt": "Pequenas asas do elfo"
       },
       "tags": ["cashShop", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
+            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Increase speed",
+            "de": "Erhöht die Geschwindigkeit",
+            "es": "aumentar la velocidad",
+            "id": "Tingkatkan kecepatan",
+            "ja": "移動速度向上",
+            "pl": "Zwiększa prędkość",
+            "pt": "Aumentar a velocidade",
+            "ru": "Увеличить скорость",
+            "tl": "Dagdagan ang bilis",
+            "uk": "Збільште швидкість",
+            "zh-TW": "提高速度"
+          }
+        }
+      ],
       "width": 3,
       "height": 2,
       "slot": "wings",
@@ -1856,6 +2781,53 @@
         "pt": "Pequenas asas do paraíso"
       },
       "tags": ["cashShop", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
+            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Increase speed",
+            "de": "Erhöht die Geschwindigkeit",
+            "es": "aumentar la velocidad",
+            "id": "Tingkatkan kecepatan",
+            "ja": "移動速度向上",
+            "pl": "Zwiększa prędkość",
+            "pt": "Aumentar a velocidade",
+            "ru": "Увеличить скорость",
+            "tl": "Dagdagan ang bilis",
+            "uk": "Збільште швидкість",
+            "zh-TW": "提高速度"
+          }
+        }
+      ],
       "width": 3,
       "height": 2,
       "slot": "wings",
@@ -1887,6 +2859,53 @@
         "pt": "Pequenas asas de Satã"
       },
       "tags": ["cashShop", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
+            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
+            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
+            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
+            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
+            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
+            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
+            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
+            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
+            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
+            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
+            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
+            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
+            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
+            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
+            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
+            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
+            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
+            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
+            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Increase speed",
+            "de": "Erhöht die Geschwindigkeit",
+            "es": "aumentar la velocidad",
+            "id": "Tingkatkan kecepatan",
+            "ja": "移動速度向上",
+            "pl": "Zwiększa prędkość",
+            "pt": "Aumentar a velocidade",
+            "ru": "Увеличить скорость",
+            "tl": "Dagdagan ang bilis",
+            "uk": "Збільште швидкість",
+            "zh-TW": "提高速度"
+          }
+        }
+      ],
       "width": 3,
       "height": 2,
       "slot": "wings",
@@ -1918,6 +2937,53 @@
         "pt": "Manto de Pequeno Guerreiro"
       },
       "tags": ["cape", "cashShop", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase {table:capeDamageIncrease}% of Damage",
+            "de": "Erhöht den Schaden um {table:capeDamageIncrease}%",
+            "es": "Aumenta el daño de {table:capeDamageIncrease}% of",
+            "id": "Meningkatkan Kerusakan {table:capeDamageIncrease}% of",
+            "ja": "ダメージ {table:capeDamageIncrease}%増加",
+            "pl": "Zwiększa obrażenia o {table:capeDamageIncrease}%",
+            "pt": "Aumentar o dano de {table:capeDamageIncrease}% of",
+            "ru": "Увеличение урона {table:capeDamageIncrease}% of",
+            "tl": "Dagdagan ang {table:capeDamageIncrease}% of Pinsala",
+            "uk": "Збільшення шкоди на {table:capeDamageIncrease}% of",
+            "zh-TW": "增加 {table:capeDamageIncrease}% of 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb {table:smallCapeDamageAbsorb}% of Damage",
+            "de": "Absorbiert {table:smallCapeDamageAbsorb}% des Schadens",
+            "es": "Absorber daño {table:smallCapeDamageAbsorb}% of",
+            "id": "Menyerap Kerusakan {table:smallCapeDamageAbsorb}% of",
+            "ja": "ダメージ {table:smallCapeDamageAbsorb}%吸収",
+            "pl": "Pochłania {table:smallCapeDamageAbsorb}% obrażeń",
+            "pt": "Absorver Dano {table:smallCapeDamageAbsorb}% of",
+            "ru": "Поглощение {table:smallCapeDamageAbsorb}% of урона",
+            "tl": "Isipsip ang {table:smallCapeDamageAbsorb}% of Pinsala",
+            "uk": "Поглинання шкоди {table:smallCapeDamageAbsorb}% of",
+            "zh-TW": "吸收{table:smallCapeDamageAbsorb}% of傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Increase speed",
+            "de": "Erhöht die Geschwindigkeit",
+            "es": "aumentar la velocidad",
+            "id": "Tingkatkan kecepatan",
+            "ja": "移動速度向上",
+            "pl": "Zwiększa prędkość",
+            "pt": "Aumentar a velocidade",
+            "ru": "Увеличить скорость",
+            "tl": "Dagdagan ang bilis",
+            "uk": "Збільште швидкість",
+            "zh-TW": "提高速度"
+          }
+        }
+      ],
       "width": 2,
       "height": 2,
       "slot": "wings",

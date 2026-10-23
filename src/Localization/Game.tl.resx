@@ -2148,10 +2148,6 @@
     <value>Sumipsip ng 30%% of pinsala</value>
     <comment>legacy_id=575</comment>
   </data>
-  <data name="Increase 30%% of attacking &amp; Wizardry Dmg" xml:space="preserve">
-    <value>Dagdagan ang 30%% of pag-atake at Wizardry Dmg</value>
-    <comment>legacy_id=576</comment>
-  </data>
   <data name="Increase %d%% of Damage" xml:space="preserve">
     <value>Dagdagan ang %d%% of Pinsala</value>
     <comment>legacy_id=577</comment>
@@ -2779,10 +2775,6 @@
   <data name="Summon" xml:space="preserve">
     <value>Ipatawag</value>
     <comment>legacy_id=738</comment>
-  </data>
-  <data name="Max HP +%d increased" xml:space="preserve">
-    <value>Tumaas ang Max HP +%d</value>
-    <comment>legacy_id=739</comment>
   </data>
   <data name="HP +%d increased" xml:space="preserve">
     <value>Tumaas ang HP +%d</value>

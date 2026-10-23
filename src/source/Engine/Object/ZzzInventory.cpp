@@ -3802,86 +3802,7 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
         mu_swprintf(TextList[TextNum], I18N::Game::WarpToTheCorrespondingAreaAfterDSeconds, 3);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
-    if (ip->Type == ITEM_GUARDIAN_ANGEL) //
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::AbsorbDOfDamage, 20);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::MaxHPDIncreased, 50);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-    }
-    if (ip->Type == ITEM_IMP)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::Increase30OfAttackingWizardryDmg);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-    }
-    if ((ip->Type >= ITEM_WING && ip->Type <= ITEM_WINGS_OF_SATAN) || ip->Type == ITEM_WING_OF_CURSE)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::IncreaseDOfDamage, 12 + Level * 2);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::AbsorbDOfDamage, 12 + Level * 2);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::IncreaseSpeed);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-    }
-    else if (GameLogic::Items::IsSecondTierWingExceptCape(ip)) //날개
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::IncreaseDOfDamage, 32 + Level);  //  데미지 몇%증가.
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::AbsorbDOfDamage, 25 + Level * 2);  //  데미지 몇%흡수.
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::IncreaseSpeed);             //  이동 속도 향상.
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-    }
-    else if (GameLogic::Items::IsThirdTierWing(ip))
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::IncreaseDOfDamage, 39 + Level * 2);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        if (ip->Type == ITEM_CAPE_OF_EMPEROR || ip->Type == ITEM_CAPE_OF_OVERRULE)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::AbsorbDOfDamage, 24 + Level * 2);
-        }
-        else
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::AbsorbDOfDamage, 39 + Level * 2);
-        }
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::IncreaseSpeed);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-    }
-    else if (GameLogic::Items::IsSmallWing(ip))
-    {
-        switch (ip->Type)
-        {
-        case ITEM_SMALL_CAPE_OF_LORD:
-        case ITEM_LITTLE_WARRIORS_CLOAK:
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::IncreaseDOfDamage, 20 + Level * 2);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-            mu_swprintf(TextList[TextNum], I18N::Game::AbsorbDOfDamage, 20 + Level * 2);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        }break;
-        case ITEM_SMALL_WING_OF_CURSE:
-        case ITEM_SMALL_WINGS_OF_ELF:
-        case ITEM_SMALL_WINGS_OF_HEAVEN:
-        case ITEM_SMALL_WINGS_OF_SATAN:
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::IncreaseDOfDamage, 12 + Level * 2);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-            mu_swprintf(TextList[TextNum], I18N::Game::AbsorbDOfDamage, 12 + Level * 2);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        }break;
-        }
-        mu_swprintf(TextList[TextNum], I18N::Game::IncreaseSpeed);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-    }
-    else if (ip->Type == ITEM_HORN_OF_DINORANT)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::IncreaseDOfDamage, 15);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::AbsorbDOfDamage, 10);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-    }
-    else if (ip->Type == ITEM_SPIRIT)
+    if (ip->Type == ITEM_SPIRIT)
     {
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         switch (Level)
@@ -4067,15 +3988,6 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
     else if (ip->Type == ITEM_LOST_MAP || ip->Type == ITEM_SYMBOL_OF_KUNDUN)
     {
         TextNum = RenderHellasItemInfo(ip, TextNum);
-    }
-    else if (ip->Type == ITEM_CAPE_OF_FIGHTER || ip->Type == ITEM_CAPE_OF_LORD)
-    {
-        // 망토 관련 옵션변경
-        mu_swprintf(TextList[TextNum], I18N::Game::IncreaseDOfDamage, 20 + Level * 2);  //  데미지 몇%증가
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        int _iDamage = (ip->Type == ITEM_CAPE_OF_FIGHTER) ? 10 + Level * 2 : 10 + Level;
-        mu_swprintf(TextList[TextNum], I18N::Game::AbsorbDOfDamage, _iDamage);  //  데미지 몇%흡수
-        TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
 
     BOOL bDurExist = FALSE;

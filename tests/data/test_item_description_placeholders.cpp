@@ -215,3 +215,148 @@ TEST_CASE("A description placeholder is a built-in value or a stat file table [d
     deleted.names = {};
     CHECK(CheckNames(deleted).empty());
 }
+
+namespace
+{
+std::vector<ItemDataIssue> CheckTableUses(const std::vector<ItemDefinition>& items)
+{
+    std::vector<ItemDataIssue> issues;
+    ValidateTableUses(items, MakeProfiles(), "ItemStats.json", issues);
+    return issues;
+}
+
+ItemDefinition MakeWing(short number, WingTier tier, const std::string& english)
+{
+    ItemDefinition wing = MakeJewel(english);
+    wing.group = 12;
+    wing.number = number;
+    wing.names.Set("en", "Wing " + std::to_string(number));
+    wing.wingTier = tier;
+    return wing;
+}
+} // namespace
+
+TEST_CASE("A table that neither a stat nor a description names is a warning [data][items]")
+{
+    // A table no stat uses is for descriptions: a warning when none names it either.
+    const std::vector<ItemDataIssue> unused = CheckTableUses({MakeJewel("No placeholders")});
+    REQUIRE(unused.size() == 1);
+    CHECK(unused.front().severity == ItemDataIssueSeverity::Warning);
+    CHECK(unused.front().source == "ItemStats.json");
+    CHECK(unused.front().field == "tables.wingDamage");
+    CHECK(CheckTableUses({MakeJewel("Increase {table:wingDamage}% of Damage")}).empty());
+}
+
+TEST_CASE("A wing has the lines the other wings of its tier have [data][items]")
+{
+    const std::string lines = "Increase {table:wingDamage}% of Damage";
+    const auto third = [&](short number) { return MakeWing(number, WingTier::Third, lines); };
+    std::vector<ItemDefinition> wings = {third(36), third(37), third(38)};
+    CHECK(CheckTableUses(wings).empty());
+
+    // A new third-tier wing without the lines.
+    wings.push_back(MakeWing(200, WingTier::Third, "Increase speed"));
+    const std::vector<ItemDataIssue> missing = CheckTableUses(wings);
+    REQUIRE(missing.size() == 1);
+    CHECK(missing.front().severity == ItemDataIssueSeverity::Warning);
+    CHECK(missing.front().number == 200);
+    CHECK(missing.front().field == "description");
+    CHECK(missing.front().message == "its wing lines are not those of the other third-tier wings of group 12: it has 1 "
+                                     "line naming no table, they have 1 line naming {table:wingDamage}");
+
+    // A wing moved to another tier keeps the tables of its old one.
+    wings.back() = MakeWing(200, WingTier::Third, "Increase {table:otherDamage}% of Damage");
+    REQUIRE(CheckTableUses(wings).size() == 1);
+
+    // One that gains or loses a line without a table.
+    wings.back() = third(200);
+    wings.back().description.push_back(wings.back().description.front());
+    wings.back().description.back().text.Set("en", "Increase speed");
+    const std::vector<ItemDataIssue> extra = CheckTableUses(wings);
+    REQUIRE(extra.size() == 1);
+    CHECK(extra.front().message.find("it has 2 lines naming {table:wingDamage}") != std::string::npos);
+}
+
+TEST_CASE("Wings of a tier that split evenly are told they disagree, none of them blamed [data][items]")
+{
+    const auto wing = [](short number, const char* text) { return MakeWing(number, WingTier::Third, text); };
+    // A pair, one wrong; and two against two.
+    for (const std::vector<ItemDefinition>& wings :
+         {std::vector<ItemDefinition>{wing(40, "Increase {table:wingDamage}%"), wing(50, "Increase {table:other}%")},
+          std::vector<ItemDefinition>{wing(36, "Increase {table:wingDamage}%"),
+                                      wing(37, "Increase {table:wingDamage}%"), wing(38, "Increase {table:other}%"),
+                                      wing(39, "Increase {table:other}%")}})
+    {
+        const std::vector<ItemDataIssue> issues = CheckTableUses(wings);
+        REQUIRE(issues.size() == 1);
+        CHECK(issues.front().message.starts_with("the third-tier wings of group 12 don't agree on their wing lines: "));
+    }
+
+    // Wings without lines don't take a side in a tie of the others.
+    std::vector<ItemDefinition> withLineless = {wing(36, "Increase {table:wingDamage}%"),
+                                                wing(37, "Increase {table:other}%"), wing(200, "x")};
+    withLineless.back().description.clear();
+    const std::vector<ItemDataIssue> tie = CheckTableUses(withLineless);
+    REQUIRE(tie.size() == 1);
+    CHECK(tie.front().message.starts_with("the third-tier wings of group 12 don't agree on their wing lines: "));
+}
+
+TEST_CASE("Wings without lines never set the lines of their tier [data][items]")
+{
+    // Two new second-tier capes without lines, next to Cape of Fighter with them: the new ones are pointed out, though
+    // they are more.
+    auto cape = [](short number, const char* text)
+    {
+        ItemDefinition item = MakeWing(number, WingTier::Second, text);
+        item.tags.Set(ItemTag::Cape);
+        return item;
+    };
+    std::vector<ItemDefinition> capes = {cape(49, "Absorb {table:wingDamage}%"), cape(201, "x"), cape(202, "x")};
+    capes[1].description.clear();
+    capes[2].description.clear();
+    const std::vector<ItemDataIssue> capeIssues = CheckTableUses(capes);
+    REQUIRE(capeIssues.size() == 2);
+    CHECK(capeIssues[0].number == 201);
+    CHECK(capeIssues[1].number == 202);
+
+    // The same for a whole batch: three new third-tier wings without lines next to two with them.
+    const std::string lines = "Increase {table:wingDamage}% of Damage";
+    std::vector<ItemDefinition> wings = {MakeWing(36, WingTier::Third, lines), MakeWing(37, WingTier::Third, lines)};
+    for (short number = 300; number < 303; ++number)
+    {
+        wings.push_back(MakeWing(number, WingTier::Third, "x"));
+        wings.back().description.clear();
+    }
+    const std::vector<ItemDataIssue> issues = CheckTableUses(wings);
+    REQUIRE(issues.size() == 3);
+    for (const ItemDataIssue& issue : issues)
+    {
+        CHECK(issue.number >= 300);
+        CHECK(issue.message.find("it has 0 lines naming no table") != std::string::npos);
+    }
+}
+
+TEST_CASE("A wing alone in its tier and group is compared with the other groups' wings of its tier [data][items]")
+{
+    const std::string lines = "Increase {table:wingDamage}% of Damage";
+    std::vector<ItemDefinition> wings = {MakeWing(36, WingTier::Third, lines), MakeWing(37, WingTier::Third, lines)};
+    // A third-tier wing of group 13, without the lines.
+    wings.push_back(MakeWing(200, WingTier::Third, "Increase speed"));
+    wings.back().group = 13;
+    const std::vector<ItemDataIssue> issues = CheckTableUses(wings);
+    REQUIRE(issues.size() == 1);
+    CHECK(issues.front().group == 13);
+    CHECK(
+        issues.front().message.starts_with("its wing lines are not those of the third-tier wings of the other groups"));
+
+    // Two wings alone in their groups, as Cape of Fighter (12) and Cape of Lord (13), aren't compared with each other.
+    std::vector<ItemDefinition> capes = {MakeWing(49, WingTier::Second, "Absorb {table:wingDamage}%"),
+                                         MakeWing(30, WingTier::Second, "Absorb {table:other}%")};
+    capes[1].group = 13;
+    CHECK(CheckTableUses(capes).empty());
+
+    // A cape is compared with capes only.
+    wings.back() = MakeWing(200, WingTier::Third, "Increase {table:otherDamage}% of Damage");
+    wings.back().tags.Set(ItemTag::Cape);
+    CHECK(CheckTableUses(wings).empty());
+}
