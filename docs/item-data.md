@@ -290,7 +290,9 @@ bmd):
   groups that have more than one; Cape of Fighter (12) and Cape of Lord (13),
   each alone and written apart by the old code, are not compared with each
   other. Wings of a group that split evenly get one warning that they don't
-  agree, without blaming either side.
+  agree, without blaming either side. Wings without lines never set the
+  lines the others are compared with, so new wings imported without them are
+  pointed out, also when they are more than the wings with lines.
 
 The shipped data is checked by the tests, so a wrong placeholder fails the
 build's tests.

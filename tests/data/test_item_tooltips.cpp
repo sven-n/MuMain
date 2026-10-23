@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <iterator>
 #include <clocale>
+#include <ctime>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -224,7 +225,8 @@ private:
 };
 } // namespace
 
-// Every item's tooltip at every level 0 to 15, as plain, full, ancient and harmony items (WriteItemTooltipSnapshot),
+// Every item's tooltip at every level 0 to 15, in the eleven variants of WriteItemTooltipSnapshot (plain, full, ancient,
+// harmony, each option alone, worn, broken and expired),
 // for the two heroes, against the hashes recorded in item_tooltip_snapshot.txt: a tooltip that changes shows here.
 // After a change that is meant, run the test with MU_TOOLTIP_SNAPSHOT_UPDATE=1 to record the new hashes; the control
 // socket's `tooltip-snapshot` writes the full lines in the game to compare with.
@@ -248,7 +250,7 @@ TEST_CASE("Every item's tooltip is as recorded [data][items][tooltip]")
         ::Hero->Class = hero.Hero().Class;
         ::Hero->Level = hero.Hero().Level;
         std::ostringstream snapshot;
-        CHECK(WriteItemTooltipSnapshot(snapshot) == 911 * 4 * 16);
+        CHECK(WriteItemTooltipSnapshot(snapshot) == 911 * 11 * 16);
         const std::map<std::string, std::string> heroHashes = HashesByItem(name, snapshot.str(), tooltips);
         hashes.insert(heroHashes.begin(), heroHashes.end());
     }
@@ -291,6 +293,84 @@ TEST_CASE("Every item's tooltip is as recorded [data][items][tooltip]")
     }
     CHECK(changed == 0);
     CHECK(recorded.size() == hashes.size());
+}
+
+namespace
+{
+// The tooltip's line formatted as the game formats it, e.g. from an I18N::Game format.
+template <typename... Args> std::wstring Formatted(const wchar_t* format, Args... args)
+{
+    wchar_t text[256];
+    mu_swprintf(text, format, args...);
+    return text;
+}
+
+bool HasLine(const std::vector<ItemTooltipLine>& lines, const std::wstring& text, int color = -1)
+{
+    return std::any_of(lines.begin(), lines.end(), [&](const ItemTooltipLine& line)
+                       { return line.text == text && (color < 0 || line.color == color); });
+}
+} // namespace
+
+// The lines that depend on the durability or the expiry, which the snapshot's full items don't show apart.
+TEST_CASE("A tooltip's durability, count and expiry lines follow the item [data][items][tooltip]")
+{
+    ProcessLocaleScope locale;
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+
+    // A weapon's durability, full, worn and broken, out of the same maximum.
+    ItemCreationParams kris = FullItemParameters(0, 0);
+    const int maxDurability = kris.Durability;
+    REQUIRE(maxDurability > 1);
+    for (const int durability : {maxDurability, 1, 0})
+    {
+        INFO(durability);
+        kris.Durability = static_cast<BYTE>(durability);
+        const std::vector<ItemTooltipLine> lines = TooltipOfParameters(kris);
+        CHECK(HasLine(lines, Formatted(I18N::Game::DurabilityDD, durability, maxDurability)));
+    }
+
+    // A stack's count.
+    ItemCreationParams apples = FullItemParameters(14, 0);
+    apples.Durability = 3;
+    CHECK(HasLine(TooltipOfParameters(apples), Formatted(I18N::Game::NumberOfItemsD, 3)));
+    apples.Durability = 1;
+    CHECK(HasLine(TooltipOfParameters(apples), Formatted(I18N::Game::NumberOfItemsD, 1)));
+
+    // An expired item says so, in red, and shows no durability.
+    kris.Durability = static_cast<BYTE>(maxDurability);
+    kris.WithExpiration = true;
+    kris.IsExpired = true;
+    const std::vector<ItemTooltipLine> expired = TooltipOfParameters(kris);
+    CHECK(HasLine(expired, Formatted(I18N::Game::ExpiredItem), TEXT_COLOR_RED));
+    CHECK_FALSE(HasLine(expired, Formatted(I18N::Game::DurabilityDD, maxDurability, maxDurability)));
+
+    // A timed item shows when it ends, in the local time, and no durability either.
+    kris.IsExpired = false;
+    ITEM timed;
+    FillItemFromParameters(timed, kris);
+    timed.lExpireTime = 1767225600; // 2026-01-01 00:00 UTC
+    const std::vector<ItemTooltipLine> timedLines = BuildItemTooltipLines(&timed, false);
+    time_t expireTime = timed.lExpireTime;
+    const tm* local = localtime(&expireTime);
+    REQUIRE(local != nullptr);
+    CHECK(HasLine(timedLines, Formatted(I18N::Game::ExpirationDay), TEXT_COLOR_ORANGE));
+    CHECK(HasLine(timedLines,
+                  Formatted(L"%d-%02d-%02d  %02d:%02d", local->tm_year + 1900, local->tm_mon + 1, local->tm_mday,
+                            local->tm_hour, local->tm_min),
+                  TEXT_COLOR_BLUE));
+    CHECK_FALSE(HasLine(timedLines, Formatted(I18N::Game::DurabilityDD, maxDurability, maxDurability)));
+    // Without its end date (the server sends it apart), it shows no tooltip.
+    timed.lExpireTime = 0;
+    CHECK(BuildItemTooltipLines(&timed, false).empty());
+
+    SetItemTooltipTextMeasure(nullptr);
 }
 
 TEST_CASE("Every built-in placeholder but {level} is a value of the tooltip's stat lines [data][items][tooltip]")
