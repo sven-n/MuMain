@@ -40,6 +40,15 @@ public:
     // such group or server, or when the server is full.
     bool SelectServer(const wchar_t* groupName, int serverIndex);
 
+#ifdef _EDITOR
+    // The ID (CServerGroup::m_iServerIndex) of the open group, or -1; for the
+    // editor, before it builds the groups again.
+    int GetOpenGroupId() const;
+    // After the editor built the groups again: shows them, with the group of
+    // that ID open again wherever it is in the list now, or none when it is gone.
+    void ShowRebuiltGroups(int openGroupId);
+#endif
+
     // mu::ui::window::IObject
     bool Render() override;
     bool Update() override;

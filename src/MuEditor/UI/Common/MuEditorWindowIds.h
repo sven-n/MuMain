@@ -25,6 +25,7 @@ inline constexpr char SkillEditor[] = "###SkillEditor";
 inline constexpr char DevEditor[] = "###DevEditor";
 inline constexpr char EffectBrowser[] = "###EffectBrowser";
 inline constexpr char ItemTranslations[] = "###ItemTranslations";
+inline constexpr char ServerList[] = "###ServerList";
 // Titles that are not translated: the whole title is the name.
 inline constexpr char MapEditor[] = "Map Editor";
 inline constexpr char Console[] = "Console";
