@@ -301,3 +301,23 @@ TEST_CASE("wrap to width: a word wider than the line after a break is broken too
     CHECK(lines[2] == L"veluppoi");
     CHECK(lines[3] == L"nts");
 }
+
+TEST_CASE("wrap to width: an indented word wider than the line gets no empty line above it")
+{
+    const auto lines = WrapTextToWidth(L"  masterleveluppoints", 8, OneUnitPerCharacter());
+
+    REQUIRE(lines.size() == 3);
+    CHECK(lines[0] == L"masterle");
+    CHECK(lines[1] == L"veluppoi");
+    CHECK(lines[2] == L"nts");
+
+    // The same after a line break: the text's own blank lines stay.
+    const auto afterBreak = WrapTextToWidth(L"set\n  masterleveluppoints\n\nend", 8, OneUnitPerCharacter());
+    REQUIRE(afterBreak.size() == 6);
+    CHECK(afterBreak[0] == L"set");
+    CHECK(afterBreak[1] == L"masterle");
+    CHECK(afterBreak[2] == L"veluppoi");
+    CHECK(afterBreak[3] == L"nts");
+    CHECK(afterBreak[4].empty());
+    CHECK(afterBreak[5] == L"end");
+}
