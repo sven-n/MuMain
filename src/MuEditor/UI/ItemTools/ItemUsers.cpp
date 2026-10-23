@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "ItemUsers.h"
+#include "ItemStatFileChange.h"
 
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
@@ -114,6 +115,14 @@ int ItemStatProfileUseCounts::Rules(std::string_view name)
     return FindCount(m_rules, name);
 }
 
+const std::vector<int>& ItemStatProfileUseCounts::DescriptionUsers(std::string_view table)
+{
+    static const std::vector<int> None;
+    Update();
+    const auto found = m_descriptionUsers.find(table);
+    return found != m_descriptionUsers.end() ? found->second : None;
+}
+
 void ItemStatProfileUseCounts::Update()
 {
     if (m_version == g_ItemDatabase.GetVersion())
@@ -123,6 +132,7 @@ void ItemStatProfileUseCounts::Update()
     m_version = g_ItemDatabase.GetVersion();
     m_items.clear();
     m_rules.clear();
+    m_descriptionUsers.clear();
     for (const ItemDefinition& item : g_ItemDatabase.GetAllSlots())
     {
         if (item.Exists())
@@ -133,6 +143,10 @@ void ItemStatProfileUseCounts::Update()
     for (const Data::Items::StatProfileRule& rule : g_ItemDatabase.GetStatProfiles().GetRules())
     {
         ++m_rules[std::string(CountKey(rule.profile))];
+    }
+    for (const std::string& table : g_ItemDatabase.GetStatProfiles().GetTableNames())
+    {
+        m_descriptionUsers[table] = FindTableDescriptionUsers(g_ItemDatabase.GetAllSlots(), table);
     }
 }
 } // namespace MuEditor::Items

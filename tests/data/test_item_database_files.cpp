@@ -754,6 +754,28 @@ TEST_CASE("Item data errors stop loading [data][items]")
     CHECK(errorMessage.find("Group00_Sword.json") != std::string::npos);
 }
 
+TEST_CASE("A description placeholder that names no table stops loading [data][items]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    const std::filesystem::path potions = folder.Directory() / GetItemDataDirectory() / "Group14_Potion.json";
+    std::string text = TestFiles::ReadWholeFile(potions);
+    // The Jewel of Bless's text, with its translations, becomes an English text that names no table.
+    const size_t found = text.find("\"en\": \"It is used to increase your item level up to 6\"");
+    REQUIRE(found != std::string::npos);
+    const size_t start = text.rfind("\"text\": {", found);
+    const size_t end = text.find('}', found);
+    REQUIRE(start != std::string::npos);
+    REQUIRE(end != std::string::npos);
+    text.replace(start, end + 1 - start, "\"text\": \"Up to +{table:noSuchTable}\"");
+    std::ofstream(potions, std::ios::binary) << text;
+    ClientDataScope client(folder.Directory());
+
+    std::string errorMessage;
+    CHECK_FALSE(g_ItemDataHandler.Load(errorMessage));
+    CHECK(errorMessage.find("has the unknown placeholder {table:noSuchTable}") != std::string::npos);
+}
+
 // The bmd import and the item editor keep a weapon kind that its group gives
 // following the group and slot; every shipped item has that kind.
 TEST_CASE("The shipped weapon kinds are the ones their groups give [data][items]")
@@ -3495,5 +3517,34 @@ TEST_CASE("The item tools add glow colors, change them and remove unused ones [d
 
     edits.GetHistory().Clear();
     g_GlowColors.Build(shipped);
+}
+
+TEST_CASE("A description placeholder that names no table stops the save [editor][items]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope models;
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE_MESSAGE(g_ItemDataHandler.LoadModels(errorMessage), errorMessage);
+    const std::filesystem::path potions = folder.Directory() / GetItemDataDirectory() / "Group14_Potion.json";
+    const std::string shippedText = TestFiles::ReadWholeFile(potions);
+
+    const int blessType = MakeItemType(14, 13);
+    EditItem(blessType,
+             [](ItemDefinition& bless)
+             {
+                 REQUIRE_FALSE(bless.description.empty());
+                 bless.description[0].text = {};
+                 bless.description[0].text.Set("en", "Up to +{table:noSuchTable}");
+             });
+    std::vector<ItemDataIssue> issues;
+    CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::InvalidData);
+    CHECK(
+        std::ranges::any_of(issues, [](const ItemDataIssue& issue)
+                            { return issue.message.starts_with("has the unknown placeholder {table:noSuchTable}"); }));
+    CHECK(TestFiles::ReadWholeFile(potions) == shippedText);
 }
 #endif
