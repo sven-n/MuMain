@@ -6,7 +6,9 @@
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/DataHandler/TextFile.h"
+#include "Data/GameData/MonsterData/LegacyMonsterKind.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/MonsterKind.h"
 #include "Data/GameData/MonsterData/MonstersJson.h"
 
 #include <algorithm>
@@ -83,7 +85,7 @@ TEST_CASE("Shipped monster list: loads, with only the warning about 252's empty 
     REQUIRE_MESSAGE(loaded.issues.size() == 1, Messages(loaded.issues));
     CHECK(loaded.issues[0].severity == ItemDataIssueSeverity::Warning);
     CHECK(loaded.issues[0].number == 252);
-    CHECK(loaded.monsters.size() == 536);
+    CHECK(loaded.monsters.size() == 547);
 }
 
 TEST_CASE("Shipped monster list: written in the writer's format [data][monsters]")
@@ -135,6 +137,23 @@ TEST_CASE("Shipped monster list: names are plain text, the Kalima gates too [dat
     }
     CHECK(FindMonster(loaded.monsters, 152)->names.GetNeutral() == "Gate to Kalima 1");
     CHECK(FindMonster(loaded.monsters, 158)->names.GetNeutral() == "Gate to Kalima 7");
+}
+
+TEST_CASE("Shipped monster list: OpenMU's statues 658-668 have its English names and their old kind [data][monsters]")
+{
+    const Data::Monsters::MonsterDataLoadResult loaded =
+        Data::Monsters::LoadMonstersFile(ClientData / "Monsters" / "Monsters.json");
+
+    CHECK(FindMonster(loaded.monsters, 658)->names.GetNeutral() == "Cursed Statue");
+    CHECK(FindMonster(loaded.monsters, 659)->names.GetNeutral() == "Captured Stone Statue (1)");
+    CHECK(FindMonster(loaded.monsters, 668)->names.GetNeutral() == "Captured Stone Statue (10)");
+    for (int number = 658; number <= 668; ++number)
+    {
+        CAPTURE(number);
+        const MonsterDefinition* monster = FindMonster(loaded.monsters, number);
+        REQUIRE(monster != nullptr);
+        CHECK(Data::Monsters::ToObjectKind(monster->kind) == Data::Monsters::GetLegacyObjectKind(number));
+    }
 }
 
 TEST_CASE("Monster data: the game's load fills the table, errors stop it [data][monsters]")

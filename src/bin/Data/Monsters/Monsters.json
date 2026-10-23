@@ -2680,6 +2680,61 @@
       "number": 585,
       "name": {"en": "Scarecrow", "es": "Scarecrow", "pt": "Scarecrow"},
       "kind": "monster"
+    },
+    {
+      "number": 658,
+      "name": {"en": "Cursed Statue"},
+      "kind": "monster"
+    },
+    {
+      "number": 659,
+      "name": {"en": "Captured Stone Statue (1)"},
+      "kind": "monster"
+    },
+    {
+      "number": 660,
+      "name": {"en": "Captured Stone Statue (2)"},
+      "kind": "monster"
+    },
+    {
+      "number": 661,
+      "name": {"en": "Captured Stone Statue (3)"},
+      "kind": "monster"
+    },
+    {
+      "number": 662,
+      "name": {"en": "Captured Stone Statue (4)"},
+      "kind": "monster"
+    },
+    {
+      "number": 663,
+      "name": {"en": "Captured Stone Statue (5)"},
+      "kind": "monster"
+    },
+    {
+      "number": 664,
+      "name": {"en": "Captured Stone Statue (6)"},
+      "kind": "monster"
+    },
+    {
+      "number": 665,
+      "name": {"en": "Captured Stone Statue (7)"},
+      "kind": "monster"
+    },
+    {
+      "number": 666,
+      "name": {"en": "Captured Stone Statue (8)"},
+      "kind": "monster"
+    },
+    {
+      "number": 667,
+      "name": {"en": "Captured Stone Statue (9)"},
+      "kind": "monster"
+    },
+    {
+      "number": 668,
+      "name": {"en": "Captured Stone Statue (10)"},
+      "kind": "monster"
     }
   ]
 }
