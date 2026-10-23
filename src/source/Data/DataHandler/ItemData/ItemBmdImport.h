@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Data/DataHandler/LegacyLanguages.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemDefinition.h"
 
@@ -20,13 +21,11 @@
 // encoding of the Portuguese and Spanish files).
 namespace Data::Items
 {
-struct ItemBmdLanguage
-{
-    std::wstring folder; // Data/Local/<folder>/Item_<folder>.bmd
-    std::string locale;  // UI locale code, e.g. "pt"
-};
+// Data/Local/<folder>/Item_<folder>.bmd holds the items in the language.
+using ItemBmdLanguage = LegacyLanguage;
 
-// Eng (en), Por (pt), Spn (es). English first: it provides the stats.
+// The original client's languages (GetLegacyLanguages). English first: it
+// provides the stats.
 std::span<const ItemBmdLanguage> GetItemBmdLanguages();
 
 // A field whose value was replaced because a name ran into it.

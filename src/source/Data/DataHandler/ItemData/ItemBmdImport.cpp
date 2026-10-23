@@ -362,12 +362,7 @@ void ImportItem(const std::vector<LanguageFile>& files, int itemType, ItemBmdImp
 
 std::span<const ItemBmdLanguage> GetItemBmdLanguages()
 {
-    static const std::array<ItemBmdLanguage, 3> Languages = {{
-        {L"Eng", std::string(LocalizedString::NeutralLocale)},
-        {L"Por", "pt"},
-        {L"Spn", "es"},
-    }};
-    return Languages;
+    return GetLegacyLanguages();
 }
 
 ItemBmdImportResult ImportItemBmdFiles(std::span<const ItemBmdLanguage> languages)
