@@ -15033,16 +15033,12 @@ CHARACTER* CreateHellGate(char* ID, int Key, EMonsterType Index, int x, int y, i
     wchar_t ownerName[MAX_USERNAME_SIZE + 1]{};
     CMultiLanguage::ConvertFromUtf8(ownerName, ID, MAX_USERNAME_SIZE);
 
-    // The gate's name is a format that takes the owner's name ("Magic stone of %s").
+    // The gate shows its owner: "Magic stone of <owner>".
     // _TRUNCATE: swprintf_s would abort the MSVC client on a long name.
-    wchar_t gateName[MAX_MONSTER_NAME + 1]{};
-    static_assert(sizeof gateName == sizeof portal->ID);
-    _snwprintf_s(gateName, std::size(gateName), _TRUNCATE, portal->ID, ownerName);
+    _snwprintf_s(portal->ID, std::size(portal->ID), _TRUNCATE, I18N::Game::MagicStoneOfOwner, ownerName);
 
     if (portal->Level == 7)
         portal->Object.SubType = 1;
-
-    memcpy(portal->ID, gateName, sizeof gateName);
 
     if (CreateFlag)
     {

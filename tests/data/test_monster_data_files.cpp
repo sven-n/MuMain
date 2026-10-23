@@ -116,6 +116,27 @@ TEST_CASE("Shipped monster list: the names the old name file test asked for [dat
     CHECK(FindMonster(loaded.monsters, 566)->names.Get("es") == "Tercia de Encargados del Gremio Mercenario");
 }
 
+TEST_CASE("Shipped monster list: names are plain text, the Kalima gates too [data][monsters]")
+{
+    const Data::Monsters::MonsterDataLoadResult loaded =
+        Data::Monsters::LoadMonstersFile(ClientData / "Monsters" / "Monsters.json");
+
+    // The gates' owner text is the UI text MagicStoneOfOwner; a "%" in a name
+    // would be a format that nothing fills in.
+    for (const MonsterDefinition& monster : loaded.monsters)
+    {
+        CAPTURE(monster.number);
+        CHECK(monster.names.GetNeutral().find('%') == std::string::npos);
+        for (const auto& [locale, name] : monster.names.GetTranslations())
+        {
+            CAPTURE(locale);
+            CHECK(name.find('%') == std::string::npos);
+        }
+    }
+    CHECK(FindMonster(loaded.monsters, 152)->names.GetNeutral() == "Gate to Kalima 1");
+    CHECK(FindMonster(loaded.monsters, 158)->names.GetNeutral() == "Gate to Kalima 7");
+}
+
 TEST_CASE("Monster data: the game's load fills the table, errors stop it [data][monsters]")
 {
     SUBCASE("the shipped file")

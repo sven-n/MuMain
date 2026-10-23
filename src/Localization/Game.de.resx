@@ -13079,4 +13079,7 @@
   <data name="Other items" xml:space="preserve">
     <value>Andere Gegenstände</value>
   </data>
+  <data name="MagicStoneOfOwner" xml:space="preserve">
+    <value>Zauberstein von %ls</value>
+  </data>
 </root>

@@ -743,37 +743,37 @@
     },
     {
       "number": 152,
-      "name": {"en": "Magic stone of %s ", "es": "Piedra mágica de %s ", "pt": "Pedra mágica de %s "},
+      "name": {"en": "Gate to Kalima 1"},
       "kind": "monster"
     },
     {
       "number": 153,
-      "name": {"en": "Magic stone of %s ", "es": "Piedra mágica de %s ", "pt": "Pedra mágica de %s "},
+      "name": {"en": "Gate to Kalima 2"},
       "kind": "monster"
     },
     {
       "number": 154,
-      "name": {"en": "Magic stone of %s ", "es": "Piedra mágica de %s ", "pt": "Pedra mágica de %s "},
+      "name": {"en": "Gate to Kalima 3"},
       "kind": "monster"
     },
     {
       "number": 155,
-      "name": {"en": "Magic stone of %s ", "es": "Piedra mágica de %s ", "pt": "Pedra mágica de %s "},
+      "name": {"en": "Gate to Kalima 4"},
       "kind": "monster"
     },
     {
       "number": 156,
-      "name": {"en": "Magic stone of %s ", "es": "Piedra mágica de %s ", "pt": "Pedra mágica de %s "},
+      "name": {"en": "Gate to Kalima 5"},
       "kind": "monster"
     },
     {
       "number": 157,
-      "name": {"en": "Magic stone of %s ", "es": "Piedra mágica de %s ", "pt": "Pedra mágica de %s "},
+      "name": {"en": "Gate to Kalima 6"},
       "kind": "monster"
     },
     {
       "number": 158,
-      "name": {"en": "Magic stone of %s ", "es": "Piedra mágica de %s ", "pt": "Pedra mágica de %s "},
+      "name": {"en": "Gate to Kalima 7"},
       "kind": "monster"
     },
     {
