@@ -334,6 +334,15 @@ constexpr GrownRequirement GrownRequirements[] = {
     {ItemRequirement::Vitality, &ItemRequirements::vitality, &ITEM_ATTRIBUTE::RequireVitality},
 };
 
+// The original client's requirement growth, which its bmd files hold the weights for: its code, so
+// it stays as it was also when the item stat file's formulas change.
+//   add + weight * drop level * percent / 100, energy with a percent of its own; a scroll's energy
+//   (group 15) from its level requirement where it has one.
+constexpr long long OriginalRequirementAdd = 20;
+constexpr long long OriginalRequirementPercent = 3;
+constexpr long long OriginalEnergyRequirementPercent = 4;
+constexpr long long PercentDivisor = 100;
+
 // What the original client asked for with `weight`.
 int GrowWeight(const ItemDefinition& definition, ItemRequirement requirement, int weight)
 {
@@ -342,16 +351,18 @@ int GrowWeight(const ItemDefinition& definition, ItemRequirement requirement, in
         return 0;
     }
     const bool energy = requirement == ItemRequirement::Energy;
-    const bool fromLevelRequirement = energy && definition.group == 15 && definition.requirements.level > 0;
+    const bool fromLevelRequirement = energy && definition.group == ITEM_GROUP_ETC && definition.requirements.level > 0;
     const long long basis = fromLevelRequirement ? definition.requirements.level : definition.level;
-    const long long percent = energy ? 4 : 3;
-    return static_cast<int>(std::min<long long>(20 + weight * basis * percent / 100, MaxRequirement));
+    const long long percent = energy ? OriginalEnergyRequirementPercent : OriginalRequirementPercent;
+    return static_cast<int>(
+        std::min<long long>(OriginalRequirementAdd + weight * basis * percent / PercentDivisor, MaxRequirement));
 }
 } // namespace
 
 bool HasRequirementWeightsInBmd(const ItemDefinition& definition)
 {
-    return definition.slot == ItemSlot::None && (definition.group == 12 || definition.group == 15);
+    return definition.slot == ItemSlot::None &&
+           (definition.group == ITEM_GROUP_WING || definition.group == ITEM_GROUP_ETC);
 }
 
 void ToRequirementValues(ItemDefinition& definition)
