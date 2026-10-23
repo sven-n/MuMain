@@ -4,6 +4,7 @@
 
 #include "ClientDataScope.h"
 
+#include "Core/Platform/ProcessLocale.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "I18N/All.h"
 #include "Data/DataHandler/SkillData/SkillDataHandler.h"
@@ -24,6 +25,7 @@
 #include "UI/Inventory/ItemMng.h"
 
 #include <algorithm>
+#include <clocale>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -200,6 +202,27 @@ std::map<std::string, std::string> HashesByItem(const std::string& hero, const s
     }
     return hashes;
 }
+
+// The game's process locale for the scope: macOS writes wide text (mu_swprintf) through LC_CTYPE, and in the test's
+// "C" locale it leaves any text with a character above U+00FF unwritten, such as an ancient name with the English set
+// names' typographic apostrophe (U+2019).
+class ProcessLocaleScope
+{
+public:
+    ProcessLocaleScope() : m_previous(std::setlocale(LC_ALL, nullptr))
+    {
+        Core::Platform::ApplyProcessLocale();
+    }
+    ~ProcessLocaleScope()
+    {
+        std::setlocale(LC_ALL, m_previous.c_str());
+    }
+    ProcessLocaleScope(const ProcessLocaleScope&) = delete;
+    ProcessLocaleScope& operator=(const ProcessLocaleScope&) = delete;
+
+private:
+    std::string m_previous;
+};
 } // namespace
 
 // Every item's tooltip at every level 0 to 15, as plain, full, ancient, harmony, count and timed items
@@ -209,6 +232,7 @@ std::map<std::string, std::string> HashesByItem(const std::string& hero, const s
 // socket's `tooltip-snapshot` writes the full lines in the game to compare with.
 TEST_CASE("Every item's tooltip is as recorded [data][items][tooltip]")
 {
+    ProcessLocaleScope locale;
     ClientDataScope client(ClientDirectory);
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
