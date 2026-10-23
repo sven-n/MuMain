@@ -54,15 +54,22 @@ target_compile_definitions(server_list_data_tests PRIVATE
 )
 
 # The monster list (Data/Monsters/Monsters.json) and the name files of the
-# original client (NpcName_<lang>.txt).
+# original client (NpcName_<lang>.txt). The one-time comparison reads the name
+# files with the old loader, which needs the client globals of Winmain.cpp.
 mu_add_test(
     NAME monster_data_tests
     SOURCES
         test_legacy_monster_kind.cpp
+        test_monster_data_files.cpp
+        test_monster_database.cpp
         test_monster_json.cpp
         test_npc_name_text.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
+)
+target_compile_definitions(monster_data_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
 # The look profile of the Enhanced rendering features (Data/Render/Look.json) and the player's own

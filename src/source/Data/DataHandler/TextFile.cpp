@@ -11,6 +11,7 @@ namespace Data
 namespace
 {
 constexpr std::string_view Utf8ByteOrderMark = "\xEF\xBB\xBF";
+constexpr const char* TemporaryExtension = ".tmp";
 } // namespace
 
 std::optional<std::string> ReadTextFile(const std::filesystem::path& path)
@@ -27,5 +28,32 @@ std::optional<std::string> ReadTextFile(const std::filesystem::path& path)
         text.erase(0, Utf8ByteOrderMark.size());
     }
     return text;
+}
+
+bool WriteTextFile(const std::filesystem::path& path, std::string_view text, std::string& error)
+{
+    std::filesystem::path temporaryPath = path;
+    temporaryPath += TemporaryExtension;
+    std::error_code fileError;
+    std::filesystem::create_directories(path.parent_path(), fileError);
+    std::ofstream stream(temporaryPath, std::ios::binary | std::ios::trunc);
+    stream << text;
+    // Closing flushes; checking only afterwards also catches a failing final
+    // write (e.g. a full disk) before the old file is replaced.
+    stream.close();
+    if (!stream)
+    {
+        error = "could not be written";
+        std::filesystem::remove(temporaryPath, fileError);
+        return false;
+    }
+    std::filesystem::rename(temporaryPath, path, fileError);
+    if (fileError)
+    {
+        error = "could not be replaced: " + fileError.message();
+        std::filesystem::remove(temporaryPath, fileError);
+        return false;
+    }
+    return true;
 }
 } // namespace Data
