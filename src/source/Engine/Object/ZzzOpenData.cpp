@@ -33,6 +33,9 @@
 #include "Data/DataHandler/EffectData/EffectDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemModelLoader.h"
+#include "Data/DataHandler/ItemData/ItemBmdImport.h"
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
+#include "Data/GameData/Common/LocalizedString.h"
 #include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "Render/Effects/EffectRegistry.h"
 #include "Render/Items/ItemEffects.h"
@@ -392,6 +395,30 @@ static void OpenServerList()
     if (!g_ServerListManager->LoadServerListScript(errorMessage))
     {
         StopOnDataError("Server list error", errorMessage);
+    }
+}
+
+// The language of the monster names: the one of the old name files,
+// NpcName_<[LOGIN] Language>.txt; English for a language without them.
+static std::string MonsterNameLocale()
+{
+    for (const Data::Items::ItemBmdLanguage& language : Data::Items::GetItemBmdLanguages())
+    {
+        if (_wcsicmp(language.folder.c_str(), g_strSelectedML.c_str()) == 0)
+        {
+            return language.locale;
+        }
+    }
+    return std::string(Data::LocalizedString::NeutralLocale);
+}
+
+// Loads the monster list (Data/Monsters/Monsters.json); errors stop the game.
+static void OpenMonsterData()
+{
+    std::string errorMessage;
+    if (!g_MonsterDataHandler.Load(MonsterNameLocale(), errorMessage))
+    {
+        StopOnDataError("Monster data error", errorMessage);
     }
 }
 
@@ -4417,8 +4444,7 @@ void OpenBasicData(HDC hDC)
     mu_swprintf(Text, L"Data\\Local\\%ls\\movereq_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     SEASON3B::CMoveCommandData::OpenMoveReqScript(Text);
 
-    mu_swprintf(Text, L"Data\\Local\\%ls\\NpcName_%ls.txt", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-    OpenMonsterScript(Text);
+    OpenMonsterData();
 
     mu_swprintf(Text, L"Data\\Local\\%ls\\Quest_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     g_csQuest.OpenQuestScript(Text);

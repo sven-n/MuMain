@@ -40,6 +40,19 @@ std::string Messages(const std::vector<ItemDataIssue>& issues)
     return text;
 }
 
+// The old getMonsterName: the first entry of the name file with this number.
+const wchar_t* OldMonsterName(int number)
+{
+    for (int i = 0; i < MAX_MONSTER; ++i)
+    {
+        if (MonsterScript[i].Type == number)
+        {
+            return MonsterScript[i].Name;
+        }
+    }
+    return L"()";
+}
+
 const MonsterDefinition* FindMonster(const std::vector<MonsterDefinition>& monsters, int number)
 {
     const auto found = std::find_if(monsters.begin(), monsters.end(),
@@ -124,7 +137,8 @@ TEST_CASE("Shipped monster list: the names the old name file test asked for [dat
 
 // One-time check (monsters design, D50): the monster list gives the names of
 // NpcName_<lang>.txt as the old loader read them, and the kinds of the old
-// rules, for every number. Deleted with the name files and the old loader.
+// rules, for every number; so do getMonsterName and the name Setting_Monster
+// copies. Deleted with the name files and the old loader.
 TEST_CASE("One-time: the monster list holds the names of the name files and the old kinds [data][monsters]")
 {
     const Data::Monsters::MonsterDataLoadResult loaded =
@@ -155,7 +169,16 @@ TEST_CASE("One-time: the monster list holds the names of the name files and the 
         for (int number : numbers)
         {
             CAPTURE(number);
-            CHECK(std::wstring(getMonsterName(number)) == std::wstring(Data::Monsters::GetMonsterName(number)));
+            const std::wstring oldName = OldMonsterName(number);
+            CHECK(oldName == std::wstring(getMonsterName(number)));
+            // Setting_Monster copied the old name when the file had the number,
+            // and copies the table's name when the table has an entry.
+            const bool oldHasEntry = oldName != L"()";
+            CHECK(oldHasEntry == (g_MonsterDatabase.Find(number) != nullptr));
+            if (oldHasEntry)
+            {
+                CHECK(oldName == std::wstring(g_MonsterDatabase.FindDisplayName(number)));
+            }
         }
     }
     for (int number : numbers)

@@ -30,6 +30,7 @@
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
 
 CLASS_ATTRIBUTE     ClassAttribute[MAX_CLASS];
 MONSTER_SCRIPT      MonsterScript[MAX_MONSTER];
@@ -1818,15 +1819,7 @@ void OpenMonsterScript(wchar_t* FileName)
 
 const wchar_t* getMonsterName(int type)
 {
-    for (int i = 0; i < MAX_MONSTER; ++i)
-    {
-        if (MonsterScript[i].Type == type)
-        {
-            return MonsterScript[i].Name;
-        }
-    }
-
-    return L"()";
+    return Data::Monsters::GetMonsterName(type);
 }
 
 void MonsterConvert(MONSTER* m, int Level)

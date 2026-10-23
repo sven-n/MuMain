@@ -48,7 +48,8 @@
 #include "GameLogic/Items/ItemCategories.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemType.h"
-#include "Data/GameData/MonsterData/LegacyMonsterKind.h"
+#include "Core/Text/WideString.h"
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
 
 // DevEditor function declarations
 #ifdef _EDITOR
@@ -13099,19 +13100,16 @@ void Setting_Monster(CHARACTER* c, EMonsterType Type, int PositionX, int Positio
     if (c != NULL)
     {
         o = &c->Object;
-        for (int i = 0; i < MAX_MONSTER; i++)
+        // A number the monster list has no entry for keeps the name it has.
+        if (const wchar_t* name = g_MonsterDatabase.FindDisplayName(Type))
         {
-            if (Type == MonsterScript[i].Type)
-            {
-                wcscpy_s(c->ID, MAX_MONSTER_NAME + 1, MonsterScript[i].Name);
-                break;
-            }
+            Core::Text::CopyWideString(c->ID, std::size(c->ID), name);
         }
 
         c->MonsterIndex = Type;
         c->Object.ExtState = 0;
         c->TargetCharacter = HeroIndex;
-        o->Kind = Data::Monsters::GetLegacyObjectKind(Type);
+        o->Kind = Data::Monsters::GetMonsterObjectKind(Type);
     }
 }
 

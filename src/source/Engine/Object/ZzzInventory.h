@@ -142,7 +142,6 @@ extern int  RepairEnable;
 extern int AskYesOrNo;
 extern char OkYesOrNo;
 
-extern int  SommonTable[];
 extern int  StorageGoldFlag;
 extern ITEM* SrcInventory;
 extern int  SrcInventoryIndex;
