@@ -117,14 +117,15 @@ struct SyncOptions
     // An item the game holds keeps its size and slot, is not removed, and a new one of its type
     // is not added.
     std::function<bool(int itemType)> isHeld;
-    // A comparison of two files: every language counts, also one that only one side has.
-    bool everyLanguage = false;
+    // A comparison of two files: every language counts, also one that only one side has; a
+    // removed item lists its fields; a row of an item a file has twice names that file.
+    bool comparingFiles = false;
 };
 
 // The differences between the client's data (`client`, BuildItemExchange) and `file`. Checked
 // by default: what the file changes; unchecked: removals, known differences, inexact and locked
-// fields. A language one side lacks stays as it is on the other (unless everyLanguage). An item a
-// side has more than once (its repeatedItems) is a locked row without fields. The formulas are
+// fields. A language one side lacks stays as it is on the other (unless comparingFiles). An item
+// a side has more than once (its repeatedItems) is a locked row without fields. The formulas are
 // compared while both sides have them.
 ItemSyncDiff BuildItemSyncDiff(const Data::Items::ItemExchangeFile& client, const Data::Items::ItemExchangeFile& file,
                                const SyncOptions& options);

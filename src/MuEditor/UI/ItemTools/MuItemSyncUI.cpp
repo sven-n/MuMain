@@ -532,7 +532,7 @@ void CMuItemSyncUI::CompareFiles(const std::filesystem::path& a, const std::file
     }
     SyncOptions options;
     options.known = &m_known;
-    options.everyLanguage = true;
+    options.comparingFiles = true;
     m_diff = BuildItemSyncDiff(m_fileA, m_file, options);
 }
 
@@ -974,8 +974,10 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
     constexpr ImGuiTableFlags Flags =
         ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingStretchProp;
     const bool changed = row.change == SyncChange::Changed;
-    // A comparison of two files has no boxes, and its sides are file A and file B.
+    // A comparison of two files has no boxes, and its sides are file A and file B; an item only
+    // file A has lists file A's values.
     const bool checkable = !m_comparingFiles;
+    const bool removed = row.change == SyncChange::Removed;
     const int columns = (changed ? 5 : 2) + (checkable ? 1 : 0);
     if (!ImGui::BeginTable("##SyncFields", columns, Flags, ImVec2(0.0f, Scaled(FieldListHeight))))
     {
@@ -991,7 +993,9 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
     {
         ImGui::TableSetupColumn(checkable ? I18N::Editor::Now : I18N::Editor::FileA);
     }
-    ImGui::TableSetupColumn(checkable ? I18N::Editor::FromTheFile : I18N::Editor::FileB);
+    ImGui::TableSetupColumn(removed     ? I18N::Editor::FileA
+                            : checkable ? I18N::Editor::FromTheFile
+                                        : I18N::Editor::FileB);
     if (changed)
     {
         ImGui::TableSetupColumn(I18N::Editor::Note);
@@ -1021,7 +1025,7 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
             RenderValue(field.current);
         }
         ImGui::TableNextColumn();
-        RenderValue(field.incoming);
+        RenderValue(removed ? field.current : field.incoming);
         if (changed)
         {
             ImGui::TableNextColumn();

@@ -1091,9 +1091,11 @@ Update from server, which downloads it, are later steps of phase 7; see the
   data: pick file A and file B (**Swap** swaps them), then **Compare the
   files**. The lists say what changes from file A to file B (Added,
   Changed, Removed under "From A to B", the values under "File A" and
-  "File B"), in every language, also one only one file has. Nothing can be
-  applied, but a row can be marked as a known difference. An import or a
-  comparison of two files replaces the other in the window.
+  "File B"; an item only file A has lists file A's values), in every
+  language, also one only one file has. An item a file has twice is a
+  locked row that names that file. Nothing can be applied, but a row can be
+  marked as a known difference. An import or a comparison of two files
+  replaces the other in the window.
 - An import lists only what differs. The lists say how much of what was
   compared differs ("Items that differ (3 of 911)"), and when nothing does,
   how many are the same ("Items: all 911 are the same in the client and the

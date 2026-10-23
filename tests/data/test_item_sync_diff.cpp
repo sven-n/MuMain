@@ -526,6 +526,13 @@ TEST_CASE("Item Sync compares two files read-only [data][items][editor]")
     added.names = Data::LocalizedString::Parse("New Sword");
     fileB.items.push_back(added);
     fileB.formulas->excellentDropLevelBonus = 30;
+    // Only file A has (0,101), and file A has (0,3) twice, as an OpenMU export can.
+    ItemDefinition onlyInA = Sides::Find(fileA, KrisType);
+    onlyInA.number = 101;
+    onlyInA.names = Data::LocalizedString::Parse("Old Sword");
+    fileA.items.push_back(onlyInA);
+    const int twiceType = MakeItemType(0, 3);
+    fileA.items.push_back(Sides::Find(fileA, twiceType));
     WriteFile(a, WriteItemExchangeJson(fileA));
     WriteFile(b, WriteItemExchangeJson(fileB));
 
@@ -533,7 +540,20 @@ TEST_CASE("Item Sync compares two files read-only [data][items][editor]")
     CHECK(g_MuItemSyncUI.IsComparingFiles());
     REQUIRE(g_MuItemSyncUI.GetDiff());
     const ItemSyncDiff& diff = *g_MuItemSyncUI.GetDiff();
-    CHECK(diff.items.size() == 3);
+    CHECK(diff.items.size() == 5);
+    const SyncItem* removed = FindRow(diff, MakeItemType(0, 101));
+    REQUIRE(removed != nullptr);
+    CHECK(removed->change == SyncChange::Removed);
+    const SyncField* removedName = FindField(*removed, "name.en");
+    REQUIRE(removedName != nullptr);
+    CHECK(removedName->current.has_value());
+    CHECK_FALSE(removedName->incoming.has_value());
+    // File B has it once: changed, with the name file B has, locked.
+    const SyncItem* twice = FindRow(diff, twiceType);
+    REQUIRE(twice != nullptr);
+    CHECK(twice->change == SyncChange::Changed);
+    CHECK_FALSE(twice->name.empty());
+    CHECK(twice->locked == std::string(I18N::Editor::ItIsInFileAMoreThanOnce));
     const SyncItem* kris = FindRow(diff, KrisType);
     REQUIRE(kris != nullptr);
     CHECK(kris->change == SyncChange::Changed);

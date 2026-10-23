@@ -2350,4 +2350,10 @@
   <data name="Formulas: not compared, a file has none" xml:space="preserve">
     <value>Formulas: not compared, a file has none.</value>
   </data>
+  <data name="It is in file A more than once" xml:space="preserve">
+    <value>It is in file A more than once, so it is not compared.</value>
+  </data>
+  <data name="It is in file B more than once" xml:space="preserve">
+    <value>It is in file B more than once, so it is not compared.</value>
+  </data>
 </root>

@@ -2329,4 +2329,10 @@
   <data name="Formulas: not compared, a file has none" xml:space="preserve">
     <value>Formeln: nicht verglichen, eine Datei hat keine.</value>
   </data>
+  <data name="It is in file A more than once" xml:space="preserve">
+    <value>Es ist mehrmals in Datei A und wird daher nicht verglichen.</value>
+  </data>
+  <data name="It is in file B more than once" xml:space="preserve">
+    <value>Es ist mehrmals in Datei B und wird daher nicht verglichen.</value>
+  </data>
 </root>

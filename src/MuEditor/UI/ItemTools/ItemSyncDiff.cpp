@@ -123,11 +123,11 @@ bool IsNamePath(const std::string& path, std::string& locale)
 
 // Whether `path` of the incoming side takes part: a language the incoming side lacks stays,
 // and an import takes names only in the client's UI languages. A comparison of two files
-// (everyLanguage) takes every one.
+// (comparingFiles) takes every one.
 bool TakesPart(const std::string& path, bool incomingHasIt, const SyncOptions& options)
 {
     std::string locale;
-    if (!IsNamePath(path, locale) || options.everyLanguage)
+    if (!IsNamePath(path, locale) || options.comparingFiles)
     {
         return true;
     }
@@ -207,6 +207,14 @@ SyncItem CompareItem(const ItemKey& key, const ItemDefinition* current, const It
     if (incoming == nullptr)
     {
         row.change = SyncChange::Removed;
+        // A comparison of two files shows what file A has (nothing applies them).
+        if (options.comparingFiles)
+        {
+            for (const auto& [path, value] : currentFields)
+            {
+                row.fields.push_back({path, ToText(value), std::nullopt});
+            }
+        }
         if (IsHeld(options, key))
         {
             row.locked = I18N::Editor::TheItemIsWornOrInAnItemWindowItIsNotMovedOrRemoved;
@@ -599,10 +607,12 @@ ItemSyncDiff BuildItemSyncDiff(const ItemExchangeFile& client, const ItemExchang
     const ItemExchangeFile& incoming = file;
     const std::map<ItemKey, const ItemDefinition*> currentItems = IndexItems(current);
     const std::map<ItemKey, const ItemDefinition*> incomingItems = IndexItems(incoming);
-    // An item a side has more than once (a file read with repeatedItems): an error row that is
-    // not applied.
-    std::set<ItemKey> repeated(file.repeatedItems.begin(), file.repeatedItems.end());
-    repeated.insert(client.repeatedItems.begin(), client.repeatedItems.end());
+    // An item a side has more than once (a file read with repeatedItems; the client's data never
+    // has one): an error row that is not applied.
+    const std::set<ItemKey> currentRepeated(client.repeatedItems.begin(), client.repeatedItems.end());
+    const std::set<ItemKey> incomingRepeated(file.repeatedItems.begin(), file.repeatedItems.end());
+    std::set<ItemKey> repeated = currentRepeated;
+    repeated.insert(incomingRepeated.begin(), incomingRepeated.end());
     std::set<ItemKey> keys = repeated;
     for (const auto& [key, item] : currentItems)
     {
@@ -616,18 +626,36 @@ ItemSyncDiff BuildItemSyncDiff(const ItemExchangeFile& client, const ItemExchang
     for (const ItemKey& key : keys)
     {
         const auto was = currentItems.find(key);
+        const auto becomes = incomingItems.find(key);
         if (repeated.contains(key))
         {
+            // A side that has the item twice has it too, though not among its items.
+            const bool inCurrent = was != currentItems.end() || currentRepeated.contains(key);
+            const bool inIncoming = becomes != incomingItems.end() || incomingRepeated.contains(key);
             SyncItem row;
             row.group = key.first;
             row.number = key.second;
-            row.change = was != currentItems.end() ? SyncChange::Changed : SyncChange::New;
-            row.name = was != currentItems.end() ? was->second->names.GetNeutral() : std::string();
-            row.locked = I18N::Editor::ItIsInTheFileMoreThanOnce;
+            row.change = !inCurrent ? SyncChange::New : !inIncoming ? SyncChange::Removed : SyncChange::Changed;
+            if (becomes != incomingItems.end())
+            {
+                row.name = becomes->second->names.GetNeutral();
+            }
+            else if (was != currentItems.end())
+            {
+                row.name = was->second->names.GetNeutral();
+            }
+            if (!options.comparingFiles)
+            {
+                row.locked = I18N::Editor::ItIsInTheFileMoreThanOnce;
+            }
+            else
+            {
+                row.locked = currentRepeated.contains(key) ? I18N::Editor::ItIsInFileAMoreThanOnce
+                                                           : I18N::Editor::ItIsInFileBMoreThanOnce;
+            }
             diff.items.push_back(std::move(row));
             continue;
         }
-        const auto becomes = incomingItems.find(key);
         SyncItem row = CompareItem(key, was != currentItems.end() ? was->second : nullptr,
                                    becomes != incomingItems.end() ? becomes->second : nullptr, incoming, options);
         if (row.change != SyncChange::Changed || !row.fields.empty())
