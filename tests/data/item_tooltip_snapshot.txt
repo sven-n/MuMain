@@ -76,7 +76,7 @@ bladeMaster 10/37 26c8ee373b2f0eea
 bladeMaster 10/38 cabe501c18d5a338
 bladeMaster 10/39 dd5f29ff32ec3c07
 bladeMaster 10/4 2d0c747f02fe6c67
-bladeMaster 10/40 004965750eea6a2f
+bladeMaster 10/40 f8853621bd84112d
 bladeMaster 10/41 edfd7cf571b517f8
 bladeMaster 10/42 d252eeed8fc03cad
 bladeMaster 10/43 3a5384348b228ab3
@@ -743,7 +743,7 @@ bladeMaster 7/36 10d0c56b4c4a2f1c
 bladeMaster 7/38 826609db27e4a613
 bladeMaster 7/39 495cc23881eb4f9c
 bladeMaster 7/4 ee0afe57ce788266
-bladeMaster 7/40 706f775d1f1fd0b6
+bladeMaster 7/40 be45178302a96192
 bladeMaster 7/41 da12dc2333043475
 bladeMaster 7/42 af75ebaac16fecf2
 bladeMaster 7/43 508df4a0cf7c566f
@@ -876,7 +876,7 @@ bladeMaster 9/37 358db602bc0aab90
 bladeMaster 9/38 bda399753abd6a92
 bladeMaster 9/39 37d27d02ee8f5a9f
 bladeMaster 9/4 554c70ea8f27627c
-bladeMaster 9/40 2ab694cdea413b04
+bladeMaster 9/40 c9c21083ae6a04b8
 bladeMaster 9/41 2aeae971a2e90c9d
 bladeMaster 9/42 92c140329a381c6f
 bladeMaster 9/43 c45a146ce0be991f
@@ -987,7 +987,7 @@ newDarkWizard 10/37 d0864fb0da355a66
 newDarkWizard 10/38 d7db96bcc8e77e7a
 newDarkWizard 10/39 9a37450a31874b3a
 newDarkWizard 10/4 ca4562612a957acd
-newDarkWizard 10/40 7303dd3ee269ebbb
+newDarkWizard 10/40 a1cbaa29d1368871
 newDarkWizard 10/41 9f7c7fca196e3fa7
 newDarkWizard 10/42 c3cf88a3887ecc3d
 newDarkWizard 10/43 40a1dec753d194e4
@@ -1654,7 +1654,7 @@ newDarkWizard 7/36 bcb05a703e4c37f5
 newDarkWizard 7/38 b39bfbce71ee5c7a
 newDarkWizard 7/39 0cd202c8de1439e1
 newDarkWizard 7/4 854737a579684fac
-newDarkWizard 7/40 57ee6640d4ef794a
+newDarkWizard 7/40 dd246a2fbe251e6a
 newDarkWizard 7/41 e22fd572e94a5da1
 newDarkWizard 7/42 acd37b5eae305918
 newDarkWizard 7/43 89539090edc2c688
@@ -1787,7 +1787,7 @@ newDarkWizard 9/37 99aeccd6201593ac
 newDarkWizard 9/38 e27e390e37bb9ca4
 newDarkWizard 9/39 4d77d332e67ace0c
 newDarkWizard 9/4 a42d98e8c759d6c8
-newDarkWizard 9/40 e855c677e5234753
+newDarkWizard 9/40 0912269edadb7f9b
 newDarkWizard 9/41 5b574d552ebcaf6d
 newDarkWizard 9/42 e5873313ef20655d
 newDarkWizard 9/43 e32e06a333db03d4
