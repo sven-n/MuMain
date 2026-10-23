@@ -93,29 +93,36 @@ std::vector<std::string> DescribeNewItem(const ItemDefinition& exchange)
     return notes;
 }
 
-bool ApplyItemSyncImport(const ItemSyncDiff& diff, const ItemExchangeFile& file, std::vector<ItemDataIssue>& issues)
+namespace
 {
-    const ItemExchangeFile client = BuildClientExchange();
-    std::vector<ItemDataIssue> applyIssues;
-    const ItemExchangeFile applied = ApplyItemSyncDiff(client, file, diff, applyIssues);
-    issues.insert(issues.end(), applyIssues.begin(), applyIssues.end());
-    if (Data::Items::HasErrors(applyIssues))
-    {
-        return false;
-    }
+using Data::Items::ItemStatFile;
+using Data::Items::ItemStatProfiles;
 
-    // The formulas; the client's profile rules stay.
-    std::optional<Data::Items::ItemStatFile> statFile;
-    if (applied.formulas && client.formulas && !(*applied.formulas == *client.formulas))
-    {
-        statFile = *applied.formulas;
-        statFile->profileRules = g_ItemDataHandler.GetStatFile().profileRules;
-    }
-    const Data::Items::ItemStatProfiles profiles =
-        statFile ? Data::Items::ItemStatProfiles(*statFile) : g_ItemDatabase.GetStatProfiles();
-
+// What an import changes in the client's items: the items it stores and the ones it removes.
+struct ImportChange
+{
     std::vector<ItemDefinition> items;
     std::vector<int> removed;
+};
+
+// The formulas the import stores, with the client's profile rules; nothing when they stay.
+std::optional<ItemStatFile> FindChangedStatFile(const ItemExchangeFile& applied, const ItemExchangeFile& client)
+{
+    if (!applied.formulas || !client.formulas || *applied.formulas == *client.formulas)
+    {
+        return std::nullopt;
+    }
+    ItemStatFile statFile = *applied.formulas;
+    statFile.profileRules = g_ItemDataHandler.GetStatFile().profileRules;
+    return statFile;
+}
+
+// The items the checked rows change (from `applied`, the client's data with them taken) and the
+// ones they remove.
+ImportChange CollectImportChange(const ItemSyncDiff& diff, const ItemExchangeFile& applied,
+                                 const ItemStatProfiles& profiles)
+{
+    ImportChange change;
     const Data::Items::ExchangeItemIndex appliedItems = Data::Items::IndexExchangeItems(applied);
     for (const SyncItem& row : diff.items)
     {
@@ -124,7 +131,7 @@ bool ApplyItemSyncImport(const ItemSyncDiff& diff, const ItemExchangeFile& file,
         {
             if (row.checked && row.locked.empty())
             {
-                removed.push_back(itemType);
+                change.removed.push_back(itemType);
             }
             continue;
         }
@@ -135,41 +142,43 @@ bool ApplyItemSyncImport(const ItemSyncDiff& diff, const ItemExchangeFile& file,
         {
             continue;
         }
-        items.push_back(ToClientItem(current, *exchange, profiles));
+        change.items.push_back(ToClientItem(current, *exchange, profiles));
     }
+    return change;
+}
 
-    // What the game holds keeps its size and slot and stays (ItemEdits refuses the whole change
-    // otherwise); the character may have taken the item since the comparison.
-    std::vector<ItemDataIssue> heldIssues;
-    for (const ItemDefinition& item : items)
+// What the game holds keeps its size and slot and stays (ItemEdits refuses the whole change
+// otherwise); the character may have taken the item since the comparison.
+void CheckHeldItems(const ImportChange& change, std::vector<ItemDataIssue>& issues)
+{
+    for (const ItemDefinition& item : change.items)
     {
         // The slot, also an empty one: an item the client has no data for can be held too.
         const int itemType = Data::Items::MakeItemType(item.group, item.number);
         const ItemDefinition& slot = g_ItemDatabase.GetAllSlots()[static_cast<size_t>(itemType)];
         if (!KeepsShape(slot, item) && IsHeldByCharacter(itemType))
         {
-            heldIssues.push_back({Data::Items::ItemDataIssueSeverity::Error, "", item.group, item.number, "",
-                                  slot.Exists()
-                                      ? "is worn or in an item window now, so its size and slot stay: compare again"
-                                      : "is worn or in an item window now, so it is not added: compare again"});
+            issues.push_back({Data::Items::ItemDataIssueSeverity::Error, "", item.group, item.number, "",
+                              slot.Exists()
+                                  ? "is worn or in an item window now, so its size and slot stay: compare again"
+                                  : "is worn or in an item window now, so it is not added: compare again"});
         }
     }
-    for (const int itemType : removed)
+    for (const int itemType : change.removed)
     {
         if (IsHeldByCharacter(itemType))
         {
-            heldIssues.push_back({Data::Items::ItemDataIssueSeverity::Error, "", Data::Items::GetItemGroup(itemType),
-                                  Data::Items::GetItemNumber(itemType), "",
-                                  "is worn or in an item window now, so it is not removed: compare again"});
+            issues.push_back({Data::Items::ItemDataIssueSeverity::Error, "", Data::Items::GetItemGroup(itemType),
+                              Data::Items::GetItemNumber(itemType), "",
+                              "is worn or in an item window now, so it is not removed: compare again"});
         }
     }
-    if (!heldIssues.empty())
-    {
-        issues.insert(issues.end(), heldIssues.begin(), heldIssues.end());
-        return false;
-    }
+}
 
-    // The checks of a save, on the data as it would be.
+// The checks of a save, on the data as it would be; only their errors go into `issues`.
+void CheckImportedData(const ImportChange& change, const ItemStatProfiles& profiles,
+                       const std::optional<ItemStatFile>& statFile, std::vector<ItemDataIssue>& issues)
+{
     std::map<int, ItemDefinition> candidates;
     for (const ItemDefinition& item : g_ItemDatabase.GetAllSlots())
     {
@@ -178,7 +187,7 @@ bool ApplyItemSyncImport(const ItemSyncDiff& diff, const ItemExchangeFile& file,
             candidates[Data::Items::MakeItemType(item.group, item.number)] = item;
         }
     }
-    for (const ItemDefinition& item : items)
+    for (const ItemDefinition& item : change.items)
     {
         ItemDefinition candidate = item;
         if (candidate.statProfile.empty())
@@ -187,7 +196,7 @@ bool ApplyItemSyncImport(const ItemSyncDiff& diff, const ItemExchangeFile& file,
         }
         candidates[Data::Items::MakeItemType(item.group, item.number)] = std::move(candidate);
     }
-    for (const int itemType : removed)
+    for (const int itemType : change.removed)
     {
         candidates.erase(itemType);
     }
@@ -203,14 +212,15 @@ bool ApplyItemSyncImport(const ItemSyncDiff& diff, const ItemExchangeFile& file,
     {
         Data::Items::ValidateItemStatsAsWritten(*statFile, checkIssues);
     }
-    if (Data::Items::HasErrors(checkIssues))
-    {
-        std::ranges::copy_if(checkIssues, std::back_inserter(issues), [](const ItemDataIssue& issue)
-                             { return issue.severity == Data::Items::ItemDataIssueSeverity::Error; });
-        return false;
-    }
+    std::ranges::copy_if(checkIssues, std::back_inserter(issues), [](const ItemDataIssue& issue)
+                         { return issue.severity == Data::Items::ItemDataIssueSeverity::Error; });
+}
 
-    // One step of the undo history.
+// The change as one step of the undo history: the item stat file first, so the items' profiles
+// follow the new rules, then the items.
+void RecordImport(const ImportChange& change, const ItemStatProfiles& profiles,
+                  const std::optional<ItemStatFile>& statFile)
+{
     const std::string label = I18N::Editor::ImportItems;
     g_ItemEdits.BeginGroup(label);
     if (statFile)
@@ -219,16 +229,45 @@ bool ApplyItemSyncImport(const ItemSyncDiff& diff, const ItemExchangeFile& file,
             FindStatProfileChanges(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(), profiles);
         g_ItemEdits.SetStatFile(label, *statFile, ApplyStatProfileChanges(g_ItemDatabase.GetAllSlots(), changes));
     }
-    if (!items.empty())
+    if (!change.items.empty())
     {
         // ToClientItem decided each item's profile: "" follows the rules, another one is a pick.
-        g_ItemEdits.SetItems(label, items, Data::Items::StatProfileStore::AsGiven);
+        g_ItemEdits.SetItems(label, change.items, Data::Items::StatProfileStore::AsGiven);
     }
-    for (const int itemType : removed)
+    for (const int itemType : change.removed)
     {
         g_ItemEdits.RemoveItem(label, itemType);
     }
     g_ItemEdits.EndGroup();
+}
+} // namespace
+
+bool ApplyItemSyncImport(const ItemSyncDiff& diff, const ItemExchangeFile& file, std::vector<ItemDataIssue>& issues)
+{
+    const ItemExchangeFile client = BuildClientExchange();
+    std::vector<ItemDataIssue> applyIssues;
+    const ItemExchangeFile applied = ApplyItemSyncDiff(client, file, diff, applyIssues);
+    issues.insert(issues.end(), applyIssues.begin(), applyIssues.end());
+    if (Data::Items::HasErrors(applyIssues))
+    {
+        return false;
+    }
+    const std::optional<ItemStatFile> statFile = FindChangedStatFile(applied, client);
+    const ItemStatProfiles profiles = statFile ? ItemStatProfiles(*statFile) : g_ItemDatabase.GetStatProfiles();
+    const ImportChange change = CollectImportChange(diff, applied, profiles);
+
+    std::vector<ItemDataIssue> refusals;
+    CheckHeldItems(change, refusals);
+    if (refusals.empty())
+    {
+        CheckImportedData(change, profiles, statFile, refusals);
+    }
+    if (!refusals.empty())
+    {
+        issues.insert(issues.end(), refusals.begin(), refusals.end());
+        return false;
+    }
+    RecordImport(change, profiles, statFile);
     return true;
 }
 
