@@ -4,19 +4,20 @@
 #pragma once
 #include "ServerGroup.h"
 
-#define SLM_MAX_SERVER_NAME_LENGTH 32
-#define SLM_MAX_SERVER_COUNT 15
+#include "Data/GameData/ServerListData/ServerListGroup.h"
 
+#include <span>
+#include <string>
+#include <vector>
+
+// A group of Data/Local/ServerList.json, with its place in the list.
 struct SServerGroupInfo
 {
-    wchar_t m_szName[SLM_MAX_SERVER_NAME_LENGTH + 1];
-    BYTE m_byPos;
-    BYTE m_bySequence;
-    BYTE m_abyNonPVP[SLM_MAX_SERVER_COUNT];
-    std::wstring m_strDescript;
+    Data::ServerList::ServerGroup group;
+    int sequence = 0;
 };
 
-typedef std::map<WORD, SServerGroupInfo> ServerListScriptMap;
+typedef std::map<int, SServerGroupInfo> ServerListScriptMap;
 typedef std::map<int, CServerGroup*> type_mapServerGroup;
 
 class CServerListManager
@@ -32,7 +33,11 @@ public:
 
     void InsertServerGroup(int iConnectIndex, int iServerPercent);
     void Release();
-    void LoadServerListScript();
+    // Reads Data/Local/ServerList.json. False when it has errors; they are in
+    // errorMessage then, for the player.
+    bool LoadServerListScript(std::string& errorMessage);
+    // The groups the login screen names the servers with, in their order.
+    void SetServerGroups(std::span<const Data::ServerList::ServerGroup> groups);
     void SetFirst();
     bool GetNext(OUT CServerGroup*& pServerGroup);
     CServerGroup* GetServerGroupByBtnPos(int iBtnPos);
@@ -47,8 +52,31 @@ public:
     void SetTotalServer(int iTotalServer);
     int GetTotalServer();
 
+#ifdef _EDITOR
+    // A server of the last list the connect server sent.
+    struct ReceivedServer
+    {
+        int connectIndex = 0;
+        int percent = 0;
+    };
+
+    const std::vector<ReceivedServer>& GetReceivedServers() const
+    {
+        return m_receivedServers;
+    }
+    // Changes each time the received servers change, so a view of them is
+    // built again only then.
+    int GetReceivedServersVersion() const
+    {
+        return m_receivedServersVersion;
+    }
+    // Builds the groups of the last list the connect server sent again, with
+    // the groups SetServerGroups set since.
+    void RebuildServerGroups();
+#endif
+
 protected:
-    const SServerGroupInfo* GetServerGroupInfoInScript(WORD wServerGroupIndex);
+    const SServerGroupInfo* GetServerGroupInfoInScript(int iServerGroupIndex);
     bool MakeServerGroup(IN int iServerGroupIndex, OUT CServerGroup* pServerGroup);
     void InsertServer(CServerGroup* pServerGroup, int iConnectIndex, int iServerPercent);
 
@@ -63,6 +91,10 @@ public:
 
 protected:
     ServerListScriptMap m_mapServerListScript;
+#ifdef _EDITOR
+    std::vector<ReceivedServer> m_receivedServers;
+    int m_receivedServersVersion = 0;
+#endif
 };
 
 #define g_ServerListManager CServerListManager::GetInstance()

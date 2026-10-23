@@ -16,6 +16,8 @@ src/shaders/compiled/*.msl text eol=lf whitespace=-blank-at-eof
 src/bin/Data/Items/**/*.json text eol=lf
 # The effect catalogue is checked against the format its writer produces (LF).
 src/bin/Data/Effects/*.json text eol=lf
+# The server list is written by the editor's Server List window with LF.
+src/bin/Data/Local/ServerList.json text eol=lf
 # The creation baseline of the effect recorder is compared line by line on every platform.
 tests/effects/baseline/*.txt text eol=lf
 
