@@ -707,7 +707,7 @@ TEST_CASE("A tooltip's name color goes by the item's kind, level and options in 
 }
 
 // The quests, the mixes, the server's messages and the ground labels name an item with GetItemName: for every item at
-// every level, the name is the tooltip's first line, which the recorded snapshot covers.
+// every level, the name is the tooltip's first line that isn't blank, which the recorded snapshot covers.
 TEST_CASE("Every item's name at every level is its tooltip's name [data][items][tooltip]")
 {
     ClientDataScope client(ClientDirectory);
@@ -731,7 +731,10 @@ TEST_CASE("Every item's name at every level is its tooltip's name [data][items][
             ItemCreationParams params = FullItemParameters(definition.group, definition.number);
             params.Level = static_cast<BYTE>(level);
             const std::vector<ItemTooltipLine> lines = TooltipOfParameters(params);
-            if (lines.empty())
+            // The name is the first line that isn't blank.
+            const auto first = std::find_if(lines.begin(), lines.end(),
+                                            [](const ItemTooltipLine& line) { return line.text != L"\n"; });
+            if (first == lines.end())
             {
                 continue;
             }
@@ -740,12 +743,12 @@ TEST_CASE("Every item's name at every level is its tooltip's name [data][items][
             wchar_t buffer[128] = L"";
             GetItemName(type, level, buffer);
             ++names;
-            if (name != lines.front().text || std::wstring(buffer) != name)
+            if (name != first->text || std::wstring(buffer) != name)
             {
                 if (++different <= 5)
                 {
                     INFO(definition.group << "/" << definition.number << " +" << level);
-                    CHECK(Core::Text::ToUtf8(name.c_str()) == Core::Text::ToUtf8(lines.front().text.c_str()));
+                    CHECK(Core::Text::ToUtf8(name.c_str()) == Core::Text::ToUtf8(first->text.c_str()));
                     CHECK(Core::Text::ToUtf8(buffer) == Core::Text::ToUtf8(name.c_str()));
                 }
             }
