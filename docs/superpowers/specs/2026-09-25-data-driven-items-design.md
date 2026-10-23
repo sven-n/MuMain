@@ -372,9 +372,9 @@ Each field belongs to one of two groups:
     rules give or the picked one; `"default"` for the default; always
     written), `excellentBonus` and `excellentRaisesLevel`.
 - Not in the file: what is client-only (the model and display data, D22;
-  the other tags, `wingTier`, `weaponKind`, `twoHanded`, `potionPriority`,
-  `attackType`, `magicDefense`, the rental flags) and what is server-only
-  (`DropsFromMonsters`, `MaximumDropLevel`, `MaximumItemLevel`,
+  `description`; the other tags, `wingTier`, `weaponKind`, `twoHanded`,
+  `potionPriority`, `attackType`, `magicDefense`, the rental flags) and what
+  is server-only (`DropsFromMonsters`, `MaximumDropLevel`, `MaximumItemLevel`,
   `IsBoundToCharacter`, `StorageLimitPerCharacter`, `PetExperienceFormula`,
   `ConsumeEffect`, `MaximumSockets`, the item options and sets, the drop
   items and the power-ups the client has no field for, e.g. `CanFly`).

@@ -1143,9 +1143,10 @@ number, fields with their default value left out, LF line endings.
   the item uses, `default` for the default), `excellentBonus` and
   `excellentRaisesLevel`.
 - What only the client has is not in it: the model and display data, the
-  other tags, the wing tier, weapon kind, two-handed flag, potion priority,
-  attack type, magic defense and the rental flags. A file with such a field
-  is read with a warning and the field is left out.
+  description, the other tags, the wing tier, weapon kind, two-handed flag,
+  potion priority, attack type, magic defense and the rental flags. A file
+  with such a field is read with a warning and the field is left out; an
+  import keeps the client's.
 
 **The diff of an import**:
 

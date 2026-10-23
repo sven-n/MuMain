@@ -180,6 +180,16 @@ TEST_CASE("The exchange file reader leaves out what stays with the client [data]
         CHECK(file.items[0].weaponKind == WeaponKind::None);
         CHECK(file.items[0].statProfile == "weapon");
     }
+    SUBCASE("an item's description")
+    {
+        const ItemExchangeFile file = ReadExchange(
+            FileWithItem(R"({"group": 0, "number": 0, "name": "Kris", "description": [{"text": "A short dagger"}]})"),
+            issues);
+        CHECK_FALSE(HasErrors(issues));
+        CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Warning, "stay with the client"));
+        REQUIRE(file.items.size() == 1);
+        CHECK(file.items[0].description.empty());
+    }
     SUBCASE("profile rules in the formulas")
     {
         ShippedItems items;
