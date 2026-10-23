@@ -2339,8 +2339,8 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_YETIDIE, L"Data\\Sound\\mYetiDie.wav", Channel, Enable);
         SetMonsterSound(MODEL_YETI, 68, 68, 70, 70, 71);
         SetMonsterSound(MODEL_ELITE_YETI, 68, 69, 70, 70, 71);
-        Models[MODEL_YETI].BoneHead = 20;
-        Models[MODEL_ELITE_YETI].BoneHead = 20;
+        // Bone 20 of both BMDs; by name so that a model file with other bone indices turns the same head.
+        b->BoneHead = b->FindBoneOrRoot("Bip01 Head");
         break;
     case MONSTER_MODEL_GOBLIN:
         LoadWaveFile(SOUND_MONSTER_GOBLIN1, L"Data\\Sound\\mGoblin1.wav", Channel, Enable);

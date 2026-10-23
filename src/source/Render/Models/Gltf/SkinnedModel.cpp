@@ -106,6 +106,20 @@ const SkinnedModel* SkinnedModelOf(const BMD& model)
     return static_cast<const SkinnedModel*>(model.GltfModel.get());
 }
 
+SkinnedModel::~SkinnedModel()
+{
+    for (const auto& lod : packedMeshes)
+    {
+        for (const PackedMesh& packed : lod)
+        {
+            if (!packed.vertices.empty())
+            {
+                mu::GetRenderer().ReleaseSkinnedMesh(packed.vertices.data());
+            }
+        }
+    }
+}
+
 int SkinnedModel::ClipKeyIntervals(int numKeys, bool lockPositions, bool held)
 {
     const int intervals = lockPositions || held ? numKeys - 1 : numKeys;
@@ -203,10 +217,57 @@ std::vector<Matrix34> SkinnedModel::RestPose() const
     return world;
 }
 
+const LodMesh* SkinnedModel::LodMeshFor(int lod, int mesh, bool& absent) const
+{
+    absent = false;
+    if (lod <= 0 || lod > static_cast<int>(lods.size()) || mesh < 0)
+    {
+        return nullptr;
+    }
+    const std::vector<LodMesh>& meshes = lods[static_cast<size_t>(lod - 1)];
+    if (mesh >= static_cast<int>(meshes.size()))
+    {
+        absent = true;
+        return nullptr;
+    }
+    return &meshes[static_cast<size_t>(mesh)];
+}
+
+void SkinnedModel::ComputeRestBounds()
+{
+    const std::vector<Matrix34> rest = RestPose();
+    std::vector<float> matrices(rest.size() * 12);
+    for (size_t i = 0; i < rest.size(); ++i)
+    {
+        std::copy(&rest[i][0][0], &rest[i][0][0] + 12, &matrices[i * 12]);
+    }
+    const auto* boneMatrices = reinterpret_cast<const float (*)[3][4]>(matrices.data());
+    bool any = false;
+    for (size_t mesh = 0; mesh < meshVertices.size(); ++mesh)
+    {
+        for (size_t vertex = 0; vertex < meshVertices[mesh].size(); ++vertex)
+        {
+            float p[3];
+            SkinPosition(static_cast<int>(mesh), static_cast<int>(vertex), boneMatrices, 1.f, 0.f, p);
+            for (int r = 0; r < 3; ++r)
+            {
+                restBoundsMin[r] = any ? std::min(restBoundsMin[r], p[r]) : p[r];
+                restBoundsMax[r] = any ? std::max(restBoundsMax[r], p[r]) : p[r];
+            }
+            any = true;
+        }
+    }
+}
+
 void SkinnedModel::SkinPosition(int mesh, int vertex, const float (*boneMatrices)[3][4], float boneScale, float scale,
                                 float out[3]) const
 {
-    const SkinnedVertex& v = meshVertices[mesh][vertex];
+    SkinPosition(meshVertices[mesh][vertex], boneMatrices, boneScale, scale, out);
+}
+
+void SkinnedModel::SkinPosition(const SkinnedVertex& v, const float (*boneMatrices)[3][4], float boneScale, float scale,
+                                float out[3])
+{
     out[0] = out[1] = out[2] = 0.f;
     for (int k = 0; k < v.count; ++k)
     {

@@ -16,6 +16,7 @@
 #include <functional>
 #include <span>
 #include <string_view>
+#include <vector>
 
 // Forward declaration of SDL_GPUDevice so IMuRenderer::GetDevice()
 // can be declared without pulling SDL3 headers into every TU that includes MuRenderer.h.
@@ -210,6 +211,20 @@ struct RendererStats
 // IMuRenderer: Pure abstract rendering interface.
 // Game code obtains the active backend via GetRenderer() (see below).
 // ---------------------------------------------------------------------------
+// The corners of indexed triangles, in index order: out[i] = vertices[indices[i]]
+// (out holds indices.size() vertices). An indexed draw and the draw of these
+// corners rasterise the same triangles in the same order.
+template <typename Vertex>
+void ExpandIndexedCorners(std::span<const Vertex> vertices, std::span<const std::uint16_t> indices,
+                          std::vector<Vertex>& out)
+{
+    out.resize(indices.size());
+    for (std::size_t i = 0; i < indices.size(); ++i)
+    {
+        out[i] = vertices[indices[i]];
+    }
+}
+
 class IMuRenderer
 {
 public:
@@ -234,6 +249,18 @@ public:
         (void)textureId;
         (void)parameters;
         return false;
+    }
+
+    // RenderTriangles of the triangles `indices` makes of `vertices` (three
+    // indices per triangle, in draw order). A backend without index buffers
+    // keeps this default: the corners (ExpandIndexedCorners) through
+    // RenderTriangles.
+    virtual void RenderIndexedTriangles(std::span<const Vertex3D> vertices, std::span<const std::uint16_t> indices,
+                                        std::uint32_t textureId)
+    {
+        static thread_local std::vector<Vertex3D> corners;
+        ExpandIndexedCorners(vertices, indices, corners);
+        RenderTriangles(corners, textureId);
     }
 
     // Rest-pose triangles kept on the GPU under `mesh`, so a draw no longer uploads them. The data

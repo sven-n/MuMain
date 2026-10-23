@@ -29,6 +29,9 @@ bool DecodeEmbeddedImage(const EmbeddedImage& image, DecodedImage& decoded, std:
 // an image that image as texture (BMD::IndexTexture), loaded under the name
 // "<modelFile>#<image name>". A mesh without one, or whose image cannot be
 // used (logged), keeps the texture it has. Returns the number of meshes that
-// got an embedded image.
+// got an embedded image. Also sets the textures of the coarser LODs' meshes
+// (SkinnedModel::lodTextures): their image, else the texture of the BMD mesh
+// with the same texture name, else that of the BMD mesh of the same index -
+// so it runs after the BMD's textures were opened.
 int OpenEmbeddedTextures(BMD& model, const std::wstring& modelFile, int wrap, int filter);
 } // namespace Render::Models::Gltf

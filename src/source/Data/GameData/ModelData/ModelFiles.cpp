@@ -30,6 +30,9 @@ constexpr const char* File = "file";
 constexpr const char* Actions = "actions";
 constexpr const char* Clip = "clip";
 constexpr const char* Crossfade = "crossfade";
+constexpr const char* Lod = "lod";
+constexpr const char* ScreenHeights = "screenHeights";
+constexpr const char* Hysteresis = "hysteresis";
 } // namespace Keys
 
 constexpr const char* UnknownField = "unknown field, ignored";
@@ -164,6 +167,80 @@ bool ReadActions(const OrderedJson& json, const std::string& field, const std::s
     return valid;
 }
 
+// Reads "screenHeights" of an entry's "lod" into `lod`; false on an error.
+bool ReadLodScreenHeights(const OrderedJson& heights, const std::string& field, const std::string& source,
+                          LodSettings& lod, std::vector<ItemDataIssue>& issues)
+{
+    const std::string heightsField = field + "." + Keys::ScreenHeights;
+    if (!heights.is_array() || heights.size() > static_cast<size_t>(MaxLodThresholds))
+    {
+        AddError(issues, source, heightsField,
+                 "must be a list of at most " + std::to_string(MaxLodThresholds) + " screen heights");
+        return false;
+    }
+    std::vector<float> values;
+    for (const auto& height : heights)
+    {
+        if (!height.is_number() || !std::isfinite(height.get<double>()) || height.get<double>() <= 0.0 ||
+            (!values.empty() && height.get<float>() >= values.back()))
+        {
+            AddError(issues, source, heightsField, "must be positive numbers, each below the one before");
+            return false;
+        }
+        values.push_back(height.get<float>());
+    }
+    lod.screenHeights = std::move(values);
+    return true;
+}
+
+// Reads "lod" of an entry; false on an error.
+bool ReadLod(const OrderedJson& json, const std::string& field, const std::string& source, ModelFileEntry& entry,
+             std::vector<ItemDataIssue>& issues)
+{
+    const auto lod = json.find(Keys::Lod);
+    if (lod == json.end())
+    {
+        return true;
+    }
+    const std::string lodField = field + "." + Keys::Lod;
+    if (!lod->is_object())
+    {
+        AddError(issues, source, lodField, "must be an object with screenHeights and/or a hysteresis");
+        return false;
+    }
+    LodSettings settings;
+    bool valid = true;
+    if (const auto heights = lod->find(Keys::ScreenHeights); heights != lod->end())
+    {
+        valid = ReadLodScreenHeights(*heights, lodField, source, settings, issues) && valid;
+    }
+    if (const auto hysteresis = lod->find(Keys::Hysteresis); hysteresis != lod->end())
+    {
+        if (!hysteresis->is_number() || !std::isfinite(hysteresis->get<double>()) || hysteresis->get<double>() < 0.0 ||
+            hysteresis->get<double>() >= 1.0)
+        {
+            AddError(issues, source, lodField + "." + Keys::Hysteresis, "must be a number from 0 to below 1");
+            valid = false;
+        }
+        else
+        {
+            settings.hysteresis = hysteresis->get<float>();
+        }
+    }
+    for (const auto& [key, value] : lod->items())
+    {
+        if (key != Keys::ScreenHeights && key != Keys::Hysteresis)
+        {
+            AddWarning(issues, source, lodField + "." + key, UnknownField);
+        }
+    }
+    if (valid)
+    {
+        entry.lod = std::move(settings);
+    }
+    return valid;
+}
+
 // Reads entry `index` of "models"; false when it cannot be used.
 bool ReadEntry(const OrderedJson& json, size_t index, const std::string& source, ModelFileEntry& entry,
                std::vector<ItemDataIssue>& issues)
@@ -215,9 +292,13 @@ bool ReadEntry(const OrderedJson& json, size_t index, const std::string& source,
     {
         valid = false;
     }
+    if (!ReadLod(json, field, source, entry, issues))
+    {
+        valid = false;
+    }
     for (const auto& [key, value] : json.items())
     {
-        if (key != Keys::Model && key != Keys::File && key != Keys::Actions)
+        if (key != Keys::Model && key != Keys::File && key != Keys::Actions && key != Keys::Lod)
         {
             AddWarning(issues, source, field + "." + key, UnknownField);
         }

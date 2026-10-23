@@ -776,6 +776,9 @@ struct RenderCmd
     Uint32 vtxCount;       // for DrawTriangles
     Uint32 idxCount;       // for DrawIndexed*
     Uint32 stripIdxOffset; // byte offset into strip index scratch buffer
+    // DrawTriangles / DrawSkinnedTriangles drawn through idxCount indices of the
+    // strip index scratch at stripIdxOffset (RenderIndexed*Triangles).
+    bool trianglesIndexed{};
     VertexUniforms vu;
     Uint32 skinningIndex = 0u; // into s_skinningUniforms, for DrawSkinnedTriangles
     Uint32 shadowIndex = ~0u;  // into s_shadowUniforms when a DrawSkinnedTriangles is a body shadow
@@ -1099,7 +1102,7 @@ static void ReplayDrawCommand(const RenderCmd& command, SDL_GPUGraphicsPipeline*
     Uint32 firstIndex = 0u;
     if (command.type == RenderCmdType::DrawIndexedQuads)
         BindReplayIndexBuffer(s_quadIdxBuf, 0, SDL_GPU_INDEXELEMENTSIZE_16BIT, state);
-    else if (command.type == RenderCmdType::DrawIndexedStrip)
+    else if (command.type == RenderCmdType::DrawIndexedStrip || command.trianglesIndexed)
     {
         BindReplayIndexBuffer(s_stripIdxBuf, 0, SDL_GPU_INDEXELEMENTSIZE_16BIT, state);
         firstIndex = command.stripIdxOffset / sizeof(Uint16);
@@ -1108,7 +1111,8 @@ static void ReplayDrawCommand(const RenderCmd& command, SDL_GPUGraphicsPipeline*
     BindReplayFragmentSampler(command, state);
     PushReplayFragmentUniforms(command.fogUniform, state);
 
-    if (command.type == RenderCmdType::DrawIndexedQuads || command.type == RenderCmdType::DrawIndexedStrip)
+    if (command.type == RenderCmdType::DrawIndexedQuads || command.type == RenderCmdType::DrawIndexedStrip ||
+        command.trianglesIndexed)
         SDL_DrawGPUIndexedPrimitives(s_renderPass, command.idxCount, 1, firstIndex, static_cast<Sint32>(firstVertex), 0);
     else
         SDL_DrawGPUPrimitives(s_renderPass, command.vtxCount, 1, firstVertex, firstInstance);
@@ -4282,12 +4286,45 @@ public:
     // -----------------------------------------------------------------------
     void RenderTriangles(std::span<const Vertex3D> vertices, std::uint32_t textureId) override
     {
+        RecordTriangles(vertices, {}, textureId);
+    }
+
+    void RenderIndexedTriangles(std::span<const Vertex3D> vertices, std::span<const std::uint16_t> indices,
+                                std::uint32_t textureId) override
+    {
+        if (indices.empty() || !ValidTriangleIndices(vertices.size(), indices))
+        {
+            return;
+        }
+        RecordTriangles(vertices, indices, textureId);
+    }
+
+    // Indices that make whole triangles of vertices that exist.
+    [[nodiscard]] static bool ValidTriangleIndices(std::size_t vertexCount, std::span<const std::uint16_t> indices)
+    {
+        return indices.size() % 3 == 0 && std::all_of(indices.begin(), indices.end(), [vertexCount](std::uint16_t index)
+                                                      { return index < vertexCount; });
+    }
+
+    // Appends `indices` to the frame's strip index scratch and makes `cmd` draw them.
+    static void RecordTriangleIndices(RenderCmd& cmd, std::span<const std::uint16_t> indices)
+    {
+        cmd.trianglesIndexed = true;
+        cmd.idxCount = static_cast<Uint32>(indices.size());
+        cmd.stripIdxOffset = static_cast<Uint32>(s_stripIdxScratch.size() * sizeof(Uint16));
+        s_stripIdxScratch.insert(s_stripIdxScratch.end(), indices.begin(), indices.end());
+    }
+
+    // RenderTriangles, of `indices` into `vertices` when there are indices.
+    void RecordTriangles(std::span<const Vertex3D> vertices, std::span<const std::uint16_t> indices,
+                         std::uint32_t textureId)
+    {
         if (vertices.empty() || !s_frameActive || !m_colorWriteEnabled || m_stencilTestEnabled)
         {
             return;
         }
 
-        if (vertices.size() % 3 != 0)
+        if (indices.empty() && vertices.size() % 3 != 0)
         {
             mu::log::Get("render")->warn("SDL_gpu::RenderTriangles -- vertex count {} not divisible by 3",
                                          vertices.size());
@@ -4349,7 +4386,16 @@ public:
         FrameProfiler::Count(FrameProfiler::Counter::BatchVertices, cmd.vtxCount);
         std::size_t& previousCommand =
             Render::PreviousDrawCommand(s_previousDrawCommands, Render::DrawCommandFamily::Triangles3D);
-        if (!s_disableD3D12TriangleMerging && MergeAdjacentTriangleCommand(cmd, previousCommand, sizeof(Vertex3D)))
+        if (!indices.empty())
+        {
+            // An indexed draw merges with nothing, before or after it.
+            RecordTriangleIndices(cmd, indices);
+            s_renderCmds.push_back(cmd);
+            previousCommand = kNoDrawCommand;
+            FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
+            FrameProfiler::Count(FrameProfiler::Counter::BatchDraws);
+        }
+        else if (!s_disableD3D12TriangleMerging && MergeAdjacentTriangleCommand(cmd, previousCommand, sizeof(Vertex3D)))
         {
             ++s_dbgMergedDrawsThisFrame;
             FrameProfiler::Count(FrameProfiler::Counter::MergedDraws);

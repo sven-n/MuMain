@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Data/GameData/ModelData/ModelFiles.h"
+#include "Render/Renderer/MuRenderer.h"
+
 #include <array>
 #include <cstdint>
 #include <optional>
@@ -98,6 +101,32 @@ struct EmbeddedImage
     std::vector<std::uint8_t> bytes;
 };
 
+// A mesh of a coarser LOD (extras.lod 1 or 2), on the
+// same skin as the BMD's meshes (LOD 0): drawn in place of the BMD mesh of the
+// same index while that LOD is active (BMD::ActiveLod).
+struct LodMesh
+{
+    std::vector<SkinnedVertex> vertices;
+    // Per vertex: u, v.
+    std::vector<std::array<float, 2>> texCoords;
+    // Vertex indices of each triangle.
+    std::vector<std::array<int, 3>> triangles;
+    // The material's extras.texture (the BMD texture it stands for), may be empty.
+    std::string texture;
+    // Index into SkinnedModel::images of the base colour image, -1 for none.
+    int image = -1;
+};
+
+// A mesh packed for indexed GPU-skinned draws: each distinct corner (vertex
+// and texture coordinate) once, in order of first use, and the triangles as
+// indices into them; `indices` empty when the vertices are the corners
+// themselves (more distinct corners than 16-bit indices reach).
+struct PackedMesh
+{
+    std::vector<mu::SkinnedVertex3D> vertices;
+    std::vector<std::uint16_t> indices;
+};
+
 class SkinnedModel
 {
 public:
@@ -119,6 +148,40 @@ public:
     // Per BMD mesh: index into `images`, -1 when its material has no embedded
     // image (the mesh's texture is then looked up by its name, as for a BMD).
     std::vector<int> meshImages;
+    // The coarser LODs: lods[k] holds LOD k + 1, each with at most as many
+    // meshes as the BMD has (LOD 0).
+    std::vector<std::vector<LodMesh>> lods;
+    // Per lods, per mesh: its texture (a bitmap index), set when the model's
+    // textures are opened (OpenEmbeddedTextures), after loading.
+    mutable std::vector<std::vector<unsigned int>> lodTextures;
+    // When the LODs are drawn (Data/Models/ModelFiles.json "lod").
+    Data::Models::LodSettings lodSettings;
+    // Per LOD, per BMD mesh: its GPU vertices and triangle indices as a
+    // GPU-skinned draw sends them (Render::Models::PackedWeightedMeshOf),
+    // packed on the mesh's first draw at that LOD and unchanged after that.
+    // The renderer caches a packed mesh under its vertices' address
+    // (BMD::RenderMesh); the destructor releases those.
+    mutable std::vector<std::vector<PackedMesh>> packedMeshes;
+
+    ~SkinnedModel();
+
+    // The number of LODs, 1 + lods.size().
+    [[nodiscard]] int LodCount() const
+    {
+        return 1 + static_cast<int>(lods.size());
+    }
+
+    // The mesh drawn in place of BMD mesh `mesh` while LOD `lod` is active:
+    // nullptr for LOD 0 or a LOD the model does not have (the BMD mesh is
+    // drawn), and for a mesh beyond the LOD's meshes, which sets `absent` (that
+    // LOD draws nothing for it).
+    [[nodiscard]] const LodMesh* LodMeshFor(int lod, int mesh, bool& absent) const;
+
+    // The box around LOD 0 in rest pose, in MU model space (unscaled): the
+    // bounds whose screen height picks the LOD. Set by ComputeRestBounds.
+    Vector3 restBoundsMin{};
+    Vector3 restBoundsMax{};
+    void ComputeRestBounds();
 
     // The key intervals of MU's timeline that one cycle of an action's clip
     // spans (the clip rule): n - 1 for a locked action (MU
@@ -152,6 +215,9 @@ public:
     // otherwise the rotated position is scaled by boneScale.
     void SkinPosition(int mesh, int vertex, const float (*boneMatrices)[3][4], float boneScale, float scale,
                       float out[3]) const;
+    // The same for any vertex on the skin (a coarser LOD's, see LodMesh).
+    static void SkinPosition(const SkinnedVertex& vertex, const float (*boneMatrices)[3][4], float boneScale,
+                             float scale, float out[3]);
     // The skinned normal (weighted rotation, normalised).
     void SkinNormal(int mesh, int vertex, const float (*boneMatrices)[3][4], float out[3]) const;
 };

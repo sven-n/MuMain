@@ -21,6 +21,7 @@
 #include "Render/Models/Gltf/EmbeddedTextures.h"
 #include "Render/Models/Gltf/GlbLoader.h"
 #include "Render/Models/Gltf/SkinnedModel.h"
+#include "Render/Models/ModelLod.h"
 #include "Render/Models/SkinnedVertexPacking.h"
 #include "Render/Models/ZzzBMD.h"
 
@@ -41,6 +42,7 @@
 #include <iterator>
 #include <limits>
 #include <map>
+#include <utility>
 #include <memory>
 #include <random>
 #include <string>
@@ -1407,7 +1409,7 @@ TEST_CASE("glb_model: FindBone gives the exported Elite Yeti the BMD's indices, 
 
 TEST_CASE("glb_model: a model without Box03 falls back to the root bone and logs it once")
 {
-    // A GLB without one of the BMD's bones is refused (decision 2), so the bone table that lacks
+    // A GLB without one of the BMD's bones is refused, so the bone table that lacks
     // Box03 is made in memory.
     const auto model = OpenYetiGlb();
     std::snprintf(model->Bones[22].Name, sizeof(model->Bones[22].Name), "%s", "Box03 renamed");
@@ -1880,6 +1882,449 @@ TEST_CASE("glb_model: one key per step samples the clip at the continuous key ti
     CHECK(localX(0.5f, 6.75f) == doctest::Approx(Spike).epsilon(1e-4));
     // A held pose (prior key = current key) stays the key itself.
     CHECK(localX(3.5f, 3.f) == doctest::Approx(0.f).epsilon(1e-4));
+}
+
+// ---------------------------------------------------------------- LOD by screen size
+
+namespace
+{
+using Data::Models::LodSettings;
+using Render::Models::SelectLod;
+
+// The LOD 0 primitive's triangles as vertex indices.
+std::vector<std::uint32_t> Lod0Indices(const Glb& glb)
+{
+    const auto& accessor = glb.json["accessors"][glb.json["meshes"][0]["primitives"][0]["indices"].get<int>()];
+    const auto& view = glb.json["bufferViews"][accessor["bufferView"].get<int>()];
+    const size_t offset = view.value("byteOffset", 0) + accessor.value("byteOffset", 0);
+    const size_t count = accessor["count"];
+    std::vector<std::uint32_t> indices(count);
+    for (size_t i = 0; i < count; ++i)
+    {
+        std::uint16_t index = 0;
+        std::memcpy(&index, &glb.bin[offset + i * 2], 2);
+        indices[i] = index;
+    }
+    return indices;
+}
+
+// Adds a mesh node with extras.lod = `lod` that draws every `stride`-th
+// triangle of LOD 0 (same vertices, skin and material), with 32-bit indices.
+void AddLodNode(Glb& glb, int lod, int stride, bool onSkin = true)
+{
+    const std::vector<std::uint32_t> all = Lod0Indices(glb);
+    std::vector<std::uint32_t> indices;
+    for (size_t t = 0; t + 2 < all.size(); t += 3)
+    {
+        if ((t / 3) % static_cast<size_t>(stride) == 0)
+            indices.insert(indices.end(), all.begin() + static_cast<std::ptrdiff_t>(t),
+                           all.begin() + static_cast<std::ptrdiff_t>(t + 3));
+    }
+    while (glb.bin.size() % 4 != 0)
+        glb.bin.push_back(0);
+    const size_t offset = glb.bin.size();
+    glb.bin.resize(offset + indices.size() * 4);
+    std::memcpy(&glb.bin[offset], indices.data(), indices.size() * 4);
+    glb.json["bufferViews"].push_back({{"buffer", 0}, {"byteOffset", offset}, {"byteLength", indices.size() * 4}});
+    glb.json["accessors"].push_back({{"bufferView", glb.json["bufferViews"].size() - 1},
+                                     {"componentType", 5125},
+                                     {"count", indices.size()},
+                                     {"type", "SCALAR"}});
+    nlohmann::json primitive = glb.json["meshes"][0]["primitives"][0];
+    primitive["indices"] = glb.json["accessors"].size() - 1;
+    glb.json["meshes"].push_back({{"name", "LOD" + std::to_string(lod)}, {"primitives", {primitive}}});
+    nlohmann::json node = {{"name", "LOD" + std::to_string(lod)},
+                           {"mesh", glb.json["meshes"].size() - 1},
+                           {"extras", {{"lod", lod}}}};
+    if (onSkin)
+        node["skin"] = 0;
+    glb.json["nodes"].push_back(node);
+    glb.json["scenes"][0]["nodes"].push_back(glb.json["nodes"].size() - 1);
+}
+
+// The exported Elite Yeti with LOD 1 (every 2nd triangle) and LOD 2 (every 4th).
+void WriteThreeLodYeti(const std::filesystem::path& file)
+{
+    Glb glb = Glb::Read(YetiGlb);
+    AddLodNode(glb, 1, 2);
+    AddLodNode(glb, 2, 4);
+    glb.Write(file);
+}
+
+size_t TriangleCount(const std::vector<Render::Models::Gltf::LodMesh>& meshes)
+{
+    size_t count = 0;
+    for (const auto& mesh : meshes)
+        count += mesh.triangles.size();
+    return count;
+}
+} // namespace
+
+TEST_CASE("glb_model: LOD selection switches with screen height and holds near the thresholds")
+{
+    const LodSettings settings; // 0.2 and 0.1, 10 % hysteresis
+    // From afar to near and back, starting at LOD 0.
+    CHECK(SelectLod(0.5f, 0, settings, 3) == 0);
+    CHECK(SelectLod(0.19f, 0, settings, 3) == 1);
+    CHECK(SelectLod(0.09f, 1, settings, 3) == 2);
+    CHECK(SelectLod(0.05f, 0, settings, 3) == 2); // a jump goes straight to the coarsest
+    // Hysteresis: finer only above threshold x 1.1.
+    CHECK(SelectLod(0.105f, 2, settings, 3) == 2);
+    CHECK(SelectLod(0.11f, 2, settings, 3) == 2);
+    CHECK(SelectLod(0.111f, 2, settings, 3) == 1);
+    CHECK(SelectLod(0.215f, 1, settings, 3) == 1);
+    CHECK(SelectLod(0.221f, 1, settings, 3) == 0);
+    CHECK(SelectLod(0.9f, 2, settings, 3) == 0);
+    // Coarser at once below the threshold, whatever came before.
+    CHECK(SelectLod(0.1999f, 0, settings, 3) == 1);
+    CHECK(SelectLod(0.2f, 0, settings, 3) == 0);
+    // A model with fewer levels ignores the thresholds beyond them.
+    CHECK(SelectLod(0.01f, 0, settings, 2) == 1);
+    CHECK(SelectLod(0.01f, 2, settings, 2) == 1);
+    CHECK(SelectLod(0.01f, 0, settings, 1) == 0);
+    CHECK(SelectLod(0.01f, 0, LodSettings{{}, 0.1f}, 3) == 0);
+    // A stale previous LOD counts as 0.
+    CHECK(SelectLod(0.5f, 7, settings, 3) == 0);
+    CHECK(SelectLod(0.5f, -1, settings, 3) == 0);
+    // No hysteresis: the thresholds both ways.
+    CHECK(SelectLod(0.2001f, 1, LodSettings{{0.2f, 0.1f}, 0.f}, 3) == 0);
+}
+
+TEST_CASE("glb_model: LOD follows the camera distance with hysteresis on the way back")
+{
+    // A model 200 units high seen by a camera whose window shows 1000 units at distance 1000:
+    // screen height = 200 / distance.
+    const LodSettings settings;
+    const auto heightAt = [](float distance) { return 200.f / distance; };
+    int lod = 0;
+    std::vector<std::pair<float, int>> switches;
+    for (float distance = 500.f; distance <= 3000.f; distance += 10.f)
+    {
+        const int next = SelectLod(heightAt(distance), lod, settings, 3);
+        if (next != lod)
+            switches.emplace_back(distance, next);
+        lod = next;
+    }
+    REQUIRE(switches.size() == 2);
+    CHECK(switches[0] == std::pair<float, int>{1010.f, 1}); // 200 / 1010 < 0.2
+    CHECK(switches[1] == std::pair<float, int>{2010.f, 2}); // 200 / 2010 < 0.1
+    switches.clear();
+    for (float distance = 3000.f; distance >= 500.f; distance -= 10.f)
+    {
+        const int next = SelectLod(heightAt(distance), lod, settings, 3);
+        if (next != lod)
+            switches.emplace_back(distance, next);
+        lod = next;
+    }
+    REQUIRE(switches.size() == 2);
+    CHECK(switches[0] == std::pair<float, int>{1810.f, 1}); // 200 / 1810 > 0.11
+    CHECK(switches[1] == std::pair<float, int>{900.f, 0});  // 200 / 900 > 0.22
+    // Jitter around a threshold does not flicker.
+    lod = 1;
+    for (const float distance : {1000.f, 1005.f, 995.f, 1003.f, 990.f, 1008.f})
+    {
+        lod = SelectLod(heightAt(distance), lod, settings, 3);
+        CHECK(lod == 1);
+    }
+}
+
+TEST_CASE("glb_model: screen height of projected bounds")
+{
+    const float rows[] = {420.f, 100.f, 380.f, 160.f};
+    CHECK(Render::Models::ScreenHeightFraction(rows, true, 1000.f) == doctest::Approx(0.32f));
+    CHECK(Render::Models::ScreenHeightFraction(rows, false, 1000.f) == 1.f);
+    CHECK(Render::Models::ScreenHeightFraction({}, true, 1000.f) == 1.f);
+}
+
+TEST_CASE("glb_model: the loader takes LOD 1 and 2 on the same skin")
+{
+    TemporaryFile file;
+    WriteThreeLodYeti(file.Path());
+    const auto model = OpenYetiGlb(file.Path());
+    const auto* skinned = SkinnedModelOf(*model);
+    REQUIRE(skinned->LodCount() == 3);
+    const size_t lod0Triangles = Lod0Indices(Glb::Read(YetiGlb)).size() / 3;
+    size_t bmdTriangles = 0;
+    for (int i = 0; i < model->NumMeshs; ++i)
+        bmdTriangles += static_cast<size_t>(model->Meshs[i].NumTriangles);
+    CHECK(bmdTriangles == lod0Triangles);
+    CHECK(TriangleCount(skinned->lods[0]) == (lod0Triangles + 1) / 2);
+    CHECK(TriangleCount(skinned->lods[1]) == (lod0Triangles + 3) / 4);
+    // The LOD meshes skin to the same joints as LOD 0: the skeleton is posed once per character.
+    for (const auto& meshes : skinned->lods)
+    {
+        REQUIRE(!meshes.empty());
+        CHECK(meshes.size() <= static_cast<size_t>(model->NumMeshs));
+        for (const auto& mesh : meshes)
+        {
+            CHECK(mesh.texture == "snowman02.jpg");
+            CHECK(mesh.vertices.size() == mesh.texCoords.size());
+            for (const auto& vertex : mesh.vertices)
+                for (int k = 0; k < vertex.count; ++k)
+                    CHECK(vertex.joints[k] < model->NumBones);
+        }
+    }
+    // A LOD vertex is the same skinned vertex as the LOD 0 vertex it comes from.
+    const auto& lod0 = skinned->meshVertices[0];
+    const auto& lod1 = skinned->lods[0][0].vertices;
+    const auto& first = skinned->lods[0][0].triangles[0];
+    const Triangle_t& bmdFirst = model->Meshs[0].Triangles[0];
+    for (int c = 0; c < 3; ++c)
+    {
+        const auto& a = lod1[static_cast<size_t>(first[c])];
+        const auto& b = lod0[static_cast<size_t>(bmdFirst.VertexIndex[c])];
+        CHECK(a.count == b.count);
+        CHECK(a.joints == b.joints);
+        CHECK(a.bindPosition == b.bindPosition);
+    }
+    // LodMeshFor: LOD 0 draws the BMD mesh; a LOD's mesh stands in for BMD mesh i.
+    bool absent = true;
+    CHECK(skinned->LodMeshFor(0, 0, absent) == nullptr);
+    CHECK_FALSE(absent);
+    CHECK(skinned->LodMeshFor(1, 0, absent) == &skinned->lods[0][0]);
+    CHECK(skinned->LodMeshFor(2, 0, absent) == &skinned->lods[1][0]);
+    CHECK(skinned->LodMeshFor(3, 0, absent) == nullptr);
+    CHECK_FALSE(absent);
+    CHECK(skinned->LodMeshFor(1, static_cast<int>(skinned->lods[0].size()), absent) == nullptr);
+    CHECK(absent);
+    // The rest bounds enclose the Yeti standing (z up, MU units).
+    CHECK(skinned->restBoundsMax[2] - skinned->restBoundsMin[2] > 50.f);
+    CHECK(skinned->restBoundsMin[2] < skinned->restBoundsMax[2]);
+}
+
+TEST_CASE("glb_model: a mesh is packed once per LOD, indexed, and expands to the corners a draw packed")
+{
+    TemporaryFile file;
+    WriteThreeLodYeti(file.Path());
+    const auto model = OpenYetiGlb(file.Path());
+    const auto* skinned = SkinnedModelOf(*model);
+    REQUIRE(skinned->LodCount() == 3);
+    const Mesh_t& mesh = model->Meshs[0];
+    const auto same = [](const mu::SkinnedVertex3D& a, const mu::SkinnedVertex3D& b) {
+        return std::memcmp(&a, &b, sizeof(a)) == 0;
+    };
+    std::vector<mu::SkinnedVertex3D> corners;
+
+    // LOD 0: the BMD mesh's corners on the file's skin, as the per-corner draw packed them.
+    auto& lod0 = Render::Models::PackedWeightedMeshOf(*skinned, mesh, 0, 0, nullptr);
+    REQUIRE(lod0.indices.size() == static_cast<size_t>(mesh.NumTriangles) * 3);
+    CHECK(lod0.vertices.size() <= lod0.indices.size());
+    mu::ExpandIndexedCorners<mu::SkinnedVertex3D>(lod0.vertices, lod0.indices, corners);
+    size_t corner = 0;
+    bool lod0Same = true;
+    for (int t = 0; t < mesh.NumTriangles; ++t)
+    {
+        const Triangle_t& triangle = mesh.Triangles[t];
+        for (int k = 0; k < triangle.Polygon; ++k)
+        {
+            const TexCoord_t& texCoord = mesh.TexCoords[triangle.TexCoordIndex[k]];
+            lod0Same = lod0Same && same(corners[corner++], Render::Models::PackWeightedSkinnedVertex(
+                                                               skinned->meshVertices[0][triangle.VertexIndex[k]],
+                                                               texCoord.TexCoordU + 0.0f, texCoord.TexCoordV + 0.0f));
+        }
+    }
+    CHECK(lod0Same);
+
+    // LOD 1: its own mesh.
+    bool absent = false;
+    const auto* lodMesh = skinned->LodMeshFor(1, 0, absent);
+    REQUIRE(lodMesh != nullptr);
+    auto& lod1 = Render::Models::PackedWeightedMeshOf(*skinned, mesh, 0, 1, lodMesh);
+    REQUIRE(lod1.indices.size() == lodMesh->triangles.size() * 3);
+    CHECK(lod1.vertices.size() <= lodMesh->vertices.size());
+    mu::ExpandIndexedCorners<mu::SkinnedVertex3D>(lod1.vertices, lod1.indices, corners);
+    corner = 0;
+    bool lod1Same = true;
+    for (const auto& triangle : lodMesh->triangles)
+    {
+        for (const int vertex : triangle)
+        {
+            lod1Same = lod1Same && same(corners[corner++], Render::Models::PackWeightedSkinnedVertex(
+                                                               lodMesh->vertices[static_cast<size_t>(vertex)],
+                                                               lodMesh->texCoords[static_cast<size_t>(vertex)][0] + 0.0f,
+                                                               lodMesh->texCoords[static_cast<size_t>(vertex)][1] + 0.0f));
+        }
+    }
+    CHECK(lod1Same);
+
+    // Kept on the model: a later draw gets the same vertices at the same address (the GPU cache key).
+    const mu::SkinnedVertex3D* lod1Vertices = lod1.vertices.data();
+    auto& again = Render::Models::PackedWeightedMeshOf(*skinned, mesh, 0, 1, lodMesh);
+    CHECK(&again == &lod1);
+    CHECK(again.vertices.data() == lod1Vertices);
+    CHECK(&Render::Models::PackedWeightedMeshOf(*skinned, mesh, 0, 0, nullptr) == &lod0);
+}
+
+namespace
+{
+// A stand-in for the planar shadow's projection (BMD.cpp CalcShadowPosition):
+// the same arithmetic with a made-up ground height, a pure function of the position.
+struct TestGround
+{
+    float origin[3];
+    float sx;
+    float sy;
+};
+
+void ProjectOntoTestGround(float position[3], const void* context)
+{
+    const auto* ground = static_cast<const TestGround*>(context);
+    float relative[3] = {position[0] - ground->origin[0], position[1] - ground->origin[1],
+                         position[2] - ground->origin[2]};
+    relative[0] += relative[2] * (relative[0] + ground->sx) / (relative[2] - ground->sy);
+    position[0] = relative[0] + ground->origin[0];
+    position[1] = relative[1] + ground->origin[1];
+    position[2] = std::sin(position[0] * 0.01f) * 30.f + std::cos(position[1] * 0.013f) * 20.f + 5.f;
+}
+
+bool SameBits(const float a[3], const float b[3])
+{
+    return std::memcmp(a, b, sizeof(float) * 3) == 0;
+}
+
+// The corners of mesh `mesh`'s planar shadow: its projected vertices
+// (BMD::ProjectWeightedShadowMesh) expanded by its indices, as an indexed draw
+// rasterises them. Returns the number of corners.
+int ShadowCorners(const BMD& model, int mesh, const TestGround& ground, std::vector<std::array<float, 3>>& corners)
+{
+    std::vector<std::array<float, 3>> vertices;
+    std::vector<std::uint32_t> indices;
+    model.ProjectWeightedShadowMesh(mesh, ProjectOntoTestGround, &ground, vertices, indices);
+    REQUIRE(std::all_of(indices.begin(), indices.end(), [&](std::uint32_t index) { return index < vertices.size(); }));
+    corners.resize(indices.size());
+    for (size_t c = 0; c < indices.size(); ++c)
+    {
+        corners[c] = vertices[indices[c]];
+    }
+    return static_cast<int>(indices.size());
+}
+} // namespace
+
+TEST_CASE("glb_model: a single-LOD model's indexed planar shadow expands to the per-corner projection, bit for bit")
+{
+    auto model = OpenYetiGlb();
+    PrepareLikeTheGame(*model);
+    auto bones = std::make_unique<BoneMatrices>();
+    const TestGround ground{{1200.f, -800.f, 160.f}, 2000.f, 4000.f};
+    const Mesh_t& mesh = model->Meshs[0];
+    std::vector<std::array<float, 3>> corners(static_cast<size_t>(mesh.NumTriangles) * 3);
+
+    for (const bool translate : {false, true})
+    {
+        for (unsigned short action = 0; action < YetiActions; ++action)
+        {
+            CAPTURE(translate);
+            CAPTURE(action);
+            SkinOnCpu(*model, *bones, action, 2.4f, translate);
+            const int count = ShadowCorners(*model, 0, ground, corners);
+            REQUIRE(count == mesh.NumTriangles * 3);
+            // What AddMeshShadowTriangles does for a BMD: each corner copied from VertexTransform, then projected.
+            bool same = true;
+            int corner = 0;
+            for (int t = 0; t < mesh.NumTriangles; ++t)
+            {
+                for (int k = 0; k < mesh.Triangles[t].Polygon; ++k)
+                {
+                    vec3_t expected;
+                    VectorCopy(VertexTransform[0][mesh.Triangles[t].VertexIndex[k]], expected);
+                    ProjectOntoTestGround(expected, &ground);
+                    same = same && SameBits(corners[static_cast<size_t>(corner++)].data(), expected);
+                }
+            }
+            CHECK(same);
+        }
+    }
+}
+
+TEST_CASE("glb_model: the planar shadow follows the LOD being drawn")
+{
+    TemporaryFile file;
+    WriteThreeLodYeti(file.Path());
+    auto model = OpenYetiGlb(file.Path());
+    PrepareLikeTheGame(*model);
+    const auto* skinned = SkinnedModelOf(*model);
+    REQUIRE(skinned->LodCount() == 3);
+    auto bones = std::make_unique<BoneMatrices>();
+    const TestGround ground{{1200.f, -800.f, 160.f}, 2000.f, 4000.f};
+    const Mesh_t& mesh = model->Meshs[0];
+    std::vector<std::array<float, 3>> lod0(static_cast<size_t>(mesh.NumTriangles) * 3);
+    std::vector<std::array<float, 3>> lod(lod0.size());
+
+    for (const bool translate : {false, true})
+    {
+        CAPTURE(translate);
+        SkinOnCpu(*model, *bones, YetiAttack1, 3.7f, translate);
+        model->ActiveLod = 0;
+        REQUIRE(ShadowCorners(*model, 0, ground, lod0) == mesh.NumTriangles * 3);
+        for (int level = 1; level <= 2; ++level)
+        {
+            CAPTURE(level);
+            model->ActiveLod = level;
+            const auto& triangles = skinned->lods[static_cast<size_t>(level - 1)][0].triangles;
+            const int count = ShadowCorners(*model, 0, ground, lod);
+            // The LOD's own triangles: every 2nd (LOD 1) or 4th (LOD 2) triangle of LOD 0, on the same skin,
+            // so each corner is where LOD 0's shadow puts it.
+            REQUIRE(count == static_cast<int>(triangles.size()) * 3);
+            const size_t stride = level == 1 ? 2 : 4;
+            bool same = true;
+            for (size_t corner = 0; corner < static_cast<size_t>(count); ++corner)
+            {
+                const size_t lod0Corner = (corner / 3) * stride * 3 + corner % 3;
+                same = same && SameBits(lod[corner].data(), lod0[lod0Corner].data());
+            }
+            CHECK(same);
+        }
+        // A mesh the LOD does not have casts no shadow; a BMD mesh index out of range neither.
+        model->ActiveLod = 1;
+        CHECK(ShadowCorners(*model, model->NumMeshs, ground, lod) == 0);
+        model->ActiveLod = 0;
+    }
+}
+
+TEST_CASE("glb_model: the exported Elite Yeti alone has one LOD")
+{
+    const auto model = OpenYetiGlb();
+    CHECK(SkinnedModelOf(*model)->LodCount() == 1);
+    CHECK(SkinnedModelOf(*model)->lods.empty());
+}
+
+TEST_CASE("glb_model: LOD meshes that break the conventions are refused")
+{
+    SUBCASE("LOD 2 without LOD 1")
+    {
+        Glb glb = Glb::Read(YetiGlb);
+        AddLodNode(glb, 2, 4);
+        TemporaryFile file;
+        glb.Write(file.Path());
+        RequireRefused(file.Path(), "LOD 2 but no LOD 1");
+    }
+    SUBCASE("LOD 3")
+    {
+        Glb glb = Glb::Read(YetiGlb);
+        AddLodNode(glb, 3, 4);
+        TemporaryFile file;
+        glb.Write(file.Path());
+        RequireRefused(file.Path(), "has LOD 3");
+    }
+    SUBCASE("a LOD off the skin")
+    {
+        Glb glb = Glb::Read(YetiGlb);
+        AddLodNode(glb, 1, 2, false);
+        TemporaryFile file;
+        glb.Write(file.Path());
+        RequireRefused(file.Path(), "is not on the skin");
+    }
+}
+
+TEST_CASE("glb_model: the LOD settings of the table reach the model")
+{
+    TemporaryFile file;
+    WriteThreeLodYeti(file.Path());
+    auto model = OpenYetiBmd();
+    std::string reason;
+    const LodSettings settings{{0.35f, 0.15f}, 0.2f};
+    REQUIRE(LoadGlbIntoBmd(*model, file.Path(), NoActionClips, reason, settings));
+    CHECK(SkinnedModelOf(*model)->lodSettings == settings);
 }
 
 // ---------------------------------------------------------------- loader validation

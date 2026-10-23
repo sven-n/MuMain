@@ -1,6 +1,7 @@
 #ifndef __ZZZBMD_H__
 #define __ZZZBMD_H__
 
+#include <array>
 #include <vector>
 #include <cstdint>
 #include <memory>
@@ -238,6 +239,10 @@ public:
     // Render::Models in this header would hide the global Models[] from code
     // inside namespace Render.
     std::shared_ptr<const void> GltfModel;
+    // The LOD of a model from a glTF binary that GPU-skinned draws use (0: the
+    // BMD's meshes); set per object around its draw (RenderObject) and 0
+    // otherwise. Draws on the CPU path keep LOD 0.
+    int ActiveLod = 0;
 
     float (*m_pCurrentBoneTransform)[3][4]; // Active bone matrix palette stored during Transform()
     bool m_LastTranslate;       // Set by Transform(): true=Translate mode (BodyOrigin/BodyScale shift world pos),
@@ -411,6 +416,19 @@ public:
     void RenderBodyTranslate(int RenderFlag, float Alpha = 1.f, int BlendMesh = -1, float BlendMeshLight = 1.f, float BlendMeshTexCoordU = 0.f, float BlendMeshTexCoordV = 0.f, int HiddenMesh = -1, int Texture = -1);
     void RenderBodyShadow(int blendMesh = -1, int hiddenMesh = -1, int startMeshNumber = -1,
         int endMeshNumber = -1, void* pClothes = nullptr, int clothesCount = 0, float alpha = 1.f);
+    // Moves a skinned position onto the ground for the planar shadow (with `context`).
+    using ShadowProjection = void (*)(float position[3], const void* context);
+    // The planar shadow of model file mesh `mesh` (BMD::GltfModel) at the LOD
+    // being drawn (ActiveLod; the LODs share the skin): `vertices` gets its
+    // vertices, each skinned once (LOD 0: the VertexTransform of
+    // EnsureCpuVertices; a coarser LOD: its own vertices with the same
+    // arithmetic) and projected once; `indices` its triangles' corners in
+    // triangle order, as indices into `vertices`. Both are replaced; both empty
+    // for a mesh the LOD does not draw. With a pure `project` the corners equal
+    // those of projecting every corner, as AddMeshShadowTriangles does for a BMD.
+    void ProjectWeightedShadowMesh(int mesh, ShadowProjection project, const void* context,
+                                   std::vector<std::array<float, 3>>& vertices,
+                                   std::vector<std::uint32_t>& indices) const;
 
     void SetBodyLight(vec3_t right) { VectorCopy(right, BodyLight); }
 
@@ -450,6 +468,10 @@ private:
         std::uint32_t color) const;
     void AddMeshShadowTriangles(int blendMesh, int hiddenMesh, int startMesh, int endMesh, float sx, float sy,
         std::uint32_t color) const;
+    // AddMeshShadowTriangles of a model file: the meshes' shadows
+    // (ProjectWeightedShadowMesh) drawn indexed, in mesh and triangle order.
+    void AddWeightedMeshShadowTriangles(int blendMesh, int hiddenMesh, int startMesh, int endMesh, float sx, float sy,
+                                        std::uint32_t color) const;
     // The same shadow from a cached rest-pose stream skinned on the GPU; false leaves it to the CPU.
     [[nodiscard]] bool RenderGpuMeshShadow(int blendMesh, int hiddenMesh, int startMesh, int endMesh, float sx,
         float sy, std::uint32_t color) const;

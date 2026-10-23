@@ -93,7 +93,7 @@ bool ApplyModelFile(BMD& model, int type, const ModelFiles& table)
         return false;
     }
     std::string reason;
-    return Render::Models::Gltf::LoadGlbIntoBmd(model, entry->path, entry->actions, reason);
+    return Render::Models::Gltf::LoadGlbIntoBmd(model, entry->path, entry->actions, reason, entry->lod);
 }
 
 std::wstring ModelFileTextureName(const ModelFileEntry& entry)

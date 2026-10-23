@@ -8,7 +8,9 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <limits>
 #include <numeric>
+#include <unordered_map>
 
 namespace Render::Models
 {
@@ -95,5 +97,94 @@ void BuildWeightedSkinPalette(const Gltf::SkinnedModel& model, const float (*bon
             }
         }
     }
+}
+
+Gltf::PackedMesh& PackedWeightedMeshOf(const Gltf::SkinnedModel& model, const Mesh_t& mesh, int meshIndex, int lod,
+                                       const Gltf::LodMesh* lodMesh)
+{
+    auto& meshes = model.packedMeshes;
+    if (meshes.size() <= static_cast<std::size_t>(lod))
+    {
+        meshes.resize(static_cast<std::size_t>(lod) + 1);
+    }
+    if (meshes[lod].size() <= static_cast<std::size_t>(meshIndex))
+    {
+        meshes[lod].resize(static_cast<std::size_t>(meshIndex) + 1);
+    }
+    Gltf::PackedMesh& packed = meshes[lod][meshIndex];
+    if (!packed.vertices.empty())
+    {
+        return packed;
+    }
+
+    // Corner c of the mesh: its vertex and texture coordinate (which identify it) and its packed vertex.
+    struct Corner
+    {
+        std::uint64_t key;
+        const Gltf::SkinnedVertex* vertex;
+        float u;
+        float v;
+    };
+    std::vector<Corner> corners;
+    if (lodMesh)
+    {
+        corners.reserve(lodMesh->triangles.size() * 3);
+        for (const auto& triangle : lodMesh->triangles)
+        {
+            for (const int vertexIndex : triangle)
+            {
+                const auto& texCoord = lodMesh->texCoords[vertexIndex];
+                corners.push_back({static_cast<std::uint64_t>(vertexIndex), &lodMesh->vertices[vertexIndex],
+                                   texCoord[0], texCoord[1]});
+            }
+        }
+    }
+    else
+    {
+        corners.reserve(static_cast<std::size_t>(mesh.NumTriangles) * 3);
+        for (int j = 0; j < mesh.NumTriangles; ++j)
+        {
+            const Triangle_t& triangle = mesh.Triangles[j];
+            for (int k = 0; k < triangle.Polygon; ++k)
+            {
+                const auto& texCoord = mesh.TexCoords[triangle.TexCoordIndex[k]];
+                const auto key =
+                    (static_cast<std::uint64_t>(static_cast<std::uint32_t>(triangle.VertexIndex[k])) << 32u) |
+                    static_cast<std::uint32_t>(triangle.TexCoordIndex[k]);
+                corners.push_back({key, &model.meshVertices[meshIndex][triangle.VertexIndex[k]], texCoord.TexCoordU,
+                                   texCoord.TexCoordV});
+            }
+        }
+    }
+
+    const auto pack = [](const Corner& corner)
+    { return PackWeightedSkinnedVertex(*corner.vertex, corner.u + 0.0f, corner.v + 0.0f); };
+    std::unordered_map<std::uint64_t, std::uint16_t> indexOf;
+    packed.indices.reserve(corners.size());
+    for (const Corner& corner : corners)
+    {
+        const auto [found, added] = indexOf.try_emplace(corner.key, static_cast<std::uint16_t>(packed.vertices.size()));
+        if (added)
+        {
+            if (packed.vertices.size() > std::numeric_limits<std::uint16_t>::max())
+            {
+                break;
+            }
+            packed.vertices.push_back(pack(corner));
+        }
+        packed.indices.push_back(found->second);
+    }
+    if (packed.indices.size() != corners.size())
+    {
+        // More distinct corners than 16-bit indices reach: the corners themselves.
+        packed.indices.clear();
+        packed.vertices.clear();
+        packed.vertices.reserve(corners.size());
+        for (const Corner& corner : corners)
+        {
+            packed.vertices.push_back(pack(corner));
+        }
+    }
+    return packed;
 }
 } // namespace Render::Models

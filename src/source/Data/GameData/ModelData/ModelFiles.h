@@ -19,7 +19,12 @@
 //   file     a glTF binary, relative to Data/; it must exist;
 //   actions  optional: per MU action index, the clip that plays it (default: the
 //            clip "actionNN" plays action NN) and the crossfade into it in ticks
-//            (default: the playback rule's prior-frame fade).
+//            (default: the playback rule's prior-frame fade);
+//   lod      optional: {"screenHeights": [h1, h2], "hysteresis": x}: below the
+//            projected screen height h1 (a fraction of the window's height) the
+//            file's LOD 1 is drawn, below h2 its LOD 2 (h1 > h2 > 0); a level
+//            changes back to a finer one only above h x (1 + hysteresis)
+//            (0 <= x < 1). Defaults: LodSettings.
 // A model named twice, an unknown model or a missing file is an error; an
 // unknown field is a warning. The model keeps its BMD for its action metadata
 // and as the fallback.
@@ -49,6 +54,19 @@ struct ActionClip
     bool operator==(const ActionClip&) const = default;
 };
 
+// When a model file's LOD meshes are drawn (the entry's "lod").
+struct LodSettings
+{
+    // Descending: below screenHeights[i] LOD i + 1 is drawn. At most MaxLodThresholds.
+    std::vector<float> screenHeights{0.2f, 0.1f};
+    float hysteresis = 0.1f;
+
+    bool operator==(const LodSettings&) const = default;
+};
+
+// LOD 0 to 2: two thresholds.
+constexpr int MaxLodThresholds = 2;
+
 struct ModelFileEntry
 {
     std::string model;
@@ -56,6 +74,7 @@ struct ModelFileEntry
     // As written in the table, relative to Data/.
     std::string file;
     std::map<int, ActionClip> actions;
+    LodSettings lod;
     // The file found by LoadModelFiles (overlay first); empty after ReadModelFilesJson.
     std::filesystem::path path;
 

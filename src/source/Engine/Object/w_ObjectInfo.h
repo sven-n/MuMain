@@ -135,6 +135,8 @@ public:
     unsigned char AI;
     unsigned short CurrentAction;
     unsigned short PriorAction;
+    // The LOD its model file was last drawn with (Render/Models/ModelLod.h); 0 for a BMD.
+    unsigned char ModelLod;
 
 public:
     BYTE          ExtState;

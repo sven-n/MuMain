@@ -180,6 +180,42 @@ TEST_CASE("ReadModelFilesJson reads models, files and the action table")
     CHECK(result.models[1].actions.empty());
 }
 
+TEST_CASE("ReadModelFilesJson reads the LOD settings, with defaults for three levels")
+{
+    const ReadResult result = Read(Table(R"(
+        { "model": "MODEL_ELITE_YETI", "file": "Monster/Monster14.glb",
+          "lod": { "screenHeights": [0.3, 0.12], "hysteresis": 0.25 } },
+        { "model": "MODEL_HOUND", "file": "Monster/Monster02.glb", "lod": { "screenHeights": [0.4] } },
+        { "model": "MODEL_YETI", "file": "Monster/Monster13.glb" })"));
+    INFO(Messages(result.issues));
+    CHECK(result.issues.empty());
+    REQUIRE(result.models.size() == 3);
+    CHECK(result.models[0].lod == Data::Models::LodSettings{{0.3f, 0.12f}, 0.25f});
+    CHECK(result.models[1].lod.screenHeights == std::vector<float>{0.4f});
+    CHECK(result.models[1].lod.hysteresis == Data::Models::LodSettings{}.hysteresis);
+    // Defaults: LOD 1 below a fifth of the window's height, LOD 2 below a tenth, 10 % hysteresis.
+    CHECK(result.models[2].lod == Data::Models::LodSettings{{0.2f, 0.1f}, 0.1f});
+}
+
+TEST_CASE("ReadModelFilesJson reports bad LOD settings and leaves the entry out")
+{
+    for (const char* lod : {R"("lod": 3)", R"("lod": { "screenHeights": [0.1, 0.2] })",
+                            R"("lod": { "screenHeights": [0.3, 0.2, 0.1] })", R"("lod": { "screenHeights": [0] })",
+                            R"("lod": { "screenHeights": "near" })", R"("lod": { "hysteresis": 1 })",
+                            R"("lod": { "hysteresis": -0.1 })"})
+    {
+        CAPTURE(lod);
+        const ReadResult result =
+            Read(Table(std::string(R"({ "model": "MODEL_ELITE_YETI", "file": "a.glb", )") + lod + " }"));
+        CHECK(result.models.empty());
+        CHECK(HasErrors(result.issues));
+    }
+    const ReadResult unknown =
+        Read(Table(R"({ "model": "MODEL_ELITE_YETI", "file": "a.glb", "lod": { "distance": 3 } })"));
+    REQUIRE(unknown.models.size() == 1);
+    CHECK(HasIssue(unknown.issues, ItemDataIssueSeverity::Warning, "models[0].lod.distance", "unknown field"));
+}
+
 TEST_CASE("ReadModelFilesJson reports table errors and leaves the entry out")
 {
     SUBCASE("unknown model")
@@ -248,14 +284,14 @@ TEST_CASE("ReadModelFilesJson reports table errors and leaves the entry out")
 TEST_CASE("ReadModelFilesJson warns about unknown fields and empty actions but keeps the entry")
 {
     const ReadResult result = Read(R"({ "formatVersion": 1, "comment": "x", "models": [
-        { "model": "MODEL_ELITE_YETI", "file": "a.glb", "lod": 2,
+        { "model": "MODEL_ELITE_YETI", "file": "a.glb", "scale": 2,
           "actions": { "1": { "clip": "idle", "speed": 2 }, "2": {} } } ] })");
     INFO(Messages(result.issues));
     CHECK_FALSE(HasErrors(result.issues));
     REQUIRE(result.models.size() == 1);
     CHECK(result.models[0].actions.size() == 1);
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "comment", "unknown field"));
-    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "models[0].lod", "unknown field"));
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "models[0].scale", "unknown field"));
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "models[0].actions.1.speed", "unknown field"));
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "models[0].actions.2", "neither a clip"));
 }

@@ -5,9 +5,13 @@
 #include <cstdint>
 #include <vector>
 
+typedef struct _Mesh_t Mesh_t;
+
 namespace Render::Models::Gltf
 {
 struct SkinnedVertex;
+struct LodMesh;
+struct PackedMesh;
 class SkinnedModel;
 } // namespace Render::Models::Gltf
 
@@ -36,4 +40,16 @@ namespace Render::Models
 // is 1, else the rotated position by `boneScale`.
 void BuildWeightedSkinPalette(const Gltf::SkinnedModel& model, const float (*boneMatrices)[3][4], float boneScale,
                               float restPoseScale, std::vector<float>& palette);
+
+// A model file's mesh at LOD `lod` packed for an indexed draw: `lodMesh`
+// when that LOD draws its own mesh, else BMD mesh `meshIndex` (`mesh`) on the
+// file's skin. Its corners, expanded from the indices (mu::ExpandIndexedCorners),
+// are PackWeightedSkinnedVertex of every triangle corner in triangle order,
+// texture coordinates + 0 (the draw's sum with no wave). Packed on the first
+// call and kept on the model (SkinnedModel::packedMeshes), unchanged after
+// that: a draw with a wave adds it on a copy, and the renderer may cache the
+// mesh on the GPU under its vertices' address (SkinnedModel's destructor
+// releases it).
+[[nodiscard]] Gltf::PackedMesh& PackedWeightedMeshOf(const Gltf::SkinnedModel& model, const Mesh_t& mesh, int meshIndex,
+                                                     int lod, const Gltf::LodMesh* lodMesh);
 } // namespace Render::Models

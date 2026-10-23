@@ -29,6 +29,8 @@ using Matrix4 = std::array<std::array<double, 4>, 4>; // row-major
 
 // The highest triangle count of a BMD mesh (Mesh_t::NumTriangles is a short).
 constexpr int MaxMeshTriangles = 32767;
+// LOD 0 to 2.
+constexpr int MaxLod = Data::Models::MaxLodThresholds;
 
 // How far a matrix may be from a rotation and still count as one.
 constexpr double RigidTolerance = 1e-3;
@@ -316,14 +318,17 @@ struct PrimitiveData
 class Loader
 {
 public:
-    Loader(BMD& model, const std::filesystem::path& file, const std::map<int, Data::Models::ActionClip>& actions)
+    Loader(BMD& model, const std::filesystem::path& file, const std::map<int, Data::Models::ActionClip>& actions,
+           const Data::Models::LodSettings& lod)
         : model_(model), file_(file), actions_(actions)
     {
+        skinned_->lodSettings = lod;
     }
 
     bool Load(std::string& reason)
     {
-        if (!Parse(reason) || !ReadSkeleton(reason) || !ReadClips(reason) || !ReadMeshes(reason))
+        if (!Parse(reason) || !ReadSkeleton(reason) || !ReadClips(reason) || !ReadMeshes(reason) ||
+            !ReadCoarserLods(reason))
         {
             return false;
         }
@@ -343,6 +348,8 @@ private:
     // Joint index of each entry of the skin's joint list.
     std::vector<int> jointOfSkinJoint_;
     std::vector<MeshPart> parts_;
+    // The meshes of LOD 1 and 2, while there are any.
+    std::vector<std::vector<MeshPart>> lodParts_;
     std::vector<PrimitiveData> primitives_;
 
     bool Parse(std::string& reason)
@@ -785,7 +792,8 @@ private:
 
     // Splits a primitive into BMD meshes of at most MAX_VERTICES vertices and
     // MaxMeshTriangles triangles.
-    void SplitPrimitive(const cgltf_primitive& primitive, size_t primitiveIndex, const PrimitiveData& data)
+    void SplitPrimitive(const cgltf_primitive& primitive, size_t primitiveIndex, const PrimitiveData& data,
+                        std::vector<MeshPart>& parts) const
     {
         const std::string texture = TextureNameOf(data_.get(), primitive);
         std::vector<int> local(data.positions.size() / 3, -1);
@@ -807,7 +815,7 @@ private:
             {
                 local[vertex] = -1;
             }
-            parts_.push_back(std::move(part));
+            parts.push_back(std::move(part));
         };
         startPart();
         for (size_t t = 0; t + 2 < data.indices.size(); t += 3)
@@ -842,13 +850,24 @@ private:
         finishPart();
     }
 
-    bool ReadMeshes(std::string& reason)
+    // The primitives of the mesh nodes of LOD `lod`; false when a node breaks the conventions.
+    bool LodPrimitives(int lod, std::vector<const cgltf_primitive*>& primitives, std::string& reason) const
     {
-        std::vector<const cgltf_primitive*> primitives;
         for (cgltf_size n = 0; n < data_->nodes_count; ++n)
         {
             const cgltf_node& node = data_->nodes[n];
-            if (!node.mesh || LodOf(data_.get(), &node) != 0)
+            if (!node.mesh)
+            {
+                continue;
+            }
+            const int nodeLod = LodOf(data_.get(), &node);
+            if (nodeLod < 0 || nodeLod > MaxLod)
+            {
+                reason = "mesh node \"" + NodeName(&node) + "\" has LOD " + std::to_string(nodeLod) +
+                         ", the conventions allow 0 to " + std::to_string(MaxLod);
+                return false;
+            }
+            if (nodeLod != lod)
             {
                 continue;
             }
@@ -862,19 +881,76 @@ private:
                 primitives.push_back(&node.mesh->primitives[p]);
             }
         }
+        return true;
+    }
+
+    // Reads and splits `primitives` into `parts`.
+    bool ReadLodPrimitives(const std::vector<const cgltf_primitive*>& primitives, std::vector<MeshPart>& parts,
+                           std::string& reason)
+    {
+        for (const cgltf_primitive* primitive : primitives)
+        {
+            const size_t index = primitives_.size();
+            primitives_.emplace_back();
+            if (!ReadPrimitive(*primitive, primitives_[index], reason))
+            {
+                return false;
+            }
+            SplitPrimitive(*primitive, index, primitives_[index], parts);
+        }
+        return true;
+    }
+
+    // LOD 1 and 2, when the file has them: each at most as many BMD meshes as LOD 0, LOD 2 only with LOD 1.
+    bool ReadCoarserLods(std::string& reason)
+    {
+        for (int lod = 1; lod <= MaxLod; ++lod)
+        {
+            std::vector<const cgltf_primitive*> primitives;
+            if (!LodPrimitives(lod, primitives, reason))
+            {
+                return false;
+            }
+            if (primitives.empty())
+            {
+                continue;
+            }
+            if (static_cast<int>(lodParts_.size()) != lod - 1)
+            {
+                reason = "it has a LOD " + std::to_string(lod) + " but no LOD " + std::to_string(lod - 1);
+                return false;
+            }
+            std::vector<MeshPart> parts;
+            if (!ReadLodPrimitives(primitives, parts, reason))
+            {
+                return false;
+            }
+            if (parts.empty() || parts.size() > parts_.size())
+            {
+                reason = "its LOD " + std::to_string(lod) + " needs " + std::to_string(parts.size()) +
+                         " BMD meshes, from 1 to LOD 0's " + std::to_string(parts_.size()) + " are allowed";
+                return false;
+            }
+            lodParts_.push_back(std::move(parts));
+        }
+        return true;
+    }
+
+    bool ReadMeshes(std::string& reason)
+    {
+        std::vector<const cgltf_primitive*> primitives;
+        if (!LodPrimitives(0, primitives, reason))
+        {
+            return false;
+        }
         if (primitives.empty())
         {
             reason = "it has no LOD 0 mesh";
             return false;
         }
-        primitives_.resize(primitives.size());
-        for (size_t p = 0; p < primitives.size(); ++p)
+        if (!ReadLodPrimitives(primitives, parts_, reason))
         {
-            if (!ReadPrimitive(*primitives[p], primitives_[p], reason))
-            {
-                return false;
-            }
-            SplitPrimitive(*primitives[p], p, primitives_[p]);
+            return false;
         }
         if (parts_.size() > MAX_MESH)
         {
@@ -971,6 +1047,36 @@ private:
         skinned_->images.push_back(std::move(embedded));
         indices.emplace(image, index);
         return index;
+    }
+
+    // The coarser LODs' meshes into SkinnedModel::lods.
+    void ApplyCoarserLods(std::unordered_map<const cgltf_image*, int>& imageIndices)
+    {
+        skinned_->lods.resize(lodParts_.size());
+        skinned_->lodTextures.resize(lodParts_.size());
+        for (size_t lod = 0; lod < lodParts_.size(); ++lod)
+        {
+            std::vector<LodMesh>& meshes = skinned_->lods[lod];
+            meshes.resize(lodParts_[lod].size());
+            skinned_->lodTextures[lod].assign(meshes.size(), BITMAP_UNKNOWN);
+            for (size_t i = 0; i < meshes.size(); ++i)
+            {
+                const MeshPart& part = lodParts_[lod][i];
+                const PrimitiveData& data = primitives_[part.primitiveIndex];
+                LodMesh& mesh = meshes[i];
+                mesh.vertices.reserve(part.vertices.size());
+                mesh.texCoords.reserve(part.vertices.size());
+                for (const int vertex : part.vertices)
+                {
+                    const auto source = static_cast<size_t>(vertex);
+                    mesh.vertices.push_back(SkinVertexOf(data, source));
+                    mesh.texCoords.push_back({data.texCoords[source * 2], data.texCoords[source * 2 + 1]});
+                }
+                mesh.triangles = part.triangles;
+                mesh.texture = part.texture;
+                mesh.image = EmbeddedImageIndex(EmbeddedBaseColorImageOf(*part.primitive), imageIndices);
+            }
+        }
     }
 
     // Replaces the BMD's bones and meshes; nothing can fail any more.
@@ -1113,13 +1219,16 @@ private:
         model_.IndexTexture = textureIndices;
         model_.NumMeshs = static_cast<short>(meshCount);
         model_.CreateBoundingBox();
+        ApplyCoarserLods(imageIndices);
+        skinned_->ComputeRestBounds();
         model_.GltfModel = std::move(skinned_);
     }
 };
 } // namespace
 
 bool LoadGlbIntoBmd(BMD& model, const std::filesystem::path& file,
-                    const std::map<int, Data::Models::ActionClip>& actions, std::string& reason)
+                    const std::map<int, Data::Models::ActionClip>& actions, std::string& reason,
+                    const Data::Models::LodSettings& lod)
 {
     reason.clear();
     if (!model.m_bCompletedAlloc || !model.Bones || !model.Actions || model.SharesData() ||
@@ -1129,7 +1238,7 @@ bool LoadGlbIntoBmd(BMD& model, const std::filesystem::path& file,
     }
     else
     {
-        Loader loader(model, file, actions);
+        Loader loader(model, file, actions, lod);
         if (loader.Load(reason))
         {
             return true;

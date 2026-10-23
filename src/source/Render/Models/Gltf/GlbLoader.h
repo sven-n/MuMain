@@ -15,7 +15,9 @@ namespace Render::Models::Gltf
 // and attaches the file's SkinnedModel
 // (BMD::GltfModel). The BMD's actions stay: they are the MU timeline the
 // file's clips are played on. `actions` names other clips than the default
-// "actionNN" for some actions (Data/Models/ModelFiles.json).
+// "actionNN" for some actions and `lod` when the file's LOD 1 and 2 are drawn
+// (Data/Models/ModelFiles.json). LOD 1 and 2 are optional; each may need at
+// most as many BMD meshes as LOD 0 (mesh i of a LOD stands in for BMD mesh i).
 //
 // Joints are matched to the BMD's bones by name (a dummy bone, which has no
 // name in the BMD, is "dummy<index>"); the file's other joints are appended
@@ -26,5 +28,6 @@ namespace Render::Models::Gltf
 // than MAX_BONES joints, is not one skin with inverse bind matrices, or breaks
 // another rule of the conventions the loader depends on.
 bool LoadGlbIntoBmd(BMD& model, const std::filesystem::path& file,
-                    const std::map<int, Data::Models::ActionClip>& actions, std::string& reason);
+                    const std::map<int, Data::Models::ActionClip>& actions, std::string& reason,
+                    const Data::Models::LodSettings& lod = {});
 } // namespace Render::Models::Gltf

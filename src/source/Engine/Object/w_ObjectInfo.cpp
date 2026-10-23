@@ -102,6 +102,7 @@ void OBJECT::Initialize()
     AI = 0;
     CurrentAction = 0;
     PriorAction = 0;
+    ModelLod = 0;
 
     ExtState = 0;
     Teleport = 0;

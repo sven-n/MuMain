@@ -12,6 +12,7 @@
 #include <climits>
 #include <map>
 #include <optional>
+#include <limits>
 #include <set>
 #include <span>
 #include <tuple>
@@ -1901,13 +1902,56 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
     bool gpuSkinningSubmitted = false;
     if (gpuSkinningEligible)
     {
+        // A coarser LOD of a model file draws its own mesh, or nothing beyond its meshes.
+        bool absentFromLod = false;
+        const Render::Models::Gltf::LodMesh* lodMesh =
+            gltfModel ? gltfModel->LodMeshFor(ActiveLod, meshIndex, absentFromLod) : nullptr;
+        if (absentFromLod)
+        {
+            return;
+        }
+        if (lodMesh && explicitTextureIndex == -1 && finalRenderFlags == RENDER_TEXTURE)
+        {
+            const unsigned int lodTexture = gltfModel->lodTextures[ActiveLod - 1][meshIndex];
+            if (lodTexture != BITMAP_UNKNOWN)
+            {
+                BindTexture(static_cast<int>(lodTexture));
+            }
+        }
         const auto textureCoordinates = GetSkinningTextureCoordinates(renderFlags);
+        const bool useMeshTextureCoordinates = textureCoordinates == mu::SkinningTextureCoordinates::Mesh;
         // A scrolling texture bakes this frame's offset into the UVs, so only the other meshes are cached.
-        const bool waveTextureCoordinates = textureCoordinates == mu::SkinningTextureCoordinates::Mesh && EnableWave;
+        const bool waveTextureCoordinates = useMeshTextureCoordinates && EnableWave;
+        const float waveU = waveTextureCoordinates ? blendMeshTextureCoordU : 0.0f;
+        const float waveV = waveTextureCoordinates ? blendMeshTextureCoordV : 0.0f;
         const std::uint32_t color =
             PackABGR(BodyLight[0] * colorScale, BodyLight[1] * colorScale, BodyLight[2] * colorScale, baseAlpha);
-        auto buildSkinnedVertices = [&]()
+        // A model file's mesh at this LOD is packed once (Render::Models::PackedWeightedMeshOf) and cached
+        // under its vertices' address; a BMD mesh is cached under the mesh.
+        const Render::Models::Gltf::PackedMesh* packedMesh =
+            gltfModel
+                ? &Render::Models::PackedWeightedMeshOf(*gltfModel, *m, meshIndex, lodMesh ? ActiveLod : 0, lodMesh)
+                : nullptr;
+        const void* cacheKey = packedMesh && !packedMesh->vertices.empty()
+                                   ? static_cast<const void*>(packedMesh->vertices.data())
+                                   : static_cast<const void*>(m);
+        auto buildSkinnedVertices = [&]() -> std::span<const mu::SkinnedVertex3D>
         {
+            if (packedMesh)
+            {
+                // The triangle corners (the cache draws without indices), plus this draw's wave.
+                const auto& vertices = packedMesh->vertices;
+                const auto& indices = packedMesh->indices;
+                const std::size_t cornerCount = indices.empty() ? vertices.size() : indices.size();
+                auto corners = GetRendererSkinnedVertexScratch(cornerCount);
+                for (std::size_t i = 0; i < cornerCount; ++i)
+                {
+                    corners[i] = vertices[indices.empty() ? i : indices[i]];
+                    corners[i].u += waveU;
+                    corners[i].v += waveV;
+                }
+                return corners.first(cornerCount);
+            }
             auto skinnedVertices = GetRendererSkinnedVertexScratch(maxVertexCount);
             std::size_t skinnedVertexCount = 0;
             for (int j = 0; j < m->NumTriangles; ++j)
@@ -1915,18 +1959,12 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
                 const auto* triangle = &m->Triangles[j];
                 for (int k = 0; k < triangle->Polygon; ++k)
                 {
-                    const int vertexIndex = triangle->VertexIndex[k];
-                    const auto& vertex = m->Vertices[vertexIndex];
+                    const auto& vertex = m->Vertices[triangle->VertexIndex[k]];
                     const auto& normal = m->Normals[triangle->NormalIndex[k]];
                     const auto& texCoord = m->TexCoords[triangle->TexCoordIndex[k]];
-                    const float u = texCoord.TexCoordU + (waveTextureCoordinates ? blendMeshTextureCoordU : 0.0f);
-                    const float v = texCoord.TexCoordV + (waveTextureCoordinates ? blendMeshTextureCoordV : 0.0f);
-                    // A model from a glTF binary blends up to four joints per vertex.
                     skinnedVertices[skinnedVertexCount++] =
-                        gltfModel ? Render::Models::PackWeightedSkinnedVertex(
-                                        gltfModel->meshVertices[meshIndex][vertexIndex], u, v)
-                                  : Render::Models::PackBmdSkinnedVertex(vertex.Position, vertex.Node, normal.Normal,
-                                                                         normal.Node, u, v);
+                        Render::Models::PackBmdSkinnedVertex(vertex.Position, vertex.Node, normal.Normal, normal.Node,
+                                                             texCoord.TexCoordU + waveU, texCoord.TexCoordV + waveV);
                 }
             }
             return skinnedVertices.first(skinnedVertexCount);
@@ -1958,9 +1996,9 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
         };
         auto& renderer = mu::GetRenderer();
         if (!waveTextureCoordinates &&
-            (renderer.IsSkinnedMeshCached(m) || renderer.CacheSkinnedMesh(m, buildSkinnedVertices())))
+            (renderer.IsSkinnedMeshCached(cacheKey) || renderer.CacheSkinnedMesh(cacheKey, buildSkinnedVertices())))
         {
-            gpuSkinningSubmitted = renderer.RenderCachedSkinnedMesh(m, color, 0u, skinning);
+            gpuSkinningSubmitted = renderer.RenderCachedSkinnedMesh(cacheKey, color, 0u, skinning);
         }
         else
         {
@@ -2982,9 +3020,167 @@ void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, cons
     mu::GetRenderer().RenderTriangles(muVerts, 0u);
 }
 
+namespace
+{
+// What CalcShadowPosition needs besides the position.
+struct ShadowGround
+{
+    const float* origin;
+    float sx;
+    float sy;
+};
+
+void ProjectOntoGround(float position[3], const void* context)
+{
+    const auto* ground = static_cast<const ShadowGround*>(context);
+    CalcShadowPosition(reinterpret_cast<vec3_t*>(position), ground->origin, ground->sx, ground->sy);
+}
+} // namespace
+
+void BMD::ProjectWeightedShadowMesh(const int mesh, const ShadowProjection project, const void* context,
+                                    std::vector<std::array<float, 3>>& vertices,
+                                    std::vector<std::uint32_t>& indices) const
+{
+    vertices.clear();
+    indices.clear();
+    const auto* gltf = Render::Models::Gltf::SkinnedModelOf(*this);
+    if (!gltf || mesh < 0 || mesh >= NumMeshs)
+    {
+        return;
+    }
+    bool absent = false;
+    const Render::Models::Gltf::LodMesh* lodMesh = gltf->LodMeshFor(ActiveLod, mesh, absent);
+    if (absent)
+    {
+        return;
+    }
+
+    if (lodMesh)
+    {
+        vertices.resize(lodMesh->vertices.size());
+        for (std::size_t v = 0; v < lodMesh->vertices.size(); ++v)
+        {
+            float* position = vertices[v].data();
+            Render::Models::Gltf::SkinnedModel::SkinPosition(lodMesh->vertices[v], m_pCurrentBoneTransform,
+                                                             m_LastBoneScale, m_LastSkinScale, position);
+            // As BMD::SkinVertex finishes a skinned position.
+            if (m_LastTranslate)
+            {
+                VectorScale(position, BodyScale, position);
+                VectorAdd(position, BodyOrigin, position);
+            }
+            project(position, context);
+        }
+        indices.reserve(lodMesh->triangles.size() * 3);
+        for (const auto& triangle : lodMesh->triangles)
+        {
+            for (const int vertex : triangle)
+            {
+                indices.push_back(static_cast<std::uint32_t>(vertex));
+            }
+        }
+        return;
+    }
+
+    EnsureCpuVertices(mesh);
+    const Mesh_t& m = Meshs[mesh];
+    vertices.resize(static_cast<std::size_t>(std::max<short>(m.NumVertices, 0)));
+    for (int v = 0; v < m.NumVertices; ++v)
+    {
+        float* position = vertices[static_cast<std::size_t>(v)].data();
+        VectorCopy(VertexTransform[mesh][v], position);
+        project(position, context);
+    }
+    indices.reserve(static_cast<std::size_t>(m.NumTriangles) * 3);
+    for (int t = 0; t < m.NumTriangles; ++t)
+    {
+        const Triangle_t& triangle = m.Triangles[t];
+        for (int k = 0; k < triangle.Polygon; ++k)
+        {
+            indices.push_back(static_cast<std::uint32_t>(triangle.VertexIndex[k]));
+        }
+    }
+}
+
+void BMD::AddWeightedMeshShadowTriangles(const int blendMesh, const int hiddenMesh, const int startMesh,
+                                         const int endMesh, const float sx, const float sy,
+                                         const std::uint32_t color) const
+{
+    constexpr std::size_t indexReach = std::size_t{std::numeric_limits<std::uint16_t>::max()} + 1;
+    static thread_local std::vector<std::array<float, 3>> meshVertices;
+    static thread_local std::vector<std::uint32_t> meshIndices;
+    static thread_local std::vector<mu::Vertex3D> batchVertices;
+    static thread_local std::vector<std::uint16_t> batchIndices;
+    batchVertices.clear();
+    batchIndices.clear();
+    const auto shadowVertex = [color](const std::array<float, 3>& position)
+    { return mu::Vertex3D{position[0], position[1], position[2], 0.f, 0.f, 0.f, 0.f, 0.f, color}; };
+    const auto flush = []
+    {
+        if (!batchIndices.empty())
+        {
+            mu::GetRenderer().RenderIndexedTriangles(batchVertices, batchIndices, 0u);
+        }
+        batchVertices.clear();
+        batchIndices.clear();
+    };
+
+    const ShadowGround ground{BodyOrigin, sx, sy};
+    for (int i = startMesh; i < endMesh; i++)
+    {
+        if (i == hiddenMesh)
+        {
+            continue;
+        }
+        const Mesh_t* mesh = &Meshs[i];
+        if (mesh->NumTriangles <= 0 || mesh->Texture == blendMesh)
+        {
+            continue;
+        }
+
+        ProjectWeightedShadowMesh(i, ProjectOntoGround, &ground, meshVertices, meshIndices);
+        if (meshIndices.empty())
+        {
+            continue;
+        }
+        if (meshVertices.size() > indexReach)
+        {
+            // Beyond 16-bit indices: this mesh's corners, drawn in their place in the order.
+            flush();
+            auto corners = GetRendererVertexScratch(meshIndices.size());
+            for (std::size_t c = 0; c < meshIndices.size(); ++c)
+            {
+                corners[c] = shadowVertex(meshVertices[meshIndices[c]]);
+            }
+            mu::GetRenderer().RenderTriangles(corners, 0u);
+            continue;
+        }
+        if (batchVertices.size() + meshVertices.size() > indexReach)
+        {
+            flush();
+        }
+        const auto base = static_cast<std::uint32_t>(batchVertices.size());
+        for (const auto& position : meshVertices)
+        {
+            batchVertices.push_back(shadowVertex(position));
+        }
+        for (const std::uint32_t index : meshIndices)
+        {
+            batchIndices.push_back(static_cast<std::uint16_t>(base + index));
+        }
+    }
+    flush();
+}
+
 void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, const int startMesh,
     const int endMesh, const float sx, const float sy, const std::uint32_t color) const
 {
+    if (Render::Models::Gltf::SkinnedModelOf(*this))
+    {
+        AddWeightedMeshShadowTriangles(blendMesh, hiddenMesh, startMesh, endMesh, sx, sy, color);
+        return;
+    }
+
     auto vertices = RenderArrayVertices;
     int target_vertex_index = -1;
 
