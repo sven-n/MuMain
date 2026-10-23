@@ -117,9 +117,10 @@ bool IsTouchedByTornado(const CHARACTER& c, const vec3_t position, float range, 
     if (!isTarget)
         return false;
 
+    // Squared, so no square root per character (coding rule 12).
     const float dx = position[0] - o.Position[0];
     const float dy = position[1] - o.Position[1];
-    return sqrtf(dx * dx + dy * dy) <= range;
+    return dx * dx + dy * dy <= range * range;
 }
 } // namespace
 
