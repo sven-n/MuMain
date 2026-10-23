@@ -17,6 +17,7 @@
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
+#include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
 #include "Data/GameData/ItemData/ItemNames.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
@@ -727,6 +728,39 @@ TEST_CASE("The second item chain's tooltip texts come from the descriptions as f
         }
     }
     CHECK(OldChainLines().size() == 72);
+}
+
+// The translations of those texts are the ones the old code showed: item_chain_texts_before.json records them from the
+// .resx before the texts moved (a format filled in with the item's values), by the English text.
+TEST_CASE("The second item chain's tooltip texts keep their translations [data][items]")
+{
+    const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
+    std::ifstream file(std::filesystem::path(MU_TEST_CHAIN_TEXTS_BEFORE));
+    REQUIRE(file);
+    const nlohmann::json before = nlohmann::json::parse(file).at("texts");
+    int checked = 0;
+    for (const OldChainItem& old : OldChainLines())
+    {
+        const auto found = std::find_if(result.items.begin(), result.items.end(), [&](const ItemDefinition& item)
+                                        { return item.group == old.group && item.number == old.number; });
+        REQUIRE(found != result.items.end());
+        for (size_t index = 0; index < old.lines.size(); ++index)
+        {
+            const std::string english = found->description[index].text.GetNeutral();
+            const auto recorded = before.find(english);
+            if (recorded == before.end())
+            {
+                continue;
+            }
+            for (const auto& [locale, translation] : recorded->items())
+            {
+                INFO(old.group << "/" << old.number << " line " << index << " " << locale);
+                CHECK(found->description[index].text.Get(locale) == translation.get<std::string>());
+                ++checked;
+            }
+        }
+    }
+    CHECK(checked > 600);
 }
 
 // The texts the tooltip code wrote for these items are their descriptions now, in every UI language.
