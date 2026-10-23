@@ -37,6 +37,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include "Core/Text/Utf8.h"
 
 namespace
 {
@@ -566,6 +567,194 @@ TEST_CASE("The item names of windows and ground labels come from the name lines 
     GetItemName(ITEM_BOX_OF_LUCK, 4, name);
     CHECK(std::wstring(name) == L"Olive of love");
     CHECK(GetItemNameText(-1, 0).empty());
+}
+
+// The option lines are the lines the full item has and the plain one doesn't (luck, skill, the option, the excellent
+// options); an item's restriction drawn after its options comes after the last of them.
+TEST_CASE("A transformation ring's restriction comes after its option lines [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+
+    const std::wstring restriction = L"Unable to Equip with a Different Transformation Ring";
+    for (const int number : {10, 39, 41, 68, 76, 122})
+    {
+        INFO("13/" << number);
+        const std::vector<ItemTooltipLine> plain = TooltipOfParameters(FullItemParameters(13, number));
+        ItemCreationParams full = FullItemParameters(13, number);
+        full.WithLuck = true;
+        full.WithSkill = true;
+        full.WithOption = true;
+        full.OptionLevel = 4;
+        full.HasExcellentOption = true;
+        full.ExcellentFlags = 63;
+        const std::vector<ItemTooltipLine> lines = TooltipOfParameters(full);
+
+        const auto at = std::find_if(lines.begin(), lines.end(),
+                                     [&](const ItemTooltipLine& line) { return line.text == restriction; });
+        REQUIRE(at != lines.end());
+        int lastOption = -1;
+        for (int index = 0; index < static_cast<int>(lines.size()); ++index)
+        {
+            const bool inPlain = std::any_of(plain.begin(), plain.end(), [&](const ItemTooltipLine& line)
+                                             { return line.text == lines[index].text; });
+            if (!inPlain && lines[index].text != L"
+")
+            {
+                lastOption = index;
+            }
+        }
+        CHECK(lastOption >= 0);
+        CHECK(at - lines.begin() > lastOption);
+    }
+
+    SetItemTooltipTextMeasure(nullptr);
+}
+
+// The second chain's cases with conditions, as the tooltip shows them: the Command Fruit's class line, white for a
+// Dark Lord and dark red for the other classes, and the Wizard's Ring's lines by its level.
+TEST_CASE("The Command Fruit's class line and the Wizard's Ring's lines follow the hero and the level "
+          "[data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+
+    ItemCreationParams fruit = FullItemParameters(13, 15);
+    fruit.Level = 4;
+    ::Hero->Class = CLASS_DARK_LORD;
+    CHECK(HasLine(TooltipOfParameters(fruit), L"Can be equipped by Dark Lord", TEXT_COLOR_WHITE));
+    ::Hero->Class = CLASS_LORDEMPEROR;
+    CHECK(HasLine(TooltipOfParameters(fruit), L"Can be equipped by Dark Lord", TEXT_COLOR_WHITE));
+    ::Hero->Class = CLASS_WIZARD;
+    CHECK(HasLine(TooltipOfParameters(fruit), L"Can be equipped by Dark Lord", TEXT_COLOR_DARKRED));
+
+    // The Wizard's Ring: +0 and +3 can't be repaired and show their durability; +1 and +2 are the event rings, which
+    // say instead when they can be dropped and that they can't be stored, traded or sold.
+    for (const int level : {0, 1, 2, 3})
+    {
+        INFO("+" << level);
+        ItemCreationParams ring = FullItemParameters(13, 20);
+        ring.Level = static_cast<BYTE>(level);
+        const std::vector<ItemTooltipLine> lines = TooltipOfParameters(ring);
+        const bool eventRing = level == 1 || level == 2;
+        CHECK(HasLine(lines, L"Cannot Repair", TEXT_COLOR_RED) == !eventRing);
+        CHECK(std::any_of(lines.begin(), lines.end(),
+                          [](const ItemTooltipLine& line) { return line.text.starts_with(L"Durability:"); }) ==
+              !eventRing);
+        CHECK(HasLine(lines, L"Can be dropped after level 40") == (level == 1));
+        CHECK(HasLine(lines, L"Can be dropped after level 80") == (level == 2));
+        CHECK(HasLine(lines, L"Cannot be sold.", TEXT_COLOR_RED) == eventRing);
+    }
+
+    SetItemTooltipTextMeasure(nullptr);
+}
+
+// The standard name's color, by precedence: ancient, socket, excellent with an option, +7 and above, an option, else
+// white. The name is the tooltip's first line.
+TEST_CASE("A tooltip's name color goes by the item's kind, level and options in their order [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+    const auto name = [](int level, bool luck, bool excellent, bool ancient)
+    {
+        ItemCreationParams kris = FullItemParameters(0, 0);
+        kris.Level = static_cast<BYTE>(level);
+        kris.WithLuck = luck;
+        kris.HasExcellentOption = excellent;
+        kris.ExcellentFlags = excellent ? 1 : 0;
+        kris.IsAncient = ancient;
+        kris.AncientDiscriminator = ancient ? 1 : 0;
+        const std::vector<ItemTooltipLine> lines = TooltipOfParameters(kris);
+        REQUIRE_FALSE(lines.empty());
+        return lines.front();
+    };
+
+    const ItemTooltipLine plain = name(0, false, false, false);
+    CHECK(plain.text == L"Kris");
+    CHECK(plain.color == TEXT_COLOR_WHITE);
+    CHECK(name(0, true, false, false).color == TEXT_COLOR_BLUE);
+    CHECK(name(7, false, false, false).color == TEXT_COLOR_YELLOW);
+    // +7 and above wins over an option, excellent with an option over the level, ancient over all.
+    CHECK(name(9, true, false, false).color == TEXT_COLOR_YELLOW);
+    CHECK(name(9, true, true, false).color == TEXT_COLOR_GREEN);
+    CHECK(name(9, true, true, true).color == TEXT_COLOR_GREEN_BLUE);
+
+    // In the item names' language, with translated item names on.
+    const std::string uiLocale = I18N::GetCurrentLocale();
+    const bool translateItemNames = g_ItemDataHandler.GetTranslateItemNames();
+    g_ItemDataHandler.SetTranslateItemNames(true);
+    I18N::SetLocale("pt");
+    const std::wstring portuguese = name(9, false, false, false).text;
+    I18N::SetLocale(uiLocale.c_str());
+    g_ItemDataHandler.SetTranslateItemNames(translateItemNames);
+    CHECK(portuguese == L"Cris +9");
+
+    SetItemTooltipTextMeasure(nullptr);
+}
+
+// The quests, the mixes, the server's messages and the ground labels name an item with GetItemName: for every item at
+// every level, the name is the tooltip's first line, which the recorded snapshot covers.
+TEST_CASE("Every item's name at every level is its tooltip's name [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+
+    int names = 0;
+    int different = 0;
+    for (const Data::Items::ItemDefinition& definition : g_ItemDatabase.GetAllSlots())
+    {
+        if (!definition.Exists())
+        {
+            continue;
+        }
+        for (int level = 0; level < Data::Items::ItemLevelCount; ++level)
+        {
+            ItemCreationParams params = FullItemParameters(definition.group, definition.number);
+            params.Level = static_cast<BYTE>(level);
+            const std::vector<ItemTooltipLine> lines = TooltipOfParameters(params);
+            if (lines.empty())
+            {
+                continue;
+            }
+            const int type = definition.group * MAX_ITEM_INDEX + definition.number;
+            const std::wstring name = GetItemNameText(type, level);
+            wchar_t buffer[128] = L"";
+            GetItemName(type, level, buffer);
+            ++names;
+            if (name != lines.front().text || std::wstring(buffer) != name)
+            {
+                if (++different <= 5)
+                {
+                    INFO(definition.group << "/" << definition.number << " +" << level);
+                    CHECK(Core::Text::ToUtf8(name) == Core::Text::ToUtf8(lines.front().text));
+                    CHECK(Core::Text::ToUtf8(buffer) == Core::Text::ToUtf8(name));
+                }
+            }
+        }
+    }
+    SetItemTooltipTextMeasure(nullptr);
+    CHECK(names > 911 * 10);
+    CHECK(different == 0);
 }
 
 TEST_CASE("With translated item names off, the names are English and the rest of the tooltip is translated "
