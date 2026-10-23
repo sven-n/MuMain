@@ -24,6 +24,11 @@
 
 namespace
 {
+// The original client hard-coded g_Enable3DSound = false, so every sound effect was
+// played in 2D. The 3D path places sounds at absolute world positions while the
+// listener stays at the origin, which makes monster sounds inaudible. Keep 2D.
+constexpr bool kEnable3DSound = false;
+
 std::string AudioPathToUtf8(const wchar_t* text)
 {
 #ifdef _WIN32
@@ -155,7 +160,7 @@ void MiniAudioBackend::Shutdown()
 // LoadSound — load a WAV/OGG sound file into polyphonic slots
 // Each ESound slot gets MAX_CHANNEL (4) duplicate ma_sound instances for polyphony.
 // Sound effects use MA_SOUND_FLAG_DECODE (pre-decode to PCM for low-latency).
-// 3D sounds also enable spatialization per slot.
+// 3D sounds also enable spatialization per slot (only when kEnable3DSound is set).
 // ---------------------------------------------------------------------------
 void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int channels, bool enable3D)
 {
@@ -201,6 +206,11 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
     utf8Path = MuResolvePath(utf8Path.c_str());
 #endif
 
+    // Same as the original LoadWaveFile: the 3D request is ignored while 3D sound is off.
+    const bool use3D = enable3D && kEnable3DSound;
+    const ma_uint32 soundFlags =
+        MA_SOUND_FLAG_DECODE | (use3D ? 0u : static_cast<ma_uint32>(MA_SOUND_FLAG_NO_SPATIALIZATION));
+
     // Clamp channels to the array dimension
     const int numChannels = (channels > 0 && channels <= MAX_CHANNEL) ? channels : MAX_CHANNEL;
 
@@ -208,7 +218,7 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
     for (int ch = 0; ch < numChannels; ++ch)
     {
         ma_result result = ma_sound_init_from_file(&m_engine, utf8Path.c_str(),
-                                                   MA_SOUND_FLAG_DECODE, // pre-decode for low-latency sound effects
+                                                   soundFlags, // pre-decoded, 2D unless use3D
                                                    nullptr, nullptr, &m_sounds[bufIdx][ch]);
 
         if (result != MA_SUCCESS)
@@ -225,14 +235,14 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
             return;
         }
 
-        if (enable3D)
+        if (use3D)
         {
             ma_sound_set_spatialization_enabled(&m_sounds[bufIdx][ch], MA_TRUE);
         }
     }
 
     m_soundLoaded[bufIdx] = true;
-    m_sound3DEnabled[bufIdx] = enable3D;
+    m_sound3DEnabled[bufIdx] = use3D;
     m_activeChannel[bufIdx] = 0;
     // Record how many slots were actually initialised so that
     // PlaySound/StopSound/AllStopSound never touch uninitialized ma_sound handles.
