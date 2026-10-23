@@ -34,6 +34,24 @@ target_compile_definitions(light_mood_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
+# The server groups of the login screen (Data/Local/ServerList.json). The
+# window test draws the editor's Server List window, which needs the client
+# globals of Winmain.cpp.
+mu_add_test(
+    NAME server_list_data_tests
+    SOURCES
+        test_server_list_edits.cpp
+        test_server_list_json.cpp
+        test_server_list_manager.cpp
+        test_server_list_window.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(server_list_data_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
 # The look profile of the Enhanced rendering features (Data/Render/Look.json) and the player's own
 # tuning of it ([EnhancedTuning] of config.ini).
 mu_add_test(
@@ -54,6 +72,7 @@ target_compile_definitions(look_profile_data_tests PRIVATE
 mu_add_test(
     NAME test_item_database_files
     SOURCES
+        test_helper_pickup_filters.cpp
         test_item_database_files.cpp
         test_item_model_files.cpp
         test_item_requirement_weights.cpp

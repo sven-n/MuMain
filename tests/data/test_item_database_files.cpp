@@ -6,6 +6,7 @@
 #include "ItemModelDatabaseScope.h"
 #include "ItemStatProfilesScope.h"
 #include "TestFiles.h"
+#include "TestImGuiContext.h"
 
 #include "Core/Globals/_crypt.h"
 #include "Core/Utilities/Log/MuLogger.h"
@@ -250,6 +251,39 @@ TEST_CASE("Loading item data fills ItemAttribute in the UI locale [data][items]"
     CHECK(client.Name(BladeType) == L"Klinge");
     // The German name is the English one.
     CHECK(client.Name(KrisType) == L"Kris");
+}
+
+// Turns translated item names back on when the test ends, as the other tests
+// expect them.
+class TranslatedItemNamesScope
+{
+public:
+    ~TranslatedItemNamesScope()
+    {
+        g_ItemDataHandler.SetTranslateItemNames(true);
+    }
+};
+
+TEST_CASE("Item names stay English while translated item names are off, also after a language change [data][items]")
+{
+    ClientDataScope client(ShippedClientDirectory);
+    TranslatedItemNamesScope translatedNames;
+    I18N::SetLocale("pt");
+    g_ItemDataHandler.SetTranslateItemNames(false);
+
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    CHECK(client.Name(BladeType) == L"Blade");
+
+    I18N::SetLocale("de");
+    CHECK(client.Name(BladeType) == L"Blade");
+
+    g_ItemDataHandler.SetTranslateItemNames(true);
+    CHECK(client.Name(BladeType) == L"Klinge");
+
+    g_ItemDataHandler.SetTranslateItemNames(false);
+    CHECK(client.Name(BladeType) == L"Blade");
+    CHECK(g_ItemDatabase.Find(BladeType)->name == L"Blade");
 }
 
 TEST_CASE("Item data errors stop loading [data][items]")
@@ -1469,38 +1503,6 @@ TEST_CASE("The usage of an item lists its tags, its model and the code that name
 
 namespace
 {
-// An ImGui context of its own for a test, without a window or a renderer.
-class TestImGuiContext
-{
-public:
-    TestImGuiContext() : m_previous(ImGui::GetCurrentContext()), m_context(ImGui::CreateContext())
-    {
-        ImGuiIO& io = ImGui::GetIO();
-        io.DisplaySize = ImVec2(DisplayWidth, DisplayHeight);
-        io.DeltaTime = 1.0f / 60.0f;
-        io.IniFilename = nullptr;
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-        // The font atlas is built without a renderer that takes its texture.
-        io.BackendFlags |= ImGuiBackendFlags_RendererHasTextures;
-    }
-
-    ~TestImGuiContext()
-    {
-        ImGui::DestroyContext(m_context);
-        ImGui::SetCurrentContext(m_previous);
-    }
-
-    TestImGuiContext(const TestImGuiContext&) = delete;
-    TestImGuiContext& operator=(const TestImGuiContext&) = delete;
-
-private:
-    static constexpr float DisplayWidth = 1600.0f;
-    static constexpr float DisplayHeight = 1000.0f;
-
-    ImGuiContext* m_previous;
-    ImGuiContext* m_context;
-};
-
 // The id of a field an item tool window draws, inside the ID scopes it pushes
 // (the item type, a requirement), with its label.
 ImGuiID ItemToolFieldId(const char* windowId, std::initializer_list<int> scopes, const char* label)

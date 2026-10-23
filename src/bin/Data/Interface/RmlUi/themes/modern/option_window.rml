@@ -413,6 +413,10 @@
 							</div>
 						</div>
 					</div>
+					<div class="opt-row opt-toggle-row opt-sub-row" data-event-click="option_toggle_translate_item_names">
+						<span class="opt-label">{{translate_item_names_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="translate_item_names"><div class="opt-toggle-knob"></div></div></div>
+					</div>
 					<div class="opt-row">
 						<span class="opt-label">{{font_row_label}}</span>
 						<div class="opt-control">

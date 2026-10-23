@@ -33,6 +33,7 @@
 #include "../MuEditor/UI/MapEditor/MapEditorUI.h"
 #include "../MuEditor/UI/EffectBrowser/MuEffectBrowserUI.h"
 #include "../MuEditor/UI/ItemTranslations/MuItemTranslationsUI.h"
+#include "../MuEditor/UI/ServerList/MuServerListUI.h"
 #include "../UI/Common/MuEditorUI.h"
 #include "../UI/Console/MuEditorConsoleUI.h"
 #include "I18N/All.h"
@@ -875,6 +876,10 @@ void CMuEditorCore::Render()
         if (m_windows.itemTranslations)
         {
             g_MuItemTranslationsUI.Render(&m_windows.itemTranslations);
+        }
+        if (m_windows.serverList)
+        {
+            g_MuServerListUI.Render(&m_windows.serverList);
         }
         RenderItemTools();
 
