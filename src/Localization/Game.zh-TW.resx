@@ -2105,11 +2105,11 @@
     <comment>legacy_id=575</comment>
   </data>
   <data name="Increase %d%% of Damage" xml:space="preserve">
-    <value>增加 %d%% of 傷害</value>
+    <value>增加 %d%% 傷害</value>
     <comment>legacy_id=577</comment>
   </data>
   <data name="Absorb %d%% of Damage" xml:space="preserve">
-    <value>吸收%d%% of傷害</value>
+    <value>吸收%d%%傷害</value>
     <comment>legacy_id=578</comment>
   </data>
   <data name="Increase speed" xml:space="preserve">
