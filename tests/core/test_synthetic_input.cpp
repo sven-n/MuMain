@@ -193,7 +193,13 @@ TEST_CASE("A scripted Alt is down for its frame [core][synthetic-input]")
 TEST_CASE("Synthetic navigation keys carry SDL keycodes for RmlSDL [core][synthetic-input]")
 {
     ResetInjector guard;
-    const struct { int virtualKey; SDL_Scancode scancode; SDL_Keycode keycode; } cases[] = {
+    struct KeyCase
+    {
+        int virtualKey;
+        SDL_Scancode scancode;
+        SDL_Keycode keycode;
+    };
+    const KeyCase cases[] = {
         {VK_TAB, SDL_SCANCODE_TAB, SDLK_TAB},
         {VK_DOWN, SDL_SCANCODE_DOWN, SDLK_DOWN},
         {VK_SPACE, SDL_SCANCODE_SPACE, SDLK_SPACE},
