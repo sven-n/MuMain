@@ -25,7 +25,7 @@ MonsterDataHandler& MonsterDataHandler::GetInstance()
     return instance;
 }
 
-bool MonsterDataHandler::Load(std::string_view nameLocale, std::string& errorMessage)
+bool MonsterDataHandler::Load(std::string& errorMessage)
 {
     const auto loadStart = std::chrono::steady_clock::now();
     MonsterDataLoadResult result = LoadMonstersFile(GetMonstersFile());
@@ -37,10 +37,31 @@ bool MonsterDataHandler::Load(std::string_view nameLocale, std::string& errorMes
         return false;
     }
 
-    g_MonsterDatabase.Build(result.monsters, nameLocale);
+    g_MonsterDatabase.Build(result.monsters, I18N::GetCurrentLocale());
+    RegisterLocaleObserver();
     const std::chrono::duration<double, std::milli> elapsed = std::chrono::steady_clock::now() - loadStart;
     MU_LOG_INFO(mu::log::Get("data"), "Loaded {} monsters from {} in {:.1f} ms", result.monsters.size(),
                 GetMonstersFile().generic_string(), elapsed.count());
     return true;
+}
+
+void MonsterDataHandler::RegisterLocaleObserver()
+{
+    if (m_localeObserverRegistered)
+    {
+        return;
+    }
+    I18N::RegisterLocaleObserver(&MonsterDataHandler::OnLocaleChanged, this);
+    m_localeObserverRegistered = true;
+}
+
+void MonsterDataHandler::OnLocaleChanged(void* context) noexcept
+{
+    auto* handler = static_cast<MonsterDataHandler*>(context);
+    g_MonsterDatabase.SetDisplayLocale(I18N::GetCurrentLocale());
+    if (handler->m_namesChanged != nullptr)
+    {
+        handler->m_namesChanged(AllNumbers);
+    }
 }
 } // namespace Data::Monsters

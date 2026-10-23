@@ -173,9 +173,9 @@ TEST_CASE("Monster data: the game's load fills the table, errors stop it [data][
         ClientDataScope scope(ClientData.parent_path());
         std::string error;
 
-        CHECK(g_MonsterDataHandler.Load("pt", error));
+        CHECK(g_MonsterDataHandler.Load(error));
         CHECK(error.empty());
-        CHECK(std::wstring(g_MonsterDatabase.FindDisplayName(2)) == L"Dragão Lento");
+        CHECK(std::wstring(g_MonsterDatabase.FindDisplayName(2)) == L"Budge Dragon");
     }
     SUBCASE("a broken file")
     {
@@ -184,7 +184,7 @@ TEST_CASE("Monster data: the game's load fills the table, errors stop it [data][
         ClientDataScope scope(folder.Path());
         std::string error;
 
-        CHECK_FALSE(g_MonsterDataHandler.Load("en", error));
+        CHECK_FALSE(g_MonsterDataHandler.Load(error));
         CHECK(error.find("monster data") != std::string::npos);
     }
     SUBCASE("a missing file")
@@ -193,7 +193,7 @@ TEST_CASE("Monster data: the game's load fills the table, errors stop it [data][
         ClientDataScope scope(folder.Path());
         std::string error;
 
-        CHECK_FALSE(g_MonsterDataHandler.Load("en", error));
+        CHECK_FALSE(g_MonsterDataHandler.Load(error));
         CHECK(error.find("could not be read") != std::string::npos);
     }
 }

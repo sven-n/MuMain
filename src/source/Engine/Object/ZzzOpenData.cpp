@@ -33,9 +33,7 @@
 #include "Data/DataHandler/EffectData/EffectDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemModelLoader.h"
-#include "Data/DataHandler/ItemData/ItemBmdImport.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
-#include "Data/GameData/Common/LocalizedString.h"
 #include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "Render/Effects/EffectRegistry.h"
 #include "Render/Items/ItemEffects.h"
@@ -398,25 +396,12 @@ static void OpenServerList()
     }
 }
 
-// The language of the monster names: the one of the old name files,
-// NpcName_<[LOGIN] Language>.txt; English for a language without them.
-static std::string MonsterNameLocale()
-{
-    for (const Data::Items::ItemBmdLanguage& language : Data::Items::GetItemBmdLanguages())
-    {
-        if (_wcsicmp(language.folder.c_str(), g_strSelectedML.c_str()) == 0)
-        {
-            return language.locale;
-        }
-    }
-    return std::string(Data::LocalizedString::NeutralLocale);
-}
-
-// Loads the monster list (Data/Monsters/Monsters.json); errors stop the game.
+// Loads the monster list (Data/Monsters/Monsters.json), with the names in the
+// UI language; errors stop the game.
 static void OpenMonsterData()
 {
     std::string errorMessage;
-    if (!g_MonsterDataHandler.Load(MonsterNameLocale(), errorMessage))
+    if (!g_MonsterDataHandler.Load(errorMessage))
     {
         StopOnDataError("Monster data error", errorMessage);
     }

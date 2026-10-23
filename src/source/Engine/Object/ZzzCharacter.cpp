@@ -48,8 +48,8 @@
 #include "GameLogic/Items/ItemCategories.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemType.h"
-#include "Core/Text/WideString.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "GameLogic/Monsters/MonsterNames.h"
 
 // DevEditor function declarations
 #ifdef _EDITOR
@@ -13100,11 +13100,7 @@ void Setting_Monster(CHARACTER* c, EMonsterType Type, int PositionX, int Positio
     if (c != NULL)
     {
         o = &c->Object;
-        // A number the monster list has no entry for keeps the name it has.
-        if (const wchar_t* name = g_MonsterDatabase.FindDisplayName(Type))
-        {
-            Core::Text::CopyWideString(c->ID, std::size(c->ID), name);
-        }
+        GameLogic::Monsters::Names::WriteShownName(*c, Type);
 
         c->MonsterIndex = Type;
         c->Object.ExtState = 0;

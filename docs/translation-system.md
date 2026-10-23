@@ -316,8 +316,9 @@ names stay English; items that teach a skill name it after a colon
    menu lists every locale from `GetAvailableLocales` by itself.
 4. Build. `ResxGen` picks up the new locale automatically from the filename;
    `GetAvailableLocales` will include it next run.
-5. To show item names in the new language, add them to the item data; see
-   [Item names](#item-names).
+5. To show item, monster and NPC names in the new language, add them to the
+   item data and the monster list; see [Item names](#item-names) and
+   [Monster and NPC names](#monster-and-npc-names).
 
 ## Item names
 
@@ -423,6 +424,28 @@ also check the files in `src/bin/Data/Items` without starting the game:
 ```bash
 ctest --test-dir <build folder> --build-config Debug -R items --output-on-failure
 ```
+
+## Monster and NPC names
+
+Monster and NPC names are not in the `.resx` files either. They are in the
+monster list, `src/bin/Data/Monsters/Monsters.json`: each monster's `name`
+holds the names by language code, like an item's. English (`en`) is the name
+every monster has; Portuguese (`pt`) and Spanish (`es`) come from the original
+client's name files.
+
+The game shows the name in the UI language and falls back to English. When
+the language changes, the monsters and NPCs on screen are renamed at once.
+Names made of a monster and a player keep theirs until they appear again:
+summons ("Budge Dragon of <owner>"), transformed players and the Kalima gates.
+**Translate item names** does not change monster names.
+
+The original client read the names from `Data/Local/<Language>/NpcName_<Language>.txt`
+in the `[LOGIN] Language`, apart from the UI language.
+
+The game holds up to 64 characters of a name (UTF-16 units); a longer name is
+cut, and loading warns about it. A Kalima gate shows "Magic stone of <owner>",
+which is the UI text `MagicStoneOfOwner` of the `Game` group, not a monster
+name.
 
 ## Migration history
 
