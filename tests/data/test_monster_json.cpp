@@ -174,8 +174,23 @@ TEST_CASE("Monster data: an empty English name and a long name are warnings [dat
     REQUIRE(issues.size() == 2);
     CHECK(issues[0].number == 252);
     CHECK(issues[0].message.find("English name is empty") != std::string::npos);
+    CHECK(issues[0].message.find("without a translation") == std::string::npos);
     CHECK(issues[1].number == 7);
     CHECK(issues[1].message.find("cut in the game") != std::string::npos);
+}
+
+TEST_CASE("Monster data: without an English name a translation still shows in its language [data][monsters]")
+{
+    MonsterDefinition monster = Monster(252, "");
+    monster.names.Set("pt", "Nome");
+    const std::array monsters = {monster};
+    std::vector<ItemDataIssue> issues;
+
+    Data::Monsters::ValidateMonsterNames(monsters, issues);
+
+    REQUIRE(issues.size() == 1);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Warning);
+    CHECK(issues[0].message.find("without a translation") != std::string::npos);
 }
 
 TEST_CASE("Monster data: an emoji counts as two characters of the name [data][monsters]")

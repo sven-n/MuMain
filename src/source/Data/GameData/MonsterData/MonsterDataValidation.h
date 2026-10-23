@@ -10,8 +10,9 @@ namespace Data::Monsters
 {
 // Checks the names of the monsters: the separator of the LocalizedString
 // format and a language code that is not one are errors; an empty English name
-// (the game shows no name) and a name longer than the game holds (it is cut)
-// are warnings. Appends the problems to `issues`.
+// (the game shows no name where there is no translation) and a name longer
+// than the game holds (it is cut) are warnings. Appends the problems to
+// `issues`.
 void ValidateMonsterNames(std::span<const MonsterDefinition> monsters, std::vector<Items::ItemDataIssue>& issues);
 
 // A name in a language the game has no texts for is never shown: a warning for

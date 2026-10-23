@@ -32,7 +32,11 @@ void ValidateName(const MonsterDefinition& monster, std::vector<ItemDataIssue>& 
     const LocalizedString& names = monster.names;
     if (names.GetNeutral().empty())
     {
-        AddIssue(issues, ItemDataIssueSeverity::Warning, monster, "the English name is empty: the game shows no name");
+        // A translation still shows in its own language (LocalizedString::Get).
+        AddIssue(issues, ItemDataIssueSeverity::Warning, monster,
+                 names.GetTranslations().empty()
+                     ? "the English name is empty: the game shows no name"
+                     : "the English name is empty: the game shows no name in a language without a translation");
     }
 
     const auto check = [&](const std::string& locale, const std::string& text)

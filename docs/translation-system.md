@@ -459,7 +459,8 @@ Each monster's `name` lists its names by language code, as an item's does
 ```
 
 - Change, add and remove names as for items. Without an English name the
-  game shows no name for the monster (a warning at startup).
+  game shows no name for the monster in a language without a translation (a
+  warning at startup).
 - Names must not contain `||`, and names longer than 64 characters are cut
   in the game (a warning at startup). Names for a code that is not a UI
   language are never shown; loading warns about them.

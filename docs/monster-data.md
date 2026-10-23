@@ -162,7 +162,7 @@ the file, the monster and the field. All problems are also written to
 
 - unknown fields (they are ignored)
 - an empty English name (also a name object without `en`): the game shows no
-  name
+  name in a language without a translation
 - a name longer than 64 characters: the game shows it cut
 - a name in a language the game has no UI texts for (it is never shown)
 
