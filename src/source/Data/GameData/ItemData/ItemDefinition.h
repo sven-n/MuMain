@@ -63,6 +63,36 @@ enum class WeaponKind : BYTE
     Book,
 };
 
+// The color of a tooltip line; the values are the tooltip's TEXT_COLOR_*.
+enum class ItemTextColor : BYTE
+{
+    White = TEXT_COLOR_WHITE,
+    Blue = TEXT_COLOR_BLUE,
+    Red = TEXT_COLOR_RED,
+    Yellow = TEXT_COLOR_YELLOW,
+    Green = TEXT_COLOR_GREEN,
+    DarkRed = TEXT_COLOR_DARKRED,
+    Purple = TEXT_COLOR_PURPLE,
+    DarkBlue = TEXT_COLOR_DARKBLUE,
+    DarkYellow = TEXT_COLOR_DARKYELLOW,
+    GreenBlue = TEXT_COLOR_GREEN_BLUE,
+    Gray = TEXT_COLOR_GRAY,
+    RedPurple = TEXT_COLOR_REDPURPLE,
+    Violet = TEXT_COLOR_VIOLET,
+    Orange = TEXT_COLOR_ORANGE,
+    Count
+};
+constexpr size_t ItemTextColorCount = static_cast<size_t>(ItemTextColor::Count);
+
+// One line of an item's description in its tooltip: a text with its translations (empty: a blank line) and its color.
+struct ItemDescriptionLine
+{
+    LocalizedString text;
+    ItemTextColor color = ItemTextColor::White;
+
+    bool operator==(const ItemDescriptionLine& other) const = default;
+};
+
 // What a player may do with an item. See the rule flags in ItemDefinition.
 enum class ItemAction : BYTE
 {
@@ -170,6 +200,10 @@ struct ItemDefinition
     std::wstring name;
 
     ItemTagSet tags;
+
+    // What the tooltip says about the item, line by line, after its own lines (empty for most items; the jewels'
+    // texts of the original client are still in the tooltip code).
+    std::vector<ItemDescriptionLine> description;
 
     BYTE width = 0;
     BYTE height = 0;

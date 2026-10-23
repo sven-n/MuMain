@@ -40,6 +40,9 @@
 #include "GameLogic/Items/ItemStats.h"
 #include "Render/Items/ItemDisplay.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Core/Text/TextLineWrap.h"
+#include "Core/Text/Utf8.h"
 #include "UI/Scaling/UITransform.h"
 #include "GameLogic/Items/ShopRestrictions.h"
 #include "GameLogic/Items/TradeRestrictions.h"
@@ -187,10 +190,10 @@ int getLevelGeneration(int level, unsigned int* color)
     return lvl;
 }
 
-wchar_t TextList[50][100];
-int  TextListColor[50];
-int  TextBold[50];
-SIZE Size[50];
+wchar_t TextList[MaxTextListRows][100];
+int TextListColor[MaxTextListRows];
+int TextBold[MaxTextListRows];
+SIZE Size[MaxTextListRows];
 
 int RenderTextList(int sx, int sy, int TextNum, int Tab, int iSort = RT3_SORT_CENTER)
 {
@@ -1620,6 +1623,44 @@ void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int 
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         mu_swprintf(Text, I18N::Game::BeastUppercutManaD, iMana);
         break;
+    }
+}
+
+// How wide a description line is drawn before it wraps, in the tooltip's text units: about the widest lines of the
+// original tooltips.
+static constexpr int ItemDescriptionWrapWidth = 200;
+
+void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, ItemTooltipTextMeasure measure)
+{
+    const int lastRow = std::min(TextNum + MaxItemDescriptionRows, static_cast<int>(std::size(TextList)));
+    for (const Data::Items::ItemDescriptionLine& line : definition.description)
+    {
+        // In the UI's language, also when the item names stay English ("Translate item names" off).
+        const std::wstring text = Core::Text::FromUtf8(line.text.Get(I18N::GetCurrentLocale()));
+        // A blank line is one blank piece. So is a blank line inside a text (`\n\n`, or a text that starts with
+        // `\n`): a row left empty would end the tooltip there.
+        const std::vector<std::wstring> pieces =
+            text.empty() ? std::vector<std::wstring>(1) : WrapTextToWidth(text, ItemDescriptionWrapWidth, measure);
+        for (const std::wstring& piece : pieces)
+        {
+            if (TextNum >= lastRow)
+            {
+                return;
+            }
+            if (piece.empty())
+            {
+                // As the tooltip writes its own blank rows.
+                mu_swprintf(TextList[TextNum], L"\n");
+                SkipNum++;
+            }
+            else
+            {
+                mu_swprintf(TextList[TextNum], L"%.*ls", static_cast<int>(std::size(TextList[0]) - 1), piece.c_str());
+            }
+            TextListColor[TextNum] = static_cast<int>(line.color);
+            TextBold[TextNum] = false;
+            TextNum++;
+        }
     }
 }
 
@@ -3747,6 +3788,12 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
             mu_swprintf(TextList[TextNum], I18N::Game::CanBeUsedAfterDismantling);
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }
+    }
+    if (const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(ip->Type))
+    {
+        g_pRenderText->SetFont(g_hFont);
+        WriteItemDescriptionLines(*definition, [](const wchar_t* text, size_t length) -> int
+                                  { return g_pRenderText->MeasureText(text, static_cast<int>(length)).cx; });
     }
     if (ip->Type == ITEM_JEWEL_OF_BLESS)
     {

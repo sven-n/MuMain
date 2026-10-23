@@ -74,6 +74,7 @@ mu_add_test(
     SOURCES
         test_helper_pickup_filters.cpp
         test_item_database_files.cpp
+        test_item_descriptions.cpp
         test_item_model_files.cpp
         test_item_requirement_weights.cpp
         test_item_rules.cpp

@@ -125,48 +125,68 @@ std::vector<std::wstring> WrapTextToWidth(const std::wstring& text, int maxWidth
     // has seen. npos while it has none.
     size_t breakAt = std::wstring::npos;
 
+    const auto fits = [&](size_t length) { return measureWidth(line.c_str(), length) <= maxWidth; };
+    // Called when a word ends: the line is measured once per word, not after
+    // every letter (a tooltip is built every frame, and each measured piece
+    // is a new text for the renderer's text cache).
+    const auto wrapAfterWord = [&]()
+    {
+        // Spaces never make a line too wide: it is measured up to its last
+        // word, and the spaces it ends with are dropped when it is broken.
+        if (line.empty() || line.back() == L' ' || fits(line.size()))
+        {
+            return;
+        }
+        if (breakAt != std::wstring::npos)
+        {
+            std::wstring word = line.substr(breakAt);
+            line.erase(breakAt);
+            TrimTrailingSpaces(line);
+            // Only spaces before the word (an indented line): no line of
+            // their own, or an empty line would appear above the word.
+            if (!line.empty())
+            {
+                lines.push_back(line);
+            }
+            line = std::move(word);
+            breakAt = std::wstring::npos;
+        }
+        // A single word which is wider than a whole line. It has to be broken
+        // somewhere, otherwise it would never fit: where it stops fitting.
+        while (line.size() > 1 && !fits(line.size()))
+        {
+            size_t length = 1;
+            while (length + 1 < line.size() && fits(length + 1))
+            {
+                ++length;
+            }
+            lines.push_back(line.substr(0, length));
+            line.erase(0, length);
+        }
+    };
+
     for (const wchar_t character : text)
     {
         if (character == L'\n')
         {
+            wrapAfterWord();
             TrimTrailingSpaces(line);
             lines.push_back(line);
             line.clear();
             breakAt = std::wstring::npos;
             continue;
         }
-
-        line += character;
         if (character == L' ')
         {
+            wrapAfterWord();
+            line += character;
             breakAt = line.size();
             continue;
         }
-
-        if (measureWidth(line.c_str(), line.size()) <= maxWidth)
-        {
-            continue;
-        }
-
-        if (breakAt != std::wstring::npos)
-        {
-            std::wstring rest = line.substr(breakAt);
-            line.erase(breakAt);
-            TrimTrailingSpaces(line);
-            lines.push_back(line);
-            line = std::move(rest);
-        }
-        else if (line.size() > 1)
-        {
-            // A single word which is wider than a whole line. It has to be
-            // broken somewhere, otherwise it would never fit.
-            lines.push_back(line.substr(0, line.size() - 1));
-            line = line.substr(line.size() - 1);
-        }
-
-        breakAt = std::wstring::npos;
+        line += character;
     }
 
+    wrapAfterWord();
     TrimTrailingSpaces(line);
     if (!line.empty())
     {

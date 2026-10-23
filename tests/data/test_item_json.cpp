@@ -285,6 +285,46 @@ TEST_CASE("Item tags, wing tier, potion priority and rule flags are kept through
     CHECK(read.sellable);
 }
 
+TEST_CASE("An item's description is kept through write and read [data][items]")
+{
+    ItemDefinition jewel = MakeKris();
+    jewel.group = 14;
+    jewel.number = 13;
+    jewel.slot = ItemSlot::None;
+    jewel.weaponKind = WeaponKind::None;
+    jewel.statProfile.clear();
+    // The Jewel of Bless's own tooltip line, as the client's translations have it.
+    ItemDescriptionLine first;
+    first.text.Set("en", "It is used to increase your item level up to 6");
+    first.text.Set("de", "Wird verwendet, um das Gegenstandslevel auf bis zu 6 zu erhöhen");
+    first.text.Set("es", "Se utiliza para aumentar el nivel de tu objeto hasta 6.");
+    first.text.Set("pt", "É usado para aumentar o nível do seu item até 6");
+    ItemDescriptionLine blank;
+    ItemDescriptionLine last = first;
+    last.color = ItemTextColor::Blue;
+    jewel.description = {first, blank, last};
+
+    const std::string text = WriteItemGroupJson(14, std::vector<ItemDefinition>{jewel});
+    CHECK(text.find("\"color\": \"blue\"") != std::string::npos);
+    const ReadResult result = Read(text);
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items.front().description == jewel.description);
+    CHECK_FALSE(HasErrors(result.issues));
+    CHECK(WriteItemGroupJson(14, result.items) == text);
+
+    // A line break in a text is kept; the tooltip starts a new line there.
+    ItemDefinition twoLines = jewel;
+    twoLines.description = {first};
+    twoLines.description[0].text.Set("en", "It is used to increase\nyour item level up to 6");
+    const ReadResult broken = Read(WriteItemGroupJson(14, std::vector<ItemDefinition>{twoLines}));
+    REQUIRE(broken.items.size() == 1);
+    CHECK(broken.items.front().description == twoLines.description);
+
+    const ReadResult badColor = Read(R"({"formatVersion": 1, "group": 14, "items": [
+        {"number": 13, "name": "Jewel of Bless", "description": [{"text": "x", "color": "pink"}]}]})");
+    CHECK(HasErrors(badColor.issues));
+}
+
 TEST_CASE("An item's stat profile is kept through write and read [data][items]")
 {
     ItemDefinition kris = MakeKris();
