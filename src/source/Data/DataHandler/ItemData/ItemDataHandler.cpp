@@ -27,6 +27,7 @@
 #include "Data/DataHandler/CommonDataSaver.h"
 #include "ItemDataSaver.h"
 #include "ItemDataExportS6E3.h"
+#include "Data/GameData/ItemData/ItemFileFit.h"
 #include "ItemDataExportAsCSV.h"
 #endif
 
@@ -732,6 +733,15 @@ void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items,
 
 bool CItemDataHandler::ExportAsBmd(std::string& changeLog)
 {
+    // The values are the same in every language: check them once.
+    const std::vector<ItemFileMisfit> misfits =
+        FindItemFileMisfits(BuildItemAttributes(GetItemBmdLanguages().front().locale).get(), MAX_ITEM);
+    if (!misfits.empty())
+    {
+        changeLog += DescribeItemFileMisfits(misfits);
+        return false;
+    }
+
     bool success = true;
     for (const ItemBmdLanguage& language : GetItemBmdLanguages())
     {
@@ -747,9 +757,9 @@ bool CItemDataHandler::ExportAsBmd(std::string& changeLog)
     return success;
 }
 
-bool CItemDataHandler::ExportAsS6E3(wchar_t* fileName)
+bool CItemDataHandler::ExportAsS6E3(wchar_t* fileName, std::string& problems)
 {
-    return ItemDataExportS6E3::SaveLegacy(fileName, BuildItemAttributes(I18N::GetCurrentLocale()).get());
+    return ItemDataExportS6E3::SaveLegacy(fileName, BuildItemAttributes(I18N::GetCurrentLocale()).get(), &problems);
 }
 
 bool CItemDataHandler::ExportToCsv(wchar_t* fileName)

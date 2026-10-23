@@ -10,10 +10,11 @@ namespace Data::Items
 {
 class ItemStatProfiles;
 
-// Placeholders in the texts of an item's description: "{name}" is a value the tooltip fills in for the item. A name is
-// letters and digits, a built-in item value, or "table:" and the name of a level bonus table of the item stat file, at
-// the item's + level. The tables are written apart, so a table never takes the name of a built-in value, also of one
-// a later version adds. Item texts have no braces of their own, so every brace belongs to a placeholder.
+// Placeholders in the texts of an item's description: "{name}" is a value the tooltip fills in for the item, at the
+// item's + level. A placeholder is a built-in item value ("{level}"), or "table:" and the name of a level bonus table
+// of the item stat file ("{table:damageIncreaseWeapons}"); names have only letters and digits. The tables are written
+// apart, so a table never takes the name of a built-in value, also of one a later version adds. Item texts have no
+// braces of their own, so every brace belongs to a placeholder.
 
 // The built-in values: "level" is the item's + level.
 inline constexpr std::string_view LevelPlaceholder = "level";
@@ -34,8 +35,8 @@ struct PlaceholderScan
 };
 PlaceholderScan ScanPlaceholders(std::string_view text);
 
-// The value of a placeholder for an item at `level`, or nothing for a name that is neither built in nor a table of
-// `profiles`.
+// The value of a placeholder for an item at `level`, or nothing for a name that is neither built in nor "table:" and a
+// table of `profiles`.
 std::optional<int> GetPlaceholderValue(std::string_view name, int level, const ItemStatProfiles& profiles);
 
 // The text with each placeholder replaced by its value. A placeholder without a value, or a text ScanPlaceholders
