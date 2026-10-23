@@ -53,6 +53,17 @@ target_compile_definitions(server_list_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
+# The monster list (Data/Monsters/Monsters.json) and the name files of the
+# original client (NpcName_<lang>.txt).
+mu_add_test(
+    NAME monster_data_tests
+    SOURCES
+        test_monster_json.cpp
+        test_npc_name_text.cpp
+    LINK_LIBS
+        MuClient
+)
+
 # The look profile of the Enhanced rendering features (Data/Render/Look.json) and the player's own
 # tuning of it ([EnhancedTuning] of config.ini).
 mu_add_test(
