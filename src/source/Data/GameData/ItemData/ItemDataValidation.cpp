@@ -470,7 +470,8 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
                     }
                     addError(field + ".values." + placeholder,
                              "\"" + value + "\" is neither a built-in value, a table of " + statFile + " (\"" +
-                                 MakeTablePlaceholder("name") + "\") nor a game data value (\"skillMana:<skill>\", ...)" +
+                                 MakeTablePlaceholder("name") +
+                                 "\") nor a game data value (\"skillMana:<skill>\", ...)" +
                                  (suggestion.empty() ? "" : "; did you mean \"" + suggestion + "\"?"));
                 }
             }

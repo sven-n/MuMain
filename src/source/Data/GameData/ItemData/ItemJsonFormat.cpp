@@ -634,7 +634,8 @@ void ItemReader::ReadDescriptionValues(const OrderedJson& json, const std::strin
     }
     for (const auto& [placeholder, value] : json.items())
     {
-        // The value is a built-in value's name, "table:" and a table's name, or a game data value ("skillMana:<skill>").
+        // The value is a built-in value's name, "table:" and a table's name, or a game data value
+        // ("skillMana:<skill>").
         const std::string name = value.is_string() ? value.get<std::string>() : std::string();
         const std::string_view table = GetPlaceholderTable(name);
         if (!Json::IsName(placeholder) || !value.is_string() ||
