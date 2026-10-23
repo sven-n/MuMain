@@ -2,6 +2,7 @@
 
 #include "Render/Renderer/MuRenderer.h"
 
+#include <array>
 #include <cstdint>
 #include <vector>
 
@@ -26,11 +27,17 @@ namespace Render::Models
 [[nodiscard]] mu::SkinnedVertex3D PackBmdSkinnedVertex(const float position[3], int positionBone, const float normal[3],
                                                        int normalBone, float u, float v);
 
-// The GPU vertex of a glTF vertex: its bind position and normal, its joints and
-// their weights as unorm bytes that sum to 255, the largest weight first (the
-// shader takes a vertex whose first weight is above 0 as weighted). The bone
-// indices of the BMD fields name the dominant joint.
+// The GPU vertex of a glTF vertex: its bind position, normal and tangent
+// (PackTangent), its joints and their weights as unorm bytes that sum to 255,
+// the largest weight first (the shader takes a vertex whose first weight is
+// above 0 as weighted). The bone indices of the BMD fields name the dominant
+// joint.
 [[nodiscard]] mu::SkinnedVertex3D PackWeightedSkinnedVertex(const Gltf::SkinnedVertex& vertex, float u, float v);
+
+// The GPU tangent of a glTF vertex (SkinnedVertex::bindTangent): xyz as snorm16
+// (clamped to -1..1) and w as +-32767 for the handedness; a tangent with w 0
+// (no normal map) packs as all 0, which the shader reads as "no tangent".
+[[nodiscard]] std::array<std::int16_t, 4> PackTangent(const std::array<float, 4>& tangent);
 
 // The palette of a weighted draw: per joint of `model`, 12 floats (a 3x4
 // row-major matrix) that take a bind-space position to where

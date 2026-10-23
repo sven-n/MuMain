@@ -35,6 +35,7 @@ bool SdlGpuReplayState::SelectPipeline(SDL_GPUGraphicsPipeline* pipeline)
     m_pipeline = pipeline;
     m_pipelineValid = true;
     m_fragmentSamplerValid = false;
+    m_normalMapSamplerValid = false;
     m_vertexUniformsValid.fill(false);
     m_fragmentUniformsValid = false;
     m_vertexStorageBufferValid = false;
@@ -49,6 +50,17 @@ bool SdlGpuReplayState::SelectFragmentSampler(SDL_GPUTexture* texture, SDL_GPUSa
     m_texture = texture;
     m_sampler = sampler;
     m_fragmentSamplerValid = true;
+    return true;
+}
+
+bool SdlGpuReplayState::SelectNormalMapSampler(SDL_GPUTexture* texture, SDL_GPUSampler* sampler)
+{
+    if (m_normalMapSamplerValid && m_normalMapTexture == texture && m_normalMapSampler == sampler)
+        return false;
+
+    m_normalMapTexture = texture;
+    m_normalMapSampler = sampler;
+    m_normalMapSamplerValid = true;
     return true;
 }
 
@@ -153,6 +165,7 @@ void SdlGpuReplayState::Invalidate()
 {
     m_pipelineValid = false;
     m_fragmentSamplerValid = false;
+    m_normalMapSamplerValid = false;
     m_vertexUniformsValid.fill(false);
     m_fragmentUniformsValid = false;
     m_vertexStorageBufferValid = false;

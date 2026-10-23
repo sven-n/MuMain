@@ -20,6 +20,8 @@ static_assert(MAX_BONES <= 256, "skinned_textured.vert reads joints as bytes");
 
 constexpr int MaxWeightsPerVertex = 4;
 constexpr float WeightUnits = 255.f;
+// SDL_GPU_VERTEXELEMENTFORMAT_SHORT4_NORM: -32767 to 32767 is -1 to 1.
+constexpr std::int16_t SnormUnits = 32767;
 
 // The weight indices of a vertex, the largest weight first (equal weights keep
 // their order). Insertion sort: at most four entries, per vertex and draw.
@@ -72,6 +74,23 @@ mu::SkinnedVertex3D PackWeightedSkinnedVertex(const Gltf::SkinnedVertex& vertex,
     }
     packed.joints[0] = static_cast<std::uint8_t>(dominantJoint);
     packed.weights[0] = static_cast<std::uint8_t>(std::max(rest, 1));
+    const std::array<std::int16_t, 4> tangent = PackTangent(vertex.bindTangent);
+    std::copy(tangent.begin(), tangent.end(), packed.tangent);
+    return packed;
+}
+
+std::array<std::int16_t, 4> PackTangent(const std::array<float, 4>& tangent)
+{
+    if (tangent[3] == 0.f)
+    {
+        return {};
+    }
+    std::array<std::int16_t, 4> packed{};
+    for (int c = 0; c < 3; ++c)
+    {
+        packed[c] = static_cast<std::int16_t>(std::lround(std::clamp(tangent[c], -1.f, 1.f) * SnormUnits));
+    }
+    packed[3] = static_cast<std::int16_t>(tangent[3] < 0.f ? -SnormUnits : SnormUnits);
     return packed;
 }
 

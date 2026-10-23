@@ -117,7 +117,7 @@ struct SkinningVertexUniforms
     float fogParameters[4]{};
     std::uint32_t textureCoordinates[4]{};
     float chromeParameters[4]{};
-    float textureCoordinateParameters[4]{};
+    float textureCoordinateParameters[4]{}; // offset u, v; chrome time term; normal map scale (0: none)
     float eyePositionAndSpecular[4]{};
     // Enhanced lighting: rows of the affine transform from this draw's vertex space to world space.
     float vertexToWorldRows[3][4]{};
@@ -127,6 +127,11 @@ static_assert(offsetof(SkinningVertexUniforms, eyePositionAndSpecular) == 192,
               "eyePositionAndSpecular must follow textureCoordinateParameters (HLSL cbuffer Skinning)");
 static_assert(offsetof(SkinningVertexUniforms, vertexToWorldRows) == 208,
               "vertexToWorldRows must follow eyePositionAndSpecular (HLSL cbuffer Skinning)");
+
+// skinned_lit.frag's normal map (t1, s1 in space2): bound for every draw with that shader.
+constexpr Uint32 k_FragmentSamplerSlotNormalMap = 1u;
+// The flat tangent-space normal (0, 0, 1) as RGBA8: the normal map of draws without one.
+constexpr Uint32 k_FlatNormalPixel = 0xFFFF8080u; // R = G = 128, B = A = 255 (little-endian RGBA)
 
 // Skinning cbuffer palette.w: how skinned_textured.vert.hlsl lights the vertex colour.
 constexpr std::uint32_t k_SkinningLightingNone = 0u;
@@ -769,6 +774,9 @@ struct RenderCmd
     SDL_GPUGraphicsPipeline* pipeline;
     SDL_GPUTexture* texture;
     SDL_GPUSampler* sampler;
+    // skinned_lit.frag's second texture (the normal map, or the flat default); null for other draws.
+    SDL_GPUTexture* normalTexture = nullptr;
+    SDL_GPUSampler* normalSampler = nullptr;
     SDL_GPUBuffer* vtxBuffer = nullptr; // null: the frame's s_vtxGpuBuf
     Uint32 vtxOffset;      // in bytes, a multiple of vtxStride
     Uint32 vtxStride;
@@ -1015,6 +1023,12 @@ static void PushSceneLightingUniforms()
 
 static void BindReplayFragmentSampler(const RenderCmd& command, Render::SdlGpuReplayState& state)
 {
+    if (command.normalTexture && state.SelectNormalMapSampler(command.normalTexture, command.normalSampler))
+    {
+        const SDL_GPUTextureSamplerBinding normalBinding{command.normalTexture, command.normalSampler};
+        SDL_BindGPUFragmentSamplers(s_renderPass, k_FragmentSamplerSlotNormalMap, &normalBinding, 1);
+        ++s_dbgSamplerBindsThisFrame;
+    }
     if (!state.SelectFragmentSampler(command.texture, command.sampler))
         return;
 
@@ -1142,6 +1156,8 @@ static std::vector<TextureUpdateCmd> s_textureUpdates;
 
 // Default white 1×1 texture used for textureId==0 and unknown IDs.
 static SDL_GPUTexture* s_whiteTexture = nullptr;
+// 1×1 flat normal map (k_FlatNormalPixel) bound to skinned_lit.frag for draws without a map.
+static SDL_GPUTexture* s_flatNormalTexture = nullptr;
 
 // Shader handles for basic_textured (2D path) and basic_colored — released after pipeline creation.
 static SDL_GPUShader* s_vertShader2D = nullptr;      // basic_textured.vert
@@ -1914,6 +1930,11 @@ public:
                 SDL_ReleaseGPUTexture(s_device, s_whiteTexture);
                 s_whiteTexture = nullptr;
             }
+            if (s_flatNormalTexture)
+            {
+                SDL_ReleaseGPUTexture(s_device, s_flatNormalTexture);
+                s_flatNormalTexture = nullptr;
+            }
             SDL_ReleaseGPUSampler(s_device, s_defaultSampler);
             s_defaultSampler = nullptr;
             DestroyQuadIndexBuffer();
@@ -2014,6 +2035,11 @@ public:
         {
             SDL_ReleaseGPUTexture(s_device, s_whiteTexture);
             s_whiteTexture = nullptr;
+        }
+        if (s_flatNormalTexture)
+        {
+            SDL_ReleaseGPUTexture(s_device, s_flatNormalTexture);
+            s_flatNormalTexture = nullptr;
         }
 
         if (s_defaultSampler)
@@ -4528,6 +4554,28 @@ public:
         }
     }
 
+    // skinned_lit.frag's normal map for a draw: the draw's map with its scale, or the flat
+    // default with scale 0 (the shader then lights the unperturbed normal).
+    static void BindNormalMap(RenderCmd& cmd, SkinningVertexUniforms& skinningVu, const SkinningParameters& parameters)
+    {
+        cmd.normalTexture = s_flatNormalTexture;
+        cmd.normalSampler = s_defaultSampler;
+        skinningVu.textureCoordinateParameters[3] = 0.0f;
+        if (parameters.normalMapScale == 0.0f || parameters.normalTextureId == 0u)
+        {
+            return;
+        }
+        auto* normalTexture = static_cast<SDL_GPUTexture*>(LookupTextureForDraw(parameters.normalTextureId));
+        if (!normalTexture)
+        {
+            return;
+        }
+        void* normalSampler = LookupWorldSampler(parameters.normalTextureId);
+        cmd.normalTexture = normalTexture;
+        cmd.normalSampler = normalSampler ? static_cast<SDL_GPUSampler*>(normalSampler) : s_defaultSampler;
+        skinningVu.textureCoordinateParameters[3] = parameters.normalMapScale;
+    }
+
     [[nodiscard]] bool RenderSkinnedTriangles(std::span<const SkinnedVertex3D> vertices, std::uint32_t color,
                                               std::uint32_t textureId, const SkinningParameters& parameters) override
     {
@@ -5120,6 +5168,7 @@ private:
         skinningVu.textureCoordinateParameters[2] = parameters.chromeTimeTerm;
         if (enhancedLit)
         {
+            BindNormalMap(cmd, skinningVu, parameters);
             const glm::vec4 eyePosition = glm::inverse(m_modelViewMatrix) * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
             skinningVu.eyePositionAndSpecular[0] = eyePosition.x;
             skinningVu.eyePositionAndSpecular[1] = eyePosition.y;
@@ -5524,7 +5573,8 @@ private:
         s_fragShaderTexFog =
             createShader("basic_textured_fog", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 2, /*fatal=*/false);
         // skinned_lit.frag also reads the frame's point lights, DynamicLights (b2).
-        s_fragShaderLit = createShader("skinned_lit", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 3, /*fatal=*/false);
+        // skinned_lit.frag samples the texture and the normal map (k_FragmentSamplerSlotNormalMap).
+        s_fragShaderLit = createShader("skinned_lit", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 2, 0, 3, /*fatal=*/false);
 
         // Post-processing — non-fatal: without them post-processing is unavailable.
         // Bloom passes: source texture (t0) and BloomUniforms (b0); composite: scene, bloom and
@@ -5771,7 +5821,7 @@ private:
         colorTargetDesc.format = swapchainFmt;
         colorTargetDesc.blend_state = blendState;
 
-        SDL_GPUVertexAttribute vertexAttribs[8];
+        SDL_GPUVertexAttribute vertexAttribs[9];
         Uint32 numAttribs = 0;
         SDL_GPUVertexBufferDescription vtxBufDescs[2]{};
         SDL_GPUVertexBufferDescription& vtxBufDesc = vtxBufDescs[0];
@@ -5888,8 +5938,14 @@ private:
             vertexAttribs[7].format = SDL_GPU_VERTEXELEMENTFORMAT_UBYTE4_NORM;
             vertexAttribs[7].offset = static_cast<Uint32>(offsetof(SkinnedVertex3D, weights));
 
+            vertexAttribs[8] = {};
+            vertexAttribs[8].location = 8;
+            vertexAttribs[8].buffer_slot = 0;
+            vertexAttribs[8].format = SDL_GPU_VERTEXELEMENTFORMAT_SHORT4_NORM;
+            vertexAttribs[8].offset = static_cast<Uint32>(offsetof(SkinnedVertex3D, tangent));
+
             vtxBufDesc.pitch = sizeof(SkinnedVertex3D);
-            numAttribs = 8;
+            numAttribs = 9;
         }
 
         SDL_GPUVertexInputState vtxInputState{};
@@ -7108,9 +7164,10 @@ private:
         return true;
     }
 
-    [[nodiscard]] static bool CreateWhiteTexture()
+    // A 1×1 RGBA8 texture of one pixel (`pixel`, little-endian RGBA), uploaded at once; nullptr
+    // (logged) when it cannot be created.
+    [[nodiscard]] static SDL_GPUTexture* CreateSolidTexture(Uint32 pixel, const char* what)
     {
-        // Upload a 1×1 RGBA white pixel as the default fallback texture.
         SDL_GPUTextureCreateInfo texInfo{};
         texInfo.type = SDL_GPU_TEXTURETYPE_2D;
         texInfo.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
@@ -7121,15 +7178,13 @@ private:
         texInfo.num_levels = 1;
         texInfo.sample_count = SDL_GPU_SAMPLECOUNT_1;
 
-        s_whiteTexture = SDL_CreateGPUTexture(s_device, &texInfo);
-        if (!s_whiteTexture)
+        SDL_GPUTexture* texture = SDL_CreateGPUTexture(s_device, &texInfo);
+        if (!texture)
         {
-            mu::log::Get("render")->error("SDL_gpu -- white texture creation failed: {}", SDL_GetError());
-            return false;
+            mu::log::Get("render")->error("SDL_gpu -- {} texture creation failed: {}", what, SDL_GetError());
+            return nullptr;
         }
 
-        // Upload white pixel data.
-        constexpr Uint32 kWhitePixel = 0xFFFFFFFFu; // RGBA = 255,255,255,255
         constexpr Uint32 kPixelByteSize = 4u;
 
         SDL_GPUTransferBufferCreateInfo tbInfo{};
@@ -7138,40 +7193,36 @@ private:
         SDL_GPUTransferBuffer* pixelTransfer = SDL_CreateGPUTransferBuffer(s_device, &tbInfo);
         if (!pixelTransfer)
         {
-            mu::log::Get("render")->error("SDL_gpu -- white texture transfer buffer failed: {}", SDL_GetError());
-            SDL_ReleaseGPUTexture(s_device, s_whiteTexture);
-            s_whiteTexture = nullptr;
-            return false;
+            mu::log::Get("render")->error("SDL_gpu -- {} texture transfer buffer failed: {}", what, SDL_GetError());
+            SDL_ReleaseGPUTexture(s_device, texture);
+            return nullptr;
         }
 
         void* pMapped = SDL_MapGPUTransferBuffer(s_device, pixelTransfer, false);
         if (!pMapped)
         {
             SDL_ReleaseGPUTransferBuffer(s_device, pixelTransfer);
-            SDL_ReleaseGPUTexture(s_device, s_whiteTexture);
-            s_whiteTexture = nullptr;
-            return false;
+            SDL_ReleaseGPUTexture(s_device, texture);
+            return nullptr;
         }
-        std::memcpy(pMapped, &kWhitePixel, kPixelByteSize);
+        std::memcpy(pMapped, &pixel, kPixelByteSize);
         SDL_UnmapGPUTransferBuffer(s_device, pixelTransfer);
 
         SDL_GPUCommandBuffer* uploadCmd = SDL_AcquireGPUCommandBuffer(s_device);
         if (!uploadCmd)
         {
             SDL_ReleaseGPUTransferBuffer(s_device, pixelTransfer);
-            SDL_ReleaseGPUTexture(s_device, s_whiteTexture);
-            s_whiteTexture = nullptr;
-            return false;
+            SDL_ReleaseGPUTexture(s_device, texture);
+            return nullptr;
         }
 
         SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmd);
         if (!copyPass)
         {
             SDL_ReleaseGPUTransferBuffer(s_device, pixelTransfer);
-            SDL_ReleaseGPUTexture(s_device, s_whiteTexture);
-            s_whiteTexture = nullptr;
+            SDL_ReleaseGPUTexture(s_device, texture);
             SDL_CancelGPUCommandBuffer(uploadCmd);
-            return false;
+            return nullptr;
         }
 
         SDL_GPUTextureTransferInfo texTransferInfo{};
@@ -7181,7 +7232,7 @@ private:
         texTransferInfo.rows_per_layer = 1;
 
         SDL_GPUTextureRegion texRegion{};
-        texRegion.texture = s_whiteTexture;
+        texRegion.texture = texture;
         texRegion.mip_level = 0;
         texRegion.layer = 0;
         texRegion.x = 0;
@@ -7196,6 +7247,25 @@ private:
         SDL_SubmitGPUCommandBuffer(uploadCmd);
 
         SDL_ReleaseGPUTransferBuffer(s_device, pixelTransfer);
+        return texture;
+    }
+
+    // The default textures: white (textureId 0) and the flat normal map of skinned_lit.frag.
+    [[nodiscard]] static bool CreateWhiteTexture()
+    {
+        constexpr Uint32 kWhitePixel = 0xFFFFFFFFu; // RGBA = 255,255,255,255
+        s_whiteTexture = CreateSolidTexture(kWhitePixel, "white");
+        if (!s_whiteTexture)
+        {
+            return false;
+        }
+        s_flatNormalTexture = CreateSolidTexture(k_FlatNormalPixel, "flat normal map");
+        if (!s_flatNormalTexture)
+        {
+            SDL_ReleaseGPUTexture(s_device, s_whiteTexture);
+            s_whiteTexture = nullptr;
+            return false;
+        }
 
         // Register the white texture as textureId=0 (sentinel for "no texture").
         RegisterTexture(0u, s_whiteTexture);

@@ -112,6 +112,9 @@ struct Vertex3D
 // A BMD vertex follows one bone (positionBoneIndex, normalBoneIndex; its weights
 // stay 0); a vertex with weights (glTF models) is in bind space and blends up to
 // four palette joints by weight (unorm, summing to 255, the largest first).
+// tangent: the bind-space tangent of a vertex under a normal map, snorm16 xyz and
+// w = +-32767 for the handedness; all 0 otherwise (BMD vertices, glTF meshes
+// without a map).
 struct SkinnedVertex3D
 {
     float x, y, z;
@@ -121,6 +124,7 @@ struct SkinnedVertex3D
     std::int32_t normalBoneIndex;
     std::uint8_t joints[4];
     std::uint8_t weights[4];
+    std::int16_t tangent[4];
 };
 
 enum class SkinningTextureCoordinates : std::uint32_t
@@ -160,6 +164,10 @@ struct SkinningParameters
     bool lightEnabled = false;
     // Enhanced lighting only: Blinn-Phong strength declared by the item model; 0 = no highlight.
     float specularStrength = 0.0f;
+    // Enhanced lighting only: the tangent-space normal map of the draw (a texture id) and its
+    // glTF scale; a scale of 0 (or no map) lights with the unperturbed normal. Classic ignores it.
+    std::uint32_t normalTextureId = 0;
+    float normalMapScale = 0.0f;
 };
 
 // Where a body shadow lands, as CalcShadowPosition() puts it there.

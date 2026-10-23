@@ -32,6 +32,8 @@ bool DecodeEmbeddedImage(const EmbeddedImage& image, DecodedImage& decoded, std:
 // got an embedded image. Also sets the textures of the coarser LODs' meshes
 // (SkinnedModel::lodTextures): their image, else the texture of the BMD mesh
 // with the same texture name, else that of the BMD mesh of the same index -
-// so it runs after the BMD's textures were opened.
+// so it runs after the BMD's textures were opened - and loads the normal maps
+// of the meshes of every LOD (SkinnedModel::meshNormalTextures,
+// lodNormalTextures).
 int OpenEmbeddedTextures(BMD& model, const std::wstring& modelFile, int wrap, int filter);
 } // namespace Render::Models::Gltf

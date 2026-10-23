@@ -90,6 +90,10 @@ struct SkinnedVertex
     std::array<Vector3, 4> normals{};
     Vector3 bindPosition{};
     Vector3 bindNormal{};
+    // The file's TANGENT in bind space, w = handedness (+1 or -1, the sign of the
+    // bitangent cross(normal, tangent) x w); all 0 when the vertex's material
+    // has no normal map (only those carry tangents).
+    std::array<float, 4> bindTangent{};
 };
 
 // An image the file carries (a material's base colour texture), still encoded.
@@ -99,6 +103,23 @@ struct EmbeddedImage
     std::string name;
     std::string mimeType;
     std::vector<std::uint8_t> bytes;
+};
+
+// A mesh's normal map, as SkinnedModel and LodMesh keep it: the image
+// (index into SkinnedModel::images, -1: none) and the material's
+// normalTexture.scale (glTF: the map's x and y are multiplied by it).
+struct NormalMap
+{
+    int image = -1;
+    float scale = 1.f;
+};
+
+// A normal map ready to draw: its texture (a bitmap index) and scale; scale 0
+// means none (the unperturbed normal is lit).
+struct NormalMapTexture
+{
+    unsigned int texture = 0;
+    float scale = 0.f;
 };
 
 // A mesh of a coarser LOD (extras.lod 1 or 2), on the
@@ -115,6 +136,8 @@ struct LodMesh
     std::string texture;
     // Index into SkinnedModel::images of the base colour image, -1 for none.
     int image = -1;
+    // The material's normal map (Enhanced only).
+    NormalMap normalMap;
 };
 
 // A mesh packed for indexed GPU-skinned draws: each distinct corner (vertex
@@ -148,6 +171,13 @@ public:
     // Per BMD mesh: index into `images`, -1 when its material has no embedded
     // image (the mesh's texture is then looked up by its name, as for a BMD).
     std::vector<int> meshImages;
+    // Per BMD mesh: its material's normal map (Enhanced lighting only).
+    std::vector<NormalMap> meshNormalMaps;
+    // Per BMD mesh, then per lods, per mesh: the normal map's texture (a bitmap
+    // index), BITMAP_UNKNOWN when the mesh has none or it cannot be used; set
+    // with the other textures (OpenEmbeddedTextures).
+    mutable std::vector<unsigned int> meshNormalTextures;
+    mutable std::vector<std::vector<unsigned int>> lodNormalTextures;
     // The coarser LODs: lods[k] holds LOD k + 1, each with at most as many
     // meshes as the BMD has (LOD 0).
     std::vector<std::vector<LodMesh>> lods;
@@ -176,6 +206,11 @@ public:
     // drawn), and for a mesh beyond the LOD's meshes, which sets `absent` (that
     // LOD draws nothing for it).
     [[nodiscard]] const LodMesh* LodMeshFor(int lod, int mesh, bool& absent) const;
+
+    // The normal map texture of BMD mesh `mesh` at LOD `lod` (the LOD's mesh
+    // that stands in for it, see LodMeshFor) and its scale; scale 0 when the
+    // mesh has no usable map.
+    [[nodiscard]] NormalMapTexture NormalMapTextureFor(int lod, int mesh) const;
 
     // The box around LOD 0 in rest pose, in MU model space (unscaled): the
     // bounds whose screen height picks the LOD. Set by ComputeRestBounds.

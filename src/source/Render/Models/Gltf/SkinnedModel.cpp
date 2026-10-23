@@ -233,6 +233,29 @@ const LodMesh* SkinnedModel::LodMeshFor(int lod, int mesh, bool& absent) const
     return &meshes[static_cast<size_t>(mesh)];
 }
 
+NormalMapTexture SkinnedModel::NormalMapTextureFor(int lod, int mesh) const
+{
+    bool absent = false;
+    const LodMesh* lodMesh = LodMeshFor(lod, mesh, absent);
+    unsigned int texture = BITMAP_UNKNOWN;
+    float scale = 0.f;
+    if (lodMesh)
+    {
+        texture = lodNormalTextures[static_cast<size_t>(lod - 1)][static_cast<size_t>(mesh)];
+        scale = lodMesh->normalMap.scale;
+    }
+    else if (!absent && mesh >= 0 && mesh < static_cast<int>(meshNormalTextures.size()))
+    {
+        texture = meshNormalTextures[static_cast<size_t>(mesh)];
+        scale = meshNormalMaps[static_cast<size_t>(mesh)].scale;
+    }
+    if (texture == BITMAP_UNKNOWN)
+    {
+        return {};
+    }
+    return {texture, scale};
+}
+
 void SkinnedModel::ComputeRestBounds()
 {
     const std::vector<Matrix34> rest = RestPose();

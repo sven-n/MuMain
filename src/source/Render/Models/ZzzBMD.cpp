@@ -1994,6 +1994,14 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             .lightEnabled = usesCpuLighting,
             .specularStrength = texture->IsSkin || texture->IsHair ? 0.0f : SpecularStrength,
         };
+        // A model file's normal map (Enhanced lighting only), for draws on the mesh's own coordinates.
+        if (gltfModel && useMeshTextureCoordinates)
+        {
+            const Render::Models::Gltf::NormalMapTexture normalMap =
+                gltfModel->NormalMapTextureFor(ActiveLod, meshIndex);
+            skinning.normalTextureId = normalMap.texture;
+            skinning.normalMapScale = normalMap.scale;
+        }
         auto& renderer = mu::GetRenderer();
         if (!waveTextureCoordinates &&
             (renderer.IsSkinnedMeshCached(cacheKey) || renderer.CacheSkinnedMesh(cacheKey, buildSkinnedVertices())))

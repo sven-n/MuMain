@@ -264,6 +264,28 @@ const cgltf_image* EmbeddedBaseColorImageOf(const cgltf_primitive& primitive)
     return texture->image;
 }
 
+// The material's embedded normal map and its scale; image nullptr when it has none.
+struct EmbeddedNormalMap
+{
+    const cgltf_image* image = nullptr;
+    float scale = 1.f;
+};
+
+EmbeddedNormalMap EmbeddedNormalMapOf(const cgltf_primitive& primitive)
+{
+    const cgltf_material* material = primitive.material;
+    if (!material)
+    {
+        return {};
+    }
+    const cgltf_texture* texture = material->normal_texture.texture;
+    if (!texture || !texture->image || !texture->image->buffer_view)
+    {
+        return {};
+    }
+    return {texture->image, material->normal_texture.scale};
+}
+
 // Every component of an accessor as floats (sparse data applied, normalised
 // integers converted).
 std::vector<float> ReadFloats(const cgltf_accessor* accessor)
@@ -312,6 +334,8 @@ struct PrimitiveData
     std::vector<float> texCoords;
     std::vector<float> joints;
     std::vector<float> weights;
+    // Only for a material with a normal map: 4 per vertex, w the handedness.
+    std::vector<float> tangents;
     std::vector<float> indices;
 };
 
@@ -769,6 +793,10 @@ private:
             reason = "a mesh has a negative weight";
             return false;
         }
+        if (EmbeddedNormalMapOf(primitive).image && !ReadTangents(primitive, vertexCount, out, reason))
+        {
+            return false;
+        }
         // Indices are exact as floats below 2^24, far beyond any model.
         out.indices = ReadFloats(primitive.indices);
         for (const float index : out.indices)
@@ -786,6 +814,25 @@ private:
                 reason = "a vertex names a joint the skin does not have";
                 return false;
             }
+        }
+        return true;
+    }
+
+    // The TANGENT of a primitive whose material has a normal map: required, used as baked.
+    static bool ReadTangents(const cgltf_primitive& primitive, size_t vertexCount, PrimitiveData& out,
+                             std::string& reason)
+    {
+        const cgltf_accessor* accessor = FindAttribute(primitive, cgltf_attribute_type_tangent);
+        if (!accessor || cgltf_num_components(accessor->type) != 4 || accessor->count != vertexCount)
+        {
+            reason = "a mesh with a normal map lacks TANGENT (4 components per vertex)";
+            return false;
+        }
+        out.tangents = ReadFloats(accessor);
+        if (!AllFinite(out.tangents))
+        {
+            reason = "a mesh's TANGENT holds a value that is not finite";
+            return false;
         }
         return true;
     }
@@ -996,6 +1043,11 @@ private:
         const float* n = &data.normals[vertex * 3];
         out.bindPosition = {p[0], p[1], p[2]};
         out.bindNormal = {n[0], n[1], n[2]};
+        if (!data.tangents.empty())
+        {
+            const float* t = &data.tangents[vertex * 4];
+            out.bindTangent = {t[0], t[1], t[2], t[3] < 0.f ? -1.f : 1.f};
+        }
         for (int k = 0; k < out.count; ++k)
         {
             out.weights[k] /= sum;
@@ -1049,16 +1101,25 @@ private:
         return index;
     }
 
+    // A primitive's normal map, its image copied into SkinnedModel::images on first use.
+    NormalMap NormalMapOf(const cgltf_primitive& primitive, std::unordered_map<const cgltf_image*, int>& indices) const
+    {
+        const EmbeddedNormalMap map = EmbeddedNormalMapOf(primitive);
+        return {EmbeddedImageIndex(map.image, indices), map.scale};
+    }
+
     // The coarser LODs' meshes into SkinnedModel::lods.
     void ApplyCoarserLods(std::unordered_map<const cgltf_image*, int>& imageIndices)
     {
         skinned_->lods.resize(lodParts_.size());
         skinned_->lodTextures.resize(lodParts_.size());
+        skinned_->lodNormalTextures.resize(lodParts_.size());
         for (size_t lod = 0; lod < lodParts_.size(); ++lod)
         {
             std::vector<LodMesh>& meshes = skinned_->lods[lod];
             meshes.resize(lodParts_[lod].size());
             skinned_->lodTextures[lod].assign(meshes.size(), BITMAP_UNKNOWN);
+            skinned_->lodNormalTextures[lod].assign(meshes.size(), BITMAP_UNKNOWN);
             for (size_t i = 0; i < meshes.size(); ++i)
             {
                 const MeshPart& part = lodParts_[lod][i];
@@ -1075,6 +1136,7 @@ private:
                 mesh.triangles = part.triangles;
                 mesh.texture = part.texture;
                 mesh.image = EmbeddedImageIndex(EmbeddedBaseColorImageOf(*part.primitive), imageIndices);
+                mesh.normalMap = NormalMapOf(*part.primitive, imageIndices);
             }
         }
     }
@@ -1134,6 +1196,8 @@ private:
         auto* textureIndices = new GLuint[meshCount]();
         skinned_->meshVertices.resize(meshCount);
         skinned_->meshImages.assign(meshCount, -1);
+        skinned_->meshNormalMaps.assign(meshCount, NormalMap{});
+        skinned_->meshNormalTextures.assign(meshCount, BITMAP_UNKNOWN);
         std::unordered_map<const cgltf_image*, int> imageIndices;
         for (int i = 0; i < meshCount; ++i)
         {
@@ -1188,6 +1252,7 @@ private:
 
             std::snprintf(textures[i].FileName, sizeof(textures[i].FileName), "%s", part.texture.c_str());
             skinned_->meshImages[i] = EmbeddedImageIndex(EmbeddedBaseColorImageOf(*part.primitive), imageIndices);
+            skinned_->meshNormalMaps[i] = NormalMapOf(*part.primitive, imageIndices);
             TextureScriptParsing script;
             mesh.m_csTScript = nullptr;
             if (script.parsingTScriptA(textures[i].FileName))

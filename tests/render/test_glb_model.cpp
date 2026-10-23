@@ -2327,6 +2327,287 @@ TEST_CASE("glb_model: the LOD settings of the table reach the model")
     CHECK(SkinnedModelOf(*model)->lodSettings == settings);
 }
 
+// ---------------------------------------------------------------- normal maps
+
+namespace
+{
+// Gives the LOD 0 primitive a TANGENT accessor (`tangentOf(vertex)`) and a
+// material with a normalTexture of scale `scale` (an embedded "PNG" whose
+// bytes the loader only copies).
+template <typename TangentOf>
+void AddNormalMap(Glb& glb, float scale, TangentOf tangentOf, bool withTangents = true)
+{
+    auto& primitive = glb.json["meshes"][0]["primitives"][0];
+    const size_t count = glb.json["accessors"][primitive["attributes"]["POSITION"].get<int>()]["count"];
+    if (withTangents)
+    {
+        std::vector<float> tangents;
+        for (size_t v = 0; v < count; ++v)
+        {
+            const std::array<float, 4> t = tangentOf(v);
+            tangents.insert(tangents.end(), t.begin(), t.end());
+        }
+        primitive["attributes"]["TANGENT"] = glb.AddAccessor(tangents, "VEC4", count);
+    }
+    while (glb.bin.size() % 4 != 0)
+        glb.bin.push_back(0);
+    const std::vector<std::uint8_t> png = {0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A};
+    const size_t offset = glb.bin.size();
+    glb.bin.insert(glb.bin.end(), png.begin(), png.end());
+    glb.json["bufferViews"].push_back({{"buffer", 0}, {"byteOffset", offset}, {"byteLength", png.size()}});
+    glb.json["images"].push_back(
+        {{"name", "bump_normal"}, {"mimeType", "image/png"}, {"bufferView", glb.json["bufferViews"].size() - 1}});
+    glb.json["textures"].push_back({{"source", glb.json["images"].size() - 1}});
+    auto& material = glb.json["materials"][primitive.value("material", 0)];
+    material["normalTexture"] = {{"index", glb.json["textures"].size() - 1}, {"scale", scale}};
+}
+
+// A unit tangent per vertex, the handedness alternating: an "unmirrored" and a "mirrored" UV island.
+std::array<float, 4> AlternatingTangent(size_t vertex)
+{
+    const float angle = 0.37f * static_cast<float>(vertex);
+    return {std::cos(angle), std::sin(angle), 0.f, vertex % 2 == 0 ? 1.f : -1.f};
+}
+
+// skinned_textured.vert's tangent: the packed tangent (snorm16) through skinWeightedNormal
+// (the shader skins it like the normal), then normalised as skinned_lit.frag does.
+std::array<float, 4> ShadeWeightedTangent(const mu::SkinnedVertex3D& packed, const std::vector<float>& palette,
+                                          float boneScale, float restPoseScale)
+{
+    mu::SkinnedVertex3D asNormal = packed;
+    asNormal.nx = static_cast<float>(packed.tangent[0]) / 32767.f;
+    asNormal.ny = static_cast<float>(packed.tangent[1]) / 32767.f;
+    asNormal.nz = static_cast<float>(packed.tangent[2]) / 32767.f;
+    float t[3];
+    ShadeWeightedNormal(asNormal, palette, boneScale, restPoseScale, t);
+    const float length = std::sqrt(t[0] * t[0] + t[1] * t[1] + t[2] * t[2]);
+    return {t[0] / length, t[1] / length, t[2] / length, packed.tangent[3] > 0 ? 1.f : -1.f};
+}
+
+std::array<float, 3> Cross(const std::array<float, 3>& a, const std::array<float, 3>& b)
+{
+    return {a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]};
+}
+
+// skinned_lit.frag's PerturbNormal for unit n and t.
+std::array<float, 3> PerturbNormal(const std::array<float, 3>& n, const std::array<float, 3>& t, float handedness,
+                                   const std::array<float, 3>& mapped)
+{
+    const std::array<float, 3> b = Cross(n, t);
+    std::array<float, 3> out{};
+    for (int c = 0; c < 3; ++c)
+        out[c] = t[c] * mapped[0] + b[c] * handedness * mapped[1] + n[c] * mapped[2];
+    const float length = std::sqrt(out[0] * out[0] + out[1] * out[1] + out[2] * out[2]);
+    for (float& c : out)
+        c /= length;
+    return out;
+}
+} // namespace
+
+TEST_CASE("glb_model: a mesh with a normal map keeps the file's tangents and the map's scale")
+{
+    Glb glb = Glb::Read(YetiGlb);
+    AddNormalMap(glb, 0.7f, AlternatingTangent);
+    TemporaryFile file;
+    glb.Write(file.Path());
+    const auto model = OpenYetiGlb(file.Path());
+    const auto* skinned = SkinnedModelOf(*model);
+    REQUIRE(skinned->meshNormalMaps.size() == static_cast<size_t>(model->NumMeshs));
+    for (int mesh = 0; mesh < model->NumMeshs; ++mesh)
+    {
+        const auto& map = skinned->meshNormalMaps[static_cast<size_t>(mesh)];
+        REQUIRE(map.image >= 0);
+        CHECK(skinned->images[static_cast<size_t>(map.image)].name == "bump_normal");
+        CHECK(map.scale == doctest::Approx(0.7f));
+    }
+    // The base colour image and the normal map are two images.
+    CHECK(skinned->meshImages[0] != skinned->meshNormalMaps[0].image);
+    // Tangents as baked, w exactly +-1; the BMD mesh vertex is the primitive's vertex, so compare by value.
+    int mirrored = 0;
+    int unmirrored = 0;
+    for (const auto& vertex : skinned->meshVertices[0])
+    {
+        const float length = std::sqrt(vertex.bindTangent[0] * vertex.bindTangent[0] +
+                                       vertex.bindTangent[1] * vertex.bindTangent[1] +
+                                       vertex.bindTangent[2] * vertex.bindTangent[2]);
+        CHECK(length == doctest::Approx(1.f).epsilon(1e-5));
+        CHECK(std::fabs(vertex.bindTangent[3]) == 1.f);
+        (vertex.bindTangent[3] < 0.f ? mirrored : unmirrored)++;
+    }
+    CHECK(mirrored > 0);
+    CHECK(unmirrored > 0);
+    // Not drawn before the textures are opened: no map texture yet.
+    CHECK(skinned->NormalMapTextureFor(0, 0).scale == 0.f);
+}
+
+TEST_CASE("glb_model: a mesh without a normal map has no tangents and no map")
+{
+    const auto model = OpenYetiGlb();
+    const auto* skinned = SkinnedModelOf(*model);
+    for (const auto& map : skinned->meshNormalMaps)
+        CHECK(map.image == -1);
+    for (const auto& vertex : skinned->meshVertices[0])
+        CHECK(vertex.bindTangent == std::array<float, 4>{});
+    for (const auto& vertex : skinned->meshVertices[0])
+    {
+        const mu::SkinnedVertex3D packed = Render::Models::PackWeightedSkinnedVertex(vertex, 0.f, 0.f);
+        for (int c = 0; c < 4; ++c)
+            CHECK(packed.tangent[c] == 0);
+    }
+}
+
+TEST_CASE("glb_model: a normal map without TANGENT is refused")
+{
+    Glb glb = Glb::Read(YetiGlb);
+    AddNormalMap(glb, 1.f, AlternatingTangent, false);
+    TemporaryFile file;
+    glb.Write(file.Path());
+    RequireRefused(file.Path(), "lacks TANGENT");
+}
+
+TEST_CASE("glb_model: tangents pack as snorm16 with the handedness in w; BMD vertices carry none")
+{
+    using Render::Models::PackTangent;
+    CHECK(PackTangent({1.f, 0.f, 0.f, 1.f}) == std::array<std::int16_t, 4>{32767, 0, 0, 32767});
+    CHECK(PackTangent({0.f, -1.f, 0.f, -1.f}) == std::array<std::int16_t, 4>{0, -32767, 0, -32767});
+    CHECK(PackTangent({0.6f, 0.f, 0.8f, -1.f}) == std::array<std::int16_t, 4>{19660, 0, 26214, -32767});
+    // No normal map: w 0 packs as no tangent at all.
+    CHECK(PackTangent({0.f, 0.f, 0.f, 0.f}) == std::array<std::int16_t, 4>{});
+    CHECK(PackTangent({0.3f, 0.4f, 0.f, 0.f}) == std::array<std::int16_t, 4>{});
+    // Round trip within half a unit of 1/32767.
+    for (size_t v = 0; v < 64; ++v)
+    {
+        const std::array<float, 4> tangent = AlternatingTangent(v);
+        const std::array<std::int16_t, 4> packed = PackTangent(tangent);
+        for (int c = 0; c < 3; ++c)
+            CHECK(std::fabs(static_cast<float>(packed[c]) / 32767.f - tangent[c]) <= 0.5f / 32767.f + 1e-7f);
+        CHECK(packed[3] == (tangent[3] > 0.f ? 32767 : -32767));
+    }
+    const float position[3] = {1.f, 2.f, 3.f};
+    const float normal[3] = {0.f, 0.f, 1.f};
+    const mu::SkinnedVertex3D bmd = Render::Models::PackBmdSkinnedVertex(position, 7, normal, 9, 0.f, 0.f);
+    for (int c = 0; c < 4; ++c)
+        CHECK(bmd.tangent[c] == 0);
+}
+
+TEST_CASE("glb_model: GPU tangent skinning follows the normal and keeps the handedness of both UV islands")
+{
+    auto bmd = OpenYetiBmd();
+    Glb glb = Glb::Read(YetiGlb);
+    MakeTwoWeightSkin(glb, *bmd);
+    // Tangents perpendicular to the file's normals, so that (T, B, N) is a frame.
+    const auto& primitive = glb.json["meshes"][0]["primitives"][0];
+    const auto& normals = glb.json["accessors"][primitive["attributes"]["NORMAL"].get<int>()];
+    const auto& view = glb.json["bufferViews"][normals["bufferView"].get<int>()];
+    const size_t normalOffset = view.value("byteOffset", 0) + normals.value("byteOffset", 0);
+    const Glb& source = glb;
+    AddNormalMap(glb, 1.f, [&](size_t v) {
+        std::array<float, 3> n{};
+        std::memcpy(n.data(), &source.bin[normalOffset + v * 12], 12);
+        const std::array<float, 3> helper = std::fabs(n[2]) < 0.9f ? std::array<float, 3>{0.f, 0.f, 1.f}
+                                                                    : std::array<float, 3>{1.f, 0.f, 0.f};
+        std::array<float, 3> t = Cross(helper, n);
+        const float length = std::sqrt(t[0] * t[0] + t[1] * t[1] + t[2] * t[2]);
+        return std::array<float, 4>{t[0] / length, t[1] / length, t[2] / length, v % 2 == 0 ? 1.f : -1.f};
+    });
+    TemporaryFile file;
+    glb.Write(file.Path());
+    auto model = OpenYetiGlb(file.Path());
+    PrepareLikeTheGame(*model);
+    auto bones = std::make_unique<BoneMatrices>();
+    SkinOnCpu(*model, *bones, YetiWalk, 3.7f, false);
+    const auto* skinned = SkinnedModelOf(*model);
+    std::vector<float> palette;
+    Render::Models::BuildWeightedSkinPalette(*skinned, bones->bones, 1.f, 0.f, palette);
+    float largestDot = 0.f;
+    float largestAngle = 0.f;
+    int checked[2] = {0, 0};
+    for (size_t v = 0; v < skinned->meshVertices[0].size(); ++v)
+    {
+        const auto& vertex = skinned->meshVertices[0][v];
+        const mu::SkinnedVertex3D packed = Render::Models::PackWeightedSkinnedVertex(vertex, 0.f, 0.f);
+        const std::array<float, 4> t = ShadeWeightedTangent(packed, palette, 1.f, 0.f);
+        float nRaw[3];
+        ShadeWeightedNormal(packed, palette, 1.f, 0.f, nRaw);
+        const float nLength = std::sqrt(nRaw[0] * nRaw[0] + nRaw[1] * nRaw[1] + nRaw[2] * nRaw[2]);
+        const std::array<float, 3> n{nRaw[0] / nLength, nRaw[1] / nLength, nRaw[2] / nLength};
+        // The expected tangent: the bind tangent through the joints' palette rotations, like the normal.
+        std::array<float, 3> expected{};
+        for (int k = 0; k < vertex.count; ++k)
+        {
+            const float* rows = &palette[static_cast<size_t>(vertex.joints[k]) * 12];
+            for (int r = 0; r < 3; ++r)
+                expected[r] += vertex.weights[k] * (rows[r * 4] * vertex.bindTangent[0] +
+                                                    rows[r * 4 + 1] * vertex.bindTangent[1] +
+                                                    rows[r * 4 + 2] * vertex.bindTangent[2]);
+        }
+        const float eLength = std::sqrt(expected[0] * expected[0] + expected[1] * expected[1] + expected[2] * expected[2]);
+        const float alignment = (t[0] * expected[0] + t[1] * expected[1] + t[2] * expected[2]) / eLength;
+        largestAngle = std::max(largestAngle, std::acos(std::min(1.f, alignment)));
+        // A rigid blend keeps T perpendicular to N closely enough for the frame.
+        largestDot = std::max(largestDot, std::fabs(t[0] * n[0] + t[1] * n[1] + t[2] * n[2]));
+        CHECK(t[3] == vertex.bindTangent[3]);
+        // The bitangent cross(N, T) x w: a map normal tilted along +y moves towards it on both islands.
+        const std::array<float, 3> b = Cross(n, {t[0], t[1], t[2]});
+        const std::array<float, 3> tilted = PerturbNormal(n, {t[0], t[1], t[2]}, t[3], {0.f, 0.5f, 0.8660254f});
+        const float towardsB = (tilted[0] * b[0] + tilted[1] * b[1] + tilted[2] * b[2]) * t[3];
+        // 0.5 for a frame with T exactly perpendicular to N; a blend of joints leaves them slightly off
+        // (tangents are used as baked, not orthogonalised), which only shortens cross(N, T).
+        CHECK(towardsB > 0.45f);
+        CHECK(towardsB <= 0.5f + 1e-4f);
+        // The other handedness mirrors it.
+        const std::array<float, 3> mirroredTilt = PerturbNormal(n, {t[0], t[1], t[2]}, -t[3], {0.f, 0.5f, 0.8660254f});
+        CHECK((mirroredTilt[0] * b[0] + mirroredTilt[1] * b[1] + mirroredTilt[2] * b[2]) * t[3] < -0.45f);
+        ++checked[t[3] > 0.f ? 0 : 1];
+    }
+    CHECK(checked[0] > 0);
+    CHECK(checked[1] > 0);
+    MESSAGE("largest tangent angle " << largestAngle << ", largest |T.N| " << largestDot);
+    CHECK(largestAngle < 1e-3f);
+    CHECK(largestDot < 0.2f);
+}
+
+TEST_CASE("glb_model: the flat map and scale 0 leave the normal as it is")
+{
+    const std::array<float, 3> n{0.f, 0.6f, 0.8f};
+    const std::array<float, 3> t{1.f, 0.f, 0.f};
+    for (const float handedness : {1.f, -1.f})
+    {
+        const std::array<float, 3> flat = PerturbNormal(n, t, handedness, {0.f, 0.f, 1.f});
+        for (int c = 0; c < 3; ++c)
+            CHECK(flat[c] == doctest::Approx(n[c]).epsilon(1e-6));
+    }
+    // A bump's slope along +x (tangent space) tilts the normal towards T on both islands; along +y towards
+    // +B on the unmirrored one and its mirror image on the mirrored one.
+    const std::array<float, 3> alongX = PerturbNormal(n, t, -1.f, {0.6f, 0.f, 0.8f});
+    CHECK(alongX[0] == doctest::Approx(0.6f));
+    const std::array<float, 3> b = Cross(n, t);
+    const std::array<float, 3> up = PerturbNormal(n, t, 1.f, {0.f, 0.6f, 0.8f});
+    const std::array<float, 3> mirroredUp = PerturbNormal(n, t, -1.f, {0.f, 0.6f, 0.8f});
+    const auto dot = [](const std::array<float, 3>& a, const std::array<float, 3>& c) {
+        return a[0] * c[0] + a[1] * c[1] + a[2] * c[2];
+    };
+    CHECK(dot(up, b) == doctest::Approx(0.6f));
+    CHECK(dot(mirroredUp, b) == doctest::Approx(-0.6f));
+}
+
+TEST_CASE("glb_model: a coarser LOD keeps its own normal map and tangents")
+{
+    Glb glb = Glb::Read(YetiGlb);
+    AddNormalMap(glb, 0.5f, AlternatingTangent);
+    AddLodNode(glb, 1, 2);
+    TemporaryFile file;
+    glb.Write(file.Path());
+    const auto model = OpenYetiGlb(file.Path());
+    const auto* skinned = SkinnedModelOf(*model);
+    REQUIRE(skinned->LodCount() == 2);
+    const auto& mesh = skinned->lods[0][0];
+    CHECK(mesh.normalMap.image == skinned->meshNormalMaps[0].image);
+    CHECK(mesh.normalMap.scale == doctest::Approx(0.5f));
+    for (const auto& vertex : mesh.vertices)
+        CHECK(std::fabs(vertex.bindTangent[3]) == 1.f);
+}
+
 // ---------------------------------------------------------------- loader validation
 
 namespace
@@ -2424,6 +2705,13 @@ TEST_CASE("glb_model: a value that is not finite is refused")
     {
         SetFloat(glb, AttributeAccessor(glb, "NORMAL"), 4, -infinity);
         expected = "NORMAL holds a value that is not finite";
+    }
+    SUBCASE("TANGENT")
+    {
+        AddNormalMap(glb, 1.f, [nan](size_t vertex) {
+            return vertex == 5 ? std::array<float, 4>{nan, 0.f, 0.f, 1.f} : AlternatingTangent(vertex);
+        });
+        expected = "TANGENT holds a value that is not finite";
     }
     SUBCASE("WEIGHTS_0")
     {

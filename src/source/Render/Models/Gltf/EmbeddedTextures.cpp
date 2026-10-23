@@ -163,16 +163,26 @@ int OpenEmbeddedTextures(BMD& model, const std::wstring& modelFile, int wrap, in
             ++textured;
         }
     }
+    skinned->meshNormalTextures.assign(skinned->meshNormalMaps.size(), BITMAP_UNKNOWN);
+    for (size_t mesh = 0; mesh < skinned->meshNormalMaps.size(); ++mesh)
+    {
+        skinned->meshNormalTextures[mesh] = loader.Texture(skinned->meshNormalMaps[mesh].image);
+    }
+    skinned->lodTextures.resize(skinned->lods.size());
+    skinned->lodNormalTextures.resize(skinned->lods.size());
     for (size_t lod = 0; lod < skinned->lods.size(); ++lod)
     {
         const std::vector<LodMesh>& meshes = skinned->lods[lod];
         std::vector<unsigned int>& textures = skinned->lodTextures[lod];
+        std::vector<unsigned int>& normalTextures = skinned->lodNormalTextures[lod];
         textures.resize(meshes.size());
+        normalTextures.resize(meshes.size());
         for (size_t mesh = 0; mesh < meshes.size(); ++mesh)
         {
             const GLuint texture = loader.Texture(meshes[mesh].image);
             textures[mesh] =
                 texture != BITMAP_UNKNOWN ? texture : LodFallbackTexture(model, meshes[mesh], static_cast<int>(mesh));
+            normalTextures[mesh] = loader.Texture(meshes[mesh].normalMap.image);
         }
     }
     return textured;

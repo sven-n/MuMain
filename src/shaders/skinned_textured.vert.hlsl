@@ -6,6 +6,10 @@
 // vertex colour stays unlit and skinned_lit.frag lights each pixel from the normal, view vector and
 // light direction outputs), 3 Enhanced lighting plus the frame's point lights (world-space
 // outputs). Other fragment shaders ignore the Enhanced outputs.
+// Normal maps (Enhanced lighting only): a weighted vertex with a tangent (w = handedness) under a
+// draw with a normal map (textureCoordinateParameters.w = the map's scale, 0: none) passes its
+// tangent skinned like its normal, in draw and world space, for skinned_lit.frag; every other
+// vertex passes zero tangents and scale 0.
 #ifdef MU_D3D12_RAW_STORAGE_BUFFER
 ByteAddressBuffer boneRows : register(t0, space0);
 static const uint BoneRowSizeBytes = 16;
@@ -31,6 +35,7 @@ cbuffer Skinning : register(b0, space1)
 };
 
 static const uint LightingClassic = 1;
+static const uint LightingEnhanced = 2;
 static const uint LightingEnhancedDynamic = 3;
 
 // The light mood's highlight shoulder (Render::Lighting::LightMood::RollOffHighlight): a lit
@@ -65,6 +70,7 @@ struct VSInput
     int normalBoneIndex : TEXCOORD5;
     uint4 joints : TEXCOORD6;
     float4 weights : TEXCOORD7;
+    float4 tangent : TEXCOORD8; // snorm16; w = +-1, 0 without a normal map
 };
 
 struct VSOutput
@@ -79,6 +85,8 @@ struct VSOutput
     nointerpolation float4 lightDirectionAndSpecular : TEXCOORD6;
     float4 worldPositionAndDynamicLights : TEXCOORD7; // w: 1 when the point lights apply
     float3 worldNormal : TEXCOORD8;
+    float4 tangent : TEXCOORD9;                       // w: handedness, 0 without a normal map
+    float4 worldTangentAndNormalMapScale : TEXCOORD10; // w: the map's scale, 0 without one
     float clipDist : SV_ClipDistance0;
 };
 
@@ -299,5 +307,16 @@ VSOutput main(VSInput input)
     output.worldNormal = float3(dot(vertexToWorldRows[0].xyz, skinnedNormal),
                                 dot(vertexToWorldRows[1].xyz, skinnedNormal),
                                 dot(vertexToWorldRows[2].xyz, skinnedNormal));
+    const bool normalMapped = palette.w >= LightingEnhanced && input.weights.x > 0.0 && input.tangent.w != 0.0 &&
+                              textureCoordinateParameters.w != 0.0;
+    float3 skinnedTangent = float3(0.0, 0.0, 0.0);
+    if (normalMapped)
+    {
+        skinnedTangent = skinWeightedNormal(input.tangent.xyz, input.joints, input.weights);
+    }
+    output.tangent = float4(skinnedTangent, normalMapped ? sign(input.tangent.w) : 0.0);
+    output.worldTangentAndNormalMapScale =
+        float4(dot(vertexToWorldRows[0].xyz, skinnedTangent), dot(vertexToWorldRows[1].xyz, skinnedTangent),
+               dot(vertexToWorldRows[2].xyz, skinnedTangent), normalMapped ? textureCoordinateParameters.w : 0.0);
     return output;
 }

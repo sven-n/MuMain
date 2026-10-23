@@ -13,6 +13,8 @@ class SdlGpuReplayState final
 public:
     bool SelectPipeline(SDL_GPUGraphicsPipeline* pipeline);
     bool SelectFragmentSampler(SDL_GPUTexture* texture, SDL_GPUSampler* sampler);
+    // The second fragment texture slot (skinned_lit.frag's normal map).
+    bool SelectNormalMapSampler(SDL_GPUTexture* texture, SDL_GPUSampler* sampler);
     bool SelectVertexUniforms(Uint32 slot, std::span<const std::byte> bytes);
     bool SelectFragmentUniforms(std::span<const std::byte> bytes);
     // The buffers bound from storage slot 0.
@@ -42,6 +44,8 @@ private:
     SDL_GPUGraphicsPipeline* m_pipeline = nullptr;
     SDL_GPUTexture* m_texture = nullptr;
     SDL_GPUSampler* m_sampler = nullptr;
+    SDL_GPUTexture* m_normalMapTexture = nullptr;
+    SDL_GPUSampler* m_normalMapSampler = nullptr;
     std::array<SDL_GPUBuffer*, kVertexStorageBufferCapacity> m_vertexStorageBuffers{};
     std::size_t m_vertexStorageBufferCount = 0;
     SDL_GPUBuffer* m_vertexBuffer = nullptr;
@@ -55,6 +59,7 @@ private:
     SDL_Rect m_scissor{};
     bool m_pipelineValid = false;
     bool m_fragmentSamplerValid = false;
+    bool m_normalMapSamplerValid = false;
     std::array<bool, kVertexUniformSlots> m_vertexUniformsValid{};
     bool m_fragmentUniformsValid = false;
     bool m_vertexStorageBufferValid = false;
