@@ -327,6 +327,21 @@ TEST_CASE("The formulas differ by drop level bonus, table, term and whole profil
     CHECK(appliedWeapon->requirements.strengthPerOptionLevel == 4);
 }
 
+// A formula entry only the client has starts unchecked, as a removed item does: taking it away
+// would leave the orbs naming a profile that is not there.
+TEST_CASE("A formula entry only the client has starts unchecked [data][items][editor]")
+{
+    Sides sides;
+    std::erase_if(sides.file.formulas->profiles,
+                  [](const WrittenStatProfile& profile) { return profile.name == "orb"; });
+    const ItemSyncDiff diff = sides.Diff();
+    const SyncFormula* orb = FindFormula(diff, "profiles.orb");
+    REQUIRE(orb != nullptr);
+    CHECK(orb->current.has_value());
+    CHECK_FALSE(orb->incoming.has_value());
+    CHECK_FALSE(orb->checked);
+}
+
 TEST_CASE("Formulas the item stat file's checks refuse are not taken [data][items][editor]")
 {
     Sides sides;

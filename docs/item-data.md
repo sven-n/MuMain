@@ -1171,8 +1171,9 @@ number, fields with their default value left out, LF line endings.
   `profiles.scroll.requirements.energy`, …) and a profile only one side
   has. A file without formulas compares none and leaves the client's as
   they are.
-- Checked at first: what the file changes. Unchecked: removals,
-  known differences (grey) and fields with a note: the size and slot of an
+- Checked at first: what the file changes. Unchecked: removals (also of
+  a formula entry only the client has), known differences (grey) and
+  fields with a note: the size and slot of an
   item your character wears or an item window shows (they stay; such an
   item is not removed either, nor added when the client has no data for it
   yet), and a drop level above 255, which OpenMU keeps in a byte.

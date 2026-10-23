@@ -123,10 +123,10 @@ struct SyncOptions
 };
 
 // The differences between the client's data (`client`, BuildItemExchange) and `file`. Checked
-// by default: what the file changes; unchecked: removals, known differences, inexact and locked
-// fields. A language one side lacks stays as it is on the other (unless comparingFiles). An item
-// a side has more than once (its repeatedItems) is a locked row without fields. The formulas are
-// compared while both sides have them.
+// by default: what the file changes; unchecked: removals (items and formula entries the file
+// lacks), known differences, inexact and locked fields. A language one side lacks stays as it is
+// on the other (unless comparingFiles). An item a side has more than once (its repeatedItems) is a
+// locked row without fields. The formulas are compared while both sides have them.
 ItemSyncDiff BuildItemSyncDiff(const Data::Items::ItemExchangeFile& client, const Data::Items::ItemExchangeFile& file,
                                const SyncOptions& options);
 

@@ -450,7 +450,9 @@ void CompareFormulas(const Data::Items::ItemStatFile& current, const Data::Items
             }
         }
         row.known = options.known != nullptr && options.known->Contains(row.entry);
-        row.checked = !row.known;
+        // An entry the file lacks starts unchecked, as a removed item does: taking it away would
+        // leave the items that name a profile or table without it.
+        row.checked = !row.known && row.incoming.has_value();
         diff.formulas.push_back(std::move(row));
     }
 }
