@@ -1075,49 +1075,64 @@ TEST_CASE("Bmd import recovers long names and repairs the fields they overwrote 
     CHECK(result.repairs.front().fromLocale == "pt");
 }
 
-// The orbs, crystals and scrolls keep their requirements as values; the original client's bmd
-// files hold weights for them, which its code grew.
+// The orbs, crystals and scrolls keep their requirements as values (their profiles keep the base
+// value); the original client's bmd files hold weights for them, which its code grew.
 TEST_CASE("The orbs, crystals and scrolls hold their requirements as weights in a bmd file [data][items]")
 {
+    const ItemStatsLoadResult stats = LoadItemStatsFile(ShippedClientDirectory / GetItemStatsFile());
+    REQUIRE(stats.issues.empty());
+    const ItemStatProfiles profiles(stats.file);
+
     // Healing Orb: 20 + weight * drop level * 4 / 100.
     ItemDefinition orb;
     orb.group = 12;
     orb.number = 8;
     orb.level = 8;
+    orb.statProfile = "orb";
     orb.requirements.energy = 100;
-    REQUIRE(HasRequirementWeightsInBmd(orb));
-    ToRequirementValues(orb);
+    REQUIRE(HasRequirementWeightsInBmd(profiles, orb));
+    ToRequirementValues(profiles, orb);
     CHECK(orb.requirements.energy == 52);
     ITEM_ATTRIBUTE attribute{};
-    CHECK(ToBmdRequirementWeights(orb, attribute).empty());
+    CHECK(ToBmdRequirementWeights(profiles, orb, attribute).empty());
     CHECK(attribute.RequireEnergy == 100);
+    // Without a profile it names, the rules give it the orb profile.
+    ItemDefinition ruledOrb = orb;
+    ruledOrb.statProfile.clear();
+    CHECK(HasRequirementWeightsInBmd(profiles, ruledOrb));
+    // Given the default profile, its requirements grow like any item's: weights.
+    ItemDefinition defaultOrb = orb;
+    defaultOrb.statProfile = "default";
+    CHECK_FALSE(HasRequirementWeightsInBmd(profiles, defaultOrb));
 
     // Scroll of Wizardry Enhance: the energy from the level requirement, 20 + weight * 220 * 4 / 100.
     ItemDefinition scroll;
     scroll.group = 15;
     scroll.number = 28;
     scroll.level = 100;
+    scroll.statProfile = "scroll";
     scroll.requirements.level = 220;
     scroll.requirements.energy = 118;
-    ToRequirementValues(scroll);
+    ToRequirementValues(profiles, scroll);
     CHECK(scroll.requirements.level == 220);
     CHECK(scroll.requirements.energy == 1058);
-    CHECK(ToBmdRequirementWeights(scroll, attribute).empty());
+    CHECK(ToBmdRequirementWeights(profiles, scroll, attribute).empty());
     CHECK(attribute.RequireEnergy == 118);
 
     // A value no weight gives (each weight adds 4): the nearest one.
     ItemDefinition steps = orb;
     steps.level = 100;
     steps.requirements.energy = 27;
-    const std::vector<ItemRequirement> inexact = ToBmdRequirementWeights(steps, attribute);
+    const std::vector<ItemRequirement> inexact = ToBmdRequirementWeights(profiles, steps, attribute);
     CHECK(inexact == std::vector<ItemRequirement>{ItemRequirement::Energy});
     CHECK(attribute.RequireEnergy == 2);
 
-    // An item with a slot keeps its weights in both.
+    // A weapon keeps its weights in both.
     ItemDefinition kris;
     kris.group = 0;
     kris.slot = ItemSlot::MainHand;
-    CHECK_FALSE(HasRequirementWeightsInBmd(kris));
+    kris.statProfile = "weapon";
+    CHECK_FALSE(HasRequirementWeightsInBmd(profiles, kris));
 }
 
 TEST_CASE("Bmd import reads Portuguese and Spanish names as Windows-1252 [data][items]")
@@ -1868,7 +1883,7 @@ TEST_CASE("Export as bmd and Import from bmd keep the orbs', crystals' and scrol
     std::vector<ItemDefinition> weighted;
     for (const ItemDefinition& item : g_ItemDatabase.GetAllSlots())
     {
-        if (item.Exists() && HasRequirementWeightsInBmd(item) &&
+        if (item.Exists() && HasRequirementWeightsInBmd(g_ItemDatabase.GetStatProfiles(), item) &&
             (item.requirements.strength > 0 || item.requirements.dexterity > 0 || item.requirements.energy > 0 ||
              item.requirements.vitality > 0))
         {

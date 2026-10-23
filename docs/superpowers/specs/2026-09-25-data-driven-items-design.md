@@ -415,7 +415,9 @@ Orb of Summoning keeps its energy by level. The bmd files of the original
 client hold weights for these items, so Import from bmd turns them into the
 values with the original client's formulas, and Export as bmd and Export as
 S6E3 turn the values back into the smallest weight that gives them (the
-nearest one, with a note, when none gives a value exactly).
+nearest one, with a note, when none gives a value exactly). Which
+requirements convert follows the item's stat profile, as in the game: one
+the profile keeps as it is while the default grows it.
 
 **The Item Sync window** (MuEditor, `_EDITOR` builds only; the Item Sync
 tool of section 9):

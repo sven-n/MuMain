@@ -71,11 +71,12 @@ std::unique_ptr<ITEM_ATTRIBUTE[]> BuildItemAttributes(std::string_view locale)
 // (ToBmdRequirementWeights), with a line of `notes` for each one no weight gives exactly.
 void WriteBmdRequirementWeights(const ItemDefinition& definition, ITEM_ATTRIBUTE& attribute, std::string& notes)
 {
-    if (!HasRequirementWeightsInBmd(definition))
+    const ItemStatProfiles& profiles = g_ItemDatabase.GetStatProfiles();
+    if (!HasRequirementWeightsInBmd(profiles, definition))
     {
         return;
     }
-    for (const ItemRequirement requirement : ToBmdRequirementWeights(definition, attribute))
+    for (const ItemRequirement requirement : ToBmdRequirementWeights(profiles, definition, attribute))
     {
         notes += g_ItemDatabase.GetLogName(MakeItemType(definition.group, definition.number)) +
                  ": no weight gives its " + FindEnumName(requirement) +
@@ -697,6 +698,12 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
     result.keptEnglishNameCount = KeepCurrentEnglishNames(result.items);
     KeepMissingNamesMissing(result.items, result.importedLocales);
     KeepFieldsNotInBmd(result.items, result.importedLocales);
+    // With its stat profile known, a requirement the item keeps as a value takes the value the
+    // bmd file's weight gave in the original client.
+    for (ItemDefinition& item : result.items)
+    {
+        ToRequirementValues(g_ItemDatabase.GetStatProfiles(), item);
+    }
     ValidateItems(result.items, result.validationIssues);
     ValidateStatProfiles(result.items, g_ItemDatabase.GetStatProfiles(), GetItemStatsFile().generic_string(),
                          result.validationIssues);

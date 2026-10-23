@@ -4,6 +4,7 @@
 #include "ItemDataHandler.h"
 #include "ItemDataLoader.h"
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
+#include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Core/Text/Utf8.h"
 
@@ -298,10 +299,6 @@ void ImportItem(const std::vector<LanguageFile>& files, int itemType, ItemBmdImp
     CopyItemAttributeStats(MergeStats(records, itemType, result.repairs), definition);
     definition.group = GetItemGroup(itemType);
     definition.number = GetItemNumber(itemType);
-    if (HasRequirementWeightsInBmd(definition))
-    {
-        ToRequirementValues(definition);
-    }
     for (const LanguageRecord& record : records)
     {
         // Also a name equal to the English one: the item can have the same
@@ -324,14 +321,18 @@ constexpr int MaxRequirement = 65535;
 struct GrownRequirement
 {
     ItemRequirement requirement;
+    ItemRequirementStat stat;
     WORD ItemRequirements::* value;
     WORD ITEM_ATTRIBUTE::* weight;
 };
 constexpr GrownRequirement GrownRequirements[] = {
-    {ItemRequirement::Strength, &ItemRequirements::strength, &ITEM_ATTRIBUTE::RequireStrength},
-    {ItemRequirement::Dexterity, &ItemRequirements::dexterity, &ITEM_ATTRIBUTE::RequireDexterity},
-    {ItemRequirement::Energy, &ItemRequirements::energy, &ITEM_ATTRIBUTE::RequireEnergy},
-    {ItemRequirement::Vitality, &ItemRequirements::vitality, &ITEM_ATTRIBUTE::RequireVitality},
+    {ItemRequirement::Strength, ItemRequirementStat::Strength, &ItemRequirements::strength,
+     &ITEM_ATTRIBUTE::RequireStrength},
+    {ItemRequirement::Dexterity, ItemRequirementStat::Dexterity, &ItemRequirements::dexterity,
+     &ITEM_ATTRIBUTE::RequireDexterity},
+    {ItemRequirement::Energy, ItemRequirementStat::Energy, &ItemRequirements::energy, &ITEM_ATTRIBUTE::RequireEnergy},
+    {ItemRequirement::Vitality, ItemRequirementStat::Vitality, &ItemRequirements::vitality,
+     &ITEM_ATTRIBUTE::RequireVitality},
 };
 
 // The original client's requirement growth, which its bmd files hold the weights for: its code, so
@@ -359,26 +360,56 @@ int GrowWeight(const ItemDefinition& definition, ItemRequirement requirement, in
 }
 } // namespace
 
-bool HasRequirementWeightsInBmd(const ItemDefinition& definition)
+namespace
 {
-    return definition.slot == ItemSlot::None &&
-           (definition.group == ITEM_GROUP_WING || definition.group == ITEM_GROUP_ETC);
+// The profile the item uses: the one it names, or the one its rules give.
+const ItemStatProfile& FindItemProfile(const ItemStatProfiles& profiles, const ItemDefinition& definition)
+{
+    const std::string name =
+        definition.statProfile.empty() ? DeriveStatProfile(profiles, definition) : definition.statProfile;
+    const int profile = profiles.Find(name);
+    return profiles.Get(profile == ItemStatProfiles::UnknownProfile ? ItemStatProfiles::DefaultProfile : profile);
 }
 
-void ToRequirementValues(ItemDefinition& definition)
+// Whether the item keeps the requirement as a value where the original client grew a weight.
+bool HoldsWeightInBmd(const ItemStatProfiles& profiles, const ItemStatProfile& profile, ItemRequirementStat stat)
 {
+    return profile.requirements.Get(stat).keepBase &&
+           !profiles.Get(ItemStatProfiles::DefaultProfile).requirements.Get(stat).keepBase;
+}
+} // namespace
+
+bool HasRequirementWeightsInBmd(const ItemStatProfiles& profiles, const ItemDefinition& definition)
+{
+    const ItemStatProfile& profile = FindItemProfile(profiles, definition);
+    return std::ranges::any_of(GrownRequirements, [&](const GrownRequirement& grown)
+                               { return HoldsWeightInBmd(profiles, profile, grown.stat); });
+}
+
+void ToRequirementValues(const ItemStatProfiles& profiles, ItemDefinition& definition)
+{
+    const ItemStatProfile& profile = FindItemProfile(profiles, definition);
     for (const GrownRequirement& grown : GrownRequirements)
     {
-        WORD& value = definition.requirements.*grown.value;
-        value = static_cast<WORD>(GrowWeight(definition, grown.requirement, value));
+        if (HoldsWeightInBmd(profiles, profile, grown.stat))
+        {
+            WORD& value = definition.requirements.*grown.value;
+            value = static_cast<WORD>(GrowWeight(definition, grown.requirement, value));
+        }
     }
 }
 
-std::vector<ItemRequirement> ToBmdRequirementWeights(const ItemDefinition& definition, ITEM_ATTRIBUTE& attribute)
+std::vector<ItemRequirement> ToBmdRequirementWeights(const ItemStatProfiles& profiles, const ItemDefinition& definition,
+                                                     ITEM_ATTRIBUTE& attribute)
 {
     std::vector<ItemRequirement> inexact;
+    const ItemStatProfile& profile = FindItemProfile(profiles, definition);
     for (const GrownRequirement& grown : GrownRequirements)
     {
+        if (!HoldsWeightInBmd(profiles, profile, grown.stat))
+        {
+            continue;
+        }
         const int value = definition.requirements.*grown.value;
         // The weights grow the value without going down: the smallest that reaches it.
         int low = 0;
