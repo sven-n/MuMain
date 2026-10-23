@@ -18,13 +18,20 @@ struct ReadResult
 {
     std::map<int, std::string> names;
     std::vector<ItemDataIssue> issues;
+    int cutNames = 0;
 };
 
 ReadResult Read(const std::string& text)
 {
     ReadResult result;
-    Data::Monsters::ReadNpcNameText(text, "NpcName_Eng.txt", result.names, result.issues);
+    result.cutNames = Data::Monsters::ReadNpcNameText(text, "NpcName_Eng.txt", result.names, result.issues);
     return result;
+}
+
+// A line of a name file with the number and the name.
+std::string NameLine(int number, const std::string& name)
+{
+    return std::to_string(number) + "\t1\t\"" + name + "\"\n";
 }
 
 bool HasIssueAbout(const std::vector<ItemDataIssue>& issues, const std::string& field, const std::string& message)
@@ -71,10 +78,29 @@ TEST_CASE("Name files: bad lines, numbers outside 0-1023 and doubles are skipped
 
 TEST_CASE("Name files: a name longer than the game holds is cut [data][monsters]")
 {
-    const ReadResult read = Read("7\t1\t\"" + std::string(70, 'x') + "\"\n");
+    // An emoji counts as two, as the game holds it in UTF-16.
+    const std::string emoji = "\xF0\x9F\x90\x89";
+    const ReadResult read = Read(NameLine(7, std::string(70, 'x')) + NameLine(8, std::string(63, 'y') + emoji) +
+                                 NameLine(9, std::string(62, 'z') + emoji));
 
     CHECK(HasIssueAbout(read.issues, "line 1", "was cut"));
+    CHECK(HasIssueAbout(read.issues, "line 2", "was cut"));
+    CHECK(read.cutNames == 2);
     CHECK(read.names.at(7) == std::string(64, 'x'));
+    CHECK(read.names.at(8) == std::string(63, 'y'));
+    CHECK(read.names.at(9) == std::string(62, 'z') + emoji);
+}
+
+TEST_CASE("Name files: a name that is not UTF-8 is skipped with a warning [data][monsters]")
+{
+    // "Dragão" in Windows-1252.
+    const ReadResult read = Read("2\t1\t\"Drag\xE3o\"\r\n"
+                                 "3\t1\t\"Drag\xC3\xA3o\"\r\n");
+
+    CHECK_FALSE(HasErrors(read.issues));
+    CHECK(HasIssueAbout(read.issues, "line 1", "not UTF-8"));
+    CHECK_FALSE(read.names.contains(2));
+    CHECK(read.names.at(3) == "Drag\xC3\xA3o");
 }
 
 TEST_CASE("Name files: written sorted with an end line, and read back the same [data][monsters]")

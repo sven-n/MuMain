@@ -83,7 +83,8 @@ void Warn(std::vector<ItemDataIssue>& issues, const std::string& source, int mon
     issues.push_back({ItemDataIssueSeverity::Warning, source, ItemDataIssue::NoItem, monster, field, message});
 }
 
-void AddName(NameLine line, const std::string& source, const std::string& field, std::map<int, std::string>& names,
+// Adds the name of the line; true when it was cut.
+bool AddName(NameLine line, const std::string& source, const std::string& field, std::map<int, std::string>& names,
              std::vector<ItemDataIssue>& issues)
 {
     if (line.number < 0 || line.number >= MonsterNumberCount)
@@ -91,26 +92,37 @@ void AddName(NameLine line, const std::string& source, const std::string& field,
         Warn(issues, source, ItemDataIssue::NoItem, field,
              "monster " + std::to_string(line.number) + " is not a number from 0 to " +
                  std::to_string(MonsterNumberCount - 1) + "; skipped");
-        return;
+        return false;
     }
     if (names.contains(line.number))
     {
         Warn(issues, source, line.number, field,
              "monster " + std::to_string(line.number) + " has a name already; this one is skipped");
-        return;
+        return false;
     }
-    if (Core::Text::CutToUtf16Length(line.name, MaxMonsterNameLength))
+    // The game read the names as UTF-8; a file saved in another encoding
+    // would give a garbled name.
+    if (!Core::Text::IsValidUtf8(line.name))
+    {
+        Warn(issues, source, line.number, field,
+             "the name of monster " + std::to_string(line.number) + " is not UTF-8; skipped");
+        return false;
+    }
+    const bool cut = Core::Text::CutToUtf16Length(line.name, MaxMonsterNameLength);
+    if (cut)
     {
         Warn(issues, source, line.number, field,
              "the name is longer than " + std::to_string(MaxMonsterNameLength) + " characters and was cut");
     }
     names.emplace(line.number, std::move(line.name));
+    return cut;
 }
 } // namespace
 
-void ReadNpcNameText(std::string_view text, const std::string& source, std::map<int, std::string>& names,
-                     std::vector<ItemDataIssue>& issues)
+int ReadNpcNameText(std::string_view text, const std::string& source, std::map<int, std::string>& names,
+                    std::vector<ItemDataIssue>& issues)
 {
+    int cutNames = 0;
     size_t lineNumber = 0;
     while (!text.empty())
     {
@@ -135,8 +147,12 @@ void ReadNpcNameText(std::string_view text, const std::string& source, std::map<
             Warn(issues, source, ItemDataIssue::NoItem, field, "not <number> <number> \"<name>\"; skipped");
             continue;
         }
-        AddName(std::move(*parsed), source, field, names, issues);
+        if (AddName(std::move(*parsed), source, field, names, issues))
+        {
+            ++cutNames;
+        }
     }
+    return cutNames;
 }
 
 std::string WriteNpcNameText(const std::map<int, std::string>& names, std::vector<ItemDataIssue>& issues)
