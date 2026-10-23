@@ -384,7 +384,8 @@ placeholder is one of:
   strength and agility reductions) and `missing…` (what the hero lacks of it, 0
   when nothing), and the item's add option (the potions', scrolls', seals' and
   charms' effect in the game's ItemAddOption data): `addOptionValue1`,
-  `addOptionValue2` and `addOptionDuration`, a text such as "1 Hour";
+  `addOptionValue2` and `addOptionDuration`, a text such as "1 Hour"; and the
+  hero's `heroLevel`;
 - a **level bonus table** of [`Stats/ItemStats.json`](#item-stats-by-level),
   as `table:` and its name: the table's value at the item's + level
   (`{table:damageIncreaseWeapons}` is 3 at +1 and 66 at +15, the damage a
