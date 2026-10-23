@@ -40,12 +40,12 @@ void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatP
                           const std::string& statFile, std::vector<ItemDataIssue>& issues);
 
 // The placeholders of the items' descriptions, written in place or in a shared text of `tooltips`, against the item
-// stat file (`statFile` names it in messages). A placeholder is a built-in value, a table of the file, one the line's
-// "values" names, or one of the item's "levelValues"; another name is an error, with the nearest known name when it
-// looks like a typo. A line's "values" names a built-in value or a table; a line that shows a level value is shown only
-// at levels that have one; a level value's name is not a built-in value or a table. A table of the file that neither a
-// stat nor a description uses, and a level value no line shows, are warnings. The braces and the translations are
-// checked by ValidateItems.
+// stat file (`statFile` names it in messages). A placeholder is a built-in value, "table:" and a table of the file, one
+// the line's "values" names, or one of the item's "levelValues"; another name is an error, with the nearest known name
+// when it looks like a typo. The line's values and the item's level values are its own names: they win over a
+// built-in value of the same name. A line's "values" names a built-in value or a table; a line that shows a level
+// value is shown only at levels that have one. A table of the file that neither a stat nor a description uses, and a
+// level value no line shows, are warnings. The braces and the translations are checked by ValidateItems.
 void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
                                      const ItemTooltipFile& tooltips, const std::string& statFile,
                                      std::vector<ItemDataIssue>& issues);

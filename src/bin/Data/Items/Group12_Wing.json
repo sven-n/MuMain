@@ -14,11 +14,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "wingDamageIncrease1st"}
+          "values": {"percent": "table:wingDamageIncrease1st"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "wingDamageAbsorb1st"}
+          "values": {"percent": "table:wingDamageAbsorb1st"}
         },
         {
           "text": "@increaseSpeed"
@@ -51,11 +51,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "wingDamageIncrease1st"}
+          "values": {"percent": "table:wingDamageIncrease1st"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "wingDamageAbsorb1st"}
+          "values": {"percent": "table:wingDamageAbsorb1st"}
         },
         {
           "text": "@increaseSpeed"
@@ -89,11 +89,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "wingDamageIncrease1st"}
+          "values": {"percent": "table:wingDamageIncrease1st"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "wingDamageAbsorb1st"}
+          "values": {"percent": "table:wingDamageAbsorb1st"}
         },
         {
           "text": "@increaseSpeed"
@@ -127,11 +127,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "wingDamageIncrease2nd"}
+          "values": {"percent": "table:wingDamageIncrease2nd"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "wingDamageAbsorb2nd"}
+          "values": {"percent": "table:wingDamageAbsorb2nd"}
         },
         {
           "text": "@increaseSpeed"
@@ -199,11 +199,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "wingDamageIncrease2nd"}
+          "values": {"percent": "table:wingDamageIncrease2nd"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "wingDamageAbsorb2nd"}
+          "values": {"percent": "table:wingDamageAbsorb2nd"}
         },
         {
           "text": "@increaseSpeed"
@@ -271,11 +271,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "wingDamageIncrease2nd"}
+          "values": {"percent": "table:wingDamageIncrease2nd"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "wingDamageAbsorb2nd"}
+          "values": {"percent": "table:wingDamageAbsorb2nd"}
         },
         {
           "text": "@increaseSpeed"
@@ -343,11 +343,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "wingDamageIncrease2nd"}
+          "values": {"percent": "table:wingDamageIncrease2nd"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "wingDamageAbsorb2nd"}
+          "values": {"percent": "table:wingDamageAbsorb2nd"}
         },
         {
           "text": "@increaseSpeed"
@@ -917,7 +917,7 @@
       "nameLines": [
         {
           "text": {
-            "en": "{name} x{bundleCount}"
+            "en": "{name} x{table:bundleCount}"
           },
           "color": "yellow"
         }
@@ -946,7 +946,7 @@
       "nameLines": [
         {
           "text": {
-            "en": "{name} x{bundleCount}"
+            "en": "{name} x{table:bundleCount}"
           },
           "color": "yellow"
         }
@@ -1080,11 +1080,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "wingDamageIncrease3rd"}
+          "values": {"percent": "table:wingDamageIncrease3rd"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "wingDamageAbsorb3rd"}
+          "values": {"percent": "table:wingDamageAbsorb3rd"}
         },
         {
           "text": "@increaseSpeed"
@@ -1152,11 +1152,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "wingDamageIncrease3rd"}
+          "values": {"percent": "table:wingDamageIncrease3rd"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "wingDamageAbsorb3rd"}
+          "values": {"percent": "table:wingDamageAbsorb3rd"}
         },
         {
           "text": "@increaseSpeed"
@@ -1224,11 +1224,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "wingDamageIncrease3rd"}
+          "values": {"percent": "table:wingDamageIncrease3rd"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "wingDamageAbsorb3rd"}
+          "values": {"percent": "table:wingDamageAbsorb3rd"}
         },
         {
           "text": "@increaseSpeed"
@@ -1296,11 +1296,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "wingDamageIncrease3rd"}
+          "values": {"percent": "table:wingDamageIncrease3rd"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "wingDamageAbsorb3rd"}
+          "values": {"percent": "table:wingDamageAbsorb3rd"}
         },
         {
           "text": "@increaseSpeed"
@@ -1368,11 +1368,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "wingDamageIncrease3rd"}
+          "values": {"percent": "table:wingDamageIncrease3rd"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "capeDamageAbsorb3rd"}
+          "values": {"percent": "table:capeDamageAbsorb3rd"}
         },
         {
           "text": "@increaseSpeed"
@@ -1440,11 +1440,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "wingDamageIncrease1st"}
+          "values": {"percent": "table:wingDamageIncrease1st"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "wingDamageAbsorb1st"}
+          "values": {"percent": "table:wingDamageAbsorb1st"}
         },
         {
           "text": "@increaseSpeed"
@@ -1477,11 +1477,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "wingDamageIncrease2nd"}
+          "values": {"percent": "table:wingDamageIncrease2nd"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "wingDamageAbsorb2nd"}
+          "values": {"percent": "table:wingDamageAbsorb2nd"}
         },
         {
           "text": "@increaseSpeed"
@@ -1549,11 +1549,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "wingDamageIncrease3rd"}
+          "values": {"percent": "table:wingDamageIncrease3rd"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "wingDamageAbsorb3rd"}
+          "values": {"percent": "table:wingDamageAbsorb3rd"}
         },
         {
           "text": "@increaseSpeed"
@@ -1718,11 +1718,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "capeDamageIncrease"}
+          "values": {"percent": "table:capeDamageIncrease"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "capeOfFighterDamageAbsorb"}
+          "values": {"percent": "table:capeOfFighterDamageAbsorb"}
         }
       ],
       "nameLines": [
@@ -1787,11 +1787,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "wingDamageIncrease3rd"}
+          "values": {"percent": "table:wingDamageIncrease3rd"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "capeDamageAbsorb3rd"}
+          "values": {"percent": "table:capeDamageAbsorb3rd"}
         },
         {
           "text": "@increaseSpeed"
@@ -2924,11 +2924,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "capeDamageIncrease"}
+          "values": {"percent": "table:capeDamageIncrease"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "smallCapeDamageAbsorb"}
+          "values": {"percent": "table:smallCapeDamageAbsorb"}
         },
         {
           "text": "@increaseSpeed"
@@ -2967,11 +2967,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "wingDamageIncrease1st"}
+          "values": {"percent": "table:wingDamageIncrease1st"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "wingDamageAbsorb1st"}
+          "values": {"percent": "table:wingDamageAbsorb1st"}
         },
         {
           "text": "@increaseSpeed"
@@ -3010,11 +3010,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "wingDamageIncrease1st"}
+          "values": {"percent": "table:wingDamageIncrease1st"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "wingDamageAbsorb1st"}
+          "values": {"percent": "table:wingDamageAbsorb1st"}
         },
         {
           "text": "@increaseSpeed"
@@ -3053,11 +3053,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "wingDamageIncrease1st"}
+          "values": {"percent": "table:wingDamageIncrease1st"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "wingDamageAbsorb1st"}
+          "values": {"percent": "table:wingDamageAbsorb1st"}
         },
         {
           "text": "@increaseSpeed"
@@ -3097,11 +3097,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "wingDamageIncrease1st"}
+          "values": {"percent": "table:wingDamageIncrease1st"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "wingDamageAbsorb1st"}
+          "values": {"percent": "table:wingDamageAbsorb1st"}
         },
         {
           "text": "@increaseSpeed"
@@ -3141,11 +3141,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "capeDamageIncrease"}
+          "values": {"percent": "table:capeDamageIncrease"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "smallCapeDamageAbsorb"}
+          "values": {"percent": "table:smallCapeDamageAbsorb"}
         },
         {
           "text": "@increaseSpeed"
@@ -3184,7 +3184,7 @@
       "nameLines": [
         {
           "text": {
-            "en": "{name} x{bundleCount}"
+            "en": "{name} x{table:bundleCount}"
           },
           "color": "yellow"
         }
@@ -3214,7 +3214,7 @@
       "nameLines": [
         {
           "text": {
-            "en": "{name} x{bundleCount}"
+            "en": "{name} x{table:bundleCount}"
           },
           "color": "yellow"
         }
@@ -3244,7 +3244,7 @@
       "nameLines": [
         {
           "text": {
-            "en": "{name} x{bundleCount}"
+            "en": "{name} x{table:bundleCount}"
           },
           "color": "yellow"
         }
@@ -3274,7 +3274,7 @@
       "nameLines": [
         {
           "text": {
-            "en": "{name} x{bundleCount}"
+            "en": "{name} x{table:bundleCount}"
           },
           "color": "yellow"
         }
@@ -3304,7 +3304,7 @@
       "nameLines": [
         {
           "text": {
-            "en": "{name} x{bundleCount}"
+            "en": "{name} x{table:bundleCount}"
           },
           "color": "yellow"
         }
@@ -3334,7 +3334,7 @@
       "nameLines": [
         {
           "text": {
-            "en": "{name} x{bundleCount}"
+            "en": "{name} x{table:bundleCount}"
           },
           "color": "yellow"
         }
@@ -3364,7 +3364,7 @@
       "nameLines": [
         {
           "text": {
-            "en": "{name} x{bundleCount}"
+            "en": "{name} x{table:bundleCount}"
           },
           "color": "yellow"
         }
@@ -3394,7 +3394,7 @@
       "nameLines": [
         {
           "text": {
-            "en": "{name} x{bundleCount}"
+            "en": "{name} x{table:bundleCount}"
           },
           "color": "yellow"
         }
