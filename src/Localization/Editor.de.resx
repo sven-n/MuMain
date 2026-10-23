@@ -2183,7 +2183,7 @@
     <value>Items importieren</value>
   </data>
   <data name="The checks refuse the change" xml:space="preserve">
-    <value>Die Prüfungen lehnen die Änderung ab; die Zeilen der Items mit Fehlern haben keinen Haken mehr:</value>
+    <value>Die Prüfungen lehnen die Änderung ab; die Zeilen der Items mit Fehlern haben keinen Haken mehr, und alle Formelzeilen, wenn die Formeln einen Fehler haben:</value>
   </data>
   <data name="Fields of {0}" xml:space="preserve">
     <value>Felder von {0}</value>

@@ -369,6 +369,40 @@ TEST_CASE("Formulas the item stat file's checks refuse are not taken [data][item
     CHECK(*applied.formulas == *sides.client.formulas);
 }
 
+// A refusal by the formulas cannot be traced back to a formula row: the window unchecks them all,
+// so the next Apply does not fail the same way.
+TEST_CASE("Item Sync unchecks the formula rows when the formulas refuse an import [data][items][editor]")
+{
+    Sides sides;
+    g_ItemEdits.GetHistory().Clear();
+    ItemStatFile& formulas = *sides.file.formulas;
+    LevelBonusTable table = formulas.tables.front();
+    table.name = "runeTable";
+    formulas.tables.push_back(table);
+    for (WrittenStatProfile& profile : formulas.profiles)
+    {
+        if (profile.name == "armor")
+        {
+            profile.stats[static_cast<size_t>(ItemStat::Defense)].table = "runeTable";
+        }
+    }
+    TemporaryFolder folder;
+    const std::filesystem::path file = folder.Path() / "ItemExchange.json";
+    WriteFile(file, WriteItemExchangeJson(sides.file));
+
+    g_MuItemSyncUI.Compare(file);
+    REQUIRE(g_MuItemSyncUI.GetDiff());
+    // The term, not the table it names.
+    for (SyncFormula& row : g_MuItemSyncUI.GetDiff()->formulas)
+    {
+        row.checked = row.entry != "tables.runeTable";
+    }
+    CHECK_FALSE(g_MuItemSyncUI.Apply());
+    REQUIRE(g_MuItemSyncUI.GetDiff());
+    CHECK(std::ranges::none_of(g_MuItemSyncUI.GetDiff()->formulas, &SyncFormula::checked));
+    CHECK_FALSE(g_ItemEdits.GetHistory().CanUndo());
+}
+
 // The window's Import: the checked rows change the client's data as one step of the undo
 // history, which undoes them all.
 TEST_CASE("Item Sync imports the checked rows of a file as one undo step [data][items][editor]")

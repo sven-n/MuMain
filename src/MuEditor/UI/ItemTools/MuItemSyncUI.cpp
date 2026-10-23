@@ -597,16 +597,26 @@ bool CMuItemSyncUI::Apply()
         m_result.clear();
         m_messages.clear();
         m_messages.push_back(I18N::Editor::TheChecksRefuseTheChange);
+        bool formulasRefused = false;
         for (const ItemDataIssue& issue : issues)
         {
             m_messages.push_back(issue.ToString());
-            // The rows of the items with errors are unchecked.
+            // The rows of the items with errors are unchecked; an error of no item is one of the
+            // formulas, which an issue cannot trace back to its row: all of them are unchecked.
+            formulasRefused = formulasRefused || issue.group == ItemDataIssue::NoItem;
             for (SyncItem& row : m_diff->items)
             {
                 if (row.group == issue.group && row.number == issue.number)
                 {
                     SetRowChecked(row, false);
                 }
+            }
+        }
+        if (formulasRefused)
+        {
+            for (SyncFormula& row : m_diff->formulas)
+            {
+                row.checked = false;
             }
         }
         m_messagesAreErrors = true;

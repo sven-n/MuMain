@@ -2204,7 +2204,7 @@
     <value>Import items</value>
   </data>
   <data name="The checks refuse the change" xml:space="preserve">
-    <value>The checks refuse the change; the rows of the items with errors are unchecked:</value>
+    <value>The checks refuse the change; the rows of the items with errors are unchecked, and all formula rows when the formulas have one:</value>
   </data>
   <data name="Fields of {0}" xml:space="preserve">
     <value>Fields of {0}</value>
