@@ -137,6 +137,17 @@ TEST_CASE("A tooltip file's typos are errors with the name meant [data][items][t
     error(R"("defense": {"en": "Defense: {defense}", "de": "Verteidigung: {defens}"})", R"({"text": "@defense"},)",
           "texts.defense.de", "the English text {defense}");
     error("", R"({"when": ["defense"]},)", "layouts[0].lines[1]", "must have a \"text\"");
+    // A reference that's like no text names none.
+    error(defense, R"({"text": "@nothing"},)", "layouts[0].lines[1].text", "\"@nothing\" is not a text of \"texts\"");
+    CHECK_FALSE(Read(TooltipFile(defense, R"({"text": "@nothing"},)"))
+                    .Has(ItemDataIssueSeverity::Error, "layouts[0].lines[1].text", "did you mean"));
+    // A translation that drops a placeholder, adds one, or breaks a brace.
+    error(R"("defense": {"en": "Defense: {defense}", "de": "Verteidigung"})", R"({"text": "@defense"},)",
+          "texts.defense.de", "the English text {defense}");
+    error(R"("defense": {"en": "Defense: {defense}", "de": "Verteidigung: {defense} {level}"})",
+          R"({"text": "@defense"},)", "texts.defense.de", "the English text {defense}");
+    error(R"("defense": {"en": "Defense: {defense}", "de": "Verteidigung: defense}"})", R"({"text": "@defense"},)",
+          "texts.defense.de", "without its \"{\"");
 }
 
 TEST_CASE("A tooltip layout has the four sections once each, in their order [data][items][tooltip]")
@@ -163,6 +174,12 @@ TEST_CASE("A tooltip file needs the default layout [data][items][tooltip]")
 {
     const ReadResult result = Read(R"({"formatVersion": 1, "layouts": []})");
     CHECK(result.Has(ItemDataIssueSeverity::Error, "layouts", "must have the layout \"default\""));
+
+    // A layout of another name doesn't stand in for it.
+    const ReadResult other = Read(R"({"formatVersion": 1, "layouts": [{"name": "compact", "lines": [
+        {"section": "name"}, {"section": "description"}, {"section": "classes"}, {"section": "options"}]}]})");
+    CHECK(other.Has(ItemDataIssueSeverity::Error, "layouts", "must have the layout \"default\""));
+    CHECK(other.Has(ItemDataIssueSeverity::Warning, "layouts[0].name", "only the \"default\" layout is used"));
 }
 
 TEST_CASE("A tooltip file warns about what nothing uses [data][items][tooltip]")
