@@ -119,7 +119,7 @@ TEST_CASE("Item attribute conversion keeps every field [data][items]")
 }
 
 // The editor rebuilds an item from its bmd attribute, which has no tooltip data: the fields the attribute lacks come
-// from the item as it was, its description lines and level values whole.
+// from the item as it was, its description lines, level values and name lines whole.
 TEST_CASE("Converting from the item attribute keeps the client-only fields [data][items]")
 {
     ItemDefinition source = MakeItem(SwordGroup, 0, "Kris");
@@ -143,6 +143,14 @@ TEST_CASE("Converting from the item attribute keeps the client-only fields [data
     ItemLevelValue sharedStat;
     sharedStat.textName = "stamina";
     source.levelValues = {{"stat", {stat, sharedStat}}};
+    ItemNameLine olive;
+    olive.text.Set("en", "Olive of love");
+    olive.hasText = true;
+    olive.color = ItemTextColor::Yellow;
+    olive.hasColor = true;
+    olive.minLevel = 4;
+    olive.maxLevel = 4;
+    source.nameLines = {olive};
     source.statProfile = "weapon";
 
     // As the bmd import makes it: the attribute's fields, nothing of the tooltip.
@@ -152,6 +160,7 @@ TEST_CASE("Converting from the item attribute keeps the client-only fields [data
 
     CHECK(target.description == source.description);
     CHECK(target.levelValues == source.levelValues);
+    CHECK(target.nameLines == source.nameLines);
     CHECK(target.statProfile == "weapon");
     // The attribute's own fields stay the imported ones.
     CHECK(target.names.GetNeutral() == "Kris of the bmd");
