@@ -393,7 +393,7 @@ TEST_CASE("Item stat file warnings [data][items]")
     CHECK(HasIssue(excellentAfter.issues, Severity::Warning, "default.defense.excellent.afterLevelBonus"));
 
     // A table no stat uses can be one for item descriptions, so the file alone does not warn about it
-    // (ValidateDescriptionPlaceholders does, with the items).
+    // (ValidateTableUses does, with the items).
     const ReadResult unusedTable = Read(Changed(R"("defense": {"table": "linear", )", R"("defense": {)"));
     CHECK(unusedTable.issues.empty());
     CHECK_FALSE(ItemStatProfiles(unusedTable.file).IsTableUsedByStats("linear"));
