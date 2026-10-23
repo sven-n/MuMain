@@ -31,6 +31,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Physics/PhysicsManager.h"
 #include "GameLogic/Items/ItemStats.h"
+#include "Core/Text/Utf8.h"
 #include "I18N/All.h"
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
@@ -74,6 +75,7 @@
 #include <fstream>
 #include <initializer_list>
 #include <memory>
+#include <optional>
 #include <random>
 #include <span>
 #include <string>
@@ -241,6 +243,7 @@ TEST_CASE("The shipped descriptions' placeholders are built-in values or stat fi
     REQUIRE_FALSE(HasErrors(stats.issues));
     std::vector<ItemDataIssue> issues;
     ValidateDescriptionPlaceholders(result.items, ItemStatProfiles(stats.file), ItemStatsFileName, issues);
+    ValidateTableUses(result.items, ItemStatProfiles(stats.file), ItemStatsFileName, issues);
     for (const ItemDataIssue& issue : issues)
     {
         INFO(issue.ToString());
@@ -248,13 +251,32 @@ TEST_CASE("The shipped descriptions' placeholders are built-in values or stat fi
     }
 }
 
-// The lines the tooltip code wrote for the wings, capes and pets before they were their descriptions, as it printed
-// them in English: the old formulas, to compare the data with.
-std::vector<std::string> OldWingAndPetLines(int group, int number, int level)
+// A line the tooltip code wrote for the wings, capes and pets before it was their descriptions: one of the game's
+// texts that other code still prints ("Increase %d%% of Damage", "Absorb %d%% of Damage", "Increase speed") with its
+// value, or another text, in English.
+struct OldWingLine
 {
-    const auto increase = [](int value) { return "Increase " + std::to_string(value) + "% of Damage"; };
-    const auto absorb = [](int value) { return "Absorb " + std::to_string(value) + "% of Damage"; };
-    const std::string speed = "Increase speed";
+    enum class Kind
+    {
+        Increase,
+        Absorb,
+        Speed,
+        Other,
+    };
+    Kind kind;
+    int value = 0;
+    std::string english;
+
+    bool operator==(const OldWingLine&) const = default;
+};
+
+// The old formulas, to compare the data with.
+std::vector<OldWingLine> OldWingAndPetLines(int group, int number, int level)
+{
+    const auto increase = [](int value) { return OldWingLine{OldWingLine::Kind::Increase, value}; };
+    const auto absorb = [](int value) { return OldWingLine{OldWingLine::Kind::Absorb, value}; };
+    const OldWingLine speed{OldWingLine::Kind::Speed};
+    const auto other = [](const char* english) { return OldWingLine{OldWingLine::Kind::Other, 0, english}; };
     const auto in = [&](std::initializer_list<int> numbers)
     { return std::find(numbers.begin(), numbers.end(), number) != numbers.end(); };
     if (group == 12 && in({0, 1, 2, 41, 131, 132, 133, 134}))
@@ -291,13 +313,70 @@ std::vector<std::string> OldWingAndPetLines(int group, int number, int level)
     }
     if (group == 13 && number == 0)
     {
-        return {absorb(20), "Max HP +50 increased"};
+        return {absorb(20), other("Max HP +50 increased")};
     }
     if (group == 13 && number == 1)
     {
-        return {"Increase 30% of attacking & Wizardry Dmg"};
+        return {other("Increase 30% of attacking & Wizardry Dmg")};
     }
     return {};
+}
+
+// What the old code printed for the line in the UI's language: the game's text with its value, as printf fills
+// "%d" and "%%" (the only conversions these texts have); another text only in English.
+std::optional<std::string> PrintOldWingLine(const OldWingLine& line)
+{
+    const wchar_t* format = nullptr;
+    switch (line.kind)
+    {
+    case OldWingLine::Kind::Increase:
+        format = I18N::Game::IncreaseDOfDamage;
+        break;
+    case OldWingLine::Kind::Absorb:
+        format = I18N::Game::AbsorbDOfDamage;
+        break;
+    case OldWingLine::Kind::Speed:
+        format = I18N::Game::IncreaseSpeed;
+        break;
+    case OldWingLine::Kind::Other:
+        return std::nullopt;
+    }
+    const std::string text = Core::Text::ToUtf8(format);
+    std::string printed;
+    for (size_t position = 0; position < text.size(); ++position)
+    {
+        if (text.compare(position, 2, "%%") == 0)
+        {
+            printed += '%';
+            ++position;
+        }
+        else if (text.compare(position, 2, "%d") == 0)
+        {
+            printed += std::to_string(line.value);
+            ++position;
+        }
+        else
+        {
+            printed += text[position];
+        }
+    }
+    return printed;
+}
+
+std::string EnglishOldWingLine(const OldWingLine& line)
+{
+    switch (line.kind)
+    {
+    case OldWingLine::Kind::Increase:
+        return "Increase " + std::to_string(line.value) + "% of Damage";
+    case OldWingLine::Kind::Absorb:
+        return "Absorb " + std::to_string(line.value) + "% of Damage";
+    case OldWingLine::Kind::Speed:
+        return "Increase speed";
+    case OldWingLine::Kind::Other:
+        break;
+    }
+    return line.english;
 }
 
 TEST_CASE("The wings', capes' and pets' tooltip values come from their data as from the old formulas [data][items]")
@@ -316,12 +395,24 @@ TEST_CASE("The wings', capes' and pets' tooltip values come from their data as f
         for (int level = 0; level < ItemLevelCount; ++level)
         {
             INFO(item.group << "/" << item.number << " +" << level);
-            std::vector<std::string> lines;
-            for (const ItemDescriptionLine& line : item.description)
+            const std::vector<OldWingLine> old = OldWingAndPetLines(item.group, item.number, level);
+            REQUIRE(item.description.size() == old.size());
+            for (size_t index = 0; index < old.size(); ++index)
             {
-                lines.push_back(FillPlaceholders(line.text.GetNeutral(), level, profiles));
+                const Data::LocalizedString& text = item.description[index].text;
+                CHECK(FillPlaceholders(text.GetNeutral(), level, profiles) == EnglishOldWingLine(old[index]));
+                // In every language, as the game's texts that other code still prints have it.
+                for (const char* locale : I18N::GetAvailableLocales())
+                {
+                    INFO(locale);
+                    I18N::SetLocale(locale);
+                    if (const std::optional<std::string> printed = PrintOldWingLine(old[index]))
+                    {
+                        CHECK(FillPlaceholders(text.Get(locale), level, profiles) == *printed);
+                    }
+                }
+                I18N::SetLocale("en");
             }
-            CHECK(lines == OldWingAndPetLines(item.group, item.number, level));
             ++compared;
         }
     }
