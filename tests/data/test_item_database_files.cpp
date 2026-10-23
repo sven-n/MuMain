@@ -19,6 +19,7 @@
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
+#include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 #include "Data/GameData/ItemData/ItemNames.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
@@ -77,6 +78,7 @@
 #include <initializer_list>
 #include <memory>
 #include <optional>
+#include <sstream>
 #include <random>
 #include <span>
 #include <string>
@@ -802,13 +804,23 @@ TEST_CASE("The second item chain's tooltip texts come from the descriptions as f
 }
 
 // The translations of those texts are the ones the old code showed: item_chain_texts_before.json records them from the
-// .resx before the texts moved (a format filled in with the item's values), by the English text.
+// .resx before the texts moved (a format filled in with the item's values), by the English text. A line that names a
+// shared text is checked by that text of the tooltip file.
 TEST_CASE("The second item chain's tooltip texts keep their translations [data][items]")
 {
     const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
     std::ifstream file(std::filesystem::path(MU_TEST_CHAIN_TEXTS_BEFORE));
     REQUIRE(file);
     const nlohmann::json before = nlohmann::json::parse(file).at("texts");
+    ItemTooltipFile tooltips;
+    {
+        std::ifstream tooltipFile(DataDirectory / "Items" / "Tooltips" / "Tooltip.json", std::ios::binary);
+        REQUIRE(tooltipFile);
+        std::ostringstream tooltipText;
+        tooltipText << tooltipFile.rdbuf();
+        std::vector<ItemDataIssue> issues;
+        ReadItemTooltipJson(tooltipText.str(), "Tooltip.json", tooltips, issues);
+    }
     int checked = 0;
     for (const OldChainItem& old : OldChainLines())
     {
@@ -817,7 +829,14 @@ TEST_CASE("The second item chain's tooltip texts keep their translations [data][
         REQUIRE(found != result.items.end());
         for (size_t index = 0; index < old.lines.size(); ++index)
         {
-            const std::string english = found->description[index].text.GetNeutral();
+            const ItemDescriptionLine& line = found->description[index];
+            const Data::LocalizedString* text = &line.text;
+            if (!line.textName.empty())
+            {
+                text = tooltips.FindText(line.textName);
+                REQUIRE(text != nullptr);
+            }
+            const std::string english = text->GetNeutral();
             const auto recorded = before.find(english);
             if (recorded == before.end())
             {
@@ -826,7 +845,7 @@ TEST_CASE("The second item chain's tooltip texts keep their translations [data][
             for (const auto& [locale, translation] : recorded->items())
             {
                 INFO(old.group << "/" << old.number << " line " << index << " " << locale);
-                CHECK(found->description[index].text.Get(locale) == translation.get<std::string>());
+                CHECK(text->Get(locale) == translation.get<std::string>());
                 ++checked;
             }
         }
