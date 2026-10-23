@@ -29,6 +29,15 @@ std::string_view ObjectKindName(int objectKind)
     }
 }
 
+std::optional<int> MonsterNumberOf(const CHARACTER& character)
+{
+    if (character.MonsterIndex == MONSTER_UNDEFINED)
+    {
+        return std::nullopt;
+    }
+    return static_cast<int>(character.MonsterIndex);
+}
+
 Events::ObjectDescription DescribeGameObject(int key)
 {
     Events::ObjectDescription description;
@@ -48,6 +57,7 @@ Events::ObjectDescription DescribeGameObject(int key)
     const CHARACTER& character = CharactersClient[index];
     description.name = Core::Text::ToUtf8(character.ID);
     description.kind = ObjectKindName(character.Object.Kind);
+    description.monster = MonsterNumberOf(character);
     description.x = character.PositionX;
     description.y = character.PositionY;
     description.known = true;

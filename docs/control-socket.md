@@ -67,7 +67,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `ping` | build identifier, the git `commit` the client was built from (`commit_changed` when tracked files differed from it), and the current scene |
 | `scene` | which screen the client is on: `login`, `character_list`, `world`, … |
 | `state` | the character and everything around it (see below) |
-| `nearby` | the objects the client can see |
+| `nearby` | the objects the client can see, with their monster numbers |
 | `events` (`since`, `follow`) | recorded events, or a live stream of them |
 | `wait-for` (`event`, `match`, `timeout`) | block until a matching event arrives |
 | `screenshot` (`out`, `quality`) | capture the next frame as a JPEG to a path; without `out` it names itself, uniquely per capture; `quality` 1 to 100, default 100 |
@@ -137,6 +137,12 @@ a drop, and `unknown` for anything else. Monster, npc, trap and other are the
 kinds of the monster list (`Data/Monsters/Monsters.json`); summons and
 transformed players are `player`.
 
+A character also carries `monster`, the monster number the server created it
+with (the `number` in the monster list), or `null` for a player. Summons and
+transformed players have one too, with the kind `player`. Monster and NPC
+`name`s are in the client's language, so a script finds an NPC by its
+`monster` number rather than by its name.
+
 Each `nearby` object carries `id`, `kind`, `name`, `position`, and a player,
 monster or NPC also `alive`, `level` and `hp_percent`. `hp_percent` is a
 percentage of full health (`100` is untouched) and is `null` when the server
@@ -195,7 +201,7 @@ strictly increasing `seq`, a UTC `time` and its own fields:
 
 | Event | Fields |
 |---|---|
-| `hit` | `direction` (`dealt`/`received`), `attacker`/`target` `{id,name,kind}`, `damage`, `shield_damage`, `critical`, `missed` |
+| `hit` | `direction` (`dealt`/`received`), `attacker`/`target` `{id,name,kind,monster}`, `damage`, `shield_damage`, `critical`, `missed` |
 | `killed` | `victim`, `killer` |
 | `stat` | `stat` (`life`, `mana`, `sd`, `ag`, `level`, `experience_gained` — the experience of one kill, and `damage_dealt` with it — the cumulative total is `state.experience`), `value`, `max` |
 | `chat` | `sender`, `text`, `kind` (`public`, `whisper`, `party`, `guild`, `union`, `gens`, `gm`) |
