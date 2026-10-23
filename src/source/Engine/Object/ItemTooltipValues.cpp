@@ -94,7 +94,9 @@ void ComputeRequirements(const ITEM& item, ItemTooltipValues& values)
         strengthReduction = harmony.SI_NB.SI_force;
         dexterityReduction = harmony.SI_NB.SI_activity;
     }
-    for (int socket = 0; socket < item.SocketCount; ++socket)
+    // The count comes from the server; a bad one must not read past the item's sockets.
+    const int socketCount = std::min<int>(item.SocketCount, MAX_SOCKETS);
+    for (int socket = 0; socket < socketCount; ++socket)
     {
         if (item.SocketSeedID[socket] == 38)
         {
