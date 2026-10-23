@@ -597,6 +597,12 @@ TEST_CASE("A transformation ring's restriction comes after its option lines [dat
 
         const auto at = std::find_if(lines.begin(), lines.end(),
                                      [&](const ItemTooltipLine& line) { return line.text == restriction; });
+        std::string shown;
+        for (const ItemTooltipLine& line : lines)
+        {
+            shown += Core::Text::ToUtf8(line.text.c_str()) + " | ";
+        }
+        INFO(shown);
         REQUIRE(at != lines.end());
         int lastOption = -1;
         for (int index = 0; index < static_cast<int>(lines.size()); ++index)
@@ -659,7 +665,7 @@ TEST_CASE("The Command Fruit's class line and the Wizard's Ring's lines follow t
 }
 
 // The standard name's color, by precedence: ancient, socket, excellent with an option, +7 and above, an option, else
-// white. The name is the tooltip's first line.
+// white. The name is the tooltip's first line that isn't blank.
 TEST_CASE("A tooltip's name color goes by the item's kind, level and options in their order [data][items][tooltip]")
 {
     ClientDataScope client(ClientDirectory);
@@ -679,8 +685,10 @@ TEST_CASE("A tooltip's name color goes by the item's kind, level and options in 
         kris.IsAncient = ancient;
         kris.AncientDiscriminator = ancient ? 1 : 0;
         const std::vector<ItemTooltipLine> lines = TooltipOfParameters(kris);
-        REQUIRE_FALSE(lines.empty());
-        return lines.front();
+        const auto name = std::find_if(lines.begin(), lines.end(),
+                                       [](const ItemTooltipLine& line) { return line.text != L"\n"; });
+        REQUIRE(name != lines.end());
+        return *name;
     };
 
     const ItemTooltipLine plain = name(0, false, false, false);
@@ -707,7 +715,7 @@ TEST_CASE("A tooltip's name color goes by the item's kind, level and options in 
 }
 
 // The quests, the mixes, the server's messages and the ground labels name an item with GetItemName: for every item at
-// every level, the name is the tooltip's first line, which the recorded snapshot covers.
+// every level, the name is the tooltip's first line that isn't blank, which the recorded snapshot covers.
 TEST_CASE("Every item's name at every level is its tooltip's name [data][items][tooltip]")
 {
     ClientDataScope client(ClientDirectory);
@@ -731,7 +739,10 @@ TEST_CASE("Every item's name at every level is its tooltip's name [data][items][
             ItemCreationParams params = FullItemParameters(definition.group, definition.number);
             params.Level = static_cast<BYTE>(level);
             const std::vector<ItemTooltipLine> lines = TooltipOfParameters(params);
-            if (lines.empty())
+            // The name is the first line that isn't blank.
+            const auto first = std::find_if(lines.begin(), lines.end(),
+                                            [](const ItemTooltipLine& line) { return line.text != L"\n"; });
+            if (first == lines.end())
             {
                 continue;
             }
@@ -740,12 +751,12 @@ TEST_CASE("Every item's name at every level is its tooltip's name [data][items][
             wchar_t buffer[128] = L"";
             GetItemName(type, level, buffer);
             ++names;
-            if (name != lines.front().text || std::wstring(buffer) != name)
+            if (name != first->text || std::wstring(buffer) != name)
             {
                 if (++different <= 5)
                 {
                     INFO(definition.group << "/" << definition.number << " +" << level);
-                    CHECK(Core::Text::ToUtf8(name.c_str()) == Core::Text::ToUtf8(lines.front().text.c_str()));
+                    CHECK(Core::Text::ToUtf8(name.c_str()) == Core::Text::ToUtf8(first->text.c_str()));
                     CHECK(Core::Text::ToUtf8(buffer) == Core::Text::ToUtf8(name.c_str()));
                 }
             }
