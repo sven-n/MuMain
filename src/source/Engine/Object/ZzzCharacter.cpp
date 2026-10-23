@@ -15143,17 +15143,21 @@ CHARACTER* CreateHellGate(char* ID, int Key, EMonsterType Index, int x, int y, i
 {
     CHARACTER* portal = CreateMonster(Index, x, y, Key);
     portal->Level = Index - 152 + 1;
-    wchar_t portalText[100];
-    wchar_t name[sizeof portal->ID];
 
-    CMultiLanguage::ConvertFromUtf8(name, ID);
+    // The packet's name holds MAX_USERNAME_SIZE bytes, without a terminator when it is full.
+    wchar_t ownerName[MAX_USERNAME_SIZE + 1]{};
+    CMultiLanguage::ConvertFromUtf8(ownerName, ID, MAX_USERNAME_SIZE);
 
-    mu_swprintf(portalText, portal->ID, name);
+    // The gate's name is a format that takes the owner's name ("Magic stone of %s").
+    // _TRUNCATE: swprintf_s would abort the MSVC client on a long name.
+    wchar_t gateName[MAX_MONSTER_NAME + 1]{};
+    static_assert(sizeof gateName == sizeof portal->ID);
+    _snwprintf_s(gateName, std::size(gateName), _TRUNCATE, portal->ID, ownerName);
 
     if (portal->Level == 7)
         portal->Object.SubType = 1;
 
-    memcpy(portal->ID, portalText, sizeof portalText);
+    memcpy(portal->ID, gateName, sizeof gateName);
 
     if (CreateFlag)
     {
