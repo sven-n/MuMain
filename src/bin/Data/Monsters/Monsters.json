@@ -2609,12 +2609,12 @@
     {
       "number": 566,
       "name": {"en": "Mercenary Guild Manager Tercia", "es": "Tercia de Encargados del Gremio Mercenario", "pt": "Administrador da Guilda Mercenária Tercia"},
-      "kind": "monster"
+      "kind": "npc"
     },
     {
       "number": 567,
       "name": {"en": "Priestess Veina", "es": "Sacerdotisa Veina", "pt": "Sacerdotisa Veina"},
-      "kind": "monster"
+      "kind": "npc"
     },
     {
       "number": 568,

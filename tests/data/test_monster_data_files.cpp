@@ -156,6 +156,16 @@ TEST_CASE("Shipped monster list: OpenMU's statues 658-668 have its English names
     }
 }
 
+TEST_CASE("Shipped monster list: Tercia and Veina are NPCs [data][monsters]")
+{
+    // The old rules made them monsters (P7 of the monsters design).
+    const Data::Monsters::MonsterDataLoadResult loaded =
+        Data::Monsters::LoadMonstersFile(ClientData / "Monsters" / "Monsters.json");
+
+    CHECK(FindMonster(loaded.monsters, 566)->kind == Data::Monsters::MonsterKind::Npc);
+    CHECK(FindMonster(loaded.monsters, 567)->kind == Data::Monsters::MonsterKind::Npc);
+}
+
 TEST_CASE("Monster data: the game's load fills the table, errors stop it [data][monsters]")
 {
     SUBCASE("the shipped file")
