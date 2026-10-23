@@ -672,8 +672,8 @@ void ValidateWingLines(const std::map<WingKey, std::vector<const ItemDefinition*
             if (WingLines(*wing) != WingLines(*most))
             {
                 warn(*wing, "its wing lines are not those of the other " + DescribeWingKind(tier, cape) + " of group " +
-                                std::to_string(group) + ": it has " + DescribeWingLines(*wing, tooltips) + ", they have " +
-                                DescribeWingLines(*most, tooltips));
+                                std::to_string(group) + ": it has " + DescribeWingLines(*wing, tooltips) +
+                                ", they have " + DescribeWingLines(*most, tooltips));
             }
         }
     }
