@@ -2113,6 +2113,11 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         case 0: mu_swprintf(TextList[TextNum], I18N::Game::AbsoluteStaffOfArchangel); break;
         case 1: mu_swprintf(TextList[TextNum], I18N::Game::AbsoluteSwordOfArchangel); break;
         case 2: mu_swprintf(TextList[TextNum], I18N::Game::AbsoluteCrossbowOfArchangel); break;
+        // The item exists at +0 to +2; at another level (the tooltip snapshot draws every level) its own name, not the
+        // row an earlier tooltip left.
+        default:
+            mu_swprintf(TextList[TextNum], L"%ls", p->Name);
+            break;
         }
     }
     else if (ip->Type == ITEM_WIZARDS_RING)
@@ -2356,9 +2361,10 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     if (ip->Type == ITEM_WEAPON_OF_ARCHANGEL)
     {
         int iMana;
-        int iWeaponSpeed;
-        int iNeedStrength;
-        int iNeedDex;
+        // 0 at a level the item doesn't have (it exists at +0 to +2), instead of whatever the stack held.
+        int iWeaponSpeed = 0;
+        int iNeedStrength = 0;
+        int iNeedDex = 0;
 
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         mu_swprintf(TextList[TextNum], I18N::Game::QuestItem); TextBold[TextNum] = false; TextNum++;
