@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <iterator>
 #include <map>
 #include <set>
 #include <string>
@@ -494,14 +495,19 @@ WingsByLines SortByLines(const std::vector<const ItemDefinition*>& wings)
     return sorted;
 }
 
-// The lines most of the wings have, or nothing when two sets of lines are as common.
+// The lines most of the wings that have lines have, or nothing when two sets of lines are as common. Wings without
+// lines never set the lines the others are compared with: new wings imported without their lines, more of them than
+// there are wings with them, would otherwise point at the wings that have them.
 const ItemDefinition* FindMostLines(const WingsByLines& sorted)
 {
-    if (sorted.empty() || (sorted.size() > 1 && sorted[0].size() == sorted[1].size()))
+    WingsByLines withLines;
+    std::copy_if(sorted.begin(), sorted.end(), std::back_inserter(withLines),
+                 [](const std::vector<const ItemDefinition*>& having) { return !having.front()->description.empty(); });
+    if (withLines.empty() || (withLines.size() > 1 && withLines[0].size() == withLines[1].size()))
     {
         return nullptr;
     }
-    return sorted[0].front();
+    return withLines[0].front();
 }
 
 using WingKey = std::tuple<WingTier, bool, int>;
