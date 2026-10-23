@@ -6,13 +6,10 @@
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/DataHandler/TextFile.h"
-#include "Data/GameData/MonsterData/LegacyMonsterKind.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonstersJson.h"
-#include "Engine/Object/ZzzInfomation.h"
 
 #include <algorithm>
-#include <cstring>
 #include <filesystem>
 #include <random>
 #include <string>
@@ -22,9 +19,6 @@ using Data::Items::HasErrors;
 using Data::Items::ItemDataIssue;
 using Data::Items::ItemDataIssueSeverity;
 using Data::Monsters::MonsterDefinition;
-
-// The number of monsters the old loader has filled in; reset to read another file.
-extern int EditMonsterNumber;
 
 namespace
 {
@@ -38,19 +32,6 @@ std::string Messages(const std::vector<ItemDataIssue>& issues)
         text += issue.ToString() + "\n";
     }
     return text;
-}
-
-// The old getMonsterName: the first entry of the name file with this number.
-const wchar_t* OldMonsterName(int number)
-{
-    for (int i = 0; i < MAX_MONSTER; ++i)
-    {
-        if (MonsterScript[i].Type == number)
-        {
-            return MonsterScript[i].Name;
-        }
-    }
-    return L"()";
 }
 
 const MonsterDefinition* FindMonster(const std::vector<MonsterDefinition>& monsters, int number)
@@ -133,59 +114,6 @@ TEST_CASE("Shipped monster list: the names the old name file test asked for [dat
     CHECK(FindMonster(loaded.monsters, 89)->names.Get("es") == "Esqueleto Mágico");
     CHECK(FindMonster(loaded.monsters, 566)->names.Get("pt") == "Administrador da Guilda Mercenária Tercia");
     CHECK(FindMonster(loaded.monsters, 566)->names.Get("es") == "Tercia de Encargados del Gremio Mercenario");
-}
-
-// One-time check (monsters design, D50): the monster list gives the names of
-// NpcName_<lang>.txt as the old loader read them, and the kinds of the old
-// rules, for every number; so do getMonsterName and the name Setting_Monster
-// copies. Deleted with the name files and the old loader.
-TEST_CASE("One-time: the monster list holds the names of the name files and the old kinds [data][monsters]")
-{
-    const Data::Monsters::MonsterDataLoadResult loaded =
-        Data::Monsters::LoadMonstersFile(ClientData / "Monsters" / "Monsters.json");
-    REQUIRE_FALSE(HasErrors(loaded.issues));
-
-    std::vector<int> numbers = {-1, Data::Monsters::MonsterNumberCount, 65535};
-    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
-    {
-        numbers.push_back(number);
-    }
-
-    struct Language
-    {
-        const char* folder;
-        const char* locale;
-    };
-    for (const Language language : {Language{"Eng", "en"}, Language{"Por", "pt"}, Language{"Spn", "es"}})
-    {
-        CAPTURE(language.locale);
-        std::memset(MonsterScript, 0, sizeof MonsterScript);
-        EditMonsterNumber = 0;
-        std::wstring nameFile =
-            (ClientData / "Local" / language.folder / (std::string("NpcName_") + language.folder + ".txt")).wstring();
-        OpenMonsterScript(nameFile.data());
-        g_MonsterDatabase.Build(loaded.monsters, language.locale);
-
-        for (int number : numbers)
-        {
-            CAPTURE(number);
-            const std::wstring oldName = OldMonsterName(number);
-            CHECK(oldName == std::wstring(getMonsterName(number)));
-            // Setting_Monster copied the old name when the file had the number,
-            // and copies the table's name when the table has an entry.
-            const bool oldHasEntry = oldName != L"()";
-            CHECK(oldHasEntry == (g_MonsterDatabase.Find(number) != nullptr));
-            if (oldHasEntry)
-            {
-                CHECK(oldName == std::wstring(g_MonsterDatabase.FindDisplayName(number)));
-            }
-        }
-    }
-    for (int number : numbers)
-    {
-        CAPTURE(number);
-        CHECK(Data::Monsters::GetMonsterObjectKind(number) == Data::Monsters::GetLegacyObjectKind(number));
-    }
 }
 
 TEST_CASE("Monster data: the game's load fills the table, errors stop it [data][monsters]")

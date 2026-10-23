@@ -53,9 +53,9 @@ target_compile_definitions(server_list_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
-# The monster list (Data/Monsters/Monsters.json) and the name files of the
-# original client (NpcName_<lang>.txt). The one-time comparison reads the name
-# files with the old loader, which needs the client globals of Winmain.cpp.
+# The monster list (Data/Monsters/Monsters.json), its table and the format of
+# the original client's name files. The table needs the client globals of
+# Winmain.cpp.
 mu_add_test(
     NAME monster_data_tests
     SOURCES
