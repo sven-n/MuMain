@@ -381,7 +381,10 @@ TEST_CASE("A description line's item levels are kept through write and read, and
     CHECK(WriteItemGroupJson(14, result.items) == text);
 
     for (const char* levels : {R"("levels": [8, 1])", R"("levels": [0, 16])", R"("levels": [-1, 2])",
-                               R"("levels": [3])", R"("levels": 3)", R"("levels": [1.5, 2])"})
+                               R"("levels": [3])", R"("levels": 3)", R"("levels": [1.5, 2])",
+                               // Outside int's range: they'd wrap into a level (2^32 + 1 into 1) if read as an int.
+                               R"("levels": [4294967297, 4294967298])", R"("levels": [-4294967295, 2])",
+                               R"("levels": [0, 18446744073709551615])", R"("levels": [-9223372036854775808, 2])"})
     {
         INFO(levels);
         const ReadResult bad = Read(std::string(R"({"formatVersion": 1, "group": 14, "items": [
