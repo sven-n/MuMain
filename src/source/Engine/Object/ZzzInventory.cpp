@@ -41,6 +41,7 @@
 #include "Render/Items/ItemDisplay.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Core/Text/TextLineWrap.h"
 #include "Core/Text/Utf8.h"
 #include "UI/Scaling/UITransform.h"
@@ -1630,13 +1631,14 @@ void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int 
 // original tooltips.
 static constexpr int ItemDescriptionWrapWidth = 200;
 
-void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, ItemTooltipTextMeasure measure)
+void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, int level, ItemTooltipTextMeasure measure)
 {
     const int lastRow = std::min(TextNum + MaxItemDescriptionRows, static_cast<int>(std::size(TextList)));
     for (const Data::Items::ItemDescriptionLine& line : definition.description)
     {
         // In the UI's language, also when the item names stay English ("Translate item names" off).
-        const std::wstring text = Core::Text::FromUtf8(line.text.Get(I18N::GetCurrentLocale()));
+        const std::wstring text = Core::Text::FromUtf8(Data::Items::FillPlaceholders(
+            line.text.Get(I18N::GetCurrentLocale()), level, g_ItemDatabase.GetStatProfiles()));
         // A blank line is one blank piece. So is a blank line inside a text (`\n\n`, or a text that starts with
         // `\n`): a row left empty would end the tooltip there.
         const std::vector<std::wstring> pieces =
@@ -3792,7 +3794,7 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
     if (const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(ip->Type))
     {
         g_pRenderText->SetFont(g_hFont);
-        WriteItemDescriptionLines(*definition, [](const wchar_t* text, size_t length) -> int
+        WriteItemDescriptionLines(*definition, Level, [](const wchar_t* text, size_t length) -> int
                                   { return g_pRenderText->MeasureText(text, static_cast<int>(length)).cx; });
     }
     if (ip->Type == ITEM_TOWN_PORTAL_SCROLL && Level >= 1 && Level <= 8)

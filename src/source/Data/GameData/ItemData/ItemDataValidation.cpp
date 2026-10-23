@@ -2,6 +2,7 @@
 
 #include "ItemDataValidation.h"
 #include "ItemAttributeConversion.h"
+#include "ItemDescriptionPlaceholders.h"
 #include "ItemEnumNames.h"
 #include "ItemType.h"
 #include "Core/Text/Utf8.h"
@@ -79,8 +80,34 @@ void ValidateName(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
         check(locale, text);
     }
 }
+// The field of a description line's text in one language, as the item file writes it.
+std::string DescriptionTextField(size_t line, std::string_view locale)
+{
+    std::string field = "description[" + std::to_string(line) + "].text";
+    if (locale != LocalizedString::NeutralLocale)
+    {
+        field += "." + std::string(locale);
+    }
+    return field;
+}
+
+std::string ListPlaceholders(const std::set<std::string>& names)
+{
+    if (names.empty())
+    {
+        return "none";
+    }
+    std::string list;
+    for (const std::string& name : names)
+    {
+        list += (list.empty() ? "{" : ", {") + name + "}";
+    }
+    return list;
+}
+
 // A description line's text is written like a name: an English text, and translations under language codes. A blank
-// line has no text in any language.
+// line has no text in any language. The braces of its placeholders are checked in every language, and each
+// translation has the placeholders of the English text.
 void ValidateDescription(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
 {
     for (size_t index = 0; index < definition.description.size(); ++index)
@@ -90,10 +117,16 @@ void ValidateDescription(const ItemDefinition& definition, std::vector<ItemDataI
         {
             continue;
         }
-        const std::string field = "description[" + std::to_string(index) + "].text";
+        const std::string field = DescriptionTextField(index, LocalizedString::NeutralLocale);
         if (text.GetNeutral().empty())
         {
             AddIssue(issues, ItemDataIssueSeverity::Error, definition, "the English text is missing", field.c_str());
+        }
+        const PlaceholderScan english = ScanPlaceholders(text.GetNeutral());
+        const std::set<std::string> englishNames(english.names.begin(), english.names.end());
+        if (!english.error.empty())
+        {
+            AddIssue(issues, ItemDataIssueSeverity::Error, definition, english.error, field.c_str());
         }
         for (const auto& [locale, translation] : text.GetTranslations())
         {
@@ -101,6 +134,21 @@ void ValidateDescription(const ItemDefinition& definition, std::vector<ItemDataI
             {
                 AddIssue(issues, ItemDataIssueSeverity::Error, definition,
                          "\"" + locale + "\" is not a language code (letters, digits and \"-\" only)", field.c_str());
+            }
+            const std::string translationField = DescriptionTextField(index, locale);
+            const PlaceholderScan scan = ScanPlaceholders(translation);
+            if (!scan.error.empty())
+            {
+                AddIssue(issues, ItemDataIssueSeverity::Error, definition, scan.error, translationField.c_str());
+                continue;
+            }
+            const std::set<std::string> names(scan.names.begin(), scan.names.end());
+            if (english.error.empty() && names != englishNames)
+            {
+                AddIssue(issues, ItemDataIssueSeverity::Error, definition,
+                         "has the placeholders " + ListPlaceholders(names) + ", the English text " +
+                             ListPlaceholders(englishNames),
+                         translationField.c_str());
             }
         }
     }
@@ -316,6 +364,58 @@ void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatP
     }
 }
 
+void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
+                                     const std::string& statFile, std::vector<ItemDataIssue>& issues)
+{
+    std::vector<std::string> known(GetBuiltInPlaceholders().begin(), GetBuiltInPlaceholders().end());
+    for (const std::string& table : profiles.GetTableNames())
+    {
+        known.push_back(MakeTablePlaceholder(table));
+    }
+    for (const ItemDefinition& definition : items)
+    {
+        if (!definition.Exists())
+        {
+            continue;
+        }
+        for (size_t line = 0; line < definition.description.size(); ++line)
+        {
+            // The translations have the English text's placeholders (ValidateItems checks that).
+            const PlaceholderScan scan = ScanPlaceholders(definition.description[line].text.GetNeutral());
+            std::set<std::string> reported;
+            for (const std::string& name : scan.names)
+            {
+                if (GetPlaceholderValue(name, 0, profiles) || !reported.insert(name).second)
+                {
+                    continue;
+                }
+                // A table written without "table:" is suggested with it. Its own name comes first, also when it is
+                // close to a built-in value: {levels} for the table "levels" is not {level}.
+                std::string suggestion;
+                if (GetPlaceholderTable(name).empty() && profiles.FindTable(name) != nullptr)
+                {
+                    suggestion = MakeTablePlaceholder(name);
+                }
+                else
+                {
+                    suggestion = SuggestPlaceholder(name, known);
+                    if (suggestion.empty() && GetPlaceholderTable(name).empty())
+                    {
+                        suggestion = SuggestPlaceholder(MakeTablePlaceholder(name), known);
+                    }
+                }
+                const std::string hint = suggestion.empty() ? "a placeholder is a built-in value ({" +
+                                                                  std::string(LevelPlaceholder) + "}) or a table of " +
+                                                                  statFile + " ({" + MakeTablePlaceholder("name") + "})"
+                                                            : "did you mean {" + suggestion + "}?";
+                issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number,
+                                  DescriptionTextField(line, LocalizedString::NeutralLocale),
+                                  "has the unknown placeholder {" + name + "}; " + hint});
+            }
+        }
+    }
+}
+
 void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const char* const> uiLocales,
                          std::vector<ItemDataIssue>& issues)
 {
@@ -344,10 +444,9 @@ void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const 
             {
                 if (!isShown(locale))
                 {
-                    const std::string field = "description[" + std::to_string(index) + "].text";
                     AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
                              "the " + locale + " text is never shown: the game has no texts in that language",
-                             field.c_str());
+                             DescriptionTextField(index, LocalizedString::NeutralLocale).c_str());
                 }
             }
         }

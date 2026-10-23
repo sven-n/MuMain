@@ -1,0 +1,217 @@
+#include "stdafx.h"
+
+#include "doctest.h"
+
+#include "Data/GameData/ItemData/ItemDataValidation.h"
+#include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
+#include "Data/GameData/ItemData/ItemStatFile.h"
+#include "Data/GameData/ItemData/ItemStatProfiles.h"
+
+#include <algorithm>
+#include <string>
+#include <vector>
+
+using namespace Data::Items;
+
+namespace
+{
+// A stat file with one table: 2 at +0, then 3 more per level.
+ItemStatProfiles MakeProfiles()
+{
+    ItemStatFile file;
+    LevelBonusTable table;
+    table.name = "wingDamage";
+    table.values.fill(2);
+    table.perLevel = 3;
+    file.tables.push_back(table);
+    return ItemStatProfiles(file);
+}
+
+// A stat file with one table of `name` that is `value` at every level.
+ItemStatProfiles MakeProfilesWithTable(const std::string& name, int value)
+{
+    ItemStatFile file;
+    LevelBonusTable table;
+    table.name = name;
+    table.values.fill(value);
+    file.tables.push_back(table);
+    return ItemStatProfiles(file);
+}
+
+ItemDefinition MakeJewel(const std::string& english)
+{
+    ItemDefinition jewel;
+    jewel.group = 14;
+    jewel.number = 13;
+    jewel.names.Set("en", "Jewel of Bless");
+    ItemDescriptionLine line;
+    line.text.Set("en", english);
+    jewel.description = {line};
+    return jewel;
+}
+
+// The issues of `field`.
+std::vector<ItemDataIssue> IssuesOf(const std::vector<ItemDataIssue>& issues, const std::string& field)
+{
+    std::vector<ItemDataIssue> found;
+    std::copy_if(issues.begin(), issues.end(), std::back_inserter(found),
+                 [&](const ItemDataIssue& issue) { return issue.field == field; });
+    return found;
+}
+
+std::vector<ItemDataIssue> CheckSyntax(const ItemDefinition& item)
+{
+    std::vector<ItemDataIssue> issues;
+    ValidateItems(std::vector<ItemDefinition>{item}, issues);
+    return issues;
+}
+
+std::vector<ItemDataIssue> CheckNames(const ItemDefinition& item, const ItemStatProfiles& profiles = MakeProfiles())
+{
+    std::vector<ItemDataIssue> issues;
+    ValidateDescriptionPlaceholders(std::vector<ItemDefinition>{item}, profiles, "ItemStats.json", issues);
+    return issues;
+}
+} // namespace
+
+TEST_CASE("Description placeholders are read from their braces [data][items]")
+{
+    CHECK(ScanPlaceholders("Increases damage by 12%").names.empty());
+    CHECK(ScanPlaceholders("").names.empty());
+    CHECK(ScanPlaceholders("+{level}: {table:wingDamage}% and {level}").names ==
+          std::vector<std::string>{"level", "table:wingDamage", "level"});
+    CHECK_FALSE(ScanPlaceholders("up to {level").error.empty());
+    // Item texts have no braces of their own: a doubled one is a mistake too.
+    CHECK_FALSE(ScanPlaceholders("{{level}}").error.empty());
+    CHECK_FALSE(ScanPlaceholders("{level{table:wingDamage}").error.empty());
+    CHECK_FALSE(ScanPlaceholders("an empty {}").error.empty());
+    CHECK_FALSE(ScanPlaceholders("level} alone").error.empty());
+    CHECK_FALSE(ScanPlaceholders("{wing damage}").error.empty());
+    CHECK_FALSE(ScanPlaceholders("{wing_damage}").error.empty());
+    // "table:" takes a table's name, which is letters and digits too.
+    CHECK_FALSE(ScanPlaceholders("{table:}").error.empty());
+    CHECK_FALSE(ScanPlaceholders("{table:wing damage}").error.empty());
+    CHECK_FALSE(ScanPlaceholders("{stat:wingDamage}").error.empty());
+}
+
+TEST_CASE("Description placeholders get the item's values [data][items]")
+{
+    const ItemStatProfiles profiles = MakeProfiles();
+    CHECK(GetPlaceholderValue("level", 7, profiles) == 7);
+    CHECK(GetPlaceholderValue("table:wingDamage", 0, profiles) == 2);
+    CHECK(GetPlaceholderValue("table:wingDamage", 9, profiles) == 29);
+    CHECK_FALSE(GetPlaceholderValue("table:wingdamage", 9, profiles));
+    // A table is named only with "table:", so it never stands for a built-in value or the other way round.
+    CHECK_FALSE(GetPlaceholderValue("wingDamage", 9, profiles));
+    CHECK_FALSE(GetPlaceholderValue("table:level", 9, profiles));
+
+    CHECK(FillPlaceholders("Increases damage by {table:wingDamage} at +{level}", 4, profiles) ==
+          "Increases damage by 14 at +4");
+    CHECK(FillPlaceholders("no placeholders", 3, profiles) == "no placeholders");
+    // What has no value stays as written, from there on.
+    CHECK(FillPlaceholders("{level} and {unknown} and {level}", 2, profiles) == "2 and {unknown} and {level}");
+    CHECK(FillPlaceholders("{level} and {broken", 2, profiles) == "2 and {broken");
+}
+
+TEST_CASE("A typo in a description placeholder gets the nearest name [data][items]")
+{
+    const std::vector<std::string> known = {"level", "damageIncreaseWeapons", "defenseBonus1stWings"};
+    CHECK(SuggestPlaceholder("levl", known) == "level");
+    CHECK(SuggestPlaceholder("damgeIncreaseWeapons", known) == "damageIncreaseWeapons");
+    CHECK(SuggestPlaceholder("defenseBonus1stWing", known) == "defenseBonus1stWings");
+    // Three letters away is another name, not a typo.
+    CHECK(SuggestPlaceholder("defenseBonus2ndWings", known).empty());
+    CHECK(SuggestPlaceholder("durability", known).empty());
+}
+
+TEST_CASE("A table's placeholders are found and renamed [data][items]")
+{
+    CHECK(MakeTablePlaceholder("wingDamage") == "table:wingDamage");
+    CHECK(GetPlaceholderTable("table:wingDamage") == "wingDamage");
+    CHECK(GetPlaceholderTable("level").empty());
+
+    CHECK(NamesTable("+{table:wingDamage} at +{level}", "wingDamage"));
+    CHECK_FALSE(NamesTable("+{table:wingDamage2} at +{level}", "wingDamage"));
+    CHECK_FALSE(NamesTable("+{wingDamage}", "wingDamage"));
+
+    CHECK(RenameTablePlaceholders("{table:wingDamage}, {table:wingDamage2} and {table:wingDamage}", "wingDamage",
+                                  "wingDamageIncrease") ==
+          "{table:wingDamageIncrease}, {table:wingDamage2} and {table:wingDamageIncrease}");
+    CHECK(RenameTablePlaceholders("no placeholders", "wingDamage", "other") == "no placeholders");
+}
+
+TEST_CASE("Broken braces in a description are errors in every language [data][items]")
+{
+    CHECK(CheckSyntax(MakeJewel("Increases damage by {table:wingDamage}")).empty());
+
+    const std::vector<ItemDataIssue> english = IssuesOf(CheckSyntax(MakeJewel("up to {level")), "description[0].text");
+    REQUIRE(english.size() == 1);
+    CHECK(english.front().severity == ItemDataIssueSeverity::Error);
+
+    ItemDefinition translated = MakeJewel("up to +{level}");
+    translated.description[0].text.Set("de", "bis zu +{level");
+    const std::vector<ItemDataIssue> german = IssuesOf(CheckSyntax(translated), "description[0].text.de");
+    REQUIRE(german.size() == 1);
+    CHECK(german.front().severity == ItemDataIssueSeverity::Error);
+}
+
+TEST_CASE("A translation has the placeholders of the English text [data][items]")
+{
+    ItemDefinition jewel = MakeJewel("Increases damage by {table:wingDamage} at +{level}");
+    // Another order is fine.
+    jewel.description[0].text.Set("de", "Bei +{level}: Schaden +{table:wingDamage}");
+    // A typo, and a missing one.
+    jewel.description[0].text.Set("es", "Aumenta el daño en {table:wingDamge} a +{level}");
+    jewel.description[0].text.Set("pt", "Aumenta o dano em {table:wingDamage}");
+    const std::vector<ItemDataIssue> issues = CheckSyntax(jewel);
+    CHECK(IssuesOf(issues, "description[0].text.de").empty());
+    const std::vector<ItemDataIssue> spanish = IssuesOf(issues, "description[0].text.es");
+    REQUIRE(spanish.size() == 1);
+    CHECK(spanish.front().severity == ItemDataIssueSeverity::Error);
+    CHECK(spanish.front().message.find("{table:wingDamge}") != std::string::npos);
+    CHECK(IssuesOf(issues, "description[0].text.pt").size() == 1);
+}
+
+TEST_CASE("A table may be named like a built-in value [data][items]")
+{
+    // {level} stays the item's + level; {table:level} is the table.
+    const ItemStatProfiles profiles = MakeProfilesWithTable("level", 5);
+    CHECK(GetPlaceholderValue("level", 9, profiles) == 9);
+    CHECK(GetPlaceholderValue("table:level", 9, profiles) == 5);
+    CHECK(FillPlaceholders("+{level}: {table:level}", 9, profiles) == "+9: 5");
+    CHECK(CheckNames(MakeJewel("+{level}: {table:level}"), profiles).empty());
+}
+
+TEST_CASE("A description placeholder is a built-in value or a stat file table [data][items]")
+{
+    CHECK(CheckNames(MakeJewel("Increases damage by {table:wingDamage} at +{level}")).empty());
+    CHECK(CheckNames(MakeJewel("No placeholders")).empty());
+
+    const std::vector<ItemDataIssue> typo =
+        CheckNames(MakeJewel("Increases damage by {table:wingDamge}, {table:wingDamge}"));
+    REQUIRE(typo.size() == 1);
+    CHECK(typo.front().severity == ItemDataIssueSeverity::Error);
+    CHECK(typo.front().field == "description[0].text");
+    CHECK(typo.front().message == "has the unknown placeholder {table:wingDamge}; did you mean {table:wingDamage}?");
+
+    // A table without "table:" is a typo of its placeholder.
+    const std::vector<ItemDataIssue> bare = CheckNames(MakeJewel("Increases damage by {wingDamage}"));
+    REQUIRE(bare.size() == 1);
+    CHECK(bare.front().message.find("{table:wingDamage}") != std::string::npos);
+    // Also when the table's name is close to a built-in value: {levels} is the table "levels", not {level}.
+    const std::vector<ItemDataIssue> nearBuiltIn =
+        CheckNames(MakeJewel("+{levels}"), MakeProfilesWithTable("levels", 5));
+    REQUIRE(nearBuiltIn.size() == 1);
+    CHECK(nearBuiltIn.front().message == "has the unknown placeholder {levels}; did you mean {table:levels}?");
+
+    const std::vector<ItemDataIssue> unknown = CheckNames(MakeJewel("Durability {durability}"));
+    REQUIRE(unknown.size() == 1);
+    CHECK(unknown.front().message ==
+          "has the unknown placeholder {durability}; a placeholder is a built-in value ({level}) or a table of "
+          "ItemStats.json ({table:name})");
+
+    // A deleted item (no name) is not checked.
+    ItemDefinition deleted = MakeJewel("{durability}");
+    deleted.names = {};
+    CHECK(CheckNames(deleted).empty());
+}

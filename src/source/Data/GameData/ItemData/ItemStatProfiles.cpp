@@ -3,6 +3,8 @@
 #include "ItemStatProfiles.h"
 #include "ItemStatFile.h"
 
+#include <algorithm>
+
 namespace Data::Items
 {
 namespace
@@ -156,5 +158,23 @@ int ItemStatProfiles::GetLevelBonus(const StatTerms& terms, int level) const
         return 0;
     }
     return m_tables[static_cast<size_t>(terms.table)].GetBonus(level);
+}
+
+const LevelBonusTable* ItemStatProfiles::FindTable(std::string_view name) const
+{
+    const auto found = std::find_if(m_tables.begin(), m_tables.end(),
+                                    [&](const LevelBonusTable& table) { return table.name == name; });
+    return found != m_tables.end() ? &*found : nullptr;
+}
+
+std::vector<std::string> ItemStatProfiles::GetTableNames() const
+{
+    std::vector<std::string> names;
+    names.reserve(m_tables.size());
+    for (const LevelBonusTable& table : m_tables)
+    {
+        names.push_back(table.name);
+    }
+    return names;
 }
 } // namespace Data::Items

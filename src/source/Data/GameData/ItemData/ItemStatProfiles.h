@@ -96,6 +96,9 @@ public:
     }
 
     int GetLevelBonus(const StatTerms& terms, int level) const;
+    // The level bonus table of that name, or nullptr: what a description's placeholder names.
+    const LevelBonusTable* FindTable(std::string_view name) const;
+    std::vector<std::string> GetTableNames() const;
     int GetExcellentDropLevelBonus() const
     {
         return m_excellentDropLevelBonus;

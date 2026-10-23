@@ -4,6 +4,7 @@ mu_add_test(
         test_item_check_targets.cpp
         test_item_code_references.cpp
         test_item_database.cpp
+        test_item_description_placeholders.cpp
         test_item_edit_history.cpp
         test_item_json.cpp
         test_item_list_model.cpp

@@ -16,12 +16,14 @@ namespace Data::Items
 {
 // Checks rules across items that a single file cannot check: unique ids,
 // the required English name, and names that fit the LocalizedString format.
-// Appends the problems to `issues`.
+// Also the description texts: the English text, the language codes, the
+// braces in every language, and the English text's placeholders in each
+// translation. Appends the problems to `issues`.
 void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIssue>& issues);
 
-// A translation of an item name in a language the game has no texts for is
-// never shown: a warning for each. `uiLocales` are the game's languages
-// (I18N::GetAvailableLocales).
+// A translation of an item name or a description text in a language the game
+// has no texts for is never shown: a warning for each. `uiLocales` are the
+// game's languages (I18N::GetAvailableLocales).
 void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const char* const> uiLocales,
                          std::vector<ItemDataIssue>& issues);
 
@@ -35,6 +37,12 @@ void ValidateItemModels(std::span<const ItemModelDefinition> models, std::vector
 // warnings.
 void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
                           const std::string& statFile, std::vector<ItemDataIssue>& issues);
+
+// The placeholders of the items' descriptions against the item stat file (`statFile` names it in messages): a name
+// that is neither a built-in value nor "table:" and a table of the file is an error, with the nearest known name when
+// it looks like a typo. The braces and the translations are checked by ValidateItems.
+void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
+                                     const std::string& statFile, std::vector<ItemDataIssue>& issues);
 
 // Gives the model entries that name a shared model ("model") its file,
 // texture folders and none-blend meshes. A name that is not a shared model

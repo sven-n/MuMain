@@ -207,7 +207,8 @@ Each line is `{"text": ..., "color": ...}`:
 - **`text`** is written like `name`: a plain English text, or the texts by
   language. It is checked like a name too: the English text is required, a
   language code has only letters, digits and `-`, and a language the game
-  has no texts in is a warning.
+  has no texts in is a warning. A text can have
+  [placeholders](#description-placeholders).
 - **An empty text** (`{"text": ""}`) is a blank line.
 - **Long lines** wrap at about the width of the original tooltips' widest
   lines, and `\n` in a text breaks the line there (`\n\n` leaves a blank
@@ -229,6 +230,38 @@ In the tooltip:
   one never takes the room of the tooltip's other lines.
 - **Dark Horse and Dark Raven:** they show it only in shops; elsewhere the
   pet window writes their tooltip.
+
+### Description placeholders
+
+A description text can show values of the item: `{name}` is replaced by the
+value of `name` for the hovered item, e.g.
+`"Increases damage by {table:damageIncreaseWeapons} at +{level}"`. Item texts
+have no braces of their own, so every brace belongs to a placeholder. A
+placeholder is one of:
+
+- a **built-in value**, by its name: `{level}`, the item's + level;
+- a **level bonus table** of [`Stats/ItemStats.json`](#item-stats-by-level),
+  as `table:` and its name: the table's value at the item's + level
+  (`{table:damageIncreaseWeapons}` is 3 at +1 and 66 at +15, the damage a
+  weapon gains). A new table is a new placeholder.
+
+The tables are written apart from the built-in values, so a table may have
+any name, also one a later version gives a built-in value: `{level}` and
+`{table:level}` are not the same.
+
+**Errors** (when the item data loads, in the save checks and in Import from
+bmd):
+
+- a `{` without its `}`, an empty `{}`, a `}` without its `{`, or a name that is
+  not letters and digits (after `table:` for a table), in any language;
+- a translation whose placeholders are not those of the English text (another
+  order is fine);
+- a name that is neither built in nor a table: `has the unknown placeholder
+  {table:damgeIncreaseWeapons}; did you mean {table:damageIncreaseWeapons}?`.
+  A table written without `table:` gets the same hint.
+
+The shipped data is checked by the tests, so a wrong placeholder fails the
+build's tests.
 
 ### Rules
 
@@ -956,7 +989,8 @@ step of the undo history; renaming a color is left out.
 The [item stat file](#item-stats-by-level): its drop level bonus, the
 default, the profiles, the level bonus tables and the profile rules, each in
 the list with how
-many items use it (a table: how many stats name it; unused ones are grey).
+many items use it (a table: how many stats and item descriptions name it;
+unused ones are grey).
 The picked entry is changed on a copy and **Apply to the formulas** takes
 it: the file is checked first (written and read back, as Save Items does),
 and when the change reaches items (other values, or another profile when a
@@ -977,9 +1011,11 @@ applied, **New stat profile**, **New level bonus table**, **Copy**,
   in every item that names it. **Remove** works while no item and no rule
   uses the profile, **Remove them** for all such profiles.
 - **A table**: the bonus at each item level 0 to 15, what it adds for every
-  level (also above +15) and its English caption. New, copied, renamed (in
-  every stat that names it) and removed tables work like profiles; a table
-  is removed while no stat names it.
+  level (also above +15), its English caption and the items whose
+  descriptions name it. New, copied, renamed (in every stat and every item
+  description that names it, in every language) and removed tables work like
+  profiles; a table is removed while no stat and no item description names
+  it.
 - **Profile rules**: the rules in order, each with its profile, its
   conditions and how many items it gives their profile (the selected item's
   rule is marked). **New rule** adds a copy of the picked rule below it (or a
