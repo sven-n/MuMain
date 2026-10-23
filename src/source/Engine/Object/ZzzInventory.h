@@ -1,6 +1,7 @@
 #ifndef __ZZZINVENTORY_H__
 #define __ZZZINVENTORY_H__
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -100,6 +101,17 @@ namespace Data::Items
 struct ItemDefinition;
 }
 struct ItemTooltipValues;
+
+// The server's pet information that a Dark Lord pet's tooltip asks for: the Dark Horse's when it is pointed at as the
+// equipped helper, the Dark Raven's when it is pointed at in the left hand; nothing elsewhere. `inventype` is the
+// tooltip's storage.
+struct PetInfoRequest
+{
+    PetType pet;
+    StorageType storage;
+    BYTE slot;
+};
+std::optional<PetInfoRequest> GetPetInfoRequest(int itemType, int pointedIndex, int inventype);
 
 // How wide a text is in the tooltip's text units.
 using ItemTooltipTextMeasure = int (*)(const wchar_t* text, size_t length);

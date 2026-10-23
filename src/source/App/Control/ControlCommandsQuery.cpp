@@ -478,6 +478,15 @@ std::string State(const Request& request, std::unique_ptr<Act>&)
     return EncodeResult(request.EncodedId(), WorldStateObject());
 }
 
+namespace
+{
+// Reads the integer `key` into `value` when the request has it; false when it is not a number from 0 to `max`.
+bool ReadBounded(const Request& request, const char* key, int max, int& value)
+{
+    return !request.Has(key) || (request.GetInt(key, value) && value >= 0 && value <= max);
+}
+} // namespace
+
 std::string ItemTooltip(const Request& request, std::unique_ptr<Act>&)
 {
     int group = -1;
@@ -490,37 +499,51 @@ std::string ItemTooltip(const Request& request, std::unique_ptr<Act>&)
     }
 
     ItemCreationParams params = FullItemParameters(group, number);
-    int value = 0;
+    // The item's fields hold these values (as the item packet has them); a value they can't hold is a `bad_request`,
+    // not a wrapped one.
+    int level = params.Level;
+    int durability = params.Durability;
+    int option = 0;
+    int excellent = 0;
+    int ancient = 0;
+    int harmony = 0;
+    int harmonyLevel = params.HarmonyOptionLevel;
+    if (!ReadBounded(request, "level", Data::Items::ItemLevelCount - 1, level) ||
+        !ReadBounded(request, "durability", 255, durability) || !ReadBounded(request, "option", 15, option) ||
+        !ReadBounded(request, "excellent", 63, excellent) || !ReadBounded(request, "ancient", 255, ancient) ||
+        !ReadBounded(request, "harmony", 15, harmony) || !ReadBounded(request, "harmony_level", 15, harmonyLevel))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`level`, `option`, `harmony` and `harmony_level` are 0 to 15, `excellent` the excellent "
+                           "options' bits 0 to 63, `durability` and `ancient` 0 to 255");
+    }
+    params.Level = static_cast<BYTE>(level);
+    params.Durability = static_cast<BYTE>(durability);
     bool flag = false;
-    if (request.GetInt("level", value))
-        params.Level = static_cast<BYTE>(value);
-    if (request.GetInt("durability", value))
-        params.Durability = static_cast<BYTE>(value);
     if (request.GetBool("luck", flag))
         params.WithLuck = flag;
     if (request.GetBool("skill", flag))
         params.WithSkill = flag;
-    if (request.GetInt("option", value) && value > 0)
+    if (option > 0)
     {
         params.WithOption = true;
-        params.OptionLevel = static_cast<BYTE>(value);
+        params.OptionLevel = static_cast<BYTE>(option);
     }
-    if (request.GetInt("excellent", value) && value > 0)
+    if (excellent > 0)
     {
         params.HasExcellentOption = true;
-        params.ExcellentFlags = static_cast<BYTE>(value);
+        params.ExcellentFlags = static_cast<BYTE>(excellent);
     }
-    if (request.GetInt("ancient", value) && value > 0)
+    if (ancient > 0)
     {
         params.IsAncient = true;
-        params.AncientDiscriminator = static_cast<BYTE>(value);
+        params.AncientDiscriminator = static_cast<BYTE>(ancient);
     }
-    if (request.GetInt("harmony", value) && value > 0)
+    if (harmony > 0)
     {
         params.HasHarmonyOption = true;
-        params.HarmonyOptionType = static_cast<BYTE>(value);
-        if (request.GetInt("harmony_level", value))
-            params.HarmonyOptionLevel = static_cast<BYTE>(value);
+        params.HarmonyOptionType = static_cast<BYTE>(harmony);
+        params.HarmonyOptionLevel = static_cast<BYTE>(harmonyLevel);
     }
 
     const std::vector<ItemTooltipLine> lines = TooltipOfParameters(params);
@@ -557,6 +580,12 @@ std::string ItemTooltipSnapshot(const Request& request, std::unique_ptr<Act>&)
     }
 
     const int tooltips = WriteItemTooltipSnapshot(out, onlyGroup);
+    // A full disk or a failed write leaves the file short: not a snapshot.
+    out.flush();
+    if (!out)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Failed, "the file could not be written completely");
+    }
 
     json result;
     result["tooltips"] = tooltips;
