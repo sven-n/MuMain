@@ -2114,9 +2114,82 @@ TEST_CASE(
     RenderItemTool(g_MuItemRequirementsUI, true);
     RenderItemTool(g_MuItemRequirementsUI, true);
 
-    // The weight list asks; nothing is stored until one is taken.
-    CHECK(OpenPopupWindow() != nullptr);
-    CHECK(g_ItemDatabase.Find(KrisType)->requirements.strength == typedWeight);
+    // The weight list asks; nothing is stored until one is taken. Also not when
+    // the list takes the keyboard from the weight field: activated by
+    // navigation, as this test clicks, it became active a frame before the +0
+    // field was reported left, with the weight of the typed value.
+    for (int frame = 0; frame < 3; ++frame)
+    {
+        INFO("frame " << frame);
+        CHECK(OpenPopupWindow() != nullptr);
+        CHECK(g_ItemDatabase.Find(KrisType)->requirements.strength == typedWeight);
+        RenderItemTool(g_MuItemRequirementsUI, true);
+    }
+    g_ItemEdits.GetHistory().Clear();
+}
+
+// A click from a +0 value into the +0 field of a requirement drawn above it
+// makes that field active, earlier in the same frame, before the first one is
+// reported left: the typed value still asks for its own weight.
+TEST_CASE("A +0 value left by a click into the +0 field above it still asks for its weight [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    g_ItemSelection.Select(KrisType);
+    const ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+    REQUIRE(MuEditor::Items::HasWeight(kris, ItemRequirement::Strength));
+    REQUIRE(MuEditor::Items::HasWeight(kris, ItemRequirement::Dexterity));
+    int value = MuEditor::Items::ComputeZeroValue(kris, ItemRequirement::Dexterity) + 1;
+    while (MuEditor::Items::FindWeightsGiving(kris, ItemRequirement::Dexterity, value).GetCount() < 2)
+    {
+        ++value;
+        REQUIRE(value < 1000);
+    }
+    REQUIRE(MuEditor::Items::ChooseWeight(kris, ItemRequirement::Dexterity, value, kris.requirements.dexterity).kind ==
+            MuEditor::Items::WeightChoice::Kind::Pick);
+
+    TestImGuiContext context;
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    const ImGuiID strength =
+        ItemToolFieldId(MuEditor::WindowIds::ItemRequirements, {KrisType, static_cast<int>(ItemRequirement::Strength)},
+                        I18N::Metadata::ReqStrength);
+    const ImGuiID dexterity =
+        ItemToolFieldId(MuEditor::WindowIds::ItemRequirements, {KrisType, static_cast<int>(ItemRequirement::Dexterity)},
+                        I18N::Metadata::ReqDexterity);
+    ImGui::ActivateItemByID(dexterity);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    REQUIRE(ImGui::GetActiveID() == dexterity);
+    RenderItemTool(g_MuItemRequirementsUI, true, std::to_string(value).c_str());
+    ImGui::ActivateItemByID(strength);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+
+    // The list asks, and nothing is stored until a weight is taken.
+    for (int frame = 0; frame < 3; ++frame)
+    {
+        INFO("frame " << frame);
+        RenderItemTool(g_MuItemRequirementsUI, true);
+        CHECK(OpenPopupWindow() != nullptr);
+        CHECK(g_ItemDatabase.Find(KrisType)->requirements.strength == kris.requirements.strength);
+        CHECK(g_ItemDatabase.Find(KrisType)->requirements.dexterity == kris.requirements.dexterity);
+    }
+    CHECK_FALSE(g_ItemEdits.GetHistory().CanUndo());
+
+    // It is the list of the typed dexterity value.
+    const ImGuiWindow* list = OpenPopupWindow();
+    REQUIRE(list != nullptr);
+    ImGui::ActivateItemByID(ImGui::GetIDWithSeed(I18N::Editor::TakeThisWeight, nullptr, list->ID));
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    CHECK(OpenPopupWindow() == nullptr);
+    CHECK(MuEditor::Items::FindWeightsGiving(kris, ItemRequirement::Dexterity, value)
+              .Contains(g_ItemDatabase.Find(KrisType)->requirements.dexterity));
+    CHECK(g_ItemDatabase.Find(KrisType)->requirements.strength == kris.requirements.strength);
+    CHECK(g_ItemEdits.GetHistory().CanUndo());
     g_ItemEdits.GetHistory().Clear();
 }
 
