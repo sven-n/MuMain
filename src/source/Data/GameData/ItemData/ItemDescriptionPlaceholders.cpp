@@ -46,11 +46,13 @@ Placeholder ReadPlaceholder(std::string_view text, size_t open)
     {
         return {{}, std::string_view::npos, "has an empty placeholder \"{}\""};
     }
-    if (!Json::IsName(name))
+    const std::string_view table = GetPlaceholderTable(name);
+    if (!Json::IsName(table.empty() ? name : table))
     {
         return {{},
                 std::string_view::npos,
-                "has \"{" + std::string(name) + "}\": a placeholder is a name of letters and digits"};
+                "has \"{" + std::string(name) +
+                    "}\": a placeholder is a name of letters and digits, or \"table:\" and a table's name"};
     }
     return {name, close + 1, {}};
 }
@@ -80,6 +82,16 @@ size_t EditDistance(std::string_view first, std::string_view second)
 std::span<const std::string_view> GetBuiltInPlaceholders()
 {
     return BuiltIns;
+}
+
+std::string MakeTablePlaceholder(std::string_view table)
+{
+    return std::string(TablePlaceholderPrefix) + std::string(table);
+}
+
+std::string_view GetPlaceholderTable(std::string_view name)
+{
+    return name.starts_with(TablePlaceholderPrefix) ? name.substr(TablePlaceholderPrefix.size()) : std::string_view{};
 }
 
 PlaceholderScan ScanPlaceholders(std::string_view text)
@@ -116,7 +128,8 @@ std::optional<int> GetPlaceholderValue(std::string_view name, int level, const I
     {
         return level;
     }
-    if (const LevelBonusTable* table = profiles.FindTable(name))
+    const std::string_view tableName = GetPlaceholderTable(name);
+    if (const LevelBonusTable* table = tableName.empty() ? nullptr : profiles.FindTable(tableName))
     {
         return table->GetBonus(level);
     }
@@ -199,5 +212,23 @@ std::string SuggestPlaceholder(std::string_view name, std::span<const std::strin
         }
     }
     return nearest;
+}
+
+bool NamesTable(std::string_view text, std::string_view table)
+{
+    const std::vector<std::string> names = ScanPlaceholders(text).names;
+    return std::ranges::any_of(names, [&](const std::string& name) { return GetPlaceholderTable(name) == table; });
+}
+
+std::string RenameTablePlaceholders(std::string_view text, std::string_view from, std::string_view to)
+{
+    const std::string old = "{" + MakeTablePlaceholder(from) + "}";
+    const std::string renamed = "{" + MakeTablePlaceholder(to) + "}";
+    std::string result(text);
+    for (size_t found = result.find(old); found != std::string::npos; found = result.find(old, found + renamed.size()))
+    {
+        result.replace(found, old.size(), renamed);
+    }
+    return result;
 }
 } // namespace Data::Items

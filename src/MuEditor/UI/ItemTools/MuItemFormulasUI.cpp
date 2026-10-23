@@ -8,6 +8,7 @@
 #include "ItemFieldWidgets.h"
 #include "ItemGroupNames.h"
 #include "ItemSelection.h"
+#include "ItemStatFileChange.h"
 #include "ItemStatTermFields.h"
 #include "ItemTextInput.h"
 #include "ItemToolWindow.h"
@@ -70,7 +71,8 @@ template <typename TEntry> const TEntry* FindNamed(const std::vector<TEntry>& en
     return found != entries.end() ? &*found : nullptr;
 }
 
-// The stats of the default and the profiles that name the table.
+// The stats of the default and the profiles that name the table (the item
+// descriptions that name it are counted apart).
 int CountTableUsers(const ItemStatFile& file, std::string_view name)
 {
     int users = 0;
@@ -419,7 +421,7 @@ void CMuItemFormulasUI::RenderUnused()
     std::vector<std::string> tables;
     for (const LevelBonusTable& table : stored.tables)
     {
-        if (CountTableUsers(stored, table.name) == 0)
+        if (CountTableUsers(stored, table.name) == 0 && m_counts.DescriptionUsers(table.name).empty())
         {
             tables.push_back(table.name);
         }
@@ -438,7 +440,7 @@ void CMuItemFormulasUI::RenderUnused()
     }
     if (!tables.empty())
     {
-        RenderNote(I18N::Format(I18N::Editor::NoStatUsesTheseTables0, {JoinNames(tables)}).c_str());
+        RenderNote(I18N::Format(I18N::Editor::NoStatOrItemDescriptionUsesTheseTables0, {JoinNames(tables)}).c_str());
         if (SmallButtonUnlessUnapplied((std::string(I18N::Editor::RemoveThem) + "##Tables").c_str(), unapplied))
         {
             ItemStatFile file = stored;
@@ -503,12 +505,16 @@ void CMuItemFormulasUI::RenderList()
     }
     for (const LevelBonusTable& table : stored.tables)
     {
-        const int users = CountTableUsers(stored, table.name);
+        const int stats = CountTableUsers(stored, table.name);
+        const int descriptions = static_cast<int>(m_counts.DescriptionUsers(table.name).size());
         ImGui::PushID(table.name.c_str());
-        row(table.name + " (" + std::to_string(users) + ")", {Entry::Kind::Table, table.name}, users == 0);
+        row(table.name + " (" + std::to_string(stats + descriptions) + ")", {Entry::Kind::Table, table.name},
+            stats + descriptions == 0);
         if (ImGui::IsItemHovered())
         {
-            ImGui::SetTooltip("%s", I18N::Format(I18N::Editor::NamedBy0Stats, {std::to_string(users)}).c_str());
+            ImGui::SetTooltip("%s", I18N::Format(I18N::Editor::NamedBy0StatsAnd1ItemDescriptions,
+                                                 {std::to_string(stats), std::to_string(descriptions)})
+                                        .c_str());
         }
         ImGui::PopID();
     }
@@ -682,7 +688,10 @@ void CMuItemFormulasUI::RenderTable(ItemStatFile& file)
         ImGui::TextDisabled("%s", I18N::Editor::PickAnEntryInTheList);
         return;
     }
-    const int users = CountTableUsers(Stored(), table->name);
+    const int stats = CountTableUsers(Stored(), table->name);
+    // A copy: the counts change with the item data.
+    const std::vector<int> descriptions = m_counts.DescriptionUsers(table->name);
+    const bool used = stats > 0 || !descriptions.empty();
     ImGui::TextUnformatted(table->name.c_str());
     ImGui::SameLine();
     const bool unapplied = HasUnappliedChanges();
@@ -696,12 +705,12 @@ void CMuItemFormulasUI::RenderTable(ItemStatFile& file)
         OpenNameDialog(NamePurpose::CopyTable, table->name);
     }
     ImGui::SameLine();
-    ImGui::BeginDisabled(users > 0);
+    ImGui::BeginDisabled(used);
     const bool remove = ImGui::SmallButton(I18N::Editor::Remove);
     ImGui::EndDisabled();
-    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled) && users > 0)
+    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled) && used)
     {
-        ImGui::SetTooltip("%s", I18N::Editor::RemovedOnlyWhileNoStatNamesIt);
+        ImGui::SetTooltip("%s", I18N::Editor::RemovedOnlyWhileNoStatAndNoItemDescriptionNamesIt);
     }
     if (remove)
     {
@@ -710,7 +719,15 @@ void CMuItemFormulasUI::RenderTable(ItemStatFile& file)
         Apply(std::move(removed), I18N::Editor::RemoveALevelBonusTable);
         return;
     }
-    ImGui::TextUnformatted(I18N::Format(I18N::Editor::NamedBy0Stats, {std::to_string(users)}).c_str());
+    ImGui::TextUnformatted(I18N::Format(I18N::Editor::NamedBy0StatsAnd1ItemDescriptions,
+                                        {std::to_string(stats), std::to_string(descriptions.size())})
+                               .c_str());
+    if (!descriptions.empty())
+    {
+        // D26: where a shared definition is used.
+        ImGui::TextDisabled("%s", I18N::Editor::ItemDescriptionsThatNameIt);
+        RenderUsers("##DescriptionUsers", descriptions);
+    }
 
     std::string caption = table->caption.GetNeutral();
     ImGui::SetNextItemWidth(Fields::ScaledWidth(Fields::NumberWidth * 3.0f));
@@ -881,7 +898,8 @@ void CMuItemFormulasUI::RenderRuleConditions(StatProfileRule& rule)
     ConditionCombo<Data::Items::ItemRequirement>(I18N::Editor::BaseRequirementAbove0, rule.requirements);
 }
 
-void CMuItemFormulasUI::Apply(ItemStatFile file, std::string label, std::string renamedFrom, std::string renamedTo)
+void CMuItemFormulasUI::Apply(ItemStatFile file, std::string label, std::string renamedFrom, std::string renamedTo,
+                              bool renamedTable)
 {
     m_errors.clear();
     Data::Items::ValidateItemStatsAsWritten(file, m_errors);
@@ -891,15 +909,19 @@ void CMuItemFormulasUI::Apply(ItemStatFile file, std::string label, std::string 
     }
     const Data::Items::ItemStatProfiles& current = g_ItemDatabase.GetStatProfiles();
     const Data::Items::ItemStatProfiles after(file);
-    const std::vector<StatProfileChange> changes =
-        FindStatProfileChanges(g_ItemDatabase.GetAllSlots(), current, after, renamedFrom, renamedTo);
+    const std::vector<StatProfileChange> changes = FindStatProfileChanges(
+        g_ItemDatabase.GetAllSlots(), current, after, renamedTable ? "" : renamedFrom, renamedTable ? "" : renamedTo);
     const std::vector<std::string> changedProfiles = FindProfilesWithChangedTerms(current, after);
-    m_pending = {std::move(file),
-                 std::move(label),
-                 std::move(renamedFrom),
-                 std::move(renamedTo),
-                 FindItemsReached(g_ItemDatabase.GetAllSlots(), changes, changedProfiles),
-                 m_pending.pickAfter};
+    std::vector<int> reached = FindItemsReached(g_ItemDatabase.GetAllSlots(), changes, changedProfiles);
+    if (renamedTable)
+    {
+        const std::vector<int> descriptions = FindTableDescriptionUsers(g_ItemDatabase.GetAllSlots(), renamedFrom);
+        reached.insert(reached.end(), descriptions.begin(), descriptions.end());
+        std::ranges::sort(reached);
+        reached.erase(std::unique(reached.begin(), reached.end()), reached.end());
+    }
+    m_pending = {std::move(file), std::move(label),   std::move(renamedFrom), std::move(renamedTo),
+                 renamedTable,    std::move(reached), m_pending.pickAfter};
     if (m_pending.reached.empty())
     {
         Commit();
@@ -915,11 +937,16 @@ void CMuItemFormulasUI::Apply(ItemStatFile file, std::string label, std::string 
 void CMuItemFormulasUI::Commit()
 {
     const Data::Items::ItemStatProfiles after(m_pending.file);
-    const std::vector<StatProfileChange> changes =
-        FindStatProfileChanges(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(), after,
-                               m_pending.renamedFrom, m_pending.renamedTo);
-    g_ItemEdits.SetStatFile(m_pending.label, m_pending.file,
-                            ApplyStatProfileChanges(g_ItemDatabase.GetAllSlots(), changes));
+    const std::vector<StatProfileChange> changes = FindStatProfileChanges(
+        g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(), after,
+        m_pending.renamedTable ? "" : m_pending.renamedFrom, m_pending.renamedTable ? "" : m_pending.renamedTo);
+    std::vector<Data::Items::ItemDefinition> changed = ApplyStatProfileChanges(g_ItemDatabase.GetAllSlots(), changes);
+    if (m_pending.renamedTable)
+    {
+        // D26: renaming a table renames it in the descriptions that name it too.
+        RenameTableInDescriptions(g_ItemDatabase.GetAllSlots(), changed, m_pending.renamedFrom, m_pending.renamedTo);
+    }
+    g_ItemEdits.SetStatFile(m_pending.label, m_pending.file, changed);
     if (m_pending.pickAfter.kind != Entry::Kind::None)
     {
         m_picked = m_pending.pickAfter;
@@ -1072,7 +1099,7 @@ void CMuItemFormulasUI::ApplyName(NamePurpose purpose, const std::string& name)
     case NamePurpose::RenameTable:
         RenameTable(file, m_nameFrom, name);
         m_pending.pickAfter = {Entry::Kind::Table, name};
-        Apply(std::move(file), I18N::Editor::RenameALevelBonusTable);
+        Apply(std::move(file), I18N::Editor::RenameALevelBonusTable, m_nameFrom, name, true);
         break;
     }
 }
