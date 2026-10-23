@@ -370,7 +370,7 @@ void OpenPlayerTextures()
     }
 }
 
-// The game cannot run with broken item or effect data: shows the errors and quits.
+// The game cannot run with broken item, effect or server list data: shows the errors and quits.
 static void StopOnDataError(const char* title, const std::string& errorMessage)
 {
     const std::wstring message = Core::Text::FromUtf8(errorMessage);
@@ -382,6 +382,17 @@ static void StopOnDataError(const char* title, const std::string& errorMessage)
 static void StopOnItemDataError(const std::string& errorMessage)
 {
     StopOnDataError("Item data error", errorMessage);
+}
+
+// Loads the server groups of the login screen (Data/Local/ServerList.json);
+// errors stop the game.
+static void OpenServerList()
+{
+    std::string errorMessage;
+    if (!g_ServerListManager->LoadServerListScript(errorMessage))
+    {
+        StopOnDataError("Server list error", errorMessage);
+    }
 }
 
 // Loads the effect types (Data/Effects) and builds the effect registry from
@@ -4392,7 +4403,7 @@ void OpenBasicData(HDC hDC)
 
     wchar_t Text[100];
 
-    g_ServerListManager->LoadServerListScript();
+    OpenServerList();
 
     // NPC dialog text used to live in Data\Local\<lang>\Dialog_<lang>.bmd
     // and was loaded into g_DialogScript here. The text and answer labels

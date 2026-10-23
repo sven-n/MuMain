@@ -111,7 +111,7 @@ variants or option words. An online keyword need not select the same items offli
 | Field | Meaning |
 |---|---|
 | `tags` | Categories the game code asks for, e.g. `["mount", "flying"]`; see [Tags](#tags) |
-| `description` | Lines the tooltip shows for the item, after its damage, defense and speed lines and before its durability, requirements and options, e.g. the Jewel of Bless's "It is used to increase your item level up to 6". A few lines that read the hero or other tables (the Armor of Guardsman's Chaos Castle table, the Lost Map) are still written by the tooltip code, after the description. A text can have [placeholders](#description-placeholders). The Dark Horse and the Dark Raven show it only in shops: elsewhere the pet window writes their tooltip. Its texts are in the UI's language, also when the item names stay English ("Translate item names" off). Each line is `{"text": ..., "color": ..., "levels": [first, last]}`: `text` is written like `name` (a plain English text, or the texts by language) and checked like it (the English text is required, a language code has only letters, digits and `-`, and a language the game has no texts in is a warning), an empty text (`{"text": ""}`) is a blank line, a long line wraps at about the width of the original tooltips' widest lines, and `\n` in a text breaks the line there (`\n\n` leaves a blank line). The description draws at most 32 rows, which it has to itself, so a long one never takes the room of the tooltip's other lines. `color` is one of the tooltip colors: `white` (left out), `blue`, `red`, `yellow`, `green`, `darkRed`, `purple`, `darkBlue`, `darkYellow`, `greenBlue`, `gray`, `redPurple`, `violet`, `orange`. `levels` shows the line only at those item levels, both included (`[1, 8]`; left out: every level); a list of two levels from 0 to 15 with the first not above the last. A client-only field; the bmd import keeps it |
+| `description` | Lines the tooltip shows for the item, e.g. the Jewel of Bless's "It is used to increase your item level up to 6"; see [Descriptions](#descriptions). A client-only field; the bmd import keeps it |
 | `width`, `height` | Size in inventory slots |
 | `slot` | Equipment slot: `mainHand`, `offHand`, `helm`, `armor`, `pants`, `gloves`, `boots`, `wings`, `pet`, `pendant`, `ring`. Left out = not equippable |
 | `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, defense per level, damage increase, absorption) depend on it; excellent second and third tier wings get no extra durability, and the chaos mix knows a wing's tier from it |
@@ -221,6 +221,48 @@ well.
 A tag name that does not exist is an error, so a typo cannot silently
 remove an item from a category. New tags need code that uses them; they
 are added in `ItemTag` (`ItemTagSet.h`) and `ItemEnumNames.cpp`.
+
+### Descriptions
+
+`description` lists the lines the item's tooltip shows, for example the
+Jewel of Bless's:
+
+```json
+"description": [
+  {"text": {"en": "It is used to increase your item level up to 6", "de": "Wird verwendet, um das Gegenstandslevel auf bis zu 6 zu erhöhen"}}
+]
+```
+
+Each line is `{"text": ..., "color": ..., "levels": [first, last]}`:
+
+- **`text`** is written like `name`: a plain English text, or the texts by
+  language. It is checked like a name too: the English text is required, a
+  language code has only letters, digits and `-`, and a language the game
+  has no texts in is a warning. A text can have
+  [placeholders](#description-placeholders).
+- **An empty text** (`{"text": ""}`) is a blank line.
+- **Long lines** wrap at about the width of the original tooltips' widest
+  lines, and `\n` in a text breaks the line there (`\n\n` leaves a blank
+  line).
+- **`color`** is one of the tooltip colors: `white` (left out), `blue`,
+  `red`, `yellow`, `green`, `darkRed`, `purple`, `darkBlue`, `darkYellow`,
+  `greenBlue`, `gray`, `redPurple`, `violet`, `orange`.
+- **`levels`** shows the line only at those item levels, both included (`[1,
+  8]`; left out: every level): a list of two levels from 0 to 15, the first
+  not above the last.
+
+In the tooltip:
+
+- **Place:** after the item's damage, defense and speed lines, and before
+  its durability, requirements and options. A few lines that read the hero
+  or other tables (the Armor of Guardsman's Chaos Castle table, the Lost
+  Map) are still written by the tooltip code, after the description.
+- **Language:** the UI's language, also when the item names stay English
+  ("Translate item names" off).
+- **Size:** at most 32 rows. The description has them to itself, so a long
+  one never takes the room of the tooltip's other lines.
+- **Dark Horse and Dark Raven:** they show it only in shops; elsewhere the
+  pet window writes their tooltip.
 
 ### Rules
 

@@ -142,7 +142,12 @@ std::vector<std::wstring> WrapTextToWidth(const std::wstring& text, int maxWidth
             std::wstring word = line.substr(breakAt);
             line.erase(breakAt);
             TrimTrailingSpaces(line);
-            lines.push_back(line);
+            // Only spaces before the word (an indented line): no line of
+            // their own, or an empty line would appear above the word.
+            if (!line.empty())
+            {
+                lines.push_back(line);
+            }
             line = std::move(word);
             breakAt = std::wstring::npos;
         }
