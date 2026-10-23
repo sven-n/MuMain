@@ -2933,6 +2933,47 @@ TEST_CASE("A change of the profile rules gives the items that follow them the ne
     edits.GetHistory().Clear();
 }
 
+TEST_CASE("The bmd exports refuse damage or magic power past 255 and name the items [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    const WORD krisDamageMin = g_ItemDatabase.Find(KrisType)->damageMin;
+    const WORD bladeMagicPower = g_ItemDatabase.Find(BladeType)->magicPower;
+    EditItem(KrisType, [](ItemDefinition& item) { item.damageMin = 300; });
+    EditItem(BladeType, [](ItemDefinition& item) { item.magicPower = 256; });
+    const std::string named = "Item (0,0) DamageMin is 300; a .bmd item file holds up to 255\n"
+                              "Item (0,5) MagicPower is 256; a .bmd item file holds up to 255\n";
+
+    // Every such item is named once, and no file is written.
+    std::string changeLog;
+    CHECK_FALSE(g_ItemDataHandler.ExportAsBmd(changeLog));
+    CHECK(changeLog == named);
+    for (const ItemBmdLanguage& language : GetItemBmdLanguages())
+    {
+        CHECK_FALSE(std::filesystem::exists(folder.LegacyItemFilePath(language.folder)));
+    }
+
+    std::wstring legacyFile = (folder.Directory() / "Item_S6E3.bmd").wstring();
+    std::string problems;
+    CHECK_FALSE(g_ItemDataHandler.ExportAsS6E3(legacyFile.data(), problems));
+    CHECK(problems == named);
+    CHECK_FALSE(std::filesystem::exists(legacyFile));
+
+    // With the values back, both write.
+    EditItem(KrisType, [&](ItemDefinition& item) { item.damageMin = krisDamageMin; });
+    EditItem(BladeType, [&](ItemDefinition& item) { item.magicPower = bladeMagicPower; });
+    std::string savedChangeLog;
+    CHECK(g_ItemDataHandler.ExportAsBmd(savedChangeLog));
+    problems.clear();
+    CHECK(g_ItemDataHandler.ExportAsS6E3(legacyFile.data(), problems));
+    CHECK(problems.empty());
+    CHECK(std::filesystem::exists(legacyFile));
+}
+
 TEST_CASE("Exporting unchanged bmd files is not a failure [data][items][editor]")
 {
     TemporaryClientFolder folder;

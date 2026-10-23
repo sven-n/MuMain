@@ -4,6 +4,7 @@
 
 #include "ItemDataExportS6E3.h"
 #include "Data/DataHandler/DataFileIO.h"
+#include "Data/GameData/ItemData/ItemFileFit.h"
 #include "Data/GameData/ItemData/ItemStructs.h"
 #include "Core/Globals/_struct.h"
 #include "Core/Globals/_define.h"
@@ -11,9 +12,18 @@
 #include "Data/Translation/MultiLanguage.h"
 #include <memory>
 
-bool ItemDataExportS6E3::SaveLegacy(wchar_t* fileName, const ITEM_ATTRIBUTE* attributes)
+bool ItemDataExportS6E3::SaveLegacy(wchar_t* fileName, const ITEM_ATTRIBUTE* attributes, std::string* outProblems)
 {
     const int Size = sizeof(ITEM_ATTRIBUTE_FILE_LEGACY);
+
+    if (const std::vector<ItemFileMisfit> misfits = FindItemFileMisfits(attributes, MAX_ITEM); !misfits.empty())
+    {
+        if (outProblems != nullptr)
+        {
+            *outProblems += DescribeItemFileMisfits(misfits);
+        }
+        return false;
+    }
 
     FILE* fp = _wfopen(fileName, L"wb");
     if (fp == NULL)

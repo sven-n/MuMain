@@ -224,14 +224,15 @@ struct ItemDefinition
 
     BYTE durability = 0;
     BYTE magicDurability = 0;
-    BYTE damageMin = 0;
-    BYTE damageMax = 0;
+    // Damage and magic power pass 255 for later items (the .bmd item files hold one byte; see FindItemFileMisfits).
+    WORD damageMin = 0;
+    WORD damageMax = 0;
     BYTE blockRate = 0;
     BYTE defense = 0;
     BYTE magicDefense = 0;
     BYTE attackSpeed = 0;
     BYTE walkSpeed = 0;
-    BYTE magicPower = 0;
+    WORD magicPower = 0;
     // A fixed excellent bonus of damage and magic power instead of the stat
     // file's excellent term (three chaos weapons); 0 uses the term.
     BYTE excellentBonus = 0;
