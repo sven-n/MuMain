@@ -999,9 +999,7 @@ void mu::ui::window::ShowCherryBlossomMenuDialog()
     GenericMenuConfig cfg;
     cfg.kind = "cherry-blossom";
 
-    wchar_t title[256];
-    mu_swprintf(title, L"%ls", MonsterScript[450].Name);
-    cfg.title = title;
+    cfg.title = getMonsterName(MONSTER_CHERRY_BLOSSOM_SPIRIT);
     cfg.lines.push_back({ I18N::Game::GoldenCherryBlossomsBranches, true });
 
     // Native's own 3 color buttons are no-ops beyond closing the box (WhiteCBBtnDown/RedCBBtnDown/
