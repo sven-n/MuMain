@@ -56,8 +56,9 @@ public:
     void Remove(int number);
 #endif
 
-    // Counts the changes of the table and its names, so a cache can tell it is
-    // out of date.
+    // Counts the changes of the monsters (Build, and the editor's Set and
+    // Remove), so a cache can tell it is out of date. A language switch is not
+    // one: the shown names are read where they are (FindDisplayName).
     int GetVersion() const
     {
         return m_version;

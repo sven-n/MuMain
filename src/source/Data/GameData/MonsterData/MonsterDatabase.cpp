@@ -66,12 +66,12 @@ void MonsterDatabase::Build(std::span<const MonsterDefinition> monsters, std::st
 
 void MonsterDatabase::SetDisplayLocale(std::string_view locale)
 {
+    // Not a change of the data: the version stays (GetVersion).
     m_displayLocale = std::string(locale);
     for (std::size_t number = 0; number < m_monsters.size(); ++number)
     {
         FillNames(number);
     }
-    ++m_version;
 }
 
 void MonsterDatabase::FillNames(std::size_t number)

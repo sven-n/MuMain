@@ -93,7 +93,8 @@ TEST_CASE("Monster table: a language switch keeps the names where they are [data
 
     CHECK(g_MonsterDatabase.FindDisplayName(2) == name);
     CHECK(std::wstring(name) == L"Dragão Lento");
-    CHECK(g_MonsterDatabase.GetVersion() != version);
+    // The monsters did not change, so the editor's checks stay current.
+    CHECK(g_MonsterDatabase.GetVersion() == version);
 }
 
 TEST_CASE("Monster table: a rebuild drops the monsters that are gone [data][monsters]")
