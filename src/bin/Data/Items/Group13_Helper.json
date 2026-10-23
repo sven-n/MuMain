@@ -1960,11 +1960,11 @@
       "description": [
         {
           "text": "@damageIncrease",
-          "values": {"percent": "capeDamageIncrease"}
+          "values": {"percent": "table:capeDamageIncrease"}
         },
         {
           "text": "@damageAbsorb",
-          "values": {"percent": "capeOfLordDamageAbsorb"}
+          "values": {"percent": "table:capeOfLordDamageAbsorb"}
         }
       ],
       "nameLines": [

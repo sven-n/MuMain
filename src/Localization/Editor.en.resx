@@ -1693,8 +1693,11 @@
   <data name="Used by {0} items and {1} rules" xml:space="preserve">
     <value>Used by {0} items and {1} rules</value>
   </data>
-  <data name="Named by {0} stats" xml:space="preserve">
-    <value>Named by {0} stats</value>
+  <data name="Named by {0} stats and {1} item descriptions" xml:space="preserve">
+    <value>Named by {0} stats and {1} item descriptions</value>
+  </data>
+  <data name="Item descriptions that name it" xml:space="preserve">
+    <value>Item descriptions that name it</value>
   </data>
   <data name="Pick an entry in the list." xml:space="preserve">
     <value>Pick an entry in the list.</value>
@@ -1711,8 +1714,8 @@
   <data name="No item or rule uses these profiles: {0}" xml:space="preserve">
     <value>No item or rule uses these profiles: {0}</value>
   </data>
-  <data name="No stat uses these tables: {0}" xml:space="preserve">
-    <value>No stat uses these tables: {0}</value>
+  <data name="No stat or item description uses these tables: {0}" xml:space="preserve">
+    <value>No stat or item description uses these tables: {0}</value>
   </data>
   <data name="Rename" xml:space="preserve">
     <value>Rename</value>
@@ -1732,8 +1735,8 @@
   <data name="Removed only while no item and no rule uses it." xml:space="preserve">
     <value>Removed only while no item and no rule uses it.</value>
   </data>
-  <data name="Removed only while no stat names it." xml:space="preserve">
-    <value>Removed only while no stat names it.</value>
+  <data name="Removed only while no stat and no item description names it." xml:space="preserve">
+    <value>Removed only while no stat and no item description names it.</value>
   </data>
   <data name="Override" xml:space="preserve">
     <value>Override</value>
