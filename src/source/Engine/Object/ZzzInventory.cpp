@@ -2058,8 +2058,12 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     }
 
     mu_swprintf(TextList[TextNum], L"%.*ls", static_cast<int>(std::size(TextList[0]) - 1), name.text.c_str());
-    TextListColor[TextNum] = Color; TextBold[TextNum] = true; TextNum++;
-    mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+    TextListColor[TextNum] = Color;
+    TextBold[TextNum] = true;
+    TextNum++;
+    mu_swprintf(TextList[TextNum], L"\n");
+    TextNum++;
+    SkipNum++;
 
     // The item cases whose lines need the game (the reset points, the saved revive position, the socket system,
     // the signs still needed); the others' lines are their descriptions.
