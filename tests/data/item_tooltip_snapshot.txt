@@ -323,7 +323,7 @@ bladeMaster 13/15 08c295f3f66befe7
 bladeMaster 13/16 6de7b9b02085c817
 bladeMaster 13/17 0223ce082f449dc7
 bladeMaster 13/18 092a66f81c997fcf
-bladeMaster 13/19 092a23e6a050dee4
+bladeMaster 13/19 4d6939aca3c6398c
 bladeMaster 13/2 9b4adabeb05892d4
 bladeMaster 13/20 911ed775b0bfb652
 bladeMaster 13/21 92a1db1d5f1e871b
@@ -1234,7 +1234,7 @@ newDarkWizard 13/15 08c295f3f66befe7
 newDarkWizard 13/16 6de7b9b02085c817
 newDarkWizard 13/17 0223ce082f449dc7
 newDarkWizard 13/18 092a66f81c997fcf
-newDarkWizard 13/19 092a23e6a050dee4
+newDarkWizard 13/19 4d6939aca3c6398c
 newDarkWizard 13/2 13ea37d05c227f50
 newDarkWizard 13/20 911ed775b0bfb652
 newDarkWizard 13/21 01802d5a30bfdc8a
