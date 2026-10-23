@@ -34,10 +34,6 @@ namespace
 using Data::Items::ItemDataIssue;
 using Data::Items::ItemDefinition;
 using Data::Items::ItemExchangeFile;
-using Data::Items::ItemTag;
-
-// The tags of the exchange file; the client's other tags stay.
-constexpr ItemTag SharedTags[] = {ItemTag::Ammunition, ItemTag::SecondClassQuestItem, ItemTag::ThirdClassQuestItem};
 
 // The rule all shipped items follow: groups 0 to 5, a hand slot, two cells wide or more.
 bool IsTwoHanded(const ItemDefinition& item)
@@ -71,39 +67,8 @@ ItemDefinition ToClientItem(const ItemDefinition* current, const ItemDefinition&
     ItemDefinition item = current != nullptr ? *current : ItemDefinition{};
     item.group = exchange.group;
     item.number = exchange.number;
-    item.names = exchange.names;
-    for (const ItemTag tag : SharedTags)
-    {
-        item.tags.Set(tag, exchange.tags.Has(tag));
-    }
-    item.width = exchange.width;
-    item.height = exchange.height;
-    item.slot = exchange.slot;
-    item.skill = exchange.skill;
-    item.level = exchange.level;
-    item.durability = exchange.durability;
-    item.magicDurability = exchange.magicDurability;
-    item.damageMin = exchange.damageMin;
-    item.damageMax = exchange.damageMax;
-    item.blockRate = exchange.blockRate;
-    item.defense = exchange.defense;
-    item.attackSpeed = exchange.attackSpeed;
-    item.walkSpeed = exchange.walkSpeed;
-    item.magicPower = exchange.magicPower;
-    item.excellentBonus = exchange.excellentBonus;
-    item.excellentRaisesLevel = exchange.excellentRaisesLevel;
-    item.requirements = exchange.requirements;
-    item.requirementsByLevel = exchange.requirementsByLevel;
-    item.classRequirements = exchange.classRequirements;
-    item.resistances = exchange.resistances;
-    item.sellValue = exchange.sellValue;
-    item.buyPrice = exchange.buyPrice;
-    item.tradable = exchange.tradable;
-    item.droppable = exchange.droppable;
-    item.storable = exchange.storable;
-    item.sellable = exchange.sellable;
-    item.personalShopSellable = exchange.personalShopSellable;
-    item.repairable = exchange.repairable;
+    // The shared fields; the client-only ones stay.
+    Data::Items::CopyExchangeFields(exchange, item);
     if (current == nullptr)
     {
         item.twoHanded = IsTwoHanded(item);

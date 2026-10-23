@@ -34,9 +34,6 @@ constexpr const char* Group = "group";
 const Json::KeySet RootKeys = {Keys::FormatVersion, Keys::Source,   Keys::Server,
                                Keys::GameVersion,   Keys::Formulas, Keys::Items};
 
-// The tags OpenMU has too: IsAmmunition and IsQuestItem.
-constexpr ItemTag SharedTags[] = {ItemTag::Ammunition, ItemTag::SecondClassQuestItem, ItemTag::ThirdClassQuestItem};
-
 bool LessByKey(const ItemDefinition& left, const ItemDefinition& right)
 {
     return std::pair(left.group, left.number) < std::pair(right.group, right.number);
@@ -209,45 +206,50 @@ void ExchangeReader::ReadItem(const OrderedJson& json, size_t index, std::vector
 }
 } // namespace
 
+void CopyExchangeFields(const ItemDefinition& from, ItemDefinition& to)
+{
+    to.names = from.names;
+    for (const ItemTag tag : ExchangeTags)
+    {
+        to.tags.Set(tag, from.tags.Has(tag));
+    }
+    to.width = from.width;
+    to.height = from.height;
+    to.slot = from.slot;
+    to.skill = from.skill;
+    to.level = from.level;
+    to.durability = from.durability;
+    to.magicDurability = from.magicDurability;
+    to.damageMin = from.damageMin;
+    to.damageMax = from.damageMax;
+    to.blockRate = from.blockRate;
+    to.defense = from.defense;
+    to.attackSpeed = from.attackSpeed;
+    to.walkSpeed = from.walkSpeed;
+    to.magicPower = from.magicPower;
+    to.excellentBonus = from.excellentBonus;
+    to.excellentRaisesLevel = from.excellentRaisesLevel;
+    to.requirements = from.requirements;
+    to.requirementsByLevel = from.requirementsByLevel;
+    to.classRequirements = from.classRequirements;
+    to.resistances = from.resistances;
+    to.sellValue = from.sellValue;
+    to.buyPrice = from.buyPrice;
+    to.tradable = from.tradable;
+    to.droppable = from.droppable;
+    to.storable = from.storable;
+    to.sellable = from.sellable;
+    to.personalShopSellable = from.personalShopSellable;
+    to.repairable = from.repairable;
+}
+
 ItemDefinition ToExchangeItem(const ItemDefinition& item)
 {
     ItemDefinition shared;
     shared.group = item.group;
     shared.number = item.number;
-    shared.names = item.names;
-    for (const ItemTag tag : SharedTags)
-    {
-        shared.tags.Set(tag, item.tags.Has(tag));
-    }
-    shared.width = item.width;
-    shared.height = item.height;
-    shared.slot = item.slot;
+    CopyExchangeFields(item, shared);
     shared.statProfile = item.statProfile.empty() ? std::string(StatProfileNames::Default) : item.statProfile;
-    shared.skill = item.skill;
-    shared.level = item.level;
-    shared.durability = item.durability;
-    shared.magicDurability = item.magicDurability;
-    shared.damageMin = item.damageMin;
-    shared.damageMax = item.damageMax;
-    shared.blockRate = item.blockRate;
-    shared.defense = item.defense;
-    shared.attackSpeed = item.attackSpeed;
-    shared.walkSpeed = item.walkSpeed;
-    shared.magicPower = item.magicPower;
-    shared.excellentBonus = item.excellentBonus;
-    shared.excellentRaisesLevel = item.excellentRaisesLevel;
-    shared.requirements = item.requirements;
-    shared.requirementsByLevel = item.requirementsByLevel;
-    shared.classRequirements = item.classRequirements;
-    shared.resistances = item.resistances;
-    shared.sellValue = item.sellValue;
-    shared.buyPrice = item.buyPrice;
-    shared.tradable = item.tradable;
-    shared.droppable = item.droppable;
-    shared.storable = item.storable;
-    shared.sellable = item.sellable;
-    shared.personalShopSellable = item.personalShopSellable;
-    shared.repairable = item.repairable;
     return shared;
 }
 

@@ -52,6 +52,16 @@ struct ItemExchangeFile
     std::vector<std::pair<int, int>> repeatedItems;
 };
 
+// The tags the exchange file has, as OpenMU has them too (IsAmmunition, IsQuestItem); the client's
+// other tags stay with it.
+inline constexpr ItemTag ExchangeTags[] = {ItemTag::Ammunition, ItemTag::SecondClassQuestItem,
+                                           ItemTag::ThirdClassQuestItem};
+
+// Copies the fields the exchange file has from `from` to `to`, all but the group, the number and
+// the stat profile (each direction treats those itself); the other fields of `to` stay. The one
+// list of them, for the export (ToExchangeItem) and the import (ToClientItem).
+void CopyExchangeFields(const ItemDefinition& from, ItemDefinition& to);
+
 // The item as the exchange file has it: the shared fields, the client-only ones at their
 // defaults. `statProfile` names the profile the item uses ("default" for the default).
 ItemDefinition ToExchangeItem(const ItemDefinition& item);
