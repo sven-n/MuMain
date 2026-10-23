@@ -1726,7 +1726,9 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         return ItemTooltipBuild::DarkLordPet;
     }
 
-    mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+    mu_swprintf(TextList[TextNum], L"\n");
+    TextNum++;
+    SkipNum++;
 
     int Level = ip->Level;
 
@@ -1757,11 +1759,14 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
             TextListColor[TextNum] = Color;
             //			TextBold[TextNum] = true;
             TextNum++;
-            mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+            mu_swprintf(TextList[TextNum], L"\n");
+            TextNum++;
+            SkipNum++;
         }
     }
-    if ((Inventype == mu::ui::window::TOOLTIP_TYPE_MY_SHOP || Inventype == mu::ui::window::TOOLTIP_TYPE_PURCHASE_SHOP)
-        && !GameLogic::Items::IsPersonalShopBan(ip))
+    if ((Inventype == mu::ui::window::TOOLTIP_TYPE_MY_SHOP ||
+         Inventype == mu::ui::window::TOOLTIP_TYPE_PURCHASE_SHOP) &&
+        !GameLogic::Items::IsPersonalShopBan(ip))
     {
         {
             GameLogic::PersonalShop::ItemPrice itemPrice;
