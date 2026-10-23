@@ -124,7 +124,7 @@ variants or option words. An online keyword need not select the same items offli
 | `skill` | Skill the item gives |
 | `level` | Item level (the drop level); also used in price and damage calculations |
 | `durability`, `magicDurability` | Durability at item level 0; an item with `magicDurability` (staffs, sticks, books) uses it as its maximum durability instead |
-| `damageMin`, `damageMax`, `attackSpeed`, `walkSpeed`, `magicPower` | Weapon values |
+| `damageMin`, `damageMax`, `attackSpeed`, `walkSpeed`, `magicPower` | Weapon values. Damage and magic power go up to 65535 (later items pass 255); the [bmd exports](#import-from-bmd--export-as-bmd) take up to 255 |
 | `excellentBonus` | A fixed excellent bonus of damage and magic power instead of the [item stat file's](#item-stats-by-level) excellent term; left out = the term. The Chaos Dragon Axe has 15, the Chaos Nature Bow 30 and the Chaos Lightning Staff 25. The bmd import keeps it |
 | `excellentRaisesLevel` | `false`: excellent options do not raise the level requirement by the [item stat file's](#item-stats-by-level) `excellentLevelAdd`. Left out = they do. The shipped data has it on the Dragon Knight, Venom Mist, Sylphid Ray, Volcano, Sunlight and Storm Blitz armour, the Bone Blade, Explosion Blade, Soleil Scepter, Sylph Wind Bow, Grand Viper Staff and Storm Blitz Stick, the lucky items and the Horn of Fenrir. The bmd import keeps it |
 | `defense`, `magicDefense`, `blockRate` | Armor and shield values |
@@ -540,8 +540,8 @@ defense and magic defense, and how its requirements grow. It is in a folder of i
 - What stays code: the order of the terms; which items count as excellent
   (excellent options on wings are wing options, and ancient items get the
   excellent part too); that a stat the item does not have stays 0; that the
-  excellent part needs a drop level above 0; and that magic power and defense
-  rate stop at 255.
+  excellent part needs a drop level above 0; and that defense rate stops at
+  255.
 
 The shipped profiles:
 
@@ -1207,7 +1207,11 @@ only item data. The import is there to bring in your own old item files.
   A missing Portuguese or Spanish name is written as the English one.
   Files that already have the data stay as they are. Values that the bmd
   format does not have (tags, wing tier, weapon kind, stat fields, rule
-  flags) are left out.
+  flags) are left out. The format holds damage and magic power in one byte:
+  while an item has more than 255, nothing is written, and the console names
+  every such item with its field and value ("Item (0,51) DamageMin is 300; a
+  .bmd item file holds up to 255"). **Export as S6E3** refuses them the same
+  way.
 
 ### How the bmd import repairs the legacy files
 

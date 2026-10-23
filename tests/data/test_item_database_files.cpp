@@ -31,6 +31,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Physics/PhysicsManager.h"
 #include "GameLogic/Items/ItemStats.h"
+#include "Core/Text/Utf8.h"
 #include "I18N/All.h"
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
@@ -74,6 +75,7 @@
 #include <fstream>
 #include <initializer_list>
 #include <memory>
+#include <optional>
 #include <random>
 #include <span>
 #include <string>
@@ -246,6 +248,7 @@ TEST_CASE("The shipped descriptions' placeholders and shared texts are known [da
     ValidateDescriptionPlaceholders(result.items, ItemStatProfiles(stats.file), tooltips.file, ItemStatsFileName,
                                     issues);
     ValidateDescriptionTexts(result.items, tooltips.file, ItemTooltipFileName, issues);
+    ValidateTableUses(result.items, ItemStatProfiles(stats.file), tooltips.file, ItemStatsFileName, issues);
     for (const ItemDataIssue& issue : issues)
     {
         INFO(issue.ToString());
@@ -273,12 +276,12 @@ const Data::LocalizedString& LineText(const ItemDescriptionLine& line)
     return text != nullptr ? *text : none;
 }
 
-// A description line in English as the tooltip fills it for the item at `level`: the values the line binds, the
+// A description line in `locale` as the tooltip fills it for the item at `level`: the values the line binds, the
 // item's level values, {level} and the stat file's tables.
 std::string FilledLine(const ItemDefinition& item, const ItemDescriptionLine& line, int level,
-                       const ItemStatProfiles& profiles)
+                       const ItemStatProfiles& profiles, std::string_view locale = Data::LocalizedString::NeutralLocale)
 {
-    return FillPlaceholders(LineText(line).GetNeutral(),
+    return FillPlaceholders(LineText(line).Get(locale),
                             [&](std::string_view name) -> std::optional<std::string>
                             {
                                 for (const auto& [placeholder, value] : line.values)
@@ -291,7 +294,7 @@ std::string FilledLine(const ItemDefinition& item, const ItemDescriptionLine& li
                                 if (const ItemLevelValues* values = item.FindLevelValues(name))
                                 {
                                     return level < static_cast<int>(values->values.size())
-                                               ? std::optional<std::string>(values->values[level].text.GetNeutral())
+                                               ? std::optional<std::string>(values->values[level].text.Get(locale))
                                                : std::nullopt;
                                 }
                                 if (const std::optional<int> value = GetPlaceholderValue(name, level, profiles))
@@ -309,13 +312,32 @@ bool IsDurabilityLine(const ItemDescriptionLine& line)
            line.textName == "life" || line.textName == "usableTimes";
 }
 
-// The lines the tooltip code wrote for the wings, capes and pets before they were their descriptions, as it printed
-// them in English: the old formulas, to compare the data with.
-std::vector<std::string> OldWingAndPetLines(int group, int number, int level)
+// A line the tooltip code wrote for the wings, capes and pets before it was their descriptions: one of the game's
+// texts that other code still prints ("Increase %d%% of Damage", "Absorb %d%% of Damage", "Increase speed") with its
+// value, or another text, in English.
+struct OldWingLine
 {
-    const auto increase = [](int value) { return "Increase " + std::to_string(value) + "% of Damage"; };
-    const auto absorb = [](int value) { return "Absorb " + std::to_string(value) + "% of Damage"; };
-    const std::string speed = "Increase speed";
+    enum class Kind
+    {
+        Increase,
+        Absorb,
+        Speed,
+        Other,
+    };
+    Kind kind;
+    int value = 0;
+    std::string english;
+
+    bool operator==(const OldWingLine&) const = default;
+};
+
+// The old formulas, to compare the data with.
+std::vector<OldWingLine> OldWingAndPetLines(int group, int number, int level)
+{
+    const auto increase = [](int value) { return OldWingLine{OldWingLine::Kind::Increase, value}; };
+    const auto absorb = [](int value) { return OldWingLine{OldWingLine::Kind::Absorb, value}; };
+    const OldWingLine speed{OldWingLine::Kind::Speed};
+    const auto other = [](const char* english) { return OldWingLine{OldWingLine::Kind::Other, 0, english}; };
     const auto in = [&](std::initializer_list<int> numbers)
     { return std::find(numbers.begin(), numbers.end(), number) != numbers.end(); };
     if (group == 12 && in({0, 1, 2, 41, 131, 132, 133, 134}))
@@ -352,13 +374,70 @@ std::vector<std::string> OldWingAndPetLines(int group, int number, int level)
     }
     if (group == 13 && number == 0)
     {
-        return {absorb(20), "Max HP +50 increased"};
+        return {absorb(20), other("Max HP +50 increased")};
     }
     if (group == 13 && number == 1)
     {
-        return {"Increase 30% of attacking & Wizardry Dmg"};
+        return {other("Increase 30% of attacking & Wizardry Dmg")};
     }
     return {};
+}
+
+// What the old code printed for the line in the UI's language: the game's text with its value, as printf fills
+// "%d" and "%%" (the only conversions these texts have); another text only in English.
+std::optional<std::string> PrintOldWingLine(const OldWingLine& line)
+{
+    const wchar_t* format = nullptr;
+    switch (line.kind)
+    {
+    case OldWingLine::Kind::Increase:
+        format = I18N::Game::IncreaseDOfDamage;
+        break;
+    case OldWingLine::Kind::Absorb:
+        format = I18N::Game::AbsorbDOfDamage;
+        break;
+    case OldWingLine::Kind::Speed:
+        format = I18N::Game::IncreaseSpeed;
+        break;
+    case OldWingLine::Kind::Other:
+        return std::nullopt;
+    }
+    const std::string text = Core::Text::ToUtf8(format);
+    std::string printed;
+    for (size_t position = 0; position < text.size(); ++position)
+    {
+        if (text.compare(position, 2, "%%") == 0)
+        {
+            printed += '%';
+            ++position;
+        }
+        else if (text.compare(position, 2, "%d") == 0)
+        {
+            printed += std::to_string(line.value);
+            ++position;
+        }
+        else
+        {
+            printed += text[position];
+        }
+    }
+    return printed;
+}
+
+std::string EnglishOldWingLine(const OldWingLine& line)
+{
+    switch (line.kind)
+    {
+    case OldWingLine::Kind::Increase:
+        return "Increase " + std::to_string(line.value) + "% of Damage";
+    case OldWingLine::Kind::Absorb:
+        return "Absorb " + std::to_string(line.value) + "% of Damage";
+    case OldWingLine::Kind::Speed:
+        return "Increase speed";
+    case OldWingLine::Kind::Other:
+        break;
+    }
+    return line.english;
 }
 
 TEST_CASE("The wings', capes' and pets' tooltip values come from their data as from the old formulas [data][items]")
@@ -377,15 +456,33 @@ TEST_CASE("The wings', capes' and pets' tooltip values come from their data as f
         for (int level = 0; level < ItemLevelCount; ++level)
         {
             INFO(item.group << "/" << item.number << " +" << level);
-            std::vector<std::string> lines;
+            const std::vector<OldWingLine> old = OldWingAndPetLines(item.group, item.number, level);
+            // Not the durability lines, which came from another part of the old code.
+            std::vector<const ItemDescriptionLine*> wingLines;
             for (const ItemDescriptionLine& line : item.description)
             {
                 if (!IsDurabilityLine(line))
                 {
-                    lines.push_back(FilledLine(item, line, level, profiles));
+                    wingLines.push_back(&line);
                 }
             }
-            CHECK(lines == OldWingAndPetLines(item.group, item.number, level));
+            REQUIRE(wingLines.size() == old.size());
+            for (size_t index = 0; index < old.size(); ++index)
+            {
+                const ItemDescriptionLine& line = *wingLines[index];
+                CHECK(FilledLine(item, line, level, profiles) == EnglishOldWingLine(old[index]));
+                // In every language, as the game's texts that other code still prints have it.
+                for (const char* locale : I18N::GetAvailableLocales())
+                {
+                    INFO(locale);
+                    I18N::SetLocale(locale);
+                    if (const std::optional<std::string> printed = PrintOldWingLine(old[index]))
+                    {
+                        CHECK(FilledLine(item, line, level, profiles, locale) == *printed);
+                    }
+                }
+                I18N::SetLocale("en");
+            }
             ++compared;
         }
     }
@@ -3421,6 +3518,47 @@ TEST_CASE("A change of the profile rules gives the items that follow them the ne
         CHECK(g_ItemDataHandler.GetStatFile() == shipped);
     }
     edits.GetHistory().Clear();
+}
+
+TEST_CASE("The bmd exports refuse damage or magic power past 255 and name the items [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    const WORD krisDamageMin = g_ItemDatabase.Find(KrisType)->damageMin;
+    const WORD bladeMagicPower = g_ItemDatabase.Find(BladeType)->magicPower;
+    EditItem(KrisType, [](ItemDefinition& item) { item.damageMin = 300; });
+    EditItem(BladeType, [](ItemDefinition& item) { item.magicPower = 256; });
+    const std::string named = "Item (0,0) DamageMin is 300; a .bmd item file holds up to 255\n"
+                              "Item (0,5) MagicPower is 256; a .bmd item file holds up to 255\n";
+
+    // Every such item is named once, and no file is written.
+    std::string changeLog;
+    CHECK_FALSE(g_ItemDataHandler.ExportAsBmd(changeLog));
+    CHECK(changeLog == named);
+    for (const ItemBmdLanguage& language : GetItemBmdLanguages())
+    {
+        CHECK_FALSE(std::filesystem::exists(folder.LegacyItemFilePath(language.folder)));
+    }
+
+    std::wstring legacyFile = (folder.Directory() / "Item_S6E3.bmd").wstring();
+    std::string problems;
+    CHECK_FALSE(g_ItemDataHandler.ExportAsS6E3(legacyFile.data(), problems));
+    CHECK(problems == named);
+    CHECK_FALSE(std::filesystem::exists(legacyFile));
+
+    // With the values back, both write.
+    EditItem(KrisType, [&](ItemDefinition& item) { item.damageMin = krisDamageMin; });
+    EditItem(BladeType, [&](ItemDefinition& item) { item.magicPower = bladeMagicPower; });
+    std::string savedChangeLog;
+    CHECK(g_ItemDataHandler.ExportAsBmd(savedChangeLog));
+    problems.clear();
+    CHECK(g_ItemDataHandler.ExportAsS6E3(legacyFile.data(), problems));
+    CHECK(problems.empty());
+    CHECK(std::filesystem::exists(legacyFile));
 }
 
 TEST_CASE("Exporting unchanged bmd files is not a failure [data][items][editor]")
