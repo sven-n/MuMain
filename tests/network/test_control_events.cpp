@@ -6,9 +6,12 @@
 //
 // Run: ctest --test-dir <build directory> --build-config Release -R "Control events"
 
+#include "stdafx.h"
+
 #include "doctest.h"
 
 #include "App/Control/ControlEvents.h"
+#include "App/Control/ControlObjects.h"
 
 #include "json.hpp"
 
@@ -252,4 +255,16 @@ TEST_CASE("Control events describe the steps of a trade [network][control-events
     CHECK_FALSE(FieldsOf(recorded[1]).contains("name"));
     CHECK(FieldsOf(recorded[2])["change"] == "closed");
     CHECK(FieldsOf(recorded[2])["result"] == "completed");
+}
+
+TEST_CASE("Control objects name the engine's object kinds [network][control-events]")
+{
+    CHECK(App::Control::ObjectKindName(KIND_PLAYER) == "player");
+    CHECK(App::Control::ObjectKindName(KIND_MONSTER) == "monster");
+    CHECK(App::Control::ObjectKindName(KIND_NPC) == "npc");
+    CHECK(App::Control::ObjectKindName(KIND_TRAP) == "trap");
+    CHECK(App::Control::ObjectKindName(KIND_PET) == "pet");
+    CHECK(App::Control::ObjectKindName(KIND_TMP) == "other");
+    CHECK(App::Control::ObjectKindName(KIND_EDIT) == "unknown");
+    CHECK(App::Control::ObjectKindName(0) == "unknown");
 }

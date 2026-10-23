@@ -39,7 +39,7 @@ struct ObjectDescription
 {
     int id = -1;
     std::string name;
-    // player | monster | npc | pet | unknown
+    // player | monster | npc | trap | pet | other | unknown
     std::string kind = "unknown";
     int x = -1;
     int y = -1;

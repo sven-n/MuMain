@@ -131,6 +131,12 @@ dialog on screen (`quest`, `page`, `text`, `need_zen`, and its `answers`, each
 with its `text` and `action`: `next` turns the page, `accept` takes the quest,
 `complete` hands it in, `close` ends the talk) or `null`.
 
+An object's `kind` is `player`, `monster`, `npc`, `trap` or `other` (the
+Cherry Blossom Tree, and the players of the castle siege preview), `item` for
+a drop, and `unknown` for anything else. Monster, npc, trap and other are the
+kinds of the monster list (`Data/Monsters/Monsters.json`); summons and
+transformed players are `player`.
+
 Each `nearby` object carries `id`, `kind`, `name`, `position`, and a player,
 monster or NPC also `alive`, `level` and `hp_percent`. `hp_percent` is a
 percentage of full health (`100` is untouched) and is `null` when the server

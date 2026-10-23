@@ -137,23 +137,6 @@ json TradeState()
     return trade;
 }
 
-std::string_view ObjectKindName(int objectKind)
-{
-    switch (objectKind)
-    {
-    case KIND_PLAYER:
-        return "player";
-    case KIND_MONSTER:
-        return "monster";
-    case KIND_NPC:
-        return "npc";
-    case KIND_PET:
-        return "pet";
-    default:
-        return "unknown";
-    }
-}
-
 json EquipmentArray()
 {
     json equipment = json::array();

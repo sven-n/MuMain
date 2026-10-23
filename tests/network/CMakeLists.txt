@@ -41,10 +41,13 @@ if(ENABLE_CONTROL_SOCKET)
             MuClient
     )
 
+    # The kind names come from the object code, which needs the client
+    # globals of Winmain.cpp.
     mu_add_test(
         NAME test_control_events
         SOURCES
             test_control_events.cpp
+            ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
         LINK_LIBS
             MuClient
     )
