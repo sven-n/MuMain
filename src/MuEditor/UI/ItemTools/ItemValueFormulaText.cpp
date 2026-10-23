@@ -20,7 +20,7 @@ using Data::Items::ItemDefinition;
 using Data::Items::ItemRequirement;
 using Data::Items::ItemStat;
 
-// Stats the game keeps in a byte.
+// Defense rate, which the game keeps in a byte.
 constexpr int MaxByteStat = 255;
 
 // A part of a line and where it comes from; a part without a source states a
@@ -286,7 +286,7 @@ FormulaLine DescribeStatFormula(const ItemDefinition& item, ItemStat stat, bool 
                                   : "(" + text + ") / 2") +
                " [" + DescribeFormulaSource(growth.source) + "]";
     }
-    if (stat == ItemStat::MagicPower || stat == ItemStat::BlockRate)
+    if (stat == ItemStat::BlockRate)
     {
         text = I18N::Format(I18N::Editor::FormulaAtMost, {text, Number(MaxByteStat)});
     }
