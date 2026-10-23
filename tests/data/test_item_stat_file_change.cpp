@@ -208,6 +208,19 @@ TEST_CASE("A table a line's values name is used and renamed there [editor][items
     REQUIRE(changed.size() == 1);
     CHECK(changed[0].description[0].values ==
           std::vector<std::pair<std::string, std::string>>{{"percent", "table:blockBonus"}, {"level", "level"}});
+
+    // A name line too.
+    ItemDefinition named = MakeShield(1, "");
+    ItemNameLine nameLine;
+    nameLine.text.Set("en", "{name} +{table:bonus}");
+    nameLine.hasText = true;
+    named.nameLines = {nameLine};
+    const std::vector<ItemDefinition> namedItems = {named};
+    CHECK(FindTableDescriptionUsers(namedItems, "bonus") == std::vector<int>{MakeItemType(6, 1)});
+    changed.clear();
+    RenameTableInDescriptions(namedItems, changed, "bonus", "blockBonus");
+    REQUIRE(changed.size() == 1);
+    CHECK(changed[0].nameLines[0].text.GetNeutral() == "{name} +{table:blockBonus}");
 }
 
 #endif // _EDITOR
