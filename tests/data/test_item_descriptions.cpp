@@ -115,7 +115,8 @@ TEST_CASE("A description's placeholders are filled in for the item's level befor
     jewel.description = {Line("+{level}: {table:b} more")};
     TextNum = 0;
     SkipNum = 0;
-    WriteItemDescriptionLines(jewel, 15, ItemTooltipValues{}, FiveUnitsPerLetter);
+    int rowsLeft = MaxItemDescriptionRows;
+    WriteItemDescriptionLines(jewel, 15, ItemTooltipValues{}, false, rowsLeft, FiveUnitsPerLetter);
     REQUIRE(TextNum == 1);
     CHECK(std::wstring(TextList[0]) == L"+15: 2000000000 more");
 
@@ -123,10 +124,12 @@ TEST_CASE("A description's placeholders are filled in for the item's level befor
     const std::string text = "{table:b} " + std::string(30, 'a');
     jewel.description = {Line(text.c_str())};
     TextNum = 0;
-    WriteItemDescriptionLines(jewel, 15, ItemTooltipValues{}, FiveUnitsPerLetter);
+    rowsLeft = MaxItemDescriptionRows;
+    WriteItemDescriptionLines(jewel, 15, ItemTooltipValues{}, false, rowsLeft, FiveUnitsPerLetter);
     CHECK(TextNum == 2);
     TextNum = 0;
-    WriteItemDescriptionLines(jewel, 0, ItemTooltipValues{}, FiveUnitsPerLetter);
+    rowsLeft = MaxItemDescriptionRows;
+    WriteItemDescriptionLines(jewel, 0, ItemTooltipValues{}, false, rowsLeft, FiveUnitsPerLetter);
     CHECK(TextNum == 1);
 }
 
