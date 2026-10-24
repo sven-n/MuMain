@@ -32,15 +32,6 @@ bool ContainsSeparator(const std::string& text)
     return text.find(LocalizedString::Separator) != std::string::npos;
 }
 
-// Locale codes like "pt" or "zh-TW". Anything else (empty, "=", "||") would
-// break the LocalizedString format used for the OpenMU exchange.
-bool IsValidLocaleCode(const std::string& locale)
-{
-    return !locale.empty() &&
-           std::all_of(locale.begin(), locale.end(), [](char character)
-                       { return std::isalnum(static_cast<unsigned char>(character)) || character == '-'; });
-}
-
 // The game shows names through the MAX_ITEM_NAME-sized ITEM_ATTRIBUTE name.
 bool IsTooLongForGame(const std::string& text)
 {
@@ -282,6 +273,15 @@ void ValidatePotionPriority(const ItemDefinition& definition, std::vector<ItemDa
 }
 } // namespace
 
+// Locale codes like "pt" or "zh-TW". Anything else (empty, "=", "||") would
+// break the LocalizedString format used for the OpenMU exchange.
+bool IsValidLocaleCode(const std::string& locale)
+{
+    return !locale.empty() &&
+           std::all_of(locale.begin(), locale.end(), [](char character)
+                       { return std::isalnum(static_cast<unsigned char>(character)) || character == '-'; });
+}
+
 void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIssue>& issues)
 {
     std::set<int> seenItemTypes;
@@ -387,7 +387,8 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
             std::set<std::string> reported;
             for (const std::string& name : scan.names)
             {
-                if (GetPlaceholderValue(name, 0, profiles) || !reported.insert(name).second)
+                if (IsBuiltInPlaceholder(name) || GetPlaceholderValue(name, 0, profiles) ||
+                    !reported.insert(name).second)
                 {
                     continue;
                 }
@@ -406,10 +407,10 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
                         suggestion = SuggestPlaceholder(MakeTablePlaceholder(name), known);
                     }
                 }
-                const std::string hint = suggestion.empty() ? "a placeholder is a built-in value ({" +
-                                                                  std::string(LevelPlaceholder) + "}) or a table of " +
-                                                                  statFile + " ({" + MakeTablePlaceholder("name") + "})"
-                                                            : "did you mean {" + suggestion + "}?";
+                const std::string hint = suggestion.empty()
+                                             ? "a placeholder is a built-in value (docs/item-data.md) or a table of " +
+                                                   statFile + " ({" + MakeTablePlaceholder("name") + "})"
+                                             : "did you mean {" + suggestion + "}?";
                 issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number,
                                   DescriptionTextField(line, LocalizedString::NeutralLocale),
                                   "has the unknown placeholder {" + name + "}; " + hint});

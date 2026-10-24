@@ -17,6 +17,7 @@ fields, so it can later be exchanged with the server.
 |---|---|
 | `Group00_Sword.json` … `Group15_Etc.json` | 0–15, named after the `ITEM_GROUP_*` constants |
 | `Stats/ItemStats.json` | What the + level, excellent options, ancient sets and option level add to the stats and requirements; see [Item stats by level](#item-stats-by-level) |
+| `Tooltips/Tooltip.json` | The item tooltip's shared texts and layouts: which stat and requirement lines a tooltip shows; see [Tooltip layouts](#tooltip-layouts) |
 
 The file name is only a convention; the group comes from the file content.
 
@@ -169,8 +170,105 @@ can have several tags; the file lists them in the order below.
 | `gemJewelry` | The gem rings and necklaces from the cash shop |
 | `luckyItemTicket` | Lucky item tickets |
 | `valuable` | The game asks for confirmation before the item is sold or dropped |
+| `noDamageLine` | The tooltip shows no damage line, though the item has damage (the Scrolls of Teleport, Teleport Ally and Soul Barrier) |
+| `noLevelRequirement` | The tooltip shows no level requirement, though the item has one (Loch's Feather) |
 
 Wings need no tag: an item is a wing when its `slot` is `wings`.
+
+### Tooltip layouts
+
+`Tooltips/Tooltip.json` says which lines an item tooltip shows besides the
+item's own description: damage, defense, magic defense, defense rate, the
+speeds, the resistances, the requirements with their "(lacking …)" lines, and
+the wizardry, curse and pet attack increases. It has the **shared texts**, by
+name and with their translations, and the **layouts**. Every item uses the
+layout `default` for now.
+
+```json
+{
+  "formatVersion": 1,
+  "texts": {
+    "defense": {"en": "Defense: {defense}", "de": "Verteidigung: {defense}"},
+    "lacking": {"en": "(lacking {missing})", "de": "(fehlt {missing})"}
+  },
+  "layouts": [
+    {
+      "name": "default",
+      "lines": [
+        {"section": "name"},
+        {"text": "@defense", "when": ["defense"], "colors": [{"when": ["defenseHarmonyBonus"], "color": "yellow"}, {"when": ["armour", "excellent"], "color": "blue"}]},
+        {"section": "description"},
+        {"text": "@requiredLevel", "when": ["requiredLevel", "!tag:noLevelRequirement"], "colors": [{"when": ["missingLevel"], "color": "red"}]},
+        {"text": "@lacking", "values": {"missing": "missingLevel"}, "when": ["requiredLevel", "!tag:noLevelRequirement", "missingLevel"], "color": "red"},
+        {"section": "classes"},
+        {"text": "", "when": ["tag:sceptre"]},
+        {"text": "@petAttackIncrease", "when": ["tag:sceptre"], "color": "blue", "bold": true},
+        {"section": "options"}
+      ]
+    }
+  ]
+}
+```
+
+A layout line has:
+
+- **`text`**: `"@name"` for a shared text, a text written in place (with its
+  translations, as in a description), or `""` for a blank line. Its
+  placeholders are the [built-in values](#description-placeholders), `level`
+  and the stat file's tables.
+- **`when`**: the line shows only when every entry holds. An entry is
+  - a built-in value, which holds when it is not 0 (`"defense"`,
+    `"missingStrength"`);
+  - a state (below);
+  - `"tag:<tag>"`, which holds when the item has that [tag](#tags).
+
+  A `!` in front turns an entry around: `"!tag:luckyItem"`. Without `when`
+  the line always shows.
+- **`color`**: the line's color, white when left out. The color names are
+  those of a description line.
+- **`colors`**: rules `{"when": [...], "color": ...}`. The first rule whose
+  `when` holds gives the color, else `color` does.
+- **`bold`**: `true` for a bold line.
+- **`values`**: a placeholder of the text and the built-in value it shows on
+  this line. One "(lacking {missing})" serves every requirement this way.
+
+The **states** a condition can name:
+
+| State | Set when |
+|---|---|
+| `hasDamage` | The item has damage above 0 to show; for a skill book, its skill's |
+| `skillBook` | A skill book or scroll (group 15): its damage line is wizardry damage |
+| `twoHanded` | A two-handed weapon |
+| `excellent`, `ancient` | An excellent or ancient item |
+| `damageHarmonyBonus`, `defenseHarmonyBonus` | A Jewel of Harmony option raises its damage or defense |
+| `strengthReduced`, `dexterityReduced` | A Jewel of Harmony option or a socket lowers that requirement |
+| `armour` | A helm, armor, pants, gloves or boots (groups 7 to 11) |
+| `wizardryWeapon` | A staff, a book, or a Magic Gladiator's sword with magic power |
+
+A **section** is a part of the tooltip the code still writes, and the lines
+of a layout go between them:
+
+| Section | What the code writes there |
+|---|---|
+| `name` | Everything up to the item's name, and the name |
+| `description` | The item's own texts: the code's texts for particular items, the item's [description](#fields), durability |
+| `classes` | The classes that can use the item, and the boots' and gloves' texts from +5 |
+| `options` | The excellent, set, socket, Jewel of Harmony and other options, to the end of the tooltip |
+
+Each layout has the four sections once each, in this order: it starts with
+`name` and ends with `options`.
+
+**Errors** when the item data loads: a `@name` that is not a shared text, an
+entry of `when` that is neither a value, a state nor a known tag, an unknown
+color, a placeholder that is neither built in nor named by the line's
+`values`, a translation whose placeholders are not those of the English
+text, a text (other than a blank line) without its English text, a language
+code that has more than letters, digits and `-`, a `values` entry that names
+no built-in value, missing or misplaced sections, and no layout `default`. The
+messages suggest the name meant for a typo. **Warnings**: a shared text no
+layout uses, a `values` entry the text does not have, a translation in a
+language the game has no texts in (as for item names), and a layout other
+than `default` (nothing uses it yet).
 
 ### Flight equipment
 
@@ -244,7 +342,18 @@ value of `name` for the hovered item, e.g.
 have no braces of their own, so every brace belongs to a placeholder. A
 placeholder is one of:
 
-- a **built-in value**, by its name: `{level}`, the item's + level;
+- a **built-in value**, by its name: `{level}`, the item's + level, or a value of the tooltip's stat
+  lines, as the game computes them for the item and the hero:
+  `damageMin`, `damageMax` (with the Jewel of Harmony's attack bonus; a skill
+  book's wizardry damage), `defense` (with its defense bonus), `magicDefense`,
+  `blockRate`, `attackSpeed`, `walkSpeed`, `magicPower`, `durability`,
+  `maxDurability`, the resistances `iceResistance`, `poisonResistance`,
+  `lightningResistance`, `fireResistance`, `earthResistance`, `windResistance`,
+  `waterResistance` (the item's level + 1 for a resistance it has), and for
+  `Level`, `Strength`, `Dexterity`, `Vitality`, `Energy` and `Leadership`
+  `required…` (what the item asks, after the Jewel of Harmony's and the sockets'
+  strength and agility reductions) and `missing…` (what the hero lacks of it, 0
+  when nothing);
 - a **level bonus table** of [`Stats/ItemStats.json`](#item-stats-by-level),
   as `table:` and its name: the table's value at the item's + level
   (`{table:damageIncreaseWeapons}` is 3 at +1 and 66 at +15, the damage a

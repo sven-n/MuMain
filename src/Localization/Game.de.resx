@@ -260,17 +260,9 @@
     <value>Verteidigung: %d</value>
     <comment>legacy_id=65,209</comment>
   </data>
-  <data name="Spell resistance: %d" xml:space="preserve">
-    <value>Zauberresistenz: %d</value>
-    <comment>legacy_id=66</comment>
-  </data>
   <data name="Defense rate: %d" xml:space="preserve">
     <value>Verteidigungsrate: %d</value>
     <comment>legacy_id=67,2045</comment>
-  </data>
-  <data name="Moving speed: %d" xml:space="preserve">
-    <value>Bewegungsgeschwindigkeit: %d</value>
-    <comment>legacy_id=68</comment>
   </data>
   <data name="Number of items: %d" xml:space="preserve">
     <value>Anzahl: %d</value>
@@ -283,10 +275,6 @@
   <data name="Durability: [%d/%d]" xml:space="preserve">
     <value>Haltbarkeit: [%d/%d]</value>
     <comment>legacy_id=71</comment>
-  </data>
-  <data name="%s Resistance: %d" xml:space="preserve">
-    <value>%s-Resistenz: %d</value>
-    <comment>legacy_id=72</comment>
   </data>
   <data name="Strength Requirement: %d" xml:space="preserve">
     <value>Benötigte Stärke: %d</value>
@@ -4552,10 +4540,6 @@
     <value>Kein %s.</value>
     <comment>legacy_id=1233</comment>
   </data>
-  <data name="Increase pet attack as %d%%" xml:space="preserve">
-    <value>Erhöht den Haustierangriff um %d%%</value>
-    <comment>legacy_id=1234</comment>
-  </data>
   <data name="Crest of monarch" xml:space="preserve">
     <value>Crest of Monarch</value>
     <comment>legacy_id=1235</comment>
@@ -6216,10 +6200,6 @@
     <value>Starke Mentalität und ausgezeichnete Einsicht erzeugen den mächtigsten Fluchzauber. Außerdem lockt dieser Gegenstand Beschwörer aus einer anderen Welt hervor und setzt die schädliche Zauberei gegen sie ein.</value>
     <comment>legacy_id=1690</comment>
   </data>
-  <data name="Curse Spell increment %d%%" xml:space="preserve">
-    <value>Fluchzauber +%d%%</value>
-    <comment>legacy_id=1691</comment>
-  </data>
   <data name="Curse Spell: %d ~ %d" xml:space="preserve">
     <value>Fluchzauber: %d ~ %d</value>
     <comment>legacy_id=1692</comment>
@@ -7055,10 +7035,6 @@
   <data name="Skills will improve through upgrading." xml:space="preserve">
     <value>Fähigkeiten werden durch Verbesserung stärker.</value>
     <comment>legacy_id=1929</comment>
-  </data>
-  <data name="Stamina Requirement: %d" xml:space="preserve">
-    <value>Benötigte Vitalität: %d</value>
-    <comment>legacy_id=1930</comment>
   </data>
   <data name="Req LV" xml:space="preserve">
     <value>Benötigtes LV</value>
