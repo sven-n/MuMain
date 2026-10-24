@@ -1990,4 +1990,133 @@
   <data name="Step channel" xml:space="preserve">
     <value>{0}: channel {1}</value>
   </data>
+  <data name="Monster Browser" xml:space="preserve">
+    <value>Monster Browser</value>
+  </data>
+  <data name="Monster Translations" xml:space="preserve">
+    <value>Monster Translations</value>
+  </data>
+  <data name="Monster Checks" xml:space="preserve">
+    <value>Monster Checks</value>
+  </data>
+  <data name="The monsters changed since this step; it is not undone." xml:space="preserve">
+    <value>The monsters changed since this step; it is not undone.</value>
+  </data>
+  <data name="Save Monsters" xml:space="preserve">
+    <value>Save Monsters</value>
+  </data>
+  <data name="Add monster" xml:space="preserve">
+    <value>Add monster</value>
+  </data>
+  <data name="Copy monster" xml:space="preserve">
+    <value>Copy monster</value>
+  </data>
+  <data name="Remove monster" xml:space="preserve">
+    <value>Remove monster</value>
+  </data>
+  <data name="All kinds" xml:space="preserve">
+    <value>All kinds</value>
+  </data>
+  <data name="All monsters" xml:space="preserve">
+    <value>All monsters</value>
+  </data>
+  <data name="Kind monster" xml:space="preserve">
+    <value>Monster</value>
+  </data>
+  <data name="Kind NPC" xml:space="preserve">
+    <value>NPC</value>
+  </data>
+  <data name="Kind trap" xml:space="preserve">
+    <value>Trap</value>
+  </data>
+  <data name="Kind other" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="Step kind" xml:space="preserve">
+    <value>{0}: kind</value>
+  </data>
+  <data name="Copy monster note" xml:space="preserve">
+    <value>A copy of {0} with its English name only, without the translations.</value>
+  </data>
+  <data name="The monster entry is removed." xml:space="preserve">
+    <value>The monster entry is removed.</value>
+  </data>
+  <data name="Monster without entry in game" xml:space="preserve">
+    <value>Without an entry a monster of this number that appears gets the name its code gives it (often an old Korean name) or none, and the kind of the old number rules: {0}. The quest windows name it "()".</value>
+  </data>
+  <data name="Removed monster in game" xml:space="preserve">
+    <value>Monsters and NPCs of this number that are in the game keep their name and kind until they appear again.</value>
+  </data>
+  <data name="Kind change in game" xml:space="preserve">
+    <value>Monsters and NPCs of this number that are in the game keep their kind until they appear again.</value>
+  </data>
+  <data name="Nothing uses the monster" xml:space="preserve">
+    <value>Nothing uses the monster</value>
+  </data>
+  <data name="The sources were not found: code that names the monster is not known." xml:space="preserve">
+    <value>The sources were not found: code that names the monster is not known.</value>
+  </data>
+  <data name="Monster code references limit" xml:space="preserve">
+    <value>Not found: code that uses the number in other ways, such as a case label, a function argument or a variable whose name does not end in MonsterIndex.</value>
+  </data>
+  <data name="NPC of the quests {0}" xml:space="preserve">
+    <value>The NPC of the quests: {0}</value>
+  </data>
+  <data name="Killed in the quests {0}" xml:space="preserve">
+    <value>To be killed in the quests: {0}</value>
+  </data>
+  <data name="Dialogues of the quest system {0}" xml:space="preserve">
+    <value>Dialogue states of the quest system: {0}</value>
+  </data>
+  <data name="Monster names cannot contain the separator" xml:space="preserve">
+    <value>A monster name cannot contain "||".</value>
+  </data>
+  <data name="Select the monster and show the Monster Browser" xml:space="preserve">
+    <value>Select the monster and show the Monster Browser</value>
+  </data>
+  <data name="Step monster name" xml:space="preserve">
+    <value>{0}: name ({1})</value>
+  </data>
+  <data name="Import names from NpcName txt" xml:space="preserve">
+    <value>Import names from NpcName txt</value>
+  </data>
+  <data name="Export as NpcName txt" xml:space="preserve">
+    <value>Export as NpcName txt</value>
+  </data>
+  <data name="Import NpcName txt note" xml:space="preserve">
+    <value>Reads {0} and sets the names of the monsters that have an entry; Undo takes back the whole import at once. The Kalima gates (152-158) and numbers without an entry are skipped. An empty name removes a translation; an English name is never emptied. A name equal to the English one stays missing where the monster has no name of its own in that language, as Export writes the English name there.</value>
+  </data>
+  <data name="Export NpcName txt note" xml:space="preserve">
+    <value>Writes the names of all monsters to {0}, in English where a language has no name of its own. A file that changes is backed up first.</value>
+  </data>
+  <data name="NpcName import line" xml:space="preserve">
+    <value>{0}: {1} names read, {2} changed, {3} skipped, {4} cut</value>
+  </data>
+  <data name="NpcName export line" xml:space="preserve">
+    <value>{0}: {1} names written, {2} of them in English</value>
+  </data>
+  <data name="NpcName export unchanged" xml:space="preserve">
+    <value>{0}: has these names already; not written</value>
+  </data>
+  <data name="Monster names imported" xml:space="preserve">
+    <value>Names imported: {0} changed. See the console.</value>
+  </data>
+  <data name="Monster names exported" xml:space="preserve">
+    <value>Names exported to {0}. See the console.</value>
+  </data>
+  <data name="Monster names not exported" xml:space="preserve">
+    <value>Not every file was written. See the console.</value>
+  </data>
+  <data name="Monster" xml:space="preserve">
+    <value>Monster</value>
+  </data>
+  <data name="The monsters changed since the last check; check again." xml:space="preserve">
+    <value>The monsters changed since the last check; check again.</value>
+  </data>
+  <data name="Save Monsters refuses data with errors and saves data with warnings." xml:space="preserve">
+    <value>Save Monsters refuses data with errors and saves data with warnings.</value>
+  </data>
+  <data name="Monster checks click note" xml:space="preserve">
+    <value>Click a problem of a monster to select the monster and open the tool of its field.</value>
+  </data>
 </root>

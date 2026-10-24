@@ -6,6 +6,7 @@
 
 #include "Core/Platform/ProcessLocale.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/SkillData/SkillDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -66,11 +67,11 @@ private:
 };
 
 // The game data a tooltip reads besides the items, loaded as the game loads it (ZzzOpenData.cpp, CUIManager): the
-// skills (the orbs' and scrolls' names and damage), the socket items, the item sets, the monster names (the
+// skills (the orbs' and scrolls' names and damage), the socket items, the item sets, the monster list (the
 // transformation rings), the Jewel of Harmony and item add
 // option tables, and the buff system's time texts. Run in a ClientDataScope, which makes the paths relative to the
 // client. It puts back what it replaces (the language, the two tables, the buff system and the skill table it made),
-// but the item sets, the socket items and the monster names stay loaded for the tests after it: the game has no
+// but the item sets, the socket items and the monster list stay loaded for the tests after it: the game has no
 // way to unload them, and every one of these loads replaces what was there.
 class TooltipDataScope
 {
@@ -89,9 +90,9 @@ public:
         mu_swprintf(path, L"Data\\Local\\%ls\\SocketItem_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
         g_SocketItemMgr.OpenSocketItemScript(path);
         g_csItemOption.OpenItemSetScript();
-        // The transformation rings' names are monster names.
-        mu_swprintf(path, L"Data\\Local\\%ls\\NpcName_%ls.txt", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-        OpenMonsterScript(path);
+        // The transformation rings' names are monster names (Data/Monsters/Monsters.json).
+        std::string monsterError;
+        g_MonsterDataHandler.Load(monsterError);
         m_previousHarmony = g_pUIJewelHarmonyinfo;
         m_previousAddOptions = g_pItemAddOptioninfo;
         g_pUIJewelHarmonyinfo = JewelHarmonyInfo::MakeInfo();

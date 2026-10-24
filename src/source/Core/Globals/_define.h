@@ -261,7 +261,6 @@ enum struct STORAGE_TYPE
 #define EDIT_HEIGHT  4
 #define EDIT_LIGHT   5
 #define EDIT_SOUND   6
-#define EDIT_MONSTER 7
 
 #define IME_CONVERSIONMODE  1
 #define IME_SENTENCEMODE    2

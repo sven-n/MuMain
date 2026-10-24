@@ -2,9 +2,7 @@
 
 #ifdef _EDITOR
 
-#include "Data/GameData/ItemData/ItemDataIssue.h"
-
-#include <vector>
+#include "../MuEditor/UI/Common/IssueTable.h"
 
 // The item checks (section 9): the errors and warnings Save Items finds in the
 // item data and the item models, errors first. A click on a problem of an
@@ -19,30 +17,15 @@ public:
     void Render(bool* open);
 
 private:
-    static constexpr int NoIssue = -1;
-
     CMuItemChecksUI() = default;
 
     void RunChecks();
-    // The problems the error and warning boxes show.
-    void FilterIssues();
     void RenderCheckLine();
-    void RenderNotes();
-    void RenderTable();
-    void RenderRow(int issueIndex);
 
-    std::vector<Data::Items::ItemDataIssue> m_issues;
-    // Indexes into m_issues, in its order.
-    std::vector<int> m_shownIssues;
-    int m_errorCount = 0;
-    int m_warningCount = 0;
+    MuEditor::IssueTable m_issueTable;
     bool m_checked = false;
     // ToolWindow::GetDataVersion() when the checks ran.
     long long m_checkedDataVersion = 0;
-    bool m_showErrors = true;
-    bool m_showWarnings = true;
-    // The index into m_issues of the problem clicked last, or NoIssue.
-    int m_clickedIssue = NoIssue;
 };
 
 #define g_MuItemChecksUI CMuItemChecksUI::GetInstance()

@@ -67,7 +67,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `ping` | build identifier, the git `commit` the client was built from (`commit_changed` when tracked files differed from it), and the current scene |
 | `scene` | which screen the client is on: `login`, `character_list`, `world`, … |
 | `state` | the character and everything around it (see below) |
-| `nearby` | the objects the client can see |
+| `nearby` | the objects the client can see, with their monster numbers |
 | `events` (`since`, `follow`) | recorded events, or a live stream of them |
 | `wait-for` (`event`, `match`, `timeout`) | block until a matching event arrives |
 | `screenshot` (`out`, `quality`) | capture the next frame as a JPEG to a path; without `out` it names itself, uniquely per capture; `quality` 1 to 100, default 100 |
@@ -89,7 +89,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `move` (`x`, `y`) | walk there with the client's own path finder |
 | `warp` (`gate`) | use a warp-list entry by name |
 | `teleport` (`x`, `y`, `map`) | the game master's own move command; `map` is an index, the current map when omitted |
-| `attack` (`target`, `times`, `interval`) | plain attacks on an id or character name |
+| `attack` (`target`, `times`, `interval`) | plain attacks on a `target` |
 | `skill` (`skill`, `target`) | cast a skill the character owns — with `target` it is aimed at that object, without one it is cast where the character stands |
 | `pickup` (`item`) | walk to a drop and take it, by the id `nearby` reports for it |
 | `use` (`slot`), `equip` (`slot`, `target_slot`) | inventory actions |
@@ -97,6 +97,12 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `party` (`action`, `target`) | `invite`, `accept`, `decline`, `leave` |
 | `trade` (`action`, `target`) | `request` a trade with another player at most one tile away (`not_allowed` otherwise), or `cancel` the open one; the partner accepts with the Enter key, and items go in with `click-ui` |
 | `halt` | stop the walk or repeated attack in progress |
+
+A `target` is an object id (the `id` of `nearby`), a character name, or
+`{"monster": <number>}`: the nearest living monster or NPC with that monster
+number. Traps, objects of the kind `other`, and summons, Kalima gates and
+transformed players are not found by their number; a trade needs a player
+either way.
 
 `state` reports the scene and account on every screen, and in the world adds:
 character name, class, level, experience, zen, HP/mana/SD/AG with their
@@ -132,6 +138,19 @@ these, as in the `quest` events), and `npc_quest`, the quest
 dialog on screen (`quest`, `page`, `text`, `need_zen`, and its `answers`, each
 with its `text` and `action`: `next` turns the page, `accept` takes the quest,
 `complete` hands it in, `close` ends the talk) or `null`.
+
+An object's `kind` is `player`, `monster`, `npc`, `trap` or `other` (the
+Cherry Blossom Tree, and the players of the castle siege preview), `item` for
+a drop, and `unknown` for anything else. Monster, npc, trap and other are the
+kinds of the monster list (`Data/Monsters/Monsters.json`, see
+[monster-data.md](monster-data.md#kinds)); summons, Kalima gates and
+transformed players are `player`.
+
+A character also carries `monster`, the monster number the server created it
+with (the `number` in the monster list), or `null` for a player. Summons,
+Kalima gates and transformed players have one too, with the kind `player`. Monster and NPC
+`name`s are in the client's language, so a script finds an NPC by its
+`monster` number rather than by its name.
 
 Each `nearby` object carries `id`, `kind`, `name`, `position`, and a player,
 monster or NPC also `alive`, `level` and `hp_percent`. `hp_percent` is a
@@ -191,7 +210,7 @@ strictly increasing `seq`, a UTC `time` and its own fields:
 
 | Event | Fields |
 |---|---|
-| `hit` | `direction` (`dealt`/`received`), `attacker`/`target` `{id,name,kind}`, `damage`, `shield_damage`, `critical`, `missed` |
+| `hit` | `direction` (`dealt`/`received`), `attacker`/`target` `{id,name,kind,monster}`, `damage`, `shield_damage`, `critical`, `missed` |
 | `killed` | `victim`, `killer` |
 | `stat` | `stat` (`life`, `mana`, `sd`, `ag`, `level`, `experience_gained` — the experience of one kill, and `damage_dealt` with it — the cumulative total is `state.experience`), `value`, `max` |
 | `chat` | `sender`, `text`, `kind` (`public`, `whisper`, `party`, `guild`, `union`, `gens`, `gm`) |

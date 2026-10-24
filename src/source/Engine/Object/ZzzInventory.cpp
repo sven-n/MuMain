@@ -37,6 +37,7 @@
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "GameLogic/Items/ItemStats.h"
+#include "GameLogic/Items/TransformationRing.h"
 #include "Render/Items/ItemDisplay.h"
 #include <chrono>
 #include "Data/GameData/ItemData/ItemModelSlots.h"
@@ -1053,15 +1054,6 @@ int CharacterInfoStartX;
 int CharacterInfoStartY;
 int GuildStartX;
 int GuildStartY;
-int SommonTable[] = { 2,7,14,8,9,41 };
-
-// Whether a Transformation Ring of that level turns into that monster type. The rings have a monster up to +5;
-// above, the table has none (reading past it was undefined).
-static bool IsTransformationRingMonster(int ringLevel, int monsterType)
-{
-    return ringLevel >= 0 && ringLevel < static_cast<int>(std::size(SommonTable)) &&
-           SommonTable[ringLevel] == monsterType;
-}
 
 wchar_t ChaosEventName[][100] = {
     L"히돼?고향 여행권",
@@ -1332,12 +1324,9 @@ void GetItemName(int iType, int iLevel, wchar_t* Text)
     }
     else if (iType == ITEM_TRANSFORMATION_RING)
     {
-        for (int i = 0; i < MAX_MONSTER; i++)
+        if (const wchar_t* monsterName = GameLogic::Items::TransformationRing::MonsterName(iLevel))
         {
-            if (IsTransformationRingMonster(iLevel, MonsterScript[i].Type))
-            {
-                mu_swprintf(Text, L"%ls %ls", MonsterScript[i].Name, I18N::Game::TransformationRing);
-            }
+            mu_swprintf(Text, L"%ls %ls", monsterName, I18N::Game::TransformationRing);
         }
     }
     else if (iType >= ITEM_WINGS_OF_SPIRITS && iType <= ITEM_WINGS_OF_DARKNESS)
@@ -2111,13 +2100,9 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     }
     else if (ip->Type == ITEM_TRANSFORMATION_RING)
     {
-        for (int i = 0; i < MAX_MONSTER; i++)
+        if (const wchar_t* monsterName = GameLogic::Items::TransformationRing::MonsterName(Level))
         {
-            if (IsTransformationRingMonster(Level, MonsterScript[i].Type))
-            {
-                mu_swprintf(TextList[TextNum], L"%ls %ls", MonsterScript[i].Name, I18N::Game::TransformationRing);
-                break;
-            }
+            mu_swprintf(TextList[TextNum], L"%ls %ls", monsterName, I18N::Game::TransformationRing);
         }
     }
     else if (ip->Type >= ITEM_WINGS_OF_SPIRITS && ip->Type <= ITEM_WINGS_OF_DARKNESS)
@@ -4650,13 +4635,9 @@ static void RenderRepairInfo(const UI::Scaling::Transform& screen, int sx, int s
     }
     else if (ip->Type == ITEM_TRANSFORMATION_RING)
     {
-        for (int i = 0; i < MAX_MONSTER; i++)
+        if (const wchar_t* monsterName = GameLogic::Items::TransformationRing::MonsterName(Level))
         {
-            if (IsTransformationRingMonster(Level, MonsterScript[i].Type))
-            {
-                mu_swprintf(TextList[TextNum], L"%ls %ls", MonsterScript[i].Name, I18N::Game::TransformationRing);
-                break;
-            }
+            mu_swprintf(TextList[TextNum], L"%ls %ls", monsterName, I18N::Game::TransformationRing);
         }
     }
     else if (GameLogic::Items::IsDarkLordPet(ip))
@@ -5397,13 +5378,9 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     }
     else if (o->Type == MODEL_TRANSFORMATION_RING)
     {
-        for (int i = 0; i < MAX_MONSTER; i++)
+        if (const wchar_t* monsterName = GameLogic::Items::TransformationRing::MonsterName(ItemLevel))
         {
-            if (IsTransformationRingMonster(ItemLevel, MonsterScript[i].Type))
-            {
-                FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", MonsterScript[i].Name, I18N::Game::TransformationRing);
-                break;
-            }
+            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", monsterName, I18N::Game::TransformationRing);
         }
     }
     else if (o->Type == MODEL_RENA && ItemLevel == 3)

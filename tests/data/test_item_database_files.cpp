@@ -1097,6 +1097,27 @@ TEST_CASE("Bmd import reads Portuguese and Spanish names as Windows-1252 [data][
     CHECK(gaionsOrder->names.GetNeutral() == "Gaion's Order");
 }
 
+TEST_CASE("Bmd import reads a name that only looks like UTF-8 as Windows-1252 [data][items]")
+{
+    TemporaryClientFolder folder;
+    LegacyItemFile english;
+    english.SetName(BladeType, "Blade");
+    english.Write(folder.LegacyItemFilePath(L"Eng"));
+    LegacyItemFile portuguese;
+    // C0 AF would be an overlong form of '/' in UTF-8; read as Windows-1252 it is U+00C0 U+00AF.
+    portuguese.SetName(BladeType, "Blade \xC0\xAF");
+    portuguese.Write(folder.LegacyItemFilePath(L"Por"));
+    ClientDataScope client(folder.Directory());
+
+    const ItemBmdImportResult result = ImportItemBmdFiles();
+    REQUIRE_FALSE(HasErrors(result.issues));
+    CHECK(result.reencodedNameCount == 1);
+
+    const ItemDefinition* blade = FindItem(result.items, BladeType);
+    REQUIRE(blade != nullptr);
+    CHECK(blade->names.Get("pt") == "Blade \xC3\x80\xC2\xAF");
+}
+
 TEST_CASE("A folder that cannot be written is a write failure, not a data error [data][items]")
 {
     const ItemDataLoadResult shipped = LoadItemDataDirectory(DataDirectory / "Items");
@@ -1107,7 +1128,29 @@ TEST_CASE("A folder that cannot be written is a write failure, not a data error 
 
     std::vector<ItemDataIssue> issues;
     CHECK(SaveItemDataDirectory(blocked, shipped.items, issues) == ItemDataSaveResult::WriteFailed);
-    CHECK_FALSE(issues.empty());
+    // The issue names the temporary file that could not be written.
+    CHECK(std::any_of(issues.begin(), issues.end(), [](const ItemDataIssue& issue)
+                      { return issue.message == "could not be written" && issue.source.ends_with(".json.tmp"); }));
+}
+
+TEST_CASE("A file that cannot be replaced is a write failure and leaves no temporary file [data][items]")
+{
+    const ItemDataLoadResult shipped = LoadItemDataDirectory(DataDirectory / "Items");
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    const std::filesystem::path itemDirectory = folder.Directory() / GetItemDataDirectory();
+    // A folder with the name of the sword file: the written file cannot take its place.
+    const std::filesystem::path swordFile = itemDirectory / GetItemGroupFileName(0);
+    std::filesystem::remove(swordFile);
+    std::filesystem::create_directories(swordFile / "inside");
+
+    std::vector<ItemDataIssue> issues;
+    CHECK(SaveItemDataDirectory(itemDirectory, shipped.items, issues) == ItemDataSaveResult::WriteFailed);
+    CHECK(std::any_of(
+        issues.begin(), issues.end(), [&](const ItemDataIssue& issue)
+        { return issue.source == swordFile.string() && issue.message.starts_with("could not be replaced: "); }));
+    CHECK(std::filesystem::is_directory(swordFile));
+    CHECK_FALSE(std::filesystem::exists(swordFile.string() + ".tmp"));
 }
 
 // The items and their models are saved together: when one of the files
