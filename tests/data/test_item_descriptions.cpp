@@ -129,6 +129,34 @@ TEST_CASE("A description's placeholders are filled in for the item's level befor
     CHECK(TextNum == 1);
 }
 
+TEST_CASE("A description line is written only at the item levels it is shown at [data][items]")
+{
+    ItemDefinition scroll = MakeJewel();
+    ItemDescriptionLine warp = Line("Warp after 3 seconds");
+    warp.minLevel = 1;
+    warp.maxLevel = 8;
+    scroll.description = {Line("Every level"), warp};
+
+    TextNum = 0;
+    SkipNum = 0;
+    WriteItemDescriptionLines(scroll, 0, FiveUnitsPerLetter);
+    REQUIRE(TextNum == 1);
+    CHECK(std::wstring(TextList[0]) == L"Every level");
+
+    for (const int level : {1, 8})
+    {
+        INFO("+" << level);
+        TextNum = 0;
+        WriteItemDescriptionLines(scroll, level, FiveUnitsPerLetter);
+        REQUIRE(TextNum == 2);
+        CHECK(std::wstring(TextList[1]) == L"Warp after 3 seconds");
+    }
+
+    TextNum = 0;
+    WriteItemDescriptionLines(scroll, 9, FiveUnitsPerLetter);
+    CHECK(TextNum == 1);
+}
+
 TEST_CASE("A description writes at most its own rows, leaving the tooltip's rows to the rest [data][items]")
 {
     ItemDefinition jewel = MakeJewel();
