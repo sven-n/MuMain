@@ -37,7 +37,7 @@ void RefreshShownNames(int number)
         {
             continue;
         }
-        if (number != AllNumbers && character.MonsterIndex != number)
+        if (number != Data::Monsters::MonsterDataHandler::AllNumbers && character.MonsterIndex != number)
         {
             continue;
         }
