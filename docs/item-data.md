@@ -331,7 +331,10 @@ Each line is `{"text": ..., "values": {...}, "when": [...], "color": ...,
   `greenBlue`, `gray`, `redPurple`, `violet`, `orange`.
 - **`levels`** shows the line only at those item levels, both included (`[1,
   8]`; left out: every level): a list of two levels from 0 to 15, the first
-  not above the last.
+  not above the last. Most items that use it today are level variants (the
+  Fruits, Contract Summon, Life Stone, Rena, …), which the items design makes
+  items of their own later: their lines then move into those items and lose
+  their `levels`.
 - **`when`** shows the line only when its [conditions](#tooltip-layouts)
   hold, as a layout line's (`["!timed"]`, `["durability=2"]`).
 
