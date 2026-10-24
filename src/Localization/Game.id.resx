@@ -639,10 +639,6 @@
     <value>Pindahkan kursor ke bawah-&gt; Sesuaikan jendela obrolan</value>
     <comment>legacy_id=156</comment>
   </data>
-  <data name="Warp to the corresponding area after %d seconds" xml:space="preserve">
-    <value>Warp ke area yang sesuai setelah %d detik</value>
-    <comment>legacy_id=157</comment>
-  </data>
   <data name="%s Warp scroll" xml:space="preserve">
     <value>%s Gulir warp</value>
     <comment>legacy_id=158</comment>
@@ -2372,10 +2368,6 @@
     <value>Meningkatkan tingkat perolehan Mana setelah berburu monster +Mana/8</value>
     <comment>legacy_id=635</comment>
   </data>
-  <data name="Increases 1~3 stat points" xml:space="preserve">
-    <value>Meningkatkan 1~3 poin stat</value>
-    <comment>legacy_id=636</comment>
-  </data>
   <data name="The remaining time is shown" xml:space="preserve">
     <value>Waktu yang tersisa ditampilkan</value>
     <comment>legacy_id=638</comment>
@@ -2808,10 +2800,6 @@
     <value>Anda telah menukarkan Dinorant</value>
     <comment>legacy_id=747</comment>
   </data>
-  <data name="Used to upgrade wings" xml:space="preserve">
-    <value>Digunakan untuk meningkatkan sayap</value>
-    <comment>legacy_id=748</comment>
-  </data>
   <data name="Must be over level 10 to use fruits" xml:space="preserve">
     <value>Harus lebih dari level 10 untuk menggunakan buah</value>
     <comment>legacy_id=749</comment>
@@ -2988,21 +2976,9 @@
     <value>Pedang Malaikat Tertinggi</value>
     <comment>legacy_id=812</comment>
   </data>
-  <data name="Used in the online event" xml:space="preserve">
-    <value>Digunakan dalam acara online</value>
-    <comment>legacy_id=813</comment>
-  </data>
-  <data name="Used when entering Blood Castle" xml:space="preserve">
-    <value>Digunakan saat memasuki Blood Castle</value>
-    <comment>legacy_id=814</comment>
-  </data>
   <data name="Reward received when returned to the Archangel" xml:space="preserve">
     <value>Hadiah diterima saat dikembalikan ke Malaikat Agung</value>
     <comment>legacy_id=815</comment>
-  </data>
-  <data name="Used when creating a Cloak of Invisibility" xml:space="preserve">
-    <value>Digunakan saat membuat Jubah Gaib</value>
-    <comment>legacy_id=816</comment>
   </data>
   <data name="Absolute Crossbow of Archangel" xml:space="preserve">
     <value>Panah Mutlak Malaikat Agung</value>
@@ -4068,10 +4044,6 @@
     <value>Batu Persahabatan</value>
     <comment>legacy_id=1098</comment>
   </data>
-  <data name="Used in the My Friend event." xml:space="preserve">
-    <value>Digunakan dalam acara Temanku.</value>
-    <comment>legacy_id=1099</comment>
-  </data>
   <data name="Do you want to buy an item?" xml:space="preserve">
     <value>Apakah Anda ingin membeli suatu barang?</value>
     <comment>legacy_id=1100</comment>
@@ -4500,14 +4472,6 @@
     <value>gagak gelap</value>
     <comment>legacy_id=1214</comment>
   </data>
-  <data name="Used in Dark Horse resurrection" xml:space="preserve">
-    <value>Digunakan dalam kebangkitan Kuda Hitam</value>
-    <comment>legacy_id=1215</comment>
-  </data>
-  <data name="Used in Dark Raven resurrection" xml:space="preserve">
-    <value>Digunakan dalam kebangkitan Dark Raven</value>
-    <comment>legacy_id=1216</comment>
-  </data>
   <data name="Pet" xml:space="preserve">
     <value>Peliharaan</value>
     <comment>legacy_id=1217</comment>
@@ -4583,10 +4547,6 @@
   <data name="Crest of monarch" xml:space="preserve">
     <value>Lambang raja</value>
     <comment>legacy_id=1235</comment>
-  </data>
-  <data name="Used in combining Cape of Lord &amp; Warrior's Cloak" xml:space="preserve">
-    <value>Digunakan dalam menggabungkan Cape of Lord &amp; Warrior's Cloak</value>
-    <comment>legacy_id=1236</comment>
   </data>
   <data name="Check the details in pet information window" xml:space="preserve">
     <value>Periksa detailnya di jendela informasi hewan peliharaan</value>
@@ -4767,10 +4727,6 @@
   <data name="Sign of lord" xml:space="preserve">
     <value>Tanda tuan</value>
     <comment>legacy_id=1290</comment>
-  </data>
-  <data name="Use in siege registration" xml:space="preserve">
-    <value>Gunakan dalam pendaftaran pengepungan</value>
-    <comment>legacy_id=1291</comment>
   </data>
   <data name="Move to vault" xml:space="preserve">
     <value>Pindah ke brankas</value>
@@ -5244,18 +5200,6 @@
     <value>Gulir Penjaga</value>
     <comment>legacy_id=1416</comment>
   </data>
-  <data name="Damage +20%% increase effect" xml:space="preserve">
-    <value>Kerusakan +20%% imeningkatkan efek</value>
-    <comment>legacy_id=1417</comment>
-  </data>
-  <data name="Duration 60 seconds" xml:space="preserve">
-    <value>Durasi 60 detik</value>
-    <comment>legacy_id=1418</comment>
-  </data>
-  <data name="Only applicable for castle gate and statue" xml:space="preserve">
-    <value>Hanya berlaku untuk gerbang kastil dan patung</value>
-    <comment>legacy_id=1419,1465</comment>
-  </data>
   <data name="No. of signs" xml:space="preserve">
     <value>Jumlah tanda</value>
     <comment>legacy_id=1420</comment>
@@ -5435,10 +5379,6 @@
   <data name="Attacking skill will increase +20%%" xml:space="preserve">
     <value>Keterampilan menyerang akan meningkat +20%%</value>
     <comment>legacy_id=1471</comment>
-  </data>
-  <data name="Attacking speed will increase +20" xml:space="preserve">
-    <value>Kecepatan menyerang akan meningkat +20</value>
-    <comment>legacy_id=1472</comment>
   </data>
   <data name="Can use the skill" xml:space="preserve">
     <value>Dapat menggunakan keterampilan tersebut</value>
@@ -6063,14 +6003,6 @@
   <data name="Alliance function will be restricted due to the Castle Siege." xml:space="preserve">
     <value>Fungsi aliansi akan dibatasi karena Pengepungan Kastil.</value>
     <comment>legacy_id=1637</comment>
-  </data>
-  <data name="Increase +8 AG recovery speed" xml:space="preserve">
-    <value>Meningkatkan kecepatan pemulihan +8 AG</value>
-    <comment>legacy_id=1638</comment>
-  </data>
-  <data name="Increase resistance of Lightning and Ice" xml:space="preserve">
-    <value>Meningkatkan ketahanan terhadap Petir dan Es</value>
-    <comment>legacy_id=1639</comment>
   </data>
   <data name="Store1640" xml:space="preserve">
     <value>Toko</value>
@@ -7047,10 +6979,6 @@
   <data name="To decrease the fruit, weapons, armors and others must be removed." xml:space="preserve">
     <value>Untuk mengurangi buah, senjata, armor dan lain-lain harus dihilangkan.</value>
     <comment>legacy_id=1909</comment>
-  </data>
-  <data name="Possible to decrease stat 1~9 point" xml:space="preserve">
-    <value>Kemungkinan untuk menurunkan stat 1~9 poin</value>
-    <comment>legacy_id=1910</comment>
   </data>
   <data name="Impossible since the usable fruit points are at maximum." xml:space="preserve">
     <value>Tidak mungkin karena poin buah yang bisa digunakan sudah maksimal.</value>

@@ -639,10 +639,6 @@
     <value>Cursor nach unten bewegen -&gt; Chatfenster anpassen</value>
     <comment>legacy_id=156</comment>
   </data>
-  <data name="Warp to the corresponding area after %d seconds" xml:space="preserve">
-    <value>Warp in den entsprechenden Bereich in %d Sekunden</value>
-    <comment>legacy_id=157</comment>
-  </data>
   <data name="%s Warp scroll" xml:space="preserve">
     <value>%s-Warp-Schriftrolle</value>
     <comment>legacy_id=158</comment>
@@ -2392,10 +2388,6 @@
     <value>Erhöht die Manaregeneration beim Jagen von Monstern +Mana/8</value>
     <comment>legacy_id=635</comment>
   </data>
-  <data name="Increases 1~3 stat points" xml:space="preserve">
-    <value>Erhöht 1~3 Statuspunkte</value>
-    <comment>legacy_id=636</comment>
-  </data>
   <data name="The remaining time is shown" xml:space="preserve">
     <value>Die verbleibende Zeit wird angezeigt</value>
     <comment>legacy_id=638</comment>
@@ -2828,10 +2820,6 @@
     <value>Sie haben Dinorants getauscht</value>
     <comment>legacy_id=747</comment>
   </data>
-  <data name="Used to upgrade wings" xml:space="preserve">
-    <value>Wird zum Verbessern von Flügeln verwendet</value>
-    <comment>legacy_id=748</comment>
-  </data>
   <data name="Must be over level 10 to use fruits" xml:space="preserve">
     <value>Um Früchte zu verwenden, müssen Sie über Level 10 sein</value>
     <comment>legacy_id=749</comment>
@@ -3008,21 +2996,9 @@
     <value>Absolutes Schwert des Erzengels</value>
     <comment>legacy_id=812</comment>
   </data>
-  <data name="Used in the online event" xml:space="preserve">
-    <value>Wird im Online-Event verwendet</value>
-    <comment>legacy_id=813</comment>
-  </data>
-  <data name="Used when entering Blood Castle" xml:space="preserve">
-    <value>Wird beim Betreten der Blutburg verwendet</value>
-    <comment>legacy_id=814</comment>
-  </data>
   <data name="Reward received when returned to the Archangel" xml:space="preserve">
     <value>Belohnung bei Rückgabe an den Erzengel</value>
     <comment>legacy_id=815</comment>
-  </data>
-  <data name="Used when creating a Cloak of Invisibility" xml:space="preserve">
-    <value>Wird beim Erstellen eines Umhangs der Unsichtbarkeit verwendet</value>
-    <comment>legacy_id=816</comment>
   </data>
   <data name="Absolute Crossbow of Archangel" xml:space="preserve">
     <value>Absolute Armbrust des Erzengels</value>
@@ -4088,10 +4064,6 @@
     <value>Stein der Freundschaft</value>
     <comment>legacy_id=1098</comment>
   </data>
-  <data name="Used in the My Friend event." xml:space="preserve">
-    <value>Wird im „Mein Freund“-Event verwendet.</value>
-    <comment>legacy_id=1099</comment>
-  </data>
   <data name="Do you want to buy an item?" xml:space="preserve">
     <value>Möchten Sie einen Gegenstand kaufen?</value>
     <comment>legacy_id=1100</comment>
@@ -4520,14 +4492,6 @@
     <value>Dunkler Rabe</value>
     <comment>legacy_id=1214</comment>
   </data>
-  <data name="Used in Dark Horse resurrection" xml:space="preserve">
-    <value>Wird zur Wiederbelebung des Dunklen Pferdes verwendet</value>
-    <comment>legacy_id=1215</comment>
-  </data>
-  <data name="Used in Dark Raven resurrection" xml:space="preserve">
-    <value>Wird zur Wiederbelebung des Dunklen Raben verwendet</value>
-    <comment>legacy_id=1216</comment>
-  </data>
   <data name="Pet" xml:space="preserve">
     <value>Haustier</value>
     <comment>legacy_id=1217</comment>
@@ -4603,10 +4567,6 @@
   <data name="Crest of monarch" xml:space="preserve">
     <value>Crest of Monarch</value>
     <comment>legacy_id=1235</comment>
-  </data>
-  <data name="Used in combining Cape of Lord &amp; Warrior's Cloak" xml:space="preserve">
-    <value>Wird zur Kombination von Umhang des Lords und Kriegerumhang verwendet</value>
-    <comment>legacy_id=1236</comment>
   </data>
   <data name="Check the details in pet information window" xml:space="preserve">
     <value>Details finden Sie im Haustierinformationsfenster</value>
@@ -4787,10 +4747,6 @@
   <data name="Sign of lord" xml:space="preserve">
     <value>Zeichen des Lords</value>
     <comment>legacy_id=1290</comment>
-  </data>
-  <data name="Use in siege registration" xml:space="preserve">
-    <value>Wird zur Registrierung für Castle Siege verwendet</value>
-    <comment>legacy_id=1291</comment>
   </data>
   <data name="Move to vault" xml:space="preserve">
     <value>Zum Tresor</value>
@@ -5264,18 +5220,6 @@
     <value>Schriftrolle des Wächters</value>
     <comment>legacy_id=1416</comment>
   </data>
-  <data name="Damage +20%% increase effect" xml:space="preserve">
-    <value>Effekt: Schaden +20%%</value>
-    <comment>legacy_id=1417</comment>
-  </data>
-  <data name="Duration 60 seconds" xml:space="preserve">
-    <value>Dauer 60 Sekunden</value>
-    <comment>legacy_id=1418</comment>
-  </data>
-  <data name="Only applicable for castle gate and statue" xml:space="preserve">
-    <value>Gilt nur für Burgtor und Statue</value>
-    <comment>legacy_id=1419,1465</comment>
-  </data>
   <data name="No. of signs" xml:space="preserve">
     <value>Anzahl der Zeichen</value>
     <comment>legacy_id=1420</comment>
@@ -5455,10 +5399,6 @@
   <data name="Attacking skill will increase +20%%" xml:space="preserve">
     <value>Angriffsfähigkeit wird um +20%% erhöht</value>
     <comment>legacy_id=1471</comment>
-  </data>
-  <data name="Attacking speed will increase +20" xml:space="preserve">
-    <value>Die Angriffsgeschwindigkeit wird um +20 erhöht</value>
-    <comment>legacy_id=1472</comment>
   </data>
   <data name="Can use the skill" xml:space="preserve">
     <value>Kann die Fähigkeit verwenden</value>
@@ -6083,14 +6023,6 @@
   <data name="Alliance function will be restricted due to the Castle Siege." xml:space="preserve">
     <value>Die Allianzfunktionen sind wegen Castle Siege eingeschränkt.</value>
     <comment>legacy_id=1637</comment>
-  </data>
-  <data name="Increase +8 AG recovery speed" xml:space="preserve">
-    <value>Erhöht die AG-Regeneration um +8</value>
-    <comment>legacy_id=1638</comment>
-  </data>
-  <data name="Increase resistance of Lightning and Ice" xml:space="preserve">
-    <value>Erhöht die Resistenz gegen Blitz und Eis</value>
-    <comment>legacy_id=1639</comment>
   </data>
   <data name="Store1640" xml:space="preserve">
     <value>Laden</value>
@@ -7067,10 +6999,6 @@
   <data name="To decrease the fruit, weapons, armors and others must be removed." xml:space="preserve">
     <value>Um Werte mit Früchten zu verringern, müssen Waffen, Rüstungen usw. abgelegt werden.</value>
     <comment>legacy_id=1909</comment>
-  </data>
-  <data name="Possible to decrease stat 1~9 point" xml:space="preserve">
-    <value>Verringert einen Wert um 1~9 Punkte</value>
-    <comment>legacy_id=1910</comment>
   </data>
   <data name="Impossible since the usable fruit points are at maximum." xml:space="preserve">
     <value>Nicht möglich, da die nutzbaren Fruchtpunkte das Maximum erreicht haben.</value>

@@ -122,6 +122,110 @@
         "es": "Pócima de Asedio",
         "pt": "Poção de sítio"
       },
+      "description": [
+        {
+          "text": {
+            "en": "Damage +20% increase effect",
+            "de": "Effekt: Schaden +20%",
+            "es": "Daño +20% iefecto de aumento",
+            "id": "Kerusakan +20% imeningkatkan efek",
+            "ja": "攻撃力+20%上昇效果",
+            "pl": "Efekt zwiększenia obrażeń o 20%",
+            "pt": "Dano +20% infeito de aumento",
+            "ru": "Урон +20% inувеличение эффекта",
+            "tl": "Pinsala +20% ipagtaas na epekto",
+            "uk": "Пошкодження +20% inпосилення ефекту",
+            "zh-TW": "傷害+20% i效果增加"
+          },
+          "color": "darkRed",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Duration 60 seconds",
+            "de": "Dauer 60 Sekunden",
+            "es": "Duración 60 segundos",
+            "id": "Durasi 60 detik",
+            "ja": "持続時間120秒",
+            "pl": "Czas trwania 60 sekund",
+            "pt": "Duração 60 segundos",
+            "ru": "Продолжительность 60 секунд",
+            "tl": "Tagal 60 segundo",
+            "uk": "Тривалість 60 секунд",
+            "zh-TW": "持續時間 60 秒"
+          },
+          "color": "darkRed",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Only applicable for castle gate and statue",
+            "de": "Gilt nur für Burgtor und Statue",
+            "es": "Sólo aplicable a la puerta del castillo y a la estatua.",
+            "id": "Hanya berlaku untuk gerbang kastil dan patung",
+            "ja": "城門、石像のみ適用",
+            "pl": "Dotyczy tylko bramy zamkowej i posągu",
+            "pt": "Aplicável apenas para portão de castelo e estátua",
+            "ru": "Применимо только для ворот замка и статуи.",
+            "tl": "Naaangkop lamang para sa gate ng kastilyo at rebulto",
+            "uk": "Застосовується лише для воріт і статуї замку",
+            "zh-TW": "僅適用於城堡大門和雕像"
+          },
+          "color": "darkRed",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Increase +8 AG recovery speed",
+            "de": "Erhöht die AG-Regeneration um +8",
+            "es": "Aumentar la velocidad de recuperación de +8 AG",
+            "id": "Meningkatkan kecepatan pemulihan +8 AG",
+            "ja": "AG回復のスピード増加+8",
+            "pl": "Zwiększa prędkość odzyskiwania +8 AG",
+            "pt": "Aumenta a velocidade de recuperação de +8 AG",
+            "ru": "Увеличение скорости восстановления AG на +8.",
+            "tl": "Taasan ang +8 AG na bilis ng pagbawi",
+            "uk": "Збільшити швидкість відновлення AG на +8",
+            "zh-TW": "增加+8 AG恢復速度"
+          },
+          "color": "darkRed",
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Increase resistance of Lightning and Ice",
+            "de": "Erhöht die Resistenz gegen Blitz und Eis",
+            "es": "Aumenta la resistencia de Rayo y Hielo.",
+            "id": "Meningkatkan ketahanan terhadap Petir dan Es",
+            "ja": "サンダー、アイス抵抗力向上",
+            "pl": "Zwiększa odporność na błyskawice i lód",
+            "pt": "Aumenta a resistência de Raios e Gelo",
+            "ru": "Увеличение сопротивления молнии и льду.",
+            "tl": "Dagdagan ang resistensya ng Kidlat at Yelo",
+            "uk": "Збільшити опір блискавки та льоду",
+            "zh-TW": "增加閃電和冰的抗性"
+          },
+          "color": "darkRed",
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Attacking speed will increase +20",
+            "de": "Die Angriffsgeschwindigkeit wird um +20 erhöht",
+            "es": "La velocidad de ataque aumentará +20",
+            "id": "Kecepatan menyerang akan meningkat +20",
+            "ja": "攻撃スピードも+20増加します。",
+            "pl": "Szybkość ataku wzrośnie o +20",
+            "pt": "A velocidade de ataque aumentará +20",
+            "ru": "Скорость атаки увеличится +20.",
+            "tl": "Ang bilis ng pag-atake ay tataas ang +20",
+            "uk": "Швидкість атаки збільшиться на +20",
+            "zh-TW": "攻擊速度增加+20"
+          },
+          "color": "darkRed",
+          "levels": [1, 1]
+        }
+      ],
       "width": 1,
       "height": 1,
       "sellValue": 30,
@@ -163,6 +267,24 @@
         "es": "Rollo del Portal del Pueblo",
         "pt": "Perg. de Portal para a Cidade"
       },
+      "description": [
+        {
+          "text": {
+            "en": "Warp to the corresponding area after 3 seconds",
+            "de": "Warp in den entsprechenden Bereich in 3 Sekunden",
+            "es": "Deformarse al área correspondiente después de 3 segundos",
+            "id": "Warp ke area yang sesuai setelah 3 detik",
+            "ja": "3秒後該当地域に移動",
+            "pl": "Teleportacja do wybranego obszaru za 3 sekundy",
+            "pt": "Warp para a área correspondente após 3 segundos",
+            "ru": "Переместитесь в соответствующую область через 3 секунд.",
+            "tl": "Warp sa kaukulang lugar pagkatapos ng 3 segundo",
+            "uk": "Деформація до відповідної області через 3 секунд",
+            "zh-TW": "3秒後扭曲到對應區域"
+          },
+          "levels": [1, 8]
+        }
+      ],
       "width": 1,
       "height": 2,
       "level": 30,
@@ -393,6 +515,56 @@
         "es": "Rena",
         "pt": "Rena"
       },
+      "description": [
+        {
+          "text": {
+            "en": "Used in the online event",
+            "de": "Wird im Online-Event verwendet",
+            "es": "Utilizado en el evento en línea.",
+            "id": "Digunakan dalam acara online",
+            "ja": "オンラインイベントに使われます。",
+            "pl": "Używane podczas wydarzenia online",
+            "pt": "Usado no evento online",
+            "ru": "Используется в онлайн-мероприятии",
+            "tl": "Ginamit sa online na kaganapan",
+            "uk": "Використовується в онлайн-події",
+            "zh-TW": "用於線上活動"
+          },
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Used in the My Friend event.",
+            "de": "Wird im „Mein Freund“-Event verwendet.",
+            "es": "Usado en el evento Mi Amigo.",
+            "id": "Digunakan dalam acara Temanku.",
+            "ja": "友達イベントに使われます。",
+            "pl": "Używane w wydarzeniu „Znajomi”.",
+            "pt": "Usado no evento Meu Amigo.",
+            "ru": "Используется в событии «Мой друг».",
+            "tl": "Ginamit sa kaganapang Aking Kaibigan.",
+            "uk": "Використовується в події My Friend.",
+            "zh-TW": "在「我的朋友」活動中使用。"
+          },
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "Use in siege registration",
+            "de": "Wird zur Registrierung für Castle Siege verwendet",
+            "es": "Uso en el registro de asedio",
+            "id": "Gunakan dalam pendaftaran pengepungan",
+            "ja": "エンブレム登録期間に使用",
+            "pl": "Użyj w rejestracji oblężenia",
+            "pt": "Use no registro de cerco",
+            "ru": "Использование при регистрации осады",
+            "tl": "Gamitin sa pagpaparehistro ng pagkubkob",
+            "uk": "Використання при реєстрації облоги",
+            "zh-TW": "用於攻城登記"
+          },
+          "levels": [3, 3]
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,

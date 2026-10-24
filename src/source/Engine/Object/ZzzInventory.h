@@ -100,9 +100,9 @@ struct ItemDefinition;
 // How wide a text is in the tooltip's text units.
 using ItemTooltipTextMeasure = int (*)(const wchar_t* text, size_t length);
 // Writes the item data's description in the UI's language, with its placeholders filled in for the item's level, into
-// TextList, TextListColor and TextBold from TextNum on: each line wrapped to the tooltip's width and at its line
-// breaks, the pieces in the line's color, a blank line or piece as the tooltip's own blank rows. At most
-// MaxItemDescriptionRows rows.
+// TextList, TextListColor and TextBold from TextNum on: the lines of that level, each wrapped to the tooltip's width
+// and at its line breaks, the pieces in the line's color, a blank line or piece as the tooltip's own blank rows. At
+// most MaxItemDescriptionRows rows.
 void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, int level,
                                ItemTooltipTextMeasure measure);
 

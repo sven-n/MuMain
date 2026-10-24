@@ -347,6 +347,53 @@ TEST_CASE("An item's description is kept through write and read [data][items]")
     CHECK(HasErrors(badColor.issues));
 }
 
+TEST_CASE("A description line's item levels are kept through write and read, and checked [data][items]")
+{
+    ItemDefinition scroll = MakeKris();
+    scroll.group = 14;
+    scroll.number = 10;
+    scroll.slot = ItemSlot::None;
+    scroll.weaponKind = WeaponKind::None;
+    scroll.statProfile.clear();
+    ItemDescriptionLine warp;
+    warp.text.Set("en", "Warp to the corresponding area after 3 seconds");
+    warp.minLevel = 1;
+    warp.maxLevel = 8;
+    ItemDescriptionLine always;
+    always.text.Set("en", "Shown at every level");
+    scroll.description = {warp, always};
+
+    CHECK_FALSE(warp.IsShownAt(0));
+    CHECK(warp.IsShownAt(1));
+    CHECK(warp.IsShownAt(8));
+    CHECK_FALSE(warp.IsShownAt(9));
+    CHECK(always.IsShownAt(0));
+    CHECK(always.IsShownAt(ItemLevelCount - 1));
+
+    // Written on one line, and only for a line that is not shown at every level.
+    const std::string text = WriteItemGroupJson(14, std::vector<ItemDefinition>{scroll});
+    CHECK(text.find("\"levels\": [1, 8]") != std::string::npos);
+    CHECK(text.find("\"levels\"") == text.rfind("\"levels\""));
+    const ReadResult result = Read(text);
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items.front().description == scroll.description);
+    CHECK_FALSE(HasErrors(result.issues));
+    CHECK(WriteItemGroupJson(14, result.items) == text);
+
+    for (const char* levels : {R"("levels": [8, 1])", R"("levels": [0, 16])", R"("levels": [-1, 2])",
+                               R"("levels": [3])", R"("levels": 3)", R"("levels": [1.5, 2])",
+                               // Outside int's range: they'd wrap into a level (2^32 + 1 into 1) if read as an int.
+                               R"("levels": [4294967297, 4294967298])", R"("levels": [-4294967295, 2])",
+                               R"("levels": [0, 18446744073709551615])", R"("levels": [-9223372036854775808, 2])"})
+    {
+        INFO(levels);
+        const ReadResult bad = Read(std::string(R"({"formatVersion": 1, "group": 14, "items": [
+            {"number": 10, "name": "Town Portal Scroll", "description": [{"text": "x", )") +
+                                    levels + "}]}]}");
+        CHECK(HasIssue(bad.issues, ItemDataIssueSeverity::Error, "description[0].levels"));
+    }
+}
+
 TEST_CASE("An item's stat profile is kept through write and read [data][items]")
 {
     ItemDefinition kris = MakeKris();

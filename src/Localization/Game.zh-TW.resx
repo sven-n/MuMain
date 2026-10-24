@@ -639,10 +639,6 @@
     <value>遊標下移-&gt;調整聊天窗口</value>
     <comment>legacy_id=156</comment>
   </data>
-  <data name="Warp to the corresponding area after %d seconds" xml:space="preserve">
-    <value>%d秒後扭曲到對應區域</value>
-    <comment>legacy_id=157</comment>
-  </data>
   <data name="%s Warp scroll" xml:space="preserve">
     <value>%s 扭曲捲軸</value>
     <comment>legacy_id=158</comment>
@@ -2372,10 +2368,6 @@
     <value>狩獵怪物後魔力獲取率增加+魔力/8</value>
     <comment>legacy_id=635</comment>
   </data>
-  <data name="Increases 1~3 stat points" xml:space="preserve">
-    <value>增加1~3點屬性點</value>
-    <comment>legacy_id=636</comment>
-  </data>
   <data name="The remaining time is shown" xml:space="preserve">
     <value>顯示剩餘時間</value>
     <comment>legacy_id=638</comment>
@@ -2808,10 +2800,6 @@
     <value>您已交換迪諾蘭特</value>
     <comment>legacy_id=747</comment>
   </data>
-  <data name="Used to upgrade wings" xml:space="preserve">
-    <value>用於升級翅膀</value>
-    <comment>legacy_id=748</comment>
-  </data>
   <data name="Must be over level 10 to use fruits" xml:space="preserve">
     <value>必須達到10級以上才能使用水果</value>
     <comment>legacy_id=749</comment>
@@ -2988,21 +2976,9 @@
     <value>絕對大天使之劍</value>
     <comment>legacy_id=812</comment>
   </data>
-  <data name="Used in the online event" xml:space="preserve">
-    <value>用於線上活動</value>
-    <comment>legacy_id=813</comment>
-  </data>
-  <data name="Used when entering Blood Castle" xml:space="preserve">
-    <value>進入血色城堡時使用</value>
-    <comment>legacy_id=814</comment>
-  </data>
   <data name="Reward received when returned to the Archangel" xml:space="preserve">
     <value>回到大天使身邊時獲得的獎勵</value>
     <comment>legacy_id=815</comment>
-  </data>
-  <data name="Used when creating a Cloak of Invisibility" xml:space="preserve">
-    <value>建立隱形斗篷時使用</value>
-    <comment>legacy_id=816</comment>
   </data>
   <data name="Absolute Crossbow of Archangel" xml:space="preserve">
     <value>大天使的絕對弩</value>
@@ -4068,10 +4044,6 @@
     <value>友誼之石</value>
     <comment>legacy_id=1098</comment>
   </data>
-  <data name="Used in the My Friend event." xml:space="preserve">
-    <value>在「我的朋友」活動中使用。</value>
-    <comment>legacy_id=1099</comment>
-  </data>
   <data name="Do you want to buy an item?" xml:space="preserve">
     <value>您想購買商品嗎？</value>
     <comment>legacy_id=1100</comment>
@@ -4500,14 +4472,6 @@
     <value>暗鴉</value>
     <comment>legacy_id=1214</comment>
   </data>
-  <data name="Used in Dark Horse resurrection" xml:space="preserve">
-    <value>用於黑馬復活</value>
-    <comment>legacy_id=1215</comment>
-  </data>
-  <data name="Used in Dark Raven resurrection" xml:space="preserve">
-    <value>用於暗鴉復活</value>
-    <comment>legacy_id=1216</comment>
-  </data>
   <data name="Pet" xml:space="preserve">
     <value>寵物</value>
     <comment>legacy_id=1217</comment>
@@ -4583,10 +4547,6 @@
   <data name="Crest of monarch" xml:space="preserve">
     <value>君主的紋章</value>
     <comment>legacy_id=1235</comment>
-  </data>
-  <data name="Used in combining Cape of Lord &amp; Warrior's Cloak" xml:space="preserve">
-    <value>用於組合領主斗篷和戰士斗篷</value>
-    <comment>legacy_id=1236</comment>
   </data>
   <data name="Check the details in pet information window" xml:space="preserve">
     <value>在寵物資訊視窗查看詳細信息</value>
@@ -4767,10 +4727,6 @@
   <data name="Sign of lord" xml:space="preserve">
     <value>主的標誌</value>
     <comment>legacy_id=1290</comment>
-  </data>
-  <data name="Use in siege registration" xml:space="preserve">
-    <value>用於攻城登記</value>
-    <comment>legacy_id=1291</comment>
   </data>
   <data name="Move to vault" xml:space="preserve">
     <value>移至保管庫</value>
@@ -5244,18 +5200,6 @@
     <value>守護者捲軸</value>
     <comment>legacy_id=1416</comment>
   </data>
-  <data name="Damage +20%% increase effect" xml:space="preserve">
-    <value>傷害+20%% i效果增加</value>
-    <comment>legacy_id=1417</comment>
-  </data>
-  <data name="Duration 60 seconds" xml:space="preserve">
-    <value>持續時間 60 秒</value>
-    <comment>legacy_id=1418</comment>
-  </data>
-  <data name="Only applicable for castle gate and statue" xml:space="preserve">
-    <value>僅適用於城堡大門和雕像</value>
-    <comment>legacy_id=1419,1465</comment>
-  </data>
   <data name="No. of signs" xml:space="preserve">
     <value>標誌數量</value>
     <comment>legacy_id=1420</comment>
@@ -5435,10 +5379,6 @@
   <data name="Attacking skill will increase +20%%" xml:space="preserve">
     <value>攻擊力增加+20%%</value>
     <comment>legacy_id=1471</comment>
-  </data>
-  <data name="Attacking speed will increase +20" xml:space="preserve">
-    <value>攻擊速度增加+20</value>
-    <comment>legacy_id=1472</comment>
   </data>
   <data name="Can use the skill" xml:space="preserve">
     <value>可以使用技能</value>
@@ -6063,14 +6003,6 @@
   <data name="Alliance function will be restricted due to the Castle Siege." xml:space="preserve">
     <value>聯盟功能將因城堡圍攻而受到限制。</value>
     <comment>legacy_id=1637</comment>
-  </data>
-  <data name="Increase +8 AG recovery speed" xml:space="preserve">
-    <value>增加+8 AG恢復速度</value>
-    <comment>legacy_id=1638</comment>
-  </data>
-  <data name="Increase resistance of Lightning and Ice" xml:space="preserve">
-    <value>增加閃電和冰的抗性</value>
-    <comment>legacy_id=1639</comment>
   </data>
   <data name="Store1640" xml:space="preserve">
     <value>店鋪</value>
@@ -7047,10 +6979,6 @@
   <data name="To decrease the fruit, weapons, armors and others must be removed." xml:space="preserve">
     <value>為了減少水果，必須移除武器、盔甲等。</value>
     <comment>legacy_id=1909</comment>
-  </data>
-  <data name="Possible to decrease stat 1~9 point" xml:space="preserve">
-    <value>可減少屬性1~9點</value>
-    <comment>legacy_id=1910</comment>
   </data>
   <data name="Impossible since the usable fruit points are at maximum." xml:space="preserve">
     <value>不可能，因為可用的水果點數已達到最大。</value>

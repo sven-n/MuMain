@@ -639,10 +639,6 @@
     <value>Przesuń kursor w dół-&gt; Dostosuj okno czatu</value>
     <comment>legacy_id=156</comment>
   </data>
-  <data name="Warp to the corresponding area after %d seconds" xml:space="preserve">
-    <value>Teleportacja do wybranego obszaru za %d sekund</value>
-    <comment>legacy_id=157</comment>
-  </data>
   <data name="%s Warp scroll" xml:space="preserve">
     <value>%s Warp scroll</value>
     <comment>legacy_id=158</comment>
@@ -2668,10 +2664,6 @@
     <value>Zwiększa szybkość zdobywania many po polowaniu na potwory +Mana/8</value>
     <comment>legacy_id=635</comment>
   </data>
-  <data name="Increases 1~3 stat points" xml:space="preserve">
-    <value>Zwiększa 1-3 punkty statystyk</value>
-    <comment>legacy_id=636</comment>
-  </data>
   <data name="The remaining time is shown" xml:space="preserve">
     <value>Wyświetlany jest pozostały czas</value>
     <comment>legacy_id=638</comment>
@@ -3104,10 +3096,6 @@
     <value>Wymieniłeś Dinoranty</value>
     <comment>legacy_id=747</comment>
   </data>
-  <data name="Used to upgrade wings" xml:space="preserve">
-    <value>Służy do ulepszania Wings</value>
-    <comment>legacy_id=748</comment>
-  </data>
   <data name="Must be over level 10 to use fruits" xml:space="preserve">
     <value>Aby używać Fruit, musisz mieć poziom powyżej 10</value>
     <comment>legacy_id=749</comment>
@@ -3284,21 +3272,9 @@
     <value>Absolute Sword of Archangel</value>
     <comment>legacy_id=812</comment>
   </data>
-  <data name="Used in the online event" xml:space="preserve">
-    <value>Używane podczas wydarzenia online</value>
-    <comment>legacy_id=813</comment>
-  </data>
-  <data name="Used when entering Blood Castle" xml:space="preserve">
-    <value>Używane podczas wchodzenia do Blood Castle</value>
-    <comment>legacy_id=814</comment>
-  </data>
   <data name="Reward received when returned to the Archangel" xml:space="preserve">
     <value>Nagroda otrzymana po powrocie do Archanioła</value>
     <comment>legacy_id=815</comment>
-  </data>
-  <data name="Used when creating a Cloak of Invisibility" xml:space="preserve">
-    <value>Używane podczas tworzenia Cloak of Invisibility</value>
-    <comment>legacy_id=816</comment>
   </data>
   <data name="Absolute Crossbow of Archangel" xml:space="preserve">
     <value>Absolute Crossbow of Archangel</value>
@@ -4364,10 +4340,6 @@
     <value>Stone of Friendship</value>
     <comment>legacy_id=1098</comment>
   </data>
-  <data name="Used in the My Friend event." xml:space="preserve">
-    <value>Używane w wydarzeniu „Znajomi”.</value>
-    <comment>legacy_id=1099</comment>
-  </data>
   <data name="Do you want to buy an item?" xml:space="preserve">
     <value>Czy chcesz kupić przedmiot?</value>
     <comment>legacy_id=1100</comment>
@@ -4796,14 +4768,6 @@
     <value>Dark Raven</value>
     <comment>legacy_id=1214</comment>
   </data>
-  <data name="Used in Dark Horse resurrection" xml:space="preserve">
-    <value>Używany podczas wskrzeszenia Dark Horse</value>
-    <comment>legacy_id=1215</comment>
-  </data>
-  <data name="Used in Dark Raven resurrection" xml:space="preserve">
-    <value>Używany do wskrzeszenia Dark Raven</value>
-    <comment>legacy_id=1216</comment>
-  </data>
   <data name="Pet" xml:space="preserve">
     <value>Zwierzak</value>
     <comment>legacy_id=1217</comment>
@@ -4879,10 +4843,6 @@
   <data name="Crest of monarch" xml:space="preserve">
     <value>Crest of Monarch</value>
     <comment>legacy_id=1235</comment>
-  </data>
-  <data name="Used in combining Cape of Lord &amp; Warrior's Cloak" xml:space="preserve">
-    <value>Używany do łączenia Cape of Lord i Warrior's Cloak</value>
-    <comment>legacy_id=1236</comment>
   </data>
   <data name="Check the details in pet information window" xml:space="preserve">
     <value>Sprawdź szczegóły w oknie informacji o zwierzaku</value>
@@ -5063,10 +5023,6 @@
   <data name="Sign of lord" xml:space="preserve">
     <value>Sign of Lord</value>
     <comment>legacy_id=1290</comment>
-  </data>
-  <data name="Use in siege registration" xml:space="preserve">
-    <value>Użyj w rejestracji oblężenia</value>
-    <comment>legacy_id=1291</comment>
   </data>
   <data name="Move to vault" xml:space="preserve">
     <value>Przenieś do skarbca</value>
@@ -5540,18 +5496,6 @@
     <value>Scroll of Guardian</value>
     <comment>legacy_id=1416</comment>
   </data>
-  <data name="Damage +20%% increase effect" xml:space="preserve">
-    <value>Efekt zwiększenia obrażeń o 20%%</value>
-    <comment>legacy_id=1417</comment>
-  </data>
-  <data name="Duration 60 seconds" xml:space="preserve">
-    <value>Czas trwania 60 sekund</value>
-    <comment>legacy_id=1418</comment>
-  </data>
-  <data name="Only applicable for castle gate and statue" xml:space="preserve">
-    <value>Dotyczy tylko bramy zamkowej i posągu</value>
-    <comment>legacy_id=1419,1465</comment>
-  </data>
   <data name="No. of signs" xml:space="preserve">
     <value>Liczba znaków</value>
     <comment>legacy_id=1420</comment>
@@ -5731,10 +5675,6 @@
   <data name="Attacking skill will increase +20%%" xml:space="preserve">
     <value>Siła ataku +20%%</value>
     <comment>legacy_id=1471</comment>
-  </data>
-  <data name="Attacking speed will increase +20" xml:space="preserve">
-    <value>Szybkość ataku wzrośnie o +20</value>
-    <comment>legacy_id=1472</comment>
   </data>
   <data name="Can use the skill" xml:space="preserve">
     <value>Można używać umiejętności</value>
@@ -6359,14 +6299,6 @@
   <data name="Alliance function will be restricted due to the Castle Siege." xml:space="preserve">
     <value>Funkcja Sojuszu będzie ograniczona ze względu na Castle Siege.</value>
     <comment>legacy_id=1637</comment>
-  </data>
-  <data name="Increase +8 AG recovery speed" xml:space="preserve">
-    <value>Zwiększa prędkość odzyskiwania +8 AG</value>
-    <comment>legacy_id=1638</comment>
-  </data>
-  <data name="Increase resistance of Lightning and Ice" xml:space="preserve">
-    <value>Zwiększa odporność na błyskawice i lód</value>
-    <comment>legacy_id=1639</comment>
   </data>
   <data name="Store1640" xml:space="preserve">
     <value>Sklep</value>
@@ -7343,10 +7275,6 @@
   <data name="To decrease the fruit, weapons, armors and others must be removed." xml:space="preserve">
     <value>Aby zmniejszyć statystykę za pomocą Fruit, zdejmij broń, zbroję i pozostały ekwipunek.</value>
     <comment>legacy_id=1909</comment>
-  </data>
-  <data name="Possible to decrease stat 1~9 point" xml:space="preserve">
-    <value>Możliwe zmniejszenie statystyki o 1~9 punktów</value>
-    <comment>legacy_id=1910</comment>
   </data>
   <data name="Impossible since the usable fruit points are at maximum." xml:space="preserve">
     <value>Niemożliwe, ponieważ możliwe do wykorzystania punkty Fruit są maksymalne.</value>
