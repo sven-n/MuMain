@@ -903,6 +903,9 @@ TEST_CASE("The tooltip texts by item level are the game's texts in every languag
 {
     constexpr std::pair<int, int> items[] = {{13, 7}, {13, 11}, {13, 15}};
     const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
+    const ItemStatsLoadResult stats = LoadItemStatsFile(DataDirectory / "Items" / "Stats" / ItemStatsFileName);
+    REQUIRE_FALSE(HasErrors(stats.issues));
+    const ItemStatProfiles profiles(stats.file);
     // The test switches the UI language: it needs an item table of its own.
     ClientDataScope client(ShippedClientDirectory);
     int compared = 0;
@@ -932,7 +935,7 @@ TEST_CASE("The tooltip texts by item level are the game's texts in every languag
                     {
                         continue;
                     }
-                    const std::string text = shown[index]->text.Get(locale);
+                    const std::string text = FilledLine(*found, *shown[index], level, profiles, locale);
                     if (old[index]->isPrefix)
                     {
                         CHECK(text.starts_with(old[index]->text));
