@@ -187,9 +187,7 @@ bool CheckMana(CHARACTER* c, int Skill)
     return true;
 }
 
-namespace
-{
-bool CanBeginSkill(CHARACTER* c)
+bool IsSkillActionReady(const CHARACTER* c)
 {
     const OBJECT* o = &c->Object;
     if (o->Type == MODEL_PLAYER)
@@ -204,7 +202,6 @@ bool CanBeginSkill(CHARACTER* c)
                   o->CurrentAction <= PLAYER_RAGE_FENRIR_STAND_ONE_LEFT) &&
                 o->CurrentAction != PLAYER_RAGE_UNI_STOP_ONE_RIGHT && o->CurrentAction != PLAYER_STOP_RAGEFIGHTER)
         {
-            MouseRButtonPress = 0;
             return false;
         }
     }
@@ -218,7 +215,6 @@ bool CanBeginSkill(CHARACTER* c)
 
     return true;
 }
-} // namespace
 
 int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
 {
@@ -231,8 +227,12 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
         return 0;
     }
 
-    if (!CanBeginSkill(c))
+    if (!IsSkillActionReady(c))
+    {
+        if (o->Type == MODEL_PLAYER)
+            MouseRButtonPress = 0;
         return 0;
+    }
 
     int iSkillIndex = gSkillManager.FindSkillIndex(Skill);
     if (iSkillIndex == -1)

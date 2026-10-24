@@ -9,8 +9,9 @@ The rotation skips skills that are not learned, are on cooldown, or do not
 meet their attribute or skill-use requirements. Selection does not start a
 cooldown. Mana and AG remain checked by the normal cast path, including automatic
 mana-potion use when the selected skill is unaffordable. Busy attacks, movement,
-and target reacquisition retain the selected slot. Temporary casting-state waits
-also keep the turn; four consecutive no-action attempts yield to the next slot
+and target reacquisition retain the selected slot. The existing animation gate
+is reported as busy for its full duration. When the character is ready, four
+consecutive no-action attempts yield to the next slot
 so a persistently unusable action cannot stall the rotation. Cast and refused
 attempts advance it.
 The existing basic-attack fallback remains available when skills cannot be used.
