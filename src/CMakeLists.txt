@@ -283,6 +283,21 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND MU_LINK_SDL_PLATFORM_BACKENDS)
   find_package(Vulkan REQUIRED)
 endif()
 target_link_libraries(MuClient PUBLIC OpenSSL::Crypto)
+# Crypto++: the ciphers of version 14 BMD models (Render/Models/BmdModulusCipher). vcpkg ships a CMake
+# package; Debian/Ubuntu (libcrypto++) and Homebrew (libcryptopp) ship pkg-config files.
+# MuCryptopp names whichever one was found, for MuClient and the tests.
+add_library(MuCryptopp INTERFACE)
+find_package(cryptopp CONFIG QUIET)
+if(TARGET cryptopp::cryptopp)
+  # Global, so the tests' directories can resolve it through MuCryptopp.
+  set_target_properties(cryptopp::cryptopp PROPERTIES IMPORTED_GLOBAL TRUE)
+  target_link_libraries(MuCryptopp INTERFACE cryptopp::cryptopp)
+else()
+  find_package(PkgConfig REQUIRED)
+  pkg_search_module(CRYPTOPP REQUIRED IMPORTED_TARGET GLOBAL libcrypto++ libcryptopp)
+  target_link_libraries(MuCryptopp INTERFACE PkgConfig::CRYPTOPP)
+endif()
+target_link_libraries(MuClient PRIVATE MuCryptopp)
 if(TARGET SDL3_ttf::SDL3_ttf)
   target_link_libraries(MuClient PUBLIC SDL3_ttf::SDL3_ttf)
 endif()
