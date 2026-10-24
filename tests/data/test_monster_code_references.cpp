@@ -365,4 +365,21 @@ TEST_CASE("The monster code references of the editor's sources [editor][monsters
     CHECK(range);
 }
 
+// Removing a monster that a transformation ring turns into lists the ring.
+TEST_CASE("The monster code references list the transformation ring for each of its forms [editor][monsters]")
+{
+    const MonsterCodeReferences& references = MuEditor::Monsters::GetMonsterCodeReferences();
+    REQUIRE(references.IsLoaded());
+
+    constexpr std::string_view RingFile = "GameLogic/Items/TransformationRing.cpp";
+    for (const int form : {MONSTER_BUDGE_DRAGON, MONSTER_GIANT, MONSTER_SKELETON_WARRIOR, MONSTER_POISON_BULL,
+                           MONSTER_THUNDER_LICH, MONSTER_DEATH_COW})
+    {
+        CAPTURE(form);
+        const std::span<const CodeReference> found = references.Find(form);
+        CHECK(std::any_of(found.begin(), found.end(),
+                          [&](const CodeReference& reference) { return reference.file == RingFile; }));
+    }
+}
+
 #endif // _EDITOR

@@ -11,9 +11,10 @@ namespace GameLogic::Items::TransformationRing
 {
 namespace
 {
-// The form of each ring level: Budge Dragon, Giant, Skeleton Warrior, Poison
-// Bull, Thunder Lich and Death Cow.
-constexpr std::array<int, 6> FormByLevel = {2, 7, 14, 8, 9, 41};
+// The monster each ring level turns into.
+constexpr std::array<EMonsterType, 6> FormByLevel = {MONSTER_BUDGE_DRAGON,     MONSTER_GIANT,
+                                                     MONSTER_SKELETON_WARRIOR, MONSTER_POISON_BULL,
+                                                     MONSTER_THUNDER_LICH,     MONSTER_DEATH_COW};
 } // namespace
 
 const wchar_t* MonsterName(int ringLevel)
