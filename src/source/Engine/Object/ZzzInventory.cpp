@@ -1185,9 +1185,11 @@ void GetItemName(int iType, int iLevel, wchar_t* Text)
         case 0: mu_swprintf(Text, L"%ls", I18N::Game::Zen); break;
         case 1: mu_swprintf(Text, L"%ls", I18N::Game::Heart); break;
         case 2:
-            // The prize by the item's durability; none past the list, so the caller's fallback names the item.
+            // The prize by the item's durability; past the list, the item's own name, as the tooltip writes it.
             if (p->Durability < std::size(ChaosEventName))
                 mu_swprintf(Text, L"%ls", ChaosEventName[p->Durability]);
+            else
+                mu_swprintf(Text, L"%ls", p->Name);
             break;
         }
     }
@@ -1696,7 +1698,6 @@ void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, in
     }
 }
 
-// (sx, sy) in the screen's 640x480 stretch, `screen`.
 // A test's measure of description text (SetItemTooltipTextMeasure); nullptr: the game's font.
 static ItemTooltipTextMeasure s_itemTooltipTextMeasure = nullptr;
 
@@ -1727,7 +1728,8 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         if (ip->lExpireTime == 0)
             return ItemTooltipBuild::Nothing;
 
-        ExpireTime = localtime((time_t*)&(ip->lExpireTime));
+        const time_t expireTime = ip->lExpireTime;
+        ExpireTime = localtime(&expireTime);
     }
 
     ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
@@ -3547,10 +3549,13 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
                 TextListColor[TextNum] = TEXT_COLOR_BLUE;
                 TextBold[TextNum] = false;
                 TextNum++;
-                g_PortalMgr.GetPortalPositionText(TextList[TextNum]);
-                TextListColor[TextNum] = TEXT_COLOR_BLUE;
-                TextBold[TextNum] = false;
-                TextNum++;
+                if (g_PortalMgr.IsPortalPositionSaved())
+                {
+                    g_PortalMgr.GetPortalPositionText(TextList[TextNum]);
+                    TextListColor[TextNum] = TEXT_COLOR_BLUE;
+                    TextBold[TextNum] = false;
+                    TextNum++;
+                }
             }
         }
         else if (GameLogic::Items::IsLuckyItemTicket(ip))

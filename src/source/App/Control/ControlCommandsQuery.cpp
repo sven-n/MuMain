@@ -532,7 +532,7 @@ std::string ItemTooltip(const Request& request, std::unique_ptr<Act>&)
                            "no item has group " + std::to_string(group) + " and number " + std::to_string(number));
     }
 
-    ItemCreationParams params = FullItemParameters(group, number);
+    ItemCreationParams params = Engine::Items::TooltipSnapshot::FullItemParameters(group, number);
     if (level >= 0)
         params.Level = static_cast<BYTE>(level);
     if (durability >= 0)
@@ -565,7 +565,7 @@ std::string ItemTooltip(const Request& request, std::unique_ptr<Act>&)
             params.HarmonyOptionLevel = static_cast<BYTE>(harmonyLevel);
     }
 
-    const std::vector<ItemTooltipLine> lines = TooltipOfParameters(params);
+    const std::vector<ItemTooltipLine> lines = Engine::Items::TooltipSnapshot::TooltipOfParameters(params);
 
     json result;
     result["lines"] = json::array();
@@ -601,7 +601,7 @@ std::string ItemTooltipSnapshot(const Request& request, std::unique_ptr<Act>&)
         return EncodeError(request.EncodedId(), ErrorCode::Failed, "the file could not be written");
     }
 
-    const int tooltips = WriteItemTooltipSnapshot(out, onlyGroup);
+    const int tooltips = Engine::Items::TooltipSnapshot::WriteItemTooltipSnapshot(out, onlyGroup);
     // A full disk or a failed write leaves the file short: not a snapshot.
     out.flush();
     if (!out)

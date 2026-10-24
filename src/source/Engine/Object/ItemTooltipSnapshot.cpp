@@ -5,8 +5,11 @@
 #include "Core/Text/Utf8.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 
+#include <sstream>
 #include <string>
 
+namespace Engine::Items::TooltipSnapshot
+{
 namespace
 {
 struct TooltipVariant
@@ -84,7 +87,7 @@ std::vector<ItemTooltipLine> TooltipOfParameters(const ItemCreationParams& param
     return BuildItemTooltipLines(&item, false);
 }
 
-int WriteItemTooltipSnapshot(std::ostream& out, int onlyGroup)
+int VisitItemTooltipSnapshots(const ItemSnapshot& item, int onlyGroup)
 {
     int tooltips = 0;
     for (const Data::Items::ItemDefinition& definition : g_ItemDatabase.GetAllSlots())
@@ -93,6 +96,7 @@ int WriteItemTooltipSnapshot(std::ostream& out, int onlyGroup)
         {
             continue;
         }
+        std::ostringstream out;
         for (const TooltipVariant& variant : TooltipVariants)
         {
             for (int level = 0; level < Data::Items::ItemLevelCount; ++level)
@@ -109,6 +113,13 @@ int WriteItemTooltipSnapshot(std::ostream& out, int onlyGroup)
                 ++tooltips;
             }
         }
+        item(definition.group, definition.number, out.str());
     }
     return tooltips;
 }
+
+int WriteItemTooltipSnapshot(std::ostream& out, int onlyGroup)
+{
+    return VisitItemTooltipSnapshots([&out](int, int, const std::string& text) { out << text; }, onlyGroup);
+}
+} // namespace Engine::Items::TooltipSnapshot
