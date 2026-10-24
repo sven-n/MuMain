@@ -772,6 +772,11 @@ The problems are:
 | `renderStyle` names a style that does not exist; the model is drawn plainly. | warning |
 | `itemEffect` names an item effect that does not exist; the model is drawn without it. | warning |
 
+A model file can be in the formats of the Season 6 client (BMD versions
+10 and 12) or in the encrypted format of later seasons' models (version
+14); files of other versions cannot be opened. The version is the fourth
+byte of the file, after `BMD`.
+
 The model names textures as `.jpg`/`.tga`; the game reads the encrypted
 copies with the same name, `.OZJ`/`.OZT`. Meshes whose texture name starts
 with `hid` are not drawn, so their texture is not loaded.

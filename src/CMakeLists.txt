@@ -283,6 +283,35 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND MU_LINK_SDL_PLATFORM_BACKENDS)
   find_package(Vulkan REQUIRED)
 endif()
 target_link_libraries(MuClient PUBLIC OpenSSL::Crypto)
+# Crypto++: the ciphers of version 14 BMD models (Render/Models/BmdModulusCipher), linked statically so Main
+# needs no Crypto++ library at run time (the release builds ship none). vcpkg ships a CMake package with a
+# static library; Debian/Ubuntu (libcrypto++-dev) and Homebrew (cryptopp) ship pkg-config files and install
+# the static archive next to the shared one, which pkg-config would pick.
+# MuCryptopp names whichever one was found, for MuClient and the tests.
+add_library(MuCryptopp INTERFACE)
+find_package(cryptopp CONFIG QUIET)
+if(MSVC AND NOT TARGET cryptopp::cryptopp)
+  message(FATAL_ERROR "Crypto++ not found: install vcpkg's cryptopp (vcpkg.json lists it).")
+endif()
+if(TARGET cryptopp::cryptopp)
+  # Global, so the tests' directories can resolve it through MuCryptopp.
+  set_target_properties(cryptopp::cryptopp PROPERTIES IMPORTED_GLOBAL TRUE)
+  target_link_libraries(MuCryptopp INTERFACE cryptopp::cryptopp)
+else()
+  find_package(PkgConfig REQUIRED)
+  pkg_search_module(CRYPTOPP REQUIRED libcrypto++ libcryptopp)
+  find_library(MU_CRYPTOPP_STATIC_LIBRARY
+    NAMES libcrypto++.a libcryptopp.a
+    HINTS ${CRYPTOPP_LIBRARY_DIRS}
+  )
+  if(NOT MU_CRYPTOPP_STATIC_LIBRARY)
+    message(FATAL_ERROR "Crypto++'s static library (libcrypto++.a or libcryptopp.a) not found in "
+                        "'${CRYPTOPP_LIBRARY_DIRS}': install libcrypto++-dev or Homebrew's cryptopp.")
+  endif()
+  target_include_directories(MuCryptopp INTERFACE ${CRYPTOPP_INCLUDE_DIRS})
+  target_link_libraries(MuCryptopp INTERFACE "${MU_CRYPTOPP_STATIC_LIBRARY}")
+endif()
+target_link_libraries(MuClient PRIVATE MuCryptopp)
 if(TARGET SDL3_ttf::SDL3_ttf)
   target_link_libraries(MuClient PUBLIC SDL3_ttf::SDL3_ttf)
 endif()
