@@ -656,6 +656,27 @@ TEST_CASE("Bmd import reads Portuguese and Spanish names as Windows-1252 [data][
     CHECK(gaionsOrder->names.GetNeutral() == "Gaion's Order");
 }
 
+TEST_CASE("Bmd import reads a name that only looks like UTF-8 as Windows-1252 [data][items]")
+{
+    TemporaryClientFolder folder;
+    LegacyItemFile english;
+    english.SetName(BladeType, "Blade");
+    english.Write(folder.LegacyItemFilePath(L"Eng"));
+    LegacyItemFile portuguese;
+    // C0 AF would be an overlong form of '/' in UTF-8; read as Windows-1252 it is U+00C0 U+00AF.
+    portuguese.SetName(BladeType, "Blade \xC0\xAF");
+    portuguese.Write(folder.LegacyItemFilePath(L"Por"));
+    ClientDataScope client(folder.Directory());
+
+    const ItemBmdImportResult result = ImportItemBmdFiles();
+    REQUIRE_FALSE(HasErrors(result.issues));
+    CHECK(result.reencodedNameCount == 1);
+
+    const ItemDefinition* blade = FindItem(result.items, BladeType);
+    REQUIRE(blade != nullptr);
+    CHECK(blade->names.Get("pt") == "Blade \xC3\x80\xC2\xAF");
+}
+
 TEST_CASE("A folder that cannot be written is a write failure, not a data error [data][items]")
 {
     const ItemDataLoadResult shipped = LoadItemDataDirectory(DataDirectory / "Items");

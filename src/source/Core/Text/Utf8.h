@@ -23,8 +23,9 @@ namespace Core::Text
 // hold the text on Windows, the same on every platform: an emoji counts as two.
 bool CutToUtf16Length(std::string& text, std::size_t maxUnits);
 
-// Whether each character of the text is a UTF-8 lead byte followed by as many
-// continuation bytes as it announces. Text in a code page such as
-// Windows-1252 fails this as soon as it holds a letter outside ASCII.
+// Whether the text is UTF-8 as RFC 3629 allows it: each character a lead byte
+// followed by as many continuation bytes as it announces, in its shortest
+// form, and neither a UTF-16 surrogate nor above U+10FFFF. Text in a code page
+// such as Windows-1252 fails this as soon as it holds a letter outside ASCII.
 bool IsValidUtf8(std::string_view text);
 } // namespace Core::Text

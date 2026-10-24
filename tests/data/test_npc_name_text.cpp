@@ -103,6 +103,22 @@ TEST_CASE("Name files: a name that is not UTF-8 is skipped with a warning [data]
     CHECK(read.names.at(3) == "Drag\xC3\xA3o");
 }
 
+TEST_CASE("Name files: an overlong form, a surrogate or a code point above U+10FFFF is not UTF-8 [data][monsters]")
+{
+    // Save would write these bytes as U+FFFD, so the saved name would differ.
+    const ReadResult read = Read("2\t1\t\"Dragon \xC0\xAF\"\r\n"
+                                 "3\t1\t\"Dragon \xED\xA0\x80\"\r\n"
+                                 "4\t1\t\"Dragon \xF5\x80\x80\x80\"\r\n"
+                                 "5\t1\t\"Dragon \xF0\x9F\x90\x89\"\r\n");
+
+    CHECK_FALSE(HasErrors(read.issues));
+    CHECK(HasIssueAbout(read.issues, "line 1", "not UTF-8"));
+    CHECK(HasIssueAbout(read.issues, "line 2", "not UTF-8"));
+    CHECK(HasIssueAbout(read.issues, "line 3", "not UTF-8"));
+    REQUIRE(read.names.size() == 1);
+    CHECK(read.names.at(5) == "Dragon \xF0\x9F\x90\x89");
+}
+
 TEST_CASE("Name files: written sorted with an end line, and read back the same [data][monsters]")
 {
     const std::map<int, std::string> names = {{84, "Chief Skeleton Warrior"}, {2, "Budge Dragon"}, {252, ""}};
