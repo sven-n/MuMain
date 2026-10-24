@@ -189,6 +189,11 @@ SkillResult CastSkill(ActionSkillType skill, bool targetRequired, int targetKey,
         }
     }
 
+    // Automation can wait without changing the manual execution path's
+    // auto-attack setup, Cursed Temple handling or movement bookkeeping.
+    if (!GameLogic::Combat::IsSkillActionReady(Hero))
+        return SkillResult::Busy;
+
     // The globals the execution reads are set only once the aim held: a
     // refused aim must leave the movement-skill state as it was rather than
     // switch it to a skill that was never cast.

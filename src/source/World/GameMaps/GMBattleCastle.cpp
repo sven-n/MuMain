@@ -1975,10 +1975,7 @@ namespace battleCastle
         case MODEL_CASTLE_GATE1:
             if (o->CurrentAction == MONSTER01_DIE)
             {
-                if (o->CurrentAction == MONSTER01_DIE)
-                {
-                    o->Live = false;
-                }
+                o->Live = false;
                 PlayBuffer(SOUND_HIT_GATE2);
                 b->RenderMeshEffect(0, MODEL_GATE_PART1);
             }
@@ -1996,10 +1993,7 @@ namespace battleCastle
 
                 if (o->CurrentAction == MONSTER01_DIE)
                 {
-                    if (o->CurrentAction == MONSTER01_DIE)
-                    {
-                        o->Live = false;
-                    }
+                    o->Live = false;
 
                     PlayBuffer(SOUND_BC_GUARD_STONE_DIS);
                     b->RenderMeshEffect(0, MODEL_STONE_COFFIN);

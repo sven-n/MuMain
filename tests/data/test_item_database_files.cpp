@@ -1097,6 +1097,27 @@ TEST_CASE("Bmd import reads Portuguese and Spanish names as Windows-1252 [data][
     CHECK(gaionsOrder->names.GetNeutral() == "Gaion's Order");
 }
 
+TEST_CASE("Bmd import reads a name that only looks like UTF-8 as Windows-1252 [data][items]")
+{
+    TemporaryClientFolder folder;
+    LegacyItemFile english;
+    english.SetName(BladeType, "Blade");
+    english.Write(folder.LegacyItemFilePath(L"Eng"));
+    LegacyItemFile portuguese;
+    // C0 AF would be an overlong form of '/' in UTF-8; read as Windows-1252 it is U+00C0 U+00AF.
+    portuguese.SetName(BladeType, "Blade \xC0\xAF");
+    portuguese.Write(folder.LegacyItemFilePath(L"Por"));
+    ClientDataScope client(folder.Directory());
+
+    const ItemBmdImportResult result = ImportItemBmdFiles();
+    REQUIRE_FALSE(HasErrors(result.issues));
+    CHECK(result.reencodedNameCount == 1);
+
+    const ItemDefinition* blade = FindItem(result.items, BladeType);
+    REQUIRE(blade != nullptr);
+    CHECK(blade->names.Get("pt") == "Blade \xC3\x80\xC2\xAF");
+}
+
 TEST_CASE("A folder that cannot be written is a write failure, not a data error [data][items]")
 {
     const ItemDataLoadResult shipped = LoadItemDataDirectory(DataDirectory / "Items");
@@ -1107,7 +1128,29 @@ TEST_CASE("A folder that cannot be written is a write failure, not a data error 
 
     std::vector<ItemDataIssue> issues;
     CHECK(SaveItemDataDirectory(blocked, shipped.items, issues) == ItemDataSaveResult::WriteFailed);
-    CHECK_FALSE(issues.empty());
+    // The issue names the temporary file that could not be written.
+    CHECK(std::any_of(issues.begin(), issues.end(), [](const ItemDataIssue& issue)
+                      { return issue.message == "could not be written" && issue.source.ends_with(".json.tmp"); }));
+}
+
+TEST_CASE("A file that cannot be replaced is a write failure and leaves no temporary file [data][items]")
+{
+    const ItemDataLoadResult shipped = LoadItemDataDirectory(DataDirectory / "Items");
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    const std::filesystem::path itemDirectory = folder.Directory() / GetItemDataDirectory();
+    // A folder with the name of the sword file: the written file cannot take its place.
+    const std::filesystem::path swordFile = itemDirectory / GetItemGroupFileName(0);
+    std::filesystem::remove(swordFile);
+    std::filesystem::create_directories(swordFile / "inside");
+
+    std::vector<ItemDataIssue> issues;
+    CHECK(SaveItemDataDirectory(itemDirectory, shipped.items, issues) == ItemDataSaveResult::WriteFailed);
+    CHECK(std::any_of(
+        issues.begin(), issues.end(), [&](const ItemDataIssue& issue)
+        { return issue.source == swordFile.string() && issue.message.starts_with("could not be replaced: "); }));
+    CHECK(std::filesystem::is_directory(swordFile));
+    CHECK_FALSE(std::filesystem::exists(swordFile.string() + ".tmp"));
 }
 
 // The items and their models are saved together: when one of the files
@@ -2195,7 +2238,7 @@ TEST_CASE("The usage of an item lists its tags, its model and the code that name
     // The editor was built from these sources, and the code names the Kris.
     REQUIRE(kris.codeKnown);
     CHECK_FALSE(kris.code.empty());
-    // No set file is loaded here, so the set numbers are all 0: no set.
+    // The Kris is in no ancient set, whether or not an earlier test loaded the set files.
     CHECK_FALSE(kris.inAncientSet);
 
     const MuEditor::Items::ItemUsage nothing = MuEditor::Items::FindItemUsage(MakeItemType(0, 100));
@@ -2555,9 +2598,82 @@ TEST_CASE(
     RenderItemTool(g_MuItemRequirementsUI, true);
     RenderItemTool(g_MuItemRequirementsUI, true);
 
-    // The weight list asks; nothing is stored until one is taken.
-    CHECK(OpenPopupWindow() != nullptr);
-    CHECK(g_ItemDatabase.Find(KrisType)->requirements.strength == typedWeight);
+    // The weight list asks; nothing is stored until one is taken. Also not when
+    // the list takes the keyboard from the weight field: activated by
+    // navigation, as this test clicks, it became active a frame before the +0
+    // field was reported left, with the weight of the typed value.
+    for (int frame = 0; frame < 3; ++frame)
+    {
+        INFO("frame " << frame);
+        CHECK(OpenPopupWindow() != nullptr);
+        CHECK(g_ItemDatabase.Find(KrisType)->requirements.strength == typedWeight);
+        RenderItemTool(g_MuItemRequirementsUI, true);
+    }
+    g_ItemEdits.GetHistory().Clear();
+}
+
+// A click from a +0 value into the +0 field of a requirement drawn above it
+// makes that field active, earlier in the same frame, before the first one is
+// reported left: the typed value still asks for its own weight.
+TEST_CASE("A +0 value left by a click into the +0 field above it still asks for its weight [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    g_ItemSelection.Select(KrisType);
+    const ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+    REQUIRE(MuEditor::Items::HasWeight(kris, ItemRequirement::Strength));
+    REQUIRE(MuEditor::Items::HasWeight(kris, ItemRequirement::Dexterity));
+    int value = MuEditor::Items::ComputeZeroValue(kris, ItemRequirement::Dexterity) + 1;
+    while (MuEditor::Items::FindWeightsGiving(kris, ItemRequirement::Dexterity, value).GetCount() < 2)
+    {
+        ++value;
+        REQUIRE(value < 1000);
+    }
+    REQUIRE(MuEditor::Items::ChooseWeight(kris, ItemRequirement::Dexterity, value, kris.requirements.dexterity).kind ==
+            MuEditor::Items::WeightChoice::Kind::Pick);
+
+    TestImGuiContext context;
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    const ImGuiID strength =
+        ItemToolFieldId(MuEditor::WindowIds::ItemRequirements, {KrisType, static_cast<int>(ItemRequirement::Strength)},
+                        I18N::Metadata::ReqStrength);
+    const ImGuiID dexterity =
+        ItemToolFieldId(MuEditor::WindowIds::ItemRequirements, {KrisType, static_cast<int>(ItemRequirement::Dexterity)},
+                        I18N::Metadata::ReqDexterity);
+    ImGui::ActivateItemByID(dexterity);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    REQUIRE(ImGui::GetActiveID() == dexterity);
+    RenderItemTool(g_MuItemRequirementsUI, true, std::to_string(value).c_str());
+    ImGui::ActivateItemByID(strength);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+
+    // The list asks, and nothing is stored until a weight is taken.
+    for (int frame = 0; frame < 3; ++frame)
+    {
+        INFO("frame " << frame);
+        RenderItemTool(g_MuItemRequirementsUI, true);
+        CHECK(OpenPopupWindow() != nullptr);
+        CHECK(g_ItemDatabase.Find(KrisType)->requirements.strength == kris.requirements.strength);
+        CHECK(g_ItemDatabase.Find(KrisType)->requirements.dexterity == kris.requirements.dexterity);
+    }
+    CHECK_FALSE(g_ItemEdits.GetHistory().CanUndo());
+
+    // It is the list of the typed dexterity value.
+    const ImGuiWindow* list = OpenPopupWindow();
+    REQUIRE(list != nullptr);
+    ImGui::ActivateItemByID(ImGui::GetIDWithSeed(I18N::Editor::TakeThisWeight, nullptr, list->ID));
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    CHECK(OpenPopupWindow() == nullptr);
+    CHECK(MuEditor::Items::FindWeightsGiving(kris, ItemRequirement::Dexterity, value)
+              .Contains(g_ItemDatabase.Find(KrisType)->requirements.dexterity));
+    CHECK(g_ItemDatabase.Find(KrisType)->requirements.strength == kris.requirements.strength);
+    CHECK(g_ItemEdits.GetHistory().CanUndo());
     g_ItemEdits.GetHistory().Clear();
 }
 

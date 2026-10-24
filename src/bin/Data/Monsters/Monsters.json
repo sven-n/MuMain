@@ -1,0 +1,2740 @@
+{
+  "formatVersion": 1,
+  "monsters": [
+    {
+      "number": 0,
+      "name": {"en": "Bull Fighter", "es": "Toro Luchador", "pt": "Toureiro"},
+      "kind": "monster"
+    },
+    {
+      "number": 1,
+      "name": {"en": "Hound", "es": "Sabueso", "pt": "Cão"},
+      "kind": "monster"
+    },
+    {
+      "number": 2,
+      "name": {"en": "Budge Dragon", "es": "Dragón Escurridizo", "pt": "Dragão Lento"},
+      "kind": "monster"
+    },
+    {
+      "number": 3,
+      "name": {"en": "Spider", "es": "Araña", "pt": "Aranha"},
+      "kind": "monster"
+    },
+    {
+      "number": 4,
+      "name": {"en": "Elite Bull Fighter", "es": "Toro Luchador de Élite", "pt": "Toureiro de elite"},
+      "kind": "monster"
+    },
+    {
+      "number": 5,
+      "name": {"en": "Hell Hound", "es": "Sabueso Infernal", "pt": "Cão do inferno"},
+      "kind": "monster"
+    },
+    {
+      "number": 6,
+      "name": {"en": "LIch", "es": "Lich", "pt": "Liche"},
+      "kind": "monster"
+    },
+    {
+      "number": 7,
+      "name": {"en": "Giant", "es": "Gigante", "pt": "Gigante"},
+      "kind": "monster"
+    },
+    {
+      "number": 8,
+      "name": {"en": "Poison Bull Fighter", "es": "Toro Luchador Venenoso", "pt": "Toureiro Venenoso"},
+      "kind": "monster"
+    },
+    {
+      "number": 9,
+      "name": {"en": "Thunder Lich", "es": "Lich de Trueno", "pt": "Liche do trovão"},
+      "kind": "monster"
+    },
+    {
+      "number": 10,
+      "name": {"en": "Dark Knight", "es": "Caballero Oscuro", "pt": "Cavaleiro negro"},
+      "kind": "monster"
+    },
+    {
+      "number": 11,
+      "name": {"en": "Ghost", "es": "Espíritu Fantasmal", "pt": "Fantasma"},
+      "kind": "monster"
+    },
+    {
+      "number": 12,
+      "name": {"en": "Larva", "es": "Larva", "pt": "Larva"},
+      "kind": "monster"
+    },
+    {
+      "number": 13,
+      "name": {"en": "Hell Spider", "es": "Araña Infernal", "pt": "Aranha do inferno"},
+      "kind": "monster"
+    },
+    {
+      "number": 14,
+      "name": {"en": "Skeleton", "es": "Esqueleto", "pt": "Esqueleto"},
+      "kind": "monster"
+    },
+    {
+      "number": 15,
+      "name": {"en": "Skeleton Archer", "es": "Arquero Esqueleto", "pt": "Arqueiro esqueleto"},
+      "kind": "monster"
+    },
+    {
+      "number": 16,
+      "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
+      "kind": "monster"
+    },
+    {
+      "number": 17,
+      "name": {"en": "Cyclops", "es": "Cíclope", "pt": "Ciclope"},
+      "kind": "monster"
+    },
+    {
+      "number": 18,
+      "name": {"en": "Gorgon", "es": "Gorgon", "pt": "Górgone"},
+      "kind": "monster"
+    },
+    {
+      "number": 19,
+      "name": {"en": "Yeti", "es": "Yeti", "pt": "Ieti"},
+      "kind": "monster"
+    },
+    {
+      "number": 20,
+      "name": {"en": "Elite Yeti", "es": "Yeti de Élite", "pt": "Ieti de elite"},
+      "kind": "monster"
+    },
+    {
+      "number": 21,
+      "name": {"en": "Assassin", "es": "Asesino", "pt": "Assassino"},
+      "kind": "monster"
+    },
+    {
+      "number": 22,
+      "name": {"en": "Ice Monster", "es": "Monstruo de Hielo", "pt": "Monstro de gelo"},
+      "kind": "monster"
+    },
+    {
+      "number": 23,
+      "name": {"en": "Hommerd", "es": "Hommerd", "pt": "Hommerd"},
+      "kind": "monster"
+    },
+    {
+      "number": 24,
+      "name": {"en": "Worm", "es": "Gusano", "pt": "Verme"},
+      "kind": "monster"
+    },
+    {
+      "number": 25,
+      "name": {"en": "Ice Queen", "es": "Reina de Hielo", "pt": "Rainha de gelo"},
+      "kind": "monster"
+    },
+    {
+      "number": 26,
+      "name": {"en": "Goblin", "es": "Duende", "pt": "Goblin"},
+      "kind": "monster"
+    },
+    {
+      "number": 27,
+      "name": {"en": "Chain Scorpion", "es": "Escorpión Cadena", "pt": "Escorpião de correntes"},
+      "kind": "monster"
+    },
+    {
+      "number": 28,
+      "name": {"en": "Beetle Monster", "es": "Monstruo Escarabajo", "pt": "Monstro besouro"},
+      "kind": "monster"
+    },
+    {
+      "number": 29,
+      "name": {"en": "Hunter", "es": "Cazador", "pt": "Caçador"},
+      "kind": "monster"
+    },
+    {
+      "number": 30,
+      "name": {"en": "Forest Monster", "es": "Monstruo del Bosque", "pt": "Monstro da floresta"},
+      "kind": "monster"
+    },
+    {
+      "number": 31,
+      "name": {"en": "Agon", "es": "Agon", "pt": "Agon"},
+      "kind": "monster"
+    },
+    {
+      "number": 32,
+      "name": {"en": "Stone Golem", "es": "Gólem de Piedra", "pt": "Golem de pedra"},
+      "kind": "monster"
+    },
+    {
+      "number": 33,
+      "name": {"en": "Elite Goblin", "es": "Duende de Élite", "pt": "Goblin de Elite"},
+      "kind": "monster"
+    },
+    {
+      "number": 34,
+      "name": {"en": "Cursed Wizard", "es": "Mago Maldito", "pt": "Mago amaldiçoado"},
+      "kind": "monster"
+    },
+    {
+      "number": 35,
+      "name": {"en": "Death Gorgon", "es": "Gorgon de la Muerte", "pt": "Górgone da morte"},
+      "kind": "monster"
+    },
+    {
+      "number": 36,
+      "name": {"en": "Shadow", "es": "Sombra", "pt": "Sombra"},
+      "kind": "monster"
+    },
+    {
+      "number": 37,
+      "name": {"en": "Devil", "es": "Diablo", "pt": "Demônio"},
+      "kind": "monster"
+    },
+    {
+      "number": 38,
+      "name": {"en": "Balrog", "es": "Balrog", "pt": "Balrog"},
+      "kind": "monster"
+    },
+    {
+      "number": 39,
+      "name": {"en": "Poison Shadow", "es": "Sombra Venenosa", "pt": "Sombra venenosa"},
+      "kind": "monster"
+    },
+    {
+      "number": 40,
+      "name": {"en": "Death Knight", "es": "Caballero de la Muerte", "pt": "Cavaleiro da morte"},
+      "kind": "monster"
+    },
+    {
+      "number": 41,
+      "name": {"en": "Death Cow", "es": "Vaca de la Muerte", "pt": "Vaca da morte"},
+      "kind": "monster"
+    },
+    {
+      "number": 42,
+      "name": {"en": "Red Dragon", "es": "Dragón Rojo", "pt": "Dragão Vermelho"},
+      "kind": "monster"
+    },
+    {
+      "number": 43,
+      "name": {"en": "Golden Budge Dragon", "es": "Dragón Escurridizo Dorado", "pt": "Dragão Lento Dourado"},
+      "kind": "monster"
+    },
+    {
+      "number": 44,
+      "name": {"en": "Dragon", "es": "Dragón", "pt": "Dragão"},
+      "kind": "monster"
+    },
+    {
+      "number": 45,
+      "name": {"en": "Bahamut", "es": "Bahamut", "pt": "Bahamut"},
+      "kind": "monster"
+    },
+    {
+      "number": 46,
+      "name": {"en": "Vepar", "es": "Vepar", "pt": "Vepar"},
+      "kind": "monster"
+    },
+    {
+      "number": 47,
+      "name": {"en": "Valkyrie", "es": "Valquiria", "pt": "Valquíria"},
+      "kind": "monster"
+    },
+    {
+      "number": 48,
+      "name": {"en": "Lizard King", "es": "Rey Lagarto", "pt": "Rei Lagarto"},
+      "kind": "monster"
+    },
+    {
+      "number": 49,
+      "name": {"en": "Hydra", "es": "Hidra", "pt": "Hidra"},
+      "kind": "monster"
+    },
+    {
+      "number": 50,
+      "name": {"en": "Sea Worm", "es": "Gusano Marítimo", "pt": "Verme marinho"},
+      "kind": "monster"
+    },
+    {
+      "number": 51,
+      "name": {"en": "Great Bahamut", "es": "Gran Bahamut", "pt": "Grande Bahamut"},
+      "kind": "monster"
+    },
+    {
+      "number": 52,
+      "name": {"en": "Silver Valkyrie", "es": "Valquiria Plateada", "pt": "Valquíria prateada"},
+      "kind": "monster"
+    },
+    {
+      "number": 53,
+      "name": {"en": "Golden Titan", "es": "Titán Dorado", "pt": "Titã dourado"},
+      "kind": "monster"
+    },
+    {
+      "number": 54,
+      "name": {"en": "Golden Soldier", "es": "Soldado Dorado", "pt": "Soldado dourado"},
+      "kind": "monster"
+    },
+    {
+      "number": 55,
+      "name": {"en": "Death King", "es": "Rey de la Muerte", "pt": "Rei da Morte"},
+      "kind": "monster"
+    },
+    {
+      "number": 56,
+      "name": {"en": "Death Bone", "es": "Hueso de la Muerte", "pt": "Osso da Morte"},
+      "kind": "monster"
+    },
+    {
+      "number": 57,
+      "name": {"en": "Iron Wheel", "es": "Rueda de Acero", "pt": "Roda de ferro"},
+      "kind": "monster"
+    },
+    {
+      "number": 58,
+      "name": {"en": "Tantalos", "es": "Tantalos", "pt": "Tântalo"},
+      "kind": "monster"
+    },
+    {
+      "number": 59,
+      "name": {"en": "Zaikan", "es": "Zaikan", "pt": "Zaikan"},
+      "kind": "monster"
+    },
+    {
+      "number": 60,
+      "name": {"en": "Bloody wolf", "es": "Lobo Sangriento", "pt": "Lobo sanguinário"},
+      "kind": "monster"
+    },
+    {
+      "number": 61,
+      "name": {"en": "Beam Knight", "es": "Caballero de Rayo", "pt": "Cavaleiro do raio"},
+      "kind": "monster"
+    },
+    {
+      "number": 62,
+      "name": {"en": "Mutant", "es": "Mutante", "pt": "Mutante"},
+      "kind": "monster"
+    },
+    {
+      "number": 63,
+      "name": {"en": "Death Beam Knight", "es": "Caballero de Rayo de la Muerte", "pt": "Cavaleiro do raio da morte"},
+      "kind": "monster"
+    },
+    {
+      "number": 64,
+      "name": {"en": "Ogre archer", "es": "Arquero Ogro", "pt": "Arqueiro ogro"},
+      "kind": "monster"
+    },
+    {
+      "number": 65,
+      "name": {"en": "Elite Ogre", "es": "Ogre de Élite", "pt": "Ogro de elite"},
+      "kind": "monster"
+    },
+    {
+      "number": 66,
+      "name": {"en": "Cursed king", "es": "Rey Maldito", "pt": "Rei amaldiçoado"},
+      "kind": "monster"
+    },
+    {
+      "number": 67,
+      "name": {"en": "Metal Balrog", "es": "Balrog de Metal", "pt": "Balrog de metal"},
+      "kind": "monster"
+    },
+    {
+      "number": 68,
+      "name": {"en": "Molt", "es": "Molt", "pt": "Molt"},
+      "kind": "monster"
+    },
+    {
+      "number": 69,
+      "name": {"en": "Alquamos", "es": "Alquamos", "pt": "Alquamos"},
+      "kind": "monster"
+    },
+    {
+      "number": 70,
+      "name": {"en": "Queen Rainier", "es": "Reina Rainier", "pt": "Rainha Rainier"},
+      "kind": "monster"
+    },
+    {
+      "number": 71,
+      "name": {"en": "Mega Crust", "es": "Mega Corteza", "pt": "Mega Crust"},
+      "kind": "monster"
+    },
+    {
+      "number": 72,
+      "name": {"en": "Phantom Knight", "es": "Caballero Fantasma", "pt": "Cavaleiro fantasma"},
+      "kind": "monster"
+    },
+    {
+      "number": 73,
+      "name": {"en": "Drakan", "es": "Drakan", "pt": "Drakan"},
+      "kind": "monster"
+    },
+    {
+      "number": 74,
+      "name": {"en": "Alpha Crust", "es": "Corteza Alfa", "pt": "Crust Alfa"},
+      "kind": "monster"
+    },
+    {
+      "number": 75,
+      "name": {"en": "Great Drakan", "es": "Gran Drakan", "pt": "Grande Drakan"},
+      "kind": "monster"
+    },
+    {
+      "number": 76,
+      "name": {"en": "Phoenix Darkness shield", "es": "Escudo de Fénix de Oscuridad", "pt": "Escudo da Fênix da escuridão"},
+      "kind": "monster"
+    },
+    {
+      "number": 77,
+      "name": {"en": "Phoenix of Darkness", "es": "Fénix de la Oscuridad", "pt": "Fênix da escuridão"},
+      "kind": "monster"
+    },
+    {
+      "number": 78,
+      "name": {"en": "Golden Goblin", "es": "Duende Dorado", "pt": "Goblin dourado"},
+      "kind": "monster"
+    },
+    {
+      "number": 79,
+      "name": {"en": "Golden Derkon", "es": "Derkon Dorado", "pt": "Derkon dourado"},
+      "kind": "monster"
+    },
+    {
+      "number": 80,
+      "name": {"en": "Golden Lizard King", "es": "Rey Lagarto Dorado", "pt": "Rei Lagarto dourado"},
+      "kind": "monster"
+    },
+    {
+      "number": 81,
+      "name": {"en": "Golden Vepar", "es": "Vepar Dorado", "pt": "Vepar dourado"},
+      "kind": "monster"
+    },
+    {
+      "number": 82,
+      "name": {"en": "Golden Tantalos", "es": "Tantalos Dorado", "pt": "Tântalo dourado"},
+      "kind": "monster"
+    },
+    {
+      "number": 83,
+      "name": {"en": "Golden Wheel", "es": "Rueda Dorada", "pt": "Roda dourada"},
+      "kind": "monster"
+    },
+    {
+      "number": 84,
+      "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
+      "kind": "monster"
+    },
+    {
+      "number": 85,
+      "name": {"en": "Chief Skeleton Archer", "es": "Jefe Arquero Esqueleto", "pt": "Arqueiro esqueleto chefe"},
+      "kind": "monster"
+    },
+    {
+      "number": 86,
+      "name": {"en": "Dark Skull Soldier", "es": "Soldado Calavera Oscura", "pt": "Soldado da caveira negra"},
+      "kind": "monster"
+    },
+    {
+      "number": 87,
+      "name": {"en": "Giant Ogre", "es": "Ogro Gigante", "pt": "Ogro gigante"},
+      "kind": "monster"
+    },
+    {
+      "number": 88,
+      "name": {"en": "Red Skeleton Knight", "es": "Caballero Rojo Esqueleto", "pt": "Cavaleiro Esqueleto Vermelho"},
+      "kind": "monster"
+    },
+    {
+      "number": 89,
+      "name": {"en": "Magic Skeleton", "es": "Esqueleto Mágico", "pt": "Esqueleto mágico"},
+      "kind": "monster"
+    },
+    {
+      "number": 90,
+      "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
+      "kind": "monster"
+    },
+    {
+      "number": 91,
+      "name": {"en": "Chief Skeleton Archer", "es": "Jefe Arquero Esqueleto", "pt": "Arqueiro esqueleto chefe"},
+      "kind": "monster"
+    },
+    {
+      "number": 92,
+      "name": {"en": "Dark Skull Soldier", "es": "Soldado Calavera Oscura", "pt": "Soldado da caveira negra"},
+      "kind": "monster"
+    },
+    {
+      "number": 93,
+      "name": {"en": "Giant Ogre", "es": "Ogro Gigante", "pt": "Ogro gigante"},
+      "kind": "monster"
+    },
+    {
+      "number": 94,
+      "name": {"en": "Red Skeleton Knight", "es": "Caballero Rojo Esqueleto", "pt": "Cavaleiro Esqueleto Vermelho"},
+      "kind": "monster"
+    },
+    {
+      "number": 95,
+      "name": {"en": "Magic Skeleton", "es": "Esqueleto Mágico", "pt": "Esqueleto mágico"},
+      "kind": "monster"
+    },
+    {
+      "number": 96,
+      "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
+      "kind": "monster"
+    },
+    {
+      "number": 97,
+      "name": {"en": "Chief Skeleton Archer", "es": "Jefe Arquero Esqueleto", "pt": "Arqueiro esqueleto chefe"},
+      "kind": "monster"
+    },
+    {
+      "number": 98,
+      "name": {"en": "Dark Skull Soldier", "es": "Soldado Calavera Oscura", "pt": "Soldado da caveira negra"},
+      "kind": "monster"
+    },
+    {
+      "number": 99,
+      "name": {"en": "Giant Ogre", "es": "Ogro Gigante", "pt": "Ogro gigante"},
+      "kind": "monster"
+    },
+    {
+      "number": 100,
+      "name": {"en": "Lance", "es": "Lance", "pt": "Lança"},
+      "kind": "trap"
+    },
+    {
+      "number": 101,
+      "name": {"en": "Iron Stick", "es": "Vara de Hierro", "pt": "Vara de ferro"},
+      "kind": "trap"
+    },
+    {
+      "number": 102,
+      "name": {"en": "Fire", "es": "Fuego", "pt": "Fogo"},
+      "kind": "trap"
+    },
+    {
+      "number": 103,
+      "name": {"en": "Meteorite", "es": "Meteorito", "pt": "Meteorito"},
+      "kind": "trap"
+    },
+    {
+      "number": 104,
+      "name": {"en": "Trap", "es": "Trampa", "pt": "Armadilha"},
+      "kind": "trap"
+    },
+    {
+      "number": 105,
+      "name": {"en": "Canon Trap", "es": "Trampa Cañón", "pt": "Armadilha de canhão"},
+      "kind": "trap"
+    },
+    {
+      "number": 106,
+      "name": {"en": "Laser Trap", "es": "Trampa Láser", "pt": "Armadilha de laser"},
+      "kind": "trap"
+    },
+    {
+      "number": 111,
+      "name": {"en": "Red Skeleton Knight", "es": "Caballero Rojo Esqueleto", "pt": "Cavaleiro Esqueleto Vermelho"},
+      "kind": "monster"
+    },
+    {
+      "number": 112,
+      "name": {"en": "Magic Skeleton", "es": "Esqueleto Mágico", "pt": "Esqueleto mágico"},
+      "kind": "monster"
+    },
+    {
+      "number": 113,
+      "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
+      "kind": "monster"
+    },
+    {
+      "number": 114,
+      "name": {"en": "Chief Skeleton Archer", "es": "Jefe Arquero Esqueleto", "pt": "Arqueiro esqueleto chefe"},
+      "kind": "monster"
+    },
+    {
+      "number": 115,
+      "name": {"en": "Dark Skull Soldier", "es": "Soldado Calavera Oscura", "pt": "Soldado da caveira negra"},
+      "kind": "monster"
+    },
+    {
+      "number": 116,
+      "name": {"en": "Giant Ogre", "es": "Ogro Gigante", "pt": "Ogro gigante"},
+      "kind": "monster"
+    },
+    {
+      "number": 117,
+      "name": {"en": "Red Skeleton Knight", "es": "Caballero Rojo Esqueleto", "pt": "Cavaleiro Esqueleto Vermelho"},
+      "kind": "monster"
+    },
+    {
+      "number": 118,
+      "name": {"en": "Magic Skeleton", "es": "Esqueleto Mágico", "pt": "Esqueleto mágico"},
+      "kind": "monster"
+    },
+    {
+      "number": 119,
+      "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
+      "kind": "monster"
+    },
+    {
+      "number": 120,
+      "name": {"en": "Chief Skeleton Archer", "es": "Jefe Arquero Esqueleto", "pt": "Arqueiro esqueleto chefe"},
+      "kind": "monster"
+    },
+    {
+      "number": 121,
+      "name": {"en": "Dark Skull Soldier", "es": "Soldado Calavera Oscura", "pt": "Soldado da caveira negra"},
+      "kind": "monster"
+    },
+    {
+      "number": 122,
+      "name": {"en": "Giant Ogre", "es": "Ogro Gigante", "pt": "Ogro gigante"},
+      "kind": "monster"
+    },
+    {
+      "number": 123,
+      "name": {"en": "Red Skeleton Knight", "es": "Caballero Rojo Esqueleto", "pt": "Cavaleiro Esqueleto Vermelho"},
+      "kind": "monster"
+    },
+    {
+      "number": 124,
+      "name": {"en": "Magic Skeleton", "es": "Esqueleto Mágico", "pt": "Esqueleto mágico"},
+      "kind": "monster"
+    },
+    {
+      "number": 125,
+      "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
+      "kind": "monster"
+    },
+    {
+      "number": 126,
+      "name": {"en": "Chief Skeleton Archer", "es": "Jefe Arquero Esqueleto", "pt": "Arqueiro esqueleto chefe"},
+      "kind": "monster"
+    },
+    {
+      "number": 127,
+      "name": {"en": "Dark Skull Soldier", "es": "Soldado Calavera Oscura", "pt": "Soldado da caveira negra"},
+      "kind": "monster"
+    },
+    {
+      "number": 128,
+      "name": {"en": "Giant Ogre", "es": "Ogro Gigante", "pt": "Ogro gigante"},
+      "kind": "monster"
+    },
+    {
+      "number": 129,
+      "name": {"en": "Red Skeleton Knight", "es": "Caballero Rojo Esqueleto", "pt": "Cavaleiro Esqueleto Vermelho"},
+      "kind": "monster"
+    },
+    {
+      "number": 130,
+      "name": {"en": "Magic Skeleton", "es": "Esqueleto Mágico", "pt": "Esqueleto mágico"},
+      "kind": "monster"
+    },
+    {
+      "number": 131,
+      "name": {"en": "Castle Gate", "es": "Puerta del Castillo", "pt": "Portão do castelo"},
+      "kind": "monster"
+    },
+    {
+      "number": 132,
+      "name": {"en": "Statue of Saint", "es": "Estatua de Santo", "pt": "Estátua do Santo"},
+      "kind": "monster"
+    },
+    {
+      "number": 133,
+      "name": {"en": "Statue of Saint", "es": "Estatua de Santo", "pt": "Estátua do Santo"},
+      "kind": "monster"
+    },
+    {
+      "number": 134,
+      "name": {"en": "Statue of Saint", "es": "Estatua de Santo", "pt": "Estátua do Santo"},
+      "kind": "monster"
+    },
+    {
+      "number": 135,
+      "name": {"en": "White wizard", "es": "Mago Blanco", "pt": "Mago branco"},
+      "kind": "monster"
+    },
+    {
+      "number": 136,
+      "name": {"en": "Destructive ogre soldier", "es": "Soldado ogro destructivo", "pt": "Soldado ogro destrutivo"},
+      "kind": "monster"
+    },
+    {
+      "number": 137,
+      "name": {"en": "Destructive ogre archer", "es": "Arquero ogro destructivo", "pt": "Arqueiro ogro destrutivo"},
+      "kind": "monster"
+    },
+    {
+      "number": 138,
+      "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
+      "kind": "monster"
+    },
+    {
+      "number": 139,
+      "name": {"en": "Chief Skeleton Archer", "es": "Jefe Arquero Esqueleto", "pt": "Arqueiro esqueleto chefe"},
+      "kind": "monster"
+    },
+    {
+      "number": 140,
+      "name": {"en": "Dark Skull Soldier", "es": "Soldado Calavera Oscura", "pt": "Soldado da caveira negra"},
+      "kind": "monster"
+    },
+    {
+      "number": 141,
+      "name": {"en": "Giant Ogre", "es": "Ogro Gigante", "pt": "Ogro gigante"},
+      "kind": "monster"
+    },
+    {
+      "number": 142,
+      "name": {"en": "Red Skeleton Knight", "es": "Caballero Rojo Esqueleto", "pt": "Cavaleiro Esqueleto Vermelho"},
+      "kind": "monster"
+    },
+    {
+      "number": 143,
+      "name": {"en": "Magic Skeleton", "es": "Esqueleto Mágico", "pt": "Esqueleto mágico"},
+      "kind": "monster"
+    },
+    {
+      "number": 144,
+      "name": {"en": "Death Angel", "es": "Ángel de la Muerte", "pt": "Anjo da Morte"},
+      "kind": "monster"
+    },
+    {
+      "number": 145,
+      "name": {"en": "Death Centurion", "es": "Centurión de la Muerte", "pt": "Centurião da morte"},
+      "kind": "monster"
+    },
+    {
+      "number": 146,
+      "name": {"en": "Blood Soldier", "es": "Soldado Sangriento", "pt": "Soldado sanguinário"},
+      "kind": "monster"
+    },
+    {
+      "number": 147,
+      "name": {"en": "Aegis", "es": "Aegis", "pt": "Aegis"},
+      "kind": "monster"
+    },
+    {
+      "number": 148,
+      "name": {"en": "Rogue Centurion", "es": "Centurión Canalla", "pt": "Centurião vigarista"},
+      "kind": "monster"
+    },
+    {
+      "number": 149,
+      "name": {"en": "Necron", "es": "Necron", "pt": "Necron"},
+      "kind": "monster"
+    },
+    {
+      "number": 150,
+      "name": {"en": "Bali", "es": "Bali", "pt": "Bali"},
+      "kind": "monster"
+    },
+    {
+      "number": 151,
+      "name": {"en": "Soldier", "es": "Soldado", "pt": "Soldado"},
+      "kind": "monster"
+    },
+    {
+      "number": 152,
+      "name": {"en": "Gate to Kalima 1"},
+      "kind": "monster"
+    },
+    {
+      "number": 153,
+      "name": {"en": "Gate to Kalima 2"},
+      "kind": "monster"
+    },
+    {
+      "number": 154,
+      "name": {"en": "Gate to Kalima 3"},
+      "kind": "monster"
+    },
+    {
+      "number": 155,
+      "name": {"en": "Gate to Kalima 4"},
+      "kind": "monster"
+    },
+    {
+      "number": 156,
+      "name": {"en": "Gate to Kalima 5"},
+      "kind": "monster"
+    },
+    {
+      "number": 157,
+      "name": {"en": "Gate to Kalima 6"},
+      "kind": "monster"
+    },
+    {
+      "number": 158,
+      "name": {"en": "Gate to Kalima 7"},
+      "kind": "monster"
+    },
+    {
+      "number": 160,
+      "name": {"en": "Schriker", "es": "Schriker", "pt": "Schriker"},
+      "kind": "monster"
+    },
+    {
+      "number": 161,
+      "name": {"en": "Illusion of Kundun", "es": "Ilusión de Kundun", "pt": "Ilusão de Kundun"},
+      "kind": "monster"
+    },
+    {
+      "number": 162,
+      "name": {"en": "Chaos Castle 1", "es": "Castillo del Caos 1", "pt": "Castelo do Caos 1"},
+      "kind": "monster"
+    },
+    {
+      "number": 163,
+      "name": {"en": "Chaos Castle 2", "es": "Castillo del Caos 2", "pt": "Castelo do Caos 2"},
+      "kind": "monster"
+    },
+    {
+      "number": 164,
+      "name": {"en": "Chaos Castle 3", "es": "Castillo del Caos 3", "pt": "Castelo do Caos 3"},
+      "kind": "monster"
+    },
+    {
+      "number": 165,
+      "name": {"en": "Chaos Castle 4", "es": "Castillo del Caos 4", "pt": "Castelo do Caos 4"},
+      "kind": "monster"
+    },
+    {
+      "number": 166,
+      "name": {"en": "Chaos Castle 5", "es": "Castillo del Caos 5", "pt": "Castelo do Caos 5"},
+      "kind": "monster"
+    },
+    {
+      "number": 167,
+      "name": {"en": "Chaos Castle 6", "es": "Castillo del Caos 6", "pt": "Castelo do Caos 6"},
+      "kind": "monster"
+    },
+    {
+      "number": 168,
+      "name": {"en": "Chaos Castle 7", "es": "Castillo del Caos 7", "pt": "Castelo do Caos 7"},
+      "kind": "monster"
+    },
+    {
+      "number": 169,
+      "name": {"en": "Chaos Castle 8", "es": "Castillo del Caos 8", "pt": "Castelo do Caos 8"},
+      "kind": "monster"
+    },
+    {
+      "number": 170,
+      "name": {"en": "Chaos Castle 9", "es": "Castillo del Caos 9", "pt": "Castelo do Caos 9"},
+      "kind": "monster"
+    },
+    {
+      "number": 171,
+      "name": {"en": "Chaos Castle 10", "es": "Castillo del Caos 10", "pt": "Castelo do Caos 10"},
+      "kind": "monster"
+    },
+    {
+      "number": 172,
+      "name": {"en": "Chaos Castle 11", "es": "Castillo del Caos 11", "pt": "Castelo do Caos 11"},
+      "kind": "monster"
+    },
+    {
+      "number": 173,
+      "name": {"en": "Chaos Castle 12", "es": "Castillo del Caos 12", "pt": "Castelo do Caos 12"},
+      "kind": "monster"
+    },
+    {
+      "number": 174,
+      "name": {"en": "Death Angel", "es": "Ángel de la Muerte", "pt": "Anjo da Morte"},
+      "kind": "monster"
+    },
+    {
+      "number": 175,
+      "name": {"en": "Death Centurion", "es": "Centurión de la Muerte", "pt": "Centurião da morte"},
+      "kind": "monster"
+    },
+    {
+      "number": 176,
+      "name": {"en": "Blood Soldier", "es": "Soldado Sangriento", "pt": "Soldado sanguinário"},
+      "kind": "monster"
+    },
+    {
+      "number": 177,
+      "name": {"en": "Aegis", "es": "Aegis", "pt": "Aegis"},
+      "kind": "monster"
+    },
+    {
+      "number": 178,
+      "name": {"en": "Rogue Centurion", "es": "Centurión Canalla", "pt": "Centurião vigarista"},
+      "kind": "monster"
+    },
+    {
+      "number": 179,
+      "name": {"en": "Necron", "es": "Necron", "pt": "Necron"},
+      "kind": "monster"
+    },
+    {
+      "number": 180,
+      "name": {"en": "Schriker", "es": "Schriker", "pt": "Schriker"},
+      "kind": "monster"
+    },
+    {
+      "number": 181,
+      "name": {"en": "Illusion of Kundun", "es": "Ilusión de Kundun", "pt": "Ilusão de Kundun"},
+      "kind": "monster"
+    },
+    {
+      "number": 182,
+      "name": {"en": "Death Angel", "es": "Ángel de la Muerte", "pt": "Anjo da Morte"},
+      "kind": "monster"
+    },
+    {
+      "number": 183,
+      "name": {"en": "Death Centurion", "es": "Centurión de la Muerte", "pt": "Centurião da morte"},
+      "kind": "monster"
+    },
+    {
+      "number": 184,
+      "name": {"en": "Blood Soldier", "es": "Soldado Sangriento", "pt": "Soldado sanguinário"},
+      "kind": "monster"
+    },
+    {
+      "number": 185,
+      "name": {"en": "Aegis", "es": "Aegis", "pt": "Aegis"},
+      "kind": "monster"
+    },
+    {
+      "number": 186,
+      "name": {"en": "Rogue Centurion", "es": "Centurión Canalla", "pt": "Centurião vigarista"},
+      "kind": "monster"
+    },
+    {
+      "number": 187,
+      "name": {"en": "Necron", "es": "Necron", "pt": "Necron"},
+      "kind": "monster"
+    },
+    {
+      "number": 188,
+      "name": {"en": "Schriker", "es": "Schriker", "pt": "Schriker"},
+      "kind": "monster"
+    },
+    {
+      "number": 189,
+      "name": {"en": "Illusion of Kundun", "es": "Ilusión de Kundun", "pt": "Ilusão de Kundun"},
+      "kind": "monster"
+    },
+    {
+      "number": 190,
+      "name": {"en": "Death Angel", "es": "Ángel de la Muerte", "pt": "Anjo da Morte"},
+      "kind": "monster"
+    },
+    {
+      "number": 191,
+      "name": {"en": "Death Centurion", "es": "Centurión de la Muerte", "pt": "Centurião da morte"},
+      "kind": "monster"
+    },
+    {
+      "number": 192,
+      "name": {"en": "Blood Soldier", "es": "Soldado Sangriento", "pt": "Soldado sanguinário"},
+      "kind": "monster"
+    },
+    {
+      "number": 193,
+      "name": {"en": "Aegis", "es": "Aegis", "pt": "Aegis"},
+      "kind": "monster"
+    },
+    {
+      "number": 194,
+      "name": {"en": "Rogue Centurion", "es": "Centurión Canalla", "pt": "Centurião vigarista"},
+      "kind": "monster"
+    },
+    {
+      "number": 195,
+      "name": {"en": "Necron", "es": "Necron", "pt": "Necron"},
+      "kind": "monster"
+    },
+    {
+      "number": 196,
+      "name": {"en": "Schriker", "es": "Schriker", "pt": "Schriker"},
+      "kind": "monster"
+    },
+    {
+      "number": 197,
+      "name": {"en": "Illusion of Kundun", "es": "Ilusión de Kundun", "pt": "Ilusão de Kundun"},
+      "kind": "monster"
+    },
+    {
+      "number": 200,
+      "name": {"en": "Soccer Ball", "es": "Bola de Fútbol", "pt": "Bola de futebol"},
+      "kind": "monster"
+    },
+    {
+      "number": 204,
+      "name": {"en": "Wolf Status", "es": "Estatus de Lobo", "pt": "Status de lobo"},
+      "kind": "npc"
+    },
+    {
+      "number": 205,
+      "name": {"en": "Wolf Altar1", "es": "Altar de Lobo1", "pt": "Altar do lobo1"},
+      "kind": "npc"
+    },
+    {
+      "number": 206,
+      "name": {"en": "Wolf Altar2", "es": "Altar de Lobo2", "pt": "Altar do lobo2"},
+      "kind": "npc"
+    },
+    {
+      "number": 207,
+      "name": {"en": "Wolf Altar3", "es": "Altar de Lobo3", "pt": "Altar do lobo3"},
+      "kind": "npc"
+    },
+    {
+      "number": 208,
+      "name": {"en": "Wolf Altar4", "es": "Altar de Lobo4", "pt": "Altar do lobo4"},
+      "kind": "npc"
+    },
+    {
+      "number": 209,
+      "name": {"en": "Wolf Altar5", "es": "Altar de Lobo5", "pt": "Altar do lobo5"},
+      "kind": "npc"
+    },
+    {
+      "number": 215,
+      "name": {"en": "Shield", "es": "Escudo", "pt": "Escudo"},
+      "kind": "npc"
+    },
+    {
+      "number": 216,
+      "name": {"en": "Crown", "es": "Corona", "pt": "Coroa"},
+      "kind": "npc"
+    },
+    {
+      "number": 217,
+      "name": {"en": "Crown Switch2", "es": "Corona Conmutador2", "pt": "Troca de coroa2"},
+      "kind": "npc"
+    },
+    {
+      "number": 218,
+      "name": {"en": "Crown Switch1", "es": "Corona Conmutador1", "pt": "Troca de coroa1"},
+      "kind": "npc"
+    },
+    {
+      "number": 219,
+      "name": {"en": "Castle Gate Switch", "es": "Interruptor Puerta de Castillo", "pt": "Inter. do Portão do Castelo"},
+      "kind": "npc"
+    },
+    {
+      "number": 220,
+      "name": {"en": "Gatekeeper", "es": "Guardián de Entrada", "pt": "Porteiro"},
+      "kind": "npc"
+    },
+    {
+      "number": 221,
+      "name": {"en": "Slingshot attack", "es": "Ataque con honda", "pt": "Ataque de estilingue"},
+      "kind": "npc"
+    },
+    {
+      "number": 222,
+      "name": {"en": "Slingshot defense", "es": "Defensa con honda", "pt": "Defesa de estilingue"},
+      "kind": "npc"
+    },
+    {
+      "number": 223,
+      "name": {"en": "Senior", "es": "Superior", "pt": "Sênior"},
+      "kind": "npc"
+    },
+    {
+      "number": 224,
+      "name": {"en": "Guardsman", "es": "Guardia", "pt": "Guarda"},
+      "kind": "npc"
+    },
+    {
+      "number": 226,
+      "name": {"en": "Trainer", "es": "Adiestrador", "pt": "Treinador"},
+      "kind": "npc"
+    },
+    {
+      "number": 229,
+      "name": {"en": "Marlon", "es": "Marlon", "pt": "Marlon"},
+      "kind": "npc"
+    },
+    {
+      "number": 230,
+      "name": {"en": "Wandering Merchant Alex", "es": "Mercader Errante Alex", "pt": "Alex, o Mercador itinerante"},
+      "kind": "npc"
+    },
+    {
+      "number": 231,
+      "name": {"en": "Thompson Kenel", "es": "Thompson Kenel", "pt": "Thompson Kenel"},
+      "kind": "npc"
+    },
+    {
+      "number": 232,
+      "name": {"en": "Archangel", "es": "Arcángel", "pt": "Arcanjo"},
+      "kind": "npc"
+    },
+    {
+      "number": 233,
+      "name": {"en": "Messenger of Archangel", "es": "Mensajero de Arcángel", "pt": "Mensageiro do Arcanjo"},
+      "kind": "npc"
+    },
+    {
+      "number": 234,
+      "name": {"en": "Pet Trainer", "es": "Mascota Adiestrador", "pt": "Trein. de Animais de Estimação"},
+      "kind": "npc"
+    },
+    {
+      "number": 235,
+      "name": {"en": "Sebina the Priest", "es": "Sebina la Sacerdotisa", "pt": "Sebina, a Madre"},
+      "kind": "npc"
+    },
+    {
+      "number": 236,
+      "name": {"en": "Golden Archer", "es": "Arquero Dorado", "pt": "Arqueiro dourado"},
+      "kind": "npc"
+    },
+    {
+      "number": 237,
+      "name": {"en": "Charon", "es": "Charon", "pt": "Charon"},
+      "kind": "npc"
+    },
+    {
+      "number": 238,
+      "name": {"en": "Chaos Goblin", "es": "Duende del Caos", "pt": "Goblin do Caos"},
+      "kind": "npc"
+    },
+    {
+      "number": 239,
+      "name": {"en": "Arena Guard", "es": "Guardia de la Arena", "pt": "Guarda da arena"},
+      "kind": "npc"
+    },
+    {
+      "number": 240,
+      "name": {"en": "Safety Guardian", "es": "Guardián de Seguridad", "pt": "Guardião de segurança"},
+      "kind": "npc"
+    },
+    {
+      "number": 241,
+      "name": {"en": "Royal Guard Captain Lorence", "es": "Lorence Capitán Guardia Real", "pt": "Lorence, o Cap. da Guarda Real"},
+      "kind": "npc"
+    },
+    {
+      "number": 242,
+      "name": {"en": "Elf Lala", "es": "Elfa Lala", "pt": "Elfa Lala"},
+      "kind": "npc"
+    },
+    {
+      "number": 243,
+      "name": {"en": "Eo the Craftsman", "es": "Eo el Artesano", "pt": "Eo, o artesão"},
+      "kind": "npc"
+    },
+    {
+      "number": 244,
+      "name": {"en": "Caren the Barmaid", "es": "Caren la Mesera", "pt": "Caren, a garçonete"},
+      "kind": "npc"
+    },
+    {
+      "number": 245,
+      "name": {"en": "Wizard Izabel", "es": "Maga Izabel", "pt": "Maga Izabel"},
+      "kind": "npc"
+    },
+    {
+      "number": 246,
+      "name": {"en": "Weapons Merchant Zienna", "es": "Mercader de Armas Zienna", "pt": "Zienna, a Mercadora de armas"},
+      "kind": "npc"
+    },
+    {
+      "number": 247,
+      "name": {"en": "Guard", "es": "Guardia", "pt": "Guarda"},
+      "kind": "npc"
+    },
+    {
+      "number": 248,
+      "name": {"en": "Wandering Merchant Martin", "es": "Mercader Errante Martin", "pt": "Martin, o Mercador itinerante"},
+      "kind": "npc"
+    },
+    {
+      "number": 249,
+      "name": {"en": "Guard", "es": "Guardia", "pt": "Guarda"},
+      "kind": "npc"
+    },
+    {
+      "number": 250,
+      "name": {"en": "Wandering Merchant", "es": "Mercader Errante", "pt": "Mercador itinerante"},
+      "kind": "npc"
+    },
+    {
+      "number": 251,
+      "name": {"en": "Hanzo the Blacksmith", "es": "Hanzo el Herrero", "pt": "Hanzo, o ferreiro"},
+      "kind": "npc"
+    },
+    {
+      "number": 252,
+      "name": {"en": ""},
+      "kind": "npc"
+    },
+    {
+      "number": 253,
+      "name": {"en": "Potion Girl Amy", "es": "Amy la Chica de las Pócimas", "pt": "Amy, a Garota das poções"},
+      "kind": "npc"
+    },
+    {
+      "number": 254,
+      "name": {"en": "Pasi the Mage", "es": "Pasi el Mágico", "pt": "Pasi, o mago"},
+      "kind": "npc"
+    },
+    {
+      "number": 255,
+      "name": {"en": "Lumen the Barmaid", "es": "Lumen la Mesera", "pt": "Lumen, a garçonete"},
+      "kind": "npc"
+    },
+    {
+      "number": 256,
+      "name": {"en": "Lahap", "es": "Lahap", "pt": "Lahap"},
+      "kind": "npc"
+    },
+    {
+      "number": 257,
+      "name": {"en": "Shadow Phantom Soldier", "es": "Soldado Fantasma de la Sombra", "pt": "Soldado Fantasma das sombras"},
+      "kind": "npc"
+    },
+    {
+      "number": 258,
+      "name": {"en": "Luke the Helper", "es": "Luke el Ayudante", "pt": "Luke, o ajudante"},
+      "kind": "npc"
+    },
+    {
+      "number": 259,
+      "name": {"en": "Oracle Layla", "es": "Oráculo Layla", "pt": "Oráculo Layla"},
+      "kind": "npc"
+    },
+    {
+      "number": 260,
+      "name": {"en": "Death Angel", "es": "Ángel de la Muerte", "pt": "Anjo da Morte"},
+      "kind": "monster"
+    },
+    {
+      "number": 261,
+      "name": {"en": "Death Centurion", "es": "Centurión de la Muerte", "pt": "Centurião da morte"},
+      "kind": "monster"
+    },
+    {
+      "number": 262,
+      "name": {"en": "Blood Soldier", "es": "Soldado Sangriento", "pt": "Soldado sanguinário"},
+      "kind": "monster"
+    },
+    {
+      "number": 263,
+      "name": {"en": "Aegis", "es": "Aegis", "pt": "Aegis"},
+      "kind": "monster"
+    },
+    {
+      "number": 264,
+      "name": {"en": "Rogue Centurion", "es": "Centurión Canalla", "pt": "Centurião vigarista"},
+      "kind": "monster"
+    },
+    {
+      "number": 265,
+      "name": {"en": "Necron", "es": "Necron", "pt": "Necron"},
+      "kind": "monster"
+    },
+    {
+      "number": 266,
+      "name": {"en": "Schriker", "es": "Schriker", "pt": "Schriker"},
+      "kind": "monster"
+    },
+    {
+      "number": 267,
+      "name": {"en": "Illusion of Kundun", "es": "Ilusión de Kundun", "pt": "Ilusão de Kundun"},
+      "kind": "monster"
+    },
+    {
+      "number": 268,
+      "name": {"en": "Death Angel", "es": "Ángel de la Muerte", "pt": "Anjo da Morte"},
+      "kind": "monster"
+    },
+    {
+      "number": 269,
+      "name": {"en": "Death Centurion", "es": "Centurión de la Muerte", "pt": "Centurião da morte"},
+      "kind": "monster"
+    },
+    {
+      "number": 270,
+      "name": {"en": "Blood Soldier", "es": "Soldado Sangriento", "pt": "Soldado sanguinário"},
+      "kind": "monster"
+    },
+    {
+      "number": 271,
+      "name": {"en": "Aegis", "es": "Aegis", "pt": "Aegis"},
+      "kind": "monster"
+    },
+    {
+      "number": 272,
+      "name": {"en": "Rogue Centurion", "es": "Centurión Canalla", "pt": "Centurião vigarista"},
+      "kind": "monster"
+    },
+    {
+      "number": 273,
+      "name": {"en": "Necron", "es": "Necron", "pt": "Necron"},
+      "kind": "monster"
+    },
+    {
+      "number": 274,
+      "name": {"en": "Schriker", "es": "Schriker", "pt": "Schriker"},
+      "kind": "monster"
+    },
+    {
+      "number": 275,
+      "name": {"en": "Kundun", "es": "Kundun", "pt": "Kundun"},
+      "kind": "monster"
+    },
+    {
+      "number": 277,
+      "name": {"en": "Castle Gate", "es": "Puerta del Castillo", "pt": "Portão do castelo"},
+      "kind": "monster"
+    },
+    {
+      "number": 278,
+      "name": {"en": "Life Stone", "es": "Piedra de la Vida", "pt": "Pedra da Vida"},
+      "kind": "monster"
+    },
+    {
+      "number": 283,
+      "name": {"en": "Guardian Statue", "es": "Estatua Guardián", "pt": "Estátua do guardião"},
+      "kind": "monster"
+    },
+    {
+      "number": 285,
+      "name": {"en": "Guardian", "es": "Guardián", "pt": "Guardião"},
+      "kind": "monster"
+    },
+    {
+      "number": 286,
+      "name": {"en": "Archer", "es": "Arquero", "pt": "Arqueiro"},
+      "kind": "monster"
+    },
+    {
+      "number": 287,
+      "name": {"en": "Spearman", "es": "Lancero", "pt": "Lanceiro"},
+      "kind": "monster"
+    },
+    {
+      "number": 288,
+      "name": {"en": "Canon Tower", "es": "Torre Cañón", "pt": "Torre de canhão"},
+      "kind": "monster"
+    },
+    {
+      "number": 290,
+      "name": {"en": "Lizard Warrior", "es": "Guerrero Lagartija", "pt": "Guerreiro lagarto"},
+      "kind": "monster"
+    },
+    {
+      "number": 291,
+      "name": {"en": "Fire Golem", "es": "Gólem de Fuego", "pt": "Golem de fogo"},
+      "kind": "monster"
+    },
+    {
+      "number": 292,
+      "name": {"en": "Queen Bee", "es": "Reina Abeja", "pt": "Abelha Rainha"},
+      "kind": "monster"
+    },
+    {
+      "number": 293,
+      "name": {"en": "Poison Golem", "es": "Gólem Venenoso", "pt": "Golem venenoso"},
+      "kind": "monster"
+    },
+    {
+      "number": 294,
+      "name": {"en": "Ax Warrior", "es": "Guerrero Hachero", "pt": "Guerreiro do machado"},
+      "kind": "monster"
+    },
+    {
+      "number": 295,
+      "name": {"en": "Erohim", "es": "Erohim", "pt": "Erohim"},
+      "kind": "monster"
+    },
+    {
+      "number": 296,
+      "name": {"en": "Monster7", "es": "Monstruo7", "pt": "Monstro7"},
+      "kind": "monster"
+    },
+    {
+      "number": 297,
+      "name": {"en": "PK Dark Knight", "es": "Caballero Oscuro PK", "pt": "Cavaleiro Negro PK"},
+      "kind": "monster"
+    },
+    {
+      "number": 300,
+      "name": {"en": "Hero Mutant", "es": "Héroe Mutante", "pt": "Herói mutante"},
+      "kind": "monster"
+    },
+    {
+      "number": 301,
+      "name": {"en": "Omega Wing", "es": "Ala Omega", "pt": "Asa ômega"},
+      "kind": "monster"
+    },
+    {
+      "number": 302,
+      "name": {"en": "Axl Hero", "es": "Héroe Axl", "pt": "Herói Axl"},
+      "kind": "monster"
+    },
+    {
+      "number": 303,
+      "name": {"en": "Gigas Golem", "es": "Gólem Gigas", "pt": "Golem Gigas"},
+      "kind": "monster"
+    },
+    {
+      "number": 304,
+      "name": {"en": "Witch Queen", "es": "Reina Bruja", "pt": "Rainha Bruxa"},
+      "kind": "monster"
+    },
+    {
+      "number": 305,
+      "name": {"en": "Blue Golem", "es": "Gólem Azul", "pt": "Golem azul"},
+      "kind": "monster"
+    },
+    {
+      "number": 306,
+      "name": {"en": "Death Rider", "es": "Jinete de la Muerte", "pt": "Cavaleiro da morte"},
+      "kind": "monster"
+    },
+    {
+      "number": 307,
+      "name": {"en": "Forest Orc", "es": "Orc del Bosque", "pt": "Orc da floresta"},
+      "kind": "monster"
+    },
+    {
+      "number": 308,
+      "name": {"en": "Death Tree", "es": "Árbol de la Muerte", "pt": "Árvore da morte"},
+      "kind": "monster"
+    },
+    {
+      "number": 309,
+      "name": {"en": "Hell Maine", "es": "Maine Infernal", "pt": "Maine do inferno"},
+      "kind": "monster"
+    },
+    {
+      "number": 310,
+      "name": {"en": "Hammer Scout", "es": "Explorador con Martillo", "pt": "Batedor de martelo"},
+      "kind": "monster"
+    },
+    {
+      "number": 311,
+      "name": {"en": "Lance Scout", "es": "Explorador con Lanza", "pt": "Batedor de lança"},
+      "kind": "monster"
+    },
+    {
+      "number": 312,
+      "name": {"en": "Bow Scout", "es": "Explorador con Arco", "pt": "Batedor de arco"},
+      "kind": "monster"
+    },
+    {
+      "number": 313,
+      "name": {"en": "Werewolf", "es": "Hombre Lobo", "pt": "Lobisomem"},
+      "kind": "monster"
+    },
+    {
+      "number": 314,
+      "name": {"en": "Scout(Hero)", "es": "Explorador (Héroe)", "pt": "Batedor (Herói)"},
+      "kind": "monster"
+    },
+    {
+      "number": 315,
+      "name": {"en": "Werewolf(Hero)", "es": "Hombre Lobo (Héroe)", "pt": "Lobisomem(Herói)"},
+      "kind": "monster"
+    },
+    {
+      "number": 316,
+      "name": {"en": "Balram", "es": "Balram", "pt": "Balram"},
+      "kind": "monster"
+    },
+    {
+      "number": 317,
+      "name": {"en": "Soram", "es": "Soram", "pt": "Soram"},
+      "kind": "monster"
+    },
+    {
+      "number": 318,
+      "name": {"en": "Scout", "es": "Explorador", "pt": "Batedor"},
+      "kind": "monster"
+    },
+    {
+      "number": 331,
+      "name": {"en": "Aegis", "es": "Aegis", "pt": "Aegis"},
+      "kind": "monster"
+    },
+    {
+      "number": 332,
+      "name": {"en": "Rogue Centurion", "es": "Centurión Canalla", "pt": "Centurião vigarista"},
+      "kind": "monster"
+    },
+    {
+      "number": 333,
+      "name": {"en": "Blood Soldier", "es": "Soldado Sangriento", "pt": "Soldado sanguinário"},
+      "kind": "monster"
+    },
+    {
+      "number": 334,
+      "name": {"en": "Death Angel", "es": "Ángel de la Muerte", "pt": "Anjo da Morte"},
+      "kind": "monster"
+    },
+    {
+      "number": 335,
+      "name": {"en": "Necron", "es": "Necron", "pt": "Necron"},
+      "kind": "monster"
+    },
+    {
+      "number": 336,
+      "name": {"en": "Death Centurion", "es": "Centurión de la Muerte", "pt": "Centurião da morte"},
+      "kind": "monster"
+    },
+    {
+      "number": 337,
+      "name": {"en": "Schriker", "es": "Schriker", "pt": "Schriker"},
+      "kind": "monster"
+    },
+    {
+      "number": 338,
+      "name": {"en": "Illusion of Kundun", "es": "Ilusión de Kundun", "pt": "Ilusão de Kundun"},
+      "kind": "monster"
+    },
+    {
+      "number": 340,
+      "name": {"en": "Dark Elf", "es": "Elfo Oscuro", "pt": "Elfo negro"},
+      "kind": "monster"
+    },
+    {
+      "number": 341,
+      "name": {"en": "Soram", "es": "Soram", "pt": "Soram"},
+      "kind": "monster"
+    },
+    {
+      "number": 344,
+      "name": {"en": "Balram", "es": "Balram", "pt": "Balram"},
+      "kind": "monster"
+    },
+    {
+      "number": 345,
+      "name": {"en": "Death spirit", "es": "Espíritu de la Muerte", "pt": "Espírito da morte"},
+      "kind": "monster"
+    },
+    {
+      "number": 348,
+      "name": {"en": "Tanker", "es": "Tanker", "pt": "Tanker"},
+      "kind": "monster"
+    },
+    {
+      "number": 349,
+      "name": {"en": "Balgass", "es": "Balgass", "pt": "Balgass"},
+      "kind": "monster"
+    },
+    {
+      "number": 350,
+      "name": {"en": "Berserker", "es": "Energúmeno", "pt": "Berserker"},
+      "kind": "monster"
+    },
+    {
+      "number": 351,
+      "name": {"en": "Splinter Wolf", "es": "Lobo Esquirla", "pt": "Lobo de espinhos"},
+      "kind": "monster"
+    },
+    {
+      "number": 352,
+      "name": {"en": "Iron Rider", "es": "Jinete de Hierro", "pt": "Cavaleiro de ferro"},
+      "kind": "monster"
+    },
+    {
+      "number": 353,
+      "name": {"en": "Satyros", "es": "Sátiros", "pt": "Sátiro"},
+      "kind": "monster"
+    },
+    {
+      "number": 354,
+      "name": {"en": "Blade Hunter", "es": "Cazador Blade", "pt": "Caçador de espada"},
+      "kind": "monster"
+    },
+    {
+      "number": 355,
+      "name": {"en": "Kentauros", "es": "Centauros", "pt": "Kentauros"},
+      "kind": "monster"
+    },
+    {
+      "number": 356,
+      "name": {"en": "Gigantis", "es": "Gigantis", "pt": "Gigantis"},
+      "kind": "monster"
+    },
+    {
+      "number": 357,
+      "name": {"en": "Genocider", "es": "Genocida", "pt": "Genocida"},
+      "kind": "monster"
+    },
+    {
+      "number": 358,
+      "name": {"en": "Persona", "es": "Imagen", "pt": "Persona"},
+      "kind": "monster"
+    },
+    {
+      "number": 359,
+      "name": {"en": "Twin Tale", "es": "Cola Gemela", "pt": "Cauda dupla"},
+      "kind": "monster"
+    },
+    {
+      "number": 360,
+      "name": {"en": "Dreadfear", "es": "Pavor Terrorífico", "pt": "Terror"},
+      "kind": "monster"
+    },
+    {
+      "number": 361,
+      "name": {"en": "Nightmare", "es": "Pesadilla", "pt": "Pesadelo"},
+      "kind": "monster"
+    },
+    {
+      "number": 362,
+      "name": {"en": "Maya Hand", "es": "Mano de Maya", "pt": "Mão de Maya"},
+      "kind": "monster"
+    },
+    {
+      "number": 363,
+      "name": {"en": "Maya Hand", "es": "Mano de Maya", "pt": "Mão de Maya"},
+      "kind": "monster"
+    },
+    {
+      "number": 364,
+      "name": {"en": "Maya", "es": "Maya", "pt": "Maya"},
+      "kind": "monster"
+    },
+    {
+      "number": 365,
+      "name": {"en": "Pouch of Blessing", "es": "Saco de Bendiciones", "pt": "Bolsa da bênção"},
+      "kind": "monster"
+    },
+    {
+      "number": 367,
+      "name": {"en": "Gateway Machine", "es": "Máquina de Portón", "pt": "Máquina do portal"},
+      "kind": "npc"
+    },
+    {
+      "number": 368,
+      "name": {"en": "Elpis", "es": "Elpis", "pt": "Elpis"},
+      "kind": "npc"
+    },
+    {
+      "number": 369,
+      "name": {"en": "Osbourne", "es": "Osbourne", "pt": "Osbourne"},
+      "kind": "npc"
+    },
+    {
+      "number": 370,
+      "name": {"en": "Jerridon", "es": "Jerridon", "pt": "Jerridon"},
+      "kind": "npc"
+    },
+    {
+      "number": 371,
+      "name": {"en": "Leo the Helper", "es": "Leo el Ayudante", "pt": "Leo, o ajudante"},
+      "kind": "npc"
+    },
+    {
+      "number": 372,
+      "name": {"en": "Elite Skull Soldier", "es": "Soldado Calavera de Élite", "pt": "Soldado elite da caveira"},
+      "kind": "monster"
+    },
+    {
+      "number": 373,
+      "name": {"en": "Jack Olantern", "es": "Jack Olantern", "pt": "Jack Olantern"},
+      "kind": "monster"
+    },
+    {
+      "number": 374,
+      "name": {"en": "Santa", "es": "Santa", "pt": "Papai Noel"},
+      "kind": "monster"
+    },
+    {
+      "number": 375,
+      "name": {"en": "Chaos Card Master", "es": "Amo de Tarjetas de Caos", "pt": "Mestre das cartas do caos"},
+      "kind": "npc"
+    },
+    {
+      "number": 376,
+      "name": {"en": "Pamela the Supplier", "es": "Pamela la Proveedora", "pt": "Pamela, a fornecedora"},
+      "kind": "npc"
+    },
+    {
+      "number": 377,
+      "name": {"en": "Angela the Supplier", "es": "Angela la Proveedora", "pt": "Angela, a fornecedora"},
+      "kind": "npc"
+    },
+    {
+      "number": 378,
+      "name": {"en": "GameMaster", "es": "Amo del Juego", "pt": "Mestre do jogo"},
+      "kind": "monster"
+    },
+    {
+      "number": 379,
+      "name": {"en": "Natasha the Firecracker Merchant", "es": "Natasha, Mercader de Petardos", "pt": "Natasha, Merc. Fog. Artifício"},
+      "kind": "npc"
+    },
+    {
+      "number": 380,
+      "name": {"en": "Stone Statue", "es": "Estatua de Piedra", "pt": "Estátua de pedra"},
+      "kind": "npc"
+    },
+    {
+      "number": 381,
+      "name": {"en": "MU Allies General", "es": "General de Aliados de MU", "pt": "General dos Aliados do MU"},
+      "kind": "npc"
+    },
+    {
+      "number": 382,
+      "name": {"en": "Illusion Sorcerer Elder", "es": "Anciano Hechicero de Ilusiones", "pt": "Ancião feiticeiro da ilusão"},
+      "kind": "npc"
+    },
+    {
+      "number": 383,
+      "name": {"en": "Alliance Sacred Item Storage", "es": "Almacén Alianza Ítems Sagrados", "pt": "Armaz. Item Sagr. da Aliança"},
+      "kind": "npc"
+    },
+    {
+      "number": 384,
+      "name": {"en": "Illusion Castle Sacred Item Storage", "es": "Alm. Ít. Sagrado Cast. Ilusión", "pt": "Armaz. It. Sagr. Cast. Ilusão"},
+      "kind": "npc"
+    },
+    {
+      "number": 385,
+      "name": {"en": "Mirage", "es": "Espejismo", "pt": "Miragem"},
+      "kind": "npc"
+    },
+    {
+      "number": 386,
+      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
+      "kind": "monster"
+    },
+    {
+      "number": 387,
+      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
+      "kind": "monster"
+    },
+    {
+      "number": 388,
+      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
+      "kind": "monster"
+    },
+    {
+      "number": 389,
+      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
+      "kind": "monster"
+    },
+    {
+      "number": 390,
+      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
+      "kind": "monster"
+    },
+    {
+      "number": 391,
+      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
+      "kind": "monster"
+    },
+    {
+      "number": 392,
+      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
+      "kind": "monster"
+    },
+    {
+      "number": 393,
+      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
+      "kind": "monster"
+    },
+    {
+      "number": 394,
+      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
+      "kind": "monster"
+    },
+    {
+      "number": 395,
+      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
+      "kind": "monster"
+    },
+    {
+      "number": 396,
+      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
+      "kind": "monster"
+    },
+    {
+      "number": 397,
+      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
+      "kind": "monster"
+    },
+    {
+      "number": 398,
+      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
+      "kind": "monster"
+    },
+    {
+      "number": 399,
+      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
+      "kind": "monster"
+    },
+    {
+      "number": 400,
+      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
+      "kind": "monster"
+    },
+    {
+      "number": 401,
+      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
+      "kind": "monster"
+    },
+    {
+      "number": 402,
+      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
+      "kind": "monster"
+    },
+    {
+      "number": 403,
+      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
+      "kind": "monster"
+    },
+    {
+      "number": 404,
+      "name": {"en": "MU Allies", "es": "Aliados de MU", "pt": "Aliados do MU"},
+      "kind": "monster"
+    },
+    {
+      "number": 405,
+      "name": {"en": "Illusion Sorcerer", "es": "Hechicero de Ilusiones", "pt": "Feiticeiro da ilusão"},
+      "kind": "monster"
+    },
+    {
+      "number": 406,
+      "name": {"en": "Apostle Devin", "es": "Apóstol Devin", "pt": "Apóstolo Devin"},
+      "kind": "npc"
+    },
+    {
+      "number": 407,
+      "name": {"en": "Werewolf Quarel", "es": "Hombre Lobo Quarel", "pt": "Lobisomem Quarel"},
+      "kind": "npc"
+    },
+    {
+      "number": 408,
+      "name": {"en": "Gatekeeper", "es": "Guardián de Entrada", "pt": "Porteiro"},
+      "kind": "npc"
+    },
+    {
+      "number": 409,
+      "name": {"en": "Balram (Trainee Soldier)", "es": "Balram (Soldado Recluta)", "pt": "Balram (Trein.)"},
+      "kind": "monster"
+    },
+    {
+      "number": 410,
+      "name": {"en": "Death Spirit (Trainee Soldier)", "es": "Espíritu de Muerte (Recluta)", "pt": "Esp. Morte (Trein.)"},
+      "kind": "monster"
+    },
+    {
+      "number": 411,
+      "name": {"en": "Soram (Trainee Soldier)", "es": "Soram (Soldado Recluta)", "pt": "Soram (Trein.)"},
+      "kind": "monster"
+    },
+    {
+      "number": 412,
+      "name": {"en": "Dark Elf (Trainee Soldier)", "es": "Elfo Oscuro (Soldado Recluta)", "pt": "Elfo Negro (Trein.)"},
+      "kind": "monster"
+    },
+    {
+      "number": 413,
+      "name": {"en": "Lunar Rabbit", "es": "Conejo Lunar", "pt": "Coelho lunar"},
+      "kind": "monster"
+    },
+    {
+      "number": 414,
+      "name": {"en": "Helper Ellen", "es": "Ayudante Ellen", "pt": "Ajudante Ellen"},
+      "kind": "npc"
+    },
+    {
+      "number": 415,
+      "name": {"en": "Silvia", "es": "Silvia", "pt": "Silvia"},
+      "kind": "npc"
+    },
+    {
+      "number": 416,
+      "name": {"en": "Rhea", "es": "Rhea", "pt": "Rhea"},
+      "kind": "npc"
+    },
+    {
+      "number": 417,
+      "name": {"en": "Marce", "es": "Marce", "pt": "Marce"},
+      "kind": "npc"
+    },
+    {
+      "number": 418,
+      "name": {"en": "Strange Rabbit", "es": "Conejo Raro", "pt": "Coelho estranho"},
+      "kind": "monster"
+    },
+    {
+      "number": 419,
+      "name": {"en": "Hideous Rabbit", "es": "Conejo Espantoso", "pt": "Coelho horrendo"},
+      "kind": "monster"
+    },
+    {
+      "number": 420,
+      "name": {"en": "Werewolf", "es": "Hombre Lobo", "pt": "Lobisomem"},
+      "kind": "monster"
+    },
+    {
+      "number": 421,
+      "name": {"en": "Polluted Butterfly", "es": "Mariposa Contaminada", "pt": "Borboleta poluída"},
+      "kind": "monster"
+    },
+    {
+      "number": 422,
+      "name": {"en": "Cursed Lich", "es": "Lich Maldito", "pt": "Liche amaldiçoado"},
+      "kind": "monster"
+    },
+    {
+      "number": 423,
+      "name": {"en": "Totem Golem", "es": "Gólem Tótem", "pt": "Totem Golem "},
+      "kind": "monster"
+    },
+    {
+      "number": 424,
+      "name": {"en": "Grizzly", "es": "Grizzly", "pt": "Grizzly"},
+      "kind": "monster"
+    },
+    {
+      "number": 425,
+      "name": {"en": "Captain Grizzly", "es": "Capitán Grizzly", "pt": "Capitão Grizzly"},
+      "kind": "monster"
+    },
+    {
+      "number": 426,
+      "name": {"en": "Chaos Castle13", "es": "Castillo del Caos13", "pt": "Castelo do Caos13"},
+      "kind": "monster"
+    },
+    {
+      "number": 427,
+      "name": {"en": "Chaos Castle14", "es": "Castillo del Caos14", "pt": "Castelo do Caos14"},
+      "kind": "monster"
+    },
+    {
+      "number": 428,
+      "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
+      "kind": "monster"
+    },
+    {
+      "number": 429,
+      "name": {"en": "Chief Skeleton Archer", "es": "Jefe Arquero Esqueleto", "pt": "Arqueiro esqueleto chefe"},
+      "kind": "monster"
+    },
+    {
+      "number": 430,
+      "name": {"en": "Dark Skull Soldier", "es": "Soldado Calavera Oscura", "pt": "Soldado da caveira negra"},
+      "kind": "monster"
+    },
+    {
+      "number": 431,
+      "name": {"en": "Giant Ogre", "es": "Ogro Gigante", "pt": "Ogro gigante"},
+      "kind": "monster"
+    },
+    {
+      "number": 432,
+      "name": {"en": "Red Skeleton Knight", "es": "Caballero Rojo Esqueleto", "pt": "Cavaleiro Esqueleto Vermelho"},
+      "kind": "monster"
+    },
+    {
+      "number": 433,
+      "name": {"en": "Magic Skeleton", "es": "Esqueleto Mágico", "pt": "Esqueleto mágico"},
+      "kind": "monster"
+    },
+    {
+      "number": 434,
+      "name": {"en": "Gigantis", "es": "Gigantis", "pt": "Gigantis"},
+      "kind": "monster"
+    },
+    {
+      "number": 435,
+      "name": {"en": "Berserker", "es": "Energúmeno", "pt": "Berserker"},
+      "kind": "monster"
+    },
+    {
+      "number": 436,
+      "name": {"en": "Balram (Trainee Soldier)", "es": "Balram (Soldado Recluta)", "pt": "Balram (Trein.)"},
+      "kind": "monster"
+    },
+    {
+      "number": 437,
+      "name": {"en": "Soram (Trainee Soldier)", "es": "Soram (Soldado Recluta)", "pt": "Soram (Trein.)"},
+      "kind": "monster"
+    },
+    {
+      "number": 438,
+      "name": {"en": "Persona", "es": "Imagen", "pt": "Persona"},
+      "kind": "monster"
+    },
+    {
+      "number": 439,
+      "name": {"en": "Dreadfear", "es": "Pavor Terrorífico", "pt": "Terror"},
+      "kind": "monster"
+    },
+    {
+      "number": 440,
+      "name": {"en": "Dark Elf", "es": "Elfo Oscuro", "pt": "Elfo negro"},
+      "kind": "monster"
+    },
+    {
+      "number": 441,
+      "name": {"en": "Sapi-Unus", "es": "Sapi-Unus", "pt": "Sapi-Unus"},
+      "kind": "monster"
+    },
+    {
+      "number": 442,
+      "name": {"en": "Sapi-Duo", "es": "Sapi-Duo", "pt": "Sapi-Duo"},
+      "kind": "monster"
+    },
+    {
+      "number": 443,
+      "name": {"en": "Sapi-Tres", "es": "Sapi-Tres", "pt": "Sapi-Tres"},
+      "kind": "monster"
+    },
+    {
+      "number": 444,
+      "name": {"en": "Shadow Pawn", "es": "Peón Sombra", "pt": "Peão das sombras"},
+      "kind": "monster"
+    },
+    {
+      "number": 445,
+      "name": {"en": "Shadow Knight", "es": "Caballero de la Sombra", "pt": "Cavaleiro das sombras"},
+      "kind": "monster"
+    },
+    {
+      "number": 446,
+      "name": {"en": "Shadow Look", "es": "Mirada Sombría", "pt": "Visão das sombras"},
+      "kind": "monster"
+    },
+    {
+      "number": 447,
+      "name": {"en": "Thunder Napin", "es": "Napin Trueno", "pt": "Napin do trovão"},
+      "kind": "monster"
+    },
+    {
+      "number": 448,
+      "name": {"en": "Ghost Napin", "es": "Napin Espíritu Fantasmal", "pt": "Napin fantasma"},
+      "kind": "monster"
+    },
+    {
+      "number": 449,
+      "name": {"en": "Blaze Napin", "es": "Napin Llamarada", "pt": "Blaze Napin"},
+      "kind": "monster"
+    },
+    {
+      "number": 450,
+      "name": {"en": "Cherry Blossom Spirit", "es": "Espíritu Flor de Cerezo", "pt": "Espírito da flor de cereja"},
+      "kind": "npc"
+    },
+    {
+      "number": 451,
+      "name": {"en": "Cherry Blossom Tree", "es": "Árbol Flor de Cerezo", "pt": "Cerejeira"},
+      "kind": "other"
+    },
+    {
+      "number": 452,
+      "name": {"en": "Seed Master", "es": "Amo de Simientes", "pt": "Mestre das sementes"},
+      "kind": "npc"
+    },
+    {
+      "number": 453,
+      "name": {"en": "Seed Researcher", "es": "Investigador de Simientes", "pt": "Pesquisador de sementes"},
+      "kind": "npc"
+    },
+    {
+      "number": 454,
+      "name": {"en": "Ice Walker", "es": "Caminante del Hielo", "pt": "Caminhante do gelo"},
+      "kind": "monster"
+    },
+    {
+      "number": 455,
+      "name": {"en": "Giant Mammoth", "es": "Mamut Gigante", "pt": "Mamute gigante"},
+      "kind": "monster"
+    },
+    {
+      "number": 456,
+      "name": {"en": "Ice Giant", "es": "Gigante de Hielo", "pt": "Gigante de gelo"},
+      "kind": "monster"
+    },
+    {
+      "number": 457,
+      "name": {"en": "Coolutin", "es": "Coolutin", "pt": "Coolutin"},
+      "kind": "monster"
+    },
+    {
+      "number": 458,
+      "name": {"en": "Iron Knight", "es": "Caballero de Acero", "pt": "Cavaleiro de ferro"},
+      "kind": "monster"
+    },
+    {
+      "number": 459,
+      "name": {"en": "Selupan", "es": "Selupan", "pt": "Selupan"},
+      "kind": "monster"
+    },
+    {
+      "number": 460,
+      "name": {"en": "Spider Eggs", "es": "Huevos de Araña", "pt": "Ovos de aranha"},
+      "kind": "monster"
+    },
+    {
+      "number": 461,
+      "name": {"en": "Spider Eggs", "es": "Huevos de Araña", "pt": "Ovos de aranha"},
+      "kind": "monster"
+    },
+    {
+      "number": 462,
+      "name": {"en": "Spider Eggs", "es": "Huevos de Araña", "pt": "Ovos de aranha"},
+      "kind": "monster"
+    },
+    {
+      "number": 463,
+      "name": {"en": "Fire Flame Ghost", "es": "Espíritu de Llama de Fuego", "pt": "Fantasma da chama de fogo"},
+      "kind": "monster"
+    },
+    {
+      "number": 464,
+      "name": {"en": "Reset Helper", "es": "Ayudante de Reinicio", "pt": "Assistente de Reinicialização"},
+      "kind": "npc"
+    },
+    {
+      "number": 465,
+      "name": {"en": "Santa Claus", "es": "Santa", "pt": "Papai Noel"},
+      "kind": "npc"
+    },
+    {
+      "number": 466,
+      "name": {"en": "Cursed Goblin", "es": "Lich Maldito", "pt": "Goblin amaldiçoado"},
+      "kind": "monster"
+    },
+    {
+      "number": 467,
+      "name": {"en": "Snowman", "es": "Hombre de nieve", "pt": "Homem de neve"},
+      "kind": "npc"
+    },
+    {
+      "number": 468,
+      "name": {"en": "Dasher", "es": "Brioso", "pt": "Corredora"},
+      "kind": "npc"
+    },
+    {
+      "number": 469,
+      "name": {"en": "Kermit", "es": "Kermit", "pt": "Kermit"},
+      "kind": "npc"
+    },
+    {
+      "number": 470,
+      "name": {"en": "Little Santa", "es": "Pequeño Santa", "pt": "Pequeno Papai Noel"},
+      "kind": "npc"
+    },
+    {
+      "number": 471,
+      "name": {"en": "Cupid", "es": "Cupido", "pt": "Cupido"},
+      "kind": "npc"
+    },
+    {
+      "number": 472,
+      "name": {"en": "Prancer", "es": "Acróbata", "pt": "Empinadora"},
+      "kind": "npc"
+    },
+    {
+      "number": 473,
+      "name": {"en": "Donner", "es": "Trueno", "pt": "Trovão"},
+      "kind": "npc"
+    },
+    {
+      "number": 474,
+      "name": {"en": "Vixen", "es": "Juguetón", "pt": "Raposa"},
+      "kind": "npc"
+    },
+    {
+      "number": 475,
+      "name": {"en": "Blitzen", "es": "Relámpago", "pt": "Relâmpado"},
+      "kind": "npc"
+    },
+    {
+      "number": 476,
+      "name": {"en": "Cursed Santa", "es": "Santa Maldito", "pt": "Papai Noel Amaldiçoado"},
+      "kind": "monster"
+    },
+    {
+      "number": 477,
+      "name": {"en": "Transformed Snowman", "es": "Hombre de nieve transformado", "pt": "Homem de neve transformado"},
+      "kind": "monster"
+    },
+    {
+      "number": 478,
+      "name": {"en": "Delgado", "es": "Delgado", "pt": "Delgado"},
+      "kind": "npc"
+    },
+    {
+      "number": 479,
+      "name": {"en": "Doorkeeper Titus", "es": "Portero Titus", "pt": "Porteiro Titus"},
+      "kind": "npc"
+    },
+    {
+      "number": 480,
+      "name": {"en": "Zombie Fighter", "es": "Luchador Zombie", "pt": "Lutador zumbi"},
+      "kind": "monster"
+    },
+    {
+      "number": 481,
+      "name": {"en": "Zombie Fighter", "es": "Luchador Zombie", "pt": "Lutador zumbi"},
+      "kind": "monster"
+    },
+    {
+      "number": 482,
+      "name": {"en": "Resurrected Gladiator", "es": "Gladiador Resucitado", "pt": "Gladiador ressuscitado"},
+      "kind": "monster"
+    },
+    {
+      "number": 483,
+      "name": {"en": "Resurrected Gladiator", "es": "Gladiador Resucitado", "pt": "Gladiador ressuscitado"},
+      "kind": "monster"
+    },
+    {
+      "number": 484,
+      "name": {"en": "Ash Slaughterer", "es": "Descuartizador Ceniza", "pt": "Matador das cinzas"},
+      "kind": "monster"
+    },
+    {
+      "number": 485,
+      "name": {"en": "Ash Slaughterer", "es": "Descuartizador Ceniza", "pt": "Matador das cinzas"},
+      "kind": "monster"
+    },
+    {
+      "number": 486,
+      "name": {"en": "Blood Assassin", "es": "Soldado Sangriento", "pt": "Assassino sanguinário"},
+      "kind": "monster"
+    },
+    {
+      "number": 487,
+      "name": {"en": "Cruel Blood Assassin", "es": "Asesino Sangriento Cruel", "pt": "Assassino sanguinário cruel"},
+      "kind": "monster"
+    },
+    {
+      "number": 488,
+      "name": {"en": "Cruel Blood Assassin", "es": "Asesino Sangriento Cruel", "pt": "Assassino sanguinário cruel"},
+      "kind": "monster"
+    },
+    {
+      "number": 489,
+      "name": {"en": "Burning Lava Giant", "es": "Gigante de Lava Ardiente", "pt": "Gigante de lava incandescente"},
+      "kind": "monster"
+    },
+    {
+      "number": 490,
+      "name": {"en": "Ruthless Lava Giant", "es": "Gigante de Lava Despiadado", "pt": "Gigante de lava cruel"},
+      "kind": "monster"
+    },
+    {
+      "number": 491,
+      "name": {"en": "Ruthless Lava Giant", "es": "Gigante de Lava Despiadado", "pt": "Gigante de lava cruel"},
+      "kind": "monster"
+    },
+    {
+      "number": 492,
+      "name": {"en": "Moss", "es": "Moss", "pt": "Moss"},
+      "kind": "npc"
+    },
+    {
+      "number": 493,
+      "name": {"en": "Golden Dark Knight", "es": "Caballero Oscuro Dorado", "pt": "Cavaleiro negro dourado"},
+      "kind": "monster"
+    },
+    {
+      "number": 494,
+      "name": {"en": "Golden Devil", "es": "Diablo Dorado", "pt": "Demônio dourado"},
+      "kind": "monster"
+    },
+    {
+      "number": 495,
+      "name": {"en": "Golden Stone Golem", "es": "Gólem de Piedra Dorado", "pt": "Golem de pedra dourado"},
+      "kind": "monster"
+    },
+    {
+      "number": 496,
+      "name": {"en": "Golden Crust", "es": "Corteza Dorada", "pt": "Crust dourado"},
+      "kind": "monster"
+    },
+    {
+      "number": 497,
+      "name": {"en": "Golden Satyros", "es": "Sátiro Dorado", "pt": "Sátiro dourado"},
+      "kind": "monster"
+    },
+    {
+      "number": 498,
+      "name": {"en": "Golden Twin Tail", "es": "Cola Gemela Dorada", "pt": "Cauda dupla dourado"},
+      "kind": "monster"
+    },
+    {
+      "number": 499,
+      "name": {"en": "Golden Iron Knight", "es": "Caballero de Hierro Dorado", "pt": "Cavaleiro de ferro dourado"},
+      "kind": "monster"
+    },
+    {
+      "number": 500,
+      "name": {"en": "Golden Napin", "es": "Napin Dorado", "pt": "Napin dourado"},
+      "kind": "monster"
+    },
+    {
+      "number": 501,
+      "name": {"en": "Great Golden Dragon", "es": "Gran Dragón Dorado", "pt": "Grande Dragão dourado"},
+      "kind": "monster"
+    },
+    {
+      "number": 502,
+      "name": {"en": "Golden Rabbit", "es": "Conejo Dorado", "pt": "Coelho dourado"},
+      "kind": "monster"
+    },
+    {
+      "number": 503,
+      "name": {"en": "Transformed Panda", "es": "Panda transformado", "pt": "Panda transformado"},
+      "kind": "monster"
+    },
+    {
+      "number": 504,
+      "name": {"en": "Gaion Kharein", "es": "Gaion Kharein", "pt": "Gaion Kharein"},
+      "kind": "monster"
+    },
+    {
+      "number": 505,
+      "name": {"en": "Jerint", "es": "Jerint", "pt": "Jerint"},
+      "kind": "monster"
+    },
+    {
+      "number": 506,
+      "name": {"en": "Raymond", "es": "Raymond", "pt": "Raymond"},
+      "kind": "monster"
+    },
+    {
+      "number": 507,
+      "name": {"en": "Erkanne", "es": "Erkanne", "pt": "Erkanne"},
+      "kind": "monster"
+    },
+    {
+      "number": 508,
+      "name": {"en": "Destler", "es": "Destler", "pt": "Destler"},
+      "kind": "monster"
+    },
+    {
+      "number": 509,
+      "name": {"en": "Vermont", "es": "Vermont", "pt": "Vermont"},
+      "kind": "monster"
+    },
+    {
+      "number": 510,
+      "name": {"en": "Kato", "es": "Kato", "pt": "Kato"},
+      "kind": "monster"
+    },
+    {
+      "number": 511,
+      "name": {"en": "Galia", "es": "Galia", "pt": "Galia"},
+      "kind": "monster"
+    },
+    {
+      "number": 512,
+      "name": {"en": "Quartermaster", "es": "Amo del Cuartel", "pt": "Contramestre"},
+      "kind": "monster"
+    },
+    {
+      "number": 513,
+      "name": {"en": "Combat Instructor", "es": "Instructor de Combate", "pt": "Instrutor de combate"},
+      "kind": "monster"
+    },
+    {
+      "number": 514,
+      "name": {"en": "Knight Commander", "es": "Comandante de Caballeros", "pt": "Comandante dos Cavaleiros"},
+      "kind": "monster"
+    },
+    {
+      "number": 515,
+      "name": {"en": "Grand Wizard", "es": "Gran Mago", "pt": "Grande Mago"},
+      "kind": "monster"
+    },
+    {
+      "number": 516,
+      "name": {"en": "Master Assassin", "es": "Amo Asesino", "pt": "Mestre Assassino"},
+      "kind": "monster"
+    },
+    {
+      "number": 517,
+      "name": {"en": "Cavalry Captain", "es": "Capitán de Caballería", "pt": "Capitão da Cavalaria"},
+      "kind": "monster"
+    },
+    {
+      "number": 518,
+      "name": {"en": "Shield Bearer", "es": "Portador de Escudo", "pt": "Portador do escudo"},
+      "kind": "monster"
+    },
+    {
+      "number": 519,
+      "name": {"en": "Medic", "es": "Médico", "pt": "Médico"},
+      "kind": "monster"
+    },
+    {
+      "number": 520,
+      "name": {"en": "Knights", "es": "Caballeros", "pt": "Cavaleiros"},
+      "kind": "monster"
+    },
+    {
+      "number": 521,
+      "name": {"en": "Bodyguard", "es": "Guardaespaldas", "pt": "Guarda-costas"},
+      "kind": "monster"
+    },
+    {
+      "number": 522,
+      "name": {"en": "Jerint the Assistant", "es": "Jerint el Asistente", "pt": "Jerint, o Assistente"},
+      "kind": "npc"
+    },
+    {
+      "number": 523,
+      "name": {"en": "Trap", "es": "Trampa", "pt": "Armadilha"},
+      "kind": "monster"
+    },
+    {
+      "number": 524,
+      "name": {"en": "Castle Gate 1", "es": "Puerta del Castillo 1", "pt": "Portão 1 do castelo"},
+      "kind": "monster"
+    },
+    {
+      "number": 525,
+      "name": {"en": "Castle Gate 2", "es": "Puerta del Castillo 2", "pt": "Portão 2 do castelo"},
+      "kind": "monster"
+    },
+    {
+      "number": 526,
+      "name": {"en": "Stone Statue 1", "es": "Estatua de Piedra 1", "pt": "Estátua de pedra 1"},
+      "kind": "monster"
+    },
+    {
+      "number": 527,
+      "name": {"en": "Castle Gate 3", "es": "Puerta del Castillo 3", "pt": "Portão 3 do castelo"},
+      "kind": "monster"
+    },
+    {
+      "number": 528,
+      "name": {"en": "Castle Gate 4", "es": "Puerta del Castillo 4", "pt": "Portão 4 do castelo"},
+      "kind": "monster"
+    },
+    {
+      "number": 529,
+      "name": {"en": "Furious Slaughterer", "es": "Descuartizador Furioso", "pt": "Matador furioso"},
+      "kind": "monster"
+    },
+    {
+      "number": 530,
+      "name": {"en": "Slaughterer", "es": "Descuartizador", "pt": "Matador"},
+      "kind": "monster"
+    },
+    {
+      "number": 531,
+      "name": {"en": "Ice Walker", "es": "Caminante del Hielo", "pt": "Caminhante do gelo"},
+      "kind": "monster"
+    },
+    {
+      "number": 532,
+      "name": {"en": "Larva", "es": "Larva", "pt": "Larva"},
+      "kind": "monster"
+    },
+    {
+      "number": 533,
+      "name": {"en": "Doppelganger", "es": "Doppelganger", "pt": "Doppelganger"},
+      "kind": "monster"
+    },
+    {
+      "number": 534,
+      "name": {"en": "Doppelganger Elf", "es": "Elfo Doppelganger", "pt": "Elfo Doppelganger "},
+      "kind": "monster"
+    },
+    {
+      "number": 535,
+      "name": {"en": "Doppelganger Knight", "es": "Caballero Doppelganger", "pt": "Cavaleiro Doppelganger"},
+      "kind": "monster"
+    },
+    {
+      "number": 536,
+      "name": {"en": "Doppelganger Wizard", "es": "Mago Doppelganger", "pt": "Mago Doppelganger"},
+      "kind": "monster"
+    },
+    {
+      "number": 537,
+      "name": {"en": "Doppelganger Magic Gladiator", "es": "Gladiador Mágico Doppelganger", "pt": "Gladiador mágico Doppelganger"},
+      "kind": "monster"
+    },
+    {
+      "number": 538,
+      "name": {"en": "Doppelganger Dark Lord", "es": "Señor Oscuro Doppelganger", "pt": "Lorde negro Doppelganger"},
+      "kind": "monster"
+    },
+    {
+      "number": 539,
+      "name": {"en": "Doppelganger Summoner", "es": "Invocadora Doppelganger", "pt": "Invocador Doppelganger"},
+      "kind": "monster"
+    },
+    {
+      "number": 540,
+      "name": {"en": "Lugard", "es": "Lugard", "pt": "Lugard"},
+      "kind": "npc"
+    },
+    {
+      "number": 541,
+      "name": {"en": "Interim Reward Chest", "es": "Arcón de Recompensa Provisorio", "pt": "Baú de recompensa temporário"},
+      "kind": "npc"
+    },
+    {
+      "number": 542,
+      "name": {"en": "Final Reward Chest", "es": "Arcón de Recompensa Final", "pt": "Baú de recompensa final"},
+      "kind": "npc"
+    },
+    {
+      "number": 543,
+      "name": {"en": "Gens Duprian Steward", "es": "Mayordomo Gens Duprian", "pt": "Gens Duprian Steward"},
+      "kind": "npc"
+    },
+    {
+      "number": 544,
+      "name": {"en": "Gens Vanert Steward", "es": "Mayordomo Gens Vanert", "pt": "Gens Vanert Steward"},
+      "kind": "npc"
+    },
+    {
+      "number": 545,
+      "name": {"en": "Christine the General Goods Merchant", "es": "Christine Mercader Art. Varios", "pt": "Christine, Merc. Prod. Gerais"},
+      "kind": "npc"
+    },
+    {
+      "number": 546,
+      "name": {"en": "Jeweler Raul", "es": "Joyero Raul", "pt": "Joalheiro Raul"},
+      "kind": "npc"
+    },
+    {
+      "number": 547,
+      "name": {"en": "Market Union Member Julia", "es": "Julia Miembro Unión de Mercado", "pt": "Julia, Membro da Un. Mercantil"},
+      "kind": "npc"
+    },
+    {
+      "number": 548,
+      "name": {"en": "Transformed Skeleton", "es": "Esqueleto transformado", "pt": "Esqueleto transformado"},
+      "kind": "monster"
+    },
+    {
+      "number": 549,
+      "name": {"en": "Bloody Orc", "es": "Orc Sangriento", "pt": "Orc sanguinário"},
+      "kind": "monster"
+    },
+    {
+      "number": 550,
+      "name": {"en": "Bloody Death Rider", "es": "Jinete Sangriento de la Muerte", "pt": "Cavaleiro da morte sanguinário"},
+      "kind": "monster"
+    },
+    {
+      "number": 551,
+      "name": {"en": "Bloody Golem", "es": "Gólem Sangriento", "pt": "Golem sanguinário"},
+      "kind": "monster"
+    },
+    {
+      "number": 552,
+      "name": {"en": "Bloody Witch Queen", "es": "Reina Bruja Sangrienta", "pt": "Rainha feiticeira sanguinária"},
+      "kind": "monster"
+    },
+    {
+      "number": 553,
+      "name": {"en": "Berserker Warrior", "es": "Guerrero Energúmeno", "pt": "Guerreiro berserker"},
+      "kind": "monster"
+    },
+    {
+      "number": 554,
+      "name": {"en": "Kentauros Warrior", "es": "Guerrero Centauro", "pt": "Guerreiro Kentauros"},
+      "kind": "monster"
+    },
+    {
+      "number": 555,
+      "name": {"en": "Gigantis Warrior", "es": "Guerrero Gigantis", "pt": "Guerreiro Gigantis"},
+      "kind": "monster"
+    },
+    {
+      "number": 556,
+      "name": {"en": "Genocider Warrior", "es": "Guerrero Genocida", "pt": "Guerreiro genocida"},
+      "kind": "monster"
+    },
+    {
+      "number": 557,
+      "name": {"en": "Sapi Queen", "es": "Reina Sapi", "pt": "Rainha Sapi"},
+      "kind": "monster"
+    },
+    {
+      "number": 558,
+      "name": {"en": "Ice Napin", "es": "Napin del Hielo", "pt": "Napin de gelo"},
+      "kind": "monster"
+    },
+    {
+      "number": 559,
+      "name": {"en": "Shadow Master", "es": "Amo de la Sombra", "pt": "Mestre das sombras"},
+      "kind": "monster"
+    },
+    {
+      "number": 560,
+      "name": {"en": "Sapi Queen", "es": "Reina Sapi", "pt": "Rainha Sapi"},
+      "kind": "monster"
+    },
+    {
+      "number": 561,
+      "name": {"en": "Medusa", "es": "Medusa", "pt": "Medusa"},
+      "kind": "monster"
+    },
+    {
+      "number": 562,
+      "name": {"en": "Dark Mammoth", "es": "Mamut Oscuro", "pt": "Mamute negro"},
+      "kind": "monster"
+    },
+    {
+      "number": 563,
+      "name": {"en": "Dark Giant", "es": "Gigante Oscuro", "pt": "Gigante negro"},
+      "kind": "monster"
+    },
+    {
+      "number": 564,
+      "name": {"en": "Dark Coolutin", "es": "Coolutin Oscuro", "pt": "Coolutin negro"},
+      "kind": "monster"
+    },
+    {
+      "number": 565,
+      "name": {"en": "Dark Iron Knight", "es": "Caballero de Hierro Oscuro", "pt": "Cavaleiro de ferro negro"},
+      "kind": "monster"
+    },
+    {
+      "number": 566,
+      "name": {"en": "Mercenary Guild Manager Tercia", "es": "Tercia de Encargados del Gremio Mercenario", "pt": "Administrador da Guilda Mercenária Tercia"},
+      "kind": "npc"
+    },
+    {
+      "number": 567,
+      "name": {"en": "Priestess Veina", "es": "Sacerdotisa Veina", "pt": "Sacerdotisa Veina"},
+      "kind": "npc"
+    },
+    {
+      "number": 568,
+      "name": {"en": "Wandering Merchant Zyro", "es": "Comerciante Vagabundo Zyro", "pt": "Mercador Nômade Zyro"},
+      "kind": "npc"
+    },
+    {
+      "number": 569,
+      "name": {"en": "Venomous Chain Scorpion", "es": "Escorpión de Cadena Venenosa", "pt": "Escorpião Cadeia Venenosa"},
+      "kind": "monster"
+    },
+    {
+      "number": 570,
+      "name": {"en": "Bone Scorpion", "es": "Escorpión de Hueso", "pt": "Escorpião de Osso"},
+      "kind": "monster"
+    },
+    {
+      "number": 571,
+      "name": {"en": "Orcus", "es": "Orco", "pt": "Orcus"},
+      "kind": "monster"
+    },
+    {
+      "number": 572,
+      "name": {"en": "Gollock", "es": "Gollock", "pt": "Gollock"},
+      "kind": "monster"
+    },
+    {
+      "number": 573,
+      "name": {"en": "Crypta", "es": "Crypta", "pt": "Crypta"},
+      "kind": "monster"
+    },
+    {
+      "number": 574,
+      "name": {"en": "Crypos", "es": "Crypos", "pt": "Crypos"},
+      "kind": "monster"
+    },
+    {
+      "number": 575,
+      "name": {"en": "Condra", "es": "Condra", "pt": "Condra"},
+      "kind": "monster"
+    },
+    {
+      "number": 576,
+      "name": {"en": "Narcondra", "es": "Narcondra", "pt": "Narcondra"},
+      "kind": "monster"
+    },
+    {
+      "number": 577,
+      "name": {"en": "Leina the General Goods Merchant", "es": "Leina the General Goods Merchant", "pt": "Leina the General Goods Merchant"},
+      "kind": "npc"
+    },
+    {
+      "number": 578,
+      "name": {"en": "Weapons Merchant Bolo", "es": "Weapons Merchant Bolo", "pt": "Weapons Merchant Bolo"},
+      "kind": "npc"
+    },
+    {
+      "number": 579,
+      "name": {"en": "David", "es": "David", "pt": "David"},
+      "kind": "npc"
+    },
+    {
+      "number": 585,
+      "name": {"en": "Scarecrow", "es": "Scarecrow", "pt": "Scarecrow"},
+      "kind": "monster"
+    },
+    {
+      "number": 658,
+      "name": {"en": "Cursed Statue"},
+      "kind": "monster"
+    },
+    {
+      "number": 659,
+      "name": {"en": "Captured Stone Statue (1)"},
+      "kind": "monster"
+    },
+    {
+      "number": 660,
+      "name": {"en": "Captured Stone Statue (2)"},
+      "kind": "monster"
+    },
+    {
+      "number": 661,
+      "name": {"en": "Captured Stone Statue (3)"},
+      "kind": "monster"
+    },
+    {
+      "number": 662,
+      "name": {"en": "Captured Stone Statue (4)"},
+      "kind": "monster"
+    },
+    {
+      "number": 663,
+      "name": {"en": "Captured Stone Statue (5)"},
+      "kind": "monster"
+    },
+    {
+      "number": 664,
+      "name": {"en": "Captured Stone Statue (6)"},
+      "kind": "monster"
+    },
+    {
+      "number": 665,
+      "name": {"en": "Captured Stone Statue (7)"},
+      "kind": "monster"
+    },
+    {
+      "number": 666,
+      "name": {"en": "Captured Stone Statue (8)"},
+      "kind": "monster"
+    },
+    {
+      "number": 667,
+      "name": {"en": "Captured Stone Statue (9)"},
+      "kind": "monster"
+    },
+    {
+      "number": 668,
+      "name": {"en": "Captured Stone Statue (10)"},
+      "kind": "monster"
+    }
+  ]
+}

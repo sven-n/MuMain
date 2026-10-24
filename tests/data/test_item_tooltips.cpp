@@ -6,6 +6,7 @@
 
 #include "Core/Platform/ProcessLocale.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/SkillData/SkillDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
@@ -69,10 +70,12 @@ private:
 };
 
 // The game data a tooltip reads besides the items, loaded as the game loads it (ZzzOpenData.cpp, CUIManager): the
-// skills (the orbs' and scrolls' names and damage), the socket items, the item sets, the monster names (the
+// skills (the orbs' and scrolls' names and damage), the socket items, the item sets, the monster list (the
 // transformation rings), the Jewel of Harmony and item add
 // option tables, and the buff system's time texts. Run in a ClientDataScope, which makes the paths relative to the
-// client.
+// client. It puts back what it replaces (the language, the two tables, the buff system and the skill table it made),
+// but the item sets, the socket items and the monster list stay loaded for the tests after it: the game has no
+// way to unload them, and every one of these loads replaces what was there.
 class TooltipDataScope
 {
 public:
@@ -90,9 +93,9 @@ public:
         mu_swprintf(path, L"Data\\Local\\%ls\\SocketItem_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
         g_SocketItemMgr.OpenSocketItemScript(path);
         g_csItemOption.OpenItemSetScript();
-        // The transformation rings' names are monster names.
-        mu_swprintf(path, L"Data\\Local\\%ls\\NpcName_%ls.txt", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-        OpenMonsterScript(path);
+        // The transformation rings' names are monster names (Data/Monsters/Monsters.json).
+        std::string monsterError;
+        g_MonsterDataHandler.Load(monsterError);
         m_previousHarmony = g_pUIJewelHarmonyinfo;
         m_previousAddOptions = g_pItemAddOptioninfo;
         g_pUIJewelHarmonyinfo = JewelHarmonyInfo::MakeInfo();
@@ -178,29 +181,12 @@ uint64_t StableHash(const std::string& text)
     return hash;
 }
 
-// "<hero> <group>/<number> <hash>" for each item of a snapshot: the hash of all its tooltips.
-std::map<std::string, std::string> HashesByItem(const std::string& hero, const std::string& snapshot,
-                                                std::map<std::string, std::string>& tooltips)
+// The hash of an item's tooltips as recorded in item_tooltip_snapshot.txt.
+std::string HashText(const std::string& text)
 {
-    std::map<std::string, std::string> hashes;
-    std::istringstream lines(snapshot);
-    std::string line;
-    std::string item;
-    while (std::getline(lines, line))
-    {
-        if (!line.starts_with("  "))
-        {
-            item = hero + " " + line.substr(0, line.find(' '));
-        }
-        tooltips[item] += line + "\n";
-    }
-    for (const auto& [key, text] : tooltips)
-    {
-        char hash[17];
-        std::snprintf(hash, sizeof(hash), "%016llx", static_cast<unsigned long long>(StableHash(text)));
-        hashes[key] = hash;
-    }
-    return hashes;
+    char hash[17];
+    std::snprintf(hash, sizeof(hash), "%016llx", static_cast<unsigned long long>(StableHash(text)));
+    return hash;
 }
 
 // The game's process locale for the scope: macOS writes wide text (mu_swprintf) through LC_CTYPE, and in the test's
@@ -239,8 +225,27 @@ TEST_CASE("Every item's tooltip is as recorded [data][items][tooltip]")
     TooltipDataScope data;
     SetItemTooltipTextMeasure(&FixedWidthMeasure);
 
+    const std::filesystem::path recordedFile = MU_TEST_TOOLTIP_SNAPSHOT;
+    const bool update = std::getenv("MU_TOOLTIP_SNAPSHOT_UPDATE") != nullptr;
+    std::map<std::string, std::string> recorded;
+    if (!update)
+    {
+        std::ifstream in(recordedFile);
+        REQUIRE(in);
+        std::string hero;
+        std::string item;
+        std::string hash;
+        while (in >> hero >> item >> hash)
+        {
+            recorded[hero + " " + item] = hash;
+        }
+    }
+
+    // Each item is hashed as it is written and compared at once; only a changed item's text is kept, for the first
+    // five, so the test holds one item's tooltips at a time.
     std::map<std::string, std::string> hashes;
-    std::map<std::string, std::string> tooltips;
+    std::vector<std::pair<std::string, std::string>> changedTooltips;
+    int changed = 0;
     const std::pair<const char*, void (*)(CHARACTER_ATTRIBUTE&)> heroes[] = {{"newDarkWizard", &MakeNewDarkWizard},
                                                                              {"bladeMaster", &MakeBladeMaster}};
     for (const auto& [name, make] : heroes)
@@ -249,15 +254,23 @@ TEST_CASE("Every item's tooltip is as recorded [data][items][tooltip]")
         make(hero.Hero());
         ::Hero->Class = hero.Hero().Class;
         ::Hero->Level = hero.Hero().Level;
-        std::ostringstream snapshot;
-        CHECK(WriteItemTooltipSnapshot(snapshot) == 911 * 11 * 16);
-        const std::map<std::string, std::string> heroHashes = HashesByItem(name, snapshot.str(), tooltips);
-        hashes.insert(heroHashes.begin(), heroHashes.end());
+        const int tooltips = Engine::Items::TooltipSnapshot::VisitItemTooltipSnapshots(
+            [&, heroName = std::string(name)](int group, int number, const std::string& text)
+            {
+                const std::string key = heroName + " " + std::to_string(group) + "/" + std::to_string(number);
+                const std::string hash = HashText(text);
+                hashes[key] = hash;
+                const auto found = recorded.find(key);
+                if (!update && (found == recorded.end() || found->second != hash) && ++changed <= 5)
+                {
+                    changedTooltips.emplace_back(key, text);
+                }
+            });
+        CHECK(tooltips == 911 * 11 * 16);
     }
     SetItemTooltipTextMeasure(nullptr);
 
-    const std::filesystem::path recordedFile = MU_TEST_TOOLTIP_SNAPSHOT;
-    if (std::getenv("MU_TOOLTIP_SNAPSHOT_UPDATE") != nullptr)
+    if (update)
     {
         std::ofstream out(recordedFile, std::ios::binary);
         for (const auto& [item, hash] : hashes)
@@ -267,29 +280,10 @@ TEST_CASE("Every item's tooltip is as recorded [data][items][tooltip]")
         MESSAGE("recorded " << hashes.size() << " items in " << recordedFile.string());
         return;
     }
-
-    std::map<std::string, std::string> recorded;
-    std::ifstream in(recordedFile);
-    REQUIRE(in);
-    std::string hero;
-    std::string item;
-    std::string hash;
-    while (in >> hero >> item >> hash)
+    for (const auto& [key, text] : changedTooltips)
     {
-        recorded[hero + " " + item] = hash;
-    }
-    int changed = 0;
-    for (const auto& [key, current] : hashes)
-    {
-        const auto found = recorded.find(key);
-        if (found == recorded.end() || found->second != current)
-        {
-            if (++changed <= 5)
-            {
-                INFO(key << " now:\n" << tooltips[key]);
-                CHECK(false);
-            }
-        }
+        INFO(key << " now:\n" << text);
+        CHECK(false);
     }
     CHECK(changed == 0);
     CHECK(recorded.size() == hashes.size());
@@ -326,36 +320,38 @@ TEST_CASE("A tooltip's durability, count and expiry lines follow the item [data]
     SetItemTooltipTextMeasure(&FixedWidthMeasure);
 
     // A weapon's durability, full, worn and broken, out of the same maximum.
-    ItemCreationParams kris = FullItemParameters(0, 0);
+    ItemCreationParams kris = Engine::Items::TooltipSnapshot::FullItemParameters(0, 0);
     const int maxDurability = kris.Durability;
     REQUIRE(maxDurability > 1);
     for (const int durability : {maxDurability, 1, 0})
     {
         INFO(durability);
         kris.Durability = static_cast<BYTE>(durability);
-        const std::vector<ItemTooltipLine> lines = TooltipOfParameters(kris);
+        const std::vector<ItemTooltipLine> lines = Engine::Items::TooltipSnapshot::TooltipOfParameters(kris);
         CHECK(HasLine(lines, Formatted(L"Durability: [%d/%d]", durability, maxDurability)));
     }
 
     // A stack's count.
-    ItemCreationParams apples = FullItemParameters(14, 0);
+    ItemCreationParams apples = Engine::Items::TooltipSnapshot::FullItemParameters(14, 0);
     apples.Durability = 3;
-    CHECK(HasLine(TooltipOfParameters(apples), Formatted(L"Number of items: %d", 3)));
+    CHECK(HasLine(Engine::Items::TooltipSnapshot::TooltipOfParameters(apples), Formatted(L"Number of items: %d", 3)));
     apples.Durability = 1;
-    CHECK(HasLine(TooltipOfParameters(apples), Formatted(L"Number of items: %d", 1)));
+    CHECK(HasLine(Engine::Items::TooltipSnapshot::TooltipOfParameters(apples), Formatted(L"Number of items: %d", 1)));
 
     // An expired item says so, in red, and shows no durability.
     kris.Durability = static_cast<BYTE>(maxDurability);
     kris.WithExpiration = true;
     kris.IsExpired = true;
-    const std::vector<ItemTooltipLine> expired = TooltipOfParameters(kris);
+    const std::vector<ItemTooltipLine> expired = Engine::Items::TooltipSnapshot::TooltipOfParameters(kris);
     CHECK(HasLine(expired, L"Expired Item", TEXT_COLOR_RED));
     CHECK_FALSE(HasLine(expired, Formatted(L"Durability: [%d/%d]", maxDurability, maxDurability)));
 
     // A timed item shows when it ends, in the local time, and no durability either.
     kris.IsExpired = false;
-    ITEM timed;
-    FillItemFromParameters(timed, kris);
+    // Made by the item manager, as the game makes it: its reference count (1) comes right after the expiry time, so a
+    // read of more than the expiry time's own bytes would take it as the time's high half.
+    mu::ui::window::CItemMng items;
+    ITEM& timed = *items.CreateItemByParameters(&kris);
     timed.lExpireTime = 1767225600; // 2026-01-01 00:00 UTC
     const std::vector<ItemTooltipLine> timedLines = BuildItemTooltipLines(&timed, false);
     time_t expireTime = timed.lExpireTime;
@@ -370,6 +366,7 @@ TEST_CASE("A tooltip's durability, count and expiry lines follow the item [data]
     // Without its end date (the server sends it apart), it shows no tooltip.
     timed.lExpireTime = 0;
     CHECK(BuildItemTooltipLines(&timed, false).empty());
+    items.DeleteItem(&timed);
 
     SetItemTooltipTextMeasure(nullptr);
 }

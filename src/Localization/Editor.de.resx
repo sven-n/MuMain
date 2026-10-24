@@ -1969,4 +1969,133 @@
   <data name="Step channel" xml:space="preserve">
     <value>{0}: Kanal {1}</value>
   </data>
+  <data name="Monster Browser" xml:space="preserve">
+    <value>Monsterliste</value>
+  </data>
+  <data name="Monster Translations" xml:space="preserve">
+    <value>Monsterübersetzungen</value>
+  </data>
+  <data name="Monster Checks" xml:space="preserve">
+    <value>Monsterprüfung</value>
+  </data>
+  <data name="The monsters changed since this step; it is not undone." xml:space="preserve">
+    <value>Die Monster haben sich seit diesem Schritt geändert; er wird nicht rückgängig gemacht.</value>
+  </data>
+  <data name="Save Monsters" xml:space="preserve">
+    <value>Monster speichern</value>
+  </data>
+  <data name="Add monster" xml:space="preserve">
+    <value>Monster hinzufügen</value>
+  </data>
+  <data name="Copy monster" xml:space="preserve">
+    <value>Monster kopieren</value>
+  </data>
+  <data name="Remove monster" xml:space="preserve">
+    <value>Monster entfernen</value>
+  </data>
+  <data name="All kinds" xml:space="preserve">
+    <value>Alle Arten</value>
+  </data>
+  <data name="All monsters" xml:space="preserve">
+    <value>Alle Monster</value>
+  </data>
+  <data name="Kind monster" xml:space="preserve">
+    <value>Monster</value>
+  </data>
+  <data name="Kind NPC" xml:space="preserve">
+    <value>NPC</value>
+  </data>
+  <data name="Kind trap" xml:space="preserve">
+    <value>Falle</value>
+  </data>
+  <data name="Kind other" xml:space="preserve">
+    <value>Sonstiges</value>
+  </data>
+  <data name="Step kind" xml:space="preserve">
+    <value>{0}: Art</value>
+  </data>
+  <data name="Copy monster note" xml:space="preserve">
+    <value>Eine Kopie von {0} nur mit dem englischen Namen, ohne die Übersetzungen.</value>
+  </data>
+  <data name="The monster entry is removed." xml:space="preserve">
+    <value>Der Monstereintrag wird entfernt.</value>
+  </data>
+  <data name="Monster without entry in game" xml:space="preserve">
+    <value>Ohne Eintrag bekommt ein Monster dieser Nummer, das erscheint, den Namen, den sein Code ihm gibt (oft einen alten koreanischen Namen), oder keinen, und die Art der alten Nummernregeln: {0}. Die Questfenster nennen es "()".</value>
+  </data>
+  <data name="Removed monster in game" xml:space="preserve">
+    <value>Monster und NPCs dieser Nummer, die im Spiel sind, behalten ihren Namen und ihre Art, bis sie wieder erscheinen.</value>
+  </data>
+  <data name="Kind change in game" xml:space="preserve">
+    <value>Monster und NPCs dieser Nummer, die im Spiel sind, behalten ihre Art, bis sie wieder erscheinen.</value>
+  </data>
+  <data name="Nothing uses the monster" xml:space="preserve">
+    <value>Nichts nutzt das Monster</value>
+  </data>
+  <data name="The sources were not found: code that names the monster is not known." xml:space="preserve">
+    <value>Die Quellen wurden nicht gefunden: Code, der das Monster nennt, ist nicht bekannt.</value>
+  </data>
+  <data name="Monster code references limit" xml:space="preserve">
+    <value>Nicht gefunden wird Code, der die Nummer anders nutzt, etwa als case-Marke, als Funktionsargument oder mit einer Variable, deren Name nicht auf MonsterIndex endet.</value>
+  </data>
+  <data name="NPC of the quests {0}" xml:space="preserve">
+    <value>Der NPC der Quests: {0}</value>
+  </data>
+  <data name="Killed in the quests {0}" xml:space="preserve">
+    <value>Zu besiegen in den Quests: {0}</value>
+  </data>
+  <data name="Dialogues of the quest system {0}" xml:space="preserve">
+    <value>Dialogzustände des Questsystems: {0}</value>
+  </data>
+  <data name="Monster names cannot contain the separator" xml:space="preserve">
+    <value>Ein Monstername darf kein "||" enthalten.</value>
+  </data>
+  <data name="Select the monster and show the Monster Browser" xml:space="preserve">
+    <value>Das Monster auswählen und die Monsterliste zeigen</value>
+  </data>
+  <data name="Step monster name" xml:space="preserve">
+    <value>{0}: Name ({1})</value>
+  </data>
+  <data name="Import names from NpcName txt" xml:space="preserve">
+    <value>Namen aus NpcName-txt importieren</value>
+  </data>
+  <data name="Export as NpcName txt" xml:space="preserve">
+    <value>Als NpcName-txt exportieren</value>
+  </data>
+  <data name="Import NpcName txt note" xml:space="preserve">
+    <value>Liest {0} und setzt die Namen der Monster, die einen Eintrag haben; Rückgängig nimmt den ganzen Import auf einmal zurück. Die Kalima-Tore (152-158) und Nummern ohne Eintrag werden übersprungen. Ein leerer Name entfernt eine Übersetzung; ein englischer Name wird nie geleert. Ein Name gleich dem englischen bleibt fehlend, wo das Monster in der Sprache keinen eigenen Namen hat, denn der Export schreibt dort den englischen Namen.</value>
+  </data>
+  <data name="Export NpcName txt note" xml:space="preserve">
+    <value>Schreibt die Namen aller Monster nach {0}, auf Englisch, wo eine Sprache keinen eigenen Namen hat. Eine Datei, die sich ändert, wird vorher gesichert.</value>
+  </data>
+  <data name="NpcName import line" xml:space="preserve">
+    <value>{0}: {1} Namen gelesen, {2} geändert, {3} übersprungen, {4} gekürzt</value>
+  </data>
+  <data name="NpcName export line" xml:space="preserve">
+    <value>{0}: {1} Namen geschrieben, davon {2} auf Englisch</value>
+  </data>
+  <data name="NpcName export unchanged" xml:space="preserve">
+    <value>{0}: enthält diese Namen schon; nicht geschrieben</value>
+  </data>
+  <data name="Monster names imported" xml:space="preserve">
+    <value>Namen importiert: {0} geändert. Siehe Konsole.</value>
+  </data>
+  <data name="Monster names exported" xml:space="preserve">
+    <value>Namen nach {0} exportiert. Siehe Konsole.</value>
+  </data>
+  <data name="Monster names not exported" xml:space="preserve">
+    <value>Nicht jede Datei wurde geschrieben. Siehe Konsole.</value>
+  </data>
+  <data name="Monster" xml:space="preserve">
+    <value>Monster</value>
+  </data>
+  <data name="The monsters changed since the last check; check again." xml:space="preserve">
+    <value>Die Monster haben sich seit der letzten Prüfung geändert; prüfen Sie erneut.</value>
+  </data>
+  <data name="Save Monsters refuses data with errors and saves data with warnings." xml:space="preserve">
+    <value>Monster speichern verweigert Daten mit Fehlern und speichert Daten mit Warnungen.</value>
+  </data>
+  <data name="Monster checks click note" xml:space="preserve">
+    <value>Ein Klick auf das Problem eines Monsters wählt es aus und öffnet das Werkzeug seines Felds.</value>
+  </data>
 </root>
