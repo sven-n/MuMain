@@ -875,14 +875,6 @@ std::string PrintWithName(const wchar_t* format, const wchar_t* name)
 std::vector<std::optional<PrintedOldLine>> PrintedOldLevelLines(int group, int number, int level)
 {
     const auto printed = [](const wchar_t* text) { return std::optional<PrintedOldLine>({Core::Text::ToUtf8(text)}); };
-    if (group == 13 && number == 7 && level <= 1)
-    {
-        return {printed(level == 0 ? I18N::Game::Archer : I18N::Game::Spearman)};
-    }
-    if (group == 13 && number == 11 && level <= 1)
-    {
-        return {printed(level == 0 ? I18N::Game::ScrollOfGuardian : I18N::Game::PlaceLifeStone)};
-    }
     if (group == 13 && number == 15 && level <= 4)
     {
         std::vector<std::optional<PrintedOldLine>> lines = {std::nullopt, std::nullopt,
@@ -899,7 +891,8 @@ std::vector<std::optional<PrintedOldLine>> PrintedOldLevelLines(int group, int n
 // The lines whose texts other code still prints, in every language as the game prints them.
 TEST_CASE("The tooltip texts by item level are the game's texts in every language [data][items]")
 {
-    constexpr std::pair<int, int> items[] = {{13, 7}, {13, 11}, {13, 15}};
+    // Archer, Spearman, Scroll of Guardian and Place Life Stone are item names from the data now, not game texts.
+    constexpr std::pair<int, int> items[] = {{13, 15}};
     const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
     const ItemStatsLoadResult stats = LoadItemStatsFile(DataDirectory / "Items" / "Stats" / ItemStatsFileName);
     REQUIRE_FALSE(HasErrors(stats.issues));
@@ -941,9 +934,8 @@ TEST_CASE("The tooltip texts by item level are the game's texts in every languag
             I18N::SetLocale("en");
         }
     }
-    // Archer and Spearman, Scroll of Guardian and Place Life Stone, and the Fruits' last line at +0 to +3 and last two
-    // at +4, in every language.
-    CHECK(compared == (2 + 2 + 4 * 1 + 2) * static_cast<int>(std::size(I18N::GetAvailableLocales())));
+    // The Fruits' last line at +0 to +3 and last two at +4, in every language.
+    CHECK(compared == (4 * 1 + 2) * static_cast<int>(std::size(I18N::GetAvailableLocales())));
 }
 
 // The texts the tooltip code wrote for these items are their descriptions now, in every UI language.
