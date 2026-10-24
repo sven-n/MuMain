@@ -6,6 +6,8 @@ theme ships the result instead, drawn unscaled:
   Nis_vframe_tall.ozj   nis_vframe (5x40) stacked 12 times: the chat window's sides.
   Message_box2_268.ozj  Message_box2 (213x5) stretched to 268: the chat window's top edge.
   Message_box2_230.ozj  the same stretched to 230: the in-game message box's edges.
+  Message_box1_60x5.ozj Message_box1 (213x40) stretched to 60 and stacked 5 times: the Season 2
+                        Chaos Goblin menu's stone (213x300).
   s1/DuelWindow_add.ozt Season 1's duel crest (a JPEG on black), which Season 1 drew additively:
                         as a TGA whose alpha is each texel's brightest channel and colour that
                         channel scaled back up, so plain alpha blending lands close to the
@@ -76,6 +78,13 @@ def main():
     prefix, top = read_ozj("Message_box2.ozj")
     for width in (268, 230):
         write_ozj(f"Message_box2_{width}.ozj", prefix, top.resize((width, top.height), Image.BILINEAR))
+
+    prefix, stone = read_ozj("Message_box1.ozj")
+    strip = stone.resize((stone.width, 60), Image.BILINEAR)
+    stack = Image.new("RGB", (strip.width, strip.height * 5))
+    for i in range(5):
+        stack.paste(strip, (0, i * strip.height))
+    write_ozj("Message_box1_60x5.ozj", prefix, stack)
 
     _, crest = read_ozj("s1/DuelWindow.OZJ")
     write_ozt_rgba("s1/DuelWindow_add.ozt", additive_to_alpha(crest))

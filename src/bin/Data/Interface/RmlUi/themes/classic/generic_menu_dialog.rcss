@@ -6,9 +6,10 @@
    is redrawn additively in (0.8, 0.6, 0.4) and each label is centred in white at y + 5. The rules
    are at the end of this file, scoped to #panel.system-menu.
 
-   The NPC menus (chaos-mix, npc-menu, trainer-recover, elpis, elpis-about, reset-points,
-   delgardo, gem-integration, cherry-blossom, and the menus without a kind) keep the S6 look: 0.97
-   has no equivalent of them. This file replaces themes/legacy/generic_menu_dialog.rcss whole, so
+   The Chaos Goblin's menu (kind "chaos-mix") takes the Season 2 client's box (scoped to
+   #panel[data-kind="chaos-mix"], at the end of this file). The other NPC menus (npc-menu,
+   trainer-recover, elpis, elpis-about, reset-points, delgardo, gem-integration, cherry-blossom,
+   and the menus without a kind) keep the S6 look: 0.97 has no equivalent of them. This file replaces themes/legacy/generic_menu_dialog.rcss whole, so
    every rule below that is not scoped to the system menu is legacy's, verbatim; the four legacy
    rules the system menu drops are marked where they stood. The shell's frame sprites and header
    come from legacy's window_shell.rml/.rcss and are hidden here for the system menu only.
@@ -366,3 +367,82 @@
 	filter: brightness(1.8);
 }
 #panel.system-menu .gmd-btn-label { color: #ffffff; }
+
+/* The Chaos Goblin's menu (kind "chaos-mix", CChaosMixMenuMsgBox). 0.97 opens the Chaos Machine
+   straight from the goblin; this menu is the Season 2 client's message box 0x8e (RE\mains2:
+   drawn in 006a9ad0, clicked in 0069ed30's 0x8e branch), in the 640x480 frame:
+   - the box: Message_box2 (213x5) at (213, 60), five Message_box1 strips (213x40) each stretched
+     to 213x60 from y 65, Message_box2 again at y 365 -- 213x310, no title banner;
+   - the title (text 734) bold, orange (255, 128, 0), centred, its text top at y 75;
+   - three buttons, Message_box (213x64) squashed to 150x35 at x 245, y 130, 215 and 300, tinted
+     0.7 grey and drawn white while the mouse is over them; their labels bold, (200, 240, 255),
+     centred, text top 12 under the button's;
+   - each button's lines regular, white, left-aligned at x 248, 10 apart, the text tops at 90,
+     100 and 110 (the first button), 180 and 190 (the second), 270 (the third) -- centred here
+     (below);
+   - no Close button: the box closes with the Chaos Machine (Esc here, GenericMenuConfig's
+     onCancel, the Close button's own action).
+   Positions below are from the box's top-left (213, 60). The stone is the derived
+   Message_box1_60x5 (tools/classic_theme/make_classic_derived_textures.py): five strips already
+   stretched to 60, drawn unscaled. */
+@spritesheet classic-cm-edge-sheet  { src: ../../../Classic/Message_box2.jpg;      classic-cm-edge: 0px 0px 213px 5px; }
+@spritesheet classic-cm-stone-sheet { src: ../../../Classic/Message_box1_60x5.jpg; classic-cm-stone: 0px 0px 213px 300px; }
+@spritesheet classic-cm-plate-sheet { src: ../../../Classic/Message_box.jpg;       classic-cm-plate: 0px 0px 213px 64px; }
+
+#panel[data-kind="chaos-mix"] {
+	width: 213dp;
+	height: 310dp;
+	margin-left: -106.5dp;
+}
+#panel[data-kind="chaos-mix"] .window-shell-sprite-back,
+#panel[data-kind="chaos-mix"] .window-shell-header-rail { decorator: none; }
+#panel[data-kind="chaos-mix"] .window-shell-sprite-top { height: 5dp; decorator: image(classic-cm-edge); }
+#panel[data-kind="chaos-mix"] .window-shell-sprite-middle { top: 5dp; bottom: 5dp; decorator: image(classic-cm-stone fill); }
+#panel[data-kind="chaos-mix"] .window-shell-sprite-bottom { height: 5dp; decorator: image(classic-cm-edge); }
+
+/* The title: a 10 line box around its text top at 15 (the glyphs, 9 tall, centre in it). */
+#panel[data-kind="chaos-mix"] .window-shell-header-title {
+	top: 14.5dp;
+	line-height: 10dp;
+	color: #ff8000;
+}
+
+/* The content box is the whole box, so every offset below is from its top-left. */
+#panel[data-kind="chaos-mix"].native-frame .window-shell-content { top: 0; bottom: 0; left: 0; right: 0; }
+
+/* Each recipe's lines: 10 apart, the first line box 0.5 above its text top. Season 2 starts them
+   at x 35 (248), left-aligned, but MuMain's lines are longer than its and ran into the box's
+   right edge there: they are centred instead, between the stone's golden sides (8 in from each
+   edge), and a line wider than that is drawn smaller to fit it (.native-fit). */
+#panel[data-kind="chaos-mix"] .gmd-button-cell:nth-child(1) { top: 29.5dp; }
+#panel[data-kind="chaos-mix"] .gmd-button-cell:nth-child(2) { top: 119.5dp; }
+#panel[data-kind="chaos-mix"] .gmd-button-cell:nth-child(3) { top: 209.5dp; }
+#panel[data-kind="chaos-mix"] .gmd-button-cell:nth-child(-n+3) .gmd-line {
+	align-self: stretch; /* the cell centres its children: the line spans it instead */
+	width: auto;
+	margin: 0 8dp;
+	line-height: 10dp;
+	text-align: center;
+}
+#panel[data-kind="chaos-mix"].native-frame .gmd-line .native-fit { margin: 0; }
+
+/* The buttons at y 70, 155 and 240 of the box, below their 3, 2 and 1 lines. The id-scoped
+   rules outrank .gmd-btn's :hover/:active art above, so the plate stays under the mouse and the
+   press: Season 2 only draws it white. The label's text top is 12 under the button's: a 33 line
+   box from its top. */
+#panel[data-kind="chaos-mix"] .gmd-button-cell:nth-child(1) .gmd-btn { margin-top: 10.5dp; }
+#panel[data-kind="chaos-mix"] .gmd-button-cell:nth-child(2) .gmd-btn { margin-top: 15.5dp; }
+#panel[data-kind="chaos-mix"] .gmd-button-cell:nth-child(3) .gmd-btn { margin-top: 20.5dp; }
+#panel[data-kind="chaos-mix"] .gmd-btn {
+	width: 150dp;
+	height: 35dp;
+	line-height: 33dp;
+	image-color: rgb(179, 179, 179);
+	decorator: image(classic-cm-plate fill);
+}
+#panel[data-kind="chaos-mix"] .gmd-btn:hover,
+#panel[data-kind="chaos-mix"] .gmd-btn:active { image-color: #ffffff; decorator: image(classic-cm-plate fill); }
+#panel[data-kind="chaos-mix"] .gmd-btn-label { font-weight: bold; color: rgb(200, 240, 255); }
+
+/* Season 2's box has no Close button. */
+#panel[data-kind="chaos-mix"] .gmd-button-cell.compact { display: none; }
