@@ -20,6 +20,7 @@ constexpr std::string_view EndLine = "end";
 constexpr std::string_view Whitespace = " \t\r";
 constexpr char Quote = '"';
 constexpr std::string_view LineEnd = "\r\n";
+constexpr std::string_view LineBreaks = "\r\n";
 // The number the game ignores; the original files have 1 on every line.
 constexpr std::string_view IgnoredNumber = "1";
 
@@ -117,6 +118,21 @@ bool AddName(NameLine line, const std::string& source, const std::string& field,
     names.emplace(line.number, std::move(line.name));
     return cut;
 }
+
+// What keeps the name off a line of a name file: a quote would end the name, a
+// line break the line. Empty when nothing does.
+std::string_view Unwritable(std::string_view name)
+{
+    if (name.find(Quote) != std::string_view::npos)
+    {
+        return "a quote";
+    }
+    if (name.find_first_of(LineBreaks) != std::string_view::npos)
+    {
+        return "a line break";
+    }
+    return {};
+}
 } // namespace
 
 int ReadNpcNameText(std::string_view text, const std::string& source, std::map<int, std::string>& names,
@@ -160,10 +176,11 @@ std::string WriteNpcNameText(const std::map<int, std::string>& names, std::vecto
     std::string text;
     for (const auto& [number, name] : names)
     {
-        if (name.find(Quote) != std::string::npos)
+        const std::string_view unwritable = Unwritable(name);
+        if (!unwritable.empty())
         {
             Warn(issues, "", number, "monster " + std::to_string(number) + " name",
-                 "a name holding a quote cannot be written to a name file; left out");
+                 "a name holding " + std::string(unwritable) + " cannot be written to a name file; left out");
             continue;
         }
         text += std::to_string(number);

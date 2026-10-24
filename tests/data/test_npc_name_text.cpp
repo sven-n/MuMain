@@ -127,3 +127,17 @@ TEST_CASE("Name files: a name with a quote is left out of the written file [data
     CHECK(text == "8\t1\t\"Fine\"\r\nend\r\n");
     CHECK(HasIssueAbout(issues, "monster 7 name", "quote"));
 }
+
+TEST_CASE("Name files: a name with a line break is left out of the written file [data][monsters]")
+{
+    std::vector<ItemDataIssue> issues;
+
+    const std::string text =
+        Data::Monsters::WriteNpcNameText({{7, "Foo\nBar"}, {8, "Foo\rBar"}, {9, "Foo\r\n"}, {10, "Fine"}}, issues);
+
+    CHECK(text == "10\t1\t\"Fine\"\r\nend\r\n");
+    CHECK(issues.size() == 3);
+    CHECK(HasIssueAbout(issues, "monster 7 name", "line break"));
+    CHECK(HasIssueAbout(issues, "monster 8 name", "line break"));
+    CHECK(HasIssueAbout(issues, "monster 9 name", "line break"));
+}

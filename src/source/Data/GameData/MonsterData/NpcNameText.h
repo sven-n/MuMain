@@ -27,7 +27,7 @@ int ReadNpcNameText(std::string_view text, const std::string& source, std::map<i
                     std::vector<Items::ItemDataIssue>& issues);
 
 // The text of a name file with these names, sorted by number, with Windows
-// line ends as the original files have. A name holding a quote cannot be
-// written: it is left out, with a warning.
+// line ends as the original files have. A name holding a quote or a line break
+// cannot be written: it is left out, with a warning.
 std::string WriteNpcNameText(const std::map<int, std::string>& names, std::vector<Items::ItemDataIssue>& issues);
 } // namespace Data::Monsters
