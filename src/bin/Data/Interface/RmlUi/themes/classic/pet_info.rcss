@@ -3,7 +3,7 @@
    0.97 frame, two win_button tabs 49 wide every 45 from x 15, the selected one at y 63 (49x20),
    the other at y 67 (49x16) darkened to 0.6; Trading_line (190x10) at y 80 and 380; a frame of
    lines (0.9, 0.9, 0.6) from (12, 90) to (178, 380); no S6 group boxes. The window's otherwise
-   hidden frame pieces carry the lines. */
+   hidden frame pieces carry the lines. Without a pet, the red message in the middle of the frame. */
 
 /* Legacy theme for CPetInfoWindow -- #panel/frame sprites/exit button/group-box
    corner-and-fill shape are shared with character_info/my_quest_info/party_info via
@@ -228,19 +228,39 @@
 @spritesheet petinfo-classic-tab-sheet { src: "../../../win_button.tga"; petinfo-classic-tab: 0px 0px 49px 16px; }
 @spritesheet petinfo-classic-line-sheet { src: ../../../Classic/Trading_line.jpg; petinfo-classic-line: 0px 0px 190px 10px; }
 
-.tab-row { left: 15px; top: 63px; width: 94px; height: 20px; }
+/* The tabs are sharp text (counter-scaled), so their own sizes are reference px times the panel's
+   --root-scale, and they take the two-class selectors of legacy's sizes above, which would
+   otherwise win over a plain .tab-btn rule. Their places (left, top) stay in the panel's px.
+   Season 1's tabs are 49 wide every 45, for its short labels; here they are 78 wide side by side
+   across the frame, so "Dark Horse" and "Dark Raven" fit. */
+.tab-row { left: 15px; top: 63px; width: 159px; height: 20px; }
 .tab-btn {
 	top: 4px;
-	width: 49px;
-	height: 16px;
-	line-height: 16px;
 	color: rgb(230, 220, 200);
 	image-color: rgb(153, 153, 153);
 	decorator: image(petinfo-classic-tab fill);
 }
-.tab-btn.active { top: 0; height: 20px; line-height: 20px; z-index: 1; color: #ffffff; image-color: #ffffff; decorator: image(petinfo-classic-tab fill); }
+.tab-btn.tab-btn-darkhorse,
+.tab-btn.tab-btn-darkspirit { width: calc(78px * var(--root-scale)); height: calc(16px * var(--root-scale)); line-height: calc(16px * var(--root-scale)); }
+.tab-btn.active { top: 0; z-index: 1; color: #ffffff; image-color: #ffffff; decorator: image(petinfo-classic-tab fill); }
+.tab-btn.active.tab-btn-darkhorse,
+.tab-btn.active.tab-btn-darkspirit { height: calc(20px * var(--root-scale)); line-height: calc(20px * var(--root-scale)); }
 .tab-btn-darkhorse { left: 0; }
-.tab-btn-darkspirit { left: 45px; }
+.tab-btn-darkspirit { left: 81px; }
+
+/* No pet: Season 1 writes the message in red (220, 60, 60) over a black copy one pixel down and
+   right, centred in the frame at y 220, with no band behind it. */
+.pet-no-pet-msg {
+	top: 213px;
+	height: auto;
+	padding-top: 0;
+	color: rgb(220, 60, 60);
+	background-color: transparent;
+	font-effect: shadow(1px 1px black);
+}
+
+/* Season 1 has one title; the tab already names the pet, so legacy's subtitle under it goes. */
+.pet-subtitle { display: none; }
 
 /* The two Trading_lines (80 and 380) on one piece, the frame of lines on the other. */
 .frame-right {
