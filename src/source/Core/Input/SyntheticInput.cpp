@@ -118,11 +118,12 @@ constexpr NamedKey NamedKeys[] = {
     {"f4", VK_F4},          {"f5", VK_F5},         {"f6", VK_F6},
     {"f7", VK_F7},          {"f8", VK_F8},         {"f9", VK_F9},
     {"f10", VK_F10},        {"f11", VK_F11},       {"f12", VK_F12},
+    {"alt", VK_MENU},
 };
 
 constexpr std::string_view KeyNameList =
     "a-z, 0-9, esc, enter, tab, space, backspace, home, end, insert, delete, pageup, pagedown, "
-    "up, down, left, right, printscreen, f1-f12";
+    "up, down, left, right, printscreen, f1-f12, alt";
 
 std::string Lowercase(std::string_view text)
 {

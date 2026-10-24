@@ -5067,20 +5067,11 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
     }
 }
 
-// (sx, sy) in the screen's 640x480 stretch, `screen`.
-static void RenderRepairInfo(const UI::Scaling::Transform& screen, int sx, int sy, ITEM* ip, bool Sell)
+int BuildRepairInfoText(ITEM* ip)
 {
-    // Unconditional: the many early returns below used to mean "this frame draws nothing" under
-    // the old per-frame native draw, which was already equivalent to "hidden" for that item type.
-    // The shared tooltip document is persistent, so an explicit Hide() here replicates that -- Show()
-    // at the very end of this function (reached only when none of the guards below fire) makes it
-    // visible again for an allowed item, same net effect as before, one frame earlier than a stale
-    // previous item's tooltip would otherwise have lingered.
-    UI::Tooltip::HideLegacyTextList();
-
     if (GameLogic::Items::IsRepairBan(ip) == true)
     {
-        return;
+        return 0;
     }
 
     ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
@@ -5168,7 +5159,7 @@ static void RenderRepairInfo(const UI::Scaling::Transform& screen, int sx, int s
 
             int iGold = ItemValue(ip, 2);
             if (iGold == -1)
-                return;
+                return 0;
             ConvertRepairGold(iGold, ip->Durability, maxDurability, ip->Type, Text);
             mu_swprintf(TextList[TextNum], I18N::Game::RepairingCostS, Text);
 
@@ -5252,6 +5243,25 @@ static void RenderRepairInfo(const UI::Scaling::Transform& screen, int sx, int s
     }
 
     mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+    return TextNum;
+}
+
+// (sx, sy) in the screen's 640x480 stretch, `screen`.
+static void RenderRepairInfo(const UI::Scaling::Transform& screen, int sx, int sy, ITEM* ip, bool Sell)
+{
+    (void)Sell;
+    // Unconditional: an item without a repair tooltip used to mean "this frame draws nothing" under
+    // the old per-frame native draw, which was already equivalent to "hidden" for that item type.
+    // The shared tooltip document is persistent, so an explicit Hide() here replicates that -- Show()
+    // at the very end of this function (reached only for an item with a repair tooltip) makes it
+    // visible again, same net effect as before, one frame earlier than a stale previous item's
+    // tooltip would otherwise have lingered.
+    UI::Tooltip::HideLegacyTextList();
+
+    if (BuildRepairInfoText(ip) == 0)
+    {
+        return;
+    }
 
     g_pRenderText->SetFont(TextBold[0] ? g_hFontBold : g_hFont);
     const SIZE TextSize = g_pRenderText->MeasureText(L"Q", 1);
@@ -5259,7 +5269,7 @@ static void RenderRepairInfo(const UI::Scaling::Transform& screen, int sx, int s
     if (sy - Height >= 0)
         sy -= Height;
     else
-        sy += p->Height * INVENTORY_SCALE;
+        sy += ItemAttribute[ip->Type].Height * INVENTORY_SCALE;
 
     UI::Tooltip::ShowLegacyTextList(
         TextNum,
@@ -6086,6 +6096,13 @@ void ApplyGroundItemLabelDescriptor(const GroundItemLabelDescriptor& descriptor)
     g_pRenderText->SetBgColor(descriptor.BgColor);
 }
 
+}
+
+GroundItemLabel DescribeGroundItemLabel(OBJECT* o, ITEM* ip)
+{
+    GroundItemLabelDescriptor descriptor;
+    BuildGroundItemLabelDescriptor(o, ip, descriptor);
+    return {descriptor.Name, descriptor.TextColor, descriptor.BgColor, descriptor.Font == g_hFontBold};
 }
 
 void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)

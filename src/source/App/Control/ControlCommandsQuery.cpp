@@ -2,11 +2,16 @@
 #include "App/Control/ControlCommands.h"
 
 #include "App/Control/ControlEvents.h"
+#include "App/Control/ControlObjects.h"
 #include "App/Control/ControlState.h"
 #include "Core/Input/SyntheticInput.h"
 #include "Core/Utilities/Benchmark/BenchRecorder.h"
 #include "Core/Text/Utf8.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "Engine/Object/ZzzInventory.h"
+#include "UI/Core/WindowSystem.h"
+#include "UI/Inventory/ItemMng.h"
 #include "Network/Server/WSclient.h"
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
@@ -20,6 +25,7 @@
 #include <cmath>
 #include <cstdint>
 #include <filesystem>
+#include <fstream>
 #include <map>
 #include <memory>
 #include <optional>
@@ -474,6 +480,151 @@ std::string State(const Request& request, std::unique_ptr<Act>&)
     }
 
     return EncodeResult(request.EncodedId(), WorldStateObject());
+}
+
+namespace
+{
+// The six excellent options, as bits 0 to 5 of an item's excellent flags.
+constexpr int MaxExcellentFlags = 63;
+
+// Reads `group` and `number` (and `level`, 0 when left out) into an item type; false when they name no item slot.
+bool ReadItemType(const Request& request, int& type, int& level)
+{
+    int group = -1;
+    int number = -1;
+    if (!request.GetInt("group", group) || !request.GetInt("number", number) || group < 0 || group >= MAX_ITEM_TYPE ||
+        number < 0 || number >= MAX_ITEM_INDEX)
+    {
+        return false;
+    }
+    level = 0;
+    if (request.Has("level") && (!request.GetInt("level", level) || level < 0 || level >= Data::Items::ItemLevelCount))
+    {
+        return false;
+    }
+    type = group * MAX_ITEM_INDEX + number;
+    return true;
+}
+} // namespace
+
+std::string ItemName(const Request& request, std::unique_ptr<Act>&)
+{
+    int type = 0;
+    int level = 0;
+    if (!ReadItemType(request, type, level))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`item-name` needs `group` and `number` of an item, and a `level` of 0 to 15");
+    }
+
+    json result;
+    result["name"] = Core::Text::ToUtf8(App::Control::ItemDisplayName(type, level).c_str());
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string ItemNameSnapshot(const Request& request, std::unique_ptr<Act>&)
+{
+    std::string path;
+    if (!request.GetString("out", path) || path.empty())
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`item-name-snapshot` needs `out`, the file to write");
+    }
+    int onlyGroup = -1;
+    if (request.Has("group") && (!request.GetInt("group", onlyGroup) || onlyGroup < 0 || onlyGroup >= MAX_ITEM_TYPE))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`group` is an item group, 0 to 15");
+    }
+    std::ofstream out(std::filesystem::path(Core::Text::FromUtf8(path)), std::ios::binary);
+    if (!out)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Failed, "the file could not be written");
+    }
+
+    int names = 0;
+    for (const Data::Items::ItemDefinition& definition : g_ItemDatabase.GetAllSlots())
+    {
+        if (!definition.Exists() || (onlyGroup >= 0 && definition.group != onlyGroup))
+        {
+            continue;
+        }
+        const int type = definition.group * MAX_ITEM_INDEX + definition.number;
+        for (int level = 0; level < Data::Items::ItemLevelCount; ++level)
+        {
+            out << definition.group << '/' << definition.number << " +" << level << ' '
+                << Core::Text::ToUtf8(App::Control::ItemDisplayName(type, level).c_str()) << '\n';
+            ++names;
+        }
+    }
+    // A full disk or a failed write leaves the file short: not a snapshot.
+    out.flush();
+    if (!out)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Failed, "the file could not be written completely");
+    }
+
+    json result;
+    result["names"] = names;
+    result["out"] = path;
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string RepairTooltip(const Request& request, std::unique_ptr<Act>&)
+{
+    int type = 0;
+    int level = 0;
+    if (!ReadItemType(request, type, level))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`repair-tooltip` needs `group` and `number` of an item, and a `level` of 0 to 15");
+    }
+
+    // The item's byte fields: a value they can't hold is a `bad_request`, not a wrapped one.
+    int durability = -1;
+    if (request.Has("durability") && (!request.GetInt("durability", durability) || durability < 0 || durability > 255))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`durability` is 0 to 255");
+    }
+    int excellent = 0;
+    if (request.Has("excellent") &&
+        (!request.GetInt("excellent", excellent) || excellent < 0 || excellent > MaxExcellentFlags))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`excellent` is the excellent options' bits, 0 to " + std::to_string(MaxExcellentFlags));
+    }
+
+    // An item as the server would send it: full durability unless `durability` says otherwise.
+    ItemCreationParams params{};
+    params.Group = type / MAX_ITEM_INDEX;
+    params.Number = type % MAX_ITEM_INDEX;
+    params.Level = static_cast<BYTE>(level);
+    params.Durability = static_cast<BYTE>(durability >= 0 ? durability : ItemAttribute[type].Durability);
+    if (excellent > 0)
+    {
+        params.HasExcellentOption = true;
+        params.ExcellentFlags = static_cast<BYTE>(excellent);
+    }
+    ITEM* item = g_pNewItemMng->CreateItemByParameters(&params);
+    if (item == nullptr)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "the item could not be made");
+    }
+
+    // Building the lines also sets whether a click would repair; that is the drawn tooltip's to say.
+    const int repairEnable = RepairEnable;
+    const int lineCount = BuildRepairInfoText(item);
+    RepairEnable = repairEnable;
+    g_pNewItemMng->DeleteItem(item);
+
+    json result;
+    result["lines"] = json::array();
+    for (int line = 0; line < lineCount; ++line)
+    {
+        result["lines"].push_back({{"text", Core::Text::ToUtf8(TextList[line])},
+                                   {"color", TextListColor[line]},
+                                   {"bold", TextBold[line] != 0}});
+    }
+    return EncodeResult(request.EncodedId(), result.dump());
 }
 
 std::string Nearby(const Request& request, std::unique_ptr<Act>&)
