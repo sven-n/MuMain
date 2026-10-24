@@ -75,6 +75,7 @@ int HangerBloodCastleQuestItem(int Key);
 void SetAllAction(int Action);
 
 void ReleaseCharacters(void);
+void DeleteCharacterCompanions(CHARACTER* c);
 void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, unsigned char PositionY,
                             float Rotation = 0.f);
 CHARACTER* CreateCharacter(int Key, int Type, unsigned char PositionX, unsigned char PositionY, float Rotation = 0.f);

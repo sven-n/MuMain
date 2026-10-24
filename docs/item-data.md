@@ -76,11 +76,42 @@ read as the English name only; saving writes the object form.
 - Logs always use the English name and the item id, e.g.
   `Short Sword (0,1)`, never a translation.
 
+### MU Helper pickup filters
+
+**Pick All** collects every eligible drop. **Selected** applies the enabled
+categories and Extra Items; with neither mode selected, retained filters collect
+nothing. Pick All takes precedence if an older save has both modes set, matching
+the original client and OpenMU's offline leveling.
+
+Extra Items uses case-sensitive substrings of the localized inventory-style name,
+including names selected by level. For example, `Box of Luck` does not match
+`Heart of love`, medals or Kundun boxes that share its item id. This is not always
+the ground label: summoned creatures and spirits can use different word order or
+names, ancient set prefixes are omitted, and money uses `Zen +amount`. A language
+change may require updating saved keywords; option words follow the UI language
+too. Ordinary equipment keeps contiguous keywords such as `+7+Skill` in English.
+`+N` matches the displayed name's number, not necessarily the raw source level:
+Kundun tiers and jewel bundles use their displayed numbers, while seeds and some
+quest items omit their source level. Unmapped variant levels fall back to the base
+name and `+level`.
+
+A saved keyword holds **at most 14 encoded bytes** (14 single-byte characters,
+fewer when characters need multiple bytes); longer or unencodable keywords are
+discarded when saving and will be absent after relog. Use short substrings such as
+`Heart`, `Kundun`, `Crest` or `+7+Skill`, rather than a long full name or combined
+option string. The Zen category selects money; other enabled categories and extra
+keywords remain independent.
+
+OpenMU's offline leveling reads the same saved list but uses its own rules:
+case-insensitive server item-definition names, without these localized level
+variants or option words. An online keyword need not select the same items offline.
+
 ### Fields
 
 | Field | Meaning |
 |---|---|
 | `tags` | Categories the game code asks for, e.g. `["mount", "flying"]`; see [Tags](#tags) |
+| `description` | Lines the tooltip shows for the item, e.g. the Jewel of Bless's "It is used to increase your item level up to 6"; see [Descriptions](#descriptions). A client-only field; the bmd import keeps it |
 | `width`, `height` | Size in inventory slots |
 | `slot` | Equipment slot: `mainHand`, `offHand`, `helm`, `armor`, `pants`, `gloves`, `boots`, `wings`, `pet`, `pendant`, `ring`. Left out = not equippable |
 | `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, defense per level, damage increase, absorption) depend on it; excellent second and third tier wings get no extra durability, and the chaos mix knows a wing's tier from it |
@@ -91,7 +122,7 @@ read as the English name only; saving writes the object form.
 | `skill` | Skill the item gives |
 | `level` | Item level (the drop level); also used in price and damage calculations |
 | `durability`, `magicDurability` | Durability at item level 0; an item with `magicDurability` (staffs, sticks, books) uses it as its maximum durability instead |
-| `damageMin`, `damageMax`, `attackSpeed`, `walkSpeed`, `magicPower` | Weapon values |
+| `damageMin`, `damageMax`, `attackSpeed`, `walkSpeed`, `magicPower` | Weapon values. Damage and magic power go up to 65535 (later items pass 255); the [bmd exports](#import-from-bmd--export-as-bmd) take up to 255 |
 | `excellentBonus` | A fixed excellent bonus of damage and magic power instead of the [item stat file's](#item-stats-by-level) excellent term; left out = the term. The Chaos Dragon Axe has 15, the Chaos Nature Bow 30 and the Chaos Lightning Staff 25. The bmd import keeps it |
 | `excellentRaisesLevel` | `false`: excellent options do not raise the level requirement by the [item stat file's](#item-stats-by-level) `excellentLevelAdd`. Left out = they do. The shipped data has it on the Dragon Knight, Venom Mist, Sylphid Ray, Volcano, Sunlight and Storm Blitz armour, the Bone Blade, Explosion Blade, Soleil Scepter, Sylph Wind Bow, Grand Viper Staff and Storm Blitz Stick, the lucky items and the Horn of Fenrir. The bmd import keeps it |
 | `defense`, `magicDefense`, `blockRate` | Armor and shield values |
@@ -159,6 +190,104 @@ well.
 A tag name that does not exist is an error, so a typo cannot silently
 remove an item from a category. New tags need code that uses them; they
 are added in `ItemTag` (`ItemTagSet.h`) and `ItemEnumNames.cpp`.
+
+### Descriptions
+
+`description` lists the lines the item's tooltip shows, for example the
+Jewel of Bless's:
+
+```json
+"description": [
+  {"text": {"en": "It is used to increase your item level up to 6", "de": "Wird verwendet, um das Gegenstandslevel auf bis zu 6 zu erhöhen"}}
+]
+```
+
+Each line is `{"text": ..., "color": ..., "levels": [first, last]}`:
+
+- **`text`** is written like `name`: a plain English text, or the texts by
+  language. It is checked like a name too: the English text is required, a
+  language code has only letters, digits and `-`, and a language the game
+  has no texts in is a warning. A text can have
+  [placeholders](#description-placeholders).
+- **An empty text** (`{"text": ""}`) is a blank line.
+- **Long lines** wrap at about the width of the original tooltips' widest
+  lines, and `\n` in a text breaks the line there (`\n\n` leaves a blank
+  line).
+- **`color`** is one of the tooltip colors: `white` (left out), `blue`,
+  `red`, `yellow`, `green`, `darkRed`, `purple`, `darkBlue`, `darkYellow`,
+  `greenBlue`, `gray`, `redPurple`, `violet`, `orange`.
+- **`levels`** shows the line only at those item levels, both included (`[1,
+  8]`; left out: every level): a list of two levels from 0 to 15, the first
+  not above the last. Most items that use it today are level variants (the
+  Fruits, Contract Summon, Life Stone, Rena, …), which the items design makes
+  items of their own later: their lines then move into those items and lose
+  their `levels`.
+
+In the tooltip:
+
+- **Place:** after the item's damage, defense and speed lines, and before
+  its durability, requirements and options. A few lines that read the hero
+  or other tables (the Armor of Guardsman's Chaos Castle table, the Lost
+  Map) are still written by the tooltip code, after the description.
+- **Language:** the UI's language, also when the item names stay English
+  ("Translate item names" off).
+- **Size:** at most 32 rows. The description has them to itself, so a long
+  one never takes the room of the tooltip's other lines.
+- **Dark Horse and Dark Raven:** they show it only in shops; elsewhere the
+  pet window writes their tooltip.
+
+### Description placeholders
+
+A description text can show values of the item: `{name}` is replaced by the
+value of `name` for the hovered item, e.g.
+`"Increases damage by {table:damageIncreaseWeapons} at +{level}"`. Item texts
+have no braces of their own, so every brace belongs to a placeholder. A
+placeholder is one of:
+
+- a **built-in value**, by its name: `{level}`, the item's + level;
+- a **level bonus table** of [`Stats/ItemStats.json`](#item-stats-by-level),
+  as `table:` and its name: the table's value at the item's + level
+  (`{table:damageIncreaseWeapons}` is 3 at +1 and 66 at +15, the damage a
+  weapon gains). A new table is a new placeholder.
+  The wings, capes and pets show their damage increase and absorption this
+  way: `"Increase {table:wingDamageIncrease1st}% of Damage"` over the table
+  `wingDamageIncrease1st` (`{"values": 12, "perLevel": 2}`, 12 + 2 per level).
+  Such tables are only for descriptions: no stat profile names them.
+
+The tables are written apart from the built-in values, so a table may have
+any name, also one a later version gives a built-in value: `{level}` and
+`{table:level}` are not the same.
+
+**Errors** (when the item data loads, in the save checks and in Import from
+bmd):
+
+- a `{` without its `}`, an empty `{}`, a `}` without its `{`, or a name that is
+  not letters and digits (after `table:` for a table), in any language;
+- a translation whose placeholders are not those of the English text (another
+  order is fine);
+- a name that is neither built in nor a table: `has the unknown placeholder
+  {table:damgeIncreaseWeapons}; did you mean {table:damageIncreaseWeapons}?`.
+  A table written without `table:` gets the same hint.
+
+**Warnings:**
+
+- a table of the stat file that neither a stat nor a description names;
+- a wing (an item with a `wingTier`) whose description lines are not those of
+  most of the other wings of its tier, `cape` tag and group: the tooltip code
+  chose the wings' lines by the tier, so a new wing without them, or one moved
+  to another tier that keeps its old tier's tables, is pointed out
+  (`its wing lines are not those of the other third-tier wings of group 12:
+  it has 1 line naming no table, they have 3 lines naming …`). A wing alone
+  there is compared with the wings of its tier and `cape` tag in the other
+  groups that have more than one; Cape of Fighter (12) and Cape of Lord (13),
+  each alone and written apart by the old code, are not compared with each
+  other. Wings of a group that split evenly get one warning that they don't
+  agree, without blaming either side. Wings without lines never set the
+  lines the others are compared with, so new wings imported without them are
+  pointed out, also when they are more than the wings with lines.
+
+The shipped data is checked by the tests, so a wrong placeholder fails the
+build's tests.
 
 ### Rules
 
@@ -293,8 +422,8 @@ defense and magic defense, and how its requirements grow. It is in a folder of i
 - What stays code: the order of the terms; which items count as excellent
   (excellent options on wings are wing options, and ancient items get the
   excellent part too); that a stat the item does not have stays 0; that the
-  excellent part needs a drop level above 0; and that magic power and defense
-  rate stop at 255.
+  excellent part needs a drop level above 0; and that defense rate stops at
+  255.
 
 The shipped profiles:
 
@@ -361,8 +490,9 @@ the file does not have (other than `"default"`); a condition the format does
 not have; and a condition that is not a list of one or more values, or a
 value that is not one of its names (for `group`, a whole number from 0 to
 15).
-**Warnings:** unknown fields, a table no stat uses, and a caption without
-English. An item whose `statProfile` the file does not have is an error, and
+**Warnings:** unknown fields, a table that neither a stat nor a
+[description placeholder](#description-placeholders) uses (see there for the
+wings' tables too), and a caption without English. An item whose `statProfile` the file does not have is an error, and
 a profile no item names is a warning.
 
 ---
@@ -891,7 +1021,8 @@ step of the undo history; renaming a color is left out.
 The [item stat file](#item-stats-by-level): its drop level bonus, the
 default, the profiles, the level bonus tables and the profile rules, each in
 the list with how
-many items use it (a table: how many stats name it; unused ones are grey).
+many items use it (a table: how many stats and item descriptions name it;
+unused ones are grey).
 The picked entry is changed on a copy and **Apply to the formulas** takes
 it: the file is checked first (written and read back, as Save Items does),
 and when the change reaches items (other values, or another profile when a
@@ -912,9 +1043,11 @@ applied, **New stat profile**, **New level bonus table**, **Copy**,
   in every item that names it. **Remove** works while no item and no rule
   uses the profile, **Remove them** for all such profiles.
 - **A table**: the bonus at each item level 0 to 15, what it adds for every
-  level (also above +15) and its English caption. New, copied, renamed (in
-  every stat that names it) and removed tables work like profiles; a table
-  is removed while no stat names it.
+  level (also above +15), its English caption and the items whose
+  descriptions name it. New, copied, renamed (in every stat and every item
+  description that names it, in every language) and removed tables work like
+  profiles; a table is removed while no stat and no item description names
+  it.
 - **Profile rules**: the rules in order, each with its profile, its
   conditions and how many items it gives their profile (the selected item's
   rule is marked). **New rule** adds a copy of the picked rule below it (or a
@@ -961,7 +1094,11 @@ only item data. The import is there to bring in your own old item files.
   A missing Portuguese or Spanish name is written as the English one.
   Files that already have the data stay as they are. Values that the bmd
   format does not have (tags, wing tier, weapon kind, stat fields, rule
-  flags) are left out.
+  flags) are left out. The format holds damage and magic power in one byte:
+  while an item has more than 255, nothing is written, and the console names
+  every such item with its field and value ("Item (0,51) DamageMin is 300; a
+  .bmd item file holds up to 255"). **Export as S6E3** refuses them the same
+  way.
 
 ### How the bmd import repairs the legacy files
 

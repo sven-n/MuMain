@@ -22,6 +22,15 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_transform_appearance
+    SOURCES
+        test_transform_appearance.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+target_compile_definitions(test_transform_appearance PRIVATE MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data")
+
+mu_add_test(
     NAME test_connection_library_load
     SOURCES
         test_connection_library_load.cpp
@@ -41,10 +50,24 @@ if(ENABLE_CONTROL_SOCKET)
             MuClient
     )
 
+    # The target lookup reads the character table, which needs the client
+    # globals of Winmain.cpp.
+    mu_add_test(
+        NAME test_control_targets
+        SOURCES
+            test_control_targets.cpp
+            ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        LINK_LIBS
+            MuClient
+    )
+
+    # The kind names come from the object code, which needs the client
+    # globals of Winmain.cpp.
     mu_add_test(
         NAME test_control_events
         SOURCES
             test_control_events.cpp
+            ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
         LINK_LIBS
             MuClient
     )

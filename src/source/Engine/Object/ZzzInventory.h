@@ -1,6 +1,10 @@
 #ifndef __ZZZINVENTORY_H__
 #define __ZZZINVENTORY_H__
 
+#include <optional>
+#include <string>
+#include <vector>
+
 enum _COLUMN_TYPE
 {
     _COLUMN_TYPE_LEVEL = 0,
@@ -82,10 +86,40 @@ extern int AllRepairGold;
 //////////////////////////////////////////////////////////////////////////
 // text 관련
 //////////////////////////////////////////////////////////////////////////
-extern wchar_t TextList[50][100];
-extern int TextListColor[50];
-extern int TextBold[50];
-extern SIZE Size[50];
+// The rows an item's description may write into a tooltip, on top of the original client's 50: the description
+// gets rows of its own, so it never takes the room the rest of the tooltip needs.
+constexpr int MaxItemDescriptionRows = 32;
+constexpr int MaxTextListRows = 50 + MaxItemDescriptionRows;
+
+extern wchar_t TextList[MaxTextListRows][100];
+extern int TextListColor[MaxTextListRows];
+extern int TextBold[MaxTextListRows];
+extern SIZE Size[MaxTextListRows];
+
+namespace Data::Items
+{
+struct ItemDefinition;
+}
+
+// The server's pet information that a Dark Lord pet's tooltip asks for: the Dark Horse's when it is pointed at as the
+// equipped helper, the Dark Raven's when it is pointed at in the left hand; nothing elsewhere. `inventype` is the
+// tooltip's storage.
+struct PetInfoRequest
+{
+    PetType pet;
+    StorageType storage;
+    BYTE slot;
+};
+std::optional<PetInfoRequest> GetPetInfoRequest(int itemType, int pointedIndex, int inventype);
+
+// How wide a text is in the tooltip's text units.
+using ItemTooltipTextMeasure = int (*)(const wchar_t* text, size_t length);
+// Writes the item data's description in the UI's language, with its placeholders filled in for the item's level, into
+// TextList, TextListColor and TextBold from TextNum on: the lines of that level, each wrapped to the tooltip's width
+// and at its line breaks, the pieces in the line's color, a blank line or piece as the tooltip's own blank rows. At
+// most MaxItemDescriptionRows rows.
+void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, int level,
+                               ItemTooltipTextMeasure measure);
 
 ///////////////////////////////////////////////////////////////////////////////
 // party
@@ -123,7 +157,6 @@ extern int  RepairEnable;
 extern int AskYesOrNo;
 extern char OkYesOrNo;
 
-extern int  SommonTable[];
 extern int  StorageGoldFlag;
 extern ITEM* SrcInventory;
 extern int  SrcInventoryIndex;
@@ -184,11 +217,24 @@ void RenderItem3DWithHover(float sx, float sy, float Width, float Height, int Ty
 void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancientDiscriminator, vec3_t Target, int Select, bool PickUp);
 bool GetAttackDamage(int* iMinDamage, int* iMaxDamage);
 void GetItemName(int iType, int iLevel, wchar_t* Text);
+std::wstring GetItemName(int iType, int iLevel);
 std::wstring GetItemDisplayName(ITEM* pItem);
 void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int iMana);
 // The item's information and repair tooltips, anchored in window pixels: their layout runs in the
 // screen's 640x480 stretch, the space the original computed it in, whichever window asks.
 void RenderItemInfoAtPx(float x, float y, ITEM* ip, bool Sell, int Inventype = 0, bool bItemTextListBoxUse = false);
+// One line of an item's information tooltip as RenderItemInfoAtPx builds it: its text ("\n" for a blank line), its
+// TEXT_COLOR_* and whether it is bold.
+struct ItemTooltipLine
+{
+    std::wstring text;
+    int color = 0;
+    bool bold = false;
+};
+// The lines of `ip`'s information tooltip, built as RenderItemInfoAtPx builds them but not drawn; none when it shows
+// no tooltip or the pet manager draws its own (the Dark Lord's pets).
+std::vector<ItemTooltipLine> BuildItemTooltipLines(ITEM* ip, bool Sell, int Inventype = 0,
+                                                   bool bItemTextListBoxUse = false);
 void RenderRepairInfoAtPx(float x, float y, ITEM* ip, bool Sell);
 void RenderSkillInfo(int sx, int sy, int Type, int SkillNum = 0, int iRenderPoint = STRP_NONE);
 void RequireClass(ITEM_ATTRIBUTE* p);

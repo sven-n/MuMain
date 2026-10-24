@@ -260,3 +260,64 @@ TEST_CASE("wrap to width: an own line break starts a new line")
     CHECK(lines[0] == L"first");
     CHECK(lines[1] == L"second");
 }
+
+TEST_CASE("wrap to width: a blank line inside the text is an empty line")
+{
+    const auto lines = WrapTextToWidth(L"Line one\n\nLine two", 32, OneUnitPerCharacter());
+
+    REQUIRE(lines.size() == 3);
+    CHECK(lines[0] == L"Line one");
+    CHECK(lines[1].empty());
+    CHECK(lines[2] == L"Line two");
+
+    const auto leading = WrapTextToWidth(L"\nLeading break", 32, OneUnitPerCharacter());
+    REQUIRE(leading.size() == 2);
+    CHECK(leading[0].empty());
+    CHECK(leading[1] == L"Leading break");
+}
+
+TEST_CASE("wrap to width: a line is measured once per word, not per letter")
+{
+    int measured = 0;
+    const MeasureTextWidth counting = [&measured](const wchar_t*, size_t length)
+    {
+        ++measured;
+        return static_cast<int>(length);
+    };
+
+    const auto lines = WrapTextToWidth(L"Handles the chat command", 12, counting);
+
+    REQUIRE(lines.size() == 2);
+    CHECK(measured <= 5); // four words, and the line measured again after its break
+}
+
+TEST_CASE("wrap to width: a word wider than the line after a break is broken too")
+{
+    const auto lines = WrapTextToWidth(L"set masterleveluppoints", 8, OneUnitPerCharacter());
+
+    REQUIRE(lines.size() == 4);
+    CHECK(lines[0] == L"set");
+    CHECK(lines[1] == L"masterle");
+    CHECK(lines[2] == L"veluppoi");
+    CHECK(lines[3] == L"nts");
+}
+
+TEST_CASE("wrap to width: an indented word wider than the line gets no empty line above it")
+{
+    const auto lines = WrapTextToWidth(L"  masterleveluppoints", 8, OneUnitPerCharacter());
+
+    REQUIRE(lines.size() == 3);
+    CHECK(lines[0] == L"masterle");
+    CHECK(lines[1] == L"veluppoi");
+    CHECK(lines[2] == L"nts");
+
+    // The same after a line break: the text's own blank lines stay.
+    const auto afterBreak = WrapTextToWidth(L"set\n  masterleveluppoints\n\nend", 8, OneUnitPerCharacter());
+    REQUIRE(afterBreak.size() == 6);
+    CHECK(afterBreak[0] == L"set");
+    CHECK(afterBreak[1] == L"masterle");
+    CHECK(afterBreak[2] == L"veluppoi");
+    CHECK(afterBreak[3] == L"nts");
+    CHECK(afterBreak[4].empty());
+    CHECK(afterBreak[5] == L"end");
+}

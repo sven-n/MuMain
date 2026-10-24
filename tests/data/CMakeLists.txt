@@ -4,6 +4,7 @@ mu_add_test(
         test_item_check_targets.cpp
         test_item_code_references.cpp
         test_item_database.cpp
+        test_item_description_placeholders.cpp
         test_item_edit_history.cpp
         test_item_json.cpp
         test_item_list_model.cpp
@@ -34,6 +35,57 @@ target_compile_definitions(light_mood_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
+# The server groups of the login screen (Data/Local/ServerList.json). The
+# window test draws the editor's Server List window, which needs the client
+# globals of Winmain.cpp.
+mu_add_test(
+    NAME server_list_data_tests
+    SOURCES
+        test_server_list_edits.cpp
+        test_server_list_json.cpp
+        test_server_list_manager.cpp
+        test_server_list_window.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(server_list_data_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
+# The monster list (Data/Monsters/Monsters.json), its table, the format of
+# the original client's name files and the editor's monster tools. The table
+# needs the client globals of Winmain.cpp.
+mu_add_test(
+    NAME monster_data_tests
+    SOURCES
+        test_legacy_monster_kind.cpp
+        test_monster_browser_window.cpp
+        test_monster_check_targets.cpp
+        test_monster_checks_window.cpp
+        test_monster_code_references.cpp
+        test_monster_data_edits.cpp
+        test_monster_data_files.cpp
+        test_monster_data_users.cpp
+        test_monster_database.cpp
+        test_monster_edit_history.cpp
+        test_monster_json.cpp
+        test_monster_list_model.cpp
+        test_monster_names.cpp
+        test_monster_npc_name_files.cpp
+        test_monster_tool_windows.cpp
+        test_monster_translations_window.cpp
+        test_names_grid.cpp
+        test_npc_name_text.cpp
+        test_transformation_ring.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(monster_data_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
 # The look profile of the Enhanced rendering features (Data/Render/Look.json) and the player's own
 # tuning of it ([EnhancedTuning] of config.ini).
 mu_add_test(
@@ -54,7 +106,10 @@ target_compile_definitions(look_profile_data_tests PRIVATE
 mu_add_test(
     NAME test_item_database_files
     SOURCES
+        test_helper_pickup_filters.cpp
+        test_dark_lord_pet_tooltip.cpp
         test_item_database_files.cpp
+        test_item_descriptions.cpp
         test_item_model_files.cpp
         test_item_requirement_weights.cpp
         test_item_rules.cpp
@@ -66,6 +121,7 @@ mu_add_test(
 )
 target_compile_definitions(test_item_database_files PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+    MU_TEST_CHAIN_TEXTS_BEFORE="${CMAKE_CURRENT_SOURCE_DIR}/item_chain_texts_before.json"
 )
 
 # Animates the shipped player model the way the character pre-pass does.

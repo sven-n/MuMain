@@ -6,6 +6,7 @@
 #include "ItemModelDatabaseScope.h"
 #include "ItemStatProfilesScope.h"
 #include "TestFiles.h"
+#include "TestImGuiContext.h"
 
 #include "Core/Globals/_crypt.h"
 #include "Core/Utilities/Log/MuLogger.h"
@@ -15,12 +16,15 @@
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
+#include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
 #include "Data/GameData/ItemData/ItemNames.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
+#include "Data/GameData/ItemData/ItemStatsJson.h"
 #include "Data/GameData/ItemData/ItemStructs.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Data/GameData/ItemData/ItemTypeUse.h"
@@ -28,6 +32,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Physics/PhysicsManager.h"
 #include "GameLogic/Items/ItemStats.h"
+#include "Core/Text/Utf8.h"
 #include "I18N/All.h"
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
@@ -71,6 +76,7 @@
 #include <fstream>
 #include <initializer_list>
 #include <memory>
+#include <optional>
 #include <random>
 #include <span>
 #include <string>
@@ -231,6 +237,681 @@ TEST_CASE("The shipped item names are in languages the game shows [data][items]"
     }
 }
 
+TEST_CASE("The shipped descriptions' placeholders are built-in values or stat file tables [data][items]")
+{
+    const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
+    const ItemStatsLoadResult stats = LoadItemStatsFile(DataDirectory / "Items" / "Stats" / ItemStatsFileName);
+    REQUIRE_FALSE(HasErrors(stats.issues));
+    std::vector<ItemDataIssue> issues;
+    ValidateDescriptionPlaceholders(result.items, ItemStatProfiles(stats.file), ItemStatsFileName, issues);
+    ValidateTableUses(result.items, ItemStatProfiles(stats.file), ItemStatsFileName, issues);
+    for (const ItemDataIssue& issue : issues)
+    {
+        INFO(issue.ToString());
+        CHECK(false);
+    }
+}
+
+// A line the tooltip code wrote for the wings, capes and pets before it was their descriptions: one of the game's
+// texts that other code still prints ("Increase %d%% of Damage", "Absorb %d%% of Damage", "Increase speed") with its
+// value, or another text, in English.
+struct OldWingLine
+{
+    enum class Kind
+    {
+        Increase,
+        Absorb,
+        Speed,
+        Other,
+    };
+    Kind kind;
+    int value = 0;
+    std::string english;
+
+    bool operator==(const OldWingLine&) const = default;
+};
+
+// The old formulas, to compare the data with.
+std::vector<OldWingLine> OldWingAndPetLines(int group, int number, int level)
+{
+    const auto increase = [](int value) { return OldWingLine{OldWingLine::Kind::Increase, value}; };
+    const auto absorb = [](int value) { return OldWingLine{OldWingLine::Kind::Absorb, value}; };
+    const OldWingLine speed{OldWingLine::Kind::Speed};
+    const auto other = [](const char* english) { return OldWingLine{OldWingLine::Kind::Other, 0, english}; };
+    const auto in = [&](std::initializer_list<int> numbers)
+    { return std::find(numbers.begin(), numbers.end(), number) != numbers.end(); };
+    if (group == 12 && in({0, 1, 2, 41, 131, 132, 133, 134}))
+    {
+        return {increase(12 + level * 2), absorb(12 + level * 2), speed};
+    }
+    if (group == 12 && in({3, 4, 5, 6, 42}))
+    {
+        return {increase(32 + level), absorb(25 + level * 2), speed};
+    }
+    if (group == 12 && in({36, 37, 38, 39, 43}))
+    {
+        return {increase(39 + level * 2), absorb(39 + level * 2), speed};
+    }
+    if (group == 12 && in({40, 50}))
+    {
+        return {increase(39 + level * 2), absorb(24 + level * 2), speed};
+    }
+    if (group == 12 && in({130, 135}))
+    {
+        return {increase(20 + level * 2), absorb(20 + level * 2), speed};
+    }
+    if (group == 12 && number == 49)
+    {
+        return {increase(20 + level * 2), absorb(10 + level * 2)};
+    }
+    if (group == 13 && number == 30)
+    {
+        return {increase(20 + level * 2), absorb(10 + level)};
+    }
+    if (group == 13 && number == 3)
+    {
+        return {increase(15), absorb(10)};
+    }
+    if (group == 13 && number == 0)
+    {
+        return {absorb(20), other("Max HP +50 increased")};
+    }
+    if (group == 13 && number == 1)
+    {
+        return {other("Increase 30% of attacking & Wizardry Dmg")};
+    }
+    return {};
+}
+
+// What the old code printed for the line in the UI's language: the game's text with its value, as printf fills
+// "%d" and "%%" (the only conversions these texts have); another text only in English.
+std::optional<std::string> PrintOldWingLine(const OldWingLine& line)
+{
+    const wchar_t* format = nullptr;
+    switch (line.kind)
+    {
+    case OldWingLine::Kind::Increase:
+        format = I18N::Game::IncreaseDOfDamage;
+        break;
+    case OldWingLine::Kind::Absorb:
+        format = I18N::Game::AbsorbDOfDamage;
+        break;
+    case OldWingLine::Kind::Speed:
+        format = I18N::Game::IncreaseSpeed;
+        break;
+    case OldWingLine::Kind::Other:
+        return std::nullopt;
+    }
+    const std::string text = Core::Text::ToUtf8(format);
+    std::string printed;
+    for (size_t position = 0; position < text.size(); ++position)
+    {
+        if (text.compare(position, 2, "%%") == 0)
+        {
+            printed += '%';
+            ++position;
+        }
+        else if (text.compare(position, 2, "%d") == 0)
+        {
+            printed += std::to_string(line.value);
+            ++position;
+        }
+        else
+        {
+            printed += text[position];
+        }
+    }
+    return printed;
+}
+
+std::string EnglishOldWingLine(const OldWingLine& line)
+{
+    switch (line.kind)
+    {
+    case OldWingLine::Kind::Increase:
+        return "Increase " + std::to_string(line.value) + "% of Damage";
+    case OldWingLine::Kind::Absorb:
+        return "Absorb " + std::to_string(line.value) + "% of Damage";
+    case OldWingLine::Kind::Speed:
+        return "Increase speed";
+    case OldWingLine::Kind::Other:
+        break;
+    }
+    return line.english;
+}
+
+TEST_CASE("The wings', capes' and pets' tooltip values come from their data as from the old formulas [data][items]")
+{
+    const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
+    const ItemStatsLoadResult stats = LoadItemStatsFile(DataDirectory / "Items" / "Stats" / ItemStatsFileName);
+    REQUIRE_FALSE(HasErrors(stats.issues));
+    const ItemStatProfiles profiles(stats.file);
+    // The test switches the UI language, and once a test has loaded the item data every switch refills
+    // ItemAttribute: it needs an item table of its own.
+    ClientDataScope client(ShippedClientDirectory);
+    int compared = 0;
+    for (const ItemDefinition& item : result.items)
+    {
+        if (OldWingAndPetLines(item.group, item.number, 0).empty())
+        {
+            continue;
+        }
+        for (int level = 0; level < ItemLevelCount; ++level)
+        {
+            INFO(item.group << "/" << item.number << " +" << level);
+            const std::vector<OldWingLine> old = OldWingAndPetLines(item.group, item.number, level);
+            REQUIRE(item.description.size() == old.size());
+            for (size_t index = 0; index < old.size(); ++index)
+            {
+                const Data::LocalizedString& text = item.description[index].text;
+                CHECK(FillPlaceholders(text.GetNeutral(), level, profiles) == EnglishOldWingLine(old[index]));
+                // In every language, as the game's texts that other code still prints have it.
+                for (const char* locale : I18N::GetAvailableLocales())
+                {
+                    INFO(locale);
+                    I18N::SetLocale(locale);
+                    if (const std::optional<std::string> printed = PrintOldWingLine(old[index]))
+                    {
+                        CHECK(FillPlaceholders(text.Get(locale), level, profiles) == *printed);
+                    }
+                }
+                I18N::SetLocale("en");
+            }
+            ++compared;
+        }
+    }
+    // 24 wings and capes, Horn of Dinorant, Guardian Angel and Imp, at each level.
+    CHECK(compared == 27 * ItemLevelCount);
+}
+
+// The lines the tooltip code wrote by item level before they were descriptions, in English with their colors.
+struct OldLine
+{
+    std::string text;
+    ItemTextColor color = ItemTextColor::White;
+    bool operator==(const OldLine& other) const = default;
+};
+
+std::vector<OldLine> OldLevelLines(int group, int number, int level)
+{
+    using enum ItemTextColor;
+    const auto one = [&](std::initializer_list<std::pair<int, OldLine>> byLevel) -> std::vector<OldLine>
+    {
+        for (const auto& [lineLevel, line] : byLevel)
+        {
+            if (lineLevel == level)
+            {
+                return {line};
+            }
+        }
+        return {};
+    };
+    if (group == 13 && number == 7)
+    {
+        return one({{0, {"Archer", Yellow}}, {1, {"Spearman", Yellow}}});
+    }
+    if (group == 13 && number == 11)
+    {
+        return one({{0, {"Scroll of Guardian", Yellow}}, {1, {"Place Life Stone", Yellow}}});
+    }
+    if (group == 13 && number == 14)
+    {
+        return one({{0, {"Used to upgrade wings"}}, {1, {"Used in combining Cape of Lord & Warrior's Cloak"}}});
+    }
+    if (group == 13 && number == 15 && level <= 4)
+    {
+        constexpr const char* stats[] = {"ENG", "STA", "AGI", "STR", "Command"};
+        std::vector<OldLine> lines = {{std::string(stats[level]) + " Increases 1~3 stat points"},
+                                      {std::string(stats[level]) + " Possible to decrease stat 1~9 point"},
+                                      {"It can be used with item removed.", DarkRed}};
+        if (level == 4)
+        {
+            lines.push_back({"Can be equipped by Dark Lord"});
+        }
+        return lines;
+    }
+    if (group == 13 && (number == 16 || number == 17))
+    {
+        return {{"Used when creating a Cloak of Invisibility"}};
+    }
+    if (group == 13 && number == 18)
+    {
+        return {{"Used when entering Blood Castle"},
+                {""},
+                {"The remaining time is shown"},
+                {"when you right click on your mouse."}};
+    }
+    if (group == 13 && number == 31)
+    {
+        return one({{0, {"Used in Dark Horse resurrection"}}, {1, {"Used in Dark Raven resurrection"}}});
+    }
+    if (group == 14 && number == 7 && level == 0)
+    {
+        return {{"Damage +20% increase effect", DarkRed},
+                {"Duration 60 seconds", DarkRed},
+                {"Only applicable for castle gate and statue", DarkRed}};
+    }
+    if (group == 14 && number == 7 && level == 1)
+    {
+        return {{"Increase +8 AG recovery speed", DarkRed},
+                {"Increase resistance of Lightning and Ice", DarkRed},
+                {"Attacking speed will increase +20", DarkRed}};
+    }
+    if (group == 14 && number == 10 && level >= 1 && level <= 8)
+    {
+        return {{"Warp to the corresponding area after 3 seconds"}};
+    }
+    if (group == 14 && number == 21)
+    {
+        return one({{1, {"Used in the online event"}},
+                    {2, {"Used in the My Friend event."}},
+                    {3, {"Use in siege registration"}}});
+    }
+    return {};
+}
+
+TEST_CASE("The tooltip texts by item level come from the descriptions as from the old code [data][items]")
+{
+    constexpr std::pair<int, int> items[] = {{13, 7},  {13, 11}, {13, 14}, {13, 15}, {13, 16}, {13, 17},
+                                             {13, 18}, {13, 31}, {14, 7},  {14, 10}, {14, 21}};
+    const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
+    const ItemStatsLoadResult stats = LoadItemStatsFile(DataDirectory / "Items" / "Stats" / ItemStatsFileName);
+    REQUIRE_FALSE(HasErrors(stats.issues));
+    const ItemStatProfiles profiles(stats.file);
+    for (const auto& [group, number] : items)
+    {
+        const auto found = std::find_if(result.items.begin(), result.items.end(), [&](const ItemDefinition& item)
+                                        { return item.group == group && item.number == number; });
+        REQUIRE(found != result.items.end());
+        // Every level the items have. The old code also wrote an empty line at the Contract Summon's, Life Stone's and
+        // Rena's levels without a text, and two at the Fruits' +5 to +15 before "It can be used with item removed." (a
+        // stale line of the text list); the data writes none of them. Fruits only exist at +0 to +4.
+        for (int level = 0; level < ItemLevelCount; ++level)
+        {
+            INFO(group << "/" << number << " +" << level);
+            std::vector<OldLine> lines;
+            for (const ItemDescriptionLine& line : found->description)
+            {
+                if (line.IsShownAt(level))
+                {
+                    lines.push_back({FillPlaceholders(line.text.GetNeutral(), level, profiles), line.color});
+                }
+            }
+            CHECK(lines == OldLevelLines(group, number, level));
+        }
+    }
+}
+
+// The lines the second item chain of the tooltip code (seals, talismans, tickets, rings, ...) wrote, in English with
+// their colors: the item data's description starts with them.
+struct OldChainItem
+{
+    int group;
+    int number;
+    std::vector<OldLine> lines;
+};
+
+const std::vector<OldChainItem>& OldChainLines()
+{
+    static const std::vector<OldChainItem> items = {
+        {14, 54, {{"You can achieve special items with combinations.", ItemTextColor::Blue}}},
+        {14, 58, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 59, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 60, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 61, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 62, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 83, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 145, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 146, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 147, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 148, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 149, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 150, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 53, {{"Increases the combination rate,but only up to the maximum rate.", ItemTextColor::Blue}}},
+        {13,
+         43,
+         {{"Increases experience gained.", ItemTextColor::Blue},
+          {"Warp Command Window available.", ItemTextColor::Blue},
+          {"Not applicable to", ItemTextColor::Yellow},
+          {"Master Level Characters.", ItemTextColor::Yellow}}},
+        {13,
+         44,
+         {{"Increases experience gained and item drop rate.", ItemTextColor::Blue},
+          {"Warp Command Window available.", ItemTextColor::Blue},
+          {"Not applicable to", ItemTextColor::Yellow},
+          {"Master Level Characters.", ItemTextColor::Yellow}}},
+        {13,
+         45,
+         {{"Prevents experiences to be gained.", ItemTextColor::Blue},
+          {"Warp Command Window available.", ItemTextColor::Blue},
+          {"Master Level EXP cannot be achieved during the item usage.", ItemTextColor::Yellow}}},
+        {13, 59, {{"You may freely move onward.", ItemTextColor::Blue}}},
+        {13, 60, {{"It reduces the killing rate.", ItemTextColor::Blue}}},
+        {14, 140, {{"Automatic HP recovery 3%", ItemTextColor::Blue}, {"Max. HP increase +100", ItemTextColor::Blue}}},
+        {14,
+         96,
+         {{"Minimum +10 - +15 level item upgrade", ItemTextColor::Blue},
+          {"blocks the item dissipation.", ItemTextColor::Purple},
+          {"+10~+15 When upgrading level item please put it in combination window.", ItemTextColor::Purple}}},
+        {13,
+         64,
+         {{"Increases Attack Power and Wizardry by 40%", ItemTextColor::Blue},
+          {"Increases Attack Speed by 10", ItemTextColor::Purple}}},
+        {13,
+         65,
+         {{"Alleviates monster's damage by 30%", ItemTextColor::Blue},
+          {"Increases Maximum Life by 50", ItemTextColor::Purple}}},
+        {13, 67, {{"Surrounding Zens are automatically collected.", ItemTextColor::Blue}}},
+        {13,
+         123,
+         {{"Surrounding Zens are automatically collected.", ItemTextColor::Blue},
+          {"increases Damage, Wizardry and Curse by 20%", ItemTextColor::Blue},
+          {"Increases Attack Speed by 10", ItemTextColor::Blue},
+          {"and EXP by 30%.", ItemTextColor::Blue}}},
+        {13,
+         80,
+         {{"Auto-collects zen around you.", ItemTextColor::Blue},
+          {"EXP rate 50% increase", ItemTextColor::Blue},
+          {"Increase Defensive Skill +50", ItemTextColor::Blue}}},
+        {13,
+         106,
+         {{"Auto-collects zen around you.", ItemTextColor::Blue},
+          {"Zen increase 50%", ItemTextColor::Blue},
+          {"Increase Defensive Skill +50", ItemTextColor::Blue}}},
+        {13, 107, {{"Cannot Repair", ItemTextColor::Red}}},
+        {13, 104, {{"Increase Max. AG + Level", ItemTextColor::Blue}}},
+        {13, 105, {{"Increase Max. SD + Levelx10", ItemTextColor::Blue}}},
+        {13,
+         103,
+         {{"Up to 170% EXP gain increase, depending on the number of members in your party.", ItemTextColor::Blue}}},
+        {13, 70, {{"Save the application location.", ItemTextColor::Blue}}},
+        {13,
+         81,
+         {{"Exp and item will be secured when character dies.", ItemTextColor::Blue},
+          {"No penalty for dying.", ItemTextColor::Blue},
+          {"Right click to use.", ItemTextColor::Blue}}},
+        {13,
+         82,
+         {{"Item durability will not be decrease for a certain period.", ItemTextColor::Blue},
+          {"Keeps item durable", ItemTextColor::Blue},
+          {"Applicable to mountable items only besides pet.", ItemTextColor::Blue}}},
+        {13,
+         93,
+         {{"Increases experience gained.", ItemTextColor::Blue},
+          {"Warp Command Window available.", ItemTextColor::Blue}}},
+        {13,
+         94,
+         {{"Increases experience gained and item drop rate.", ItemTextColor::Blue},
+          {"Warp Command Window available.", ItemTextColor::Blue}}},
+        {13,
+         61,
+         {{"Enables entrance into Illusion Temple.", ItemTextColor::Blue},
+          {"You will be assigned to a stage according to your level.", ItemTextColor::Blue},
+          {"", ItemTextColor::White}}},
+        {14, 84, {{"Drop it to receive the gift.", ItemTextColor::Blue}}},
+        {13, 49, {{"Assemble the Scroll of Blood with the contract from the Illusion Sorcery.", ItemTextColor::Blue}}},
+        {13, 50, {{"Assemble the Scroll of Blood with the old scrolls.", ItemTextColor::Blue}}},
+        {13, 51, {{"This is a mark of Illusion Sorcery; this is required to enter the temple.", ItemTextColor::Blue}}},
+        {14, 64, {{"Mobility speed reduces upon achievement.", ItemTextColor::Blue}}},
+        {13, 52, {{"Ingredients for the 3rd wing assembly.", ItemTextColor::White}}},
+        {13, 53, {{"Ingredients for the 3rd wing assembly.", ItemTextColor::White}}},
+        {13, 38, {{"Cannot Repair", ItemTextColor::Red}}},
+        {14,
+         111,
+         {{"That's the only thing that will get Lugard to help you", ItemTextColor::DarkBlue},
+          {"enter the Doppelganger area.", ItemTextColor::DarkBlue}}},
+        {13,
+         109,
+         {{"Automatic HP recovery 3%", ItemTextColor::White}, {"Increases Max Mana 4%", ItemTextColor::White}}},
+        {13, 110, {{"Automatic HP recovery 3%", ItemTextColor::White}, {"Increase Max HP +4%", ItemTextColor::White}}},
+        {13,
+         111,
+         {{"Automatic HP recovery 3%", ItemTextColor::White},
+          {"Increases acquisition rate of Zen after hunting monsters +30%", ItemTextColor::White}}},
+        {13, 112, {{"Automatic HP recovery 3%", ItemTextColor::White}, {"Damage Decrease +4%", ItemTextColor::White}}},
+        {13,
+         113,
+         {{"Automatic HP recovery 3%", ItemTextColor::White}, {"Excellent Damage rate +10%", ItemTextColor::White}}},
+        {13,
+         114,
+         {{"Automatic HP recovery 3%", ItemTextColor::White}, {"Attack Speed increase +7", ItemTextColor::White}}},
+        {13,
+         115,
+         {{"Automatic HP recovery 3%", ItemTextColor::White},
+          {"Increases acquisition rate of Mana after hunting monsters +Mana/8", ItemTextColor::White}}},
+        {14,
+         112,
+         {{"You can do a Goblin combination with a Sealed Silver Box to create a Silver Box.", ItemTextColor::White}}},
+        {14,
+         113,
+         {{"You can do a Goblin combination with a Sealed Golden Box to create a Golden Box.", ItemTextColor::White}}},
+        {14, 120, {{"You can acquire Goblin Points by using the MU Item Shop's storage.", ItemTextColor::White}}},
+        {14, 121, {{"You can do a Goblin combination with a Gold Key to create a Golden Box.", ItemTextColor::White}}},
+        {14,
+         122,
+         {{"You can do a Goblin combination with a Silver Key to create a Silver Box.", ItemTextColor::White}}},
+        {14, 123, {{"You can drop it with a fixed probability of it turning into a rare item.", ItemTextColor::White}}},
+        {14, 124, {{"You can drop it with a fixed probability of it turning into a rare item.", ItemTextColor::White}}},
+        {14, 134, {{"It's a box containing various items.", ItemTextColor::White}}},
+        {14, 135, {{"It's a box containing various items.", ItemTextColor::White}}},
+        {14, 136, {{"It's a box containing various items.", ItemTextColor::White}}},
+        {14, 137, {{"It's a box containing various items.", ItemTextColor::White}}},
+        {14, 138, {{"It's a box containing various items.", ItemTextColor::White}}},
+        {14, 139, {{"It's a box containing various items.", ItemTextColor::White}}},
+        {13, 116, {{"Boosts the item drop rate.", ItemTextColor::Blue}}},
+        {14, 141, {{"Throw it and you may receive some Zen or items", ItemTextColor::White}}},
+        {14, 142, {{"Throw it and you may receive some Zen or items", ItemTextColor::White}}},
+        {14, 143, {{"Throw it and you may receive some Zen or items", ItemTextColor::White}}},
+        {14, 144, {{"Throw it and you may receive some Zen or items", ItemTextColor::White}}},
+        {14,
+         19,
+         {{"The remaining time is shown", ItemTextColor::White},
+          {"when you right click on your mouse.", ItemTextColor::White}}},
+    };
+    return items;
+}
+
+TEST_CASE("The second item chain's tooltip texts come from the descriptions as from the old code [data][items]")
+{
+    const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
+    for (const OldChainItem& old : OldChainLines())
+    {
+        INFO(old.group << "/" << old.number);
+        const auto found = std::find_if(result.items.begin(), result.items.end(), [&](const ItemDefinition& item)
+                                        { return item.group == old.group && item.number == old.number; });
+        REQUIRE(found != result.items.end());
+        REQUIRE(found->description.size() >= old.lines.size());
+        for (size_t index = 0; index < old.lines.size(); ++index)
+        {
+            const ItemDescriptionLine& line = found->description[index];
+            CHECK(OldLine{line.text.GetNeutral(), line.color} == old.lines[index]);
+            CHECK_FALSE(line.HasLevels());
+        }
+    }
+    CHECK(OldChainLines().size() == 72);
+}
+
+// The translations of those texts are the ones the old code showed: item_chain_texts_before.json records them from the
+// .resx before the texts moved (a format filled in with the item's values), by the English text.
+TEST_CASE("The second item chain's tooltip texts keep their translations [data][items]")
+{
+    const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
+    std::ifstream file(std::filesystem::path(MU_TEST_CHAIN_TEXTS_BEFORE));
+    REQUIRE(file);
+    const nlohmann::json before = nlohmann::json::parse(file).at("texts");
+    int checked = 0;
+    for (const OldChainItem& old : OldChainLines())
+    {
+        const auto found = std::find_if(result.items.begin(), result.items.end(), [&](const ItemDefinition& item)
+                                        { return item.group == old.group && item.number == old.number; });
+        REQUIRE(found != result.items.end());
+        for (size_t index = 0; index < old.lines.size(); ++index)
+        {
+            const std::string english = found->description[index].text.GetNeutral();
+            const auto recorded = before.find(english);
+            if (recorded == before.end())
+            {
+                continue;
+            }
+            for (const auto& [locale, translation] : recorded->items())
+            {
+                INFO(old.group << "/" << old.number << " line " << index << " " << locale);
+                CHECK(found->description[index].text.Get(locale) == translation.get<std::string>());
+                ++checked;
+            }
+        }
+    }
+    CHECK(checked >= 1050);
+}
+
+// What the old code printed for an item's level lines in the UI's language, where the texts are the game's that other
+// code still prints: one entry per line of OldLevelLines, empty for a text only the tooltip had (removed since). A
+// Fruit's stat lines started with the stat's name; the rest of them was a removed text.
+struct PrintedOldLine
+{
+    std::string text;
+    bool isPrefix = false;
+};
+
+std::string PrintWithName(const wchar_t* format, const wchar_t* name)
+{
+    // The game's wide texts have "%ls" where the .resx has "%s".
+    std::string text = Core::Text::ToUtf8(format);
+    const size_t wide = text.find("%ls");
+    const size_t position = wide != std::string::npos ? wide : text.find("%s");
+    REQUIRE(position != std::string::npos);
+    return text.replace(position, wide != std::string::npos ? 3 : 2, Core::Text::ToUtf8(name));
+}
+
+std::vector<std::optional<PrintedOldLine>> PrintedOldLevelLines(int group, int number, int level)
+{
+    const auto printed = [](const wchar_t* text) { return std::optional<PrintedOldLine>({Core::Text::ToUtf8(text)}); };
+    if (group == 13 && number == 7 && level <= 1)
+    {
+        return {printed(level == 0 ? I18N::Game::Archer : I18N::Game::Spearman)};
+    }
+    if (group == 13 && number == 11 && level <= 1)
+    {
+        return {printed(level == 0 ? I18N::Game::ScrollOfGuardian : I18N::Game::PlaceLifeStone)};
+    }
+    if (group == 13 && number == 15 && level <= 4)
+    {
+        const wchar_t* const stats[] = {I18N::Game::ENG, I18N::Game::STA, I18N::Game::AGI, I18N::Game::STR,
+                                        I18N::Game::Command};
+        const PrintedOldLine stat{Core::Text::ToUtf8(stats[level]) + " ", true};
+        std::vector<std::optional<PrintedOldLine>> lines = {stat, stat, printed(I18N::Game::ItCanBeUsedWithItemRemoved)};
+        if (level == 4)
+        {
+            lines.push_back(PrintedOldLine{PrintWithName(I18N::Game::CanBeEquippedByS, I18N::Game::DarkLord)});
+        }
+        return lines;
+    }
+    return std::vector<std::optional<PrintedOldLine>>(OldLevelLines(group, number, level).size());
+}
+
+// The lines whose texts other code still prints, in every language as the game prints them.
+TEST_CASE("The tooltip texts by item level are the game's texts in every language [data][items]")
+{
+    constexpr std::pair<int, int> items[] = {{13, 7}, {13, 11}, {13, 15}};
+    const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
+    // The test switches the UI language: it needs an item table of its own.
+    ClientDataScope client(ShippedClientDirectory);
+    int compared = 0;
+    for (const auto& [group, number] : items)
+    {
+        const ItemDefinition* found = FindItem(result.items, MakeItemType(group, number));
+        REQUIRE(found != nullptr);
+        for (int level = 0; level < ItemLevelCount; ++level)
+        {
+            std::vector<const ItemDescriptionLine*> shown;
+            for (const ItemDescriptionLine& line : found->description)
+            {
+                if (line.IsShownAt(level))
+                {
+                    shown.push_back(&line);
+                }
+            }
+            for (const char* locale : I18N::GetAvailableLocales())
+            {
+                INFO(group << "/" << number << " +" << level << " " << locale);
+                I18N::SetLocale(locale);
+                const std::vector<std::optional<PrintedOldLine>> old = PrintedOldLevelLines(group, number, level);
+                REQUIRE(shown.size() == old.size());
+                for (size_t index = 0; index < old.size(); ++index)
+                {
+                    if (!old[index])
+                    {
+                        continue;
+                    }
+                    const std::string text = shown[index]->text.Get(locale);
+                    if (old[index]->isPrefix)
+                    {
+                        CHECK(text.starts_with(old[index]->text));
+                    }
+                    else
+                    {
+                        CHECK(text == old[index]->text);
+                    }
+                    ++compared;
+                }
+            }
+            I18N::SetLocale("en");
+        }
+    }
+    // Archer and Spearman, Scroll of Guardian and Place Life Stone, and the Fruits' 3 lines at +0 to +3 and 4 at +4, in
+    // every language.
+    CHECK(compared == (2 + 2 + 4 * 3 + 4) * static_cast<int>(std::size(I18N::GetAvailableLocales())));
+}
+
+// The texts the tooltip code wrote for these items are their descriptions now, in every UI language.
+TEST_CASE("The original items' tooltip texts are in their descriptions [data][items]")
+{
+    struct DescribedItem
+    {
+        int group;
+        int number;
+        std::string_view text;
+    };
+    constexpr DescribedItem described[] = {
+        {12, 15, "It is used to combine Chaos items"},
+        {13, 38, "I.D. of Kantur Chief Scientist. You can enter the Refinery Tower."},
+        {14, 13, "It is used to increase your item level up to 6"},
+        {14, 14, "It is used to increase your item level up to 7,8,9"},
+        {14, 16, "Increases item option by 1 level"},
+        {14, 17, "It is used to combine items for a Devil Square Invitation"},
+        {14, 18, "It is used to combine items for a Devil Square Invitation"},
+        {14, 22, "Used to create fruits that increase stats"},
+        {14, 31, "Create and improve items for siege"},
+        {14, 41, "Jewel with impurities"},
+        {14, 42, "Jewel for item reinforcement"},
+        {14, 43, "Grant actual power to reinforced item."},
+        {14, 44, "Grant actual power to reinforced item."},
+        {14, 160, "Jewel used for repairing a Lucky Item."},
+        {14, 161, "Jewel for item reinforcement"},
+    };
+    const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
+    for (const DescribedItem& item : described)
+    {
+        INFO(item.group << "/" << item.number);
+        const ItemDefinition* found = FindItem(result.items, MakeItemType(item.group, item.number));
+        REQUIRE(found != nullptr);
+        // The last line: the Moonstone Pendant's "Cannot Repair" of the second item chain comes before it.
+        REQUIRE_FALSE(found->description.empty());
+        const Data::LocalizedString& text = found->description.back().text;
+        CHECK(text.GetNeutral() == item.text);
+        CHECK(found->description.back().color == ItemTextColor::White);
+        for (const char* locale : I18N::GetAvailableLocales())
+        {
+            INFO(locale);
+            CHECK_FALSE(text.Get(locale).empty());
+            if (std::string_view(locale) != Data::LocalizedString::NeutralLocale)
+            {
+                CHECK(text.GetTranslations().contains(locale));
+            }
+        }
+    }
+}
+
 TEST_CASE("Loading item data fills ItemAttribute in the UI locale [data][items]")
 {
     ClientDataScope client(ShippedClientDirectory);
@@ -252,6 +933,39 @@ TEST_CASE("Loading item data fills ItemAttribute in the UI locale [data][items]"
     CHECK(client.Name(KrisType) == L"Kris");
 }
 
+// Turns translated item names back on when the test ends, as the other tests
+// expect them.
+class TranslatedItemNamesScope
+{
+public:
+    ~TranslatedItemNamesScope()
+    {
+        g_ItemDataHandler.SetTranslateItemNames(true);
+    }
+};
+
+TEST_CASE("Item names stay English while translated item names are off, also after a language change [data][items]")
+{
+    ClientDataScope client(ShippedClientDirectory);
+    TranslatedItemNamesScope translatedNames;
+    I18N::SetLocale("pt");
+    g_ItemDataHandler.SetTranslateItemNames(false);
+
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    CHECK(client.Name(BladeType) == L"Blade");
+
+    I18N::SetLocale("de");
+    CHECK(client.Name(BladeType) == L"Blade");
+
+    g_ItemDataHandler.SetTranslateItemNames(true);
+    CHECK(client.Name(BladeType) == L"Klinge");
+
+    g_ItemDataHandler.SetTranslateItemNames(false);
+    CHECK(client.Name(BladeType) == L"Blade");
+    CHECK(g_ItemDatabase.Find(BladeType)->name == L"Blade");
+}
+
 TEST_CASE("Item data errors stop loading [data][items]")
 {
     TemporaryClientFolder folder;
@@ -261,6 +975,28 @@ TEST_CASE("Item data errors stop loading [data][items]")
     std::string errorMessage;
     CHECK_FALSE(g_ItemDataHandler.Load(errorMessage));
     CHECK(errorMessage.find("Group00_Sword.json") != std::string::npos);
+}
+
+TEST_CASE("A description placeholder that names no table stops loading [data][items]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    const std::filesystem::path potions = folder.Directory() / GetItemDataDirectory() / "Group14_Potion.json";
+    std::string text = TestFiles::ReadWholeFile(potions);
+    // The Jewel of Bless's text, with its translations, becomes an English text that names no table.
+    const size_t found = text.find("\"en\": \"It is used to increase your item level up to 6\"");
+    REQUIRE(found != std::string::npos);
+    const size_t start = text.rfind("\"text\": {", found);
+    const size_t end = text.find('}', found);
+    REQUIRE(start != std::string::npos);
+    REQUIRE(end != std::string::npos);
+    text.replace(start, end + 1 - start, "\"text\": \"Up to +{table:noSuchTable}\"");
+    std::ofstream(potions, std::ios::binary) << text;
+    ClientDataScope client(folder.Directory());
+
+    std::string errorMessage;
+    CHECK_FALSE(g_ItemDataHandler.Load(errorMessage));
+    CHECK(errorMessage.find("has the unknown placeholder {table:noSuchTable}") != std::string::npos);
 }
 
 // The bmd import and the item editor keep a weapon kind that its group gives
@@ -361,6 +1097,27 @@ TEST_CASE("Bmd import reads Portuguese and Spanish names as Windows-1252 [data][
     CHECK(gaionsOrder->names.GetNeutral() == "Gaion's Order");
 }
 
+TEST_CASE("Bmd import reads a name that only looks like UTF-8 as Windows-1252 [data][items]")
+{
+    TemporaryClientFolder folder;
+    LegacyItemFile english;
+    english.SetName(BladeType, "Blade");
+    english.Write(folder.LegacyItemFilePath(L"Eng"));
+    LegacyItemFile portuguese;
+    // C0 AF would be an overlong form of '/' in UTF-8; read as Windows-1252 it is U+00C0 U+00AF.
+    portuguese.SetName(BladeType, "Blade \xC0\xAF");
+    portuguese.Write(folder.LegacyItemFilePath(L"Por"));
+    ClientDataScope client(folder.Directory());
+
+    const ItemBmdImportResult result = ImportItemBmdFiles();
+    REQUIRE_FALSE(HasErrors(result.issues));
+    CHECK(result.reencodedNameCount == 1);
+
+    const ItemDefinition* blade = FindItem(result.items, BladeType);
+    REQUIRE(blade != nullptr);
+    CHECK(blade->names.Get("pt") == "Blade \xC3\x80\xC2\xAF");
+}
+
 TEST_CASE("A folder that cannot be written is a write failure, not a data error [data][items]")
 {
     const ItemDataLoadResult shipped = LoadItemDataDirectory(DataDirectory / "Items");
@@ -371,7 +1128,29 @@ TEST_CASE("A folder that cannot be written is a write failure, not a data error 
 
     std::vector<ItemDataIssue> issues;
     CHECK(SaveItemDataDirectory(blocked, shipped.items, issues) == ItemDataSaveResult::WriteFailed);
-    CHECK_FALSE(issues.empty());
+    // The issue names the temporary file that could not be written.
+    CHECK(std::any_of(issues.begin(), issues.end(), [](const ItemDataIssue& issue)
+                      { return issue.message == "could not be written" && issue.source.ends_with(".json.tmp"); }));
+}
+
+TEST_CASE("A file that cannot be replaced is a write failure and leaves no temporary file [data][items]")
+{
+    const ItemDataLoadResult shipped = LoadItemDataDirectory(DataDirectory / "Items");
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    const std::filesystem::path itemDirectory = folder.Directory() / GetItemDataDirectory();
+    // A folder with the name of the sword file: the written file cannot take its place.
+    const std::filesystem::path swordFile = itemDirectory / GetItemGroupFileName(0);
+    std::filesystem::remove(swordFile);
+    std::filesystem::create_directories(swordFile / "inside");
+
+    std::vector<ItemDataIssue> issues;
+    CHECK(SaveItemDataDirectory(itemDirectory, shipped.items, issues) == ItemDataSaveResult::WriteFailed);
+    CHECK(std::any_of(
+        issues.begin(), issues.end(), [&](const ItemDataIssue& issue)
+        { return issue.source == swordFile.string() && issue.message.starts_with("could not be replaced: "); }));
+    CHECK(std::filesystem::is_directory(swordFile));
+    CHECK_FALSE(std::filesystem::exists(swordFile.string() + ".tmp"));
 }
 
 // The items and their models are saved together: when one of the files
@@ -1469,38 +2248,6 @@ TEST_CASE("The usage of an item lists its tags, its model and the code that name
 
 namespace
 {
-// An ImGui context of its own for a test, without a window or a renderer.
-class TestImGuiContext
-{
-public:
-    TestImGuiContext() : m_previous(ImGui::GetCurrentContext()), m_context(ImGui::CreateContext())
-    {
-        ImGuiIO& io = ImGui::GetIO();
-        io.DisplaySize = ImVec2(DisplayWidth, DisplayHeight);
-        io.DeltaTime = 1.0f / 60.0f;
-        io.IniFilename = nullptr;
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-        // The font atlas is built without a renderer that takes its texture.
-        io.BackendFlags |= ImGuiBackendFlags_RendererHasTextures;
-    }
-
-    ~TestImGuiContext()
-    {
-        ImGui::DestroyContext(m_context);
-        ImGui::SetCurrentContext(m_previous);
-    }
-
-    TestImGuiContext(const TestImGuiContext&) = delete;
-    TestImGuiContext& operator=(const TestImGuiContext&) = delete;
-
-private:
-    static constexpr float DisplayWidth = 1600.0f;
-    static constexpr float DisplayHeight = 1000.0f;
-
-    ImGuiContext* m_previous;
-    ImGuiContext* m_context;
-};
-
 // The id of a field an item tool window draws, inside the ID scopes it pushes
 // (the item type, a requirement), with its label.
 ImGuiID ItemToolFieldId(const char* windowId, std::initializer_list<int> scopes, const char* label)
@@ -1851,9 +2598,82 @@ TEST_CASE(
     RenderItemTool(g_MuItemRequirementsUI, true);
     RenderItemTool(g_MuItemRequirementsUI, true);
 
-    // The weight list asks; nothing is stored until one is taken.
-    CHECK(OpenPopupWindow() != nullptr);
-    CHECK(g_ItemDatabase.Find(KrisType)->requirements.strength == typedWeight);
+    // The weight list asks; nothing is stored until one is taken. Also not when
+    // the list takes the keyboard from the weight field: activated by
+    // navigation, as this test clicks, it became active a frame before the +0
+    // field was reported left, with the weight of the typed value.
+    for (int frame = 0; frame < 3; ++frame)
+    {
+        INFO("frame " << frame);
+        CHECK(OpenPopupWindow() != nullptr);
+        CHECK(g_ItemDatabase.Find(KrisType)->requirements.strength == typedWeight);
+        RenderItemTool(g_MuItemRequirementsUI, true);
+    }
+    g_ItemEdits.GetHistory().Clear();
+}
+
+// A click from a +0 value into the +0 field of a requirement drawn above it
+// makes that field active, earlier in the same frame, before the first one is
+// reported left: the typed value still asks for its own weight.
+TEST_CASE("A +0 value left by a click into the +0 field above it still asks for its weight [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    g_ItemSelection.Select(KrisType);
+    const ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+    REQUIRE(MuEditor::Items::HasWeight(kris, ItemRequirement::Strength));
+    REQUIRE(MuEditor::Items::HasWeight(kris, ItemRequirement::Dexterity));
+    int value = MuEditor::Items::ComputeZeroValue(kris, ItemRequirement::Dexterity) + 1;
+    while (MuEditor::Items::FindWeightsGiving(kris, ItemRequirement::Dexterity, value).GetCount() < 2)
+    {
+        ++value;
+        REQUIRE(value < 1000);
+    }
+    REQUIRE(MuEditor::Items::ChooseWeight(kris, ItemRequirement::Dexterity, value, kris.requirements.dexterity).kind ==
+            MuEditor::Items::WeightChoice::Kind::Pick);
+
+    TestImGuiContext context;
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    const ImGuiID strength =
+        ItemToolFieldId(MuEditor::WindowIds::ItemRequirements, {KrisType, static_cast<int>(ItemRequirement::Strength)},
+                        I18N::Metadata::ReqStrength);
+    const ImGuiID dexterity =
+        ItemToolFieldId(MuEditor::WindowIds::ItemRequirements, {KrisType, static_cast<int>(ItemRequirement::Dexterity)},
+                        I18N::Metadata::ReqDexterity);
+    ImGui::ActivateItemByID(dexterity);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    REQUIRE(ImGui::GetActiveID() == dexterity);
+    RenderItemTool(g_MuItemRequirementsUI, true, std::to_string(value).c_str());
+    ImGui::ActivateItemByID(strength);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+
+    // The list asks, and nothing is stored until a weight is taken.
+    for (int frame = 0; frame < 3; ++frame)
+    {
+        INFO("frame " << frame);
+        RenderItemTool(g_MuItemRequirementsUI, true);
+        CHECK(OpenPopupWindow() != nullptr);
+        CHECK(g_ItemDatabase.Find(KrisType)->requirements.strength == kris.requirements.strength);
+        CHECK(g_ItemDatabase.Find(KrisType)->requirements.dexterity == kris.requirements.dexterity);
+    }
+    CHECK_FALSE(g_ItemEdits.GetHistory().CanUndo());
+
+    // It is the list of the typed dexterity value.
+    const ImGuiWindow* list = OpenPopupWindow();
+    REQUIRE(list != nullptr);
+    ImGui::ActivateItemByID(ImGui::GetIDWithSeed(I18N::Editor::TakeThisWeight, nullptr, list->ID));
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    CHECK(OpenPopupWindow() == nullptr);
+    CHECK(MuEditor::Items::FindWeightsGiving(kris, ItemRequirement::Dexterity, value)
+              .Contains(g_ItemDatabase.Find(KrisType)->requirements.dexterity));
+    CHECK(g_ItemDatabase.Find(KrisType)->requirements.strength == kris.requirements.strength);
+    CHECK(g_ItemEdits.GetHistory().CanUndo());
     g_ItemEdits.GetHistory().Clear();
 }
 
@@ -2883,6 +3703,47 @@ TEST_CASE("A change of the profile rules gives the items that follow them the ne
     edits.GetHistory().Clear();
 }
 
+TEST_CASE("The bmd exports refuse damage or magic power past 255 and name the items [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    const WORD krisDamageMin = g_ItemDatabase.Find(KrisType)->damageMin;
+    const WORD bladeMagicPower = g_ItemDatabase.Find(BladeType)->magicPower;
+    EditItem(KrisType, [](ItemDefinition& item) { item.damageMin = 300; });
+    EditItem(BladeType, [](ItemDefinition& item) { item.magicPower = 256; });
+    const std::string named = "Item (0,0) DamageMin is 300; a .bmd item file holds up to 255\n"
+                              "Item (0,5) MagicPower is 256; a .bmd item file holds up to 255\n";
+
+    // Every such item is named once, and no file is written.
+    std::string changeLog;
+    CHECK_FALSE(g_ItemDataHandler.ExportAsBmd(changeLog));
+    CHECK(changeLog == named);
+    for (const ItemBmdLanguage& language : GetItemBmdLanguages())
+    {
+        CHECK_FALSE(std::filesystem::exists(folder.LegacyItemFilePath(language.folder)));
+    }
+
+    std::wstring legacyFile = (folder.Directory() / "Item_S6E3.bmd").wstring();
+    std::string problems;
+    CHECK_FALSE(g_ItemDataHandler.ExportAsS6E3(legacyFile.data(), problems));
+    CHECK(problems == named);
+    CHECK_FALSE(std::filesystem::exists(legacyFile));
+
+    // With the values back, both write.
+    EditItem(KrisType, [&](ItemDefinition& item) { item.damageMin = krisDamageMin; });
+    EditItem(BladeType, [&](ItemDefinition& item) { item.magicPower = bladeMagicPower; });
+    std::string savedChangeLog;
+    CHECK(g_ItemDataHandler.ExportAsBmd(savedChangeLog));
+    problems.clear();
+    CHECK(g_ItemDataHandler.ExportAsS6E3(legacyFile.data(), problems));
+    CHECK(problems.empty());
+    CHECK(std::filesystem::exists(legacyFile));
+}
+
 TEST_CASE("Exporting unchanged bmd files is not a failure [data][items][editor]")
 {
     TemporaryClientFolder folder;
@@ -3036,5 +3897,34 @@ TEST_CASE("The item tools add glow colors, change them and remove unused ones [d
 
     edits.GetHistory().Clear();
     g_GlowColors.Build(shipped);
+}
+
+TEST_CASE("A description placeholder that names no table stops the save [editor][items]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope models;
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE_MESSAGE(g_ItemDataHandler.LoadModels(errorMessage), errorMessage);
+    const std::filesystem::path potions = folder.Directory() / GetItemDataDirectory() / "Group14_Potion.json";
+    const std::string shippedText = TestFiles::ReadWholeFile(potions);
+
+    const int blessType = MakeItemType(14, 13);
+    EditItem(blessType,
+             [](ItemDefinition& bless)
+             {
+                 REQUIRE_FALSE(bless.description.empty());
+                 bless.description[0].text = {};
+                 bless.description[0].text.Set("en", "Up to +{table:noSuchTable}");
+             });
+    std::vector<ItemDataIssue> issues;
+    CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::InvalidData);
+    CHECK(
+        std::ranges::any_of(issues, [](const ItemDataIssue& issue)
+                            { return issue.message.starts_with("has the unknown placeholder {table:noSuchTable}"); }));
+    CHECK(TestFiles::ReadWholeFile(potions) == shippedText);
 }
 #endif

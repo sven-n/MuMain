@@ -4,6 +4,11 @@
 
 #include "imgui.h"
 
+namespace MuEditor
+{
+struct ToolGroup;
+}
+
 // The editor window: where it first opens, and the tool windows docked in it.
 namespace MuEditor::Layout
 {
@@ -39,6 +44,11 @@ void RenderToolWindowBar();
 // as a tab beside the other item tools, also in a layout made before it
 // existed. Call before PrepareToolWindow and Begin().
 void DockBesideItemTools(const char* windowId);
+
+// The same for a tool of any group: beside the group's tools, else beside its
+// browser, else where its fallback group docks. The browser of a group with a
+// fallback docks beside the fallback's browser first.
+void DockInGroup(const char* windowId, const ToolGroup& group);
 } // namespace MuEditor::Layout
 
 #endif // _EDITOR

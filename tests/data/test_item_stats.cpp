@@ -685,7 +685,7 @@ TEST_CASE("Wing defense adds up above +9, from 5 for the third tier wings [data]
     CHECK(ComputeItem(ITEM_CAPE_OF_LORD, 15).Defense == 72);
 }
 
-TEST_CASE("Magic power and defense rate past 255 are not wrapped around [data][items]")
+TEST_CASE("Magic power passes 255 and defense rate stops there [data][items]")
 {
     ShippedItemAttributes items;
     // Values the editor can give an item; no shipped item gets this high.
@@ -696,6 +696,10 @@ TEST_CASE("Magic power and defense rate past 255 are not wrapped around [data][i
 
     // 200 + 67 (excellent) + 66 (+15) = 333, halved, + 30.
     CHECK(ComputeItem(ITEM_LEGENDARY_STAFF, 15, 0x01).MagicPower == 196);
+    // A later staff: 345 + 66 (excellent: 345 * 25 / 140 + 5) + 66 (+15) = 477, halved, + 30.
+    items[ITEM_LEGENDARY_STAFF].MagicPower = 345;
+    items[ITEM_LEGENDARY_STAFF].Level = 140;
+    CHECK(ComputeItem(ITEM_LEGENDARY_STAFF, 15, 0x01).MagicPower == 268);
     // 170 + 47 (excellent) + 66 (+15) = 283.
     CHECK(ComputeItem(DragonShieldType, 15, 0x01).SuccessfulBlocking == 255);
 
@@ -919,12 +923,21 @@ TEST_CASE("The item help window builds its content again only when what it shows
     CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != shown);
     help.HeroCharacter().Class = CLASS_WIZARD;
 
+    // Another language changes the texts and the item names. Back in English
+    // the names were taken again; the content then stays until something changes.
     I18N::SetLocale("pt");
     CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != shown);
     I18N::SetLocale("en");
-    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) == shown);
+    const auto backInEnglish = GetItemHelpContentKey(ITEM_BONE_BLADE);
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) == backInEnglish);
 
     // An item editor change, which stores the item in the item database.
     g_ItemDatabase.Set(*g_ItemDatabase.Find(ITEM_BONE_BLADE));
-    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != shown);
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != backInEnglish);
+
+    // Translated item names turned on or off: only the item names change language.
+    const auto namesInEnglish = GetItemHelpContentKey(ITEM_BONE_BLADE);
+    g_ItemDatabase.SetDisplayLocale("pt");
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != namesInEnglish);
+    g_ItemDatabase.SetDisplayLocale("en");
 }

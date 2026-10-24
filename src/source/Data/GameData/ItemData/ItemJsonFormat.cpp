@@ -24,6 +24,10 @@ using namespace Json::Keys;
 constexpr const char* Items = "items";
 constexpr const char* Name = "name";
 constexpr const char* Tags = "tags";
+constexpr const char* Description = "description";
+constexpr const char* Text = "text";
+constexpr const char* Color = "color";
+constexpr const char* Levels = "levels";
 constexpr const char* Requirements = "requirements";
 constexpr const char* RequirementsByLevel = "requirementsByLevel";
 constexpr const char* ClassRequirements = "classRequirements";
@@ -55,14 +59,14 @@ template <typename TDefinition, typename TVisitor> void VisitStatFields(TDefinit
     visit("level", definition.level, WORD{0});
     visit("durability", definition.durability, BYTE{0});
     visit("magicDurability", definition.magicDurability, BYTE{0});
-    visit("damageMin", definition.damageMin, BYTE{0});
-    visit("damageMax", definition.damageMax, BYTE{0});
+    visit("damageMin", definition.damageMin, WORD{0});
+    visit("damageMax", definition.damageMax, WORD{0});
     visit("blockRate", definition.blockRate, BYTE{0});
     visit("defense", definition.defense, BYTE{0});
     visit("magicDefense", definition.magicDefense, BYTE{0});
     visit("attackSpeed", definition.attackSpeed, BYTE{0});
     visit("walkSpeed", definition.walkSpeed, BYTE{0});
-    visit("magicPower", definition.magicPower, BYTE{0});
+    visit("magicPower", definition.magicPower, WORD{0});
     visit("excellentBonus", definition.excellentBonus, BYTE{0});
     visit("excellentRaisesLevel", definition.excellentRaisesLevel, true);
     visit("attackType", definition.attackType, BYTE{0});
@@ -144,6 +148,29 @@ OrderedJson WriteTags(const ItemTagSet& tags)
     return json;
 }
 
+// One object per line: its text (as a name is written; "" for a blank line), its color unless white, and its item
+// levels unless it is shown at every level.
+OrderedJson WriteDescription(const std::vector<ItemDescriptionLine>& description)
+{
+    OrderedJson json = OrderedJson::array();
+    for (const ItemDescriptionLine& line : description)
+    {
+        OrderedJson entry;
+        // A blank line is a plain empty text, as it is written by hand.
+        entry[Keys::Text] = line.text.IsEmpty() ? OrderedJson("") : Json::WriteLocalizedString(line.text);
+        if (line.color != ItemTextColor::White)
+        {
+            entry[Keys::Color] = WriteValue(line.color);
+        }
+        if (line.HasLevels())
+        {
+            entry[Keys::Levels] = OrderedJson::array({line.minLevel, line.maxLevel});
+        }
+        json.push_back(std::move(entry));
+    }
+    return json;
+}
+
 OrderedJson WriteItem(const ItemDefinition& definition)
 {
     OrderedJson item;
@@ -152,6 +179,10 @@ OrderedJson WriteItem(const ItemDefinition& definition)
     if (!definition.tags.IsEmpty())
     {
         item[Keys::Tags] = WriteTags(definition.tags);
+    }
+    if (!definition.description.empty())
+    {
+        item[Keys::Description] = WriteDescription(definition.description);
     }
 
     const auto writeIfNotDefault = [](OrderedJson& target)
@@ -213,6 +244,8 @@ private:
     bool ReadIdentity(const OrderedJson& json, ItemDefinition& definition);
     bool ReadNames(const OrderedJson& json, LocalizedString& names);
     void ReadTags(const OrderedJson& json, ItemTagSet& tags);
+    void ReadDescription(const OrderedJson& json, std::vector<ItemDescriptionLine>& description);
+    void ReadDescriptionLevels(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line);
     void ReadStats(const OrderedJson& json, ItemDefinition& definition);
     void ReadRequirements(const OrderedJson& json, ItemDefinition& definition);
     void ReadRequirementsByLevel(const OrderedJson& json, ItemDefinition& definition);
@@ -355,6 +388,71 @@ void ItemReader::ReadTags(const OrderedJson& json, ItemTagSet& tags)
     }
 }
 
+void ItemReader::ReadDescription(const OrderedJson& json, std::vector<ItemDescriptionLine>& description)
+{
+    const auto list = json.find(Keys::Description);
+    if (list == json.end())
+    {
+        return;
+    }
+    if (!list->is_array())
+    {
+        AddIssue(ItemDataIssueSeverity::Error, Keys::Description, "must be a list of lines");
+        return;
+    }
+
+    for (size_t index = 0; index < list->size(); ++index)
+    {
+        const OrderedJson& entry = (*list)[index];
+        const std::string field = std::string(Keys::Description) + "[" + std::to_string(index) + "]";
+        const auto text = entry.is_object() ? entry.find(Keys::Text) : entry.end();
+        if (!entry.is_object() || text == entry.end())
+        {
+            AddIssue(ItemDataIssueSeverity::Error, field, "must be an object with a text");
+            continue;
+        }
+
+        ItemDescriptionLine line;
+        const bool read = Json::ReadLocalizedString(*text, field + "." + Keys::Text, line.text,
+                                                    [this](const std::string& errorField, const std::string& message)
+                                                    { AddIssue(ItemDataIssueSeverity::Error, errorField, message); });
+        const auto color = entry.find(Keys::Color);
+        if (color != entry.end())
+        {
+            ReadValue(*color, field + "." + Keys::Color, line.color);
+        }
+        const auto levels = entry.find(Keys::Levels);
+        if (levels != entry.end())
+        {
+            ReadDescriptionLevels(*levels, field + "." + Keys::Levels, line);
+        }
+        WarnAboutUnknownKeys(entry, {Keys::Text, Keys::Color, Keys::Levels}, field + ".");
+        if (read)
+        {
+            description.push_back(std::move(line));
+        }
+    }
+}
+
+// [first, last]: the item levels a description line is shown at, both included.
+void ItemReader::ReadDescriptionLevels(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line)
+{
+    // Read as a whole number first: a number outside int's range would wrap into a level.
+    const auto readLevel = [](const OrderedJson& value, long long& level)
+    { return ReadWholeNumber(value, level) && level >= 0 && level < ItemLevelCount; };
+    long long first = 0;
+    long long last = 0;
+    if (!json.is_array() || json.size() != 2 || !readLevel(json[0], first) || !readLevel(json[1], last) || first > last)
+    {
+        AddIssue(ItemDataIssueSeverity::Error, field,
+                 "must be [first, last], two item levels from 0 to " + std::to_string(ItemLevelCount - 1) +
+                     " with the first not above the last");
+        return;
+    }
+    line.minLevel = static_cast<int>(first);
+    line.maxLevel = static_cast<int>(last);
+}
+
 void ItemReader::ReadStats(const OrderedJson& json, ItemDefinition& definition)
 {
     VisitStatFields(definition,
@@ -468,6 +566,7 @@ std::set<std::string, std::less<>> GetKnownItemKeys()
     std::set<std::string, std::less<>> keys{Keys::Number,
                                             Keys::Name,
                                             Keys::Tags,
+                                            Keys::Description,
                                             Keys::Requirements,
                                             Keys::RequirementsByLevel,
                                             Keys::ClassRequirements,
@@ -490,6 +589,7 @@ bool ItemReader::Read(const OrderedJson& json, ItemDefinition& definition)
     }
 
     ReadTags(json, definition.tags);
+    ReadDescription(json, definition.description);
     ReadStats(json, definition);
     ReadRequirements(json, definition);
     ReadRequirementsByLevel(json, definition);
@@ -555,8 +655,9 @@ std::string WriteItemGroupJson(int group, std::span<const ItemDefinition> items)
 
     // Names are UTF-8 already; replace (instead of throwing on) anything that
     // is not, so a bad name can never stop a save half-way.
-    const std::string text =
+    std::string text =
         Json::PutListsOnOneLine(root.dump(Json::Indent, ' ', false, OrderedJson::error_handler_t::replace), Keys::Tags);
+    text = Json::PutListsOnOneLine(text, Keys::Levels);
     return Json::PutObjectsOnOneLine(text, Keys::RequirementsByLevel) + "\n";
 }
 } // namespace Data::Items

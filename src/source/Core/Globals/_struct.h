@@ -180,7 +180,7 @@ typedef struct tagITEM
     BYTE  SuccessfulBlocking;
     WORD  Defense;
     WORD  MagicDefense;
-    BYTE  MagicPower;
+    WORD MagicPower;
     BYTE  WeaponSpeed;
     WORD  WalkSpeed;
 
@@ -242,14 +242,6 @@ typedef struct
     WORD AttackRating;
     WORD SuccessfulBlocking;
 } MONSTER_ATTRIBUTE;
-
-typedef struct
-{
-    WORD				Type;
-    wchar_t				Name[MAX_MONSTER_NAME + 1];
-    WORD				Level;
-    MONSTER_ATTRIBUTE	Attribute;
-} MONSTER_SCRIPT;
 
 typedef struct
 {

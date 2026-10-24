@@ -162,6 +162,28 @@ TEST_CASE("Item values must fit their type [data][items]")
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Error, "twoHanded"));
 }
 
+TEST_CASE("Damage and magic power past 255 are kept through write and read [data][items]")
+{
+    // A later-season weapon and staff.
+    ItemDefinition sword = MakeKris();
+    sword.damageMin = 345;
+    sword.damageMax = 380;
+    sword.magicPower = 400;
+
+    const std::string text = WriteItemGroupJson(0, std::vector<ItemDefinition>{sword});
+    CHECK(text.find(R"("damageMin": 345)") != std::string::npos);
+    const ReadResult result = Read(text);
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.issues.empty());
+    CHECK(result.items.front().damageMin == 345);
+    CHECK(result.items.front().damageMax == 380);
+    CHECK(result.items.front().magicPower == 400);
+
+    // Up to what the field holds.
+    const ReadResult tooHigh = Read(GroupFile(0, R"({"number": 0, "name": "Kris", "damageMax": 65536})"));
+    CHECK(HasIssue(tooHigh.issues, ItemDataIssueSeverity::Error, "damageMax"));
+}
+
 TEST_CASE("Unknown item fields are warnings [data][items]")
 {
     const ReadResult result =
@@ -283,6 +305,93 @@ TEST_CASE("Item tags, wing tier, potion priority and rule flags are kept through
     CHECK_FALSE(read.repairable);
     CHECK(read.droppable);
     CHECK(read.sellable);
+}
+
+TEST_CASE("An item's description is kept through write and read [data][items]")
+{
+    ItemDefinition jewel = MakeKris();
+    jewel.group = 14;
+    jewel.number = 13;
+    jewel.slot = ItemSlot::None;
+    jewel.weaponKind = WeaponKind::None;
+    jewel.statProfile.clear();
+    // The Jewel of Bless's own tooltip line, as the client's translations have it.
+    ItemDescriptionLine first;
+    first.text.Set("en", "It is used to increase your item level up to 6");
+    first.text.Set("de", "Wird verwendet, um das Gegenstandslevel auf bis zu 6 zu erhöhen");
+    first.text.Set("es", "Se utiliza para aumentar el nivel de tu objeto hasta 6.");
+    first.text.Set("pt", "É usado para aumentar o nível do seu item até 6");
+    ItemDescriptionLine blank;
+    ItemDescriptionLine last = first;
+    last.color = ItemTextColor::Blue;
+    jewel.description = {first, blank, last};
+
+    const std::string text = WriteItemGroupJson(14, std::vector<ItemDefinition>{jewel});
+    CHECK(text.find("\"color\": \"blue\"") != std::string::npos);
+    const ReadResult result = Read(text);
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items.front().description == jewel.description);
+    CHECK_FALSE(HasErrors(result.issues));
+    CHECK(WriteItemGroupJson(14, result.items) == text);
+
+    // A line break in a text is kept; the tooltip starts a new line there.
+    ItemDefinition twoLines = jewel;
+    twoLines.description = {first};
+    twoLines.description[0].text.Set("en", "It is used to increase\nyour item level up to 6");
+    const ReadResult broken = Read(WriteItemGroupJson(14, std::vector<ItemDefinition>{twoLines}));
+    REQUIRE(broken.items.size() == 1);
+    CHECK(broken.items.front().description == twoLines.description);
+
+    const ReadResult badColor = Read(R"({"formatVersion": 1, "group": 14, "items": [
+        {"number": 13, "name": "Jewel of Bless", "description": [{"text": "x", "color": "pink"}]}]})");
+    CHECK(HasErrors(badColor.issues));
+}
+
+TEST_CASE("A description line's item levels are kept through write and read, and checked [data][items]")
+{
+    ItemDefinition scroll = MakeKris();
+    scroll.group = 14;
+    scroll.number = 10;
+    scroll.slot = ItemSlot::None;
+    scroll.weaponKind = WeaponKind::None;
+    scroll.statProfile.clear();
+    ItemDescriptionLine warp;
+    warp.text.Set("en", "Warp to the corresponding area after 3 seconds");
+    warp.minLevel = 1;
+    warp.maxLevel = 8;
+    ItemDescriptionLine always;
+    always.text.Set("en", "Shown at every level");
+    scroll.description = {warp, always};
+
+    CHECK_FALSE(warp.IsShownAt(0));
+    CHECK(warp.IsShownAt(1));
+    CHECK(warp.IsShownAt(8));
+    CHECK_FALSE(warp.IsShownAt(9));
+    CHECK(always.IsShownAt(0));
+    CHECK(always.IsShownAt(ItemLevelCount - 1));
+
+    // Written on one line, and only for a line that is not shown at every level.
+    const std::string text = WriteItemGroupJson(14, std::vector<ItemDefinition>{scroll});
+    CHECK(text.find("\"levels\": [1, 8]") != std::string::npos);
+    CHECK(text.find("\"levels\"") == text.rfind("\"levels\""));
+    const ReadResult result = Read(text);
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items.front().description == scroll.description);
+    CHECK_FALSE(HasErrors(result.issues));
+    CHECK(WriteItemGroupJson(14, result.items) == text);
+
+    for (const char* levels : {R"("levels": [8, 1])", R"("levels": [0, 16])", R"("levels": [-1, 2])",
+                               R"("levels": [3])", R"("levels": 3)", R"("levels": [1.5, 2])",
+                               // Outside int's range: they'd wrap into a level (2^32 + 1 into 1) if read as an int.
+                               R"("levels": [4294967297, 4294967298])", R"("levels": [-4294967295, 2])",
+                               R"("levels": [0, 18446744073709551615])", R"("levels": [-9223372036854775808, 2])"})
+    {
+        INFO(levels);
+        const ReadResult bad = Read(std::string(R"({"formatVersion": 1, "group": 14, "items": [
+            {"number": 10, "name": "Town Portal Scroll", "description": [{"text": "x", )") +
+                                    levels + "}]}]}");
+        CHECK(HasIssue(bad.issues, ItemDataIssueSeverity::Error, "description[0].levels"));
+    }
 }
 
 TEST_CASE("An item's stat profile is kept through write and read [data][items]")

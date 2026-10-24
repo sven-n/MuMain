@@ -1672,8 +1672,11 @@
   <data name="Used by {0} items and {1} rules" xml:space="preserve">
     <value>Verwendet von {0} Gegenständen und {1} Regeln</value>
   </data>
-  <data name="Named by {0} stats" xml:space="preserve">
-    <value>Von {0} Werten genannt</value>
+  <data name="Named by {0} stats and {1} item descriptions" xml:space="preserve">
+    <value>Von {0} Werten und {1} Gegenstandsbeschreibungen genannt</value>
+  </data>
+  <data name="Item descriptions that name it" xml:space="preserve">
+    <value>Gegenstandsbeschreibungen, die sie nennen</value>
   </data>
   <data name="Pick an entry in the list." xml:space="preserve">
     <value>Wählen Sie einen Eintrag in der Liste.</value>
@@ -1690,8 +1693,8 @@
   <data name="No item or rule uses these profiles: {0}" xml:space="preserve">
     <value>Kein Gegenstand und keine Regel nutzt diese Profile: {0}</value>
   </data>
-  <data name="No stat uses these tables: {0}" xml:space="preserve">
-    <value>Kein Wert nutzt diese Tabellen: {0}</value>
+  <data name="No stat or item description uses these tables: {0}" xml:space="preserve">
+    <value>Kein Wert und keine Gegenstandsbeschreibung nutzt diese Tabellen: {0}</value>
   </data>
   <data name="Rename" xml:space="preserve">
     <value>Umbenennen</value>
@@ -1711,8 +1714,8 @@
   <data name="Removed only while no item and no rule uses it." xml:space="preserve">
     <value>Wird nur entfernt, solange kein Gegenstand und keine Regel es nutzt.</value>
   </data>
-  <data name="Removed only while no stat names it." xml:space="preserve">
-    <value>Wird nur entfernt, solange kein Wert sie nennt.</value>
+  <data name="Removed only while no stat and no item description names it." xml:space="preserve">
+    <value>Wird nur entfernt, solange kein Wert und keine Gegenstandsbeschreibung sie nennt.</value>
   </data>
   <data name="Override" xml:space="preserve">
     <value>Überschreiben</value>
@@ -1851,5 +1854,248 @@
   </data>
   <data name="Apply or revert the changes first." xml:space="preserve">
     <value>Erst die Änderungen anwenden oder zurücksetzen.</value>
+  </data>
+  <data name="Server List" xml:space="preserve">
+    <value>Serverliste</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Speichern</value>
+  </data>
+  <data name="Reads {0} again; unsaved changes are lost." xml:space="preserve">
+    <value>Liest {0} neu ein; ungespeicherte Änderungen gehen verloren.</value>
+  </data>
+  <data name="Unsaved changes" xml:space="preserve">
+    <value>Ungespeicherte Änderungen</value>
+  </data>
+  <data name="Saved to {0}" xml:space="preserve">
+    <value>In {0} gespeichert</value>
+  </data>
+  <data name="Not saved, see the problems below." xml:space="preserve">
+    <value>Nicht gespeichert, siehe die Probleme unten.</value>
+  </data>
+  <data name="Problems in {0}:" xml:space="preserve">
+    <value>Probleme in {0}:</value>
+  </data>
+  <data name="New Group" xml:space="preserve">
+    <value>Neue Gruppe</value>
+  </data>
+  <data name="Group ID" xml:space="preserve">
+    <value>Gruppen-ID</value>
+  </data>
+  <data name="Servers {0} to {1}" xml:space="preserve">
+    <value>Server {0} bis {1}</value>
+  </data>
+  <data name="Another group has the ID {0}." xml:space="preserve">
+    <value>Eine andere Gruppe hat die ID {0}.</value>
+  </data>
+  <data name="A group needs a name." xml:space="preserve">
+    <value>Eine Gruppe braucht einen Namen.</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Beschreibung</value>
+  </data>
+  <data name="Description note" xml:space="preserve">
+    <value>Steht unter den Kanälen, solange die Gruppe gewählt ist.</value>
+  </data>
+  <data name="Test server" xml:space="preserve">
+    <value>Testserver</value>
+  </data>
+  <data name="Test server note" xml:space="preserve">
+    <value>Der Anmeldebildschirm zeigt nur die erste Testserver-Gruppe, an ihrem Platz in der Liste.</value>
+  </data>
+  <data name="Channel" xml:space="preserve">
+    <value>Kanal</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Art</value>
+  </data>
+  <data name="On the login screen" xml:space="preserve">
+    <value>Auf dem Anmeldebildschirm</value>
+  </data>
+  <data name="Connect server" xml:space="preserve">
+    <value>Connect-Server</value>
+  </data>
+  <data name="Normal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="Non-PvP" xml:space="preserve">
+    <value>Kein PvP</value>
+  </data>
+  <data name="Gold PvP" xml:space="preserve">
+    <value>Gold-PvP</value>
+  </data>
+  <data name="Gold" xml:space="preserve">
+    <value>Gold</value>
+  </data>
+  <data name="Sent, {0}% load" xml:space="preserve">
+    <value>Gemeldet, {0} % Last</value>
+  </data>
+  <data name="Groups the list does not have" xml:space="preserve">
+    <value>Der Connect-Server meldet Server von Gruppen, die die Liste nicht hat; der Anmeldebildschirm zeigt sie nicht:</value>
+  </data>
+  <data name="Group {0}: servers {1}" xml:space="preserve">
+    <value>Gruppe {0}: Server {1}</value>
+  </data>
+  <data name="Pick a group in the list." xml:space="preserve">
+    <value>Wählen Sie eine Gruppe in der Liste.</value>
+  </data>
+  <data name="Server list order note" xml:space="preserve">
+    <value>Die Reihenfolge der Liste ist die der Schaltflächen auf dem Anmeldebildschirm, der jede Änderung sofort zeigt. Speichern schreibt {0}.</value>
+  </data>
+  <data name="Save off after read errors" xml:space="preserve">
+    <value>Die Datei hatte beim Lesen Fehler, daher enthält die Liste nur die Gruppen, die gelesen werden konnten. Speichern bleibt aus, bis die Datei korrigiert ist und Zurücksetzen sie neu einliest; es würde die anderen Gruppen aus der Datei entfernen.</value>
+  </data>
+  <data name="Step add" xml:space="preserve">
+    <value>{0} hinzufügen</value>
+  </data>
+  <data name="Step remove" xml:space="preserve">
+    <value>{0} entfernen</value>
+  </data>
+  <data name="Step move" xml:space="preserve">
+    <value>{0} verschieben</value>
+  </data>
+  <data name="Step name" xml:space="preserve">
+    <value>{0}: Name</value>
+  </data>
+  <data name="Step ID" xml:space="preserve">
+    <value>{0}: ID</value>
+  </data>
+  <data name="Step description" xml:space="preserve">
+    <value>{0}: Beschreibung</value>
+  </data>
+  <data name="Step test server" xml:space="preserve">
+    <value>{0}: Testserver</value>
+  </data>
+  <data name="Step channel" xml:space="preserve">
+    <value>{0}: Kanal {1}</value>
+  </data>
+  <data name="Monster Browser" xml:space="preserve">
+    <value>Monsterliste</value>
+  </data>
+  <data name="Monster Translations" xml:space="preserve">
+    <value>Monsterübersetzungen</value>
+  </data>
+  <data name="Monster Checks" xml:space="preserve">
+    <value>Monsterprüfung</value>
+  </data>
+  <data name="The monsters changed since this step; it is not undone." xml:space="preserve">
+    <value>Die Monster haben sich seit diesem Schritt geändert; er wird nicht rückgängig gemacht.</value>
+  </data>
+  <data name="Save Monsters" xml:space="preserve">
+    <value>Monster speichern</value>
+  </data>
+  <data name="Add monster" xml:space="preserve">
+    <value>Monster hinzufügen</value>
+  </data>
+  <data name="Copy monster" xml:space="preserve">
+    <value>Monster kopieren</value>
+  </data>
+  <data name="Remove monster" xml:space="preserve">
+    <value>Monster entfernen</value>
+  </data>
+  <data name="All kinds" xml:space="preserve">
+    <value>Alle Arten</value>
+  </data>
+  <data name="All monsters" xml:space="preserve">
+    <value>Alle Monster</value>
+  </data>
+  <data name="Kind monster" xml:space="preserve">
+    <value>Monster</value>
+  </data>
+  <data name="Kind NPC" xml:space="preserve">
+    <value>NPC</value>
+  </data>
+  <data name="Kind trap" xml:space="preserve">
+    <value>Falle</value>
+  </data>
+  <data name="Kind other" xml:space="preserve">
+    <value>Sonstiges</value>
+  </data>
+  <data name="Step kind" xml:space="preserve">
+    <value>{0}: Art</value>
+  </data>
+  <data name="Copy monster note" xml:space="preserve">
+    <value>Eine Kopie von {0} nur mit dem englischen Namen, ohne die Übersetzungen.</value>
+  </data>
+  <data name="The monster entry is removed." xml:space="preserve">
+    <value>Der Monstereintrag wird entfernt.</value>
+  </data>
+  <data name="Monster without entry in game" xml:space="preserve">
+    <value>Ohne Eintrag bekommt ein Monster dieser Nummer, das erscheint, den Namen, den sein Code ihm gibt (oft einen alten koreanischen Namen), oder keinen, und die Art der alten Nummernregeln: {0}. Die Questfenster nennen es "()".</value>
+  </data>
+  <data name="Removed monster in game" xml:space="preserve">
+    <value>Monster und NPCs dieser Nummer, die im Spiel sind, behalten ihren Namen und ihre Art, bis sie wieder erscheinen.</value>
+  </data>
+  <data name="Kind change in game" xml:space="preserve">
+    <value>Monster und NPCs dieser Nummer, die im Spiel sind, behalten ihre Art, bis sie wieder erscheinen.</value>
+  </data>
+  <data name="Nothing uses the monster" xml:space="preserve">
+    <value>Nichts nutzt das Monster</value>
+  </data>
+  <data name="The sources were not found: code that names the monster is not known." xml:space="preserve">
+    <value>Die Quellen wurden nicht gefunden: Code, der das Monster nennt, ist nicht bekannt.</value>
+  </data>
+  <data name="Monster code references limit" xml:space="preserve">
+    <value>Nicht gefunden wird Code, der die Nummer anders nutzt, etwa als case-Marke, als Funktionsargument oder mit einer Variable, deren Name nicht auf MonsterIndex endet.</value>
+  </data>
+  <data name="NPC of the quests {0}" xml:space="preserve">
+    <value>Der NPC der Quests: {0}</value>
+  </data>
+  <data name="Killed in the quests {0}" xml:space="preserve">
+    <value>Zu besiegen in den Quests: {0}</value>
+  </data>
+  <data name="Dialogues of the quest system {0}" xml:space="preserve">
+    <value>Dialogzustände des Questsystems: {0}</value>
+  </data>
+  <data name="Monster names cannot contain the separator" xml:space="preserve">
+    <value>Ein Monstername darf kein "||" enthalten.</value>
+  </data>
+  <data name="Select the monster and show the Monster Browser" xml:space="preserve">
+    <value>Das Monster auswählen und die Monsterliste zeigen</value>
+  </data>
+  <data name="Step monster name" xml:space="preserve">
+    <value>{0}: Name ({1})</value>
+  </data>
+  <data name="Import names from NpcName txt" xml:space="preserve">
+    <value>Namen aus NpcName-txt importieren</value>
+  </data>
+  <data name="Export as NpcName txt" xml:space="preserve">
+    <value>Als NpcName-txt exportieren</value>
+  </data>
+  <data name="Import NpcName txt note" xml:space="preserve">
+    <value>Liest {0} und setzt die Namen der Monster, die einen Eintrag haben; Rückgängig nimmt den ganzen Import auf einmal zurück. Die Kalima-Tore (152-158) und Nummern ohne Eintrag werden übersprungen. Ein leerer Name entfernt eine Übersetzung; ein englischer Name wird nie geleert. Ein Name gleich dem englischen bleibt fehlend, wo das Monster in der Sprache keinen eigenen Namen hat, denn der Export schreibt dort den englischen Namen.</value>
+  </data>
+  <data name="Export NpcName txt note" xml:space="preserve">
+    <value>Schreibt die Namen aller Monster nach {0}, auf Englisch, wo eine Sprache keinen eigenen Namen hat. Eine Datei, die sich ändert, wird vorher gesichert.</value>
+  </data>
+  <data name="NpcName import line" xml:space="preserve">
+    <value>{0}: {1} Namen gelesen, {2} geändert, {3} übersprungen, {4} gekürzt</value>
+  </data>
+  <data name="NpcName export line" xml:space="preserve">
+    <value>{0}: {1} Namen geschrieben, davon {2} auf Englisch</value>
+  </data>
+  <data name="NpcName export unchanged" xml:space="preserve">
+    <value>{0}: enthält diese Namen schon; nicht geschrieben</value>
+  </data>
+  <data name="Monster names imported" xml:space="preserve">
+    <value>Namen importiert: {0} geändert. Siehe Konsole.</value>
+  </data>
+  <data name="Monster names exported" xml:space="preserve">
+    <value>Namen nach {0} exportiert. Siehe Konsole.</value>
+  </data>
+  <data name="Monster names not exported" xml:space="preserve">
+    <value>Nicht jede Datei wurde geschrieben. Siehe Konsole.</value>
+  </data>
+  <data name="Monster" xml:space="preserve">
+    <value>Monster</value>
+  </data>
+  <data name="The monsters changed since the last check; check again." xml:space="preserve">
+    <value>Die Monster haben sich seit der letzten Prüfung geändert; prüfen Sie erneut.</value>
+  </data>
+  <data name="Save Monsters refuses data with errors and saves data with warnings." xml:space="preserve">
+    <value>Monster speichern verweigert Daten mit Fehlern und speichert Daten mit Warnungen.</value>
+  </data>
+  <data name="Monster checks click note" xml:space="preserve">
+    <value>Ein Klick auf das Problem eines Monsters wählt es aus und öffnet das Werkzeug seines Felds.</value>
   </data>
 </root>

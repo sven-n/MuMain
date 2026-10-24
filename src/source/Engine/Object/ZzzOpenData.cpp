@@ -33,6 +33,7 @@
 #include "Data/DataHandler/EffectData/EffectDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemModelLoader.h"
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "Render/Effects/EffectRegistry.h"
 #include "Render/Items/ItemEffects.h"
@@ -370,7 +371,7 @@ void OpenPlayerTextures()
     }
 }
 
-// The game cannot run with broken item or effect data: shows the errors and quits.
+// The game cannot run with broken item, effect or server list data: shows the errors and quits.
 static void StopOnDataError(const char* title, const std::string& errorMessage)
 {
     const std::wstring message = Core::Text::FromUtf8(errorMessage);
@@ -382,6 +383,28 @@ static void StopOnDataError(const char* title, const std::string& errorMessage)
 static void StopOnItemDataError(const std::string& errorMessage)
 {
     StopOnDataError("Item data error", errorMessage);
+}
+
+// Loads the server groups of the login screen (Data/Local/ServerList.json);
+// errors stop the game.
+static void OpenServerList()
+{
+    std::string errorMessage;
+    if (!g_ServerListManager->LoadServerListScript(errorMessage))
+    {
+        StopOnDataError("Server list error", errorMessage);
+    }
+}
+
+// Loads the monster list (Data/Monsters/Monsters.json), with the names in the
+// UI language; errors stop the game.
+static void OpenMonsterData()
+{
+    std::string errorMessage;
+    if (!g_MonsterDataHandler.Load(errorMessage))
+    {
+        StopOnDataError("Monster data error", errorMessage);
+    }
 }
 
 // Loads the effect types (Data/Effects) and builds the effect registry from
@@ -4392,7 +4415,7 @@ void OpenBasicData(HDC hDC)
 
     wchar_t Text[100];
 
-    g_ServerListManager->LoadServerListScript();
+    OpenServerList();
 
     // NPC dialog text used to live in Data\Local\<lang>\Dialog_<lang>.bmd
     // and was loaded into g_DialogScript here. The text and answer labels
@@ -4406,8 +4429,7 @@ void OpenBasicData(HDC hDC)
     mu_swprintf(Text, L"Data\\Local\\%ls\\movereq_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     SEASON3B::CMoveCommandData::OpenMoveReqScript(Text);
 
-    mu_swprintf(Text, L"Data\\Local\\%ls\\NpcName_%ls.txt", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-    OpenMonsterScript(Text);
+    OpenMonsterData();
 
     mu_swprintf(Text, L"Data\\Local\\%ls\\Quest_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     g_csQuest.OpenQuestScript(Text);

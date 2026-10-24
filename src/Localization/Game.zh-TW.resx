@@ -639,10 +639,6 @@
     <value>遊標下移-&gt;調整聊天窗口</value>
     <comment>legacy_id=156</comment>
   </data>
-  <data name="Warp to the corresponding area after %d seconds" xml:space="preserve">
-    <value>%d秒後扭曲到對應區域</value>
-    <comment>legacy_id=157</comment>
-  </data>
   <data name="%s Warp scroll" xml:space="preserve">
     <value>%s 扭曲捲軸</value>
     <comment>legacy_id=158</comment>
@@ -1430,6 +1426,9 @@
   <data name="Language" xml:space="preserve">
     <value>語言</value>
   </data>
+  <data name="Translate Item Names" xml:space="preserve">
+    <value>翻譯物品名稱</value>
+  </data>
   <data name="Windowed mode" xml:space="preserve">
     <value>視窗模式</value>
   </data>
@@ -2141,25 +2140,9 @@
     <value>丟掉它，你可能會收到一些禪宗或物品</value>
     <comment>legacy_id=571</comment>
   </data>
-  <data name="It is used to increase your item level up to 6" xml:space="preserve">
-    <value>它用於將您的物品等級提高到 6</value>
-    <comment>legacy_id=572</comment>
-  </data>
-  <data name="It is used to increase your item level up to 7,8,9" xml:space="preserve">
-    <value>它用於將您的物品等級提高到7、8、9</value>
-    <comment>legacy_id=573</comment>
-  </data>
-  <data name="It is used to combine Chaos items" xml:space="preserve">
-    <value>它用於組合混沌物品</value>
-    <comment>legacy_id=574</comment>
-  </data>
   <data name="Absorb 30%% of damage" xml:space="preserve">
     <value>吸收30%% of傷害</value>
     <comment>legacy_id=575</comment>
-  </data>
-  <data name="Increase 30%% of attacking &amp; Wizardry Dmg" xml:space="preserve">
-    <value>攻擊力和魔法傷害增加30%% of</value>
-    <comment>legacy_id=576</comment>
   </data>
   <data name="Increase %d%% of Damage" xml:space="preserve">
     <value>增加 %d%% of 傷害</value>
@@ -2325,17 +2308,9 @@
     <value>建立套裝項目</value>
     <comment>legacy_id=618</comment>
   </data>
-  <data name="Used to create fruits that increase stats" xml:space="preserve">
-    <value>用於製造增加屬性的水果</value>
-    <comment>legacy_id=619</comment>
-  </data>
   <data name="Excellent" xml:space="preserve">
     <value>出色的</value>
     <comment>legacy_id=620</comment>
-  </data>
-  <data name="Increases item option by 1 level" xml:space="preserve">
-    <value>將物品選項增加 1 級</value>
-    <comment>legacy_id=621</comment>
   </data>
   <data name="Increase Max HP +4%%" xml:space="preserve">
     <value>最大生命值增加+4%%</value>
@@ -2392,22 +2367,6 @@
   <data name="Increases acquisition rate of Mana after hunting monsters +Mana/8" xml:space="preserve">
     <value>狩獵怪物後魔力獲取率增加+魔力/8</value>
     <comment>legacy_id=635</comment>
-  </data>
-  <data name="Increases 1~3 stat points" xml:space="preserve">
-    <value>增加1~3點屬性點</value>
-    <comment>legacy_id=636</comment>
-  </data>
-  <data name="It is used to combine items for a Devil Square Invitation" xml:space="preserve">
-    <value>它用於組合惡魔廣場邀請函的項目</value>
-    <comment>legacy_id=637</comment>
-  </data>
-  <data name="The remaining time is shown" xml:space="preserve">
-    <value>顯示剩餘時間</value>
-    <comment>legacy_id=638</comment>
-  </data>
-  <data name="when you right click on your mouse." xml:space="preserve">
-    <value>當您右鍵單擊滑鼠時。</value>
-    <comment>legacy_id=639</comment>
   </data>
   <data name="You will enter Devil Square (%d seconds from now)" xml:space="preserve">
     <value>您將進入魔鬼廣場（%d 秒後）</value>
@@ -2801,10 +2760,6 @@
     <value>召喚</value>
     <comment>legacy_id=738</comment>
   </data>
-  <data name="Max HP +%d increased" xml:space="preserve">
-    <value>最大生命值+%d增加</value>
-    <comment>legacy_id=739</comment>
-  </data>
   <data name="HP +%d increased" xml:space="preserve">
     <value>HP +%d 增加</value>
     <comment>legacy_id=740</comment>
@@ -2836,10 +2791,6 @@
   <data name="You have exchanged Dinorants" xml:space="preserve">
     <value>您已交換迪諾蘭特</value>
     <comment>legacy_id=747</comment>
-  </data>
-  <data name="Used to upgrade wings" xml:space="preserve">
-    <value>用於升級翅膀</value>
-    <comment>legacy_id=748</comment>
   </data>
   <data name="Must be over level 10 to use fruits" xml:space="preserve">
     <value>必須達到10級以上才能使用水果</value>
@@ -3017,21 +2968,9 @@
     <value>絕對大天使之劍</value>
     <comment>legacy_id=812</comment>
   </data>
-  <data name="Used in the online event" xml:space="preserve">
-    <value>用於線上活動</value>
-    <comment>legacy_id=813</comment>
-  </data>
-  <data name="Used when entering Blood Castle" xml:space="preserve">
-    <value>進入血色城堡時使用</value>
-    <comment>legacy_id=814</comment>
-  </data>
   <data name="Reward received when returned to the Archangel" xml:space="preserve">
     <value>回到大天使身邊時獲得的獎勵</value>
     <comment>legacy_id=815</comment>
-  </data>
-  <data name="Used when creating a Cloak of Invisibility" xml:space="preserve">
-    <value>建立隱形斗篷時使用</value>
-    <comment>legacy_id=816</comment>
   </data>
   <data name="Absolute Crossbow of Archangel" xml:space="preserve">
     <value>大天使的絕對弩</value>
@@ -4097,10 +4036,6 @@
     <value>友誼之石</value>
     <comment>legacy_id=1098</comment>
   </data>
-  <data name="Used in the My Friend event." xml:space="preserve">
-    <value>在「我的朋友」活動中使用。</value>
-    <comment>legacy_id=1099</comment>
-  </data>
   <data name="Do you want to buy an item?" xml:space="preserve">
     <value>您想購買商品嗎？</value>
     <comment>legacy_id=1100</comment>
@@ -4529,14 +4464,6 @@
     <value>暗鴉</value>
     <comment>legacy_id=1214</comment>
   </data>
-  <data name="Used in Dark Horse resurrection" xml:space="preserve">
-    <value>用於黑馬復活</value>
-    <comment>legacy_id=1215</comment>
-  </data>
-  <data name="Used in Dark Raven resurrection" xml:space="preserve">
-    <value>用於暗鴉復活</value>
-    <comment>legacy_id=1216</comment>
-  </data>
   <data name="Pet" xml:space="preserve">
     <value>寵物</value>
     <comment>legacy_id=1217</comment>
@@ -4612,10 +4539,6 @@
   <data name="Crest of monarch" xml:space="preserve">
     <value>君主的紋章</value>
     <comment>legacy_id=1235</comment>
-  </data>
-  <data name="Used in combining Cape of Lord &amp; Warrior's Cloak" xml:space="preserve">
-    <value>用於組合領主斗篷和戰士斗篷</value>
-    <comment>legacy_id=1236</comment>
   </data>
   <data name="Check the details in pet information window" xml:space="preserve">
     <value>在寵物資訊視窗查看詳細信息</value>
@@ -4793,17 +4716,9 @@
     <value>防止裝備掉落</value>
     <comment>legacy_id=1288</comment>
   </data>
-  <data name="Create and improve items for siege" xml:space="preserve">
-    <value>創建和改進攻城物品</value>
-    <comment>legacy_id=1289</comment>
-  </data>
   <data name="Sign of lord" xml:space="preserve">
     <value>主的標誌</value>
     <comment>legacy_id=1290</comment>
-  </data>
-  <data name="Use in siege registration" xml:space="preserve">
-    <value>用於攻城登記</value>
-    <comment>legacy_id=1291</comment>
   </data>
   <data name="Move to vault" xml:space="preserve">
     <value>移至保管庫</value>
@@ -5277,18 +5192,6 @@
     <value>守護者捲軸</value>
     <comment>legacy_id=1416</comment>
   </data>
-  <data name="Damage +20%% increase effect" xml:space="preserve">
-    <value>傷害+20%% i效果增加</value>
-    <comment>legacy_id=1417</comment>
-  </data>
-  <data name="Duration 60 seconds" xml:space="preserve">
-    <value>持續時間 60 秒</value>
-    <comment>legacy_id=1418</comment>
-  </data>
-  <data name="Only applicable for castle gate and statue" xml:space="preserve">
-    <value>僅適用於城堡大門和雕像</value>
-    <comment>legacy_id=1419,1465</comment>
-  </data>
   <data name="No. of signs" xml:space="preserve">
     <value>標誌數量</value>
     <comment>legacy_id=1420</comment>
@@ -5468,10 +5371,6 @@
   <data name="Attacking skill will increase +20%%" xml:space="preserve">
     <value>攻擊力增加+20%%</value>
     <comment>legacy_id=1471</comment>
-  </data>
-  <data name="Attacking speed will increase +20" xml:space="preserve">
-    <value>攻擊速度增加+20</value>
-    <comment>legacy_id=1472</comment>
   </data>
   <data name="Can use the skill" xml:space="preserve">
     <value>可以使用技能</value>
@@ -6097,14 +5996,6 @@
     <value>聯盟功能將因城堡圍攻而受到限制。</value>
     <comment>legacy_id=1637</comment>
   </data>
-  <data name="Increase +8 AG recovery speed" xml:space="preserve">
-    <value>增加+8 AG恢復速度</value>
-    <comment>legacy_id=1638</comment>
-  </data>
-  <data name="Increase resistance of Lightning and Ice" xml:space="preserve">
-    <value>增加閃電和冰的抗性</value>
-    <comment>legacy_id=1639</comment>
-  </data>
   <data name="Store1640" xml:space="preserve">
     <value>店鋪</value>
     <comment>legacy_id=1640</comment>
@@ -6204,10 +6095,6 @@
   <data name="LugadrS12ApostlesAreHelping" xml:space="preserve">
     <value>盧加德爾的 12 名使徒正在幫忙，他們蒙蔽了通往巴爾加斯安息之地的道路旁的守門人。</value>
     <comment>legacy_id=1664</comment>
-  </data>
-  <data name="Ingredients for the 3rd wing assembly." xml:space="preserve">
-    <value>第三機翼組件的材料。</value>
-    <comment>legacy_id=1665</comment>
   </data>
   <data name="Condor's feather" xml:space="preserve">
     <value>禿鷹的羽毛</value>
@@ -7081,10 +6968,6 @@
     <value>為了減少水果，必須移除武器、盔甲等。</value>
     <comment>legacy_id=1909</comment>
   </data>
-  <data name="Possible to decrease stat 1~9 point" xml:space="preserve">
-    <value>可減少屬性1~9點</value>
-    <comment>legacy_id=1910</comment>
-  </data>
   <data name="Impossible since the usable fruit points are at maximum." xml:space="preserve">
     <value>不可能，因為可用的水果點數已達到最大。</value>
     <comment>legacy_id=1911</comment>
@@ -7921,22 +7804,6 @@
     <value>埃爾皮斯</value>
     <comment>legacy_id=2206</comment>
   </data>
-  <data name="I.D. of Kantur Chief Scientist. You can enter the Refinery Tower." xml:space="preserve">
-    <value>ID。坎圖爾首席科學家。您可以進入煉油塔。</value>
-    <comment>legacy_id=2207</comment>
-  </data>
-  <data name="Jewel with impurities" xml:space="preserve">
-    <value>含有雜質的寶石</value>
-    <comment>legacy_id=2208</comment>
-  </data>
-  <data name="Jewel for item reinforcement" xml:space="preserve">
-    <value>強化物品的寶石</value>
-    <comment>legacy_id=2209</comment>
-  </data>
-  <data name="Grant actual power to reinforced item." xml:space="preserve">
-    <value>賦予強化物品實際力量。</value>
-    <comment>legacy_id=2210</comment>
-  </data>
   <data name="Reinforced item can't be sold." xml:space="preserve">
     <value>強化物品無法出售。</value>
     <comment>legacy_id=2211</comment>
@@ -8089,10 +7956,6 @@
     <value>更強烈的效果已經發生。</value>
     <comment>legacy_id=2249</comment>
   </data>
-  <data name="Increases the combination rate,but only up to the maximum rate." xml:space="preserve">
-    <value>增加組合速率，但僅達最大速率。</value>
-    <comment>legacy_id=2250</comment>
-  </data>
   <data name="Unable to increase combination rate any further." xml:space="preserve">
     <value>無法進一步提高組合速率。</value>
     <comment>legacy_id=2251</comment>
@@ -8112,18 +7975,6 @@
   <data name="Unable to gain experience rate" xml:space="preserve">
     <value>無法獲得經驗值</value>
     <comment>legacy_id=2255</comment>
-  </data>
-  <data name="Increases experience gained." xml:space="preserve">
-    <value>增加獲得的經驗。</value>
-    <comment>legacy_id=2256</comment>
-  </data>
-  <data name="Increases experience gained and item drop rate." xml:space="preserve">
-    <value>增加獲得的經驗值和物品掉落率。</value>
-    <comment>legacy_id=2257</comment>
-  </data>
-  <data name="Prevents experiences to be gained." xml:space="preserve">
-    <value>阻止獲得經驗。</value>
-    <comment>legacy_id=2258</comment>
   </data>
   <data name="Enables entrance into %s." xml:space="preserve">
     <value>允許進入 %s。</value>
@@ -8164,10 +8015,6 @@
   <data name="You have achieve %s item." xml:space="preserve">
     <value>您已獲得 %s 專案。</value>
     <comment>legacy_id=2268</comment>
-  </data>
-  <data name="Congratulations. Please contact CS team and change it to item." xml:space="preserve">
-    <value>恭喜。請聯絡CS團隊並將其變更為專案。</value>
-    <comment>legacy_id=2269</comment>
   </data>
   <data name="You will be assigned to a stage according to your level." xml:space="preserve">
     <value>您將根據您的等級被分配到一個階段。</value>
@@ -8272,10 +8119,6 @@
   <data name="%d%% Combination success rate increase" xml:space="preserve">
     <value>%d%% 組合成功率提升</value>
     <comment>legacy_id=2296</comment>
-  </data>
-  <data name="Warp Command Window available." xml:space="preserve">
-    <value>扭曲命令視窗可用。</value>
-    <comment>legacy_id=2297</comment>
   </data>
   <data name="Hour" xml:space="preserve">
     <value>小時</value>
@@ -8428,6 +8271,9 @@
   <data name="Maximum" xml:space="preserve">
     <value>最大限度</value>
     <comment>legacy_id=2342</comment>
+  </data>
+  <data name="Max" xml:space="preserve">
+    <value>最大</value>
   </data>
   <data name="Rate increase" xml:space="preserve">
     <value>加息</value>
@@ -8605,18 +8451,6 @@
     <value>血捲軸</value>
     <comment>legacy_id=2396</comment>
   </data>
-  <data name="AssembleTheScrollOfBloodWith" xml:space="preserve">
-    <value>用幻象魔法的契約組裝血色捲軸。</value>
-    <comment>legacy_id=2397</comment>
-  </data>
-  <data name="Assemble the Scroll of Blood with the old scrolls." xml:space="preserve">
-    <value>將血液捲軸與舊捲軸組裝起來。</value>
-    <comment>legacy_id=2398</comment>
-  </data>
-  <data name="This is a mark of Illusion Sorcery; this is required to enter the temple." xml:space="preserve">
-    <value>這是幻術的印記；這是進入寺廟所必需的。</value>
-    <comment>legacy_id=2399</comment>
-  </data>
   <data name="&lt;STEP 1: Battle Begins&gt;" xml:space="preserve">
     <value>&lt;第一步：戰鬥開始&gt;</value>
     <comment>legacy_id=2400</comment>
@@ -8692,10 +8526,6 @@
   <data name="This is the origin of strength that protects the Illusion Temple." xml:space="preserve">
     <value>這就是守護幻殿的力量本源。</value>
     <comment>legacy_id=2419</comment>
-  </data>
-  <data name="Mobility speed reduces upon achievement." xml:space="preserve">
-    <value>成就後移動速度會降低。</value>
-    <comment>legacy_id=2420</comment>
   </data>
   <data name="&lt;AM&gt; &lt;PM&gt;" xml:space="preserve">
     <value>&lt;上午&gt; &lt;下午&gt;</value>
@@ -8905,10 +8735,6 @@
     <value>法力增加 %d</value>
     <comment>legacy_id=2508</comment>
   </data>
-  <data name="You may freely move onward." xml:space="preserve">
-    <value>你可以自由地前進。</value>
-    <comment>legacy_id=2509</comment>
-  </data>
   <data name="Resets the status." xml:space="preserve">
     <value>重置狀態。</value>
     <comment>legacy_id=2510</comment>
@@ -8944,10 +8770,6 @@
   <data name="There's an increase effect to it." xml:space="preserve">
     <value>對它有一個增加的效果。</value>
     <comment>legacy_id=2518</comment>
-  </data>
-  <data name="It reduces the killing rate." xml:space="preserve">
-    <value>它降低了殺滅率。</value>
-    <comment>legacy_id=2519</comment>
   </data>
   <data name="Reduction point: %d" xml:space="preserve">
     <value>還原點：%d</value>
@@ -9073,14 +8895,6 @@
     <value>使用物品期間無法獲得大師級經驗值。</value>
     <comment>legacy_id=2566</comment>
   </data>
-  <data name="Not applicable to" xml:space="preserve">
-    <value>不適用於</value>
-    <comment>legacy_id=2567</comment>
-  </data>
-  <data name="Master Level Characters." xml:space="preserve">
-    <value>大師級人物。</value>
-    <comment>legacy_id=2568</comment>
-  </data>
   <data name="Automatic Life Recover increment %d%%" xml:space="preserve">
     <value>自動生命復原增量 %d%%</value>
     <comment>legacy_id=2569</comment>
@@ -9096,30 +8910,6 @@
   <data name="Item achievement and the automatic Mana recovery increases onward." xml:space="preserve">
     <value>物品成就和自動法力恢復量不斷增加。</value>
     <comment>legacy_id=2572</comment>
-  </data>
-  <data name="Minimum +10 - +15 level item upgrade" xml:space="preserve">
-    <value>最低 +10 - +15 級物品升級</value>
-    <comment>legacy_id=2573</comment>
-  </data>
-  <data name="blocks the item dissipation." xml:space="preserve">
-    <value>阻止物品耗散。</value>
-    <comment>legacy_id=2574</comment>
-  </data>
-  <data name="Increases Attack Power and Wizardry by 40%%" xml:space="preserve">
-    <value>攻擊力和魔法增加40%%</value>
-    <comment>legacy_id=2575</comment>
-  </data>
-  <data name="Increases Attack Speed by 10" xml:space="preserve">
-    <value>攻擊速度提高 10</value>
-    <comment>legacy_id=2576,3069</comment>
-  </data>
-  <data name="Alleviates monster's damage by 30%%" xml:space="preserve">
-    <value>減少怪物傷害30%%</value>
-    <comment>legacy_id=2577</comment>
-  </data>
-  <data name="Increases Maximum Life by 50" xml:space="preserve">
-    <value>最大生命增加 50</value>
-    <comment>legacy_id=2578</comment>
   </data>
   <data name="Maximum Mana +50" xml:space="preserve">
     <value>最大法力 +50</value>
@@ -9205,10 +8995,6 @@
     <value>AG恢復速度增加了%d。</value>
     <comment>legacy_id=2599</comment>
   </data>
-  <data name="Surrounding Zens are automatically collected." xml:space="preserve">
-    <value>周圍的禪宗會自動收集。</value>
-    <comment>legacy_id=2600</comment>
-  </data>
   <data name="You may turn into a snowman if applied." xml:space="preserve">
     <value>如果你應用的話，你可能會變成雪人。</value>
     <comment>legacy_id=2601</comment>
@@ -9220,10 +9006,6 @@
   <data name="Move by a right-mouse-click." xml:space="preserve">
     <value>按一下滑鼠右鍵進行移動。</value>
     <comment>legacy_id=2603</comment>
-  </data>
-  <data name="Save the application location." xml:space="preserve">
-    <value>儲存應用程式位置。</value>
-    <comment>legacy_id=2604</comment>
   </data>
   <data name="Saves the location with the right-mouse-click." xml:space="preserve">
     <value>點選滑鼠右鍵儲存位置。</value>
@@ -9509,25 +9291,9 @@
     <value>巨像裡的人太多了。</value>
     <comment>legacy_id=2707</comment>
   </data>
-  <data name="+10~+15 When upgrading level item please put it in combination window." xml:space="preserve">
-    <value>+10~+15 升級等級項目時請將其放在組合視窗中。</value>
-    <comment>legacy_id=2708</comment>
-  </data>
   <data name="item/skill/luck/option will be randomly added." xml:space="preserve">
     <value>物品/技能/運氣/選項將隨機添加。</value>
     <comment>legacy_id=2709</comment>
-  </data>
-  <data name="Exp and item will be secured when character dies." xml:space="preserve">
-    <value>當角色死亡時，經驗值和物品將受到保護。</value>
-    <comment>legacy_id=2714</comment>
-  </data>
-  <data name="Item durability will not be decrease for a certain period." xml:space="preserve">
-    <value>物品耐久度在一定時間內不會減少。</value>
-    <comment>legacy_id=2715</comment>
-  </data>
-  <data name="Applicable to mountable items only besides pet." xml:space="preserve">
-    <value>僅適用於寵物以外的可安裝物品。</value>
-    <comment>legacy_id=2716</comment>
   </data>
   <data name="Increases your luck to create wing of your wish." xml:space="preserve">
     <value>增加你的運氣來創造你想要的翅膀。</value>
@@ -9576,14 +9342,6 @@
   <data name="Only increases Master level exp." xml:space="preserve">
     <value>只增加大師等級經驗。</value>
     <comment>legacy_id=2728</comment>
-  </data>
-  <data name="No penalty for dying." xml:space="preserve">
-    <value>死亡沒有懲罰。</value>
-    <comment>legacy_id=2729</comment>
-  </data>
-  <data name="Keeps item durable" xml:space="preserve">
-    <value>保持物品耐用</value>
-    <comment>legacy_id=2730</comment>
   </data>
   <data name="Select to move." xml:space="preserve">
     <value>選擇移動。</value>
@@ -9644,18 +9402,6 @@
   <data name="Damage/Wizardry/Curse +30" xml:space="preserve">
     <value>傷害/魔法/詛咒 +30</value>
     <comment>legacy_id=2745</comment>
-  </data>
-  <data name="Auto-collects zen around you." xml:space="preserve">
-    <value>自動收集你周圍的禪宗。</value>
-    <comment>legacy_id=2746</comment>
-  </data>
-  <data name="EXP rate 50%% increase" xml:space="preserve">
-    <value>EXP率50%% i增加</value>
-    <comment>legacy_id=2747</comment>
-  </data>
-  <data name="Increase Defensive Skill +50" xml:space="preserve">
-    <value>防禦技能增加+50</value>
-    <comment>legacy_id=2748</comment>
   </data>
   <data name="Lugard" xml:space="preserve">
     <value>盧加德</value>
@@ -9732,14 +9478,6 @@
   <data name="You need %d more to create a Mirror of Dimensions." xml:space="preserve">
     <value>您還需要 %d 來建立維度之鏡。</value>
     <comment>legacy_id=2776</comment>
-  </data>
-  <data name="That's the only thing that will get Lugard to help you" xml:space="preserve">
-    <value>這是唯一能讓盧加德幫助你的事情</value>
-    <comment>legacy_id=2777</comment>
-  </data>
-  <data name="enter the Doppelganger area." xml:space="preserve">
-    <value>進入分身區域。</value>
-    <comment>legacy_id=2778</comment>
   </data>
   <data name="Only those in possession of a Mirror of Dimensions may enter." xml:space="preserve">
     <value>只有持有次元鏡的人才可以進入。</value>
@@ -10020,26 +9758,6 @@
   <data name="The High Vitality potion has negated the Fatigue Level penalty." xml:space="preserve">
     <value>高活力藥水抵消了疲勞度懲罰。</value>
     <comment>legacy_id=2874</comment>
-  </data>
-  <data name="YouCanDoAGoblinCombination" xml:space="preserve">
-    <value>您可以將哥布林與密封金盒進行組合來創建金盒。</value>
-    <comment>legacy_id=2875</comment>
-  </data>
-  <data name="YouCanDoAGoblinCombination2876" xml:space="preserve">
-    <value>您可以將哥布林與密封銀盒進行組合來創建銀盒。</value>
-    <comment>legacy_id=2876</comment>
-  </data>
-  <data name="You can do a Goblin combination with a Gold Key to create a Golden Box." xml:space="preserve">
-    <value>您可以將哥布林與金鑰匙組合來創建金盒子。</value>
-    <comment>legacy_id=2877</comment>
-  </data>
-  <data name="You can do a Goblin combination with a Silver Key to create a Silver Box." xml:space="preserve">
-    <value>您可以將哥布林與銀鑰匙組合來創建銀盒子。</value>
-    <comment>legacy_id=2878</comment>
-  </data>
-  <data name="You can drop it with a fixed probability of it turning into a rare item." xml:space="preserve">
-    <value>你可以以固定的機率掉落它，使其變成稀有物品。</value>
-    <comment>legacy_id=2879,2880</comment>
   </data>
   <data name="Golden Box" xml:space="preserve">
     <value>金盒</value>
@@ -10333,26 +10051,6 @@
     <value>發生資料庫存取錯誤。</value>
     <comment>legacy_id=2967</comment>
   </data>
-  <data name="Increase Max. AG + Level" xml:space="preserve">
-    <value>增加最大。 AG+等級</value>
-    <comment>legacy_id=2968</comment>
-  </data>
-  <data name="Increase Max. SD + Levelx10" xml:space="preserve">
-    <value>增加最大。 SD + 等級x10</value>
-    <comment>legacy_id=2969</comment>
-  </data>
-  <data name="Up to %d%% EXP gain increase, depending on the number of members in your party." xml:space="preserve">
-    <value>增益增加最多 %d%% EXP，取決於隊伍中的成員數量。</value>
-    <comment>legacy_id=2970</comment>
-  </data>
-  <data name="You can acquire Goblin Points by using the MU Item Shop's storage." xml:space="preserve">
-    <value>您可以使用 MU 物品商店的存儲來獲取哥布林點數。</value>
-    <comment>legacy_id=2971</comment>
-  </data>
-  <data name="It's a box containing various items." xml:space="preserve">
-    <value>這是一個裝有各種物品的盒子。</value>
-    <comment>legacy_id=2972</comment>
-  </data>
   <data name="AnItemThatLetsYouEnjoy" xml:space="preserve">
     <value>可讓您享受30天MU的物品。 \n只能在MU Online網站上使用。</value>
     <comment>legacy_id=2973</comment>
@@ -10533,10 +10231,6 @@
     <value>羅倫市場</value>
     <comment>legacy_id=3017</comment>
   </data>
-  <data name="Boosts the item drop rate." xml:space="preserve">
-    <value>提高物品掉落率。</value>
-    <comment>legacy_id=3018</comment>
-  </data>
   <data name="Runedil" xml:space="preserve">
     <value>魯尼迪爾</value>
     <comment>legacy_id=3022</comment>
@@ -10673,10 +10367,6 @@
     <value>分身</value>
     <comment>legacy_id=3057</comment>
   </data>
-  <data name="Increases Max Mana 4%%" xml:space="preserve">
-    <value>最大法力增加 4%%</value>
-    <comment>legacy_id=3058</comment>
-  </data>
   <data name="PC Cafe Bonus" xml:space="preserve">
     <value>網咖獎金</value>
     <comment>legacy_id=3059</comment>
@@ -10712,14 +10402,6 @@
   <data name="Equipping along with a Pet Skeleton" xml:space="preserve">
     <value>與寵物骷髏一起裝備</value>
     <comment>legacy_id=3067</comment>
-  </data>
-  <data name="increases Damage, Wizardry and Curse by 20%%" xml:space="preserve">
-    <value>傷害、魔法和詛咒增加 20%%</value>
-    <comment>legacy_id=3068</comment>
-  </data>
-  <data name="and EXP by 30%%." xml:space="preserve">
-    <value>經驗值增加 30%%。</value>
-    <comment>legacy_id=3070</comment>
   </data>
   <data name="Equipping along with a Skeleton Transformation Ring" xml:space="preserve">
     <value>與骷髏變身戒指一起裝備</value>
@@ -10764,10 +10446,6 @@
   <data name="Random Reward (%lu different kinds)" xml:space="preserve">
     <value>隨機獎勵（%lu不同種類）</value>
     <comment>legacy_id=3082</comment>
-  </data>
-  <data name="Right click to use." xml:space="preserve">
-    <value>右鍵點擊即可使用。</value>
-    <comment>legacy_id=3084</comment>
   </data>
   <data name="+14 Item Creation" xml:space="preserve">
     <value>+14 物品創建</value>
@@ -11268,10 +10946,6 @@
   <data name="Jewel used for reinforcing a Lucky Item." xml:space="preserve">
     <value>用於強化幸運物品的寶石。</value>
     <comment>legacy_id=3304</comment>
-  </data>
-  <data name="Jewel used for repairing a Lucky Item." xml:space="preserve">
-    <value>用於修復幸運物品的寶石。</value>
-    <comment>legacy_id=3305</comment>
   </data>
   <data name="Jewel cannot be used on durability 0 item (repair)." xml:space="preserve">
     <value>寶石不能用於耐久度為 0 的物品（修理）。</value>

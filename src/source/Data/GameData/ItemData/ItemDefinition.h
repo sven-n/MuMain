@@ -63,6 +63,48 @@ enum class WeaponKind : BYTE
     Book,
 };
 
+// The color of a tooltip line; the values are the tooltip's TEXT_COLOR_*.
+enum class ItemTextColor : BYTE
+{
+    White = TEXT_COLOR_WHITE,
+    Blue = TEXT_COLOR_BLUE,
+    Red = TEXT_COLOR_RED,
+    Yellow = TEXT_COLOR_YELLOW,
+    Green = TEXT_COLOR_GREEN,
+    DarkRed = TEXT_COLOR_DARKRED,
+    Purple = TEXT_COLOR_PURPLE,
+    DarkBlue = TEXT_COLOR_DARKBLUE,
+    DarkYellow = TEXT_COLOR_DARKYELLOW,
+    GreenBlue = TEXT_COLOR_GREEN_BLUE,
+    Gray = TEXT_COLOR_GRAY,
+    RedPurple = TEXT_COLOR_REDPURPLE,
+    Violet = TEXT_COLOR_VIOLET,
+    Orange = TEXT_COLOR_ORANGE,
+    Count
+};
+constexpr size_t ItemTextColorCount = static_cast<size_t>(ItemTextColor::Count);
+
+// One line of an item's description in its tooltip: a text with its translations (empty: a blank line), its color, and
+// the item levels it is shown at (both included; every level unless set).
+struct ItemDescriptionLine
+{
+    LocalizedString text;
+    ItemTextColor color = ItemTextColor::White;
+    int minLevel = 0;
+    int maxLevel = ItemLevelCount - 1;
+
+    bool IsShownAt(int level) const
+    {
+        return level >= minLevel && level <= maxLevel;
+    }
+    bool HasLevels() const
+    {
+        return minLevel != 0 || maxLevel != ItemLevelCount - 1;
+    }
+
+    bool operator==(const ItemDescriptionLine& other) const = default;
+};
+
 // What a player may do with an item. See the rule flags in ItemDefinition.
 enum class ItemAction : BYTE
 {
@@ -164,11 +206,16 @@ struct ItemDefinition
     // All names of the item, English first. Logs always use the English
     // name (names.GetNeutral()), never a translation.
     LocalizedString names;
-    // The name in the current UI locale, shown to the player. Filled by
+    // The name in the item name language (the UI language, or English while
+    // translated item names are off), shown to the player. Filled by
     // ItemDatabase from names.
     std::wstring name;
 
     ItemTagSet tags;
+
+    // What the tooltip says about the item, line by line, after its own lines (empty for most items; the jewels'
+    // texts of the original client are still in the tooltip code).
+    std::vector<ItemDescriptionLine> description;
 
     BYTE width = 0;
     BYTE height = 0;
@@ -189,14 +236,15 @@ struct ItemDefinition
 
     BYTE durability = 0;
     BYTE magicDurability = 0;
-    BYTE damageMin = 0;
-    BYTE damageMax = 0;
+    // Damage and magic power pass 255 for later items (the .bmd item files hold one byte; see FindItemFileMisfits).
+    WORD damageMin = 0;
+    WORD damageMax = 0;
     BYTE blockRate = 0;
     BYTE defense = 0;
     BYTE magicDefense = 0;
     BYTE attackSpeed = 0;
     BYTE walkSpeed = 0;
-    BYTE magicPower = 0;
+    WORD magicPower = 0;
     // A fixed excellent bonus of damage and magic power instead of the stat
     // file's excellent term (three chaos weapons); 0 uses the term.
     BYTE excellentBonus = 0;

@@ -120,6 +120,14 @@ public:
 
     void SetNPC(int nNPCIndex);
     int GetNPCIndex();
+#ifdef _EDITOR
+    // The NPC dialogues by NPC number * 0x10000 + dialogue state, for the
+    // editor's monster tools.
+    const NPCDialogueMap& GetNPCDialogues() const
+    {
+        return m_mapNPCDialogue;
+    }
+#endif
     const wchar_t* GetNPCName();
 
     void SetCurQuestProgress(DWORD dwQuestIndex);

@@ -27,6 +27,7 @@
 #include "Data/DataHandler/CommonDataSaver.h"
 #include "ItemDataSaver.h"
 #include "ItemDataExportS6E3.h"
+#include "Data/GameData/ItemData/ItemFileFit.h"
 #include "ItemDataExportAsCSV.h"
 #endif
 
@@ -120,6 +121,8 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     {
         statProfiles = ItemStatProfiles(stats.file);
         ValidateStatProfiles(result.items, statProfiles, GetItemStatsFile().generic_string(), result.issues);
+        ValidateDescriptionPlaceholders(result.items, statProfiles, GetItemStatsFile().generic_string(), result.issues);
+        ValidateTableUses(result.items, statProfiles, GetItemStatsFile().generic_string(), result.issues);
     }
     Data::LogDataIssues(ItemDataLabel, result.issues);
     if (HasErrors(result.issues))
@@ -134,10 +137,11 @@ bool CItemDataHandler::Load(std::string& errorMessage)
 #endif
 
     const auto buildStart = std::chrono::steady_clock::now();
-    g_ItemDatabase.SetDisplayLocale(I18N::GetCurrentLocale());
+    g_ItemDatabase.SetDisplayLocale(ItemNameLocale());
     g_ItemDatabase.SetStatProfiles(std::move(statProfiles));
     g_ItemDatabase.Build(result.items);
     FillItemAttributes();
+    m_loaded = true;
     RegisterLocaleObserver();
 
     MU_LOG_INFO(mu::log::Get("data"), "Loaded {} items from {} in {:.1f} ms (item database build {:.2f} ms)",
@@ -208,9 +212,27 @@ void CItemDataHandler::RegisterLocaleObserver()
 
 void CItemDataHandler::OnLocaleChanged(void* context) noexcept
 {
-    auto* handler = static_cast<CItemDataHandler*>(context);
-    g_ItemDatabase.SetDisplayLocale(I18N::GetCurrentLocale());
-    handler->FillItemAttributes();
+    static_cast<CItemDataHandler*>(context)->RefreshItemNames();
+}
+
+void CItemDataHandler::SetTranslateItemNames(bool translate)
+{
+    m_translateItemNames = translate;
+    if (m_loaded)
+    {
+        RefreshItemNames();
+    }
+}
+
+std::string_view CItemDataHandler::ItemNameLocale() const
+{
+    return Data::Items::GetItemNameLocale(I18N::GetCurrentLocale(), m_translateItemNames);
+}
+
+void CItemDataHandler::RefreshItemNames()
+{
+    g_ItemDatabase.SetDisplayLocale(ItemNameLocale());
+    FillItemAttributes();
 }
 
 #ifdef _EDITOR
@@ -512,7 +534,9 @@ void CItemDataHandler::SwapItemModels(int firstItemType, int secondItemType)
     if (m_openedModelHooks.changed != nullptr)
     {
         const int itemTypes[] = {firstItemType, secondItemType};
-        m_openedModelHooks.changed(itemTypes);
+        // A call through a function pointer: GCC lets the array decay to a
+        // pointer instead of making a span of it.
+        m_openedModelHooks.changed(std::span<const int>(itemTypes));
     }
     m_changedModelGroups.set(static_cast<size_t>(GetItemGroup(firstItemType)));
     m_changedModelGroups.set(static_cast<size_t>(GetItemGroup(secondItemType)));
@@ -554,6 +578,10 @@ void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
     // A profile the item stat file does not have would stop the next start.
     ValidateStatProfiles(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(),
                          GetItemStatsFile().generic_string(), issues);
+    ValidateDescriptionPlaceholders(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(),
+                                    GetItemStatsFile().generic_string(), issues);
+    ValidateTableUses(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(),
+                      GetItemStatsFile().generic_string(), issues);
     ValidateNameLocales(g_ItemDatabase.GetAllSlots(), I18N::GetAvailableLocales(), issues);
     std::vector<ItemDefinition> items;
     std::ranges::copy_if(g_ItemDatabase.GetAllSlots(), std::back_inserter(items), &ItemDefinition::Exists);
@@ -633,6 +661,10 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
     ValidateItems(result.items, result.validationIssues);
     ValidateStatProfiles(result.items, g_ItemDatabase.GetStatProfiles(), GetItemStatsFile().generic_string(),
                          result.validationIssues);
+    ValidateDescriptionPlaceholders(result.items, g_ItemDatabase.GetStatProfiles(), GetItemStatsFile().generic_string(),
+                                    result.validationIssues);
+    ValidateTableUses(result.items, g_ItemDatabase.GetStatProfiles(), GetItemStatsFile().generic_string(),
+                      result.validationIssues);
     ValidateNameLocales(result.items, I18N::GetAvailableLocales(), result.validationIssues);
 
     g_ItemDatabase.Build(result.items);
@@ -706,6 +738,15 @@ void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items,
 
 bool CItemDataHandler::ExportAsBmd(std::string& changeLog)
 {
+    // The values are the same in every language: check them once.
+    const std::vector<ItemFileMisfit> misfits =
+        FindItemFileMisfits(BuildItemAttributes(GetItemBmdLanguages().front().locale).get(), MAX_ITEM);
+    if (!misfits.empty())
+    {
+        changeLog += DescribeItemFileMisfits(misfits);
+        return false;
+    }
+
     bool success = true;
     for (const ItemBmdLanguage& language : GetItemBmdLanguages())
     {
@@ -721,13 +762,13 @@ bool CItemDataHandler::ExportAsBmd(std::string& changeLog)
     return success;
 }
 
-bool CItemDataHandler::ExportAsS6E3(wchar_t* fileName)
+bool CItemDataHandler::ExportAsS6E3(wchar_t* fileName, std::string& problems)
 {
-    return ItemDataExportS6E3::SaveLegacy(fileName);
+    return ItemDataExportS6E3::SaveLegacy(fileName, BuildItemAttributes(I18N::GetCurrentLocale()).get(), &problems);
 }
 
 bool CItemDataHandler::ExportToCsv(wchar_t* fileName)
 {
-    return ItemDataExportAsCSV::ExportToCsv(fileName);
+    return ItemDataExportAsCSV::ExportToCsv(fileName, BuildItemAttributes(I18N::GetCurrentLocale()).get());
 }
 #endif
