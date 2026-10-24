@@ -1664,7 +1664,7 @@ void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, in
             line.text.Get(I18N::GetCurrentLocale()),
             [&](std::string_view name)
             {
-                if (const std::optional<int> value = GetItemTooltipValue(values, name))
+                if (const std::optional<int> value = Engine::Items::TooltipValues::GetItemTooltipValue(values, name))
                     return value;
                 return Data::Items::GetPlaceholderValue(name, level, g_ItemDatabase.GetStatProfiles());
             }));
@@ -3048,7 +3048,7 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     mu_swprintf(TextList[TextNum], L"%ls", p->Name);
 
     // The numbers of the stat lines, the built-in placeholders of the descriptions.
-    const ItemTooltipValues values = ComputeItemTooltipValues(*ip);
+    const ItemTooltipValues values = Engine::Items::TooltipValues::ComputeItemTooltipValues(*ip);
     if (ip->DamageMin)
     {
         if (ip->Type >> 4 == 15)

@@ -3,6 +3,7 @@
 #include <array>
 #include <optional>
 #include <string_view>
+#include <vector>
 
 // The values the item tooltip's stat lines show for an item and the hero, each computed as RenderItemInfo always has:
 // the built-in placeholders of the item descriptions ({damageMin}, {requiredStrength}, ...), and the states the lines'
@@ -48,9 +49,16 @@ struct ItemTooltipValues
     bool ancient = false;
 };
 
-// The values of `item` for the hero as he is (CharacterAttribute).
+namespace Engine::Items::TooltipValues
+{
+// The values of `item` for the hero as he is (CharacterAttribute); without a hero (none set yet), the requirements
+// are shown but nothing is missing.
 ItemTooltipValues ComputeItemTooltipValues(const ITEM& item);
 
 // The value of a built-in placeholder (ItemDescriptionPlaceholders' names, without {level}), or nothing for another
 // name.
 std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, std::string_view name);
+
+// Every name GetItemTooltipValue answers for, so a test can check them against the placeholder checks' list.
+std::vector<std::string_view> GetItemTooltipValueNames();
+} // namespace Engine::Items::TooltipValues
