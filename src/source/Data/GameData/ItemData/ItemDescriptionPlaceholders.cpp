@@ -6,13 +6,25 @@
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
 
 #include <algorithm>
+#include <functional>
 #include <array>
 
 namespace Data::Items
 {
 namespace
 {
-constexpr std::array<std::string_view, 1> BuiltIns = {LevelPlaceholder};
+// {level}, and the values of the tooltip's stat lines, which the game computes (Engine/Object/ItemTooltipValues).
+constexpr std::array<std::string_view, 34> BuiltIns = {
+    LevelPlaceholder,    "damageMin",           "damageMax",        "defense",
+    "magicDefense",      "blockRate",           "attackSpeed",      "walkSpeed",
+    "magicPower",        "durability",          "maxDurability",    "iceResistance",
+    "poisonResistance",  "lightningResistance", "fireResistance",   "earthResistance",
+    "windResistance",    "waterResistance",     "requiredLevel",    "requiredStrength",
+    "requiredDexterity", "requiredVitality",    "requiredEnergy",   "requiredLeadership",
+    "missingLevel",      "missingStrength",     "missingDexterity", "missingVitality",
+    "missingEnergy",     "missingLeadership",   "addOptionValue1",  "addOptionValue2",
+    "addOptionDuration", "heroLevel",
+};
 
 // The placeholder of `text` that starts at the "{" at `open`: its name and the position after its "}", or the problem.
 struct Placeholder
@@ -124,7 +136,39 @@ std::optional<int> GetPlaceholderValue(std::string_view name, int level, const I
     return std::nullopt;
 }
 
+std::optional<int> ReadSkillManaValue(std::string_view name)
+{
+    if (!name.starts_with(SkillManaPrefix))
+    {
+        return std::nullopt;
+    }
+    const std::string_view number = name.substr(SkillManaPrefix.size());
+    if (number.empty() || number.size() > 4 ||
+        !std::all_of(number.begin(), number.end(), [](char c) { return c >= '0' && c <= '9'; }))
+    {
+        return std::nullopt;
+    }
+    const int skill = std::stoi(std::string(number));
+    return skill < MAX_SKILLS ? std::optional<int>(skill) : std::nullopt;
+}
+
+bool IsBuiltInPlaceholder(std::string_view name)
+{
+    return std::find(BuiltIns.begin(), BuiltIns.end(), name) != BuiltIns.end();
+}
+
 std::string FillPlaceholders(std::string_view text, int level, const ItemStatProfiles& profiles)
+{
+    return FillPlaceholders(text,
+                            [&](std::string_view name) -> std::optional<std::string>
+                            {
+                                if (const std::optional<int> value = GetPlaceholderValue(name, level, profiles))
+                                    return std::to_string(*value);
+                                return std::nullopt;
+                            });
+}
+
+std::string FillPlaceholders(std::string_view text, const PlaceholderValueOf& valueOf)
 {
     std::string filled;
     filled.reserve(text.size());
@@ -138,15 +182,15 @@ std::string FillPlaceholders(std::string_view text, int level, const ItemStatPro
         }
         filled.append(text.substr(position, brace - position));
         const Placeholder placeholder = text[brace] == '{' ? ReadPlaceholder(text, brace) : Placeholder{};
-        const std::optional<int> value = placeholder.error.empty() && placeholder.end != std::string_view::npos
-                                             ? GetPlaceholderValue(placeholder.name, level, profiles)
-                                             : std::nullopt;
+        const std::optional<std::string> value = placeholder.error.empty() && placeholder.end != std::string_view::npos
+                                                     ? valueOf(placeholder.name)
+                                                     : std::nullopt;
         if (!value)
         {
             position = brace;
             break;
         }
-        filled.append(std::to_string(*value));
+        filled.append(*value);
         position = placeholder.end;
     }
     filled.append(text.substr(std::min(position, text.size())));

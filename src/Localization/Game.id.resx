@@ -156,18 +156,6 @@
     <value>Lapangan Setan</value>
     <comment>legacy_id=39,1145</comment>
   </data>
-  <data name="One-Handed Damage" xml:space="preserve">
-    <value>Kerusakan Satu Tangan</value>
-    <comment>legacy_id=40</comment>
-  </data>
-  <data name="Two-Handed Damage" xml:space="preserve">
-    <value>Kerusakan Dua Tangan</value>
-    <comment>legacy_id=41</comment>
-  </data>
-  <data name="Wizardry Damage" xml:space="preserve">
-    <value>Kerusakan Sihir</value>
-    <comment>legacy_id=42</comment>
-  </data>
   <data name="Very Slow" xml:space="preserve">
     <value>Sangat Lambat</value>
     <comment>legacy_id=43</comment>
@@ -260,21 +248,9 @@
     <value>Pertahanan: %d</value>
     <comment>legacy_id=65,209</comment>
   </data>
-  <data name="Spell resistance: %d" xml:space="preserve">
-    <value>Ketahanan mantra: %d</value>
-    <comment>legacy_id=66</comment>
-  </data>
   <data name="Defense rate: %d" xml:space="preserve">
     <value>Tingkat pertahanan: %d</value>
     <comment>legacy_id=67,2045</comment>
-  </data>
-  <data name="Moving speed: %d" xml:space="preserve">
-    <value>Kecepatan bergerak: %d</value>
-    <comment>legacy_id=68</comment>
-  </data>
-  <data name="Number of items: %d" xml:space="preserve">
-    <value>Jumlah item: %d</value>
-    <comment>legacy_id=69</comment>
   </data>
   <data name="Life: %d" xml:space="preserve">
     <value>Kehidupan: %d</value>
@@ -283,10 +259,6 @@
   <data name="Durability: [%d/%d]" xml:space="preserve">
     <value>Daya Tahan: [%d/%d]</value>
     <comment>legacy_id=71</comment>
-  </data>
-  <data name="%s Resistance: %d" xml:space="preserve">
-    <value>Resistensi %s: %d</value>
-    <comment>legacy_id=72</comment>
   </data>
   <data name="Strength Requirement: %d" xml:space="preserve">
     <value>Persyaratan Kekuatan: %d</value>
@@ -311,10 +283,6 @@
   <data name="Increases moving speed" xml:space="preserve">
     <value>Meningkatkan kecepatan bergerak</value>
     <comment>legacy_id=78</comment>
-  </data>
-  <data name="Wizardry Dmg %d%% rise" xml:space="preserve">
-    <value>Sihir Dmg %d%% meningkat</value>
-    <comment>legacy_id=79</comment>
   </data>
   <data name="Defend skill (Mana:%d)" xml:space="preserve">
     <value>Keterampilan bertahan (Mana: %d)</value>
@@ -375,10 +343,6 @@
   <data name="Luck (critical damage rate +5%%)" xml:space="preserve">
     <value>Keberuntungan (tingkat kerusakan kritis +5%%)</value>
     <comment>legacy_id=94</comment>
-  </data>
-  <data name="Durability: [%d]" xml:space="preserve">
-    <value>Daya Tahan: [%d]</value>
-    <comment>legacy_id=95</comment>
   </data>
   <data name="Can only be used in moving unit" xml:space="preserve">
     <value>Hanya dapat digunakan pada unit yang bergerak</value>
@@ -471,10 +435,6 @@
   <data name="Moon Cookie" xml:space="preserve">
     <value>Kue Bulan</value>
     <comment>legacy_id=118</comment>
-  </data>
-  <data name="You can register by giving it to the NPC" xml:space="preserve">
-    <value>Anda bisa mendaftar dengan memberikannya kepada NPC</value>
-    <comment>legacy_id=119</comment>
   </data>
   <data name="Key Function" xml:space="preserve">
     <value>Fungsi Kunci</value>
@@ -2145,11 +2105,11 @@
     <comment>legacy_id=575</comment>
   </data>
   <data name="Increase %d%% of Damage" xml:space="preserve">
-    <value>Meningkatkan Kerusakan %d%% of</value>
+    <value>Meningkatkan Kerusakan %d%%</value>
     <comment>legacy_id=577</comment>
   </data>
   <data name="Absorb %d%% of Damage" xml:space="preserve">
-    <value>Menyerap Kerusakan %d%% of</value>
+    <value>Menyerap %d%% Kerusakan</value>
     <comment>legacy_id=578</comment>
   </data>
   <data name="Increase speed" xml:space="preserve">
@@ -3384,17 +3344,9 @@
     <value>Anda dapat menjatuhkan cincin ketika Anda mencapai level %d.</value>
     <comment>legacy_id=923</comment>
   </data>
-  <data name="Can be dropped after level %d" xml:space="preserve">
-    <value>Dapat dijatuhkan setelah level %d</value>
-    <comment>legacy_id=924</comment>
-  </data>
   <data name="Ring of Wizard" xml:space="preserve">
     <value>Cincin Penyihir</value>
     <comment>legacy_id=925</comment>
-  </data>
-  <data name="Cannot Repair" xml:space="preserve">
-    <value>Tidak Dapat Memperbaiki</value>
-    <comment>legacy_id=926</comment>
   </data>
   <data name="Close (%s)" xml:space="preserve">
     <value>Tutup (%s)</value>
@@ -4531,10 +4483,6 @@
   <data name="No %s." xml:space="preserve">
     <value>Tidak ada %s.</value>
     <comment>legacy_id=1233</comment>
-  </data>
-  <data name="Increase pet attack as %d%%" xml:space="preserve">
-    <value>Tingkatkan serangan hewan peliharaan sebagai %d%%</value>
-    <comment>legacy_id=1234</comment>
   </data>
   <data name="Crest of monarch" xml:space="preserve">
     <value>Lambang raja</value>
@@ -6196,10 +6144,6 @@
     <value>Mentalitas yang kuat dan wawasan yang luar biasa menciptakan mantra kutukan yang paling kuat. Juga item ini menarik pemanggil dunia lain dan menggunakan sihir yang merugikan untuk melawan mereka.</value>
     <comment>legacy_id=1690</comment>
   </data>
-  <data name="Curse Spell increment %d%%" xml:space="preserve">
-    <value>Peningkatan Mantra Kutukan %d%%</value>
-    <comment>legacy_id=1691</comment>
-  </data>
   <data name="Curse Spell: %d ~ %d" xml:space="preserve">
     <value>Mantra Kutukan: %d ~ %d</value>
     <comment>legacy_id=1692</comment>
@@ -6888,10 +6832,6 @@
     <value>Klik pada tombol untuk menginisialisasi ulang semua poin stat.</value>
     <comment>legacy_id=1886</comment>
   </data>
-  <data name="Register with the NPC to receive various gifts." xml:space="preserve">
-    <value>Daftar ke NPC untuk menerima berbagai hadiah.</value>
-    <comment>legacy_id=1887</comment>
-  </data>
   <data name="Exchange has been made." xml:space="preserve">
     <value>Pertukaran telah dilakukan.</value>
     <comment>legacy_id=1888</comment>
@@ -6984,18 +6924,6 @@
     <value>Fenrir</value>
     <comment>legacy_id=1916</comment>
   </data>
-  <data name="FragmentOfHornCanBeMade" xml:space="preserve">
-    <value>Fragmen tanduk dapat dibuat menggunakan perlindungan Ilahi dari Dewi dan fragmen baju besi.</value>
-    <comment>legacy_id=1917</comment>
-  </data>
-  <data name="Broken horn can be made using the claw of beast and fragment of horn." xml:space="preserve">
-    <value>Tanduk patah dapat dibuat dengan menggunakan cakar binatang dan pecahan tanduk.</value>
-    <comment>legacy_id=1918</comment>
-  </data>
-  <data name="Fenrir's horn can be made through item combination." xml:space="preserve">
-    <value>Tanduk Fenrir dapat dibuat melalui kombinasi item.</value>
-    <comment>legacy_id=1919</comment>
-  </data>
   <data name="Can summon the Fenrir when equipped." xml:space="preserve">
     <value>Dapat memanggil Fenrir saat dipakai.</value>
     <comment>legacy_id=1920</comment>
@@ -7035,10 +6963,6 @@
   <data name="Skills will improve through upgrading." xml:space="preserve">
     <value>Keterampilan akan meningkat melalui peningkatan.</value>
     <comment>legacy_id=1929</comment>
-  </data>
-  <data name="Stamina Requirement: %d" xml:space="preserve">
-    <value>Persyaratan Stamina: %d</value>
-    <comment>legacy_id=1930</comment>
   </data>
   <data name="Req LV" xml:space="preserve">
     <value>Persyaratan LV</value>
@@ -7856,10 +7780,6 @@
     <value>Kilang telah dimulai. Refinery merupakan bagian dari proses perubahan item menjadi Refining Stone untuk diperkuat. Item yang dimurnikan akan dihilangkan, pastikan untuk memeriksa item tersebut.</value>
     <comment>legacy_id=2224</comment>
   </data>
-  <data name="VitalityD2225" xml:space="preserve">
-    <value>vitalitas +%d</value>
-    <comment>legacy_id=2225</comment>
-  </data>
   <data name="This item is not allowed to use the private store." xml:space="preserve">
     <value>Item ini tidak diperbolehkan menggunakan toko pribadi.</value>
     <comment>legacy_id=2226</comment>
@@ -7883,10 +7803,6 @@
   <data name="Defense Power increase +%d" xml:space="preserve">
     <value>Peningkatan Kekuatan Pertahanan +%d</value>
     <comment>legacy_id=2231</comment>
-  </data>
-  <data name="Enjoy Halloween Festival." xml:space="preserve">
-    <value>Nikmati Festival Halloween.</value>
-    <comment>legacy_id=2232</comment>
   </data>
   <data name="Blessing of Jack O'Lantern" xml:space="preserve">
     <value>Berkat Jack O'Lantern</value>
@@ -7932,10 +7848,6 @@
     <value>Natal</value>
     <comment>legacy_id=2243</comment>
   </data>
-  <data name="Fireworks will appear once thrown in the field." xml:space="preserve">
-    <value>Kembang api akan muncul setelah dilempar ke lapangan.</value>
-    <comment>legacy_id=2244</comment>
-  </data>
   <data name="Santa Clause" xml:space="preserve">
     <value>Klausul Sinterklas</value>
     <comment>legacy_id=2245</comment>
@@ -7947,10 +7859,6 @@
   <data name="Snowman" xml:space="preserve">
     <value>manusia salju</value>
     <comment>legacy_id=2247</comment>
-  </data>
-  <data name="Merry Christmas." xml:space="preserve">
-    <value>Selamat natal.</value>
-    <comment>legacy_id=2248</comment>
   </data>
   <data name="Stonger effect has taken place." xml:space="preserve">
     <value>Efek yang lebih kuat telah terjadi.</value>
@@ -7964,25 +7872,9 @@
     <value>Hari</value>
     <comment>legacy_id=2252,2298</comment>
   </data>
-  <data name="Experience rate is increased %d%%" xml:space="preserve">
-    <value>Tingkat pengalaman meningkat %d%%</value>
-    <comment>legacy_id=2253</comment>
-  </data>
-  <data name="Item drop rate is increased %d%%" xml:space="preserve">
-    <value>Tingkat penurunan item meningkat %d%%</value>
-    <comment>legacy_id=2254</comment>
-  </data>
   <data name="Unable to gain experience rate" xml:space="preserve">
     <value>Tidak dapat memperoleh tingkat pengalaman</value>
     <comment>legacy_id=2255</comment>
-  </data>
-  <data name="Enables entrance into %s." xml:space="preserve">
-    <value>Memungkinkan masuk ke %s.</value>
-    <comment>legacy_id=2259</comment>
-  </data>
-  <data name="usable %dtimes" xml:space="preserve">
-    <value>waktu %d yang dapat digunakan</value>
-    <comment>legacy_id=2260</comment>
   </data>
   <data name="You can achieve special items with combinations." xml:space="preserve">
     <value>Anda dapat memperoleh item khusus dengan kombinasi.</value>
@@ -8015,10 +7907,6 @@
   <data name="You have achieve %s item." xml:space="preserve">
     <value>Anda telah mencapai item %s.</value>
     <comment>legacy_id=2268</comment>
-  </data>
-  <data name="You will be assigned to a stage according to your level." xml:space="preserve">
-    <value>Anda akan ditugaskan ke tahapan sesuai dengan level Anda.</value>
-    <comment>legacy_id=2270</comment>
   </data>
   <data name="Display general items." xml:space="preserve">
     <value>Tampilkan item umum.</value>
@@ -8116,10 +8004,6 @@
     <value>http://muonline.webzen.com/</value>
     <comment>legacy_id=2295</comment>
   </data>
-  <data name="%d%% Combination success rate increase" xml:space="preserve">
-    <value>%d%% Peningkatan tingkat keberhasilan kombinasi</value>
-    <comment>legacy_id=2296</comment>
-  </data>
   <data name="Hour" xml:space="preserve">
     <value>Jam</value>
     <comment>legacy_id=2299</comment>
@@ -8131,10 +8015,6 @@
   <data name="Second" xml:space="preserve">
     <value>Kedua</value>
     <comment>legacy_id=2301</comment>
-  </data>
-  <data name="Available" xml:space="preserve">
-    <value>Tersedia</value>
-    <comment>legacy_id=2302</comment>
   </data>
   <data name="Preparing." xml:space="preserve">
     <value>Mempersiapkan.</value>
@@ -8191,10 +8071,6 @@
   <data name="You do not have sufficient points." xml:space="preserve">
     <value>Anda tidak memiliki poin yang cukup.</value>
     <comment>legacy_id=2322</comment>
-  </data>
-  <data name="GM has gifted this special box." xml:space="preserve">
-    <value>GM telah menghadiahkan kotak khusus ini.</value>
-    <comment>legacy_id=2323</comment>
   </data>
   <data name="GM summon zone" xml:space="preserve">
     <value>Zona pemanggilan GM</value>
@@ -8699,42 +8575,6 @@
     <value>8 Tuan Tuan</value>
     <comment>legacy_id=2464</comment>
   </data>
-  <data name="Restores HP by 100%% immediately." xml:space="preserve">
-    <value>Memulihkan HP sebesar 100%% imsegera.</value>
-    <comment>legacy_id=2500</comment>
-  </data>
-  <data name="Restores Mana by 100%% immediately." xml:space="preserve">
-    <value>Memulihkan Mana sebesar 100%% imsegera.</value>
-    <comment>legacy_id=2501</comment>
-  </data>
-  <data name="You may continue to use the strengthener power." xml:space="preserve">
-    <value>Anda dapat terus menggunakan kekuatan penguat.</value>
-    <comment>legacy_id=2502</comment>
-  </data>
-  <data name="Increases Attack Speed by %d" xml:space="preserve">
-    <value>Meningkatkan Kecepatan Serangan sebesar %d</value>
-    <comment>legacy_id=2503</comment>
-  </data>
-  <data name="Increases Defense by %d" xml:space="preserve">
-    <value>Meningkatkan Pertahanan sebesar %d</value>
-    <comment>legacy_id=2504</comment>
-  </data>
-  <data name="Increases Attack Power by %d" xml:space="preserve">
-    <value>Meningkatkan Kekuatan Serangan sebesar %d</value>
-    <comment>legacy_id=2505</comment>
-  </data>
-  <data name="Increases Wizardry by %d" xml:space="preserve">
-    <value>Meningkatkan Sihir sebesar %d</value>
-    <comment>legacy_id=2506</comment>
-  </data>
-  <data name="Increases HP by %d" xml:space="preserve">
-    <value>Meningkatkan HP sebesar %d</value>
-    <comment>legacy_id=2507</comment>
-  </data>
-  <data name="Increases Mana by %d" xml:space="preserve">
-    <value>Meningkatkan Mana sebanyak %d</value>
-    <comment>legacy_id=2508</comment>
-  </data>
   <data name="Resets the status." xml:space="preserve">
     <value>Menyetel ulang statusnya.</value>
     <comment>legacy_id=2510</comment>
@@ -8742,34 +8582,6 @@
   <data name="Reset point: %d" xml:space="preserve">
     <value>Titik reset: %d</value>
     <comment>legacy_id=2511</comment>
-  </data>
-  <data name="Strength increment +%d" xml:space="preserve">
-    <value>Peningkatan kekuatan +%d</value>
-    <comment>legacy_id=2512</comment>
-  </data>
-  <data name="Quickness increment +%d" xml:space="preserve">
-    <value>Peningkatan kecepatan +%d</value>
-    <comment>legacy_id=2513</comment>
-  </data>
-  <data name="stamina increment +%d" xml:space="preserve">
-    <value>peningkatan stamina +%d</value>
-    <comment>legacy_id=2514</comment>
-  </data>
-  <data name="Energy increment +%d" xml:space="preserve">
-    <value>Peningkatan energi +%d</value>
-    <comment>legacy_id=2515</comment>
-  </data>
-  <data name="Control increment +%d" xml:space="preserve">
-    <value>Kenaikan kontrol +%d</value>
-    <comment>legacy_id=2516</comment>
-  </data>
-  <data name="Status for the set period" xml:space="preserve">
-    <value>Status untuk periode yang ditentukan</value>
-    <comment>legacy_id=2517</comment>
-  </data>
-  <data name="There's an increase effect to it." xml:space="preserve">
-    <value>Ada efek peningkatannya.</value>
-    <comment>legacy_id=2518</comment>
   </data>
   <data name="Reduction point: %d" xml:space="preserve">
     <value>Titik reduksi: %d</value>
@@ -8819,17 +8631,9 @@
     <value>Item ini tidak dapat dibeli.</value>
     <comment>legacy_id=2531</comment>
   </data>
-  <data name="Attack power increment +40" xml:space="preserve">
-    <value>Peningkatan kekuatan serangan +40</value>
-    <comment>legacy_id=2532</comment>
-  </data>
   <data name="Duration period: %s" xml:space="preserve">
     <value>Periode durasi: %s</value>
     <comment>legacy_id=2533</comment>
-  </data>
-  <data name="Collect Cherry Blossoms and take it to the spirit for item compensation." xml:space="preserve">
-    <value>Kumpulkan Bunga Sakura dan bawa ke spirit untuk kompensasi item.</value>
-    <comment>legacy_id=2534</comment>
   </data>
   <data name="You'll be compensated for the Cherry Blossoms branches you bring back." xml:space="preserve">
     <value>Anda akan mendapat kompensasi atas cabang Bunga Sakura yang Anda bawa kembali.</value>
@@ -8855,18 +8659,6 @@
     <value>Produksi cabang Bunga Sakura</value>
     <comment>legacy_id=2545</comment>
   </data>
-  <data name="700 Maximum Mana increment" xml:space="preserve">
-    <value>700 peningkatan Mana Maksimum</value>
-    <comment>legacy_id=2549</comment>
-  </data>
-  <data name="700 Maximum Life increment" xml:space="preserve">
-    <value>700 Peningkatan Kehidupan Maksimum</value>
-    <comment>legacy_id=2550</comment>
-  </data>
-  <data name="Restores HP by 65%% immediately." xml:space="preserve">
-    <value>Memulihkan HP sebesar 65%% imsegera.</value>
-    <comment>legacy_id=2559</comment>
-  </data>
   <data name="Cherry Blossoms branches assembly" xml:space="preserve">
     <value>Perakitan cabang Bunga Sakura</value>
     <comment>legacy_id=2560</comment>
@@ -8891,37 +8683,9 @@
     <value>255 Cabang Bunga Sakura Emas</value>
     <comment>legacy_id=2565</comment>
   </data>
-  <data name="Master Level EXP cannot be achieved during the item usage." xml:space="preserve">
-    <value>EXP Tingkat Master tidak dapat dicapai selama penggunaan item.</value>
-    <comment>legacy_id=2566</comment>
-  </data>
-  <data name="Automatic Life Recover increment %d%%" xml:space="preserve">
-    <value>Peningkatan Pemulihan Kehidupan Otomatis %d%%</value>
-    <comment>legacy_id=2569</comment>
-  </data>
-  <data name="EXP achievement and the automatic life recovery rate increases." xml:space="preserve">
-    <value>Pencapaian EXP dan tingkat pemulihan kehidupan otomatis meningkat.</value>
-    <comment>legacy_id=2570</comment>
-  </data>
-  <data name="Automatic Mana recovery increment in %d%% rate" xml:space="preserve">
-    <value>Peningkatan pemulihan Mana otomatis pada tingkat %d%%.</value>
-    <comment>legacy_id=2571</comment>
-  </data>
-  <data name="Item achievement and the automatic Mana recovery increases onward." xml:space="preserve">
-    <value>Pencapaian item dan pemulihan Mana otomatis meningkat dan seterusnya.</value>
-    <comment>legacy_id=2572</comment>
-  </data>
   <data name="Maximum Mana +50" xml:space="preserve">
     <value>Mana Maksimum +50</value>
     <comment>legacy_id=2579</comment>
-  </data>
-  <data name="Increases Critical Damage by 20%%" xml:space="preserve">
-    <value>Meningkatkan Kerusakan Kritis sebesar 20%%</value>
-    <comment>legacy_id=2580</comment>
-  </data>
-  <data name="Increses Excellent Damage by 20%%" xml:space="preserve">
-    <value>Meningkatkan Kerusakan Luar Biasa sebesar 20%%</value>
-    <comment>legacy_id=2581</comment>
   </data>
   <data name="Carrier" xml:space="preserve">
     <value>Pembawa</value>
@@ -8950,10 +8714,6 @@
   <data name="WelcomeToSantaSVillageHere" xml:space="preserve">
     <value>Selamat datang di Desa Santa. Ini hadiah untukmu. Anda akan selalu menemukan sesuatu yang memberi Anda banyak uang di sini.</value>
     <comment>legacy_id=2588</comment>
-  </data>
-  <data name="Relocate to the Santa's Village by the right-mouse click." xml:space="preserve">
-    <value>Pindah ke Desa Santa dengan klik kanan mouse.</value>
-    <comment>legacy_id=2589</comment>
   </data>
   <data name="Would you like to move to the Santa's Village?" xml:space="preserve">
     <value>Apakah Anda ingin pindah ke Desa Santa?</value>
@@ -9006,14 +8766,6 @@
   <data name="Move by a right-mouse-click." xml:space="preserve">
     <value>Bergerak dengan klik kanan mouse.</value>
     <comment>legacy_id=2603</comment>
-  </data>
-  <data name="Saves the location with the right-mouse-click." xml:space="preserve">
-    <value>Menyimpan lokasi dengan klik kanan mouse.</value>
-    <comment>legacy_id=2605</comment>
-  </data>
-  <data name="Returns to the saved location by a click." xml:space="preserve">
-    <value>Kembali ke lokasi yang disimpan dengan satu klik.</value>
-    <comment>legacy_id=2606</comment>
   </data>
   <data name="Would you like to save the location?" xml:space="preserve">
     <value>Apakah Anda ingin menyimpan lokasi?</value>
@@ -9291,54 +9043,6 @@
     <value>Terlalu banyak orang di colossum.</value>
     <comment>legacy_id=2707</comment>
   </data>
-  <data name="item/skill/luck/option will be randomly added." xml:space="preserve">
-    <value>item/keterampilan/keberuntungan/opsi akan ditambahkan secara acak.</value>
-    <comment>legacy_id=2709</comment>
-  </data>
-  <data name="Increases your luck to create wing of your wish." xml:space="preserve">
-    <value>Meningkatkan keberuntungan Anda untuk menciptakan sayap keinginan Anda.</value>
-    <comment>legacy_id=2717</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Satan." xml:space="preserve">
-    <value>Meningkatkan keberuntungan Anda untuk menciptakan Sayap Setan.</value>
-    <comment>legacy_id=2718</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Dragon." xml:space="preserve">
-    <value>Meningkatkan keberuntungan Anda untuk membuat Wings of Dragon.</value>
-    <comment>legacy_id=2719</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Heaven." xml:space="preserve">
-    <value>Meningkatkan keberuntungan Anda untuk menciptakan Wings of Heaven.</value>
-    <comment>legacy_id=2720</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Soul." xml:space="preserve">
-    <value>Meningkatkan keberuntungan Anda untuk menciptakan Wings of Soul.</value>
-    <comment>legacy_id=2721</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Elf." xml:space="preserve">
-    <value>Meningkatkan keberuntungan Anda untuk membuat Wings of Elf.</value>
-    <comment>legacy_id=2722</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Spirits." xml:space="preserve">
-    <value>Meningkatkan keberuntungan Anda untuk menciptakan Wings of Spirits.</value>
-    <comment>legacy_id=2723</comment>
-  </data>
-  <data name="Increases your luck to create Wing of Curse." xml:space="preserve">
-    <value>Meningkatkan keberuntungan Anda untuk membuat Wing of Curse.</value>
-    <comment>legacy_id=2724</comment>
-  </data>
-  <data name="Increases your luck to create Wing of Despair." xml:space="preserve">
-    <value>Meningkatkan keberuntungan Anda untuk menciptakan Wing of Despair.</value>
-    <comment>legacy_id=2725</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Darkness." xml:space="preserve">
-    <value>Meningkatkan keberuntungan Anda untuk menciptakan Wings of Darkness.</value>
-    <comment>legacy_id=2726</comment>
-  </data>
-  <data name="Increases your luck to create Cape of Emperor." xml:space="preserve">
-    <value>Meningkatkan keberuntungan Anda untuk membuat Cape of Emperor.</value>
-    <comment>legacy_id=2727</comment>
-  </data>
   <data name="Only increases Master level exp." xml:space="preserve">
     <value>Hanya meningkatkan exp level Master.</value>
     <comment>legacy_id=2728</comment>
@@ -9346,62 +9050,6 @@
   <data name="Select to move." xml:space="preserve">
     <value>Pilih untuk bergerak.</value>
     <comment>legacy_id=2731</comment>
-  </data>
-  <data name="Talisman of Wings of Satan" xml:space="preserve">
-    <value>Jimat Sayap Setan</value>
-    <comment>legacy_id=2732</comment>
-  </data>
-  <data name="Talisman of Wings of Heaven" xml:space="preserve">
-    <value>Jimat Sayap Surga</value>
-    <comment>legacy_id=2733</comment>
-  </data>
-  <data name="Talisman of Wings of Elf" xml:space="preserve">
-    <value>Jimat Sayap Elf</value>
-    <comment>legacy_id=2734</comment>
-  </data>
-  <data name="Talisman of Wing of Curse" xml:space="preserve">
-    <value>Jimat Sayap Kutukan</value>
-    <comment>legacy_id=2735</comment>
-  </data>
-  <data name="Talisman of Cape of Emperor" xml:space="preserve">
-    <value>Jimat Tanjung Kaisar</value>
-    <comment>legacy_id=2736</comment>
-  </data>
-  <data name="Talisman of Wings of Dragon" xml:space="preserve">
-    <value>Jimat Sayap Naga</value>
-    <comment>legacy_id=2737</comment>
-  </data>
-  <data name="Talisman of Wings of Soul" xml:space="preserve">
-    <value>Jimat Sayap Jiwa</value>
-    <comment>legacy_id=2738</comment>
-  </data>
-  <data name="Talisman of Wings of Spirits" xml:space="preserve">
-    <value>Jimat Sayap Roh</value>
-    <comment>legacy_id=2739</comment>
-  </data>
-  <data name="Talisman of Wing of Despair" xml:space="preserve">
-    <value>Jimat Sayap Keputusasaan</value>
-    <comment>legacy_id=2740</comment>
-  </data>
-  <data name="Talisman of Wings of Darkness" xml:space="preserve">
-    <value>Jimat Sayap Kegelapan</value>
-    <comment>legacy_id=2741</comment>
-  </data>
-  <data name="Attack rate and defense rate increase." xml:space="preserve">
-    <value>Tingkat serangan dan tingkat pertahanan meningkat.</value>
-    <comment>legacy_id=2742</comment>
-  </data>
-  <data name="Transform into Panda." xml:space="preserve">
-    <value>Berubah menjadi Panda.</value>
-    <comment>legacy_id=2743</comment>
-  </data>
-  <data name="Zen increase 50%%" xml:space="preserve">
-    <value>Zen meningkat 50%%</value>
-    <comment>legacy_id=2744</comment>
-  </data>
-  <data name="Damage/Wizardry/Curse +30" xml:space="preserve">
-    <value>Kerusakan/Sihir/Kutukan +30</value>
-    <comment>legacy_id=2745</comment>
   </data>
   <data name="Lugard" xml:space="preserve">
     <value>orang bodoh</value>
@@ -9487,45 +9135,17 @@
     <value>Perintah Gaion</value>
     <comment>legacy_id=2783</comment>
   </data>
-  <data name="It contains Gaion's plans for the destruction of the empire" xml:space="preserve">
-    <value>Ini berisi rencana Gaion untuk menghancurkan kekaisaran</value>
-    <comment>legacy_id=2784</comment>
-  </data>
-  <data name="and orders for the Empire Guardians." xml:space="preserve">
-    <value>dan perintah untuk Penjaga Kerajaan.</value>
-    <comment>legacy_id=2785</comment>
-  </data>
-  <data name="You may enter the Fortress of Empire Guardians." xml:space="preserve">
-    <value>Anda dapat memasuki Benteng Penjaga Kerajaan.</value>
-    <comment>legacy_id=2786</comment>
-  </data>
   <data name="Suspicious Scrap of Paper" xml:space="preserve">
     <value>Potongan Kertas yang Mencurigakan</value>
     <comment>legacy_id=2787</comment>
-  </data>
-  <data name="It's a worn piece of paper containing incomprehensible text." xml:space="preserve">
-    <value>Itu adalah selembar kertas usang yang berisi teks yang tidak dapat dipahami.</value>
-    <comment>legacy_id=2788</comment>
   </data>
   <data name="No. %d Secromicon Fragment" xml:space="preserve">
     <value>Fragmen Secromicon %d</value>
     <comment>legacy_id=2789</comment>
   </data>
-  <data name="It's part of a Complete Secromicon." xml:space="preserve">
-    <value>Itu bagian dari Secromicon Lengkap.</value>
-    <comment>legacy_id=2790</comment>
-  </data>
   <data name="Complete Secromicon" xml:space="preserve">
     <value>Secromicon Lengkap</value>
     <comment>legacy_id=2791</comment>
-  </data>
-  <data name="Indestructible Metal Secromicon" xml:space="preserve">
-    <value>Secromicon Logam yang Tidak Bisa Dihancurkan</value>
-    <comment>legacy_id=2792</comment>
-  </data>
-  <data name="Contains information about Grand Wizard Etramu Lenos' research." xml:space="preserve">
-    <value>Berisi informasi tentang penelitian Grand Wizard Etramu Lenos.</value>
-    <comment>legacy_id=2793</comment>
   </data>
   <data name="Jerint the Assistant" xml:space="preserve">
     <value>Jerint sang Asisten</value>
@@ -10391,26 +10011,6 @@
     <value>Anda tidak dapat meminta orang lain untuk bergabung dengan pesta Anda saat berada di Pasar Loren.</value>
     <comment>legacy_id=3064</comment>
   </data>
-  <data name="Equip to transform into a Skeleton Warrior." xml:space="preserve">
-    <value>Lengkapi untuk berubah menjadi Skeleton Warrior.</value>
-    <comment>legacy_id=3065</comment>
-  </data>
-  <data name="Damage/Wizardry/Curse +40" xml:space="preserve">
-    <value>Kerusakan/Sihir/Kutukan +40</value>
-    <comment>legacy_id=3066</comment>
-  </data>
-  <data name="Equipping along with a Pet Skeleton" xml:space="preserve">
-    <value>Dilengkapi dengan Pet Skeleton</value>
-    <comment>legacy_id=3067</comment>
-  </data>
-  <data name="Equipping along with a Skeleton Transformation Ring" xml:space="preserve">
-    <value>Dilengkapi dengan Cincin Transformasi Kerangka</value>
-    <comment>legacy_id=3071</comment>
-  </data>
-  <data name="increases EXP by 30%%." xml:space="preserve">
-    <value>meningkatkan EXP sebesar 30%%.</value>
-    <comment>legacy_id=3072</comment>
-  </data>
   <data name="Chaos Castle Lv.%lu Guardsman x %lu/%lu" xml:space="preserve">
     <value>Chaos Castle Lv.%lu Penjaga x %lu/%lu</value>
     <comment>legacy_id=3074</comment>
@@ -10454,10 +10054,6 @@
   <data name="+15 Item Creation" xml:space="preserve">
     <value>+15 Pembuatan Barang</value>
     <comment>legacy_id=3087</comment>
-  </data>
-  <data name="Unable to Equip with a Different Transformation Ring" xml:space="preserve">
-    <value>Tidak Dapat Melengkapi Cincin Transformasi Berbeda</value>
-    <comment>legacy_id=3088</comment>
   </data>
   <data name="Cannot be equipped while another Transformation Ring is equipped." xml:space="preserve">
     <value>Tidak dapat digunakan ketika Cincin Transformasi lain sedang dipasang.</value>
@@ -10519,14 +10115,6 @@
     <value>Adipati Agung#Duke#Marquis#Hitungan#Viscount#Baron#Komandan Ksatria#Ksatria Unggul#Ksatria#Prefek Penjaga#Petugas#Letnan#Sersan#Prajurit</value>
     <comment>legacy_id=3104</comment>
   </data>
-  <data name="Can enter the Monday - Saturday map." xml:space="preserve">
-    <value>Bisa masuk ke map Senin - Sabtu.</value>
-    <comment>legacy_id=3105</comment>
-  </data>
-  <data name="Can enter the Sunday map." xml:space="preserve">
-    <value>Bisa masuk ke map hari Minggu.</value>
-    <comment>legacy_id=3106</comment>
-  </data>
   <data name="Varka Map 7" xml:space="preserve">
     <value>Peta Varka 7</value>
     <comment>legacy_id=3107</comment>
@@ -10554,14 +10142,6 @@
   <data name="The information is not correct." xml:space="preserve">
     <value>Informasinya tidak benar.</value>
     <comment>legacy_id=3113</comment>
-  </data>
-  <data name="Dark Lord use only." xml:space="preserve">
-    <value>Penggunaan Pangeran Kegelapan saja.</value>
-    <comment>legacy_id=3115</comment>
-  </data>
-  <data name="You can enter to Gold Channel." xml:space="preserve">
-    <value>Anda bisa masuk ke Saluran Emas.</value>
-    <comment>legacy_id=3116</comment>
   </data>
   <data name="TheGameClientIsLoadedOnly" xml:space="preserve">
     <value>Klien game dimuat hanya melalui Situs Web resmi. Menutup aplikasi silakan coba lagi.</value>
@@ -10602,10 +10182,6 @@
   <data name="Item Drop Rate increase +%d%%" xml:space="preserve">
     <value>Tingkat Penurunan Item meningkat +%d%%</value>
     <comment>legacy_id=3126</comment>
-  </data>
-  <data name="7 Days until Expiration" xml:space="preserve">
-    <value>7 Hari hingga Kedaluwarsa</value>
-    <comment>legacy_id=3127</comment>
   </data>
   <data name="You cannot purchase this item more than once." xml:space="preserve">
     <value>Anda tidak dapat membeli item ini lebih dari satu kali.</value>
@@ -10794,10 +10370,6 @@
   <data name="Expired Item" xml:space="preserve">
     <value>Barang Kedaluwarsa</value>
     <comment>legacy_id=3266</comment>
-  </data>
-  <data name="Restores SD by 65%% immediately." xml:space="preserve">
-    <value>Memulihkan SD sebesar 65%% imsegera.</value>
-    <comment>legacy_id=3267</comment>
   </data>
   <data name="Click the item to see the quest information again." xml:space="preserve">
     <value>Klik item tersebut untuk melihat informasi misi lagi.</value>

@@ -17,12 +17,6 @@ bool IsClothWingType(int itemType)
     return model != nullptr && model->cloth;
 }
 
-bool IsCharacterCardType(int itemType)
-{
-    return itemType == ITEM_MAGIC_GLADIATOR_CHARACTER_CARD || itemType == ITEM_DARK_LORD_CHARACTER_CARD ||
-           itemType == ITEM_SUMMONER_CHARACTER_CARD;
-}
-
 bool IsSecromiconQuestItemType(int itemType)
 {
     return itemType >= ITEM_SUSPICIOUS_SCRAP_OF_PAPER && itemType <= ITEM_COMPLETE_SECROMICON;
@@ -64,11 +58,6 @@ bool IsWingMixCharmModel(int modelType)
 bool IsSealType(int itemType)
 {
     return itemType == ITEM_SEAL_OF_ASCENSION || itemType == ITEM_SEAL_OF_WEALTH || itemType == ITEM_SEAL_OF_SUSTENANCE;
-}
-
-bool IsCharacterCard(const ITEM* pItem)
-{
-    return IsCharacterCardType(pItem->Type);
 }
 
 bool IsDevilSquareItemType(int itemType)

@@ -32,15 +32,6 @@ bool ContainsSeparator(const std::string& text)
     return text.find(LocalizedString::Separator) != std::string::npos;
 }
 
-// Locale codes like "pt" or "zh-TW". Anything else (empty, "=", "||") would
-// break the LocalizedString format used for the OpenMU exchange.
-bool IsValidLocaleCode(const std::string& locale)
-{
-    return !locale.empty() &&
-           std::all_of(locale.begin(), locale.end(), [](char character)
-                       { return std::isalnum(static_cast<unsigned char>(character)) || character == '-'; });
-}
-
 // The game shows names through the MAX_ITEM_NAME-sized ITEM_ATTRIBUTE name.
 bool IsTooLongForGame(const std::string& text)
 {
@@ -107,51 +98,76 @@ std::string ListPlaceholders(const std::set<std::string>& names)
     return list;
 }
 
-// A description line's text is written like a name: an English text, and translations under language codes. A blank
-// line has no text in any language. The braces of its placeholders are checked in every language, and each
-// translation has the placeholders of the English text.
+// An item's own text (a description line's, a level value's) is written like a name: an English text, and
+// translations under language codes. A blank one has no text in any language.
+void ValidateItemText(const ItemDefinition& definition, const LocalizedString& text, const std::string& field,
+                      std::vector<ItemDataIssue>& issues)
+{
+    if (text.IsEmpty())
+    {
+        return;
+    }
+    if (text.GetNeutral().empty())
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Error, definition, "the English text is missing", field.c_str());
+    }
+    for (const auto& [locale, translation] : text.GetTranslations())
+    {
+        if (!IsValidLocaleCode(locale))
+        {
+            AddIssue(issues, ItemDataIssueSeverity::Error, definition,
+                     "\"" + locale + "\" is not a language code (letters, digits and \"-\" only)", field.c_str());
+        }
+    }
+}
+
+// The braces of a description line's placeholders in every language, and the English text's placeholders in each
+// translation.
+void ValidateDescriptionPlaceholderBraces(const ItemDefinition& definition, size_t index,
+                                          std::vector<ItemDataIssue>& issues)
+{
+    const LocalizedString& text = definition.description[index].text;
+    const PlaceholderScan english = ScanPlaceholders(text.GetNeutral());
+    const std::set<std::string> englishNames(english.names.begin(), english.names.end());
+    if (!english.error.empty())
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Error, definition, english.error,
+                 DescriptionTextField(index, LocalizedString::NeutralLocale).c_str());
+    }
+    for (const auto& [locale, translation] : text.GetTranslations())
+    {
+        const std::string field = DescriptionTextField(index, locale);
+        const PlaceholderScan scan = ScanPlaceholders(translation);
+        if (!scan.error.empty())
+        {
+            AddIssue(issues, ItemDataIssueSeverity::Error, definition, scan.error, field.c_str());
+            continue;
+        }
+        const std::set<std::string> names(scan.names.begin(), scan.names.end());
+        if (english.error.empty() && names != englishNames)
+        {
+            AddIssue(issues, ItemDataIssueSeverity::Error, definition,
+                     "has the placeholders " + ListPlaceholders(names) + ", the English text " +
+                         ListPlaceholders(englishNames),
+                     field.c_str());
+        }
+    }
+}
+
 void ValidateDescription(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
 {
     for (size_t index = 0; index < definition.description.size(); ++index)
     {
-        const LocalizedString& text = definition.description[index].text;
-        if (text.IsEmpty())
+        ValidateItemText(definition, definition.description[index].text,
+                         DescriptionTextField(index, LocalizedString::NeutralLocale), issues);
+        ValidateDescriptionPlaceholderBraces(definition, index, issues);
+    }
+    for (const ItemLevelValues& levelValues : definition.levelValues)
+    {
+        for (size_t level = 0; level < levelValues.values.size(); ++level)
         {
-            continue;
-        }
-        const std::string field = DescriptionTextField(index, LocalizedString::NeutralLocale);
-        if (text.GetNeutral().empty())
-        {
-            AddIssue(issues, ItemDataIssueSeverity::Error, definition, "the English text is missing", field.c_str());
-        }
-        const PlaceholderScan english = ScanPlaceholders(text.GetNeutral());
-        const std::set<std::string> englishNames(english.names.begin(), english.names.end());
-        if (!english.error.empty())
-        {
-            AddIssue(issues, ItemDataIssueSeverity::Error, definition, english.error, field.c_str());
-        }
-        for (const auto& [locale, translation] : text.GetTranslations())
-        {
-            if (!IsValidLocaleCode(locale))
-            {
-                AddIssue(issues, ItemDataIssueSeverity::Error, definition,
-                         "\"" + locale + "\" is not a language code (letters, digits and \"-\" only)", field.c_str());
-            }
-            const std::string translationField = DescriptionTextField(index, locale);
-            const PlaceholderScan scan = ScanPlaceholders(translation);
-            if (!scan.error.empty())
-            {
-                AddIssue(issues, ItemDataIssueSeverity::Error, definition, scan.error, translationField.c_str());
-                continue;
-            }
-            const std::set<std::string> names(scan.names.begin(), scan.names.end());
-            if (english.error.empty() && names != englishNames)
-            {
-                AddIssue(issues, ItemDataIssueSeverity::Error, definition,
-                         "has the placeholders " + ListPlaceholders(names) + ", the English text " +
-                             ListPlaceholders(englishNames),
-                         translationField.c_str());
-            }
+            ValidateItemText(definition, levelValues.values[level].text,
+                             "levelValues." + levelValues.name + "[" + std::to_string(level) + "]", issues);
         }
     }
 }
@@ -282,6 +298,15 @@ void ValidatePotionPriority(const ItemDefinition& definition, std::vector<ItemDa
 }
 } // namespace
 
+// Locale codes like "pt" or "zh-TW". Anything else (empty, "=", "||") would
+// break the LocalizedString format used for the OpenMU exchange.
+bool IsValidLocaleCode(const std::string& locale)
+{
+    return !locale.empty() &&
+           std::all_of(locale.begin(), locale.end(), [](char character)
+                       { return std::isalnum(static_cast<unsigned char>(character)) || character == '-'; });
+}
+
 void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIssue>& issues)
 {
     std::set<int> seenItemTypes;
@@ -367,52 +392,126 @@ void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatP
 }
 
 void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
-                                     const std::string& statFile, std::vector<ItemDataIssue>& issues)
+                                     const ItemTooltipFile& tooltips, const std::string& statFile,
+                                     std::vector<ItemDataIssue>& issues)
 {
-    std::vector<std::string> known(GetBuiltInPlaceholders().begin(), GetBuiltInPlaceholders().end());
-    for (const std::string& table : profiles.GetTableNames())
+    std::vector<std::string> builtIns(GetBuiltInPlaceholders().begin(), GetBuiltInPlaceholders().end());
+    const std::vector<std::string> tables = profiles.GetTableNames();
+    for (const std::string& table : tables)
     {
-        known.push_back(MakeTablePlaceholder(table));
+        builtIns.push_back(MakeTablePlaceholder(table));
     }
+    const auto isValue = [&](std::string_view name)
+    { return IsBuiltInPlaceholder(name) || GetPlaceholderValue(name, 0, profiles).has_value(); };
+    // A table written without "table:" is suggested with it. Its own name comes first, also when it is close to a
+    // built-in value: {levels} for the table "levels" is not {level}.
+    const auto suggest = [&](const std::string& name, std::span<const std::string> candidates)
+    {
+        if (GetPlaceholderTable(name).empty() && profiles.FindTable(name) != nullptr)
+        {
+            return MakeTablePlaceholder(name);
+        }
+        std::string suggestion = SuggestPlaceholder(name, candidates);
+        if (suggestion.empty() && GetPlaceholderTable(name).empty())
+        {
+            suggestion = SuggestPlaceholder(MakeTablePlaceholder(name), candidates);
+        }
+        return suggestion;
+    };
     for (const ItemDefinition& definition : items)
     {
         if (!definition.Exists())
         {
             continue;
         }
+        const auto addError = [&](const std::string& field, const std::string& message)
+        { issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number, field, message}); };
+        std::set<std::string, std::less<>> shownLevelValues;
         for (size_t line = 0; line < definition.description.size(); ++line)
         {
-            // The translations have the English text's placeholders (ValidateItems checks that).
-            const PlaceholderScan scan = ScanPlaceholders(definition.description[line].text.GetNeutral());
+            const ItemDescriptionLine& entry = definition.description[line];
+            const std::string field = "description[" + std::to_string(line) + "]";
+            std::vector<std::string> known = builtIns;
+            for (const auto& [placeholder, value] : entry.values)
+            {
+                known.push_back(placeholder);
+                if (value.starts_with(SkillManaPrefix))
+                {
+                    if (!ReadSkillManaValue(value))
+                    {
+                        addError(field + ".values." + placeholder,
+                                 "\"" + value + "\" names no skill: \"skillMana:\" takes a skill's number, below " +
+                                     std::to_string(MAX_SKILLS));
+                    }
+                }
+                else if (!isValue(value))
+                {
+                    const std::string suggestion = suggest(value, builtIns);
+                    addError(field + ".values." + placeholder,
+                             "\"" + value + "\" is neither a built-in value, a table of " + statFile + " (\"" +
+                                 MakeTablePlaceholder("name") + "\") nor \"skillMana:<skill>\"" +
+                                 (suggestion.empty() ? "" : "; did you mean \"" + suggestion + "\"?"));
+                }
+            }
+            for (const ItemLevelValues& levelValues : definition.levelValues)
+            {
+                known.push_back(levelValues.name);
+            }
+            // The translations have the English text's placeholders (ValidateItems checks that); a shared text the
+            // tooltip file does not have is ValidateDescriptionTexts' error.
+            const LocalizedString* text = entry.textName.empty() ? &entry.text : tooltips.FindText(entry.textName);
+            if (text == nullptr)
+            {
+                continue;
+            }
+            const PlaceholderScan scan = ScanPlaceholders(text->GetNeutral());
             std::set<std::string> reported;
             for (const std::string& name : scan.names)
             {
-                if (GetPlaceholderValue(name, 0, profiles) || !reported.insert(name).second)
+                if (!reported.insert(name).second)
                 {
                     continue;
                 }
-                // A table written without "table:" is suggested with it. Its own name comes first, also when it is
-                // close to a built-in value: {levels} for the table "levels" is not {level}.
-                std::string suggestion;
-                if (GetPlaceholderTable(name).empty() && profiles.FindTable(name) != nullptr)
+                const bool bound = std::any_of(entry.values.begin(), entry.values.end(),
+                                               [&](const auto& value) { return value.first == name; });
+                if (bound)
                 {
-                    suggestion = MakeTablePlaceholder(name);
+                    continue;
                 }
-                else
+                if (const ItemLevelValues* levelValues = definition.FindLevelValues(name))
                 {
-                    suggestion = SuggestPlaceholder(name, known);
-                    if (suggestion.empty() && GetPlaceholderTable(name).empty())
+                    shownLevelValues.insert(name);
+                    if (entry.maxLevel >= static_cast<int>(levelValues->values.size()))
                     {
-                        suggestion = SuggestPlaceholder(MakeTablePlaceholder(name), known);
+                        addError(field + ".levels", "the line shows {" + name + "} up to +" +
+                                                        std::to_string(entry.maxLevel) + ", but levelValues." + name +
+                                                        " has values only up to +" +
+                                                        std::to_string(levelValues->values.size() - 1));
                     }
+                    continue;
                 }
-                const std::string hint = suggestion.empty() ? "a placeholder is a built-in value ({" +
-                                                                  std::string(LevelPlaceholder) + "}) or a table of " +
-                                                                  statFile + " ({" + MakeTablePlaceholder("name") + "})"
-                                                            : "did you mean {" + suggestion + "}?";
-                issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number,
-                                  DescriptionTextField(line, LocalizedString::NeutralLocale),
-                                  "has the unknown placeholder {" + name + "}; " + hint});
+                if (isValue(name))
+                {
+                    continue;
+                }
+                const std::string suggestion = suggest(name, known);
+                const std::string hint = suggestion.empty()
+                                             ? "a placeholder is a built-in value (docs/item-data.md), a table of " +
+                                                   statFile + " ({" + MakeTablePlaceholder("name") +
+                                                   "}), or one of the line's values or the item's levelValues"
+                                             : "did you mean {" + suggestion + "}?";
+                addError(entry.textName.empty() ? DescriptionTextField(line, LocalizedString::NeutralLocale)
+                                                : field + ".text",
+                         (entry.textName.empty() ? "has" : "\"@" + entry.textName + "\" has") +
+                             std::string(" the unknown placeholder {") + name + "}; " + hint);
+            }
+        }
+        for (const ItemLevelValues& levelValues : definition.levelValues)
+        {
+            if (!shownLevelValues.contains(levelValues.name))
+            {
+                issues.push_back({ItemDataIssueSeverity::Warning, "", definition.group, definition.number,
+                                  "levelValues." + levelValues.name, "no line of the description shows it"});
             }
         }
     }
@@ -420,19 +519,33 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
 
 namespace
 {
-// The tables an item's description names, by the English texts (the translations have their placeholders).
-std::set<std::string> FindDescriptionTables(const ItemDefinition& definition)
+// The tables an item's description names: in its texts, written in place or shared in `tooltips` (the English texts;
+// the translations have their placeholders), and in its lines' "values".
+std::set<std::string> FindDescriptionTables(const ItemDefinition& definition, const ItemTooltipFile& tooltips)
 {
     std::set<std::string> tables;
+    const auto add = [&](std::string_view name)
+    {
+        if (const std::string_view table = GetPlaceholderTable(name); !table.empty())
+        {
+            tables.emplace(table);
+        }
+    };
     for (const ItemDescriptionLine& line : definition.description)
     {
-        const PlaceholderScan scan = ScanPlaceholders(line.text.GetNeutral());
+        for (const auto& [placeholder, value] : line.values)
+        {
+            add(value);
+        }
+        const LocalizedString* text = line.textName.empty() ? &line.text : tooltips.FindText(line.textName);
+        if (text == nullptr)
+        {
+            continue;
+        }
+        const PlaceholderScan scan = ScanPlaceholders(text->GetNeutral());
         for (const std::string& name : scan.names)
         {
-            if (const std::string_view table = GetPlaceholderTable(name); !table.empty())
-            {
-                tables.emplace(table);
-            }
+            add(name);
         }
     }
     return tables;
@@ -452,22 +565,28 @@ std::string ListTables(const std::set<std::string>& tables)
     return list;
 }
 
-// A wing's lines as the wing check compares them: each line's English text (its tables included).
+// A wing's lines as the wing check compares them: each line's shared text ("@name") or English text (its tables
+// included), and the values its "values" names.
 std::vector<std::string> WingLines(const ItemDefinition& wing)
 {
     std::vector<std::string> lines;
     for (const ItemDescriptionLine& line : wing.description)
     {
-        lines.push_back(line.text.GetNeutral());
+        std::string text = line.textName.empty() ? line.text.GetNeutral() : "@" + line.textName;
+        for (const auto& [placeholder, value] : line.values)
+        {
+            text += " " + placeholder + "=" + value;
+        }
+        lines.push_back(std::move(text));
     }
     return lines;
 }
 
-std::string DescribeWingLines(const ItemDefinition& wing)
+std::string DescribeWingLines(const ItemDefinition& wing, const ItemTooltipFile& tooltips)
 {
     const size_t count = wing.description.size();
     return std::to_string(count) + (count == 1 ? " line" : " lines") + " naming " +
-           ListTables(FindDescriptionTables(wing));
+           ListTables(FindDescriptionTables(wing, tooltips));
 }
 
 std::string DescribeWingKind(WingTier tier, bool cape)
@@ -516,7 +635,7 @@ using WingKey = std::tuple<WingTier, bool, int>;
 // its tier and cape tag in the other groups that have more than one, so Cape of Fighter (12) and Cape of Lord (13),
 // which the code wrote apart, are not compared with each other.
 void ValidateWingLines(const std::map<WingKey, std::vector<const ItemDefinition*>>& wings,
-                       std::vector<ItemDataIssue>& issues)
+                       const ItemTooltipFile& tooltips, std::vector<ItemDataIssue>& issues)
 {
     const auto warn = [&](const ItemDefinition& wing, const std::string& message)
     { issues.push_back({ItemDataIssueSeverity::Warning, "", wing.group, wing.number, "description", message}); };
@@ -539,8 +658,8 @@ void ValidateWingLines(const std::map<WingKey, std::vector<const ItemDefinition*
             if (most != nullptr && WingLines(wing) != WingLines(*most))
             {
                 warn(wing, "its wing lines are not those of the " + DescribeWingKind(tier, cape) +
-                               " of the other groups: it has " + DescribeWingLines(wing) + ", they have " +
-                               DescribeWingLines(*most));
+                               " of the other groups: it has " + DescribeWingLines(wing, tooltips) + ", they have " +
+                               DescribeWingLines(*most, tooltips));
             }
             continue;
         }
@@ -557,7 +676,7 @@ void ValidateWingLines(const std::map<WingKey, std::vector<const ItemDefinition*
             for (const auto& having : sorted)
             {
                 counts += (counts.empty() ? "" : ", ") + std::to_string(having.size()) + " have " +
-                          DescribeWingLines(*having.front());
+                          DescribeWingLines(*having.front(), tooltips);
             }
             warn(*kindWings.front(), "the " + DescribeWingKind(tier, cape) + " of group " + std::to_string(group) +
                                          " don't agree on their wing lines: " + counts);
@@ -568,8 +687,8 @@ void ValidateWingLines(const std::map<WingKey, std::vector<const ItemDefinition*
             if (WingLines(*wing) != WingLines(*most))
             {
                 warn(*wing, "its wing lines are not those of the other " + DescribeWingKind(tier, cape) + " of group " +
-                                std::to_string(group) + ": it has " + DescribeWingLines(*wing) + ", they have " +
-                                DescribeWingLines(*most));
+                                std::to_string(group) + ": it has " + DescribeWingLines(*wing, tooltips) +
+                                ", they have " + DescribeWingLines(*most, tooltips));
             }
         }
     }
@@ -577,7 +696,7 @@ void ValidateWingLines(const std::map<WingKey, std::vector<const ItemDefinition*
 } // namespace
 
 void ValidateTableUses(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
-                       const std::string& statFile, std::vector<ItemDataIssue>& issues)
+                       const ItemTooltipFile& tooltips, const std::string& statFile, std::vector<ItemDataIssue>& issues)
 {
     std::set<std::string, std::less<>> named;
     // The wings by tier, cape tag and group.
@@ -588,7 +707,7 @@ void ValidateTableUses(std::span<const ItemDefinition> items, const ItemStatProf
         {
             continue;
         }
-        const std::set<std::string> tables = FindDescriptionTables(definition);
+        const std::set<std::string> tables = FindDescriptionTables(definition, tooltips);
         named.insert(tables.begin(), tables.end());
         if (definition.wingTier != WingTier::None)
         {
@@ -603,7 +722,81 @@ void ValidateTableUses(std::span<const ItemDefinition> items, const ItemStatProf
                               "tables." + table, "neither a stat nor an item description uses this table"});
         }
     }
-    ValidateWingLines(wings, issues);
+    ValidateWingLines(wings, tooltips, issues);
+}
+
+void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemTooltipFile& tooltips,
+                              const std::string& tooltipFile, std::vector<ItemDataIssue>& issues)
+{
+    std::vector<std::string> textNames;
+    for (const auto& [name, text] : tooltips.texts)
+    {
+        textNames.push_back(name);
+    }
+    std::set<std::string, std::less<>> used;
+    for (const TooltipLayout& layout : tooltips.layouts)
+    {
+        for (const TooltipLayoutLine& line : layout.lines)
+        {
+            used.insert(line.textName);
+        }
+    }
+    for (const ItemDefinition& definition : items)
+    {
+        if (!definition.Exists())
+        {
+            continue;
+        }
+        const auto check = [&](const std::string& name, const std::string& field, bool isLevelValue)
+        {
+            used.insert(name);
+            const LocalizedString* text = tooltips.FindText(name);
+            if (text == nullptr)
+            {
+                const std::string suggestion = SuggestPlaceholder(name, textNames);
+                issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number, field,
+                                  "\"@" + name + "\" is not a text of " + tooltipFile +
+                                      (suggestion.empty() ? "" : "; did you mean \"@" + suggestion + "\"?")});
+            }
+            else if (isLevelValue && !ScanPlaceholders(text->GetNeutral()).names.empty())
+            {
+                issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number, field,
+                                  "\"@" + name + "\" has placeholders, which a level value cannot have"});
+            }
+        };
+        for (size_t line = 0; line < definition.description.size(); ++line)
+        {
+            if (!definition.description[line].textName.empty())
+            {
+                check(definition.description[line].textName, "description[" + std::to_string(line) + "].text", false);
+            }
+        }
+        for (const ItemLevelValues& levelValues : definition.levelValues)
+        {
+            for (size_t level = 0; level < levelValues.values.size(); ++level)
+            {
+                const ItemLevelValue& value = levelValues.values[level];
+                const std::string field = "levelValues." + levelValues.name + "[" + std::to_string(level) + "]";
+                if (!value.textName.empty())
+                {
+                    check(value.textName, field, true);
+                }
+                else if (!ScanPlaceholders(value.text.GetNeutral()).names.empty())
+                {
+                    issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number, field,
+                                      "has placeholders, which a level value cannot have"});
+                }
+            }
+        }
+    }
+    for (const std::string& name : textNames)
+    {
+        if (!used.contains(name))
+        {
+            issues.push_back({ItemDataIssueSeverity::Warning, tooltipFile, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
+                              "texts." + name, "neither a layout nor an item description uses this text"});
+        }
+    }
 }
 
 void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const char* const> uiLocales,
@@ -628,16 +821,28 @@ void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const 
                          "the " + locale + " name is never shown: the game has no texts in that language");
             }
         }
-        for (size_t index = 0; index < definition.description.size(); ++index)
+        const auto warnAbout = [&](const LocalizedString& text, const std::string& field)
         {
-            for (const auto& [locale, text] : definition.description[index].text.GetTranslations())
+            for (const auto& [locale, translation] : text.GetTranslations())
             {
                 if (!isShown(locale))
                 {
                     AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
                              "the " + locale + " text is never shown: the game has no texts in that language",
-                             DescriptionTextField(index, LocalizedString::NeutralLocale).c_str());
+                             field.c_str());
                 }
+            }
+        };
+        for (size_t index = 0; index < definition.description.size(); ++index)
+        {
+            warnAbout(definition.description[index].text, DescriptionTextField(index, LocalizedString::NeutralLocale));
+        }
+        for (const ItemLevelValues& levelValues : definition.levelValues)
+        {
+            for (size_t level = 0; level < levelValues.values.size(); ++level)
+            {
+                warnAbout(levelValues.values[level].text,
+                          "levelValues." + levelValues.name + "[" + std::to_string(level) + "]");
             }
         }
     }
