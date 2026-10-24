@@ -16,6 +16,12 @@ constexpr const char* TemporaryExtension = ".tmp";
 
 std::optional<std::string> ReadTextFile(const std::filesystem::path& path)
 {
+    // Only a regular file: on Linux a folder opens, and reading it throws.
+    std::error_code error;
+    if (!std::filesystem::is_regular_file(path, error))
+    {
+        return std::nullopt;
+    }
     std::ifstream file(path, std::ios::binary);
     if (!file)
     {
