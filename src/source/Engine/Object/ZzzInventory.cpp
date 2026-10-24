@@ -4445,6 +4445,7 @@ std::vector<ItemTooltipLine> BuildItemTooltipLines(ITEM* ip, bool Sell, int Inve
     return lines;
 }
 
+// (sx, sy) in the screen's 640x480 stretch, `screen`.
 static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy, ITEM* ip, bool Sell, int Inventype,
                            bool bItemTextListBoxUse)
 {
