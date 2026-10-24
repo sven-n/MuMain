@@ -3,12 +3,12 @@
 #include "ServerListJson.h"
 
 #include "Core/Text/Utf8.h"
+#include "Data/DataHandler/TextFile.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 
 #include <algorithm>
 #include <array>
 #include <charconv>
-#include <fstream>
 #include <set>
 
 namespace Data::ServerList
@@ -25,8 +25,6 @@ constexpr const char* NameKey = "name";
 constexpr const char* DescriptionKey = "description";
 constexpr const char* TestServerKey = "testServer";
 constexpr const char* ChannelsKey = "channels";
-// A save writes this file first, then puts it in the old one's place.
-constexpr const char* TemporaryExtension = ".tmp";
 
 // In the order of the ChannelType values.
 constexpr std::array<const char*, ChannelTypeCount> ChannelTypeNames = {"normal", "nonPvp", "goldPvp", "gold"};
@@ -349,25 +347,10 @@ bool SaveServerListFile(const std::filesystem::path& file, std::span<const Serve
         return false;
     }
 
-    std::filesystem::path temporaryFile = file;
-    temporaryFile += TemporaryExtension;
-    std::error_code error;
-    std::filesystem::create_directories(file.parent_path(), error);
-    std::ofstream stream(temporaryFile, std::ios::binary | std::ios::trunc);
-    stream << text;
-    // Closing flushes; checking only afterwards also catches a failing final write.
-    stream.close();
-    if (!stream)
+    std::string error;
+    if (!WriteTextFile(file, text, error))
     {
-        IssueList(source, issues).Error("", "could not be written");
-        std::filesystem::remove(temporaryFile, error);
-        return false;
-    }
-    std::filesystem::rename(temporaryFile, file, error);
-    if (error)
-    {
-        IssueList(source, issues).Error("", "could not be replaced: " + error.message());
-        std::filesystem::remove(temporaryFile, error);
+        IssueList(source, issues).Error("", error);
         return false;
     }
     return true;

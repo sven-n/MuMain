@@ -687,7 +687,29 @@ TEST_CASE("A folder that cannot be written is a write failure, not a data error 
 
     std::vector<ItemDataIssue> issues;
     CHECK(SaveItemDataDirectory(blocked, shipped.items, issues) == ItemDataSaveResult::WriteFailed);
-    CHECK_FALSE(issues.empty());
+    // The issue names the temporary file that could not be written.
+    CHECK(std::any_of(issues.begin(), issues.end(), [](const ItemDataIssue& issue)
+                      { return issue.message == "could not be written" && issue.source.ends_with(".json.tmp"); }));
+}
+
+TEST_CASE("A file that cannot be replaced is a write failure and leaves no temporary file [data][items]")
+{
+    const ItemDataLoadResult shipped = LoadItemDataDirectory(DataDirectory / "Items");
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    const std::filesystem::path itemDirectory = folder.Directory() / GetItemDataDirectory();
+    // A folder with the name of the sword file: the written file cannot take its place.
+    const std::filesystem::path swordFile = itemDirectory / GetItemGroupFileName(0);
+    std::filesystem::remove(swordFile);
+    std::filesystem::create_directories(swordFile / "inside");
+
+    std::vector<ItemDataIssue> issues;
+    CHECK(SaveItemDataDirectory(itemDirectory, shipped.items, issues) == ItemDataSaveResult::WriteFailed);
+    CHECK(std::any_of(
+        issues.begin(), issues.end(), [&](const ItemDataIssue& issue)
+        { return issue.source == swordFile.string() && issue.message.starts_with("could not be replaced: "); }));
+    CHECK(std::filesystem::is_directory(swordFile));
+    CHECK_FALSE(std::filesystem::exists(swordFile.string() + ".tmp"));
 }
 
 // The items and their models are saved together: when one of the files

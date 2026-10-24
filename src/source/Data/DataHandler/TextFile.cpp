@@ -30,10 +30,16 @@ std::optional<std::string> ReadTextFile(const std::filesystem::path& path)
     return text;
 }
 
-bool WriteTextFile(const std::filesystem::path& path, std::string_view text, std::string& error)
+std::filesystem::path GetTemporaryPath(const std::filesystem::path& path)
 {
     std::filesystem::path temporaryPath = path;
     temporaryPath += TemporaryExtension;
+    return temporaryPath;
+}
+
+bool WriteTemporaryFile(const std::filesystem::path& path, std::string_view text, std::string& error)
+{
+    const std::filesystem::path temporaryPath = GetTemporaryPath(path);
     std::error_code fileError;
     std::filesystem::create_directories(path.parent_path(), fileError);
     std::ofstream stream(temporaryPath, std::ios::binary | std::ios::trunc);
@@ -47,6 +53,13 @@ bool WriteTextFile(const std::filesystem::path& path, std::string_view text, std
         std::filesystem::remove(temporaryPath, fileError);
         return false;
     }
+    return true;
+}
+
+bool ReplaceWithTemporaryFile(const std::filesystem::path& path, std::string& error)
+{
+    const std::filesystem::path temporaryPath = GetTemporaryPath(path);
+    std::error_code fileError;
     std::filesystem::rename(temporaryPath, path, fileError);
     if (fileError)
     {
@@ -55,5 +68,10 @@ bool WriteTextFile(const std::filesystem::path& path, std::string_view text, std
         return false;
     }
     return true;
+}
+
+bool WriteTextFile(const std::filesystem::path& path, std::string_view text, std::string& error)
+{
+    return WriteTemporaryFile(path, text, error) && ReplaceWithTemporaryFile(path, error);
 }
 } // namespace Data

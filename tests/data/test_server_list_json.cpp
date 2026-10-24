@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <fstream>
 #include <optional>
 #include <string>
 #include <vector>
@@ -317,6 +318,37 @@ TEST_CASE("ServerListJson: save writes the file and refuses a list with errors")
     // The file stays as it was.
     CHECK(Data::ServerList::LoadServerListFile(file).groups == read.groups);
     CHECK_FALSE(std::filesystem::exists(file.string() + ".tmp"));
+
+    std::filesystem::remove_all(folder);
+}
+
+TEST_CASE("ServerListJson: a save that cannot write or replace the file names it and leaves no temporary file")
+{
+    const std::filesystem::path folder = std::filesystem::temp_directory_path() / "mu_server_list_blocked_test";
+    std::filesystem::remove_all(folder);
+    std::filesystem::create_directories(folder);
+    const std::vector<ServerGroup> groups = Read(ValidFile).groups;
+
+    // A file where the Local folder should be: nothing can be written there.
+    const std::filesystem::path blocked = folder / "Local";
+    std::ofstream(blocked) << "not a folder";
+    const std::filesystem::path unwritable = blocked / "ServerList.json";
+    std::vector<ItemDataIssue> issues;
+    CHECK_FALSE(Data::ServerList::SaveServerListFile(unwritable, groups, issues));
+    REQUIRE(issues.size() == 1);
+    CHECK(issues[0].source == unwritable.generic_string());
+    CHECK(issues[0].message == "could not be written");
+    CHECK_FALSE(std::filesystem::exists(unwritable.string() + ".tmp"));
+
+    // A folder with the file's name: the written file cannot take its place.
+    const std::filesystem::path irreplaceable = folder / "ServerList.json";
+    std::filesystem::create_directories(irreplaceable / "inside");
+    issues.clear();
+    CHECK_FALSE(Data::ServerList::SaveServerListFile(irreplaceable, groups, issues));
+    REQUIRE(issues.size() == 1);
+    CHECK(issues[0].source == irreplaceable.generic_string());
+    CHECK(issues[0].message.starts_with("could not be replaced: "));
+    CHECK_FALSE(std::filesystem::exists(irreplaceable.string() + ".tmp"));
 
     std::filesystem::remove_all(folder);
 }
