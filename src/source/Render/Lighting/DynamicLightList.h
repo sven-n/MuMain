@@ -26,8 +26,12 @@ public:
     void MarkDisplaceable();
     // Ends the lingering interval; later additions are called lights, never evictable.
     void EndDisplaceable();
+    // Remembers where the lights added from now on start (WorldDynamicLights).
+    void Mark();
 
     [[nodiscard]] std::span<const DynamicLight> Lights() const;
+    // The lights added since Mark(), all of them without a mark.
+    [[nodiscard]] std::span<const DynamicLight> LightsSinceMark() const;
     // Lights added this frame that did not fit.
     [[nodiscard]] std::size_t Overflow() const
     {
@@ -42,6 +46,7 @@ private:
     std::size_t m_displaceableBegin = kCapacity;
     std::size_t m_displaceableEnd = kCapacity;
     bool m_marking = false;
+    std::size_t m_mark = 0;
 };
 
 // The list the game's terrain light calls record into.

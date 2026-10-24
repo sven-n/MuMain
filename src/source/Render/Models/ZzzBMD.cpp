@@ -39,6 +39,10 @@
 #include "Core/Utilities/FrameProfiler.h"
 #include "Scenes/MainScene.h"
 #include "Render/Lighting/LightMoodSetting.h"
+#include "Render/Lighting/DynamicLightsSetting.h"
+#include "Render/Lighting/LightShadowCasters.h"
+#include "Render/Lighting/WorldDynamicLights.h"
+#include "Render/Look/LookProfileSetting.h"
 
 using mu::PackABGR;
 
@@ -2701,8 +2705,9 @@ void BMD::RenderBodyTranslate(int Flag, float Alpha, int BlendMesh, float BlendM
     EndRender();
 }
 
-__forceinline void CalcShadowPosition(vec3_t* position, const vec3_t origin, const float sx, const float sy)
+__forceinline void CalcShadowPosition(vec3_t* position, const mu::ShadowProjection& projection)
 {
+    const float* origin = projection.origin;
     vec3_t result;
     VectorCopy(*position, result);
 
@@ -2710,8 +2715,12 @@ __forceinline void CalcShadowPosition(vec3_t* position, const vec3_t origin, con
     // The result is the relative coordinate of the vertex to the origin.
     VectorSubtract(result, origin, result)
 
-    // scale the shadow in the x direction
-    result[0] += result[2] * (result[0] + sx) / (result[2] - sy);
+        // shear the shadow along its axis (x in Classic, where axisAngle is 0)
+        const float axis[2] = {std::cos(projection.axisAngle), std::sin(projection.axisAngle)};
+    const float along = result[0] * axis[0] + result[1] * axis[1];
+    const float shift = result[2] * (along + projection.shearX) / (result[2] - projection.shearHeight);
+    result[0] += shift * axis[0];
+    result[1] += shift * axis[1];
 
     // Add the origin again, to get the absolute coordinate of the vertex again
     VectorAdd(result, origin, result);
@@ -2723,14 +2732,15 @@ __forceinline void CalcShadowPosition(vec3_t* position, const vec3_t origin, con
     VectorCopy(result, *position);
 }
 
-__forceinline void GetClothShadowPosition(vec3_t* target, CPhysicsCloth* pCloth, const int index, const vec3_t origin, const float sx, const float sy)
+__forceinline void GetClothShadowPosition(vec3_t* target, CPhysicsCloth* pCloth, const int index,
+                                          const mu::ShadowProjection& projection)
 {
     pCloth->GetPosition(index, target);
-    CalcShadowPosition(target, origin, sx, sy);
+    CalcShadowPosition(target, projection);
 }
 
-void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, const float sx, const float sy,
-    const std::uint32_t color) const
+void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, const mu::ShadowProjection& projection,
+                                    const std::uint32_t color) const
 {
     auto vertices = RenderArrayVertices;
     int target_vertex_index = -1;
@@ -2754,10 +2764,10 @@ void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, cons
 
                 vec3_t posA, posB, posC, posD;
 
-                GetClothShadowPosition(&posA, pCloth, a, BodyOrigin, sx, sy);
-                GetClothShadowPosition(&posB, pCloth, b, BodyOrigin, sx, sy);
-                GetClothShadowPosition(&posC, pCloth, c, BodyOrigin, sx, sy);
-                GetClothShadowPosition(&posD, pCloth, d, BodyOrigin, sx, sy);
+                GetClothShadowPosition(&posA, pCloth, a, projection);
+                GetClothShadowPosition(&posB, pCloth, b, projection);
+                GetClothShadowPosition(&posC, pCloth, c, projection);
+                GetClothShadowPosition(&posD, pCloth, d, projection);
 
                 // A-Triangle:
                 target_vertex_index++;
@@ -2793,8 +2803,8 @@ void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, cons
     mu::GetRenderer().RenderTriangles(muVerts, 0u);
 }
 
-void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, const int startMesh,
-    const int endMesh, const float sx, const float sy, const std::uint32_t color) const
+void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, const int startMesh, const int endMesh,
+                                 const mu::ShadowProjection& projection, const std::uint32_t color) const
 {
     auto vertices = RenderArrayVertices;
     int target_vertex_index = -1;
@@ -2824,7 +2834,7 @@ void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, cons
 
                 VectorCopy(VertexTransform[i][source_vertex_index], vertices[target_vertex_index]);
 
-                CalcShadowPosition(&vertices[target_vertex_index], BodyOrigin, sx, sy);
+                CalcShadowPosition(&vertices[target_vertex_index], projection);
             }
         }
     }
@@ -2845,7 +2855,7 @@ void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, cons
 }
 
 bool BMD::RenderGpuMeshShadow(const int blendMesh, const int hiddenMesh, const int startMesh, const int endMesh,
-    const float sx, const float sy, const std::uint32_t color) const
+                              const mu::ShadowProjection& projection, const std::uint32_t color) const
 {
     if (!m_pCurrentBoneTransform || startMesh < 0 || endMesh > NumMeshs || endMesh > MAX_MESH)
     {
@@ -2922,14 +2932,19 @@ bool BMD::RenderGpuMeshShadow(const int blendMesh, const int hiddenMesh, const i
         .restPoseScale = m_LastSkinScale,
         .translate = m_LastTranslate,
     };
-    const mu::ShadowProjection projection{
-        .origin = {BodyOrigin[0], BodyOrigin[1], BodyOrigin[2]},
-        .shearX = sx,
-        .shearHeight = sy,
-        .specialHeight = g_fSpecialHeight,
-        .terrain = SceneFlag != SERVER_LIST_SCENE && SceneFlag != WEBZEN_SCENE && SceneFlag != LOADING_SCENE,
-    };
     return renderer.RenderCachedSkinnedShadow(key, color, skinning, projection);
+}
+
+// The body shadow's shear axis: Classic's, or with Enhanced dynamic lights the map's shadow direction
+// (dynamic.shadowAngle, where shadows fall; the shear axis points the other way).
+static float BodyShadowAxisAngle()
+{
+    if (!Render::Lighting::DynamicLightsActive())
+    {
+        return 0.f;
+    }
+    constexpr float RadiansPerDegree = 3.14159265358979f / 180.f;
+    return (Render::Look::Value(Data::Maps::LookValue::GroundShadowAngle) + 180.f) * RadiansPerDegree;
 }
 
 void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int startMeshNumber,
@@ -2953,20 +2968,45 @@ void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int 
 
     const auto [startMesh, endMesh] = ResolveMeshRange(NumMeshs, startMeshNumber, endMeshNumber);
 
-    const float sx = gMapManager.InBattleCastle() ? 2500.f : 2000.f;
-    const float sy = 4000.f;
-    const std::uint32_t shadowColor = PackABGR(0.f, 0.f, 0.f, std::clamp(alpha, 0.f, 1.f));
-
-    if (clothesCount == 0)
+    mu::ShadowProjection projection{
+        .origin = {BodyOrigin[0], BodyOrigin[1], BodyOrigin[2]},
+        .shearX = gMapManager.InBattleCastle() ? 2500.f : 2000.f,
+        .shearHeight = 4000.f,
+        .axisAngle = BodyShadowAxisAngle(),
+        .specialHeight = g_fSpecialHeight,
+        .terrain = SceneFlag != SERVER_LIST_SCENE && SceneFlag != WEBZEN_SCENE && SceneFlag != LOADING_SCENE,
+    };
+    const auto drawShadow = [&](float shadowAlpha)
     {
-        if (!RenderGpuMeshShadow(blendMesh, hiddenMesh, startMesh, endMesh, sx, sy, shadowColor))
+        const std::uint32_t shadowColor = PackABGR(0.f, 0.f, 0.f, std::clamp(shadowAlpha, 0.f, 1.f));
+        if (clothesCount != 0)
         {
-            AddMeshShadowTriangles(blendMesh, hiddenMesh, startMesh, endMesh, sx, sy, shadowColor);
+            AddClothesShadowTriangles(pClothes, clothesCount, projection, shadowColor);
         }
-    }
-    else
+        else if (!RenderGpuMeshShadow(blendMesh, hiddenMesh, startMesh, endMesh, projection, shadowColor))
+        {
+            AddMeshShadowTriangles(blendMesh, hiddenMesh, startMesh, endMesh, projection, shadowColor);
+        }
+    };
     {
-        AddClothesShadowTriangles(pClothes, clothesCount, sx, sy, shadowColor);
+        const mu::ScopedGroundShadow groundShadow;
+        drawShadow(alpha);
+    }
+    // The ground's strongest point lights cast one more shadow each, away from the light.
+    const Render::Lighting::WorldDynamicLights& worldLights = Render::Lighting::FrameWorldDynamicLights();
+    if (Render::Lighting::DynamicLightsActive() && worldLights.IsPinned())
+    {
+        const auto maxCasters =
+            static_cast<std::size_t>(Render::Look::Value(Data::Maps::LookValue::GroundShadowLights));
+        const Render::Lighting::LightShadowCasters casters = Render::Lighting::SelectLightShadowCasters(
+            worldLights.Selection().uniform, {BodyOrigin[0], BodyOrigin[1], BodyOrigin[2]}, maxCasters);
+        const mu::ScopedGroundShadow lightShadow(mu::GroundShadowSource::PointLight);
+        for (std::size_t i = 0; i < casters.count; ++i)
+        {
+            constexpr float HalfTurn = 3.14159265358979f;
+            projection.axisAngle = casters.casters[i].fallAngle + HalfTurn;
+            drawShadow(alpha * casters.casters[i].strength);
+        }
     }
 
     EndRender();

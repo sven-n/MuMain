@@ -209,20 +209,26 @@ bool SdlGpuPostProcessing::CreateGradingTexture()
     return m_gradingTexture != nullptr;
 }
 
-bool SdlGpuPostProcessing::EnsureTargets(SdlGpuTargetSize size)
+bool SdlGpuPostProcessing::EnsureTargets(SdlGpuTargetSize size, SDL_GPUTextureFormat sceneFormat)
 {
     if (!m_device || size.width == 0u || size.height == 0u)
     {
         return false;
     }
-    if (m_sceneTexture && m_targetSize.width == size.width && m_targetSize.height == size.height)
+    if (sceneFormat == SDL_GPU_TEXTUREFORMAT_INVALID)
+    {
+        sceneFormat = m_frameFormat;
+    }
+    if (m_sceneTexture && m_targetSize.width == size.width && m_targetSize.height == size.height &&
+        m_sceneFormat == sceneFormat)
     {
         return true;
     }
 
     ReleaseTargets();
-    m_sceneTexture = CreateTarget(m_device, m_frameFormat, size);
-    m_bloomSourceTexture = CreateTarget(m_device, m_frameFormat, size);
+    m_sceneFormat = sceneFormat;
+    m_sceneTexture = CreateTarget(m_device, m_sceneFormat, size);
+    m_bloomSourceTexture = CreateTarget(m_device, m_sceneFormat, size);
     SdlGpuTargetSize levelSize = HalfSize(size);
     bool created = m_sceneTexture && m_bloomSourceTexture;
     for (BloomLevel& level : m_bloomLevels)
@@ -241,6 +247,11 @@ bool SdlGpuPostProcessing::EnsureTargets(SdlGpuTargetSize size)
     }
     m_targetSize = size;
     return true;
+}
+
+bool SdlGpuPostProcessing::IsHdrScene() const
+{
+    return m_sceneTexture && m_sceneFormat != m_frameFormat;
 }
 
 SDL_GPUTexture* SdlGpuPostProcessing::GetSceneTexture() const
@@ -327,7 +338,8 @@ void SdlGpuPostProcessing::RenderBloom(SDL_GPUCommandBuffer* commandBuffer, floa
 }
 
 void SdlGpuPostProcessing::DrawComposite(SDL_GPUCommandBuffer* commandBuffer, SDL_GPURenderPass* pass,
-                                         SdlGpuTargetSize size, const PostProcessingLook& look, PostProcessingView view)
+                                         SdlGpuTargetSize size, const PostProcessingLook& look, PostProcessingView view,
+                                         SDL_GPUTexture* ambientOcclusion)
 {
     if (!IsAvailable() || !m_sceneTexture || size.width == 0u || size.height == 0u)
     {
@@ -376,6 +388,8 @@ void SdlGpuPostProcessing::DrawComposite(SDL_GPUCommandBuffer* commandBuffer, SD
         {shown, shownSampler},
         {bloom ? m_bloomLevels[0].texture : m_sceneTexture, m_linearSampler},
         {grading ? m_gradingTexture : m_sceneTexture, m_linearSampler},
+        {ambientOcclusion ? ambientOcclusion : m_sceneTexture, m_linearSampler},
+        {bloomRendered ? m_bloomSourceTexture : m_sceneTexture, m_pointSampler},
     };
 
     const SDL_GPUViewport viewport{0.0f, 0.0f, static_cast<float>(size.width), static_cast<float>(size.height),
@@ -385,8 +399,17 @@ void SdlGpuPostProcessing::DrawComposite(SDL_GPUCommandBuffer* commandBuffer, SD
     SDL_SetGPUScissor(pass, &scissor);
     SDL_BindGPUGraphicsPipeline(pass, m_compositePipeline);
     SDL_BindGPUFragmentSamplers(pass, 0, bindings, static_cast<Uint32>(std::size(bindings)));
+    // One step of the 8-bit target: enough to break up banding in the smooth HDR gradients.
+    constexpr float DitherAmount = 1.0f / 255.0f;
+    const bool hdr = IsHdrScene() && view == PostProcessingView::Scene;
     const SdlGpuCompositeUniform uniform{
-        {1.0f / static_cast<float>(size.width), 1.0f / static_cast<float>(size.height)}, bloomScale, gradingStrength};
+        {1.0f / static_cast<float>(size.width), 1.0f / static_cast<float>(size.height)},
+        bloomScale,
+        gradingStrength,
+        hdr ? HdrToneMapKnee : 1.0f,
+        hdr ? DitherAmount : 0.0f,
+        ambientOcclusion && view == PostProcessingView::Scene ? look.ambientOcclusionStrength : 0.0f,
+        bloomRendered ? 1.0f : 0.0f};
     SDL_PushGPUFragmentUniformData(commandBuffer, 0, &uniform, sizeof(uniform));
     SDL_DrawGPUPrimitives(pass, FullscreenVertexCount, 1, 0, 0);
 }
