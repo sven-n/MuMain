@@ -14,7 +14,8 @@
 > each, every finding checked by a second reviewer, then a completeness check)
 > and a final check of this text corrected and completed the first draft;
 > Q-MN8 to Q-MN15 are the questions it raised. The owner chose three PRs for
-> the work that can start now (see "Pull requests and phases").
+> the work that can start now (see "Pull requests and phases"). Q-MN16 to
+> Q-MN19 were answered on 2026-10-25, at the start of PR 2.
 >
 > The counts come from reading and searching the code, not from a compiler.
 > Where code is sorted into kinds, a count can be off by a few.
@@ -557,7 +558,7 @@ of its own after the owner agrees.
 
 | # | Problem | Where | Phase |
 |---|---|---|---|
-| P1 | `Monster50.bmd` (MOLT) is missing; spawning a Molt stops the game. | `ZzzCharacter.cpp:13617` | MN3 |
+| P1 | `Monster50.bmd` (MOLT) is missing; spawning a Molt stops the game. Agreed fix: log it and keep running (Q-MN18). | `ZzzCharacter.cpp:13617` | MN3 |
 | P2 | Numbers without a creator become a Bull Fighter: 76, 658–668 and 523, which OpenMU spawns in every Imperial Guardian run. A fix must still return a character for every number (callers rely on it). Agreed fixes (Q-MN15): 523 becomes an invisible trap with the trap kind, 658–668 get the statue 380's model and the NPC kind. | `ZzzCharacter.cpp:14118` | MN4 |
 | P3 | Kentauros, Berserker Warrior, Kentauros Warrior and Genocider Warrior (355, 553, 554, 556): the handler picks the skill animation and then returns "not handled", so the generic pattern overwrites it. | `GM_Kanturu_1st.cpp:604-657` | MN2 |
 | P4 | Selupan never clears its skill, so normal attacks repeat the last skill's animation, sound and effects. Dark Ghost's skills 51 and 52 are the same. | `GM_Raklion.cpp:2464`, `GMEmpireGuardian2.cpp:1099` | MN2 |
@@ -565,7 +566,7 @@ of its own after the owner agrees.
 | P6 | Skills 78–81 of monster 566 (`MERCENARY_GUILD_FELICIA`) are not below `ATMON_SKILL_END` (78) and never animate. | `WSclient.cpp:4104` | MN2 |
 | P7 | 566 (`MERCENARY_GUILD_FELICIA`) and 567 (`PRIESTESS_VEINA`) use NPC models but count as monsters: a click attacks them instead of talking, they get the red outline and are MU Helper targets, while OpenMU makes 566 a PassiveNpc with a dialogue. | `ZzzCharacter.cpp:13086` | MN1 |
 | P8 | `MonsterScript` is read by position, not by number: `MonsterScript[450]` is monster 494; the legacy edit mode does the same; `MonsterConvert` is unused. | `UI/Dialogs/CustomMessageBox.cpp:1003`, `EditObjects.cpp:73`, `ZzzInterface.cpp:4110`, `ZzzInfomation.cpp:1832` | MN1 |
-| P9 | A `-1` in sound slot 1 or 3 plays sound 209; models without slots play slot 0 of the generic table; the Dragon's slot sounds are silent. | `ZzzCharacter.cpp:436-1556`, `ZzzOpenData.cpp:2396` | MN3 |
+| P9 | A `-1` in sound slot 1 or 3 plays sound 209; models without slots play slot 0 of the generic table; the Dragon's slot sounds are silent. Agreed: all three fixed (Q-MN19). | `ZzzCharacter.cpp:436-1556`, `ZzzOpenData.cpp:2396` | MN3 |
 | P10 | A condition that can never be true (`==` && `==`). | `ZzzCharacter.cpp:10054` | MN8 |
 | P11 | `MonsterSkill.bmd`'s loader clears only entry 0 and does not check the monster number. | `ZzzInfomation.cpp:182` | MN2 |
 | P12 | `CreateHellGate` uses the name as a printf format and copies 200 bytes into the 130-byte name, overwriting the gate's key, level, monster number and more with stack bytes. OpenMU sends these gates (0x1F). | `ZzzCharacter.cpp:15146-15156` | MN1 |
@@ -634,11 +635,14 @@ the defaults of its range. The examples show the shape; field names are
 decided in each phase.
 
 Sounds keep their ids while code names them: a model's sounds are entries of
-(sound id by its `SOUND_*` name, file, channels, 3D), its slots point at ids,
-and loads without a slot are "extra sounds" that code and the hooks play
-(MN7). The +5 shift for `SubType` 9 stays as a named second set. New sounds
-need ids, of which only a few unused ones are left below 450; a pool for them
-is decided in MN3.
+(file, channels, 3D, and the sound id by its `SOUND_*` name where code plays
+the sound by that id), its slots point at sounds, and loads without a slot are
+"extra sounds" that code and the hooks play (MN7). The +5 shift for `SubType`
+9 stays as a named second set. A sound without a named id gets a number when
+it is loaded, from a part of the sound table that grows as sounds are loaded
+(Q-MN16): no fixed range limits new sounds, a file loaded by two models gets
+one number, and a map change frees them with the monster models. The audio
+backend's tables, sized by the `SOUND_*` list today, grow for them.
 
 ### 3. Data fields
 
@@ -756,7 +760,7 @@ Focused tools that share one monster selection (`MonsterSelection`, like
 | **Monster Setup** | Model (from the model list), scale, outline (with "computed"), skin, meshes, render tier, equipment as items (item pickers), the merchants' part models, the other setup fields, NPC rules. Says when a model change switches the attack path (`player` and monster models attack differently). |
 | **Monster Attacks** | The skill → animation tables, `otherwise` or `otherwiseRandom`, `clearSkill`; the map gate of the handler that reads the table; whether each skill reaches the lookup directly or only on the next 0x18; the skills OpenMU sends (after MN6). Read-only with a note for player-shaped monsters. A player skill opens the skill tools once SK1 exists. |
 | **Monster Model** | The model entry: file picker over every folder the monster and NPC models use (`Data/Monster`, `Data/NPC` with subfolders, `Object35`, `Item/xmas`, the part model folders, in their on-disk spelling); texture folders; animation speeds and "hold last frame" with an animation picker, and the speed factors code applies on top (transformed ×1.5, Illusion of Kundun die ×4, Erohim die ½); sounds with play buttons; the slot range and what depends on it; users of the model: monsters, ambient boids, map objects, effects (D26). |
-| **Monster Preview** | The selected monster in a preview, with the item model preview's camera (orbit, pan, zoom) and a character path in the preview scene (weapons, body parts, skin). Animation preview: pick any animation of the model; play, pause and a frame slider; speed edits in Monster Model show at once; the model's sounds play at their moment (idle, attack, die); the return to idle after an attack and the impact frame of attack 1 and 2 are marked; the speed factors the game adds on top (transformed ×1.5, Illusion of Kundun die ×4, Erohim die ½) are shown as "in game". Player-shaped monsters show their equipment once MN4c moved it into data. In the world: a drawn copy outside `CharactersClient`, or a real character with a key the server never uses (outside 0–0x7FFF), a kind that cannot be targeted, no MU Helper target, removed when the preview closes or the map changes. Monsters on map object slots (traps) only on a map that loaded the object; refused when the character table is full. |
+| **Monster Preview** | The selected monster in a preview, with the item model preview's camera (orbit, pan, zoom) and a character path in the preview scene (weapons, body parts, skin). Animation preview: pick any animation of the model; play, pause and a frame slider; speed edits in Monster Model show at once; the model's sounds play at their moment (idle, attack, die); the return to idle after an attack and the impact frame of attack 1 and 2 are marked; the speed factors the game adds on top (transformed ×1.5, Illusion of Kundun die ×4, Erohim die ½) are shown as "in game". Player-shaped monsters show their equipment once MN4c moved it into data. Only in the editor's window: there is no view of the previewed monster in the world (Q-MN17). |
 | **Monster Translations** | Names × languages (the generic grid, D56). |
 | **Monster Checks** | Missing model files (case-resolved), animations a model does not have or with speed 0, the animation warnings of section 6, a kind against OpenMU's `ObjectKind` (allowed pairs; 0x1F numbers and summons are players in game), a monster of kind "monster" on an NPC-range model, unused models (counting non-monster users), item types that no longer exist, names over 64 units, no free model slots. |
 | **Look editor** (MN8) | The roadmap's shared look editor for the looks of the selected monster. |
@@ -976,6 +980,10 @@ groups:
 | Q-MN13 | Keep the handlers' map gates in code, or give `attacks` a map field? | Keep them in code; `attacks` is read where a handler answers today (D48). |
 | Q-MN14 | How the skill is cleared: a `clearSkill` field per monster, or hooks? | The field, filled by the converter (D48). |
 | Q-MN15 | 523 (Trap) and 658–668 (statues): give them proper bodies as fixes in MN4? | Yes, as P2 fixes after the comparison: 523 an invisible trap with the trap kind, 658–668 the statue 380's model and the NPC kind. For 658–668 OpenMU's Illusion Temple still decides whether it sends 380 or these numbers. |
+| Q-MN16 | New model sounds need ids, and only about 10 are free below 450. A pool of ids, or no new ids in MN3? *(2026-10-25)* | Neither: the fixed ids are a legacy of the `SOUND_*` list and the audio backend's fixed tables, not a need of speed. Sounds are named by file and get a number when loaded, from a table that grows without limit; sounds that code plays by name keep their named ids (section 2). |
+| Q-MN17 | The previewed monster in the world: a drawn copy, or a real character? *(2026-10-25)* | Neither: the preview stays in the editor's window. A view in the world is hard to use and does not look good. |
+| Q-MN18 | P1: Molt (68) has no model file; OpenMU has no monster 68, so no one notices. Keep stopping the game when a server sends it? *(2026-10-25)* | No: a missing monster model file is logged and listed by Monster Checks, the monster appears without a body, and the game keeps running. A fix of its own after MN3's comparison. |
+| Q-MN19 | P9: fix the sound slot quirks (a -1 in the second slot of a pair plays the unloaded id 209; models without slots play the Bull Fighter's sounds where those are loaded; the Dragon's slots point at ids nobody loads)? *(2026-10-25)* | All three, one commit each, after MN3's comparison. |
 
 ## Open questions
 
