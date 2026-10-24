@@ -60,12 +60,16 @@ bool SameTerms(const ItemStatProfiles& before, const ItemStatProfile& old, const
     return SameRequirementTerms(old.requirements, changed.requirements);
 }
 
+// A line names a table in its text or in its "values".
 bool DescriptionNamesTable(const ItemDefinition& item, std::string_view table)
 {
+    const std::string placeholder = Data::Items::MakeTablePlaceholder(table);
     return std::ranges::any_of(item.description,
                                [&](const Data::Items::ItemDescriptionLine& line)
                                {
-                                   if (Data::Items::NamesTable(line.text.GetNeutral(), table))
+                                   if (Data::Items::NamesTable(line.text.GetNeutral(), table) ||
+                                       std::ranges::any_of(line.values, [&](const auto& value)
+                                                           { return value.second == placeholder; }))
                                    {
                                        return true;
                                    }
@@ -190,6 +194,13 @@ void RenameTableInDescriptions(std::span<const ItemDefinition> slots, std::vecto
                 text.Set(locale, Data::Items::RenameTablePlaceholders(translation, from, to));
             }
             line.text = std::move(text);
+            for (auto& [placeholder, value] : line.values)
+            {
+                if (value == Data::Items::MakeTablePlaceholder(from))
+                {
+                    value = Data::Items::MakeTablePlaceholder(to);
+                }
+            }
         }
     }
 }

@@ -260,17 +260,9 @@
     <value>Defesa: %d</value>
     <comment>legacy_id=65,209</comment>
   </data>
-  <data name="Spell resistance: %d" xml:space="preserve">
-    <value>Resistência à magia: %d</value>
-    <comment>legacy_id=66</comment>
-  </data>
   <data name="Defense rate: %d" xml:space="preserve">
     <value>Taxa de defesa: %d</value>
     <comment>legacy_id=67,2045</comment>
-  </data>
-  <data name="Moving speed: %d" xml:space="preserve">
-    <value>Velocidade de movimento: %d</value>
-    <comment>legacy_id=68</comment>
   </data>
   <data name="Number of items: %d" xml:space="preserve">
     <value>Número de itens: %d</value>
@@ -283,10 +275,6 @@
   <data name="Durability: [%d/%d]" xml:space="preserve">
     <value>Durabilidade: [%d/%d]</value>
     <comment>legacy_id=71</comment>
-  </data>
-  <data name="%s Resistance: %d" xml:space="preserve">
-    <value>Resistência %s: %d</value>
-    <comment>legacy_id=72</comment>
   </data>
   <data name="Strength Requirement: %d" xml:space="preserve">
     <value>Requisito de força: %d</value>
@@ -375,10 +363,6 @@
   <data name="Luck (critical damage rate +5%%)" xml:space="preserve">
     <value>Sorte (taxa de dano crítico +5%%)</value>
     <comment>legacy_id=94</comment>
-  </data>
-  <data name="Durability: [%d]" xml:space="preserve">
-    <value>Durabilidade: [%d]</value>
-    <comment>legacy_id=95</comment>
   </data>
   <data name="Can only be used in moving unit" xml:space="preserve">
     <value>Só pode ser usado em unidade móvel</value>
@@ -2145,11 +2129,11 @@
     <comment>legacy_id=575</comment>
   </data>
   <data name="Increase %d%% of Damage" xml:space="preserve">
-    <value>Aumentar o dano de %d%% of</value>
+    <value>Aumenta o dano em %d%%</value>
     <comment>legacy_id=577</comment>
   </data>
   <data name="Absorb %d%% of Damage" xml:space="preserve">
-    <value>Absorver Dano %d%% of</value>
+    <value>Absorve %d%% do dano</value>
     <comment>legacy_id=578</comment>
   </data>
   <data name="Increase speed" xml:space="preserve">
@@ -4532,10 +4516,6 @@
     <value>Não %s.</value>
     <comment>legacy_id=1233</comment>
   </data>
-  <data name="Increase pet attack as %d%%" xml:space="preserve">
-    <value>Aumente o ataque de animais de estimação como %d%%</value>
-    <comment>legacy_id=1234</comment>
-  </data>
   <data name="Crest of monarch" xml:space="preserve">
     <value>Crista do monarca</value>
     <comment>legacy_id=1235</comment>
@@ -6196,10 +6176,6 @@
     <value>Mentalidade forte e excelente visão criam o feitiço de maldição mais poderoso. Além disso, este item atrai invocadores de outro mundo e usa a feitiçaria prejudicial contra eles.</value>
     <comment>legacy_id=1690</comment>
   </data>
-  <data name="Curse Spell increment %d%%" xml:space="preserve">
-    <value>Incremento de feitiço de maldição %d%%</value>
-    <comment>legacy_id=1691</comment>
-  </data>
   <data name="Curse Spell: %d ~ %d" xml:space="preserve">
     <value>Feitiço de Maldição: %d ~ %d</value>
     <comment>legacy_id=1692</comment>
@@ -7035,10 +7011,6 @@
   <data name="Skills will improve through upgrading." xml:space="preserve">
     <value>As habilidades melhorarão através da atualização.</value>
     <comment>legacy_id=1929</comment>
-  </data>
-  <data name="Stamina Requirement: %d" xml:space="preserve">
-    <value>Requisito de Vigor: %d</value>
-    <comment>legacy_id=1930</comment>
   </data>
   <data name="Req LV" xml:space="preserve">
     <value>Requerimento LV</value>
@@ -8116,10 +8088,6 @@
     <value>http://muonline.webzen.com/</value>
     <comment>legacy_id=2295</comment>
   </data>
-  <data name="%d%% Combination success rate increase" xml:space="preserve">
-    <value>%d%% Aumento da taxa de sucesso da combinação</value>
-    <comment>legacy_id=2296</comment>
-  </data>
   <data name="Hour" xml:space="preserve">
     <value>Hora</value>
     <comment>legacy_id=2299</comment>
@@ -9006,14 +8974,6 @@
   <data name="Move by a right-mouse-click." xml:space="preserve">
     <value>Mova com um clique com o botão direito do mouse.</value>
     <comment>legacy_id=2603</comment>
-  </data>
-  <data name="Saves the location with the right-mouse-click." xml:space="preserve">
-    <value>Salva o local com o clique direito do mouse.</value>
-    <comment>legacy_id=2605</comment>
-  </data>
-  <data name="Returns to the saved location by a click." xml:space="preserve">
-    <value>Retorna ao local salvo com um clique.</value>
-    <comment>legacy_id=2606</comment>
   </data>
   <data name="Would you like to save the location?" xml:space="preserve">
     <value>Gostaria de salvar o local?</value>
@@ -10518,14 +10478,6 @@
   <data name="GrandDukeDukeMarquisCountViscount" xml:space="preserve">
     <value>Grão-Duque#Duque#Marquês#Conde#Visconde#Barão#Cavaleiro Comandante#Cavaleiro Superior#Cavaleiro#Prefeito da Guarda#Oficial#Tenente#Sargento#Soldado</value>
     <comment>legacy_id=3104</comment>
-  </data>
-  <data name="Can enter the Monday - Saturday map." xml:space="preserve">
-    <value>Pode entrar no mapa de segunda a sábado.</value>
-    <comment>legacy_id=3105</comment>
-  </data>
-  <data name="Can enter the Sunday map." xml:space="preserve">
-    <value>Pode entrar no mapa de domingo.</value>
-    <comment>legacy_id=3106</comment>
   </data>
   <data name="Varka Map 7" xml:space="preserve">
     <value>Mapa de Varka 7</value>

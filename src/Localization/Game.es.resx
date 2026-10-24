@@ -260,17 +260,9 @@
     <value>Defensa: %d</value>
     <comment>legacy_id=65,209</comment>
   </data>
-  <data name="Spell resistance: %d" xml:space="preserve">
-    <value>Resistencia a hechizos: %d</value>
-    <comment>legacy_id=66</comment>
-  </data>
   <data name="Defense rate: %d" xml:space="preserve">
     <value>Tasa de defensa: %d</value>
     <comment>legacy_id=67,2045</comment>
-  </data>
-  <data name="Moving speed: %d" xml:space="preserve">
-    <value>Velocidad de movimiento: %d</value>
-    <comment>legacy_id=68</comment>
   </data>
   <data name="Number of items: %d" xml:space="preserve">
     <value>Número de artículos: %d</value>
@@ -283,10 +275,6 @@
   <data name="Durability: [%d/%d]" xml:space="preserve">
     <value>Durabilidad: [%d/%d]</value>
     <comment>legacy_id=71</comment>
-  </data>
-  <data name="%s Resistance: %d" xml:space="preserve">
-    <value>Resistencia %s: %d</value>
-    <comment>legacy_id=72</comment>
   </data>
   <data name="Strength Requirement: %d" xml:space="preserve">
     <value>Requisito de fuerza: %d</value>
@@ -375,10 +363,6 @@
   <data name="Luck (critical damage rate +5%%)" xml:space="preserve">
     <value>Suerte (tasa de daño crítico +5%%)</value>
     <comment>legacy_id=94</comment>
-  </data>
-  <data name="Durability: [%d]" xml:space="preserve">
-    <value>Durabilidad: [%d]</value>
-    <comment>legacy_id=95</comment>
   </data>
   <data name="Can only be used in moving unit" xml:space="preserve">
     <value>Sólo se puede utilizar en unidades móviles.</value>
@@ -2145,11 +2129,11 @@
     <comment>legacy_id=575</comment>
   </data>
   <data name="Increase %d%% of Damage" xml:space="preserve">
-    <value>Aumenta el daño de %d%% of</value>
+    <value>Aumenta el daño un %d%%</value>
     <comment>legacy_id=577</comment>
   </data>
   <data name="Absorb %d%% of Damage" xml:space="preserve">
-    <value>Absorber daño %d%% of</value>
+    <value>Absorbe el %d%% del daño</value>
     <comment>legacy_id=578</comment>
   </data>
   <data name="Increase speed" xml:space="preserve">
@@ -4532,10 +4516,6 @@
     <value>Sin %s.</value>
     <comment>legacy_id=1233</comment>
   </data>
-  <data name="Increase pet attack as %d%%" xml:space="preserve">
-    <value>Aumenta el ataque de mascotas como %d%%</value>
-    <comment>legacy_id=1234</comment>
-  </data>
   <data name="Crest of monarch" xml:space="preserve">
     <value>Cresta del monarca</value>
     <comment>legacy_id=1235</comment>
@@ -6196,10 +6176,6 @@
     <value>Una mentalidad fuerte y una visión excelente crean el hechizo de maldición más poderoso. Además, este objeto atrae a los invocadores de otro mundo y utiliza la hechicería perjudicial contra ellos.</value>
     <comment>legacy_id=1690</comment>
   </data>
-  <data name="Curse Spell increment %d%%" xml:space="preserve">
-    <value>Incremento del hechizo de maldición %d%%</value>
-    <comment>legacy_id=1691</comment>
-  </data>
   <data name="Curse Spell: %d ~ %d" xml:space="preserve">
     <value>Hechizo de maldición: %d ~ %d</value>
     <comment>legacy_id=1692</comment>
@@ -7035,10 +7011,6 @@
   <data name="Skills will improve through upgrading." xml:space="preserve">
     <value>Las habilidades mejorarán mediante la actualización.</value>
     <comment>legacy_id=1929</comment>
-  </data>
-  <data name="Stamina Requirement: %d" xml:space="preserve">
-    <value>Requisito de resistencia: %d</value>
-    <comment>legacy_id=1930</comment>
   </data>
   <data name="Req LV" xml:space="preserve">
     <value>Requiere BT</value>
@@ -7981,7 +7953,7 @@
     <comment>legacy_id=2259</comment>
   </data>
   <data name="usable %dtimes" xml:space="preserve">
-    <value>utilizable %dveces</value>
+    <value>utilizable %d veces</value>
     <comment>legacy_id=2260</comment>
   </data>
   <data name="You can achieve special items with combinations." xml:space="preserve">
@@ -8115,10 +8087,6 @@
   <data name="http://muonline.webzen.com/" xml:space="preserve">
     <value>http://muonline.webzen.com/</value>
     <comment>legacy_id=2295</comment>
-  </data>
-  <data name="%d%% Combination success rate increase" xml:space="preserve">
-    <value>%d%% Aumento de la tasa de éxito de la combinación</value>
-    <comment>legacy_id=2296</comment>
   </data>
   <data name="Hour" xml:space="preserve">
     <value>Hora</value>
@@ -9006,14 +8974,6 @@
   <data name="Move by a right-mouse-click." xml:space="preserve">
     <value>Muévete haciendo clic con el botón derecho del ratón.</value>
     <comment>legacy_id=2603</comment>
-  </data>
-  <data name="Saves the location with the right-mouse-click." xml:space="preserve">
-    <value>Guarda la ubicación con el clic derecho del mouse.</value>
-    <comment>legacy_id=2605</comment>
-  </data>
-  <data name="Returns to the saved location by a click." xml:space="preserve">
-    <value>Vuelve a la ubicación guardada con un clic.</value>
-    <comment>legacy_id=2606</comment>
   </data>
   <data name="Would you like to save the location?" xml:space="preserve">
     <value>¿Quieres guardar la ubicación?</value>
@@ -10518,14 +10478,6 @@
   <data name="GrandDukeDukeMarquisCountViscount" xml:space="preserve">
     <value>Gran Duque#Duque#Marqués#Conde#Vizconde#Barón#Caballero Comandante#Caballero Superior#Caballero#Prefecto de la Guardia#Oficial#Teniente#Sargento#Soldado</value>
     <comment>legacy_id=3104</comment>
-  </data>
-  <data name="Can enter the Monday - Saturday map." xml:space="preserve">
-    <value>Puede ingresar al mapa de lunes a sábado.</value>
-    <comment>legacy_id=3105</comment>
-  </data>
-  <data name="Can enter the Sunday map." xml:space="preserve">
-    <value>Puede ingresar al mapa del domingo.</value>
-    <comment>legacy_id=3106</comment>
   </data>
   <data name="Varka Map 7" xml:space="preserve">
     <value>Mapa de Varka 7</value>
