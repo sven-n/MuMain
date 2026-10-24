@@ -89,10 +89,22 @@ ImGuiID WidgetId(const char* window, const char* label)
 }
 
 // As a click: pressed in the next frame.
+void Press(ImGuiID id)
+{
+    ImGui::ActivateItemByID(id);
+    RenderBrowser();
+}
+
 void Press(const char* window, const char* label)
 {
-    ImGui::ActivateItemByID(WidgetId(window, label));
-    RenderBrowser();
+    Press(WidgetId(window, label));
+}
+
+// The kind combo of a monster's row in the browser's list.
+ImGuiID RowKindCombo(int number)
+{
+    const ImGuiID table = WidgetId(MuEditor::WindowIds::MonsterBrowser, "##Monsters");
+    return ImGui::GetIDWithSeed("##Kind", nullptr, ImGui::GetIDWithSeed(number, table));
 }
 
 // Activation selects all of the field's text; the typed text replaces it.
@@ -179,21 +191,38 @@ TEST_CASE("Monster Browser: a copy has the kind and English name of its source, 
     CHECK(g_MonsterEdits.GetHistory().GetUndoLabel() == StepAdd("Budge Dragon (3)"));
 }
 
-TEST_CASE("Monster Browser: the kind of the selected monster is an undo step [editor][monsters]")
+TEST_CASE("Monster Browser: a row's kind combo changes that monster's kind as an undo step [editor][monsters]")
 {
-    StartWith({Monster(2, "Budge Dragon")}, 2);
+    // 2 is selected; the kind is changed in 7's row.
+    StartWith({Monster(2, "Budge Dragon"), Monster(7, "Giant")}, 2);
     TestImGuiContext context;
     RenderBrowser();
 
-    Press(MuEditor::WindowIds::MonsterBrowser, I18N::Editor::Kind);
+    Press(RowKindCombo(7));
     Press(ComboWindow, I18N::Editor::KindNPC);
     RenderBrowser();
 
-    REQUIRE(g_MonsterDatabase.Find(2) != nullptr);
-    CHECK(g_MonsterDatabase.Find(2)->kind == MonsterKind::Npc);
-    CHECK(g_MonsterEdits.GetHistory().GetUndoLabel() == I18N::Format(I18N::Editor::StepKind, {"Budge Dragon (2)"}));
-    MuEditor::Monsters::ToolWindow::GetUndoTarget().Undo();
+    REQUIRE(g_MonsterDatabase.Find(7) != nullptr);
+    CHECK(g_MonsterDatabase.Find(7)->kind == MonsterKind::Npc);
     CHECK(g_MonsterDatabase.Find(2)->kind == MonsterKind::Monster);
+    CHECK(g_MonsterSelection.GetNumber() == 7);
+    CHECK(g_MonsterEdits.GetHistory().GetUndoLabel() == I18N::Format(I18N::Editor::StepKind, {"Giant (7)"}));
+    MuEditor::Monsters::ToolWindow::GetUndoTarget().Undo();
+    CHECK(g_MonsterDatabase.Find(7)->kind == MonsterKind::Monster);
+}
+
+TEST_CASE("Monster Browser: picking the kind a monster has changes nothing [editor][monsters]")
+{
+    StartWith({Monster(2, "Budge Dragon", MonsterKind::Npc)}, 2);
+    TestImGuiContext context;
+    RenderBrowser();
+
+    Press(RowKindCombo(2));
+    Press(ComboWindow, I18N::Editor::KindNPC);
+    RenderBrowser();
+
+    CHECK(g_MonsterDatabase.Find(2)->kind == MonsterKind::Npc);
+    CHECK_FALSE(g_MonsterEdits.GetHistory().CanUndo());
 }
 
 TEST_CASE("Monster Browser: a removed monster comes back with undo [editor][monsters]")

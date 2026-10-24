@@ -213,7 +213,8 @@ other two are tabs beside the item tools.
     around it (`78 <= c->MonsterIndex && c->MonsterIndex <= MONSTER_GOLDEN_WHEEL`).
     Code that uses the number in other ways is not found: a `case` label, a
     function argument (`getMonsterName(236)`), a variable with another name.
-  - **Kind**: the selected monster's kind.
+  - **Kind**: each row has a combo with the monster's kind; picking another
+    kind changes it (one undo step) and selects the monster.
 - **Monster Translations**: the names in all languages, with **Save
   Monsters**, **Import names from NpcName txt** and **Export as NpcName
   txt**, see

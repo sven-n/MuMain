@@ -30,7 +30,8 @@ private:
     void RenderKindFilter();
     void RenderMissingFilter();
     void RenderMonsterActions(int selectedNumber);
-    void RenderSelectedKind(int selectedNumber);
+    // A kind picked in a row's combo, as an undo step.
+    void SetKind(int number, Data::Monsters::MonsterKind kind);
     // When the selection changed elsewhere: clears the filters that hide the
     // monster; returns whether the list scrolls to it.
     bool RevealSelection(int selectedNumber);

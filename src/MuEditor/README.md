@@ -62,7 +62,7 @@ One selected monster (**MonsterSelection**) is shown by every monster tool.
 Changes go through **MonsterEdits** (the monster data handler plus the
 session's undo history, **MonsterEditHistory**); **MonsterStepLabel** names
 each step ("Budge Dragon (2): kind").
-- **MuMonsterBrowserUI** - The monster list with search and filters (MonsterBrowserList, MonsterListModel), Save and Revert (MonsterFileActions), the kind of the selected monster (MonsterKindField), and the add, copy and remove dialogs (MonsterAddDialog, MonsterRemoveDialog) with what uses a number: the quest data (MonsterDataUsers) and the source lines (MonsterCodeReferences, MonsterCodeLine, MonsterCodeReferenceIndex)
+- **MuMonsterBrowserUI** - The monster list with search and filters (MonsterBrowserList, MonsterListModel), Save and Revert (MonsterFileActions), the kind combo of each row (MonsterKindField), and the add, copy and remove dialogs (MonsterAddDialog, MonsterRemoveDialog) with what uses a number: the quest data (MonsterDataUsers) and the source lines (MonsterCodeReferences, MonsterCodeLine, MonsterCodeReferenceIndex)
 - **MuMonsterTranslationsUI** - Monster names as a grid of numbers and languages (the shared names grid, with MonsterNameRows as its rows), and the import and export of the old NpcName txt files (MonsterNpcNameFiles)
 - **MuMonsterChecksUI** - The checks of a save in the shared problem table, each leading to its monster and field (MonsterChecks, MonsterCheckTargets)
 - **MonsterToolWindow** - What every monster tool window shares: the monster tools' frame, and the monster edit history as the editor bar's undo target while a monster tool is open

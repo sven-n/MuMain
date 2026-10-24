@@ -31,7 +31,6 @@ namespace
 // Pixel widths before the editor UI scale.
 constexpr float SearchWidth = 180.0f;
 constexpr float FilterWidth = 160.0f;
-constexpr float KindWidth = 120.0f;
 
 using Data::Monsters::MonsterDefinition;
 using Data::Monsters::MonsterKind;
@@ -61,11 +60,15 @@ void MuMonsterBrowserUI::Render(bool* open)
 
         const bool reveal = RevealSelection(selected);
         m_filter.search = m_search;
-        const int clicked = m_rows.Render(m_list.GetNumbers(m_filter), selected, reveal);
-        if (clicked >= 0)
+        const MonsterBrowserList::Result rows = m_rows.Render(m_list.GetNumbers(m_filter), selected, reveal);
+        if (rows.clicked >= 0)
         {
-            g_MonsterSelection.Select(clicked);
+            g_MonsterSelection.Select(rows.clicked);
             m_shownSerial = g_MonsterSelection.GetSerial();
+        }
+        if (rows.kindChanged >= 0)
+        {
+            SetKind(rows.kindChanged, rows.kind);
         }
         m_addDialog.Render();
         m_removeDialog.Render();
@@ -173,34 +176,24 @@ void MuMonsterBrowserUI::RenderMonsterActions(int selectedNumber)
         m_removeDialog.Open(selectedNumber);
     }
     ImGui::EndDisabled();
-    ImGui::SameLine();
-    RenderSelectedKind(selectedNumber);
 }
 
-void MuMonsterBrowserUI::RenderSelectedKind(int selectedNumber)
+void MuMonsterBrowserUI::SetKind(int number, MonsterKind kind)
 {
-    ImGui::SetNextItemWidth(KindWidth * g_MuEditorCore.GetUIScale());
-    const MonsterDefinition* monster = g_MonsterDatabase.Find(selectedNumber);
+    const MonsterDefinition* monster = g_MonsterDatabase.Find(number);
     if (monster == nullptr)
     {
-        ImGui::BeginDisabled();
-        if (ImGui::BeginCombo(I18N::Editor::Kind, ""))
-        {
-            ImGui::EndCombo();
-        }
-        ImGui::EndDisabled();
         return;
     }
     MonsterDefinition changed = *monster;
-    const bool picked = KindField::RenderCombo(I18N::Editor::Kind, changed.kind);
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::SetTooltip("%s", I18N::Editor::KindChangeInGame);
-    }
-    if (picked && g_MonsterEdits.SetMonster(StepLabel::Kind(changed), changed))
+    changed.kind = kind;
+    if (g_MonsterEdits.SetMonster(StepLabel::Kind(changed), changed))
     {
         // The row stays while a kind filter would hide it now.
         m_list.KeepRowsAfterOwnEdit();
+        // The monster whose kind changed is the one the tools show.
+        g_MonsterSelection.Select(number);
+        m_shownSerial = g_MonsterSelection.GetSerial();
     }
 }
 
