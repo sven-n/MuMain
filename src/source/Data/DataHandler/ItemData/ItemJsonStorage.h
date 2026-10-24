@@ -97,6 +97,11 @@ using ItemGroupSet = std::bitset<MAX_ITEM_TYPE>;
 ItemDataSaveResult SaveItemDataDirectory(const std::filesystem::path& directory, std::span<const ItemDefinition> items,
                                          std::vector<ItemDataIssue>& issues);
 
+// Writes `text` to `file` as the saves do: by a temporary file that replaces it, so a failed
+// write leaves the old file. An unchanged file is not touched.
+ItemDataSaveResult WriteItemTextFile(const std::filesystem::path& file, const std::string& text,
+                                     std::vector<ItemDataIssue>& issues);
+
 // The item models a save writes with the items.
 struct ItemModelSave
 {

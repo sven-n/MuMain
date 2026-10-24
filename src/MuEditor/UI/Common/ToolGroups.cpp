@@ -14,7 +14,7 @@ namespace MuEditor
 {
 namespace
 {
-const std::array<ToolWindowEntry, 9> ItemToolEntries = {{
+const std::array<ToolWindowEntry, 10> ItemToolEntries = {{
     {WindowIds::ItemBasics, &I18N::Editor::ItemBasics, &ToolWindows::itemBasics},
     {WindowIds::ItemRequirements, &I18N::Editor::ItemRequirements, &ToolWindows::itemRequirements},
     {WindowIds::ItemRules, &I18N::Editor::ItemRules, &ToolWindows::itemRules},
@@ -22,6 +22,7 @@ const std::array<ToolWindowEntry, 9> ItemToolEntries = {{
     {WindowIds::ItemModel, &I18N::Editor::ItemModel, &ToolWindows::itemModel},
     {WindowIds::ItemGlowColors, &I18N::Editor::GlowColors, &ToolWindows::itemGlowColors},
     {WindowIds::ItemFormulas, &I18N::Editor::ItemFormulas, &ToolWindows::itemFormulas},
+    {WindowIds::ItemSync, &I18N::Editor::ItemSync, &ToolWindows::itemSync},
     {WindowIds::ItemChecks, &I18N::Editor::ItemChecks, &ToolWindows::itemChecks},
     {WindowIds::ItemTranslations, &I18N::Editor::ItemTranslations, &ToolWindows::itemTranslations},
 }};

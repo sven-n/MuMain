@@ -2098,4 +2098,241 @@
   <data name="Monster checks click note" xml:space="preserve">
     <value>Ein Klick auf das Problem eines Monsters wählt es aus und öffnet das Werkzeug seines Felds.</value>
   </data>
+  <data name="Item Sync" xml:space="preserve">
+    <value>Item-Abgleich</value>
+  </data>
+  <data name="Import..." xml:space="preserve">
+    <value>Importieren…</value>
+  </data>
+  <data name="Export..." xml:space="preserve">
+    <value>Exportieren…</value>
+  </data>
+  <data name="Exchange file" xml:space="preserve">
+    <value>Austauschdatei</value>
+  </data>
+  <data name="Compare again" xml:space="preserve">
+    <value>Neu vergleichen</value>
+  </data>
+  <data name="What Import and Export do" xml:space="preserve">
+    <value>Importieren listet auf, wie sich eine Datei von den Items und Formeln des Clients unterscheidet, nur die Unterschiede (was auf beiden Seiten gleich ist, fehlt), und übernimmt die angehakten Werte in den Client. Exportieren schreibt die Items und Formeln des Clients in eine Datei.</value>
+  </data>
+  <data name="Import from {0}" xml:space="preserve">
+    <value>Import aus {0}</value>
+  </data>
+  <data name="From OpenMU, server {0}" xml:space="preserve">
+    <value>Von OpenMU, Server {0}</value>
+  </data>
+  <data name="The diff counts" xml:space="preserve">
+    <value>{0} hinzugefügte, {1} geänderte, {2} entfernte Items; {3} Formeleinträge</value>
+  </data>
+  <data name="Check all" xml:space="preserve">
+    <value>Alle anhaken</value>
+  </data>
+  <data name="Check none" xml:space="preserve">
+    <value>Keinen anhaken</value>
+  </data>
+  <data name="A field in all items" xml:space="preserve">
+    <value>Ein Feld in allen Items</value>
+  </data>
+  <data name="Check them" xml:space="preserve">
+    <value>Anhaken</value>
+  </data>
+  <data name="Uncheck them" xml:space="preserve">
+    <value>Haken entfernen</value>
+  </data>
+  <data name="Changed" xml:space="preserve">
+    <value>Geändert</value>
+  </data>
+  <data name="Removed" xml:space="preserve">
+    <value>Entfernt</value>
+  </data>
+  <data name="Fields" xml:space="preserve">
+    <value>Felder</value>
+  </data>
+  <data name="Now" xml:space="preserve">
+    <value>Jetzt</value>
+  </data>
+  <data name="From the file" xml:space="preserve">
+    <value>Aus der Datei</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Hinweis</value>
+  </data>
+  <data name="Entry" xml:space="preserve">
+    <value>Eintrag</value>
+  </data>
+  <data name="Known" xml:space="preserve">
+    <value>Bekannt</value>
+  </data>
+  <data name="What a known difference is" xml:space="preserve">
+    <value>Ein bekannter Unterschied: zwischen Client und Server gewollt, er bleibt daher ohne Haken. Gespeichert in Data/Items/Sync/KnownDifferences.json.</value>
+  </data>
+  <data name="OpenMU keeps the drop level in a byte (at most 255)" xml:space="preserve">
+    <value>OpenMU speichert die Drop-Stufe in einem Byte (höchstens 255)</value>
+  </data>
+  <data name="It has no model yet" xml:space="preserve">
+    <value>Es hat noch kein Modell</value>
+  </data>
+  <data name="Its profile rules give {0}, the file {1}" xml:space="preserve">
+    <value>Seine Profilregeln geben {0}, die Datei {1}: eine Flügelstufe oder ein Tag fehlt vielleicht</value>
+  </data>
+  <data name="Apply the checked changes" xml:space="preserve">
+    <value>Angehakte Änderungen übernehmen</value>
+  </data>
+  <data name="Import items" xml:space="preserve">
+    <value>Items importieren</value>
+  </data>
+  <data name="The checks refuse the change" xml:space="preserve">
+    <value>Die Prüfungen lehnen die Änderung ab; die Zeilen der Items mit Fehlern haben keinen Haken mehr, und alle Formelzeilen, wenn die Formeln einen Fehler haben:</value>
+  </data>
+  <data name="Fields of {0}" xml:space="preserve">
+    <value>Felder von {0}</value>
+  </data>
+  <data name="Item exchange files" xml:space="preserve">
+    <value>Item-Austauschdateien</value>
+  </data>
+  <data name="The client data changed since the comparison" xml:space="preserve">
+    <value>Die Daten des Clients haben sich seit dem Vergleich geändert: neu vergleichen.</value>
+  </data>
+  <data name="It is in the file more than once" xml:space="preserve">
+    <value>Es ist mehrmals in der Datei: im Client bleibt es, wie es ist</value>
+  </data>
+  <data name="How to see differences" xml:space="preserve">
+    <value>Um Unterschiede zu sehen, ein Item im Editor oder in der Datei ändern oder eine andere Datei wählen und dann neu vergleichen.</value>
+  </data>
+  <data name="The file matches the client" xml:space="preserve">
+    <value>Die Datei stimmt mit dem Client überein: nichts unterscheidet sich.</value>
+  </data>
+  <data name="The file matches the client in all items" xml:space="preserve">
+    <value>Die Datei stimmt in allen Items mit dem Client überein; sie hat keine Formeln zum Vergleichen.</value>
+  </data>
+  <data name="Items that differ ({0} of {1})" xml:space="preserve">
+    <value>Items mit Unterschieden ({0} von {1})</value>
+  </data>
+  <data name="Formula entries that differ ({0} of {1})" xml:space="preserve">
+    <value>Formeleinträge mit Unterschieden ({0} von {1})</value>
+  </data>
+  <data name="Items: all {0} are the same" xml:space="preserve">
+    <value>Items: alle {0} sind im Client und in der Datei gleich.</value>
+  </data>
+  <data name="Formula entries: all {0} are the same" xml:space="preserve">
+    <value>Formeleinträge: alle {0} sind im Client und in der Datei gleich.</value>
+  </data>
+  <data name="Formulas: not compared, the file has none" xml:space="preserve">
+    <value>Formeln: nicht verglichen, die Datei hat keine. Die Formeln des Clients bleiben, wie sie sind.</value>
+  </data>
+  <data name="Applied: {0} items and {1} formula entries" xml:space="preserve">
+    <value>Als ein Schritt des Rückgängig-Verlaufs übernommen: {0} Items und {1} Formeleinträge. Was übernommen wurde, unterscheidet sich nicht mehr.</value>
+  </data>
+  <data name="Still listed below: the rows that were not checked" xml:space="preserve">
+    <value>Weiter unten noch aufgeführt, ohne Haken: was nicht angehakt war oder nicht übernommen werden kann.</value>
+  </data>
+  <data name="After applying, the window compares again" xml:space="preserve">
+    <value>Nach dem Übernehmen vergleicht das Fenster neu: Was übernommen wurde, unterscheidet sich nicht mehr und verschwindet aus der Liste.</value>
+  </data>
+  <data name="Nothing is checked" xml:space="preserve">
+    <value>Nichts ist angehakt.</value>
+  </data>
+  <data name="The path is not the compared file" xml:space="preserve">
+    <value>Der Pfad im Feld ist nicht die verglichene Datei: neu vergleichen.</value>
+  </data>
+  <data name="The item is worn or in an item window, it is not added" xml:space="preserve">
+    <value>Das Item wird getragen oder ist in einem Item-Fenster: Es wird nicht hinzugefügt, solange das so ist.</value>
+  </data>
+  <data name="Added" xml:space="preserve">
+    <value>Hinzugefügt</value>
+  </data>
+  <data name="In the client" xml:space="preserve">
+    <value>Im Client</value>
+  </data>
+  <data name="Apply" xml:space="preserve">
+    <value>Übernehmen</value>
+  </data>
+  <data name="Replace" xml:space="preserve">
+    <value>Ersetzen</value>
+  </data>
+  <data name="Apply the import" xml:space="preserve">
+    <value>Import übernehmen</value>
+  </data>
+  <data name="The import changes" xml:space="preserve">
+    <value>Das ändert die Items und Formeln des Clients mit den angehakten Zeilen aus {0}: {1} Items hinzugefügt, {2} geändert, {3} entfernt; {4} Formeleinträge ändern sich.</value>
+  </data>
+  <data name="What the import leaves" xml:space="preserve">
+    <value>Alles, was nicht angehakt oder nicht aufgeführt ist, bleibt, wie es ist. Rückgängig nimmt den ganzen Import zurück.</value>
+  </data>
+  <data name="Replace the exchange file" xml:space="preserve">
+    <value>Austauschdatei ersetzen</value>
+  </data>
+  <data name="The export changes" xml:space="preserve">
+    <value>{0} bekommt die Items und Formeln des Clients: {1} Items hinzugefügt, {2} geändert, {3} entfernt; {4} Formeleinträge ändern sich.</value>
+  </data>
+  <data name="The export changes, the formulas are added" xml:space="preserve">
+    <value>{0} bekommt die Items und Formeln des Clients: {1} Items hinzugefügt, {2} geändert, {3} entfernt; die Formeln kommen hinzu.</value>
+  </data>
+  <data name="The file cannot be read, replace it" xml:space="preserve">
+    <value>{0} lässt sich nicht als Item-Austauschdatei lesen. Durch die Items und Formeln des Clients ersetzen?</value>
+  </data>
+  <data name="The file already has the client data" xml:space="preserve">
+    <value>{0} hat schon die Items und Formeln des Clients: nichts zu schreiben.</value>
+  </data>
+  <data name="The export could not be written" xml:space="preserve">
+    <value>Der Export konnte nicht geschrieben werden:</value>
+  </data>
+  <data name="Exported {0} items to {1}" xml:space="preserve">
+    <value>{0} Items und alle Formeln nach {1} exportiert.</value>
+  </data>
+  <data name="Compare two files" xml:space="preserve">
+    <value>Zwei Dateien vergleichen</value>
+  </data>
+  <data name="What comparing files does" xml:space="preserve">
+    <value>Vergleicht zwei Austauschdateien, z. B. einen Client-Export mit einem Server-Export: was sich von Datei A zu Datei B ändert, in jeder Sprache. Nichts wird übernommen; ein Unterschied kann als bekannt markiert werden.</value>
+  </data>
+  <data name="File A" xml:space="preserve">
+    <value>Datei A</value>
+  </data>
+  <data name="File B" xml:space="preserve">
+    <value>Datei B</value>
+  </data>
+  <data name="Pick..." xml:space="preserve">
+    <value>Wählen…</value>
+  </data>
+  <data name="Swap" xml:space="preserve">
+    <value>Tauschen</value>
+  </data>
+  <data name="Compare the files" xml:space="preserve">
+    <value>Dateien vergleichen</value>
+  </data>
+  <data name="File A: {0}" xml:space="preserve">
+    <value>Datei A: {0}</value>
+  </data>
+  <data name="File B: {0}" xml:space="preserve">
+    <value>Datei B: {0}</value>
+  </data>
+  <data name="The files match" xml:space="preserve">
+    <value>Die Dateien haben dieselben Items und Formeln.</value>
+  </data>
+  <data name="The files match in all items" xml:space="preserve">
+    <value>Die Dateien haben dieselben Items; die Formeln wurden nicht verglichen, eine Datei hat keine.</value>
+  </data>
+  <data name="The file diff counts" xml:space="preserve">
+    <value>Von Datei A zu Datei B: {0} hinzugefügte, {1} geänderte, {2} entfernte Items; {3} Formeleinträge</value>
+  </data>
+  <data name="From A to B" xml:space="preserve">
+    <value>Von A nach B</value>
+  </data>
+  <data name="Items: all {0} are the same in both files" xml:space="preserve">
+    <value>Items: alle {0} sind in beiden Dateien gleich.</value>
+  </data>
+  <data name="Formula entries: all {0} are the same in both files" xml:space="preserve">
+    <value>Formeleinträge: alle {0} sind in beiden Dateien gleich.</value>
+  </data>
+  <data name="Formulas: not compared, a file has none" xml:space="preserve">
+    <value>Formeln: nicht verglichen, eine Datei hat keine.</value>
+  </data>
+  <data name="It is in file A more than once" xml:space="preserve">
+    <value>Es ist mehrmals in Datei A und wird daher nicht verglichen.</value>
+  </data>
+  <data name="It is in file B more than once" xml:space="preserve">
+    <value>Es ist mehrmals in Datei B und wird daher nicht verglichen.</value>
+  </data>
 </root>

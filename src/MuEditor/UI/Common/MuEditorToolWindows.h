@@ -17,6 +17,7 @@ struct ToolWindows
     bool itemModel = false;
     bool itemGlowColors = false;
     bool itemFormulas = false;
+    bool itemSync = false;
     bool itemChecks = false;
     bool itemTranslations = false;
     bool monsterBrowser = false;

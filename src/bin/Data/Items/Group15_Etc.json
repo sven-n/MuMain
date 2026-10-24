@@ -19,7 +19,7 @@
       "buyPrice": 17000,
       "repairable": false,
       "requirements": {
-        "energy": 100
+        "energy": 140
       },
       "classRequirements": {
         "darkWizard": 1,
@@ -43,7 +43,7 @@
       "buyPrice": 11000,
       "repairable": false,
       "requirements": {
-        "energy": 100
+        "energy": 104
       },
       "classRequirements": {
         "darkWizard": 1,
@@ -68,7 +68,7 @@
       "buyPrice": 3000,
       "repairable": false,
       "requirements": {
-        "energy": 100
+        "energy": 72
       },
       "classRequirements": {
         "darkWizard": 1,
@@ -92,7 +92,7 @@
       "buyPrice": 300,
       "repairable": false,
       "requirements": {
-        "energy": 100
+        "energy": 40
       },
       "classRequirements": {
         "darkWizard": 1,
@@ -117,7 +117,7 @@
       "buyPrice": 21000,
       "repairable": false,
       "requirements": {
-        "energy": 100
+        "energy": 160
       },
       "classRequirements": {
         "darkWizard": 1,
@@ -141,7 +141,7 @@
       "buyPrice": 5000,
       "repairable": false,
       "requirements": {
-        "energy": 100
+        "energy": 88
       },
       "classRequirements": {
         "darkWizard": 1
@@ -164,7 +164,7 @@
       "buyPrice": 14000,
       "repairable": false,
       "requirements": {
-        "energy": 100
+        "energy": 120
       },
       "classRequirements": {
         "darkWizard": 1,
@@ -189,7 +189,7 @@
       "buyPrice": 25000,
       "repairable": false,
       "requirements": {
-        "energy": 100
+        "energy": 180
       },
       "classRequirements": {
         "darkWizard": 1,
@@ -213,7 +213,7 @@
       "buyPrice": 35000,
       "repairable": false,
       "requirements": {
-        "energy": 100
+        "energy": 220
       },
       "classRequirements": {
         "darkWizard": 1,
@@ -237,7 +237,7 @@
       "buyPrice": 60000,
       "repairable": false,
       "requirements": {
-        "energy": 100
+        "energy": 260
       },
       "classRequirements": {
         "darkWizard": 1,
@@ -261,7 +261,7 @@
       "buyPrice": 1150,
       "repairable": false,
       "requirements": {
-        "energy": 100
+        "energy": 56
       },
       "classRequirements": {
         "darkWizard": 1,
@@ -286,7 +286,7 @@
       "buyPrice": 100000,
       "repairable": false,
       "requirements": {
-        "energy": 110
+        "energy": 345
       },
       "classRequirements": {
         "darkWizard": 1,
@@ -310,7 +310,7 @@
       "buyPrice": 175000,
       "repairable": false,
       "requirements": {
-        "energy": 150
+        "energy": 500
       },
       "classRequirements": {
         "darkWizard": 1,
@@ -334,7 +334,7 @@
       "buyPrice": 265000,
       "repairable": false,
       "requirements": {
-        "energy": 200
+        "energy": 724
       },
       "classRequirements": {
         "darkWizard": 1,
@@ -358,7 +358,7 @@
       "buyPrice": 245000,
       "repairable": false,
       "requirements": {
-        "energy": 188
+        "energy": 644
       },
       "classRequirements": {
         "darkWizard": 2
@@ -381,7 +381,7 @@
       "buyPrice": 135000,
       "repairable": false,
       "requirements": {
-        "energy": 126
+        "energy": 408
       },
       "classRequirements": {
         "darkWizard": 1
@@ -404,7 +404,7 @@
       "buyPrice": 345000,
       "repairable": false,
       "requirements": {
-        "energy": 243
+        "energy": 953
       },
       "classRequirements": {
         "darkWizard": 2
@@ -427,7 +427,7 @@
       "buyPrice": 315000,
       "repairable": false,
       "requirements": {
-        "energy": 223
+        "energy": 849
       },
       "classRequirements": {
         "darkWizard": 2
@@ -450,7 +450,7 @@
       "buyPrice": 410000,
       "repairable": false,
       "requirements": {
-        "energy": 258
+        "energy": 1052
       },
       "classRequirements": {
         "darkWizard": 2
@@ -473,7 +473,7 @@
       "buyPrice": 175000,
       "repairable": false,
       "requirements": {
-        "energy": 75
+        "energy": 245
       },
       "classRequirements": {
         "summoner": 1
@@ -496,7 +496,7 @@
       "buyPrice": 100000,
       "repairable": false,
       "requirements": {
-        "energy": 93
+        "energy": 150
       },
       "classRequirements": {
         "summoner": 1
@@ -519,7 +519,7 @@
       "buyPrice": 315000,
       "repairable": false,
       "requirements": {
-        "energy": 216
+        "energy": 823
       },
       "classRequirements": {
         "summoner": 1
@@ -542,7 +542,7 @@
       "buyPrice": 245000,
       "repairable": false,
       "requirements": {
-        "energy": 111
+        "energy": 375
       },
       "classRequirements": {
         "summoner": 1
@@ -565,7 +565,7 @@
       "buyPrice": 265000,
       "repairable": false,
       "requirements": {
-        "energy": 181
+        "energy": 620
       },
       "classRequirements": {
         "summoner": 1
@@ -588,7 +588,7 @@
       "buyPrice": 135000,
       "repairable": false,
       "requirements": {
-        "energy": 100
+        "energy": 180
       },
       "classRequirements": {
         "summoner": 1
@@ -611,7 +611,7 @@
       "buyPrice": 410000,
       "repairable": false,
       "requirements": {
-        "energy": 173
+        "energy": 663
       },
       "classRequirements": {
         "summoner": 2
@@ -634,7 +634,7 @@
       "buyPrice": 450000,
       "repairable": false,
       "requirements": {
-        "energy": 201
+        "energy": 912
       },
       "classRequirements": {
         "summoner": 2
@@ -658,7 +658,7 @@
       "repairable": false,
       "requirements": {
         "level": 220,
-        "energy": 118
+        "energy": 1058
       },
       "classRequirements": {
         "darkWizard": 2
@@ -682,7 +682,7 @@
       "repairable": false,
       "requirements": {
         "level": 220,
-        "energy": 118
+        "energy": 1058
       },
       "classRequirements": {
         "magicGladiator": 1
@@ -798,7 +798,7 @@
       "repairable": false,
       "requirements": {
         "level": 120,
-        "energy": 80
+        "energy": 404
       },
       "classRequirements": {
         "rageFighter": 1
@@ -822,7 +822,7 @@
       "repairable": false,
       "requirements": {
         "level": 80,
-        "energy": 35
+        "energy": 132
       },
       "classRequirements": {
         "rageFighter": 1
@@ -846,7 +846,7 @@
       "repairable": false,
       "requirements": {
         "level": 50,
-        "energy": 30
+        "energy": 80
       },
       "classRequirements": {
         "rageFighter": 1

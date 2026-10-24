@@ -20,6 +20,7 @@ inline constexpr char ItemCategories[] = "###ItemCategories";
 inline constexpr char ItemModel[] = "###ItemModel";
 inline constexpr char ItemGlowColors[] = "###ItemGlowColors";
 inline constexpr char ItemFormulas[] = "###ItemFormulas";
+inline constexpr char ItemSync[] = "###ItemSync";
 inline constexpr char ItemChecks[] = "###ItemChecks";
 inline constexpr char SkillEditor[] = "###SkillEditor";
 inline constexpr char DevEditor[] = "###DevEditor";

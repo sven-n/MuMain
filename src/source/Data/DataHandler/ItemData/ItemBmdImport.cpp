@@ -4,9 +4,11 @@
 #include "ItemDataHandler.h"
 #include "ItemDataLoader.h"
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
+#include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Core/Text/Utf8.h"
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstring>
@@ -309,6 +311,136 @@ void ImportItem(const std::vector<LanguageFile>& files, int itemType, ItemBmdImp
     result.items.push_back(std::move(definition));
 }
 } // namespace
+
+namespace
+{
+constexpr int MaxRequirement = 65535;
+
+// The stat requirements the original client grew from a weight: in the definition and in the
+// bmd record.
+struct GrownRequirement
+{
+    ItemRequirement requirement;
+    ItemRequirementStat stat;
+    WORD ItemRequirements::* value;
+    WORD ITEM_ATTRIBUTE::* weight;
+};
+constexpr GrownRequirement GrownRequirements[] = {
+    {ItemRequirement::Strength, ItemRequirementStat::Strength, &ItemRequirements::strength,
+     &ITEM_ATTRIBUTE::RequireStrength},
+    {ItemRequirement::Dexterity, ItemRequirementStat::Dexterity, &ItemRequirements::dexterity,
+     &ITEM_ATTRIBUTE::RequireDexterity},
+    {ItemRequirement::Energy, ItemRequirementStat::Energy, &ItemRequirements::energy, &ITEM_ATTRIBUTE::RequireEnergy},
+    {ItemRequirement::Vitality, ItemRequirementStat::Vitality, &ItemRequirements::vitality,
+     &ITEM_ATTRIBUTE::RequireVitality},
+};
+
+// The original client's requirement growth, which its bmd files hold the weights for: its code, so
+// it stays as it was also when the item stat file's formulas change.
+//   add + weight * drop level * percent / 100, energy with a percent of its own; a scroll's energy
+//   (group 15) from its level requirement where it has one.
+constexpr long long OriginalRequirementAdd = 20;
+constexpr long long OriginalRequirementPercent = 3;
+constexpr long long OriginalEnergyRequirementPercent = 4;
+constexpr long long PercentDivisor = 100;
+
+// What the original client asked for with `weight`.
+int GrowWeight(const ItemDefinition& definition, ItemRequirement requirement, int weight)
+{
+    if (weight == 0)
+    {
+        return 0;
+    }
+    const bool energy = requirement == ItemRequirement::Energy;
+    const bool fromLevelRequirement = energy && definition.group == ITEM_GROUP_ETC && definition.requirements.level > 0;
+    const long long basis = fromLevelRequirement ? definition.requirements.level : definition.level;
+    const long long percent = energy ? OriginalEnergyRequirementPercent : OriginalRequirementPercent;
+    return static_cast<int>(
+        std::min<long long>(OriginalRequirementAdd + weight * basis * percent / PercentDivisor, MaxRequirement));
+}
+} // namespace
+
+namespace
+{
+// The profile the item uses: the one it names, or the one its rules give.
+const ItemStatProfile& FindItemProfile(const ItemStatProfiles& profiles, const ItemDefinition& definition)
+{
+    const std::string name =
+        definition.statProfile.empty() ? DeriveStatProfile(profiles, definition) : definition.statProfile;
+    const int profile = profiles.Find(name);
+    return profiles.Get(profile == ItemStatProfiles::UnknownProfile ? ItemStatProfiles::DefaultProfile : profile);
+}
+
+// Whether the item keeps the requirement as a value where the original client grew a weight.
+bool HoldsWeightInBmd(const ItemStatProfiles& profiles, const ItemStatProfile& profile, ItemRequirementStat stat)
+{
+    return profile.requirements.Get(stat).keepBase &&
+           !profiles.Get(ItemStatProfiles::DefaultProfile).requirements.Get(stat).keepBase;
+}
+} // namespace
+
+bool HasRequirementWeightsInBmd(const ItemStatProfiles& profiles, const ItemDefinition& definition)
+{
+    const ItemStatProfile& profile = FindItemProfile(profiles, definition);
+    return std::ranges::any_of(GrownRequirements, [&](const GrownRequirement& grown)
+                               { return HoldsWeightInBmd(profiles, profile, grown.stat); });
+}
+
+void ToRequirementValues(const ItemStatProfiles& profiles, ItemDefinition& definition)
+{
+    const ItemStatProfile& profile = FindItemProfile(profiles, definition);
+    for (const GrownRequirement& grown : GrownRequirements)
+    {
+        if (HoldsWeightInBmd(profiles, profile, grown.stat))
+        {
+            WORD& value = definition.requirements.*grown.value;
+            value = static_cast<WORD>(GrowWeight(definition, grown.requirement, value));
+        }
+    }
+}
+
+std::vector<ItemRequirement> ToBmdRequirementWeights(const ItemStatProfiles& profiles, const ItemDefinition& definition,
+                                                     ITEM_ATTRIBUTE& attribute)
+{
+    std::vector<ItemRequirement> inexact;
+    const ItemStatProfile& profile = FindItemProfile(profiles, definition);
+    for (const GrownRequirement& grown : GrownRequirements)
+    {
+        if (!HoldsWeightInBmd(profiles, profile, grown.stat))
+        {
+            continue;
+        }
+        const int value = definition.requirements.*grown.value;
+        // The weights grow the value without going down: the smallest that reaches it.
+        int low = 0;
+        int high = MaxRequirement;
+        while (low < high)
+        {
+            const int middle = low + (high - low) / 2;
+            if (GrowWeight(definition, grown.requirement, middle) < value)
+            {
+                low = middle + 1;
+            }
+            else
+            {
+                high = middle;
+            }
+        }
+        int weight = low;
+        const int reached = GrowWeight(definition, grown.requirement, weight);
+        if (reached != value)
+        {
+            // Past the value, or none reaches it: the nearer of this weight and the one below.
+            if (weight > 0 && value - GrowWeight(definition, grown.requirement, weight - 1) <= reached - value)
+            {
+                --weight;
+            }
+            inexact.push_back(grown.requirement);
+        }
+        attribute.*grown.weight = static_cast<WORD>(weight);
+    }
+    return inexact;
+}
 
 std::span<const ItemBmdLanguage> GetItemBmdLanguages()
 {

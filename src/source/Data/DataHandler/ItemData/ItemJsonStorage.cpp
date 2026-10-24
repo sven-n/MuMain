@@ -296,6 +296,13 @@ ItemDataSaveResult SaveItemDataDirectory(const std::filesystem::path& directory,
     return SaveItemAndModelDataDirectories(directory, items, ItemModelSave{}, issues);
 }
 
+ItemDataSaveResult WriteItemTextFile(const std::filesystem::path& file, const std::string& text,
+                                     std::vector<ItemDataIssue>& issues)
+{
+    const FileToSave files[] = {{file, text}};
+    return WriteChangedFiles(files, issues);
+}
+
 ItemDataSaveResult SaveItemAndModelDataDirectories(const std::filesystem::path& itemDirectory,
                                                    std::span<const ItemDefinition> items, const ItemModelSave& models,
                                                    std::vector<ItemDataIssue>& issues)
