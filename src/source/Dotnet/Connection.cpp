@@ -261,6 +261,9 @@ Connection::~Connection()
     {
         disconnect(_handle);
     }
+    // The managed side reports the disconnect later, from another thread; a callback for this handle that
+    // arrives after this object is gone must find no connection.
+    connections.erase(_handle);
 
     SAFE_DELETE(_chatServer);
     SAFE_DELETE(_connectServer);
