@@ -156,18 +156,6 @@
     <value>デビルスクエア</value>
     <comment>legacy_id=39,1145</comment>
   </data>
-  <data name="One-Handed Damage" xml:space="preserve">
-    <value>片手の攻撃力</value>
-    <comment>legacy_id=40</comment>
-  </data>
-  <data name="Two-Handed Damage" xml:space="preserve">
-    <value>両手の攻撃力</value>
-    <comment>legacy_id=41</comment>
-  </data>
-  <data name="Wizardry Damage" xml:space="preserve">
-    <value>魔法の攻撃力</value>
-    <comment>legacy_id=42</comment>
-  </data>
   <data name="Very Slow" xml:space="preserve">
     <value>非常に遅い</value>
     <comment>legacy_id=43</comment>
@@ -260,21 +248,9 @@
     <value>防御力: %d</value>
     <comment>legacy_id=65,209</comment>
   </data>
-  <data name="Spell resistance: %d" xml:space="preserve">
-    <value>魔法抵抗力: %d</value>
-    <comment>legacy_id=66</comment>
-  </data>
   <data name="Defense rate: %d" xml:space="preserve">
     <value>防御率: %d</value>
     <comment>legacy_id=67,2045</comment>
-  </data>
-  <data name="Moving speed: %d" xml:space="preserve">
-    <value>移動速度: %d</value>
-    <comment>legacy_id=68</comment>
-  </data>
-  <data name="Number of items: %d" xml:space="preserve">
-    <value>個数: %d</value>
-    <comment>legacy_id=69</comment>
   </data>
   <data name="Life: %d" xml:space="preserve">
     <value>生命力: %d</value>
@@ -283,10 +259,6 @@
   <data name="Durability: [%d/%d]" xml:space="preserve">
     <value>耐久力: [%d/%d]</value>
     <comment>legacy_id=71</comment>
-  </data>
-  <data name="%s Resistance: %d" xml:space="preserve">
-    <value>%s抵抗力: %d</value>
-    <comment>legacy_id=72</comment>
   </data>
   <data name="Strength Requirement: %d" xml:space="preserve">
     <value>使用可能な力: %d</value>
@@ -311,10 +283,6 @@
   <data name="Increases moving speed" xml:space="preserve">
     <value>移動速度プラス</value>
     <comment>legacy_id=78</comment>
-  </data>
-  <data name="Wizardry Dmg %d%% rise" xml:space="preserve">
-    <value>魔力 %d%%プラス</value>
-    <comment>legacy_id=79</comment>
   </data>
   <data name="Defend skill (Mana:%d)" xml:space="preserve">
     <value>ガーディアンスキル(マナ:%d)</value>
@@ -375,10 +343,6 @@
   <data name="Luck (critical damage rate +5%%)" xml:space="preserve">
     <value>幸運 (クリティカルダメージ確率 +5%%)</value>
     <comment>legacy_id=94</comment>
-  </data>
-  <data name="Durability: [%d]" xml:space="preserve">
-    <value>耐久力: [ %d ]</value>
-    <comment>legacy_id=95</comment>
   </data>
   <data name="Can only be used in moving unit" xml:space="preserve">
     <value>移動ユニットを乗っているときに使用可能</value>
@@ -471,10 +435,6 @@
   <data name="Moon Cookie" xml:space="preserve">
     <value>PK魔のマーク</value>
     <comment>legacy_id=118</comment>
-  </data>
-  <data name="You can register by giving it to the NPC" xml:space="preserve">
-    <value>NPCに渡すと登録されます。</value>
-    <comment>legacy_id=119</comment>
   </data>
   <data name="Key Function" xml:space="preserve">
     <value>ショートカットキー使用方法</value>
@@ -3275,17 +3235,9 @@
     <value>レベル%d以上から指輪を落とすことができます。</value>
     <comment>legacy_id=923</comment>
   </data>
-  <data name="Can be dropped after level %d" xml:space="preserve">
-    <value>レベル%d以上なら落とすことが可能</value>
-    <comment>legacy_id=924</comment>
-  </data>
   <data name="Ring of Wizard" xml:space="preserve">
     <value>魔法師の指輪</value>
     <comment>legacy_id=925</comment>
-  </data>
-  <data name="Cannot Repair" xml:space="preserve">
-    <value>修理不可能</value>
-    <comment>legacy_id=926</comment>
   </data>
   <data name="Close (%s)" xml:space="preserve">
     <value>閉じる（%s）</value>
@@ -4207,10 +4159,6 @@
     <value>ゲートの使用者とパーティーメンバーだけが入場可能です。</value>
     <comment>legacy_id=1179</comment>
   </data>
-  <data name="Kundun mark +%d level" xml:space="preserve">
-    <value>+%dクンドンの印</value>
-    <comment>legacy_id=1180</comment>
-  </data>
   <data name="%d / %d" xml:space="preserve">
     <value>%d個/ %d個</value>
     <comment>legacy_id=1181</comment>
@@ -4410,10 +4358,6 @@
   <data name="No %s." xml:space="preserve">
     <value>%sがありません。</value>
     <comment>legacy_id=1233</comment>
-  </data>
-  <data name="Increase pet attack as %d%%" xml:space="preserve">
-    <value>ペット攻撃力%d%%上昇</value>
-    <comment>legacy_id=1234</comment>
   </data>
   <data name="Crest of monarch" xml:space="preserve">
     <value>君主の紋章</value>
@@ -6075,10 +6019,6 @@
     <value>強い精神力を持ち、呪いの魔法を使う。また異世界の召喚獣を呼び出し、攻撃を加える。</value>
     <comment>legacy_id=1690</comment>
   </data>
-  <data name="Curse Spell increment %d%%" xml:space="preserve">
-    <value>呪い %d%%上昇</value>
-    <comment>legacy_id=1691</comment>
-  </data>
   <data name="Curse Spell: %d ~ %d" xml:space="preserve">
     <value>呪い：%d～%d</value>
     <comment>legacy_id=1692</comment>
@@ -6683,10 +6623,6 @@
     <value>フェンリルの角笛を修理しますか?</value>
     <comment>legacy_id=1865</comment>
   </data>
-  <data name="+Illusion" xml:space="preserve">
-    <value>+幻影</value>
-    <comment>legacy_id=1866</comment>
-  </data>
   <data name="Added %d of Life" xml:space="preserve">
     <value>生命 %d 増加</value>
     <comment>legacy_id=1867</comment>
@@ -6766,10 +6702,6 @@
   <data name="Click on the button to reinitialize all stat points." xml:space="preserve">
     <value>ボタンをクリックすると全てのステータスが初期化されます。</value>
     <comment>legacy_id=1886</comment>
-  </data>
-  <data name="Register with the NPC to receive various gifts." xml:space="preserve">
-    <value>月の商人デルガドが集めている金貨</value>
-    <comment>legacy_id=1887</comment>
   </data>
   <data name="Exchange has been made." xml:space="preserve">
     <value>ガハハハ。商談成立じゃな。</value>
@@ -6863,18 +6795,6 @@
     <value>フェンリル</value>
     <comment>legacy_id=1916</comment>
   </data>
-  <data name="FragmentOfHornCanBeMade" xml:space="preserve">
-    <value>女神の加護と鎧の破片の合成を通じて角笛の破片を作ることができます。</value>
-    <comment>legacy_id=1917</comment>
-  </data>
-  <data name="Broken horn can be made using the claw of beast and fragment of horn." xml:space="preserve">
-    <value>猛獣の爪と角笛のかけらの合成を通じて折れた角笛を作ることができます。</value>
-    <comment>legacy_id=1918</comment>
-  </data>
-  <data name="Fenrir's horn can be made through item combination." xml:space="preserve">
-    <value>合成を通じてフェンリルの角笛を作ることができます。</value>
-    <comment>legacy_id=1919</comment>
-  </data>
   <data name="Can summon the Fenrir when equipped." xml:space="preserve">
     <value>装備の際、フェンリルを召還することができます。</value>
     <comment>legacy_id=1920</comment>
@@ -6914,10 +6834,6 @@
   <data name="Skills will improve through upgrading." xml:space="preserve">
     <value>アップグレードで能力が向上されます。</value>
     <comment>legacy_id=1929</comment>
-  </data>
-  <data name="Stamina Requirement: %d" xml:space="preserve">
-    <value>使用可能な体力: %d</value>
-    <comment>legacy_id=1930</comment>
   </data>
   <data name="Req LV" xml:space="preserve">
     <value>必要レベル</value>
@@ -7735,10 +7651,6 @@
     <value>これから製錬が始まります。製錬とは着用アイテムをアイテムエンチャントに必要な製錬石に変える一連の過程のことです。当然、製錬に使われたアイテムは消滅されますので、ご注意ください。</value>
     <comment>legacy_id=2224</comment>
   </data>
-  <data name="VitalityD2225" xml:space="preserve">
-    <value>生命力 +%d</value>
-    <comment>legacy_id=2225</comment>
-  </data>
   <data name="This item is not allowed to use the private store." xml:space="preserve">
     <value>個人商店で利用できないアイテムです</value>
     <comment>legacy_id=2226</comment>
@@ -7758,10 +7670,6 @@
   <data name="Defense Power increase +%d" xml:space="preserve">
     <value>防御力上昇 +%d</value>
     <comment>legacy_id=2231</comment>
-  </data>
-  <data name="Enjoy Halloween Festival." xml:space="preserve">
-    <value>ハロウィンの祭を楽しんでください。</value>
-    <comment>legacy_id=2232</comment>
   </data>
   <data name="Blessing of Jack O'Lantern" xml:space="preserve">
     <value>ジャックランタンの祝福</value>
@@ -7795,10 +7703,6 @@
     <value>クリスマス</value>
     <comment>legacy_id=2243</comment>
   </data>
-  <data name="Fireworks will appear once thrown in the field." xml:space="preserve">
-    <value>地面に投げるとクラッカーを鳴らすことができます。</value>
-    <comment>legacy_id=2244</comment>
-  </data>
   <data name="Santa Clause" xml:space="preserve">
     <value>サンタクロース</value>
     <comment>legacy_id=2245</comment>
@@ -7810,10 +7714,6 @@
   <data name="Snowman" xml:space="preserve">
     <value>雪だるま</value>
     <comment>legacy_id=2247</comment>
-  </data>
-  <data name="Merry Christmas." xml:space="preserve">
-    <value>メリークリスマス！~</value>
-    <comment>legacy_id=2248</comment>
   </data>
   <data name="Stonger effect has taken place." xml:space="preserve">
     <value>重複して使用することができません。</value>
@@ -7827,25 +7727,9 @@
     <value>日</value>
     <comment>legacy_id=2252,2298</comment>
   </data>
-  <data name="Experience rate is increased %d%%" xml:space="preserve">
-    <value>経験値獲得量　%d%%に上昇</value>
-    <comment>legacy_id=2253</comment>
-  </data>
-  <data name="Item drop rate is increased %d%%" xml:space="preserve">
-    <value>アイテム獲得量 %d%%に上昇</value>
-    <comment>legacy_id=2254</comment>
-  </data>
   <data name="Unable to gain experience rate" xml:space="preserve">
     <value>経験値獲得不可能</value>
     <comment>legacy_id=2255</comment>
-  </data>
-  <data name="Enables entrance into %s." xml:space="preserve">
-    <value>%s 入場時、決まった回数だけ使えます。</value>
-    <comment>legacy_id=2259</comment>
-  </data>
-  <data name="usable %dtimes" xml:space="preserve">
-    <value>%d回利用可能</value>
-    <comment>legacy_id=2260</comment>
   </data>
   <data name="You can achieve special items with combinations." xml:space="preserve">
     <value>パンドラ合成でアイテムを獲得</value>
@@ -7878,10 +7762,6 @@
   <data name="You have achieve %s item." xml:space="preserve">
     <value>%s を獲得しました。</value>
     <comment>legacy_id=2268</comment>
-  </data>
-  <data name="You will be assigned to a stage according to your level." xml:space="preserve">
-    <value>入場できるレベルに合わせて自動的に入場します。</value>
-    <comment>legacy_id=2270</comment>
   </data>
   <data name="Display general items." xml:space="preserve">
     <value>ノーマルアイテムを表示します。</value>
@@ -7979,10 +7859,6 @@
     <value>http://www.muonline.jp/game_buy.asp</value>
     <comment>legacy_id=2295</comment>
   </data>
-  <data name="%d%% Combination success rate increase" xml:space="preserve">
-    <value>%d%% 合成成功確率上昇</value>
-    <comment>legacy_id=2296</comment>
-  </data>
   <data name="Hour" xml:space="preserve">
     <value>時間</value>
     <comment>legacy_id=2299</comment>
@@ -7994,10 +7870,6 @@
   <data name="Second" xml:space="preserve">
     <value>秒</value>
     <comment>legacy_id=2301</comment>
-  </data>
-  <data name="Available" xml:space="preserve">
-    <value>利用可能</value>
-    <comment>legacy_id=2302</comment>
   </data>
   <data name="Preparing." xml:space="preserve">
     <value>準備中です。</value>
@@ -8054,10 +7926,6 @@
   <data name="You do not have sufficient points." xml:space="preserve">
     <value>ポイントが足りません。</value>
     <comment>legacy_id=2322</comment>
-  </data>
-  <data name="GM has gifted this special box." xml:space="preserve">
-    <value>GMがプレゼントした特別な箱です。</value>
-    <comment>legacy_id=2323</comment>
   </data>
   <data name="GM summon zone" xml:space="preserve">
     <value>GM召喚地域</value>
@@ -8414,42 +8282,6 @@
     <value> 8    マスター    マスター</value>
     <comment>legacy_id=2464</comment>
   </data>
-  <data name="Restores HP by 100%% immediately." xml:space="preserve">
-    <value>体力を100%%回復します。</value>
-    <comment>legacy_id=2500</comment>
-  </data>
-  <data name="Restores Mana by 100%% immediately." xml:space="preserve">
-    <value>マナを100%%回復します。</value>
-    <comment>legacy_id=2501</comment>
-  </data>
-  <data name="You may continue to use the strengthener power." xml:space="preserve">
-    <value>強化された能力を使うことができます。</value>
-    <comment>legacy_id=2502</comment>
-  </data>
-  <data name="Increases Attack Speed by %d" xml:space="preserve">
-    <value>攻撃速度+%d上昇効果</value>
-    <comment>legacy_id=2503</comment>
-  </data>
-  <data name="Increases Defense by %d" xml:space="preserve">
-    <value>防御力+%d上昇効果</value>
-    <comment>legacy_id=2504</comment>
-  </data>
-  <data name="Increases Attack Power by %d" xml:space="preserve">
-    <value>攻撃力+%d上昇効果</value>
-    <comment>legacy_id=2505</comment>
-  </data>
-  <data name="Increases Wizardry by %d" xml:space="preserve">
-    <value>魔力+%d上昇効果</value>
-    <comment>legacy_id=2506</comment>
-  </data>
-  <data name="Increases HP by %d" xml:space="preserve">
-    <value>HP +%d上昇効果</value>
-    <comment>legacy_id=2507</comment>
-  </data>
-  <data name="Increases Mana by %d" xml:space="preserve">
-    <value>MP +%d上昇効果</value>
-    <comment>legacy_id=2508</comment>
-  </data>
   <data name="Resets the status." xml:space="preserve">
     <value>ステータスをリセットする効果があります。</value>
     <comment>legacy_id=2510</comment>
@@ -8457,34 +8289,6 @@
   <data name="Reset point: %d" xml:space="preserve">
     <value>リセットポイント: %d</value>
     <comment>legacy_id=2511</comment>
-  </data>
-  <data name="Strength increment +%d" xml:space="preserve">
-    <value>力+%d上昇効果</value>
-    <comment>legacy_id=2512</comment>
-  </data>
-  <data name="Quickness increment +%d" xml:space="preserve">
-    <value>敏捷+%d上昇効果</value>
-    <comment>legacy_id=2513</comment>
-  </data>
-  <data name="stamina increment +%d" xml:space="preserve">
-    <value>体力+%d上昇効果</value>
-    <comment>legacy_id=2514</comment>
-  </data>
-  <data name="Energy increment +%d" xml:space="preserve">
-    <value>エナジー+%d上昇効果</value>
-    <comment>legacy_id=2515</comment>
-  </data>
-  <data name="Control increment +%d" xml:space="preserve">
-    <value>統率+%d上昇効果</value>
-    <comment>legacy_id=2516</comment>
-  </data>
-  <data name="Status for the set period" xml:space="preserve">
-    <value>一定期間ステータス</value>
-    <comment>legacy_id=2517</comment>
-  </data>
-  <data name="There's an increase effect to it." xml:space="preserve">
-    <value>上昇の効果があります。</value>
-    <comment>legacy_id=2518</comment>
   </data>
   <data name="Reduction point: %d" xml:space="preserve">
     <value>減少ポイント: %d</value>
@@ -8534,17 +8338,9 @@
     <value>購入できないアイテムです。</value>
     <comment>legacy_id=2531</comment>
   </data>
-  <data name="Attack power increment +40" xml:space="preserve">
-    <value>攻撃力40上昇効果</value>
-    <comment>legacy_id=2532</comment>
-  </data>
   <data name="Duration period: %s" xml:space="preserve">
     <value>持続時間：%s</value>
     <comment>legacy_id=2533</comment>
-  </data>
-  <data name="Collect Cherry Blossoms and take it to the spirit for item compensation." xml:space="preserve">
-    <value>集めて桜の精霊に持っていくとアイテムがもらえます。</value>
-    <comment>legacy_id=2534</comment>
   </data>
   <data name="You'll be compensated for the Cherry Blossoms branches you bring back." xml:space="preserve">
     <value>桜の枝を集めてくれば欲しい褒賞が得られます。</value>
@@ -8570,18 +8366,6 @@
     <value>桜の枝生成</value>
     <comment>legacy_id=2545</comment>
   </data>
-  <data name="700 Maximum Mana increment" xml:space="preserve">
-    <value>最大マナ700上昇効果</value>
-    <comment>legacy_id=2549</comment>
-  </data>
-  <data name="700 Maximum Life increment" xml:space="preserve">
-    <value>最大生命700上昇効果</value>
-    <comment>legacy_id=2550</comment>
-  </data>
-  <data name="Restores HP by 65%% immediately." xml:space="preserve">
-    <value>体力を65%%回復します。</value>
-    <comment>legacy_id=2559</comment>
-  </data>
   <data name="Cherry Blossoms branches assembly" xml:space="preserve">
     <value>桜の枝の合成</value>
     <comment>legacy_id=2560</comment>
@@ -8598,37 +8382,9 @@
     <value>桜の精霊</value>
     <comment>legacy_id=2563</comment>
   </data>
-  <data name="Master Level EXP cannot be achieved during the item usage." xml:space="preserve">
-    <value>利用中はマスターレベル経験値が獲得できません。</value>
-    <comment>legacy_id=2566</comment>
-  </data>
-  <data name="Automatic Life Recover increment %d%%" xml:space="preserve">
-    <value>生命自動回復%d%%上昇</value>
-    <comment>legacy_id=2569</comment>
-  </data>
-  <data name="EXP achievement and the automatic life recovery rate increases." xml:space="preserve">
-    <value>経験値獲得量と生命自動回復量が上昇されます。</value>
-    <comment>legacy_id=2570</comment>
-  </data>
-  <data name="Automatic Mana recovery increment in %d%% rate" xml:space="preserve">
-    <value>マナ自動回復%d%%上昇</value>
-    <comment>legacy_id=2571</comment>
-  </data>
-  <data name="Item achievement and the automatic Mana recovery increases onward." xml:space="preserve">
-    <value>アイテム獲得量とマナ自動回復量が上昇されます。</value>
-    <comment>legacy_id=2572</comment>
-  </data>
   <data name="Maximum Mana +50" xml:space="preserve">
     <value>最大マナ+50</value>
     <comment>legacy_id=2579</comment>
-  </data>
-  <data name="Increases Critical Damage by 20%%" xml:space="preserve">
-    <value>クリティカルダメージ20%%上昇効果</value>
-    <comment>legacy_id=2580</comment>
-  </data>
-  <data name="Increses Excellent Damage by 20%%" xml:space="preserve">
-    <value>エクセレントダメージ20%%上昇効果</value>
-    <comment>legacy_id=2581</comment>
   </data>
   <data name="Carrier" xml:space="preserve">
     <value>装備中のアイテムは売却できません。</value>
@@ -8657,10 +8413,6 @@
   <data name="WelcomeToSantaSVillageHere" xml:space="preserve">
     <value>サンタ村へよくきたのぅ。ワシのところに来ればプレゼントをやるぞ。ただし、1日1回までじゃぞ。</value>
     <comment>legacy_id=2588</comment>
-  </data>
-  <data name="Relocate to the Santa's Village by the right-mouse click." xml:space="preserve">
-    <value>右クリックでサンタ村へ移動可能</value>
-    <comment>legacy_id=2589</comment>
   </data>
   <data name="Would you like to move to the Santa's Village?" xml:space="preserve">
     <value>サンタ村へ移動しますか?</value>
@@ -8713,14 +8465,6 @@
   <data name="Move by a right-mouse-click." xml:space="preserve">
     <value>右クリックすると移動します。</value>
     <comment>legacy_id=2603</comment>
-  </data>
-  <data name="Saves the location with the right-mouse-click." xml:space="preserve">
-    <value>右クリックすると場所が記憶されます。</value>
-    <comment>legacy_id=2605</comment>
-  </data>
-  <data name="Returns to the saved location by a click." xml:space="preserve">
-    <value>クリックすると記憶した場所へ移動します。</value>
-    <comment>legacy_id=2606</comment>
   </data>
   <data name="Would you like to save the location?" xml:space="preserve">
     <value>該当場所へ移動しますか？</value>
@@ -8994,54 +8738,6 @@
     <value>観戦可能な最大人数を超えました。</value>
     <comment>legacy_id=2707</comment>
   </data>
-  <data name="item/skill/luck/option will be randomly added." xml:space="preserve">
-    <value>アイテム/スキル/幸運/オプションがランダムに生成されます。</value>
-    <comment>legacy_id=2709</comment>
-  </data>
-  <data name="Increases your luck to create wing of your wish." xml:space="preserve">
-    <value>羽合成時、好きな職業用の羽・マントに生成されるようになります。</value>
-    <comment>legacy_id=2717</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Satan." xml:space="preserve">
-    <value>合成成功時、サタンの羽が生成されます。</value>
-    <comment>legacy_id=2718</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Dragon." xml:space="preserve">
-    <value>合成成功時、デビルウイングが生成されます。</value>
-    <comment>legacy_id=2719</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Heaven." xml:space="preserve">
-    <value>合成成功時、守護天使の羽が生成されます。</value>
-    <comment>legacy_id=2720</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Soul." xml:space="preserve">
-    <value>合成成功時、ソウルウイングが生成されます。</value>
-    <comment>legacy_id=2721</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Elf." xml:space="preserve">
-    <value>合成成功時、妖精の羽が生成されます。</value>
-    <comment>legacy_id=2722</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Spirits." xml:space="preserve">
-    <value>合成成功時、ホーリーウイングが生成されます。</value>
-    <comment>legacy_id=2723</comment>
-  </data>
-  <data name="Increases your luck to create Wing of Curse." xml:space="preserve">
-    <value>合成成功時、ミザリーウイングが生成されます。</value>
-    <comment>legacy_id=2724</comment>
-  </data>
-  <data name="Increases your luck to create Wing of Despair." xml:space="preserve">
-    <value>合成成功時、デスペアーウイングが生成されます。</value>
-    <comment>legacy_id=2725</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Darkness." xml:space="preserve">
-    <value>合成成功時、ダークウイングが生成されます。</value>
-    <comment>legacy_id=2726</comment>
-  </data>
-  <data name="Increases your luck to create Cape of Emperor." xml:space="preserve">
-    <value>合成成功時、君主のマントが生成されます。</value>
-    <comment>legacy_id=2727</comment>
-  </data>
   <data name="Only increases Master level exp." xml:space="preserve">
     <value>マスターレベル経験値のみ増加します。</value>
     <comment>legacy_id=2728</comment>
@@ -9049,62 +8745,6 @@
   <data name="Select to move." xml:space="preserve">
     <value>移動する地域を選択してください。</value>
     <comment>legacy_id=2731</comment>
-  </data>
-  <data name="Talisman of Wings of Satan" xml:space="preserve">
-    <value>合成成功時、サタンの羽が生成されます。</value>
-    <comment>legacy_id=2732</comment>
-  </data>
-  <data name="Talisman of Wings of Heaven" xml:space="preserve">
-    <value>合成成功時、守護天使の羽が生成されます。</value>
-    <comment>legacy_id=2733</comment>
-  </data>
-  <data name="Talisman of Wings of Elf" xml:space="preserve">
-    <value>合成成功時、妖精の羽が生成されます。</value>
-    <comment>legacy_id=2734</comment>
-  </data>
-  <data name="Talisman of Wing of Curse" xml:space="preserve">
-    <value>合成成功時、ミザリーウイングが生成されます。</value>
-    <comment>legacy_id=2735</comment>
-  </data>
-  <data name="Talisman of Cape of Emperor" xml:space="preserve">
-    <value>合成成功時、君主のマントが生成されます。</value>
-    <comment>legacy_id=2736</comment>
-  </data>
-  <data name="Talisman of Wings of Dragon" xml:space="preserve">
-    <value>合成成功時、デビルウイングが生成されます。</value>
-    <comment>legacy_id=2737</comment>
-  </data>
-  <data name="Talisman of Wings of Soul" xml:space="preserve">
-    <value>合成成功時、ソウルウイングが生成されます。</value>
-    <comment>legacy_id=2738</comment>
-  </data>
-  <data name="Talisman of Wings of Spirits" xml:space="preserve">
-    <value>合成成功時、ホーリーウイングが生成されます。</value>
-    <comment>legacy_id=2739</comment>
-  </data>
-  <data name="Talisman of Wing of Despair" xml:space="preserve">
-    <value>合成成功時、デスペアーウイングが生成されます。</value>
-    <comment>legacy_id=2740</comment>
-  </data>
-  <data name="Talisman of Wings of Darkness" xml:space="preserve">
-    <value>合成成功時、ダークウイングが生成されます。</value>
-    <comment>legacy_id=2741</comment>
-  </data>
-  <data name="Attack rate and defense rate increase." xml:space="preserve">
-    <value>攻撃力と防御力が向上します。</value>
-    <comment>legacy_id=2742</comment>
-  </data>
-  <data name="Transform into Panda." xml:space="preserve">
-    <value>装備すると、パンダマンに変身できます。</value>
-    <comment>legacy_id=2743</comment>
-  </data>
-  <data name="Zen increase 50%%" xml:space="preserve">
-    <value>ゼン増加50%%に向上</value>
-    <comment>legacy_id=2744</comment>
-  </data>
-  <data name="Damage/Wizardry/Curse +30" xml:space="preserve">
-    <value>攻撃力 +30</value>
-    <comment>legacy_id=2745</comment>
   </data>
   <data name="Lugard" xml:space="preserve">
     <value>ルガド</value>
@@ -9190,45 +8830,17 @@
     <value>ガイオンの指令書</value>
     <comment>legacy_id=2783</comment>
   </data>
-  <data name="It contains Gaion's plans for the destruction of the empire" xml:space="preserve">
-    <value>ガイオンの帝国滅亡計画と</value>
-    <comment>legacy_id=2784</comment>
-  </data>
-  <data name="and orders for the Empire Guardians." xml:space="preserve">
-    <value>帝国守護軍への指令が記されています。</value>
-    <comment>legacy_id=2785</comment>
-  </data>
-  <data name="You may enter the Fortress of Empire Guardians." xml:space="preserve">
-    <value>ガイオンのバルカ要塞に進攻できます。</value>
-    <comment>legacy_id=2786</comment>
-  </data>
   <data name="Suspicious Scrap of Paper" xml:space="preserve">
     <value>謎の紙片</value>
     <comment>legacy_id=2787</comment>
-  </data>
-  <data name="It's a worn piece of paper containing incomprehensible text." xml:space="preserve">
-    <value>古い紙片。謎の暗号文が書かれています。</value>
-    <comment>legacy_id=2788</comment>
   </data>
   <data name="No. %d Secromicon Fragment" xml:space="preserve">
     <value>失われた魔導書の第%d章</value>
     <comment>legacy_id=2789</comment>
   </data>
-  <data name="It's part of a Complete Secromicon." xml:space="preserve">
-    <value>全て集めれば魔力を復活させられるかもしれません。</value>
-    <comment>legacy_id=2790</comment>
-  </data>
   <data name="Complete Secromicon" xml:space="preserve">
     <value>魔術書セクロミコン</value>
     <comment>legacy_id=2791</comment>
-  </data>
-  <data name="Indestructible Metal Secromicon" xml:space="preserve">
-    <value>不滅の金属セクロミコンで作られた魔術書</value>
-    <comment>legacy_id=2792</comment>
-  </data>
-  <data name="Contains information about Grand Wizard Etramu Lenos' research." xml:space="preserve">
-    <value>大魔法師エトラム・レノスの魔法が記されています。</value>
-    <comment>legacy_id=2793</comment>
   </data>
   <data name="Jerint the Assistant" xml:space="preserve">
     <value>参謀長 ジェリント</value>
@@ -10074,26 +9686,6 @@
     <value>ロレン市場ではパーティーを申し込むことができません。</value>
     <comment>legacy_id=3064</comment>
   </data>
-  <data name="Equip to transform into a Skeleton Warrior." xml:space="preserve">
-    <value>装備するとスケルトンに変身できます。</value>
-    <comment>legacy_id=3065</comment>
-  </data>
-  <data name="Damage/Wizardry/Curse +40" xml:space="preserve">
-    <value>攻撃力/魔力/呪い +40</value>
-    <comment>legacy_id=3066</comment>
-  </data>
-  <data name="Equipping along with a Pet Skeleton" xml:space="preserve">
-    <value>スケルトンパージドラゴンと同時に装備すると</value>
-    <comment>legacy_id=3067</comment>
-  </data>
-  <data name="Equipping along with a Skeleton Transformation Ring" xml:space="preserve">
-    <value>スケルトン変身指輪と同時に装備すると</value>
-    <comment>legacy_id=3071</comment>
-  </data>
-  <data name="increases EXP by 30%%." xml:space="preserve">
-    <value>経験値30%%を追加獲得できます。</value>
-    <comment>legacy_id=3072</comment>
-  </data>
   <data name="Chaos Castle Lv.%lu Guardsman x %lu/%lu" xml:space="preserve">
     <value>カオスキャッスル Lv.%lu 近衛兵 x %lu/%lu</value>
     <comment>legacy_id=3074</comment>
@@ -10137,10 +9729,6 @@
   <data name="+15 Item Creation" xml:space="preserve">
     <value>+15 アイテム生成</value>
     <comment>legacy_id=3087</comment>
-  </data>
-  <data name="Unable to Equip with a Different Transformation Ring" xml:space="preserve">
-    <value>他の変身指輪と同時に装備不可</value>
-    <comment>legacy_id=3088</comment>
   </data>
   <data name="Gens Info Window" xml:space="preserve">
     <value>ゲンス情報ウィンドウ</value>
@@ -10198,14 +9786,6 @@
     <value>総司令官#副司令官#参謀長#軍団長#師団長#アーティクルマスター#コンバットマスター#クォーターマスター#騎士団長#近衛騎士#上級騎士#一等騎士#二等騎士#傭兵</value>
     <comment>legacy_id=3104</comment>
   </data>
-  <data name="Can enter the Monday - Saturday map." xml:space="preserve">
-    <value>バルカ要塞の第1～6要塞に入場できます。</value>
-    <comment>legacy_id=3105</comment>
-  </data>
-  <data name="Can enter the Sunday map." xml:space="preserve">
-    <value>バルカ要塞の第7要塞に入場できます。</value>
-    <comment>legacy_id=3106</comment>
-  </data>
   <data name="Varka Map 7" xml:space="preserve">
     <value>バルカ要塞 第7要塞</value>
     <comment>legacy_id=3107</comment>
@@ -10261,10 +9841,6 @@
   <data name="Item Drop Rate increase +%d%%" xml:space="preserve">
     <value>アイテム追加獲得確率増加  +%d%%</value>
     <comment>legacy_id=3126</comment>
-  </data>
-  <data name="7 Days until Expiration" xml:space="preserve">
-    <value>使用期間7日</value>
-    <comment>legacy_id=3127</comment>
   </data>
   <data name="You cannot purchase this item more than once." xml:space="preserve">
     <value>該当アイテムは重複で購入できません。</value>
@@ -10441,10 +10017,6 @@
   <data name="Expired Item" xml:space="preserve">
     <value>満了アイテム</value>
     <comment>legacy_id=3266</comment>
-  </data>
-  <data name="Restores SD by 65%% immediately." xml:space="preserve">
-    <value>SDを65%%回復します。</value>
-    <comment>legacy_id=3267</comment>
   </data>
   <data name="Click the item to see the quest information again." xml:space="preserve">
     <value>アイテムクリックするとクエスト内容の確認ができます。</value>

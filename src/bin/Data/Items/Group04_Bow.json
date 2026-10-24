@@ -213,7 +213,12 @@
         "es": "Rayo",
         "pt": "Dardo"
       },
-      "tags": ["ammunition"],
+      "tags": ["ammunition", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@numberOfItems"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "offHand",
@@ -434,7 +439,12 @@
         "es": "Flecha",
         "pt": "Flecha"
       },
-      "tags": ["ammunition"],
+      "tags": ["ammunition", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@numberOfItems"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "mainHand",
@@ -511,6 +521,21 @@
         "pt": "Besta divina do arcanjo"
       },
       "tags": ["divineArchangelWeapon", "valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "purple",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "purple"
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "mainHand",
