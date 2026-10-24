@@ -118,7 +118,7 @@ void PetProcess::Destroy()
     {
         auto tempiter = iter;
         ++iter;
-        Weak_Ptr(PetObject) basepet = *tempiter;
+        std::weak_ptr<PetObject> basepet = *tempiter;
 
         if (basepet.expired() == FALSE)
         {
@@ -131,7 +131,7 @@ void PetProcess::Destroy()
     m_petsAction.clear();
 }
 
-Weak_Ptr(PetAction) PetProcess::Find(int key)
+std::weak_ptr<PetAction> PetProcess::Find(int key)
 {
     auto iter = m_petsAction.find(key);
 
@@ -140,12 +140,12 @@ Weak_Ptr(PetAction) PetProcess::Find(int key)
         return (*iter).second;
     }
 
-    Weak_Ptr(PetAction) temp;
+    std::weak_ptr<PetAction> temp;
 
     return temp;
 }
 
-void PetProcess::Register(Smart_Ptr(PetObject) pPet)
+void PetProcess::Register(std::shared_ptr<PetObject> pPet)
 {
     m_petsList.push_back(pPet);
 }
@@ -275,7 +275,7 @@ bool PetProcess::IsPet(int itemType)
     auto iter = m_petsInfo.find(itemType);
     if (iter == m_petsInfo.end()) return FALSE;
 
-    Weak_Ptr(PetInfo) petInfo = (*iter).second;
+    std::weak_ptr<PetInfo> petInfo = (*iter).second;
     if (petInfo.expired()) return FALSE;
 
     return TRUE;
@@ -291,7 +291,7 @@ bool PetProcess::CreatePet(int itemType, int modelType, vec3_t Position, CHARACT
         auto iter = m_petsInfo.find(itemType);
         if (iter == m_petsInfo.end()) return FALSE;
 
-        Weak_Ptr(PetInfo) petInfo = (*iter).second;
+        std::weak_ptr<PetInfo> petInfo = (*iter).second;
 
         int _count = 0;
         int* action = NULL;
@@ -332,7 +332,7 @@ void PetProcess::SetCommandPet(CHARACTER* Owner, int targetKey, PetObject::Actio
     {
         auto tempiter = iter;
         ++iter;
-        Weak_Ptr(PetObject) basepet = *tempiter;
+        std::weak_ptr<PetObject> basepet = *tempiter;
 
         if (basepet.expired() == FALSE)
         {
@@ -350,7 +350,7 @@ void PetProcess::UpdatePets()
     {
         auto tempiter = iter;
         ++iter;
-        Weak_Ptr(PetObject) basepet = *tempiter;
+        std::weak_ptr<PetObject> basepet = *tempiter;
 
         if (basepet.expired() == false)
         {
@@ -365,7 +365,7 @@ void PetProcess::RenderPets()
     {
         auto tempiter = iter;
         ++iter;
-        Weak_Ptr(PetObject) basepet = *tempiter;
+        std::weak_ptr<PetObject> basepet = *tempiter;
 
         if (basepet.expired() == FALSE)
         {
