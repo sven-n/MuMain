@@ -44,27 +44,58 @@
    font-size 1rem, never dp: the theme sizes text natively (window_shell's body carries native-text). */
 #panel { width: 300dp; height: 170dp; min-width: 290dp; min-height: 150dp; max-width: 100%; max-height: 100%; font-family: "token(font-body)"; font-size: 1rem; color: rgb(230, 220, 200); }
 
-/* The frame, on the template's four layers: the back is the body colour, the top and bottom
-   layers the horizontal outline bands, the middle one the two vertical ones. */
-.window-shell-sprite-back { left: 0; right: 0; top: 5dp; bottom: 5dp; decorator: none; background-color: rgba(0, 0, 0, 179); }
-.window-shell-sprite-top,
-.window-shell-sprite-bottom {
+/* The frame: CUIBaseWindow::DrawOutLine(), in its drawing order. The top and bottom bands (146 /
+   37 three units / 106) run the full width; then each side's 146 line and 106 line run the full
+   height (the 106 one from y 1 to h-1, so the inner lines cross into the corners), the sides' 37
+   only between the bands; last, a 173,167,150 dot in the middle of each corner, all but the
+   bottom-right one, where a resizeable window has its grip. On the template's layers: the back
+   is the body (black at 179 from y 5 to h-5) with the sides' 37 bands, the top layer the two
+   horizontal bands, the middle layer the side lines over them, the bottom layer the two top dots
+   and the footer anchor (unused by this window) the bottom-left one. */
+.window-shell-sprite-back {
 	left: 0;
 	right: 0;
-	height: 5dp;
-	box-sizing: border-box;
-	decorator: none;
-	background-color: rgb(37, 37, 37);
+	top: 5dp;
+	bottom: 5dp;
+	background-color: rgba(0, 0, 0, 179);
+	decorator: linear-gradient(to right, transparent 1dp, rgb(37, 37, 37) 1dp, rgb(37, 37, 37) 4dp, transparent 4dp),
+	           linear-gradient(to left, transparent 1dp, rgb(37, 37, 37) 1dp, rgb(37, 37, 37) 4dp, transparent 4dp);
 }
-.window-shell-sprite-top    { top: 0; border-top: 1dp rgb(146, 134, 121); border-bottom: 1dp rgb(106, 97, 88); }
-.window-shell-sprite-bottom { bottom: 0; border-top: 1dp rgb(106, 97, 88); border-bottom: 1dp rgb(146, 134, 121); }
-.window-shell-sprite-middle {
+.window-shell-sprite-top {
 	left: 0;
 	right: 0;
 	top: 0;
 	bottom: 0;
-	decorator: linear-gradient(to right, rgb(146, 134, 121) 1dp, rgb(37, 37, 37) 1dp, rgb(37, 37, 37) 4dp, rgb(106, 97, 88) 4dp, rgb(106, 97, 88) 5dp, transparent 5dp),
-	           linear-gradient(to left, rgb(146, 134, 121) 1dp, rgb(37, 37, 37) 1dp, rgb(37, 37, 37) 4dp, rgb(106, 97, 88) 4dp, rgb(106, 97, 88) 5dp, transparent 5dp);
+	height: auto;
+	decorator: linear-gradient(to bottom, rgb(146, 134, 121) 1dp, rgb(37, 37, 37) 1dp, rgb(37, 37, 37) 4dp, rgb(106, 97, 88) 4dp, rgb(106, 97, 88) 5dp, transparent 5dp),
+	           linear-gradient(to top, rgb(146, 134, 121) 1dp, rgb(37, 37, 37) 1dp, rgb(37, 37, 37) 4dp, rgb(106, 97, 88) 4dp, rgb(106, 97, 88) 5dp, transparent 5dp);
+}
+/* The inner 106 lines start one unit in (y 1 to h-1): the outer 146 line keeps the corner. */
+.window-shell-sprite-middle {
+	left: 0;
+	right: 0;
+	top: 1dp;
+	bottom: 1dp;
+	decorator: linear-gradient(to right, rgb(146, 134, 121) 1dp, transparent 1dp, transparent 4dp, rgb(106, 97, 88) 4dp, rgb(106, 97, 88) 5dp, transparent 5dp),
+	           linear-gradient(to left, rgb(146, 134, 121) 1dp, transparent 1dp, transparent 4dp, rgb(106, 97, 88) 4dp, rgb(106, 97, 88) 5dp, transparent 5dp);
+}
+.window-shell-sprite-bottom {
+	left: 2dp;
+	right: 2dp;
+	top: 2dp;
+	bottom: auto;
+	height: 1dp;
+	decorator: linear-gradient(to right, rgb(173, 167, 150) 1dp, transparent 1dp),
+	           linear-gradient(to left, rgb(173, 167, 150) 1dp, transparent 1dp);
+}
+#window_shell_footer {
+	left: 2dp;
+	right: auto;
+	top: auto;
+	bottom: 2dp;
+	width: 1dp;
+	height: 1dp;
+	background-color: rgb(173, 167, 150);
 }
 
 /* The title bar: win_titlebar stretched over (6, 5, w-12, 15), a one-unit edge each side, and the
