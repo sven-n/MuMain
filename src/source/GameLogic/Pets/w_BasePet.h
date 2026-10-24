@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../Core/Globals/_define.h"
 #include "w_PetAction.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Core/Time/Timer.h"
