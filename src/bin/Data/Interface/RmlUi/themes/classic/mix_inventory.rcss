@@ -218,3 +218,9 @@
 .mix-list-line.mix-unwrapped { width: calc(167px * var(--root-scale)); }
 #socket_list { width: calc(160px * var(--root-scale)); height: calc(65px * var(--root-scale)); }
 .socket-row { width: calc(148px * var(--root-scale)); height: calc(13px * var(--root-scale)); }
+
+/* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
+   controls take their own. (Legacy's rule, which this copy predated.) */
+#panel.slot-placed { pointer-events: none; }
+/* Legacy's #panel font-size (calc(var(--text-px) / var(--root-scale))) is left out: the lists'
+   lines are sized in em above, placed at 0.97's y 203, and that rule moves them 4 units down. */

@@ -156,3 +156,7 @@
 #item_grid, #item_grid_counts { left: 15px; top: 200px; width: calc(8 * var(--item-cell)); height: calc(8 * var(--item-cell)); }
 #item_view { height: 473px; }
 #option_tooltip_anchor { left: 95px; top: 40px; }
+
+/* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
+   controls take their own. (Legacy's rule, which this copy predated.) */
+#panel.slot-placed { pointer-events: none; }
