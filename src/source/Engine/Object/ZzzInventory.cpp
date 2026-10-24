@@ -1176,7 +1176,13 @@ void GetItemName(int iType, int iLevel, wchar_t* Text)
         {
         case 0: mu_swprintf(Text, L"%ls", I18N::Game::Zen); break;
         case 1: mu_swprintf(Text, L"%ls", I18N::Game::Heart); break;
-        case 2: mu_swprintf(Text, L"%ls", ChaosEventName[p->Durability]); break;
+        case 2:
+            // The prize by the item's durability; past the list, the item's own name, as the tooltip writes it.
+            if (p->Durability < std::size(ChaosEventName))
+                mu_swprintf(Text, L"%ls", ChaosEventName[p->Durability]);
+            else
+                mu_swprintf(Text, L"%ls", p->Name);
+            break;
         }
     }
     else if (iType == ITEM_BOX_OF_LUCK)
@@ -1681,7 +1687,14 @@ void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, in
     }
 }
 
-// (sx, sy) in the screen's 640x480 stretch, `screen`.
+// A test's measure of description text (SetItemTooltipTextMeasure); nullptr: the game's font.
+static ItemTooltipTextMeasure s_itemTooltipTextMeasure = nullptr;
+
+void SetItemTooltipTextMeasure(ItemTooltipTextMeasure measure)
+{
+    s_itemTooltipTextMeasure = measure;
+}
+
 // What BuildItemTooltipText made of an item.
 enum class ItemTooltipBuild
 {
@@ -1704,7 +1717,8 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         if (ip->lExpireTime == 0)
             return ItemTooltipBuild::Nothing;
 
-        ExpireTime = localtime((time_t*)&(ip->lExpireTime));
+        const time_t expireTime = ip->lExpireTime;
+        ExpireTime = localtime(&expireTime);
     }
 
     ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
@@ -1924,7 +1938,17 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         {
         case 0:mu_swprintf(TextList[TextNum], I18N::Game::Zen); break;
         case 1:mu_swprintf(TextList[TextNum], I18N::Game::Heart); break;
-        case 2:mu_swprintf(TextList[TextNum], L"%ls", ChaosEventName[ip->Durability]); break;
+        case 2:
+            // The prize by the item's durability; its own name for one past the list (the tooltip snapshot's item
+            // has its full durability).
+            mu_swprintf(TextList[TextNum], L"%ls",
+                        ip->Durability < std::size(ChaosEventName) ? ChaosEventName[ip->Durability] : p->Name);
+            break;
+        // The item exists at +0 to +2; at another level (the tooltip snapshot draws every level) its own name, not the
+        // row an earlier tooltip left.
+        default:
+            mu_swprintf(TextList[TextNum], L"%ls", p->Name);
+            break;
         }
     }
     else if (ip->Type == ITEM_BOX_OF_LUCK)
@@ -1962,7 +1986,17 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         {
         case 0:mu_swprintf(TextList[TextNum], I18N::Game::Zen); break;
         case 1:mu_swprintf(TextList[TextNum], I18N::Game::Heart); break;
-        case 2:mu_swprintf(TextList[TextNum], L"%ls", ChaosEventName[ip->Durability]); break;
+        case 2:
+            // The prize by the item's durability; its own name for one past the list (the tooltip snapshot's item
+            // has its full durability).
+            mu_swprintf(TextList[TextNum], L"%ls",
+                        ip->Durability < std::size(ChaosEventName) ? ChaosEventName[ip->Durability] : p->Name);
+            break;
+        // The item exists at +0 to +2; at another level (the tooltip snapshot draws every level) its own name, not the
+        // row an earlier tooltip left.
+        default:
+            mu_swprintf(TextList[TextNum], L"%ls", p->Name);
+            break;
         }
     }
     else if (ip->Type == ITEM_FRUITS)
@@ -2005,6 +2039,11 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         case 0: mu_swprintf(TextList[TextNum], I18N::Game::AbsoluteStaffOfArchangel); break;
         case 1: mu_swprintf(TextList[TextNum], I18N::Game::AbsoluteSwordOfArchangel); break;
         case 2: mu_swprintf(TextList[TextNum], I18N::Game::AbsoluteCrossbowOfArchangel); break;
+        // The item exists at +0 to +2; at another level (the tooltip snapshot draws every level) its own name, not the
+        // row an earlier tooltip left.
+        default:
+            mu_swprintf(TextList[TextNum], L"%ls", p->Name);
+            break;
         }
     }
     else if (ip->Type == ITEM_WIZARDS_RING)
@@ -2244,9 +2283,10 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     if (ip->Type == ITEM_WEAPON_OF_ARCHANGEL)
     {
         int iMana;
-        int iWeaponSpeed;
-        int iNeedStrength;
-        int iNeedDex;
+        // 0 at a level the item doesn't have (it exists at +0 to +2), instead of whatever the stack held.
+        int iWeaponSpeed = 0;
+        int iNeedStrength = 0;
+        int iNeedDex = 0;
 
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         mu_swprintf(TextList[TextNum], I18N::Game::QuestItem); TextBold[TextNum] = false; TextNum++;
@@ -3269,8 +3309,13 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     if (const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(ip->Type))
     {
         g_pRenderText->SetFont(g_hFont);
-        WriteItemDescriptionLines(*definition, Level, [](const wchar_t* text, size_t length) -> int
-                                  { return g_pRenderText->MeasureText(text, static_cast<int>(length)).cx; });
+        WriteItemDescriptionLines(*definition, Level,
+                                  [](const wchar_t* text, size_t length) -> int
+                                  {
+                                      return s_itemTooltipTextMeasure != nullptr
+                                                 ? s_itemTooltipTextMeasure(text, length)
+                                                 : g_pRenderText->MeasureText(text, static_cast<int>(length)).cx;
+                                  });
     }
     if (ip->Type == ITEM_ARMOR_OF_GUARDSMAN)
     {
@@ -3489,10 +3534,13 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
                 TextListColor[TextNum] = TEXT_COLOR_BLUE;
                 TextBold[TextNum] = false;
                 TextNum++;
-                g_PortalMgr.GetPortalPositionText(TextList[TextNum]);
-                TextListColor[TextNum] = TEXT_COLOR_BLUE;
-                TextBold[TextNum] = false;
-                TextNum++;
+                if (g_PortalMgr.IsPortalPositionSaved())
+                {
+                    g_PortalMgr.GetPortalPositionText(TextList[TextNum]);
+                    TextListColor[TextNum] = TEXT_COLOR_BLUE;
+                    TextBold[TextNum] = false;
+                    TextNum++;
+                }
             }
         }
         else if (GameLogic::Items::IsLuckyItemTicket(ip))
@@ -4351,11 +4399,13 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
 
     if (!bItemTextListBoxUse)
     {
-        bool bThisisEquippedItem = false;
-
-        mu::ui::window::CInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
-        ITEM* pFindItem = pNewInventoryCtrl->FindItemByKey(ip->Key);
-        (pFindItem == NULL) ? bThisisEquippedItem = true : bThisisEquippedItem = false;
+        // An item that is not in the inventory grid is a worn one: the item sets count its options as equipped.
+        // Without the game's windows (the tooltip tests) every item is one.
+        bool bThisisEquippedItem = true;
+        if (mu::ui::window::CMyInventory* inventory = g_pMyInventory)
+        {
+            bThisisEquippedItem = inventory->GetInventoryCtrl()->FindItemByKey(ip->Key) == nullptr;
+        }
 
         TextNum = g_csItemOption.RenderSetOptionListInItem(ip, TextNum, bThisisEquippedItem);
 
@@ -4380,6 +4430,7 @@ std::vector<ItemTooltipLine> BuildItemTooltipLines(ITEM* ip, bool Sell, int Inve
     return lines;
 }
 
+// (sx, sy) in the screen's 640x480 stretch, `screen`.
 static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy, ITEM* ip, bool Sell, int Inventype,
                            bool bItemTextListBoxUse)
 {

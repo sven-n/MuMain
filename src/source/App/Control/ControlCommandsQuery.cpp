@@ -9,9 +9,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
-#include "Engine/Object/ZzzInventory.h"
-#include "UI/Core/WindowSystem.h"
-#include "UI/Inventory/ItemMng.h"
+#include "Engine/Object/ItemTooltipSnapshot.h"
 #include "Network/Server/WSclient.h"
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
@@ -485,59 +483,6 @@ std::string State(const Request& request, std::unique_ptr<Act>&)
 
 namespace
 {
-// An item as the server would send it: the fields not set are 0, the durability is full.
-ItemCreationParams FullItem(int group, int number)
-{
-    ItemCreationParams params{};
-    params.Group = group;
-    params.Number = number;
-    params.Durability = static_cast<BYTE>(ItemAttribute[group * MAX_ITEM_INDEX + number].Durability);
-    return params;
-}
-
-// The tooltip lines of such an item and the hero as it is; nothing when the item can't be made.
-std::vector<ItemTooltipLine> TooltipOf(const ItemCreationParams& params)
-{
-    ITEM* item = g_pNewItemMng->CreateItemByParameters(&params);
-    std::vector<ItemTooltipLine> lines = BuildItemTooltipLines(item, false);
-    g_pNewItemMng->DeleteItem(item);
-    return lines;
-}
-
-// The kinds of item `tooltip-snapshot` records at every level: plain; with luck, skill, the +4 option and every
-// excellent option; ancient (set 1); with a Jewel of Harmony option (option 1 at level 13).
-struct TooltipVariant
-{
-    const char* name;
-    void (*apply)(ItemCreationParams& params);
-};
-constexpr TooltipVariant TooltipVariants[] = {
-    {"plain", [](ItemCreationParams&) {}},
-    {"full",
-     [](ItemCreationParams& params)
-     {
-         params.WithLuck = true;
-         params.WithSkill = true;
-         params.WithOption = true;
-         params.OptionLevel = 4;
-         params.HasExcellentOption = true;
-         params.ExcellentFlags = 63;
-     }},
-    {"ancient",
-     [](ItemCreationParams& params)
-     {
-         params.IsAncient = true;
-         params.AncientDiscriminator = 1;
-     }},
-    {"harmony",
-     [](ItemCreationParams& params)
-     {
-         params.HasHarmonyOption = true;
-         params.HarmonyOptionType = 1;
-         params.HarmonyOptionLevel = 13;
-     }},
-};
-
 // Reads the integer `key` into `value` when the request has it; false when it is not a number from 0 to `max`.
 bool ReadBounded(const Request& request, const char* key, int max, int& value)
 {
@@ -587,7 +532,7 @@ std::string ItemTooltip(const Request& request, std::unique_ptr<Act>&)
                            "no item has group " + std::to_string(group) + " and number " + std::to_string(number));
     }
 
-    ItemCreationParams params = FullItem(group, number);
+    ItemCreationParams params = Engine::Items::TooltipSnapshot::FullItemParameters(group, number);
     if (level >= 0)
         params.Level = static_cast<BYTE>(level);
     if (durability >= 0)
@@ -620,9 +565,11 @@ std::string ItemTooltip(const Request& request, std::unique_ptr<Act>&)
             params.HarmonyOptionLevel = static_cast<BYTE>(harmonyLevel);
     }
 
+    const std::vector<ItemTooltipLine> lines = Engine::Items::TooltipSnapshot::TooltipOfParameters(params);
+
     json result;
     result["lines"] = json::array();
-    for (const ItemTooltipLine& line : TooltipOf(params))
+    for (const ItemTooltipLine& line : lines)
     {
         result["lines"].push_back(
             {{"text", Core::Text::ToUtf8(line.text.c_str())}, {"color", line.color}, {"bold", line.bold}});
@@ -638,6 +585,7 @@ std::string ItemTooltipSnapshot(const Request& request, std::unique_ptr<Act>&)
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
                            "`tooltip-snapshot` needs `out`, the file to write");
     }
+
     // One group per request keeps the frame that builds them short. Checked before `out` is opened: opening it
     // empties it, and a mistyped request must not wipe a recorded snapshot.
     int onlyGroup = -1;
@@ -653,30 +601,7 @@ std::string ItemTooltipSnapshot(const Request& request, std::unique_ptr<Act>&)
         return EncodeError(request.EncodedId(), ErrorCode::Failed, "the file could not be written");
     }
 
-    int tooltips = 0;
-    for (const Data::Items::ItemDefinition& definition : g_ItemDatabase.GetAllSlots())
-    {
-        if (!definition.Exists() || (onlyGroup >= 0 && definition.group != onlyGroup))
-        {
-            continue;
-        }
-        for (const TooltipVariant& variant : TooltipVariants)
-        {
-            for (int level = 0; level < Data::Items::ItemLevelCount; ++level)
-            {
-                ItemCreationParams params = FullItem(definition.group, definition.number);
-                params.Level = static_cast<BYTE>(level);
-                variant.apply(params);
-                out << definition.group << '/' << definition.number << ' ' << variant.name << " +" << level << '\n';
-                for (const ItemTooltipLine& line : TooltipOf(params))
-                {
-                    const std::string text = line.text == L"\n" ? "<blank>" : Core::Text::ToUtf8(line.text.c_str());
-                    out << "  " << line.color << (line.bold ? " bold " : " ") << text << '\n';
-                }
-                ++tooltips;
-            }
-        }
-    }
+    const int tooltips = Engine::Items::TooltipSnapshot::WriteItemTooltipSnapshot(out, onlyGroup);
     // A full disk or a failed write leaves the file short: not a snapshot.
     out.flush();
     if (!out)
