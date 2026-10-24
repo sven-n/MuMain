@@ -524,7 +524,8 @@ TEST_CASE("The tooltip texts by item level come from the descriptions as from th
                                         { return item.group == group && item.number == number; });
         REQUIRE(found != result.items.end());
         // Every level the items have. The old code also wrote an empty line at the Contract Summon's, Life Stone's and
-        // Rena's levels without a text (a stale line of the text list); the data writes none.
+        // Rena's levels without a text, and two at the Fruits' +5 to +15 before "It can be used with item removed." (a
+        // stale line of the text list); the data writes none of them. Fruits only exist at +0 to +4.
         for (int level = 0; level < ItemLevelCount; ++level)
         {
             INFO(group << "/" << number << " +" << level);
@@ -761,6 +762,104 @@ TEST_CASE("The second item chain's tooltip texts keep their translations [data][
         }
     }
     CHECK(checked >= 1050);
+
+// What the old code printed for an item's level lines in the UI's language, where the texts are the game's that other
+// code still prints: one entry per line of OldLevelLines, empty for a text only the tooltip had (removed since). A
+// Fruit's stat lines started with the stat's name; the rest of them was a removed text.
+struct PrintedOldLine
+{
+    std::string text;
+    bool isPrefix = false;
+};
+
+std::string PrintWithName(const wchar_t* format, const wchar_t* name)
+{
+    // The game's wide texts have "%ls" where the .resx has "%s".
+    std::string text = Core::Text::ToUtf8(format);
+    const size_t wide = text.find("%ls");
+    const size_t position = wide != std::string::npos ? wide : text.find("%s");
+    REQUIRE(position != std::string::npos);
+    return text.replace(position, wide != std::string::npos ? 3 : 2, Core::Text::ToUtf8(name));
+}
+
+std::vector<std::optional<PrintedOldLine>> PrintedOldLevelLines(int group, int number, int level)
+{
+    const auto printed = [](const wchar_t* text) { return std::optional<PrintedOldLine>({Core::Text::ToUtf8(text)}); };
+    if (group == 13 && number == 7 && level <= 1)
+    {
+        return {printed(level == 0 ? I18N::Game::Archer : I18N::Game::Spearman)};
+    }
+    if (group == 13 && number == 11 && level <= 1)
+    {
+        return {printed(level == 0 ? I18N::Game::ScrollOfGuardian : I18N::Game::PlaceLifeStone)};
+    }
+    if (group == 13 && number == 15 && level <= 4)
+    {
+        const wchar_t* const stats[] = {I18N::Game::ENG, I18N::Game::STA, I18N::Game::AGI, I18N::Game::STR,
+                                        I18N::Game::Command};
+        const PrintedOldLine stat{Core::Text::ToUtf8(stats[level]) + " ", true};
+        std::vector<std::optional<PrintedOldLine>> lines = {stat, stat, printed(I18N::Game::ItCanBeUsedWithItemRemoved)};
+        if (level == 4)
+        {
+            lines.push_back(PrintedOldLine{PrintWithName(I18N::Game::CanBeEquippedByS, I18N::Game::DarkLord)});
+        }
+        return lines;
+    }
+    return std::vector<std::optional<PrintedOldLine>>(OldLevelLines(group, number, level).size());
+}
+
+// The lines whose texts other code still prints, in every language as the game prints them.
+TEST_CASE("The tooltip texts by item level are the game's texts in every language [data][items]")
+{
+    constexpr std::pair<int, int> items[] = {{13, 7}, {13, 11}, {13, 15}};
+    const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
+    // The test switches the UI language: it needs an item table of its own.
+    ClientDataScope client(ShippedClientDirectory);
+    int compared = 0;
+    for (const auto& [group, number] : items)
+    {
+        const ItemDefinition* found = FindItem(result.items, MakeItemType(group, number));
+        REQUIRE(found != nullptr);
+        for (int level = 0; level < ItemLevelCount; ++level)
+        {
+            std::vector<const ItemDescriptionLine*> shown;
+            for (const ItemDescriptionLine& line : found->description)
+            {
+                if (line.IsShownAt(level))
+                {
+                    shown.push_back(&line);
+                }
+            }
+            for (const char* locale : I18N::GetAvailableLocales())
+            {
+                INFO(group << "/" << number << " +" << level << " " << locale);
+                I18N::SetLocale(locale);
+                const std::vector<std::optional<PrintedOldLine>> old = PrintedOldLevelLines(group, number, level);
+                REQUIRE(shown.size() == old.size());
+                for (size_t index = 0; index < old.size(); ++index)
+                {
+                    if (!old[index])
+                    {
+                        continue;
+                    }
+                    const std::string text = shown[index]->text.Get(locale);
+                    if (old[index]->isPrefix)
+                    {
+                        CHECK(text.starts_with(old[index]->text));
+                    }
+                    else
+                    {
+                        CHECK(text == old[index]->text);
+                    }
+                    ++compared;
+                }
+            }
+            I18N::SetLocale("en");
+        }
+    }
+    // Archer and Spearman, Scroll of Guardian and Place Life Stone, and the Fruits' 3 lines at +0 to +3 and 4 at +4, in
+    // every language.
+    CHECK(compared == (2 + 2 + 4 * 3 + 4) * static_cast<int>(std::size(I18N::GetAvailableLocales())));
 }
 
 // The texts the tooltip code wrote for these items are their descriptions now, in every UI language.
