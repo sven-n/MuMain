@@ -234,7 +234,8 @@ std::string& MutableBuildIdentifier()
 }
 
 // Absolute path for a caller-given one, so the answer names a file the
-// caller can open regardless of the client's working directory.
+// caller can open regardless of the client's working directory. Used by every
+// command that writes a file (`screenshot`, `tooltip-snapshot`).
 std::filesystem::path ResolveScreenshotPath(const std::string& requested)
 {
     // Through the wide form: a std::string given to std::filesystem::path is
@@ -495,13 +496,9 @@ ItemCreationParams FullItem(int group, int number)
 }
 
 // The tooltip lines of such an item and the hero as it is; nothing when the item can't be made.
-std::optional<std::vector<ItemTooltipLine>> TooltipOf(const ItemCreationParams& params)
+std::vector<ItemTooltipLine> TooltipOf(const ItemCreationParams& params)
 {
     ITEM* item = g_pNewItemMng->CreateItemByParameters(&params);
-    if (item == nullptr)
-    {
-        return std::nullopt;
-    }
     std::vector<ItemTooltipLine> lines = BuildItemTooltipLines(item, false);
     g_pNewItemMng->DeleteItem(item);
     return lines;
@@ -577,6 +574,18 @@ std::string ItemTooltip(const Request& request, std::unique_ptr<Act>&)
                            "`level`, `option`, `harmony` and `harmony_level` are 0 to 15, `excellent` the excellent "
                            "options' bits 0 to 63, `durability` and `ancient` 0 to 255");
     }
+    // A harmony level counts only with a harmony option; alone it would be ignored.
+    if (harmonyLevel >= 0 && harmony == 0)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`harmony_level` needs `harmony`, the Jewel of Harmony option");
+    }
+    // An item number no item uses would answer with the tooltip of an empty item.
+    if (g_ItemDatabase.Find(group, number) == nullptr)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "no item has group " + std::to_string(group) + " and number " + std::to_string(number));
+    }
 
     ItemCreationParams params = FullItem(group, number);
     if (level >= 0)
@@ -611,15 +620,9 @@ std::string ItemTooltip(const Request& request, std::unique_ptr<Act>&)
             params.HarmonyOptionLevel = static_cast<BYTE>(harmonyLevel);
     }
 
-    const std::optional<std::vector<ItemTooltipLine>> lines = TooltipOf(params);
-    if (!lines)
-    {
-        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "the item could not be made");
-    }
-
     json result;
     result["lines"] = json::array();
-    for (const ItemTooltipLine& line : *lines)
+    for (const ItemTooltipLine& line : TooltipOf(params))
     {
         result["lines"].push_back(
             {{"text", Core::Text::ToUtf8(line.text.c_str())}, {"color", line.color}, {"bold", line.bold}});
@@ -635,17 +638,19 @@ std::string ItemTooltipSnapshot(const Request& request, std::unique_ptr<Act>&)
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
                            "`tooltip-snapshot` needs `out`, the file to write");
     }
-    std::ofstream out(std::filesystem::path(Core::Text::FromUtf8(path)), std::ios::binary);
-    if (!out)
-    {
-        return EncodeError(request.EncodedId(), ErrorCode::Failed, "the file could not be written");
-    }
-
-    // One group per request keeps the frame that builds them short.
+    // One group per request keeps the frame that builds them short. Checked before `out` is opened: opening it
+    // empties it, and a mistyped request must not wipe a recorded snapshot.
     int onlyGroup = -1;
     if (request.Has("group") && (!request.GetInt("group", onlyGroup) || onlyGroup < 0 || onlyGroup >= MAX_ITEM_TYPE))
     {
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`group` is an item group, 0 to 15");
+    }
+
+    const std::filesystem::path file = ResolveScreenshotPath(path);
+    std::ofstream out(file, std::ios::binary);
+    if (!out)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Failed, "the file could not be written");
     }
 
     int tooltips = 0;
@@ -663,7 +668,7 @@ std::string ItemTooltipSnapshot(const Request& request, std::unique_ptr<Act>&)
                 params.Level = static_cast<BYTE>(level);
                 variant.apply(params);
                 out << definition.group << '/' << definition.number << ' ' << variant.name << " +" << level << '\n';
-                for (const ItemTooltipLine& line : TooltipOf(params).value_or(std::vector<ItemTooltipLine>{}))
+                for (const ItemTooltipLine& line : TooltipOf(params))
                 {
                     const std::string text = line.text == L"\n" ? "<blank>" : Core::Text::ToUtf8(line.text.c_str());
                     out << "  " << line.color << (line.bold ? " bold " : " ") << text << '\n';
@@ -681,7 +686,7 @@ std::string ItemTooltipSnapshot(const Request& request, std::unique_ptr<Act>&)
 
     json result;
     result["tooltips"] = tooltips;
-    result["out"] = path;
+    result["out"] = Core::Text::ToUtf8(file.wstring().c_str());
     return EncodeResult(request.EncodedId(), result.dump());
 }
 
