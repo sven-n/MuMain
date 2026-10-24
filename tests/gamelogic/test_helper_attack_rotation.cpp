@@ -6,9 +6,14 @@
 #include "GameLogic/Skills/SkillManager.h"
 #include "MUHelper/AttackSkillRotation.h"
 #include "MUHelper/MuHelperData.h"
+#include "MUHelper/MuHelper.h"
+#include "Engine/Object/ZzzInterface.h"
+#include <memory>
 
 #include <array>
 #include <cstring>
+
+extern MovementSkill g_MovementSkill;
 
 namespace
 {
@@ -27,7 +32,7 @@ struct SkillFixture
     CHARACTER_ATTRIBUTE* previousCharacter = CharacterAttribute;
     SKILL_ATTRIBUTE* previousAttributes = SkillAttribute;
     MUHelper::ConfigData config;
-    MUHelper::AttackSkillRotation rotation;
+    GameLogic::Automation::AttackSkillRotation rotation;
 
     SkillFixture()
     {
@@ -85,7 +90,7 @@ TEST_CASE("Automatic selection reads real cooldowns without consuming them [help
     SkillFixture fixture;
     SkillAttribute[ExtraOne].Delay = 500;
     CharacterAttribute->SkillDelay[1] = 50;
-    CHECK_FALSE(MUHelper::IsAttackSkillReady(ExtraOne));
+    CHECK_FALSE(GameLogic::Automation::IsAttackSkillAvailable(ExtraOne));
     CHECK(CharacterAttribute->SkillDelay[1] == 50);
     CHECK(fixture.Select() == Primary);
     fixture.rotation.Complete(SkillResult::Cast);
@@ -94,40 +99,41 @@ TEST_CASE("Automatic selection reads real cooldowns without consuming them [help
 
     CharacterAttribute->SkillDelay[1] = 0;
     fixture.rotation.Reset();
-    CHECK(MUHelper::IsAttackSkillReady(ExtraOne));
+    CHECK(GameLogic::Automation::IsAttackSkillAvailable(ExtraOne));
     CHECK(CharacterAttribute->SkillDelay[1] == 0);
     CHECK(fixture.Select() == Primary);
     fixture.rotation.Complete(SkillResult::Cast);
     CHECK(fixture.Select() == ExtraOne);
     CHECK(CharacterAttribute->SkillDelay[1] == 0);
 
+    SkillAttribute[AT_SKILL_NOVA].Delay = 500;
     CharacterAttribute->Skill[2] = AT_SKILL_NOVA;
     CharacterAttribute->SkillDelay[2] = 5;
-    CHECK_FALSE(MUHelper::IsAttackSkillReady(AT_SKILL_NOVA_BEGIN));
+    CHECK_FALSE(GameLogic::Automation::IsAttackSkillAvailable(AT_SKILL_NOVA_BEGIN));
     CharacterAttribute->SkillDelay[2] = 0;
-    CHECK(MUHelper::IsAttackSkillReady(AT_SKILL_NOVA_BEGIN));
+    CHECK(GameLogic::Automation::IsAttackSkillAvailable(AT_SKILL_NOVA_BEGIN));
     CHECK(CharacterAttribute->SkillDelay[2] == 0);
 }
 
-TEST_CASE("Automatic attacks skip unlearned and resource-ineligible skills [helper_rotation]")
+TEST_CASE("Resource shortages reach execution while unlearned skills are skipped [helper_rotation]")
 {
     SkillFixture fixture;
     SkillAttribute[ExtraOne].Mana = 10;
     SkillAttribute[ExtraOne].AbilityGuage = 5;
     CharacterAttribute->Mana = 9;
-    CHECK_FALSE(MUHelper::IsAttackSkillReady(ExtraOne));
+    CHECK(GameLogic::Automation::IsAttackSkillAvailable(ExtraOne));
     CharacterAttribute->Mana = 10;
     CharacterAttribute->SkillMana = 4;
-    CHECK_FALSE(MUHelper::IsAttackSkillReady(ExtraOne));
+    CHECK(GameLogic::Automation::IsAttackSkillAvailable(ExtraOne));
     CharacterAttribute->SkillMana = 5;
-    CHECK(MUHelper::IsAttackSkillReady(ExtraOne));
+    CHECK(GameLogic::Automation::IsAttackSkillAvailable(ExtraOne));
     CharacterAttribute->Skill[1] = AT_SKILL_UNDEFINED;
-    CHECK_FALSE(MUHelper::IsAttackSkillReady(ExtraOne));
+    CHECK_FALSE(GameLogic::Automation::IsAttackSkillAvailable(ExtraOne));
     CHECK(fixture.Select() == Primary);
     fixture.rotation.Complete(SkillResult::Cast);
     CHECK(fixture.Select() == ExtraTwo);
-    CHECK_FALSE(MUHelper::IsAttackSkillReady(AT_SKILL_UNDEFINED));
-    CHECK_FALSE(MUHelper::IsAttackSkillReady(static_cast<ActionSkillType>(MAX_SKILLS)));
+    CHECK_FALSE(GameLogic::Automation::IsAttackSkillAvailable(AT_SKILL_UNDEFINED));
+    CHECK_FALSE(GameLogic::Automation::IsAttackSkillAvailable(static_cast<ActionSkillType>(MAX_SKILLS)));
 }
 
 TEST_CASE("Automatic eligibility retains attributes and skill-use conditions [helper_rotation]")
@@ -135,15 +141,15 @@ TEST_CASE("Automatic eligibility retains attributes and skill-use conditions [he
     SkillFixture fixture;
     SkillAttribute[ExtraOne].Strength = 501;
     gSkillManager.InvalidateSkillAttributeRequirementsCache();
-    CHECK_FALSE(MUHelper::IsAttackSkillReady(ExtraOne));
+    CHECK_FALSE(GameLogic::Automation::IsAttackSkillAvailable(ExtraOne));
     SkillAttribute[ExtraOne].Strength = 500;
     gSkillManager.InvalidateSkillAttributeRequirementsCache();
-    CHECK(MUHelper::IsAttackSkillReady(ExtraOne));
+    CHECK(GameLogic::Automation::IsAttackSkillAvailable(ExtraOne));
     SkillAttribute[ExtraOne].SkillUseType = SKILL_USE_TYPE_BRAND;
-    CHECK_FALSE(MUHelper::IsAttackSkillReady(ExtraOne));
+    CHECK_FALSE(GameLogic::Automation::IsAttackSkillAvailable(ExtraOne));
 }
 
-TEST_CASE("Busy and approaching actions keep their slot while unsuccessful attempts advance [helper_rotation]")
+TEST_CASE("Busy and approaching actions keep their slot while cast and refusal advance [helper_rotation]")
 {
     SkillFixture fixture;
     CHECK(fixture.Select() == Primary);
@@ -156,7 +162,7 @@ TEST_CASE("Busy and approaching actions keep their slot while unsuccessful attem
     }
     fixture.rotation.Complete(SkillResult::Refused);
     CHECK(fixture.Select() == ExtraTwo);
-    fixture.rotation.Complete(SkillResult::NotReady);
+    fixture.rotation.Complete(SkillResult::Cast);
     CHECK(fixture.Select() == Primary);
 }
 
@@ -244,4 +250,152 @@ TEST_CASE("Saved unconditioned slots rotate despite inactive condition subfields
         CHECK(fixture.Select() == expected);
         fixture.rotation.Complete(SkillResult::Cast);
     }
+}
+
+TEST_CASE("Selected extra retains its actual slot after a skipped primary [helper_rotation]")
+{
+    SkillFixture fixture;
+    SkillAttribute[Primary].Delay = 500;
+    CharacterAttribute->SkillDelay[0] = 50;
+    CHECK(fixture.Select() == ExtraOne);
+    fixture.rotation.Complete(SkillResult::Approaching);
+    CharacterAttribute->SkillDelay[0] = 0;
+    CHECK(fixture.Select() == ExtraOne);
+    fixture.rotation.Complete(SkillResult::Busy);
+    CHECK(fixture.Select() == ExtraOne);
+    fixture.rotation.Complete(SkillResult::Cast);
+    CHECK(fixture.Select() == ExtraTwo);
+}
+
+TEST_CASE("Real target failures preserve the next attack slot [helper_rotation]")
+{
+    SkillFixture fixture;
+    auto characters = std::make_unique<CHARACTER[]>(MAX_CHARACTERS_CLIENT);
+    auto* previous = CharactersClient;
+    CharactersClient = characters.get();
+    auto& target = characters[0];
+    target.Key = 123;
+    target.Object.Live = true;
+    target.Dead = 1;
+    for (const auto expected : {Primary, ExtraOne, ExtraTwo})
+    {
+        CHECK(fixture.Select() == expected);
+        const auto result = GameLogic::Automation::CastSkill(expected, true, target.Key, true, 6);
+        CHECK(result == SkillResult::NotAttackable);
+        fixture.rotation.Complete(result);
+        CHECK(fixture.Select() == expected);
+        target.Object.Live = false;
+        const auto gone = GameLogic::Automation::CastSkill(expected, true, target.Key, true, 6);
+        CHECK(gone == SkillResult::NotInView);
+        fixture.rotation.Complete(gone);
+        CHECK(fixture.Select() == expected);
+        fixture.rotation.Complete(SkillResult::Cast);
+        target.Object.Live = true;
+    }
+    CharactersClient = previous;
+}
+
+TEST_CASE("Real execution animation waits keep a bounded turn [helper_rotation]")
+{
+    SkillFixture fixture;
+    Hero->Object.Type = MODEL_PLAYER;
+    for (const auto action : {PLAYER_SKILL_CHAIN_LIGHTNING, PLAYER_SKILL_THRUST, PLAYER_WALK_MALE})
+    {
+        fixture.rotation.Reset();
+        Hero->Object.CurrentAction = action;
+        for (int attempt = 0; attempt < 4; ++attempt)
+        {
+            REQUIRE(fixture.Select() == Primary);
+            const auto result = GameLogic::Automation::CastSkill(Primary, false, -1, true, 6);
+            CHECK(result == SkillResult::NotReady);
+            fixture.rotation.Complete(result);
+            CHECK(CharacterAttribute->SkillDelay[0] == 0);
+        }
+        CHECK(fixture.Select() == ExtraOne);
+    }
+}
+
+TEST_CASE("Helper timer feeds real execution outcomes back into rotation [helper_rotation]")
+{
+    SkillFixture fixture;
+    auto characters = std::make_unique<CHARACTER[]>(MAX_CHARACTERS_CLIENT);
+    auto* previous = CharactersClient;
+    CharactersClient = characters.get();
+    auto& target = characters[0];
+    target.Key = 123;
+    target.Object.Live = true;
+    target.Object.Kind = KIND_MONSTER;
+    target.PositionX = target.TargetX = Hero->PositionX = 100;
+    target.PositionY = target.TargetY = Hero->PositionY = 100;
+    target.Object.Position[0] = target.Object.Position[1] = 100 * TERRAIN_SCALE;
+    Hero->Object.Position[0] = Hero->Object.Position[1] = 100 * TERRAIN_SCALE;
+    Hero->Object.Type = MODEL_PLAYER;
+    Hero->Object.CurrentAction = PLAYER_SKILL_CHAIN_LIGHTNING;
+    fixture.config.iHuntingRange = 6;
+    for (auto skill : fixture.config.aiSkill)
+        SkillAttribute[skill].Distance = 6;
+    MUHelper::g_MuHelper.Load(fixture.config);
+    MUHelper::g_MuHelper.Start();
+    MUHelper::g_MuHelper.AddTarget(target.Key, false);
+    for (auto expected : {Primary, ExtraOne, ExtraTwo})
+    {
+        for (int attempt = 0; attempt < 4; ++attempt)
+        {
+            MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
+            CHECK(g_MovementSkill.m_iSkill == expected);
+            CHECK(CharacterAttribute->SkillDelay[expected - Primary] == 0);
+        }
+    }
+    for (int attempt = 0; attempt < 4; ++attempt)
+        MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
+    MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
+    CHECK(g_MovementSkill.m_iSkill == ExtraOne);
+    MUHelper::g_MuHelper.Load(fixture.config);
+    MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
+    CHECK(g_MovementSkill.m_iSkill == Primary);
+    auto& replacement = characters[1];
+    replacement.Key = 124;
+    replacement.Object.Live = true;
+    replacement.Object.Kind = KIND_MONSTER;
+    replacement.PositionX = replacement.TargetX = 100;
+    replacement.PositionY = replacement.TargetY = 100;
+    replacement.Object.Position[0] = replacement.Object.Position[1] = 100 * TERRAIN_SCALE;
+    target.Dead = 1;
+    MUHelper::g_MuHelper.AddTarget(replacement.Key, false);
+    MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
+    MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
+    CHECK(g_MovementSkill.m_iSkill == Primary);
+    replacement.Object.Live = false;
+    MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
+    target.Dead = 0;
+    MUHelper::g_MuHelper.AddTarget(target.Key, false);
+    MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
+    CHECK(g_MovementSkill.m_iSkill == Primary);
+    MUHelper::g_MuHelper.Stop();
+    MUHelper::g_MuHelper.Start();
+    MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
+    CHECK(g_MovementSkill.m_iSkill == Primary);
+    MUHelper::g_MuHelper.Stop();
+    MUHelper::g_MuHelper.DeleteAllTargets();
+    CharactersClient = previous;
+}
+
+TEST_CASE("Unaffordable primary reaches the normal mana-potion path [helper_rotation]")
+{
+    SkillFixture fixture;
+    SkillAttribute[Primary].Mana = 100;
+    SkillAttribute[ExtraOne].Mana = 10;
+    CharacterAttribute->Mana = 50;
+    CHECK(fixture.Select() == Primary);
+    CHECK(CharacterAttribute->Mana == 50);
+    CHECK(CharacterAttribute->SkillDelay[0] == 0);
+}
+
+TEST_CASE("Zero-delay skills ignore stale delay counters as execution does [helper_rotation]")
+{
+    SkillFixture fixture;
+    SkillAttribute[ExtraOne].Delay = 0;
+    CharacterAttribute->SkillDelay[1] = 50;
+    CHECK(GameLogic::Automation::IsAttackSkillAvailable(ExtraOne));
+    CHECK(CharacterAttribute->SkillDelay[1] == 50);
 }

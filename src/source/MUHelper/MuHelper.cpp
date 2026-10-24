@@ -741,29 +741,30 @@ namespace MUHelper
         return 1;
     }
 
+    bool CMuHelper::SelectAttackTarget()
+    {
+        if (m_iCurrentTarget != -1)
+        {
+            const auto* target = FindCharacterByKey(m_iCurrentTarget);
+            if (target != nullptr && target->Object.Live && target->Dead == 0)
+                return true;
+            DeleteTarget(m_iCurrentTarget);
+        }
+        CleanupTargets();
+        if (m_config.bLongRangeCounterAttack)
+            m_iCurrentTarget = GetFarthestAttackingTarget();
+        if (m_iCurrentTarget == -1)
+            m_iCurrentTarget = GetNearestTarget();
+        return m_iCurrentTarget != -1;
+    }
+
     int CMuHelper::Attack()
     {
-        if (m_iCurrentTarget == -1)
+        if (!SelectAttackTarget())
         {
-            if (!m_setTargets.empty())
-            {
-                CleanupTargets();
-
-                if (m_config.bLongRangeCounterAttack)
-                {
-                    m_iCurrentTarget = GetFarthestAttackingTarget();
-                }
-                
-                if (m_iCurrentTarget == -1)
-                {
-                    m_iCurrentTarget = GetNearestTarget();
-                }
-            }
-            else
-            {
+            if (m_setTargets.empty())
                 m_iComboState = 0;
-                return 0;
-            }
+            return 0;
         }
 
         if (m_config.bUseCombo)
@@ -777,10 +778,9 @@ namespace MUHelper
             const float fSkillDistance = gSkillManager.GetSkillDistance(m_iCurrentSkill, Hero);
             if (GameLogic::Combat::CanExecuteSkill(Hero, m_iCurrentSkill, fSkillDistance))
             {
-                auto outcome = GameLogic::Automation::SkillResult::NotReady;
-                const int result = SimulateAttack(m_iCurrentSkill, &outcome);
-                m_attackSkills.Complete(outcome);
-                return result;
+                const auto result = CastSkill(m_iCurrentSkill, true, m_iCurrentTarget);
+                m_attackSkills.Complete(result);
+                return result == GameLogic::Automation::SkillResult::Cast ? 1 : 0;
             }
             m_attackSkills.Complete(GameLogic::Automation::SkillResult::Refused);
         }
@@ -819,13 +819,17 @@ namespace MUHelper
         return 1;
     }
 
-    int CMuHelper::SimulateAttack(ActionSkillType iSkill, GameLogic::Automation::SkillResult* outcome)
+    int CMuHelper::SimulateAttack(ActionSkillType iSkill)
     {
-        return SimulateSkill(iSkill, true, m_iCurrentTarget, outcome);
+        return SimulateSkill(iSkill, true, m_iCurrentTarget);
     }
 
-    int CMuHelper::SimulateSkill(ActionSkillType iSkill, bool bTargetRequired, int iTarget,
-                                 GameLogic::Automation::SkillResult* outcome)
+    int CMuHelper::SimulateSkill(ActionSkillType iSkill, bool bTargetRequired, int iTarget)
+    {
+        return CastSkill(iSkill, bTargetRequired, iTarget) == GameLogic::Automation::SkillResult::Cast ? 1 : 0;
+    }
+
+    GameLogic::Automation::SkillResult CMuHelper::CastSkill(ActionSkillType iSkill, bool bTargetRequired, int iTarget)
     {
         using GameLogic::Automation::SkillResult;
 
@@ -835,15 +839,13 @@ namespace MUHelper
         // still refused by the primitive when it is dead.
         const SkillResult result =
             GameLogic::Automation::CastSkill(iSkill, bTargetRequired, iTarget, true, m_iHuntingDistance);
-        if (outcome != nullptr)
-            *outcome = result;
 
         if (iTarget != -1 && GameLogic::Automation::ShouldForgetTarget(result))
         {
             DeleteTarget(iTarget);
         }
 
-        return result == SkillResult::Cast ? 1 : 0;
+        return result;
     }
 
     int CMuHelper::SimulateBasicAttack(int iTarget)

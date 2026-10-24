@@ -5,12 +5,14 @@ With Combo disabled, an additional attack with neither Delay nor Condition enabl
 joins the primary in a round-robin rotation. No artificial delay is required.
 Clearing the additional slots keeps the primary-only behavior.
 
-The rotation skips skills that are not learned, are on cooldown, lack mana or AG,
-or do not meet their attribute or skill-use requirements. Selection does not start
-a cooldown. The normal attack path still checks range, movement and casting state;
-an attack that is busy or approaching its target keeps its turn. Other attempts
-advance the rotation even when no cast was issued, so one unusable skill cannot
-hold up the other slots.
+The rotation skips skills that are not learned, are on cooldown, or do not
+meet their attribute or skill-use requirements. Selection does not start a
+cooldown. Mana and AG remain checked by the normal cast path, including automatic
+mana-potion use when the selected skill is unaffordable. Busy attacks, movement,
+and target reacquisition retain the selected slot. Temporary casting-state waits
+also keep the turn; four consecutive no-action attempts yield to the next slot
+so a persistently unusable action cannot stall the rotation. Cast and refused
+attempts advance it.
 The existing basic-attack fallback remains available when skills cannot be used.
 
 Additional attacks with Delay or Condition enabled keep their existing priority

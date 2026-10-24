@@ -55,53 +55,53 @@ namespace MUHelper
 		int RepairEquipments();
 		int Regroup();
 		ActionSkillType SelectAttackSkill();
-        int SimulateAttack(ActionSkillType iSkill, GameLogic::Automation::SkillResult* outcome = nullptr);
-        int SimulateSkill(ActionSkillType iSkill, bool bTargetRequired, int iTarget,
-                          GameLogic::Automation::SkillResult* outcome = nullptr);
+		int SimulateAttack(ActionSkillType iSkill);
+		int SimulateSkill(ActionSkillType iSkill, bool bTargetRequired, int iTarget);
+		int SimulateBasicAttack(int iTarget);
+		int SimulateComboAttack();
+		int GetNearestTarget();
+		int GetFarthestAttackingTarget();
+		void CleanupTargets();
+		int ComputeDistanceByRange(int iRange);
+		int ComputeDistanceFromTarget(CHARACTER* pTarget);
+		int ComputeDistanceBetween(POINT posA, POINT posB);
+		int SimulateMove(POINT posMove);
+		int ObtainItem();
+		int SelectItemToObtain();
+		bool ShouldObtainItem(int iItemId);
+		ActionSkillType GetHealingSkill();
+		ActionSkillType GetDrainLifeSkill();
+		bool HasAssignedBuffSkill();
+		bool IsSelfPositionSkill(ActionSkillType iSkill);
 
-        int SimulateBasicAttack(int iTarget);
-        int SimulateComboAttack();
-        int GetNearestTarget();
-        int GetFarthestAttackingTarget();
-        void CleanupTargets();
-        int ComputeDistanceByRange(int iRange);
-        int ComputeDistanceFromTarget(CHARACTER* pTarget);
-        int ComputeDistanceBetween(POINT posA, POINT posB);
-        int SimulateMove(POINT posMove);
-        int ObtainItem();
-        int SelectItemToObtain();
-        bool ShouldObtainItem(int iItemId);
-        ActionSkillType GetHealingSkill();
-        ActionSkillType GetDrainLifeSkill();
-        bool HasAssignedBuffSkill();
-        bool IsSelfPositionSkill(ActionSkillType iSkill);
+	private:
+		ConfigData m_config;
+		POINT m_posOriginal;
+		std::thread m_timerThread;
+		std::atomic<bool> m_bActive;
+		std::set<int> m_setTargets;
+		std::set<int> m_setTargetsAttacking;
+		std::set<int> m_setItems;
+		int m_iCurrentItem;
+		int m_iCurrentTarget;
+		int m_iCurrentBuffIndex;
+		int m_iCurrentBuffPartyIndex;
+		int m_iCurrentHealPartyIndex;
+		int m_iComboState;
+		ActionSkillType m_iCurrentSkill;
+		int m_iHuntingDistance;
+		int m_iObtainingDistance;
+		int m_iLoopCounter;
+		int m_iSecondsElapsed;
+		int m_iSecondsAway;
+		bool m_bTimerActivatedBuffOngoing;
+		bool m_bPetActivated;
+		int m_iTotalCost;
 
-    private:
-        ConfigData m_config;
-        AttackSkillRotation m_attackSkills;
-
-        POINT m_posOriginal;
-        std::thread m_timerThread;
-        std::atomic<bool> m_bActive;
-        std::set<int> m_setTargets;
-        std::set<int> m_setTargetsAttacking;
-        std::set<int> m_setItems;
-        int m_iCurrentItem;
-        int m_iCurrentTarget;
-        int m_iCurrentBuffIndex;
-        int m_iCurrentBuffPartyIndex;
-        int m_iCurrentHealPartyIndex;
-        int m_iComboState;
-        ActionSkillType m_iCurrentSkill;
-        int m_iHuntingDistance;
-        int m_iObtainingDistance;
-        int m_iLoopCounter;
-        int m_iSecondsElapsed;
-        int m_iSecondsAway;
-        bool m_bTimerActivatedBuffOngoing;
-        bool m_bPetActivated;
-        int m_iTotalCost;
+        GameLogic::Automation::AttackSkillRotation m_attackSkills;
+        bool SelectAttackTarget();
+        GameLogic::Automation::SkillResult CastSkill(ActionSkillType skill, bool targetRequired, int target);
     };
 
     extern CMuHelper g_MuHelper;
-    } // namespace MUHelper
+}

@@ -6,36 +6,29 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "GameLogic/Skills/SkillManager.h"
 
-#include <algorithm>
-#include <iterator>
-#include <span>
+#include <tuple>
 
-namespace MUHelper
+namespace GameLogic::Automation
 {
-bool IsAttackSkillReady(ActionSkillType skill)
+using MUHelper::ConfigData;
+
+bool IsAttackSkillAvailable(ActionSkillType skill)
 {
     if (skill <= AT_SKILL_UNDEFINED || skill >= MAX_SKILLS)
         return false;
-
-    // Nova's charging action uses the learned Nova slot, as in the skill bar.
-    const auto learnedSkill = skill == AT_SKILL_NOVA_BEGIN ? AT_SKILL_NOVA : skill;
-    const auto skills = std::span(CharacterAttribute->Skill, MAX_MAGIC);
-    const auto found = std::find(skills.begin(), skills.end(), learnedSkill);
-    if (found == skills.end() || CharacterAttribute->SkillDelay[std::distance(skills.begin(), found)] > 0)
+    const int slot = gSkillManager.FindSkillIndex(skill);
+    if (slot < 0 ||
+        (SkillAttribute[CharacterAttribute->Skill[slot]].Delay > 0 && CharacterAttribute->SkillDelay[slot] > 0))
         return false;
-
-    int mana = 0;
-    int ag = 0;
-    gSkillManager.GetSkillInformation(skill, 1, nullptr, &mana, nullptr, &ag);
-    if (CharacterAttribute->Mana < mana || CharacterAttribute->SkillMana < ag)
-        return false;
-
-    // CheckSkillDelay writes a cooldown; the ordinary cast path alone owns it.
+    // The normal cast path owns mana/AG checks and automatic potion use.
+    // CheckSkillDelay starts a cooldown; selection must not call it.
     return gSkillManager.AreSkillAttributeRequirementsMet(skill) && CheckSkillUseCondition(&Hero->Object, skill);
 }
 
 namespace
 {
+constexpr int AttackSlotCount = static_cast<int>(std::tuple_size_v<decltype(ConfigData::aiSkill)>);
+
 bool IsValidSkill(uint32_t skill)
 {
     return skill > AT_SKILL_UNDEFINED && skill < MAX_SKILLS;
@@ -43,15 +36,16 @@ bool IsValidSkill(uint32_t skill)
 
 bool IsAutomaticSlot(const ConfigData& config, int slot)
 {
-    return slot == 0 || !(config.aiSkillCondition[slot] & (ON_TIMER | ON_CONDITION));
+    return IsValidSkill(config.aiSkill[slot]) &&
+           (slot == 0 || !(config.aiSkillCondition[slot] & (MUHelper::ON_TIMER | MUHelper::ON_CONDITION)));
 }
 
 bool IsConditionMet(uint32_t condition, std::size_t nearby, std::size_t attacking)
 {
     std::size_t count = 0;
-    if (condition & ON_MOBS_NEARBY)
+    if (condition & MUHelper::ON_MOBS_NEARBY)
         count = nearby;
-    else if (condition & ON_MOBS_ATTACKING)
+    else if (condition & MUHelper::ON_MOBS_ATTACKING)
         count = attacking;
     else
         return false;
@@ -60,10 +54,10 @@ bool IsConditionMet(uint32_t condition, std::size_t nearby, std::size_t attackin
     constexpr std::size_t ThreeMobs = 3;
     constexpr std::size_t FourMobs = 4;
     constexpr std::size_t FiveMobs = 5;
-    return ((condition & ON_MORE_THAN_TWO_MOBS) && count >= TwoMobs) ||
-           ((condition & ON_MORE_THAN_THREE_MOBS) && count >= ThreeMobs) ||
-           ((condition & ON_MORE_THAN_FOUR_MOBS) && count >= FourMobs) ||
-           ((condition & ON_MORE_THAN_FIVE_MOBS) && count >= FiveMobs);
+    return ((condition & MUHelper::ON_MORE_THAN_TWO_MOBS) && count >= TwoMobs) ||
+           ((condition & MUHelper::ON_MORE_THAN_THREE_MOBS) && count >= ThreeMobs) ||
+           ((condition & MUHelper::ON_MORE_THAN_FOUR_MOBS) && count >= FourMobs) ||
+           ((condition & MUHelper::ON_MORE_THAN_FIVE_MOBS) && count >= FiveMobs);
 }
 
 ActionSkillType SelectTriggeredSkill(const ConfigData& config, int secondsElapsed, std::size_t nearby,
@@ -77,8 +71,8 @@ ActionSkillType SelectTriggeredSkill(const ConfigData& config, int secondsElapse
         const auto condition = config.aiSkillCondition[slot];
         const auto interval = config.aiSkillInterval[slot];
         const bool timerDue =
-            (condition & ON_TIMER) && interval != 0 && secondsElapsed > 0 && secondsElapsed % interval == 0;
-        const bool conditionMet = (condition & ON_CONDITION) && IsConditionMet(condition, nearby, attacking);
+            (condition & MUHelper::ON_TIMER) && interval != 0 && secondsElapsed > 0 && secondsElapsed % interval == 0;
+        const bool conditionMet = (condition & MUHelper::ON_CONDITION) && IsConditionMet(condition, nearby, attacking);
         if (timerDue || conditionMet)
             return static_cast<ActionSkillType>(config.aiSkill[slot]);
     }
@@ -90,48 +84,62 @@ void AttackSkillRotation::Reset()
 {
     m_nextSlot = 0;
     m_selectedSlot = -1;
+    m_notReadyAttempts = 0;
 }
 
 ActionSkillType AttackSkillRotation::Select(const ConfigData& config, int secondsElapsed, std::size_t nearby,
                                             std::size_t attacking)
 {
+    const int previousSlot = m_selectedSlot;
     m_selectedSlot = -1;
-    m_slotCount = static_cast<int>(config.aiSkill.size());
     const auto triggered = SelectTriggeredSkill(config, secondsElapsed, nearby, attacking);
     if (triggered > AT_SKILL_UNDEFINED)
         return triggered;
 
     bool hasAutomaticExtra = false;
-    for (int slot = 1; slot < m_slotCount; ++slot)
-        hasAutomaticExtra |= IsAutomaticSlot(config, slot) && IsValidSkill(config.aiSkill[slot]);
+    for (int slot = 1; slot < AttackSlotCount; ++slot)
+        hasAutomaticExtra |= IsAutomaticSlot(config, slot);
 
     if (hasAutomaticExtra)
     {
-        for (int offset = 0; offset < m_slotCount; ++offset)
+        for (int offset = 0; offset < AttackSlotCount; ++offset)
         {
-            const int slot = (m_nextSlot + offset) % m_slotCount;
-            if (!IsAutomaticSlot(config, slot) || !IsValidSkill(config.aiSkill[slot]))
+            const int slot = (m_nextSlot + offset) % AttackSlotCount;
+            if (!IsAutomaticSlot(config, slot))
                 continue;
 
             const auto skill = static_cast<ActionSkillType>(config.aiSkill[slot]);
-            if (!IsAttackSkillReady(skill))
+            if (!IsAttackSkillAvailable(skill))
                 continue;
 
             m_selectedSlot = slot;
+            if (previousSlot != slot)
+                m_notReadyAttempts = 0;
             return skill;
         }
     }
 
     // Keep legacy low-resource handling and basic-attack fallback when none is ready.
-    return config.aiSkill[0] > 0 ? static_cast<ActionSkillType>(config.aiSkill[0]) : AT_SKILL_UNDEFINED;
+    return IsValidSkill(config.aiSkill[0]) ? static_cast<ActionSkillType>(config.aiSkill[0]) : AT_SKILL_UNDEFINED;
 }
 
 void AttackSkillRotation::Complete(GameLogic::Automation::SkillResult result)
 {
     using GameLogic::Automation::SkillResult;
-    if (m_selectedSlot < 0 || result == SkillResult::Busy || result == SkillResult::Approaching)
+    if (m_selectedSlot < 0)
         return;
 
-    m_nextSlot = (m_selectedSlot + 1) % m_slotCount;
+    // Select can skip the starting cursor. Retain the slot actually chosen,
+    // including across a lost target and the walk/animation before a cast.
+    m_nextSlot = m_selectedSlot;
+    constexpr int MaxNotReadyAttempts = 4;
+    const bool retryExhausted = result == SkillResult::NotReady && ++m_notReadyAttempts >= MaxNotReadyAttempts;
+    if (result != SkillResult::NotReady)
+        m_notReadyAttempts = 0;
+    if (result == SkillResult::Cast || result == SkillResult::Refused || retryExhausted)
+    {
+        m_nextSlot = (m_selectedSlot + 1) % AttackSlotCount;
+        m_notReadyAttempts = 0;
+    }
 }
-} // namespace MUHelper
+} // namespace GameLogic::Automation

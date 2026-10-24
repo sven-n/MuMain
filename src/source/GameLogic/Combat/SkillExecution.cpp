@@ -187,6 +187,39 @@ bool CheckMana(CHARACTER* c, int Skill)
     return true;
 }
 
+namespace
+{
+bool CanBeginSkill(CHARACTER* c)
+{
+    const OBJECT* o = &c->Object;
+    if (o->Type == MODEL_PLAYER)
+    {
+        if (o->CurrentAction < PLAYER_STOP_MALE ||
+            o->CurrentAction > PLAYER_STOP_RIDE_WEAPON && o->CurrentAction != PLAYER_STOP_TWO_HAND_SWORD_TWO &&
+                o->CurrentAction != PLAYER_SKILL_HELL_BEGIN && o->CurrentAction != PLAYER_DARKLORD_STAND &&
+                o->CurrentAction != PLAYER_STOP_RIDE_HORSE && o->CurrentAction != PLAYER_FENRIR_STAND &&
+                o->CurrentAction != PLAYER_FENRIR_STAND_TWO_SWORD &&
+                o->CurrentAction != PLAYER_FENRIR_STAND_ONE_RIGHT && o->CurrentAction != PLAYER_FENRIR_STAND_ONE_LEFT &&
+                !(o->CurrentAction >= PLAYER_RAGE_FENRIR_STAND &&
+                  o->CurrentAction <= PLAYER_RAGE_FENRIR_STAND_ONE_LEFT) &&
+                o->CurrentAction != PLAYER_RAGE_UNI_STOP_ONE_RIGHT && o->CurrentAction != PLAYER_STOP_RAGEFIGHTER)
+        {
+            MouseRButtonPress = 0;
+            return false;
+        }
+    }
+    else
+    {
+        if (o->CurrentAction < MONSTER01_STOP1 || o->CurrentAction > MONSTER01_STOP2)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+} // namespace
+
 int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
 {
     OBJECT* o = &c->Object;
@@ -198,7 +231,10 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
         return 0;
     }
 
-    int iSkillIndex = g_pSkillList->GetSkillIndex(Skill);
+    if (!CanBeginSkill(c))
+        return 0;
+
+    int iSkillIndex = gSkillManager.FindSkillIndex(Skill);
     if (iSkillIndex == -1)
     {
         return 0;
@@ -281,34 +317,6 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
         else
         {
             Attacking = 2;
-        }
-    }
-
-    if (o->Type == MODEL_PLAYER)
-    {
-        if (o->CurrentAction < PLAYER_STOP_MALE
-            || o->CurrentAction > PLAYER_STOP_RIDE_WEAPON
-            && o->CurrentAction != PLAYER_STOP_TWO_HAND_SWORD_TWO
-            && o->CurrentAction != PLAYER_SKILL_HELL_BEGIN
-            && o->CurrentAction != PLAYER_DARKLORD_STAND
-            && o->CurrentAction != PLAYER_STOP_RIDE_HORSE
-            && o->CurrentAction != PLAYER_FENRIR_STAND
-            && o->CurrentAction != PLAYER_FENRIR_STAND_TWO_SWORD
-            && o->CurrentAction != PLAYER_FENRIR_STAND_ONE_RIGHT
-            && o->CurrentAction != PLAYER_FENRIR_STAND_ONE_LEFT
-            && !(o->CurrentAction >= PLAYER_RAGE_FENRIR_STAND && o->CurrentAction <= PLAYER_RAGE_FENRIR_STAND_ONE_LEFT)
-            && o->CurrentAction != PLAYER_RAGE_UNI_STOP_ONE_RIGHT
-            && o->CurrentAction != PLAYER_STOP_RAGEFIGHTER)
-        {
-            MouseRButtonPress = 0;
-            return 0;
-        }
-    }
-    else
-    {
-        if (o->CurrentAction < MONSTER01_STOP1 || o->CurrentAction > MONSTER01_STOP2)
-        {
-            return 0;
         }
     }
 
