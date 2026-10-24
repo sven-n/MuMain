@@ -34,6 +34,15 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_tornado_spin
+    SOURCES
+        test_tornado_spin.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
     NAME test_direction_turning
     SOURCES
         test_direction_turning.cpp
