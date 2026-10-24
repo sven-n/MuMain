@@ -16,7 +16,9 @@
 	height: 29dp;
 	font-family: "token(font-body)";
 	font-size: 1rem;
-	pointer-events: none;
+	/* The bar takes the pointer, so a click on it never walks the character (legacy's rule: the
+	   C++ asks IsPointerOver()). The two halves below take none, so the click lands here. */
+	pointer-events: auto;
 }
 #panel.workspace-placed { margin-left: 0; }
 
