@@ -143,7 +143,8 @@ TEST_CASE("A description line is written only at the item levels it is shown at 
 
     TextNum = 0;
     SkipNum = 0;
-    WriteItemDescriptionLines(scroll, 0, ItemTooltipValues{}, FiveUnitsPerLetter);
+    int rowsLeft = MaxItemDescriptionRows;
+    WriteItemDescriptionLines(scroll, 0, ItemTooltipValues{}, false, rowsLeft, FiveUnitsPerLetter);
     REQUIRE(TextNum == 1);
     CHECK(std::wstring(TextList[0]) == L"Every level");
 
@@ -151,13 +152,15 @@ TEST_CASE("A description line is written only at the item levels it is shown at 
     {
         INFO("+" << level);
         TextNum = 0;
-        WriteItemDescriptionLines(scroll, level, ItemTooltipValues{}, FiveUnitsPerLetter);
+        rowsLeft = MaxItemDescriptionRows;
+        WriteItemDescriptionLines(scroll, level, ItemTooltipValues{}, false, rowsLeft, FiveUnitsPerLetter);
         REQUIRE(TextNum == 2);
         CHECK(std::wstring(TextList[1]) == L"Warp after 3 seconds");
     }
 
     TextNum = 0;
-    WriteItemDescriptionLines(scroll, 9, ItemTooltipValues{}, FiveUnitsPerLetter);
+    rowsLeft = MaxItemDescriptionRows;
+    WriteItemDescriptionLines(scroll, 9, ItemTooltipValues{}, false, rowsLeft, FiveUnitsPerLetter);
     CHECK(TextNum == 1);
 }
 
