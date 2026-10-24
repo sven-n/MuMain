@@ -141,9 +141,9 @@ public:
         AddRanges(mentions);
         // One mention per item, the first kind that fits.
         std::sort(mentions.begin(), mentions.end(), [](const ItemMention& left, const ItemMention& right)
-                  { return std::tie(left.itemType, left.kind) < std::tie(right.itemType, right.kind); });
+                  { return std::tie(left.number, left.kind) < std::tie(right.number, right.kind); });
         const auto sameItem = [](const ItemMention& left, const ItemMention& right)
-        { return left.itemType == right.itemType; };
+        { return left.number == right.number; };
         mentions.erase(std::unique(mentions.begin(), mentions.end(), sameItem), mentions.end());
         return mentions;
     }

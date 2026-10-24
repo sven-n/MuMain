@@ -4,22 +4,16 @@
 
 #include "MonsterCodeReferenceIndex.h"
 
-#include "MuEditorSourceDir.h"
-
-#include <filesystem>
+#include "../MuEditor/UI/Common/CodeReferenceScan.h"
 
 namespace MuEditor::Monsters
 {
 namespace
 {
-// The sources the editor was built from (src/source); UTF-8, as the path may
-// hold any letter.
-constexpr const char8_t* SourceDirectory = MU_EDITOR_SOURCE_DIR;
-
 MonsterCodeReferences LoadMonsterCodeReferences()
 {
     MonsterCodeReferences references;
-    references.Load(std::filesystem::path(SourceDirectory));
+    references.Load(CodeReferenceScan::EditorSourceFolder());
     return references;
 }
 } // namespace

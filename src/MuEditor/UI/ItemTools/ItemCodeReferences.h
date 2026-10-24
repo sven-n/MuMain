@@ -45,7 +45,7 @@ public:
     std::string_view GetCodeName(int itemType) const;
 
 private:
-    // By item type.
+    // By item type; empty until loaded.
     std::vector<std::string> m_codeNames;
     std::vector<std::vector<ItemCodeReference>> m_references;
     bool m_loaded = false;

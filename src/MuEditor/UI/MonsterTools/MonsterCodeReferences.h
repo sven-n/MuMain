@@ -33,7 +33,7 @@ public:
     std::span<const CodeReference> Find(int number) const;
 
 private:
-    // By monster number.
+    // By monster number; empty until loaded.
     std::vector<std::vector<CodeReference>> m_references;
     bool m_loaded = false;
 };

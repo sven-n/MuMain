@@ -2,7 +2,7 @@
 
 #ifdef _EDITOR
 
-#include "../MuEditor/UI/Common/CodeReference.h"
+#include "../MuEditor/UI/Common/CodeReferenceScan.h"
 
 #include <functional>
 #include <map>
@@ -27,13 +27,8 @@ struct MonsterConstant
 // The MONSTER_ constants by name.
 using MonsterConstants = std::map<std::string, MonsterConstant, std::less<>>;
 
-// A monster number a line names, and how.
-struct MonsterMention
-{
-    // Always 0-1023.
-    int number = 0;
-    CodeReference::Kind kind = CodeReference::Kind::Name;
-};
+// A monster number a line names, and how; the number is always 0-1023.
+using MonsterMention = CodeReferenceScan::Mention;
 
 // The constant a line inside enum EMonsterType defines, written as
 // MONSTER_BUDGE_DRAGON = 2, (the comma left out after the last one): its
