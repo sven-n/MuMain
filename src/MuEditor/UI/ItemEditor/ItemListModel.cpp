@@ -15,7 +15,7 @@
 
 namespace
 {
-using MuEditor::TextSearch::ContainsIgnoringCase;
+using MuEditor::TextSearch::AnyNameContains;
 using MuEditor::TextSearch::ReadWholeNumber;
 
 // "group,number" or the item type.
@@ -37,17 +37,7 @@ bool MatchesItemNumber(const Data::Items::ItemDefinition& definition, std::strin
 
 bool MatchesItemSearch(const Data::Items::ItemDefinition& definition, std::string_view search)
 {
-    if (search.empty() || MatchesItemNumber(definition, search))
-    {
-        return true;
-    }
-    if (ContainsIgnoringCase(definition.names.GetNeutral(), search))
-    {
-        return true;
-    }
-    const auto& translations = definition.names.GetTranslations();
-    return std::any_of(translations.begin(), translations.end(),
-                       [&](const auto& translation) { return ContainsIgnoringCase(translation.second, search); });
+    return search.empty() || MatchesItemNumber(definition, search) || AnyNameContains(definition.names, search);
 }
 
 std::vector<int> GetFreeItemNumbers(int group)

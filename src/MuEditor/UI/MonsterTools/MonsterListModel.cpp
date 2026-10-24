@@ -36,13 +36,7 @@ bool MatchesMonsterSearch(const MonsterDefinition& monster, std::string_view sea
     {
         return true;
     }
-    if (TextSearch::ContainsIgnoringCase(monster.names.GetNeutral(), search))
-    {
-        return true;
-    }
-    const auto& translations = monster.names.GetTranslations();
-    return std::any_of(translations.begin(), translations.end(), [&](const auto& translation)
-                       { return TextSearch::ContainsIgnoringCase(translation.second, search); });
+    return TextSearch::AnyNameContains(monster.names, search);
 }
 
 bool IsFreeMonsterNumber(int number)

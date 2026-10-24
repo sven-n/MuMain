@@ -4,6 +4,8 @@
 
 #include "TextSearch.h"
 
+#include "Data/GameData/Common/LocalizedString.h"
+
 #include <algorithm>
 #include <charconv>
 
@@ -24,6 +26,17 @@ bool ContainsIgnoringCase(std::string_view text, std::string_view search)
     const auto found = std::search(text.begin(), text.end(), search.begin(), search.end(),
                                    [](char a, char b) { return ToLowerAscii(a) == ToLowerAscii(b); });
     return found != text.end();
+}
+
+bool AnyNameContains(const Data::LocalizedString& names, std::string_view search)
+{
+    if (ContainsIgnoringCase(names.GetNeutral(), search))
+    {
+        return true;
+    }
+    const auto& translations = names.GetTranslations();
+    return std::any_of(translations.begin(), translations.end(),
+                       [&](const auto& translation) { return ContainsIgnoringCase(translation.second, search); });
 }
 
 bool ReadWholeNumber(std::string_view text, int& value)
