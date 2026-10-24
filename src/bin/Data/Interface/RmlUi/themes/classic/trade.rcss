@@ -165,3 +165,8 @@
 #partner_grid, #partner_grid_counts { left: 15px; top: 70px; width: calc(8 * var(--item-cell)); height: calc(4 * var(--item-cell)); }
 #item_grid, #item_grid_counts { left: 15px; top: 270px; width: calc(8 * var(--item-cell)); height: calc(4 * var(--item-cell)); }
 #item_view { height: 473px; }
+
+/* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
+   controls take their own. (Legacy's rules, which this copy predated.) */
+#panel.slot-placed { pointer-events: none; }
+#panel { font-size: calc(var(--text-px, 12px) / var(--root-scale)); }

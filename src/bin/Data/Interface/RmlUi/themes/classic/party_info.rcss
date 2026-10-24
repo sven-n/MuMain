@@ -105,3 +105,7 @@
 	pointer-events: auto;
 }
 .party-kick-btn:active { decorator: image(party-classic-kick-pressed); }
+
+/* The native text size, counter-scaled out of the panel's scale. (Legacy's rule, which this copy
+   predated.) */
+#panel { font-size: calc(var(--text-px) / var(--root-scale)); }
