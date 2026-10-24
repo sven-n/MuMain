@@ -202,7 +202,7 @@ Jewel of Bless's:
 ]
 ```
 
-Each line is `{"text": ..., "color": ...}`:
+Each line is `{"text": ..., "color": ..., "levels": [first, last]}`:
 
 - **`text`** is written like `name`: a plain English text, or the texts by
   language. It is checked like a name too: the English text is required, a
@@ -216,13 +216,19 @@ Each line is `{"text": ..., "color": ...}`:
 - **`color`** is one of the tooltip colors: `white` (left out), `blue`,
   `red`, `yellow`, `green`, `darkRed`, `purple`, `darkBlue`, `darkYellow`,
   `greenBlue`, `gray`, `redPurple`, `violet`, `orange`.
+- **`levels`** shows the line only at those item levels, both included (`[1,
+  8]`; left out: every level): a list of two levels from 0 to 15, the first
+  not above the last. Most items that use it today are level variants (the
+  Fruits, Contract Summon, Life Stone, Rena, …), which the items design makes
+  items of their own later: their lines then move into those items and lose
+  their `levels`.
 
 In the tooltip:
 
 - **Place:** after the item's damage, defense and speed lines, and before
-  its durability, requirements and options. The Town Portal scroll's delay
-  and a few other lines are still written by the tooltip code, after the
-  description.
+  its durability, requirements and options. A few lines that read the hero
+  or other tables (the Armor of Guardsman's Chaos Castle table, the Lost
+  Map) are still written by the tooltip code, after the description.
 - **Language:** the UI's language, also when the item names stay English
   ("Translate item names" off).
 - **Size:** at most 32 rows. The description has them to itself, so a long

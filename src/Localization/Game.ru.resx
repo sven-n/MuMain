@@ -639,10 +639,6 @@
     <value>Переместить курсор вниз-&gt; Настроить окно чата.</value>
     <comment>legacy_id=156</comment>
   </data>
-  <data name="Warp to the corresponding area after %d seconds" xml:space="preserve">
-    <value>Переместитесь в соответствующую область через %d секунд.</value>
-    <comment>legacy_id=157</comment>
-  </data>
   <data name="%s Warp scroll" xml:space="preserve">
     <value>%s Свиток варпа</value>
     <comment>legacy_id=158</comment>
@@ -2372,18 +2368,6 @@
     <value>Увеличивает скорость получения маны после охоты на монстров +Мана/8.</value>
     <comment>legacy_id=635</comment>
   </data>
-  <data name="Increases 1~3 stat points" xml:space="preserve">
-    <value>Увеличивает 1~3 очка характеристик.</value>
-    <comment>legacy_id=636</comment>
-  </data>
-  <data name="The remaining time is shown" xml:space="preserve">
-    <value>Оставшееся время показано</value>
-    <comment>legacy_id=638</comment>
-  </data>
-  <data name="when you right click on your mouse." xml:space="preserve">
-    <value>когда вы щелкаете правой кнопкой мыши.</value>
-    <comment>legacy_id=639</comment>
-  </data>
   <data name="You will enter Devil Square (%d seconds from now)" xml:space="preserve">
     <value>Вы войдете на площадь Дьявола (через %d секунд).</value>
     <comment>legacy_id=640</comment>
@@ -2808,10 +2792,6 @@
     <value>Вы обменяли Диноранты</value>
     <comment>legacy_id=747</comment>
   </data>
-  <data name="Used to upgrade wings" xml:space="preserve">
-    <value>Используется для улучшения крыльев.</value>
-    <comment>legacy_id=748</comment>
-  </data>
   <data name="Must be over level 10 to use fruits" xml:space="preserve">
     <value>Должен быть выше 10 уровня, чтобы использовать фрукты.</value>
     <comment>legacy_id=749</comment>
@@ -2988,21 +2968,9 @@
     <value>Абсолютный Меч Архангела</value>
     <comment>legacy_id=812</comment>
   </data>
-  <data name="Used in the online event" xml:space="preserve">
-    <value>Используется в онлайн-мероприятии</value>
-    <comment>legacy_id=813</comment>
-  </data>
-  <data name="Used when entering Blood Castle" xml:space="preserve">
-    <value>Используется при входе в Кровавый Замок.</value>
-    <comment>legacy_id=814</comment>
-  </data>
   <data name="Reward received when returned to the Archangel" xml:space="preserve">
     <value>Награда, полученная при возвращении в Архангельск</value>
     <comment>legacy_id=815</comment>
-  </data>
-  <data name="Used when creating a Cloak of Invisibility" xml:space="preserve">
-    <value>Используется при создании плаща-невидимки.</value>
-    <comment>legacy_id=816</comment>
   </data>
   <data name="Absolute Crossbow of Archangel" xml:space="preserve">
     <value>Абсолютный арбалет Архангела</value>
@@ -4068,10 +4036,6 @@
     <value>Камень Дружбы</value>
     <comment>legacy_id=1098</comment>
   </data>
-  <data name="Used in the My Friend event." xml:space="preserve">
-    <value>Используется в событии «Мой друг».</value>
-    <comment>legacy_id=1099</comment>
-  </data>
   <data name="Do you want to buy an item?" xml:space="preserve">
     <value>Вы хотите купить товар?</value>
     <comment>legacy_id=1100</comment>
@@ -4500,14 +4464,6 @@
     <value>Темный ворон</value>
     <comment>legacy_id=1214</comment>
   </data>
-  <data name="Used in Dark Horse resurrection" xml:space="preserve">
-    <value>Используется в воскрешении Темной Лошади.</value>
-    <comment>legacy_id=1215</comment>
-  </data>
-  <data name="Used in Dark Raven resurrection" xml:space="preserve">
-    <value>Используется при воскрешении Темного Ворона.</value>
-    <comment>legacy_id=1216</comment>
-  </data>
   <data name="Pet" xml:space="preserve">
     <value>Домашний питомец</value>
     <comment>legacy_id=1217</comment>
@@ -4583,10 +4539,6 @@
   <data name="Crest of monarch" xml:space="preserve">
     <value>Герб монарха</value>
     <comment>legacy_id=1235</comment>
-  </data>
-  <data name="Used in combining Cape of Lord &amp; Warrior's Cloak" xml:space="preserve">
-    <value>Используется для объединения накидки лорда и плаща воина.</value>
-    <comment>legacy_id=1236</comment>
   </data>
   <data name="Check the details in pet information window" xml:space="preserve">
     <value>Проверьте детали в окне информации о домашнем животном.</value>
@@ -4767,10 +4719,6 @@
   <data name="Sign of lord" xml:space="preserve">
     <value>Знак лорда</value>
     <comment>legacy_id=1290</comment>
-  </data>
-  <data name="Use in siege registration" xml:space="preserve">
-    <value>Использование при регистрации осады</value>
-    <comment>legacy_id=1291</comment>
   </data>
   <data name="Move to vault" xml:space="preserve">
     <value>Переместить в хранилище</value>
@@ -5244,18 +5192,6 @@
     <value>Свиток Стража</value>
     <comment>legacy_id=1416</comment>
   </data>
-  <data name="Damage +20%% increase effect" xml:space="preserve">
-    <value>Урон +20%% inувеличение эффекта</value>
-    <comment>legacy_id=1417</comment>
-  </data>
-  <data name="Duration 60 seconds" xml:space="preserve">
-    <value>Продолжительность 60 секунд</value>
-    <comment>legacy_id=1418</comment>
-  </data>
-  <data name="Only applicable for castle gate and statue" xml:space="preserve">
-    <value>Применимо только для ворот замка и статуи.</value>
-    <comment>legacy_id=1419,1465</comment>
-  </data>
   <data name="No. of signs" xml:space="preserve">
     <value>Количество знаков</value>
     <comment>legacy_id=1420</comment>
@@ -5435,10 +5371,6 @@
   <data name="Attacking skill will increase +20%%" xml:space="preserve">
     <value>Навык атаки увеличится на +20%%</value>
     <comment>legacy_id=1471</comment>
-  </data>
-  <data name="Attacking speed will increase +20" xml:space="preserve">
-    <value>Скорость атаки увеличится +20.</value>
-    <comment>legacy_id=1472</comment>
   </data>
   <data name="Can use the skill" xml:space="preserve">
     <value>Можно использовать навык</value>
@@ -6064,14 +5996,6 @@
     <value>Функция Альянса будет ограничена из-за осады замка.</value>
     <comment>legacy_id=1637</comment>
   </data>
-  <data name="Increase +8 AG recovery speed" xml:space="preserve">
-    <value>Увеличение скорости восстановления AG на +8.</value>
-    <comment>legacy_id=1638</comment>
-  </data>
-  <data name="Increase resistance of Lightning and Ice" xml:space="preserve">
-    <value>Увеличение сопротивления молнии и льду.</value>
-    <comment>legacy_id=1639</comment>
-  </data>
   <data name="Store1640" xml:space="preserve">
     <value>Магазин</value>
     <comment>legacy_id=1640</comment>
@@ -6171,10 +6095,6 @@
   <data name="LugadrS12ApostlesAreHelping" xml:space="preserve">
     <value>12 апостолов Лугадра помогают ослепить привратника на дороге к месту упокоения Балгасса.</value>
     <comment>legacy_id=1664</comment>
-  </data>
-  <data name="Ingredients for the 3rd wing assembly." xml:space="preserve">
-    <value>Ингредиенты для сборки третьего крыла.</value>
-    <comment>legacy_id=1665</comment>
   </data>
   <data name="Condor's feather" xml:space="preserve">
     <value>Перо Кондора</value>
@@ -7047,10 +6967,6 @@
   <data name="To decrease the fruit, weapons, armors and others must be removed." xml:space="preserve">
     <value>Чтобы уменьшить количество фруктов, необходимо снять оружие, доспехи и т. д.</value>
     <comment>legacy_id=1909</comment>
-  </data>
-  <data name="Possible to decrease stat 1~9 point" xml:space="preserve">
-    <value>Возможно понижение показателя с 1 по 9.</value>
-    <comment>legacy_id=1910</comment>
   </data>
   <data name="Impossible since the usable fruit points are at maximum." xml:space="preserve">
     <value>Это невозможно, поскольку количество полезных фруктов максимально.</value>
@@ -8040,10 +7956,6 @@
     <value>Произошел более сильный эффект.</value>
     <comment>legacy_id=2249</comment>
   </data>
-  <data name="Increases the combination rate,but only up to the maximum rate." xml:space="preserve">
-    <value>Увеличивает коэффициент комбинации, но только до максимального коэффициента.</value>
-    <comment>legacy_id=2250</comment>
-  </data>
   <data name="Unable to increase combination rate any further." xml:space="preserve">
     <value>Невозможно увеличить коэффициент комбинации дальше.</value>
     <comment>legacy_id=2251</comment>
@@ -8063,18 +7975,6 @@
   <data name="Unable to gain experience rate" xml:space="preserve">
     <value>Невозможно получить ставку опыта</value>
     <comment>legacy_id=2255</comment>
-  </data>
-  <data name="Increases experience gained." xml:space="preserve">
-    <value>Увеличивает получаемый опыт.</value>
-    <comment>legacy_id=2256</comment>
-  </data>
-  <data name="Increases experience gained and item drop rate." xml:space="preserve">
-    <value>Увеличивает получаемый опыт и шанс выпадения предметов.</value>
-    <comment>legacy_id=2257</comment>
-  </data>
-  <data name="Prevents experiences to be gained." xml:space="preserve">
-    <value>Мешает приобретению опыта.</value>
-    <comment>legacy_id=2258</comment>
   </data>
   <data name="Enables entrance into %s." xml:space="preserve">
     <value>Позволяет войти в %s.</value>
@@ -8115,10 +8015,6 @@
   <data name="You have achieve %s item." xml:space="preserve">
     <value>Вы получили предмет %s.</value>
     <comment>legacy_id=2268</comment>
-  </data>
-  <data name="Congratulations. Please contact CS team and change it to item." xml:space="preserve">
-    <value>Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.</value>
-    <comment>legacy_id=2269</comment>
   </data>
   <data name="You will be assigned to a stage according to your level." xml:space="preserve">
     <value>Вам будет назначен этап в соответствии с вашим уровнем.</value>
@@ -8223,10 +8119,6 @@
   <data name="%d%% Combination success rate increase" xml:space="preserve">
     <value>%d%% Увеличение шанса успешной комбинации</value>
     <comment>legacy_id=2296</comment>
-  </data>
-  <data name="Warp Command Window available." xml:space="preserve">
-    <value>Доступно окно управления варпом.</value>
-    <comment>legacy_id=2297</comment>
   </data>
   <data name="Hour" xml:space="preserve">
     <value>Час</value>
@@ -8559,18 +8451,6 @@
     <value>Свиток крови</value>
     <comment>legacy_id=2396</comment>
   </data>
-  <data name="AssembleTheScrollOfBloodWith" xml:space="preserve">
-    <value>Соберите Свиток Крови с помощью контракта Волшебства Иллюзий.</value>
-    <comment>legacy_id=2397</comment>
-  </data>
-  <data name="Assemble the Scroll of Blood with the old scrolls." xml:space="preserve">
-    <value>Соберите Свиток Крови из старых свитков.</value>
-    <comment>legacy_id=2398</comment>
-  </data>
-  <data name="This is a mark of Illusion Sorcery; this is required to enter the temple." xml:space="preserve">
-    <value>Это знак волшебства иллюзий; это необходимо для входа в храм.</value>
-    <comment>legacy_id=2399</comment>
-  </data>
   <data name="&lt;STEP 1: Battle Begins&gt;" xml:space="preserve">
     <value>&lt;ШАГ 1: Битва начинается&gt;</value>
     <comment>legacy_id=2400</comment>
@@ -8646,10 +8526,6 @@
   <data name="This is the origin of strength that protects the Illusion Temple." xml:space="preserve">
     <value>Это источник силы, защищающей Храм Иллюзий.</value>
     <comment>legacy_id=2419</comment>
-  </data>
-  <data name="Mobility speed reduces upon achievement." xml:space="preserve">
-    <value>Скорость мобильности снижается при достижении.</value>
-    <comment>legacy_id=2420</comment>
   </data>
   <data name="&lt;AM&gt; &lt;PM&gt;" xml:space="preserve">
     <value>&lt;Утро&gt; &lt;После полудня&gt;</value>
@@ -8859,10 +8735,6 @@
     <value>Увеличивает ману на %d.</value>
     <comment>legacy_id=2508</comment>
   </data>
-  <data name="You may freely move onward." xml:space="preserve">
-    <value>Вы можете свободно двигаться дальше.</value>
-    <comment>legacy_id=2509</comment>
-  </data>
   <data name="Resets the status." xml:space="preserve">
     <value>Сбрасывает статус.</value>
     <comment>legacy_id=2510</comment>
@@ -8898,10 +8770,6 @@
   <data name="There's an increase effect to it." xml:space="preserve">
     <value>Есть эффект увеличения.</value>
     <comment>legacy_id=2518</comment>
-  </data>
-  <data name="It reduces the killing rate." xml:space="preserve">
-    <value>Это снижает уровень убийств.</value>
-    <comment>legacy_id=2519</comment>
   </data>
   <data name="Reduction point: %d" xml:space="preserve">
     <value>Точка сокращения: %d</value>
@@ -9027,14 +8895,6 @@
     <value>Опыт мастер-уровня не может быть достигнут во время использования предмета.</value>
     <comment>legacy_id=2566</comment>
   </data>
-  <data name="Not applicable to" xml:space="preserve">
-    <value>Не применимо к</value>
-    <comment>legacy_id=2567</comment>
-  </data>
-  <data name="Master Level Characters." xml:space="preserve">
-    <value>Персонажи уровня Мастер.</value>
-    <comment>legacy_id=2568</comment>
-  </data>
   <data name="Automatic Life Recover increment %d%%" xml:space="preserve">
     <value>Увеличение автоматического восстановления ресурса %d%%</value>
     <comment>legacy_id=2569</comment>
@@ -9050,30 +8910,6 @@
   <data name="Item achievement and the automatic Mana recovery increases onward." xml:space="preserve">
     <value>Достижение предмета и автоматическое восстановление маны увеличиваются.</value>
     <comment>legacy_id=2572</comment>
-  </data>
-  <data name="Minimum +10 - +15 level item upgrade" xml:space="preserve">
-    <value>Минимум +10–+15 повышение уровня предмета.</value>
-    <comment>legacy_id=2573</comment>
-  </data>
-  <data name="blocks the item dissipation." xml:space="preserve">
-    <value>блокирует рассеивание предмета.</value>
-    <comment>legacy_id=2574</comment>
-  </data>
-  <data name="Increases Attack Power and Wizardry by 40%%" xml:space="preserve">
-    <value>Увеличивает силу атаки и волшебство на 40%%</value>
-    <comment>legacy_id=2575</comment>
-  </data>
-  <data name="Increases Attack Speed by 10" xml:space="preserve">
-    <value>Увеличивает скорость атаки на 10.</value>
-    <comment>legacy_id=2576,3069</comment>
-  </data>
-  <data name="Alleviates monster's damage by 30%%" xml:space="preserve">
-    <value>Уменьшает урон монстра на 30%%</value>
-    <comment>legacy_id=2577</comment>
-  </data>
-  <data name="Increases Maximum Life by 50" xml:space="preserve">
-    <value>Увеличивает максимальное количество жизни на 50.</value>
-    <comment>legacy_id=2578</comment>
   </data>
   <data name="Maximum Mana +50" xml:space="preserve">
     <value>Максимум маны +50</value>
@@ -9159,10 +8995,6 @@
     <value>Скорость восстановления AG увеличилась на %d.</value>
     <comment>legacy_id=2599</comment>
   </data>
-  <data name="Surrounding Zens are automatically collected." xml:space="preserve">
-    <value>Окружающие дзены собираются автоматически.</value>
-    <comment>legacy_id=2600</comment>
-  </data>
   <data name="You may turn into a snowman if applied." xml:space="preserve">
     <value>Если применить его, вы можете превратиться в снеговика.</value>
     <comment>legacy_id=2601</comment>
@@ -9174,10 +9006,6 @@
   <data name="Move by a right-mouse-click." xml:space="preserve">
     <value>Перемещение осуществляется щелчком правой кнопки мыши.</value>
     <comment>legacy_id=2603</comment>
-  </data>
-  <data name="Save the application location." xml:space="preserve">
-    <value>Сохраните местоположение приложения.</value>
-    <comment>legacy_id=2604</comment>
   </data>
   <data name="Saves the location with the right-mouse-click." xml:space="preserve">
     <value>Сохраняет местоположение щелчком правой кнопки мыши.</value>
@@ -9463,25 +9291,9 @@
     <value>Слишком много людей в Колосуме.</value>
     <comment>legacy_id=2707</comment>
   </data>
-  <data name="+10~+15 When upgrading level item please put it in combination window." xml:space="preserve">
-    <value>+10~+15 При обновлении предмета уровня поместите его в окно комбинации.</value>
-    <comment>legacy_id=2708</comment>
-  </data>
   <data name="item/skill/luck/option will be randomly added." xml:space="preserve">
     <value>предмет/навык/удача/опция будут добавлены случайным образом.</value>
     <comment>legacy_id=2709</comment>
-  </data>
-  <data name="Exp and item will be secured when character dies." xml:space="preserve">
-    <value>Опыт и предмет будут сохранены после смерти персонажа.</value>
-    <comment>legacy_id=2714</comment>
-  </data>
-  <data name="Item durability will not be decrease for a certain period." xml:space="preserve">
-    <value>Прочность предмета не будет уменьшаться в течение определенного периода.</value>
-    <comment>legacy_id=2715</comment>
-  </data>
-  <data name="Applicable to mountable items only besides pet." xml:space="preserve">
-    <value>Применимо только к монтируемым предметам, кроме питомца.</value>
-    <comment>legacy_id=2716</comment>
   </data>
   <data name="Increases your luck to create wing of your wish." xml:space="preserve">
     <value>Увеличивает вашу удачу в создании крыла вашего желания.</value>
@@ -9530,14 +9342,6 @@
   <data name="Only increases Master level exp." xml:space="preserve">
     <value>Только увеличивает опыт уровня Мастера.</value>
     <comment>legacy_id=2728</comment>
-  </data>
-  <data name="No penalty for dying." xml:space="preserve">
-    <value>Никакого наказания за смерть.</value>
-    <comment>legacy_id=2729</comment>
-  </data>
-  <data name="Keeps item durable" xml:space="preserve">
-    <value>Сохраняет вещь прочной</value>
-    <comment>legacy_id=2730</comment>
   </data>
   <data name="Select to move." xml:space="preserve">
     <value>Выберите, чтобы переместить.</value>
@@ -9598,18 +9402,6 @@
   <data name="Damage/Wizardry/Curse +30" xml:space="preserve">
     <value>Урон/Магия/Проклятие +30</value>
     <comment>legacy_id=2745</comment>
-  </data>
-  <data name="Auto-collects zen around you." xml:space="preserve">
-    <value>Автоматически собирает дзен вокруг себя.</value>
-    <comment>legacy_id=2746</comment>
-  </data>
-  <data name="EXP rate 50%% increase" xml:space="preserve">
-    <value>Скорость опыта 50%% increase</value>
-    <comment>legacy_id=2747</comment>
-  </data>
-  <data name="Increase Defensive Skill +50" xml:space="preserve">
-    <value>Увеличение навыка защиты +50</value>
-    <comment>legacy_id=2748</comment>
   </data>
   <data name="Lugard" xml:space="preserve">
     <value>Лугард</value>
@@ -9686,14 +9478,6 @@
   <data name="You need %d more to create a Mirror of Dimensions." xml:space="preserve">
     <value>Вам понадобится еще %d, чтобы создать Зеркало Измерений.</value>
     <comment>legacy_id=2776</comment>
-  </data>
-  <data name="That's the only thing that will get Lugard to help you" xml:space="preserve">
-    <value>Это единственное, что заставит Лугарда помочь вам.</value>
-    <comment>legacy_id=2777</comment>
-  </data>
-  <data name="enter the Doppelganger area." xml:space="preserve">
-    <value>войдите в зону Доппельгангера.</value>
-    <comment>legacy_id=2778</comment>
   </data>
   <data name="Only those in possession of a Mirror of Dimensions may enter." xml:space="preserve">
     <value>Входить могут только те, у кого есть Зеркало Измерений.</value>
@@ -9974,26 +9758,6 @@
   <data name="The High Vitality potion has negated the Fatigue Level penalty." xml:space="preserve">
     <value>Зелье высокой живучести отменило штраф за уровень усталости.</value>
     <comment>legacy_id=2874</comment>
-  </data>
-  <data name="YouCanDoAGoblinCombination" xml:space="preserve">
-    <value>Вы можете создать комбинацию Гоблина с Запечатанной Золотой Коробкой, чтобы создать Золотую Коробку.</value>
-    <comment>legacy_id=2875</comment>
-  </data>
-  <data name="YouCanDoAGoblinCombination2876" xml:space="preserve">
-    <value>Вы можете создать комбинацию Гоблина с Запечатанной Серебряной Коробкой, чтобы создать Серебряную Коробку.</value>
-    <comment>legacy_id=2876</comment>
-  </data>
-  <data name="You can do a Goblin combination with a Gold Key to create a Golden Box." xml:space="preserve">
-    <value>Вы можете создать комбинацию Гоблина с Золотым ключом, чтобы создать Золотую шкатулку.</value>
-    <comment>legacy_id=2877</comment>
-  </data>
-  <data name="You can do a Goblin combination with a Silver Key to create a Silver Box." xml:space="preserve">
-    <value>Вы можете создать комбинацию гоблина с серебряным ключом, чтобы создать серебряную шкатулку.</value>
-    <comment>legacy_id=2878</comment>
-  </data>
-  <data name="You can drop it with a fixed probability of it turning into a rare item." xml:space="preserve">
-    <value>Вы можете выбросить его с фиксированной вероятностью, что он превратится в редкий предмет.</value>
-    <comment>legacy_id=2879,2880</comment>
   </data>
   <data name="Golden Box" xml:space="preserve">
     <value>Золотая шкатулка</value>
@@ -10287,26 +10051,6 @@
     <value>Произошла ошибка доступа к базе данных.</value>
     <comment>legacy_id=2967</comment>
   </data>
-  <data name="Increase Max. AG + Level" xml:space="preserve">
-    <value>Увеличить Макс. АГ + Уровень</value>
-    <comment>legacy_id=2968</comment>
-  </data>
-  <data name="Increase Max. SD + Levelx10" xml:space="preserve">
-    <value>Увеличить Макс. СД + Уровеньx10</value>
-    <comment>legacy_id=2969</comment>
-  </data>
-  <data name="Up to %d%% EXP gain increase, depending on the number of members in your party." xml:space="preserve">
-    <value>Увеличение получаемого урона до %d%% EXP, в зависимости от количества членов вашей группы.</value>
-    <comment>legacy_id=2970</comment>
-  </data>
-  <data name="You can acquire Goblin Points by using the MU Item Shop's storage." xml:space="preserve">
-    <value>Вы можете получить очки гоблинов, используя хранилище магазина предметов MU.</value>
-    <comment>legacy_id=2971</comment>
-  </data>
-  <data name="It's a box containing various items." xml:space="preserve">
-    <value>Это коробка, содержащая различные предметы.</value>
-    <comment>legacy_id=2972</comment>
-  </data>
   <data name="AnItemThatLetsYouEnjoy" xml:space="preserve">
     <value>Предмет, который позволит вам наслаждаться MU в течение 30 дней. \nМожно использовать только с веб-сайта MU Online.</value>
     <comment>legacy_id=2973</comment>
@@ -10487,10 +10231,6 @@
     <value>Лорен Маркет</value>
     <comment>legacy_id=3017</comment>
   </data>
-  <data name="Boosts the item drop rate." xml:space="preserve">
-    <value>Увеличивает шанс выпадения предметов.</value>
-    <comment>legacy_id=3018</comment>
-  </data>
   <data name="Runedil" xml:space="preserve">
     <value>Рунедил</value>
     <comment>legacy_id=3022</comment>
@@ -10627,10 +10367,6 @@
     <value>двойник</value>
     <comment>legacy_id=3057</comment>
   </data>
-  <data name="Increases Max Mana 4%%" xml:space="preserve">
-    <value>Увеличивает максимальное количество маны на 4%%</value>
-    <comment>legacy_id=3058</comment>
-  </data>
   <data name="PC Cafe Bonus" xml:space="preserve">
     <value>Бонус ПК-кафе</value>
     <comment>legacy_id=3059</comment>
@@ -10666,14 +10402,6 @@
   <data name="Equipping along with a Pet Skeleton" xml:space="preserve">
     <value>Экипировка вместе со скелетом питомца</value>
     <comment>legacy_id=3067</comment>
-  </data>
-  <data name="increases Damage, Wizardry and Curse by 20%%" xml:space="preserve">
-    <value>увеличивает урон, волшебство и проклятие на 20%%</value>
-    <comment>legacy_id=3068</comment>
-  </data>
-  <data name="and EXP by 30%%." xml:space="preserve">
-    <value>и EXP на 30%%.</value>
-    <comment>legacy_id=3070</comment>
   </data>
   <data name="Equipping along with a Skeleton Transformation Ring" xml:space="preserve">
     <value>Экипировка вместе с кольцом трансформации скелета.</value>
@@ -10718,10 +10446,6 @@
   <data name="Random Reward (%lu different kinds)" xml:space="preserve">
     <value>Случайная награда (различные виды %lu)</value>
     <comment>legacy_id=3082</comment>
-  </data>
-  <data name="Right click to use." xml:space="preserve">
-    <value>Щелкните правой кнопкой мыши, чтобы использовать.</value>
-    <comment>legacy_id=3084</comment>
   </data>
   <data name="+14 Item Creation" xml:space="preserve">
     <value>+14 Создание предметов</value>

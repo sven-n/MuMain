@@ -17,6 +17,7 @@
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
+#include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
 #include "Data/GameData/ItemData/ItemNames.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
@@ -423,6 +424,445 @@ TEST_CASE("The wings', capes' and pets' tooltip values come from their data as f
     CHECK(compared == 27 * ItemLevelCount);
 }
 
+// The lines the tooltip code wrote by item level before they were descriptions, in English with their colors.
+struct OldLine
+{
+    std::string text;
+    ItemTextColor color = ItemTextColor::White;
+    bool operator==(const OldLine& other) const = default;
+};
+
+std::vector<OldLine> OldLevelLines(int group, int number, int level)
+{
+    using enum ItemTextColor;
+    const auto one = [&](std::initializer_list<std::pair<int, OldLine>> byLevel) -> std::vector<OldLine>
+    {
+        for (const auto& [lineLevel, line] : byLevel)
+        {
+            if (lineLevel == level)
+            {
+                return {line};
+            }
+        }
+        return {};
+    };
+    if (group == 13 && number == 7)
+    {
+        return one({{0, {"Archer", Yellow}}, {1, {"Spearman", Yellow}}});
+    }
+    if (group == 13 && number == 11)
+    {
+        return one({{0, {"Scroll of Guardian", Yellow}}, {1, {"Place Life Stone", Yellow}}});
+    }
+    if (group == 13 && number == 14)
+    {
+        return one({{0, {"Used to upgrade wings"}}, {1, {"Used in combining Cape of Lord & Warrior's Cloak"}}});
+    }
+    if (group == 13 && number == 15 && level <= 4)
+    {
+        constexpr const char* stats[] = {"ENG", "STA", "AGI", "STR", "Command"};
+        std::vector<OldLine> lines = {{std::string(stats[level]) + " Increases 1~3 stat points"},
+                                      {std::string(stats[level]) + " Possible to decrease stat 1~9 point"},
+                                      {"It can be used with item removed.", DarkRed}};
+        if (level == 4)
+        {
+            lines.push_back({"Can be equipped by Dark Lord"});
+        }
+        return lines;
+    }
+    if (group == 13 && (number == 16 || number == 17))
+    {
+        return {{"Used when creating a Cloak of Invisibility"}};
+    }
+    if (group == 13 && number == 18)
+    {
+        return {{"Used when entering Blood Castle"},
+                {""},
+                {"The remaining time is shown"},
+                {"when you right click on your mouse."}};
+    }
+    if (group == 13 && number == 31)
+    {
+        return one({{0, {"Used in Dark Horse resurrection"}}, {1, {"Used in Dark Raven resurrection"}}});
+    }
+    if (group == 14 && number == 7 && level == 0)
+    {
+        return {{"Damage +20% increase effect", DarkRed},
+                {"Duration 60 seconds", DarkRed},
+                {"Only applicable for castle gate and statue", DarkRed}};
+    }
+    if (group == 14 && number == 7 && level == 1)
+    {
+        return {{"Increase +8 AG recovery speed", DarkRed},
+                {"Increase resistance of Lightning and Ice", DarkRed},
+                {"Attacking speed will increase +20", DarkRed}};
+    }
+    if (group == 14 && number == 10 && level >= 1 && level <= 8)
+    {
+        return {{"Warp to the corresponding area after 3 seconds"}};
+    }
+    if (group == 14 && number == 21)
+    {
+        return one({{1, {"Used in the online event"}},
+                    {2, {"Used in the My Friend event."}},
+                    {3, {"Use in siege registration"}}});
+    }
+    return {};
+}
+
+TEST_CASE("The tooltip texts by item level come from the descriptions as from the old code [data][items]")
+{
+    constexpr std::pair<int, int> items[] = {{13, 7},  {13, 11}, {13, 14}, {13, 15}, {13, 16}, {13, 17},
+                                             {13, 18}, {13, 31}, {14, 7},  {14, 10}, {14, 21}};
+    const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
+    const ItemStatsLoadResult stats = LoadItemStatsFile(DataDirectory / "Items" / "Stats" / ItemStatsFileName);
+    REQUIRE_FALSE(HasErrors(stats.issues));
+    const ItemStatProfiles profiles(stats.file);
+    for (const auto& [group, number] : items)
+    {
+        const auto found = std::find_if(result.items.begin(), result.items.end(), [&](const ItemDefinition& item)
+                                        { return item.group == group && item.number == number; });
+        REQUIRE(found != result.items.end());
+        // Every level the items have. The old code also wrote an empty line at the Contract Summon's, Life Stone's and
+        // Rena's levels without a text, and two at the Fruits' +5 to +15 before "It can be used with item removed." (a
+        // stale line of the text list); the data writes none of them. Fruits only exist at +0 to +4.
+        for (int level = 0; level < ItemLevelCount; ++level)
+        {
+            INFO(group << "/" << number << " +" << level);
+            std::vector<OldLine> lines;
+            for (const ItemDescriptionLine& line : found->description)
+            {
+                if (line.IsShownAt(level))
+                {
+                    lines.push_back({FillPlaceholders(line.text.GetNeutral(), level, profiles), line.color});
+                }
+            }
+            CHECK(lines == OldLevelLines(group, number, level));
+        }
+    }
+}
+
+// The lines the second item chain of the tooltip code (seals, talismans, tickets, rings, ...) wrote, in English with
+// their colors: the item data's description starts with them.
+struct OldChainItem
+{
+    int group;
+    int number;
+    std::vector<OldLine> lines;
+};
+
+const std::vector<OldChainItem>& OldChainLines()
+{
+    static const std::vector<OldChainItem> items = {
+        {14, 54, {{"You can achieve special items with combinations.", ItemTextColor::Blue}}},
+        {14, 58, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 59, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 60, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 61, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 62, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 83, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 145, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 146, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 147, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 148, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 149, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 150, {{"Congratulations. Please contact CS team and change it to item.", ItemTextColor::Blue}}},
+        {14, 53, {{"Increases the combination rate,but only up to the maximum rate.", ItemTextColor::Blue}}},
+        {13,
+         43,
+         {{"Increases experience gained.", ItemTextColor::Blue},
+          {"Warp Command Window available.", ItemTextColor::Blue},
+          {"Not applicable to", ItemTextColor::Yellow},
+          {"Master Level Characters.", ItemTextColor::Yellow}}},
+        {13,
+         44,
+         {{"Increases experience gained and item drop rate.", ItemTextColor::Blue},
+          {"Warp Command Window available.", ItemTextColor::Blue},
+          {"Not applicable to", ItemTextColor::Yellow},
+          {"Master Level Characters.", ItemTextColor::Yellow}}},
+        {13,
+         45,
+         {{"Prevents experiences to be gained.", ItemTextColor::Blue},
+          {"Warp Command Window available.", ItemTextColor::Blue},
+          {"Master Level EXP cannot be achieved during the item usage.", ItemTextColor::Yellow}}},
+        {13, 59, {{"You may freely move onward.", ItemTextColor::Blue}}},
+        {13, 60, {{"It reduces the killing rate.", ItemTextColor::Blue}}},
+        {14, 140, {{"Automatic HP recovery 3%", ItemTextColor::Blue}, {"Max. HP increase +100", ItemTextColor::Blue}}},
+        {14,
+         96,
+         {{"Minimum +10 - +15 level item upgrade", ItemTextColor::Blue},
+          {"blocks the item dissipation.", ItemTextColor::Purple},
+          {"+10~+15 When upgrading level item please put it in combination window.", ItemTextColor::Purple}}},
+        {13,
+         64,
+         {{"Increases Attack Power and Wizardry by 40%", ItemTextColor::Blue},
+          {"Increases Attack Speed by 10", ItemTextColor::Purple}}},
+        {13,
+         65,
+         {{"Alleviates monster's damage by 30%", ItemTextColor::Blue},
+          {"Increases Maximum Life by 50", ItemTextColor::Purple}}},
+        {13, 67, {{"Surrounding Zens are automatically collected.", ItemTextColor::Blue}}},
+        {13,
+         123,
+         {{"Surrounding Zens are automatically collected.", ItemTextColor::Blue},
+          {"increases Damage, Wizardry and Curse by 20%", ItemTextColor::Blue},
+          {"Increases Attack Speed by 10", ItemTextColor::Blue},
+          {"and EXP by 30%.", ItemTextColor::Blue}}},
+        {13,
+         80,
+         {{"Auto-collects zen around you.", ItemTextColor::Blue},
+          {"EXP rate 50% increase", ItemTextColor::Blue},
+          {"Increase Defensive Skill +50", ItemTextColor::Blue}}},
+        {13,
+         106,
+         {{"Auto-collects zen around you.", ItemTextColor::Blue},
+          {"Zen increase 50%", ItemTextColor::Blue},
+          {"Increase Defensive Skill +50", ItemTextColor::Blue}}},
+        {13, 107, {{"Cannot Repair", ItemTextColor::Red}}},
+        {13, 104, {{"Increase Max. AG + Level", ItemTextColor::Blue}}},
+        {13, 105, {{"Increase Max. SD + Levelx10", ItemTextColor::Blue}}},
+        {13,
+         103,
+         {{"Up to 170% EXP gain increase, depending on the number of members in your party.", ItemTextColor::Blue}}},
+        {13, 70, {{"Save the application location.", ItemTextColor::Blue}}},
+        {13,
+         81,
+         {{"Exp and item will be secured when character dies.", ItemTextColor::Blue},
+          {"No penalty for dying.", ItemTextColor::Blue},
+          {"Right click to use.", ItemTextColor::Blue}}},
+        {13,
+         82,
+         {{"Item durability will not be decrease for a certain period.", ItemTextColor::Blue},
+          {"Keeps item durable", ItemTextColor::Blue},
+          {"Applicable to mountable items only besides pet.", ItemTextColor::Blue}}},
+        {13,
+         93,
+         {{"Increases experience gained.", ItemTextColor::Blue},
+          {"Warp Command Window available.", ItemTextColor::Blue}}},
+        {13,
+         94,
+         {{"Increases experience gained and item drop rate.", ItemTextColor::Blue},
+          {"Warp Command Window available.", ItemTextColor::Blue}}},
+        {13,
+         61,
+         {{"Enables entrance into Illusion Temple.", ItemTextColor::Blue},
+          {"You will be assigned to a stage according to your level.", ItemTextColor::Blue},
+          {"", ItemTextColor::White}}},
+        {14, 84, {{"Drop it to receive the gift.", ItemTextColor::Blue}}},
+        {13, 49, {{"Assemble the Scroll of Blood with the contract from the Illusion Sorcery.", ItemTextColor::Blue}}},
+        {13, 50, {{"Assemble the Scroll of Blood with the old scrolls.", ItemTextColor::Blue}}},
+        {13, 51, {{"This is a mark of Illusion Sorcery; this is required to enter the temple.", ItemTextColor::Blue}}},
+        {14, 64, {{"Mobility speed reduces upon achievement.", ItemTextColor::Blue}}},
+        {13, 52, {{"Ingredients for the 3rd wing assembly.", ItemTextColor::White}}},
+        {13, 53, {{"Ingredients for the 3rd wing assembly.", ItemTextColor::White}}},
+        {13, 38, {{"Cannot Repair", ItemTextColor::Red}}},
+        {14,
+         111,
+         {{"That's the only thing that will get Lugard to help you", ItemTextColor::DarkBlue},
+          {"enter the Doppelganger area.", ItemTextColor::DarkBlue}}},
+        {13,
+         109,
+         {{"Automatic HP recovery 3%", ItemTextColor::White}, {"Increases Max Mana 4%", ItemTextColor::White}}},
+        {13, 110, {{"Automatic HP recovery 3%", ItemTextColor::White}, {"Increase Max HP +4%", ItemTextColor::White}}},
+        {13,
+         111,
+         {{"Automatic HP recovery 3%", ItemTextColor::White},
+          {"Increases acquisition rate of Zen after hunting monsters +30%", ItemTextColor::White}}},
+        {13, 112, {{"Automatic HP recovery 3%", ItemTextColor::White}, {"Damage Decrease +4%", ItemTextColor::White}}},
+        {13,
+         113,
+         {{"Automatic HP recovery 3%", ItemTextColor::White}, {"Excellent Damage rate +10%", ItemTextColor::White}}},
+        {13,
+         114,
+         {{"Automatic HP recovery 3%", ItemTextColor::White}, {"Attack Speed increase +7", ItemTextColor::White}}},
+        {13,
+         115,
+         {{"Automatic HP recovery 3%", ItemTextColor::White},
+          {"Increases acquisition rate of Mana after hunting monsters +Mana/8", ItemTextColor::White}}},
+        {14,
+         112,
+         {{"You can do a Goblin combination with a Sealed Silver Box to create a Silver Box.", ItemTextColor::White}}},
+        {14,
+         113,
+         {{"You can do a Goblin combination with a Sealed Golden Box to create a Golden Box.", ItemTextColor::White}}},
+        {14, 120, {{"You can acquire Goblin Points by using the MU Item Shop's storage.", ItemTextColor::White}}},
+        {14, 121, {{"You can do a Goblin combination with a Gold Key to create a Golden Box.", ItemTextColor::White}}},
+        {14,
+         122,
+         {{"You can do a Goblin combination with a Silver Key to create a Silver Box.", ItemTextColor::White}}},
+        {14, 123, {{"You can drop it with a fixed probability of it turning into a rare item.", ItemTextColor::White}}},
+        {14, 124, {{"You can drop it with a fixed probability of it turning into a rare item.", ItemTextColor::White}}},
+        {14, 134, {{"It's a box containing various items.", ItemTextColor::White}}},
+        {14, 135, {{"It's a box containing various items.", ItemTextColor::White}}},
+        {14, 136, {{"It's a box containing various items.", ItemTextColor::White}}},
+        {14, 137, {{"It's a box containing various items.", ItemTextColor::White}}},
+        {14, 138, {{"It's a box containing various items.", ItemTextColor::White}}},
+        {14, 139, {{"It's a box containing various items.", ItemTextColor::White}}},
+        {13, 116, {{"Boosts the item drop rate.", ItemTextColor::Blue}}},
+        {14, 141, {{"Throw it and you may receive some Zen or items", ItemTextColor::White}}},
+        {14, 142, {{"Throw it and you may receive some Zen or items", ItemTextColor::White}}},
+        {14, 143, {{"Throw it and you may receive some Zen or items", ItemTextColor::White}}},
+        {14, 144, {{"Throw it and you may receive some Zen or items", ItemTextColor::White}}},
+        {14,
+         19,
+         {{"The remaining time is shown", ItemTextColor::White},
+          {"when you right click on your mouse.", ItemTextColor::White}}},
+    };
+    return items;
+}
+
+TEST_CASE("The second item chain's tooltip texts come from the descriptions as from the old code [data][items]")
+{
+    const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
+    for (const OldChainItem& old : OldChainLines())
+    {
+        INFO(old.group << "/" << old.number);
+        const auto found = std::find_if(result.items.begin(), result.items.end(), [&](const ItemDefinition& item)
+                                        { return item.group == old.group && item.number == old.number; });
+        REQUIRE(found != result.items.end());
+        REQUIRE(found->description.size() >= old.lines.size());
+        for (size_t index = 0; index < old.lines.size(); ++index)
+        {
+            const ItemDescriptionLine& line = found->description[index];
+            CHECK(OldLine{line.text.GetNeutral(), line.color} == old.lines[index]);
+            CHECK_FALSE(line.HasLevels());
+        }
+    }
+    CHECK(OldChainLines().size() == 72);
+}
+
+// The translations of those texts are the ones the old code showed: item_chain_texts_before.json records them from the
+// .resx before the texts moved (a format filled in with the item's values), by the English text.
+TEST_CASE("The second item chain's tooltip texts keep their translations [data][items]")
+{
+    const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
+    std::ifstream file(std::filesystem::path(MU_TEST_CHAIN_TEXTS_BEFORE));
+    REQUIRE(file);
+    const nlohmann::json before = nlohmann::json::parse(file).at("texts");
+    int checked = 0;
+    for (const OldChainItem& old : OldChainLines())
+    {
+        const auto found = std::find_if(result.items.begin(), result.items.end(), [&](const ItemDefinition& item)
+                                        { return item.group == old.group && item.number == old.number; });
+        REQUIRE(found != result.items.end());
+        for (size_t index = 0; index < old.lines.size(); ++index)
+        {
+            const std::string english = found->description[index].text.GetNeutral();
+            const auto recorded = before.find(english);
+            if (recorded == before.end())
+            {
+                continue;
+            }
+            for (const auto& [locale, translation] : recorded->items())
+            {
+                INFO(old.group << "/" << old.number << " line " << index << " " << locale);
+                CHECK(found->description[index].text.Get(locale) == translation.get<std::string>());
+                ++checked;
+            }
+        }
+    }
+    CHECK(checked >= 1050);
+}
+
+// What the old code printed for an item's level lines in the UI's language, where the texts are the game's that other
+// code still prints: one entry per line of OldLevelLines, empty for a text only the tooltip had (removed since). A
+// Fruit's stat lines started with the stat's name; the rest of them was a removed text.
+struct PrintedOldLine
+{
+    std::string text;
+    bool isPrefix = false;
+};
+
+std::string PrintWithName(const wchar_t* format, const wchar_t* name)
+{
+    // The game's wide texts have "%ls" where the .resx has "%s".
+    std::string text = Core::Text::ToUtf8(format);
+    const size_t wide = text.find("%ls");
+    const size_t position = wide != std::string::npos ? wide : text.find("%s");
+    REQUIRE(position != std::string::npos);
+    return text.replace(position, wide != std::string::npos ? 3 : 2, Core::Text::ToUtf8(name));
+}
+
+std::vector<std::optional<PrintedOldLine>> PrintedOldLevelLines(int group, int number, int level)
+{
+    const auto printed = [](const wchar_t* text) { return std::optional<PrintedOldLine>({Core::Text::ToUtf8(text)}); };
+    if (group == 13 && number == 7 && level <= 1)
+    {
+        return {printed(level == 0 ? I18N::Game::Archer : I18N::Game::Spearman)};
+    }
+    if (group == 13 && number == 11 && level <= 1)
+    {
+        return {printed(level == 0 ? I18N::Game::ScrollOfGuardian : I18N::Game::PlaceLifeStone)};
+    }
+    if (group == 13 && number == 15 && level <= 4)
+    {
+        const wchar_t* const stats[] = {I18N::Game::ENG, I18N::Game::STA, I18N::Game::AGI, I18N::Game::STR,
+                                        I18N::Game::Command};
+        const PrintedOldLine stat{Core::Text::ToUtf8(stats[level]) + " ", true};
+        std::vector<std::optional<PrintedOldLine>> lines = {stat, stat, printed(I18N::Game::ItCanBeUsedWithItemRemoved)};
+        if (level == 4)
+        {
+            lines.push_back(PrintedOldLine{PrintWithName(I18N::Game::CanBeEquippedByS, I18N::Game::DarkLord)});
+        }
+        return lines;
+    }
+    return std::vector<std::optional<PrintedOldLine>>(OldLevelLines(group, number, level).size());
+}
+
+// The lines whose texts other code still prints, in every language as the game prints them.
+TEST_CASE("The tooltip texts by item level are the game's texts in every language [data][items]")
+{
+    constexpr std::pair<int, int> items[] = {{13, 7}, {13, 11}, {13, 15}};
+    const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
+    // The test switches the UI language: it needs an item table of its own.
+    ClientDataScope client(ShippedClientDirectory);
+    int compared = 0;
+    for (const auto& [group, number] : items)
+    {
+        const ItemDefinition* found = FindItem(result.items, MakeItemType(group, number));
+        REQUIRE(found != nullptr);
+        for (int level = 0; level < ItemLevelCount; ++level)
+        {
+            std::vector<const ItemDescriptionLine*> shown;
+            for (const ItemDescriptionLine& line : found->description)
+            {
+                if (line.IsShownAt(level))
+                {
+                    shown.push_back(&line);
+                }
+            }
+            for (const char* locale : I18N::GetAvailableLocales())
+            {
+                INFO(group << "/" << number << " +" << level << " " << locale);
+                I18N::SetLocale(locale);
+                const std::vector<std::optional<PrintedOldLine>> old = PrintedOldLevelLines(group, number, level);
+                REQUIRE(shown.size() == old.size());
+                for (size_t index = 0; index < old.size(); ++index)
+                {
+                    if (!old[index])
+                    {
+                        continue;
+                    }
+                    const std::string text = shown[index]->text.Get(locale);
+                    if (old[index]->isPrefix)
+                    {
+                        CHECK(text.starts_with(old[index]->text));
+                    }
+                    else
+                    {
+                        CHECK(text == old[index]->text);
+                    }
+                    ++compared;
+                }
+            }
+            I18N::SetLocale("en");
+        }
+    }
+    // Archer and Spearman, Scroll of Guardian and Place Life Stone, and the Fruits' 3 lines at +0 to +3 and 4 at +4, in
+    // every language.
+    CHECK(compared == (2 + 2 + 4 * 3 + 4) * static_cast<int>(std::size(I18N::GetAvailableLocales())));
+}
+
 // The texts the tooltip code wrote for these items are their descriptions now, in every UI language.
 TEST_CASE("The original items' tooltip texts are in their descriptions [data][items]")
 {
@@ -455,10 +895,11 @@ TEST_CASE("The original items' tooltip texts are in their descriptions [data][it
         INFO(item.group << "/" << item.number);
         const ItemDefinition* found = FindItem(result.items, MakeItemType(item.group, item.number));
         REQUIRE(found != nullptr);
-        REQUIRE(found->description.size() == 1);
-        const Data::LocalizedString& text = found->description.front().text;
+        // The last line: the Moonstone Pendant's "Cannot Repair" of the second item chain comes before it.
+        REQUIRE_FALSE(found->description.empty());
+        const Data::LocalizedString& text = found->description.back().text;
         CHECK(text.GetNeutral() == item.text);
-        CHECK(found->description.front().color == ItemTextColor::White);
+        CHECK(found->description.back().color == ItemTextColor::White);
         for (const char* locale : I18N::GetAvailableLocales())
         {
             INFO(locale);

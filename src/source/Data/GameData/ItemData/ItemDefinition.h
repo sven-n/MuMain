@@ -84,11 +84,23 @@ enum class ItemTextColor : BYTE
 };
 constexpr size_t ItemTextColorCount = static_cast<size_t>(ItemTextColor::Count);
 
-// One line of an item's description in its tooltip: a text with its translations (empty: a blank line) and its color.
+// One line of an item's description in its tooltip: a text with its translations (empty: a blank line), its color, and
+// the item levels it is shown at (both included; every level unless set).
 struct ItemDescriptionLine
 {
     LocalizedString text;
     ItemTextColor color = ItemTextColor::White;
+    int minLevel = 0;
+    int maxLevel = ItemLevelCount - 1;
+
+    bool IsShownAt(int level) const
+    {
+        return level >= minLevel && level <= maxLevel;
+    }
+    bool HasLevels() const
+    {
+        return minLevel != 0 || maxLevel != ItemLevelCount - 1;
+    }
 
     bool operator==(const ItemDescriptionLine& other) const = default;
 };
