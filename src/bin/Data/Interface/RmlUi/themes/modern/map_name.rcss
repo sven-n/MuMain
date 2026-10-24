@@ -1,8 +1,21 @@
-/* Keep the map artwork's proportions and vertical anchor in step with the legacy theme.
-   dp makes the entry banner follow UI scale. */
+/* Centered entry HUD at the original 220/480 viewport-height anchor.
+   A compact text field grows vertically for long names. The classic silver MU ornament
+   is shared by every map and fits its slots without changing its aspect ratio. */
+@spritesheet map-name-decoration
+{
+    src: "../../../MapName_Karutan.tga";
+    map-name-rule: 0px 44px 166px 42px;
+}
 
 body { pointer-events: none; }
-
-#banner { top: 45.8333%; width: 166dp; height: 90dp; pointer-events: none; }
-#name { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
-#strife { position: absolute; left: 0; top: -28dp; width: 100%; height: 28dp; }
+#banner { top: 45.8333%; width: 163.75dp; max-width: 90%; pointer-events: none; }
+#ornament_bottom { display: block; width: 100dp; max-width: 100%; margin: -4dp auto 0; height: 25.3012dp; decorator: image(map-name-rule contain); }
+#name {
+    min-height: 24dp;
+    display: flex; align-items: center; justify-content: center;
+    font-family: token(font-map-name); font-size: 23dp; font-weight: normal; font-style: token(font-map-name-style); line-height: 1.1;
+    color: #f0ece2; font-effect: outline(2px #100e0b), shadow(2px 2px #000000);
+    text-align: center;
+}
+#name_text { max-width: 100%; word-break: break-word; }
+#strife { position: absolute; top: -14dp; width: 83dp; height: 14dp; }

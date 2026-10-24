@@ -80,7 +80,7 @@ std::optional<std::string> ExpandEnvironment(const std::string& source)
     return result;
 }
 
-bool FamilyAvailable(std::string family)
+bool FamilyAvailable(std::string family, Rml::Style::FontStyle style = Rml::Style::FontStyle::Normal)
 {
     auto* fonts = Rml::GetFontEngineInterface();
     if (!fonts)
@@ -88,8 +88,35 @@ bool FamilyAvailable(std::string family)
     std::transform(family.begin(), family.end(), family.begin(),
         [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
     constexpr int probeSize = 16;
-    return fonts->GetFontFaceHandle(family, Rml::Style::FontStyle::Normal,
-                                    Rml::Style::FontWeight::Normal, probeSize) != 0;
+    return fonts->GetFontFaceHandle(family, style, Rml::Style::FontWeight::Normal, probeSize) != 0;
+}
+
+std::optional<std::string> ResolveMapNameFontToken(const ThemeInheritance& theme, const std::string& token)
+{
+    // The optional map-name face may be italic-only. Keep its family and style paired,
+    // so a missing system font still uses the bundled regular face.
+    constexpr const char* mapNameFamily = "font-map-name";
+    constexpr const char* mapNameStyle = "font-map-name-style";
+    if (token != mapNameFamily && token != mapNameStyle)
+        return std::nullopt;
+
+    for (const auto& directory : theme.Directories())
+    {
+        const auto family = ThemeInheritance::ReadSetting(directory, "Tokens", mapNameFamily);
+        if (!family)
+            continue;
+        for (const auto style : {Rml::Style::FontStyle::Normal, Rml::Style::FontStyle::Italic})
+        {
+            if (!FamilyAvailable(*family, style))
+                continue;
+            if (token == mapNameStyle)
+                return style == Rml::Style::FontStyle::Italic ? "italic" : "normal";
+            return family;
+        }
+    }
+    if (token == mapNameStyle)
+        return "normal";
+    return FamilyAvailable("Liberation Sans") ? std::optional<std::string>("Liberation Sans") : std::nullopt;
 }
 } // namespace
 
@@ -134,6 +161,8 @@ std::optional<std::string> ResolveThemeFontToken(const ThemeInheritance& theme, 
 {
     if (!token.starts_with("font-") || !theme.IsValid())
         return std::nullopt;
+    if (const auto mapFont = ResolveMapNameFontToken(theme, token))
+        return mapFont;
     const std::string& selected = SelectedFontFamily();
     if (token == kNativeFontToken)
     {

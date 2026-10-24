@@ -137,6 +137,21 @@ and inheritance cycles make a theme unavailable for selection.
 5. Relaunch (if you edited `config.ini`). No rebuild needed either way — this is a pure data/config
    change.
 
+## Map-name banner
+
+The world-entry banner shows localized map names in both maintained themes, with a shared
+ornament already included in the client data. Adding a map name no longer needs an individual
+name image. Unrecognized maps display “Unknown map”. The Gens warning still appears on eligible
+battle maps. Edit a theme's `map_name.rcss` to change the font, color, width, wrapping, placement
+or decoration; long names wrap above the single lower ornament. A custom theme can replace the
+shared ornament with its own locally supplied artwork without changing the map names.
+
+The map banner optionally loads Monotype Corsiva from the local Windows font folder;
+its file is not distributed. It uses the face's italic style at normal weight, a bright
+silver fill with dark outline and shadow, and one classic MU ornament below the name. Without that font, bundled Liberation Sans remains readable.
+`font-map-name` selects the dedicated family; `font-map-name-style` resolves its matching
+style automatically. Other UI fonts follow their existing settings.
+
 ## Switching themes without relaunching
 
 `$theme <name>` (typed into the chat box, handled locally by `CmuConsoleDebug::CheckCommand` —

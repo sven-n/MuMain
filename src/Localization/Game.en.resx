@@ -13367,4 +13367,7 @@
   <data name="Other items" xml:space="preserve">
     <value>Other items</value>
   </data>
+  <data name="Unknown map" xml:space="preserve">
+    <value>Unknown map</value>
+  </data>
 </root>
