@@ -53,6 +53,7 @@ namespace MUHelper
 
     void CMuHelper::Save(const ConfigData& config)
     {
+        m_attackSkills.Reset();
         m_config = config;
 
         PRECEIVE_MUHELPER_DATA netData;
@@ -63,6 +64,7 @@ namespace MUHelper
 
     void CMuHelper::Load(const ConfigData& config)
     {
+        m_attackSkills.Reset();
         m_config = config;
     }
 
@@ -106,6 +108,7 @@ namespace MUHelper
             return;
         }
 
+        m_attackSkills.Reset();
         m_iTotalCost = 0;
         m_iComboState = 0;
         m_iCurrentBuffIndex = 0;
@@ -774,8 +777,12 @@ namespace MUHelper
             const float fSkillDistance = gSkillManager.GetSkillDistance(m_iCurrentSkill, Hero);
             if (GameLogic::Combat::CanExecuteSkill(Hero, m_iCurrentSkill, fSkillDistance))
             {
-                return SimulateAttack(m_iCurrentSkill);
+                auto outcome = GameLogic::Automation::SkillResult::NotReady;
+                const int result = SimulateAttack(m_iCurrentSkill, &outcome);
+                m_attackSkills.Complete(outcome);
+                return result;
             }
+            m_attackSkills.Complete(GameLogic::Automation::SkillResult::Refused);
         }
 
         if (m_config.bFallbackBasicAttack)
@@ -791,55 +798,7 @@ namespace MUHelper
 
     ActionSkillType CMuHelper::SelectAttackSkill()
     {
-        const size_t safeSize = std::min({m_config.aiSkill.size(), m_config.aiSkillCondition.size(), m_config.aiSkillInterval.size()});
-        for (int i = 1; i < (int)safeSize; i++)
-        {
-            const int iSkillId = m_config.aiSkill[i];
-            if (iSkillId <= 0 || iSkillId >= MAX_SKILLS)
-            {
-                continue;
-            }
-
-            if ((m_config.aiSkillCondition[i] & ON_TIMER)
-                && m_config.aiSkillInterval[i] != 0
-                && m_iSecondsElapsed > 0
-                && m_iSecondsElapsed % m_config.aiSkillInterval[i] == 0)
-            {
-                return (ActionSkillType)iSkillId;
-            }
-
-            if (m_config.aiSkillCondition[i] & ON_CONDITION)
-            {
-                int iCount = 0;
-                if (m_config.aiSkillCondition[i] & ON_MOBS_NEARBY)
-                {
-                    iCount = (int)m_setTargets.size();
-                }
-                else if (m_config.aiSkillCondition[i] & ON_MOBS_ATTACKING)
-                {
-                    iCount = (int)m_setTargetsAttacking.size();
-                }
-                else
-                {
-                    continue;
-                }
-
-                if (((m_config.aiSkillCondition[i] & ON_MORE_THAN_TWO_MOBS)   && iCount >= 2)
-                    || ((m_config.aiSkillCondition[i] & ON_MORE_THAN_THREE_MOBS) && iCount >= 3)
-                    || ((m_config.aiSkillCondition[i] & ON_MORE_THAN_FOUR_MOBS)  && iCount >= 4)
-                    || ((m_config.aiSkillCondition[i] & ON_MORE_THAN_FIVE_MOBS)  && iCount >= 5))
-                {
-                    return (ActionSkillType)iSkillId;
-                }
-            }
-        }
-
-        if (m_config.aiSkill[0] > 0)
-        {
-            return (ActionSkillType)m_config.aiSkill[0];
-        }
-
-        return AT_SKILL_UNDEFINED;
+        return m_attackSkills.Select(m_config, m_iSecondsElapsed, m_setTargets.size(), m_setTargetsAttacking.size());
     }
 
     int CMuHelper::SimulateComboAttack()
@@ -860,12 +819,13 @@ namespace MUHelper
         return 1;
     }
 
-    int CMuHelper::SimulateAttack(ActionSkillType iSkill)
+    int CMuHelper::SimulateAttack(ActionSkillType iSkill, GameLogic::Automation::SkillResult* outcome)
     {
-        return SimulateSkill(iSkill, true, m_iCurrentTarget);
+        return SimulateSkill(iSkill, true, m_iCurrentTarget, outcome);
     }
 
-    int CMuHelper::SimulateSkill(ActionSkillType iSkill, bool bTargetRequired, int iTarget)
+    int CMuHelper::SimulateSkill(ActionSkillType iSkill, bool bTargetRequired, int iTarget,
+                                 GameLogic::Automation::SkillResult* outcome)
     {
         using GameLogic::Automation::SkillResult;
 
@@ -875,6 +835,8 @@ namespace MUHelper
         // still refused by the primitive when it is dead.
         const SkillResult result =
             GameLogic::Automation::CastSkill(iSkill, bTargetRequired, iTarget, true, m_iHuntingDistance);
+        if (outcome != nullptr)
+            *outcome = result;
 
         if (iTarget != -1 && GameLogic::Automation::ShouldForgetTarget(result))
         {
