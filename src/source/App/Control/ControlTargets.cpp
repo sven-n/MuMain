@@ -14,9 +14,16 @@ namespace App::Control::Targets
 {
 namespace
 {
+// Traps and objects of the kind other carry a monster number too, and so do
+// summons, Kalima gates and transformed players, which are players; only
+// monsters and NPCs are found by it.
+bool IsMonsterOrNpc(const OBJECT& object)
+{
+    return object.Kind == KIND_MONSTER || object.Kind == KIND_NPC;
+}
+
 // The nearest living monster or NPC with this monster number, by tiles from
-// the hero; the first one in the character table on a tie. Summons, Kalima
-// gates and transformed players carry a monster number too, but are players.
+// the hero; the first one in the character table on a tie.
 bool FindNearestMonster(int number, int& key)
 {
     if (CharactersClient == nullptr)
@@ -28,7 +35,7 @@ bool FindNearestMonster(int number, int& key)
     {
         const CHARACTER& character = CharactersClient[index];
         if (!character.Object.Live || character.Dead > 0 || character.MonsterIndex != number ||
-            character.Object.Kind == KIND_PLAYER)
+            !IsMonsterOrNpc(character.Object))
         {
             continue;
         }

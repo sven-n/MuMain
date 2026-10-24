@@ -308,5 +308,7 @@ The [control socket](control-socket.md) reports each character's monster
 number as `monster` (in `nearby` and in the objects of the `hit`, `killed`
 and `view_*` events) and the kinds of this list (`monster`, `npc`, `trap`,
 `other`; summons, Kalima gates and transformed players are `player`). A
-`target` can be `{"monster": <number>}`. Since monster and NPC names follow the UI language,
-scripts find NPCs by their number, not by their name.
+`target` can be `{"monster": <number>}`, the nearest living monster or NPC
+of that number (traps, `other` objects and players are not found by it).
+Since monster and NPC names follow the UI language, scripts find NPCs by
+their number, not by their name.

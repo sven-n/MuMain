@@ -98,8 +98,9 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 
 A `target` is an object id (the `id` of `nearby`), a character name, or
 `{"monster": <number>}`: the nearest living monster or NPC with that monster
-number. Summons, Kalima gates and transformed players are not found by their
-number; a trade needs a player either way.
+number. Traps, objects of the kind `other`, and summons, Kalima gates and
+transformed players are not found by their number; a trade needs a player
+either way.
 
 `state` reports the scene and account on every screen, and in the world adds:
 character name, class, level, experience, zen, HP/mana/SD/AG with their
