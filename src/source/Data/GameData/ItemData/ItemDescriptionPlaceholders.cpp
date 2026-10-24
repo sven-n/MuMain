@@ -6,13 +6,26 @@
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
 
 #include <algorithm>
+#include <functional>
 #include <array>
 
 namespace Data::Items
 {
 namespace
 {
-constexpr std::array<std::string_view, 1> BuiltIns = {LevelPlaceholder};
+// {level}, and the values of the tooltip's stat lines, which the game computes (Engine/Object/ItemTooltipValues).
+constexpr std::array<std::string_view, 37> BuiltIns = {
+    LevelPlaceholder,    "damageMin",           "damageMax",        "defense",
+    "magicDefense",      "blockRate",           "attackSpeed",      "walkSpeed",
+    "magicPower",        "durability",          "maxDurability",    "iceResistance",
+    "poisonResistance",  "lightningResistance", "fireResistance",   "earthResistance",
+    "windResistance",    "waterResistance",     "requiredLevel",    "requiredStrength",
+    "requiredDexterity", "requiredVitality",    "requiredEnergy",   "requiredLeadership",
+    "missingLevel",      "missingStrength",     "missingDexterity", "missingVitality",
+    "missingEnergy",     "missingLeadership",   "addOptionValue1",  "addOptionValue2",
+    "addOptionDuration", "heroLevel",           "levelPlusOne",     "name",
+    "excellentFlags",
+};
 
 // The placeholder of `text` that starts at the "{" at `open`: its name and the position after its "}", or the problem.
 struct Placeholder
@@ -124,7 +137,64 @@ std::optional<int> GetPlaceholderValue(std::string_view name, int level, const I
     return std::nullopt;
 }
 
+namespace
+{
+struct GameDataValuePrefix
+{
+    GameDataValueKind kind;
+    std::string_view prefix;
+    int limit; // numbers below it
+};
+constexpr GameDataValuePrefix GameDataValuePrefixes[] = {
+    {GameDataValueKind::SkillMana, "skillMana:", MAX_SKILLS},
+    {GameDataValueKind::SkillName, "skillName:", MAX_SKILLS},
+    {GameDataValueKind::MonsterName, "monsterName:", MAX_MONSTER},
+};
+} // namespace
+
+bool HasGameDataValuePrefix(std::string_view name)
+{
+    return std::any_of(std::begin(GameDataValuePrefixes), std::end(GameDataValuePrefixes),
+                       [&](const GameDataValuePrefix& entry) { return name.starts_with(entry.prefix); });
+}
+
+std::optional<GameDataValue> ReadGameDataValue(std::string_view name)
+{
+    for (const GameDataValuePrefix& entry : GameDataValuePrefixes)
+    {
+        if (!name.starts_with(entry.prefix))
+        {
+            continue;
+        }
+        const std::string_view number = name.substr(entry.prefix.size());
+        if (number.empty() || number.size() > 4 ||
+            !std::all_of(number.begin(), number.end(), [](char c) { return c >= '0' && c <= '9'; }))
+        {
+            return std::nullopt;
+        }
+        const int value = std::stoi(std::string(number));
+        return value < entry.limit ? std::optional<GameDataValue>(GameDataValue{entry.kind, value}) : std::nullopt;
+    }
+    return std::nullopt;
+}
+
+bool IsBuiltInPlaceholder(std::string_view name)
+{
+    return std::find(BuiltIns.begin(), BuiltIns.end(), name) != BuiltIns.end();
+}
+
 std::string FillPlaceholders(std::string_view text, int level, const ItemStatProfiles& profiles)
+{
+    return FillPlaceholders(text,
+                            [&](std::string_view name) -> std::optional<std::string>
+                            {
+                                if (const std::optional<int> value = GetPlaceholderValue(name, level, profiles))
+                                    return std::to_string(*value);
+                                return std::nullopt;
+                            });
+}
+
+std::string FillPlaceholders(std::string_view text, const PlaceholderValueOf& valueOf)
 {
     std::string filled;
     filled.reserve(text.size());
@@ -138,15 +208,15 @@ std::string FillPlaceholders(std::string_view text, int level, const ItemStatPro
         }
         filled.append(text.substr(position, brace - position));
         const Placeholder placeholder = text[brace] == '{' ? ReadPlaceholder(text, brace) : Placeholder{};
-        const std::optional<int> value = placeholder.error.empty() && placeholder.end != std::string_view::npos
-                                             ? GetPlaceholderValue(placeholder.name, level, profiles)
-                                             : std::nullopt;
+        const std::optional<std::string> value = placeholder.error.empty() && placeholder.end != std::string_view::npos
+                                                     ? valueOf(placeholder.name)
+                                                     : std::nullopt;
         if (!value)
         {
             position = brace;
             break;
         }
-        filled.append(std::to_string(*value));
+        filled.append(*value);
         position = placeholder.end;
     }
     filled.append(text.substr(std::min(position, text.size())));

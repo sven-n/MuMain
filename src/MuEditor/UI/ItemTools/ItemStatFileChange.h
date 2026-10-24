@@ -43,11 +43,12 @@ std::vector<Data::Items::ItemDefinition> ApplyStatProfileChanges(std::span<const
 // Renames the profile `from` and every profile rule that names it.
 void RenameStatProfile(Data::Items::ItemStatFile& file, std::string_view from, const std::string& to);
 
-// The item types of `slots` whose descriptions name the table as a placeholder ({table:<name>}), in item type order.
+// The item types of `slots` whose descriptions or name lines name the table, as a placeholder ({table:<name>}) or in a
+// line's "values" ("table:<name>"), in item type order.
 std::vector<int> FindTableDescriptionUsers(std::span<const Data::Items::ItemDefinition> slots, std::string_view table);
 
-// Has every item of `slots` whose description names the table `from` name `to` instead, in every language: an item
-// of `changed` is changed there, another one is added to it as changed.
+// Has every item of `slots` whose description or name lines name the table `from` name `to` instead, in every
+// language and in the lines' "values": an item of `changed` is changed there, another one is added to it as changed.
 void RenameTableInDescriptions(std::span<const Data::Items::ItemDefinition> slots,
                                std::vector<Data::Items::ItemDefinition>& changed, std::string_view from,
                                std::string_view to);

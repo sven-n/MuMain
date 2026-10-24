@@ -134,7 +134,6 @@ namespace GameLogic::Items
     bool IsEventTicketType(int itemType);
     bool IsDoppelgangerOrVarkaTicket(const ITEM* pItem);
     bool IsDoppelgangerOrVarkaTicketType(int itemType);
-    bool IsCharacterCard(const ITEM* pItem);
     bool IsDevilSquareItem(const ITEM* pItem);
     bool IsDevilSquareItemType(int itemType);
     bool IsChocolateBox(const ITEM* pItem);
