@@ -22,6 +22,15 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_transform_appearance
+    SOURCES
+        test_transform_appearance.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+target_compile_definitions(test_transform_appearance PRIVATE MU_TEST_ASSET_DIR="${CMAKE_SOURCE_DIR}/src/bin")
+
+mu_add_test(
     NAME test_connection_library_load
     SOURCES
         test_connection_library_load.cpp

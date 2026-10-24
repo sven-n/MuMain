@@ -10,7 +10,7 @@
 #include "w_PetActionUnicorn.h"
 #include "w_PetProcess.h"
 #include "Core/Utilities/ReadScript.h"
-
+#include "GameLogic/Pets/CompanionCleanup.h"
 
 PetInfoPtr PetInfo::Make()
 {
@@ -152,26 +152,7 @@ void PetProcess::Register(Smart_Ptr(PetObject) pPet)
 
 void PetProcess::UnRegister(CHARACTER* Owner, int itemType, bool isUnregistAll)
 {
-    if (NULL == Owner) return;
-
-    for (auto iter = m_petsList.begin(); iter != m_petsList.end(); )
-    {
-        auto tempiter = iter;
-        ++iter;
-        Weak_Ptr(PetObject) basepet = *tempiter;
-
-        if (basepet.expired() == FALSE)
-        {
-            if ((-1 == itemType && basepet.lock()->IsSameOwner(&Owner->Object))
-                || basepet.lock()->IsSameObject(&Owner->Object, itemType))
-            {
-                basepet.lock()->Release();
-                m_petsList.erase(tempiter);
-
-                if (-1 == itemType || !isUnregistAll) return;
-            }
-        }
-    }
+    GameLogic::Pets::RemovePetObjects(m_petsList, Owner, itemType, isUnregistAll);
 }
 
 bool PetProcess::LoadData()

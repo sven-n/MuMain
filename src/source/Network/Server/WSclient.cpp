@@ -2464,11 +2464,10 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
         }
         break;
     case 8:
+        DeleteCharacterCompanions(c);
         if (Data->ItemGroup == 0xFF)
         {
             c->Helper.Type = -1;
-            DeleteMount(o);
-            ThePetProcess().DeletePet(c, c->Helper.Type, true);
         }
         else
         {
@@ -2677,6 +2676,11 @@ void ReceiveCreatePlayerViewportExtended(std::span<const BYTE> ReceiveBuffer)
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x12 [ReceiveCreatePlayerViewportExtended]");
 }
 
+void Network::Viewport::ApplyTransformEquipment(CHARACTER* character, PCREATE_TRANSFORM_EXTENDED& entry)
+{
+    ReadEquipmentExtended(0, entry.Flags, entry.Equipment, character);
+}
+
 void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
 {
     auto Data = safe_cast<PWHEADER_DEFAULT_WORD>(ReceiveBuffer);
@@ -2799,7 +2803,7 @@ void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
 
             CMultiLanguage::ConvertFromUtf8(c->ID, Data2->ID, MAX_USERNAME_SIZE);
 
-            ChangeCharacterExt(FindCharacterIndex(Key), Data2->Equipment);
+            Network::Viewport::ApplyTransformEquipment(c, *Data2);
         }
 
         Offset += *EntryLength;

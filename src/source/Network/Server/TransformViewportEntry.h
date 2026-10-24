@@ -1,4 +1,4 @@
-// Bounds of the entries of head code 45, the transformed players that come into view.
+// Bounds and equipment application for head code 45, transformed players coming into view.
 #pragma once
 
 #include <cstddef>
@@ -7,6 +7,8 @@
 
 #include "Network/Server/WSclient.h"
 
+class CHARACTER;
+
 namespace Network::Viewport
 {
 // The length of the transformed player entry at `offset`: its fixed fields and
@@ -14,4 +16,5 @@ namespace Network::Viewport
 // only its s_BuffCount buffs are sent. nullopt when the packet ends before the
 // entry does, or when the entry carries more buffs than a character can have.
 [[nodiscard]] std::optional<std::size_t> TransformViewportEntryLength(std::span<const BYTE> packet, std::size_t offset);
+void ApplyTransformEquipment(CHARACTER* character, PCREATE_TRANSFORM_EXTENDED& entry);
 } // namespace Network::Viewport
