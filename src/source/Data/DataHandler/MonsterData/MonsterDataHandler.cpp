@@ -32,25 +32,16 @@ std::vector<MonsterDefinition> CollectMonsters()
     }
     return monsters;
 }
+#endif
 
-// The problems from `first` on are problems of the monster list file.
-void NameSource(std::vector<Items::ItemDataIssue>& issues, std::size_t first)
-{
-    const std::string source = GetMonstersFile().generic_string();
-    for (std::size_t index = first; index < issues.size(); ++index)
-    {
-        issues[index].source = source;
-    }
-}
-
-// The languages check of Load, on top of the checks of the file's reader.
+// The languages check, on top of the checks of the file's reader: names in
+// languages the game has no texts for, as problems of the monster list file.
 void ValidateLocales(std::span<const MonsterDefinition> monsters, std::vector<Items::ItemDataIssue>& issues)
 {
     const std::size_t first = issues.size();
     ValidateMonsterNameLocales(monsters, I18N::GetAvailableLocales(), issues);
-    NameSource(issues, first);
+    NameIssueSource(issues, first, GetMonstersFile());
 }
-#endif
 } // namespace
 
 MonsterDataHandler& MonsterDataHandler::GetInstance()
@@ -63,7 +54,7 @@ bool MonsterDataHandler::Load(std::string& errorMessage)
 {
     const auto loadStart = std::chrono::steady_clock::now();
     MonsterDataLoadResult result = LoadMonstersFile(GetMonstersFile());
-    ValidateMonsterNameLocales(result.monsters, I18N::GetAvailableLocales(), result.issues);
+    ValidateLocales(result.monsters, result.issues);
     LogDataIssues(MonsterDataLabel, result.issues);
     if (Items::HasErrors(result.issues))
     {
@@ -141,7 +132,7 @@ void MonsterDataHandler::Validate(std::vector<Items::ItemDataIssue>& issues) con
     const std::vector<MonsterDefinition> monsters = CollectMonsters();
     const std::size_t first = issues.size();
     ValidateMonsterNames(monsters, issues);
-    NameSource(issues, first);
+    NameIssueSource(issues, first, GetMonstersFile());
     ValidateLocales(monsters, issues);
 }
 

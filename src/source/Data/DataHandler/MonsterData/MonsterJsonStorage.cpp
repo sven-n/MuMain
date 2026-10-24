@@ -22,15 +22,6 @@ void AddFileError(std::vector<ItemDataIssue>& issues, const std::string& source,
     issues.push_back(
         {Items::ItemDataIssueSeverity::Error, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, "", message});
 }
-
-// The validation finds problems without a file; they belong to this one.
-void NameSource(std::vector<ItemDataIssue>& issues, std::size_t first, const std::string& source)
-{
-    for (std::size_t index = first; index < issues.size(); ++index)
-    {
-        issues[index].source = source;
-    }
-}
 } // namespace
 
 std::filesystem::path GetMonstersFile()
@@ -51,7 +42,7 @@ MonsterDataLoadResult LoadMonstersFile(const std::filesystem::path& file)
     ReadMonstersJson(*text, source, result.monsters, result.issues);
     const std::size_t firstValidationIssue = result.issues.size();
     ValidateMonsterNames(result.monsters, result.issues);
-    NameSource(result.issues, firstValidationIssue, source);
+    NameIssueSource(result.issues, firstValidationIssue, file);
     return result;
 }
 
@@ -64,7 +55,7 @@ bool SaveMonstersFile(const std::filesystem::path& file, std::span<const Monster
     ReadMonstersJson(text, source, readBack, issues);
     const std::size_t firstValidationIssue = issues.size();
     ValidateMonsterNames(readBack, issues);
-    NameSource(issues, firstValidationIssue, source);
+    NameIssueSource(issues, firstValidationIssue, file);
     if (Items::HasErrors(issues))
     {
         return false;
@@ -76,5 +67,14 @@ bool SaveMonstersFile(const std::filesystem::path& file, std::span<const Monster
         return false;
     }
     return true;
+}
+
+void NameIssueSource(std::vector<ItemDataIssue>& issues, std::size_t first, const std::filesystem::path& file)
+{
+    const std::string source = file.generic_string();
+    for (std::size_t index = first; index < issues.size(); ++index)
+    {
+        issues[index].source = source;
+    }
 }
 } // namespace Data::Monsters

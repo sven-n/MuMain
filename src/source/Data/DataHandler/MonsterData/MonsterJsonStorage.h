@@ -3,6 +3,7 @@
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/MonsterData/MonsterDefinition.h"
 
+#include <cstddef>
 #include <filesystem>
 #include <span>
 #include <vector>
@@ -28,4 +29,8 @@ MonsterDataLoadResult LoadMonstersFile(const std::filesystem::path& file);
 // cannot be written whole.
 bool SaveMonstersFile(const std::filesystem::path& file, std::span<const MonsterDefinition> monsters,
                       std::vector<Items::ItemDataIssue>& issues);
+
+// Makes `file` the source of the problems from `first` on: the checks of the
+// monsters find them without a file.
+void NameIssueSource(std::vector<Items::ItemDataIssue>& issues, std::size_t first, const std::filesystem::path& file);
 } // namespace Data::Monsters
