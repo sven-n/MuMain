@@ -50,8 +50,9 @@ public:
 
 #ifdef _EDITOR
     // The monster editor's reads and changes. A change is written into the
-    // table in place and the names-changed callback is told its numbers, so
-    // living monsters and NPCs of a number show its new name at once (D55).
+    // table in place and the names-changed callback is told its number, or
+    // AllNumbers for more than one, so living monsters and NPCs of a number
+    // show its new name at once (D55).
     // Their kind is not rewritten: a living character keeps the OBJECT::Kind
     // it appeared with until it appears again.
 

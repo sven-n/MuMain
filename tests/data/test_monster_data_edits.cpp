@@ -132,8 +132,23 @@ TEST_CASE("Monster data: the editor reads monsters as snapshots and restores the
     CHECK(g_MonsterDatabase.Find(3)->number == 3);
     CHECK(g_MonsterDatabase.Find(3)->names.GetNeutral() == "Larva");
     CHECK(g_MonsterDatabase.Find(99) == nullptr);
-    // Living monsters of these numbers get their names at once (D55).
-    CHECK(g_toldNumbers == std::vector<int>{2, 3});
+    // Living monsters of these numbers get their names at once (D55), told
+    // once for both.
+    CHECK(g_toldNumbers == std::vector<int>{MonsterDataHandler::AllNumbers});
+
+    // One number, even restored twice, is told as itself; a number outside
+    // 0-1023 is not told.
+    g_toldNumbers.clear();
+    const std::array oneNumber = {MonsterSnapshot{2, BudgeDragon()}, MonsterSnapshot{1024, std::nullopt},
+                                  MonsterSnapshot{2, std::nullopt}};
+    g_MonsterDataHandler.RestoreMonsters(oneNumber);
+    CHECK(g_MonsterDatabase.Find(2) == nullptr);
+    CHECK(g_toldNumbers == std::vector<int>{2});
+
+    // Nothing restored, nothing told.
+    g_toldNumbers.clear();
+    g_MonsterDataHandler.RestoreMonsters(std::span<const MonsterSnapshot>());
+    CHECK(g_toldNumbers.empty());
 }
 
 TEST_CASE("Monster data: the editor's checks are those of loading and saving [data][monsters][editor]")

@@ -108,6 +108,9 @@ std::optional<MonsterDefinition> MonsterDataHandler::ReadMonster(int number) con
 
 void MonsterDataHandler::RestoreMonsters(std::span<const MonsterSnapshot> snapshots)
 {
+    // The callback is told once: the number restored, or AllNumbers when more
+    // were. The game walks every character for each call.
+    std::optional<int> changed;
     for (const MonsterSnapshot& snapshot : snapshots)
     {
         if (snapshot.number < 0 || snapshot.number >= MonsterNumberCount)
@@ -124,7 +127,12 @@ void MonsterDataHandler::RestoreMonsters(std::span<const MonsterSnapshot> snapsh
         {
             g_MonsterDatabase.Remove(snapshot.number);
         }
-        NotifyNamesChanged(snapshot.number);
+        const bool sameNumber = !changed || *changed == snapshot.number;
+        changed = sameNumber ? snapshot.number : AllNumbers;
+    }
+    if (changed)
+    {
+        NotifyNamesChanged(*changed);
     }
 }
 
