@@ -772,6 +772,7 @@ TEST_CASE("The second item chain's tooltip texts keep their translations [data][
         }
     }
     CHECK(checked >= 1050);
+}
 
 // What the old code printed for an item's level lines in the UI's language, where the texts are the game's that other
 // code still prints: one entry per line of OldLevelLines, empty for a text only the tooltip had (removed since). A
