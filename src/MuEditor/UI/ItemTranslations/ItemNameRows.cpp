@@ -58,7 +58,7 @@ void CItemNameRows::FormatId(int id, char* buffer, std::size_t size) const
 void CItemNameRows::CommitName(int id, const char* locale, const char* text)
 {
     // A name with the separator would be stored, then refuse every save.
-    if (std::string_view(text).find(Data::LocalizedString::Separator) != std::string_view::npos)
+    if (Data::LocalizedString::ContainsSeparator(text))
     {
         g_MuEditorConsoleUI.LogEditor(I18N::Editor::ItemNamesCannotContainTheSeparator);
         return;
