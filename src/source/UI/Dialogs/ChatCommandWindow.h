@@ -61,6 +61,12 @@ class CChatCommandWindow : public CObject
         VALUE_HEIGHT = 16,
         // A parameter takes its name, the box with its value, and a gap.
         PARAMETER_HEIGHT = ROW_HEIGHT + VALUE_HEIGHT + 4,
+        // The part at the right of a parameter's name which fills in the value of the own
+        // character, e.g. its position for a coordinate (chat_command.rcss: .cc-own-value).
+        OWN_VALUE_WIDTH = 50,
+        // The values which have a name are numbers, which take no more than this; the name is
+        // shown right of it (chat_command.rcss: .cc-param-name).
+        NUMBER_VALUE_WIDTH = 36,
     };
 
     // What the window shows; each page owns the whole content area (no scrolling between pages).
@@ -120,7 +126,15 @@ private:
     void StopEditing();
     static bool IsPickedFromList(const GameLogic::Commands::ChatCommandParameter& parameter);
     static std::vector<std::wstring> SplitValidValues(const std::wstring& validValues);
+    // What an empty box shows: the accepted values, or the accepted range when it's small enough
+    // to tell the player something.
+    static std::wstring GetPlaceholder(const GameLogic::Commands::ChatCommandParameter& parameter);
+    void FillOwnValue(size_t parameterIndex);
+    // The names behind the values only change with the values, so they are looked up then
+    // instead of every frame.
+    void RefreshValueNames();
     bool AreRequiredValuesSet() const;
+    bool AreValuesAccepted() const;
 
     int GetScrollableRowCount() const;
     // Wrapped once on page entry; measuring against the font every frame would be wasteful.
@@ -157,6 +171,9 @@ private:
 
     // The value of every parameter of the selected command, in its order.
     std::vector<std::wstring> m_parameterValues;
+    // What the values refer to, e.g. the name of a map, in the same order.
+    std::vector<std::wstring> m_valueNames;
+    std::vector<std::wstring> m_placeholders;
     std::vector<std::wstring> m_descriptionLines;
     // One field is enough: it is moved onto whichever parameter is edited.
     int m_editedParameter;

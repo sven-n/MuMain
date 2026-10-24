@@ -42,12 +42,19 @@
 			</div>
 
 			<!-- Every parameter has a value field; only the edited one's shows, and the window
-			     finds it by the parameter's position. -->
+			     finds it by the parameter's position. The name of what a value refers to (a map,
+			     a monster, ...) sits right of the value; a parameter the own character has a value
+			     for gets a cell right of its label which fills it in. -->
 			<div class="cc-parameters">
 				<div class="cc-parameter" data-for="p, i : parameters">
 					<span class="sharp-text cc-param-label" data-class-missing="p.missing" data-style-font-size="p.label_text_px + 'px'">{{p.label}}</span>
+					<div class="cc-own-value" data-if="p.has_own_value" data-event-click="chat_command_hit(7, i)">
+						<span class="sharp-text cc-own-value-text"
+						      data-style-font-size="own_value_action.text_px + 'px'">{{own_value_action.text}}</span>
+					</div>
 					<div class="cc-value-box" data-if="!p.edited" data-event-click="chat_command_hit(2, i)"></div>
 					<span class="sharp-text cc-param-value" data-if="!p.edited" data-class-placeholder="p.placeholder" data-style-font-size="p.value_text_px + 'px'">{{p.value}}</span>
+					<span class="sharp-text cc-param-name" data-if="!p.edited" data-style-font-size="p.value_name_text_px + 'px'">{{p.value_name}}</span>
 					<div class="cc-value-box" data-if="p.edited"></div>
 					<input data-if="p.edited" data-value="edit_value" type="text" class="text-field sharp-text cc-value-field"
 					       data-style-font-size="text_px + 'px'"/>
