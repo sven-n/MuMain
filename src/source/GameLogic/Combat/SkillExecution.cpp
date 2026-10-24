@@ -227,13 +227,6 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
         return 0;
     }
 
-    if (!IsSkillActionReady(c))
-    {
-        if (o->Type == MODEL_PLAYER)
-            MouseRButtonPress = 0;
-        return 0;
-    }
-
     int iSkillIndex = gSkillManager.FindSkillIndex(Skill);
     if (iSkillIndex == -1)
     {
@@ -318,6 +311,13 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
         {
             Attacking = 2;
         }
+    }
+
+    if (!IsSkillActionReady(c))
+    {
+        if (o->Type == MODEL_PLAYER)
+            MouseRButtonPress = 0;
+        return 0;
     }
 
     if (ClassIndex != CLASS_WIZARD)

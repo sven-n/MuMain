@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "MUHelper/AttackSkillRotation.h"
+#include "GameLogic/Automation/AttackSkillRotation.h"
 #include "MUHelper/MuHelperData.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"

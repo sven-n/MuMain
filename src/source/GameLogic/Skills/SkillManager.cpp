@@ -1,4 +1,4 @@
-// SkillManager.cpp: implementation of the CSkillManager class.
+﻿// SkillManager.cpp: implementation of the CSkillManager class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"

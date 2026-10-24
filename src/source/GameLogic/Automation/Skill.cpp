@@ -24,7 +24,6 @@ constexpr int StepsPerApproach = 2;
 // Result of ExecuteSkill: -1 refused, 0 nothing yet, 1 cast.
 constexpr int SkillExecutionRefused = -1;
 constexpr int SkillExecutionCast = 1;
-constexpr int SkillExecutionNoAction = 0;
 
 bool IsSelfPositionSkill(ActionSkillType skill)
 {
@@ -190,6 +189,11 @@ SkillResult CastSkill(ActionSkillType skill, bool targetRequired, int targetKey,
         }
     }
 
+    // Automation can wait without changing the manual execution path's
+    // auto-attack setup, Cursed Temple handling or movement bookkeeping.
+    if (!GameLogic::Combat::IsSkillActionReady(Hero))
+        return SkillResult::Busy;
+
     // The globals the execution reads are set only once the aim held: a
     // refused aim must leave the movement-skill state as it was rather than
     // switch it to a skill that was never cast.
@@ -201,11 +205,6 @@ SkillResult CastSkill(ActionSkillType skill, bool targetRequired, int targetKey,
     {
         return SkillResult::Refused;
     }
-
-    // A long cast/walk animation is a global busy state, not an unusable
-    // skill. Do not spend the rotation's bounded no-action retry budget on it.
-    if (executed == SkillExecutionNoAction && !GameLogic::Combat::IsSkillActionReady(Hero))
-        return SkillResult::Busy;
 
     return executed == SkillExecutionCast ? SkillResult::Cast : SkillResult::NotReady;
 }

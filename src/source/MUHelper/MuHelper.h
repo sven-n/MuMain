@@ -8,7 +8,7 @@
 #include <atomic>
 
 #include "MuHelperData.h"
-#include "AttackSkillRotation.h"
+#include "GameLogic/Automation/AttackSkillRotation.h"
 
 namespace MUHelper
 {
@@ -101,6 +101,12 @@ namespace MUHelper
         GameLogic::Automation::AttackSkillRotation m_attackSkills;
         bool SelectAttackTarget();
         GameLogic::Automation::SkillResult CastSkill(ActionSkillType skill, bool targetRequired, int target);
+
+    public:
+        ActionSkillType GetCurrentSkill() const
+        {
+            return m_iCurrentSkill;
+        }
     };
 
     extern CMuHelper g_MuHelper;

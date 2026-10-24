@@ -4,7 +4,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "GameLogic/Skills/SkillManager.h"
-#include "MUHelper/AttackSkillRotation.h"
+#include "GameLogic/Automation/AttackSkillRotation.h"
 #include "MUHelper/MuHelperData.h"
 #include "MUHelper/MuHelper.h"
 #include "Engine/Object/ZzzInterface.h"
@@ -306,8 +306,12 @@ TEST_CASE("Long execution animations retain their selected turn [helper_rotation
         for (int attempt = 0; attempt < 9; ++attempt)
         {
             REQUIRE(fixture.Select() == Primary);
+            g_MovementSkill.m_iSkill = ExtraTwo;
+            g_MovementSkill.m_bMagic = false;
             const auto result = GameLogic::Automation::CastSkill(Primary, false, -1, true, 6);
             CHECK(result == SkillResult::Busy);
+            CHECK(g_MovementSkill.m_iSkill == ExtraTwo);
+            CHECK_FALSE(g_MovementSkill.m_bMagic);
             fixture.rotation.Complete(result);
             CHECK(CharacterAttribute->SkillDelay[0] == 0);
         }
@@ -358,7 +362,7 @@ TEST_CASE("Helper timer feeds real execution outcomes back into rotation [helper
     for (int attempt = 0; attempt < 9; ++attempt)
     {
         MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
-        CHECK(g_MovementSkill.m_iSkill == Primary);
+        CHECK(MUHelper::g_MuHelper.GetCurrentSkill() == Primary);
         CHECK(CharacterAttribute->SkillDelay[0] == 0);
     }
     // The real admission check refuses insufficient AG and advances once.
@@ -367,11 +371,11 @@ TEST_CASE("Helper timer feeds real execution outcomes back into rotation [helper
     MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
     Hero->Object.CurrentAction = PLAYER_SKILL_CHAIN_LIGHTNING;
     MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
-    CHECK(g_MovementSkill.m_iSkill == ExtraOne);
+    CHECK(MUHelper::g_MuHelper.GetCurrentSkill() == ExtraOne);
     SkillAttribute[Primary].AbilityGuage = 0;
     MUHelper::g_MuHelper.Load(fixture.config);
     MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
-    CHECK(g_MovementSkill.m_iSkill == Primary);
+    CHECK(MUHelper::g_MuHelper.GetCurrentSkill() == Primary);
     auto& replacement = characters[1];
     replacement.Key = 124;
     replacement.Object.Live = true;
@@ -383,24 +387,24 @@ TEST_CASE("Helper timer feeds real execution outcomes back into rotation [helper
     MUHelper::g_MuHelper.AddTarget(replacement.Key, false);
     MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
     MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
-    CHECK(g_MovementSkill.m_iSkill == Primary);
+    CHECK(MUHelper::g_MuHelper.GetCurrentSkill() == Primary);
     replacement.Object.Live = false;
     MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
     target.Dead = 0;
     MUHelper::g_MuHelper.AddTarget(target.Key, false);
     MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
-    CHECK(g_MovementSkill.m_iSkill == Primary);
+    CHECK(MUHelper::g_MuHelper.GetCurrentSkill() == Primary);
     Hero->Object.CurrentAction = PLAYER_STOP_MALE;
     SkillAttribute[Primary].AbilityGuage = 101;
     MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
     Hero->Object.CurrentAction = PLAYER_SKILL_CHAIN_LIGHTNING;
     MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
-    CHECK(g_MovementSkill.m_iSkill == ExtraOne);
+    CHECK(MUHelper::g_MuHelper.GetCurrentSkill() == ExtraOne);
     SkillAttribute[Primary].AbilityGuage = 0;
     MUHelper::g_MuHelper.Stop();
     MUHelper::g_MuHelper.Start();
     MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
-    CHECK(g_MovementSkill.m_iSkill == Primary);
+    CHECK(MUHelper::g_MuHelper.GetCurrentSkill() == Primary);
     MUHelper::g_MuHelper.Stop();
     MUHelper::g_MuHelper.DeleteAllTargets();
     CharactersClient = previous;
