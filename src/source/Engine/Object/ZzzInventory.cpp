@@ -21,7 +21,6 @@
 
 #include "Scenes/SceneCore.h"
 
-#include "Core/Utilities/Debouncer.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "App/Platform/Windows/Local.h"
@@ -39,6 +38,7 @@
 #include "GameLogic/Items/ItemCategories.h"
 #include "GameLogic/Items/ItemStats.h"
 #include "Render/Items/ItemDisplay.h"
+#include <chrono>
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
@@ -1631,6 +1631,20 @@ void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int 
 // original tooltips.
 static constexpr int ItemDescriptionWrapWidth = 200;
 
+std::optional<PetInfoRequest> GetPetInfoRequest(int itemType, int pointedIndex, int inventype)
+{
+    const StorageType storage = static_cast<StorageType>(inventype);
+    if (itemType == ITEM_DARK_HORSE_ITEM)
+    {
+        return pointedIndex == EQUIPMENT_HELPER
+                   ? std::optional<PetInfoRequest>(PetInfoRequest{PetType::DarkHorse, storage, EQUIPMENT_HELPER})
+                   : std::nullopt;
+    }
+    return pointedIndex == EQUIPMENT_WEAPON_LEFT
+               ? std::optional<PetInfoRequest>(PetInfoRequest{PetType::DarkRaven, storage, EQUIPMENT_WEAPON_LEFT})
+               : std::nullopt;
+}
+
 void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, int level, ItemTooltipTextMeasure measure)
 {
     const int lastRow = std::min(TextNum + MaxItemDescriptionRows, static_cast<int>(std::size(TextList)));
@@ -1671,25 +1685,27 @@ void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, in
 }
 
 // (sx, sy) in the screen's 640x480 stretch, `screen`.
-static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy, ITEM* ip, bool Sell, int Inventype,
-                           bool bItemTextListBoxUse)
+// What BuildItemTooltipText made of an item.
+enum class ItemTooltipBuild
 {
-    // Unconditional: the early returns below (and the pet-item delegation further down, which
-    // renders its own tooltip via giPetManager::RenderPetItemInfo() instead) used to mean "this
-    // frame draws nothing" under the old per-frame native draw -- already equivalent to "hidden"
-    // for that item. The shared tooltip document is persistent, so this replicates that; the real
-    // Show() call near the end of this function makes it visible again once actually reached.
-    UI::Tooltip::HideLegacyTextList();
+    Nothing,     // no tooltip for it
+    DarkLordPet, // the pet manager draws its own
+    Lines,       // TextList, TextListColor and TextBold hold its TextNum lines
+};
 
+// Writes the lines of an item's tooltip into TextList, TextListColor and TextBold (TextNum, SkipNum), without drawing
+// them; RenderItemInfo draws them.
+static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype, bool bItemTextListBoxUse)
+{
     if (ip->Type == -1)
-        return;
+        return ItemTooltipBuild::Nothing;
 
     tm* ExpireTime;
     if (ip->bPeriodItem == true && ip->bExpiredPeriod == false)
     {
         _tzset();
         if (ip->lExpireTime == 0)
-            return;
+            return ItemTooltipBuild::Nothing;
 
         ExpireTime = localtime((time_t*)&(ip->lExpireTime));
     }
@@ -1706,28 +1722,7 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
 
     if (!Sell && (GameLogic::Items::IsDarkLordPet(ip)))
     {
-        static DebouncedAction debouncedPetInfoRequest([ip, Inventype]()
-            {
-                PetType PetType = PetType::DarkRaven;
-                if (ip->Type == ITEM_DARK_HORSE_ITEM)
-                {
-                    PetType = PetType::DarkHorse;
-
-                    if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_HELPER) 
-                    {
-                        SocketClient->ToGameServer()->SendPetInfoRequest(PetType, static_cast<StorageType>(Inventype), EQUIPMENT_HELPER);
-                    }
-                }
-                else if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_WEAPON_LEFT) 
-                {
-                    SocketClient->ToGameServer()->SendPetInfoRequest(PetType, static_cast<StorageType>(Inventype), EQUIPMENT_WEAPON_LEFT);
-                }
-            }, 1000); // 1-second intervals
-
-        debouncedPetInfoRequest.invoke();
-
-        giPetManager::RenderPetItemInfo(screen, sx, sy, ip, Inventype);
-        return;
+        return ItemTooltipBuild::DarkLordPet;
     }
 
     mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
@@ -2851,27 +2846,32 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
         case ITEM_TYPE_CHARM_MIXWING + EWS_KNIGHT_2_CHARM:
         {
             mu_swprintf(TextList[TextNum], I18N::Game::IncreasesYourLuckToCreateWingsOfDragon, Item_data.m_byValue1);
-        }break;
+        }
+        break;
         case ITEM_TYPE_CHARM_MIXWING + EWS_MAGICIAN_2_CHARM:
         {
             mu_swprintf(TextList[TextNum], I18N::Game::IncreasesYourLuckToCreateWingsOfSoul, Item_data.m_byValue1);
-        }break;
+        }
+        break;
         case ITEM_TYPE_CHARM_MIXWING + EWS_ELF_2_CHARM:
         {
             mu_swprintf(TextList[TextNum], I18N::Game::IncreasesYourLuckToCreateWingsOfSpirits, Item_data.m_byValue1);
-        }break;
+        }
+        break;
         case ITEM_TYPE_CHARM_MIXWING + EWS_SUMMONER_2_CHARM:
         {
             mu_swprintf(TextList[TextNum], I18N::Game::IncreasesYourLuckToCreateWingOfDespair, Item_data.m_byValue1);
-        }break;
+        }
+        break;
         case ITEM_TYPE_CHARM_MIXWING + EWS_DARKKNIGHT_2_CHARM:
         {
             mu_swprintf(TextList[TextNum], I18N::Game::IncreasesYourLuckToCreateWingsOfDarkness, Item_data.m_byValue1);
-        }break;
+        }
+        break;
         }
 
         mu_swprintf(TextList[TextNum], I18N::Game::Lookup(2732 + (ip->Type - (ITEM_TYPE_CHARM_MIXWING + EWS_BEGIN))),
-            Item_data.m_byValue1);
+                    Item_data.m_byValue1);
 
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
@@ -2891,7 +2891,9 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
-        mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+        mu_swprintf(TextList[TextNum], L"\n");
+        TextNum++;
+        SkipNum++;
         mu_swprintf(TextList[TextNum], I18N::Game::DD, ip->Durability, 5);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
@@ -2916,7 +2918,8 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
             TextBold[TextNum] = false;
             TextNum++;
-        }break;
+        }
+        break;
         case ITEM_GAIONS_ORDER:
         {
             mu_swprintf(TextList[TextNum], I18N::Game::ItContainsGaionSPlansForTheDestructionOfTheEmpire);
@@ -2944,7 +2947,8 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
             TextBold[TextNum] = false;
             TextNum++;
-        }break;
+        }
+        break;
         case ITEM_COMPLETE_SECROMICON:
         {
             mu_swprintf(TextList[TextNum], I18N::Game::IndestructibleMetalSecromicon);
@@ -2955,7 +2959,8 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
             TextBold[TextNum] = false;
             TextNum++;
-        }break;
+        }
+        break;
         }
     }
     else if (ITEM_OPEN_ACCESS_TICKET_TO_CHAOS_CASTLE == ip->Type)
@@ -4362,7 +4367,62 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
         TextNum = g_csItemOption.RenderSetOptionListInItem(ip, TextNum, bThisisEquippedItem);
 
         TextNum = g_SocketItemMgr.AttachToolTipForSocketItem(ip, TextNum);
+    }
 
+    return ItemTooltipBuild::Lines;
+}
+
+std::vector<ItemTooltipLine> BuildItemTooltipLines(ITEM* ip, bool Sell, int Inventype, bool bItemTextListBoxUse)
+{
+    std::vector<ItemTooltipLine> lines;
+    if (BuildItemTooltipText(ip, Sell, Inventype, bItemTextListBoxUse) != ItemTooltipBuild::Lines)
+    {
+        return lines;
+    }
+    lines.reserve(TextNum);
+    for (int index = 0; index < TextNum; ++index)
+    {
+        lines.push_back({TextList[index], TextListColor[index], TextBold[index] != 0});
+    }
+    return lines;
+}
+
+static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy, ITEM* ip, bool Sell, int Inventype,
+                           bool bItemTextListBoxUse)
+{
+    // Unconditional: the early returns below (and the pet-item delegation further down, which
+    // renders its own tooltip via giPetManager::RenderPetItemInfo() instead) used to mean "this
+    // frame draws nothing" under the old per-frame native draw -- already equivalent to "hidden"
+    // for that item. The shared tooltip document is persistent, so this replicates that; the real
+    // Show() call near the end of this function makes it visible again once actually reached.
+    UI::Tooltip::HideLegacyTextList();
+
+    const ItemTooltipBuild build = BuildItemTooltipText(ip, Sell, Inventype, bItemTextListBoxUse);
+    if (build == ItemTooltipBuild::Nothing)
+        return;
+    if (build == ItemTooltipBuild::DarkLordPet)
+    {
+        // The pet's information is requested once a second at most, for the pet whose tooltip is drawn.
+        static std::chrono::steady_clock::time_point lastPetInfoRequest;
+        const auto now = std::chrono::steady_clock::now();
+        if (lastPetInfoRequest == std::chrono::steady_clock::time_point() ||
+            now - lastPetInfoRequest >= std::chrono::seconds(1))
+        {
+            lastPetInfoRequest = now;
+            if (const std::optional<PetInfoRequest> request =
+                    GetPetInfoRequest(ip->Type, g_pMyInventory->GetPointedItemIndex(), Inventype))
+            {
+                SocketClient->ToGameServer()->SendPetInfoRequest(request->pet, request->storage, request->slot);
+            }
+        }
+
+        giPetManager::RenderPetItemInfo(screen, sx, sy, ip, Inventype);
+        return;
+    }
+
+    ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
+    if (!bItemTextListBoxUse)
+    {
         SIZE TextSize = { 0, 0 };
         int	Height = 0;
         int	EmptyLine = 0;
