@@ -260,17 +260,9 @@
     <value>防御力: %d</value>
     <comment>legacy_id=65,209</comment>
   </data>
-  <data name="Spell resistance: %d" xml:space="preserve">
-    <value>魔法抵抗力: %d</value>
-    <comment>legacy_id=66</comment>
-  </data>
   <data name="Defense rate: %d" xml:space="preserve">
     <value>防御率: %d</value>
     <comment>legacy_id=67,2045</comment>
-  </data>
-  <data name="Moving speed: %d" xml:space="preserve">
-    <value>移動速度: %d</value>
-    <comment>legacy_id=68</comment>
   </data>
   <data name="Number of items: %d" xml:space="preserve">
     <value>個数: %d</value>
@@ -283,10 +275,6 @@
   <data name="Durability: [%d/%d]" xml:space="preserve">
     <value>耐久力: [%d/%d]</value>
     <comment>legacy_id=71</comment>
-  </data>
-  <data name="%s Resistance: %d" xml:space="preserve">
-    <value>%s抵抗力: %d</value>
-    <comment>legacy_id=72</comment>
   </data>
   <data name="Strength Requirement: %d" xml:space="preserve">
     <value>使用可能な力: %d</value>
@@ -375,10 +363,6 @@
   <data name="Luck (critical damage rate +5%%)" xml:space="preserve">
     <value>幸運 (クリティカルダメージ確率 +5%%)</value>
     <comment>legacy_id=94</comment>
-  </data>
-  <data name="Durability: [%d]" xml:space="preserve">
-    <value>耐久力: [ %d ]</value>
-    <comment>legacy_id=95</comment>
   </data>
   <data name="Can only be used in moving unit" xml:space="preserve">
     <value>移動ユニットを乗っているときに使用可能</value>
@@ -4411,10 +4395,6 @@
     <value>%sがありません。</value>
     <comment>legacy_id=1233</comment>
   </data>
-  <data name="Increase pet attack as %d%%" xml:space="preserve">
-    <value>ペット攻撃力%d%%上昇</value>
-    <comment>legacy_id=1234</comment>
-  </data>
   <data name="Crest of monarch" xml:space="preserve">
     <value>君主の紋章</value>
     <comment>legacy_id=1235</comment>
@@ -6075,10 +6055,6 @@
     <value>強い精神力を持ち、呪いの魔法を使う。また異世界の召喚獣を呼び出し、攻撃を加える。</value>
     <comment>legacy_id=1690</comment>
   </data>
-  <data name="Curse Spell increment %d%%" xml:space="preserve">
-    <value>呪い %d%%上昇</value>
-    <comment>legacy_id=1691</comment>
-  </data>
   <data name="Curse Spell: %d ~ %d" xml:space="preserve">
     <value>呪い：%d～%d</value>
     <comment>legacy_id=1692</comment>
@@ -6914,10 +6890,6 @@
   <data name="Skills will improve through upgrading." xml:space="preserve">
     <value>アップグレードで能力が向上されます。</value>
     <comment>legacy_id=1929</comment>
-  </data>
-  <data name="Stamina Requirement: %d" xml:space="preserve">
-    <value>使用可能な体力: %d</value>
-    <comment>legacy_id=1930</comment>
   </data>
   <data name="Req LV" xml:space="preserve">
     <value>必要レベル</value>
@@ -7979,10 +7951,6 @@
     <value>http://www.muonline.jp/game_buy.asp</value>
     <comment>legacy_id=2295</comment>
   </data>
-  <data name="%d%% Combination success rate increase" xml:space="preserve">
-    <value>%d%% 合成成功確率上昇</value>
-    <comment>legacy_id=2296</comment>
-  </data>
   <data name="Hour" xml:space="preserve">
     <value>時間</value>
     <comment>legacy_id=2299</comment>
@@ -8713,14 +8681,6 @@
   <data name="Move by a right-mouse-click." xml:space="preserve">
     <value>右クリックすると移動します。</value>
     <comment>legacy_id=2603</comment>
-  </data>
-  <data name="Saves the location with the right-mouse-click." xml:space="preserve">
-    <value>右クリックすると場所が記憶されます。</value>
-    <comment>legacy_id=2605</comment>
-  </data>
-  <data name="Returns to the saved location by a click." xml:space="preserve">
-    <value>クリックすると記憶した場所へ移動します。</value>
-    <comment>legacy_id=2606</comment>
   </data>
   <data name="Would you like to save the location?" xml:space="preserve">
     <value>該当場所へ移動しますか？</value>
@@ -10197,14 +10157,6 @@
   <data name="GrandDukeDukeMarquisCountViscount" xml:space="preserve">
     <value>総司令官#副司令官#参謀長#軍団長#師団長#アーティクルマスター#コンバットマスター#クォーターマスター#騎士団長#近衛騎士#上級騎士#一等騎士#二等騎士#傭兵</value>
     <comment>legacy_id=3104</comment>
-  </data>
-  <data name="Can enter the Monday - Saturday map." xml:space="preserve">
-    <value>バルカ要塞の第1～6要塞に入場できます。</value>
-    <comment>legacy_id=3105</comment>
-  </data>
-  <data name="Can enter the Sunday map." xml:space="preserve">
-    <value>バルカ要塞の第7要塞に入場できます。</value>
-    <comment>legacy_id=3106</comment>
   </data>
   <data name="Varka Map 7" xml:space="preserve">
     <value>バルカ要塞 第7要塞</value>
