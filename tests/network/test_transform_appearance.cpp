@@ -212,12 +212,17 @@ TEST_CASE("Viewport removal clears all owner pets including non-live entries [tr
     CharactersClient = characters.get();
     auto& owner = characters[0];
     auto& observer = characters[1];
+    owner.Object.Type = observer.Object.Type = MODEL_PLAYER;
+    owner.Object.Kind = observer.Object.Kind = KIND_PLAYER;
+    owner.Object.Live = observer.Object.Live = true;
+    owner.Class = observer.Class = CLASS_KNIGHT;
     owner.Key = 123;
     observer.Key = 456;
     ReadEquipmentExtended(0, fixture.entry.Flags, fixture.entry.Equipment, &owner);
     ReadEquipmentExtended(0, fixture.entry.Flags, fixture.entry.Equipment, &observer);
     CHECK(g_petProcess->CountPets(&owner) == 1);
     CHECK(g_petProcess->CountPets(&observer) == 1);
+    owner.Object.Live = observer.Object.Live = false;
     ClearCharacters(observer.Key);
     CHECK(g_petProcess->CountPets(&owner) == 0);
     CHECK(g_petProcess->CountPets(&observer) == 1);
