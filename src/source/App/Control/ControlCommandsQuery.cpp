@@ -7,6 +7,8 @@
 #include "Core/Utilities/Benchmark/BenchRecorder.h"
 #include "Core/Text/Utf8.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "Data/GameData/ItemData/ItemType.h"
+#include "Engine/Object/ItemTooltipSnapshot.h"
 #include "Network/Server/WSclient.h"
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
@@ -20,6 +22,7 @@
 #include <cmath>
 #include <cstdint>
 #include <filesystem>
+#include <fstream>
 #include <map>
 #include <memory>
 #include <optional>
@@ -474,6 +477,125 @@ std::string State(const Request& request, std::unique_ptr<Act>&)
     }
 
     return EncodeResult(request.EncodedId(), WorldStateObject());
+}
+
+namespace
+{
+// Reads the integer `key` into `value` when the request has it; false when it is not a number from 0 to `max`.
+bool ReadBounded(const Request& request, const char* key, int max, int& value)
+{
+    return !request.Has(key) || (request.GetInt(key, value) && value >= 0 && value <= max);
+}
+} // namespace
+
+std::string ItemTooltip(const Request& request, std::unique_ptr<Act>&)
+{
+    int group = -1;
+    int number = -1;
+    if (!request.GetInt("group", group) || !request.GetInt("number", number) || group < 0 || group >= MAX_ITEM_TYPE ||
+        number < 0 || number >= MAX_ITEM_INDEX)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`tooltip` needs `group` and `number` of an item");
+    }
+
+    // The item's fields hold these values (as the item packet has them); a value they can't hold is a `bad_request`,
+    // not a wrapped one. Checked before the item is made from the item data. -1: left out.
+    int level = -1;
+    int durability = -1;
+    int option = 0;
+    int excellent = 0;
+    int ancient = 0;
+    int harmony = 0;
+    int harmonyLevel = -1;
+    if (!ReadBounded(request, "level", Data::Items::ItemLevelCount - 1, level) ||
+        !ReadBounded(request, "durability", 255, durability) || !ReadBounded(request, "option", 15, option) ||
+        !ReadBounded(request, "excellent", 63, excellent) || !ReadBounded(request, "ancient", 255, ancient) ||
+        !ReadBounded(request, "harmony", 15, harmony) || !ReadBounded(request, "harmony_level", 15, harmonyLevel))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`level`, `option`, `harmony` and `harmony_level` are 0 to 15, `excellent` the excellent "
+                           "options' bits 0 to 63, `durability` and `ancient` 0 to 255");
+    }
+
+    ItemCreationParams params = FullItemParameters(group, number);
+    if (level >= 0)
+        params.Level = static_cast<BYTE>(level);
+    if (durability >= 0)
+        params.Durability = static_cast<BYTE>(durability);
+    bool flag = false;
+    if (request.GetBool("luck", flag))
+        params.WithLuck = flag;
+    if (request.GetBool("skill", flag))
+        params.WithSkill = flag;
+    if (option > 0)
+    {
+        params.WithOption = true;
+        params.OptionLevel = static_cast<BYTE>(option);
+    }
+    if (excellent > 0)
+    {
+        params.HasExcellentOption = true;
+        params.ExcellentFlags = static_cast<BYTE>(excellent);
+    }
+    if (ancient > 0)
+    {
+        params.IsAncient = true;
+        params.AncientDiscriminator = static_cast<BYTE>(ancient);
+    }
+    if (harmony > 0)
+    {
+        params.HasHarmonyOption = true;
+        params.HarmonyOptionType = static_cast<BYTE>(harmony);
+        if (harmonyLevel >= 0)
+            params.HarmonyOptionLevel = static_cast<BYTE>(harmonyLevel);
+    }
+
+    const std::vector<ItemTooltipLine> lines = TooltipOfParameters(params);
+
+    json result;
+    result["lines"] = json::array();
+    for (const ItemTooltipLine& line : lines)
+    {
+        result["lines"].push_back(
+            {{"text", Core::Text::ToUtf8(line.text.c_str())}, {"color", line.color}, {"bold", line.bold}});
+    }
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string ItemTooltipSnapshot(const Request& request, std::unique_ptr<Act>&)
+{
+    std::string path;
+    if (!request.GetString("out", path) || path.empty())
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`tooltip-snapshot` needs `out`, the file to write");
+    }
+    std::ofstream out(std::filesystem::path(Core::Text::FromUtf8(path)), std::ios::binary);
+    if (!out)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Failed, "the file could not be written");
+    }
+
+    // One group per request keeps the frame that builds them short.
+    int onlyGroup = -1;
+    if (request.Has("group") && (!request.GetInt("group", onlyGroup) || onlyGroup < 0 || onlyGroup >= MAX_ITEM_TYPE))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`group` is an item group, 0 to 15");
+    }
+
+    const int tooltips = WriteItemTooltipSnapshot(out, onlyGroup);
+    // A full disk or a failed write leaves the file short: not a snapshot.
+    out.flush();
+    if (!out)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Failed, "the file could not be written completely");
+    }
+
+    json result;
+    result["tooltips"] = tooltips;
+    result["out"] = path;
+    return EncodeResult(request.EncodedId(), result.dump());
 }
 
 std::string Nearby(const Request& request, std::unique_ptr<Act>&)

@@ -1,6 +1,10 @@
 #ifndef __ZZZINVENTORY_H__
 #define __ZZZINVENTORY_H__
 
+#include <optional>
+#include <string>
+#include <vector>
+
 enum _COLUMN_TYPE
 {
     _COLUMN_TYPE_LEVEL = 0,
@@ -96,15 +100,27 @@ namespace Data::Items
 {
 struct ItemDefinition;
 }
+struct ItemTooltipValues;
+
+// The server's pet information that a Dark Lord pet's tooltip asks for: the Dark Horse's when it is pointed at as the
+// equipped helper, the Dark Raven's when it is pointed at in the left hand; nothing elsewhere. `inventype` is the
+// tooltip's storage.
+struct PetInfoRequest
+{
+    PetType pet;
+    StorageType storage;
+    BYTE slot;
+};
+std::optional<PetInfoRequest> GetPetInfoRequest(int itemType, int pointedIndex, int inventype);
 
 // How wide a text is in the tooltip's text units.
 using ItemTooltipTextMeasure = int (*)(const wchar_t* text, size_t length);
-// Writes the item data's description in the UI's language, with its placeholders filled in for the item's level, into
-// TextList, TextListColor and TextBold from TextNum on: the lines of that level, each wrapped to the tooltip's width
-// and at its line breaks, the pieces in the line's color, a blank line or piece as the tooltip's own blank rows. At
-// most MaxItemDescriptionRows rows.
+// Writes the item data's description in the UI's language, with its placeholders filled in for the item (`values`,
+// and the stat file's tables at `level`), into TextList, TextListColor and TextBold from TextNum on: the lines of that
+// level, each wrapped to the tooltip's width and at its line breaks, the pieces in the line's color, a blank line or
+// piece as the tooltip's own blank rows. At most MaxItemDescriptionRows rows.
 void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, int level,
-                               ItemTooltipTextMeasure measure);
+                               const ItemTooltipValues& values, ItemTooltipTextMeasure measure);
 
 ///////////////////////////////////////////////////////////////////////////////
 // party
@@ -209,6 +225,21 @@ void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int 
 // The item's information and repair tooltips, anchored in window pixels: their layout runs in the
 // screen's 640x480 stretch, the space the original computed it in, whichever window asks.
 void RenderItemInfoAtPx(float x, float y, ITEM* ip, bool Sell, int Inventype = 0, bool bItemTextListBoxUse = false);
+// One line of an item's information tooltip as RenderItemInfoAtPx builds it: its text ("\n" for a blank line), its
+// TEXT_COLOR_* and whether it is bold.
+struct ItemTooltipLine
+{
+    std::wstring text;
+    int color = 0;
+    bool bold = false;
+};
+// The lines of `ip`'s information tooltip, built as RenderItemInfoAtPx builds them but not drawn; none when it shows
+// no tooltip or the pet manager draws its own (the Dark Lord's pets).
+// How the tooltip measures a description piece for wrapping: the game's font (g_pRenderText), unless a test sets
+// a measure of its own, which needs no font; nullptr puts the font back.
+void SetItemTooltipTextMeasure(ItemTooltipTextMeasure measure);
+std::vector<ItemTooltipLine> BuildItemTooltipLines(ITEM* ip, bool Sell, int Inventype = 0,
+                                                   bool bItemTextListBoxUse = false);
 void RenderRepairInfoAtPx(float x, float y, ITEM* ip, bool Sell);
 void RenderSkillInfo(int sx, int sy, int Type, int SkillNum = 0, int iRenderPoint = STRP_NONE);
 void RequireClass(ITEM_ATTRIBUTE* p);

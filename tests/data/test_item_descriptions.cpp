@@ -11,6 +11,7 @@
 #include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "I18N/All.h"
+#include "Engine/Object/ItemTooltipValues.h"
 #include "Engine/Object/ZzzInventory.h"
 
 #include <algorithm>
@@ -46,7 +47,7 @@ std::vector<std::wstring> WriteRows(const ItemDefinition& definition)
 {
     TextNum = 0;
     SkipNum = 0;
-    WriteItemDescriptionLines(definition, 0, FiveUnitsPerLetter);
+    WriteItemDescriptionLines(definition, 0, ItemTooltipValues{}, FiveUnitsPerLetter);
     return {std::begin(TextList), std::begin(TextList) + TextNum};
 }
 
@@ -113,7 +114,7 @@ TEST_CASE("A description's placeholders are filled in for the item's level befor
     jewel.description = {Line("+{level}: {table:b} more")};
     TextNum = 0;
     SkipNum = 0;
-    WriteItemDescriptionLines(jewel, 15, FiveUnitsPerLetter);
+    WriteItemDescriptionLines(jewel, 15, ItemTooltipValues{}, FiveUnitsPerLetter);
     REQUIRE(TextNum == 1);
     CHECK(std::wstring(TextList[0]) == L"+15: 2000000000 more");
 
@@ -121,10 +122,10 @@ TEST_CASE("A description's placeholders are filled in for the item's level befor
     const std::string text = "{table:b} " + std::string(30, 'a');
     jewel.description = {Line(text.c_str())};
     TextNum = 0;
-    WriteItemDescriptionLines(jewel, 15, FiveUnitsPerLetter);
+    WriteItemDescriptionLines(jewel, 15, ItemTooltipValues{}, FiveUnitsPerLetter);
     CHECK(TextNum == 2);
     TextNum = 0;
-    WriteItemDescriptionLines(jewel, 0, FiveUnitsPerLetter);
+    WriteItemDescriptionLines(jewel, 0, ItemTooltipValues{}, FiveUnitsPerLetter);
     CHECK(TextNum == 1);
 }
 
@@ -138,7 +139,7 @@ TEST_CASE("A description line is written only at the item levels it is shown at 
 
     TextNum = 0;
     SkipNum = 0;
-    WriteItemDescriptionLines(scroll, 0, FiveUnitsPerLetter);
+    WriteItemDescriptionLines(scroll, 0, ItemTooltipValues{}, FiveUnitsPerLetter);
     REQUIRE(TextNum == 1);
     CHECK(std::wstring(TextList[0]) == L"Every level");
 
@@ -146,13 +147,13 @@ TEST_CASE("A description line is written only at the item levels it is shown at 
     {
         INFO("+" << level);
         TextNum = 0;
-        WriteItemDescriptionLines(scroll, level, FiveUnitsPerLetter);
+        WriteItemDescriptionLines(scroll, level, ItemTooltipValues{}, FiveUnitsPerLetter);
         REQUIRE(TextNum == 2);
         CHECK(std::wstring(TextList[1]) == L"Warp after 3 seconds");
     }
 
     TextNum = 0;
-    WriteItemDescriptionLines(scroll, 9, FiveUnitsPerLetter);
+    WriteItemDescriptionLines(scroll, 9, ItemTooltipValues{}, FiveUnitsPerLetter);
     CHECK(TextNum == 1);
 }
 
@@ -162,12 +163,12 @@ TEST_CASE("A description writes at most its own rows, leaving the tooltip's rows
     jewel.description.assign(MaxItemDescriptionRows + 10, Line("A line"));
 
     TextNum = 5;
-    WriteItemDescriptionLines(jewel, 0, FiveUnitsPerLetter);
+    WriteItemDescriptionLines(jewel, 0, ItemTooltipValues{}, FiveUnitsPerLetter);
     CHECK(TextNum == 5 + MaxItemDescriptionRows);
 
     // Near the end of the list it stops at the list's end.
     TextNum = MaxTextListRows - 3;
-    WriteItemDescriptionLines(jewel, 0, FiveUnitsPerLetter);
+    WriteItemDescriptionLines(jewel, 0, ItemTooltipValues{}, FiveUnitsPerLetter);
     CHECK(TextNum == MaxTextListRows);
 }
 
