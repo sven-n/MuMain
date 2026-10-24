@@ -11575,18 +11575,13 @@ void ClearCharacters(int Key)
     {
         CHARACTER* c = &CharactersClient[i];
         OBJECT* o = &c->Object;
+        if (c->Key != Key)
+            DeleteCharacterCompanions(c);
         if (o->Live && c->Key != Key)
         {
             o->Live = false;
 
             BoneManager::UnregisterBone(c);
-
-            for (int j = 0; j < MAX_MOUNTS; j++)
-            {
-                OBJECT* b = &Mounts[j];
-                if (b->Live && b->Owner == o)
-                    b->Live = false;
-            }
         }
 
         DeletePet(c);
@@ -11607,12 +11602,7 @@ void DeleteCharacter(int Key)
 
             BoneManager::UnregisterBone(c);
 
-            for (int j = 0; j < MAX_MOUNTS; j++)
-            {
-                OBJECT* b = &Mounts[j];
-                if (b->Live && b->Owner == o)
-                    b->Live = false;
-            }
+            DeleteCharacterCompanions(c);
             DeletePet(c);
             DeleteCloth(c, o);
             DeleteParts(c);
@@ -11627,12 +11617,7 @@ void DeleteCharacter(CHARACTER* c, OBJECT* o)
 
     BoneManager::UnregisterBone(c);
 
-    for (int j = 0; j < MAX_MOUNTS; j++)
-    {
-        OBJECT* b = &Mounts[j];
-        if (b->Live && b->Owner == o)
-            b->Live = false;
-    }
+    DeleteCharacterCompanions(c);
 
     DeletePet(c);
     DeleteCloth(c, o);
@@ -11719,6 +11704,13 @@ void ReleaseCharacters(void)
     DeleteParts(&CharacterView);
 
     BoneManager::UnregisterAll();
+}
+
+void DeleteCharacterCompanions(CHARACTER* c)
+{
+    DeleteMount(&c->Object);
+    if (g_petProcess)
+        g_petProcess->DeletePet(c, -1, true);
 }
 
 void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, unsigned char PositionY, float Rotation)
@@ -12145,6 +12137,7 @@ CHARACTER* CreateCharacter(int Key, int Type, unsigned char PositionX, unsigned 
         OBJECT* o = &c->Object;
         if (o->Live && c->Key == Key)
         {
+            DeleteCharacterCompanions(c);
             CreateCharacterPointer(c, Type, PositionX, PositionY, Rotation);
             g_CharacterClearBuff(o);
             return c;
@@ -12161,6 +12154,7 @@ CHARACTER* CreateCharacter(int Key, int Type, unsigned char PositionX, unsigned 
             DeletePet(c);
             DeleteCloth(c, o);
             DeleteParts(c);
+            DeleteCharacterCompanions(c);
             CreateCharacterPointer(c, Type, PositionX, PositionY, Rotation);
             g_CharacterClearBuff(o);
             c->Key = Key;
@@ -12880,6 +12874,53 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
     SetCharacterScale(c);
 }
 
+namespace
+{
+int ReadBodyEquipmentExtended(CHARACTER* c, BYTE* Equipment)
+{
+    constexpr int BytesPerBodyPart = 3;
+    constexpr int BodyEquipmentLength = (MAX_BODYPART - 1) * BytesPerBodyPart;
+    // A transformed body stays intact, but its bytes still precede wings and helper.
+    if (c->Change)
+        return BodyEquipmentLength;
+
+    int offset = 0;
+    short bodyParts[] = {0, MODEL_BODY_HELM, MODEL_BODY_ARMOR, MODEL_BODY_PANTS, MODEL_BODY_GLOVES, MODEL_BODY_BOOTS};
+    for (int i = 1; i < MAX_BODYPART; i++)
+    {
+        c->BodyPart[i].Type = bodyParts[i] + c->SkinIndex;
+        c->BodyPart[i].ExcellentFlags = 0;
+        c->BodyPart[i].AncientDiscriminator = 0;
+        c->BodyPart[i].Level = 0;
+
+        if (Equipment[offset] != 0xFF && Equipment[offset + 1] != 0xFF)
+        {
+            short number = MAKEWORD(Equipment[offset + 1], Equipment[offset] & 0xF);
+            BYTE group = (Equipment[offset] & 0xF0) >> 4;
+            BYTE glowLevel = (Equipment[offset + 2] & 0xF0) >> 4;
+            bool isAncient = Equipment[offset + 2] & 0x04;
+            bool isExcellent = Equipment[offset + 2] & 0x08;
+
+            if (number > MAX_ITEM_INDEX)
+            {
+                // not supported
+            }
+            else
+            {
+                c->BodyPart[i].Type = Data::Items::ToModelSlot(Data::Items::MakeItemType(group, number));
+                c->BodyPart[i].Level = LevelConvert(glowLevel);
+                c->BodyPart[i].ExcellentFlags = isExcellent;
+                c->BodyPart[i].AncientDiscriminator = isAncient;
+            }
+        }
+
+        offset += BytesPerBodyPart;
+    }
+
+    return BodyEquipmentLength;
+}
+} // namespace
+
 void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCharacter, OBJECT* pHelper)
 {
     CHARACTER* c;
@@ -12931,43 +12972,7 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
     }
 
     DeleteParts(c);
-    if (c->Change)
-    {
-        // todo: is this the correct place to return?
-        return;
-    }
-
-    short bodyParts[] = { 0, MODEL_BODY_HELM, MODEL_BODY_ARMOR, MODEL_BODY_PANTS, MODEL_BODY_GLOVES, MODEL_BODY_BOOTS};
-    for (int i = 1; i < MAX_BODYPART; i++)
-    {
-        c->BodyPart[i].Type = bodyParts[i] + c->SkinIndex;
-        c->BodyPart[i].ExcellentFlags = 0;
-        c->BodyPart[i].AncientDiscriminator = 0;
-        c->BodyPart[i].Level = 0;
-
-        if (Equipment[offset] != 0xFF && Equipment[offset + 1] != 0xFF)
-        {
-            short number = MAKEWORD(Equipment[offset + 1], Equipment[offset] & 0xF);
-            BYTE group = (Equipment[offset] & 0xF0) >> 4;
-            BYTE glowLevel = (Equipment[offset + 2] & 0xF0) >> 4;
-            bool isAncient = Equipment[offset + 2] & 0x04;
-            bool isExcellent = Equipment[offset + 2] & 0x08;
-
-            if (number > MAX_ITEM_INDEX)
-            {
-                // not supported
-            }
-            else
-            {
-                c->BodyPart[i].Type = Data::Items::ToModelSlot(Data::Items::MakeItemType(group, number));
-                c->BodyPart[i].Level = LevelConvert(glowLevel);
-                c->BodyPart[i].ExcellentFlags = isExcellent;
-                c->BodyPart[i].AncientDiscriminator = isAncient;
-            }
-        }
-
-        offset += 3;
-    }
+    offset += ReadBodyEquipmentExtended(c, Equipment + offset);
 
     // Wings:
     {
@@ -12991,6 +12996,15 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
         offset += 2;
     }
 
+    if (pHelper == nullptr)
+    {
+        DeleteCharacterCompanions(c);
+    }
+    else
+    {
+        pHelper->Live = false;
+    }
+
     // Helper:
     int HelperVariant = 0;
     {
@@ -13007,16 +13021,6 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
         }
 
         // offset += 2;
-    }
-
-    if (pHelper == nullptr)
-    {
-        DeleteMount(o);
-        ThePetProcess().DeletePet(c, Data::Items::ToItemType(c->Helper.Type), true);
-    }
-    else
-    {
-        pHelper->Live = false;
     }
 
     switch (c->Helper.Type)
@@ -13071,13 +13075,16 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
         break;
     }
 
-    c->EtcPart = 0;
+    // A transformed Blood Castle carrier keeps the quest-item marker.
+    if (!c->Change || c->EtcPart > 3)
+        c->EtcPart = 0;
     if ((flags & 0x20) > 0)
     {
         c->EtcPart = PARTS_LION;
     }
 
-    ChangeChaosCastleUnit(c);
+    if (!c->Change)
+        ChangeChaosCastleUnit(c);
     SetCharacterScale(c);
 }
 
