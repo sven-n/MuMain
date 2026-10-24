@@ -55,6 +55,11 @@ void Warn(std::vector<ItemDataIssue>& issues, const std::string& source, int num
                       "monster " + std::to_string(number) + " name", message});
 }
 
+void AddFileError(std::vector<ItemDataIssue>& issues, const std::string& source, const std::string& message)
+{
+    issues.push_back({ItemDataIssueSeverity::Error, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, "", message});
+}
+
 // Sets one name read from a file of `locale`, unless the import leaves it.
 NameOutcome ApplyName(int number, std::string name, const std::string& locale, const std::string& source,
                       std::vector<ItemDataIssue>& issues)
@@ -175,12 +180,16 @@ LanguageExport ExportLanguage(const std::filesystem::path& clientFolder, const D
         result.unchanged = true;
         return result;
     }
-    CommonDataSaver::CreateBackup(target.wstring().c_str());
+    // Without the backup the old names would be lost.
+    if (!CommonDataSaver::CreateBackup(target.wstring().c_str()))
+    {
+        AddFileError(result.issues, source, "could not be backed up; not written");
+        return result;
+    }
     std::string error;
     if (!Data::WriteTextFile(target, text, error))
     {
-        result.issues.push_back(
-            {ItemDataIssueSeverity::Error, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, "", error});
+        AddFileError(result.issues, source, error);
         return result;
     }
     result.written = true;

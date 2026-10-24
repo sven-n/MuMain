@@ -298,7 +298,9 @@ whole path.
   no name of its own (the console counts them). The Kalima gates are written
   with their plain names. A name containing `"` cannot be written: it is
   left out with a warning. A file that already has these names is not
-  written; a file that changes is backed up first.
+  written; a file that changes is backed up first. A file that cannot be
+  backed up is not written (an error in the console); the other languages
+  are still written.
 
 ## Control socket
 

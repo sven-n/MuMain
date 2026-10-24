@@ -70,7 +70,8 @@ std::vector<LanguageImport> Import(const std::filesystem::path& clientFolder, st
 // Writes each language's file below the client folder with the names of all
 // monsters with an entry, in English where the language has no name of its
 // own. A file that already has these names is not written; one that changes is
-// backed up first, as the item bmd export does.
+// backed up first, as the item bmd export does. A file whose backup fails is not
+// written, with an error; the other languages go on.
 std::vector<LanguageExport> Export(const std::filesystem::path& clientFolder,
                                    std::span<const Data::LegacyLanguage> languages = Data::GetLegacyLanguages());
 } // namespace MuEditor::Monsters::NpcNameFiles

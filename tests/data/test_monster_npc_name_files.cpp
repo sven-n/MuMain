@@ -21,6 +21,10 @@
 #include <string_view>
 #include <vector>
 
+#ifdef _WIN32
+#include <aclapi.h>
+#endif
+
 using Data::Items::ItemDataIssue;
 using Data::Monsters::MonsterDefinition;
 namespace NpcNameFiles = MuEditor::Monsters::NpcNameFiles;
@@ -97,6 +101,63 @@ int CountBackups(const std::filesystem::path& folder)
                                                   [](const std::filesystem::directory_entry& entry)
                                                   { return entry.path().extension() == ".bak"; }));
 }
+
+#ifdef _WIN32
+// Denies this user reading the file, as for a file of another user: it cannot be
+// copied (so not backed up), but it can still be replaced. The file's old access
+// comes back at the end.
+class UnreadableFile
+{
+public:
+    explicit UnreadableFile(const std::filesystem::path& file) : m_file(file.wstring())
+    {
+        PACL oldAcl = nullptr;
+        if (GetNamedSecurityInfoW(m_file.c_str(), SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, nullptr, nullptr, &oldAcl,
+                                  nullptr, &m_oldSecurity) != ERROR_SUCCESS)
+        {
+            return;
+        }
+        m_oldAcl = oldAcl;
+        EXPLICIT_ACCESSW deny{};
+        BuildExplicitAccessWithNameW(&deny, const_cast<LPWSTR>(L"CURRENT_USER"), FILE_READ_DATA, DENY_ACCESS,
+                                     NO_INHERITANCE);
+        PACL deniedAcl = nullptr;
+        if (SetEntriesInAclW(1, &deny, oldAcl, &deniedAcl) != ERROR_SUCCESS)
+        {
+            return;
+        }
+        m_denied = SetAcl(deniedAcl);
+        LocalFree(deniedAcl);
+    }
+    ~UnreadableFile()
+    {
+        if (m_denied)
+        {
+            SetAcl(m_oldAcl);
+        }
+        LocalFree(m_oldSecurity);
+    }
+    UnreadableFile(const UnreadableFile&) = delete;
+    UnreadableFile& operator=(const UnreadableFile&) = delete;
+
+    bool IsDenied() const
+    {
+        return m_denied;
+    }
+
+private:
+    bool SetAcl(PACL acl)
+    {
+        return SetNamedSecurityInfoW(m_file.data(), SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, nullptr, nullptr, acl,
+                                     nullptr) == ERROR_SUCCESS;
+    }
+
+    std::wstring m_file;
+    PSECURITY_DESCRIPTOR m_oldSecurity = nullptr;
+    PACL m_oldAcl = nullptr;
+    bool m_denied = false;
+};
+#endif
 } // namespace
 
 TEST_CASE("NpcName txt: the files are below Data/Local in the language's folder [editor][monsters]")
@@ -276,6 +337,34 @@ TEST_CASE("NpcName txt: an unchanged file is not written again, a changed one is
     CHECK(CountBackups(englishFolder) == 1);
     CHECK(ReadNameFile(folder, "en") == "2\t1\t\"Red Dragon\"\r\nend\r\n");
 }
+
+#ifdef _WIN32
+TEST_CASE("NpcName txt: a file that cannot be backed up is not written, the others are [editor][monsters]")
+{
+    StartWith({Monster(2, "Budge Dragon")});
+    const TemporaryMonsterFolder folder;
+    const std::string oldText = "2\t1\t\"Red Dragon\"\r\nend\r\n";
+    WriteNameFile(folder, "en", oldText);
+    const std::filesystem::path englishFile = NpcNameFiles::GetFile(folder.Path(), Language("en"));
+
+    std::vector<NpcNameFiles::LanguageExport> exported;
+    {
+        const UnreadableFile unreadable(englishFile);
+        REQUIRE(unreadable.IsDenied());
+        exported = NpcNameFiles::Export(folder.Path());
+    }
+
+    const auto& english = Of(exported, "en");
+    CHECK_FALSE(english.written);
+    REQUIRE(english.issues.size() == 1);
+    CHECK(english.issues.front().severity == Data::Items::ItemDataIssueSeverity::Error);
+    CHECK(english.issues.front().message.find("backed up") != std::string::npos);
+    CHECK(CountBackups(englishFile.parent_path()) == 0);
+    CHECK(ReadNameFile(folder, "en") == oldText);
+    CHECK(Of(exported, "pt").written);
+    CHECK(Of(exported, "es").written);
+}
+#endif
 
 TEST_CASE("NpcName txt: a name with a quote is left out of the export, with a warning [editor][monsters]")
 {
