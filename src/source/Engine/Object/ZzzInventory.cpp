@@ -21,7 +21,6 @@
 
 #include "Scenes/SceneCore.h"
 
-#include "Core/Utilities/Debouncer.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "App/Platform/Windows/Local.h"
@@ -39,6 +38,7 @@
 #include "GameLogic/Items/ItemCategories.h"
 #include "GameLogic/Items/ItemStats.h"
 #include "Render/Items/ItemDisplay.h"
+#include <chrono>
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
@@ -4455,24 +4455,19 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
         return;
     if (build == ItemTooltipBuild::DarkLordPet)
     {
-        // The request is made once a second at most, for the pet whose tooltip is drawn then: the callback lives on,
-        // so it reads the item of this call, not one it was made with.
-        static int petItemType = -1;
-        static int petInventype = 0;
-        petItemType = ip->Type;
-        petInventype = Inventype;
-        static DebouncedAction debouncedPetInfoRequest(
-            []()
+        // The pet's information is requested once a second at most, for the pet whose tooltip is drawn.
+        static std::chrono::steady_clock::time_point lastPetInfoRequest;
+        const auto now = std::chrono::steady_clock::now();
+        if (lastPetInfoRequest == std::chrono::steady_clock::time_point() ||
+            now - lastPetInfoRequest >= std::chrono::seconds(1))
+        {
+            lastPetInfoRequest = now;
+            if (const std::optional<PetInfoRequest> request =
+                    GetPetInfoRequest(ip->Type, g_pMyInventory->GetPointedItemIndex(), Inventype))
             {
-                if (const std::optional<PetInfoRequest> request =
-                        GetPetInfoRequest(petItemType, g_pMyInventory->GetPointedItemIndex(), petInventype))
-                {
-                    SocketClient->ToGameServer()->SendPetInfoRequest(request->pet, request->storage, request->slot);
-                }
-            },
-            1000); // 1-second intervals
-
-        debouncedPetInfoRequest.invoke();
+                SocketClient->ToGameServer()->SendPetInfoRequest(request->pet, request->storage, request->slot);
+            }
+        }
 
         giPetManager::RenderPetItemInfo(screen, sx, sy, ip, Inventype);
         return;

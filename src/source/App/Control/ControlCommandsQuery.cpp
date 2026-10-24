@@ -7,6 +7,7 @@
 #include "Core/Utilities/Benchmark/BenchRecorder.h"
 #include "Core/Text/Utf8.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Engine/Object/ItemTooltipSnapshot.h"
 #include "Network/Server/WSclient.h"
@@ -231,7 +232,8 @@ std::string& MutableBuildIdentifier()
 }
 
 // Absolute path for a caller-given one, so the answer names a file the
-// caller can open regardless of the client's working directory.
+// caller can open regardless of the client's working directory. Used by every
+// command that writes a file (`screenshot`, `tooltip-snapshot`).
 std::filesystem::path ResolveScreenshotPath(const std::string& requested)
 {
     // Through the wide form: a std::string given to std::filesystem::path is
@@ -517,6 +519,18 @@ std::string ItemTooltip(const Request& request, std::unique_ptr<Act>&)
                            "`level`, `option`, `harmony` and `harmony_level` are 0 to 15, `excellent` the excellent "
                            "options' bits 0 to 63, `durability` and `ancient` 0 to 255");
     }
+    // A harmony level counts only with a harmony option; alone it would be ignored.
+    if (harmonyLevel >= 0 && harmony == 0)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`harmony_level` needs `harmony`, the Jewel of Harmony option");
+    }
+    // An item number no item uses would answer with the tooltip of an empty item.
+    if (g_ItemDatabase.Find(group, number) == nullptr)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "no item has group " + std::to_string(group) + " and number " + std::to_string(number));
+    }
 
     ItemCreationParams params = FullItemParameters(group, number);
     if (level >= 0)
@@ -571,17 +585,20 @@ std::string ItemTooltipSnapshot(const Request& request, std::unique_ptr<Act>&)
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
                            "`tooltip-snapshot` needs `out`, the file to write");
     }
-    std::ofstream out(std::filesystem::path(Core::Text::FromUtf8(path)), std::ios::binary);
-    if (!out)
-    {
-        return EncodeError(request.EncodedId(), ErrorCode::Failed, "the file could not be written");
-    }
 
-    // One group per request keeps the frame that builds them short.
+    // One group per request keeps the frame that builds them short. Checked before `out` is opened: opening it
+    // empties it, and a mistyped request must not wipe a recorded snapshot.
     int onlyGroup = -1;
     if (request.Has("group") && (!request.GetInt("group", onlyGroup) || onlyGroup < 0 || onlyGroup >= MAX_ITEM_TYPE))
     {
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`group` is an item group, 0 to 15");
+    }
+
+    const std::filesystem::path file = ResolveScreenshotPath(path);
+    std::ofstream out(file, std::ios::binary);
+    if (!out)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Failed, "the file could not be written");
     }
 
     const int tooltips = WriteItemTooltipSnapshot(out, onlyGroup);
@@ -594,7 +611,7 @@ std::string ItemTooltipSnapshot(const Request& request, std::unique_ptr<Act>&)
 
     json result;
     result["tooltips"] = tooltips;
-    result["out"] = path;
+    result["out"] = Core::Text::ToUtf8(file.wstring().c_str());
     return EncodeResult(request.EncodedId(), result.dump());
 }
 
