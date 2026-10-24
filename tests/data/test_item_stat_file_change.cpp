@@ -193,4 +193,34 @@ TEST_CASE("Renaming a table renames it in the descriptions that name it [editor]
     CHECK(changed[1].description[0].text.Get("de") == "Abwehr +{table:blockBonus}");
 }
 
+TEST_CASE("A table a line's values name is used and renamed there [editor][items]")
+{
+    ItemDefinition shield = MakeShield(0, "");
+    ItemDescriptionLine line;
+    line.textName = "increaseBlock";
+    line.values = {{"percent", "table:bonus"}, {"level", "level"}};
+    shield.description = {line};
+    const std::vector<ItemDefinition> items = {shield};
+
+    CHECK(FindTableDescriptionUsers(items, "bonus") == std::vector<int>{MakeItemType(6, 0)});
+    std::vector<ItemDefinition> changed;
+    RenameTableInDescriptions(items, changed, "bonus", "blockBonus");
+    REQUIRE(changed.size() == 1);
+    CHECK(changed[0].description[0].values ==
+          std::vector<std::pair<std::string, std::string>>{{"percent", "table:blockBonus"}, {"level", "level"}});
+
+    // A name line too.
+    ItemDefinition named = MakeShield(1, "");
+    ItemNameLine nameLine;
+    nameLine.text.Set("en", "{name} +{table:bonus}");
+    nameLine.hasText = true;
+    named.nameLines = {nameLine};
+    const std::vector<ItemDefinition> namedItems = {named};
+    CHECK(FindTableDescriptionUsers(namedItems, "bonus") == std::vector<int>{MakeItemType(6, 1)});
+    changed.clear();
+    RenameTableInDescriptions(namedItems, changed, "bonus", "blockBonus");
+    REQUIRE(changed.size() == 1);
+    CHECK(changed[0].nameLines[0].text.GetNeutral() == "{name} +{table:blockBonus}");
+}
+
 #endif // _EDITOR

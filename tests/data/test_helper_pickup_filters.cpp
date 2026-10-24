@@ -139,8 +139,12 @@ TEST_CASE("Helper unmapped variant levels retain the base name [data][helper][pi
 {
     ClientDataScope client(ShippedClientDirectory);
     LoadShippedItems();
-    for (auto item : {MakeItem(ITEM_BOX_OF_LUCK, 4), MakeItem(ITEM_POTION + 12, 3), MakeItem(ITEM_FRUITS, 5),
-                      MakeItem(ITEM_LOCHS_FEATHER, 2)})
+    // The Box of Luck +4 has a name of its own in the item data's name lines ("Olive of love", the original client's
+    // name for that level), and the extra filters match it.
+    ITEM olive = MakeItem(ITEM_BOX_OF_LUCK, 4);
+    CHECK(GetItemDisplayName(&olive) == L"Olive of love");
+    CHECK(GameLogic::Automation::ShouldPickUpHelperItem(ExtraFilter(L"Olive"), &olive));
+    for (auto item : {MakeItem(ITEM_POTION + 12, 3), MakeItem(ITEM_FRUITS, 5), MakeItem(ITEM_LOCHS_FEATHER, 2)})
     {
         CAPTURE(item.Type);
         CAPTURE(item.Level);

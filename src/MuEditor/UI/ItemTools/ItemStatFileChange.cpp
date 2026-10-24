@@ -60,19 +60,44 @@ bool SameTerms(const ItemStatProfiles& before, const ItemStatProfile& old, const
     return SameRequirementTerms(old.requirements, changed.requirements);
 }
 
+// A line names a table in its text or in its "values".
+bool LineNamesTable(const Data::Items::ItemDescriptionLine& line, std::string_view table)
+{
+    const std::string placeholder = Data::Items::MakeTablePlaceholder(table);
+    if (Data::Items::NamesTable(line.text.GetNeutral(), table) ||
+        std::ranges::any_of(line.values, [&](const auto& value) { return value.second == placeholder; }))
+    {
+        return true;
+    }
+    return std::ranges::any_of(line.text.GetTranslations(), [&](const auto& translation)
+                               { return Data::Items::NamesTable(translation.second, table); });
+}
+
+// A description line or a name line of the item names the table.
 bool DescriptionNamesTable(const ItemDefinition& item, std::string_view table)
 {
-    return std::ranges::any_of(item.description,
-                               [&](const Data::Items::ItemDescriptionLine& line)
-                               {
-                                   if (Data::Items::NamesTable(line.text.GetNeutral(), table))
-                                   {
-                                       return true;
-                                   }
-                                   return std::ranges::any_of(
-                                       line.text.GetTranslations(), [&](const auto& translation)
-                                       { return Data::Items::NamesTable(translation.second, table); });
-                               });
+    const auto names = [&](const Data::Items::ItemDescriptionLine& line) { return LineNamesTable(line, table); };
+    return std::ranges::any_of(item.description, names) || std::ranges::any_of(item.nameLines, names);
+}
+
+// The line naming the table `to` where it names `from`, in every language and in its "values".
+void RenameTableInLine(Data::Items::ItemDescriptionLine& line, std::string_view from, std::string_view to)
+{
+    Data::LocalizedString text;
+    text.Set(Data::LocalizedString::NeutralLocale,
+             Data::Items::RenameTablePlaceholders(line.text.GetNeutral(), from, to));
+    for (const auto& [locale, translation] : line.text.GetTranslations())
+    {
+        text.Set(locale, Data::Items::RenameTablePlaceholders(translation, from, to));
+    }
+    line.text = std::move(text);
+    for (auto& [placeholder, value] : line.values)
+    {
+        if (value == Data::Items::MakeTablePlaceholder(from))
+        {
+            value = Data::Items::MakeTablePlaceholder(to);
+        }
+    }
 }
 
 // "" for the default, also when an item names "default".
@@ -182,14 +207,11 @@ void RenameTableInDescriptions(std::span<const ItemDefinition> slots, std::vecto
         ItemDefinition& renamed = found != changed.end() ? *found : changed.emplace_back(item);
         for (Data::Items::ItemDescriptionLine& line : renamed.description)
         {
-            Data::LocalizedString text;
-            text.Set(Data::LocalizedString::NeutralLocale,
-                     Data::Items::RenameTablePlaceholders(line.text.GetNeutral(), from, to));
-            for (const auto& [locale, translation] : line.text.GetTranslations())
-            {
-                text.Set(locale, Data::Items::RenameTablePlaceholders(translation, from, to));
-            }
-            line.text = std::move(text);
+            RenameTableInLine(line, from, to);
+        }
+        for (Data::Items::ItemDescriptionLine& line : renamed.nameLines)
+        {
+            RenameTableInLine(line, from, to);
         }
     }
 }

@@ -5,6 +5,7 @@
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
+#include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 #include "Data/GameData/ItemData/SharedItemModel.h"
 
 #include <bitset>
@@ -64,6 +65,18 @@ struct ItemStatsLoadResult
 std::filesystem::path GetItemStatsFile();
 
 ItemStatsLoadResult LoadItemStatsFile(const std::filesystem::path& file);
+
+struct ItemTooltipLoadResult
+{
+    ItemTooltipFile file;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Items/Tooltips/Tooltip.json, relative to the client folder: the shared texts and the layouts of the item
+// tooltips, see ItemTooltipLayouts.h. In a folder of its own like the stat file.
+std::filesystem::path GetItemTooltipFile();
+
+ItemTooltipLoadResult LoadItemTooltipFile(const std::filesystem::path& file);
 
 struct GlowColorsLoadResult
 {
