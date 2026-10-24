@@ -491,6 +491,38 @@
         "es": "Invitación del Diablo",
         "pt": "Convite do diabo"
       },
+      "description": [
+        {
+          "text": {
+            "en": "The remaining time is shown",
+            "de": "Die verbleibende Zeit wird angezeigt",
+            "es": "Se muestra el tiempo restante",
+            "id": "Waktu yang tersisa ditampilkan",
+            "ja": "マウスボタンを右クリックすれば",
+            "pl": "Wyświetlany jest pozostały czas",
+            "pt": "O tempo restante é mostrado",
+            "ru": "Оставшееся время показано",
+            "tl": "Ang natitirang oras ay ipinapakita",
+            "uk": "Показано час, що залишився",
+            "zh-TW": "顯示剩餘時間"
+          }
+        },
+        {
+          "text": {
+            "en": "when you right click on your mouse.",
+            "de": "wenn Sie mit der rechten Maustaste klicken.",
+            "es": "cuando haces clic derecho en tu mouse.",
+            "id": "ketika Anda mengklik kanan pada mouse Anda.",
+            "ja": "残った時間を見ることができます。",
+            "pl": "po kliknięciu prawym przyciskiem myszy.",
+            "pt": "quando você clica com o botão direito do mouse.",
+            "ru": "когда вы щелкаете правой кнопкой мыши.",
+            "tl": "kapag nag-right click ka sa iyong mouse.",
+            "uk": "коли ви клацаєте правою кнопкою миші.",
+            "zh-TW": "當您右鍵單擊滑鼠時。"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -1090,6 +1122,24 @@
         "pt": "Talismã da sorte"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Increases the combination rate,but only up to the maximum rate.",
+            "de": "Erhöht die Kombinationsrate, jedoch nur bis zur Maximalrate.",
+            "es": "Aumenta la tasa de combinación, pero solo hasta la tasa máxima.",
+            "id": "Meningkatkan laju kombinasi, namun hanya hingga laju maksimum.",
+            "ja": "合成成功確率が高くなり、一定の数値以上は高くなりません。",
+            "pl": "Zwiększa współczynnik kombinacji, ale tylko do maksymalnego współczynnika.",
+            "pt": "Aumenta a taxa de combinação, mas apenas até a taxa máxima.",
+            "ru": "Увеличивает коэффициент комбинации, но только до максимального коэффициента.",
+            "tl": "Pinapataas ang rate ng kumbinasyon, ngunit hanggang sa maximum na rate lamang.",
+            "uk": "Збільшує швидкість комбінації, але лише до максимальної швидкості.",
+            "zh-TW": "增加組合速率，但僅達最大速率。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -1107,6 +1157,24 @@
         "pt": "Cartão do caos"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "You can achieve special items with combinations.",
+            "de": "Durch Kombinationen können Sie besondere Gegenstände erhalten.",
+            "es": "Puedes conseguir objetos especiales con combinaciones.",
+            "id": "Anda dapat memperoleh item khusus dengan kombinasi.",
+            "ja": "パンドラ合成でアイテムを獲得",
+            "pl": "Dzięki kombinacjom możesz zdobyć specjalne przedmioty.",
+            "pt": "Você pode conseguir itens especiais com combinações.",
+            "ru": "Вы можете получить особые предметы с помощью комбинаций.",
+            "tl": "Makakamit mo ang mga espesyal na item na may mga kumbinasyon.",
+            "uk": "Ви можете отримати спеціальні предмети за допомогою комбінацій.",
+            "zh-TW": "您可以透過組合獲得特殊物品。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -1160,6 +1228,24 @@
         "pt": "Bilhete de item raro1"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Congratulations. Please contact CS team and change it to item.",
+            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
+            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
+            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
+            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
+            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
+            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
+            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
+            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
+            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
+            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -1177,6 +1263,24 @@
         "pt": "Bilhete de item raro2"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Congratulations. Please contact CS team and change it to item.",
+            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
+            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
+            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
+            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
+            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
+            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
+            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
+            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
+            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
+            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -1194,6 +1298,24 @@
         "pt": "Bilhete de item raro3"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Congratulations. Please contact CS team and change it to item.",
+            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
+            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
+            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
+            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
+            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
+            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
+            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
+            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
+            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
+            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -1211,6 +1333,24 @@
         "pt": "Bilhete de item raro4"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Congratulations. Please contact CS team and change it to item.",
+            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
+            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
+            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
+            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
+            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
+            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
+            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
+            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
+            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
+            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -1228,6 +1368,24 @@
         "pt": "Bilhete de item raro5"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Congratulations. Please contact CS team and change it to item.",
+            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
+            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
+            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
+            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
+            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
+            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
+            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
+            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
+            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
+            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -1256,6 +1414,24 @@
         "es": "Agua de Castillo Maldito",
         "pt": "Água do Castelo Amaldiçoado"
       },
+      "description": [
+        {
+          "text": {
+            "en": "Mobility speed reduces upon achievement.",
+            "de": "Beim Tragen verringert sich die Bewegungsgeschwindigkeit.",
+            "es": "La velocidad de movilidad se reduce al lograrlo.",
+            "id": "Kecepatan mobilitas berkurang setelah pencapaian.",
+            "ja": "獲得時に移動速度減少",
+            "pl": "Po podniesieniu przedmiotu prędkość ruchu spada.",
+            "pt": "A velocidade de mobilidade diminui após a conquista.",
+            "ru": "Скорость мобильности снижается при достижении.",
+            "tl": "Ang bilis ng paggalaw ay bumababa kapag nakamit.",
+            "uk": "Швидкість рухливості знижується після досягнення.",
+            "zh-TW": "成就後移動速度會降低。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -1558,6 +1734,24 @@
         "es": "Boleto de Ítem Raro",
         "pt": "Bilhete de item raro"
       },
+      "description": [
+        {
+          "text": {
+            "en": "Congratulations. Please contact CS team and change it to item.",
+            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
+            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
+            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
+            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
+            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
+            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
+            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
+            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
+            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
+            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -1570,6 +1764,24 @@
         "es": "Caja Juegos Flor de Cerezo",
         "pt": "Cx. de Brinq. Flor de Cereja"
       },
+      "description": [
+        {
+          "text": {
+            "en": "Drop it to receive the gift.",
+            "de": "Lassen Sie es fallen, um das Geschenk zu erhalten.",
+            "es": "Déjalo para recibir el regalo.",
+            "id": "Jatuhkan untuk menerima hadiah.",
+            "ja": "地面に投げるとプレゼントが出ます。",
+            "pl": "Upuść go, aby otrzymać prezent.",
+            "pt": "Solte-o para receber o presente.",
+            "ru": "Брось его, чтобы получить подарок.",
+            "tl": "I-drop ito upang matanggap ang regalo.",
+            "uk": "Киньте його, щоб отримати подарунок.",
+            "zh-TW": "放下它即可收到禮物。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -1740,6 +1952,56 @@
         "pt": "Talismã do Agrup. do Caos"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Minimum +10 - +15 level item upgrade",
+            "de": "Mindestens +10 bis +15 bei der Verbesserung von Gegenständen:",
+            "es": "Actualización mínima de elemento de nivel +10 - +15",
+            "id": "Minimal +10 - +15 peningkatan item level",
+            "ja": "+10～+15レベル以上のアイテムアップグレード時",
+            "pl": "Przy ulepszaniu przedmiotu na +10 – +15",
+            "pt": "Atualização mínima de item de nível +10 - +15",
+            "ru": "Минимум +10–+15 повышение уровня предмета.",
+            "tl": "Pinakamababang +10 - +15 na antas ng pag-upgrade ng item",
+            "uk": "Мінімальне підвищення рівня +10 - +15",
+            "zh-TW": "最低 +10 - +15 級物品升級"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "blocks the item dissipation.",
+            "de": "verhindert das Verschwinden des Gegenstands.",
+            "es": "Bloquea la disipación del artículo.",
+            "id": "memblokir disipasi item.",
+            "ja": "アイテムの消滅を防ぎます。",
+            "pl": "chroni przedmiot przed zniszczeniem.",
+            "pt": "bloqueia a dissipação do item.",
+            "ru": "блокирует рассеивание предмета.",
+            "tl": "hinaharangan ang pagwawaldas ng item.",
+            "uk": "блокує розсіювання предмета.",
+            "zh-TW": "阻止物品耗散。"
+          },
+          "color": "purple"
+        },
+        {
+          "text": {
+            "en": "+10~+15 When upgrading level item please put it in combination window.",
+            "de": "Legen Sie Gegenstände für die Verbesserung auf +10~+15 in das Kombinationsfenster.",
+            "es": "+10~+15 Al actualizar el elemento de nivel, colóquelo en la ventana de combinación.",
+            "id": "+10~+15 Saat meningkatkan item level, harap letakkan di jendela kombinasi.",
+            "ja": "+10~+15レベルアイテムのアップグレード時に合成ウィンドウに入れて使用",
+            "pl": "+10~+15 Podczas ulepszania przedmiotu na poziomie proszę umieścić go w oknie kombinacji.",
+            "pt": "+10~+15 Ao atualizar o item de nível, coloque-o na janela de combinação.",
+            "ru": "+10~+15 При обновлении предмета уровня поместите его в окно комбинации.",
+            "tl": "+10~+15 Kapag nag-a-upgrade ng item sa antas, mangyaring ilagay ito sa window ng kumbinasyon.",
+            "uk": "+10~+15 Під час підвищення рівня предмета, будь ласка, помістіть його у вікно комбінацій.",
+            "zh-TW": "+10~+15 升級等級項目時請將其放在組合視窗中。"
+          },
+          "color": "purple"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -1936,6 +2198,40 @@
         "es": "Espejo de Dimensiones",
         "pt": "Espelho das dimensões"
       },
+      "description": [
+        {
+          "text": {
+            "en": "That's the only thing that will get Lugard to help you",
+            "de": "Nur damit hilft Ihnen Lugard,",
+            "es": "Eso es lo único que hará que Lugard te ayude.",
+            "id": "Itulah satu-satunya hal yang akan membuat Lugard membantu Anda",
+            "ja": "NPCルガドによって次元の狭間へ",
+            "pl": "Tylko to sprawi, że Lugard ci pomoże",
+            "pt": "Essa é a única coisa que fará Lugard ajudá-lo",
+            "ru": "Это единственное, что заставит Лугарда помочь вам.",
+            "tl": "Iyan lang ang makakatutulong sa iyo ni Lugard",
+            "uk": "Це єдине, що змусить Лугарда вам допомогти",
+            "zh-TW": "這是唯一能讓盧加德幫助你的事情"
+          },
+          "color": "darkBlue"
+        },
+        {
+          "text": {
+            "en": "enter the Doppelganger area.",
+            "de": "den Doppelgänger-Bereich zu betreten.",
+            "es": "Ingrese al área de Doppelganger.",
+            "id": "memasuki area Doppelganger.",
+            "ja": "移動できる唯一のアイテムです。",
+            "pl": "wejść do Doppelganger.",
+            "pt": "entre na área Doppelganger.",
+            "ru": "войдите в зону Доппельгангера.",
+            "tl": "pumasok sa lugar ng Doppelganger.",
+            "uk": "увійдіть у зону Doppelganger.",
+            "zh-TW": "進入分身區域。"
+          },
+          "color": "darkBlue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -1949,6 +2245,23 @@
         "pt": "Chave prateada"
       },
       "tags": ["cashShop", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "You can do a Goblin combination with a Sealed Silver Box to create a Silver Box.",
+            "de": "Mit einer versiegelten silbernen Box können Sie beim Goblin eine Silberne Box kombinieren.",
+            "es": "Puedes hacer una combinación de Duende con una Caja plateada sellada para crear una Caja plateada.",
+            "id": "Kalian bisa melakukan kombinasi Goblin dengan Sealed Silver Box untuk membuat Silver Box.",
+            "ja": "封印された銀箱とのカオス合成で銀箱を生成できます。",
+            "pl": "Połącz Sealed Silver Box u Chaos Goblina, aby stworzyć Silver Box.",
+            "pt": "Você pode fazer uma combinação de Goblin com uma Caixa de Prata Selada para criar uma Caixa de Prata.",
+            "ru": "Вы можете создать комбинацию Гоблина с Запечатанной Серебряной Коробкой, чтобы создать Серебряную Коробку.",
+            "tl": "Maaari kang gumawa ng kumbinasyon ng Goblin na may Sealed Silver Box para gumawa ng Silver Box.",
+            "uk": "Ви можете поєднати Гобліна з Запечатаною Срібною Скринькою, щоб створити Срібну Скриньку.",
+            "zh-TW": "您可以將哥布林與密封銀盒進行組合來創建銀盒。"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -1967,6 +2280,23 @@
         "pt": "Chave dourada"
       },
       "tags": ["cashShop", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "You can do a Goblin combination with a Sealed Golden Box to create a Golden Box.",
+            "de": "Mit einer versiegelten goldenen Box können Sie beim Goblin eine Goldene Box kombinieren.",
+            "es": "Puedes hacer una combinación de Duende con una Caja Dorada Sellada para crear una Caja Dorada.",
+            "id": "Kalian bisa melakukan kombinasi Goblin dengan Sealed Golden Box untuk membuat Golden Box.",
+            "ja": "封印された金箱とのカオス合成で金箱を生成できます。",
+            "pl": "Połącz Sealed Golden Box u Chaos Goblina, aby stworzyć Golden Box.",
+            "pt": "Você pode fazer uma combinação de Goblin com uma Caixa Dourada Selada para criar uma Caixa Dourada.",
+            "ru": "Вы можете создать комбинацию Гоблина с Запечатанной Золотой Коробкой, чтобы создать Золотую Коробку.",
+            "tl": "Maaari kang gumawa ng kumbinasyon ng Goblin na may Sealed Golden Box para gumawa ng Golden Box.",
+            "uk": "Ви можете створити комбінацію гобліна із запечатаною золотою скринькою, щоб створити золоту скриньку.",
+            "zh-TW": "您可以將哥布林與密封金盒進行組合來創建金盒。"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2087,6 +2417,23 @@
         "pt": "Moeda dourada do goblin"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "You can acquire Goblin Points by using the MU Item Shop's storage.",
+            "de": "Sie erhalten Goblin-Punkte, wenn Sie das Lager des MU Item Shops nutzen.",
+            "es": "Puedes adquirir puntos Goblin utilizando el almacenamiento de la tienda de artículos MU.",
+            "id": "Anda dapat memperoleh Poin Goblin dengan menggunakan penyimpanan MU Item Shop.",
+            "ja": "インゲームショップ保管箱で使用すると、ゴブリンポイントを獲得できます。",
+            "pl": "Goblin Points zdobywasz, korzystając z magazynu MU Item Shop.",
+            "pt": "Você pode adquirir Goblin Points usando o armazenamento da MU Item Shop.",
+            "ru": "Вы можете получить очки гоблинов, используя хранилище магазина предметов MU.",
+            "tl": "Maaari kang makakuha ng Goblin Points sa pamamagitan ng paggamit ng storage ng MU Item Shop.",
+            "uk": "Ви можете отримати бали гоблінів, використовуючи сховище MU Item Shop.",
+            "zh-TW": "您可以使用 MU 物品商店的存儲來獲取哥布林點數。"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2104,6 +2451,23 @@
         "pt": "Caixa dourada lacrada"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "You can do a Goblin combination with a Gold Key to create a Golden Box.",
+            "de": "Mit einem goldenen Schlüssel können Sie beim Goblin eine Goldene Box kombinieren.",
+            "es": "Puedes hacer una combinación de Duende con una Llave Dorada para crear una Caja Dorada.",
+            "id": "Kalian bisa melakukan kombinasi Goblin dengan Gold Key untuk membuat Golden Box.",
+            "ja": "ゴールドキーとのカオス合成で金箱を生成できます。",
+            "pl": "Połącz Gold Key u Chaos Goblina, aby stworzyć Golden Box.",
+            "pt": "Você pode fazer uma combinação de Goblin com uma Chave Dourada para criar uma Caixa Dourada.",
+            "ru": "Вы можете создать комбинацию Гоблина с Золотым ключом, чтобы создать Золотую шкатулку.",
+            "tl": "Maaari kang gumawa ng kumbinasyon ng Goblin gamit ang isang Gold Key upang lumikha ng isang Golden Box.",
+            "uk": "Ви можете створити комбінацію гобліна із золотим ключем, щоб створити золоту скриньку.",
+            "zh-TW": "您可以將哥布林與金鑰匙組合來創建金盒子。"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -2118,6 +2482,23 @@
         "pt": "Caixa prateada lacrada"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "You can do a Goblin combination with a Silver Key to create a Silver Box.",
+            "de": "Mit einem silbernen Schlüssel können Sie beim Goblin eine Silberne Box kombinieren.",
+            "es": "Puedes hacer una combinación de Duende con una Llave plateada para crear una Caja plateada.",
+            "id": "Kalian bisa melakukan kombinasi Goblin dengan Silver Key untuk membuat Silver Box.",
+            "ja": "シルバーキーとのカオス合成で銀箱を生成できます。",
+            "pl": "Połącz Silver Key u Chaos Goblina, aby stworzyć Silver Box.",
+            "pt": "Você pode fazer uma combinação de Goblin com uma Silver Key para criar uma Silver Box.",
+            "ru": "Вы можете создать комбинацию гоблина с серебряным ключом, чтобы создать серебряную шкатулку.",
+            "tl": "Maaari kang gumawa ng kumbinasyon ng Goblin na may Silver Key para gumawa ng Silver Box.",
+            "uk": "Ви можете створити комбінацію гобліна зі срібним ключем, щоб створити срібну скриню.",
+            "zh-TW": "您可以將哥布林與銀鑰匙組合來創建銀盒子。"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -2132,6 +2513,23 @@
         "pt": "Caixa dourada"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "You can drop it with a fixed probability of it turning into a rare item.",
+            "de": "Wenn Sie es fallen lassen, wird es mit einer festen Wahrscheinlichkeit zu einem seltenen Gegenstand.",
+            "es": "Puedes soltarlo con una probabilidad fija de que se convierta en un objeto raro.",
+            "id": "Anda dapat menjatuhkannya dengan kemungkinan tetap untuk berubah menjadi barang langka.",
+            "ja": "地面に投げると一定確率でレアアイテムが手に入ります。",
+            "pl": "Możesz go upuścić ze stałym prawdopodobieństwem, że zamieni się w rzadki przedmiot.",
+            "pt": "Você pode derrubá-lo com uma probabilidade fixa de se transformar em um item raro.",
+            "ru": "Вы можете выбросить его с фиксированной вероятностью, что он превратится в редкий предмет.",
+            "tl": "Maaari mong i-drop ito nang may nakapirming posibilidad na maging isang bihirang item.",
+            "uk": "Ви можете скинути його з фіксованою ймовірністю того, що він перетвориться на рідкісний предмет.",
+            "zh-TW": "你可以以固定的機率掉落它，使其變成稀有物品。"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2149,6 +2547,23 @@
         "pt": "Caixa prateada"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "You can drop it with a fixed probability of it turning into a rare item.",
+            "de": "Wenn Sie es fallen lassen, wird es mit einer festen Wahrscheinlichkeit zu einem seltenen Gegenstand.",
+            "es": "Puedes soltarlo con una probabilidad fija de que se convierta en un objeto raro.",
+            "id": "Anda dapat menjatuhkannya dengan kemungkinan tetap untuk berubah menjadi barang langka.",
+            "ja": "地面に投げると一定確率でレアアイテムが手に入ります。",
+            "pl": "Możesz go upuścić ze stałym prawdopodobieństwem, że zamieni się w rzadki przedmiot.",
+            "pt": "Você pode derrubá-lo com uma probabilidade fixa de se transformar em um item raro.",
+            "ru": "Вы можете выбросить его с фиксированной вероятностью, что он превратится в редкий предмет.",
+            "tl": "Maaari mong i-drop ito nang may nakapirming posibilidad na maging isang bihirang item.",
+            "uk": "Ви можете скинути його з фіксованою ймовірністю того, що він перетвориться на рідкісний предмет.",
+            "zh-TW": "你可以以固定的機率掉落它，使其變成稀有物品。"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2314,6 +2729,23 @@
         "pt": "Caixa de pacote A"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "It's a box containing various items.",
+            "de": "Eine Kiste mit verschiedenen Gegenständen.",
+            "es": "Es una caja que contiene varios artículos.",
+            "id": "Itu adalah kotak berisi berbagai item.",
+            "ja": "各種商品が入っている箱です。",
+            "pl": "To pudełko zawierające różne przedmioty.",
+            "pt": "É uma caixa contendo vários itens.",
+            "ru": "Это коробка, содержащая различные предметы.",
+            "tl": "Ito ay isang kahon na naglalaman ng iba't ibang mga item.",
+            "uk": "Це коробка з різними предметами.",
+            "zh-TW": "這是一個裝有各種物品的盒子。"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2331,6 +2763,23 @@
         "pt": "Caixa de pacote B"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "It's a box containing various items.",
+            "de": "Eine Kiste mit verschiedenen Gegenständen.",
+            "es": "Es una caja que contiene varios artículos.",
+            "id": "Itu adalah kotak berisi berbagai item.",
+            "ja": "各種商品が入っている箱です。",
+            "pl": "To pudełko zawierające różne przedmioty.",
+            "pt": "É uma caixa contendo vários itens.",
+            "ru": "Это коробка, содержащая различные предметы.",
+            "tl": "Ito ay isang kahon na naglalaman ng iba't ibang mga item.",
+            "uk": "Це коробка з різними предметами.",
+            "zh-TW": "這是一個裝有各種物品的盒子。"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2348,6 +2797,23 @@
         "pt": "Caixa de pacote C"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "It's a box containing various items.",
+            "de": "Eine Kiste mit verschiedenen Gegenständen.",
+            "es": "Es una caja que contiene varios artículos.",
+            "id": "Itu adalah kotak berisi berbagai item.",
+            "ja": "各種商品が入っている箱です。",
+            "pl": "To pudełko zawierające różne przedmioty.",
+            "pt": "É uma caixa contendo vários itens.",
+            "ru": "Это коробка, содержащая различные предметы.",
+            "tl": "Ito ay isang kahon na naglalaman ng iba't ibang mga item.",
+            "uk": "Це коробка з різними предметами.",
+            "zh-TW": "這是一個裝有各種物品的盒子。"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2365,6 +2831,23 @@
         "pt": "Caixa de pacote D"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "It's a box containing various items.",
+            "de": "Eine Kiste mit verschiedenen Gegenständen.",
+            "es": "Es una caja que contiene varios artículos.",
+            "id": "Itu adalah kotak berisi berbagai item.",
+            "ja": "各種商品が入っている箱です。",
+            "pl": "To pudełko zawierające różne przedmioty.",
+            "pt": "É uma caixa contendo vários itens.",
+            "ru": "Это коробка, содержащая различные предметы.",
+            "tl": "Ito ay isang kahon na naglalaman ng iba't ibang mga item.",
+            "uk": "Це коробка з різними предметами.",
+            "zh-TW": "這是一個裝有各種物品的盒子。"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2382,6 +2865,23 @@
         "pt": "Caixa de pacote E"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "It's a box containing various items.",
+            "de": "Eine Kiste mit verschiedenen Gegenständen.",
+            "es": "Es una caja que contiene varios artículos.",
+            "id": "Itu adalah kotak berisi berbagai item.",
+            "ja": "各種商品が入っている箱です。",
+            "pl": "To pudełko zawierające różne przedmioty.",
+            "pt": "É uma caixa contendo vários itens.",
+            "ru": "Это коробка, содержащая различные предметы.",
+            "tl": "Ito ay isang kahon na naglalaman ng iba't ibang mga item.",
+            "uk": "Це коробка з різними предметами.",
+            "zh-TW": "這是一個裝有各種物品的盒子。"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2399,6 +2899,23 @@
         "pt": "Caixa de pacote F"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "It's a box containing various items.",
+            "de": "Eine Kiste mit verschiedenen Gegenständen.",
+            "es": "Es una caja que contiene varios artículos.",
+            "id": "Itu adalah kotak berisi berbagai item.",
+            "ja": "各種商品が入っている箱です。",
+            "pl": "To pudełko zawierające różne przedmioty.",
+            "pt": "É uma caixa contendo vários itens.",
+            "ru": "Это коробка, содержащая различные предметы.",
+            "tl": "Ito ay isang kahon na naglalaman ng iba't ibang mga item.",
+            "uk": "Це коробка з різними предметами.",
+            "zh-TW": "這是一個裝有各種物品的盒子。"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2416,6 +2933,40 @@
         "pt": "Pergaminho da cura"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Automatic HP recovery 3%",
+            "de": "Automatische HP-Wiederherstellung 3%",
+            "es": "Recuperación automática de HP 3%",
+            "id": "Pemulihan HP otomatis 3%",
+            "ja": "オートヒーリング 3%",
+            "pl": "Automatyczne odzyskiwanie HP 3%",
+            "pt": "Recuperação automática de HP 3%",
+            "ru": "Автоматическое восстановление HP 3%",
+            "tl": "Awtomatikong pagbawi ng HP 3%",
+            "uk": "Автоматичне відновлення HP 3%",
+            "zh-TW": "HP自動恢復 3%"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Max. HP increase +100",
+            "de": "Max. HP +100",
+            "es": "Máx. Aumento de HP +100",
+            "id": "Maks. Peningkatan HP +100",
+            "ja": "最大 HP　上昇 +100",
+            "pl": "Maks. HP +100",
+            "pt": "Máx. Aumento de HP +100",
+            "ru": "Макс. Увеличение HP +100",
+            "tl": "Max. Tumaas ang HP +100",
+            "uk": "Макс. HP збільшення +100",
+            "zh-TW": "最大限度。生命值增加+100"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 2,
       "height": 2,
       "tradable": false,
@@ -2432,6 +2983,23 @@
         "es": "Joyero Brillante",
         "pt": "Estojo de joias brilhante"
       },
+      "description": [
+        {
+          "text": {
+            "en": "Throw it and you may receive some Zen or items",
+            "de": "Werfen Sie es weg und Sie erhalten vielleicht etwas Zen oder Gegenstände",
+            "es": "Tíralo y podrás recibir algo de Zen o artículos.",
+            "id": "Lemparkan dan Anda mungkin menerima beberapa Zen atau item",
+            "ja": "地面に投げればゼンやアイテムが出現",
+            "pl": "Rzuć nim, a możesz otrzymać trochę Zen lub przedmiotów",
+            "pt": "Jogue-o e você poderá receber algum Zen ou itens",
+            "ru": "Бросайте его, и вы можете получить немного Дзена или предметы.",
+            "tl": "Itapon ito at maaari kang makatanggap ng ilang Zen o mga item",
+            "uk": "Киньте його, і ви можете отримати дзен або предмети",
+            "zh-TW": "丟掉它，你可能會收到一些禪宗或物品"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -2444,6 +3012,23 @@
         "es": "Joyero Elegante",
         "pt": "Estojo de joias elegante"
       },
+      "description": [
+        {
+          "text": {
+            "en": "Throw it and you may receive some Zen or items",
+            "de": "Werfen Sie es weg und Sie erhalten vielleicht etwas Zen oder Gegenstände",
+            "es": "Tíralo y podrás recibir algo de Zen o artículos.",
+            "id": "Lemparkan dan Anda mungkin menerima beberapa Zen atau item",
+            "ja": "地面に投げればゼンやアイテムが出現",
+            "pl": "Rzuć nim, a możesz otrzymać trochę Zen lub przedmiotów",
+            "pt": "Jogue-o e você poderá receber algum Zen ou itens",
+            "ru": "Бросайте его, и вы можете получить немного Дзена или предметы.",
+            "tl": "Itapon ito at maaari kang makatanggap ng ilang Zen o mga item",
+            "uk": "Киньте його, і ви можете отримати дзен або предмети",
+            "zh-TW": "丟掉它，你可能會收到一些禪宗或物品"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -2456,6 +3041,23 @@
         "es": "Joyero de Acero",
         "pt": "Estojo de joias de aço"
       },
+      "description": [
+        {
+          "text": {
+            "en": "Throw it and you may receive some Zen or items",
+            "de": "Werfen Sie es weg und Sie erhalten vielleicht etwas Zen oder Gegenstände",
+            "es": "Tíralo y podrás recibir algo de Zen o artículos.",
+            "id": "Lemparkan dan Anda mungkin menerima beberapa Zen atau item",
+            "ja": "地面に投げればゼンやアイテムが出現",
+            "pl": "Rzuć nim, a możesz otrzymać trochę Zen lub przedmiotów",
+            "pt": "Jogue-o e você poderá receber algum Zen ou itens",
+            "ru": "Бросайте его, и вы можете получить немного Дзена или предметы.",
+            "tl": "Itapon ito at maaari kang makatanggap ng ilang Zen o mga item",
+            "uk": "Киньте його, і ви можете отримати дзен або предмети",
+            "zh-TW": "丟掉它，你可能會收到一些禪宗或物品"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -2468,6 +3070,23 @@
         "es": "Joyero Antiguo",
         "pt": "Estojo de joias antigo"
       },
+      "description": [
+        {
+          "text": {
+            "en": "Throw it and you may receive some Zen or items",
+            "de": "Werfen Sie es weg und Sie erhalten vielleicht etwas Zen oder Gegenstände",
+            "es": "Tíralo y podrás recibir algo de Zen o artículos.",
+            "id": "Lemparkan dan Anda mungkin menerima beberapa Zen atau item",
+            "ja": "地面に投げればゼンやアイテムが出現",
+            "pl": "Rzuć nim, a możesz otrzymać trochę Zen lub przedmiotów",
+            "pt": "Jogue-o e você poderá receber algum Zen ou itens",
+            "ru": "Бросайте его, и вы можете получить немного Дзена или предметы.",
+            "tl": "Itapon ito at maaari kang makatanggap ng ilang Zen o mga item",
+            "uk": "Киньте його, і ви можете отримати дзен або предмети",
+            "zh-TW": "丟掉它，你可能會收到一些禪宗或物品"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -2481,6 +3100,24 @@
         "pt": "Bilhete de item raro7"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Congratulations. Please contact CS team and change it to item.",
+            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
+            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
+            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
+            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
+            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
+            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
+            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
+            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
+            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
+            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2498,6 +3135,24 @@
         "pt": "Bilhete de item raro8"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Congratulations. Please contact CS team and change it to item.",
+            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
+            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
+            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
+            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
+            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
+            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
+            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
+            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
+            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
+            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2515,6 +3170,24 @@
         "pt": "Bilhete de item raro9"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Congratulations. Please contact CS team and change it to item.",
+            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
+            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
+            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
+            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
+            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
+            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
+            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
+            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
+            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
+            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2532,6 +3205,24 @@
         "pt": "Bilhete de item raro10"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Congratulations. Please contact CS team and change it to item.",
+            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
+            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
+            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
+            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
+            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
+            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
+            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
+            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
+            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
+            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2549,6 +3240,24 @@
         "pt": "Bilhete de item raro11"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Congratulations. Please contact CS team and change it to item.",
+            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
+            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
+            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
+            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
+            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
+            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
+            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
+            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
+            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
+            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2566,6 +3275,24 @@
         "pt": "Bilhete de item raro12"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Congratulations. Please contact CS team and change it to item.",
+            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
+            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
+            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
+            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
+            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
+            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
+            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
+            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
+            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
+            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
