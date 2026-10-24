@@ -1,15 +1,7 @@
 #include <doctest.h>
 
+#include "BmdModulusTestEncryption.h"
 #include "Render/Models/BmdModulusCipher.h"
-
-#include <cryptopp/3way.h>
-#include <cryptopp/cast.h>
-#include <cryptopp/gost.h>
-#include <cryptopp/idea.h>
-#include <cryptopp/mars.h>
-#include <cryptopp/rc5.h>
-#include <cryptopp/rc6.h>
-#include <cryptopp/tea.h>
 
 #include <array>
 #include <cstdint>
@@ -18,104 +10,9 @@
 
 namespace
 {
-using Render::Models::BmdModulusCipher::BodyOffset;
+using namespace BmdModulusTest;
 using Render::Models::BmdModulusCipher::DecryptInPlace;
-
-constexpr std::size_t KeySize = 32;
-constexpr std::size_t SecondKeyOffset = 2;
-constexpr std::size_t MiddleChunkThreshold = 4;
-constexpr std::size_t ChunkSize = 1024;
-constexpr std::size_t AlgorithmCount = 8;
-constexpr std::uint8_t FixedKey[] = "webzen#@!01webzen#@!01webzen#@!0";
-
-template <class TCipher> std::unique_ptr<CryptoPP::BlockTransformation> CreateEncryption(const std::uint8_t* key)
-{
-    return std::make_unique<typename TCipher::Encryption>(key, TCipher::DEFAULT_KEYLENGTH);
-}
-
-// The same numbering as the files use.
-std::unique_ptr<CryptoPP::BlockTransformation> CreateEncryption(std::size_t algorithm, const std::uint8_t* key)
-{
-    switch (algorithm)
-    {
-    case 0:
-        return CreateEncryption<CryptoPP::TEA>(key);
-    case 1:
-        return CreateEncryption<CryptoPP::ThreeWay>(key);
-    case 2:
-        return CreateEncryption<CryptoPP::CAST128>(key);
-    case 3:
-        return CreateEncryption<CryptoPP::RC5>(key);
-    case 4:
-        return CreateEncryption<CryptoPP::RC6>(key);
-    case 5:
-        return CreateEncryption<CryptoPP::MARS>(key);
-    case 6:
-        return CreateEncryption<CryptoPP::IDEA>(key);
-    default:
-        return CreateEncryption<CryptoPP::GOST>(key);
-    }
-}
-
-void EncryptBlocks(const CryptoPP::BlockTransformation& cipher, std::uint8_t* data, std::size_t length)
-{
-    const std::size_t blockSize = cipher.BlockSize();
-    for (std::size_t offset = 0; offset + blockSize <= length; offset += blockSize)
-    {
-        cipher.ProcessBlock(data + offset);
-    }
-}
-
-std::vector<std::uint8_t> MakeBody(std::size_t size)
-{
-    constexpr std::size_t PatternStep = 7;
-    constexpr std::size_t PatternModulus = 251;
-    std::vector<std::uint8_t> body(size);
-    for (std::size_t i = 0; i < size; ++i)
-    {
-        body[i] = static_cast<std::uint8_t>(i * PatternStep % PatternModulus);
-    }
-    return body;
-}
-
-std::array<std::uint8_t, KeySize> MakeSecondKey()
-{
-    std::array<std::uint8_t, KeySize> key{};
-    for (std::size_t i = 0; i < key.size(); ++i)
-    {
-        key[i] = static_cast<std::uint8_t>(i);
-    }
-    return key;
-}
-
-// Builds a payload the way the files are made: the reverse of the decryption, in the reverse order.
-std::vector<std::uint8_t> Encrypt(std::size_t secondAlgorithm, std::size_t firstAlgorithm,
-                                  const std::vector<std::uint8_t>& body)
-{
-    const auto secondKey = MakeSecondKey();
-    std::vector<std::uint8_t> payload{static_cast<std::uint8_t>(secondAlgorithm),
-                                      static_cast<std::uint8_t>(firstAlgorithm)};
-    payload.insert(payload.end(), secondKey.begin(), secondKey.end());
-    payload.insert(payload.end(), body.begin(), body.end());
-
-    EncryptBlocks(*CreateEncryption(secondAlgorithm, secondKey.data()), payload.data() + BodyOffset, body.size());
-
-    const auto first = CreateEncryption(firstAlgorithm, FixedKey);
-    const std::size_t chunk = ChunkSize - ChunkSize % first->BlockSize();
-    const std::size_t dataSize = body.size();
-    if (dataSize > chunk)
-    {
-        EncryptBlocks(*first, payload.data() + SecondKeyOffset, chunk);
-        EncryptBlocks(*first, payload.data() + payload.size() - chunk, chunk);
-    }
-
-    if (dataSize > MiddleChunkThreshold * chunk)
-    {
-        EncryptBlocks(*first, payload.data() + SecondKeyOffset + dataSize / 2, chunk);
-    }
-
-    return payload;
-}
+using Render::Models::BmdModulusCipher::ModelHeaderSize;
 
 std::vector<std::uint8_t> Decrypt(std::vector<std::uint8_t> payload)
 {
@@ -170,21 +67,31 @@ TEST_CASE("the first payload byte picks the second cipher, the second byte the f
 
 TEST_CASE("a payload too short for a model is rejected [render][bmd]")
 {
-    std::array<std::uint8_t, BodyOffset> payload{};
+    // The keys and a model header (name and counts) at the least: one byte short is refused, exactly enough is not.
+    std::vector<std::uint8_t> payload = MakeBody(BodyOffset + ModelHeaderSize - 1);
     CHECK_FALSE(DecryptInPlace(payload.data(), payload.size()));
+    payload = MakeBody(BodyOffset + ModelHeaderSize);
+    CHECK(DecryptInPlace(payload.data(), payload.size()));
     CHECK_FALSE(DecryptInPlace(nullptr, 0));
 }
 
 TEST_CASE("a corrupt version 14 payload decrypts without throwing, whichever ciphers it picks [render][bmd]")
 {
-    // The algorithm bytes are the file's, so every value (also with the bits the cipher choice ignores) and payload
-    // sizes around the chunk rules; the key and data bytes are whatever a damaged file holds.
-    constexpr std::array<std::size_t, 6> PayloadSizes = {BodyOffset + 1, BodyOffset + 7, 1024, 1025, 4200, 9001};
+    // The algorithm bytes are the file's, so values with the bits the cipher choice ignores set too. Both strides are
+    // odd, so their low three bits (the cipher) run through all eight values within eight steps: 29 for the first
+    // cipher, 13 for the second (37 left RC5 out of the second stage). The key and data bytes are whatever a damaged
+    // file holds.
+    constexpr int FirstStride = 29;
+    constexpr int SecondStride = 13;
+    // The smallest payload, then sizes just past the first stage's thresholds: more than 1024 data bytes (1020 for
+    // 3-Way's 12-byte blocks) runs its end chunks, more than 4 chunks its middle one.
+    constexpr std::array<std::size_t, 5> PayloadSizes = {BodyOffset + ModelHeaderSize, BodyOffset + 1025,
+                                                         BodyOffset + 4097, 4200, 9001};
     for (const std::size_t size : PayloadSizes)
     {
-        for (int second = 0; second < 256; second += 37)
+        for (int second = 0; second < 256; second += SecondStride)
         {
-            for (int first = 0; first < 256; first += 29)
+            for (int first = 0; first < 256; first += FirstStride)
             {
                 CAPTURE(size);
                 CAPTURE(second);

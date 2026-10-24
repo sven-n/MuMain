@@ -16,7 +16,9 @@ namespace Render::Models::BmdModulusCipher
 {
 // Where the model data starts in a decrypted payload.
 constexpr std::size_t BodyOffset = 34;
+// The smallest model body: its 32-byte name and its mesh, bone and action counts (three int16).
+constexpr std::size_t ModelHeaderSize = 32 + 3 * 2;
 
-// Decrypts a version 14 payload in place. False when it is too short to hold a model.
+// Decrypts a version 14 payload in place. False when it is too short to hold a model (the keys and a model header).
 bool DecryptInPlace(std::uint8_t* payload, std::size_t size);
 } // namespace Render::Models::BmdModulusCipher

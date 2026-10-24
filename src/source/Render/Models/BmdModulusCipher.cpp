@@ -75,13 +75,14 @@ void DecryptBlocks(const CryptoPP::BlockTransformation& cipher, std::uint8_t* da
     }
 }
 
-// The first stage restores the second stage's key, among a few chunks of the model data.
-void DecryptFirstStage(std::uint8_t* payload, std::size_t size)
+// The first stage restores the second stage's key, among a few chunks of the model data; false when its cipher
+// can't be made, as the second stage fails then.
+bool DecryptFirstStage(std::uint8_t* payload, std::size_t size)
 {
     const auto cipher = CreateDecryption(payload[1], FirstStageKey);
     if (cipher == nullptr)
     {
-        return;
+        return false;
     }
     const std::size_t dataSize = size - Render::Models::BmdModulusCipher::BodyOffset;
     const std::size_t chunkSize = FirstStageChunkSize - FirstStageChunkSize % cipher->BlockSize();
@@ -95,12 +96,13 @@ void DecryptFirstStage(std::uint8_t* payload, std::size_t size)
         DecryptBlocks(*cipher, payload + size - chunkSize, chunkSize);
         DecryptBlocks(*cipher, payload + SecondKeyOffset, chunkSize);
     }
+    return true;
 }
 } // namespace
 
 bool Render::Models::BmdModulusCipher::DecryptInPlace(std::uint8_t* payload, std::size_t size)
 {
-    if (payload == nullptr || size <= BodyOffset)
+    if (payload == nullptr || size < BodyOffset + ModelHeaderSize)
     {
         return false;
     }
@@ -109,7 +111,10 @@ bool Render::Models::BmdModulusCipher::DecryptInPlace(std::uint8_t* payload, std
     // Crypto++ reports a bad key or state with an exception.
     try
     {
-        DecryptFirstStage(payload, size);
+        if (!DecryptFirstStage(payload, size))
+        {
+            return false;
+        }
         const auto cipher = CreateDecryption(payload[0], payload + SecondKeyOffset);
         if (cipher == nullptr)
         {
