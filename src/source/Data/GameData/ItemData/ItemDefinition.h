@@ -4,6 +4,7 @@
 #include "Core/Globals/_define.h"
 #include "Data/GameData/Common/LocalizedString.h"
 #include "Data/GameData/ItemData/ItemTagSet.h"
+#include "Data/GameData/ItemData/ItemTooltipConditions.h"
 #include "Data/GameData/ItemData/ItemType.h"
 
 #include <algorithm>
@@ -84,11 +85,15 @@ enum class ItemTextColor : BYTE
 };
 constexpr size_t ItemTextColorCount = static_cast<size_t>(ItemTextColor::Count);
 
-// One line of an item's description in its tooltip: a text with its translations (empty: a blank line), its color, and
-// the item levels it is shown at (both included; every level unless set).
+// One line of an item's description in its tooltip: a text with its translations or a shared text of the tooltip file
+// (neither: a blank line), the conditions it shows on (all of them; ItemTooltipConditions.h), its color, and the item
+// levels it is shown at (both included; every level unless set).
 struct ItemDescriptionLine
 {
     LocalizedString text;
+    // The shared text of Data/Items/Tooltips/Tooltip.json, without its "@"; empty for a text written in place.
+    std::string textName;
+    std::vector<TooltipCondition> when;
     ItemTextColor color = ItemTextColor::White;
     int minLevel = 0;
     int maxLevel = ItemLevelCount - 1;

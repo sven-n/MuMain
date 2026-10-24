@@ -28,6 +28,7 @@ constexpr const char* Description = "description";
 constexpr const char* Text = "text";
 constexpr const char* Color = "color";
 constexpr const char* Levels = "levels";
+constexpr const char* When = "when";
 constexpr const char* Requirements = "requirements";
 constexpr const char* RequirementsByLevel = "requirementsByLevel";
 constexpr const char* ClassRequirements = "classRequirements";
@@ -148,8 +149,8 @@ OrderedJson WriteTags(const ItemTagSet& tags)
     return json;
 }
 
-// One object per line: its text (as a name is written; "" for a blank line), its color unless white, and its item
-// levels unless it is shown at every level.
+// One object per line: its text (as a name is written, "@name" for a shared text, "" for a blank line), its conditions
+// unless it has none, its color unless white, and its item levels unless it is shown at every level.
 OrderedJson WriteDescription(const std::vector<ItemDescriptionLine>& description)
 {
     OrderedJson json = OrderedJson::array();
@@ -157,7 +158,18 @@ OrderedJson WriteDescription(const std::vector<ItemDescriptionLine>& description
     {
         OrderedJson entry;
         // A blank line is a plain empty text, as it is written by hand.
-        entry[Keys::Text] = line.text.IsEmpty() ? OrderedJson("") : Json::WriteLocalizedString(line.text);
+        entry[Keys::Text] = !line.textName.empty() ? OrderedJson("@" + line.textName)
+                            : line.text.IsEmpty()  ? OrderedJson("")
+                                                   : Json::WriteLocalizedString(line.text);
+        if (!line.when.empty())
+        {
+            OrderedJson when = OrderedJson::array();
+            for (const TooltipCondition& condition : line.when)
+            {
+                when.push_back(WriteTooltipCondition(condition));
+            }
+            entry[Keys::When] = std::move(when);
+        }
         if (line.color != ItemTextColor::White)
         {
             entry[Keys::Color] = WriteValue(line.color);
@@ -246,6 +258,7 @@ private:
     void ReadTags(const OrderedJson& json, ItemTagSet& tags);
     void ReadDescription(const OrderedJson& json, std::vector<ItemDescriptionLine>& description);
     void ReadDescriptionLevels(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line);
+    void ReadDescriptionConditions(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line);
     void ReadStats(const OrderedJson& json, ItemDefinition& definition);
     void ReadRequirements(const OrderedJson& json, ItemDefinition& definition);
     void ReadRequirementsByLevel(const OrderedJson& json, ItemDefinition& definition);
@@ -413,9 +426,22 @@ void ItemReader::ReadDescription(const OrderedJson& json, std::vector<ItemDescri
         }
 
         ItemDescriptionLine line;
-        const bool read = Json::ReadLocalizedString(*text, field + "." + Keys::Text, line.text,
-                                                    [this](const std::string& errorField, const std::string& message)
-                                                    { AddIssue(ItemDataIssueSeverity::Error, errorField, message); });
+        bool read = true;
+        if (text->is_string() && text->get<std::string>().starts_with("@"))
+        {
+            // A shared text of the tooltip file; ValidateDescriptionTexts checks that it has it.
+            line.textName = text->get<std::string>().substr(1);
+        }
+        else
+        {
+            read = Json::ReadLocalizedString(*text, field + "." + Keys::Text, line.text,
+                                             [this](const std::string& errorField, const std::string& message)
+                                             { AddIssue(ItemDataIssueSeverity::Error, errorField, message); });
+        }
+        if (const auto when = entry.find(Keys::When); when != entry.end())
+        {
+            ReadDescriptionConditions(*when, field + "." + Keys::When, line);
+        }
         const auto color = entry.find(Keys::Color);
         if (color != entry.end())
         {
@@ -426,10 +452,39 @@ void ItemReader::ReadDescription(const OrderedJson& json, std::vector<ItemDescri
         {
             ReadDescriptionLevels(*levels, field + "." + Keys::Levels, line);
         }
-        WarnAboutUnknownKeys(entry, {Keys::Text, Keys::Color, Keys::Levels}, field + ".");
+        WarnAboutUnknownKeys(entry, {Keys::Text, Keys::When, Keys::Color, Keys::Levels}, field + ".");
         if (read)
         {
             description.push_back(std::move(line));
+        }
+    }
+}
+
+// The conditions a description line is shown on, all of them: a list of texts such as "durability" or "!timed".
+void ItemReader::ReadDescriptionConditions(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line)
+{
+    if (!json.is_array())
+    {
+        AddIssue(ItemDataIssueSeverity::Error, field,
+                 "must be a list of conditions, such as [\"durability\", \"!timed\"]");
+        return;
+    }
+    for (size_t index = 0; index < json.size(); ++index)
+    {
+        const std::string entryField = field + "[" + std::to_string(index) + "]";
+        TooltipCondition condition;
+        std::string error;
+        if (!json[index].is_string())
+        {
+            AddIssue(ItemDataIssueSeverity::Error, entryField, "must be a text");
+        }
+        else if (!ReadTooltipCondition(json[index].get<std::string>(), condition, error))
+        {
+            AddIssue(ItemDataIssueSeverity::Error, entryField, error);
+        }
+        else
+        {
+            line.when.push_back(std::move(condition));
         }
     }
 }
@@ -658,6 +713,7 @@ std::string WriteItemGroupJson(int group, std::span<const ItemDefinition> items)
     std::string text =
         Json::PutListsOnOneLine(root.dump(Json::Indent, ' ', false, OrderedJson::error_handler_t::replace), Keys::Tags);
     text = Json::PutListsOnOneLine(text, Keys::Levels);
+    text = Json::PutListsOnOneLine(text, Keys::When);
     return Json::PutObjectsOnOneLine(text, Keys::RequirementsByLevel) + "\n";
 }
 } // namespace Data::Items

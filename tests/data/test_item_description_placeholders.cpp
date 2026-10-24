@@ -204,14 +204,17 @@ TEST_CASE("A description placeholder is a built-in value or a stat file table [d
     REQUIRE(nearBuiltIn.size() == 1);
     CHECK(nearBuiltIn.front().message == "has the unknown placeholder {levels}; did you mean {table:levels}?");
 
-    const std::vector<ItemDataIssue> unknown = CheckNames(MakeJewel("Durability {durability}"));
+    const std::vector<ItemDataIssue> unknown = CheckNames(MakeJewel("Sparkle {sparkle}"));
     REQUIRE(unknown.size() == 1);
     CHECK(unknown.front().message ==
-          "has the unknown placeholder {durability}; a placeholder is a built-in value ({level}) or a table of "
+          "has the unknown placeholder {sparkle}; a placeholder is a built-in value (docs/item-data.md) or a table of "
           "ItemStats.json ({table:name})");
 
+    // The stat line values are built in too.
+    CHECK(CheckNames(MakeJewel("Durability {durability}/{maxDurability}, {missingStrength} strength missing")).empty());
+
     // A deleted item (no name) is not checked.
-    ItemDefinition deleted = MakeJewel("{durability}");
+    ItemDefinition deleted = MakeJewel("{sparkle}");
     deleted.names = {};
     CHECK(CheckNames(deleted).empty());
 }

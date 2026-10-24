@@ -400,10 +400,19 @@ TEST_CASE("The wings', capes' and pets' tooltip values come from their data as f
         {
             INFO(item.group << "/" << item.number << " +" << level);
             const std::vector<OldWingLine> old = OldWingAndPetLines(item.group, item.number, level);
-            REQUIRE(item.description.size() == old.size());
+            // Not the durability lines, which came from another part of the old code.
+            std::vector<const ItemDescriptionLine*> wingLines;
+            for (const ItemDescriptionLine& line : item.description)
+            {
+                if (line.textName.empty() && line.when.empty())
+                {
+                    wingLines.push_back(&line);
+                }
+            }
+            REQUIRE(wingLines.size() == old.size());
             for (size_t index = 0; index < old.size(); ++index)
             {
-                const Data::LocalizedString& text = item.description[index].text;
+                const Data::LocalizedString& text = wingLines[index]->text;
                 CHECK(FillPlaceholders(text.GetNeutral(), level, profiles) == EnglishOldWingLine(old[index]));
                 // In every language, as the game's texts that other code still prints have it.
                 for (const char* locale : I18N::GetAvailableLocales())
@@ -532,7 +541,8 @@ TEST_CASE("The tooltip texts by item level come from the descriptions as from th
             std::vector<OldLine> lines;
             for (const ItemDescriptionLine& line : found->description)
             {
-                if (line.IsShownAt(level))
+                // Not the durability lines, which came from another part of the old code.
+                if (line.IsShownAt(level) && line.textName.empty() && line.when.empty())
                 {
                     lines.push_back({FillPlaceholders(line.text.GetNeutral(), level, profiles), line.color});
                 }

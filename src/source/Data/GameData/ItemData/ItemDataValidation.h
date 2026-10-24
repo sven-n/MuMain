@@ -5,6 +5,7 @@
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
+#include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 #include "Data/GameData/ItemData/SharedItemModel.h"
 
 #include <span>
@@ -14,6 +15,9 @@
 
 namespace Data::Items
 {
+// A language code like "pt" or "zh-TW": letters, digits and "-" only.
+bool IsValidLocaleCode(const std::string& locale);
+
 // Checks rules across items that a single file cannot check: unique ids,
 // the required English name, and names that fit the LocalizedString format.
 // Also the description texts: the English text, the language codes, the
@@ -43,6 +47,14 @@ void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatP
 // it looks like a typo. The braces and the translations are checked by ValidateItems.
 void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
                                      const std::string& statFile, std::vector<ItemDataIssue>& issues);
+
+// The shared texts ("@name") of the items' descriptions against the tooltip file (`tooltipFile` names it in
+// messages): a text the file does not have is an error, with the nearest name when it looks like a typo, and so is a
+// placeholder of a shared text that is neither a built-in value nor a table of `profiles`. A shared text that neither a
+// layout nor a description uses is a warning.
+void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemTooltipFile& tooltips,
+                              const ItemStatProfiles& profiles, const std::string& tooltipFile,
+                              std::vector<ItemDataIssue>& issues);
 
 // The tables of the item stat file the items use (`statFile` names it in messages). A table that neither a stat nor a
 // description names is a warning. So is a wing (an item with a wing tier) whose description lines are not those of

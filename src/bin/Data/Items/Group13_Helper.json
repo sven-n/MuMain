@@ -10,6 +10,7 @@
         "es": "Angel Guardián",
         "pt": "Anjo guardião"
       },
+      "tags": ["noDurabilityLine"],
       "description": [
         {
           "text": {
@@ -40,6 +41,10 @@
             "uk": "Макс HP +50 збільшено",
             "zh-TW": "最大生命值+50增加"
           }
+        },
+        {
+          "text": "@life",
+          "when": ["!timed"]
         }
       ],
       "width": 1,
@@ -70,6 +75,7 @@
         "es": "Diablillo",
         "pt": "Diabrete"
       },
+      "tags": ["noDurabilityLine"],
       "description": [
         {
           "text": {
@@ -85,6 +91,10 @@
             "uk": "Збільште на 30% of шкоду від атаки та магії",
             "zh-TW": "攻擊力和魔法傷害增加30% of"
           }
+        },
+        {
+          "text": "@life",
+          "when": ["!timed"]
         }
       ],
       "width": 1,
@@ -115,7 +125,13 @@
         "es": "Cuerno de Uniria",
         "pt": "Chifre de Uniria"
       },
-      "tags": ["mount", "hornMount"],
+      "tags": ["mount", "hornMount", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@life",
+          "when": ["!timed"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "pet",
@@ -144,7 +160,7 @@
         "es": "Cuerno de Dinorant",
         "pt": "Chifre de Dinorant"
       },
-      "tags": ["mount", "hornMount", "flying", "valuable"],
+      "tags": ["mount", "hornMount", "flying", "valuable", "noDurabilityLine"],
       "description": [
         {
           "text": {
@@ -175,6 +191,10 @@
             "uk": "Поглинання шкоди 10% of",
             "zh-TW": "吸收10% of傷害"
           }
+        },
+        {
+          "text": "@life",
+          "when": ["!timed"]
         }
       ],
       "width": 1,
@@ -206,7 +226,13 @@
         "es": "Caballo Oscuro",
         "pt": "Cavalo negro"
       },
-      "tags": ["mount", "flying", "darkLordPet", "valuable"],
+      "tags": ["mount", "flying", "darkLordPet", "valuable", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@life",
+          "when": ["!timed"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "pet",
@@ -230,7 +256,13 @@
         "es": "Cuervo Oscuro",
         "pt": "Corvo negro"
       },
-      "tags": ["darkLordPet", "valuable"],
+      "tags": ["darkLordPet", "valuable", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@life",
+          "when": ["!timed"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "offHand",
@@ -252,6 +284,7 @@
         "es": "Contrato (Invocación)",
         "pt": "Contrato (Invocação)"
       },
+      "tags": ["noDurabilityLine"],
       "description": [
         {
           "text": {
@@ -372,7 +405,24 @@
         "es": "Anillo de Transformación",
         "pt": "Anel de Transformação"
       },
-      "tags": ["transformationRing"],
+      "tags": ["transformationRing", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "Durability: [{durability}]",
+            "de": "Haltbarkeit: [{durability}]",
+            "es": "Durabilidad: [{durability}]",
+            "id": "Daya Tahan: [{durability}]",
+            "ja": "耐久力: [ {durability} ]",
+            "pl": "Trwałość: [{durability}]",
+            "pt": "Durabilidade: [{durability}]",
+            "ru": "Прочность: [{durability}]",
+            "tl": "Katatagan: [{durability}]",
+            "uk": "Довговічність: [{durability}]",
+            "zh-TW": "耐久性：[{durability}]"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -397,6 +447,7 @@
         "es": "Orden (Guardián/Roca de Vida)",
         "pt": "Ordem (Guard./Pedra da Vida)"
       },
+      "tags": ["noDurabilityLine"],
       "description": [
         {
           "text": {
@@ -517,7 +568,7 @@
         "es": "Pluma de Loch",
         "pt": "Pena de Loch"
       },
-      "tags": ["valuable"],
+      "tags": ["valuable", "noLevelRequirement"],
       "description": [
         {
           "text": {
@@ -795,7 +846,7 @@
         "es": "Rollo de Arcángel",
         "pt": "Pergaminho do arcanjo"
       },
-      "tags": ["bloodCastleTicketPart"],
+      "tags": ["bloodCastleTicketPart", "noDurabilityLine"],
       "description": [
         {
           "text": {
@@ -835,7 +886,7 @@
         "es": "Hueso Sangriento",
         "pt": "Osso de sangue"
       },
-      "tags": ["bloodCastleTicketPart"],
+      "tags": ["bloodCastleTicketPart", "noDurabilityLine"],
       "description": [
         {
           "text": {
@@ -875,6 +926,7 @@
         "es": "Manto de Invisibilidad",
         "pt": "Manto da invisibilidade"
       },
+      "tags": ["noDurabilityLine"],
       "description": [
         {
           "text": {
@@ -947,7 +999,7 @@
         "es": "Arma Absoluta de Arcángel",
         "pt": "Arma absoluta do arcanjo"
       },
-      "tags": ["valuable"],
+      "tags": ["valuable", "noDurabilityLine"],
       "width": 1,
       "height": 2,
       "durability": 255,
@@ -974,6 +1026,13 @@
         "es": "Anillo de los Magos",
         "pt": "Anel dos magos"
       },
+      "tags": ["noDurabilityLine"],
+      "description": [
+        {
+          "text": "@durability",
+          "when": ["!timed", "level!=1", "level!=2"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -1368,6 +1427,14 @@
         "es": "Astilla de Armadura",
         "pt": "Estilhaço da armadura"
       },
+      "tags": ["noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "{durability} / 20"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 1,
@@ -1390,6 +1457,14 @@
         "es": "Bendición de Guardián",
         "pt": "Bênção do guardião"
       },
+      "tags": ["noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "{durability} / 20"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 1,
@@ -1412,7 +1487,14 @@
         "es": "Garra de Bestia",
         "pt": "Garra da besta"
       },
-      "tags": ["valuable"],
+      "tags": ["valuable", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "{durability} / 10"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 1,
@@ -1435,7 +1517,7 @@
         "es": "Fragmento de Cuerno",
         "pt": "Fragmento de chifre"
       },
-      "tags": ["valuable"],
+      "tags": ["valuable", "noDurabilityLine"],
       "width": 1,
       "height": 1,
       "durability": 1,
@@ -1481,7 +1563,13 @@
         "es": "Cuerno de Fenrir",
         "pt": "Chifre de Fenrir"
       },
-      "tags": ["mount", "hornMount", "flying", "valuable"],
+      "tags": ["mount", "hornMount", "flying", "valuable", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@life",
+          "when": ["!timed"]
+        }
+      ],
       "width": 2,
       "height": 2,
       "slot": "pet",
@@ -1963,7 +2051,12 @@
         "es": "Boleto de la Plaza del Diablo",
         "pt": "Bilhete da Praça do Diabo"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@usableTimes"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -1990,7 +2083,12 @@
         "es": "Boleto al Castillo Sangriento",
         "pt": "Bilhete do Castelo de Sangue"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@usableTimes"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -2017,7 +2115,12 @@
         "es": "Boleto de Kalima",
         "pt": "Bilhete de Kalima"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@usableTimes"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -2238,7 +2341,7 @@
         "es": "Reiniciar Fruto de Fuerza",
         "pt": "Reiniciar força da fruta"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
       "width": 1,
       "height": 1,
       "durability": 100,
@@ -2265,7 +2368,7 @@
         "es": "Reiniciar Fruto de Rapidez",
         "pt": "Reiniciar rapidez da fruta"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
       "width": 1,
       "height": 1,
       "durability": 100,
@@ -2292,7 +2395,7 @@
         "es": "Reiniciar Fruto de Salud",
         "pt": "Reiniciar saúde da Fruta"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
       "width": 1,
       "height": 1,
       "durability": 100,
@@ -2319,7 +2422,7 @@
         "es": "Reiniciar Fruto de Energía",
         "pt": "Reiniciar energia da fruta"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
       "width": 1,
       "height": 1,
       "durability": 100,
@@ -2346,7 +2449,7 @@
         "es": "Reiniciar Fruto de Control",
         "pt": "Reiniciar controle da fruta"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
       "width": 1,
       "height": 1,
       "durability": 100,
@@ -2461,7 +2564,7 @@
         "es": "Boleto al Templo de Ilusión",
         "pt": "Bilhete do Templo da Ilusão"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
       "description": [
         {
           "text": {
@@ -2497,6 +2600,9 @@
         },
         {
           "text": ""
+        },
+        {
+          "text": "@usableTimes"
         }
       ],
       "width": 1,
@@ -2577,7 +2683,7 @@
         "es": "Demonio",
         "pt": "Demônio"
       },
-      "tags": ["guardianPet", "cashShop", "valuable"],
+      "tags": ["guardianPet", "cashShop", "valuable", "noDurabilityLine"],
       "description": [
         {
           "text": {
@@ -2610,6 +2716,10 @@
             "zh-TW": "攻擊速度提高 10"
           },
           "color": "purple"
+        },
+        {
+          "text": "@life",
+          "when": ["!timed"]
         }
       ],
       "width": 1,
@@ -2645,7 +2755,7 @@
         "es": "Espír. Guardián",
         "pt": "Espír. Guardião"
       },
-      "tags": ["guardianPet", "cashShop", "valuable"],
+      "tags": ["guardianPet", "cashShop", "valuable", "noDurabilityLine"],
       "description": [
         {
           "text": {
@@ -2678,6 +2788,10 @@
             "zh-TW": "最大生命增加 50"
           },
           "color": "purple"
+        },
+        {
+          "text": "@life",
+          "when": ["!timed"]
         }
       ],
       "width": 1,
@@ -2713,6 +2827,7 @@
         "es": "Invitación a Aldea de Santa",
         "pt": "Conv. p/ Vila do Papai Noel"
       },
+      "tags": ["noDurabilityLine"],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -2735,6 +2850,7 @@
         "es": "Mascota Rudolf",
         "pt": "Animal de estimação Rodolfo"
       },
+      "tags": ["noDurabilityLine"],
       "description": [
         {
           "text": {
@@ -2751,6 +2867,10 @@
             "zh-TW": "周圍的禪宗會自動收集。"
           },
           "color": "blue"
+        },
+        {
+          "text": "@life",
+          "when": ["!timed"]
         }
       ],
       "width": 1,
@@ -2836,7 +2956,7 @@
         "es": "Talismán de Movilidad",
         "pt": "Talismã da mobilidade"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
       "description": [
         {
           "text": {
@@ -2852,6 +2972,40 @@
             "uk": "Збережіть розташування програми.",
             "zh-TW": "儲存應用程式位置。"
           },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Saves the location with the right-mouse-click.",
+            "de": "Speichert den Ort per Rechtsklick.",
+            "es": "Guarda la ubicación con el clic derecho del mouse.",
+            "id": "Menyimpan lokasi dengan klik kanan mouse.",
+            "ja": "右クリックすると場所が記憶されます。",
+            "pl": "Zapisuje lokalizację po kliknięciu prawym przyciskiem myszy.",
+            "pt": "Salva o local com o clique direito do mouse.",
+            "ru": "Сохраняет местоположение щелчком правой кнопки мыши.",
+            "tl": "Sine-save ang lokasyon gamit ang right-mouse-click.",
+            "uk": "Зберігає розташування клацанням правою кнопкою миші.",
+            "zh-TW": "點選滑鼠右鍵儲存位置。"
+          },
+          "when": ["durability=2"],
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Returns to the saved location by a click.",
+            "de": "Kehrt per Klick zum gespeicherten Ort zurück.",
+            "es": "Vuelve a la ubicación guardada con un clic.",
+            "id": "Kembali ke lokasi yang disimpan dengan satu klik.",
+            "ja": "クリックすると記憶した場所へ移動します。",
+            "pl": "Powrót do zapisanej lokalizacji jednym kliknięciem.",
+            "pt": "Retorna ao local salvo com um clique.",
+            "ru": "Возвращается в сохраненное место по клику.",
+            "tl": "Bumalik sa naka-save na lokasyon sa pamamagitan ng isang pag-click.",
+            "uk": "Повернення до збереженого місця клацанням.",
+            "zh-TW": "單擊即可返回已儲存的位置。"
+          },
+          "when": ["durability=1"],
           "color": "blue"
         }
       ],
@@ -2881,7 +3035,7 @@
         "es": "Espada/Maza/Jabalina",
         "pt": "Espada/Maça/Lança"
       },
-      "tags": ["gambleItem"],
+      "tags": ["gambleItem", "noDurabilityLine"],
       "width": 2,
       "height": 3,
       "slot": "pet",
@@ -2905,7 +3059,7 @@
         "es": "Báculo",
         "pt": "Bastão"
       },
-      "tags": ["gambleItem"],
+      "tags": ["gambleItem", "noDurabilityLine"],
       "width": 2,
       "height": 3,
       "slot": "pet",
@@ -2929,7 +3083,7 @@
         "es": "Arco/Ballesta",
         "pt": "Arco/Besta"
       },
-      "tags": ["gambleItem"],
+      "tags": ["gambleItem", "noDurabilityLine"],
       "width": 2,
       "height": 3,
       "slot": "pet",
@@ -2953,7 +3107,7 @@
         "es": "Cetro",
         "pt": "Cetro"
       },
-      "tags": ["gambleItem"],
+      "tags": ["gambleItem", "noDurabilityLine"],
       "width": 2,
       "height": 3,
       "slot": "pet",
@@ -2977,7 +3131,7 @@
         "es": "Vara",
         "pt": "Cajado"
       },
-      "tags": ["gambleItem"],
+      "tags": ["gambleItem", "noDurabilityLine"],
       "width": 2,
       "height": 3,
       "slot": "pet",
@@ -3035,7 +3189,7 @@
         "es": "Mascota Panda",
         "pt": "Animal de estimação Panda"
       },
-      "tags": ["pandaOrSkeleton", "valuable"],
+      "tags": ["pandaOrSkeleton", "valuable", "noDurabilityLine"],
       "description": [
         {
           "text": {
@@ -3084,6 +3238,10 @@
             "zh-TW": "防禦技能增加+50"
           },
           "color": "blue"
+        },
+        {
+          "text": "@life",
+          "when": ["!timed"]
         }
       ],
       "width": 1,
@@ -3271,6 +3429,24 @@
         "es": "Talismán de Alas de Satán",
         "pt": "Talismã das Asas de Satã"
       },
+      "description": [
+        {
+          "text": {
+            "en": "Talisman of Wings of Satan",
+            "de": "Talisman der Satansflügel",
+            "es": "Talismán de Alas de Satán",
+            "id": "Jimat Sayap Setan",
+            "ja": "合成成功時、サタンの羽が生成されます。",
+            "pl": "Talisman of Wings of Satan",
+            "pt": "Talismã das Asas de Satanás",
+            "ru": "Талисман Крыльев Сатаны",
+            "tl": "Talisman of Wings of Satanas",
+            "uk": "Талісман крил сатани",
+            "zh-TW": "撒旦之翼護身符"
+          },
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -3294,6 +3470,24 @@
         "es": "Talismán de Alas de Cielo",
         "pt": "Talismã das Asas do Paraíso"
       },
+      "description": [
+        {
+          "text": {
+            "en": "Talisman of Wings of Heaven",
+            "de": "Talisman der Himmelsflügel",
+            "es": "Talismán de Alas del Cielo",
+            "id": "Jimat Sayap Surga",
+            "ja": "合成成功時、守護天使の羽が生成されます。",
+            "pl": "Talisman of Wings of Heaven",
+            "pt": "Talismã das Asas do Céu",
+            "ru": "Талисман Крыльев Небес",
+            "tl": "Talisman of Wings of Heaven",
+            "uk": "Талісман Крила Неба",
+            "zh-TW": "天之翼護符"
+          },
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -3317,6 +3511,24 @@
         "es": "Talismán de Alas de Elfo",
         "pt": "Talismã das Asas do Elfo"
       },
+      "description": [
+        {
+          "text": {
+            "en": "Talisman of Wings of Elf",
+            "de": "Talisman der Elfenflügel",
+            "es": "Talismán de Alas de Elfo",
+            "id": "Jimat Sayap Elf",
+            "ja": "合成成功時、妖精の羽が生成されます。",
+            "pl": "Talisman of Wings of Elf",
+            "pt": "Talismã das Asas do Elfo",
+            "ru": "Талисман Крыльев эльфа",
+            "tl": "Talisman ng Wings of Elf",
+            "uk": "Талісман Крила Ельфа",
+            "zh-TW": "精靈之翼護身符"
+          },
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -3340,6 +3552,24 @@
         "es": "Talismán de Alas de Maldición",
         "pt": "Talismã da Asa da Maldição"
       },
+      "description": [
+        {
+          "text": {
+            "en": "Talisman of Wing of Curse",
+            "de": "Talisman der Fluchflügel",
+            "es": "Talismán del ala de la maldición",
+            "id": "Jimat Sayap Kutukan",
+            "ja": "合成成功時、ミザリーウイングが生成されます。",
+            "pl": "Talisman of Wing of Curse",
+            "pt": "Talismã da Asa da Maldição",
+            "ru": "Талисман Крыла Проклятия",
+            "tl": "Talisman ng Wing of Curse",
+            "uk": "Талісман Крила Прокляття",
+            "zh-TW": "詛咒之翼護符"
+          },
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -3363,6 +3593,24 @@
         "es": "Talismán de Capa de Emperador",
         "pt": "Talismã da Capa do Imperador"
       },
+      "description": [
+        {
+          "text": {
+            "en": "Talisman of Cape of Emperor",
+            "de": "Talisman des Umhangs des Imperators",
+            "es": "Talismán del Cabo del Emperador",
+            "id": "Jimat Tanjung Kaisar",
+            "ja": "合成成功時、君主のマントが生成されます。",
+            "pl": "Talisman of Cape of Emperor",
+            "pt": "Talismã do Cabo do Imperador",
+            "ru": "Талисман Мыса Императора",
+            "tl": "Talisman ng Cape of Emperor",
+            "uk": "Талісман накидки імператора",
+            "zh-TW": "帝披風護身符"
+          },
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -3386,6 +3634,24 @@
         "es": "Talismán de Alas de Dragón",
         "pt": "Talismã das Asas do Dragão"
       },
+      "description": [
+        {
+          "text": {
+            "en": "Talisman of Wings of Dragon",
+            "de": "Talisman der Drachenflügel",
+            "es": "Talismán de Alas de Dragón",
+            "id": "Jimat Sayap Naga",
+            "ja": "合成成功時、デビルウイングが生成されます。",
+            "pl": "Talisman of Wings of Dragon",
+            "pt": "Talismã das Asas do Dragão",
+            "ru": "Талисман Крыльев Дракона",
+            "tl": "Talisman ng Wings of Dragon",
+            "uk": "Талісман Крила Дракона",
+            "zh-TW": "龍翼護符"
+          },
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -3409,6 +3675,24 @@
         "es": "Talismán de Alas del Alma",
         "pt": "Talismã das Asas da Alma"
       },
+      "description": [
+        {
+          "text": {
+            "en": "Talisman of Wings of Soul",
+            "de": "Talisman der Seelenflügel",
+            "es": "Talismán de Alas del Alma",
+            "id": "Jimat Sayap Jiwa",
+            "ja": "合成成功時、ソウルウイングが生成されます。",
+            "pl": "Talisman of Wings of Soul",
+            "pt": "Talismã das Asas da Alma",
+            "ru": "Талисман Крыльев Души",
+            "tl": "Talisman ng Wings of Soul",
+            "uk": "Талісман Крила Душі",
+            "zh-TW": "靈魂之翼護符"
+          },
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -3432,6 +3716,24 @@
         "es": "Talismán de Alas de Espíritus",
         "pt": "Talismã das Asas dos Esp."
       },
+      "description": [
+        {
+          "text": {
+            "en": "Talisman of Wings of Spirits",
+            "de": "Talisman der Geisterflügel",
+            "es": "Talismán de Alas de Espíritus",
+            "id": "Jimat Sayap Roh",
+            "ja": "合成成功時、ホーリーウイングが生成されます。",
+            "pl": "Talisman of Wings of Spirits",
+            "pt": "Talismã das Asas dos Espíritos",
+            "ru": "Талисман Крыльев Духов",
+            "tl": "Talisman of Wings of Spirits",
+            "uk": "Талісман Крила Духів",
+            "zh-TW": "靈魂之翼護符"
+          },
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -3455,6 +3757,24 @@
         "es": "Talismán Alas de Desolación",
         "pt": "Talismã da Asa do Desespero"
       },
+      "description": [
+        {
+          "text": {
+            "en": "Talisman of Wing of Despair",
+            "de": "Talisman der Flügel der Verzweiflung",
+            "es": "Talismán del Ala de la Desesperación",
+            "id": "Jimat Sayap Keputusasaan",
+            "ja": "合成成功時、デスペアーウイングが生成されます。",
+            "pl": "Talisman of Wing of Despair",
+            "pt": "Talismã da Asa do Desespero",
+            "ru": "Талисман Крыла Отчаяния",
+            "tl": "Talisman of Wing of Despair",
+            "uk": "Талісман Крила Відчаю",
+            "zh-TW": "絕望之翼護符"
+          },
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -3478,6 +3798,24 @@
         "es": "Talismán de Alas de Oscuridad",
         "pt": "Talismã das Asas da Escuridão"
       },
+      "description": [
+        {
+          "text": {
+            "en": "Talisman of Wings of Darkness",
+            "de": "Talisman der Flügel der Dunkelheit",
+            "es": "Talismán de alas de oscuridad",
+            "id": "Jimat Sayap Kegelapan",
+            "ja": "合成成功時、ダークウイングが生成されます。",
+            "pl": "Talisman of Wings of Darkness",
+            "pt": "Talismã das Asas das Trevas",
+            "ru": "Талисман Крыльев Тьмы",
+            "tl": "Talisman of Wings of Darkness",
+            "uk": "Талісман крил темряви",
+            "zh-TW": "黑暗之翼護身符"
+          },
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -3534,6 +3872,22 @@
             "zh-TW": "扭曲命令視窗可用。"
           },
           "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Attack rate and defense rate increase.",
+            "de": "Angriffsrate und Verteidigungsrate erhöhen sich.",
+            "es": "La tasa de ataque y la tasa de defensa aumentan.",
+            "id": "Tingkat serangan dan tingkat pertahanan meningkat.",
+            "ja": "攻撃力と防御力が向上します。",
+            "pl": "Zwiększenie współczynnika ataku i współczynnika obrony.",
+            "pt": "A taxa de ataque e a taxa de defesa aumentam.",
+            "ru": "Увеличивается скорость атаки и защита.",
+            "tl": "Attack rate at defense rate increase.",
+            "uk": "Збільшення швидкості атаки та захисту.",
+            "zh-TW": "攻擊率和防禦率增加。"
+          },
+          "when": ["durability"]
         }
       ],
       "width": 1,
@@ -3833,7 +4187,7 @@
         "es": "Unicornio",
         "pt": "Unic. Est."
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
       "description": [
         {
           "text": {
@@ -3882,6 +4236,10 @@
             "zh-TW": "防禦技能增加+50"
           },
           "color": "blue"
+        },
+        {
+          "text": "@life",
+          "when": ["!timed"]
         }
       ],
       "width": 1,
@@ -4509,7 +4867,17 @@
         "es": "Boleto Abierto; Castillo Caos",
         "pt": "Bilhete Ac. Livre Cast. Caos"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@durability",
+          "when": ["!timed"]
+        },
+        {
+          "text": "@usableTimes",
+          "when": ["timed"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -4570,7 +4938,7 @@
         "es": "Mascota Esqueleto",
         "pt": "Mascote esqueleto"
       },
-      "tags": ["pandaOrSkeleton", "valuable"],
+      "tags": ["pandaOrSkeleton", "valuable", "noDurabilityLine"],
       "description": [
         {
           "text": {
@@ -4635,6 +5003,10 @@
             "zh-TW": "經驗值增加 30%。"
           },
           "color": "blue"
+        },
+        {
+          "text": "@life",
+          "when": ["!timed"]
         }
       ],
       "width": 1,
@@ -4696,7 +5068,12 @@
         "es": "Boleto Acceso a Doppenganger",
         "pt": "Bilhete Ac. Livre Doppeganger"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@usableTimes"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -4723,7 +5100,27 @@
         "es": "Boleto Acceso a Varka",
         "pt": "Bilhete Ac. Livre Varka"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@usableTimes"
+        },
+        {
+          "text": {
+            "en": "Can enter the Monday - Saturday map.",
+            "de": "Kann die Karte für Montag bis Samstag betreten.",
+            "es": "Puede ingresar al mapa de lunes a sábado.",
+            "id": "Bisa masuk ke map Senin - Sabtu.",
+            "ja": "バルカ要塞の第1～6要塞に入場できます。",
+            "pl": "Można wejść na mapę od poniedziałku do soboty.",
+            "pt": "Pode entrar no mapa de segunda a sábado.",
+            "ru": "Можно войти на карту понедельник-суббота.",
+            "tl": "Maaaring pumasok sa mapa ng Lunes - Sabado.",
+            "uk": "Можна ввести карту понеділок - субота.",
+            "zh-TW": "可以輸入週一-週六的地圖。"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -4750,7 +5147,27 @@
         "es": "Boleto Acceso Mapa 7 de Varka",
         "pt": "Bil. Ac. Livre Mapa 7 Varka"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@usableTimes"
+        },
+        {
+          "text": {
+            "en": "Can enter the Sunday map.",
+            "de": "Kann die Karte für Sonntag betreten.",
+            "es": "Puede ingresar al mapa del domingo.",
+            "id": "Bisa masuk ke map hari Minggu.",
+            "ja": "バルカ要塞の第7要塞に入場できます。",
+            "pl": "Można wejść na niedzielną mapę.",
+            "pt": "Pode entrar no mapa de domingo.",
+            "ru": "Можно войти в воскресную карту.",
+            "tl": "Maaaring pumasok sa mapa ng Linggo.",
+            "uk": "Можна ввести недільну карту.",
+            "zh-TW": "可以進入周日地圖。"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 3,
@@ -4931,7 +5348,28 @@
         "es": "1er Boleto Armadura de la Suerte",
         "pt": "1º Bilhete de Armadura da Sorte"
       },
-      "tags": ["luckyItemTicket"],
+      "tags": ["luckyItemTicket", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "You can achieve special items with combinations.",
+            "de": "Durch Kombinationen können Sie besondere Gegenstände erhalten.",
+            "es": "Puedes conseguir objetos especiales con combinaciones.",
+            "id": "Anda dapat memperoleh item khusus dengan kombinasi.",
+            "ja": "パンドラ合成でアイテムを獲得",
+            "pl": "Dzięki kombinacjom możesz zdobyć specjalne przedmioty.",
+            "pt": "Você pode conseguir itens especiais com combinações.",
+            "ru": "Вы можете получить особые предметы с помощью комбинаций.",
+            "tl": "Makakamit mo ang mga espesyal na item na may mga kumbinasyon.",
+            "uk": "Ви можете отримати спеціальні предмети за допомогою комбінацій.",
+            "zh-TW": "您可以透過組合獲得特殊物品。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": ""
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -4957,7 +5395,28 @@
         "es": "1er Boleto Pantalones de la Suerte",
         "pt": "1º Bilhete de Calças da Sorte"
       },
-      "tags": ["luckyItemTicket"],
+      "tags": ["luckyItemTicket", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "You can achieve special items with combinations.",
+            "de": "Durch Kombinationen können Sie besondere Gegenstände erhalten.",
+            "es": "Puedes conseguir objetos especiales con combinaciones.",
+            "id": "Anda dapat memperoleh item khusus dengan kombinasi.",
+            "ja": "パンドラ合成でアイテムを獲得",
+            "pl": "Dzięki kombinacjom możesz zdobyć specjalne przedmioty.",
+            "pt": "Você pode conseguir itens especiais com combinações.",
+            "ru": "Вы можете получить особые предметы с помощью комбинаций.",
+            "tl": "Makakamit mo ang mga espesyal na item na may mga kumbinasyon.",
+            "uk": "Ви можете отримати спеціальні предмети за допомогою комбінацій.",
+            "zh-TW": "您可以透過組合獲得特殊物品。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": ""
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -4983,7 +5442,28 @@
         "es": "1er Boleto Yelmo de la Suerte",
         "pt": "1º Bilhete de Elmo da Sorte"
       },
-      "tags": ["luckyItemTicket"],
+      "tags": ["luckyItemTicket", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "You can achieve special items with combinations.",
+            "de": "Durch Kombinationen können Sie besondere Gegenstände erhalten.",
+            "es": "Puedes conseguir objetos especiales con combinaciones.",
+            "id": "Anda dapat memperoleh item khusus dengan kombinasi.",
+            "ja": "パンドラ合成でアイテムを獲得",
+            "pl": "Dzięki kombinacjom możesz zdobyć specjalne przedmioty.",
+            "pt": "Você pode conseguir itens especiais com combinações.",
+            "ru": "Вы можете получить особые предметы с помощью комбинаций.",
+            "tl": "Makakamit mo ang mga espesyal na item na may mga kumbinasyon.",
+            "uk": "Ви можете отримати спеціальні предмети за допомогою комбінацій.",
+            "zh-TW": "您可以透過組合獲得特殊物品。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": ""
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -5009,7 +5489,28 @@
         "es": "1er Boleto Guantes de la Suerte",
         "pt": "1º Bilhete de Luvas da Sorte"
       },
-      "tags": ["luckyItemTicket"],
+      "tags": ["luckyItemTicket", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "You can achieve special items with combinations.",
+            "de": "Durch Kombinationen können Sie besondere Gegenstände erhalten.",
+            "es": "Puedes conseguir objetos especiales con combinaciones.",
+            "id": "Anda dapat memperoleh item khusus dengan kombinasi.",
+            "ja": "パンドラ合成でアイテムを獲得",
+            "pl": "Dzięki kombinacjom możesz zdobyć specjalne przedmioty.",
+            "pt": "Você pode conseguir itens especiais com combinações.",
+            "ru": "Вы можете получить особые предметы с помощью комбинаций.",
+            "tl": "Makakamit mo ang mga espesyal na item na may mga kumbinasyon.",
+            "uk": "Ви можете отримати спеціальні предмети за допомогою комбінацій.",
+            "zh-TW": "您可以透過組合獲得特殊物品。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": ""
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -5035,7 +5536,28 @@
         "es": "1er Boleto Botas de la Suerte",
         "pt": "1º Bilhete de Botas da Sorte"
       },
-      "tags": ["luckyItemTicket"],
+      "tags": ["luckyItemTicket", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "You can achieve special items with combinations.",
+            "de": "Durch Kombinationen können Sie besondere Gegenstände erhalten.",
+            "es": "Puedes conseguir objetos especiales con combinaciones.",
+            "id": "Anda dapat memperoleh item khusus dengan kombinasi.",
+            "ja": "パンドラ合成でアイテムを獲得",
+            "pl": "Dzięki kombinacjom możesz zdobyć specjalne przedmioty.",
+            "pt": "Você pode conseguir itens especiais com combinações.",
+            "ru": "Вы можете получить особые предметы с помощью комбинаций.",
+            "tl": "Makakamit mo ang mga espesyal na item na may mga kumbinasyon.",
+            "uk": "Ви можете отримати спеціальні предмети за допомогою комбінацій.",
+            "zh-TW": "您可以透過組合獲得特殊物品。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": ""
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -5061,7 +5583,28 @@
         "es": "2º Boleto Armadura de la Suerte",
         "pt": "2º Bilhete de Armadura da Sorte"
       },
-      "tags": ["luckyItemTicket"],
+      "tags": ["luckyItemTicket", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "You can achieve special items with combinations.",
+            "de": "Durch Kombinationen können Sie besondere Gegenstände erhalten.",
+            "es": "Puedes conseguir objetos especiales con combinaciones.",
+            "id": "Anda dapat memperoleh item khusus dengan kombinasi.",
+            "ja": "パンドラ合成でアイテムを獲得",
+            "pl": "Dzięki kombinacjom możesz zdobyć specjalne przedmioty.",
+            "pt": "Você pode conseguir itens especiais com combinações.",
+            "ru": "Вы можете получить особые предметы с помощью комбинаций.",
+            "tl": "Makakamit mo ang mga espesyal na item na may mga kumbinasyon.",
+            "uk": "Ви можете отримати спеціальні предмети за допомогою комбінацій.",
+            "zh-TW": "您可以透過組合獲得特殊物品。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": ""
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -5087,7 +5630,28 @@
         "es": "2º Boleto Pantalones de la Suerte",
         "pt": "2º Bilhete de Calças da Sorte"
       },
-      "tags": ["luckyItemTicket"],
+      "tags": ["luckyItemTicket", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "You can achieve special items with combinations.",
+            "de": "Durch Kombinationen können Sie besondere Gegenstände erhalten.",
+            "es": "Puedes conseguir objetos especiales con combinaciones.",
+            "id": "Anda dapat memperoleh item khusus dengan kombinasi.",
+            "ja": "パンドラ合成でアイテムを獲得",
+            "pl": "Dzięki kombinacjom możesz zdobyć specjalne przedmioty.",
+            "pt": "Você pode conseguir itens especiais com combinações.",
+            "ru": "Вы можете получить особые предметы с помощью комбинаций.",
+            "tl": "Makakamit mo ang mga espesyal na item na may mga kumbinasyon.",
+            "uk": "Ви можете отримати спеціальні предмети за допомогою комбінацій.",
+            "zh-TW": "您可以透過組合獲得特殊物品。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": ""
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -5113,7 +5677,28 @@
         "es": "2º Boleto Yelmo de la Suerte",
         "pt": "2º Bilhete de Elmo da Sorte"
       },
-      "tags": ["luckyItemTicket"],
+      "tags": ["luckyItemTicket", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "You can achieve special items with combinations.",
+            "de": "Durch Kombinationen können Sie besondere Gegenstände erhalten.",
+            "es": "Puedes conseguir objetos especiales con combinaciones.",
+            "id": "Anda dapat memperoleh item khusus dengan kombinasi.",
+            "ja": "パンドラ合成でアイテムを獲得",
+            "pl": "Dzięki kombinacjom możesz zdobyć specjalne przedmioty.",
+            "pt": "Você pode conseguir itens especiais com combinações.",
+            "ru": "Вы можете получить особые предметы с помощью комбинаций.",
+            "tl": "Makakamit mo ang mga espesyal na item na may mga kumbinasyon.",
+            "uk": "Ви можете отримати спеціальні предмети за допомогою комбінацій.",
+            "zh-TW": "您可以透過組合獲得特殊物品。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": ""
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -5139,7 +5724,28 @@
         "es": "2º Boleto Guantes de la Suerte",
         "pt": "2º Bilhete de Luvas da Sorte"
       },
-      "tags": ["luckyItemTicket"],
+      "tags": ["luckyItemTicket", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "You can achieve special items with combinations.",
+            "de": "Durch Kombinationen können Sie besondere Gegenstände erhalten.",
+            "es": "Puedes conseguir objetos especiales con combinaciones.",
+            "id": "Anda dapat memperoleh item khusus dengan kombinasi.",
+            "ja": "パンドラ合成でアイテムを獲得",
+            "pl": "Dzięki kombinacjom możesz zdobyć specjalne przedmioty.",
+            "pt": "Você pode conseguir itens especiais com combinações.",
+            "ru": "Вы можете получить особые предметы с помощью комбинаций.",
+            "tl": "Makakamit mo ang mga espesyal na item na may mga kumbinasyon.",
+            "uk": "Ви можете отримати спеціальні предмети за допомогою комбінацій.",
+            "zh-TW": "您可以透過組合獲得特殊物品。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": ""
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -5165,7 +5771,28 @@
         "es": "2º Boleto Botas de la Suerte",
         "pt": "2º Bilhete de Botas da Sorte"
       },
-      "tags": ["luckyItemTicket"],
+      "tags": ["luckyItemTicket", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "You can achieve special items with combinations.",
+            "de": "Durch Kombinationen können Sie besondere Gegenstände erhalten.",
+            "es": "Puedes conseguir objetos especiales con combinaciones.",
+            "id": "Anda dapat memperoleh item khusus dengan kombinasi.",
+            "ja": "パンドラ合成でアイテムを獲得",
+            "pl": "Dzięki kombinacjom możesz zdobyć specjalne przedmioty.",
+            "pt": "Você pode conseguir itens especiais com combinações.",
+            "ru": "Вы можете получить особые предметы с помощью комбинаций.",
+            "tl": "Makakamit mo ang mga espesyal na item na may mga kumbinasyon.",
+            "uk": "Ви можете отримати спеціальні предмети за допомогою комбінацій.",
+            "zh-TW": "您可以透過組合獲得特殊物品。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": ""
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,

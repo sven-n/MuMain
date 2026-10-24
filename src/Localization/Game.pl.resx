@@ -260,17 +260,9 @@
     <value>Obrona: %d</value>
     <comment>legacy_id=65,209</comment>
   </data>
-  <data name="Spell resistance: %d" xml:space="preserve">
-    <value>Odporność na zaklęcia: %d</value>
-    <comment>legacy_id=66</comment>
-  </data>
   <data name="Defense rate: %d" xml:space="preserve">
     <value>Współczynnik obrony: %d</value>
     <comment>legacy_id=67,2045</comment>
-  </data>
-  <data name="Moving speed: %d" xml:space="preserve">
-    <value>Prędkość ruchu: %d</value>
-    <comment>legacy_id=68</comment>
   </data>
   <data name="Number of items: %d" xml:space="preserve">
     <value>Ilość sztuk: %d</value>
@@ -283,10 +275,6 @@
   <data name="Durability: [%d/%d]" xml:space="preserve">
     <value>Trwałość: [%d/%d]</value>
     <comment>legacy_id=71</comment>
-  </data>
-  <data name="%s Resistance: %d" xml:space="preserve">
-    <value>%s Opór: %d</value>
-    <comment>legacy_id=72</comment>
   </data>
   <data name="Strength Requirement: %d" xml:space="preserve">
     <value>Wymagana siła: %d</value>
@@ -375,10 +363,6 @@
   <data name="Luck (critical damage rate +5%%)" xml:space="preserve">
     <value>Szczęście (wskaźnik obrażeń krytycznych +5%%)</value>
     <comment>legacy_id=94</comment>
-  </data>
-  <data name="Durability: [%d]" xml:space="preserve">
-    <value>Trwałość: [%d]</value>
-    <comment>legacy_id=95</comment>
   </data>
   <data name="Can only be used in moving unit" xml:space="preserve">
     <value>Można używać tylko w ruchomych jednostkach</value>
@@ -4828,10 +4812,6 @@
     <value>Brak %s.</value>
     <comment>legacy_id=1233</comment>
   </data>
-  <data name="Increase pet attack as %d%%" xml:space="preserve">
-    <value>Zwiększa atak zwierzaka o %d%%</value>
-    <comment>legacy_id=1234</comment>
-  </data>
   <data name="Crest of monarch" xml:space="preserve">
     <value>Crest of Monarch</value>
     <comment>legacy_id=1235</comment>
@@ -6492,10 +6472,6 @@
     <value>Silna mentalność i doskonały wgląd tworzą najpotężniejsze zaklęcie klątwy. Również ten przedmiot przyciąga przywoływaczy z innego świata i używa przeciwko nim szkodliwej magii.</value>
     <comment>legacy_id=1690</comment>
   </data>
-  <data name="Curse Spell increment %d%%" xml:space="preserve">
-    <value>Przyrost zaklęcia klątwy %d%%</value>
-    <comment>legacy_id=1691</comment>
-  </data>
   <data name="Curse Spell: %d ~ %d" xml:space="preserve">
     <value>Zaklęcie klątwy: %d ~ %d</value>
     <comment>legacy_id=1692</comment>
@@ -7331,10 +7307,6 @@
   <data name="Skills will improve through upgrading." xml:space="preserve">
     <value>Umiejętności będą doskonalone poprzez ulepszanie.</value>
     <comment>legacy_id=1929</comment>
-  </data>
-  <data name="Stamina Requirement: %d" xml:space="preserve">
-    <value>Wymagania dotyczące wytrzymałości: %d</value>
-    <comment>legacy_id=1930</comment>
   </data>
   <data name="Req LV" xml:space="preserve">
     <value>Wymagane LV</value>
@@ -8412,10 +8384,6 @@
     <value>http://muonline.webzen.com/</value>
     <comment>legacy_id=2295</comment>
   </data>
-  <data name="%d%% Combination success rate increase" xml:space="preserve">
-    <value>%d%% Wzrost współczynnika powodzenia kombinacji</value>
-    <comment>legacy_id=2296</comment>
-  </data>
   <data name="Hour" xml:space="preserve">
     <value>Godzina</value>
     <comment>legacy_id=2299</comment>
@@ -9302,14 +9270,6 @@
   <data name="Move by a right-mouse-click." xml:space="preserve">
     <value>Przenosi tam po kliknięciu prawym przyciskiem myszy.</value>
     <comment>legacy_id=2603</comment>
-  </data>
-  <data name="Saves the location with the right-mouse-click." xml:space="preserve">
-    <value>Zapisuje lokalizację po kliknięciu prawym przyciskiem myszy.</value>
-    <comment>legacy_id=2605</comment>
-  </data>
-  <data name="Returns to the saved location by a click." xml:space="preserve">
-    <value>Powrót do zapisanej lokalizacji jednym kliknięciem.</value>
-    <comment>legacy_id=2606</comment>
   </data>
   <data name="Would you like to save the location?" xml:space="preserve">
     <value>Czy chcesz zapisać lokalizację?</value>
@@ -10814,14 +10774,6 @@
   <data name="GrandDukeDukeMarquisCountViscount" xml:space="preserve">
     <value>Wielki Książę#Książę#Markiz#Hrabia#Wicehrabia#Baron#Komandor Rycerzy#Starszy Rycerz#Rycerz#Prefekt Straży#Oficer#Porucznik#Sierżant#Szeregowy</value>
     <comment>legacy_id=3104</comment>
-  </data>
-  <data name="Can enter the Monday - Saturday map." xml:space="preserve">
-    <value>Można wejść na mapę od poniedziałku do soboty.</value>
-    <comment>legacy_id=3105</comment>
-  </data>
-  <data name="Can enter the Sunday map." xml:space="preserve">
-    <value>Można wejść na niedzielną mapę.</value>
-    <comment>legacy_id=3106</comment>
   </data>
   <data name="Varka Map 7" xml:space="preserve">
     <value>Mapa Varki 7</value>

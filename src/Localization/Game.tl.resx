@@ -260,17 +260,9 @@
     <value>Depensa: %d</value>
     <comment>legacy_id=65,209</comment>
   </data>
-  <data name="Spell resistance: %d" xml:space="preserve">
-    <value>Paglaban sa spell: %d</value>
-    <comment>legacy_id=66</comment>
-  </data>
   <data name="Defense rate: %d" xml:space="preserve">
     <value>Rate ng depensa: %d</value>
     <comment>legacy_id=67,2045</comment>
-  </data>
-  <data name="Moving speed: %d" xml:space="preserve">
-    <value>Bilis ng paggalaw: %d</value>
-    <comment>legacy_id=68</comment>
   </data>
   <data name="Number of items: %d" xml:space="preserve">
     <value>Bilang ng mga item: %d</value>
@@ -283,10 +275,6 @@
   <data name="Durability: [%d/%d]" xml:space="preserve">
     <value>Katatagan: [%d/%d]</value>
     <comment>legacy_id=71</comment>
-  </data>
-  <data name="%s Resistance: %d" xml:space="preserve">
-    <value>%s Paglaban: %d</value>
-    <comment>legacy_id=72</comment>
   </data>
   <data name="Strength Requirement: %d" xml:space="preserve">
     <value>Kinakailangan ng Lakas: %d</value>
@@ -375,10 +363,6 @@
   <data name="Luck (critical damage rate +5%%)" xml:space="preserve">
     <value>Swerte (critical damage rate +5%%)</value>
     <comment>legacy_id=94</comment>
-  </data>
-  <data name="Durability: [%d]" xml:space="preserve">
-    <value>Katatagan: [%d]</value>
-    <comment>legacy_id=95</comment>
   </data>
   <data name="Can only be used in moving unit" xml:space="preserve">
     <value>Maaari lamang gamitin sa paglipat ng yunit</value>
@@ -4532,10 +4516,6 @@
     <value>Walang %s.</value>
     <comment>legacy_id=1233</comment>
   </data>
-  <data name="Increase pet attack as %d%%" xml:space="preserve">
-    <value>Dagdagan ang pag-atake ng alagang hayop bilang %d%%</value>
-    <comment>legacy_id=1234</comment>
-  </data>
   <data name="Crest of monarch" xml:space="preserve">
     <value>Crest of monarch</value>
     <comment>legacy_id=1235</comment>
@@ -6196,10 +6176,6 @@
     <value>Ang malakas na kaisipan at mahusay na pananaw ay lumilikha ng pinakamalakas na spell ng sumpa. Gayundin ang item na ito ay kumukuha ng isa pang summoner sa mundo at ginagamit ang nakapipinsalang pangkukulam laban sa kanila.</value>
     <comment>legacy_id=1690</comment>
   </data>
-  <data name="Curse Spell increment %d%%" xml:space="preserve">
-    <value>Pagtaas ng Curse Spell %d%%</value>
-    <comment>legacy_id=1691</comment>
-  </data>
   <data name="Curse Spell: %d ~ %d" xml:space="preserve">
     <value>Spell ng Sumpa: %d ~ %d</value>
     <comment>legacy_id=1692</comment>
@@ -7035,10 +7011,6 @@
   <data name="Skills will improve through upgrading." xml:space="preserve">
     <value>Mapapabuti ang mga kasanayan sa pamamagitan ng pag-upgrade.</value>
     <comment>legacy_id=1929</comment>
-  </data>
-  <data name="Stamina Requirement: %d" xml:space="preserve">
-    <value>Kinakailangan ng Stamina: %d</value>
-    <comment>legacy_id=1930</comment>
   </data>
   <data name="Req LV" xml:space="preserve">
     <value>Req LV</value>
@@ -7981,7 +7953,7 @@
     <comment>legacy_id=2259</comment>
   </data>
   <data name="usable %dtimes" xml:space="preserve">
-    <value>magagamit %dtimes</value>
+    <value>magagamit nang %d beses</value>
     <comment>legacy_id=2260</comment>
   </data>
   <data name="You can achieve special items with combinations." xml:space="preserve">
@@ -8115,10 +8087,6 @@
   <data name="http://muonline.webzen.com/" xml:space="preserve">
     <value>http://muonline.webzen.com/</value>
     <comment>legacy_id=2295</comment>
-  </data>
-  <data name="%d%% Combination success rate increase" xml:space="preserve">
-    <value>%d%% Pagtaas ng rate ng tagumpay ng kumbinasyon</value>
-    <comment>legacy_id=2296</comment>
   </data>
   <data name="Hour" xml:space="preserve">
     <value>Oras</value>
@@ -9006,14 +8974,6 @@
   <data name="Move by a right-mouse-click." xml:space="preserve">
     <value>Ilipat sa pamamagitan ng isang right-mouse-click.</value>
     <comment>legacy_id=2603</comment>
-  </data>
-  <data name="Saves the location with the right-mouse-click." xml:space="preserve">
-    <value>Sine-save ang lokasyon gamit ang right-mouse-click.</value>
-    <comment>legacy_id=2605</comment>
-  </data>
-  <data name="Returns to the saved location by a click." xml:space="preserve">
-    <value>Bumalik sa naka-save na lokasyon sa pamamagitan ng isang pag-click.</value>
-    <comment>legacy_id=2606</comment>
   </data>
   <data name="Would you like to save the location?" xml:space="preserve">
     <value>Gusto mo bang i-save ang lokasyon?</value>
@@ -10518,14 +10478,6 @@
   <data name="GrandDukeDukeMarquisCountViscount" xml:space="preserve">
     <value>Grand Duke#Duke#Marquis#Count#Viscount#Baron#Knight Commander#Superior Knight#Knight#Guard Prefect#Opisyal#Lieutenant#Sarhento#Pribado</value>
     <comment>legacy_id=3104</comment>
-  </data>
-  <data name="Can enter the Monday - Saturday map." xml:space="preserve">
-    <value>Maaaring pumasok sa mapa ng Lunes - Sabado.</value>
-    <comment>legacy_id=3105</comment>
-  </data>
-  <data name="Can enter the Sunday map." xml:space="preserve">
-    <value>Maaaring pumasok sa mapa ng Linggo.</value>
-    <comment>legacy_id=3106</comment>
   </data>
   <data name="Varka Map 7" xml:space="preserve">
     <value>Varka Mapa 7</value>
