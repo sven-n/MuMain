@@ -150,6 +150,14 @@ void PetProcess::Register(Smart_Ptr(PetObject) pPet)
     m_petsList.push_back(pPet);
 }
 
+std::size_t PetProcess::CountPets(CHARACTER* owner) const
+{
+    if (owner == nullptr)
+        return 0;
+    return std::count_if(m_petsList.begin(), m_petsList.end(), [owner](const auto& pet)
+                         { return pet && pet->GetObject() != nullptr && pet->IsSameOwner(&owner->Object); });
+}
+
 void PetProcess::UnRegister(CHARACTER* Owner, int itemType, bool isUnregistAll)
 {
     GameLogic::Pets::RemovePetObjects(m_petsList, Owner, itemType, isUnregistAll);

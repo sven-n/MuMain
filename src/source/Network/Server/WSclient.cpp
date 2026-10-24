@@ -2676,11 +2676,6 @@ void ReceiveCreatePlayerViewportExtended(std::span<const BYTE> ReceiveBuffer)
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x12 [ReceiveCreatePlayerViewportExtended]");
 }
 
-void Network::Viewport::ApplyTransformEquipment(CHARACTER* character, PCREATE_TRANSFORM_EXTENDED& entry)
-{
-    ReadEquipmentExtended(0, entry.Flags, entry.Equipment, character);
-}
-
 void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
 {
     auto Data = safe_cast<PWHEADER_DEFAULT_WORD>(ReceiveBuffer);
@@ -2773,6 +2768,8 @@ void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
             o->Kind = KIND_PLAYER;
             c->Change = true;
 
+            ReadEquipmentExtended(Key, Data2->Flags, Data2->Equipment, c);
+
             for (int j = 0; j < Data2->s_BuffCount; ++j)
             {
                 RegisterBuff(static_cast<eBuffState>(Data2->s_BuffEffectState[j]), o);
@@ -2801,9 +2798,9 @@ void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
                 c->Movement = true;
             }
 
+            memset(c->ID, 0, sizeof c->ID);
             CMultiLanguage::ConvertFromUtf8(c->ID, Data2->ID, MAX_USERNAME_SIZE);
 
-            Network::Viewport::ApplyTransformEquipment(c, *Data2);
         }
 
         Offset += *EntryLength;

@@ -6,6 +6,8 @@
 #include "GameLogic/Pets/CompanionCleanup.h"
 #include "GameLogic/Pets/w_PetProcess.h"
 #include "Network/Server/TransformViewportEntry.h"
+#include "../data/ClientDataScope.h"
+#include <memory>
 #include "World/MapInfra/MapManager.h"
 
 #include <filesystem>
@@ -14,7 +16,7 @@ namespace
 {
 struct AppearanceFixture
 {
-    std::filesystem::path previousDirectory = std::filesystem::current_path();
+    ClientDataScope data{std::filesystem::path(MU_TEST_DATA_DIR).parent_path()};
     int previousWorld = gMapManager.WorldActive;
     CHARACTER character;
     CHARACTER observer;
@@ -22,7 +24,6 @@ struct AppearanceFixture
 
     AppearanceFixture()
     {
-        std::filesystem::current_path(MU_TEST_ASSET_DIR);
         gMapManager.WorldActive = WD_0LORENCIA;
         g_petProcess = PetProcess::Make();
         character.Object.Type = MODEL_PLAYER;
@@ -50,7 +51,6 @@ struct AppearanceFixture
         g_petProcess.reset();
         for (auto& mount : std::span(Mounts, MAX_MOUNTS))
             mount.Live = false;
-        std::filesystem::current_path(previousDirectory);
         gMapManager.WorldActive = previousWorld;
     }
 };
@@ -76,8 +76,10 @@ TEST_CASE("Transformed extended equipment preserves body and decodes real equipm
         fixture.entry.Equipment[16] = wornGloves ? 1 : 0xFF;
         for (int cycle = 0; cycle < 5; ++cycle)
         {
-            Network::Viewport::ApplyTransformEquipment(&c, fixture.entry);
+            ReadEquipmentExtended(0, fixture.entry.Flags, fixture.entry.Equipment, &c);
             CHECK(c.Helper.Type == MODEL_PET_SKELETON);
+            CHECK(g_petProcess->CountPets(&c) == 1);
+            CHECK(g_petProcess->CountPets(&fixture.observer) == 0);
             CHECK(c.Weapon[0].Type == MODEL_SWORD + 1);
             CHECK(c.Weapon[1].Type == MODEL_SHIELD + 1);
             CHECK(c.Wing.Type == MODEL_WING + 1);
@@ -110,7 +112,7 @@ TEST_CASE("Normal equipment and owner mounts survive independent appearance chan
     fixture.entry.Equipment[23] = 0xFF;
     fixture.entry.Equipment[24] = 0xFF;
     c.Change = true;
-    Network::Viewport::ApplyTransformEquipment(&c, fixture.entry);
+    ReadEquipmentExtended(0, fixture.entry.Flags, fixture.entry.Equipment, &c);
     CHECK(c.Helper.Type == -1);
     CHECK(Mounts[1].Live);
 }
@@ -122,9 +124,11 @@ TEST_CASE(
     auto& c = fixture.character;
     c.BodyPart[BODYPART_GLOVES].Type = MODEL_BODY_GLOVES + 20;
     gMapManager.WorldActive = WD_18CHAOS_CASTLE;
-    Network::Viewport::ApplyTransformEquipment(&c, fixture.entry);
+    ReadEquipmentExtended(0, fixture.entry.Flags, fixture.entry.Equipment, &c);
     CHECK(c.BodyPart[BODYPART_GLOVES].Type == MODEL_BODY_GLOVES + 20);
     CHECK(c.Change);
+    CHECK(c.Weapon[0].Type == MODEL_SWORD + 1);
+    CHECK(c.Wing.Type == MODEL_WING + 1);
 }
 
 TEST_CASE("Wildcard all-delete releases every matching companion and preserves observers [transform_appearance]")
@@ -152,9 +156,17 @@ TEST_CASE("Recreating a character clears its old mount before resetting helper i
     Mounts[0].Owner = &c.Object;
     Mounts[1].Live = true;
     Mounts[1].Owner = &fixture.observer.Object;
-    CreateCharacterPointer(&c, MODEL_PLAYER, 0, 0);
-    CHECK(c.Helper.Type == -1);
+    auto characters = std::make_unique<CHARACTER[]>(MAX_CHARACTERS_CLIENT + 1);
+    auto* previous = CharactersClient;
+    CharactersClient = characters.get();
+    auto& viewport = characters[0];
+    viewport.Object.Live = true;
+    viewport.Key = 123;
+    Mounts[0].Owner = &viewport.Object;
+    CreateCharacter(123, MODEL_PLAYER, 0, 0);
+    CHECK(viewport.Helper.Type == -1);
     CHECK_FALSE(Mounts[0].Live);
+    CharactersClient = previous;
     CHECK(Mounts[1].Live);
 }
 
@@ -173,5 +185,55 @@ TEST_CASE("Single and typed companion deletion keep their original scope [transf
     CHECK(pets.size() == 1);
     CHECK(third->GetObject() != nullptr);
     GameLogic::Pets::RemovePetObjects(pets, nullptr, -1, true);
+    CHECK(pets.size() == 1);
+}
+
+TEST_CASE("Direct respawn reset preserves owner companions and observers [transform_appearance]")
+{
+    AppearanceFixture fixture;
+    auto& c = fixture.character;
+    ReadEquipmentExtended(0, fixture.entry.Flags, fixture.entry.Equipment, &c);
+    REQUIRE(g_petProcess->CountPets(&c) == 1);
+    Mounts[0].Live = true;
+    Mounts[0].Owner = &c.Object;
+    Mounts[1].Live = true;
+    Mounts[1].Owner = &fixture.observer.Object;
+    CreateCharacterPointer(&c, MODEL_PLAYER, 0, 0);
+    CHECK(g_petProcess->CountPets(&c) == 1);
+    CHECK(Mounts[0].Live);
+    CHECK(Mounts[1].Live);
+}
+
+TEST_CASE("Viewport removal clears all owner pets including non-live entries [transform_appearance]")
+{
+    AppearanceFixture fixture;
+    auto characters = std::make_unique<CHARACTER[]>(MAX_CHARACTERS_CLIENT + 1);
+    auto* previous = CharactersClient;
+    CharactersClient = characters.get();
+    auto& owner = characters[0];
+    auto& observer = characters[1];
+    owner.Key = 123;
+    observer.Key = 456;
+    ReadEquipmentExtended(0, fixture.entry.Flags, fixture.entry.Equipment, &owner);
+    ReadEquipmentExtended(0, fixture.entry.Flags, fixture.entry.Equipment, &observer);
+    CHECK(g_petProcess->CountPets(&owner) == 1);
+    CHECK(g_petProcess->CountPets(&observer) == 1);
+    ClearCharacters(observer.Key);
+    CHECK(g_petProcess->CountPets(&owner) == 0);
+    CHECK(g_petProcess->CountPets(&observer) == 1);
+    observer.Object.Live = true;
+    DeleteCharacter(observer.Key);
+    CHECK(g_petProcess->CountPets(&observer) == 0);
+    CharactersClient = previous;
+}
+
+TEST_CASE("Transformed quest markers and empty pet entries are preserved safely [transform_appearance]")
+{
+    AppearanceFixture fixture;
+    fixture.character.EtcPart = 2;
+    ReadEquipmentExtended(0, fixture.entry.Flags, fixture.entry.Equipment, &fixture.character);
+    CHECK(fixture.character.EtcPart == 2);
+    PetProcess::PetList pets{nullptr};
+    GameLogic::Pets::RemovePetObjects(pets, &fixture.character, -1, true);
     CHECK(pets.size() == 1);
 }

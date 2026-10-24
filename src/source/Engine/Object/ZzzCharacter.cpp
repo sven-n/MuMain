@@ -11573,18 +11573,13 @@ void ClearCharacters(int Key)
     {
         CHARACTER* c = &CharactersClient[i];
         OBJECT* o = &c->Object;
+        if (c->Key != Key)
+            DeleteCharacterCompanions(c);
         if (o->Live && c->Key != Key)
         {
             o->Live = false;
 
             BoneManager::UnregisterBone(c);
-
-            for (int j = 0; j < MAX_MOUNTS; j++)
-            {
-                OBJECT* b = &Mounts[j];
-                if (b->Live && b->Owner == o)
-                    b->Live = false;
-            }
         }
 
         DeletePet(c);
@@ -11605,12 +11600,7 @@ void DeleteCharacter(int Key)
 
             BoneManager::UnregisterBone(c);
 
-            for (int j = 0; j < MAX_MOUNTS; j++)
-            {
-                OBJECT* b = &Mounts[j];
-                if (b->Live && b->Owner == o)
-                    b->Live = false;
-            }
+            DeleteCharacterCompanions(c);
             DeletePet(c);
             DeleteCloth(c, o);
             DeleteParts(c);
@@ -11625,12 +11615,7 @@ void DeleteCharacter(CHARACTER* c, OBJECT* o)
 
     BoneManager::UnregisterBone(c);
 
-    for (int j = 0; j < MAX_MOUNTS; j++)
-    {
-        OBJECT* b = &Mounts[j];
-        if (b->Live && b->Owner == o)
-            b->Live = false;
-    }
+    DeleteCharacterCompanions(c);
 
     DeletePet(c);
     DeleteCloth(c, o);
@@ -11740,7 +11725,6 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     }
     c->m_pParts = NULL;
 
-    DeleteCharacterCompanions(c);
     giPetManager::DeletePet(c);
 
     int Index = TERRAIN_INDEX_REPEAT((c->PositionX), (c->PositionY));
@@ -12151,6 +12135,7 @@ CHARACTER* CreateCharacter(int Key, int Type, unsigned char PositionX, unsigned 
         OBJECT* o = &c->Object;
         if (o->Live && c->Key == Key)
         {
+            DeleteCharacterCompanions(c);
             CreateCharacterPointer(c, Type, PositionX, PositionY, Rotation);
             g_CharacterClearBuff(o);
             return c;
@@ -12167,6 +12152,7 @@ CHARACTER* CreateCharacter(int Key, int Type, unsigned char PositionX, unsigned 
             DeletePet(c);
             DeleteCloth(c, o);
             DeleteParts(c);
+            DeleteCharacterCompanions(c);
             CreateCharacterPointer(c, Type, PositionX, PositionY, Rotation);
             g_CharacterClearBuff(o);
             c->Key = Key;
@@ -12926,10 +12912,10 @@ int ReadBodyEquipmentExtended(CHARACTER* c, BYTE* Equipment)
             }
         }
 
-        offset += 3;
+        offset += BytesPerBodyPart;
     }
 
-    return offset;
+    return BodyEquipmentLength;
 }
 } // namespace
 
@@ -13087,7 +13073,9 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
         break;
     }
 
-    c->EtcPart = 0;
+    // A transformed Blood Castle carrier keeps the quest-item marker.
+    if (!c->Change || c->EtcPart > 3)
+        c->EtcPart = 0;
     if ((flags & 0x20) > 0)
     {
         c->EtcPart = PARTS_LION;

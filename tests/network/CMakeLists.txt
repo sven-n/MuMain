@@ -28,7 +28,7 @@ mu_add_test(
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
 )
-target_compile_definitions(test_transform_appearance PRIVATE MU_TEST_ASSET_DIR="${CMAKE_SOURCE_DIR}/src/bin")
+target_compile_definitions(test_transform_appearance PRIVATE MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data")
 
 mu_add_test(
     NAME test_connection_library_load

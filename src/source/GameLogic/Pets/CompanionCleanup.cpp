@@ -14,8 +14,8 @@ void RemovePetObjects(std::list<std::shared_ptr<PetObject>>& pets, CHARACTER* ow
     for (auto iter = pets.begin(); iter != pets.end();)
     {
         const auto& pet = *iter;
-        const bool matches =
-            itemType == AnyItem ? pet->IsSameOwner(&owner->Object) : pet->IsSameObject(&owner->Object, itemType);
+        const bool matches = pet && (itemType == AnyItem ? pet->IsSameOwner(&owner->Object)
+                                                         : pet->IsSameObject(&owner->Object, itemType));
         if (!matches)
         {
             ++iter;
