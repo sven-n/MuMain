@@ -6,6 +6,11 @@
 #include <memory>
 #include "Render/Sprites/TextureScript.h"
 
+namespace mu
+{
+struct ShadowProjection;
+}
+
 extern const float (*g_pActiveBoneTransform)[3][4];
 // Bumped by every SetActiveBoneTransform() call — lets BoneUBO detect "the pointer is
 // the same address as last upload, but the content underneath it has changed" (e.g. a
@@ -416,13 +421,13 @@ private:
     // The shadow streams the renderer keeps for the meshes of this slot.
     void ReleaseShadowStreams();
 
-    void AddClothesShadowTriangles(void* pClothes, int clothesCount, float sx, float sy,
-        std::uint32_t color) const;
-    void AddMeshShadowTriangles(int blendMesh, int hiddenMesh, int startMesh, int endMesh, float sx, float sy,
-        std::uint32_t color) const;
+    void AddClothesShadowTriangles(void* pClothes, int clothesCount, const mu::ShadowProjection& projection,
+                                   std::uint32_t color) const;
+    void AddMeshShadowTriangles(int blendMesh, int hiddenMesh, int startMesh, int endMesh,
+                                const mu::ShadowProjection& projection, std::uint32_t color) const;
     // The same shadow from a cached rest-pose stream skinned on the GPU; false leaves it to the CPU.
-    [[nodiscard]] bool RenderGpuMeshShadow(int blendMesh, int hiddenMesh, int startMesh, int endMesh, float sx,
-        float sy, std::uint32_t color) const;
+    [[nodiscard]] bool RenderGpuMeshShadow(int blendMesh, int hiddenMesh, int startMesh, int endMesh,
+                                           const mu::ShadowProjection& projection, std::uint32_t color) const;
 };
 
 extern BMD* Models;

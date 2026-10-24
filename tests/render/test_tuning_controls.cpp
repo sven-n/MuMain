@@ -63,12 +63,18 @@ const SpecRow Spec[] = {
      TuningUnit::Seconds, TuningZero::Immediate},
     {TuningControlId::EffectCap, TuningGroup::DynamicLights, false, LookValue::DynamicEffectCap, 0, 8, 0.1,
      TuningUnit::None, TuningZero::NoCap},
+    {TuningControlId::ShadowOpacity, TuningGroup::DynamicLights, false, LookValue::GroundShadowOpacity, 0, 1, 0.05,
+     TuningUnit::Percent, TuningZero::Plain},
+    {TuningControlId::ShadowLights, TuningGroup::DynamicLights, false, LookValue::GroundShadowLights, 0, 4, 1,
+     TuningUnit::None, TuningZero::Plain},
     {TuningControlId::Wrap, TuningGroup::DynamicLights, true, LookValue::DynamicWrap, 0, 0.5, 0.05, TuningUnit::None,
      TuningZero::Plain},
     {TuningControlId::MapSmoothing, TuningGroup::DynamicLights, true, LookValue::DynamicMapSmoothing, 0, 2, 0.05,
      TuningUnit::Seconds, TuningZero::Immediate},
     {TuningControlId::EffectRangeMax, TuningGroup::DynamicLights, true, LookValue::DynamicEffectRangeMax, 0, 16, 1,
      TuningUnit::Cells, TuningZero::NoCap},
+    {TuningControlId::ShadowAngle, TuningGroup::DynamicLights, true, LookValue::GroundShadowAngle, 0, 360, 5,
+     TuningUnit::Degrees, TuningZero::Plain},
     {TuningControlId::MoodStrength, TuningGroup::LightMood, false, std::nullopt, 0, 100, 1, TuningUnit::Percent,
      TuningZero::Plain},
     {TuningControlId::BloomStrength, TuningGroup::PostProcessing, false, LookValue::BloomStrength, 0, 2, 0.05,
@@ -77,6 +83,10 @@ const SpecRow Spec[] = {
      0.05, TuningUnit::None, TuningZero::Plain},
     {TuningControlId::GradingStrength, TuningGroup::PostProcessing, false, LookValue::GradingStrength, 0, 1, 0.01,
      TuningUnit::Percent, TuningZero::Plain},
+    {TuningControlId::AmbientOcclusionStrength, TuningGroup::PostProcessing, false, LookValue::AmbientOcclusionStrength,
+     0, 2, 0.05, TuningUnit::None, TuningZero::Plain},
+    {TuningControlId::AmbientOcclusionRadius, TuningGroup::PostProcessing, false, LookValue::AmbientOcclusionRadius, 10,
+     300, 5, TuningUnit::None, TuningZero::Plain},
 };
 
 Data::Maps::LookProfileData ShippedLikeProfile()
@@ -92,9 +102,9 @@ Data::Maps::LookProfileData ShippedLikeProfile()
 }
 } // namespace
 
-TEST_CASE("the 19 tuning controls have the specified bounds, steps, units and placement [render][look][tuning]")
+TEST_CASE("the 24 tuning controls have the specified bounds, steps, units and placement [render][look][tuning]")
 {
-    REQUIRE(Render::Look::TuningControlCount == 19);
+    REQUIRE(Render::Look::TuningControlCount == 24);
     REQUIRE(std::size(Spec) == Render::Look::TuningControlCount);
     std::set<LookValue> covered;
     for (const SpecRow& row : Spec)

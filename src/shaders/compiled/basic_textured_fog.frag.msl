@@ -38,7 +38,7 @@ struct main0_in
     float input_eyeDepth [[user(locn3)]];
 };
 
-fragment main0_out main0(main0_in in [[stage_in]], constant SceneLighting& _24 [[buffer(0)]], constant FogUniforms& _72 [[buffer(1)]], texture2d<float> tex [[texture(0)]], sampler s [[sampler(0)]])
+fragment main0_out main0(main0_in in [[stage_in]], constant FogUniforms& _72 [[buffer(0)]], constant SceneLighting& _24 [[buffer(1)]], texture2d<float> tex [[texture(0)]], sampler s [[sampler(0)]])
 {
     main0_out out = {};
     float4 _190 = tex.sample(s, in.input_uv);

@@ -10,6 +10,7 @@
 #include "Render/Lighting/DynamicLightsSetting.h"
 #include "Render/Lighting/EnhancedLightingSetting.h"
 #include "Render/Lighting/LightMoodSetting.h"
+#include "Render/Lighting/WorldDynamicLights.h"
 #include "Render/Look/LookProfileSetting.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/SceneLighting.h"
@@ -56,6 +57,17 @@ void SubmitSceneLighting()
     mu::GetRenderer().SetSceneLighting(lighting);
 }
 
+void PinWorldDynamicLights()
+{
+    if (!Render::Lighting::DynamicLightsActive())
+    {
+        return;
+    }
+    float reference[3];
+    SelectionReference(reference);
+    Render::Lighting::FrameWorldDynamicLights().Pin(Render::Lighting::FrameDynamicLights(), reference);
+}
+
 void SubmitDynamicLights()
 {
     if (!Render::Lighting::DynamicLightsActive())
@@ -65,11 +77,14 @@ void SubmitDynamicLights()
     }
 
     const Render::Lighting::DynamicLightList& lights = Render::Lighting::FrameDynamicLights();
+    const Render::Lighting::WorldDynamicLights& world = Render::Lighting::FrameWorldDynamicLights();
     float reference[3];
     SelectionReference(reference);
     Render::Lighting::DynamicLightSelection selection =
-        Render::Lighting::SelectDynamicLights(lights.Lights(), reference);
+        world.IsPinned() ? Render::Lighting::SelectDynamicLights(world.Selection(), lights.LightsSinceMark(), reference)
+                         : Render::Lighting::SelectDynamicLights(lights.Lights(), reference);
     selection.uniform.wrap = Render::Look::Value(Data::Maps::LookValue::DynamicWrap);
+    selection.uniform.groundShadowOpacity = Render::Look::Value(Data::Maps::LookValue::GroundShadowOpacity);
     mu::GetRenderer().SetDynamicLights(selection.uniform);
 
     if (selection.dropped > 0 || lights.Overflow() > 0)

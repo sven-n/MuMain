@@ -68,6 +68,9 @@ struct PostProcessingLook
     float bloomStrength = 0.0f;
     float bloomLevelFalloff = 0.5f;
     float gradingStrength = 1.0f;
+    // Ambient occlusion: how much it darkens (0: none) and how far it looks, in world units.
+    float ambientOcclusionStrength = 0.0f;
+    float ambientOcclusionRadius = 60.0f;
 };
 
 // ---------------------------------------------------------------------------
@@ -156,14 +159,27 @@ struct SkinningParameters
     float specularStrength = 0.0f;
 };
 
+// What casts a ground shadow (ScopedGroundShadow).
+enum class GroundShadowSource : std::uint8_t
+{
+    Sun,        // the map's light: darkens the ground's own light
+    PointLight, // a candle, fire or spell light: darkens the point lights
+};
+
 // Where a body shadow lands, as CalcShadowPosition() puts it there.
 struct ShadowProjection
 {
     float origin[3]{};
     float shearX = 0.0f;        // sx
     float shearHeight = 0.0f;   // sy
+    // Radians from world +x to the axis the shear acts along; shadows fall the opposite way. 0 is
+    // Classic (shadows towards -x).
+    float axisAngle = 0.0f;
     float specialHeight = 0.0f; // the height of TW_HEIGHT cells
     bool terrain = true;        // false in the scenes where RequestTerrainHeight() returns 0
+    // Projected exactly from a point light shearX along the axis and shearHeight up, instead of the
+    // legacy shear (Render::Lighting::ProjectShadow).
+    bool pointLight = false;
 };
 
 // RmlUi port: the current frame's raw SDL_GPU submission context. RmlUi's own vendored
@@ -358,6 +374,21 @@ public:
     // does in Classic. Scopes nest; use ScopedBloomExclusion.
     virtual void BeginBloomExclusion() {}
     virtual void EndBloomExclusion() {}
+
+    // 3D draws between BeginWorldLitGeometry and EndWorldLitGeometry are ground lit by the
+    // terrain light: with Enhanced lighting, the frame's first DynamicLightsUniform::worldLightCount
+    // point lights are added to their vertex colour per pixel. Scopes nest; use
+    // ScopedWorldLitGeometry.
+    virtual void BeginWorldLitGeometry() {}
+    virtual void EndWorldLitGeometry() {}
+
+    // Draws between BeginGroundShadow and EndGroundShadow are shadows cast on the ground. In a frame
+    // with world-lit ground they darken it through a coverage mask instead (each pixel once, by
+    // DynamicLightsUniform::groundShadowOpacity): a sun shadow its own light, a point-light shadow
+    // its point light. Otherwise a sun shadow draws as recorded and a point-light shadow not at all.
+    // Scopes nest; use ScopedGroundShadow.
+    virtual void BeginGroundShadow(GroundShadowSource /*source*/) {}
+    virtual void EndGroundShadow(GroundShadowSource /*source*/) {}
     // True while a bloom exclusion is open: what is queued now and drawn later
     // (a character's glow sprites) can be drawn inside one too.
     [[nodiscard]] virtual bool IsBloomExcluded() const
@@ -788,6 +819,37 @@ public:
     }
     ScopedBloomExclusion(const ScopedBloomExclusion&) = delete;
     ScopedBloomExclusion& operator=(const ScopedBloomExclusion&) = delete;
+};
+class ScopedWorldLitGeometry
+{
+public:
+    ScopedWorldLitGeometry()
+    {
+        GetRenderer().BeginWorldLitGeometry();
+    }
+    ~ScopedWorldLitGeometry()
+    {
+        GetRenderer().EndWorldLitGeometry();
+    }
+    ScopedWorldLitGeometry(const ScopedWorldLitGeometry&) = delete;
+    ScopedWorldLitGeometry& operator=(const ScopedWorldLitGeometry&) = delete;
+};
+class ScopedGroundShadow
+{
+public:
+    explicit ScopedGroundShadow(GroundShadowSource source = GroundShadowSource::Sun) : m_source(source)
+    {
+        GetRenderer().BeginGroundShadow(source);
+    }
+    ~ScopedGroundShadow()
+    {
+        GetRenderer().EndGroundShadow(m_source);
+    }
+    ScopedGroundShadow(const ScopedGroundShadow&) = delete;
+    ScopedGroundShadow& operator=(const ScopedGroundShadow&) = delete;
+
+private:
+    GroundShadowSource m_source;
 };
 // The draws recorded in its lifetime may be reordered (BeginReorderableDraws).
 class ScopedReorderableDraws

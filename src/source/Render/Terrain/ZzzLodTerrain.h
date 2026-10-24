@@ -61,6 +61,8 @@ void InitTerrainLight();
 void InitTerrainShadow();
 void SetTerrainLight(float xf, float yf, vec3_t Light, int Range, vec3_t* Buffer);
 void AddTerrainLight(float xf, float yf, vec3_t Light, int Range, vec3_t* Buffer);
+// AddTerrainLight from world height z: a point light there (its shadows' length follows it).
+void AddTerrainLightAt(float xf, float yf, float z, vec3_t Light, int Range, vec3_t* Buffer);
 void AddTerrainLightClip(float xf, float yf, vec3_t Light, int Range, vec3_t* Buffer);
 void RequestTerrainLight(float xf, float yf, vec3_t Light);
 // The static terrain light plus this frame's darkening lights, without the brightening ones.

@@ -129,12 +129,14 @@ void AddLight(float (*grid)[3], float x, float y, const float* color, int range)
 }
 
 void AddDynamicLight(float (*grid)[3], Lighting::DynamicLightList& frameLights, float x, float y, const float* color,
-                     int range, float terrainHeight)
+                     int range, float terrainHeight, float aboveTerrain, bool castsShadows)
 {
     AddLight(grid, x, y, color, range);
     if (range > 0)
     {
-        frameLights.Add(MakeDynamicLight(x, y, color, range, terrainHeight));
+        Lighting::DynamicLight light = MakeDynamicLight(x, y, color, range, terrainHeight, aboveTerrain);
+        light.castsShadows = castsShadows;
+        frameLights.Add(light);
     }
 }
 
@@ -145,7 +147,9 @@ void ApplyCall(const FrameLightTarget& target, const Lighting::LightCall& call)
     float color[kColorComponents];
     for (int k = 0; k < kColorComponents; ++k)
         color[k] = call.color[k] > 0.f ? call.color[k] * target.dynamicGain : call.color[k];
-    AddDynamicLight(target.grid, *target.frameLights, call.x, call.y, color, call.range, target.height(call.x, call.y));
+    const float terrainHeight = target.height(call.x, call.y);
+    const float aboveTerrain = call.z ? *call.z - terrainHeight : Lighting::DefaultLightHeight(call.source);
+    AddDynamicLight(target.grid, *target.frameLights, call.x, call.y, color, call.range, terrainHeight, aboveTerrain);
 }
 } // namespace
 
@@ -235,12 +239,13 @@ void SampleBrightening(std::span<const Lighting::DynamicLight> lights, float x, 
     }
 }
 
-Lighting::DynamicLight MakeDynamicLight(float x, float y, const float* color, int range, float terrainHeight)
+Lighting::DynamicLight MakeDynamicLight(float x, float y, const float* color, int range, float terrainHeight,
+                                        float aboveTerrain)
 {
     Lighting::DynamicLight light{};
     light.position[0] = x;
     light.position[1] = y;
-    light.position[2] = terrainHeight + Lighting::kDynamicLightHeightAboveTerrain;
+    light.position[2] = terrainHeight + aboveTerrain;
     std::copy_n(color, kColorComponents, light.color);
     light.range = range;
     light.radius = static_cast<float>(range) * TERRAIN_SCALE;

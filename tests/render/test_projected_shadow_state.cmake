@@ -18,6 +18,14 @@ endif()
 math(EXPR shadow_length "${shadow_end} - ${shadow_start}")
 string(SUBSTRING "${bmd_source}" ${shadow_start} ${shadow_length} projected_shadow_source)
 
+# Every path (GPU, CPU fallback, cloth) records inside the ground-shadow scope, so a world-lit frame
+# draws them into the ground shadow mask.
+string(FIND "${projected_shadow_source}" "const mu::ScopedGroundShadow groundShadow;" scope_position)
+string(FIND "${projected_shadow_source}" "drawShadow(alpha);" first_draw_position)
+if(scope_position EQUAL -1 OR first_draw_position LESS scope_position)
+    message(FATAL_ERROR "Projected body shadows must be recorded inside a ScopedGroundShadow")
+endif()
+
 foreach(required_call IN ITEMS AddMeshShadowTriangles AddClothesShadowTriangles)
     string(FIND "${projected_shadow_source}" "${required_call}(" call_position)
     if(call_position EQUAL -1)
