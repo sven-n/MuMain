@@ -4,6 +4,7 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemFileFit.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
+#include "Data/GameData/ItemData/ItemTooltipConditions.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Data/GameData/ItemData/StatProfileRule.h"
 
@@ -115,6 +116,55 @@ TEST_CASE("Item attribute conversion keeps every field [data][items]")
     {
         CHECK(converted.Resistance[i] == original.Resistance[i]);
     }
+}
+
+// The editor rebuilds an item from its bmd attribute, which has no tooltip data: the fields the attribute lacks come
+// from the item as it was, its description lines, level values and name lines whole.
+TEST_CASE("Converting from the item attribute keeps the client-only fields [data][items]")
+{
+    ItemDefinition source = MakeItem(SwordGroup, 0, "Kris");
+    ItemDescriptionLine written;
+    written.text.Set("en", "Increase {percent}% of Damage");
+    written.text.Set("de", "Erhöht den Schaden um {percent}%");
+    written.values = {{"percent", "wingDamageIncrease1st"}};
+    TooltipCondition condition;
+    std::string error;
+    REQUIRE(ReadTooltipCondition("level>=3", condition, error));
+    written.when = {condition};
+    written.color = ItemTextColor::Blue;
+    written.minLevel = 3;
+    written.maxLevel = 9;
+    ItemDescriptionLine shared;
+    shared.textName = "cannotRepair";
+    shared.color = ItemTextColor::Red;
+    source.description = {written, ItemDescriptionLine{}, shared};
+    ItemLevelValue stat;
+    stat.text.Set("en", "ENG");
+    ItemLevelValue sharedStat;
+    sharedStat.textName = "stamina";
+    source.levelValues = {{"stat", {stat, sharedStat}}};
+    ItemNameLine olive;
+    olive.text.Set("en", "Olive of love");
+    olive.hasText = true;
+    olive.color = ItemTextColor::Yellow;
+    olive.hasColor = true;
+    olive.minLevel = 4;
+    olive.maxLevel = 4;
+    source.nameLines = {olive};
+    source.statProfile = "weapon";
+
+    // As the bmd import makes it: the attribute's fields, nothing of the tooltip.
+    ItemDefinition target = MakeItem(SwordGroup, 0, "Kris of the bmd");
+    target.damageMin = 99;
+    CopyFieldsNotInItemAttribute(source, target);
+
+    CHECK(target.description == source.description);
+    CHECK(target.levelValues == source.levelValues);
+    CHECK(target.nameLines == source.nameLines);
+    CHECK(target.statProfile == "weapon");
+    // The attribute's own fields stay the imported ones.
+    CHECK(target.names.GetNeutral() == "Kris of the bmd");
+    CHECK(target.damageMin == 99);
 }
 
 TEST_CASE("Damage and magic power past 255 are kept, but do not fit the bmd item file [data][items]")

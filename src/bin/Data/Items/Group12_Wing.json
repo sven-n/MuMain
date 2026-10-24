@@ -13,49 +13,15 @@
       "tags": ["valuable"],
       "description": [
         {
-          "text": {
-            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
-            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
-            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
-            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
-            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
-            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
-            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
-            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
-            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
-            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
-            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
-          }
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease1st"}
         },
         {
-          "text": {
-            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
-            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
-            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
-            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
-            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
-            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
-            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
-            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
-            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
-            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
-            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
-          }
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb1st"}
         },
         {
-          "text": {
-            "en": "Increase speed",
-            "de": "Erhöht die Geschwindigkeit",
-            "es": "aumentar la velocidad",
-            "id": "Tingkatkan kecepatan",
-            "ja": "移動速度向上",
-            "pl": "Zwiększa prędkość",
-            "pt": "Aumentar a velocidade",
-            "ru": "Увеличить скорость",
-            "tl": "Dagdagan ang bilis",
-            "uk": "Збільште швидкість",
-            "zh-TW": "提高速度"
-          }
+          "text": "@increaseSpeed"
         }
       ],
       "width": 3,
@@ -84,49 +50,15 @@
       "tags": ["valuable"],
       "description": [
         {
-          "text": {
-            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
-            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
-            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
-            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
-            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
-            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
-            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
-            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
-            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
-            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
-            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
-          }
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease1st"}
         },
         {
-          "text": {
-            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
-            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
-            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
-            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
-            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
-            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
-            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
-            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
-            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
-            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
-            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
-          }
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb1st"}
         },
         {
-          "text": {
-            "en": "Increase speed",
-            "de": "Erhöht die Geschwindigkeit",
-            "es": "aumentar la velocidad",
-            "id": "Tingkatkan kecepatan",
-            "ja": "移動速度向上",
-            "pl": "Zwiększa prędkość",
-            "pt": "Aumentar a velocidade",
-            "ru": "Увеличить скорость",
-            "tl": "Dagdagan ang bilis",
-            "uk": "Збільште швидкість",
-            "zh-TW": "提高速度"
-          }
+          "text": "@increaseSpeed"
         }
       ],
       "width": 5,
@@ -156,49 +88,15 @@
       "tags": ["valuable"],
       "description": [
         {
-          "text": {
-            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
-            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
-            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
-            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
-            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
-            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
-            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
-            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
-            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
-            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
-            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
-          }
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease1st"}
         },
         {
-          "text": {
-            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
-            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
-            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
-            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
-            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
-            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
-            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
-            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
-            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
-            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
-            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
-          }
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb1st"}
         },
         {
-          "text": {
-            "en": "Increase speed",
-            "de": "Erhöht die Geschwindigkeit",
-            "es": "aumentar la velocidad",
-            "id": "Tingkatkan kecepatan",
-            "ja": "移動速度向上",
-            "pl": "Zwiększa prędkość",
-            "pt": "Aumentar a velocidade",
-            "ru": "Увеличить скорость",
-            "tl": "Dagdagan ang bilis",
-            "uk": "Збільште швидкість",
-            "zh-TW": "提高速度"
-          }
+          "text": "@increaseSpeed"
         }
       ],
       "width": 5,
@@ -228,49 +126,50 @@
       "tags": ["valuable"],
       "description": [
         {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease2nd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb2nd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
           "text": {
-            "en": "Increase {table:wingDamageIncrease2nd}% of Damage",
-            "de": "Erhöht den Schaden um {table:wingDamageIncrease2nd}%",
-            "es": "Aumenta el daño de {table:wingDamageIncrease2nd}% of",
-            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease2nd}% of",
-            "ja": "ダメージ {table:wingDamageIncrease2nd}%増加",
-            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease2nd}%",
-            "pt": "Aumentar o dano de {table:wingDamageIncrease2nd}% of",
-            "ru": "Увеличение урона {table:wingDamageIncrease2nd}% of",
-            "tl": "Dagdagan ang {table:wingDamageIncrease2nd}% of Pinsala",
-            "uk": "Збільшення шкоди на {table:wingDamageIncrease2nd}% of",
-            "zh-TW": "增加 {table:wingDamageIncrease2nd}% of 傷害"
-          }
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
         },
         {
           "text": {
-            "en": "Absorb {table:wingDamageAbsorb2nd}% of Damage",
-            "de": "Absorbiert {table:wingDamageAbsorb2nd}% des Schadens",
-            "es": "Absorber daño {table:wingDamageAbsorb2nd}% of",
-            "id": "Menyerap Kerusakan {table:wingDamageAbsorb2nd}% of",
-            "ja": "ダメージ {table:wingDamageAbsorb2nd}%吸収",
-            "pl": "Pochłania {table:wingDamageAbsorb2nd}% obrażeń",
-            "pt": "Absorver Dano {table:wingDamageAbsorb2nd}% of",
-            "ru": "Поглощение {table:wingDamageAbsorb2nd}% of урона",
-            "tl": "Isipsip ang {table:wingDamageAbsorb2nd}% of Pinsala",
-            "uk": "Поглинання шкоди {table:wingDamageAbsorb2nd}% of",
-            "zh-TW": "吸收{table:wingDamageAbsorb2nd}% of傷害"
-          }
-        },
-        {
-          "text": {
-            "en": "Increase speed",
-            "de": "Erhöht die Geschwindigkeit",
-            "es": "aumentar la velocidad",
-            "id": "Tingkatkan kecepatan",
-            "ja": "移動速度向上",
-            "pl": "Zwiększa prędkość",
-            "pt": "Aumentar a velocidade",
-            "ru": "Увеличить скорость",
-            "tl": "Dagdagan ang bilis",
-            "uk": "Збільште швидкість",
-            "zh-TW": "提高速度"
-          }
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
         }
       ],
       "width": 5,
@@ -299,49 +198,50 @@
       "tags": ["valuable"],
       "description": [
         {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease2nd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb2nd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
           "text": {
-            "en": "Increase {table:wingDamageIncrease2nd}% of Damage",
-            "de": "Erhöht den Schaden um {table:wingDamageIncrease2nd}%",
-            "es": "Aumenta el daño de {table:wingDamageIncrease2nd}% of",
-            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease2nd}% of",
-            "ja": "ダメージ {table:wingDamageIncrease2nd}%増加",
-            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease2nd}%",
-            "pt": "Aumentar o dano de {table:wingDamageIncrease2nd}% of",
-            "ru": "Увеличение урона {table:wingDamageIncrease2nd}% of",
-            "tl": "Dagdagan ang {table:wingDamageIncrease2nd}% of Pinsala",
-            "uk": "Збільшення шкоди на {table:wingDamageIncrease2nd}% of",
-            "zh-TW": "增加 {table:wingDamageIncrease2nd}% of 傷害"
-          }
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
         },
         {
           "text": {
-            "en": "Absorb {table:wingDamageAbsorb2nd}% of Damage",
-            "de": "Absorbiert {table:wingDamageAbsorb2nd}% des Schadens",
-            "es": "Absorber daño {table:wingDamageAbsorb2nd}% of",
-            "id": "Menyerap Kerusakan {table:wingDamageAbsorb2nd}% of",
-            "ja": "ダメージ {table:wingDamageAbsorb2nd}%吸収",
-            "pl": "Pochłania {table:wingDamageAbsorb2nd}% obrażeń",
-            "pt": "Absorver Dano {table:wingDamageAbsorb2nd}% of",
-            "ru": "Поглощение {table:wingDamageAbsorb2nd}% of урона",
-            "tl": "Isipsip ang {table:wingDamageAbsorb2nd}% of Pinsala",
-            "uk": "Поглинання шкоди {table:wingDamageAbsorb2nd}% of",
-            "zh-TW": "吸收{table:wingDamageAbsorb2nd}% of傷害"
-          }
-        },
-        {
-          "text": {
-            "en": "Increase speed",
-            "de": "Erhöht die Geschwindigkeit",
-            "es": "aumentar la velocidad",
-            "id": "Tingkatkan kecepatan",
-            "ja": "移動速度向上",
-            "pl": "Zwiększa prędkość",
-            "pt": "Aumentar a velocidade",
-            "ru": "Увеличить скорость",
-            "tl": "Dagdagan ang bilis",
-            "uk": "Збільште швидкість",
-            "zh-TW": "提高速度"
-          }
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
         }
       ],
       "width": 5,
@@ -370,49 +270,50 @@
       "tags": ["valuable"],
       "description": [
         {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease2nd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb2nd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
           "text": {
-            "en": "Increase {table:wingDamageIncrease2nd}% of Damage",
-            "de": "Erhöht den Schaden um {table:wingDamageIncrease2nd}%",
-            "es": "Aumenta el daño de {table:wingDamageIncrease2nd}% of",
-            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease2nd}% of",
-            "ja": "ダメージ {table:wingDamageIncrease2nd}%増加",
-            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease2nd}%",
-            "pt": "Aumentar o dano de {table:wingDamageIncrease2nd}% of",
-            "ru": "Увеличение урона {table:wingDamageIncrease2nd}% of",
-            "tl": "Dagdagan ang {table:wingDamageIncrease2nd}% of Pinsala",
-            "uk": "Збільшення шкоди на {table:wingDamageIncrease2nd}% of",
-            "zh-TW": "增加 {table:wingDamageIncrease2nd}% of 傷害"
-          }
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
         },
         {
           "text": {
-            "en": "Absorb {table:wingDamageAbsorb2nd}% of Damage",
-            "de": "Absorbiert {table:wingDamageAbsorb2nd}% des Schadens",
-            "es": "Absorber daño {table:wingDamageAbsorb2nd}% of",
-            "id": "Menyerap Kerusakan {table:wingDamageAbsorb2nd}% of",
-            "ja": "ダメージ {table:wingDamageAbsorb2nd}%吸収",
-            "pl": "Pochłania {table:wingDamageAbsorb2nd}% obrażeń",
-            "pt": "Absorver Dano {table:wingDamageAbsorb2nd}% of",
-            "ru": "Поглощение {table:wingDamageAbsorb2nd}% of урона",
-            "tl": "Isipsip ang {table:wingDamageAbsorb2nd}% of Pinsala",
-            "uk": "Поглинання шкоди {table:wingDamageAbsorb2nd}% of",
-            "zh-TW": "吸收{table:wingDamageAbsorb2nd}% of傷害"
-          }
-        },
-        {
-          "text": {
-            "en": "Increase speed",
-            "de": "Erhöht die Geschwindigkeit",
-            "es": "aumentar la velocidad",
-            "id": "Tingkatkan kecepatan",
-            "ja": "移動速度向上",
-            "pl": "Zwiększa prędkość",
-            "pt": "Aumentar a velocidade",
-            "ru": "Увеличить скорость",
-            "tl": "Dagdagan ang bilis",
-            "uk": "Збільште швидкість",
-            "zh-TW": "提高速度"
-          }
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
         }
       ],
       "width": 3,
@@ -441,49 +342,50 @@
       "tags": ["valuable"],
       "description": [
         {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease2nd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb2nd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
           "text": {
-            "en": "Increase {table:wingDamageIncrease2nd}% of Damage",
-            "de": "Erhöht den Schaden um {table:wingDamageIncrease2nd}%",
-            "es": "Aumenta el daño de {table:wingDamageIncrease2nd}% of",
-            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease2nd}% of",
-            "ja": "ダメージ {table:wingDamageIncrease2nd}%増加",
-            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease2nd}%",
-            "pt": "Aumentar o dano de {table:wingDamageIncrease2nd}% of",
-            "ru": "Увеличение урона {table:wingDamageIncrease2nd}% of",
-            "tl": "Dagdagan ang {table:wingDamageIncrease2nd}% of Pinsala",
-            "uk": "Збільшення шкоди на {table:wingDamageIncrease2nd}% of",
-            "zh-TW": "增加 {table:wingDamageIncrease2nd}% of 傷害"
-          }
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
         },
         {
           "text": {
-            "en": "Absorb {table:wingDamageAbsorb2nd}% of Damage",
-            "de": "Absorbiert {table:wingDamageAbsorb2nd}% des Schadens",
-            "es": "Absorber daño {table:wingDamageAbsorb2nd}% of",
-            "id": "Menyerap Kerusakan {table:wingDamageAbsorb2nd}% of",
-            "ja": "ダメージ {table:wingDamageAbsorb2nd}%吸収",
-            "pl": "Pochłania {table:wingDamageAbsorb2nd}% obrażeń",
-            "pt": "Absorver Dano {table:wingDamageAbsorb2nd}% of",
-            "ru": "Поглощение {table:wingDamageAbsorb2nd}% of урона",
-            "tl": "Isipsip ang {table:wingDamageAbsorb2nd}% of Pinsala",
-            "uk": "Поглинання шкоди {table:wingDamageAbsorb2nd}% of",
-            "zh-TW": "吸收{table:wingDamageAbsorb2nd}% of傷害"
-          }
-        },
-        {
-          "text": {
-            "en": "Increase speed",
-            "de": "Erhöht die Geschwindigkeit",
-            "es": "aumentar la velocidad",
-            "id": "Tingkatkan kecepatan",
-            "ja": "移動速度向上",
-            "pl": "Zwiększa prędkość",
-            "pt": "Aumentar a velocidade",
-            "ru": "Увеличить скорость",
-            "tl": "Dagdagan ang bilis",
-            "uk": "Збільште швидкість",
-            "zh-TW": "提高速度"
-          }
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
         }
       ],
       "width": 4,
@@ -590,6 +492,127 @@
         "es": "Orbe de Invocación",
         "pt": "Orbe da invocação"
       },
+      "nameLines": [
+        {
+          "text": {
+            "en": "{skill} Jewel",
+            "de": "{skill} Juwel",
+            "es": "{skill} Joya",
+            "id": "{skill} Permata",
+            "ja": "{skill} 玉",
+            "pl": "{skill} Jewel",
+            "pt": "{skill} Jóia",
+            "ru": "{skill} Драгоценность",
+            "tl": "{skill} Jewel",
+            "uk": "{skill} Коштовність",
+            "zh-TW": "{skill} 寶石"
+          },
+          "values": {"skill": "skillName:30"},
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{skill} Jewel",
+            "de": "{skill} Juwel",
+            "es": "{skill} Joya",
+            "id": "{skill} Permata",
+            "ja": "{skill} 玉",
+            "pl": "{skill} Jewel",
+            "pt": "{skill} Jóia",
+            "ru": "{skill} Драгоценность",
+            "tl": "{skill} Jewel",
+            "uk": "{skill} Коштовність",
+            "zh-TW": "{skill} 寶石"
+          },
+          "values": {"skill": "skillName:31"},
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "{skill} Jewel",
+            "de": "{skill} Juwel",
+            "es": "{skill} Joya",
+            "id": "{skill} Permata",
+            "ja": "{skill} 玉",
+            "pl": "{skill} Jewel",
+            "pt": "{skill} Jóia",
+            "ru": "{skill} Драгоценность",
+            "tl": "{skill} Jewel",
+            "uk": "{skill} Коштовність",
+            "zh-TW": "{skill} 寶石"
+          },
+          "values": {"skill": "skillName:32"},
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "{skill} Jewel",
+            "de": "{skill} Juwel",
+            "es": "{skill} Joya",
+            "id": "{skill} Permata",
+            "ja": "{skill} 玉",
+            "pl": "{skill} Jewel",
+            "pt": "{skill} Jóia",
+            "ru": "{skill} Драгоценность",
+            "tl": "{skill} Jewel",
+            "uk": "{skill} Коштовність",
+            "zh-TW": "{skill} 寶石"
+          },
+          "values": {"skill": "skillName:33"},
+          "levels": [3, 3]
+        },
+        {
+          "text": {
+            "en": "{skill} Jewel",
+            "de": "{skill} Juwel",
+            "es": "{skill} Joya",
+            "id": "{skill} Permata",
+            "ja": "{skill} 玉",
+            "pl": "{skill} Jewel",
+            "pt": "{skill} Jóia",
+            "ru": "{skill} Драгоценность",
+            "tl": "{skill} Jewel",
+            "uk": "{skill} Коштовність",
+            "zh-TW": "{skill} 寶石"
+          },
+          "values": {"skill": "skillName:34"},
+          "levels": [4, 4]
+        },
+        {
+          "text": {
+            "en": "{skill} Jewel",
+            "de": "{skill} Juwel",
+            "es": "{skill} Joya",
+            "id": "{skill} Permata",
+            "ja": "{skill} 玉",
+            "pl": "{skill} Jewel",
+            "pt": "{skill} Jóia",
+            "ru": "{skill} Драгоценность",
+            "tl": "{skill} Jewel",
+            "uk": "{skill} Коштовність",
+            "zh-TW": "{skill} 寶石"
+          },
+          "values": {"skill": "skillName:35"},
+          "levels": [5, 5]
+        },
+        {
+          "text": {
+            "en": "{skill} Jewel",
+            "de": "{skill} Juwel",
+            "es": "{skill} Joya",
+            "id": "{skill} Permata",
+            "ja": "{skill} 玉",
+            "pl": "{skill} Jewel",
+            "pt": "{skill} Jóia",
+            "ru": "{skill} Драгоценность",
+            "tl": "{skill} Jewel",
+            "uk": "{skill} Коштовність",
+            "zh-TW": "{skill} 寶石"
+          },
+          "values": {"skill": "skillName:36"},
+          "levels": [6, 6]
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -685,6 +708,11 @@
             "uk": "Використовується для комбінування предметів Хаосу",
             "zh-TW": "它用於組合混沌物品"
           }
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -882,10 +910,18 @@
       "name": {
         "en": "Bundle of Jewel of Bless",
         "de": "Bündel Juwelen des Segens",
-        "es": "manojo de Joyas de Bendición",
-        "pt": "feixe da Joia da bênção"
+        "es": "Fardo de Joyas de Bendición",
+        "pt": "Lote de Joias da bênção"
       },
       "tags": ["valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} x{table:bundleCount}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -903,10 +939,18 @@
       "name": {
         "en": "Bundle of Jewel of Soul",
         "de": "Bündel Juwelen der Seele",
-        "es": "manojo de Joyas de Alma",
-        "pt": "feixe da Joia da alma"
+        "es": "Fardo de Joyas de Alma",
+        "pt": "Lote de Joias da alma"
       },
       "tags": ["valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} x{table:bundleCount}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 30,
@@ -927,6 +971,13 @@
         "es": "caja de moño rojo",
         "pt": "caixa de fita vermelha"
       },
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "classRequirements": {
@@ -946,6 +997,13 @@
         "es": "caja de moño verde",
         "pt": "caixa de fita verde"
       },
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "classRequirements": {
@@ -965,6 +1023,13 @@
         "es": "caja de moño azul",
         "pt": "caixa de fita azul"
       },
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "classRequirements": {
@@ -984,6 +1049,13 @@
         "es": "Rollo de Alarido de Fuego",
         "pt": "Pergaminho de grito de fogo"
       },
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          }
+        }
+      ],
       "width": 1,
       "height": 2,
       "level": 102,
@@ -1007,49 +1079,50 @@
       "tags": ["valuable"],
       "description": [
         {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease3rd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb3rd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
           "text": {
-            "en": "Increase {table:wingDamageIncrease3rd}% of Damage",
-            "de": "Erhöht den Schaden um {table:wingDamageIncrease3rd}%",
-            "es": "Aumenta el daño de {table:wingDamageIncrease3rd}% of",
-            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease3rd}% of",
-            "ja": "ダメージ {table:wingDamageIncrease3rd}%増加",
-            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease3rd}%",
-            "pt": "Aumentar o dano de {table:wingDamageIncrease3rd}% of",
-            "ru": "Увеличение урона {table:wingDamageIncrease3rd}% of",
-            "tl": "Dagdagan ang {table:wingDamageIncrease3rd}% of Pinsala",
-            "uk": "Збільшення шкоди на {table:wingDamageIncrease3rd}% of",
-            "zh-TW": "增加 {table:wingDamageIncrease3rd}% of 傷害"
-          }
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
         },
         {
           "text": {
-            "en": "Absorb {table:wingDamageAbsorb3rd}% of Damage",
-            "de": "Absorbiert {table:wingDamageAbsorb3rd}% des Schadens",
-            "es": "Absorber daño {table:wingDamageAbsorb3rd}% of",
-            "id": "Menyerap Kerusakan {table:wingDamageAbsorb3rd}% of",
-            "ja": "ダメージ {table:wingDamageAbsorb3rd}%吸収",
-            "pl": "Pochłania {table:wingDamageAbsorb3rd}% obrażeń",
-            "pt": "Absorver Dano {table:wingDamageAbsorb3rd}% of",
-            "ru": "Поглощение {table:wingDamageAbsorb3rd}% of урона",
-            "tl": "Isipsip ang {table:wingDamageAbsorb3rd}% of Pinsala",
-            "uk": "Поглинання шкоди {table:wingDamageAbsorb3rd}% of",
-            "zh-TW": "吸收{table:wingDamageAbsorb3rd}% of傷害"
-          }
-        },
-        {
-          "text": {
-            "en": "Increase speed",
-            "de": "Erhöht die Geschwindigkeit",
-            "es": "aumentar la velocidad",
-            "id": "Tingkatkan kecepatan",
-            "ja": "移動速度向上",
-            "pl": "Zwiększa prędkość",
-            "pt": "Aumentar a velocidade",
-            "ru": "Увеличить скорость",
-            "tl": "Dagdagan ang bilis",
-            "uk": "Збільште швидкість",
-            "zh-TW": "提高速度"
-          }
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
         }
       ],
       "width": 4,
@@ -1078,49 +1151,50 @@
       "tags": ["valuable"],
       "description": [
         {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease3rd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb3rd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
           "text": {
-            "en": "Increase {table:wingDamageIncrease3rd}% of Damage",
-            "de": "Erhöht den Schaden um {table:wingDamageIncrease3rd}%",
-            "es": "Aumenta el daño de {table:wingDamageIncrease3rd}% of",
-            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease3rd}% of",
-            "ja": "ダメージ {table:wingDamageIncrease3rd}%増加",
-            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease3rd}%",
-            "pt": "Aumentar o dano de {table:wingDamageIncrease3rd}% of",
-            "ru": "Увеличение урона {table:wingDamageIncrease3rd}% of",
-            "tl": "Dagdagan ang {table:wingDamageIncrease3rd}% of Pinsala",
-            "uk": "Збільшення шкоди на {table:wingDamageIncrease3rd}% of",
-            "zh-TW": "增加 {table:wingDamageIncrease3rd}% of 傷害"
-          }
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
         },
         {
           "text": {
-            "en": "Absorb {table:wingDamageAbsorb3rd}% of Damage",
-            "de": "Absorbiert {table:wingDamageAbsorb3rd}% des Schadens",
-            "es": "Absorber daño {table:wingDamageAbsorb3rd}% of",
-            "id": "Menyerap Kerusakan {table:wingDamageAbsorb3rd}% of",
-            "ja": "ダメージ {table:wingDamageAbsorb3rd}%吸収",
-            "pl": "Pochłania {table:wingDamageAbsorb3rd}% obrażeń",
-            "pt": "Absorver Dano {table:wingDamageAbsorb3rd}% of",
-            "ru": "Поглощение {table:wingDamageAbsorb3rd}% of урона",
-            "tl": "Isipsip ang {table:wingDamageAbsorb3rd}% of Pinsala",
-            "uk": "Поглинання шкоди {table:wingDamageAbsorb3rd}% of",
-            "zh-TW": "吸收{table:wingDamageAbsorb3rd}% of傷害"
-          }
-        },
-        {
-          "text": {
-            "en": "Increase speed",
-            "de": "Erhöht die Geschwindigkeit",
-            "es": "aumentar la velocidad",
-            "id": "Tingkatkan kecepatan",
-            "ja": "移動速度向上",
-            "pl": "Zwiększa prędkość",
-            "pt": "Aumentar a velocidade",
-            "ru": "Увеличить скорость",
-            "tl": "Dagdagan ang bilis",
-            "uk": "Збільште швидкість",
-            "zh-TW": "提高速度"
-          }
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
         }
       ],
       "width": 4,
@@ -1149,49 +1223,50 @@
       "tags": ["valuable"],
       "description": [
         {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease3rd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb3rd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
           "text": {
-            "en": "Increase {table:wingDamageIncrease3rd}% of Damage",
-            "de": "Erhöht den Schaden um {table:wingDamageIncrease3rd}%",
-            "es": "Aumenta el daño de {table:wingDamageIncrease3rd}% of",
-            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease3rd}% of",
-            "ja": "ダメージ {table:wingDamageIncrease3rd}%増加",
-            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease3rd}%",
-            "pt": "Aumentar o dano de {table:wingDamageIncrease3rd}% of",
-            "ru": "Увеличение урона {table:wingDamageIncrease3rd}% of",
-            "tl": "Dagdagan ang {table:wingDamageIncrease3rd}% of Pinsala",
-            "uk": "Збільшення шкоди на {table:wingDamageIncrease3rd}% of",
-            "zh-TW": "增加 {table:wingDamageIncrease3rd}% of 傷害"
-          }
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
         },
         {
           "text": {
-            "en": "Absorb {table:wingDamageAbsorb3rd}% of Damage",
-            "de": "Absorbiert {table:wingDamageAbsorb3rd}% des Schadens",
-            "es": "Absorber daño {table:wingDamageAbsorb3rd}% of",
-            "id": "Menyerap Kerusakan {table:wingDamageAbsorb3rd}% of",
-            "ja": "ダメージ {table:wingDamageAbsorb3rd}%吸収",
-            "pl": "Pochłania {table:wingDamageAbsorb3rd}% obrażeń",
-            "pt": "Absorver Dano {table:wingDamageAbsorb3rd}% of",
-            "ru": "Поглощение {table:wingDamageAbsorb3rd}% of урона",
-            "tl": "Isipsip ang {table:wingDamageAbsorb3rd}% of Pinsala",
-            "uk": "Поглинання шкоди {table:wingDamageAbsorb3rd}% of",
-            "zh-TW": "吸收{table:wingDamageAbsorb3rd}% of傷害"
-          }
-        },
-        {
-          "text": {
-            "en": "Increase speed",
-            "de": "Erhöht die Geschwindigkeit",
-            "es": "aumentar la velocidad",
-            "id": "Tingkatkan kecepatan",
-            "ja": "移動速度向上",
-            "pl": "Zwiększa prędkość",
-            "pt": "Aumentar a velocidade",
-            "ru": "Увеличить скорость",
-            "tl": "Dagdagan ang bilis",
-            "uk": "Збільште швидкість",
-            "zh-TW": "提高速度"
-          }
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
         }
       ],
       "width": 4,
@@ -1220,49 +1295,50 @@
       "tags": ["valuable"],
       "description": [
         {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease3rd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb3rd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
           "text": {
-            "en": "Increase {table:wingDamageIncrease3rd}% of Damage",
-            "de": "Erhöht den Schaden um {table:wingDamageIncrease3rd}%",
-            "es": "Aumenta el daño de {table:wingDamageIncrease3rd}% of",
-            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease3rd}% of",
-            "ja": "ダメージ {table:wingDamageIncrease3rd}%増加",
-            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease3rd}%",
-            "pt": "Aumentar o dano de {table:wingDamageIncrease3rd}% of",
-            "ru": "Увеличение урона {table:wingDamageIncrease3rd}% of",
-            "tl": "Dagdagan ang {table:wingDamageIncrease3rd}% of Pinsala",
-            "uk": "Збільшення шкоди на {table:wingDamageIncrease3rd}% of",
-            "zh-TW": "增加 {table:wingDamageIncrease3rd}% of 傷害"
-          }
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
         },
         {
           "text": {
-            "en": "Absorb {table:wingDamageAbsorb3rd}% of Damage",
-            "de": "Absorbiert {table:wingDamageAbsorb3rd}% des Schadens",
-            "es": "Absorber daño {table:wingDamageAbsorb3rd}% of",
-            "id": "Menyerap Kerusakan {table:wingDamageAbsorb3rd}% of",
-            "ja": "ダメージ {table:wingDamageAbsorb3rd}%吸収",
-            "pl": "Pochłania {table:wingDamageAbsorb3rd}% obrażeń",
-            "pt": "Absorver Dano {table:wingDamageAbsorb3rd}% of",
-            "ru": "Поглощение {table:wingDamageAbsorb3rd}% of урона",
-            "tl": "Isipsip ang {table:wingDamageAbsorb3rd}% of Pinsala",
-            "uk": "Поглинання шкоди {table:wingDamageAbsorb3rd}% of",
-            "zh-TW": "吸收{table:wingDamageAbsorb3rd}% of傷害"
-          }
-        },
-        {
-          "text": {
-            "en": "Increase speed",
-            "de": "Erhöht die Geschwindigkeit",
-            "es": "aumentar la velocidad",
-            "id": "Tingkatkan kecepatan",
-            "ja": "移動速度向上",
-            "pl": "Zwiększa prędkość",
-            "pt": "Aumentar a velocidade",
-            "ru": "Увеличить скорость",
-            "tl": "Dagdagan ang bilis",
-            "uk": "Збільште швидкість",
-            "zh-TW": "提高速度"
-          }
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
         }
       ],
       "width": 4,
@@ -1291,49 +1367,50 @@
       "tags": ["cape", "valuable"],
       "description": [
         {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease3rd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:capeDamageAbsorb3rd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
           "text": {
-            "en": "Increase {table:wingDamageIncrease3rd}% of Damage",
-            "de": "Erhöht den Schaden um {table:wingDamageIncrease3rd}%",
-            "es": "Aumenta el daño de {table:wingDamageIncrease3rd}% of",
-            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease3rd}% of",
-            "ja": "ダメージ {table:wingDamageIncrease3rd}%増加",
-            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease3rd}%",
-            "pt": "Aumentar o dano de {table:wingDamageIncrease3rd}% of",
-            "ru": "Увеличение урона {table:wingDamageIncrease3rd}% of",
-            "tl": "Dagdagan ang {table:wingDamageIncrease3rd}% of Pinsala",
-            "uk": "Збільшення шкоди на {table:wingDamageIncrease3rd}% of",
-            "zh-TW": "增加 {table:wingDamageIncrease3rd}% of 傷害"
-          }
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
         },
         {
           "text": {
-            "en": "Absorb {table:capeDamageAbsorb3rd}% of Damage",
-            "de": "Absorbiert {table:capeDamageAbsorb3rd}% des Schadens",
-            "es": "Absorber daño {table:capeDamageAbsorb3rd}% of",
-            "id": "Menyerap Kerusakan {table:capeDamageAbsorb3rd}% of",
-            "ja": "ダメージ {table:capeDamageAbsorb3rd}%吸収",
-            "pl": "Pochłania {table:capeDamageAbsorb3rd}% obrażeń",
-            "pt": "Absorver Dano {table:capeDamageAbsorb3rd}% of",
-            "ru": "Поглощение {table:capeDamageAbsorb3rd}% of урона",
-            "tl": "Isipsip ang {table:capeDamageAbsorb3rd}% of Pinsala",
-            "uk": "Поглинання шкоди {table:capeDamageAbsorb3rd}% of",
-            "zh-TW": "吸收{table:capeDamageAbsorb3rd}% of傷害"
-          }
-        },
-        {
-          "text": {
-            "en": "Increase speed",
-            "de": "Erhöht die Geschwindigkeit",
-            "es": "aumentar la velocidad",
-            "id": "Tingkatkan kecepatan",
-            "ja": "移動速度向上",
-            "pl": "Zwiększa prędkość",
-            "pt": "Aumentar a velocidade",
-            "ru": "Увеличить скорость",
-            "tl": "Dagdagan ang bilis",
-            "uk": "Збільште швидкість",
-            "zh-TW": "提高速度"
-          }
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
         }
       ],
       "width": 2,
@@ -1362,49 +1439,15 @@
       "tags": ["valuable"],
       "description": [
         {
-          "text": {
-            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
-            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
-            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
-            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
-            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
-            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
-            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
-            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
-            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
-            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
-            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
-          }
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease1st"}
         },
         {
-          "text": {
-            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
-            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
-            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
-            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
-            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
-            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
-            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
-            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
-            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
-            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
-            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
-          }
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb1st"}
         },
         {
-          "text": {
-            "en": "Increase speed",
-            "de": "Erhöht die Geschwindigkeit",
-            "es": "aumentar la velocidad",
-            "id": "Tingkatkan kecepatan",
-            "ja": "移動速度向上",
-            "pl": "Zwiększa prędkość",
-            "pt": "Aumentar a velocidade",
-            "ru": "Увеличить скорость",
-            "tl": "Dagdagan ang bilis",
-            "uk": "Збільште швидкість",
-            "zh-TW": "提高速度"
-          }
+          "text": "@increaseSpeed"
         }
       ],
       "width": 4,
@@ -1433,49 +1476,50 @@
       "tags": ["valuable"],
       "description": [
         {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease2nd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb2nd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
           "text": {
-            "en": "Increase {table:wingDamageIncrease2nd}% of Damage",
-            "de": "Erhöht den Schaden um {table:wingDamageIncrease2nd}%",
-            "es": "Aumenta el daño de {table:wingDamageIncrease2nd}% of",
-            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease2nd}% of",
-            "ja": "ダメージ {table:wingDamageIncrease2nd}%増加",
-            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease2nd}%",
-            "pt": "Aumentar o dano de {table:wingDamageIncrease2nd}% of",
-            "ru": "Увеличение урона {table:wingDamageIncrease2nd}% of",
-            "tl": "Dagdagan ang {table:wingDamageIncrease2nd}% of Pinsala",
-            "uk": "Збільшення шкоди на {table:wingDamageIncrease2nd}% of",
-            "zh-TW": "增加 {table:wingDamageIncrease2nd}% of 傷害"
-          }
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
         },
         {
           "text": {
-            "en": "Absorb {table:wingDamageAbsorb2nd}% of Damage",
-            "de": "Absorbiert {table:wingDamageAbsorb2nd}% des Schadens",
-            "es": "Absorber daño {table:wingDamageAbsorb2nd}% of",
-            "id": "Menyerap Kerusakan {table:wingDamageAbsorb2nd}% of",
-            "ja": "ダメージ {table:wingDamageAbsorb2nd}%吸収",
-            "pl": "Pochłania {table:wingDamageAbsorb2nd}% obrażeń",
-            "pt": "Absorver Dano {table:wingDamageAbsorb2nd}% of",
-            "ru": "Поглощение {table:wingDamageAbsorb2nd}% of урона",
-            "tl": "Isipsip ang {table:wingDamageAbsorb2nd}% of Pinsala",
-            "uk": "Поглинання шкоди {table:wingDamageAbsorb2nd}% of",
-            "zh-TW": "吸收{table:wingDamageAbsorb2nd}% of傷害"
-          }
-        },
-        {
-          "text": {
-            "en": "Increase speed",
-            "de": "Erhöht die Geschwindigkeit",
-            "es": "aumentar la velocidad",
-            "id": "Tingkatkan kecepatan",
-            "ja": "移動速度向上",
-            "pl": "Zwiększa prędkość",
-            "pt": "Aumentar a velocidade",
-            "ru": "Увеличить скорость",
-            "tl": "Dagdagan ang bilis",
-            "uk": "Збільште швидкість",
-            "zh-TW": "提高速度"
-          }
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
         }
       ],
       "width": 4,
@@ -1504,49 +1548,50 @@
       "tags": ["valuable"],
       "description": [
         {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease3rd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb3rd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
           "text": {
-            "en": "Increase {table:wingDamageIncrease3rd}% of Damage",
-            "de": "Erhöht den Schaden um {table:wingDamageIncrease3rd}%",
-            "es": "Aumenta el daño de {table:wingDamageIncrease3rd}% of",
-            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease3rd}% of",
-            "ja": "ダメージ {table:wingDamageIncrease3rd}%増加",
-            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease3rd}%",
-            "pt": "Aumentar o dano de {table:wingDamageIncrease3rd}% of",
-            "ru": "Увеличение урона {table:wingDamageIncrease3rd}% of",
-            "tl": "Dagdagan ang {table:wingDamageIncrease3rd}% of Pinsala",
-            "uk": "Збільшення шкоди на {table:wingDamageIncrease3rd}% of",
-            "zh-TW": "增加 {table:wingDamageIncrease3rd}% of 傷害"
-          }
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
         },
         {
           "text": {
-            "en": "Absorb {table:wingDamageAbsorb3rd}% of Damage",
-            "de": "Absorbiert {table:wingDamageAbsorb3rd}% des Schadens",
-            "es": "Absorber daño {table:wingDamageAbsorb3rd}% of",
-            "id": "Menyerap Kerusakan {table:wingDamageAbsorb3rd}% of",
-            "ja": "ダメージ {table:wingDamageAbsorb3rd}%吸収",
-            "pl": "Pochłania {table:wingDamageAbsorb3rd}% obrażeń",
-            "pt": "Absorver Dano {table:wingDamageAbsorb3rd}% of",
-            "ru": "Поглощение {table:wingDamageAbsorb3rd}% of урона",
-            "tl": "Isipsip ang {table:wingDamageAbsorb3rd}% of Pinsala",
-            "uk": "Поглинання шкоди {table:wingDamageAbsorb3rd}% of",
-            "zh-TW": "吸收{table:wingDamageAbsorb3rd}% of傷害"
-          }
-        },
-        {
-          "text": {
-            "en": "Increase speed",
-            "de": "Erhöht die Geschwindigkeit",
-            "es": "aumentar la velocidad",
-            "id": "Tingkatkan kecepatan",
-            "ja": "移動速度向上",
-            "pl": "Zwiększa prędkość",
-            "pt": "Aumentar a velocidade",
-            "ru": "Увеличить скорость",
-            "tl": "Dagdagan ang bilis",
-            "uk": "Збільште швидкість",
-            "zh-TW": "提高速度"
-          }
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
         }
       ],
       "width": 4,
@@ -1672,34 +1717,47 @@
       "tags": ["cape", "valuable"],
       "description": [
         {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:capeDamageIncrease"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:capeOfFighterDamageAbsorb"}
+        }
+      ],
+      "nameLines": [
+        {
           "text": {
-            "en": "Increase {table:capeDamageIncrease}% of Damage",
-            "de": "Erhöht den Schaden um {table:capeDamageIncrease}%",
-            "es": "Aumenta el daño de {table:capeDamageIncrease}% of",
-            "id": "Meningkatkan Kerusakan {table:capeDamageIncrease}% of",
-            "ja": "ダメージ {table:capeDamageIncrease}%増加",
-            "pl": "Zwiększa obrażenia o {table:capeDamageIncrease}%",
-            "pt": "Aumentar o dano de {table:capeDamageIncrease}% of",
-            "ru": "Увеличение урона {table:capeDamageIncrease}% of",
-            "tl": "Dagdagan ang {table:capeDamageIncrease}% of Pinsala",
-            "uk": "Збільшення шкоди на {table:capeDamageIncrease}% of",
-            "zh-TW": "增加 {table:capeDamageIncrease}% of 傷害"
-          }
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
         },
         {
           "text": {
-            "en": "Absorb {table:capeOfFighterDamageAbsorb}% of Damage",
-            "de": "Absorbiert {table:capeOfFighterDamageAbsorb}% des Schadens",
-            "es": "Absorber daño {table:capeOfFighterDamageAbsorb}% of",
-            "id": "Menyerap Kerusakan {table:capeOfFighterDamageAbsorb}% of",
-            "ja": "ダメージ {table:capeOfFighterDamageAbsorb}%吸収",
-            "pl": "Pochłania {table:capeOfFighterDamageAbsorb}% obrażeń",
-            "pt": "Absorver Dano {table:capeOfFighterDamageAbsorb}% of",
-            "ru": "Поглощение {table:capeOfFighterDamageAbsorb}% of урона",
-            "tl": "Isipsip ang {table:capeOfFighterDamageAbsorb}% of Pinsala",
-            "uk": "Поглинання шкоди {table:capeOfFighterDamageAbsorb}% of",
-            "zh-TW": "吸收{table:capeOfFighterDamageAbsorb}% of傷害"
-          }
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
         }
       ],
       "width": 2,
@@ -1728,49 +1786,50 @@
       "tags": ["cape", "valuable"],
       "description": [
         {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease3rd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:capeDamageAbsorb3rd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
           "text": {
-            "en": "Increase {table:wingDamageIncrease3rd}% of Damage",
-            "de": "Erhöht den Schaden um {table:wingDamageIncrease3rd}%",
-            "es": "Aumenta el daño de {table:wingDamageIncrease3rd}% of",
-            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease3rd}% of",
-            "ja": "ダメージ {table:wingDamageIncrease3rd}%増加",
-            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease3rd}%",
-            "pt": "Aumentar o dano de {table:wingDamageIncrease3rd}% of",
-            "ru": "Увеличение урона {table:wingDamageIncrease3rd}% of",
-            "tl": "Dagdagan ang {table:wingDamageIncrease3rd}% of Pinsala",
-            "uk": "Збільшення шкоди на {table:wingDamageIncrease3rd}% of",
-            "zh-TW": "增加 {table:wingDamageIncrease3rd}% of 傷害"
-          }
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
         },
         {
           "text": {
-            "en": "Absorb {table:capeDamageAbsorb3rd}% of Damage",
-            "de": "Absorbiert {table:capeDamageAbsorb3rd}% des Schadens",
-            "es": "Absorber daño {table:capeDamageAbsorb3rd}% of",
-            "id": "Menyerap Kerusakan {table:capeDamageAbsorb3rd}% of",
-            "ja": "ダメージ {table:capeDamageAbsorb3rd}%吸収",
-            "pl": "Pochłania {table:capeDamageAbsorb3rd}% obrażeń",
-            "pt": "Absorver Dano {table:capeDamageAbsorb3rd}% of",
-            "ru": "Поглощение {table:capeDamageAbsorb3rd}% of урона",
-            "tl": "Isipsip ang {table:capeDamageAbsorb3rd}% of Pinsala",
-            "uk": "Поглинання шкоди {table:capeDamageAbsorb3rd}% of",
-            "zh-TW": "吸收{table:capeDamageAbsorb3rd}% of傷害"
-          }
-        },
-        {
-          "text": {
-            "en": "Increase speed",
-            "de": "Erhöht die Geschwindigkeit",
-            "es": "aumentar la velocidad",
-            "id": "Tingkatkan kecepatan",
-            "ja": "移動速度向上",
-            "pl": "Zwiększa prędkość",
-            "pt": "Aumentar a velocidade",
-            "ru": "Увеличить скорость",
-            "tl": "Dagdagan ang bilis",
-            "uk": "Збільште швидкість",
-            "zh-TW": "提高速度"
-          }
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
         }
       ],
       "width": 2,
@@ -1797,6 +1856,14 @@
         "pt": "Semente (Fogo)"
       },
       "tags": ["socketSeed"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -1820,6 +1887,14 @@
         "pt": "Semente (Água)"
       },
       "tags": ["socketSeed"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -1843,6 +1918,14 @@
         "pt": "Semente (Gelo)"
       },
       "tags": ["socketSeed"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -1866,6 +1949,14 @@
         "pt": "Semente (Vento)"
       },
       "tags": ["socketSeed"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -1889,6 +1980,14 @@
         "pt": "Semente (Relâmpago)"
       },
       "tags": ["socketSeed"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -1912,6 +2011,14 @@
         "pt": "Semente (Terra)"
       },
       "tags": ["socketSeed"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -1935,6 +2042,14 @@
         "pt": "Esfera (Mono)"
       },
       "tags": ["socketSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 102,
@@ -1958,6 +2073,14 @@
         "pt": "Esfera (Di)"
       },
       "tags": ["socketSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 122,
@@ -1981,6 +2104,14 @@
         "pt": "Esfera (Tri)"
       },
       "tags": ["socketSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 132,
@@ -2004,6 +2135,14 @@
         "pt": "Esfera de semente (Fogo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -2027,6 +2166,14 @@
         "pt": "Esfera de semente (Água)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -2050,6 +2197,14 @@
         "pt": "Esfera de semente (Gelo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -2073,6 +2228,14 @@
         "pt": "Esfera de semente (Vento)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -2096,6 +2259,14 @@
         "pt": "Esfera Semente (Relâmpago)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -2119,6 +2290,14 @@
         "pt": "Esfera de semente (Terra)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -2142,6 +2321,14 @@
         "pt": "Esfera de semente (Fogo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -2165,6 +2352,14 @@
         "pt": "Esfera de semente (Água)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -2188,6 +2383,14 @@
         "pt": "Esfera de semente (Gelo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -2211,6 +2414,14 @@
         "pt": "Esfera de semente (Vento)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -2234,6 +2445,14 @@
         "pt": "Esfera Semente (Relâmpago)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -2257,6 +2476,14 @@
         "pt": "Esfera de semente (Terra)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -2280,6 +2507,14 @@
         "pt": "Esfera de semente (Fogo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -2303,6 +2538,14 @@
         "pt": "Esfera de semente (Água)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -2326,6 +2569,14 @@
         "pt": "Esfera de semente (Gelo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -2349,6 +2600,14 @@
         "pt": "Esfera de semente (Vento)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -2372,6 +2631,14 @@
         "pt": "Esfera Semente (Relâmpago)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -2395,6 +2662,14 @@
         "pt": "Esfera de semente (Terra)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -2418,6 +2693,14 @@
         "pt": "Esfera de semente (Fogo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -2429,6 +2712,14 @@
         "pt": "Esfera de semente (Água)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -2440,6 +2731,14 @@
         "pt": "Esfera de semente (Gelo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -2451,6 +2750,14 @@
         "pt": "Esfera de semente (Vento)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -2462,6 +2769,14 @@
         "pt": "Esfera Semente (Relâmpago)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -2473,6 +2788,14 @@
         "pt": "Esfera de semente (Terra)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -2484,6 +2807,14 @@
         "pt": "Esfera de semente (Fogo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -2495,6 +2826,14 @@
         "pt": "Esfera de semente (Água)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -2506,6 +2845,14 @@
         "pt": "Esfera de semente (Gelo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -2517,6 +2864,14 @@
         "pt": "Esfera de semente (Vento)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -2528,6 +2883,14 @@
         "pt": "Esfera Semente (Relâmpago)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -2539,6 +2902,14 @@
         "pt": "Esfera de semente (Terra)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
       "slot": "mainHand"
     },
     {
@@ -2552,49 +2923,15 @@
       "tags": ["cape", "cashShop", "valuable"],
       "description": [
         {
-          "text": {
-            "en": "Increase {table:capeDamageIncrease}% of Damage",
-            "de": "Erhöht den Schaden um {table:capeDamageIncrease}%",
-            "es": "Aumenta el daño de {table:capeDamageIncrease}% of",
-            "id": "Meningkatkan Kerusakan {table:capeDamageIncrease}% of",
-            "ja": "ダメージ {table:capeDamageIncrease}%増加",
-            "pl": "Zwiększa obrażenia o {table:capeDamageIncrease}%",
-            "pt": "Aumentar o dano de {table:capeDamageIncrease}% of",
-            "ru": "Увеличение урона {table:capeDamageIncrease}% of",
-            "tl": "Dagdagan ang {table:capeDamageIncrease}% of Pinsala",
-            "uk": "Збільшення шкоди на {table:capeDamageIncrease}% of",
-            "zh-TW": "增加 {table:capeDamageIncrease}% of 傷害"
-          }
+          "text": "@damageIncrease",
+          "values": {"percent": "table:capeDamageIncrease"}
         },
         {
-          "text": {
-            "en": "Absorb {table:smallCapeDamageAbsorb}% of Damage",
-            "de": "Absorbiert {table:smallCapeDamageAbsorb}% des Schadens",
-            "es": "Absorber daño {table:smallCapeDamageAbsorb}% of",
-            "id": "Menyerap Kerusakan {table:smallCapeDamageAbsorb}% of",
-            "ja": "ダメージ {table:smallCapeDamageAbsorb}%吸収",
-            "pl": "Pochłania {table:smallCapeDamageAbsorb}% obrażeń",
-            "pt": "Absorver Dano {table:smallCapeDamageAbsorb}% of",
-            "ru": "Поглощение {table:smallCapeDamageAbsorb}% of урона",
-            "tl": "Isipsip ang {table:smallCapeDamageAbsorb}% of Pinsala",
-            "uk": "Поглинання шкоди {table:smallCapeDamageAbsorb}% of",
-            "zh-TW": "吸收{table:smallCapeDamageAbsorb}% of傷害"
-          }
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:smallCapeDamageAbsorb"}
         },
         {
-          "text": {
-            "en": "Increase speed",
-            "de": "Erhöht die Geschwindigkeit",
-            "es": "aumentar la velocidad",
-            "id": "Tingkatkan kecepatan",
-            "ja": "移動速度向上",
-            "pl": "Zwiększa prędkość",
-            "pt": "Aumentar a velocidade",
-            "ru": "Увеличить скорость",
-            "tl": "Dagdagan ang bilis",
-            "uk": "Збільште швидкість",
-            "zh-TW": "提高速度"
-          }
+          "text": "@increaseSpeed"
         }
       ],
       "width": 2,
@@ -2629,49 +2966,15 @@
       "tags": ["cashShop", "valuable"],
       "description": [
         {
-          "text": {
-            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
-            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
-            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
-            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
-            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
-            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
-            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
-            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
-            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
-            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
-            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
-          }
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease1st"}
         },
         {
-          "text": {
-            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
-            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
-            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
-            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
-            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
-            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
-            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
-            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
-            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
-            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
-            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
-          }
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb1st"}
         },
         {
-          "text": {
-            "en": "Increase speed",
-            "de": "Erhöht die Geschwindigkeit",
-            "es": "aumentar la velocidad",
-            "id": "Tingkatkan kecepatan",
-            "ja": "移動速度向上",
-            "pl": "Zwiększa prędkość",
-            "pt": "Aumentar a velocidade",
-            "ru": "Увеличить скорость",
-            "tl": "Dagdagan ang bilis",
-            "uk": "Збільште швидкість",
-            "zh-TW": "提高速度"
-          }
+          "text": "@increaseSpeed"
         }
       ],
       "width": 3,
@@ -2706,49 +3009,15 @@
       "tags": ["cashShop", "valuable"],
       "description": [
         {
-          "text": {
-            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
-            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
-            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
-            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
-            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
-            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
-            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
-            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
-            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
-            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
-            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
-          }
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease1st"}
         },
         {
-          "text": {
-            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
-            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
-            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
-            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
-            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
-            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
-            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
-            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
-            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
-            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
-            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
-          }
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb1st"}
         },
         {
-          "text": {
-            "en": "Increase speed",
-            "de": "Erhöht die Geschwindigkeit",
-            "es": "aumentar la velocidad",
-            "id": "Tingkatkan kecepatan",
-            "ja": "移動速度向上",
-            "pl": "Zwiększa prędkość",
-            "pt": "Aumentar a velocidade",
-            "ru": "Увеличить скорость",
-            "tl": "Dagdagan ang bilis",
-            "uk": "Збільште швидкість",
-            "zh-TW": "提高速度"
-          }
+          "text": "@increaseSpeed"
         }
       ],
       "width": 3,
@@ -2783,49 +3052,15 @@
       "tags": ["cashShop", "valuable"],
       "description": [
         {
-          "text": {
-            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
-            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
-            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
-            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
-            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
-            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
-            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
-            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
-            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
-            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
-            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
-          }
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease1st"}
         },
         {
-          "text": {
-            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
-            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
-            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
-            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
-            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
-            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
-            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
-            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
-            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
-            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
-            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
-          }
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb1st"}
         },
         {
-          "text": {
-            "en": "Increase speed",
-            "de": "Erhöht die Geschwindigkeit",
-            "es": "aumentar la velocidad",
-            "id": "Tingkatkan kecepatan",
-            "ja": "移動速度向上",
-            "pl": "Zwiększa prędkość",
-            "pt": "Aumentar a velocidade",
-            "ru": "Увеличить скорость",
-            "tl": "Dagdagan ang bilis",
-            "uk": "Збільште швидкість",
-            "zh-TW": "提高速度"
-          }
+          "text": "@increaseSpeed"
         }
       ],
       "width": 3,
@@ -2861,49 +3096,15 @@
       "tags": ["cashShop", "valuable"],
       "description": [
         {
-          "text": {
-            "en": "Increase {table:wingDamageIncrease1st}% of Damage",
-            "de": "Erhöht den Schaden um {table:wingDamageIncrease1st}%",
-            "es": "Aumenta el daño de {table:wingDamageIncrease1st}% of",
-            "id": "Meningkatkan Kerusakan {table:wingDamageIncrease1st}% of",
-            "ja": "ダメージ {table:wingDamageIncrease1st}%増加",
-            "pl": "Zwiększa obrażenia o {table:wingDamageIncrease1st}%",
-            "pt": "Aumentar o dano de {table:wingDamageIncrease1st}% of",
-            "ru": "Увеличение урона {table:wingDamageIncrease1st}% of",
-            "tl": "Dagdagan ang {table:wingDamageIncrease1st}% of Pinsala",
-            "uk": "Збільшення шкоди на {table:wingDamageIncrease1st}% of",
-            "zh-TW": "增加 {table:wingDamageIncrease1st}% of 傷害"
-          }
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease1st"}
         },
         {
-          "text": {
-            "en": "Absorb {table:wingDamageAbsorb1st}% of Damage",
-            "de": "Absorbiert {table:wingDamageAbsorb1st}% des Schadens",
-            "es": "Absorber daño {table:wingDamageAbsorb1st}% of",
-            "id": "Menyerap Kerusakan {table:wingDamageAbsorb1st}% of",
-            "ja": "ダメージ {table:wingDamageAbsorb1st}%吸収",
-            "pl": "Pochłania {table:wingDamageAbsorb1st}% obrażeń",
-            "pt": "Absorver Dano {table:wingDamageAbsorb1st}% of",
-            "ru": "Поглощение {table:wingDamageAbsorb1st}% of урона",
-            "tl": "Isipsip ang {table:wingDamageAbsorb1st}% of Pinsala",
-            "uk": "Поглинання шкоди {table:wingDamageAbsorb1st}% of",
-            "zh-TW": "吸收{table:wingDamageAbsorb1st}% of傷害"
-          }
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb1st"}
         },
         {
-          "text": {
-            "en": "Increase speed",
-            "de": "Erhöht die Geschwindigkeit",
-            "es": "aumentar la velocidad",
-            "id": "Tingkatkan kecepatan",
-            "ja": "移動速度向上",
-            "pl": "Zwiększa prędkość",
-            "pt": "Aumentar a velocidade",
-            "ru": "Увеличить скорость",
-            "tl": "Dagdagan ang bilis",
-            "uk": "Збільште швидкість",
-            "zh-TW": "提高速度"
-          }
+          "text": "@increaseSpeed"
         }
       ],
       "width": 3,
@@ -2939,49 +3140,15 @@
       "tags": ["cape", "cashShop", "valuable"],
       "description": [
         {
-          "text": {
-            "en": "Increase {table:capeDamageIncrease}% of Damage",
-            "de": "Erhöht den Schaden um {table:capeDamageIncrease}%",
-            "es": "Aumenta el daño de {table:capeDamageIncrease}% of",
-            "id": "Meningkatkan Kerusakan {table:capeDamageIncrease}% of",
-            "ja": "ダメージ {table:capeDamageIncrease}%増加",
-            "pl": "Zwiększa obrażenia o {table:capeDamageIncrease}%",
-            "pt": "Aumentar o dano de {table:capeDamageIncrease}% of",
-            "ru": "Увеличение урона {table:capeDamageIncrease}% of",
-            "tl": "Dagdagan ang {table:capeDamageIncrease}% of Pinsala",
-            "uk": "Збільшення шкоди на {table:capeDamageIncrease}% of",
-            "zh-TW": "增加 {table:capeDamageIncrease}% of 傷害"
-          }
+          "text": "@damageIncrease",
+          "values": {"percent": "table:capeDamageIncrease"}
         },
         {
-          "text": {
-            "en": "Absorb {table:smallCapeDamageAbsorb}% of Damage",
-            "de": "Absorbiert {table:smallCapeDamageAbsorb}% des Schadens",
-            "es": "Absorber daño {table:smallCapeDamageAbsorb}% of",
-            "id": "Menyerap Kerusakan {table:smallCapeDamageAbsorb}% of",
-            "ja": "ダメージ {table:smallCapeDamageAbsorb}%吸収",
-            "pl": "Pochłania {table:smallCapeDamageAbsorb}% obrażeń",
-            "pt": "Absorver Dano {table:smallCapeDamageAbsorb}% of",
-            "ru": "Поглощение {table:smallCapeDamageAbsorb}% of урона",
-            "tl": "Isipsip ang {table:smallCapeDamageAbsorb}% of Pinsala",
-            "uk": "Поглинання шкоди {table:smallCapeDamageAbsorb}% of",
-            "zh-TW": "吸收{table:smallCapeDamageAbsorb}% of傷害"
-          }
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:smallCapeDamageAbsorb"}
         },
         {
-          "text": {
-            "en": "Increase speed",
-            "de": "Erhöht die Geschwindigkeit",
-            "es": "aumentar la velocidad",
-            "id": "Tingkatkan kecepatan",
-            "ja": "移動速度向上",
-            "pl": "Zwiększa prędkość",
-            "pt": "Aumentar a velocidade",
-            "ru": "Увеличить скорость",
-            "tl": "Dagdagan ang bilis",
-            "uk": "Збільште швидкість",
-            "zh-TW": "提高速度"
-          }
+          "text": "@increaseSpeed"
         }
       ],
       "width": 2,
@@ -3008,12 +3175,20 @@
     {
       "number": 136,
       "name": {
-        "en": "Jewel of Life Bundle",
+        "en": "Bundle of Jewel of Life",
         "de": "Bündel Juwelen des Lebens",
-        "es": "Fardo de Joyas de la Vida",
-        "pt": "Joia do Lote da Vida"
+        "es": "Fardo de Joyas de Vida",
+        "pt": "Lote de Joias da vida"
       },
       "tags": ["valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} x{table:bundleCount}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 72,
@@ -3030,12 +3205,20 @@
     {
       "number": 137,
       "name": {
-        "en": "Jewel of Creation Bundle",
+        "en": "Bundle of Jewel of Creation",
         "de": "Bündel Juwelen der Schöpfung",
         "es": "Fardo de Joyas de la Creación",
-        "pt": "Joia do Lote da Criação"
+        "pt": "Lote de Joias da criação"
       },
       "tags": ["valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} x{table:bundleCount}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 78,
@@ -3052,12 +3235,20 @@
     {
       "number": 138,
       "name": {
-        "en": "Jewel of Guardian Bundle",
+        "en": "Bundle of Jewel of Guardian",
         "de": "Bündel Juwelen des Wächters",
-        "es": "Fardo de Joyas Guardián",
-        "pt": "Joia do Lote Guardião"
+        "es": "Fardo de Joyas de Guardián",
+        "pt": "Lote de Joias do guardião"
       },
       "tags": ["valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} x{table:bundleCount}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 75,
@@ -3074,12 +3265,20 @@
     {
       "number": 139,
       "name": {
-        "en": "Gemstone Bundle",
+        "en": "Bundle of Gemstone",
         "de": "Bündel Edelsteine",
         "es": "Fardo de Gemas",
-        "pt": "Lote de Pedra Preciosa"
+        "pt": "Lote de Pedras preciosas"
       },
       "tags": ["valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} x{table:bundleCount}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -3096,12 +3295,20 @@
     {
       "number": 140,
       "name": {
-        "en": "Jewel of Harmony Bundle",
+        "en": "Bundle of Jewel of Harmony",
         "de": "Bündel Juwelen der Harmonie",
         "es": "Fardo de Joyas de la Armonía",
-        "pt": "Joia do Lote da Harmonia"
+        "pt": "Lote de Joias da harmonia"
       },
       "tags": ["valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} x{table:bundleCount}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -3118,12 +3325,20 @@
     {
       "number": 141,
       "name": {
-        "en": "Jewel of Chaos Bundle",
+        "en": "Bundle of Jewel of Chaos",
         "de": "Bündel Juwelen des Chaos",
-        "es": "Fardo de Joyas del Caos",
-        "pt": "Joia do Lote do Caos"
+        "es": "Fardo de Joyas de Caos",
+        "pt": "Lote de Joias do caos"
       },
       "tags": ["valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} x{table:bundleCount}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 12,
@@ -3140,12 +3355,20 @@
     {
       "number": 142,
       "name": {
-        "en": "Lower Refining Stone Bundle",
+        "en": "Bundle of Lower Refining Stone",
         "de": "Bündel niederer Verfeinerungssteine",
-        "es": "Fardo de Joyas de Bajo Pulido",
-        "pt": "Lote de Joias de Baixo Polimento"
+        "es": "Fardo de Piedras de Más Baja Refinación",
+        "pt": "Lote de Pedras refinadas inferiores"
       },
       "tags": ["valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} x{table:bundleCount}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -3162,12 +3385,20 @@
     {
       "number": 143,
       "name": {
-        "en": "Higher Refining Stone Bundle",
+        "en": "Bundle of Higher Refining Stone",
         "de": "Bündel höherer Verfeinerungssteine",
-        "es": "Fardo de Joyas de Alto Pulido",
-        "pt": "Lote de Joias de Alto Polimento"
+        "es": "Fardo de Piedras de Más Alta Refinación",
+        "pt": "Lote de Pedras refinadas superiores"
       },
       "tags": ["valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} x{table:bundleCount}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "level": 25,

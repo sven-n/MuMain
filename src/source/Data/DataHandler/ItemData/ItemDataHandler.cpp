@@ -116,13 +116,26 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     ValidateNameLocales(result.items, I18N::GetAvailableLocales(), result.issues);
     ItemStatsLoadResult stats = LoadItemStatsFile(GetItemStatsFile());
     result.issues.insert(result.issues.end(), stats.issues.begin(), stats.issues.end());
+    ItemTooltipLoadResult tooltips = LoadItemTooltipFile(GetItemTooltipFile());
+    ValidateTooltipTextLocales(tooltips.file, I18N::GetAvailableLocales(), GetItemTooltipFile().generic_string(),
+                               tooltips.issues);
+    result.issues.insert(result.issues.end(), tooltips.issues.begin(), tooltips.issues.end());
     ItemStatProfiles statProfiles;
     if (!HasErrors(stats.issues))
     {
         statProfiles = ItemStatProfiles(stats.file);
         ValidateStatProfiles(result.items, statProfiles, GetItemStatsFile().generic_string(), result.issues);
-        ValidateDescriptionPlaceholders(result.items, statProfiles, GetItemStatsFile().generic_string(), result.issues);
-        ValidateTableUses(result.items, statProfiles, GetItemStatsFile().generic_string(), result.issues);
+        if (!HasErrors(tooltips.issues))
+        {
+            ValidateDescriptionPlaceholders(result.items, statProfiles, tooltips.file,
+                                            GetItemStatsFile().generic_string(), result.issues);
+            ValidateTableUses(result.items, statProfiles, tooltips.file, GetItemStatsFile().generic_string(),
+                              result.issues);
+        }
+    }
+    if (!HasErrors(tooltips.issues))
+    {
+        ValidateDescriptionTexts(result.items, tooltips.file, GetItemTooltipFile().generic_string(), result.issues);
     }
     Data::LogDataIssues(ItemDataLabel, result.issues);
     if (HasErrors(result.issues))
@@ -139,6 +152,7 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     const auto buildStart = std::chrono::steady_clock::now();
     g_ItemDatabase.SetDisplayLocale(ItemNameLocale());
     g_ItemDatabase.SetStatProfiles(std::move(statProfiles));
+    g_ItemDatabase.SetTooltipFile(std::move(tooltips.file));
     g_ItemDatabase.Build(result.items);
     FillItemAttributes();
     m_loaded = true;
@@ -579,8 +593,10 @@ void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
     ValidateStatProfiles(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(),
                          GetItemStatsFile().generic_string(), issues);
     ValidateDescriptionPlaceholders(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(),
-                                    GetItemStatsFile().generic_string(), issues);
-    ValidateTableUses(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(),
+                                    g_ItemDatabase.GetTooltipFile(), GetItemStatsFile().generic_string(), issues);
+    ValidateDescriptionTexts(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetTooltipFile(),
+                             GetItemTooltipFile().generic_string(), issues);
+    ValidateTableUses(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(), g_ItemDatabase.GetTooltipFile(),
                       GetItemStatsFile().generic_string(), issues);
     ValidateNameLocales(g_ItemDatabase.GetAllSlots(), I18N::GetAvailableLocales(), issues);
     std::vector<ItemDefinition> items;
@@ -661,10 +677,12 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
     ValidateItems(result.items, result.validationIssues);
     ValidateStatProfiles(result.items, g_ItemDatabase.GetStatProfiles(), GetItemStatsFile().generic_string(),
                          result.validationIssues);
-    ValidateDescriptionPlaceholders(result.items, g_ItemDatabase.GetStatProfiles(), GetItemStatsFile().generic_string(),
-                                    result.validationIssues);
-    ValidateTableUses(result.items, g_ItemDatabase.GetStatProfiles(), GetItemStatsFile().generic_string(),
-                      result.validationIssues);
+    ValidateDescriptionPlaceholders(result.items, g_ItemDatabase.GetStatProfiles(), g_ItemDatabase.GetTooltipFile(),
+                                    GetItemStatsFile().generic_string(), result.validationIssues);
+    ValidateDescriptionTexts(result.items, g_ItemDatabase.GetTooltipFile(), GetItemTooltipFile().generic_string(),
+                             result.validationIssues);
+    ValidateTableUses(result.items, g_ItemDatabase.GetStatProfiles(), g_ItemDatabase.GetTooltipFile(),
+                      GetItemStatsFile().generic_string(), result.validationIssues);
     ValidateNameLocales(result.items, I18N::GetAvailableLocales(), result.validationIssues);
 
     g_ItemDatabase.Build(result.items);

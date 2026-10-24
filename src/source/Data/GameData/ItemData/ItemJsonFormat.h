@@ -36,4 +36,7 @@ void ReadItemGroupJson(std::string_view text, const std::string& source, std::ve
 
 // Writes the items of `group` (other items are ignored).
 std::string WriteItemGroupJson(int group, std::span<const ItemDefinition> items);
+
+// The names of the classes in "classRequirements", in the order of their numbers (CLASS_WIZARD, ...).
+std::span<const char* const> GetClassKeys();
 } // namespace Data::Items
