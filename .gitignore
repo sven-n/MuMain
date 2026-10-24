@@ -47,6 +47,10 @@ build-linux/
 !src/bin/Data/Items/
 !src/bin/Data/Items/**
 src/bin/Data/Items/**/*.tmp
+# Monster data (JSON, written by the monster tools) is source-controlled.
+!src/bin/Data/Monsters/
+!src/bin/Data/Monsters/**
+src/bin/Data/Monsters/**/*.tmp
 # Effect data (JSON), e.g. the glow colors of the items.
 !src/bin/Data/Effects/
 !src/bin/Data/Effects/**

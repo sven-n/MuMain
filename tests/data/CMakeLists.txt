@@ -53,6 +53,39 @@ target_compile_definitions(server_list_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
+# The monster list (Data/Monsters/Monsters.json), its table, the format of
+# the original client's name files and the editor's monster tools. The table
+# needs the client globals of Winmain.cpp.
+mu_add_test(
+    NAME monster_data_tests
+    SOURCES
+        test_legacy_monster_kind.cpp
+        test_monster_browser_window.cpp
+        test_monster_check_targets.cpp
+        test_monster_checks_window.cpp
+        test_monster_code_references.cpp
+        test_monster_data_edits.cpp
+        test_monster_data_files.cpp
+        test_monster_data_users.cpp
+        test_monster_database.cpp
+        test_monster_edit_history.cpp
+        test_monster_json.cpp
+        test_monster_list_model.cpp
+        test_monster_names.cpp
+        test_monster_npc_name_files.cpp
+        test_monster_tool_windows.cpp
+        test_monster_translations_window.cpp
+        test_names_grid.cpp
+        test_npc_name_text.cpp
+        test_transformation_ring.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(monster_data_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
 # The look profile of the Enhanced rendering features (Data/Render/Look.json) and the player's own
 # tuning of it ([EnhancedTuning] of config.ini).
 mu_add_test(

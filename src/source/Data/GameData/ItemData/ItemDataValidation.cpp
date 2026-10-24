@@ -8,7 +8,6 @@
 #include "Core/Text/Utf8.h"
 
 #include <algorithm>
-#include <cctype>
 #include <iterator>
 #include <map>
 #include <set>
@@ -27,20 +26,6 @@ void AddIssue(std::vector<ItemDataIssue>& issues, ItemDataIssueSeverity severity
     issues.push_back({severity, "", definition.group, definition.number, field, message});
 }
 
-bool ContainsSeparator(const std::string& text)
-{
-    return text.find(LocalizedString::Separator) != std::string::npos;
-}
-
-// Locale codes like "pt" or "zh-TW". Anything else (empty, "=", "||") would
-// break the LocalizedString format used for the OpenMU exchange.
-bool IsValidLocaleCode(const std::string& locale)
-{
-    return !locale.empty() &&
-           std::all_of(locale.begin(), locale.end(), [](char character)
-                       { return std::isalnum(static_cast<unsigned char>(character)) || character == '-'; });
-}
-
 // The game shows names through the MAX_ITEM_NAME-sized ITEM_ATTRIBUTE name.
 bool IsTooLongForGame(const std::string& text)
 {
@@ -57,7 +42,7 @@ void ValidateName(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
 
     const auto check = [&](const std::string& locale, const std::string& text)
     {
-        if (ContainsSeparator(text))
+        if (LocalizedString::ContainsSeparator(text))
         {
             AddIssue(issues, ItemDataIssueSeverity::Error, definition,
                      "the " + locale + " name must not contain \"" + std::string(LocalizedString::Separator) + "\"");
@@ -73,7 +58,7 @@ void ValidateName(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
     check(std::string(LocalizedString::NeutralLocale), names.GetNeutral());
     for (const auto& [locale, text] : names.GetTranslations())
     {
-        if (!IsValidLocaleCode(locale))
+        if (!LocalizedString::IsValidLocaleCode(locale))
         {
             AddIssue(issues, ItemDataIssueSeverity::Error, definition,
                      "\"" + locale + "\" is not a language code (letters, digits and \"-\" only)");
@@ -132,7 +117,7 @@ void ValidateDescription(const ItemDefinition& definition, std::vector<ItemDataI
         }
         for (const auto& [locale, translation] : text.GetTranslations())
         {
-            if (!IsValidLocaleCode(locale))
+            if (!LocalizedString::IsValidLocaleCode(locale))
             {
                 AddIssue(issues, ItemDataIssueSeverity::Error, definition,
                          "\"" + locale + "\" is not a language code (letters, digits and \"-\" only)", field.c_str());
