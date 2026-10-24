@@ -184,6 +184,9 @@ Developer diagnostics, read at startup:
 - [Texture packs](docs/texture-packs.md) - installing, choosing and removing
   packs of replacement or 2x/4x textures in `Data/TexturePacks/`, and how to
   make one.
+- [GLB monster models](docs/glb-models.md) - drawing a monster from a glTF
+  binary named in `Data/Models/ModelFiles.json`: the table, the developer
+  overlay, what the loader expects of a file and its log lines.
 - [Build guide](docs/build/README.md) - platform-specific build notes.
 - [In-game tests](docs/in-game-tests.md) - the tester next to developer
   builds that plays test scenarios with real clients against a fresh OpenMU

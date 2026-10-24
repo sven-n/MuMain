@@ -6185,8 +6185,9 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
         case MODEL_ELITE_YETI:
             if (rand_fps_check(4))
             {
+                // The breath: bone 22 of both BMDs, by name for model files.
                 Vector(0.f, 0.f, 0.f, p);
-                b->TransformPosition(o->BoneTransform[22], p, Position, true);
+                b->TransformPosition(o->BoneTransform[b->FindBoneOrRoot("Box03")], p, Position, true);
                 CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light);
             }
             break;

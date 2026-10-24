@@ -47,3 +47,4 @@ tests/effects/baseline/*.txt text eol=lf
 *.[Ww][Aa][Vv]   binary
 *.[Oo][Gg][Gg]   binary
 *.[Mm][Pp]3      binary
+*.[Gg][Ll][Bb]   binary

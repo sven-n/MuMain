@@ -7,10 +7,17 @@
 //              over the horizontal distance * wrapped diffuse, added to the diffuse light
 //   specular = Blinn-Phong, opt-in per item model, scaled by the scene and object light
 //   fog      = Enhanced exponential fog (see basic_textured_fog.frag.hlsl)
+//   normal   = with a normal map (glTF models, Enhanced lighting only): the
+//              map's tangent-space normal (2 rgb - 1, +Y up, xy times the map's scale) in the frame
+//              of the skinned tangent T, bitangent cross(N, T) x handedness and N, for the diffuse,
+//              rim, specular and point-light terms; without one (scale 0) the interpolated normal
+//              as before, and the flat default map bound at t1 is not read
 // FogUniforms mirrors FogUniform, SceneLighting mirrors mu::SceneLightingUniform and DynamicLights
 // mirrors mu::DynamicLightsUniform (std140).
 Texture2D tex : register(t0, space2);
 SamplerState s : register(s0, space2);
+Texture2D normalMap : register(t1, space2);
+SamplerState normalSampler : register(s1, space2);
 cbuffer FogUniforms : register(b0, space3)
 {
     uint fogEnabled;
@@ -75,6 +82,8 @@ struct FSInput
     nointerpolation float4 lightDirectionAndSpecular : TEXCOORD6;
     float4 worldPositionAndDynamicLights : TEXCOORD7; // w: 1 when the point lights apply
     float3 worldNormal : TEXCOORD8;
+    float4 tangent : TEXCOORD9;                       // w: handedness, 0 without a normal map
+    float4 worldTangentAndNormalMapScale : TEXCOORD10; // w: the map's scale, 0 without one
 };
 
 // Same curve as basic_textured_fog.frag.hlsl and mu::EnhancedFogAmount() (SceneLighting.cpp).
@@ -113,21 +122,49 @@ float3 DynamicLighting(float3 worldPosition, float3 worldNormal)
     return light;
 }
 
+// The map's normal `mapped` (tangent space) in the frame of `normal` and `tangent`, unit length.
+float3 PerturbNormal(float3 normal, float3 tangent, float handedness, float3 mapped)
+{
+    const float3 n = SafeNormalize(normal);
+    const float3 t = SafeNormalize(tangent);
+    const float3 b = cross(n, t) * handedness;
+    return SafeNormalize(t * mapped.x + b * mapped.y + n * mapped.z);
+}
+
 float4 main(FSInput input) : SV_Target
 {
+    // Sampled first: the MSL translation numbers textures and samplers in the order of first use,
+    // and SDL binds the texture at slot 0, the normal map at slot 1.
+    const float4 texel = tex.Sample(s, input.uv);
+    // The normal map is sampled with derivatives taken here, outside the per-pixel branch.
+    const float2 uvDx = ddx(input.uv);
+    const float2 uvDy = ddy(input.uv);
+    float3 shadingNormal = input.normal;
+    float3 worldNormal = input.worldNormal;
+    const float normalMapScale = input.worldTangentAndNormalMapScale.w;
+    if (normalMapScale > 0.0 && input.tangent.w != 0.0)
+    {
+        float3 mapped = normalMap.SampleGrad(normalSampler, input.uv, uvDx, uvDy).xyz * 2.0 - 1.0;
+        mapped.xy *= normalMapScale;
+        const float handedness = input.tangent.w > 0.0 ? 1.0 : -1.0;
+        // Keeps the interpolated normal's length, which the Classic diffuse curve reads.
+        shadingNormal = PerturbNormal(input.normal, input.tangent.xyz, handedness, mapped) * length(input.normal);
+        worldNormal = PerturbNormal(input.worldNormal, input.worldTangentAndNormalMapScale.xyz, handedness, mapped);
+    }
+
     const float3 objectLight = input.color.rgb;
-    const float3 normal = SafeNormalize(input.normal);
+    const float3 normal = SafeNormalize(shadingNormal);
     const float3 view = SafeNormalize(input.viewVector);
     // Neither the per-object direction nor the skinned normal is unit length in Classic. The
     // diffuse term uses both as they are, so that it is the Classic per-vertex value wherever the
     // curve is not clamped (dot() is linear in the interpolated normal) and keeps the palette.
     const float3 light = input.lightDirectionAndSpecular.xyz;
-    const float lightDot = dot(input.normal, light);
+    const float lightDot = dot(shadingNormal, light);
 
     const float luminosity = max(lightDot * diffuseCurve.x + diffuseCurve.y, diffuseCurve.z);
     const float3 dynamicLight = input.worldPositionAndDynamicLights.w > 0.5
                                     ? DynamicLighting(input.worldPositionAndDynamicLights.xyz,
-                                                      SafeNormalize(input.worldNormal))
+                                                      SafeNormalize(worldNormal))
                                     : float3(0.0, 0.0, 0.0);
     float3 diffuse = saturate(objectLight * luminosity + dynamicLight);
     if (RollsOffHighlight(diffuseCurve.w))
@@ -148,7 +185,6 @@ float4 main(FSInput input) : SV_Target
 
     // Rim and specular are light added on top of the surface, so dark textures still get an
     // outline; both are bounded by the object light.
-    const float4 texel = tex.Sample(s, input.uv);
     float4 color = float4(texel.rgb * diffuse + rim + specular, texel.a * input.color.a);
     if (alphaToCoverage)
     {

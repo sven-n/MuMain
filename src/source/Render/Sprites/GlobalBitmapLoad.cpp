@@ -775,6 +775,90 @@ bool CGlobalBitmap::LoadTgaFile(GLuint uiBitmapIndex, const std::wstring& filena
     return true;
 }
 
+// The upload of a model file's image (LoadImagePixels). Its pixels stay on the bitmap: ReadBitmapPixels
+// cannot read them back from a file when texture filtering later wants their mip chain.
+bool CGlobalBitmap::UploadBitmap(std::unique_ptr<BITMAP_t> bitmap, std::span<const std::uint8_t> rgba, GLuint uiFilter,
+                                 GLuint uiWrapMode)
+{
+    const bool hasAlpha = bitmap->Components == 4;
+    const GLuint uiBitmapIndex = bitmap->BitmapIndex;
+    const int width = static_cast<int>(bitmap->Width);
+    const int height = static_cast<int>(bitmap->Height);
+    bitmap->TextureNumber = uiBitmapIndex;
+    bitmap->wrapRepeat = uiWrapMode == GL_REPEAT;
+    const MipLevels mips = PlanMipLevels(bitmap->worldTexture && m_textureFilteringEnabled, rgba.data(), width, height,
+                                         hasAlpha, m_mipChainSeconds);
+    if (!UploadTextureSDLGpu(bitmap.get(), rgba, width, height, MapGLFilterToSDL(uiFilter), MapGLWrapToSDL(uiWrapMode),
+                             mips))
+    {
+        return false;
+    }
+    bitmap->UploadedBytes = UploadedBytes(width, height);
+
+    SDL_GPUTexture* rawTexture = bitmap->sdlTexture;
+    SDL_GPUSampler* rawSampler = bitmap->sdlSampler;
+    const BITMAP_t& loaded = *bitmap;
+    const std::uint32_t uploadedBytes = bitmap->UploadedBytes;
+    m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, std::move(bitmap)));
+    mu::RegisterTexture(uiBitmapIndex, rawTexture);
+    mu::RegisterSampler(uiBitmapIndex, rawSampler);
+    RegisterFilteredSampler(loaded);
+    m_dwUsedTextureMemory += uploadedBytes;
+
+    return true;
+}
+
+GLuint CGlobalBitmap::LoadImagePixels(const std::wstring& name, std::span<const std::uint8_t> rgba, int width,
+                                      int height, bool hasAlpha, GLuint uiFilter, GLuint uiWrapMode)
+{
+    constexpr std::size_t RgbaComponents = 4;
+    constexpr std::size_t RgbComponents = 3;
+    const std::size_t pixelCount = static_cast<std::size_t>(width) * static_cast<std::size_t>(height);
+    if (width <= 0 || height <= 0 || rgba.size() != pixelCount * RgbaComponents)
+    {
+        return BITMAP_UNKNOWN;
+    }
+    if (BITMAP_t* loaded = FindTexture(name); loaded && 0 == _wcsicmp(loaded->FileName, name.c_str()))
+    {
+        loaded->Ref++;
+        return loaded->BitmapIndex;
+    }
+
+    const GLuint uiBitmapIndex = GenerateTextureIndex();
+    auto bitmap = std::make_unique<BITMAP_t>();
+    bitmap->BitmapIndex = uiBitmapIndex;
+    wcsncpy(bitmap->FileName, name.c_str(), MAX_BITMAP_FILE_NAME - 1);
+    bitmap->FileName[MAX_BITMAP_FILE_NAME - 1] = L'\0';
+    bitmap->Width = static_cast<float>(width);
+    bitmap->Height = static_cast<float>(height);
+    bitmap->Ref = 1;
+    bitmap->worldTexture = Render::Textures::IsWorldTexturePath(name);
+    // Like a .jpg (RGB) or a .tga (RGBA) texture: Components 4 is what makes a model mesh blend.
+    bitmap->Components = hasAlpha ? static_cast<int>(RgbaComponents) : static_cast<int>(RgbComponents);
+    if (hasAlpha)
+    {
+        bitmap->BufferStorage.assign(rgba.begin(), rgba.end());
+    }
+    else
+    {
+        bitmap->BufferStorage.resize(pixelCount * RgbComponents);
+        for (std::size_t pixel = 0; pixel < pixelCount; ++pixel)
+        {
+            std::memcpy(&bitmap->BufferStorage[pixel * RgbComponents], &rgba[pixel * RgbaComponents], RgbComponents);
+        }
+    }
+    bitmap->Buffer = bitmap->BufferStorage.data();
+    if (!UploadBitmap(std::move(bitmap), rgba, uiFilter, uiWrapMode))
+    {
+        return BITMAP_UNKNOWN;
+    }
+    m_listNonamedIndex.push_back(uiBitmapIndex);
+#ifdef _EDITOR
+    m_loadWorlds[uiBitmapIndex] = Core::AssetLoadWorld::Get();
+#endif
+    return uiBitmapIndex;
+}
+
 void CGlobalBitmap::SetTextureFiltering(bool enabled, int anisotropy)
 {
     m_textureFilteringRequested = enabled;
