@@ -98,6 +98,7 @@ jobs:
         run: |
           echo "Linting ${{ steps.changed.outputs.count }} files..."
           cat /tmp/changed-cpp-files.txt | xargs cppcheck \
+            -I src/source \
             -j$(nproc) \
             --max-configs=1 \
             --error-exitcode=1 \

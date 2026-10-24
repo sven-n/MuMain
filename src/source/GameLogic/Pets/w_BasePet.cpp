@@ -1,4 +1,4 @@
-// w_BasePet.cpp: implementation of the BasePet class.
+﻿// w_BasePet.cpp: implementation of the BasePet class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -104,7 +104,7 @@ void PetObject::Release()
 
     for (ActionMap::iterator iter = m_actionMap.begin(); iter != m_actionMap.end(); iter++)
     {
-        std::weak_ptr<PetAction> petAction = (*iter).second;
+        Weak_Ptr(PetAction) petAction = (*iter).second;
 
         if (petAction.expired() == FALSE)
         {
@@ -178,7 +178,7 @@ bool PetObject::IsSameObject(OBJECT* Owner, int itemType)
     return (Owner == m_obj->Owner && itemType == m_itemType) ? TRUE : FALSE;
 }
 
-void PetObject::SetActions(ActionType type, std::weak_ptr<PetAction> action, float speed)
+void PetObject::SetActions(ActionType type, Weak_Ptr(PetAction) action, float speed)
 {
     if (action.expired() == TRUE)
         return;
@@ -215,7 +215,7 @@ bool PetObject::UpdateMove(double tick, bool bForceRender)
 
     // std::tr1::weak_ptr<PetAction> petAction = (*iter).second;
 
-    std::weak_ptr<PetAction> petAction = (*iter).second;
+    Weak_Ptr(PetAction) petAction = (*iter).second;
 
     if (petAction.expired() == FALSE)
     {
@@ -231,7 +231,7 @@ bool PetObject::UpdateModel(double tick, bool bForceRender)
     if (iter == m_actionMap.end())
         return FALSE;
 
-    std::weak_ptr<PetAction> petAction = (*iter).second;
+    Weak_Ptr(PetAction) petAction = (*iter).second;
 
     if (petAction.expired() == FALSE)
     {
@@ -252,7 +252,7 @@ bool PetObject::UpdateSound(double tick, bool bForceRender)
     if (iter == m_actionMap.end())
         return FALSE;
 
-    std::weak_ptr<PetAction> petAction = (*iter).second;
+    Weak_Ptr(PetAction) petAction = (*iter).second;
 
     if (petAction.expired() == FALSE)
     {
@@ -268,7 +268,7 @@ bool PetObject::CreateEffect(double tick, bool bForceRender)
     if (iter == m_actionMap.end())
         return FALSE;
 
-    std::weak_ptr<PetAction> petAction = (*iter).second;
+    Weak_Ptr(PetAction) petAction = (*iter).second;
 
     if (petAction.expired() == FALSE)
     {
