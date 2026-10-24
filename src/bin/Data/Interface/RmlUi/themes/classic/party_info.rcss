@@ -1,0 +1,111 @@
+/* Classic (0.97) party window (P), from the 0.97 client's 004ef160: the title on its dark box at the top, the seven help
+   lines from y 50 while there is no party, and one 35-unit row per member from y 50 -- the name
+   (white on dark blue for the leader, pale blue for the others), the map and the coordinates in
+   pale orange, the health bar (a 92x5 dark red back, a 90x3 red fill) and "health / max" under
+   it. No group boxes and no leader flag. The frame and Close come from docked_panel_frame.rcss.
+   Text leaves are counter-scaled (base.rcss): widths inside them are times --root-scale. */
+
+.frame-top { decorator: image(docked-bg-top-b); }
+
+#title {
+	position: absolute;
+	left: 35px;
+	top: 12px;
+	width: calc(120px * var(--root-scale));
+	text-align: center;
+	color: #dcdcdc;
+	font-weight: bold;
+	font-size: 1em;
+	pointer-events: none;
+}
+
+.party-empty-msg {
+	position: absolute;
+	left: 20px;
+	top: 50px;
+	width: calc(160px * var(--root-scale));
+	color: #e6e6e6;
+	font-size: 1em;
+	text-align: left;
+}
+.party-empty-msg span { display: block; }
+.party-empty-msg span.paragraph { margin-top: calc(5px * var(--root-scale)); }
+.party-empty-msg { line-height: calc(15px * var(--root-scale)); }
+
+.party-list { position: absolute; left: 0; top: 50px; width: 190px; }
+.party-row { position: relative; display: block; width: 190px; height: 35px; }
+
+.gbox-title-fill, .gbox-content-fill, .gbox-corner, .gbox-edge, .party-flag { display: none; }
+
+.party-name {
+	display: block;
+	position: absolute;
+	left: 20px;
+	top: 2px;
+	white-space: nowrap;
+	font-size: 1em;
+	color: rgb(210, 230, 255);
+	pointer-events: none;
+}
+.party-name.leader { color: #ffffff; background-color: #282896; }
+
+.party-map, .party-coord {
+	display: block;
+	position: absolute;
+	top: 10px;
+	white-space: nowrap;
+	font-size: 1em;
+	color: rgb(255, 230, 210);
+	pointer-events: none;
+}
+.party-map { left: 40px; }
+.party-coord { left: 90px; }
+
+.party-hp-bar {
+	position: absolute;
+	left: 39px;
+	top: 19px;
+	width: 92px;
+	height: 5px;
+	background-color: rgb(51, 0, 0);
+	pointer-events: none;
+}
+.party-hp-fill {
+	position: absolute;
+	left: 1px;
+	top: 1px;
+	width: 0%;
+	max-width: 90px;
+	height: 3px;
+	background-color: rgb(225, 15, 0);
+	pointer-events: none;
+}
+.party-hp-text {
+	display: block;
+	position: absolute;
+	left: 65px;
+	top: 27px;
+	white-space: nowrap;
+	font-size: 1em;
+	color: #ffffff;
+	pointer-events: none;
+}
+
+/* The leader's kick / a member's leave: the 0.97 Close plate (exit_01, 24x24) at x 140. */
+@spritesheet party-classic-kick-sheet { src: ../../../Classic/Exit_01.jpg; party-classic-kick: 0px 0px 24px 24px; }
+@spritesheet party-classic-kick2-sheet { src: ../../../Classic/Exit_02.jpg; party-classic-kick-pressed: 0px 0px 24px 24px; }
+.party-kick-btn {
+	position: absolute;
+	left: 140px;
+	top: 5px;
+	width: 24px;
+	height: 24px;
+	decorator: image(party-classic-kick);
+	cursor: pointer;
+	pointer-events: auto;
+}
+.party-kick-btn:active { decorator: image(party-classic-kick-pressed); }
+
+/* The native text size, counter-scaled out of the panel's scale. (Legacy's rule, which this copy
+   predated.) */
+#panel { font-size: calc(var(--text-px) / var(--root-scale)); }

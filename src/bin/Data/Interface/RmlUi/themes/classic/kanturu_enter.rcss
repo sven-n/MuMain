@@ -1,0 +1,70 @@
+/* Classic theme for CKanturu2ndEnterNpc. 0.97 has no Kanturu; the Season 2 client's entry window
+   (00430482 places it, 0043119e draws the frame, 004312ed the texts, 00475c3e the
+   buttons) is a 0.97 message box 213 x 250 at (213, 15): a Message_box2 edge (213 x 5) at the top
+   and the bottom (y 245), six Message_box1 stones (213 x 40) between them from y 5. The texts as
+   legacy's, from y 20: the subject in (255, 176, 73), the state texts 20 lower, the first green
+   (145, 241, 97), the others (255, 238, 193), 12 apart and 15 between two. The buttons are Season 1's
+   win_button stretched to 50 x 16 at y 215: Enter at x 12, Refresh at 82, Close at 152, labelled in
+   (230, 220, 200); grey (0.8) at rest, white under the mouse, darker (0.6) and one unit in while
+   pressed, red (1, 0.4, 0.4) while locked. Reference px inside #panel. */
+
+@spritesheet kanturu-classic-stone-sheet { src: ../../../Classic/Message_box1.jpg; kanturu-classic-stone: 0px 0px 213px 40px; }
+@spritesheet kanturu-classic-edge-sheet  { src: ../../../Classic/Message_box2.jpg; kanturu-classic-edge: 0px 0px 213px 5px; }
+@spritesheet kanturu-classic-btn-sheet   { src: "../../../win_button.tga"; kanturu-classic-btn: 0px 0px 49px 16px; }
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 213px;
+	height: 250px;
+	font-family: "token(font-body)";
+	pointer-events: auto;
+}
+
+/* The stones: #back and the first five middle tiles, 40 apart from y 5; the edges: the top and the
+   bottom pieces. */
+#back { position: absolute; left: 0; top: 5px; width: 213px; height: 40px; decorator: image(kanturu-classic-stone); }
+#frame_top { position: absolute; left: 0; top: 0; width: 213px; height: 5px; decorator: image(kanturu-classic-edge); }
+.frame-middle { position: absolute; left: 0; width: 213px; height: 40px; decorator: image(kanturu-classic-stone); }
+#frame_bottom { position: absolute; left: 0; top: 245px; width: 213px; height: 5px; decorator: image(kanturu-classic-edge); }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: center; pointer-events: none; }
+#kanturu_lines { left: 0; top: 20px; --flow-w: 213px; }
+.kanturu-line { display: block; height: calc(12px * var(--root-scale)); white-space: nowrap; color: #ffb049; }
+.kanturu-line.tone-state.group-start { margin-top: calc(20px * var(--root-scale)); }
+.kanturu-line.tone-note.group-start { margin-top: calc(15px * var(--root-scale)); }
+.kanturu-line.tone-subject { font-weight: bold; }
+.kanturu-line.tone-state { color: #91f161; }
+.kanturu-line.tone-note { color: #ffeec1; }
+
+.kanturu-btn {
+	display: block;
+	position: absolute;
+	top: 215px;
+	width: 50px;
+	height: 16px;
+	decorator: image(kanturu-classic-btn fill);
+	image-color: #cccccc;
+	pointer-events: auto;
+}
+.kanturu-btn:hover { image-color: #ffffff; }
+.kanturu-btn:active { image-color: #999999; }
+.kanturu-btn.locked, .kanturu-btn.locked:hover, .kanturu-btn.locked:active { image-color: #ff6666; }
+#btn_enter { left: 12px; }
+#btn_refresh { left: 82px; }
+#btn_close { left: 152px; }
+.kanturu-label { left: 0; color: #e6dcc8; }
+.kanturu-btn:active .kanturu-label { margin-left: calc(1px * var(--root-scale)); margin-top: calc(1px * var(--root-scale)); }
+.kanturu-btn.locked:active .kanturu-label { margin-left: 0; margin-top: 0; }
+
+/* Five of the ten middle tiles finish the stones; the rest are not drawn. */
+.frame-middles { position: static; }
+.frame-middles .frame-middle:nth-child(1) { top: 45px; }
+.frame-middles .frame-middle:nth-child(2) { top: 85px; }
+.frame-middles .frame-middle:nth-child(3) { top: 125px; }
+.frame-middles .frame-middle:nth-child(4) { top: 165px; }
+.frame-middles .frame-middle:nth-child(5) { top: 205px; }
+.frame-middles .frame-middle:nth-child(n+6) { display: none; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+.kanturu-label { width: calc(50px * var(--root-scale)); }

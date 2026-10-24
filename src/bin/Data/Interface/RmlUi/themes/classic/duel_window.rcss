@@ -1,0 +1,53 @@
+/* Classic theme for CDuelWindow (duel_window.rml is forked here). 0.97 has no duel; the Season 1
+   client's score (00580440) is a band at the top of the area the open windows leave
+   free: black at 50%, 300 x 40 from y 20, centred, edged by 1-unit lines (0.65, 0.53, 0.34); the
+   names in the bold font with a black shadow one unit down and right, centred at y 30 (the hero
+   blue (0, 150, 255) 80 left of the centre, "vs" orange (255, 150, 0) on it, the opponent red
+   (255, 25, 25) 80 right of it), and the scores in the big font at y 48 under each name. The
+   classic workspace centres the 640 frame on the free area, so the band's left is 170 in it.
+   Reference px relative to the band's top-left, under .screen's W/640 x H/480 stretch. */
+
+body { pointer-events: none; }
+
+.screen {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640px;
+	height: 480px;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+#panel { position: absolute; width: 300px; height: 40px; font-family: "token(font-body)"; }
+#back {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 300px;
+	height: 40px;
+	box-sizing: border-box;
+	background-color: rgba(0, 0, 0, 128);
+	border-width: 1px;
+	border-color: rgb(166, 135, 87);
+}
+
+/* Each text centred on its x: a 200-unit box (counter-scaled) whose middle is that x. */
+.duel-text {
+	display: block;
+	position: absolute;
+	transform-origin: left top;
+	white-space: nowrap;
+	text-align: center;
+	font-weight: bold;
+	width: calc(200px * var(--root-scale, 1));
+	font-effect: shadow(1px 1px black);
+}
+.duel-text.hero { color: #0096ff; left: -30px; }
+.duel-text.vs { color: #ff9600; left: 50px; }
+.duel-text.enemy { color: #ff1919; left: 130px; }
+#hero_name, #duel_vs, #enemy_name { top: 10px; }
+.duel-text.score { top: 28px; font-effect: none; }
+
+/* The HUD takes no pointer events where it is placed (base.rcss gives a placed panel them). */
+#panel.slot-placed { pointer-events: none; }

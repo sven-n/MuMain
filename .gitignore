@@ -43,6 +43,12 @@ build-linux/
 !src/bin/Data/Interface/
 !src/bin/Data/Interface/RmlUi/
 !src/bin/Data/Interface/RmlUi/**
+# The classic theme's original interface and login art (themes/classic).
+!src/bin/Data/Interface/Classic/
+!src/bin/Data/Interface/Classic/**
+!src/bin/Data/Logo/
+!src/bin/Data/Logo/Classic/
+!src/bin/Data/Logo/Classic/**
 # Item data (JSON, written by the item editor) is source-controlled.
 !src/bin/Data/Items/
 !src/bin/Data/Items/**

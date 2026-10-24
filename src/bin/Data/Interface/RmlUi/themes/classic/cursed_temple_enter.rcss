@@ -1,0 +1,85 @@
+/* Classic theme for the Illusion Temple entry window (CCursedTempleEnter). 0.97 and the Season 2
+   client have no Illusion Temple; the window takes the Season 2 client's Kanturu entry box
+   (kanturu_enter.rcss): a 0.97 message box 213 x 250 (Message_box1 stones between Message_box2
+   edges), the question bold (255, 176, 73) at y 13, the lines white and red as legacy's, the hero's
+   band on a red text box, 0.97's divider (Trading_line) above the buttons, and Season 1's
+   win_button (50 x 16) for Enter and Close at y 215, tinted as Season 2 tinted it. Legacy's rows
+   (the temple at 42, the bands 15 apart from 67, the members at 160). Reference px inside #panel. */
+
+@spritesheet temple-classic-stone-sheet { src: ../../../Classic/Message_box1.jpg; temple-classic-stone: 0px 0px 213px 40px; }
+@spritesheet temple-classic-edge-sheet  { src: ../../../Classic/Message_box2.jpg; temple-classic-edge: 0px 0px 213px 5px; }
+@spritesheet temple-classic-line-sheet  { src: ../../../Classic/Trading_line.jpg; temple-classic-line: 0px 0px 190px 10px; }
+@spritesheet temple-classic-btn-sheet   { src: "../../../win_button.tga"; temple-classic-btn: 0px 0px 49px 16px; }
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 213px;
+	height: 250px;
+	font-family: "token(font-body)";
+	pointer-events: auto;
+}
+
+/* The stones: #back and the first five middle tiles, 40 apart from y 5; the edges: the top and the
+   bottom pieces. */
+#back { position: absolute; left: 0; top: 5px; width: 213px; height: 40px; decorator: image(temple-classic-stone); }
+#frame_top { position: absolute; left: 0; top: 0; width: 213px; height: 5px; decorator: image(temple-classic-edge); }
+.frame-middle { position: absolute; left: 0; width: 213px; height: 40px; decorator: image(temple-classic-stone); }
+#frame_bottom { position: absolute; left: 0; top: 245px; width: 213px; height: 5px; decorator: image(temple-classic-edge); }
+#line { position: absolute; left: 11px; top: 190px; width: 190px; height: 10px; decorator: image(temple-classic-line); }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: center; pointer-events: none; }
+#title { left: 0; top: 13px; font-weight: bold; color: #ffb049; }
+.temple-line { color: #ffffff; }
+.temple-line.red { color: #ff0000; }
+/* The frame tiles and the level bands are containers so each piece can be counted; the containers
+   themselves take no space. */
+.frame-middles, .temple-bands { position: static; }
+.frame-middles .frame-middle:nth-child(1) { top: 45px; }
+.frame-middles .frame-middle:nth-child(2) { top: 85px; }
+.frame-middles .frame-middle:nth-child(3) { top: 125px; }
+.frame-middles .frame-middle:nth-child(4) { top: 165px; }
+.frame-middles .frame-middle:nth-child(5) { top: 205px; }
+.frame-middles .frame-middle:nth-child(n+6) { display: none; }
+
+#ct_temple { left: 3px; top: 42px; }
+#ct_members { left: 3px; top: 160px; }
+#ct_notice { left: 0; top: 52px; }
+.temple-band { position: absolute; left: 3px; width: 207px; height: 15px; margin-top: 67px; }
+.temple-band:nth-child(1) { top: 0px; }
+.temple-band:nth-child(2) { top: 15px; }
+.temple-band:nth-child(3) { top: 30px; }
+.temple-band:nth-child(4) { top: 45px; }
+.temple-band:nth-child(5) { top: 60px; }
+.temple-band:nth-child(6) { top: 75px; }
+.temple-band .temple-line { left: 0; top: 0; }
+.band-hero { position: absolute; left: 0; top: 0; width: 207px; background-color: #ff0000;
+             pointer-events: none; }
+
+.temple-btn {
+	display: block;
+	position: absolute;
+	top: 215px;
+	width: 50px;
+	height: 16px;
+	decorator: image(temple-classic-btn fill);
+	image-color: #cccccc;
+	pointer-events: auto;
+}
+.temple-btn:hover { image-color: #ffffff; }
+.temple-btn:active { image-color: #999999; }
+#btn_enter { left: 35px; }
+#btn_close { left: 128px; }
+.temple-label { left: 0; color: #e6dcc8; }
+.temple-btn:active .temple-label { margin-left: calc(1px * var(--root-scale)); margin-top: calc(1px * var(--root-scale)); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#title { width: calc(213px * var(--root-scale)); }
+#ct_temple { width: calc(207px * var(--root-scale)); }
+.temple-line { width: calc(207px * var(--root-scale)); }
+#ct_members { width: calc(207px * var(--root-scale)); }
+#ct_notice { width: calc(213px * var(--root-scale)); }
+.temple-label { width: calc(50px * var(--root-scale)); }
+
+/* The native line height, counter-scaled out of the panel. */
+.band-hero { height: calc(var(--line-height) / var(--root-scale)); }
