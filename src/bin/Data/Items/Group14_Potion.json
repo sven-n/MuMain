@@ -169,15 +169,15 @@
           "text": {
             "en": "Damage +20% increase effect",
             "de": "Effekt: Schaden +20%",
-            "es": "Daño +20% iefecto de aumento",
-            "id": "Kerusakan +20% imeningkatkan efek",
+            "es": "Daño +20% efecto de aumento",
+            "id": "Kerusakan +20% meningkatkan efek",
             "ja": "攻撃力+20%上昇效果",
             "pl": "Efekt zwiększenia obrażeń o 20%",
-            "pt": "Dano +20% infeito de aumento",
-            "ru": "Урон +20% inувеличение эффекта",
-            "tl": "Pinsala +20% ipagtaas na epekto",
-            "uk": "Пошкодження +20% inпосилення ефекту",
-            "zh-TW": "傷害+20% i效果增加"
+            "pt": "Dano +20% efeito de aumento",
+            "ru": "Урон +20% увеличение эффекта",
+            "tl": "Pinsala +20% pagtaas na epekto",
+            "uk": "Пошкодження +20% посилення ефекту",
+            "zh-TW": "傷害+20% 效果增加"
           },
           "color": "darkRed",
           "levels": [0, 0]
