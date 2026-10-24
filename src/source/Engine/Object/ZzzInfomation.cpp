@@ -1797,7 +1797,9 @@ void OpenMonsterScript(wchar_t* FileName)
         return;
     }
 
-    while (true)
+    // A second load replaces the names instead of adding them after the first ones, past the end of the table.
+    EditMonsterNumber = 0;
+    while (EditMonsterNumber < MAX_MONSTER)
     {
         SMDToken token = GetToken();
         if (token == END) break;
