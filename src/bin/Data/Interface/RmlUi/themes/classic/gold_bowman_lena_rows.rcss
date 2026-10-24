@@ -22,3 +22,9 @@
 .entry-text:nth-child(5) .sharp-text, .entry-text:nth-child(7) .sharp-text { visibility: hidden; }
 .entry-text:nth-child(5) { font-size: 8px; decorator: text("Collected Renas" #ffe6d2 center center), image(gb-classic-box); }
 .entry-text:nth-child(7) { font-size: 8px; decorator: text("Registered Renas" #ffe6d2 center center), image(gb-classic-box flip-horizontal); }
+
+/* Where C++ draws the live 3D Rena (legacy's .entry-item-box, which this copy predated): 20x20,
+   just left of each count's "X". */
+.entry-item-box { position: absolute; width: 20px; height: 20px; pointer-events: none; }
+#entry_item_box_1 { left: 22px; top: 136px; }
+#entry_item_box_2 { left: 111px; top: 136px; }
