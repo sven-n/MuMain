@@ -44,11 +44,6 @@ const Data::Monsters::MonsterAttacks* FindAttacks(const CHARACTER& character)
 }
 } // namespace
 
-bool HasAttacks(const CHARACTER& character)
-{
-    return FindAttacks(character) != nullptr;
-}
-
 bool Play(CHARACTER& character, OBJECT& object)
 {
     const Data::Monsters::MonsterAttacks* attacks = FindAttacks(character);
