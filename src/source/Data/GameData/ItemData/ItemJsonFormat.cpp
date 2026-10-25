@@ -569,7 +569,14 @@ void ItemReader::ReadLevelValues(const OrderedJson& json, std::vector<ItemLevelV
             const OrderedJson& json = list[level];
             if (json.is_string() && json.get<std::string>().starts_with("@"))
             {
+                // "@" alone names no shared text, as for a description line.
                 value.textName = json.get<std::string>().substr(1);
+                if (value.textName.empty())
+                {
+                    AddIssue(
+                        ItemDataIssueSeverity::Error, field + "[" + std::to_string(level) + "]",
+                        "\"@\" names no text: a shared text is \"@\" and its name in the tooltip file's \"texts\"");
+                }
             }
             else
             {

@@ -441,6 +441,16 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
                 continue;
             }
             const PlaceholderScan scan = ScanPlaceholders(text->GetNeutral());
+            // A value the text doesn't show is likely left on the wrong line (as a layout line's).
+            for (const auto& [placeholder, value] : entry.values)
+            {
+                if (std::find(scan.names.begin(), scan.names.end(), placeholder) == scan.names.end())
+                {
+                    issues.push_back({ItemDataIssueSeverity::Warning, "", definition.group, definition.number,
+                                      field + ".values." + placeholder,
+                                      "the line's text has no {" + placeholder + "}"});
+                }
+            }
             std::set<std::string> reported;
             for (const std::string& name : scan.names)
             {
@@ -464,6 +474,15 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
                                                         " has values only up to +" +
                                                         std::to_string(levelValues->values.size() - 1));
                     }
+                    continue;
+                }
+                // A shared text names a table only through the line's "values": the editor's table counts and its
+                // rename read an item's own data, not the tooltip file.
+                if (!entry.textName.empty() && !GetPlaceholderTable(name).empty())
+                {
+                    addError(field + ".text", "\"@" + entry.textName + "\" names the table {" + name +
+                                                  "} itself; a shared text names a table only through the line's " +
+                                                  "\"values\" (\"values\": {\"percent\": \"" + name + "\"})");
                     continue;
                 }
                 if (isValue(name))

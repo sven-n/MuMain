@@ -271,13 +271,15 @@ Each layout has the four sections once each, in this order: it starts with
 layout or a description), an entry of `when` that is neither a value, a
 comparison of a value with a whole number, a state nor a known tag, an unknown
 color, a placeholder that is neither built in nor named by the line's
-`values`, a translation whose placeholders are not those of the English text,
+`values`, a shared text of a description that names a table itself (it names one only through the line's
+`values`, which the table checks and the editor's table counts and rename read), a translation whose placeholders
+are not those of the English text,
 a text (other than a blank line) without its English text, a language code
 that has more than letters, digits and `-`, a `values` entry that names no
 built-in value, missing or misplaced sections, and no layout `default`. The
 messages suggest the name meant for a typo. **Warnings**: a shared text that
 neither a layout nor a description uses, a `values` entry the text does not
-have, a translation in a language the game has no texts in (as for item
+have (a layout's or a description's line), a translation in a language the game has no texts in (as for item
 names), and a layout other than `default` (nothing uses it yet).
 
 ### Flight equipment

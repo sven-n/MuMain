@@ -96,7 +96,7 @@ struct ItemDescriptionLine
     // The shared text of Data/Items/Tooltips/Tooltip.json, without its "@"; empty for a text written in place.
     std::string textName;
     // A placeholder of the text and the value it shows on this line: a built-in value or a table of the item stat
-    // file ({"percent": "wingDamageIncrease1st"}).
+    // file ({"percent": "table:wingDamageIncrease1st"}).
     std::vector<std::pair<std::string, std::string>> values;
     std::vector<TooltipCondition> when;
     ItemTextColor color = ItemTextColor::White;
