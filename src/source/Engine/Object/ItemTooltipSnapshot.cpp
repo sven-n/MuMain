@@ -107,8 +107,14 @@ int VisitItemTooltipSnapshots(const ItemSnapshot& item, int onlyGroup)
                 out << definition.group << '/' << definition.number << ' ' << variant.name << " +" << level << '\n';
                 for (const ItemTooltipLine& line : TooltipOfParameters(params))
                 {
-                    const std::string text = line.text == L"\n" ? "<blank>" : Core::Text::ToUtf8(line.text.c_str());
-                    out << "  " << line.color << (line.bold ? " bold " : " ") << text << '\n';
+                    // A blank line shows no color or style: what its slot keeps of an earlier tooltip is left out.
+                    if (line.text == L"\n")
+                    {
+                        out << "  <blank>\n";
+                        continue;
+                    }
+                    out << "  " << line.color << (line.bold ? " bold " : " ") << Core::Text::ToUtf8(line.text.c_str())
+                        << '\n';
                 }
                 ++tooltips;
             }

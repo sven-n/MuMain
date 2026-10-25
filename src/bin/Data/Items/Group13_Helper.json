@@ -694,6 +694,13 @@
             "uk": "Може бути оснащений Темний Лорд",
             "zh-TW": "可由黑暗領主配備"
           },
+          "color": "darkRed",
+          "colors": [
+            {
+              "when": ["class:darkLord"],
+              "color": "white"
+            }
+          ],
           "levels": [4, 4]
         }
       ],
@@ -893,6 +900,477 @@
         "pt": "Arma absoluta do arcanjo"
       },
       "tags": ["valuable", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@questItem"
+        },
+        {
+          "text": {
+            "en": "Reward received when returned to the Archangel",
+            "de": "Belohnung bei Rückgabe an den Erzengel",
+            "es": "Recompensa recibida al regresar al Arcángel",
+            "id": "Hadiah diterima saat dikembalikan ke Malaikat Agung",
+            "ja": "大天使に持っていくと報奨がもらえます。",
+            "pl": "Nagroda otrzymana po powrocie do Archanioła",
+            "pt": "Recompensa recebida quando devolvida ao Arcanjo",
+            "ru": "Награда, полученная при возвращении в Архангельск",
+            "tl": "Natanggap ang gantimpala nang ibalik sa Arkanghel",
+            "uk": "Нагорода отримана після повернення до Архангела",
+            "zh-TW": "回到大天使身邊時獲得的獎勵"
+          },
+          "color": "darkRed"
+        },
+        {
+          "text": ""
+        },
+        {
+          "text": {
+            "en": "Wizardry Damage: 107 ~ 110",
+            "de": "Zaubereischaden: 107 ~ 110",
+            "es": "Daño mágico: 107 ~ 110",
+            "id": "Kerusakan Sihir: 107 ~ 110",
+            "ja": "魔法の攻撃力: 107 ~ 110",
+            "pl": "Obrażenia magiczne: 107 ~ 110",
+            "pt": "Dano de Magia: 107 ~ 110",
+            "ru": "Волшебный урон: 107 ~ 110",
+            "tl": "Pinsala ng Wizardry: 107 ~ 110",
+            "uk": "Пошкодження магії: 107 ~ 110",
+            "zh-TW": "魔法傷害: 107 ~ 110"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "One-Handed Damage: 110 ~ 120",
+            "de": "Einhandschaden: 110 ~ 120",
+            "es": "Daño con una mano: 110 ~ 120",
+            "id": "Kerusakan Satu Tangan: 110 ~ 120",
+            "ja": "片手の攻撃力: 110 ~ 120",
+            "pl": "Obrażenia jedną ręką: 110 ~ 120",
+            "pt": "Dano com uma mão: 110 ~ 120",
+            "ru": "Урон одной рукой: 110 ~ 120",
+            "tl": "Pinsala ng Isang Kamay: 110 ~ 120",
+            "uk": "Пошкодження однією рукою: 110 ~ 120",
+            "zh-TW": "單手傷害: 110 ~ 120"
+          },
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Two-Handed Damage: 120 ~ 140",
+            "de": "Zweihandschaden: 120 ~ 140",
+            "es": "Daño a dos manos: 120 ~ 140",
+            "id": "Kerusakan Dua Tangan: 120 ~ 140",
+            "ja": "両手の攻撃力: 120 ~ 140",
+            "pl": "Obrażenia dwuręczne: 120 ~ 140",
+            "pt": "Dano com duas mãos: 120 ~ 140",
+            "ru": "Двуручный урон: 120 ~ 140",
+            "tl": "Pinsala ng Dalawang Kamay: 120 ~ 140",
+            "uk": "Пошкодження двома руками: 120 ~ 140",
+            "zh-TW": "雙手傷害: 120 ~ 140"
+          },
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "Attack speed: 20",
+            "de": "Angriffsgeschwindigkeit: 20",
+            "es": "Velocidad de ataque: 20",
+            "id": "Kecepatan serangan: 20",
+            "ja": "攻撃速度: 20",
+            "pl": "Szybkość ataku: 20",
+            "pt": "Velocidade de ataque: 20",
+            "ru": "Скорость атаки: 20",
+            "tl": "Bilis ng pag-atake: 20",
+            "uk": "Швидкість атаки: 20",
+            "zh-TW": "攻擊速度：20"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Attack speed: 35",
+            "de": "Angriffsgeschwindigkeit: 35",
+            "es": "Velocidad de ataque: 35",
+            "id": "Kecepatan serangan: 35",
+            "ja": "攻撃速度: 35",
+            "pl": "Szybkość ataku: 35",
+            "pt": "Velocidade de ataque: 35",
+            "ru": "Скорость атаки: 35",
+            "tl": "Bilis ng pag-atake: 35",
+            "uk": "Швидкість атаки: 35",
+            "zh-TW": "攻擊速度：35"
+          },
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Attack speed: 35",
+            "de": "Angriffsgeschwindigkeit: 35",
+            "es": "Velocidad de ataque: 35",
+            "id": "Kecepatan serangan: 35",
+            "ja": "攻撃速度: 35",
+            "pl": "Szybkość ataku: 35",
+            "pt": "Velocidade de ataque: 35",
+            "ru": "Скорость атаки: 35",
+            "tl": "Bilis ng pag-atake: 35",
+            "uk": "Швидкість атаки: 35",
+            "zh-TW": "攻擊速度：35"
+          },
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "Strength Requirement: 132",
+            "de": "Benötigte Stärke: 132",
+            "es": "Requisito de fuerza: 132",
+            "id": "Persyaratan Kekuatan: 132",
+            "ja": "使用可能な力: 132",
+            "pl": "Wymagana siła: 132",
+            "pt": "Requisito de força: 132",
+            "ru": "Требование к прочности: 132",
+            "tl": "Kinakailangan ng Lakas: 132",
+            "uk": "Вимоги до міцності: 132",
+            "zh-TW": "強度要求：132"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Strength Requirement: 381",
+            "de": "Benötigte Stärke: 381",
+            "es": "Requisito de fuerza: 381",
+            "id": "Persyaratan Kekuatan: 381",
+            "ja": "使用可能な力: 381",
+            "pl": "Wymagana siła: 381",
+            "pt": "Requisito de força: 381",
+            "ru": "Требование к прочности: 381",
+            "tl": "Kinakailangan ng Lakas: 381",
+            "uk": "Вимоги до міцності: 381",
+            "zh-TW": "強度要求：381"
+          },
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Strength Requirement: 140",
+            "de": "Benötigte Stärke: 140",
+            "es": "Requisito de fuerza: 140",
+            "id": "Persyaratan Kekuatan: 140",
+            "ja": "使用可能な力: 140",
+            "pl": "Wymagana siła: 140",
+            "pt": "Requisito de força: 140",
+            "ru": "Требование к прочности: 140",
+            "tl": "Kinakailangan ng Lakas: 140",
+            "uk": "Вимоги до міцності: 140",
+            "zh-TW": "強度要求：140"
+          },
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "Agility Requirement: 32",
+            "de": "Benötigte Beweglichkeit: 32",
+            "es": "Requisito de agilidad: 32",
+            "id": "Persyaratan Ketangkasan: 32",
+            "ja": "使用可能な敏捷性: 32",
+            "pl": "Wymagania dotyczące zwinności: 32",
+            "pt": "Requisito de agilidade: 32",
+            "ru": "Требование к ловкости: 32",
+            "tl": "Kinakailangan sa Liksi: 32",
+            "uk": "Вимоги до спритності: 32",
+            "zh-TW": "敏捷性需求：32"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Agility Requirement: 149",
+            "de": "Benötigte Beweglichkeit: 149",
+            "es": "Requisito de agilidad: 149",
+            "id": "Persyaratan Ketangkasan: 149",
+            "ja": "使用可能な敏捷性: 149",
+            "pl": "Wymagania dotyczące zwinności: 149",
+            "pt": "Requisito de agilidade: 149",
+            "ru": "Требование к ловкости: 149",
+            "tl": "Kinakailangan sa Liksi: 149",
+            "uk": "Вимоги до спритності: 149",
+            "zh-TW": "敏捷性需求：149"
+          },
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Agility Requirement: 350",
+            "de": "Benötigte Beweglichkeit: 350",
+            "es": "Requisito de agilidad: 350",
+            "id": "Persyaratan Ketangkasan: 350",
+            "ja": "使用可能な敏捷性: 350",
+            "pl": "Wymagania dotyczące zwinności: 350",
+            "pt": "Requisito de agilidade: 350",
+            "ru": "Требование к ловкости: 350",
+            "tl": "Kinakailangan sa Liksi: 350",
+            "uk": "Вимоги до спритності: 350",
+            "zh-TW": "敏捷性需求：350"
+          },
+          "levels": [2, 2]
+        },
+        {
+          "text": ""
+        },
+        {
+          "text": {
+            "en": "Luck (success rate of Jewel of Soul +25%)",
+            "de": "Glück (Erfolgsrate von Juwel der Seele +25%)",
+            "es": "Suerte (tasa de éxito de Jewel of Soul +25%)",
+            "id": "Keberuntungan (tingkat keberhasilan Permata Jiwa +25%)",
+            "ja": "幸運 (霊魂の宝石　成功確率 +25%)",
+            "pl": "Szczęście (wskaźnik sukcesu Jewel of Soul +25%)",
+            "pt": "Sorte (taxa de sucesso da Jóia da Alma +25%)",
+            "ru": "Удача (шанс успеха «Драгоценности души» +25%)",
+            "tl": "Suwerte (rate ng tagumpay ng Jewel of Soul +25%)",
+            "uk": "Удача (швидкість успіху Jewel of Soul +25%)",
+            "zh-TW": "幸運（靈魂寶石成功率+25%）"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Luck (critical damage rate +5%)",
+            "de": "Glück (kritische Schadensrate +5%)",
+            "es": "Suerte (tasa de daño crítico +5%)",
+            "id": "Keberuntungan (tingkat kerusakan kritis +5%)",
+            "ja": "幸運 (クリティカルダメージ確率 +5%)",
+            "pl": "Szczęście (wskaźnik obrażeń krytycznych +5%)",
+            "pt": "Sorte (taxa de dano crítico +5%)",
+            "ru": "Удача (коэффициент критического урона +5%)",
+            "tl": "Swerte (critical damage rate +5%)",
+            "uk": "Удача (рівень критичної шкоди +5%)",
+            "zh-TW": "幸運（暴擊傷害率+5%）"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Wizardry Dmg 53% rise",
+            "de": "Zaubereischaden +53%",
+            "es": "Wizardry Dmg 53% aumento",
+            "id": "Sihir Dmg 53% meningkat",
+            "ja": "魔力 53%プラス",
+            "pl": "Obrażenia magiczne +53%",
+            "pt": "Magia Dmg 53% aumento",
+            "ru": "Волшебный урон 53% увеличивается",
+            "tl": "Wizardry Dmg 53% tumaas",
+            "uk": "Wizardry Dmg 53% зростання",
+            "zh-TW": "魔法傷害 53% 上漲"
+          },
+          "color": "blue",
+          "bold": true,
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Increase Wizardry Dmg +level/20",
+            "de": "Erhöht Zaubereischaden +Level/20",
+            "es": "Aumentar el daño de hechicería +nivel/20",
+            "id": "Meningkatkan Dmg Sihir +level/20",
+            "ja": "魔力増加 +レベル/20",
+            "pl": "Zwiększa obrażenia czarodziejstwa +poziom/20",
+            "pt": "Aumenta Dano de Magia +nível/20",
+            "ru": "Увеличение магического урона +уровень/20",
+            "tl": "Taasan ang Wizardry Dmg +level/20",
+            "uk": "Збільшити Wizardry Dmg +level/20",
+            "zh-TW": "增加魔法傷害+level/20"
+          },
+          "color": "blue",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Increase Wizardry Dmg +2%",
+            "de": "Erhöht Zaubereischaden +2%",
+            "es": "Aumentar daño mágico +2%",
+            "id": "Meningkatkan Dmg Sihir +2%",
+            "ja": "魔力増加 +2%",
+            "pl": "Zwiększ obrażenia czarodziejstwa +2%",
+            "pt": "Aumenta Dano de Magia +2%",
+            "ru": "Увеличение урона от волшебства +2%",
+            "tl": "Dagdagan ang Wizardry Dmg +2%",
+            "uk": "Збільшити шкоду магії +2%",
+            "zh-TW": "增加魔法傷害+2%"
+          },
+          "color": "blue",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Cyclone Cutting skill (Mana:{mana})",
+            "de": "Fähigkeit Cyclone Cutting (Mana:{mana})",
+            "es": "Habilidad de corte de ciclón (Mana:{mana})",
+            "id": "Keterampilan Pemotongan Topan (Mana: {mana})",
+            "ja": "真空斬りスキル (マナ:{mana})",
+            "pl": "Umiejętność Cięcia Cyklonu (Mana: {mana})",
+            "pt": "Habilidade de Corte Ciclone (Mana:{mana})",
+            "ru": "Навык циклонной резки (Мана:{mana})",
+            "tl": "Kasanayan sa Cyclone Cutting (Mana:{mana})",
+            "uk": "Навички Cyclone Cutting (Мана:{mana})",
+            "zh-TW": "旋風切割技能（法力：{mana}）"
+          },
+          "values": {"mana": "skillMana:22"},
+          "color": "blue",
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Increase Damage +level/20",
+            "de": "Erhöht Schaden +Level/20",
+            "es": "Aumentar daño +nivel/20",
+            "id": "Meningkatkan Kerusakan +level/20",
+            "ja": "攻撃力増加 +レベル/20",
+            "pl": "Zwiększa obrażenia + poziom/20",
+            "pt": "Aumentar Dano +nível/20",
+            "ru": "Увеличение урона +уровень/20",
+            "tl": "Taasan ang Damage +level/20",
+            "uk": "Збільшення шкоди + рівень/20",
+            "zh-TW": "傷害增加+level/20"
+          },
+          "color": "blue",
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Increase Damage +2%",
+            "de": "Erhöht Schaden +2%",
+            "es": "Aumentar daño +2%",
+            "id": "Meningkatkan Kerusakan +2%",
+            "ja": "攻撃力増加 +2%",
+            "pl": "Zwiększ obrażenia +2%",
+            "pt": "Aumentar Dano +2%",
+            "ru": "Увеличение урона +2%",
+            "tl": "Palakihin ang Pinsala +2%",
+            "uk": "Збільшення шкоди +2%",
+            "zh-TW": "增加傷害+2%"
+          },
+          "color": "blue",
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Triple Shot skill (Mana:{mana})",
+            "de": "Fähigkeit Triple Shot (Mana:{mana})",
+            "es": "Habilidad Triple Disparo (Mana:{mana})",
+            "id": "Keterampilan Tembakan Tiga Kali (Mana: {mana})",
+            "ja": "乱れ撃ちスキル (マナ:{mana})",
+            "pl": "Umiejętność Potrójnego Strzału (Mana: {mana})",
+            "pt": "Habilidade de Tiro Triplo (Mana:{mana})",
+            "ru": "Навык «Тройной выстрел» (Мана:{mana})",
+            "tl": "Triple Shot skill (Mana:{mana})",
+            "uk": "Навичка «Потрійний постріл» (мана:{mana})",
+            "zh-TW": "三重射擊技能（法力：{mana}）"
+          },
+          "values": {"mana": "skillMana:24"},
+          "color": "blue",
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "Increase Damage +level/20",
+            "de": "Erhöht Schaden +Level/20",
+            "es": "Aumentar daño +nivel/20",
+            "id": "Meningkatkan Kerusakan +level/20",
+            "ja": "攻撃力増加 +レベル/20",
+            "pl": "Zwiększa obrażenia + poziom/20",
+            "pt": "Aumentar Dano +nível/20",
+            "ru": "Увеличение урона +уровень/20",
+            "tl": "Taasan ang Damage +level/20",
+            "uk": "Збільшення шкоди + рівень/20",
+            "zh-TW": "傷害增加+level/20"
+          },
+          "color": "blue",
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "Increase Damage +2%",
+            "de": "Erhöht Schaden +2%",
+            "es": "Aumentar daño +2%",
+            "id": "Meningkatkan Kerusakan +2%",
+            "ja": "攻撃力増加 +2%",
+            "pl": "Zwiększ obrażenia +2%",
+            "pt": "Aumentar Dano +2%",
+            "ru": "Увеличение урона +2%",
+            "tl": "Palakihin ang Pinsala +2%",
+            "uk": "Збільшення шкоди +2%",
+            "zh-TW": "增加傷害+2%"
+          },
+          "color": "blue",
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "Excellent Damage rate +10%",
+            "de": "Exzellente Schadensrate +10%",
+            "es": "Excelente tasa de daño +10%",
+            "id": "Tingkat Kerusakan Luar Biasa +10%",
+            "ja": "エクセレントダメージ確率 +10%",
+            "pl": "Doskonały współczynnik obrażeń +10%",
+            "pt": "Excelente taxa de dano +10%",
+            "ru": "Отличный урон +10%",
+            "tl": "Napakahusay na Damage rate +10%",
+            "uk": "Відмінний рівень шкоди +10%",
+            "zh-TW": "優 破損率+10%"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Increase Attacking(Wizardry)speed +7",
+            "de": "Erhöht Angriffsgeschwindigkeit (Zauberei) +7",
+            "es": "Aumentar la velocidad de ataque (hechicería) +7",
+            "id": "Meningkatkan kecepatan Menyerang (Sihir) +7",
+            "ja": "攻撃(魔法)速度増加 +7",
+            "pl": "Zwiększ prędkość ataku (czarodziejskiego) +7",
+            "pt": "Aumenta a velocidade de ataque (feitiçaria) +7",
+            "ru": "Увеличение скорости атаки (волшебства) +7",
+            "tl": "Dagdagan ang bilis ng Pag-atake(Wizardry) +7",
+            "uk": "Збільшити швидкість атаки (чарівництво) +7",
+            "zh-TW": "增加攻擊（魔法）速度+7"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Increases acquisition rate of Life after hunting monsters +life/8",
+            "de": "Erhöht die Lebensregeneration beim Jagen von Monstern +Leben/8",
+            "es": "Aumenta la tasa de adquisición de vida después de cazar monstruos +vida/8",
+            "id": "Meningkatkan tingkat perolehan Nyawa setelah berburu monster +nyawa/8",
+            "ja": "獲得する生命増加 +生命/8",
+            "pl": "Zwiększa tempo zdobywania życia po upolowaniu potworów +życie/8",
+            "pt": "Aumenta a taxa de aquisição de Vida após caçar monstros +vida/8",
+            "ru": "Увеличивает скорость получения жизни после охоты на монстров +жизнь/8.",
+            "tl": "Pinapataas ang rate ng pagkuha ng Buhay pagkatapos manghuli ng mga halimaw +buhay/8",
+            "uk": "Збільшує швидкість отримання життя після полювання на монстрів + життя/8",
+            "zh-TW": "狩獵怪物後生命獲得率增加+life/8"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Increases acquisition rate of Mana after hunting monsters +Mana/8",
+            "de": "Erhöht die Manaregeneration beim Jagen von Monstern +Mana/8",
+            "es": "Aumenta la tasa de adquisición de Mana después de cazar monstruos +Mana/8",
+            "id": "Meningkatkan tingkat perolehan Mana setelah berburu monster +Mana/8",
+            "ja": "獲得するマナ増加 +マナ/8",
+            "pl": "Zwiększa szybkość zdobywania many po polowaniu na potwory +Mana/8",
+            "pt": "Aumenta a taxa de aquisição de Mana após caçar monstros +Mana/8",
+            "ru": "Увеличивает скорость получения маны после охоты на монстров +Мана/8.",
+            "tl": "Pinapataas ang rate ng pagkuha ng Mana pagkatapos manghuli ng mga halimaw +Mana/8",
+            "uk": "Збільшує швидкість отримання мани після полювання на монстрів +Мана/8",
+            "zh-TW": "狩獵怪物後魔力獲取率增加+魔力/8"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 2,
       "durability": 255,
@@ -921,6 +1399,71 @@
       },
       "tags": ["noDurabilityLine"],
       "description": [
+        {
+          "text": "@cannotRepair",
+          "when": ["level!=1", "level!=2"],
+          "color": "red",
+          "levels": [0, 3]
+        },
+        {
+          "text": {
+            "en": "Can be dropped after level 40",
+            "de": "Kann ab Level 40 fallen gelassen werden",
+            "es": "Se puede soltar después del nivel 40.",
+            "id": "Dapat dijatuhkan setelah level 40",
+            "ja": "レベル40以上なら落とすことが可能",
+            "pl": "Można upuścić po poziomie 40",
+            "pt": "Pode ser descartado após o nível 40",
+            "ru": "Можно выбросить после уровня 40.",
+            "tl": "Maaaring i-drop pagkatapos ng level 40",
+            "uk": "Можна викинути після рівня 40",
+            "zh-TW": "等級 40 後可掉落"
+          },
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Can be dropped after level 80",
+            "de": "Kann ab Level 80 fallen gelassen werden",
+            "es": "Se puede soltar después del nivel 80.",
+            "id": "Dapat dijatuhkan setelah level 80",
+            "ja": "レベル80以上なら落とすことが可能",
+            "pl": "Można upuścić po poziomie 80",
+            "pt": "Pode ser descartado após o nível 80",
+            "ru": "Можно выбросить после уровня 80.",
+            "tl": "Maaaring i-drop pagkatapos ng level 80",
+            "uk": "Можна викинути після рівня 80",
+            "zh-TW": "等級 80 後可掉落"
+          },
+          "levels": [2, 2]
+        },
+        {
+          "text": "@cannotStoreInVault",
+          "color": "red",
+          "levels": [1, 2]
+        },
+        {
+          "text": "@cannotBeTraded",
+          "color": "red",
+          "levels": [1, 2]
+        },
+        {
+          "text": {
+            "en": "Cannot be sold.",
+            "de": "Kann nicht verkauft werden.",
+            "es": "No se puede vender.",
+            "id": "Tidak bisa dijual.",
+            "ja": "売却不可",
+            "pl": "Nie można sprzedać.",
+            "pt": "Não pode ser vendido.",
+            "ru": "Не подлежит продаже.",
+            "tl": "Hindi maaaring ibenta.",
+            "uk": "Не можна продати.",
+            "zh-TW": "不能出售。"
+          },
+          "color": "red",
+          "levels": [1, 2]
+        },
         {
           "text": "@durability",
           "when": ["!timed", "level!=1", "level!=2"]
@@ -1756,19 +2299,7 @@
           "color": "blue"
         },
         {
-          "text": {
-            "en": "Master Level EXP cannot be achieved during the item usage.",
-            "de": "Während der Verwendung des Gegenstands kann keine Master-Erfahrung gesammelt werden.",
-            "es": "La EXP de nivel maestro no se puede lograr durante el uso del artículo.",
-            "id": "EXP Tingkat Master tidak dapat dicapai selama penggunaan item.",
-            "ja": "利用中はマスターレベル経験値が獲得できません。",
-            "pl": "Podczas działania przedmiotu nie zdobywasz EXP poziomu mistrzowskiego.",
-            "pt": "Master Level EXP não pode ser alcançado durante o uso do item.",
-            "ru": "Опыт мастер-уровня не может быть достигнут во время использования предмета.",
-            "tl": "Ang Master Level EXP ay hindi makakamit sa panahon ng paggamit ng item.",
-            "uk": "Майстер-рівень EXP не може бути досягнутий під час використання предмета.",
-            "zh-TW": "使用物品期間無法獲得大師級經驗值。"
-          },
+          "text": "@masterLevelEXPCannotBeAchievedDuringTheItemUsage",
           "color": "yellow"
         }
       ],
@@ -1802,6 +2333,29 @@
       "tags": ["cashShop", "noDurabilityLine"],
       "description": [
         {
+          "text": {
+            "en": "Enables entrance into Devil Square.",
+            "de": "Ermöglicht den Zugang zu Devil Square.",
+            "es": "Permite la entrada a Plaza del Diablo.",
+            "id": "Memungkinkan masuk ke Lapangan Setan.",
+            "ja": "デビルスクエア 入場時、決まった回数だけ使えます。",
+            "pl": "Umożliwia wejście do Devil Square.",
+            "pt": "Permite a entrada em Praça do Diabo.",
+            "ru": "Позволяет войти в Площадь Дьявола.",
+            "tl": "Pinapagana ang pagpasok sa Devil Square.",
+            "uk": "Дозволяє вхід у Площа диявола.",
+            "zh-TW": "允許進入 魔鬼廣場。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": "@youWillBeAssignedToAStageAccordingToYourLevel",
+          "color": "blue"
+        },
+        {
+          "text": ""
+        },
+        {
           "text": "@usableTimes"
         }
       ],
@@ -1834,6 +2388,29 @@
       "tags": ["cashShop", "noDurabilityLine"],
       "description": [
         {
+          "text": {
+            "en": "Enables entrance into Blood Castle.",
+            "de": "Ermöglicht den Zugang zu Blutburg.",
+            "es": "Permite la entrada a Castillo de sangre.",
+            "id": "Memungkinkan masuk ke Kastil Darah.",
+            "ja": "ブラッドキャッスル 入場時、決まった回数だけ使えます。",
+            "pl": "Umożliwia wejście do Blood Castle.",
+            "pt": "Permite a entrada em Castelo de Sangue.",
+            "ru": "Позволяет войти в Кровавый Замок.",
+            "tl": "Pinapagana ang pagpasok sa Kastilyo ng Dugo.",
+            "uk": "Дозволяє вхід у Кривавий замок.",
+            "zh-TW": "允許進入 血色城堡。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": "@youWillBeAssignedToAStageAccordingToYourLevel",
+          "color": "blue"
+        },
+        {
+          "text": ""
+        },
+        {
           "text": "@usableTimes"
         }
       ],
@@ -1865,6 +2442,29 @@
       },
       "tags": ["cashShop", "noDurabilityLine"],
       "description": [
+        {
+          "text": {
+            "en": "Enables entrance into Kalima.",
+            "de": "Ermöglicht den Zugang zu Kalima.",
+            "es": "Permite la entrada a Kalima.",
+            "id": "Memungkinkan masuk ke kalima.",
+            "ja": "カルリマ 入場時、決まった回数だけ使えます。",
+            "pl": "Umożliwia wejście do Kalima.",
+            "pt": "Permite a entrada em Kalima.",
+            "ru": "Позволяет войти в Калима.",
+            "tl": "Pinapagana ang pagpasok sa Kalima.",
+            "uk": "Дозволяє вхід у Каліма.",
+            "zh-TW": "允許進入 卡利馬。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": "@youWillBeAssignedToAStageAccordingToYourLevel",
+          "color": "blue"
+        },
+        {
+          "text": ""
+        },
         {
           "text": "@usableTimes"
         }
@@ -2307,19 +2907,7 @@
           "color": "blue"
         },
         {
-          "text": {
-            "en": "You will be assigned to a stage according to your level.",
-            "de": "Sie werden entsprechend Ihrem Level einer Stufe zugeteilt.",
-            "es": "Se te asignará una etapa según tu nivel.",
-            "id": "Anda akan ditugaskan ke tahapan sesuai dengan level Anda.",
-            "ja": "入場できるレベルに合わせて自動的に入場します。",
-            "pl": "Zostaniesz przydzielony do etapu zgodnie z Twoim poziomem.",
-            "pt": "Você será designado para uma etapa de acordo com seu nível.",
-            "ru": "Вам будет назначен этап в соответствии с вашим уровнем.",
-            "tl": "Itatalaga ka sa isang yugto ayon sa iyong antas.",
-            "uk": "Ви будете розподілені на етап відповідно до вашого рівня.",
-            "zh-TW": "您將根據您的等級被分配到一個階段。"
-          },
+          "text": "@youWillBeAssignedToAStageAccordingToYourLevel",
           "color": "blue"
         },
         {
@@ -2356,6 +2944,60 @@
         "pt": "Selo da cura"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Experience rate is increased {addOptionValue1}%",
+            "de": "Erfahrungsrate um {addOptionValue1}% erhöht",
+            "es": "La tasa de experiencia aumenta {addOptionValue1}%",
+            "id": "Tingkat pengalaman meningkat {addOptionValue1}%",
+            "ja": "経験値獲得量　{addOptionValue1}%に上昇",
+            "pl": "Doświadczenie zwiększone o {addOptionValue1}%",
+            "pt": "A taxa de experiência aumentou {addOptionValue1}%",
+            "ru": "Процент опыта увеличен {addOptionValue1}%",
+            "tl": "Tumaas ang rate ng karanasan {addOptionValue1}%",
+            "uk": "Швидкість досвіду збільшено {addOptionValue1}%",
+            "zh-TW": "經驗率增加{addOptionValue1}%"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Automatic Life Recover increment {addOptionValue2}%",
+            "de": "Automatische Lebensregeneration +{addOptionValue2}%",
+            "es": "Incremento de recuperación de vida automática {addOptionValue2}%",
+            "id": "Peningkatan Pemulihan Kehidupan Otomatis {addOptionValue2}%",
+            "ja": "生命自動回復{addOptionValue2}%上昇",
+            "pl": "Automatyczna regeneracja życia +{addOptionValue2}%",
+            "pt": "Incremento automático de recuperação de vida {addOptionValue2}%",
+            "ru": "Увеличение автоматического восстановления ресурса {addOptionValue2}%",
+            "tl": "Ang Awtomatikong Life Recover na pagtaas {addOptionValue2}%",
+            "uk": "Приріст автоматичного відновлення життя {addOptionValue2}%",
+            "zh-TW": "自動生命復原增量 {addOptionValue2}%"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "EXP achievement and the automatic life recovery rate increases.",
+            "de": "Erhöht die erhaltene Erfahrung und die automatische Lebensregeneration.",
+            "es": "El logro de EXP y la tasa de recuperación automática de vida aumentan.",
+            "id": "Pencapaian EXP dan tingkat pemulihan kehidupan otomatis meningkat.",
+            "ja": "経験値獲得量と生命自動回復量が上昇されます。",
+            "pl": "Zwiększa zdobywany EXP i automatyczną regenerację życia.",
+            "pt": "A conquista de EXP e a taxa de recuperação automática de vida aumentam.",
+            "ru": "Достижение опыта и скорость автоматического восстановления жизни увеличиваются.",
+            "tl": "EXP achievement at ang awtomatikong pagtaas ng rate ng pagbawi sa buhay.",
+            "uk": "Досягнення EXP і швидкість автоматичного відновлення життя збільшуються.",
+            "zh-TW": "EXP成就和自動生命恢復率增加。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": "@masterLevelEXPCannotBeAchievedDuringTheItemUsage",
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2382,6 +3024,56 @@
         "pt": "Selo da divindade"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Item drop rate is increased {addOptionValue1}%",
+            "de": "Droprate von Gegenständen um {addOptionValue1}% erhöht",
+            "es": "La tasa de caída de artículos aumenta {addOptionValue1}%",
+            "id": "Tingkat penurunan item meningkat {addOptionValue1}%",
+            "ja": "アイテム獲得量 {addOptionValue1}%に上昇",
+            "pl": "Drop przedmiotów zwiększony o {addOptionValue1}%",
+            "pt": "A taxa de queda de itens aumentou {addOptionValue1}%",
+            "ru": "Шанс выпадения предметов увеличен {addOptionValue1}%",
+            "tl": "Ang rate ng pagbaba ng item ay tumaas {addOptionValue1}%",
+            "uk": "Швидкість випадання предметів збільшена {addOptionValue1}%",
+            "zh-TW": "物品掉落率增加 {addOptionValue1}%"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Automatic Mana recovery increment in {addOptionValue2}% rate",
+            "de": "Automatische Manaregeneration +{addOptionValue2}%",
+            "es": "Incremento de recuperación automática de maná en tasa de % {addOptionValue2}",
+            "id": "Peningkatan pemulihan Mana otomatis pada tingkat {addOptionValue2}%.",
+            "ja": "マナ自動回復{addOptionValue2}%上昇",
+            "pl": "Automatyczna regeneracja many +{addOptionValue2}%",
+            "pt": "Incremento automático de recuperação de Mana na taxa {addOptionValue2}%",
+            "ru": "Автоматическое увеличение восстановления маны со скоростью {addOptionValue2}%.",
+            "tl": "Awtomatikong pagtaas ng Mana recovery sa {addOptionValue2}% rate",
+            "uk": "Автоматичне приріст відновлення мани в {addOptionValue2}%.",
+            "zh-TW": "自動法力恢復增量（{addOptionValue2}% 率）"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Item achievement and the automatic Mana recovery increases onward.",
+            "de": "Erhöht die Gegenstands-Droprate und die automatische Manaregeneration.",
+            "es": "Los logros de los objetos y la recuperación automática de maná aumentan en el futuro.",
+            "id": "Pencapaian item dan pemulihan Mana otomatis meningkat dan seterusnya.",
+            "ja": "アイテム獲得量とマナ自動回復量が上昇されます。",
+            "pl": "Zwiększa drop przedmiotów i automatyczną regenerację many.",
+            "pt": "A conquista de itens e a recuperação automática de Mana aumentam posteriormente.",
+            "ru": "Достижение предмета и автоматическое восстановление маны увеличиваются.",
+            "tl": "Ang pagkamit ng item at ang awtomatikong pagbawi ng Mana ay tumataas.",
+            "uk": "Досягнення предметів і автоматичне відновлення мани збільшуються.",
+            "zh-TW": "物品成就和自動法力恢復量不斷增加。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2736,6 +3428,11 @@
         "pt": "Espada/Maça/Lança"
       },
       "tags": ["gambleItem", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@itemSkillLuckOptionWillBeRandomlyAdded"
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "pet",
@@ -2760,6 +3457,11 @@
         "pt": "Bastão"
       },
       "tags": ["gambleItem", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@itemSkillLuckOptionWillBeRandomlyAdded"
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "pet",
@@ -2784,6 +3486,11 @@
         "pt": "Arco/Besta"
       },
       "tags": ["gambleItem", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@itemSkillLuckOptionWillBeRandomlyAdded"
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "pet",
@@ -2808,6 +3515,11 @@
         "pt": "Cetro"
       },
       "tags": ["gambleItem", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@itemSkillLuckOptionWillBeRandomlyAdded"
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "pet",
@@ -2832,6 +3544,11 @@
         "pt": "Cajado"
       },
       "tags": ["gambleItem", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@itemSkillLuckOptionWillBeRandomlyAdded"
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "pet",
@@ -3107,19 +3824,14 @@
       },
       "description": [
         {
-          "text": {
-            "en": "Talisman of Wings of Satan",
-            "de": "Talisman der Satansflügel",
-            "es": "Talismán de Alas de Satán",
-            "id": "Jimat Sayap Setan",
-            "ja": "合成成功時、サタンの羽が生成されます。",
-            "pl": "Talisman of Wings of Satan",
-            "pt": "Talismã das Asas de Satanás",
-            "ru": "Талисман Крыльев Сатаны",
-            "tl": "Talisman of Wings of Satanas",
-            "uk": "Талісман крил сатани",
-            "zh-TW": "撒旦之翼護身符"
-          },
+          "text": "@increasesYourLuckToCreateWingOfYourWish"
+        },
+        {
+          "text": "@talismanOfWingsOfSatan",
+          "color": "blue"
+        },
+        {
+          "text": "@talismanOfWingsOfSatan",
           "when": ["durability"]
         }
       ],
@@ -3148,19 +3860,14 @@
       },
       "description": [
         {
-          "text": {
-            "en": "Talisman of Wings of Heaven",
-            "de": "Talisman der Himmelsflügel",
-            "es": "Talismán de Alas del Cielo",
-            "id": "Jimat Sayap Surga",
-            "ja": "合成成功時、守護天使の羽が生成されます。",
-            "pl": "Talisman of Wings of Heaven",
-            "pt": "Talismã das Asas do Céu",
-            "ru": "Талисман Крыльев Небес",
-            "tl": "Talisman of Wings of Heaven",
-            "uk": "Талісман Крила Неба",
-            "zh-TW": "天之翼護符"
-          },
+          "text": "@increasesYourLuckToCreateWingOfYourWish"
+        },
+        {
+          "text": "@talismanOfWingsOfHeaven",
+          "color": "blue"
+        },
+        {
+          "text": "@talismanOfWingsOfHeaven",
           "when": ["durability"]
         }
       ],
@@ -3189,19 +3896,14 @@
       },
       "description": [
         {
-          "text": {
-            "en": "Talisman of Wings of Elf",
-            "de": "Talisman der Elfenflügel",
-            "es": "Talismán de Alas de Elfo",
-            "id": "Jimat Sayap Elf",
-            "ja": "合成成功時、妖精の羽が生成されます。",
-            "pl": "Talisman of Wings of Elf",
-            "pt": "Talismã das Asas do Elfo",
-            "ru": "Талисман Крыльев эльфа",
-            "tl": "Talisman ng Wings of Elf",
-            "uk": "Талісман Крила Ельфа",
-            "zh-TW": "精靈之翼護身符"
-          },
+          "text": "@increasesYourLuckToCreateWingOfYourWish"
+        },
+        {
+          "text": "@talismanOfWingsOfElf",
+          "color": "blue"
+        },
+        {
+          "text": "@talismanOfWingsOfElf",
           "when": ["durability"]
         }
       ],
@@ -3230,19 +3932,14 @@
       },
       "description": [
         {
-          "text": {
-            "en": "Talisman of Wing of Curse",
-            "de": "Talisman der Fluchflügel",
-            "es": "Talismán del ala de la maldición",
-            "id": "Jimat Sayap Kutukan",
-            "ja": "合成成功時、ミザリーウイングが生成されます。",
-            "pl": "Talisman of Wing of Curse",
-            "pt": "Talismã da Asa da Maldição",
-            "ru": "Талисман Крыла Проклятия",
-            "tl": "Talisman ng Wing of Curse",
-            "uk": "Талісман Крила Прокляття",
-            "zh-TW": "詛咒之翼護符"
-          },
+          "text": "@increasesYourLuckToCreateWingOfYourWish"
+        },
+        {
+          "text": "@talismanOfWingOfCurse",
+          "color": "blue"
+        },
+        {
+          "text": "@talismanOfWingOfCurse",
           "when": ["durability"]
         }
       ],
@@ -3271,19 +3968,14 @@
       },
       "description": [
         {
-          "text": {
-            "en": "Talisman of Cape of Emperor",
-            "de": "Talisman des Umhangs des Imperators",
-            "es": "Talismán del Cabo del Emperador",
-            "id": "Jimat Tanjung Kaisar",
-            "ja": "合成成功時、君主のマントが生成されます。",
-            "pl": "Talisman of Cape of Emperor",
-            "pt": "Talismã do Cabo do Imperador",
-            "ru": "Талисман Мыса Императора",
-            "tl": "Talisman ng Cape of Emperor",
-            "uk": "Талісман накидки імператора",
-            "zh-TW": "帝披風護身符"
-          },
+          "text": "@increasesYourLuckToCreateWingOfYourWish"
+        },
+        {
+          "text": "@talismanOfCapeOfEmperor",
+          "color": "blue"
+        },
+        {
+          "text": "@talismanOfCapeOfEmperor",
           "when": ["durability"]
         }
       ],
@@ -3312,19 +4004,14 @@
       },
       "description": [
         {
-          "text": {
-            "en": "Talisman of Wings of Dragon",
-            "de": "Talisman der Drachenflügel",
-            "es": "Talismán de Alas de Dragón",
-            "id": "Jimat Sayap Naga",
-            "ja": "合成成功時、デビルウイングが生成されます。",
-            "pl": "Talisman of Wings of Dragon",
-            "pt": "Talismã das Asas do Dragão",
-            "ru": "Талисман Крыльев Дракона",
-            "tl": "Talisman ng Wings of Dragon",
-            "uk": "Талісман Крила Дракона",
-            "zh-TW": "龍翼護符"
-          },
+          "text": "@increasesYourLuckToCreateWingOfYourWish"
+        },
+        {
+          "text": "@talismanOfWingsOfDragon",
+          "color": "blue"
+        },
+        {
+          "text": "@talismanOfWingsOfDragon",
           "when": ["durability"]
         }
       ],
@@ -3353,19 +4040,14 @@
       },
       "description": [
         {
-          "text": {
-            "en": "Talisman of Wings of Soul",
-            "de": "Talisman der Seelenflügel",
-            "es": "Talismán de Alas del Alma",
-            "id": "Jimat Sayap Jiwa",
-            "ja": "合成成功時、ソウルウイングが生成されます。",
-            "pl": "Talisman of Wings of Soul",
-            "pt": "Talismã das Asas da Alma",
-            "ru": "Талисман Крыльев Души",
-            "tl": "Talisman ng Wings of Soul",
-            "uk": "Талісман Крила Душі",
-            "zh-TW": "靈魂之翼護符"
-          },
+          "text": "@increasesYourLuckToCreateWingOfYourWish"
+        },
+        {
+          "text": "@talismanOfWingsOfSoul",
+          "color": "blue"
+        },
+        {
+          "text": "@talismanOfWingsOfSoul",
           "when": ["durability"]
         }
       ],
@@ -3394,19 +4076,14 @@
       },
       "description": [
         {
-          "text": {
-            "en": "Talisman of Wings of Spirits",
-            "de": "Talisman der Geisterflügel",
-            "es": "Talismán de Alas de Espíritus",
-            "id": "Jimat Sayap Roh",
-            "ja": "合成成功時、ホーリーウイングが生成されます。",
-            "pl": "Talisman of Wings of Spirits",
-            "pt": "Talismã das Asas dos Espíritos",
-            "ru": "Талисман Крыльев Духов",
-            "tl": "Talisman of Wings of Spirits",
-            "uk": "Талісман Крила Духів",
-            "zh-TW": "靈魂之翼護符"
-          },
+          "text": "@increasesYourLuckToCreateWingOfYourWish"
+        },
+        {
+          "text": "@talismanOfWingsOfSpirits",
+          "color": "blue"
+        },
+        {
+          "text": "@talismanOfWingsOfSpirits",
           "when": ["durability"]
         }
       ],
@@ -3435,19 +4112,14 @@
       },
       "description": [
         {
-          "text": {
-            "en": "Talisman of Wing of Despair",
-            "de": "Talisman der Flügel der Verzweiflung",
-            "es": "Talismán del Ala de la Desesperación",
-            "id": "Jimat Sayap Keputusasaan",
-            "ja": "合成成功時、デスペアーウイングが生成されます。",
-            "pl": "Talisman of Wing of Despair",
-            "pt": "Talismã da Asa do Desespero",
-            "ru": "Талисман Крыла Отчаяния",
-            "tl": "Talisman of Wing of Despair",
-            "uk": "Талісман Крила Відчаю",
-            "zh-TW": "絕望之翼護符"
-          },
+          "text": "@increasesYourLuckToCreateWingOfYourWish"
+        },
+        {
+          "text": "@talismanOfWingOfDespair",
+          "color": "blue"
+        },
+        {
+          "text": "@talismanOfWingOfDespair",
           "when": ["durability"]
         }
       ],
@@ -3476,19 +4148,14 @@
       },
       "description": [
         {
-          "text": {
-            "en": "Talisman of Wings of Darkness",
-            "de": "Talisman der Flügel der Dunkelheit",
-            "es": "Talismán de alas de oscuridad",
-            "id": "Jimat Sayap Kegelapan",
-            "ja": "合成成功時、ダークウイングが生成されます。",
-            "pl": "Talisman of Wings of Darkness",
-            "pt": "Talismã das Asas das Trevas",
-            "ru": "Талисман Крыльев Тьмы",
-            "tl": "Talisman of Wings of Darkness",
-            "uk": "Талісман крил темряви",
-            "zh-TW": "黑暗之翼護身符"
-          },
+          "text": "@increasesYourLuckToCreateWingOfYourWish"
+        },
+        {
+          "text": "@talismanOfWingsOfDarkness",
+          "color": "blue"
+        },
+        {
+          "text": "@talismanOfWingsOfDarkness",
           "when": ["durability"]
         }
       ],
@@ -3526,19 +4193,7 @@
           "color": "blue"
         },
         {
-          "text": {
-            "en": "Attack rate and defense rate increase.",
-            "de": "Angriffsrate und Verteidigungsrate erhöhen sich.",
-            "es": "La tasa de ataque y la tasa de defensa aumentan.",
-            "id": "Tingkat serangan dan tingkat pertahanan meningkat.",
-            "ja": "攻撃力と防御力が向上します。",
-            "pl": "Zwiększenie współczynnika ataku i współczynnika obrony.",
-            "pt": "A taxa de ataque e a taxa de defesa aumentam.",
-            "ru": "Увеличивается скорость атаки и защита.",
-            "tl": "Attack rate at defense rate increase.",
-            "uk": "Збільшення швидкості атаки та захисту.",
-            "zh-TW": "攻擊率和防禦率增加。"
-          },
+          "text": "@attackRateAndDefenseRateIncrease",
           "when": ["durability"]
         }
       ],
@@ -4378,6 +5033,27 @@
       "tags": ["cashShop", "noDurabilityLine"],
       "description": [
         {
+          "text": {
+            "en": "Enables entrance into Chaos Castle.",
+            "de": "Ermöglicht den Zugang zu Chaos Castle.",
+            "es": "Permite la entrada a Castillo del Caos.",
+            "id": "Memungkinkan masuk ke Kastil Kekacauan.",
+            "ja": "カオスキャッスル 入場時、決まった回数だけ使えます。",
+            "pl": "Umożliwia wejście do Chaos Castle.",
+            "pt": "Permite a entrada em Castelo do Caos.",
+            "ru": "Позволяет войти в Замок Хаоса.",
+            "tl": "Pinapagana ang pagpasok sa Chaos Castle.",
+            "uk": "Дозволяє вхід у Замок Хаосу.",
+            "zh-TW": "允許進入 混沌城堡。"
+          }
+        },
+        {
+          "text": "@youWillBeAssignedToAStageAccordingToYourLevel"
+        },
+        {
+          "text": "@usableTimes"
+        },
+        {
           "text": "@durability",
           "when": ["!timed"]
         },
@@ -4527,6 +5203,40 @@
         "pt": "Bilhete Ac. a Canal Pago"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "You can enter to Gold Channel.",
+            "de": "Sie können den Gold-Kanal betreten.",
+            "es": "Puedes ingresar al Canal Oro.",
+            "id": "Anda bisa masuk ke Saluran Emas.",
+            "pl": "Możesz wejść do Gold Channel.",
+            "pt": "Você pode entrar no Gold Channel.",
+            "ru": "Вы можете войти в Золотой канал.",
+            "tl": "Maaari kang pumasok sa Gold Channel.",
+            "uk": "Ви можете увійти в Gold Channel.",
+            "zh-TW": "您可以進入黃金通道。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "7 Days until Expiration",
+            "de": "Läuft in 7 Tagen ab",
+            "es": "7 días hasta el vencimiento",
+            "id": "7 Hari hingga Kedaluwarsa",
+            "ja": "使用期間7日",
+            "pl": "7 dni do wygaśnięcia",
+            "pt": "7 dias até a expiração",
+            "ru": "7 дней до истечения срока действия",
+            "tl": "7 Araw bago ang Expiration",
+            "uk": "7 днів до закінчення терміну дії",
+            "zh-TW": "距離到期還有 7 天"
+          },
+          "color": "yellow",
+          "bold": true
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4554,6 +5264,25 @@
       },
       "tags": ["cashShop", "noDurabilityLine"],
       "description": [
+        {
+          "text": {
+            "en": "Enables entrance into Doppelganger.",
+            "de": "Ermöglicht den Zugang zu Doppelgänger.",
+            "es": "Permite la entrada a doble.",
+            "id": "Memungkinkan masuk ke kembaran.",
+            "ja": "次元の狭間 入場時、決まった回数だけ使えます。",
+            "pl": "Umożliwia wejście do Sobowtór.",
+            "pt": "Permite a entrada em Sósia.",
+            "ru": "Позволяет войти в двойник.",
+            "tl": "Pinapagana ang pagpasok sa Doppelganger.",
+            "uk": "Дозволяє вхід у Двійник.",
+            "zh-TW": "允許進入 分身。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": ""
+        },
         {
           "text": "@usableTimes"
         }
@@ -4586,6 +5315,25 @@
       },
       "tags": ["cashShop", "noDurabilityLine"],
       "description": [
+        {
+          "text": {
+            "en": "Enables entrance into Varka.",
+            "de": "Ermöglicht den Zugang zu Varka.",
+            "es": "Permite la entrada a Varka.",
+            "id": "Memungkinkan masuk ke Varka.",
+            "ja": "バルカ要塞 入場時、決まった回数だけ使えます。",
+            "pl": "Umożliwia wejście do Varka.",
+            "pt": "Permite a entrada em Varka.",
+            "ru": "Позволяет войти в Варка.",
+            "tl": "Pinapagana ang pagpasok sa Varka.",
+            "uk": "Дозволяє вхід у Варка.",
+            "zh-TW": "允許進入 瓦爾卡。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": ""
+        },
         {
           "text": "@usableTimes"
         },
@@ -4633,6 +5381,25 @@
       },
       "tags": ["cashShop", "noDurabilityLine"],
       "description": [
+        {
+          "text": {
+            "en": "Enables entrance into Varka Map 7.",
+            "de": "Ermöglicht den Zugang zu Varka Karte 7.",
+            "es": "Permite la entrada a Mapa de Varka 7.",
+            "id": "Memungkinkan masuk ke Peta Varka 7.",
+            "ja": "バルカ要塞 第7要塞 入場時、決まった回数だけ使えます。",
+            "pl": "Umożliwia wejście do Mapa Varki 7.",
+            "pt": "Permite a entrada em Mapa de Varka 7.",
+            "ru": "Позволяет войти в Карта Варки 7.",
+            "tl": "Pinapagana ang pagpasok sa Varka Mapa 7.",
+            "uk": "Дозволяє вхід у Варка Карта 7.",
+            "zh-TW": "允許進入 瓦爾卡地圖 7。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": ""
+        },
         {
           "text": "@usableTimes"
         },

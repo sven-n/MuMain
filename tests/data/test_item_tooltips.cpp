@@ -17,6 +17,7 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"
+#include "GameLogic/Skills/SkillManager.h"
 #include "Network/Server/SocketSystem.h"
 #include "Core/Utilities/_GlobalFunctions.h"
 #include "UI/Core/UIManager.h"
@@ -525,6 +526,27 @@ TEST_CASE("An item's add option values come from its add option [data][items][to
     CHECK(Engine::Items::TooltipValues::GetItemTooltipText(values, "addOptionDuration") == values.addOptionDuration);
 }
 
+TEST_CASE("The Weapon of Archangel shows its reward weapon's skill mana from the skill data [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeNewDarkWizard(hero.Hero());
+    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+
+    int mana = 0;
+    gSkillManager.GetSkillInformation(AT_SKILL_CYCLONE, 1, nullptr, &mana, nullptr);
+    REQUIRE(mana > 0);
+    ItemCreationParams params = Engine::Items::TooltipSnapshot::FullItemParameters(13, 19);
+    params.Level = 1;
+    const std::vector<ItemTooltipLine> lines = Engine::Items::TooltipSnapshot::TooltipOfParameters(params);
+    SetItemTooltipTextMeasure(nullptr);
+    const std::wstring expected = L"Cyclone Cutting skill (Mana:" + std::to_wstring(mana) + L")";
+    CHECK(std::any_of(lines.begin(), lines.end(), [&](const ItemTooltipLine& line) { return line.text == expected; }));
+}
+
 TEST_CASE("A class condition holds for a hero of that class [data][items][tooltip]")
 {
     TooltipHeroScope hero;
@@ -545,4 +567,47 @@ TEST_CASE("A class condition holds for a hero of that class [data][items][toolti
     // A Lord Emperor is a Dark Lord too.
     ::Hero->Class = CLASS_LORDEMPEROR;
     CHECK(Engine::Items::TooltipValues::AreTooltipConditionsMet(conditions, 0, 0, values));
+}
+
+// The second chain's cases with conditions, as the tooltip shows them: the Command Fruit's class line, white for a
+// Dark Lord and dark red for the other classes, and the Wizard's Ring's lines by its level.
+TEST_CASE("The Command Fruit's class line and the Wizard's Ring's lines follow the hero and the level "
+          "[data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+
+    ItemCreationParams fruit = Engine::Items::TooltipSnapshot::FullItemParameters(13, 15);
+    fruit.Level = 4;
+    ::Hero->Class = CLASS_DARK_LORD;
+    CHECK(HasLine(Engine::Items::TooltipSnapshot::TooltipOfParameters(fruit), L"Can be equipped by Dark Lord", TEXT_COLOR_WHITE));
+    ::Hero->Class = CLASS_LORDEMPEROR;
+    CHECK(HasLine(Engine::Items::TooltipSnapshot::TooltipOfParameters(fruit), L"Can be equipped by Dark Lord", TEXT_COLOR_WHITE));
+    ::Hero->Class = CLASS_WIZARD;
+    CHECK(HasLine(Engine::Items::TooltipSnapshot::TooltipOfParameters(fruit), L"Can be equipped by Dark Lord", TEXT_COLOR_DARKRED));
+
+    // The Wizard's Ring: +0 and +3 can't be repaired and show their durability; +1 and +2 are the event rings, which
+    // say instead when they can be dropped and that they can't be stored, traded or sold.
+    for (const int level : {0, 1, 2, 3})
+    {
+        INFO("+" << level);
+        ItemCreationParams ring = Engine::Items::TooltipSnapshot::FullItemParameters(13, 20);
+        ring.Level = static_cast<BYTE>(level);
+        const std::vector<ItemTooltipLine> lines = Engine::Items::TooltipSnapshot::TooltipOfParameters(ring);
+        const bool eventRing = level == 1 || level == 2;
+        CHECK(HasLine(lines, L"Cannot Repair", TEXT_COLOR_RED) == !eventRing);
+        CHECK(std::any_of(lines.begin(), lines.end(),
+                          [](const ItemTooltipLine& line) { return line.text.starts_with(L"Durability:"); }) ==
+              !eventRing);
+        CHECK(HasLine(lines, L"Can be dropped after level 40") == (level == 1));
+        CHECK(HasLine(lines, L"Can be dropped after level 80") == (level == 2));
+        CHECK(HasLine(lines, L"Cannot be sold.", TEXT_COLOR_RED) == eventRing);
+    }
+
+    SetItemTooltipTextMeasure(nullptr);
 }
