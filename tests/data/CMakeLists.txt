@@ -60,6 +60,8 @@ mu_add_test(
     NAME monster_data_tests
     SOURCES
         test_legacy_monster_kind.cpp
+        test_monster_attack_checks.cpp
+        test_monster_attack_readers.cpp
         test_monster_attacks.cpp
         test_monster_browser_window.cpp
         test_monster_check_targets.cpp

@@ -4,6 +4,8 @@
 
 #include "MonsterChecks.h"
 
+#include "MonsterAttackChecks.h"
+
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 
 namespace MuEditor::Monsters::MonsterChecks
@@ -14,6 +16,7 @@ void Run(std::vector<Data::Items::ItemDataIssue>& issues)
     // that differs from them is a choice (566 and 567 are NPCs), not a problem.
     g_MonsterDataHandler.Validate(issues);
     g_MonsterDataHandler.ValidateModels(issues);
+    AttackChecks::Validate(issues);
 }
 } // namespace MuEditor::Monsters::MonsterChecks
 

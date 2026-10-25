@@ -32,6 +32,7 @@ inline constexpr char MonsterTranslations[] = "###MonsterTranslations";
 inline constexpr char MonsterChecks[] = "###MonsterChecks";
 inline constexpr char MonsterModel[] = "###MonsterModel";
 inline constexpr char MonsterPreview[] = "###MonsterPreview";
+inline constexpr char MonsterAttacks[] = "###MonsterAttacks";
 // Titles that are not translated: the whole title is the name.
 inline constexpr char MapEditor[] = "Map Editor";
 inline constexpr char Console[] = "Console";

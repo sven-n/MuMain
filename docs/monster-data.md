@@ -24,7 +24,7 @@ Design and plans: [monsters design](superpowers/specs/2026-10-23-data-driven-mon
 
 | File | What |
 |---|---|
-| `Monsters.json` | The monsters and NPCs: number, names, kind and model |
+| `Monsters.json` | The monsters and NPCs: number, names, kind, model and attacks |
 | `Models.json` | The monster and NPC models, see [Models](#models) |
 
 ```json
@@ -51,7 +51,7 @@ Design and plans: [monsters design](superpowers/specs/2026-10-23-data-driven-mon
   sends when a monster or NPC appears (packet 0x13 has 10 bits for it). Each
   number has at most one entry.
 - Every entry has `number`, `name` and `kind`; `model` may be left out (every
-  shipped entry has it).
+  shipped entry has it), and so may `attacks`.
 - Monsters are sorted by number and the fields always come in the same
   order, so saving unchanged data gives the same file (a test checks that
   the shipped file is written this way).
@@ -66,6 +66,7 @@ Design and plans: [monsters design](superpowers/specs/2026-10-23-data-driven-mon
 | `name` | The names by language, see [Names and translations](#names-and-translations) |
 | `kind` | `monster`, `npc`, `trap` or `other`: what the game does with it, see [Kinds](#kinds) |
 | `model` | The model it appears with: a slot of the model list (`MONSTER_MODEL_HOUND`, `MODEL_SMITH`), `player` (a player-shaped monster: the player model with class and items), `MODEL_WARCRAFT` or `MODEL_BALL` (models of other areas: the Kalima gates, the soccer ball), or `mapObject <number>` (a map object, a trap). The code still chooses the model; the field says which one, for the tools |
+| `attacks` | Which animation the monster plays for the skill it attacks with, see [Attacks](#attacks); left out: attack 1, attack 2, attack 2 |
 
 ### Names and translations
 
@@ -242,6 +243,72 @@ and the game keeps running; the file is logged and listed by Monster Checks.
 Molt's `Data/Monster/Monster50.bmd` is missing, here and in the original
 client (OpenMU has no monster 68).
 
+## Attacks
+
+A monster entry's `attacks` say which animation the monster plays for the
+skill it attacks with (Selupan's):
+
+```json
+"attacks": {
+  "monsterSkills": {"34": "attack2", "35": "attack1", "36": "attack3", "37": "appear", "41": "none"},
+  "otherwise": "attack4",
+  "clearSkill": "afterAttack"
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `monsterSkills` | The monster skills (packet 0x69) and the animation each plays |
+| `skills` | The player skills (packets 0x19 and 0x1E) and the animation each plays |
+| `otherwise` | What any other skill, a stale skill or a normal attack plays; `attack1` when left out |
+| `otherwiseRandom` | In place of `otherwise`, a draw of the original client: `rand` (attack 1 or 2, half and half), `randFps` (attack 1 or 2 with a chance that depends on the frame rate) or `bali` (Bali's draw of attack 1 to 4) |
+| `clearSkill` | When the monster skill is cleared: `never` (when left out), `onMatch` (an entry named it), `onNoMatch` (no entry named it), `always` (right after the animation was chosen) or `afterAttack` (when the attack's animation ends) |
+
+An animation is a name of the model's animations (`attack1` to `attack5`,
+`appear`, `shock`, `stop2`, …) or `none`: the animation that plays goes on.
+The monster skill's entry comes first, then the player skill's, else
+`otherwise`. The player skill is never cleared.
+
+### When the game plays an attack
+
+What the server sends:
+
+- **0x18** (a normal attack) plays an attack.
+- **0x69** (a monster skill) stores the monster skill and plays an attack
+  for the skills 1 to 77 (`ATMON_SKILL_END`); others it only stores.
+- **0x19** (a player skill) stores the player skill and plays an attack only
+  for some skills (200 to 202, the Lightning to Flame group, Fire Slash,
+  Party Teleport, Chaotic Diseier). Heals and buffs play attack 1, attack 2,
+  attack 2 without the attacks; other skills play nothing. A player skill's
+  entry then plays on the next 0x18, which reads the stored skill.
+- **0x1E** (an area skill) stores the player skill and plays an attack.
+
+Playing an attack (`SetPlayerAttack`) for a monster:
+
+1. A player-shaped monster (model `player`) plays a player attack chosen
+   from its equipment; its `attacks` do nothing.
+2. The traps (`mapObject 39`, `40` and `51`) play their `attacks` and their
+   effects and sounds; Bali plays its `attacks` (its draw).
+3. Else the map handlers are asked in a row, each for the monsters and maps
+   it knows: Hellas (any map), the Battle Castle guards (by model, any map),
+   the Hunting Ground, Aida, Crywolf and Devil Square, Kanturu 1st, 2nd and
+   3rd, the Balgass barracks and refuge, Illusion Temple, the Swamp of Quiet
+   (by model), Raklion, and Empire Guardian 1 to 4. A handler that answers
+   for the monster plays its `attacks` and keeps what its code adds: the
+   guards' AI, Maya's scene, Selupan's height, sounds and effects, and the
+   rage of the Empire Guardian bosses (in a rage a boss plays appear).
+4. If none answered, the generic pattern plays: attack 1, attack 2, attack 2
+   by a count of the character.
+
+So `attacks` work where a handler answers for the monster: the Monster
+Attacks tool says which one, and Monster Checks lists the attacks no handler
+reads (a monster moved to another model loses a model-keyed handler).
+
+The game counts only attack 1 and attack 2 as attacks: a hit plays shock
+over any other animation, and only they have a hit frame. After appear, only
+Maya's hands and Selupan go back to stop1; other models play it again
+until their next action. Monster Checks warns about both.
+
 ## Loading and errors
 
 At startup `Data/Monsters/Monsters.json` is read and checked, and after the
@@ -292,7 +359,8 @@ ctest --test-dir <build folder> --build-config Debug -R monster --output-on-fail
 
 The monster tools (editor builds, F12, **Windows → Monsters**) edit the
 monsters of the running game: **Monster Browser**, **Monster Model**,
-**Monster Preview**, **Monster Translations** and **Monster Checks**. They
+**Monster Preview**, **Monster Attacks**, **Monster Translations** and
+**Monster Checks**. They
 share one selected monster: selecting it in one tool shows it in the others.
 In the first layout (also after **Windows > Reset Layout**) the Monster
 Browser is a tab beside the Item Browser and the others are tabs beside the
@@ -365,17 +433,38 @@ item tools.
   slider, and the line under it says what the game adds. **The game's speed
   factors** plays them (**As a transformed player** too). The preview is
   only in the editor's window.
+- **Monster Attacks**: the [attacks](#attacks) of the selected monster, and
+  the handlers that read them, with their maps (or that none does). **Add
+  attacks** gives a monster without them attacks that play attack 1;
+  **Remove the attacks** gives it the generic pattern again. Each table
+  (monster skills, player skills) has a row per skill with its animation and
+  **Remove**, and a number field with **Add**; a monster skill that 0x69
+  plays no attack for is marked. **Any other attack** is an animation or a
+  draw, and **Clear the monster skill** says when the skill is cleared. The
+  animations offered are those of the open model with a speed above 0 (the
+  tool opens it); while it is not open, stop1 to attack5. Each change is one
+  undo step and reaches the monsters' next attack. A player-shaped monster
+  shows a note instead.
 - **Monster Checks**: the checks of loading and saving, run on the monsters
   and models as they are now: a name with `||` or a language code that is not one
   (errors), an empty English name, a name longer than 64 characters and a
   name in a language the game has no UI texts for (warnings), and the checks
   of the model list's load (a model or part file that is not in the client
-  folder is a warning). With the shipped lists it shows two warnings, 252's
-  empty name and Molt's missing file. The checks run when
+  folder is a warning), and the checks of the attacks (warnings): attacks
+  that no handler reads or of a player-shaped monster, a monster skill that
+  0x69 plays no attack for, and each animation the attacks can play that the
+  open model lacks, whose speed is 0, after which the model does not go back
+  to stop1, or that is not attack 1 or 2 (see [Attacks](#attacks)). With the
+  shipped lists it shows 46 warnings: 252's empty name, Molt's missing file,
+  and 44 of the attacks, among them five animations of Empire Guardian bosses
+  that stand still (speed 0: appear of Destler, Kato, Galia and the Cavalry
+  Captain, and the Cavalry Captain's attack3), as in the original client.
+  The checks run when
   the window is first shown and on **Check**; after a change the window says
   that the monsters changed since the last check. Errors come first, and
   each kind can be hidden with its box. A click on a problem selects the
-  monster and opens the tool of its field (Monster Translations for a name);
+  monster and opens the tool of its field (Monster Translations for a name,
+  Monster Attacks for the attacks);
   an arrow key onto it only selects the monster. There is no check of the
   kind: a kind that differs from the old rules (566, 567) is not a problem.
 

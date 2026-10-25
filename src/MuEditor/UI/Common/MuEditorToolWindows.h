@@ -25,6 +25,7 @@ struct ToolWindows
     bool monsterChecks = false;
     bool monsterModel = false;
     bool monsterPreview = false;
+    bool monsterAttacks = false;
     bool serverList = false;
     bool skillEditor = false;
     bool devEditor = false;

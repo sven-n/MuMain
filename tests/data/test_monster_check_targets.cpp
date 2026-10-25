@@ -139,6 +139,16 @@ TEST_CASE("Monster checks: the tools of the targets are the monster tools' windo
     CHECK(std::string_view(GetToolWindow(MonsterTool::Translations).windowId) ==
           MuEditor::WindowIds::MonsterTranslations);
     CHECK(GetToolWindow(MonsterTool::Translations).open == &MuEditor::ToolWindows::monsterTranslations);
+    CHECK(std::string_view(GetToolWindow(MonsterTool::Attacks).windowId) == MuEditor::WindowIds::MonsterAttacks);
+    CHECK(GetToolWindow(MonsterTool::Attacks).open == &MuEditor::ToolWindows::monsterAttacks);
+}
+
+TEST_CASE("Monster checks: the attacks go to Monster Attacks [editor][monsters]")
+{
+    CHECK(GetToolForField("monster 459 attacks") == MonsterTool::Attacks);
+    CHECK(GetToolForField("monster 459 attacks.monsterSkills") == MonsterTool::Attacks);
+    CHECK(GetToolForField("attacks") == MonsterTool::Attacks);
+    CHECK(GetToolForField("monster 459 attackSpeed") == MonsterTool::Browser);
 }
 
 TEST_CASE("Monster checks: Run finds the name problems of the table and sends them to Monster Translations "

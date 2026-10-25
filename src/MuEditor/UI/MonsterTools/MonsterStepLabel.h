@@ -19,6 +19,8 @@ std::string Remove(const Data::Monsters::MonsterDefinition& monster);
 std::string Kind(const Data::Monsters::MonsterDefinition& monster);
 // The name in one language.
 std::string Name(const Data::Monsters::MonsterDefinition& monster, const char* locale);
+// The attacks of a monster: "Ice Walker (456): attacks".
+std::string Attacks(const Data::Monsters::MonsterDefinition& monster);
 // A change of a model entry: "MONSTER_MODEL_HOUND: speed of walk".
 std::string Model(const std::string& slot, const std::string& what);
 } // namespace MuEditor::Monsters::StepLabel

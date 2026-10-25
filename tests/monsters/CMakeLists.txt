@@ -13,6 +13,7 @@ mu_add_test(
         test_monster_slot_sounds.cpp
         test_monster_model_changes.cpp
         test_monster_attacks_play.cpp
+        test_monster_attack_models.cpp
         test_monster_creation_models.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS

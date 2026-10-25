@@ -27,9 +27,10 @@ const std::array<ToolWindowEntry, 10> ItemToolEntries = {{
     {WindowIds::ItemTranslations, &I18N::Editor::ItemTranslations, &ToolWindows::itemTranslations},
 }};
 
-const std::array<ToolWindowEntry, 4> MonsterToolEntries = {{
+const std::array<ToolWindowEntry, 5> MonsterToolEntries = {{
     {WindowIds::MonsterModel, &I18N::Editor::MonsterModel, &ToolWindows::monsterModel},
     {WindowIds::MonsterPreview, &I18N::Editor::MonsterPreview, &ToolWindows::monsterPreview},
+    {WindowIds::MonsterAttacks, &I18N::Editor::MonsterAttacks, &ToolWindows::monsterAttacks},
     {WindowIds::MonsterTranslations, &I18N::Editor::MonsterTranslations, &ToolWindows::monsterTranslations},
     {WindowIds::MonsterChecks, &I18N::Editor::MonsterChecks, &ToolWindows::monsterChecks},
 }};

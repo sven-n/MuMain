@@ -2551,4 +2551,142 @@
   <data name="Weapon bones" xml:space="preserve">
     <value>Waffenknochen</value>
   </data>
+  <data name="Monster Attacks" xml:space="preserve">
+    <value>Monsterangriffe</value>
+  </data>
+  <data name="No animation" xml:space="preserve">
+    <value>(keine)</value>
+  </data>
+  <data name="Random attack 1 or 2" xml:space="preserve">
+    <value>Angriff 1 oder 2 zufällig (rand)</value>
+  </data>
+  <data name="Random attack 1 or 2 by frame rate" xml:space="preserve">
+    <value>Angriff 1 oder 2, mit einer von der Bildrate abhängigen Chance (randFps)</value>
+  </data>
+  <data name="Random Balis draw" xml:space="preserve">
+    <value>Balis Ziehung von Angriff 1 bis 4 (bali)</value>
+  </data>
+  <data name="Clear skill never" xml:space="preserve">
+    <value>nie (never)</value>
+  </data>
+  <data name="Clear skill on match" xml:space="preserve">
+    <value>wenn ein Eintrag ihn nannte (onMatch)</value>
+  </data>
+  <data name="Clear skill on no match" xml:space="preserve">
+    <value>wenn kein Eintrag ihn nannte (onNoMatch)</value>
+  </data>
+  <data name="Clear skill always" xml:space="preserve">
+    <value>immer, sofort (always)</value>
+  </data>
+  <data name="Clear skill after attack" xml:space="preserve">
+    <value>wenn die Animation des Angriffs endet (afterAttack)</value>
+  </data>
+  <data name="Reader Hellas" xml:space="preserve">
+    <value>der Hellas-Handler, auf jeder Karte</value>
+  </data>
+  <data name="Reader Battle Castle guards" xml:space="preserve">
+    <value>der Battle-Castle-Handler, nach den Modellen der Wachen, auf jeder Karte</value>
+  </data>
+  <data name="Reader Hunting Ground" xml:space="preserve">
+    <value>der Hunting-Ground-Handler, auf seiner Karte</value>
+  </data>
+  <data name="Reader Aida" xml:space="preserve">
+    <value>der Aida-Handler, in Aida</value>
+  </data>
+  <data name="Reader Crywolf and Devil Square" xml:space="preserve">
+    <value>der Crywolf-Handler, in Crywolf und im Devil Square</value>
+  </data>
+  <data name="Reader Kanturu 1st" xml:space="preserve">
+    <value>der Kanturu-1-Handler, in Kanturu 1</value>
+  </data>
+  <data name="Reader Kanturu 2nd and 3rd" xml:space="preserve">
+    <value>der Kanturu-2-Handler, in Kanturu 2 und 3</value>
+  </data>
+  <data name="Reader Kanturu 3rd" xml:space="preserve">
+    <value>der Kanturu-3-Handler, in Kanturu 3</value>
+  </data>
+  <data name="Reader Balgass barracks" xml:space="preserve">
+    <value>der Handler der Balgass-Kaserne, in der Kaserne und der Zuflucht</value>
+  </data>
+  <data name="Reader Illusion Temple" xml:space="preserve">
+    <value>der Illusion-Temple-Handler, im Illusion Temple</value>
+  </data>
+  <data name="Reader Swamp of Quiet" xml:space="preserve">
+    <value>der Handler des Swamp of Quiet, nach den Modellen, auf seiner Karte</value>
+  </data>
+  <data name="Reader Raklion" xml:space="preserve">
+    <value>der Raklion-Handler, in Raklion und auf seiner Bosskarte</value>
+  </data>
+  <data name="Reader Empire Guardian" xml:space="preserve">
+    <value>der Empire-Guardian-Handler, auf den vier Empire-Guardian-Karten</value>
+  </data>
+  <data name="Reader Empire Guardian 2" xml:space="preserve">
+    <value>der Handler von Empire Guardian 2, auf seiner Karte</value>
+  </data>
+  <data name="Reader Empire Guardian 3" xml:space="preserve">
+    <value>der Handler von Empire Guardian 3, auf seiner Karte</value>
+  </data>
+  <data name="Reader Empire Guardian 4" xml:space="preserve">
+    <value>der Handler von Empire Guardian 4, auf seiner Karte</value>
+  </data>
+  <data name="Reader traps" xml:space="preserve">
+    <value>SetPlayerAttack, nach den Fallenmodellen; ihre Effekte und Geräusche bleiben Code</value>
+  </data>
+  <data name="Reader Bali" xml:space="preserve">
+    <value>SetPlayerAttack, nach Balis Modell</value>
+  </data>
+  <data name="Player shaped monsters choose a player attack" xml:space="preserve">
+    <value>Ein Monster in Spielergestalt wählt einen Spielerangriff nach seiner Ausrüstung; Angriffe gelten für es nicht.</value>
+  </data>
+  <data name="The monster has no attacks; it plays the generic pattern." xml:space="preserve">
+    <value>Das Monster hat keine Angriffe: Es spielt Angriff 1, Angriff 2, Angriff 2 (das allgemeine Muster).</value>
+  </data>
+  <data name="Add attacks" xml:space="preserve">
+    <value>Angriffe hinzufügen</value>
+  </data>
+  <data name="Monster skills" xml:space="preserve">
+    <value>Monsterskills (0x69)</value>
+  </data>
+  <data name="Player skills" xml:space="preserve">
+    <value>Spielerskills (0x19, 0x1E)</value>
+  </data>
+  <data name="Any other attack" xml:space="preserve">
+    <value>Jeder andere Angriff</value>
+  </data>
+  <data name="Remove the attacks" xml:space="preserve">
+    <value>Angriffe entfernen</value>
+  </data>
+  <data name="No code reads these attacks." xml:space="preserve">
+    <value>Kein Handler liest diese Angriffe: Sie bewirken nichts, bis Code sie liest.</value>
+  </data>
+  <data name="Read by" xml:space="preserve">
+    <value>Gelesen von:</value>
+  </data>
+  <data name="Monster skills note" xml:space="preserve">
+    <value>Der Monsterskill von Paket 0x69; das Spiel spielt einen Angriff für die Skills 1 bis 77.</value>
+  </data>
+  <data name="Player skills note" xml:space="preserve">
+    <value>Der Spielerskill der Pakete 0x19 und 0x1E: 0x1E spielt den Angriff sofort; nach 0x19 spielen die meisten Skills beim nächsten normalen Angriff (0x18), der den gespeicherten Skill liest.</value>
+  </data>
+  <data name="The game does not play an attack for this skill." xml:space="preserve">
+    <value>Paket 0x69 spielt für diesen Skill keinen Angriff</value>
+  </data>
+  <data name="Add monster skill" xml:space="preserve">
+    <value>Hinzufügen</value>
+  </data>
+  <data name="Add player skill" xml:space="preserve">
+    <value>Hinzufügen</value>
+  </data>
+  <data name="An animation" xml:space="preserve">
+    <value>Eine Animation</value>
+  </data>
+  <data name="A draw" xml:space="preserve">
+    <value>Eine Ziehung</value>
+  </data>
+  <data name="Clear the monster skill" xml:space="preserve">
+    <value>Monsterskill löschen</value>
+  </data>
+  <data name="Step attacks" xml:space="preserve">
+    <value>{0}: Angriffe</value>
+  </data>
 </root>

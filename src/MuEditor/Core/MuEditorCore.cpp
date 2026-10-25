@@ -35,6 +35,7 @@
 #include "../MuEditor/UI/EffectBrowser/MuEffectBrowserUI.h"
 #include "../MuEditor/UI/ItemTranslations/MuItemTranslationsUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterBrowserUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterAttacksUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterChecksUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterModelUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterPreviewUI.h"
@@ -640,6 +641,10 @@ void CMuEditorCore::RenderMonsterTools()
     if (m_windows.monsterPreview)
     {
         g_MuMonsterPreviewUI.Render(&m_windows.monsterPreview);
+    }
+    if (m_windows.monsterAttacks)
+    {
+        g_MuMonsterAttacksUI.Render(&m_windows.monsterAttacks);
     }
     if (m_windows.monsterTranslations)
     {

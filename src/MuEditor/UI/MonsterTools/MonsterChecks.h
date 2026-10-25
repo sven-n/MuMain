@@ -11,8 +11,9 @@
 // empty English name, the length the game holds) and names in a language the
 // game has no texts for; and the checks of the model list's load
 // (MonsterDataHandler::ValidateModels), among them the model files that are
-// not in the client folder (a monster without a body, P1). The checks of
-// later monster fields go here too.
+// not in the client folder (a monster without a body, P1); and the checks of
+// the monsters' attacks (MonsterAttackChecks). The checks of later monster
+// fields go here too.
 namespace MuEditor::Monsters::MonsterChecks
 {
 // Appends the problems of the monster and model tables as they are now to

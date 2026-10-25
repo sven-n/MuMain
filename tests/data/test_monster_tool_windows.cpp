@@ -7,8 +7,10 @@
 #include "TestImGuiContext.h"
 #include "ToolWindowsScope.h"
 
+#include "Core/Globals/_define.h"
 #include "Core/Globals/_enum.h"
 #include "Core/MuEditorCore.h"
+#include "Data/GameData/MonsterData/MonsterAttacks.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "UI/Common/MuEditorLayout.h"
@@ -19,6 +21,7 @@
 #include "UI/MonsterTools/MonsterEdits.h"
 #include "UI/MonsterTools/MonsterSelection.h"
 #include "UI/MonsterTools/MonsterToolWindow.h"
+#include "UI/MonsterTools/MuMonsterAttacksUI.h"
 #include "UI/MonsterTools/MuMonsterBrowserUI.h"
 #include "UI/MonsterTools/MuMonsterChecksUI.h"
 #include "UI/MonsterTools/MuMonsterModelUI.h"
@@ -51,6 +54,7 @@ void RenderMonsterTools()
     g_MuMonsterBrowserUI.Render(&open);
     g_MuMonsterModelUI.Render(&open);
     g_MuMonsterPreviewUI.Render(&open);
+    g_MuMonsterAttacksUI.Render(&open);
     g_MuMonsterTranslationsUI.Render(&open);
     g_MuMonsterChecksUI.Render(&open);
 }
@@ -98,6 +102,56 @@ TEST_CASE("The monster tools draw their frames without ImGui errors [editor][mon
     CHECK(ImGui::FindWindowByName(WindowIds::MonsterChecks) != nullptr);
     CHECK(ImGui::FindWindowByName(WindowIds::MonsterModel) != nullptr);
     CHECK(ImGui::FindWindowByName(WindowIds::MonsterPreview) != nullptr);
+    CHECK(ImGui::FindWindowByName(WindowIds::MonsterAttacks) != nullptr);
+}
+
+// Monster Attacks with attacks of each kind (skill tables, a draw, a skill
+// 0x69 plays no attack for), a monster without attacks, a player-shaped one
+// and one that no handler reads. The test binary opens no models: the tool
+// offers the named animations.
+TEST_CASE("The Monster Attacks window draws attacks without ImGui errors and stores nothing [editor][monsters]")
+{
+    MonsterDefinition selupan = Monster(MONSTER_SELUPAN, "Selupan");
+    selupan.model = "MONSTER_MODEL_SELUPAN";
+    selupan.attacks.emplace();
+    selupan.attacks->monsterSkills = {
+        {34, MONSTER01_ATTACK2}, {41, Data::Monsters::NoAttackAnimation}, {90, MONSTER01_APEAR}};
+    selupan.attacks->skills = {{12, MONSTER01_ATTACK3}};
+    selupan.attacks->otherwise = MONSTER01_ATTACK4;
+    selupan.attacks->clearSkill = Data::Monsters::MonsterSkillClear::AfterAttack;
+    MonsterDefinition bali = Monster(MONSTER_BALI, "Bali");
+    bali.model = "MONSTER_MODEL_BALI";
+    bali.attacks.emplace();
+    bali.attacks->otherwiseRandom = Data::Monsters::MonsterAttackRandom::Bali;
+    MonsterDefinition budge = Monster(2, "Budge Dragon");
+    budge.model = "MONSTER_MODEL_BUDGE_DRAGON";
+    budge.attacks.emplace();
+    MonsterDefinition player = Monster(4, "Guard");
+    player.model = "player";
+    MonsterDefinition hound = Monster(3, "Hound");
+    hound.model = "MONSTER_MODEL_HOUND";
+    const std::array monsters = {budge, hound, player, bali, selupan};
+    g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterEdits.GetHistory().Clear();
+    TestImGuiContext context;
+
+    constexpr int Frames = 5;
+    for (const int number : std::array<int, 7>{MONSTER_SELUPAN, MONSTER_BALI, 2, 3, 4, 76, MonsterSelection::NoMonster})
+    {
+        g_MonsterSelection.Select(number);
+        for (int frame = 0; frame < Frames; ++frame)
+        {
+            ImGui::NewFrame();
+            bool open = true;
+            g_MuMonsterAttacksUI.Render(&open);
+            ImGui::Render();
+            INFO("monster " << number << ", frame " << frame);
+            CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+        }
+    }
+    CHECK(g_MonsterDatabase.Find(MONSTER_SELUPAN)->attacks == selupan.attacks);
+    CHECK_FALSE(g_MonsterDatabase.Find(3)->attacks.has_value());
+    CHECK_FALSE(g_MonsterEdits.GetHistory().CanUndo());
 }
 
 // The model tools with a monster whose model has an entry with sounds and
@@ -154,9 +208,9 @@ TEST_CASE("The first layout docks the monster browser beside the item browser, i
         BeginEditorWindow();
         MuEditor::Layout::SubmitDockSpace(false);
         ImGui::End();
-        for (const char* window :
-             {WindowIds::ItemBrowser, WindowIds::ItemBasics, WindowIds::MonsterBrowser, WindowIds::MonsterModel,
-              WindowIds::MonsterPreview, WindowIds::MonsterTranslations, WindowIds::MonsterChecks})
+        for (const char* window : {WindowIds::ItemBrowser, WindowIds::ItemBasics, WindowIds::MonsterBrowser,
+                                   WindowIds::MonsterModel, WindowIds::MonsterPreview, WindowIds::MonsterAttacks,
+                                   WindowIds::MonsterTranslations, WindowIds::MonsterChecks})
         {
             ImGui::Begin(window);
             ImGui::End();
@@ -172,6 +226,7 @@ TEST_CASE("The first layout docks the monster browser beside the item browser, i
     CHECK(DockIdOf(WindowIds::MonsterChecks) == DockIdOf(WindowIds::ItemBasics));
     CHECK(DockIdOf(WindowIds::MonsterModel) == DockIdOf(WindowIds::ItemBasics));
     CHECK(DockIdOf(WindowIds::MonsterPreview) == DockIdOf(WindowIds::ItemBasics));
+    CHECK(DockIdOf(WindowIds::MonsterAttacks) == DockIdOf(WindowIds::ItemBasics));
     CHECK(DockIdOf(WindowIds::MonsterBrowser) != DockIdOf(WindowIds::ItemBasics));
 }
 
