@@ -11,12 +11,14 @@
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "Data/GameData/MonsterData/MonsterSoundIds.h"
+#include "Engine/Object/MonsterSlotSound.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "World/MapInfra/MapManager.h"
 
 #include <algorithm>
 #include <cstring>
+#include <iterator>
 #include <optional>
 #include <string>
 #include <vector>
@@ -195,8 +197,13 @@ short SlotValue(const MonsterModelDefinition& model, const std::string& value)
     return id ? static_cast<short>(*id - SOUND_MONSTER) : -1;
 }
 
+// The entry's sound slots. Without slots in the entry, every slot has no
+// sound: a slot keeps no 0, which is the Bull Fighter's first sound
+// (SOUND_MONSTER), so a model without slots played it where it was loaded
+// (P9).
 void SetSoundSlots(BMD& target, const MonsterModelDefinition& model)
 {
+    std::fill(std::begin(target.Sounds), std::end(target.Sounds), Engine::Object::MonsterSlotSound::NoSound);
     if (!model.soundSlots)
     {
         return;
@@ -254,10 +261,11 @@ bool Open(int slot)
     // A model whose file is missing has no body, and the game keeps running
     // (P1): AccessModel logs the file, and Monster Checks lists it.
     OpenFile(slot, model->load.file);
-    // A monster model without meshes gets nothing more; an NPC model still
-    // loads its sounds.
+    // A monster model without meshes gets nothing more, and its sound slots
+    // stay without sounds; an NPC model still loads its sounds.
     if (monsterRange && target.NumMeshs == 0)
     {
+        std::fill(std::begin(target.Sounds), std::end(target.Sounds), Engine::Object::MonsterSlotSound::NoSound);
         return true;
     }
     ApplyTextureNames(target, model->textureNames);
