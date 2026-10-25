@@ -40,6 +40,17 @@ struct SoundEvent
     bool spatial = false;
 };
 
+// One sound played, in the order they came: the object of a 3D sound, else
+// nullptr.
+struct PlayedSound
+{
+    int id = 0;
+    const void* object = nullptr;
+    bool looped = false;
+
+    bool operator==(const PlayedSound&) const = default;
+};
+
 // What one model slot holds.
 struct ModelSlotState
 {
@@ -115,6 +126,9 @@ public:
 
     // What a slot holds now.
     ModelSlotState ReadSlot(int slot) const;
+
+    // The sounds played since the last call.
+    std::vector<PlayedSound> TakePlayedSounds();
 
 private:
     struct State;

@@ -608,7 +608,9 @@
       "model": "mapObject 39",
       "attacks": {
         "otherwise": "none",
-        "clearSkill": "never"
+        "clearSkill": "never",
+        "sound": "SOUND_TRAP01",
+        "soundAtMonster": true
       }
     },
     {
@@ -618,7 +620,9 @@
       "model": "mapObject 40",
       "attacks": {
         "otherwise": "stop2",
-        "clearSkill": "never"
+        "clearSkill": "never",
+        "sound": "SOUND_TRAP01",
+        "soundAtMonster": true
       }
     },
     {
@@ -628,7 +632,8 @@
       "model": "mapObject 51",
       "attacks": {
         "otherwise": "none",
-        "clearSkill": "never"
+        "clearSkill": "never",
+        "sound": "SOUND_FLAME"
       }
     },
     {
@@ -656,7 +661,8 @@
       "model": "mapObject 51",
       "attacks": {
         "otherwise": "none",
-        "clearSkill": "never"
+        "clearSkill": "never",
+        "sound": "SOUND_FLAME"
       }
     },
     {

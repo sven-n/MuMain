@@ -43,6 +43,7 @@ class RecordingAudio final : public mu::IPlatformAudio
 {
 public:
     std::vector<SoundEvent> events;
+    std::vector<PlayedSound> plays;
 
     bool Initialize() override
     {
@@ -53,8 +54,9 @@ public:
     {
         events.push_back({false, static_cast<int>(buffer), filename != nullptr ? filename : L"", channels, enable3D});
     }
-    bool PlaySound(ESound, const void*, bool) override
+    bool PlaySound(ESound buffer, const void* object, bool looped) override
     {
+        plays.push_back({static_cast<int>(buffer), object, looped});
         return true;
     }
     void StopSound(ESound, bool) override {}
@@ -249,6 +251,13 @@ struct LoadScope::State
     int previousWorld = 0;
     std::filesystem::path previousFolder;
 };
+
+std::vector<PlayedSound> LoadScope::TakePlayedSounds()
+{
+    std::vector<PlayedSound> plays = std::move(m_state->audio.plays);
+    m_state->audio.plays.clear();
+    return plays;
+}
 
 LoadScope::LoadScope(int world) : m_state(std::make_unique<State>())
 {

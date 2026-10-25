@@ -53,6 +53,7 @@
 #include "Engine/Object/MonsterModelBody.h"
 #include "Engine/Object/MonsterSlotSound.h"
 #include "GameLogic/Monsters/MonsterAttackPlay.h"
+#include "GameLogic/Monsters/MonsterSoundEvents.h"
 #include "GameLogic/Monsters/MonsterNames.h"
 
 // DevEditor function declarations
@@ -233,6 +234,12 @@ BOOL PlayMonsterSoundGlobal(OBJECT* pObject);
 
 BOOL PlayMonsterSound(OBJECT* pObject)
 {
+    // A model whose entry has sound events plays them; the hooks below play
+    // the others' (monsters design, MN7).
+    if (GameLogic::Monsters::SoundEvents::Play(*pObject))
+    {
+        return TRUE;
+    }
     if (PlayMonsterSoundGlobal(pObject))
     {
         return TRUE;
@@ -1240,20 +1247,24 @@ void SetPlayerAttack(CHARACTER* c)
 
     else if (o->Type == 39)
     {
+        // A trap's attacks play its sound (Q-MN28); without one, the code does.
         GameLogic::Monsters::Attacks::Play(*c, *o);
         CreateEffect(MODEL_SAW, o->Position, o->Angle, o->Light);
-        PlayBuffer(SOUND_TRAP01, o);
+        if (!GameLogic::Monsters::Attacks::PlaysSound(*c))
+            PlayBuffer(SOUND_TRAP01, o);
     }
     else if (o->Type == 40)
     {
         GameLogic::Monsters::Attacks::Play(*c, *o);
-        PlayBuffer(SOUND_TRAP01, o);
+        if (!GameLogic::Monsters::Attacks::PlaysSound(*c))
+            PlayBuffer(SOUND_TRAP01, o);
     }
     else if (o->Type == 51)
     {
         GameLogic::Monsters::Attacks::Play(*c, *o);
         CreateEffect(BITMAP_FIRE + 1, o->Position, o->Angle, o->Light);
-        PlayBuffer(SOUND_FLAME);
+        if (!GameLogic::Monsters::Attacks::PlaysSound(*c))
+            PlayBuffer(SOUND_FLAME);
     }
     else
     {

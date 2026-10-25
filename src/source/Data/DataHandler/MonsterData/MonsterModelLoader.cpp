@@ -186,15 +186,8 @@ short SlotValue(const MonsterModelDefinition& model, const std::string& value)
     {
         return -1;
     }
-    for (const MonsterModelSound& sound : model.sounds)
-    {
-        if ((!sound.id.empty() && sound.id == value) || (sound.id.empty() && sound.file == value))
-        {
-            return static_cast<short>(SoundNumber(sound) - SOUND_MONSTER);
-        }
-    }
-    const std::optional<int> id = FindMonsterSoundId(value);
-    return id ? static_cast<short>(*id - SOUND_MONSTER) : -1;
+    const std::optional<int> number = FindSoundNumber(model, value);
+    return number ? static_cast<short>(*number - SOUND_MONSTER) : -1;
 }
 
 // The entry's sound slots. Without slots in the entry, every slot has no
@@ -277,6 +270,18 @@ bool Open(int slot)
     SetSoundSlots(target, *model);
     LoadBitmaps(*model);
     return true;
+}
+
+std::optional<int> FindSoundNumber(const MonsterModelDefinition& model, const std::string& value)
+{
+    for (const MonsterModelSound& sound : model.sounds)
+    {
+        if ((!sound.id.empty() && sound.id == value) || (sound.id.empty() && sound.file == value))
+        {
+            return static_cast<int>(SoundNumber(sound));
+        }
+    }
+    return FindMonsterSoundId(value);
 }
 
 bool IsOpen(int slot)

@@ -2,9 +2,11 @@
 
 #include "GameLogic/Monsters/MonsterAttackPlay.h"
 
+#include "Audio/DSPlaySound.h"
 #include "Core/Globals/_define.h"
 #include "Data/GameData/MonsterData/MonsterAttacks.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/MonsterSoundIds.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -62,7 +64,17 @@ bool Play(CHARACTER& character, OBJECT& object)
     {
         character.MonsterSkill = -1;
     }
+    if (const std::optional<int> sound = Data::Monsters::FindMonsterSoundId(attacks->sound))
+    {
+        PlayBuffer(static_cast<ESound>(*sound), attacks->soundAtMonster ? &object : nullptr);
+    }
     return true;
+}
+
+bool PlaysSound(const CHARACTER& character)
+{
+    const Data::Monsters::MonsterAttacks* attacks = FindAttacks(character);
+    return attacks != nullptr && !attacks->sound.empty();
 }
 
 void OnAttackEnded(CHARACTER& character)

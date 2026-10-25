@@ -1,6 +1,13 @@
 #pragma once
 
+#include <optional>
+#include <string>
 #include <vector>
+
+namespace Data::Monsters
+{
+struct MonsterModelDefinition;
+}
 
 // Opens monster and NPC models from their entries in the model table
 // (g_MonsterModelDatabase, Data/Monsters/Models.json): the file and its
@@ -15,6 +22,11 @@ bool Open(int slot);
 
 // Whether the slot holds an opened model (meshes or animations).
 bool IsOpen(int slot);
+
+// The number the game plays a sound by that a sound slot or a sound event of
+// the entry names: a sound of the model (by its id, or by its file when it
+// has none), else a SOUND_* id; nullopt when it names neither.
+std::optional<int> FindSoundNumber(const MonsterModelDefinition& model, const std::string& value);
 
 #ifdef _EDITOR
 // Opens the slot's model again from its entry when the game has it open

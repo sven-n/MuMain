@@ -8,9 +8,12 @@ class OBJECT;
 namespace GameLogic::Monsters::Attacks
 {
 // Plays the animation the monster's `attacks` choose for its monster skill and
-// player skill, and clears its monster skill as they say. False, with nothing
-// done, when its entry has no `attacks`.
+// player skill and their sound, and clears its monster skill as they say.
+// False, with nothing done, when its entry has no `attacks`.
 bool Play(CHARACTER& character, OBJECT& object);
+
+// Whether the monster's `attacks` play a sound.
+bool PlaysSound(const CHARACTER& character);
 
 // The attack animation of the character ended: its attacks may clear the
 // monster skill now (clearSkill afterAttack).
