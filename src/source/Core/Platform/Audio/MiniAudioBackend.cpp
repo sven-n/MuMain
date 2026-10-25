@@ -89,7 +89,8 @@ MiniAudioBackend::~MiniAudioBackend()
 {
     if (m_initialized)
     {
-        Shutdown();
+        // Called by name: a destructor never calls an override.
+        MiniAudioBackend::Shutdown();
     }
 }
 
