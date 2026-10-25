@@ -13,6 +13,9 @@ namespace Data::Monsters::ModelLoader
 // entry. The slot must not be open yet (the callers check it).
 bool Open(int slot);
 
+// Whether the slot holds an opened model (meshes or animations).
+bool IsOpen(int slot);
+
 #ifdef _EDITOR
 // Opens the slot's model again from its entry when the game has it open
 // (the monster editor changed the entry, D55), with its parts, also those of

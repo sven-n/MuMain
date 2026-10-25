@@ -2335,4 +2335,187 @@
   <data name="It is in file B more than once" xml:space="preserve">
     <value>Es ist mehrmals in Datei B und wird daher nicht verglichen.</value>
   </data>
+  <data name="And {0} more" xml:space="preserve">
+    <value>und {0} weitere</value>
+  </data>
+  <data name="Animation" xml:space="preserve">
+    <value>Animation</value>
+  </data>
+  <data name="Animations" xml:space="preserve">
+    <value>Animationen</value>
+  </data>
+  <data name="As the file has it" xml:space="preserve">
+    <value>wie in der Datei</value>
+  </data>
+  <data name="Attack sound 1" xml:space="preserve">
+    <value>Angriffsgeräusch 1</value>
+  </data>
+  <data name="Attack sound 2" xml:space="preserve">
+    <value>Angriffsgeräusch 2</value>
+  </data>
+  <data name="Bounding box max" xml:space="preserve">
+    <value>Begrenzungsbox max</value>
+  </data>
+  <data name="Bounding box min" xml:space="preserve">
+    <value>Begrenzungsbox min</value>
+  </data>
+  <data name="Die sound" xml:space="preserve">
+    <value>Todesgeräusch</value>
+  </data>
+  <data name="Fixed bitmaps" xml:space="preserve">
+    <value>Bitmaps in festen Plätzen</value>
+  </data>
+  <data name="Head bone" xml:space="preserve">
+    <value>Kopfknochen</value>
+  </data>
+  <data name="Hit at frame {0}" xml:space="preserve">
+    <value>Treffer bei Bild {0}</value>
+  </data>
+  <data name="Holds last frame" xml:space="preserve">
+    <value>Hält letztes Bild</value>
+  </data>
+  <data name="Idle sound 1" xml:space="preserve">
+    <value>Ruhegeräusch 1</value>
+  </data>
+  <data name="Idle sound 2" xml:space="preserve">
+    <value>Ruhegeräusch 2</value>
+  </data>
+  <data name="In game" xml:space="preserve">
+    <value>Im Spiel</value>
+  </data>
+  <data name="Meshes without blending" xml:space="preserve">
+    <value>Meshes ohne Blending</value>
+  </data>
+  <data name="Monster Model" xml:space="preserve">
+    <value>Monstermodell</value>
+  </data>
+  <data name="Monster range" xml:space="preserve">
+    <value>Monsterbereich</value>
+  </data>
+  <data name="Monster range note" xml:space="preserve">
+    <value>Der Code des Monsterbereichs: Das Modell stirbt mit einer Blutlache und bleibt tot, kehrt nach stop2, shock und Angriffen zu stop1 zurück, trifft bei Angriff 1 und 2 in Bild 5 und wird beim Kartenwechsel freigegeben.</value>
+  </data>
+  <data name="Monsters with the model" xml:space="preserve">
+    <value>Monster mit dem Modell:</value>
+  </data>
+  <data name="More of the model entry" xml:space="preserve">
+    <value>Mehr aus dem Modelleintrag</value>
+  </data>
+  <data name="No monster at this number" xml:space="preserve">
+    <value>Kein Monster unter dieser Nummer</value>
+  </data>
+  <data name="No monster is selected" xml:space="preserve">
+    <value>Kein Monster ausgewählt</value>
+  </data>
+  <data name="No sound" xml:space="preserve">
+    <value>(kein Geräusch)</value>
+  </data>
+  <data name="Not in the client folder" xml:space="preserve">
+    <value>nicht im Client-Ordner</value>
+  </data>
+  <data name="Npc range" xml:space="preserve">
+    <value>NPC-Bereich</value>
+  </data>
+  <data name="Npc range note" xml:space="preserve">
+    <value>Der Code des NPC-Bereichs: keine Blutlache und kein Trefferbild; manche NPCs wählen ihre nächste Animation im Code.</value>
+  </data>
+  <data name="Number of its file" xml:space="preserve">
+    <value>Nummer seiner Datei</value>
+  </data>
+  <data name="Part models" xml:space="preserve">
+    <value>Teilmodelle</value>
+  </data>
+  <data name="Play this sound" xml:space="preserve">
+    <value>Abspielen</value>
+  </data>
+  <data name="Range default" xml:space="preserve">
+    <value>Standard des Bereichs</value>
+  </data>
+  <data name="Search model files" xml:space="preserve">
+    <value>Modelldateien suchen</value>
+  </data>
+  <data name="Sound channels" xml:space="preserve">
+    <value>Kanäle</value>
+  </data>
+  <data name="Sound file" xml:space="preserve">
+    <value>Datei</value>
+  </data>
+  <data name="Sound id" xml:space="preserve">
+    <value>Id</value>
+  </data>
+  <data name="Sound slots note" xml:space="preserve">
+    <value>Die Geräusche, die das Spiel spielt, wenn das Modell steht, geht, angreift, getroffen wird und stirbt; von einem Paar wählt es eines zufällig.</value>
+  </data>
+  <data name="Sounds" xml:space="preserve">
+    <value>Geräusche</value>
+  </data>
+  <data name="Speed" xml:space="preserve">
+    <value>Geschwindigkeit</value>
+  </data>
+  <data name="Speed {0}" xml:space="preserve">
+    <value>×{0}</value>
+  </data>
+  <data name="Speed {0} after frame 6" xml:space="preserve">
+    <value>×{0} nach Bild 6</value>
+  </data>
+  <data name="Speed {0} when transformed" xml:space="preserve">
+    <value>×{0} bei einem verwandelten Spieler</value>
+  </data>
+  <data name="Step model" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
+  <data name="Step what file" xml:space="preserve">
+    <value>Datei</value>
+  </data>
+  <data name="Step what hold of {0}" xml:space="preserve">
+    <value>hält das letzte Bild von {0}</value>
+  </data>
+  <data name="Step what sound slots" xml:space="preserve">
+    <value>Geräuschplätze</value>
+  </data>
+  <data name="Step what speed of {0}" xml:space="preserve">
+    <value>Geschwindigkeit von {0}</value>
+  </data>
+  <data name="Step what texture folders" xml:space="preserve">
+    <value>Texturordner</value>
+  </data>
+  <data name="Stream mesh" xml:space="preserve">
+    <value>Stream-Mesh</value>
+  </data>
+  <data name="Texture folders note" xml:space="preserve">
+    <value>In dieser Reihenfolge gesucht, unter Data/.</value>
+  </data>
+  <data name="Texture folders on maps" xml:space="preserve">
+    <value>Texturordner auf Karten</value>
+  </data>
+  <data name="Texture names by mesh" xml:space="preserve">
+    <value>Texturnamen je Mesh</value>
+  </data>
+  <data name="The file is not in the client folder; the model has no body." xml:space="preserve">
+    <value>Die Datei ist nicht im Client-Ordner; das Modell hat keinen Körper.</value>
+  </data>
+  <data name="The model has a second sound set for SubType 9." xml:space="preserve">
+    <value>Das Modell hat einen zweiten Geräuschsatz, den Monster mit SubType 9 spielen (fünf Nummern weiter); er wird in der Datei bearbeitet.</value>
+  </data>
+  <data name="The model is not open; its animations show when it is." xml:space="preserve">
+    <value>Das Modell ist nicht geöffnet (vielleicht fehlt seine Datei); seine Animationen erscheinen, sobald das Spiel es öffnet.</value>
+  </data>
+  <data name="The model loads no sounds." xml:space="preserve">
+    <value>Das Modell lädt keine Geräusche.</value>
+  </data>
+  <data name="The monster appears with {0}, which is not in the model list." xml:space="preserve">
+    <value>Das Monster erscheint mit {0}, das nicht in der Modellliste steht.</value>
+  </data>
+  <data name="The monster names no model." xml:space="preserve">
+    <value>Das Monster nennt kein Modell.</value>
+  </data>
+  <data name="Then {0}" xml:space="preserve">
+    <value>dann {0}</value>
+  </data>
+  <data name="These values are edited in the file." xml:space="preserve">
+    <value>Diese Werte werden in Data/Monsters/Models.json bearbeitet.</value>
+  </data>
+  <data name="Weapon bones" xml:space="preserve">
+    <value>Waffenknochen</value>
+  </data>
 </root>

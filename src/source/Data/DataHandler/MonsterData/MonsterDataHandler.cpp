@@ -301,6 +301,21 @@ void MonsterDataHandler::ReopenChangedModels()
     {
         m_modelsReopened(reopened);
     }
+
+    std::vector<int> toOpen;
+    toOpen.swap(m_modelsToOpen);
+    for (const int slot : toOpen)
+    {
+        if (!ModelLoader::IsOpen(slot))
+        {
+            ModelLoader::Open(slot);
+        }
+    }
+}
+
+void MonsterDataHandler::OpenModelForTools(int slot)
+{
+    m_modelsToOpen.push_back(slot);
 }
 
 void MonsterDataHandler::NotifyNamesChanged(int number) const

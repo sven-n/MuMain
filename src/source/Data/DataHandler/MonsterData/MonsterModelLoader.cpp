@@ -279,19 +279,25 @@ bool Open(int slot)
     return true;
 }
 
+bool IsOpen(int slot)
+{
+    if (Models == nullptr || (!IsMonsterRangeSlot(slot) && !IsNpcRangeSlot(slot)))
+    {
+        return false;
+    }
+    const BMD& model = Models[slot];
+    return model.NumActions > 0 || model.NumMeshs > 0;
+}
+
 #ifdef _EDITOR
 std::vector<int> Reopen(int slot)
 {
     std::vector<int> reopened;
-    if (Models == nullptr || (!IsMonsterRangeSlot(slot) && !IsNpcRangeSlot(slot)))
+    if (!IsOpen(slot))
     {
         return reopened;
     }
     BMD& target = Models[slot];
-    if (target.NumActions <= 0 && target.NumMeshs <= 0)
-    {
-        return reopened;
-    }
     const MonsterModelDefinition* model = g_MonsterModelDatabase.Find(slot);
     if (model == nullptr)
     {

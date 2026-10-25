@@ -72,6 +72,7 @@ mu_add_test(
         test_monster_json.cpp
         test_monster_list_model.cpp
         test_monster_model_files.cpp
+        test_monster_model_values.cpp
         test_monster_models_json.cpp
         test_monster_names.cpp
         test_monster_npc_name_files.cpp

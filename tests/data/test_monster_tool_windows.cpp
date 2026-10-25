@@ -7,8 +7,10 @@
 #include "TestImGuiContext.h"
 #include "ToolWindowsScope.h"
 
+#include "Core/Globals/_enum.h"
 #include "Core/MuEditorCore.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "UI/Common/MuEditorLayout.h"
 #include "UI/Common/MuEditorToolWindows.h"
 #include "UI/Common/MuEditorWindowIds.h"
@@ -19,6 +21,7 @@
 #include "UI/MonsterTools/MonsterToolWindow.h"
 #include "UI/MonsterTools/MuMonsterBrowserUI.h"
 #include "UI/MonsterTools/MuMonsterChecksUI.h"
+#include "UI/MonsterTools/MuMonsterModelUI.h"
 #include "UI/MonsterTools/MuMonsterTranslationsUI.h"
 #include "imgui.h"
 #include "imgui_internal.h"
@@ -45,6 +48,7 @@ void RenderMonsterTools()
 {
     bool open = true;
     g_MuMonsterBrowserUI.Render(&open);
+    g_MuMonsterModelUI.Render(&open);
     g_MuMonsterTranslationsUI.Render(&open);
     g_MuMonsterChecksUI.Render(&open);
 }
@@ -90,6 +94,50 @@ TEST_CASE("The monster tools draw their frames without ImGui errors [editor][mon
     CHECK(ImGui::FindWindowByName(WindowIds::MonsterBrowser) != nullptr);
     CHECK(ImGui::FindWindowByName(WindowIds::MonsterTranslations) != nullptr);
     CHECK(ImGui::FindWindowByName(WindowIds::MonsterChecks) != nullptr);
+    CHECK(ImGui::FindWindowByName(WindowIds::MonsterModel) != nullptr);
+}
+
+// The model tools with a monster whose model has an entry with sounds and
+// sound slots, one whose model is outside the model list, and one without a
+// model. The test binary opens no models: the animations say that the
+// model is not open.
+TEST_CASE("The Monster Model window draws a model entry without ImGui errors [editor][monsters]")
+{
+    MonsterDefinition hound = Monster(3, "Hound");
+    hound.model = "MONSTER_MODEL_HOUND";
+    MonsterDefinition player = Monster(4, "Guard");
+    player.model = "player";
+    const std::array monsters = {Monster(2, "Budge Dragon"), hound, player};
+    g_MonsterDatabase.Build(monsters, "en");
+    Data::Monsters::MonsterModelDefinition model;
+    model.slot = "MONSTER_MODEL_HOUND";
+    model.load.file = "Data/Monster/Monster02.bmd";
+    model.load.textureFolders = {"Monster"};
+    model.load.speeds = {{2, 0.34f}};
+    model.sounds = {{"Data/Sound/mHound1.wav", "", 2, true}, {"Data/Sound/mHound2.wav", "", 2, true}};
+    model.soundSlots.emplace();
+    model.soundSlots->first = {"Data/Sound/mHound1.wav", "Data/Sound/mHound2.wav", "", "", ""};
+    const std::array models = {model};
+    g_MonsterModelDatabase.Build(models);
+    TestImGuiContext context;
+
+    constexpr int Frames = 5;
+    for (const int number : {3, 4, 2, MonsterSelection::NoMonster})
+    {
+        g_MonsterSelection.Select(number);
+        for (int frame = 0; frame < Frames; ++frame)
+        {
+            ImGui::NewFrame();
+            bool open = true;
+            g_MuMonsterModelUI.Render(&open);
+            ImGui::Render();
+            INFO("monster " << number << ", frame " << frame);
+            CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+        }
+    }
+    // The model tool shows the entry: nothing was stored.
+    CHECK(g_MonsterModelDatabase.Find(MODEL_HOUND)->load.speeds == model.load.speeds);
+    g_MonsterModelDatabase.Build({});
 }
 
 TEST_CASE("The first layout docks the monster browser beside the item browser, its tools with the others "
@@ -102,8 +150,9 @@ TEST_CASE("The first layout docks the monster browser beside the item browser, i
         BeginEditorWindow();
         MuEditor::Layout::SubmitDockSpace(false);
         ImGui::End();
-        for (const char* window : {WindowIds::ItemBrowser, WindowIds::ItemBasics, WindowIds::MonsterBrowser,
-                                   WindowIds::MonsterTranslations, WindowIds::MonsterChecks})
+        for (const char* window :
+             {WindowIds::ItemBrowser, WindowIds::ItemBasics, WindowIds::MonsterBrowser, WindowIds::MonsterModel,
+              WindowIds::MonsterTranslations, WindowIds::MonsterChecks})
         {
             ImGui::Begin(window);
             ImGui::End();
@@ -117,6 +166,7 @@ TEST_CASE("The first layout docks the monster browser beside the item browser, i
     CHECK(DockIdOf(WindowIds::MonsterBrowser) == DockIdOf(WindowIds::ItemBrowser));
     CHECK(DockIdOf(WindowIds::MonsterTranslations) == DockIdOf(WindowIds::ItemBasics));
     CHECK(DockIdOf(WindowIds::MonsterChecks) == DockIdOf(WindowIds::ItemBasics));
+    CHECK(DockIdOf(WindowIds::MonsterModel) == DockIdOf(WindowIds::ItemBasics));
     CHECK(DockIdOf(WindowIds::MonsterBrowser) != DockIdOf(WindowIds::ItemBasics));
 }
 

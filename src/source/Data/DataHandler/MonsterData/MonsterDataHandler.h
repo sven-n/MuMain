@@ -128,12 +128,17 @@ public:
     }
     bool HasModelsToReopen() const
     {
-        return !m_modelsToReopen.empty();
+        return !m_modelsToReopen.empty() || !m_modelsToOpen.empty();
     }
     // Opens the changed models that the game has open again (ModelLoader::
     // Reopen): the file, its textures from the folders of the loaded map,
-    // the parts, the speeds and the sounds.
+    // the parts, the speeds and the sounds. Also opens the models the tools
+    // asked for.
     void ReopenChangedModels();
+    // Opens the slot's model with ReopenChangedModels when the game does not
+    // have it open, for the monster tools, which show the animations of an
+    // open model. It stays open as if a monster of it had appeared.
+    void OpenModelForTools(int slot);
 #endif
 
 private:
@@ -148,6 +153,7 @@ private:
 #ifdef _EDITOR
     ModelsReopenedCallback m_modelsReopened = nullptr;
     std::vector<int> m_modelsToReopen;
+    std::vector<int> m_modelsToOpen;
 #endif
 };
 } // namespace Data::Monsters

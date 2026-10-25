@@ -23,6 +23,7 @@ struct ToolWindows
     bool monsterBrowser = false;
     bool monsterTranslations = false;
     bool monsterChecks = false;
+    bool monsterModel = false;
     bool serverList = false;
     bool skillEditor = false;
     bool devEditor = false;
