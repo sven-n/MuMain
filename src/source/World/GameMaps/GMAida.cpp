@@ -1606,39 +1606,9 @@ bool M33Aida::SetCurrentActionAidaMonster(CHARACTER* pCharacter, OBJECT* pObject
     case MONSTER_BLOODY_DEATH_RIDER:
         return CheckMonsterSkill(pCharacter, pObject);
     case MONSTER_BLOODY_GOLEM:
-    {
-        if (GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject))
-            return true;
-        if (pCharacter->MonsterSkill == ATMON_SKILL_EX_BLOODYGOLUEM_ATTACKSKILL)
-        {
-            SetAction(pObject, MONSTER01_ATTACK2);
-            pCharacter->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(pObject, MONSTER01_ATTACK1);
-            pCharacter->MonsterSkill = -1;
-        }
-        return true;
-    }
-        return true;
+        return GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject);
     case MONSTER_BLOODY_WITCH_QUEEN:
-    {
-        if (GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject))
-            return true;
-        if (pCharacter->MonsterSkill == ATMON_SKILL_EX_BLOODYWITCHQUEEN_ATTACKSKILL)
-        {
-            SetAction(pObject, MONSTER01_ATTACK2);
-            pCharacter->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(pObject, MONSTER01_ATTACK1);
-            pCharacter->MonsterSkill = -1;
-        }
-        return true;
-    }
-        return true;
+        return GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject);
     }
     return false;
 }

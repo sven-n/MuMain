@@ -2150,8 +2150,6 @@ void OpenBasicData(HDC hDC)
 
     OpenNameFilterFile(L"Data\\Local\\FilterName.bmd");
 
-    OpenMonsterSkillScript(L"Data\\Local\\MonsterSkill.bmd");
-
     g_pMasterLevelInterface->OpenMasterSkillTreeData(L"Data\\Local\\MasterSkillTreeData.bmd");
     g_pMasterLevelInterface->OpenMasterSkillTooltip(L"Data\\Local\\Eng\\MasterSkillTooltip_eng.bmd");
 

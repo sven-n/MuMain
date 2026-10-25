@@ -17,7 +17,6 @@ void OpenNameFilterFile(const wchar_t* FileName);
 extern GATE_ATTRIBUTE* GateAttribute;
 
 void OpenGateScript(const wchar_t* FileName);
-void OpenMonsterSkillScript(const wchar_t* FileName);
 
 extern ITEM_ATTRIBUTE* ItemAttribute;
 

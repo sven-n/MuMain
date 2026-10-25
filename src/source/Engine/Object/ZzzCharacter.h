@@ -4,7 +4,6 @@
 #include "Render/Models/ZzzBMD.h"
 #include <span>
 
-extern Script_Skill MonsterSkill[];
 extern CHARACTER* CharactersClient;
 extern CHARACTER CharacterView;
 extern CHARACTER* Hero;
@@ -99,6 +98,8 @@ void SetChangeClass(CHARACTER* c);
 int LevelConvert(BYTE Level);
 float CharacterMoveSpeed(CHARACTER* c);
 
+// Plays the attacks of the monster's entry; Maya plays her scene. False when
+// the entry has no attacks.
 bool CheckMonsterSkill(CHARACTER* c, OBJECT* o);
 bool CharacterAnimation(CHARACTER* c, OBJECT* o);
 bool AttackStage(CHARACTER* c, OBJECT* o);

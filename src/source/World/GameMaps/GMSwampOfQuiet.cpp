@@ -1433,93 +1433,12 @@ bool GMSwampOfQuiet::SetCurrentActionMonster(CHARACTER* pCharacter, OBJECT* pObj
     switch (pObject->Type)
     {
     case MODEL_MEDUSA:
-    {
-        if (GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject))
-            return true;
-        switch (pCharacter->Skill)
-        {
-        case AT_SKILL_DECAY:
-        {
-            SetAction(pObject, MONSTER01_ATTACK2);
-            pCharacter->MonsterSkill = -1;
-        } break;
-        case AT_SKILL_CHAOTIC_DISEIER:
-        {
-            SetAction(pObject, MONSTER01_ATTACK2);
-            pCharacter->MonsterSkill = -1;
-        } break;
-        case AT_SKILL_GIGANTIC_STORM:
-        {
-            SetAction(pObject, MONSTER01_ATTACK3);
-            pCharacter->MonsterSkill = -1;
-        } break;
-        case AT_SKILL_EVIL_SPIRIT:
-        {
-            SetAction(pObject, MONSTER01_ATTACK1);
-            pCharacter->MonsterSkill = -1;
-        } break;
-        default:
-        {
-            SetAction(pObject, MONSTER01_ATTACK1);
-            pCharacter->MonsterSkill = -1;
-        } break;
-        }
-    }
-    return true;
     case MODEL_SAPI_QUEEN:
     case MODEL_WOLF_STATUS:
-    {
-        if (GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject))
-            return true;
-        if (pCharacter->MonsterSkill == ATMON_SKILL_EX_SAPIQUEEN_ATTACKSKILL)
-        {
-            SetAction(pObject, MONSTER01_ATTACK2);
-            pCharacter->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(pObject, MONSTER01_ATTACK1);
-            pCharacter->MonsterSkill = -1;
-        }
-        return true;
-    }
-    return true;
     case MODEL_ICE_NAPIN:
-    {
-        if (GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject))
-            return true;
-        if (pCharacter->MonsterSkill == ATMON_SKILL_EX_ICENAPIN_ATTACKSKILL)
-        {
-            SetAction(pObject, MONSTER01_ATTACK2);
-            pCharacter->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(pObject, MONSTER01_ATTACK1);
-            pCharacter->MonsterSkill = -1;
-        }
-        return true;
-    }
-    return true;
     case MODEL_SHADOW_MASTER:
-    {
-        if (GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject))
-            return true;
-        if (pCharacter->MonsterSkill == ATMON_SKILL_EX_SHADOWMASTER_ATTACKSKILL)
-        {
-            SetAction(pObject, MONSTER01_ATTACK2);
-            pCharacter->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(pObject, MONSTER01_ATTACK1);
-            pCharacter->MonsterSkill = -1;
-        }
-        return true;
-    }
-    return true;
+        return GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject);
     default:
         return false;
     }
-    return false;
 }

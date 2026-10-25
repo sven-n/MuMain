@@ -937,88 +937,24 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
     case MONSTER_DEATH_CENTURION_4:
     case MONSTER_DEATH_CENTURION_5:
     case MONSTER_DEATH_CENTURION_6:
-        if (GameLogic::Monsters::Attacks::Play(*c, *o))
-            return true;
-        switch ((c->Skill))
-        {
-        case AT_SKILL_ENERGYBALL:
-        case AT_SKILL_FIRE_SLASH:
-        case AT_SKILL_FIRE_SLASH_STR:
-        case AT_SKILL_POISON:
-        case AT_SKILL_POISON_STR:
-        case AT_SKILL_MONSTER_SUMMON:
-        case AT_SKILL_MONSTER_MAGIC_DEF:
-        case AT_SKILL_MONSTER_PHY_DEF:
-            SetAction(o, MONSTER01_ATTACK2);
-            break;
-
-        default:
-            SetAction(o, MONSTER01_ATTACK1);
-            break;
-        }
-        return true;
-
     case MONSTER_AEGIS_1:
     case MONSTER_AEGIS_2:
     case MONSTER_AEGIS_3:
     case MONSTER_AEGIS_4:
     case MONSTER_AEGIS_5:
     case MONSTER_AEGIS_6:
-        if (GameLogic::Monsters::Attacks::Play(*c, *o))
-            return true;
-        switch ((c->Skill))
-        {
-        case AT_SKILL_ENERGYBALL:
-            SetAction(o, MONSTER01_ATTACK2);
-            break;
-
-        default:
-            SetAction(o, MONSTER01_ATTACK1);
-            break;
-        }
-        return true;
-
     case MONSTER_ROGUE_CENTURION_1:
     case MONSTER_ROGUE_CENTURION_2:
     case MONSTER_ROGUE_CENTURION_3:
     case MONSTER_ROGUE_CENTURION_4:
     case MONSTER_ROGUE_CENTURION_5:
     case MONSTER_ROGUE_CENTURION_6:
-        if (GameLogic::Monsters::Attacks::Play(*c, *o))
-            return true;
-        switch ((c->Skill))
-        {
-        case AT_SKILL_ENERGYBALL:
-            SetAction(o, MONSTER01_ATTACK2);
-            break;
-
-        default:
-            SetAction(o, MONSTER01_ATTACK1);
-            break;
-        }
-        return true;
-
     case MONSTER_NECRON_1:
     case MONSTER_NECRON_2:
     case MONSTER_NECRON_3:
     case MONSTER_NECRON_4:
     case MONSTER_NECRON_5:
     case MONSTER_NECRON_6:
-        if (GameLogic::Monsters::Attacks::Play(*c, *o))
-            return true;
-        switch ((c->Skill))
-        {
-        case AT_SKILL_POISON:
-        case AT_SKILL_POISON_STR:
-            SetAction(o, MONSTER01_ATTACK2);
-            break;
-
-        case AT_SKILL_ENERGYBALL:
-            SetAction(o, MONSTER01_ATTACK1);
-            break;
-        }
-        return true;
-
     case MONSTER_SCHRIKER_1:
     case MONSTER_SCHRIKER_2:
     case MONSTER_SCHRIKER_3:
@@ -1030,16 +966,8 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
     case MONSTER_ILLUSION_OF_KUNDUN_3:
     case MONSTER_ILLUSION_OF_KUNDUN_4:
     case MONSTER_ILLUSION_OF_KUNDUN_5:
-        if (GameLogic::Monsters::Attacks::Play(*c, *o))
-            return true;
-        SetAction(o, MONSTER01_ATTACK1 + rand() % 2);
-        return true;
-
     case MONSTER_ILLUSION_OF_KUNDUN_7:
-        if (GameLogic::Monsters::Attacks::Play(*c, *o))
-            return true;
-        SetAction(o, MONSTER01_ATTACK1 + rand() % 2);
-        return true;
+        return GameLogic::Monsters::Attacks::Play(*c, *o);
     }
     return false;
 }

@@ -1177,125 +1177,19 @@ bool GMEmpireGuardian3::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
             return true;
         }
         const WORD skill = c->MonsterSkill;
-        if (GameLogic::Monsters::Attacks::Play(*c, *o))
-        {
-            if (skill == ATMON_SKILL_EMPIREGUARDIAN_BERSERKER)
-                m_bCurrentIsRage_Kato = true;
-            return true;
-        }
-
-        switch (c->MonsterSkill)
-        {
-        case 58:
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        break;
-        case 60:
-        {
-            SetAction(o, MONSTER01_ATTACK3);
-            c->MonsterSkill = -1;
-        }
-        break;
-        case ATMON_SKILL_EMPIREGUARDIAN_BERSERKER:
-        {
-            SetAction(o, MONSTER01_APEAR);
-            c->MonsterSkill = -1;
-
+        if (!GameLogic::Monsters::Attacks::Play(*c, *o))
+            return false;
+        // The Berserker skill starts the boss's rage.
+        if (skill == ATMON_SKILL_EMPIREGUARDIAN_BERSERKER)
             m_bCurrentIsRage_Kato = true;
-        }
-        break;
-        default:
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-            c->MonsterSkill = -1;
-        }
-        break;
-        }
-    }
         return true;
+    }
     case MONSTER_HEAD_MOUNTER:
-    {
-        if (GameLogic::Monsters::Attacks::Play(*c, *o))
-            return true;
-        switch (c->MonsterSkill)
-        {
-        case 54:
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        break;
-        case 55:
-        {
-            SetAction(o, MONSTER01_APEAR);
-            c->MonsterSkill = -1;
-        }
-        break;
-        case 56:
-        {
-            SetAction(o, MONSTER01_ATTACK3);
-            c->MonsterSkill = -1;
-        }
-        break;
-        default:
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-            c->MonsterSkill = -1;
-        }
-        break;
-        }
-    }
-        return true;
+        return GameLogic::Monsters::Attacks::Play(*c, *o);
     case MONSTER_FORSAKER:
-    {
-        if (GameLogic::Monsters::Attacks::Play(*c, *o))
-            return true;
-        switch (c->MonsterSkill)
-        {
-        case 46:
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        break;
-        default:
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-            c->MonsterSkill = -1;
-        }
-        break;
-        }
-    }
-        return true;
+        return GameLogic::Monsters::Attacks::Play(*c, *o);
     case MONSTER_BANSHEE:
-    {
-        if (GameLogic::Monsters::Attacks::Play(*c, *o))
-            return true;
-        switch (c->MonsterSkill)
-        {
-        case 47:
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        break;
-        case 53:
-        {
-            SetAction(o, MONSTER01_ATTACK3);
-            c->MonsterSkill = -1;
-        }
-        break;
-        default:
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-            c->MonsterSkill = -1;
-        }
-        break;
-        }
-    }
-        return true;
+        return GameLogic::Monsters::Attacks::Play(*c, *o);
     }
     return false;
 }

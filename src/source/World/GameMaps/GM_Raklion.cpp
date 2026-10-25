@@ -2316,171 +2316,27 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
     switch (c->MonsterIndex)
     {
     case MONSTER_ICE_WALKER:
-    {
-        if (GameLogic::Monsters::Attacks::Play(*c, *o))
-            return true;
-        if (c->MonsterSkill == 29)
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-        }
-        return true;
-    }
-    break;
     case MONSTER_GIANT_MAMMOTH:
-    {
-        if (GameLogic::Monsters::Attacks::Play(*c, *o))
-            return true;
-        if (c->MonsterSkill == 30)
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-        }
-        return true;
-    }
-    break;
     case MONSTER_ICE_GIANT:
-    {
-        if (GameLogic::Monsters::Attacks::Play(*c, *o))
-            return true;
-        if (c->MonsterSkill == 31)
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-        }
-        return true;
-    }
-    break;
     case MONSTER_COOLUTIN:
-    {
-        if (GameLogic::Monsters::Attacks::Play(*c, *o))
-            return true;
-        if (c->MonsterSkill == 32)
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-        }
-        return true;
-    }
     case MONSTER_IRON_KNIGHT:
-    {
-        if (GameLogic::Monsters::Attacks::Play(*c, *o))
-            return true;
-        if (c->MonsterSkill == 33)
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-        }
-        return true;
-    }
-    break;
+    case MONSTER_DARK_MAMMOTH:
+    case MONSTER_DARK_GIANT:
+    case MONSTER_DARK_IRON_KNIGHT:
+    case MONSTER_DARK_COOLUTIN:
+        return GameLogic::Monsters::Attacks::Play(*c, *o);
     case MONSTER_SELUPAN:
-    {
-        SetBossMonsterAction(c, o);
-        return true;
-    }
-    break;
+        return SetBossMonsterAction(c, o);
     case MONSTER_SPIDER_EGGS_1:
     case MONSTER_SPIDER_EGGS_2:
     case MONSTER_SPIDER_EGGS_3:
-    {
         return false;
-    }
-    break;
-    case MONSTER_DARK_MAMMOTH:
-    {
-        if (GameLogic::Monsters::Attacks::Play(*c, *o))
-            return true;
-        if (c->MonsterSkill == ATMON_SKILL_EX_DARKMEMUD_ATTACKSKILL)
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-            c->MonsterSkill = -1;
-        }
-        return true;
-    }
-    break;
-    case MONSTER_DARK_GIANT:
-    {
-        if (GameLogic::Monsters::Attacks::Play(*c, *o))
-            return true;
-        if (c->MonsterSkill == ATMON_SKILL_EX_DARKGIANT_ATTACKSKILL)
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-            c->MonsterSkill = -1;
-        }
-        return true;
-    }
-    break;
-    case MONSTER_DARK_IRON_KNIGHT:
-    {
-        if (GameLogic::Monsters::Attacks::Play(*c, *o))
-            return true;
-        if (c->MonsterSkill == ATMON_SKILL_EX_DARKAIONNIGHT_ATTACKSKILL)
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-            c->MonsterSkill = -1;
-        }
-        return true;
-    }
-    break;
-    case MONSTER_DARK_COOLUTIN:
-    {
-        if (GameLogic::Monsters::Attacks::Play(*c, *o))
-            return true;
-        if (c->MonsterSkill == ATMON_SKILL_EX_DARKCOOLERTIN_ATTACKSKILL)
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-            c->MonsterSkill = -1;
-        }
-        return true;
-    }
-    break;
     }
 
     return false;
 }
 
-void CGM_Raklion::SetBossMonsterAction(CHARACTER* c, OBJECT* o)
+bool CGM_Raklion::SetBossMonsterAction(CHARACTER* c, OBJECT* o)
 {
     if (c->MonsterSkill == 37 || !(c->MonsterSkill >= 34 && c->MonsterSkill <= 42) || m_bBossHeightMove == true)
     {
@@ -2488,37 +2344,14 @@ void CGM_Raklion::SetBossMonsterAction(CHARACTER* c, OBJECT* o)
         m_bBossHeightMove = false;
     }
 
-    const bool fromData = GameLogic::Monsters::Attacks::Play(*c, *o);
-    if (c->MonsterSkill == 34)
+    // The animation is Selupan's attacks'; its skills' sounds and effects stay here.
+    const bool played = GameLogic::Monsters::Attacks::Play(*c, *o);
+    if (c->MonsterSkill == 38)
     {
-        if (!fromData)
-            SetAction(o, MONSTER01_ATTACK2);
-    }
-    else if (c->MonsterSkill == 35)
-    {
-        if (!fromData)
-            SetAction(o, MONSTER01_ATTACK1);
-    }
-    else if (c->MonsterSkill == 36)
-    {
-        if (!fromData)
-            SetAction(o, MONSTER01_ATTACK3);
-    }
-    else if (c->MonsterSkill == 37)
-    {
-        if (!fromData)
-            SetAction(o, MONSTER01_APEAR);
-    }
-    else if (c->MonsterSkill == 38)
-    {
-        if (!fromData)
-            SetAction(o, MONSTER01_ATTACK4);
         PlayBuffer(SOUND_RAKLION_SERUFAN_WORD4);
     }
     else if (c->MonsterSkill == 39)
     {
-        if (!fromData)
-            SetAction(o, MONSTER01_ATTACK4);
         PlayBuffer(SOUND_RAKLION_SERUFAN_CURE);
 
         vec3_t vLight, vPos, vAngle;
@@ -2539,27 +2372,17 @@ void CGM_Raklion::SetBossMonsterAction(CHARACTER* c, OBJECT* o)
     }
     else if (c->MonsterSkill == 40)
     {
-        if (!fromData)
-            SetAction(o, MONSTER01_ATTACK4);
         PlayBuffer(SOUND_RAKLION_SERUFAN_WORD3);
-    }
-    else if (c->MonsterSkill == 41)
-    {
     }
     else if (c->MonsterSkill == 42)
     {
-        if (!fromData)
-            SetAction(o, MONSTER01_ATTACK4);
 
         vec3_t vLight;
         Vector(0.3f, 0.2f, 0.1f, vLight);
         CreateEffect(MODEL_STORM2, o->Position, o->Angle, vLight, 1, NULL, -1, 0, 0, 0, 1.6f);
         CreateEffect(MODEL_SUMMON, o->Position, o->Angle, vLight, 3);
     }
-    else if (!fromData)
-    {
-        SetAction(o, MONSTER01_ATTACK4);
-    }
+    return played;
 }
 
 bool CGM_Raklion::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)

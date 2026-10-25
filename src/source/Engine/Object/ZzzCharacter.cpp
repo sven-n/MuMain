@@ -151,7 +151,6 @@ namespace
 CHARACTER* CharactersClient;
 CHARACTER CharacterView;
 CHARACTER* Hero;
-Script_Skill MonsterSkill[MODEL_MONSTER_END];
 extern CKanturuDirection KanturuDirection;
 float g_fBoneSave[10][3][4];
 static  wchar_t    vec_list[35] =
@@ -1247,8 +1246,7 @@ void SetPlayerAttack(CHARACTER* c)
     }
     else if (o->Type == 40)
     {
-        if (!GameLogic::Monsters::Attacks::Play(*c, *o))
-            SetAction(&c->Object, 1);
+        GameLogic::Monsters::Attacks::Play(*c, *o);
         PlayBuffer(SOUND_TRAP01, o);
     }
     else if (o->Type == 51)
@@ -1261,16 +1259,9 @@ void SetPlayerAttack(CHARACTER* c)
     {
         if (o->Type == MODEL_BALI)
         {
-            if (!GameLogic::Monsters::Attacks::Play(*c, *o))
-            {
-                int Action = rand() % 8;
-                if (Action > 2)
-                    SetAction(&c->Object, MONSTER01_ATTACK1 + rand() % 2);
-                else if (Action > 0)
-                    SetAction(&c->Object, MONSTER01_ATTACK3);
-                else
-                    SetAction(&c->Object, MONSTER01_ATTACK4);
-            }
+            // Bali's draw (its attacks' otherwiseRandom "bali"); no handler
+            // answers for it.
+            GameLogic::Monsters::Attacks::Play(*c, *o);
         }
         else
         {
@@ -2445,71 +2436,7 @@ bool CheckMonsterSkill(CHARACTER* pCharacter, OBJECT* pObject)
         GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject);
         return true;
     }
-    if (GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject))
-    {
-        return true;
-    }
-
-    int iCheckAttackAni = -1;
-
-    for (int i = 0; i < MAX_MONSTERSKILL_NUM; i++)
-    {
-        if (MonsterSkill[pCharacter->MonsterIndex].Skill_Num[i] == pCharacter->MonsterSkill)
-        {
-            iCheckAttackAni = i;
-            break;
-        }
-        else
-        {
-            iCheckAttackAni = -1;
-        }
-    }
-
-    switch (iCheckAttackAni)
-    {
-    case 0:
-        SetAction(pObject, MONSTER01_ATTACK1);
-        break;
-    case 1:
-        SetAction(pObject, MONSTER01_ATTACK2);
-        break;
-    case 2:
-        SetAction(pObject, MONSTER01_ATTACK3);
-        break;
-    case 3:
-        SetAction(pObject, MONSTER01_ATTACK4);
-        break;
-    case 4:
-        SetAction(pObject, MONSTER01_ATTACK5);
-        break;
-    case 5:
-        SetAction(pObject, MONSTER01_ATTACK5);
-        break;
-    case 6:
-        SetAction(pObject, MONSTER01_ATTACK5);
-        break;
-    case 7:
-        SetAction(pObject, MONSTER01_ATTACK5);
-        break;
-    case 8:
-        SetAction(pObject, MONSTER01_ATTACK5);
-        break;
-    case 9:
-        SetAction(pObject, MONSTER01_ATTACK5);
-        break;
-    }
-
-    pCharacter->MonsterSkill = -1;
-
-    if (iCheckAttackAni < 0)
-    {
-        SetAction(pObject, MONSTER01_ATTACK1);
-    }
-
-    if (iCheckAttackAni > 4)
-        return false;
-
-    return true;
+    return GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject);
 }
 
 bool CharacterAnimation(CHARACTER* c, OBJECT* o)

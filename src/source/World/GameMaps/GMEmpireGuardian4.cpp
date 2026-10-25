@@ -1397,57 +1397,13 @@ bool GMEmpireGuardian4::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
             return true;
         }
         const WORD skill = c->MonsterSkill;
-        if (GameLogic::Monsters::Attacks::Play(*c, *o))
-        {
-            if (skill == ATMON_SKILL_EMPIREGUARDIAN_BERSERKER)
-                m_bCurrentIsRage_BossGaion = true;
-            return true;
-        }
-
-        switch (c->MonsterSkill)
-        {
-        case ATMON_SKILL_EMPIREGUARDIAN_GAION_01_GENERALATTACK:
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-            c->MonsterSkill = -1;
-        }
-        break;
-        case ATMON_SKILL_EMPIREGUARDIAN_GAION_02_BLOODATTACK:
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        break;
-        case ATMON_SKILL_EMPIREGUARDIAN_GAION_03_GIGANTIKSTORM:
-        {
-            SetAction(o, MONSTER01_ATTACK3);
-            c->MonsterSkill = -1;
-        }
-        break;
-        case ATMON_SKILL_EMPIREGUARDIAN_GAION_04_FLAMEATTACK:
-        {
-            SetAction(o, MONSTER01_ATTACK4);
-            c->MonsterSkill = -1;
-        }
-        break;
-        case ATMON_SKILL_EMPIREGUARDIAN_BERSERKER:
-        {
-            SetAction(o, MONSTER01_APEAR);
-            c->MonsterSkill = -1;
+        if (!GameLogic::Monsters::Attacks::Play(*c, *o))
+            return false;
+        // The Berserker skill starts the boss's rage.
+        if (skill == ATMON_SKILL_EMPIREGUARDIAN_BERSERKER)
             m_bCurrentIsRage_BossGaion = true;
-        }
-        break;
-        default:
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-            c->MonsterSkill = -1;
-        }
-        break;
-        }
-
         return true;
     }
-        return true;
     case MONSTER_JERRY:
     {
         if (m_bCurrentIsRage_Jerint == true)
@@ -1457,44 +1413,13 @@ bool GMEmpireGuardian4::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
             return true;
         }
         const WORD skill = c->MonsterSkill;
-        if (GameLogic::Monsters::Attacks::Play(*c, *o))
-        {
-            if (skill == ATMON_SKILL_EMPIREGUARDIAN_BERSERKER)
-                m_bCurrentIsRage_Jerint = true;
-            return true;
-        }
-
-        switch (c->MonsterSkill)
-        {
-        case 55:
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        break;
-        case 61:
-        {
-            SetAction(o, MONSTER01_ATTACK3);
-            c->MonsterSkill = -1;
-        }
-        break;
-        case ATMON_SKILL_EMPIREGUARDIAN_BERSERKER:
-        {
-            SetAction(o, MONSTER01_APEAR);
-            c->MonsterSkill = -1;
-
+        if (!GameLogic::Monsters::Attacks::Play(*c, *o))
+            return false;
+        // The Berserker skill starts the boss's rage.
+        if (skill == ATMON_SKILL_EMPIREGUARDIAN_BERSERKER)
             m_bCurrentIsRage_Jerint = true;
-        }
-        break;
-        default:
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-            c->MonsterSkill = -1;
-        }
-        break;
-        }
-    }
         return true;
+    }
     }
     return false;
 }

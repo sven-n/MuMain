@@ -179,42 +179,6 @@ void OpenGateScript(const wchar_t* FileName)
     }
 }
 
-void OpenMonsterSkillScript(const wchar_t* FileName)
-{
-    memset(MonsterSkill, -1, sizeof(Script_Skill));
-
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (fp != NULL)
-    {
-        int Size = (sizeof(Script_Skill) + sizeof(int));
-        BYTE* Buffer = new BYTE[Size];
-        int FileCount = 0;
-        fread(&FileCount, sizeof(int), 1, fp);
-        for (int i = 0; i < FileCount; i++)
-        {
-            fread(Buffer, Size, 1, fp);
-            BuxConvert(Buffer, Size);
-            int dummy = -1;
-            int Seek = 0;
-            memcpy(&dummy, Buffer + Seek, sizeof(int));
-            Seek += sizeof(int);
-            memcpy(MonsterSkill[dummy].Skill_Num, Buffer + Seek, sizeof(int) * MAX_MONSTERSKILL_NUM);
-            Seek += (sizeof(int) * MAX_MONSTERSKILL_NUM);
-            memcpy(&MonsterSkill[dummy].Slot, Buffer + Seek, sizeof(int));
-        }
-        delete[] Buffer;
-        fclose(fp);
-    }
-    else
-    {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-    }
-}
-
 void OpenNpcScript(wchar_t* FileName)
 {
     if ((SMDFile = _wfopen(FileName, L"rb")) == NULL)

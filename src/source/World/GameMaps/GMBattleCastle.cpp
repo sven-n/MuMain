@@ -1681,10 +1681,7 @@ namespace battleCastle
         case MODEL_BATTLE_GUARD1:
         case MODEL_BATTLE_GUARD2:
             o->AI = GUARD_ATTACK;
-            if (GameLogic::Monsters::Attacks::Play(*c, *o))
-                return true;
-            SetAction(o, 5);
-            return true;
+            return GameLogic::Monsters::Attacks::Play(*c, *o);
         }
         return false;
     }
