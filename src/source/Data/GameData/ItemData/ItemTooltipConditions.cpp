@@ -63,6 +63,7 @@ constexpr std::array<std::string_view, 14> States = {
     "damageHarmonyBonus", "defenseHarmonyBonus", "armour",    "strengthReduced", "dexterityReduced",
     "wizardryWeapon",     "hasDurability",       "timed",     "hasOptions",
 };
+static_assert(States.size() == static_cast<size_t>(TooltipState::Count), "a name for every TooltipState, in order");
 } // namespace
 
 std::span<const std::string_view> GetTooltipStates()
@@ -72,12 +73,21 @@ std::span<const std::string_view> GetTooltipStates()
 
 bool IsTooltipState(std::string_view name)
 {
-    return std::find(States.begin(), States.end(), name) != States.end();
+    return FindTooltipState(name).has_value();
+}
+
+std::optional<TooltipState> FindTooltipState(std::string_view name)
+{
+    const auto found = std::find(States.begin(), States.end(), name);
+    return found == States.end() ? std::nullopt
+                                 : std::optional<TooltipState>(static_cast<TooltipState>(found - States.begin()));
 }
 
 bool ReadTooltipCondition(std::string_view text, TooltipCondition& condition, std::string& error)
 {
     std::string_view name = text;
+    condition.value = TooltipValue::Count;
+    condition.state = TooltipState::Count;
     condition.negated = name.starts_with(Negation);
     if (condition.negated)
     {
@@ -117,9 +127,10 @@ bool ReadTooltipCondition(std::string_view text, TooltipCondition& condition, st
     const std::string_view comparison = name.substr(nameEnd);
     name = name.substr(0, nameEnd);
     condition.name = name;
+    const std::optional<TooltipValue> value = FindBuiltInPlaceholder(name);
     if (!comparison.empty())
     {
-        if (!IsBuiltInPlaceholder(name))
+        if (!value)
         {
             error = "\"" + std::string(text) + "\" compares " +
                     (IsTooltipState(name) ? "a state, which is set or not" : "no built-in value") +
@@ -134,16 +145,19 @@ bool ReadTooltipCondition(std::string_view text, TooltipCondition& condition, st
             return false;
         }
         condition.kind = TooltipCondition::Kind::Value;
+        condition.value = *value;
         return true;
     }
-    if (IsTooltipState(name))
+    if (const std::optional<TooltipState> state = FindTooltipState(name))
     {
         condition.kind = TooltipCondition::Kind::State;
+        condition.state = *state;
         return true;
     }
-    if (IsBuiltInPlaceholder(name))
+    if (value)
     {
         condition.kind = TooltipCondition::Kind::Value;
+        condition.value = *value;
         return true;
     }
     std::vector<std::string> known(GetBuiltInPlaceholders().begin(), GetBuiltInPlaceholders().end());

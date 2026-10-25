@@ -14,6 +14,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "Engine/Object/ItemTooltipText.h"
 #include "Engine/Object/ItemTooltipValues.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -72,6 +73,8 @@
 #include "GameLogic/Skills/SkillManager.h"
 #include "Camera/CameraProjection.h"
 #include "Render/Text/CUIRenderText.h"
+
+namespace TooltipText = Engine::Items::TooltipText;
 
 extern int g_iChatInputType;
 
@@ -1368,66 +1371,6 @@ void SetItemTooltipTextMeasure(ItemTooltipTextMeasure measure)
     s_itemTooltipTextMeasure = measure;
 }
 
-// The value of a placeholder of a tooltip line for the item at `level`: the value the line binds it to (`bound`), the
-// item's level value (`definition`, when given; in `locale`, the line's language), a built-in value, {level} or a
-// table of the item stat file; nothing for another name.
-static std::optional<std::string> TooltipPlaceholderValue(std::string_view name,
-                                                          std::span<const std::pair<std::string, std::string>> bound,
-                                                          const Data::Items::ItemDefinition* definition, int level,
-                                                          const ItemTooltipValues& values, std::string_view locale)
-{
-    for (const auto& [placeholder, value] : bound)
-    {
-        if (placeholder == name)
-        {
-            name = value;
-            break;
-        }
-    }
-    if (const std::optional<Data::Items::GameDataValue> data = Data::Items::ReadGameDataValue(name))
-    {
-        switch (data->kind)
-        {
-        case Data::Items::GameDataValueKind::SkillMana:
-        {
-            int mana = 0;
-            gSkillManager.GetSkillInformation(data->number, 1, nullptr, &mana, nullptr);
-            return std::to_string(mana);
-        }
-        case Data::Items::GameDataValueKind::SkillName:
-            return Core::Text::ToUtf8(SkillAttribute[data->number].Name);
-        case Data::Items::GameDataValueKind::MonsterName:
-            for (const MONSTER_SCRIPT& monster : MonsterScript)
-            {
-                if (monster.Type == data->number)
-                    return Core::Text::ToUtf8(monster.Name);
-            }
-            return std::nullopt;
-        }
-        return std::nullopt;
-    }
-    if (const Data::Items::ItemLevelValues* levelValues =
-            definition != nullptr ? definition->FindLevelValues(name) : nullptr)
-    {
-        if (level < 0 || level >= static_cast<int>(levelValues->values.size()))
-            return std::nullopt;
-        const Data::Items::ItemLevelValue& value = levelValues->values[level];
-        const Data::LocalizedString* text =
-            value.textName.empty() ? &value.text : g_ItemDatabase.GetTooltipFile().FindText(value.textName);
-        if (text == nullptr)
-            return std::nullopt;
-        return text->Get(locale);
-    }
-    if (const std::optional<int> value = GetItemTooltipValue(values, name))
-        return std::to_string(*value);
-    if (std::optional<std::string> text = GetItemTooltipText(values, name))
-        return text;
-    if (const std::optional<int> value =
-            Data::Items::GetPlaceholderValue(name, level, g_ItemDatabase.GetStatProfiles()))
-        return std::to_string(*value);
-    return std::nullopt;
-}
-
 std::optional<PetInfoRequest> GetPetInfoRequest(int itemType, int pointedIndex, int inventype)
 {
     const StorageType storage = static_cast<StorageType>(inventype);
@@ -1460,15 +1403,14 @@ void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, in
         const Data::LocalizedString* lineText =
             line.textName.empty() ? &line.text : g_ItemDatabase.GetTooltipFile().FindText(line.textName);
         // In the UI's language, also when the item names stay English ("Translate item names" off).
-        const std::wstring text = lineText == nullptr
-                                      ? std::wstring()
-                                      : Core::Text::FromUtf8(Data::Items::FillPlaceholders(
-                                            lineText->Get(I18N::GetCurrentLocale()),
-                                            [&](std::string_view name)
-                                            {
-                                                return TooltipPlaceholderValue(name, line.values, &definition, level,
-                                                                               values, I18N::GetCurrentLocale());
-                                            }));
+        const std::string_view locale = I18N::GetCurrentLocale();
+        wchar_t filled[512];
+        const size_t length =
+            lineText == nullptr
+                ? 0
+                : TooltipText::Write(TooltipText::Compile(lineText->Get(locale), line.values, &definition, locale),
+                                     level, values, filled, std::size(filled));
+        const std::wstring text(filled, length);
         // A blank line is one blank piece. So is a blank line inside a text (`\n\n`, or a text that starts with
         // `\n`): a row left empty would end the tooltip there.
         const std::vector<std::wstring> pieces =
@@ -1531,11 +1473,11 @@ static void WriteItemTooltipLayoutLines(const ITEM& item, int level, const ItemT
             SkipNum++;
             continue;
         }
-        // In the UI's language, also when the item names stay English ("Translate item names" off).
-        const std::string filled = Data::Items::FillPlaceholders(
-            text->Get(I18N::GetCurrentLocale()), [&](std::string_view name)
-            { return TooltipPlaceholderValue(name, line->values, nullptr, level, values, I18N::GetCurrentLocale()); });
-        if (filled.empty())
+        // In the UI's language, also when the item names stay English ("Translate item names" off); written straight
+        // into the row, as the tooltip's own lines are.
+        const std::string_view locale = I18N::GetCurrentLocale();
+        if (TooltipText::Write(TooltipText::Compile(text->Get(locale), line->values, nullptr, locale), level, values,
+                               TextList[TextNum], std::size(TextList[TextNum])) == 0)
         {
             // No text in the UI's language: a row left empty would end the tooltip there.
             mu_swprintf(TextList[TextNum], L"\n");
@@ -1543,8 +1485,6 @@ static void WriteItemTooltipLayoutLines(const ITEM& item, int level, const ItemT
             SkipNum++;
             continue;
         }
-        mu_swprintf(TextList[TextNum], L"%.*ls", static_cast<int>(std::size(TextList[0]) - 1),
-                    Core::Text::FromUtf8(filled).c_str());
         TextListColor[TextNum] = static_cast<int>(GetTooltipLineColor(*line, item.Type, level, values));
         TextBold[TextNum] = line->bold;
         TextNum++;
@@ -1633,17 +1573,14 @@ static std::optional<std::wstring> ItemNameLineText(const Data::Items::ItemNameL
         line.textName.empty() ? &line.text : g_ItemDatabase.GetTooltipFile().FindText(line.textName);
     if (text == nullptr)
         return std::nullopt;
-    std::wstring filled = Core::Text::FromUtf8(
-        Data::Items::FillPlaceholders(text->Get(g_ItemDatabase.GetDisplayLocale()),
-                                      [&](std::string_view placeholder)
-                                      {
-                                          // In the item names' language, as the item's name.
-                                          return TooltipPlaceholderValue(placeholder, line.values, &definition, level,
-                                                                         values, g_ItemDatabase.GetDisplayLocale());
-                                      }));
-    if (filled.empty())
+    // In the item names' language, as the item's name.
+    const std::string& locale = g_ItemDatabase.GetDisplayLocale();
+    wchar_t filled[256];
+    const size_t length = TooltipText::Write(TooltipText::Compile(text->Get(locale), line.values, &definition, locale),
+                                             level, values, filled, std::size(filled));
+    if (length == 0)
         return std::nullopt;
-    return filled;
+    return std::wstring(filled, length);
 }
 
 // The item's name in the item names' language and its color, as its tooltip and the repair window write it: the first

@@ -90,8 +90,12 @@ TEST_CASE("A tooltip layout line has its text, conditions, colors, style and val
     const TooltipLayoutLine& line = FirstLine(result);
     CHECK(line.textName == "lacking");
     REQUIRE(line.when.size() == 3);
-    CHECK(line.when[0] == TooltipCondition{TooltipCondition::Kind::Value, "requiredLevel", ItemTag::Count, false});
-    CHECK(line.when[1] == TooltipCondition{TooltipCondition::Kind::State, "excellent", ItemTag::Count, true});
+    // Read with the value and the state they name resolved.
+    CHECK(line.when[0] == TooltipCondition{TooltipCondition::Kind::Value, "requiredLevel", ItemTag::Count, false,
+                                           TooltipCondition::Comparison::NotZero, 0, TooltipValue::RequiredLevel});
+    CHECK(line.when[1] == TooltipCondition{TooltipCondition::Kind::State, "excellent", ItemTag::Count, true,
+                                           TooltipCondition::Comparison::NotZero, 0, TooltipValue::Count,
+                                           TooltipState::Excellent});
     CHECK(line.when[2].kind == TooltipCondition::Kind::Tag);
     CHECK(line.when[2].tag == ItemTag::Sceptre);
     CHECK(line.color == ItemTextColor::Red);
@@ -281,8 +285,16 @@ TEST_CASE("A tooltip line's conditions all hold, each turned around by \"!\" [da
     ItemTooltipValues values;
     values.defense = 12;
     values.excellent = true;
+    // Conditions written here by name are resolved as reading them does.
     const auto met = [&](std::vector<TooltipCondition> conditions, int type = ScrollOfPoisonType, int level = 0)
-    { return AreTooltipConditionsMet(conditions, type, level, values); };
+    {
+        for (TooltipCondition& condition : conditions)
+        {
+            condition.value = FindBuiltInPlaceholder(condition.name).value_or(TooltipValue::Count);
+            condition.state = FindTooltipState(condition.name).value_or(TooltipState::Count);
+        }
+        return AreTooltipConditionsMet(conditions, type, level, values);
+    };
     using Kind = TooltipCondition::Kind;
     CHECK(met({}));
     CHECK(met({{Kind::Value, "defense"}, {Kind::State, "excellent"}}));
@@ -309,11 +321,19 @@ TEST_CASE("A tooltip line takes the color of its first color rule that holds [da
     ItemTooltipValues values;
     values.excellent = true;
     values.damageHarmonyBonus = true;
+    // Conditions as a file has them: read, so the state each names is resolved.
+    const auto read = [](std::string_view text)
+    {
+        TooltipCondition condition;
+        std::string error;
+        REQUIRE(ReadTooltipCondition(text, condition, error));
+        return condition;
+    };
     TooltipLayoutLine line;
     line.color = ItemTextColor::Gray;
-    line.colors = {{{{TooltipCondition::Kind::State, "ancient"}}, ItemTextColor::Green},
-                   {{{TooltipCondition::Kind::State, "damageHarmonyBonus"}}, ItemTextColor::Yellow},
-                   {{{TooltipCondition::Kind::State, "excellent"}}, ItemTextColor::Blue}};
+    line.colors = {{{read("ancient")}, ItemTextColor::Green},
+                   {{read("damageHarmonyBonus")}, ItemTextColor::Yellow},
+                   {{read("excellent")}, ItemTextColor::Blue}};
     CHECK(GetTooltipLineColor(line, ScrollOfPoisonType, 0, values) == ItemTextColor::Yellow);
     values.damageHarmonyBonus = false;
     CHECK(GetTooltipLineColor(line, ScrollOfPoisonType, 0, values) == ItemTextColor::Blue);

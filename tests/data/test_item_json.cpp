@@ -409,6 +409,7 @@ TEST_CASE("An item's name lines are kept through write and read, with or without
     destroy.color = ItemTextColor::Blue;
     TooltipCondition kind;
     kind.name = "excellentFlags";
+    kind.value = TooltipValue::ExcellentFlags; // as reading it resolves the name
     kind.comparison = TooltipCondition::Comparison::Equal;
     kind.number = 1;
     destroy.when = {kind};

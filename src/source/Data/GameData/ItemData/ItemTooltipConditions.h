@@ -1,7 +1,9 @@
 #pragma once
 
+#include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Data/GameData/ItemData/ItemTagSet.h"
 
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -17,6 +19,28 @@ namespace Data::Items
 // (Engine/Object/ItemTooltipValues), listed in docs/item-data.md.
 std::span<const std::string_view> GetTooltipStates();
 bool IsTooltipState(std::string_view name);
+
+// The states by number, in GetTooltipStates' order: what a condition naming one is resolved to when it is read.
+enum class TooltipState : unsigned char
+{
+    HasDamage,
+    SkillBook,
+    TwoHanded,
+    Excellent,
+    Ancient,
+    DamageHarmonyBonus,
+    DefenseHarmonyBonus,
+    Armour,
+    StrengthReduced,
+    DexterityReduced,
+    WizardryWeapon,
+    HasDurability,
+    Timed,
+    HasOptions,
+    Count,
+};
+// The state of that name, or nothing for another name.
+std::optional<TooltipState> FindTooltipState(std::string_view name);
 
 struct TooltipCondition
 {
@@ -38,11 +62,15 @@ struct TooltipCondition
         GreaterOrEqual,
     };
     Kind kind = Kind::Value;
-    std::string name; // of the value or state
+    std::string name; // of the value or state, as the file writes it
     ItemTag tag = ItemTag::Count;
     bool negated = false;
     Comparison comparison = Comparison::NotZero;
     int number = 0;
+    // The value or state `name` names, resolved when the condition is read (ReadTooltipCondition), so a condition is
+    // checked without comparing names.
+    TooltipValue value = TooltipValue::Count;
+    TooltipState state = TooltipState::Count;
 
     bool operator==(const TooltipCondition& other) const = default;
 };

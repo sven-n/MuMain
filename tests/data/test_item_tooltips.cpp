@@ -451,8 +451,8 @@ TEST_CASE("An item's add option values come from its add option [data][items][to
     CHECK(values.addOptionValue1 == addOption.m_byValue1);
     CHECK(values.addOptionValue2 == addOption.m_byValue2);
     CHECK(GetItemTooltipValue(values, "addOptionValue1") == static_cast<int>(addOption.m_byValue1));
-    CHECK_FALSE(values.addOptionDuration.empty());
-    CHECK(GetItemTooltipText(values, "addOptionDuration") == values.addOptionDuration);
+    CHECK(values.addOptionDuration[0] != L'\0');
+    CHECK(GetItemTooltipText(values, "addOptionDuration") == Core::Text::ToUtf8(values.addOptionDuration.data()));
 }
 
 TEST_CASE("The Weapon of Archangel shows its reward weapon's skill mana from the skill data [data][items][tooltip]")

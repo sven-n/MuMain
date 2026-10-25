@@ -99,9 +99,11 @@ public:
         return m_statProfiles;
     }
 
-    // The shared texts and layouts of the item tooltips (Data/Items/Tooltips/Tooltip.json).
+    // The shared texts and layouts of the item tooltips (Data/Items/Tooltips/Tooltip.json). A version change, as the
+    // items' and the stat file's: what the tooltips made of them (their compiled texts) is made again.
     void SetTooltipFile(ItemTooltipFile file)
     {
+        ++m_version;
         m_tooltipFile = std::move(file);
     }
 
@@ -148,8 +150,9 @@ public:
 
     int GetExistingItemCount() const { return m_existingItemCount; }
 
-    // Counts the changes of the items; views taken from them (e.g. the item
-    // names the editor lists) take them again when it changes.
+    // Counts the changes of the items, the stat file and the tooltip file;
+    // views taken from them (e.g. the item names the editor lists, the
+    // tooltips' compiled texts) take them again when it changes.
     int GetVersion() const
     {
         return m_version;

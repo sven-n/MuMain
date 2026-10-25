@@ -66,29 +66,33 @@ struct ItemTooltipValues
     bool hasOptions = false;
     // The hero's level.
     int heroLevel = 0;
-    // The item's name as its data has it, its level + 1, and its excellent options (bits 0 to 5 of ExcellentFlags;
-    // Fenrir's 1, 2 and 4 are its Destroy, Protect and Illusion kinds).
-    std::string name;
+    // The item's name as its data has it (ItemAttribute's, not copied), its level + 1, and its excellent options (bits
+    // 0 to 5 of ExcellentFlags; Fenrir's 1, 2 and 4 are its Destroy, Protect and Illusion kinds).
+    const wchar_t* name = L"";
     int levelPlusOne = 0;
     int excellentFlags = 0;
     // The item's add option (the potions', scrolls' and seals' effects of ItemAddOption): its two values, and how long
-    // it lasts as the tooltip writes it ("1 Hour").
+    // it lasts as the tooltip writes it ("1 Hour"). Computed every frame a tooltip shows, so nothing here allocates.
     int addOptionValue1 = 0;
     int addOptionValue2 = 0;
-    std::string addOptionDuration;
+    std::array<wchar_t, 32> addOptionDuration{};
 };
 
 // The values of `item` for the hero as he is (CharacterAttribute).
 ItemTooltipValues ComputeItemTooltipValues(const ITEM& item);
 
-// The value of a built-in placeholder (ItemDescriptionPlaceholders' names, without {level}), or nothing for another
-// name.
+// The value of a built-in value that is a number, or nothing for {level} (the item's level, which the caller has) and
+// the texts ({name}, {addOptionDuration}).
+std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, Data::Items::TooltipValue value);
+// The text of a built-in value that is a text ({name}, {addOptionDuration}), or nullptr for another.
+const wchar_t* GetItemTooltipText(const ItemTooltipValues& values, Data::Items::TooltipValue value);
+// The state.
+bool GetItemTooltipState(const ItemTooltipValues& values, Data::Items::TooltipState state);
+
+// The same by name (ItemDescriptionPlaceholders' and GetTooltipStates' names), for the tests and the editor: nothing,
+// or false, for another name.
 std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, std::string_view name);
-
-// The value of a built-in placeholder that is a text ({name}, {addOptionDuration}), or nothing for another name.
 std::optional<std::string> GetItemTooltipText(const ItemTooltipValues& values, std::string_view name);
-
-// The state of that name (Data::Items::GetTooltipStates); false for another name.
 bool GetItemTooltipState(const ItemTooltipValues& values, std::string_view name);
 
 // Whether every condition holds for the item of `type` at item level `level`: a value (a built-in, {level} or a table
