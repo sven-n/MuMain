@@ -1488,6 +1488,14 @@ namespace battleCastle
         return c;
     }
 
+    void ResetCastleGateAttackCount(CHARACTER* c, int Type)
+    {
+        if (Type == MODEL_CASTLE_GATE1)
+        {
+            c->SwordCount = 0;
+        }
+    }
+
     bool    SettingBattleCastleMonsterLinkBone(CHARACTER* c, int Type)
     {
         switch (Type)

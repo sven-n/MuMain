@@ -49,6 +49,8 @@
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/MonsterModelDatabase.h"
+#include "Engine/Object/MonsterModelBody.h"
 #include "GameLogic/Monsters/MonsterNames.h"
 
 // DevEditor function declarations
@@ -11953,6 +11955,12 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
         Vector(50.f, 50.f, 150.f, o->BoundingBoxMax);
         break;
     }
+    // A model of the model list has its box and weapon bones there.
+    const Data::Monsters::MonsterModelDefinition* modelEntry = g_MonsterModelDatabase.Find(Type);
+    if (modelEntry != nullptr)
+    {
+        Engine::Object::MonsterBody::ApplyBoundingBox(*o, modelEntry->body);
+    }
 
     if (o->BoneTransform != NULL)
     {
@@ -11990,6 +11998,12 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
 
     o->BlendMesh = -1;
     o->BlendMeshLight = 1.f;
+    if (modelEntry != nullptr)
+    {
+        Engine::Object::MonsterBody::ApplyLinkBones(*c, modelEntry->body);
+        battleCastle::ResetCastleGateAttackCount(c, Type);
+        return;
+    }
     switch (Type)
     {
     case MODEL_CHAOS_CASTLE_KNIGHT:

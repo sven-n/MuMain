@@ -17,7 +17,8 @@
         "idle": ["Data/Sound/mBull1.wav", "Data/Sound/mBull2.wav"],
         "attack": ["SOUND_MONSTER_BULLATTACK1", "Data/Sound/mBullAttack2.wav"],
         "die": "Data/Sound/mBullDie.wav"
-      }
+      },
+      "linkBones": [42, 33]
     },
     {
       "slot": "MONSTER_MODEL_HOUND",
@@ -35,7 +36,8 @@
         "idle": ["Data/Sound/mHound1.wav", "Data/Sound/mHound2.wav"],
         "attack": ["Data/Sound/mHoundAttack1.wav", "Data/Sound/mHoundAttack2.wav"],
         "die": "Data/Sound/mHoundDie.wav"
-      }
+      },
+      "linkBones": [19, 14]
     },
     {
       "slot": "MONSTER_MODEL_BUDGE_DRAGON",
@@ -52,7 +54,8 @@
         "idle": ["Data/Sound/mBudge1.wav", "Data/Sound/mBudgeAttack1.wav"],
         "attack": ["Data/Sound/mBudgeAttack1.wav", "Data/Sound/mBudgeAttack1.wav"],
         "die": "Data/Sound/mBudgeDie.wav"
-      }
+      },
+      "boundingBox": {"max": [50, 50, 80]}
     },
     {
       "slot": "MONSTER_MODEL_DARK_KNIGHT",
@@ -71,7 +74,8 @@
         "idle": ["Data/Sound/mDarkKnight1.wav", "Data/Sound/mDarkKnight2.wav"],
         "attack": ["Data/Sound/mDarkKnightAttack1.wav", "Data/Sound/mDarkKnightAttack2.wav"],
         "die": "Data/Sound/mDarkKnightDie.wav"
-      }
+      },
+      "linkBones": [26, 36]
     },
     {
       "slot": "MONSTER_MODEL_LICH",
@@ -89,7 +93,8 @@
         "idle": ["Data/Sound/mWizard1.wav", "Data/Sound/mWizard2.wav"],
         "attack": ["Data/Sound/mWizardAttack1.wav", "Data/Sound/mWizardAttack2.wav"],
         "die": "Data/Sound/mWizardDie.wav"
-      }
+      },
+      "linkBones": [41, 32]
     },
     {
       "slot": "MONSTER_MODEL_GIANT",
@@ -108,7 +113,8 @@
         "idle": ["Data/Sound/mGiant1.wav", "Data/Sound/mGiant2.wav"],
         "attack": ["Data/Sound/mGiantAttack1.wav", "Data/Sound/mGiantAttack2.wav"],
         "die": "Data/Sound/mGiantDie.wav"
-      }
+      },
+      "linkBones": [41, 32]
     },
     {
       "slot": "MONSTER_MODEL_LARVA",
@@ -123,7 +129,8 @@
         "idle": ["Data/Sound/mLarva1.wav", "Data/Sound/mLarva2.wav"],
         "attack": ["Data/Sound/mLarva1.wav", "Data/Sound/mLarva2.wav"],
         "die": "Data/Sound/mLarva2.wav"
-      }
+      },
+      "boundingBox": {"max": [50, 50, 80]}
     },
     {
       "slot": "MONSTER_MODEL_GHOST",
@@ -158,7 +165,8 @@
         "idle": ["Data/Sound/mHellSpider1.wav", "Data/Sound/mHellSpiderAttack1.wav"],
         "attack": ["Data/Sound/mHellSpiderAttack1.wav", "Data/Sound/mHellSpiderAttack1.wav"],
         "die": "SOUND_MONSTER_HELLSPIDERDIE"
-      }
+      },
+      "linkBones": [29, 38]
     },
     {
       "slot": "MONSTER_MODEL_SPIDER",
@@ -172,7 +180,8 @@
         "idle": ["Data/Sound/mSpider1.wav", "Data/Sound/mSpider1.wav"],
         "attack": ["Data/Sound/mSpider1.wav", "Data/Sound/mSpider1.wav"],
         "die": "Data/Sound/mSpider1.wav"
-      }
+      },
+      "boundingBox": {"max": [50, 50, 80]}
     },
     {
       "slot": "MONSTER_MODEL_CYCLOPS",
@@ -191,7 +200,8 @@
         "idle": ["Data/Sound/mOgre1.wav", "Data/Sound/mOgre2.wav"],
         "attack": ["Data/Sound/mOgreAttack1.wav", "Data/Sound/mOgreAttack2.wav"],
         "die": "Data/Sound/mOgreDie.wav"
-      }
+      },
+      "linkBones": [41, 32]
     },
     {
       "slot": "MONSTER_MODEL_GORGON",
@@ -209,7 +219,9 @@
         "idle": ["Data/Sound/mGorgon1.wav", "Data/Sound/mGorgon2.wav"],
         "attack": ["Data/Sound/mGorgonAttack1.wav", "Data/Sound/mGorgonAttack2.wav"],
         "die": "Data/Sound/mGorgonDie.wav"
-      }
+      },
+      "boundingBox": {"max": [70, 70, 250]},
+      "linkBones": [30, 39]
     },
     {
       "slot": "MONSTER_MODEL_YETI",
@@ -295,7 +307,8 @@
         "idle": ["Data/Sound/mHomord1.wav", "Data/Sound/mHomord2.wav"],
         "attack": ["Data/Sound/mHomordAttack1.wav", "Data/Sound/mHomordAttack1.wav"],
         "die": "Data/Sound/mHomordDie.wav"
-      }
+      },
+      "linkBones": [30, 39]
     },
     {
       "slot": "MONSTER_MODEL_WORM",
@@ -311,7 +324,8 @@
         "idle": ["Data/Sound/mWorm1.wav", "Data/Sound/mWorm1.wav"],
         "attack": ["Data/Sound/mWormDie.wav", "Data/Sound/mWormDie.wav"],
         "die": "Data/Sound/mWormDie.wav"
-      }
+      },
+      "boundingBox": {"max": [50, 50, 80]}
     },
     {
       "slot": "MONSTER_MODEL_ICE_QUEEN",
@@ -329,7 +343,8 @@
         "idle": ["Data/Sound/mIceQueen1.wav", "Data/Sound/mIceQueen2.wav"],
         "attack": ["Data/Sound/mIceQueenAttack1.wav", "Data/Sound/mIceQueenAttack2.wav"],
         "die": "Data/Sound/mIceQueenDie.wav"
-      }
+      },
+      "linkBones": [26, 35]
     },
     {
       "slot": "MONSTER_MODEL_GOBLIN",
@@ -348,7 +363,9 @@
         "idle": ["Data/Sound/mGoblin1.wav", "Data/Sound/mGoblin2.wav"],
         "attack": ["Data/Sound/mGoblinAttack1.wav", "Data/Sound/mGoblinAttack2.wav"],
         "die": "Data/Sound/mGoblinDie.wav"
-      }
+      },
+      "boundingBox": {"max": [50, 50, 80]},
+      "linkBones": [31, 22]
     },
     {
       "slot": "MONSTER_MODEL_CHAIN_SCORPION",
@@ -366,7 +383,8 @@
         "idle": ["Data/Sound/mScorpion1.wav", "Data/Sound/mScorpion2.wav"],
         "attack": ["Data/Sound/mScorpionAttack1.wav", "Data/Sound/mScorpionAttack2.wav"],
         "die": "Data/Sound/mScorpionDie.wav"
-      }
+      },
+      "boundingBox": {"max": [50, 50, 80]}
     },
     {
       "slot": "MONSTER_MODEL_BEETLE_MONSTER",
@@ -383,7 +401,8 @@
         "idle": ["Data/Sound/mBeetle1.wav", "Data/Sound/mBeetle1.wav"],
         "attack": ["Data/Sound/mBeetleAttack1.wav", "Data/Sound/mBeetleAttack1.wav"],
         "die": "Data/Sound/mBeetleDie.wav"
-      }
+      },
+      "linkBones": [24, 19]
     },
     {
       "slot": "MONSTER_MODEL_HUNTER",
@@ -401,7 +420,8 @@
         "idle": ["Data/Sound/mHunter1.wav", "Data/Sound/mHunter2.wav"],
         "attack": ["Data/Sound/mHunterAttack1.wav", "Data/Sound/mHunterAttack2.wav"],
         "die": "Data/Sound/mHunterDie.wav"
-      }
+      },
+      "linkBones": [25, 16]
     },
     {
       "slot": "MONSTER_MODEL_FOREST_MONSTER",
@@ -437,7 +457,8 @@
         "idle": ["Data/Sound/mArgon1.wav", "Data/Sound/mArgon2.wav"],
         "attack": ["Data/Sound/mArgonAttack1.wav", "Data/Sound/mArgonAttack2.wav"],
         "die": "Data/Sound/mArgonDie.wav"
-      }
+      },
+      "linkBones": [39, 30]
     },
     {
       "slot": "MONSTER_MODEL_STONE_GOLEM",
@@ -472,7 +493,8 @@
         "idle": ["SOUND_MONSTER_YETI1_", "SOUND_MONSTER_YETI1_"],
         "attack": ["Data/Sound/mSatanAttack1.wav", "Data/Sound/mSatanAttack1.wav"],
         "die": "SOUND_MONSTER_YETIDIE_"
-      }
+      },
+      "linkBones": [16, 25]
     },
     {
       "slot": "MONSTER_MODEL_BALROG",
@@ -491,7 +513,8 @@
         "idle": ["Data/Sound/mBalrog1.wav", "Data/Sound/mBalrog2.wav"],
         "attack": ["SOUND_MONSTER_WIZARDATTACK2_", "SOUND_MONSTER_GORGONATTACK2_"],
         "die": "Data/Sound/mBalrogDie.wav"
-      }
+      },
+      "linkBones": [17, 28]
     },
     {
       "slot": "MONSTER_MODEL_SHADOW",
@@ -528,7 +551,8 @@
         "idle": ["Data/Sound/mDarkKnight1.wav", "Data/Sound/mDarkKnight2.wav"],
         "attack": ["Data/Sound/mDarkKnightAttack1.wav", "Data/Sound/mDarkKnightAttack2.wav"],
         "die": "Data/Sound/mDarkKnightDie.wav"
-      }
+      },
+      "linkBones": [30, 39]
     },
     {
       "slot": "MONSTER_MODEL_DEATH_COW",
@@ -546,7 +570,8 @@
         "idle": ["Data/Sound/mBull1.wav", "Data/Sound/mBull2.wav"],
         "attack": ["SOUND_MONSTER_BULLATTACK1", "Data/Sound/mBullAttack2.wav"],
         "die": "Data/Sound/mBullDie.wav"
-      }
+      },
+      "linkBones": [42, 33]
     },
     {
       "slot": "MONSTER_MODEL_DRAGON",
@@ -563,7 +588,8 @@
         "idle": ["SOUND_MONSTER_YETI1__", "SOUND_MONSTER_YETI1__"],
         "attack": ["SOUND_MONSTER_BULLATTACK1_", "SOUND_MONSTER_BULLATTACK1_"],
         "die": "SOUND_MONSTER_YETIDIE__"
-      }
+      },
+      "boundingBox": {"max": [70, 70, 250]}
     },
     {
       "slot": "MONSTER_MODEL_BALI",
@@ -612,7 +638,8 @@
         "idle": ["Data/Sound/mBepar1.wav", "Data/Sound/mBepar2.wav"],
         "attack": ["SOUND_MONSTER_GOLEMDIE", "SOUND_MONSTER_GOLEMDIE"],
         "die": "Data/Sound/mBepar2.wav"
-      }
+      },
+      "linkBones": [30, 39]
     },
     {
       "slot": "MONSTER_MODEL_VALKYRIE",
@@ -628,7 +655,8 @@
         "idle": ["Data/Sound/mValkyrie1.wav", "Data/Sound/mValkyrie1.wav"],
         "attack": ["SOUND_MONSTER_BALIATTACK2_", "SOUND_MONSTER_BALIATTACK2_"],
         "die": "Data/Sound/mValkyrieDie.wav"
-      }
+      },
+      "linkBones": [30, 39]
     },
     {
       "slot": "MONSTER_MODEL_LIZARD",
@@ -644,7 +672,8 @@
         "idle": ["Data/Sound/mLizardKing1.wav", "Data/Sound/mLizardKing2.wav"],
         "attack": ["Data/Sound/mLizardKing1.wav", "Data/Sound/mLizardKing2.wav"],
         "die": "SOUND_MONSTER_GORGONDIE_"
-      }
+      },
+      "linkBones": [52, 65]
     },
     {
       "slot": "MONSTER_MODEL_HYDRA",
@@ -659,7 +688,8 @@
         "idle": ["Data/Sound/mHydra1.wav", "Data/Sound/mHydra1.wav"],
         "attack": ["Data/Sound/mHydraAttack1.wav", "Data/Sound/mHydraAttack1.wav"],
         "die": "Data/Sound/mHydra1.wav"
-      }
+      },
+      "boundingBox": {"max": [100, 100, 150]}
     },
     {
       "slot": "MONSTER_MODEL_SEA_WORM",
@@ -684,7 +714,8 @@
         "idle": ["Data/Sound/mDarkKnight1.wav", "Data/Sound/mDarkKnight2.wav"],
         "attack": ["Data/Sound/mDarkKnightAttack1.wav", "Data/Sound/mDarkKnightAttack2.wav"],
         "die": "Data/Sound/mDarkKnightDie.wav"
-      }
+      },
+      "boundingBox": {"max": [70, 70, 250]}
     },
     {
       "slot": "MONSTER_MODEL_SOLDIER",
@@ -701,7 +732,8 @@
         "idle": ["Data/Sound/mLizardKing1.wav", "Data/Sound/mLizardKing2.wav"],
         "attack": ["Data/Sound/mLizardKing1.wav", "Data/Sound/mLizardKing2.wav"],
         "die": "SOUND_MONSTER_GORGONDIE_"
-      }
+      },
+      "linkBones": [20, 33]
     },
     {
       "slot": "MONSTER_MODEL_GOLDEN_WHEEL",
@@ -717,7 +749,8 @@
         "idle": ["Data/Sound/iron1.wav", "Data/Sound/iron1.wav"],
         "attack": ["Data/Sound/iron_attack1.wav", "Data/Sound/iron_attack1.wav"],
         "die": "Data/Sound/iron_attack1.wav"
-      }
+      },
+      "linkBones": [23]
     },
     {
       "slot": "MONSTER_MODEL_TANTALLOS",
@@ -740,7 +773,9 @@
       "bitmaps": [
         {"file": "Monster/bv01_2.jpg", "slot": "BITMAP_MONSTER_SKIN", "filter": "linear", "wrap": "repeat"},
         {"file": "Monster/bv02_2.jpg", "slot": "BITMAP_MONSTER_SKIN+1", "filter": "linear", "wrap": "repeat"}
-      ]
+      ],
+      "boundingBox": {"max": [70, 70, 250]},
+      "linkBones": [43]
     },
     {
       "slot": "MONSTER_MODEL_BLOODY_WOLF",
@@ -774,7 +809,9 @@
         "idle": ["SOUND_MONSTER_DEATH1", "SOUND_MONSTER_DEATH1"],
         "attack": ["Data/Sound/death_attack1.wav", "Data/Sound/death_attack1.wav"],
         "die": "Data/Sound/death_die.wav"
-      }
+      },
+      "boundingBox": {"max": [70, 70, 250]},
+      "linkBones": [55, 70]
     },
     {
       "slot": "MONSTER_MODEL_MUTANT",
@@ -805,7 +842,8 @@
         "idle": [null, null],
         "attack": ["Data/Sound/mOrcArcherAttack1.wav", "Data/Sound/mOrcArcherAttack1.wav"],
         "die": "Data/Sound/mBullDie.wav"
-      }
+      },
+      "linkBones": [39, 39]
     },
     {
       "slot": "MONSTER_MODEL_ORC",
@@ -821,7 +859,8 @@
         "idle": ["Data/Sound/mHunter2.wav", "Data/Sound/mHunter2.wav"],
         "attack": ["SOUND_MONSTER_ORCCAPATTACK1", "SOUND_MONSTER_ORCCAPATTACK1"],
         "die": "Data/Sound/mBullDie.wav"
-      }
+      },
+      "linkBones": [27, 38]
     },
     {
       "slot": "MONSTER_MODEL_CURSED_KING",
@@ -837,7 +876,8 @@
         "idle": ["Data/Sound/mCursedKing1.wav", "Data/Sound/mCursedKing2.wav"],
         "attack": [null, null],
         "die": "Data/Sound/mCursedKingDie1.wav"
-      }
+      },
+      "linkBones": [32, 43]
     },
     {
       "slot": "MONSTER_MODEL_MOLT",
@@ -900,7 +940,8 @@
         "idle": ["Data/Sound/mMegaCrust1.wav", "Data/Sound/mMegaCrust1.wav"],
         "attack": ["Data/Sound/mMegaCrustAttack1.wav", "Data/Sound/mMegaCrustAttack1.wav"],
         "die": "Data/Sound/mMegaCrustDie.wav"
-      }
+      },
+      "linkBones": [36, 45]
     },
     {
       "slot": "MONSTER_MODEL_PHANTOM_KNIGHT",
@@ -916,7 +957,8 @@
         "idle": ["Data/Sound/mPhantom1.wav", "Data/Sound/mPhantom1.wav"],
         "attack": ["Data/Sound/mPhantomAttack1.wav", "Data/Sound/mPhantomAttack1.wav"],
         "die": "Data/Sound/mPhantomDie.wav"
-      }
+      },
+      "linkBones": [30, 39]
     },
     {
       "slot": "MONSTER_MODEL_DRAKAN",
@@ -947,7 +989,8 @@
         "idle": ["Data/Sound/mPhoenix1.wav", "SOUND_MONSTER_PHOENIX2"],
         "attack": ["Data/Sound/mPhoenixAttack1.wav", "Data/Sound/mPhoenixAttack1.wav"],
         "die": null
-      }
+      },
+      "linkBones": [27, 18]
     },
     {
       "slot": "MONSTER_MODEL_DARK_PHOENIX",
@@ -968,7 +1011,8 @@
         "idle": ["Data/Sound/mRedSkull.wav", null],
         "attack": ["Data/Sound/mRedSkullAttack.wav", null],
         "die": "Data/Sound/mRedSkullDie.wav"
-      }
+      },
+      "linkBones": [30, 39]
     },
     {
       "slot": "MONSTER_MODEL_GIANT_OGRE",
@@ -998,17 +1042,21 @@
         "idle": ["SOUND_MONSTER_HUNTER2_", null],
         "attack": ["Data/Sound/mBlackSkullAttack.wav", null],
         "die": "Data/Sound/mBlackSkullDie.wav"
-      }
+      },
+      "linkBones": [33, 20]
     },
     {
       "slot": "MONSTER_MODEL_STATUE_OF_SAINT",
       "file": "Data/Monster/Monster61.bmd",
-      "textureFolders": ["Monster"]
+      "textureFolders": ["Monster"],
+      "boundingBox": {"min": [-90, -50, 0], "max": [90, 50, 200]},
+      "linkBones": [1, 1]
     },
     {
       "slot": "MONSTER_MODEL_CASTLE_GATE",
       "file": "Data/Monster/Monster62.bmd",
-      "textureFolders": ["Monster"]
+      "textureFolders": ["Monster"],
+      "boundingBox": {"min": [-120, -120, 0], "max": [100, 100, 300]}
     },
     {
       "slot": "MONSTER_MODEL_MAGIC_SKELETON",
@@ -1125,7 +1173,8 @@
           "textureFolders": ["Monster"],
           "worlds": [24, 25, 26, 27, 28, 29, 36]
         }
-      ]
+      ],
+      "linkBones": [29, 49]
     },
     {
       "slot": "MONSTER_MODEL_BLOOD_SOLDIER",
@@ -1159,7 +1208,8 @@
         "idle": ["Data/Sound/mEsisIdle.wav", "Data/Sound/mEsisIdle.wav"],
         "attack": ["Data/Sound/mEsisAttack1.wav", "Data/Sound/mEsisAttack2.wav"],
         "die": "Data/Sound/mEsisDeath.wav"
-      }
+      },
+      "linkBones": [13, 14]
     },
     {
       "slot": "MONSTER_MODEL_DEATH_CENTURION",
@@ -1187,7 +1237,8 @@
           "attack": ["SOUND_MONSTER_LSATTACK1", "SOUND_MONSTER_LSATTACK2"],
           "die": "SOUND_MONSTER_LSDEATH"
         }
-      }
+      },
+      "linkBones": [56, 42]
     },
     {
       "slot": "MONSTER_MODEL_NECRON",
@@ -1204,7 +1255,8 @@
         "idle": ["Data/Sound/mNecronIdle1.wav", "Data/Sound/mNecronIdle2.wav"],
         "attack": ["Data/Sound/mNecronAttack1.wav", "Data/Sound/mNecronAttack2.wav"],
         "die": "Data/Sound/mNecronDeath.wav"
-      }
+      },
+      "linkBones": [60, 60]
     },
     {
       "slot": "MONSTER_MODEL_SHRIKER",
@@ -1232,7 +1284,8 @@
           "attack": ["SOUND_MONSTER_LVATTACK1", "SOUND_MONSTER_LVATTACK2"],
           "die": "SOUND_MONSTER_LVDEATH"
         }
-      }
+      },
+      "linkBones": [41, 51]
     },
     {
       "slot": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT",
@@ -1250,7 +1303,8 @@
         "idle": [null, null],
         "attack": ["SOUND_MONSTER_ORCCAPATTACK1", "SOUND_MONSTER_ORCCAPATTACK1"],
         "die": null
-      }
+      },
+      "boundingBox": {"max": [40, 40, 120]}
     },
     {
       "slot": "MONSTER_MODEL_CHAOSCASTLE_ELF",
@@ -1268,7 +1322,8 @@
         "idle": [null, null],
         "attack": ["SOUND_MONSTER_ORCCAPATTACK1", "SOUND_MONSTER_ORCCAPATTACK1"],
         "die": null
-      }
+      },
+      "boundingBox": {"max": [40, 40, 120]}
     },
     {
       "slot": "MONSTER_MODEL_CHAOSCASTLE_WIZARD",
@@ -1286,7 +1341,8 @@
         "idle": [null, null],
         "attack": ["Data/Sound/mOrcArcherAttack1.wav", "Data/Sound/mOrcArcherAttack1.wav"],
         "die": null
-      }
+      },
+      "boundingBox": {"max": [40, 40, 120]}
     },
     {
       "slot": "MONSTER_MODEL_CASTLE_GATE1",
@@ -1299,7 +1355,9 @@
         "idle": [null, null],
         "attack": [null, null],
         "die": "Data/Sound/BattleCastle/oCDoorDis.wav"
-      }
+      },
+      "boundingBox": {"min": [-140, -140, 0], "max": [140, 140, 300]},
+      "linkBones": []
     },
     {
       "slot": "MONSTER_MODEL_GUARDIAN_STATUE",
@@ -2102,22 +2160,26 @@
         {"file": "Data/Sound/w58w59/Selupan_word2.wav", "id": "SOUND_RAKLION_SERUFAN_WORD2", "channels": 1, "spatial": false},
         {"file": "Data/Sound/w58w59/Selupan_word3.wav", "id": "SOUND_RAKLION_SERUFAN_WORD3", "channels": 1, "spatial": false},
         {"file": "Data/Sound/w58w59/Selupan_word4.wav", "id": "SOUND_RAKLION_SERUFAN_WORD4", "channels": 1, "spatial": false}
-      ]
+      ],
+      "boundingBox": {"min": [-150, -150, 0], "max": [150, 150, 400]}
     },
     {
       "slot": "MONSTER_MODEL_SPIDER_EGGS_1",
       "file": "Data/Monster/Monster152.bmd",
-      "textureFolders": ["Monster"]
+      "textureFolders": ["Monster"],
+      "boundingBox": {"min": [-100, -100, 0], "max": [100, 100, 200]}
     },
     {
       "slot": "MONSTER_MODEL_SPIDER_EGGS_2",
       "file": "Data/Monster/Monster153.bmd",
-      "textureFolders": ["Monster"]
+      "textureFolders": ["Monster"],
+      "boundingBox": {"min": [-100, -100, 0], "max": [100, 100, 200]}
     },
     {
       "slot": "MONSTER_MODEL_SPIDER_EGGS_3",
       "file": "Data/Monster/Monster154.bmd",
-      "textureFolders": ["Monster"]
+      "textureFolders": ["Monster"],
+      "boundingBox": {"min": [-100, -100, 0], "max": [100, 100, 200]}
     },
     {
       "slot": "MONSTER_MODEL_FIRE_FLAME_GHOST",
@@ -2170,7 +2232,8 @@
         {"file": "Data/Sound/w64/ZombieWarrior_death.wav", "id": "SOUND_PKFIELD_ZOMBIEWARRIOR_DEATH", "channels": 4, "spatial": false},
         {"file": "Data/Sound/w64/ZombieWarrior_move01.wav", "id": "SOUND_PKFIELD_ZOMBIEWARRIOR_MOVE01", "channels": 4, "spatial": false},
         {"file": "Data/Sound/w64/ZombieWarrior_move02.wav", "id": "SOUND_PKFIELD_ZOMBIEWARRIOR_MOVE02", "channels": 4, "spatial": false}
-      ]
+      ],
+      "boundingBox": {"min": [-100, -70, 0], "max": [100, 70, 150]}
     },
     {
       "slot": "MONSTER_MODEL_GLADIATOR",
@@ -2184,7 +2247,8 @@
         {"file": "Data/Sound/w64/RaisedGladiator_death.wav", "id": "SOUND_PKFIELD_RAISEDGLADIATOR_DEATH", "channels": 4, "spatial": false},
         {"file": "Data/Sound/w64/RaisedGladiator_move01.wav", "id": "SOUND_PKFIELD_RAISEDGLADIATOR_MOVE01", "channels": 4, "spatial": false},
         {"file": "Data/Sound/w64/RaisedGladiator_move02.wav", "id": "SOUND_PKFIELD_RAISEDGLADIATOR_MOVE02", "channels": 4, "spatial": false}
-      ]
+      ],
+      "boundingBox": {"min": [-100, -100, 50], "max": [100, 100, 150]}
     },
     {
       "slot": "MONSTER_MODEL_SLAUGTHERER",
@@ -2198,7 +2262,8 @@
         {"file": "Data/Sound/w64/AshesButcher_death.wav", "id": "SOUND_PKFIELD_ASHESBUTCHER_DEATH", "channels": 4, "spatial": false},
         {"file": "Data/Sound/w64/AshesButcher_move01.wav", "id": "SOUND_PKFIELD_ASHESBUTCHER_MOVE01", "channels": 4, "spatial": false},
         {"file": "Data/Sound/w64/AshesButcher_move02.wav", "id": "SOUND_PKFIELD_ASHESBUTCHER_MOVE02", "channels": 4, "spatial": false}
-      ]
+      ],
+      "boundingBox": {"min": [-100, -100, 0], "max": [100, 100, 180]}
     },
     {
       "slot": "MONSTER_MODEL_BLOOD_ASSASSIN",
@@ -2238,13 +2303,15 @@
           "textureFolders": ["Monster"],
           "worlds": [63]
         }
-      ]
+      ],
+      "boundingBox": {"min": [-80, -80, 0], "max": [80, 80, 130]}
     },
     {
       "slot": "MONSTER_MODEL_CRUEL_BLOOD_ASSASSIN",
       "file": "Data/Monster/MONSTER162.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop1": 0.28, "walk": 0.5, "attack1": 0.17, "shock": 0.25, "die": 0.4}
+      "animations": {"stop1": 0.28, "walk": 0.5, "attack1": 0.17, "shock": 0.25, "die": 0.4},
+      "boundingBox": {"min": [-80, -80, 0], "max": [80, 80, 130]}
     },
     {
       "slot": "MONSTER_MODEL_LAVA_GIANT",
@@ -2259,13 +2326,15 @@
         {"file": "Data/Sound/w64/BurningLavaGolem_death.wav", "id": "SOUND_PKFIELD_BURNINGLAVAGOLEM_DEATH", "channels": 4, "spatial": false},
         {"file": "Data/Sound/w64/BurningLavaGolem_move01.wav", "id": "SOUND_PKFIELD_BURNINGLAVAGOLEM_MOVE01", "channels": 4, "spatial": false},
         {"file": "Data/Sound/w64/BurningLavaGolem_move02.wav", "id": "SOUND_PKFIELD_BURNINGLAVAGOLEM_MOVE02", "channels": 4, "spatial": false}
-      ]
+      ],
+      "boundingBox": {"min": [-100, -80, 50], "max": [100, 70, 280]}
     },
     {
       "slot": "MONSTER_MODEL_BURNING_LAVA_GIANT",
       "file": "Data/Monster/MONSTER164.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop1": 0.28, "walk": 0.3, "attack1": 0.25, "attack2": 0.25, "shock": 0.25, "die": 0.25}
+      "animations": {"stop1": 0.28, "walk": 0.3, "attack1": 0.25, "attack2": 0.25, "shock": 0.25, "die": 0.25},
+      "boundingBox": {"min": [-100, -80, 50], "max": [100, 70, 280]}
     },
     {
       "slot": "MONSTER_MODEL_GAYION",
@@ -3073,7 +3142,8 @@
     {
       "slot": "MODEL_NPC_CAPATULT_ATT",
       "file": "Data/NPC/Model_Npc_Catapult_Att.bmd",
-      "textureFolders": ["NPC"]
+      "textureFolders": ["NPC"],
+      "boundingBox": {"min": [-200, -50, -100], "max": [200, 50, 100]}
     },
     {
       "slot": "MODEL_NPC_CAPATULT_DEF",
@@ -3254,49 +3324,57 @@
       "slot": "MODEL_LITTLESANTA",
       "file": "Data/NPC/xmassanta.bmd",
       "textureFolders": ["NPC"],
-      "textureNames": {"0": "xmassanta1.jpg"}
+      "textureNames": {"0": "xmassanta1.jpg"},
+      "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
     },
     {
       "slot": "MODEL_LITTLESANTA+1",
       "file": "Data/NPC/xmassanta.bmd",
       "textureFolders": ["NPC"],
-      "textureNames": {"0": "xmassanta2.jpg"}
+      "textureNames": {"0": "xmassanta2.jpg"},
+      "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
     },
     {
       "slot": "MODEL_LITTLESANTA+2",
       "file": "Data/NPC/xmassanta.bmd",
       "textureFolders": ["NPC"],
-      "textureNames": {"0": "xmassanta3.jpg"}
+      "textureNames": {"0": "xmassanta3.jpg"},
+      "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
     },
     {
       "slot": "MODEL_LITTLESANTA+3",
       "file": "Data/NPC/xmassanta.bmd",
       "textureFolders": ["NPC"],
-      "textureNames": {"0": "xmassanta4.jpg"}
+      "textureNames": {"0": "xmassanta4.jpg"},
+      "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
     },
     {
       "slot": "MODEL_LITTLESANTA+4",
       "file": "Data/NPC/xmassanta.bmd",
       "textureFolders": ["NPC"],
-      "textureNames": {"0": "xmassanta5.jpg"}
+      "textureNames": {"0": "xmassanta5.jpg"},
+      "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
     },
     {
       "slot": "MODEL_LITTLESANTA+5",
       "file": "Data/NPC/xmassanta.bmd",
       "textureFolders": ["NPC"],
-      "textureNames": {"0": "xmassanta6.jpg"}
+      "textureNames": {"0": "xmassanta6.jpg"},
+      "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
     },
     {
       "slot": "MODEL_LITTLESANTA+6",
       "file": "Data/NPC/xmassanta.bmd",
       "textureFolders": ["NPC"],
-      "textureNames": {"0": "xmassanta7.jpg"}
+      "textureNames": {"0": "xmassanta7.jpg"},
+      "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
     },
     {
       "slot": "MODEL_LITTLESANTA+7",
       "file": "Data/NPC/xmassanta.bmd",
       "textureFolders": ["NPC"],
-      "textureNames": {"0": "xmassanta8.jpg"}
+      "textureNames": {"0": "xmassanta8.jpg"},
+      "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
     },
     {
       "slot": "MODEL_XMAS2008_SNOWMAN",

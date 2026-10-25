@@ -16,13 +16,16 @@
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "World/MapInfra/MapManager.h"
 
 #include <doctest.h>
 
 #include <algorithm>
+#include <array>
 #include <cctype>
+#include <memory>
 #include <map>
 #include <string>
 #include <vector>
@@ -294,5 +297,64 @@ TEST_CASE("Monster models: the comparison opens the map parts from the data [mon
                                         [](const auto& slot) { return slot.first == MODEL_TOTEMGOLEM_PART1; });
     REQUIRE(totemPart != changes.slots.end());
     CHECK(IsLoaded(totemPart->second));
+    g_MonsterModelDatabase.Build({});
+}
+
+namespace
+{
+struct CharacterBody
+{
+    std::array<float, 3> boxMin{};
+    std::array<float, 3> boxMax{};
+    int rightHandBone = 0;
+    int leftHandBone = 0;
+    int swordCount = 0;
+
+    bool operator==(const CharacterBody&) const = default;
+};
+
+// What CreateCharacterPointer gives a character of the slot, on a character
+// whose bones and attack count were set to values no model uses.
+CharacterBody CreateCharacterOf(int slot)
+{
+    constexpr BYTE Untouched = 250;
+    auto character = std::make_unique<CHARACTER>();
+    character->Weapon[0].LinkBone = Untouched;
+    character->Weapon[1].LinkBone = Untouched;
+    character->SwordCount = 9;
+    CreateCharacterPointer(character.get(), slot, 10, 10, 0.0f);
+    const OBJECT& object = character->Object;
+    CharacterBody body;
+    body.boxMin = {object.BoundingBoxMin[0], object.BoundingBoxMin[1], object.BoundingBoxMin[2]};
+    body.boxMax = {object.BoundingBoxMax[0], object.BoundingBoxMax[1], object.BoundingBoxMax[2]};
+    body.rightHandBone = character->Weapon[0].LinkBone;
+    body.leftHandBone = character->Weapon[1].LinkBone;
+    body.swordCount = character->SwordCount;
+    delete[] character->Object.BoneTransform;
+    character->Object.BoneTransform = nullptr;
+    return body;
+}
+} // namespace
+
+TEST_CASE("Monster models: characters get the bounding box and weapon bones of Models.json as the code gave them "
+          "[monsters][comparison]")
+{
+    ShippedModels();
+    int withEntry = 0;
+    for (int slot = 0; slot < MAX_MODELS; ++slot)
+    {
+        g_MonsterModelDatabase.Build({});
+        const CharacterBody old = CreateCharacterOf(slot);
+        g_MonsterModelDatabase.Build(ShippedModels());
+        const CharacterBody data = CreateCharacterOf(slot);
+        withEntry += g_MonsterModelDatabase.Find(slot) != nullptr ? 1 : 0;
+        INFO("slot " << slot << " (" << Data::Monsters::GetMonsterModelSymbol(slot) << ")");
+        CHECK(old.boxMin == data.boxMin);
+        CHECK(old.boxMax == data.boxMax);
+        CHECK(old.rightHandBone == data.rightHandBone);
+        CHECK(old.leftHandBone == data.leftHandBone);
+        CHECK(old.swordCount == data.swordCount);
+    }
+    CHECK(withEntry == static_cast<int>(ShippedModels().size()));
     g_MonsterModelDatabase.Build({});
 }
