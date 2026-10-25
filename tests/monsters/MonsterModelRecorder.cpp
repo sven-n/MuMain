@@ -18,7 +18,9 @@
 
 #include <algorithm>
 #include <array>
-#include <charconv>
+#include <cstdio>
+#include <cstdlib>
+#include <limits>
 #include <cstring>
 #include <cwctype>
 #include <map>
@@ -91,11 +93,20 @@ public:
     }
 };
 
+// The shortest text that reads back as the same float (std::to_chars of a
+// float is missing before macOS 13.3).
 std::string FloatText(float value)
 {
     std::array<char, 32> buffer{};
-    const auto result = std::to_chars(buffer.data(), buffer.data() + buffer.size(), value);
-    return std::string(buffer.data(), result.ptr);
+    for (int digits = 1; digits <= std::numeric_limits<float>::max_digits10; ++digits)
+    {
+        std::snprintf(buffer.data(), buffer.size(), "%.*g", digits, static_cast<double>(value));
+        if (std::strtof(buffer.data(), nullptr) == value)
+        {
+            break;
+        }
+    }
+    return buffer.data();
 }
 
 // Paths in the record are compared without case: the game finds files the

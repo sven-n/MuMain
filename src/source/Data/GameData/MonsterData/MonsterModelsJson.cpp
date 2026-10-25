@@ -10,8 +10,8 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
-#include <charconv>
 #include <cmath>
+#include <cstdio>
 #include <cstdlib>
 #include <limits>
 #include <optional>
@@ -973,7 +973,8 @@ std::optional<MonsterModelDefinition> ReadModel(const OrderedJson& json, size_t 
 // ---------------------------------------------------------------- writing
 
 // 0.7 instead of 0.69999998807907104: the shortest text that reads back as
-// the same float; 270 instead of 270.0.
+// the same float, found digit by digit (std::to_chars of a float, which
+// does it at once, is missing before macOS 13.3); 270 instead of 270.0.
 OrderedJson WriteFloat(float value)
 {
     if (value == std::floor(value) && std::abs(value) < static_cast<float>(1 << 24))
@@ -981,8 +982,15 @@ OrderedJson WriteFloat(float value)
         return static_cast<long long>(value);
     }
     std::array<char, 32> buffer{};
-    const auto result = std::to_chars(buffer.data(), buffer.data() + buffer.size(), value);
-    return std::strtod(std::string(buffer.data(), result.ptr).c_str(), nullptr);
+    for (int digits = 1; digits <= std::numeric_limits<float>::max_digits10; ++digits)
+    {
+        std::snprintf(buffer.data(), buffer.size(), "%.*g", digits, static_cast<double>(value));
+        if (std::strtof(buffer.data(), nullptr) == value)
+        {
+            break;
+        }
+    }
+    return std::strtod(buffer.data(), nullptr);
 }
 
 OrderedJson WriteSpeeds(const std::vector<MonsterAnimationSpeed>& speeds)
