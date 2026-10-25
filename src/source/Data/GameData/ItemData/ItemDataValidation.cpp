@@ -420,12 +420,21 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
             for (const auto& [placeholder, value] : entry.values)
             {
                 known.push_back(placeholder);
-                if (!isValue(value))
+                if (value.starts_with(SkillManaPrefix))
+                {
+                    if (!ReadSkillManaValue(value))
+                    {
+                        addError(field + ".values." + placeholder,
+                                 "\"" + value + "\" names no skill: \"skillMana:\" takes a skill's number, below " +
+                                     std::to_string(MAX_SKILLS));
+                    }
+                }
+                else if (!isValue(value))
                 {
                     const std::string suggestion = suggest(value, builtIns);
                     addError(field + ".values." + placeholder,
-                             "\"" + value + "\" is neither a built-in value nor a table of " + statFile + " (\"" +
-                                 MakeTablePlaceholder("name") + "\")" +
+                             "\"" + value + "\" is neither a built-in value, a table of " + statFile + " (\"" +
+                                 MakeTablePlaceholder("name") + "\") nor \"skillMana:<skill>\"" +
                                  (suggestion.empty() ? "" : "; did you mean \"" + suggestion + "\"?"));
                 }
             }

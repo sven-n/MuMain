@@ -9,7 +9,8 @@
 
 // The conditions of tooltip lines, in the tooltip layouts (ItemTooltipLayouts.h) and in item descriptions: "defense"
 // (a built-in value that is not 0), "durability=2" (a value compared with a whole number by =, !=, <, <=, > or >=),
-// "excellent" (a state), "tag:sceptre" (an item tag), each turned around by a "!" in front.
+// "excellent" (a state), "tag:sceptre" (an item tag), "class:darkLord" (the hero's class, as "classRequirements"
+// names it), each turned around by a "!" in front.
 namespace Data::Items
 {
 // The states a condition can name besides the built-in values: what the game knows of the item and the hero
@@ -24,6 +25,7 @@ struct TooltipCondition
         Value, // a built-in value (or {level}), compared with `number`
         State,
         Tag,
+        Class, // the hero's class is `number` (CLASS_WIZARD, ...)
     };
     enum class Comparison : unsigned char
     {

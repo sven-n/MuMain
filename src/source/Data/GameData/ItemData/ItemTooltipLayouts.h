@@ -66,14 +66,6 @@ enum class TooltipSection : BYTE
 };
 std::string_view GetTooltipSectionName(TooltipSection section);
 
-struct TooltipColorRule
-{
-    std::vector<TooltipCondition> when;
-    ItemTextColor color = ItemTextColor::White;
-
-    bool operator==(const TooltipColorRule& other) const = default;
-};
-
 struct TooltipLayoutLine
 {
     TooltipSection section = TooltipSection::None;

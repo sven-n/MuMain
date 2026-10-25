@@ -38,6 +38,9 @@ void ReadItemGroupJson(std::string_view text, const std::string& source, std::ve
 // Writes the items of `group` (other items are ignored).
 std::string WriteItemGroupJson(int group, std::span<const ItemDefinition> items);
 
+// The names of the classes in "classRequirements", in the order of their numbers (CLASS_WIZARD, ...).
+std::span<const char* const> GetClassKeys();
+
 // One item as the item files have it, without its group, which the file has. The item
 // exchange file with OpenMU (ItemExchangeFile) has its items so too.
 Json::OrderedJson WriteItemJson(const ItemDefinition& definition);
