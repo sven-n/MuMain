@@ -664,11 +664,11 @@
     <comment>legacy_id=167</comment>
   </data>
   <data name="ENG" xml:space="preserve">
-    <value>POR</value>
+    <value>ENE</value>
     <comment>legacy_id=168</comment>
   </data>
   <data name="STA" xml:space="preserve">
-    <value>STA</value>
+    <value>VIT</value>
     <comment>legacy_id=169</comment>
   </data>
   <data name="Wizardry Dmg:%d~%d" xml:space="preserve">
@@ -2129,11 +2129,11 @@
     <comment>legacy_id=575</comment>
   </data>
   <data name="Increase %d%% of Damage" xml:space="preserve">
-    <value>Aumentar o dano de %d%% of</value>
+    <value>Aumenta o dano em %d%%</value>
     <comment>legacy_id=577</comment>
   </data>
   <data name="Absorb %d%% of Damage" xml:space="preserve">
-    <value>Absorver Dano %d%% of</value>
+    <value>Absorve %d%% do dano</value>
     <comment>legacy_id=578</comment>
   </data>
   <data name="Increase speed" xml:space="preserve">
