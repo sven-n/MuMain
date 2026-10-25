@@ -14,12 +14,16 @@
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "Core/Utilities/Random.h"
 #include "GameLogic/Monsters/MonsterSoundEvents.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 #include "World/MapInfra/MapManager.h"
 #include "World/MapInfra/w_MapProcess.h"
 
 #include <doctest.h>
 
+#include <array>
+#include <cstdlib>
 #include <vector>
 
 using MonsterRecorder::PlayedSound;
@@ -143,4 +147,57 @@ TEST_CASE("Monster sounds: the traps' attacks play their sounds, the Iron Stick'
     fire->Object.AnimationFrame = 3.0f;
     SetPlayerAttack(fire);
     CHECK(scope.Creation().Load().TakePlayedSounds() == Sounds({SOUND_FLAME}));
+}
+
+// Q-MN29: the shipped events draw with rand(), as the Hellas monsters'
+// attacks: a chance of one in n and a pick of one of two come out the same at
+// any frame rate; with rand_fps_check they came out less often the higher the
+// frame rate.
+TEST_CASE("Monster sounds: the shipped chances and picks are the same at any frame rate (Q-MN29) [monsters][sounds]")
+{
+    SoundScope scope(WD_57ICECITY);
+    const float factor = FPS_ANIMATION_FACTOR;
+    constexpr int Seeds = 600;
+    constexpr std::array<float, 2> Factors = {1.0f, 0.25f};
+    int steps = 0;
+    for (unsigned seed = 0; seed < Seeds; ++seed)
+    {
+        // The Ice Giant's step plays one time in a hundred.
+        std::srand(seed);
+        const std::vector<PlayedSound> expected =
+            std::rand() % 100 == 0 ? Sounds({SOUND_RAKLION_ICEGIANT_MOVE}) : std::vector<PlayedSound>{};
+        steps += expected.empty() ? 0 : 1;
+        for (const float fps : Factors)
+        {
+            std::srand(seed);
+            Random::Seed(seed);
+            FPS_ANIMATION_FACTOR = fps;
+            INFO("seed " << seed << ", factor " << fps);
+            CHECK(scope.Play(MODEL_ICE_GIANT, MONSTER01_WALK) == expected);
+        }
+    }
+    CHECK(steps > 0);
+
+    // The Totem Golem's step picks one of two.
+    gMapManager.WorldActive = WD_51HOME_6TH_CHAR;
+    int first = 0;
+    for (unsigned seed = 0; seed < Seeds; ++seed)
+    {
+        std::srand(seed);
+        const bool firstSound = std::rand() % 2 == 0;
+        first += firstSound ? 1 : 0;
+        for (const float fps : Factors)
+        {
+            std::srand(seed);
+            Random::Seed(seed);
+            FPS_ANIMATION_FACTOR = fps;
+            INFO("seed " << seed << ", factor " << fps);
+            CHECK(scope.Play(MODEL_TOTEM_GOLEM, MONSTER01_WALK) ==
+                  Sounds({firstSound ? SOUND_ELBELAND_TOTEMGOLEM_MOVE01 : SOUND_ELBELAND_TOTEMGOLEM_MOVE02}));
+        }
+    }
+    // About half.
+    CHECK(first > Seeds / 3);
+    CHECK(first < Seeds * 2 / 3);
+    FPS_ANIMATION_FACTOR = factor;
 }

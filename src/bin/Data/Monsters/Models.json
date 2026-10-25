@@ -1704,7 +1704,7 @@
         {"file": "Data/Sound/w52/SE_Mon_rabbitugly_death01.wav", "id": "SOUND_ELBELAND_RABBITUGLY_DEATH01", "channels": 1, "spatial": false}
       ],
       "soundEvents": [
-        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "randFps"}, "sounds": ["SOUND_ELBELAND_RABBITUGLY_BREATH01"]},
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_ELBELAND_RABBITUGLY_BREATH01"]},
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_ELBELAND_RABBITUGLY_ATTACK01"]},
         {"animations": ["die"], "sounds": ["SOUND_ELBELAND_RABBITUGLY_DEATH01"]}
       ],
@@ -1721,7 +1721,7 @@
         {"file": "Data/Sound/w52/SE_Mon_wolfhuman_death01.wav", "id": "SOUND_ELBELAND_WOLFHUMAN_DEATH01", "channels": 1, "spatial": false}
       ],
       "soundEvents": [
-        {"animations": ["stop1", "stop2", "walk"], "chance": {"oneIn": 30, "draw": "randFps"}, "sounds": ["SOUND_ELBELAND_WOLFHUMAN_MOVE02"]},
+        {"animations": ["stop1", "stop2", "walk"], "chance": {"oneIn": 30, "draw": "rand"}, "sounds": ["SOUND_ELBELAND_WOLFHUMAN_MOVE02"]},
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_ELBELAND_WOLFHUMAN_ATTACK01"]},
         {"animations": ["die"], "sounds": ["SOUND_ELBELAND_WOLFHUMAN_DEATH01"]}
       ],
@@ -1737,7 +1737,7 @@
         {"file": "Data/Sound/w52/SE_Mon_butterflypollution_death01.wav", "id": "SOUND_ELBELAND_BUTTERFLYPOLLUTION_DEATH01", "channels": 1, "spatial": false}
       ],
       "soundEvents": [
-        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "randFps"}, "sounds": ["SOUND_ELBELAND_BUTTERFLYPOLLUTION_MOVE01"]},
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_ELBELAND_BUTTERFLYPOLLUTION_MOVE01"]},
         {"animations": ["die"], "sounds": ["SOUND_ELBELAND_BUTTERFLYPOLLUTION_DEATH01"]}
       ],
       "soundEventWorlds": [51, 73, 74]
@@ -1753,7 +1753,7 @@
         {"file": "Data/Sound/w52/SE_Mon_curserich_death01.wav", "id": "SOUND_ELBELAND_CURSERICH_DEATH01", "channels": 1, "spatial": false}
       ],
       "soundEvents": [
-        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "randFps"}, "sounds": ["SOUND_ELBELAND_CURSERICH_MOVE01"]},
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_ELBELAND_CURSERICH_MOVE01"]},
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_ELBELAND_CURSERICH_ATTACK01"]},
         {"animations": ["die"], "sounds": ["SOUND_ELBELAND_CURSERICH_DEATH01"]}
       ],
@@ -1772,7 +1772,7 @@
         {"file": "Data/Sound/w52/SE_Mon_totemgolem_death01.wav", "id": "SOUND_ELBELAND_TOTEMGOLEM_DEATH01", "channels": 1, "spatial": false}
       ],
       "soundEvents": [
-        {"animations": ["walk"], "pick": "randFps", "sounds": ["SOUND_ELBELAND_TOTEMGOLEM_MOVE01", "SOUND_ELBELAND_TOTEMGOLEM_MOVE02"]},
+        {"animations": ["walk"], "pick": "rand", "sounds": ["SOUND_ELBELAND_TOTEMGOLEM_MOVE01", "SOUND_ELBELAND_TOTEMGOLEM_MOVE02"]},
         {"animations": ["attack1"], "sounds": ["SOUND_ELBELAND_TOTEMGOLEM_ATTACK01"]},
         {"animations": ["attack2"], "sounds": ["SOUND_ELBELAND_TOTEMGOLEM_ATTACK02"]},
         {"animations": ["die"], "sounds": ["SOUND_ELBELAND_TOTEMGOLEM_DEATH01"]}
@@ -1828,7 +1828,7 @@
         {"file": "Data/Sound/w52/SE_Mon_beastwoo_death01.wav", "id": "SOUND_ELBELAND_BEASTWOO_DEATH01", "channels": 1, "spatial": false}
       ],
       "soundEvents": [
-        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "randFps"}, "sounds": ["SOUND_ELBELAND_BEASTWOO_MOVE01"]},
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_ELBELAND_BEASTWOO_MOVE01"]},
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_ELBELAND_BEASTWOO_ATTACK01"]},
         {"animations": ["die"], "sounds": ["SOUND_ELBELAND_BEASTWOO_DEATH01"]}
       ],
@@ -1845,7 +1845,7 @@
         {"file": "Data/Sound/w52/SE_Mon_beastwoo_death01.wav", "id": "SOUND_ELBELAND_BEASTWOO_DEATH01", "channels": 1, "spatial": false}
       ],
       "soundEvents": [
-        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "randFps"}, "sounds": ["SOUND_ELBELAND_BEASTWOOLEADER_MOVE01"]},
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_ELBELAND_BEASTWOOLEADER_MOVE01"]},
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_ELBELAND_BEASTWOOLEADER_ATTACK01"]},
         {"animations": ["die"], "sounds": ["SOUND_ELBELAND_BEASTWOO_DEATH01"]}
       ],
@@ -1861,8 +1861,8 @@
         {"file": "Data/Sound/w57/Sapi-Death.wav", "id": "SOUND_SWAMPOFQUIET_SAPI_DEATH01", "channels": 1, "spatial": false}
       ],
       "soundEvents": [
-        {"animations": ["attack1", "attack2"], "chance": {"oneIn": 3, "draw": "randFps"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_UNUS_ATTACK01"]},
-        {"animations": ["die"], "chance": {"oneIn": 3, "draw": "randFps"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_DEATH01"]}
+        {"animations": ["attack1", "attack2"], "chance": {"oneIn": 3, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_UNUS_ATTACK01"]},
+        {"animations": ["die"], "chance": {"oneIn": 3, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_DEATH01"]}
       ],
       "soundEventWorlds": [56]
     },
@@ -1876,8 +1876,8 @@
         {"file": "Data/Sound/w57/Sapi-Death.wav", "id": "SOUND_SWAMPOFQUIET_SAPI_DEATH01", "channels": 1, "spatial": false}
       ],
       "soundEvents": [
-        {"animations": ["attack1", "attack2"], "chance": {"oneIn": 3, "draw": "randFps"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_UNUS_ATTACK01"]},
-        {"animations": ["die"], "chance": {"oneIn": 3, "draw": "randFps"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_DEATH01"]}
+        {"animations": ["attack1", "attack2"], "chance": {"oneIn": 3, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_UNUS_ATTACK01"]},
+        {"animations": ["die"], "chance": {"oneIn": 3, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_DEATH01"]}
       ],
       "soundEventWorlds": [56]
     },
@@ -1891,8 +1891,8 @@
         {"file": "Data/Sound/w57/Sapi-Death.wav", "id": "SOUND_SWAMPOFQUIET_SAPI_DEATH01", "channels": 1, "spatial": false}
       ],
       "soundEvents": [
-        {"animations": ["attack1", "attack2"], "chance": {"oneIn": 3, "draw": "randFps"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_TRES_ATTACK01"]},
-        {"animations": ["die"], "chance": {"oneIn": 3, "draw": "randFps"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_DEATH01"]}
+        {"animations": ["attack1", "attack2"], "chance": {"oneIn": 3, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_TRES_ATTACK01"]},
+        {"animations": ["die"], "chance": {"oneIn": 3, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_DEATH01"]}
       ],
       "soundEventWorlds": [56]
     },
@@ -2120,7 +2120,7 @@
         {"file": "Data/Sound/w57/Naipin-Death.wav", "id": "SOUND_SWAMPOFQUIET_NAIPIN_DEATH01", "channels": 1, "spatial": false}
       ],
       "soundEvents": [
-        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "randFps"}, "sounds": ["SOUND_SWAMPOFQUIET_THUNDER_NAIPIN_BREATH01"]},
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_THUNDER_NAIPIN_BREATH01"]},
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_SWAMPOFQUIET_NAIPIN_ATTACK01"]},
         {"animations": ["die"], "sounds": ["SOUND_SWAMPOFQUIET_NAIPIN_DEATH01"]}
       ],
@@ -2137,7 +2137,7 @@
         {"file": "Data/Sound/w57/Naipin-Death.wav", "id": "SOUND_SWAMPOFQUIET_NAIPIN_DEATH01", "channels": 1, "spatial": false}
       ],
       "soundEvents": [
-        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "randFps"}, "sounds": ["SOUND_SWAMPOFQUIET_GHOST_NAIPIN_BREATH01"]},
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_GHOST_NAIPIN_BREATH01"]},
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_SWAMPOFQUIET_NAIPIN_ATTACK01"]},
         {"animations": ["die"], "sounds": ["SOUND_SWAMPOFQUIET_NAIPIN_DEATH01"]}
       ],
@@ -2154,7 +2154,7 @@
         {"file": "Data/Sound/w57/Naipin-Death.wav", "id": "SOUND_SWAMPOFQUIET_NAIPIN_DEATH01", "channels": 1, "spatial": false}
       ],
       "soundEvents": [
-        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "randFps"}, "sounds": ["SOUND_SWAMPOFQUIET_BLAZE_NAIPIN_BREATH01"]},
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_BLAZE_NAIPIN_BREATH01"]},
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_SWAMPOFQUIET_NAIPIN_ATTACK01"]},
         {"animations": ["die"], "sounds": ["SOUND_SWAMPOFQUIET_NAIPIN_DEATH01"]}
       ],
@@ -2172,7 +2172,7 @@
       ],
       "soundEvents": [
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_RAKLION_ICEWALKER_ATTACK"]},
-        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "randFps"}, "sounds": ["SOUND_RAKLION_ICEWALKER_MOVE"]},
+        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "rand"}, "sounds": ["SOUND_RAKLION_ICEWALKER_MOVE"]},
         {"animations": ["die"], "sounds": ["SOUND_ELBELAND_WOLFHUMAN_DEATH01"]}
       ],
       "soundEventWorlds": [57, 58, 65, 66, 67, 68]
@@ -2188,7 +2188,7 @@
       ],
       "soundEvents": [
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_RAKLION_GIANT_MAMUD_ATTACK"]},
-        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "randFps"}, "sounds": ["SOUND_RAKLION_GIANT_MAMUD_MOVE"]},
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_RAKLION_GIANT_MAMUD_MOVE"]},
         {"animations": ["die"], "sounds": ["SOUND_RAKLION_GIANT_MAMUD_DEATH"]}
       ],
       "soundEventWorlds": [57, 58]
@@ -2203,7 +2203,7 @@
         {"file": "Data/Sound/w58w59/IceGiant_death.wav", "id": "SOUND_RAKLION_ICEGIANT_DEATH", "channels": 1, "spatial": false}
       ],
       "soundEvents": [
-        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "randFps"}, "sounds": ["SOUND_RAKLION_ICEGIANT_MOVE"]},
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_RAKLION_ICEGIANT_MOVE"]},
         {"animations": ["die"], "sounds": ["SOUND_RAKLION_ICEGIANT_DEATH"]}
       ],
       "soundEventWorlds": [57, 58],
@@ -2251,7 +2251,7 @@
       ],
       "soundEvents": [
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_RAKLION_COOLERTIN_ATTACK"]},
-        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "randFps"}, "sounds": ["SOUND_RAKLION_COOLERTIN_MOVE"]},
+        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "rand"}, "sounds": ["SOUND_RAKLION_COOLERTIN_MOVE"]},
         {"animations": ["die"], "sounds": ["SOUND_MONSTER_HELLSPIDERDIE"]}
       ],
       "soundEventWorlds": [57, 58]
@@ -2336,10 +2336,10 @@
         {"file": "Data/Sound/xmas/DarkSanta_Death01.wav", "id": "SOUND_XMAS_SANTA_DEATH_1", "channels": 4, "spatial": false}
       ],
       "soundEvents": [
-        {"animations": ["stop1"], "pick": "randFps", "sounds": ["SOUND_XMAS_SANTA_IDLE_1", "SOUND_XMAS_SANTA_IDLE_2"]},
-        {"animations": ["walk"], "pick": "randFps", "sounds": ["SOUND_XMAS_SANTA_WALK_1", "SOUND_XMAS_SANTA_WALK_2"]},
+        {"animations": ["stop1"], "pick": "rand", "sounds": ["SOUND_XMAS_SANTA_IDLE_1", "SOUND_XMAS_SANTA_IDLE_2"]},
+        {"animations": ["walk"], "pick": "rand", "sounds": ["SOUND_XMAS_SANTA_WALK_1", "SOUND_XMAS_SANTA_WALK_2"]},
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_XMAS_SANTA_ATTACK_1"]},
-        {"animations": ["shock"], "pick": "randFps", "sounds": ["SOUND_XMAS_SANTA_DAMAGE_1", "SOUND_XMAS_SANTA_DAMAGE_2"]},
+        {"animations": ["shock"], "pick": "rand", "sounds": ["SOUND_XMAS_SANTA_DAMAGE_1", "SOUND_XMAS_SANTA_DAMAGE_2"]},
         {"animations": ["die"], "sounds": ["SOUND_XMAS_SANTA_DEATH_1"]}
       ]
     },
@@ -2376,7 +2376,7 @@
       "soundEvents": [
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_PKFIELD_ZOMBIEWARRIOR_ATTACK"]},
         {"animations": ["shock"], "sounds": ["SOUND_PKFIELD_ZOMBIEWARRIOR_DAMAGE01"]},
-        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "randFps"}, "sounds": ["SOUND_PKFIELD_ZOMBIEWARRIOR_MOVE01"]},
+        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "rand"}, "sounds": ["SOUND_PKFIELD_ZOMBIEWARRIOR_MOVE01"]},
         {"animations": ["die"], "sounds": ["SOUND_PKFIELD_ZOMBIEWARRIOR_DEATH"]}
       ],
       "soundEventWorlds": [63],
@@ -2398,7 +2398,7 @@
       "soundEvents": [
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_PKFIELD_RAISEDGLADIATOR_ATTACK"]},
         {"animations": ["shock"], "sounds": ["SOUND_PKFIELD_RAISEDGLADIATOR_DAMAGE01"]},
-        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "randFps"}, "sounds": ["SOUND_PKFIELD_RAISEDGLADIATOR_MOVE01"]},
+        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "rand"}, "sounds": ["SOUND_PKFIELD_RAISEDGLADIATOR_MOVE01"]},
         {"animations": ["die"], "sounds": ["SOUND_PKFIELD_RAISEDGLADIATOR_DEATH"]}
       ],
       "soundEventWorlds": [63],
@@ -2420,7 +2420,7 @@
       "soundEvents": [
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_PKFIELD_ASHESBUTCHER_ATTACK"]},
         {"animations": ["shock"], "sounds": ["SOUND_PKFIELD_ASHESBUTCHER_DAMAGE01"]},
-        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "randFps"}, "sounds": ["SOUND_PKFIELD_ASHESBUTCHER_MOVE01"]},
+        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "rand"}, "sounds": ["SOUND_PKFIELD_ASHESBUTCHER_MOVE01"]},
         {"animations": ["die"], "sounds": ["SOUND_PKFIELD_ASHESBUTCHER_DEATH"]}
       ],
       "soundEventWorlds": [63],
@@ -2442,7 +2442,7 @@
       "soundEvents": [
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_PKFIELD_BLOODASSASSIN_ATTACK"]},
         {"animations": ["shock"], "sounds": ["SOUND_PKFIELD_BLOODASSASSIN_DAMAGE01"]},
-        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "randFps"}, "sounds": ["SOUND_PKFIELD_BLOODASSASSIN_MOVE01"]},
+        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "rand"}, "sounds": ["SOUND_PKFIELD_BLOODASSASSIN_MOVE01"]},
         {"animations": ["die"], "sounds": ["SOUND_PKFIELD_BLOODASSASSIN_DEDTH"]}
       ],
       "soundEventWorlds": [63],
@@ -2482,7 +2482,7 @@
       "soundEvents": [
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_PKFIELD_BLOODASSASSIN_ATTACK"]},
         {"animations": ["shock"], "sounds": ["SOUND_PKFIELD_BLOODASSASSIN_DAMAGE01"]},
-        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "randFps"}, "sounds": ["SOUND_PKFIELD_BLOODASSASSIN_MOVE01"]},
+        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "rand"}, "sounds": ["SOUND_PKFIELD_BLOODASSASSIN_MOVE01"]},
         {"animations": ["die"], "sounds": ["SOUND_PKFIELD_BLOODASSASSIN_DEDTH"]}
       ],
       "soundEventWorlds": [63],
@@ -2506,7 +2506,7 @@
         {"animations": ["attack1"], "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK01"]},
         {"animations": ["attack2"], "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK02"]},
         {"animations": ["shock"], "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_DAMAGE01"]},
-        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "randFps"}, "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_MOVE01"]},
+        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "rand"}, "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_MOVE01"]},
         {"animations": ["die"], "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_DEATH"]}
       ],
       "soundEventWorlds": [63],
@@ -2521,7 +2521,7 @@
         {"animations": ["attack1"], "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK01"]},
         {"animations": ["attack2"], "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK02"]},
         {"animations": ["shock"], "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_DAMAGE01"]},
-        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "randFps"}, "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_MOVE01"]},
+        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "rand"}, "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_MOVE01"]},
         {"animations": ["die"], "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_DEATH"]}
       ],
       "soundEventWorlds": [63],
@@ -2545,7 +2545,7 @@
       "textureFolders": ["Monster"],
       "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.5, "attack1": 0.86, "attack2": 0.86, "die": 0.4, "appear": 0.4, "attack3": 0.76},
       "soundEvents": [
-        {"animations": ["walk"], "pick": "randFps", "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
+        {"animations": ["walk"], "pick": "rand", "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
         {"animations": ["attack1"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01"]},
         {"animations": ["attack2"], "sounds": ["SOUND_BLOODATTACK"]},
         {"animations": ["attack3"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK03", "SOUND_SKILL_BLOWOFDESTRUCTION"]},
@@ -2576,7 +2576,7 @@
       "textureFolders": ["Monster"],
       "animations": {"stop1": 0.6, "stop2": 0.6, "walk": 0.5, "attack1": 0.71, "attack2": 0.4, "die": 0.3, "appear": 0.8, "attack3": 0.4},
       "soundEvents": [
-        {"animations": ["walk"], "pick": "randFps", "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
+        {"animations": ["walk"], "pick": "rand", "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
         {"animations": ["attack1"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01"]},
         {"animations": ["attack2"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK03"]},
         {"animations": ["attack3"], "sounds": ["SOUND_EMPIREGUARDIAN_ERCANNE_MONSTER_ATTACK03"]},
@@ -2607,7 +2607,7 @@
       "textureFolders": ["Monster"],
       "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.35, "attack1": 0.4, "attack2": 0.45, "die": 0.4, "appear": 0.45, "attack3": 0.45},
       "soundEvents": [
-        {"animations": ["walk"], "pick": "randFps", "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
+        {"animations": ["walk"], "pick": "rand", "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
         {"animations": ["attack1"], "sounds": ["SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK01"]},
         {"animations": ["attack2"], "sounds": ["SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK02"]},
         {"animations": ["attack3"], "sounds": ["SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK01"]},
@@ -2679,7 +2679,7 @@
       "textureFolders": ["Monster"],
       "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.65, "attack1": 0.86, "attack2": 0.86, "die": 0.3, "appear": 0.86},
       "soundEvents": [
-        {"animations": ["walk"], "pick": "randFps", "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
+        {"animations": ["walk"], "pick": "rand", "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
         {"animations": ["attack1"], "sounds": ["SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK03"]},
         {"animations": ["attack2"], "sounds": ["SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK03"]},
         {"animations": ["attack3"], "sounds": ["SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK03"]},
@@ -2895,8 +2895,8 @@
       "textureFolders": ["Monster"],
       "animations": {"die": 0.25},
       "soundEvents": [
-        {"animations": ["attack1", "attack2"], "chance": {"oneIn": 3, "draw": "randFps"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_UNUS_ATTACK01"]},
-        {"animations": ["die"], "chance": {"oneIn": 3, "draw": "randFps"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_DEATH01"]}
+        {"animations": ["attack1", "attack2"], "chance": {"oneIn": 3, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_UNUS_ATTACK01"]},
+        {"animations": ["die"], "chance": {"oneIn": 3, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_DEATH01"]}
       ],
       "soundEventWorlds": [56]
     },
@@ -2906,7 +2906,7 @@
       "textureFolders": ["Monster"],
       "animations": {"walk": 0.25, "die": 0.2},
       "soundEvents": [
-        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "randFps"}, "sounds": ["SOUND_SWAMPOFQUIET_BLAZE_NAIPIN_BREATH01"]},
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_BLAZE_NAIPIN_BREATH01"]},
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_SWAMPOFQUIET_NAIPIN_ATTACK01"]},
         {"animations": ["die"], "sounds": ["SOUND_SWAMPOFQUIET_NAIPIN_DEATH01"]}
       ],
@@ -2985,7 +2985,7 @@
       "textureFolders": ["Monster"],
       "soundEvents": [
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_RAKLION_GIANT_MAMUD_ATTACK"]},
-        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "randFps"}, "sounds": ["SOUND_RAKLION_GIANT_MAMUD_MOVE"]},
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_RAKLION_GIANT_MAMUD_MOVE"]},
         {"animations": ["die"], "sounds": ["SOUND_RAKLION_GIANT_MAMUD_DEATH"]}
       ],
       "soundEventWorlds": [57, 58]
@@ -2996,7 +2996,7 @@
       "textureFolders": ["Monster"],
       "animations": {"die": 0.13},
       "soundEvents": [
-        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "randFps"}, "sounds": ["SOUND_RAKLION_ICEGIANT_MOVE"]},
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_RAKLION_ICEGIANT_MOVE"]},
         {"animations": ["die"], "sounds": ["SOUND_RAKLION_ICEGIANT_DEATH"]}
       ],
       "soundEventWorlds": [57, 58]
@@ -3008,7 +3008,7 @@
       "animations": {"walk": 0.46},
       "soundEvents": [
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_RAKLION_COOLERTIN_ATTACK"]},
-        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "randFps"}, "sounds": ["SOUND_RAKLION_COOLERTIN_MOVE"]},
+        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "rand"}, "sounds": ["SOUND_RAKLION_COOLERTIN_MOVE"]},
         {"animations": ["die"], "sounds": ["SOUND_MONSTER_HELLSPIDERDIE"]}
       ],
       "soundEventWorlds": [57, 58]
@@ -3885,7 +3885,7 @@
         {"file": "Data/Sound/Doppelganger/Lugard.wav", "id": "SOUND_DOPPELGANGER_LUGARD_BREATH", "channels": 4, "spatial": false}
       ],
       "soundEvents": [
-        {"animations": ["stop1"], "chance": {"oneIn": 2, "draw": "randFps"}, "sounds": ["SOUND_DOPPELGANGER_LUGARD_BREATH"]}
+        {"animations": ["stop1"], "chance": {"oneIn": 2, "draw": "rand"}, "sounds": ["SOUND_DOPPELGANGER_LUGARD_BREATH"]}
       ]
     },
     {
