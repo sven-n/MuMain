@@ -594,15 +594,11 @@ bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
     case MONSTER_SPLINTER_WOLF:
     case MONSTER_IRON_RIDER:
     case MONSTER_GIGANTIS_WARRIOR:
-        return GameLogic::Monsters::Attacks::Play(*c, *o);
     case MONSTER_KENTAUROS:
     case MONSTER_BERSERKER_WARRIOR:
     case MONSTER_KENTAUROS_WARRIOR:
     case MONSTER_GENOCIDER_WARRIOR:
-        // They answer "not handled": the generic pattern overwrites the
-        // animation of their attacks (P3).
-        GameLogic::Monsters::Attacks::Play(*c, *o);
-        return false;
+        return GameLogic::Monsters::Attacks::Play(*c, *o);
     }
 
     return false;
