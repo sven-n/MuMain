@@ -2,6 +2,7 @@
 // File: GM_kanturu_1st.cpp
 //*****************************************************************************
 #include "stdafx.h"
+#include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Render/Models/ZzzBMD.h"
@@ -593,6 +594,8 @@ bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
     case MONSTER_SPLINTER_WOLF:
     case MONSTER_IRON_RIDER:
     {
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return true;
         if (rand_fps_check(2))
             SetAction(o, MONSTER01_ATTACK1);
         else
@@ -603,6 +606,8 @@ bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
     break;
     case MONSTER_KENTAUROS:
     {
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return false;
         if (c->MonsterSkill == ATMON_SKILL_NUM9)
         {
             SetAction(o, MONSTER01_ATTACK2);
@@ -614,6 +619,8 @@ bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
     break;
     case MONSTER_BERSERKER_WARRIOR:
     {
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return false;
         if (c->MonsterSkill == ATMON_SKILL_EX_BERSERKERWARRIOR_ATTACKSKILL)
         {
             SetAction(o, MONSTER01_ATTACK2);
@@ -625,6 +632,8 @@ bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
     break;
     case MONSTER_KENTAUROS_WARRIOR:
     {
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return false;
         if (c->MonsterSkill == ATMON_SKILL_EX_KENTAURUSWARRIOR_ATTACKSKILL)
         {
             SetAction(o, MONSTER01_ATTACK2);
@@ -636,6 +645,8 @@ bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
     break;
     case MONSTER_GIGANTIS_WARRIOR:
     {
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return true;
         if (rand_fps_check(2))
             SetAction(o, MONSTER01_ATTACK1);
         else
@@ -646,6 +657,8 @@ bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
     break;
     case MONSTER_GENOCIDER_WARRIOR:
     {
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return false;
         if (c->MonsterSkill == ATMON_SKILL_EX_GENOSIDEWARRIOR_ATTACKSKILL)
         {
             SetAction(o, MONSTER01_ATTACK2);

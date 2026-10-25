@@ -52,6 +52,7 @@
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Engine/Object/MonsterModelBody.h"
 #include "Engine/Object/MonsterSlotSound.h"
+#include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "GameLogic/Monsters/MonsterNames.h"
 
 // DevEditor function declarations
@@ -1240,16 +1241,19 @@ void SetPlayerAttack(CHARACTER* c)
 
     else if (o->Type == 39)
     {
+        GameLogic::Monsters::Attacks::Play(*c, *o);
         CreateEffect(MODEL_SAW, o->Position, o->Angle, o->Light);
         PlayBuffer(SOUND_TRAP01, o);
     }
     else if (o->Type == 40)
     {
-        SetAction(&c->Object, 1);
+        if (!GameLogic::Monsters::Attacks::Play(*c, *o))
+            SetAction(&c->Object, 1);
         PlayBuffer(SOUND_TRAP01, o);
     }
     else if (o->Type == 51)
     {
+        GameLogic::Monsters::Attacks::Play(*c, *o);
         CreateEffect(BITMAP_FIRE + 1, o->Position, o->Angle, o->Light);
         PlayBuffer(SOUND_FLAME);
     }
@@ -1257,13 +1261,16 @@ void SetPlayerAttack(CHARACTER* c)
     {
         if (o->Type == MODEL_BALI)
         {
-            int Action = rand() % 8;
-            if (Action > 2)
-                SetAction(&c->Object, MONSTER01_ATTACK1 + rand() % 2);
-            else if (Action > 0)
-                SetAction(&c->Object, MONSTER01_ATTACK3);
-            else
-                SetAction(&c->Object, MONSTER01_ATTACK4);
+            if (!GameLogic::Monsters::Attacks::Play(*c, *o))
+            {
+                int Action = rand() % 8;
+                if (Action > 2)
+                    SetAction(&c->Object, MONSTER01_ATTACK1 + rand() % 2);
+                else if (Action > 0)
+                    SetAction(&c->Object, MONSTER01_ATTACK3);
+                else
+                    SetAction(&c->Object, MONSTER01_ATTACK4);
+            }
         }
         else
         {
@@ -2435,6 +2442,11 @@ bool CheckMonsterSkill(CHARACTER* pCharacter, OBJECT* pObject)
     if (pCharacter->MonsterIndex == MONSTER_MAYA)
     {
         M39Kanturu3rd::MayaSceneMayaAction(pCharacter->MonsterSkill);
+        GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject);
+        return true;
+    }
+    if (GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject))
+    {
         return true;
     }
 

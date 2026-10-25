@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Network/Server/WSclient.h"
 #include "UI/Core/UIManager.h"
 #include "Audio/DSPlaySound.h"
@@ -1680,6 +1681,8 @@ namespace battleCastle
         case MODEL_BATTLE_GUARD1:
         case MODEL_BATTLE_GUARD2:
             o->AI = GUARD_ATTACK;
+            if (GameLogic::Monsters::Attacks::Play(*c, *o))
+                return true;
             SetAction(o, 5);
             return true;
         }

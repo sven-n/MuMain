@@ -1,4 +1,5 @@
 ﻿#include "stdafx.h"
+#include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
@@ -1606,6 +1607,8 @@ bool M33Aida::SetCurrentActionAidaMonster(CHARACTER* pCharacter, OBJECT* pObject
         return CheckMonsterSkill(pCharacter, pObject);
     case MONSTER_BLOODY_GOLEM:
     {
+        if (GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject))
+            return true;
         if (pCharacter->MonsterSkill == ATMON_SKILL_EX_BLOODYGOLUEM_ATTACKSKILL)
         {
             SetAction(pObject, MONSTER01_ATTACK2);
@@ -1621,6 +1624,8 @@ bool M33Aida::SetCurrentActionAidaMonster(CHARACTER* pCharacter, OBJECT* pObject
         return true;
     case MONSTER_BLOODY_WITCH_QUEEN:
     {
+        if (GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject))
+            return true;
         if (pCharacter->MonsterSkill == ATMON_SKILL_EX_BLOODYWITCHQUEEN_ATTACKSKILL)
         {
             SetAction(pObject, MONSTER01_ATTACK2);

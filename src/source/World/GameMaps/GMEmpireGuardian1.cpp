@@ -1,6 +1,7 @@
 ﻿// GMEmpireGuardian1.cpp: implementation of the GMEmpireGuardian1 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -2379,6 +2380,13 @@ bool GMEmpireGuardian1::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
             c->MonsterSkill = -1;
             return true;
         }
+        const WORD skill = c->MonsterSkill;
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+        {
+            if (skill == ATMON_SKILL_EMPIREGUARDIAN_BERSERKER)
+                m_bCurrentIsRage_Raymond = true;
+            return true;
+        }
 
         switch (c->MonsterSkill)
         {
@@ -2417,6 +2425,13 @@ bool GMEmpireGuardian1::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         {
             SetAction(o, MONSTER01_APEAR);
             c->MonsterSkill = -1;
+            return true;
+        }
+        const WORD skill = c->MonsterSkill;
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+        {
+            if (skill == ATMON_SKILL_EMPIREGUARDIAN_BERSERKER)
+                m_bCurrentIsRage_Ercanne = true;
             return true;
         }
 
@@ -2459,6 +2474,13 @@ bool GMEmpireGuardian1::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
             c->MonsterSkill = -1;
             return true;
         }
+        const WORD skill = c->MonsterSkill;
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+        {
+            if (skill == ATMON_SKILL_EMPIREGUARDIAN_BERSERKER)
+                m_bCurrentIsRage_Daesuler = true;
+            return true;
+        }
 
         switch (c->MonsterSkill)
         {
@@ -2499,6 +2521,13 @@ bool GMEmpireGuardian1::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
             c->MonsterSkill = -1;
             return true;
         }
+        const WORD skill = c->MonsterSkill;
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+        {
+            if (skill == ATMON_SKILL_EMPIREGUARDIAN_BERSERKER)
+                m_bCurrentIsRage_Gallia = true;
+            return true;
+        }
 
         switch (c->MonsterSkill)
         {
@@ -2533,6 +2562,8 @@ bool GMEmpireGuardian1::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         return true;
     case MONSTER_COMBAT_INSTRUCTOR:
     {
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return true;
         switch (c->MonsterSkill)
         {
         case 47:
@@ -2558,6 +2589,8 @@ bool GMEmpireGuardian1::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         return true;
     case MONSTER_DEFENDER:
     {
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return true;
         switch (c->MonsterSkill)
         {
         case 44:
@@ -2583,6 +2616,8 @@ bool GMEmpireGuardian1::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         return true;
     case MONSTER_FORSAKER:
     {
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return true;
         switch (c->MonsterSkill)
         {
         case 46:

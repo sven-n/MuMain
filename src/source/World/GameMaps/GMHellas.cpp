@@ -2,6 +2,7 @@
 //  GMHellas.cpp
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Renderer/MuRenderer.h"
@@ -936,6 +937,8 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
     case MONSTER_DEATH_CENTURION_4:
     case MONSTER_DEATH_CENTURION_5:
     case MONSTER_DEATH_CENTURION_6:
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return true;
         switch ((c->Skill))
         {
         case AT_SKILL_ENERGYBALL:
@@ -961,6 +964,8 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
     case MONSTER_AEGIS_4:
     case MONSTER_AEGIS_5:
     case MONSTER_AEGIS_6:
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return true;
         switch ((c->Skill))
         {
         case AT_SKILL_ENERGYBALL:
@@ -979,6 +984,8 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
     case MONSTER_ROGUE_CENTURION_4:
     case MONSTER_ROGUE_CENTURION_5:
     case MONSTER_ROGUE_CENTURION_6:
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return true;
         switch ((c->Skill))
         {
         case AT_SKILL_ENERGYBALL:
@@ -997,6 +1004,8 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
     case MONSTER_NECRON_4:
     case MONSTER_NECRON_5:
     case MONSTER_NECRON_6:
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return true;
         switch ((c->Skill))
         {
         case AT_SKILL_POISON:
@@ -1021,10 +1030,14 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
     case MONSTER_ILLUSION_OF_KUNDUN_3:
     case MONSTER_ILLUSION_OF_KUNDUN_4:
     case MONSTER_ILLUSION_OF_KUNDUN_5:
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return true;
         SetAction(o, MONSTER01_ATTACK1 + rand() % 2);
         return true;
 
     case MONSTER_ILLUSION_OF_KUNDUN_7:
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return true;
         SetAction(o, MONSTER01_ATTACK1 + rand() % 2);
         return true;
     }

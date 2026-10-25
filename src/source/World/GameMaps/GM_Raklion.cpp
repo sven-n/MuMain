@@ -2,6 +2,7 @@
 // GM_Raklion.cpp: implementation of the CGM_Raklion class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -2316,6 +2317,8 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
     {
     case MONSTER_ICE_WALKER:
     {
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return true;
         if (c->MonsterSkill == 29)
         {
             SetAction(o, MONSTER01_ATTACK2);
@@ -2330,6 +2333,8 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
     break;
     case MONSTER_GIANT_MAMMOTH:
     {
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return true;
         if (c->MonsterSkill == 30)
         {
             SetAction(o, MONSTER01_ATTACK2);
@@ -2344,6 +2349,8 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
     break;
     case MONSTER_ICE_GIANT:
     {
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return true;
         if (c->MonsterSkill == 31)
         {
             SetAction(o, MONSTER01_ATTACK2);
@@ -2358,6 +2365,8 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
     break;
     case MONSTER_COOLUTIN:
     {
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return true;
         if (c->MonsterSkill == 32)
         {
             SetAction(o, MONSTER01_ATTACK2);
@@ -2371,6 +2380,8 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
     }
     case MONSTER_IRON_KNIGHT:
     {
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return true;
         if (c->MonsterSkill == 33)
         {
             SetAction(o, MONSTER01_ATTACK2);
@@ -2398,6 +2409,8 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
     break;
     case MONSTER_DARK_MAMMOTH:
     {
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return true;
         if (c->MonsterSkill == ATMON_SKILL_EX_DARKMEMUD_ATTACKSKILL)
         {
             SetAction(o, MONSTER01_ATTACK2);
@@ -2413,6 +2426,8 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
     break;
     case MONSTER_DARK_GIANT:
     {
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return true;
         if (c->MonsterSkill == ATMON_SKILL_EX_DARKGIANT_ATTACKSKILL)
         {
             SetAction(o, MONSTER01_ATTACK2);
@@ -2428,6 +2443,8 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
     break;
     case MONSTER_DARK_IRON_KNIGHT:
     {
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return true;
         if (c->MonsterSkill == ATMON_SKILL_EX_DARKAIONNIGHT_ATTACKSKILL)
         {
             SetAction(o, MONSTER01_ATTACK2);
@@ -2443,6 +2460,8 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
     break;
     case MONSTER_DARK_COOLUTIN:
     {
+        if (GameLogic::Monsters::Attacks::Play(*c, *o))
+            return true;
         if (c->MonsterSkill == ATMON_SKILL_EX_DARKCOOLERTIN_ATTACKSKILL)
         {
             SetAction(o, MONSTER01_ATTACK2);
@@ -2469,30 +2488,37 @@ void CGM_Raklion::SetBossMonsterAction(CHARACTER* c, OBJECT* o)
         m_bBossHeightMove = false;
     }
 
+    const bool fromData = GameLogic::Monsters::Attacks::Play(*c, *o);
     if (c->MonsterSkill == 34)
     {
-        SetAction(o, MONSTER01_ATTACK2);
+        if (!fromData)
+            SetAction(o, MONSTER01_ATTACK2);
     }
     else if (c->MonsterSkill == 35)
     {
-        SetAction(o, MONSTER01_ATTACK1);
+        if (!fromData)
+            SetAction(o, MONSTER01_ATTACK1);
     }
     else if (c->MonsterSkill == 36)
     {
-        SetAction(o, MONSTER01_ATTACK3);
+        if (!fromData)
+            SetAction(o, MONSTER01_ATTACK3);
     }
     else if (c->MonsterSkill == 37)
     {
-        SetAction(o, MONSTER01_APEAR);
+        if (!fromData)
+            SetAction(o, MONSTER01_APEAR);
     }
     else if (c->MonsterSkill == 38)
     {
-        SetAction(o, MONSTER01_ATTACK4);
+        if (!fromData)
+            SetAction(o, MONSTER01_ATTACK4);
         PlayBuffer(SOUND_RAKLION_SERUFAN_WORD4);
     }
     else if (c->MonsterSkill == 39)
     {
-        SetAction(o, MONSTER01_ATTACK4);
+        if (!fromData)
+            SetAction(o, MONSTER01_ATTACK4);
         PlayBuffer(SOUND_RAKLION_SERUFAN_CURE);
 
         vec3_t vLight, vPos, vAngle;
@@ -2513,7 +2539,8 @@ void CGM_Raklion::SetBossMonsterAction(CHARACTER* c, OBJECT* o)
     }
     else if (c->MonsterSkill == 40)
     {
-        SetAction(o, MONSTER01_ATTACK4);
+        if (!fromData)
+            SetAction(o, MONSTER01_ATTACK4);
         PlayBuffer(SOUND_RAKLION_SERUFAN_WORD3);
     }
     else if (c->MonsterSkill == 41)
@@ -2521,14 +2548,15 @@ void CGM_Raklion::SetBossMonsterAction(CHARACTER* c, OBJECT* o)
     }
     else if (c->MonsterSkill == 42)
     {
-        SetAction(o, MONSTER01_ATTACK4);
+        if (!fromData)
+            SetAction(o, MONSTER01_ATTACK4);
 
         vec3_t vLight;
         Vector(0.3f, 0.2f, 0.1f, vLight);
         CreateEffect(MODEL_STORM2, o->Position, o->Angle, vLight, 1, NULL, -1, 0, 0, 0, 1.6f);
         CreateEffect(MODEL_SUMMON, o->Position, o->Angle, vLight, 3);
     }
-    else
+    else if (!fromData)
     {
         SetAction(o, MONSTER01_ATTACK4);
     }

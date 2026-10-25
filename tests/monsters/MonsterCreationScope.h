@@ -28,6 +28,11 @@ public:
     // the next creation finds its slot free.
     int CreatedModel(int number);
 
+    // Creates the monster with CreateMonster on the world that is set and
+    // returns the character, which lives until the next Create or
+    // CreatedModel; nullptr when it was not created.
+    CHARACTER* Create(int number);
+
     LoadScope& Load()
     {
         return *m_load;

@@ -67,6 +67,11 @@ void CreationScope::SetWorld(int world)
     gMapManager.WorldActive = world;
 }
 
+CHARACTER* CreationScope::Create(int number)
+{
+    return CreateMonster(static_cast<EMonsterType>(number), TileX + 2, TileY, MonsterTestKey);
+}
+
 int CreationScope::CreatedModel(int number)
 {
     CHARACTER* character = CreateMonster(static_cast<EMonsterType>(number), TileX + 2, TileY, MonsterTestKey);
