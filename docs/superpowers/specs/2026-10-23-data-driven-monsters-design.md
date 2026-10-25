@@ -579,6 +579,8 @@ of its own after the owner agrees.
 | P18 | The random Kanturu 1st monsters (Berserker, Gigantis, Genocider, Splinter Wolf, Iron Rider) pick attack 1 with a chance that depends on the frame rate (`rand_fps_check(2)` in a one-time choice: about 21 % at 60 FPS, 9 % at 144 FPS). Agreed: 50/50 with `rand() % 2`, also for the Gigantis Warrior (Q-MN25). | `GM_Kanturu_1st.cpp:595`, `:640` | MN2 |
 | P19 | `RenderCharacter` skips the shadow of Kalima gate 1 only, not gates 2–7. | `ZzzCharacter.cpp:8715` | MN8 |
 | P20 | Destler, Kato, Galia and the Cavalry Captain (508, 510, 511, 517) play appear at speed 0, and the Cavalry Captain also attack3: their models give these animations no speed (here and in the original client), so they stand still in them until another animation starts. Destler, Kato and Galia play appear for skill 59 and in their rage, the Cavalry Captain for skills 55 (appear) and 56 (attack3). Found by Monster Checks. Agreed: fixed with each model's attack 3 speed, 0.33 for the Cavalry Captain (Q-MN27). | `Models.json`, `ZzzOpenData.cpp` before MN3 | MN3 |
+| P21 | The Dark Ghost's second attack plays the fire pillar sound, which only the Balgass maps (41, 42) load: silent on Empire Guardian 2 unless the hero was there earlier. Agreed: its model loads it (Q-MN31). | `GMEmpireGuardian2.cpp:1230` before MN7 | MN7 |
+| P22 | 13 models play sounds that only another model loads: Raklion's dark twins, the PK field's Burning Lava Giant and Cruel Blood Assassin, the Swamp's Sapi Queen, Ice Napin and Shadow Master, and Crypos play their normal versions' sounds (silent unless those appeared); the Coolutin's death (the Hell Spider's sound), the Forsaker's second attack (Selupan's) and the Cavalry Captain's death (the Giant Mammoth's) are silent on their maps. Agreed: each model loads the sounds its events play (Q-MN32). | the sound hooks before MN7 | MN7 |
 
 ## Target design
 
@@ -996,6 +998,9 @@ groups:
 | Q-MN27 | P20: fix the bosses' appear (and the Cavalry Captain's attack 3) at speed 0? *(2026-10-25)* | Yes: appear gets each model's attack 3 speed (Destler 0.4, Kato 0.4, Galia 0.45); the Cavalry Captain's appear and attack 3 get 0.33. |
 | Q-MN28 | MN7: where do the trap sounds of `SetPlayerAttack` go, as traps have no model entry? *(2026-10-25)* | Into the attacks: `sound` (and `soundAtMonster` for a sound played at the monster) in the monster entry's `attacks`, played whenever the attacks play. |
 | Q-MN29 | MN7: the sound hooks draw with `rand_fps_check` once per step, attack, hit or idle loop, so the chances depend on the frame rate. Fix after the move? *(2026-10-25)* | Yes, like P18: picks become 50/50 with `rand() % 2`, chances 1 in n with `rand() % n`, in a commit of their own after the comparison. |
+| Q-MN30 | MN7: the Empire Guardian maps load 31 sounds their monsters' events play; every other monster loads its sounds with its model at its first appearance. Move them into the models? *(2026-10-25)* | Yes, into the models, as for all other monsters; a model does not load a sound again that is already loaded from the same file. The map keeps its ambient sounds and DEFENDER_ATTACK02, which a player weapon plays too. A preload per map can come later. |
+| Q-MN31 | P21: the Dark Ghost's fire pillar sound is loaded only on the Balgass maps. Fix? *(2026-10-25)* | Yes: its model loads it. |
+| Q-MN32 | P22: 13 more models play sounds only another model loads. Fix the same way? *(2026-10-25)* | Yes: each model lists the sounds its events play. |
 
 ## Open questions
 

@@ -254,6 +254,13 @@ and only within 500 units of the hero (the Empire Guardian bosses' steps):
 One call can play several events, in their order; their draws come in that
 order too.
 
+A model loads the sounds its events play, like its other sounds, when the
+first monster of it appears (the Empire Guardian monsters' too; the map
+loads only its ambient sounds). A sound that another model or the map
+already loaded from the same file, with the same channels and 3D setting,
+is not loaded again, so models that share a sound list it alike (a test
+checks both).
+
 ### What the code adds
 
 On top of the model list the code does (the Monster Model and Monster
