@@ -14,9 +14,6 @@
 
 namespace Data::Items
 {
-// A language code like "pt" or "zh-TW": letters, digits and "-" only.
-bool IsValidLocaleCode(const std::string& locale);
-
 // Checks rules across items that a single file cannot check: unique ids,
 // the required English name, and names that fit the LocalizedString format.
 // Also the description texts: the English text, the language codes, the

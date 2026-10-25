@@ -55,7 +55,6 @@ enum class ItemTag : uint8_t
     // Asked for confirmation before selling or dropping
     Valuable,
     // Tooltip lines the item does not show though its data has the value
-    NoDamageLine,
     NoLevelRequirement,
 
     Count

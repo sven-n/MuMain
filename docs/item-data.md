@@ -171,7 +171,6 @@ can have several tags; the file lists them in the order below.
 | `gemJewelry` | The gem rings and necklaces from the cash shop |
 | `luckyItemTicket` | Lucky item tickets |
 | `valuable` | The game asks for confirmation before the item is sold or dropped |
-| `noDamageLine` | The tooltip shows no damage line, though the item has damage (the Scrolls of Teleport, Teleport Ally and Soul Barrier) |
 | `noLevelRequirement` | The tooltip shows no level requirement, though the item has one (Loch's Feather) |
 
 Wings need no tag: an item is a wing when its `slot` is `wings`.
@@ -215,8 +214,9 @@ A layout line has:
 
 - **`text`**: `"@name"` for a shared text, a text written in place (with its
   translations, as in a description), or `""` for a blank line. Its
-  placeholders are the [built-in values](#description-placeholders), `level`
-  and the stat file's tables.
+  placeholders are the [built-in values](#description-placeholders) and those
+  the line's `values` names (the stat file's tables, which descriptions can
+  use, aren't checked here, so a layout can't use them yet).
 - **`when`**: the line shows only when every entry holds. An entry is
   - a built-in value, which holds when it is not 0 (`"defense"`,
     `"missingStrength"`);
@@ -243,6 +243,7 @@ The **states** a condition can name:
 | `excellent`, `ancient` | An excellent or ancient item |
 | `damageHarmonyBonus`, `defenseHarmonyBonus` | A Jewel of Harmony option raises its damage or defense |
 | `strengthReduced`, `dexterityReduced` | A Jewel of Harmony option or a socket lowers that requirement |
+| `strengthRequired`, `dexterityRequired` | The item asks for that stat at all (its own requirement, before the reductions): a reduction to 0 still shows the line, at 0 |
 | `armour` | A helm, armor, pants, gloves or boots (groups 7 to 11) |
 | `wizardryWeapon` | A staff, a book, or a Magic Gladiator's sword with magic power |
 

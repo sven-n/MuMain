@@ -132,7 +132,6 @@
         "es": "Rollo de Telepuerto",
         "pt": "Pergaminho de teletransporte"
       },
-      "tags": ["noDamageLine"],
       "width": 1,
       "height": 2,
       "statProfile": "scroll",
@@ -350,7 +349,6 @@
         "es": "Rollo de Telepuerto Aliado",
         "pt": "Pergaminho Teletr. De Aliado"
       },
-      "tags": ["noDamageLine"],
       "width": 1,
       "height": 2,
       "statProfile": "scroll",
@@ -374,7 +372,6 @@
         "es": "Rollo de Barrera de Almas",
         "pt": "Pergaminho Barr. da Alma"
       },
-      "tags": ["noDamageLine"],
       "width": 1,
       "height": 2,
       "statProfile": "scroll",

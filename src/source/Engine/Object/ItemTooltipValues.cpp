@@ -76,6 +76,7 @@ ItemTooltipValues::Requirement HeroRequirement(int required, std::optional<int> 
     requirement.required = required - reduction;
     requirement.missing = heroValue && *heroValue < requirement.required ? requirement.required - *heroValue : 0;
     requirement.reduced = reduction != 0;
+    requirement.asked = required != 0;
     return requirement;
 }
 
@@ -262,6 +263,14 @@ bool GetItemTooltipState(const ItemTooltipValues& values, std::string_view name)
     if (name == "dexterityReduced")
     {
         return values.dexterity.reduced;
+    }
+    if (name == "strengthRequired")
+    {
+        return values.strength.asked;
+    }
+    if (name == "dexterityRequired")
+    {
+        return values.dexterity.asked;
     }
     return false;
 }
