@@ -5,6 +5,7 @@
 #include "../MuEditor/UI/ItemTools/ItemEditDraft.h"
 #include "Data/GameData/MonsterData/MonsterDefinition.h"
 
+#include <string>
 #include <vector>
 
 namespace MuEditor::Monsters
@@ -32,6 +33,7 @@ private:
     void RenderEntries(Data::Monsters::MonsterDefinition& monster, int modelSlot, bool monsterSkills);
     void RenderOtherwise(Data::Monsters::MonsterDefinition& monster, int modelSlot);
     void RenderClearSkill(Data::Monsters::MonsterDefinition& monster);
+    void RenderSound(Data::Monsters::MonsterDefinition& monster);
     // A combo of the animations the model has (with a speed above 0) and
     // none; true when one was picked.
     bool AnimationCombo(const char* id, int& animation, int modelSlot);
@@ -39,6 +41,11 @@ private:
     MonsterDraft m_draft;
     int m_newMonsterSkill = 0;
     int m_newSkill = 0;
+    // The text of the sound field while it is edited, and whether the last
+    // one left named no sound.
+    std::string m_soundText;
+    bool m_soundTextUnknown = false;
+    int m_soundMonster = -1;
 };
 } // namespace MuEditor::Monsters
 

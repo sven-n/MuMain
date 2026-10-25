@@ -9,6 +9,7 @@
 #include "MonsterModelValues.h"
 #include "MonsterSelection.h"
 #include "MonsterShownModel.h"
+#include "MonsterSoundEventsEditor.h"
 #include "MonsterStepLabel.h"
 #include "MonsterToolWindow.h"
 
@@ -218,6 +219,10 @@ void MuMonsterModelUI::RenderModel(MonsterModelDefinition& model, int slot)
     {
         RenderSounds(model, slot);
         RenderSoundSlots(model);
+    }
+    if (ImGui::CollapsingHeader(I18N::Editor::SoundEvents, ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        SoundEventsEditor::Render(model, slot, ShownModel::IsOpen(slot), m_draft, m_soundEventMaps);
     }
     if (ImGui::CollapsingHeader(I18N::Editor::MoreOfTheModelEntry))
     {

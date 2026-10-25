@@ -20,6 +20,8 @@
 #include "Data/GameData/MonsterData/MonsterAttacks.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
+#include "Data/GameData/MonsterData/MonsterSoundIds.h"
+#include "../MuEditor/UI/ItemTools/ItemTextInput.h"
 #include "I18N/All.h"
 #include "Render/Models/ZzzBMD.h"
 #include "imgui.h"
@@ -254,6 +256,10 @@ void MuMonsterAttacksUI::RenderAttacks(MonsterDefinition& monster, int modelSlot
         RenderOtherwise(monster, modelSlot);
         RenderClearSkill(monster);
     }
+    if (ImGui::CollapsingHeader(I18N::Editor::AttackSound, ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        RenderSound(monster);
+    }
     ImGui::Separator();
     if (ImGui::Button(I18N::Editor::RemoveTheAttacks))
     {
@@ -386,6 +392,47 @@ void MuMonsterAttacksUI::RenderClearSkill(MonsterDefinition& monster)
         }
         ImGui::EndCombo();
     }
+}
+
+void MuMonsterAttacksUI::RenderSound(MonsterDefinition& monster)
+{
+    MonsterAttacks& attacks = *monster.attacks;
+    if (m_soundMonster != monster.number)
+    {
+        m_soundMonster = monster.number;
+        m_soundTextUnknown = false;
+    }
+    RenderNote(I18N::Editor::AttackSoundNote);
+    ImGui::SetNextItemWidth(ComboWidth * 2.0f * g_MuEditorCore.GetUIScale());
+    Items::InputStringWithHint("##Sound", "SOUND_TRAP01", m_soundText);
+    const bool active = ImGui::IsItemActive();
+    if (ImGui::IsItemDeactivatedAfterEdit())
+    {
+        // A text that names no sound is not stored; the field says so.
+        m_soundTextUnknown = !m_soundText.empty() && !Data::Monsters::FindMonsterSoundId(m_soundText);
+        if (!m_soundTextUnknown && m_soundText != attacks.sound)
+        {
+            attacks.sound = m_soundText;
+            if (attacks.sound.empty())
+            {
+                attacks.soundAtMonster = false;
+            }
+            m_draft.AfterChange(true, StepLabel::Attacks(monster));
+        }
+    }
+    if (!active && !m_soundTextUnknown)
+    {
+        m_soundText = attacks.sound;
+    }
+    if (m_soundTextUnknown)
+    {
+        ImGui::SameLine();
+        RenderWarning(I18N::Editor::AttackSoundUnknown);
+    }
+    ImGui::BeginDisabled(attacks.sound.empty());
+    m_draft.AfterChange(ImGui::Checkbox(I18N::Editor::AttackSoundAtMonster, &attacks.soundAtMonster),
+                        StepLabel::Attacks(monster));
+    ImGui::EndDisabled();
 }
 
 bool MuMonsterAttacksUI::AnimationCombo(const char* id, int& animation, int modelSlot)

@@ -2710,4 +2710,67 @@
   <data name="Step attacks" xml:space="preserve">
     <value>{0}: attacks</value>
   </data>
+  <data name="Sound events" xml:space="preserve">
+    <value>Sound events</value>
+  </data>
+  <data name="Sound events note" xml:space="preserve">
+    <value>Sounds the game plays on top of the slots for a character in one of an event's animations: when an attack starts, when it is hit or dies, at each step and at the end of each idle loop, within 500 units of the hero. An event plays sounds of this model.</value>
+  </data>
+  <data name="Sound event frames" xml:space="preserve">
+    <value>Frames</value>
+  </data>
+  <data name="Sound event death effect" xml:space="preserve">
+    <value>Death effect</value>
+  </data>
+  <data name="Sound event death effect note" xml:space="preserve">
+    <value>Only while the character's death effect is armed (the Snowman's death).</value>
+  </data>
+  <data name="Sound event chance" xml:space="preserve">
+    <value>Chance</value>
+  </data>
+  <data name="Sound event one in" xml:space="preserve">
+    <value>1 in</value>
+  </data>
+  <data name="Sound event pick" xml:space="preserve">
+    <value>One of two</value>
+  </data>
+  <data name="Sound event pick note" xml:space="preserve">
+    <value>Plays the first of two sounds when a draw of one in two comes up, else the second; needs two sounds.</value>
+  </data>
+  <data name="Sound draw rand" xml:space="preserve">
+    <value>random (rand)</value>
+  </data>
+  <data name="Sound draw rand fps" xml:space="preserve">
+    <value>by frame rate (randFps)</value>
+  </data>
+  <data name="Sound event add sound" xml:space="preserve">
+    <value>Add a sound</value>
+  </data>
+  <data name="Sound event maps" xml:space="preserve">
+    <value>Maps:</value>
+  </data>
+  <data name="Sound event every map" xml:space="preserve">
+    <value>every map</value>
+  </data>
+  <data name="Add a sound event" xml:space="preserve">
+    <value>Add a sound event</value>
+  </data>
+  <data name="Sound event needs a sound of the model" xml:space="preserve">
+    <value>An event plays sounds of this model, and it loads none.</value>
+  </data>
+  <data name="Step what sound events" xml:space="preserve">
+    <value>sound events</value>
+  </data>
+  <data name="Attack sound" xml:space="preserve">
+    <value>Sound of the attacks</value>
+  </data>
+  <data name="Attack sound note" xml:space="preserve">
+    <value>A SOUND_ id the attacks play each time they play (the traps'); empty: none.</value>
+  </data>
+  <data name="Attack sound at monster" xml:space="preserve">
+    <value>At the monster (3D)</value>
+  </data>
+  <data name="Attack sound unknown" xml:space="preserve">
+    <value>not a SOUND_ id the monster data can name</value>
+  </data>
 </root>

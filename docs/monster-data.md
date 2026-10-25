@@ -455,6 +455,13 @@ item tools.
     frame).
   - **Sounds**: the model's sounds, each with **Play**, and the five sound
     slots, each set to a sound of the model or to no sound.
+  - **Sound events**: a row per [sound event](#sound-events): its
+    animations (one or more), frames, whether the death effect must be armed,
+    a chance of one in n, a pick of one of two sounds, and its sounds, picked
+    from the model's own; **Play** plays them, **Remove** removes the event.
+    **Add a sound event** adds one for attack1 with the model's first sound
+    (a model without sounds cannot have events). **Maps** lists the maps the
+    events play on (empty: every map).
   - **More of the model entry**: the values the tool shows but does not edit
     (head bone, stream mesh, part models, bitmaps, box, weapon bones); they
     are edited in the file.
@@ -480,7 +487,10 @@ item tools.
   (monster skills, player skills) has a row per skill with its animation and
   **Remove**, and a number field with **Add**; a monster skill that 0x69
   plays no attack for is marked. **Any other attack** is an animation or a
-  draw, and **Clear the monster skill** says when the skill is cleared. The
+  draw, and **Clear the monster skill** says when the skill is cleared.
+  **Sound of the attacks** is a `SOUND_*` id they play each time (the traps'),
+  **At the monster (3D)** plays it there; a name the monster data does not
+  know is not stored, and the field says so. The
   animations offered are those of the open model with a speed above 0 (the
   tool opens it); while it is not open, stop1 to attack5. Each change is one
   undo step and reaches the monsters' next attack. A player-shaped monster

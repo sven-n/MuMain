@@ -123,6 +123,8 @@ TEST_CASE("The Monster Attacks window draws attacks without ImGui errors and sto
     bali.model = "MONSTER_MODEL_BALI";
     bali.attacks.emplace();
     bali.attacks->otherwiseRandom = Data::Monsters::MonsterAttackRandom::Bali;
+    bali.attacks->sound = "SOUND_TRAP01";
+    bali.attacks->soundAtMonster = true;
     MonsterDefinition budge = Monster(2, "Budge Dragon");
     budge.model = "MONSTER_MODEL_BUDGE_DRAGON";
     budge.attacks.emplace();
@@ -174,6 +176,17 @@ TEST_CASE("The Monster Model and Monster Preview windows draw a model entry with
     model.sounds = {{"Data/Sound/mHound1.wav", "", 2, true}, {"Data/Sound/mHound2.wav", "", 2, true}};
     model.soundSlots.emplace();
     model.soundSlots->first = {"Data/Sound/mHound1.wav", "Data/Sound/mHound2.wav", "", "", ""};
+    Data::Monsters::MonsterSoundEvent walk;
+    walk.animations = {MONSTER01_WALK};
+    walk.frames = std::pair<float, float>{1.0f, 2.0f};
+    walk.chance = Data::Monsters::MonsterSoundChance{20, Data::Monsters::MonsterSoundDraw::Rand};
+    walk.sounds = {"Data/Sound/mHound1.wav"};
+    Data::Monsters::MonsterSoundEvent attack;
+    attack.animations = {MONSTER01_ATTACK1, MONSTER01_ATTACK2};
+    attack.pick = Data::Monsters::MonsterSoundDraw::Rand;
+    attack.sounds = {"Data/Sound/mHound1.wav", "SOUND_THUNDERS01"};
+    model.soundEvents = {walk, attack};
+    model.soundEventWorlds = {69, 70};
     const std::array models = {model};
     g_MonsterModelDatabase.Build(models);
     TestImGuiContext context;

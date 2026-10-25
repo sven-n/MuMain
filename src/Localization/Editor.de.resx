@@ -2689,4 +2689,67 @@
   <data name="Step attacks" xml:space="preserve">
     <value>{0}: Angriffe</value>
   </data>
+  <data name="Sound events" xml:space="preserve">
+    <value>Geräuschereignisse</value>
+  </data>
+  <data name="Sound events note" xml:space="preserve">
+    <value>Geräusche, die das Spiel zusätzlich zu den Slots für eine Figur in einer der Animationen eines Ereignisses spielt: wenn ein Angriff beginnt, wenn sie getroffen wird oder stirbt, bei jedem Schritt und am Ende jeder Ruheschleife, bis 500 Einheiten vom Helden entfernt. Ein Ereignis spielt Geräusche dieses Modells.</value>
+  </data>
+  <data name="Sound event frames" xml:space="preserve">
+    <value>Bilder</value>
+  </data>
+  <data name="Sound event death effect" xml:space="preserve">
+    <value>Todeseffekt</value>
+  </data>
+  <data name="Sound event death effect note" xml:space="preserve">
+    <value>Nur solange der Todeseffekt der Figur scharf ist (der Tod des Schneemanns).</value>
+  </data>
+  <data name="Sound event chance" xml:space="preserve">
+    <value>Chance</value>
+  </data>
+  <data name="Sound event one in" xml:space="preserve">
+    <value>1 zu</value>
+  </data>
+  <data name="Sound event pick" xml:space="preserve">
+    <value>Eines von zwei</value>
+  </data>
+  <data name="Sound event pick note" xml:space="preserve">
+    <value>Spielt das erste von zwei Geräuschen, wenn eine Ziehung von eins zu zwei gelingt, sonst das zweite; braucht zwei Geräusche.</value>
+  </data>
+  <data name="Sound draw rand" xml:space="preserve">
+    <value>zufällig (rand)</value>
+  </data>
+  <data name="Sound draw rand fps" xml:space="preserve">
+    <value>nach Bildrate (randFps)</value>
+  </data>
+  <data name="Sound event add sound" xml:space="preserve">
+    <value>Ein Geräusch hinzufügen</value>
+  </data>
+  <data name="Sound event maps" xml:space="preserve">
+    <value>Karten:</value>
+  </data>
+  <data name="Sound event every map" xml:space="preserve">
+    <value>jede Karte</value>
+  </data>
+  <data name="Add a sound event" xml:space="preserve">
+    <value>Geräuschereignis hinzufügen</value>
+  </data>
+  <data name="Sound event needs a sound of the model" xml:space="preserve">
+    <value>Ein Ereignis spielt Geräusche dieses Modells, und es lädt keine.</value>
+  </data>
+  <data name="Step what sound events" xml:space="preserve">
+    <value>Geräuschereignisse</value>
+  </data>
+  <data name="Attack sound" xml:space="preserve">
+    <value>Geräusch der Angriffe</value>
+  </data>
+  <data name="Attack sound note" xml:space="preserve">
+    <value>Eine SOUND_-ID, die die Angriffe jedes Mal spielen (die der Fallen); leer: keine.</value>
+  </data>
+  <data name="Attack sound at monster" xml:space="preserve">
+    <value>Am Monster (3D)</value>
+  </data>
+  <data name="Attack sound unknown" xml:space="preserve">
+    <value>keine SOUND_-ID, die die Monsterdaten nennen können</value>
+  </data>
 </root>
