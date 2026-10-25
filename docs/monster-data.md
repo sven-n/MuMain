@@ -455,11 +455,9 @@ item tools.
   0x69 plays no attack for, and each animation the attacks can play that the
   open model lacks, whose speed is 0, after which the model does not go back
   to stop1, or that is not attack 1 or 2 (see [Attacks](#attacks)). With the
-  shipped lists it shows 46 warnings: 252's empty name, Molt's missing file,
-  and 44 of the attacks, among them five animations of Empire Guardian bosses
-  that stand still (speed 0: appear of Destler, Kato, Galia and the Cavalry
-  Captain, and the Cavalry Captain's attack3), as in the original client.
-  The checks run when
+  shipped lists it shows 50 warnings: 252's empty name, Molt's missing file,
+  and 48 of the attacks (the bosses' appear and attack 3, Bali's draw, the
+  Battle Castle guards' shock and the like). The checks run when
   the window is first shown and on **Check**; after a change the window says
   that the monsters changed since the last check. Errors come first, and
   each kind can be hidden with its box. A click on a problem selects the

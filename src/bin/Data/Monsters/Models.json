@@ -2367,7 +2367,7 @@
       "slot": "MONSTER_MODEL_FRED",
       "file": "Data/Monster/monster169.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.4, "attack2": 0.38, "die": 0.3, "attack3": 0.4, "attack4": 0.45}
+      "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.4, "attack2": 0.38, "die": 0.3, "appear": 0.4, "attack3": 0.4, "attack4": 0.45}
     },
     {
       "slot": "MONSTER_MODEL_HAMMERIZE",
@@ -2379,13 +2379,13 @@
       "slot": "MONSTER_MODEL_DUAL_BERSERKER",
       "file": "Data/Monster/Monster171.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.35, "attack1": 0.4, "attack2": 0.35, "die": 0.35, "attack3": 0.4}
+      "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.35, "attack1": 0.4, "attack2": 0.35, "die": 0.35, "appear": 0.4, "attack3": 0.4}
     },
     {
       "slot": "MONSTER_MODEL_DEVIL_LORD",
       "file": "Data/Monster/monster172.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.4, "attack1": 0.45, "attack2": 0.5, "die": 0.3, "attack3": 0.45}
+      "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.4, "attack1": 0.45, "attack2": 0.5, "die": 0.3, "appear": 0.45, "attack3": 0.45}
     },
     {
       "slot": "MONSTER_MODEL_QUARTER_MASTER",
@@ -2421,7 +2421,7 @@
       "slot": "MONSTER_MODEL_HEAD_MOUNTER",
       "file": "Data/Monster/monster178.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.37, "die": 0.3}
+      "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.37, "die": 0.3, "appear": 0.33, "attack3": 0.33}
     },
     {
       "slot": "MONSTER_MODEL_DEFENDER",

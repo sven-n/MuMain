@@ -59,7 +59,7 @@ TEST_CASE("Monster attacks: the shipped attacks play only animations that their 
         CHECK(issue.message.find("does not have") == std::string::npos);
     }
     // The warnings of the data alone (tests/data, test_monster_attack_checks).
-    CHECK(issues.size() == 44);
+    CHECK(issues.size() == 48);
 }
 
 #endif // _EDITOR

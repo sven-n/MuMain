@@ -206,9 +206,8 @@ TEST_CASE("Monster attack checks: the draw's animations, an animation the open m
 
 // What Monster Checks shows for the shipped lists while no model is open
 // (docs/monster-data.md): the attacks that play other animations than attack 1
-// and 2, as the converter took them from the code, and five animations of
-// Empire Guardian bosses that their model entries give no speed (the original
-// client's speeds too: they stand still in them).
+// and 2, as the converter took them from the code. Every animation they play
+// has a speed (P20 gave the Empire Guardian bosses' appear one).
 TEST_CASE("Monster attack checks: the shipped lists' attacks [editor][monsters]")
 {
     const Data::Monsters::MonsterDataLoadResult monsters =
@@ -234,9 +233,8 @@ TEST_CASE("Monster attack checks: the shipped lists' attacks [editor][monsters]"
                                       issue.message.substr(0, issue.message.find(" is played")));
         }
     }
-    CHECK(stillAnimations == std::vector<std::string>{"508 appear (7)", "510 appear (7)", "511 appear (7)",
-                                                      "517 appear (7)", "517 attack3 (8)"});
-    CHECK(issues.size() == 44);
+    CHECK(stillAnimations.empty());
+    CHECK(issues.size() == 48);
 }
 
 #endif // _EDITOR
