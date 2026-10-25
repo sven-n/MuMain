@@ -213,6 +213,16 @@ const ItemDefinition* FindItem(const std::vector<ItemDefinition>& items, int ite
     });
     return found != items.end() ? &*found : nullptr;
 }
+
+// A durability line of the item data, which came from another part of the old code than the description texts: a
+// shared text of the tooltip file, or a line shown by the item's durability ("durability", "durability=2"). A line with
+// another condition is no durability line, so the old-code comparisons keep it.
+bool IsDurabilityLine(const ItemDescriptionLine& line)
+{
+    return !line.textName.empty() || std::any_of(line.when.begin(), line.when.end(),
+                                                 [](const TooltipCondition& condition)
+                                                 { return condition.name == "durability"; });
+}
 } // namespace
 
 TEST_CASE("Shipped item data loads without problems [data][items]")
@@ -402,10 +412,19 @@ TEST_CASE("The wings', capes' and pets' tooltip values come from their data as f
         {
             INFO(item.group << "/" << item.number << " +" << level);
             const std::vector<OldWingLine> old = OldWingAndPetLines(item.group, item.number, level);
-            REQUIRE(item.description.size() == old.size());
+            // Not the durability lines, which came from another part of the old code.
+            std::vector<const ItemDescriptionLine*> wingLines;
+            for (const ItemDescriptionLine& line : item.description)
+            {
+                if (!IsDurabilityLine(line))
+                {
+                    wingLines.push_back(&line);
+                }
+            }
+            REQUIRE(wingLines.size() == old.size());
             for (size_t index = 0; index < old.size(); ++index)
             {
-                const Data::LocalizedString& text = item.description[index].text;
+                const Data::LocalizedString& text = wingLines[index]->text;
                 CHECK(FillPlaceholders(text.GetNeutral(), level, profiles) == EnglishOldWingLine(old[index]));
                 // In every language, as the game's texts that other code still prints have it.
                 for (const char* locale : I18N::GetAvailableLocales())
@@ -534,7 +553,8 @@ TEST_CASE("The tooltip texts by item level come from the descriptions as from th
             std::vector<OldLine> lines;
             for (const ItemDescriptionLine& line : found->description)
             {
-                if (line.IsShownAt(level))
+                // Not the durability lines, which came from another part of the old code.
+                if (line.IsShownAt(level) && !IsDurabilityLine(line))
                 {
                     lines.push_back({FillPlaceholders(line.text.GetNeutral(), level, profiles), line.color});
                 }

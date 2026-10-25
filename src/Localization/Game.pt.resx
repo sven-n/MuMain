@@ -364,10 +364,6 @@
     <value>Sorte (taxa de dano crítico +5%%)</value>
     <comment>legacy_id=94</comment>
   </data>
-  <data name="Durability: [%d]" xml:space="preserve">
-    <value>Durabilidade: [%d]</value>
-    <comment>legacy_id=95</comment>
-  </data>
   <data name="Can only be used in moving unit" xml:space="preserve">
     <value>Só pode ser usado em unidade móvel</value>
     <comment>legacy_id=96</comment>
@@ -8092,10 +8088,6 @@
     <value>http://muonline.webzen.com/</value>
     <comment>legacy_id=2295</comment>
   </data>
-  <data name="%d%% Combination success rate increase" xml:space="preserve">
-    <value>%d%% Aumento da taxa de sucesso da combinação</value>
-    <comment>legacy_id=2296</comment>
-  </data>
   <data name="Hour" xml:space="preserve">
     <value>Hora</value>
     <comment>legacy_id=2299</comment>
@@ -8982,14 +8974,6 @@
   <data name="Move by a right-mouse-click." xml:space="preserve">
     <value>Mova com um clique com o botão direito do mouse.</value>
     <comment>legacy_id=2603</comment>
-  </data>
-  <data name="Saves the location with the right-mouse-click." xml:space="preserve">
-    <value>Salva o local com o clique direito do mouse.</value>
-    <comment>legacy_id=2605</comment>
-  </data>
-  <data name="Returns to the saved location by a click." xml:space="preserve">
-    <value>Retorna ao local salvo com um clique.</value>
-    <comment>legacy_id=2606</comment>
   </data>
   <data name="Would you like to save the location?" xml:space="preserve">
     <value>Gostaria de salvar o local?</value>
@@ -10494,14 +10478,6 @@
   <data name="GrandDukeDukeMarquisCountViscount" xml:space="preserve">
     <value>Grão-Duque#Duque#Marquês#Conde#Visconde#Barão#Cavaleiro Comandante#Cavaleiro Superior#Cavaleiro#Prefeito da Guarda#Oficial#Tenente#Sargento#Soldado</value>
     <comment>legacy_id=3104</comment>
-  </data>
-  <data name="Can enter the Monday - Saturday map." xml:space="preserve">
-    <value>Pode entrar no mapa de segunda a sábado.</value>
-    <comment>legacy_id=3105</comment>
-  </data>
-  <data name="Can enter the Sunday map." xml:space="preserve">
-    <value>Pode entrar no mapa de domingo.</value>
-    <comment>legacy_id=3106</comment>
   </data>
   <data name="Varka Map 7" xml:space="preserve">
     <value>Mapa de Varka 7</value>

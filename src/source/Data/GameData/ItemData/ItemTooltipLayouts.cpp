@@ -5,6 +5,7 @@
 #include "ItemDescriptionPlaceholders.h"
 #include "ItemEnumNames.h"
 #include "ItemJsonCommon.h"
+#include "ItemTooltipConditionsJson.h"
 
 #include <algorithm>
 #include <array>
@@ -33,17 +34,9 @@ constexpr const char* Values = "values";
 } // namespace Keys
 
 constexpr std::string_view TextReference = "@";
-constexpr std::string_view Negation = "!";
-constexpr std::string_view TagPrefix = "tag:";
 
 // Same order as TooltipSection, after None.
 constexpr std::array<std::string_view, 4> SectionNames = {"name", "description", "classes", "options"};
-
-constexpr std::array<std::string_view, 13> States = {
-    "hasDamage",          "skillBook",           "twoHanded",      "excellent",       "ancient",
-    "damageHarmonyBonus", "defenseHarmonyBonus", "armour",         "strengthReduced", "dexterityReduced",
-    "strengthRequired",   "dexterityRequired",   "wizardryWeapon",
-};
 
 using Json::KeySet;
 
@@ -106,13 +99,11 @@ private:
     void ReadLineValues(const OrderedJson& json, const std::string& field, TooltipLayoutLine& line);
     void CheckLinePlaceholders(const TooltipLayoutLine& line, const ItemTooltipFile& file, const std::string& field);
     void ReadConditions(const OrderedJson& json, const std::string& field, std::vector<TooltipCondition>& conditions);
-    bool ReadCondition(const std::string& entry, const std::string& field, TooltipCondition& condition);
     void ReadColor(const OrderedJson& json, const std::string& field, ItemTextColor& color);
     void ReadColorRules(const OrderedJson& json, const std::string& field, std::vector<TooltipColorRule>& rules);
 
     const std::string& m_source;
     std::vector<ItemDataIssue>& m_issues;
-    std::set<std::string, std::less<>> m_usedTexts;
 };
 
 // A text is written like an item name and checked like one: an English text (unless it is a blank line), and
@@ -194,66 +185,12 @@ void ItemTooltipReader::ReadTexts(const OrderedJson& root, ItemTooltipFile& file
     }
 }
 
-bool ItemTooltipReader::ReadCondition(const std::string& entry, const std::string& field, TooltipCondition& condition)
-{
-    std::string_view name = entry;
-    condition.negated = name.starts_with(Negation);
-    if (condition.negated)
-    {
-        name.remove_prefix(Negation.size());
-    }
-    if (name.starts_with(TagPrefix))
-    {
-        name.remove_prefix(TagPrefix.size());
-        condition.kind = TooltipCondition::Kind::Tag;
-        if (!FindEnumValue(name, condition.tag))
-        {
-            AddError(field, "\"" + entry + "\" names no item tag (docs/item-data.md, \"Tags\")");
-            return false;
-        }
-        return true;
-    }
-    condition.name = name;
-    if (IsTooltipState(name))
-    {
-        condition.kind = TooltipCondition::Kind::State;
-        return true;
-    }
-    if (IsBuiltInPlaceholder(name))
-    {
-        condition.kind = TooltipCondition::Kind::Value;
-        return true;
-    }
-    std::vector<std::string> known(GetBuiltInPlaceholders().begin(), GetBuiltInPlaceholders().end());
-    known.insert(known.end(), States.begin(), States.end());
-    const std::string suggestion = SuggestPlaceholder(name, known);
-    AddError(field,
-             "\"" + entry + "\" is neither a built-in value, a state nor \"tag:<tag>\"" +
-                 (suggestion.empty() ? std::string(" (docs/item-data.md)") : "; did you mean " + suggestion + "?"));
-    return false;
-}
-
 void ItemTooltipReader::ReadConditions(const OrderedJson& json, const std::string& field,
                                        std::vector<TooltipCondition>& conditions)
 {
-    if (!json.is_array())
-    {
-        AddError(field, "must be a list of conditions, such as [\"defense\", \"!excellent\", \"tag:sceptre\"]");
-        return;
-    }
-    for (size_t index = 0; index < json.size(); ++index)
-    {
-        const std::string entryField = field + "[" + std::to_string(index) + "]";
-        TooltipCondition condition;
-        if (!json[index].is_string())
-        {
-            AddError(entryField, "must be a text");
-        }
-        else if (ReadCondition(json[index].get<std::string>(), entryField, condition))
-        {
-            conditions.push_back(std::move(condition));
-        }
-    }
+    ReadTooltipConditions(json, field, R"(["defense", "!excellent", "tag:sceptre"])", conditions,
+                          [this](const std::string& errorField, const std::string& message)
+                          { AddError(errorField, message); });
 }
 
 void ItemTooltipReader::ReadColor(const OrderedJson& json, const std::string& field, ItemTextColor& color)
@@ -386,7 +323,6 @@ void ItemTooltipReader::ReadLine(const OrderedJson& json, const std::string& fie
     if (text->is_string() && text->get<std::string>().starts_with(TextReference))
     {
         line.textName = text->get<std::string>().substr(TextReference.size());
-        m_usedTexts.insert(line.textName);
         if (file.FindText(line.textName) == nullptr)
         {
             std::vector<std::string> names;
@@ -545,29 +481,12 @@ void ItemTooltipReader::Read(const OrderedJson& root, ItemTooltipFile& file)
     WarnAboutUnknownKeys(root, RootKeys, "");
     ReadTexts(root, file);
     ReadLayouts(root, file);
-    for (const auto& [name, text] : file.texts)
-    {
-        if (!m_usedTexts.contains(name))
-        {
-            AddIssue(ItemDataIssueSeverity::Warning, std::string(Keys::Texts) + "." + name, "no layout uses this text");
-        }
-    }
 }
 } // namespace
 
 std::string_view GetTooltipSectionName(TooltipSection section)
 {
     return section == TooltipSection::None ? std::string_view() : SectionNames[static_cast<size_t>(section) - 1];
-}
-
-std::span<const std::string_view> GetTooltipStates()
-{
-    return States;
-}
-
-bool IsTooltipState(std::string_view name)
-{
-    return std::find(States.begin(), States.end(), name) != States.end();
 }
 
 const LocalizedString* ItemTooltipFile::FindText(std::string_view name) const

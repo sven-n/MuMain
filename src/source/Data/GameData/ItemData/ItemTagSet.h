@@ -56,6 +56,7 @@ enum class ItemTag : uint8_t
     Valuable,
     // Tooltip lines the item does not show though its data has the value
     NoLevelRequirement,
+    NoDurabilityLine,
 
     Count
 };

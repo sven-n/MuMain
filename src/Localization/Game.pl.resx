@@ -364,10 +364,6 @@
     <value>Szczęście (wskaźnik obrażeń krytycznych +5%%)</value>
     <comment>legacy_id=94</comment>
   </data>
-  <data name="Durability: [%d]" xml:space="preserve">
-    <value>Trwałość: [%d]</value>
-    <comment>legacy_id=95</comment>
-  </data>
   <data name="Can only be used in moving unit" xml:space="preserve">
     <value>Można używać tylko w ruchomych jednostkach</value>
     <comment>legacy_id=96</comment>
@@ -8388,10 +8384,6 @@
     <value>http://muonline.webzen.com/</value>
     <comment>legacy_id=2295</comment>
   </data>
-  <data name="%d%% Combination success rate increase" xml:space="preserve">
-    <value>%d%% Wzrost współczynnika powodzenia kombinacji</value>
-    <comment>legacy_id=2296</comment>
-  </data>
   <data name="Hour" xml:space="preserve">
     <value>Godzina</value>
     <comment>legacy_id=2299</comment>
@@ -9278,14 +9270,6 @@
   <data name="Move by a right-mouse-click." xml:space="preserve">
     <value>Przenosi tam po kliknięciu prawym przyciskiem myszy.</value>
     <comment>legacy_id=2603</comment>
-  </data>
-  <data name="Saves the location with the right-mouse-click." xml:space="preserve">
-    <value>Zapisuje lokalizację po kliknięciu prawym przyciskiem myszy.</value>
-    <comment>legacy_id=2605</comment>
-  </data>
-  <data name="Returns to the saved location by a click." xml:space="preserve">
-    <value>Powrót do zapisanej lokalizacji jednym kliknięciem.</value>
-    <comment>legacy_id=2606</comment>
   </data>
   <data name="Would you like to save the location?" xml:space="preserve">
     <value>Czy chcesz zapisać lokalizację?</value>
@@ -10790,14 +10774,6 @@
   <data name="GrandDukeDukeMarquisCountViscount" xml:space="preserve">
     <value>Wielki Książę#Książę#Markiz#Hrabia#Wicehrabia#Baron#Komandor Rycerzy#Starszy Rycerz#Rycerz#Prefekt Straży#Oficer#Porucznik#Sierżant#Szeregowy</value>
     <comment>legacy_id=3104</comment>
-  </data>
-  <data name="Can enter the Monday - Saturday map." xml:space="preserve">
-    <value>Można wejść na mapę od poniedziałku do soboty.</value>
-    <comment>legacy_id=3105</comment>
-  </data>
-  <data name="Can enter the Sunday map." xml:space="preserve">
-    <value>Można wejść na niedzielną mapę.</value>
-    <comment>legacy_id=3106</comment>
   </data>
   <data name="Varka Map 7" xml:space="preserve">
     <value>Mapa Varki 7</value>

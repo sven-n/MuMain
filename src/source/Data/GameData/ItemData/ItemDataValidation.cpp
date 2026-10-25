@@ -592,6 +592,72 @@ void ValidateTableUses(std::span<const ItemDefinition> items, const ItemStatProf
     ValidateWingLines(wings, issues);
 }
 
+void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemTooltipFile& tooltips,
+                              const std::string& tooltipFile, std::vector<ItemDataIssue>& issues)
+{
+    std::vector<std::string> textNames;
+    for (const auto& [name, text] : tooltips.texts)
+    {
+        textNames.push_back(name);
+    }
+    std::set<std::string, std::less<>> used;
+    for (const TooltipLayout& layout : tooltips.layouts)
+    {
+        for (const TooltipLayoutLine& line : layout.lines)
+        {
+            used.insert(line.textName);
+        }
+    }
+    for (const ItemDefinition& definition : items)
+    {
+        if (!definition.Exists())
+        {
+            continue;
+        }
+        for (size_t line = 0; line < definition.description.size(); ++line)
+        {
+            const std::string& name = definition.description[line].textName;
+            if (name.empty())
+            {
+                continue;
+            }
+            used.insert(name);
+            const std::string field = "description[" + std::to_string(line) + "].text";
+            const LocalizedString* text = tooltips.FindText(name);
+            if (text == nullptr)
+            {
+                const std::string suggestion = SuggestPlaceholder(name, textNames);
+                issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number, field,
+                                  "\"@" + name + "\" is not a text of " + tooltipFile +
+                                      (suggestion.empty() ? "" : "; did you mean \"@" + suggestion + "\"?")});
+                continue;
+            }
+            // Built-in values only: the table checks (an unused table, the editor's table counts and renames) look at
+            // the items' own texts, so a table named by a shared text would go unseen.
+            const PlaceholderScan scan = ScanPlaceholders(text->GetNeutral());
+            for (const std::string& placeholder : scan.names)
+            {
+                if (!IsBuiltInPlaceholder(placeholder))
+                {
+                    issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number, field,
+                                      "\"@" + name + "\" has the placeholder {" + placeholder +
+                                          "}, which a shared text cannot have: a description's shared text takes "
+                                          "built-in values only (a table goes in the item's own text)"});
+                    break;
+                }
+            }
+        }
+    }
+    for (const std::string& name : textNames)
+    {
+        if (!used.contains(name))
+        {
+            issues.push_back({ItemDataIssueSeverity::Warning, tooltipFile, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
+                              "texts." + name, "neither a layout nor an item description uses this text"});
+        }
+    }
+}
+
 void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const char* const> uiLocales,
                          std::vector<ItemDataIssue>& issues)
 {

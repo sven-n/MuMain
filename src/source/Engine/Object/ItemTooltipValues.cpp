@@ -142,6 +142,13 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item)
     values.armour = item.Type >= ITEM_HELM && item.Type < ITEM_BOOTS + MAX_ITEM_INDEX;
     values.wizardryWeapon =
         GameLogic::Items::IsStaffOrBookType(item.Type) || GameLogic::Items::IsMagicSwordType(item.Type);
+    const int type = item.Type;
+    values.hasDurability = ((attribute->Durability || attribute->MagicDur) &&
+                            (type < ITEM_WING || type >= ITEM_HELPER) && type < ITEM_POTION) ||
+                           (type >= ITEM_WING && type <= ITEM_WINGS_OF_DARKNESS) ||
+                           (type >= ITEM_WING_OF_STORM && type <= ITEM_WING_OF_DIMENSION) ||
+                           (type >= ITEM_CAPE_OF_FIGHTER && type <= ITEM_CAPE_OF_OVERRULE);
+    values.timed = item.bPeriodItem;
     ComputeDamage(item, values);
 
     const StrengthenCapability harmony = HarmonyBonus(item, 2);
@@ -248,6 +255,8 @@ bool GetItemTooltipState(const ItemTooltipValues& values, std::string_view name)
         {"defenseHarmonyBonus", &ItemTooltipValues::defenseHarmonyBonus},
         {"armour", &ItemTooltipValues::armour},
         {"wizardryWeapon", &ItemTooltipValues::wizardryWeapon},
+        {"hasDurability", &ItemTooltipValues::hasDurability},
+        {"timed", &ItemTooltipValues::timed},
     };
     for (const Named& named : States)
     {
@@ -290,7 +299,7 @@ bool AreTooltipConditionsMet(std::span<const Data::Items::TooltipCondition> cond
             {
                 value = Data::Items::GetPlaceholderValue(condition.name, level, g_ItemDatabase.GetStatProfiles());
             }
-            return value.value_or(0) != 0;
+            return value && Data::Items::CompareTooltipValue(condition, *value);
         }
         case TooltipCondition::Kind::State:
             return GetItemTooltipState(values, condition.name);

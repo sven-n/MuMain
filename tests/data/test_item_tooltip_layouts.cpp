@@ -6,12 +6,15 @@
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
+#include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Engine/Object/ItemTooltipValues.h"
 
+#include <algorithm>
 #include <filesystem>
+#include <tuple>
 #include <string>
 #include <vector>
 
@@ -182,13 +185,94 @@ TEST_CASE("A tooltip file needs the default layout [data][items][tooltip]")
     CHECK(other.Has(ItemDataIssueSeverity::Warning, "layouts[0].name", "only the \"default\" layout is used"));
 }
 
-TEST_CASE("A tooltip file warns about what nothing uses [data][items][tooltip]")
+TEST_CASE("A tooltip file warns about a line value its text does not have [data][items][tooltip]")
 {
-    const ReadResult result = Read(TooltipFile(R"("unused": "Nothing shows this", "used": "Defense: {defense}")",
-                                               R"({"text": "@used", "values": {"missing": "missingLevel"}},)"));
+    const ReadResult result = Read(
+        TooltipFile(R"("used": "Defense: {defense}")", R"({"text": "@used", "values": {"missing": "missingLevel"}},)"));
     CHECK_FALSE(HasErrors(result.issues));
-    CHECK(result.Has(ItemDataIssueSeverity::Warning, "texts.unused", "no layout uses this text"));
     CHECK(result.Has(ItemDataIssueSeverity::Warning, "layouts[0].lines[1].values.missing", "has no {missing}"));
+}
+
+TEST_CASE("A shared text is used by a layout or an item description [data][items][tooltip]")
+{
+    const ReadResult tooltips = Read(
+        TooltipFile(R"("unused": "Nothing shows this", "layout": "Defense: {defense}", "life": "Life: {durability}",)"
+                    R"("table": "Up {notATable}", "stats": "Up {table:capeDamageIncrease}")",
+                    R"({"text": "@layout"},)"));
+    ItemDefinition pet;
+    pet.group = 13;
+    pet.number = 0;
+    pet.names.Set("en", "Pet");
+    ItemDescriptionLine life;
+    life.textName = "life";
+    ItemDescriptionLine typo;
+    typo.textName = "lif";
+    ItemDescriptionLine table;
+    table.textName = "table";
+    ItemDescriptionLine stats;
+    stats.textName = "stats";
+    pet.description = {life, typo, table, stats};
+    const std::vector<ItemDefinition> items = {pet};
+    std::vector<ItemDataIssue> issues;
+    ValidateDescriptionTexts(items, tooltips.file, "Tooltip.json", issues);
+    const auto has = [&](ItemDataIssueSeverity severity, const std::string& field, const std::string& message)
+    {
+        return std::any_of(issues.begin(), issues.end(),
+                           [&](const ItemDataIssue& issue)
+                           {
+                               return issue.severity == severity && issue.field == field &&
+                                      issue.message.find(message) != std::string::npos;
+                           });
+    };
+    CHECK(has(ItemDataIssueSeverity::Error, "description[1].text", "did you mean \"@life\"?"));
+    CHECK(has(ItemDataIssueSeverity::Error, "description[2].text", "{notATable}"));
+    // A table, too: the table checks don't see a shared text's.
+    CHECK(has(ItemDataIssueSeverity::Error, "description[3].text", "{table:capeDamageIncrease}"));
+    CHECK(has(ItemDataIssueSeverity::Warning, "texts.unused", "neither a layout nor an item description"));
+    CHECK_FALSE(has(ItemDataIssueSeverity::Warning, "texts.life", ""));
+    CHECK_FALSE(has(ItemDataIssueSeverity::Warning, "texts.layout", ""));
+}
+
+TEST_CASE("A condition compares a value with a whole number [data][items][tooltip]")
+{
+    const auto read = [](std::string_view text)
+    {
+        TooltipCondition condition;
+        std::string error;
+        const bool read = ReadTooltipCondition(text, condition, error);
+        return std::make_tuple(read, condition, error);
+    };
+    const auto [equal, durabilityIsTwo, noError] = read("durability=2");
+    REQUIRE(equal);
+    CHECK(durabilityIsTwo.comparison == TooltipCondition::Comparison::Equal);
+    CHECK(durabilityIsTwo.number == 2);
+    CHECK(WriteTooltipCondition(durabilityIsTwo) == "durability=2");
+    for (const std::string_view text :
+         {"level!=1", "level<=3", "level>=-1", "!durability>4", "level<10", "durability>=2147483647", "level>-2147483648"})
+    {
+        INFO(text);
+        const auto [read_, condition, error] = read(text);
+        CHECK(read_);
+        CHECK(WriteTooltipCondition(condition) == text);
+    }
+    CHECK(std::get<2>(read("timed=1")).find("compares a state") != std::string::npos);
+    CHECK(std::get<2>(read("durability=two")).find("no comparison with a whole number") != std::string::npos);
+    // Past int's range, signs other than one "-", spaces and anything after the number.
+    for (const std::string_view text : {"durability=2147483648", "durability>-2147483649", "durability=99999999999",
+                                        "durability=+2", "durability=--2", "durability=-", "durability=", "durability= 2",
+                                        "durability=2 ", "durability=2x", "durability=1.5"})
+    {
+        INFO(text);
+        CHECK(std::get<2>(read(text)).find("no comparison with a whole number") != std::string::npos);
+    }
+    CHECK(std::get<2>(read("durabilty=2")).find("compares no built-in value") != std::string::npos);
+
+    TooltipCondition condition = durabilityIsTwo;
+    CHECK(CompareTooltipValue(condition, 2));
+    CHECK_FALSE(CompareTooltipValue(condition, 3));
+    condition.comparison = TooltipCondition::Comparison::GreaterOrEqual;
+    CHECK(CompareTooltipValue(condition, 3));
+    CHECK_FALSE(CompareTooltipValue(condition, 1));
 }
 
 TEST_CASE("A tooltip line's conditions all hold, each turned around by \"!\" [data][items][tooltip]")
@@ -215,6 +299,13 @@ TEST_CASE("A tooltip line's conditions all hold, each turned around by \"!\" [da
     CHECK(met({{Kind::Tag, "", ItemTag::Sceptre}}, MakeItemType(2, 8)));
     CHECK_FALSE(met({{Kind::Tag, "", ItemTag::Sceptre}}, MakeItemType(0, 0)));
     CHECK(met({{Kind::Tag, "", ItemTag::Sceptre, true}}, MakeItemType(0, 0)));
+    // A value compared with a number.
+    values.durability = 2;
+    using Comparison = TooltipCondition::Comparison;
+    CHECK(met({{Kind::Value, "durability", ItemTag::Count, false, Comparison::Equal, 2}}));
+    CHECK_FALSE(met({{Kind::Value, "durability", ItemTag::Count, false, Comparison::Equal, 1}}));
+    CHECK(met({{Kind::Value, "durability", ItemTag::Count, true, Comparison::Equal, 1}}));
+    CHECK(met({{Kind::Value, "level", ItemTag::Count, false, Comparison::NotEqual, 1}}, ScrollOfPoisonType, 2));
 }
 
 TEST_CASE("A tooltip line takes the color of its first color rule that holds [data][items][tooltip]")
@@ -239,7 +330,7 @@ TEST_CASE("Every tooltip state is one the game sets [data][items][tooltip]")
     ItemTooltipValues values;
     values.hasDamage = values.skillBook = values.twoHanded = values.excellent = values.ancient = true;
     values.damageHarmonyBonus = values.defenseHarmonyBonus = values.armour = values.wizardryWeapon = true;
-    values.strength.reduced = values.dexterity.reduced = true;
+    values.strength.reduced = values.dexterity.reduced = values.hasDurability = values.timed = true;
     values.strength.asked = values.dexterity.asked = true;
     for (const std::string_view state : GetTooltipStates())
     {

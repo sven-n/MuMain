@@ -60,6 +60,11 @@ struct ItemTooltipValues
     bool armour = false;
     // A staff, a book or a Magic Gladiator's magic sword: it shows its wizardry or curse damage increase.
     bool wizardryWeapon = false;
+    // The item keeps a durability: one of groups 0 to 11 or 13 with durability or magic durability in its data, or
+    // the wings and capes 12/0-6, 12/36-43 and 12/49-50 (the tooltip's durability rule).
+    bool hasDurability = false;
+    // A timed item (one that expires).
+    bool timed = false;
 };
 
 namespace Engine::Items::TooltipValues
@@ -75,8 +80,8 @@ std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, std::str
 // The state of that name (Data::Items::GetTooltipStates); false for another name.
 bool GetItemTooltipState(const ItemTooltipValues& values, std::string_view name);
 
-// Whether every condition holds for the item of `type` at item level `level`: a value is not 0 (a built-in, or
-// {level}), a state is set, the item has the tag; each turned around when negated.
+// Whether every condition holds for the item of `type` at item level `level`: a value (a built-in, or {level}) is not 0
+// or compares as the condition says, a state is set, the item has the tag; each turned around when negated.
 bool AreTooltipConditionsMet(std::span<const Data::Items::TooltipCondition> conditions, int type, int level,
                              const ItemTooltipValues& values);
 

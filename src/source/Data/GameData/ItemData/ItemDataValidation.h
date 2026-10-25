@@ -5,6 +5,7 @@
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
+#include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 #include "Data/GameData/ItemData/SharedItemModel.h"
 
 #include <span>
@@ -43,6 +44,13 @@ void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatP
 // it looks like a typo. The braces and the translations are checked by ValidateItems.
 void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
                                      const std::string& statFile, std::vector<ItemDataIssue>& issues);
+
+// The shared texts ("@name") of the items' descriptions against the tooltip file (`tooltipFile` names it in
+// messages): a text the file does not have is an error, with the nearest name when it looks like a typo, and so is a
+// placeholder of a shared text that is no built-in value (a table goes in an item's own text, where the table checks
+// see it). A shared text that neither a layout nor a description uses is a warning.
+void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemTooltipFile& tooltips,
+                              const std::string& tooltipFile, std::vector<ItemDataIssue>& issues);
 
 // The tables of the item stat file the items use (`statFile` names it in messages). A table that neither a stat nor a
 // description names is a warning. So is a wing (an item with a wing tier) whose description lines are not those of

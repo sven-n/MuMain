@@ -364,10 +364,6 @@
     <value>Luck (critical damage rate +5%%)</value>
     <comment>legacy_id=94</comment>
   </data>
-  <data name="Durability: [%d]" xml:space="preserve">
-    <value>Durability: [%d]</value>
-    <comment>legacy_id=95</comment>
-  </data>
   <data name="Can only be used in moving unit" xml:space="preserve">
     <value>Can only be used in moving unit</value>
     <comment>legacy_id=96</comment>
@@ -8262,7 +8258,7 @@
     <comment>legacy_id=2259</comment>
   </data>
   <data name="usable %dtimes" xml:space="preserve">
-    <value>usable %dtimes</value>
+    <value>usable %d times</value>
     <comment>legacy_id=2260</comment>
   </data>
   <data name="You can achieve special items with combinations." xml:space="preserve">
@@ -8396,10 +8392,6 @@
   <data name="http://muonline.webzen.com/" xml:space="preserve">
     <value>http://muonline.webzen.com/</value>
     <comment>legacy_id=2295</comment>
-  </data>
-  <data name="%d%% Combination success rate increase" xml:space="preserve">
-    <value>%d%% Combination success rate increase</value>
-    <comment>legacy_id=2296</comment>
   </data>
   <data name="Hour" xml:space="preserve">
     <value>Hour</value>
@@ -9287,14 +9279,6 @@
   <data name="Move by a right-mouse-click." xml:space="preserve">
     <value>Move by a right-mouse-click.</value>
     <comment>legacy_id=2603</comment>
-  </data>
-  <data name="Saves the location with the right-mouse-click." xml:space="preserve">
-    <value>Saves the location with the right-mouse-click.</value>
-    <comment>legacy_id=2605</comment>
-  </data>
-  <data name="Returns to the saved location by a click." xml:space="preserve">
-    <value>Returns to the saved location by a click.</value>
-    <comment>legacy_id=2606</comment>
   </data>
   <data name="Would you like to save the location?" xml:space="preserve">
     <value>Would you like to save the location?</value>
@@ -10799,14 +10783,6 @@
   <data name="GrandDukeDukeMarquisCountViscount" xml:space="preserve">
     <value>Grand Duke#Duke#Marquis#Count#Viscount#Baron#Knight Commander#Superior Knight#Knight#Guard Prefect#Officer#Lieutenant#Sergeant#Private</value>
     <comment>legacy_id=3104</comment>
-  </data>
-  <data name="Can enter the Monday - Saturday map." xml:space="preserve">
-    <value>Can enter the Monday - Saturday map.</value>
-    <comment>legacy_id=3105</comment>
-  </data>
-  <data name="Can enter the Sunday map." xml:space="preserve">
-    <value>Can enter the Sunday map.</value>
-    <comment>legacy_id=3106</comment>
   </data>
   <data name="Varka Map 7" xml:space="preserve">
     <value>Varka Map 7</value>
