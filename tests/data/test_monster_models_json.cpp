@@ -241,6 +241,15 @@ TEST_CASE("Monster models: a slot must be a model slot of the monster area and b
     CHECK(HasIssueAbout(read.issues, ItemDataIssueSeverity::Error, "model MONSTER_MODEL_HOUND slot", "more than once"));
 }
 
+TEST_CASE("Monster models: both weapons may hang on one bone [data][monsters]")
+{
+    const ReadResult read = Read(ModelsFile(Model("MONSTER_MODEL_ORC_ARCHER", R"("linkBones": [39, 39])")));
+    INFO(Messages(read.issues));
+    CHECK(read.issues.empty());
+    REQUIRE(read.models.size() == 1);
+    CHECK(read.models[0].body.linkBones == std::vector<int>{39, 39});
+}
+
 TEST_CASE("Monster models: unknown fields are warnings and are ignored [data][monsters]")
 {
     const ReadResult read = Read(ModelsFile(Model(

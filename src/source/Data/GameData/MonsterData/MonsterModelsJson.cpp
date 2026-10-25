@@ -162,10 +162,10 @@ std::string RangeText(long long low, long long high)
     return "must be a whole number from " + std::to_string(low) + " to " + std::to_string(high);
 }
 
-// A list of whole numbers from low to high, each once; empty and false on
-// errors, which are reported.
+// A list of whole numbers from low to high, each once unless `repeats`;
+// false on errors, which are reported.
 bool ReadWholeList(const OrderedJson& json, const std::string& key, long long low, long long high,
-                   std::vector<int>& values, ModelIssues& issues)
+                   std::vector<int>& values, ModelIssues& issues, bool repeats = false)
 {
     if (!json.is_array())
     {
@@ -181,7 +181,7 @@ bool ReadWholeList(const OrderedJson& json, const std::string& key, long long lo
             issues.Error(key + "[" + std::to_string(i) + "]", RangeText(low, high));
             return false;
         }
-        if (!seen.insert(*value).second)
+        if (!seen.insert(*value).second && !repeats)
         {
             issues.Error(key, "has " + std::to_string(*value) + " more than once");
             return false;
@@ -663,6 +663,23 @@ void ReadBox(const OrderedJson& json, MonsterModelBody& body, ModelIssues& issue
                                       { issues.Warning(unknown, message); });
 }
 
+void ReadLinkBones(const OrderedJson& json, MonsterModelBody& body, ModelIssues& issues)
+{
+    if (!json.is_array() || json.size() > MaxLinkBones)
+    {
+        issues.Error(Keys::LinkBones, "must be a list of at most two bones");
+        return;
+    }
+    std::vector<int> linkBones;
+    // Both hands may hang on one bone.
+    constexpr bool RepeatsAllowed = true;
+    if (ReadWholeList(json, Keys::LinkBones, 0, std::numeric_limits<unsigned char>::max(), linkBones, issues,
+                      RepeatsAllowed))
+    {
+        body.linkBones = std::move(linkBones);
+    }
+}
+
 void ReadOptionalWhole(const OrderedJson& json, const char* key, long long low, long long high,
                        std::optional<int>& value, ModelIssues& issues)
 {
@@ -720,15 +737,7 @@ void ReadModelFields(const OrderedJson& json, MonsterModelDefinition& model, Mod
     }
     if (const auto bones = json.find(Keys::LinkBones); bones != json.end())
     {
-        std::vector<int> linkBones;
-        if (!bones->is_array() || bones->size() > MaxLinkBones)
-        {
-            issues.Error(Keys::LinkBones, "must be a list of at most two bones");
-        }
-        else if (ReadWholeList(*bones, Keys::LinkBones, 0, std::numeric_limits<int>::max(), linkBones, issues))
-        {
-            model.body.linkBones = std::move(linkBones);
-        }
+        ReadLinkBones(*bones, model.body, issues);
     }
 }
 
