@@ -3,6 +3,7 @@
 #include "ItemJsonFormat.h"
 #include "ItemEnumNames.h"
 #include "ItemJsonCommon.h"
+#include "ItemTooltipConditionsJson.h"
 #include "ItemType.h"
 
 #include <algorithm>
@@ -429,8 +430,15 @@ void ItemReader::ReadDescription(const OrderedJson& json, std::vector<ItemDescri
         bool read = true;
         if (text->is_string() && text->get<std::string>().starts_with("@"))
         {
-            // A shared text of the tooltip file; ValidateDescriptionTexts checks that it has it.
+            // A shared text of the tooltip file; ValidateDescriptionTexts checks that it has it. "@" alone names none,
+            // as in a layout.
             line.textName = text->get<std::string>().substr(1);
+            if (line.textName.empty())
+            {
+                AddIssue(ItemDataIssueSeverity::Error, field + "." + Keys::Text,
+                         "\"@\" names no text: a shared text is \"@\" and its name in the tooltip file's \"texts\"");
+                read = false;
+            }
         }
         else
         {
@@ -463,30 +471,9 @@ void ItemReader::ReadDescription(const OrderedJson& json, std::vector<ItemDescri
 // The conditions a description line is shown on, all of them: a list of texts such as "durability" or "!timed".
 void ItemReader::ReadDescriptionConditions(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line)
 {
-    if (!json.is_array())
-    {
-        AddIssue(ItemDataIssueSeverity::Error, field,
-                 "must be a list of conditions, such as [\"durability\", \"!timed\"]");
-        return;
-    }
-    for (size_t index = 0; index < json.size(); ++index)
-    {
-        const std::string entryField = field + "[" + std::to_string(index) + "]";
-        TooltipCondition condition;
-        std::string error;
-        if (!json[index].is_string())
-        {
-            AddIssue(ItemDataIssueSeverity::Error, entryField, "must be a text");
-        }
-        else if (!ReadTooltipCondition(json[index].get<std::string>(), condition, error))
-        {
-            AddIssue(ItemDataIssueSeverity::Error, entryField, error);
-        }
-        else
-        {
-            line.when.push_back(std::move(condition));
-        }
-    }
+    ReadTooltipConditions(json, field, R"(["durability", "!timed"])", line.when,
+                          [this](const std::string& errorField, const std::string& message)
+                          { AddIssue(ItemDataIssueSeverity::Error, errorField, message); });
 }
 
 // [first, last]: the item levels a description line is shown at, both included.

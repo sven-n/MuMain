@@ -593,8 +593,7 @@ void ValidateTableUses(std::span<const ItemDefinition> items, const ItemStatProf
 }
 
 void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemTooltipFile& tooltips,
-                              const ItemStatProfiles& profiles, const std::string& tooltipFile,
-                              std::vector<ItemDataIssue>& issues)
+                              const std::string& tooltipFile, std::vector<ItemDataIssue>& issues)
 {
     std::vector<std::string> textNames;
     for (const auto& [name, text] : tooltips.texts)
@@ -633,15 +632,17 @@ void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemT
                                       (suggestion.empty() ? "" : "; did you mean \"@" + suggestion + "\"?")});
                 continue;
             }
+            // Built-in values only: the table checks (an unused table, the editor's table counts and renames) look at
+            // the items' own texts, so a table named by a shared text would go unseen.
             const PlaceholderScan scan = ScanPlaceholders(text->GetNeutral());
             for (const std::string& placeholder : scan.names)
             {
-                if (!IsBuiltInPlaceholder(placeholder) && !GetPlaceholderValue(placeholder, 0, profiles))
+                if (!IsBuiltInPlaceholder(placeholder))
                 {
                     issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number, field,
                                       "\"@" + name + "\" has the placeholder {" + placeholder +
-                                          "}, which a description cannot fill: it is neither a built-in value nor a "
-                                          "table of the item stat file"});
+                                          "}, which a shared text cannot have: a description's shared text takes "
+                                          "built-in values only (a table goes in the item's own text)"});
                     break;
                 }
             }

@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+﻿///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -3198,35 +3198,30 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         case ITEM_RED_CHOCOLATE_BOX:
             if (Level == 0)
                 TextListColor[TextNum] = TEXT_COLOR_RED;
-            else if (Level == 1)
-                TextListColor[TextNum] = TEXT_COLOR_RED;
+            else
+                if (Level == 1)
+                    TextListColor[TextNum] = TEXT_COLOR_RED;
             break;
         case ITEM_BLUE_CHOCOLATE_BOX:
             if (Level == 0)
                 TextListColor[TextNum] = TEXT_COLOR_BLUE;
-            else if (Level == 1)
-                TextListColor[TextNum] = TEXT_COLOR_BLUE;
+            else
+                if (Level == 1)
+                    TextListColor[TextNum] = TEXT_COLOR_BLUE;
             break;
         }
-        TextBold[TextNum] = false;
-        TextNum++;
+        TextBold[TextNum] = false; TextNum++;
     }
     if (ip->Type == ITEM_BOX_OF_LUCK)
     {
         if (Level == 7)
         {
             mu_swprintf(TextList[TextNum], I18N::Game::WhenYouDropItOnTheGround);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            TextBold[TextNum] = false;
-            TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
             mu_swprintf(TextList[TextNum], I18N::Game::RenaZenJewelItem);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            TextBold[TextNum] = false;
-            TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
             mu_swprintf(TextList[TextNum], I18N::Game::YouWillGetOneOfTheAboveItems);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            TextBold[TextNum] = false;
-            TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }
         else if (Level == 14)
         {
@@ -3278,9 +3273,9 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     if (ip->Type == ITEM_ARMOR_OF_GUARDSMAN)
     {
         int startIndex = 0;
-        if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK ||
-            gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD ||
-            gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER)
+        if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK || gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD
+            || gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER
+            )
         {
             startIndex = 6;
         }
@@ -3288,22 +3283,14 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         int HeroLevel = CharacterAttribute->Level;
 
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        mu_swprintf(TextList[TextNum], L"%ls %ls    %ls      %ls    ", I18N::Game::ChaosCastle, I18N::Game::Level,
-                    I18N::Game::MinLevel, I18N::Game::Cost);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        TextBold[TextNum] = false;
-        TextNum++;
+        mu_swprintf(TextList[TextNum], L"%ls %ls    %ls      %ls    ", I18N::Game::ChaosCastle, I18N::Game::Level, I18N::Game::MinLevel, I18N::Game::Cost); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
 
         for (int i = 0; i < 6; i++)
         {
             int Zen = g_iChaosCastleZen[i];
 
-            mu_swprintf(TextList[TextNum], L"        %d             %3d~%3d     %3d,000", i + 1,
-                        g_iChaosCastleLevel[startIndex + i][0],
-                        std::min<int>(400, g_iChaosCastleLevel[startIndex + i][1]), Zen);
-            if ((HeroLevel >= g_iChaosCastleLevel[startIndex + i][0] &&
-                 HeroLevel <= g_iChaosCastleLevel[startIndex + i][1]) &&
-                gCharacterManager.IsMasterLevel(Hero->Class) == false)
+            mu_swprintf(TextList[TextNum], L"        %d             %3d~%3d     %3d,000", i + 1, g_iChaosCastleLevel[startIndex + i][0], std::min<int>(400, g_iChaosCastleLevel[startIndex + i][1]), Zen);
+            if ((HeroLevel >= g_iChaosCastleLevel[startIndex + i][0] && HeroLevel <= g_iChaosCastleLevel[startIndex + i][1]) && gCharacterManager.IsMasterLevel(Hero->Class) == false)
             {
                 TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
             }
@@ -3311,8 +3298,7 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
             {
                 TextListColor[TextNum] = TEXT_COLOR_WHITE;
             }
-            TextBold[TextNum] = false;
-            TextNum++;
+            TextBold[TextNum] = false; TextNum++;
         }
         mu_swprintf(TextList[TextNum], L"         %d          %ls   %3d,000", 7, I18N::Game::MasterLevel, 1000);
         if (gCharacterManager.IsMasterLevel(Hero->Class) == true)

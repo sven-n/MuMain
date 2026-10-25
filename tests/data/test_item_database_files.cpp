@@ -213,6 +213,16 @@ const ItemDefinition* FindItem(const std::vector<ItemDefinition>& items, int ite
     });
     return found != items.end() ? &*found : nullptr;
 }
+
+// A durability line of the item data, which came from another part of the old code than the description texts: a
+// shared text of the tooltip file, or a line shown by the item's durability ("durability", "durability=2"). A line with
+// another condition is no durability line, so the old-code comparisons keep it.
+bool IsDurabilityLine(const ItemDescriptionLine& line)
+{
+    return !line.textName.empty() || std::any_of(line.when.begin(), line.when.end(),
+                                                 [](const TooltipCondition& condition)
+                                                 { return condition.name == "durability"; });
+}
 } // namespace
 
 TEST_CASE("Shipped item data loads without problems [data][items]")
@@ -406,7 +416,7 @@ TEST_CASE("The wings', capes' and pets' tooltip values come from their data as f
             std::vector<const ItemDescriptionLine*> wingLines;
             for (const ItemDescriptionLine& line : item.description)
             {
-                if (line.textName.empty() && line.when.empty())
+                if (!IsDurabilityLine(line))
                 {
                     wingLines.push_back(&line);
                 }
@@ -544,7 +554,7 @@ TEST_CASE("The tooltip texts by item level come from the descriptions as from th
             for (const ItemDescriptionLine& line : found->description)
             {
                 // Not the durability lines, which came from another part of the old code.
-                if (line.IsShownAt(level) && line.textName.empty() && line.when.empty())
+                if (line.IsShownAt(level) && !IsDurabilityLine(line))
                 {
                     lines.push_back({FillPlaceholders(line.text.GetNeutral(), level, profiles), line.color});
                 }

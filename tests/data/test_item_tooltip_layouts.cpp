@@ -197,7 +197,7 @@ TEST_CASE("A shared text is used by a layout or an item description [data][items
 {
     const ReadResult tooltips = Read(
         TooltipFile(R"("unused": "Nothing shows this", "layout": "Defense: {defense}", "life": "Life: {durability}",)"
-                    R"("table": "Up {notATable}")",
+                    R"("table": "Up {notATable}", "stats": "Up {table:capeDamageIncrease}")",
                     R"({"text": "@layout"},)"));
     ItemDefinition pet;
     pet.group = 13;
@@ -209,10 +209,12 @@ TEST_CASE("A shared text is used by a layout or an item description [data][items
     typo.textName = "lif";
     ItemDescriptionLine table;
     table.textName = "table";
-    pet.description = {life, typo, table};
+    ItemDescriptionLine stats;
+    stats.textName = "stats";
+    pet.description = {life, typo, table, stats};
     const std::vector<ItemDefinition> items = {pet};
     std::vector<ItemDataIssue> issues;
-    ValidateDescriptionTexts(items, tooltips.file, ItemStatProfiles(), "Tooltip.json", issues);
+    ValidateDescriptionTexts(items, tooltips.file, "Tooltip.json", issues);
     const auto has = [&](ItemDataIssueSeverity severity, const std::string& field, const std::string& message)
     {
         return std::any_of(issues.begin(), issues.end(),
@@ -224,6 +226,8 @@ TEST_CASE("A shared text is used by a layout or an item description [data][items
     };
     CHECK(has(ItemDataIssueSeverity::Error, "description[1].text", "did you mean \"@life\"?"));
     CHECK(has(ItemDataIssueSeverity::Error, "description[2].text", "{notATable}"));
+    // A table, too: the table checks don't see a shared text's.
+    CHECK(has(ItemDataIssueSeverity::Error, "description[3].text", "{table:capeDamageIncrease}"));
     CHECK(has(ItemDataIssueSeverity::Warning, "texts.unused", "neither a layout nor an item description"));
     CHECK_FALSE(has(ItemDataIssueSeverity::Warning, "texts.life", ""));
     CHECK_FALSE(has(ItemDataIssueSeverity::Warning, "texts.layout", ""));

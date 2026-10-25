@@ -5,6 +5,7 @@
 #include "ItemDescriptionPlaceholders.h"
 #include "ItemEnumNames.h"
 #include "ItemJsonCommon.h"
+#include "ItemTooltipConditionsJson.h"
 
 #include <algorithm>
 #include <array>
@@ -98,7 +99,6 @@ private:
     void ReadLineValues(const OrderedJson& json, const std::string& field, TooltipLayoutLine& line);
     void CheckLinePlaceholders(const TooltipLayoutLine& line, const ItemTooltipFile& file, const std::string& field);
     void ReadConditions(const OrderedJson& json, const std::string& field, std::vector<TooltipCondition>& conditions);
-    bool ReadCondition(const std::string& entry, const std::string& field, TooltipCondition& condition);
     void ReadColor(const OrderedJson& json, const std::string& field, ItemTextColor& color);
     void ReadColorRules(const OrderedJson& json, const std::string& field, std::vector<TooltipColorRule>& rules);
 
@@ -185,38 +185,12 @@ void ItemTooltipReader::ReadTexts(const OrderedJson& root, ItemTooltipFile& file
     }
 }
 
-bool ItemTooltipReader::ReadCondition(const std::string& entry, const std::string& field, TooltipCondition& condition)
-{
-    std::string error;
-    if (!ReadTooltipCondition(entry, condition, error))
-    {
-        AddError(field, error);
-        return false;
-    }
-    return true;
-}
-
 void ItemTooltipReader::ReadConditions(const OrderedJson& json, const std::string& field,
                                        std::vector<TooltipCondition>& conditions)
 {
-    if (!json.is_array())
-    {
-        AddError(field, "must be a list of conditions, such as [\"defense\", \"!excellent\", \"tag:sceptre\"]");
-        return;
-    }
-    for (size_t index = 0; index < json.size(); ++index)
-    {
-        const std::string entryField = field + "[" + std::to_string(index) + "]";
-        TooltipCondition condition;
-        if (!json[index].is_string())
-        {
-            AddError(entryField, "must be a text");
-        }
-        else if (ReadCondition(json[index].get<std::string>(), entryField, condition))
-        {
-            conditions.push_back(std::move(condition));
-        }
-    }
+    ReadTooltipConditions(json, field, R"(["defense", "!excellent", "tag:sceptre"])", conditions,
+                          [this](const std::string& errorField, const std::string& message)
+                          { AddError(errorField, message); });
 }
 
 void ItemTooltipReader::ReadColor(const OrderedJson& json, const std::string& field, ItemTextColor& color)

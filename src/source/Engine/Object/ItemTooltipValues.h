@@ -80,9 +80,8 @@ std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, std::str
 // The state of that name (Data::Items::GetTooltipStates); false for another name.
 bool GetItemTooltipState(const ItemTooltipValues& values, std::string_view name);
 
-// Whether every condition holds for the item of `type` at item level `level`: a value (a built-in, {level} or a table
-// of the item stat file) is not 0 or compares as the condition says, a state is set, the item has the tag; each turned
-// around when negated.
+// Whether every condition holds for the item of `type` at item level `level`: a value (a built-in, or {level}) is not 0
+// or compares as the condition says, a state is set, the item has the tag; each turned around when negated.
 bool AreTooltipConditionsMet(std::span<const Data::Items::TooltipCondition> conditions, int type, int level,
                              const ItemTooltipValues& values);
 

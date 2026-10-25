@@ -1431,7 +1431,8 @@
       "description": [
         {
           "text": {
-            "en": "{durability} / 20"
+            "en": "{durability} / 20",
+            "ja": "{durability}個/ 20個"
           }
         }
       ],
@@ -1461,7 +1462,8 @@
       "description": [
         {
           "text": {
-            "en": "{durability} / 20"
+            "en": "{durability} / 20",
+            "ja": "{durability}個/ 20個"
           }
         }
       ],
@@ -1491,7 +1493,8 @@
       "description": [
         {
           "text": {
-            "en": "{durability} / 10"
+            "en": "{durability} / 10",
+            "ja": "{durability}個/ 10個"
           }
         }
       ],
