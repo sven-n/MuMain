@@ -13582,11 +13582,6 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         {
             c->Object.Scale = 0.8f;
         }
-        Models[c->Object.Type].Meshs[0].NoneBlendMesh = true;
-        Models[c->Object.Type].Meshs[1].NoneBlendMesh = false;
-        Models[c->Object.Type].Meshs[2].NoneBlendMesh = false;
-        Models[c->Object.Type].Meshs[3].NoneBlendMesh = true;
-        Models[c->Object.Type].Meshs[4].NoneBlendMesh = true;
         break;
     case MONSTER_DARK_PHOENIX:
     {
@@ -13595,7 +13590,6 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c = CreateCharacter(Key, MODEL_DARK_PHEONIX_SHIELD, PositionX, PositionY);
         c->NotRotateOnMagicHit = true;
         c->Object.Scale = 1.0f;
-        Models[MODEL_DARK_PHEONIX_SHIELD].StreamMesh = 0;
     }
     break;
     case MONSTER_ORC_ARCHER:
@@ -14461,10 +14455,6 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Object.LifeTime = 100;
         c->Object.Scale = 0.8f;
         c->Object.m_fEdgeScale = 1.1f;
-        for (int i = 0; i < 6; i++)
-        {
-            Models[MODEL_GAMBLE_NPC_MOSS].Actions[i].PlaySpeed = 0.33f;
-        }
         break;
     case MONSTER_HANZO_THE_BLACKSMITH:
         OpenNpc(MODEL_SMITH);
@@ -14690,11 +14680,6 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         wcscpy(c->ID, L"Lucky Item NPC");
         c->Object.Scale = 0.95f;
         c->Object.m_fEdgeScale = 1.2f;
-        Models[MODEL_LUCKYITEM_NPC].Actions[0].PlaySpeed = 0.45f;
-        Models[MODEL_LUCKYITEM_NPC].Actions[1].PlaySpeed = 0.5f;
-
-        //	Models[MODEL_LUCKYITEM_NPC].Actions[0].PlaySpeed = 50.0f;
-        //	Models[MODEL_LUCKYITEM_NPC].Actions[1].PlaySpeed = 50.0f;
         break;
     case MONSTER_SEED_MASTER:
         OpenNpc(MODEL_SEED_MASTER);
@@ -14764,20 +14749,6 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c = CreateCharacter(Key, _Model_NpcIndex, PositionX, PositionY);
 
         c->Object.Scale = 0.43f;
-
-        for (int i = 0; i < 5; i++)
-        {
-            if (i < 2 || i == 4)
-            {
-                //xmassanta_stand_1~2 || xmassanta_idle3
-                Models[_Model_NpcIndex].Actions[i].PlaySpeed = 0.4f;
-            }
-            else// if(i >= 2 && i < 4)
-            {
-                //xmassanta_idle1~2
-                Models[_Model_NpcIndex].Actions[i].PlaySpeed = 0.5f;
-            }
-        }
         wcscpy(c->ID, L"little santa");
     }
     break;
@@ -14803,11 +14774,6 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Object.LifeTime = 100;
         c->Object.Scale = 0.8f;
         c->Object.m_fEdgeScale = 1.1f;
-
-        for (int i = 0; i < 6; i++)
-        {
-            Models[MODEL_GAMBLE_NPC_MOSS].Actions[i].PlaySpeed = 0.33f;
-        }
     }
     break;
     case MONSTER_GOLDEN_RABBIT:

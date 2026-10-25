@@ -965,6 +965,7 @@
       "file": "Data/Monster/Monster55.bmd",
       "textureFolders": ["Monster"],
       "animations": {"die": 0.22},
+      "noneBlendMeshes": [0, 3, 4],
       "sounds": [
         {"file": "Data/Sound/mDrakan1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mDrakanAttack1.wav", "channels": 2, "spatial": true},
@@ -981,6 +982,7 @@
       "file": "Data/Monster/Monster56.bmd",
       "textureFolders": ["Monster"],
       "animations": {"die": 0.22},
+      "streamMesh": 0,
       "sounds": [
         {"file": "Data/Sound/mPhoenix1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mPhoenixAttack1.wav", "channels": 2, "spatial": true}
@@ -3293,7 +3295,8 @@
     {
       "slot": "MODEL_ELBELAND_RHEA",
       "file": "Data/NPC/rhea.bmd",
-      "textureFolders": ["NPC"]
+      "textureFolders": ["NPC"],
+      "animations": {"stop1": 0.2, "stop2": 0.4}
     },
     {
       "slot": "MODEL_ELBELAND_MARCE",
@@ -3325,6 +3328,7 @@
       "file": "Data/NPC/xmassanta.bmd",
       "textureFolders": ["NPC"],
       "textureNames": {"0": "xmassanta1.jpg"},
+      "animations": {"stop1": 0.4, "stop2": 0.4, "walk": 0.5, "attack1": 0.5, "attack2": 0.4},
       "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
     },
     {
@@ -3332,6 +3336,7 @@
       "file": "Data/NPC/xmassanta.bmd",
       "textureFolders": ["NPC"],
       "textureNames": {"0": "xmassanta2.jpg"},
+      "animations": {"stop1": 0.4, "stop2": 0.4, "walk": 0.5, "attack1": 0.5, "attack2": 0.4},
       "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
     },
     {
@@ -3339,6 +3344,7 @@
       "file": "Data/NPC/xmassanta.bmd",
       "textureFolders": ["NPC"],
       "textureNames": {"0": "xmassanta3.jpg"},
+      "animations": {"stop1": 0.4, "stop2": 0.4, "walk": 0.5, "attack1": 0.5, "attack2": 0.4},
       "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
     },
     {
@@ -3346,6 +3352,7 @@
       "file": "Data/NPC/xmassanta.bmd",
       "textureFolders": ["NPC"],
       "textureNames": {"0": "xmassanta4.jpg"},
+      "animations": {"stop1": 0.4, "stop2": 0.4, "walk": 0.5, "attack1": 0.5, "attack2": 0.4},
       "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
     },
     {
@@ -3353,6 +3360,7 @@
       "file": "Data/NPC/xmassanta.bmd",
       "textureFolders": ["NPC"],
       "textureNames": {"0": "xmassanta5.jpg"},
+      "animations": {"stop1": 0.4, "stop2": 0.4, "walk": 0.5, "attack1": 0.5, "attack2": 0.4},
       "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
     },
     {
@@ -3360,6 +3368,7 @@
       "file": "Data/NPC/xmassanta.bmd",
       "textureFolders": ["NPC"],
       "textureNames": {"0": "xmassanta6.jpg"},
+      "animations": {"stop1": 0.4, "stop2": 0.4, "walk": 0.5, "attack1": 0.5, "attack2": 0.4},
       "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
     },
     {
@@ -3367,6 +3376,7 @@
       "file": "Data/NPC/xmassanta.bmd",
       "textureFolders": ["NPC"],
       "textureNames": {"0": "xmassanta7.jpg"},
+      "animations": {"stop1": 0.4, "stop2": 0.4, "walk": 0.5, "attack1": 0.5, "attack2": 0.4},
       "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
     },
     {
@@ -3374,6 +3384,7 @@
       "file": "Data/NPC/xmassanta.bmd",
       "textureFolders": ["NPC"],
       "textureNames": {"0": "xmassanta8.jpg"},
+      "animations": {"stop1": 0.4, "stop2": 0.4, "walk": 0.5, "attack1": 0.5, "attack2": 0.4},
       "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
     },
     {
@@ -3422,7 +3433,8 @@
     {
       "slot": "MODEL_GAMBLE_NPC_MOSS",
       "file": "Data/NPC/gambler_moss.bmd",
-      "textureFolders": ["NPC"]
+      "textureFolders": ["NPC"],
+      "animations": {"stop1": 0.33, "stop2": 0.33, "walk": 0.33, "attack1": 0.33, "attack2": 0.33, "shock": 0.33}
     },
     {
       "slot": "MODEL_DOPPELGANGER_NPC_LUGARD",
@@ -3495,7 +3507,8 @@
     {
       "slot": "MODEL_LUCKYITEM_NPC",
       "file": "Data/NPC/LuckyItem/npc_burial.bmd",
-      "textureFolders": ["NPC/LuckyItem"]
+      "textureFolders": ["NPC/LuckyItem"],
+      "animations": {"stop1": 0.45, "stop2": 0.5}
     },
     {
       "slot": "MODEL_TERSIA",

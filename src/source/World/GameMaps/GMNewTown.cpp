@@ -872,8 +872,6 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
         pCharacter = CreateCharacter(Key, MODEL_ELBELAND_RHEA, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Object.m_fEdgeScale = 1.1f;
-        Models[MODEL_ELBELAND_RHEA].Actions[0].PlaySpeed = 0.2f;
-        Models[MODEL_ELBELAND_RHEA].Actions[1].PlaySpeed = 0.4f;
         break;
     case MONSTER_MARCE:
         OpenNpc(MODEL_ELBELAND_MARCE);

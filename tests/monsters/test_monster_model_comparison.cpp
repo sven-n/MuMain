@@ -18,6 +18,7 @@
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzOpenData.h"
+#include "Render/Models/ZzzBMD.h"
 #include "World/MapInfra/MapManager.h"
 
 #include <doctest.h>
@@ -25,6 +26,7 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <functional>
 #include <memory>
 #include <map>
 #include <string>
@@ -135,20 +137,98 @@ std::vector<std::pair<int, ModelSlotState>> TakeWritesIntoClosedSlots(LoadChange
     return writes;
 }
 
+// What the creators wrote into the shared models when a monster appeared
+// (the values are in the model entries now),
+// copied as it was (ZzzCharacter.cpp CreateMonster, GMNewTown.cpp), only
+// kept within the animations and meshes the files have.
+void SetSpeed(int slot, int animation, float speed)
+{
+    if (animation < Models[slot].NumActions)
+        Models[slot].Actions[animation].PlaySpeed = speed;
+}
+
+struct CreatorWrite
+{
+    int slot;
+    std::function<void()> write;
+};
+
+std::vector<CreatorWrite> MakeCreatorWrites()
+{
+    std::vector<CreatorWrite> writes = {
+        {MODEL_DRAKAN,
+         []
+         {
+             BMD& model = Models[MODEL_DRAKAN];
+             const bool noneBlend[] = {true, false, false, true, true};
+             for (int mesh = 0; mesh < 5 && mesh < model.NumMeshs; ++mesh)
+                 model.Meshs[mesh].NoneBlendMesh = noneBlend[mesh];
+         }},
+        {MODEL_DARK_PHEONIX_SHIELD, [] { Models[MODEL_DARK_PHEONIX_SHIELD].StreamMesh = 0; }},
+        {MODEL_GAMBLE_NPC_MOSS,
+         []
+         {
+             for (int i = 0; i < 6; i++)
+                 SetSpeed(MODEL_GAMBLE_NPC_MOSS, i, 0.33f);
+         }},
+        {MODEL_LUCKYITEM_NPC,
+         []
+         {
+             SetSpeed(MODEL_LUCKYITEM_NPC, 0, 0.45f);
+             SetSpeed(MODEL_LUCKYITEM_NPC, 1, 0.5f);
+         }},
+        {MODEL_ELBELAND_RHEA,
+         []
+         {
+             SetSpeed(MODEL_ELBELAND_RHEA, 0, 0.2f);
+             SetSpeed(MODEL_ELBELAND_RHEA, 1, 0.4f);
+         }},
+    };
+    for (int santa = 0; santa < 8; ++santa)
+    {
+        const int slot = MODEL_LITTLESANTA + santa;
+        writes.push_back({slot, [slot]
+                          {
+                              for (int i = 0; i < 5; i++)
+                                  SetSpeed(slot, i, i < 2 || i == 4 ? 0.4f : 0.5f);
+                          }});
+    }
+    return writes;
+}
+
+// The creator's writes into the slot's model, or nothing.
+std::function<void()> CreatorWriteOf(int slot)
+{
+    static const std::vector<CreatorWrite> writes = MakeCreatorWrites();
+    for (const CreatorWrite& write : writes)
+    {
+        if (write.slot == slot)
+            return write.write;
+    }
+    return [] {};
+}
+
 struct Comparison
 {
     std::vector<std::string> differences;
     std::vector<std::pair<int, ModelSlotState>> writesIntoClosedSlots;
 };
 
-Comparison Compare(int world, const std::function<void()>& open)
+// `creatorWrite` follows the old code: what the creator of a monster of the
+// model wrote into it when the monster appeared.
+Comparison Compare(int world, const std::function<void()>& open, const std::function<void()>& creatorWrite = [] {})
 {
     Comparison comparison;
     LoadChanges old;
     {
         g_MonsterModelDatabase.Build({});
         LoadScope scope(world);
-        old = scope.Run(open);
+        old = scope.Run(
+            [&]
+            {
+                open();
+                creatorWrite();
+            });
     }
     LoadChanges data;
     {
@@ -189,8 +269,9 @@ void CheckMonsterModels(int world)
     {
         if (type == MoltType || !HasEntry(MODEL_MONSTER01 + type))
             continue;
-        const Comparison comparison =
-            Compare(world, [type] { OpenMonsterModel(static_cast<EMonsterModelType>(type)); });
+        const Comparison comparison = Compare(
+            world, [type] { OpenMonsterModel(static_cast<EMonsterModelType>(type)); },
+            CreatorWriteOf(MODEL_MONSTER01 + type));
         INFO("monster model type " << type << " (" << Data::Monsters::GetMonsterModelTypeName(type) << ") on world "
                                    << world);
         for (const std::string& difference : comparison.differences)
@@ -230,7 +311,7 @@ TEST_CASE("Monster models: Models.json opens the NPC models as the model code di
     ShippedModels();
     for (int slot = MODEL_NPC_BEGIN + 1; slot < MODEL_NPC_END; ++slot)
     {
-        const Comparison comparison = Compare(0, [slot] { OpenNpc(slot); });
+        const Comparison comparison = Compare(0, [slot] { OpenNpc(slot); }, CreatorWriteOf(slot));
         INFO("NPC slot " << slot << " (" << Data::Monsters::GetMonsterModelSymbol(slot) << ")");
         for (const std::string& difference : comparison.differences)
         {
