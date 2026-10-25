@@ -26,6 +26,11 @@ void AddIssue(std::vector<ItemDataIssue>& issues, ItemDataIssueSeverity severity
     issues.push_back({severity, "", definition.group, definition.number, field, message});
 }
 
+bool ContainsSeparator(const std::string& text)
+{
+    return text.find(LocalizedString::Separator) != std::string::npos;
+}
+
 // The game shows names through the MAX_ITEM_NAME-sized ITEM_ATTRIBUTE name.
 bool IsTooLongForGame(const std::string& text)
 {
@@ -266,6 +271,15 @@ void ValidatePotionPriority(const ItemDefinition& definition, std::vector<ItemDa
     }
 }
 } // namespace
+
+// Locale codes like "pt" or "zh-TW". Anything else (empty, "=", "||") would
+// break the LocalizedString format used for the OpenMU exchange.
+bool IsValidLocaleCode(const std::string& locale)
+{
+    return !locale.empty() &&
+           std::all_of(locale.begin(), locale.end(), [](char character)
+                       { return std::isalnum(static_cast<unsigned char>(character)) || character == '-'; });
+}
 
 void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIssue>& issues)
 {
