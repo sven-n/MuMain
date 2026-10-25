@@ -54,6 +54,8 @@ enum class ItemTag : uint8_t
     LuckyItemTicket,
     // Asked for confirmation before selling or dropping
     Valuable,
+    // Tooltip lines the item does not show though its data has the value
+    NoLevelRequirement,
 
     Count
 };

@@ -469,3 +469,31 @@ TEST_CASE("The tooltip's values need no hero [data][items][tooltip]")
     CHECK(values.strength.missing == 0);
     CHECK(values.level.missing == 0);
 }
+
+// A Jewel of Harmony option that brings a requirement to exactly 0 still shows the line, at 0 and in yellow, as the
+// old code did: the Grand Viper Staff (5/10) asks for 37 agility, which its option 3 at level 12 takes off.
+TEST_CASE("A requirement reduced to 0 still shows [data][items][tooltip]")
+{
+    ProcessLocaleScope locale;
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeNewDarkWizard(hero.Hero());
+    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+
+    ItemCreationParams params = Engine::Items::TooltipSnapshot::FullItemParameters(5, 10);
+    params.Level = 13;
+    params.HasHarmonyOption = true;
+    params.HarmonyOptionType = 3;
+    params.HarmonyOptionLevel = 12;
+    ITEM staff;
+    FillItemFromParameters(staff, params);
+    const ItemTooltipValues values = Engine::Items::TooltipValues::ComputeItemTooltipValues(staff);
+    REQUIRE(values.dexterity.reduced);
+    REQUIRE(values.dexterity.required == 0);
+    CHECK(HasLine(BuildItemTooltipLines(&staff, false), L"Agility Requirement: 0", TEXT_COLOR_YELLOW));
+
+    SetItemTooltipTextMeasure(nullptr);
+}

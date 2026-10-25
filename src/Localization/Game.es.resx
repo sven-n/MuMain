@@ -260,17 +260,9 @@
     <value>Defensa: %d</value>
     <comment>legacy_id=65,209</comment>
   </data>
-  <data name="Spell resistance: %d" xml:space="preserve">
-    <value>Resistencia a hechizos: %d</value>
-    <comment>legacy_id=66</comment>
-  </data>
   <data name="Defense rate: %d" xml:space="preserve">
     <value>Tasa de defensa: %d</value>
     <comment>legacy_id=67,2045</comment>
-  </data>
-  <data name="Moving speed: %d" xml:space="preserve">
-    <value>Velocidad de movimiento: %d</value>
-    <comment>legacy_id=68</comment>
   </data>
   <data name="Number of items: %d" xml:space="preserve">
     <value>Número de artículos: %d</value>
@@ -283,10 +275,6 @@
   <data name="Durability: [%d/%d]" xml:space="preserve">
     <value>Durabilidad: [%d/%d]</value>
     <comment>legacy_id=71</comment>
-  </data>
-  <data name="%s Resistance: %d" xml:space="preserve">
-    <value>Resistencia %s: %d</value>
-    <comment>legacy_id=72</comment>
   </data>
   <data name="Strength Requirement: %d" xml:space="preserve">
     <value>Requisito de fuerza: %d</value>
@@ -4532,10 +4520,6 @@
     <value>Sin %s.</value>
     <comment>legacy_id=1233</comment>
   </data>
-  <data name="Increase pet attack as %d%%" xml:space="preserve">
-    <value>Aumenta el ataque de mascotas como %d%%</value>
-    <comment>legacy_id=1234</comment>
-  </data>
   <data name="Crest of monarch" xml:space="preserve">
     <value>Cresta del monarca</value>
     <comment>legacy_id=1235</comment>
@@ -6196,10 +6180,6 @@
     <value>Una mentalidad fuerte y una visión excelente crean el hechizo de maldición más poderoso. Además, este objeto atrae a los invocadores de otro mundo y utiliza la hechicería perjudicial contra ellos.</value>
     <comment>legacy_id=1690</comment>
   </data>
-  <data name="Curse Spell increment %d%%" xml:space="preserve">
-    <value>Incremento del hechizo de maldición %d%%</value>
-    <comment>legacy_id=1691</comment>
-  </data>
   <data name="Curse Spell: %d ~ %d" xml:space="preserve">
     <value>Hechizo de maldición: %d ~ %d</value>
     <comment>legacy_id=1692</comment>
@@ -7035,10 +7015,6 @@
   <data name="Skills will improve through upgrading." xml:space="preserve">
     <value>Las habilidades mejorarán mediante la actualización.</value>
     <comment>legacy_id=1929</comment>
-  </data>
-  <data name="Stamina Requirement: %d" xml:space="preserve">
-    <value>Requisito de resistencia: %d</value>
-    <comment>legacy_id=1930</comment>
   </data>
   <data name="Req LV" xml:space="preserve">
     <value>Requiere BT</value>
