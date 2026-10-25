@@ -201,3 +201,10 @@
 .nq-btn-complete, .nq-btn-complete:hover, .nq-btn-complete.disabled { decorator: image(nq-classic-plate fill); }
 .nq-btn-complete:hover { image-color: #ffe3c6; filter: brightness(1.7); }
 .nq-cost { decorator: image(nq-zen-img fill); }
+
+/* The name and the quest title in Item_Back01's dark band (y 5-30), shorter than legacy's header,
+   whose quest title line (y 29) fell on the band's ornament; the name alone (a Dark Lord or Magic
+   Gladiator at Marlon) where the other classic windows put their title. */
+#title { top: 12px; }
+#title.with-quest-title { top: 8px; }
+.nq-quest-title { top: 19px; }
