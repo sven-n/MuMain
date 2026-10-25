@@ -13043,4 +13043,7 @@
   <data name="Other items" xml:space="preserve">
     <value>Other items</value>
   </data>
+  <data name="MagicStoneOfOwner" xml:space="preserve">
+    <value>Magic stone of %ls</value>
+  </data>
 </root>

@@ -7,7 +7,7 @@ group; the item models are in `src/bin/Data/Items/Models/` (see
 database; `Item_<lang>.bmd` is no longer read by the game.
 
 The data matches OpenMU's `ItemDefinition` where both sides have the same
-fields, so it can later be exchanged with the server.
+fields, so it can be exchanged with the server (see [Item Sync](#item-sync)).
 
 ---
 
@@ -18,6 +18,7 @@ fields, so it can later be exchanged with the server.
 | `Group00_Sword.json` … `Group15_Etc.json` | 0–15, named after the `ITEM_GROUP_*` constants |
 | `Stats/ItemStats.json` | What the + level, excellent options, ancient sets and option level add to the stats and requirements; see [Item stats by level](#item-stats-by-level) |
 | `Tooltips/Tooltip.json` | The item tooltip's shared texts and layouts: which stat and requirement lines a tooltip shows; see [Tooltip layouts](#tooltip-layouts) |
+| `Sync/KnownDifferences.json` | Not read by the game: the differences from the server that MuEditor's Item Sync leaves unchecked; see [Item Sync](#item-sync) |
 
 The file name is only a convention; the group comes from the file content.
 
@@ -119,7 +120,7 @@ variants or option words. An online keyword need not select the same items offli
 | `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, defense per level, damage increase, absorption) depend on it; excellent second and third tier wings get no extra durability, and the chaos mix knows a wing's tier from it |
 | `weaponKind` | Only for weapons and shields: `sword`, `glove`, `axe`, `mace`, `spear`, `bow`, `crossbow`, `staff`, `book`, `shield`, as OpenMU's item groups 0 to 6: swords and the Rage Fighter's gloves (group 0; gloves are the items only the Rage Fighter may use), axes (1), maces and sceptres (2), spears (3), bows and crossbows (4: bows have the slot `offHand`, crossbows `mainHand`; arrows and bolts have no weapon kind), staffs, sticks and books (5: books have the slot `offHand`) and shields (6). While an item has the weapon kind its group gives, the bmd import and the item editor (also when it moves an item to another number) keep it matching the group, the slot and, in group 0, the class requirements (a group gives its kind only on that kind's slot, and in group 4 only to two-handed items), so a new weapon gets one too; a kind written in the file that differs from the group's stays as long as it differs. Which bow or crossbow a character holds (its animations, arrows and damage), the elf's arrows-only rule, a spear's reach and Impale, the shield defense set option, the bonus of leveled arrows and bolts, a staff's damage (it counts for the left hand), which right-hand weapons a summoner may hold in the left hand (not staffs or books), the character window's wizardry line, the tooltip's magic power line, the knight skills that need a weapon without a staff or book, Death Stab, Death Cannon and Spiral Slash, the weapon in the left hand that adds its magic options, the dual wield of Dark Knights, Magic Gladiators and Rage Fighters, and the weapon that moves into an empty right hand depend on it |
 | `potionPriority` | Only for potions with the `healingPotion`, `manaPotion`, `complexPotion` or `shieldPotion` tag: which one of a kind the game takes first, the higher the earlier (0 or left out = last; equal ones take the higher group and number first). The shipped potions count up with their size, so the largest is taken first. A client-only field (OpenMU has none); the bmd import keeps it |
-| `statProfile` | The item's profile in the [item stat file](#item-stats-by-level): what its + level, excellent options, ancient set and option level add to its stats and requirements. `"default"` names the default. The [profile rules](#item-stats-by-level) of the item stat file say which profile an item's data gives it: in the shipped file `sceptre` for the items with the `sceptre` tag, `book` for summoner books, `shield` for shields, `weapon` for the other items with a weapon kind (not arrows and bolts), `armor` for helms, armour, pants, gloves and boots, `scroll` for the items of group 15 with requirements, `helper` for the items of groups 13 and 14 with a base level requirement (`requirements.level`; the Transformation Ring's comes from `requirementsByLevel`, so it has the default), and a wing tier's profile for wings (`firstTierWing`, `secondTierWing`, `secondTierCape` for the second tier capes, `thirdTierWing`, `smallWing`). While an item has the profile its data gives, the bmd import and the item editor keep it matching (also when it moves an item to another number); a profile written in the file that differs from it stays as long as it differs: the Horn of Fenrir's data gives `helper`, and it names `"default"`. A left-out profile always follows the data; while the data gives one, the item has the default and loading warns about it, as for item files saved before the field. An item whose data stops giving its profile loses the profile's terms: a bow made one-handed, which is then no bow, loses the `weapon` profile's strength per option level |
+| `statProfile` | The item's profile in the [item stat file](#item-stats-by-level): what its + level, excellent options, ancient set and option level add to its stats and requirements. `"default"` names the default. The [profile rules](#item-stats-by-level) of the item stat file say which profile an item's data gives it: in the shipped file `sceptre` for the items with the `sceptre` tag, `book` for summoner books, `shield` for shields, `weapon` for the other items with a weapon kind (not arrows and bolts), `armor` for helms, armour, pants, gloves and boots, `scroll` for the items of group 15 with requirements, `orb` for the items of group 12 with stat requirements (the orbs, crystals and the Dark Lord's scrolls), `helper` for the items of groups 13 and 14 with a base level requirement (`requirements.level`; the Transformation Ring's comes from `requirementsByLevel`, so it has the default), and a wing tier's profile for wings (`firstTierWing`, `secondTierWing`, `secondTierCape` for the second tier capes, `thirdTierWing`, `smallWing`). While an item has the profile its data gives, the bmd import and the item editor keep it matching (also when it moves an item to another number); a profile written in the file that differs from it stays as long as it differs: the Horn of Fenrir's data gives `helper`, and it names `"default"`. A left-out profile always follows the data; while the data gives one, the item has the default and loading warns about it, as for item files saved before the field. An item whose data stops giving its profile loses the profile's terms: a bow made one-handed, which is then no bow, loses the `weapon` profile's strength per option level |
 | `twoHanded` | Weapon needs both hands |
 | `skill` | Skill the item gives |
 | `level` | Item level (the drop level); also used in price and damage calculations |
@@ -131,7 +132,7 @@ variants or option words. An online keyword need not select the same items offli
 | `attackType` | Attack type used by the client |
 | `sellValue` | Value factor used by the price calculation of some items |
 | `buyPrice` | Fixed price; when set, it replaces the calculated price |
-| `requirements` | `level`, `strength`, `dexterity`, `energy`, `vitality`, `leadership` |
+| `requirements` | `level`, `strength`, `dexterity`, `energy`, `vitality`, `leadership`. The stat requirements of the orbs, crystals and scrolls (groups 12 and 15, without a slot) are the values the game asks for, as OpenMU stores them: their profiles keep them as they are. The original client's bmd files hold weights for them, which Import from bmd turns into the values and Export as bmd and Export as S6E3 turn back (the smallest weight that gives each value). Which ones convert follows the item's profile: a requirement it keeps as it is while the default grows it (an orb given the default profile holds weights like any item) |
 | `requirementsByLevel` | A requirement for each item level 0 to 15 (one number for all of them, or 16), instead of the [item stat file's](#item-stats-by-level) formula; above +15 the +15 value counts. The Orb of Summoning has `{"energy": [30, 60, 90, 130, 170, 210, 300, 500, 0, ...]}` and the Transformation Ring `{"level": [20, 20, 20, 50, ...]}`. The base value of that requirement is not used. The bmd import keeps it |
 | `classRequirements` | Per class (`darkWizard`, `darkKnight`, `fairyElf`, `magicGladiator`, `darkLord`, `summoner`, `rageFighter`): 0 = cannot use, otherwise the class level needed |
 | `resistances` | `ice`, `poison`, `lightning`, `fire`, `earth`, `wind`, `water` |
@@ -171,7 +172,6 @@ can have several tags; the file lists them in the order below.
 | `gemJewelry` | The gem rings and necklaces from the cash shop |
 | `luckyItemTicket` | Lucky item tickets |
 | `valuable` | The game asks for confirmation before the item is sold or dropped |
-| `noDamageLine` | The tooltip shows no damage line, though the item has damage (the Scrolls of Teleport, Teleport Ally and Soul Barrier) |
 | `noLevelRequirement` | The tooltip shows no level requirement, though the item has one (Loch's Feather) |
 | `noDurabilityLine` | The tooltip shows no standard durability line, though the item has a durability: it shows none, or its description has its own (a pet's "Life", a stack's "Number of items", a ticket's "usable … times") |
 
@@ -217,8 +217,9 @@ A layout line has:
 
 - **`text`**: `"@name"` for a shared text, a text written in place (with its
   translations, as in a description), or `""` for a blank line. Its
-  placeholders are the [built-in values](#description-placeholders), `level`
-  and the stat file's tables.
+  placeholders are the [built-in values](#description-placeholders) and those
+  the line's `values` names (the stat file's tables, which descriptions can
+  use, aren't checked here, so a layout can't use them yet).
 - **`when`**: the line shows only when every entry holds. An entry is
   - a built-in value, which holds when it is not 0 (`"defense"`,
     `"missingStrength"`), or a built-in value compared with a whole number by
@@ -247,6 +248,7 @@ The **states** a condition can name:
 | `excellent`, `ancient` | An excellent or ancient item |
 | `damageHarmonyBonus`, `defenseHarmonyBonus` | A Jewel of Harmony option raises its damage or defense |
 | `strengthReduced`, `dexterityReduced` | A Jewel of Harmony option or a socket lowers that requirement |
+| `strengthRequired`, `dexterityRequired` | The item asks for that stat at all (its own requirement, before the reductions): a reduction to 0 still shows the line, at 0 |
 | `armour` | A helm, armor, pants, gloves or boots (groups 7 to 11) |
 | `wizardryWeapon` | A staff, a book, or a Magic Gladiator's sword with magic power |
 | `hasDurability` | The item keeps a durability: an item of groups 0 to 11 or 13 with a `durability` or `magicDurability`, or the wings and capes 12/0–6, 12/36–43 and 12/49–50 |
@@ -572,7 +574,8 @@ The shipped profiles:
 | `armor` | 5 strength per option level: helms, armour, pants, gloves and boots |
 | `book` | Energy `20 + base * (drop level + item level) * 3 / 100`; 5 strength per option level: summoner books |
 | `helper` | Level requirement +4 per level: the items of groups 13 and 14 with a base level requirement (in the shipped data the rings, pendants, pets and Loch's Feather of group 13); the Horn of Fenrir names `"default"` |
-| `scroll` | Level requirement +4 per level; energy from the level requirement (`20 + base * level requirement * 4 / 100`) when the item has one: the skill scrolls and parchments of group 15 |
+| `scroll` | Level requirement +4 per level; the stat requirements as stored (`"base"`): the skill scrolls and parchments of group 15 |
+| `orb` | The stat requirements as stored (`"base"`): the orbs, crystals and the Dark Lord's scrolls of group 12 |
 | `sceptre` | No magic power per level after halving; 5 strength per option level: the Dark Lord's sceptres |
 | `shield` | Defense +1 per level (`defenseIncreaseShields`), no excellent part, ancient part `(defense + level) * 20 / d + 2` |
 | `firstTierWing` | Defense from `defenseBonus1stWings`; level requirement +4 per level |
@@ -582,9 +585,8 @@ The shipped profiles:
 | `thirdTierWing` | Defense from `defenseBonus3rdWings`: 4 per level up to +9, then 5 to 10 more per level |
 
 The shield also adds 5 strength per option level. Items without a profile
-or with `"default"` (arrows and bolts, jewels, potions, the orbs, crystals
-and scrolls of group 12, the Horn of Fenrir, …) have the default: their
-level requirement does not grow.
+or with `"default"` (arrows and bolts, jewels, potions, the Horn of Fenrir,
+…) have the default: their level requirement does not grow.
 
 The shipped profile rules, in order, with the items each gives its profile:
 
@@ -602,10 +604,11 @@ The shipped profile rules, in order, with the items each gives its profile:
 | 10 | `secondTierWing` | slot `wings`, wing tier `second` | 5 |
 | 11 | `thirdTierWing` | slot `wings`, wing tier `third` | 7 |
 | 12 | `default` | slot `wings` (wings without a tier) | 0 |
-| 13 | `scroll` | group 15, any base requirement | 36 |
-| 14 | `helper` | groups 13 and 14, a base level requirement | 32 |
+| 13 | `orb` | group 12, a base stat requirement | 12 |
+| 14 | `scroll` | group 15, any base requirement | 36 |
+| 15 | `helper` | groups 13 and 14, a base level requirement | 32 |
 
-The other 342 items match no rule and have the default. Rule 14 reaches the
+The other 330 items match no rule and have the default. Rule 15 reaches the
 Horn of Fenrir, which names `"default"`.
 
 **Errors** in the file stop the start like errors in the item files: a file
@@ -911,6 +914,11 @@ The problems are:
 | `renderStyle` names a style that does not exist; the model is drawn plainly. | warning |
 | `itemEffect` names an item effect that does not exist; the model is drawn without it. | warning |
 
+A model file can be in the formats of the Season 6 client (BMD versions
+10 and 12) or in the encrypted format of later seasons' models (version
+14); files of other versions cannot be opened. The version is the fourth
+byte of the file, after `BMD`.
+
 The model names textures as `.jpg`/`.tga`; the game reads the encrypted
 copies with the same name, `.OZJ`/`.OZT`. Meshes whose texture name starts
 with `hid` are not drawn, so their texture is not loaded.
@@ -1025,9 +1033,8 @@ shows it in the others.
   the base value back; excellent and ancient items get no higher stat
   requirement from them, while excellent options still raise a level given
   by level and the option level still adds the strength its stat profile
-  gives per option level; a scroll's energy,
-  whose formula takes the level requirement, follows a level given by
-  level). Below them, what the game asks at each + level
+  gives per option level; a stat requirement whose formula takes the level
+  requirement, follows a level given by level). Below them, what the game asks at each + level
   (the `/<item name>` window shows the normal item), also as excellent,
   ancient or with an option level, while a value is still being typed. Then
   the class steps (0: the
@@ -1044,6 +1051,8 @@ shows it in the others.
   a problem of an item selects it and opens the tool of its field; an arrow
   key onto it only selects the item. A click on a problem of the item stat
   file (a profile or a table nothing uses) opens Item Formulas at it.
+- **Item Sync**: Export and Import of the items and item formulas with an
+  OpenMU server, see [Item Sync](#item-sync).
 - **Item Translations**: the names in all languages, see
   [translation-system.md → In the item editor](translation-system.md#in-the-item-editor).
 
@@ -1193,9 +1202,167 @@ applied, **New stat profile**, **New level bonus table**, **Copy**,
   the items keep the profile they name, and those it no longer gives count as
   picked.
 
-The server keeps its own formulas until they are synced, so what it checks
-and computes can differ from what changed formulas give. Items your
-character already has keep their values until they are made again.
+The server keeps its own formulas until they are synced (see
+[Item Sync](#item-sync)), so what it checks and computes can differ from
+what changed formulas give. Items your character already has keep their
+values until they are made again.
+
+### Item Sync
+
+Item Sync exchanges the items and the item formulas with an OpenMU server
+through a file, the *item exchange file*. The server stays authoritative:
+the client never writes to it. (OpenMU's export and import of the file, and
+Update from server, which downloads it, are later steps of phase 7; see the
+[design](superpowers/specs/2026-09-25-data-driven-items-design.md).)
+
+- **Import…** opens a file and lists how it differs from the client's
+  items and formulas: what the import would add to the client, change in
+  it or remove from it. **Apply the checked changes** first says what it
+  changes ("3 items added, 5 changed, 1 removed; 2 formula entries
+  change"; what is not checked or not listed stays as it is), then takes
+  the checked rows into the client as one step of the undo history; Save
+  Items writes the files, as for any edit.
+- **Export…** writes the client's items and formulas into the file it
+  picks, without a diff: OpenMU's import page shows what the file changes
+  on the server, and Import shows what one changes in the client. A new
+  file is written right away ("Exported 911 items and all formulas to
+  …"). A file that is there is replaced after a confirmation that says what
+  changes in it ("3 items added, 5 changed, 1 removed; 2 formula entries
+  change"), or that it cannot be read as an exchange file; a file that has
+  the client's data already is left as it is. The written file says
+  `"source": "MuMain"`.
+- **Compare two files** (folded under the path field) compares two exchange
+  files, e.g. a client export with a server export, without the client's
+  data: pick file A and file B (**Swap** swaps them), then **Compare the
+  files**. The lists say what changes from file A to file B (Added,
+  Changed, Removed under "From A to B", the values under "File A" and
+  "File B"; an item only file A has lists file A's values), in every
+  language, also one only one file has. An item a file has twice is a
+  locked row that names that file. Nothing can be applied, but a row can be
+  marked as a known difference. An import or a comparison of two files
+  replaces the other in the window.
+- An import lists only what differs. The lists say how much of what was
+  compared differs ("Items that differ (3 of 911)"), and when nothing does,
+  how many are the same ("Items: all 911 are the same in the client and the
+  file"). When the file has exactly the client's data, the window says so
+  in green ("The file matches the client: nothing differs."), e.g. for a
+  file you just exported; change an item or the file, or pick another
+  file, to see differences again. "The same" means that there is nothing to
+  take: a name in a language the file lacks, or one the client's UI does
+  not show, is not compared (no language is removed).
+- After applying, the window compares again: what was applied no longer
+  differs and leaves the list. A green line above says what was applied;
+  what was not checked stays listed and unchecked. An import is refused
+  when an item it would add, resize, give another slot or remove is worn or
+  in an item window by then (compare again).
+- The path of an import can also be typed into **Exchange file**;
+  **Compare again** compares with it. **Apply the checked changes** is off
+  while nothing is checked, while the path field holds another file than
+  the one compared, and while the client's items or formulas changed since
+  the comparison (the window says which; compare again).
+
+**The file** has the layout of the item files: items sorted by group and
+number, fields with their default value left out, LF line endings.
+
+```json
+{
+  "formatVersion": 1,
+  "source": "OpenMU",
+  "server": "…",
+  "gameVersion": "season6",
+  "formulas": {
+    "dropLevelBonus": {"excellent": 25, "ancient": 30},
+    "tables": […],
+    "default": {…},
+    "profiles": […]
+  },
+  "items": [
+    {"group": 0, "number": 0, "name": {"en": "Kris", …}, "width": 1, "height": 2, …, "statProfile": "weapon"}
+  ]
+}
+```
+
+- `source` is `MuMain` or `OpenMU`; `server`, only in a file from OpenMU,
+  names the server's installation.
+- Only `season6` data is exchanged; a file of another `gameVersion` is
+  refused, as is a `formatVersion` the client does not know.
+- `formulas` is the [item stat file](#item-stats-by-level) without its
+  `formatVersion` and its profile rules, which stay with the client.
+- `items` has the fields both sides have, with the keys and meanings of the
+  item files: the group and number, the names, size, slot, skill, drop
+  level, durability and magic durability, damage, attack and walk speed,
+  magic power, defense, block rate, resistances, the requirements (also by
+  level), the class requirements, the prices, the [rule flags](#rules)
+  without the rental ones, the tags `ammunition`, `secondClassQuestItem`
+  and `thirdClassQuestItem`, and `statProfile` (always written: the profile
+  the item uses, `default` for the default), `excellentBonus` and
+  `excellentRaisesLevel`.
+- What only the client has is not in it: the model and display data, the
+  description, the other tags, the wing tier, weapon kind, two-handed flag,
+  potion priority, attack type, magic defense and the rental flags. A file
+  with such a field is read with a warning and the field is left out; an
+  import keeps the client's.
+
+**The diff of an import**:
+
+- The **Items** list says for each item what the import does to it in the
+  client (Added, Changed, Removed). The box of an added or removed item
+  checks the whole item, the box of a changed one all its fields. A click on a row shows its fields (and selects the item in the
+  item tools): each field (`width`, `requirements.strength`, `name.de`,
+  `tags.ammunition`, …) with its value now and the file's, and a box of its
+  own.
+- The **Formulas** list has the drop level bonus, each table, each term of
+  the default and of each profile (`default.damage.table`,
+  `profiles.scroll.requirements.energy`, …) and a profile only one side
+  has. A file without formulas compares none and leaves the client's as
+  they are.
+- Checked at first: what the file changes. Unchecked: removals (also of
+  a formula entry only the client has), known differences (grey) and
+  fields with a note: the size and slot of an
+  item your character wears or an item window shows (they stay; such an
+  item is not removed either, nor added when the client has no data for it
+  yet), and a drop level above 255, which OpenMU keeps in a byte.
+- **Check all** and **Check none** take every row; **A field in all items**
+  checks or unchecks one field in every changed item.
+- **Names**: only the client's UI languages are taken from the file; a
+  language the file lacks stays as it is, and no language is removed.
+- **Stat profile**: a file's profile that the item's profile rules give
+  leaves the item following its rules; another one becomes a pick (see
+  Item Basics).
+- **Added items** get the client-only fields at their defaults; the
+  two-handed flag follows the rule of the shipped items (groups 0 to 5, a
+  hand slot, two cells wide or more) and the weapon kind follows the group,
+  as for Add item. The row says when the item has no model entry yet (link
+  one in Item Model; the browser's "without a model" filter lists it) and
+  when its profile rules give another profile than the file (a wing tier
+  or a tag such as `cape` may be missing).
+- **Removed items** go with their model entry, as Remove item does; the row
+  lists what goes with the item and what uses it at its number.
+- An item a file has more than once (OpenMU does not keep the group and
+  number unique) is a locked row: the import leaves it as it is.
+- Before the import is applied, the data as it would be gets the checks of
+  a save. With errors nothing changes; the errors are listed and the rows of
+  their items are unchecked.
+
+**Known differences** are fields and formula entries meant to differ
+between the client and the server. Ticking **Known** on a field, on an
+added or removed item or on a formula entry leaves it unchecked and grey in
+every comparison. They are kept in `Data/Items/Sync/KnownDifferences.json`
+next to the game, written when one is ticked; copy it to
+`src/bin/Data/Items/Sync` with the item files to share it. `""` stands for
+the whole item:
+
+```json
+{
+  "formatVersion": 1,
+  "items": [
+    {"group": 13, "number": 4, "fields": ["", "repairable"]}
+  ],
+  "formulas": [
+    "default.requirements.leadership"
+  ]
+}
+```
 
 ### Import from bmd / Export as bmd
 

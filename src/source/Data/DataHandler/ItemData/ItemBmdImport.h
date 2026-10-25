@@ -1,7 +1,9 @@
 #pragma once
 
+#include "Data/DataHandler/LegacyLanguages.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemDefinition.h"
+#include "Data/GameData/ItemData/ItemStructs.h"
 
 #include <span>
 #include <string>
@@ -20,14 +22,29 @@
 // encoding of the Portuguese and Spanish files).
 namespace Data::Items
 {
-struct ItemBmdLanguage
-{
-    std::wstring folder; // Data/Local/<folder>/Item_<folder>.bmd
-    std::string locale;  // UI locale code, e.g. "pt"
-};
+// Data/Local/<folder>/Item_<folder>.bmd holds the items in the language.
+using ItemBmdLanguage = LegacyLanguage;
 
-// Eng (en), Por (pt), Spn (es). English first: it provides the stats.
+// The original client's languages (GetLegacyLanguages). English first: it
+// provides the stats.
 std::span<const ItemBmdLanguage> GetItemBmdLanguages();
+
+class ItemStatProfiles;
+
+// A stat requirement whose formula the item's stat profile (the one it names, or the one its rules
+// give) keeps the base value of, where the default grows it, is kept as the value the game asks
+// for, as OpenMU does: with the shipped formulas, those of the orbs, crystals and scrolls (the orb
+// and scroll profiles). The original client's bmd files hold weights for them, which its code grew
+// like any item's: 20 + weight * drop level * 3 / 100 (energy * 4), and a scroll's energy (group
+// 15) from its level requirement where it has one: 20 + weight * level requirement * 4 / 100.
+// Leadership is the value in both. An orb given the default profile holds weights like any item.
+bool HasRequirementWeightsInBmd(const ItemStatProfiles& profiles, const ItemDefinition& definition);
+// Import from bmd: the weights of such requirements become the values.
+void ToRequirementValues(const ItemStatProfiles& profiles, ItemDefinition& definition);
+// Export as bmd: the smallest weight that gives each value of such requirements, written into
+// `attribute`. Returns the requirements no weight gives exactly; they get the nearest one.
+std::vector<ItemRequirement> ToBmdRequirementWeights(const ItemStatProfiles& profiles, const ItemDefinition& definition,
+                                                     ITEM_ATTRIBUTE& attribute);
 
 // A field whose value was replaced because a name ran into it.
 struct ItemBmdRepair

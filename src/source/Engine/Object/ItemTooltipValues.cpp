@@ -69,12 +69,14 @@ void ComputeDamage(const ITEM& item, ItemTooltipValues& values)
     values.hasDamage = damageMin > 0;
 }
 
-ItemTooltipValues::Requirement HeroRequirement(int required, int heroValue, int reduction)
+// `heroValue` is nothing without a hero: then nothing is missing.
+ItemTooltipValues::Requirement HeroRequirement(int required, std::optional<int> heroValue, int reduction)
 {
     ItemTooltipValues::Requirement requirement;
     requirement.required = required - reduction;
-    requirement.missing = heroValue < requirement.required ? requirement.required - heroValue : 0;
+    requirement.missing = heroValue && *heroValue < requirement.required ? requirement.required - *heroValue : 0;
     requirement.reduced = reduction != 0;
+    requirement.asked = required != 0;
     return requirement;
 }
 
@@ -103,18 +105,34 @@ void ComputeRequirements(const ITEM& item, ItemTooltipValues& values)
         }
     }
 
-    const CHARACTER_ATTRIBUTE& hero = *CharacterAttribute;
-    values.level = HeroRequirement(item.RequireLevel, hero.Level, 0);
-    values.strength =
-        HeroRequirement(item.RequireStrength, static_cast<WORD>(hero.Strength + hero.AddStrength), strengthReduction);
-    values.dexterity = HeroRequirement(item.RequireDexterity, static_cast<WORD>(hero.Dexterity + hero.AddDexterity),
-                                       dexterityReduction);
-    values.vitality = HeroRequirement(item.RequireVitality, static_cast<WORD>(hero.Vitality + hero.AddVitality), 0);
-    values.energy = HeroRequirement(item.RequireEnergy, static_cast<WORD>(hero.Energy + hero.AddEnergy), 0);
-    values.leadership = HeroRequirement(item.RequireCharisma, static_cast<WORD>(hero.Charisma + hero.AddCharisma), 0);
+    // The hero's stats as the old code read them (WORD sums); none without a hero.
+    const CHARACTER_ATTRIBUTE* hero = CharacterAttribute;
+    const auto stat = [hero](auto value) -> std::optional<int>
+    { return hero != nullptr ? std::optional<int>(value(*hero)) : std::nullopt; };
+    values.level =
+        HeroRequirement(item.RequireLevel, stat([](const CHARACTER_ATTRIBUTE& h) { return int(h.Level); }), 0);
+    values.strength = HeroRequirement(
+        item.RequireStrength,
+        stat([](const CHARACTER_ATTRIBUTE& h) { return int(static_cast<WORD>(h.Strength + h.AddStrength)); }),
+        strengthReduction);
+    values.dexterity = HeroRequirement(
+        item.RequireDexterity,
+        stat([](const CHARACTER_ATTRIBUTE& h) { return int(static_cast<WORD>(h.Dexterity + h.AddDexterity)); }),
+        dexterityReduction);
+    values.vitality = HeroRequirement(
+        item.RequireVitality,
+        stat([](const CHARACTER_ATTRIBUTE& h) { return int(static_cast<WORD>(h.Vitality + h.AddVitality)); }), 0);
+    values.energy = HeroRequirement(
+        item.RequireEnergy,
+        stat([](const CHARACTER_ATTRIBUTE& h) { return int(static_cast<WORD>(h.Energy + h.AddEnergy)); }), 0);
+    values.leadership = HeroRequirement(
+        item.RequireCharisma,
+        stat([](const CHARACTER_ATTRIBUTE& h) { return int(static_cast<WORD>(h.Charisma + h.AddCharisma)); }), 0);
 }
 } // namespace
 
+namespace Engine::Items::TooltipValues
+{
 ItemTooltipValues ComputeItemTooltipValues(const ITEM& item)
 {
     ITEM_ATTRIBUTE* attribute = &ItemAttribute[item.Type];
@@ -154,56 +172,65 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item)
     return values;
 }
 
+namespace
+{
+struct NamedValue
+{
+    std::string_view name;
+    int ItemTooltipValues::* value;
+};
+constexpr NamedValue PlainValues[] = {
+    {"damageMin", &ItemTooltipValues::damageMin},   {"damageMax", &ItemTooltipValues::damageMax},
+    {"defense", &ItemTooltipValues::defense},       {"magicDefense", &ItemTooltipValues::magicDefense},
+    {"blockRate", &ItemTooltipValues::blockRate},   {"attackSpeed", &ItemTooltipValues::attackSpeed},
+    {"walkSpeed", &ItemTooltipValues::walkSpeed},   {"magicPower", &ItemTooltipValues::magicPower},
+    {"durability", &ItemTooltipValues::durability}, {"maxDurability", &ItemTooltipValues::maxDurability},
+};
+
+constexpr std::string_view ResistanceNames[] = {"iceResistance",  "poisonResistance", "lightningResistance",
+                                                "fireResistance", "earthResistance",  "windResistance",
+                                                "waterResistance"};
+
+// "required<Stat>" and "missing<Stat>" for each.
+struct NamedRequirement
+{
+    std::string_view requiredName;
+    std::string_view missingName;
+    ItemTooltipValues::Requirement ItemTooltipValues::* requirement;
+};
+constexpr NamedRequirement Requirements[] = {
+    {"requiredLevel", "missingLevel", &ItemTooltipValues::level},
+    {"requiredStrength", "missingStrength", &ItemTooltipValues::strength},
+    {"requiredDexterity", "missingDexterity", &ItemTooltipValues::dexterity},
+    {"requiredVitality", "missingVitality", &ItemTooltipValues::vitality},
+    {"requiredEnergy", "missingEnergy", &ItemTooltipValues::energy},
+    {"requiredLeadership", "missingLeadership", &ItemTooltipValues::leadership},
+};
+} // namespace
+
 std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, std::string_view name)
 {
-    struct Named
-    {
-        std::string_view name;
-        int ItemTooltipValues::* value;
-    };
-    static constexpr Named Plain[] = {
-        {"damageMin", &ItemTooltipValues::damageMin},   {"damageMax", &ItemTooltipValues::damageMax},
-        {"defense", &ItemTooltipValues::defense},       {"magicDefense", &ItemTooltipValues::magicDefense},
-        {"blockRate", &ItemTooltipValues::blockRate},   {"attackSpeed", &ItemTooltipValues::attackSpeed},
-        {"walkSpeed", &ItemTooltipValues::walkSpeed},   {"magicPower", &ItemTooltipValues::magicPower},
-        {"durability", &ItemTooltipValues::durability}, {"maxDurability", &ItemTooltipValues::maxDurability},
-    };
-    for (const Named& named : Plain)
+    for (const NamedValue& named : PlainValues)
     {
         if (named.name == name)
         {
             return values.*named.value;
         }
     }
-
-    static constexpr std::string_view Resistances[] = {"iceResistance",  "poisonResistance", "lightningResistance",
-                                                       "fireResistance", "earthResistance",  "windResistance",
-                                                       "waterResistance"};
-    for (size_t index = 0; index < std::size(Resistances); ++index)
+    for (size_t index = 0; index < std::size(ResistanceNames); ++index)
     {
-        if (Resistances[index] == name)
+        if (ResistanceNames[index] == name)
         {
             return values.resistances[index];
         }
     }
-
-    struct NamedRequirement
-    {
-        std::string_view stat;
-        ItemTooltipValues::Requirement ItemTooltipValues::* requirement;
-    };
-    static constexpr NamedRequirement Requirements[] = {
-        {"Level", &ItemTooltipValues::level},         {"Strength", &ItemTooltipValues::strength},
-        {"Dexterity", &ItemTooltipValues::dexterity}, {"Vitality", &ItemTooltipValues::vitality},
-        {"Energy", &ItemTooltipValues::energy},       {"Leadership", &ItemTooltipValues::leadership},
-    };
     for (const NamedRequirement& named : Requirements)
     {
-        if (name.starts_with("required") && name.substr(8) == named.stat)
+        if (named.requiredName == name)
         {
             return (values.*named.requirement).required;
         }
-        if (name.starts_with("missing") && name.substr(7) == named.stat)
+        if (named.missingName == name)
         {
             return (values.*named.requirement).missing;
         }
@@ -245,6 +272,14 @@ bool GetItemTooltipState(const ItemTooltipValues& values, std::string_view name)
     if (name == "dexterityReduced")
     {
         return values.dexterity.reduced;
+    }
+    if (name == "strengthRequired")
+    {
+        return values.strength.asked;
+    }
+    if (name == "dexterityRequired")
+    {
+        return values.dexterity.asked;
     }
     return false;
 }
@@ -289,3 +324,19 @@ Data::Items::ItemTextColor GetTooltipLineColor(const Data::Items::TooltipLayoutL
     }
     return line.color;
 }
+std::vector<std::string_view> GetItemTooltipValueNames()
+{
+    std::vector<std::string_view> names;
+    for (const NamedValue& named : PlainValues)
+    {
+        names.push_back(named.name);
+    }
+    names.insert(names.end(), std::begin(ResistanceNames), std::end(ResistanceNames));
+    for (const NamedRequirement& named : Requirements)
+    {
+        names.push_back(named.requiredName);
+        names.push_back(named.missingName);
+    }
+    return names;
+}
+} // namespace Engine::Items::TooltipValues

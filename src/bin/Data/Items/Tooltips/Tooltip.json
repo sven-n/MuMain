@@ -85,7 +85,7 @@
       "es": "Daño mágico: {damageMin} ~ {damageMax}",
       "id": "Kerusakan Sihir: {damageMin} ~ {damageMax}",
       "ja": "魔法の攻撃力: {damageMin} ~ {damageMax}",
-      "pl": "Czarodziejskie obrażenia: {damageMin} ~ {damageMax}",
+      "pl": "Obrażenia magiczne: {damageMin} ~ {damageMax}",
       "pt": "Dano de Magia: {damageMin} ~ {damageMax}",
       "ru": "Волшебный урон: {damageMin} ~ {damageMax}",
       "tl": "Pinsala ng Wizardry: {damageMin} ~ {damageMax}",
@@ -319,7 +319,7 @@
       "es": "Requisito de carisma: {requiredLeadership}",
       "id": "Persyaratan Karisma: {requiredLeadership}",
       "ja": "使用可能な統率: {requiredLeadership}",
-      "pl": "Wymagania dotyczące charyzmy: {requiredLeadership}",
+      "pl": "Wymagane dowodzenie: {requiredLeadership}",
       "pt": "Requisito de Carisma: {requiredLeadership}",
       "ru": "Требование к харизме: {requiredLeadership}",
       "tl": "Kinakailangan ng Charisma: {requiredLeadership}",
@@ -345,7 +345,7 @@
       "es": "Wizardry Dmg {magicPower}% aumento",
       "id": "Sihir Dmg {magicPower}% meningkat",
       "ja": "魔力 {magicPower}%プラス",
-      "pl": "Zwiększenie obrażeń Wizardry {magicPower}%.",
+      "pl": "Obrażenia magiczne +{magicPower}%",
       "pt": "Magia Dmg {magicPower}% aumento",
       "ru": "Волшебный урон {magicPower}% увеличивается",
       "tl": "Wizardry Dmg {magicPower}% tumaas",
@@ -457,7 +457,8 @@
       "zh-TW": "當您右鍵單擊滑鼠時。"
     },
     "piecesOfTwenty": {
-      "en": "{durability} / 20"
+      "en": "{durability} / 20",
+      "ja": "{durability}個/ 20個"
     },
     "cannotRepair": {
       "en": "Cannot Repair",
@@ -725,9 +726,9 @@
       "name": "default",
       "lines": [
         {"section": "name"},
-        {"text": "@oneHandedDamage", "when": ["hasDamage", "!tag:noDamageLine", "!skillBook", "!twoHanded"], "colors": [{"when": ["damageHarmonyBonus"], "color": "yellow"}, {"when": ["excellent"], "color": "blue"}]},
-        {"text": "@twoHandedDamage", "when": ["hasDamage", "!tag:noDamageLine", "!skillBook", "twoHanded"], "colors": [{"when": ["damageHarmonyBonus"], "color": "yellow"}, {"when": ["excellent"], "color": "blue"}]},
-        {"text": "@wizardryDamage", "when": ["hasDamage", "!tag:noDamageLine", "skillBook"], "colors": [{"when": ["damageHarmonyBonus"], "color": "yellow"}, {"when": ["excellent"], "color": "blue"}]},
+        {"text": "@oneHandedDamage", "when": ["hasDamage", "!skillBook", "!twoHanded"], "colors": [{"when": ["damageHarmonyBonus"], "color": "yellow"}, {"when": ["excellent"], "color": "blue"}]},
+        {"text": "@twoHandedDamage", "when": ["hasDamage", "!skillBook", "twoHanded"], "colors": [{"when": ["damageHarmonyBonus"], "color": "yellow"}, {"when": ["excellent"], "color": "blue"}]},
+        {"text": "@wizardryDamage", "when": ["hasDamage", "skillBook"], "colors": [{"when": ["damageHarmonyBonus"], "color": "yellow"}, {"when": ["excellent"], "color": "blue"}]},
         {"text": "@defense", "when": ["defense"], "colors": [{"when": ["defenseHarmonyBonus"], "color": "yellow"}, {"when": ["armour", "excellent"], "color": "blue"}]},
         {"text": "@magicDefense", "when": ["magicDefense"]},
         {"text": "@blockRate", "when": ["blockRate"], "colors": [{"when": ["excellent"], "color": "blue"}]},
@@ -744,9 +745,9 @@
         {"text": "@waterResistance", "when": ["waterResistance"]},
         {"text": "@requiredLevel", "when": ["requiredLevel", "!tag:noLevelRequirement"], "colors": [{"when": ["missingLevel"], "color": "red"}]},
         {"text": "@lacking", "values": {"missing": "missingLevel"}, "when": ["requiredLevel", "!tag:noLevelRequirement", "missingLevel"], "color": "red"},
-        {"text": "@requiredStrength", "when": ["requiredStrength", "!tag:luckyItem"], "colors": [{"when": ["missingStrength"], "color": "red"}, {"when": ["strengthReduced"], "color": "yellow"}]},
+        {"text": "@requiredStrength", "when": ["strengthRequired", "!tag:luckyItem"], "colors": [{"when": ["missingStrength"], "color": "red"}, {"when": ["strengthReduced"], "color": "yellow"}]},
         {"text": "@lacking", "values": {"missing": "missingStrength"}, "when": ["requiredStrength", "!tag:luckyItem", "missingStrength"], "color": "red"},
-        {"text": "@requiredDexterity", "when": ["requiredDexterity", "!tag:luckyItem"], "colors": [{"when": ["missingDexterity"], "color": "red"}, {"when": ["dexterityReduced"], "color": "yellow"}]},
+        {"text": "@requiredDexterity", "when": ["dexterityRequired", "!tag:luckyItem"], "colors": [{"when": ["missingDexterity"], "color": "red"}, {"when": ["dexterityReduced"], "color": "yellow"}]},
         {"text": "@lacking", "values": {"missing": "missingDexterity"}, "when": ["requiredDexterity", "!tag:luckyItem", "missingDexterity"], "color": "red"},
         {"text": "@requiredVitality", "when": ["requiredVitality", "!tag:luckyItem"], "colors": [{"when": ["missingVitality"], "color": "red"}]},
         {"text": "@lacking", "values": {"missing": "missingVitality"}, "when": ["requiredVitality", "!tag:luckyItem", "missingVitality"], "color": "red"},

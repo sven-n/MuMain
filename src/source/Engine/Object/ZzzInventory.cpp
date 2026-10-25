@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+﻿///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -22,7 +22,6 @@
 
 #include "Scenes/SceneCore.h"
 
-#include "Core/Utilities/Debouncer.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "App/Platform/Windows/Local.h"
@@ -39,7 +38,9 @@
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "GameLogic/Items/ItemStats.h"
+#include "GameLogic/Items/TransformationRing.h"
 #include "Render/Items/ItemDisplay.h"
+#include <chrono>
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
@@ -1055,15 +1056,6 @@ int CharacterInfoStartX;
 int CharacterInfoStartY;
 int GuildStartX;
 int GuildStartY;
-int SommonTable[] = { 2,7,14,8,9,41 };
-
-// Whether a Transformation Ring of that level turns into that monster type. The rings have a monster up to +5;
-// above, the table has none (reading past it was undefined).
-static bool IsTransformationRingMonster(int ringLevel, int monsterType)
-{
-    return ringLevel >= 0 && ringLevel < static_cast<int>(std::size(SommonTable)) &&
-           SommonTable[ringLevel] == monsterType;
-}
 
 wchar_t ChaosEventName[][100] = {
     L"히돼?고향 여행권",
@@ -1187,9 +1179,11 @@ void GetItemName(int iType, int iLevel, wchar_t* Text)
         case 0: mu_swprintf(Text, L"%ls", I18N::Game::Zen); break;
         case 1: mu_swprintf(Text, L"%ls", I18N::Game::Heart); break;
         case 2:
-            // The prize by the item's durability; none past the list, so the caller's fallback names the item.
+            // The prize by the item's durability; past the list, the item's own name, as the tooltip writes it.
             if (p->Durability < std::size(ChaosEventName))
                 mu_swprintf(Text, L"%ls", ChaosEventName[p->Durability]);
+            else
+                mu_swprintf(Text, L"%ls", p->Name);
             break;
         }
     }
@@ -1332,12 +1326,9 @@ void GetItemName(int iType, int iLevel, wchar_t* Text)
     }
     else if (iType == ITEM_TRANSFORMATION_RING)
     {
-        for (int i = 0; i < MAX_MONSTER; i++)
+        if (const wchar_t* monsterName = GameLogic::Items::TransformationRing::MonsterName(iLevel))
         {
-            if (IsTransformationRingMonster(iLevel, MonsterScript[i].Type))
-            {
-                mu_swprintf(Text, L"%ls %ls", MonsterScript[i].Name, I18N::Game::TransformationRing);
-            }
+            mu_swprintf(Text, L"%ls %ls", monsterName, I18N::Game::TransformationRing);
         }
     }
     else if (iType >= ITEM_WINGS_OF_SPIRITS && iType <= ITEM_WINGS_OF_DARKNESS)
@@ -1682,7 +1673,7 @@ static std::optional<std::string> TooltipPlaceholderValue(std::string_view name,
             return std::nullopt;
         return text->Get(locale);
     }
-    if (const std::optional<int> value = GetItemTooltipValue(values, name))
+    if (const std::optional<int> value = Engine::Items::TooltipValues::GetItemTooltipValue(values, name))
         return std::to_string(*value);
     if (const std::optional<int> value =
             Data::Items::GetPlaceholderValue(name, level, g_ItemDatabase.GetStatProfiles()))
@@ -1711,7 +1702,8 @@ void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, in
     const int itemType = Data::Items::MakeItemType(definition.group, definition.number);
     for (const Data::Items::ItemDescriptionLine& line : definition.description)
     {
-        if (!line.IsShownAt(level) || !AreTooltipConditionsMet(line.when, itemType, level, values))
+        if (!line.IsShownAt(level) ||
+            !Engine::Items::TooltipValues::AreTooltipConditionsMet(line.when, itemType, level, values))
         {
             continue;
         }
@@ -1771,7 +1763,7 @@ static void WriteItemTooltipLayoutLines(const ITEM& item, int level, const ItemT
     for (auto line = first == layout->lines.end() ? first : first + 1;
          line != layout->lines.end() && line->section == Data::Items::TooltipSection::None; ++line)
     {
-        if (!AreTooltipConditionsMet(line->when, item.Type, level, values))
+        if (!Engine::Items::TooltipValues::AreTooltipConditionsMet(line->when, item.Type, level, values))
         {
             continue;
         }
@@ -1802,7 +1794,8 @@ static void WriteItemTooltipLayoutLines(const ITEM& item, int level, const ItemT
         }
         mu_swprintf(TextList[TextNum], L"%.*ls", static_cast<int>(std::size(TextList[0]) - 1),
                     Core::Text::FromUtf8(filled).c_str());
-        TextListColor[TextNum] = static_cast<int>(GetTooltipLineColor(*line, item.Type, level, values));
+        TextListColor[TextNum] =
+            static_cast<int>(Engine::Items::TooltipValues::GetTooltipLineColor(*line, item.Type, level, values));
         TextBold[TextNum] = line->bold;
         TextNum++;
     }
@@ -1830,7 +1823,8 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         if (ip->lExpireTime == 0)
             return ItemTooltipBuild::Nothing;
 
-        ExpireTime = localtime((time_t*)&(ip->lExpireTime));
+        const time_t expireTime = ip->lExpireTime;
+        ExpireTime = localtime(&expireTime);
     }
 
     ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
@@ -2212,13 +2206,9 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     }
     else if (ip->Type == ITEM_TRANSFORMATION_RING)
     {
-        for (int i = 0; i < MAX_MONSTER; i++)
+        if (const wchar_t* monsterName = GameLogic::Items::TransformationRing::MonsterName(Level))
         {
-            if (IsTransformationRingMonster(Level, MonsterScript[i].Type))
-            {
-                mu_swprintf(TextList[TextNum], L"%ls %ls", MonsterScript[i].Name, I18N::Game::TransformationRing);
-                break;
-            }
+            mu_swprintf(TextList[TextNum], L"%ls %ls", monsterName, I18N::Game::TransformationRing);
         }
     }
     else if (ip->Type >= ITEM_WINGS_OF_SPIRITS && ip->Type <= ITEM_WINGS_OF_DARKNESS)
@@ -3156,7 +3146,7 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     mu_swprintf(TextList[TextNum], L"%ls", p->Name);
 
     // The numbers of the stat lines, the built-in placeholders of the descriptions.
-    const ItemTooltipValues values = ComputeItemTooltipValues(*ip);
+    const ItemTooltipValues values = Engine::Items::TooltipValues::ComputeItemTooltipValues(*ip);
     WriteItemTooltipLayoutLines(*ip, Level, values, Data::Items::TooltipSection::Name);
     if (GameLogic::Items::IsRibbonBox(ip))
     {
@@ -3229,53 +3219,42 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         case ITEM_RED_CHOCOLATE_BOX:
             if (Level == 0)
                 TextListColor[TextNum] = TEXT_COLOR_RED;
-            else if (Level == 1)
-                TextListColor[TextNum] = TEXT_COLOR_RED;
+            else
+                if (Level == 1)
+                    TextListColor[TextNum] = TEXT_COLOR_RED;
             break;
         case ITEM_BLUE_CHOCOLATE_BOX:
             if (Level == 0)
                 TextListColor[TextNum] = TEXT_COLOR_BLUE;
-            else if (Level == 1)
-                TextListColor[TextNum] = TEXT_COLOR_BLUE;
+            else
+                if (Level == 1)
+                    TextListColor[TextNum] = TEXT_COLOR_BLUE;
             break;
         }
-        TextBold[TextNum] = false;
-        TextNum++;
+        TextBold[TextNum] = false; TextNum++;
     }
     if (ip->Type == ITEM_BOX_OF_LUCK)
     {
         if (Level == 7)
         {
             mu_swprintf(TextList[TextNum], I18N::Game::WhenYouDropItOnTheGround);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            TextBold[TextNum] = false;
-            TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
             mu_swprintf(TextList[TextNum], I18N::Game::RenaZenJewelItem);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            TextBold[TextNum] = false;
-            TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
             mu_swprintf(TextList[TextNum], I18N::Game::YouWillGetOneOfTheAboveItems);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            TextBold[TextNum] = false;
-            TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }
         else if (Level == 14)
         {
             mu_swprintf(TextList[TextNum], I18N::Game::FreeEntranceToKalima);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            TextBold[TextNum] = false;
-            TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
             mu_swprintf(TextList[TextNum], I18N::Game::IncreaseStamina);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            TextBold[TextNum] = false;
-            TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }
         else
         {
             mu_swprintf(TextList[TextNum], I18N::Game::ThrowItAndYouMayReceiveSomeZenOrItems);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            TextBold[TextNum] = false;
-            TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }
         mu_swprintf(TextList[TextNum], I18N::Game::CannotBeSold);
         TextListColor[TextNum] = TEXT_COLOR_RED;
@@ -3292,18 +3271,13 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     char tCount = COMGEM::CalcCompiledCount(ip);
     if (tCount > 0)
     {
-        int nJewelIndex = COMGEM::Check_Jewel_Com(ip->Type);
+        int	nJewelIndex = COMGEM::Check_Jewel_Com(ip->Type);
         if (nJewelIndex != COMGEM::NOGEM)
         {
-            mu_swprintf(TextList[TextNum], I18N::Game::DSIsCombined, tCount,
-                        I18N::Game::Lookup(COMGEM::GetJewelIndex(nJewelIndex, COMGEM::eGEM_NAME)));
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            TextBold[TextNum] = false;
-            TextNum++;
+            mu_swprintf(TextList[TextNum], I18N::Game::DSIsCombined, tCount, I18N::Game::Lookup(COMGEM::GetJewelIndex(nJewelIndex, COMGEM::eGEM_NAME)));
+            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
             mu_swprintf(TextList[TextNum], I18N::Game::CanBeUsedAfterDismantling);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            TextBold[TextNum] = false;
-            TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }
     }
     if (const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(ip->Type))
@@ -3320,9 +3294,9 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     if (ip->Type == ITEM_ARMOR_OF_GUARDSMAN)
     {
         int startIndex = 0;
-        if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK ||
-            gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD ||
-            gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER)
+        if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK || gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD
+            || gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER
+            )
         {
             startIndex = 6;
         }
@@ -3330,22 +3304,14 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         int HeroLevel = CharacterAttribute->Level;
 
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        mu_swprintf(TextList[TextNum], L"%ls %ls    %ls      %ls    ", I18N::Game::ChaosCastle, I18N::Game::Level,
-                    I18N::Game::MinLevel, I18N::Game::Cost);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        TextBold[TextNum] = false;
-        TextNum++;
+        mu_swprintf(TextList[TextNum], L"%ls %ls    %ls      %ls    ", I18N::Game::ChaosCastle, I18N::Game::Level, I18N::Game::MinLevel, I18N::Game::Cost); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
 
         for (int i = 0; i < 6; i++)
         {
             int Zen = g_iChaosCastleZen[i];
 
-            mu_swprintf(TextList[TextNum], L"        %d             %3d~%3d     %3d,000", i + 1,
-                        g_iChaosCastleLevel[startIndex + i][0],
-                        std::min<int>(400, g_iChaosCastleLevel[startIndex + i][1]), Zen);
-            if ((HeroLevel >= g_iChaosCastleLevel[startIndex + i][0] &&
-                 HeroLevel <= g_iChaosCastleLevel[startIndex + i][1]) &&
-                gCharacterManager.IsMasterLevel(Hero->Class) == false)
+            mu_swprintf(TextList[TextNum], L"        %d             %3d~%3d     %3d,000", i + 1, g_iChaosCastleLevel[startIndex + i][0], std::min<int>(400, g_iChaosCastleLevel[startIndex + i][1]), Zen);
+            if ((HeroLevel >= g_iChaosCastleLevel[startIndex + i][0] && HeroLevel <= g_iChaosCastleLevel[startIndex + i][1]) && gCharacterManager.IsMasterLevel(Hero->Class) == false)
             {
                 TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
             }
@@ -3353,8 +3319,7 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
             {
                 TextListColor[TextNum] = TEXT_COLOR_WHITE;
             }
-            TextBold[TextNum] = false;
-            TextNum++;
+            TextBold[TextNum] = false; TextNum++;
         }
         mu_swprintf(TextList[TextNum], L"         %d          %ls   %3d,000", 7, I18N::Game::MasterLevel, 1000);
         if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
@@ -3381,7 +3346,8 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     }
 
     // The Talisman of Mobility's saved location, under its description's "Returns to the saved location by a click."
-    if (ip->Type == ITEM_TALISMAN_OF_MOBILITY && ip->Durability == 1 && TextNum < static_cast<int>(std::size(TextList)))
+    if (ip->Type == ITEM_TALISMAN_OF_MOBILITY && ip->Durability == 1 && g_PortalMgr.IsPortalPositionSaved() &&
+        TextNum < static_cast<int>(std::size(TextList)))
     {
         g_PortalMgr.GetPortalPositionText(TextList[TextNum]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -4012,6 +3978,7 @@ std::vector<ItemTooltipLine> BuildItemTooltipLines(ITEM* ip, bool Sell, int Inve
     return lines;
 }
 
+// (sx, sy) in the screen's 640x480 stretch, `screen`.
 static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy, ITEM* ip, bool Sell, int Inventype,
                            bool bItemTextListBoxUse)
 {
@@ -4027,24 +3994,19 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
         return;
     if (build == ItemTooltipBuild::DarkLordPet)
     {
-        // The request is made once a second at most, for the pet whose tooltip is drawn then: the callback lives on,
-        // so it reads the item of this call, not one it was made with.
-        static int petItemType = -1;
-        static int petInventype = 0;
-        petItemType = ip->Type;
-        petInventype = Inventype;
-        static DebouncedAction debouncedPetInfoRequest(
-            []()
+        // The pet's information is requested once a second at most, for the pet whose tooltip is drawn.
+        static std::chrono::steady_clock::time_point lastPetInfoRequest;
+        const auto now = std::chrono::steady_clock::now();
+        if (lastPetInfoRequest == std::chrono::steady_clock::time_point() ||
+            now - lastPetInfoRequest >= std::chrono::seconds(1))
+        {
+            lastPetInfoRequest = now;
+            if (const std::optional<PetInfoRequest> request =
+                    GetPetInfoRequest(ip->Type, g_pMyInventory->GetPointedItemIndex(), Inventype))
             {
-                if (const std::optional<PetInfoRequest> request =
-                        GetPetInfoRequest(petItemType, g_pMyInventory->GetPointedItemIndex(), petInventype))
-                {
-                    SocketClient->ToGameServer()->SendPetInfoRequest(request->pet, request->storage, request->slot);
-                }
-            },
-            1000); // 1-second intervals
-
-        debouncedPetInfoRequest.invoke();
+                SocketClient->ToGameServer()->SendPetInfoRequest(request->pet, request->storage, request->slot);
+            }
+        }
 
         giPetManager::RenderPetItemInfo(screen, sx, sy, ip, Inventype);
         return;
@@ -4221,13 +4183,9 @@ static void RenderRepairInfo(const UI::Scaling::Transform& screen, int sx, int s
     }
     else if (ip->Type == ITEM_TRANSFORMATION_RING)
     {
-        for (int i = 0; i < MAX_MONSTER; i++)
+        if (const wchar_t* monsterName = GameLogic::Items::TransformationRing::MonsterName(Level))
         {
-            if (IsTransformationRingMonster(Level, MonsterScript[i].Type))
-            {
-                mu_swprintf(TextList[TextNum], L"%ls %ls", MonsterScript[i].Name, I18N::Game::TransformationRing);
-                break;
-            }
+            mu_swprintf(TextList[TextNum], L"%ls %ls", monsterName, I18N::Game::TransformationRing);
         }
     }
     else if (GameLogic::Items::IsDarkLordPet(ip))
@@ -4968,13 +4926,9 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     }
     else if (o->Type == MODEL_TRANSFORMATION_RING)
     {
-        for (int i = 0; i < MAX_MONSTER; i++)
+        if (const wchar_t* monsterName = GameLogic::Items::TransformationRing::MonsterName(ItemLevel))
         {
-            if (IsTransformationRingMonster(ItemLevel, MonsterScript[i].Type))
-            {
-                FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", MonsterScript[i].Name, I18N::Game::TransformationRing);
-                break;
-            }
+            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", monsterName, I18N::Game::TransformationRing);
         }
     }
     else if (o->Type == MODEL_RENA && ItemLevel == 3)

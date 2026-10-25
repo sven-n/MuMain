@@ -37,7 +37,8 @@ bar.
 
 The editor opens in a window of its own, beside the game window where the
 screen has room (else over its right side), and stays in front of the game. Its
-**Windows** menu opens the tool windows: Item, Server List
+**Windows** menu opens the tool windows: Item, Monster
+([monster-data.md](monster-data.md)), Server List
 ([server-list.md](server-list.md)), Skill, Dev and Map Editor, the Effect
 Browser and the console. They open as tabs docked in the editor window, the
 console along the bottom. Drag a tab out to float a tool window anywhere, over
@@ -47,12 +48,13 @@ between sessions (`imgui.ini` in the game folder).
 
 The editor window's bar has the **Windows** menu, **Undo** and **Redo**, the UI
 scale and the language. Undo and Redo act on the tool used last: after a click
-into the Server List window on its changes, after a click into an item tool on
-item edits; while the Server List window is closed, on item edits. A window of
-tool windows floating outside the editor window has the same bar once, on the
-tab shown at its top left when several are docked in it, so it can be worked
-with from another monitor; its **Windows > Fullscreen** switches that window to
-full screen.
+into the Server List window on its changes, after a click into a monster tool
+on monster edits, after a click into an item tool on item edits. While the
+tool used last is closed (for the monster tools: all of them), they act on
+item edits. A window of tool windows floating outside the editor window has the
+same bar once, on the tab shown at its top left when several are docked in it,
+so it can be worked with from another monitor; its **Windows > Fullscreen**
+switches that window to full screen.
 
 The editor window, and a tool window floating outside the game window, are
 ordinary windows of the system, with its title bar, buttons and window

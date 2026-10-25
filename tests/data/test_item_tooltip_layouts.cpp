@@ -19,12 +19,12 @@
 #include <vector>
 
 using namespace Data::Items;
+using namespace Engine::Items::TooltipValues;
 
 namespace
 {
 const std::filesystem::path ClientDirectory = std::filesystem::path(MU_TEST_DATA_DIR).parent_path();
 
-constexpr int ScrollOfTeleportType = MakeItemType(15, 5);
 constexpr int ScrollOfPoisonType = MakeItemType(15, 0);
 
 // A tooltip file with the texts `texts` and a default layout of the four sections with `lines` after the name.
@@ -197,7 +197,7 @@ TEST_CASE("A shared text is used by a layout or an item description [data][items
 {
     const ReadResult tooltips = Read(
         TooltipFile(R"("unused": "Nothing shows this", "layout": "Defense: {defense}", "life": "Life: {durability}",)"
-                    R"("table": "Up {notATable}")",
+                    R"("table": "Up {notATable}", "stats": "Up {table:capeDamageIncrease}")",
                     R"({"text": "@layout"},)"));
     ItemDefinition pet;
     pet.group = 13;
@@ -209,7 +209,9 @@ TEST_CASE("A shared text is used by a layout or an item description [data][items
     typo.textName = "lif";
     ItemDescriptionLine table;
     table.textName = "table";
-    pet.description = {life, typo, table};
+    ItemDescriptionLine stats;
+    stats.textName = "stats";
+    pet.description = {life, typo, table, stats};
     const std::vector<ItemDefinition> items = {pet};
     std::vector<ItemDataIssue> issues;
     ValidateDescriptionPlaceholders(items, ItemStatProfiles(), tooltips.file, "ItemStats.json", issues);
@@ -225,6 +227,9 @@ TEST_CASE("A shared text is used by a layout or an item description [data][items
     };
     CHECK(has(ItemDataIssueSeverity::Error, "description[1].text", "did you mean \"@life\"?"));
     CHECK(has(ItemDataIssueSeverity::Error, "description[2].text", "{notATable}"));
+    // A table the stat file doesn't have (these stats have none); one it has is fine (#827: the table checks see
+    // shared texts).
+    CHECK(has(ItemDataIssueSeverity::Error, "description[3].text", "{table:capeDamageIncrease}"));
     CHECK(has(ItemDataIssueSeverity::Warning, "texts.unused", "neither a layout nor an item description"));
     CHECK_FALSE(has(ItemDataIssueSeverity::Warning, "texts.life", ""));
     CHECK_FALSE(has(ItemDataIssueSeverity::Warning, "texts.layout", ""));
@@ -289,12 +294,13 @@ TEST_CASE("A tooltip line's conditions all hold, each turned around by \"!\" [da
     CHECK_FALSE(met({{Kind::Value, "defense"}, {Kind::State, "ancient"}}));
     CHECK(met({{Kind::State, "ancient", ItemTag::Count, true}}));
     CHECK_FALSE(met({{Kind::Value, "magicDefense"}}));
-    // {level} and the stat file's tables are values too.
+    // {level} is a value too.
     CHECK_FALSE(met({{Kind::Value, "level"}}));
     CHECK(met({{Kind::Value, "level"}}, ScrollOfPoisonType, 3));
-    CHECK(met({{Kind::Tag, "", ItemTag::NoDamageLine}}, ScrollOfTeleportType));
-    CHECK_FALSE(met({{Kind::Tag, "", ItemTag::NoDamageLine}}, ScrollOfPoisonType));
-    CHECK(met({{Kind::Tag, "", ItemTag::NoDamageLine, true}}, ScrollOfPoisonType));
+    // A tag, and a tag turned around: the Battle Scepter is a sceptre, the Kris is not.
+    CHECK(met({{Kind::Tag, "", ItemTag::Sceptre}}, MakeItemType(2, 8)));
+    CHECK_FALSE(met({{Kind::Tag, "", ItemTag::Sceptre}}, MakeItemType(0, 0)));
+    CHECK(met({{Kind::Tag, "", ItemTag::Sceptre, true}}, MakeItemType(0, 0)));
     // A value compared with a number.
     values.durability = 2;
     using Comparison = TooltipCondition::Comparison;
@@ -327,6 +333,7 @@ TEST_CASE("Every tooltip state is one the game sets [data][items][tooltip]")
     values.hasDamage = values.skillBook = values.twoHanded = values.excellent = values.ancient = true;
     values.damageHarmonyBonus = values.defenseHarmonyBonus = values.armour = values.wizardryWeapon = true;
     values.strength.reduced = values.dexterity.reduced = values.hasDurability = values.timed = true;
+    values.strength.asked = values.dexterity.asked = true;
     for (const std::string_view state : GetTooltipStates())
     {
         INFO(state);

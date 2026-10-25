@@ -1358,7 +1358,8 @@
       "description": [
         {
           "text": {
-            "en": "{durability} / 10"
+            "en": "{durability} / 10",
+            "ja": "{durability}個/ 10個"
           }
         }
       ],

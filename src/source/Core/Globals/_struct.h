@@ -245,14 +245,6 @@ typedef struct
 
 typedef struct
 {
-    WORD				Type;
-    wchar_t				Name[MAX_MONSTER_NAME + 1];
-    WORD				Level;
-    MONSTER_ATTRIBUTE	Attribute;
-} MONSTER_SCRIPT;
-
-typedef struct
-{
     short             Type;
     BYTE              Level;
     int               Experince;

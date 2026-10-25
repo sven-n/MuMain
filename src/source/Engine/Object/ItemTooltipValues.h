@@ -6,6 +6,7 @@
 #include <optional>
 #include <span>
 #include <string_view>
+#include <vector>
 
 // The values the item tooltip's stat lines show for an item and the hero, each computed as RenderItemInfo always has:
 // the built-in placeholders of the item descriptions ({damageMin}, {requiredStrength}, ...), and the states the
@@ -19,14 +20,17 @@ struct ItemTooltipValues
         int required = 0;
         int missing = 0;
         bool reduced = false;
+        // The item asks for it at all (its own requirement, before the reductions): a reduction to 0 still shows
+        // the line.
+        bool asked = false;
     };
 
     // Damage as the damage line shows it: with the Jewel of Harmony's attack bonus, or the skill's wizardry damage of
     // a skill book.
     int damageMin = 0;
     int damageMax = 0;
-    // The item has damage above 0 to show (a skill book: its skill's; the teleport scrolls have it, though their tag
-    // noDamageLine hides the line).
+    // The item has damage above 0 to show (a skill book or scroll: its skill's, which the teleport scrolls' skills
+    // don't have).
     bool hasDamage = false;
     bool damageHarmonyBonus = false;
     // Defense with the Jewel of Harmony's defense bonus.
@@ -63,7 +67,10 @@ struct ItemTooltipValues
     bool timed = false;
 };
 
-// The values of `item` for the hero as he is (CharacterAttribute).
+namespace Engine::Items::TooltipValues
+{
+// The values of `item` for the hero as he is (CharacterAttribute); without a hero (none set yet), the requirements
+// are shown but nothing is missing.
 ItemTooltipValues ComputeItemTooltipValues(const ITEM& item);
 
 // The value of a built-in placeholder (ItemDescriptionPlaceholders' names, without {level}), or nothing for another
@@ -73,12 +80,14 @@ std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, std::str
 // The state of that name (Data::Items::GetTooltipStates); false for another name.
 bool GetItemTooltipState(const ItemTooltipValues& values, std::string_view name);
 
-// Whether every condition holds for the item of `type` at item level `level`: a value (a built-in, {level} or a table
-// of the item stat file) is not 0 or compares as the condition says, a state is set, the item has the tag; each turned
-// around when negated.
+// Whether every condition holds for the item of `type` at item level `level`: a value (a built-in, or {level}) is not 0
+// or compares as the condition says, a state is set, the item has the tag; each turned around when negated.
 bool AreTooltipConditionsMet(std::span<const Data::Items::TooltipCondition> conditions, int type, int level,
                              const ItemTooltipValues& values);
 
 // The color of a layout line: that of its first color rule whose conditions hold, else its color.
 Data::Items::ItemTextColor GetTooltipLineColor(const Data::Items::TooltipLayoutLine& line, int type, int level,
                                                const ItemTooltipValues& values);
+// Every name GetItemTooltipValue answers for, so a test can check them against the placeholder checks' list.
+std::vector<std::string_view> GetItemTooltipValueNames();
+} // namespace Engine::Items::TooltipValues
