@@ -3652,7 +3652,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_DARK_COOLUTIN",
       "attacks": {
-        "monsterSkills": {"77": "attack2"},
+        "monsterSkills": {"32": "attack2"},
         "otherwise": "attack1",
         "clearSkill": "always"
       }
@@ -3663,7 +3663,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_DARK_IRON_KNIGHT",
       "attacks": {
-        "monsterSkills": {"32": "attack2"},
+        "monsterSkills": {"77": "attack2"},
         "otherwise": "attack1",
         "clearSkill": "always"
       }

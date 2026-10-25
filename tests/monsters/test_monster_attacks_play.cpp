@@ -115,3 +115,15 @@ TEST_CASE("Monster attacks: Selupan and the Dark Ghost clear their skill when th
         CHECK(Attack(ghost, ghost.MonsterSkill) == MONSTER01_ATTACK1);
     }
 }
+
+TEST_CASE("Monster attacks: the Dark Iron Knight plays attack 2 for skill 77, the Dark Coolutin for 32 (P5) "
+          "[monsters][attacks]")
+{
+    AttackScope scope(WD_57ICECITY);
+    CHARACTER& knight = scope.Create(MONSTER_DARK_IRON_KNIGHT);
+    CHECK(Attack(knight, 77) == MONSTER01_ATTACK2);
+    CHECK(Attack(knight, 32) == MONSTER01_ATTACK1);
+    CHARACTER& coolutin = scope.Create(MONSTER_DARK_COOLUTIN);
+    CHECK(Attack(coolutin, 32) == MONSTER01_ATTACK2);
+    CHECK(Attack(coolutin, 77) == MONSTER01_ATTACK1);
+}
