@@ -134,19 +134,23 @@ std::optional<int> PartSlot(const MonsterModelPart& part)
     return g_EffectTypeCatalogue.FindType(Effects::EffectKind::Effect, part.effect);
 }
 
+void OpenPart(const MonsterModelPart& part, int slot)
+{
+    OpenFile(slot, part.load.file);
+    OpenTextures(slot, part.load.textureFolders);
+    ApplyAnimations(Models[slot], part.load, Defaults::None);
+}
+
 void OpenParts(const MonsterModelDefinition& model)
 {
     for (const MonsterModelPart& part : model.parts)
     {
         const std::optional<int> slot = PartSlot(part);
         // Parts of a map are opened with the map.
-        if (!slot || !part.worlds.empty())
+        if (slot && part.worlds.empty())
         {
-            continue;
+            OpenPart(part, *slot);
         }
-        OpenFile(*slot, part.load.file);
-        OpenTextures(*slot, part.load.textureFolders);
-        ApplyAnimations(Models[*slot], part.load, Defaults::None);
     }
 }
 
@@ -272,5 +276,33 @@ bool Open(int slot)
     SetSoundSlots(target, *model);
     LoadBitmaps(*model);
     return true;
+}
+
+bool HasMapParts()
+{
+    for (const MonsterModelDefinition* model : g_MonsterModelDatabase.GetAll())
+    {
+        if (std::any_of(model->parts.begin(), model->parts.end(),
+                        [](const MonsterModelPart& part) { return !part.worlds.empty(); }))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+void OpenMapParts(int world)
+{
+    for (const MonsterModelDefinition* model : g_MonsterModelDatabase.GetAll())
+    {
+        for (const MonsterModelPart& part : model->parts)
+        {
+            const std::optional<int> slot = PartSlot(part);
+            if (slot && std::find(part.worlds.begin(), part.worlds.end(), world) != part.worlds.end())
+            {
+                OpenPart(part, *slot);
+            }
+        }
+    }
 }
 } // namespace Data::Monsters::ModelLoader

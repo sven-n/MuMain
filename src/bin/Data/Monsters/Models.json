@@ -1054,7 +1054,78 @@
         "idle": ["Data/Sound/mKundunIdle.wav", "Data/Sound/mKundunIdle.wav"],
         "attack": ["Data/Sound/mKundunAttack1.wav", "Data/Sound/mKundunAttack2.wav"],
         "die": null
-      }
+      },
+      "parts": [
+        {
+          "effect": "kundunPart1",
+          "file": "Data/Monster/cd71a.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [24, 25, 26, 27, 28, 29, 36]
+        },
+        {
+          "effect": "kundunPart2",
+          "file": "Data/Monster/cd71b.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [24, 25, 26, 27, 28, 29, 36]
+        },
+        {
+          "effect": "kundunPart3",
+          "file": "Data/Monster/cd71c.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [24, 25, 26, 27, 28, 29, 36]
+        },
+        {
+          "effect": "kundunPart4",
+          "file": "Data/Monster/cd71d.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [24, 25, 26, 27, 28, 29, 36]
+        },
+        {
+          "effect": "kundunPart5",
+          "file": "Data/Monster/cd71e.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [24, 25, 26, 27, 28, 29, 36]
+        },
+        {
+          "effect": "kundunPart6",
+          "file": "Data/Monster/cd71f.bmd",
+          "textureFolders": ["Monster"],
+          "animations": {"stop1": 0.13},
+          "worlds": [24, 25, 26, 27, 28, 29, 36]
+        },
+        {
+          "effect": "kundunPart7",
+          "file": "Data/Monster/cd71g.bmd",
+          "textureFolders": ["Monster"],
+          "animations": {"stop1": 0.13},
+          "worlds": [24, 25, 26, 27, 28, 29, 36]
+        },
+        {
+          "effect": "kundunPart8",
+          "file": "Data/Monster/cd71h.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [24, 25, 26, 27, 28, 29, 36]
+        },
+        {
+          "effect": "kundunDragonHead",
+          "file": "Data/Skill/dragonhead.bmd",
+          "textureFolders": ["Skill"],
+          "worlds": [24, 25, 26, 27, 28, 29, 36]
+        },
+        {
+          "effect": "kundunPhoenix",
+          "file": "Data/Skill/phoenix.bmd",
+          "textureFolders": ["Skill"],
+          "holdLastFrame": ["stop1"],
+          "worlds": [24, 25, 26, 27, 28, 29, 36]
+        },
+        {
+          "effect": "kundunGhost",
+          "file": "Data/Monster/cundun_gone.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [24, 25, 26, 27, 28, 29, 36]
+        }
+      ]
     },
     {
       "slot": "MONSTER_MODEL_BLOOD_SOLDIER",
@@ -1374,7 +1445,21 @@
       "slot": "MONSTER_MODEL_BALLISTA",
       "file": "Data/Monster/Monster100.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"attack1": 0.37, "attack2": 0.37, "die": 0.15}
+      "animations": {"attack1": 0.37, "attack2": 0.37, "die": 0.15},
+      "parts": [
+        {
+          "effect": "arrowTanker",
+          "file": "Data/Monster/arrowstusk.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [34]
+        },
+        {
+          "effect": "arrowTankerHit",
+          "file": "Data/Monster/arrowstusk.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [34]
+        }
+      ]
     },
     {
       "slot": "MONSTER_MODEL_WITCH_QUEEN",
@@ -1596,6 +1681,44 @@
         {"file": "Data/Sound/w52/SE_Mon_totemgolem_attack01.wav", "id": "SOUND_ELBELAND_TOTEMGOLEM_ATTACK01", "channels": 1, "spatial": false},
         {"file": "Data/Sound/w52/SE_Mon_totemgolem_attack02.wav", "id": "SOUND_ELBELAND_TOTEMGOLEM_ATTACK02", "channels": 1, "spatial": false},
         {"file": "Data/Sound/w52/SE_Mon_totemgolem_death01.wav", "id": "SOUND_ELBELAND_TOTEMGOLEM_DEATH01", "channels": 1, "spatial": false}
+      ],
+      "parts": [
+        {
+          "effect": "totemGolemPart1",
+          "file": "Data/Monster/totemhead.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [51]
+        },
+        {
+          "effect": "totemGolemPart2",
+          "file": "Data/Monster/totembody.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [51]
+        },
+        {
+          "effect": "totemGolemPart3",
+          "file": "Data/Monster/totemleft.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [51]
+        },
+        {
+          "effect": "totemGolemPart4",
+          "file": "Data/Monster/totemright.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [51]
+        },
+        {
+          "effect": "totemGolemPart5",
+          "file": "Data/Monster/totemleg.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [51]
+        },
+        {
+          "effect": "totemGolemPart6",
+          "file": "Data/Monster/totemleg2.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [51]
+        }
       ]
     },
     {
@@ -1658,6 +1781,62 @@
       "sounds": [
         {"file": "Data/Sound/w57/ShadowPawn-Attack.wav", "id": "SOUND_SWAMPOFQUIET_SHADOW_PAWN_ATTACK01", "channels": 1, "spatial": false},
         {"file": "Data/Sound/w57/Shadow-Death.wav", "id": "SOUND_SWAMPOFQUIET_SHADOW_DEATH01", "channels": 1, "spatial": false}
+      ],
+      "parts": [
+        {
+          "effect": "shadowPawnAnkleLeft",
+          "file": "Data/Monster/shadow_pawn_7_ankle_left.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowPawnAnkleRight",
+          "file": "Data/Monster/shadow_pawn_7_ankle_right.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowPawnBelt",
+          "file": "Data/Monster/shadow_pawn_7_belt.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowPawnChest",
+          "file": "Data/Monster/shadow_pawn_7_chest.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowPawnHelmet",
+          "file": "Data/Monster/shadow_pawn_7_helmet.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowPawnKneeLeft",
+          "file": "Data/Monster/shadow_pawn_7_knee_left.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowPawnKneeRight",
+          "file": "Data/Monster/shadow_pawn_7_knee_right.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowPawnWristLeft",
+          "file": "Data/Monster/shadow_pawn_7_wrist_left.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowPawnWristRight",
+          "file": "Data/Monster/shadow_pawn_7_wrist_right.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        }
       ]
     },
     {
@@ -1668,6 +1847,62 @@
       "sounds": [
         {"file": "Data/Sound/w57/ShadowKnight-Attack.wav", "id": "SOUND_SWAMPOFQUIET_SHADOW_KNIGHT_ATTACK01", "channels": 1, "spatial": false},
         {"file": "Data/Sound/w57/Shadow-Death.wav", "id": "SOUND_SWAMPOFQUIET_SHADOW_DEATH01", "channels": 1, "spatial": false}
+      ],
+      "parts": [
+        {
+          "effect": "shadowKnightAnkleLeft",
+          "file": "Data/Monster/shadow_knight_7_ankle_left.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowKnightAnkleRight",
+          "file": "Data/Monster/shadow_knight_7_ankle_right.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowKnightBelt",
+          "file": "Data/Monster/shadow_knight_7_belt.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowKnightChest",
+          "file": "Data/Monster/shadow_knight_7_chest.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowKnightHelmet",
+          "file": "Data/Monster/shadow_knight_7_helmet.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowKnightKneeLeft",
+          "file": "Data/Monster/shadow_knight_7_knee_left.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowKnightKneeRight",
+          "file": "Data/Monster/shadow_knight_7_knee_right.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowKnightWristLeft",
+          "file": "Data/Monster/shadow_knight_7_wrist_left.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowKnightWristRight",
+          "file": "Data/Monster/shadow_knight_7_wrist_right.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        }
       ]
     },
     {
@@ -1678,6 +1913,62 @@
       "sounds": [
         {"file": "Data/Sound/w57/ShadowRook-Attack.wav", "id": "SOUND_SWAMPOFQUIET_SHADOW_ROOK_ATTACK01", "channels": 1, "spatial": false},
         {"file": "Data/Sound/w57/Shadow-Death.wav", "id": "SOUND_SWAMPOFQUIET_SHADOW_DEATH01", "channels": 1, "spatial": false}
+      ],
+      "parts": [
+        {
+          "effect": "shadowRookAnkleLeft",
+          "file": "Data/Monster/shadow_rock_7_ankle_left.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowRookAnkleRight",
+          "file": "Data/Monster/shadow_rock_7_ankle_right.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowRookBelt",
+          "file": "Data/Monster/shadow_rock_7_belt.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowRookChest",
+          "file": "Data/Monster/shadow_rock_7_chest.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowRookHelmet",
+          "file": "Data/Monster/shadow_rock_7_helmet.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowRookKneeLeft",
+          "file": "Data/Monster/shadow_rock_7_knee_left.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowRookKneeRight",
+          "file": "Data/Monster/shadow_rock_7_knee_right.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowRookWristLeft",
+          "file": "Data/Monster/shadow_rock_7_wrist_left.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "shadowRookWristRight",
+          "file": "Data/Monster/shadow_rock_7_wrist_right.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        }
       ]
     },
     {
@@ -1921,6 +2212,32 @@
         {"file": "Data/Sound/w64/BloodAssassin_death.wav", "id": "SOUND_PKFIELD_BLOODASSASSIN_DEDTH", "channels": 4, "spatial": false},
         {"file": "Data/Sound/w64/BloodAssassin_move01.wav", "id": "SOUND_PKFIELD_BLOODASSASSIN_MOVE01", "channels": 4, "spatial": false},
         {"file": "Data/Sound/w64/BloodAssassin_move02.wav", "channels": 4, "spatial": false}
+      ],
+      "parts": [
+        {
+          "effect": "pkFieldAssassinEffectGreenHead",
+          "file": "Data/Monster/pk_manhead_green.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [63]
+        },
+        {
+          "effect": "pkFieldAssassinEffectRedHead",
+          "file": "Data/Monster/pk_manhead_red.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [63]
+        },
+        {
+          "effect": "pkFieldAssassinEffectGreenBody",
+          "file": "Data/Monster/assassin_dieg.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [63]
+        },
+        {
+          "effect": "pkFieldAssassinEffectRedBody",
+          "file": "Data/Monster/assassin_dier.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [63]
+        }
       ]
     },
     {
@@ -2181,7 +2498,63 @@
       "slot": "MONSTER_MODEL_SHADOW_MASTER",
       "file": "Data/Monster/monster204.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"die": 0.25}
+      "animations": {"die": 0.25},
+      "parts": [
+        {
+          "effect": "ex01ShadowMasterAnkleLeft",
+          "file": "Data/Monster/ex01shadow_rock_7_ankle_left.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "ex01ShadowMasterAnkleRight",
+          "file": "Data/Monster/ex01shadow_rock_7_ankle_right.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "ex01ShadowMasterBelt",
+          "file": "Data/Monster/ex01shadow_rock_7_belt.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "ex01ShadowMasterChest",
+          "file": "Data/Monster/ex01shadow_rock_7_chest.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "ex01ShadowMasterHelmet",
+          "file": "Data/Monster/ex01shadow_rock_7_helmet.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "ex01ShadowMasterKneeLeft",
+          "file": "Data/Monster/ex01shadow_rock_7_knee_left.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "ex01ShadowMasterKneeRight",
+          "file": "Data/Monster/ex01shadow_rock_7_knee_right.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "ex01ShadowMasterWristLeft",
+          "file": "Data/Monster/ex01shadow_rock_7_wrist_left.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        },
+        {
+          "effect": "ex01ShadowMasterWristRight",
+          "file": "Data/Monster/ex01shadow_rock_7_wrist_right.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [56]
+        }
+      ]
     },
     {
       "slot": "MONSTER_MODEL_DARK_MAMMOTH",
@@ -2287,6 +2660,50 @@
         {"file": "Data/Sound/Karutan/Condra_move2.wav", "id": "SOUND_KARUTAN_CONDRA_MOVE2", "channels": 4, "spatial": false},
         {"file": "Data/Sound/Karutan/Condra_attack.wav", "id": "SOUND_KARUTAN_CONDRA_ATTACK", "channels": 4, "spatial": false},
         {"file": "Data/Sound/Karutan/Condra_death.wav", "id": "SOUND_KARUTAN_CONDRA_DEATH", "channels": 4, "spatial": false}
+      ],
+      "parts": [
+        {
+          "effect": "condraArmL",
+          "file": "Data/Monster/condra_7_arm_left.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [80, 81]
+        },
+        {
+          "effect": "condraArmL2",
+          "file": "Data/Monster/condra_7_arm_left_2.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [80, 81]
+        },
+        {
+          "effect": "condraShoulder",
+          "file": "Data/Monster/condra_7_shoulder_right.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [80, 81]
+        },
+        {
+          "effect": "condraArmR",
+          "file": "Data/Monster/condra_7_arm_right.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [80, 81]
+        },
+        {
+          "effect": "condraArmR2",
+          "file": "Data/Monster/condra_7_arm_right_2.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [80, 81]
+        },
+        {
+          "effect": "condraConeL",
+          "file": "Data/Monster/condra_7_cone_left.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [80, 81]
+        },
+        {
+          "effect": "condraConeR",
+          "file": "Data/Monster/condra_7_cone_right.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [80, 81]
+        }
       ]
     },
     {
@@ -2299,6 +2716,104 @@
         {"file": "Data/Sound/Karutan/Condra_move2.wav", "id": "SOUND_KARUTAN_CONDRA_MOVE2", "channels": 4, "spatial": false},
         {"file": "Data/Sound/Karutan/NarCondra_attack.wav", "id": "SOUND_KARUTAN_NARCONDRA_ATTACK", "channels": 4, "spatial": false},
         {"file": "Data/Sound/Karutan/Condra_death.wav", "id": "SOUND_KARUTAN_CONDRA_DEATH", "channels": 4, "spatial": false}
+      ],
+      "parts": [
+        {
+          "effect": "narcondraArmL",
+          "file": "Data/Monster/nar_condra_7_arm_left.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [80, 81]
+        },
+        {
+          "effect": "narcondraArmL2",
+          "file": "Data/Monster/nar_condra_7_arm_left_2.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [80, 81]
+        },
+        {
+          "effect": "narcondraShoulderL",
+          "file": "Data/Monster/nar_condra_7_shoulder_left.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [80, 81]
+        },
+        {
+          "effect": "narcondraShoulderR",
+          "file": "Data/Monster/nar_condra_7_shoulder_right.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [80, 81]
+        },
+        {
+          "effect": "narcondraArmR",
+          "file": "Data/Monster/nar_condra_7_arm_right.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [80, 81]
+        },
+        {
+          "effect": "narcondraArmR2",
+          "file": "Data/Monster/nar_condra_7_arm_right_2.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [80, 81]
+        },
+        {
+          "effect": "narcondraArmR3",
+          "file": "Data/Monster/nar_condra_7_arm_right_3.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [80, 81]
+        },
+        {
+          "effect": "narcondraCone1",
+          "file": "Data/Monster/nar_condra_7_cone_1.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [80, 81]
+        },
+        {
+          "effect": "narcondraCone2",
+          "file": "Data/Monster/nar_condra_7_cone_2.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [80, 81]
+        },
+        {
+          "effect": "narcondraCone3",
+          "file": "Data/Monster/nar_condra_7_cone_3.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [80, 81]
+        },
+        {
+          "effect": "narcondraCone4",
+          "file": "Data/Monster/nar_condra_7_cone_4.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [80, 81]
+        },
+        {
+          "effect": "narcondraCone5",
+          "file": "Data/Monster/nar_condra_7_cone_5.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [80, 81]
+        },
+        {
+          "effect": "narcondraCone6",
+          "file": "Data/Monster/nar_condra_7_cone_6.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [80, 81]
+        },
+        {
+          "effect": "narcondraPelvis",
+          "file": "Data/Monster/nar_condra_7_pelvis.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [80, 81]
+        },
+        {
+          "effect": "narcondraStomach",
+          "file": "Data/Monster/nar_condra_7_stomach.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [80, 81]
+        },
+        {
+          "effect": "narcondraNeck",
+          "file": "Data/Monster/nar_condra_7_neck.bmd",
+          "textureFolders": ["Monster"],
+          "worlds": [80, 81]
+        }
       ]
     },
     {

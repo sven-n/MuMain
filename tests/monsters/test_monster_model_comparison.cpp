@@ -12,6 +12,7 @@
 #include "Core/Globals/_enum.h"
 #include "Data/DataHandler/EffectData/EffectDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterModelJsonStorage.h"
+#include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
@@ -246,5 +247,52 @@ TEST_CASE("Monster models: the comparison opens the models from the data [monste
     const LoadChanges changes = scope.Run([] { OpenMonsterModel(MONSTER_MODEL_HOUND); });
     REQUIRE_FALSE(changes.sounds.empty());
     CHECK(changes.sounds.front().id >= static_cast<int>(MAX_BUFFER));
+    g_MonsterModelDatabase.Build({});
+}
+
+namespace
+{
+// Every map's load, with the part models it opens for monsters. Raklion's
+// load needs the terrain (CreateObject) and cannot run here; its code opens
+// no monster part.
+void CheckMapLoads(int firstWorld, int lastWorld)
+{
+    ShippedModels();
+    for (int world = firstWorld; world <= lastWorld; ++world)
+    {
+        if (world == WD_57ICECITY || world == WD_58ICECITY_BOSS)
+            continue;
+        const Comparison comparison = Compare(world, [] { gMapManager.Load(); });
+        INFO("map load of world " << world);
+        for (const std::string& difference : comparison.differences)
+        {
+            INFO(difference);
+            CHECK(false);
+        }
+    }
+}
+} // namespace
+
+TEST_CASE("Monster models: the maps open the monster part models as their code did, worlds 0-40 [monsters][comparison]")
+{
+    CheckMapLoads(0, 40);
+}
+
+TEST_CASE(
+    "Monster models: the maps open the monster part models as their code did, worlds 41-81 [monsters][comparison]")
+{
+    CheckMapLoads(41, NUM_WD - 1);
+}
+
+TEST_CASE("Monster models: the comparison opens the map parts from the data [monsters][comparison]")
+{
+    g_MonsterModelDatabase.Build(ShippedModels());
+    REQUIRE(Data::Monsters::ModelLoader::HasMapParts());
+    LoadScope scope(WD_51HOME_6TH_CHAR);
+    const LoadChanges changes = scope.Run([] { Data::Monsters::ModelLoader::OpenMapParts(WD_51HOME_6TH_CHAR); });
+    const auto totemPart = std::find_if(changes.slots.begin(), changes.slots.end(),
+                                        [](const auto& slot) { return slot.first == MODEL_TOTEMGOLEM_PART1; });
+    REQUIRE(totemPart != changes.slots.end());
+    CHECK(IsLoaded(totemPart->second));
     g_MonsterModelDatabase.Build({});
 }
