@@ -6,10 +6,11 @@
    is redrawn additively in (0.8, 0.6, 0.4) and each label is centred in white at y + 5. The rules
    are at the end of this file, scoped to #panel.system-menu.
 
-   The Chaos Goblin's menu (kind "chaos-mix") takes the Season 2 client's box (scoped to
-   #panel[data-kind="chaos-mix"], at the end of this file). The other NPC menus (npc-menu,
-   trainer-recover, elpis, elpis-about, reset-points, delgardo, gem-integration, cherry-blossom,
-   and the menus without a kind) keep the S6 look: 0.97 has no equivalent of them. This file replaces themes/legacy/generic_menu_dialog.rcss whole, so
+   The Chaos Goblin's menu (kind "chaos-mix"), the trainer's (npc-menu, trainer-recover; the other
+   npc-menu menus take the trainer's box) and Lahap's (gem-integration) take the Season 2 client's
+   boxes (scoped to their kinds, at the end of this file). The other NPC menus (elpis, elpis-about,
+   reset-points, delgardo, cherry-blossom, and the menus without a kind) keep the S6 look: no
+   classic client has them. This file replaces themes/legacy/generic_menu_dialog.rcss whole, so
    every rule below that is not scoped to the system menu is legacy's, verbatim; the four legacy
    rules the system menu drops are marked where they stood. The shell's frame sprites and header
    come from legacy's window_shell.rml/.rcss and are hidden here for the system menu only.
@@ -446,3 +447,151 @@
 
 /* Season 2's box has no Close button. */
 #panel[data-kind="chaos-mix"] .gmd-button-cell.compact { display: none; }
+
+/* The NPC menus of kind "npc-menu" (the trainer, and the Lucky Item, seed master and seed researcher
+   menus, which no classic client has and which take the trainer's box) and the trainer's pet
+   recovery (kind "trainer-recover"): the Season 2 client's trainer boxes (RE\mains2: 00462c5b and
+   00463377), in the 640x480 frame:
+   - the box: Message_box2 (213x5) at (213, 90), five Message_box1 rows (213x40) from y 90, and
+     Message_box2 again at y 290 -- 213x205;
+   - the title (text 1227) bold, centred on x 319 at y 100; Season 2 writes it black over a band of
+     (200, 200, 200) at 78%, which the theme takes orange (255, 128, 0) and bandless instead, as the
+     Chaos Goblin's and Lahap's titles (the user's choice);
+   - the lines centred on x 319, (200, 200, 200), their text tops at 120 and 140;
+   - two Message_box plates (213x64) squashed to 120x22 at x 259: at y 180
+     and 210 in the menu, 150 and 210 in the recovery; their labels gold (223, 191, 103), text top
+     5 under the plate's, drawn bold under the mouse; the recovery's status line 30 under each
+     plate's top;
+   - Close is exit_01 (24x24) at (394, 265), with no label.
+   Positions below are from the box's top-left (213, 90). The stone is the derived
+   Message_box1_40x6 (six rows, unscaled), cut to the rows the box shows. */
+@spritesheet classic-tr-stone-sheet { src: ../../../Classic/Message_box1_40x6.jpg; classic-tr-stone: 0px 5px 213px 195px; classic-lh-stone: 0px 0px 213px 240px; }
+@spritesheet classic-tr-plate-sheet { src: ../../../Classic/Message_box.jpg; classic-tr-plate: 0px 0px 213px 64px; }
+@spritesheet classic-tr-exit-sheet  { src: ../../../Classic/Exit_01.jpg; classic-tr-exit: 0px 0px 24px 24px; }
+@spritesheet classic-tr-exit2-sheet { src: ../../../Classic/Exit_02.jpg; classic-tr-exit-pressed: 0px 0px 24px 24px; }
+
+#panel[data-kind="npc-menu"], #panel[data-kind="trainer-recover"] {
+	top: 90dp;
+	width: 213dp;
+	height: 205dp;
+	margin-left: -106.5dp;
+}
+#panel[data-kind="npc-menu"] .window-shell-sprite-back, #panel[data-kind="trainer-recover"] .window-shell-sprite-back,
+#panel[data-kind="npc-menu"] .window-shell-header-rail, #panel[data-kind="trainer-recover"] .window-shell-header-rail { decorator: none; }
+#panel[data-kind="npc-menu"] .window-shell-sprite-top, #panel[data-kind="trainer-recover"] .window-shell-sprite-top { height: 5dp; decorator: image(classic-cm-edge); }
+#panel[data-kind="npc-menu"] .window-shell-sprite-middle, #panel[data-kind="trainer-recover"] .window-shell-sprite-middle { top: 5dp; bottom: 5dp; decorator: image(classic-tr-stone fill); }
+#panel[data-kind="npc-menu"] .window-shell-sprite-bottom, #panel[data-kind="trainer-recover"] .window-shell-sprite-bottom { height: 5dp; decorator: image(classic-cm-edge); }
+#panel[data-kind="npc-menu"].native-frame .window-shell-content,
+#panel[data-kind="trainer-recover"].native-frame .window-shell-content { top: 0; bottom: 0; left: 0; right: 0; }
+
+/* The title: a 13 line box at 10. */
+#panel[data-kind="npc-menu"] .window-shell-header-title, #panel[data-kind="trainer-recover"] .window-shell-header-title {
+	left: 5dp;
+	right: 5dp;
+	top: 10dp;
+	line-height: 13dp;
+	color: #ff8000;
+}
+
+/* The lines: 20 apart, their text tops at 30 and 50 (a 20 line box 5.5 above each). */
+#panel[data-kind="npc-menu"] .gmd-lines, #panel[data-kind="trainer-recover"] .gmd-lines { top: 24.5dp; line-height: 20dp; }
+#panel[data-kind="npc-menu"] .gmd-lines .gmd-line, #panel[data-kind="trainer-recover"] .gmd-lines .gmd-line { color: rgb(200, 200, 200); }
+
+/* The plates at 90 and 120 (menu), 60 and 120 (recovery), 46 from the box's left. The kind-scoped
+   rules outrank .gmd-btn's :hover/:active art above: Season 2 only draws the label bold. */
+#panel[data-kind="npc-menu"] .gmd-button-cell:nth-child(1) { top: 90dp; }
+#panel[data-kind="npc-menu"] .gmd-button-cell:nth-child(2) { top: 120dp; }
+#panel[data-kind="trainer-recover"] .gmd-button-cell:nth-child(1) { top: 60dp; }
+#panel[data-kind="trainer-recover"] .gmd-button-cell:nth-child(2) { top: 120dp; }
+#panel[data-kind="npc-menu"] .gmd-btn, #panel[data-kind="trainer-recover"] .gmd-btn,
+#panel[data-kind="npc-menu"] .gmd-btn:hover, #panel[data-kind="trainer-recover"] .gmd-btn:hover,
+#panel[data-kind="npc-menu"] .gmd-btn:active, #panel[data-kind="trainer-recover"] .gmd-btn:active {
+	width: 120dp;
+	height: 22dp;
+	line-height: 21dp;
+	decorator: image(classic-tr-plate fill);
+}
+#panel[data-kind="npc-menu"] .gmd-btn-label, #panel[data-kind="trainer-recover"] .gmd-btn-label { color: rgb(223, 191, 103); }
+#panel[data-kind="npc-menu"] .gmd-btn:hover .gmd-btn-label, #panel[data-kind="trainer-recover"] .gmd-btn:hover .gmd-btn-label { font-weight: bold; }
+/* The recovery's status line under each plate, its text top 30 under the plate's. */
+#panel[data-kind="trainer-recover"].native-frame .gmd-button-cell.lines-below .gmd-line { margin-top: 2.5dp; line-height: 10dp; }
+
+/* Close: exit_01 at (181, 175), its label hidden. */
+#panel[data-kind="npc-menu"].native-frame .gmd-button-cell.compact,
+#panel[data-kind="trainer-recover"].native-frame .gmd-button-cell.compact {
+	left: 181dp;
+	right: auto;
+	top: 175dp;
+	bottom: auto;
+	width: 24dp;
+}
+#panel[data-kind="npc-menu"] .gmd-btn.compact, #panel[data-kind="trainer-recover"] .gmd-btn.compact,
+#panel[data-kind="npc-menu"] .gmd-btn.compact:hover, #panel[data-kind="trainer-recover"] .gmd-btn.compact:hover {
+	width: 24dp;
+	height: 24dp;
+	decorator: image(classic-tr-exit);
+}
+#panel[data-kind="npc-menu"] .gmd-btn.compact:active, #panel[data-kind="trainer-recover"] .gmd-btn.compact:active { width: 24dp; height: 24dp; decorator: image(classic-tr-exit-pressed); }
+#panel[data-kind="npc-menu"] .gmd-btn.compact .gmd-btn-label, #panel[data-kind="trainer-recover"] .gmd-btn.compact .gmd-btn-label { visibility: hidden; }
+
+/* Lahap's jewel menu (kind "gem-integration"): the Season 2 client's message box 0xa1 (RE\mains2:
+   drawn in 006a9ad0), in the 640x480 frame:
+   - the box: Message_box2 (213x5) at (213, 120), six Message_box1 rows (213x40) from y 125, and
+     Message_box2 again at y 365 -- 213x250;
+   - the title (text 1801, MuMain's first line, bold orange) centred, its text top about 15 under
+     the box's, as the Chaos Goblin's;
+   - the lines (texts 1802 and 1803) white, left-aligned at x 248, their text tops at 150 and 160;
+   - two Message_box plates squashed to 150x35 at x 245, y 190 and 255, tinted 0.7 grey and drawn
+     white under the mouse; their labels bold, (200, 240, 255), centred, 12 under the plate's top;
+   - Close: a Message_box plate squashed to 81x25 at (279, 320), tinted 0.8 grey and white under
+     the mouse, its label like the others, 8 under its top.
+   Positions below are from the box's top-left (213, 120). */
+#panel[data-kind="gem-integration"] {
+	top: 120dp;
+	width: 213dp;
+	height: 250dp;
+	margin-left: -106.5dp;
+}
+#panel[data-kind="gem-integration"] .window-shell-sprite-back,
+#panel[data-kind="gem-integration"] .window-shell-header-rail { decorator: none; }
+#panel[data-kind="gem-integration"] .window-shell-sprite-top { height: 5dp; decorator: image(classic-cm-edge); }
+#panel[data-kind="gem-integration"] .window-shell-sprite-middle { top: 5dp; bottom: 5dp; decorator: image(classic-lh-stone fill); }
+#panel[data-kind="gem-integration"] .window-shell-sprite-bottom { height: 5dp; decorator: image(classic-cm-edge); }
+#panel[data-kind="gem-integration"].native-frame .window-shell-content { top: 0; bottom: 0; left: 0; right: 0; }
+
+/* The title line centred at 15; the two lines under it left-aligned at 35, at 30 and 40 (10 line
+   boxes, 0.5 above each text top). */
+#panel[data-kind="gem-integration"] .gmd-lines {
+	position: absolute;
+	left: 0;
+	right: 0;
+	width: auto;
+	top: 14.5dp;
+	line-height: 10dp;
+}
+#panel[data-kind="gem-integration"] .gmd-lines .gmd-line { margin-bottom: 0; padding-left: 35dp; text-align: left; white-space: nowrap; }
+#panel[data-kind="gem-integration"] .gmd-lines .gmd-line:first-child { margin-bottom: 5dp; padding-left: 0; text-align: center; }
+
+#panel[data-kind="gem-integration"] .gmd-button-cell:nth-child(1) { top: 70dp; }
+#panel[data-kind="gem-integration"] .gmd-button-cell:nth-child(2) { top: 135dp; }
+#panel[data-kind="gem-integration"] .gmd-btn,
+#panel[data-kind="gem-integration"] .gmd-btn.narrow {
+	width: 150dp;
+	height: 35dp;
+	line-height: 33dp;
+	image-color: rgb(179, 179, 179);
+	decorator: image(classic-tr-plate fill);
+}
+#panel[data-kind="gem-integration"] .gmd-btn:hover,
+#panel[data-kind="gem-integration"] .gmd-btn:active { image-color: #ffffff; decorator: image(classic-tr-plate fill); }
+#panel[data-kind="gem-integration"] .gmd-btn-label { font-weight: bold; color: rgb(200, 240, 255); }
+#panel[data-kind="gem-integration"] .gmd-button-cell:nth-child(3) { top: 200dp; bottom: auto; }
+#panel[data-kind="gem-integration"] .gmd-btn.compact {
+	width: 81dp;
+	height: 25dp;
+	line-height: 25dp;
+	image-color: rgb(204, 204, 204);
+	decorator: image(classic-tr-plate fill);
+}
+#panel[data-kind="gem-integration"] .gmd-btn.compact:hover,
+#panel[data-kind="gem-integration"] .gmd-btn.compact:active { image-color: #ffffff; decorator: image(classic-tr-plate fill); }
