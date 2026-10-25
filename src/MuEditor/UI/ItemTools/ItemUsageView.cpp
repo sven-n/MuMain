@@ -4,6 +4,7 @@
 
 #include "ItemUsageView.h"
 
+#include "../MuEditor/UI/Common/CodeReferenceList.h"
 #include "Data/GameData/ItemData/ItemEnumNames.h"
 #include "I18N/All.h"
 #include "imgui.h"
@@ -14,10 +15,6 @@ namespace MuEditor::Items::UsageView
 {
 namespace
 {
-// How many source lines are listed; the count says how many there are.
-constexpr size_t ListedCodeLines = 12;
-constexpr float CodeListLines = 8.0f;
-
 void RenderTags(const ItemUsage& usage)
 {
     if (usage.tags.empty())
@@ -47,33 +44,6 @@ void RenderModel(const ItemUsage& usage)
     ImGui::BulletText("%s", I18N::Format(I18N::Editor::SharedModel0AlsoUsedBy1Items,
                                          {usage.sharedModel, std::to_string(usage.sharedModelOtherUsers)})
                                 .c_str());
-}
-
-void RenderCode(const ItemUsage& usage)
-{
-    if (!usage.codeKnown)
-    {
-        ImGui::BulletText("%s", I18N::Editor::TheSourcesWereNotFoundCodeThatNamesTheItemIsNotKnown);
-        return;
-    }
-    if (usage.code.empty())
-    {
-        return;
-    }
-    ImGui::BulletText("%s", I18N::Format(I18N::Editor::NamedInCode0Lines, {std::to_string(usage.code.size())}).c_str());
-    if (ImGui::BeginListBox("##Code", ImVec2(-FLT_MIN, CodeListLines * ImGui::GetTextLineHeightWithSpacing())))
-    {
-        for (size_t index = 0; index < usage.code.size() && index < ListedCodeLines; ++index)
-        {
-            const ItemCodeReference& reference = usage.code[index];
-            ImGui::Text("%s:%d  %s", reference.file.c_str(), reference.line, reference.text.c_str());
-        }
-        if (usage.code.size() > ListedCodeLines)
-        {
-            ImGui::TextDisabled("...");
-        }
-        ImGui::EndListBox();
-    }
 }
 
 void RenderGameData(const ItemUsage& usage)
@@ -107,7 +77,8 @@ void RenderUsesAtNumber(const ItemUsage& usage)
         return;
     }
     RenderGameData(usage);
-    RenderCode(usage);
+    CodeReferenceList::Render(usage.codeKnown, usage.code,
+                              I18N::Editor::TheSourcesWereNotFoundCodeThatNamesTheItemIsNotKnown);
 }
 } // namespace MuEditor::Items::UsageView
 

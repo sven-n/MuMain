@@ -9,6 +9,7 @@
 #include "../MuEditor/UI/Common/MuEditorLayout.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
+#include "Core/Text/Utf8.h"
 #include "Data/GameData/ServerListData/ServerListJson.h"
 #include "I18N/All.h"
 #include "Network/Server/ServerListManager.h"
@@ -593,7 +594,7 @@ bool CMuServerListUI::RenderGroupFields(ServerGroup& group)
     bool changed = false;
     if (MuEditor::Items::InputString(I18N::Editor::Name, group.name))
     {
-        Data::ServerList::CutToUtf16Length(group.name, Data::ServerList::MaxServerGroupNameLength);
+        Core::Text::CutToUtf16Length(group.name, Data::ServerList::MaxServerGroupNameLength);
         changed = true;
     }
     CommitWhenFieldLeft();
@@ -604,7 +605,7 @@ bool CMuServerListUI::RenderGroupFields(ServerGroup& group)
     ImGui::SetNextItemWidth(TextFieldWidth * scale);
     if (MuEditor::Items::InputString(I18N::Editor::Description, group.description))
     {
-        Data::ServerList::CutToUtf16Length(group.description, Data::ServerList::MaxServerGroupDescriptionLength);
+        Core::Text::CutToUtf16Length(group.description, Data::ServerList::MaxServerGroupDescriptionLength);
         changed = true;
     }
     CommitWhenFieldLeft();

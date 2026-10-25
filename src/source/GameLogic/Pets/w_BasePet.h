@@ -1,5 +1,7 @@
 #pragma once
 
+// Relative path lets standalone cppcheck resolve the pointer macros without global header analysis.
+#include "../../Core/Globals/_define.h"
 #include "w_PetAction.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Core/Time/Timer.h"

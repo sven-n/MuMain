@@ -121,7 +121,7 @@ bool ItemTooltipReader::ReadText(const OrderedJson& json, const std::string& fie
     }
     for (const auto& [locale, translation] : text.GetTranslations())
     {
-        if (!IsValidLocaleCode(locale))
+        if (!LocalizedString::IsValidLocaleCode(locale))
         {
             AddError(field, "\"" + locale + "\" is not a language code (letters, digits and \"-\" only)");
         }
@@ -559,11 +559,14 @@ void ValidateTooltipTextLocales(const ItemTooltipFile& file, std::span<const cha
     {
         warn(text, std::string(Keys::Texts) + "." + name);
     }
-    for (const TooltipLayout& layout : file.layouts)
+    // Named as the reader names them: by the layout's place in the list.
+    for (size_t layout = 0; layout < file.layouts.size(); ++layout)
     {
-        for (size_t index = 0; index < layout.lines.size(); ++index)
+        const std::vector<TooltipLayoutLine>& lines = file.layouts[layout].lines;
+        for (size_t index = 0; index < lines.size(); ++index)
         {
-            warn(layout.lines[index].text, "layouts." + layout.name + ".lines[" + std::to_string(index) + "].text");
+            warn(lines[index].text, std::string(Keys::Layouts) + "[" + std::to_string(layout) + "].lines[" +
+                                        std::to_string(index) + "].text");
         }
     }
 }

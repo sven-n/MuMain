@@ -56,10 +56,10 @@ bool ReadComparison(std::string_view text, TooltipCondition& condition)
     return false;
 }
 
-constexpr std::array<std::string_view, 13> States = {
-    "hasDamage",          "skillBook",           "twoHanded", "excellent",       "ancient",
-    "damageHarmonyBonus", "defenseHarmonyBonus", "armour",    "strengthReduced", "dexterityReduced",
-    "wizardryWeapon",     "hasDurability",       "timed",
+constexpr std::array<std::string_view, 15> States = {
+    "hasDamage",          "skillBook",           "twoHanded",        "excellent",       "ancient",
+    "damageHarmonyBonus", "defenseHarmonyBonus", "armour",           "strengthReduced", "dexterityReduced",
+    "strengthRequired",   "dexterityRequired",   "wizardryWeapon",   "hasDurability",   "timed",
 };
 } // namespace
 

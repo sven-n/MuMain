@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "ItemCodeReferences.h"
+#include "UI/Common/CodeReferenceScan.h"
 
 #include <functional>
 #include <map>
@@ -19,13 +20,8 @@ namespace MuEditor::Items
 // The ITEM_ and MODEL_ constants of the items, by name, with their item types.
 using ItemConstants = std::map<std::string, int, std::less<>>;
 
-// An item a line names, and how.
-struct ItemMention
-{
-    // Always a valid item type.
-    int itemType = 0;
-    ItemCodeReference::Kind kind = ItemCodeReference::Kind::Name;
-};
+// An item a line names, and how; the number is always a valid item type.
+using ItemMention = CodeReferenceScan::Mention;
 
 // The constant a line of _enum.h defines for an item, written as
 // ITEM_KRIS = ITEM_SWORD + 0, (MODEL_ alike): its name, which points into

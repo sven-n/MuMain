@@ -16,6 +16,7 @@
 #include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
 #include "imgui.h"
+#include "imgui_internal.h"
 
 #include <algorithm>
 #include <array>
@@ -105,14 +106,18 @@ CMuItemRequirementsUI::CMuItemRequirementsUI()
 
 void CMuItemRequirementsUI::StoreItem(const std::string& label, const ItemDefinition& item)
 {
-    if (!m_drawingFields && m_typed && m_typed->itemType == Data::Items::MakeItemType(item.group, item.number) &&
-        label == m_typed->label)
+    const int itemType = Data::Items::MakeItemType(item.group, item.number);
+    for (std::optional<TypedZeroValue>& typing : m_typed)
     {
+        if (m_drawingFields || !typing || typing->itemType != itemType || label != typing->label)
+        {
+            continue;
+        }
         // Stored without its field being left (the form hidden, the selection
         // changed, the section closed): there is no list to ask which weight,
         // so a value several weights give, or none, is dropped.
-        const TypedZeroValue typed = *m_typed;
-        m_typed.reset();
+        const TypedZeroValue typed = *typing;
+        typing.reset();
         const WeightChoice choice = ChooseWeight(item, typed.requirement, typed.value, typed.weightBefore);
         if (choice.kind == WeightChoice::Kind::Pick || choice.kind == WeightChoice::Kind::Unreachable)
         {
@@ -194,8 +199,9 @@ void CMuItemRequirementsUI::RenderWeightedRequirement(ItemDefinition& item, Item
                                                       const char* label, WORD& weight, bool byLevel)
 {
     const int itemType = Data::Items::MakeItemType(item.group, item.number);
-    const bool typing = m_typed && m_typed->itemType == itemType && m_typed->requirement == requirement;
-    const int zeroValue = typing ? m_typed->value : ComputeZeroValue(item, requirement);
+    std::optional<TypedZeroValue>& typedValue = m_typed[static_cast<size_t>(requirement)];
+    const bool typing = typedValue && typedValue->itemType == itemType;
+    const int zeroValue = typing ? typedValue->value : ComputeZeroValue(item, requirement);
 
     // A requirement given by level does not use its weight.
     ImGui::BeginDisabled(byLevel);
@@ -204,42 +210,49 @@ void CMuItemRequirementsUI::RenderWeightedRequirement(ItemDefinition& item, Item
     const bool edited = ImGui::InputScalar(label, ImGuiDataType_U16, &shown);
     if (ImGui::IsItemActivated())
     {
-        m_typed = TypedZeroValue{itemType, requirement, zeroValue, weight, label};
+        typedValue = TypedZeroValue{itemType, requirement, zeroValue, weight, label};
     }
-    if (edited && m_typed)
+    if (edited && typedValue && typedValue->itemType == itemType)
     {
         // The weight follows the typed value, so the tables follow too; a value
         // no weight gives keeps the weight.
-        m_typed->value = shown;
-        const WeightChoice choice = ChooseWeight(item, requirement, shown, m_typed->weightBefore);
-        weight =
-            static_cast<WORD>(choice.kind == WeightChoice::Kind::Unreachable ? m_typed->weightBefore : choice.weight);
+        typedValue->value = shown;
+        const WeightChoice choice = ChooseWeight(item, requirement, shown, typedValue->weightBefore);
+        weight = static_cast<WORD>(choice.kind == WeightChoice::Kind::Unreachable ? typedValue->weightBefore
+                                                                                  : choice.weight);
     }
     if (ImGui::IsItemHovered())
     {
         ImGui::SetTooltip("%s", I18N::Editor::WhatANormalItemNeedsAt0);
     }
-    if (ImGui::IsItemDeactivatedAfterEdit() && m_typed)
+    if (ImGui::IsItemDeactivatedAfterEdit() && typedValue && typedValue->itemType == itemType)
     {
         // Several weights give it, or none: the list asks which, and nothing is
         // stored until one is taken.
-        const WeightChoice choice = ChooseWeight(item, requirement, m_typed->value, m_typed->weightBefore);
+        const WeightChoice choice = ChooseWeight(item, requirement, typedValue->value, typedValue->weightBefore);
         if (choice.kind == WeightChoice::Kind::Pick || choice.kind == WeightChoice::Kind::Unreachable)
         {
             m_draft.Discard();
-            m_weightPopup.Open(itemType, requirement, label, m_typed->value);
+            m_weightPopup.Open(itemType, requirement, label, typedValue->value);
+            // A field activated by navigation (ActivateItemByID, the keyboard
+            // focus API) while this one was active became active a frame
+            // before this one was reported left, with the weight dropped just
+            // now in its text, and would store it when let go. A mouse click
+            // lets go of this field in the click frame, before the fields
+            // below are drawn. The list takes the keyboard anyway.
+            ImGui::ClearActiveID();
         }
     }
     m_draft.AfterField(label);
     // The value the weights below are for: the typed one, also on the frame
     // the field is left.
-    const bool typed = m_typed && m_typed->itemType == itemType && m_typed->requirement == requirement;
-    const int target = typed ? m_typed->value : zeroValue;
+    const bool typed = typedValue && typedValue->itemType == itemType;
+    const int target = typed ? typedValue->value : zeroValue;
     // Also a typed value whose field was let go without being left (its
     // window hidden): it ends with the field.
     if (typed && !ImGui::IsItemActive())
     {
-        m_typed.reset();
+        typedValue.reset();
     }
 
     ImGui::SameLine();

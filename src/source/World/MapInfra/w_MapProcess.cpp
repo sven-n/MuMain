@@ -146,6 +146,7 @@ BaseMap& MapProcess::FindBaseMap(ENUM_WORLD type)
     throw;
 }
 
+// cppcheck-suppress unknownMacro ; Smart_Ptr is the std::shared_ptr macro of _define.h
 void MapProcess::Register(Smart_Ptr(BaseMap) pMap)
 {
     ENUM_WORLD type = pMap->FindMapIndex();

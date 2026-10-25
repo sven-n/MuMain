@@ -17,6 +17,8 @@
 #include <cstring>
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "../MuEditor/UI/ItemTools/ItemToolWindow.h"
+#include "MuEditorToolWindows.h"
+#include "ToolGroups.h"
 #include "UndoTarget.h"
 
 // Layout of the Open Editor strip over the game while the editor is closed. The
@@ -214,21 +216,9 @@ void CMuEditorUI::RenderWindowsMenu(MuEditor::ToolWindows& windows, SDL_Window* 
     {
         return;
     }
-    // The item tools, which share one selected item.
-    if (ImGui::BeginMenu(I18N::Editor::Items))
-    {
-        ImGui::MenuItem(I18N::Editor::ItemBrowser, nullptr, &windows.itemBrowser);
-        ImGui::MenuItem(I18N::Editor::ItemBasics, nullptr, &windows.itemBasics);
-        ImGui::MenuItem(I18N::Editor::ItemRequirements, nullptr, &windows.itemRequirements);
-        ImGui::MenuItem(I18N::Editor::ItemRules, nullptr, &windows.itemRules);
-        ImGui::MenuItem(I18N::Editor::ItemCategories, nullptr, &windows.itemCategories);
-        ImGui::MenuItem(I18N::Editor::ItemModel, nullptr, &windows.itemModel);
-        ImGui::MenuItem(I18N::Editor::GlowColors, nullptr, &windows.itemGlowColors);
-        ImGui::MenuItem(I18N::Editor::ItemFormulas, nullptr, &windows.itemFormulas);
-        ImGui::MenuItem(I18N::Editor::ItemChecks, nullptr, &windows.itemChecks);
-        ImGui::MenuItem(I18N::Editor::ItemTranslations, nullptr, &windows.itemTranslations);
-        ImGui::EndMenu();
-    }
+    // The item tools, which share one selected item, and the monster tools.
+    RenderToolGroupMenu(MuEditor::GetItemTools(), windows);
+    RenderToolGroupMenu(MuEditor::GetMonsterTools(), windows);
     ImGui::MenuItem(I18N::Editor::ServerList, nullptr, &windows.serverList);
     ImGui::MenuItem("Skill Editor", nullptr, &windows.skillEditor);
     ImGui::MenuItem("Dev Editor", nullptr, &windows.devEditor);
@@ -245,6 +235,20 @@ void CMuEditorUI::RenderWindowsMenu(MuEditor::ToolWindows& windows, SDL_Window* 
     if (ImGui::MenuItem("Fullscreen", "F11", MuEditor::PlatformWindows::IsFullscreen(osWindow), osWindow != nullptr))
     {
         MuEditor::PlatformWindows::ToggleFullscreen(osWindow);
+    }
+    ImGui::EndMenu();
+}
+
+void CMuEditorUI::RenderToolGroupMenu(const MuEditor::ToolGroup& group, MuEditor::ToolWindows& windows)
+{
+    if (!ImGui::BeginMenu(*group.menuTitle))
+    {
+        return;
+    }
+    ImGui::MenuItem(*group.browser.label, nullptr, &(windows.*(group.browser.open)));
+    for (const MuEditor::ToolWindowEntry& tool : group.tools)
+    {
+        ImGui::MenuItem(*tool.label, nullptr, &(windows.*(tool.open)));
     }
     ImGui::EndMenu();
 }
