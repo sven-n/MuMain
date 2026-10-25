@@ -8,6 +8,10 @@ theme ships the result instead, drawn unscaled:
   Message_box2_230.ozj  the same stretched to 230: the in-game message box's edges.
   Message_box1_60x5.ozj Message_box1 (213x40) stretched to 60 and stacked 5 times: the Season 2
                         Chaos Goblin menu's stone (213x300).
+  Message_box1_440x300.ozj  Message_box1 widened to 440 for the settings window: its 5-texel sides
+                        kept at their width, the stone between them stretched in proportion, in
+                        rows down to 300.
+  Message_box2_440.ozj  Message_box2 widened to 440 the same way: the settings window's edges.
   s1/DuelWindow_add.ozt Season 1's duel crest (a JPEG on black), which Season 1 drew additively:
                         as a TGA whose alpha is each texel's brightest channel and colour that
                         channel scaled back up, so plain alpha blending lands close to the
@@ -68,6 +72,26 @@ def additive_to_alpha(image):
     return out
 
 
+def widen_box_part(part, width, height):
+    """Widens a 0.97 box part (213 wide, 5-texel sides) to width without widening its sides: the
+    sides keep their width and the middle stretches, both scaled in height by the middle's factor,
+    and the result stacked in rows down to height."""
+    side = 5
+    middle = part.crop((side, 0, part.width - side, part.height))
+    row_height = round(part.height * (width - 2 * side) / middle.width)
+    row = Image.new("RGB", (width, row_height))
+    row.paste(part.crop((0, 0, side, part.height)).resize((side, row_height), Image.BILINEAR), (0, 0))
+    row.paste(middle.resize((width - 2 * side, row_height), Image.BILINEAR), (side, 0))
+    row.paste(part.crop((part.width - side, 0, part.width, part.height)).resize((side, row_height), Image.BILINEAR),
+              (width - side, 0))
+    if height == part.height:
+        return row.resize((width, height), Image.BILINEAR)
+    out = Image.new("RGB", (width, height))
+    for y in range(0, height, row_height):
+        out.paste(row, (0, y))
+    return out
+
+
 def main():
     prefix, side = read_ozj("Nis_vframe.ozj")
     tall = Image.new("RGB", (side.width, side.height * 12))
@@ -85,6 +109,10 @@ def main():
     for i in range(5):
         stack.paste(strip, (0, i * strip.height))
     write_ozj("Message_box1_60x5.ozj", prefix, stack)
+
+    write_ozj("Message_box1_440x300.ozj", prefix, widen_box_part(stone, 440, 300))
+    prefix, edge = read_ozj("Message_box2.ozj")
+    write_ozj("Message_box2_440.ozj", prefix, widen_box_part(edge, 440, edge.height))
 
     _, crest = read_ozj("s1/DuelWindow.OZJ")
     write_ozt_rgba("s1/DuelWindow_add.ozt", additive_to_alpha(crest))

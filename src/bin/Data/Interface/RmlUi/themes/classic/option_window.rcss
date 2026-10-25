@@ -509,8 +509,8 @@
 
 /* ---- Classic (0.97) parts ------------------------------------------------------------------- */
 
-@spritesheet classic-opt-stone-sheet { src: ../../../Classic/Message_box1.jpg; classic-opt-stone: 0px 0px 213px 40px; }
-@spritesheet classic-opt-edge-sheet  { src: ../../../Classic/Message_box2.jpg; classic-opt-edge: 0px 0px 213px 5px; }
+@spritesheet classic-opt-stone-sheet { src: ../../../Classic/Message_box1_440x300.jpg; classic-opt-stone: 0px 0px 440px 300px; }
+@spritesheet classic-opt-edge-sheet  { src: ../../../Classic/Message_box2_440.jpg;     classic-opt-edge: 0px 0px 440px 5px; }
 @spritesheet classic-opt-plate-sheet { src: ../../../Classic/Message_box.jpg;  classic-opt-plate: 0px 0px 213px 64px; }
 @spritesheet classic-opt-check-sheet { src: "../../../win_check.tga";           classic-opt-check: 0px 0px 5px 5px; }
 @spritesheet classic-opt-scroll-sheet
@@ -529,19 +529,20 @@
 	top: 34dp;
 }
 
-/* The box, in place of legacy's message box caps: 0.97 stacks the stone (213x40) in rows between
-   two edge strips. This build cannot repeat an image, so two layers hold three rows each, the stone
-   kept in proportion (contain: 440 wide makes a row 82.6 high), one layer from the top and one from
-   the bottom; together they cover the 300 between the edges, and overlap on a capped window. */
-.window-shell-sprite-back,
-.window-shell-sprite-middle {
+/* The box, in place of legacy's message box caps: 0.97's dialog stone (Message_box1, 213x40) in
+   rows between two edge strips (Message_box2, 213x5). Stretched to this 440 width, their 5-texel
+   sides blurred into wide bands, so both come widened ahead of time
+   (tools/classic_theme/make_classic_derived_textures.py): the sides keep their width and only the
+   stone between them stretches, in proportion, in rows down to the 300 between the edges. */
+.window-shell-sprite-back {
 	left: 0;
 	right: 0;
-	height: 247.9dp;
-	decorator: image(classic-opt-stone contain left top), image(classic-opt-stone contain left center), image(classic-opt-stone contain left bottom);
+	top: 5dp;
+	bottom: 5dp;
+	height: auto;
+	decorator: image(classic-opt-stone fill);
 }
-.window-shell-sprite-back { top: 5dp; bottom: auto; }
-.window-shell-sprite-middle { top: auto; bottom: 5dp; }
+.window-shell-sprite-middle { decorator: none; }
 .window-shell-sprite-top { left: 0; right: 0; top: 0; height: 5dp; decorator: image(classic-opt-edge fill); }
 .window-shell-sprite-bottom { left: 0; right: 0; bottom: 0; height: 5dp; decorator: image(classic-opt-edge fill); }
 
