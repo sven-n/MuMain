@@ -2776,7 +2776,8 @@
       "animations": {"stop1": 0.6, "stop2": 0.6, "walk": 0.8, "attack1": 0.96, "attack2": 0.96, "shock": 1, "die": 0.3},
       "sounds": [
         {"file": "Data/Sound/w69w70w71w72/GaionKalein_move.wav", "id": "SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE", "channels": 4, "spatial": false},
-        {"file": "Data/Sound/w69w70w71w72/GrandWizard_death.wav", "id": "SOUND_EMPIREGUARDIAN_GRANDWIZARD_DEATH", "channels": 4, "spatial": false}
+        {"file": "Data/Sound/w69w70w71w72/GrandWizard_death.wav", "id": "SOUND_EMPIREGUARDIAN_GRANDWIZARD_DEATH", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w42/firepillar.wav", "id": "SOUND_3RD_CHANGE_UP_BG_FIREPILLAR", "channels": 1, "spatial": false}
       ],
       "soundEvents": [
         {"animations": ["walk"], "sounds": ["SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE"]},
