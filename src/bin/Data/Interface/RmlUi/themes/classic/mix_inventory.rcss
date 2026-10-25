@@ -1,6 +1,6 @@
 /* Classic (0.97) Chaos Machine (CMixInventory), from the 0.97 client's 004f27f0: Item_Back01 over Item_Back02 and the Mix
-   button 0.97 drew -- mix_button1 (44x32, mix_button2 while pressed) at (75, 300), where the
-   0.97 window's warning lines end. MuMain's recipe texts keep their S6 places, which are 0.97's
+   button 0.97 drew -- mix_button1 (44x32, mix_button2 while pressed), lowered from 0.97's (75, 300)
+   to legacy's y 380 (see .mix-btn). MuMain's recipe texts keep their S6 places, which are 0.97's
    in the main: success rate and zen from y 49, the 8x4 grid at (15, 110), the lists from 203.
    The rest is legacy's. */
 
@@ -140,10 +140,13 @@
    `m_Pos.y + 380`. */
 @spritesheet mix-classic-btn1-sheet { src: ../../../Classic/Mix_button1.jpg; mix-classic-btn: 0px 0px 44px 32px; }
 @spritesheet mix-classic-btn2-sheet { src: ../../../Classic/Mix_button2.jpg; mix-classic-btn-pressed: 0px 0px 44px 32px; }
+/* 0.97 drew it at (75, 300), where its short texts ended; MuMain's lists (from 203, up to about
+   nine 15-unit lines) and descriptions (to 367) run past that, so it sits at legacy's y 380, under
+   them, keeping 0.97's x (the Close at (25, 395) is left of it). */
 .mix-btn {
 	position: absolute;
 	left: 75px;
-	top: 300px;
+	top: 380px;
 	width: 44px;
 	height: 32px;
 	cursor: pointer;
