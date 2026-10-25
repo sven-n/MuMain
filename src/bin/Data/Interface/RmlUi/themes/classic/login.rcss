@@ -114,5 +114,47 @@ body {
 	decorator: image(classic-login-exit-hover);
 }
 
-/* The S6 "remember me" / "save password" options: the 0.97 box has neither. */
-#classic_box .checkbox-row { display: none; }
+/* The "remember me" / "save password" options, which neither 0.97 nor Season 1 (the same box) has:
+   on the two blank plates of the box's second row (x 52 and 129, y 118, 69x19), each with the
+   classic social windows' check box (a 7x7 box, win_check's mark). */
+@spritesheet classic-login-check-sheet { src: ../../../win_check.tga; classic-login-check: 0px 0px 5px 5px; }
+
+#classic_box .checkbox-row {
+	position: absolute;
+	top: calc(118 * var(--px));
+	width: calc(69 * var(--px));
+	height: calc(19 * var(--px));
+	line-height: calc(19 * var(--px));
+	text-align: center;
+	white-space: nowrap;
+	cursor: pointer;
+	pointer-events: auto;
+}
+#classic_box .checkbox-remember-me   { left: calc(52 * var(--px)); }
+#classic_box .checkbox-save-password { left: calc(129 * var(--px)); }
+#classic_box .checkbox-box {
+	display: inline-block;
+	width: calc(7 * var(--px));
+	height: calc(7 * var(--px));
+	margin-right: calc(3 * var(--px));
+	vertical-align: middle;
+	box-sizing: border-box;
+	background-color: rgb(106, 97, 88);
+	border: 1px rgb(146, 134, 121);
+	decorator: none;
+}
+#classic_box .checkbox-box.checked { decorator: image(classic-login-check); }
+/* The labels are sized with the box, not at the native text size, which would run past the plate
+   at most sizes (the plate shrinks with the screen faster than the native text does). They break
+   into two lines at their space ("Remember / Password", German's "Benutzernamen / merken", the
+   longest word), beside the check box. */
+#classic_box .checkbox-label {
+	position: static;
+	display: inline-block;
+	max-width: calc(54 * var(--px));
+	vertical-align: middle;
+	white-space: normal;
+	text-align: left;
+	font-size: calc(6.5 * var(--px));
+	line-height: calc(7.5 * var(--px));
+}
