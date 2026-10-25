@@ -24,6 +24,14 @@ std::optional<float> GetImpactFrame(int slot, int animation);
 // next one in code.
 std::optional<int> GetNextAnimation(int slot, int animation);
 
+// The frame the game blends a model's pose from at `frame` (BMD::Animation
+// blends from the prior frame to the frame): BMD::PlayAnimation keeps the key
+// it left as the prior frame, so frame 3.5 shows key 2 halfway to key 3 and
+// the model moves between its keys. In the first key it blends from the last
+// of the `playedFrames` keys of an animation that starts again, and not at
+// all in one that holds its last frame (it starts there).
+float GetPriorFrame(float frame, int playedFrames, bool holdsLastFrame);
+
 // Whether the model is one of the monster range, whose code is that of
 // monsters (die with a blood pool, the next animation, the impact frame, a
 // release at a map change).

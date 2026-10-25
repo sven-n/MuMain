@@ -27,14 +27,15 @@ public:
     // animation, with the plane under it.
     Effects::PreviewFraming Frame(int slot);
 
-    // Draws the slot's model at `frame` of `animation`, turned by
+    // Draws the slot's model at `frame` of `animation`, blended from
+    // `priorFrame` as the game blends (BMD::Animation), turned by
     // `turnDegrees`, as `camera` sees it at the aspect width / height of the
     // view. Leaves the game's render state as it was.
-    void Draw(int slot, int animation, float frame, float turnDegrees, const Effects::EffectPreviewCamera& camera,
-              float aspect);
+    void Draw(int slot, int animation, float frame, float priorFrame, float turnDegrees,
+              const Effects::EffectPreviewCamera& camera, float aspect);
 
 private:
-    void SetUp(int slot, int animation, float frame, float turnDegrees);
+    void SetUp(int slot, int animation, float frame, float priorFrame, float turnDegrees);
 
     std::unique_ptr<OBJECT> m_object;
 };

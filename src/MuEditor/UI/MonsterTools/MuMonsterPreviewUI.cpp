@@ -170,7 +170,7 @@ void MuMonsterPreviewUI::RenderPreview(int slot)
     {
         Advance(slot, *values);
     }
-    RenderView(slot);
+    RenderView(slot, *values);
 }
 
 void MuMonsterPreviewUI::RenderControls(int slot, const MonsterModelDefinition& values)
@@ -319,7 +319,7 @@ void MuMonsterPreviewUI::Restart(int slot)
     }
 }
 
-void MuMonsterPreviewUI::RenderView(int slot)
+void MuMonsterPreviewUI::RenderView(int slot, const MonsterModelDefinition& values)
 {
     const float width = ImGui::GetContentRegionAvail().x;
     if (width < 1.0f)
@@ -363,7 +363,9 @@ void MuMonsterPreviewUI::RenderView(int slot)
             return;
         }
         const MuEditor::ScopedOffscreenCapture endCapture;
-        m_scene.Draw(slot, m_animation, m_frame, m_turnDegrees, m_camera, width / height);
+        const float priorFrame = AnimationFacts::GetPriorFrame(m_frame, PlayedFrames(Models[slot].Actions[m_animation]),
+                                                               ModelValues::HoldsLastFrame(values, slot, m_animation));
+        m_scene.Draw(slot, m_animation, m_frame, priorFrame, m_turnDegrees, m_camera, width / height);
     }
     else
     {

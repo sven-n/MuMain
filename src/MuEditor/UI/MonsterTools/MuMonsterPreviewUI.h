@@ -37,7 +37,7 @@ private:
     void RenderPreview(int slot);
     void RenderControls(int slot, const Data::Monsters::MonsterModelDefinition& values);
     void RenderFrameSlider(int slot, int keys);
-    void RenderView(int slot);
+    void RenderView(int slot, const Data::Monsters::MonsterModelDefinition& values);
     void Advance(int slot, const Data::Monsters::MonsterModelDefinition& values);
     void Restart(int slot);
     float SpeedFactor(int slot) const;

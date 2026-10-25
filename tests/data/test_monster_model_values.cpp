@@ -64,6 +64,13 @@ TEST_CASE("Monster model values: the held last frames list none while they are t
 TEST_CASE("Monster animation facts: the impact frame and the next animation are the monster range's [editor][monsters]")
 {
     CHECK(AnimationFacts::GetImpactFrame(MODEL_HOUND, MONSTER01_ATTACK1) == 5.0f);
+    // The pose blends from the key before (BMD::PlayAnimation keeps it), in
+    // the first key from the last one of a looping animation.
+    CHECK(AnimationFacts::GetPriorFrame(3.5f, 10, false) == 2.0f);
+    CHECK(AnimationFacts::GetPriorFrame(1.0f, 10, false) == 0.0f);
+    CHECK(AnimationFacts::GetPriorFrame(0.5f, 10, false) == 9.0f);
+    CHECK(AnimationFacts::GetPriorFrame(0.5f, 10, true) == 0.0f);
+    CHECK(AnimationFacts::GetPriorFrame(9.99f, 10, true) == 8.0f);
     CHECK(AnimationFacts::GetImpactFrame(MODEL_HOUND, MONSTER01_ATTACK2) == 5.0f);
     CHECK_FALSE(AnimationFacts::GetImpactFrame(MODEL_HOUND, MONSTER01_ATTACK3));
     CHECK_FALSE(AnimationFacts::GetImpactFrame(MODEL_SMITH, MONSTER01_ATTACK1));

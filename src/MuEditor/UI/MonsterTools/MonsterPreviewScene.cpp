@@ -56,7 +56,7 @@ MonsterPreviewScene::~MonsterPreviewScene() = default;
 
 // As CreateCharacter sets up a character's object, at the origin and
 // without the terrain's light.
-void MonsterPreviewScene::SetUp(int slot, int animation, float frame, float turnDegrees)
+void MonsterPreviewScene::SetUp(int slot, int animation, float frame, float priorFrame, float turnDegrees)
 {
     OBJECT& o = *m_object;
     o.Initialize();
@@ -75,7 +75,7 @@ void MonsterPreviewScene::SetUp(int slot, int animation, float frame, float turn
     o.CurrentAction = static_cast<unsigned short>(animation);
     o.PriorAction = static_cast<unsigned short>(animation);
     o.AnimationFrame = frame;
-    o.PriorAnimationFrame = frame;
+    o.PriorAnimationFrame = priorFrame;
     Vector(1.0f, 1.0f, 1.0f, o.Light);
     Vector(0.0f, 0.0f, turnDegrees, o.Angle);
     Vector(0.0f, 0.0f, 0.0f, o.HeadAngle);
@@ -88,7 +88,7 @@ PreviewFraming MonsterPreviewScene::Frame(int slot)
     PreviewVector max = {UnmeasuredHalfSize, UnmeasuredHalfSize, 2.0f * UnmeasuredHalfSize};
     if (IsDrawable(slot))
     {
-        SetUp(slot, 0, 0.0f, 0.0f);
+        SetUp(slot, 0, 0.0f, 0.0f, 0.0f);
         PreviewVector measuredMin{};
         PreviewVector measuredMax{};
         if (Effects::MeasureModel(*m_object, measuredMin, measuredMax))
@@ -103,7 +103,7 @@ PreviewFraming MonsterPreviewScene::Frame(int slot)
     return {center, std::max(RadiusOf(min, max), MinFramingRadius)};
 }
 
-void MonsterPreviewScene::Draw(int slot, int animation, float frame, float turnDegrees,
+void MonsterPreviewScene::Draw(int slot, int animation, float frame, float priorFrame, float turnDegrees,
                                const Effects::EffectPreviewCamera& camera, float aspect)
 {
     const Effects::SavedGameRenderState savedState;
@@ -131,7 +131,7 @@ void MonsterPreviewScene::Draw(int slot, int animation, float frame, float turnD
     {
         BMD& b = Models[slot];
         const Effects::ScopedModelState saved(b);
-        SetUp(slot, animation, frame, turnDegrees);
+        SetUp(slot, animation, frame, priorFrame, turnDegrees);
         OBJECT& o = *m_object;
         Effects::PoseLikeRenderObject(o, b);
         b.Transform(BoneTransform, o.BoundingBoxMin, o.BoundingBoxMax, &o.OBB, false);

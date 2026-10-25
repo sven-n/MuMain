@@ -10,6 +10,7 @@
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "I18N/All.h"
 
+#include <algorithm>
 #include <cstdio>
 #include <string>
 
@@ -23,6 +24,16 @@ constexpr float TransformedAttackFactor = 1.5f;
 constexpr float IllusionOfKundunDieFactor = 4.0f;
 constexpr float ErohimDieFactor = 0.5f;
 } // namespace
+
+float GetPriorFrame(float frame, int playedFrames, bool holdsLastFrame)
+{
+    const int key = static_cast<int>(frame);
+    if (key > 0)
+    {
+        return static_cast<float>(key - 1);
+    }
+    return holdsLastFrame ? 0.0f : static_cast<float>(std::max(playedFrames - 1, 0));
+}
 
 bool IsMonsterRange(int slot)
 {
