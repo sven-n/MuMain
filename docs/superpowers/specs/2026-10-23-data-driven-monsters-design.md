@@ -863,7 +863,7 @@ model entries.
 | MN6 | OpenMU sync, client side | MN1, MN2, items 7 | Exchange of number and names (D53); the read-only kind, window and skill data for the checks; the skill check against `attacks`. |
 | MN-B | OpenMU sync, server side | MN6 (file format) | OpenMU: monsters in the exchange pages of items phase B, with the event monster skills collected from settings and code. |
 | MN7 | Sounds per animation | MN3 | The global and the 7 map `PlayMonsterSound` hooks (with the 500-unit cut-off), the trap sounds of `SetPlayerAttack` and the per-map sound loads become sound events of the models. Monster recorder, sound part. |
-| MN8 | Looks | MN4, items 13, FX1 | Glow, render styles, per-frame visuals, attack effects (with a skill-number condition), the trap effects of `SetPlayerAttack`, death debris, the no-shadow lists of `RenderCharacter`, cloth (Magic Skeleton, the Crust family, the Death King robe, Dark Phoenix hair; items kept cloth in code, so the look format needs a cloth block or cloth stays a hook), `RenderLinkObject`'s monster check, and the item render styles only monsters use (`helperNpcPlate`, `monsterBattleBow`) move to the monsters' looks. Look recorder of items phase 13. P10, P19. |
+| MN8 | Looks | MN4, items 13, FX1 | Glow, render styles, per-frame visuals, attack effects (with a skill-number condition), the trap effects of `SetPlayerAttack`, death debris, the no-shadow lists of `RenderCharacter`, cloth (Magic Skeleton, the Crust family, the Death King robe, Dark Phoenix hair; items kept cloth in code, so the look format needs a cloth block or cloth stays a hook), `RenderLinkObject`'s monster check, and the item render styles only monsters use (`helperNpcPlate`, `monsterBattleBow`) move to the monsters' looks. The sounds those per-frame visuals play (about 200 `PlayBuffer` calls in 12 files: Aida, Crywolf, Kanturu 1st to 3rd, the Hunting Ground, the Balgass barracks, Illusion Temple, the events, Empire Guardian, Hellas, Raklion) and their maps' loads of them move into the models' sound events then, with two more kinds of event: once when an animation starts (the `SubType` flag they use) and a chance every frame while it plays (Q-MN34). Look recorder of items phase 13. P10, P19. |
 | MN9 | Cleanup | all MN phases | What later areas still need moves to the roadmap; then remove this document. |
 
 MN1 is first because every later phase adds fields to its monster entries, and
@@ -1002,6 +1002,7 @@ groups:
 | Q-MN31 | P21: the Dark Ghost's fire pillar sound is loaded only on the Balgass maps. Fix? *(2026-10-25)* | Yes: its model loads it. |
 | Q-MN32 | P22: 13 more models play sounds only another model loads. Fix the same way? *(2026-10-25)* | Yes: each model lists the sounds its events play. |
 | Q-MN33 | Monsters miss their weapons and player-shaped monsters their whole look in Monster Preview, because the equipment is still code (MN4). When? *(2026-10-25)* | In PR 3 (MN4), not before. Monster Preview gets a **Show equipment** checkbox, and the equipment gets a tab of its own, **Monster Equipment**. |
+| Q-MN34 | Monsters 340 to 417 and others show no sounds in Monster Model: their maps' per-frame visual code plays them (about 200 calls in 12 files), not `PlayMonsterSound`. Move them in PR 2 (an MN7b step) or later? *(2026-10-26)* | Later, in MN8 with the per-frame visuals. |
 
 ## Open questions
 

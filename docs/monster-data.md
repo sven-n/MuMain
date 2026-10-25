@@ -261,6 +261,13 @@ already loaded from the same file, with the same channels and 3D setting,
 is not loaded again, so models that share a sound list it alike (a test
 checks both).
 
+Not all monster sounds are data yet: the monsters of Aida, Crywolf, Kanturu,
+the Hunting Ground, the Balgass barracks, Illusion Temple and a few others
+(among them 340 to 365, 386 to 403 and 409 to 412) play their sounds from
+their map's per-frame drawing code, and their maps load them; Monster Model
+shows no sounds for their models. They move into sound events with the
+monsters' looks (design, MN8).
+
 ### What the code adds
 
 On top of the model list the code does (the Monster Model and Monster
