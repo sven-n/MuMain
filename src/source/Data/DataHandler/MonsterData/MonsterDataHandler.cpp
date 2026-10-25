@@ -5,8 +5,10 @@
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Data/DataHandler/DataIssueReport.h"
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
+#include "Data/DataHandler/MonsterData/MonsterModelJsonStorage.h"
 #include "Data/GameData/MonsterData/MonsterDataValidation.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "I18N/All.h"
 
 #include <chrono>
@@ -17,6 +19,8 @@ namespace
 {
 constexpr std::string_view MonsterDataLabel = "Monster data";
 constexpr std::string_view MonsterDataName = "monster data";
+constexpr std::string_view MonsterModelsLabel = "Monster models";
+constexpr std::string_view MonsterModelsName = "monster model list";
 
 #ifdef _EDITOR
 // The entries of the table, sorted by number.
@@ -67,6 +71,24 @@ bool MonsterDataHandler::Load(std::string& errorMessage)
     const std::chrono::duration<double, std::milli> elapsed = std::chrono::steady_clock::now() - loadStart;
     MU_LOG_INFO(mu::log::Get("data"), "Loaded {} monsters from {} in {:.1f} ms", result.monsters.size(),
                 GetMonstersFile().generic_string(), elapsed.count());
+    return true;
+}
+
+bool MonsterDataHandler::LoadModels(std::string& errorMessage)
+{
+    const auto loadStart = std::chrono::steady_clock::now();
+    const MonsterModelsLoadResult result = LoadMonsterModelsFile(GetMonsterModelsFile());
+    LogDataIssues(MonsterModelsLabel, result.issues);
+    if (Items::HasErrors(result.issues))
+    {
+        errorMessage = DescribeDataErrors(MonsterModelsName, GetMonsterModelsFile(), result.issues);
+        return false;
+    }
+
+    g_MonsterModelDatabase.Build(result.models);
+    const std::chrono::duration<double, std::milli> elapsed = std::chrono::steady_clock::now() - loadStart;
+    MU_LOG_INFO(mu::log::Get("data"), "Loaded {} monster models from {} in {:.1f} ms", result.models.size(),
+                GetMonsterModelsFile().generic_string(), elapsed.count());
     return true;
 }
 

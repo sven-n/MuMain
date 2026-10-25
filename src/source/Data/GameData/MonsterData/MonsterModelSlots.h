@@ -21,4 +21,9 @@ bool IsNpcRangeSlot(int slot);
 
 // The name of a monster model type for logs; "UNKNOWN" outside the types.
 std::string_view GetMonsterModelTypeName(int type);
+
+// The fixed bitmap slots that monster models load bitmaps into, which their
+// drawing code uses: "BITMAP_MONSTER_SKIN", "BITMAP_MONSTER_SKIN+1",
+// "BITMAP_ROBE+3", "BITMAP_ROBE+5". nullopt for other texts.
+std::optional<int> FindMonsterModelBitmapSlot(std::string_view symbol);
 } // namespace Data::Monsters

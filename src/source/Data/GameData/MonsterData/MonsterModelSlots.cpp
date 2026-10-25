@@ -2,6 +2,7 @@
 
 #include "MonsterModelSlots.h"
 
+#include "Core/Globals/_TextureIndex.h"
 #include "Core/Globals/_enum.h"
 
 #include <array>
@@ -370,6 +371,13 @@ constexpr bool IsDense(std::span<const SlotSymbol> symbols, int first)
     return true;
 }
 
+constexpr SlotSymbol BitmapSlots[] = {
+    {"BITMAP_MONSTER_SKIN", BITMAP_MONSTER_SKIN},
+    {"BITMAP_MONSTER_SKIN+1", BITMAP_MONSTER_SKIN + 1},
+    {"BITMAP_ROBE+3", BITMAP_ROBE + 3},
+    {"BITMAP_ROBE+5", BITMAP_ROBE + 5},
+};
+
 static_assert(std::size(MonsterModelTypes) == MONSTER_MODEL_COUNT, "a monster model type without a name");
 static_assert(IsDense(MonsterModelTypes, 0), "the monster model types are out of order");
 static_assert(std::size(NpcSlots) == MODEL_NPC_END - MODEL_NPC_BEGIN - 1, "an NPC slot without a name");
@@ -415,5 +423,15 @@ std::string_view GetMonsterModelTypeName(int type)
     if (type < 0 || type >= MONSTER_MODEL_COUNT)
         return "UNKNOWN";
     return MonsterModelTypes[type].symbol;
+}
+
+std::optional<int> FindMonsterModelBitmapSlot(std::string_view symbol)
+{
+    for (const SlotSymbol& slot : BitmapSlots)
+    {
+        if (slot.symbol == symbol)
+            return slot.value;
+    }
+    return std::nullopt;
 }
 } // namespace Data::Monsters

@@ -43,6 +43,12 @@ public:
     // `errorMessage` describes them; the game must not start then.
     bool Load(std::string& errorMessage);
 
+    // Reads the model list (Data/Monsters/Models.json) into the model table
+    // (g_MonsterModelDatabase), after the effect catalogue, whose effect
+    // types it names. Like Load, it logs the problems; on errors the table
+    // stays as it was and `errorMessage` describes them.
+    bool LoadModels(std::string& errorMessage);
+
     void SetNamesChangedCallback(NamesChangedCallback callback)
     {
         m_namesChanged = callback;
