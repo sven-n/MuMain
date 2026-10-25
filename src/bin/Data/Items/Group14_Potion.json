@@ -481,19 +481,7 @@
       },
       "description": [
         {
-          "text": {
-            "en": "It is used to combine items for a Devil Square Invitation",
-            "de": "Wird verwendet, um Gegenstände zu einer Einladung für Devil Square zu kombinieren",
-            "es": "Se utiliza para combinar elementos para una invitación de Devil Square.",
-            "id": "Ini digunakan untuk menggabungkan item untuk Undangan Kotak Setan",
-            "ja": "合成すると悪魔の招待状を入手できます",
-            "pl": "Służy do łączenia przedmiotów w Zaproszenie na Devil Square",
-            "pt": "É usado para combinar itens para um convite Devil Square",
-            "ru": "Используется для объединения предметов для приглашения на площадь Дьявола.",
-            "tl": "Ito ay ginagamit upang pagsamahin ang mga item para sa isang Devil Square Invitation",
-            "uk": "Він використовується для комбінування предметів для запрошення Devil Square",
-            "zh-TW": "它用於組合惡魔廣場邀請函的項目"
-          }
+          "text": "@devilSquareInvitationIngredient"
         }
       ],
       "width": 1,
@@ -511,19 +499,7 @@
       },
       "description": [
         {
-          "text": {
-            "en": "It is used to combine items for a Devil Square Invitation",
-            "de": "Wird verwendet, um Gegenstände zu einer Einladung für Devil Square zu kombinieren",
-            "es": "Se utiliza para combinar elementos para una invitación de Devil Square.",
-            "id": "Ini digunakan untuk menggabungkan item untuk Undangan Kotak Setan",
-            "ja": "合成すると悪魔の招待状を入手できます",
-            "pl": "Służy do łączenia przedmiotów w Zaproszenie na Devil Square",
-            "pt": "É usado para combinar itens para um convite Devil Square",
-            "ru": "Используется для объединения предметов для приглашения на площадь Дьявола.",
-            "tl": "Ito ay ginagamit upang pagsamahin ang mga item para sa isang Devil Square Invitation",
-            "uk": "Він використовується для комбінування предметів для запрошення Devil Square",
-            "zh-TW": "它用於組合惡魔廣場邀請函的項目"
-          }
+          "text": "@devilSquareInvitationIngredient"
         }
       ],
       "width": 1,
@@ -541,34 +517,10 @@
       },
       "description": [
         {
-          "text": {
-            "en": "The remaining time is shown",
-            "de": "Die verbleibende Zeit wird angezeigt",
-            "es": "Se muestra el tiempo restante",
-            "id": "Waktu yang tersisa ditampilkan",
-            "ja": "マウスボタンを右クリックすれば",
-            "pl": "Wyświetlany jest pozostały czas",
-            "pt": "O tempo restante é mostrado",
-            "ru": "Оставшееся время показано",
-            "tl": "Ang natitirang oras ay ipinapakita",
-            "uk": "Показано час, що залишився",
-            "zh-TW": "顯示剩餘時間"
-          }
+          "text": "@remainingTimeShown"
         },
         {
-          "text": {
-            "en": "when you right click on your mouse.",
-            "de": "wenn Sie mit der rechten Maustaste klicken.",
-            "es": "cuando haces clic derecho en tu mouse.",
-            "id": "ketika Anda mengklik kanan pada mouse Anda.",
-            "ja": "残った時間を見ることができます。",
-            "pl": "po kliknięciu prawym przyciskiem myszy.",
-            "pt": "quando você clica com o botão direito do mouse.",
-            "ru": "когда вы щелкаете правой кнопкой мыши.",
-            "tl": "kapag nag-right click ka sa iyong mouse.",
-            "uk": "коли ви клацаєте правою кнопкою миші.",
-            "zh-TW": "當您右鍵單擊滑鼠時。"
-          }
+          "text": "@whenYouRightClick"
         }
       ],
       "width": 1,
@@ -1019,19 +971,7 @@
       "tags": ["valuable"],
       "description": [
         {
-          "text": {
-            "en": "Jewel for item reinforcement",
-            "de": "Juwel zur Gegenstandsverstärkung",
-            "es": "Joya para refuerzo de artículos.",
-            "id": "Permata untuk penguatan item",
-            "ja": "アイテムをエンチャントする時使われる宝石",
-            "pl": "Jewel for item reinforcement",
-            "pt": "Joia para reforço de itens",
-            "ru": "Самоцвет для усиления предмета",
-            "tl": "Hiyas para sa pagpapatibay ng item",
-            "uk": "Коштовність для посилення предметів",
-            "zh-TW": "強化物品的寶石"
-          }
+          "text": "@reinforcementJewel"
         }
       ],
       "width": 1,
@@ -1051,19 +991,7 @@
       "tags": ["refineStone", "valuable"],
       "description": [
         {
-          "text": {
-            "en": "Grant actual power to reinforced item.",
-            "de": "Verleiht einem verstärkten Gegenstand echte Kraft.",
-            "es": "Otorga poder real al elemento reforzado.",
-            "id": "Berikan kekuatan sebenarnya pada item yang diperkuat.",
-            "ja": "エンチャントされたアイテムに、実際の力が付与されます。",
-            "pl": "Nadaje wzmocnionemu przedmiotowi pełną moc.",
-            "pt": "Conceda poder real ao item reforçado.",
-            "ru": "Предоставьте реальную силу усиленному предмету.",
-            "tl": "Bigyan ng aktwal na kapangyarihan ang reinforced item.",
-            "uk": "Надати фактичну силу посиленому предмету.",
-            "zh-TW": "賦予強化物品實際力量。"
-          }
+          "text": "@grantPowerToReinforcedItem"
         }
       ],
       "width": 1,
@@ -1083,19 +1011,7 @@
       "tags": ["refineStone", "valuable"],
       "description": [
         {
-          "text": {
-            "en": "Grant actual power to reinforced item.",
-            "de": "Verleiht einem verstärkten Gegenstand echte Kraft.",
-            "es": "Otorga poder real al elemento reforzado.",
-            "id": "Berikan kekuatan sebenarnya pada item yang diperkuat.",
-            "ja": "エンチャントされたアイテムに、実際の力が付与されます。",
-            "pl": "Nadaje wzmocnionemu przedmiotowi pełną moc.",
-            "pt": "Conceda poder real ao item reforçado.",
-            "ru": "Предоставьте реальную силу усиленному предмету.",
-            "tl": "Bigyan ng aktwal na kapangyarihan ang reinforced item.",
-            "uk": "Надати фактичну силу посиленому предмету.",
-            "zh-TW": "賦予強化物品實際力量。"
-          }
+          "text": "@grantPowerToReinforcedItem"
         }
       ],
       "width": 1,
@@ -1294,19 +1210,7 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "You can achieve special items with combinations.",
-            "de": "Durch Kombinationen können Sie besondere Gegenstände erhalten.",
-            "es": "Puedes conseguir objetos especiales con combinaciones.",
-            "id": "Anda dapat memperoleh item khusus dengan kombinasi.",
-            "ja": "パンドラ合成でアイテムを獲得",
-            "pl": "Dzięki kombinacjom możesz zdobyć specjalne przedmioty.",
-            "pt": "Você pode conseguir itens especiais com combinações.",
-            "ru": "Вы можете получить особые предметы с помощью комбинаций.",
-            "tl": "Makakamit mo ang mga espesyal na item na may mga kumbinasyon.",
-            "uk": "Ви можете отримати спеціальні предмети за допомогою комбінацій.",
-            "zh-TW": "您可以透過組合獲得特殊物品。"
-          },
+          "text": "@specialItemsWithCombinations",
           "color": "blue"
         }
       ],
@@ -1365,19 +1269,7 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "Congratulations. Please contact CS team and change it to item.",
-            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
-            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
-            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
-            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
-            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
-            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
-            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
-            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
-            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
-            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
-          },
+          "text": "@contactCsTeam",
           "color": "blue"
         }
       ],
@@ -1400,19 +1292,7 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "Congratulations. Please contact CS team and change it to item.",
-            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
-            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
-            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
-            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
-            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
-            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
-            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
-            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
-            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
-            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
-          },
+          "text": "@contactCsTeam",
           "color": "blue"
         }
       ],
@@ -1435,19 +1315,7 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "Congratulations. Please contact CS team and change it to item.",
-            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
-            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
-            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
-            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
-            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
-            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
-            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
-            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
-            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
-            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
-          },
+          "text": "@contactCsTeam",
           "color": "blue"
         }
       ],
@@ -1470,19 +1338,7 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "Congratulations. Please contact CS team and change it to item.",
-            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
-            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
-            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
-            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
-            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
-            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
-            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
-            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
-            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
-            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
-          },
+          "text": "@contactCsTeam",
           "color": "blue"
         }
       ],
@@ -1505,19 +1361,7 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "Congratulations. Please contact CS team and change it to item.",
-            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
-            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
-            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
-            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
-            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
-            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
-            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
-            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
-            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
-            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
-          },
+          "text": "@contactCsTeam",
           "color": "blue"
         }
       ],
@@ -1871,19 +1715,7 @@
       },
       "description": [
         {
-          "text": {
-            "en": "Congratulations. Please contact CS team and change it to item.",
-            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
-            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
-            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
-            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
-            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
-            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
-            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
-            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
-            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
-            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
-          },
+          "text": "@contactCsTeam",
           "color": "blue"
         }
       ],
@@ -2656,19 +2488,7 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "You can drop it with a fixed probability of it turning into a rare item.",
-            "de": "Wenn Sie es fallen lassen, wird es mit einer festen Wahrscheinlichkeit zu einem seltenen Gegenstand.",
-            "es": "Puedes soltarlo con una probabilidad fija de que se convierta en un objeto raro.",
-            "id": "Anda dapat menjatuhkannya dengan kemungkinan tetap untuk berubah menjadi barang langka.",
-            "ja": "地面に投げると一定確率でレアアイテムが手に入ります。",
-            "pl": "Możesz go upuścić ze stałym prawdopodobieństwem, że zamieni się w rzadki przedmiot.",
-            "pt": "Você pode derrubá-lo com uma probabilidade fixa de se transformar em um item raro.",
-            "ru": "Вы можете выбросить его с фиксированной вероятностью, что он превратится в редкий предмет.",
-            "tl": "Maaari mong i-drop ito nang may nakapirming posibilidad na maging isang bihirang item.",
-            "uk": "Ви можете скинути його з фіксованою ймовірністю того, що він перетвориться на рідкісний предмет.",
-            "zh-TW": "你可以以固定的機率掉落它，使其變成稀有物品。"
-          }
+          "text": "@mayTurnIntoRareItem"
         }
       ],
       "width": 1,
@@ -2690,19 +2510,7 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "You can drop it with a fixed probability of it turning into a rare item.",
-            "de": "Wenn Sie es fallen lassen, wird es mit einer festen Wahrscheinlichkeit zu einem seltenen Gegenstand.",
-            "es": "Puedes soltarlo con una probabilidad fija de que se convierta en un objeto raro.",
-            "id": "Anda dapat menjatuhkannya dengan kemungkinan tetap untuk berubah menjadi barang langka.",
-            "ja": "地面に投げると一定確率でレアアイテムが手に入ります。",
-            "pl": "Możesz go upuścić ze stałym prawdopodobieństwem, że zamieni się w rzadki przedmiot.",
-            "pt": "Você pode derrubá-lo com uma probabilidade fixa de se transformar em um item raro.",
-            "ru": "Вы можете выбросить его с фиксированной вероятностью, что он превратится в редкий предмет.",
-            "tl": "Maaari mong i-drop ito nang may nakapirming posibilidad na maging isang bihirang item.",
-            "uk": "Ви можете скинути його з фіксованою ймовірністю того, що він перетвориться на рідкісний предмет.",
-            "zh-TW": "你可以以固定的機率掉落它，使其變成稀有物品。"
-          }
+          "text": "@mayTurnIntoRareItem"
         }
       ],
       "width": 1,
@@ -2872,19 +2680,7 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "It's a box containing various items.",
-            "de": "Eine Kiste mit verschiedenen Gegenständen.",
-            "es": "Es una caja que contiene varios artículos.",
-            "id": "Itu adalah kotak berisi berbagai item.",
-            "ja": "各種商品が入っている箱です。",
-            "pl": "To pudełko zawierające różne przedmioty.",
-            "pt": "É uma caixa contendo vários itens.",
-            "ru": "Это коробка, содержащая различные предметы.",
-            "tl": "Ito ay isang kahon na naglalaman ng iba't ibang mga item.",
-            "uk": "Це коробка з різними предметами.",
-            "zh-TW": "這是一個裝有各種物品的盒子。"
-          }
+          "text": "@boxOfVariousItems"
         }
       ],
       "width": 1,
@@ -2906,19 +2702,7 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "It's a box containing various items.",
-            "de": "Eine Kiste mit verschiedenen Gegenständen.",
-            "es": "Es una caja que contiene varios artículos.",
-            "id": "Itu adalah kotak berisi berbagai item.",
-            "ja": "各種商品が入っている箱です。",
-            "pl": "To pudełko zawierające różne przedmioty.",
-            "pt": "É uma caixa contendo vários itens.",
-            "ru": "Это коробка, содержащая различные предметы.",
-            "tl": "Ito ay isang kahon na naglalaman ng iba't ibang mga item.",
-            "uk": "Це коробка з різними предметами.",
-            "zh-TW": "這是一個裝有各種物品的盒子。"
-          }
+          "text": "@boxOfVariousItems"
         }
       ],
       "width": 1,
@@ -2940,19 +2724,7 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "It's a box containing various items.",
-            "de": "Eine Kiste mit verschiedenen Gegenständen.",
-            "es": "Es una caja que contiene varios artículos.",
-            "id": "Itu adalah kotak berisi berbagai item.",
-            "ja": "各種商品が入っている箱です。",
-            "pl": "To pudełko zawierające różne przedmioty.",
-            "pt": "É uma caixa contendo vários itens.",
-            "ru": "Это коробка, содержащая различные предметы.",
-            "tl": "Ito ay isang kahon na naglalaman ng iba't ibang mga item.",
-            "uk": "Це коробка з різними предметами.",
-            "zh-TW": "這是一個裝有各種物品的盒子。"
-          }
+          "text": "@boxOfVariousItems"
         }
       ],
       "width": 1,
@@ -2974,19 +2746,7 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "It's a box containing various items.",
-            "de": "Eine Kiste mit verschiedenen Gegenständen.",
-            "es": "Es una caja que contiene varios artículos.",
-            "id": "Itu adalah kotak berisi berbagai item.",
-            "ja": "各種商品が入っている箱です。",
-            "pl": "To pudełko zawierające różne przedmioty.",
-            "pt": "É uma caixa contendo vários itens.",
-            "ru": "Это коробка, содержащая различные предметы.",
-            "tl": "Ito ay isang kahon na naglalaman ng iba't ibang mga item.",
-            "uk": "Це коробка з різними предметами.",
-            "zh-TW": "這是一個裝有各種物品的盒子。"
-          }
+          "text": "@boxOfVariousItems"
         }
       ],
       "width": 1,
@@ -3008,19 +2768,7 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "It's a box containing various items.",
-            "de": "Eine Kiste mit verschiedenen Gegenständen.",
-            "es": "Es una caja que contiene varios artículos.",
-            "id": "Itu adalah kotak berisi berbagai item.",
-            "ja": "各種商品が入っている箱です。",
-            "pl": "To pudełko zawierające różne przedmioty.",
-            "pt": "É uma caixa contendo vários itens.",
-            "ru": "Это коробка, содержащая различные предметы.",
-            "tl": "Ito ay isang kahon na naglalaman ng iba't ibang mga item.",
-            "uk": "Це коробка з різними предметами.",
-            "zh-TW": "這是一個裝有各種物品的盒子。"
-          }
+          "text": "@boxOfVariousItems"
         }
       ],
       "width": 1,
@@ -3042,19 +2790,7 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "It's a box containing various items.",
-            "de": "Eine Kiste mit verschiedenen Gegenständen.",
-            "es": "Es una caja que contiene varios artículos.",
-            "id": "Itu adalah kotak berisi berbagai item.",
-            "ja": "各種商品が入っている箱です。",
-            "pl": "To pudełko zawierające różne przedmioty.",
-            "pt": "É uma caixa contendo vários itens.",
-            "ru": "Это коробка, содержащая различные предметы.",
-            "tl": "Ito ay isang kahon na naglalaman ng iba't ibang mga item.",
-            "uk": "Це коробка з різними предметами.",
-            "zh-TW": "這是一個裝有各種物品的盒子。"
-          }
+          "text": "@boxOfVariousItems"
         }
       ],
       "width": 1,
@@ -3076,19 +2812,7 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "Automatic HP recovery 3%",
-            "de": "Automatische HP-Wiederherstellung 3%",
-            "es": "Recuperación automática de HP 3%",
-            "id": "Pemulihan HP otomatis 3%",
-            "ja": "オートヒーリング 3%",
-            "pl": "Automatyczne odzyskiwanie HP 3%",
-            "pt": "Recuperação automática de HP 3%",
-            "ru": "Автоматическое восстановление HP 3%",
-            "tl": "Awtomatikong pagbawi ng HP 3%",
-            "uk": "Автоматичне відновлення HP 3%",
-            "zh-TW": "HP自動恢復 3%"
-          },
+          "text": "@automaticHpRecovery3",
           "color": "blue"
         },
         {
@@ -3126,19 +2850,7 @@
       },
       "description": [
         {
-          "text": {
-            "en": "Throw it and you may receive some Zen or items",
-            "de": "Werfen Sie es weg und Sie erhalten vielleicht etwas Zen oder Gegenstände",
-            "es": "Tíralo y podrás recibir algo de Zen o artículos.",
-            "id": "Lemparkan dan Anda mungkin menerima beberapa Zen atau item",
-            "ja": "地面に投げればゼンやアイテムが出現",
-            "pl": "Rzuć nim, a możesz otrzymać trochę Zen lub przedmiotów",
-            "pt": "Jogue-o e você poderá receber algum Zen ou itens",
-            "ru": "Бросайте его, и вы можете получить немного Дзена или предметы.",
-            "tl": "Itapon ito at maaari kang makatanggap ng ilang Zen o mga item",
-            "uk": "Киньте його, і ви можете отримати дзен або предмети",
-            "zh-TW": "丟掉它，你可能會收到一些禪宗或物品"
-          }
+          "text": "@throwForZenOrItems"
         }
       ],
       "width": 1,
@@ -3155,19 +2867,7 @@
       },
       "description": [
         {
-          "text": {
-            "en": "Throw it and you may receive some Zen or items",
-            "de": "Werfen Sie es weg und Sie erhalten vielleicht etwas Zen oder Gegenstände",
-            "es": "Tíralo y podrás recibir algo de Zen o artículos.",
-            "id": "Lemparkan dan Anda mungkin menerima beberapa Zen atau item",
-            "ja": "地面に投げればゼンやアイテムが出現",
-            "pl": "Rzuć nim, a możesz otrzymać trochę Zen lub przedmiotów",
-            "pt": "Jogue-o e você poderá receber algum Zen ou itens",
-            "ru": "Бросайте его, и вы можете получить немного Дзена или предметы.",
-            "tl": "Itapon ito at maaari kang makatanggap ng ilang Zen o mga item",
-            "uk": "Киньте його, і ви можете отримати дзен або предмети",
-            "zh-TW": "丟掉它，你可能會收到一些禪宗或物品"
-          }
+          "text": "@throwForZenOrItems"
         }
       ],
       "width": 1,
@@ -3184,19 +2884,7 @@
       },
       "description": [
         {
-          "text": {
-            "en": "Throw it and you may receive some Zen or items",
-            "de": "Werfen Sie es weg und Sie erhalten vielleicht etwas Zen oder Gegenstände",
-            "es": "Tíralo y podrás recibir algo de Zen o artículos.",
-            "id": "Lemparkan dan Anda mungkin menerima beberapa Zen atau item",
-            "ja": "地面に投げればゼンやアイテムが出現",
-            "pl": "Rzuć nim, a możesz otrzymać trochę Zen lub przedmiotów",
-            "pt": "Jogue-o e você poderá receber algum Zen ou itens",
-            "ru": "Бросайте его, и вы можете получить немного Дзена или предметы.",
-            "tl": "Itapon ito at maaari kang makatanggap ng ilang Zen o mga item",
-            "uk": "Киньте його, і ви можете отримати дзен або предмети",
-            "zh-TW": "丟掉它，你可能會收到一些禪宗或物品"
-          }
+          "text": "@throwForZenOrItems"
         }
       ],
       "width": 1,
@@ -3213,19 +2901,7 @@
       },
       "description": [
         {
-          "text": {
-            "en": "Throw it and you may receive some Zen or items",
-            "de": "Werfen Sie es weg und Sie erhalten vielleicht etwas Zen oder Gegenstände",
-            "es": "Tíralo y podrás recibir algo de Zen o artículos.",
-            "id": "Lemparkan dan Anda mungkin menerima beberapa Zen atau item",
-            "ja": "地面に投げればゼンやアイテムが出現",
-            "pl": "Rzuć nim, a możesz otrzymać trochę Zen lub przedmiotów",
-            "pt": "Jogue-o e você poderá receber algum Zen ou itens",
-            "ru": "Бросайте его, и вы можете получить немного Дзена или предметы.",
-            "tl": "Itapon ito at maaari kang makatanggap ng ilang Zen o mga item",
-            "uk": "Киньте його, і ви можете отримати дзен або предмети",
-            "zh-TW": "丟掉它，你可能會收到一些禪宗或物品"
-          }
+          "text": "@throwForZenOrItems"
         }
       ],
       "width": 1,
@@ -3243,19 +2919,7 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "Congratulations. Please contact CS team and change it to item.",
-            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
-            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
-            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
-            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
-            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
-            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
-            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
-            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
-            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
-            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
-          },
+          "text": "@contactCsTeam",
           "color": "blue"
         }
       ],
@@ -3278,19 +2942,7 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "Congratulations. Please contact CS team and change it to item.",
-            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
-            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
-            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
-            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
-            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
-            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
-            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
-            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
-            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
-            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
-          },
+          "text": "@contactCsTeam",
           "color": "blue"
         }
       ],
@@ -3313,19 +2965,7 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "Congratulations. Please contact CS team and change it to item.",
-            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
-            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
-            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
-            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
-            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
-            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
-            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
-            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
-            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
-            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
-          },
+          "text": "@contactCsTeam",
           "color": "blue"
         }
       ],
@@ -3348,19 +2988,7 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "Congratulations. Please contact CS team and change it to item.",
-            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
-            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
-            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
-            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
-            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
-            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
-            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
-            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
-            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
-            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
-          },
+          "text": "@contactCsTeam",
           "color": "blue"
         }
       ],
@@ -3383,19 +3011,7 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "Congratulations. Please contact CS team and change it to item.",
-            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
-            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
-            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
-            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
-            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
-            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
-            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
-            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
-            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
-            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
-          },
+          "text": "@contactCsTeam",
           "color": "blue"
         }
       ],
@@ -3418,19 +3034,7 @@
       "tags": ["cashShop"],
       "description": [
         {
-          "text": {
-            "en": "Congratulations. Please contact CS team and change it to item.",
-            "de": "Herzlichen Glückwunsch. Bitte wenden Sie sich an den Kundendienst, um ihn in einen Gegenstand umzuwandeln.",
-            "es": "Felicidades. Comuníquese con el equipo de CS y cámbielo a elemento.",
-            "id": "Selamat. Silakan menghubungi tim CS dan mengubahnya menjadi item.",
-            "ja": "おめでとうございます。運営チームに連絡すると、当選アイテムと交換できます。",
-            "pl": "Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.",
-            "pt": "Parabéns. Entre em contato com a equipe CS e altere para item.",
-            "ru": "Поздравляю. Пожалуйста, свяжитесь с командой CS и измените его на элемент.",
-            "tl": "Binabati kita. Mangyaring makipag-ugnayan sa CS team at palitan ito ng item.",
-            "uk": "Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.",
-            "zh-TW": "恭喜。請聯絡CS團隊並將其變更為專案。"
-          },
+          "text": "@contactCsTeam",
           "color": "blue"
         }
       ],
@@ -3623,19 +3227,7 @@
       },
       "description": [
         {
-          "text": {
-            "en": "Jewel for item reinforcement",
-            "de": "Juwel zur Gegenstandsverstärkung",
-            "es": "Joya para refuerzo de artículos.",
-            "id": "Permata untuk penguatan item",
-            "ja": "アイテムをエンチャントする時使われる宝石",
-            "pl": "Jewel for item reinforcement",
-            "pt": "Joia para reforço de itens",
-            "ru": "Самоцвет для усиления предмета",
-            "tl": "Hiyas para sa pagpapatibay ng item",
-            "uk": "Коштовність для посилення предметів",
-            "zh-TW": "強化物品的寶石"
-          }
+          "text": "@reinforcementJewel"
         }
       ],
       "width": 1,

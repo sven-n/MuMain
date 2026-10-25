@@ -44,9 +44,10 @@ PlaceholderScan ScanPlaceholders(std::string_view text);
 std::optional<int> GetPlaceholderValue(std::string_view name, int level, const ItemStatProfiles& profiles);
 
 // The text with each placeholder replaced by its value. A placeholder without a value, or a text ScanPlaceholders
-// refuses, stays as written from there on. The first takes {level} and the tables; the second asks `valueOf`.
+// refuses, stays as written from there on. The first takes {level} and the tables; the second asks `valueOf`, whose
+// value is a number or a text (an item's level value: "ENG").
 std::string FillPlaceholders(std::string_view text, int level, const ItemStatProfiles& profiles);
-using PlaceholderValueOf = std::function<std::optional<int>(std::string_view name)>;
+using PlaceholderValueOf = std::function<std::optional<std::string>(std::string_view name)>;
 std::string FillPlaceholders(std::string_view text, const PlaceholderValueOf& valueOf);
 
 // The known name nearest to `name` when it is at most two letters away (a typo), else empty.

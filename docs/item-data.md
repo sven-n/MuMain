@@ -113,6 +113,7 @@ variants or option words. An online keyword need not select the same items offli
 | Field | Meaning |
 |---|---|
 | `tags` | Categories the game code asks for, e.g. `["mount", "flying"]`; see [Tags](#tags) |
+| `levelValues` | Values of the description's own placeholders, one per item level from +0: `{"stat": ["ENG", "STA", ...]}` makes `{stat}` "ENG" at +0 and "STA" at +1. Each value is a text with its translations (written like `name`, and checked like a description text) or a shared text (`"@name"`), without placeholders. A line that shows one is shown only at levels that have a value. The Fruits' `{stat}` is one. A client-only field; the bmd import keeps it |
 | `description` | Lines the tooltip shows for the item, e.g. the Jewel of Bless's "It is used to increase your item level up to 6"; see [Descriptions](#descriptions). A client-only field; the bmd import keeps it |
 | `width`, `height` | Size in inventory slots |
 | `slot` | Equipment slot: `mainHand`, `offHand`, `helm`, `armor`, `pants`, `gloves`, `boots`, `wings`, `pet`, `pendant`, `ring`. Left out = not equippable |
@@ -270,13 +271,15 @@ Each layout has the four sections once each, in this order: it starts with
 layout or a description), an entry of `when` that is neither a value, a
 comparison of a value with a whole number, a state nor a known tag, an unknown
 color, a placeholder that is neither built in nor named by the line's
-`values`, a translation whose placeholders are not those of the English text,
+`values`, a shared text of a description that names a table itself (it names one only through the line's
+`values`, which the table checks and the editor's table counts and rename read), a translation whose placeholders
+are not those of the English text,
 a text (other than a blank line) without its English text, a language code
 that has more than letters, digits and `-`, a `values` entry that names no
 built-in value, missing or misplaced sections, and no layout `default`. The
 messages suggest the name meant for a typo. **Warnings**: a shared text that
 neither a layout nor a description uses, a `values` entry the text does not
-have, a translation in a language the game has no texts in (as for item
+have (a layout's or a description's line), a translation in a language the game has no texts in (as for item
 names), and a layout other than `default` (nothing uses it yet).
 
 ### Flight equipment
@@ -309,15 +312,20 @@ Jewel of Bless's:
 ]
 ```
 
-Each line is `{"text": ..., "when": [...], "color": ..., "levels": [first,
-last]}`:
+Each line is `{"text": ..., "values": {...}, "when": [...], "color": ...,
+"levels": [first, last]}`:
 
 - **`text`** is written like `name`: a plain English text, or the texts by
   language. It is checked like a name too: the English text is required, a
   language code has only letters, digits and `-`, and a language the game
   has no texts in is a warning. It can also be `"@name"`, a shared text of
-  the [tooltip file](#tooltip-layouts) (`"@life"`). A text can have
+  the [tooltip file](#tooltip-layouts) (`"@increaseSpeed"`), which is how a
+  text several items show is written once. A text can have
   [placeholders](#description-placeholders).
+- **`values`** names the value a placeholder of the text shows on this line:
+  a built-in value, or a table as `table:` and its name (`"values":
+  {"percent": "table:wingDamageIncrease1st"}` with the shared text "Increase
+  {percent}% of Damage").
 - **An empty text** (`{"text": ""}`) is a blank line.
 - **Long lines** wrap at about the width of the original tooltips' widest
   lines, and `\n` in a text breaks the line there (`\n\n` leaves a blank
@@ -373,13 +381,20 @@ placeholder is one of:
   (`{table:damageIncreaseWeapons}` is 3 at +1 and 66 at +15, the damage a
   weapon gains). A new table is a new placeholder.
   The wings, capes and pets show their damage increase and absorption this
-  way: `"Increase {table:wingDamageIncrease1st}% of Damage"` over the table
-  `wingDamageIncrease1st` (`{"values": 12, "perLevel": 2}`, 12 + 2 per level).
-  Such tables are only for descriptions: no stat profile names them.
+  way: the shared text `"Increase {percent}% of Damage"` with
+  `"values": {"percent": "table:wingDamageIncrease1st"}` on the line, over the
+  table `wingDamageIncrease1st` (`{"values": 12, "perLevel": 2}`, 12 + 2 per
+  level). Such tables are only for descriptions: no stat profile names them.
+- a name the line's `values` binds to a built-in value or a table
+  (`"table:<name>"`), so one shared text serves items whose numbers come from
+  different tables;
+- one of the item's `levelValues`, a text by item level.
 
 The tables are written apart from the built-in values, so a table may have
 any name, also one a later version gives a built-in value: `{level}` and
-`{table:level}` are not the same.
+`{table:level}` are not the same. The names of a line's `values` and the item's
+`levelValues` are the item's own: one named like a built-in value is the
+item's, on its lines.
 
 **Errors** (when the item data loads, in the save checks and in Import from
 bmd):
@@ -390,7 +405,12 @@ bmd):
   order is fine);
 - a name that is neither built in nor a table: `has the unknown placeholder
   {table:damgeIncreaseWeapons}; did you mean {table:damageIncreaseWeapons}?`.
-  A table written without `table:` gets the same hint.
+  A table written without `table:` gets the same hint;
+- a line's `values` entry that names neither a built-in value nor a table;
+- a level value with placeholders, and a line that shows a level value at a
+  level the value has none for.
+
+A level value no line shows is a warning.
 
 **Warnings:**
 

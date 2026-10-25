@@ -405,6 +405,10 @@ TEST_CASE("A description line's \"@\" names a shared text [data][items]")
     CHECK_FALSE(HasErrors(named.issues));
     REQUIRE(named.items.size() == 1);
     CHECK(named.items.front().description.front().textName == "durability");
+    // So does a level value's.
+    const ReadResult levelValue = Read(R"({"formatVersion": 1, "group": 14, "items": [
+        {"number": 10, "name": "Town Portal Scroll", "levelValues": {"stat": ["ENG", "@"]}}]})");
+    CHECK(HasIssue(levelValue.issues, ItemDataIssueSeverity::Error, "levelValues.stat[1]"));
 }
 
 TEST_CASE("An item's stat profile is kept through write and read [data][items]")

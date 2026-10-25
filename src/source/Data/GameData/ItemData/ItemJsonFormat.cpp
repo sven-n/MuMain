@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "ItemJsonFormat.h"
+#include "ItemDescriptionPlaceholders.h"
 #include "ItemEnumNames.h"
 #include "ItemJsonCommon.h"
 #include "ItemTooltipConditionsJson.h"
@@ -30,6 +31,8 @@ constexpr const char* Text = "text";
 constexpr const char* Color = "color";
 constexpr const char* Levels = "levels";
 constexpr const char* When = "when";
+constexpr const char* Values = "values";
+constexpr const char* LevelValues = "levelValues";
 constexpr const char* Requirements = "requirements";
 constexpr const char* RequirementsByLevel = "requirementsByLevel";
 constexpr const char* ClassRequirements = "classRequirements";
@@ -162,6 +165,15 @@ OrderedJson WriteDescription(const std::vector<ItemDescriptionLine>& description
         entry[Keys::Text] = !line.textName.empty() ? OrderedJson("@" + line.textName)
                             : line.text.IsEmpty()  ? OrderedJson("")
                                                    : Json::WriteLocalizedString(line.text);
+        if (!line.values.empty())
+        {
+            OrderedJson values = OrderedJson::object();
+            for (const auto& [placeholder, value] : line.values)
+            {
+                values[placeholder] = value;
+            }
+            entry[Keys::Values] = std::move(values);
+        }
         if (!line.when.empty())
         {
             OrderedJson when = OrderedJson::array();
@@ -184,6 +196,23 @@ OrderedJson WriteDescription(const std::vector<ItemDescriptionLine>& description
     return json;
 }
 
+// {"stat": ["ENG", {"en": "STA", "de": "VIT"}, "@name", ...]}: each value as a name is written, or "@name".
+OrderedJson WriteLevelValues(const std::vector<ItemLevelValues>& levelValues)
+{
+    OrderedJson json = OrderedJson::object();
+    for (const ItemLevelValues& entry : levelValues)
+    {
+        OrderedJson values = OrderedJson::array();
+        for (const ItemLevelValue& value : entry.values)
+        {
+            values.push_back(!value.textName.empty() ? OrderedJson("@" + value.textName)
+                                                     : Json::WriteLocalizedString(value.text));
+        }
+        json[entry.name] = std::move(values);
+    }
+    return json;
+}
+
 OrderedJson WriteItemObject(const ItemDefinition& definition)
 {
     OrderedJson item;
@@ -196,6 +225,10 @@ OrderedJson WriteItemObject(const ItemDefinition& definition)
     if (!definition.description.empty())
     {
         item[Keys::Description] = WriteDescription(definition.description);
+    }
+    if (!definition.levelValues.empty())
+    {
+        item[Keys::LevelValues] = WriteLevelValues(definition.levelValues);
     }
 
     const auto writeIfNotDefault = [](OrderedJson& target)
@@ -260,6 +293,8 @@ private:
     void ReadDescription(const OrderedJson& json, std::vector<ItemDescriptionLine>& description);
     void ReadDescriptionLevels(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line);
     void ReadDescriptionConditions(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line);
+    void ReadDescriptionValues(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line);
+    void ReadLevelValues(const OrderedJson& json, std::vector<ItemLevelValues>& levelValues);
     void ReadStats(const OrderedJson& json, ItemDefinition& definition);
     void ReadRequirements(const OrderedJson& json, ItemDefinition& definition);
     void ReadRequirementsByLevel(const OrderedJson& json, ItemDefinition& definition);
@@ -446,6 +481,10 @@ void ItemReader::ReadDescription(const OrderedJson& json, std::vector<ItemDescri
                                              [this](const std::string& errorField, const std::string& message)
                                              { AddIssue(ItemDataIssueSeverity::Error, errorField, message); });
         }
+        if (const auto values = entry.find(Keys::Values); values != entry.end())
+        {
+            ReadDescriptionValues(*values, field + "." + Keys::Values, line);
+        }
         if (const auto when = entry.find(Keys::When); when != entry.end())
         {
             ReadDescriptionConditions(*when, field + "." + Keys::When, line);
@@ -460,11 +499,94 @@ void ItemReader::ReadDescription(const OrderedJson& json, std::vector<ItemDescri
         {
             ReadDescriptionLevels(*levels, field + "." + Keys::Levels, line);
         }
-        WarnAboutUnknownKeys(entry, {Keys::Text, Keys::When, Keys::Color, Keys::Levels}, field + ".");
+        WarnAboutUnknownKeys(entry, {Keys::Text, Keys::Values, Keys::When, Keys::Color, Keys::Levels}, field + ".");
         if (read)
         {
             description.push_back(std::move(line));
         }
+    }
+}
+
+// A placeholder of a description line's text and the value it shows on the line: {"percent":
+// "table:wingDamageIncrease1st"}. ValidateDescriptionPlaceholders checks the values' names.
+void ItemReader::ReadDescriptionValues(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line)
+{
+    if (!json.is_object())
+    {
+        AddIssue(ItemDataIssueSeverity::Error, field, "must be an object of placeholders and the values they show");
+        return;
+    }
+    for (const auto& [placeholder, value] : json.items())
+    {
+        // The value is a built-in value's name, or "table:" and a table's name.
+        const std::string name = value.is_string() ? value.get<std::string>() : std::string();
+        const std::string_view table = GetPlaceholderTable(name);
+        if (!Json::IsName(placeholder) || !value.is_string() || !Json::IsName(table.empty() ? name : table))
+        {
+            AddIssue(ItemDataIssueSeverity::Error, field + "." + placeholder,
+                     "must be a placeholder name and the name of the value it shows, both of letters and digits (a "
+                     "table's as \"table:<name>\")");
+            continue;
+        }
+        line.values.emplace_back(placeholder, value.get<std::string>());
+    }
+}
+
+// {"stat": ["ENG", "STA", ...]}: the values of a description placeholder at the item levels from +0, each a text (as
+// a name is written) or a shared text of the tooltip file ("@name").
+void ItemReader::ReadLevelValues(const OrderedJson& json, std::vector<ItemLevelValues>& levelValues)
+{
+    const auto found = json.find(Keys::LevelValues);
+    if (found == json.end())
+    {
+        return;
+    }
+    if (!found->is_object())
+    {
+        AddIssue(ItemDataIssueSeverity::Error, Keys::LevelValues, "must be an object of placeholders and their values");
+        return;
+    }
+    for (const auto& [name, list] : found->items())
+    {
+        const std::string field = std::string(Keys::LevelValues) + "." + name;
+        if (!Json::IsName(name))
+        {
+            AddIssue(ItemDataIssueSeverity::Error, field, "a placeholder name has only letters and digits");
+            continue;
+        }
+        if (!list.is_array() || list.empty() || list.size() > ItemLevelCount)
+        {
+            AddIssue(ItemDataIssueSeverity::Error, field,
+                     "must be a list of one value for each item level from +0, at most " +
+                         std::to_string(ItemLevelCount));
+            continue;
+        }
+        ItemLevelValues entry;
+        entry.name = name;
+        for (size_t level = 0; level < list.size(); ++level)
+        {
+            ItemLevelValue value;
+            const OrderedJson& json = list[level];
+            if (json.is_string() && json.get<std::string>().starts_with("@"))
+            {
+                // "@" alone names no shared text, as for a description line.
+                value.textName = json.get<std::string>().substr(1);
+                if (value.textName.empty())
+                {
+                    AddIssue(
+                        ItemDataIssueSeverity::Error, field + "[" + std::to_string(level) + "]",
+                        "\"@\" names no text: a shared text is \"@\" and its name in the tooltip file's \"texts\"");
+                }
+            }
+            else
+            {
+                Json::ReadLocalizedString(json, field + "[" + std::to_string(level) + "]", value.text,
+                                          [this](const std::string& errorField, const std::string& message)
+                                          { AddIssue(ItemDataIssueSeverity::Error, errorField, message); });
+            }
+            entry.values.push_back(std::move(value));
+        }
+        levelValues.push_back(std::move(entry));
     }
 }
 
@@ -609,6 +731,7 @@ std::set<std::string, std::less<>> GetKnownItemKeys()
                                             Keys::Name,
                                             Keys::Tags,
                                             Keys::Description,
+                                            Keys::LevelValues,
                                             Keys::Requirements,
                                             Keys::RequirementsByLevel,
                                             Keys::ClassRequirements,
@@ -632,6 +755,7 @@ bool ItemReader::Read(const OrderedJson& json, ItemDefinition& definition)
 
     ReadTags(json, definition.tags);
     ReadDescription(json, definition.description);
+    ReadLevelValues(json, definition.levelValues);
     ReadStats(json, definition);
     ReadRequirements(json, definition);
     ReadRequirementsByLevel(json, definition);
@@ -717,6 +841,7 @@ std::string LayOutItemJsonText(const std::string& text)
     std::string laidOut = Json::PutListsOnOneLine(text, Keys::Tags);
     laidOut = Json::PutListsOnOneLine(laidOut, Keys::Levels);
     laidOut = Json::PutListsOnOneLine(laidOut, Keys::When);
+    laidOut = Json::PutObjectsOnOneLine(laidOut, Keys::Values);
     return Json::PutObjectsOnOneLine(laidOut, Keys::RequirementsByLevel);
 }
 } // namespace Data::Items

@@ -1636,6 +1636,51 @@ void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int 
 // original tooltips.
 static constexpr int ItemDescriptionWrapWidth = 200;
 
+// (sx, sy) in the screen's 640x480 stretch, `screen`.
+// A test's measure of description text (SetItemTooltipTextMeasure); nullptr: the game's font.
+static ItemTooltipTextMeasure s_itemTooltipTextMeasure = nullptr;
+
+void SetItemTooltipTextMeasure(ItemTooltipTextMeasure measure)
+{
+    s_itemTooltipTextMeasure = measure;
+}
+
+// The value of a placeholder of a tooltip line for the item at `level`: the value the line binds it to (`bound`), the
+// item's level value (`definition`, when given; in `locale`, the line's language), a built-in value, {level} or a
+// table of the item stat file; nothing for another name.
+static std::optional<std::string> TooltipPlaceholderValue(std::string_view name,
+                                                          std::span<const std::pair<std::string, std::string>> bound,
+                                                          const Data::Items::ItemDefinition* definition, int level,
+                                                          const ItemTooltipValues& values, std::string_view locale)
+{
+    for (const auto& [placeholder, value] : bound)
+    {
+        if (placeholder == name)
+        {
+            name = value;
+            break;
+        }
+    }
+    if (const Data::Items::ItemLevelValues* levelValues =
+            definition != nullptr ? definition->FindLevelValues(name) : nullptr)
+    {
+        if (level < 0 || level >= static_cast<int>(levelValues->values.size()))
+            return std::nullopt;
+        const Data::Items::ItemLevelValue& value = levelValues->values[level];
+        const Data::LocalizedString* text =
+            value.textName.empty() ? &value.text : g_ItemDatabase.GetTooltipFile().FindText(value.textName);
+        if (text == nullptr)
+            return std::nullopt;
+        return text->Get(locale);
+    }
+    if (const std::optional<int> value = Engine::Items::TooltipValues::GetItemTooltipValue(values, name))
+        return std::to_string(*value);
+    if (const std::optional<int> value =
+            Data::Items::GetPlaceholderValue(name, level, g_ItemDatabase.GetStatProfiles()))
+        return std::to_string(*value);
+    return std::nullopt;
+}
+
 std::optional<PetInfoRequest> GetPetInfoRequest(int itemType, int pointedIndex, int inventype)
 {
     const StorageType storage = static_cast<StorageType>(inventype);
@@ -1666,18 +1711,15 @@ void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, in
         const Data::LocalizedString* lineText =
             line.textName.empty() ? &line.text : g_ItemDatabase.GetTooltipFile().FindText(line.textName);
         // In the UI's language, also when the item names stay English ("Translate item names" off).
-        const std::wstring text =
-            lineText == nullptr
-                ? std::wstring()
-                : Core::Text::FromUtf8(Data::Items::FillPlaceholders(
-                      lineText->Get(I18N::GetCurrentLocale()),
-                      [&](std::string_view name)
-                      {
-                          if (const std::optional<int> value =
-                                  Engine::Items::TooltipValues::GetItemTooltipValue(values, name))
-                              return value;
-                          return Data::Items::GetPlaceholderValue(name, level, g_ItemDatabase.GetStatProfiles());
-                      }));
+        const std::wstring text = lineText == nullptr
+                                      ? std::wstring()
+                                      : Core::Text::FromUtf8(Data::Items::FillPlaceholders(
+                                            lineText->Get(I18N::GetCurrentLocale()),
+                                            [&](std::string_view name)
+                                            {
+                                                return TooltipPlaceholderValue(name, line.values, &definition, level,
+                                                                               values, I18N::GetCurrentLocale());
+                                            }));
         // A blank line is one blank piece. So is a blank line inside a text (`\n\n`, or a text that starts with
         // `\n`): a row left empty would end the tooltip there.
         const std::vector<std::wstring> pieces =
@@ -1703,14 +1745,6 @@ void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, in
             TextNum++;
         }
     }
-}
-
-// A test's measure of description text (SetItemTooltipTextMeasure); nullptr: the game's font.
-static ItemTooltipTextMeasure s_itemTooltipTextMeasure = nullptr;
-
-void SetItemTooltipTextMeasure(ItemTooltipTextMeasure measure)
-{
-    s_itemTooltipTextMeasure = measure;
 }
 
 // Writes the lines of the item tooltip layout that come after its section `after`, up to its next section, into
@@ -1748,21 +1782,8 @@ static void WriteItemTooltipLayoutLines(const ITEM& item, int level, const ItemT
         }
         // In the UI's language, also when the item names stay English ("Translate item names" off).
         const std::string filled = Data::Items::FillPlaceholders(
-            text->Get(I18N::GetCurrentLocale()),
-            [&](std::string_view name)
-            {
-                for (const auto& [placeholder, builtIn] : line->values)
-                {
-                    if (placeholder == name)
-                    {
-                        name = builtIn;
-                        break;
-                    }
-                }
-                if (const std::optional<int> value = Engine::Items::TooltipValues::GetItemTooltipValue(values, name))
-                    return value;
-                return Data::Items::GetPlaceholderValue(name, level, g_ItemDatabase.GetStatProfiles());
-            });
+            text->Get(I18N::GetCurrentLocale()), [&](std::string_view name)
+            { return TooltipPlaceholderValue(name, line->values, nullptr, level, values, I18N::GetCurrentLocale()); });
         if (filled.empty())
         {
             // No text in the UI's language: a row left empty would end the tooltip there.

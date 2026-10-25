@@ -8,6 +8,8 @@
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemStatFile.h"
+#include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Engine/Object/ItemTooltipValues.h"
@@ -197,7 +199,7 @@ TEST_CASE("A shared text is used by a layout or an item description [data][items
 {
     const ReadResult tooltips = Read(
         TooltipFile(R"("unused": "Nothing shows this", "layout": "Defense: {defense}", "life": "Life: {durability}",)"
-                    R"("table": "Up {notATable}", "stats": "Up {table:capeDamageIncrease}")",
+                    R"("table": "Up {notATable}", "stats": "Up {table:capeDamageIncrease}", "bound": "Up {percent}%")",
                     R"({"text": "@layout"},)"));
     ItemDefinition pet;
     pet.group = 13;
@@ -211,9 +213,18 @@ TEST_CASE("A shared text is used by a layout or an item description [data][items
     table.textName = "table";
     ItemDescriptionLine stats;
     stats.textName = "stats";
-    pet.description = {life, typo, table, stats};
+    // The line's "values" names the table instead, and has a value its text doesn't show.
+    ItemDescriptionLine bound;
+    bound.textName = "bound";
+    bound.values = {{"percent", "table:capeDamageIncrease"}, {"missing", "missingLevel"}};
+    pet.description = {life, typo, table, stats, bound};
     const std::vector<ItemDefinition> items = {pet};
     std::vector<ItemDataIssue> issues;
+    ItemStatFile statFile;
+    LevelBonusTable cape;
+    cape.name = "capeDamageIncrease";
+    statFile.tables.push_back(cape);
+    ValidateDescriptionPlaceholders(items, ItemStatProfiles(statFile), tooltips.file, "ItemStats.json", issues);
     ValidateDescriptionTexts(items, tooltips.file, "Tooltip.json", issues);
     const auto has = [&](ItemDataIssueSeverity severity, const std::string& field, const std::string& message)
     {
@@ -226,8 +237,12 @@ TEST_CASE("A shared text is used by a layout or an item description [data][items
     };
     CHECK(has(ItemDataIssueSeverity::Error, "description[1].text", "did you mean \"@life\"?"));
     CHECK(has(ItemDataIssueSeverity::Error, "description[2].text", "{notATable}"));
-    // A table, too: the table checks don't see a shared text's.
-    CHECK(has(ItemDataIssueSeverity::Error, "description[3].text", "{table:capeDamageIncrease}"));
+    // A shared text names a table only through the line's values, also one the stat file has: the editor's table
+    // counts and rename read an item's own data.
+    CHECK(has(ItemDataIssueSeverity::Error, "description[3].text", "names the table {table:capeDamageIncrease}"));
+    CHECK_FALSE(has(ItemDataIssueSeverity::Error, "description[4].text", ""));
+    CHECK_FALSE(has(ItemDataIssueSeverity::Error, "description[4].values.percent", ""));
+    CHECK(has(ItemDataIssueSeverity::Warning, "description[4].values.missing", "has no {missing}"));
     CHECK(has(ItemDataIssueSeverity::Warning, "texts.unused", "neither a layout nor an item description"));
     CHECK_FALSE(has(ItemDataIssueSeverity::Warning, "texts.life", ""));
     CHECK_FALSE(has(ItemDataIssueSeverity::Warning, "texts.layout", ""));
