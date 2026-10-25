@@ -178,13 +178,15 @@ void AddSlot(Record& record, int slot, const ModelSlotState& state)
     }
 }
 
+// The file of each watched bitmap slot, and whether it repeats.
 std::map<int, std::wstring> ReadWatchedBitmaps()
 {
     std::map<int, std::wstring> bitmaps;
     for (const int slot : WatchedBitmapSlots)
     {
         const BITMAP_t* bitmap = Bitmaps.FindTexture(static_cast<GLuint>(slot));
-        bitmaps[slot] = bitmap != nullptr ? bitmap->FileName : L"";
+        bitmaps[slot] =
+            bitmap != nullptr ? std::wstring(bitmap->FileName) + (bitmap->wrapRepeat ? L" repeat" : L" clamp") : L"";
     }
     return bitmaps;
 }
@@ -252,6 +254,10 @@ LoadScope::LoadScope(int world) : m_state(std::make_unique<State>())
 
     m_state->previousWorld = gMapManager.WorldActive;
     gMapManager.WorldActive = world;
+    // Without a bitmap of another scope: a model's texture that its folders
+    // lack could be taken from one (OpenTexture uses a loaded texture of the
+    // same name).
+    Bitmaps.UnloadAllImages();
 }
 
 LoadScope::~LoadScope()
@@ -261,6 +267,8 @@ LoadScope::~LoadScope()
         if (IsLoaded(Models[slot]))
             Models[slot].Release();
     }
+    // Also the bitmaps the models did not take along (the fixed slots).
+    Bitmaps.UnloadAllImages();
     gMapManager.WorldActive = m_state->previousWorld;
     Models = m_state->previousModels;
     g_platformAudio = m_state->previousAudio;
@@ -269,7 +277,7 @@ LoadScope::~LoadScope()
     std::filesystem::current_path(m_state->previousFolder);
 }
 
-Record LoadScope::RecordLoad(const std::function<void()>& load)
+LoadChanges LoadScope::Run(const std::function<void()>& load)
 {
     std::vector<ModelSlotState> before;
     before.reserve(MAX_MODELS);
@@ -281,37 +289,45 @@ Record LoadScope::RecordLoad(const std::function<void()>& load)
 
     load();
 
-    Record record;
+    LoadChanges changes;
     for (int slot = 0; slot < MAX_MODELS; ++slot)
     {
-        const ModelSlotState after = ReadSlotState(slot);
+        ModelSlotState after = ReadSlotState(slot);
         if (!(after == before[static_cast<size_t>(slot)]))
-            AddSlot(record, slot, after);
+            changes.slots.emplace_back(slot, std::move(after));
     }
     for (const auto& [slot, file] : ReadWatchedBitmaps())
     {
         if (file != bitmapsBefore.at(slot))
-            record.push_back({"bitmap " + std::to_string(slot), PathText(file)});
+            changes.bitmaps.emplace_back(slot, file);
     }
-    for (size_t i = 0; i < m_state->audio.events.size(); ++i)
-        record.push_back({"sound event " + std::to_string(i), SoundEventText(m_state->audio.events[i])});
-    m_state->audio.events.clear();
-    for (size_t i = 0; i < TextureErrors().size(); ++i)
-        record.push_back({"texture error " + std::to_string(i), TextureErrors()[i]});
-    TextureErrors().clear();
+    changes.sounds.swap(m_state->audio.events);
+    changes.textureErrors.swap(TextureErrors());
+    return changes;
+}
+
+Record LoadScope::RecordLoad(const std::function<void()>& load)
+{
+    return ToRecord(Run(load));
+}
+
+Record ToRecord(const LoadChanges& changes)
+{
+    Record record;
+    for (const auto& [slot, state] : changes.slots)
+        AddSlot(record, slot, state);
+    for (const auto& [slot, file] : changes.bitmaps)
+        record.push_back({"bitmap " + std::to_string(slot), PathText(file)});
+    for (size_t i = 0; i < changes.sounds.size(); ++i)
+        record.push_back({"sound event " + std::to_string(i), SoundEventText(changes.sounds[i])});
+    for (size_t i = 0; i < changes.textureErrors.size(); ++i)
+        record.push_back({"texture error " + std::to_string(i), changes.textureErrors[i]});
     return record;
 }
 
 ModelSlotState LoadScope::ReadSlot(int slot) const
 {
     return ReadSlotState(slot);
-}
-
-std::vector<SoundEvent> LoadScope::TakeSoundEvents()
-{
-    std::vector<SoundEvent> events;
-    events.swap(m_state->audio.events);
-    return events;
 }
 
 std::vector<std::string> Compare(const Record& old, const Record& now)

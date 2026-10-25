@@ -1,0 +1,250 @@
+#include "stdafx.h"
+
+// One-time comparison of MN3 (monsters design, D50): every monster and NPC
+// model opens from Data/Monsters/Models.json exactly as the model code opened
+// it. Each slot is opened twice in one build: with an empty model table, so
+// OpenMonsterModel and OpenNpc run their old code, and with the shipped
+// table. It goes with the old code.
+
+#include "MonsterModelRecorder.h"
+
+#include "Audio/DSPlaySound.h"
+#include "Core/Globals/_enum.h"
+#include "Data/DataHandler/EffectData/EffectDataHandler.h"
+#include "Data/DataHandler/MonsterData/MonsterModelJsonStorage.h"
+#include "Data/GameData/ItemData/ItemDataIssue.h"
+#include "Data/GameData/MonsterData/MonsterModelDatabase.h"
+#include "Data/GameData/MonsterData/MonsterModelSlots.h"
+#include "Engine/Object/ZzzOpenData.h"
+#include "World/MapInfra/MapManager.h"
+
+#include <doctest.h>
+
+#include <algorithm>
+#include <cctype>
+#include <map>
+#include <string>
+#include <vector>
+
+namespace
+{
+using MonsterRecorder::LoadChanges;
+using MonsterRecorder::LoadScope;
+using MonsterRecorder::ModelSlotState;
+
+// Molt's file is missing: its old code closes the game (P1).
+constexpr int MoltType = MONSTER_MODEL_MOLT;
+
+const std::vector<Data::Monsters::MonsterModelDefinition>& ShippedModels()
+{
+    static const std::vector<Data::Monsters::MonsterModelDefinition> models = []
+    {
+        LoadScope scope(0);
+        std::string error;
+        REQUIRE(Data::Effects::LoadEffectTypes(error));
+        Data::Monsters::MonsterModelsLoadResult result =
+            Data::Monsters::LoadMonsterModelsFile(Data::Monsters::GetMonsterModelsFile());
+        REQUIRE_FALSE(Data::Items::HasErrors(result.issues));
+        return result.models;
+    }();
+    return models;
+}
+
+bool IsLoaded(const ModelSlotState& state)
+{
+    return state.numMeshs > 0 || state.numActions > 0;
+}
+
+// The numbers that sounds without a SOUND_* id got, as the ids the old code
+// loaded the same files with, so the two records can be compared.
+void NumberSoundsAsOld(LoadChanges& data, const LoadChanges& old)
+{
+    std::map<int, int> oldIds;
+    for (const MonsterRecorder::SoundEvent& event : data.sounds)
+    {
+        if (event.id < static_cast<int>(MAX_BUFFER))
+            continue;
+        const auto match =
+            std::find_if(old.sounds.begin(), old.sounds.end(), [&](const MonsterRecorder::SoundEvent& oldEvent)
+                         { return !oldEvent.release && oldEvent.file == event.file; });
+        if (match != old.sounds.end())
+            oldIds[event.id] = match->id;
+    }
+    for (MonsterRecorder::SoundEvent& event : data.sounds)
+    {
+        if (const auto oldId = oldIds.find(event.id); oldId != oldIds.end())
+            event.id = oldId->second;
+    }
+    for (auto& [slot, state] : data.slots)
+    {
+        for (int& value : state.sounds)
+        {
+            if (value == -1)
+                continue;
+            if (const auto oldId = oldIds.find(SOUND_MONSTER + value); oldId != oldIds.end())
+                value = oldId->second - SOUND_MONSTER;
+        }
+    }
+}
+
+// What the old code repeats changes nothing: the Dark Phoenix's shield loads
+// the same sound twice in a row (a load replaces the sound), and OpenNpc opens
+// the textures twice from the same folder, so a texture no folder has is
+// reported twice. Each is kept once, and the errors without case (the data
+// spells folders as they are on disk: "NPC" for "Npc").
+void LeaveOutRepeats(LoadChanges& changes)
+{
+    std::vector<MonsterRecorder::SoundEvent> sounds;
+    for (const MonsterRecorder::SoundEvent& event : changes.sounds)
+    {
+        const bool repeated = !sounds.empty() && !event.release && !sounds.back().release &&
+                              sounds.back().id == event.id && sounds.back().file == event.file &&
+                              sounds.back().channels == event.channels && sounds.back().spatial == event.spatial;
+        if (!repeated)
+            sounds.push_back(event);
+    }
+    changes.sounds = std::move(sounds);
+
+    std::vector<std::string> errors;
+    for (std::string error : changes.textureErrors)
+    {
+        std::transform(error.begin(), error.end(), error.begin(),
+                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+        if (std::find(errors.begin(), errors.end(), error) == errors.end())
+            errors.push_back(error);
+    }
+    std::sort(errors.begin(), errors.end());
+    changes.textureErrors = std::move(errors);
+}
+
+// The old code of the Yeti and the Elite Yeti also writes the head bone and
+// sound slots of the other's slot. These writes into a slot that is not open
+// are left out of the comparison; the test checks that they are what the
+// other's own old code sets, which its entry sets as well.
+std::vector<std::pair<int, ModelSlotState>> TakeWritesIntoClosedSlots(LoadChanges& old)
+{
+    std::vector<std::pair<int, ModelSlotState>> writes;
+    const auto closed = std::stable_partition(old.slots.begin(), old.slots.end(),
+                                              [](const auto& slot) { return IsLoaded(slot.second); });
+    writes.assign(closed, old.slots.end());
+    old.slots.erase(closed, old.slots.end());
+    return writes;
+}
+
+struct Comparison
+{
+    std::vector<std::string> differences;
+    std::vector<std::pair<int, ModelSlotState>> writesIntoClosedSlots;
+};
+
+Comparison Compare(int world, const std::function<void()>& open)
+{
+    Comparison comparison;
+    LoadChanges old;
+    {
+        g_MonsterModelDatabase.Build({});
+        LoadScope scope(world);
+        old = scope.Run(open);
+    }
+    LoadChanges data;
+    {
+        g_MonsterModelDatabase.Build(ShippedModels());
+        LoadScope scope(world);
+        data = scope.Run(open);
+    }
+    comparison.writesIntoClosedSlots = TakeWritesIntoClosedSlots(old);
+    LeaveOutRepeats(old);
+    LeaveOutRepeats(data);
+    NumberSoundsAsOld(data, old);
+    comparison.differences = MonsterRecorder::Compare(MonsterRecorder::ToRecord(old), MonsterRecorder::ToRecord(data));
+    return comparison;
+}
+
+// What a slot holds after its own old code opened it.
+ModelSlotState OpenedByOldCode(int slot)
+{
+    g_MonsterModelDatabase.Build({});
+    LoadScope scope(0);
+    if (Data::Monsters::IsMonsterRangeSlot(slot))
+        OpenMonsterModel(static_cast<EMonsterModelType>(slot - MODEL_MONSTER01));
+    else
+        OpenNpc(slot);
+    return scope.ReadSlot(slot);
+}
+
+bool HasEntry(int slot)
+{
+    return std::any_of(ShippedModels().begin(), ShippedModels().end(),
+                       [&](const auto& model) { return Data::Monsters::FindMonsterModelSlot(model.slot) == slot; });
+}
+
+void CheckMonsterModels(int world)
+{
+    int compared = 0;
+    for (int type = 0; type < MONSTER_MODEL_COUNT; ++type)
+    {
+        if (type == MoltType || !HasEntry(MODEL_MONSTER01 + type))
+            continue;
+        const Comparison comparison =
+            Compare(world, [type] { OpenMonsterModel(static_cast<EMonsterModelType>(type)); });
+        INFO("monster model type " << type << " (" << Data::Monsters::GetMonsterModelTypeName(type) << ") on world "
+                                   << world);
+        for (const std::string& difference : comparison.differences)
+        {
+            INFO(difference);
+            CHECK(false);
+        }
+        for (const auto& [slot, written] : comparison.writesIntoClosedSlots)
+        {
+            const ModelSlotState own = OpenedByOldCode(slot);
+            CHECK(written.boneHead == own.boneHead);
+            CHECK(written.sounds == own.sounds);
+        }
+        ++compared;
+    }
+    CHECK(compared > 0);
+}
+} // namespace
+
+TEST_CASE("Monster models: Models.json opens the monster models as the model code did [monsters][comparison]")
+{
+    CheckMonsterModels(0);
+}
+
+TEST_CASE("Monster models: in Chaos Castle as the model code did [monsters][comparison]")
+{
+    CheckMonsterModels(WD_18CHAOS_CASTLE);
+}
+
+TEST_CASE("Monster models: in Battle Castle as the model code did [monsters][comparison]")
+{
+    CheckMonsterModels(WD_30BATTLECASTLE);
+}
+
+TEST_CASE("Monster models: Models.json opens the NPC models as the model code did [monsters][comparison]")
+{
+    ShippedModels();
+    for (int slot = MODEL_NPC_BEGIN + 1; slot < MODEL_NPC_END; ++slot)
+    {
+        const Comparison comparison = Compare(0, [slot] { OpenNpc(slot); });
+        INFO("NPC slot " << slot << " (" << Data::Monsters::GetMonsterModelSymbol(slot) << ")");
+        for (const std::string& difference : comparison.differences)
+        {
+            INFO(difference);
+            CHECK(false);
+        }
+        CHECK(comparison.writesIntoClosedSlots.empty());
+    }
+}
+
+TEST_CASE("Monster models: the comparison opens the models from the data [monsters][comparison]")
+{
+    // A sound without an id gets a number after the SOUND_* list only when
+    // the entry opens the model.
+    g_MonsterModelDatabase.Build(ShippedModels());
+    LoadScope scope(0);
+    const LoadChanges changes = scope.Run([] { OpenMonsterModel(MONSTER_MODEL_HOUND); });
+    REQUIRE_FALSE(changes.sounds.empty());
+    CHECK(changes.sounds.front().id >= static_cast<int>(MAX_BUFFER));
+    g_MonsterModelDatabase.Build({});
+}

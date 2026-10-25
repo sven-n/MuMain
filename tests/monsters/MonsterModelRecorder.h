@@ -6,6 +6,7 @@
 #include <memory>
 #include <span>
 #include <string>
+#include <utility>
 #include <vector>
 
 class BMD;
@@ -75,6 +76,22 @@ struct ModelSlotState
 // The bitmap slots that monster loads fill (Tantallos, Crust, map loads).
 std::span<const int> WatchedBitmaps();
 
+// What one load changed.
+struct LoadChanges
+{
+    // Each slot that differs afterwards, with what it holds then.
+    std::vector<std::pair<int, ModelSlotState>> slots;
+    // The watched bitmap slots that changed: their file, and " repeat" or
+    // " clamp".
+    std::vector<std::pair<int, std::wstring>> bitmaps;
+    std::vector<SoundEvent> sounds;
+    // The game shows a dialog for each.
+    std::vector<std::string> textureErrors;
+};
+
+// The record of the changes, as values by path.
+Record ToRecord(const LoadChanges& changes);
+
 // What a load needs for the life of the scope, like the game sets it up at
 // startup: the client folder as the working folder, model slots that start
 // zeroed, uploads skipped, the recording audio backend and the active world.
@@ -88,15 +105,15 @@ public:
     LoadScope(const LoadScope&) = delete;
     LoadScope& operator=(const LoadScope&) = delete;
 
-    // Runs `load` and records what it changed: every model slot that differs
-    // afterwards, the sounds loaded and released in order, and the watched
-    // bitmap slots.
+    // Runs `load` and returns what it changed: every model slot that differs
+    // afterwards, the watched bitmap slots, the sounds loaded and released in
+    // order, and the texture errors.
+    LoadChanges Run(const std::function<void()>& load);
+    // The same, as a record.
     Record RecordLoad(const std::function<void()>& load);
 
-    // What a slot holds now, and the sounds since the last RecordLoad or
-    // TakeSoundEvents.
+    // What a slot holds now.
     ModelSlotState ReadSlot(int slot) const;
-    std::vector<SoundEvent> TakeSoundEvents();
 
 private:
     struct State;

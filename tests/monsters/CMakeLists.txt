@@ -8,6 +8,7 @@ mu_add_test(
     SOURCES
         MonsterModelRecorder.cpp
         test_monster_model_recorder.cpp
+        test_monster_model_comparison.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
