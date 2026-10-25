@@ -83,6 +83,13 @@
 	color: #dcdcdc;
 }
 .mix-list-line.hidden { display: none; }
+/* The lists are at the native text size, which does not shrink with the window: per unit of the
+   window it is 7.5 at a dp ratio of 2 but 9.6 at 1.25 and 11.7 at 0.94 (800x600, or 1280x720 at
+   75%). There the long recipes (seed extraction) wrapped into more lines and ran down under the
+   Mix button; on these small canvases the lists' lines are drawn smaller, back to about 8.7 units
+   (on the lines: the list itself takes C++'s native size inline). */
+@media (max-resolution: 1.3x) { .mix-list .mix-list-line { font-size: 0.85em; } }
+@media (max-resolution: 1x)   { .mix-list .mix-list-line { font-size: 0.75em; } }
 /* Native cuts only the prediction and source lines (CutStr); status and advice run on. */
 /* One native line each, cut at the frame's inner edge (x 182):
    nothing covers what native runs on past its frame. */
