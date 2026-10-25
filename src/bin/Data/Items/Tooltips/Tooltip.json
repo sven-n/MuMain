@@ -381,28 +381,28 @@
     "damageIncrease": {
       "en": "Increase {percent}% of Damage",
       "de": "Erhöht den Schaden um {percent}%",
-      "es": "Aumenta el daño de {percent}% of",
-      "id": "Meningkatkan Kerusakan {percent}% of",
+      "es": "Aumenta el daño un {percent}%",
+      "id": "Meningkatkan Kerusakan {percent}%",
       "ja": "ダメージ {percent}%増加",
       "pl": "Zwiększa obrażenia o {percent}%",
-      "pt": "Aumentar o dano de {percent}% of",
-      "ru": "Увеличение урона {percent}% of",
-      "tl": "Dagdagan ang {percent}% of Pinsala",
-      "uk": "Збільшення шкоди на {percent}% of",
-      "zh-TW": "增加 {percent}% of 傷害"
+      "pt": "Aumenta o dano em {percent}%",
+      "ru": "Увеличение урона на {percent}%",
+      "tl": "Dagdagan ang Pinsala nang {percent}%",
+      "uk": "Збільшення шкоди на {percent}%",
+      "zh-TW": "增加 {percent}% 傷害"
     },
     "damageAbsorb": {
       "en": "Absorb {percent}% of Damage",
       "de": "Absorbiert {percent}% des Schadens",
-      "es": "Absorber daño {percent}% of",
-      "id": "Menyerap Kerusakan {percent}% of",
+      "es": "Absorbe el {percent}% del daño",
+      "id": "Menyerap {percent}% Kerusakan",
       "ja": "ダメージ {percent}%吸収",
       "pl": "Pochłania {percent}% obrażeń",
-      "pt": "Absorver Dano {percent}% of",
-      "ru": "Поглощение {percent}% of урона",
-      "tl": "Isipsip ang {percent}% of Pinsala",
-      "uk": "Поглинання шкоди {percent}% of",
-      "zh-TW": "吸收{percent}% of傷害"
+      "pt": "Absorve {percent}% do dano",
+      "ru": "Поглощение {percent}% урона",
+      "tl": "Isipsip ang {percent}% ng Pinsala",
+      "uk": "Поглинання {percent}% шкоди",
+      "zh-TW": "吸收{percent}%傷害"
     },
     "increaseSpeed": {
       "en": "Increase speed",

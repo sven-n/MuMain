@@ -2129,11 +2129,11 @@
     <comment>legacy_id=575</comment>
   </data>
   <data name="Increase %d%% of Damage" xml:space="preserve">
-    <value>Meningkatkan Kerusakan %d%% of</value>
+    <value>Meningkatkan Kerusakan %d%%</value>
     <comment>legacy_id=577</comment>
   </data>
   <data name="Absorb %d%% of Damage" xml:space="preserve">
-    <value>Menyerap Kerusakan %d%% of</value>
+    <value>Menyerap %d%% Kerusakan</value>
     <comment>legacy_id=578</comment>
   </data>
   <data name="Increase speed" xml:space="preserve">
