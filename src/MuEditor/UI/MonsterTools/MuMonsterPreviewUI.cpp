@@ -8,6 +8,7 @@
 #include "MonsterModelValues.h"
 #include "MonsterSelection.h"
 #include "MonsterShownModel.h"
+#include "MonsterSoundPreview.h"
 #include "MonsterToolWindow.h"
 #include "MuMonsterModelUI.h"
 
@@ -220,6 +221,8 @@ void MuMonsterPreviewUI::RenderControls(int slot, const MonsterModelDefinition& 
     ImGui::SameLine();
     ImGui::Checkbox(I18N::Editor::PlayTheSounds, &m_sounds);
     ImGui::SameLine();
+    SoundPreview::RenderVolume();
+    ImGui::SameLine();
     ImGui::Checkbox(I18N::Editor::GameSpeedFactors, &m_gameFactors);
     ImGui::SameLine();
     ImGui::BeginDisabled(!m_gameFactors);
@@ -314,7 +317,7 @@ void MuMonsterPreviewUI::Restart(int slot)
     {
         if (const std::optional<ESound> sound = Engine::Object::MonsterSlotSound::Find(Models[slot], *soundSlot, 0))
         {
-            PlayBuffer(*sound, Hero != nullptr ? &Hero->Object : nullptr);
+            SoundPreview::Play(*sound);
         }
     }
 }

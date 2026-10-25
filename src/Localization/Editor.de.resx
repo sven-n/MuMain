@@ -2761,4 +2761,10 @@
   <data name="Monster model other area note" xml:space="preserve">
     <value>Das Monster erscheint mit {0}, einem Modell eines anderen Bereichs (die Kalima-Tore, der Fußball): Die Modellliste enthält Monster- und NPC-Modelle.</value>
   </data>
+  <data name="Preview volume" xml:space="preserve">
+    <value>Vorschau-Lautstärke</value>
+  </data>
+  <data name="Preview volume note" xml:space="preserve">
+    <value>Die Lautstärke der Geräuschvorschauen der Monster-Werkzeuge (Abspielen, die Geräusche der Vorschau). Die Geräuschlautstärke des Spiels bleibt, wie sie ist, und dies wird nicht gespeichert.</value>
+  </data>
 </root>

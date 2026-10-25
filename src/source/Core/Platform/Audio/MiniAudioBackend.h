@@ -45,6 +45,7 @@ public:
     // Sound effects
     void LoadSound(ESound buffer, const wchar_t* filename, int channels = MAX_CHANNEL, bool enable3D = false) override;
     [[nodiscard]] bool PlaySound(ESound buffer, const void* pObject = nullptr, bool looped = false) override;
+    [[nodiscard]] bool PlaySoundAtLevel(ESound buffer, float level) override;
     void StopSound(ESound buffer, bool resetPosition) override;
     void AllStopSound() override;
     void ReleaseSound(ESound buffer) override;
@@ -65,6 +66,10 @@ public:
     [[nodiscard]] float GetSFXVolume() const override;
 
 private:
+    // PlaySound at `volume`; `atListener` puts a 3D sound where the listener
+    // is instead of at an object.
+    bool StartSound(ESound buffer, const void* pObject, bool looped, float volume, bool atListener);
+
     // Convert DirectSound volume (dB * 100, range -10000..0) to linear 0.0..1.0
     static float DbToLinear(long dsVol);
 

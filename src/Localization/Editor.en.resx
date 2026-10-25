@@ -2782,4 +2782,10 @@
   <data name="Monster model other area note" xml:space="preserve">
     <value>The monster appears with {0}, a model of another area (the Kalima gates, the soccer ball): the model list holds monster and NPC models.</value>
   </data>
+  <data name="Preview volume" xml:space="preserve">
+    <value>Preview volume</value>
+  </data>
+  <data name="Preview volume note" xml:space="preserve">
+    <value>The volume of the monster tools' sound previews (Play, the preview's sounds). The game's sound volume stays as it is, and this is not saved.</value>
+  </data>
 </root>

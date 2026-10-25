@@ -4,6 +4,7 @@
 
 #include "MonsterSoundEventsEditor.h"
 
+#include "MonsterSoundPreview.h"
 #include "MonsterStepLabel.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
@@ -113,8 +114,8 @@ std::vector<int> OfferedAnimations(int slot, bool modelOpen)
     return animations;
 }
 
-// Plays the event's sounds where the hero stands; a sound of a model that
-// is not open is loaded as the model loads it.
+// Plays the event's sounds at the preview volume; a sound of a model that is
+// not open is loaded as the model loads it.
 void PlayEvent(const MonsterModelDefinition& model, const MonsterSoundEvent& event, bool modelOpen)
 {
     for (const std::string& name : event.sounds)
@@ -131,7 +132,7 @@ void PlayEvent(const MonsterModelDefinition& model, const MonsterSoundEvent& eve
             const std::wstring file(sound->file.begin(), sound->file.end());
             LoadWaveFile(static_cast<ESound>(*number), file.c_str(), sound->channels, sound->spatial);
         }
-        PlayBuffer(static_cast<ESound>(*number), Hero != nullptr ? &Hero->Object : nullptr);
+        SoundPreview::Play(*number);
         if (event.pick)
         {
             // A pick plays one of them: the first is heard.

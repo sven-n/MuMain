@@ -102,6 +102,59 @@ TEST_CASE("an active one-channel sound is not restarted [audio][ambient]")
     ma_audio_buffer_uninit(&audioBuffer);
 }
 
+// The editor's sound previews have their own level: they are heard while the
+// game's effect volume is 0, and a 3D sound plays where the listener is, not
+// where it played last.
+TEST_CASE("a sound played at a level ignores the effect volume and plays at the listener [audio][volume]")
+{
+    auto backend = std::make_unique<mu::MiniAudioBackend>();
+
+    ma_engine_config engineConfig = ma_engine_config_init();
+    engineConfig.noDevice = MA_TRUE;
+    engineConfig.channels = 1;
+    engineConfig.sampleRate = 48000;
+    REQUIRE(ma_engine_init(&engineConfig, &backend->m_engine) == MA_SUCCESS);
+    backend->m_initialized = true;
+
+    constexpr ma_uint64 sourceFrameCount = 1024;
+    std::array<float, sourceFrameCount> sourceFrames{};
+    sourceFrames.fill(0.25f);
+    ma_audio_buffer_config bufferConfig =
+        ma_audio_buffer_config_init(ma_format_f32, 1, sourceFrameCount, sourceFrames.data(), nullptr);
+    ma_audio_buffer audioBuffer{};
+    REQUIRE(ma_audio_buffer_init(&bufferConfig, &audioBuffer) == MA_SUCCESS);
+
+    constexpr ESound soundId = SOUND_CLICK01;
+    const int soundIndex = static_cast<int>(soundId);
+    ma_sound& sound = backend->m_sounds[soundIndex][0];
+    REQUIRE(ma_sound_init_from_data_source(&backend->m_engine, reinterpret_cast<ma_data_source*>(&audioBuffer), 0,
+                                           nullptr, &sound) == MA_SUCCESS);
+    backend->m_soundLoaded[soundIndex] = true;
+    backend->m_loadedChannels[soundIndex] = 1;
+    backend->m_activeChannel[soundIndex] = 0;
+    backend->m_sound3DEnabled[soundIndex] = true;
+    ma_sound_set_spatialization_enabled(&sound, MA_TRUE);
+    // Where a monster played it last.
+    ma_sound_set_position(&sound, 5000.0f, 3000.0f, 100.0f);
+    backend->SetSFXVolume(0.0f);
+
+    REQUIRE(backend->PlaySoundAtLevel(soundId, 0.6f));
+    CHECK(ma_sound_get_volume(&sound) == doctest::Approx(0.6f));
+    const ma_vec3f position = ma_sound_get_position(&sound);
+    const ma_vec3f listener = ma_engine_listener_get_position(&backend->m_engine, 0);
+    CHECK(position.x == doctest::Approx(listener.x));
+    CHECK(position.y == doctest::Approx(listener.y));
+    CHECK(position.z == doctest::Approx(listener.z));
+
+    // The game's sounds keep the effect volume.
+    ma_sound_stop(&sound);
+    REQUIRE(backend->PlaySound(soundId, nullptr, false));
+    CHECK(ma_sound_get_volume(&sound) == doctest::Approx(0.0f));
+
+    backend->Shutdown();
+    ma_audio_buffer_uninit(&audioBuffer);
+}
+
 TEST_CASE("sound effects resolve Windows-spelled asset paths [audio][paths]")
 {
     auto backend = std::make_unique<mu::MiniAudioBackend>();
@@ -369,9 +422,15 @@ TEST_CASE("the editor's mute starts no sound effect played once, and lets looped
     CHECK(audio.playedLooped == 1);
     CHECK(audio.stopped == 1);
 
+    // A preview at its own level is muted too.
+    PlayBufferAtLevel(SOUND_CLICK01, 1.0f);
+    CHECK(audio.played == 0);
+
     Audio::EditorMute::SetMuted(false);
     PlayBuffer(SOUND_CLICK01, nullptr, FALSE);
     CHECK(audio.played == 1);
+    PlayBufferAtLevel(SOUND_CLICK01, 0.5f);
+    CHECK(audio.played == 2);
 
     g_platformAudio = previous;
 }

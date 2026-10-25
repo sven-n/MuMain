@@ -10,6 +10,7 @@
 #include "MonsterSelection.h"
 #include "MonsterShownModel.h"
 #include "MonsterSoundEventsEditor.h"
+#include "MonsterSoundPreview.h"
 #include "MonsterStepLabel.h"
 #include "MonsterToolWindow.h"
 
@@ -122,8 +123,8 @@ ESound NumberOf(const MonsterModelSound& sound)
     return Audio::SoundNumbers::ForFile(file);
 }
 
-// Plays the sound where the hero stands, so a 3D sound is heard. A model
-// that is not open has not loaded it: it is loaded as the model loads it.
+// Plays the sound at the preview volume. A model that is not open has not
+// loaded it: it is loaded as the model loads it.
 void PlaySoundOf(const MonsterModelSound& sound, bool modelOpen)
 {
     const ESound number = NumberOf(sound);
@@ -132,7 +133,7 @@ void PlaySoundOf(const MonsterModelSound& sound, bool modelOpen)
         const std::wstring file(sound.file.begin(), sound.file.end());
         LoadWaveFile(number, file.c_str(), sound.channels, sound.spatial);
     }
-    PlayBuffer(number, Hero != nullptr ? &Hero->Object : nullptr);
+    SoundPreview::Play(number);
 }
 
 const char* SlotLabel(size_t index)
@@ -217,6 +218,7 @@ void MuMonsterModelUI::RenderModel(MonsterModelDefinition& model, int slot)
     }
     if (ImGui::CollapsingHeader(I18N::Editor::Sounds, ImGuiTreeNodeFlags_DefaultOpen))
     {
+        SoundPreview::RenderVolume();
         RenderSounds(model, slot);
         RenderSoundSlots(model);
     }

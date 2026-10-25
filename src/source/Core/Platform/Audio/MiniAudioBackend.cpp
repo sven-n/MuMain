@@ -281,6 +281,16 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
 // ---------------------------------------------------------------------------
 bool MiniAudioBackend::PlaySound(ESound buffer, const void* pObject, bool looped)
 {
+    return StartSound(buffer, pObject, looped, m_sfxVolume, false);
+}
+
+bool MiniAudioBackend::PlaySoundAtLevel(ESound buffer, float level)
+{
+    return StartSound(buffer, nullptr, false, std::clamp(level, 0.0f, 1.0f), true);
+}
+
+bool MiniAudioBackend::StartSound(ESound buffer, const void* pObject, bool looped, float volume, bool atListener)
+{
     if (!m_initialized)
     {
         return false;
@@ -349,6 +359,13 @@ bool MiniAudioBackend::PlaySound(ESound buffer, const void* pObject, bool looped
         const auto* pObj = static_cast<const OBJECT*>(pObject);
         ma_sound_set_position(pSound, pObj->Position[0], pObj->Position[1], pObj->Position[2]);
     }
+    else if (m_sound3DEnabled[bufIdx] && atListener)
+    {
+        // A preview is heard as loud as it is played, wherever the sound
+        // played last.
+        const ma_vec3f listener = ma_engine_listener_get_position(&m_engine, 0);
+        ma_sound_set_position(pSound, listener.x, listener.y, listener.z);
+    }
 
     // Store the object pointer for per-frame position updates in Set3DSoundPosition(). Only
     // track for 3D-enabled slots — mono/stereo SFX do not need per-frame position updates.
@@ -358,8 +375,8 @@ bool MiniAudioBackend::PlaySound(ESound buffer, const void* pObject, bool looped
         m_soundObjects[bufIdx] = pObject;
     }
 
-    // Apply stored SFX volume to newly-started effect
-    ma_sound_set_volume(pSound, m_sfxVolume);
+    // The effect volume, or a preview's own level.
+    ma_sound_set_volume(pSound, volume);
 
     ma_sound_start(pSound);
 

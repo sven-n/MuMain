@@ -1014,6 +1014,10 @@ bool IsSoundLoaded(ESound Buffer, const wchar_t* strFileName, int BufferChannel,
 // it (the tests' recorders).
 void ForgetLoadedSounds();
 HRESULT PlayBuffer(ESound Buffer, OBJECT* Object = nullptr, BOOL bLooped = false);
+// Plays the sound once at `Level` (0 to 1) instead of the effect volume, where
+// the listener is: the editor's previews of a sound, heard also while the
+// game's effect volume is down.
+HRESULT PlayBufferAtLevel(ESound Buffer, float Level);
 void StopBuffer(ESound Buffer, BOOL bResetPosition);
 void AllStopSound(void);
 void Set3DSoundPosition();
