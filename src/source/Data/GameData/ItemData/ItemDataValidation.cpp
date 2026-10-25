@@ -372,7 +372,8 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
             std::set<std::string> reported;
             for (const std::string& name : scan.names)
             {
-                if (GetPlaceholderValue(name, 0, profiles) || !reported.insert(name).second)
+                if (IsBuiltInPlaceholder(name) || GetPlaceholderValue(name, 0, profiles) ||
+                    !reported.insert(name).second)
                 {
                     continue;
                 }
@@ -391,10 +392,10 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
                         suggestion = SuggestPlaceholder(MakeTablePlaceholder(name), known);
                     }
                 }
-                const std::string hint = suggestion.empty() ? "a placeholder is a built-in value ({" +
-                                                                  std::string(LevelPlaceholder) + "}) or a table of " +
-                                                                  statFile + " ({" + MakeTablePlaceholder("name") + "})"
-                                                            : "did you mean {" + suggestion + "}?";
+                const std::string hint = suggestion.empty()
+                                             ? "a placeholder is a built-in value (docs/item-data.md) or a table of " +
+                                                   statFile + " ({" + MakeTablePlaceholder("name") + "})"
+                                             : "did you mean {" + suggestion + "}?";
                 issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number,
                                   DescriptionTextField(line, LocalizedString::NeutralLocale),
                                   "has the unknown placeholder {" + name + "}; " + hint});

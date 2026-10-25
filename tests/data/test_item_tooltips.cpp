@@ -9,9 +9,11 @@
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/SkillData/SkillDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ItemTooltipSnapshot.h"
+#include "Engine/Object/ItemTooltipValues.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"
@@ -22,6 +24,7 @@
 #include "UI/Inventory/ItemMng.h"
 
 #include <algorithm>
+#include <iterator>
 #include <clocale>
 #include <ctime>
 #include <cstdint>
@@ -366,4 +369,103 @@ TEST_CASE("A tooltip's durability, count and expiry lines follow the item [data]
     items.DeleteItem(&timed);
 
     SetItemTooltipTextMeasure(nullptr);
+}
+
+TEST_CASE("Every built-in placeholder but {level} is a value of the tooltip's stat lines [data][items][tooltip]")
+{
+    using namespace Engine::Items::TooltipValues;
+    const ItemTooltipValues values;
+    const auto builtIns = Data::Items::GetBuiltInPlaceholders();
+    for (const std::string_view name : builtIns)
+    {
+        INFO(std::string(name));
+        CHECK(GetItemTooltipValue(values, name).has_value() == (name != Data::Items::LevelPlaceholder));
+    }
+    CHECK_FALSE(GetItemTooltipValue(values, "sparkle").has_value());
+    // And the other way round: a value the game can fill that the placeholder checks don't know would make every
+    // description using it fail to load.
+    for (const std::string_view name : GetItemTooltipValueNames())
+    {
+        INFO(std::string(name));
+        CHECK(std::find(builtIns.begin(), builtIns.end(), name) != builtIns.end());
+    }
+}
+
+TEST_CASE("The tooltip's values of an item follow the item and the hero [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeNewDarkWizard(hero.Hero());
+
+    using namespace Engine::Items::TooltipValues;
+    ItemCreationParams params = Engine::Items::TooltipSnapshot::FullItemParameters(0, 0);
+    params.Level = 7;
+    ITEM kris;
+    FillItemFromParameters(kris, params);
+    const ItemTooltipValues values = ComputeItemTooltipValues(kris);
+    CHECK(values.damageMin == kris.DamageMin);
+    CHECK(values.damageMax == kris.DamageMax);
+    CHECK(values.hasDamage);
+    CHECK_FALSE(values.damageHarmonyBonus);
+    CHECK(values.maxDurability > 0);
+    CHECK(values.strength.required == kris.RequireStrength);
+    CHECK(values.strength.missing == kris.RequireStrength - 18);
+    CHECK_FALSE(values.strength.reduced);
+    CHECK(GetItemTooltipValue(values, "requiredStrength") == values.strength.required);
+    CHECK(GetItemTooltipValue(values, "missingStrength") == values.strength.missing);
+    CHECK(GetItemTooltipValue(values, "maxDurability") == values.maxDurability);
+    CHECK_FALSE(values.excellent);
+
+    // A socket count past the item's sockets reads only its sockets: the strength socket's seed in the next field
+    // isn't taken for a sixth socket.
+    ITEM corrupted = kris;
+    corrupted.SocketCount = 255;
+    std::fill(std::begin(corrupted.SocketSeedID), std::end(corrupted.SocketSeedID), BYTE{0});
+    std::fill(std::begin(corrupted.SocketSphereLv), std::end(corrupted.SocketSphereLv), BYTE{38});
+    CHECK_FALSE(ComputeItemTooltipValues(corrupted).strength.reduced);
+
+    // The Blade Master lacks nothing of it.
+    MakeBladeMaster(hero.Hero());
+    CHECK(ComputeItemTooltipValues(kris).strength.missing == 0);
+
+    // A Jewel of Harmony option that lowers the strength requirement (a weapon's option 3, at level 13, on a +13
+    // item) shows the lowered requirement, marked reduced (yellow); agility is untouched.
+    ItemCreationParams refined = Engine::Items::TooltipSnapshot::FullItemParameters(0, 0);
+    refined.Level = 13;
+    refined.HasHarmonyOption = true;
+    refined.HarmonyOptionType = 3;
+    refined.HarmonyOptionLevel = 13;
+    ITEM lowered;
+    FillItemFromParameters(lowered, refined);
+    StrengthenCapability capability{};
+    g_pUIJewelHarmonyinfo->GetStrengthenCapability(&capability, &lowered, 0);
+    REQUIRE(capability.SI_isNB);
+    REQUIRE(capability.SI_NB.SI_force > 0);
+    const ItemTooltipValues loweredValues = ComputeItemTooltipValues(lowered);
+    CHECK(loweredValues.strength.required == lowered.RequireStrength - capability.SI_NB.SI_force);
+    CHECK(loweredValues.strength.reduced);
+    CHECK(loweredValues.dexterity.required == lowered.RequireDexterity);
+    CHECK_FALSE(loweredValues.dexterity.reduced);
+}
+
+// Without a hero (an editor preview, before entering the world), the requirements are still shown and nothing is
+// missing, instead of reading through a null hero.
+TEST_CASE("The tooltip's values need no hero [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    CHARACTER_ATTRIBUTE* const previous = CharacterAttribute;
+    CharacterAttribute = nullptr;
+    ITEM kris;
+    FillItemFromParameters(kris, Engine::Items::TooltipSnapshot::FullItemParameters(0, 0));
+    const ItemTooltipValues values = Engine::Items::TooltipValues::ComputeItemTooltipValues(kris);
+    CharacterAttribute = previous;
+    CHECK(values.strength.required == kris.RequireStrength);
+    CHECK(values.strength.missing == 0);
+    CHECK(values.level.missing == 0);
 }

@@ -100,6 +100,7 @@ namespace Data::Items
 {
 struct ItemDefinition;
 }
+struct ItemTooltipValues;
 
 // The server's pet information that a Dark Lord pet's tooltip asks for: the Dark Horse's when it is pointed at as the
 // equipped helper, the Dark Raven's when it is pointed at in the left hand; nothing elsewhere. `inventype` is the
@@ -114,12 +115,12 @@ std::optional<PetInfoRequest> GetPetInfoRequest(int itemType, int pointedIndex, 
 
 // How wide a text is in the tooltip's text units.
 using ItemTooltipTextMeasure = int (*)(const wchar_t* text, size_t length);
-// Writes the item data's description in the UI's language, with its placeholders filled in for the item's level, into
-// TextList, TextListColor and TextBold from TextNum on: the lines of that level, each wrapped to the tooltip's width
-// and at its line breaks, the pieces in the line's color, a blank line or piece as the tooltip's own blank rows. At
-// most MaxItemDescriptionRows rows.
+// Writes the item data's description in the UI's language, with its placeholders filled in for the item (`values`,
+// and the stat file's tables at `level`), into TextList, TextListColor and TextBold from TextNum on: the lines of that
+// level, each wrapped to the tooltip's width and at its line breaks, the pieces in the line's color, a blank line or
+// piece as the tooltip's own blank rows. At most MaxItemDescriptionRows rows.
 void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, int level,
-                               ItemTooltipTextMeasure measure);
+                               const ItemTooltipValues& values, ItemTooltipTextMeasure measure);
 
 ///////////////////////////////////////////////////////////////////////////////
 // party
