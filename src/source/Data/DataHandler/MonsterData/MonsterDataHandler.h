@@ -5,6 +5,7 @@
 #ifdef _EDITOR
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/MonsterData/MonsterDefinition.h"
+#include "Data/GameData/MonsterData/MonsterModelDefinition.h"
 
 #include <optional>
 #include <span>
@@ -22,6 +23,16 @@ struct MonsterSnapshot
     std::optional<MonsterDefinition> monster;
 
     bool operator==(const MonsterSnapshot&) const = default;
+};
+
+// A model slot as the monster editor's undo keeps it: its entry, or nullopt
+// for no entry.
+struct MonsterModelSnapshot
+{
+    int slot = 0;
+    std::optional<MonsterModelDefinition> model;
+
+    bool operator==(const MonsterModelSnapshot&) const = default;
 };
 #endif
 
@@ -87,6 +98,42 @@ public:
     // was saved are gone. On errors the table stays as it is; the problems
     // found are added to `issues`.
     bool Revert(std::vector<Items::ItemDataIssue>& issues);
+
+    // The monster editor's reads and changes of the model table. A change
+    // is written into the table in place; the slots it changed that the
+    // game has open are opened again by ReopenChangedModels, between frames
+    // (D55).
+
+    // The entry of the model slot as it is now; nullopt when it has none.
+    std::optional<MonsterModelDefinition> ReadModel(int slot) const;
+    // Makes each slot what its snapshot says, exactly: the entry (stored at
+    // the snapshot's slot), or no entry for nullopt. Slots outside the
+    // monster and NPC ranges are skipped.
+    void RestoreModels(std::span<const MonsterModelSnapshot> snapshots);
+    // Writes the model table to the model list file (GetMonsterModelsFile)
+    // unless the checks of LoadModels find errors; the old file stays then.
+    // The problems found are added to `issues`.
+    bool SaveModels(std::vector<Items::ItemDataIssue>& issues);
+    // Reads the model list file again, as LoadModels does; the models that
+    // changed are opened again. On errors the table stays as it is; the
+    // problems found are added to `issues`.
+    bool RevertModels(std::vector<Items::ItemDataIssue>& issues);
+
+    // Told after ReopenChangedModels with the slots it opened again; the
+    // game clamps the animations of the characters that use them.
+    using ModelsReopenedCallback = void (*)(std::span<const int> slots);
+    void SetModelsReopenedCallback(ModelsReopenedCallback callback)
+    {
+        m_modelsReopened = callback;
+    }
+    bool HasModelsToReopen() const
+    {
+        return !m_modelsToReopen.empty();
+    }
+    // Opens the changed models that the game has open again (ModelLoader::
+    // Reopen): the file, its textures from the folders of the loaded map,
+    // the parts, the speeds and the sounds.
+    void ReopenChangedModels();
 #endif
 
 private:
@@ -98,6 +145,10 @@ private:
 
     NamesChangedCallback m_namesChanged = nullptr;
     bool m_localeObserverRegistered = false;
+#ifdef _EDITOR
+    ModelsReopenedCallback m_modelsReopened = nullptr;
+    std::vector<int> m_modelsToReopen;
+#endif
 };
 } // namespace Data::Monsters
 

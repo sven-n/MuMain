@@ -40,6 +40,14 @@ public:
     // Removes the monster's entry; false when it has none.
     bool RemoveMonster(std::string label, int number);
 
+    // Stores the model entry at its slot (MonsterModelDefinition::slot),
+    // which must have an entry, for the monster the tool shows it for (its
+    // undo selects it again; -1 for none). False, with nothing changed, when
+    // the slot has no entry or the model list's save would refuse it (no
+    // texture folder, a sound slot that names no sound, a part slot that is
+    // not one).
+    bool SetModel(std::string label, const Data::Monsters::MonsterModelDefinition& model, int monster);
+
     // The changes until EndGroup are one undo step under `label` (an import of
     // names): a number changed twice keeps its first "before" and its last
     // "after".
@@ -52,14 +60,15 @@ public:
     bool Undo();
     bool Redo();
 
-    // MonsterDataHandler::Save; the saved monsters are the history's saved
-    // state.
+    // MonsterDataHandler::Save and SaveModels, the monster list and the
+    // model list; the saved monsters and models are the history's saved
+    // state. The model list is not written when the monster list was not.
     bool Save(std::vector<Data::Items::ItemDataIssue>& issues);
-    // MonsterDataHandler::Revert; the history is dropped (OnDataReplaced) and
-    // the monsters read are the saved state.
+    // MonsterDataHandler::Revert and RevertModels; the history is dropped
+    // (OnDataReplaced) and the monsters and models read are the saved state.
     bool Revert(std::vector<Data::Items::ItemDataIssue>& issues);
-    // Drops the history: the monsters were replaced as a whole, so no step
-    // before can be undone.
+    // Drops the history: the monsters or models were replaced as a whole, so
+    // no step before can be undone.
     void OnDataReplaced();
 
     MonsterEditHistory& GetHistory()
@@ -73,6 +82,9 @@ private:
     // Stores `after` at `number` (nullopt removes the entry) and records the
     // change as one entry.
     void Change(std::string label, int number, const std::optional<Data::Monsters::MonsterDefinition>& after);
+    // The same for a model slot.
+    void ChangeModel(std::string label, int slot, const std::optional<Data::Monsters::MonsterModelDefinition>& after,
+                     int monster);
     // Into the history, or into the open group.
     void Record(MonsterEditEntry entry);
 

@@ -43,6 +43,8 @@
 #include "I18N/All.h"
 #include "Core/Utilities/AssetLoadWorld.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
+#include "GameLogic/Monsters/MonsterModelChanges.h"
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
 #include "Core/Utilities/WorldClearing.h"
@@ -486,6 +488,9 @@ void CMuEditorCore::ConnectGameHooks()
     // the item tools change an opened item model, and the game makes it again;
     // the Grand Soul pants' mesh is made their cloth grid again after.
     g_ItemDataHandler.SetOpenedModelHooks({&MuEditor::Items::DropWornCloth, &MuEditor::Items::PrepareClothMeshes});
+    // Characters of a monster model the monster tools opened again stay
+    // inside its animations.
+    g_MonsterDataHandler.SetModelsReopenedCallback(&GameLogic::Monsters::ModelChanges::ClampAnimations);
 }
 
 void CMuEditorCore::Shutdown()
@@ -541,8 +546,10 @@ void CMuEditorCore::Update()
         // only before the renderer's frame starts.
         g_MuEffectBrowserUI.BeforeFrame();
         g_MuItemModelUI.BeforeFrame();
-        // Between frames too: item models the item tools changed are opened again.
+        // Between frames too: item models the item tools changed are opened
+        // again, and so are the monster models the monster tools changed.
         ReopenChangedItemModels();
+        g_MonsterDataHandler.ReopenChangedModels();
 
         SelectWindowMode();
         UpdateKeyboardNavigation();

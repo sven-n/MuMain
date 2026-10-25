@@ -6,13 +6,17 @@
 #include "Data/DataHandler/DataIssueReport.h"
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/DataHandler/MonsterData/MonsterModelJsonStorage.h"
+#include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/GameData/MonsterData/MonsterDataValidation.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
+#include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "Data/GameData/MonsterData/MonsterModelValidation.h"
 #include "I18N/All.h"
 
+#include <algorithm>
 #include <chrono>
+#include <map>
 
 namespace Data::Monsters
 {
@@ -36,6 +40,31 @@ std::vector<MonsterDefinition> CollectMonsters()
         }
     }
     return monsters;
+}
+
+// The entries of the model table, sorted by slot.
+std::vector<MonsterModelDefinition> CollectModels()
+{
+    std::vector<MonsterModelDefinition> models;
+    for (const MonsterModelDefinition* model : g_MonsterModelDatabase.GetAll())
+    {
+        models.push_back(*model);
+    }
+    return models;
+}
+
+// The entries by slot.
+std::map<int, MonsterModelDefinition> BySlot(std::span<const MonsterModelDefinition> models)
+{
+    std::map<int, MonsterModelDefinition> bySlot;
+    for (const MonsterModelDefinition& model : models)
+    {
+        if (const std::optional<int> slot = FindMonsterModelSlot(model.slot))
+        {
+            bySlot.emplace(*slot, model);
+        }
+    }
+    return bySlot;
 }
 #endif
 
@@ -161,11 +190,7 @@ void MonsterDataHandler::Validate(std::vector<Items::ItemDataIssue>& issues) con
 
 void MonsterDataHandler::ValidateModels(std::vector<Items::ItemDataIssue>& issues) const
 {
-    std::vector<MonsterModelDefinition> models;
-    for (const MonsterModelDefinition* model : g_MonsterModelDatabase.GetAll())
-    {
-        models.push_back(*model);
-    }
+    const std::vector<MonsterModelDefinition> models = CollectModels();
     const std::string source = GetMonsterModelsFile().generic_string();
     ValidateMonsterModelNames(models, source, issues);
     ValidateMonsterModelFiles(models, source, issues);
@@ -194,6 +219,88 @@ bool MonsterDataHandler::Revert(std::vector<Items::ItemDataIssue>& issues)
     RegisterLocaleObserver();
     NotifyNamesChanged(AllNumbers);
     return true;
+}
+
+std::optional<MonsterModelDefinition> MonsterDataHandler::ReadModel(int slot) const
+{
+    const MonsterModelDefinition* model = g_MonsterModelDatabase.Find(slot);
+    return model != nullptr ? std::optional<MonsterModelDefinition>(*model) : std::nullopt;
+}
+
+void MonsterDataHandler::RestoreModels(std::span<const MonsterModelSnapshot> snapshots)
+{
+    for (const MonsterModelSnapshot& snapshot : snapshots)
+    {
+        const std::string_view symbol = GetMonsterModelSymbol(snapshot.slot);
+        if (symbol.empty())
+        {
+            continue;
+        }
+        if (snapshot.model)
+        {
+            MonsterModelDefinition model = *snapshot.model;
+            model.slot = std::string(symbol);
+            g_MonsterModelDatabase.Set(model);
+        }
+        else
+        {
+            g_MonsterModelDatabase.Remove(snapshot.slot);
+        }
+        m_modelsToReopen.push_back(snapshot.slot);
+    }
+}
+
+bool MonsterDataHandler::SaveModels(std::vector<Items::ItemDataIssue>& issues)
+{
+    return SaveMonsterModelsFile(GetMonsterModelsFile(), CollectModels(), issues);
+}
+
+bool MonsterDataHandler::RevertModels(std::vector<Items::ItemDataIssue>& issues)
+{
+    const MonsterModelsLoadResult result = LoadMonsterModelsFile(GetMonsterModelsFile());
+    issues.insert(issues.end(), result.issues.begin(), result.issues.end());
+    if (Items::HasErrors(result.issues))
+    {
+        return false;
+    }
+    // The slots whose entry the file changes, also those it removes.
+    const std::map<int, MonsterModelDefinition> before = BySlot(CollectModels());
+    const std::map<int, MonsterModelDefinition> after = BySlot(result.models);
+    for (const auto& [slot, model] : before)
+    {
+        const auto read = after.find(slot);
+        if (read == after.end() || !(read->second == model))
+        {
+            m_modelsToReopen.push_back(slot);
+        }
+    }
+    for (const auto& [slot, model] : after)
+    {
+        if (!before.contains(slot))
+        {
+            m_modelsToReopen.push_back(slot);
+        }
+    }
+    g_MonsterModelDatabase.Build(result.models);
+    return true;
+}
+
+void MonsterDataHandler::ReopenChangedModels()
+{
+    std::vector<int> slots;
+    slots.swap(m_modelsToReopen);
+    std::ranges::sort(slots);
+    slots.erase(std::unique(slots.begin(), slots.end()), slots.end());
+    std::vector<int> reopened;
+    for (const int slot : slots)
+    {
+        const std::vector<int> opened = ModelLoader::Reopen(slot);
+        reopened.insert(reopened.end(), opened.begin(), opened.end());
+    }
+    if (!reopened.empty() && m_modelsReopened != nullptr)
+    {
+        m_modelsReopened(reopened);
+    }
 }
 
 void MonsterDataHandler::NotifyNamesChanged(int number) const

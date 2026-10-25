@@ -4,6 +4,7 @@
 
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/GameData/MonsterData/MonsterDefinition.h"
+#include "Data/GameData/MonsterData/MonsterModelDefinition.h"
 
 #include <cstddef>
 #include <functional>
@@ -24,20 +25,33 @@ struct MonsterEditStep
     std::optional<Data::Monsters::MonsterDefinition> after;
 };
 
+// One model slot an edit changed: its entry before and after (nullopt: no
+// entry), and the monster the tools showed it for, which its undo selects
+// again (-1: none).
+struct MonsterModelEditStep
+{
+    int slot = 0;
+    std::optional<Data::Monsters::MonsterModelDefinition> before;
+    std::optional<Data::Monsters::MonsterModelDefinition> after;
+    int monster = -1;
+};
+
 // What one action of a tool changed, undone and redone as a whole: an edited
-// name, a kind, an added monster, an import of names. Each number is in one
-// step of an entry at most.
+// name, a kind, an added monster, an import of names, a model's speed. Each
+// number and each model slot is in one step of an entry at most.
 struct MonsterEditEntry
 {
     std::string label;
     std::vector<MonsterEditStep> steps;
+    std::vector<MonsterModelEditStep> models;
 };
 
 // The undo history of the monster tools for the session. Entries are applied
 // back through the hooks (the editor's go through MonsterDataHandler), so the
-// monster table and the names of living monsters stay in step. An entry is
-// only undone while the monsters are as it left them: a change that went past
-// the history makes the undo refuse instead of overwriting it.
+// monster and model tables, the names of living monsters and the open models
+// stay in step. An entry is only undone while the monsters and models are as
+// it left them: a change that went past the history makes the undo refuse
+// instead of overwriting it.
 class MonsterEditHistory
 {
 public:
@@ -46,6 +60,10 @@ public:
         std::function<std::optional<Data::Monsters::MonsterDefinition>(int number)> readMonster;
         // Puts these entries back exactly (nullopt removes the entry).
         std::function<void(std::span<const Data::Monsters::MonsterSnapshot> snapshots)> restoreMonsters;
+        // The same for the model entries; needed only for entries with
+        // model steps.
+        std::function<std::optional<Data::Monsters::MonsterModelDefinition>(int slot)> readModel;
+        std::function<void(std::span<const Data::Monsters::MonsterModelSnapshot> snapshots)> restoreModels;
     };
 
     // Why the last Undo or Redo did nothing.
@@ -53,7 +71,7 @@ public:
     {
         None,
         NothingToDo,
-        // The monsters are no longer as the entry expects.
+        // The monsters or models are no longer as the entry expects.
         MonstersChanged,
     };
 
@@ -81,7 +99,8 @@ public:
         return m_lastRefusal;
     }
 
-    // The number the last Undo or Redo changed first, to select it.
+    // The number the last Undo or Redo changed first, or the monster its
+    // first model step was made for, to select it.
     std::optional<int> GetLastChangedMonster() const
     {
         return m_lastChangedMonster;

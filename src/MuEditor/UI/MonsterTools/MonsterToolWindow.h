@@ -21,7 +21,7 @@ void End();
 // (UndoTargets).
 UndoTarget& GetUndoTarget();
 
-// The data the tools show changed: the monster table.
+// The data the tools show changed: the monster table or the model table.
 int GetDataVersion();
 } // namespace MuEditor::Monsters::ToolWindow
 

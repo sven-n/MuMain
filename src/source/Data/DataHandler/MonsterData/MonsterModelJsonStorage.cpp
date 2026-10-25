@@ -37,4 +37,29 @@ MonsterModelsLoadResult LoadMonsterModelsFile(const std::filesystem::path& file)
     ValidateMonsterModelFiles(result.models, source, result.issues);
     return result;
 }
+
+bool SaveMonsterModelsFile(const std::filesystem::path& file, std::span<const MonsterModelDefinition> models,
+                           std::vector<Items::ItemDataIssue>& issues)
+{
+    const std::string source = file.generic_string();
+    const std::string text = WriteMonsterModelsJson(models);
+    std::vector<MonsterModelDefinition> readBack;
+    std::vector<Items::ItemDataIssue> found;
+    ReadMonsterModelsJson(text, source, readBack, found);
+    ValidateMonsterModelNames(readBack, source, found);
+    ValidateMonsterModelFiles(readBack, source, found);
+    issues.insert(issues.end(), found.begin(), found.end());
+    if (Items::HasErrors(found))
+    {
+        return false;
+    }
+    std::string error;
+    if (!WriteTextFile(file, text, error))
+    {
+        issues.push_back({Items::ItemDataIssueSeverity::Error, source, Items::ItemDataIssue::NoItem,
+                          Items::ItemDataIssue::NoItem, "", error});
+        return false;
+    }
+    return true;
+}
 } // namespace Data::Monsters

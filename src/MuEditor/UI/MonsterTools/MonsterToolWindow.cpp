@@ -12,6 +12,7 @@
 #include "../MuEditor/UI/Common/UndoTarget.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "I18N/All.h"
 
 #include <string>
@@ -88,7 +89,7 @@ UndoTarget& GetUndoTarget()
 
 int GetDataVersion()
 {
-    return g_MonsterDatabase.GetVersion();
+    return g_MonsterDatabase.GetVersion() + g_MonsterModelDatabase.GetVersion();
 }
 } // namespace MuEditor::Monsters::ToolWindow
 

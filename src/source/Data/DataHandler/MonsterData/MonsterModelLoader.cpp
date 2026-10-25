@@ -279,6 +279,53 @@ bool Open(int slot)
     return true;
 }
 
+#ifdef _EDITOR
+std::vector<int> Reopen(int slot)
+{
+    std::vector<int> reopened;
+    if (Models == nullptr || (!IsMonsterRangeSlot(slot) && !IsNpcRangeSlot(slot)))
+    {
+        return reopened;
+    }
+    BMD& target = Models[slot];
+    if (target.NumActions <= 0 && target.NumMeshs <= 0)
+    {
+        return reopened;
+    }
+    const MonsterModelDefinition* model = g_MonsterModelDatabase.Find(slot);
+    if (model == nullptr)
+    {
+        target.Release();
+        reopened.push_back(slot);
+        return reopened;
+    }
+    Open(slot);
+    reopened.push_back(slot);
+    for (const MonsterModelPart& part : model->parts)
+    {
+        const std::optional<int> partSlot = PartSlot(part);
+        if (!partSlot)
+        {
+            continue;
+        }
+        // The map's parts that the loaded map opened; Open opened the others.
+        if (!part.worlds.empty())
+        {
+            const bool onThisMap =
+                std::find(part.worlds.begin(), part.worlds.end(), gMapManager.WorldActive) != part.worlds.end();
+            const BMD& partModel = Models[*partSlot];
+            if (!onThisMap || (partModel.NumActions <= 0 && partModel.NumMeshs <= 0))
+            {
+                continue;
+            }
+            OpenPart(part, *partSlot);
+        }
+        reopened.push_back(*partSlot);
+    }
+    return reopened;
+}
+#endif
+
 void OpenMapParts(int world)
 {
     for (const MonsterModelDefinition* model : g_MonsterModelDatabase.GetAll())

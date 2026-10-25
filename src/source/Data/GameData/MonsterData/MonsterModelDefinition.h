@@ -135,7 +135,7 @@ struct MonsterModelDefinition
     // Meshes drawn without blending.
     std::vector<int> noneBlendMeshes;
     std::vector<MonsterModelSound> sounds;
-    // nullopt: the model sets no slots.
+    // nullopt: no slot has a sound (the loader sets them all to -1).
     std::optional<MonsterSoundSlots> soundSlots;
     std::vector<MonsterModelBitmap> bitmaps;
     std::vector<MonsterModelPart> parts;

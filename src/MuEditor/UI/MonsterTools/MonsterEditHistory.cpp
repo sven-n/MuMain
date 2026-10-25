@@ -19,7 +19,7 @@ MonsterEditHistory::MonsterEditHistory(Hooks hooks) : m_hooks(std::move(hooks)) 
 
 void MonsterEditHistory::Record(MonsterEditEntry entry)
 {
-    if (entry.steps.empty())
+    if (entry.steps.empty() && entry.models.empty())
     {
         return;
     }
@@ -121,35 +121,73 @@ bool MonsterEditHistory::IsModifiedSinceSave() const
     return m_saved != m_done;
 }
 
-// Undoing: the monsters are as the entry's steps left them. Redoing: as they
-// were before them.
+// Undoing: the monsters and models are as the entry's steps left them.
+// Redoing: as they were before them.
 bool MonsterEditHistory::IsAsLeft(const MonsterEditEntry& entry, bool undoing) const
 {
-    return std::ranges::all_of(entry.steps, [&](const MonsterEditStep& step)
-                               { return m_hooks.readMonster(step.number) == (undoing ? step.after : step.before); });
+    const bool monstersAsLeft =
+        std::ranges::all_of(entry.steps, [&](const MonsterEditStep& step)
+                            { return m_hooks.readMonster(step.number) == (undoing ? step.after : step.before); });
+    return monstersAsLeft &&
+           std::ranges::all_of(entry.models, [&](const MonsterModelEditStep& step)
+                               { return m_hooks.readModel(step.slot) == (undoing ? step.after : step.before); });
 }
 
 // Undoing puts the steps back last first.
 void MonsterEditHistory::Apply(const MonsterEditEntry& entry, bool undoing)
 {
-    std::vector<Data::Monsters::MonsterSnapshot> snapshots;
-    snapshots.reserve(entry.steps.size());
-    if (undoing)
+    if (!entry.steps.empty())
     {
-        for (const MonsterEditStep& step : std::views::reverse(entry.steps))
+        std::vector<Data::Monsters::MonsterSnapshot> snapshots;
+        snapshots.reserve(entry.steps.size());
+        if (undoing)
         {
-            snapshots.push_back({step.number, step.before});
+            for (const MonsterEditStep& step : std::views::reverse(entry.steps))
+            {
+                snapshots.push_back({step.number, step.before});
+            }
         }
+        else
+        {
+            for (const MonsterEditStep& step : entry.steps)
+            {
+                snapshots.push_back({step.number, step.after});
+            }
+        }
+        m_hooks.restoreMonsters(snapshots);
+    }
+    if (!entry.models.empty())
+    {
+        std::vector<Data::Monsters::MonsterModelSnapshot> snapshots;
+        snapshots.reserve(entry.models.size());
+        if (undoing)
+        {
+            for (const MonsterModelEditStep& step : std::views::reverse(entry.models))
+            {
+                snapshots.push_back({step.slot, step.before});
+            }
+        }
+        else
+        {
+            for (const MonsterModelEditStep& step : entry.models)
+            {
+                snapshots.push_back({step.slot, step.after});
+            }
+        }
+        m_hooks.restoreModels(snapshots);
+    }
+    if (!entry.steps.empty())
+    {
+        m_lastChangedMonster = entry.steps.front().number;
+    }
+    else if (entry.models.front().monster >= 0)
+    {
+        m_lastChangedMonster = entry.models.front().monster;
     }
     else
     {
-        for (const MonsterEditStep& step : entry.steps)
-        {
-            snapshots.push_back({step.number, step.after});
-        }
+        m_lastChangedMonster.reset();
     }
-    m_hooks.restoreMonsters(snapshots);
-    m_lastChangedMonster = entry.steps.front().number;
 }
 } // namespace MuEditor::Monsters
 

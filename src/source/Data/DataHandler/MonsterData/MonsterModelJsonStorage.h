@@ -4,10 +4,11 @@
 #include "Data/GameData/MonsterData/MonsterModelDefinition.h"
 
 #include <filesystem>
+#include <span>
 #include <vector>
 
-// Reads the model list file of the monster area (Data/Monsters/Models.json),
-// see MonsterModelsJson.h.
+// Reads and writes the model list file of the monster area
+// (Data/Monsters/Models.json), see MonsterModelsJson.h.
 namespace Data::Monsters
 {
 // Data/Monsters/Models.json, relative to the client folder.
@@ -23,4 +24,11 @@ struct MonsterModelsLoadResult
 // catalogue must be loaded) and that its model files are in the working
 // folder; a file that cannot be read is an error.
 MonsterModelsLoadResult LoadMonsterModelsFile(const std::filesystem::path& file);
+
+// Writes the models to the file when they read back without errors, with the
+// checks of LoadMonsterModelsFile; the problems found are added to `issues`
+// (a missing model file is a warning and does not stop the save). The old
+// file stays when the new one cannot be written whole.
+bool SaveMonsterModelsFile(const std::filesystem::path& file, std::span<const MonsterModelDefinition> models,
+                           std::vector<Items::ItemDataIssue>& issues);
 } // namespace Data::Monsters
