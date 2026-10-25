@@ -51,6 +51,7 @@
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Engine/Object/MonsterModelBody.h"
+#include "Engine/Object/MonsterSlotSound.h"
 #include "GameLogic/Monsters/MonsterNames.h"
 
 // DevEditor function declarations
@@ -65,6 +66,16 @@ namespace
     // Character selection screen: generous axis-aligned pick box dimensions.
     constexpr float CHARSCENE_PICK_MIN_HEIGHT = 300.0f;
     constexpr float CHARSCENE_PICK_HALF_WIDTH = 72.0f;
+
+    // Plays the sound of the model's sound slot; a slot without a sound plays
+    // nothing.
+    void PlaySlotSound(OBJECT* o, int slot, int offset)
+    {
+        if (const std::optional<ESound> sound = Engine::Object::MonsterSlotSound::Find(Models[o->Type], slot, offset))
+        {
+            PlayBuffer(*sound, o);
+        }
+    }
 }
 
 void BuildCharacterScenePickOBB(const OBJECT* o, OBB_t& outOBB)
@@ -445,7 +456,7 @@ void SetPlayerStop(CHARACTER* c)
                     offset = 5;
                 }
 
-                PlayBuffer(static_cast<ESound>(SOUND_MONSTER + offset + Models[o->Type].Sounds[rand() % 2]), o);
+                PlaySlotSound(o, rand() % 2, offset);
             }
         }
         else if (c->Helper.Type == MODEL_HORN_OF_FENRIR)
@@ -805,7 +816,7 @@ void SetPlayerWalk(CHARACTER* c)
                 {
                     offset = 5;
                 }
-                PlayBuffer(static_cast<ESound>(SOUND_MONSTER + offset + Models[o->Type].Sounds[rand() % 2]), o);
+                PlaySlotSound(o, rand() % 2, offset);
             }
         }
     }
@@ -1300,7 +1311,7 @@ void SetPlayerAttack(CHARACTER* c)
                     {
                         offset = 5;
                     }
-                    PlayBuffer(static_cast<ESound>(SOUND_MONSTER + offset + Models[o->Type].Sounds[2 + rand() % 2]), o);
+                    PlaySlotSound(o, 2 + rand() % 2, offset);
                 }
             }
             else
@@ -1422,7 +1433,7 @@ void SetPlayerShock(CHARACTER* c, int Hit)
                     {
                         offset = 5;
                     }
-                    PlayBuffer(static_cast<ESound>(SOUND_MONSTER + offset + Models[o->Type].Sounds[2 + rand() % 2]), o);
+                    PlaySlotSound(o, 2 + rand() % 2, offset);
                 }
             }
             else
@@ -1557,7 +1568,7 @@ void SetPlayerDie(CHARACTER* c)
                     {
                         offset = 5;
                     }
-                    PlayBuffer(static_cast<ESound>(SOUND_MONSTER + offset + Models[o->Type].Sounds[4]), o);
+                    PlaySlotSound(o, 4, offset);
                 }
             }
             else
