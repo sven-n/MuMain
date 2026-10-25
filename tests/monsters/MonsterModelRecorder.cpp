@@ -2,6 +2,7 @@
 
 #include "MonsterModelRecorder.h"
 
+#include "Audio/DSPlaySound.h"
 #include "Core/Globals/_TextureIndex.h"
 #include "Core/Platform/IPlatformAudio.h"
 #include "Core/Text/Utf8.h"
@@ -272,6 +273,8 @@ LoadScope::LoadScope(int world) : m_state(std::make_unique<State>())
 
     m_state->previousAudio = g_platformAudio;
     g_platformAudio = &m_state->audio;
+    // The recorder holds no sound yet.
+    ForgetLoadedSounds();
 
     // OpenPlayers zeroes the slots right after making them; the loads rely on
     // that (a model whose code sets no sound slot keeps zeros).
@@ -300,6 +303,7 @@ LoadScope::~LoadScope()
     gMapManager.WorldActive = m_state->previousWorld;
     Models = m_state->previousModels;
     g_platformAudio = m_state->previousAudio;
+    ForgetLoadedSounds();
     Render::Textures::SetTextureErrorCollector(nullptr);
     Render::Sprites::SetGpuUploadsSkipped(false);
     std::filesystem::current_path(m_state->previousFolder);

@@ -1006,6 +1006,13 @@ constexpr int MAX_FILE_SOUNDS = 16384;
 
 void LoadWaveFile(ESound Buffer, const wchar_t* strFileName, int BufferChannel = MAX_CHANNEL,
                   bool Enable3DSound = false);
+// Whether LoadWaveFile loaded this file into the sound, with these channels
+// and 3D setting, and it was not released since; the file without case. A
+// load of the same again would only start over (and stop it where it plays).
+bool IsSoundLoaded(ESound Buffer, const wchar_t* strFileName, int BufferChannel, bool Enable3DSound);
+// Forgets what LoadWaveFile loaded: for an audio backend that holds none of
+// it (the tests' recorders).
+void ForgetLoadedSounds();
 HRESULT PlayBuffer(ESound Buffer, OBJECT* Object = nullptr, BOOL bLooped = false);
 void StopBuffer(ESound Buffer, BOOL bResetPosition);
 void AllStopSound(void);

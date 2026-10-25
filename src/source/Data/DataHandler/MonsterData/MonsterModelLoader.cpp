@@ -170,11 +170,18 @@ ESound SoundNumber(const MonsterModelSound& sound)
     return Audio::SoundNumbers::ForFile(ToLoaderPath(sound.file));
 }
 
+// A sound that another model or the map already loaded from the same file is
+// not loaded again: a load starts it over and stops it where it plays.
 void LoadSounds(const MonsterModelDefinition& model)
 {
     for (const MonsterModelSound& sound : model.sounds)
     {
-        LoadWaveFile(SoundNumber(sound), ToLoaderPath(sound.file).c_str(), sound.channels, sound.spatial);
+        const ESound number = SoundNumber(sound);
+        const std::wstring file = ToLoaderPath(sound.file);
+        if (!IsSoundLoaded(number, file.c_str(), sound.channels, sound.spatial))
+        {
+            LoadWaveFile(number, file.c_str(), sound.channels, sound.spatial);
+        }
     }
 }
 

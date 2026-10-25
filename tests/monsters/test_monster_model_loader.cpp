@@ -6,6 +6,7 @@
 
 #include "MonsterModelRecorder.h"
 
+#include "Audio/DSPlaySound.h"
 #include "Core/Globals/_enum.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDefinition.h"
@@ -85,4 +86,33 @@ TEST_CASE("Monster models: an NPC model whose file is missing has no body and st
     CHECK(scope.ReadSlot(MODEL_SMITH).numMeshs == 0);
     REQUIRE(changes.sounds.size() == 1);
     CHECK_FALSE(changes.sounds[0].release);
+}
+
+namespace
+{
+int CountLoads(const LoadChanges& changes, int id)
+{
+    return static_cast<int>(std::count_if(changes.sounds.begin(), changes.sounds.end(),
+                                          [&](const MonsterRecorder::SoundEvent& sound)
+                                          { return !sound.release && sound.id == id; }));
+}
+} // namespace
+
+TEST_CASE("Monster models: a sound that another model loaded from the same file is not loaded again "
+          "[monsters][models][sounds]")
+{
+    LoadScope scope(0);
+    // The Grizzly and its captain both load the Grizzly's death sound.
+    const LoadChanges grizzly = scope.Run([] { OpenMonsterModel(MONSTER_MODEL_GRIZZLY); });
+    const LoadChanges captain = scope.Run([] { OpenMonsterModel(MONSTER_MODEL_CAPTAIN_GRIZZLY); });
+    CHECK(CountLoads(grizzly, SOUND_ELBELAND_BEASTWOO_DEATH01) == 1);
+    CHECK(CountLoads(captain, SOUND_ELBELAND_BEASTWOO_DEATH01) == 0);
+    // The captain's own sounds load.
+    CHECK(CountLoads(captain, SOUND_ELBELAND_BEASTWOOLEADER_ATTACK01) == 1);
+
+    // A released sound is loaded again.
+    ReleaseBuffer(SOUND_ELBELAND_BEASTWOO_DEATH01);
+    Models[MODEL_GRIZZLY].Release();
+    const LoadChanges again = scope.Run([] { OpenMonsterModel(MONSTER_MODEL_GRIZZLY); });
+    CHECK(CountLoads(again, SOUND_ELBELAND_BEASTWOO_DEATH01) == 1);
 }
