@@ -32,6 +32,9 @@ static  const   BYTE    BOID_DOWN = 1;
 static  const   BYTE    BOID_GROUND = 2;
 static  const   BYTE    BOID_UP = 3;
 
+// Action 1 of the bird and crow models: standing on the ground.
+static  const   unsigned short BIRD_ACTION_GROUND = 1;
+
 void DeleteMount(OBJECT* Owner)
 {
     for (int i = 0; i < MAX_MOUNTS; i++)
@@ -995,10 +998,10 @@ void MoveBird(OBJECT* o)
         float Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
         if (o->Position[2] < Height)
         {
-            o->AI = BOID_UP;
-            o->Velocity = 1.1f;
-            o->Direction[2] = 20.f;
-            o->CurrentAction = 0;
+            // Land and stay until the hero moves or a random take-off (BOID_GROUND below).
+            o->Position[2] = Height;
+            o->AI = BOID_GROUND;
+            o->CurrentAction = BIRD_ACTION_GROUND;
         }
     }
     if (o->AI == BOID_GROUND)
