@@ -585,9 +585,9 @@
         {"file": "Data/Sound/mYetiDie.wav", "channels": 2, "spatial": true}
       ],
       "soundSlots": {
-        "idle": ["SOUND_MONSTER_YETI1__", "SOUND_MONSTER_YETI1__"],
-        "attack": ["SOUND_MONSTER_BULLATTACK1_", "SOUND_MONSTER_BULLATTACK1_"],
-        "die": "SOUND_MONSTER_YETIDIE__"
+        "idle": ["Data/Sound/mYeti1.wav", "Data/Sound/mYeti1.wav"],
+        "attack": ["SOUND_MONSTER_BULLATTACK1", "SOUND_MONSTER_BULLATTACK1"],
+        "die": "Data/Sound/mYetiDie.wav"
       },
       "boundingBox": {"max": [70, 70, 250]}
     },

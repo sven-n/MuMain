@@ -232,10 +232,9 @@ TEST_CASE("Monster models: a SOUND_ id that a sound slot names is loaded by a mo
     // Kalima, Vepar's the Stone Golem's death sound. The ids below no model
     // loads, here and in the original client; their slots play nothing.
     const std::set<std::string> idsNoModelLoads = {
-        "SOUND_MONSTER_BALIATTACK2_",   "SOUND_MONSTER_BULLATTACK1_", "SOUND_MONSTER_GORGONATTACK2_",
-        "SOUND_MONSTER_GORGONDIE_",     "SOUND_MONSTER_HUNTER2_",     "SOUND_MONSTER_PHOENIX2",
-        "SOUND_MONSTER_WIZARDATTACK2_", "SOUND_MONSTER_YETI1_",       "SOUND_MONSTER_YETI1__",
-        "SOUND_MONSTER_YETI1___",       "SOUND_MONSTER_YETIDIE_",     "SOUND_MONSTER_YETIDIE__",
+        "SOUND_MONSTER_BALIATTACK2_", "SOUND_MONSTER_GORGONATTACK2_", "SOUND_MONSTER_GORGONDIE_",
+        "SOUND_MONSTER_HUNTER2_",     "SOUND_MONSTER_PHOENIX2",       "SOUND_MONSTER_WIZARDATTACK2_",
+        "SOUND_MONSTER_YETI1_",       "SOUND_MONSTER_YETI1___",       "SOUND_MONSTER_YETIDIE_",
     };
     const Data::Monsters::MonsterModelsLoadResult result = LoadShipped();
     std::set<std::string> loaded;

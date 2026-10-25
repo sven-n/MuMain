@@ -71,3 +71,19 @@ TEST_CASE("Monster models: a monster model without a body has no sound in any sl
         CHECK(sound == NoSound);
     }
 }
+
+TEST_CASE("Monster models: the Dragon's sound slots play the sounds it loads (P9) [monsters][sounds]")
+{
+    MonsterRecorder::LoadScope scope(0);
+    const MonsterRecorder::LoadChanges changes = scope.Run([] { OpenMonsterModel(MONSTER_MODEL_DRAGON); });
+    const MonsterRecorder::ModelSlotState dragon = scope.ReadSlot(MODEL_DRAGON_);
+    // Idle 0 and 1, attack 2 and 3, die 4; before, they named numbers that
+    // nothing loads.
+    for (int slot = 0; slot < 5; ++slot)
+    {
+        INFO("slot " << slot);
+        const int number = SOUND_MONSTER + dragon.sounds[slot];
+        CHECK(std::any_of(changes.sounds.begin(), changes.sounds.end(), [&](const MonsterRecorder::SoundEvent& event)
+                          { return !event.release && event.id == number; }));
+    }
+}
