@@ -564,7 +564,7 @@ of its own after the owner agrees.
 | P3 | Kentauros, Berserker Warrior, Kentauros Warrior and Genocider Warrior (355, 553, 554, 556): the handler picks the skill animation and then returns "not handled", so the generic pattern overwrites it. Agreed: fixed, the skill plays attack 2 (Q-MN21). | `GM_Kanturu_1st.cpp:604-657` | MN2 |
 | P4 | Selupan never clears its skill, so normal attacks repeat the last skill's animation, sound and effects. Dark Ghost's skills 51 and 52 are the same. Agreed: fixed, the skill is cleared (Q-MN22). | `GM_Raklion.cpp:2464`, `GMEmpireGuardian2.cpp:1099` | MN2 |
 | P5 | Dark Iron Knight (565) plays attack 2 for skill 32, Dark Coolutin (564) for 77: the two constants look swapped. Agreed: swapped (Q-MN23). | `GM_Raklion.cpp:2429-2458` | MN2 |
-| P6 | Skills 78–81 of monster 566 (`MERCENARY_GUILD_FELICIA`) are not below `ATMON_SKILL_END` (78) and never animate. Agreed: they animate (Q-MN24). | `WSclient.cpp:4104` | MN2 |
+| P6 | Skills 78–81 of monster 566 (`MERCENARY_GUILD_FELICIA`) are not below `ATMON_SKILL_END` (78) and never animate. Agreed: they animate (Q-MN24). Open again (2026-10-25): 566 is an NPC (kind `npc` since MN1, Tercia's model, a PassiveNpc in OpenMU), no handler answers for it, and the question had called it a monster; not done until the owner decides again. | `WSclient.cpp:4104` | MN2 |
 | P7 | 566 (`MERCENARY_GUILD_FELICIA`) and 567 (`PRIESTESS_VEINA`) use NPC models but count as monsters: a click attacks them instead of talking, they get the red outline and are MU Helper targets, while OpenMU makes 566 a PassiveNpc with a dialogue. | `ZzzCharacter.cpp:13086` | MN1 |
 | P8 | `MonsterScript` is read by position, not by number: `MonsterScript[450]` is monster 494; the legacy edit mode does the same; `MonsterConvert` is unused. | `UI/Dialogs/CustomMessageBox.cpp:1003`, `EditObjects.cpp:73`, `ZzzInterface.cpp:4110`, `ZzzInfomation.cpp:1832` | MN1 |
 | P9 | A `-1` in sound slot 1 or 3 plays sound 209; models without slots play slot 0 of the generic table; the Dragon's slot sounds are silent. Agreed: all three fixed (Q-MN19). The other slots that name numbers nothing loads (Devil, Balrog, Bahamut, Valkyrie, Lizard King, Soldier, Giant Ogre, Dark Skull Soldier, Dark Phoenix Shield) are fixed the same way (Q-MN20). | `ZzzCharacter.cpp:436-1556`, `ZzzOpenData.cpp:2396` | MN3 |
@@ -578,6 +578,7 @@ of its own after the owner agrees.
 | P17 | `Setting_Monster` uses the character before its null check. | `ZzzCharacter.cpp:13207`, `:13212` | MN4 |
 | P18 | The random Kanturu 1st monsters (Berserker, Gigantis, Genocider, Splinter Wolf, Iron Rider) pick attack 1 with a chance that depends on the frame rate (`rand_fps_check(2)` in a one-time choice: about 21 % at 60 FPS, 9 % at 144 FPS). Agreed: 50/50 with `rand() % 2`, also for the Gigantis Warrior (Q-MN25). | `GM_Kanturu_1st.cpp:595`, `:640` | MN2 |
 | P19 | `RenderCharacter` skips the shadow of Kalima gate 1 only, not gates 2–7. | `ZzzCharacter.cpp:8715` | MN8 |
+| P20 | Destler, Kato, Galia and the Cavalry Captain (508, 510, 511, 517) play appear at speed 0, and the Cavalry Captain also attack3: their models give these animations no speed (here and in the original client), so they stand still in them until another animation starts. Destler, Kato and Galia play appear for skill 59 and in their rage, the Cavalry Captain for skills 55 (appear) and 56 (attack3). Found by Monster Checks; open, the owner decides (D51). | `Models.json`, `ZzzOpenData.cpp` before MN3 | MN3 |
 
 ## Target design
 
@@ -989,7 +990,7 @@ groups:
 | Q-MN21 | P3: the Kanturu 1st handler's skill animation is overwritten by the generic pattern. Fix? *(2026-10-25)* | Yes: the skill plays attack 2. |
 | Q-MN22 | P4: Selupan and Dark Ghost never clear their skill, so normal attacks repeat it. Fix? *(2026-10-25)* | Yes: the skill is cleared after its attack. |
 | Q-MN23 | P5: swap the skill numbers of the Dark Iron Knight and the Dark Coolutin? *(2026-10-25)* | Yes. |
-| Q-MN24 | P6: animate Felicia's skills 78–81? *(2026-10-25)* | Yes, with the animations her table entries name. |
+| Q-MN24 | P6: animate Felicia's skills 78–81? *(2026-10-25)* | Yes, with the animations her table entries name. Open again: the question called 566 a monster, but it is an NPC (P6). |
 | Q-MN25 | P18: the random Kanturu 1st monsters choose by frame rate. How should they choose? *(2026-10-25)* | 50/50 with `rand() % 2`, as the Hellas monsters. |
 
 ## Open questions
