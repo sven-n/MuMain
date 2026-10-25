@@ -2412,9 +2412,7 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         TextBold[TextNum] = false;
         TextNum++;
 
-        mu_swprintf(TextList[TextNum], L"\n");
-        TextNum++;
-        SkipNum++;
+        mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
         TextListColor[TextNum] = TEXT_COLOR_DARKRED;
         mu_swprintf(TextList[TextNum], I18N::Game::ItCanBeUsedWithItemRemoved);
@@ -2505,10 +2503,9 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             break;
         }
-        TextBold[TextNum] = false;
-        TextNum++;
+        TextBold[TextNum] = false; TextNum++;
     }
-    if (ip->Type >= ITEM_PUMPKIN_OF_LUCK && ip->Type <= ITEM_JACK_OLANTERN_DRINK) // Halloween event
+    if (ip->Type >= ITEM_PUMPKIN_OF_LUCK && ip->Type <= ITEM_JACK_OLANTERN_DRINK) //Halloween event
     {
         wchar_t Text_data[300];
         ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
@@ -2545,8 +2542,7 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
             TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
             break;
         }
-        TextBold[TextNum] = false;
-        TextNum++;
+        TextBold[TextNum] = false; TextNum++;
     }
     if (GameLogic::Items::IsChocolateBox(ip))
     {
@@ -2556,8 +2552,9 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         case ITEM_PINK_CHOCOLATE_BOX:
             if (Level == 0)
                 TextListColor[TextNum] = TEXT_COLOR_PURPLE;
-            else if (Level == 1)
-                TextListColor[TextNum] = TEXT_COLOR_PURPLE;
+            else
+                if (Level == 1)
+                    TextListColor[TextNum] = TEXT_COLOR_PURPLE;
             break;
         case ITEM_RED_CHOCOLATE_BOX:
             if (Level == 0)

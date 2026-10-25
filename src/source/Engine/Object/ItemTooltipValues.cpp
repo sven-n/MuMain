@@ -159,9 +159,7 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item)
         const ITEM_ADD_OPTION& addOption = g_pItemAddOptioninfo->GetItemAddOtioninfo(item.Type);
         values.addOptionValue1 = addOption.m_byValue1;
         values.addOptionValue2 = addOption.m_byValue2;
-        std::wstring duration;
-        g_StringTime(addOption.m_Time, duration, true);
-        values.addOptionDuration = Core::Text::ToUtf8(duration.c_str());
+        values.addOptionTime = addOption.m_Time;
     }
     ComputeDamage(item, values);
 
@@ -263,7 +261,15 @@ std::optional<std::string> GetItemTooltipText(const ItemTooltipValues& values, s
 {
     if (name == "addOptionDuration")
     {
-        return values.addOptionDuration;
+        // Written only here, for the line that shows it: g_StringTime needs the buff system, and every tooltip
+        // computes the values each frame. Without the buff system (the tests) it's an empty text.
+        if (!g_BuffSystem)
+        {
+            return std::string();
+        }
+        std::wstring duration;
+        g_StringTime(values.addOptionTime, duration, true);
+        return Core::Text::ToUtf8(duration.c_str());
     }
     return std::nullopt;
 }

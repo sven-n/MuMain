@@ -67,10 +67,10 @@ struct ItemTooltipValues
     // A timed item (one that expires).
     bool timed = false;
     // The item's add option (the potions', scrolls' and seals' effects of ItemAddOption): its two values, and how long
-    // it lasts as the tooltip writes it ("1 Hour").
+    // it lasts in seconds, which {addOptionDuration} writes as the tooltip does ("1 Hour") only for a line showing it.
     int addOptionValue1 = 0;
     int addOptionValue2 = 0;
-    std::string addOptionDuration;
+    DWORD addOptionTime = 0;
 };
 
 namespace Engine::Items::TooltipValues

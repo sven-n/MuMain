@@ -522,8 +522,12 @@ TEST_CASE("An item's add option values come from its add option [data][items][to
     CHECK(values.addOptionValue1 == addOption.m_byValue1);
     CHECK(values.addOptionValue2 == addOption.m_byValue2);
     CHECK(Engine::Items::TooltipValues::GetItemTooltipValue(values, "addOptionValue1") == static_cast<int>(addOption.m_byValue1));
-    CHECK_FALSE(values.addOptionDuration.empty());
-    CHECK(Engine::Items::TooltipValues::GetItemTooltipText(values, "addOptionDuration") == values.addOptionDuration);
+    CHECK(values.addOptionTime == addOption.m_Time);
+    // How long it lasts is written only when a line asks for it.
+    const std::optional<std::string> duration =
+        Engine::Items::TooltipValues::GetItemTooltipText(values, "addOptionDuration");
+    REQUIRE(duration.has_value());
+    CHECK_FALSE(duration->empty());
 }
 
 TEST_CASE("The Weapon of Archangel shows its reward weapon's skill mana from the skill data [data][items][tooltip]")
