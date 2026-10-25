@@ -189,17 +189,19 @@
 #item_slot_1 { position: absolute; left: 31dp; top: 0dp; width: 20dp; height: 20dp; }
 #item_slot_2 { position: absolute; left: 62dp; top: 0dp; width: 20dp; height: 20dp; }
 .item-icon { position: absolute; left: 0; top: 0; width: 20dp; height: 20dp; pointer-events: none; }
-/* The stack count above the icon, centred on it (the current client's 0.97 + Main.dll). */
+/* The stack count in the bar's oval right of each slot: 0.97 draws it with RenderNumber (005122f0,
+   9x10 digits, 6.3 apart) at x 226 + 31i, y 447 (004be48b), which puts a two- or three-digit
+   count's middle about x 17 from the slot and its digits from y 447 to 457. */
 .item-stack-label {
 	position: absolute;
-	left: 10dp;
-	top: -10dp;
+	left: 17dp;
+	top: -7dp;
 	transform: translateX(-50%);
 	color: #ffffff;
 	font-weight: bold;
 	font-effect: outline(1px #000000);
 	font-size: 11dp;
-	line-height: 11dp;
+	line-height: 10dp;
 	white-space: nowrap;
 	pointer-events: none;
 }
