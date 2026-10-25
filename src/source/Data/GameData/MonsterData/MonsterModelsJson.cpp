@@ -59,6 +59,14 @@ constexpr const char* BoundingBox = "boundingBox";
 constexpr const char* Min = "min";
 constexpr const char* Max = "max";
 constexpr const char* LinkBones = "linkBones";
+constexpr const char* SoundEvents = "soundEvents";
+constexpr const char* SoundEventWorlds = "soundEventWorlds";
+constexpr const char* Frames = "frames";
+constexpr const char* DeathEffectArmed = "deathEffectArmed";
+constexpr const char* Chance = "chance";
+constexpr const char* OneIn = "oneIn";
+constexpr const char* Draw = "draw";
+constexpr const char* Pick = "pick";
 } // namespace Keys
 
 constexpr const char* LinearFilter = "linear";
@@ -73,7 +81,8 @@ const KeySet ModelKeys{Keys::Slot,           Keys::File,
                        Keys::StreamMesh,     Keys::NoneBlendMeshes,
                        Keys::Sounds,         Keys::SoundSlots,
                        Keys::Bitmaps,        Keys::Parts,
-                       Keys::BoundingBox,    Keys::LinkBones};
+                       Keys::BoundingBox,    Keys::LinkBones,
+                       Keys::SoundEvents,    Keys::SoundEventWorlds};
 const KeySet PartKeys{Keys::Slot,       Keys::Effect,        Keys::File,  Keys::TextureFolders,
                       Keys::Animations, Keys::HoldLastFrame, Keys::Worlds};
 const KeySet SoundKeys{Keys::File, Keys::Id, Keys::Channels, Keys::Spatial};
@@ -82,6 +91,16 @@ const KeySet SecondSetKeys{Keys::Idle, Keys::Attack, Keys::Die};
 const KeySet BitmapKeys{Keys::File, Keys::Slot, Keys::Filter, Keys::Wrap};
 const KeySet WorldFolderKeys{Keys::Worlds, Keys::Folders};
 const KeySet BoxKeys{Keys::Min, Keys::Max};
+const KeySet SoundEventKeys{Keys::Animations, Keys::Frames, Keys::DeathEffectArmed,
+                            Keys::Chance,     Keys::Pick,   Keys::Sounds};
+const KeySet ChanceKeys{Keys::OneIn, Keys::Draw};
+
+constexpr const char* RandFpsDraw = "randFps";
+constexpr const char* RandDraw = "rand";
+// A sound event's chance: one in 1 to this.
+constexpr int MaxOneIn = 100000;
+// A pick chooses one of two sounds.
+constexpr size_t PickSounds = 2;
 
 constexpr std::string_view ModelFileExtension = ".bmd";
 // A texture name fits Texture_t::FileName with its terminating zero.
@@ -532,6 +551,175 @@ void ReadSoundSlots(const OrderedJson& json, std::optional<MonsterSoundSlots>& s
     soundSlots = std::move(slots);
 }
 
+std::optional<MonsterSoundDraw> FindSoundDraw(const OrderedJson& json)
+{
+    if (json.is_string() && json.get_ref<const std::string&>() == RandFpsDraw)
+    {
+        return MonsterSoundDraw::RandFps;
+    }
+    if (json.is_string() && json.get_ref<const std::string&>() == RandDraw)
+    {
+        return MonsterSoundDraw::Rand;
+    }
+    return std::nullopt;
+}
+
+bool ReadSoundDraw(const OrderedJson& json, const std::string& key, MonsterSoundDraw& draw, ModelIssues& issues)
+{
+    const std::optional<MonsterSoundDraw> found = FindSoundDraw(json);
+    if (!found)
+    {
+        issues.Error(key, std::string("must be ") + RandFpsDraw + " or " + RandDraw);
+        return false;
+    }
+    draw = *found;
+    return true;
+}
+
+bool ReadFrames(const OrderedJson& json, const std::string& key, std::pair<float, float>& frames, ModelIssues& issues)
+{
+    const auto isFrame = [](const OrderedJson& value)
+    { return value.is_number() && std::isfinite(value.get<double>()) && value.get<double>() >= 0.0; };
+    if (!json.is_array() || json.size() != 2 || !isFrame(json[0]) || !isFrame(json[1]) ||
+        json[0].get<double>() >= json[1].get<double>())
+    {
+        issues.Error(key, "must be two frames, the first below the second: [7, 8]");
+        return false;
+    }
+    frames = {static_cast<float>(json[0].get<double>()), static_cast<float>(json[1].get<double>())};
+    return true;
+}
+
+bool ReadChance(const OrderedJson& json, const std::string& key, MonsterSoundChance& chance, ModelIssues& issues)
+{
+    if (!json.is_object() || !json.contains(Keys::OneIn) || !json.contains(Keys::Draw))
+    {
+        issues.Error(key, "must be an object with oneIn and draw");
+        return false;
+    }
+    const std::optional<int> oneIn = ReadWholeIn(json[Keys::OneIn], 1, MaxOneIn);
+    if (!oneIn)
+    {
+        issues.Error(key + "." + Keys::OneIn, RangeText(1, MaxOneIn));
+        return false;
+    }
+    chance.oneIn = *oneIn;
+    if (!ReadSoundDraw(json[Keys::Draw], key + "." + Keys::Draw, chance.draw, issues))
+    {
+        return false;
+    }
+    Items::Json::WarnAboutUnknownKeys(json, ChanceKeys, key + ".",
+                                      [&](const std::string& unknown, const std::string& message)
+                                      { issues.Warning(unknown, message); });
+    return true;
+}
+
+bool ReadEventSounds(const OrderedJson& json, const std::string& key, std::vector<std::string>& sounds,
+                     ModelIssues& issues)
+{
+    if (!json.is_array() || json.empty())
+    {
+        issues.Error(key, "must be a list of one sound or more");
+        return false;
+    }
+    for (size_t i = 0; i < json.size(); ++i)
+    {
+        std::string sound;
+        if (!ReadText(json[i], key + "[" + std::to_string(i) + "]", sound, issues))
+        {
+            return false;
+        }
+        sounds.push_back(std::move(sound));
+    }
+    return true;
+}
+
+bool ReadSoundEvent(const OrderedJson& entry, const std::string& key, MonsterSoundEvent& event, ModelIssues& issues)
+{
+    if (!entry.is_object() || !entry.contains(Keys::Animations) || !entry.contains(Keys::Sounds))
+    {
+        issues.Error(key, "must be an object with animations and sounds");
+        return false;
+    }
+    const std::string prefix = key + ".";
+    if (!ReadAnimationList(entry[Keys::Animations], prefix + Keys::Animations, event.animations, issues))
+    {
+        return false;
+    }
+    if (event.animations.empty())
+    {
+        issues.Error(prefix + Keys::Animations, "must name one animation or more");
+        return false;
+    }
+    if (const auto frames = entry.find(Keys::Frames); frames != entry.end())
+    {
+        std::pair<float, float> range;
+        if (!ReadFrames(*frames, prefix + Keys::Frames, range, issues))
+        {
+            return false;
+        }
+        event.frames = range;
+    }
+    if (const auto armed = entry.find(Keys::DeathEffectArmed); armed != entry.end())
+    {
+        if (!armed->is_boolean())
+        {
+            issues.Error(prefix + Keys::DeathEffectArmed, "must be true or false");
+            return false;
+        }
+        event.deathEffectArmed = armed->get<bool>();
+    }
+    if (const auto chance = entry.find(Keys::Chance); chance != entry.end())
+    {
+        MonsterSoundChance read;
+        if (!ReadChance(*chance, prefix + Keys::Chance, read, issues))
+        {
+            return false;
+        }
+        event.chance = read;
+    }
+    if (const auto pick = entry.find(Keys::Pick); pick != entry.end())
+    {
+        MonsterSoundDraw draw = MonsterSoundDraw::RandFps;
+        if (!ReadSoundDraw(*pick, prefix + Keys::Pick, draw, issues))
+        {
+            return false;
+        }
+        event.pick = draw;
+    }
+    if (!ReadEventSounds(entry[Keys::Sounds], prefix + Keys::Sounds, event.sounds, issues))
+    {
+        return false;
+    }
+    if (event.pick && event.sounds.size() != PickSounds)
+    {
+        issues.Error(prefix + Keys::Sounds, "must be two sounds with pick");
+        return false;
+    }
+    Items::Json::WarnAboutUnknownKeys(entry, SoundEventKeys, prefix,
+                                      [&](const std::string& unknown, const std::string& message)
+                                      { issues.Warning(unknown, message); });
+    return true;
+}
+
+void ReadSoundEvents(const OrderedJson& json, std::vector<MonsterSoundEvent>& events, ModelIssues& issues)
+{
+    if (!json.is_array())
+    {
+        issues.Error(Keys::SoundEvents, "must be a list of sound events");
+        return;
+    }
+    for (size_t i = 0; i < json.size(); ++i)
+    {
+        MonsterSoundEvent event;
+        if (!ReadSoundEvent(json[i], std::string(Keys::SoundEvents) + "[" + std::to_string(i) + "]", event, issues))
+        {
+            return;
+        }
+        events.push_back(std::move(event));
+    }
+}
+
 bool ReadChoice(const OrderedJson& entry, const char* key, const std::string& field, const char* yes, const char* no,
                 bool& value, ModelIssues& issues)
 {
@@ -723,6 +911,16 @@ void ReadModelFields(const OrderedJson& json, MonsterModelDefinition& model, Mod
     {
         ReadSoundSlots(*slots, model.soundSlots, issues);
     }
+    if (const auto events = json.find(Keys::SoundEvents); events != json.end())
+    {
+        ReadSoundEvents(*events, model.soundEvents, issues);
+    }
+    if (const auto worlds = json.find(Keys::SoundEventWorlds); worlds != json.end())
+    {
+        ReadWholeList(*worlds, Keys::SoundEventWorlds, 0, std::numeric_limits<int>::max(), model.soundEventWorlds,
+                      issues);
+        std::sort(model.soundEventWorlds.begin(), model.soundEventWorlds.end());
+    }
     if (const auto bitmaps = json.find(Keys::Bitmaps); bitmaps != json.end())
     {
         ReadBitmaps(*bitmaps, model.bitmaps, issues);
@@ -913,6 +1111,38 @@ void WriteBody(const MonsterModelBody& body, OrderedJson& json)
     }
 }
 
+OrderedJson WriteSoundDraw(MonsterSoundDraw draw)
+{
+    return draw == MonsterSoundDraw::Rand ? RandDraw : RandFpsDraw;
+}
+
+OrderedJson WriteSoundEvent(const MonsterSoundEvent& event)
+{
+    OrderedJson json = OrderedJson::object();
+    json[Keys::Animations] = WriteAnimationList(event.animations);
+    if (event.frames)
+    {
+        json[Keys::Frames] = OrderedJson::array({WriteFloat(event.frames->first), WriteFloat(event.frames->second)});
+    }
+    if (event.deathEffectArmed)
+    {
+        json[Keys::DeathEffectArmed] = true;
+    }
+    if (event.chance)
+    {
+        OrderedJson chance = OrderedJson::object();
+        chance[Keys::OneIn] = event.chance->oneIn;
+        chance[Keys::Draw] = WriteSoundDraw(event.chance->draw);
+        json[Keys::Chance] = std::move(chance);
+    }
+    if (event.pick)
+    {
+        json[Keys::Pick] = WriteSoundDraw(*event.pick);
+    }
+    json[Keys::Sounds] = event.sounds;
+    return json;
+}
+
 void WriteSoundFields(const MonsterModelDefinition& model, OrderedJson& json)
 {
     if (!model.sounds.empty())
@@ -932,6 +1162,19 @@ void WriteSoundFields(const MonsterModelDefinition& model, OrderedJson& json)
             slots[Keys::SecondSet] = WriteSlotSet(*model.soundSlots->second);
         }
         json[Keys::SoundSlots] = std::move(slots);
+    }
+    if (!model.soundEvents.empty())
+    {
+        OrderedJson events = OrderedJson::array();
+        for (const MonsterSoundEvent& event : model.soundEvents)
+        {
+            events.push_back(WriteSoundEvent(event));
+        }
+        json[Keys::SoundEvents] = std::move(events);
+    }
+    if (!model.soundEventWorlds.empty())
+    {
+        json[Keys::SoundEventWorlds] = model.soundEventWorlds;
     }
 }
 
@@ -1002,7 +1245,7 @@ std::string FormatText(std::string text)
 {
     using namespace Items::Json;
     for (const char* key : {Keys::TextureFolders, Keys::HoldLastFrame, Keys::NoneBlendMeshes, Keys::Worlds,
-                            Keys::Folders, Keys::Idle, Keys::Attack, Keys::LinkBones})
+                            Keys::Folders, Keys::Idle, Keys::Attack, Keys::LinkBones, Keys::SoundEventWorlds})
     {
         text = PutListsOnOneLine(text, key);
     }
@@ -1010,7 +1253,7 @@ std::string FormatText(std::string text)
     {
         text = PutObjectsOnOneLine(text, key);
     }
-    for (const char* key : {Keys::Sounds, Keys::Bitmaps, Keys::WorldTextureFolders})
+    for (const char* key : {Keys::Sounds, Keys::Bitmaps, Keys::WorldTextureFolders, Keys::SoundEvents})
     {
         text = PutListEntriesOnOneLine(text, key);
     }

@@ -132,21 +132,41 @@ TEST_CASE("Monster attacks: the list reads and writes them, the skill tables on 
     hellas.attacks->skills = {{17, MONSTER01_ATTACK2}};
     hellas.attacks->otherwiseRandom = MonsterAttackRandom::Rand;
     hellas.attacks->clearSkill = MonsterSkillClear::Always;
-    const std::vector<MonsterDefinition> monsters = {monster, hellas};
+    MonsterDefinition trap;
+    trap.number = 101;
+    trap.names.Set("en", "Iron Stick");
+    trap.attacks.emplace();
+    trap.attacks->otherwise = MONSTER01_STOP2;
+    trap.attacks->sound = "SOUND_TRAP01";
+    trap.attacks->soundAtMonster = true;
+    MonsterDefinition fire;
+    fire.number = 102;
+    fire.names.Set("en", "Fire Trap");
+    fire.attacks.emplace();
+    fire.attacks->otherwise = NoAttackAnimation;
+    fire.attacks->sound = "SOUND_FLAME";
+    const std::vector<MonsterDefinition> monsters = {monster, hellas, trap, fire};
 
     const std::string text = Data::Monsters::WriteMonstersJson(monsters);
     CHECK(text.find(R"("monsterSkills": {"34": "attack2", "37": "appear", "41": "none"})") != std::string::npos);
     CHECK(text.find(R"("otherwise": "attack4")") != std::string::npos);
     CHECK(text.find(R"("otherwiseRandom": "rand")") != std::string::npos);
     CHECK(text.find(R"("clearSkill": "always")") != std::string::npos);
+    CHECK(text.find(R"("sound": "SOUND_TRAP01",)") != std::string::npos);
+    CHECK(text.find(R"("soundAtMonster": true)") != std::string::npos);
+    CHECK(text.find(R"("sound": "SOUND_FLAME")") != std::string::npos);
+    // A sound everywhere alike leaves soundAtMonster out.
+    CHECK(text.find("soundAtMonster") == text.rfind("soundAtMonster"));
 
     std::vector<MonsterDefinition> read;
     std::vector<ItemDataIssue> issues;
     Data::Monsters::ReadMonstersJson(text, "Monsters.json", read, issues);
     CHECK(issues.empty());
-    REQUIRE(read.size() == 2);
-    CHECK(read[0] == hellas);
-    CHECK(read[1] == monster);
+    REQUIRE(read.size() == 4);
+    CHECK(read[0] == trap);
+    CHECK(read[1] == fire);
+    CHECK(read[2] == hellas);
+    CHECK(read[3] == monster);
 }
 
 TEST_CASE("Monster attacks: without otherwise they play attack 1, and nothing is cleared [data][monsters]")
@@ -178,6 +198,10 @@ TEST_CASE("Monster attacks: wrong values are errors that name the monster and th
              {R"({ "otherwiseRandom": "dice" })", "monster 456 attacks.otherwiseRandom", "rand, randFps or bali"},
              {R"({ "otherwise": "attack1", "otherwiseRandom": "rand" })", "monster 456 attacks", "not both"},
              {R"({ "clearSkill": "sometimes" })", "monster 456 attacks.clearSkill", "never, onMatch"},
+             {R"({ "sound": "SOUND_NOBODY_KNOWS" })", "monster 456 attacks.sound", "SOUND_ id"},
+             {R"({ "sound": 3 })", "monster 456 attacks.sound", "SOUND_ id"},
+             {R"({ "sound": "SOUND_TRAP01", "soundAtMonster": 1 })", "monster 456 attacks.soundAtMonster",
+              "true or false"},
          })
     {
         INFO(wrong.attacks);

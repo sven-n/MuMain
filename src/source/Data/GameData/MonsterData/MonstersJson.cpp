@@ -5,6 +5,7 @@
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/MonsterData/MonsterAnimations.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
+#include "Data/GameData/MonsterData/MonsterSoundIds.h"
 
 #include <algorithm>
 #include <optional>
@@ -29,6 +30,8 @@ constexpr const char* SkillsKey = "skills";
 constexpr const char* OtherwiseKey = "otherwise";
 constexpr const char* OtherwiseRandomKey = "otherwiseRandom";
 constexpr const char* ClearSkillKey = "clearSkill";
+constexpr const char* SoundKey = "sound";
+constexpr const char* SoundAtMonsterKey = "soundAtMonster";
 constexpr const char* NoAnimationName = "none";
 // The skill numbers the packets carry (a WORD; 65535 is "no skill").
 constexpr long long MaxSkillNumber = 65534;
@@ -258,8 +261,34 @@ bool ReadAttacks(const OrderedJson& json, int number, std::optional<MonsterAttac
             valid = false;
         }
     }
+    if (const auto sound = value->find(SoundKey); sound != value->end())
+    {
+        if (sound->is_string() && FindMonsterSoundId(sound->get<std::string>()))
+        {
+            read.sound = sound->get<std::string>();
+        }
+        else
+        {
+            issues.Error(field + "." + SoundKey, "must be a SOUND_ id that the monster data can name", number);
+            valid = false;
+        }
+    }
+    if (const auto atMonster = value->find(SoundAtMonsterKey); atMonster != value->end())
+    {
+        if (atMonster->is_boolean())
+        {
+            read.soundAtMonster = atMonster->get<bool>();
+        }
+        else
+        {
+            issues.Error(field + "." + SoundAtMonsterKey, "must be true or false", number);
+            valid = false;
+        }
+    }
     Items::Json::WarnAboutUnknownKeys(
-        *value, {MonsterSkillsKey, SkillsKey, OtherwiseKey, OtherwiseRandomKey, ClearSkillKey}, field + " ",
+        *value,
+        {MonsterSkillsKey, SkillsKey, OtherwiseKey, OtherwiseRandomKey, ClearSkillKey, SoundKey, SoundAtMonsterKey},
+        field + " ",
         [&](const std::string& unknown, const std::string& message) { issues.Warning(unknown, message, number); });
     if (valid)
     {
@@ -298,6 +327,14 @@ OrderedJson WriteAttacks(const MonsterAttacks& attacks)
         json[OtherwiseKey] = AttackAnimationName(attacks.otherwise);
     }
     json[ClearSkillKey] = std::string(GetMonsterSkillClearName(attacks.clearSkill));
+    if (!attacks.sound.empty())
+    {
+        json[SoundKey] = attacks.sound;
+        if (attacks.soundAtMonster)
+        {
+            json[SoundAtMonsterKey] = true;
+        }
+    }
     return json;
 }
 

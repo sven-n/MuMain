@@ -3,6 +3,7 @@
 #include "Core/Globals/_define.h"
 
 #include <optional>
+#include <string>
 #include <string_view>
 #include <utility>
 #include <vector>
@@ -58,6 +59,11 @@ struct MonsterAttacks
     // Picks that in place of `otherwise` when it is set.
     std::optional<MonsterAttackRandom> otherwiseRandom;
     MonsterSkillClear clearSkill = MonsterSkillClear::Never;
+    // A SOUND_ id the attacks play each time they play (the traps, Q-MN28);
+    // empty: none.
+    std::string sound;
+    // At the monster (a 3D sound) instead of everywhere alike.
+    bool soundAtMonster = false;
 
     bool operator==(const MonsterAttacks&) const = default;
 };

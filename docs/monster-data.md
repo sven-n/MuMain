@@ -209,6 +209,8 @@ to `MuError.log`:
 | `noneBlendMeshes` | Meshes drawn without blending |
 | `sounds` | The sounds the model loads: `file`, `channels` (how many can play at once), `spatial` (3D, louder near the hero), and `id` for a sound that keeps its `SOUND_*` number, see below |
 | `soundSlots` | What the game plays when a character of the model stands or walks (`idle`, two), attacks or is hit (`attack`, two) and dies (`die`); of a pair it picks one at random. A slot names a sound of the model (its `id`, or its `file` when it has none) or any `SOUND_*` number; `null` is no sound. `secondSet` has the sounds a monster with SubType 9 plays (five numbers further on). Without `soundSlots` no slot has a sound |
+| `soundEvents` | Sounds the game plays on top of the slots, see [Sound events](#sound-events) |
+| `soundEventWorlds` | The maps the sound events play on; without it every map |
 | `bitmaps` | Bitmaps loaded into fixed bitmap slots that the model's code draws with: `file` below `Data/`, `slot` (`BITMAP_MONSTER_SKIN`), `filter` (`linear` or `nearest`), `wrap` (`repeat` or `clamp`) |
 | `parts` | Models loaded with it: `slot` (an NPC slot) or `effect` (an effect type of the effect catalogue), `file`, `textureFolders`, `animations`, `holdLastFrame` (no range defaults), and `worlds` for parts loaded with a map instead (the Kundun parts in Kalima, the Totem Golem's in Elbeland) |
 | `boundingBox` | `min` and `max` of a character's box; without one -60, -60, 0 to 50, 50, 150 |
@@ -222,6 +224,35 @@ number, whichever model loaded it (the Giant Ogre's attack plays the Dark
 Skull Soldier's `SOUND_MONSTER_BLACKSKULLATTACK` in Kalima). Some slots name
 numbers that no model loads, as in the original client; they play nothing (a
 test lists them).
+
+### Sound events
+
+`soundEvents` are sounds the game plays for a character of the model while it
+is in one of the event's animations, when it starts an attack, is hit or
+dies, at each step of a walk and at the end of each loop of stop1 and stop2,
+and only within 500 units of the hero (the Empire Guardian bosses' steps):
+
+```json
+"soundEvents": [
+  {"animations": ["walk"], "frames": [7, 8], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01"]},
+  {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_RAKLION_ICEGIANT_MOVE"]},
+  {"animations": ["stop1"], "pick": "rand", "sounds": ["SOUND_XMAS_SANTA_IDLE_1", "SOUND_XMAS_SANTA_IDLE_2"]},
+  {"animations": ["die"], "deathEffectArmed": true, "sounds": ["SOUND_XMAS_SNOWMAN_DEATH_1"]}
+],
+"soundEventWorlds": [69, 70, 71, 72]
+```
+
+| Field | Meaning |
+|---|---|
+| `animations` | The animations it plays in |
+| `frames` | Only while the animation's frame is from the first number to below the second |
+| `deathEffectArmed` | Only while the character's death effect is armed |
+| `chance` | Plays with a chance of one in `oneIn`, drawn as `draw` says: `rand` (`rand() % oneIn == 0`) or `randFps` (the original client's `rand_fps_check`, whose chance depends on the frame rate) |
+| `pick` | Plays the first of the two sounds when a draw of one in two comes up, else the second (`rand` or `randFps`) |
+| `sounds` | The sounds, played together (one of the two with `pick`), each named as a slot names it |
+
+One call can play several events, in their order; their draws come in that
+order too.
 
 ### What the code adds
 
@@ -263,6 +294,8 @@ skill it attacks with (Selupan's):
 | `otherwise` | What any other skill, a stale skill or a normal attack plays; `attack1` when left out |
 | `otherwiseRandom` | In place of `otherwise`, a draw of the original client: `rand` (attack 1 or 2, half and half), `randFps` (attack 1 or 2 with a chance that depends on the frame rate) or `bali` (Bali's draw of attack 1 to 4) |
 | `clearSkill` | When the monster skill is cleared: `never` (when left out), `onMatch` (an entry named it), `onNoMatch` (no entry named it), `always` (right after the animation was chosen) or `afterAttack` (when the attack's animation ends) |
+| `sound` | A `SOUND_*` sound the attacks play each time they play (the traps') |
+| `soundAtMonster` | The sound plays at the monster (3D) instead of everywhere alike |
 
 An animation is a name of the model's animations (`attack1` to `attack5`,
 `appear`, `shock`, `stop2`, …) or `none`: the animation that plays goes on.

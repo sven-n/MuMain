@@ -45,6 +45,48 @@ struct MonsterSoundSlots
     bool operator==(const MonsterSoundSlots&) const = default;
 };
 
+// How a sound event draws: rand_fps_check as the original client did, whose
+// chance depends on the frame rate when it is drawn once per step, attack,
+// hit or idle loop, or rand().
+enum class MonsterSoundDraw
+{
+    RandFps,
+    Rand,
+};
+
+// A chance of one in `oneIn`: rand_fps_check(oneIn), or rand() % oneIn == 0.
+struct MonsterSoundChance
+{
+    int oneIn = 1;
+    MonsterSoundDraw draw = MonsterSoundDraw::RandFps;
+
+    bool operator==(const MonsterSoundChance&) const = default;
+};
+
+// Sounds that the game plays for a character of the model while it is in one
+// of `animations` (monsters design, MN7): PlayMonsterSound, at the start of an
+// attack, a hit and the death, at each step of a walk and at the end of each
+// loop of stop1 and stop2, on top of the sound slots.
+struct MonsterSoundEvent
+{
+    // Sorted.
+    std::vector<int> animations;
+    // Only while the animation's frame is from `first` to below `second`.
+    std::optional<std::pair<float, float>> frames;
+    // Only while the character's death effect is armed (OBJECT::LifeTime 100).
+    bool deathEffectArmed = false;
+    std::optional<MonsterSoundChance> chance;
+    // Plays the first of two sounds when a draw of one in two comes up
+    // (rand_fps_check(2), or rand() % 2 == 0), else the second.
+    std::optional<MonsterSoundDraw> pick;
+    // The sounds, played together (one of the two with `pick`), each named
+    // as a sound slot names it: by its id, or by the file of a sound of the
+    // model without one.
+    std::vector<std::string> sounds;
+
+    bool operator==(const MonsterSoundEvent&) const = default;
+};
+
 // Texture folders that the model uses on some maps instead of its own.
 struct MonsterModelWorldFolders
 {
@@ -137,6 +179,11 @@ struct MonsterModelDefinition
     std::vector<MonsterModelSound> sounds;
     // nullopt: no slot has a sound (the loader sets them all to -1).
     std::optional<MonsterSoundSlots> soundSlots;
+    // In order: one call can play several, and their draws come in this
+    // order.
+    std::vector<MonsterSoundEvent> soundEvents;
+    // The maps the sound events play on; empty: every map.
+    std::vector<int> soundEventWorlds;
     std::vector<MonsterModelBitmap> bitmaps;
     std::vector<MonsterModelPart> parts;
     MonsterModelBody body;

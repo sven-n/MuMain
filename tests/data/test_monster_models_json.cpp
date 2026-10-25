@@ -6,6 +6,7 @@
 #include "Core/Globals/_enum.h"
 #include "Data/GameData/MonsterData/MonsterAnimations.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
+#include "Data/GameData/MonsterData/MonsterModelValidation.h"
 #include "Data/GameData/MonsterData/MonsterModelsJson.h"
 
 #include <algorithm>
@@ -84,6 +85,21 @@ MonsterModelDefinition FullModel()
     slots.first = {"SOUND_MONSTER_DARKKNIGHT1", "SOUND_MONSTER_DARKKNIGHT1", "", "", "Data/Sound/mDarkKnightDie.wav"};
     slots.second = Data::Monsters::MonsterSoundSlotSet{"a", "b", "c", "d", "e"};
     model.soundSlots = slots;
+    Data::Monsters::MonsterSoundEvent walk;
+    walk.animations = {MONSTER01_WALK};
+    walk.frames = std::pair<float, float>{7.0f, 8.0f};
+    walk.sounds = {"SOUND_MONSTER_DARKKNIGHT1"};
+    Data::Monsters::MonsterSoundEvent breath;
+    breath.animations = {MONSTER01_STOP1, MONSTER01_STOP2};
+    breath.chance = Data::Monsters::MonsterSoundChance{100, Data::Monsters::MonsterSoundDraw::Rand};
+    breath.pick = Data::Monsters::MonsterSoundDraw::RandFps;
+    breath.sounds = {"SOUND_MONSTER_DARKKNIGHT1", "Data/Sound/mDarkKnightDie.wav"};
+    Data::Monsters::MonsterSoundEvent die;
+    die.animations = {MONSTER01_DIE};
+    die.deathEffectArmed = true;
+    die.sounds = {"Data/Sound/mDarkKnightDie.wav", "SOUND_MONSTER_DARKKNIGHT1"};
+    model.soundEvents = {walk, breath, die};
+    model.soundEventWorlds = {69, 70};
     model.bitmaps = {{"Monster/bv01_2.jpg", "BITMAP_MONSTER_SKIN", true, true}, {"Monster/iui02.tga", "BITMAP_ROBE+3"}};
     Data::Monsters::MonsterModelPart part;
     part.effect = "totemGolemPart1";
@@ -162,6 +178,61 @@ TEST_CASE("Monster models: the writer sorts by slot and puts short values on one
 )");
 }
 
+TEST_CASE("Monster models: each sound event is written on a line of its own [data][monsters]")
+{
+    MonsterModelDefinition model;
+    model.slot = "MONSTER_MODEL_HOUND";
+    model.load.file = "Data/Monster/Monster02.bmd";
+    model.load.textureFolders = {"Monster"};
+    Data::Monsters::MonsterSoundEvent walk;
+    walk.animations = {MONSTER01_WALK};
+    walk.frames = std::pair<float, float>{1.0f, 2.5f};
+    walk.sounds = {"SOUND_KARUTAN_ORCUS_MOVE1"};
+    Data::Monsters::MonsterSoundEvent attack;
+    attack.animations = {MONSTER01_ATTACK1, MONSTER01_ATTACK2};
+    attack.chance = Data::Monsters::MonsterSoundChance{3, Data::Monsters::MonsterSoundDraw::RandFps};
+    attack.pick = Data::Monsters::MonsterSoundDraw::Rand;
+    attack.sounds = {"SOUND_KARUTAN_ORCUS_ATTACK1", "SOUND_KARUTAN_ORCUS_ATTACK2"};
+    model.soundEvents = {walk, attack};
+    model.soundEventWorlds = {80, 81};
+
+    const std::string text = Data::Monsters::WriteMonsterModelsJson(std::vector<MonsterModelDefinition>{model});
+    CHECK(text.find(R"(      "soundEvents": [
+        {"animations": ["walk"], "frames": [1, 2.5], "sounds": ["SOUND_KARUTAN_ORCUS_MOVE1"]},
+        {"animations": ["attack1", "attack2"], "chance": {"oneIn": 3, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_KARUTAN_ORCUS_ATTACK1", "SOUND_KARUTAN_ORCUS_ATTACK2"]}
+      ],
+      "soundEventWorlds": [80, 81])") != std::string::npos);
+    INFO(text);
+    const ReadResult read = Read(text);
+    INFO(Messages(read.issues));
+    CHECK(read.issues.empty());
+    REQUIRE(read.models.size() == 1);
+    CHECK(read.models[0] == model);
+}
+
+TEST_CASE("Monster models: a sound event names a sound of the model or a SOUND_ id [data][monsters]")
+{
+    MonsterModelDefinition model;
+    model.slot = "MONSTER_MODEL_HOUND";
+    model.load.file = "Data/Monster/Monster02.bmd";
+    model.load.textureFolders = {"Monster"};
+    model.sounds = {{"Data/Sound/mHound1.wav", "", 2, true}};
+    Data::Monsters::MonsterSoundEvent event;
+    event.animations = {MONSTER01_ATTACK1};
+    // The model's sound by its file, an id the data can name, and neither.
+    event.sounds = {"Data/Sound/mHound1.wav", "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "Data/Sound/mNobody.wav"};
+    model.soundEvents = {event};
+    std::vector<ItemDataIssue> issues;
+
+    Data::Monsters::ValidateMonsterModelNames(std::vector<MonsterModelDefinition>{model}, "Models.json", issues);
+
+    INFO(Messages(issues));
+    REQUIRE(issues.size() == 1);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Error);
+    CHECK(issues[0].field == "model MONSTER_MODEL_HOUND soundEvents[0].sounds[2]");
+    CHECK(issues[0].message.find("is no sound of the model") != std::string::npos);
+}
+
 TEST_CASE("Monster models: a speed is written as the shortest text that reads back the same [data][monsters]")
 {
     MonsterModelDefinition model;
@@ -219,6 +290,28 @@ TEST_CASE("Monster models: wrong values are errors that name the model and the f
         {Model("MONSTER_MODEL_HOUND", R"("boundingBox": {"min": [0, 0]})"), "model MONSTER_MODEL_HOUND boundingBox.min",
          "three numbers"},
         {Model("MONSTER_MODEL_HOUND", R"("headBone": 1.5)"), "model MONSTER_MODEL_HOUND headBone", "whole number"},
+        {Model("MONSTER_MODEL_HOUND", R"("soundEvents": [{"sounds": ["a"]}])"),
+         "model MONSTER_MODEL_HOUND soundEvents[0]", "animations and sounds"},
+        {Model("MONSTER_MODEL_HOUND", R"("soundEvents": [{"animations": [], "sounds": ["a"]}])"),
+         "model MONSTER_MODEL_HOUND soundEvents[0].animations", "one animation or more"},
+        {Model("MONSTER_MODEL_HOUND", R"("soundEvents": [{"animations": ["walk"], "sounds": []}])"),
+         "model MONSTER_MODEL_HOUND soundEvents[0].sounds", "one sound or more"},
+        {Model("MONSTER_MODEL_HOUND",
+               R"("soundEvents": [{"animations": ["walk"], "frames": [8, 7], "sounds": ["a"]}])"),
+         "model MONSTER_MODEL_HOUND soundEvents[0].frames", "first below the second"},
+        {Model("MONSTER_MODEL_HOUND",
+               R"("soundEvents": [{"animations": ["walk"], "chance": {"oneIn": 0, "draw": "rand"}, "sounds": ["a"]}])"),
+         "model MONSTER_MODEL_HOUND soundEvents[0].chance.oneIn", "1 to 100000"},
+        {Model("MONSTER_MODEL_HOUND",
+               R"("soundEvents": [{"animations": ["walk"], "chance": {"oneIn": 2, "draw": "dice"}, "sounds": ["a"]}])"),
+         "model MONSTER_MODEL_HOUND soundEvents[0].chance.draw", "randFps or rand"},
+        {Model("MONSTER_MODEL_HOUND", R"("soundEvents": [{"animations": ["walk"], "pick": "rand", "sounds": ["a"]}])"),
+         "model MONSTER_MODEL_HOUND soundEvents[0].sounds", "two sounds with pick"},
+        {Model("MONSTER_MODEL_HOUND",
+               R"("soundEvents": [{"animations": ["die"], "deathEffectArmed": 1, "sounds": ["a"]}])"),
+         "model MONSTER_MODEL_HOUND soundEvents[0].deathEffectArmed", "true or false"},
+        {Model("MONSTER_MODEL_HOUND", R"("soundEventWorlds": [69, -1])"),
+         "model MONSTER_MODEL_HOUND soundEventWorlds[1]", "whole number"},
     };
     for (const Case& test : cases)
     {

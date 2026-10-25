@@ -80,6 +80,21 @@ void ValidateSounds(const MonsterModelDefinition& model, ModelProblems& problems
             ValidateSlotSet(model, *model.soundSlots->second, "soundSlots.secondSet", problems);
         }
     }
+    for (size_t event = 0; event < model.soundEvents.size(); ++event)
+    {
+        const std::vector<std::string>& sounds = model.soundEvents[event].sounds;
+        for (size_t i = 0; i < sounds.size(); ++i)
+        {
+            if (NamesSoundOfModel(model, sounds[i]) || FindMonsterSoundId(sounds[i]))
+            {
+                continue;
+            }
+            problems.Add(ItemDataIssueSeverity::Error,
+                         "soundEvents[" + std::to_string(event) + "].sounds[" + std::to_string(i) + "]",
+                         "\"" + sounds[i] +
+                             "\" is no sound of the model (its id, or its file when it has none) and no SOUND_ id");
+        }
+    }
 }
 
 void ValidateParts(const MonsterModelDefinition& model, ModelProblems& problems)
