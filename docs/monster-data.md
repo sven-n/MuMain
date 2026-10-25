@@ -1,15 +1,20 @@
 # Monster data
 
 The monster list gives every monster and NPC number the client knows its
-names and its kind. It lives in `src/bin/Data/Monsters/Monsters.json` and is
-loaded once at startup into a table by number. It replaces the original
-client's name files (`Data/Local/<Language>/NpcName_<Language>.txt`), which
-the repository no longer ships.
+names, its kind and the model it appears with. It lives in
+`src/bin/Data/Monsters/Monsters.json` and is loaded once at startup into a
+table by number. It replaces the original client's name files
+(`Data/Local/<Language>/NpcName_<Language>.txt`), which the repository no
+longer ships.
 
-How a monster looks, its setup when it appears and its attacks are still
-code, chosen by its number; later phases move them into the monster data. The
-number and the names are what OpenMU calls a monster's `Number` and
-`Designation`, so they can later be exchanged with the server.
+The models are a list of their own, `src/bin/Data/Monsters/Models.json`: the
+file, textures, animation speeds and sounds of each monster and NPC model
+(see [Models](#models)). Which model a monster gets is still chosen by code
+when it appears (its creator); a monster's `model` names the model the code
+chooses, and a test checks that they agree. Its setup when it appears and its
+attacks are still code, chosen by its number; later phases move them into the
+monster data. The number and the names are what OpenMU calls a monster's
+`Number` and `Designation`, so they can later be exchanged with the server.
 
 Design and plans: [monsters design](superpowers/specs/2026-10-23-data-driven-monsters-design.md).
 
@@ -19,7 +24,8 @@ Design and plans: [monsters design](superpowers/specs/2026-10-23-data-driven-mon
 
 | File | What |
 |---|---|
-| `Monsters.json` | The monsters and NPCs: number, names and kind |
+| `Monsters.json` | The monsters and NPCs: number, names, kind and model |
+| `Models.json` | The monster and NPC models, see [Models](#models) |
 
 ```json
 {
@@ -28,12 +34,14 @@ Design and plans: [monsters design](superpowers/specs/2026-10-23-data-driven-mon
     {
       "number": 2,
       "name": {"en": "Budge Dragon", "es": "Dragón Escurridizo", "pt": "Dragão Lento"},
-      "kind": "monster"
+      "kind": "monster",
+      "model": "MONSTER_MODEL_BUDGE_DRAGON"
     },
     {
       "number": 251,
       "name": {"en": "Hanzo the Blacksmith", "es": "Hanzo el Herrero", "pt": "Hanzo, o ferreiro"},
-      "kind": "npc"
+      "kind": "npc",
+      "model": "MODEL_SMITH"
     }
   ]
 }
@@ -42,7 +50,8 @@ Design and plans: [monsters design](superpowers/specs/2026-10-23-data-driven-mon
 - A monster is identified by its `number`, 0–1023: the number the server
   sends when a monster or NPC appears (packet 0x13 has 10 bits for it). Each
   number has at most one entry.
-- Every entry has all three fields.
+- Every entry has `number`, `name` and `kind`; `model` may be left out (every
+  shipped entry has it).
 - Monsters are sorted by number and the fields always come in the same
   order, so saving unchanged data gives the same file (a test checks that
   the shipped file is written this way).
@@ -56,6 +65,7 @@ Design and plans: [monsters design](superpowers/specs/2026-10-23-data-driven-mon
 | `number` | The monster number, 0–1023 |
 | `name` | The names by language, see [Names and translations](#names-and-translations) |
 | `kind` | `monster`, `npc`, `trap` or `other`: what the game does with it, see [Kinds](#kinds) |
+| `model` | The model it appears with: a slot of the model list (`MONSTER_MODEL_HOUND`, `MODEL_SMITH`), `player` (a player-shaped monster: the player model with class and items), `MODEL_WARCRAFT` or `MODEL_BALL` (models of other areas: the Kalima gates, the soccer ball), or `mapObject <number>` (a map object, a trap). The code still chooses the model; the field says which one, for the tools |
 
 ### Names and translations
 
@@ -140,9 +150,102 @@ to `MuError.log`:
   character already on screen whose entry is removed in the editor keeps its
   name until it appears again.
 
+## Models
+
+`Models.json` has one entry per model slot of the monster and NPC models.
+
+```json
+{
+  "formatVersion": 1,
+  "models": [
+    {
+      "slot": "MONSTER_MODEL_BULL_FIGHTER",
+      "file": "Data/Monster/Monster01.bmd",
+      "textureFolders": ["Monster"],
+      "headBone": 20,
+      "sounds": [
+        {"file": "Data/Sound/mBull1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBullAttack1.wav", "id": "SOUND_MONSTER_BULLATTACK1", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBullDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundSlots": {
+        "idle": ["Data/Sound/mBull1.wav", "Data/Sound/mBull1.wav"],
+        "attack": ["SOUND_MONSTER_BULLATTACK1", null],
+        "die": "Data/Sound/mBullDie.wav"
+      },
+      "linkBones": [42, 33]
+    }
+  ]
+}
+```
+
+- `slot` names the model slot by the code's symbol. The **monster range**
+  has the `MONSTER_MODEL_*` types (slot `MODEL_MONSTER01` + type): its
+  models are opened when a monster with them appears and released when the
+  map changes. The **NPC range** has the `MODEL_*` slots from `MODEL_NPC_BEGIN`
+  on (`MODEL_SMITH`, `MODEL_MERCHANT_FEMALE_HEAD+1`). The code treats the
+  two ranges differently, see [What the code adds](#what-the-code-adds).
+- Models are sorted by slot and written in one way, as `Monsters.json`; a
+  test checks that the shipped file is written this way, that every file and
+  texture folder is there with exactly that spelling, and that each model's
+  textures are in its folders.
+- Files are `Data/...` paths in their spelling on disk; the game finds them
+  in any case on Linux too.
+
+### Model fields
+
+| Field | Meaning |
+|---|---|
+| `slot` | The model slot, see above |
+| `file` | The `.bmd` file |
+| `textureFolders` | The folders below `Data/` its textures are searched in, in this order; at least one |
+| `worldTextureFolders` | Other folders on some maps: `[{"worlds": [18, 19], "folders": ["NPC"]}]` (the Chaos Castle knights) |
+| `textureNames` | A texture name that replaces the file's, by mesh: `{"0": "xmassanta1.jpg"}` (the Little Santas share one file) |
+| `animations` | The speeds that differ from the range's defaults, in frames per game frame, by animation: `stop1`, `stop2`, `walk`, `attack1`, `attack2`, `shock`, `die`, `appear`, `attack3`, `attack4`, `run`, `attack5`, then the number (`"12"`). The monster range plays stop1 at 0.25, stop2 at 0.2, walk at 0.34, attack1 and attack2 at 0.33, shock at 0.5, die at 0.55 and the others at 0; the NPC range plays all at 0.25 |
+| `holdLastFrame` | The animations that stop at their last frame instead of starting again. Without it: die in the monster range, none in the NPC range |
+| `headBone` | The bone the head turns with; without it as the file has it |
+| `streamMesh` | The mesh drawn as a stream; without it as the file has it |
+| `noneBlendMeshes` | Meshes drawn without blending |
+| `sounds` | The sounds the model loads: `file`, `channels` (how many can play at once), `spatial` (3D, louder near the hero), and `id` for a sound that keeps its `SOUND_*` number, see below |
+| `soundSlots` | What the game plays when a character of the model stands or walks (`idle`, two), attacks or is hit (`attack`, two) and dies (`die`); of a pair it picks one at random. A slot names a sound of the model (its `id`, or its `file` when it has none) or any `SOUND_*` number; `null` is no sound. `secondSet` has the sounds a monster with SubType 9 plays (five numbers further on). Without `soundSlots` no slot has a sound |
+| `bitmaps` | Bitmaps loaded into fixed bitmap slots that the model's code draws with: `file` below `Data/`, `slot` (`BITMAP_MONSTER_SKIN`), `filter` (`linear` or `nearest`), `wrap` (`repeat` or `clamp`) |
+| `parts` | Models loaded with it: `slot` (an NPC slot) or `effect` (an effect type of the effect catalogue), `file`, `textureFolders`, `animations`, `holdLastFrame` (no range defaults), and `worlds` for parts loaded with a map instead (the Kundun parts in Kalima, the Totem Golem's in Elbeland) |
+| `boundingBox` | `min` and `max` of a character's box; without one -60, -60, 0 to 50, 50, 150 |
+| `linkBones` | The bones the weapons hang on, right then left; without it 33 and 42. One bone sets the right hand's only |
+
+A sound without an `id` gets a number of its own when it is first loaded,
+after the `SOUND_*` list; the same file keeps the same number for the
+session. A sound keeps its `SOUND_*` number (`id`) when code plays it by that
+name, or when a slot of another model names it: a slot plays the sound of its
+number, whichever model loaded it (the Giant Ogre's attack plays the Dark
+Skull Soldier's `SOUND_MONSTER_BLACKSKULLATTACK` in Kalima). Some slots name
+numbers that no model loads, as in the original client; they play nothing (a
+test lists them).
+
+### What the code adds
+
+On top of the model list the code does (the Monster Model and Monster
+Preview tools show it):
+
+- **Monster range**: a character of the model dies with a blood pool and
+  stays dead, goes back to stop1 after stop2, shock and attacks 1 to 5 (and
+  after appear for Maya's hands and Selupan), and lands the hit of attacks
+  1 and 2 at frame 5.
+- **NPC range**: some NPCs pick their next animation in code (among them the
+  Smith, the wedding NPC, Silvia and Rhea).
+- **Speed factors**: a player transformed into a monster plays attacks 1 and
+  2 at 1.5 times their speed; the Illusion of Kundun plays die 4 times as
+  fast after frame 6; Erohim plays die at half its speed.
+
+A model whose file is missing has no body: the monster appears without one
+and the game keeps running; the file is logged and listed by Monster Checks.
+Molt's `Data/Monster/Monster50.bmd` is missing, here and in the original
+client (OpenMU has no monster 68).
+
 ## Loading and errors
 
-At startup `Data/Monsters/Monsters.json` is read and checked.
+At startup `Data/Monsters/Monsters.json` is read and checked, and after the
+effect catalogue `Data/Monsters/Models.json`.
 
 **Errors** stop the start with a message ("Monster data error") that names
 the file, the monster and the field. All problems are also written to
@@ -168,8 +271,17 @@ the file, the monster and the field. All problems are also written to
 - a name longer than 64 characters: the game shows it cut
 - a name in a language the game has no UI texts for (it is never shown)
 
+In the model list, errors (they stop the start with "Monster data error" too,
+naming the model list) are a
+value of the wrong form (each names the model and the field), a slot that is
+no model slot of the two ranges or is there twice, a sound slot that names no
+sound of the model and no `SOUND_*` number, a sound `id`, bitmap slot or
+part slot that does not exist, and a part `effect` that is not an effect
+type. Unknown fields and a model or part file that is not in the client
+folder are warnings; the shipped list has one, Molt's file.
+
 An automated test loads the shipped monster list (it expects only the
-warning about 252), so a pull request with broken monster data fails its
+warning about 252) and the shipped model list (only Molt's file), so a pull request with broken monster data fails its
 checks. With a test build (`-DBUILD_TESTING=ON`):
 
 ```bash
@@ -179,11 +291,12 @@ ctest --test-dir <build folder> --build-config Debug -R monster --output-on-fail
 ## Editing monsters (MuEditor)
 
 The monster tools (editor builds, F12, **Windows → Monsters**) edit the
-monsters of the running game: **Monster Browser**, **Monster Translations**
-and **Monster Checks**. They share one selected monster: selecting it in one
-tool shows it in the others. In the first layout (also after **Windows >
-Reset Layout**) the Monster Browser is a tab beside the Item Browser and the
-other two are tabs beside the item tools.
+monsters of the running game: **Monster Browser**, **Monster Model**,
+**Monster Preview**, **Monster Translations** and **Monster Checks**. They
+share one selected monster: selecting it in one tool shows it in the others.
+In the first layout (also after **Windows > Reset Layout**) the Monster
+Browser is a tab beside the Item Browser and the others are tabs beside the
+item tools.
 
 - **Monster Browser**: the monsters with their number, their name in the UI
   language and their kind, with a search (the whole number, or a part of a
@@ -220,11 +333,45 @@ other two are tabs beside the item tools.
   txt**, see
   [translation-system.md → In the monster editor](translation-system.md#in-the-monster-editor)
   and [Import and export of NpcName txt](#import-and-export-of-npcname-txt).
+- **Monster Model**: the model of the selected monster, from the model list:
+  its slot and range (hover over the range for what the code does with it),
+  the monsters with the model (a click selects one), and
+  - **Model file**: the file, with a search over the `.bmd` files below
+    `Data/Monster` and `Data/NPC` and in the other folders the model list
+    uses. Picking one changes the file; a model whose texture folder was its
+    file's folder takes the new file's folder.
+  - **Texture folders**: remove one (not the last) or add one.
+  - **Animations**: one row per animation of the model: its speed (drag it;
+    **Default** gives back the range's), whether it holds its last frame, and
+    what the game adds in game (a speed factor, the next animation, the hit
+    frame).
+  - **Sounds**: the model's sounds, each with **Play**, and the five sound
+    slots, each set to a sound of the model or to no sound.
+  - **More of the model entry**: the values the tool shows but does not edit
+    (head bone, stream mesh, part models, bitmaps, box, weapon bones); they
+    are edited in the file.
+
+  A model is shown once the game has it open; the tool opens it when it
+  shows it (as if a monster of it had appeared). A monster whose model is
+  outside the model list (`player`, a map object) says so.
+- **Monster Preview**: the selected monster's model, turning if you like,
+  with the item preview's camera: drag to turn it, the middle button moves
+  the picture, the wheel zooms, a double click puts it back. Pick any
+  animation; **Play**, **Pause**, **From the start**, and a frame slider to go
+  frame by frame. The speeds are those of Monster Model, also while one is
+  being dragged there. The model's slot sounds play when their animation
+  starts (an idle sound for stop and walk, an attack sound for attacks and
+  shock, the die sound). The hit frame of attacks 1 and 2 is marked on the
+  slider, and the line under it says what the game adds. **The game's speed
+  factors** plays them (**As a transformed player** too). The preview is
+  only in the editor's window.
 - **Monster Checks**: the checks of loading and saving, run on the monsters
-  as they are now: a name with `||` or a language code that is not one
+  and models as they are now: a name with `||` or a language code that is not one
   (errors), an empty English name, a name longer than 64 characters and a
-  name in a language the game has no UI texts for (warnings). With the
-  shipped list it shows one warning, 252's empty name. The checks run when
+  name in a language the game has no UI texts for (warnings), and the checks
+  of the model list's load (a model or part file that is not in the client
+  folder is a warning). With the shipped lists it shows two warnings, 252's
+  empty name and Molt's missing file. The checks run when
   the window is first shown and on **Check**; after a change the window says
   that the monsters changed since the last check. Errors come first, and
   each kind can be hidden with its box. A click on a problem selects the
@@ -244,8 +391,11 @@ How changes work:
   they appear again: a kind change, Add and Remove reach the monsters and
   NPCs that appear after it. After Remove, the ones on screen keep their name
   and kind until they appear again.
-- A name is stored when you leave its field after a change, a kind right
-  away. Each is one step of **Undo** and **Redo** (in the editor's bar, see
+- A name or a speed is stored when you leave its field after a change, a
+  kind, a file, a folder, a held last frame or a sound slot right away. A
+  changed model is opened again before the next frame, with its textures and
+  sounds, and the characters of the model keep playing (an animation it no
+  longer has goes back to the first). Each is one step of **Undo** and **Redo** (in the editor's bar, see
   [dev-editor.md](dev-editor.md); also Ctrl+Z and Ctrl+Y while a monster
   tool has the focus and no field is being typed in): the last 256 steps,
   for the whole session and across saves. Undo and Redo select the monster
@@ -253,17 +403,18 @@ How changes work:
   history did not record; the console says so. The Monster Browser's title
   has a `*` while there are changes that are not saved.
 - **Save Monsters** (in the Monster Browser and Monster Translations) runs
-  the checks and writes `Data/Monsters/Monsters.json` next to the game. With
+  the checks and writes `Data/Monsters/Monsters.json` and
+  `Data/Monsters/Models.json` next to the game. With
   errors nothing is written, and the problems are listed under the button;
   warnings do not stop it. The new file takes the old one's place only when
   it was written whole.
-- **Revert** reads the file again: the changes since it was saved are lost,
-  and so is the undo history. A file with errors is not taken; the monsters
-  stay as they are and the problems are listed.
+- **Revert** reads both files again: the changes since they were saved are
+  lost, and so is the undo history. A file with errors is not taken; its
+  monsters or models stay as they are and the problems are listed.
 
 The game runs from the build folder, which has a copy of `src/bin/Data`.
-To keep your changes, copy `<build folder>/Data/Monsters/Monsters.json` to
-`src/bin/Data/Monsters` and commit it.
+To keep your changes, copy `<build folder>/Data/Monsters/Monsters.json` and
+`Models.json` to `src/bin/Data/Monsters` and commit them.
 
 ### Import and export of NpcName txt
 
