@@ -2872,7 +2872,7 @@
       "attacks": {
         "monsterSkills": {"34": "attack2", "35": "attack1", "36": "attack3", "37": "appear", "38": "attack4", "39": "attack4", "40": "attack4", "41": "none", "42": "attack4"},
         "otherwise": "attack4",
-        "clearSkill": "never"
+        "clearSkill": "afterAttack"
       }
     },
     {
@@ -3263,7 +3263,7 @@
       "attacks": {
         "monsterSkills": {"51": "attack2", "52": "attack2"},
         "otherwise": "attack1",
-        "clearSkill": "onNoMatch"
+        "clearSkill": "afterAttack"
       }
     },
     {

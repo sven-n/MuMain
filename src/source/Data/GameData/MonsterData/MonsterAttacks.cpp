@@ -26,11 +26,12 @@ constexpr std::array<std::pair<MonsterAttackRandom, std::string_view>, 3> Random
     {MonsterAttackRandom::Bali, "bali"},
 }};
 
-constexpr std::array<std::pair<MonsterSkillClear, std::string_view>, 4> ClearNames = {{
+constexpr std::array<std::pair<MonsterSkillClear, std::string_view>, 5> ClearNames = {{
     {MonsterSkillClear::Never, "never"},
     {MonsterSkillClear::OnMatch, "onMatch"},
     {MonsterSkillClear::OnNoMatch, "onNoMatch"},
     {MonsterSkillClear::Always, "always"},
+    {MonsterSkillClear::AfterAttack, "afterAttack"},
 }};
 } // namespace
 
@@ -57,6 +58,7 @@ MonsterAttackChoice ChooseMonsterAttack(const MonsterAttacks& attacks, int monst
     switch (attacks.clearSkill)
     {
     case MonsterSkillClear::Never:
+    case MonsterSkillClear::AfterAttack:
         choice.clearMonsterSkill = false;
         break;
     case MonsterSkillClear::OnMatch:
@@ -70,6 +72,11 @@ MonsterAttackChoice ChooseMonsterAttack(const MonsterAttacks& attacks, int monst
         break;
     }
     return choice;
+}
+
+bool ClearsMonsterSkillAfterAttack(const MonsterAttacks& attacks)
+{
+    return attacks.clearSkill == MonsterSkillClear::AfterAttack;
 }
 
 std::string_view GetMonsterAttackRandomName(MonsterAttackRandom random)

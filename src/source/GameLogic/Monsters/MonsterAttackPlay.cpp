@@ -69,4 +69,13 @@ bool Play(CHARACTER& character, OBJECT& object)
     }
     return true;
 }
+
+void OnAttackEnded(CHARACTER& character)
+{
+    const Data::Monsters::MonsterAttacks* attacks = FindAttacks(character);
+    if (attacks != nullptr && Data::Monsters::ClearsMonsterSkillAfterAttack(*attacks))
+    {
+        character.MonsterSkill = -1;
+    }
+}
 } // namespace GameLogic::Monsters::Attacks

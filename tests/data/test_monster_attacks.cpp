@@ -92,7 +92,8 @@ TEST_CASE("Monster attacks: a random draw replaces otherwise, not an entry [data
     CHECK(ChooseMonsterAttack(attacks, 9, 0).animation == MONSTER01_ATTACK2);
 }
 
-TEST_CASE("Monster attacks: the monster skill is cleared never, on a match, on no match or always [data][monsters]")
+TEST_CASE("Monster attacks: the monster skill is cleared never, on a match, on no match, always or after the attack "
+          "[data][monsters]")
 {
     MonsterAttacks attacks = IceWalker();
     const auto clears = [&](MonsterSkillClear clear, int monsterSkill)
@@ -108,6 +109,12 @@ TEST_CASE("Monster attacks: the monster skill is cleared never, on a match, on n
     CHECK(clears(MonsterSkillClear::OnNoMatch, 30));
     CHECK(clears(MonsterSkillClear::Always, 29));
     CHECK(clears(MonsterSkillClear::Always, 30));
+    // afterAttack keeps it for the attack's effects and clears it when the
+    // animation ends.
+    CHECK_FALSE(clears(MonsterSkillClear::AfterAttack, 29));
+    CHECK(Data::Monsters::ClearsMonsterSkillAfterAttack(attacks));
+    attacks.clearSkill = MonsterSkillClear::Always;
+    CHECK_FALSE(Data::Monsters::ClearsMonsterSkillAfterAttack(attacks));
 }
 
 TEST_CASE("Monster attacks: the list reads and writes them, the skill tables on one line [data][monsters]")

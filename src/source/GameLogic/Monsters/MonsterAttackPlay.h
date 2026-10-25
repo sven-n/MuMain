@@ -14,4 +14,8 @@ bool HasAttacks(const CHARACTER& character);
 // player skill, and clears its monster skill as they say. False, with nothing
 // done, when its entry has no `attacks`.
 bool Play(CHARACTER& character, OBJECT& object);
+
+// The attack animation of the character ended: its attacks may clear the
+// monster skill now (clearSkill afterAttack).
+void OnAttackEnded(CHARACTER& character);
 } // namespace GameLogic::Monsters::Attacks

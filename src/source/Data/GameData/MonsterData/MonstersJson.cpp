@@ -253,7 +253,8 @@ bool ReadAttacks(const OrderedJson& json, int number, std::optional<MonsterAttac
         }
         else
         {
-            issues.Error(field + "." + ClearSkillKey, "must be never, onMatch, onNoMatch or always", number);
+            issues.Error(field + "." + ClearSkillKey, "must be never, onMatch, onNoMatch, always or afterAttack",
+                         number);
             valid = false;
         }
     }

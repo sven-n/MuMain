@@ -3483,11 +3483,16 @@ void EtcStopAnimationSetting(CHARACTER* c, OBJECT* o)
                     }
                     return;
                 }
-                else if (o->CurrentAction == MONSTER01_STOP2 || o->CurrentAction == MONSTER01_SHOCK
-                    || o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2
-                    || o->CurrentAction == MONSTER01_ATTACK3 || o->CurrentAction == MONSTER01_ATTACK4
-                    || o->CurrentAction == MONSTER01_ATTACK5
-                    )
+                if ((o->CurrentAction >= MONSTER01_ATTACK1 && o->CurrentAction <= MONSTER01_ATTACK2) ||
+                    (o->CurrentAction >= MONSTER01_APEAR && o->CurrentAction <= MONSTER01_ATTACK4) ||
+                    o->CurrentAction == MONSTER01_ATTACK5)
+                {
+                    GameLogic::Monsters::Attacks::OnAttackEnded(*c);
+                }
+                if (o->CurrentAction == MONSTER01_STOP2 || o->CurrentAction == MONSTER01_SHOCK ||
+                    o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2 ||
+                    o->CurrentAction == MONSTER01_ATTACK3 || o->CurrentAction == MONSTER01_ATTACK4 ||
+                    o->CurrentAction == MONSTER01_ATTACK5)
                 {
                     SetAction(o, MONSTER01_STOP1);
                 }

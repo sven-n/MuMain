@@ -18,6 +18,9 @@
 
 #include <vector>
 
+// The end of a monster's animation (MoveCharacter calls it).
+void EtcStopAnimationSetting(CHARACTER* c, OBJECT* o);
+
 namespace
 {
 constexpr int NoMonsterSkill = 0xFFFF;
@@ -85,5 +88,30 @@ TEST_CASE("Monster attacks: the Kanturu 1st warriors play attack 2 for their ski
             character.SwordCount = count;
             CHECK(Attack(character, NoMonsterSkill) == MONSTER01_ATTACK1);
         }
+    }
+}
+
+TEST_CASE("Monster attacks: Selupan and the Dark Ghost clear their skill when the attack ends (P4) "
+          "[monsters][attacks]")
+{
+    {
+        AttackScope scope(WD_58ICECITY_BOSS);
+        CHARACTER& selupan = scope.Create(MONSTER_SELUPAN);
+        CHECK(Attack(selupan, 34) == MONSTER01_ATTACK2);
+        // The effects of the skill read it while the attack plays.
+        CHECK(selupan.MonsterSkill == 34);
+        EtcStopAnimationSetting(&selupan, &selupan.Object);
+        CHECK(selupan.MonsterSkill == NoMonsterSkill);
+        // The next normal attack does not repeat the skill (attack 2).
+        CHECK(Attack(selupan, selupan.MonsterSkill) == MONSTER01_ATTACK4);
+    }
+    {
+        AttackScope scope(WD_70EMPIREGUARDIAN2);
+        CHARACTER& ghost = scope.Create(MONSTER_DARK_GHOST);
+        CHECK(Attack(ghost, 51) == MONSTER01_ATTACK2);
+        CHECK(ghost.MonsterSkill == 51);
+        EtcStopAnimationSetting(&ghost, &ghost.Object);
+        CHECK(ghost.MonsterSkill == NoMonsterSkill);
+        CHECK(Attack(ghost, ghost.MonsterSkill) == MONSTER01_ATTACK1);
     }
 }

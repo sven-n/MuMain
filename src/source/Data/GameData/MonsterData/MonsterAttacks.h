@@ -38,6 +38,9 @@ enum class MonsterSkillClear
     // When no entry named it.
     OnNoMatch,
     Always,
+    // When the attack's animation ends: its effects, which read the skill
+    // while it plays, still see it, and the next attack does not (P4).
+    AfterAttack,
 };
 
 // A skill number and the animation it plays (an animation number,
@@ -71,6 +74,9 @@ struct MonsterAttackChoice
     bool operator==(const MonsterAttackChoice&) const = default;
 };
 MonsterAttackChoice ChooseMonsterAttack(const MonsterAttacks& attacks, int monsterSkill, int skill);
+
+// Whether the monster skill is cleared when the attack's animation ends.
+bool ClearsMonsterSkillAfterAttack(const MonsterAttacks& attacks);
 
 std::string_view GetMonsterAttackRandomName(MonsterAttackRandom random);
 std::optional<MonsterAttackRandom> FindMonsterAttackRandom(std::string_view name);
