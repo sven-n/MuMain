@@ -115,6 +115,7 @@ mu_add_test(
         test_item_requirement_weights.cpp
         test_item_rules.cpp
         test_item_stats.cpp
+        test_item_tooltip_layouts.cpp
         test_item_sync_diff.cpp
         test_item_tooltips.cpp
         test_item_value_formulas.cpp
