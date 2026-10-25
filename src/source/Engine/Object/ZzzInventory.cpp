@@ -1657,7 +1657,8 @@ void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, in
     const int itemType = Data::Items::MakeItemType(definition.group, definition.number);
     for (const Data::Items::ItemDescriptionLine& line : definition.description)
     {
-        if (!line.IsShownAt(level) || !AreTooltipConditionsMet(line.when, itemType, level, values))
+        if (!line.IsShownAt(level) ||
+            !Engine::Items::TooltipValues::AreTooltipConditionsMet(line.when, itemType, level, values))
         {
             continue;
         }
