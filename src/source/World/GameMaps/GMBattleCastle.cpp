@@ -1496,25 +1496,6 @@ namespace battleCastle
         }
     }
 
-    bool    SettingBattleCastleMonsterLinkBone(CHARACTER* c, int Type)
-    {
-        switch (Type)
-        {
-        case MODEL_NPC_CAPATULT_ATT:
-            Vector(-200.f, -50.f, -100.f, c->Object.BoundingBoxMin);
-            Vector(200.f, 50.f, 100.f, c->Object.BoundingBoxMax);
-            break;
-
-        case MODEL_CASTLE_GATE1:
-            Vector(-140.f, -140.f, 0.f, c->Object.BoundingBoxMin);
-            Vector(140.f, 140.f, 300.f, c->Object.BoundingBoxMax);
-            c->SwordCount = 0;
-            return true;
-        }
-
-        return false;
-    }
-
     bool    StopBattleCastleMonster(CHARACTER* c, OBJECT* o)
     {
         if (gMapManager.InBattleCastle() == false)  return false;

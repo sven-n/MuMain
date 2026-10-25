@@ -6,7 +6,9 @@
 #include "Core/Platform/IPlatformAudio.h"
 #include "Core/Text/Utf8.h"
 #include "Core/Utilities/Log/MuLogger.h"
+#include "Data/DataHandler/EffectData/EffectDataHandler.h"
 #include "Data/DataHandler/LoadData.h"
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Render/Sprites/GpuUploadSkip.h"
@@ -19,6 +21,8 @@
 #include <cstring>
 #include <cwctype>
 #include <map>
+#include <stdexcept>
+#include <string>
 
 static_assert(MonsterRecorder::SoundSlotCount == MAX_MONSTER_SOUND);
 
@@ -203,6 +207,20 @@ void CollectTextureError(const std::string& message)
     TextureErrors().push_back(message);
 }
 
+// The model table as the game loads it at startup: the effect catalogue
+// first, whose effect types the model list names. Once per test binary; the
+// table stays loaded.
+void LoadModelTable()
+{
+    static bool loaded = false;
+    if (loaded)
+        return;
+    std::string error;
+    if (!Data::Effects::LoadEffectTypes(error) || !g_MonsterDataHandler.LoadModels(error))
+        throw std::runtime_error("the model table does not load: " + error);
+    loaded = true;
+}
+
 std::string SoundEventText(const SoundEvent& event)
 {
     if (event.release)
@@ -239,6 +257,7 @@ LoadScope::LoadScope(int world) : m_state(std::make_unique<State>())
     mu::log::Init();
     m_state->previousFolder = std::filesystem::current_path();
     std::filesystem::current_path(ClientFolder());
+    LoadModelTable();
     Render::Sprites::SetGpuUploadsSkipped(true);
     Render::Textures::SetTextureErrorCollector(&CollectTextureError);
 

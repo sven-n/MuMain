@@ -11,12 +11,8 @@ namespace Data::Monsters::ModelLoader
 // entry. The slot must not be open yet (the callers check it).
 bool Open(int slot);
 
-// Whether some entry has part models that a map opens (the Totem Golem's
-// pieces in Elbeland, the Kundun parts in Kalima); CMapManager::Load opens
-// them from the table then.
-bool HasMapParts();
-
-// Opens the part models that the entries list for the world, as a map
-// load did. They are never closed, as before.
+// Opens the part models that the entries list for the world (the Totem
+// Golem's pieces in Elbeland, the Kundun parts in Kalima); CMapManager::Load
+// calls it. They are never closed, as before.
 void OpenMapParts(int world);
 } // namespace Data::Monsters::ModelLoader

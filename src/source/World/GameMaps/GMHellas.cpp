@@ -926,35 +926,6 @@ CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, 
     return c;
 }
 
-bool    SettingHellasMonsterLinkBone(CHARACTER* c, int Type)
-{
-    switch (Type)
-    {
-    case MODEL_ILLUSION_OF_KUNDUN:
-        c->Weapon[0].LinkBone = 29;
-        c->Weapon[1].LinkBone = 49;
-        return true;
-    case MODEL_AEGIS:
-        c->Weapon[0].LinkBone = 13;
-        c->Weapon[1].LinkBone = 14;
-        return true;
-    case MODEL_DEATH_CENTURION:
-        c->Weapon[0].LinkBone = 56;
-        c->Weapon[1].LinkBone = 42;
-        return true;
-    case MODEL_NECRON:
-        c->Weapon[0].LinkBone = 60;
-        c->Weapon[1].LinkBone = 60;
-        return true;
-    case MODEL_SHRIKER:
-        c->Weapon[0].LinkBone = 41;
-        c->Weapon[1].LinkBone = 51;
-        return true;
-    }
-
-    return false;
-}
-
 bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
 {
     switch (c->MonsterIndex)

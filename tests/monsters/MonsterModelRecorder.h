@@ -12,8 +12,8 @@
 class BMD;
 
 // The monster recorder's model part (monsters design, section 10): what
-// opening monster and NPC models changes, recorded so that the old code and
-// the model data can be compared case by case in one build.
+// opening monster and NPC models changes, recorded so that tests can check
+// what the game takes from the model data (Data/Monsters/Models.json).
 //
 // A test binary has no GPU: textures load without an upload and are recorded
 // by file name; sounds go to an audio backend that records the loads.
@@ -93,8 +93,9 @@ struct LoadChanges
 Record ToRecord(const LoadChanges& changes);
 
 // What a load needs for the life of the scope, like the game sets it up at
-// startup: the client folder as the working folder, model slots that start
-// zeroed, uploads skipped, the recording audio backend and the active world.
+// startup: the client folder as the working folder, the model table loaded
+// from the client folder, model slots that start zeroed, uploads skipped, the
+// recording audio backend and the active world.
 // Each scope has slots of its own, so two loads compared start the same.
 class LoadScope
 {
