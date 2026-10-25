@@ -2247,7 +2247,8 @@
       "animations": {"walk": 0.46},
       "sounds": [
         {"file": "Data/Sound/w58w59/Coolertin_attack.wav", "id": "SOUND_RAKLION_COOLERTIN_ATTACK", "channels": 1, "spatial": false},
-        {"file": "Data/Sound/w58w59/Coolertin_move.wav", "id": "SOUND_RAKLION_COOLERTIN_MOVE", "channels": 1, "spatial": false}
+        {"file": "Data/Sound/w58w59/Coolertin_move.wav", "id": "SOUND_RAKLION_COOLERTIN_MOVE", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/mHellSpiderDie.wav", "id": "SOUND_MONSTER_HELLSPIDERDIE", "channels": 2, "spatial": true}
       ],
       "soundEvents": [
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_RAKLION_COOLERTIN_ATTACK"]},
@@ -2479,6 +2480,12 @@
       "file": "Data/Monster/MONSTER162.bmd",
       "textureFolders": ["Monster"],
       "animations": {"stop1": 0.28, "walk": 0.5, "attack1": 0.17, "shock": 0.25, "die": 0.4},
+      "sounds": [
+        {"file": "Data/Sound/w64/BloodAssassin_attack.wav", "id": "SOUND_PKFIELD_BLOODASSASSIN_ATTACK", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BloodAssassin_damage01.wav", "id": "SOUND_PKFIELD_BLOODASSASSIN_DAMAGE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BloodAssassin_death.wav", "id": "SOUND_PKFIELD_BLOODASSASSIN_DEDTH", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BloodAssassin_move01.wav", "id": "SOUND_PKFIELD_BLOODASSASSIN_MOVE01", "channels": 4, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_PKFIELD_BLOODASSASSIN_ATTACK"]},
         {"animations": ["shock"], "sounds": ["SOUND_PKFIELD_BLOODASSASSIN_DAMAGE01"]},
@@ -2517,6 +2524,13 @@
       "file": "Data/Monster/MONSTER164.bmd",
       "textureFolders": ["Monster"],
       "animations": {"stop1": 0.28, "walk": 0.3, "attack1": 0.25, "attack2": 0.25, "shock": 0.25, "die": 0.25},
+      "sounds": [
+        {"file": "Data/Sound/w64/BurningLavaGolem_attack01.wav", "id": "SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BurningLavaGolem_attack02.wav", "id": "SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BurningLavaGolem_damage01.wav", "id": "SOUND_PKFIELD_BURNINGLAVAGOLEM_DAMAGE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BurningLavaGolem_death.wav", "id": "SOUND_PKFIELD_BURNINGLAVAGOLEM_DEATH", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BurningLavaGolem_move01.wav", "id": "SOUND_PKFIELD_BURNINGLAVAGOLEM_MOVE01", "channels": 4, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["attack1"], "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK01"]},
         {"animations": ["attack2"], "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK02"]},
@@ -2816,7 +2830,8 @@
         {"file": "Data/Sound/w69w70w71w72/CavalryLeader_move01.wav", "id": "SOUND_EMPIREGUARDIAN_CAVALRYLEADER_MOVE01", "channels": 4, "spatial": false},
         {"file": "Data/Sound/w69w70w71w72/CavalryLeader_move02.wav", "id": "SOUND_EMPIREGUARDIAN_CAVALRYLEADER_MOVE02", "channels": 4, "spatial": false},
         {"file": "Data/Sound/w69w70w71w72/CavalryLeader_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK01", "channels": 4, "spatial": false},
-        {"file": "Data/Sound/w69w70w71w72/CavalryLeader_attack2.wav", "id": "SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK02", "channels": 4, "spatial": false}
+        {"file": "Data/Sound/w69w70w71w72/CavalryLeader_attack2.wav", "id": "SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w58w59/GiantMammoth_death.wav", "id": "SOUND_RAKLION_GIANT_MAMUD_DEATH", "channels": 1, "spatial": false}
       ],
       "soundEvents": [
         {"animations": ["walk"], "frames": [7, 8], "sounds": ["SOUND_EMPIREGUARDIAN_CAVALRYLEADER_MOVE01"]},
@@ -2853,7 +2868,8 @@
       "file": "Data/Monster/monster180.bmd",
       "textureFolders": ["Monster"],
       "sounds": [
-        {"file": "Data/Sound/w69w70w71w72/Priest_stay.wav", "id": "SOUND_EMPIREGUARDIAN_PRIEST_STOP", "channels": 4, "spatial": false}
+        {"file": "Data/Sound/w69w70w71w72/Priest_stay.wav", "id": "SOUND_EMPIREGUARDIAN_PRIEST_STOP", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w58w59/Selupan_cure.wav", "id": "SOUND_RAKLION_SERUFAN_CURE", "channels": 1, "spatial": false}
       ],
       "soundEvents": [
         {"animations": ["stop1", "stop2"], "sounds": ["SOUND_EMPIREGUARDIAN_PRIEST_STOP"]},
@@ -3003,6 +3019,10 @@
       "file": "Data/Monster/monster202.bmd",
       "textureFolders": ["Monster"],
       "animations": {"die": 0.25},
+      "sounds": [
+        {"file": "Data/Sound/w57/Sapi-Death.wav", "id": "SOUND_SWAMPOFQUIET_SAPI_DEATH01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w57/Sapi-Attack.wav", "id": "SOUND_SWAMPOFQUIET_SAPI_UNUS_ATTACK01", "channels": 1, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["attack1", "attack2"], "chance": {"oneIn": 3, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_UNUS_ATTACK01"]},
         {"animations": ["die"], "chance": {"oneIn": 3, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_DEATH01"]}
@@ -3014,6 +3034,11 @@
       "file": "Data/Monster/monster203.bmd",
       "textureFolders": ["Monster"],
       "animations": {"walk": 0.25, "die": 0.2},
+      "sounds": [
+        {"file": "Data/Sound/w57/Naipin-Blaze.wav", "id": "SOUND_SWAMPOFQUIET_BLAZE_NAIPIN_BREATH01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w57/Naipin-Attack.wav", "id": "SOUND_SWAMPOFQUIET_NAIPIN_ATTACK01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w57/Naipin-Death.wav", "id": "SOUND_SWAMPOFQUIET_NAIPIN_DEATH01", "channels": 1, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_BLAZE_NAIPIN_BREATH01"]},
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_SWAMPOFQUIET_NAIPIN_ATTACK01"]},
@@ -3026,6 +3051,10 @@
       "file": "Data/Monster/monster204.bmd",
       "textureFolders": ["Monster"],
       "animations": {"die": 0.25},
+      "sounds": [
+        {"file": "Data/Sound/w57/Shadow-Death.wav", "id": "SOUND_SWAMPOFQUIET_SHADOW_DEATH01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w57/ShadowRook-Attack.wav", "id": "SOUND_SWAMPOFQUIET_SHADOW_ROOK_ATTACK01", "channels": 1, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_SWAMPOFQUIET_SHADOW_ROOK_ATTACK01"]},
         {"animations": ["die"], "sounds": ["SOUND_SWAMPOFQUIET_SHADOW_DEATH01"]}
@@ -3092,6 +3121,11 @@
       "slot": "MONSTER_MODEL_DARK_MAMMOTH",
       "file": "Data/Monster/Monster206.bmd",
       "textureFolders": ["Monster"],
+      "sounds": [
+        {"file": "Data/Sound/w58w59/GiantMammoth_attack.wav", "id": "SOUND_RAKLION_GIANT_MAMUD_ATTACK", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/GiantMammoth_death.wav", "id": "SOUND_RAKLION_GIANT_MAMUD_DEATH", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/GiantMammoth_move.wav", "id": "SOUND_RAKLION_GIANT_MAMUD_MOVE", "channels": 1, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_RAKLION_GIANT_MAMUD_ATTACK"]},
         {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_RAKLION_GIANT_MAMUD_MOVE"]},
@@ -3104,6 +3138,10 @@
       "file": "Data/Monster/Monster207.bmd",
       "textureFolders": ["Monster"],
       "animations": {"die": 0.13},
+      "sounds": [
+        {"file": "Data/Sound/w58w59/IceGiant_death.wav", "id": "SOUND_RAKLION_ICEGIANT_DEATH", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/IceGiant_move.wav", "id": "SOUND_RAKLION_ICEGIANT_MOVE", "channels": 1, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_RAKLION_ICEGIANT_MOVE"]},
         {"animations": ["die"], "sounds": ["SOUND_RAKLION_ICEGIANT_DEATH"]}
@@ -3115,6 +3153,11 @@
       "file": "Data/Monster/Monster208.bmd",
       "textureFolders": ["Monster"],
       "animations": {"walk": 0.46},
+      "sounds": [
+        {"file": "Data/Sound/mHellSpiderDie.wav", "id": "SOUND_MONSTER_HELLSPIDERDIE", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/w58w59/Coolertin_attack.wav", "id": "SOUND_RAKLION_COOLERTIN_ATTACK", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/Coolertin_move.wav", "id": "SOUND_RAKLION_COOLERTIN_MOVE", "channels": 1, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_RAKLION_COOLERTIN_ATTACK"]},
         {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "rand"}, "sounds": ["SOUND_RAKLION_COOLERTIN_MOVE"]},
@@ -3127,6 +3170,11 @@
       "file": "Data/Monster/Monster209.bmd",
       "textureFolders": ["Monster"],
       "animations": {"walk": 0.25, "attack1": 0.21, "die": 0.23},
+      "sounds": [
+        {"file": "Data/Sound/death1.wav", "id": "SOUND_MONSTER_DEATH1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/IronKnight_attack.wav", "id": "SOUND_RAKLION_IRON_KNIGHT_ATTACK", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/IronKnight_move.wav", "id": "SOUND_RAKLION_IRON_KNIGHT_MOVE", "channels": 1, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["attack1", "attack2"], "sounds": ["SOUND_RAKLION_IRON_KNIGHT_ATTACK"]},
         {"animations": ["stop1", "stop2", "walk"], "sounds": ["SOUND_RAKLION_IRON_KNIGHT_MOVE"]},
@@ -3236,7 +3284,8 @@
         {"file": "Data/Sound/Karutan/Crypos_move1.wav", "id": "SOUND_KARUTAN_CRYPOS_MOVE1", "channels": 4, "spatial": false},
         {"file": "Data/Sound/Karutan/Crypos_move2.wav", "id": "SOUND_KARUTAN_CRYPOS_MOVE2", "channels": 4, "spatial": false},
         {"file": "Data/Sound/Karutan/Crypos_attack_1.wav", "id": "SOUND_KARUTAN_CRYPOS_ATTACK1", "channels": 4, "spatial": false},
-        {"file": "Data/Sound/Karutan/Crypos_attack_2.wav", "id": "SOUND_KARUTAN_CRYPOS_ATTACK2", "channels": 4, "spatial": false}
+        {"file": "Data/Sound/Karutan/Crypos_attack_2.wav", "id": "SOUND_KARUTAN_CRYPOS_ATTACK2", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/Crypta_death.wav", "id": "SOUND_KARUTAN_CRYPTA_DEATH", "channels": 4, "spatial": false}
       ],
       "soundEvents": [
         {"animations": ["walk"], "frames": [1, 2], "sounds": ["SOUND_KARUTAN_CRYPOS_MOVE1"]},

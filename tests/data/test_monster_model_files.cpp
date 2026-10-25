@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cctype>
 #include <filesystem>
+#include <map>
 #include <set>
 #include <string>
 #include <vector>
@@ -284,4 +285,36 @@ TEST_CASE("Monster models: the game's load fills the model table [data][monsters
     CHECK(hound->load.file == "Data/Monster/Monster02.bmd");
     CHECK(g_MonsterModelDatabase.Find(MODEL_SMITH) != nullptr);
     CHECK(g_MonsterModelDatabase.Find(MODEL_PLAYER) == nullptr);
+}
+
+// A sound that several models list is loaded once (MonsterModelLoader skips
+// one already loaded from the same file): they must list the same file,
+// channels and 3D setting, or the later model loads it again with its own.
+TEST_CASE("Monster model files: models that share a sound id load it alike [data][monsters]")
+{
+    const Data::Monsters::MonsterModelsLoadResult loaded = LoadShipped();
+    REQUIRE_FALSE(Data::Items::HasErrors(loaded.issues));
+    std::map<std::string, std::set<std::string>> loads;
+    for (const MonsterModelDefinition& model : loaded.models)
+    {
+        for (const Data::Monsters::MonsterModelSound& sound : model.sounds)
+        {
+            if (!sound.id.empty())
+            {
+                loads[sound.id].insert(Lower(sound.file) + " channels " + std::to_string(sound.channels) +
+                                       (sound.spatial ? " 3d" : ""));
+            }
+        }
+    }
+    std::vector<std::string> differing;
+    for (const auto& [id, ways] : loads)
+    {
+        if (ways.size() > 1)
+        {
+            differing.push_back(id);
+        }
+    }
+    // As in the original client: the Beam Knight loads death1.wav with two
+    // channels in 3D, the Iron Knight (and its dark twin) with one.
+    CHECK(differing == std::vector<std::string>{"SOUND_MONSTER_DEATH1"});
 }
