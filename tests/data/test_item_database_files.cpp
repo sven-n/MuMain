@@ -216,15 +216,6 @@ const ItemDefinition* FindItem(const std::vector<ItemDefinition>& items, int ite
     return found != items.end() ? &*found : nullptr;
 }
 
-// A durability line of the item data, which came from another part of the old code than the description texts: a
-// shared text of the tooltip file, or a line shown by the item's durability ("durability", "durability=2"). A line with
-// another condition is no durability line, so the old-code comparisons keep it.
-bool IsDurabilityLine(const ItemDescriptionLine& line)
-{
-    return !line.textName.empty() || std::any_of(line.when.begin(), line.when.end(),
-                                                 [](const TooltipCondition& condition)
-                                                 { return condition.name == "durability"; });
-}
 } // namespace
 
 TEST_CASE("Shipped item data loads without problems [data][items]")
@@ -320,11 +311,15 @@ std::string FilledLine(const ItemDefinition& item, const ItemDescriptionLine& li
                             });
 }
 
-// The durability lines of the descriptions (step 5b-3b), which came from another part of the old code.
+// The durability lines of the descriptions (step 5b-3b), which came from another part of the old code: the durability
+// shared texts, or a line shown by the item's durability ("durability", "durability=2"). Another shared text, or a line
+// with another condition, is no durability line, so the old-code comparisons keep it.
 bool IsDurabilityLine(const ItemDescriptionLine& line)
 {
-    return !line.when.empty() || line.textName == "durability" || line.textName == "numberOfItems" ||
-           line.textName == "life" || line.textName == "usableTimes";
+    return line.textName == "durability" || line.textName == "numberOfItems" || line.textName == "life" ||
+           line.textName == "usableTimes" ||
+           std::any_of(line.when.begin(), line.when.end(),
+                       [](const TooltipCondition& condition) { return condition.name == "durability"; });
 }
 
 // A line the tooltip code wrote for the wings, capes and pets before it was their descriptions: one of the game's
