@@ -74,6 +74,11 @@ public:
     // holds) and names in languages the game has no texts for. Appends the
     // problems to `issues`.
     void Validate(std::vector<Items::ItemDataIssue>& issues) const;
+    // The checks of LoadModels on the model table as it is: the names it
+    // holds (sound ids and slots, bitmap and part slots, part effects) and
+    // the model and part files that are not in the client folder, as
+    // problems of the model list file. Appends them to `issues`.
+    void ValidateModels(std::vector<Items::ItemDataIssue>& issues) const;
     // Writes the table to the monster list file (GetMonstersFile, relative to
     // the working directory as Load reads it), unless the checks find errors;
     // the old file stays then. The problems found are added to `issues`.

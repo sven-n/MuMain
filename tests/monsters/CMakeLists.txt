@@ -9,6 +9,7 @@ mu_add_test(
         MonsterCreationScope.cpp
         MonsterModelRecorder.cpp
         test_monster_model_recorder.cpp
+        test_monster_model_loader.cpp
         test_monster_creation_models.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS

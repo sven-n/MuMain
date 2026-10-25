@@ -9,6 +9,7 @@
 #include "Data/GameData/MonsterData/MonsterDataValidation.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
+#include "Data/GameData/MonsterData/MonsterModelValidation.h"
 #include "I18N/All.h"
 
 #include <chrono>
@@ -156,6 +157,18 @@ void MonsterDataHandler::Validate(std::vector<Items::ItemDataIssue>& issues) con
     ValidateMonsterNames(monsters, issues);
     NameIssueSource(issues, first, GetMonstersFile());
     ValidateLocales(monsters, issues);
+}
+
+void MonsterDataHandler::ValidateModels(std::vector<Items::ItemDataIssue>& issues) const
+{
+    std::vector<MonsterModelDefinition> models;
+    for (const MonsterModelDefinition* model : g_MonsterModelDatabase.GetAll())
+    {
+        models.push_back(*model);
+    }
+    const std::string source = GetMonsterModelsFile().generic_string();
+    ValidateMonsterModelNames(models, source, issues);
+    ValidateMonsterModelFiles(models, source, issues);
 }
 
 bool MonsterDataHandler::Save(std::vector<Items::ItemDataIssue>& issues)

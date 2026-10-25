@@ -24,10 +24,9 @@ namespace
 {
 using Data::Monsters::MonsterDefinition;
 
-// Molt's model file is missing (its creation closes the game, P1); the
-// Gateway Machine's creator needs Kanturu's entrance object, which only the
-// game makes. Their models are read from the code.
-const std::set<int> NotCreated = {68, 367};
+// The Gateway Machine's creator needs Kanturu's entrance object, which only
+// the game makes. Its model is read from the code.
+const std::set<int> NotCreated = {367};
 
 // The Chaos Castle monsters that get one of two models at random (the Elf or
 // the Wizard); their entries name the first.

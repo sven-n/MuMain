@@ -240,12 +240,6 @@ void LoadBitmaps(const MonsterModelDefinition& model)
     }
 }
 
-// A monster model without its file stops the game, as before (P1).
-void StopForMissingFile(const MonsterModelDefinition& model)
-{
-    const std::wstring path = ToLoaderPath(model.load.file);
-    gLoadData.StopForMissingModel(path.substr(path.find_last_of(L'\\') + 1));
-}
 } // namespace
 
 bool Open(int slot)
@@ -257,10 +251,9 @@ bool Open(int slot)
     }
     const bool monsterRange = IsMonsterRangeSlot(slot);
     BMD& target = Models[slot];
-    if (!OpenFile(slot, model->load.file) && monsterRange)
-    {
-        StopForMissingFile(*model);
-    }
+    // A model whose file is missing has no body, and the game keeps running
+    // (P1): AccessModel logs the file, and Monster Checks lists it.
+    OpenFile(slot, model->load.file);
     // A monster model without meshes gets nothing more; an NPC model still
     // loads its sounds.
     if (monsterRange && target.NumMeshs == 0)

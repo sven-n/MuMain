@@ -29,10 +29,6 @@ public:
     virtual ~CLoadData();
     // Returns false when the model file could not be opened.
     bool AccessModel(int Type, const wchar_t* Dir, const wchar_t* FileName, int i = -1, bool optional = false);
-    // The game cannot go on without the model file ("Monster50.bmd"): shows
-    // "<file> file does not exist." and closes the game, as AccessModel does
-    // for the player's and the monsters' models.
-    void StopForMissingModel(const std::wstring& FileName);
     // Lets the slot `Type` use the model data that AccessModel opened into
     // the slot `OwnerType` (BMD::ShareFrom); the last of them to let go frees
     // it.
