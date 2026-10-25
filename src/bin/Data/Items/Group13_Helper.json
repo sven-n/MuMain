@@ -702,28 +702,28 @@
           {
             "en": "ENG",
             "de": "ENG",
-            "es": "ESP",
-            "id": "Bahasa Inggris",
+            "es": "ENE",
+            "id": "ENG",
             "ja": "エナジー",
             "pl": "ENG",
-            "pt": "POR",
-            "ru": "АНГЛ",
+            "pt": "ENE",
+            "ru": "ЭНЕ",
             "tl": "ENG",
-            "uk": "ENG",
-            "zh-TW": "英語"
+            "uk": "ЕНЕ",
+            "zh-TW": "能量"
           },
           {
             "en": "STA",
             "de": "VIT",
-            "es": "STA",
+            "es": "VIT",
             "id": "STA",
             "ja": "体力",
             "pl": "STA",
-            "pt": "STA",
-            "ru": "СТА",
+            "pt": "VIT",
+            "ru": "ВЫН",
             "tl": "STA",
-            "uk": "STA",
-            "zh-TW": "史塔"
+            "uk": "ВИТ",
+            "zh-TW": "體力"
           },
           {
             "en": "AGI",
@@ -733,10 +733,10 @@
             "ja": "敏捷性",
             "pl": "AGI",
             "pt": "AGI",
-            "ru": "ОИИ",
+            "ru": "ЛВК",
             "tl": "AGI",
-            "uk": "AGI",
-            "zh-TW": "通用人工智慧"
+            "uk": "СПР",
+            "zh-TW": "敏捷"
           },
           {
             "en": "STR",
@@ -746,23 +746,23 @@
             "ja": "力",
             "pl": "STR",
             "pt": "FOR",
-            "ru": "СТР",
+            "ru": "СИЛ",
             "tl": "STR",
-            "uk": "ВУЛ",
-            "zh-TW": "STR"
+            "uk": "СИЛ",
+            "zh-TW": "力量"
           },
           {
             "en": "Command",
             "de": "Führung",
             "es": "Dominio",
-            "id": "Memerintah",
+            "id": "Kepemimpinan",
             "ja": "統率",
             "pl": "Dowodzenie",
             "pt": "Comando",
-            "ru": "Команда",
-            "tl": "Utos",
-            "uk": "Команда",
-            "zh-TW": "命令"
+            "ru": "Командование",
+            "tl": "Pamumuno",
+            "uk": "Командування",
+            "zh-TW": "統率"
           }
         ]
       },
