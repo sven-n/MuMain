@@ -224,6 +224,60 @@ TEST_CASE("Monster models: the shipped models' textures are in their folders [da
     }
 }
 
+TEST_CASE("Monster models: a SOUND_ id that a sound slot names is loaded by a model of the shipped list "
+          "[data][monsters]")
+{
+    // A slot plays the sound of its number, whichever model loaded it: the
+    // Giant Ogre's attack plays the Dark Skull Soldier's attack sound in
+    // Kalima, Vepar's the Stone Golem's death sound. The ids below no model
+    // loads, here and in the original client; their slots play nothing.
+    const std::set<std::string> idsNoModelLoads = {
+        "SOUND_MONSTER_BALIATTACK2_",   "SOUND_MONSTER_BULLATTACK1_", "SOUND_MONSTER_GORGONATTACK2_",
+        "SOUND_MONSTER_GORGONDIE_",     "SOUND_MONSTER_HUNTER2_",     "SOUND_MONSTER_PHOENIX2",
+        "SOUND_MONSTER_WIZARDATTACK2_", "SOUND_MONSTER_YETI1_",       "SOUND_MONSTER_YETI1__",
+        "SOUND_MONSTER_YETI1___",       "SOUND_MONSTER_YETIDIE_",     "SOUND_MONSTER_YETIDIE__",
+    };
+    const Data::Monsters::MonsterModelsLoadResult result = LoadShipped();
+    std::set<std::string> loaded;
+    for (const MonsterModelDefinition& model : result.models)
+    {
+        for (const Data::Monsters::MonsterModelSound& sound : model.sounds)
+        {
+            if (!sound.id.empty())
+            {
+                loaded.insert(sound.id);
+            }
+        }
+    }
+    std::set<std::string> notLoaded;
+    for (const MonsterModelDefinition& model : result.models)
+    {
+        if (!model.soundSlots)
+        {
+            continue;
+        }
+        std::vector<std::string> values(model.soundSlots->first.begin(), model.soundSlots->first.end());
+        if (model.soundSlots->second)
+        {
+            values.insert(values.end(), model.soundSlots->second->begin(), model.soundSlots->second->end());
+        }
+        for (const std::string& value : values)
+        {
+            if (value.starts_with("SOUND_") && !loaded.contains(value))
+            {
+                notLoaded.insert(value);
+            }
+        }
+    }
+    std::string listed;
+    for (const std::string& id : notLoaded)
+    {
+        listed += id + " ";
+    }
+    INFO("named by slots, loaded by no model: " << listed);
+    CHECK(notLoaded == idsNoModelLoads);
+}
+
 TEST_CASE("Monster models: the game's load fills the model table [data][monsters]")
 {
     ClientDataScope scope(ClientData.parent_path());

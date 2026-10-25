@@ -471,12 +471,12 @@
         {"file": "Data/Sound/mGolem2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mGolemAttack1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mGolemAttack2.wav", "channels": 2, "spatial": true},
-        {"file": "Data/Sound/mGolemDie.wav", "channels": 2, "spatial": true}
+        {"file": "Data/Sound/mGolemDie.wav", "id": "SOUND_MONSTER_GOLEMDIE", "channels": 2, "spatial": true}
       ],
       "soundSlots": {
         "idle": ["Data/Sound/mGolem1.wav", "Data/Sound/mGolem2.wav"],
         "attack": ["Data/Sound/mGolemAttack1.wav", "Data/Sound/mGolemAttack2.wav"],
-        "die": "Data/Sound/mGolemDie.wav"
+        "die": "SOUND_MONSTER_GOLEMDIE"
       }
     },
     {
@@ -1038,11 +1038,11 @@
         {"file": "Data/Sound/mBullDie.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mHunter2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mBlackSkullDie.wav", "channels": 2, "spatial": true},
-        {"file": "Data/Sound/mBlackSkullAttack.wav", "channels": 2, "spatial": true}
+        {"file": "Data/Sound/mBlackSkullAttack.wav", "id": "SOUND_MONSTER_BLACKSKULLATTACK", "channels": 2, "spatial": true}
       ],
       "soundSlots": {
         "idle": ["SOUND_MONSTER_HUNTER2_", null],
-        "attack": ["Data/Sound/mBlackSkullAttack.wav", null],
+        "attack": ["SOUND_MONSTER_BLACKSKULLATTACK", null],
         "die": "Data/Sound/mBlackSkullDie.wav"
       },
       "linkBones": [33, 20]
