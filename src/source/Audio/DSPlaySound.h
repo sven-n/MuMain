@@ -15,7 +15,7 @@ struct OBJECT;
 #define SOUND_MONSTER 210
 #define SOUND_MONSTER_END 450
 
-enum ESound
+enum ESound : int
 {
     SOUND_WIND01 = 0,
     SOUND_RAIN01 = 1,
@@ -998,6 +998,11 @@ enum ESound
 
     MAX_BUFFER
 };
+
+// Numbers after MAX_BUFFER belong to sounds without a SOUND_* id, which get
+// one when they are loaded (Audio/SoundNumbers.h); this many at most, so a
+// model's sound slots (BMD::Sounds, a short from SOUND_MONSTER on) reach all.
+constexpr int MAX_FILE_SOUNDS = 16384;
 
 void LoadWaveFile(ESound Buffer, const wchar_t* strFileName, int BufferChannel = MAX_CHANNEL,
                   bool Enable3DSound = false);

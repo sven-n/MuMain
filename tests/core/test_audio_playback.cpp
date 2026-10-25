@@ -13,6 +13,7 @@
 #include "Core/Platform/Audio/MiniAudioBackend.h"
 #undef private
 
+#include "Audio/SoundNumbers.h"
 #include "Scenes/SceneCore.h"
 #ifdef _EDITOR
 #include "Audio/DSPlaySound.h"
@@ -375,3 +376,64 @@ TEST_CASE("the editor's mute starts no sound effect played once, and lets looped
     g_platformAudio = previous;
 }
 #endif // _EDITOR
+
+namespace
+{
+// Writes Data/Sound/<name>.wav under a fresh temp directory and returns the file.
+std::filesystem::path CreateSoundAsset(const std::string& name)
+{
+    constexpr std::array<unsigned char, 46> wav = {
+        'R',  'I',  'F',  'F',  0x26, 0x00, 0x00, 0x00, 'W',  'A',  'V',  'E',  'f',  'm',  't',  ' ',
+        0x10, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x40, 0x1f, 0x00, 0x00, 0x80, 0x3e, 0x00, 0x00,
+        0x02, 0x00, 0x10, 0x00, 'd',  'a',  't',  'a',  0x02, 0x00, 0x00, 0x00, 0x00, 0x00,
+    };
+    const auto timestamp = std::chrono::steady_clock::now().time_since_epoch().count();
+    const std::filesystem::path assetPath = std::filesystem::temp_directory_path() /
+                                            ("mu_audio_sound_" + std::to_string(timestamp)) / "Data" / "Sound" /
+                                            (name + ".wav");
+    REQUIRE(std::filesystem::create_directories(assetPath.parent_path()));
+    std::ofstream file(assetPath, std::ios::binary);
+    REQUIRE(file.write(reinterpret_cast<const char*>(wav.data()), wav.size()).good());
+    return assetPath;
+}
+} // namespace
+
+TEST_CASE("a sound with a number after the SOUND_* list loads, plays and is released [audio]")
+{
+    auto backend = std::make_unique<mu::MiniAudioBackend>();
+    InitNoDeviceEngine(*backend);
+    const std::filesystem::path asset = CreateSoundAsset("numbered");
+    const int number = static_cast<int>(MAX_BUFFER) + 3;
+
+    backend->LoadSound(static_cast<ESound>(number), asset.wstring().c_str(), 2, true);
+
+    CHECK(backend->m_soundLoaded.size() == static_cast<size_t>(number) + 1);
+    CHECK(backend->m_soundLoaded[static_cast<size_t>(number)]);
+    CHECK(backend->m_loadedChannels[static_cast<size_t>(number)] == 2);
+    CHECK(backend->PlaySound(static_cast<ESound>(number), nullptr, false));
+    backend->ReleaseSound(static_cast<ESound>(number));
+    CHECK_FALSE(backend->m_soundLoaded[static_cast<size_t>(number)]);
+    // The SOUND_* ids before it keep their slots.
+    CHECK_FALSE(backend->m_soundLoaded[static_cast<size_t>(SOUND_CLICK01)]);
+
+    // No number beyond the sounds that can be given numbers.
+    backend->LoadSound(static_cast<ESound>(static_cast<int>(MAX_BUFFER) + MAX_FILE_SOUNDS), asset.wstring().c_str(), 1,
+                       false);
+    CHECK(backend->m_soundLoaded.size() == static_cast<size_t>(number) + 1);
+
+    backend->Shutdown();
+    std::filesystem::remove_all(asset.parent_path().parent_path().parent_path());
+}
+
+TEST_CASE("sound files get one number each after the SOUND_* list [audio]")
+{
+    const ESound first = Audio::SoundNumbers::ForFile(L"Data/Sound/TestNumbersOne.wav");
+    const ESound second = Audio::SoundNumbers::ForFile(L"Data/Sound/TestNumbersTwo.wav");
+
+    CHECK(static_cast<int>(first) >= static_cast<int>(MAX_BUFFER));
+    CHECK(second != first);
+    // The same file, as the game opens it: without case, \ and / alike.
+    CHECK(Audio::SoundNumbers::ForFile(L"data\\sound\\testnumbersone.wav") == first);
+    CHECK(Audio::SoundNumbers::FileOf(first) == L"Data/Sound/TestNumbersOne.wav");
+    CHECK(Audio::SoundNumbers::FileOf(SOUND_CLICK01).empty());
+}
