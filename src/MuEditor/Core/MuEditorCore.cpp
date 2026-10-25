@@ -37,6 +37,7 @@
 #include "../MuEditor/UI/MonsterTools/MuMonsterBrowserUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterChecksUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterModelUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterPreviewUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterTranslationsUI.h"
 #include "../MuEditor/UI/ServerList/MuServerListUI.h"
 #include "../UI/Common/MuEditorUI.h"
@@ -547,6 +548,7 @@ void CMuEditorCore::Update()
         // only before the renderer's frame starts.
         g_MuEffectBrowserUI.BeforeFrame();
         g_MuItemModelUI.BeforeFrame();
+        g_MuMonsterPreviewUI.BeforeFrame();
         // Between frames too: item models the item tools changed are opened
         // again, and so are the monster models the monster tools changed.
         ReopenChangedItemModels();
@@ -634,6 +636,10 @@ void CMuEditorCore::RenderMonsterTools()
     if (m_windows.monsterModel)
     {
         g_MuMonsterModelUI.Render(&m_windows.monsterModel);
+    }
+    if (m_windows.monsterPreview)
+    {
+        g_MuMonsterPreviewUI.Render(&m_windows.monsterPreview);
     }
     if (m_windows.monsterTranslations)
     {

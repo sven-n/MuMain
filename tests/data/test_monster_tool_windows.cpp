@@ -22,6 +22,7 @@
 #include "UI/MonsterTools/MuMonsterBrowserUI.h"
 #include "UI/MonsterTools/MuMonsterChecksUI.h"
 #include "UI/MonsterTools/MuMonsterModelUI.h"
+#include "UI/MonsterTools/MuMonsterPreviewUI.h"
 #include "UI/MonsterTools/MuMonsterTranslationsUI.h"
 #include "imgui.h"
 #include "imgui_internal.h"
@@ -49,6 +50,7 @@ void RenderMonsterTools()
     bool open = true;
     g_MuMonsterBrowserUI.Render(&open);
     g_MuMonsterModelUI.Render(&open);
+    g_MuMonsterPreviewUI.Render(&open);
     g_MuMonsterTranslationsUI.Render(&open);
     g_MuMonsterChecksUI.Render(&open);
 }
@@ -95,13 +97,14 @@ TEST_CASE("The monster tools draw their frames without ImGui errors [editor][mon
     CHECK(ImGui::FindWindowByName(WindowIds::MonsterTranslations) != nullptr);
     CHECK(ImGui::FindWindowByName(WindowIds::MonsterChecks) != nullptr);
     CHECK(ImGui::FindWindowByName(WindowIds::MonsterModel) != nullptr);
+    CHECK(ImGui::FindWindowByName(WindowIds::MonsterPreview) != nullptr);
 }
 
 // The model tools with a monster whose model has an entry with sounds and
 // sound slots, one whose model is outside the model list, and one without a
-// model. The test binary opens no models: the animations say that the
-// model is not open.
-TEST_CASE("The Monster Model window draws a model entry without ImGui errors [editor][monsters]")
+// model. The test binary opens no models: the animations and the preview
+// say that the model is not open.
+TEST_CASE("The Monster Model and Monster Preview windows draw a model entry without ImGui errors [editor][monsters]")
 {
     MonsterDefinition hound = Monster(3, "Hound");
     hound.model = "MONSTER_MODEL_HOUND";
@@ -130,6 +133,7 @@ TEST_CASE("The Monster Model window draws a model entry without ImGui errors [ed
             ImGui::NewFrame();
             bool open = true;
             g_MuMonsterModelUI.Render(&open);
+            g_MuMonsterPreviewUI.Render(&open);
             ImGui::Render();
             INFO("monster " << number << ", frame " << frame);
             CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
@@ -152,7 +156,7 @@ TEST_CASE("The first layout docks the monster browser beside the item browser, i
         ImGui::End();
         for (const char* window :
              {WindowIds::ItemBrowser, WindowIds::ItemBasics, WindowIds::MonsterBrowser, WindowIds::MonsterModel,
-              WindowIds::MonsterTranslations, WindowIds::MonsterChecks})
+              WindowIds::MonsterPreview, WindowIds::MonsterTranslations, WindowIds::MonsterChecks})
         {
             ImGui::Begin(window);
             ImGui::End();
@@ -167,6 +171,7 @@ TEST_CASE("The first layout docks the monster browser beside the item browser, i
     CHECK(DockIdOf(WindowIds::MonsterTranslations) == DockIdOf(WindowIds::ItemBasics));
     CHECK(DockIdOf(WindowIds::MonsterChecks) == DockIdOf(WindowIds::ItemBasics));
     CHECK(DockIdOf(WindowIds::MonsterModel) == DockIdOf(WindowIds::ItemBasics));
+    CHECK(DockIdOf(WindowIds::MonsterPreview) == DockIdOf(WindowIds::ItemBasics));
     CHECK(DockIdOf(WindowIds::MonsterBrowser) != DockIdOf(WindowIds::ItemBasics));
 }
 

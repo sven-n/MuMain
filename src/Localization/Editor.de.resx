@@ -2344,6 +2344,9 @@
   <data name="Animations" xml:space="preserve">
     <value>Animationen</value>
   </data>
+  <data name="As a transformed player" xml:space="preserve">
+    <value>Als verwandelter Spieler</value>
+  </data>
   <data name="As the file has it" xml:space="preserve">
     <value>wie in der Datei</value>
   </data>
@@ -2365,11 +2368,23 @@
   <data name="Fixed bitmaps" xml:space="preserve">
     <value>Bitmaps in festen Plätzen</value>
   </data>
+  <data name="Frame" xml:space="preserve">
+    <value>Bild</value>
+  </data>
+  <data name="From the start" xml:space="preserve">
+    <value>Von vorn</value>
+  </data>
+  <data name="Game speed factors" xml:space="preserve">
+    <value>Geschwindigkeitsfaktoren des Spiels</value>
+  </data>
   <data name="Head bone" xml:space="preserve">
     <value>Kopfknochen</value>
   </data>
   <data name="Hit at frame {0}" xml:space="preserve">
     <value>Treffer bei Bild {0}</value>
+  </data>
+  <data name="Holds its last frame" xml:space="preserve">
+    <value>hält sein letztes Bild</value>
   </data>
   <data name="Holds last frame" xml:space="preserve">
     <value>Hält letztes Bild</value>
@@ -2383,11 +2398,17 @@
   <data name="In game" xml:space="preserve">
     <value>Im Spiel</value>
   </data>
+  <data name="In game: {0}" xml:space="preserve">
+    <value>im Spiel: {0}</value>
+  </data>
   <data name="Meshes without blending" xml:space="preserve">
     <value>Meshes ohne Blending</value>
   </data>
   <data name="Monster Model" xml:space="preserve">
     <value>Monstermodell</value>
+  </data>
+  <data name="Monster Preview" xml:space="preserve">
+    <value>Monstervorschau</value>
   </data>
   <data name="Monster range" xml:space="preserve">
     <value>Monsterbereich</value>
@@ -2425,8 +2446,14 @@
   <data name="Part models" xml:space="preserve">
     <value>Teilmodelle</value>
   </data>
+  <data name="Play animation" xml:space="preserve">
+    <value>Abspielen</value>
+  </data>
   <data name="Play this sound" xml:space="preserve">
     <value>Abspielen</value>
+  </data>
+  <data name="Play the sounds" xml:space="preserve">
+    <value>Geräusche abspielen</value>
   </data>
   <data name="Range default" xml:space="preserve">
     <value>Standard des Bereichs</value>
@@ -2457,6 +2484,9 @@
   </data>
   <data name="Speed {0} after frame 6" xml:space="preserve">
     <value>×{0} nach Bild 6</value>
+  </data>
+  <data name="Speed {0} per frame" xml:space="preserve">
+    <value>Geschwindigkeit: {0} Bilder pro Spielbild</value>
   </data>
   <data name="Speed {0} when transformed" xml:space="preserve">
     <value>×{0} bei einem verwandelten Spieler</value>
@@ -2496,6 +2526,9 @@
   </data>
   <data name="The model has a second sound set for SubType 9." xml:space="preserve">
     <value>Das Modell hat einen zweiten Geräuschsatz, den Monster mit SubType 9 spielen (fünf Nummern weiter); er wird in der Datei bearbeitet.</value>
+  </data>
+  <data name="The model is not open; it shows when it is." xml:space="preserve">
+    <value>Das Modell ist nicht geöffnet (vielleicht fehlt seine Datei); es erscheint, sobald das Spiel es öffnet.</value>
   </data>
   <data name="The model is not open; its animations show when it is." xml:space="preserve">
     <value>Das Modell ist nicht geöffnet (vielleicht fehlt seine Datei); seine Animationen erscheinen, sobald das Spiel es öffnet.</value>
