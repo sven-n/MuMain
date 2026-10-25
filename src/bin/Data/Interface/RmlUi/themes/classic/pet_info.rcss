@@ -284,3 +284,64 @@
 
 /* No S6 group boxes. */
 .gbox-corner, .gbox-title-fill, .gbox-content-fill { display: none; }
+
+/* The pet's level and stats as Season 1 draws them (00412bb0, called from 004222d0 with the window's
+   left edge), in the window's units:
+   - the level in a Level_box (75x21) at (13, 96), gold (223, 191, 103), centred in the 70 from 14,
+     its text top at 100;
+   - the life line at (24, 120), then the bar at (24, 135): a 145x8 back in (0.2, 0, 0) and the
+     life, life * 143 / 255 wide and 6 high, in (0.882, 0.059, 0) one in from its top-left -- no
+     texture;
+   - the other lines 15 apart from 150 at x 24, all (230, 230, 230) over a band of black at 50%,
+     145 wide. */
+@spritesheet petinfo-classic-level-sheet { src: ../../../Classic/Level_box.jpg; petinfo-classic-level: 0px 0px 75px 21px; }
+
+.gbox-title-fill.gbox-dh-title-fill,
+.gbox-title-fill.gbox-ds1-title-fill {
+	display: block;
+	left: 13px;
+	top: 96px;
+	width: 75px;
+	height: 21px;
+	background-color: transparent;
+	decorator: image(petinfo-classic-level);
+}
+.gbox-title-text.gbox-dh-title-text,
+.gbox-title-text.gbox-ds1-title-text {
+	left: 14px;
+	top: 99px;
+	width: calc(70px * var(--root-scale));
+	color: rgb(223, 191, 103);
+}
+
+.pet-stat-text.pet-dh-life-text, .pet-stat-text.pet-dh-exp-text, .pet-stat-text.pet-dh-dmg-text,
+.pet-stat-text.pet-dh-atkspeed-text,
+.pet-stat-text.pet-ds-life-text, .pet-stat-text.pet-ds-exp-text, .pet-stat-text.pet-ds-dmg-text,
+.pet-stat-text.pet-ds-atkspeed-text, .pet-stat-text.pet-ds-charisma-text {
+	left: 24px;
+	width: calc(145px * var(--root-scale));
+	color: rgb(230, 230, 230);
+	background-color: rgba(0, 0, 0, 128);
+}
+.pet-dh-life-text, .pet-ds-life-text { top: 119px; }
+.pet-dh-exp-text, .pet-ds-exp-text { top: 149px; }
+.pet-dh-dmg-text, .pet-ds-dmg-text { top: 164px; }
+.pet-dh-atkspeed-text, .pet-ds-atkspeed-text { top: 179px; }
+.pet-ds-charisma-text { top: 194px; }
+
+.hp-bar {
+	left: 24px;
+	width: 145px;
+	height: 8px;
+	background-color: rgb(51, 0, 0);
+	decorator: none;
+}
+.hp-bar-dh, .hp-bar-ds { top: 135px; }
+.hp-bar-fill {
+	left: 1px;
+	top: 1px;
+	max-width: 143px;
+	height: 6px;
+	background-color: rgb(225, 15, 0);
+	decorator: none;
+}
