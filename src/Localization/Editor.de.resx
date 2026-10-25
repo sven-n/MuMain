@@ -2752,4 +2752,13 @@
   <data name="Attack sound unknown" xml:space="preserve">
     <value>keine SOUND_-ID, die die Monsterdaten nennen können</value>
   </data>
+  <data name="Monster model player note" xml:space="preserve">
+    <value>Ein Monster in Spielergestalt: Das Spiel zeichnet es als Spielerfigur, mit dem Modell, den Animationen und den Gegenständen, die sein Code ihm gibt, manche mit eigener Haut (die Körper der Skelette). Sein Aussehen kommt noch aus dem Code; die Modellliste enthält Monster- und NPC-Modelle.</value>
+  </data>
+  <data name="Monster model map object note" xml:space="preserve">
+    <value>Das Monster erscheint als Objekt {0} seiner Karte (eine Falle): Die Karte lädt dieses Modell, nicht die Modellliste.</value>
+  </data>
+  <data name="Monster model other area note" xml:space="preserve">
+    <value>Das Monster erscheint mit {0}, einem Modell eines anderen Bereichs (die Kalima-Tore, der Fußball): Die Modellliste enthält Monster- und NPC-Modelle.</value>
+  </data>
 </root>

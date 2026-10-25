@@ -2773,4 +2773,13 @@
   <data name="Attack sound unknown" xml:space="preserve">
     <value>not a SOUND_ id the monster data can name</value>
   </data>
+  <data name="Monster model player note" xml:space="preserve">
+    <value>A player-shaped monster: the game draws it as a player character, with the player's model, animations and the items its code gives it, some with a skin of their own (the skeletons' bodies). Its look still comes from the code; the model list holds monster and NPC models.</value>
+  </data>
+  <data name="Monster model map object note" xml:space="preserve">
+    <value>The monster appears as object {0} of its map (a trap): the map loads that model, not the model list.</value>
+  </data>
+  <data name="Monster model other area note" xml:space="preserve">
+    <value>The monster appears with {0}, a model of another area (the Kalima gates, the soccer ball): the model list holds monster and NPC models.</value>
+  </data>
 </root>
