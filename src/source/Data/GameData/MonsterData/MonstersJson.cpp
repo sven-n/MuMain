@@ -3,6 +3,7 @@
 #include "MonstersJson.h"
 
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
+#include "Data/GameData/MonsterData/MonsterModelSlots.h"
 
 #include <algorithm>
 #include <optional>
@@ -20,6 +21,7 @@ constexpr const char* MonstersKey = "monsters";
 constexpr const char* NumberKey = "number";
 constexpr const char* NameKey = "name";
 constexpr const char* KindKey = "kind";
+constexpr const char* ModelKey = "model";
 
 // The problems of one file; a problem of a monster names its number, so the
 // editor can select it.
@@ -100,6 +102,25 @@ bool ReadKind(const OrderedJson& json, int number, MonsterKind& kind, IssueList&
     return true;
 }
 
+bool ReadModel(const OrderedJson& json, int number, std::string& model, IssueList& issues)
+{
+    const auto value = json.find(ModelKey);
+    if (value == json.end())
+    {
+        return true;
+    }
+    if (!value->is_string() || !FindMonsterModelReference(value->get<std::string>()))
+    {
+        issues.Error(MonsterField(number, ModelKey),
+                     "must be a model of the model list (MONSTER_MODEL_..., MODEL_...), player, MODEL_WARCRAFT, "
+                     "MODEL_BALL or mapObject <number>",
+                     number);
+        return false;
+    }
+    model = value->get<std::string>();
+    return true;
+}
+
 std::optional<MonsterDefinition> ReadMonster(const OrderedJson& json, const std::string& field, IssueList& issues)
 {
     if (!json.is_object())
@@ -116,7 +137,9 @@ std::optional<MonsterDefinition> ReadMonster(const OrderedJson& json, const std:
     monster.number = *number;
     bool valid = ReadNames(json, monster.number, monster.names, issues);
     valid = ReadKind(json, monster.number, monster.kind, issues) && valid;
-    Items::Json::WarnAboutUnknownKeys(json, {NumberKey, NameKey, KindKey}, "monster " + std::to_string(*number) + " ",
+    valid = ReadModel(json, monster.number, monster.model, issues) && valid;
+    Items::Json::WarnAboutUnknownKeys(json, {NumberKey, NameKey, KindKey, ModelKey},
+                                      "monster " + std::to_string(*number) + " ",
                                       [&](const std::string& unknown, const std::string& message)
                                       { issues.Warning(unknown, message, monster.number); });
     return valid ? std::optional<MonsterDefinition>(std::move(monster)) : std::nullopt;
@@ -128,6 +151,10 @@ OrderedJson WriteMonster(const MonsterDefinition& monster)
     json[NumberKey] = monster.number;
     json[NameKey] = Items::Json::WriteLocalizedString(monster.names);
     json[KindKey] = GetMonsterKindName(monster.kind);
+    if (!monster.model.empty())
+    {
+        json[ModelKey] = monster.model;
+    }
     return json;
 }
 } // namespace

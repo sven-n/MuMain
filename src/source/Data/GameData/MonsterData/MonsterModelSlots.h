@@ -1,6 +1,7 @@
 #pragma once
 
 #include <optional>
+#include <string>
 #include <string_view>
 
 // The model slots of the monster area (monsters design, D47) and the names
@@ -21,6 +22,18 @@ bool IsNpcRangeSlot(int slot);
 
 // The name of a monster model type for logs; "UNKNOWN" outside the types.
 std::string_view GetMonsterModelTypeName(int type);
+
+// What a monster's "model" names (monsters design, D47): a model of the
+// model list by its slot ("MONSTER_MODEL_HOUND", "MODEL_SMITH"), "player"
+// (MODEL_PLAYER, a player-shaped monster), a model of another area by the
+// code's name of its slot ("MODEL_WARCRAFT" for the Kalima gates,
+// "MODEL_BALL" for the soccer ball), or a map object ("mapObject 39" for a
+// trap). The slot, or nullopt for a text that names none.
+std::optional<int> FindMonsterModelReference(std::string_view model);
+
+// How a monster's "model" names the slot; empty for a slot no monster can
+// use.
+std::string GetMonsterModelReference(int slot);
 
 // The fixed bitmap slots that monster models load bitmaps into, which their
 // drawing code uses: "BITMAP_MONSTER_SKIN", "BITMAP_MONSTER_SKIN+1",

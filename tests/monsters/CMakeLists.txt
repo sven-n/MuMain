@@ -6,9 +6,11 @@
 mu_add_test(
     NAME monster_model_recorder_tests
     SOURCES
+        MonsterCreationScope.cpp
         MonsterModelRecorder.cpp
         test_monster_model_recorder.cpp
         test_monster_model_comparison.cpp
+        test_monster_creation_models.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient

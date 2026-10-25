@@ -6,6 +6,7 @@
 #include "Core/Globals/_enum.h"
 
 #include <array>
+#include <charconv>
 #include <span>
 
 namespace Data::Monsters
@@ -371,6 +372,15 @@ constexpr bool IsDense(std::span<const SlotSymbol> symbols, int first)
     return true;
 }
 
+// Models of other areas that monsters use.
+constexpr SlotSymbol OtherAreaModels[] = {
+    {"MODEL_WARCRAFT", MODEL_WARCRAFT},
+    {"MODEL_BALL", MODEL_BALL},
+};
+
+constexpr std::string_view PlayerModel = "player";
+constexpr std::string_view MapObjectPrefix = "mapObject ";
+
 constexpr SlotSymbol BitmapSlots[] = {
     {"BITMAP_MONSTER_SKIN", BITMAP_MONSTER_SKIN},
     {"BITMAP_MONSTER_SKIN+1", BITMAP_MONSTER_SKIN + 1},
@@ -423,6 +433,42 @@ std::string_view GetMonsterModelTypeName(int type)
     if (type < 0 || type >= MONSTER_MODEL_COUNT)
         return "UNKNOWN";
     return MonsterModelTypes[type].symbol;
+}
+
+std::optional<int> FindMonsterModelReference(std::string_view model)
+{
+    if (model == PlayerModel)
+        return MODEL_PLAYER;
+    for (const SlotSymbol& other : OtherAreaModels)
+    {
+        if (other.symbol == model)
+            return other.value;
+    }
+    if (model.starts_with(MapObjectPrefix))
+    {
+        const std::string_view number = model.substr(MapObjectPrefix.size());
+        int slot = -1;
+        const auto [end, error] = std::from_chars(number.data(), number.data() + number.size(), slot);
+        if (error == std::errc() && end == number.data() + number.size() && slot >= MODEL_WORLD_OBJECT &&
+            slot < MAX_WORLD_OBJECTS)
+            return slot;
+        return std::nullopt;
+    }
+    return FindMonsterModelSlot(model);
+}
+
+std::string GetMonsterModelReference(int slot)
+{
+    if (slot == MODEL_PLAYER)
+        return std::string(PlayerModel);
+    for (const SlotSymbol& other : OtherAreaModels)
+    {
+        if (other.value == slot)
+            return std::string(other.symbol);
+    }
+    if (slot >= MODEL_WORLD_OBJECT && slot < MAX_WORLD_OBJECTS)
+        return std::string(MapObjectPrefix) + std::to_string(slot);
+    return std::string(GetMonsterModelSymbol(slot));
 }
 
 std::optional<int> FindMonsterModelBitmapSlot(std::string_view symbol)

@@ -21,6 +21,11 @@ struct MonsterDefinition
     // The names by language; the English name may be empty (252).
     LocalizedString names;
     MonsterKind kind = MonsterKind::Monster;
+    // The model its monsters appear with (MonsterModelSlots.h
+    // FindMonsterModelReference); empty when the list does not say. The
+    // creators in the code still choose the model (until MN4); a test checks
+    // that they choose this one.
+    std::string model;
 
     bool operator==(const MonsterDefinition& other) const = default;
 };

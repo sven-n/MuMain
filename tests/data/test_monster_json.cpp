@@ -4,6 +4,8 @@
 
 #include "Core/Globals/_define.h"
 #include "Data/GameData/MonsterData/MonsterDataValidation.h"
+#include "Data/GameData/MonsterData/MonsterModelSlots.h"
+#include "Core/Globals/_enum.h"
 #include "Data/GameData/MonsterData/MonstersJson.h"
 
 #include <algorithm>
@@ -254,4 +256,58 @@ TEST_CASE("Monster data: kinds have names and object kinds [data][monsters]")
     CHECK(ToObjectKind(MonsterKind::Other) == KIND_TMP);
     CHECK_FALSE(FromObjectKind(KIND_PLAYER).has_value());
     CHECK_FALSE(FindMonsterKind("boss").has_value());
+}
+
+TEST_CASE("Monster data: a monster names the model it appears with [data][monsters]")
+{
+    const ReadResult read = Read(MonsterFile(
+        R"({ "number": 2, "name": "Budge Dragon", "kind": "monster", "model": "MONSTER_MODEL_BUDGE_DRAGON" },
+        { "number": 151, "name": "Soldier", "kind": "monster", "model": "player" },
+        { "number": 152, "name": "Gate to Kalima 1", "kind": "monster", "model": "MODEL_WARCRAFT" },
+        { "number": 102, "name": "Trap", "kind": "trap", "model": "mapObject 39" },
+        { "number": 251, "name": "Hanzo the Blacksmith", "kind": "npc", "model": "MODEL_SMITH" },
+        { "number": 7, "name": "Giant", "kind": "monster" })"));
+    CHECK_MESSAGE(read.issues.empty(), Messages(read.issues));
+    REQUIRE(read.monsters.size() == 6);
+    CHECK(read.monsters[0].model == "MONSTER_MODEL_BUDGE_DRAGON");
+    CHECK(read.monsters[3].model == "mapObject 39");
+    // A monster without a model is read; the list does not say its model.
+    CHECK(read.monsters[5].model.empty());
+
+    MonsterDefinition budge = Monster(2, "Budge Dragon");
+    budge.model = "MONSTER_MODEL_BUDGE_DRAGON";
+    const std::string text = Data::Monsters::WriteMonstersJson(std::array{budge});
+    CHECK(text.find("\"kind\": \"monster\",\n      \"model\": \"MONSTER_MODEL_BUDGE_DRAGON\"\n") != std::string::npos);
+    const ReadResult back = Read(text);
+    REQUIRE(back.monsters.size() == 1);
+    CHECK(back.monsters[0] == budge);
+}
+
+TEST_CASE("Monster data: a model that names no model is an error [data][monsters]")
+{
+    for (const char* model : {"MODEL_HOUND", "MODEL_PLAYER", "Player", "mapObject 160", "mapObject x", "\"\""})
+    {
+        const std::string text = std::string(R"({ "number": 2, "name": "X", "kind": "monster", "model": )") +
+                                 (model[0] == '"' ? model : "\"" + std::string(model) + "\"") + " }";
+        INFO(model);
+        const ReadResult read = Read(MonsterFile(text));
+        CHECK(read.monsters.empty());
+        CHECK(HasIssueAbout(read.issues, "monster 2 model", "must be a model"));
+    }
+    CHECK(HasIssueAbout(Read(MonsterFile(R"({ "number": 2, "name": "X", "kind": "monster", "model": 5 })")).issues,
+                        "monster 2 model", "must be a model"));
+}
+
+TEST_CASE("Monster data: the models a monster can name, and back [data][monsters]")
+{
+    CHECK(Data::Monsters::FindMonsterModelReference("player") == MODEL_PLAYER);
+    CHECK(Data::Monsters::FindMonsterModelReference("MODEL_BALL") == MODEL_BALL);
+    CHECK(Data::Monsters::FindMonsterModelReference("mapObject 51") == 51);
+    CHECK(Data::Monsters::FindMonsterModelReference("MONSTER_MODEL_HOUND") == MODEL_HOUND);
+    for (const int slot : {static_cast<int>(MODEL_PLAYER), static_cast<int>(MODEL_WARCRAFT), 25,
+                           static_cast<int>(MODEL_HOUND), static_cast<int>(MODEL_SMITH)})
+    {
+        CHECK(Data::Monsters::FindMonsterModelReference(Data::Monsters::GetMonsterModelReference(slot)) == slot);
+    }
+    CHECK(Data::Monsters::GetMonsterModelReference(MODEL_ARROW).empty());
 }
