@@ -1,0 +1,24 @@
+#pragma once
+
+#include <optional>
+#include <string_view>
+
+// The model slots of the monster area (monsters design, D47) and the names
+// the code gives them: a monster model by its model type
+// ("MONSTER_MODEL_HOUND", slot MODEL_MONSTER01 + type), an NPC model by its
+// slot ("MODEL_SMITH"; "MODEL_LITTLESANTA+3" for a slot without a name of its
+// own).
+namespace Data::Monsters
+{
+// The slot of a symbol, or nullopt for a text that names none.
+std::optional<int> FindMonsterModelSlot(std::string_view symbol);
+
+// The symbol of a slot of the monster or NPC range; empty for other slots.
+std::string_view GetMonsterModelSymbol(int slot);
+
+bool IsMonsterRangeSlot(int slot);
+bool IsNpcRangeSlot(int slot);
+
+// The name of a monster model type for logs; "UNKNOWN" outside the types.
+std::string_view GetMonsterModelTypeName(int type);
+} // namespace Data::Monsters
