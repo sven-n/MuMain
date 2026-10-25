@@ -862,11 +862,12 @@ TEST_CASE("The second item chain's tooltip texts keep their translations [data][
 }
 
 // What the old code printed for an item's level lines in the UI's language, where the texts are the game's that other
-// code still prints: one entry per line of OldLevelLines, empty for a text only the tooltip had (removed since). The
-// Fruits' stat lines aren't compared: their stat words are corrected here, and stay wrong in the game's texts.
+// code still prints: one entry per line of OldLevelLines, empty for a text only the tooltip had (removed since). A
+// Fruit's stat lines started with the stat's name; the rest of them was a removed text.
 struct PrintedOldLine
 {
     std::string text;
+    bool isPrefix = false;
 };
 
 std::string PrintWithName(const wchar_t* format, const wchar_t* name)
@@ -892,8 +893,10 @@ std::vector<std::optional<PrintedOldLine>> PrintedOldLevelLines(int group, int n
     }
     if (group == 13 && number == 15 && level <= 4)
     {
-        std::vector<std::optional<PrintedOldLine>> lines = {std::nullopt, std::nullopt,
-                                                            printed(I18N::Game::ItCanBeUsedWithItemRemoved)};
+        const wchar_t* const stats[] = {I18N::Game::ENG, I18N::Game::STA, I18N::Game::AGI, I18N::Game::STR,
+                                        I18N::Game::Command};
+        const PrintedOldLine stat{Core::Text::ToUtf8(stats[level]) + " ", true};
+        std::vector<std::optional<PrintedOldLine>> lines = {stat, stat, printed(I18N::Game::ItCanBeUsedWithItemRemoved)};
         if (level == 4)
         {
             lines.push_back(PrintedOldLine{PrintWithName(I18N::Game::CanBeEquippedByS, I18N::Game::DarkLord)});
@@ -941,16 +944,23 @@ TEST_CASE("The tooltip texts by item level are the game's texts in every languag
                         continue;
                     }
                     const std::string text = FilledLine(*found, *shown[index], level, profiles, locale);
-                    CHECK(text == old[index]->text);
+                    if (old[index]->isPrefix)
+                    {
+                        CHECK(text.starts_with(old[index]->text));
+                    }
+                    else
+                    {
+                        CHECK(text == old[index]->text);
+                    }
                     ++compared;
                 }
             }
             I18N::SetLocale("en");
         }
     }
-    // Archer and Spearman, Scroll of Guardian and Place Life Stone, and the Fruits' last line at +0 to +3 and last two
-    // at +4, in every language.
-    CHECK(compared == (2 + 2 + 4 * 1 + 2) * static_cast<int>(std::size(I18N::GetAvailableLocales())));
+    // Archer and Spearman, Scroll of Guardian and Place Life Stone, and the Fruits' 3 lines at +0 to +3 and 4 at +4, in
+    // every language.
+    CHECK(compared == (2 + 2 + 4 * 3 + 4) * static_cast<int>(std::size(I18N::GetAvailableLocales())));
 }
 
 // The damage texts without the English "of" and the Fruits' stat words, as #828 fixed them: rendered with 12 in each
