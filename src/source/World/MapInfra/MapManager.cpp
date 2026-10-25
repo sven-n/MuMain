@@ -728,38 +728,7 @@ void CMapManager::Load() // OK
         LoadWaveFile(SOUND_EMPIREGUARDIAN_WEATHER_FOG, L"Data\\Sound\\w69w70w71w72\\ImperialGuardianFort_out2.wav");
         LoadWaveFile(SOUND_EMPIREGUARDIAN_WEATHER_STORM, L"Data\\Sound\\w69w70w71w72\\ImperialGuardianFort_out3.wav");
         LoadWaveFile(SOUND_EMPIREGUARDIAN_INDOOR_SOUND, L"Data\\Sound\\w69w70w71w72\\ImperialGuardianFort_in.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE, L"Data\\Sound\\w69w70w71w72\\GaionKalein_move.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_RAGE, L"Data\\Sound\\w69w70w71w72\\GaionKalein_rage.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_DEATH, L"Data\\Sound\\w69w70w71w72\\GrandWizard_death.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01, L"Data\\Sound\\w69w70w71w72\\Jelint_attack1.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK03, L"Data\\Sound\\w69w70w71w72\\Jelint_attack3.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01, L"Data\\Sound\\w69w70w71w72\\Jelint_move01.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02, L"Data\\Sound\\w69w70w71w72\\Jelint_move02.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE, L"Data\\Sound\\w69w70w71w72\\Jelint_rage.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH, L"Data\\Sound\\w69w70w71w72\\Jelint_death.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_ATTACK02, L"Data\\Sound\\w69w70w71w72\\Raymond_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_RAGE, L"Data\\Sound\\w69w70w71w72\\Raymond_rage.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_ERCANNE_MONSTER_ATTACK03, L"Data\\Sound\\w69w70w71w72\\Ercanne_attack3.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_1CORP_DEASULER_MONSTER_ATTACK02, L"Data\\Sound\\w69w70w71w72\\1Deasuler_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_1CORP_DEASULER_MONSTER_ATTACK03, L"Data\\Sound\\w69w70w71w72\\1Deasuler_attack3.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK01, L"Data\\Sound\\w69w70w71w72\\2Vermont_attack1.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK02, L"Data\\Sound\\w69w70w71w72\\2Vermont_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_DEATH, L"Data\\Sound\\w69w70w71w72\\2Vermont_death.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_3CORP_CATO_ATTACK02, L"Data\\Sound\\w69w70w71w72\\3Cato_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_3CORP_CATO_MOVE, L"Data\\Sound\\w69w70w71w72\\3Cato_move.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_4CORP_GALLIA_ATTACK02, L"Data\\Sound\\w69w70w71w72\\4Gallia_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_QUATERMASTER_ATTACK02, L"Data\\Sound\\w69w70w71w72\\QuaterMaster_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01, L"Data\\Sound\\w69w70w71w72\\CombatMaster_attack1.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK02, L"Data\\Sound\\w69w70w71w72\\CombatMaster_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK03, L"Data\\Sound\\w69w70w71w72\\CombatMaster_attack3.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_GRANDWIZARD_DEATH, L"Data\\Sound\\w69w70w71w72\\GrandWizard_death.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_ASSASSINMASTER_DEATH, L"Data\\Sound\\w69w70w71w72\\AssassinMaster_Death.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK01, L"Data\\Sound\\w69w70w71w72\\CavalryLeader_attack1.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK02, L"Data\\Sound\\w69w70w71w72\\CavalryLeader_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_CAVALRYLEADER_MOVE01, L"Data\\Sound\\w69w70w71w72\\CavalryLeader_move01.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_CAVALRYLEADER_MOVE02, L"Data\\Sound\\w69w70w71w72\\CavalryLeader_move02.wav");
         LoadWaveFile(SOUND_EMPIREGUARDIAN_DEFENDER_ATTACK02, L"Data\\Sound\\w69w70w71w72\\GrandWizard_death.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_PRIEST_STOP, L"Data\\Sound\\w69w70w71w72\\Priest_stay.wav");
         break;
     case WD_73NEW_LOGIN_SCENE:
     case WD_74NEW_CHARACTER_SCENE:

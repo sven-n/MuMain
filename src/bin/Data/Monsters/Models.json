@@ -2532,6 +2532,11 @@
       "file": "Data/Monster/Monster165.bmd",
       "textureFolders": ["Monster"],
       "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.4, "attack1": 0.38, "attack2": 0.4, "die": 0.2, "appear": 0.4, "attack3": 0.38, "attack4": 0.38},
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/GaionKalein_move.wav", "id": "SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/GrandWizard_death.wav", "id": "SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_DEATH", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/GaionKalein_rage.wav", "id": "SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_RAGE", "channels": 4, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["walk"], "sounds": ["SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE"]},
         {"animations": ["die"], "sounds": ["SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_DEATH"]},
@@ -2544,6 +2549,14 @@
       "file": "Data/Monster/Monster166.bmd",
       "textureFolders": ["Monster"],
       "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.5, "attack1": 0.86, "attack2": 0.86, "die": 0.4, "appear": 0.4, "attack3": 0.76},
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move01.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move02.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_attack3.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK03", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_death.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_rage.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE", "channels": 4, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["walk"], "pick": "rand", "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
         {"animations": ["attack1"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01"]},
@@ -2559,6 +2572,14 @@
       "file": "Data/Monster/Monster167.bmd",
       "textureFolders": ["Monster"],
       "animations": {"stop1": 0.6, "stop2": 0.6, "walk": 0.55, "attack1": 0.75, "attack2": 0.5, "die": 0.3, "appear": 0.8, "attack3": 0.5},
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move01.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move02.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Raymond_attack2.wav", "id": "SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_ATTACK02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Raymond_rage.wav", "id": "SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_RAGE", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_death.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH", "channels": 4, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["walk"], "frames": [7, 8], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01"]},
         {"animations": ["walk"], "frames": [1, 2], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
@@ -2575,6 +2596,15 @@
       "file": "Data/Monster/Monster168.bmd",
       "textureFolders": ["Monster"],
       "animations": {"stop1": 0.6, "stop2": 0.6, "walk": 0.5, "attack1": 0.71, "attack2": 0.4, "die": 0.3, "appear": 0.8, "attack3": 0.4},
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move01.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move02.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_attack3.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK03", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Ercanne_attack3.wav", "id": "SOUND_EMPIREGUARDIAN_ERCANNE_MONSTER_ATTACK03", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Raymond_rage.wav", "id": "SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_RAGE", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_death.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH", "channels": 4, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["walk"], "pick": "rand", "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
         {"animations": ["attack1"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01"]},
@@ -2590,6 +2620,15 @@
       "file": "Data/Monster/monster169.bmd",
       "textureFolders": ["Monster"],
       "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.4, "attack2": 0.38, "die": 0.3, "appear": 0.4, "attack3": 0.4, "attack4": 0.45},
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move01.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move02.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CombatMaster_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/1Deasuler_attack2.wav", "id": "SOUND_EMPIREGUARDIAN_1CORP_DEASULER_MONSTER_ATTACK02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/1Deasuler_attack3.wav", "id": "SOUND_EMPIREGUARDIAN_1CORP_DEASULER_MONSTER_ATTACK03", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_rage.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_death.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH", "channels": 4, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["walk"], "frames": [7, 8], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01"]},
         {"animations": ["walk"], "frames": [1, 2], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
@@ -2606,6 +2645,14 @@
       "file": "Data/Monster/Monster170.bmd",
       "textureFolders": ["Monster"],
       "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.35, "attack1": 0.4, "attack2": 0.45, "die": 0.4, "appear": 0.45, "attack3": 0.45},
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move01.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move02.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/2Vermont_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/2Vermont_attack2.wav", "id": "SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_rage.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/2Vermont_death.wav", "id": "SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_DEATH", "channels": 4, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["walk"], "pick": "rand", "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
         {"animations": ["attack1"], "sounds": ["SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK01"]},
@@ -2621,6 +2668,13 @@
       "file": "Data/Monster/Monster171.bmd",
       "textureFolders": ["Monster"],
       "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.35, "attack1": 0.4, "attack2": 0.35, "die": 0.35, "appear": 0.4, "attack3": 0.4},
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/3Cato_move.wav", "id": "SOUND_EMPIREGUARDIAN_3CORP_CATO_MOVE", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CombatMaster_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/3Cato_attack2.wav", "id": "SOUND_EMPIREGUARDIAN_3CORP_CATO_ATTACK02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Raymond_rage.wav", "id": "SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_RAGE", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/2Vermont_death.wav", "id": "SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_DEATH", "channels": 4, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["walk"], "sounds": ["SOUND_EMPIREGUARDIAN_3CORP_CATO_MOVE"]},
         {"animations": ["attack1"], "sounds": ["SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01"]},
@@ -2635,6 +2689,13 @@
       "file": "Data/Monster/monster172.bmd",
       "textureFolders": ["Monster"],
       "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.4, "attack1": 0.45, "attack2": 0.5, "die": 0.3, "appear": 0.45, "attack3": 0.45},
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/3Cato_move.wav", "id": "SOUND_EMPIREGUARDIAN_3CORP_CATO_MOVE", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/4Gallia_attack2.wav", "id": "SOUND_EMPIREGUARDIAN_4CORP_GALLIA_ATTACK02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_rage.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/2Vermont_death.wav", "id": "SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_DEATH", "channels": 4, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["walk"], "sounds": ["SOUND_EMPIREGUARDIAN_3CORP_CATO_MOVE"]},
         {"animations": ["attack1"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01"]},
@@ -2649,6 +2710,13 @@
       "file": "Data/Monster/monster173.bmd",
       "textureFolders": ["Monster"],
       "animations": {"walk": 0.5, "attack1": 0.66},
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move01.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move02.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/QuaterMaster_attack2.wav", "id": "SOUND_EMPIREGUARDIAN_QUATERMASTER_ATTACK02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_death.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH", "channels": 4, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["walk"], "frames": [7, 8], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01"]},
         {"animations": ["walk"], "frames": [1, 2], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
@@ -2663,6 +2731,14 @@
       "file": "Data/Monster/Monster174.bmd",
       "textureFolders": ["Monster"],
       "animations": {"walk": 0.4, "attack2": 0.36, "die": 0.3, "appear": 0.4},
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move01.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move02.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CombatMaster_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CombatMaster_attack2.wav", "id": "SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CombatMaster_attack3.wav", "id": "SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK03", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_death.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH", "channels": 4, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["walk"], "frames": [7, 8], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01"]},
         {"animations": ["walk"], "frames": [1, 2], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
@@ -2678,6 +2754,12 @@
       "file": "Data/Monster/Monster175.bmd",
       "textureFolders": ["Monster"],
       "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.65, "attack1": 0.86, "attack2": 0.86, "die": 0.3, "appear": 0.86},
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move01.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move02.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CombatMaster_attack3.wav", "id": "SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK03", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_death.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH", "channels": 4, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["walk"], "pick": "rand", "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
         {"animations": ["attack1"], "sounds": ["SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK03"]},
@@ -2692,6 +2774,10 @@
       "file": "Data/Monster/Monster176.bmd",
       "textureFolders": ["Monster"],
       "animations": {"stop1": 0.6, "stop2": 0.6, "walk": 0.8, "attack1": 0.96, "attack2": 0.96, "shock": 1, "die": 0.3},
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/GaionKalein_move.wav", "id": "SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/GrandWizard_death.wav", "id": "SOUND_EMPIREGUARDIAN_GRANDWIZARD_DEATH", "channels": 4, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["walk"], "sounds": ["SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE"]},
         {"animations": ["attack1"], "sounds": ["SOUND_METEORITE01", "SOUND_EXPLOTION01"]},
@@ -2706,6 +2792,12 @@
       "file": "Data/Monster/Monster177.bmd",
       "textureFolders": ["Monster"],
       "animations": {"walk": 0.2, "attack1": 0.4, "attack2": 0.38, "die": 0.4, "attack3": 0.38},
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/GaionKalein_move.wav", "id": "SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CombatMaster_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CombatMaster_attack2.wav", "id": "SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/AssassinMaster_Death.wav", "id": "SOUND_EMPIREGUARDIAN_ASSASSINMASTER_DEATH", "channels": 4, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["walk"], "sounds": ["SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE"]},
         {"animations": ["attack1"], "sounds": ["SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01"]},
@@ -2719,6 +2811,12 @@
       "file": "Data/Monster/monster178.bmd",
       "textureFolders": ["Monster"],
       "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.37, "die": 0.3, "appear": 0.33, "attack3": 0.33},
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/CavalryLeader_move01.wav", "id": "SOUND_EMPIREGUARDIAN_CAVALRYLEADER_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CavalryLeader_move02.wav", "id": "SOUND_EMPIREGUARDIAN_CAVALRYLEADER_MOVE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CavalryLeader_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CavalryLeader_attack2.wav", "id": "SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK02", "channels": 4, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["walk"], "frames": [7, 8], "sounds": ["SOUND_EMPIREGUARDIAN_CAVALRYLEADER_MOVE01"]},
         {"animations": ["walk"], "frames": [1, 2], "sounds": ["SOUND_EMPIREGUARDIAN_CAVALRYLEADER_MOVE02"]},
@@ -2733,6 +2831,13 @@
       "file": "Data/Monster/Monster179.bmd",
       "textureFolders": ["Monster"],
       "animations": {"stop1": 0.4, "stop2": 0.4, "walk": 0.4, "attack1": 0.4, "attack2": 0.4, "shock": 0.4, "die": 0.45, "appear": 0.4},
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move01.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move02.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CombatMaster_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CombatMaster_attack2.wav", "id": "SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/GrandWizard_death.wav", "id": "SOUND_EMPIREGUARDIAN_DEFENDER_ATTACK02", "channels": 4, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["walk"], "frames": [7, 8], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01"]},
         {"animations": ["walk"], "frames": [1, 2], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
@@ -2746,6 +2851,9 @@
       "slot": "MONSTER_MODEL_FORSAKER",
       "file": "Data/Monster/monster180.bmd",
       "textureFolders": ["Monster"],
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/Priest_stay.wav", "id": "SOUND_EMPIREGUARDIAN_PRIEST_STOP", "channels": 4, "spatial": false}
+      ],
       "soundEvents": [
         {"animations": ["stop1", "stop2"], "sounds": ["SOUND_EMPIREGUARDIAN_PRIEST_STOP"]},
         {"animations": ["attack1"], "sounds": ["SOUND_THUNDERS01"]},
