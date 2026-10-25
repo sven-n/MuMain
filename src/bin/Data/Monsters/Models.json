@@ -490,9 +490,9 @@
         {"file": "Data/Sound/mYetiDie.wav", "channels": 2, "spatial": true}
       ],
       "soundSlots": {
-        "idle": ["SOUND_MONSTER_YETI1_", "SOUND_MONSTER_YETI1_"],
+        "idle": ["Data/Sound/mYeti1.wav", "Data/Sound/mYeti1.wav"],
         "attack": ["Data/Sound/mSatanAttack1.wav", "Data/Sound/mSatanAttack1.wav"],
-        "die": "SOUND_MONSTER_YETIDIE_"
+        "die": "Data/Sound/mYetiDie.wav"
       },
       "linkBones": [16, 25]
     },
@@ -511,7 +511,7 @@
       ],
       "soundSlots": {
         "idle": ["Data/Sound/mBalrog1.wav", "Data/Sound/mBalrog2.wav"],
-        "attack": ["SOUND_MONSTER_WIZARDATTACK2_", "SOUND_MONSTER_GORGONATTACK2_"],
+        "attack": ["Data/Sound/mWizardAttack2.wav", "Data/Sound/mGorgonAttack2.wav"],
         "die": "Data/Sound/mBalrogDie.wav"
       },
       "linkBones": [17, 28]
@@ -619,7 +619,7 @@
       ],
       "soundSlots": {
         "idle": ["Data/Sound/mBahamut1.wav", "Data/Sound/mBahamut1.wav"],
-        "attack": ["SOUND_MONSTER_YETI1___", "SOUND_MONSTER_YETI1___"],
+        "attack": ["Data/Sound/mYeti1.wav", "Data/Sound/mYeti1.wav"],
         "die": "Data/Sound/mBahamut1.wav"
       }
     },
@@ -653,7 +653,7 @@
       ],
       "soundSlots": {
         "idle": ["Data/Sound/mValkyrie1.wav", "Data/Sound/mValkyrie1.wav"],
-        "attack": ["SOUND_MONSTER_BALIATTACK2_", "SOUND_MONSTER_BALIATTACK2_"],
+        "attack": ["Data/Sound/mBaliAttack2.wav", "Data/Sound/mBaliAttack2.wav"],
         "die": "Data/Sound/mValkyrieDie.wav"
       },
       "linkBones": [30, 39]
@@ -671,7 +671,7 @@
       "soundSlots": {
         "idle": ["Data/Sound/mLizardKing1.wav", "Data/Sound/mLizardKing2.wav"],
         "attack": ["Data/Sound/mLizardKing1.wav", "Data/Sound/mLizardKing2.wav"],
-        "die": "SOUND_MONSTER_GORGONDIE_"
+        "die": "Data/Sound/mGorgonDie.wav"
       },
       "linkBones": [52, 65]
     },
@@ -731,7 +731,7 @@
       "soundSlots": {
         "idle": ["Data/Sound/mLizardKing1.wav", "Data/Sound/mLizardKing2.wav"],
         "attack": ["Data/Sound/mLizardKing1.wav", "Data/Sound/mLizardKing2.wav"],
-        "die": "SOUND_MONSTER_GORGONDIE_"
+        "die": "Data/Sound/mGorgonDie.wav"
       },
       "linkBones": [20, 33]
     },
@@ -985,10 +985,11 @@
       "streamMesh": 0,
       "sounds": [
         {"file": "Data/Sound/mPhoenix1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mPhoenix2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mPhoenixAttack1.wav", "channels": 2, "spatial": true}
       ],
       "soundSlots": {
-        "idle": ["Data/Sound/mPhoenix1.wav", "SOUND_MONSTER_PHOENIX2"],
+        "idle": ["Data/Sound/mPhoenix1.wav", "Data/Sound/mPhoenix2.wav"],
         "attack": ["Data/Sound/mPhoenixAttack1.wav", "Data/Sound/mPhoenixAttack1.wav"],
         "die": null
       },
@@ -1025,7 +1026,7 @@
         {"file": "Data/Sound/mGhaintOrgerDie.wav", "channels": 2, "spatial": true}
       ],
       "soundSlots": {
-        "idle": ["SOUND_MONSTER_HUNTER2_", null],
+        "idle": ["Data/Sound/mHunter2.wav", null],
         "attack": ["SOUND_MONSTER_BLACKSKULLATTACK", null],
         "die": "Data/Sound/mGhaintOrgerDie.wav"
       }
@@ -1041,7 +1042,7 @@
         {"file": "Data/Sound/mBlackSkullAttack.wav", "id": "SOUND_MONSTER_BLACKSKULLATTACK", "channels": 2, "spatial": true}
       ],
       "soundSlots": {
-        "idle": ["SOUND_MONSTER_HUNTER2_", null],
+        "idle": ["Data/Sound/mHunter2.wav", null],
         "attack": ["SOUND_MONSTER_BLACKSKULLATTACK", null],
         "die": "Data/Sound/mBlackSkullDie.wav"
       },

@@ -229,13 +229,9 @@ TEST_CASE("Monster models: a SOUND_ id that a sound slot names is loaded by a mo
 {
     // A slot plays the sound of its number, whichever model loaded it: the
     // Giant Ogre's attack plays the Dark Skull Soldier's attack sound in
-    // Kalima, Vepar's the Stone Golem's death sound. The ids below no model
-    // loads, here and in the original client; their slots play nothing.
-    const std::set<std::string> idsNoModelLoads = {
-        "SOUND_MONSTER_BALIATTACK2_", "SOUND_MONSTER_GORGONATTACK2_", "SOUND_MONSTER_GORGONDIE_",
-        "SOUND_MONSTER_HUNTER2_",     "SOUND_MONSTER_PHOENIX2",       "SOUND_MONSTER_WIZARDATTACK2_",
-        "SOUND_MONSTER_YETI1_",       "SOUND_MONSTER_YETI1___",       "SOUND_MONSTER_YETIDIE_",
-    };
+    // Kalima, Vepar's the Stone Golem's death sound. A number that no model
+    // loads plays nothing; the slots that named one in the original client
+    // name their models' sounds now (P9, Q-MN20).
     const Data::Monsters::MonsterModelsLoadResult result = LoadShipped();
     std::set<std::string> loaded;
     for (const MonsterModelDefinition& model : result.models)
@@ -274,7 +270,7 @@ TEST_CASE("Monster models: a SOUND_ id that a sound slot names is loaded by a mo
         listed += id + " ";
     }
     INFO("named by slots, loaded by no model: " << listed);
-    CHECK(notLoaded == idsNoModelLoads);
+    CHECK(notLoaded.empty());
 }
 
 TEST_CASE("Monster models: the game's load fills the model table [data][monsters]")
