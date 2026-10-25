@@ -8,14 +8,17 @@
 
 #include "Core/Globals/_define.h"
 #include "Core/Globals/_enum.h"
+#include "Core/Utilities/Random.h"
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 #include "World/MapInfra/MapManager.h"
 #include "World/MapInfra/w_MapProcess.h"
 
 #include <doctest.h>
 
+#include <cstdlib>
 #include <vector>
 
 // The end of a monster's animation (MoveCharacter calls it).
@@ -126,4 +129,30 @@ TEST_CASE("Monster attacks: the Dark Iron Knight plays attack 2 for skill 77, th
     CHARACTER& coolutin = scope.Create(MONSTER_DARK_COOLUTIN);
     CHECK(Attack(coolutin, 32) == MONSTER01_ATTACK2);
     CHECK(Attack(coolutin, 77) == MONSTER01_ATTACK1);
+}
+
+TEST_CASE("Monster attacks: the random Kanturu 1st monsters draw 50/50 at any frame rate (P18) [monsters][attacks]")
+{
+    AttackScope scope(WD_37KANTURU_1ST);
+    const float savedFps = FPS_ANIMATION_FACTOR;
+    for (const int number : {MONSTER_BERSERKER, MONSTER_GIGANTIS, MONSTER_GENOCIDER, MONSTER_SPLINTER_WOLF,
+                             MONSTER_IRON_RIDER, MONSTER_GIGANTIS_WARRIOR})
+    {
+        INFO("monster " << number);
+        CHARACTER& character = scope.Create(number);
+        for (const unsigned int seed : {1u, 2u, 3u, 4u, 5u, 6u})
+        {
+            std::srand(seed);
+            const int expected = MONSTER01_ATTACK1 + std::rand() % 2;
+            // Before, the chance of attack 1 fell with the frame rate.
+            for (const float fps : {1.0f, 0.25f})
+            {
+                FPS_ANIMATION_FACTOR = fps;
+                std::srand(seed);
+                Random::Seed(seed);
+                CHECK(Attack(character, NoMonsterSkill) == expected);
+            }
+        }
+    }
+    FPS_ANIMATION_FACTOR = savedFps;
 }

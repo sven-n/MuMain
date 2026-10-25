@@ -2086,7 +2086,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_BERSERK",
       "attacks": {
-        "otherwiseRandom": "randFps",
+        "otherwiseRandom": "rand",
         "clearSkill": "never"
       }
     },
@@ -2096,7 +2096,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_SPLINTER_WOLF",
       "attacks": {
-        "otherwiseRandom": "randFps",
+        "otherwiseRandom": "rand",
         "clearSkill": "never"
       }
     },
@@ -2106,7 +2106,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_IRON_RIDER",
       "attacks": {
-        "otherwiseRandom": "randFps",
+        "otherwiseRandom": "rand",
         "clearSkill": "never"
       }
     },
@@ -2139,7 +2139,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_GIGANTIS",
       "attacks": {
-        "otherwiseRandom": "randFps",
+        "otherwiseRandom": "rand",
         "clearSkill": "never"
       }
     },
@@ -2149,7 +2149,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_GENOCIDER",
       "attacks": {
-        "otherwiseRandom": "randFps",
+        "otherwiseRandom": "rand",
         "clearSkill": "never"
       }
     },
@@ -3554,7 +3554,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_GIGANTIS_WARRIOR",
       "attacks": {
-        "otherwiseRandom": "randFps",
+        "otherwiseRandom": "rand",
         "clearSkill": "never"
       }
     },
