@@ -230,35 +230,10 @@ void FallingMonster(CHARACTER* c, OBJECT* o)
     o->Position[2] -= o->Gravity;
 }
 
-BOOL PlayMonsterSoundGlobal(OBJECT* pObject);
-
-BOOL PlayMonsterSound(OBJECT* pObject)
+// The sounds of the model's sound events (monsters design, MN7).
+void PlayMonsterSound(OBJECT* pObject)
 {
-    // A model whose entry has sound events plays them; the hooks below play
-    // the others' (monsters design, MN7).
-    if (GameLogic::Monsters::SoundEvents::Play(*pObject))
-    {
-        return TRUE;
-    }
-    if (PlayMonsterSoundGlobal(pObject))
-    {
-        return TRUE;
-    }
-    if (SEASON3B::GMNewTown::IsCurrentMap())
-    {
-        SEASON3B::GMNewTown::PlayMonsterSound(pObject);
-        return TRUE;
-    }
-    if (SEASON3C::GMSwampOfQuiet::IsCurrentMap())
-    {
-        SEASON3C::GMSwampOfQuiet::PlayMonsterSound(pObject);
-        return TRUE;
-    }
-    if (TheMapProcess().PlayMonsterSound(pObject) == true)
-    {
-        return TRUE;
-    }
-    return FALSE;
+    GameLogic::Monsters::SoundEvents::Play(*pObject);
 }
 
 void SetPlayerStop(CHARACTER* c)
@@ -1247,24 +1222,18 @@ void SetPlayerAttack(CHARACTER* c)
 
     else if (o->Type == 39)
     {
-        // A trap's attacks play its sound (Q-MN28); without one, the code does.
+        // The traps' attacks play their sounds (Q-MN28); their effects stay code.
         GameLogic::Monsters::Attacks::Play(*c, *o);
         CreateEffect(MODEL_SAW, o->Position, o->Angle, o->Light);
-        if (!GameLogic::Monsters::Attacks::PlaysSound(*c))
-            PlayBuffer(SOUND_TRAP01, o);
     }
     else if (o->Type == 40)
     {
         GameLogic::Monsters::Attacks::Play(*c, *o);
-        if (!GameLogic::Monsters::Attacks::PlaysSound(*c))
-            PlayBuffer(SOUND_TRAP01, o);
     }
     else if (o->Type == 51)
     {
         GameLogic::Monsters::Attacks::Play(*c, *o);
         CreateEffect(BITMAP_FIRE + 1, o->Position, o->Angle, o->Light);
-        if (!GameLogic::Monsters::Attacks::PlaysSound(*c))
-            PlayBuffer(SOUND_FLAME);
     }
     else
     {
@@ -14765,110 +14734,6 @@ CHARACTER* CreateHellGate(char* ID, int Key, EMonsterType Index, int x, int y, i
         CreateJoint(BITMAP_JOINT_THUNDER + 1, portal->Object.Position, portal->Object.Position, portal->Object.Angle, 1, NULL, 60.f + rand() % 10);
     }
     return portal;
-}
-
-BOOL PlayMonsterSoundGlobal(OBJECT* pObject)
-{
-    float fDis_x, fDis_y;
-    fDis_x = pObject->Position[0] - Hero->Object.Position[0];
-    fDis_y = pObject->Position[1] - Hero->Object.Position[1];
-    float fDistance = sqrtf(fDis_x * fDis_x + fDis_y * fDis_y);
-
-    if (fDistance > 500.0f) return true;
-
-    switch (pObject->Type)
-    {
-    case MODEL_CURSED_SANTA:
-        if (pObject->CurrentAction == MONSTER01_STOP1)
-        {
-            // 			if (rand_fps_check(10))
-            {
-                if (rand_fps_check(2))
-                    PlayBuffer(SOUND_XMAS_SANTA_IDLE_1);
-                else
-                    PlayBuffer(SOUND_XMAS_SANTA_IDLE_2);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_WALK)
-        {
-            //if (rand_fps_check(10))
-            {
-                if (rand_fps_check(2))
-                    PlayBuffer(SOUND_XMAS_SANTA_WALK_1);
-                else
-                    PlayBuffer(SOUND_XMAS_SANTA_WALK_2);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            PlayBuffer(SOUND_XMAS_SANTA_ATTACK_1);
-        }
-        else if (pObject->CurrentAction == MONSTER01_SHOCK)
-        {
-            if (rand_fps_check(2))
-                PlayBuffer(SOUND_XMAS_SANTA_DAMAGE_1);
-            else
-                PlayBuffer(SOUND_XMAS_SANTA_DAMAGE_2);
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_XMAS_SANTA_DEATH_1);
-        }
-        return TRUE;
-
-    case MODEL_XMAS2008_SNOWMAN:
-        if (pObject->CurrentAction == MONSTER01_WALK)
-        {
-            PlayBuffer(SOUND_XMAS_SNOWMAN_WALK_1);
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1)
-        {
-            PlayBuffer(SOUND_XMAS_SNOWMAN_ATTACK_1);
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            PlayBuffer(SOUND_XMAS_SNOWMAN_ATTACK_2);
-        }
-        else if (pObject->CurrentAction == MONSTER01_SHOCK)
-        {
-            PlayBuffer(SOUND_XMAS_SNOWMAN_DAMAGE_1);
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            if (pObject->LifeTime == 100)
-            {
-                PlayBuffer(SOUND_XMAS_SNOWMAN_DEATH_1);
-            }
-        }
-        return TRUE;
-    case MODEL_DUEL_NPC_TITUS:
-        if (pObject->CurrentAction == MONSTER01_STOP1)
-        {
-            PlayBuffer(SOUND_DUEL_NPC_IDLE_1);
-        }
-        return TRUE;
-    case MODEL_DOPPELGANGER_NPC_LUGARD:
-        if (pObject->CurrentAction == MONSTER01_STOP1)
-        {
-            if (rand_fps_check(2))
-                PlayBuffer(SOUND_DOPPELGANGER_LUGARD_BREATH);
-        }
-        return TRUE;
-    case MODEL_DOPPELGANGER_NPC_BOX:
-        if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_DOPPELGANGER_JEWELBOX_OPEN);
-        }
-        return TRUE;
-    case MODEL_DOPPELGANGER_NPC_GOLDENBOX:
-        if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_DOPPELGANGER_JEWELBOX_OPEN);
-        }
-        return TRUE;
-    }
-
-    return FALSE;
 }
 
 bool IsBackItem(CHARACTER* c, int iType)

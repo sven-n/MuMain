@@ -12,9 +12,6 @@ namespace GameLogic::Monsters::Attacks
 // False, with nothing done, when its entry has no `attacks`.
 bool Play(CHARACTER& character, OBJECT& object);
 
-// Whether the monster's `attacks` play a sound.
-bool PlaysSound(const CHARACTER& character);
-
 // The attack animation of the character ended: its attacks may clear the
 // monster skill now (clearSkill afterAttack).
 void OnAttackEnded(CHARACTER& character);

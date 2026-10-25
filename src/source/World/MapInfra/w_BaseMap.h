@@ -72,10 +72,6 @@ public: // Weather
     }
 
 public: // Sound
-    virtual bool PlayMonsterSound(OBJECT* o)
-    {
-        return false;
-    }
     virtual void PlayObjectSound(OBJECT* o) {}
 
 public: // Server Message

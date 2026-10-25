@@ -71,12 +71,6 @@ bool Play(CHARACTER& character, OBJECT& object)
     return true;
 }
 
-bool PlaysSound(const CHARACTER& character)
-{
-    const Data::Monsters::MonsterAttacks* attacks = FindAttacks(character);
-    return attacks != nullptr && !attacks->sound.empty();
-}
-
 void OnAttackEnded(CHARACTER& character)
 {
     const Data::Monsters::MonsterAttacks* attacks = FindAttacks(character);

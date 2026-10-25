@@ -66,7 +66,6 @@ namespace SEASON4A
         virtual bool SetCurrentActionMonster(CHARACTER* c, OBJECT* o);
 
     public: // Sound
-        virtual bool PlayMonsterSound(OBJECT* o);
         virtual void PlayObjectSound(OBJECT* o);
         void PlayBGM();
 
