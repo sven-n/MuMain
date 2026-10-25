@@ -15,7 +15,8 @@
 > and a final check of this text corrected and completed the first draft;
 > Q-MN8 to Q-MN15 are the questions it raised. The owner chose three PRs for
 > the work that can start now (see "Pull requests and phases"). Q-MN16 to
-> Q-MN19 were answered on 2026-10-25, at the start of PR 2.
+> Q-MN19 were answered on 2026-10-25, at the start of PR 2, and Q-MN20 to
+> Q-MN25 the same day, after MN3.
 >
 > The counts come from reading and searching the code, not from a compiler.
 > Where code is sorted into kinds, a count can be off by a few.
@@ -560,13 +561,13 @@ of its own after the owner agrees.
 |---|---|---|---|
 | P1 | `Monster50.bmd` (MOLT) is missing; spawning a Molt stops the game. Agreed fix: log it and keep running (Q-MN18). | `ZzzCharacter.cpp:13617` | MN3 |
 | P2 | Numbers without a creator become a Bull Fighter: 76, 658–668 and 523, which OpenMU spawns in every Imperial Guardian run. A fix must still return a character for every number (callers rely on it). Agreed fixes (Q-MN15): 523 becomes an invisible trap with the trap kind, 658–668 get the statue 380's model and the NPC kind. | `ZzzCharacter.cpp:14118` | MN4 |
-| P3 | Kentauros, Berserker Warrior, Kentauros Warrior and Genocider Warrior (355, 553, 554, 556): the handler picks the skill animation and then returns "not handled", so the generic pattern overwrites it. | `GM_Kanturu_1st.cpp:604-657` | MN2 |
-| P4 | Selupan never clears its skill, so normal attacks repeat the last skill's animation, sound and effects. Dark Ghost's skills 51 and 52 are the same. | `GM_Raklion.cpp:2464`, `GMEmpireGuardian2.cpp:1099` | MN2 |
-| P5 | Dark Iron Knight (565) plays attack 2 for skill 32, Dark Coolutin (564) for 77: the two constants look swapped. | `GM_Raklion.cpp:2429-2458` | MN2 |
-| P6 | Skills 78–81 of monster 566 (`MERCENARY_GUILD_FELICIA`) are not below `ATMON_SKILL_END` (78) and never animate. | `WSclient.cpp:4104` | MN2 |
+| P3 | Kentauros, Berserker Warrior, Kentauros Warrior and Genocider Warrior (355, 553, 554, 556): the handler picks the skill animation and then returns "not handled", so the generic pattern overwrites it. Agreed: fixed, the skill plays attack 2 (Q-MN21). | `GM_Kanturu_1st.cpp:604-657` | MN2 |
+| P4 | Selupan never clears its skill, so normal attacks repeat the last skill's animation, sound and effects. Dark Ghost's skills 51 and 52 are the same. Agreed: fixed, the skill is cleared (Q-MN22). | `GM_Raklion.cpp:2464`, `GMEmpireGuardian2.cpp:1099` | MN2 |
+| P5 | Dark Iron Knight (565) plays attack 2 for skill 32, Dark Coolutin (564) for 77: the two constants look swapped. Agreed: swapped (Q-MN23). | `GM_Raklion.cpp:2429-2458` | MN2 |
+| P6 | Skills 78–81 of monster 566 (`MERCENARY_GUILD_FELICIA`) are not below `ATMON_SKILL_END` (78) and never animate. Agreed: they animate (Q-MN24). | `WSclient.cpp:4104` | MN2 |
 | P7 | 566 (`MERCENARY_GUILD_FELICIA`) and 567 (`PRIESTESS_VEINA`) use NPC models but count as monsters: a click attacks them instead of talking, they get the red outline and are MU Helper targets, while OpenMU makes 566 a PassiveNpc with a dialogue. | `ZzzCharacter.cpp:13086` | MN1 |
 | P8 | `MonsterScript` is read by position, not by number: `MonsterScript[450]` is monster 494; the legacy edit mode does the same; `MonsterConvert` is unused. | `UI/Dialogs/CustomMessageBox.cpp:1003`, `EditObjects.cpp:73`, `ZzzInterface.cpp:4110`, `ZzzInfomation.cpp:1832` | MN1 |
-| P9 | A `-1` in sound slot 1 or 3 plays sound 209; models without slots play slot 0 of the generic table; the Dragon's slot sounds are silent. Agreed: all three fixed (Q-MN19). | `ZzzCharacter.cpp:436-1556`, `ZzzOpenData.cpp:2396` | MN3 |
+| P9 | A `-1` in sound slot 1 or 3 plays sound 209; models without slots play slot 0 of the generic table; the Dragon's slot sounds are silent. Agreed: all three fixed (Q-MN19). The other slots that name numbers nothing loads (Devil, Balrog, Bahamut, Valkyrie, Lizard King, Soldier, Giant Ogre, Dark Skull Soldier, Dark Phoenix Shield) are fixed the same way (Q-MN20). | `ZzzCharacter.cpp:436-1556`, `ZzzOpenData.cpp:2396` | MN3 |
 | P10 | A condition that can never be true (`==` && `==`). | `ZzzCharacter.cpp:10054` | MN8 |
 | P11 | `MonsterSkill.bmd`'s loader clears only entry 0 and does not check the monster number. | `ZzzInfomation.cpp:182` | MN2 |
 | P12 | `CreateHellGate` uses the name as a printf format and copies 200 bytes into the 130-byte name, overwriting the gate's key, level, monster number and more with stack bytes. OpenMU sends these gates (0x1F). | `ZzzCharacter.cpp:15146-15156` | MN1 |
@@ -575,7 +576,7 @@ of its own after the owner agrees.
 | P15 | 12 `EnableShadow = false` lines in the creators do nothing (`CreateCharacterPointer` sets it, the renderer switches it each frame). | `ZzzCharacter.cpp:13462-14742` | MN4 |
 | P16 | A comparison with a Korean guild master name that no name file has; the branch is dead. | `WSclient.cpp:1950` | MN1 |
 | P17 | `Setting_Monster` uses the character before its null check. | `ZzzCharacter.cpp:13207`, `:13212` | MN4 |
-| P18 | The random Kanturu 1st monsters (Berserker, Gigantis, Genocider, Splinter Wolf, Iron Rider) pick attack 1 with a chance that depends on the frame rate (`rand_fps_check(2)` in a one-time choice: about 21 % at 60 FPS, 9 % at 144 FPS). | `GM_Kanturu_1st.cpp:595`, `:640` | MN2 |
+| P18 | The random Kanturu 1st monsters (Berserker, Gigantis, Genocider, Splinter Wolf, Iron Rider) pick attack 1 with a chance that depends on the frame rate (`rand_fps_check(2)` in a one-time choice: about 21 % at 60 FPS, 9 % at 144 FPS). Agreed: 50/50 with `rand() % 2`, also for the Gigantis Warrior (Q-MN25). | `GM_Kanturu_1st.cpp:595`, `:640` | MN2 |
 | P19 | `RenderCharacter` skips the shadow of Kalima gate 1 only, not gates 2–7. | `ZzzCharacter.cpp:8715` | MN8 |
 
 ## Target design
@@ -984,6 +985,12 @@ groups:
 | Q-MN17 | The previewed monster in the world: a drawn copy, or a real character? *(2026-10-25)* | Neither: the preview stays in the editor's window. A view in the world is hard to use and does not look good. |
 | Q-MN18 | P1: Molt (68) has no model file; OpenMU has no monster 68, so no one notices. Keep stopping the game when a server sends it? *(2026-10-25)* | No: a missing monster model file is logged and listed by Monster Checks, the monster appears without a body, and the game keeps running. A fix of its own after MN3's comparison. |
 | Q-MN19 | P9: fix the sound slot quirks (a -1 in the second slot of a pair plays the unloaded id 209; models without slots play the Bull Fighter's sounds where those are loaded; the Dragon's slots point at ids nobody loads)? *(2026-10-25)* | All three, one commit each, after MN3's comparison. |
+| Q-MN20 | Other models' sound slots also name numbers that nothing loads, as the Dragon's did (Devil, Balrog, Bahamut, Valkyrie, Lizard King, Soldier, Giant Ogre, Dark Skull Soldier, Dark Phoenix Shield): fix them too? *(2026-10-25)* | Yes, like the Dragon: each slot names the sound it was meant to play. |
+| Q-MN21 | P3: the Kanturu 1st handler's skill animation is overwritten by the generic pattern. Fix? *(2026-10-25)* | Yes: the skill plays attack 2. |
+| Q-MN22 | P4: Selupan and Dark Ghost never clear their skill, so normal attacks repeat it. Fix? *(2026-10-25)* | Yes: the skill is cleared after its attack. |
+| Q-MN23 | P5: swap the skill numbers of the Dark Iron Knight and the Dark Coolutin? *(2026-10-25)* | Yes. |
+| Q-MN24 | P6: animate Felicia's skills 78–81? *(2026-10-25)* | Yes, with the animations her table entries name. |
+| Q-MN25 | P18: the random Kanturu 1st monsters choose by frame rate. How should they choose? *(2026-10-25)* | 50/50 with `rand() % 2`, as the Hellas monsters. |
 
 ## Open questions
 
