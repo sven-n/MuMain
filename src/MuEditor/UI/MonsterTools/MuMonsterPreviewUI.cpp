@@ -315,7 +315,7 @@ void MuMonsterPreviewUI::Restart(int slot)
     }
     if (const std::optional<int> soundSlot = SoundSlotOf(m_animation))
     {
-        if (const std::optional<ESound> sound = Engine::Object::MonsterSlotSound::Find(Models[slot], *soundSlot, 0))
+        if (const std::optional<ESound> sound = Engine::Object::MonsterSlotSound::Find(Models[slot], *soundSlot))
         {
             SoundPreview::Play(*sound);
         }

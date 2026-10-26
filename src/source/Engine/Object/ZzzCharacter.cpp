@@ -69,11 +69,12 @@ namespace
     constexpr float CHARSCENE_PICK_MIN_HEIGHT = 300.0f;
     constexpr float CHARSCENE_PICK_HALF_WIDTH = 72.0f;
 
-    // Plays the sound of the model's sound slot; a slot without a sound plays
-    // nothing.
-    void PlaySlotSound(OBJECT* o, int slot, int offset)
+    // Plays the sound of the model's sound slot (0 to 4), of the second set
+    // for a monster with SubType 9; a slot without a sound plays nothing.
+    void PlaySlotSound(OBJECT* o, int slot)
     {
-        if (const std::optional<ESound> sound = Engine::Object::MonsterSlotSound::Find(Models[o->Type], slot, offset))
+        const int played = Engine::Object::MonsterSlotSound::SlotFor(slot, o->SubType);
+        if (const std::optional<ESound> sound = Engine::Object::MonsterSlotSound::Find(Models[o->Type], played))
         {
             PlayBuffer(*sound, o);
         }
@@ -432,13 +433,7 @@ void SetPlayerStop(CHARACTER* c)
         {
             if (Models[o->Type].Sounds[0] != -1)
             {
-                int offset = 0;
-                if (o->SubType == 9)
-                {
-                    offset = 5;
-                }
-
-                PlaySlotSound(o, rand() % 2, offset);
+                PlaySlotSound(o, rand() % 2);
             }
         }
         else if (c->Helper.Type == MODEL_HORN_OF_FENRIR)
@@ -793,12 +788,7 @@ void SetPlayerWalk(CHARACTER* c)
                 PlayBuffer(SOUND_BONE1, o);
             if (Models[o->Type].Sounds[0] != -1)
             {
-                int offset = 0;
-                if (o->SubType == 9)
-                {
-                    offset = 5;
-                }
-                PlaySlotSound(o, rand() % 2, offset);
+                PlaySlotSound(o, rand() % 2);
             }
         }
     }
@@ -1284,12 +1274,7 @@ void SetPlayerAttack(CHARACTER* c)
                     PlayBuffer(static_cast<ESound>(SOUND_BRANDISH_SWORD01 + rand() % 2), o);
                 if (Models[o->Type].Sounds[2] != -1)
                 {
-                    int offset = 0;
-                    if (o->SubType == 9)
-                    {
-                        offset = 5;
-                    }
-                    PlaySlotSound(o, 2 + rand() % 2, offset);
+                    PlaySlotSound(o, 2 + rand() % 2);
                 }
             }
             else
@@ -1414,12 +1399,7 @@ void SetPlayerShock(CHARACTER* c, int Hit)
                     PlayBuffer(SOUND_BONE1, o);
                 else if (o->Type != MODEL_ASSASSIN && Models[o->Type].Sounds[2] != -1)
                 {
-                    int offset = 0;
-                    if (o->SubType == 9)
-                    {
-                        offset = 5;
-                    }
-                    PlaySlotSound(o, 2 + rand() % 2, offset);
+                    PlaySlotSound(o, 2 + rand() % 2);
                 }
             }
             else
@@ -1549,12 +1529,7 @@ void SetPlayerDie(CHARACTER* c)
             {
                 if (Models[o->Type].Sounds[4] != -1)
                 {
-                    int offset = 0;
-                    if (o->SubType == 9)
-                    {
-                        offset = 5;
-                    }
-                    PlaySlotSound(o, 4, offset);
+                    PlaySlotSound(o, 4);
                 }
             }
             else
