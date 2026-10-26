@@ -255,14 +255,20 @@ private:
         auto& [from, to] = *event.frames;
         ImGui::SameLine();
         ImGui::SetNextItemWidth(FrameWidth * m_scale);
-        ImGui::InputFloat("##From", &from, 0.0f, 0.0f, "%.1f");
-        from = std::max(from, 0.0f);
-        to = std::max(to, from + 0.1f);
+        // The inputs keep the range at least 0.1 wide, but only when one is
+        // edited: a narrower range of the file stays as it is.
+        if (ImGui::InputFloat("##From", &from, 0.0f, 0.0f, "%.1f"))
+        {
+            from = std::max(from, 0.0f);
+            to = std::max(to, from + 0.1f);
+        }
         m_draft.AfterField(m_label);
         ImGui::SameLine();
         ImGui::SetNextItemWidth(FrameWidth * m_scale);
-        ImGui::InputFloat("##To", &to, 0.0f, 0.0f, "%.1f");
-        to = std::max(to, from + 0.1f);
+        if (ImGui::InputFloat("##To", &to, 0.0f, 0.0f, "%.1f"))
+        {
+            to = std::max(to, from + 0.1f);
+        }
         m_draft.AfterField(m_label);
     }
 

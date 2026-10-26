@@ -211,6 +211,48 @@ TEST_CASE("The Monster Model and Monster Preview windows draw a model entry with
     g_MonsterModelDatabase.Build({});
 }
 
+TEST_CASE("The Monster Model window leaves a sound event's frame range under 0.1 as it is until it is edited "
+          "[editor][monsters]")
+{
+    MonsterDefinition hound = Monster(3, "Hound");
+    hound.model = "MONSTER_MODEL_HOUND";
+    const std::array monsters = {hound};
+    g_MonsterDatabase.Build(monsters, "en");
+    Data::Monsters::MonsterModelDefinition model;
+    model.slot = "MONSTER_MODEL_HOUND";
+    model.load.file = "Data/Monster/Monster02.bmd";
+    model.load.textureFolders = {"Monster"};
+    model.sounds = {{"Data/Sound/mHound1.wav", "", 2, true}};
+    Data::Monsters::MonsterSoundEvent walk;
+    walk.animations = {MONSTER01_WALK};
+    // Narrower than the inputs keep a range they edit; the file allows it.
+    walk.frames = std::pair<float, float>{7.0f, 7.05f};
+    walk.sounds = {"Data/Sound/mHound1.wav"};
+    model.soundEvents = {walk};
+    const std::array models = {model};
+    g_MonsterModelDatabase.Build(models);
+    TestImGuiContext context;
+    g_MonsterSelection.Select(3);
+
+    for (int frame = 0; frame < 3; ++frame)
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterModelUI.Render(&open);
+        ImGui::Render();
+        INFO("frame " << frame);
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+        // Before, the draft held [7, 7.1] from the first frame on: the
+        // preview played it, and the next stored change of the model saved it.
+        const Data::Monsters::MonsterModelDefinition* draft = g_MuMonsterModelUI.GetShownDraft(MODEL_HOUND);
+        REQUIRE(draft != nullptr);
+        REQUIRE(draft->soundEvents.size() == 1);
+        CHECK(draft->soundEvents[0].frames == walk.frames);
+    }
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+    g_MonsterModelDatabase.Build({});
+}
+
 TEST_CASE("The first layout docks the monster browser beside the item browser, its tools with the others "
           "[editor][monsters]")
 {
