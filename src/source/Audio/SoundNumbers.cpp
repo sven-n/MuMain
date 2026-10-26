@@ -44,7 +44,8 @@ ESound ForFile(std::wstring_view file)
     }
     if (numbers.files.size() >= static_cast<size_t>(MAX_FILE_SOUNDS))
     {
-        return MAX_BUFFER;
+        // MAX_BUFFER is the first file's number.
+        return NoNumber;
     }
     const int number = static_cast<int>(MAX_BUFFER) + static_cast<int>(numbers.files.size());
     numbers.files.emplace_back(file);

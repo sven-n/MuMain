@@ -498,9 +498,9 @@ TEST_CASE("a sound with a number after the SOUND_* list loads, plays and is rele
     // The SOUND_* ids before it keep their slots.
     CHECK_FALSE(backend->m_soundLoaded[static_cast<size_t>(SOUND_CLICK01)]);
 
-    // No number beyond the sounds that can be given numbers.
-    backend->LoadSound(static_cast<ESound>(static_cast<int>(MAX_BUFFER) + MAX_FILE_SOUNDS), asset.wstring().c_str(), 1,
-                       false);
+    // No number beyond the sounds that can be given numbers: what ForFile
+    // gives when all are taken.
+    backend->LoadSound(Audio::SoundNumbers::NoNumber, asset.wstring().c_str(), 1, false);
     CHECK(backend->m_soundLoaded.size() == static_cast<size_t>(number) + 1);
 
     backend->Shutdown();

@@ -12,8 +12,12 @@
 // \ and / alike.
 namespace Audio::SoundNumbers
 {
+// The number past the ones files get (MAX_BUFFER on), which loads and plays
+// nothing.
+constexpr ESound NoNumber = static_cast<ESound>(static_cast<int>(MAX_BUFFER) + MAX_FILE_SOUNDS);
+
 // The number of the file. When all MAX_FILE_SOUNDS numbers are taken:
-// MAX_BUFFER, which loads and plays nothing.
+// NoNumber.
 ESound ForFile(std::wstring_view file);
 
 // The file a number was given for; empty for a SOUND_* id and for a number
