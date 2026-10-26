@@ -11817,10 +11817,11 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
 
     o->BlendMesh = -1;
     o->BlendMeshLight = 1.f;
+    // Castle Gate 1 counts the hits it takes from 0, also without an entry.
+    battleCastle::ResetCastleGateAttackCount(c, Type);
     if (modelEntry != nullptr)
     {
         Engine::Object::MonsterBody::ApplyLinkBones(*c, modelEntry->body);
-        battleCastle::ResetCastleGateAttackCount(c, Type);
         return;
     }
     c->Weapon[0].LinkBone = 33;

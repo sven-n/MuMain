@@ -11,6 +11,7 @@
 #include "Core/Utilities/Random.h"
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "World/MapInfra/MapManager.h"
@@ -18,6 +19,7 @@
 
 #include <doctest.h>
 
+#include <algorithm>
 #include <cstdlib>
 #include <vector>
 
@@ -32,15 +34,23 @@ constexpr int NoMonsterSkill = 0xFFFF;
 class AttackScope
 {
 public:
-    explicit AttackScope(int world) : m_scope(world)
+    explicit AttackScope(int world)
+        : m_scope(world), m_monsters(Data::Monsters::LoadMonstersFile(MonsterRecorder::ClientFolder() / "Data" /
+                                                                      "Monsters" / "Monsters.json")
+                                         .monsters)
     {
-        const std::vector<Data::Monsters::MonsterDefinition> monsters =
-            Data::Monsters::LoadMonstersFile(MonsterRecorder::ClientFolder() / "Data" / "Monsters" / "Monsters.json")
-                .monsters;
-        REQUIRE(monsters.size() > 500);
-        g_MonsterDatabase.Build(monsters, "en");
+        REQUIRE(m_monsters.size() > 500);
+        g_MonsterDatabase.Build(m_monsters, "en");
         g_MapProcess = MapProcess::Make();
     }
+
+    ~AttackScope()
+    {
+        g_MonsterDatabase.Build(m_monsters, "en");
+    }
+
+    AttackScope(const AttackScope&) = delete;
+    AttackScope& operator=(const AttackScope&) = delete;
 
     CHARACTER& Create(int number)
     {
@@ -49,8 +59,54 @@ public:
         return *character;
     }
 
+    // The monster list with the monster's entry without attacks, for the
+    // life of the scope.
+    void RemoveAttacks(int number)
+    {
+        std::vector<Data::Monsters::MonsterDefinition> changed = m_monsters;
+        const auto monster =
+            std::find_if(changed.begin(), changed.end(),
+                         [number](const Data::Monsters::MonsterDefinition& entry) { return entry.number == number; });
+        REQUIRE(monster != changed.end());
+        REQUIRE(monster->attacks.has_value());
+        monster->attacks.reset();
+        g_MonsterDatabase.Build(changed, "en");
+    }
+
 private:
     MonsterRecorder::CreationScope m_scope;
+    std::vector<Data::Monsters::MonsterDefinition> m_monsters;
+};
+
+// The model table without one model's entry, for the life of the scope.
+class ModelTableWithout
+{
+public:
+    explicit ModelTableWithout(int slot)
+    {
+        std::vector<Data::Monsters::MonsterModelDefinition> changed;
+        for (const Data::Monsters::MonsterModelDefinition* model : g_MonsterModelDatabase.GetAll())
+        {
+            m_models.push_back(*model);
+            if (g_MonsterModelDatabase.Find(slot) != model)
+            {
+                changed.push_back(*model);
+            }
+        }
+        REQUIRE(changed.size() + 1 == m_models.size());
+        g_MonsterModelDatabase.Build(changed);
+    }
+
+    ~ModelTableWithout()
+    {
+        g_MonsterModelDatabase.Build(m_models);
+    }
+
+    ModelTableWithout(const ModelTableWithout&) = delete;
+    ModelTableWithout& operator=(const ModelTableWithout&) = delete;
+
+private:
+    std::vector<Data::Monsters::MonsterModelDefinition> m_models;
 };
 
 // An attack with these skills; the animation it plays.
@@ -174,4 +230,38 @@ TEST_CASE("Monster attacks: the random Kanturu 1st monsters draw 50/50 at any fr
         }
     }
     FPS_ANIMATION_FACTOR = savedFps;
+}
+
+TEST_CASE("Monster attacks: the Berserker skill starts an Empire Guardian boss's rage, also when its entry has "
+          "no attacks [monsters][attacks]")
+{
+    for (const bool withAttacks : {true, false})
+    {
+        INFO("attacks in the entry: " << withAttacks);
+        AttackScope scope(WD_69EMPIREGUARDIAN1);
+        if (!withAttacks)
+        {
+            scope.RemoveAttacks(MONSTER_RAYMOND);
+        }
+        CHARACTER& raymond = scope.Create(MONSTER_RAYMOND);
+        Attack(raymond, ATMON_SKILL_EMPIREGUARDIAN_BERSERKER);
+        // In its rage, each attack plays appear.
+        CHECK(Attack(raymond, NoMonsterSkill) == MONSTER01_APEAR);
+    }
+}
+
+TEST_CASE("Monster attacks: Castle Gate 1 counts its hits from 0 when it is set up, also without a model entry "
+          "[monsters][attacks]")
+{
+    AttackScope scope(WD_30BATTLECASTLE);
+    CHARACTER& gate = scope.Create(MONSTER_CASTLE_GATE1);
+    REQUIRE(gate.Object.Type == MODEL_CASTLE_GATE1);
+    gate.SwordCount = 5;
+    CreateCharacterPointer(&gate, MODEL_CASTLE_GATE1, 0, 0, 0.0f);
+    CHECK(gate.SwordCount == 0);
+
+    const ModelTableWithout withoutEntry(MODEL_CASTLE_GATE1);
+    gate.SwordCount = 5;
+    CreateCharacterPointer(&gate, MODEL_CASTLE_GATE1, 0, 0, 0.0f);
+    CHECK(gate.SwordCount == 0);
 }

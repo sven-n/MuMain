@@ -1040,13 +1040,11 @@ bool GMEmpireGuardian2::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
             c->MonsterSkill = -1;
             return true;
         }
-        const WORD skill = c->MonsterSkill;
-        if (!GameLogic::Monsters::Attacks::Play(*c, *o))
-            return false;
-        // The Berserker skill starts the boss's rage.
-        if (skill == ATMON_SKILL_EMPIREGUARDIAN_BERSERKER)
+        // The Berserker skill starts the boss's rage, also when its entry has
+        // no attacks.
+        if (c->MonsterSkill == ATMON_SKILL_EMPIREGUARDIAN_BERSERKER)
             m_bCurrentIsRage_Bermont = true;
-        return true;
+        return GameLogic::Monsters::Attacks::Play(*c, *o);
     }
     case MONSTER_ATICLES_HEAD:
         return GameLogic::Monsters::Attacks::Play(*c, *o);
