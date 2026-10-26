@@ -1904,7 +1904,8 @@
       "description": [
         {
           "text": {
-            "en": "{durability} / 10"
+            "en": "{durability} / 10",
+            "ja": "{durability}個/ 10個"
           }
         },
         {
@@ -5750,7 +5751,7 @@
             "es": "Permite la entrada a doble.",
             "id": "Memungkinkan masuk ke kembaran.",
             "ja": "次元の狭間 入場時、決まった回数だけ使えます。",
-            "pl": "Umożliwia wejście do Sobowtór.",
+            "pl": "Umożliwia wejście do Doppelganger.",
             "pt": "Permite a entrada em Sósia.",
             "ru": "Позволяет войти в двойник.",
             "tl": "Pinapagana ang pagpasok sa Doppelganger.",

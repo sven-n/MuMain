@@ -4,6 +4,8 @@
 
 #include "ItemEditHistory.h"
 
+#include "Data/GameData/ItemData/ItemAttributeConversion.h"
+
 #include <optional>
 #include <span>
 #include <string>
@@ -23,7 +25,9 @@ public:
     // False, with nothing changed, when it would change the size or slot of an
     // item the game holds (IsHeldByCharacter), as its undo would be refused.
     bool SetItem(std::string label, const Data::Items::ItemDefinition& item);
-    bool SetItems(std::string label, std::span<const Data::Items::ItemDefinition> items);
+    // AsGiven keeps the stat profile each item names as a pick (CItemDataHandler::SetItems).
+    bool SetItems(std::string label, std::span<const Data::Items::ItemDefinition> items,
+                  Data::Items::StatProfileStore profiles = Data::Items::StatProfileStore::Follow);
     // CItemDataHandler::SetItemName; false when it refused the name.
     bool SetItemName(std::string label, int itemType, std::string_view locale, std::string text);
     bool AddItem(std::string label, const Data::Items::ItemDefinition& item,

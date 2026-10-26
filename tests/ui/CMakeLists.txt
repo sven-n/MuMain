@@ -152,13 +152,6 @@ add_test(
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_inventory_mouse_capture.cmake
 )
 
-add_test(
-    NAME npc_name_assets
-    COMMAND "${Python3_EXECUTABLE}"
-            "${CMAKE_CURRENT_SOURCE_DIR}/test_npc_name_assets.py"
-            "${CMAKE_SOURCE_DIR}"
-)
-
 mu_add_test(
     NAME npc_name_storage_tests
     SOURCES

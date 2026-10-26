@@ -15,6 +15,10 @@ public:
         io.DeltaTime = 1.0f / 60.0f;
         io.IniFilename = nullptr;
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        // Keys as the Windows and Linux backends deliver them on every
+        // platform: on macOS ImGui would turn an injected Ctrl into Cmd, and a
+        // test's Ctrl+Z would never be pressed.
+        io.ConfigMacOSXBehaviors = false;
         // The font atlas is built without a renderer that takes its texture.
         io.BackendFlags |= ImGuiBackendFlags_RendererHasTextures;
     }

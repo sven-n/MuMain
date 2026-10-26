@@ -6,9 +6,12 @@
 //
 // Run: ctest --test-dir <build directory> --build-config Release -R "Control events"
 
+#include "stdafx.h"
+
 #include "doctest.h"
 
 #include "App/Control/ControlEvents.h"
+#include "App/Control/ControlObjects.h"
 
 #include "json.hpp"
 
@@ -170,6 +173,7 @@ TEST_CASE("Control events describe a hit on both sides [network][control-events]
         CHECK(fields[side].contains("kind"));
         // Out of view here, so the kind is honest about not knowing.
         CHECK(fields[side]["kind"] == "unknown");
+        CHECK(fields[side]["monster"].is_null());
     }
 
     Events::RecordHit(Events::Direction::Dealt, 1234, 4321, 12, 0, false, true);
@@ -252,4 +256,55 @@ TEST_CASE("Control events describe the steps of a trade [network][control-events
     CHECK_FALSE(FieldsOf(recorded[1]).contains("name"));
     CHECK(FieldsOf(recorded[2])["change"] == "closed");
     CHECK(FieldsOf(recorded[2])["result"] == "completed");
+}
+
+TEST_CASE("Control events give the monster number of an object [network][control-events]")
+{
+    const RingFixture fixture;
+    // The other cases rely on having no resolver, so this one removes its own.
+    struct ResolverScope
+    {
+        ResolverScope()
+        {
+            Events::SetObjectResolver(
+                [](int key)
+                {
+                    Events::ObjectDescription description;
+                    description.id = key;
+                    description.name = "Trap";
+                    description.kind = "trap";
+                    description.monster = 523;
+                    description.x = 10;
+                    description.y = 20;
+                    description.known = true;
+                    return description;
+                });
+        }
+        ~ResolverScope()
+        {
+            Events::SetObjectResolver(nullptr);
+        }
+    } const resolver;
+
+    Events::RecordHit(Events::Direction::Received, 4321, 1234, 57, 0, false, false);
+
+    const std::vector<Events::Record> recorded = Events::Since(0);
+    REQUIRE(recorded.size() == 1);
+    const nlohmann::json attacker = FieldsOf(recorded.front())["attacker"];
+    CHECK(attacker["id"] == 4321);
+    CHECK(attacker["kind"] == "trap");
+    CHECK(attacker["monster"] == 523);
+    CHECK(attacker["position"] == nlohmann::json::array({10, 20}));
+}
+
+TEST_CASE("Control objects name the engine's object kinds [network][control-events]")
+{
+    CHECK(App::Control::ObjectKindName(KIND_PLAYER) == "player");
+    CHECK(App::Control::ObjectKindName(KIND_MONSTER) == "monster");
+    CHECK(App::Control::ObjectKindName(KIND_NPC) == "npc");
+    CHECK(App::Control::ObjectKindName(KIND_TRAP) == "trap");
+    CHECK(App::Control::ObjectKindName(KIND_PET) == "pet");
+    CHECK(App::Control::ObjectKindName(KIND_TMP) == "other");
+    CHECK(App::Control::ObjectKindName(KIND_EDIT) == "unknown");
+    CHECK(App::Control::ObjectKindName(0) == "unknown");
 }

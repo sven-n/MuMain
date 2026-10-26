@@ -2,12 +2,13 @@
 
 #include "ServerListJson.h"
 
+#include "Core/Text/Utf8.h"
+#include "Data/DataHandler/TextFile.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 
 #include <algorithm>
 #include <array>
 #include <charconv>
-#include <fstream>
 #include <set>
 
 namespace Data::ServerList
@@ -24,20 +25,9 @@ constexpr const char* NameKey = "name";
 constexpr const char* DescriptionKey = "description";
 constexpr const char* TestServerKey = "testServer";
 constexpr const char* ChannelsKey = "channels";
-// A save writes this file first, then puts it in the old one's place.
-constexpr const char* TemporaryExtension = ".tmp";
 
 // In the order of the ChannelType values.
 constexpr std::array<const char*, ChannelTypeCount> ChannelTypeNames = {"normal", "nonPvp", "goldPvp", "gold"};
-
-// The bits of a UTF-8 byte that tell whether it continues a character, and
-// whether it starts one of four bytes.
-constexpr unsigned char Utf8ContinuationMask = 0xC0;
-constexpr unsigned char Utf8ContinuationBits = 0x80;
-constexpr unsigned char Utf8FourByteMask = 0xF8;
-constexpr unsigned char Utf8FourByteBits = 0xF0;
-// A character outside the Basic Multilingual Plane takes two UTF-16 units.
-constexpr size_t SurrogatePairUnits = 2;
 
 class IssueList
 {
@@ -70,18 +60,6 @@ std::string Field(const std::string& object, const char* key)
     return object + "." + key;
 }
 
-bool IsContinuationByte(char byte)
-{
-    return (static_cast<unsigned char>(byte) & Utf8ContinuationMask) == Utf8ContinuationBits;
-}
-
-// The UTF-16 units of the character a UTF-8 lead byte starts: a four-byte
-// character (most emoji) is outside the Basic Multilingual Plane.
-size_t Utf16UnitsOf(char leadByte)
-{
-    return (static_cast<unsigned char>(leadByte) & Utf8FourByteMask) == Utf8FourByteBits ? SurrogatePairUnits : 1;
-}
-
 bool ReadId(const OrderedJson& json, const std::string& field, int& id, IssueList& issues)
 {
     const auto value = json.find(IdKey);
@@ -112,7 +90,7 @@ bool ReadText(const OrderedJson& json, const std::string& field, const char* key
         return false;
     }
     text = value->get<std::string>();
-    if (CutToUtf16Length(text, maxUnits))
+    if (Core::Text::CutToUtf16Length(text, maxUnits))
     {
         issues.Warning(Field(field, key),
                        "longer than " + std::to_string(maxUnits) + " characters (an emoji counts as two), cut");
@@ -277,25 +255,6 @@ OrderedJson WriteGroup(const ServerGroup& group)
 }
 } // namespace
 
-bool CutToUtf16Length(std::string& text, size_t maxUnits)
-{
-    size_t units = 0;
-    for (size_t i = 0; i < text.size(); ++i)
-    {
-        if (IsContinuationByte(text[i]))
-        {
-            continue;
-        }
-        units += Utf16UnitsOf(text[i]);
-        if (units > maxUnits)
-        {
-            text.resize(i);
-            return true;
-        }
-    }
-    return false;
-}
-
 const char* GetChannelTypeName(ChannelType type)
 {
     return ChannelTypeNames[static_cast<size_t>(type)];
@@ -388,25 +347,10 @@ bool SaveServerListFile(const std::filesystem::path& file, std::span<const Serve
         return false;
     }
 
-    std::filesystem::path temporaryFile = file;
-    temporaryFile += TemporaryExtension;
-    std::error_code error;
-    std::filesystem::create_directories(file.parent_path(), error);
-    std::ofstream stream(temporaryFile, std::ios::binary | std::ios::trunc);
-    stream << text;
-    // Closing flushes; checking only afterwards also catches a failing final write.
-    stream.close();
-    if (!stream)
+    std::string error;
+    if (!WriteTextFile(file, text, error))
     {
-        IssueList(source, issues).Error("", "could not be written");
-        std::filesystem::remove(temporaryFile, error);
-        return false;
-    }
-    std::filesystem::rename(temporaryFile, file, error);
-    if (error)
-    {
-        IssueList(source, issues).Error("", "could not be replaced: " + error.message());
-        std::filesystem::remove(temporaryFile, error);
+        IssueList(source, issues).Error("", error);
         return false;
     }
     return true;

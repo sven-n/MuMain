@@ -20,12 +20,16 @@ inline constexpr char ItemCategories[] = "###ItemCategories";
 inline constexpr char ItemModel[] = "###ItemModel";
 inline constexpr char ItemGlowColors[] = "###ItemGlowColors";
 inline constexpr char ItemFormulas[] = "###ItemFormulas";
+inline constexpr char ItemSync[] = "###ItemSync";
 inline constexpr char ItemChecks[] = "###ItemChecks";
 inline constexpr char SkillEditor[] = "###SkillEditor";
 inline constexpr char DevEditor[] = "###DevEditor";
 inline constexpr char EffectBrowser[] = "###EffectBrowser";
 inline constexpr char ItemTranslations[] = "###ItemTranslations";
 inline constexpr char ServerList[] = "###ServerList";
+inline constexpr char MonsterBrowser[] = "###MonsterBrowser";
+inline constexpr char MonsterTranslations[] = "###MonsterTranslations";
+inline constexpr char MonsterChecks[] = "###MonsterChecks";
 // Titles that are not translated: the whole title is the name.
 inline constexpr char MapEditor[] = "Map Editor";
 inline constexpr char Console[] = "Console";

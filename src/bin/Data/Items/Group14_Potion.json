@@ -171,7 +171,7 @@
             "de": "Effekt: Schaden +20%",
             "es": "Daño +20% efecto de aumento",
             "id": "Kerusakan +20% meningkatkan efek",
-            "ja": "攻撃力+20%上昇效果",
+            "ja": "攻撃力+20%上昇効果",
             "pl": "Efekt zwiększenia obrażeń o 20%",
             "pt": "Dano +20% efeito de aumento",
             "ru": "Урон +20% увеличение эффекта",
@@ -1659,11 +1659,11 @@
           "text": {
             "en": "Restores HP by 100% immediately.",
             "de": "Stellt sofort 100% der HP wieder her.",
-            "es": "Restaura HP al 100% % i inmediatamente.",
+            "es": "Restaura HP al 100% inmediatamente.",
             "id": "Memulihkan HP sebesar 100% imsegera.",
             "ja": "体力を100%回復します。",
             "pl": "Natychmiast przywraca 100% HP.",
-            "pt": "Restaura HP em 100% % i imediatamente.",
+            "pt": "Restaura HP em 100% imediatamente.",
             "ru": "Мгновенно восстанавливает HP на 100% i.",
             "tl": "Ibinabalik ang HP nang 100% i kaagad.",
             "uk": "Негайно відновлює HP на 100% i.",
@@ -1698,7 +1698,7 @@
           "text": {
             "en": "Restores Mana by 100% immediately.",
             "de": "Stellt sofort 100% des Manas wieder her.",
-            "es": "Restaura Mana al 100% % i inmediatamente.",
+            "es": "Restaura Mana al 100% inmediatamente.",
             "id": "Memulihkan Mana sebesar 100% imsegera.",
             "ja": "マナを100%回復します。",
             "pl": "Natychmiast przywraca 100% Many.",
@@ -2539,11 +2539,11 @@
           "text": {
             "en": "Restores HP by 65% immediately.",
             "de": "Stellt sofort 65% der HP wieder her.",
-            "es": "Restaura HP en un 65% % i inmediatamente.",
+            "es": "Restaura HP en un 65% inmediatamente.",
             "id": "Memulihkan HP sebesar 65% imsegera.",
             "ja": "体力を65%回復します。",
             "pl": "Natychmiast przywraca HP o 65%.",
-            "pt": "Restaura HP em 65% % i imediatamente.",
+            "pt": "Restaura HP em 65% imediatamente.",
             "ru": "Мгновенно восстанавливает HP на 65% i.",
             "tl": "Ibinabalik ang HP nang 65% i kaagad.",
             "uk": "Відновлює HP на 65% iмразово.",
@@ -2786,7 +2786,8 @@
       "description": [
         {
           "text": {
-            "en": "{durability} / 5"
+            "en": "{durability} / 5",
+            "ja": "{durability}個/ 5個"
           }
         },
         {
@@ -3535,11 +3536,11 @@
           "text": {
             "en": "Restores SD by 65% immediately.",
             "de": "Stellt sofort 65% des SD wieder her.",
-            "es": "Restaura SD en un 65% % i inmediatamente.",
+            "es": "Restaura SD en un 65% inmediatamente.",
             "id": "Memulihkan SD sebesar 65% imsegera.",
             "ja": "SDを65%回復します。",
             "pl": "Natychmiast przywraca SD o 65%.",
-            "pt": "Restaura SD em 65% % i imediatamente.",
+            "pt": "Restaura SD em 65% imediatamente.",
             "ru": "Восстанавливает SD на 65% i сразу.",
             "tl": "Ibinabalik kaagad ang SD nang 65% i.",
             "uk": "Миттєво відновлює SD на 65% i.",

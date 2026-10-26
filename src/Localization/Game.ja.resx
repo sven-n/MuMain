@@ -5168,7 +5168,7 @@
     <comment>legacy_id=1462</comment>
   </data>
   <data name="Attacking speed +25 increase effect" xml:space="preserve">
-    <value>攻撃力+25上昇效果</value>
+    <value>攻撃力+25上昇効果</value>
     <comment>legacy_id=1463</comment>
   </data>
   <data name="Duration 30 seconds" xml:space="preserve">
@@ -6392,7 +6392,7 @@
     <comment>legacy_id=1786</comment>
   </data>
   <data name="effect increase by reinforcement process" xml:space="preserve">
-    <value>強化段階別效果上昇</value>
+    <value>強化段階別効果上昇</value>
     <comment>legacy_id=1787</comment>
   </data>
   <data name="%d%% decrease" xml:space="preserve">
@@ -6564,7 +6564,7 @@
     <comment>legacy_id=1839</comment>
   </data>
   <data name="+Effect limitation" xml:space="preserve">
-    <value>+效果制限</value>
+    <value>+効果制限</value>
     <comment>legacy_id=1840</comment>
   </data>
   <data name="Collect the orbs during the event to get a special prizes." xml:space="preserve">
