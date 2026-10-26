@@ -60,6 +60,11 @@ bool Play(CHARACTER& character, OBJECT& object)
     {
         SetAction(&object, animation);
     }
+    else if (Data::Monsters::ClearsMonsterSkillAfterAttack(*attacks))
+    {
+        // No attack plays, so none ends that would clear the skill (P4).
+        character.MonsterSkill = -1;
+    }
     if (choice.clearMonsterSkill)
     {
         character.MonsterSkill = -1;
@@ -77,6 +82,22 @@ void OnAttackEnded(CHARACTER& character)
     if (attacks != nullptr && Data::Monsters::ClearsMonsterSkillAfterAttack(*attacks))
     {
         character.MonsterSkill = -1;
+    }
+}
+
+bool IsAttackAnimation(int animation)
+{
+    switch (animation)
+    {
+    case MONSTER01_ATTACK1:
+    case MONSTER01_ATTACK2:
+    case MONSTER01_ATTACK3:
+    case MONSTER01_ATTACK4:
+    case MONSTER01_ATTACK5:
+    case MONSTER01_APEAR:
+        return true;
+    default:
+        return false;
     }
 }
 } // namespace GameLogic::Monsters::Attacks

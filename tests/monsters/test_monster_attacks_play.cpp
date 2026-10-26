@@ -109,6 +109,25 @@ TEST_CASE("Monster attacks: Selupan and the Dark Ghost clear their skill when th
         CHECK(Attack(selupan, selupan.MonsterSkill) == MONSTER01_ATTACK4);
     }
     {
+        AttackScope scope(WD_58ICECITY_BOSS);
+        CHARACTER& selupan = scope.Create(MONSTER_SELUPAN);
+        // A hit's shock ends attack 3 before its end, which clears the skill.
+        CHECK(Attack(selupan, 36) == MONSTER01_ATTACK3);
+        SetPlayerShock(&selupan, 1);
+        CHECK(selupan.Object.CurrentAction == MONSTER01_SHOCK);
+        CHECK(selupan.MonsterSkill == NoMonsterSkill);
+        CHECK(Attack(selupan, selupan.MonsterSkill) == MONSTER01_ATTACK4);
+        // Attack 1 and 2 are not shocked: the skill stays until they end.
+        CHECK(Attack(selupan, 34) == MONSTER01_ATTACK2);
+        SetPlayerShock(&selupan, 1);
+        CHECK(selupan.Object.CurrentAction == MONSTER01_ATTACK2);
+        CHECK(selupan.MonsterSkill == 34);
+        // Skill 41 plays no attack, so it is cleared at once.
+        CHECK(Attack(selupan, 41) == MONSTER01_WALK);
+        CHECK(selupan.MonsterSkill == NoMonsterSkill);
+        CHECK(Attack(selupan, selupan.MonsterSkill) == MONSTER01_ATTACK4);
+    }
+    {
         AttackScope scope(WD_70EMPIREGUARDIAN2);
         CHARACTER& ghost = scope.Create(MONSTER_DARK_GHOST);
         CHECK(Attack(ghost, 51) == MONSTER01_ATTACK2);

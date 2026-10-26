@@ -12,7 +12,11 @@ namespace GameLogic::Monsters::Attacks
 // False, with nothing done, when its entry has no `attacks`.
 bool Play(CHARACTER& character, OBJECT& object);
 
-// The attack animation of the character ended: its attacks may clear the
-// monster skill now (clearSkill afterAttack).
+// The attack animation of the character ended, played to its end or replaced
+// by the shock: its attacks may clear the monster skill now (clearSkill
+// afterAttack).
 void OnAttackEnded(CHARACTER& character);
+
+// True for the animations an attack plays: attack 1 to 5 and appear.
+bool IsAttackAnimation(int animation);
 } // namespace GameLogic::Monsters::Attacks

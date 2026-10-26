@@ -1393,7 +1393,15 @@ void SetPlayerShock(CHARACTER* c, int Hit)
         else
         {
             if (o->CurrentAction<MONSTER01_ATTACK1 || o->CurrentAction>MONSTER01_ATTACK2)
+            {
+                const int interrupted = o->CurrentAction;
                 SetAction(&c->Object, MONSTER01_SHOCK);
+                // The shock ends an attack 3 to 5 or appear before its end (P4).
+                if (o->CurrentAction != interrupted && GameLogic::Monsters::Attacks::IsAttackAnimation(interrupted))
+                {
+                    GameLogic::Monsters::Attacks::OnAttackEnded(*c);
+                }
+            }
             //c->Movement = false;
         }
         if (c->Object.AnimationFrame == 0.f)
@@ -3463,9 +3471,7 @@ void EtcStopAnimationSetting(CHARACTER* c, OBJECT* o)
                     }
                     return;
                 }
-                if ((o->CurrentAction >= MONSTER01_ATTACK1 && o->CurrentAction <= MONSTER01_ATTACK2) ||
-                    (o->CurrentAction >= MONSTER01_APEAR && o->CurrentAction <= MONSTER01_ATTACK4) ||
-                    o->CurrentAction == MONSTER01_ATTACK5)
+                if (GameLogic::Monsters::Attacks::IsAttackAnimation(o->CurrentAction))
                 {
                     GameLogic::Monsters::Attacks::OnAttackEnded(*c);
                 }
