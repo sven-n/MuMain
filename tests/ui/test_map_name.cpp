@@ -415,8 +415,8 @@ TEST_CASE("map-name bundled file is the italic MU Map Name face at normal weight
     REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/MuMapName-Italic.otf"));
     auto* engine = Rml::GetFontEngineInterface();
     REQUIRE(engine != nullptr);
-    CHECK(engine->GetFontFaceHandle("mu map name", Rml::Style::FontStyle::Italic, Rml::Style::FontWeight::Normal,
-                                    18) != 0);
-    CHECK(engine->GetFontFaceHandle("mu map name", Rml::Style::FontStyle::Normal, Rml::Style::FontWeight::Normal,
-                                    18) == 0);
+    const auto face = [engine](Rml::Style::FontStyle style)
+    { return engine->GetFontFaceHandle("mu map name", style, Rml::Style::FontWeight::Normal, 18); };
+    CHECK(face(Rml::Style::FontStyle::Italic) != 0);
+    CHECK(face(Rml::Style::FontStyle::Normal) == 0);
 }
