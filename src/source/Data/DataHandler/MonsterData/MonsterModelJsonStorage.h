@@ -34,13 +34,11 @@ MonsterModelsLoadResult LoadMonsterModelsFile(const std::filesystem::path& file)
 bool SaveMonsterModelsFile(const std::filesystem::path& file, std::span<const MonsterModelDefinition> models,
                            std::vector<Items::ItemDataIssue>& issues);
 
-// SaveMonsterModelsFile in two steps, so that a caller can check more files
-// before it writes any: the text for the file when the models read back
-// without errors (nullopt otherwise; the problems found are added to
-// `issues`), and the write of that text.
+// The text SaveMonsterModelsFile writes, so that a caller can check more files
+// before it writes any (with WriteTextFiles): the text for the file when the
+// models read back without errors, nullopt otherwise; the problems found are
+// added to `issues`.
 std::optional<std::string> MakeMonsterModelsFileText(const std::filesystem::path& file,
                                                      std::span<const MonsterModelDefinition> models,
                                                      std::vector<Items::ItemDataIssue>& issues);
-bool WriteMonsterModelsFileText(const std::filesystem::path& file, const std::string& text,
-                                std::vector<Items::ItemDataIssue>& issues);
 } // namespace Data::Monsters

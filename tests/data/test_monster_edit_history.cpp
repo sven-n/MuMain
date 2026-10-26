@@ -514,6 +514,46 @@ TEST_CASE("Saving the monster edits writes neither file when one has errors [edi
     CHECK(g_MonsterEdits.GetHistory().IsModifiedSinceSave());
 }
 
+TEST_CASE("Saving the monster edits writes neither file when one cannot be written or replaced [editor][monsters]")
+{
+    TemporaryMonsterFolder folder;
+    ClientDataScope scope(folder.Path());
+    BuildMonsters();
+    std::vector<Data::Items::ItemDataIssue> issues;
+    // The Hound's file is not in this client folder: a warning, which saves.
+    REQUIRE(g_MonsterEdits.Save(issues));
+    const std::filesystem::path monstersFile = folder.MonstersFile();
+    const std::filesystem::path modelsFile = folder.Path() / Data::Monsters::GetMonsterModelsFile();
+    const std::optional<std::string> monsters = Data::ReadTextFile(monstersFile);
+    REQUIRE(monsters);
+    REQUIRE(std::filesystem::is_regular_file(modelsFile));
+    REQUIRE(g_MonsterEdits.AddMonster("Add", Monster(3, "Larva")));
+
+    // A folder where the model list's temporary file goes: it cannot be
+    // written.
+    REQUIRE(std::filesystem::create_directory(Data::GetTemporaryPath(modelsFile)));
+    issues.clear();
+    CHECK_FALSE(g_MonsterEdits.Save(issues));
+    CHECK(Data::Items::HasErrors(issues));
+    CHECK(Data::ReadTextFile(monstersFile) == monsters);
+    CHECK_FALSE(std::filesystem::exists(Data::GetTemporaryPath(monstersFile)));
+    std::filesystem::remove(Data::GetTemporaryPath(modelsFile));
+
+    // A folder in the model list's place: its new text cannot replace it.
+    // Before, the monster list was replaced already.
+    std::filesystem::remove(modelsFile);
+    REQUIRE(std::filesystem::create_directory(modelsFile));
+    std::string error;
+    REQUIRE(Data::WriteTextFile(modelsFile / "kept.txt", "kept", error));
+    issues.clear();
+    CHECK_FALSE(g_MonsterEdits.Save(issues));
+    CHECK(Data::Items::HasErrors(issues));
+    CHECK(Data::ReadTextFile(monstersFile) == monsters);
+    CHECK_FALSE(std::filesystem::exists(Data::GetTemporaryPath(monstersFile)));
+    CHECK_FALSE(std::filesystem::exists(Data::GetTemporaryPath(modelsFile)));
+    CHECK(g_MonsterEdits.GetHistory().IsModifiedSinceSave());
+}
+
 TEST_CASE("A revert of the monster edits changes nothing when one file has errors [editor][monsters]")
 {
     TemporaryMonsterFolder folder;

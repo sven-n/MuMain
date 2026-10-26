@@ -7,6 +7,7 @@
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/DataHandler/MonsterData/MonsterModelJsonStorage.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
+#include "Data/DataHandler/TextFile.h"
 #include "Data/GameData/MonsterData/MonsterDataValidation.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
@@ -15,6 +16,7 @@
 #include "I18N/All.h"
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <map>
 
@@ -283,8 +285,19 @@ bool MonsterDataHandler::SaveAll(std::vector<Items::ItemDataIssue>& issues)
     {
         return false;
     }
-    return WriteMonstersFileText(GetMonstersFile(), *monstersText, issues) &&
-           WriteMonsterModelsFileText(GetMonsterModelsFile(), *modelsText, issues);
+    // Both files or neither: the new monster list next to the old model list
+    // may name a model that list lacks.
+    const std::array<TextFileToWrite, 2> files{
+        {{GetMonstersFile(), *monstersText}, {GetMonsterModelsFile(), *modelsText}}};
+    std::filesystem::path failed;
+    std::string error;
+    if (!WriteTextFiles(files, failed, error))
+    {
+        issues.push_back({Items::ItemDataIssueSeverity::Error, failed.generic_string(), Items::ItemDataIssue::NoItem,
+                          Items::ItemDataIssue::NoItem, "", error});
+        return false;
+    }
+    return true;
 }
 
 bool MonsterDataHandler::RevertAll(std::vector<Items::ItemDataIssue>& issues)

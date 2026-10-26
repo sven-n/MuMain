@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <optional>
+#include <span>
 #include <string>
 #include <string_view>
 
@@ -28,4 +29,18 @@ bool ReplaceWithTemporaryFile(const std::filesystem::path& path, std::string& er
 // a write that fails leaves the old file as it was. False, with the reason in
 // `error`, when the file could not be written or replaced.
 bool WriteTextFile(const std::filesystem::path& path, std::string_view text, std::string& error);
+
+// A file that WriteTextFiles writes, with its new text.
+struct TextFileToWrite
+{
+    std::filesystem::path path;
+    std::string_view text;
+};
+
+// Writes several files, all or none: every text is written to its temporary
+// file before any file is replaced, and when a file then cannot be replaced
+// (a read-only or locked file), the files replaced before it get their old
+// content back. False, with the file and the reason in `failed` and `error`,
+// when a file could not be written or replaced.
+bool WriteTextFiles(std::span<const TextFileToWrite> files, std::filesystem::path& failed, std::string& error);
 } // namespace Data

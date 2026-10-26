@@ -50,7 +50,17 @@ bool SaveMonstersFile(const std::filesystem::path& file, std::span<const Monster
                       std::vector<ItemDataIssue>& issues)
 {
     const std::optional<std::string> text = MakeMonstersFileText(file, monsters, issues);
-    return text && WriteMonstersFileText(file, *text, issues);
+    if (!text)
+    {
+        return false;
+    }
+    std::string error;
+    if (!WriteTextFile(file, *text, error))
+    {
+        AddFileError(issues, file.generic_string(), error);
+        return false;
+    }
+    return true;
 }
 
 std::optional<std::string> MakeMonstersFileText(const std::filesystem::path& file,
@@ -69,18 +79,6 @@ std::optional<std::string> MakeMonstersFileText(const std::filesystem::path& fil
         return std::nullopt;
     }
     return text;
-}
-
-bool WriteMonstersFileText(const std::filesystem::path& file, const std::string& text,
-                           std::vector<ItemDataIssue>& issues)
-{
-    std::string error;
-    if (!WriteTextFile(file, text, error))
-    {
-        AddFileError(issues, file.generic_string(), error);
-        return false;
-    }
-    return true;
 }
 
 void NameIssueSource(std::vector<ItemDataIssue>& issues, std::size_t first, const std::filesystem::path& file)

@@ -42,7 +42,18 @@ bool SaveMonsterModelsFile(const std::filesystem::path& file, std::span<const Mo
                            std::vector<Items::ItemDataIssue>& issues)
 {
     const std::optional<std::string> text = MakeMonsterModelsFileText(file, models, issues);
-    return text && WriteMonsterModelsFileText(file, *text, issues);
+    if (!text)
+    {
+        return false;
+    }
+    std::string error;
+    if (!WriteTextFile(file, *text, error))
+    {
+        issues.push_back({Items::ItemDataIssueSeverity::Error, file.generic_string(), Items::ItemDataIssue::NoItem,
+                          Items::ItemDataIssue::NoItem, "", error});
+        return false;
+    }
+    return true;
 }
 
 std::optional<std::string> MakeMonsterModelsFileText(const std::filesystem::path& file,
@@ -62,18 +73,5 @@ std::optional<std::string> MakeMonsterModelsFileText(const std::filesystem::path
         return std::nullopt;
     }
     return text;
-}
-
-bool WriteMonsterModelsFileText(const std::filesystem::path& file, const std::string& text,
-                                std::vector<Items::ItemDataIssue>& issues)
-{
-    std::string error;
-    if (!WriteTextFile(file, text, error))
-    {
-        issues.push_back({Items::ItemDataIssueSeverity::Error, file.generic_string(), Items::ItemDataIssue::NoItem,
-                          Items::ItemDataIssue::NoItem, "", error});
-        return false;
-    }
-    return true;
 }
 } // namespace Data::Monsters
