@@ -13,7 +13,9 @@
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDefinition.h"
 #include "Engine/Object/ZzzOpenData.h"
+#ifdef _EDITOR
 #include "UI/MonsterTools/MonsterShownModel.h"
+#endif
 
 #include <doctest.h>
 
@@ -142,6 +144,7 @@ TEST_CASE("Monster models: the monster tools load a sound they play as its model
     CHECK(CountLoads(opened, number) == 0);
 }
 
+#ifdef _EDITOR
 TEST_CASE("Monster models: the monster tools ask once for each model whose file is missing [monsters][models][editor]")
 {
     LoadScope scope(0);
@@ -159,3 +162,4 @@ TEST_CASE("Monster models: the monster tools ask once for each model whose file 
         CHECK_FALSE(Data::Monsters::ModelLoader::IsOpen(MODEL_HOUND));
     }
 }
+#endif // _EDITOR
