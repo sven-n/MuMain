@@ -200,6 +200,36 @@ TEST_CASE("Description texts are checked like item names [data][items]")
     CHECK(issues[3].field == "description[3].text");
 }
 
+TEST_CASE("Level values written in place are checked like description texts [data][items]")
+{
+    const char* uiLocales[] = {"en", "de"};
+
+    ItemDefinition fruit = MakeJewel();
+    ItemLevelValues stat;
+    stat.name = "stat";
+    ItemLevelValue english;
+    english.text.Set("en", "ENG");
+    ItemLevelValue noEnglish;
+    noEnglish.text.Set("de", "ENE");
+    ItemLevelValue unknownLanguage;
+    unknownLanguage.text.Set("en", "STR");
+    unknownLanguage.text.Set("xx", "FUE");
+    stat.values = {english, noEnglish, unknownLanguage};
+    fruit.levelValues = {stat};
+
+    std::vector<ItemDataIssue> issues;
+    ValidateItems(std::vector<ItemDefinition>{fruit}, issues);
+    ValidateNameLocales(std::vector<ItemDefinition>{fruit}, uiLocales, issues);
+    std::erase_if(issues, [](const ItemDataIssue& issue) { return !issue.field.starts_with("levelValues"); });
+
+    REQUIRE(issues.size() == 2);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Error);
+    CHECK(issues[0].field == "levelValues.stat[1]");
+    CHECK(issues[0].message == "the English text is missing");
+    CHECK(issues[1].severity == ItemDataIssueSeverity::Warning);
+    CHECK(issues[1].field == "levelValues.stat[2]");
+}
+
 TEST_CASE("A description is in the UI's language also when the item names stay English [data][items]")
 {
     ItemDefinition jewel = MakeJewel();
@@ -228,4 +258,33 @@ TEST_CASE("A description is in the UI's language also when the item names stay E
     CHECK(namesLocale == "en");
     REQUIRE_FALSE(rows.empty());
     CHECK(rows[0].starts_with(L"Wird verwendet"));
+}
+
+TEST_CASE("A level value is in the UI's language also when the item names stay English [data][items]")
+{
+    ItemDefinition fruit = MakeJewel();
+    ItemLevelValues stat;
+    stat.name = "stat";
+    ItemLevelValue energy;
+    energy.text.Set("en", "ENG");
+    energy.text.Set("de", "ENE");
+    stat.values = {energy};
+    fruit.levelValues = {stat};
+    ItemDescriptionLine line = Line("{stat} +1");
+    line.text.Set("de", "{stat} +1");
+    fruit.description = {line};
+
+    // Once a test has loaded the item data, switching the UI language refills ItemAttribute, so the switch needs an
+    // item table of its own.
+    ClientDataScope client(ShippedClientDirectory);
+    const std::string itemNameLocale = g_ItemDatabase.GetDisplayLocale();
+    const std::string uiLocale = I18N::GetCurrentLocale();
+    g_ItemDatabase.SetDisplayLocale("en");
+    I18N::SetLocale("de");
+    const std::vector<std::wstring> rows = WriteRows(fruit);
+    I18N::SetLocale(uiLocale.c_str());
+    g_ItemDatabase.SetDisplayLocale(itemNameLocale);
+
+    REQUIRE(rows.size() == 1);
+    CHECK(rows[0] == L"ENE +1");
 }

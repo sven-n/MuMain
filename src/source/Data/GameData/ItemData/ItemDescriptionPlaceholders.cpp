@@ -142,7 +142,13 @@ bool IsBuiltInPlaceholder(std::string_view name)
 
 std::string FillPlaceholders(std::string_view text, int level, const ItemStatProfiles& profiles)
 {
-    return FillPlaceholders(text, [&](std::string_view name) { return GetPlaceholderValue(name, level, profiles); });
+    return FillPlaceholders(text,
+                            [&](std::string_view name) -> std::optional<std::string>
+                            {
+                                if (const std::optional<int> value = GetPlaceholderValue(name, level, profiles))
+                                    return std::to_string(*value);
+                                return std::nullopt;
+                            });
 }
 
 std::string FillPlaceholders(std::string_view text, const PlaceholderValueOf& valueOf)
@@ -159,15 +165,15 @@ std::string FillPlaceholders(std::string_view text, const PlaceholderValueOf& va
         }
         filled.append(text.substr(position, brace - position));
         const Placeholder placeholder = text[brace] == '{' ? ReadPlaceholder(text, brace) : Placeholder{};
-        const std::optional<int> value = placeholder.error.empty() && placeholder.end != std::string_view::npos
-                                             ? valueOf(placeholder.name)
-                                             : std::nullopt;
+        const std::optional<std::string> value = placeholder.error.empty() && placeholder.end != std::string_view::npos
+                                                     ? valueOf(placeholder.name)
+                                                     : std::nullopt;
         if (!value)
         {
             position = brace;
             break;
         }
-        filled.append(std::to_string(*value));
+        filled.append(*value);
         position = placeholder.end;
     }
     filled.append(text.substr(std::min(position, text.size())));

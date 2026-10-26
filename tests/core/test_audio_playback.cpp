@@ -103,9 +103,8 @@ TEST_CASE("an active one-channel sound is not restarted [audio][ambient]")
 }
 
 // The editor's sound previews have their own level: they are heard while the
-// game's effect volume is 0, and a 3D sound plays where the listener is, not
-// where it played last.
-TEST_CASE("a sound played at a level ignores the effect volume and plays at the listener [audio][volume]")
+// game's effect volume is 0.
+TEST_CASE("a sound played at a level ignores the effect volume [audio][volume]")
 {
     auto backend = std::make_unique<mu::MiniAudioBackend>();
 
@@ -132,19 +131,10 @@ TEST_CASE("a sound played at a level ignores the effect volume and plays at the 
     backend->m_soundLoaded[soundIndex] = true;
     backend->m_loadedChannels[soundIndex] = 1;
     backend->m_activeChannel[soundIndex] = 0;
-    backend->m_sound3DEnabled[soundIndex] = true;
-    ma_sound_set_spatialization_enabled(&sound, MA_TRUE);
-    // Where a monster played it last.
-    ma_sound_set_position(&sound, 5000.0f, 3000.0f, 100.0f);
     backend->SetSFXVolume(0.0f);
 
     REQUIRE(backend->PlaySoundAtLevel(soundId, 0.6f));
     CHECK(ma_sound_get_volume(&sound) == doctest::Approx(0.6f));
-    const ma_vec3f position = ma_sound_get_position(&sound);
-    const ma_vec3f listener = ma_engine_listener_get_position(&backend->m_engine, 0);
-    CHECK(position.x == doctest::Approx(listener.x));
-    CHECK(position.y == doctest::Approx(listener.y));
-    CHECK(position.z == doctest::Approx(listener.z));
 
     // The game's sounds keep the effect volume.
     ma_sound_stop(&sound);
@@ -220,6 +210,39 @@ std::filesystem::path CreateMusicAsset()
     return testDirectory;
 }
 } // namespace
+
+TEST_CASE("sound effects requested as 3D load without spatialization [audio][3d]")
+{
+    auto backend = std::make_unique<mu::MiniAudioBackend>();
+    InitNoDeviceEngine(*backend);
+
+    constexpr std::array<unsigned char, 46> wav = {
+        'R',  'I',  'F',  'F',  0x26, 0x00, 0x00, 0x00, 'W',  'A',  'V',  'E',  'f',  'm',  't',  ' ',
+        0x10, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x40, 0x1f, 0x00, 0x00, 0x80, 0x3e, 0x00, 0x00,
+        0x02, 0x00, 0x10, 0x00, 'd',  'a',  't',  'a',  0x02, 0x00, 0x00, 0x00, 0x00, 0x00,
+    };
+    const auto timestamp = std::chrono::steady_clock::now().time_since_epoch().count();
+    const std::filesystem::path testDirectory =
+        std::filesystem::temp_directory_path() / ("mu_audio_3d_" + std::to_string(timestamp));
+    const std::filesystem::path assetPath = testDirectory / "Data" / "Sound" / "iButtonClick.wav";
+    REQUIRE(std::filesystem::create_directories(assetPath.parent_path()));
+    {
+        std::ofstream file(assetPath, std::ios::binary);
+        REQUIRE(file.write(reinterpret_cast<const char*>(wav.data()), wav.size()).good());
+    }
+
+    // Monster models request 3D; a spatialized sound at a world position would be inaudible.
+    const int soundIndex = static_cast<int>(SOUND_CLICK01);
+    backend->LoadSound(SOUND_CLICK01, assetPath.wstring().c_str(), 2, true);
+
+    REQUIRE(backend->m_soundLoaded[soundIndex]);
+    for (int ch = 0; ch < backend->m_loadedChannels[soundIndex]; ++ch)
+    {
+        CHECK_FALSE(ma_sound_is_spatialization_enabled(&backend->m_sounds[soundIndex][ch]));
+    }
+    backend->Shutdown();
+    std::filesystem::remove_all(testDirectory);
+}
 
 TEST_CASE("a named music stop matches a Windows-spelled track name [audio][music]")
 {

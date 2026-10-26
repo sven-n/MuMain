@@ -364,10 +364,6 @@
     <value>幸運（暴擊傷害率+5%%）</value>
     <comment>legacy_id=94</comment>
   </data>
-  <data name="Durability: [%d]" xml:space="preserve">
-    <value>耐久性：[%d]</value>
-    <comment>legacy_id=95</comment>
-  </data>
   <data name="Can only be used in moving unit" xml:space="preserve">
     <value>只能用於移動裝置</value>
     <comment>legacy_id=96</comment>
@@ -660,19 +656,19 @@
     <comment>legacy_id=165</comment>
   </data>
   <data name="STR" xml:space="preserve">
-    <value>STR</value>
+    <value>力量</value>
     <comment>legacy_id=166</comment>
   </data>
   <data name="AGI" xml:space="preserve">
-    <value>通用人工智慧</value>
+    <value>敏捷</value>
     <comment>legacy_id=167</comment>
   </data>
   <data name="ENG" xml:space="preserve">
-    <value>英語</value>
+    <value>能量</value>
     <comment>legacy_id=168</comment>
   </data>
   <data name="STA" xml:space="preserve">
-    <value>史塔</value>
+    <value>體力</value>
     <comment>legacy_id=169</comment>
   </data>
   <data name="Wizardry Dmg:%d~%d" xml:space="preserve">
@@ -2133,11 +2129,11 @@
     <comment>legacy_id=575</comment>
   </data>
   <data name="Increase %d%% of Damage" xml:space="preserve">
-    <value>增加 %d%% of 傷害</value>
+    <value>增加 %d%% 傷害</value>
     <comment>legacy_id=577</comment>
   </data>
   <data name="Absorb %d%% of Damage" xml:space="preserve">
-    <value>吸收%d%% of傷害</value>
+    <value>吸收%d%%傷害</value>
     <comment>legacy_id=578</comment>
   </data>
   <data name="Increase speed" xml:space="preserve">
@@ -6229,7 +6225,7 @@
     <comment>legacy_id=1703</comment>
   </data>
   <data name="Energy" xml:space="preserve">
-    <value>活力</value>
+    <value>能量</value>
     <comment>legacy_id=1704</comment>
   </data>
   <data name="KingdomOfWizardsDescendantOfArka" xml:space="preserve">
@@ -6361,7 +6357,7 @@
     <comment>legacy_id=1737</comment>
   </data>
   <data name="Command" xml:space="preserve">
-    <value>命令</value>
+    <value>統率</value>
     <comment>legacy_id=1738,1900</comment>
   </data>
   <data name="Long gmae time may be harmful to your health" xml:space="preserve">
@@ -8092,10 +8088,6 @@
     <value>http://muonline.webzen.com/</value>
     <comment>legacy_id=2295</comment>
   </data>
-  <data name="%d%% Combination success rate increase" xml:space="preserve">
-    <value>%d%% 組合成功率提升</value>
-    <comment>legacy_id=2296</comment>
-  </data>
   <data name="Hour" xml:space="preserve">
     <value>小時</value>
     <comment>legacy_id=2299</comment>
@@ -8982,14 +8974,6 @@
   <data name="Move by a right-mouse-click." xml:space="preserve">
     <value>按一下滑鼠右鍵進行移動。</value>
     <comment>legacy_id=2603</comment>
-  </data>
-  <data name="Saves the location with the right-mouse-click." xml:space="preserve">
-    <value>點選滑鼠右鍵儲存位置。</value>
-    <comment>legacy_id=2605</comment>
-  </data>
-  <data name="Returns to the saved location by a click." xml:space="preserve">
-    <value>單擊即可返回已儲存的位置。</value>
-    <comment>legacy_id=2606</comment>
   </data>
   <data name="Would you like to save the location?" xml:space="preserve">
     <value>您想保存位置嗎？</value>
@@ -10494,14 +10478,6 @@
   <data name="GrandDukeDukeMarquisCountViscount" xml:space="preserve">
     <value>大公#公爵#侯爵#伯爵#子爵#男爵#騎士長#高級騎士#騎士#侍衛長#軍官#中尉#中士#列兵</value>
     <comment>legacy_id=3104</comment>
-  </data>
-  <data name="Can enter the Monday - Saturday map." xml:space="preserve">
-    <value>可以輸入週一-週六的地圖。</value>
-    <comment>legacy_id=3105</comment>
-  </data>
-  <data name="Can enter the Sunday map." xml:space="preserve">
-    <value>可以進入周日地圖。</value>
-    <comment>legacy_id=3106</comment>
   </data>
   <data name="Varka Map 7" xml:space="preserve">
     <value>瓦爾卡地圖 7</value>

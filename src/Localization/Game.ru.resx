@@ -364,10 +364,6 @@
     <value>Удача (коэффициент критического урона +5%%)</value>
     <comment>legacy_id=94</comment>
   </data>
-  <data name="Durability: [%d]" xml:space="preserve">
-    <value>Прочность: [%d]</value>
-    <comment>legacy_id=95</comment>
-  </data>
   <data name="Can only be used in moving unit" xml:space="preserve">
     <value>Может использоваться только в движущемся блоке.</value>
     <comment>legacy_id=96</comment>
@@ -660,19 +656,19 @@
     <comment>legacy_id=165</comment>
   </data>
   <data name="STR" xml:space="preserve">
-    <value>СТР</value>
+    <value>СИЛ</value>
     <comment>legacy_id=166</comment>
   </data>
   <data name="AGI" xml:space="preserve">
-    <value>ОИИ</value>
+    <value>ЛВК</value>
     <comment>legacy_id=167</comment>
   </data>
   <data name="ENG" xml:space="preserve">
-    <value>АНГЛ</value>
+    <value>ЭНЕ</value>
     <comment>legacy_id=168</comment>
   </data>
   <data name="STA" xml:space="preserve">
-    <value>СТА</value>
+    <value>ВЫН</value>
     <comment>legacy_id=169</comment>
   </data>
   <data name="Wizardry Dmg:%d~%d" xml:space="preserve">
@@ -2133,11 +2129,11 @@
     <comment>legacy_id=575</comment>
   </data>
   <data name="Increase %d%% of Damage" xml:space="preserve">
-    <value>Увеличение урона %d%% of</value>
+    <value>Увеличение урона на %d%%</value>
     <comment>legacy_id=577</comment>
   </data>
   <data name="Absorb %d%% of Damage" xml:space="preserve">
-    <value>Поглощение %d%% of урона</value>
+    <value>Поглощение %d%% урона</value>
     <comment>legacy_id=578</comment>
   </data>
   <data name="Increase speed" xml:space="preserve">
@@ -6361,7 +6357,7 @@
     <comment>legacy_id=1737</comment>
   </data>
   <data name="Command" xml:space="preserve">
-    <value>Команда</value>
+    <value>Командование</value>
     <comment>legacy_id=1738,1900</comment>
   </data>
   <data name="Long gmae time may be harmful to your health" xml:space="preserve">
@@ -7957,7 +7953,7 @@
     <comment>legacy_id=2259</comment>
   </data>
   <data name="usable %dtimes" xml:space="preserve">
-    <value>годный к употреблению %dtimes</value>
+    <value>можно использовать %d раз</value>
     <comment>legacy_id=2260</comment>
   </data>
   <data name="You can achieve special items with combinations." xml:space="preserve">
@@ -8091,10 +8087,6 @@
   <data name="http://muonline.webzen.com/" xml:space="preserve">
     <value>http://muonline.webzen.com/</value>
     <comment>legacy_id=2295</comment>
-  </data>
-  <data name="%d%% Combination success rate increase" xml:space="preserve">
-    <value>%d%% Увеличение шанса успешной комбинации</value>
-    <comment>legacy_id=2296</comment>
   </data>
   <data name="Hour" xml:space="preserve">
     <value>Час</value>
@@ -8982,14 +8974,6 @@
   <data name="Move by a right-mouse-click." xml:space="preserve">
     <value>Перемещение осуществляется щелчком правой кнопки мыши.</value>
     <comment>legacy_id=2603</comment>
-  </data>
-  <data name="Saves the location with the right-mouse-click." xml:space="preserve">
-    <value>Сохраняет местоположение щелчком правой кнопки мыши.</value>
-    <comment>legacy_id=2605</comment>
-  </data>
-  <data name="Returns to the saved location by a click." xml:space="preserve">
-    <value>Возвращается в сохраненное место по клику.</value>
-    <comment>legacy_id=2606</comment>
   </data>
   <data name="Would you like to save the location?" xml:space="preserve">
     <value>Хотите сохранить местоположение?</value>
@@ -10494,14 +10478,6 @@
   <data name="GrandDukeDukeMarquisCountViscount" xml:space="preserve">
     <value>Великий герцог#Герцог#Маркиз#Граф#Виконт#Барон#Рыцарь-командир#Высший рыцарь#Рыцарь#Префект гвардии#Офицер#Лейтенант#Сержант#Рядовой</value>
     <comment>legacy_id=3104</comment>
-  </data>
-  <data name="Can enter the Monday - Saturday map." xml:space="preserve">
-    <value>Можно войти на карту понедельник-суббота.</value>
-    <comment>legacy_id=3105</comment>
-  </data>
-  <data name="Can enter the Sunday map." xml:space="preserve">
-    <value>Можно войти в воскресную карту.</value>
-    <comment>legacy_id=3106</comment>
   </data>
   <data name="Varka Map 7" xml:space="preserve">
     <value>Карта Варки 7</value>

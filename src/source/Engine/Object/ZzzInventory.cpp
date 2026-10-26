@@ -44,6 +44,7 @@
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
+#include "Data/GameData/ItemData/ItemType.h"
 #include "Core/Text/TextLineWrap.h"
 #include "Core/Text/Utf8.h"
 #include "UI/Scaling/UITransform.h"
@@ -1635,6 +1636,51 @@ void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int 
 // original tooltips.
 static constexpr int ItemDescriptionWrapWidth = 200;
 
+// (sx, sy) in the screen's 640x480 stretch, `screen`.
+// A test's measure of description text (SetItemTooltipTextMeasure); nullptr: the game's font.
+static ItemTooltipTextMeasure s_itemTooltipTextMeasure = nullptr;
+
+void SetItemTooltipTextMeasure(ItemTooltipTextMeasure measure)
+{
+    s_itemTooltipTextMeasure = measure;
+}
+
+// The value of a placeholder of a tooltip line for the item at `level`: the value the line binds it to (`bound`), the
+// item's level value (`definition`, when given; in `locale`, the line's language), a built-in value, {level} or a
+// table of the item stat file; nothing for another name.
+static std::optional<std::string> TooltipPlaceholderValue(std::string_view name,
+                                                          std::span<const std::pair<std::string, std::string>> bound,
+                                                          const Data::Items::ItemDefinition* definition, int level,
+                                                          const ItemTooltipValues& values, std::string_view locale)
+{
+    for (const auto& [placeholder, value] : bound)
+    {
+        if (placeholder == name)
+        {
+            name = value;
+            break;
+        }
+    }
+    if (const Data::Items::ItemLevelValues* levelValues =
+            definition != nullptr ? definition->FindLevelValues(name) : nullptr)
+    {
+        if (level < 0 || level >= static_cast<int>(levelValues->values.size()))
+            return std::nullopt;
+        const Data::Items::ItemLevelValue& value = levelValues->values[level];
+        const Data::LocalizedString* text =
+            value.textName.empty() ? &value.text : g_ItemDatabase.GetTooltipFile().FindText(value.textName);
+        if (text == nullptr)
+            return std::nullopt;
+        return text->Get(locale);
+    }
+    if (const std::optional<int> value = Engine::Items::TooltipValues::GetItemTooltipValue(values, name))
+        return std::to_string(*value);
+    if (const std::optional<int> value =
+            Data::Items::GetPlaceholderValue(name, level, g_ItemDatabase.GetStatProfiles()))
+        return std::to_string(*value);
+    return std::nullopt;
+}
+
 std::optional<PetInfoRequest> GetPetInfoRequest(int itemType, int pointedIndex, int inventype)
 {
     const StorageType storage = static_cast<StorageType>(inventype);
@@ -1653,21 +1699,27 @@ void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, in
                                const ItemTooltipValues& values, ItemTooltipTextMeasure measure)
 {
     const int lastRow = std::min(TextNum + MaxItemDescriptionRows, static_cast<int>(std::size(TextList)));
+    const int itemType = Data::Items::MakeItemType(definition.group, definition.number);
     for (const Data::Items::ItemDescriptionLine& line : definition.description)
     {
-        if (!line.IsShownAt(level))
+        if (!line.IsShownAt(level) ||
+            !Engine::Items::TooltipValues::AreTooltipConditionsMet(line.when, itemType, level, values))
         {
             continue;
         }
+        // A line may be a shared text of the tooltip file.
+        const Data::LocalizedString* lineText =
+            line.textName.empty() ? &line.text : g_ItemDatabase.GetTooltipFile().FindText(line.textName);
         // In the UI's language, also when the item names stay English ("Translate item names" off).
-        const std::wstring text = Core::Text::FromUtf8(Data::Items::FillPlaceholders(
-            line.text.Get(I18N::GetCurrentLocale()),
-            [&](std::string_view name)
-            {
-                if (const std::optional<int> value = Engine::Items::TooltipValues::GetItemTooltipValue(values, name))
-                    return value;
-                return Data::Items::GetPlaceholderValue(name, level, g_ItemDatabase.GetStatProfiles());
-            }));
+        const std::wstring text = lineText == nullptr
+                                      ? std::wstring()
+                                      : Core::Text::FromUtf8(Data::Items::FillPlaceholders(
+                                            lineText->Get(I18N::GetCurrentLocale()),
+                                            [&](std::string_view name)
+                                            {
+                                                return TooltipPlaceholderValue(name, line.values, &definition, level,
+                                                                               values, I18N::GetCurrentLocale());
+                                            }));
         // A blank line is one blank piece. So is a blank line inside a text (`\n\n`, or a text that starts with
         // `\n`): a row left empty would end the tooltip there.
         const std::vector<std::wstring> pieces =
@@ -1693,14 +1745,6 @@ void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, in
             TextNum++;
         }
     }
-}
-
-// A test's measure of description text (SetItemTooltipTextMeasure); nullptr: the game's font.
-static ItemTooltipTextMeasure s_itemTooltipTextMeasure = nullptr;
-
-void SetItemTooltipTextMeasure(ItemTooltipTextMeasure measure)
-{
-    s_itemTooltipTextMeasure = measure;
 }
 
 // Writes the lines of the item tooltip layout that come after its section `after`, up to its next section, into
@@ -1738,21 +1782,8 @@ static void WriteItemTooltipLayoutLines(const ITEM& item, int level, const ItemT
         }
         // In the UI's language, also when the item names stay English ("Translate item names" off).
         const std::string filled = Data::Items::FillPlaceholders(
-            text->Get(I18N::GetCurrentLocale()),
-            [&](std::string_view name)
-            {
-                for (const auto& [placeholder, builtIn] : line->values)
-                {
-                    if (placeholder == name)
-                    {
-                        name = builtIn;
-                        break;
-                    }
-                }
-                if (const std::optional<int> value = Engine::Items::TooltipValues::GetItemTooltipValue(values, name))
-                    return value;
-                return Data::Items::GetPlaceholderValue(name, level, g_ItemDatabase.GetStatProfiles());
-            });
+            text->Get(I18N::GetCurrentLocale()), [&](std::string_view name)
+            { return TooltipPlaceholderValue(name, line->values, nullptr, level, values, I18N::GetCurrentLocale()); });
         if (filled.empty())
         {
             // No text in the UI's language: a row left empty would end the tooltip there.
@@ -3314,221 +3345,14 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         TextNum = RenderHellasItemInfo(ip, TextNum);
     }
 
-    BOOL bDurExist = FALSE;
-    if ((p->Durability || p->MagicDur) &&
-        ((ip->Type < ITEM_WING || ip->Type >= ITEM_HELPER) && ip->Type < ITEM_POTION) ||
-        (ip->Type >= ITEM_WING && ip->Type <= ITEM_WINGS_OF_DARKNESS)
-        || (ip->Type >= ITEM_WING_OF_STORM && ip->Type <= ITEM_WING_OF_DIMENSION)
-        || (ip->Type >= ITEM_CAPE_OF_FIGHTER && ip->Type <= ITEM_CAPE_OF_OVERRULE))
+    // The Talisman of Mobility's saved location, under its description's "Returns to the saved location by a click."
+    if (ip->Type == ITEM_TALISMAN_OF_MOBILITY && ip->Durability == 1 && g_PortalMgr.IsPortalPositionSaved() &&
+        TextNum < static_cast<int>(std::size(TextList)))
     {
-        bDurExist = TRUE;
-    }
-    if ((bDurExist || ip->Durability) &&
-        (ip->Type<ITEM_LOCHS_FEATHER || ip->Type>ITEM_WEAPON_OF_ARCHANGEL)
-        && !(ip->Type == ITEM_WIZARDS_RING && Level == 1)
-        && !(ip->Type == ITEM_WIZARDS_RING && Level == 2)
-        && !(ip->Type == ITEM_ARMOR_OF_GUARDSMAN)
-        && ip->Type != ITEM_SIEGE_POTION && ip->Type != ITEM_CONTRACT_SUMMON && ip->Type != ITEM_LIFE_STONE_ITEM
-        && ip->Type != ITEM_FRAGMENT_OF_HORN
-        && !GameLogic::Items::IsElitePotion(ip)
-        && !GameLogic::Items::IsResetFruit(ip)
-        && !GameLogic::Items::IsElixir(ip)
-        && !(ip->Type == ITEM_INVITATION_TO_SANTA_VILLAGE)
-        && !GameLogic::Items::IsGambleItem(ip)
-        && !GameLogic::Items::IsCharacterCard(ip)
-        && !(ip->Type == ITEM_HELPER + 99)
-        && !(ip->Type == ITEM_ELITE_SD_POTION)
-        )
-    {
-        int Success = false;
-        int arrow = false;
-        if (ip->Type >= ITEM_POTION && ip->Type <= ITEM_ANTIDOTE)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
-            Success = true;
-        }
-        else if (ip->Type == ITEM_RENA && Level == 3)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
-            Success = true;
-        }
-        else if (GameLogic::Items::IsAmmunition(ip))
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
-            Success = true;
-            arrow = true;
-        }
-        else if (ip->Type >= ITEM_SMALL_SHIELD_POTION && ip->Type <= ITEM_LARGE_COMPLEX_POTION)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
-            Success = true;
-        }
-        else if (ip->Type == ITEM_ELITE_SD_POTION)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
-            Success = true;
-        }
-        else if (ip->Type >= ITEM_JACK_OLANTERN_BLESSINGS && ip->Type <= ITEM_JACK_OLANTERN_DRINK)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
-            Success = true;
-        }
-        else if (ip->Type >= ITEM_STARDUST && ip->Type <= ITEM_BURNT_MURDERERS_CLUB)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
-            Success = true;
-        }
-        else if (ip->Type >= ITEM_SPLINTER_OF_ARMOR && ip->Type <= ITEM_BLESS_OF_GUARDIAN)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::DD, ip->Durability, 20);
-            Success = true;
-        }
-        else if (ip->Type == ITEM_CLAW_OF_BEAST)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::DD, ip->Durability, 10);
-            Success = true;
-        }
-        else if (ip->Type == ITEM_HORN_OF_FENRIR)
-        {
-            if (ip->bPeriodItem == false)
-            {
-                mu_swprintf(TextList[TextNum], I18N::Game::LifeD, ip->Durability);
-                Success = true;
-            }
-        }
-        else if (ip->Type >= ITEM_HELPER && ip->Type <= ITEM_CONTRACT_SUMMON)
-        {
-            if (ip->bPeriodItem == false)
-            {
-                mu_swprintf(TextList[TextNum], I18N::Game::LifeD, ip->Durability);
-                Success = true;
-            }
-        }
-        else if (ip->Type == ITEM_TRANSFORMATION_RING)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::DurabilityD, ip->Durability);
-            Success = true;
-        }
-        else if (GameLogic::Items::IsDemonOrSpiritOfGuardian(ip))
-        {
-            if (ip->bPeriodItem == false)
-            {
-                mu_swprintf(TextList[TextNum], I18N::Game::LifeD, ip->Durability);
-                Success = true;
-            }
-        }
-        else if (ip->Type == ITEM_PET_RUDOLF || ip->Type == ITEM_PET_PANDA
-            || ip->Type == ITEM_PET_UNICORN || ip->Type == ITEM_PET_SKELETON)
-        {
-            if (ip->bPeriodItem == false)
-            {
-                mu_swprintf(TextList[TextNum], I18N::Game::LifeD, ip->Durability);
-                Success = true;
-            }
-        }
-        else if (GameLogic::Items::IsEventTicket(ip))
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::UsableDtimes, ip->Durability);
-            Success = true;
-        }
-        else if (GameLogic::Items::IsDoppelgangerOrVarkaTicket(ip))
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::UsableDtimes, ip->Durability);
-
-            if (ip->Type == ITEM_OPEN_ACCESS_TICKET_TO_VARKA)
-            {
-                TextNum++;
-                mu_swprintf(TextList[TextNum], I18N::Game::CanEnterTheMondaySaturdayMap);
-            }
-            else if (ip->Type == ITEM_OPEN_ACCESS_TICKET_TO_VARKA_7)
-            {
-                TextNum++;
-                mu_swprintf(TextList[TextNum], I18N::Game::CanEnterTheSundayMap);
-            }
-            Success = true;
-        }
-        else if (ip->Type == ITEM_TALISMAN_OF_LUCK)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::DCombinationSuccessRateIncrease, ip->Durability);
-            Success = true;
-        }
-        else if (ip->Type == ITEM_ILLUSION_TEMPLE_TICKET)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::UsableDtimes, ip->Durability);
-            Success = true;
-        }
-        else if (ip->Type == ITEM_POTION + 100)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::NumberOfItemsD, ip->Durability);
-            Success = true;
-        }
-        else if (ip->Type == ITEM_TALISMAN_OF_MOBILITY)
-        {
-            if (ip->Durability == 2)
-            {
-                mu_swprintf(TextList[TextNum], I18N::Game::SavesTheLocationWithTheRightMouseClick);
-                TextListColor[TextNum] = TEXT_COLOR_BLUE;
-                TextBold[TextNum] = false;
-                TextNum++;
-            }
-            else if (ip->Durability == 1)
-            {
-                mu_swprintf(TextList[TextNum], I18N::Game::ReturnsToTheSavedLocationByAClick);
-                TextListColor[TextNum] = TEXT_COLOR_BLUE;
-                TextBold[TextNum] = false;
-                TextNum++;
-                if (g_PortalMgr.IsPortalPositionSaved())
-                {
-                    g_PortalMgr.GetPortalPositionText(TextList[TextNum]);
-                    TextListColor[TextNum] = TEXT_COLOR_BLUE;
-                    TextBold[TextNum] = false;
-                    TextNum++;
-                }
-            }
-        }
-        else if (GameLogic::Items::IsLuckyItemTicket(ip))
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::YouCanAchieveSpecialItemsWithCombinations);
-            TextListColor[TextNum] = TEXT_COLOR_BLUE;
-            TextBold[TextNum] = false;
-            TextNum++;
-            mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-            Success = true;
-        }
-        else if ((bDurExist) && (ip->bPeriodItem == false))
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::DurabilityDD, values.durability, values.maxDurability);
-            Success = true;
-        }
-        else if (GameLogic::Items::IsWingMixCharm(ip))
-        {
-            mu_swprintf(TextList[TextNum], L"%ls", I18N::Game::Lookup(2732 + (ip->Type - (ITEM_TYPE_CHARM_MIXWING + EWS_BEGIN))));
-
-            Success = true;
-        }
-        else if (ip->Type == ITEM_OPEN_ACCESS_TICKET_TO_CHAOS_CASTLE)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::UsableDtimes, ip->Durability);
-            Success = true;
-        }
-
-        if (Success)
-        {
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            TextBold[TextNum] = false;
-            TextNum++;
-        }
-    }
-    else
-    {
-        if (ip->Type == ITEM_TRANSFORMATION_RING)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::DurabilityD, ip->Durability);
-
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            TextBold[TextNum] = false;
-            TextNum++;
-        }
+        g_PortalMgr.GetPortalPositionText(TextList[TextNum]);
+        TextListColor[TextNum] = TEXT_COLOR_BLUE;
+        TextBold[TextNum] = false;
+        TextNum++;
     }
 
     if (GameLogic::Items::IsAmmunition(ip))

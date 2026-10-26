@@ -28,9 +28,9 @@ public:
                            bool enable3D = false) = 0;
     [[nodiscard]] virtual bool PlaySound(ESound buffer, const void* pObject = nullptr, bool looped = false) = 0;
     // Plays a sound effect once at `level` (linear, 0 to 1) instead of the
-    // effect volume, where the listener is: the editor's previews of a sound,
-    // heard also while the game's effect volume is down. A backend without it
-    // plays the sound as PlaySound does.
+    // effect volume: the editor's previews of a sound, heard also while the
+    // game's effect volume is down. A backend without it plays the sound as
+    // PlaySound does.
     [[nodiscard]] virtual bool PlaySoundAtLevel(ESound buffer, float level)
     {
         static_cast<void>(level);
