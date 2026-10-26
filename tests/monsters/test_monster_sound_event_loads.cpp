@@ -2,18 +2,19 @@
 
 // The sounds a model's sound events play are loaded where they play (monsters
 // design, MN7): by the game at start (OpenSounds), by the load of each map the
-// events play on, or by the model itself when it opens.
+// events play on, or by the model itself, which loads the sounds its entry
+// lists when it opens.
 
 #include "MonsterModelRecorder.h"
 
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
-#include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "World/MapInfra/MapManager.h"
 
 #include <doctest.h>
 
+#include <map>
 #include <set>
 #include <string>
 #include <vector>
@@ -34,14 +35,36 @@ std::set<int> LoadedIds(const MonsterRecorder::LoadChanges& changes)
     }
     return ids;
 }
+
+std::vector<int> WorldsOf(const Data::Monsters::MonsterModelDefinition& model)
+{
+    return model.soundEventWorlds.empty() ? std::vector<int>{WD_0LORENCIA} : model.soundEventWorlds;
+}
+
+// The numbers of the sounds the model's entry lists, which it loads when it
+// opens.
+std::set<int> OwnSounds(const Data::Monsters::MonsterModelDefinition& model)
+{
+    std::set<int> numbers;
+    for (const Data::Monsters::MonsterModelSound& sound : model.sounds)
+    {
+        const std::string& name = sound.id.empty() ? sound.file : sound.id;
+        if (const std::optional<int> number = Data::Monsters::ModelLoader::FindSoundNumber(model, name))
+        {
+            numbers.insert(*number);
+        }
+    }
+    return numbers;
+}
 } // namespace
 
 TEST_CASE("Monster sounds: the sounds of the sound events are loaded on the maps they play on "
           "[monsters][sounds][models]")
 {
     std::vector<Data::Monsters::MonsterModelDefinition> models;
+    std::set<int> startup;
     {
-        MonsterRecorder::LoadScope table(0);
+        MonsterRecorder::LoadScope scope(WD_0LORENCIA);
         for (const Data::Monsters::MonsterModelDefinition* model : g_MonsterModelDatabase.GetAll())
         {
             if (!model->soundEvents.empty())
@@ -49,44 +72,68 @@ TEST_CASE("Monster sounds: the sounds of the sound events are loaded on the maps
                 models.push_back(*model);
             }
         }
+        startup = LoadedIds(scope.Run([] { OpenSounds(); }));
     }
     REQUIRE(models.size() == 70);
+    REQUIRE_FALSE(startup.empty());
 
+    // Each map's load once.
+    std::map<int, std::set<int>> mapLoads;
+    for (const Data::Monsters::MonsterModelDefinition& model : models)
+    {
+        for (const int world : WorldsOf(model))
+        {
+            if (mapLoads.contains(world))
+            {
+                continue;
+            }
+            // Raklion's load needs the terrain (CreateObject) and cannot run
+            // here; it loads no sound of its monsters, which their models load.
+            if (world == WD_57ICECITY || world == WD_58ICECITY_BOSS)
+            {
+                mapLoads[world] = {};
+                continue;
+            }
+            MonsterRecorder::LoadScope scope(world);
+            mapLoads[world] = LoadedIds(scope.Run([] { gMapManager.Load(); }));
+        }
+    }
+
+    // Each model loads the sounds its events play (P21, P22).
     std::set<std::string> missing;
     for (const Data::Monsters::MonsterModelDefinition& model : models)
     {
-        const int slot = *Data::Monsters::FindMonsterModelSlot(model.slot);
-        const std::vector<int> worlds =
-            model.soundEventWorlds.empty() ? std::vector<int>{WD_0LORENCIA} : model.soundEventWorlds;
-        for (const int world : worlds)
+        const std::set<int> own = OwnSounds(model);
+        for (const int world : WorldsOf(model))
         {
-            MonsterRecorder::LoadScope scope(world);
-            std::set<int> loaded = LoadedIds(scope.Run([] { OpenSounds(); }));
-            // Raklion's load needs the terrain (CreateObject) and cannot run
-            // here; it loads no sound of its monsters, which their models load.
-            const bool raklion = world == WD_57ICECITY || world == WD_58ICECITY_BOSS;
-            const std::set<int> map = raklion ? std::set<int>{} : LoadedIds(scope.Run([] { gMapManager.Load(); }));
-            const std::set<int> own = LoadedIds(scope.Run([&] { Data::Monsters::ModelLoader::Open(slot); }));
-            loaded.insert(map.begin(), map.end());
-            loaded.insert(own.begin(), own.end());
+            const std::set<int>& map = mapLoads.at(world);
             for (const Data::Monsters::MonsterSoundEvent& event : model.soundEvents)
             {
                 for (const std::string& sound : event.sounds)
                 {
                     const std::optional<int> number = Data::Monsters::ModelLoader::FindSoundNumber(model, sound);
                     REQUIRE(number.has_value());
-                    if (!loaded.contains(*number))
+                    if (!startup.contains(*number) && !map.contains(*number) && !own.contains(*number))
                     {
-                        missing.insert(model.slot + " " + sound);
+                        missing.insert(model.slot + " " + sound + " on " + std::to_string(world));
                     }
                 }
             }
         }
     }
-    // Each model loads the sounds its events play (P21, P22).
     for (const std::string& line : missing)
     {
         MESSAGE(line);
     }
     CHECK(missing.empty());
+}
+
+TEST_CASE("Monster sounds: a model loads the sounds its entry lists [monsters][sounds][models]")
+{
+    // What the test above takes from the entries: opening a model loads them.
+    MonsterRecorder::LoadScope scope(WD_69EMPIREGUARDIAN1);
+    const Data::Monsters::MonsterModelDefinition* raymond = g_MonsterModelDatabase.Find(MODEL_RAYMOND);
+    REQUIRE(raymond != nullptr);
+    const std::set<int> loaded = LoadedIds(scope.Run([] { Data::Monsters::ModelLoader::Open(MODEL_RAYMOND); }));
+    CHECK(loaded == OwnSounds(*raymond));
 }
