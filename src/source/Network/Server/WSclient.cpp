@@ -44,6 +44,7 @@
 #include "Audio/DSPlaySound.h"
 
 #include "GameLogic/Events/MatchEvent.h"
+#include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Engine/AI/GOBoid.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
@@ -4105,6 +4106,8 @@ BOOL ReceiveMonsterSkill(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     if (SkillNumber > ATMON_SKILL_BIGIN && SkillNumber < ATMON_SKILL_END)
     {
         sc->Object.Angle[2] = CreateAngle2D(so->Position, to->Position);
+        // The skill's own attack.
+        const GameLogic::Monsters::Attacks::SkillAttackScope skillAttack(*sc);
         SetPlayerAttack(sc);
         so->AnimationFrame = 0;
         sc->AttackTime = 1;

@@ -6,6 +6,7 @@
 
 #include "MonsterCreationScope.h"
 
+#include "Audio/DSPlaySound.h"
 #include "Core/Globals/_define.h"
 #include "Core/Globals/_enum.h"
 #include "Core/Utilities/Random.h"
@@ -13,6 +14,7 @@
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "World/MapInfra/MapManager.h"
 #include "World/MapInfra/w_MapProcess.h"
@@ -57,6 +59,17 @@ public:
         CHARACTER* character = m_scope.Create(number);
         REQUIRE(character != nullptr);
         return *character;
+    }
+
+    // The ids of the sounds played since the last call.
+    std::vector<int> TakePlayedSounds()
+    {
+        std::vector<int> ids;
+        for (const MonsterRecorder::PlayedSound& sound : m_scope.Load().TakePlayedSounds())
+        {
+            ids.push_back(sound.id);
+        }
+        return ids;
     }
 
     // The monster list with the monster's entry without attacks, for the
@@ -109,13 +122,31 @@ private:
     std::vector<Data::Monsters::MonsterModelDefinition> m_models;
 };
 
-// An attack with these skills; the animation it plays.
+// An attack with these skills, from a walk; the animation it plays. A
+// monster skill comes with its packet (0x69), which starts the attack.
 int Attack(CHARACTER& character, int monsterSkill, int skill = 0)
 {
     character.MonsterSkill = static_cast<WORD>(monsterSkill);
     character.Skill = static_cast<WORD>(skill);
     character.Object.CurrentAction = MONSTER01_WALK;
     character.Object.AnimationFrame = 0.0f;
+    if (monsterSkill != NoMonsterSkill)
+    {
+        const GameLogic::Monsters::Attacks::SkillAttackScope skillAttack(character);
+        SetPlayerAttack(&character);
+    }
+    else
+    {
+        SetPlayerAttack(&character);
+    }
+    return character.Object.CurrentAction;
+}
+
+// A normal attack packet where the monster is now, the monster skill as it
+// is; the animation it plays.
+int NormalAttack(CHARACTER& character)
+{
+    character.Skill = 0;
     SetPlayerAttack(&character);
     return character.Object.CurrentAction;
 }
@@ -182,6 +213,32 @@ TEST_CASE("Monster attacks: Selupan and the Dark Ghost clear their skill when th
         CHECK(Attack(selupan, 41) == MONSTER01_WALK);
         CHECK(selupan.MonsterSkill == NoMonsterSkill);
         CHECK(Attack(selupan, selupan.MonsterSkill) == MONSTER01_ATTACK4);
+    }
+    {
+        AttackScope scope(WD_58ICECITY_BOSS);
+        CHARACTER& selupan = scope.Create(MONSTER_SELUPAN);
+        scope.TakePlayedSounds();
+        // The heal (39) plays attack 4 with its sound and effects.
+        CHECK(Attack(selupan, 39) == MONSTER01_ATTACK4);
+        const std::vector<int> heal = scope.TakePlayedSounds();
+        CHECK(std::count(heal.begin(), heal.end(), static_cast<int>(SOUND_RAKLION_SERUFAN_CURE)) == 1);
+        // A normal attack while it plays is no second heal: the attack goes
+        // on, and the skill is cleared.
+        selupan.Object.AnimationFrame = 2.0f;
+        CHECK(NormalAttack(selupan) == MONSTER01_ATTACK4);
+        CHECK(selupan.Object.AnimationFrame == 2.0f);
+        CHECK(selupan.MonsterSkill == NoMonsterSkill);
+        const std::vector<int> normal = scope.TakePlayedSounds();
+        CHECK(std::count(normal.begin(), normal.end(), static_cast<int>(SOUND_RAKLION_SERUFAN_CURE)) == 0);
+    }
+    {
+        AttackScope scope(WD_70EMPIREGUARDIAN2);
+        CHARACTER& ghost = scope.Create(MONSTER_DARK_GHOST);
+        // A normal attack while skill 52's attack 2 plays is attack 1, as for
+        // the monsters that clear their skill when it is chosen.
+        CHECK(Attack(ghost, 52) == MONSTER01_ATTACK2);
+        CHECK(NormalAttack(ghost) == MONSTER01_ATTACK1);
+        CHECK(ghost.MonsterSkill == NoMonsterSkill);
     }
     {
         AttackScope scope(WD_70EMPIREGUARDIAN2);

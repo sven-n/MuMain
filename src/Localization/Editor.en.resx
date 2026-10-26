@@ -2600,7 +2600,7 @@
     <value>always, right away (always)</value>
   </data>
   <data name="Clear skill after attack" xml:space="preserve">
-    <value>when the attack's animation ends (afterAttack)</value>
+    <value>after its own attack: when it ends, or another attack or a hit stops it (afterAttack)</value>
   </data>
   <data name="Reader Hellas" xml:space="preserve">
     <value>the Hellas handler, on any map</value>

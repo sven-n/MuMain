@@ -307,7 +307,7 @@ skill it attacks with (Selupan's):
 | `skills` | The player skills (packets 0x19 and 0x1E) and the animation each plays |
 | `otherwise` | What any other skill, a stale skill or a normal attack plays; `attack1` when left out |
 | `otherwiseRandom` | In place of `otherwise`, a draw of the original client: `rand` (attack 1 or 2, half and half), `randFps` (attack 1 or 2 with a chance that depends on the frame rate) or `bali` (Bali's draw of attack 1 to 4) |
-| `clearSkill` | When the monster skill is cleared: `never` (when left out), `onMatch` (an entry named it), `onNoMatch` (no entry named it), `always` (right after the animation was chosen) or `afterAttack` (when the attack's animation ends, also when a hit's shock ends attack 3 to 5 or appear early; at once when the entry plays `none`) |
+| `clearSkill` | When the monster skill is cleared: `never` (when left out), `onMatch` (an entry named it), `onNoMatch` (no entry named it), `always` (right after the animation was chosen) or `afterAttack` (the skill plays only the attack its packet starts and stays while that attack plays; it is cleared when the animation ends, when a hit's shock ends attack 3 to 5 or appear early, at once when the entry plays `none`, and by any other attack, which is a normal one also while the skill's attack plays) |
 | `sound` | A `SOUND_*` sound the attacks play each time they play (the traps') |
 | `soundAtMonster` | The sound plays at the monster (3D) instead of everywhere alike |
 

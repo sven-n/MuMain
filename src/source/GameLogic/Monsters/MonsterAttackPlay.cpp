@@ -39,6 +39,9 @@ int Draw(Data::Monsters::MonsterAttackRandom random)
     return MONSTER01_ATTACK1;
 }
 
+// The monster whose skill packet starts the attack being chosen.
+const CHARACTER* g_skillAttacker = nullptr;
+
 const Data::Monsters::MonsterAttacks* FindAttacks(const CHARACTER& character)
 {
     const Data::Monsters::MonsterDefinition* monster = g_MonsterDatabase.Find(character.MonsterIndex);
@@ -52,6 +55,13 @@ bool Play(CHARACTER& character, OBJECT& object)
     if (attacks == nullptr)
     {
         return false;
+    }
+    if (Data::Monsters::ClearsMonsterSkillAfterAttack(*attacks) && &character != g_skillAttacker)
+    {
+        // Not the attack its skill packet started: a normal attack, also
+        // while the skill's attack plays, which would play the skill again
+        // with its sounds and effects (P4).
+        character.MonsterSkill = -1;
     }
     const Data::Monsters::MonsterAttackChoice choice =
         Data::Monsters::ChooseMonsterAttack(*attacks, character.MonsterSkill, character.Skill);
@@ -83,6 +93,16 @@ void OnAttackEnded(CHARACTER& character)
     {
         character.MonsterSkill = -1;
     }
+}
+
+SkillAttackScope::SkillAttackScope(const CHARACTER& character) : m_previous(g_skillAttacker)
+{
+    g_skillAttacker = &character;
+}
+
+SkillAttackScope::~SkillAttackScope()
+{
+    g_skillAttacker = m_previous;
 }
 
 bool IsAttackAnimation(int animation)

@@ -2579,7 +2579,7 @@
     <value>immer, sofort (always)</value>
   </data>
   <data name="Clear skill after attack" xml:space="preserve">
-    <value>wenn die Animation des Angriffs endet (afterAttack)</value>
+    <value>nach seinem eigenen Angriff: wenn er endet oder ein anderer Angriff oder ein Treffer ihn abbricht (afterAttack)</value>
   </data>
   <data name="Reader Hellas" xml:space="preserve">
     <value>der Hellas-Handler, auf jeder Karte</value>

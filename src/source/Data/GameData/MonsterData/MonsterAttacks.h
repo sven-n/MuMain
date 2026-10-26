@@ -39,8 +39,10 @@ enum class MonsterSkillClear
     // When no entry named it.
     OnNoMatch,
     Always,
-    // When the attack's animation ends: its effects, which read the skill
-    // while it plays, still see it, and the next attack does not (P4).
+    // After the skill's own attack, the one its packet starts: its effects,
+    // which read the skill while it plays, still see it; it is cleared when
+    // the attack ends or a hit's shock stops it, at once when it plays no
+    // attack, and by any other attack, which is a normal one (P4).
     AfterAttack,
 };
 
@@ -81,7 +83,8 @@ struct MonsterAttackChoice
 };
 MonsterAttackChoice ChooseMonsterAttack(const MonsterAttacks& attacks, int monsterSkill, int skill);
 
-// Whether the monster skill is cleared when the attack's animation ends.
+// Whether the monster skill is cleared after the skill's own attack
+// (AfterAttack).
 bool ClearsMonsterSkillAfterAttack(const MonsterAttacks& attacks);
 
 std::string_view GetMonsterAttackRandomName(MonsterAttackRandom random);
