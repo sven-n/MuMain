@@ -7,17 +7,49 @@ and u) or drawn with a pen whose nib makes the traced letters' stem and hairline
 Design units are x-heights: u to the right of the letters' left edge, v up from the baseline.
 Capitals are as high as the traced B; figures FIG.
 """
+import math
+
 import numpy as np
+from scipy import ndimage
 
 from letters import X_HEIGHT
 from shapes import (Pen, body_u, bottom_v, col, erase, extent_u, flip, largest, mirror, place_left, region,
                     rotate180, row, scale, shift, thicken, top_v)
 
-# Calibrated to the traced letters: 45 px stems and 33 px hairlines against their 43 and 30.
-PEN = Pen(41, 32, 8)
+PEN = None              # set by build(): a nib matched to the traced letters' strokes
+PEN_EDGE = 8            # px: the nib's thickness
+# A drawn stroke comes out this much wider than the nib's projection (anti-aliasing, round ends).
+PEN_SPREAD_STEM, PEN_SPREAD_HAIR = 2, 3
+SPIKE_RADIUS = 6        # px: points thinner than this are rounded off where parts are cut apart
 FIG = 1.3               # figure height
 MARK_GAP = 0.1          # space between a letter and its accent
 SHARP_S_TOP = 1.6
+# Cyrillic letters drawn like a Latin one; the italic forms of и, п, т, г are u, n, m, r.
+CYRILLIC_FROM_LATIN = {
+    "А": "A", "В": "B", "Е": "E", "К": "K", "М": "M", "Н": "H", "О": "O", "Р": "P", "С": "C", "Т": "T",
+    "Х": "X", "У": "Y", "І": "I", "а": "a", "е": "e", "о": "o", "р": "p", "с": "c", "х": "x", "у": "y",
+    "и": "u", "п": "n", "т": "m", "і": "i", "г": "r",
+}
+
+
+def smoothed(mask, radius):
+    """Morphological opening with a disc: removes points and spurs thinner than 2 * radius."""
+    y, x = np.mgrid[-radius:radius + 1, -radius:radius + 1]
+    return ndimage.binary_opening(mask, structure=x * x + y * y <= radius * radius)
+
+
+def matched_pen(t):
+    """A nib that draws the traced letters' stem (small letters) and hairline (o's top and bottom)."""
+    def lengths(line):
+        d = np.diff(np.concatenate([[0], line.astype(np.int8), [0]]))
+        return np.nonzero(d == -1)[0] - np.nonzero(d == 1)[0]
+    stem_widths = [w for ch in "ilnu" for v in np.arange(0.3, 0.7, 0.04) for w in lengths(t[ch][int(row(v))])]
+    o = t["o"]
+    middle = int(round(col(sum(extent_u(o)) / 2)))
+    hair_widths = [w for x in range(middle - 10, middle + 11, 5) for w in lengths(o[:, x])]
+    across = float(np.median(stem_widths)) - PEN_EDGE - PEN_SPREAD_STEM
+    up = float(np.median(hair_widths)) - PEN_EDGE - PEN_SPREAD_HAIR
+    return Pen(math.hypot(across, up), math.degrees(math.atan2(up, across)), PEN_EDGE)
 
 
 # ---------------------------------------------------------------- measuring helpers
@@ -132,6 +164,15 @@ def latin(t):
     g["Y"] = enlarge("y", 1.25, sy_below=1.0)
     g["Z"] = enlarge("z", 1.25)
 
+    # k: its leg runs on under the next letter as a hairline, like K's; in the images that
+    # hairline is too thin and dark to cut out.
+    k_small = t["k"]
+    k_foot = region(k_small, v1=0.2)
+    foot_u = extent_u(k_foot)[1] - 0.06
+    # It stays under the baseline, so it doesn't count as the letter's body for spacing.
+    g["k"] = k_small | PEN.stroke([(foot_u - 0.04, 0.02), (foot_u + 0.06, -0.1), (foot_u + 0.3, -0.16),
+                                   (foot_u + 0.5, -0.13), (foot_u + 0.62, -0.07)], start=0.7, mid=0.45, end=0.35)
+
     # x: a thick fall and a thin rise, as the nib makes them.
     g["x"] = (PEN.stroke([(0.0, 0.86), (0.1, 1.0), (0.2, 0.95), (0.5, 0.12), (0.62, 0.0), (0.74, 0.07)],
                          start=0.6, mid=1.0, end=0.5)
@@ -153,7 +194,13 @@ def latin(t):
     b = t["B"]
     b_stem = stem_right(b) + 0.03
     waist = narrowest(b, 0.35 * cap, 0.65 * cap)
-    g["P"] = erase(b, u0=b_stem, v1=waist - 0.04)
+    # Opening rounds off the point where B's two bowls met.
+    g["P"] = smoothed(erase(b, u0=b_stem, v1=waist - 0.04), SPIKE_RADIUS)
+
+    # F: the only source ("Crywolf Fortress") is squeezed and cut wrongly at its "f F"; the E
+    # without its bottom arm is the client's F.
+    e = t["E"]
+    g["F"] = erase(e, u0=stem_right(e) + 0.03, v1=0.3 * cap)
     k = t["K"]
     k_stem = stem_right(k) + 0.02
     k_joint = narrowest(k, 0.3 * cap, 0.7 * cap)
@@ -302,12 +349,7 @@ def accented(t, g, m):
 def cyrillic(t, g, f, m):
     c = {}
     cap = top_v(t["B"])
-    # Latin source -> Cyrillic letter (italic forms: u is и, n is п, m is т).
-    pairs = [("A", "А"), ("B", "В"), ("E", "Е"), ("K", "К"), ("M", "М"), ("H", "Н"), ("O", "О"), ("P", "Р"),
-             ("C", "С"), ("T", "Т"), ("X", "Х"), ("Y", "У"), ("I", "І"), ("a", "а"), ("e", "е"), ("o", "о"),
-             ("p", "р"), ("c", "с"), ("x", "х"), ("y", "у"), ("u", "и"), ("n", "п"), ("m", "т"), ("i", "і"),
-             ("r", "г")]
-    for latin_name, cyr in pairs:
+    for cyr, latin_name in CYRILLIC_FROM_LATIN.items():
         c[cyr] = g[latin_name]
     b = t["B"]
     b_stem = stem_right(b) + 0.03
@@ -367,7 +409,7 @@ def cyrillic(t, g, f, m):
     u_left_stem = stem_right(u_big, v_lo=0.4, v_hi=1.2)
     c["Ч"] = erase(u_big, u1=u_left_stem + 0.02, v1=0.62) | PEN.stroke(
         [(u_left_stem - 0.12, 0.66), (u_left_stem + 0.05, 0.5), (u_right - 0.3, 0.6)], start=0.9, end=0.6)
-    wide_u = scale(t["u"], 1.7, cap, thin=5)
+    wide_u = scale(t["u"], 1.7, cap, thin=11)        # the stretch widens stems 1.7 times
     w_right = runs_at(wide_u, 0.8)[-1]
     middle = shift(region(wide_u, u0=w_right[0] - 0.02, v0=0.25), -(w_right[0] - runs_at(wide_u, 0.8)[0][0]) / 2)
     c["Ш"] = wide_u | middle
@@ -437,6 +479,10 @@ def cyrillic(t, g, f, m):
 
 
 def build(t):
+    """All glyph masks, from the traced letters t: (Latin, figures, punctuation, accented Latin,
+    Cyrillic, marks), each a dict of glyph name or character to mask."""
+    global PEN
+    PEN = matched_pen(t)
     g = latin(t)
     f = figures(t, g)
     m = marks(t)

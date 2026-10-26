@@ -1,5 +1,7 @@
-"""Write the glyph masks as an OpenType (CFF) font: traced into curves and slanted back to the italic."""
+"""Write the glyph masks as an OpenType (CFF) font: traced into curves, slanted back to the italic,
+and spaced like the originals."""
 import math
+import unicodedata
 
 import numpy as np
 import potrace
@@ -8,15 +10,19 @@ from fontTools.fontBuilder import FontBuilder
 from fontTools.pens.t2CharStringPen import T2CharStringPen
 
 from letters import BASELINE, SLANT, X_HEIGHT, blur
+from recipes import CYRILLIC_FROM_LATIN
 
 FAMILY = "MU Map Name"
 UNITS_PER_EM = 1000
 X_HEIGHT_UNITS = 400
 UNITS = X_HEIGHT_UNITS / X_HEIGHT       # font units per mask pixel
 EDGE_SMOOTHING = 2.0    # mask pixels: rounds off the steps of cut and pen-drawn shapes
-OTHER_GAP = 70          # font units around figures and punctuation; letters keep the originals' spacing
-MIN_SPACE = 160         # the originals squeeze word gaps to fit the image; keep a readable space
+EXTRA_ROOM = 4          # mask pixels on each side of every letter, a little more air than the originals
+OTHER_ROOM = 17.5       # mask pixels on each side of figures and punctuation
+MIN_SPACE = 160         # font units: the originals squeeze word gaps to fit the image
 MIN_ADVANCE = 60
+# Letters spaced like another: their base letter (é like e), or the Latin letter they are drawn as.
+SPACING_ALIASES = {"ł": "l", "Ł": "L", "ø": "o", "Ø": "O", "ı": "i", "ȷ": "j", **CYRILLIC_FROM_LATIN}
 EXTRA_CODES = {"dotlessj": 0x0237}
 TRACE = dict(turdsize=40, alphamax=1.15, opticurve=True, opttolerance=0.5)
 
@@ -39,15 +45,29 @@ def body_edges(mask):
     return cols[0], cols[-1] + 1
 
 
-def outline(mask, gap):
-    """Contours in font units and the advance: the body starts half a gap after the origin and
-    the next glyph half a gap after the body ends."""
+def side_room(ch, bearings):
+    """Room left and right of the glyph's body, in mask pixels."""
+    base = unicodedata.normalize("NFD", ch)[0]
+    base = SPACING_ALIASES.get(base, base)
+    if not base.isalpha():
+        return OTHER_ROOM, OTHER_ROOM
+    if base in bearings:
+        left, right = bearings[base]
+    else:
+        same_case = [b for c, b in bearings.items() if c.isupper() == base.isupper()]
+        left, right = np.median(same_case, axis=0)
+    return left + EXTRA_ROOM, right + EXTRA_ROOM
+
+
+def outline(mask, room_left, room_right):
+    """Contours in font units and the advance: the body starts room_left after the origin and the
+    next glyph room_right after the body ends (mask pixels)."""
     smooth = blur(mask.astype(np.float32), EDGE_SMOOTHING) > 0.5
     left, right = body_edges(smooth)
-    advance = (right - left) * UNITS + gap
+    advance = (right - left + room_left + room_right) * UNITS
 
     def point(p):
-        x, y = (p.x - left) * UNITS + gap / 2, (BASELINE - p.y) * UNITS
+        x, y = (p.x - left + room_left) * UNITS, (BASELINE - p.y) * UNITS
         return round(x + SLANT * y, 1), round(y, 1)
 
     contours = []
@@ -85,14 +105,15 @@ def notdef():
     return pen.getCharString()
 
 
-def write_font(glyph_masks, letter_gap, word_gap, cap_height, out_path):
-    """glyph_masks: glyph name (or the character itself) -> mask. Gaps in mask pixels."""
+def write_font(glyph_masks, bearings, half_gap, word_gap, cap_height, out_path):
+    """glyph_masks: glyph name (or the character itself) -> mask. bearings: traced letter -> room
+    left and right of its body; half_gap: the typical room; word_gap: room between words. All in
+    mask pixels."""
     entries = {}
     for name, mask in glyph_masks.items():
         code = code_of(name)
-        gap = letter_gap * UNITS + (0 if chr(code).isalpha() else OTHER_GAP)
-        entries[code] = (glyph_name(code), *outline(mask, gap))
-    space = int(round(max(((word_gap or 0) - letter_gap) * UNITS, MIN_SPACE)))
+        entries[code] = (glyph_name(code), *outline(mask, *side_room(chr(code), bearings)))
+    space = int(round(max(((word_gap or 0) - 2 * half_gap) * UNITS, MIN_SPACE)))
 
     order = [".notdef", "space", "uni00A0"] + [entries[c][0] for c in sorted(entries)]
     charstrings = {".notdef": notdef()}

@@ -15,7 +15,7 @@ cut out:
 The masks share one upright frame: the baseline is row BASELINE, the x-height X_HEIGHT rows, and
 each letter's leftmost ink starts at column ANCHOR_X.
 """
-from collections import defaultdict
+from collections import defaultdict, deque
 from pathlib import Path
 
 import numpy as np
@@ -38,8 +38,15 @@ SOURCES = [
 ]
 # Dungeon and Tarkan use a bevelled variant of the lettering; the other images a different face.
 
-NAME_ROWS = 44          # the name sits above the ornament
-INK_LEVEL = 60          # brightness (0-255, alpha-weighted) separating the silver fill from the dark edge
+NAME_ROWS = 60          # rows read: the name, its descenders and swashes, and the ornament's top
+ORNAMENT_TOP = 44       # pieces that start this low are the ornament, not part of a letter
+# The fill runs from white at the top of a letter to grey at its bottom, so its edge is not one
+# brightness: a pixel's coverage is its brightness between the dark edge and the brightest fill
+# around it, and the letter is where that is over half.
+EDGE_DARK = 20          # brightness of the dark edge
+FILL_NEAR = 5           # px: where to look for the fill's brightness
+MIN_FILL = 90           # darker surroundings hold no fill
+INK_LEVEL = 128         # half coverage (0-255)
 SLANT = 0.18            # horizontal shift per row of the italic lettering
 STRAIGHTEN_PAD = 24     # room for the straightened image
 X_HEIGHT_CHARS = set("acemnorsuvwxz")
@@ -64,13 +71,30 @@ X_HEIGHT = int(TARGET_XH * UPSCALE)
 KEEP_PIECES = set("ijM")
 AGREEMENT = 0.55        # overlap with the most typical sample needed to join the average
 MAX_AVERAGED = 6
+BEARING_PULL = 0.5      # how strongly a letter's side bearing is held near the typical half gap
 
 
 # ---------------------------------------------------------------- cutting the names
 
-def ink_value(rgba):
+def fill_coverage(rgba):
+    """0-255: how much of each pixel is silver fill rather than dark edge or background."""
     rgb = rgba[..., :3].astype(np.float32)
-    return rgb.max(axis=2) * (rgba[..., 3].astype(np.float32) / 255.0)
+    value = rgb.max(axis=2) * (rgba[..., 3].astype(np.float32) / 255.0)
+    fill = ndimage.maximum_filter(value, size=FILL_NEAR)
+    coverage = np.clip((value - EDGE_DARK) / np.maximum(fill - EDGE_DARK, 1.0), 0.0, 1.0)
+    coverage[fill < MIN_FILL] = 0.0
+    return coverage * 255.0
+
+
+def without_ornament(coverage):
+    """Clear the pieces that start below the name: the ornament. Descenders and swashes hang
+    from their letters, so they start higher and stay."""
+    out = coverage.copy()
+    labels, count = ndimage.label(coverage > INK_LEVEL / 4)
+    for index, rows in enumerate(ndimage.find_objects(labels), start=1):
+        if rows is not None and rows[0].start >= ORNAMENT_TOP:
+            out[labels == index] = 0.0
+    return out
 
 
 def straighten(value, baseline):
@@ -90,10 +114,11 @@ def pieces(mask):
 
 
 def x_height_band(value):
-    """Rows where most columns with ink have ink: the x-height of a name in small letters."""
+    """Rows where most columns with ink have ink, the x-height band of a name in small letters:
+    its height and its bottom row (about the baseline)."""
     rows = (value > INK_LEVEL).sum(axis=1)
     band = np.nonzero(rows >= 0.5 * rows.max())[0]
-    return band[-1] - band[0] + 1
+    return band[-1] - band[0] + 1, band[-1] + 1
 
 
 def cut_columns(columns, letters, x_height, widths):
@@ -126,30 +151,54 @@ def cut_columns(columns, letters, x_height, widths):
     return cuts[::-1]
 
 
-def letter_shapes(mask, letters, x_height, widths):
-    """One pixel set per letter: column ranges, then each piece lying mostly inside one range is
-    given to that letter whole (a T's bar over the next letter, an f's tail)."""
+def grow_along_ink(mask, owner):
+    """Give every unowned ink pixel the owner nearest to it along the ink (8-connected)."""
+    height, width = mask.shape
+    frontier = deque(zip(*np.nonzero(owner >= 0)))
+    while frontier:
+        y, x = frontier.popleft()
+        for dy in (-1, 0, 1):
+            for dx in (-1, 0, 1):
+                ny, nx = y + dy, x + dx
+                if 0 <= ny < height and 0 <= nx < width and mask[ny, nx] and owner[ny, nx] < 0:
+                    owner[ny, nx] = owner[y, x]
+                    frontier.append((ny, nx))
+
+
+def letter_shapes(mask, letters, x_height, widths, baseline):
+    """One pixel set per letter. Column ranges give each letter a core: the middle of its range,
+    in the band from the baseline up one x-height. The rest of the ink goes to the core it is
+    nearest to along the ink, so strokes reaching over a neighbour stay with their letter (a V's
+    arm, the swash of K and k under the next letter, a T's bar). Ink no core reaches (an i dot)
+    goes by column, and to the letter its piece mostly lies over."""
     cuts = cut_columns(mask.sum(axis=0).astype(np.float32), letters, x_height, widths)
+    band_top, band_bottom = int(round(baseline - x_height)), int(round(baseline))
     owner = np.full(mask.shape, -1, np.int32)
     for index, (a, b) in enumerate(cuts):
-        owner[:, a:b][mask[:, a:b]] = index
-    for piece in pieces(mask):
-        votes = np.bincount(owner[piece[:, 0], piece[:, 1]] + 1, minlength=len(letters) + 1)[1:]
-        if votes.max() >= 0.8 * len(piece):
-            owner[piece[:, 0], piece[:, 1]] = int(np.argmax(votes))
+        margin = (b - a) // 4
+        core = np.zeros(mask.shape, bool)
+        core[band_top:band_bottom, a + margin:max(b - margin, a + margin + 1)] = True
+        owner[core & mask] = index
+    grow_along_ink(mask, owner)
+    by_column = np.full(mask.shape, -1, np.int32)
+    for index, (a, b) in enumerate(cuts):
+        by_column[:, a:b] = index
+    for piece in pieces(mask & (owner < 0)):
+        votes = np.bincount(by_column[piece[:, 0], piece[:, 1]] + 1, minlength=len(letters) + 1)[1:]
+        owner[piece[:, 0], piece[:, 1]] = int(np.argmax(votes))
     return [np.argwhere(owner == index) for index in range(len(letters))]
 
 
 def name_samples(local_dir, stem, text, squeezed, widths):
     path = next(Path(local_dir, "Eng", "ImgsMapName").glob(stem + ".*"))
     rgba = read_ozt(path)
-    raw = ink_value(rgba[:min(NAME_ROWS, rgba.shape[0])])
+    raw = without_ornament(fill_coverage(rgba[:min(NAME_ROWS, rgba.shape[0])]))
     ink_rows = np.nonzero((raw > INK_LEVEL).any(axis=1))[0]
     text_height = ink_rows[-1] - ink_rows[0] + 1
     value = straighten(raw, ink_rows[-1] - 0.2 * text_height)
-    band = x_height_band(value)
+    band, band_bottom = x_height_band(value)
     letters = text.replace(" ", "")
-    shapes = letter_shapes(value > INK_LEVEL, letters, band, widths)
+    shapes = letter_shapes(value > INK_LEVEL, letters, band, widths, band_bottom)
     bottoms = [s[:, 0].max() + 1 for s, ch in zip(shapes, letters) if ch in BASELINE_CHARS]
     baseline = float(np.median(bottoms))
     samples = []
@@ -287,13 +336,13 @@ def body_edges(mask, baseline_row, x_height_rows):
     return cols[0], cols[-1] + 1
 
 
-def spacing(samples):
-    """Median gap between neighbouring letter bodies and between words in the plain names, in
-    mask pixels."""
+def neighbour_gaps(samples):
+    """(left letter, right letter, gap) for every pair of touching letters in the plain names, and
+    the gaps between words; gaps between letter bodies, in mask pixels."""
     by_source = defaultdict(list)
     for s in samples:
         by_source[s["source"]].append(s)
-    gaps, word_gaps = [], []
+    pairs, word_gaps = [], []
     for letters in by_source.values():
         if letters[0]["squeezed"]:
             continue
@@ -306,12 +355,40 @@ def spacing(samples):
             edges.append((left + s["origin"][1], right + s["origin"][1]))
         for i in range(len(letters) - 1):
             gap = (edges[i + 1][0] - edges[i][1]) * unit
-            (gaps if positions[i + 1] - positions[i] == 1 else word_gaps).append(gap)
-    return float(np.median(gaps)), (float(np.median(word_gaps)) if word_gaps else None)
+            if positions[i + 1] - positions[i] == 1:
+                pairs.append((letters[i]["char"], letters[i + 1]["char"], gap))
+            else:
+                word_gaps.append(gap)
+    return pairs, word_gaps
+
+
+def side_bearings(pairs):
+    """Each letter's own room on its left and right, so that right(a) + left(b) fits the gap of
+    every pair a, b in the originals (least squares). Letters seen in few pairs stay near the
+    typical half gap. Returns {letter: (left, right)} and the typical half gap, in mask pixels."""
+    half = float(np.median([gap for _, _, gap in pairs])) / 2
+    chars = sorted({c for a, b, _ in pairs for c in (a, b)})
+    index = {c: i for i, c in enumerate(chars)}
+    n = len(chars)
+    rows, targets = [], []
+    for a, b, gap in pairs:
+        row_ = np.zeros(2 * n)
+        row_[n + index[a]] = 1.0      # right side of a
+        row_[index[b]] = 1.0          # left side of b
+        rows.append(row_)
+        targets.append(gap)
+    for i in range(2 * n):            # pull towards the typical half gap
+        row_ = np.zeros(2 * n)
+        row_[i] = BEARING_PULL
+        rows.append(row_)
+        targets.append(BEARING_PULL * half)
+    solution = np.linalg.lstsq(np.array(rows), np.array(targets), rcond=None)[0]
+    return {c: (solution[index[c]], solution[n + index[c]]) for c in chars}, half
 
 
 def letter_masks(samples):
-    """One mask per letter (unsqueezed sources where there are any), and the spacing."""
+    """One mask per letter (unsqueezed sources where there are any), each letter's side
+    bearings, the typical half gap and the word gap, in mask pixels."""
     factors = squeeze_factors(samples, learned_widths(samples))
     by_char = defaultdict(list)
     for s in samples:
@@ -321,5 +398,7 @@ def letter_masks(samples):
         plain = [s for s in group if not s["squeezed"]]
         entries = [enlarged(s, factors.get(s["source"], 1.0)) for s in (plain or group)]
         masks[ch] = blur(averaged(entries), SMOOTHING * UPSCALE) > INK_LEVEL
-    letter_gap, word_gap = spacing(samples)
-    return masks, letter_gap, word_gap
+    pairs, word_gaps = neighbour_gaps(samples)
+    bearings, half_gap = side_bearings(pairs)
+    word_gap = float(np.median(word_gaps)) if word_gaps else None
+    return masks, bearings, half_gap, word_gap

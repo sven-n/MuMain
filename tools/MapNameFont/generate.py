@@ -29,11 +29,11 @@ def main():
     if not (local_dir / "Eng" / "ImgsMapName").is_dir():
         parser.error(f"{local_dir / 'Eng' / 'ImgsMapName'} not found")
     samples = cut_letters(local_dir)
-    masks, letter_gap, word_gap = letter_masks(samples)
+    masks, bearings, half_gap, word_gap = letter_masks(samples)
     latin, figures, punctuation, accented, cyrillic, _ = build(masks)
     glyphs = {**latin, **figures, **punctuation, **accented, **cyrillic}
     cap_height = top_v(masks["B"]) * X_HEIGHT
-    entries = write_font(glyphs, letter_gap, word_gap, cap_height, args.out)
+    entries = write_font(glyphs, bearings, half_gap, word_gap, cap_height, args.out)
     print(f"{len(entries)} glyphs from {len(samples)} letter samples -> {args.out}")
     if args.preview:
         from preview import write_preview
