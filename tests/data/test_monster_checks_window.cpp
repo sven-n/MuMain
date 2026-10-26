@@ -12,6 +12,7 @@
 
 #include "Core/MuEditorCore.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "I18N/All.h"
 #include "UI/Common/MuEditorWindowIds.h"
 #include "UI/MonsterTools/MonsterEdits.h"
@@ -40,10 +41,11 @@ MonsterDefinition Monster(int number, const char* english, MonsterKind kind = Mo
     return monster;
 }
 
-// The monster table with these monsters and an empty history.
+// The monster table with these monsters, no models and an empty history.
 void StartWith(const std::vector<MonsterDefinition>& monsters)
 {
     g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterModelDatabase.Build({});
     g_MonsterEdits.OnDataReplaced();
 }
 

@@ -34,7 +34,6 @@ public:
     bool SetCurrentActionMonster(CHARACTER* c, OBJECT* o);
 
 public:
-    bool PlayMonsterSound(OBJECT* o);
 
 public:
     bool ReceiveMapMessage(BYTE code, BYTE subcode, BYTE* ReceiveBuffer);

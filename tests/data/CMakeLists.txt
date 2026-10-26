@@ -60,6 +60,9 @@ mu_add_test(
     NAME monster_data_tests
     SOURCES
         test_legacy_monster_kind.cpp
+        test_monster_attack_checks.cpp
+        test_monster_attack_readers.cpp
+        test_monster_attacks.cpp
         test_monster_browser_window.cpp
         test_monster_check_targets.cpp
         test_monster_checks_window.cpp
@@ -71,6 +74,9 @@ mu_add_test(
         test_monster_edit_history.cpp
         test_monster_json.cpp
         test_monster_list_model.cpp
+        test_monster_model_files.cpp
+        test_monster_model_values.cpp
+        test_monster_models_json.cpp
         test_monster_names.cpp
         test_monster_npc_name_files.cpp
         test_monster_tool_windows.cpp

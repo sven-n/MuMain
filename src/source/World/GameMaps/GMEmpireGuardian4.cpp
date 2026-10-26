@@ -1,6 +1,7 @@
 ﻿// GMEmpireGuardian4.cpp: implementation of the GMEmpireGuardian4 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -1395,51 +1396,12 @@ bool GMEmpireGuardian4::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
             c->MonsterSkill = -1;
             return true;
         }
-
-        switch (c->MonsterSkill)
-        {
-        case ATMON_SKILL_EMPIREGUARDIAN_GAION_01_GENERALATTACK:
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-            c->MonsterSkill = -1;
-        }
-        break;
-        case ATMON_SKILL_EMPIREGUARDIAN_GAION_02_BLOODATTACK:
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        break;
-        case ATMON_SKILL_EMPIREGUARDIAN_GAION_03_GIGANTIKSTORM:
-        {
-            SetAction(o, MONSTER01_ATTACK3);
-            c->MonsterSkill = -1;
-        }
-        break;
-        case ATMON_SKILL_EMPIREGUARDIAN_GAION_04_FLAMEATTACK:
-        {
-            SetAction(o, MONSTER01_ATTACK4);
-            c->MonsterSkill = -1;
-        }
-        break;
-        case ATMON_SKILL_EMPIREGUARDIAN_BERSERKER:
-        {
-            SetAction(o, MONSTER01_APEAR);
-            c->MonsterSkill = -1;
+        // The Berserker skill starts the boss's rage, also when its entry has
+        // no attacks.
+        if (c->MonsterSkill == ATMON_SKILL_EMPIREGUARDIAN_BERSERKER)
             m_bCurrentIsRage_BossGaion = true;
-        }
-        break;
-        default:
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-            c->MonsterSkill = -1;
-        }
-        break;
-        }
-
-        return true;
+        return GameLogic::Monsters::Attacks::Play(*c, *o);
     }
-        return true;
     case MONSTER_JERRY:
     {
         if (m_bCurrentIsRage_Jerint == true)
@@ -1448,38 +1410,12 @@ bool GMEmpireGuardian4::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
             c->MonsterSkill = -1;
             return true;
         }
-
-        switch (c->MonsterSkill)
-        {
-        case 55:
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        break;
-        case 61:
-        {
-            SetAction(o, MONSTER01_ATTACK3);
-            c->MonsterSkill = -1;
-        }
-        break;
-        case ATMON_SKILL_EMPIREGUARDIAN_BERSERKER:
-        {
-            SetAction(o, MONSTER01_APEAR);
-            c->MonsterSkill = -1;
-
+        // The Berserker skill starts the boss's rage, also when its entry has
+        // no attacks.
+        if (c->MonsterSkill == ATMON_SKILL_EMPIREGUARDIAN_BERSERKER)
             m_bCurrentIsRage_Jerint = true;
-        }
-        break;
-        default:
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-            c->MonsterSkill = -1;
-        }
-        break;
-        }
+        return GameLogic::Monsters::Attacks::Play(*c, *o);
     }
-        return true;
     }
     return false;
 }
@@ -1488,98 +1424,6 @@ bool GMEmpireGuardian4::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 {
     if (gMapManager.IsEmpireGuardian4() == false)
         return false;
-
-    return false;
-}
-
-bool GMEmpireGuardian4::PlayMonsterSound(OBJECT* o)
-{
-    if (gMapManager.IsEmpireGuardian4() == false)
-        return false;
-
-    if (true == g_EmpireGuardian1.PlayMonsterSound(o))
-    {
-        return true;
-    }
-
-    float fDis_x, fDis_y;
-    fDis_x = o->Position[0] - Hero->Object.Position[0];
-    fDis_y = o->Position[1] - Hero->Object.Position[1];
-    float fDistance = sqrtf(fDis_x * fDis_x + fDis_y * fDis_y);
-
-    if (fDistance > 500.0f)
-        return true;
-
-    switch (o->Type)
-    {
-    case MODEL_GAYION:
-    {
-        switch (o->CurrentAction)
-        {
-        case MONSTER01_WALK:
-        {
-            PlayBuffer(SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE);
-        }
-            return true;
-        case MONSTER01_DIE:
-        {
-            PlayBuffer(SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_DEATH);
-        }
-            return true;
-        case MONSTER01_APEAR:
-        {
-            PlayBuffer(SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_RAGE);
-        }
-            return true;
-        }
-    }
-        return true;
-    case MODEL_JERRY:
-    {
-        switch (o->CurrentAction)
-        {
-        case MONSTER01_WALK:
-        {
-            if (rand_fps_check(2))
-            {
-                PlayBuffer(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01);
-            }
-            else
-            {
-                PlayBuffer(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02);
-            }
-        }
-            return true;
-        case MONSTER01_ATTACK1:
-        {
-            PlayBuffer(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01);
-        }
-            return true;
-        case MONSTER01_ATTACK2:
-        {
-            PlayBuffer(SOUND_BLOODATTACK);
-        }
-            return true;
-        case MONSTER01_ATTACK3:
-        {
-            PlayBuffer(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK03);
-            PlayBuffer(SOUND_SKILL_BLOWOFDESTRUCTION);
-        }
-            return true;
-        case MONSTER01_DIE:
-        {
-            PlayBuffer(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH);
-        }
-            return true;
-        case MONSTER01_APEAR:
-        {
-            PlayBuffer(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE);
-        }
-            return true;
-        }
-    }
-        return true;
-    }
 
     return false;
 }

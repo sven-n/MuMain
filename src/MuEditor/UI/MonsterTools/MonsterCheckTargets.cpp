@@ -19,6 +19,19 @@ constexpr char AfterNumber = ' ';
 // The key ends at a language ("name.de") or an index.
 constexpr std::string_view KeyEnds = ".[";
 constexpr std::string_view NameKey = "name";
+constexpr std::string_view AttacksKey = "attacks";
+
+const ToolWindowEntry* FindTool(const char* windowId)
+{
+    for (const ToolWindowEntry& entry : GetMonsterTools().tools)
+    {
+        if (std::string_view(entry.windowId) == windowId)
+        {
+            return &entry;
+        }
+    }
+    return nullptr;
+}
 } // namespace
 
 std::string_view GetMonsterField(std::string_view field)
@@ -40,23 +53,25 @@ MonsterTool GetToolForField(std::string_view field)
 {
     const std::string_view monsterField = GetMonsterField(field);
     const std::string_view key = monsterField.substr(0, monsterField.find_first_of(KeyEnds));
-    return key == NameKey ? MonsterTool::Translations : MonsterTool::Browser;
+    if (key == NameKey)
+    {
+        return MonsterTool::Translations;
+    }
+    return key == AttacksKey ? MonsterTool::Attacks : MonsterTool::Browser;
 }
 
 const ToolWindowEntry& GetToolWindow(MonsterTool tool)
 {
-    const ToolGroup& tools = GetMonsterTools();
+    const ToolWindowEntry* entry = nullptr;
     if (tool == MonsterTool::Translations)
     {
-        for (const ToolWindowEntry& entry : tools.tools)
-        {
-            if (std::string_view(entry.windowId) == WindowIds::MonsterTranslations)
-            {
-                return entry;
-            }
-        }
+        entry = FindTool(WindowIds::MonsterTranslations);
     }
-    return tools.browser;
+    else if (tool == MonsterTool::Attacks)
+    {
+        entry = FindTool(WindowIds::MonsterAttacks);
+    }
+    return entry != nullptr ? *entry : GetMonsterTools().browser;
 }
 } // namespace MuEditor::Monsters
 

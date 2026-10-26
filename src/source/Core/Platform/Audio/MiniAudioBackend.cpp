@@ -111,6 +111,32 @@ MiniAudioBackend::~MiniAudioBackend()
     }
 }
 
+bool MiniAudioBackend::HasSlot(int buffer) const
+{
+    return buffer >= 0 && buffer < GetSlotCount();
+}
+
+int MiniAudioBackend::GetSlotCount() const
+{
+    return static_cast<int>(m_soundLoaded.size());
+}
+
+// A number after the SOUND_* list gets its slot (and the ones before it) when
+// its sound is loaded.
+bool MiniAudioBackend::AddSlotsUpTo(int buffer)
+{
+    if (buffer < static_cast<int>(MAX_BUFFER) || buffer >= static_cast<int>(MAX_BUFFER) + MAX_FILE_SOUNDS)
+    {
+        return false;
+    }
+    const size_t count = static_cast<size_t>(buffer) + 1;
+    m_sounds.resize(count);
+    m_soundLoaded.resize(count);
+    m_activeChannel.resize(count);
+    m_loadedChannels.resize(count);
+    return true;
+}
+
 // ---------------------------------------------------------------------------
 // Initialize — start the miniaudio engine
 // Returns false (and logs) if ma_engine_init fails (e.g., no audio device on CI)
@@ -145,7 +171,7 @@ void MiniAudioBackend::Shutdown()
     }
 
     // Release all loaded sound effect slots
-    for (int buf = 0; buf < static_cast<int>(MAX_BUFFER); ++buf)
+    for (int buf = 0; buf < GetSlotCount(); ++buf)
     {
         if (m_soundLoaded[buf])
         {
@@ -181,7 +207,7 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
     }
 
     const int bufIdx = static_cast<int>(buffer);
-    if (bufIdx < 0 || bufIdx >= static_cast<int>(MAX_BUFFER))
+    if (!HasSlot(bufIdx) && !AddSlotsUpTo(bufIdx))
     {
         return;
     }
@@ -248,13 +274,23 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
 // ---------------------------------------------------------------------------
 bool MiniAudioBackend::PlaySound(ESound buffer, const void* pObject, bool looped)
 {
+    return StartSound(buffer, pObject, looped, m_sfxVolume);
+}
+
+bool MiniAudioBackend::PlaySoundAtLevel(ESound buffer, float level)
+{
+    return StartSound(buffer, nullptr, false, std::clamp(level, 0.0f, 1.0f));
+}
+
+bool MiniAudioBackend::StartSound(ESound buffer, const void* pObject, bool looped, float volume)
+{
     if (!m_initialized)
     {
         return false;
     }
 
     const int bufIdx = static_cast<int>(buffer);
-    if (bufIdx < 0 || bufIdx >= static_cast<int>(MAX_BUFFER))
+    if (!HasSlot(bufIdx))
     {
         return false;
     }
@@ -307,8 +343,8 @@ bool MiniAudioBackend::PlaySound(ESound buffer, const void* pObject, bool looped
     // start() is subject to a data race on the first mix tick.
     ma_sound_set_looping(pSound, looped ? MA_TRUE : MA_FALSE);
 
-    // Apply stored SFX volume to newly-started effect
-    ma_sound_set_volume(pSound, m_sfxVolume);
+    // The effect volume, or a preview's own level.
+    ma_sound_set_volume(pSound, volume);
 
     ma_sound_start(pSound);
 
@@ -326,7 +362,7 @@ void MiniAudioBackend::StopSound(ESound buffer, bool resetPosition)
     }
 
     const int bufIdx = static_cast<int>(buffer);
-    if (bufIdx < 0 || bufIdx >= static_cast<int>(MAX_BUFFER))
+    if (!HasSlot(bufIdx))
     {
         return;
     }
@@ -357,7 +393,7 @@ void MiniAudioBackend::AllStopSound()
         return;
     }
 
-    for (int buf = 0; buf < static_cast<int>(MAX_BUFFER); ++buf)
+    for (int buf = 0; buf < GetSlotCount(); ++buf)
     {
         if (m_soundLoaded[buf])
         {
@@ -378,7 +414,7 @@ void MiniAudioBackend::AllStopSound()
 void MiniAudioBackend::ReleaseSound(ESound buffer)
 {
     const int buf = static_cast<int>(buffer);
-    if (buf < 0 || buf >= static_cast<int>(MAX_BUFFER) || !m_initialized)
+    if (!HasSlot(buf) || !m_initialized)
     {
         return;
     }
@@ -419,7 +455,7 @@ void MiniAudioBackend::SetVolume(ESound buffer, long vol)
     }
 
     const int bufIdx = static_cast<int>(buffer);
-    if (bufIdx < 0 || bufIdx >= static_cast<int>(MAX_BUFFER))
+    if (!HasSlot(bufIdx))
     {
         return;
     }
@@ -679,7 +715,7 @@ void MiniAudioBackend::SetSFXVolume(float level)
         return;
     }
     // Update all currently-loaded SFX slots
-    for (int buf = 0; buf < static_cast<int>(MAX_BUFFER); ++buf)
+    for (int buf = 0; buf < GetSlotCount(); ++buf)
     {
         if (!m_soundLoaded[buf])
         {

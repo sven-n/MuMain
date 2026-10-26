@@ -5,7 +5,9 @@
 
 #include <cstddef>
 #include <filesystem>
+#include <optional>
 #include <span>
+#include <string>
 #include <vector>
 
 // Reads and writes the monster list file (Data/Monsters/Monsters.json), see
@@ -29,6 +31,14 @@ MonsterDataLoadResult LoadMonstersFile(const std::filesystem::path& file);
 // cannot be written whole.
 bool SaveMonstersFile(const std::filesystem::path& file, std::span<const MonsterDefinition> monsters,
                       std::vector<Items::ItemDataIssue>& issues);
+
+// The text SaveMonstersFile writes, so that a caller can check more files
+// before it writes any (with WriteTextFiles): the text for the file when the
+// monsters read back without errors, nullopt otherwise; the problems found are
+// added to `issues`.
+std::optional<std::string> MakeMonstersFileText(const std::filesystem::path& file,
+                                                std::span<const MonsterDefinition> monsters,
+                                                std::vector<Items::ItemDataIssue>& issues);
 
 // Makes `file` the source of the problems from `first` on: the checks of the
 // monsters find them without a file.

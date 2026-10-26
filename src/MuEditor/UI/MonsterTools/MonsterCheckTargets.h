@@ -14,6 +14,7 @@ enum class MonsterTool
 {
     Browser,
     Translations,
+    Attacks,
 };
 
 // The field without the monster the monster list's problems name first:
@@ -22,9 +23,10 @@ enum class MonsterTool
 std::string_view GetMonsterField(std::string_view field);
 
 // A name ("name", "name.de") goes to Monster Translations, which has the names
-// in all languages; the kind, the number, an unknown key and a problem without
-// a field go to the Monster Browser. Takes the field with or without the
-// monster in front.
+// in all languages; the attacks ("attacks", "attacks.skills") go to Monster
+// Attacks; the kind, the number, an unknown key and a problem without a field
+// go to the Monster Browser. Takes the field with or without the monster in
+// front.
 MonsterTool GetToolForField(std::string_view field);
 
 // The window of a monster tool: its "###" id and its flag among the editor's

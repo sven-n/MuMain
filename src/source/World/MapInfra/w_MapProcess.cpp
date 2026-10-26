@@ -519,33 +519,6 @@ bool MapProcess::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
     return false;
 }
 
-bool MapProcess::PlayMonsterSound(OBJECT* o)
-{
-    for (auto iter = m_MapList.begin(); iter != m_MapList.end();)
-    {
-        auto tempiter = iter;
-        ++iter;
-        Weak_Ptr(BaseMap) basemap = *tempiter;
-
-        if (basemap.expired() == false)
-        {
-            if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive))
-            {
-                bool result = basemap.lock()->PlayMonsterSound(o);
-                if (result)
-                {
-                    return true;
-                }
-            }
-        }
-        else
-        {
-            m_MapList.erase(tempiter);
-        }
-    }
-    return false;
-}
-
 bool MapProcess::ReceiveMapMessage(BYTE code, BYTE subcode, BYTE* ReceiveBuffer)
 {
     for (auto iter = m_MapList.begin(); iter != m_MapList.end();)

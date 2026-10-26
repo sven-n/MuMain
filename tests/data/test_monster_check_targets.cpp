@@ -7,7 +7,9 @@
 #ifdef _EDITOR
 
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
+#include "Data/DataHandler/MonsterData/MonsterModelJsonStorage.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonstersJson.h"
 #include "UI/Common/MuEditorToolWindows.h"
 #include "UI/Common/MuEditorWindowIds.h"
@@ -137,6 +139,16 @@ TEST_CASE("Monster checks: the tools of the targets are the monster tools' windo
     CHECK(std::string_view(GetToolWindow(MonsterTool::Translations).windowId) ==
           MuEditor::WindowIds::MonsterTranslations);
     CHECK(GetToolWindow(MonsterTool::Translations).open == &MuEditor::ToolWindows::monsterTranslations);
+    CHECK(std::string_view(GetToolWindow(MonsterTool::Attacks).windowId) == MuEditor::WindowIds::MonsterAttacks);
+    CHECK(GetToolWindow(MonsterTool::Attacks).open == &MuEditor::ToolWindows::monsterAttacks);
+}
+
+TEST_CASE("Monster checks: the attacks go to Monster Attacks [editor][monsters]")
+{
+    CHECK(GetToolForField("monster 459 attacks") == MonsterTool::Attacks);
+    CHECK(GetToolForField("monster 459 attacks.monsterSkills") == MonsterTool::Attacks);
+    CHECK(GetToolForField("attacks") == MonsterTool::Attacks);
+    CHECK(GetToolForField("monster 459 attackSpeed") == MonsterTool::Browser);
 }
 
 TEST_CASE("Monster checks: Run finds the name problems of the table and sends them to Monster Translations "
@@ -147,6 +159,7 @@ TEST_CASE("Monster checks: Run finds the name problems of the table and sends th
     const std::array monsters = {Monster(2, "Budge Dragon"), Monster(7, "Budge||Dragon"), unknownLanguage,
                                  Monster(11, std::string(LongNameLength, 'x')), Monster(252, "", MonsterKind::Npc)};
     g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterModelDatabase.Build({});
     std::vector<ItemDataIssue> issues;
 
     MuEditor::Monsters::MonsterChecks::Run(issues);
@@ -171,6 +184,26 @@ TEST_CASE("Monster checks: Run finds the name problems of the table and sends th
         CHECK(GetToolForField(issue.field) == MonsterTool::Translations);
         CHECK(issue.source == Data::Monsters::GetMonstersFile().generic_string());
     }
+}
+
+TEST_CASE("Monster checks: Run lists a model whose file is not in the client folder (P1) [editor][monsters]")
+{
+    g_MonsterDatabase.Build({}, "en");
+    Data::Monsters::MonsterModelDefinition molt;
+    molt.slot = "MONSTER_MODEL_MOLT";
+    molt.load.file = "Data/Monster/NoSuchMonster.bmd";
+    g_MonsterModelDatabase.Build(std::array{molt});
+    std::vector<ItemDataIssue> issues;
+
+    MuEditor::Monsters::MonsterChecks::Run(issues);
+    g_MonsterModelDatabase.Build({});
+
+    REQUIRE(issues.size() == 1);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Warning);
+    CHECK(issues[0].number == ItemDataIssue::NoItem);
+    CHECK(issues[0].source == Data::Monsters::GetMonsterModelsFile().generic_string());
+    CHECK(issues[0].field.find("MONSTER_MODEL_MOLT") != std::string::npos);
+    CHECK(issues[0].message.find("Data/Monster/NoSuchMonster.bmd is not in the client folder") != std::string::npos);
 }
 
 #endif // _EDITOR

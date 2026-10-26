@@ -8,6 +8,10 @@
 
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/GameData/Common/LocalizedString.h"
+#include "Data/GameData/ItemData/ItemDataIssue.h"
+#include "Data/GameData/MonsterData/MonsterModelSlots.h"
+#include "Data/GameData/MonsterData/MonsterModelsJson.h"
+#include "Data/GameData/MonsterData/MonsterModelValidation.h"
 
 #include <algorithm>
 #include <span>
@@ -19,6 +23,8 @@ namespace
 {
 using Data::LocalizedString;
 using Data::Monsters::MonsterDefinition;
+using Data::Monsters::MonsterModelDefinition;
+using Data::Monsters::MonsterModelSnapshot;
 using Data::Monsters::MonsterSnapshot;
 
 // What the monster list's checks refuse to save: a name with the separator
@@ -41,6 +47,18 @@ bool IsMonsterNumber(int number)
 {
     return number >= 0 && number < Data::Monsters::MonsterNumberCount;
 }
+
+// Whether the model list's save would take the model: written and read back
+// as the save does, with the checks of its names, without errors.
+bool CanStoreModel(const MonsterModelDefinition& model)
+{
+    const std::string text = Data::Monsters::WriteMonsterModelsJson(std::span<const MonsterModelDefinition>(&model, 1));
+    std::vector<MonsterModelDefinition> readBack;
+    std::vector<Data::Items::ItemDataIssue> issues;
+    Data::Monsters::ReadMonsterModelsJson(text, "", readBack, issues);
+    Data::Monsters::ValidateMonsterModelNames(readBack, "", issues);
+    return !Data::Items::HasErrors(issues);
+}
 } // namespace
 
 MonsterEdits& MonsterEdits::GetInstance()
@@ -51,7 +69,10 @@ MonsterEdits& MonsterEdits::GetInstance()
 
 MonsterEdits::MonsterEdits()
     : m_history({[](int number) { return g_MonsterDataHandler.ReadMonster(number); },
-                 [](std::span<const MonsterSnapshot> snapshots) { g_MonsterDataHandler.RestoreMonsters(snapshots); }})
+                 [](std::span<const MonsterSnapshot> snapshots) { g_MonsterDataHandler.RestoreMonsters(snapshots); },
+                 [](int slot) { return g_MonsterDataHandler.ReadModel(slot); },
+                 [](std::span<const MonsterModelSnapshot> snapshots)
+                 { g_MonsterDataHandler.RestoreModels(snapshots); }})
 {
 }
 
@@ -100,6 +121,33 @@ bool MonsterEdits::RemoveMonster(std::string label, int number)
     return true;
 }
 
+bool MonsterEdits::SetModel(std::string label, const MonsterModelDefinition& model, int monster)
+{
+    const std::optional<int> slot = Data::Monsters::FindMonsterModelSlot(model.slot);
+    if (!slot || !g_MonsterDataHandler.ReadModel(*slot) || !CanStoreModel(model))
+    {
+        return false;
+    }
+    ChangeModel(std::move(label), *slot, model, monster);
+    return true;
+}
+
+void MonsterEdits::ChangeModel(std::string label, int slot, const std::optional<MonsterModelDefinition>& after,
+                               int monster)
+{
+    std::optional<MonsterModelDefinition> before = g_MonsterDataHandler.ReadModel(slot);
+    if (after == before)
+    {
+        return;
+    }
+    const MonsterModelSnapshot snapshot{slot, after};
+    g_MonsterDataHandler.RestoreModels(std::span<const MonsterModelSnapshot>(&snapshot, 1));
+    // What the table stored, as the undo compares it.
+    MonsterEditEntry entry{std::move(label), {}, {}};
+    entry.models.push_back({slot, std::move(before), g_MonsterDataHandler.ReadModel(slot), monster});
+    Record(std::move(entry));
+}
+
 void MonsterEdits::Change(std::string label, int number, const std::optional<MonsterDefinition>& after)
 {
     std::optional<MonsterDefinition> before = g_MonsterDataHandler.ReadMonster(number);
@@ -138,14 +186,26 @@ void MonsterEdits::Record(MonsterEditEntry entry)
         m_history.Record(std::move(entry));
         return;
     }
-    // One step per number: what changed twice keeps its first "before" and its
-    // last "after".
+    // One step per number and per slot: what changed twice keeps its first
+    // "before" and its last "after".
     for (MonsterEditStep& step : entry.steps)
     {
         const auto same = std::ranges::find(m_group->steps, step.number, &MonsterEditStep::number);
         if (same == m_group->steps.end())
         {
             m_group->steps.push_back(std::move(step));
+        }
+        else
+        {
+            same->after = std::move(step.after);
+        }
+    }
+    for (MonsterModelEditStep& step : entry.models)
+    {
+        const auto same = std::ranges::find(m_group->models, step.slot, &MonsterModelEditStep::slot);
+        if (same == m_group->models.end())
+        {
+            m_group->models.push_back(std::move(step));
         }
         else
         {
@@ -180,9 +240,11 @@ bool MonsterEdits::Redo()
     return true;
 }
 
+// Both files or neither: a save that stopped after the first would leave a
+// monster list that names models the model list does not have.
 bool MonsterEdits::Save(std::vector<Data::Items::ItemDataIssue>& issues)
 {
-    if (!g_MonsterDataHandler.Save(issues))
+    if (!g_MonsterDataHandler.SaveAll(issues))
     {
         return false;
     }
@@ -190,9 +252,11 @@ bool MonsterEdits::Save(std::vector<Data::Items::ItemDataIssue>& issues)
     return true;
 }
 
+// Both files or neither: when one has errors, the edits and their history
+// stay.
 bool MonsterEdits::Revert(std::vector<Data::Items::ItemDataIssue>& issues)
 {
-    if (!g_MonsterDataHandler.Revert(issues))
+    if (!g_MonsterDataHandler.RevertAll(issues))
     {
         return false;
     }

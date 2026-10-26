@@ -35,7 +35,10 @@
 #include "../MuEditor/UI/EffectBrowser/MuEffectBrowserUI.h"
 #include "../MuEditor/UI/ItemTranslations/MuItemTranslationsUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterBrowserUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterAttacksUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterChecksUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterModelUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterPreviewUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterTranslationsUI.h"
 #include "../MuEditor/UI/ServerList/MuServerListUI.h"
 #include "../UI/Common/MuEditorUI.h"
@@ -43,6 +46,8 @@
 #include "I18N/All.h"
 #include "Core/Utilities/AssetLoadWorld.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
+#include "GameLogic/Monsters/MonsterModelChanges.h"
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
 #include "Core/Utilities/WorldClearing.h"
@@ -486,6 +491,9 @@ void CMuEditorCore::ConnectGameHooks()
     // the item tools change an opened item model, and the game makes it again;
     // the Grand Soul pants' mesh is made their cloth grid again after.
     g_ItemDataHandler.SetOpenedModelHooks({&MuEditor::Items::DropWornCloth, &MuEditor::Items::PrepareClothMeshes});
+    // Characters of a monster model the monster tools opened again stay
+    // inside its animations.
+    g_MonsterDataHandler.SetModelsReopenedCallback(&GameLogic::Monsters::ModelChanges::ClampAnimations);
 }
 
 void CMuEditorCore::Shutdown()
@@ -541,8 +549,11 @@ void CMuEditorCore::Update()
         // only before the renderer's frame starts.
         g_MuEffectBrowserUI.BeforeFrame();
         g_MuItemModelUI.BeforeFrame();
-        // Between frames too: item models the item tools changed are opened again.
+        g_MuMonsterPreviewUI.BeforeFrame();
+        // Between frames too: item models the item tools changed are opened
+        // again, and so are the monster models the monster tools changed.
         ReopenChangedItemModels();
+        g_MonsterDataHandler.ReopenChangedModels();
 
         SelectWindowMode();
         UpdateKeyboardNavigation();
@@ -622,6 +633,18 @@ void CMuEditorCore::RenderMonsterTools()
     if (m_windows.monsterBrowser)
     {
         g_MuMonsterBrowserUI.Render(&m_windows.monsterBrowser);
+    }
+    if (m_windows.monsterModel)
+    {
+        g_MuMonsterModelUI.Render(&m_windows.monsterModel);
+    }
+    if (m_windows.monsterPreview)
+    {
+        g_MuMonsterPreviewUI.Render(&m_windows.monsterPreview);
+    }
+    if (m_windows.monsterAttacks)
+    {
+        g_MuMonsterAttacksUI.Render(&m_windows.monsterAttacks);
     }
     if (m_windows.monsterTranslations)
     {

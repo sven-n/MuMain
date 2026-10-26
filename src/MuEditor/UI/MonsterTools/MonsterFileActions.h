@@ -10,7 +10,8 @@
 namespace MuEditor::Monsters
 {
 // Save and Revert of the monster list file (Data/Monsters/Monsters.json) and
-// what they last reported, for every monster tool that offers them.
+// the model list file (Data/Monsters/Models.json), and what they last
+// reported, for every monster tool that offers them.
 class MonsterFileActions
 {
 public:

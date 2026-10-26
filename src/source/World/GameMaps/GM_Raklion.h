@@ -66,7 +66,6 @@ namespace SEASON4A
         virtual bool SetCurrentActionMonster(CHARACTER* c, OBJECT* o);
 
     public: // Sound
-        virtual bool PlayMonsterSound(OBJECT* o);
         virtual void PlayObjectSound(OBJECT* o);
         void PlayBGM();
 
@@ -79,7 +78,7 @@ namespace SEASON4A
     private:
         CGM_Raklion();
         bool RenderMonster(OBJECT* o, BMD* b, bool ExtraMon = 0);
-        void SetBossMonsterAction(CHARACTER* c, OBJECT* o);
+        bool SetBossMonsterAction(CHARACTER* c, OBJECT* o);
 
     public:
         bool CreateSnow(PARTICLE* o);

@@ -49,8 +49,26 @@ MonsterDataLoadResult LoadMonstersFile(const std::filesystem::path& file)
 bool SaveMonstersFile(const std::filesystem::path& file, std::span<const MonsterDefinition> monsters,
                       std::vector<ItemDataIssue>& issues)
 {
+    const std::optional<std::string> text = MakeMonstersFileText(file, monsters, issues);
+    if (!text)
+    {
+        return false;
+    }
+    std::string error;
+    if (!WriteTextFile(file, *text, error))
+    {
+        AddFileError(issues, file.generic_string(), error);
+        return false;
+    }
+    return true;
+}
+
+std::optional<std::string> MakeMonstersFileText(const std::filesystem::path& file,
+                                                std::span<const MonsterDefinition> monsters,
+                                                std::vector<ItemDataIssue>& issues)
+{
     const std::string source = file.generic_string();
-    const std::string text = WriteMonstersJson(monsters);
+    std::string text = WriteMonstersJson(monsters);
     std::vector<MonsterDefinition> readBack;
     ReadMonstersJson(text, source, readBack, issues);
     const std::size_t firstValidationIssue = issues.size();
@@ -58,15 +76,9 @@ bool SaveMonstersFile(const std::filesystem::path& file, std::span<const Monster
     NameIssueSource(issues, firstValidationIssue, file);
     if (Items::HasErrors(issues))
     {
-        return false;
+        return std::nullopt;
     }
-    std::string error;
-    if (!WriteTextFile(file, text, error))
-    {
-        AddFileError(issues, source, error);
-        return false;
-    }
-    return true;
+    return text;
 }
 
 void NameIssueSource(std::vector<ItemDataIssue>& issues, std::size_t first, const std::filesystem::path& file)

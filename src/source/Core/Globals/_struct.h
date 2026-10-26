@@ -14,7 +14,6 @@ namespace mu::ui::window
     class CItemMng;
 }
 
-#define MAX_MONSTERSKILL_NUM	10
 
 namespace info
 {
@@ -473,12 +472,6 @@ typedef struct
 } ITEM_t;
 
 //object end
-
-typedef struct Script_Skill
-{
-    int Skill_Num[MAX_MONSTERSKILL_NUM];
-    int Slot;
-} Script_Skill;
 
 typedef struct
 {

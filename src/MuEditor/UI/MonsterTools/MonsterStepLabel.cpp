@@ -32,6 +32,16 @@ std::string Name(const Data::Monsters::MonsterDefinition& monster, const char* l
 {
     return I18N::Format(I18N::Editor::StepMonsterName, {LogName(monster), I18N::GetLanguageDisplayName(locale)});
 }
+
+std::string Attacks(const Data::Monsters::MonsterDefinition& monster)
+{
+    return I18N::Format(I18N::Editor::StepAttacks, {LogName(monster)});
+}
+
+std::string Model(const std::string& slot, const std::string& what)
+{
+    return I18N::Format(I18N::Editor::StepModel, {slot, what});
+}
 } // namespace MuEditor::Monsters::StepLabel
 
 #endif // _EDITOR

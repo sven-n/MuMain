@@ -11,10 +11,14 @@
 #include "UI/MonsterTools/MonsterEdits.h"
 #include "UI/MonsterTools/MonsterSelection.h"
 
+#include "Core/Globals/_enum.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
+#include "Data/DataHandler/MonsterData/MonsterModelJsonStorage.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 
 #include <array>
+#include <filesystem>
 #include <map>
 #include <optional>
 #include <string>
@@ -23,6 +27,8 @@
 using namespace MuEditor::Monsters;
 using Data::Monsters::MonsterDefinition;
 using Data::Monsters::MonsterKind;
+using Data::Monsters::MonsterModelDefinition;
+using Data::Monsters::MonsterModelSnapshot;
 using Data::Monsters::MonsterSnapshot;
 
 namespace
@@ -62,12 +68,48 @@ public:
                             monsters.erase(snapshot.number);
                         }
                     }
+                },
+                [this](int slot)
+                {
+                    const auto found = models.find(slot);
+                    return found != models.end() ? std::optional(found->second) : std::nullopt;
+                },
+                [this](std::span<const MonsterModelSnapshot> snapshots)
+                {
+                    for (const MonsterModelSnapshot& snapshot : snapshots)
+                    {
+                        restoredModels.push_back(snapshot.slot);
+                        if (snapshot.model)
+                        {
+                            models[snapshot.slot] = *snapshot.model;
+                        }
+                        else
+                        {
+                            models.erase(snapshot.slot);
+                        }
+                    }
                 }};
     }
 
     std::map<int, MonsterDefinition> monsters;
     std::vector<int> restored;
+    std::map<int, MonsterModelDefinition> models;
+    std::vector<int> restoredModels;
 };
+
+MonsterModelDefinition Model(const char* slot, const char* file)
+{
+    MonsterModelDefinition model;
+    model.slot = slot;
+    model.load.file = file;
+    model.load.textureFolders = {"Monster"};
+    return model;
+}
+
+MonsterModelDefinition Hound()
+{
+    return Model("MONSTER_MODEL_HOUND", "Data/Monster/Monster02.bmd");
+}
 
 MonsterEditEntry Step(const std::string& label, int number, std::optional<MonsterDefinition> before,
                       std::optional<MonsterDefinition> after)
@@ -75,12 +117,25 @@ MonsterEditEntry Step(const std::string& label, int number, std::optional<Monste
     return {label, {{number, std::move(before), std::move(after)}}};
 }
 
-// A monster table for the editor's edits, with an empty history that counts
-// as saved.
+// The problems, one per line, for a failed check.
+std::string Lines(const std::vector<Data::Items::ItemDataIssue>& issues)
+{
+    std::string text;
+    for (const Data::Items::ItemDataIssue& issue : issues)
+    {
+        text += issue.ToString() + "\n";
+    }
+    return text;
+}
+
+// A monster table and a model table for the editor's edits, with an empty
+// history that counts as saved.
 void BuildMonsters()
 {
     const std::array monsters = {Monster(2, "Budge Dragon"), Monster(252, "", MonsterKind::Npc)};
     g_MonsterDatabase.Build(monsters, "en");
+    const std::array models = {Hound()};
+    g_MonsterModelDatabase.Build(models);
     g_MonsterEdits.GetHistory().Clear();
     g_MonsterEdits.GetHistory().MarkSaved();
 }
@@ -315,7 +370,9 @@ TEST_CASE("Saving the monster edits marks them saved, a revert drops them [edito
     REQUIRE(g_MonsterEdits.AddMonster("Add", Monster(3, "Larva")));
     CHECK(g_MonsterEdits.GetHistory().IsModifiedSinceSave());
     // 252's empty English name is a warning, which saves.
-    REQUIRE(g_MonsterEdits.Save(issues));
+    const bool saved = g_MonsterEdits.Save(issues);
+    INFO(Lines(issues));
+    REQUIRE(saved);
     CHECK_FALSE(g_MonsterEdits.GetHistory().IsModifiedSinceSave());
     CHECK(g_MonsterEdits.GetHistory().CanUndo());
 
@@ -325,6 +382,197 @@ TEST_CASE("Saving the monster edits marks them saved, a revert drops them [edito
     CHECK(g_MonsterDatabase.Find(3) != nullptr);
     CHECK_FALSE(g_MonsterEdits.GetHistory().CanUndo());
     CHECK_FALSE(g_MonsterEdits.GetHistory().IsModifiedSinceSave());
+}
+
+TEST_CASE("The monster edit history undoes and redoes model steps and selects their monster [editor][monsters]")
+{
+    FakeMonsters fake;
+    MonsterEditHistory history(fake.MakeHooks());
+    const MonsterModelDefinition before = Hound();
+    MonsterModelDefinition after = before;
+    after.load.speeds = {{2, 0.5f}};
+    fake.models[MODEL_HOUND] = after;
+    MonsterEditEntry entry{"Speed", {}, {}};
+    entry.models.push_back({MODEL_HOUND, before, after, 3});
+    history.Record(entry);
+
+    REQUIRE(history.CanUndo());
+    REQUIRE(history.Undo());
+    CHECK(fake.models[MODEL_HOUND] == before);
+    CHECK(fake.restoredModels == std::vector<int>{MODEL_HOUND});
+    CHECK(fake.restored.empty());
+    CHECK(history.GetLastChangedMonster() == 3);
+    REQUIRE(history.Redo());
+    CHECK(fake.models[MODEL_HOUND] == after);
+
+    // Changed past the history: the undo refuses.
+    fake.models[MODEL_HOUND] = before;
+    CHECK_FALSE(history.Undo());
+    CHECK(history.GetLastRefusal() == MonsterEditHistory::Refusal::MonstersChanged);
+}
+
+TEST_CASE("The monster edits store a model entry, and its undo puts it back [editor][monsters]")
+{
+    BuildMonsters();
+    MonsterModelDefinition faster = Hound();
+    faster.load.speeds = {{2, 0.5f}};
+
+    REQUIRE(g_MonsterEdits.SetModel("Speed", faster, 2));
+    CHECK(g_MonsterDataHandler.ReadModel(MODEL_HOUND) == faster);
+    // The game opens it again between frames.
+    CHECK(g_MonsterDataHandler.HasModelsToReopen());
+    CHECK(g_MonsterEdits.GetHistory().GetUndoLabel() == "Speed");
+    CHECK(g_MonsterEdits.GetHistory().IsModifiedSinceSave());
+
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+    REQUIRE(g_MonsterEdits.Undo());
+    CHECK(g_MonsterDataHandler.ReadModel(MODEL_HOUND) == Hound());
+    CHECK(g_MonsterSelection.GetNumber() == 2);
+    CHECK_FALSE(g_MonsterEdits.GetHistory().IsModifiedSinceSave());
+    g_MonsterDataHandler.ReopenChangedModels();
+    CHECK_FALSE(g_MonsterDataHandler.HasModelsToReopen());
+
+    // A change that changes nothing is no step.
+    REQUIRE(g_MonsterEdits.SetModel("Same", Hound(), 2));
+    CHECK(g_MonsterEdits.GetHistory().GetRedoLabel() == "Speed");
+}
+
+TEST_CASE("The monster edits refuse a model that the model list cannot hold [editor][monsters]")
+{
+    BuildMonsters();
+    const int version = g_MonsterModelDatabase.GetVersion();
+
+    // A slot without an entry, and no slot.
+    CHECK_FALSE(g_MonsterEdits.SetModel("File", Model("MONSTER_MODEL_BULL_FIGHTER", "Data/Monster/Monster01.bmd"), 0));
+    CHECK_FALSE(g_MonsterEdits.SetModel("File", Model("MONSTER_MODEL_NOBODY", "Data/Monster/Monster01.bmd"), 0));
+    // A sound slot that names no sound of the model and no SOUND_ id.
+    MonsterModelDefinition wrongSlot = Hound();
+    wrongSlot.soundSlots.emplace();
+    wrongSlot.soundSlots->first[0] = "Data/Sound/mNobody.wav";
+    CHECK_FALSE(g_MonsterEdits.SetModel("Sound", wrongSlot, 2));
+    // What the file cannot hold: a model without a texture folder.
+    MonsterModelDefinition noFolder = Hound();
+    noFolder.load.textureFolders.clear();
+    CHECK_FALSE(g_MonsterEdits.SetModel("Folders", noFolder, 2));
+
+    CHECK(g_MonsterModelDatabase.GetVersion() == version);
+    CHECK_FALSE(g_MonsterEdits.GetHistory().CanUndo());
+}
+
+TEST_CASE("Saving the monster edits writes the model list too, a revert reads it [editor][monsters]")
+{
+    TemporaryMonsterFolder folder;
+    ClientDataScope scope(folder.Path());
+    BuildMonsters();
+    std::vector<Data::Items::ItemDataIssue> issues;
+    MonsterModelDefinition faster = Hound();
+    faster.load.speeds = {{2, 0.5f}};
+    REQUIRE(g_MonsterEdits.SetModel("Speed", faster, 2));
+
+    // The Hound's file is not in this client folder: a warning, which saves.
+    const bool written = g_MonsterEdits.Save(issues);
+    INFO(Lines(issues));
+    REQUIRE(written);
+    CHECK_FALSE(Data::Items::HasErrors(issues));
+    const Data::Monsters::MonsterModelsLoadResult saved =
+        Data::Monsters::LoadMonsterModelsFile(folder.Path() / Data::Monsters::GetMonsterModelsFile());
+    CHECK(saved.models == std::vector{faster});
+    CHECK_FALSE(g_MonsterEdits.GetHistory().IsModifiedSinceSave());
+
+    MonsterModelDefinition slower = Hound();
+    slower.load.speeds = {{2, 0.1f}};
+    REQUIRE(g_MonsterEdits.SetModel("Speed", slower, 2));
+    REQUIRE(g_MonsterEdits.Revert(issues));
+    CHECK(g_MonsterDataHandler.ReadModel(MODEL_HOUND) == faster);
+    CHECK(g_MonsterDataHandler.HasModelsToReopen());
+    CHECK_FALSE(g_MonsterEdits.GetHistory().CanUndo());
+    CHECK_FALSE(g_MonsterEdits.GetHistory().IsModifiedSinceSave());
+    g_MonsterDataHandler.ReopenChangedModels();
+}
+
+TEST_CASE("Saving the monster edits writes neither file when one has errors [editor][monsters]")
+{
+    TemporaryMonsterFolder folder;
+    ClientDataScope scope(folder.Path());
+    BuildMonsters();
+    std::vector<Data::Items::ItemDataIssue> issues;
+    REQUIRE(g_MonsterEdits.AddMonster("Add", Monster(3, "Larva")));
+    // A model the model list cannot hold, put in past the edits' checks: a
+    // sound slot that names no sound of the model and no SOUND_ id.
+    MonsterModelDefinition wrongSlot = Hound();
+    wrongSlot.soundSlots.emplace();
+    wrongSlot.soundSlots->first[0] = "Data/Sound/mNobody.wav";
+    const std::array models = {wrongSlot};
+    g_MonsterModelDatabase.Build(models);
+
+    CHECK_FALSE(g_MonsterEdits.Save(issues));
+
+    CHECK(Data::Items::HasErrors(issues));
+    // Before, the monster list was written and the model list was not.
+    CHECK_FALSE(std::filesystem::exists(folder.MonstersFile()));
+    CHECK_FALSE(std::filesystem::exists(folder.Path() / Data::Monsters::GetMonsterModelsFile()));
+    CHECK(g_MonsterEdits.GetHistory().IsModifiedSinceSave());
+}
+
+TEST_CASE("Saving the monster edits writes neither file when one cannot be written or replaced [editor][monsters]")
+{
+    TemporaryMonsterFolder folder;
+    ClientDataScope scope(folder.Path());
+    BuildMonsters();
+    std::vector<Data::Items::ItemDataIssue> issues;
+    // The Hound's file is not in this client folder: a warning, which saves.
+    REQUIRE(g_MonsterEdits.Save(issues));
+    const std::filesystem::path monstersFile = folder.MonstersFile();
+    const std::filesystem::path modelsFile = folder.Path() / Data::Monsters::GetMonsterModelsFile();
+    const std::optional<std::string> monsters = Data::ReadTextFile(monstersFile);
+    REQUIRE(monsters);
+    REQUIRE(std::filesystem::is_regular_file(modelsFile));
+    REQUIRE(g_MonsterEdits.AddMonster("Add", Monster(3, "Larva")));
+
+    // A folder where the model list's temporary file goes: it cannot be
+    // written.
+    REQUIRE(std::filesystem::create_directory(Data::GetTemporaryPath(modelsFile)));
+    issues.clear();
+    CHECK_FALSE(g_MonsterEdits.Save(issues));
+    CHECK(Data::Items::HasErrors(issues));
+    CHECK(Data::ReadTextFile(monstersFile) == monsters);
+    CHECK_FALSE(std::filesystem::exists(Data::GetTemporaryPath(monstersFile)));
+    std::filesystem::remove(Data::GetTemporaryPath(modelsFile));
+
+    // A folder in the model list's place: its new text cannot replace it.
+    // Before, the monster list was replaced already.
+    std::filesystem::remove(modelsFile);
+    REQUIRE(std::filesystem::create_directory(modelsFile));
+    std::string error;
+    REQUIRE(Data::WriteTextFile(modelsFile / "kept.txt", "kept", error));
+    issues.clear();
+    CHECK_FALSE(g_MonsterEdits.Save(issues));
+    CHECK(Data::Items::HasErrors(issues));
+    CHECK(Data::ReadTextFile(monstersFile) == monsters);
+    CHECK_FALSE(std::filesystem::exists(Data::GetTemporaryPath(monstersFile)));
+    CHECK_FALSE(std::filesystem::exists(Data::GetTemporaryPath(modelsFile)));
+    CHECK(g_MonsterEdits.GetHistory().IsModifiedSinceSave());
+}
+
+TEST_CASE("A revert of the monster edits changes nothing when one file has errors [editor][monsters]")
+{
+    TemporaryMonsterFolder folder;
+    ClientDataScope scope(folder.Path());
+    BuildMonsters();
+    std::vector<Data::Items::ItemDataIssue> issues;
+    // The Hound's file is not in this client folder: a warning, which saves.
+    REQUIRE(g_MonsterEdits.Save(issues));
+    REQUIRE(g_MonsterEdits.AddMonster("Add", Monster(3, "Larva")));
+    std::string error;
+    REQUIRE(Data::WriteTextFile(folder.Path() / Data::Monsters::GetMonsterModelsFile(), "{ broken", error));
+
+    CHECK_FALSE(g_MonsterEdits.Revert(issues));
+
+    CHECK(Data::Items::HasErrors(issues));
+    // Before, the monster list was read again and the history cleared.
+    CHECK(g_MonsterDatabase.Find(3) != nullptr);
+    CHECK(g_MonsterEdits.GetHistory().CanUndo());
+    CHECK(g_MonsterEdits.GetHistory().IsModifiedSinceSave());
 }
 
 #endif // _EDITOR

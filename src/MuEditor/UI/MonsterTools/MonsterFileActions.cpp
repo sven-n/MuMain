@@ -7,6 +7,7 @@
 #include "MonsterEdits.h"
 
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
+#include "Data/DataHandler/MonsterData/MonsterModelJsonStorage.h"
 #include "I18N/All.h"
 #include "imgui.h"
 
@@ -16,10 +17,12 @@ namespace
 {
 constexpr ImVec4 ErrorColor{1.0f, 0.4f, 0.4f, 1.0f};
 
-// The file as the user finds it below the client folder.
-std::string MonstersFileName()
+// The files as the user finds them below the client folder: the monster
+// list and the model list.
+std::string MonsterFileNames()
 {
-    return Data::Monsters::GetMonstersFile().generic_string();
+    return Data::Monsters::GetMonstersFile().generic_string() + ", " +
+           Data::Monsters::GetMonsterModelsFile().generic_string();
 }
 
 void RenderNote(const char* text)
@@ -56,7 +59,7 @@ bool MonsterFileActions::RenderRevertButton()
     if (ImGui::IsItemHovered())
     {
         ImGui::SetTooltip("%s",
-                          I18N::Format(I18N::Editor::Reads0AgainUnsavedChangesAreLost, {MonstersFileName()}).c_str());
+                          I18N::Format(I18N::Editor::Reads0AgainUnsavedChangesAreLost, {MonsterFileNames()}).c_str());
     }
     return reverted;
 }
@@ -70,7 +73,7 @@ bool MonsterFileActions::Save()
         m_statusIsError = true;
         return false;
     }
-    m_status = I18N::Format(I18N::Editor::SavedTo0, {MonstersFileName()});
+    m_status = I18N::Format(I18N::Editor::SavedTo0, {MonsterFileNames()});
     m_statusIsError = false;
     return true;
 }
@@ -78,7 +81,7 @@ bool MonsterFileActions::Save()
 bool MonsterFileActions::Revert()
 {
     m_issues.clear();
-    // On errors the monsters stay as they are; the problems say why.
+    // A file with errors leaves its table as it is; the problems say why.
     const bool reverted = g_MonsterEdits.Revert(m_issues);
     m_status.clear();
     m_statusIsError = false;
@@ -98,13 +101,15 @@ void MonsterFileActions::RenderStatus() const
             ImGui::TextUnformatted(m_status.c_str());
         }
     }
-    if (m_issues.empty())
-    {
-        return;
-    }
-    ImGui::TextUnformatted(I18N::Format(I18N::Editor::ProblemsIn0, {MonstersFileName()}).c_str());
+    // The problems under the file they are in, in the order they came.
+    const std::string* lastSource = nullptr;
     for (const Data::Items::ItemDataIssue& issue : m_issues)
     {
+        if (lastSource == nullptr || *lastSource != issue.source)
+        {
+            ImGui::TextUnformatted(I18N::Format(I18N::Editor::ProblemsIn0, {issue.source}).c_str());
+            lastSource = &issue.source;
+        }
         const std::string line = issue.field.empty() ? issue.message : issue.field + ": " + issue.message;
         if (issue.severity == Data::Items::ItemDataIssueSeverity::Error)
         {
