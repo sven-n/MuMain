@@ -157,7 +157,7 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item)
     values.hasOptions = item.SpecialNum > 0;
     // No hero yet (the character screen, a tooltip built before the world loads): level 0.
     values.heroLevel = CharacterAttribute != nullptr ? CharacterAttribute->Level : 0;
-    values.name = Core::Text::ToUtf8(attribute->Name);
+    values.name = attribute->Name;
     values.levelPlusOne = item.Level + 1;
     values.excellentFlags = item.ExcellentFlags & 63;
     if (g_pItemAddOptioninfo != nullptr)
@@ -270,7 +270,7 @@ std::optional<std::string> GetItemTooltipText(const ItemTooltipValues& values, s
 {
     if (name == "name")
     {
-        return values.name;
+        return values.name != nullptr ? Core::Text::ToUtf8(values.name) : std::string();
     }
     if (name == "addOptionDuration")
     {

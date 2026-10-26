@@ -546,6 +546,14 @@ void ItemReader::ReadNameLines(const OrderedJson& json, std::vector<ItemNameLine
             AddIssue(ItemDataIssueSeverity::Error, field, "must be an object");
             continue;
         }
+        // The name is always bold and always the first row.
+        for (const char* key : {Keys::Bold, Keys::After})
+        {
+            if (entry.contains(key))
+            {
+                AddIssue(ItemDataIssueSeverity::Error, field + "." + key, "does not apply to a name line");
+            }
+        }
         ItemNameLine line;
         line.hasText = entry.contains(Keys::Text);
         line.hasColor = entry.contains(Keys::Color);

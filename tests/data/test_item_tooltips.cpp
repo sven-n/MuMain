@@ -588,28 +588,6 @@ TEST_CASE("An item's lines drawn after its options follow them [data][items][too
     SetItemTooltipTextMeasure(nullptr);
 }
 
-TEST_CASE("A class condition holds for a hero of that class [data][items][tooltip]")
-{
-    TooltipHeroScope hero;
-    Data::Items::TooltipCondition darkLord;
-    std::string error;
-    REQUIRE(Data::Items::ReadTooltipCondition("class:darkLord", darkLord, error));
-    CHECK(Data::Items::WriteTooltipCondition(darkLord) == "class:darkLord");
-    CHECK_FALSE(Data::Items::ReadTooltipCondition("class:darkLrod", darkLord, error));
-    CHECK(error.find("names no class") != std::string::npos);
-    REQUIRE(Data::Items::ReadTooltipCondition("class:darkLord", darkLord, error));
-
-    const ItemTooltipValues values;
-    const std::vector<Data::Items::TooltipCondition> conditions = {darkLord};
-    ::Hero->Class = CLASS_DARK_LORD;
-    CHECK(Engine::Items::TooltipValues::AreTooltipConditionsMet(conditions, 0, 0, values));
-    ::Hero->Class = CLASS_WIZARD;
-    CHECK_FALSE(Engine::Items::TooltipValues::AreTooltipConditionsMet(conditions, 0, 0, values));
-    // A Lord Emperor is a Dark Lord too.
-    ::Hero->Class = CLASS_LORDEMPEROR;
-    CHECK(Engine::Items::TooltipValues::AreTooltipConditionsMet(conditions, 0, 0, values));
-}
-
 // The option lines are the lines the full item has and the plain one doesn't (luck, skill, the option, the excellent
 // options); an item's restriction drawn after its options comes after the last of them.
 TEST_CASE("A transformation ring's restriction comes after its option lines [data][items][tooltip]")

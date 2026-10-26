@@ -435,6 +435,12 @@ TEST_CASE("An item's name lines are kept through write and read, with or without
     const ReadResult notObject = Read(R"({"formatVersion": 1, "group": 13, "items": [
         {"number": 37, "name": "Horn of Fenrir", "nameLines": ["{name}"]}]})");
     CHECK(HasIssue(notObject.issues, ItemDataIssueSeverity::Error, "nameLines[0]"));
+
+    // The name is always bold and the first row: a name line's "bold" and "after" are errors.
+    const ReadResult boldAndAfter = Read(R"({"formatVersion": 1, "group": 13, "items": [
+        {"number": 37, "name": "Horn of Fenrir", "nameLines": [{"text": "{name}", "bold": true, "after": "options"}]}]})");
+    CHECK(HasIssue(boldAndAfter.issues, ItemDataIssueSeverity::Error, "nameLines[0].bold"));
+    CHECK(HasIssue(boldAndAfter.issues, ItemDataIssueSeverity::Error, "nameLines[0].after"));
 }
 
 TEST_CASE("A description line's \"@\" names a shared text [data][items]")

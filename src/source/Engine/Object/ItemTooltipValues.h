@@ -70,9 +70,10 @@ struct ItemTooltipValues
     bool hasOptions = false;
     // The hero's level.
     int heroLevel = 0;
-    // The item's name as its data has it, its level + 1, and its excellent options (bits 0 to 5 of ExcellentFlags;
-    // Fenrir's 1, 2 and 4 are its Destroy, Protect and Illusion kinds).
-    std::string name;
+    // The item's name as its data has it, which {name} writes only for a line showing it, its level + 1, and its
+    // excellent options (bits 0 to 5 of ExcellentFlags; Fenrir's 1, 2 and 4 are its Destroy, Protect and Illusion
+    // kinds).
+    const wchar_t* name = nullptr;
     int levelPlusOne = 0;
     int excellentFlags = 0;
     // The item's add option (the potions', scrolls' and seals' effects of ItemAddOption): its two values, and how long

@@ -43,8 +43,7 @@
 #include <chrono>
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
-#include "Data/GameData/MonsterData/MonsterDatabase.h"
-#include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "GameLogic/Items/ItemNameParts.h"
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Core/Text/TextLineWrap.h"
@@ -1677,10 +1676,7 @@ static std::optional<std::string> TooltipPlaceholderValue(std::string_view name,
             return Core::Text::ToUtf8(SkillAttribute[data->number].Name);
         case Data::Items::GameDataValueKind::MonsterName:
         {
-            // Part of an item name, so it follows Translate item names as the rest of it does.
-            const wchar_t* monsterName = g_ItemDataHandler.GetTranslateItemNames()
-                                             ? g_MonsterDatabase.FindDisplayName(data->number)
-                                             : g_MonsterDatabase.FindEnglishName(data->number);
+            const wchar_t* monsterName = GameLogic::Items::NameParts::MonsterName(data->number);
             if (monsterName == nullptr)
                 return std::nullopt;
             return Core::Text::ToUtf8(monsterName);
