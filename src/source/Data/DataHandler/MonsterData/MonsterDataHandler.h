@@ -119,6 +119,13 @@ public:
     // problems found are added to `issues`.
     bool RevertModels(std::vector<Items::ItemDataIssue>& issues);
 
+    // Save and SaveModels together: neither file is written when the checks
+    // of one find errors.
+    bool SaveAll(std::vector<Items::ItemDataIssue>& issues);
+    // Revert and RevertModels together: neither table changes when one file
+    // has errors.
+    bool RevertAll(std::vector<Items::ItemDataIssue>& issues);
+
     // Told after ReopenChangedModels with the slots it opened again; the
     // game clamps the animations of the characters that use them.
     using ModelsReopenedCallback = void (*)(std::span<const int> slots);
@@ -146,6 +153,10 @@ private:
     void RegisterLocaleObserver();
 #ifdef _EDITOR
     void NotifyNamesChanged(int number) const;
+    // The tables become what the files read: the monsters with their names
+    // in the language shown, the models with the changed slots to reopen.
+    void UseMonsters(std::span<const MonsterDefinition> monsters);
+    void UseModels(std::span<const MonsterModelDefinition> models);
 #endif
 
     NamesChangedCallback m_namesChanged = nullptr;

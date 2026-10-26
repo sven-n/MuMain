@@ -240,9 +240,11 @@ bool MonsterEdits::Redo()
     return true;
 }
 
+// Both files or neither: a save that stopped after the first would leave a
+// monster list that names models the model list does not have.
 bool MonsterEdits::Save(std::vector<Data::Items::ItemDataIssue>& issues)
 {
-    if (!g_MonsterDataHandler.Save(issues) || !g_MonsterDataHandler.SaveModels(issues))
+    if (!g_MonsterDataHandler.SaveAll(issues))
     {
         return false;
     }
@@ -250,21 +252,15 @@ bool MonsterEdits::Save(std::vector<Data::Items::ItemDataIssue>& issues)
     return true;
 }
 
-// Both files are read, also when the first has errors: each that reads is
-// the data again.
+// Both files or neither: when one has errors, the edits and their history
+// stay.
 bool MonsterEdits::Revert(std::vector<Data::Items::ItemDataIssue>& issues)
 {
-    const bool monstersRead = g_MonsterDataHandler.Revert(issues);
-    const bool modelsRead = g_MonsterDataHandler.RevertModels(issues);
-    if (!monstersRead && !modelsRead)
+    if (!g_MonsterDataHandler.RevertAll(issues))
     {
         return false;
     }
     OnDataReplaced();
-    if (!monstersRead || !modelsRead)
-    {
-        return false;
-    }
     m_history.MarkSaved();
     return true;
 }

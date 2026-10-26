@@ -18,6 +18,7 @@
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 
 #include <array>
+#include <filesystem>
 #include <map>
 #include <optional>
 #include <string>
@@ -487,6 +488,51 @@ TEST_CASE("Saving the monster edits writes the model list too, a revert reads it
     CHECK_FALSE(g_MonsterEdits.GetHistory().CanUndo());
     CHECK_FALSE(g_MonsterEdits.GetHistory().IsModifiedSinceSave());
     g_MonsterDataHandler.ReopenChangedModels();
+}
+
+TEST_CASE("Saving the monster edits writes neither file when one has errors [editor][monsters]")
+{
+    TemporaryMonsterFolder folder;
+    ClientDataScope scope(folder.Path());
+    BuildMonsters();
+    std::vector<Data::Items::ItemDataIssue> issues;
+    REQUIRE(g_MonsterEdits.AddMonster("Add", Monster(3, "Larva")));
+    // A model the model list cannot hold, put in past the edits' checks: a
+    // sound slot that names no sound of the model and no SOUND_ id.
+    MonsterModelDefinition wrongSlot = Hound();
+    wrongSlot.soundSlots.emplace();
+    wrongSlot.soundSlots->first[0] = "Data/Sound/mNobody.wav";
+    const std::array models = {wrongSlot};
+    g_MonsterModelDatabase.Build(models);
+
+    CHECK_FALSE(g_MonsterEdits.Save(issues));
+
+    CHECK(Data::Items::HasErrors(issues));
+    // Before, the monster list was written and the model list was not.
+    CHECK_FALSE(std::filesystem::exists(folder.MonstersFile()));
+    CHECK_FALSE(std::filesystem::exists(folder.Path() / Data::Monsters::GetMonsterModelsFile()));
+    CHECK(g_MonsterEdits.GetHistory().IsModifiedSinceSave());
+}
+
+TEST_CASE("A revert of the monster edits changes nothing when one file has errors [editor][monsters]")
+{
+    TemporaryMonsterFolder folder;
+    ClientDataScope scope(folder.Path());
+    BuildMonsters();
+    std::vector<Data::Items::ItemDataIssue> issues;
+    // The Hound's file is not in this client folder: a warning, which saves.
+    REQUIRE(g_MonsterEdits.Save(issues));
+    REQUIRE(g_MonsterEdits.AddMonster("Add", Monster(3, "Larva")));
+    std::string error;
+    REQUIRE(Data::WriteTextFile(folder.Path() / Data::Monsters::GetMonsterModelsFile(), "{ broken", error));
+
+    CHECK_FALSE(g_MonsterEdits.Revert(issues));
+
+    CHECK(Data::Items::HasErrors(issues));
+    // Before, the monster list was read again and the history cleared.
+    CHECK(g_MonsterDatabase.Find(3) != nullptr);
+    CHECK(g_MonsterEdits.GetHistory().CanUndo());
+    CHECK(g_MonsterEdits.GetHistory().IsModifiedSinceSave());
 }
 
 #endif // _EDITOR

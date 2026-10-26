@@ -41,8 +41,16 @@ MonsterModelsLoadResult LoadMonsterModelsFile(const std::filesystem::path& file)
 bool SaveMonsterModelsFile(const std::filesystem::path& file, std::span<const MonsterModelDefinition> models,
                            std::vector<Items::ItemDataIssue>& issues)
 {
+    const std::optional<std::string> text = MakeMonsterModelsFileText(file, models, issues);
+    return text && WriteMonsterModelsFileText(file, *text, issues);
+}
+
+std::optional<std::string> MakeMonsterModelsFileText(const std::filesystem::path& file,
+                                                     std::span<const MonsterModelDefinition> models,
+                                                     std::vector<Items::ItemDataIssue>& issues)
+{
     const std::string source = file.generic_string();
-    const std::string text = WriteMonsterModelsJson(models);
+    std::string text = WriteMonsterModelsJson(models);
     std::vector<MonsterModelDefinition> readBack;
     std::vector<Items::ItemDataIssue> found;
     ReadMonsterModelsJson(text, source, readBack, found);
@@ -51,12 +59,18 @@ bool SaveMonsterModelsFile(const std::filesystem::path& file, std::span<const Mo
     issues.insert(issues.end(), found.begin(), found.end());
     if (Items::HasErrors(found))
     {
-        return false;
+        return std::nullopt;
     }
+    return text;
+}
+
+bool WriteMonsterModelsFileText(const std::filesystem::path& file, const std::string& text,
+                                std::vector<Items::ItemDataIssue>& issues)
+{
     std::string error;
     if (!WriteTextFile(file, text, error))
     {
-        issues.push_back({Items::ItemDataIssueSeverity::Error, source, Items::ItemDataIssue::NoItem,
+        issues.push_back({Items::ItemDataIssueSeverity::Error, file.generic_string(), Items::ItemDataIssue::NoItem,
                           Items::ItemDataIssue::NoItem, "", error});
         return false;
     }

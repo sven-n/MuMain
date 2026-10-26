@@ -212,13 +212,17 @@ bool MonsterDataHandler::Revert(std::vector<Items::ItemDataIssue>& issues)
     {
         return false;
     }
+    UseMonsters(result.monsters);
+    return true;
+}
 
+void MonsterDataHandler::UseMonsters(std::span<const MonsterDefinition> monsters)
+{
     // The data changes, not the language the names are shown in.
     const std::string displayLocale = g_MonsterDatabase.GetDisplayLocale();
-    g_MonsterDatabase.Build(result.monsters, displayLocale);
+    g_MonsterDatabase.Build(monsters, displayLocale);
     RegisterLocaleObserver();
     NotifyNamesChanged(AllNumbers);
-    return true;
 }
 
 std::optional<MonsterModelDefinition> MonsterDataHandler::ReadModel(int slot) const
@@ -263,9 +267,47 @@ bool MonsterDataHandler::RevertModels(std::vector<Items::ItemDataIssue>& issues)
     {
         return false;
     }
+    UseModels(result.models);
+    return true;
+}
+
+bool MonsterDataHandler::SaveAll(std::vector<Items::ItemDataIssue>& issues)
+{
+    const std::vector<MonsterDefinition> monsters = CollectMonsters();
+    ValidateLocales(monsters, issues);
+    // Both are checked, so that the problems of both are listed.
+    const std::optional<std::string> monstersText = MakeMonstersFileText(GetMonstersFile(), monsters, issues);
+    const std::optional<std::string> modelsText =
+        MakeMonsterModelsFileText(GetMonsterModelsFile(), CollectModels(), issues);
+    if (!monstersText || !modelsText)
+    {
+        return false;
+    }
+    return WriteMonstersFileText(GetMonstersFile(), *monstersText, issues) &&
+           WriteMonsterModelsFileText(GetMonsterModelsFile(), *modelsText, issues);
+}
+
+bool MonsterDataHandler::RevertAll(std::vector<Items::ItemDataIssue>& issues)
+{
+    MonsterDataLoadResult monsters = LoadMonstersFile(GetMonstersFile());
+    ValidateLocales(monsters.monsters, monsters.issues);
+    const MonsterModelsLoadResult models = LoadMonsterModelsFile(GetMonsterModelsFile());
+    issues.insert(issues.end(), monsters.issues.begin(), monsters.issues.end());
+    issues.insert(issues.end(), models.issues.begin(), models.issues.end());
+    if (Items::HasErrors(monsters.issues) || Items::HasErrors(models.issues))
+    {
+        return false;
+    }
+    UseMonsters(monsters.monsters);
+    UseModels(models.models);
+    return true;
+}
+
+void MonsterDataHandler::UseModels(std::span<const MonsterModelDefinition> models)
+{
     // The slots whose entry the file changes, also those it removes.
     const std::map<int, MonsterModelDefinition> before = BySlot(CollectModels());
-    const std::map<int, MonsterModelDefinition> after = BySlot(result.models);
+    const std::map<int, MonsterModelDefinition> after = BySlot(models);
     for (const auto& [slot, model] : before)
     {
         const auto read = after.find(slot);
@@ -281,8 +323,7 @@ bool MonsterDataHandler::RevertModels(std::vector<Items::ItemDataIssue>& issues)
             m_modelsToReopen.push_back(slot);
         }
     }
-    g_MonsterModelDatabase.Build(result.models);
-    return true;
+    g_MonsterModelDatabase.Build(models);
 }
 
 void MonsterDataHandler::ReopenChangedModels()
