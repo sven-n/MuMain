@@ -6,9 +6,9 @@
 
 namespace MuEditor
 {
-// A tool with an undo history of its own (the item tools, the Server List
-// window). The editor bar's Undo and Redo act on the tool the user worked in
-// last.
+// A tool with an undo history of its own (the item tools, the monster tools,
+// the Server List window). The editor bar's Undo and Redo act on the tool the
+// user worked in last.
 class UndoTarget
 {
 public:

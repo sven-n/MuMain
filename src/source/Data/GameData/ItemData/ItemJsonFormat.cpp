@@ -4,6 +4,7 @@
 #include "ItemDescriptionPlaceholders.h"
 #include "ItemEnumNames.h"
 #include "ItemJsonCommon.h"
+#include "ItemTooltipConditionsJson.h"
 #include "ItemType.h"
 
 #include <algorithm>
@@ -262,7 +263,7 @@ OrderedJson WriteLevelValues(const std::vector<ItemLevelValues>& levelValues)
     return json;
 }
 
-OrderedJson WriteItem(const ItemDefinition& definition)
+OrderedJson WriteItemObject(const ItemDefinition& definition)
 {
     OrderedJson item;
     item[Keys::Number] = definition.number;
@@ -563,8 +564,15 @@ bool ItemReader::ReadLine(const OrderedJson& entry, const std::string& field, It
     {
         if (text->is_string() && text->get<std::string>().starts_with("@"))
         {
-            // A shared text of the tooltip file; ValidateDescriptionTexts checks that it has it.
+            // A shared text of the tooltip file; ValidateDescriptionTexts checks that it has it. "@" alone names none,
+            // as in a layout.
             line.textName = text->get<std::string>().substr(1);
+            if (line.textName.empty())
+            {
+                AddIssue(ItemDataIssueSeverity::Error, field + "." + Keys::Text,
+                         "\"@\" names no text: a shared text is \"@\" and its name in the tooltip file's \"texts\"");
+                read = false;
+            }
         }
         else
         {
@@ -687,7 +695,14 @@ void ItemReader::ReadLevelValues(const OrderedJson& json, std::vector<ItemLevelV
             const OrderedJson& json = list[level];
             if (json.is_string() && json.get<std::string>().starts_with("@"))
             {
+                // "@" alone names no shared text, as for a description line.
                 value.textName = json.get<std::string>().substr(1);
+                if (value.textName.empty())
+                {
+                    AddIssue(
+                        ItemDataIssueSeverity::Error, field + "[" + std::to_string(level) + "]",
+                        "\"@\" names no text: a shared text is \"@\" and its name in the tooltip file's \"texts\"");
+                }
             }
             else
             {
@@ -705,31 +720,10 @@ void ItemReader::ReadLevelValues(const OrderedJson& json, std::vector<ItemLevelV
 bool ItemReader::ReadConditionList(const OrderedJson& json, const std::string& field,
                                    std::vector<TooltipCondition>& when)
 {
-    if (!json.is_array())
-    {
-        AddIssue(ItemDataIssueSeverity::Error, field,
-                 "must be a list of conditions, such as [\"durability\", \"!timed\"]");
-        return false;
-    }
-    for (size_t index = 0; index < json.size(); ++index)
-    {
-        const std::string entryField = field + "[" + std::to_string(index) + "]";
-        TooltipCondition condition;
-        std::string error;
-        if (!json[index].is_string())
-        {
-            AddIssue(ItemDataIssueSeverity::Error, entryField, "must be a text");
-        }
-        else if (!ReadTooltipCondition(json[index].get<std::string>(), condition, error))
-        {
-            AddIssue(ItemDataIssueSeverity::Error, entryField, error);
-        }
-        else
-        {
-            when.push_back(std::move(condition));
-        }
-    }
-    return true;
+    ReadTooltipConditions(json, field, R"(["durability", "!timed"])", when,
+                          [this](const std::string& errorField, const std::string& message)
+                          { AddIssue(ItemDataIssueSeverity::Error, errorField, message); });
+    return json.is_array();
 }
 
 // The conditions a description line is shown on, all of them.
@@ -995,16 +989,32 @@ std::string WriteItemGroupJson(int group, std::span<const ItemDefinition> items)
     root[Keys::Items] = OrderedJson::array();
     for (const ItemDefinition* definition : groupItems)
     {
-        root[Keys::Items].push_back(WriteItem(*definition));
+        root[Keys::Items].push_back(WriteItemObject(*definition));
     }
 
     // Names are UTF-8 already; replace (instead of throwing on) anything that
     // is not, so a bad name can never stop a save half-way.
-    std::string text =
-        Json::PutListsOnOneLine(root.dump(Json::Indent, ' ', false, OrderedJson::error_handler_t::replace), Keys::Tags);
-    text = Json::PutListsOnOneLine(text, Keys::Levels);
-    text = Json::PutListsOnOneLine(text, Keys::When);
-    text = Json::PutObjectsOnOneLine(text, Keys::Values);
-    return Json::PutObjectsOnOneLine(text, Keys::RequirementsByLevel) + "\n";
+    return LayOutItemJsonText(root.dump(Json::Indent, ' ', false, OrderedJson::error_handler_t::replace)) + "\n";
+}
+
+OrderedJson WriteItemJson(const ItemDefinition& definition)
+{
+    return WriteItemObject(definition);
+}
+
+bool ReadItemJson(const OrderedJson& json, const std::string& source, int group, ItemDefinition& definition,
+                  std::vector<ItemDataIssue>& issues)
+{
+    ItemReader reader(source, group, issues);
+    return reader.Read(json, definition);
+}
+
+std::string LayOutItemJsonText(const std::string& text)
+{
+    std::string laidOut = Json::PutListsOnOneLine(text, Keys::Tags);
+    laidOut = Json::PutListsOnOneLine(laidOut, Keys::Levels);
+    laidOut = Json::PutListsOnOneLine(laidOut, Keys::When);
+    laidOut = Json::PutObjectsOnOneLine(laidOut, Keys::Values);
+    return Json::PutObjectsOnOneLine(laidOut, Keys::RequirementsByLevel);
 }
 } // namespace Data::Items

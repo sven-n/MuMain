@@ -3,14 +3,17 @@ using MuMain.Tools.InGameTests.Control;
 
 namespace MuMain.Tools.InGameTests.Scenarios;
 
-/// <summary>An NPC a scenario talks to: its name as the client shows it and where it stands.</summary>
-internal sealed record Npc(string Name, int X, int Y);
+/// <summary>
+/// An NPC a scenario talks to: its English name for messages, its monster number, by which
+/// <c>nearby</c> finds it (the client shows names in its own language), and where it stands.
+/// </summary>
+internal sealed record Npc(string Name, int Number, int X, int Y);
 
 /// <summary>Walking up to NPCs and talking to them the way a player does: with a click on them.</summary>
 internal static class Npcs
 {
     /// <summary>Hanzo the Blacksmith in Lorencia: sells weapons and shields, and repairs.</summary>
-    public static readonly Npc Hanzo = new("Hanzo the Blacksmith", 116, 141);
+    public static readonly Npc Hanzo = new("Hanzo the Blacksmith", 251, 116, 141);
 
     private static readonly TimeSpan ServerAnswer = TimeSpan.FromSeconds(10);
 
@@ -34,7 +37,7 @@ internal static class Npcs
             }
         }
 
-        throw new ScenarioFailedException($"no tile next to {npc.Name} ({npc.X},{npc.Y}) can be walked to");
+        throw new ScenarioFailedException($"no tile next to {npc.Name} ({npc.Number}) at ({npc.X},{npc.Y}) can be walked to");
     }
 
     /// <summary>
@@ -44,11 +47,11 @@ internal static class Npcs
     /// </summary>
     public static async Task TalkAsync(GameClient client, Npc npc, string window)
     {
-        var pixel = await Meeting.PixelOfAsync(client, npc.Name);
+        var pixel = await Meeting.PixelOfAsync(client, npc);
         await client.SendAsync("click-ui", new { x = pixel.X, y = pixel.Y, button = "left" });
         await Expect.EventuallyAsync(
             async () => (await client.OpenWindowsAsync()).Contains(window),
             ServerAnswer,
-            $"a click on {npc.Name} at ({pixel.X},{pixel.Y}) does not open the {window} window");
+            $"a click on {npc.Name} ({npc.Number}) at ({pixel.X},{pixel.Y}) does not open the {window} window");
     }
 }

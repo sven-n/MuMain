@@ -437,6 +437,23 @@ TEST_CASE("An item's name lines are kept through write and read, with or without
     CHECK(HasIssue(notObject.issues, ItemDataIssueSeverity::Error, "nameLines[0]"));
 }
 
+TEST_CASE("A description line's \"@\" names a shared text [data][items]")
+{
+    // "@" alone names none: an error, as in a layout, not a silent blank line.
+    const ReadResult empty = Read(R"({"formatVersion": 1, "group": 14, "items": [
+        {"number": 10, "name": "Town Portal Scroll", "description": [{"text": "@"}]}]})");
+    CHECK(HasIssue(empty.issues, ItemDataIssueSeverity::Error, "description[0].text"));
+    const ReadResult named = Read(R"({"formatVersion": 1, "group": 14, "items": [
+        {"number": 10, "name": "Town Portal Scroll", "description": [{"text": "@durability"}]}]})");
+    CHECK_FALSE(HasErrors(named.issues));
+    REQUIRE(named.items.size() == 1);
+    CHECK(named.items.front().description.front().textName == "durability");
+    // So does a level value's.
+    const ReadResult levelValue = Read(R"({"formatVersion": 1, "group": 14, "items": [
+        {"number": 10, "name": "Town Portal Scroll", "levelValues": {"stat": ["ENG", "@"]}}]})");
+    CHECK(HasIssue(levelValue.issues, ItemDataIssueSeverity::Error, "levelValues.stat[1]"));
+}
+
 TEST_CASE("An item's stat profile is kept through write and read [data][items]")
 {
     ItemDefinition kris = MakeKris();

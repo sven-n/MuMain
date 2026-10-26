@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "ItemTooltipConditions.h"
+#include "ItemTooltipConditionsJson.h"
 #include "ItemDescriptionPlaceholders.h"
 #include "ItemEnumNames.h"
 #include "ItemJsonFormat.h"
@@ -58,10 +59,11 @@ bool ReadComparison(std::string_view text, TooltipCondition& condition)
     return false;
 }
 
-constexpr std::array<std::string_view, 14> States = {
-    "hasDamage",          "skillBook",           "twoHanded", "excellent",       "ancient",
-    "damageHarmonyBonus", "defenseHarmonyBonus", "armour",    "strengthReduced", "dexterityReduced",
-    "wizardryWeapon",     "hasDurability",       "timed",     "hasOptions",
+constexpr std::array<std::string_view, 16> States = {
+    "hasDamage",          "skillBook",           "twoHanded",      "excellent",       "ancient",
+    "damageHarmonyBonus", "defenseHarmonyBonus", "armour",         "strengthReduced", "dexterityReduced",
+    "strengthRequired",   "dexterityRequired",   "wizardryWeapon", "hasDurability",   "timed",
+    "hasOptions",
 };
 } // namespace
 
@@ -152,6 +154,35 @@ bool ReadTooltipCondition(std::string_view text, TooltipCondition& condition, st
     error = "\"" + std::string(text) + "\" is neither a built-in value, a state nor \"tag:<tag>\"" +
             (suggestion.empty() ? std::string(" (docs/item-data.md)") : "; did you mean " + suggestion + "?");
     return false;
+}
+
+void ReadTooltipConditions(const Json::OrderedJson& json, const std::string& field, std::string_view example,
+                           std::vector<TooltipCondition>& conditions,
+                           const std::function<void(const std::string& field, const std::string& message)>& addError)
+{
+    if (!json.is_array())
+    {
+        addError(field, "must be a list of conditions, such as " + std::string(example));
+        return;
+    }
+    for (size_t index = 0; index < json.size(); ++index)
+    {
+        const std::string entryField = field + "[" + std::to_string(index) + "]";
+        TooltipCondition condition;
+        std::string error;
+        if (!json[index].is_string())
+        {
+            addError(entryField, "must be a text");
+        }
+        else if (!ReadTooltipCondition(json[index].get<std::string>(), condition, error))
+        {
+            addError(entryField, error);
+        }
+        else
+        {
+            conditions.push_back(std::move(condition));
+        }
+    }
 }
 
 std::string WriteTooltipCondition(const TooltipCondition& condition)

@@ -48,6 +48,8 @@
 #include "GameLogic/Items/ItemCategories.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "GameLogic/Monsters/MonsterNames.h"
 
 // DevEditor function declarations
 #ifdef _EDITOR
@@ -11573,18 +11575,13 @@ void ClearCharacters(int Key)
     {
         CHARACTER* c = &CharactersClient[i];
         OBJECT* o = &c->Object;
+        if (c->Key != Key)
+            DeleteCharacterCompanions(c);
         if (o->Live && c->Key != Key)
         {
             o->Live = false;
 
             BoneManager::UnregisterBone(c);
-
-            for (int j = 0; j < MAX_MOUNTS; j++)
-            {
-                OBJECT* b = &Mounts[j];
-                if (b->Live && b->Owner == o)
-                    b->Live = false;
-            }
         }
 
         DeletePet(c);
@@ -11605,12 +11602,7 @@ void DeleteCharacter(int Key)
 
             BoneManager::UnregisterBone(c);
 
-            for (int j = 0; j < MAX_MOUNTS; j++)
-            {
-                OBJECT* b = &Mounts[j];
-                if (b->Live && b->Owner == o)
-                    b->Live = false;
-            }
+            DeleteCharacterCompanions(c);
             DeletePet(c);
             DeleteCloth(c, o);
             DeleteParts(c);
@@ -11625,12 +11617,7 @@ void DeleteCharacter(CHARACTER* c, OBJECT* o)
 
     BoneManager::UnregisterBone(c);
 
-    for (int j = 0; j < MAX_MOUNTS; j++)
-    {
-        OBJECT* b = &Mounts[j];
-        if (b->Live && b->Owner == o)
-            b->Live = false;
-    }
+    DeleteCharacterCompanions(c);
 
     DeletePet(c);
     DeleteCloth(c, o);
@@ -11717,6 +11704,13 @@ void ReleaseCharacters(void)
     DeleteParts(&CharacterView);
 
     BoneManager::UnregisterAll();
+}
+
+void DeleteCharacterCompanions(CHARACTER* c)
+{
+    DeleteMount(&c->Object);
+    if (g_petProcess)
+        g_petProcess->DeletePet(c, -1, true);
 }
 
 void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, unsigned char PositionY, float Rotation)
@@ -12143,6 +12137,7 @@ CHARACTER* CreateCharacter(int Key, int Type, unsigned char PositionX, unsigned 
         OBJECT* o = &c->Object;
         if (o->Live && c->Key == Key)
         {
+            DeleteCharacterCompanions(c);
             CreateCharacterPointer(c, Type, PositionX, PositionY, Rotation);
             g_CharacterClearBuff(o);
             return c;
@@ -12159,6 +12154,7 @@ CHARACTER* CreateCharacter(int Key, int Type, unsigned char PositionX, unsigned 
             DeletePet(c);
             DeleteCloth(c, o);
             DeleteParts(c);
+            DeleteCharacterCompanions(c);
             CreateCharacterPointer(c, Type, PositionX, PositionY, Rotation);
             g_CharacterClearBuff(o);
             c->Key = Key;
@@ -12878,6 +12874,53 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
     SetCharacterScale(c);
 }
 
+namespace
+{
+int ReadBodyEquipmentExtended(CHARACTER* c, BYTE* Equipment)
+{
+    constexpr int BytesPerBodyPart = 3;
+    constexpr int BodyEquipmentLength = (MAX_BODYPART - 1) * BytesPerBodyPart;
+    // A transformed body stays intact, but its bytes still precede wings and helper.
+    if (c->Change)
+        return BodyEquipmentLength;
+
+    int offset = 0;
+    short bodyParts[] = {0, MODEL_BODY_HELM, MODEL_BODY_ARMOR, MODEL_BODY_PANTS, MODEL_BODY_GLOVES, MODEL_BODY_BOOTS};
+    for (int i = 1; i < MAX_BODYPART; i++)
+    {
+        c->BodyPart[i].Type = bodyParts[i] + c->SkinIndex;
+        c->BodyPart[i].ExcellentFlags = 0;
+        c->BodyPart[i].AncientDiscriminator = 0;
+        c->BodyPart[i].Level = 0;
+
+        if (Equipment[offset] != 0xFF && Equipment[offset + 1] != 0xFF)
+        {
+            short number = MAKEWORD(Equipment[offset + 1], Equipment[offset] & 0xF);
+            BYTE group = (Equipment[offset] & 0xF0) >> 4;
+            BYTE glowLevel = (Equipment[offset + 2] & 0xF0) >> 4;
+            bool isAncient = Equipment[offset + 2] & 0x04;
+            bool isExcellent = Equipment[offset + 2] & 0x08;
+
+            if (number > MAX_ITEM_INDEX)
+            {
+                // not supported
+            }
+            else
+            {
+                c->BodyPart[i].Type = Data::Items::ToModelSlot(Data::Items::MakeItemType(group, number));
+                c->BodyPart[i].Level = LevelConvert(glowLevel);
+                c->BodyPart[i].ExcellentFlags = isExcellent;
+                c->BodyPart[i].AncientDiscriminator = isAncient;
+            }
+        }
+
+        offset += BytesPerBodyPart;
+    }
+
+    return BodyEquipmentLength;
+}
+} // namespace
+
 void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCharacter, OBJECT* pHelper)
 {
     CHARACTER* c;
@@ -12929,43 +12972,7 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
     }
 
     DeleteParts(c);
-    if (c->Change)
-    {
-        // todo: is this the correct place to return?
-        return;
-    }
-
-    short bodyParts[] = { 0, MODEL_BODY_HELM, MODEL_BODY_ARMOR, MODEL_BODY_PANTS, MODEL_BODY_GLOVES, MODEL_BODY_BOOTS};
-    for (int i = 1; i < MAX_BODYPART; i++)
-    {
-        c->BodyPart[i].Type = bodyParts[i] + c->SkinIndex;
-        c->BodyPart[i].ExcellentFlags = 0;
-        c->BodyPart[i].AncientDiscriminator = 0;
-        c->BodyPart[i].Level = 0;
-
-        if (Equipment[offset] != 0xFF && Equipment[offset + 1] != 0xFF)
-        {
-            short number = MAKEWORD(Equipment[offset + 1], Equipment[offset] & 0xF);
-            BYTE group = (Equipment[offset] & 0xF0) >> 4;
-            BYTE glowLevel = (Equipment[offset + 2] & 0xF0) >> 4;
-            bool isAncient = Equipment[offset + 2] & 0x04;
-            bool isExcellent = Equipment[offset + 2] & 0x08;
-
-            if (number > MAX_ITEM_INDEX)
-            {
-                // not supported
-            }
-            else
-            {
-                c->BodyPart[i].Type = Data::Items::ToModelSlot(Data::Items::MakeItemType(group, number));
-                c->BodyPart[i].Level = LevelConvert(glowLevel);
-                c->BodyPart[i].ExcellentFlags = isExcellent;
-                c->BodyPart[i].AncientDiscriminator = isAncient;
-            }
-        }
-
-        offset += 3;
-    }
+    offset += ReadBodyEquipmentExtended(c, Equipment + offset);
 
     // Wings:
     {
@@ -12989,6 +12996,15 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
         offset += 2;
     }
 
+    if (pHelper == nullptr)
+    {
+        DeleteCharacterCompanions(c);
+    }
+    else
+    {
+        pHelper->Live = false;
+    }
+
     // Helper:
     int HelperVariant = 0;
     {
@@ -13005,16 +13021,6 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
         }
 
         // offset += 2;
-    }
-
-    if (pHelper == nullptr)
-    {
-        DeleteMount(o);
-        ThePetProcess().DeletePet(c, Data::Items::ToItemType(c->Helper.Type), true);
-    }
-    else
-    {
-        pHelper->Live = false;
     }
 
     switch (c->Helper.Type)
@@ -13069,131 +13075,20 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
         break;
     }
 
-    c->EtcPart = 0;
+    // A transformed Blood Castle carrier keeps the quest-item marker.
+    if (!c->Change || c->EtcPart > 3)
+        c->EtcPart = 0;
     if ((flags & 0x20) > 0)
     {
         c->EtcPart = PARTS_LION;
     }
 
-    ChangeChaosCastleUnit(c);
+    if (!c->Change)
+        ChangeChaosCastleUnit(c);
     SetCharacterScale(c);
 }
 
 extern int HeroIndex;
-
-namespace
-{
-    bool IsForcedNpcMonsterType(EMonsterType type)
-    {
-        const int rawType = static_cast<int>(type);
-        switch (rawType)
-        {
-        case 367:
-        case 371:
-        case 375:
-        case 376:
-        case 377:
-        case 379:
-        case 380:
-        case 381:
-        case 382:
-        case 383:
-        case 384:
-        case 385:
-        case 406:
-        case 407:
-        case 408:
-        case 414:
-        case 415:
-        case 416:
-        case 417:
-        case 450:
-        case 452:
-        case 453:
-        case 464:
-        case 465:
-        case 467:
-        case 468:
-        case 469:
-        case 470:
-        case 471:
-        case 472:
-        case 473:
-        case 474:
-        case 475:
-        case 478:
-        case 479:
-        case 492:
-        case 522:
-        case 540:
-        case 541:
-        case 542:
-        case 543:
-        case 544:
-        case 545:
-        case 546:
-        case 547:
-        case 577:
-        case 578:
-        case 579:
-        case static_cast<int>(MONSTER_WANDERING_MERCHANT_ZYRO):
-            return true;
-        default:
-            return false;
-        }
-    }
-
-    int DetermineMonsterObjectKind(EMonsterType type)
-    {
-        const int rawType = static_cast<int>(type);
-
-        // Special hard overrides first.
-        if (rawType == 451)
-        {
-            return KIND_TMP;
-        }
-
-        // Exception range that must stay monster even though values are > 200.
-        if (rawType >= 480 && rawType <= 491)
-        {
-            return KIND_MONSTER;
-        }
-
-        // Explicit NPC overrides.
-        if (rawType == 368 || rawType == 369 || rawType == 370 || IsForcedNpcMonsterType(type))
-        {
-            return KIND_NPC;
-        }
-
-        // Legacy fallback classifier.
-        if (rawType == 200)
-        {
-            return KIND_MONSTER;
-        }
-        if (rawType >= 260)
-        {
-            return KIND_MONSTER;
-        }
-        if (rawType > 200)
-        {
-            return KIND_NPC;
-        }
-        if (rawType >= 150)
-        {
-            return KIND_MONSTER;
-        }
-        if (rawType > 110)
-        {
-            return KIND_MONSTER;
-        }
-        if (rawType >= 100)
-        {
-            return KIND_TRAP;
-        }
-
-        return KIND_MONSTER;
-    }
-}
 
 void Setting_Monster(CHARACTER* c, EMonsterType Type, int PositionX, int PositionY)
 {
@@ -13212,19 +13107,12 @@ void Setting_Monster(CHARACTER* c, EMonsterType Type, int PositionX, int Positio
     if (c != NULL)
     {
         o = &c->Object;
-        for (int i = 0; i < MAX_MONSTER; i++)
-        {
-            if (Type == MonsterScript[i].Type)
-            {
-                wcscpy_s(c->ID, MAX_MONSTER_NAME + 1, MonsterScript[i].Name);
-                break;
-            }
-        }
+        GameLogic::Monsters::Names::WriteShownName(*c, Type);
 
         c->MonsterIndex = Type;
         c->Object.ExtState = 0;
         c->TargetCharacter = HeroIndex;
-        o->Kind = DetermineMonsterObjectKind(Type);
+        o->Kind = Data::Monsters::GetMonsterObjectKind(Type);
     }
 }
 
@@ -15143,17 +15031,17 @@ CHARACTER* CreateHellGate(char* ID, int Key, EMonsterType Index, int x, int y, i
 {
     CHARACTER* portal = CreateMonster(Index, x, y, Key);
     portal->Level = Index - 152 + 1;
-    wchar_t portalText[100];
-    wchar_t name[sizeof portal->ID];
 
-    CMultiLanguage::ConvertFromUtf8(name, ID);
+    // The packet's name holds MAX_USERNAME_SIZE bytes, without a terminator when it is full.
+    wchar_t ownerName[MAX_USERNAME_SIZE + 1]{};
+    CMultiLanguage::ConvertFromUtf8(ownerName, ID, MAX_USERNAME_SIZE);
 
-    mu_swprintf(portalText, portal->ID, name);
+    // The gate shows its owner: "Magic stone of <owner>".
+    // _TRUNCATE: swprintf_s would abort the MSVC client on a long name.
+    _snwprintf_s(portal->ID, std::size(portal->ID), _TRUNCATE, I18N::Game::MagicStoneOfOwner, ownerName);
 
     if (portal->Level == 7)
         portal->Object.SubType = 1;
-
-    memcpy(portal->ID, portalText, sizeof portalText);
 
     if (CreateFlag)
     {

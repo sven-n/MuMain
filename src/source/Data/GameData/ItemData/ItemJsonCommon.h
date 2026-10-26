@@ -48,7 +48,8 @@ void AddFileIssue(std::vector<ItemDataIssue>& issues, const std::string& source,
 bool ReadFileVersion(std::string_view text, const std::string& source, int maxFormatVersion, OrderedJson& root,
                      std::vector<ItemDataIssue>& issues);
 
-// The whole file as text without a UTF-8 byte order mark; nothing when it cannot be opened.
+// The whole file as text without a UTF-8 byte order mark; nothing when it cannot be opened or is not a
+// regular file (a folder).
 std::optional<std::string> ReadTextFile(const std::filesystem::path& path);
 
 // ReadFileVersion, and checks that the file has a valid "group".

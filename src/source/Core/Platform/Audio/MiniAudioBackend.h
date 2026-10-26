@@ -78,22 +78,11 @@ private:
     std::array<std::array<ma_sound, MAX_CHANNEL>, MAX_BUFFER> m_sounds{};
     std::array<bool, MAX_BUFFER> m_soundLoaded{};
     std::array<int, MAX_BUFFER> m_activeChannel{};
-    std::array<bool, MAX_BUFFER> m_sound3DEnabled{};
     // CRITICAL-1 fix: tracks how many polyphonic slots were actually initialised by
     // LoadSound(). PlaySound/StopSound/AllStopSound must iterate only these slots —
     // iterating all MAX_CHANNEL slots when numChannels < MAX_CHANNEL calls miniaudio
     // APIs on uninitialized ma_sound handles (UB).
     std::array<int, MAX_BUFFER> m_loadedChannels{};
-
-    // Per-slot object pointer for per-frame 3D position updates (Story 5.2.2).
-    // Stores the most recent pObject passed to PlaySound() for each 3D-enabled buffer slot.
-    // Lifetime: game engine guarantees object outlives the attached sound (same assumption
-    // as DirectSoundManager::attachedObjects in DSplaysound.cpp). Raw pointer is intentional —
-    // adding lifetime management here would require an engine-wide refactor.
-    // nullptr = no object attached to this slot (safe — Set3DSoundPosition() checks before deref).
-    // Story 7.8.1: Changed from const OBJECT* to const void* for cross-platform portability.
-    // Cast back to const OBJECT* in Set3DSoundPosition() when accessing position data.
-    std::array<const void*, MAX_BUFFER> m_soundObjects{};
 
     float m_bgmVolume = 1.0f; // BGM volume: 0.0 (mute) to 1.0 (full) — Story 5.4.1
     float m_sfxVolume = 1.0f; // SFX volume: 0.0 (mute) to 1.0 (full) — Story 5.4.1

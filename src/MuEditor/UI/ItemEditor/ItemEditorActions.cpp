@@ -205,10 +205,15 @@ void CItemEditorActions::RenderExportS6E3Button()
         swprintf_s(fileName, _countof(fileName), L"Data\\Local\\%ls\\Item_S6E3.bmd", g_strSelectedML.c_str());
 
         std::string problems;
-        if (g_ItemDataHandler.ExportAsS6E3(fileName, problems))
+        std::string notes;
+        if (g_ItemDataHandler.ExportAsS6E3(fileName, problems, notes))
         {
             std::string filename_str =
                 "Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_S6E3.bmd";
+            if (!notes.empty())
+            {
+                g_MuEditorConsoleUI.LogEditor(notes);
+            }
             g_MuEditorConsoleUI.LogEditor("Exported items as S6E3 legacy format: " + filename_str);
             ImGui::OpenPopup("Export S6E3 Success");
         }

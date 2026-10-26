@@ -115,7 +115,9 @@ window writes to these sections:
 - `[UI]` - `Locale`, `Font`, `RmlTheme` and `UIScalePercent` from the Display and
   Interface tabs. `TranslateItemNames` (default `1`): the "Translate item names"
   checkbox under the language, applied at once; unticked, item names stay
-  English while the rest of the UI is in the chosen language.
+  English while the rest of the UI is in the chosen language. Monster and NPC
+  names follow the language either way; only the monster in a transformation
+  ring's name follows the checkbox.
   `EnableAnimationTaskPool` (`0`/`1`, set by hand only, like the
   `--enable-taskpool` command-line flag) animates characters on worker
   threads.

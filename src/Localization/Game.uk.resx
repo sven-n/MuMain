@@ -632,19 +632,19 @@
     <comment>legacy_id=165</comment>
   </data>
   <data name="STR" xml:space="preserve">
-    <value>ВУЛ</value>
+    <value>СИЛ</value>
     <comment>legacy_id=166</comment>
   </data>
   <data name="AGI" xml:space="preserve">
-    <value>AGI</value>
+    <value>СПР</value>
     <comment>legacy_id=167</comment>
   </data>
   <data name="ENG" xml:space="preserve">
-    <value>ENG</value>
+    <value>ЕНЕ</value>
     <comment>legacy_id=168</comment>
   </data>
   <data name="STA" xml:space="preserve">
-    <value>STA</value>
+    <value>ВИТ</value>
     <comment>legacy_id=169</comment>
   </data>
   <data name="Wizardry Dmg:%d~%d" xml:space="preserve">
@@ -6321,7 +6321,7 @@
     <comment>legacy_id=1737</comment>
   </data>
   <data name="Command" xml:space="preserve">
-    <value>Команда</value>
+    <value>Командування</value>
     <comment>legacy_id=1738,1900</comment>
   </data>
   <data name="Long gmae time may be harmful to your health" xml:space="preserve">

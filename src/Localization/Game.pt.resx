@@ -640,11 +640,11 @@
     <comment>legacy_id=167</comment>
   </data>
   <data name="ENG" xml:space="preserve">
-    <value>POR</value>
+    <value>ENE</value>
     <comment>legacy_id=168</comment>
   </data>
   <data name="STA" xml:space="preserve">
-    <value>STA</value>
+    <value>VIT</value>
     <comment>legacy_id=169</comment>
   </data>
   <data name="Wizardry Dmg:%d~%d" xml:space="preserve">
@@ -12268,5 +12268,8 @@
   </data>
   <data name="QuestRequirementBuff" xml:space="preserve">
     <value>Bonus: %ls</value>
+  </data>
+  <data name="MagicStoneOfOwner" xml:space="preserve">
+    <value>Pedra mágica de %ls</value>
   </data>
 </root>
