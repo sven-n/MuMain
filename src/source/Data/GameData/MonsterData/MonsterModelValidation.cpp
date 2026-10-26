@@ -40,9 +40,8 @@ private:
 
 bool NamesSoundOfModel(const MonsterModelDefinition& model, const std::string& value)
 {
-    return std::any_of(
-        model.sounds.begin(), model.sounds.end(), [&](const MonsterModelSound& sound)
-        { return (!sound.id.empty() && sound.id == value) || (sound.id.empty() && sound.file == value); });
+    return std::any_of(model.sounds.begin(), model.sounds.end(),
+                       [&](const MonsterModelSound& sound) { return SoundNameOf(sound) == value; });
 }
 
 void ValidateSlotSet(const MonsterModelDefinition& model, const MonsterSoundSlotSet& slots, const std::string& key,
@@ -119,18 +118,20 @@ void ValidateParts(const MonsterModelDefinition& model, ModelProblems& problems)
     }
 }
 
-bool IsFileThere(const std::string& file)
+} // namespace
+
+bool IsInClientFolder(const std::string& path, bool folder)
 {
 #ifdef _WIN32
-    const std::filesystem::path path = std::filesystem::u8path(file);
+    const std::filesystem::path resolved = std::filesystem::u8path(path);
 #else
     // The data spells files as they are on disk, but checks the way the game finds them.
-    const std::filesystem::path path = MuResolvePath(file.c_str());
+    const std::filesystem::path resolved = MuResolvePath(path.c_str());
 #endif
     std::error_code ignored;
-    return std::filesystem::is_regular_file(path, ignored);
+    return folder ? std::filesystem::is_directory(resolved, ignored)
+                  : std::filesystem::is_regular_file(resolved, ignored);
 }
-} // namespace
 
 void ValidateMonsterModelNames(std::span<const MonsterModelDefinition> models, const std::string& source,
                                std::vector<ItemDataIssue>& issues)
@@ -157,14 +158,14 @@ void ValidateMonsterModelFiles(std::span<const MonsterModelDefinition> models, c
     for (const MonsterModelDefinition& model : models)
     {
         ModelProblems problems(source, model.slot, issues);
-        if (!IsFileThere(model.load.file))
+        if (!IsInClientFolder(model.load.file))
         {
             problems.Add(ItemDataIssueSeverity::Warning, "file",
                          model.load.file + " is not in the client folder; the model has no body");
         }
         for (size_t i = 0; i < model.parts.size(); ++i)
         {
-            if (!IsFileThere(model.parts[i].load.file))
+            if (!IsInClientFolder(model.parts[i].load.file))
             {
                 problems.Add(ItemDataIssueSeverity::Warning, "parts[" + std::to_string(i) + "].file",
                              model.parts[i].load.file + " is not in the client folder");

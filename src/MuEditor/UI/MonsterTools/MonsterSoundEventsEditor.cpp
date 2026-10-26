@@ -50,12 +50,6 @@ constexpr int NewChance = 2;
 // A new frame range is this many frames long.
 constexpr float NewFrames = 1.0f;
 
-// The value a slot or an event names a sound by: its id, else its file.
-const std::string& NameOf(const MonsterModelSound& sound)
-{
-    return sound.id.empty() ? sound.file : sound.id;
-}
-
 std::string AnimationsText(const std::vector<int>& animations)
 {
     std::string text;
@@ -124,8 +118,9 @@ void PlayEvent(const MonsterModelDefinition& model, const MonsterSoundEvent& eve
         {
             continue;
         }
-        const auto sound = std::find_if(model.sounds.begin(), model.sounds.end(),
-                                        [&](const MonsterModelSound& candidate) { return NameOf(candidate) == name; });
+        const auto sound =
+            std::find_if(model.sounds.begin(), model.sounds.end(), [&](const MonsterModelSound& candidate)
+                         { return Data::Monsters::SoundNameOf(candidate) == name; });
         if (!modelOpen && sound != model.sounds.end())
         {
             Data::Monsters::ModelLoader::LoadSound(*sound);
@@ -150,7 +145,7 @@ bool SoundCombo(const char* id, const MonsterModelDefinition& model, std::string
         bool listed = false;
         for (const MonsterModelSound& sound : model.sounds)
         {
-            const std::string& name = NameOf(sound);
+            const std::string& name = Data::Monsters::SoundNameOf(sound);
             listed = listed || name == value;
             if (ImGui::Selectable(name.c_str(), name == value) && name != value)
             {
@@ -466,7 +461,7 @@ void Render(MonsterModelDefinition& model, int slot, bool modelOpen, ModelDraft&
     {
         MonsterSoundEvent event;
         event.animations = {MONSTER01_ATTACK1};
-        event.sounds = {NameOf(model.sounds.front())};
+        event.sounds = {Data::Monsters::SoundNameOf(model.sounds.front())};
         model.soundEvents.push_back(event);
         draft.AfterChange(true, StepLabel::Model(model.slot, I18N::Editor::StepWhatSoundEvents));
     }

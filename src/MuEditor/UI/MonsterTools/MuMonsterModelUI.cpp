@@ -18,13 +18,13 @@
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/ItemTools/ItemModelFiles.h"
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
-#include "Core/Platform/PathResolve.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/GameData/MonsterData/MonsterAnimations.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
+#include "Data/GameData/MonsterData/MonsterModelValidation.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "I18N/All.h"
 #include "Render/Models/ZzzBMD.h"
@@ -33,11 +33,9 @@
 #include <algorithm>
 #include <array>
 #include <cstdio>
-#include <filesystem>
 #include <optional>
 #include <string>
 #include <string_view>
-#include <system_error>
 #include <vector>
 
 namespace MuEditor::Monsters
@@ -58,20 +56,6 @@ constexpr int ShownUsers = 12;
 constexpr float SpeedStep = 0.005f;
 constexpr float MaxSpeed = 5.0f;
 constexpr ImVec4 WarningColor{1.0f, 0.75f, 0.3f, 1.0f};
-
-// What a path of the model list names, below the client folder (the working
-// folder), found as the game finds it.
-bool IsOnDisk(const std::string& path, bool folder)
-{
-#ifdef _WIN32
-    const std::filesystem::path resolved = std::filesystem::u8path(path);
-#else
-    const std::filesystem::path resolved(MuResolvePath(path.c_str()));
-#endif
-    std::error_code ignored;
-    return folder ? std::filesystem::is_directory(resolved, ignored)
-                  : std::filesystem::is_regular_file(resolved, ignored);
-}
 
 void RenderWarning(const char* text)
 {
@@ -99,12 +83,6 @@ std::vector<std::string> ListedFiles()
         }
     }
     return files;
-}
-
-// The value a sound slot names the sound by: its id, else its file.
-const std::string& SlotNameOf(const MonsterModelSound& sound)
-{
-    return sound.id.empty() ? sound.file : sound.id;
 }
 
 // Plays the sound at the preview volume. A model that is not open has not
@@ -265,7 +243,7 @@ void MuMonsterModelUI::RenderUsers(int slot)
 void MuMonsterModelUI::RenderFile(MonsterModelDefinition& model)
 {
     ImGui::TextUnformatted(model.load.file.c_str());
-    if (!IsOnDisk(model.load.file, false))
+    if (!Data::Monsters::IsInClientFolder(model.load.file))
     {
         RenderWarning(I18N::Editor::TheFileIsNotInTheClientFolderTheModelHasNoBody);
     }
@@ -324,7 +302,7 @@ void MuMonsterModelUI::RenderTextureFolders(MonsterModelDefinition& model)
         ImGui::EndDisabled();
         ImGui::SameLine();
         ImGui::TextUnformatted(folder.c_str());
-        if (!IsOnDisk("Data/" + folder, true))
+        if (!Data::Monsters::IsInClientFolder("Data/" + folder, true))
         {
             ImGui::SameLine();
             RenderWarning(I18N::Editor::NotInTheClientFolder);
@@ -485,7 +463,7 @@ void MuMonsterModelUI::RenderSoundSlots(MonsterModelDefinition& model)
             }
             for (const MonsterModelSound& sound : model.sounds)
             {
-                const std::string& value = SlotNameOf(sound);
+                const std::string& value = Data::Monsters::SoundNameOf(sound);
                 if (ImGui::Selectable(value.c_str(), value == current))
                 {
                     chosen = value;

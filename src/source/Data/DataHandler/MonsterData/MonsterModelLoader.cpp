@@ -262,7 +262,7 @@ std::optional<int> FindSoundNumber(const MonsterModelDefinition& model, const st
 {
     for (const MonsterModelSound& sound : model.sounds)
     {
-        if ((!sound.id.empty() && sound.id == value) || (sound.id.empty() && sound.file == value))
+        if (SoundNameOf(sound) == value)
         {
             return SoundNumber(sound);
         }

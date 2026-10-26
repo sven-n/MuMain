@@ -31,6 +31,9 @@ std::string_view GetMonsterModelTypeName(int type);
 // trap). The slot, or nullopt for a text that names none.
 std::optional<int> FindMonsterModelReference(std::string_view model);
 
+// How a monster's "model" starts that names a map object.
+constexpr std::string_view MapObjectPrefix = "mapObject ";
+
 // How a monster's "model" names the slot; empty for a slot no monster can
 // use.
 std::string GetMonsterModelReference(int slot);

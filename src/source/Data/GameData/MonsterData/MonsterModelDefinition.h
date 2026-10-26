@@ -29,6 +29,13 @@ struct MonsterModelSound
     bool operator==(const MonsterModelSound&) const = default;
 };
 
+// The name a sound slot or a sound event names the model's sound by: its id,
+// or its file when it has none.
+inline const std::string& SoundNameOf(const MonsterModelSound& sound)
+{
+    return sound.id.empty() ? sound.file : sound.id;
+}
+
 // The sound slots of the model: the game plays one of the two idle sounds
 // while it stands or walks, one of the two attack sounds when it attacks or
 // is hit, and the die sound. A slot names a sound by its id, or by its file

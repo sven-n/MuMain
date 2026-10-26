@@ -379,7 +379,6 @@ constexpr SlotSymbol OtherAreaModels[] = {
 };
 
 constexpr std::string_view PlayerModel = "player";
-constexpr std::string_view MapObjectPrefix = "mapObject ";
 
 constexpr SlotSymbol BitmapSlots[] = {
     {"BITMAP_MONSTER_SKIN", BITMAP_MONSTER_SKIN},

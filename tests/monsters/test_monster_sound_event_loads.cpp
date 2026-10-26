@@ -48,8 +48,8 @@ std::set<int> OwnSounds(const Data::Monsters::MonsterModelDefinition& model)
     std::set<int> numbers;
     for (const Data::Monsters::MonsterModelSound& sound : model.sounds)
     {
-        const std::string& name = sound.id.empty() ? sound.file : sound.id;
-        if (const std::optional<int> number = Data::Monsters::ModelLoader::FindSoundNumber(model, name))
+        if (const std::optional<int> number =
+                Data::Monsters::ModelLoader::FindSoundNumber(model, Data::Monsters::SoundNameOf(sound)))
         {
             numbers.insert(*number);
         }

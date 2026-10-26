@@ -22,9 +22,6 @@ namespace MuEditor::Monsters::ShownModel
 {
 namespace
 {
-// How a monster's model names a map object (MonsterModelSlots).
-constexpr std::string_view MapObjectPrefix = "mapObject ";
-
 // The slots asked for on this map and with this model table: two windows
 // that show two models whose files are missing ask once each, not by turns
 // each frame. A new map or a changed table asks again.
@@ -89,11 +86,11 @@ void RenderWhyNoModel(const Data::Monsters::MonsterDefinition& monster)
         // skeletons with their body as its skin (SubType).
         ImGui::TextDisabled("%s", I18N::Editor::MonsterModelPlayerNote);
     }
-    else if (monster.model.starts_with(MapObjectPrefix))
+    else if (monster.model.starts_with(Data::Monsters::MapObjectPrefix))
     {
-        ImGui::TextDisabled(
-            "%s", I18N::Format(I18N::Editor::MonsterModelMapObjectNote, {monster.model.substr(MapObjectPrefix.size())})
-                      .c_str());
+        ImGui::TextDisabled("%s", I18N::Format(I18N::Editor::MonsterModelMapObjectNote,
+                                               {monster.model.substr(Data::Monsters::MapObjectPrefix.size())})
+                                      .c_str());
     }
     else if (slot && !Data::Monsters::IsMonsterRangeSlot(*slot) && !Data::Monsters::IsNpcRangeSlot(*slot))
     {

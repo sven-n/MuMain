@@ -18,6 +18,10 @@ namespace Data::Monsters
 void ValidateMonsterModelNames(std::span<const MonsterModelDefinition> models, const std::string& source,
                                std::vector<Items::ItemDataIssue>& issues);
 
+// Whether a path of the model list, a file or a folder, is in the client
+// folder (the working folder), found as the game finds it.
+bool IsInClientFolder(const std::string& path, bool folder = false);
+
 // Warns about each model and part file that is not in the client folder (the
 // working folder): the model stays without a body.
 void ValidateMonsterModelFiles(std::span<const MonsterModelDefinition> models, const std::string& source,
