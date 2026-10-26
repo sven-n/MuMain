@@ -120,9 +120,12 @@ using ItemTooltipTextMeasure = int (*)(const wchar_t* text, size_t length);
 // level whose conditions hold (a line may be a shared text of the tooltip file), each wrapped to the tooltip's width
 // and at its line breaks, the pieces in the line's color (its first color rule that holds) and style, a blank line or
 // piece as the tooltip's own blank rows. At
-// most MaxItemDescriptionRows rows.
+// most `rowsLeft` rows, which it lowers by the rows it wrote: a tooltip's description, both its parts together, has
+// MaxItemDescriptionRows. `afterOptions` picks the lines drawn after the item's options ("after": "options") or
+// the others.
 void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, int level,
-                               const ItemTooltipValues& values, ItemTooltipTextMeasure measure);
+                               const ItemTooltipValues& values, bool afterOptions, int& rowsLeft,
+                               ItemTooltipTextMeasure measure);
 
 ///////////////////////////////////////////////////////////////////////////////
 // party

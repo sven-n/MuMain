@@ -6852,10 +6852,6 @@
     <value>Klicken Sie auf die Schaltfläche, um alle Statuspunkte zurückzusetzen.</value>
     <comment>legacy_id=1886</comment>
   </data>
-  <data name="Register with the NPC to receive various gifts." xml:space="preserve">
-    <value>Registrieren Sie sich beim NPC, um verschiedene Geschenke zu erhalten.</value>
-    <comment>legacy_id=1887</comment>
-  </data>
   <data name="Exchange has been made." xml:space="preserve">
     <value>Der Umtausch wurde durchgeführt.</value>
     <comment>legacy_id=1888</comment>
@@ -6947,18 +6943,6 @@
   <data name="Fenrir" xml:space="preserve">
     <value>Fenrir</value>
     <comment>legacy_id=1916</comment>
-  </data>
-  <data name="FragmentOfHornCanBeMade" xml:space="preserve">
-    <value>Ein Hornfragment kann aus dem göttlichen Schutz der Göttin und einem Rüstungsfragment hergestellt werden.</value>
-    <comment>legacy_id=1917</comment>
-  </data>
-  <data name="Broken horn can be made using the claw of beast and fragment of horn." xml:space="preserve">
-    <value>Ein zerbrochenes Horn kann aus der Klaue der Bestie und einem Hornfragment hergestellt werden.</value>
-    <comment>legacy_id=1918</comment>
-  </data>
-  <data name="Fenrir's horn can be made through item combination." xml:space="preserve">
-    <value>Das Horn des Fenrir kann durch die Kombination von Gegenständen hergestellt werden.</value>
-    <comment>legacy_id=1919</comment>
   </data>
   <data name="Can summon the Fenrir when equipped." xml:space="preserve">
     <value>Kann Fenrir beschwören, wenn es ausgerüstet ist.</value>
@@ -7816,10 +7800,6 @@
     <value>Die Verfeinerung hat begonnen. Bei der Verfeinerung wird der Gegenstand in einen Verfeinerungsstein für die Verstärkung umgewandelt. Der verfeinerte Gegenstand verschwindet, prüfen Sie ihn also unbedingt.</value>
     <comment>legacy_id=2224</comment>
   </data>
-  <data name="VitalityD2225" xml:space="preserve">
-    <value>Vitalität +%d</value>
-    <comment>legacy_id=2225</comment>
-  </data>
   <data name="This item is not allowed to use the private store." xml:space="preserve">
     <value>Dieser Gegenstand kann nicht im persönlichen Laden verwendet werden.</value>
     <comment>legacy_id=2226</comment>
@@ -7843,10 +7823,6 @@
   <data name="Defense Power increase +%d" xml:space="preserve">
     <value>Verteidigungskraft +%d</value>
     <comment>legacy_id=2231</comment>
-  </data>
-  <data name="Enjoy Halloween Festival." xml:space="preserve">
-    <value>Viel Spaß beim Halloween-Fest.</value>
-    <comment>legacy_id=2232</comment>
   </data>
   <data name="Blessing of Jack O'Lantern" xml:space="preserve">
     <value>Segen von Jack O'Lantern</value>
@@ -7892,10 +7868,6 @@
     <value>Weihnachten</value>
     <comment>legacy_id=2243</comment>
   </data>
-  <data name="Fireworks will appear once thrown in the field." xml:space="preserve">
-    <value>Ein Feuerwerk erscheint, wenn Sie es auf den Boden werfen.</value>
-    <comment>legacy_id=2244</comment>
-  </data>
   <data name="Santa Clause" xml:space="preserve">
     <value>Weihnachtsmann</value>
     <comment>legacy_id=2245</comment>
@@ -7907,10 +7879,6 @@
   <data name="Snowman" xml:space="preserve">
     <value>Schneemann</value>
     <comment>legacy_id=2247</comment>
-  </data>
-  <data name="Merry Christmas." xml:space="preserve">
-    <value>Frohe Weihnachten.</value>
-    <comment>legacy_id=2248</comment>
   </data>
   <data name="Stonger effect has taken place." xml:space="preserve">
     <value>Ein stärkerer Effekt ist eingetreten.</value>
@@ -7927,10 +7895,6 @@
   <data name="Unable to gain experience rate" xml:space="preserve">
     <value>Keine Erfahrung erhältlich</value>
     <comment>legacy_id=2255</comment>
-  </data>
-  <data name="usable %dtimes" xml:space="preserve">
-    <value>%d-mal verwendbar</value>
-    <comment>legacy_id=2260</comment>
   </data>
   <data name="You can achieve special items with combinations." xml:space="preserve">
     <value>Durch Kombinationen können Sie besondere Gegenstände erhalten.</value>
@@ -8127,10 +8091,6 @@
   <data name="You do not have sufficient points." xml:space="preserve">
     <value>Sie haben nicht genügend Punkte.</value>
     <comment>legacy_id=2322</comment>
-  </data>
-  <data name="GM has gifted this special box." xml:space="preserve">
-    <value>Ein GM hat diese besondere Box verschenkt.</value>
-    <comment>legacy_id=2323</comment>
   </data>
   <data name="GM summon zone" xml:space="preserve">
     <value>GM-Beschwörungszone</value>
@@ -8775,10 +8735,6 @@
     <value>Willkommen im Dorf des Weihnachtsmanns. Hier ist ein Geschenk für Sie. Hier finden Sie immer etwas, das Ihnen Glück bringt.</value>
     <comment>legacy_id=2588</comment>
   </data>
-  <data name="Relocate to the Santa's Village by the right-mouse click." xml:space="preserve">
-    <value>Per Rechtsklick ins Dorf des Weihnachtsmanns wechseln.</value>
-    <comment>legacy_id=2589</comment>
-  </data>
   <data name="Would you like to move to the Santa's Village?" xml:space="preserve">
     <value>Möchten Sie ins Dorf des Weihnachtsmanns wechseln?</value>
     <comment>legacy_id=2590</comment>
@@ -9114,18 +9070,6 @@
   <data name="Select to move." xml:space="preserve">
     <value>Zum Verschieben auswählen.</value>
     <comment>legacy_id=2731</comment>
-  </data>
-  <data name="Transform into Panda." xml:space="preserve">
-    <value>Verwandelt Sie in einen Panda.</value>
-    <comment>legacy_id=2743</comment>
-  </data>
-  <data name="Zen increase 50%%" xml:space="preserve">
-    <value>Zen +50%%</value>
-    <comment>legacy_id=2744</comment>
-  </data>
-  <data name="Damage/Wizardry/Curse +30" xml:space="preserve">
-    <value>Schaden/Zauberei/Fluch +30</value>
-    <comment>legacy_id=2745</comment>
   </data>
   <data name="Lugard" xml:space="preserve">
     <value>Lugard</value>
@@ -10087,26 +10031,6 @@
     <value>Auf dem Loren-Markt können Sie andere nicht in Ihre Party einladen.</value>
     <comment>legacy_id=3064</comment>
   </data>
-  <data name="Equip to transform into a Skeleton Warrior." xml:space="preserve">
-    <value>Ausrüsten, um sich in einen Skelettkrieger zu verwandeln.</value>
-    <comment>legacy_id=3065</comment>
-  </data>
-  <data name="Damage/Wizardry/Curse +40" xml:space="preserve">
-    <value>Schaden/Zauberei/Fluch +40</value>
-    <comment>legacy_id=3066</comment>
-  </data>
-  <data name="Equipping along with a Pet Skeleton" xml:space="preserve">
-    <value>Zusammen mit einem Haustier-Skelett ausgerüstet</value>
-    <comment>legacy_id=3067</comment>
-  </data>
-  <data name="Equipping along with a Skeleton Transformation Ring" xml:space="preserve">
-    <value>Zusammen mit einem Skelett-Verwandlungsring ausgerüstet</value>
-    <comment>legacy_id=3071</comment>
-  </data>
-  <data name="increases EXP by 30%%." xml:space="preserve">
-    <value>erhöht er die Erfahrung um 30%%.</value>
-    <comment>legacy_id=3072</comment>
-  </data>
   <data name="Chaos Castle Lv.%lu Guardsman x %lu/%lu" xml:space="preserve">
     <value>Chaos Castle Lv.%lu Gardist x %lu/%lu</value>
     <comment>legacy_id=3074</comment>
@@ -10150,10 +10074,6 @@
   <data name="+15 Item Creation" xml:space="preserve">
     <value>+15-Gegenstand erstellen</value>
     <comment>legacy_id=3087</comment>
-  </data>
-  <data name="Unable to Equip with a Different Transformation Ring" xml:space="preserve">
-    <value>Kann nicht zusammen mit einem anderen Verwandlungsring ausgerüstet werden</value>
-    <comment>legacy_id=3088</comment>
   </data>
   <data name="Cannot be equipped while another Transformation Ring is equipped." xml:space="preserve">
     <value>Kann nicht ausgerüstet werden, während ein anderer Verwandlungsring ausgerüstet ist.</value>

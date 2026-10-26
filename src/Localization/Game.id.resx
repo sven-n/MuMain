@@ -6832,10 +6832,6 @@
     <value>Klik pada tombol untuk menginisialisasi ulang semua poin stat.</value>
     <comment>legacy_id=1886</comment>
   </data>
-  <data name="Register with the NPC to receive various gifts." xml:space="preserve">
-    <value>Daftar ke NPC untuk menerima berbagai hadiah.</value>
-    <comment>legacy_id=1887</comment>
-  </data>
   <data name="Exchange has been made." xml:space="preserve">
     <value>Pertukaran telah dilakukan.</value>
     <comment>legacy_id=1888</comment>
@@ -6927,18 +6923,6 @@
   <data name="Fenrir" xml:space="preserve">
     <value>Fenrir</value>
     <comment>legacy_id=1916</comment>
-  </data>
-  <data name="FragmentOfHornCanBeMade" xml:space="preserve">
-    <value>Fragmen tanduk dapat dibuat menggunakan perlindungan Ilahi dari Dewi dan fragmen baju besi.</value>
-    <comment>legacy_id=1917</comment>
-  </data>
-  <data name="Broken horn can be made using the claw of beast and fragment of horn." xml:space="preserve">
-    <value>Tanduk patah dapat dibuat dengan menggunakan cakar binatang dan pecahan tanduk.</value>
-    <comment>legacy_id=1918</comment>
-  </data>
-  <data name="Fenrir's horn can be made through item combination." xml:space="preserve">
-    <value>Tanduk Fenrir dapat dibuat melalui kombinasi item.</value>
-    <comment>legacy_id=1919</comment>
   </data>
   <data name="Can summon the Fenrir when equipped." xml:space="preserve">
     <value>Dapat memanggil Fenrir saat dipakai.</value>
@@ -7796,10 +7780,6 @@
     <value>Kilang telah dimulai. Refinery merupakan bagian dari proses perubahan item menjadi Refining Stone untuk diperkuat. Item yang dimurnikan akan dihilangkan, pastikan untuk memeriksa item tersebut.</value>
     <comment>legacy_id=2224</comment>
   </data>
-  <data name="VitalityD2225" xml:space="preserve">
-    <value>vitalitas +%d</value>
-    <comment>legacy_id=2225</comment>
-  </data>
   <data name="This item is not allowed to use the private store." xml:space="preserve">
     <value>Item ini tidak diperbolehkan menggunakan toko pribadi.</value>
     <comment>legacy_id=2226</comment>
@@ -7823,10 +7803,6 @@
   <data name="Defense Power increase +%d" xml:space="preserve">
     <value>Peningkatan Kekuatan Pertahanan +%d</value>
     <comment>legacy_id=2231</comment>
-  </data>
-  <data name="Enjoy Halloween Festival." xml:space="preserve">
-    <value>Nikmati Festival Halloween.</value>
-    <comment>legacy_id=2232</comment>
   </data>
   <data name="Blessing of Jack O'Lantern" xml:space="preserve">
     <value>Berkat Jack O'Lantern</value>
@@ -7872,10 +7848,6 @@
     <value>Natal</value>
     <comment>legacy_id=2243</comment>
   </data>
-  <data name="Fireworks will appear once thrown in the field." xml:space="preserve">
-    <value>Kembang api akan muncul setelah dilempar ke lapangan.</value>
-    <comment>legacy_id=2244</comment>
-  </data>
   <data name="Santa Clause" xml:space="preserve">
     <value>Klausul Sinterklas</value>
     <comment>legacy_id=2245</comment>
@@ -7887,10 +7859,6 @@
   <data name="Snowman" xml:space="preserve">
     <value>manusia salju</value>
     <comment>legacy_id=2247</comment>
-  </data>
-  <data name="Merry Christmas." xml:space="preserve">
-    <value>Selamat natal.</value>
-    <comment>legacy_id=2248</comment>
   </data>
   <data name="Stonger effect has taken place." xml:space="preserve">
     <value>Efek yang lebih kuat telah terjadi.</value>
@@ -7907,10 +7875,6 @@
   <data name="Unable to gain experience rate" xml:space="preserve">
     <value>Tidak dapat memperoleh tingkat pengalaman</value>
     <comment>legacy_id=2255</comment>
-  </data>
-  <data name="usable %dtimes" xml:space="preserve">
-    <value>dapat digunakan %d kali</value>
-    <comment>legacy_id=2260</comment>
   </data>
   <data name="You can achieve special items with combinations." xml:space="preserve">
     <value>Anda dapat memperoleh item khusus dengan kombinasi.</value>
@@ -8107,10 +8071,6 @@
   <data name="You do not have sufficient points." xml:space="preserve">
     <value>Anda tidak memiliki poin yang cukup.</value>
     <comment>legacy_id=2322</comment>
-  </data>
-  <data name="GM has gifted this special box." xml:space="preserve">
-    <value>GM telah menghadiahkan kotak khusus ini.</value>
-    <comment>legacy_id=2323</comment>
   </data>
   <data name="GM summon zone" xml:space="preserve">
     <value>Zona pemanggilan GM</value>
@@ -8755,10 +8715,6 @@
     <value>Selamat datang di Desa Santa. Ini hadiah untukmu. Anda akan selalu menemukan sesuatu yang memberi Anda banyak uang di sini.</value>
     <comment>legacy_id=2588</comment>
   </data>
-  <data name="Relocate to the Santa's Village by the right-mouse click." xml:space="preserve">
-    <value>Pindah ke Desa Santa dengan klik kanan mouse.</value>
-    <comment>legacy_id=2589</comment>
-  </data>
   <data name="Would you like to move to the Santa's Village?" xml:space="preserve">
     <value>Apakah Anda ingin pindah ke Desa Santa?</value>
     <comment>legacy_id=2590</comment>
@@ -9094,18 +9050,6 @@
   <data name="Select to move." xml:space="preserve">
     <value>Pilih untuk bergerak.</value>
     <comment>legacy_id=2731</comment>
-  </data>
-  <data name="Transform into Panda." xml:space="preserve">
-    <value>Berubah menjadi Panda.</value>
-    <comment>legacy_id=2743</comment>
-  </data>
-  <data name="Zen increase 50%%" xml:space="preserve">
-    <value>Zen meningkat 50%%</value>
-    <comment>legacy_id=2744</comment>
-  </data>
-  <data name="Damage/Wizardry/Curse +30" xml:space="preserve">
-    <value>Kerusakan/Sihir/Kutukan +30</value>
-    <comment>legacy_id=2745</comment>
   </data>
   <data name="Lugard" xml:space="preserve">
     <value>orang bodoh</value>
@@ -10067,26 +10011,6 @@
     <value>Anda tidak dapat meminta orang lain untuk bergabung dengan pesta Anda saat berada di Pasar Loren.</value>
     <comment>legacy_id=3064</comment>
   </data>
-  <data name="Equip to transform into a Skeleton Warrior." xml:space="preserve">
-    <value>Lengkapi untuk berubah menjadi Skeleton Warrior.</value>
-    <comment>legacy_id=3065</comment>
-  </data>
-  <data name="Damage/Wizardry/Curse +40" xml:space="preserve">
-    <value>Kerusakan/Sihir/Kutukan +40</value>
-    <comment>legacy_id=3066</comment>
-  </data>
-  <data name="Equipping along with a Pet Skeleton" xml:space="preserve">
-    <value>Dilengkapi dengan Pet Skeleton</value>
-    <comment>legacy_id=3067</comment>
-  </data>
-  <data name="Equipping along with a Skeleton Transformation Ring" xml:space="preserve">
-    <value>Dilengkapi dengan Cincin Transformasi Kerangka</value>
-    <comment>legacy_id=3071</comment>
-  </data>
-  <data name="increases EXP by 30%%." xml:space="preserve">
-    <value>meningkatkan EXP sebesar 30%%.</value>
-    <comment>legacy_id=3072</comment>
-  </data>
   <data name="Chaos Castle Lv.%lu Guardsman x %lu/%lu" xml:space="preserve">
     <value>Chaos Castle Lv.%lu Penjaga x %lu/%lu</value>
     <comment>legacy_id=3074</comment>
@@ -10130,10 +10054,6 @@
   <data name="+15 Item Creation" xml:space="preserve">
     <value>+15 Pembuatan Barang</value>
     <comment>legacy_id=3087</comment>
-  </data>
-  <data name="Unable to Equip with a Different Transformation Ring" xml:space="preserve">
-    <value>Tidak Dapat Melengkapi Cincin Transformasi Berbeda</value>
-    <comment>legacy_id=3088</comment>
   </data>
   <data name="Cannot be equipped while another Transformation Ring is equipped." xml:space="preserve">
     <value>Tidak dapat digunakan ketika Cincin Transformasi lain sedang dipasang.</value>

@@ -6832,10 +6832,6 @@
     <value>Натисніть кнопку, щоб повторно ініціалізувати всі статистичні точки.</value>
     <comment>legacy_id=1886</comment>
   </data>
-  <data name="Register with the NPC to receive various gifts." xml:space="preserve">
-    <value>Зареєструйтесь у NPC, щоб отримувати різні подарунки.</value>
-    <comment>legacy_id=1887</comment>
-  </data>
   <data name="Exchange has been made." xml:space="preserve">
     <value>Здійснено обмін.</value>
     <comment>legacy_id=1888</comment>
@@ -6927,18 +6923,6 @@
   <data name="Fenrir" xml:space="preserve">
     <value>Фенрір</value>
     <comment>legacy_id=1916</comment>
-  </data>
-  <data name="FragmentOfHornCanBeMade" xml:space="preserve">
-    <value>Фрагмент рогу можна зробити за допомогою Божественного захисту Богині та фрагмента обладунку.</value>
-    <comment>legacy_id=1917</comment>
-  </data>
-  <data name="Broken horn can be made using the claw of beast and fragment of horn." xml:space="preserve">
-    <value>Зламаний ріг можна зробити за допомогою пазурі звіра і фрагмента рогу.</value>
-    <comment>legacy_id=1918</comment>
-  </data>
-  <data name="Fenrir's horn can be made through item combination." xml:space="preserve">
-    <value>Ріг Фенріра можна зробити за допомогою комбінації предметів.</value>
-    <comment>legacy_id=1919</comment>
   </data>
   <data name="Can summon the Fenrir when equipped." xml:space="preserve">
     <value>Може закликати Фенріра, коли є екіпірований.</value>
@@ -7796,10 +7780,6 @@
     <value>Нафтопереробний завод почав роботу. Нафтопереробний завод є частиною процесу зміни предмета на очисний камінь, який потрібно посилити. Доопрацьований предмет зникне, обов’язково перевірте предмет.</value>
     <comment>legacy_id=2224</comment>
   </data>
-  <data name="VitalityD2225" xml:space="preserve">
-    <value>життєва сила +%d</value>
-    <comment>legacy_id=2225</comment>
-  </data>
   <data name="This item is not allowed to use the private store." xml:space="preserve">
     <value>Цей товар не можна використовувати в приватному магазині.</value>
     <comment>legacy_id=2226</comment>
@@ -7823,10 +7803,6 @@
   <data name="Defense Power increase +%d" xml:space="preserve">
     <value>Збільшення сили захисту +%d</value>
     <comment>legacy_id=2231</comment>
-  </data>
-  <data name="Enjoy Halloween Festival." xml:space="preserve">
-    <value>Насолоджуйтесь фестивалем Хелловін.</value>
-    <comment>legacy_id=2232</comment>
   </data>
   <data name="Blessing of Jack O'Lantern" xml:space="preserve">
     <value>Благословення Джека О'Лантерна</value>
@@ -7872,10 +7848,6 @@
     <value>Різдво</value>
     <comment>legacy_id=2243</comment>
   </data>
-  <data name="Fireworks will appear once thrown in the field." xml:space="preserve">
-    <value>Феєрверк з'явиться, коли його кинуть у поле.</value>
-    <comment>legacy_id=2244</comment>
-  </data>
   <data name="Santa Clause" xml:space="preserve">
     <value>Дід Мороз</value>
     <comment>legacy_id=2245</comment>
@@ -7887,10 +7859,6 @@
   <data name="Snowman" xml:space="preserve">
     <value>Сніговик</value>
     <comment>legacy_id=2247</comment>
-  </data>
-  <data name="Merry Christmas." xml:space="preserve">
-    <value>Веселого Різдва.</value>
-    <comment>legacy_id=2248</comment>
   </data>
   <data name="Stonger effect has taken place." xml:space="preserve">
     <value>Має місце сильніший ефект.</value>
@@ -7907,10 +7875,6 @@
   <data name="Unable to gain experience rate" xml:space="preserve">
     <value>Не вдається отримати рівень досвіду</value>
     <comment>legacy_id=2255</comment>
-  </data>
-  <data name="usable %dtimes" xml:space="preserve">
-    <value>можна використовувати %d разів</value>
-    <comment>legacy_id=2260</comment>
   </data>
   <data name="You can achieve special items with combinations." xml:space="preserve">
     <value>Ви можете отримати спеціальні предмети за допомогою комбінацій.</value>
@@ -8107,10 +8071,6 @@
   <data name="You do not have sufficient points." xml:space="preserve">
     <value>У вас недостатньо балів.</value>
     <comment>legacy_id=2322</comment>
-  </data>
-  <data name="GM has gifted this special box." xml:space="preserve">
-    <value>GM подарував цю особливу коробку.</value>
-    <comment>legacy_id=2323</comment>
   </data>
   <data name="GM summon zone" xml:space="preserve">
     <value>Зона виклику GM</value>
@@ -8755,10 +8715,6 @@
     <value>Ласкаво просимо в село Діда Мороза. Ось тобі подарунок. Тут ви завжди знайдете, що принесе вам багатство.</value>
     <comment>legacy_id=2588</comment>
   </data>
-  <data name="Relocate to the Santa's Village by the right-mouse click." xml:space="preserve">
-    <value>Перемістіть в село Діда Мороза, клацнувши правою кнопкою миші.</value>
-    <comment>legacy_id=2589</comment>
-  </data>
   <data name="Would you like to move to the Santa's Village?" xml:space="preserve">
     <value>Чи хотіли б ви переїхати в село Діда Мороза?</value>
     <comment>legacy_id=2590</comment>
@@ -9094,18 +9050,6 @@
   <data name="Select to move." xml:space="preserve">
     <value>Виберіть для переміщення.</value>
     <comment>legacy_id=2731</comment>
-  </data>
-  <data name="Transform into Panda." xml:space="preserve">
-    <value>Перетворіться на панду.</value>
-    <comment>legacy_id=2743</comment>
-  </data>
-  <data name="Zen increase 50%%" xml:space="preserve">
-    <value>Дзен збільшення 50%%</value>
-    <comment>legacy_id=2744</comment>
-  </data>
-  <data name="Damage/Wizardry/Curse +30" xml:space="preserve">
-    <value>Пошкодження/Чарівництво/Прокляття +30</value>
-    <comment>legacy_id=2745</comment>
   </data>
   <data name="Lugard" xml:space="preserve">
     <value>Лугард</value>
@@ -10067,26 +10011,6 @@
     <value>Ви не можете просити інших приєднатися до вашої групи, перебуваючи на ринку Лорен.</value>
     <comment>legacy_id=3064</comment>
   </data>
-  <data name="Equip to transform into a Skeleton Warrior." xml:space="preserve">
-    <value>Одягніть, щоб перетворитися на воїна-скелета.</value>
-    <comment>legacy_id=3065</comment>
-  </data>
-  <data name="Damage/Wizardry/Curse +40" xml:space="preserve">
-    <value>Пошкодження/Чарівництво/Прокляття +40</value>
-    <comment>legacy_id=3066</comment>
-  </data>
-  <data name="Equipping along with a Pet Skeleton" xml:space="preserve">
-    <value>Екіпірування разом зі скелетом домашньої тварини</value>
-    <comment>legacy_id=3067</comment>
-  </data>
-  <data name="Equipping along with a Skeleton Transformation Ring" xml:space="preserve">
-    <value>Екіпірування разом із кільцем трансформації скелета</value>
-    <comment>legacy_id=3071</comment>
-  </data>
-  <data name="increases EXP by 30%%." xml:space="preserve">
-    <value>збільшує досвід на 30%%.</value>
-    <comment>legacy_id=3072</comment>
-  </data>
   <data name="Chaos Castle Lv.%lu Guardsman x %lu/%lu" xml:space="preserve">
     <value>Chaos Castle Lv.%lu Guardsman x %lu/%lu</value>
     <comment>legacy_id=3074</comment>
@@ -10130,10 +10054,6 @@
   <data name="+15 Item Creation" xml:space="preserve">
     <value>+15 Створення предметів</value>
     <comment>legacy_id=3087</comment>
-  </data>
-  <data name="Unable to Equip with a Different Transformation Ring" xml:space="preserve">
-    <value>Неможливо спорядити інше кільце трансформації</value>
-    <comment>legacy_id=3088</comment>
   </data>
   <data name="Cannot be equipped while another Transformation Ring is equipped." xml:space="preserve">
     <value>Не можна одягнути, якщо є інше кільце трансформації.</value>

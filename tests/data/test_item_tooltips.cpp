@@ -5,6 +5,7 @@
 #include "ClientDataScope.h"
 
 #include "Core/Platform/ProcessLocale.h"
+#include "Core/Text/Utf8.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/SkillData/SkillDataHandler.h"
@@ -381,13 +382,13 @@ TEST_CASE("Every built-in placeholder but {level} is a value the game computes f
     {
         INFO(std::string(name));
         // A number, or a text ({addOptionDuration}), and only one of them.
-        const bool number = GetItemTooltipValue(values, name).has_value();
-        const bool text = GetItemTooltipText(values, name).has_value();
+        const bool number = Engine::Items::TooltipValues::GetItemTooltipValue(values, name).has_value();
+        const bool text = Engine::Items::TooltipValues::GetItemTooltipText(values, name).has_value();
         CHECK((number || text) == (name != Data::Items::LevelPlaceholder));
         CHECK_FALSE((number && text));
     }
-    CHECK_FALSE(GetItemTooltipValue(values, "sparkle").has_value());
-    CHECK_FALSE(GetItemTooltipText(values, "sparkle").has_value());
+    CHECK_FALSE(Engine::Items::TooltipValues::GetItemTooltipValue(values, "sparkle").has_value());
+    CHECK_FALSE(Engine::Items::TooltipValues::GetItemTooltipText(values, "sparkle").has_value());
     // And the other way round: a value the game can fill that the placeholder checks don't know would make every
     // description using it fail to load.
     for (const std::string_view name : GetItemTooltipValueNames())
@@ -411,7 +412,7 @@ TEST_CASE("The tooltip's values of an item follow the item and the hero [data][i
     params.Level = 7;
     ITEM kris;
     FillItemFromParameters(kris, params);
-    const ItemTooltipValues values = ComputeItemTooltipValues(kris);
+    const ItemTooltipValues values = Engine::Items::TooltipValues::ComputeItemTooltipValues(kris);
     CHECK(values.damageMin == kris.DamageMin);
     CHECK(values.damageMax == kris.DamageMax);
     CHECK(values.hasDamage);
@@ -420,9 +421,9 @@ TEST_CASE("The tooltip's values of an item follow the item and the hero [data][i
     CHECK(values.strength.required == kris.RequireStrength);
     CHECK(values.strength.missing == kris.RequireStrength - 18);
     CHECK_FALSE(values.strength.reduced);
-    CHECK(GetItemTooltipValue(values, "requiredStrength") == values.strength.required);
-    CHECK(GetItemTooltipValue(values, "missingStrength") == values.strength.missing);
-    CHECK(GetItemTooltipValue(values, "maxDurability") == values.maxDurability);
+    CHECK(Engine::Items::TooltipValues::GetItemTooltipValue(values, "requiredStrength") == values.strength.required);
+    CHECK(Engine::Items::TooltipValues::GetItemTooltipValue(values, "missingStrength") == values.strength.missing);
+    CHECK(Engine::Items::TooltipValues::GetItemTooltipValue(values, "maxDurability") == values.maxDurability);
     CHECK_FALSE(values.excellent);
 
     // A socket count past the item's sockets reads only its sockets: the strength socket's seed in the next field
@@ -431,11 +432,11 @@ TEST_CASE("The tooltip's values of an item follow the item and the hero [data][i
     corrupted.SocketCount = 255;
     std::fill(std::begin(corrupted.SocketSeedID), std::end(corrupted.SocketSeedID), BYTE{0});
     std::fill(std::begin(corrupted.SocketSphereLv), std::end(corrupted.SocketSphereLv), BYTE{38});
-    CHECK_FALSE(ComputeItemTooltipValues(corrupted).strength.reduced);
+    CHECK_FALSE(Engine::Items::TooltipValues::ComputeItemTooltipValues(corrupted).strength.reduced);
 
     // The Blade Master lacks nothing of it.
     MakeBladeMaster(hero.Hero());
-    CHECK(ComputeItemTooltipValues(kris).strength.missing == 0);
+    CHECK(Engine::Items::TooltipValues::ComputeItemTooltipValues(kris).strength.missing == 0);
 
     // A Jewel of Harmony option that lowers the strength requirement (a weapon's option 3, at level 13, on a +13
     // item) shows the lowered requirement, marked reduced (yellow); agility is untouched.
@@ -450,7 +451,7 @@ TEST_CASE("The tooltip's values of an item follow the item and the hero [data][i
     g_pUIJewelHarmonyinfo->GetStrengthenCapability(&capability, &lowered, 0);
     REQUIRE(capability.SI_isNB);
     REQUIRE(capability.SI_NB.SI_force > 0);
-    const ItemTooltipValues loweredValues = ComputeItemTooltipValues(lowered);
+    const ItemTooltipValues loweredValues = Engine::Items::TooltipValues::ComputeItemTooltipValues(lowered);
     CHECK(loweredValues.strength.required == lowered.RequireStrength - capability.SI_NB.SI_force);
     CHECK(loweredValues.strength.reduced);
     CHECK(loweredValues.dexterity.required == lowered.RequireDexterity);
@@ -549,6 +550,98 @@ TEST_CASE("The Weapon of Archangel shows its reward weapon's skill mana from the
     SetItemTooltipTextMeasure(nullptr);
     const std::wstring expected = L"Cyclone Cutting skill (Mana:" + std::to_wstring(mana) + L")";
     CHECK(std::any_of(lines.begin(), lines.end(), [&](const ItemTooltipLine& line) { return line.text == expected; }));
+}
+
+TEST_CASE("An item's lines drawn after its options follow them [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+    const auto indexOf = [](const std::vector<ItemTooltipLine>& lines, std::wstring_view start)
+    {
+        const auto found = std::find_if(lines.begin(), lines.end(),
+                                        [&](const ItemTooltipLine& line) { return line.text.starts_with(start); });
+        return found != lines.end() ? static_cast<int>(found - lines.begin()) : -1;
+    };
+
+    // The Elite Transfer Skeleton Ring's vitality is the hero's level.
+    const std::vector<ItemTooltipLine> ring = Engine::Items::TooltipSnapshot::TooltipOfParameters(Engine::Items::TooltipSnapshot::FullItemParameters(13, 39));
+    CHECK(indexOf(ring, L"vitality +" + std::to_wstring(hero.Hero().Level)) >= 0);
+
+    // The Pet Skeleton leaves out the blank line after the options (noBlankAfterOptions): one blank line, its options',
+    // comes before its lines, not two.
+    const std::vector<ItemTooltipLine> pet = Engine::Items::TooltipSnapshot::TooltipOfParameters(Engine::Items::TooltipSnapshot::FullItemParameters(13, 123));
+    const int equipping = indexOf(pet, L"Equipping along with a Skeleton");
+    REQUIRE(equipping > 1);
+    CHECK(pet[equipping - 1].text == L"\n");
+    CHECK(pet[equipping - 2].text != L"\n");
+    // The Panda Ring's blank line is there.
+    const std::vector<ItemTooltipLine> panda = Engine::Items::TooltipSnapshot::TooltipOfParameters(Engine::Items::TooltipSnapshot::FullItemParameters(13, 76));
+    const int transform = indexOf(panda, L"Transform");
+    REQUIRE(transform > 0);
+    CHECK(panda[transform - 1].text == L"\n");
+    SetItemTooltipTextMeasure(nullptr);
+}
+
+// The option lines are the lines the full item has and the plain one doesn't (luck, skill, the option, the excellent
+// options); an item's restriction drawn after its options comes after the last of them.
+TEST_CASE("A transformation ring's restriction comes after its option lines [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+
+    // Its start: the line wraps at the tooltip's width.
+    const std::wstring restriction = L"Unable to Equip with a Different";
+    for (const int number : {10, 39, 41, 68, 76, 122})
+    {
+        INFO("13/" << number);
+        const std::vector<ItemTooltipLine> plain = Engine::Items::TooltipSnapshot::TooltipOfParameters(Engine::Items::TooltipSnapshot::FullItemParameters(13, number));
+        ItemCreationParams full = Engine::Items::TooltipSnapshot::FullItemParameters(13, number);
+        full.WithLuck = true;
+        full.WithSkill = true;
+        full.WithOption = true;
+        full.OptionLevel = 4;
+        full.HasExcellentOption = true;
+        full.ExcellentFlags = 63;
+        const std::vector<ItemTooltipLine> lines = Engine::Items::TooltipSnapshot::TooltipOfParameters(full);
+
+        const auto at = std::find_if(lines.begin(), lines.end(),
+                                     [&](const ItemTooltipLine& line) { return line.text.starts_with(restriction); });
+        std::string shown;
+        for (const ItemTooltipLine& line : lines)
+        {
+            shown += Core::Text::ToUtf8(line.text.c_str()) + " | ";
+        }
+        INFO(shown);
+        if (at == lines.end())
+        {
+            CHECK(at != lines.end());
+            continue;
+        }
+        int lastOption = -1;
+        for (int index = 0; index < static_cast<int>(lines.size()); ++index)
+        {
+            const bool inPlain = std::any_of(plain.begin(), plain.end(), [&](const ItemTooltipLine& line)
+                                             { return line.text == lines[index].text; });
+            if (!inPlain && lines[index].text != L"\n")
+            {
+                lastOption = index;
+            }
+        }
+        CHECK(lastOption >= 0);
+        CHECK(at - lines.begin() > lastOption);
+    }
+
+    SetItemTooltipTextMeasure(nullptr);
 }
 
 TEST_CASE("A class condition holds for a hero of that class [data][items][tooltip]")

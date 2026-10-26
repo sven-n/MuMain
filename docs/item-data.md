@@ -174,6 +174,7 @@ can have several tags; the file lists them in the order below.
 | `valuable` | The game asks for confirmation before the item is sold or dropped |
 | `noLevelRequirement` | The tooltip shows no level requirement, though the item has one (Loch's Feather) |
 | `noDurabilityLine` | The tooltip shows no standard durability line, though the item has a durability: it shows none, or its description has its own (a pet's "Life", a stack's "Number of items", a ticket's "usable … times") |
+| `noBlankAfterOptions` | The tooltip leaves out the blank line after the options, so the item's lines drawn there follow the options directly (the Pet Skeleton, the Invitation to Santa Village) |
 
 Wings need no tag: an item is a wing when its `slot` is `wings`.
 
@@ -317,7 +318,8 @@ Jewel of Bless's:
 ```
 
 Each line is `{"text": ..., "values": {...}, "when": [...], "color": ...,
-"colors": [...], "bold": true, "levels": [first, last]}`:
+"colors": [...], "bold": true, "levels": [first, last], "after":
+"options"}`:
 
 - **`text`** is written like `name`: a plain English text, or the texts by
   language. It is checked like a name too: the English text is required, a
@@ -348,6 +350,10 @@ Each line is `{"text": ..., "values": {...}, "when": [...], "color": ...,
   hold, and **`colors`** gives it the color of its first rule that holds, as
   a layout line's (`["!timed"]`, `["durability=2"]`, `[{"when":
   ["class:darkLord"], "color": "white"}]`). **`bold`** draws it bold.
+- **`"after": "options"`** draws the line after the item's options
+  (excellent, luck, skill), at the end of the tooltip, instead of with the
+  description: the transformation rings' effects and "Unable to Equip with a
+  Different Transformation Ring", for example.
 
 In the tooltip:
 
@@ -386,7 +392,8 @@ placeholder is one of:
   strength and agility reductions) and `missing…` (what the hero lacks of it, 0
   when nothing), and the item's add option (the potions', scrolls', seals' and
   charms' effect in the game's ItemAddOption data): `addOptionValue1`,
-  `addOptionValue2` and `addOptionDuration`, a text such as "1 Hour";
+  `addOptionValue2` and `addOptionDuration`, a text such as "1 Hour"; and the
+  hero's `heroLevel`;
 - a **level bonus table** of [`Stats/ItemStats.json`](#item-stats-by-level),
   as `table:` and its name: the table's value at the item's + level
   (`{table:damageIncreaseWeapons}` is 3 at +1 and 66 at +15, the damage a

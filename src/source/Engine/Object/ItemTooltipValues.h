@@ -66,6 +66,8 @@ struct ItemTooltipValues
     bool hasDurability = false;
     // A timed item (one that expires).
     bool timed = false;
+    // The hero's level.
+    int heroLevel = 0;
     // The item's add option (the potions', scrolls' and seals' effects of ItemAddOption): its two values, and how long
     // it lasts in seconds, which {addOptionDuration} writes as the tooltip does ("1 Hour") only for a line showing it.
     int addOptionValue1 = 0;

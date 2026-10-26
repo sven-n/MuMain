@@ -421,6 +421,11 @@
             "uk": "Довговічність: [{durability}]",
             "zh-TW": "耐久性：[{durability}]"
           }
+        },
+        {
+          "text": "@unableToEquipWithADifferentTransformationRing",
+          "color": "red",
+          "after": "options"
         }
       ],
       "width": 1,
@@ -1221,19 +1226,7 @@
           "levels": [1, 1]
         },
         {
-          "text": {
-            "en": "Increase Damage +level/20",
-            "de": "Erhöht Schaden +Level/20",
-            "es": "Aumentar daño +nivel/20",
-            "id": "Meningkatkan Kerusakan +level/20",
-            "ja": "攻撃力増加 +レベル/20",
-            "pl": "Zwiększa obrażenia + poziom/20",
-            "pt": "Aumentar Dano +nível/20",
-            "ru": "Увеличение урона +уровень/20",
-            "tl": "Taasan ang Damage +level/20",
-            "uk": "Збільшення шкоди + рівень/20",
-            "zh-TW": "傷害增加+level/20"
-          },
+          "text": "@increaseDamageLevel20",
           "color": "blue",
           "levels": [1, 1]
         },
@@ -1273,19 +1266,7 @@
           "levels": [2, 2]
         },
         {
-          "text": {
-            "en": "Increase Damage +level/20",
-            "de": "Erhöht Schaden +Level/20",
-            "es": "Aumentar daño +nivel/20",
-            "id": "Meningkatkan Kerusakan +level/20",
-            "ja": "攻撃力増加 +レベル/20",
-            "pl": "Zwiększa obrażenia + poziom/20",
-            "pt": "Aumentar Dano +nível/20",
-            "ru": "Увеличение урона +уровень/20",
-            "tl": "Taasan ang Damage +level/20",
-            "uk": "Збільшення шкоди + рівень/20",
-            "zh-TW": "傷害增加+level/20"
-          },
+          "text": "@increaseDamageLevel20",
           "color": "blue",
           "levels": [2, 2]
         },
@@ -1355,19 +1336,7 @@
           "color": "blue"
         },
         {
-          "text": {
-            "en": "Increases acquisition rate of Mana after hunting monsters +Mana/8",
-            "de": "Erhöht die Manaregeneration beim Jagen von Monstern +Mana/8",
-            "es": "Aumenta la tasa de adquisición de Mana después de cazar monstruos +Mana/8",
-            "id": "Meningkatkan tingkat perolehan Mana setelah berburu monster +Mana/8",
-            "ja": "獲得するマナ増加 +マナ/8",
-            "pl": "Zwiększa szybkość zdobywania many po polowaniu na potwory +Mana/8",
-            "pt": "Aumenta a taxa de aquisição de Mana após caçar monstros +Mana/8",
-            "ru": "Увеличивает скорость получения маны после охоты на монстров +Мана/8.",
-            "tl": "Pinapataas ang rate ng pagkuha ng Mana pagkatapos manghuli ng mga halimaw +Mana/8",
-            "uk": "Збільшує швидкість отримання мани після полювання на монстрів +Мана/8",
-            "zh-TW": "狩獵怪物後魔力獲取率增加+魔力/8"
-          },
+          "text": "@increasesAcquisitionRateOfManaAfterHuntingMonstersMana8",
           "color": "blue"
         }
       ],
@@ -1845,6 +1814,23 @@
       "description": [
         {
           "text": "@piecesOfTwenty"
+        },
+        {
+          "text": {
+            "en": "Fragment of horn can be made using the Divine protection of Goddess and fragment of armor.",
+            "de": "Ein Hornfragment kann aus dem göttlichen Schutz der Göttin und einem Rüstungsfragment hergestellt werden.",
+            "es": "Se puede hacer un fragmento de cuerno usando la protección divina de la Diosa y un fragmento de armadura.",
+            "id": "Fragmen tanduk dapat dibuat menggunakan perlindungan Ilahi dari Dewi dan fragmen baju besi.",
+            "ja": "女神の加護と鎧の破片の合成を通じて角笛の破片を作ることができます。",
+            "pl": "Fragment of Horn powstaje z Divine Protection of Goddess i Splinter of Armor.",
+            "pt": "Fragmento de chifre pode ser feito usando a Proteção Divina da Deusa e fragmento de armadura.",
+            "ru": "Фрагмент рога можно сделать, используя Божественную защиту Богини и фрагмент брони.",
+            "tl": "Ang fragment ng sungay ay maaaring gawin gamit ang Banal na proteksyon ng Diyosa at fragment ng baluti.",
+            "uk": "Фрагмент рогу можна зробити за допомогою Божественного захисту Богині та фрагмента обладунку.",
+            "zh-TW": "角碎片可以用女神的神聖保護和盔甲碎片來製作。"
+          },
+          "color": "yellow",
+          "after": "options"
         }
       ],
       "width": 1,
@@ -1873,6 +1859,23 @@
       "description": [
         {
           "text": "@piecesOfTwenty"
+        },
+        {
+          "text": {
+            "en": "Fragment of horn can be made using the Divine protection of Goddess and fragment of armor.",
+            "de": "Ein Hornfragment kann aus dem göttlichen Schutz der Göttin und einem Rüstungsfragment hergestellt werden.",
+            "es": "Se puede hacer un fragmento de cuerno usando la protección divina de la Diosa y un fragmento de armadura.",
+            "id": "Fragmen tanduk dapat dibuat menggunakan perlindungan Ilahi dari Dewi dan fragmen baju besi.",
+            "ja": "女神の加護と鎧の破片の合成を通じて角笛の破片を作ることができます。",
+            "pl": "Fragment of Horn powstaje z Divine Protection of Goddess i Splinter of Armor.",
+            "pt": "Fragmento de chifre pode ser feito usando a Proteção Divina da Deusa e fragmento de armadura.",
+            "ru": "Фрагмент рога можно сделать, используя Божественную защиту Богини и фрагмент брони.",
+            "tl": "Ang fragment ng sungay ay maaaring gawin gamit ang Banal na proteksyon ng Diyosa at fragment ng baluti.",
+            "uk": "Фрагмент рогу можна зробити за допомогою Божественного захисту Богині та фрагмента обладунку.",
+            "zh-TW": "角碎片可以用女神的神聖保護和盔甲碎片來製作。"
+          },
+          "color": "yellow",
+          "after": "options"
         }
       ],
       "width": 1,
@@ -1904,6 +1907,11 @@
             "en": "{durability} / 10",
             "ja": "{durability}個/ 10個"
           }
+        },
+        {
+          "text": "@brokenHornCanBeMadeUsingTheClawOfBeastAndFragmentOfHorn",
+          "color": "yellow",
+          "after": "options"
         }
       ],
       "width": 1,
@@ -1929,6 +1937,13 @@
         "pt": "Fragmento de chifre"
       },
       "tags": ["valuable", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@brokenHornCanBeMadeUsingTheClawOfBeastAndFragmentOfHorn",
+          "color": "yellow",
+          "after": "options"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 1,
@@ -1952,6 +1967,25 @@
         "pt": "Chifre quebrado"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Fenrir's horn can be made through item combination.",
+            "de": "Das Horn des Fenrir kann durch die Kombination von Gegenständen hergestellt werden.",
+            "es": "El cuerno de Fenrir se puede crear mediante una combinación de elementos.",
+            "id": "Tanduk Fenrir dapat dibuat melalui kombinasi item.",
+            "ja": "合成を通じてフェンリルの角笛を作ることができます。",
+            "pl": "Fenrir's Horn można wykonać poprzez kombinację przedmiotów.",
+            "pt": "O chifre de Fenrir pode ser feito através da combinação de itens.",
+            "ru": "Рог Фенрира можно сделать, комбинируя предметы.",
+            "tl": "Ang sungay ni Fenrir ay maaaring gawin sa pamamagitan ng kumbinasyon ng item.",
+            "uk": "Ріг Фенріра можна зробити за допомогою комбінації предметів.",
+            "zh-TW": "芬裡爾的號角可以透過物品組合來製作。"
+          },
+          "color": "yellow",
+          "after": "options"
+        }
+      ],
       "width": 2,
       "height": 2,
       "durability": 1,
@@ -2063,6 +2097,51 @@
         "pt": "Anel Esqueleto Transf. Acel."
       },
       "tags": ["transformationRing"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase defensive skill +10%",
+            "de": "Verteidigung erhöhen +10%",
+            "es": "Aumentar la habilidad defensiva +10%",
+            "id": "Meningkatkan keterampilan bertahan +10%",
+            "ja": "防御力増加 +10%",
+            "pl": "Zwiększa obronę +10%",
+            "pt": "Aumenta a habilidade defensiva +10%",
+            "ru": "Увеличение защитного навыка +10%",
+            "tl": "Dagdagan ang defensive skill +10%",
+            "uk": "Підвищити оборонний навик +10%",
+            "zh-TW": "增加防禦技能+10%"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "vitality +{heroLevel}",
+            "de": "Vitalität +{heroLevel}",
+            "es": "vitalidad +{heroLevel}",
+            "id": "vitalitas +{heroLevel}",
+            "ja": "生命力 +{heroLevel}",
+            "pl": "witalność +{heroLevel}",
+            "pt": "vitalidade +{heroLevel}",
+            "ru": "жизненная сила +{heroLevel}",
+            "tl": "sigla +{heroLevel}",
+            "uk": "життєва сила +{heroLevel}",
+            "zh-TW": "活力+{heroLevel}"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": "",
+          "after": "options"
+        },
+        {
+          "text": "@unableToEquipWithADifferentTransformationRing",
+          "color": "red",
+          "after": "options"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -2094,6 +2173,13 @@
         "pt": "Anel do Jack Olantern"
       },
       "tags": ["transformationRing"],
+      "description": [
+        {
+          "text": "@unableToEquipWithADifferentTransformationRing",
+          "color": "red",
+          "after": "options"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -2123,6 +2209,72 @@
         "pt": "Anel do Natal de Transf."
       },
       "tags": ["transformationRing"],
+      "description": [
+        {
+          "text": {
+            "en": "Additional Dmg +20",
+            "de": "Zusätzlicher Schaden +20",
+            "es": "Daño adicional +20",
+            "id": "Dmg Tambahan +20",
+            "ja": "追加攻撃力 +20",
+            "pl": "Dodatkowe obrażenia +20",
+            "pt": "Dano Adicional +20",
+            "ru": "Дополнительный урон +20",
+            "tl": "Karagdagang Dmg +20",
+            "uk": "Додатковий Dmg +20",
+            "zh-TW": "附加傷害+20"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Additional Wizardry Dmg +20",
+            "de": "Zusätzlicher Zaubereischaden +20",
+            "es": "Daño de hechicería adicional +20",
+            "id": "Dmg Sihir Tambahan +20",
+            "ja": "追加魔力 +20",
+            "pl": "Dodatkowe obrażenia magiczne +20",
+            "pt": "Dano Adicional de Magia +20",
+            "ru": "Дополнительный магический урон +20",
+            "tl": "Karagdagang Wizardry Dmg +20",
+            "uk": "Додатковий Wizardry Dmg +20",
+            "zh-TW": "額外魔法傷害+20"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": "",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Merry Christmas.",
+            "de": "Frohe Weihnachten.",
+            "es": "Feliz navidad.",
+            "id": "Selamat natal.",
+            "ja": "メリークリスマス！~",
+            "pl": "Wesołych Świąt.",
+            "pt": "Feliz Natal.",
+            "ru": "С Рождеством.",
+            "tl": "Maligayang Pasko.",
+            "uk": "Веселого Різдва.",
+            "zh-TW": "聖誕快樂。"
+          },
+          "color": "red",
+          "after": "options"
+        },
+        {
+          "text": "",
+          "after": "options"
+        },
+        {
+          "text": "@unableToEquipWithADifferentTransformationRing",
+          "color": "red",
+          "after": "options"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -2152,6 +2304,136 @@
         "pt": "Anel de GM"
       },
       "tags": ["transformationRing"],
+      "description": [
+        {
+          "text": {
+            "en": "Ice attribute skill increase damage +255",
+            "de": "Schaden von Eis-Fähigkeiten erhöhen +255",
+            "es": "Habilidad de atributo de hielo aumenta el daño +255",
+            "id": "Skill atribut es meningkatkan damage +255",
+            "ja": "氷属性スキル攻撃力増加 +255",
+            "pl": "Zwiększenie obrażeń umiejętności atrybutu lodu +255",
+            "pt": "Habilidade de atributo de gelo aumenta dano +255",
+            "ru": "Навык ледяного атрибута увеличивает урон +255",
+            "tl": "Ang kakayahan ng katangian ng yelo ay nagpapataas ng pinsala +255",
+            "uk": "Навичка льоду збільшує шкоду +255",
+            "zh-TW": "冰屬性技能傷害增加+255"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Poison attribute skill increase damage +255",
+            "de": "Schaden von Gift-Fähigkeiten erhöhen +255",
+            "es": "La habilidad del atributo de veneno aumenta el daño +255",
+            "id": "Keterampilan atribut racun meningkatkan kerusakan +255",
+            "ja": "毒属性スキル攻撃力増加 +255",
+            "pl": "Zwiększenie obrażeń umiejętności atrybutu trucizny +255",
+            "pt": "Habilidade de atributo venenoso aumenta dano +255",
+            "ru": "Навык атрибута яда увеличивает урон +255",
+            "tl": "Ang kakayahan ng katangian ng lason ay nagpapataas ng pinsala +255",
+            "uk": "Навик атрибута отрути збільшує шкоду +255",
+            "zh-TW": "毒屬性技能傷害增加+255"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Lightning attribute skill increase damage +255",
+            "de": "Schaden von Blitz-Fähigkeiten erhöhen +255",
+            "es": "Habilidad de atributo de rayo aumenta el daño +255",
+            "id": "Skill atribut petir meningkatkan damage +255",
+            "ja": "稲妻属性スキル攻撃力増加 +255",
+            "pl": "Zwiększenie obrażeń umiejętności atrybutu błyskawicy +255",
+            "pt": "Habilidade do atributo relâmpago aumenta o dano +255",
+            "ru": "Навык атрибута молнии увеличивает урон +255",
+            "tl": "Ang kakayahan ng katangian ng kidlat ay nagpapataas ng pinsala +255",
+            "uk": "Атрибут блискавки збільшує шкоду +255",
+            "zh-TW": "雷屬性技能傷害增加+255"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Fire attribute skill increase damage +255",
+            "de": "Schaden von Feuer-Fähigkeiten erhöhen +255",
+            "es": "Habilidad de atributo de fuego aumenta el daño +255",
+            "id": "Skill atribut api meningkatkan damage +255",
+            "ja": "炎属性スキル攻撃力増加 +255",
+            "pl": "Zwiększenie obrażeń umiejętności atrybutu ognia +255",
+            "pt": "Habilidade de atributo de fogo aumenta o dano +255",
+            "ru": "Навык атрибута огня увеличивает урон +255",
+            "tl": "Ang kakayahan ng katangian ng sunog ay nagpapataas ng pinsala +255",
+            "uk": "Навик атрибута вогню збільшує шкоду +255",
+            "zh-TW": "火屬性技能傷害增加+255"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Earth attribute skill increase damage +255",
+            "de": "Schaden von Erd-Fähigkeiten erhöhen +255",
+            "es": "Habilidad de atributo de tierra aumenta el daño +255",
+            "id": "Skill atribut bumi meningkatkan damage +255",
+            "ja": "地属性スキル攻撃力増加 +255",
+            "pl": "Zwiększenie obrażeń umiejętności atrybutu Ziemi +255",
+            "pt": "Habilidade de atributo Terra aumenta dano +255",
+            "ru": "Навык атрибута земли увеличивает урон +255",
+            "tl": "Ang kakayahan ng Earth attribute ay nagpapataas ng pinsala +255",
+            "uk": "Навичка атрибута Землі збільшує шкоду +255",
+            "zh-TW": "土屬性技能傷害增加+255"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Wind attribute skill increase damage +255",
+            "de": "Schaden von Wind-Fähigkeiten erhöhen +255",
+            "es": "Habilidad de atributo de viento aumenta el daño +255",
+            "id": "Skill atribut angin meningkatkan damage +255",
+            "ja": "風属性スキル攻撃力増加 +255",
+            "pl": "Zwiększenie obrażeń umiejętności atrybutu Wiatru +255",
+            "pt": "Habilidade do atributo Vento aumenta dano +255",
+            "ru": "Навык атрибута ветра увеличивает урон +255",
+            "tl": "Ang kakayahan ng katangian ng hangin ay nagpapataas ng pinsala +255",
+            "uk": "Навик атрибута вітру збільшує шкоду +255",
+            "zh-TW": "風屬性技能傷害增加+255"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Water attribute skill increase damage +255",
+            "de": "Schaden von Wasser-Fähigkeiten erhöhen +255",
+            "es": "Habilidad de atributo de agua aumenta el daño +255",
+            "id": "Skill atribut air meningkatkan damage +255",
+            "ja": "水属性スキル攻撃力増加 +255",
+            "pl": "Zwiększenie obrażeń umiejętności atrybutu wody +255",
+            "pt": "Habilidade de atributo água aumenta dano +255",
+            "ru": "Навык атрибута воды увеличивает урон +255",
+            "tl": "Ang kakayahan ng katangian ng tubig ay nagpapataas ng pinsala +255",
+            "uk": "Водний атрибут навички збільшує шкоду +255",
+            "zh-TW": "水屬性技能傷害增加+255"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": "",
+          "after": "options"
+        },
+        {
+          "text": "@unableToEquipWithADifferentTransformationRing",
+          "color": "red",
+          "after": "options"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -3231,7 +3513,31 @@
         "es": "Invitación a Aldea de Santa",
         "pt": "Conv. p/ Vila do Papai Noel"
       },
-      "tags": ["noDurabilityLine"],
+      "tags": ["noDurabilityLine", "noBlankAfterOptions"],
+      "description": [
+        {
+          "text": "@usableTimes",
+          "color": "red",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Relocate to the Santa's Village by the right-mouse click.",
+            "de": "Per Rechtsklick ins Dorf des Weihnachtsmanns wechseln.",
+            "es": "Trasládese a Santa's Village haciendo clic con el botón derecho del ratón.",
+            "id": "Pindah ke Desa Santa dengan klik kanan mouse.",
+            "ja": "右クリックでサンタ村へ移動可能",
+            "pl": "Przenieś się do Wioski Świętego Mikołaja, klikając prawym przyciskiem myszy.",
+            "pt": "Mude para a Aldeia do Papai Noel com o botão direito do mouse.",
+            "ru": "Переместитесь в Деревню Санты по щелчку правой кнопки мыши.",
+            "tl": "Lumipat sa Santa's Village sa pamamagitan ng right-mouse click.",
+            "uk": "Перемістіть в село Діда Мороза, клацнувши правою кнопкою миші.",
+            "zh-TW": "透過滑鼠右鍵重新定位到聖誕老人村。"
+          },
+          "color": "blue",
+          "after": "options"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -3294,6 +3600,13 @@
         "pt": "Anel Transf. Homem da Neve"
       },
       "tags": ["transformationRing"],
+      "description": [
+        {
+          "text": "@unableToEquipWithADifferentTransformationRing",
+          "color": "red",
+          "after": "options"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -3573,6 +3886,68 @@
         "pt": "Anel do Panda"
       },
       "tags": ["pandaOrSkeleton", "transformationRing", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Transform into Panda.",
+            "de": "Verwandelt Sie in einen Panda.",
+            "es": "Transfórmate en Panda.",
+            "id": "Berubah menjadi Panda.",
+            "ja": "装備すると、パンダマンに変身できます。",
+            "pl": "Zmienia w pandę.",
+            "pt": "Transforme-se em Panda.",
+            "ru": "Превратитесь в Панду.",
+            "tl": "Transform sa Panda.",
+            "uk": "Перетворіться на панду.",
+            "zh-TW": "變身為熊貓。"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Zen increase 50%",
+            "de": "Zen +50%",
+            "es": "Aumento del zen 50%",
+            "id": "Zen meningkat 50%",
+            "ja": "ゼン増加50%に向上",
+            "pl": "Wzrost Zen 50%",
+            "pt": "Aumento Zen 50%",
+            "ru": "Дзен увеличение 50%",
+            "tl": "50% ang pagtaas ng Zen",
+            "uk": "Дзен збільшення 50%",
+            "zh-TW": "禪宗增加50%"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Damage/Wizardry/Curse +30",
+            "de": "Schaden/Zauberei/Fluch +30",
+            "es": "Daño/Hechicería/Maldición +30",
+            "id": "Kerusakan/Sihir/Kutukan +30",
+            "ja": "攻撃力 +30",
+            "pl": "Obrażenia/Magia/Klątwa +30",
+            "pt": "Dano/Feitiçaria/Maldição +30",
+            "ru": "Урон/Магия/Проклятие +30",
+            "tl": "Pinsala/Wizardry/Curse +30",
+            "uk": "Пошкодження/Чарівництво/Прокляття +30",
+            "zh-TW": "傷害/魔法/詛咒 +30"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": "",
+          "after": "options"
+        },
+        {
+          "text": "@unableToEquipWithADifferentTransformationRing",
+          "color": "red",
+          "after": "options"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -4863,19 +5238,7 @@
           "text": "@automaticHpRecovery3"
         },
         {
-          "text": {
-            "en": "Increases acquisition rate of Mana after hunting monsters +Mana/8",
-            "de": "Erhöht die Manaregeneration beim Jagen von Monstern +Mana/8",
-            "es": "Aumenta la tasa de adquisición de Mana después de cazar monstruos +Mana/8",
-            "id": "Meningkatkan tingkat perolehan Mana setelah berburu monster +Mana/8",
-            "ja": "獲得するマナ増加 +マナ/8",
-            "pl": "Zwiększa szybkość zdobywania many po polowaniu na potwory +Mana/8",
-            "pt": "Aumenta a taxa de aquisição de Mana após caçar monstros +Mana/8",
-            "ru": "Увеличивает скорость получения маны после охоты на монстров +Мана/8.",
-            "tl": "Pinapataas ang rate ng pagkuha ng Mana pagkatapos manghuli ng mga halimaw +Mana/8",
-            "uk": "Збільшує швидкість отримання мани після полювання на монстрів +Мана/8",
-            "zh-TW": "狩獵怪物後魔力獲取率增加+魔力/8"
-          }
+          "text": "@increasesAcquisitionRateOfManaAfterHuntingMonstersMana8"
         }
       ],
       "width": 1,
@@ -5089,6 +5452,89 @@
         "pt": "Anel Transf. de Esqueleto"
       },
       "tags": ["pandaOrSkeleton", "transformationRing", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Equip to transform into a Skeleton Warrior.",
+            "de": "Ausrüsten, um sich in einen Skelettkrieger zu verwandeln.",
+            "es": "Equípate para transformarte en un guerrero esqueleto.",
+            "id": "Lengkapi untuk berubah menjadi Skeleton Warrior.",
+            "ja": "装備するとスケルトンに変身できます。",
+            "pl": "Załóż, aby zmienić się w Skeleton Warrior.",
+            "pt": "Equipe-se para se transformar em um Guerreiro Esqueleto.",
+            "ru": "Экипируйтесь, чтобы превратиться в скелета-воина.",
+            "tl": "Equip para magtransform sa isang Skeleton Warrior.",
+            "uk": "Одягніть, щоб перетворитися на воїна-скелета.",
+            "zh-TW": "裝備後可以變身為骷髏戰士。"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Damage/Wizardry/Curse +40",
+            "de": "Schaden/Zauberei/Fluch +40",
+            "es": "Daño/Hechicería/Maldición +40",
+            "id": "Kerusakan/Sihir/Kutukan +40",
+            "ja": "攻撃力/魔力/呪い +40",
+            "pl": "Obrażenia/Magia/Klątwa +40",
+            "pt": "Dano/Feitiçaria/Maldição +40",
+            "ru": "Урон/Магия/Проклятие +40",
+            "tl": "Pinsala/Wizardry/Curse +40",
+            "uk": "Пошкодження/Чарівництво/Прокляття +40",
+            "zh-TW": "傷害/魔法/詛咒 +40"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": "",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Equipping along with a Pet Skeleton",
+            "de": "Zusammen mit einem Haustier-Skelett ausgerüstet",
+            "es": "Equiparse con un esqueleto de mascota",
+            "id": "Dilengkapi dengan Pet Skeleton",
+            "ja": "スケルトンパージドラゴンと同時に装備すると",
+            "pl": "Założony razem z Pet Skeleton",
+            "pt": "Equipando com um esqueleto de animal de estimação",
+            "ru": "Экипировка вместе со скелетом питомца",
+            "tl": "Equipping kasama ng Pet Skeleton",
+            "uk": "Екіпірування разом зі скелетом домашньої тварини",
+            "zh-TW": "與寵物骷髏一起裝備"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "increases EXP by 30%.",
+            "de": "erhöht er die Erfahrung um 30%.",
+            "es": "aumenta la EXP en un 30%.",
+            "id": "meningkatkan EXP sebesar 30%.",
+            "ja": "経験値30%を追加獲得できます。",
+            "pl": "zwiększa EXP o 30%.",
+            "pt": "aumenta EXP em 30%.",
+            "ru": "увеличивает опыт на 30%.",
+            "tl": "nagpapataas ng EXP ng 30%.",
+            "uk": "збільшує досвід на 30%.",
+            "zh-TW": "經驗值增加 30%。"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": "",
+          "after": "options"
+        },
+        {
+          "text": "@unableToEquipWithADifferentTransformationRing",
+          "color": "red",
+          "after": "options"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -5122,7 +5568,7 @@
         "es": "Mascota Esqueleto",
         "pt": "Mascote esqueleto"
       },
-      "tags": ["pandaOrSkeleton", "valuable", "noDurabilityLine"],
+      "tags": ["pandaOrSkeleton", "valuable", "noDurabilityLine", "noBlankAfterOptions"],
       "description": [
         {
           "text": "@collectsSurroundingZen",
@@ -5167,6 +5613,40 @@
         {
           "text": "@life",
           "when": ["!timed"]
+        },
+        {
+          "text": {
+            "en": "Equipping along with a Skeleton Transformation Ring",
+            "de": "Zusammen mit einem Skelett-Verwandlungsring ausgerüstet",
+            "es": "Equipado con un anillo de transformación de esqueleto",
+            "id": "Dilengkapi dengan Cincin Transformasi Kerangka",
+            "ja": "スケルトン変身指輪と同時に装備すると",
+            "pl": "Założony razem ze Skeleton Transformation Ring",
+            "pt": "Equipando com um Anel de Transformação de Esqueleto",
+            "ru": "Экипировка вместе с кольцом трансформации скелета.",
+            "tl": "Equipping kasama ng isang Skeleton Transformation Ring",
+            "uk": "Екіпірування разом із кільцем трансформації скелета",
+            "zh-TW": "與骷髏變身戒指一起裝備"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "increases EXP by 30%.",
+            "de": "erhöht er die Erfahrung um 30%.",
+            "es": "aumenta la EXP en un 30%.",
+            "id": "meningkatkan EXP sebesar 30%.",
+            "ja": "経験値30%を追加獲得できます。",
+            "pl": "zwiększa EXP o 30%.",
+            "pt": "aumenta EXP em 30%.",
+            "ru": "увеличивает опыт на 30%.",
+            "tl": "nagpapataas ng EXP ng 30%.",
+            "uk": "збільшує досвід на 30%.",
+            "zh-TW": "經驗值增加 30%。"
+          },
+          "color": "blue",
+          "after": "options"
         }
       ],
       "width": 1,

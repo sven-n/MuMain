@@ -154,6 +154,8 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item)
                            (type >= ITEM_WING_OF_STORM && type <= ITEM_WING_OF_DIMENSION) ||
                            (type >= ITEM_CAPE_OF_FIGHTER && type <= ITEM_CAPE_OF_OVERRULE);
     values.timed = item.bPeriodItem;
+    // No hero yet (the character screen, a tooltip built before the world loads): level 0.
+    values.heroLevel = CharacterAttribute != nullptr ? CharacterAttribute->Level : 0;
     if (g_pItemAddOptioninfo != nullptr)
     {
         const ITEM_ADD_OPTION& addOption = g_pItemAddOptioninfo->GetItemAddOtioninfo(item.Type);
@@ -202,6 +204,7 @@ constexpr NamedValue PlainValues[] = {
     {"magicPower", &ItemTooltipValues::magicPower},
     {"durability", &ItemTooltipValues::durability},
     {"maxDurability", &ItemTooltipValues::maxDurability},
+    {"heroLevel", &ItemTooltipValues::heroLevel},
     {"addOptionValue1", &ItemTooltipValues::addOptionValue1},
     {"addOptionValue2", &ItemTooltipValues::addOptionValue2},
 };

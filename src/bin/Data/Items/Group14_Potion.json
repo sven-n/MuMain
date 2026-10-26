@@ -1201,6 +1201,13 @@
         "es": "Estrella de Navidad",
         "pt": "Estrela de Natal"
       },
+      "description": [
+        {
+          "text": "@fireworksWillAppearOnceThrownInTheField",
+          "color": "blue",
+          "after": "options"
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -1213,6 +1220,28 @@
         "es": "Regalo de GM",
         "pt": "Presente de GM"
       },
+      "description": [
+        {
+          "text": {
+            "en": "GM has gifted this special box.",
+            "de": "Ein GM hat diese besondere Box verschenkt.",
+            "es": "GM ha regalado esta caja especial.",
+            "id": "GM telah menghadiahkan kotak khusus ini.",
+            "ja": "GMがプレゼントした特別な箱です。",
+            "pl": "GM podarował to specjalne pudełko.",
+            "pt": "A GM presenteou esta caixa especial.",
+            "ru": "Компания GM подарила эту специальную коробку.",
+            "tl": "Niregalo ni GM ang espesyal na kahon na ito.",
+            "uk": "GM подарував цю особливу коробку.",
+            "zh-TW": "通用汽車贈送了這個特殊的盒子。"
+          },
+          "after": "options"
+        },
+        {
+          "text": "@dropItToReceiveTheGift",
+          "after": "options"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -1451,6 +1480,12 @@
         "es": "Petardo",
         "pt": "Fogos de artifício"
       },
+      "description": [
+        {
+          "text": "@fireworksWillAppearOnceThrownInTheField",
+          "after": "options"
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -2241,19 +2276,7 @@
       },
       "description": [
         {
-          "text": {
-            "en": "Drop it to receive the gift.",
-            "de": "Lassen Sie es fallen, um das Geschenk zu erhalten.",
-            "es": "Déjalo para recibir el regalo.",
-            "id": "Jatuhkan untuk menerima hadiah.",
-            "ja": "地面に投げるとプレゼントが出ます。",
-            "pl": "Upuść go, aby otrzymać prezent.",
-            "pt": "Solte-o para receber o presente.",
-            "ru": "Брось его, чтобы получить подарок.",
-            "tl": "I-drop ito upang matanggap ang regalo.",
-            "uk": "Киньте його, щоб отримати подарунок.",
-            "zh-TW": "放下它即可收到禮物。"
-          },
+          "text": "@dropItToReceiveTheGift",
           "color": "blue"
         }
       ],
@@ -2729,6 +2752,23 @@
         {
           "text": "@numberOfItems",
           "when": ["durability"]
+        },
+        {
+          "text": {
+            "en": "Register with the NPC to receive various gifts.",
+            "de": "Registrieren Sie sich beim NPC, um verschiedene Geschenke zu erhalten.",
+            "es": "Regístrese con el NPC para recibir varios obsequios.",
+            "id": "Daftar ke NPC untuk menerima berbagai hadiah.",
+            "ja": "月の商人デルガドが集めている金貨",
+            "pl": "Zarejestruj się u NPC, aby otrzymać różne prezenty.",
+            "pt": "Registre-se no NPC para receber diversos presentes.",
+            "ru": "Зарегистрируйтесь у NPC, чтобы получать различные подарки.",
+            "tl": "Magrehistro sa NPC upang makatanggap ng iba't ibang mga regalo.",
+            "uk": "Зареєструйтесь у NPC, щоб отримувати різні подарунки.",
+            "zh-TW": "註冊NPC即可領取各種禮物。"
+          },
+          "color": "blue",
+          "after": "options"
         }
       ],
       "width": 1,

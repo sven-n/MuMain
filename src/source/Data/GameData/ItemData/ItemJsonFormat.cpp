@@ -35,6 +35,8 @@ constexpr const char* Values = "values";
 constexpr const char* LevelValues = "levelValues";
 constexpr const char* Colors = "colors";
 constexpr const char* Bold = "bold";
+constexpr const char* After = "after";
+constexpr const char* AfterOptions = "options";
 constexpr const char* Requirements = "requirements";
 constexpr const char* RequirementsByLevel = "requirementsByLevel";
 constexpr const char* ClassRequirements = "classRequirements";
@@ -210,6 +212,10 @@ OrderedJson WriteDescription(const std::vector<ItemDescriptionLine>& description
         if (line.HasLevels())
         {
             entry[Keys::Levels] = OrderedJson::array({line.minLevel, line.maxLevel});
+        }
+        if (line.afterOptions)
+        {
+            entry[Keys::After] = Keys::AfterOptions;
         }
         json.push_back(std::move(entry));
     }
@@ -520,6 +526,19 @@ void ItemReader::ReadDescription(const OrderedJson& json, std::vector<ItemDescri
         {
             ReadDescriptionColors(*colors, field + "." + Keys::Colors, line);
         }
+        if (const auto after = entry.find(Keys::After); after != entry.end())
+        {
+            if (after->is_string() && after->get<std::string>() == Keys::AfterOptions)
+            {
+                line.afterOptions = true;
+            }
+            else
+            {
+                AddIssue(ItemDataIssueSeverity::Error, field + "." + Keys::After,
+                         "must be \"options\": the line is drawn after the item's options instead of with the "
+                         "description");
+            }
+        }
         if (const auto bold = entry.find(Keys::Bold); bold != entry.end())
         {
             if (bold->is_boolean())
@@ -537,7 +556,8 @@ void ItemReader::ReadDescription(const OrderedJson& json, std::vector<ItemDescri
             ReadDescriptionLevels(*levels, field + "." + Keys::Levels, line);
         }
         WarnAboutUnknownKeys(
-            entry, {Keys::Text, Keys::Values, Keys::When, Keys::Color, Keys::Colors, Keys::Bold, Keys::Levels},
+            entry,
+            {Keys::Text, Keys::Values, Keys::When, Keys::Color, Keys::Colors, Keys::Bold, Keys::Levels, Keys::After},
             field + ".");
         if (read)
         {

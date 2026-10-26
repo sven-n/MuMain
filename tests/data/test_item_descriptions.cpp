@@ -47,7 +47,8 @@ std::vector<std::wstring> WriteRows(const ItemDefinition& definition)
 {
     TextNum = 0;
     SkipNum = 0;
-    WriteItemDescriptionLines(definition, 0, ItemTooltipValues{}, FiveUnitsPerLetter);
+    int rowsLeft = MaxItemDescriptionRows;
+    WriteItemDescriptionLines(definition, 0, ItemTooltipValues{}, false, rowsLeft, FiveUnitsPerLetter);
     return {std::begin(TextList), std::begin(TextList) + TextNum};
 }
 
@@ -114,7 +115,8 @@ TEST_CASE("A description's placeholders are filled in for the item's level befor
     jewel.description = {Line("+{level}: {table:b} more")};
     TextNum = 0;
     SkipNum = 0;
-    WriteItemDescriptionLines(jewel, 15, ItemTooltipValues{}, FiveUnitsPerLetter);
+    int rowsLeft = MaxItemDescriptionRows;
+    WriteItemDescriptionLines(jewel, 15, ItemTooltipValues{}, false, rowsLeft, FiveUnitsPerLetter);
     REQUIRE(TextNum == 1);
     CHECK(std::wstring(TextList[0]) == L"+15: 2000000000 more");
 
@@ -122,10 +124,12 @@ TEST_CASE("A description's placeholders are filled in for the item's level befor
     const std::string text = "{table:b} " + std::string(30, 'a');
     jewel.description = {Line(text.c_str())};
     TextNum = 0;
-    WriteItemDescriptionLines(jewel, 15, ItemTooltipValues{}, FiveUnitsPerLetter);
+    rowsLeft = MaxItemDescriptionRows;
+    WriteItemDescriptionLines(jewel, 15, ItemTooltipValues{}, false, rowsLeft, FiveUnitsPerLetter);
     CHECK(TextNum == 2);
     TextNum = 0;
-    WriteItemDescriptionLines(jewel, 0, ItemTooltipValues{}, FiveUnitsPerLetter);
+    rowsLeft = MaxItemDescriptionRows;
+    WriteItemDescriptionLines(jewel, 0, ItemTooltipValues{}, false, rowsLeft, FiveUnitsPerLetter);
     CHECK(TextNum == 1);
 }
 
@@ -139,7 +143,8 @@ TEST_CASE("A description line is written only at the item levels it is shown at 
 
     TextNum = 0;
     SkipNum = 0;
-    WriteItemDescriptionLines(scroll, 0, ItemTooltipValues{}, FiveUnitsPerLetter);
+    int rowsLeft = MaxItemDescriptionRows;
+    WriteItemDescriptionLines(scroll, 0, ItemTooltipValues{}, false, rowsLeft, FiveUnitsPerLetter);
     REQUIRE(TextNum == 1);
     CHECK(std::wstring(TextList[0]) == L"Every level");
 
@@ -147,13 +152,15 @@ TEST_CASE("A description line is written only at the item levels it is shown at 
     {
         INFO("+" << level);
         TextNum = 0;
-        WriteItemDescriptionLines(scroll, level, ItemTooltipValues{}, FiveUnitsPerLetter);
+        rowsLeft = MaxItemDescriptionRows;
+        WriteItemDescriptionLines(scroll, level, ItemTooltipValues{}, false, rowsLeft, FiveUnitsPerLetter);
         REQUIRE(TextNum == 2);
         CHECK(std::wstring(TextList[1]) == L"Warp after 3 seconds");
     }
 
     TextNum = 0;
-    WriteItemDescriptionLines(scroll, 9, ItemTooltipValues{}, FiveUnitsPerLetter);
+    rowsLeft = MaxItemDescriptionRows;
+    WriteItemDescriptionLines(scroll, 9, ItemTooltipValues{}, false, rowsLeft, FiveUnitsPerLetter);
     CHECK(TextNum == 1);
 }
 
@@ -163,13 +170,35 @@ TEST_CASE("A description writes at most its own rows, leaving the tooltip's rows
     jewel.description.assign(MaxItemDescriptionRows + 10, Line("A line"));
 
     TextNum = 5;
-    WriteItemDescriptionLines(jewel, 0, ItemTooltipValues{}, FiveUnitsPerLetter);
+    int rowsLeft = MaxItemDescriptionRows;
+    WriteItemDescriptionLines(jewel, 0, ItemTooltipValues{}, false, rowsLeft, FiveUnitsPerLetter);
     CHECK(TextNum == 5 + MaxItemDescriptionRows);
+    CHECK(rowsLeft == 0);
 
     // Near the end of the list it stops at the list's end.
     TextNum = MaxTextListRows - 3;
-    WriteItemDescriptionLines(jewel, 0, ItemTooltipValues{}, FiveUnitsPerLetter);
+    rowsLeft = MaxItemDescriptionRows;
+    WriteItemDescriptionLines(jewel, 0, ItemTooltipValues{}, false, rowsLeft, FiveUnitsPerLetter);
     CHECK(TextNum == MaxTextListRows);
+}
+
+TEST_CASE("A description's parts before and after the options share its rows [data][items]")
+{
+    ItemDefinition ring = MakeJewel();
+    ItemDescriptionLine after = Line("After the options");
+    after.afterOptions = true;
+    ring.description.assign(20, Line("Before the options"));
+    ring.description.insert(ring.description.end(), 20, after);
+
+    TextNum = 0;
+    int rowsLeft = MaxItemDescriptionRows;
+    WriteItemDescriptionLines(ring, 0, ItemTooltipValues{}, false, rowsLeft, FiveUnitsPerLetter);
+    CHECK(TextNum == 20);
+    CHECK(rowsLeft == MaxItemDescriptionRows - 20);
+    WriteItemDescriptionLines(ring, 0, ItemTooltipValues{}, true, rowsLeft, FiveUnitsPerLetter);
+    CHECK(TextNum == MaxItemDescriptionRows);
+    CHECK(rowsLeft == 0);
+    CHECK(std::wstring(TextList[MaxItemDescriptionRows - 1]) == L"After the options");
 }
 
 TEST_CASE("Description texts are checked like item names [data][items]")

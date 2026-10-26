@@ -1704,13 +1704,15 @@ std::optional<PetInfoRequest> GetPetInfoRequest(int itemType, int pointedIndex, 
 }
 
 void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, int level,
-                               const ItemTooltipValues& values, ItemTooltipTextMeasure measure)
+                               const ItemTooltipValues& values, bool afterOptions, int& rowsLeft,
+                               ItemTooltipTextMeasure measure)
 {
-    const int lastRow = std::min(TextNum + MaxItemDescriptionRows, static_cast<int>(std::size(TextList)));
+    const int firstRow = TextNum;
+    const int lastRow = std::min(TextNum + rowsLeft, static_cast<int>(std::size(TextList)));
     const int itemType = Data::Items::MakeItemType(definition.group, definition.number);
     for (const Data::Items::ItemDescriptionLine& line : definition.description)
     {
-        if (!line.IsShownAt(level) ||
+        if (line.afterOptions != afterOptions || !line.IsShownAt(level) ||
             !Engine::Items::TooltipValues::AreTooltipConditionsMet(line.when, itemType, level, values))
         {
             continue;
@@ -1736,7 +1738,7 @@ void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, in
         {
             if (TextNum >= lastRow)
             {
-                return;
+                break;
             }
             if (piece.empty())
             {
@@ -1754,6 +1756,7 @@ void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, in
             TextNum++;
         }
     }
+    rowsLeft -= TextNum - firstRow;
 }
 
 // Writes the lines of the item tooltip layout that come after its section `after`, up to its next section, into
@@ -1808,6 +1811,26 @@ static void WriteItemTooltipLayoutLines(const ITEM& item, int level, const ItemT
         TextBold[TextNum] = line->bold;
         TextNum++;
     }
+}
+
+// The item data's description of `item`, measured with the game's font (or a test's measure): see
+// WriteItemDescriptionLines.
+static void WriteItemDescription(const ITEM& item, int level, const ItemTooltipValues& values, bool afterOptions,
+                                 int& rowsLeft)
+{
+    const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(item.Type);
+    if (definition == nullptr)
+    {
+        return;
+    }
+    g_pRenderText->SetFont(g_hFont);
+    WriteItemDescriptionLines(*definition, level, values, afterOptions, rowsLeft,
+                              [](const wchar_t* text, size_t length) -> int
+                              {
+                                  return s_itemTooltipTextMeasure != nullptr
+                                             ? s_itemTooltipTextMeasure(text, length)
+                                             : g_pRenderText->MeasureText(text, static_cast<int>(length)).cx;
+                              });
 }
 
 // What BuildItemTooltipText made of an item.
@@ -2620,17 +2643,9 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }
     }
-    if (const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(ip->Type))
-    {
-        g_pRenderText->SetFont(g_hFont);
-        WriteItemDescriptionLines(*definition, Level, values,
-                                  [](const wchar_t* text, size_t length) -> int
-                                  {
-                                      return s_itemTooltipTextMeasure != nullptr
-                                                 ? s_itemTooltipTextMeasure(text, length)
-                                                 : g_pRenderText->MeasureText(text, static_cast<int>(length)).cx;
-                                  });
-    }
+    // The description's rows, for both of its parts (before and after the options) together.
+    int descriptionRowsLeft = MaxItemDescriptionRows;
+    WriteItemDescription(*ip, Level, values, false, descriptionRowsLeft);
     if (ip->Type == ITEM_ARMOR_OF_GUARDSMAN)
     {
         int startIndex = 0;
@@ -2878,27 +2893,15 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         }
     }
 
-    mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+    if (!g_ItemDatabase.HasTag(ip->Type, Data::Items::ItemTag::NoBlankAfterOptions))
+    {
+        mu_swprintf(TextList[TextNum], L"\n");
+        TextNum++;
+        SkipNum++;
+    }
+    WriteItemDescription(*ip, Level, values, true, descriptionRowsLeft);
 
-    if (ip->Type == ITEM_SPLINTER_OF_ARMOR || ip->Type == ITEM_BLESS_OF_GUARDIAN)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::FragmentOfHornCanBeMade);
-        TextListColor[TextNum] = TEXT_COLOR_YELLOW;
-        TextNum++;
-    }
-    else if (ip->Type == ITEM_CLAW_OF_BEAST || ip->Type == ITEM_FRAGMENT_OF_HORN)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::BrokenHornCanBeMadeUsingTheClawOfBeastAndFragmentOfHorn);
-        TextListColor[TextNum] = TEXT_COLOR_YELLOW;
-        TextNum++;
-    }
-    else if (ip->Type == ITEM_BROKEN_HORN)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::FenrirSHornCanBeMadeThroughItemCombination);
-        TextListColor[TextNum] = TEXT_COLOR_YELLOW;
-        TextNum++;
-    }
-    else if (ip->Type == ITEM_HORN_OF_FENRIR)
+    if (ip->Type == ITEM_HORN_OF_FENRIR)
     {
         GetSpecialOptionText(0, TextList[TextNum], AT_SKILL_PLASMA_STORM_FENRIR, 0, 0);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -2961,177 +2964,6 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
             TextListColor[TextNum] = TEXT_COLOR_YELLOW;
             TextNum++;
         }
-    }
-    else if (ip->Type == ITEM_TRANSFORMATION_RING)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::UnableToEquipWithADifferentTransformationRing);
-        TextListColor[TextNum] = TEXT_COLOR_RED;
-        TextBold[TextNum] = false;
-        TextNum++;
-    }
-    else if (ip->Type == ITEM_ELITE_TRANSFER_SKELETON_RING)
-    {
-        wchar_t strText[100];
-        mu_swprintf(strText, I18N::Game::IncreaseDefensiveSkillD, 10);
-        mu_swprintf(TextList[TextNum], L"%ls%%", strText);
-        TextListColor[TextNum] = TEXT_COLOR_BLUE;
-        TextNum++;
-
-        WORD wlevel = CharacterAttribute->Level;
-        mu_swprintf(TextList[TextNum], I18N::Game::VitalityD2225, wlevel);
-        TextListColor[TextNum] = TEXT_COLOR_BLUE;
-        TextNum++;
-
-        mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-
-        mu_swprintf(TextList[TextNum], I18N::Game::UnableToEquipWithADifferentTransformationRing);
-        TextListColor[TextNum] = TEXT_COLOR_RED;
-        TextBold[TextNum] = false;
-        TextNum++;
-    }
-    else if (ip->Type == ITEM_FIRECRACKER)
-    {
-        TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        mu_swprintf(TextList[TextNum], I18N::Game::FireworksWillAppearOnceThrownInTheField); TextNum++;
-    }
-    else if (ip->Type == ITEM_GM_GIFT)
-    {
-        TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        mu_swprintf(TextList[TextNum], I18N::Game::GMHasGiftedThisSpecialBox); TextNum++;
-        TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        mu_swprintf(TextList[TextNum], I18N::Game::DropItToReceiveTheGift); TextNum++;
-    }
-    else if (ip->Type == ITEM_JACK_OLANTERN_TRANSFORMATION_RING)
-    {
-        mu_swprintf(TextList[TextNum], L"%ls", I18N::Game::EnjoyHalloweenFestival);
-        TextListColor[TextNum] = TEXT_COLOR_BLUE;
-
-        mu_swprintf(TextList[TextNum], I18N::Game::UnableToEquipWithADifferentTransformationRing);
-        TextListColor[TextNum] = TEXT_COLOR_RED;
-        TextBold[TextNum] = false;
-        TextNum++;
-        TextNum++;
-
-        mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-
-        mu_swprintf(TextList[TextNum], I18N::Game::UnableToEquipWithADifferentTransformationRing);
-        TextListColor[TextNum] = TEXT_COLOR_RED;
-        TextBold[TextNum] = false;
-        TextNum++;
-    }
-    else if (ip->Type == ITEM_CHRISTMAS_TRANSFORMATION_RING)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::AdditionalDmgD, 20);
-        TextListColor[TextNum] = TEXT_COLOR_BLUE;
-        TextNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::AdditionalWizardryDmgD, 20);
-        TextListColor[TextNum] = TEXT_COLOR_BLUE;
-        TextNum++;
-        mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-        mu_swprintf(TextList[TextNum], L"%ls", I18N::Game::MerryChristmas);
-        TextListColor[TextNum] = TEXT_COLOR_RED;
-        TextNum++;
-        mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::UnableToEquipWithADifferentTransformationRing);
-        TextListColor[TextNum] = TEXT_COLOR_RED;
-        TextBold[TextNum] = false;
-        TextNum++;
-    }
-    else if (ip->Type == ITEM_PANDA_TRANSFORMATION_RING)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::TransformIntoPanda);
-        TextListColor[TextNum] = TEXT_COLOR_BLUE;
-        TextBold[TextNum] = false;
-        TextNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::ZenIncrease50);
-        TextListColor[TextNum] = TEXT_COLOR_BLUE;
-        TextBold[TextNum] = false;
-        TextNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::DamageWizardryCurse30);
-        TextListColor[TextNum] = TEXT_COLOR_BLUE;
-        TextBold[TextNum] = false;
-        TextNum++;
-        mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::UnableToEquipWithADifferentTransformationRing);
-        TextListColor[TextNum] = TEXT_COLOR_RED;
-        TextBold[TextNum] = false;
-        TextNum++;
-    }
-    else if (ip->Type == ITEM_SKELETON_TRANSFORMATION_RING)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::EquipToTransformIntoASkeletonWarrior);
-        TextListColor[TextNum] = TEXT_COLOR_BLUE;
-        TextBold[TextNum] = false;
-        TextNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::DamageWizardryCurse40);
-        TextListColor[TextNum] = TEXT_COLOR_BLUE;
-        TextBold[TextNum] = false;
-        TextNum++;
-        mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::EquippingAlongWithAPetSkeleton);
-        TextListColor[TextNum] = TEXT_COLOR_BLUE;
-        TextBold[TextNum] = false;
-        TextNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::IncreasesEXPBy30);
-        TextListColor[TextNum] = TEXT_COLOR_BLUE;
-        TextBold[TextNum] = false;
-        TextNum++;
-        mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::UnableToEquipWithADifferentTransformationRing);
-        TextListColor[TextNum] = TEXT_COLOR_RED;
-        TextBold[TextNum] = false;
-        TextNum++;
-    }
-    else if (ip->Type == ITEM_CHRISTMAS_STAR)
-    {
-        mu_swprintf(TextList[TextNum], L"%ls", I18N::Game::FireworksWillAppearOnceThrownInTheField);
-        TextListColor[TextNum] = TEXT_COLOR_BLUE;
-        TextNum++;
-    }
-    else if (ip->Type == ITEM_GAME_MASTER_TRANSFORMATION_RING)
-    {
-        for (int i = 0; i < 7; ++i)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::Lookup(976 + i), 255);
-            TextListColor[TextNum] = TEXT_COLOR_BLUE;
-            TextNum++;
-        }
-
-        mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::UnableToEquipWithADifferentTransformationRing);
-        TextListColor[TextNum] = TEXT_COLOR_RED;
-        TextBold[TextNum] = false;
-        TextNum++;
-    }
-    else if (ip->Type == ITEM_INVITATION_TO_SANTA_VILLAGE)
-    {
-        TextNum--;
-        mu_swprintf(TextList[TextNum], I18N::Game::UsableDtimes, ip->Durability);
-        TextListColor[TextNum] = TEXT_COLOR_RED;
-        TextNum++;
-        mu_swprintf(TextList[TextNum], L"%ls", I18N::Game::RelocateToTheSantaSVillageByTheRightMouseClick);
-        TextListColor[TextNum] = TEXT_COLOR_BLUE;
-        TextNum++;
-    }
-    else if (ip->Type == ITEM_POTION + 100)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::RegisterWithTheNPCToReceiveVariousGifts, ip->Durability);
-        TextListColor[TextNum] = TEXT_COLOR_BLUE;
-        TextNum++;
-    }
-    else if (ip->Type == ITEM_PET_SKELETON)
-    {
-        TextNum--; SkipNum--;
-
-        mu_swprintf(TextList[TextNum], I18N::Game::EquippingAlongWithASkeletonTransformationRing);
-        TextListColor[TextNum] = TEXT_COLOR_BLUE;
-        TextBold[TextNum] = false;
-        TextNum++;
-
-        mu_swprintf(TextList[TextNum], I18N::Game::IncreasesEXPBy30);
-        TextListColor[TextNum] = TEXT_COLOR_BLUE;
-        TextBold[TextNum] = false;
-        TextNum++;
     }
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
     else if (g_pMyInventory->IsInvenItem(ip->Type))
@@ -3255,13 +3087,6 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         TextNum++;
     }
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-    else if (ip->Type == ITEM_SNOWMAN_TRANSFORMATION_RING)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::UnableToEquipWithADifferentTransformationRing);
-        TextListColor[TextNum] = TEXT_COLOR_RED;
-        TextBold[TextNum] = false;
-        TextNum++;
-    }
 
     if (ip->bPeriodItem == true)
     {

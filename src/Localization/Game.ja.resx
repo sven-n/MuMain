@@ -6711,10 +6711,6 @@
     <value>ボタンをクリックすると全てのステータスが初期化されます。</value>
     <comment>legacy_id=1886</comment>
   </data>
-  <data name="Register with the NPC to receive various gifts." xml:space="preserve">
-    <value>月の商人デルガドが集めている金貨</value>
-    <comment>legacy_id=1887</comment>
-  </data>
   <data name="Exchange has been made." xml:space="preserve">
     <value>ガハハハ。商談成立じゃな。</value>
     <comment>legacy_id=1888</comment>
@@ -6806,18 +6802,6 @@
   <data name="Fenrir" xml:space="preserve">
     <value>フェンリル</value>
     <comment>legacy_id=1916</comment>
-  </data>
-  <data name="FragmentOfHornCanBeMade" xml:space="preserve">
-    <value>女神の加護と鎧の破片の合成を通じて角笛の破片を作ることができます。</value>
-    <comment>legacy_id=1917</comment>
-  </data>
-  <data name="Broken horn can be made using the claw of beast and fragment of horn." xml:space="preserve">
-    <value>猛獣の爪と角笛のかけらの合成を通じて折れた角笛を作ることができます。</value>
-    <comment>legacy_id=1918</comment>
-  </data>
-  <data name="Fenrir's horn can be made through item combination." xml:space="preserve">
-    <value>合成を通じてフェンリルの角笛を作ることができます。</value>
-    <comment>legacy_id=1919</comment>
   </data>
   <data name="Can summon the Fenrir when equipped." xml:space="preserve">
     <value>装備の際、フェンリルを召還することができます。</value>
@@ -7675,10 +7659,6 @@
     <value>これから製錬が始まります。製錬とは着用アイテムをアイテムエンチャントに必要な製錬石に変える一連の過程のことです。当然、製錬に使われたアイテムは消滅されますので、ご注意ください。</value>
     <comment>legacy_id=2224</comment>
   </data>
-  <data name="VitalityD2225" xml:space="preserve">
-    <value>生命力 +%d</value>
-    <comment>legacy_id=2225</comment>
-  </data>
   <data name="This item is not allowed to use the private store." xml:space="preserve">
     <value>個人商店で利用できないアイテムです</value>
     <comment>legacy_id=2226</comment>
@@ -7698,10 +7678,6 @@
   <data name="Defense Power increase +%d" xml:space="preserve">
     <value>防御力上昇 +%d</value>
     <comment>legacy_id=2231</comment>
-  </data>
-  <data name="Enjoy Halloween Festival." xml:space="preserve">
-    <value>ハロウィンの祭を楽しんでください。</value>
-    <comment>legacy_id=2232</comment>
   </data>
   <data name="Blessing of Jack O'Lantern" xml:space="preserve">
     <value>ジャックランタンの祝福</value>
@@ -7735,10 +7711,6 @@
     <value>クリスマス</value>
     <comment>legacy_id=2243</comment>
   </data>
-  <data name="Fireworks will appear once thrown in the field." xml:space="preserve">
-    <value>地面に投げるとクラッカーを鳴らすことができます。</value>
-    <comment>legacy_id=2244</comment>
-  </data>
   <data name="Santa Clause" xml:space="preserve">
     <value>サンタクロース</value>
     <comment>legacy_id=2245</comment>
@@ -7750,10 +7722,6 @@
   <data name="Snowman" xml:space="preserve">
     <value>雪だるま</value>
     <comment>legacy_id=2247</comment>
-  </data>
-  <data name="Merry Christmas." xml:space="preserve">
-    <value>メリークリスマス！~</value>
-    <comment>legacy_id=2248</comment>
   </data>
   <data name="Stonger effect has taken place." xml:space="preserve">
     <value>重複して使用することができません。</value>
@@ -7770,10 +7738,6 @@
   <data name="Unable to gain experience rate" xml:space="preserve">
     <value>経験値獲得不可能</value>
     <comment>legacy_id=2255</comment>
-  </data>
-  <data name="usable %dtimes" xml:space="preserve">
-    <value>%d回利用可能</value>
-    <comment>legacy_id=2260</comment>
   </data>
   <data name="You can achieve special items with combinations." xml:space="preserve">
     <value>パンドラ合成でアイテムを獲得</value>
@@ -7970,10 +7934,6 @@
   <data name="You do not have sufficient points." xml:space="preserve">
     <value>ポイントが足りません。</value>
     <comment>legacy_id=2322</comment>
-  </data>
-  <data name="GM has gifted this special box." xml:space="preserve">
-    <value>GMがプレゼントした特別な箱です。</value>
-    <comment>legacy_id=2323</comment>
   </data>
   <data name="GM summon zone" xml:space="preserve">
     <value>GM召喚地域</value>
@@ -8462,10 +8422,6 @@
     <value>サンタ村へよくきたのぅ。ワシのところに来ればプレゼントをやるぞ。ただし、1日1回までじゃぞ。</value>
     <comment>legacy_id=2588</comment>
   </data>
-  <data name="Relocate to the Santa's Village by the right-mouse click." xml:space="preserve">
-    <value>右クリックでサンタ村へ移動可能</value>
-    <comment>legacy_id=2589</comment>
-  </data>
   <data name="Would you like to move to the Santa's Village?" xml:space="preserve">
     <value>サンタ村へ移動しますか?</value>
     <comment>legacy_id=2590</comment>
@@ -8797,18 +8753,6 @@
   <data name="Select to move." xml:space="preserve">
     <value>移動する地域を選択してください。</value>
     <comment>legacy_id=2731</comment>
-  </data>
-  <data name="Transform into Panda." xml:space="preserve">
-    <value>装備すると、パンダマンに変身できます。</value>
-    <comment>legacy_id=2743</comment>
-  </data>
-  <data name="Zen increase 50%%" xml:space="preserve">
-    <value>ゼン増加50%%に向上</value>
-    <comment>legacy_id=2744</comment>
-  </data>
-  <data name="Damage/Wizardry/Curse +30" xml:space="preserve">
-    <value>攻撃力 +30</value>
-    <comment>legacy_id=2745</comment>
   </data>
   <data name="Lugard" xml:space="preserve">
     <value>ルガド</value>
@@ -9750,26 +9694,6 @@
     <value>ロレン市場ではパーティーを申し込むことができません。</value>
     <comment>legacy_id=3064</comment>
   </data>
-  <data name="Equip to transform into a Skeleton Warrior." xml:space="preserve">
-    <value>装備するとスケルトンに変身できます。</value>
-    <comment>legacy_id=3065</comment>
-  </data>
-  <data name="Damage/Wizardry/Curse +40" xml:space="preserve">
-    <value>攻撃力/魔力/呪い +40</value>
-    <comment>legacy_id=3066</comment>
-  </data>
-  <data name="Equipping along with a Pet Skeleton" xml:space="preserve">
-    <value>スケルトンパージドラゴンと同時に装備すると</value>
-    <comment>legacy_id=3067</comment>
-  </data>
-  <data name="Equipping along with a Skeleton Transformation Ring" xml:space="preserve">
-    <value>スケルトン変身指輪と同時に装備すると</value>
-    <comment>legacy_id=3071</comment>
-  </data>
-  <data name="increases EXP by 30%%." xml:space="preserve">
-    <value>経験値30%%を追加獲得できます。</value>
-    <comment>legacy_id=3072</comment>
-  </data>
   <data name="Chaos Castle Lv.%lu Guardsman x %lu/%lu" xml:space="preserve">
     <value>カオスキャッスル Lv.%lu 近衛兵 x %lu/%lu</value>
     <comment>legacy_id=3074</comment>
@@ -9813,10 +9737,6 @@
   <data name="+15 Item Creation" xml:space="preserve">
     <value>+15 アイテム生成</value>
     <comment>legacy_id=3087</comment>
-  </data>
-  <data name="Unable to Equip with a Different Transformation Ring" xml:space="preserve">
-    <value>他の変身指輪と同時に装備不可</value>
-    <comment>legacy_id=3088</comment>
   </data>
   <data name="Gens Info Window" xml:space="preserve">
     <value>ゲンス情報ウィンドウ</value>

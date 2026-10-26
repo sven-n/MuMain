@@ -112,6 +112,8 @@ struct ItemDescriptionLine
     // The line's own color rules, as a layout line's: the first that holds gives the color, else `color` does.
     std::vector<TooltipColorRule> colors;
     bool bold = false;
+    // Drawn after the item's options, at the end of the tooltip ("after": "options"), instead of with the description.
+    bool afterOptions = false;
     int minLevel = 0;
     int maxLevel = ItemLevelCount - 1;
 

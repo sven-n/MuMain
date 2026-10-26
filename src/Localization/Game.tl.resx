@@ -6832,10 +6832,6 @@
     <value>Mag-click sa button para muling simulan ang lahat ng stat point.</value>
     <comment>legacy_id=1886</comment>
   </data>
-  <data name="Register with the NPC to receive various gifts." xml:space="preserve">
-    <value>Magrehistro sa NPC upang makatanggap ng iba't ibang mga regalo.</value>
-    <comment>legacy_id=1887</comment>
-  </data>
   <data name="Exchange has been made." xml:space="preserve">
     <value>Naisagawa na ang palitan.</value>
     <comment>legacy_id=1888</comment>
@@ -6927,18 +6923,6 @@
   <data name="Fenrir" xml:space="preserve">
     <value>Fenrir</value>
     <comment>legacy_id=1916</comment>
-  </data>
-  <data name="FragmentOfHornCanBeMade" xml:space="preserve">
-    <value>Ang fragment ng sungay ay maaaring gawin gamit ang Banal na proteksyon ng Diyosa at fragment ng baluti.</value>
-    <comment>legacy_id=1917</comment>
-  </data>
-  <data name="Broken horn can be made using the claw of beast and fragment of horn." xml:space="preserve">
-    <value>Ang sirang sungay ay maaaring gawin gamit ang kuko ng hayop at fragment ng sungay.</value>
-    <comment>legacy_id=1918</comment>
-  </data>
-  <data name="Fenrir's horn can be made through item combination." xml:space="preserve">
-    <value>Ang sungay ni Fenrir ay maaaring gawin sa pamamagitan ng kumbinasyon ng item.</value>
-    <comment>legacy_id=1919</comment>
   </data>
   <data name="Can summon the Fenrir when equipped." xml:space="preserve">
     <value>Maaaring ipatawag ang Fenrir kapag nilagyan.</value>
@@ -7796,10 +7780,6 @@
     <value>Nagsimula na ang refinery. Ang refinery ay isang bahagi ng proseso upang baguhin ang item sa Refining Stone upang palakasin. Ang pinong item ay magiging disapper, siguraduhing suriin ang item.</value>
     <comment>legacy_id=2224</comment>
   </data>
-  <data name="VitalityD2225" xml:space="preserve">
-    <value>sigla +%d</value>
-    <comment>legacy_id=2225</comment>
-  </data>
   <data name="This item is not allowed to use the private store." xml:space="preserve">
     <value>Ang item na ito ay hindi pinapayagang gamitin ang pribadong tindahan.</value>
     <comment>legacy_id=2226</comment>
@@ -7823,10 +7803,6 @@
   <data name="Defense Power increase +%d" xml:space="preserve">
     <value>Pagtaas ng Defense Power +%d</value>
     <comment>legacy_id=2231</comment>
-  </data>
-  <data name="Enjoy Halloween Festival." xml:space="preserve">
-    <value>Tangkilikin ang Halloween Festival.</value>
-    <comment>legacy_id=2232</comment>
   </data>
   <data name="Blessing of Jack O'Lantern" xml:space="preserve">
     <value>Pagpapala ng Jack O'Lantern</value>
@@ -7872,10 +7848,6 @@
     <value>Pasko</value>
     <comment>legacy_id=2243</comment>
   </data>
-  <data name="Fireworks will appear once thrown in the field." xml:space="preserve">
-    <value>Lilitaw ang mga paputok sa sandaling ihagis sa field.</value>
-    <comment>legacy_id=2244</comment>
-  </data>
   <data name="Santa Clause" xml:space="preserve">
     <value>Santa Clause</value>
     <comment>legacy_id=2245</comment>
@@ -7887,10 +7859,6 @@
   <data name="Snowman" xml:space="preserve">
     <value>taong yari sa niyebe</value>
     <comment>legacy_id=2247</comment>
-  </data>
-  <data name="Merry Christmas." xml:space="preserve">
-    <value>Maligayang Pasko.</value>
-    <comment>legacy_id=2248</comment>
   </data>
   <data name="Stonger effect has taken place." xml:space="preserve">
     <value>Stonger effect ay naganap.</value>
@@ -7907,10 +7875,6 @@
   <data name="Unable to gain experience rate" xml:space="preserve">
     <value>Hindi makuha ang rate ng karanasan</value>
     <comment>legacy_id=2255</comment>
-  </data>
-  <data name="usable %dtimes" xml:space="preserve">
-    <value>magagamit nang %d beses</value>
-    <comment>legacy_id=2260</comment>
   </data>
   <data name="You can achieve special items with combinations." xml:space="preserve">
     <value>Makakamit mo ang mga espesyal na item na may mga kumbinasyon.</value>
@@ -8107,10 +8071,6 @@
   <data name="You do not have sufficient points." xml:space="preserve">
     <value>Wala kang sapat na puntos.</value>
     <comment>legacy_id=2322</comment>
-  </data>
-  <data name="GM has gifted this special box." xml:space="preserve">
-    <value>Niregalo ni GM ang espesyal na kahon na ito.</value>
-    <comment>legacy_id=2323</comment>
   </data>
   <data name="GM summon zone" xml:space="preserve">
     <value>GM summon zone</value>
@@ -8755,10 +8715,6 @@
     <value>Maligayang pagdating sa Santa's Village. Narito ang isang regalo para sa iyo. Palagi kang makakahanap ng isang bagay na magdadala sa iyo ng isang kapalaran dito.</value>
     <comment>legacy_id=2588</comment>
   </data>
-  <data name="Relocate to the Santa's Village by the right-mouse click." xml:space="preserve">
-    <value>Lumipat sa Santa's Village sa pamamagitan ng right-mouse click.</value>
-    <comment>legacy_id=2589</comment>
-  </data>
   <data name="Would you like to move to the Santa's Village?" xml:space="preserve">
     <value>Gusto mo bang lumipat sa Santa's Village?</value>
     <comment>legacy_id=2590</comment>
@@ -9094,18 +9050,6 @@
   <data name="Select to move." xml:space="preserve">
     <value>Piliin upang ilipat.</value>
     <comment>legacy_id=2731</comment>
-  </data>
-  <data name="Transform into Panda." xml:space="preserve">
-    <value>Transform sa Panda.</value>
-    <comment>legacy_id=2743</comment>
-  </data>
-  <data name="Zen increase 50%%" xml:space="preserve">
-    <value>50%% ang pagtaas ng Zen</value>
-    <comment>legacy_id=2744</comment>
-  </data>
-  <data name="Damage/Wizardry/Curse +30" xml:space="preserve">
-    <value>Pinsala/Wizardry/Curse +30</value>
-    <comment>legacy_id=2745</comment>
   </data>
   <data name="Lugard" xml:space="preserve">
     <value>Lugard</value>
@@ -10067,26 +10011,6 @@
     <value>Hindi mo maaaring hilingin sa iba na sumali sa iyong partido habang nasa Loren Market.</value>
     <comment>legacy_id=3064</comment>
   </data>
-  <data name="Equip to transform into a Skeleton Warrior." xml:space="preserve">
-    <value>Equip para magtransform sa isang Skeleton Warrior.</value>
-    <comment>legacy_id=3065</comment>
-  </data>
-  <data name="Damage/Wizardry/Curse +40" xml:space="preserve">
-    <value>Pinsala/Wizardry/Curse +40</value>
-    <comment>legacy_id=3066</comment>
-  </data>
-  <data name="Equipping along with a Pet Skeleton" xml:space="preserve">
-    <value>Equipping kasama ng Pet Skeleton</value>
-    <comment>legacy_id=3067</comment>
-  </data>
-  <data name="Equipping along with a Skeleton Transformation Ring" xml:space="preserve">
-    <value>Equipping kasama ng isang Skeleton Transformation Ring</value>
-    <comment>legacy_id=3071</comment>
-  </data>
-  <data name="increases EXP by 30%%." xml:space="preserve">
-    <value>nagpapataas ng EXP ng 30%%.</value>
-    <comment>legacy_id=3072</comment>
-  </data>
   <data name="Chaos Castle Lv.%lu Guardsman x %lu/%lu" xml:space="preserve">
     <value>Chaos Castle Lv.%lu Guardsman x %lu/%lu</value>
     <comment>legacy_id=3074</comment>
@@ -10130,10 +10054,6 @@
   <data name="+15 Item Creation" xml:space="preserve">
     <value>+15 Paglikha ng Item</value>
     <comment>legacy_id=3087</comment>
-  </data>
-  <data name="Unable to Equip with a Different Transformation Ring" xml:space="preserve">
-    <value>Hindi Ma-equip ng Iba't Ibang Transformation Ring</value>
-    <comment>legacy_id=3088</comment>
   </data>
   <data name="Cannot be equipped while another Transformation Ring is equipped." xml:space="preserve">
     <value>Hindi maaaring gamitan habang ang isa pang Transformation Ring ay nilagyan.</value>
