@@ -148,18 +148,20 @@ color, width, wrapping, placement
 or decoration; long names wrap above the single lower ornament. A custom theme can replace the
 shared ornament with its own locally supplied artwork without changing the map names.
 
-The map banner optionally loads Monotype Corsiva from the system or per-user Windows Fonts
-folder; its file is not distributed. It uses the face's italic style at normal weight, an
+The map banner uses MU Map Name, a font bundled in `fonts/MuMapName-Italic.otf` and generated
+from the original client's map-name images (`tools/MapNameFont`), so any name in Latin, Polish
+or Cyrillic is written in the original lettering. It is italic only, at normal weight, with an
 ivory fill with dark outline and shadow, and one classic MU ornament below the name. The
-banner scales as a unit, including the outline and shadow. Without Corsiva, the theme's
-title font is used, including the player's selected title font. Liberation Sans is the
-final fallback if no title face is available. An unavailable RmlUi document leaves the
-banner hidden; there is no bitmap fallback.
+banner scales as a unit, including the outline and shadow. A theme whose `font-map-name`
+family isn't available gets the theme's title font, including the player's selected title
+font. Liberation Sans is the final fallback if no title face is available. An unavailable
+RmlUi document leaves the banner hidden; there is no bitmap fallback.
 
 Change the family with `font-map-name` in the theme's `tokens.ini`, keeping the paired
 `font-family` and `font-style` token references in `map_name.rcss`. The matching style is
 detected automatically; set `font-map-name-style=normal` or `italic` in `tokens.ini` to
-prefer an installed face. If that style is unavailable, an available style is used so the
+prefer a face. A theme can name a locally installed font such as Monotype Corsiva after loading
+its file in `theme.ini`'s `[Fonts]` section (see Optional system fonts). If that style is unavailable, an available style is used so the
 name remains visible. The same paired `<font-token>-style` convention works for other
 theme font tokens. Other UI fonts retain their existing selection settings.
 
