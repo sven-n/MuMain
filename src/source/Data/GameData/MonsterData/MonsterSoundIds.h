@@ -12,7 +12,4 @@ namespace Data::Monsters
 {
 // The id of a SOUND_* name of the list, or nullopt.
 std::optional<int> FindMonsterSoundId(std::string_view name);
-
-// The name of an id of the list; empty for others.
-std::string_view GetMonsterSoundIdName(int id);
 } // namespace Data::Monsters

@@ -516,6 +516,4 @@ TEST_CASE("sound files get one number each after the SOUND_* list [audio]")
     CHECK(second != first);
     // The same file, as the game opens it: without case, \ and / alike.
     CHECK(Audio::SoundNumbers::ForFile(L"data\\sound\\testnumbersone.wav") == first);
-    CHECK(Audio::SoundNumbers::FileOf(first) == L"Data/Sound/TestNumbersOne.wav");
-    CHECK(Audio::SoundNumbers::FileOf(SOUND_CLICK01).empty());
 }

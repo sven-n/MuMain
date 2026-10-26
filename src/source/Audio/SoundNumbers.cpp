@@ -4,7 +4,6 @@
 
 #include <cwctype>
 #include <unordered_map>
-#include <vector>
 
 namespace Audio::SoundNumbers
 {
@@ -13,8 +12,8 @@ namespace
 struct Numbers
 {
     std::unordered_map<std::wstring, int> byFile;
-    // The file of each number, from MAX_BUFFER on.
-    std::vector<std::wstring> files;
+    // The numbers given, from MAX_BUFFER on.
+    int given = 0;
 };
 
 Numbers& GetNumbers()
@@ -42,31 +41,20 @@ ESound ForFile(std::wstring_view file)
     {
         return static_cast<ESound>(found->second);
     }
-    if (numbers.files.size() >= static_cast<size_t>(MAX_FILE_SOUNDS))
+    if (numbers.given >= MAX_FILE_SOUNDS)
     {
         // MAX_BUFFER is the first file's number.
         return NoNumber;
     }
-    const int number = static_cast<int>(MAX_BUFFER) + static_cast<int>(numbers.files.size());
-    numbers.files.emplace_back(file);
+    const int number = static_cast<int>(MAX_BUFFER) + numbers.given;
+    ++numbers.given;
     numbers.byFile.emplace(key, number);
     return static_cast<ESound>(number);
 }
 
-std::wstring FileOf(int number)
-{
-    const Numbers& numbers = GetNumbers();
-    const int index = number - static_cast<int>(MAX_BUFFER);
-    if (index < 0 || index >= static_cast<int>(numbers.files.size()))
-    {
-        return {};
-    }
-    return numbers.files[static_cast<size_t>(index)];
-}
-
 void ReleaseAll()
 {
-    const int count = static_cast<int>(GetNumbers().files.size());
+    const int count = GetNumbers().given;
     for (int index = 0; index < count; ++index)
     {
         ReleaseBuffer(static_cast<int>(MAX_BUFFER) + index);

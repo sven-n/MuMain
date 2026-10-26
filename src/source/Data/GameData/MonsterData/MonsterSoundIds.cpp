@@ -251,14 +251,4 @@ std::optional<int> FindMonsterSoundId(std::string_view name)
     }
     return std::nullopt;
 }
-
-std::string_view GetMonsterSoundIdName(int id)
-{
-    for (const SoundIdName& sound : SoundIds)
-    {
-        if (sound.id == id)
-            return sound.name;
-    }
-    return {};
-}
 } // namespace Data::Monsters

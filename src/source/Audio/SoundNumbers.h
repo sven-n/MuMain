@@ -20,10 +20,6 @@ constexpr ESound NoNumber = static_cast<ESound>(static_cast<int>(MAX_BUFFER) + M
 // NoNumber.
 ESound ForFile(std::wstring_view file);
 
-// The file a number was given for; empty for a SOUND_* id and for a number
-// not given.
-std::wstring FileOf(int number);
-
 // Releases the loaded sounds of all numbers given so far (a map change); the
 // numbers stay with their files.
 void ReleaseAll();
