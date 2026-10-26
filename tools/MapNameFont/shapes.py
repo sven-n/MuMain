@@ -150,15 +150,18 @@ class Pen:
             self._kernels[key] = (np.abs(along) <= length / 2 + self.edge / 2) & (np.abs(across) <= self.edge / 2 + 0.5)
         return self._kernels[key]
 
-    def stroke(self, points, start=1.0, end=1.0, mid=1.0):
+    def stroke(self, points, start=1.0, end=1.0, mid=1.0, pressures=None):
         """Draw through the design points (Catmull-Rom curve). start/mid/end: nib length factors,
-        for tapered entries and exits."""
-        path = _spline([(col(u), row(v)) for u, v in points])
+        for tapered entries and exits; or `pressures`, one factor per point."""
+        path, where = _spline([(col(u), row(v)) for u, v in points])
         out = empty()
         n = len(path)
         for i, (x, y) in enumerate(path):
             t = i / max(n - 1, 1)
-            pressure = (start + (mid - start) * (t / 0.5)) if t < 0.5 else (mid + (end - mid) * ((t - 0.5) / 0.5))
+            if pressures is not None:
+                pressure = float(np.interp(where[i], np.arange(len(points)), pressures))
+            else:
+                pressure = (start + (mid - start) * (t / 0.5)) if t < 0.5 else (mid + (end - mid) * ((t - 0.5) / 0.5))
             k = self.kernel(max(pressure, 0.05))
             half = k.shape[0] // 2
             r0, c0 = int(round(y)) - half, int(round(x)) - half
@@ -180,13 +183,15 @@ class Pen:
 
 
 def _spline(points, step=1.0):
+    """Points about `step` px apart along the curve, and where each lies: the index of the design
+    point it starts from plus how far it is towards the next."""
     pts = np.array(points, np.float64)
     if len(pts) == 2:
         length = np.hypot(*(pts[1] - pts[0]))
-        t = np.linspace(0, 1, max(int(length / step), 2))[:, None]
-        return pts[0] + (pts[1] - pts[0]) * t
+        t = np.linspace(0, 1, max(int(length / step), 2))
+        return pts[0] + (pts[1] - pts[0]) * t[:, None], t
     padded = np.vstack([2 * pts[0] - pts[1], pts, 2 * pts[-1] - pts[-2]])
-    out = []
+    out, where = [], []
     for i in range(1, len(padded) - 2):
         p0, p1, p2, p3 = padded[i - 1:i + 3]
         length = np.hypot(*(p2 - p1))
@@ -194,5 +199,7 @@ def _spline(points, step=1.0):
             t2, t3 = t * t, t * t * t
             out.append(0.5 * ((2 * p1) + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2
                               + (-p0 + 3 * p1 - 3 * p2 + p3) * t3))
+            where.append(i - 1 + t)
     out.append(pts[-1])
-    return np.array(out)
+    where.append(len(pts) - 1)
+    return np.array(out), np.array(where)

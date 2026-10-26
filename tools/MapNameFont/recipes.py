@@ -235,22 +235,23 @@ def latin(t):
     g["Z"] = enlarge("z", 1.25)
 
     # k: its leg runs on under the next letter as a hairline, like K's; in the images that
-    # hairline is too thin and dark to cut out. Below the arm the leg is drawn with the pen,
-    # along the traced leg's centre line and as wide, and the swing starts inside it, so the
-    # traced and drawn parts meet without a step. The swing stays under the baseline, so it
-    # doesn't count as the body for spacing.
+    # hairline is too thin and dark to cut out. Below the arm, leg and swing are one pen stroke:
+    # the leg straight from the traced leg's top to its foot and as wide, then thinning into the
+    # swing. Its start lies on the traced leg, so the two meet without a step. The swing stays
+    # under the baseline, so it doesn't count as the body for spacing.
     k_small = t["k"]
     foot_u = extent_u(region(k_small, v1=0.2))[1] - 0.06
     leg_heights = (0.44, 0.32, 0.2, 0.08)
-    leg_line = centre_line(k_small, leg_heights)
-    leg_pressure = pressure_for(stroke_width(k_small, leg_heights), leg_line[0], leg_line[-1])
+    top, *_, foot = centre_line(k_small, leg_heights)
+    leg_pressure = pressure_for(stroke_width(k_small, leg_heights), top, foot)
     k_stem = stems(k_small, 0.1, 0.4)[0][1]
     arm = erase(k_small, u0=k_stem + 0.04, v1=leg_heights[0] - 0.04)
-    leg = PEN.stroke(leg_line, start=leg_pressure, end=leg_pressure)
-    swing = PEN.stroke(leg_line[2:] + [(foot_u - 0.04, 0.02), (foot_u + 0.08, -0.08), (foot_u + 0.3, -0.13),
-                                       (foot_u + 0.48, -0.1), (foot_u + 0.58, -0.05)],
-                       start=leg_pressure, mid=0.5, end=0.35)
-    g["k"] = filled(arm | leg | swing, JOIN_RADIUS)
+    middle = ((top[0] + foot[0]) / 2, (top[1] + foot[1]) / 2)
+    # The points are about evenly spaced: closer ones make the curve overshoot into a bulge.
+    leg = PEN.stroke([top, middle, foot, (foot_u + 0.08, -0.08), (foot_u + 0.3, -0.13), (foot_u + 0.48, -0.1),
+                      (foot_u + 0.58, -0.05)],
+                     pressures=[leg_pressure, leg_pressure, leg_pressure, 0.56, 0.45, 0.39, 0.35])
+    g["k"] = filled(arm | leg, JOIN_RADIUS)
 
     # x: a thick fall and a thin rise, as the nib makes them.
     g["x"] = (PEN.stroke([(0.0, 0.86), (0.1, 1.0), (0.2, 0.95), (0.5, 0.12), (0.62, 0.0), (0.74, 0.07)],
