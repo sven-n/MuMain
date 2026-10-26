@@ -32,8 +32,7 @@ public:
     void Render();
 
 protected:
-    // RmlUi owns this presentation, including recovery after a missing document.
-    // There is no native/per-map bitmap fallback.
+    // An unavailable RmlUi document hides the banner; there is no native/bitmap fallback.
     void BuildRmlUi();
     void SyncView();
     void RefreshName();

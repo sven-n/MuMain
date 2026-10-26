@@ -38,8 +38,9 @@ void CUIMapName::OnLocaleChanged(void* context) noexcept
 void CUIMapName::RefreshName()
 {
     using UI::MapName::MapNameRmlModel;
+    const auto* name = gMapManager.FindMapName(gMapManager.WorldActive);
     SyncField(m_RmlView.Binder(), &MapNameRmlModel::mapName, "map_name",
-              StringUtils::WideToNarrow(gMapManager.GetMapName(gMapManager.WorldActive)));
+              name != nullptr ? StringUtils::WideToNarrow(name) : Rml::String());
 }
 
 void CUIMapName::Init()
@@ -59,13 +60,13 @@ void CUIMapName::ShowMapName()
     m_fAlpha = 0.2f;
     m_dwDeltaTickSum = 0;
 
-    if (gMapManager.WorldActive == WD_40AREA_FOR_GM)
+    RefreshName();
+    if (gMapManager.WorldActive == WD_40AREA_FOR_GM || m_RmlView.GetModel().mapName.empty())
     {
         m_eState = HIDE;
         return;
     }
 
-    RefreshName();
 #ifdef ASG_ADD_GENS_SYSTEM
     m_bStrife = ::IsStrifeMap(gMapManager.WorldActive);
 #endif // ASG_ADD_GENS_SYSTEM

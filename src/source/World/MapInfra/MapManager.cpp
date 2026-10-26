@@ -1689,14 +1689,14 @@ namespace
 {
 constexpr int SecondDevilSquareMapId = 32;
 
-const wchar_t* EventMapName(int mapId)
+const wchar_t* EventMapName(CMapManager& maps, int mapId)
 {
-    if ((mapId >= WD_11BLOODCASTLE1 && mapId <= WD_11BLOODCASTLE_END) || mapId == WD_52BLOODCASTLE_MASTER_LEVEL)
+    if (maps.InBloodCastle(mapId))
         return I18N::Game::BloodCastle;
-    if ((mapId >= WD_18CHAOS_CASTLE && mapId <= WD_18CHAOS_CASTLE_END) || mapId == WD_53CAOSCASTLE_MASTER_LEVEL)
+    if (maps.InChaosCastle(mapId))
         return I18N::Game::ChaosCastle;
-    if (mapId >= WD_24HELLAS && mapId <= WD_24HELLAS_END)
-        return I18N::Game::Kalima;
+    if (maps.InHellas(mapId))
+        return maps.InHiddenHellas(mapId) ? I18N::Game::LostKalima : I18N::Game::Kalima;
     if (mapId >= WD_45CURSEDTEMPLE_LV1 && mapId <= WD_45CURSEDTEMPLE_LV6)
         return I18N::Game::IllusionTemple;
     if (mapId >= WD_65DOPPLEGANGER1 && mapId <= WD_68DOPPLEGANGER4)
@@ -1709,7 +1709,16 @@ const wchar_t* EventMapName(int mapId)
 
 const wchar_t* CMapManager::GetMapName(int iMap)
 {
-    if (const auto* eventName = EventMapName(iMap))
+    const auto* name = FindMapName(iMap);
+    return name != nullptr ? name : I18N::Game::UnknownMap;
+}
+
+const wchar_t* CMapManager::FindMapName(int iMap)
+{
+    // The event predicates reserve -1 for WorldActive; a name lookup uses only its argument.
+    if (iMap < 0)
+        return nullptr;
+    if (const auto* eventName = EventMapName(*this, iMap))
         return eventName;
 
     switch (iMap)
@@ -1744,9 +1753,8 @@ const wchar_t* CMapManager::GetMapName(int iMap)
     case WD_33AIDA:
         return I18N::Game::Aida;
     case WD_34CRYWOLF_1ST:
+    case WD_35CRYWOLF_2ND:
         return I18N::Game::CrywolfFortress;
-    case WD_24HELLAS_7:
-        return I18N::Game::LostKalima;
     case WD_37KANTURU_1ST:
         return I18N::Game::Kanturu;
     case WD_38KANTURU_2ND:
@@ -1779,6 +1787,6 @@ const wchar_t* CMapManager::GetMapName(int iMap)
     case WD_81KARUTAN2:
         return I18N::Game::Karutan;
     default:
-        return I18N::Game::UnknownMap;
+        return nullptr;
     }
 }

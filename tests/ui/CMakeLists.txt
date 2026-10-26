@@ -22,7 +22,6 @@ mu_add_test(
         test_map_name.cpp
         RmlLayoutFixture.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
-    PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/src/bin"
     LINK_LIBS MuClient
 )
 target_compile_definitions(map_name_tests PRIVATE

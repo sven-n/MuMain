@@ -141,16 +141,27 @@ and inheritance cycles make a theme unavailable for selection.
 
 The world-entry banner shows localized map names in both maintained themes, with a shared
 ornament already included in the client data. Adding a map name no longer needs an individual
-name image. Unrecognized maps display “Unknown map”. The Gens warning still appears on eligible
-battle maps. Edit a theme's `map_name.rcss` to change the font, color, width, wrapping, placement
+name image. Unrecognized maps and the GM area do not show a banner; other map-name displays
+use “Unknown map” when no name is defined. The Gens warning still appears at its original
+readable size on eligible battle maps. Edit a theme's `map_name.rcss` to change the font size,
+color, width, wrapping, placement
 or decoration; long names wrap above the single lower ornament. A custom theme can replace the
 shared ornament with its own locally supplied artwork without changing the map names.
 
-The map banner optionally loads Monotype Corsiva from the local Windows font folder;
-its file is not distributed. It uses the face's italic style at normal weight, a bright
-silver fill with dark outline and shadow, and one classic MU ornament below the name. Without that font, bundled Liberation Sans remains readable.
-`font-map-name` selects the dedicated family; `font-map-name-style` resolves its matching
-style automatically. Other UI fonts follow their existing settings.
+The map banner optionally loads Monotype Corsiva from the system or per-user Windows Fonts
+folder; its file is not distributed. It uses the face's italic style at normal weight, an
+ivory fill with dark outline and shadow, and one classic MU ornament below the name. The
+banner scales as a unit, including the outline and shadow. Without Corsiva, the theme's
+title font is used, including the player's selected title font. Liberation Sans is the
+final fallback if no title face is available. An unavailable RmlUi document leaves the
+banner hidden; there is no bitmap fallback.
+
+Change the family with `font-map-name` in the theme's `tokens.ini`, keeping the paired
+`font-family` and `font-style` token references in `map_name.rcss`. The matching style is
+detected automatically; set `font-map-name-style=normal` or `italic` in `tokens.ini` to
+prefer an installed face. If that style is unavailable, an available style is used so the
+name remains visible. The same paired `<font-token>-style` convention works for other
+theme font tokens. Other UI fonts retain their existing selection settings.
 
 ## Switching themes without relaunching
 

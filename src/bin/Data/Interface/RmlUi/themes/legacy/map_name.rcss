@@ -8,14 +8,16 @@
 }
 
 body { pointer-events: none; }
-#banner { top: 45.8333%; width: 163.75dp; max-width: 90%; pointer-events: none; }
-#ornament_bottom { display: block; width: 100dp; max-width: 100%; margin: -4dp auto 0; height: 25.3012dp; decorator: image(map-name-rule contain); }
+/* RmlUi font effects use pixel metrics; scale the reference-pixel banner as a unit. */
+#banner { top: 45.8333%; width: 163.75px; max-width: calc(90% / var(--ui-scale)); pointer-events: none;
+    transform: translateX(-50%) scale(var(--ui-scale)); transform-origin: center top; }
+#ornament_bottom { display: block; width: 100px; max-width: 100%; margin: -4px auto 0; height: 25.3012px; decorator: image(map-name-rule contain); }
 #name {
-    min-height: 24dp;
+    min-height: 24px;
     display: flex; align-items: center; justify-content: center;
-    font-family: token(font-map-name); font-size: 23dp; font-weight: normal; font-style: token(font-map-name-style); line-height: 1.1;
+    font-family: token(font-map-name); font-size: 23px; font-weight: normal; font-style: token(font-map-name-style); line-height: 1.1;
     color: #f0ece2; font-effect: outline(2px #100e0b), shadow(2px 2px #000000);
     text-align: center;
 }
 #name_text { max-width: 100%; word-break: break-word; }
-#strife { position: absolute; top: -14dp; width: 83dp; height: 14dp; }
+#strife { position: absolute; top: -28px; width: 166px; height: 28px; }

@@ -116,6 +116,9 @@
     <value>Reserve : Job</value>
     <comment>legacy_id=28,29</comment>
   </data>
+  <data name="Unknown map" xml:space="preserve">
+    <value>Unknown map</value>
+  </data>
   <data name="Lorencia" xml:space="preserve">
     <value>Lorencia</value>
     <comment>legacy_id=30</comment>
@@ -8106,7 +8109,7 @@
     <comment>legacy_id=2177</comment>
   </data>
   <data name="Kanturu3" xml:space="preserve">
-    <value>Kanturu3</value>
+    <value>Kanturu Relics</value>
     <comment>legacy_id=2178</comment>
   </data>
   <data name="Refinery Tower" xml:space="preserve">
@@ -13407,8 +13410,5 @@
   </data>
   <data name="Other items" xml:space="preserve">
     <value>Other items</value>
-  </data>
-  <data name="Unknown map" xml:space="preserve">
-    <value>Unknown map</value>
   </data>
 </root>

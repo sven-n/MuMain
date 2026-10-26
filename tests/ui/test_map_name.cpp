@@ -4,6 +4,8 @@
 #include "Core/Utilities/StringUtils.h"
 #include "I18N/All.h"
 #include "Network/Server/ServerListManager.h"
+#include "Render/Renderer/MuRenderer.h"
+#include "Render/Sprites/GlobalBitmap.h"
 #include "UI/HUD/UIMapName.h"
 #include "UI/RmlBridge/RmlElementBox.h"
 #include "UI/RmlBridge/RmlPointer.h"
@@ -16,22 +18,55 @@
 #include <RmlUi/Core/FontEngineInterface.h>
 #include <RmlUi/Core/FontEffect.h>
 #include <RmlUi/Core/FontGlyph.h>
+#include <SDL3/SDL.h>
+#include <algorithm>
 #include <array>
 #include <climits>
+#include <cmath>
+#include <cstdlib>
 #include <filesystem>
+#include <fstream>
 #include <string>
 #include <utility>
 
 namespace
 {
 constexpr float PixelTolerance = 1.f;
+constexpr GLuint GensWarningBitmap = BITMAP_INTERFACE_EX + 47;
+
+class WarningTextureFixture
+{
+public:
+    ~WarningTextureFixture()
+    {
+        Bitmaps.UnloadImage(GensWarningBitmap, true);
+        mu::ShutdownSDLGpuRenderer();
+        SDL_DestroyWindow(window);
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
+        std::error_code error;
+        std::filesystem::remove(directory / "warning.ozt", error);
+        std::filesystem::remove(directory, error);
+    }
+    SDL_Window* window = nullptr;
+    std::filesystem::path directory =
+        std::filesystem::temp_directory_path() / ("mu-map-name-gens-" + std::to_string(timeGetTime()));
+};
 
 class MapNameProbe : public CUIMapName
 {
 public:
-    float Alpha() const { return m_fAlpha; }
-    const UI::MapName::MapNameRmlModel& Model() const { return m_RmlView.GetModel(); }
-    Rml::ElementDocument* Document() { return m_RmlView.Document(); }
+    float Alpha() const
+    {
+        return m_fAlpha;
+    }
+    const UI::MapName::MapNameRmlModel& Model() const
+    {
+        return m_RmlView.GetModel();
+    }
+    Rml::ElementDocument* Document()
+    {
+        return m_RmlView.Document();
+    }
     void SetText(Rml::String text)
     {
         m_RmlView.GetModel().mapName = std::move(text);
@@ -48,11 +83,11 @@ class MapNameFixture : public UI::Tests::RmlLayoutFixture
 {
 public:
     MapNameFixture()
-        : m_Directory(std::filesystem::current_path()), m_Theme(UI::RmlBridge::GetActiveThemeName()),
-          m_Locale(I18N::GetCurrentLocale()), m_World(gMapManager.WorldActive),
-          m_NonPvp(g_ServerListManager->m_byNonPvP)
+        : m_Directory(std::filesystem::current_path()), m_Locale(I18N::GetCurrentLocale()),
+          m_World(gMapManager.WorldActive), m_NonPvp(g_ServerListManager->m_byNonPvP)
     {
         std::filesystem::current_path(MU_BIN_DIR);
+        m_Theme = UI::RmlBridge::GetActiveThemeName();
         UI::RmlBridge::ClearThemeFontCache();
         UI::RmlBridge::SetContextResolver([this](std::string_view) { return context; });
         REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/NotoSansTC-Regular.otf", true));
@@ -84,8 +119,13 @@ void CheckName(int mapId, const wchar_t* expected)
     CHECK(std::wstring(gMapManager.GetMapName(mapId)) == expected);
 }
 
-void CheckTextEffects(Rml::Element& text)
+void CheckTextEffects(Rml::Element& text, float scale)
 {
+    Rml::Vector2f position, size;
+    REQUIRE(UI::RmlBridge::DrawnBox(text, Rml::BoxArea::Border, position, size));
+    const auto referenceSize = text.GetBox().GetSize(Rml::BoxArea::Border);
+    CHECK(std::abs(size.x - referenceSize.x * scale) <= PixelTolerance);
+    CHECK(std::abs(size.y - referenceSize.y * scale) <= PixelTolerance);
     const auto* property = text.GetProperty(Rml::PropertyId::FontEffect);
     REQUIRE(property != nullptr);
     const auto effects = property->Get<Rml::FontEffectsPtr>();
@@ -126,28 +166,43 @@ void CheckBounds(Rml::Element& child, Rml::Element& parent)
 TEST_CASE("map names use the argument and bounded event aliases [ui][map-name]")
 {
     MapNameFixture fixture;
-    for (int current : std::array<int, 4>{WD_41CHANGEUP3RD_1ST, WD_42CHANGEUP3RD_2ND,
-                                        WD_45CURSEDTEMPLE_LV1, WD_0LORENCIA})
+    for (int current :
+         std::array<int, 8>{WD_41CHANGEUP3RD_1ST, WD_42CHANGEUP3RD_2ND, WD_45CURSEDTEMPLE_LV1, WD_0LORENCIA,
+                            WD_11BLOODCASTLE1, WD_18CHAOS_CASTLE, WD_24HELLAS, WD_24HELLAS_7})
     {
         gMapManager.WorldActive = current;
         CheckName(WD_0LORENCIA, I18N::Game::Lorencia);
         CheckName(WD_10HEAVEN, I18N::Game::Icarus);
         CheckName(WD_41CHANGEUP3RD_1ST, I18N::Game::BalgassBarrack);
         CheckName(WD_42CHANGEUP3RD_2ND, I18N::Game::BalgassRestingPlace);
-        for (int id : {9, 32}) CheckName(id, I18N::Game::DevilSquare);
-        for (int id : {11, 17, 52}) CheckName(id, I18N::Game::BloodCastle);
-        for (int id : {18, 23, 53}) CheckName(id, I18N::Game::ChaosCastle);
-        for (int id : {24, 29}) CheckName(id, I18N::Game::Kalima);
+        for (int id : {9, 32})
+            CheckName(id, I18N::Game::DevilSquare);
+        for (int id : {11, 17, 52})
+            CheckName(id, I18N::Game::BloodCastle);
+        for (int id : {18, 23, 53})
+            CheckName(id, I18N::Game::ChaosCastle);
+        for (int id : {24, 29})
+            CheckName(id, I18N::Game::Kalima);
         CheckName(36, I18N::Game::LostKalima);
-        for (int id : {45, 50}) CheckName(id, I18N::Game::IllusionTemple);
-        for (int id : {65, 68}) CheckName(id, I18N::Game::Doppelganger);
-        for (int id : {69, 72}) CheckName(id, I18N::Game::Varka);
+        for (int id : {34, 35})
+            CheckName(id, I18N::Game::CrywolfFortress);
+        for (int id : {45, 50})
+            CheckName(id, I18N::Game::IllusionTemple);
+        for (int id : {65, 68})
+            CheckName(id, I18N::Game::Doppelganger);
+        for (int id : {69, 72})
+            CheckName(id, I18N::Game::Varka);
         CheckName(37, I18N::Game::Kanturu);
         CheckName(38, I18N::Game::Kanturu3);
+        CheckName(38, L"Kanturu Relics");
         CheckName(39, I18N::Game::RefineryTower);
-        for (int id : {80, 81}) CheckName(id, I18N::Game::Karutan);
+        for (int id : {80, 81})
+            CheckName(id, I18N::Game::Karutan);
         for (int id : {INT_MIN, -1, 43, 54, 82, INT_MAX})
+        {
             CheckName(id, I18N::Game::UnknownMap);
+            CHECK(gMapManager.FindMapName(id) == nullptr);
+        }
     }
 }
 
@@ -186,6 +241,19 @@ TEST_CASE("same-map activation resets fade and refreshes Gens without artwork [u
     banner.Render();
     REQUIRE(banner.Document() != nullptr);
     CHECK_FALSE(banner.Document()->IsVisible());
+    for (int mapId : {INT_MIN, -1, 43, 54, 82, INT_MAX})
+    {
+        CAPTURE(mapId);
+        gMapManager.WorldActive = mapId;
+        banner.ShowMapName();
+        banner.Render();
+        CHECK_FALSE(banner.Document()->IsVisible());
+    }
+    gMapManager.WorldActive = WD_35CRYWOLF_2ND;
+    banner.ShowMapName();
+    banner.Render();
+    CHECK(banner.Document()->IsVisible());
+    CHECK(banner.Model().mapName == StringUtils::WideToNarrow(I18N::Game::CrywolfFortress));
 }
 
 TEST_CASE("map-name live binding survives locale and theme changes as plain text [ui][map-name]")
@@ -196,7 +264,9 @@ TEST_CASE("map-name live binding survives locale and theme changes as plain text
     gMapManager.WorldActive = WD_38KANTURU_2ND;
     banner.ShowMapName();
     banner.Render();
-    I18N::SetLocale("pl");
+    const auto englishName = banner.Model().mapName;
+    I18N::SetLocale("ja");
+    REQUIRE(StringUtils::WideToNarrow(I18N::Game::Kanturu3) != englishName);
     CHECK(banner.Model().mapName == StringUtils::WideToNarrow(I18N::Game::Kanturu3));
     for (const char* theme : {"legacy", "modern"})
     {
@@ -212,6 +282,44 @@ TEST_CASE("map-name live binding survives locale and theme changes as plain text
         REQUIRE(node != nullptr);
         CHECK(node->GetText() == "<b>Lorencia & Żółć</b>");
     }
+}
+
+TEST_CASE("map-name Gens texture is retried after loading [ui][map-name][gpu]" *
+          doctest::skip(std::getenv("MU_RUN_GPU_UPLOAD_TESTS") == nullptr))
+{
+    MapNameFixture fixture;
+    WarningTextureFixture texture;
+    REQUIRE(SDL_InitSubSystem(SDL_INIT_VIDEO));
+    texture.window = SDL_CreateWindow("map-name Gens test", 64, 64, SDL_WINDOW_HIDDEN);
+    REQUIRE(texture.window != nullptr);
+    REQUIRE(mu::InitSDLGpuRenderer(texture.window, "DejaVu Sans", "default", 12.f, 14.f, 12.f));
+    MapNameProbe banner;
+    banner.Init();
+    gMapManager.WorldActive = WD_63PK_FIELD;
+    banner.ShowMapName();
+    banner.Render();
+    REQUIRE(banner.Model().strife);
+    REQUIRE(banner.Model().strifeSource.empty());
+    REQUIRE(std::filesystem::create_directory(texture.directory));
+    // A one-pixel OZT exercises the production cache without requiring localized game artwork.
+    std::array<unsigned char, 26> pixels{};
+    pixels[16] = pixels[18] = 1;
+    pixels[20] = 32;
+    std::fill(pixels.begin() + 22, pixels.end(), 255);
+    {
+        std::ofstream image(texture.directory / "warning.ozt", std::ios::binary);
+        image.write(reinterpret_cast<const char*>(pixels.data()), pixels.size());
+        REQUIRE(image.good());
+    }
+    const auto warningPath = texture.directory / "warning.tga";
+    REQUIRE(Bitmaps.LoadImage(GensWarningBitmap, warningPath.wstring()));
+    banner.Render();
+    CHECK(banner.Model().strifeSource == "/" + warningPath.generic_string());
+    gMapManager.WorldActive = WD_0LORENCIA;
+    banner.ShowMapName();
+    banner.Render();
+    CHECK_FALSE(banner.Model().strife);
+    CHECK(banner.Model().strifeSource.empty());
 }
 
 TEST_CASE("map-name text wraps above a shared lower ornament across themes and scales [ui][map-name]")
@@ -263,6 +371,10 @@ TEST_CASE("map-name text wraps above a shared lower ornament across themes and s
                 CHECK(warningPosition.y + warningSize.y <= position.y + PixelTolerance);
                 CHECK(warningPosition.x + warningSize.x / 2.f ==
                       doctest::Approx(viewport.x / 2.f).epsilon(0.002));
+                CHECK(std::abs(warningSize.x - 166.f * fixture.context->GetDensityIndependentPixelRatio()) <=
+                      PixelTolerance);
+                CHECK(std::abs(warningSize.y - 28.f * fixture.context->GetDensityIndependentPixelRatio()) <=
+                      PixelTolerance);
             }
             fixture.context->ProcessMouseMove(static_cast<int>(position.x + size.x / 2.f),
                                              static_cast<int>(position.y + size.y / 2.f), 0);
@@ -270,7 +382,7 @@ TEST_CASE("map-name text wraps above a shared lower ornament across themes and s
             CHECK(text->GetComputedValues().font_size() > 0.f);
             CHECK(text->GetComputedValues().font_weight() == Rml::Style::FontWeight::Normal);
             CHECK(text->GetComputedValues().color() == Rml::Colourb(240, 236, 226));
-            CheckTextEffects(*text);
+            CheckTextEffects(*text, fixture.context->GetDensityIndependentPixelRatio());
         }
     }
 }
@@ -279,19 +391,16 @@ TEST_CASE("map-name italic-only optional family and missing-font fallback stay p
 {
     MapNameFixture fixture;
     const UI::RmlBridge::ThemeInheritance theme("Data/Interface/RmlUi/themes/legacy");
-    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-map-name") ==
-          std::optional<std::string>("Liberation Sans"));
-    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-map-name-style") ==
-          std::optional<std::string>("normal"));
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-map-name") == std::optional<std::string>("DejaVu Sans"));
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-map-name-style") == std::optional<std::string>("normal"));
 
     // Emulate an italic-only installed face with a redistributable fixture font.
     // This regression runs on machines without the optional commercial font.
-    REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/LiberationSans-Regular.ttf",
-        "Monotype Corsiva", Rml::Style::FontStyle::Italic, Rml::Style::FontWeight::Normal));
+    REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/LiberationSans-Regular.ttf", "Monotype Corsiva",
+                              Rml::Style::FontStyle::Italic, Rml::Style::FontWeight::Normal));
     CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-map-name") ==
           std::optional<std::string>("Monotype Corsiva"));
-    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-map-name-style") ==
-          std::optional<std::string>("italic"));
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-map-name-style") == std::optional<std::string>("italic"));
 }
 
 TEST_CASE("map-name configured optional file uses its real style or bundled fallback [ui][map-name]")
@@ -307,17 +416,17 @@ TEST_CASE("map-name configured optional file uses its real style or bundled fall
     {
         CHECK(style == std::optional<std::string>("italic"));
         CHECK(engine->GetFontFaceHandle("monotype corsiva", Rml::Style::FontStyle::Italic,
-            Rml::Style::FontWeight::Normal, 18) != 0);
+                                        Rml::Style::FontWeight::Normal, 18) != 0);
         CHECK(engine->GetFontFaceHandle("monotype corsiva", Rml::Style::FontStyle::Normal,
-            Rml::Style::FontWeight::Normal, 18) == 0);
+                                        Rml::Style::FontWeight::Normal, 18) == 0);
         MESSAGE("Configured file loaded: Monotype Corsiva, italic, weight400 (not a substituted fixture font)");
     }
     else
     {
-        CHECK(family == std::optional<std::string>("Liberation Sans"));
+        CHECK(family == std::optional<std::string>("DejaVu Sans"));
         CHECK(style == std::optional<std::string>("normal"));
-        CHECK(engine->GetFontFaceHandle("liberation sans", Rml::Style::FontStyle::Normal,
-            Rml::Style::FontWeight::Normal, 18) != 0);
-        MESSAGE("Optional font absent: bundled Liberation Sans, normal, weight400");
+        CHECK(engine->GetFontFaceHandle("dejavu sans", Rml::Style::FontStyle::Normal, Rml::Style::FontWeight::Normal,
+                                        18) != 0);
+        MESSAGE("Optional font absent: theme title DejaVu Sans, normal, weight400");
     }
 }
