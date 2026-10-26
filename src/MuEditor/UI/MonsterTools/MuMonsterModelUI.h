@@ -8,6 +8,7 @@
 #include "Data/GameData/MonsterData/MonsterModelDefinition.h"
 
 #include <string>
+#include <vector>
 
 namespace MuEditor::Monsters
 {
@@ -52,9 +53,18 @@ private:
     std::string m_fileSearch;
     std::string m_newFolder;
     std::string m_soundEventMaps;
-    Data::Monsters::MonsterModelDefinition m_shownDraft;
+    // The draft (m_draft's value, which lives until its next Begin), the slot
+    // and the frame it was shown in.
+    const Data::Monsters::MonsterModelDefinition* m_shownDraft = nullptr;
     int m_shownSlot = -1;
     int m_shownFrame = -1;
+    // What the frames would find again until the data changes: the monsters
+    // that use the slot, and the files of the model list.
+    std::vector<int> m_users;
+    int m_usersSlot = -1;
+    long long m_usersVersion = -1;
+    std::vector<std::string> m_listedFiles;
+    long long m_listedVersion = -1;
 };
 } // namespace MuEditor::Monsters
 

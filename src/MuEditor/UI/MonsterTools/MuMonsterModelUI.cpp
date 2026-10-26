@@ -108,11 +108,11 @@ const char* SlotLabel(size_t index)
 const MonsterModelDefinition* MuMonsterModelUI::GetShownDraft(int slot) const
 {
     // Only the draft of this frame: a hidden window keeps an old one.
-    if (m_shownSlot != slot || m_shownFrame != ImGui::GetFrameCount())
+    if (m_shownDraft == nullptr || m_shownSlot != slot || m_shownFrame != ImGui::GetFrameCount())
     {
         return nullptr;
     }
-    return &m_shownDraft;
+    return m_shownDraft;
 }
 
 MuMonsterModelUI& MuMonsterModelUI::GetInstance()
@@ -152,7 +152,7 @@ void MuMonsterModelUI::Render(bool* open)
         // is being dragged.
         if (model != nullptr && slot)
         {
-            m_shownDraft = *model;
+            m_shownDraft = model;
             m_shownSlot = *slot;
             m_shownFrame = ImGui::GetFrameCount();
         }
@@ -207,15 +207,21 @@ void MuMonsterModelUI::RenderSlot(int slot)
 
 void MuMonsterModelUI::RenderUsers(int slot)
 {
-    std::vector<int> users;
-    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
+    if (slot != m_usersSlot || ToolWindow::GetDataVersion() != m_usersVersion)
     {
-        const MonsterDefinition* monster = g_MonsterDatabase.Find(number);
-        if (monster != nullptr && Data::Monsters::FindMonsterModelReference(monster->model) == slot)
+        m_users.clear();
+        for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
         {
-            users.push_back(number);
+            const MonsterDefinition* monster = g_MonsterDatabase.Find(number);
+            if (monster != nullptr && Data::Monsters::FindMonsterModelReference(monster->model) == slot)
+            {
+                m_users.push_back(number);
+            }
         }
+        m_usersSlot = slot;
+        m_usersVersion = ToolWindow::GetDataVersion();
     }
+    const std::vector<int>& users = m_users;
     ImGui::TextUnformatted(I18N::Editor::MonstersWithTheModel);
     for (size_t index = 0; index < users.size() && index < static_cast<size_t>(ShownUsers); ++index)
     {
@@ -260,7 +266,12 @@ void MuMonsterModelUI::RenderFilePicker(MonsterModelDefinition& model)
     {
         m_files.Refresh();
     }
-    const std::vector<std::string> listed = ListedFiles();
+    if (g_MonsterModelDatabase.GetVersion() != m_listedVersion)
+    {
+        m_listedFiles = ListedFiles();
+        m_listedVersion = g_MonsterModelDatabase.GetVersion();
+    }
+    const std::vector<std::string>& listed = m_listedFiles;
     if (!ImGui::BeginChild("##Files", ImVec2(0.0f, FileListHeight * scale), ImGuiChildFlags_Borders))
     {
         ImGui::EndChild();
