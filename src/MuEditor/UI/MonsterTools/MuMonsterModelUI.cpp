@@ -18,15 +18,13 @@
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/ItemTools/ItemModelFiles.h"
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
-#include "Audio/DSPlaySound.h"
-#include "Audio/SoundNumbers.h"
 #include "Core/Platform/PathResolve.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
+#include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/GameData/MonsterData/MonsterAnimations.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
-#include "Data/GameData/MonsterData/MonsterSoundIds.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "I18N/All.h"
 #include "Render/Models/ZzzBMD.h"
@@ -109,31 +107,15 @@ const std::string& SlotNameOf(const MonsterModelSound& sound)
     return sound.id.empty() ? sound.file : sound.id;
 }
 
-// The number the game plays the sound with.
-ESound NumberOf(const MonsterModelSound& sound)
-{
-    if (!sound.id.empty())
-    {
-        if (const std::optional<int> id = Data::Monsters::FindMonsterSoundId(sound.id))
-        {
-            return static_cast<ESound>(*id);
-        }
-    }
-    const std::wstring file(sound.file.begin(), sound.file.end());
-    return Audio::SoundNumbers::ForFile(file);
-}
-
 // Plays the sound at the preview volume. A model that is not open has not
 // loaded it: it is loaded as the model loads it.
 void PlaySoundOf(const MonsterModelSound& sound, bool modelOpen)
 {
-    const ESound number = NumberOf(sound);
     if (!modelOpen)
     {
-        const std::wstring file(sound.file.begin(), sound.file.end());
-        LoadWaveFile(number, file.c_str(), sound.channels, sound.spatial);
+        Data::Monsters::ModelLoader::LoadSound(sound);
     }
-    SoundPreview::Play(number);
+    SoundPreview::Play(Data::Monsters::ModelLoader::SoundNumber(sound));
 }
 
 const char* SlotLabel(size_t index)

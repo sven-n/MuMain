@@ -7,7 +7,8 @@
 namespace Data::Monsters
 {
 struct MonsterModelDefinition;
-}
+struct MonsterModelSound;
+} // namespace Data::Monsters
 
 // Opens monster and NPC models from their entries in the model table
 // (g_MonsterModelDatabase, Data/Monsters/Models.json): the file and its
@@ -27,6 +28,15 @@ bool IsOpen(int slot);
 // the entry names: a sound of the model (by its id, or by its file when it
 // has none), else a SOUND_* id; nullopt when it names neither.
 std::optional<int> FindSoundNumber(const MonsterModelDefinition& model, const std::string& value);
+
+// The number the sound of an entry is loaded and played with: its SOUND_* id,
+// or the number of its file.
+int SoundNumber(const MonsterModelSound& sound);
+
+// Loads the sound of an entry as its model loads it, unless another model or
+// the map loaded it from the same file already: a load starts it over and
+// stops it where it plays.
+void LoadSound(const MonsterModelSound& sound);
 
 #ifdef _EDITOR
 // Opens the slot's model again from its entry when the game has it open

@@ -8,6 +8,7 @@
 
 #include "Audio/DSPlaySound.h"
 #include "Core/Globals/_enum.h"
+#include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDefinition.h"
 #include "Engine/Object/ZzzOpenData.h"
@@ -115,4 +116,26 @@ TEST_CASE("Monster models: a sound that another model loaded from the same file 
     Models[MODEL_GRIZZLY].Release();
     const LoadChanges again = scope.Run([] { OpenMonsterModel(MONSTER_MODEL_GRIZZLY); });
     CHECK(CountLoads(again, SOUND_ELBELAND_BEASTWOO_DEATH01) == 1);
+}
+
+TEST_CASE("Monster models: the monster tools load a sound they play as its model does, once "
+          "[monsters][models][sounds][editor]")
+{
+    LoadScope scope(0);
+    // A Play button of a model that is not open loads the sound first.
+    const MonsterModelDefinition* grizzly = g_MonsterModelDatabase.Find(MODEL_GRIZZLY);
+    REQUIRE(grizzly != nullptr);
+    REQUIRE_FALSE(grizzly->sounds.empty());
+    const Data::Monsters::MonsterModelSound sound = grizzly->sounds.front();
+    const int number = Data::Monsters::ModelLoader::SoundNumber(sound);
+    const LoadChanges played = scope.Run(
+        [&sound]
+        {
+            Data::Monsters::ModelLoader::LoadSound(sound);
+            Data::Monsters::ModelLoader::LoadSound(sound);
+        });
+    CHECK(CountLoads(played, number) == 1);
+    // The model then finds it loaded from the same file.
+    const LoadChanges opened = scope.Run([] { OpenMonsterModel(MONSTER_MODEL_GRIZZLY); });
+    CHECK(CountLoads(opened, number) == 0);
 }

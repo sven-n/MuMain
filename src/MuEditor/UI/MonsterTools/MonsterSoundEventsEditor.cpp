@@ -9,7 +9,6 @@
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
-#include "Audio/DSPlaySound.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/GameData/MonsterData/MonsterAnimations.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -129,8 +128,7 @@ void PlayEvent(const MonsterModelDefinition& model, const MonsterSoundEvent& eve
                                         [&](const MonsterModelSound& candidate) { return NameOf(candidate) == name; });
         if (!modelOpen && sound != model.sounds.end())
         {
-            const std::wstring file(sound->file.begin(), sound->file.end());
-            LoadWaveFile(static_cast<ESound>(*number), file.c_str(), sound->channels, sound->spatial);
+            Data::Monsters::ModelLoader::LoadSound(*sound);
         }
         SoundPreview::Play(*number);
         if (event.pick)

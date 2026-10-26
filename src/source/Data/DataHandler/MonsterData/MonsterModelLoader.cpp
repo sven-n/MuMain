@@ -156,32 +156,11 @@ void OpenParts(const MonsterModelDefinition& model)
     }
 }
 
-// The number a sound is loaded and played with: its SOUND_* id, or the
-// number of its file.
-ESound SoundNumber(const MonsterModelSound& sound)
-{
-    if (!sound.id.empty())
-    {
-        if (const std::optional<int> id = FindMonsterSoundId(sound.id))
-        {
-            return static_cast<ESound>(*id);
-        }
-    }
-    return Audio::SoundNumbers::ForFile(ToLoaderPath(sound.file));
-}
-
-// A sound that another model or the map already loaded from the same file is
-// not loaded again: a load starts it over and stops it where it plays.
 void LoadSounds(const MonsterModelDefinition& model)
 {
     for (const MonsterModelSound& sound : model.sounds)
     {
-        const ESound number = SoundNumber(sound);
-        const std::wstring file = ToLoaderPath(sound.file);
-        if (!IsSoundLoaded(number, file.c_str(), sound.channels, sound.spatial))
-        {
-            LoadWaveFile(number, file.c_str(), sound.channels, sound.spatial);
-        }
+        LoadSound(sound);
     }
 }
 
@@ -285,10 +264,32 @@ std::optional<int> FindSoundNumber(const MonsterModelDefinition& model, const st
     {
         if ((!sound.id.empty() && sound.id == value) || (sound.id.empty() && sound.file == value))
         {
-            return static_cast<int>(SoundNumber(sound));
+            return SoundNumber(sound);
         }
     }
     return FindMonsterSoundId(value);
+}
+
+int SoundNumber(const MonsterModelSound& sound)
+{
+    if (!sound.id.empty())
+    {
+        if (const std::optional<int> id = FindMonsterSoundId(sound.id))
+        {
+            return *id;
+        }
+    }
+    return static_cast<int>(Audio::SoundNumbers::ForFile(ToLoaderPath(sound.file)));
+}
+
+void LoadSound(const MonsterModelSound& sound)
+{
+    const ESound number = static_cast<ESound>(SoundNumber(sound));
+    const std::wstring file = ToLoaderPath(sound.file);
+    if (!IsSoundLoaded(number, file.c_str(), sound.channels, sound.spatial))
+    {
+        LoadWaveFile(number, file.c_str(), sound.channels, sound.spatial);
+    }
 }
 
 bool IsOpen(int slot)
