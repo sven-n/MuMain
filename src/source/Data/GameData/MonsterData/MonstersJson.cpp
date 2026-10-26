@@ -173,15 +173,19 @@ bool ReadAttackEntries(const OrderedJson& json, const char* key, int number, std
     {
         const std::string& skillText = entry.key();
         long long skill = -1;
+        // Without leading zeros: "7" and "007" would both be skill 7.
         const bool isNumber = !skillText.empty() && skillText.size() <= 5 &&
-                              skillText.find_first_not_of("0123456789") == std::string::npos;
+                              skillText.find_first_not_of("0123456789") == std::string::npos &&
+                              (skillText.size() == 1 || skillText.front() != '0');
         if (isNumber)
         {
             skill = std::stoll(skillText);
         }
         if (!isNumber || skill > MaxSkillNumber)
         {
-            issues.Error(field + "." + skillText, "must be a skill number from 0 to " + std::to_string(MaxSkillNumber),
+            issues.Error(field + "." + skillText,
+                         "must be a skill number from 0 to " + std::to_string(MaxSkillNumber) +
+                             ", without leading zeros",
                          number);
             valid = false;
             continue;

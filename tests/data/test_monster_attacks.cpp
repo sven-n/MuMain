@@ -193,6 +193,10 @@ TEST_CASE("Monster attacks: wrong values are errors that name the monster and th
              {R"({ "monsterSkills": {"x": "attack2"} })", "monster 456 attacks.monsterSkills.x", "skill number"},
              {R"({ "monsterSkills": {"70000": "attack2"} })", "monster 456 attacks.monsterSkills.70000",
               "skill number"},
+             // "7" and "007" would be the same skill.
+             {R"({ "monsterSkills": {"007": "attack2"} })", "monster 456 attacks.monsterSkills.007",
+              "without leading zeros"},
+             {R"({ "skills": {"07": "attack2"} })", "monster 456 attacks.skills.07", "without leading zeros"},
              {R"({ "skills": {"17": "jump"} })", "monster 456 attacks.skills.17", "must be an animation"},
              {R"({ "otherwise": 3 })", "monster 456 attacks.otherwise", "must be an animation"},
              {R"({ "otherwiseRandom": "dice" })", "monster 456 attacks.otherwiseRandom", "rand, randFps or bali"},
