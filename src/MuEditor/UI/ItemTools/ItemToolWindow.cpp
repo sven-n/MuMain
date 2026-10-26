@@ -8,9 +8,8 @@
 #include "ItemNamesakes.h"
 #include "ItemSelection.h"
 
-#include "../MuEditor/Core/MuEditorCore.h"
-#include "../MuEditor/UI/Common/MuEditorLayout.h"
-#include "../MuEditor/UI/Common/MuEditorWindowIds.h"
+#include "../MuEditor/UI/Common/ToolGroups.h"
+#include "../MuEditor/UI/Common/ToolWindowFrame.h"
 #include "../MuEditor/UI/Common/UndoTarget.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Core/Text/Utf8.h"
@@ -19,7 +18,6 @@
 #include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
 #include "imgui.h"
-#include "imgui_internal.h"
 
 #include <cstdint>
 #include <string>
@@ -97,57 +95,16 @@ public:
         RedoItemEdit();
     }
 };
-
-// Only while the keyboard is the editor's and this window has the focus: ImGui
-// keeps the focus in the window when the game window takes the keyboard back
-// (Alt+Tab with the editor inside the game window). A text field keeps its own
-// Ctrl+Z.
-void HandleUndoKeys()
-{
-    if (!g_MuEditorCore.IsKeyboardWithEditor())
-    {
-        return;
-    }
-    if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Z))
-    {
-        UndoItemEdit();
-    }
-    if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Y) || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiMod_Shift | ImGuiKey_Z))
-    {
-        RedoItemEdit();
-    }
-}
 } // namespace
 
 bool Begin(const char* title, const char* windowId, bool* open)
 {
-    char fullTitle[MuEditor::WindowIds::TitleCapacity];
-    MuEditor::Layout::DockBesideItemTools(windowId);
-    MuEditor::Layout::PrepareToolWindow();
-    if (!ImGui::Begin(MuEditor::WindowIds::Title(fullTitle, title, windowId), open,
-                      ImGuiWindowFlags_NoCollapse | MuEditor::Layout::ToolWindowBarFlags(windowId)))
-    {
-        return false;
-    }
-    // Before the bar: in this window's own bar it shows the item undo then.
-    if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
-    {
-        UndoTargets::Activate(GetUndoTarget());
-    }
-    MuEditor::Layout::RenderToolWindowBar();
-    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByPopup |
-                               ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) ||
-        ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId))
-    {
-        g_MuEditorCore.SetHoveringUI(true);
-    }
-    HandleUndoKeys();
-    return true;
+    return ToolWindowFrame::Begin(title, windowId, open, GetItemTools(), GetUndoTarget());
 }
 
 void End()
 {
-    ImGui::End();
+    ToolWindowFrame::End();
 }
 
 UndoTarget& GetUndoTarget()

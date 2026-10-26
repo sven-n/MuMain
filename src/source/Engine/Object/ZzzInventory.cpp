@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+﻿///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -22,7 +22,6 @@
 
 #include "Scenes/SceneCore.h"
 
-#include "Core/Utilities/Debouncer.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "App/Platform/Windows/Local.h"
@@ -39,9 +38,12 @@
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "GameLogic/Items/ItemStats.h"
+#include "GameLogic/Items/TransformationRing.h"
 #include "Render/Items/ItemDisplay.h"
+#include <chrono>
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "GameLogic/Items/ItemNameParts.h"
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Core/Text/TextLineWrap.h"
@@ -1397,12 +1399,12 @@ static std::optional<std::string> TooltipPlaceholderValue(std::string_view name,
         case Data::Items::GameDataValueKind::SkillName:
             return Core::Text::ToUtf8(SkillAttribute[data->number].Name);
         case Data::Items::GameDataValueKind::MonsterName:
-            for (const MONSTER_SCRIPT& monster : MonsterScript)
-            {
-                if (monster.Type == data->number)
-                    return Core::Text::ToUtf8(monster.Name);
-            }
-            return std::nullopt;
+        {
+            const wchar_t* monsterName = GameLogic::Items::NameParts::MonsterName(data->number);
+            if (monsterName == nullptr)
+                return std::nullopt;
+            return Core::Text::ToUtf8(monsterName);
+        }
         }
         return std::nullopt;
     }
@@ -1418,9 +1420,9 @@ static std::optional<std::string> TooltipPlaceholderValue(std::string_view name,
             return std::nullopt;
         return text->Get(locale);
     }
-    if (const std::optional<int> value = GetItemTooltipValue(values, name))
+    if (const std::optional<int> value = Engine::Items::TooltipValues::GetItemTooltipValue(values, name))
         return std::to_string(*value);
-    if (std::optional<std::string> text = GetItemTooltipText(values, name))
+    if (std::optional<std::string> text = Engine::Items::TooltipValues::GetItemTooltipText(values, name))
         return text;
     if (const std::optional<int> value =
             Data::Items::GetPlaceholderValue(name, level, g_ItemDatabase.GetStatProfiles()))
@@ -1452,7 +1454,7 @@ void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, in
     for (const Data::Items::ItemDescriptionLine& line : definition.description)
     {
         if (line.afterOptions != afterOptions || !line.IsShownAt(level) ||
-            !AreTooltipConditionsMet(line.when, itemType, level, values))
+            !Engine::Items::TooltipValues::AreTooltipConditionsMet(line.when, itemType, level, values))
         {
             continue;
         }
@@ -1489,8 +1491,8 @@ void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, in
             {
                 mu_swprintf(TextList[TextNum], L"%.*ls", static_cast<int>(std::size(TextList[0]) - 1), piece.c_str());
             }
-            TextListColor[TextNum] =
-                static_cast<int>(GetTooltipColor(line.colors, line.color, itemType, level, values));
+            TextListColor[TextNum] = static_cast<int>(
+                Engine::Items::TooltipValues::GetTooltipColor(line.colors, line.color, itemType, level, values));
             TextBold[TextNum] = line.bold;
             TextNum++;
         }
@@ -1514,7 +1516,7 @@ static void WriteItemTooltipLayoutLines(const ITEM& item, int level, const ItemT
     for (auto line = first == layout->lines.end() ? first : first + 1;
          line != layout->lines.end() && line->section == Data::Items::TooltipSection::None; ++line)
     {
-        if (!AreTooltipConditionsMet(line->when, item.Type, level, values))
+        if (!Engine::Items::TooltipValues::AreTooltipConditionsMet(line->when, item.Type, level, values))
         {
             continue;
         }
@@ -1545,7 +1547,8 @@ static void WriteItemTooltipLayoutLines(const ITEM& item, int level, const ItemT
         }
         mu_swprintf(TextList[TextNum], L"%.*ls", static_cast<int>(std::size(TextList[0]) - 1),
                     Core::Text::FromUtf8(filled).c_str());
-        TextListColor[TextNum] = static_cast<int>(GetTooltipLineColor(*line, item.Type, level, values));
+        TextListColor[TextNum] =
+            static_cast<int>(Engine::Items::TooltipValues::GetTooltipLineColor(*line, item.Type, level, values));
         TextBold[TextNum] = line->bold;
         TextNum++;
     }
@@ -1614,7 +1617,8 @@ static const Data::Items::ItemNameLine* FindItemNameLine(const Data::Items::Item
 {
     for (const Data::Items::ItemNameLine& line : definition.nameLines)
     {
-        if (line.IsShownAt(level) && AreTooltipConditionsMet(line.when, type, level, values))
+        if (line.IsShownAt(level) &&
+            Engine::Items::TooltipValues::AreTooltipConditionsMet(line.when, type, level, values))
             return &line;
     }
     return nullptr;
@@ -1660,7 +1664,8 @@ static ItemTooltipName GetItemTooltipName(const ITEM& item, int level, const Ite
     if (std::optional<std::wstring> text = ItemNameLineText(*line, *definition, level, values))
         name.text = std::move(*text);
     const auto base = line->hasColor ? line->color : static_cast<Data::Items::ItemTextColor>(name.color);
-    name.color = static_cast<int>(GetTooltipColor(line->colors, base, item.Type, level, values));
+    name.color =
+        static_cast<int>(Engine::Items::TooltipValues::GetTooltipColor(line->colors, base, item.Type, level, values));
     return name;
 }
 
@@ -1680,7 +1685,7 @@ std::wstring GetItemNameText(int type, int level, const ITEM* item)
     const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(type);
     if (definition != nullptr && !definition->nameLines.empty())
     {
-        const ItemTooltipValues values = ComputeItemTooltipValues(*item);
+        const ItemTooltipValues values = Engine::Items::TooltipValues::ComputeItemTooltipValues(*item);
         if (const Data::Items::ItemNameLine* line = FindItemNameLine(*definition, type, level, values))
         {
             if (std::optional<std::wstring> text = ItemNameLineText(*line, *definition, level, values))
@@ -1722,7 +1727,8 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         if (ip->lExpireTime == 0)
             return ItemTooltipBuild::Nothing;
 
-        ExpireTime = localtime((time_t*)&(ip->lExpireTime));
+        const time_t expireTime = ip->lExpireTime;
+        ExpireTime = localtime(&expireTime);
     }
 
     ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
@@ -1747,7 +1753,7 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     int Level = ip->Level;
 
     // The numbers of the stat lines, the built-in placeholders of the descriptions.
-    const ItemTooltipValues values = ComputeItemTooltipValues(*ip);
+    const ItemTooltipValues values = Engine::Items::TooltipValues::ComputeItemTooltipValues(*ip);
     const ItemTooltipName name = GetItemTooltipName(*ip, Level, values);
     const int Color = name.color;
 
@@ -1865,9 +1871,7 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         TextBold[TextNum] = false;
         TextNum++;
 
-        mu_swprintf(TextList[TextNum], L"\n");
-        TextNum++;
-        SkipNum++;
+        mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
         TextListColor[TextNum] = TEXT_COLOR_DARKRED;
         mu_swprintf(TextList[TextNum], I18N::Game::ItCanBeUsedWithItemRemoved);
@@ -1953,10 +1957,9 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             break;
         }
-        TextBold[TextNum] = false;
-        TextNum++;
+        TextBold[TextNum] = false; TextNum++;
     }
-    if (ip->Type >= ITEM_PUMPKIN_OF_LUCK && ip->Type <= ITEM_JACK_OLANTERN_DRINK) // Halloween event
+    if (ip->Type >= ITEM_PUMPKIN_OF_LUCK && ip->Type <= ITEM_JACK_OLANTERN_DRINK) //Halloween event
     {
         wchar_t Text_data[300];
         ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
@@ -1993,8 +1996,7 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
             TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
             break;
         }
-        TextBold[TextNum] = false;
-        TextNum++;
+        TextBold[TextNum] = false; TextNum++;
     }
     if (GameLogic::Items::IsChocolateBox(ip))
     {
@@ -2004,59 +2006,49 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         case ITEM_PINK_CHOCOLATE_BOX:
             if (Level == 0)
                 TextListColor[TextNum] = TEXT_COLOR_PURPLE;
-            else if (Level == 1)
-                TextListColor[TextNum] = TEXT_COLOR_PURPLE;
+            else
+                if (Level == 1)
+                    TextListColor[TextNum] = TEXT_COLOR_PURPLE;
             break;
         case ITEM_RED_CHOCOLATE_BOX:
             if (Level == 0)
                 TextListColor[TextNum] = TEXT_COLOR_RED;
-            else if (Level == 1)
-                TextListColor[TextNum] = TEXT_COLOR_RED;
+            else
+                if (Level == 1)
+                    TextListColor[TextNum] = TEXT_COLOR_RED;
             break;
         case ITEM_BLUE_CHOCOLATE_BOX:
             if (Level == 0)
                 TextListColor[TextNum] = TEXT_COLOR_BLUE;
-            else if (Level == 1)
-                TextListColor[TextNum] = TEXT_COLOR_BLUE;
+            else
+                if (Level == 1)
+                    TextListColor[TextNum] = TEXT_COLOR_BLUE;
             break;
         }
-        TextBold[TextNum] = false;
-        TextNum++;
+        TextBold[TextNum] = false; TextNum++;
     }
     if (ip->Type == ITEM_BOX_OF_LUCK)
     {
         if (Level == 7)
         {
             mu_swprintf(TextList[TextNum], I18N::Game::WhenYouDropItOnTheGround);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            TextBold[TextNum] = false;
-            TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
             mu_swprintf(TextList[TextNum], I18N::Game::RenaZenJewelItem);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            TextBold[TextNum] = false;
-            TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
             mu_swprintf(TextList[TextNum], I18N::Game::YouWillGetOneOfTheAboveItems);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            TextBold[TextNum] = false;
-            TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }
         else if (Level == 14)
         {
             mu_swprintf(TextList[TextNum], I18N::Game::FreeEntranceToKalima);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            TextBold[TextNum] = false;
-            TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
             mu_swprintf(TextList[TextNum], I18N::Game::IncreaseStamina);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            TextBold[TextNum] = false;
-            TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }
         else
         {
             mu_swprintf(TextList[TextNum], I18N::Game::ThrowItAndYouMayReceiveSomeZenOrItems);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            TextBold[TextNum] = false;
-            TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }
         mu_swprintf(TextList[TextNum], I18N::Game::CannotBeSold);
         TextListColor[TextNum] = TEXT_COLOR_RED;
@@ -2073,18 +2065,13 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     char tCount = COMGEM::CalcCompiledCount(ip);
     if (tCount > 0)
     {
-        int nJewelIndex = COMGEM::Check_Jewel_Com(ip->Type);
+        int	nJewelIndex = COMGEM::Check_Jewel_Com(ip->Type);
         if (nJewelIndex != COMGEM::NOGEM)
         {
-            mu_swprintf(TextList[TextNum], I18N::Game::DSIsCombined, tCount,
-                        I18N::Game::Lookup(COMGEM::GetJewelIndex(nJewelIndex, COMGEM::eGEM_NAME)));
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            TextBold[TextNum] = false;
-            TextNum++;
+            mu_swprintf(TextList[TextNum], I18N::Game::DSIsCombined, tCount, I18N::Game::Lookup(COMGEM::GetJewelIndex(nJewelIndex, COMGEM::eGEM_NAME)));
+            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
             mu_swprintf(TextList[TextNum], I18N::Game::CanBeUsedAfterDismantling);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            TextBold[TextNum] = false;
-            TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }
     }
     // The description's rows, for both of its parts (before and after the options) together.
@@ -2093,9 +2080,9 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     if (ip->Type == ITEM_ARMOR_OF_GUARDSMAN)
     {
         int startIndex = 0;
-        if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK ||
-            gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD ||
-            gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER)
+        if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK || gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD
+            || gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER
+            )
         {
             startIndex = 6;
         }
@@ -2103,22 +2090,14 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         int HeroLevel = CharacterAttribute->Level;
 
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        mu_swprintf(TextList[TextNum], L"%ls %ls    %ls      %ls    ", I18N::Game::ChaosCastle, I18N::Game::Level,
-                    I18N::Game::MinLevel, I18N::Game::Cost);
-        TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        TextBold[TextNum] = false;
-        TextNum++;
+        mu_swprintf(TextList[TextNum], L"%ls %ls    %ls      %ls    ", I18N::Game::ChaosCastle, I18N::Game::Level, I18N::Game::MinLevel, I18N::Game::Cost); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
 
         for (int i = 0; i < 6; i++)
         {
             int Zen = g_iChaosCastleZen[i];
 
-            mu_swprintf(TextList[TextNum], L"        %d             %3d~%3d     %3d,000", i + 1,
-                        g_iChaosCastleLevel[startIndex + i][0],
-                        std::min<int>(400, g_iChaosCastleLevel[startIndex + i][1]), Zen);
-            if ((HeroLevel >= g_iChaosCastleLevel[startIndex + i][0] &&
-                 HeroLevel <= g_iChaosCastleLevel[startIndex + i][1]) &&
-                gCharacterManager.IsMasterLevel(Hero->Class) == false)
+            mu_swprintf(TextList[TextNum], L"        %d             %3d~%3d     %3d,000", i + 1, g_iChaosCastleLevel[startIndex + i][0], std::min<int>(400, g_iChaosCastleLevel[startIndex + i][1]), Zen);
+            if ((HeroLevel >= g_iChaosCastleLevel[startIndex + i][0] && HeroLevel <= g_iChaosCastleLevel[startIndex + i][1]) && gCharacterManager.IsMasterLevel(Hero->Class) == false)
             {
                 TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
             }
@@ -2126,8 +2105,7 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
             {
                 TextListColor[TextNum] = TEXT_COLOR_WHITE;
             }
-            TextBold[TextNum] = false;
-            TextNum++;
+            TextBold[TextNum] = false; TextNum++;
         }
         mu_swprintf(TextList[TextNum], L"         %d          %ls   %3d,000", 7, I18N::Game::MasterLevel, 1000);
         if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
@@ -2154,7 +2132,8 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     }
 
     // The Talisman of Mobility's saved location, under its description's "Returns to the saved location by a click."
-    if (ip->Type == ITEM_TALISMAN_OF_MOBILITY && ip->Durability == 1 && TextNum < static_cast<int>(std::size(TextList)))
+    if (ip->Type == ITEM_TALISMAN_OF_MOBILITY && ip->Durability == 1 && g_PortalMgr.IsPortalPositionSaved() &&
+        TextNum < static_cast<int>(std::size(TextList)))
     {
         g_PortalMgr.GetPortalPositionText(TextList[TextNum]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -2595,6 +2574,7 @@ std::vector<ItemTooltipLine> BuildItemTooltipLines(ITEM* ip, bool Sell, int Inve
     return lines;
 }
 
+// (sx, sy) in the screen's 640x480 stretch, `screen`.
 static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy, ITEM* ip, bool Sell, int Inventype,
                            bool bItemTextListBoxUse)
 {
@@ -2610,24 +2590,19 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
         return;
     if (build == ItemTooltipBuild::DarkLordPet)
     {
-        // The request is made once a second at most, for the pet whose tooltip is drawn then: the callback lives on,
-        // so it reads the item of this call, not one it was made with.
-        static int petItemType = -1;
-        static int petInventype = 0;
-        petItemType = ip->Type;
-        petInventype = Inventype;
-        static DebouncedAction debouncedPetInfoRequest(
-            []()
+        // The pet's information is requested once a second at most, for the pet whose tooltip is drawn.
+        static std::chrono::steady_clock::time_point lastPetInfoRequest;
+        const auto now = std::chrono::steady_clock::now();
+        if (lastPetInfoRequest == std::chrono::steady_clock::time_point() ||
+            now - lastPetInfoRequest >= std::chrono::seconds(1))
+        {
+            lastPetInfoRequest = now;
+            if (const std::optional<PetInfoRequest> request =
+                    GetPetInfoRequest(ip->Type, g_pMyInventory->GetPointedItemIndex(), Inventype))
             {
-                if (const std::optional<PetInfoRequest> request =
-                        GetPetInfoRequest(petItemType, g_pMyInventory->GetPointedItemIndex(), petInventype))
-                {
-                    SocketClient->ToGameServer()->SendPetInfoRequest(request->pet, request->storage, request->slot);
-                }
-            },
-            1000); // 1-second intervals
-
-        debouncedPetInfoRequest.invoke();
+                SocketClient->ToGameServer()->SendPetInfoRequest(request->pet, request->storage, request->slot);
+            }
+        }
 
         giPetManager::RenderPetItemInfo(screen, sx, sy, ip, Inventype);
         return;
@@ -2704,7 +2679,8 @@ static void RenderRepairInfo(const UI::Scaling::Transform& screen, int sx, int s
 
     int Level = ip->Level;
     // The name and its color as the item's tooltip has them.
-    const ItemTooltipName name = GetItemTooltipName(*ip, Level, ComputeItemTooltipValues(*ip));
+    const ItemTooltipName name =
+        GetItemTooltipName(*ip, Level, Engine::Items::TooltipValues::ComputeItemTooltipValues(*ip));
     const int Color = name.color;
 
     if (ip->Type < ITEM_POTION)

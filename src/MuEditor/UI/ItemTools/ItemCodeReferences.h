@@ -2,6 +2,8 @@
 
 #ifdef _EDITOR
 
+#include "UI/Common/CodeReference.h"
+
 #include <filesystem>
 #include <span>
 #include <string>
@@ -11,29 +13,9 @@
 namespace MuEditor::Items
 {
 // A source line that names an item, which the item tools show before the
-// item is removed.
-struct ItemCodeReference
-{
-    // How the line names the item; a line that names it in more than one way
-    // counts the first of these.
-    enum class Kind
-    {
-        // Its ITEM_ or MODEL_ constant (ITEM_KRIS).
-        Name,
-        // Its group and number (ITEM_POTION + 100).
-        RawId,
-        // A range check whose two bounds enclose it.
-        Range,
-    };
-
-    // Relative to the source folder, with '/'.
-    std::string file;
-    // 1-based.
-    int line = 0;
-    // The line as written, comments included, trimmed.
-    std::string text;
-    Kind kind = Kind::Name;
-};
+// item is removed: by its ITEM_ or MODEL_ constant (Name), its group and number
+// (RawId, ITEM_POTION + 100) or a range check (Range).
+using ItemCodeReference = CodeReference;
 
 // The lines of a source folder that name an item, by item type. The item
 // names are the constants of Core/Globals/_enum.h; comments and string
@@ -63,7 +45,7 @@ public:
     std::string_view GetCodeName(int itemType) const;
 
 private:
-    // By item type.
+    // By item type; empty until loaded.
     std::vector<std::string> m_codeNames;
     std::vector<std::vector<ItemCodeReference>> m_references;
     bool m_loaded = false;

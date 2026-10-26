@@ -4,6 +4,7 @@
 
 #include "ItemListModel.h"
 
+#include "../MuEditor/UI/Common/TextSearch.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemNames.h"
@@ -11,22 +12,11 @@
 #include "Data/GameData/ItemData/ItemTypeUse.h"
 
 #include <algorithm>
-#include <charconv>
 
 namespace
 {
-// Only A to Z: std::tolower follows the process locale, which the client takes
-// from the system; with a Windows code page it changes bytes of UTF-8 letters.
-char ToLowerAscii(char character)
-{
-    return character >= 'A' && character <= 'Z' ? static_cast<char>(character - 'A' + 'a') : character;
-}
-
-bool ReadWholeNumber(std::string_view text, int& value)
-{
-    const auto [end, error] = std::from_chars(text.data(), text.data() + text.size(), value);
-    return error == std::errc{} && end == text.data() + text.size();
-}
+using MuEditor::TextSearch::AnyNameContains;
+using MuEditor::TextSearch::ReadWholeNumber;
 
 // "group,number" or the item type.
 bool MatchesItemNumber(const Data::Items::ItemDefinition& definition, std::string_view search)
@@ -45,26 +35,9 @@ bool MatchesItemNumber(const Data::Items::ItemDefinition& definition, std::strin
 }
 } // namespace
 
-bool ContainsIgnoringCase(std::string_view text, std::string_view search)
-{
-    const auto found = std::search(text.begin(), text.end(), search.begin(), search.end(),
-                                   [](char a, char b) { return ToLowerAscii(a) == ToLowerAscii(b); });
-    return found != text.end();
-}
-
 bool MatchesItemSearch(const Data::Items::ItemDefinition& definition, std::string_view search)
 {
-    if (search.empty() || MatchesItemNumber(definition, search))
-    {
-        return true;
-    }
-    if (ContainsIgnoringCase(definition.names.GetNeutral(), search))
-    {
-        return true;
-    }
-    const auto& translations = definition.names.GetTranslations();
-    return std::any_of(translations.begin(), translations.end(),
-                       [&](const auto& translation) { return ContainsIgnoringCase(translation.second, search); });
+    return search.empty() || MatchesItemNumber(definition, search) || AnyNameContains(definition.names, search);
 }
 
 std::vector<int> GetFreeItemNumbers(int group)

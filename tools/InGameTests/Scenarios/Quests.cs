@@ -11,19 +11,22 @@ namespace MuMain.Tools.InGameTests.Scenarios;
 internal static class Quests
 {
     /// <summary>Sebina the Priest in Devias: the second class change.</summary>
-    public static readonly Npc Sebina = new("Sebina the Priest", 183, 32);
+    public static readonly Npc Sebina = new("Sebina the Priest", 235, 183, 32);
 
     /// <summary>Apostle Devin in Devias: the quests towards the third class.</summary>
-    public static readonly Npc Devin = new("Apostle Devin", 181, 35);
+    public static readonly Npc Devin = new("Apostle Devin", 406, 181, 35);
+
+    /// <summary>Marlon, who wanders: where he stands is found when a scenario needs him.</summary>
+    public static readonly Npc Marlon = new("Marlon", 229, 0, 0);
 
     // Marlon wanders: OpenMU puts him on one of these spots, a random one, and
     // moves him to another every one to three hours.
     private static readonly (string Gate, int Map, Npc Spot)[] MarlonSpots =
     [
-        ("Devias", 2, new Npc("Marlon", 197, 48)),
-        ("Lorencia", 0, new Npc("Marlon", 136, 88)),
-        ("Noria", 3, new Npc("Marlon", 169, 88)),
-        ("Atlans", 7, new Npc("Marlon", 17, 35)),
+        ("Devias", 2, Marlon with { X = 197, Y = 48 }),
+        ("Lorencia", 0, Marlon with { X = 136, Y = 88 }),
+        ("Noria", 3, Marlon with { X = 169, Y = 88 }),
+        ("Atlans", 7, Marlon with { X = 17, Y = 35 }),
     ];
 
     /// <summary>The quest numbers of the legacy quests.</summary>
@@ -171,7 +174,7 @@ internal static class Quests
             await client.WarpAsync(known.Gate, known.Map);
             var spot = known.Spot with { X = logged.X, Y = logged.Y };
             await Npcs.WalkUpToAsync(client, spot);
-            if (await SeenAsync(client, spot.Name) is { } position)
+            if (await SeenAsync(client, spot) is { } position)
             {
                 return (spot with { X = position.X, Y = position.Y }, "the test server's log");
             }
@@ -188,6 +191,7 @@ internal static class Quests
     {
         while (true)
         {
+            // OpenMU's log names him by its own designation; it has no monster number.
             var spot = await Running.TestServer.WanderingNpcAsync(client.ServerHost, client.ServerPort, "Marlon", CancellationToken.None);
             if (spot is not null)
             {
@@ -214,7 +218,7 @@ internal static class Quests
         {
             await client.WarpAsync(gate, spotMap);
             await Npcs.WalkUpToAsync(client, spot);
-            if (await SeenAsync(client, spot.Name) is { } position)
+            if (await SeenAsync(client, spot) is { } position)
             {
                 return spot with { X = position.X, Y = position.Y };
             }
@@ -223,14 +227,14 @@ internal static class Quests
         throw new ScenarioFailedException("Marlon is on none of his spots in Devias, Lorencia, Noria and Atlans");
     }
 
-    private static async Task<(int X, int Y)?> SeenAsync(GameClient client, string name)
+    private static async Task<(int X, int Y)?> SeenAsync(GameClient client, Npc npc)
     {
         // The NPCs around a spot come in with the server's view update.
         (int X, int Y)? seen = null;
         try
         {
             await Expect.EventuallyAsync(
-                async () => (seen = await Meeting.SeenPositionAsync(client, name)) is not null,
+                async () => (seen = await Meeting.SeenPositionAsync(client, npc)) is not null,
                 TimeSpan.FromSeconds(5),
                 string.Empty);
         }

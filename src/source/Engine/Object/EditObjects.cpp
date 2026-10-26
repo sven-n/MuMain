@@ -47,9 +47,8 @@
 #include "GameLogic/Combat/DuelMgr.h"
 
 // File-scope editor state still owned by ZzzInterface.cpp (no shared header yet).
-extern int MonsterKey;
 extern int EditFlag;
-extern int SelectMonster, SelectModel, SelectMapping, SelectColor, SelectWall;
+extern int SelectModel, SelectMapping, SelectColor, SelectWall;
 extern float SelectMappingAngle, WallAngle;
 extern int BrushSize;
 extern bool EnableRandomObject;
@@ -62,27 +61,6 @@ namespace Editor
 {
 void EditObjects()
 {
-    if (EditFlag == EDIT_MONSTER)
-    {
-        if (MouseLButtonPush)
-        {
-            MouseLButtonPush = false;
-            bool Success = RenderTerrainTile(SelectXF, SelectYF, (int)SelectXF, (int)SelectYF, 1.f, 1, true);
-            if (Success)
-            {
-                CHARACTER* c = CreateMonster((EMonsterType)MonsterScript[SelectMonster].Type, (BYTE)(CollisionPosition[0] / TERRAIN_SCALE), (BYTE)(CollisionPosition[1] / TERRAIN_SCALE), MonsterKey++);
-                c->Object.Kind = KIND_EDIT;
-            }
-        }
-        if (MouseRButtonPush)
-        {
-            MouseRButtonPush = false;
-            if (SelectedCharacter != -1)
-            {
-                CharactersClient[SelectedCharacter].Object.Live = false;
-            }
-        }
-    }
     if (EditFlag == EDIT_OBJECT)
     {
         if (MouseRButtonPush)
