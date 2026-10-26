@@ -113,7 +113,7 @@ variants or option words. An online keyword need not select the same items offli
 | Field | Meaning |
 |---|---|
 | `tags` | Categories the game code asks for, e.g. `["mount", "flying"]`; see [Tags](#tags) |
-| `levelValues` | Values of the description's own placeholders, one per item level from +0: `{"stat": ["ENG", "STA", ...]}` makes `{stat}` "ENG" at +0 and "STA" at +1. Each value is a text with its translations (written like `name`, and checked like a description text) or a shared text (`"@name"`), without placeholders. A line that shows one is shown only at levels that have a value. The Fruits' `{stat}` is one. A client-only field; the bmd import keeps it |
+| `levelValues` | Values of the description's own placeholders, one per item level from +0: `{"stat": ["ENG", "STA", ...]}` makes `{stat}` "ENG" at +0 and "STA" at +1. Each value is a text with its translations (written like `name`) or a shared text (`"@name"`), without placeholders. A line that shows one is shown only at levels that have a value. The Fruits' `{stat}` is one. A client-only field; the bmd import keeps it |
 | `description` | Lines the tooltip shows for the item, e.g. the Jewel of Bless's "It is used to increase your item level up to 6"; see [Descriptions](#descriptions). A client-only field; the bmd import keeps it |
 | `width`, `height` | Size in inventory slots |
 | `slot` | Equipment slot: `mainHand`, `offHand`, `helm`, `armor`, `pants`, `gloves`, `boots`, `wings`, `pet`, `pendant`, `ring`. Left out = not equippable |
@@ -226,7 +226,11 @@ A layout line has:
     `=`, `!=`, `<`, `<=`, `>` or `>=` (`"durability=2"`, `"level!=1"`); the
     number is an `int`, from -2147483648 to 2147483647, with an optional `-`;
   - a state (below);
-  - `"tag:<tag>"`, which holds when the item has that [tag](#tags).
+  - `"tag:<tag>"`, which holds when the item has that [tag](#tags);
+  - `"class:<class>"`, which holds when the hero is of that class (written as in
+    `classRequirements`: `darkLord`, `summoner`, …), whatever its rank. A line
+    that says which class can use the item is white for it and dark red for
+    the others, as the class lines the game writes.
 
   A `!` in front turns an entry around: `"!tag:luckyItem"`. Without `when`
   the line always shows.
@@ -313,7 +317,7 @@ Jewel of Bless's:
 ```
 
 Each line is `{"text": ..., "values": {...}, "when": [...], "color": ...,
-"levels": [first, last]}`:
+"colors": [...], "bold": true, "levels": [first, last]}`:
 
 - **`text`** is written like `name`: a plain English text, or the texts by
   language. It is checked like a name too: the English text is required, a
@@ -323,9 +327,10 @@ Each line is `{"text": ..., "values": {...}, "when": [...], "color": ...,
   text several items show is written once. A text can have
   [placeholders](#description-placeholders).
 - **`values`** names the value a placeholder of the text shows on this line:
-  a built-in value, or a table as `table:` and its name (`"values":
+  a built-in value, a table as `table:` and its name (`"values":
   {"percent": "table:wingDamageIncrease1st"}` with the shared text "Increase
-  {percent}% of Damage").
+  {percent}% of Damage"), or `skillMana:<skill>`, the mana a skill costs, by
+  its number as `skill` writes it (`"values": {"mana": "skillMana:22"}`).
 - **An empty text** (`{"text": ""}`) is a blank line.
 - **Long lines** wrap at about the width of the original tooltips' widest
   lines, and `\n` in a text breaks the line there (`\n\n` leaves a blank
@@ -340,7 +345,9 @@ Each line is `{"text": ..., "values": {...}, "when": [...], "color": ...,
   items of their own later: their lines then move into those items and lose
   their `levels`.
 - **`when`** shows the line only when its [conditions](#tooltip-layouts)
-  hold, as a layout line's (`["!timed"]`, `["durability=2"]`).
+  hold, and **`colors`** gives it the color of its first rule that holds, as
+  a layout line's (`["!timed"]`, `["durability=2"]`, `[{"when":
+  ["class:darkLord"], "color": "white"}]`). **`bold`** draws it bold.
 
 In the tooltip:
 
@@ -348,7 +355,9 @@ In the tooltip:
   its durability, requirements and options. A few lines that read the hero
   or other tables (the Armor of Guardsman's Chaos Castle table, the Lost
   Map, the Talisman of Mobility's saved location) are still written by the
-  tooltip code, after the description.
+  tooltip code, after the description, and a few before it (the reset
+  fruits' reset points, the Talisman of Resurrection's saved place, the
+  socket seeds and spheres, the Sign of Dimensions).
 - **Language:** the UI's language, also when the item names stay English
   ("Translate item names" off).
 - **Size:** at most 32 rows. The description has them to itself, so a long
@@ -375,7 +384,9 @@ placeholder is one of:
   `Level`, `Strength`, `Dexterity`, `Vitality`, `Energy` and `Leadership`
   `required…` (what the item asks, after the Jewel of Harmony's and the sockets'
   strength and agility reductions) and `missing…` (what the hero lacks of it, 0
-  when nothing);
+  when nothing), and the item's add option (the potions', scrolls', seals' and
+  charms' effect in the game's ItemAddOption data): `addOptionValue1`,
+  `addOptionValue2` and `addOptionDuration`, a text such as "1 Hour";
 - a **level bonus table** of [`Stats/ItemStats.json`](#item-stats-by-level),
   as `table:` and its name: the table's value at the item's + level
   (`{table:damageIncreaseWeapons}` is 3 at +1 and 66 at +15, the damage a

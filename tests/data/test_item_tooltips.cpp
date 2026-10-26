@@ -17,6 +17,7 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"
+#include "GameLogic/Skills/SkillManager.h"
 #include "Network/Server/SocketSystem.h"
 #include "Core/Utilities/_GlobalFunctions.h"
 #include "UI/Core/UIManager.h"
@@ -371,7 +372,7 @@ TEST_CASE("A tooltip's durability, count and expiry lines follow the item [data]
     SetItemTooltipTextMeasure(nullptr);
 }
 
-TEST_CASE("Every built-in placeholder but {level} is a value of the tooltip's stat lines [data][items][tooltip]")
+TEST_CASE("Every built-in placeholder but {level} is a value the game computes for the item [data][items][tooltip]")
 {
     using namespace Engine::Items::TooltipValues;
     const ItemTooltipValues values;
@@ -379,9 +380,14 @@ TEST_CASE("Every built-in placeholder but {level} is a value of the tooltip's st
     for (const std::string_view name : builtIns)
     {
         INFO(std::string(name));
-        CHECK(GetItemTooltipValue(values, name).has_value() == (name != Data::Items::LevelPlaceholder));
+        // A number, or a text ({addOptionDuration}), and only one of them.
+        const bool number = GetItemTooltipValue(values, name).has_value();
+        const bool text = GetItemTooltipText(values, name).has_value();
+        CHECK((number || text) == (name != Data::Items::LevelPlaceholder));
+        CHECK_FALSE((number && text));
     }
     CHECK_FALSE(GetItemTooltipValue(values, "sparkle").has_value());
+    CHECK_FALSE(GetItemTooltipText(values, "sparkle").has_value());
     // And the other way round: a value the game can fill that the placeholder checks don't know would make every
     // description using it fail to load.
     for (const std::string_view name : GetItemTooltipValueNames())
@@ -494,6 +500,118 @@ TEST_CASE("A requirement reduced to 0 still shows [data][items][tooltip]")
     REQUIRE(values.dexterity.reduced);
     REQUIRE(values.dexterity.required == 0);
     CHECK(HasLine(BuildItemTooltipLines(&staff, false), L"Agility Requirement: 0", TEXT_COLOR_YELLOW));
+
+    SetItemTooltipTextMeasure(nullptr);
+}
+
+TEST_CASE("An item's add option values come from its add option [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeNewDarkWizard(hero.Hero());
+
+    // The Seal of Healing (13/62): its experience rate and life recovery, and how long it lasts.
+    ITEM seal;
+    FillItemFromParameters(seal, Engine::Items::TooltipSnapshot::FullItemParameters(13, 62));
+    const ITEM_ADD_OPTION& addOption = g_pItemAddOptioninfo->GetItemAddOtioninfo(seal.Type);
+    REQUIRE(addOption.m_byValue1 != 0);
+    const ItemTooltipValues values = Engine::Items::TooltipValues::ComputeItemTooltipValues(seal);
+    CHECK(values.addOptionValue1 == addOption.m_byValue1);
+    CHECK(values.addOptionValue2 == addOption.m_byValue2);
+    CHECK(Engine::Items::TooltipValues::GetItemTooltipValue(values, "addOptionValue1") == static_cast<int>(addOption.m_byValue1));
+    CHECK(values.addOptionTime == addOption.m_Time);
+    // How long it lasts is written only when a line asks for it.
+    const std::optional<std::string> duration =
+        Engine::Items::TooltipValues::GetItemTooltipText(values, "addOptionDuration");
+    REQUIRE(duration.has_value());
+    CHECK_FALSE(duration->empty());
+}
+
+TEST_CASE("The Weapon of Archangel shows its reward weapon's skill mana from the skill data [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeNewDarkWizard(hero.Hero());
+    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+
+    int mana = 0;
+    gSkillManager.GetSkillInformation(AT_SKILL_CYCLONE, 1, nullptr, &mana, nullptr);
+    REQUIRE(mana > 0);
+    ItemCreationParams params = Engine::Items::TooltipSnapshot::FullItemParameters(13, 19);
+    params.Level = 1;
+    const std::vector<ItemTooltipLine> lines = Engine::Items::TooltipSnapshot::TooltipOfParameters(params);
+    SetItemTooltipTextMeasure(nullptr);
+    const std::wstring expected = L"Cyclone Cutting skill (Mana:" + std::to_wstring(mana) + L")";
+    CHECK(std::any_of(lines.begin(), lines.end(), [&](const ItemTooltipLine& line) { return line.text == expected; }));
+}
+
+TEST_CASE("A class condition holds for a hero of that class [data][items][tooltip]")
+{
+    TooltipHeroScope hero;
+    Data::Items::TooltipCondition darkLord;
+    std::string error;
+    REQUIRE(Data::Items::ReadTooltipCondition("class:darkLord", darkLord, error));
+    CHECK(Data::Items::WriteTooltipCondition(darkLord) == "class:darkLord");
+    CHECK_FALSE(Data::Items::ReadTooltipCondition("class:darkLrod", darkLord, error));
+    CHECK(error.find("names no class") != std::string::npos);
+    REQUIRE(Data::Items::ReadTooltipCondition("class:darkLord", darkLord, error));
+
+    const ItemTooltipValues values;
+    const std::vector<Data::Items::TooltipCondition> conditions = {darkLord};
+    ::Hero->Class = CLASS_DARK_LORD;
+    CHECK(Engine::Items::TooltipValues::AreTooltipConditionsMet(conditions, 0, 0, values));
+    ::Hero->Class = CLASS_WIZARD;
+    CHECK_FALSE(Engine::Items::TooltipValues::AreTooltipConditionsMet(conditions, 0, 0, values));
+    // A Lord Emperor is a Dark Lord too.
+    ::Hero->Class = CLASS_LORDEMPEROR;
+    CHECK(Engine::Items::TooltipValues::AreTooltipConditionsMet(conditions, 0, 0, values));
+}
+
+// The second chain's cases with conditions, as the tooltip shows them: the Command Fruit's class line, white for a
+// Dark Lord and dark red for the other classes, and the Wizard's Ring's lines by its level.
+TEST_CASE("The Command Fruit's class line and the Wizard's Ring's lines follow the hero and the level "
+          "[data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+
+    ItemCreationParams fruit = Engine::Items::TooltipSnapshot::FullItemParameters(13, 15);
+    fruit.Level = 4;
+    ::Hero->Class = CLASS_DARK_LORD;
+    CHECK(HasLine(Engine::Items::TooltipSnapshot::TooltipOfParameters(fruit), L"Can be equipped by Dark Lord", TEXT_COLOR_WHITE));
+    ::Hero->Class = CLASS_LORDEMPEROR;
+    CHECK(HasLine(Engine::Items::TooltipSnapshot::TooltipOfParameters(fruit), L"Can be equipped by Dark Lord", TEXT_COLOR_WHITE));
+    ::Hero->Class = CLASS_WIZARD;
+    CHECK(HasLine(Engine::Items::TooltipSnapshot::TooltipOfParameters(fruit), L"Can be equipped by Dark Lord", TEXT_COLOR_DARKRED));
+
+    // The Wizard's Ring: +0 and +3 can't be repaired and show their durability; +1 and +2 are the event rings, which
+    // say instead when they can be dropped and that they can't be stored, traded or sold.
+    for (const int level : {0, 1, 2, 3})
+    {
+        INFO("+" << level);
+        ItemCreationParams ring = Engine::Items::TooltipSnapshot::FullItemParameters(13, 20);
+        ring.Level = static_cast<BYTE>(level);
+        const std::vector<ItemTooltipLine> lines = Engine::Items::TooltipSnapshot::TooltipOfParameters(ring);
+        const bool eventRing = level == 1 || level == 2;
+        CHECK(HasLine(lines, L"Cannot Repair", TEXT_COLOR_RED) == !eventRing);
+        CHECK(std::any_of(lines.begin(), lines.end(),
+                          [](const ItemTooltipLine& line) { return line.text.starts_with(L"Durability:"); }) ==
+              !eventRing);
+        CHECK(HasLine(lines, L"Can be dropped after level 40") == (level == 1));
+        CHECK(HasLine(lines, L"Can be dropped after level 80") == (level == 2));
+        CHECK(HasLine(lines, L"Cannot be sold.", TEXT_COLOR_RED) == eventRing);
+    }
 
     SetItemTooltipTextMeasure(nullptr);
 }

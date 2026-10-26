@@ -87,6 +87,15 @@ enum class ItemTextColor : BYTE
 };
 constexpr size_t ItemTextColorCount = static_cast<size_t>(ItemTextColor::Count);
 
+// A color rule of a tooltip line: the color when every condition holds.
+struct TooltipColorRule
+{
+    std::vector<TooltipCondition> when;
+    ItemTextColor color = ItemTextColor::White;
+
+    bool operator==(const TooltipColorRule& other) const = default;
+};
+
 // One line of an item's description in its tooltip: a text with its translations or a shared text of the tooltip file
 // (neither: a blank line), the conditions it shows on (all of them; ItemTooltipConditions.h), its color, and the item
 // levels it is shown at (both included; every level unless set).
@@ -100,6 +109,9 @@ struct ItemDescriptionLine
     std::vector<std::pair<std::string, std::string>> values;
     std::vector<TooltipCondition> when;
     ItemTextColor color = ItemTextColor::White;
+    // The line's own color rules, as a layout line's: the first that holds gives the color, else `color` does.
+    std::vector<TooltipColorRule> colors;
+    bool bold = false;
     int minLevel = 0;
     int maxLevel = ItemLevelCount - 1;
 
