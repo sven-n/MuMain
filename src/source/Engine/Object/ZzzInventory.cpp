@@ -1695,9 +1695,14 @@ std::wstring GetItemNameText(int type, int level, const ITEM* item)
     return StandardItemName(*item, level, false);
 }
 
-void GetItemName(int iType, int iLevel, wchar_t* Text)
+void GetItemName(int iType, int iLevel, wchar_t* Text, size_t textSize)
 {
-    mu_swprintf(Text, L"%ls", GetItemNameText(iType, iLevel).c_str());
+    if (textSize == 0)
+        return;
+    const std::wstring name = GetItemNameText(iType, iLevel);
+    const size_t length = std::min(name.size(), textSize - 1);
+    std::wmemcpy(Text, name.c_str(), length);
+    Text[length] = L'\0';
 }
 
 std::wstring GetItemName(int iType, int iLevel)
@@ -3209,8 +3214,7 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
         descriptor.Font = g_hFontBold;
         SetDescriptorYellowTextColor(descriptor);
     }
-    else if (o->Type == MODEL_COMPILED_CELE || o->Type == MODEL_COMPILED_SOUL ||
-             (o->Type == MODEL_BOX_OF_LUCK && ItemLevel == 7) || o->Type == MODEL_POTION + 12 ||
+    else if ((o->Type == MODEL_BOX_OF_LUCK && ItemLevel == 7) || o->Type == MODEL_POTION + 12 ||
              o->Type == MODEL_FRUITS || o->Type == MODEL_SPIRIT ||
              (o->Type >= MODEL_EVENT + 4 && o->Type <= MODEL_EVENT + 5) ||
              (o->Type >= MODEL_EVENT + 7 && o->Type <= MODEL_EVENT + 16) || o->Type == MODEL_EVENT + 18 ||

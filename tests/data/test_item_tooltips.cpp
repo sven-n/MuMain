@@ -610,6 +610,11 @@ TEST_CASE("The item names of windows and ground labels come from the name lines 
     CHECK(GetItemNameText(ITEM_LOST_MAP, 0) == L"Lost Map");
     CHECK(GetItemNameText(ITEM_LOST_MAP, 3) == L"Lost Map +3");
     CHECK(GetItemNameText(ITEM_SPIRIT, 0) == L"Spirit of Dark horse");
+    // The Weapon of Archangel's level names the weapon; a dropped one keeps it (CreateItemDrop), so its ground label
+    // names the right one.
+    CHECK(GetItemNameText(ITEM_WEAPON_OF_ARCHANGEL, 0) == L"Absolute Staff of Archangel");
+    CHECK(GetItemNameText(ITEM_WEAPON_OF_ARCHANGEL, 1) == L"Absolute Sword of Archangel");
+    CHECK(GetItemNameText(ITEM_WEAPON_OF_ARCHANGEL, 2) == L"Absolute Crossbow of Archangel");
 
     // A line's condition on the item: without the item, its options read 0.
     CHECK(GetItemNameText(ITEM_HORN_OF_FENRIR, 0) == L"Horn of Fenrir");

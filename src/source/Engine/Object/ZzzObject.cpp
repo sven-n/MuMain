@@ -5449,6 +5449,16 @@ void ItemAngle(OBJECT* o)
     }
 }
 
+namespace
+{
+// The level a ground item's model is drawn at: a Weapon of Archangel's level picks its model (CreateItemDrop), not an
+// upgrade, so the model is drawn at +0.
+int DrawnItemLevel(const ITEM& item)
+{
+    return item.Type == ITEM_WEAPON_OF_ARCHANGEL ? 0 : item.Level;
+}
+} // namespace
+
 void CreateItemDrop(ITEM_t* ip, ItemCreationParams params, vec3_t position, bool isFreshDrop)
 {
     int Type = params.Group * MAX_ITEM_INDEX + params.Number;
@@ -5538,19 +5548,18 @@ void CreateItemDrop(ITEM_t* ip, ItemCreationParams params, vec3_t position, bool
     }
     else if (Type == (int)(ITEM_WEAPON_OF_ARCHANGEL))
     {
+        // The level tells the three weapons apart: the item keeps it (its name), the model is drawn at +0
+        // (DrawnItemLevel).
         switch (n->Level)
         {
         case 0:
             o->Type = MODEL_DIVINE_STAFF_OF_ARCHANGEL;
-            n->Level = 0;
             break;
         case 1:
             o->Type = MODEL_DIVINE_SWORD_OF_ARCHANGEL;
-            n->Level = 0;
             break;
         case 2:
             o->Type = MODEL_DIVINE_CB_OF_ARCHANGEL;
-            n->Level = 0;
             break;
         }
     }
@@ -5863,7 +5872,7 @@ void RenderItems()
 
             if (o->Visible)
             {
-                const int drawnModel = Render::Items::Display::GetDrawnModel(o->Type, Items[i].Item.Level);
+                const int drawnModel = Render::Items::Display::GetDrawnModel(o->Type, DrawnItemLevel(Items[i].Item));
                 // Armor is animated on the character skeleton.
                 BMD* b =
                     &Models[Render::Items::Display::IsDrawnOnCharacterSkeleton(drawnModel) ? MODEL_PLAYER : drawnModel];
@@ -5901,7 +5910,8 @@ void RenderItems()
                     o->Position[2] = GetWaterTerrain(o->Position[0], o->Position[1]) + 180;
                 }
 
-                RenderPartObject(o, o->Type, NULL, Light, o->Alpha, Items[i].Item.Level, Items[i].Item.ExcellentFlags, Items[i].Item.AncientDiscriminator, true, true, true);
+                RenderPartObject(o, o->Type, NULL, Light, o->Alpha, DrawnItemLevel(Items[i].Item),
+                                 Items[i].Item.ExcellentFlags, Items[i].Item.AncientDiscriminator, true, true, true);
                 VectorCopy(vBackup, o->Position);
 
 #ifdef _EDITOR
