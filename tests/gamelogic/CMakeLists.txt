@@ -7,6 +7,14 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_bird_landing
+    SOURCES
+        test_bird_landing.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
     NAME test_head_movement
     SOURCES
         test_head_movement.cpp
