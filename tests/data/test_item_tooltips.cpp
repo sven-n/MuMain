@@ -7,6 +7,7 @@
 #include "Core/Platform/ProcessLocale.h"
 #include "Core/Text/Utf8.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "I18N/All.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/SkillData/SkillDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
@@ -707,4 +708,91 @@ TEST_CASE("The Command Fruit's class line and the Wizard's Ring's lines follow t
     }
 
     SetItemTooltipTextMeasure(nullptr);
+}
+
+// The standard name's color, by precedence: ancient, socket, excellent with an option, +7 and above, an option, else
+// white. The name is the tooltip's first line that isn't blank.
+TEST_CASE("A tooltip's name color goes by the item's kind, level and options in their order [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+    const auto name = [](int level, bool luck, bool excellent, bool ancient)
+    {
+        ItemCreationParams kris = Engine::Items::TooltipSnapshot::FullItemParameters(0, 0);
+        kris.Level = static_cast<BYTE>(level);
+        kris.WithLuck = luck;
+        kris.HasExcellentOption = excellent;
+        kris.ExcellentFlags = excellent ? 1 : 0;
+        kris.IsAncient = ancient;
+        kris.AncientDiscriminator = ancient ? 1 : 0;
+        const std::vector<ItemTooltipLine> lines = Engine::Items::TooltipSnapshot::TooltipOfParameters(kris);
+        const auto name = std::find_if(lines.begin(), lines.end(),
+                                       [](const ItemTooltipLine& line) { return line.text != L"\n"; });
+        REQUIRE(name != lines.end());
+        return *name;
+    };
+
+    const ItemTooltipLine plain = name(0, false, false, false);
+    CHECK(plain.text == L"Kris");
+    CHECK(plain.color == TEXT_COLOR_WHITE);
+    CHECK(name(0, true, false, false).color == TEXT_COLOR_BLUE);
+    CHECK(name(7, false, false, false).color == TEXT_COLOR_YELLOW);
+    // +7 and above wins over an option, excellent with an option over the level, ancient over all.
+    CHECK(name(9, true, false, false).color == TEXT_COLOR_YELLOW);
+    CHECK(name(9, true, true, false).color == TEXT_COLOR_GREEN);
+    CHECK(name(9, true, true, true).color == TEXT_COLOR_GREEN_BLUE);
+
+    // In the item names' language, with translated item names on.
+    const std::string uiLocale = I18N::GetCurrentLocale();
+    const bool translateItemNames = g_ItemDataHandler.GetTranslateItemNames();
+    g_ItemDataHandler.SetTranslateItemNames(true);
+    I18N::SetLocale("pt");
+    const std::wstring portuguese = name(9, false, false, false).text;
+    I18N::SetLocale(uiLocale.c_str());
+    g_ItemDataHandler.SetTranslateItemNames(translateItemNames);
+    CHECK(portuguese == L"Cris +9");
+
+    SetItemTooltipTextMeasure(nullptr);
+}
+
+TEST_CASE("With translated item names off, the names are English and the rest of the tooltip is translated "
+          "[data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+    const std::string uiLocale = I18N::GetCurrentLocale();
+    const bool translateItemNames = g_ItemDataHandler.GetTranslateItemNames();
+    g_ItemDataHandler.SetTranslateItemNames(false);
+    I18N::SetLocale("de");
+    const auto has = [](const std::vector<ItemTooltipLine>& lines, std::wstring_view start)
+    {
+        return std::any_of(lines.begin(), lines.end(),
+                           [&](const ItemTooltipLine& line) { return line.text.starts_with(start); });
+    };
+
+    // The Wings of Elf: the standard name, the stat lines of the tooltip file.
+    const std::vector<ItemTooltipLine> wings = Engine::Items::TooltipSnapshot::TooltipOfParameters(Engine::Items::TooltipSnapshot::FullItemParameters(12, 0));
+    // A name line's text, here the +0 Transformation Ring's.
+    const std::vector<ItemTooltipLine> ring = Engine::Items::TooltipSnapshot::TooltipOfParameters(Engine::Items::TooltipSnapshot::FullItemParameters(13, 10));
+
+    I18N::SetLocale(uiLocale.c_str());
+    g_ItemDataHandler.SetTranslateItemNames(translateItemNames);
+    SetItemTooltipTextMeasure(nullptr);
+
+    CHECK(has(wings, L"Wings of Elf"));
+    CHECK(has(wings, L"Verteidigung:"));
+    CHECK(has(wings, L"Haltbarkeit:"));
+    CHECK_FALSE(has(wings, L"Defense:"));
+    CHECK(std::any_of(ring.begin(), ring.end(),
+                      [](const ItemTooltipLine& line) { return line.text.ends_with(L"Transformation Ring"); }));
 }

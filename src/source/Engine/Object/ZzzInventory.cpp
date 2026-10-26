@@ -43,6 +43,7 @@
 #include <chrono>
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "GameLogic/Items/ItemNameParts.h"
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Core/Text/TextLineWrap.h"
@@ -1661,11 +1662,27 @@ static std::optional<std::string> TooltipPlaceholderValue(std::string_view name,
             break;
         }
     }
-    if (const std::optional<int> skill = Data::Items::ReadSkillManaValue(name))
+    if (const std::optional<Data::Items::GameDataValue> data = Data::Items::ReadGameDataValue(name))
     {
-        int mana = 0;
-        gSkillManager.GetSkillInformation(*skill, 1, nullptr, &mana, nullptr);
-        return std::to_string(mana);
+        switch (data->kind)
+        {
+        case Data::Items::GameDataValueKind::SkillMana:
+        {
+            int mana = 0;
+            gSkillManager.GetSkillInformation(data->number, 1, nullptr, &mana, nullptr);
+            return std::to_string(mana);
+        }
+        case Data::Items::GameDataValueKind::SkillName:
+            return Core::Text::ToUtf8(SkillAttribute[data->number].Name);
+        case Data::Items::GameDataValueKind::MonsterName:
+        {
+            const wchar_t* monsterName = GameLogic::Items::NameParts::MonsterName(data->number);
+            if (monsterName == nullptr)
+                return std::nullopt;
+            return Core::Text::ToUtf8(monsterName);
+        }
+        }
+        return std::nullopt;
     }
     if (const Data::Items::ItemLevelValues* levelValues =
             definition != nullptr ? definition->FindLevelValues(name) : nullptr)
@@ -1833,6 +1850,87 @@ static void WriteItemDescription(const ITEM& item, int level, const ItemTooltipV
                               });
 }
 
+// The name the tooltip gives an item and its color.
+struct ItemTooltipName
+{
+    std::wstring text;
+    int color = TEXT_COLOR_WHITE;
+};
+
+// The item's standard name: its set's name for an ancient item, "Excellent" for an excellent one, " +level" above 0.
+static std::wstring StandardItemName(const ITEM& item, int level)
+{
+    wchar_t setName[64]{};
+    std::wstring name;
+    if (g_csItemOption.GetSetItemName(setName, item.Type, item.AncientDiscriminator))
+        name = setName;
+    name += ItemAttribute[item.Type].Name;
+    if (item.ExcellentFlags > 0)
+        name = std::wstring(I18N::Game::Excellent) + L" " + name;
+    if (level > 0)
+        name += L" +" + std::to_wstring(level);
+    return name;
+}
+
+// The item's standard name color: an ancient, socket, excellent, +7 and up, or optioned item's, else white.
+static int StandardItemNameColor(const ITEM& item, int level)
+{
+    if (item.AncientDiscriminator > 0)
+        return TEXT_COLOR_GREEN_BLUE;
+    if (g_SocketItemMgr.IsSocketItem(&item))
+        return TEXT_COLOR_VIOLET;
+    if (item.SpecialNum > 0 && item.ExcellentFlags > 0)
+        return TEXT_COLOR_GREEN;
+    if (level >= 7)
+        return TEXT_COLOR_YELLOW;
+    return item.SpecialNum > 0 ? TEXT_COLOR_BLUE : TEXT_COLOR_WHITE;
+}
+
+// The item's name in the UI's language and its color: the first of its name lines whose levels and conditions hold
+// gives them (the standard name where the line has no text, the standard color where it has no color, then its color
+// rules); without one, the standard name and color.
+static ItemTooltipName GetItemTooltipName(const ITEM& item, int level, const ItemTooltipValues& values)
+{
+    ItemTooltipName name{StandardItemName(item, level), StandardItemNameColor(item, level)};
+    const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(item.Type);
+    if (definition == nullptr)
+        return name;
+    for (const Data::Items::ItemNameLine& line : definition->nameLines)
+    {
+        if (!line.IsShownAt(level) ||
+            !Engine::Items::TooltipValues::AreTooltipConditionsMet(line.when, item.Type, level, values))
+            continue;
+        if (line.hasText)
+        {
+            // The name follows the item names' language (English with "Translate item names" off).
+            const Data::LocalizedString* text =
+                line.textName.empty() ? &line.text : g_ItemDatabase.GetTooltipFile().FindText(line.textName);
+            if (text != nullptr)
+            {
+                const std::wstring filled = Core::Text::FromUtf8(Data::Items::FillPlaceholders(
+                    text->Get(g_ItemDatabase.GetDisplayLocale()),
+                    [&](std::string_view placeholder)
+                    {
+                        // In the item names' language, as the item's name.
+                        return TooltipPlaceholderValue(placeholder, line.values, definition, level, values,
+                                                       g_ItemDatabase.GetDisplayLocale());
+                    }));
+                // No text in the item names' language keeps the standard name: an empty first row would leave the
+                // tooltip empty.
+                if (!filled.empty())
+                {
+                    name.text = filled;
+                }
+            }
+        }
+        const auto base = line.hasColor ? line.color : static_cast<Data::Items::ItemTextColor>(name.color);
+        name.color = static_cast<int>(
+            Engine::Items::TooltipValues::GetTooltipColor(line.colors, base, item.Type, level, values));
+        break;
+    }
+    return name;
+}
+
 // What BuildItemTooltipText made of an item.
 enum class ItemTooltipBuild
 {
@@ -1877,87 +1975,11 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
     int Level = ip->Level;
-    int Color;
 
-    if (ip->Type == ITEM_JEWEL_OF_BLESS || ip->Type == ITEM_JEWEL_OF_SOUL || ip->Type == ITEM_JEWEL_OF_CHAOS || ip->Type == ITEM_JEWEL_OF_GUARDIAN ||
-        (COMGEM::isCompiledGem(ip)) ||
-        GameLogic::Items::IsThirdClassQuestItem(ip) ||
-        ip->Type == ITEM_FLAME_OF_CONDOR || ip->Type == ITEM_FEATHER_OF_CONDOR ||
-        ip->Type == ITEM_POTION + 100 ||
-        (ip->Type >= ITEM_POTION + 141 && ip->Type <= ITEM_POTION + 144) ||
-        GameLogic::Items::IsLuckyItemTicket(ip) ||
-        (ip->Type == ITEM_POTION + 160 || ip->Type == ITEM_POTION + 161) ||
-        ip->Type == ITEM_JEWEL_OF_LIFE || ip->Type == ITEM_JEWEL_OF_CREATION)
-    {
-        Color = TEXT_COLOR_YELLOW;
-    }
-    else if (GameLogic::Items::IsDivineArchangelWeapon(ip))
-    {
-        Color = TEXT_COLOR_PURPLE;
-    }
-    else if (GameLogic::Items::IsDevilSquareItem(ip))
-    {
-        Color = TEXT_COLOR_YELLOW;
-    }
-    else if (GameLogic::Items::IsBloodCastleTicketPart(ip))
-    {
-        Color = TEXT_COLOR_YELLOW;
-    }
-    else if (ip->AncientDiscriminator > 0)
-    {
-        Color = TEXT_COLOR_GREEN_BLUE;
-    }
-    else if (g_SocketItemMgr.IsSocketItem(ip))
-    {
-        Color = TEXT_COLOR_VIOLET;
-    }
-    else if (ip->SpecialNum > 0 && ip->ExcellentFlags > 0)
-    {
-        Color = TEXT_COLOR_GREEN;
-    }
-    else if (Level >= 7)
-    {
-        Color = TEXT_COLOR_YELLOW;
-    }
-    else
-    {
-        if (ip->SpecialNum > 0)
-        {
-            Color = TEXT_COLOR_BLUE;
-        }
-        else
-        {
-            Color = TEXT_COLOR_WHITE;
-        }
-    }
-
-    if ((ip->Type >= ITEM_WINGS_OF_SPIRITS && ip->Type <= ITEM_WINGS_OF_DARKNESS) || ip->Type == ITEM_CAPE_OF_LORD
-        || (ip->Type >= ITEM_WING_OF_STORM && ip->Type <= ITEM_CAPE_OF_EMPEROR)
-        || (ip->Type >= ITEM_WINGS_OF_DESPAIR && ip->Type <= ITEM_WING_OF_DIMENSION)
-        || (ip->Type >= ITEM_CAPE_OF_FIGHTER && ip->Type <= ITEM_CAPE_OF_OVERRULE))
-    {
-        if (Level >= 7)
-        {
-            Color = TEXT_COLOR_YELLOW;
-        }
-        else
-        {
-            if (ip->SpecialNum > 0)
-            {
-                Color = TEXT_COLOR_BLUE;
-            }
-            else
-            {
-                Color = TEXT_COLOR_WHITE;
-            }
-        }
-    }
-
-    int nGemType = COMGEM::Check_Jewel(ip->Type);
-    if (nGemType != COMGEM::NOGEM)
-    {
-        Color = TEXT_COLOR_YELLOW;
-    }
+    // The numbers of the stat lines, the built-in placeholders of the descriptions.
+    const ItemTooltipValues values = Engine::Items::TooltipValues::ComputeItemTooltipValues(*ip);
+    const ItemTooltipName name = GetItemTooltipName(*ip, Level, values);
+    const int Color = name.color;
 
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP) && !GameLogic::Items::IsSellingBan(ip))
     {
@@ -2045,378 +2067,13 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         }
     }
 
-    if (GameLogic::Items::IsSecondClassQuestItem(ip))
-    {
-        if (ip->Type == ITEM_SCROLL_OF_EMPEROR_RING_OF_HONOR)
-        {
-            Color = TEXT_COLOR_YELLOW;
-            switch (Level)
-            {
-            case 0: mu_swprintf(TextList[TextNum], L"%ls", p->Name); break;
-            case 1: mu_swprintf(TextList[TextNum], I18N::Game::RingOfHonor); break;
-            }
-        }
-        else if (ip->Type == ITEM_BROKEN_SWORD_DARK_STONE)
-        {
-            Color = TEXT_COLOR_YELLOW;
-            switch (Level)
-            {
-            case 0: mu_swprintf(TextList[TextNum], L"%ls", p->Name); break;
-            case 1: mu_swprintf(TextList[TextNum], I18N::Game::DarkStone); break;
-            }
-        }
-        else {
-            mu_swprintf(TextList[TextNum], L"%ls", p->Name);
-            Color = TEXT_COLOR_YELLOW;
-        }
-    }
-    else if (ip->Type == ITEM_POTION + 12)
-    {
-        switch (Level)
-        {
-        case 0:mu_swprintf(TextList[TextNum], I18N::Game::Zen); break;
-        case 1:mu_swprintf(TextList[TextNum], I18N::Game::Heart); break;
-        case 2:
-            // The prize by the item's durability; its own name for one past the list (the tooltip snapshot's item
-            // has its full durability).
-            mu_swprintf(TextList[TextNum], L"%ls",
-                        ip->Durability < std::size(ChaosEventName) ? ChaosEventName[ip->Durability] : p->Name);
-            break;
-        // The item exists at +0 to +2; at another level (the tooltip snapshot draws every level) its own name, not the
-        // row an earlier tooltip left.
-        default:
-            mu_swprintf(TextList[TextNum], L"%ls", p->Name);
-            break;
-        }
-    }
-    else if (ip->Type == ITEM_BOX_OF_LUCK)
-    {
-        switch (Level)
-        {
-        case 0:mu_swprintf(TextList[TextNum], L"%ls", p->Name); break;
-        case 1:mu_swprintf(TextList[TextNum], I18N::Game::StarOfSacredBirth); break;
-        case 2:mu_swprintf(TextList[TextNum], I18N::Game::Firecracker); break;
-        case 3:mu_swprintf(TextList[TextNum], I18N::Game::HeartOfLove); break;
-        case 5:mu_swprintf(TextList[TextNum], I18N::Game::SilverMedal); break;
-        case 6:mu_swprintf(TextList[TextNum], I18N::Game::GoldMedal); break;
-        case 7:mu_swprintf(TextList[TextNum], I18N::Game::BoxOfHeaven); break;
-        case 8:
-        case 9:
-        case 10:
-        case 11:
-        case 12:
-            mu_swprintf(TextList[TextNum], L"%ls +%d", I18N::Game::BoxOfKundun, Level - 7);
-            break;
-        case 13:
-            mu_swprintf(TextList[TextNum], I18N::Game::HeartOfDarkLord);
-            break;
-        case 14:
-            mu_swprintf(TextList[TextNum], I18N::Game::BlueLuckyPouch);
-            break;
-        case 15:
-            mu_swprintf(TextList[TextNum], I18N::Game::RedLuckyPouch);
-            break;
-        }
-    }
-    else if (ip->Type == ITEM_POTION + 12)
-    {
-        switch (Level)
-        {
-        case 0:mu_swprintf(TextList[TextNum], I18N::Game::Zen); break;
-        case 1:mu_swprintf(TextList[TextNum], I18N::Game::Heart); break;
-        case 2:
-            // The prize by the item's durability; its own name for one past the list (the tooltip snapshot's item
-            // has its full durability).
-            mu_swprintf(TextList[TextNum], L"%ls",
-                        ip->Durability < std::size(ChaosEventName) ? ChaosEventName[ip->Durability] : p->Name);
-            break;
-        // The item exists at +0 to +2; at another level (the tooltip snapshot draws every level) its own name, not the
-        // row an earlier tooltip left.
-        default:
-            mu_swprintf(TextList[TextNum], L"%ls", p->Name);
-            break;
-        }
-    }
-    else if (ip->Type == ITEM_FRUITS)
-    {
-        Color = TEXT_COLOR_YELLOW;
-        switch (Level)
-        {
-        case 0:mu_swprintf(TextList[TextNum], L"%ls %ls", I18N::Game::ENG, p->Name); break;
-        case 1:mu_swprintf(TextList[TextNum], L"%ls %ls", I18N::Game::STA, p->Name); break;
-        case 2:mu_swprintf(TextList[TextNum], L"%ls %ls", I18N::Game::AGI, p->Name); break;
-        case 3:mu_swprintf(TextList[TextNum], L"%ls %ls", I18N::Game::STR, p->Name); break;
-        case 4:mu_swprintf(TextList[TextNum], L"%ls %ls", I18N::Game::Command, p->Name); break;
-        }
-    }
-    else if (ip->Type == ITEM_LOCHS_FEATHER)
-    {
-        Color = TEXT_COLOR_YELLOW;
-        switch (Level)
-        {
-        case 0: mu_swprintf(TextList[TextNum], L"%ls", p->Name); break;
-        case 1: mu_swprintf(TextList[TextNum], L"%ls", I18N::Game::CrestOfMonarch); break;
-        }
-    }
-    else if (ip->Type == ITEM_RENA)
-    {
-        Color = TEXT_COLOR_YELLOW;
-        switch (Level)
-        {
-        case 0: mu_swprintf(TextList[TextNum], L"%ls", p->Name); break;
-        case 1: mu_swprintf(TextList[TextNum], I18N::Game::Stone); break;
-        case 2: mu_swprintf(TextList[TextNum], I18N::Game::StoneOfFriendship); break;
-        case 3: mu_swprintf(TextList[TextNum], I18N::Game::SignOfLord); break;
-        }
-    }
-    else if (ip->Type == ITEM_WEAPON_OF_ARCHANGEL)
-    {
-        Color = TEXT_COLOR_YELLOW;
-        switch (Level)
-        {
-        case 0: mu_swprintf(TextList[TextNum], I18N::Game::AbsoluteStaffOfArchangel); break;
-        case 1: mu_swprintf(TextList[TextNum], I18N::Game::AbsoluteSwordOfArchangel); break;
-        case 2: mu_swprintf(TextList[TextNum], I18N::Game::AbsoluteCrossbowOfArchangel); break;
-        // The item exists at +0 to +2; at another level (the tooltip snapshot draws every level) its own name, not the
-        // row an earlier tooltip left.
-        default:
-            mu_swprintf(TextList[TextNum], L"%ls", p->Name);
-            break;
-        }
-    }
-    else if (ip->Type == ITEM_WIZARDS_RING)
-    {
-        Color = TEXT_COLOR_YELLOW;
-        switch (Level)
-        {
-        case 0: mu_swprintf(TextList[TextNum], p->Name); break;
-        case 1: mu_swprintf(TextList[TextNum], I18N::Game::RingOfWarrior); break;
-        case 2: mu_swprintf(TextList[TextNum], I18N::Game::RingOfWarrior); break;
-        case 3: mu_swprintf(TextList[TextNum], I18N::Game::RingOfGlory); break;
-        }
-    }
-    else if (ip->Type == ITEM_LETHAL_WIZARDS_RING)
-    {
-        Color = TEXT_COLOR_YELLOW;
-        mu_swprintf(TextList[TextNum], p->Name);
-    }
-    else if (ip->Type == ITEM_SIEGE_POTION)
-    {
-        switch (Level)
-        {
-        case 0: mu_swprintf(TextList[TextNum], I18N::Game::PotionOfBless); break;
-        case 1: mu_swprintf(TextList[TextNum], I18N::Game::PotionOfSoul); break;
-        }
-    }
-    else if (ip->Type == ITEM_CONTRACT_SUMMON)
-    {
-        switch (Level)
-        {
-        case 0: mu_swprintf(TextList[TextNum], I18N::Game::Archer); break;
-        case 1: mu_swprintf(TextList[TextNum], I18N::Game::Spearman); break;
-        }
-    }
-    else if (ip->Type == ITEM_LIFE_STONE_ITEM)
-    {
-        switch (Level)
-        {
-        case 0: mu_swprintf(TextList[TextNum], I18N::Game::ScrollOfGuardian); break;
-        case 1: mu_swprintf(TextList[TextNum], I18N::Game::PlaceLifeStone); break;
-        }
-    }
-    else if (ip->Type == ITEM_ALE)
-    {
-        switch (Level)
-        {
-        case 0:mu_swprintf(TextList[TextNum], L"%ls", p->Name); break;
-        case 1:mu_swprintf(TextList[TextNum], I18N::Game::OliveOfLove); break;
-        }
-    }
-    else if (ip->Type == ITEM_ORB_OF_SUMMONING)
-    {
-        mu_swprintf(TextList[TextNum], L"%ls %ls", SkillAttribute[30 + Level].Name, I18N::Game::Jewel);
-    }
-    else if (ip->Type == ITEM_TRANSFORMATION_RING)
-    {
-        if (const wchar_t* monsterName = GameLogic::Items::TransformationRing::MonsterName(Level))
-        {
-            mu_swprintf(TextList[TextNum], L"%ls %ls", monsterName, I18N::Game::TransformationRing);
-        }
-    }
-    else if (ip->Type >= ITEM_WINGS_OF_SPIRITS && ip->Type <= ITEM_WINGS_OF_DARKNESS)
-    {
-        if (Level == 0)
-            mu_swprintf(TextList[TextNum], L"%ls", p->Name);
-        else
-            mu_swprintf(TextList[TextNum], L"%ls +%d", p->Name, Level);
-    }
-    else if ((ip->Type >= ITEM_WING_OF_STORM && ip->Type <= ITEM_CAPE_OF_EMPEROR) || (ip->Type >= ITEM_WINGS_OF_DESPAIR && ip->Type <= ITEM_WING_OF_DIMENSION)
-        || (ip->Type >= ITEM_CAPE_OF_FIGHTER && ip->Type <= ITEM_CAPE_OF_OVERRULE))
-    {
-        if (Level == 0)
-            mu_swprintf(TextList[TextNum], L"%ls", p->Name);
-        else
-            mu_swprintf(TextList[TextNum], L"%ls +%d", p->Name, Level);
-    }
-    else if (ip->Type == ITEM_SPIRIT)
-    {
-        switch (Level)
-        {
-        case 0: mu_swprintf(TextList[TextNum], L"%ls of %ls", p->Name, I18N::Game::DarkHorse); break;
-        case 1: mu_swprintf(TextList[TextNum], L"%ls of %ls", p->Name, I18N::Game::DarkRaven); break;
-        }
-    }
-    else if (ip->Type == ITEM_CAPE_OF_LORD)
-    {
-        if (Level == 0)
-            mu_swprintf(TextList[TextNum], L"%ls", p->Name);
-        else
-            mu_swprintf(TextList[TextNum], L"%ls +%d", p->Name, Level);
-    }
-    else if (ip->Type == ITEM_SYMBOL_OF_KUNDUN)
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::KundunMarkDLevel, Level);
-    }
-    else if (ip->Type == ITEM_LOST_MAP)
-    {
-        Color = TEXT_COLOR_YELLOW;
-        mu_swprintf(TextList[TextNum], L"%ls +%d", p->Name, Level);
-    }
-    else if (ip->Type == ITEM_RED_RIBBON_BOX)
-    {
-        mu_swprintf(TextList[TextNum], L"%ls", p->Name);
-    }
-    else if (ip->Type == ITEM_GREEN_RIBBON_BOX)
-    {
-        mu_swprintf(TextList[TextNum], L"%ls", p->Name);
-    }
-    else if (ip->Type == ITEM_BLUE_RIBBON_BOX)
-    {
-        mu_swprintf(TextList[TextNum], L"%ls", p->Name);
-    }
-    else if (ip->Type == ITEM_SCROLL_OF_FIRE_SCREAM)
-    {
-        mu_swprintf(TextList[TextNum], L"%ls", p->Name);
-    }
-    else if (ip->Type >= ITEM_PUMPKIN_OF_LUCK && ip->Type <= ITEM_JACK_OLANTERN_DRINK)
-    {
-        mu_swprintf(TextList[TextNum], L"%ls", p->Name);
-    }
-    else if (ip->Type == ITEM_PINK_CHOCOLATE_BOX)
-    {
-        switch (Level)
-        {
-        case 0:
-            mu_swprintf(TextList[TextNum], L"%ls", p->Name); break;
-        case 1:
-            mu_swprintf(TextList[TextNum], L"%ls", I18N::Game::LilacCandyBox); break;
-        }
-    }
-    else if (ip->Type == ITEM_RED_CHOCOLATE_BOX)
-    {
-        switch (Level)
-        {
-        case 0:
-            mu_swprintf(TextList[TextNum], L"%ls", p->Name); break;
-        case 1:
-            mu_swprintf(TextList[TextNum], L"%ls", I18N::Game::OrangeCandyBox); break;
-        }
-    }
-    else if (ip->Type == ITEM_BLUE_CHOCOLATE_BOX)
-    {
-        switch (Level)
-        {
-        case 0:
-            mu_swprintf(TextList[TextNum], L"%ls", p->Name); break;
-        case 1:
-            mu_swprintf(TextList[TextNum], L"%ls", I18N::Game::NavyCandyBox); break;
-        }
-    }
-    else if (ip->Type >= ITEM_SPLINTER_OF_ARMOR && ip->Type <= ITEM_HORN_OF_FENRIR)
-    {
-        if (ip->Type == ITEM_HORN_OF_FENRIR)
-        {
-            Color = TEXT_COLOR_BLUE;
-            if ((ip->ExcellentFlags & 63) == 0x01)
-                mu_swprintf(TextList[TextNum], L"%ls %ls", p->Name, I18N::Game::Destroy);
-            else if ((ip->ExcellentFlags & 63) == 0x02)
-                mu_swprintf(TextList[TextNum], L"%ls %ls", p->Name, I18N::Game::Protect);
-            else if ((ip->ExcellentFlags & 63) == 0x04)
-                mu_swprintf(TextList[TextNum], L"%ls %ls", p->Name, I18N::Game::Illusion);
-            else
-                mu_swprintf(TextList[TextNum], L"%ls", p->Name);
-        }
-        else
-        {
-            Color = TEXT_COLOR_WHITE;
-            mu_swprintf(TextList[TextNum], L"%ls", p->Name);
-        }
-    }
-    else if (GameLogic::Items::IsDivineArchangelWeapon(ip))
-    {
-        if (Level == 0)
-            mu_swprintf(TextList[TextNum], L"%ls", p->Name);
-        else
-            mu_swprintf(TextList[TextNum], L"%ls +%d", p->Name, Level);
-    }
-    else if (nGemType != COMGEM::NOGEM && nGemType % 2 == 1)
-    {
-        int nGlobalIndex = COMGEM::GetJewelIndex(nGemType, COMGEM::eGEM_NAME);
-        mu_swprintf(TextList[TextNum], L"%ls +%d", I18N::Game::Lookup(nGlobalIndex), Level + 1);
-    }
-    else if (ip->Type == ITEM_GEMSTONE || ip->Type == ITEM_JEWEL_OF_HARMONY ||
-        GameLogic::Items::IsRefineStone(ip) ||
-        ip->Type == ITEM_MOONSTONE_PENDANT
-        )
-    {
-        mu_swprintf(TextList[TextNum], L"%ls", p->Name);
-        Color = TEXT_COLOR_YELLOW;
-    }
-    else if (GameLogic::Items::IsSocketSeedOrSphere(ip))
-    {
-        mu_swprintf(TextList[TextNum], L"%ls", p->Name);
-        Color = TEXT_COLOR_VIOLET;
-    }
-    else if (ip->Type == ITEM_POTION + 111)
-    {
-        Color = TEXT_COLOR_YELLOW;
-        mu_swprintf(TextList[TextNum], L"%ls", p->Name);
-    }
-    else if (GameLogic::Items::IsSecromiconQuestItem(ip))
-    {
-        Color = TEXT_COLOR_YELLOW;
-        mu_swprintf(TextList[TextNum], L"%ls", p->Name);
-    }
-    else
-    {
-        wchar_t TextName[64];
-        if (g_csItemOption.GetSetItemName(TextName, ip->Type, ip->AncientDiscriminator))
-        {
-            wcscat(TextName, p->Name);
-        }
-        else
-        {
-            wcscpy(TextName, p->Name);
-        }
-
-        if (ip->ExcellentFlags > 0)
-        {
-            if (Level == 0)
-                mu_swprintf(TextList[TextNum], L"%ls %ls", I18N::Game::Excellent, TextName);
-            else
-                mu_swprintf(TextList[TextNum], L"%ls %ls +%d", I18N::Game::Excellent, TextName, Level);
-        }
-        else
-        {
-            if (Level == 0)
-                mu_swprintf(TextList[TextNum], L"%ls", TextName);
-            else
-                mu_swprintf(TextList[TextNum], L"%ls +%d", TextName, Level);
-        }
-    }
-
-    TextListColor[TextNum] = Color; TextBold[TextNum] = true; TextNum++;
-    mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+    mu_swprintf(TextList[TextNum], L"%.*ls", static_cast<int>(std::size(TextList[0]) - 1), name.text.c_str());
+    TextListColor[TextNum] = Color;
+    TextBold[TextNum] = true;
+    TextNum++;
+    mu_swprintf(TextList[TextNum], L"\n");
+    TextNum++;
+    SkipNum++;
 
     // The item cases whose lines need the game (the reset points, the saved revive position, the socket system,
     // the signs still needed); the others' lines are their descriptions.
@@ -2505,11 +2162,6 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         TextNum++;
     }
 
-    Color = TEXT_COLOR_YELLOW;
-    mu_swprintf(TextList[TextNum], L"%ls", p->Name);
-
-    // The numbers of the stat lines, the built-in placeholders of the descriptions.
-    const ItemTooltipValues values = Engine::Items::TooltipValues::ComputeItemTooltipValues(*ip);
     WriteItemTooltipLayoutLines(*ip, Level, values, Data::Items::TooltipSection::Name);
     if (GameLogic::Items::IsRibbonBox(ip))
     {

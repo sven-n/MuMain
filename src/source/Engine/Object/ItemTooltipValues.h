@@ -66,8 +66,16 @@ struct ItemTooltipValues
     bool hasDurability = false;
     // A timed item (one that expires).
     bool timed = false;
+    // The item has options to show (SpecialNum > 0: its skill, luck, additional and excellent options).
+    bool hasOptions = false;
     // The hero's level.
     int heroLevel = 0;
+    // The item's name as its data has it, which {name} writes only for a line showing it, its level + 1, and its
+    // excellent options (bits 0 to 5 of ExcellentFlags; Fenrir's 1, 2 and 4 are its Destroy, Protect and Illusion
+    // kinds).
+    const wchar_t* name = nullptr;
+    int levelPlusOne = 0;
+    int excellentFlags = 0;
     // The item's add option (the potions', scrolls' and seals' effects of ItemAddOption): its two values, and how long
     // it lasts in seconds, which {addOptionDuration} writes as the tooltip does ("1 Hour") only for a line showing it.
     int addOptionValue1 = 0;
@@ -85,7 +93,7 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item);
 // name.
 std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, std::string_view name);
 
-// The value of a built-in placeholder that is a text ({addOptionDuration}), or nothing for another name.
+// The value of a built-in placeholder that is a text ({name}, {addOptionDuration}), or nothing for another name.
 std::optional<std::string> GetItemTooltipText(const ItemTooltipValues& values, std::string_view name);
 
 // The state of that name (Data::Items::GetTooltipStates); false for another name.

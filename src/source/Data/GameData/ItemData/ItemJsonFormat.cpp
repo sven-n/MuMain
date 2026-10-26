@@ -33,6 +33,7 @@ constexpr const char* Levels = "levels";
 constexpr const char* When = "when";
 constexpr const char* Values = "values";
 constexpr const char* LevelValues = "levelValues";
+constexpr const char* NameLines = "nameLines";
 constexpr const char* Colors = "colors";
 constexpr const char* Bold = "bold";
 constexpr const char* After = "after";
@@ -159,65 +160,88 @@ OrderedJson WriteTags(const ItemTagSet& tags)
 
 // One object per line: its text (as a name is written, "@name" for a shared text, "" for a blank line), its conditions
 // unless it has none, its color unless white, and its item levels unless it is shown at every level.
+// One line of a description or of the name lines: its text (as a name is written, "@name" for a shared text, "" for a
+// blank line) when `writeText`, its values, conditions, color when `writeColor`, color rules, bold, levels unless every
+// level, and its place.
+OrderedJson WriteLine(const ItemDescriptionLine& line, bool writeText, bool writeColor)
+{
+    OrderedJson entry;
+    // A blank line is a plain empty text, as it is written by hand.
+    if (writeText)
+    {
+        entry[Keys::Text] = !line.textName.empty() ? OrderedJson("@" + line.textName)
+                            : line.text.IsEmpty()  ? OrderedJson("")
+                                                   : Json::WriteLocalizedString(line.text);
+    }
+    if (!line.values.empty())
+    {
+        OrderedJson values = OrderedJson::object();
+        for (const auto& [placeholder, value] : line.values)
+        {
+            values[placeholder] = value;
+        }
+        entry[Keys::Values] = std::move(values);
+    }
+    if (!line.when.empty())
+    {
+        OrderedJson when = OrderedJson::array();
+        for (const TooltipCondition& condition : line.when)
+        {
+            when.push_back(WriteTooltipCondition(condition));
+        }
+        entry[Keys::When] = std::move(when);
+    }
+    if (writeColor)
+    {
+        entry[Keys::Color] = WriteValue(line.color);
+    }
+    if (!line.colors.empty())
+    {
+        OrderedJson colors = OrderedJson::array();
+        for (const TooltipColorRule& rule : line.colors)
+        {
+            OrderedJson when = OrderedJson::array();
+            for (const TooltipCondition& condition : rule.when)
+            {
+                when.push_back(WriteTooltipCondition(condition));
+            }
+            colors.push_back(OrderedJson{{Keys::When, std::move(when)}, {Keys::Color, WriteValue(rule.color)}});
+        }
+        entry[Keys::Colors] = std::move(colors);
+    }
+    if (line.bold)
+    {
+        entry[Keys::Bold] = true;
+    }
+    if (line.HasLevels())
+    {
+        entry[Keys::Levels] = OrderedJson::array({line.minLevel, line.maxLevel});
+    }
+    if (line.afterOptions)
+    {
+        entry[Keys::After] = Keys::AfterOptions;
+    }
+    return entry;
+}
+
 OrderedJson WriteDescription(const std::vector<ItemDescriptionLine>& description)
 {
     OrderedJson json = OrderedJson::array();
     for (const ItemDescriptionLine& line : description)
     {
-        OrderedJson entry;
-        // A blank line is a plain empty text, as it is written by hand.
-        entry[Keys::Text] = !line.textName.empty() ? OrderedJson("@" + line.textName)
-                            : line.text.IsEmpty()  ? OrderedJson("")
-                                                   : Json::WriteLocalizedString(line.text);
-        if (!line.values.empty())
-        {
-            OrderedJson values = OrderedJson::object();
-            for (const auto& [placeholder, value] : line.values)
-            {
-                values[placeholder] = value;
-            }
-            entry[Keys::Values] = std::move(values);
-        }
-        if (!line.when.empty())
-        {
-            OrderedJson when = OrderedJson::array();
-            for (const TooltipCondition& condition : line.when)
-            {
-                when.push_back(WriteTooltipCondition(condition));
-            }
-            entry[Keys::When] = std::move(when);
-        }
-        if (line.color != ItemTextColor::White)
-        {
-            entry[Keys::Color] = WriteValue(line.color);
-        }
-        if (!line.colors.empty())
-        {
-            OrderedJson colors = OrderedJson::array();
-            for (const TooltipColorRule& rule : line.colors)
-            {
-                OrderedJson when = OrderedJson::array();
-                for (const TooltipCondition& condition : rule.when)
-                {
-                    when.push_back(WriteTooltipCondition(condition));
-                }
-                colors.push_back(OrderedJson{{Keys::When, std::move(when)}, {Keys::Color, WriteValue(rule.color)}});
-            }
-            entry[Keys::Colors] = std::move(colors);
-        }
-        if (line.bold)
-        {
-            entry[Keys::Bold] = true;
-        }
-        if (line.HasLevels())
-        {
-            entry[Keys::Levels] = OrderedJson::array({line.minLevel, line.maxLevel});
-        }
-        if (line.afterOptions)
-        {
-            entry[Keys::After] = Keys::AfterOptions;
-        }
+        OrderedJson entry = WriteLine(line, true, line.color != ItemTextColor::White);
         json.push_back(std::move(entry));
+    }
+    return json;
+}
+
+// The name lines: a description line's fields, the text and the color only when the line has them.
+OrderedJson WriteNameLines(const std::vector<ItemNameLine>& nameLines)
+{
+    OrderedJson json = OrderedJson::array();
+    for (const ItemNameLine& line : nameLines)
+    {
+        json.push_back(WriteLine(line, line.hasText, line.hasColor));
     }
     return json;
 }
@@ -255,6 +279,10 @@ OrderedJson WriteItemObject(const ItemDefinition& definition)
     if (!definition.levelValues.empty())
     {
         item[Keys::LevelValues] = WriteLevelValues(definition.levelValues);
+    }
+    if (!definition.nameLines.empty())
+    {
+        item[Keys::NameLines] = WriteNameLines(definition.nameLines);
     }
 
     const auto writeIfNotDefault = [](OrderedJson& target)
@@ -317,6 +345,8 @@ private:
     bool ReadNames(const OrderedJson& json, LocalizedString& names);
     void ReadTags(const OrderedJson& json, ItemTagSet& tags);
     void ReadDescription(const OrderedJson& json, std::vector<ItemDescriptionLine>& description);
+    void ReadNameLines(const OrderedJson& json, std::vector<ItemNameLine>& nameLines);
+    bool ReadLine(const OrderedJson& entry, const std::string& field, ItemDescriptionLine& line);
     void ReadDescriptionLevels(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line);
     void ReadDescriptionConditions(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line);
     void ReadDescriptionValues(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line);
@@ -477,20 +507,69 @@ void ItemReader::ReadDescription(const OrderedJson& json, std::vector<ItemDescri
         AddIssue(ItemDataIssueSeverity::Error, Keys::Description, "must be a list of lines");
         return;
     }
-
     for (size_t index = 0; index < list->size(); ++index)
     {
         const OrderedJson& entry = (*list)[index];
         const std::string field = std::string(Keys::Description) + "[" + std::to_string(index) + "]";
-        const auto text = entry.is_object() ? entry.find(Keys::Text) : entry.end();
-        if (!entry.is_object() || text == entry.end())
+        if (!entry.is_object() || !entry.contains(Keys::Text))
         {
             AddIssue(ItemDataIssueSeverity::Error, field, "must be an object with a text");
             continue;
         }
-
         ItemDescriptionLine line;
-        bool read = true;
+        if (ReadLine(entry, field, line))
+        {
+            description.push_back(std::move(line));
+        }
+    }
+}
+
+// The name lines, each a description line whose text and color may be left out.
+void ItemReader::ReadNameLines(const OrderedJson& json, std::vector<ItemNameLine>& nameLines)
+{
+    const auto list = json.find(Keys::NameLines);
+    if (list == json.end())
+    {
+        return;
+    }
+    if (!list->is_array())
+    {
+        AddIssue(ItemDataIssueSeverity::Error, Keys::NameLines, "must be a list of name lines");
+        return;
+    }
+    for (size_t index = 0; index < list->size(); ++index)
+    {
+        const OrderedJson& entry = (*list)[index];
+        const std::string field = std::string(Keys::NameLines) + "[" + std::to_string(index) + "]";
+        if (!entry.is_object())
+        {
+            AddIssue(ItemDataIssueSeverity::Error, field, "must be an object");
+            continue;
+        }
+        // The name is always bold and always the first row.
+        for (const char* key : {Keys::Bold, Keys::After})
+        {
+            if (entry.contains(key))
+            {
+                AddIssue(ItemDataIssueSeverity::Error, field + "." + key, "does not apply to a name line");
+            }
+        }
+        ItemNameLine line;
+        line.hasText = entry.contains(Keys::Text);
+        line.hasColor = entry.contains(Keys::Color);
+        if (ReadLine(entry, field, line))
+        {
+            nameLines.push_back(std::move(line));
+        }
+    }
+}
+
+// The fields of one line of a description or of the name lines; false when its text could not be read.
+bool ItemReader::ReadLine(const OrderedJson& entry, const std::string& field, ItemDescriptionLine& line)
+{
+    bool read = true;
+    if (const auto text = entry.find(Keys::Text); text != entry.end())
+    {
         if (text->is_string() && text->get<std::string>().starts_with("@"))
         {
             // A shared text of the tooltip file; ValidateDescriptionTexts checks that it has it. "@" alone names none,
@@ -509,61 +588,55 @@ void ItemReader::ReadDescription(const OrderedJson& json, std::vector<ItemDescri
                                              [this](const std::string& errorField, const std::string& message)
                                              { AddIssue(ItemDataIssueSeverity::Error, errorField, message); });
         }
-        if (const auto values = entry.find(Keys::Values); values != entry.end())
+    }
+    if (const auto values = entry.find(Keys::Values); values != entry.end())
+    {
+        ReadDescriptionValues(*values, field + "." + Keys::Values, line);
+    }
+    if (const auto when = entry.find(Keys::When); when != entry.end())
+    {
+        ReadDescriptionConditions(*when, field + "." + Keys::When, line);
+    }
+    if (const auto color = entry.find(Keys::Color); color != entry.end())
+    {
+        ReadValue(*color, field + "." + Keys::Color, line.color);
+    }
+    if (const auto colors = entry.find(Keys::Colors); colors != entry.end())
+    {
+        ReadDescriptionColors(*colors, field + "." + Keys::Colors, line);
+    }
+    if (const auto after = entry.find(Keys::After); after != entry.end())
+    {
+        if (after->is_string() && after->get<std::string>() == Keys::AfterOptions)
         {
-            ReadDescriptionValues(*values, field + "." + Keys::Values, line);
+            line.afterOptions = true;
         }
-        if (const auto when = entry.find(Keys::When); when != entry.end())
+        else
         {
-            ReadDescriptionConditions(*when, field + "." + Keys::When, line);
-        }
-        const auto color = entry.find(Keys::Color);
-        if (color != entry.end())
-        {
-            ReadValue(*color, field + "." + Keys::Color, line.color);
-        }
-        if (const auto colors = entry.find(Keys::Colors); colors != entry.end())
-        {
-            ReadDescriptionColors(*colors, field + "." + Keys::Colors, line);
-        }
-        if (const auto after = entry.find(Keys::After); after != entry.end())
-        {
-            if (after->is_string() && after->get<std::string>() == Keys::AfterOptions)
-            {
-                line.afterOptions = true;
-            }
-            else
-            {
-                AddIssue(ItemDataIssueSeverity::Error, field + "." + Keys::After,
-                         "must be \"options\": the line is drawn after the item's options instead of with the "
-                         "description");
-            }
-        }
-        if (const auto bold = entry.find(Keys::Bold); bold != entry.end())
-        {
-            if (bold->is_boolean())
-            {
-                line.bold = bold->get<bool>();
-            }
-            else
-            {
-                AddIssue(ItemDataIssueSeverity::Error, field + "." + Keys::Bold, "must be true or false");
-            }
-        }
-        const auto levels = entry.find(Keys::Levels);
-        if (levels != entry.end())
-        {
-            ReadDescriptionLevels(*levels, field + "." + Keys::Levels, line);
-        }
-        WarnAboutUnknownKeys(
-            entry,
-            {Keys::Text, Keys::Values, Keys::When, Keys::Color, Keys::Colors, Keys::Bold, Keys::Levels, Keys::After},
-            field + ".");
-        if (read)
-        {
-            description.push_back(std::move(line));
+            AddIssue(ItemDataIssueSeverity::Error, field + "." + Keys::After,
+                     "must be \"options\": the line is drawn after the item's options instead of with the "
+                     "description");
         }
     }
+    if (const auto bold = entry.find(Keys::Bold); bold != entry.end())
+    {
+        if (bold->is_boolean())
+        {
+            line.bold = bold->get<bool>();
+        }
+        else
+        {
+            AddIssue(ItemDataIssueSeverity::Error, field + "." + Keys::Bold, "must be true or false");
+        }
+    }
+    if (const auto levels = entry.find(Keys::Levels); levels != entry.end())
+    {
+        ReadDescriptionLevels(*levels, field + "." + Keys::Levels, line);
+    }
+    WarnAboutUnknownKeys(
+        entry, {Keys::Text, Keys::Values, Keys::When, Keys::Color, Keys::Colors, Keys::Bold, Keys::Levels, Keys::After},
+        field + ".");
+    return read;
 }
 
 // A placeholder of a description line's text and the value it shows on the line: {"percent":
@@ -577,11 +650,12 @@ void ItemReader::ReadDescriptionValues(const OrderedJson& json, const std::strin
     }
     for (const auto& [placeholder, value] : json.items())
     {
-        // The value is a built-in value's name, "table:" and a table's name, or "skillMana:<skill>".
+        // The value is a built-in value's name, "table:" and a table's name, or a game data value
+        // ("skillMana:<skill>").
         const std::string name = value.is_string() ? value.get<std::string>() : std::string();
         const std::string_view table = GetPlaceholderTable(name);
         if (!Json::IsName(placeholder) || !value.is_string() ||
-            (!Json::IsName(table.empty() ? name : table) && !name.starts_with(SkillManaPrefix)))
+            (!Json::IsName(table.empty() ? name : table) && !HasGameDataValuePrefix(name)))
         {
             AddIssue(ItemDataIssueSeverity::Error, field + "." + placeholder,
                      "must be a placeholder name and the name of the value it shows, both of letters and digits (a "
@@ -832,6 +906,7 @@ std::set<std::string, std::less<>> GetKnownItemKeys()
                                             Keys::Tags,
                                             Keys::Description,
                                             Keys::LevelValues,
+                                            Keys::NameLines,
                                             Keys::Requirements,
                                             Keys::RequirementsByLevel,
                                             Keys::ClassRequirements,
@@ -856,6 +931,7 @@ bool ItemReader::Read(const OrderedJson& json, ItemDefinition& definition)
     ReadTags(json, definition.tags);
     ReadDescription(json, definition.description);
     ReadLevelValues(json, definition.levelValues);
+    ReadNameLines(json, definition.nameLines);
     ReadStats(json, definition);
     ReadRequirements(json, definition);
     ReadRequirementsByLevel(json, definition);

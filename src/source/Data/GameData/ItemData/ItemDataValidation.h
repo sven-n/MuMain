@@ -57,12 +57,12 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
 void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemTooltipFile& tooltips,
                               const std::string& tooltipFile, std::vector<ItemDataIssue>& issues);
 
-// The tables of the item stat file the items use (`statFile` names it in messages), in their descriptions' texts
-// (written in place or shared in `tooltips`) and lines' "values". A table that neither a stat nor a description
-// names is a warning. So is a wing (an item with a wing tier) whose description lines are not those of
-// most of the other wings of its tier, cape tag and group (or, alone there, of its tier and cape tag in the other
-// groups), and a tie among them: the tooltip code chose the wings' lines by the tier, so a new or re-tiered wing
-// that misses them, keeps another tier's, or loses or gains a line, is pointed out.
+// The tables of the item stat file the items use (`statFile` names it in messages), in their description and name
+// lines' texts (written in place or shared in `tooltips`) and "values". A table that neither a stat nor a description
+// names is a warning. So is a wing (an item with a wing tier) whose description lines are not those of most of the
+// other wings of its tier, cape tag and group (or, alone there, of its tier and cape tag in the other groups), and a
+// tie among them: the tooltip code chose the wings' lines by the tier, so a new or re-tiered wing that misses them,
+// keeps another tier's, or loses or gains a line, is pointed out.
 void ValidateTableUses(std::span<const ItemDefinition> items, const ItemStatProfiles& profiles,
                        const ItemTooltipFile& tooltips, const std::string& statFile,
                        std::vector<ItemDataIssue>& issues);

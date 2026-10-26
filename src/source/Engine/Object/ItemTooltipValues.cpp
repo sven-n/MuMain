@@ -154,8 +154,12 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item)
                            (type >= ITEM_WING_OF_STORM && type <= ITEM_WING_OF_DIMENSION) ||
                            (type >= ITEM_CAPE_OF_FIGHTER && type <= ITEM_CAPE_OF_OVERRULE);
     values.timed = item.bPeriodItem;
+    values.hasOptions = item.SpecialNum > 0;
     // No hero yet (the character screen, a tooltip built before the world loads): level 0.
     values.heroLevel = CharacterAttribute != nullptr ? CharacterAttribute->Level : 0;
+    values.name = attribute->Name;
+    values.levelPlusOne = item.Level + 1;
+    values.excellentFlags = item.ExcellentFlags & 63;
     if (g_pItemAddOptioninfo != nullptr)
     {
         const ITEM_ADD_OPTION& addOption = g_pItemAddOptioninfo->GetItemAddOtioninfo(item.Type);
@@ -205,6 +209,8 @@ constexpr NamedValue PlainValues[] = {
     {"durability", &ItemTooltipValues::durability},
     {"maxDurability", &ItemTooltipValues::maxDurability},
     {"heroLevel", &ItemTooltipValues::heroLevel},
+    {"levelPlusOne", &ItemTooltipValues::levelPlusOne},
+    {"excellentFlags", &ItemTooltipValues::excellentFlags},
     {"addOptionValue1", &ItemTooltipValues::addOptionValue1},
     {"addOptionValue2", &ItemTooltipValues::addOptionValue2},
 };
@@ -262,6 +268,10 @@ std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, std::str
 
 std::optional<std::string> GetItemTooltipText(const ItemTooltipValues& values, std::string_view name)
 {
+    if (name == "name")
+    {
+        return values.name != nullptr ? Core::Text::ToUtf8(values.name) : std::string();
+    }
     if (name == "addOptionDuration")
     {
         // Written only here, for the line that shows it: g_StringTime needs the buff system, and every tooltip
@@ -296,6 +306,7 @@ bool GetItemTooltipState(const ItemTooltipValues& values, std::string_view name)
         {"wizardryWeapon", &ItemTooltipValues::wizardryWeapon},
         {"hasDurability", &ItemTooltipValues::hasDurability},
         {"timed", &ItemTooltipValues::timed},
+        {"hasOptions", &ItemTooltipValues::hasOptions},
     };
     for (const Named& named : States)
     {

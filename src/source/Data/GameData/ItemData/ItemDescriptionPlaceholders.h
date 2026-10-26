@@ -31,11 +31,24 @@ std::string MakeTablePlaceholder(std::string_view table);
 // The table a placeholder names, or empty for another placeholder.
 std::string_view GetPlaceholderTable(std::string_view name);
 
-// A value a line's "values" can name besides the built-in values and tables: "skillMana:<skill>", the mana a skill
-// costs (its number, as an item's "skill" writes it). The skill's number, or nothing for another name or a number that
-// is no skill's.
-inline constexpr std::string_view SkillManaPrefix = "skillMana:";
-std::optional<int> ReadSkillManaValue(std::string_view name);
+// The values a line's "values" can name besides the built-in values and tables: values of other game data, by number.
+// "skillMana:<skill>" is the mana a skill costs and "skillName:<skill>" its name (the skill's number, as an item's
+// "skill" writes it); "monsterName:<monster>" is a monster's name (its number in the monster data).
+enum class GameDataValueKind : unsigned char
+{
+    SkillMana,
+    SkillName,
+    MonsterName,
+};
+struct GameDataValue
+{
+    GameDataValueKind kind;
+    int number;
+};
+// Whether the name starts like a game data value ("skillMana:", ...), whatever follows.
+bool HasGameDataValuePrefix(std::string_view name);
+// The value the name means, or nothing for another name or a number that is no skill's or monster's.
+std::optional<GameDataValue> ReadGameDataValue(std::string_view name);
 
 // The placeholders of a text in their order (a repeated one each time), or the first problem of its braces.
 struct PlaceholderScan

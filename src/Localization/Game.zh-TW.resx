@@ -4280,10 +4280,6 @@
     <value>只有魔石擁有者和小隊成員才能進入</value>
     <comment>legacy_id=1179</comment>
   </data>
-  <data name="Kundun mark +%d level" xml:space="preserve">
-    <value>昆頓標誌+%d等級</value>
-    <comment>legacy_id=1180</comment>
-  </data>
   <data name="%d / %d" xml:space="preserve">
     <value>%d / %d</value>
     <comment>legacy_id=1181</comment>
@@ -6747,10 +6743,6 @@
   <data name="Would you like to repair Fenrir's horn?" xml:space="preserve">
     <value>你想修復芬裡爾的號角嗎？</value>
     <comment>legacy_id=1865</comment>
-  </data>
-  <data name="+Illusion" xml:space="preserve">
-    <value>+幻象</value>
-    <comment>legacy_id=1866</comment>
   </data>
   <data name="Added %d of Life" xml:space="preserve">
     <value>新增了生命的%d</value>

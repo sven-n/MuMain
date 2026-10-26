@@ -67,15 +67,43 @@ void ValidateName(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
         check(locale, text);
     }
 }
-// The field of a description line's text in one language, as the item file writes it.
-std::string DescriptionTextField(size_t line, std::string_view locale)
+// A line of an item's description or name lines, and the field the item file writes it at ("description[2]").
+struct TooltipLineOf
 {
-    std::string field = "description[" + std::to_string(line) + "].text";
+    const ItemDescriptionLine* line;
+    std::string field;
+};
+
+// The item's description lines, then its name lines.
+std::vector<TooltipLineOf> TooltipLinesOf(const ItemDefinition& definition)
+{
+    std::vector<TooltipLineOf> lines;
+    for (size_t index = 0; index < definition.description.size(); ++index)
+    {
+        lines.push_back({&definition.description[index], "description[" + std::to_string(index) + "]"});
+    }
+    for (size_t index = 0; index < definition.nameLines.size(); ++index)
+    {
+        lines.push_back({&definition.nameLines[index], "nameLines[" + std::to_string(index) + "]"});
+    }
+    return lines;
+}
+
+// The field of a line's text in one language, as the item file writes it.
+std::string TextField(const std::string& lineField, std::string_view locale)
+{
+    std::string field = lineField + ".text";
     if (locale != LocalizedString::NeutralLocale)
     {
         field += "." + std::string(locale);
     }
     return field;
+}
+
+// The field of a description line's text in one language.
+std::string DescriptionTextField(size_t line, std::string_view locale)
+{
+    return TextField("description[" + std::to_string(line) + "]", locale);
 }
 
 std::string ListPlaceholders(const std::set<std::string>& names)
@@ -92,8 +120,8 @@ std::string ListPlaceholders(const std::set<std::string>& names)
     return list;
 }
 
-// An item's own text (a description line's, a level value's) is written like a name: an English text, and
-// translations under language codes. A blank one has no text in any language.
+// An item's own text (a description line's, a name line's, a level value's) is written like a name: an English text,
+// and translations under language codes. A blank one has no text in any language.
 void ValidateItemText(const ItemDefinition& definition, const LocalizedString& text, const std::string& field,
                       std::vector<ItemDataIssue>& issues)
 {
@@ -115,22 +143,20 @@ void ValidateItemText(const ItemDefinition& definition, const LocalizedString& t
     }
 }
 
-// The braces of a description line's placeholders in every language, and the English text's placeholders in each
-// translation.
-void ValidateDescriptionPlaceholderBraces(const ItemDefinition& definition, size_t index,
-                                          std::vector<ItemDataIssue>& issues)
+// The braces of a line's placeholders in every language, and the English text's placeholders in each translation.
+void ValidateLinePlaceholderBraces(const ItemDefinition& definition, const LocalizedString& text,
+                                   const std::string& lineField, std::vector<ItemDataIssue>& issues)
 {
-    const LocalizedString& text = definition.description[index].text;
     const PlaceholderScan english = ScanPlaceholders(text.GetNeutral());
     const std::set<std::string> englishNames(english.names.begin(), english.names.end());
     if (!english.error.empty())
     {
         AddIssue(issues, ItemDataIssueSeverity::Error, definition, english.error,
-                 DescriptionTextField(index, LocalizedString::NeutralLocale).c_str());
+                 TextField(lineField, LocalizedString::NeutralLocale).c_str());
     }
     for (const auto& [locale, translation] : text.GetTranslations())
     {
-        const std::string field = DescriptionTextField(index, locale);
+        const std::string field = TextField(lineField, locale);
         const PlaceholderScan scan = ScanPlaceholders(translation);
         if (!scan.error.empty())
         {
@@ -150,11 +176,10 @@ void ValidateDescriptionPlaceholderBraces(const ItemDefinition& definition, size
 
 void ValidateDescription(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
 {
-    for (size_t index = 0; index < definition.description.size(); ++index)
+    for (const auto& [line, lineField] : TooltipLinesOf(definition))
     {
-        ValidateItemText(definition, definition.description[index].text,
-                         DescriptionTextField(index, LocalizedString::NeutralLocale), issues);
-        ValidateDescriptionPlaceholderBraces(definition, index, issues);
+        ValidateItemText(definition, line->text, TextField(lineField, LocalizedString::NeutralLocale), issues);
+        ValidateLinePlaceholderBraces(definition, line->text, lineField, issues);
     }
     for (const ItemLevelValues& levelValues : definition.levelValues)
     {
@@ -412,21 +437,23 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
         const auto addError = [&](const std::string& field, const std::string& message)
         { issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number, field, message}); };
         std::set<std::string, std::less<>> shownLevelValues;
-        for (size_t line = 0; line < definition.description.size(); ++line)
+        for (const auto& [line, field] : TooltipLinesOf(definition))
         {
-            const ItemDescriptionLine& entry = definition.description[line];
-            const std::string field = "description[" + std::to_string(line) + "]";
+            const ItemDescriptionLine& entry = *line;
             std::vector<std::string> known = builtIns;
             for (const auto& [placeholder, value] : entry.values)
             {
                 known.push_back(placeholder);
-                if (value.starts_with(SkillManaPrefix))
+                if (HasGameDataValuePrefix(value))
                 {
-                    if (!ReadSkillManaValue(value))
+                    if (!ReadGameDataValue(value))
                     {
                         addError(field + ".values." + placeholder,
-                                 "\"" + value + "\" names no skill: \"skillMana:\" takes a skill's number, below " +
-                                     std::to_string(MAX_SKILLS));
+                                 "\"" + value +
+                                     "\" names no skill or monster: \"skillMana:\" and \"skillName:\" "
+                                     "take a skill's number below " +
+                                     std::to_string(MAX_SKILLS) + ", \"monsterName:\" a monster's below " +
+                                     std::to_string(MAX_MONSTER));
                     }
                 }
                 else if (!isValue(value))
@@ -434,7 +461,8 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
                     const std::string suggestion = suggest(value, builtIns);
                     addError(field + ".values." + placeholder,
                              "\"" + value + "\" is neither a built-in value, a table of " + statFile + " (\"" +
-                                 MakeTablePlaceholder("name") + "\") nor \"skillMana:<skill>\"" +
+                                 MakeTablePlaceholder("name") +
+                                 "\") nor a game data value (\"skillMana:<skill>\", ...)" +
                                  (suggestion.empty() ? "" : "; did you mean \"" + suggestion + "\"?"));
                 }
             }
@@ -504,10 +532,8 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
                                                    statFile + " ({" + MakeTablePlaceholder("name") +
                                                    "}), or one of the line's values or the item's levelValues"
                                              : "did you mean {" + suggestion + "}?";
-                addError(entry.textName.empty() ? DescriptionTextField(line, LocalizedString::NeutralLocale)
-                                                : field + ".text",
-                         (entry.textName.empty() ? "has" : "\"@" + entry.textName + "\" has") +
-                             std::string(" the unknown placeholder {") + name + "}; " + hint);
+                addError(field + ".text", (entry.textName.empty() ? "has" : "\"@" + entry.textName + "\" has") +
+                                              std::string(" the unknown placeholder {") + name + "}; " + hint);
             }
         }
         for (const ItemLevelValues& levelValues : definition.levelValues)
@@ -523,8 +549,8 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
 
 namespace
 {
-// The tables an item's description names: in its texts, written in place or shared in `tooltips` (the English texts;
-// the translations have their placeholders), and in its lines' "values".
+// The tables an item's description and name lines name: in their texts, written in place or shared in `tooltips`
+// (the English texts; the translations have their placeholders), and in their "values".
 std::set<std::string> FindDescriptionTables(const ItemDefinition& definition, const ItemTooltipFile& tooltips)
 {
     std::set<std::string> tables;
@@ -535,13 +561,13 @@ std::set<std::string> FindDescriptionTables(const ItemDefinition& definition, co
             tables.emplace(table);
         }
     };
-    for (const ItemDescriptionLine& line : definition.description)
+    for (const auto& [line, field] : TooltipLinesOf(definition))
     {
-        for (const auto& [placeholder, value] : line.values)
+        for (const auto& [placeholder, value] : line->values)
         {
             add(value);
         }
-        const LocalizedString* text = line.textName.empty() ? &line.text : tooltips.FindText(line.textName);
+        const LocalizedString* text = line->textName.empty() ? &line->text : tooltips.FindText(line->textName);
         if (text == nullptr)
         {
             continue;
@@ -768,11 +794,11 @@ void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemT
                                   "\"@" + name + "\" has placeholders, which a level value cannot have"});
             }
         };
-        for (size_t line = 0; line < definition.description.size(); ++line)
+        for (const auto& [line, field] : TooltipLinesOf(definition))
         {
-            if (!definition.description[line].textName.empty())
+            if (!line->textName.empty())
             {
-                check(definition.description[line].textName, "description[" + std::to_string(line) + "].text", false);
+                check(line->textName, field + ".text", false);
             }
         }
         for (const ItemLevelValues& levelValues : definition.levelValues)
@@ -840,6 +866,10 @@ void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const 
         for (size_t index = 0; index < definition.description.size(); ++index)
         {
             warnAbout(definition.description[index].text, DescriptionTextField(index, LocalizedString::NeutralLocale));
+        }
+        for (size_t index = 0; index < definition.nameLines.size(); ++index)
+        {
+            warnAbout(definition.nameLines[index].text, "nameLines[" + std::to_string(index) + "].text");
         }
         for (const ItemLevelValues& levelValues : definition.levelValues)
         {
