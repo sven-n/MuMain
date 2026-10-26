@@ -36,6 +36,9 @@ name in the font (serve the folder with `python -m http.server`, or open `index.
      the next letter, too thin to cut out.
    - O, U, W, Y, Z enlarge o, u, w, y, z; G adds a spur to C; Q a tail to O.
    - j and J take i and I with a pen descender; x, M and the figures are drawn.
+   - y and q are u and a with a drawn descender: their only sources are squeezed names whose
+     neighbours run into them. o gets its own ellipse as outline (averaged, its small flick made
+     a lumpy shoulder); g and s are smoothed.
    - Accents, Polish and Latin-1 letters, punctuation, and Russian/Ukrainian Cyrillic in its
      italic forms (и is u, п is n, т is m).
    Chinese and Japanese stay on the bundled Noto fallback.
