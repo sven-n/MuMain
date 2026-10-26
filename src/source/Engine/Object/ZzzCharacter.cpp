@@ -79,6 +79,14 @@ namespace
             PlayBuffer(*sound, o);
         }
     }
+
+    // Whether the slot that PlaySlotSound plays for the monster has a sound:
+    // for SubType 9, the second set's slot.
+    bool HasSlotSound(const OBJECT* o, int slot)
+    {
+        const int played = Engine::Object::MonsterSlotSound::SlotFor(slot, o->SubType);
+        return Engine::Object::MonsterSlotSound::Find(Models[o->Type], played).has_value();
+    }
 }
 
 void BuildCharacterScenePickOBB(const OBJECT* o, OBB_t& outOBB)
@@ -431,7 +439,7 @@ void SetPlayerStop(CHARACTER* c)
     {
         if (o->Type != MODEL_PLAYER || (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3))
         {
-            if (Models[o->Type].Sounds[0] != -1)
+            if (HasSlotSound(o, 0))
             {
                 PlaySlotSound(o, rand() % 2);
             }
@@ -786,7 +794,7 @@ void SetPlayerWalk(CHARACTER* c)
         {
             if (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3)
                 PlayBuffer(SOUND_BONE1, o);
-            if (Models[o->Type].Sounds[0] != -1)
+            if (HasSlotSound(o, 0))
             {
                 PlaySlotSound(o, rand() % 2);
             }
@@ -1272,7 +1280,7 @@ void SetPlayerAttack(CHARACTER* c)
             {
                 if (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3)
                     PlayBuffer(static_cast<ESound>(SOUND_BRANDISH_SWORD01 + rand() % 2), o);
-                if (Models[o->Type].Sounds[2] != -1)
+                if (HasSlotSound(o, 2))
                 {
                     PlaySlotSound(o, 2 + rand() % 2);
                 }
@@ -1397,7 +1405,7 @@ void SetPlayerShock(CHARACTER* c, int Hit)
             {
                 if (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3)
                     PlayBuffer(SOUND_BONE1, o);
-                else if (o->Type != MODEL_ASSASSIN && Models[o->Type].Sounds[2] != -1)
+                else if (o->Type != MODEL_ASSASSIN && HasSlotSound(o, 2))
                 {
                     PlaySlotSound(o, 2 + rand() % 2);
                 }
@@ -1527,7 +1535,7 @@ void SetPlayerDie(CHARACTER* c)
         {
             if (o->Type != MODEL_PLAYER || (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3))
             {
-                if (Models[o->Type].Sounds[4] != -1)
+                if (HasSlotSound(o, 4))
                 {
                     PlaySlotSound(o, 4);
                 }
