@@ -12,7 +12,7 @@ import math
 import numpy as np
 from scipy import ndimage
 
-from letters import X_HEIGHT
+from letters import X_HEIGHT, blur
 from shapes import (Pen, body_u, bottom_v, col, empty, erase, extent_u, flip, largest, mirror, pieces,
                     place_left, region, rotate180, row, scale, shift, thicken, top_v)
 
@@ -81,6 +81,31 @@ def filled(mask, radius):
     padded = np.pad(mask, radius)
     closed = ndimage.binary_closing(padded, structure=disc(radius))
     return closed[radius:-radius, radius:-radius]
+
+
+def evened(mask, sigma, radius=0):
+    """Wavy edges evened out: spurs thinner than 2 * radius are cut off, the outline is blurred by
+    sigma px, and notches left are filled. Strokes much wider than sigma keep their width."""
+    if radius:
+        mask = smoothed(mask, radius)
+    return filled(blur(mask.astype(np.float32), sigma) > 0.5, max(radius, JOIN_RADIUS))
+
+
+def pressure_for(width, start, end):
+    """Nib length factor that draws a stroke `width` x-heights wide going from start to end."""
+    direction = math.atan2(end[1] - start[1], end[0] - start[0])
+    across = abs(math.sin(direction - PEN.angle))
+    return (width * X_HEIGHT - PEN.edge - PEN_SPREAD_STEM) / (PEN.length * across)
+
+
+def centre_line(mask, heights):
+    """Points along the rightmost stroke: its middle at each height."""
+    return [(sum(runs_at(mask, v)[-1]) / 2, v) for v in heights]
+
+
+def stroke_width(mask, heights):
+    """Mean width of the rightmost stroke at these heights."""
+    return float(np.mean([right - left for left, right in (runs_at(mask, v)[-1] for v in heights)]))
 
 
 def matched_pen(t):
@@ -210,17 +235,22 @@ def latin(t):
     g["Z"] = enlarge("z", 1.25)
 
     # k: its leg runs on under the next letter as a hairline, like K's; in the images that
-    # hairline is too thin and dark to cut out. The swing starts up the leg so the two flow
-    # together, and stays under the baseline, so it doesn't count as the body for spacing.
+    # hairline is too thin and dark to cut out. Below the arm the leg is drawn with the pen,
+    # along the traced leg's centre line and as wide, and the swing starts inside it, so the
+    # traced and drawn parts meet without a step. The swing stays under the baseline, so it
+    # doesn't count as the body for spacing.
     k_small = t["k"]
     foot_u = extent_u(region(k_small, v1=0.2))[1] - 0.06
-    # The leg's own rounded end is cut off; the swing carries on along the leg's centre line
-    # and forms the bottom.
-    leg_mid = [sum(runs_at(k_small, v)[-1]) / 2 for v in (0.3, 0.16)]
-    leg_cut = erase(k_small, u0=leg_mid[1] - 0.1, v1=0.12)
-    g["k"] = filled(leg_cut | PEN.stroke([(leg_mid[0], 0.3), (leg_mid[1], 0.16), (foot_u - 0.04, 0.02),
-                                          (foot_u + 0.08, -0.08), (foot_u + 0.3, -0.13), (foot_u + 0.48, -0.1),
-                                          (foot_u + 0.58, -0.05)], start=1.0, mid=0.5, end=0.35), JOIN_RADIUS)
+    leg_heights = (0.44, 0.32, 0.2, 0.08)
+    leg_line = centre_line(k_small, leg_heights)
+    leg_pressure = pressure_for(stroke_width(k_small, leg_heights), leg_line[0], leg_line[-1])
+    k_stem = stems(k_small, 0.1, 0.4)[0][1]
+    arm = erase(k_small, u0=k_stem + 0.04, v1=leg_heights[0] - 0.04)
+    leg = PEN.stroke(leg_line, start=leg_pressure, end=leg_pressure)
+    swing = PEN.stroke(leg_line[2:] + [(foot_u - 0.04, 0.02), (foot_u + 0.08, -0.08), (foot_u + 0.3, -0.13),
+                                       (foot_u + 0.48, -0.1), (foot_u + 0.58, -0.05)],
+                       start=leg_pressure, mid=0.5, end=0.35)
+    g["k"] = filled(arm | leg | swing, JOIN_RADIUS)
 
     # x: a thick fall and a thin rise, as the nib makes them.
     g["x"] = (PEN.stroke([(0.0, 0.86), (0.1, 1.0), (0.2, 0.95), (0.5, 0.12), (0.62, 0.0), (0.74, 0.07)],
@@ -247,16 +277,22 @@ def latin(t):
     g["dotlessj"] = region(g["j"], v1=1.1)
     g["J"] = with_tail(t["I"], 1.0, 0.45, 0.48)
 
-    # P and R from B: its stem and upper bowl; R adds K's leg. The bowl is cut off above B's
-    # waist, where the two bowls meet in a point, and closed back to the stem with a hairline.
+    # P and R from B: its stem and upper bowl; R adds K's leg. At B's waist the two bowls meet in
+    # a point, so the bowl's right side is drawn on with the pen from where it is straight, along
+    # its centre line and as wide, and curves back to the stem in a hairline. The traced and drawn
+    # parts meet on the straight, without a step.
     b = t["B"]
     b_stem = stem_right(b) + 0.03
     waist = narrowest(b, 0.35 * cap, 0.65 * cap)
-    upper = erase(b, u0=b_stem, v1=waist + 0.08)
-    bowl_right = runs_at(upper, waist + 0.12)[-1][1]
-    closing = PEN.stroke([(bowl_right - 0.05, waist + 0.14), (bowl_right - 0.16, waist + 0.02),
-                          (b_stem - 0.02, waist - 0.02)], start=0.8, mid=0.6, end=0.6)
-    g["P"] = smoothed(upper | closing, SPIKE_RADIUS)
+    side_heights = (waist + 0.34, waist + 0.26)
+    side = centre_line(b, side_heights)
+    side_pressure = pressure_for(stroke_width(b, side_heights), side[0], side[1])
+    upper = erase(b, u0=b_stem, v1=side_heights[1] + 0.02)
+    right = side[1][0]
+    closing = PEN.stroke(side + [(right - 0.01, waist + 0.16), (right - 0.07, waist + 0.07),
+                                 (right - 0.18, waist + 0.02), (b_stem - 0.02, waist - 0.01)],
+                         start=side_pressure, mid=0.8, end=0.6)
+    g["P"] = smoothed(filled(upper | closing, JOIN_RADIUS), SPIKE_RADIUS)
 
     # F: the only source ("Crywolf Fortress") is squeezed and cut wrongly at its "f F"; the E
     # without its bottom arm is the client's F.
@@ -265,8 +301,9 @@ def latin(t):
     k = t["K"]
     k_stem = stem_right(k) + 0.02
     k_joint = narrowest(k, 0.3 * cap, 0.7 * cap)
-    leg = region(k, u0=k_stem, v1=k_joint)
-    g["R"] = g["P"] | shift(leg, b_stem - k_stem - 0.04, waist - k_joint - 0.02)
+    # The traced leg's wavy edges are evened out; it is thick down to its curled end.
+    leg = evened(region(k, u0=k_stem, v1=k_joint), 7)
+    g["R"] = filled(g["P"] | shift(leg, b_stem - k_stem - 0.04, waist - k_joint - 0.02), JOIN_RADIUS)
 
     # H: K's stem twice and a hairline bar.
     left_stem = region(k, u1=k_stem)
@@ -417,24 +454,38 @@ def cyrillic(t, g, f, m):
     cap = top_v(t["B"])
     for cyr, latin_name in CYRILLIC_FROM_LATIN.items():
         c[cyr] = g[latin_name]
-    # Ь, Ъ, Ы, Б: B's stem and lower bowl. B's left curl belongs to its upper bowl; without that
-    # bowl it hangs loose, so it goes, and the stem gets a plain serif at its top.
+    # Ь, Ъ, Ы, Б: B's stem and lower bowl. Cut at B's waist, the bowl's top ended in the point
+    # where the two bowls met; it is drawn on with the pen instead, a hairline from the stem that
+    # runs into the bowl's right side along its centre line and as wide.
     b = t["B"]
     b_stem_left = stems(b, 0.2 * cap, 0.8 * cap)[0][0]
     b_stem = stem_right(b) + 0.03
     waist = narrowest(b, 0.35 * cap, 0.65 * cap)
-    soft = without_specks(erase(erase(b, u0=b_stem, v0=waist + 0.04), u1=b_stem_left - 0.03))
+    side_heights = (0.7 * waist, 0.6 * waist)
+    side = centre_line(b, side_heights)
+    side_pressure = pressure_for(stroke_width(b, side_heights), side[0], side[1])
+    bowl_top = waist - 0.035
+    bowl_arc = PEN.stroke([(b_stem - 0.04, bowl_top - 0.01), (b_stem + 0.12, bowl_top), (b_stem + 0.3, bowl_top - 0.03),
+                           (side[0][0] - 0.04, side[0][1] + 0.1)] + side,
+                          start=0.8, mid=1.0, end=side_pressure)
+    with_curl = filled(erase(b, u0=b_stem, v0=side_heights[0] - 0.02) | bowl_arc, JOIN_RADIUS)
+    # B's left curl belongs to its upper bowl; without that bowl it hangs loose, so Ь, Ъ and Ы
+    # leave it off (the foot stays), and the stem gets a plain serif at its top. The bowl's
+    # right side bends in a corner in the trace; it is evened out.
+    soft = evened(without_specks(erase(with_curl, u1=b_stem_left - 0.03, v0=0.2)), 9)
     stem_top = top_v(region(soft, u0=b_stem_left, u1=b_stem))
     serif = PEN.stroke([(b_stem_left - 0.12, stem_top - 0.07), (b_stem_left - 0.02, stem_top - 0.02),
                         (b_stem_left + 0.08, stem_top - 0.01)], start=0.4, end=0.8)
     e = t["E"]
-    e_stem_left = stems(e, 0.2 * cap, 0.8 * cap)[0][0]
     e_stem = stem_right(e) + 0.03
-    e_top = shift(erase(region(e, v0=cap - 0.22), u1=e_stem_left - 0.03), b_stem - e_stem)
     c["Ь"] = soft | serif
-    c["Б"] = soft | e_top
-    c["Ъ"] = soft | PEN.stroke([(b_stem_left - 0.36, stem_top - 0.07), (b_stem_left - 0.3, stem_top - 0.02),
-                                (b_stem_left + 0.08, stem_top - 0.01)], start=0.5, end=0.9)
+    # Б keeps B's curl, and E's top arm goes on the stem. The notch between the curl's top and
+    # the stem's serif is filled, so the curl runs into the stem.
+    c["Б"] = filled(evened(with_curl | shift(region(e, v0=cap - 0.22), b_stem - e_stem), 5), 16)
+    # Ъ: E's top arm mirrored is its flag, a bar to the left of the stem ending in a drop.
+    flag = mirror(region(e, u0=e_stem - 0.05, v0=cap - 0.3))
+    flag = shift(flag, b_stem_left + 0.08 - extent_u(flag)[1], stem_top - top_v(flag))
+    c["Ъ"] = filled(soft | flag, JOIN_RADIUS)
     c["Ы"] = c["Ь"] | shift(g["I"], extent_u(soft)[1] + 0.08 - extent_u(g["I"])[0])
     c["Г"] = erase(e, u0=e_stem, v1=cap - 0.22)
     c["Ґ"] = c["Г"] | PEN.stroke([(extent_u(c["Г"])[1] - 0.06, cap - 0.06), (extent_u(c["Г"])[1] - 0.02, cap + 0.22)],
@@ -449,13 +500,7 @@ def cyrillic(t, g, f, m):
     # The italic И is a U shape, like its small letter (и = u); a mirrored chancery N reads as V.
     c["И"] = g["U"]
     c["Й"] = with_mark(c["И"], m["breve"])
-    # Я: R mirrored, without B's curl (it would hang off the right) and without the swash of
-    # K's leg (it would sweep away to the left).
-    p_plain = erase(g["P"], u1=b_stem_left - 0.03)
-    k_joint_ = narrowest(t["K"], 0.3 * cap, 0.7 * cap)
-    k_stem_ = stem_right(t["K"]) + 0.02
-    plain_leg = region(t["K"], u0=k_stem_, v0=0.0, v1=k_joint_)
-    c["Я"] = mirror(without_specks(p_plain | shift(plain_leg, b_stem - k_stem_ - 0.04, waist - k_joint_ - 0.02)))
+    c["Я"] = mirror(g["R"])
     c["З"] = scale(f["three"], 1.0, cap / FIG, thin=1)
     # Ж: K's arms, mirrored on the left, around K's bare stem with plain serifs (K's own top-left
     # serif would hook into the left arms).
@@ -477,12 +522,10 @@ def cyrillic(t, g, f, m):
               | PEN.stroke([(-0.04, 0.02), (0.98, 0.02)], start=0.8, end=0.8)
               | PEN.stroke([(-0.02, 0.02), (-0.06, -0.26)], start=1.0, end=0.5)
               | PEN.stroke([(0.96, 0.02), (1.0, -0.26)], start=1.0, end=0.5))
-    # Л: a leg rising from a curled foot, a bar, and a stem standing on a foot serif.
-    c["Л"] = (PEN.stroke([(-0.06, 0.12), (0.02, 0.0), (0.14, 0.05), (0.28, 0.5), (0.42, 1.1), (0.54, cap)],
-                         start=0.5, mid=1.0, end=0.9)
-              | PEN.stroke([(0.5, cap - 0.01), (0.86, cap)], start=0.8, end=0.8)
-              | PEN.stroke([(0.84, cap), (0.82, 0.5), (0.8, 0.03)])
-              | PEN.stroke([(0.7, 0.0), (0.94, 0.01)], start=0.6, end=0.6))
+    # Л: a leg rising from a small hook, a bar, and a stem.
+    c["Л"] = (PEN.stroke([(0.02, 0.06), (0.18, 0.2), (0.36, 1.1), (0.52, cap)], start=0.5, mid=1.0, end=0.9)
+              | PEN.stroke([(0.5, cap), (0.84, cap)], start=0.8, end=0.8)
+              | PEN.stroke([(0.82, cap), (0.78, 0.0)]))
     h_left = region(k, u1=k_stem)
     c["П"] = h_left | shift(h_left, 0.78) | PEN.stroke([(k_stem - 0.12, cap - 0.03), (k_stem + 0.72, cap - 0.02)],
                                                          start=0.7, end=0.7)
@@ -571,7 +614,7 @@ def cyrillic(t, g, f, m):
 def repaired(t):
     """The traced letters with their sources' faults mended. o, g and s carry bits of their
     neighbours and pixel noise, smoothed off. y and q come only from squeezed names whose
-    neighbours run into them; they are rebuilt from the clean v and a."""
+    neighbours run into them: y's wavy edges are evened out, q is rebuilt from the clean a."""
     r = dict(t)
     for ch, radius in (("o", 8), ("g", 9), ("s", 7)):
         r[ch] = largest(smoothed(t[ch], radius))
@@ -584,20 +627,16 @@ def repaired(t):
     bowl_left = min(runs_at(g, v)[0][0] for v in (0.5, 0.6, 0.7, 0.8))
     r["g"] = largest(smoothed(erase(g, u1=bowl_left - 0.01, v0=0.15, v1=0.85), SPIKE_RADIUS))
 
-    # y and q: a letter with a right stem (u, a), its exit flick taken off and the stem carried
-    # on into a descender: y's curls left, q's ends on a foot.
-    def descending(letter, foot):
-        stem_left, stem_right_ = stems(letter, 0.25, 0.75)[-1]
-        middle = (stem_left + stem_right_) / 2
-        body = erase(letter, u0=stem_right_ + 0.01, v1=0.3)
-        if foot:
-            return (body | PEN.stroke([(middle, 0.5), (middle - 0.02, 0.0), (middle - 0.04, -0.44)])
-                    | PEN.stroke([(middle - 0.17, -0.45), (middle + 0.12, -0.44)], start=0.6, end=0.6))
-        return body | PEN.stroke([(middle, 0.5), (middle - 0.02, 0.0), (middle - 0.07, -0.24),
-                                  (middle - 0.2, -0.42), (middle - 0.38, -0.46), (middle - 0.5, -0.38)],
-                                 start=1.0, mid=1.0, end=0.45)
-    r["y"] = descending(t["u"], foot=False)
-    r["q"] = descending(t["a"], foot=True)
+    # y: its edges are wavier than other letters'; the opening also rounds off the knob at the
+    # top of its right arm.
+    r["y"] = evened(t["y"], 9, radius=10)
+    # q: a, its exit flick taken off and the right stem carried on into a descender on a foot.
+    a = t["a"]
+    stem_left, stem_right_ = stems(a, 0.25, 0.75)[-1]
+    middle = (stem_left + stem_right_) / 2
+    r["q"] = (erase(a, u0=stem_right_ + 0.01, v1=0.3)
+              | PEN.stroke([(middle, 0.5), (middle - 0.02, 0.0), (middle - 0.04, -0.44)])
+              | PEN.stroke([(middle - 0.17, -0.45), (middle + 0.12, -0.44)], start=0.6, end=0.6))
     return r
 
 

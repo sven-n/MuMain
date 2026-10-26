@@ -36,9 +36,11 @@ name in the font (serve the folder with `python -m http.server`, or open `index.
      the next letter, too thin to cut out.
    - O, U, W, Y, Z enlarge o, u, w, y, z; G adds a spur to C; Q a tail to O.
    - j and J take i and I with a pen descender; x, M and the figures are drawn.
-   - y and q are u and a with a drawn descender: their only sources are squeezed names whose
-     neighbours run into them. o gets its own ellipse as outline (averaged, its small flick made
-     a lumpy shoulder); g and s are smoothed.
+   - q is a with a drawn descender: its only source is a squeezed name whose neighbours run into
+     it. y, from squeezed names too, has its wavy edges evened out. o gets its own ellipse as
+     outline (averaged, its small flick made a lumpy shoulder); g and s are smoothed.
+   - Where a drawn stroke carries on a traced one (P's bowl, k's leg, the bowl of Ь), it starts
+     on the traced stroke's centre line and as wide, so the two meet without a step.
    - Accents, Polish and Latin-1 letters, punctuation, and Russian/Ukrainian Cyrillic in its
      italic forms (и is u, п is n, т is m).
    Chinese and Japanese stay on the bundled Noto fallback.
