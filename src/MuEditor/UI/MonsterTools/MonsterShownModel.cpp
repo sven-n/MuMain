@@ -15,19 +15,22 @@
 #include "World/MapInfra/MapManager.h"
 #include "imgui.h"
 
+#include <set>
 #include <string_view>
 
 namespace MuEditor::Monsters::ShownModel
 {
 namespace
 {
-constexpr int NoSlot = -1;
 // How a monster's model names a map object (MonsterModelSlots).
 constexpr std::string_view MapObjectPrefix = "mapObject ";
 
-// The slot asked for last, and the map it was asked on.
-int g_askedSlot = NoSlot;
+// The slots asked for on this map and with this model table: two windows
+// that show two models whose files are missing ask once each, not by turns
+// each frame. A new map or a changed table asks again.
+std::set<int> g_askedSlots;
 int g_askedWorld = -1;
+int g_askedVersion = -1;
 } // namespace
 
 std::optional<int> FindSlot(const Data::Monsters::MonsterDefinition& monster)
@@ -47,12 +50,16 @@ bool IsOpen(int slot)
 
 void OpenWhenShown(int slot)
 {
-    if (IsOpen(slot) || (slot == g_askedSlot && gMapManager.WorldActive == g_askedWorld))
+    if (gMapManager.WorldActive != g_askedWorld || g_MonsterModelDatabase.GetVersion() != g_askedVersion)
+    {
+        g_askedSlots.clear();
+        g_askedWorld = gMapManager.WorldActive;
+        g_askedVersion = g_MonsterModelDatabase.GetVersion();
+    }
+    if (IsOpen(slot) || !g_askedSlots.insert(slot).second)
     {
         return;
     }
-    g_askedSlot = slot;
-    g_askedWorld = gMapManager.WorldActive;
     g_MonsterDataHandler.OpenModelForTools(slot);
 }
 

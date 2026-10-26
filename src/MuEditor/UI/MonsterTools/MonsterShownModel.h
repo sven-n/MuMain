@@ -18,8 +18,8 @@ std::optional<int> FindSlot(const Data::Monsters::MonsterDefinition& monster);
 // The tools show the animations of an open model: a model the game does not
 // have open (no monster of it appeared on this map) is opened between frames
 // (MonsterDataHandler::OpenModelForTools). Called each frame the slot is
-// shown, it asks once per slot and map, so a model whose file is missing is
-// not tried again each frame.
+// shown, it asks once per slot, map and model table, so a model whose file
+// is missing is not tried again each frame.
 void OpenWhenShown(int slot);
 
 // Whether the game has the slot's model open now.

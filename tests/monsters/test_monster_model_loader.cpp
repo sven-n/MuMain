@@ -8,10 +8,12 @@
 
 #include "Audio/DSPlaySound.h"
 #include "Core/Globals/_enum.h"
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDefinition.h"
 #include "Engine/Object/ZzzOpenData.h"
+#include "UI/MonsterTools/MonsterShownModel.h"
 
 #include <doctest.h>
 
@@ -138,4 +140,22 @@ TEST_CASE("Monster models: the monster tools load a sound they play as its model
     // The model then finds it loaded from the same file.
     const LoadChanges opened = scope.Run([] { OpenMonsterModel(MONSTER_MODEL_GRIZZLY); });
     CHECK(CountLoads(opened, number) == 0);
+}
+
+TEST_CASE("Monster models: the monster tools ask once for each model whose file is missing [monsters][models][editor]")
+{
+    LoadScope scope(0);
+    const ChangedFileScope hound("MONSTER_MODEL_HOUND", "Data/Monster/MonsterNobody1.bmd");
+    const ChangedFileScope bull("MONSTER_MODEL_BULL_FIGHTER", "Data/Monster/MonsterNobody2.bmd");
+    // Two windows show the two models by turns, frame after frame.
+    for (int frame = 0; frame < 3; ++frame)
+    {
+        INFO("frame " << frame);
+        MuEditor::Monsters::ShownModel::OpenWhenShown(MODEL_HOUND);
+        MuEditor::Monsters::ShownModel::OpenWhenShown(MODEL_BULL_FIGHTER);
+        // Only the first frame asks; the files stay missing.
+        CHECK(g_MonsterDataHandler.HasModelsToReopen() == (frame == 0));
+        scope.Run([] { g_MonsterDataHandler.ReopenChangedModels(); });
+        CHECK_FALSE(Data::Monsters::ModelLoader::IsOpen(MODEL_HOUND));
+    }
 }
