@@ -1,0 +1,4 @@
+fonttools>=4.50
+numpy>=1.26
+potracer>=0.0.4
+scipy>=1.11
