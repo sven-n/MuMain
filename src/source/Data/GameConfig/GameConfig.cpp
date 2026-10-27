@@ -101,6 +101,7 @@ void GameConfig::Load()
     m_dynamicLights = ReadBool(CfgSectionRender, CfgKeyDynamicLights, CfgDefaultDynamicLights);
     m_lightMood = ReadBool(CfgSectionRender, CfgKeyLightMood, CfgDefaultLightMood);
     m_postProcessing = ReadBool(CfgSectionRender, CfgKeyPostProcessing, CfgDefaultPostProcessing);
+    m_enhancedMovement = ReadBool(CfgSectionRender, CfgKeyEnhancedMovement, CfgDefaultEnhancedMovement);
 
     m_renderBackend = GameConfigValidation::ValidateRenderBackend(
         ReadString(CfgSectionRender, CfgKeyRenderBackend, CfgDefaultRenderBackend), CfgDefaultRenderBackend);
@@ -168,6 +169,7 @@ void GameConfig::Save()
     WriteBool(CfgSectionRender, CfgKeyDynamicLights, m_dynamicLights);
     WriteBool(CfgSectionRender, CfgKeyLightMood, m_lightMood);
     WriteBool(CfgSectionRender, CfgKeyPostProcessing, m_postProcessing);
+    WriteBool(CfgSectionRender, CfgKeyEnhancedMovement, m_enhancedMovement);
     WriteBool(CfgSectionRender, CfgKeyDisableEffects, m_disableEffects);
     WriteBool(CfgSectionRender, CfgKeyDisableParticles, m_disableParticles);
     WriteBool(CfgSectionRender, CfgKeyDisableSkillEffectModels, m_disableSkillEffectModels);

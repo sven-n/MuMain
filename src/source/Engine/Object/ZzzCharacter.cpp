@@ -6,8 +6,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include <array>
-#include <vector>
 #include <execution>
 #include <algorithm>
 #include <span>
@@ -21,7 +19,18 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Models/ZzzBMD.h"
-#include "Render/Models/HeadTurn.h"
+#include "Engine/Object/EnhancedMovement.h"
+#include "Engine/Object/Movement/FlightFeel.h"
+#include "Engine/Object/Movement/Greetings.h"
+#include "Engine/Object/Movement/LookAt.h"
+#include "Engine/Object/Movement/Momentum.h"
+#include "Engine/Object/Movement/MovementBones.h"
+#include "Engine/Object/Movement/PoseFade.h"
+#include "Engine/Object/Movement/SlopeLean.h"
+#include "Engine/Object/Movement/SnapTurn.h"
+#include "Engine/Object/Movement/Stride.h"
+#include "Engine/Object/Movement/TurnLag.h"
+#include "Engine/Object/Movement/Wings.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
@@ -155,7 +164,6 @@ namespace
 #include "GameLogic/Skills/SummonSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Character/CharacterManager.h"
-#include "Core/Utilities/Random.h"
 #include "World/MapInfra/w_MapHeaders.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Social/MonkSystem.h"
@@ -2414,212 +2422,6 @@ bool CheckMonsterSkill(CHARACTER* pCharacter, OBJECT* pObject)
     return GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject);
 }
 
-namespace
-{
-// A stepping action's planted foot moves back at least this much per key (model units); slower ones (flying, riding,
-// standing) don't step and keep their own speed.
-constexpr float MinStepPerKey = 10.f;
-
-struct Stride
-{
-    // How far the planted foot moves back per key (model units), 0 for an action that doesn't step.
-    float stepPerKey = -1.f;
-    // Where in the action (0 to 1 of its cycle) the first foot is furthest forward: two steppings line up by it.
-    float leftForwardAt = 0.f;
-};
-
-// An action's stride (the player's), measured from the skeleton once per action: the faster half of each foot's
-// backward moves between keys, the larger of the two feet.
-const Stride& MeasureStride(int action);
-
-float StepPerKey(int action)
-{
-    return MeasureStride(action).stepPerKey;
-}
-
-const Stride& MeasureStride(int action)
-{
-    BMD& player = Models[MODEL_PLAYER];
-    static std::vector<Stride> measured;
-    static const Stride none{0.f, 0.f};
-    if (action < 0 || action >= player.NumActions || player.BoneFoot[0] < 0 || player.BoneFoot[1] < 0)
-    {
-        return none;
-    }
-    if (measured.size() != static_cast<size_t>(player.NumActions))
-    {
-        measured.assign(player.NumActions, Stride{});
-    }
-    if (measured[action].stepPerKey >= 0.f)
-    {
-        return measured[action];
-    }
-    constexpr int MaxKeys = 64;
-    const int keys = std::min<int>(player.Actions[action].NumAnimationKeys, MaxKeys);
-    float step = 0.f;
-    float leftForwardAt = 0.f;
-    if (keys >= 2)
-    {
-        static float bones[MAX_BONES][3][4];
-        vec3_t noAngle = {0.f, 0.f, 0.f};
-        vec3_t noHead = {0.f, 0.f, 0.f};
-        float forward[2][MaxKeys];
-        for (int key = 0; key < keys; ++key)
-        {
-            player.Animation(bones, static_cast<float>(key), static_cast<float>(key), static_cast<unsigned short>(action),
-                             noAngle, noHead, false, false, nullptr, static_cast<short>(action));
-            for (int foot = 0; foot < 2; ++foot)
-            {
-                // A model faces -Y.
-                forward[foot][key] = -bones[player.BoneFoot[foot]][1][3];
-            }
-        }
-        int frontKey = 0;
-        for (int key = 1; key < keys; ++key)
-        {
-            if (forward[0][key] > forward[0][frontKey])
-            {
-                frontKey = key;
-            }
-        }
-        leftForwardAt = static_cast<float>(frontKey) / static_cast<float>(keys);
-        for (int foot = 0; foot < 2; ++foot)
-        {
-            float back[MaxKeys];
-            int count = 0;
-            for (int key = 0; key < keys; ++key)
-            {
-                const float moved = forward[foot][key] - forward[foot][(key + 1) % keys];
-                if (moved > 0.f)
-                {
-                    back[count++] = moved;
-                }
-            }
-            std::sort(back, back + count);
-            float sum = 0.f;
-            for (int i = count / 2; i < count; ++i)
-            {
-                sum += back[i];
-            }
-            if (count - count / 2 > 0)
-            {
-                step = std::max(step, sum / static_cast<float>(count - count / 2));
-            }
-        }
-    }
-    measured[action] = {step >= MinStepPerKey ? step : 0.f, leftForwardAt};
-    return measured[action];
-}
-} // namespace
-
-namespace
-{
-// A player's switch from one action to the next fades over this long, by where it goes: moving, emotes and rest fade
-// gently; an attack, a skill or a hit fades just enough to lose the snap and still start at once; death and the
-// special transformations don't fade.
-constexpr float PoseFadeSeconds = 0.25f;
-constexpr float PoseFadeBriefSeconds = 0.08f;
-
-bool InRange(int action, int first, int last)
-{
-    return action >= first && action <= last;
-}
-
-float PoseFadeSecondsFor(const OBJECT* o, int from, int to)
-{
-    if (o->Type != MODEL_PLAYER)
-    {
-        return 0.f;
-    }
-    const auto still = [](int action)
-    {
-        return InRange(action, PLAYER_DIE1, PLAYER_DIE2) || action == PLAYER_COME_UP ||
-               InRange(action, PLAYER_JACK_1, PLAYER_CHANGE_UP);
-    };
-    if (still(from) || still(to))
-    {
-        return 0.f;
-    }
-    const bool gentle =
-        InRange(to, PLAYER_STOP_MALE, PLAYER_RUN_RIDE_WEAPON) || InRange(to, PLAYER_FLY_RIDE, PLAYER_RUN_RIDE_HORSE) ||
-        InRange(to, PLAYER_IDLE1_DARKHORSE, PLAYER_IDLE2_DARKHORSE) ||
-        InRange(to, PLAYER_FENRIR_RUN, PLAYER_FENRIR_WALK_ONE_LEFT) ||
-        InRange(to, PLAYER_GREETING1, PLAYER_POINT_DANCE) || InRange(to, PLAYER_SIT1, PLAYER_POSE_FEMALE1);
-    return gentle ? PoseFadeSeconds : PoseFadeBriefSeconds;
-}
-
-// One frame of the fade, before the animation plays: a switch between standing, walking and running starts one
-// (from walking to running, the new steps start where the old ones were in the stride), and a fade under way plays
-// its pose on and wears off.
-void UpdatePoseFade(CHARACTER* c, OBJECT* o, float playSpeed)
-{
-    BMD& b = Models[o->Type];
-    const float seconds = FPS_ANIMATION_FACTOR / static_cast<float>(REFERENCE_FPS);
-    const float fadeSeconds =
-        c->FadeLastAction >= 0 && o->CurrentAction != c->FadeLastAction && c->FadeLastAction < b.NumActions
-            ? PoseFadeSecondsFor(o, c->FadeLastAction, o->CurrentAction)
-            : 0.f;
-    if (fadeSeconds > 0.f)
-    {
-        c->FadeAction = c->FadeLastAction;
-        c->FadeFrame = c->FadeLastFrame;
-        c->FadeLeft = 1.f;
-        c->FadeSeconds = fadeSeconds;
-        const int oldKeys = b.Actions[c->FadeAction].NumAnimationKeys;
-        const int newKeys = b.Actions[o->CurrentAction].NumAnimationKeys;
-        const Stride& from = MeasureStride(c->FadeAction);
-        const Stride& to = MeasureStride(o->CurrentAction);
-        if (from.stepPerKey > 0.f && to.stepPerKey > 0.f && oldKeys > 0 && newKeys > 0)
-        {
-            // The same point of the stride by the feet: as far past the first foot's furthest forward.
-            const float phase = c->FadeLastFrame / static_cast<float>(oldKeys) - from.leftForwardAt;
-            const float wrapped = phase - std::floor(phase);
-            const float newPhase = wrapped + to.leftForwardAt;
-            o->AnimationFrame = (newPhase - std::floor(newPhase)) * static_cast<float>(newKeys);
-        }
-        // The fade does the blending: no blend from the last action's key as well.
-        o->PriorAction = o->CurrentAction;
-        o->PriorAnimationFrame = static_cast<float>(static_cast<int>(o->AnimationFrame));
-    }
-    else if (o->CurrentAction != c->FadeLastAction)
-    {
-        // A switch that doesn't fade (death, a transformation) ends a fade under way.
-        c->FadeLeft = 0.f;
-    }
-    else if (c->FadeLeft > 0.f && c->FadeAction >= 0 && c->FadeSeconds > 0.f)
-    {
-        c->FadeLeft = std::max(0.f, c->FadeLeft - seconds / c->FadeSeconds);
-        const Action_t& faded = b.Actions[c->FadeAction];
-        const int fadeKeys = faded.NumAnimationKeys;
-        const int keys = b.Actions[o->CurrentAction].NumAnimationKeys;
-        if (fadeKeys > 0 && keys > 0)
-        {
-            // Two strides keep one pace through the stride, as the new action plays; anything else plays on at its
-            // own speed, and an action played once holds its end.
-            const bool strides = StepPerKey(c->FadeAction) > 0.f && StepPerKey(o->CurrentAction) > 0.f;
-            const float advance =
-                strides ? playSpeed * static_cast<float>(fadeKeys) / static_cast<float>(keys) : faded.PlaySpeed;
-            const float frame = c->FadeFrame + advance * FPS_ANIMATION_FACTOR;
-            c->FadeFrame = faded.Loop ? std::min(frame, static_cast<float>(fadeKeys) - 0.01f)
-                                      : std::fmod(frame, static_cast<float>(fadeKeys));
-        }
-    }
-}
-} // namespace
-
-const PoseBlend* CharacterPoseFade(const CHARACTER* c, PoseBlend& out)
-{
-    if (c == nullptr || c->FadeLeft <= 0.f || c->FadeAction < 0)
-    {
-        return nullptr;
-    }
-    out.Action = static_cast<unsigned short>(c->FadeAction);
-    out.Frame = c->FadeFrame;
-    // Eased: it leaves gently and lets go gently.
-    out.Weight = c->FadeLeft * c->FadeLeft * (3.f - 2.f * c->FadeLeft);
-    return &out;
-}
-
 bool CharacterAnimation(CHARACTER* c, OBJECT* o)
 {
     bool Play;
@@ -2671,18 +2473,19 @@ bool CharacterAnimation(CHARACTER* c, OBJECT* o)
         }
         // Walking or running, the feet keep to the ground: the steps play as fast as the character really moves
         // (CharacterMoveSpeed: its gear, mount, buffs and freezes), for the stride the action takes (StepPerKey).
-        if (o->Type == MODEL_PLAYER && c->Movement && o->Scale > 0.f)
+        const bool enhancedMovement = Engine::Characters::EnhancedMovementEnabled();
+        if (enhancedMovement && o->Type == MODEL_PLAYER && c->Movement && o->Scale > 0.f)
         {
-            const float step = StepPerKey(o->CurrentAction);
+            const float step = Engine::Characters::StepPerKey(o->CurrentAction);
             if (step > 0.f)
             {
                 // (Slowing to a stop or speeding up, at the share of its speed it has: StepMomentum.)
-                PlaySpeed = CharacterMoveSpeed(c) * c->MomentumPace / (step * o->Scale);
+                PlaySpeed = CharacterMoveSpeed(c) * c->Motion.MomentumPace / (step * o->Scale);
             }
         }
         // Hovering in place, the body's breathing keeps the wings' beat: one of its cycles per wing beat (at their
         // speed, RenderCharacterBackItem's), instead of about one and a half.
-        if (o->Type == MODEL_PLAYER &&
+        if (enhancedMovement && o->Type == MODEL_PLAYER &&
             (o->CurrentAction == PLAYER_STOP_FLY || o->CurrentAction == PLAYER_STOP_FLY_CROSSBOW) &&
             c->Wing.Type >= 0 && Models[c->Wing.Type].NumActions > 0)
         {
@@ -2726,10 +2529,10 @@ bool CharacterAnimation(CHARACTER* c, OBJECT* o)
         return false;
     }
 
-    UpdatePoseFade(c, o, PlaySpeed);
+    Engine::Characters::UpdatePoseFade(c, o, PlaySpeed);
     Play = b->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, PlaySpeed, o->Position, o->Angle);
-    c->FadeLastAction = o->CurrentAction;
-    c->FadeLastFrame = o->AnimationFrame;
+    c->Motion.FadeLastAction = o->CurrentAction;
+    c->Motion.FadeLastFrame = o->AnimationFrame;
     if (o->CurrentAction == PLAYER_CHANGE_UP)
     {
         if (Play == false)
@@ -5759,18 +5562,6 @@ void MonsterMoveSandSmoke(OBJECT* o)
     }
 }
 
-namespace
-{
-// What a head looks at: enemies this many tiles away at most, NPCs and other players (and an NPC the hero) this many,
-// a monster its target this many, within this many degrees of where the character faces, with no wall between. A player looks
-// around for another this often, and otherwise keeps the one it looks at while that stays in sight.
-constexpr int LookEnemyTiles = 6;
-constexpr int LookNearbyTiles = 4;
-constexpr int LookMonsterTargetTiles = 8;
-constexpr float LookViewDegrees = 90.f;
-constexpr float LookScanSeconds = 0.25f;
-} // namespace
-
 void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
 {
     BMD* b = &Models[o->Type];
@@ -5808,10 +5599,16 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
             && !g_isCharacterBuff(o, eBuff_Def_up_Ourforces))
         {
             // Someone to look at (UpdateLookAt) comes before the idle glances; the hero's head is MoveHero's.
-            const CHARACTER* lookAt = c != Hero && c->Dead == 0 ? UpdateLookAt(c) : nullptr;
+            const bool enhancedMovement = Engine::Characters::EnhancedMovementEnabled();
+            if (!enhancedMovement)
+            {
+                c->Motion.LookTarget = -1;
+            }
+            const CHARACTER* lookAt =
+                enhancedMovement && c != Hero && c->Dead == 0 ? Engine::Characters::UpdateLookAt(c) : nullptr;
             if (lookAt != nullptr)
             {
-                LookTowards(o, lookAt, LookViewDegrees);
+                Engine::Characters::LookTowards(o, lookAt, Engine::Characters::LookViewDegrees);
             }
             else
             {
@@ -5826,9 +5623,9 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
                 }
             }
 
-            RemoveNod(c);
+            Engine::Characters::RemoveNod(c);
             SmoothHeadAngles(o->HeadAngle, o->HeadTargetAngle, FPS_ANIMATION_FACTOR);
-            UpdateNod(c);
+            Engine::Characters::UpdateNod(c);
         }
 
         vec3_t p, Position;
@@ -6573,43 +6370,6 @@ void MoveCharacterPosition(CHARACTER* c)
     MoveCharacterPosition(c, c->Object.Angle[2]);
 }
 
-namespace
-{
-// A walking character turning back by more than this slows to a stop over about this long, the way it was going, and
-// speeds up from a stop (from rest too) over about this long. Short, as the server times the walk tile by tile.
-constexpr float MomentumTurnBackDegrees = 90.f;
-constexpr float MomentumStopSeconds = 0.12f;
-constexpr float MomentumStartSeconds = 0.15f;
-// A gap this long between steps (in world milliseconds) means the character stood still in between.
-constexpr double MomentumRestMilliseconds = 100.0;
-} // namespace
-
-float StepMomentum(CHARACTER* c, float& heading)
-{
-    const float seconds = FPS_ANIMATION_FACTOR / static_cast<float>(REFERENCE_FPS);
-    if (c->MomentumAt < 0.0 || WorldTime - c->MomentumAt > MomentumRestMilliseconds || std::isnan(c->MomentumHeading))
-    {
-        // From rest: the new way, from no speed.
-        c->MomentumHeading = heading;
-        c->MomentumPace = 0.f;
-    }
-    c->MomentumAt = WorldTime;
-    const bool turningBack = std::fabs(FarAngle(c->MomentumHeading, heading, false)) > MomentumTurnBackDegrees;
-    if (turningBack && c->MomentumPace > 0.f)
-    {
-        // Still going the old way, slowing down.
-        c->MomentumPace = std::max(0.f, c->MomentumPace - seconds / MomentumStopSeconds);
-    }
-    else
-    {
-        c->MomentumHeading = heading;
-        c->MomentumPace = std::min(1.f, c->MomentumPace + seconds / MomentumStartSeconds);
-    }
-    heading = c->MomentumHeading;
-    // Eased: it slows into the stop and out of the start.
-    return c->MomentumPace * c->MomentumPace * (3.f - 2.f * c->MomentumPace);
-}
-
 void MoveCharacterPosition(CHARACTER* c, float heading, float pace)
 {
     OBJECT* o = &c->Object;
@@ -6638,763 +6398,7 @@ void MoveCharacterPosition(CHARACTER* c, float heading, float pace)
     }
     o->Timer += 0.15f * FPS_ANIMATION_FACTOR;
     // The height starts over from the terrain: no flight hover in it yet (UpdateFlightFeel adds it back).
-    c->FlightHoverApplied = 0.f;
-}
-
-namespace
-{
-// How a winged player flies (the fly animations, moving or hovering, outside the safe zones): it banks into a turn, up
-// to this many degrees at the turn's top speed, and drifts slowly up and down (above its usual height) by this much,
-// this many times a second, fading in and out over about this long.
-constexpr float FlightMaxBankDegrees = 8.f;
-constexpr float FlightHoverHeight = 30.f;
-constexpr float FlightHoverCyclesPerSecond = 0.15f;
-constexpr float FlightEaseSeconds = 0.25f;
-// The turning speed that banks fully: a walk's turns are short and rarely reach WalkTurnDegreesPerSecond.
-constexpr float FlightFullBankTurnSpeed = 300.f;
-// The bank pivots this high above the feet (about the waist), as a flying body banks about its middle.
-constexpr float FlightBankPivotHeight = 65.f;
-
-// A mount leans into a turn up to this many degrees, and its rider this share of that, to stay balanced on it.
-constexpr float MountMaxLeanDegrees = 10.f;
-constexpr float MountRiderLeanShare = 0.5f;
-
-bool IsRiding(const CHARACTER* c)
-{
-    // In a safe zone a mount is put away and its rider walks.
-    return c->Object.Type == MODEL_PLAYER && !c->SafeZone &&
-           (c->Helper.Type == MODEL_HORN_OF_UNIRIA || c->Helper.Type == MODEL_HORN_OF_DINORANT ||
-            c->Helper.Type == MODEL_DARK_HORSE_ITEM || c->Helper.Type == MODEL_HORN_OF_FENRIR);
-}
-
-bool IsFlying(const OBJECT* o)
-{
-    // Flying on, or hovering in place.
-    return o->Type == MODEL_PLAYER &&
-           (o->CurrentAction == PLAYER_FLY || o->CurrentAction == PLAYER_FLY_CROSSBOW ||
-            o->CurrentAction == PLAYER_STOP_FLY || o->CurrentAction == PLAYER_STOP_FLY_CROSSBOW);
-}
-} // namespace
-
-float MountLeanFromRider(float riderLean)
-{
-    return riderLean / MountRiderLeanShare;
-}
-
-void UpdateFlightFeel(CHARACTER* c)
-{
-    OBJECT* o = &c->Object;
-    const bool flying = IsFlying(o);
-    const bool riding = !flying && IsRiding(c);
-    if (!flying && !riding && c->FlightBank == 0.f && c->FlightHover == 0.f && c->FlightHoverApplied == 0.f &&
-        c->FlightPivotShift[0] == 0.f && c->FlightPivotShift[1] == 0.f)
-    {
-        return;
-    }
-    const float seconds = FPS_ANIMATION_FACTOR / static_cast<float>(REFERENCE_FPS);
-    // Eased toward its target over about FlightEaseSeconds, the same at any frame rate.
-    const float ease = seconds > 0.f ? 1.f - std::exp(-seconds / FlightEaseSeconds) : 0.f;
-
-    // Bank: rolled into the turn by how fast it turns (TurnSpeed), the wings with it (they hang from the root).
-    // Riding, the rider leans a share of the mount's lean (MoveMount gives the mount all of it).
-    // A mount leans only on the move: standing, it straightens up (TurnSpeed can be left over from the last step).
-    const float maxBank = flying               ? FlightMaxBankDegrees
-                          : riding && c->Movement ? MountMaxLeanDegrees * MountRiderLeanShare
-                                                  : 0.f;
-    const float wantedBank = std::clamp(c->TurnSpeed / FlightFullBankTurnSpeed, -1.f, 1.f) * maxBank;
-    const float bank = std::fabs(wantedBank - c->FlightBank) < 0.01f && wantedBank == 0.f
-                           ? 0.f
-                           : c->FlightBank + (wantedBank - c->FlightBank) * ease;
-    o->Angle[1] += bank - c->FlightBank;
-    c->FlightBank = bank;
-    // The model rolls about its feet; moving it back by how far the roll carried the waist makes it pivot there.
-    // (A mount and its rider lean about where they stand, as a horse banks at the hooves.)
-    float shift[2] = {0.f, 0.f};
-    if (bank != 0.f && flying)
-    {
-        const vec3_t waist = {0.f, 0.f, FlightBankPivotHeight};
-        const vec3_t rolled = {o->Angle[0], o->Angle[1], o->Angle[2]};
-        const vec3_t upright = {o->Angle[0], o->Angle[1] - bank, o->Angle[2]};
-        float matrix[3][4];
-        vec3_t withBank, withoutBank;
-        AngleMatrix(rolled, matrix);
-        VectorRotate(waist, matrix, withBank);
-        AngleMatrix(upright, matrix);
-        VectorRotate(waist, matrix, withoutBank);
-        shift[0] = withoutBank[0] - withBank[0];
-        shift[1] = withoutBank[1] - withBank[1];
-    }
-    o->Position[0] += shift[0] - c->FlightPivotShift[0];
-    o->Position[1] += shift[1] - c->FlightPivotShift[1];
-    c->FlightPivotShift[0] = shift[0];
-    c->FlightPivotShift[1] = shift[1];
-
-    // Hover: faded in while it flies.
-    const float wantedHover = flying ? 1.f : 0.f;
-    c->FlightHover = std::fabs(wantedHover - c->FlightHover) < 0.01f
-                         ? wantedHover
-                         : c->FlightHover + (wantedHover - c->FlightHover) * ease;
-    // Up and back down once a cycle, each character on its own beat (its key), easing in and out at the top and the
-    // bottom (smootherstep, which lingers there longer than a sine), and only upward from its usual height, which near
-    // the ground is just above it.
-    const float phase = static_cast<float>(c->Key) * 0.37f;
-    const float cycle = static_cast<float>(WorldTime) * 0.001f * FlightHoverCyclesPerSecond + phase;
-    const float rise = 1.f - std::fabs(2.f * (cycle - std::floor(cycle)) - 1.f); // 0 to 1 and back, linearly
-    const float eased = rise * rise * rise * (rise * (rise * 6.f - 15.f) + 10.f);
-    const float height = c->FlightHover * FlightHoverHeight * eased;
-    o->Position[2] += height - c->FlightHoverApplied;
-    c->FlightHoverApplied = height;
-}
-
-namespace
-{
-// The wings and the ponytail trail behind a turn on a spring: they swing back this many times a second, damped like
-// this (a little overshoot as they settle), never more than this many degrees behind.
-constexpr float TurnLagFrequency = 2.5f;
-constexpr float TurnLagDamping = 0.6f;
-constexpr float TurnLagMaxDegrees = 12.f;
-} // namespace
-
-void UpdateTurnLag(CHARACTER* c)
-{
-    const OBJECT* o = &c->Object;
-    if (o->Type != MODEL_PLAYER)
-    {
-        c->TurnLag = 0.f;
-        c->TurnLagSpeed = 0.f;
-        c->TurnLagFacing = NAN;
-        return;
-    }
-    const float facing = o->Angle[2];
-    if (std::isnan(c->TurnLagFacing))
-    {
-        c->TurnLagFacing = facing;
-    }
-    // The body turned by this much since the last frame: the wings don't, at first.
-    const float turned = FarAngle(c->TurnLagFacing, facing, false);
-    c->TurnLagFacing = facing;
-    if (turned == 0.f && c->TurnLag == 0.f && c->TurnLagSpeed == 0.f)
-    {
-        return;
-    }
-    c->TurnLag -= turned;
-    if (std::fabs(c->TurnLag) > TurnLagMaxDegrees)
-    {
-        c->TurnLag = std::copysign(TurnLagMaxDegrees, c->TurnLag);
-        if ((c->TurnLagSpeed > 0.f) == (c->TurnLag > 0.f))
-        {
-            c->TurnLagSpeed = 0.f;
-        }
-    }
-    const float seconds = FPS_ANIMATION_FACTOR / static_cast<float>(REFERENCE_FPS);
-    StepSpring(c->TurnLag, c->TurnLagSpeed, seconds, TurnLagFrequency, TurnLagDamping);
-    // Settled: nothing to do until the next turn.
-    if (std::fabs(c->TurnLag) < 0.01f && std::fabs(c->TurnLagSpeed) < 0.1f)
-    {
-        c->TurnLag = 0.f;
-        c->TurnLagSpeed = 0.f;
-    }
-}
-
-namespace
-{
-bool InSight(const CHARACTER* c, const CHARACTER* target, int tiles)
-{
-    if (target == c || !target->Object.Live || target->Dead != 0)
-    {
-        return false;
-    }
-    const int dx = target->PositionX - c->PositionX;
-    const int dy = target->PositionY - c->PositionY;
-    const int steps = std::max(std::abs(dx), std::abs(dy));
-    if (steps > tiles)
-    {
-        return false;
-    }
-    const float toTarget = CreateAngle2D(c->Object.Position, target->Object.Position);
-    if (FarAngle(c->Object.Angle[2], toTarget) >= LookViewDegrees)
-    {
-        return false;
-    }
-    // A wall (a tile no one walks through) on the line between them blocks the view.
-    for (int step = 1; step < steps; ++step)
-    {
-        const int x = c->PositionX + (dx * step + (dx > 0 ? steps / 2 : -steps / 2)) / steps;
-        const int y = c->PositionY + (dy * step + (dy > 0 ? steps / 2 : -steps / 2)) / steps;
-        if ((TerrainWall[TERRAIN_INDEX(x, y)] & TW_NOMOVE) != 0)
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
-const CHARACTER* CharacterAt(int index)
-{
-    return index >= 0 && index < MAX_CHARACTERS_CLIENT ? &CharactersClient[index] : nullptr;
-}
-
-int LookTiles(const CHARACTER* target)
-{
-    return target->Object.Kind == KIND_MONSTER ? LookEnemyTiles : LookNearbyTiles;
-}
-
-// The nearest character of `kind` in sight, or -1.
-int NearestInSight(const CHARACTER* c, int kind, int tiles)
-{
-    int nearest = -1;
-    int nearestSteps = tiles + 1;
-    for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
-    {
-        const CHARACTER* other = &CharactersClient[i];
-        if (other->Object.Kind != kind || !other->Object.Live)
-        {
-            continue;
-        }
-        const int steps = std::max(std::abs(other->PositionX - c->PositionX), std::abs(other->PositionY - c->PositionY));
-        if (steps < nearestSteps && InSight(c, other, tiles))
-        {
-            nearest = i;
-            nearestSteps = steps;
-        }
-    }
-    return nearest;
-}
-
-// A player's pick: what it attacks, then the one it looks at while that's still the kind it would pick, then the
-// nearest of that kind. In a combat zone enemies come first; then NPCs, then other players passing by.
-int PickPlayerLook(const CHARACTER* c)
-{
-    const bool combat = !c->SafeZone;
-    if (combat)
-    {
-        const CHARACTER* attacked = CharacterAt(c->TargetCharacter);
-        if (attacked != nullptr && attacked->Object.Kind == KIND_MONSTER && InSight(c, attacked, LookEnemyTiles))
-        {
-            return c->TargetCharacter;
-        }
-    }
-    const CHARACTER* current = CharacterAt(c->LookTarget);
-    const bool keepCurrent = current != nullptr && InSight(c, current, LookTiles(current));
-    if (combat)
-    {
-        if (keepCurrent && current->Object.Kind == KIND_MONSTER)
-        {
-            return c->LookTarget;
-        }
-        const int enemy = NearestInSight(c, KIND_MONSTER, LookEnemyTiles);
-        if (enemy >= 0)
-        {
-            return enemy;
-        }
-    }
-    if (keepCurrent && current->Object.Kind == KIND_NPC)
-    {
-        return c->LookTarget;
-    }
-    const int npc = NearestInSight(c, KIND_NPC, LookNearbyTiles);
-    if (npc >= 0)
-    {
-        return npc;
-    }
-    if (keepCurrent && current->Object.Kind == KIND_PLAYER)
-    {
-        return c->LookTarget;
-    }
-    return NearestInSight(c, KIND_PLAYER, LookNearbyTiles);
-}
-} // namespace
-
-const CHARACTER* UpdateLookAt(CHARACTER* c)
-{
-    const OBJECT* o = &c->Object;
-    if (o->Kind == KIND_MONSTER)
-    {
-        // A monster looks at its target, while it's in sight.
-        const CHARACTER* target = CharacterAt(c->TargetCharacter);
-        c->LookTarget = target != nullptr && InSight(c, target, LookMonsterTargetTiles) ? c->TargetCharacter : -1;
-        return CharacterAt(c->LookTarget);
-    }
-    if (o->Kind == KIND_NPC)
-    {
-        // An NPC looks at the hero passing by.
-        c->LookTarget = Hero != nullptr && InSight(c, Hero, LookNearbyTiles) ? static_cast<short>(Hero - CharactersClient)
-                                                                           : -1;
-        return CharacterAt(c->LookTarget);
-    }
-    if (o->Kind != KIND_PLAYER)
-    {
-        c->LookTarget = -1;
-        return nullptr;
-    }
-    // A player looks around only now and then (each on its own beat): in between it keeps the one it looks at, while
-    // that stays in sight.
-    c->LookScanSeconds -= FPS_ANIMATION_FACTOR / static_cast<float>(REFERENCE_FPS);
-    if (c->LookScanSeconds <= 0.f)
-    {
-        c->LookScanSeconds = LookScanSeconds + static_cast<float>(c->Key % 8) * (LookScanSeconds / 8.f);
-        c->LookTarget = static_cast<short>(PickPlayerLook(c));
-    }
-    else if (const CHARACTER* current = CharacterAt(c->LookTarget);
-             current != nullptr && !InSight(c, current, LookTiles(current)))
-    {
-        c->LookTarget = -1;
-    }
-    return CharacterAt(c->LookTarget);
-}
-
-void LookTowards(OBJECT* o, const CHARACTER* target, float maxDegrees)
-{
-    const OBJECT* t = &target->Object;
-    const float yaw =
-        std::clamp(FarAngle(CreateAngle2D(o->Position, t->Position), o->Angle[2], false), -maxDegrees, maxDegrees);
-    o->HeadTargetAngle[0] = yaw < 0.f ? yaw + 360.f : yaw;
-    // Up or down toward its middle, from about the eyes, as LookAtTarget.
-    const float pitch = (t->Position[2] - (o->Position[2] + 50.f)) * 0.2f;
-    o->HeadTargetAngle[1] = pitch < 0.f ? pitch + 360.f : pitch;
-}
-
-namespace
-{
-// A facing turned this far in one frame is a sudden turn (walking and standing turns ease and never go this fast); it's
-// drawn catching up as fast as this, eased, which turns half around in about this long.
-constexpr float SnapTurnDegrees = 30.f;
-constexpr float SnapTurnSeconds = 0.15f;
-// A half turn (180 degrees) eased in and out in SnapTurnSeconds: speeding up for half the time and slowing down for
-// the other half, d = a t^2 / 4.
-constexpr float SnapTurnAcceleration = 4.f * 180.f / (SnapTurnSeconds * SnapTurnSeconds);
-constexpr float SnapTurnMaxSpeed = SnapTurnAcceleration * SnapTurnSeconds / 2.f;
-} // namespace
-
-namespace
-{
-// The slope is the terrain's rise between this far ahead of the character and this far behind it, along its facing.
-// A mount follows it this much (a little more than the ground itself, so the game's gentle slopes show), up to this
-// many degrees; a player walking leans this share of it into a climb, up to this many. Both ease in and out over
-// about this long.
-constexpr float SlopeProbeDistance = 60.f;
-constexpr float SlopeMountShare = 1.5f;
-constexpr float SlopeMountMaxDegrees = 25.f;
-constexpr float SlopeWalkShare = 0.5f;
-constexpr float SlopeWalkMaxDegrees = 10.f;
-constexpr float SlopeEaseSeconds = 0.25f;
-} // namespace
-
-void UpdateSlopeLean(CHARACTER* c)
-{
-    OBJECT* o = &c->Object;
-    const bool riding = IsRiding(c);
-    const bool walking = c->Movement && !IsFlying(o);
-    float wanted = 0.f;
-    if (o->Type == MODEL_PLAYER && (riding || walking))
-    {
-        // Ahead is where it faces: a model faces -Y before its facing turns it.
-        const float facing = o->Angle[2] * (Q_PI / 180.f);
-        const float aheadX = std::sin(facing) * SlopeProbeDistance;
-        const float aheadY = -std::cos(facing) * SlopeProbeDistance;
-        const float rise = RequestTerrainHeight(o->Position[0] + aheadX, o->Position[1] + aheadY) -
-                           RequestTerrainHeight(o->Position[0] - aheadX, o->Position[1] - aheadY);
-        const float slope = std::atan2(rise, 2.f * SlopeProbeDistance) * (180.f / Q_PI);
-        // A positive pitch tips the nose down: a mount climbing tips it up (follows the slope), a walker climbing
-        // leans forward into it.
-        wanted = riding ? std::clamp(-slope * SlopeMountShare, -SlopeMountMaxDegrees, SlopeMountMaxDegrees)
-                        : std::clamp(slope * SlopeWalkShare, -SlopeWalkMaxDegrees, SlopeWalkMaxDegrees);
-    }
-    if (wanted == 0.f && c->SlopePitch == 0.f)
-    {
-        return;
-    }
-    const float seconds = FPS_ANIMATION_FACTOR / static_cast<float>(REFERENCE_FPS);
-    const float ease = seconds > 0.f ? 1.f - std::exp(-seconds / SlopeEaseSeconds) : 0.f;
-    const float pitch =
-        std::fabs(wanted - c->SlopePitch) < 0.01f ? wanted : c->SlopePitch + (wanted - c->SlopePitch) * ease;
-    o->Angle[0] += pitch - c->SlopePitch;
-    c->SlopePitch = pitch;
-}
-
-namespace
-{
-// A foot goes at most this far up or down to the ground under it, and the body down at most this far for it (world
-// units); a leg straightens to at most this share of its length, so a knee never locks.
-constexpr float FootMaxReach = 40.f;
-constexpr float FootMaxStretch = 0.995f;
-
-struct Leg
-{
-    int thigh = -1;
-    int calf = -1;
-    int foot = -1;
-};
-
-// The player skeleton's legs, by name, found once.
-const std::array<Leg, 2>& PlayerLegs()
-{
-    static const std::array<Leg, 2> legs = []
-    {
-        const BMD& player = Models[MODEL_PLAYER];
-        const auto find = [&](const char* name)
-        {
-            for (int i = 0; i < player.NumBones; ++i)
-            {
-                if (!player.Bones[i].Dummy && strcmp(player.Bones[i].Name, name) == 0)
-                {
-                    return i;
-                }
-            }
-            return -1;
-        };
-        return std::array<Leg, 2>{Leg{find("Bip01 L Thigh"), find("Bip01 L Calf"), find("Bip01 L Foot")},
-                                  Leg{find("Bip01 R Thigh"), find("Bip01 R Calf"), find("Bip01 R Foot")}};
-    }();
-    return legs;
-}
-
-// The rotation turning direction `from` onto direction `to` (the shortest way), as a 3x3 matrix.
-void RotationBetween(const float from[3], const float to[3], float rotation[3][3])
-{
-    const auto length = [](const float v[3]) { return std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]); };
-    const float fromLength = length(from);
-    const float toLength = length(to);
-    float axis[3] = {from[1] * to[2] - from[2] * to[1], from[2] * to[0] - from[0] * to[2],
-                     from[0] * to[1] - from[1] * to[0]};
-    const float sine = length(axis) / std::max(fromLength * toLength, 0.0001f);
-    const float cosine =
-        (from[0] * to[0] + from[1] * to[1] + from[2] * to[2]) / std::max(fromLength * toLength, 0.0001f);
-    const float axisLength = length(axis);
-    if (axisLength < 0.0001f)
-    {
-        for (int r = 0; r < 3; ++r)
-            for (int c = 0; c < 3; ++c)
-                rotation[r][c] = r == c ? 1.f : 0.f;
-        return;
-    }
-    for (float& a : axis)
-    {
-        a /= axisLength;
-    }
-    const float rest = 1.f - cosine;
-    const float x = axis[0];
-    const float y = axis[1];
-    const float z = axis[2];
-    const float m[3][3] = {{cosine + x * x * rest, x * y * rest - z * sine, x * z * rest + y * sine},
-                           {y * x * rest + z * sine, cosine + y * y * rest, y * z * rest - x * sine},
-                           {z * x * rest - y * sine, z * y * rest + x * sine, cosine + z * z * rest}};
-    for (int r = 0; r < 3; ++r)
-        for (int c = 0; c < 3; ++c)
-            rotation[r][c] = m[r][c];
-}
-
-// Turns a bone's rotation by `rotation` (in model space); its place stays.
-void TurnBone(float bone[3][4], const float rotation[3][3])
-{
-    float turned[3][3];
-    for (int r = 0; r < 3; ++r)
-        for (int c = 0; c < 3; ++c)
-            turned[r][c] = rotation[r][0] * bone[0][c] + rotation[r][1] * bone[1][c] + rotation[r][2] * bone[2][c];
-    for (int r = 0; r < 3; ++r)
-        for (int c = 0; c < 3; ++c)
-            bone[r][c] = turned[r][c];
-}
-
-bool IsBelow(const BMD& model, int bone, int ancestor)
-{
-    for (int b = model.Bones[bone].Parent; b >= 0; b = model.Bones[b].Parent)
-    {
-        if (b == ancestor)
-            return true;
-    }
-    return false;
-}
-} // namespace
-
-void PlaceFeet(const CHARACTER* c, float (*bones)[3][4])
-{
-    const OBJECT* o = &c->Object;
-    if (o->Type != MODEL_PLAYER || c->Dead != 0 || IsRiding(c) || IsFlying(o) || o->Scale <= 0.f)
-    {
-        return;
-    }
-    const std::array<Leg, 2>& legs = PlayerLegs();
-    for (const Leg& leg : legs)
-    {
-        if (leg.thigh < 0 || leg.calf < 0 || leg.foot < 0)
-            return;
-    }
-    const BMD& player = Models[MODEL_PLAYER];
-    const float scale = o->Scale;
-    // The animation stands on flat ground at the character's own ground; how far each foot's ground is from that.
-    const float ground = RequestTerrainHeight(o->Position[0], o->Position[1]);
-    float rise[2];
-    for (int i = 0; i < 2; ++i)
-    {
-        const float x = o->Position[0] + bones[legs[i].foot][0][3] * scale;
-        const float y = o->Position[1] + bones[legs[i].foot][1][3] * scale;
-        rise[i] = std::clamp(RequestTerrainHeight(x, y) - ground, -FootMaxReach, FootMaxReach);
-    }
-    // The body goes down as far as the lower foot needs to reach (the higher one bends).
-    const float drop = std::max(0.f, -std::min(rise[0], rise[1]));
-    if (drop == 0.f && rise[0] == 0.f && rise[1] == 0.f)
-    {
-        return;
-    }
-    const float dropModel = drop / scale;
-    for (int b = 0; b < player.NumBones; ++b)
-    {
-        bones[b][2][3] -= dropModel;
-    }
-    for (int i = 0; i < 2; ++i)
-    {
-        const Leg& leg = legs[i];
-        float hip[3], knee[3], ankle[3];
-        for (int r = 0; r < 3; ++r)
-        {
-            hip[r] = bones[leg.thigh][r][3];
-            knee[r] = bones[leg.calf][r][3];
-            ankle[r] = bones[leg.foot][r][3];
-        }
-        float target[3] = {ankle[0], ankle[1], ankle[2] + (rise[i] + drop) / scale};
-        const auto sub = [](const float a[3], const float b[3], float out[3])
-        {
-            for (int r = 0; r < 3; ++r)
-                out[r] = a[r] - b[r];
-        };
-        const auto len = [](const float v[3]) { return std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]); };
-        float thighVector[3], shinVector[3], reach[3];
-        sub(knee, hip, thighVector);
-        sub(ankle, knee, shinVector);
-        const float thighLength = len(thighVector);
-        const float shinLength = len(shinVector);
-        sub(target, hip, reach);
-        float distance = len(reach);
-        if (thighLength <= 0.f || shinLength <= 0.f || distance <= 0.f)
-            continue;
-        // Not further than the leg reaches (nearly straight), nor closer than it folds.
-        const float most = (thighLength + shinLength) * FootMaxStretch;
-        const float least = std::fabs(thighLength - shinLength) + 0.01f;
-        const float clamped = std::clamp(distance, least, most);
-        for (float& v : reach)
-            v *= clamped / distance;
-        distance = clamped;
-        for (int r = 0; r < 3; ++r)
-            target[r] = hip[r] + reach[r];
-        // The new knee: in the plane of the hip, the target and where the knee pointed.
-        float along[3] = {reach[0] / distance, reach[1] / distance, reach[2] / distance};
-        const float kneeAlong = thighVector[0] * along[0] + thighVector[1] * along[1] + thighVector[2] * along[2];
-        float bend[3] = {thighVector[0] - along[0] * kneeAlong, thighVector[1] - along[1] * kneeAlong,
-                         thighVector[2] - along[2] * kneeAlong};
-        const float bendLength = len(bend);
-        if (bendLength < 0.0001f)
-            continue;
-        for (float& v : bend)
-            v /= bendLength;
-        const float a = (thighLength * thighLength - shinLength * shinLength + distance * distance) / (2.f * distance);
-        const float h = std::sqrt(std::max(0.f, thighLength * thighLength - a * a));
-        float newKnee[3];
-        for (int r = 0; r < 3; ++r)
-            newKnee[r] = hip[r] + along[r] * a + bend[r] * h;
-        // The thigh turns onto the new knee; the calf, carried by it, turns onto the target.
-        float newThigh[3];
-        sub(newKnee, hip, newThigh);
-        float thighTurn[3][3];
-        RotationBetween(thighVector, newThigh, thighTurn);
-        TurnBone(bones[leg.thigh], thighTurn);
-        float carriedShin[3];
-        for (int r = 0; r < 3; ++r)
-            carriedShin[r] =
-                thighTurn[r][0] * shinVector[0] + thighTurn[r][1] * shinVector[1] + thighTurn[r][2] * shinVector[2];
-        float newShin[3];
-        sub(target, newKnee, newShin);
-        float shinTurn[3][3];
-        RotationBetween(carriedShin, newShin, shinTurn);
-        TurnBone(bones[leg.calf], thighTurn);
-        TurnBone(bones[leg.calf], shinTurn);
-        for (int r = 0; r < 3; ++r)
-        {
-            bones[leg.calf][r][3] = newKnee[r];
-        }
-        // The foot keeps its own turn (as animated) and moves onto the target, its toes with it.
-        float moved[3];
-        sub(target, ankle, moved);
-        for (int b = 0; b < player.NumBones; ++b)
-        {
-            if (b == leg.foot || IsBelow(player, b, leg.foot))
-            {
-                for (int r = 0; r < 3; ++r)
-                    bones[b][r][3] += moved[r];
-            }
-        }
-    }
-}
-
-namespace
-{
-// A nod: the head dips this far and back up in this long. A player or NPC this many tiles from the hero at most nods at
-// it after looking at it this long, at most once in this long. The hero always answers a nod it can turn its head to
-// (this far from where it faces: the head and shoulders, never a step): it looks at the nodder for this long and nods
-// back after this beat.
-constexpr int NodTiles = 2;
-// A nod is slow and plain to see: the head dips this far and the body bows this far, in this long. Another player
-// standing greets the hero instead (its Hello).
-constexpr float NodDegrees = 25.f;
-constexpr float NodBowDegrees = 5.f;
-constexpr float NodSeconds = 0.9f;
-constexpr float NodWatchSeconds = 1.5f;
-constexpr float NodCooldownSeconds = 10.f;
-constexpr float HeroNodLookDegrees = 60.f;
-// The hero answers after a beat, taking the greeting in first, never quite the same (between these): two people
-// don't greet at the same moment. Its head stays on them until its nod is done, and a little longer.
-constexpr float HeroNodReplySeconds[2] = {1.6f, 2.8f};
-constexpr float HeroNodAttentionAfterSeconds = 0.4f;
-
-// The hero's answer to a nod: who nodded (an index into CharactersClient, -1: none), how long its head stays on
-// them, and how long until it nods back (negative: done or none).
-int s_heroNodder = -1;
-float s_heroNodAttention = 0.f;
-float s_heroNodReplyIn = -1.f;
-
-void StartNod(CHARACTER* c)
-{
-    c->NodLeft = NodSeconds;
-    c->NodCooldown = NodCooldownSeconds;
-}
-
-// A character greeting the hero instead of nodding (only on this screen: the server isn't told). Another player, or
-// an NPC built on the player skeleton (Leo the Helper), standing: its Hello. Another NPC with a second animation
-// plays that once (its own idle variation, which reads as a greeting). Whether it greeted.
-std::array<float, MAX_CHARACTERS_CLIENT + 1> s_greetLeft = {};
-
-bool Greet(CHARACTER* c)
-{
-    OBJECT* o = &c->Object;
-    const BMD& model = Models[o->Type];
-    const bool playerSkeleton = o->Type == MODEL_PLAYER || model.NumActions == Models[MODEL_PLAYER].NumActions;
-    if (playerSkeleton)
-    {
-        if (o->CurrentAction < PLAYER_STOP_MALE || o->CurrentAction > PLAYER_STOP_RIDE_WEAPON)
-        {
-            return false;
-        }
-        SetAction(o, gCharacterManager.IsFemale(c->Class) ? PLAYER_GREETING_FEMALE1 : PLAYER_GREETING1);
-    }
-    else if (o->Kind == KIND_NPC && model.NumActions >= 2 && o->CurrentAction == 0 &&
-             model.Actions[1].NumAnimationKeys > 1 && model.Actions[1].PlaySpeed > 0.f)
-    {
-        const std::ptrdiff_t slot = c - CharactersClient;
-        if (slot < 0 || slot >= static_cast<std::ptrdiff_t>(s_greetLeft.size()))
-        {
-            return false;
-        }
-        SetAction(o, 1);
-        // Back to standing once it has played through.
-        s_greetLeft[slot] = static_cast<float>(model.Actions[1].NumAnimationKeys) /
-                            (model.Actions[1].PlaySpeed * static_cast<float>(REFERENCE_FPS));
-    }
-    else
-    {
-        return false;
-    }
-    c->NodCooldown = NodCooldownSeconds;
-    return true;
-}
-} // namespace
-
-void RemoveNod(CHARACTER* c)
-{
-    c->Object.HeadAngle[1] -= c->NodApplied;
-    c->NodApplied = 0.f;
-}
-
-namespace
-{
-// The bow of a nod: on and off the body's pitch, as the slope lean is.
-void BowFor(CHARACTER* c, float bow)
-{
-    c->Object.Angle[0] += bow - c->NodBowApplied;
-    c->NodBowApplied = bow;
-}
-} // namespace
-
-void UpdateNod(CHARACTER* c)
-{
-    const float seconds = FPS_ANIMATION_FACTOR / static_cast<float>(REFERENCE_FPS);
-    // An NPC's trial greeting played through: back to standing. (Characters outside the client's slots, a character
-    // screen's, have none.)
-    const std::ptrdiff_t slot = c - CharactersClient;
-    if (slot >= 0 && slot < static_cast<std::ptrdiff_t>(s_greetLeft.size()) && s_greetLeft[slot] > 0.f)
-    {
-        s_greetLeft[slot] -= seconds;
-        if (s_greetLeft[slot] <= 0.f && c->Object.CurrentAction == 1)
-        {
-            SetAction(&c->Object, 0);
-        }
-    }
-    if (c == Hero)
-    {
-        // Answering a nod: the head on them for a moment, and a nod back after a beat.
-        s_heroNodAttention = std::max(0.f, s_heroNodAttention - seconds);
-        if (s_heroNodReplyIn >= 0.f)
-        {
-            s_heroNodReplyIn -= seconds;
-            if (s_heroNodReplyIn < 0.f)
-            {
-                StartNod(c);
-            }
-        }
-    }
-    else if ((c->Object.Kind == KIND_PLAYER || c->Object.Kind == KIND_NPC) && Hero != nullptr && c->Dead == 0 &&
-             c->LookTarget == static_cast<short>(Hero - CharactersClient))
-    {
-        // Looking at the hero, close: after a moment, one nod, and the hero answers it if it can turn its head to it.
-        c->WatchedHeroSeconds += seconds;
-        const bool close =
-            std::max(std::abs(c->PositionX - Hero->PositionX), std::abs(c->PositionY - Hero->PositionY)) <= NodTiles;
-        if (close && !c->NoddedAtHero && c->WatchedHeroSeconds >= NodWatchSeconds && c->NodCooldown <= 0.f)
-        {
-            c->NoddedAtHero = true;
-            if (!Greet(c))
-            {
-                StartNod(c);
-            }
-            const float toNodder = CreateAngle2D(Hero->Object.Position, c->Object.Position);
-            const bool inView = std::fabs(FarAngle(Hero->Object.Angle[2], toNodder, false)) <= HeroNodLookDegrees;
-            if (inView && s_heroNodReplyIn < 0.f && Hero->Dead == 0)
-            {
-                s_heroNodder = static_cast<int>(c - CharactersClient);
-                s_heroNodReplyIn = Random::RangeFloat(HeroNodReplySeconds[0], HeroNodReplySeconds[1]);
-                s_heroNodAttention = s_heroNodReplyIn + NodSeconds + HeroNodAttentionAfterSeconds;
-            }
-        }
-    }
-    else
-    {
-        c->WatchedHeroSeconds = 0.f;
-        c->NoddedAtHero = false;
-    }
-    if (c->NodLeft <= 0.f)
-    {
-        if (c->NodBowApplied != 0.f)
-        {
-            BowFor(c, 0.f);
-        }
-        return;
-    }
-    c->NodLeft = std::max(0.f, c->NodLeft - seconds);
-    // Down and back up, eased: a positive pitch looks up, so a nod is negative; a positive body pitch leans forward.
-    const float through = 1.f - c->NodLeft / NodSeconds;
-    const float dip = std::sin(through * static_cast<float>(Q_PI));
-    c->NodApplied = -NodDegrees * dip;
-    c->Object.HeadAngle[1] += c->NodApplied;
-    BowFor(c, NodBowDegrees * dip);
-}
-
-const CHARACTER* HeroNodAttention()
-{
-    if (s_heroNodAttention <= 0.f || s_heroNodder < 0 || s_heroNodder >= MAX_CHARACTERS_CLIENT)
-    {
-        return nullptr;
-    }
-    const CHARACTER* nodder = &CharactersClient[s_heroNodder];
-    return nodder->Object.Live ? nodder : nullptr;
+    c->Motion.FlightHoverApplied = 0.f;
 }
 
 CHARACTER* CharacterOfObject(const OBJECT* o)
@@ -7406,32 +6410,6 @@ CHARACTER* CharacterOfObject(const OBJECT* o)
     }
     const auto index = offset / static_cast<std::ptrdiff_t>(sizeof(CHARACTER));
     return index < MAX_CHARACTERS_CLIENT ? &CharactersClient[index] : nullptr;
-}
-
-void UpdateSnapTurn(CHARACTER* c)
-{
-    const OBJECT* o = &c->Object;
-    const float facing = o->Angle[2];
-    if (std::isnan(c->SnapTurnFacing))
-    {
-        c->SnapTurnFacing = facing;
-    }
-    const float turned = FarAngle(c->SnapTurnFacing, facing, false);
-    c->SnapTurnFacing = facing;
-    if (std::fabs(turned) >= SnapTurnDegrees)
-    {
-        // The drawn body stays where it was, and catches up from there.
-        c->SnapTurnOffset = std::clamp(c->SnapTurnOffset - turned, -180.f, 180.f);
-    }
-    if (c->SnapTurnOffset == 0.f && c->SnapTurnSpeed == 0.f)
-    {
-        return;
-    }
-    const float seconds = FPS_ANIMATION_FACTOR / static_cast<float>(REFERENCE_FPS);
-    // StepEasedTurn on the offset, toward 0: it lands there with no speed left. Kept as -180 to 180.
-    const float stepped =
-        StepEasedTurn(c->SnapTurnOffset, 0.f, c->SnapTurnSpeed, seconds, SnapTurnMaxSpeed, SnapTurnAcceleration);
-    c->SnapTurnOffset = stepped > 180.f ? stepped - 360.f : stepped;
 }
 
 void MoveMonsterClient(CHARACTER* c, OBJECT* o)
@@ -7484,8 +6462,8 @@ void MoveMonsterClient(CHARACTER* c, OBJECT* o)
                 SetPlayerStop(c);
             }
 
-            float heading = c->MoveHeading;
-            const float pace = StepMomentum(c, heading);
+            float heading = Engine::Characters::EnhancedMovementEnabled() ? c->MoveHeading : o->Angle[2];
+            const float pace = Engine::Characters::StepMomentum(c, heading);
             MoveCharacterPosition(c, heading, pace);
         }
     }
@@ -7511,11 +6489,11 @@ void MoveCharacterClient(CHARACTER* cc)
         // The hero's comes after its move, in MoveHero.
         if (cc != Hero)
         {
-            UpdateFlightFeel(cc);
-            UpdateTurnLag(cc);
-            UpdateSlopeLean(cc);
+            Engine::Characters::UpdateFlightFeel(cc);
+            Engine::Characters::UpdateTurnLag(cc);
+            Engine::Characters::UpdateSlopeLean(cc);
         }
-        UpdateSnapTurn(cc);
+        Engine::Characters::UpdateSnapTurn(cc);
         MoveCharacterVisual(cc, co);
 
         battleCastle::MoveBattleCastleMonster(cc, co);
@@ -7590,26 +6568,19 @@ void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters)
     {
         for (CHARACTER* c : activeChars)
         {
-            PoseBlend blend;
-            AnimateCharacterBones(&c->Object, c->TurnLag, c->SnapTurnOffset, CharacterPoseFade(c, blend));
+            AnimateCharacterBones(&c->Object);
         }
     }
 }
 
-void AnimateCharacterBones(OBJECT* o, float turnLag, float facingOffset, const PoseBlend* blend)
+void AnimateCharacterBones(OBJECT* o)
 {
     BMD* model = &Models[o->Type];
     if (model->NumBones <= 0) return;
 
     // Model space, as render builds them: the model's BodyOrigin and BodyScale belong to whichever object set them
-    // last. The body is drawn facing a little behind a sudden turn (UpdateSnapTurn).
-    vec3_t angle = {o->Angle[0], o->Angle[1], o->Angle[2] + facingOffset};
-    model->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, angle, o->HeadAngle,
-                     false, false, nullptr, o->CurrentAction, MAX_BONES, turnLag, 0.f, 0.f, blend);
-    if (const CHARACTER* character = CharacterOfObject(o))
-    {
-        PlaceFeet(character, o->BoneTransform);
-    }
+    // last. With what the movement features change in how it's drawn, as the render builds (AnimateBones).
+    Engine::Characters::AnimateBones(o, *model, o->BoneTransform, false, o->CurrentAction);
     o->EnableBoneMatrix = true;
 }
 
@@ -8052,54 +7023,10 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         for (int r = 0; r < 3; ++r)
             for (int c = 0; c < 4; ++c)
                 ParentMatrix[r][c] = o->BoneTransform[f->LinkBone][r][c];
-        // A player's wings hang from Bone05, on the lower spine (Bip01 Spine), so the head's turn reaches them only by
-        // that bone's small share: they turn with the back too (the two spine bones below the neck, where they sit;
-        // HeadTurn.h, as BMD::Animation turns the bones), about the upright through Spine1. A bone's turn about its X
-        // axis is the opposite way round from the world's upright, hence the minus.
+        // A player's wings turn with its back and trail a turn (and sit straight on a Uniria or a Dinorant).
         if (o->Type == MODEL_PLAYER && f == &c->Wing)
         {
-            static const int spine1Bone = []
-            {
-                const BMD& player = Models[MODEL_PLAYER];
-                for (int i = 0; i < player.NumBones; ++i)
-                {
-                    if (!player.Bones[i].Dummy && strcmp(player.Bones[i].Name, "Bip01 Spine1") == 0)
-                    {
-                        return i;
-                    }
-                }
-                return -1;
-            }();
-            // On a Uniria or a Dinorant the riding actions turn the wings' bone askew on the spine, and the wings tilt to
-            // a side (it's the actions' own keys): there they sit on the spine as they do standing, their bone's turn
-            // under the spine taken from the standing action, in their bone's place.
-            const BMD& player = Models[MODEL_PLAYER];
-            const int link = f->LinkBone;
-            if ((c->Helper.Type == MODEL_HORN_OF_UNIRIA || c->Helper.Type == MODEL_HORN_OF_DINORANT) && link >= 0 &&
-                link < player.NumBones && player.Bones[link].Parent >= 0 && !player.Bones[link].Dummy &&
-                player.Bones[link].BoneMatrixes[PLAYER_STOP_MALE].Quaternion != nullptr)
-            {
-                float standing[3][4];
-                QuaternionMatrix(player.Bones[link].BoneMatrixes[PLAYER_STOP_MALE].Quaternion[0], standing);
-                standing[0][3] = standing[1][3] = standing[2][3] = 0.f;
-                float onSpine[3][4];
-                R_ConcatTransforms(o->BoneTransform[player.Bones[link].Parent], standing, onSpine);
-                for (int r = 0; r < 3; ++r)
-                {
-                    for (int column = 0; column < 3; ++column)
-                    {
-                        ParentMatrix[r][column] = onSpine[r][column];
-                    }
-                }
-            }
-            namespace HeadTurn = Render::Models::HeadTurn;
-            // And they trail a little behind the body's own turn (UpdateTurnLag).
-            const float back = HeadTurn::BackDegrees(HeadTurn::SignedYaw(o->HeadAngle[0])) + c->TurnLag;
-            if (spine1Bone >= 0 && back != 0.f)
-            {
-                HeadTurn::TurnAboutUpright(ParentMatrix, -back * (Q_PI / 180.f),
-                                           o->BoneTransform[spine1Bone][0][3], o->BoneTransform[spine1Bone][1][3]);
-            }
+            Engine::Characters::PlaceWingsOnBack(c, f->LinkBone, ParentMatrix);
         }
     }
     if (Type == MODEL_BOSS_HEAD)

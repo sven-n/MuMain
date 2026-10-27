@@ -25,8 +25,11 @@
 #include "GameLogic/Items/ItemCategories.h"
 #include "Core/Utilities/Random.h"
 #include "Render/Models/HeadTurn.h"
-#include "Engine/Object/ZzzInterface.h"
+#include "Engine/Object/Movement/FlightFeel.h"
+#include "Engine/Object/Movement/HeroLook.h"
 #include "Engine/Object/ZzzObject.h"
+#include "Engine/Object/EnhancedMovement.h"
+#include "Engine/Object/Movement/FrameTime.h"
 #include "Render/Renderer/MuRenderer.h"
 
 int EnableEvent = 0;
@@ -172,7 +175,7 @@ float s_mountNextShake[MAX_MOUNTS] = {};
 // One frame of a mount's idle head shake: how far its head rolls now, in degrees.
 float StepMountShake(const OBJECT* o, int slot)
 {
-    const float seconds = FPS_ANIMATION_FACTOR / static_cast<float>(REFERENCE_FPS);
+    const float seconds = Engine::Characters::FrameSeconds();
     float& idle = s_mountIdleSeconds[slot];
     float& elapsed = s_mountShakeElapsed[slot];
     float& next = s_mountNextShake[slot];
@@ -211,31 +214,36 @@ void UpdateMountFeel(OBJECT* o, int slot)
     // The head is the Biped's (looked up once per model); the Dark Horse's BoneHead from above was a body part.
     BMD* b = &Models[o->Type];
     static short headBones[MAX_MODELS];
+    static int ownHeadBones[MAX_MODELS];
     static bool headBonesFound[MAX_MODELS];
     if (!headBonesFound[o->Type])
     {
         headBonesFound[o->Type] = true;
-        headBones[o->Type] = -1;
-        for (int i = 0; i < b->NumBones; ++i)
-        {
-            if (!b->Bones[i].Dummy && strcmp(b->Bones[i].Name, "Bip01 Head") == 0)
-            {
-                headBones[o->Type] = static_cast<short>(i);
-                break;
-            }
-        }
+        ownHeadBones[o->Type] = b->BoneHead;
+        headBones[o->Type] = static_cast<short>(b->FindBone("Bip01 Head"));
+    }
+    if (!Engine::Characters::EnhancedMovementEnabled())
+    {
+        // As before: the model's own head bone, the rider's angles and head as copied, no shake.
+        b->BoneHead = ownHeadBones[o->Type];
+        MountHeadTurn[slot] = 0.f;
+        MountHeadRoll[slot] = 0.f;
+        s_mountIdleSeconds[slot] = 0.f;
+        s_mountShakeElapsed[slot] = MountShakeSeconds;
+        return;
     }
     b->BoneHead = headBones[o->Type];
-    o->Angle[1] = MountLeanFromRider(o->Owner->Angle[1]);
+    o->Angle[1] = Engine::Characters::MountLeanFromRider(o->Owner->Angle[1]);
     // The head turns where the rider's does and nods with it, and rolls when it shakes: turned in the world
     // (BMD::Animation's HeadTurnUp, HeadRoll), so it doesn't matter how the model's head bone lies.
     // Only where the rider looks on purpose (at someone, or the hero at the cursor): its idle glances are its own.
     const CHARACTER* rider = CharacterOfObject(o->Owner);
-    const bool followsRider = rider != nullptr && (rider->LookTarget >= 0 || (rider == Hero && !HeroIsGlancing()));
+    const bool followsRider =
+        rider != nullptr && (rider->Motion.LookTarget >= 0 || (rider == Hero && !Engine::Characters::HeroIsGlancing()));
     // It turns with its rider's drawn body, which catches up with a sudden turn (UpdateSnapTurn).
     if (rider != nullptr)
     {
-        o->Angle[2] += rider->SnapTurnOffset;
+        o->Angle[2] += rider->Motion.SnapTurnOffset;
     }
     const float riderTurn = followsRider ? Render::Models::HeadTurn::SignedYaw(o->Owner->HeadAngle[0]) : 0.f;
     // A positive head angle looks clockwise seen from above (LookTowards: facing minus where the target is), the

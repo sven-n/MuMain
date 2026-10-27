@@ -2,6 +2,14 @@
 #include "doctest.h"
 
 #include "Engine/AI/ZzzAI.h"
+#include "Engine/Object/EnhancedMovement.h"
+#include "Engine/Object/Movement/FlightFeel.h"
+#include "Engine/Object/Movement/Greetings.h"
+#include "Engine/Object/Movement/LookAt.h"
+#include "Engine/Object/Movement/Momentum.h"
+#include "Engine/Object/Movement/SlopeLean.h"
+#include "Engine/Object/Movement/SnapTurn.h"
+#include "Engine/Object/Movement/TurnLag.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Models/HeadTurn.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -14,6 +22,8 @@
 #include <vector>
 
 extern EGameScene SceneFlag;
+
+using namespace Engine::Characters;
 
 namespace
 {
@@ -240,11 +250,11 @@ TEST_CASE("A flying player that lands is back where it started, upright [gamelog
     CHECK(o.Position[1] == doctest::Approx(start[1]).epsilon(0.00001));
     CHECK(o.Position[2] == doctest::Approx(start[2]).epsilon(0.00001));
     CHECK(o.Angle[1] == doctest::Approx(0.f).epsilon(0.0001));
-    CHECK(flyer.FlightBank == 0.f);
-    CHECK(flyer.FlightHover == 0.f);
-    CHECK(flyer.FlightHoverApplied == 0.f);
-    CHECK(flyer.FlightPivotShift[0] == 0.f);
-    CHECK(flyer.FlightPivotShift[1] == 0.f);
+    CHECK(flyer.Motion.FlightBank == 0.f);
+    CHECK(flyer.Motion.FlightHover == 0.f);
+    CHECK(flyer.Motion.FlightHoverApplied == 0.f);
+    CHECK(flyer.Motion.FlightPivotShift[0] == 0.f);
+    CHECK(flyer.Motion.FlightPivotShift[1] == 0.f);
 }
 
 TEST_CASE(
@@ -256,23 +266,23 @@ TEST_CASE(
         const Clock clock(fps);
         CHARACTER& player = FreshPlayer();
         UpdateTurnLag(&player);
-        CHECK(player.TurnLag == 0.f);
+        CHECK(player.Motion.TurnLag == 0.f);
 
         // Turned clockwise at once: the wings stay behind, counterclockwise.
         player.Object.Angle[2] = 90.f;
         UpdateTurnLag(&player);
-        CHECK(player.TurnLag < 0.f);
-        CHECK(player.TurnLag >= -12.f);
+        CHECK(player.Motion.TurnLag < 0.f);
+        CHECK(player.Motion.TurnLag >= -12.f);
 
-        float lowest = player.TurnLag;
-        float highest = player.TurnLag;
+        float lowest = player.Motion.TurnLag;
+        float highest = player.Motion.TurnLag;
         float settledAt = -1.f;
         for (int frame = 2; frame <= clock.Frames(2.f); ++frame)
         {
             UpdateTurnLag(&player);
-            lowest = std::min(lowest, player.TurnLag);
-            highest = std::max(highest, player.TurnLag);
-            if (player.TurnLag == 0.f && player.TurnLagSpeed == 0.f)
+            lowest = std::min(lowest, player.Motion.TurnLag);
+            highest = std::max(highest, player.Motion.TurnLag);
+            if (player.Motion.TurnLag == 0.f && player.Motion.TurnLagSpeed == 0.f)
             {
                 settledAt = static_cast<float>(frame) * clock.Seconds();
                 break;
@@ -295,17 +305,17 @@ TEST_CASE("Without a turn the wings don't trail, and a non-player has no lag [ga
     for (int frame = 0; frame < 30; ++frame)
     {
         UpdateTurnLag(&player);
-        CHECK(player.TurnLag == 0.f);
-        CHECK(player.TurnLagSpeed == 0.f);
+        CHECK(player.Motion.TurnLag == 0.f);
+        CHECK(player.Motion.TurnLagSpeed == 0.f);
     }
 
     player.Object.Angle[2] = 300.f;
     UpdateTurnLag(&player);
-    REQUIRE(player.TurnLag != 0.f);
+    REQUIRE(player.Motion.TurnLag != 0.f);
     player.Object.Type = MODEL_HORN_OF_UNIRIA;
     UpdateTurnLag(&player);
-    CHECK(player.TurnLag == 0.f);
-    CHECK(player.TurnLagSpeed == 0.f);
+    CHECK(player.Motion.TurnLag == 0.f);
+    CHECK(player.Motion.TurnLagSpeed == 0.f);
 }
 
 TEST_CASE("A sudden turn is drawn catching up from where the body was, at any frame rate [gamelogic][snapturn]")
@@ -317,22 +327,22 @@ TEST_CASE("A sudden turn is drawn catching up from where the body was, at any fr
         CHARACTER& attacker = FreshPlayer();
         attacker.Object.Angle[2] = 10.f;
         UpdateSnapTurn(&attacker);
-        CHECK(attacker.SnapTurnOffset == 0.f);
+        CHECK(attacker.Motion.SnapTurnOffset == 0.f);
 
         // A jump of 170 degrees: the drawn body starts nearly where it was and eases onto the facing.
         attacker.Object.Angle[2] = 180.f;
         UpdateSnapTurn(&attacker);
-        CHECK(attacker.SnapTurnOffset < -100.f);
+        CHECK(attacker.Motion.SnapTurnOffset < -100.f);
 
         float landedAt = -1.f;
-        float previous = attacker.SnapTurnOffset;
+        float previous = attacker.Motion.SnapTurnOffset;
         for (int frame = 2; frame <= clock.Frames(1.f); ++frame)
         {
             UpdateSnapTurn(&attacker);
-            CHECK(attacker.SnapTurnOffset <= 0.f);
-            CHECK(attacker.SnapTurnOffset >= previous);
-            previous = attacker.SnapTurnOffset;
-            if (attacker.SnapTurnOffset == 0.f && attacker.SnapTurnSpeed == 0.f)
+            CHECK(attacker.Motion.SnapTurnOffset <= 0.f);
+            CHECK(attacker.Motion.SnapTurnOffset >= previous);
+            previous = attacker.Motion.SnapTurnOffset;
+            if (attacker.Motion.SnapTurnOffset == 0.f && attacker.Motion.SnapTurnSpeed == 0.f)
             {
                 landedAt = static_cast<float>(frame) * clock.Seconds();
                 break;
@@ -353,13 +363,13 @@ TEST_CASE("A turn of less than 30 degrees in a frame is not a sudden turn [gamel
     {
         walker.Object.Angle[2] = facing;
         UpdateSnapTurn(&walker);
-        CHECK(walker.SnapTurnOffset == 0.f);
-        CHECK(walker.SnapTurnSpeed == 0.f);
+        CHECK(walker.Motion.SnapTurnOffset == 0.f);
+        CHECK(walker.Motion.SnapTurnSpeed == 0.f);
     }
     // The other way across 0.
     walker.Object.Angle[2] = 350.f;
     UpdateSnapTurn(&walker);
-    CHECK(walker.SnapTurnOffset > 0.f);
+    CHECK(walker.Motion.SnapTurnOffset > 0.f);
 }
 
 TEST_CASE("A walker speeds up from rest over about 0.15 seconds [gamelogic][momentum]")
@@ -407,7 +417,7 @@ TEST_CASE("A walker turning back slows to a stop the old way before it takes the
             float heading = 0.f;
             StepMomentum(&walker, heading);
         }
-        REQUIRE(walker.MomentumPace == 1.f);
+        REQUIRE(walker.Motion.MomentumPace == 1.f);
 
         float turnedAt = -1.f;
         float previous = 1.f;
@@ -560,7 +570,7 @@ private:
 // A player's look, picked again now rather than at its next look around.
 const CHARACTER* LookNow(CHARACTER& c)
 {
-    c.LookScanSeconds = 0.f;
+    c.Motion.LookScanSeconds = 0.f;
     return UpdateLookAt(&c);
 }
 } // namespace
@@ -578,7 +588,7 @@ TEST_CASE("A player in a combat zone looks at the nearest monster in front of it
     world.Place(5, KIND_PLAYER, 101, 99);
 
     CHECK(LookNow(player) == &nearest);
-    CHECK(player.LookTarget == 2);
+    CHECK(player.Motion.LookTarget == 2);
 }
 
 TEST_CASE("A player doesn't look at a monster behind it or behind a wall [gamelogic][lookat]")
@@ -588,7 +598,7 @@ TEST_CASE("A player doesn't look at a monster behind it or behind a wall [gamelo
     world.Place(1, KIND_MONSTER, 100, 103);
     world.Place(2, KIND_MONSTER, 97, 101);
     CHECK(LookNow(player) == nullptr);
-    CHECK(player.LookTarget == -1);
+    CHECK(player.Motion.LookTarget == -1);
 
     // In front, but a wall tile lies on the line between them.
     world.Place(3, KIND_MONSTER, 100, 97);
@@ -647,7 +657,7 @@ TEST_CASE("A monster looks at its target in sight, and an NPC at the hero passin
     CHARACTER& monster = world.Place(1, KIND_MONSTER, 100, 106);
     monster.TargetCharacter = 0;
     CHECK(UpdateLookAt(&monster) == &hero);
-    CHECK(monster.LookTarget == 0);
+    CHECK(monster.Motion.LookTarget == 0);
     // Facing away from its target.
     monster.Object.Angle[2] = 180.f;
     CHECK(UpdateLookAt(&monster) == nullptr);
@@ -657,7 +667,7 @@ TEST_CASE("A monster looks at its target in sight, and an NPC at the hero passin
     hero.PositionY = 90;
     hero.Object.Position[1] = 90.5f * TERRAIN_SCALE;
     CHECK(UpdateLookAt(&npc) == nullptr);
-    CHECK(npc.LookTarget == -1);
+    CHECK(npc.Motion.LookTarget == -1);
 }
 
 namespace
@@ -724,7 +734,7 @@ CHARACTER& PlayerOnSlope()
 {
     CHARACTER& c = FreshPlayer();
     Vector(128.5f * TERRAIN_SCALE, 128.5f * TERRAIN_SCALE, 0.f, c.Object.Position);
-    c.SlopePitch = 0.f;
+    c.Motion.SlopePitch = 0.f;
     return c;
 }
 
@@ -750,7 +760,7 @@ TEST_CASE("A player walking uphill leans forward by half the slope, at most 10 d
         walker.Object.CurrentAction = PLAYER_WALK_MALE;
         LeanFor(walker, 2.f);
         CHECK(walker.Object.Angle[0] == doctest::Approx(SlopeDegrees(10.f) * 0.5f).epsilon(0.01));
-        CHECK(walker.SlopePitch == walker.Object.Angle[0]);
+        CHECK(walker.Motion.SlopePitch == walker.Object.Angle[0]);
 
         // Downhill: leaning back.
         walker.Object.Angle[2] = 180.f;
@@ -762,7 +772,7 @@ TEST_CASE("A player walking uphill leans forward by half the slope, at most 10 d
         walker.Object.CurrentAction = PLAYER_STOP_MALE;
         LeanFor(walker, 2.f);
         CHECK(walker.Object.Angle[0] == doctest::Approx(0.f).epsilon(0.0001));
-        CHECK(walker.SlopePitch == 0.f);
+        CHECK(walker.Motion.SlopePitch == 0.f);
     }
     {
         const Slope steep(100.f);
@@ -818,6 +828,112 @@ template <class Work> double NanosecondsPerCall(int calls, Work work)
 } // namespace
 
 // Not run with the tests (ctest -E benchmark): what the realism steps' per-frame updates cost a character, for the PR.
+namespace
+{
+// Enhanced Movement switched off for a test, put back after it.
+class EnhancedMovementOff
+{
+public:
+    EnhancedMovementOff() : m_was(Engine::Characters::EnhancedMovementEnabled())
+    {
+        Engine::Characters::SetEnhancedMovementEnabled(false);
+    }
+
+    ~EnhancedMovementOff()
+    {
+        Engine::Characters::SetEnhancedMovementEnabled(m_was);
+    }
+
+    EnhancedMovementOff(const EnhancedMovementOff&) = delete;
+    EnhancedMovementOff& operator=(const EnhancedMovementOff&) = delete;
+
+private:
+    bool m_was;
+};
+} // namespace
+
+TEST_CASE("Without Enhanced Movement a flying player neither banks nor drifts [gamelogic][flight][option]")
+{
+    const Clock clock(60.0);
+    const EnhancedMovementOff off;
+    CHARACTER& flyer = FreshPlayer();
+    OBJECT& o = flyer.Object;
+    o.CurrentAction = PLAYER_FLY;
+    flyer.TurnSpeed = 300.f;
+    for (int frame = 0; frame < clock.Frames(2.f); ++frame)
+    {
+        clock.Tick();
+        UpdateFlightFeel(&flyer);
+    }
+    CHECK(o.Angle[1] == 0.f);
+    CHECK(o.Position[0] == 5000.f);
+    CHECK(o.Position[1] == 5000.f);
+    CHECK(o.Position[2] == 100.f);
+    CHECK(flyer.Motion.FlightHoverApplied == 0.f);
+}
+
+TEST_CASE("Switching Enhanced Movement off mid-flight eases the bank and the drift out [gamelogic][flight][option]")
+{
+    const Clock clock(60.0);
+    CHARACTER& flyer = FreshPlayer();
+    OBJECT& o = flyer.Object;
+    o.CurrentAction = PLAYER_FLY;
+    flyer.TurnSpeed = 300.f;
+    for (int frame = 0; frame < clock.Frames(2.f); ++frame)
+    {
+        clock.Tick();
+        UpdateFlightFeel(&flyer);
+    }
+    REQUIRE(o.Angle[1] > 1.f);
+
+    const EnhancedMovementOff off;
+    for (int frame = 0; frame < clock.Frames(3.f); ++frame)
+    {
+        clock.Tick();
+        UpdateFlightFeel(&flyer);
+    }
+    CHECK(o.Angle[1] == doctest::Approx(0.f).scale(1.f));
+    CHECK(flyer.Motion.FlightBank == 0.f);
+    CHECK(flyer.Motion.FlightHoverApplied == 0.f);
+    CHECK(flyer.Motion.FlightPivotShift[0] == 0.f);
+    CHECK(flyer.Motion.FlightPivotShift[1] == 0.f);
+    CHECK(o.Position[2] == doctest::Approx(100.f));
+}
+
+TEST_CASE(
+    "Without Enhanced Movement a walker keeps its full pace and the way it's headed [gamelogic][momentum][option]")
+{
+    const Clock clock(60.0);
+    const EnhancedMovementOff off;
+    CHARACTER& walker = FreshPlayer();
+    for (const float wanted : {0.f, 0.f, 180.f, 90.f})
+    {
+        clock.Tick();
+        float heading = wanted;
+        CHECK(StepMomentum(&walker, heading) == 1.f);
+        CHECK(heading == wanted);
+    }
+}
+
+TEST_CASE("Without Enhanced Movement a sudden turn is drawn at once, and the wings don't trail "
+          "[gamelogic][snapturn][turnlag][option]")
+{
+    const Clock clock(60.0);
+    const EnhancedMovementOff off;
+    CHARACTER& attacker = FreshPlayer();
+    UpdateSnapTurn(&attacker);
+    UpdateTurnLag(&attacker);
+    attacker.Object.Angle[2] = 170.f;
+    for (int frame = 0; frame < 3; ++frame)
+    {
+        UpdateSnapTurn(&attacker);
+        UpdateTurnLag(&attacker);
+        CHECK(attacker.Motion.SnapTurnOffset == 0.f);
+        CHECK(attacker.Motion.SnapTurnSpeed == 0.f);
+        CHECK(attacker.Motion.TurnLag == 0.f);
+    }
+}
+
 TEST_CASE("The realism steps' per-frame cost for a character (benchmark) [gamelogic][benchmark]")
 {
     constexpr int Calls = 200000;
@@ -871,14 +987,32 @@ TEST_CASE("The realism steps' per-frame cost for a character (benchmark) [gamelo
         lookAround = NanosecondsPerCall(2000,
                                         [&](int)
                                         {
-                                            looker.LookTarget = -1;
+                                            looker.Motion.LookTarget = -1;
                                             LookNow(looker);
                                         });
-        CHECK(looker.LookTarget >= 0);
+        CHECK(looker.Motion.LookTarget >= 0);
     }
     MESSAGE("per frame, ns per character: flight " << flight << ", turn lag " << turnLag << ", sudden turn " << snapTurn
                                                    << ", momentum " << momentum << ", slope lean " << slopeLean
                                                    << "; a look around in a 400-character scene " << lookAround
                                                    << " (each player does one every 0.25 s or so)");
     CHECK(flight >= 0.);
+}
+
+TEST_CASE("A character that greeted may greet again once its cooldown has run out [gamelogic][nod]")
+{
+    const Clock clock(60.0);
+    CHARACTER& c = FreshPlayer();
+    c.Object.Kind = KIND_NPC;
+    c.Motion.NodCooldown = 10.f;
+    for (int frame = 0; frame < clock.Frames(5.f); ++frame)
+    {
+        UpdateNod(&c);
+    }
+    CHECK(c.Motion.NodCooldown == doctest::Approx(5.f).epsilon(0.01));
+    for (int frame = 0; frame < clock.Frames(6.f); ++frame)
+    {
+        UpdateNod(&c);
+    }
+    CHECK(c.Motion.NodCooldown == 0.f);
 }

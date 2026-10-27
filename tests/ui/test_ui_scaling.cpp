@@ -932,11 +932,12 @@ TEST_CASE("each Enhanced feature switch loads and saves through its own config.i
         bool (GameConfig::*get)() const;
         void (GameConfig::*set)(bool);
     };
-    const std::array<Switch, 4> switches{{
+    const std::array<Switch, 5> switches{{
         {"EnhancedLighting", &GameConfig::GetEnhancedLighting, &GameConfig::SetEnhancedLighting},
         {"DynamicLights", &GameConfig::GetDynamicLights, &GameConfig::SetDynamicLights},
         {"LightMood", &GameConfig::GetLightMood, &GameConfig::SetLightMood},
         {"PostProcessing", &GameConfig::GetPostProcessing, &GameConfig::SetPostProcessing},
+        {"EnhancedMovement", &GameConfig::GetEnhancedMovement, &GameConfig::SetEnhancedMovement},
     }};
     const ExecutableConfigFile file;
     GameConfig& config = GameConfig::GetInstance();

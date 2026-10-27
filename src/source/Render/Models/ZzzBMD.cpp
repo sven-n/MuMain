@@ -19,7 +19,9 @@
 
 #include "Engine/Object/ZzzInfomation.h"
 #include "ZzzBMD.h"
+#include "Render/Models/BoneMath.h"
 #include "Render/Models/HeadTurn.h"
+#include "Engine/Object/EnhancedMovement.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -236,8 +238,10 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
     if (hasHeadBone && (HeadAngle[0] != 0.f || HeadAngle[1] != 0.f))
     {
         namespace HeadTurn = Render::Models::HeadTurn;
-        // The neck and spine found at load, while this model's head is the Biped's.
-        const short* chain = HeadTurnBones[0] == BoneHead ? HeadTurnBones : nullptr;
+        // The neck and spine found at load, while this model's head is the Biped's (without Enhanced Movement the
+        // head turns alone).
+        const short* chain =
+            Engine::Characters::EnhancedMovementEnabled() && HeadTurnBones[0] == BoneHead ? HeadTurnBones : nullptr;
         const HeadTurn::BoneTurns turns =
             HeadTurn::SplitTurn(HeadTurn::SignedYaw(HeadAngle[0]), chain != nullptr && chain[1] >= 0,
                                 chain != nullptr && chain[2] >= 0, chain != nullptr && chain[3] >= 0);
@@ -370,16 +374,7 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
         // turns about), at its root, which stays where it hangs from the head.
         if (i == PonytailBone && PonytailLag != 0.f)
         {
-            const float radians = PonytailLag * (Q_PI / 180.f);
-            const float cosine = std::cos(radians);
-            const float sine = std::sin(radians);
-            for (int column = 0; column < 3; ++column)
-            {
-                const float y = Matrix[1][column];
-                const float z = Matrix[2][column];
-                Matrix[1][column] = cosine * y - sine * z;
-                Matrix[2][column] = sine * y + cosine * z;
-            }
+            Render::Models::BoneMath::TurnInPlane(Matrix, 1, 2, PonytailLag * (Q_PI / 180.f), false);
         }
         const float* Position1 = bm1->Position[PriorAnimationFrame];
         const float* Position2 = bm2->Position[currentAnimationFrame];
@@ -3508,13 +3503,16 @@ namespace
 // from model to model and lean with the head). The head's place stays; only its rotation changes.
 void TurnHeadInWorld(const float parent[3][4], float local[3][4], const vec3_t angle, float turnUp, float roll)
 {
+    namespace BoneMath = Render::Models::BoneMath;
     float parentRotation[3][3];
+    float localRotation[3][3];
     float scaleSquared = 0.f;
     for (int r = 0; r < 3; ++r)
     {
         for (int c = 0; c < 3; ++c)
         {
             parentRotation[r][c] = parent[r][c];
+            localRotation[r][c] = local[r][c];
         }
         scaleSquared += parent[r][0] * parent[r][0];
     }
@@ -3524,52 +3522,7 @@ void TurnHeadInWorld(const float parent[3][4], float local[3][4], const vec3_t a
     }
     // The head's rotation in the world, and the world rotation to put on it.
     float head[3][3];
-    for (int r = 0; r < 3; ++r)
-    {
-        for (int c = 0; c < 3; ++c)
-        {
-            head[r][c] = parentRotation[r][0] * local[0][c] + parentRotation[r][1] * local[1][c] +
-                         parentRotation[r][2] * local[2][c];
-        }
-    }
-    const auto axisRotation = [](const float axis[3], float degrees, float out[3][3])
-    {
-        const float radians = degrees * (Q_PI / 180.f);
-        const float cosine = std::cos(radians);
-        const float sine = std::sin(radians);
-        const float rest = 1.f - cosine;
-        const float x = axis[0];
-        const float y = axis[1];
-        const float z = axis[2];
-        const float m[3][3] = {{cosine + x * x * rest, x * y * rest - z * sine, x * z * rest + y * sine},
-                               {y * x * rest + z * sine, cosine + y * y * rest, y * z * rest - x * sine},
-                               {z * x * rest - y * sine, z * y * rest + x * sine, cosine + z * z * rest}};
-        for (int r = 0; r < 3; ++r)
-        {
-            for (int c = 0; c < 3; ++c)
-            {
-                out[r][c] = m[r][c];
-            }
-        }
-    };
-    const auto multiply = [](const float a[3][3], const float b[3][3], float out[3][3])
-    {
-        float result[3][3];
-        for (int r = 0; r < 3; ++r)
-        {
-            for (int c = 0; c < 3; ++c)
-            {
-                result[r][c] = a[r][0] * b[0][c] + a[r][1] * b[1][c] + a[r][2] * b[2][c];
-            }
-        }
-        for (int r = 0; r < 3; ++r)
-        {
-            for (int c = 0; c < 3; ++c)
-            {
-                out[r][c] = result[r][c];
-            }
-        }
-    };
+    BoneMath::Multiply(parentRotation, localRotation, head);
     float world[3][3] = {{1.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 0.f, 1.f}};
     if (roll != 0.f)
     {
@@ -3593,18 +3546,18 @@ void TurnHeadInWorld(const float parent[3][4], float local[3][4], const vec3_t a
         const float length =
             std::sqrt(head[0][along] * head[0][along] + head[1][along] * head[1][along] + head[2][along] * head[2][along]);
         const float axis[3] = {head[0][along] / length, head[1][along] / length, head[2][along] / length};
-        axisRotation(axis, roll, world);
+        BoneMath::RotationAbout(axis, roll * (Q_PI / 180.f), world);
     }
     if (turnUp != 0.f)
     {
         const float up[3] = {0.f, 0.f, 1.f};
         float turn[3][3];
-        axisRotation(up, turnUp, turn);
-        multiply(turn, world, world);
+        BoneMath::RotationAbout(up, turnUp * (Q_PI / 180.f), turn);
+        BoneMath::Multiply(turn, world, world);
     }
     // Back under the parent: parent^-1 * world * head, the parent's inverse its transpose over its scale squared.
     float turned[3][3];
-    multiply(world, head, turned);
+    BoneMath::Multiply(world, head, turned);
     for (int r = 0; r < 3; ++r)
     {
         for (int c = 0; c < 3; ++c)
@@ -3617,21 +3570,16 @@ void TurnHeadInWorld(const float parent[3][4], float local[3][4], const vec3_t a
 }
 
 // HeadTurnBones: "Bip01 Head", then each bone it hangs from while it is the next of the Biped's neck and spine.
-void FindHeadTurnBones(const Bone_t* bones, int numBones, short (&found)[4])
+void FindHeadTurnBones(const BMD& model, short (&found)[4])
 {
     constexpr const char* Chain[] = {"Bip01 Head", "Bip01 Neck", "Bip01 Spine1", "Bip01 Spine"};
     for (short& bone : found)
     {
         bone = -1;
     }
-    int bone = -1;
-    for (int i = 0; i < numBones && bone < 0; ++i)
-    {
-        if (!bones[i].Dummy && strcmp(bones[i].Name, Chain[0]) == 0)
-        {
-            bone = i;
-        }
-    }
+    const Bone_t* bones = model.Bones;
+    const int numBones = model.NumBones;
+    int bone = model.FindBone(Chain[0]);
     for (int link = 0; link < 4; ++link)
     {
         if (bone < 0 || bone >= numBones || bones[bone].Dummy || strcmp(bones[bone].Name, Chain[link]) != 0)
@@ -3643,6 +3591,18 @@ void FindHeadTurnBones(const Bone_t* bones, int numBones, short (&found)[4])
     }
 }
 } // namespace
+
+int BMD::FindBone(const char* name) const
+{
+    for (int i = 0; i < NumBones; ++i)
+    {
+        if (!Bones[i].Dummy && strcmp(Bones[i].Name, name) == 0)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
 
 bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAlloc)
 {
@@ -3891,16 +3851,8 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
         }
     }
 
-    FindHeadTurnBones(Bones, NumBones, HeadTurnBones);
-    PonytailBone = -1;
-    for (int i = 0; i < NumBones; ++i)
-    {
-        if (!Bones[i].Dummy && strcmp(Bones[i].Name, "Bip01 Ponytail1") == 0)
-        {
-            PonytailBone = static_cast<short>(i);
-            break;
-        }
-    }
+    FindHeadTurnBones(*this, HeadTurnBones);
+    PonytailBone = static_cast<short>(FindBone("Bip01 Ponytail1"));
     Init(false);
 
     m_bCompletedAlloc = true;

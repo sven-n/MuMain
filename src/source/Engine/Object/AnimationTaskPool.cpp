@@ -155,8 +155,7 @@ void AnimationTaskPool::DispatchCharacters(std::span<CHARACTER* const> activeCha
                 OBJECT* o = &c->Object;
                 if (!o->Live || !o->Visible) continue;
 
-                PoseBlend blend;
-                AnimateCharacterBones(o, c->TurnLag, c->SnapTurnOffset, CharacterPoseFade(c, blend));
+                AnimateCharacterBones(o);
             }
         };
 

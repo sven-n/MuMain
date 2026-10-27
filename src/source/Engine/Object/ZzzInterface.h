@@ -6,8 +6,6 @@
 #define TRADELIMITLEVEL		( 6 )
 
 extern bool WhisperEnable;
-// Whether the hero is glancing around idly now (its head on no one, and not on the cursor).
-bool HeroIsGlancing();
 
 extern bool LockInputStatus;
 

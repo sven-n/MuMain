@@ -31,10 +31,7 @@ void MoveCharacterClient(CHARACTER* cc);
 void MoveCharactersClient();
 void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters);
 void WaitCharactersAnimation();
-// `turnLag`: how far the ponytail trails behind the body's turn (CHARACTER::TurnLag), and `facingOffset` how far the
-// drawn body is behind its facing (CHARACTER::SnapTurnOffset), in degrees.
-void AnimateCharacterBones(OBJECT* o, float turnLag = 0.f, float facingOffset = 0.f,
-                           const PoseBlend* blend = nullptr);
+void AnimateCharacterBones(OBJECT* o);
 
 extern size_t g_LastActiveCharacterCount;
 extern bool g_LastAnimationWasParallel;
@@ -65,43 +62,8 @@ void MoveCharacterPosition(CHARACTER* c);
 // Moves the character one frame along `heading` (a walking character's MoveHeading) instead of its facing, at `pace`
 // of its speed (StepMomentum's).
 void MoveCharacterPosition(CHARACTER* c, float heading, float pace = 1.f);
-// A walking character's momentum, one frame: the way it really moves this frame (in `heading`, MoveHeading coming in)
-// and the share of its speed it has. Turning back (more than a right angle) it slows to a stop the way it was going
-// before it takes the new way; from rest, and after that stop, it speeds up. Gentler turns follow at once.
-float StepMomentum(CHARACTER* c, float& heading);
-// A flying winged player's bank into a turn and slow up-and-down drift, faded in and out (each frame, everyone).
-void UpdateFlightFeel(CHARACTER* c);
-// A slope under a player (each frame, everyone): on foot it leans a little into a climb while it walks; riding, the
-// mount (and the rider on it) follows the slope, nose up uphill.
-void UpdateSlopeLean(CHARACTER* c);
-// Puts a player's feet on the ground under them (a slope, a step), in its bones as just built in model space: the body
-// lowered as far as the lower foot needs, each leg bent to reach (two bones, the knee kept pointing as it did).
-// Players on foot only.
-void PlaceFeet(const CHARACTER* c, float (*bones)[3][4]);
-// A mount's lean into a turn from its rider's (UpdateFlightFeel leans a rider a share of the mount's).
-float MountLeanFromRider(float riderLean);
-// The wings and the ponytail trailing a little behind the body's turn and settling after it (each frame, everyone).
-void UpdateTurnLag(CHARACTER* c);
-// A sudden turn of the facing (an attack snapping to its target) drawn as a quick eased turn instead (each frame,
-// everyone): the facing itself, which the attack and its effects aim by, still turns at once.
-void UpdateSnapTurn(CHARACTER* c);
 // The client character whose object `o` is, or nullptr (a mount, an item, a map object).
 CHARACTER* CharacterOfObject(const OBJECT* o);
-// The pose a character is fading out of (UpdatePoseFade), or nullptr: `out` is filled in and returned.
-const PoseBlend* CharacterPoseFade(const CHARACTER* c, PoseBlend& out);
-// Who the character's head looks at, if anyone (each frame): a player looks at what it attacks or the nearest enemy in
-// sight in a combat zone, else the nearest NPC, else another player passing by; a monster at its target; an NPC at the
-// hero passing by.
-const CHARACTER* UpdateLookAt(CHARACTER* c);
-// Turns the head toward `target`, at most `maxDegrees` to either side.
-void LookTowards(OBJECT* o, const CHARACTER* target, float maxDegrees);
-// Nods, from the hero's point of view: a player or NPC that has looked at the hero for a moment nods once, and the
-// hero turns its head to it and nods back. RemoveNod takes last frame's nod off the head before the head eases to its
-// target; UpdateNod moves the nods on and puts this frame's back (each frame, everyone).
-void RemoveNod(CHARACTER* c);
-void UpdateNod(CHARACTER* c);
-// Who the hero is turning its head to, to nod back (MoveHero's head), or nullptr.
-const CHARACTER* HeroNodAttention();
 void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter = NULL, OBJECT* pHelper = NULL);
 void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCharacter = nullptr,
                            OBJECT* pHelper = nullptr);

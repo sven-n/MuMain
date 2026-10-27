@@ -513,7 +513,7 @@ void DefaultCamera::AdjustHeroHeight()
         Hero->Object.Position[2] = baseHeight;
     }
     // A flying hero's drift up and down (UpdateFlightFeel) stays in its height.
-    Hero->Object.Position[2] += Hero->FlightHoverApplied;
+    Hero->Object.Position[2] += Hero->Motion.FlightHoverApplied;
 
     // Compute target mount offset and lerp for camera
     float targetOffset = GetTargetMountOffset();
@@ -599,7 +599,7 @@ void DefaultCamera::CalculateCameraPosition()
     if (!CCameraMove::GetInstancePtr()->IsTourMode())
     {
         // Without the flight's drift, so the camera stays steady while the hero bobs.
-        m_State.Position[2] = Hero->Object.Position[2] - Hero->FlightHoverApplied;
+        m_State.Position[2] = Hero->Object.Position[2] - Hero->Motion.FlightHoverApplied;
     }
 
     if ((TerrainWall[iIndex] & TW_HEIGHT) == TW_HEIGHT)

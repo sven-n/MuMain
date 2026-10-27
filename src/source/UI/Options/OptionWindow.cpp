@@ -14,6 +14,7 @@
 #include "Render/Look/TuningSetting.h"
 #include "Render/Lighting/DynamicLightsSetting.h"
 #include "Render/Lighting/EnhancedLightingSetting.h"
+#include "Engine/Object/EnhancedMovement.h"
 #include "Render/Lighting/LightMoodScales.h"
 #include "Render/PostProcessing/PostProcessingSetting.h"
 #include "UI/Options/TuningRows.h"
@@ -444,6 +445,8 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("look_light_mood_label", &model.lookLightMoodLabel);
     c.Bind("look_post_processing_label", &model.lookPostProcessingLabel);
     c.Bind("enhanced_graphics_label", &model.enhancedGraphicsLabel);
+    c.Bind("enhanced_movement", &model.enhancedMovement);
+    c.Bind("enhanced_movement_label", &model.enhancedMovementLabel);
     auto tuningRow = c.RegisterStruct<TuningRowModel>();
     tuningRow.RegisterMember("control", &TuningRowModel::control);
     tuningRow.RegisterMember("label", &TuningRowModel::label);
@@ -566,6 +569,9 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.BindEventCallback("option_toggle_enhanced_graphics",
                         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                         { RmlToggleEnhancedGraphics(); });
+    c.BindEventCallback("option_toggle_enhanced_movement",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { RmlToggleEnhancedMovement(); });
     c.BindEventCallback("option_toggle_enhanced_feature",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
         {
@@ -1113,6 +1119,14 @@ void mu::ui::window::COptionWindow::RmlToggleEnhancedFeature(int feature)
     if (chosen == EnhancedFeature::DynamicLights && !Render::Look::EnhancedFeatureChosen(EnhancedFeature::Lighting))
         return; // dynamic lights act only with Enhanced lighting
     Render::Look::ChooseEnhancedFeature(chosen, !Render::Look::EnhancedFeatureChosen(chosen));
+}
+
+void mu::ui::window::COptionWindow::RmlToggleEnhancedMovement()
+{
+    GameConfig& config = GameConfig::GetInstance();
+    config.SetEnhancedMovement(!config.GetEnhancedMovement());
+    config.Save();
+    Engine::Characters::SetEnhancedMovementEnabled(config.GetEnhancedMovement());
 }
 
 void mu::ui::window::COptionWindow::RmlToggleTuningGroup(int group)
@@ -1743,6 +1757,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     SyncLabel(model.lookDynamicLightsLabel, "look_dynamic_lights_label", I18N::Game::DynamicLights);
     SyncLabel(model.lookLightMoodLabel, "look_light_mood_label", I18N::Game::LightMood);
     SyncLabel(model.lookPostProcessingLabel, "look_post_processing_label", I18N::Game::BloomAndColourGrading);
+    SyncLabel(model.enhancedMovementLabel, "enhanced_movement_label", I18N::Game::EnhancedMovement);
     SyncLabel(model.antialiasingRowLabel, "antialiasing_row_label", I18N::Game::AntiAliasing);
     SyncLabel(model.antialiasingTooltip, "antialiasing_tooltip", I18N::Game::AntiAliasingTooltip);
     SyncLabel(model.anisotropyRowLabel, "anisotropy_row_label", I18N::Game::AnisotropicFiltering);
@@ -1859,6 +1874,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
         syncFlag(model.lookPostProcessing, "look_post_processing", EnhancedFeatureChosen(EnhancedFeature::PostProcessing));
         syncFlag(model.lookFeaturesLocked, "look_features_locked", !enhancedGraphics);
         syncFlag(model.lookDynamicLightsLocked, "look_dynamic_lights_locked", !enhancedGraphics || !lighting);
+        syncFlag(model.enhancedMovement, "enhanced_movement", Engine::Characters::EnhancedMovementEnabled());
     }
     SyncTuningModel(model);
 

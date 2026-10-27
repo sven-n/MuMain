@@ -13,6 +13,7 @@
 #include "Core/Utilities/FrameProfiler.h"
 #include <optional>
 #include "Engine/Object/ZzzCharacter.h"
+#include "Engine/Object/Movement/MovementBones.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/AI/ZzzAI.h"
@@ -268,33 +269,6 @@ void BodyLight(OBJECT* o, BMD* b)
     }
 }
 
-namespace
-{
-// Builds an object's bones for drawing (Calc_RenderObject, Calc_ObjectAnimation; AnimateCharacterBones builds a
-// character's the same way ahead of time): a character's body a little behind a sudden turn (UpdateSnapTurn) and its
-// ponytail trailing a turn (UpdateTurnLag); a mount's head turned where its rider looks and rolled when it shakes
-// (MountHeadTurn, MountHeadRoll); a character fading between ways of moving (CharacterPoseFade).
-void AnimateObjectBones(OBJECT* o, BMD* b, bool translate)
-{
-    const CHARACTER* character = CharacterOfObject(o);
-    vec3_t angle = {o->Angle[0], o->Angle[1], o->Angle[2] + (character != nullptr ? character->SnapTurnOffset : 0.f)};
-    const float turnLag = character != nullptr ? character->TurnLag : 0.f;
-    const bool mount = o >= Mounts && o < Mounts + MAX_MOUNTS;
-    const float headTurn = mount ? MountHeadTurn[o - Mounts] : 0.f;
-    const float headRoll = mount ? MountHeadRoll[o - Mounts] : 0.f;
-    // And a character fading from one way of moving into the next (CharacterPoseFade).
-    PoseBlend blend;
-    float (*bones)[3][4] = o->EnableBoneMatrix ? o->BoneTransform : BoneTransform;
-    b->Animation(bones, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, angle, o->HeadAngle, false,
-                 !translate, nullptr, -1, MAX_BONES, turnLag, headTurn, headRoll, CharacterPoseFade(character, blend));
-    // A player's feet on the ground under them (the bones are in model space when `translate` is set).
-    if (character != nullptr && translate)
-    {
-        PlaceFeet(character, bones);
-    }
-}
-} // namespace
-
 extern float BoneScale;
 
 bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
@@ -345,7 +319,7 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
 #ifdef MU_ENABLE_CONTROL_SOCKET
     const bool checkBones = BeginPrepassBoneCheck(o, b->NumBones);
 #endif
-    AnimateObjectBones(o, b, Translate);
+    Engine::Characters::AnimateBones(o, *b, o->EnableBoneMatrix ? o->BoneTransform : BoneTransform, !Translate);
 
 #ifdef MU_ENABLE_CONTROL_SOCKET
     if (checkBones) EndPrepassBoneCheck(o, b->NumBones);
@@ -450,7 +424,7 @@ bool Calc_ObjectAnimation(OBJECT* o, bool Translate, int Select)
 #ifdef MU_ENABLE_CONTROL_SOCKET
     const bool checkBones = BeginPrepassBoneCheck(o, b->NumBones);
 #endif
-    AnimateObjectBones(o, b, Translate);
+    Engine::Characters::AnimateBones(o, *b, o->EnableBoneMatrix ? o->BoneTransform : BoneTransform, !Translate);
 #ifdef MU_ENABLE_CONTROL_SOCKET
     if (checkBones) EndPrepassBoneCheck(o, b->NumBones);
 #endif

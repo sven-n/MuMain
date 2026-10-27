@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cmath>
+#include "Render/Models/BoneMath.h"
 
 // How a character's head turn (OBJECT::HeadAngle) spreads into the neck and spine of a Biped skeleton (Bip01 Head on
 // Neck, Spine1 and Spine), so the shoulders follow the head as a person's do. BMD::Animation turns the bones by it,
@@ -58,15 +58,6 @@ inline BoneTurns SplitTurn(float yaw, bool hasNeck, bool hasSpine1, bool hasSpin
 // hanging from the root (wings) follows a turn of the spine above it.
 inline void TurnAboutUpright(float matrix[3][4], float radians, float pivotX, float pivotY)
 {
-    const float cosine = std::cos(radians);
-    const float sine = std::sin(radians);
-    for (int column = 0; column < 4; ++column)
-    {
-        const bool position = column == 3;
-        const float x = matrix[0][column] - (position ? pivotX : 0.f);
-        const float y = matrix[1][column] - (position ? pivotY : 0.f);
-        matrix[0][column] = cosine * x - sine * y + (position ? pivotX : 0.f);
-        matrix[1][column] = sine * x + cosine * y + (position ? pivotY : 0.f);
-    }
+    BoneMath::TurnInPlane(matrix, 0, 1, radians, true, pivotX, pivotY);
 }
 } // namespace Render::Models::HeadTurn

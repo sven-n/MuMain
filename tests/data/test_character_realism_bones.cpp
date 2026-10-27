@@ -4,6 +4,7 @@
 
 #include "TestModelSlots.h"
 
+#include "Engine/Object/Movement/FootPlacement.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 
@@ -170,7 +171,7 @@ TEST_CASE("Feet on flat ground leave the bones as animated [data][animation][fee
     player.Build(bones, 0.f);
     std::memcpy(animated, bones, sizeof(bones));
 
-    PlaceFeet(&c, bones);
+    Engine::Characters::PlaceFeet(&c, bones);
     CHECK(std::memcmp(bones, animated, sizeof(float) * 12 * player.model.NumBones) == 0);
 }
 
@@ -213,7 +214,7 @@ TEST_CASE("A foot over lower ground reaches down to it, the body lowered and the
     const int lower = rise[0] < rise[1] ? 0 : 1;
     REQUIRE(rise[lower] < 0.f);
 
-    PlaceFeet(&c, bones);
+    Engine::Characters::PlaceFeet(&c, bones);
 
     // The body (the pelvis) goes down as far as the lower foot's ground.
     const int pelvis = model.Bones[legs[0][0]].Parent;
@@ -363,7 +364,7 @@ TEST_CASE("The realism steps' cost in a player's bone build (benchmark) [data][a
     const double ponytail = NanosecondsPerCall(Calls, [&](int) { build(40.f, 8.f); });
     CHARACTER& walker = StandingPlayer();
     build(0.f, 0.f);
-    const double feetFlat = NanosecondsPerCall(Calls, [&](int) { PlaceFeet(&walker, bones); });
+    const double feetFlat = NanosecondsPerCall(Calls, [&](int) { Engine::Characters::PlaceFeet(&walker, bones); });
     double feetSlope = 0.;
     {
         const SideSlope slope(30.f);
@@ -371,7 +372,7 @@ TEST_CASE("The realism steps' cost in a player's bone build (benchmark) [data][a
                                        [&](int)
                                        {
                                            build(0.f, 0.f);
-                                           PlaceFeet(&walker, bones);
+                                           Engine::Characters::PlaceFeet(&walker, bones);
                                        }) -
                     plain;
     }

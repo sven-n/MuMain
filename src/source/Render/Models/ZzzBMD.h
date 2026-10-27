@@ -325,6 +325,8 @@ public:
                    bool Translate = true, const float (*ExtParentMatrix)[4] = nullptr, short CurrentAction = -1,
                    int BoneMatrixCapacity = MAX_BONES, float PonytailLag = 0.f, float HeadTurnUp = 0.f,
                    float HeadRoll = 0.f, const PoseBlend* Blend = nullptr);
+    // The first bone called `name` (not a dummy), or -1.
+    int FindBone(const char* name) const;
     void InterpolationTrans(float(*Mat1)[4], float(*TransMat2)[4], float _Scale);
     void Transform(float(*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t BoundingBoxMax, OBB_t* OBB, bool Translate = false, float _Scale = 0.0f);
     // DXP-20 increment 2: the state-stash + OBB-from-args portion of Transform(), without the

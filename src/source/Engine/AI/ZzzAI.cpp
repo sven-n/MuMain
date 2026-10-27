@@ -27,6 +27,9 @@
 #include "Scenes/SceneCore.h"
 #include "Audio/DSPlaySound.h"
 #include "Engine/Pathing/ZzzPath.h"
+#include "Engine/Object/EnhancedMovement.h"
+#include "Engine/Object/Movement/FrameTime.h"
+#include "Engine/Object/Movement/LookAt.h"
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
 
@@ -368,7 +371,8 @@ void LookAtTarget(OBJECT* o, const CHARACTER* targetCharacter)
     if (deltaAngle < 90.f)
     {
         o->HeadTargetAngle[0] = o->Angle[2] - angle;
-        o->HeadTargetAngle[1] = (targetObject->Position[2] - (o->Position[2] + 50.f)) * 0.2f;
+        o->HeadTargetAngle[1] = (targetObject->Position[2] - (o->Position[2] + Engine::Characters::LookEyeHeight)) *
+                                Engine::Characters::LookPitchPerUnit;
         if (o->HeadTargetAngle[0] < 0)
         {
             o->HeadTargetAngle[0] += 360.f;
@@ -473,9 +477,15 @@ void Damage(vec3_t soPosition, CHARACTER* tc, float AttackRange, int AttackPoint
 PATH _path;
 PATH* path = &_path;
 
+namespace
+{
+// A turn whose facing is within this many degrees of where it's going has arrived.
+constexpr float TurnArrivedDegrees = 0.5f;
+} // namespace
+
 void TurnTowardsMoveHeading(CHARACTER* c)
 {
-    const float seconds = FPS_ANIMATION_FACTOR / static_cast<float>(REFERENCE_FPS);
+    const float seconds = Engine::Characters::FrameSeconds();
     c->Object.Angle[2] = StepEasedTurn(c->Object.Angle[2], c->MoveHeading, c->TurnSpeed, seconds,
                                        WalkTurnDegreesPerSecond, WalkTurnAcceleration);
 }
@@ -483,8 +493,14 @@ void TurnTowardsMoveHeading(CHARACTER* c)
 void StartStandingTurn(CHARACTER* c, float angle)
 {
     c->MoveHeading = angle;
+    if (!Engine::Characters::EnhancedMovementEnabled())
+    {
+        c->Object.Angle[2] = angle;
+        c->TurnPending = false;
+        return;
+    }
     c->TurnLeftAt = c->Object.Angle[2];
-    c->TurnPending = FarAngle(c->Object.Angle[2], angle) > 0.5f;
+    c->TurnPending = FarAngle(c->Object.Angle[2], angle) > TurnArrivedDegrees;
 }
 
 void FinishPendingTurn(CHARACTER* c)
@@ -494,6 +510,22 @@ void FinishPendingTurn(CHARACTER* c)
         return;
     }
     OBJECT* o = &c->Object;
+    if (!Engine::Characters::EnhancedMovementEnabled())
+    {
+        // The turn ends at once, facing where it was going unless something else turned it since.
+        if (!c->Movement && o->Angle[2] == c->TurnLeftAt)
+        {
+            o->Angle[2] = c->MoveHeading;
+        }
+        if (c->TurnAction != -1 && o->CurrentAction == c->TurnAction)
+        {
+            SetPlayerStop(c);
+        }
+        c->TurnPending = false;
+        c->TurnAction = -1;
+        c->TurnSpeed = 0.f;
+        return;
+    }
     // Something else turned the character or gave it another action since (walking, an attack, a skill, the
     // server's direction): that wins, and the turn ends where it is.
     const bool stepping = c->TurnAction != -1;
@@ -515,13 +547,32 @@ void FinishPendingTurn(CHARACTER* c)
     }
     TurnTowardsMoveHeading(c);
     c->TurnLeftAt = o->Angle[2];
-    c->TurnPending = FarAngle(o->Angle[2], c->MoveHeading) > 0.5f;
+    c->TurnPending = FarAngle(o->Angle[2], c->MoveHeading) > TurnArrivedDegrees;
     if (!c->TurnPending)
     {
         c->TurnAction = -1;
         SetPlayerStop(c);
     }
 }
+
+namespace
+{
+// Without Enhanced Movement: the facing snaps toward the next point on a turn of 45 degrees or more, and otherwise
+// turns half the way.
+void SnapTowardsPathPoint(OBJECT* o, float x, float y)
+{
+    float Angle = CreateAngle(o->Position[0], o->Position[1], x, y);
+    float TargetAngle = FarAngle(o->Angle[2], Angle);
+    if (TargetAngle >= 45.f)
+    {
+        o->Angle[2] = Angle;
+    }
+    else
+    {
+        o->Angle[2] = TurnAngle2(o->Angle[2], Angle, TargetAngle * 0.5f);
+    }
+}
+} // namespace
 
 bool MovePath(CHARACTER* c, bool Turn)
 {
@@ -531,10 +582,10 @@ bool MovePath(CHARACTER* c, bool Turn)
     c->TurnPending = false;
     // The path is followed from the character's own position: without the sideways shift a flying bank adds for its
     // pivot (UpdateFlightFeel puts it back), which would otherwise turn the heading and so the bank, rocking it.
-    c->Object.Position[0] -= c->FlightPivotShift[0];
-    c->Object.Position[1] -= c->FlightPivotShift[1];
-    c->FlightPivotShift[0] = 0.f;
-    c->FlightPivotShift[1] = 0.f;
+    c->Object.Position[0] -= c->Motion.FlightPivotShift[0];
+    c->Object.Position[1] -= c->Motion.FlightPivotShift[1];
+    c->Motion.FlightPivotShift[0] = 0.f;
+    c->Motion.FlightPivotShift[1] = 0.f;
 
     std::lock_guard<SpinLock> guard(p->Lock);
 
@@ -601,18 +652,28 @@ bool MovePath(CHARACTER* c, bool Turn)
                 }
             }
         }
+        if (!Engine::Characters::EnhancedMovementEnabled())
+        {
+            if (!Success && Turn)
+            {
+                SnapTowardsPathPoint(o, cx, cy);
+            }
+            // It travels along its facing.
+            c->MoveHeading = o->Angle[2];
+            c->TurnSpeed = 0.f;
+        }
         // The character travels straight toward the point (MoveCharacterPosition along MoveHeading), so its path
         // is as before; only its facing turns smoothly, where it used to snap on a turn of 45 degrees or more.
-        if (!Success)
+        else if (!Success)
         {
             c->MoveHeading = CreateAngle(o->Position[0], o->Position[1], cx, cy);
         }
-        if (Turn)
+        if (Turn && Engine::Characters::EnhancedMovementEnabled())
         {
             TurnTowardsMoveHeading(c);
             if (Success)
             {
-                c->TurnPending = FarAngle(o->Angle[2], c->MoveHeading) > 0.5f;
+                c->TurnPending = FarAngle(o->Angle[2], c->MoveHeading) > TurnArrivedDegrees;
                 c->TurnLeftAt = o->Angle[2];
             }
         }

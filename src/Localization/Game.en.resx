@@ -1434,6 +1434,9 @@
   <data name="Light Mood" xml:space="preserve">
     <value>Darker map light</value>
   </data>
+  <data name="Enhanced Movement" xml:space="preserve">
+    <value>Enhanced movement</value>
+  </data>
   <data name="Bloom And Colour Grading" xml:space="preserve">
     <value>Bloom and colour grading</value>
   </data>
