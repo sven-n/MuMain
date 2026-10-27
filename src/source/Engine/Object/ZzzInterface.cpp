@@ -1997,8 +1997,16 @@ void SendMove(CHARACTER* c, OBJECT* o)
     }
 }
 
-int StandTime = 0;
-int HeroAngle = 0;
+namespace
+{
+// The standing hero turns to face the cursor when it stays this far from where he faces (past what the head and
+// shoulders follow) for this long, stepping around (StartStandingTurn); a passing cursor turns only the head.
+constexpr float CursorTurnDegrees = 90.f;
+constexpr float CursorTurnDelaySeconds = 0.5f;
+float s_cursorAwaySeconds = 0.f;
+// A turn toward the cursor is under way: it follows the cursor, and the server hears the new facing when it ends.
+bool s_turningToCursor = false;
+} // namespace
 
 bool CheckMacroLimit(wchar_t* Text)
 {
@@ -2867,7 +2875,6 @@ void CheckGate()
                                     g_bWhileMovingZone = TRUE;
                                 }
 
-                                StandTime = 0;
                             }
                         }
                     }
@@ -2977,7 +2984,6 @@ void MoveHero()
 
     int Angle;
     bool bLookAtMouse = true;
-    bool NoAutoAttacking = false;
 
     if (g_isCharacterBuff(o, eDeBuff_Stun)
         || g_isCharacterBuff(o, eDeBuff_Sleep)
@@ -3022,8 +3028,6 @@ void MoveHero()
         }
         Hero->Object.HeadTargetAngle[0] = (float)Angle;
         Hero->Object.HeadTargetAngle[1] = (HeroY - mousePosY) * 0.05f;
-
-        NoAutoAttacking = true;
     }
     else
     {
@@ -3033,6 +3037,9 @@ void MoveHero()
 
     if (c->Movement)
     {
+        // Walking ends a turn toward the cursor: the walk's own turn takes over.
+        s_turningToCursor = false;
+        s_cursorAwaySeconds = 0.f;
         if (g_isCharacterBuff(o, eDeBuff_Harden) || g_isCharacterBuff(o, eDeBuff_CursedTempleRestraint))
         {
             SetPlayerStop(c);
@@ -3044,8 +3051,6 @@ void MoveHero()
             {
                 c->Movement = false;
                 SetPlayerStop(c);
-                HeroAngle = (int)c->Object.Angle[2];
-                StandTime = 0;
 
                 if (c->MovementType == MOVEMENT_OPERATE)
                     Action(c, o, false);
@@ -3058,40 +3063,62 @@ void MoveHero()
             else
             {
                 g_CharacterUnRegisterBuff((&Hero->Object), eBuff_CrywolfHeroContracted);
-                MoveCharacterPosition(c);
+                MoveCharacterPosition(c, c->MoveHeading);
             }
         }
     }
     else
     {
-        StandTime++;
 
-        if (StandTime >= 40 && !MouseOnWindow && Hero->Dead == 0 &&
-            o->CurrentAction != PLAYER_POSE1 && o->CurrentAction != PLAYER_POSE_FEMALE1 &&
-            o->CurrentAction != PLAYER_SIT1 && o->CurrentAction != PLAYER_SIT_FEMALE1 && NoAutoAttacking &&
-            o->CurrentAction != PLAYER_ATTACK_TELEPORT &&
-            o->CurrentAction != PLAYER_ATTACK_RIDE_TELEPORT &&
-            o->CurrentAction != PLAYER_FENRIR_ATTACK_DARKLORD_TELEPORT &&
-            o->CurrentAction != PLAYER_SKILL_ATT_UP_OURFORCES &&
-            o->CurrentAction != PLAYER_SKILL_HP_UP_OURFORCES &&
-            Hero->AttackTime == 0)
+        // The head follows the cursor up to its limit; the body turns only when the cursor stays well behind that
+        // (it used to snap to the cursor's eighth of the circle every 40 frames).
+        const bool mayTurn = !MouseOnWindow && Hero->Dead == 0 && bLookAtMouse &&
+                             o->CurrentAction != PLAYER_POSE1 && o->CurrentAction != PLAYER_POSE_FEMALE1 &&
+                             o->CurrentAction != PLAYER_SIT1 && o->CurrentAction != PLAYER_SIT_FEMALE1 &&
+                             o->CurrentAction != PLAYER_ATTACK_TELEPORT &&
+                             o->CurrentAction != PLAYER_ATTACK_RIDE_TELEPORT &&
+                             o->CurrentAction != PLAYER_FENRIR_ATTACK_DARKLORD_TELEPORT &&
+                             o->CurrentAction != PLAYER_SKILL_ATT_UP_OURFORCES &&
+                             o->CurrentAction != PLAYER_SKILL_HP_UP_OURFORCES &&
+                             o->CurrentAction != PLAYER_ATTACK_SKILL_SWORD2 && Hero->AttackTime == 0;
+        // The cursor's direction, only when it can matter. CreateAngle's arguments are swapped vs the head's aim
+        // above and the result negated, so the camera's yaw enters with the opposite sign.
+        float cursorAngle = 0.f;
+        if (mayTurn || s_turningToCursor)
         {
-            StandTime = 0;
-            // CreateAngle args are swapped vs the head-aim case above and the result is
-            // negated, so the camera-yaw correction enters with the same magnitude but
-            // appears with opposite sign in the sum (i.e. -45 became +45 for DefaultCamera).
-            HeroAngle = -(int)(CreateAngle((float)MouseX, (float)MouseY, (float)HeroX, (float)HeroY) + g_Camera.Angle[2]) + 360;
-            HeroAngle %= 360;
-            BYTE Angle1 = ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8);
-            BYTE Angle2 = ((BYTE)(((float)HeroAngle + 22.5f) / 360.f * 8.f + 1.f) % 8);
-            if (Angle1 != Angle2)
+            cursorAngle =
+                -(CreateAngle((float)MouseX, (float)MouseY, (float)HeroX, (float)HeroY) + g_Camera.Angle[2]) + 360.f;
+            cursorAngle = std::fmod(cursorAngle, 360.f);
+        }
+        if (s_turningToCursor)
+        {
+            if (c->TurnPending && mayTurn)
             {
-                if (o->CurrentAction != PLAYER_ATTACK_SKILL_SWORD2)
-                {
-                    Hero->Object.Angle[2] = (float)HeroAngle;
-                }
-                SendRequestAction(Hero->Object, AT_STAND1);
+                c->MoveHeading = cursorAngle;
             }
+            else
+            {
+                // Done (or cut short by an attack, a sit, a window): the others see where he faces now.
+                s_turningToCursor = false;
+                if (!c->TurnPending)
+                {
+                    SendRequestAction(Hero->Object, AT_STAND1);
+                }
+            }
+        }
+        else if (mayTurn && FarAngle(o->Angle[2], cursorAngle) > CursorTurnDegrees)
+        {
+            s_cursorAwaySeconds += FPS_ANIMATION_FACTOR / static_cast<float>(REFERENCE_FPS);
+            if (s_cursorAwaySeconds >= CursorTurnDelaySeconds)
+            {
+                s_cursorAwaySeconds = 0.f;
+                StartStandingTurn(c, cursorAngle);
+                s_turningToCursor = c->TurnPending;
+            }
+        }
+        else
+        {
+            s_cursorAwaySeconds = 0.f;
         }
 
         GameLogic::Combat::UseSkillRagePosition(c);

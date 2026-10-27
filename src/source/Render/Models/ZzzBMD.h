@@ -197,6 +197,9 @@ public:
     bool          ContrastEnable;
     vec3_t        BodyLight;
     int           BoneHead;
+    // A Biped's head and the neck and spine bones below it (Bip01 Head, Neck, Spine1, Spine; -1 where the chain
+    // stops), found when the model loads: the head's turn spreads into them (HeadTurn.h) while BoneHead is that head.
+    short         HeadTurnBones[4] = {-1, -1, -1, -1};
 
     int           BoneFoot[4];
     float         BodyScale;

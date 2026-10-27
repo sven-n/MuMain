@@ -103,6 +103,34 @@ float FarAngle(float angle1, float angle2, bool absolute)
     return absolute ? std::fabs(delta) : delta;
 }
 
+float StepEasedTurn(float angle, float target, float& speed, float seconds, float maxSpeed, float acceleration)
+{
+    if (seconds <= 0.f)
+    {
+        return NormalizeAngleDegrees(angle);
+    }
+    const float gap = SignedAngleDelta(angle, target);
+    if (std::fabs(gap) < 0.01f)
+    {
+        speed = 0.f;
+        return NormalizeAngleDegrees(target);
+    }
+    // The fastest speed that still stops on the target when slowing down from here (v^2 = 2 a d), and no faster
+    // than maxSpeed; the speed moves toward it by at most the acceleration.
+    const float direction = gap > 0.f ? 1.f : -1.f;
+    const float wanted = direction * std::min(maxSpeed, std::sqrt(2.f * acceleration * std::fabs(gap)));
+    const float change = acceleration * seconds;
+    speed += std::clamp(wanted - speed, -change, change);
+    const float step = speed * seconds;
+    // A step past the target (the last frame of a turn) lands on it.
+    if ((step > 0.f) == (gap > 0.f) && std::fabs(step) >= std::fabs(gap))
+    {
+        speed = 0.f;
+        return NormalizeAngleDegrees(target);
+    }
+    return NormalizeAngleDegrees(angle + step);
+}
+
 int CalcAngle(float PositionX, float PositionY, float TargetX, float TargetY)
 {
     const float targetAngle = CreateAngle(PositionX, PositionY, TargetX, TargetY);

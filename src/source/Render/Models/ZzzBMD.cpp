@@ -19,6 +19,7 @@
 
 #include "Engine/Object/ZzzInfomation.h"
 #include "ZzzBMD.h"
+#include "Render/Models/HeadTurn.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -211,30 +212,65 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
         }
     }
 
-    // Pre-calculate Head bone quaternions ONCE outside loop
-    vec4_t headQ1, headQ2;
-    const bool hasHeadBone = (BoneHead >= 0 && BoneHead < NumBones && !Bones[BoneHead].Dummy);
-    if (hasHeadBone)
+    // The head's turn (HeadAngle), worked into the bones ONCE outside the loop. On a Biped skeleton (Bip01 Head on
+    // Neck, Spine1 and Spine) the neck and spine take a share of the turn to the side (HeadTurn.h), so the shoulders
+    // follow the head while the feet stay put; their share comes off the head's, which ends up turned as far as
+    // before. The nod (up and down) is the head's alone. Each bone turns about its own X axis, which runs along a
+    // Biped spine.
+    struct TurnedBone
     {
-        const Bone_t* hb = &Bones[BoneHead];
-        const BoneMatrix_t* hbm1 = &hb->BoneMatrixes[PriorAction];
-        const BoneMatrix_t* hbm2 = &hb->BoneMatrixes[currentAction];
-
-        vec3_t Angle1, Angle2;
-        VectorCopy(hbm1->Rotation[PriorAnimationFrame], Angle1);
-        VectorCopy(hbm2->Rotation[currentAnimationFrame], Angle2);
+        int bone = -1;
+        float share = 0.f;
+        vec4_t q1, q2;
+    };
+    TurnedBone turned[4];
+    int turnedCount = 0;
+    // The bones turned lie between these: the loop below looks for a bone among them only in that range.
+    int turnedFirst = NumBones;
+    int turnedLast = -1;
+    const bool hasHeadBone = (BoneHead >= 0 && BoneHead < NumBones && !Bones[BoneHead].Dummy);
+    // A head looking straight ahead keeps the bones' own rotations: nothing to work out.
+    if (hasHeadBone && (HeadAngle[0] != 0.f || HeadAngle[1] != 0.f))
+    {
+        namespace HeadTurn = Render::Models::HeadTurn;
+        // The neck and spine found at load, while this model's head is the Biped's.
+        const short* chain = HeadTurnBones[0] == BoneHead ? HeadTurnBones : nullptr;
+        const HeadTurn::BoneTurns turns =
+            HeadTurn::SplitTurn(HeadTurn::SignedYaw(HeadAngle[0]), chain != nullptr && chain[1] >= 0,
+                                chain != nullptr && chain[2] >= 0, chain != nullptr && chain[3] >= 0);
+        const float shares[3] = {turns.neck, turns.spine1, turns.spine};
+        turned[turnedCount].bone = BoneHead;
+        turned[turnedCount++].share = turns.head;
+        for (int s = 0; chain != nullptr && s < 3 && chain[s + 1] >= 0; ++s)
+        {
+            turned[turnedCount].bone = chain[s + 1];
+            turned[turnedCount++].share = shares[s];
+        }
+        for (int t = 0; t < turnedCount; ++t)
+        {
+            turnedFirst = std::min(turnedFirst, turned[t].bone);
+            turnedLast = std::max(turnedLast, turned[t].bone);
+        }
 
         constexpr float radFactor = 1.0f / (180.f / Q_PI);
-        const float HeadAngleX = HeadAngle[0] * radFactor;
         const float HeadAngleY = HeadAngle[1] * radFactor;
-
-        Angle1[0] -= HeadAngleX;
-        Angle2[0] -= HeadAngleX;
-        Angle1[2] -= HeadAngleY;
-        Angle2[2] -= HeadAngleY;
-
-        AngleQuaternion(Angle1, headQ1);
-        AngleQuaternion(Angle2, headQ2);
+        for (int t = 0; t < turnedCount; ++t)
+        {
+            const Bone_t* tb = &Bones[turned[t].bone];
+            vec3_t Angle1, Angle2;
+            VectorCopy(tb->BoneMatrixes[PriorAction].Rotation[PriorAnimationFrame], Angle1);
+            VectorCopy(tb->BoneMatrixes[currentAction].Rotation[currentAnimationFrame], Angle2);
+            // `share` is this bone's part of the turn, in degrees.
+            Angle1[0] -= turned[t].share * radFactor;
+            Angle2[0] -= turned[t].share * radFactor;
+            if (t == 0)
+            {
+                Angle1[2] -= HeadAngleY;
+                Angle2[2] -= HeadAngleY;
+            }
+            AngleQuaternion(Angle1, turned[t].q1);
+            AngleQuaternion(Angle2, turned[t].q2);
+        }
     }
 
     const bool bLockPositions = (Actions[PriorAction].LockPositions || Actions[currentAction].LockPositions);
@@ -273,15 +309,16 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
         const float* q1;
         const float* q2;
 
-        if (i == BoneHead)
+        q1 = bm1->Quaternion[PriorAnimationFrame];
+        q2 = bm2->Quaternion[currentAnimationFrame];
+        for (int t = 0; i >= turnedFirst && i <= turnedLast && t < turnedCount; ++t)
         {
-            q1 = headQ1;
-            q2 = headQ2;
-        }
-        else
-        {
-            q1 = bm1->Quaternion[PriorAnimationFrame];
-            q2 = bm2->Quaternion[currentAnimationFrame];
+            if (turned[t].bone == i)
+            {
+                q1 = turned[t].q1;
+                q2 = turned[t].q2;
+                break;
+            }
         }
 
         vec4_t boneQuaternion;
@@ -3395,6 +3432,36 @@ bool DecryptModulusBody(unsigned char* fileData, int fileSize, int& ptr)
 }
 } // namespace
 
+namespace
+{
+// HeadTurnBones: "Bip01 Head", then each bone it hangs from while it is the next of the Biped's neck and spine.
+void FindHeadTurnBones(const Bone_t* bones, int numBones, short (&found)[4])
+{
+    constexpr const char* Chain[] = {"Bip01 Head", "Bip01 Neck", "Bip01 Spine1", "Bip01 Spine"};
+    for (short& bone : found)
+    {
+        bone = -1;
+    }
+    int bone = -1;
+    for (int i = 0; i < numBones && bone < 0; ++i)
+    {
+        if (!bones[i].Dummy && strcmp(bones[i].Name, Chain[0]) == 0)
+        {
+            bone = i;
+        }
+    }
+    for (int link = 0; link < 4; ++link)
+    {
+        if (bone < 0 || bone >= numBones || bones[bone].Dummy || strcmp(bones[bone].Name, Chain[link]) != 0)
+        {
+            return;
+        }
+        found[link] = static_cast<short>(bone);
+        bone = bones[bone].Parent;
+    }
+}
+} // namespace
+
 bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAlloc)
 {
     if (m_bCompletedAlloc)
@@ -3642,6 +3709,7 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
         }
     }
 
+    FindHeadTurnBones(Bones, NumBones, HeadTurnBones);
     Init(false);
 
     m_bCompletedAlloc = true;

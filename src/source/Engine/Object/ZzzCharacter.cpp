@@ -19,6 +19,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Models/ZzzBMD.h"
+#include "Render/Models/HeadTurn.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
@@ -2451,6 +2452,13 @@ bool CharacterAnimation(CHARACTER* c, OBJECT* o)
         if (o->CurrentAction == PLAYER_SKILL_HELL_BEGIN)
         {
             PlaySpeed /= 2.f;
+        }
+        // A standing turn's steps (the walk FinishPendingTurn plays) are slower than a walk's: the feet shuffle
+        // around rather than march.
+        constexpr float StandingTurnStepSpeed = 0.5f;
+        if (c->TurnAction != -1 && o->CurrentAction == c->TurnAction)
+        {
+            PlaySpeed *= StandingTurnStepSpeed;
         }
         if (o->Type != MODEL_PLAYER)
         {
@@ -6301,9 +6309,15 @@ float CharacterMoveSpeed(CHARACTER* c)
 
 void MoveCharacterPosition(CHARACTER* c)
 {
+    MoveCharacterPosition(c, c->Object.Angle[2]);
+}
+
+void MoveCharacterPosition(CHARACTER* c, float heading)
+{
     OBJECT* o = &c->Object;
     float Matrix[3][4];
-    AngleMatrix(o->Angle, Matrix);
+    const vec3_t direction = {o->Angle[0], o->Angle[1], heading};
+    AngleMatrix(direction, Matrix);
     vec3_t v, Velocity;
     Vector(0.f, -CharacterMoveSpeed(c), 0.f, v);
     VectorRotate(v, Matrix, Velocity);
@@ -6377,7 +6391,7 @@ void MoveMonsterClient(CHARACTER* c, OBJECT* o)
                 SetPlayerStop(c);
             }
 
-            MoveCharacterPosition(c);
+            MoveCharacterPosition(c, c->MoveHeading);
         }
     }
     else
@@ -6397,6 +6411,7 @@ void MoveCharacterClient(CHARACTER* cc)
         co->Visible = TestFrustrum2D(co->Position[0] * 0.01f, co->Position[1] * 0.01f, -20.f);
 
         MoveMonsterClient(cc, co);
+        FinishPendingTurn(cc);
         MoveCharacter(cc, co);
         MoveCharacterVisual(cc, co);
 
@@ -6927,6 +6942,31 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         for (int r = 0; r < 3; ++r)
             for (int c = 0; c < 4; ++c)
                 ParentMatrix[r][c] = o->BoneTransform[f->LinkBone][r][c];
+        // A player's wings hang from the root, not the back: they turn with the shoulders when the head's turn
+        // twists the spine (HeadTurn.h, as BMD::Animation turns the bones), about the upright through Spine1. A bone's
+        // turn about its X axis is the opposite way round from the world's upright, hence the minus.
+        if (o->Type == MODEL_PLAYER && f == &c->Wing)
+        {
+            static const int spine1Bone = []
+            {
+                const BMD& player = Models[MODEL_PLAYER];
+                for (int i = 0; i < player.NumBones; ++i)
+                {
+                    if (!player.Bones[i].Dummy && strcmp(player.Bones[i].Name, "Bip01 Spine1") == 0)
+                    {
+                        return i;
+                    }
+                }
+                return -1;
+            }();
+            namespace HeadTurn = Render::Models::HeadTurn;
+            const float shoulders = HeadTurn::ShouldersDegrees(HeadTurn::SignedYaw(o->HeadAngle[0]));
+            if (spine1Bone >= 0 && shoulders != 0.f)
+            {
+                HeadTurn::TurnAboutUpright(ParentMatrix, -shoulders * (Q_PI / 180.f),
+                                           o->BoneTransform[spine1Bone][0][3], o->BoneTransform[spine1Bone][1][3]);
+            }
+        }
     }
     if (Type == MODEL_BOSS_HEAD)
     {

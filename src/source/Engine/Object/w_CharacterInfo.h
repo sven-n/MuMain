@@ -170,6 +170,19 @@ public:
     wchar_t     ID[MAX_MONSTER_NAME + 1]{};
     char 		Movement;
     char		MovementType;
+    // The direction a walking character travels (MovePath, toward the next point of its path); its facing,
+    // Object.Angle[2], turns toward it smoothly instead of snapping.
+    float       MoveHeading = 0.f;
+    // A turn MovePath left unfinished when the walk ended: the facing keeps turning toward MoveHeading while the
+    // character stands, unless something else sets the facing first (TurnLeftAt is the facing it last set).
+    bool        TurnPending = false;
+    float       TurnLeftAt = 0.f;
+    // The walk animation a standing turn plays so the feet step around (-1: none yet); another action set meanwhile
+    // (an attack, sitting) ends the turn where it is.
+    int         TurnAction = -1;
+    // How fast the facing turns toward MoveHeading now, in degrees per second (signed): a turn speeds up and slows
+    // down (TurnTowardsMoveHeading) instead of starting and stopping at full speed.
+    float       TurnSpeed = 0.f;
     char		CollisionTime; // unused?
 
     short       GuildMarkIndex;

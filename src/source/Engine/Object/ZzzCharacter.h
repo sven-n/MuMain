@@ -59,6 +59,8 @@ void DeleteCloth(CHARACTER* c, OBJECT* o = NULL, PART_t* p2 = NULL);
 bool CheckFullSet(CHARACTER* c);
 
 void MoveCharacterPosition(CHARACTER* c);
+// Moves the character one frame along `heading` (a walking character's MoveHeading) instead of its facing.
+void MoveCharacterPosition(CHARACTER* c, float heading);
 void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter = NULL, OBJECT* pHelper = NULL);
 void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCharacter = nullptr,
                            OBJECT* pHelper = nullptr);

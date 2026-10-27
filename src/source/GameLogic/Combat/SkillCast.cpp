@@ -59,7 +59,6 @@ extern float TargetAngle;
 extern bool EnableFastInput;
 extern int MouseUpdateTime, MouseUpdateTimeMax;
 extern int g_iFollowCharacter;
-extern int StandTime;
 
 namespace GameLogic::Combat
 {

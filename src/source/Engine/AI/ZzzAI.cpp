@@ -473,10 +473,62 @@ void Damage(vec3_t soPosition, CHARACTER* tc, float AttackRange, int AttackPoint
 PATH _path;
 PATH* path = &_path;
 
+void TurnTowardsMoveHeading(CHARACTER* c)
+{
+    const float seconds = FPS_ANIMATION_FACTOR / static_cast<float>(REFERENCE_FPS);
+    c->Object.Angle[2] = StepEasedTurn(c->Object.Angle[2], c->MoveHeading, c->TurnSpeed, seconds,
+                                       WalkTurnDegreesPerSecond, WalkTurnAcceleration);
+}
+
+void StartStandingTurn(CHARACTER* c, float angle)
+{
+    c->MoveHeading = angle;
+    c->TurnLeftAt = c->Object.Angle[2];
+    c->TurnPending = FarAngle(c->Object.Angle[2], angle) > 0.5f;
+}
+
+void FinishPendingTurn(CHARACTER* c)
+{
+    if (!c->TurnPending)
+    {
+        return;
+    }
+    OBJECT* o = &c->Object;
+    // Something else turned the character or gave it another action since (walking, an attack, a skill, the
+    // server's direction): that wins, and the turn ends where it is.
+    const bool stepping = c->TurnAction != -1;
+    if (c->Movement || o->Angle[2] != c->TurnLeftAt || (stepping && o->CurrentAction != c->TurnAction))
+    {
+        c->TurnPending = false;
+        c->TurnAction = -1;
+        if (!c->Movement)
+        {
+            c->TurnSpeed = 0.f;
+        }
+        return;
+    }
+    // The feet step around while the body turns, rather than the character spinning on the spot.
+    if (!stepping)
+    {
+        SetPlayerWalk(c);
+        c->TurnAction = o->CurrentAction;
+    }
+    TurnTowardsMoveHeading(c);
+    c->TurnLeftAt = o->Angle[2];
+    c->TurnPending = FarAngle(o->Angle[2], c->MoveHeading) > 0.5f;
+    if (!c->TurnPending)
+    {
+        c->TurnAction = -1;
+        SetPlayerStop(c);
+    }
+}
+
 bool MovePath(CHARACTER* c, bool Turn)
 {
     bool Success = false;
     PATH_t* p = &c->Path;
+    // Walking again: the turn the last walk left is this walk's now.
+    c->TurnPending = false;
 
     std::lock_guard<SpinLock> guard(p->Lock);
 
@@ -543,19 +595,26 @@ bool MovePath(CHARACTER* c, bool Turn)
                 }
             }
         }
-        if (!Success && Turn)
+        // The character travels straight toward the point (MoveCharacterPosition along MoveHeading), so its path
+        // is as before; only its facing turns smoothly, where it used to snap on a turn of 45 degrees or more.
+        if (!Success)
         {
-            float Angle = CreateAngle(o->Position[0], o->Position[1], cx, cy);
-            float TargetAngle = FarAngle(o->Angle[2], Angle);
-            if (TargetAngle >= 45.f)
+            c->MoveHeading = CreateAngle(o->Position[0], o->Position[1], cx, cy);
+        }
+        if (Turn)
+        {
+            TurnTowardsMoveHeading(c);
+            if (Success)
             {
-                o->Angle[2] = Angle;
-            }
-            else
-            {
-                o->Angle[2] = TurnAngle2(o->Angle[2], Angle, TargetAngle * 0.5f);
+                c->TurnPending = FarAngle(o->Angle[2], c->MoveHeading) > 0.5f;
+                c->TurnLeftAt = o->Angle[2];
             }
         }
+    }
+    else
+    {
+        // No path left: the character moves along its facing, as it did before it had a heading of its own.
+        c->MoveHeading = c->Object.Angle[2];
     }
 
     return Success;

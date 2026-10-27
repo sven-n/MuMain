@@ -61,7 +61,6 @@ extern float TargetAngle;
 extern bool EnableFastInput;
 extern int MouseUpdateTime, MouseUpdateTimeMax;
 extern int g_iFollowCharacter;
-extern int StandTime;
 extern BOOL g_bWhileMovingZone;
 extern DWORD g_dwLatestZoneMoving;
 
@@ -1384,7 +1383,6 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
                     SetAction(o, PLAYER_SKILL_FLASH);
 
                 c->Movement = 0;
-                StandTime = 0;
             }
             return;
             case AT_SKILL_FLAME:
