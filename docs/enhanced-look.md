@@ -12,7 +12,7 @@ options window, without editing those files (see "Tuning it yourself").
 |---|---|---|
 | Texture filtering | mipmaps and anisotropic filtering for world textures | — |
 | Enhanced lighting | per-pixel model lighting with rim light and, on metal armour, specular highlights | — |
-| Dynamic model lights | candles, fires and spells light characters, monsters and NPCs | — |
+| Dynamic model lights | candles, fires and spells light characters, monsters, NPCs and world objects per pixel, and the ground as smooth pools instead of patches interpolated between terrain vertices; characters' shadows on the ground are see-through and merge where they overlap | — |
 | Light mood | darker baked map light, so the light sources stand out | [light-mood.md](light-mood.md) |
 | Post-processing | bloom around light effects and per-map colour grading | [post-processing.md](post-processing.md) |
 | Anti-aliasing | multisampled edges (4 samples, or what `Antialiasing` asks for), alpha-to-coverage for cut-out foliage and fences | — |
@@ -70,23 +70,28 @@ window.
 |---|---|---|---|---|---|---|
 | Enhanced lighting | Directional light | `lighting.diffuse.scale` | 0–2 | 0.05 | 1 | common |
 | Enhanced lighting | Rim intensity | `lighting.rim.strength` | 0–1 | 0.05 | 0.4 | common |
-| Enhanced lighting | Metallic shine | `lighting.specular.scale` | 0–2 | 0.05 | 1 | common |
+| Enhanced lighting | Metallic shine | `lighting.specular.scale` | 0–2 | 0.05 | 0.8 | common |
 | Enhanced lighting | Ambient fill | `lighting.diffuse.ambient` | 0–1 | 0.05 | 0.3 | More settings |
 | Enhanced lighting | Minimum light | `lighting.diffuse.floor` | 0–1 | 0.05 | 0.15 | More settings |
 | Enhanced lighting | Highlight knee | `lighting.highlightKnee` | 0.5–0.9 | 0.01 | 0.8 | More settings |
 | Enhanced lighting | Rim concentration | `lighting.rim.power` | 1–8 | 0.1 | 3 | More settings |
 | Enhanced lighting | Shine concentration | `lighting.specular.power` | 4–128 | 1 | 32 | More settings |
-| Dynamic lights | Skill intensity | `dynamic.effectGain` | 0–4× | 0.1× | 2.5× | common |
-| Dynamic lights | Skill radius | `dynamic.effectRange` | 0.5–4× | 0.1× | 3× | common |
+| Dynamic lights | Skill intensity | `dynamic.effectGain` | 0–4× | 0.1× | 0.5× | common |
+| Dynamic lights | Skill radius | `dynamic.effectRange` | 0.5–4× | 0.1× | 2× | common |
 | Dynamic lights | Skill fade | `dynamic.effectFade` | 0–2 s | 0.05 s | 0.5 s | common |
 | Dynamic lights | Overlapping-light cap | `dynamic.effectCap` | 0–8 | 0.1 | 2.5 | common |
+| Dynamic lights | Shadow darkness | `dynamic.shadowOpacity` | 0–100 % | 5 % | 60 % | common |
+| Dynamic lights | Light shadows | `dynamic.shadowLights` | 0–4 | 1 | 2 | common |
 | Dynamic lights | Light wrap | `dynamic.wrap` | 0–0.5 | 0.05 | 0.3 | More settings |
 | Dynamic lights | Map-light smoothing | `dynamic.mapSmoothing` | 0–2 s | 0.05 s | 0.5 s | More settings |
 | Dynamic lights | Maximum skill radius | `dynamic.effectRangeMax` | 0–16 cells | 1 cell | 8 cells | More settings |
+| Dynamic lights | Shadow direction | `dynamic.shadowAngle` | 0–360° | 5° | 135° | More settings |
 | Darker map light | Mood strength | `mood.strengthPercent` | 0–100 % | 1 % | 100 % | common |
 | Bloom and colour grading | Bloom intensity | `bloom.strength` | 0–2 | 0.05 | 1 (Icarus 0.3) | common |
 | Bloom and colour grading | Bloom spread | `bloom.levelFalloff` | 0.25–1 | 0.05 | 0.6 | common |
 | Bloom and colour grading | Colour grading strength | `grading.strength` | 0–100 % | 1 % | 100 % | common |
+| Bloom and colour grading | Contact shadows | `ao.strength` | 0–2 | 0.05 | 0.8 | common |
+| Bloom and colour grading | Contact shadow reach | `ao.radius` | 10–300 | 5 | 60 | common |
 
 The defaults are the shipped look profile's (and each map's own, where it has
 one); they are defaults, not a promise that every combination of extremes looks
@@ -193,18 +198,23 @@ for the whole file.
 | `lighting.highlightKnee` | 0.8 | 0.8 | 0.5–0.9 | lit colours above it approach white without reaching it |
 | `lighting.rim.strength` | 0.4 | 0.35 | 0–1 | light along a model's silhouette |
 | `lighting.rim.power` | 3 | 3 | 1–8 | how narrow the rim is |
-| `lighting.specular.scale` | 1 | 1 | 0–2 | highlights on item models that declare specular (`material.specular` in the item-model JSON; the metal armour sets) |
+| `lighting.specular.scale` | 0.8 | 1 | 0–2 | highlights on item models that declare specular (`material.specular` in the item-model JSON; the metal armour sets) |
 | `lighting.specular.power` | 32 | 32 | 4–128 | how small the highlight is |
 | `dynamic.wrap` | 0.3 | 0.5 | 0–0.5 | how far a point light reaches round a model |
 | `dynamic.mapSmoothing` | 0.5 | 0 | 0–2 | seconds over which flickering map and character lights (candles, fires) ease to their new brightness |
-| `dynamic.effectGain` | 2.5 | 1 | 0–4 | brightness factor of spell and effect lights |
-| `dynamic.effectRange` | 3 | 1 | 0.5–4 | range factor of spell and effect lights |
+| `dynamic.effectGain` | 0.5 | 1 | 0–4 | brightness factor of spell and effect lights |
+| `dynamic.effectRange` | 2 | 1 | 0.5–4 | range factor of spell and effect lights |
 | `dynamic.effectRangeMax` | 8 | 0 (none) | 0–16 | the most terrain cells the range factor may widen a light to |
 | `dynamic.effectFade` | 0.5 | 0 | 0–2 | seconds over which a spell's light fades out after it ends |
 | `dynamic.effectCap` | 2.5 | 0 (none) | 0–8 | the most light overlapping spell lights may add up to |
+| `dynamic.shadowOpacity` | 0.6 | 0.6 | 0–1 | how much characters' shadows darken the ground's own light; overlapping shadows darken it once, and point lights still light shadowed ground |
+| `dynamic.shadowLights` | 2 | 0 | 0–4 | how many of the strongest point lights near a character cast its shadow away from them; each darkens the point light on the ground by its share of the character's point light, and a light at the character casts none. A shadow is projected from the light's own position, so a near, low light (a skill cast at mid-body, a torch beside you) casts a long shadow and a far or high one a short shadow; lights falling the same way (the segments of a beam such as Aqua Beam, a cluster of candles) cast one shadow together. Skill and spell lights cast shadows like any other. Torches, fires and bonfires shine from their flame, so a high torch casts a shorter shadow than a bonfire; other lights shine from 150 above the ground for the map's lamps and 100 for characters' and skills' glows |
+| `dynamic.shadowAngle` | 135 | 180 | 0–360 | which way characters' shadows fall, in degrees counter-clockwise from world +x; 135 falls away from the sun that shades the terrain's slopes, 180 is the Classic direction |
 | `bloom.strength` | 1.0 (Icarus 0.3) | 0.6 | 0–2 | how strong the halo around light effects is |
 | `bloom.levelFalloff` | 0.6 | 0.5 | 0.25–1 | how wide the halo spreads |
 | `grading.strength` | 1 | 1 | 0–1 | how much of a map's grading table applies; 0 grades nothing while the bloom stays |
+| `ao.strength` | 0.8 | 0 | 0–2 | how much screen-space ambient occlusion darkens corners, wall bases and the ground under objects; additive effects are left alone; not drawn while anti-aliasing is on |
+| `ao.radius` | 60 | 60 | 10–300 | how far, in world units, nearby geometry still darkens a surface |
 
 ## Developer commands
 
@@ -233,7 +243,7 @@ Shorter forms of `$look set`: `$lighting rim <v>`, `$lighting specular <v>`,
 `$lighting diffuse <scale> <ambient> <floor>`, `$lightmood knee <k>`,
 `$dynlights wrap <w>`, `$dynlights smooth <s>`,
 `$dynlights spell <gain> <range> <fade>`, `$dynlights cap <c>`,
-`$dynlights reach <cells>`, `$bloom falloff <f>`, `$bloom <strength>`.
+`$dynlights reach <cells>`, `$dynlights shadow <opacity>`, `$dynlights shadowangle <degrees>`, `$dynlights shadowlights <n>`, `$bloom falloff <f>`, `$bloom <strength>`, `$ao <strength>`, `$ao radius <r>`.
 The DevEditor has the same values in its Look panel.
 
 Feature overrides, to compare one feature on and off. They last for the

@@ -55,12 +55,18 @@ TEST_CASE("the look profile's built-in values are the renderer's values before i
     CHECK(BuiltInFloat(LookValue::DynamicEffectRangeMax) == classicHistory.effectRangeMax);
     CHECK(BuiltInFloat(LookValue::DynamicEffectFade) == classicHistory.effectFadeSeconds);
     CHECK(BuiltInFloat(LookValue::DynamicEffectCap) == classicHistory.effectCap);
+    CHECK(BuiltInFloat(LookValue::GroundShadowOpacity) == mu::kDefaultGroundShadowOpacity);
+    CHECK(BuiltInFloat(LookValue::GroundShadowAngle) == mu::kClassicGroundShadowAngle);
+    CHECK(BuiltIn(LookValue::GroundShadowLights) == 0.0);
 
     // Post-processing: the former config.ini default bloom strength, the level weight, full grading.
     CHECK(BuiltIn(LookValue::BloomStrength) == Approx(0.6));
     CHECK(BuiltInFloat(LookValue::BloomLevelFalloff) == mu::SdlGpuPostProcessing::BloomLevelWeight);
     CHECK(BuiltInFloat(LookValue::BloomLevelFalloff) == mu::PostProcessingLook{}.bloomLevelFalloff);
     CHECK(BuiltIn(LookValue::GradingStrength) == 1.0);
+    // Ambient occlusion: off, at the renderer's default reach.
+    CHECK(BuiltIn(LookValue::AmbientOcclusionStrength) == 0.0);
+    CHECK(BuiltInFloat(LookValue::AmbientOcclusionRadius) == mu::PostProcessingLook{}.ambientOcclusionRadius);
 }
 
 TEST_CASE("dynamic.wrap: the point-light diffuse from Lambert to half-Lambert [render][look]")
@@ -201,7 +207,7 @@ TEST_CASE(
     // The strength replaces the former gradingEnabled flag in the last register lane.
     CHECK(offsetof(mu::SdlGpuCompositeUniform, bloomScale) == 8);
     CHECK(offsetof(mu::SdlGpuCompositeUniform, gradingStrength) == 12);
-    CHECK(sizeof(mu::SdlGpuCompositeUniform) == 16);
+    CHECK(sizeof(mu::SdlGpuCompositeUniform) == 32);
 }
 
 TEST_CASE("the developer tuning commands name their look values [render][look]")
@@ -222,8 +228,13 @@ TEST_CASE("the developer tuning commands name their look values [render][look]")
     single(L"$dynlights wrap 0.3", LookValue::DynamicWrap, 0.3);
     single(L"$dynlights smooth 0.4", LookValue::DynamicMapSmoothing, 0.4);
     single(L"$dynlights cap 1", LookValue::DynamicEffectCap, 1.0);
+    single(L"$dynlights shadow 0.4", LookValue::GroundShadowOpacity, 0.4);
+    single(L"$dynlights shadowangle 90", LookValue::GroundShadowAngle, 90.0);
+    single(L"$dynlights shadowlights 3", LookValue::GroundShadowLights, 3.0);
     single(L"$bloom falloff 0.6", LookValue::BloomLevelFalloff, 0.6);
     single(L"$bloom 0.9", LookValue::BloomStrength, 0.9);
+    single(L"$ao radius 80", LookValue::AmbientOcclusionRadius, 80.0);
+    single(L"$ao 0.5", LookValue::AmbientOcclusionStrength, 0.5);
 
     const std::optional<Render::Look::LookTuningCommand> diffuse =
         ParseLookTuningCommand(L"$lighting diffuse 1.0 0.3 0.15");

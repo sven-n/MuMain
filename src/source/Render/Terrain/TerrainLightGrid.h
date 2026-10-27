@@ -23,9 +23,10 @@ namespace Render::Terrain::LightGrid
 void AddLight(float (*grid)[3], float x, float y, const float* color, int range);
 
 // AddLight, and records the light in the frame's light list as a point light over terrain of the
-// given height. A light without range changes no vertex and is not recorded.
+// given height, `aboveTerrain` above it. A light without range changes no vertex and is not recorded.
 void AddDynamicLight(float (*grid)[3], Lighting::DynamicLightList& frameLights, float x, float y, const float* color,
-                     int range, float terrainHeight);
+                     int range, float terrainHeight, float aboveTerrain = Lighting::kDynamicLightHeightAboveTerrain,
+                     bool castsShadows = true);
 
 using HeightSampler = float (*)(float, float);
 
@@ -65,8 +66,9 @@ void SampleStatic(const float (*staticGrid)[3], std::span<const Lighting::Dynami
 // the point itself: the light a model there gets from them without per-pixel lighting.
 void SampleBrightening(std::span<const Lighting::DynamicLight> lights, float x, float y, float* light);
 
-// The point light for a light call at world (x, y) over terrain of the given height.
+// The point light for a light call at world (x, y), `aboveTerrain` over terrain of the given height.
 [[nodiscard]] Lighting::DynamicLight MakeDynamicLight(float x, float y, const float* color, int range,
-                                                      float terrainHeight);
+                                                      float terrainHeight,
+                                                      float aboveTerrain = Lighting::kDynamicLightHeightAboveTerrain);
 
 } // namespace Render::Terrain::LightGrid

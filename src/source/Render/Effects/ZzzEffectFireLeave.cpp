@@ -59,7 +59,7 @@ void CreateBonfire(vec3_t Position, vec3_t Angle)
     }
     const float Luminosity = Random::RangeFloat(6, 11) * 0.1f;
     Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.4f, Light);
-    AddTerrainLight(Position[0], Position[1], Light, 4, PrimaryTerrainLight);
+    AddTerrainLightAt(Position[0], Position[1], Position[2], Light, 4, PrimaryTerrainLight);
 }
 
 void CreateFire(int Type, OBJECT* o, float x, float y, float z)
@@ -82,7 +82,7 @@ void CreateFire(int Type, OBJECT* o, float x, float y, float z)
         Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.4f, Light);
         if (rand_fps_check(2))
             CreateParticle(BITMAP_FIRE, Position, o->Angle, Light, Random::RangeInt(0, 3));
-        AddTerrainLight(Position[0], Position[1], Light, 4, PrimaryTerrainLight);
+        AddTerrainLightAt(Position[0], Position[1], Position[2], Light, 4, PrimaryTerrainLight);
         break;
     case 1:
         if (rand_fps_check(2))

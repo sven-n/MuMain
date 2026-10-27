@@ -271,7 +271,7 @@ TEST_CASE("depth buffer carries the frame's sample count [frame readback][antial
     const auto single = mu::GetSdlGpuDepthTextureInfo({1920u, 1080u}, SDL_GPU_SAMPLECOUNT_1);
     REQUIRE(single.has_value());
     CHECK(single->format == mu::SdlGpuDepthFormat);
-    CHECK(single->usage == SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET);
+    CHECK(single->usage == (SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER));
     CHECK(single->sample_count == SDL_GPU_SAMPLECOUNT_1);
 
     const auto multisampled = mu::GetSdlGpuDepthTextureInfo({1920u, 1080u}, SDL_GPU_SAMPLECOUNT_8);

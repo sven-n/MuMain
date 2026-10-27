@@ -12,6 +12,12 @@ void DynamicLightList::Clear()
     m_displaceableBegin = kCapacity;
     m_displaceableEnd = kCapacity;
     m_marking = false;
+    m_mark = 0;
+}
+
+void DynamicLightList::Mark()
+{
+    m_mark = m_count;
 }
 
 void DynamicLightList::MarkDisplaceable()
@@ -41,6 +47,10 @@ void DynamicLightList::Add(const DynamicLight& light)
         std::move(m_lights.begin() + static_cast<std::ptrdiff_t>(m_displaceableEnd),
                   m_lights.begin() + static_cast<std::ptrdiff_t>(m_count),
                   m_lights.begin() + static_cast<std::ptrdiff_t>(m_displaceableEnd) - 1);
+        if (m_mark >= m_displaceableEnd)
+        {
+            --m_mark;
+        }
         --m_displaceableEnd;
         --m_count;
         m_marking = false;
@@ -55,6 +65,11 @@ void DynamicLightList::Add(const DynamicLight& light)
 std::span<const DynamicLight> DynamicLightList::Lights() const
 {
     return {m_lights.data(), m_count};
+}
+
+std::span<const DynamicLight> DynamicLightList::LightsSinceMark() const
+{
+    return Lights().subspan(m_mark);
 }
 
 DynamicLightList& FrameDynamicLights()

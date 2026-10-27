@@ -1,0 +1,104 @@
+#include <metal_stdlib>
+#include <simd/simd.h>
+
+using namespace metal;
+
+struct SceneLighting
+{
+    float4 sceneLightDirection;
+    float4 sceneLightColor;
+    float4 diffuseCurve;
+    float4 rimParameters;
+    float4 specularParameters;
+    float4 sceneFogColor;
+    float4 sceneFogParameters;
+    float4 cameraPosition;
+};
+
+struct DynamicLights
+{
+    uint dynamicLightCount;
+    float dynamicLightWrap;
+    uint dynamicWorldLightCount;
+    float groundShadowOpacity;
+    float4 dynamicLightPositionAndRadius[32];
+    float4 dynamicLightColor[32];
+};
+
+struct FogUniforms
+{
+    uint fogEnabled;
+    uint alphaDiscardEnabled;
+    float alphaThreshold;
+    uint alphaToCoverage;
+    float fogStart;
+    float fogEnd;
+    float4 fogColor;
+};
+
+struct main0_out
+{
+    float4 _entryPointOutput [[color(0)]];
+};
+
+struct main0_in
+{
+    float2 input_uv [[user(locn0)]];
+    float4 input_color [[user(locn1)]];
+    float input_eyeDepth [[user(locn3)]];
+    float3 input_worldPosition [[user(locn4)]];
+};
+
+fragment main0_out main0(main0_in in [[stage_in]], constant FogUniforms& _214 [[buffer(0)]], constant SceneLighting& _30 [[buffer(1)]], constant DynamicLights& _64 [[buffer(2)]], texture2d<float> tex [[texture(0)]], texture2d<float> groundShadowMask [[texture(1)]], sampler s [[sampler(0)]], sampler groundShadowSampler [[sampler(1)]], float4 gl_FragCoord [[position]])
+{
+    main0_out out = {};
+    float4 _334 = tex.sample(s, in.input_uv);
+    float4 _316 = _334;
+    uint2 _317 = uint2(groundShadowMask.get_width(), groundShadowMask.get_height());
+    float2 _321 = float2(1.0) - ((float2(1.0) - groundShadowMask.sample(groundShadowSampler, (gl_FragCoord.xy / float2(float(_317.x), float(_317.y)))).xy) * _64.groundShadowOpacity);
+    uint _471 = min(min(_64.dynamicWorldLightCount, _64.dynamicLightCount), 32u);
+    float3 _555;
+    _555 = float3(0.0);
+    float3 _557;
+    for (uint _554 = 0u; _554 < _471; _555 = _557, _554++)
+    {
+        float4 _461 = _64.dynamicLightPositionAndRadius[_554];
+        float _488 = length(_64.dynamicLightPositionAndRadius[_554].xy - in.input_worldPosition.xy);
+        if (_488 < _461.w)
+        {
+            _557 = _555 + (_64.dynamicLightColor[_554].xyz * ((_461.w - _488) / _461.w));
+        }
+        else
+        {
+            _557 = _555;
+        }
+    }
+    float4 _324 = float4(_334.xyz * fast::clamp((in.input_color.xyz * _321.x) + (_555 * _321.y), float3(0.0), float3(1.0)), _316.w * in.input_color.w);
+    if (_214.alphaToCoverage != 0u)
+    {
+        _324.w *= fast::clamp(((_324.w - _214.alphaThreshold) / fast::max(fwidth(_324.w), 9.9999997473787516355514526367188e-05)) + 0.5, 0.0, 1.0);
+        if (_324.w <= 0.0)
+        {
+            discard_fragment();
+        }
+    }
+    else
+    {
+        if ((_214.alphaDiscardEnabled != 0u) && (_324.w <= _214.alphaThreshold))
+        {
+            discard_fragment();
+        }
+    }
+    if ((_214.fogEnabled != 0u) && (_30.sceneFogColor.w > 0.0))
+    {
+        float4 _439 = _324;
+        float _521 = fast::max(in.input_eyeDepth - _30.sceneFogParameters.x, 0.0) * _30.sceneFogParameters.z;
+        float3 _448 = mix(_439.xyz, _30.sceneFogColor.xyz, float3(fast::clamp(1.0 - exp((-_521) * _521), 0.0, 1.0)));
+        _324.x = _448.x;
+        _324.y = _448.y;
+        _324.z = _448.z;
+    }
+    out._entryPointOutput = _324;
+    return out;
+}
+

@@ -231,6 +231,7 @@ std::size_t DynamicLightHistory::Continue(Followed& light, const LightCall& call
 {
     light.x = call.x;
     light.y = call.y;
+    light.z = call.z;
     light.range = call.range;
     light.called = true;
     std::copy(call.color, call.color + ColorChannels, light.target);
@@ -257,6 +258,7 @@ LightCall DynamicLightHistory::Shown(const Followed& light, const LightHistorySe
     LightCall result;
     result.x = light.x;
     result.y = light.y;
+    result.z = light.z;
     result.source = light.source;
     for (int k = 0; k < ColorChannels; ++k)
     {
