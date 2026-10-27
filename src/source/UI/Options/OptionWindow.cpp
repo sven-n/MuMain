@@ -154,6 +154,7 @@ static const struct { const char* code; const wchar_t* label; } s_Languages[] = 
     { "ru",    L"Русский" },                   // Русский
     { "tl",    L"Tagalog" },
     { "uk",    L"Українська" }, // Українська
+    { "zh-CN", L"简体中文" },
     { "zh-TW", L"繁體中文" },                                      // 繁體中文
 };
 static const int s_NumLanguages = sizeof(s_Languages) / sizeof(s_Languages[0]);
@@ -175,6 +176,7 @@ static const FontOption s_Fonts[] = {
     {L"Liberation Sans", L"Liberation Sans"},
     {L"DejaVu Sans", L"DejaVu Sans"},
     {L"Noto Sans TC", L"Noto Sans TC"},
+    {L"Noto Sans SC", L"Noto Sans SC"},
 };
 static const int s_NumFonts = sizeof(s_Fonts) / sizeof(s_Fonts[0]);
 

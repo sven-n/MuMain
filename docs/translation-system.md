@@ -312,7 +312,7 @@ names stay English; items that teach a skill name it after a colon
    `tools/ResxGen/CppEmitter.cs#KnownLanguageDisplayNames` so the language
    dropdown shows it in its own language (e.g. `["fr"] = "Français"`).
 3. Add it to the game's language dropdown: the `s_Languages` list in
-   `src/source/UI/NewUI/Options/NewUIOptionWindow.cpp`. The editor's language
+   `src/source/UI/Options/OptionWindow.cpp`. The editor's language
    menu lists every locale from `GetAvailableLocales` by itself.
 4. Build. `ResxGen` picks up the new locale automatically from the filename;
    `GetAvailableLocales` will include it next run.
@@ -375,7 +375,7 @@ language:
 ### Translating items into a language the game already has
 
 The game's UI languages are `en`, `de`, `es`, `id`, `ja`, `pl`, `pt`, `ru`,
-`tl`, `uk` and `zh-TW`. Items currently have German (`de`), Portuguese (`pt`)
+`tl`, `uk`, `zh-CN` and `zh-TW`. Items currently have German (`de`), Portuguese (`pt`)
 and Spanish (`es`) names. To translate items into another of these languages,
 add names with that code (by hand or in the item editor); nothing else is
 needed. The names show as soon as a player picks that language.
@@ -403,6 +403,37 @@ also check the files in `src/bin/Data/Items` without starting the game:
 ```bash
 ctest --test-dir <build folder> --build-config Debug -R items --output-on-failure
 ```
+
+## Simplified Chinese (`zh-CN`)
+
+Simplified Chinese is being added incrementally. The first batch translates the
+Options window, including its graphics tuning labels and help text. Shared
+labels also appear translated wherever other screens use the same resource key.
+Other game text, NPC dialogue and editor text fall back to English until their
+translations are added. Item names and server messages are separate data.
+
+Rebuild the client, then select **简体中文** in the Options language dropdown.
+Select **Noto Sans SC** in the font dropdown to use Simplified Chinese glyph
+forms. The regular and bold faces are bundled under `fonts/` and provide
+missing-glyph fallback for other font choices; no system font install is needed.
+These fonts come from Noto CJK's `Sans/SubsetOTF/SC` distribution and are shipped
+with their SIL Open Font License in `fonts/NotoSansSC-LICENSE`.
+
+Alternatively, set the executable directory's `config.ini`:
+
+```ini
+[UI]
+Locale=zh-CN
+```
+
+After rebuilding, check the Options tabs and graphics tuning in both themes:
+Chinese glyphs should render without boxes, and labels and help should fit at
+75% and 150% UI scale. Switch back to English and restart to check that the
+language choice is retained.
+
+Add future translations to `Game.zh-CN.resx` by screen or feature. Keep English
+resource keys, legacy IDs, formatting arguments and command tokens unchanged.
+Missing translations intentionally use the existing English fallback.
 
 ## Migration history
 
