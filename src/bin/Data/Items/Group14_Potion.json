@@ -695,77 +695,17 @@
         },
         {
           "text": {
-            "en": "히돼?고향 여행권"
-          },
-          "when": ["durability=0"],
-          "levels": [2, 2]
-        },
-        {
-          "text": {
-            "en": "펜티엄4 컴퓨터"
-          },
-          "when": ["durability=1"],
-          "levels": [2, 2]
-        },
-        {
-          "text": {
-            "en": "디지탈카메라"
-          },
-          "when": ["durability=2"],
-          "levels": [2, 2]
-        },
-        {
-          "text": {
-            "en": "로지텍 무선 마우스+키보드 세트"
-          },
-          "when": ["durability=3"],
-          "levels": [2, 2]
-        },
-        {
-          "text": {
-            "en": "256M 램"
-          },
-          "when": ["durability=4"],
-          "levels": [2, 2]
-        },
-        {
-          "text": {
-            "en": "6개?잡지 구독권"
-          },
-          "when": ["durability=5"],
-          "levels": [2, 2]
-        },
-        {
-          "text": {
-            "en": "문화상품권(만원)"
-          },
-          "when": ["durability=6"],
-          "levels": [2, 2]
-        },
-        {
-          "text": {
-            "en": "뮤 머그컵"
-          },
-          "when": ["durability=7"],
-          "levels": [2, 2]
-        },
-        {
-          "text": {
-            "en": "뮤 T셔츠"
-          },
-          "when": ["durability=8"],
-          "levels": [2, 2]
-        },
-        {
-          "text": {
-            "en": "뮤 10시간 무료이용권"
-          },
-          "when": ["durability=9"],
-          "levels": [2, 2]
-        },
-        {
-          "text": {
-            "en": "{name}"
+            "en": "Chaos Event Gift Certificate",
+            "de": "Chaos-Event-Geschenkgutschein",
+            "es": "Certificado de regalo del evento Caos",
+            "id": "Sertifikat Hadiah Acara Chaos",
+            "ja": "カオスイベント商品券",
+            "pl": "Bon upominkowy na wydarzenie Chaos",
+            "pt": "Vale-presente do Evento Caos",
+            "ru": "Подарочный сертификат на событие Хаоса",
+            "tl": "Chaos Event Gift Certificate",
+            "uk": "Подарунковий сертифікат на подію Chaos",
+            "zh-TW": "混沌活動禮券"
           },
           "levels": [2, 2]
         }
@@ -1353,6 +1293,13 @@
       "nameLines": [
         {
           "text": {
+            "en": "{name}"
+          },
+          "color": "yellow",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
             "en": "{name} +{level}"
           },
           "color": "yellow"
@@ -1373,17 +1320,13 @@
       "nameLines": [
         {
           "text": {
-            "en": "Kundun mark +{level} level",
-            "de": "Zeichen von Kundun +{level}",
-            "es": "Marca Kundun + nivel {level}",
-            "id": "Tanda Kundun +tingkat {level}",
-            "ja": "+{level}クンドンの印",
-            "pl": "Kundun Mark +{level}",
-            "pt": "Marca Kundun + nível {level}",
-            "ru": "Знак Кундун +уровень {level}",
-            "tl": "Kundun mark +{level} level",
-            "uk": "Знак Кундун + рівень {level}",
-            "zh-TW": "昆頓標誌+{level}等級"
+            "en": "{name}"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
           }
         }
       ],

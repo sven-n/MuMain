@@ -588,6 +588,47 @@ TEST_CASE("An item's lines drawn after its options follow them [data][items][too
     SetItemTooltipTextMeasure(nullptr);
 }
 
+TEST_CASE("The item names of windows and ground labels come from the name lines [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+
+    // Without name lines: the name, " +level" above +0, and no "Excellent" or set name.
+    CHECK(GetItemNameText(ITEM_SWORD, 0) == L"Kris");
+    CHECK(GetItemNameText(ITEM_SWORD, 5) == L"Kris +5");
+    ITEM kris;
+    FillItemFromParameters(kris, Engine::Items::TooltipSnapshot::FullItemParameters(0, 0));
+    kris.ExcellentFlags = 1;
+    CHECK(GetItemNameText(kris.Type, kris.Level, &kris) == L"Kris");
+
+    // A name line's text at its levels; the standard name where none holds.
+    CHECK(GetItemNameText(ITEM_BOX_OF_LUCK, 4) == L"Olive of love");
+    CHECK(GetItemNameText(ITEM_LOST_MAP, 0) == L"Lost Map");
+    CHECK(GetItemNameText(ITEM_LOST_MAP, 3) == L"Lost Map +3");
+    CHECK(GetItemNameText(ITEM_SPIRIT, 0) == L"Spirit of Dark horse");
+    // The Weapon of Archangel's level names the weapon; a dropped one keeps it (CreateItemDrop), so its ground label
+    // names the right one.
+    CHECK(GetItemNameText(ITEM_WEAPON_OF_ARCHANGEL, 0) == L"Absolute Staff of Archangel");
+    CHECK(GetItemNameText(ITEM_WEAPON_OF_ARCHANGEL, 1) == L"Absolute Sword of Archangel");
+    CHECK(GetItemNameText(ITEM_WEAPON_OF_ARCHANGEL, 2) == L"Absolute Crossbow of Archangel");
+
+    // A line's condition on the item: without the item, its options read 0.
+    CHECK(GetItemNameText(ITEM_HORN_OF_FENRIR, 0) == L"Horn of Fenrir");
+    ITEM horn;
+    FillItemFromParameters(horn, Engine::Items::TooltipSnapshot::FullItemParameters(13, 37));
+    horn.ExcellentFlags = 1;
+    CHECK(GetItemNameText(horn.Type, 0, &horn) == L"Horn of Fenrir +Destroy");
+
+    wchar_t name[64] = L"";
+    GetItemName(ITEM_BOX_OF_LUCK, 4, name);
+    CHECK(std::wstring(name) == L"Olive of love");
+    CHECK(GetItemNameText(-1, 0).empty());
+}
+
 // The option lines are the lines the full item has and the plain one doesn't (luck, skill, the option, the excellent
 // options); an item's restriction drawn after its options comes after the last of them.
 TEST_CASE("A transformation ring's restriction comes after its option lines [data][items][tooltip]")
@@ -758,6 +799,59 @@ TEST_CASE("A tooltip's name color goes by the item's kind, level and options in 
     CHECK(portuguese == L"Cris +9");
 
     SetItemTooltipTextMeasure(nullptr);
+}
+
+// The quests, the mixes, the server's messages and the ground labels name an item with GetItemName: for every item at
+// every level, the name is the tooltip's first line that isn't blank, which the recorded snapshot covers.
+TEST_CASE("Every item's name at every level is its tooltip's name [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+
+    int names = 0;
+    int different = 0;
+    for (const Data::Items::ItemDefinition& definition : g_ItemDatabase.GetAllSlots())
+    {
+        if (!definition.Exists())
+        {
+            continue;
+        }
+        for (int level = 0; level < Data::Items::ItemLevelCount; ++level)
+        {
+            ItemCreationParams params = Engine::Items::TooltipSnapshot::FullItemParameters(definition.group, definition.number);
+            params.Level = static_cast<BYTE>(level);
+            const std::vector<ItemTooltipLine> lines = Engine::Items::TooltipSnapshot::TooltipOfParameters(params);
+            // The name is the first line that isn't blank.
+            const auto first = std::find_if(lines.begin(), lines.end(),
+                                            [](const ItemTooltipLine& line) { return line.text != L"\n"; });
+            if (first == lines.end())
+            {
+                continue;
+            }
+            const int type = definition.group * MAX_ITEM_INDEX + definition.number;
+            const std::wstring name = GetItemNameText(type, level);
+            wchar_t buffer[128] = L"";
+            GetItemName(type, level, buffer);
+            ++names;
+            if (name != first->text || std::wstring(buffer) != name)
+            {
+                if (++different <= 5)
+                {
+                    INFO(definition.group << "/" << definition.number << " +" << level);
+                    CHECK(Core::Text::ToUtf8(name.c_str()) == Core::Text::ToUtf8(first->text.c_str()));
+                    CHECK(Core::Text::ToUtf8(buffer) == Core::Text::ToUtf8(name.c_str()));
+                }
+            }
+        }
+    }
+    SetItemTooltipTextMeasure(nullptr);
+    CHECK(names > 911 * 10);
+    CHECK(different == 0);
 }
 
 TEST_CASE("With translated item names off, the names are English and the rest of the tooltip is translated "

@@ -1058,19 +1058,6 @@ int CharacterInfoStartY;
 int GuildStartX;
 int GuildStartY;
 
-wchar_t ChaosEventName[][100] = {
-    L"히돼?고향 여행권",
-    L"펜티엄4 컴퓨터",
-    L"디지탈카메라",
-    L"로지텍 무선 마우스+키보드 세트",
-    L"256M 램",
-    L"6개?잡지 구독권",
-    L"문화상품권(만원)",
-    L"뮤 머그컵",
-    L"뮤 T셔츠",
-    L"뮤 10시간 무료이용권"
-};
-
 WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
 {
     WORD maxDurability = p->Durability;
@@ -1144,269 +1131,6 @@ WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
     }
 
     return  maxDurability;
-}
-
-void GetItemName(int iType, int iLevel, wchar_t* Text)
-{
-    ITEM_ATTRIBUTE* p = &ItemAttribute[iType];
-
-    if (GameLogic::Items::IsSecondClassQuestItemType(iType))
-    {
-        if (iType == ITEM_SCROLL_OF_EMPEROR_RING_OF_HONOR)
-        {
-            switch (iLevel)
-            {
-            case 0: mu_swprintf(Text, L"%ls", p->Name); break;
-            case 1: mu_swprintf(Text, L"%ls", I18N::Game::RingOfHonor); break;
-            }
-        }
-        else if (iType == ITEM_BROKEN_SWORD_DARK_STONE)
-        {
-            switch (iLevel)
-            {
-            case 0: mu_swprintf(Text, L"%ls", p->Name); break;
-            case 1: mu_swprintf(Text, L"%ls", I18N::Game::DarkStone); break;
-            }
-        }
-        else
-        {
-            mu_swprintf(Text, L"%ls", p->Name);
-        }
-    }
-    else if (iType == ITEM_POTION + 12)
-    {
-        switch (iLevel)
-        {
-        case 0: mu_swprintf(Text, L"%ls", I18N::Game::Zen); break;
-        case 1: mu_swprintf(Text, L"%ls", I18N::Game::Heart); break;
-        case 2:
-            // The prize by the item's durability; past the list, the item's own name, as the tooltip writes it.
-            if (p->Durability < std::size(ChaosEventName))
-                mu_swprintf(Text, L"%ls", ChaosEventName[p->Durability]);
-            else
-                mu_swprintf(Text, L"%ls", p->Name);
-            break;
-        }
-    }
-    else if (iType == ITEM_BOX_OF_LUCK)
-    {
-        switch (iLevel)
-        {
-        case 0: mu_swprintf(Text, L"%ls", p->Name); break;
-        case 1: mu_swprintf(Text, L"%ls", I18N::Game::StarOfSacredBirth); break;
-        case 2: mu_swprintf(Text, L"%ls", I18N::Game::Firecracker); break;
-        case 3: mu_swprintf(Text, L"%ls", I18N::Game::HeartOfLove); break;
-        case 5: mu_swprintf(Text, L"%ls", I18N::Game::SilverMedal); break;
-        case 6: mu_swprintf(Text, L"%ls", I18N::Game::GoldMedal); break;
-        case 7: mu_swprintf(Text, L"%ls", I18N::Game::BoxOfHeaven); break;
-            break;
-        case 8:
-        case 9:
-        case 10:
-        case 11:
-        case 12:
-            mu_swprintf(Text, L"%ls +%d", I18N::Game::BoxOfKundun, iLevel - 7);
-            break;
-        case 13:
-            mu_swprintf(Text, I18N::Game::HeartOfDarkLord); break;
-        case 14:
-            mu_swprintf(Text, I18N::Game::BlueLuckyPouch); break;
-            break;
-
-        case 15:
-            mu_swprintf(Text, I18N::Game::RedLuckyPouch); break;
-            break;
-        }
-    }
-    else if (iType == ITEM_FRUITS)
-    {
-        switch (iLevel)
-        {
-        case 0:mu_swprintf(Text, L"%ls %ls", I18N::Game::ENG, p->Name); break;
-        case 1:mu_swprintf(Text, L"%ls %ls", I18N::Game::STA, p->Name); break;
-        case 2:mu_swprintf(Text, L"%ls %ls", I18N::Game::AGI, p->Name); break;
-        case 3:mu_swprintf(Text, L"%ls %ls", I18N::Game::STR, p->Name); break;
-        case 4:mu_swprintf(Text, L"%ls %ls", I18N::Game::Command, p->Name); break;
-        }
-    }
-    else if (iType == ITEM_LOCHS_FEATHER)
-    {
-        switch (iLevel)
-        {
-        case 0: mu_swprintf(Text, L"%ls", p->Name); break;
-        case 1: mu_swprintf(Text, L"%ls", I18N::Game::CrestOfMonarch); break;
-        }
-    }
-    else if (iType == ITEM_SPIRIT)
-    {
-        switch (iLevel)
-        {
-        case 0: mu_swprintf(Text, L"%ls %ls", I18N::Game::DarkHorse, p->Name); break;
-        case 1: mu_swprintf(Text, L"%ls %ls", I18N::Game::DarkRaven, p->Name); break;
-        }
-    }
-    else if (iType == ITEM_RENA)
-    {
-        switch (iLevel)
-        {
-        case 0: mu_swprintf(Text, L"%ls", p->Name); break;
-        case 1: mu_swprintf(Text, L"%ls", I18N::Game::Stone); break;
-        case 2: mu_swprintf(Text, L"%ls", I18N::Game::StoneOfFriendship); break;
-        case 3: mu_swprintf(Text, L"%ls", I18N::Game::SignOfLord); break;
-        }
-    }
-    else if (iType == ITEM_WEAPON_OF_ARCHANGEL)
-    {
-        mu_swprintf(Text, L"%ls", I18N::Game::AbsoluteWeaponOfArchangel);
-    }
-    else if (iType == ITEM_WIZARDS_RING)
-    {
-        switch (iLevel)
-        {
-        case 0: mu_swprintf(Text, L"%ls", p->Name); break;
-        case 1: mu_swprintf(Text, L"%ls", I18N::Game::RingOfWarrior); break;
-        case 2: mu_swprintf(Text, L"%ls", I18N::Game::RingOfWarrior); break;
-        case 3: mu_swprintf(Text, L"%ls", I18N::Game::RingOfGlory); break;
-        }
-    }
-    else if (iType == ITEM_ALE)
-    {
-        switch (iLevel)
-        {
-        case 0: mu_swprintf(Text, L"%ls", p->Name); break;
-        case 1:	mu_swprintf(Text, L"%ls", I18N::Game::OliveOfLove); break;
-        }
-    }
-    else if (iType == ITEM_ORB_OF_SUMMONING)
-    {
-        mu_swprintf(Text, L"%ls %ls", SkillAttribute[30 + iLevel].Name, I18N::Game::Jewel);
-    }
-    else if (iType == ITEM_RED_RIBBON_BOX)
-    {
-        mu_swprintf(Text, L"%ls", p->Name);
-    }
-    else if (iType == ITEM_GREEN_RIBBON_BOX)
-    {
-        mu_swprintf(Text, L"%ls", p->Name);
-    }
-    else if (iType == ITEM_BLUE_RIBBON_BOX)
-    {
-        mu_swprintf(Text, L"%ls", p->Name);
-    }
-    else if (iType == ITEM_SCROLL_OF_FIRE_SCREAM)
-    {
-        mu_swprintf(Text, L"%ls", p->Name);
-    }
-    else if (iType >= ITEM_PUMPKIN_OF_LUCK && iType <= ITEM_JACK_OLANTERN_DRINK)
-    {
-        mu_swprintf(Text, L"%ls", p->Name);
-    }
-    else if (iType == ITEM_PINK_CHOCOLATE_BOX)
-    {
-        switch (iLevel)
-        {
-        case 0: mu_swprintf(Text, L"%ls", p->Name); break;
-        case 1:	mu_swprintf(Text, L"%ls", I18N::Game::LilacCandyBox); break;
-        }
-    }
-    else if (iType == ITEM_RED_CHOCOLATE_BOX)
-    {
-        switch (iLevel)
-        {
-        case 0: mu_swprintf(Text, L"%ls", p->Name); break;
-        case 1:	mu_swprintf(Text, L"%ls", I18N::Game::OrangeCandyBox); break;
-        }
-    }
-    else if (iType == ITEM_BLUE_CHOCOLATE_BOX)
-    {
-        switch (iLevel)
-        {
-        case 0: mu_swprintf(Text, L"%ls", p->Name); break;
-        case 1:	mu_swprintf(Text, L"%ls", I18N::Game::NavyCandyBox); break;
-        }
-    }
-    else if (iType == ITEM_TRANSFORMATION_RING)
-    {
-        if (const wchar_t* monsterName = GameLogic::Items::TransformationRing::MonsterName(iLevel))
-        {
-            mu_swprintf(Text, L"%ls %ls", monsterName, I18N::Game::TransformationRing);
-        }
-    }
-    else if (iType >= ITEM_WINGS_OF_SPIRITS && iType <= ITEM_WINGS_OF_DARKNESS)
-    {
-        if (iLevel == 0)
-            mu_swprintf(Text, L"%ls", p->Name);
-        else
-            mu_swprintf(Text, L"%ls +%d", p->Name, iLevel);
-    }
-    else if ((iType >= ITEM_WING_OF_STORM && iType <= ITEM_CAPE_OF_EMPEROR) || (iType >= ITEM_WINGS_OF_DESPAIR && iType <= ITEM_WING_OF_DIMENSION)
-        || (iType == ITEM_CAPE_OF_OVERRULE))
-    {
-        if (iLevel == 0)
-            mu_swprintf(Text, L"%ls", p->Name);
-        else
-            mu_swprintf(Text, L"%ls +%d", p->Name, iLevel);
-    }
-    else if (GameLogic::Items::IsDivineArchangelWeaponType(iType))
-    {
-        if (iLevel == 0)
-            mu_swprintf(Text, L"%ls", p->Name);
-        else
-            mu_swprintf(Text, L"%ls +%d", p->Name, iLevel);
-    }
-    else if (COMGEM::NOGEM != COMGEM::Check_Jewel_Com(iType))
-    {
-        mu_swprintf(Text, L"%ls +%d", p->Name, iLevel + 1);
-    }
-    else if (iType == INDEX_COMPILED_CELE)
-    {
-        mu_swprintf(Text, L"%ls +%d", I18N::Game::JewelOfBless, iLevel + 1);
-    }
-    else if (iType == INDEX_COMPILED_SOUL)
-    {
-        mu_swprintf(Text, L"%ls +%d", I18N::Game::JewelOfSoul, iLevel + 1);
-    }
-    else if (GameLogic::Items::IsSocketSeedOrSphereType(iType))
-    {
-        mu_swprintf(Text, L"%ls", p->Name);
-    }
-    else if (iType == ITEM_SIEGE_POTION)
-    {
-        int iTextIndex = 0;
-        iTextIndex = (iLevel == 0) ? 1413 : 1414;
-        mu_swprintf(Text, L"%ls", I18N::Game::Lookup(iTextIndex));
-    }
-    else
-    {
-        if (iLevel == 0)
-            mu_swprintf(Text, L"%ls", p->Name);
-        else
-            mu_swprintf(Text, L"%ls +%d", p->Name, iLevel);
-    }
-}
-
-std::wstring GetItemName(int iType, int iLevel)
-{
-    if (iType < 0 || iType >= MAX_ITEM)
-    {
-        return {};
-    }
-
-    constexpr std::size_t ItemNameCapacity = 128;
-    wchar_t name[ItemNameCapacity]{};
-    GetItemName(iType, iLevel, name);
-    if (name[0] != L'\0')
-    {
-        return name;
-    }
-
-    // Alternate-name switches may not cover every source level.
-    std::wstring fallback(ItemAttribute[iType].Name, wcsnlen(ItemAttribute[iType].Name, MAX_ITEM_NAME));
-    if (iLevel)
-    {
-        fallback += L" +" + std::to_wstring(iLevel);
-    }
-    return fallback;
 }
 
 void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int iMana)
@@ -1857,15 +1581,16 @@ struct ItemTooltipName
     int color = TEXT_COLOR_WHITE;
 };
 
-// The item's standard name: its set's name for an ancient item, "Excellent" for an excellent one, " +level" above 0.
-static std::wstring StandardItemName(const ITEM& item, int level)
+// The item's standard name: " +level" above +0 after its name and, for the tooltip's `full` name, its set's name
+// before it for an ancient item and "Excellent" for an excellent one.
+static std::wstring StandardItemName(const ITEM& item, int level, bool full)
 {
     wchar_t setName[64]{};
     std::wstring name;
-    if (g_csItemOption.GetSetItemName(setName, item.Type, item.AncientDiscriminator))
+    if (full && g_csItemOption.GetSetItemName(setName, item.Type, item.AncientDiscriminator))
         name = setName;
     name += ItemAttribute[item.Type].Name;
-    if (item.ExcellentFlags > 0)
+    if (full && item.ExcellentFlags > 0)
         name = std::wstring(I18N::Game::Excellent) + L" " + name;
     if (level > 0)
         name += L" +" + std::to_wstring(level);
@@ -1886,49 +1611,103 @@ static int StandardItemNameColor(const ITEM& item, int level)
     return item.SpecialNum > 0 ? TEXT_COLOR_BLUE : TEXT_COLOR_WHITE;
 }
 
-// The item's name in the UI's language and its color: the first of its name lines whose levels and conditions hold
-// gives them (the standard name where the line has no text, the standard color where it has no color, then its color
-// rules); without one, the standard name and color.
+// The first of the name lines of the item of `type` whose levels and conditions hold at `level`, or nullptr.
+static const Data::Items::ItemNameLine* FindItemNameLine(const Data::Items::ItemDefinition& definition, int type,
+                                                         int level, const ItemTooltipValues& values)
+{
+    for (const Data::Items::ItemNameLine& line : definition.nameLines)
+    {
+        if (line.IsShownAt(level) &&
+            Engine::Items::TooltipValues::AreTooltipConditionsMet(line.when, type, level, values))
+            return &line;
+    }
+    return nullptr;
+}
+
+// A name line's text in the item names' language (the UI's, or English with "Translate item names" off) with its
+// placeholders filled in; nothing when it has none, also when it is empty in that language: the standard name stays
+// then (an empty name would be an empty first row of the tooltip, and an empty name in the windows and ground labels).
+static std::optional<std::wstring> ItemNameLineText(const Data::Items::ItemNameLine& line,
+                                                    const Data::Items::ItemDefinition& definition, int level,
+                                                    const ItemTooltipValues& values)
+{
+    if (!line.hasText)
+        return std::nullopt;
+    const Data::LocalizedString* text =
+        line.textName.empty() ? &line.text : g_ItemDatabase.GetTooltipFile().FindText(line.textName);
+    if (text == nullptr)
+        return std::nullopt;
+    std::wstring filled = Core::Text::FromUtf8(
+        Data::Items::FillPlaceholders(text->Get(g_ItemDatabase.GetDisplayLocale()),
+                                      [&](std::string_view placeholder)
+                                      {
+                                          // In the item names' language, as the item's name.
+                                          return TooltipPlaceholderValue(placeholder, line.values, &definition, level,
+                                                                         values, g_ItemDatabase.GetDisplayLocale());
+                                      }));
+    if (filled.empty())
+        return std::nullopt;
+    return filled;
+}
+
+// The item's name in the item names' language and its color, as its tooltip and the repair window write it: the first
+// of its name lines whose levels and conditions hold gives them (the standard name where the line has no text, the
+// standard color where it has no color, then its color rules); without one, the standard name and color.
 static ItemTooltipName GetItemTooltipName(const ITEM& item, int level, const ItemTooltipValues& values)
 {
-    ItemTooltipName name{StandardItemName(item, level), StandardItemNameColor(item, level)};
+    ItemTooltipName name{StandardItemName(item, level, true), StandardItemNameColor(item, level)};
     const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(item.Type);
-    if (definition == nullptr)
+    const Data::Items::ItemNameLine* line =
+        definition != nullptr ? FindItemNameLine(*definition, item.Type, level, values) : nullptr;
+    if (line == nullptr)
         return name;
-    for (const Data::Items::ItemNameLine& line : definition->nameLines)
-    {
-        if (!line.IsShownAt(level) ||
-            !Engine::Items::TooltipValues::AreTooltipConditionsMet(line.when, item.Type, level, values))
-            continue;
-        if (line.hasText)
-        {
-            // The name follows the item names' language (English with "Translate item names" off).
-            const Data::LocalizedString* text =
-                line.textName.empty() ? &line.text : g_ItemDatabase.GetTooltipFile().FindText(line.textName);
-            if (text != nullptr)
-            {
-                const std::wstring filled = Core::Text::FromUtf8(Data::Items::FillPlaceholders(
-                    text->Get(g_ItemDatabase.GetDisplayLocale()),
-                    [&](std::string_view placeholder)
-                    {
-                        // In the item names' language, as the item's name.
-                        return TooltipPlaceholderValue(placeholder, line.values, definition, level, values,
-                                                       g_ItemDatabase.GetDisplayLocale());
-                    }));
-                // No text in the item names' language keeps the standard name: an empty first row would leave the
-                // tooltip empty.
-                if (!filled.empty())
-                {
-                    name.text = filled;
-                }
-            }
-        }
-        const auto base = line.hasColor ? line.color : static_cast<Data::Items::ItemTextColor>(name.color);
-        name.color = static_cast<int>(
-            Engine::Items::TooltipValues::GetTooltipColor(line.colors, base, item.Type, level, values));
-        break;
-    }
+    if (std::optional<std::wstring> text = ItemNameLineText(*line, *definition, level, values))
+        name.text = std::move(*text);
+    const auto base = line->hasColor ? line->color : static_cast<Data::Items::ItemTextColor>(name.color);
+    name.color =
+        static_cast<int>(Engine::Items::TooltipValues::GetTooltipColor(line->colors, base, item.Type, level, values));
     return name;
+}
+
+std::wstring GetItemNameText(int type, int level, const ITEM* item)
+{
+    if (!Data::Items::IsValidItemType(type))
+        return {};
+    // Without the item, one of the type at the level and nothing else: a line's condition on the item's durability or
+    // options reads 0.
+    ITEM bare{};
+    if (item == nullptr)
+    {
+        bare.Type = static_cast<short>(type);
+        bare.Level = level;
+        item = &bare;
+    }
+    const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(type);
+    if (definition != nullptr && !definition->nameLines.empty())
+    {
+        const ItemTooltipValues values = Engine::Items::TooltipValues::ComputeItemTooltipValues(*item);
+        if (const Data::Items::ItemNameLine* line = FindItemNameLine(*definition, type, level, values))
+        {
+            if (std::optional<std::wstring> text = ItemNameLineText(*line, *definition, level, values))
+                return std::move(*text);
+        }
+    }
+    return StandardItemName(*item, level, false);
+}
+
+void GetItemName(int iType, int iLevel, wchar_t* Text, size_t textSize)
+{
+    if (textSize == 0)
+        return;
+    const std::wstring name = GetItemNameText(iType, iLevel);
+    const size_t length = std::min(name.size(), textSize - 1);
+    std::wmemcpy(Text, name.c_str(), length);
+    Text[length] = L'\0';
+}
+
+std::wstring GetItemName(int iType, int iLevel)
+{
+    return GetItemNameText(iType, iLevel);
 }
 
 // What BuildItemTooltipText made of an item.
@@ -1972,7 +1751,9 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         return ItemTooltipBuild::DarkLordPet;
     }
 
-    mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+    mu_swprintf(TextList[TextNum], L"\n");
+    TextNum++;
+    SkipNum++;
 
     int Level = ip->Level;
 
@@ -2003,11 +1784,14 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
             TextListColor[TextNum] = Color;
             //			TextBold[TextNum] = true;
             TextNum++;
-            mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+            mu_swprintf(TextList[TextNum], L"\n");
+            TextNum++;
+            SkipNum++;
         }
     }
-    if ((Inventype == mu::ui::window::TOOLTIP_TYPE_MY_SHOP || Inventype == mu::ui::window::TOOLTIP_TYPE_PURCHASE_SHOP)
-        && !GameLogic::Items::IsPersonalShopBan(ip))
+    if ((Inventype == mu::ui::window::TOOLTIP_TYPE_MY_SHOP ||
+         Inventype == mu::ui::window::TOOLTIP_TYPE_PURCHASE_SHOP) &&
+        !GameLogic::Items::IsPersonalShopBan(ip))
     {
         {
             GameLogic::PersonalShop::ItemPrice itemPrice;
@@ -2899,66 +2683,10 @@ static void RenderRepairInfo(const UI::Scaling::Transform& screen, int sx, int s
     }
 
     int Level = ip->Level;
-    int Color;
-
-    if (ip->Type == ITEM_JEWEL_OF_BLESS || ip->Type == ITEM_JEWEL_OF_SOUL || ip->Type == ITEM_JEWEL_OF_CHAOS)
-    {
-        Color = TEXT_COLOR_YELLOW;
-    }
-    else if (COMGEM::isCompiledGem(ip))
-    {
-        Color = TEXT_COLOR_YELLOW;
-    }
-    else if (GameLogic::Items::IsDivineArchangelWeapon(ip))
-    {
-        Color = TEXT_COLOR_PURPLE;
-    }
-    else if (GameLogic::Items::IsDevilSquareItem(ip))
-    {
-        Color = TEXT_COLOR_YELLOW;
-    }
-    else if (ip->SpecialNum > 0 && ip->ExcellentFlags > 0)
-    {
-        Color = TEXT_COLOR_GREEN;
-    }
-    else if (Level >= 7)
-    {
-        Color = TEXT_COLOR_YELLOW;
-    }
-    else
-    {
-        if (ip->SpecialNum > 0)
-        {
-            Color = TEXT_COLOR_BLUE;
-        }
-        else
-        {
-            Color = TEXT_COLOR_WHITE;
-        }
-    }
-
-    if ((ip->Type >= ITEM_WINGS_OF_SPIRITS && ip->Type <= ITEM_WINGS_OF_DARKNESS)
-        || ip->Type >= ITEM_CAPE_OF_LORD
-        || (ip->Type >= ITEM_WING_OF_STORM && ip->Type <= ITEM_CAPE_OF_EMPEROR)
-        || (ip->Type >= ITEM_WINGS_OF_DESPAIR && ip->Type <= ITEM_WING_OF_DIMENSION)
-        || (ip->Type >= ITEM_CAPE_OF_FIGHTER && ip->Type <= ITEM_CAPE_OF_OVERRULE))
-    {
-        if (Level >= 7)
-        {
-            Color = TEXT_COLOR_YELLOW;
-        }
-        else
-        {
-            if (ip->SpecialNum > 0)
-            {
-                Color = TEXT_COLOR_BLUE;
-            }
-            else
-            {
-                Color = TEXT_COLOR_WHITE;
-            }
-        }
-    }
+    // The name and its color as the item's tooltip has them.
+    const ItemTooltipName name =
+        GetItemTooltipName(*ip, Level, Engine::Items::TooltipValues::ComputeItemTooltipValues(*ip));
+    const int Color = name.color;
 
     if (ip->Type < ITEM_POTION)
     {
@@ -2994,49 +2722,7 @@ static void RenderRepairInfo(const UI::Scaling::Transform& screen, int sx, int s
     }
     mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
-    if (ip->Type == ITEM_ORB_OF_SUMMONING)
-    {
-        mu_swprintf(TextList[TextNum], L"%ls %ls", SkillAttribute[30 + Level].Name, I18N::Game::Jewel);
-    }
-    else if (ip->Type == ITEM_TRANSFORMATION_RING)
-    {
-        if (const wchar_t* monsterName = GameLogic::Items::TransformationRing::MonsterName(Level))
-        {
-            mu_swprintf(TextList[TextNum], L"%ls %ls", monsterName, I18N::Game::TransformationRing);
-        }
-    }
-    else if (GameLogic::Items::IsDarkLordPet(ip))
-    {
-        mu_swprintf(TextList[TextNum], L"%ls", p->Name);
-    }
-    else if ((ip->Type >= ITEM_WINGS_OF_SPIRITS && ip->Type <= ITEM_WINGS_OF_DARKNESS)
-        || ip->Type >= ITEM_CAPE_OF_LORD
-        || (ip->Type >= ITEM_WING_OF_STORM && ip->Type <= ITEM_CAPE_OF_EMPEROR)
-        || (ip->Type >= ITEM_WINGS_OF_DESPAIR && ip->Type <= ITEM_WING_OF_DIMENSION)
-        || (ip->Type >= ITEM_CAPE_OF_FIGHTER && ip->Type <= ITEM_CAPE_OF_OVERRULE))
-    {
-        if (Level == 0)
-            mu_swprintf(TextList[TextNum], L"%ls", p->Name);
-        else
-            mu_swprintf(TextList[TextNum], L"%ls +%d", p->Name, Level);
-    }
-    else
-    {
-        if (ip->ExcellentFlags > 0)
-        {
-            if (Level == 0)
-                mu_swprintf(TextList[TextNum], L"%ls %ls", I18N::Game::Excellent, p->Name);
-            else
-                mu_swprintf(TextList[TextNum], L"%ls %ls +%d", I18N::Game::Excellent, p->Name, Level);
-        }
-        else
-        {
-            if (Level == 0)
-                mu_swprintf(TextList[TextNum], L"%ls", p->Name);
-            else
-                mu_swprintf(TextList[TextNum], L"%ls +%d", p->Name, Level);
-        }
-    }
+    mu_swprintf(TextList[TextNum], L"%.*ls", static_cast<int>(std::size(TextList[0]) - 1), name.text.c_str());
     TextListColor[TextNum] = Color; TextBold[TextNum] = true; TextNum++;
     mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
@@ -3491,24 +3177,15 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     descriptor.TextColor = MakeRgba(255, 255, 255, 255);
     descriptor.BgColor = MakeRgba(0, 0, 0, 255);
 
-    // Use the item name by default, only when o->Type is an item's model slot
-    // Items with special types (e.g. MODEL_EVENT + N) are handled by overrides below
-    const wchar_t* itemName = nullptr;
-    if (Data::Items::IsItemModelSlot(o->Type))
+    // The item's name (its name lines), as windows and messages write it; Zen shows its amount. A ground item keeps its
+    // item type and level when it is drawn as an event model (MODEL_EVENT + N).
+    if (o->Type == MODEL_ZEN)
     {
-        itemName = ItemAttribute[Data::Items::ToItemType(o->Type)].Name;
-        if (o->Type == MODEL_ZEN) // Zen
-        {
-            FormatGroundItemLabelText(descriptor.Name, L"%ls %d", itemName, ItemLevel);
-        }
-        else if (ItemLevel == 0)
-        {
-            CopyGroundItemLabelText(descriptor.Name, itemName);
-        }
-        else
-        {
-            FormatGroundItemLabelText(descriptor.Name, L"%ls +%d", itemName, ItemLevel);
-        }
+        FormatGroundItemLabelText(descriptor.Name, L"%ls %d", ItemAttribute[ITEM_ZEN].Name, ItemLevel);
+    }
+    else
+    {
+        CopyGroundItemLabelText(descriptor.Name, GetItemNameText(ip->Type, ItemLevel, ip).c_str());
     }
 
     if (boldTextItems.count(o->Type) > 0)
@@ -3531,121 +3208,27 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     if (o->Type == MODEL_ORB_OF_SUMMONING)
     {
         SetDescriptorGrayTextColor(descriptor);
-        FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", SkillAttribute[30 + ItemLevel].Name, I18N::Game::Jewel);
     }
     else if (COMGEM::NOGEM != COMGEM::Check_Jewel_Com(o->Type, true))
     {
-        int iJewelItemIndex = COMGEM::GetJewelIndex(COMGEM::Check_Jewel_Com(o->Type, true), COMGEM::eGEM_NAME);
         descriptor.Font = g_hFontBold;
         SetDescriptorYellowTextColor(descriptor);
-        CopyGroundItemLabelText(descriptor.Name, I18N::Game::Lookup(iJewelItemIndex));
     }
-    else if (o->Type == MODEL_COMPILED_CELE)
+    else if ((o->Type == MODEL_BOX_OF_LUCK && ItemLevel == 7) || o->Type == MODEL_POTION + 12 ||
+             o->Type == MODEL_FRUITS || o->Type == MODEL_SPIRIT ||
+             (o->Type >= MODEL_EVENT + 4 && o->Type <= MODEL_EVENT + 5) ||
+             (o->Type >= MODEL_EVENT + 7 && o->Type <= MODEL_EVENT + 16) || o->Type == MODEL_EVENT + 18 ||
+             o->Type == MODEL_TRANSFORMATION_RING || o->Type == MODEL_SIEGE_POTION ||
+             o->Type == MODEL_CONTRACT_SUMMON || o->Type == MODEL_LIFE_STONE_ITEM)
     {
-        CopyGroundItemLabelText(descriptor.Name, ItemAttribute[ITEM_JEWEL_OF_BLESS].Name);
-    }
-    else if (o->Type == MODEL_COMPILED_SOUL)
-    {
-        CopyGroundItemLabelText(descriptor.Name, ItemAttribute[ITEM_JEWEL_OF_SOUL].Name);
-    }
-    else if (o->Type == MODEL_BOX_OF_LUCK && ItemLevel == 7)
-    {
-        CopyGroundItemLabelText(descriptor.Name, I18N::Game::BoxOfHeaven);
-    }
-    else if (o->Type == MODEL_POTION + 12)
-    {
-        switch (ItemLevel)
-        {
-        case 0: CopyGroundItemLabelText(descriptor.Name, I18N::Game::Zen); break;
-        case 1: CopyGroundItemLabelText(descriptor.Name, I18N::Game::Heart); break;
-        case 2: CopyGroundItemLabelText(descriptor.Name, I18N::Game::ChaosEventGiftCertificate); break;
-        }
-    }
-    else if (o->Type == MODEL_FRUITS)
-    {
-        switch (ItemLevel)
-        {
-        case 0:
-            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::ENG, itemName);
-            break;
-        case 1:
-            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::STA, itemName);
-            break;
-        case 2:
-            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::AGI, itemName);
-            break;
-        case 3:
-            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::STR, itemName);
-            break;
-        case 4:
-            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::Command, itemName);
-            break;
-        }
-    }
-    else if (o->Type == MODEL_SPIRIT)
-    {
-        switch (ItemLevel)
-        {
-        case 0:
-            FormatGroundItemLabelText(descriptor.Name, L"%ls of %ls", itemName, I18N::Game::DarkHorse);
-            break;
-        case 1:
-            FormatGroundItemLabelText(descriptor.Name, L"%ls of %ls", itemName, I18N::Game::DarkRaven);
-            break;
-        }
-    }
-    else if (o->Type == MODEL_EVENT + 16)
-    {
-        CopyGroundItemLabelText(descriptor.Name, I18N::Game::CrestOfMonarch);
-    }
-    else if (o->Type == MODEL_EVENT + 4)
-    {
-        CopyGroundItemLabelText(descriptor.Name, I18N::Game::StarOfSacredBirth);
-    }
-    else if (o->Type == MODEL_EVENT + 5)
-    {
-        switch (ItemLevel)
-        {
-        case 14:
-            CopyGroundItemLabelText(descriptor.Name, I18N::Game::BlueLuckyPouch);
-            break;
-
-        case 15:
-            CopyGroundItemLabelText(descriptor.Name, I18N::Game::RedLuckyPouch);
-            break;
-
-        default:
-            CopyGroundItemLabelText(descriptor.Name, I18N::Game::Firecracker);
-            break;
-        }
+        // White, the label's color.
     }
     else if (o->Type == MODEL_EVENT + 6)
     {
         if (ItemLevel == 13)
         {
             SetDescriptorYellowTextColor(descriptor);
-            CopyGroundItemLabelText(descriptor.Name, I18N::Game::HeartOfDarkLord);
         }
-        else
-        {
-            CopyGroundItemLabelText(descriptor.Name, I18N::Game::HeartOfLove);
-        }
-    }
-    else if (o->Type == MODEL_EVENT + 7)
-    {
-        CopyGroundItemLabelText(descriptor.Name, I18N::Game::OliveOfLove);
-    }
-    else if (o->Type == MODEL_EVENT + 8)
-    {
-        CopyGroundItemLabelText(descriptor.Name, I18N::Game::SilverMedal);
-    }
-    else if (o->Type == MODEL_EVENT + 9)
-    {
-        CopyGroundItemLabelText(descriptor.Name, I18N::Game::GoldMedal);
-    }
-    else if (o->Type == MODEL_EVENT + 10)
-    {
-        FormatGroundItemLabelText(descriptor.Name, L"%ls +%d", I18N::Game::BoxOfKundun, ItemLevel - 7);
     }
     else if (o->Type == MODEL_RED_RIBBON_BOX)
     {
@@ -3668,7 +3251,6 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
         else if (ItemLevel == 1)
         {
             SetDescriptorTextColor(descriptor, 1.f, 0.3f, 1.f);
-            CopyGroundItemLabelText(descriptor.Name, I18N::Game::LilacCandyBox);
         }
     }
     else if (o->Type == MODEL_RED_CHOCOLATE_BOX)
@@ -3680,7 +3262,6 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
         else if (ItemLevel == 1)
         {
             SetDescriptorTextColor(descriptor, 1.0f, 0.3f, 0.3f);
-            CopyGroundItemLabelText(descriptor.Name, I18N::Game::OrangeCandyBox);
         }
     }
     else if (o->Type == MODEL_BLUE_CHOCOLATE_BOX)
@@ -3692,99 +3273,27 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
         else if (ItemLevel == 1)
         {
             SetDescriptorTextColor(descriptor, 0.3f, 0.3f, 1.f);
-            CopyGroundItemLabelText(descriptor.Name, I18N::Game::NavyCandyBox);
         }
     }
     else if (o->Type == MODEL_EVENT + 21)
     {
         SetDescriptorTextColor(descriptor, 1.f, 0.3f, 1.f);
-        CopyGroundItemLabelText(descriptor.Name, I18N::Game::LilacCandyBox);
     }
     else if (o->Type == MODEL_EVENT + 22)
     {
         SetDescriptorTextColor(descriptor, 1.0f, 0.3f, 0.3f);
-        CopyGroundItemLabelText(descriptor.Name, I18N::Game::OrangeCandyBox);
     }
     else if (o->Type == MODEL_EVENT + 23)
     {
         SetDescriptorTextColor(descriptor, 0.3f, 0.3f, 1.f);
-        CopyGroundItemLabelText(descriptor.Name, I18N::Game::NavyCandyBox);
-    }
-    else if (o->Type == MODEL_EVENT + 11)
-    {
-        CopyGroundItemLabelText(descriptor.Name, I18N::Game::Stone);
-    }
-    else if (o->Type == MODEL_EVENT + 12)
-    {
-        CopyGroundItemLabelText(descriptor.Name, I18N::Game::RingOfHonor);
-    }
-    else if (o->Type == MODEL_EVENT + 13)
-    {
-        CopyGroundItemLabelText(descriptor.Name, I18N::Game::DarkStone);
-    }
-    else if (o->Type == MODEL_EVENT + 14)
-    {
-        switch (ItemLevel)
-        {
-        case 2:
-            CopyGroundItemLabelText(descriptor.Name, I18N::Game::RingOfWarrior);
-            break;
-        case 3:
-            CopyGroundItemLabelText(descriptor.Name, I18N::Game::RingOfGlory);
-            break;
-        default:
-            CopyGroundItemLabelText(descriptor.Name, I18N::Game::RingOfWarrior);
-            break;
-        }
-    }
-    else if (o->Type == MODEL_EVENT + 15)
-    {
-        CopyGroundItemLabelText(descriptor.Name, I18N::Game::RingOfWizard);
-    }
-    else if (o->Type == MODEL_TRANSFORMATION_RING)
-    {
-        if (const wchar_t* monsterName = GameLogic::Items::TransformationRing::MonsterName(ItemLevel))
-        {
-            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", monsterName, I18N::Game::TransformationRing);
-        }
     }
     else if (o->Type == MODEL_RENA && ItemLevel == 3)
     {
         SetDescriptorYellowTextColor(descriptor);
-        CopyGroundItemLabelText(descriptor.Name, I18N::Game::SignOfLord);
-    }
-    else if (o->Type == MODEL_SIEGE_POTION)
-    {
-        switch (ItemLevel)
-        {
-        case 0: CopyGroundItemLabelText(descriptor.Name, I18N::Game::PotionOfBless); break;
-        case 1: CopyGroundItemLabelText(descriptor.Name, I18N::Game::PotionOfSoul); break;
-        }
-    }
-    else if (o->Type == MODEL_CONTRACT_SUMMON)
-    {
-        switch (ItemLevel)
-        {
-        case 0: CopyGroundItemLabelText(descriptor.Name, I18N::Game::Archer); break;
-        case 1: CopyGroundItemLabelText(descriptor.Name, I18N::Game::Spearman); break;
-        }
-    }
-    else if (o->Type == MODEL_LIFE_STONE_ITEM)
-    {
-        switch (ItemLevel)
-        {
-        case 0: CopyGroundItemLabelText(descriptor.Name, I18N::Game::ScrollOfGuardian); break;
-        case 1: CopyGroundItemLabelText(descriptor.Name, I18N::Game::PlaceLifeStone); break;
-        }
-    }
-    else if (o->Type == MODEL_EVENT + 18)
-    {
-        CopyGroundItemLabelText(descriptor.Name, I18N::Game::PlaceLifeStone);
     }
     else if (GameLogic::Items::IsSocketSeedOrSphereModel(o->Type))
     {
         SetDescriptorTextColor(descriptor, 0.7f, 0.4f, 1.0f);
-        CopyGroundItemLabelText(descriptor.Name, itemName);
     }
     else if (o->Type == MODEL_INVITATION_TO_SANTA_VILLAGE)
     {

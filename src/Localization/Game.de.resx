@@ -4004,10 +4004,6 @@
     <value>bis</value>
     <comment>legacy_id=1096</comment>
   </data>
-  <data name="Stone of Friendship" xml:space="preserve">
-    <value>Stein der Freundschaft</value>
-    <comment>legacy_id=1098</comment>
-  </data>
   <data name="Do you want to buy an item?" xml:space="preserve">
     <value>Möchten Sie einen Gegenstand kaufen?</value>
     <comment>legacy_id=1100</comment>
@@ -4500,10 +4496,6 @@
     <value>Kein %s.</value>
     <comment>legacy_id=1233</comment>
   </data>
-  <data name="Crest of monarch" xml:space="preserve">
-    <value>Crest of Monarch</value>
-    <comment>legacy_id=1235</comment>
-  </data>
   <data name="Check the details in pet information window" xml:space="preserve">
     <value>Details finden Sie im Haustierinformationsfenster</value>
     <comment>legacy_id=1237</comment>
@@ -4679,10 +4671,6 @@
   <data name="Prevent equipment drop" xml:space="preserve">
     <value>Verhindert das Fallenlassen der Ausrüstung</value>
     <comment>legacy_id=1288</comment>
-  </data>
-  <data name="Sign of lord" xml:space="preserve">
-    <value>Zeichen des Lords</value>
-    <comment>legacy_id=1290</comment>
   </data>
   <data name="Move to vault" xml:space="preserve">
     <value>Zum Tresor</value>
@@ -5152,10 +5140,6 @@
     <value>Lebensstein</value>
     <comment>legacy_id=1415</comment>
   </data>
-  <data name="Scroll of Guardian" xml:space="preserve">
-    <value>Schriftrolle des Wächters</value>
-    <comment>legacy_id=1416</comment>
-  </data>
   <data name="No. of signs" xml:space="preserve">
     <value>Anzahl der Zeichen</value>
     <comment>legacy_id=1420</comment>
@@ -5291,18 +5275,6 @@
   <data name="Failed to fire the siege weapon" xml:space="preserve">
     <value>Die Belagerungswaffe konnte nicht abgefeuert werden</value>
     <comment>legacy_id=1459</comment>
-  </data>
-  <data name="Archer" xml:space="preserve">
-    <value>Bogenschütze</value>
-    <comment>legacy_id=1460</comment>
-  </data>
-  <data name="Spearman" xml:space="preserve">
-    <value>Speerkämpfer</value>
-    <comment>legacy_id=1461</comment>
-  </data>
-  <data name="Place Life Stone" xml:space="preserve">
-    <value>Lebensstein platzieren</value>
-    <comment>legacy_id=1462</comment>
   </data>
   <data name="Attacking speed +25 increase effect" xml:space="preserve">
     <value>Effekt: Angriffsgeschwindigkeit +25</value>
@@ -5999,14 +5971,6 @@
   <data name="be upon you." xml:space="preserve">
     <value>sei mit Ihnen.</value>
     <comment>legacy_id=1649</comment>
-  </data>
-  <data name="Blue lucky pouch" xml:space="preserve">
-    <value>Blauer Glücksbeutel</value>
-    <comment>legacy_id=1650</comment>
-  </data>
-  <data name="Red lucky pouch" xml:space="preserve">
-    <value>Roter Glücksbeutel</value>
-    <comment>legacy_id=1651</comment>
   </data>
   <data name="Free entrance to Kalima" xml:space="preserve">
     <value>Freier Eintritt nach Kalima</value>
@@ -7187,18 +7151,6 @@
   <data name="Drop it to receive the gift." xml:space="preserve">
     <value>Lassen Sie es fallen, um das Geschenk zu erhalten.</value>
     <comment>legacy_id=2011</comment>
-  </data>
-  <data name="Lilac candy box" xml:space="preserve">
-    <value>Lila Bonbonschachtel</value>
-    <comment>legacy_id=2012</comment>
-  </data>
-  <data name="Orange candy box" xml:space="preserve">
-    <value>Orangefarbene Bonbonschachtel</value>
-    <comment>legacy_id=2013</comment>
-  </data>
-  <data name="Navy candy box" xml:space="preserve">
-    <value>Marineblaue Bonbonschachtel</value>
-    <comment>legacy_id=2014</comment>
   </data>
   <data name="Would you like to receive the item?" xml:space="preserve">
     <value>Möchten Sie den Gegenstand erhalten?</value>

@@ -3984,10 +3984,6 @@
     <value>到</value>
     <comment>legacy_id=1096</comment>
   </data>
-  <data name="Stone of Friendship" xml:space="preserve">
-    <value>友誼之石</value>
-    <comment>legacy_id=1098</comment>
-  </data>
   <data name="Do you want to buy an item?" xml:space="preserve">
     <value>您想購買商品嗎？</value>
     <comment>legacy_id=1100</comment>
@@ -4480,10 +4476,6 @@
     <value>沒有 %s。</value>
     <comment>legacy_id=1233</comment>
   </data>
-  <data name="Crest of monarch" xml:space="preserve">
-    <value>君主的紋章</value>
-    <comment>legacy_id=1235</comment>
-  </data>
   <data name="Check the details in pet information window" xml:space="preserve">
     <value>在寵物資訊視窗查看詳細信息</value>
     <comment>legacy_id=1237</comment>
@@ -4659,10 +4651,6 @@
   <data name="Prevent equipment drop" xml:space="preserve">
     <value>防止裝備掉落</value>
     <comment>legacy_id=1288</comment>
-  </data>
-  <data name="Sign of lord" xml:space="preserve">
-    <value>主的標誌</value>
-    <comment>legacy_id=1290</comment>
   </data>
   <data name="Move to vault" xml:space="preserve">
     <value>移至保管庫</value>
@@ -5132,10 +5120,6 @@
     <value>生命石</value>
     <comment>legacy_id=1415</comment>
   </data>
-  <data name="Scroll of Guardian" xml:space="preserve">
-    <value>守護者捲軸</value>
-    <comment>legacy_id=1416</comment>
-  </data>
   <data name="No. of signs" xml:space="preserve">
     <value>標誌數量</value>
     <comment>legacy_id=1420</comment>
@@ -5271,18 +5255,6 @@
   <data name="Failed to fire the siege weapon" xml:space="preserve">
     <value>攻城武器發射失敗</value>
     <comment>legacy_id=1459</comment>
-  </data>
-  <data name="Archer" xml:space="preserve">
-    <value>射手</value>
-    <comment>legacy_id=1460</comment>
-  </data>
-  <data name="Spearman" xml:space="preserve">
-    <value>斯皮爾曼</value>
-    <comment>legacy_id=1461</comment>
-  </data>
-  <data name="Place Life Stone" xml:space="preserve">
-    <value>放置生命石</value>
-    <comment>legacy_id=1462</comment>
   </data>
   <data name="Attacking speed +25 increase effect" xml:space="preserve">
     <value>攻擊速度+25增加效果</value>
@@ -5979,14 +5951,6 @@
   <data name="be upon you." xml:space="preserve">
     <value>臨到你身上。</value>
     <comment>legacy_id=1649</comment>
-  </data>
-  <data name="Blue lucky pouch" xml:space="preserve">
-    <value>藍色福袋</value>
-    <comment>legacy_id=1650</comment>
-  </data>
-  <data name="Red lucky pouch" xml:space="preserve">
-    <value>紅色福袋</value>
-    <comment>legacy_id=1651</comment>
   </data>
   <data name="Free entrance to Kalima" xml:space="preserve">
     <value>免費進入卡利馬</value>
@@ -7167,18 +7131,6 @@
   <data name="Drop it to receive the gift." xml:space="preserve">
     <value>放下它即可收到禮物。</value>
     <comment>legacy_id=2011</comment>
-  </data>
-  <data name="Lilac candy box" xml:space="preserve">
-    <value>紫丁香糖果盒</value>
-    <comment>legacy_id=2012</comment>
-  </data>
-  <data name="Orange candy box" xml:space="preserve">
-    <value>橘色糖果盒</value>
-    <comment>legacy_id=2013</comment>
-  </data>
-  <data name="Navy candy box" xml:space="preserve">
-    <value>海軍藍糖果盒</value>
-    <comment>legacy_id=2014</comment>
   </data>
   <data name="Would you like to receive the item?" xml:space="preserve">
     <value>您想收到該物品嗎？</value>
