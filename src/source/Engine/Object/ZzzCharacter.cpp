@@ -6,6 +6,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include <array>
 #include <vector>
 #include <execution>
 #include <algorithm>
@@ -6521,7 +6522,8 @@ constexpr float MountRiderLeanShare = 0.5f;
 
 bool IsRiding(const CHARACTER* c)
 {
-    return c->Object.Type == MODEL_PLAYER &&
+    // In a safe zone a mount is put away and its rider walks.
+    return c->Object.Type == MODEL_PLAYER && !c->SafeZone &&
            (c->Helper.Type == MODEL_HORN_OF_UNIRIA || c->Helper.Type == MODEL_HORN_OF_DINORANT ||
             c->Helper.Type == MODEL_DARK_HORSE_ITEM || c->Helper.Type == MODEL_HORN_OF_FENRIR);
 }
@@ -6825,6 +6827,266 @@ constexpr float SnapTurnAcceleration = 4.f * 180.f / (SnapTurnSeconds * SnapTurn
 constexpr float SnapTurnMaxSpeed = SnapTurnAcceleration * SnapTurnSeconds / 2.f;
 } // namespace
 
+namespace
+{
+// The slope is the terrain's rise between this far ahead of the character and this far behind it, along its facing.
+// A mount follows it this much (a little more than the ground itself, so the game's gentle slopes show), up to this
+// many degrees; a player walking leans this share of it into a climb, up to this many. Both ease in and out over
+// about this long.
+constexpr float SlopeProbeDistance = 60.f;
+constexpr float SlopeMountShare = 1.5f;
+constexpr float SlopeMountMaxDegrees = 25.f;
+constexpr float SlopeWalkShare = 0.5f;
+constexpr float SlopeWalkMaxDegrees = 10.f;
+constexpr float SlopeEaseSeconds = 0.25f;
+} // namespace
+
+void UpdateSlopeLean(CHARACTER* c)
+{
+    OBJECT* o = &c->Object;
+    const bool riding = IsRiding(c);
+    const bool walking = c->Movement && !IsFlying(o);
+    float wanted = 0.f;
+    if (o->Type == MODEL_PLAYER && (riding || walking))
+    {
+        // Ahead is where it faces: a model faces -Y before its facing turns it.
+        const float facing = o->Angle[2] * (Q_PI / 180.f);
+        const float aheadX = std::sin(facing) * SlopeProbeDistance;
+        const float aheadY = -std::cos(facing) * SlopeProbeDistance;
+        const float rise = RequestTerrainHeight(o->Position[0] + aheadX, o->Position[1] + aheadY) -
+                           RequestTerrainHeight(o->Position[0] - aheadX, o->Position[1] - aheadY);
+        const float slope = std::atan2(rise, 2.f * SlopeProbeDistance) * (180.f / Q_PI);
+        // A positive pitch tips the nose down: a mount climbing tips it up (follows the slope), a walker climbing
+        // leans forward into it.
+        wanted = riding ? std::clamp(-slope * SlopeMountShare, -SlopeMountMaxDegrees, SlopeMountMaxDegrees)
+                        : std::clamp(slope * SlopeWalkShare, -SlopeWalkMaxDegrees, SlopeWalkMaxDegrees);
+    }
+    if (wanted == 0.f && c->SlopePitch == 0.f)
+    {
+        return;
+    }
+    const float seconds = FPS_ANIMATION_FACTOR / static_cast<float>(REFERENCE_FPS);
+    const float ease = seconds > 0.f ? 1.f - std::exp(-seconds / SlopeEaseSeconds) : 0.f;
+    const float pitch =
+        std::fabs(wanted - c->SlopePitch) < 0.01f ? wanted : c->SlopePitch + (wanted - c->SlopePitch) * ease;
+    o->Angle[0] += pitch - c->SlopePitch;
+    c->SlopePitch = pitch;
+}
+
+namespace
+{
+// A foot goes at most this far up or down to the ground under it, and the body down at most this far for it (world
+// units); a leg straightens to at most this share of its length, so a knee never locks.
+constexpr float FootMaxReach = 40.f;
+constexpr float FootMaxStretch = 0.995f;
+
+struct Leg
+{
+    int thigh = -1;
+    int calf = -1;
+    int foot = -1;
+};
+
+// The player skeleton's legs, by name, found once.
+const std::array<Leg, 2>& PlayerLegs()
+{
+    static const std::array<Leg, 2> legs = []
+    {
+        const BMD& player = Models[MODEL_PLAYER];
+        const auto find = [&](const char* name)
+        {
+            for (int i = 0; i < player.NumBones; ++i)
+            {
+                if (!player.Bones[i].Dummy && strcmp(player.Bones[i].Name, name) == 0)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        };
+        return std::array<Leg, 2>{Leg{find("Bip01 L Thigh"), find("Bip01 L Calf"), find("Bip01 L Foot")},
+                                  Leg{find("Bip01 R Thigh"), find("Bip01 R Calf"), find("Bip01 R Foot")}};
+    }();
+    return legs;
+}
+
+// The rotation turning direction `from` onto direction `to` (the shortest way), as a 3x3 matrix.
+void RotationBetween(const float from[3], const float to[3], float rotation[3][3])
+{
+    const auto length = [](const float v[3]) { return std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]); };
+    const float fromLength = length(from);
+    const float toLength = length(to);
+    float axis[3] = {from[1] * to[2] - from[2] * to[1], from[2] * to[0] - from[0] * to[2],
+                     from[0] * to[1] - from[1] * to[0]};
+    const float sine = length(axis) / std::max(fromLength * toLength, 0.0001f);
+    const float cosine =
+        (from[0] * to[0] + from[1] * to[1] + from[2] * to[2]) / std::max(fromLength * toLength, 0.0001f);
+    const float axisLength = length(axis);
+    if (axisLength < 0.0001f)
+    {
+        for (int r = 0; r < 3; ++r)
+            for (int c = 0; c < 3; ++c)
+                rotation[r][c] = r == c ? 1.f : 0.f;
+        return;
+    }
+    for (float& a : axis)
+    {
+        a /= axisLength;
+    }
+    const float rest = 1.f - cosine;
+    const float x = axis[0];
+    const float y = axis[1];
+    const float z = axis[2];
+    const float m[3][3] = {{cosine + x * x * rest, x * y * rest - z * sine, x * z * rest + y * sine},
+                           {y * x * rest + z * sine, cosine + y * y * rest, y * z * rest - x * sine},
+                           {z * x * rest - y * sine, z * y * rest + x * sine, cosine + z * z * rest}};
+    for (int r = 0; r < 3; ++r)
+        for (int c = 0; c < 3; ++c)
+            rotation[r][c] = m[r][c];
+}
+
+// Turns a bone's rotation by `rotation` (in model space); its place stays.
+void TurnBone(float bone[3][4], const float rotation[3][3])
+{
+    float turned[3][3];
+    for (int r = 0; r < 3; ++r)
+        for (int c = 0; c < 3; ++c)
+            turned[r][c] = rotation[r][0] * bone[0][c] + rotation[r][1] * bone[1][c] + rotation[r][2] * bone[2][c];
+    for (int r = 0; r < 3; ++r)
+        for (int c = 0; c < 3; ++c)
+            bone[r][c] = turned[r][c];
+}
+
+bool IsBelow(const BMD& model, int bone, int ancestor)
+{
+    for (int b = model.Bones[bone].Parent; b >= 0; b = model.Bones[b].Parent)
+    {
+        if (b == ancestor)
+            return true;
+    }
+    return false;
+}
+} // namespace
+
+void PlaceFeet(const CHARACTER* c, float (*bones)[3][4])
+{
+    const OBJECT* o = &c->Object;
+    if (o->Type != MODEL_PLAYER || c->Dead != 0 || IsRiding(c) || IsFlying(o) || o->Scale <= 0.f)
+    {
+        return;
+    }
+    const std::array<Leg, 2>& legs = PlayerLegs();
+    for (const Leg& leg : legs)
+    {
+        if (leg.thigh < 0 || leg.calf < 0 || leg.foot < 0)
+            return;
+    }
+    const BMD& player = Models[MODEL_PLAYER];
+    const float scale = o->Scale;
+    // The animation stands on flat ground at the character's own ground; how far each foot's ground is from that.
+    const float ground = RequestTerrainHeight(o->Position[0], o->Position[1]);
+    float rise[2];
+    for (int i = 0; i < 2; ++i)
+    {
+        const float x = o->Position[0] + bones[legs[i].foot][0][3] * scale;
+        const float y = o->Position[1] + bones[legs[i].foot][1][3] * scale;
+        rise[i] = std::clamp(RequestTerrainHeight(x, y) - ground, -FootMaxReach, FootMaxReach);
+    }
+    // The body goes down as far as the lower foot needs to reach (the higher one bends).
+    const float drop = std::max(0.f, -std::min(rise[0], rise[1]));
+    if (drop == 0.f && rise[0] == 0.f && rise[1] == 0.f)
+    {
+        return;
+    }
+    const float dropModel = drop / scale;
+    for (int b = 0; b < player.NumBones; ++b)
+    {
+        bones[b][2][3] -= dropModel;
+    }
+    for (int i = 0; i < 2; ++i)
+    {
+        const Leg& leg = legs[i];
+        float hip[3], knee[3], ankle[3];
+        for (int r = 0; r < 3; ++r)
+        {
+            hip[r] = bones[leg.thigh][r][3];
+            knee[r] = bones[leg.calf][r][3];
+            ankle[r] = bones[leg.foot][r][3];
+        }
+        float target[3] = {ankle[0], ankle[1], ankle[2] + (rise[i] + drop) / scale};
+        const auto sub = [](const float a[3], const float b[3], float out[3])
+        {
+            for (int r = 0; r < 3; ++r)
+                out[r] = a[r] - b[r];
+        };
+        const auto len = [](const float v[3]) { return std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]); };
+        float thighVector[3], shinVector[3], reach[3];
+        sub(knee, hip, thighVector);
+        sub(ankle, knee, shinVector);
+        const float thighLength = len(thighVector);
+        const float shinLength = len(shinVector);
+        sub(target, hip, reach);
+        float distance = len(reach);
+        if (thighLength <= 0.f || shinLength <= 0.f || distance <= 0.f)
+            continue;
+        // Not further than the leg reaches (nearly straight), nor closer than it folds.
+        const float most = (thighLength + shinLength) * FootMaxStretch;
+        const float least = std::fabs(thighLength - shinLength) + 0.01f;
+        const float clamped = std::clamp(distance, least, most);
+        for (float& v : reach)
+            v *= clamped / distance;
+        distance = clamped;
+        for (int r = 0; r < 3; ++r)
+            target[r] = hip[r] + reach[r];
+        // The new knee: in the plane of the hip, the target and where the knee pointed.
+        float along[3] = {reach[0] / distance, reach[1] / distance, reach[2] / distance};
+        const float kneeAlong = thighVector[0] * along[0] + thighVector[1] * along[1] + thighVector[2] * along[2];
+        float bend[3] = {thighVector[0] - along[0] * kneeAlong, thighVector[1] - along[1] * kneeAlong,
+                         thighVector[2] - along[2] * kneeAlong};
+        const float bendLength = len(bend);
+        if (bendLength < 0.0001f)
+            continue;
+        for (float& v : bend)
+            v /= bendLength;
+        const float a = (thighLength * thighLength - shinLength * shinLength + distance * distance) / (2.f * distance);
+        const float h = std::sqrt(std::max(0.f, thighLength * thighLength - a * a));
+        float newKnee[3];
+        for (int r = 0; r < 3; ++r)
+            newKnee[r] = hip[r] + along[r] * a + bend[r] * h;
+        // The thigh turns onto the new knee; the calf, carried by it, turns onto the target.
+        float newThigh[3];
+        sub(newKnee, hip, newThigh);
+        float thighTurn[3][3];
+        RotationBetween(thighVector, newThigh, thighTurn);
+        TurnBone(bones[leg.thigh], thighTurn);
+        float carriedShin[3];
+        for (int r = 0; r < 3; ++r)
+            carriedShin[r] =
+                thighTurn[r][0] * shinVector[0] + thighTurn[r][1] * shinVector[1] + thighTurn[r][2] * shinVector[2];
+        float newShin[3];
+        sub(target, newKnee, newShin);
+        float shinTurn[3][3];
+        RotationBetween(carriedShin, newShin, shinTurn);
+        TurnBone(bones[leg.calf], thighTurn);
+        TurnBone(bones[leg.calf], shinTurn);
+        for (int r = 0; r < 3; ++r)
+        {
+            bones[leg.calf][r][3] = newKnee[r];
+        }
+        // The foot keeps its own turn (as animated) and moves onto the target, its toes with it.
+        float moved[3];
+        sub(target, ankle, moved);
+        for (int b = 0; b < player.NumBones; ++b)
+        {
+            if (b == leg.foot || IsBelow(player, b, leg.foot))
+            {
+                for (int r = 0; r < 3; ++r)
+                    bones[b][r][3] += moved[r];
+            }
+        }
+    }
+}
+
 CHARACTER* CharacterOfObject(const OBJECT* o)
 {
     const auto offset = reinterpret_cast<const char*>(o) - reinterpret_cast<const char*>(&CharactersClient[0].Object);
@@ -6941,6 +7203,7 @@ void MoveCharacterClient(CHARACTER* cc)
         {
             UpdateFlightFeel(cc);
             UpdateTurnLag(cc);
+            UpdateSlopeLean(cc);
         }
         UpdateSnapTurn(cc);
         MoveCharacterVisual(cc, co);
@@ -7032,6 +7295,10 @@ void AnimateCharacterBones(OBJECT* o, float turnLag, float facingOffset)
     vec3_t angle = {o->Angle[0], o->Angle[1], o->Angle[2] + facingOffset};
     model->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, angle, o->HeadAngle,
                      false, false, nullptr, o->CurrentAction, MAX_BONES, turnLag);
+    if (const CHARACTER* character = CharacterOfObject(o))
+    {
+        PlaceFeet(character, o->BoneTransform);
+    }
     o->EnableBoneMatrix = true;
 }
 

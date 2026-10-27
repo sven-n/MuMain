@@ -200,6 +200,8 @@ public:
     float       MomentumPace = 1.f;
     float       MomentumHeading = NAN;
     double      MomentumAt = -1.0;
+    // The pitch a slope gives the character now (UpdateSlopeLean), in degrees, as last added to Object.Angle[0].
+    float       SlopePitch = 0.f;
     // The character its head looks at (UpdateLookAt; an index into CharactersClient, -1: none) and how long until it
     // looks around for another, in seconds.
     short       LookTarget = -1;

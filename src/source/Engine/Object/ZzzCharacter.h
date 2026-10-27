@@ -70,6 +70,13 @@ void MoveCharacterPosition(CHARACTER* c, float heading, float pace = 1.f);
 float StepMomentum(CHARACTER* c, float& heading);
 // A flying winged player's bank into a turn and slow up-and-down drift, faded in and out (each frame, everyone).
 void UpdateFlightFeel(CHARACTER* c);
+// A slope under a player (each frame, everyone): on foot it leans a little into a climb while it walks; riding, the
+// mount (and the rider on it) follows the slope, nose up uphill.
+void UpdateSlopeLean(CHARACTER* c);
+// Puts a player's feet on the ground under them (a slope, a step), in its bones as just built in model space: the body
+// lowered as far as the lower foot needs, each leg bent to reach (two bones, the knee kept pointing as it did).
+// Players on foot only.
+void PlaceFeet(const CHARACTER* c, float (*bones)[3][4]);
 // A mount's lean into a turn from its rider's (UpdateFlightFeel leans a rider a share of the mount's).
 float MountLeanFromRider(float riderLean);
 // The wings and the ponytail trailing a little behind the body's turn and settling after it (each frame, everyone).

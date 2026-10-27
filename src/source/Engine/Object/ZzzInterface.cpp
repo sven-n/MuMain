@@ -3223,6 +3223,7 @@ void MoveHero()
     // the height drawn; MoveCharacterClient does the others.
     UpdateFlightFeel(c);
     UpdateTurnLag(c);
+    UpdateSlopeLean(c);
 
     CheckGate();
 

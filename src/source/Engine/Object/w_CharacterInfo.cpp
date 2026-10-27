@@ -87,6 +87,7 @@ void CHARACTER::Initialize()
     MomentumPace = 1.f;
     MomentumHeading = NAN;
     MomentumAt = -1.0;
+    SlopePitch = 0.f;
     LookTarget = -1;
     LookScanSeconds = 0.f;
     SnapTurnOffset = 0.f;

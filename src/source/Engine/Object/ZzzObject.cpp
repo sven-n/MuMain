@@ -282,9 +282,14 @@ void AnimateObjectBones(OBJECT* o, BMD* b, bool translate)
     const bool mount = o >= Mounts && o < Mounts + MAX_MOUNTS;
     const float headTurn = mount ? MountHeadTurn[o - Mounts] : 0.f;
     const float headRoll = mount ? MountHeadRoll[o - Mounts] : 0.f;
-    b->Animation(o->EnableBoneMatrix ? o->BoneTransform : BoneTransform, o->AnimationFrame, o->PriorAnimationFrame,
-                 o->PriorAction, angle, o->HeadAngle, false, !translate, nullptr, -1, MAX_BONES, turnLag, headTurn,
-                 headRoll);
+    float (*bones)[3][4] = o->EnableBoneMatrix ? o->BoneTransform : BoneTransform;
+    b->Animation(bones, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, angle, o->HeadAngle, false,
+                 !translate, nullptr, -1, MAX_BONES, turnLag, headTurn, headRoll);
+    // A player's feet on the ground under them (the bones are in model space when `translate` is set).
+    if (character != nullptr && translate)
+    {
+        PlaceFeet(character, bones);
+    }
 }
 } // namespace
 
