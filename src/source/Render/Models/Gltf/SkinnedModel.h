@@ -146,7 +146,7 @@ struct LodMesh
 // themselves (more distinct corners than 16-bit indices reach).
 struct PackedMesh
 {
-    std::vector<mu::SkinnedVertex3D> vertices;
+    std::vector<mu::SkinnedWeightedVertex3D> vertices;
     std::vector<std::uint16_t> indices;
 };
 

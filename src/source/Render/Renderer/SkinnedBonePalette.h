@@ -17,18 +17,21 @@ template <typename Vertex> [[nodiscard]] std::uint32_t BonesIndexed(std::span<co
     for (const Vertex& vertex : vertices)
     {
         // Match the shader: the first weight selects weighted skinning, not the legacy BMD fields.
-        if (vertex.weights[0] == 0u)
+        if constexpr (requires { vertex.weights; })
         {
-            highest = std::max({highest, vertex.positionBoneIndex, vertex.normalBoneIndex});
-            continue;
-        }
-        for (std::size_t influence = 0; influence < std::size(vertex.weights); ++influence)
-        {
-            if (vertex.weights[influence] > 0u)
+            if (vertex.weights[0] != 0u)
             {
-                highest = std::max(highest, static_cast<std::int32_t>(vertex.joints[influence]));
+                for (std::size_t influence = 0; influence < std::size(vertex.weights); ++influence)
+                {
+                    if (vertex.weights[influence] > 0u)
+                    {
+                        highest = std::max(highest, static_cast<std::int32_t>(vertex.joints[influence]));
+                    }
+                }
+                continue;
             }
         }
+        highest = std::max({highest, vertex.positionBoneIndex, vertex.normalBoneIndex});
     }
     return static_cast<std::uint32_t>(highest + 1);
 }

@@ -32,7 +32,8 @@ namespace Render::Models
 // the largest weight first (the shader takes a vertex whose first weight is
 // above 0 as weighted). The bone indices of the BMD fields name the dominant
 // joint.
-[[nodiscard]] mu::SkinnedVertex3D PackWeightedSkinnedVertex(const Gltf::SkinnedVertex& vertex, float u, float v);
+[[nodiscard]] mu::SkinnedWeightedVertex3D PackWeightedSkinnedVertex(const Gltf::SkinnedVertex& vertex, float u,
+                                                                    float v);
 
 // The GPU tangent of a glTF vertex (SkinnedVertex::bindTangent): xyz as snorm16
 // (clamped to -1..1) and w as +-32767 for the handedness; a tangent with w 0

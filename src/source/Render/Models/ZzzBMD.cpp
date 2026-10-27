@@ -98,9 +98,10 @@ std::span<mu::Vertex3D> GetRendererVertexScratch(std::size_t requiredVertexCount
     return {vertices.data(), requiredVertexCount};
 }
 
-std::span<mu::SkinnedVertex3D> GetRendererSkinnedVertexScratch(std::size_t requiredVertexCount)
+template <typename Vertex = mu::SkinnedVertex3D>
+std::span<Vertex> GetRendererSkinnedVertexScratch(std::size_t requiredVertexCount)
 {
-    static thread_local std::vector<mu::SkinnedVertex3D> vertices;
+    static thread_local std::vector<Vertex> vertices;
     if (vertices.size() < requiredVertexCount)
     {
         vertices.resize(requiredVertexCount);
@@ -1936,23 +1937,23 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
         const void* cacheKey = packedMesh && !packedMesh->vertices.empty()
                                    ? static_cast<const void*>(packedMesh->vertices.data())
                                    : static_cast<const void*>(m);
+        auto buildWeightedVertices = [&]() -> std::span<const mu::SkinnedWeightedVertex3D>
+        {
+            // The triangle corners (the cache draws without indices), plus this draw's wave.
+            const auto& vertices = packedMesh->vertices;
+            const auto& indices = packedMesh->indices;
+            const std::size_t cornerCount = indices.empty() ? vertices.size() : indices.size();
+            auto corners = GetRendererSkinnedVertexScratch<mu::SkinnedWeightedVertex3D>(cornerCount);
+            for (std::size_t i = 0; i < cornerCount; ++i)
+            {
+                corners[i] = vertices[indices.empty() ? i : indices[i]];
+                corners[i].u += waveU;
+                corners[i].v += waveV;
+            }
+            return corners.first(cornerCount);
+        };
         auto buildSkinnedVertices = [&]() -> std::span<const mu::SkinnedVertex3D>
         {
-            if (packedMesh)
-            {
-                // The triangle corners (the cache draws without indices), plus this draw's wave.
-                const auto& vertices = packedMesh->vertices;
-                const auto& indices = packedMesh->indices;
-                const std::size_t cornerCount = indices.empty() ? vertices.size() : indices.size();
-                auto corners = GetRendererSkinnedVertexScratch(cornerCount);
-                for (std::size_t i = 0; i < cornerCount; ++i)
-                {
-                    corners[i] = vertices[indices.empty() ? i : indices[i]];
-                    corners[i].u += waveU;
-                    corners[i].v += waveV;
-                }
-                return corners.first(cornerCount);
-            }
             auto skinnedVertices = GetRendererSkinnedVertexScratch(maxVertexCount);
             std::size_t skinnedVertexCount = 0;
             for (int j = 0; j < m->NumTriangles; ++j)
@@ -2004,10 +2005,18 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             skinning.normalMapScale = normalMap.scale;
         }
         auto& renderer = mu::GetRenderer();
-        if (!waveTextureCoordinates &&
-            (renderer.IsSkinnedMeshCached(cacheKey) || renderer.CacheSkinnedMesh(cacheKey, buildSkinnedVertices())))
+        const bool cached = !waveTextureCoordinates &&
+                            (renderer.IsSkinnedMeshCached(cacheKey) ||
+                             (packedMesh ? renderer.CacheWeightedSkinnedMesh(cacheKey, buildWeightedVertices())
+                                         : renderer.CacheSkinnedMesh(cacheKey, buildSkinnedVertices())));
+        if (cached)
         {
             gpuSkinningSubmitted = renderer.RenderCachedSkinnedMesh(cacheKey, color, 0u, skinning);
+        }
+        else if (packedMesh)
+        {
+            gpuSkinningSubmitted =
+                renderer.RenderWeightedSkinnedTriangles(buildWeightedVertices(), color, 0u, skinning);
         }
         else
         {

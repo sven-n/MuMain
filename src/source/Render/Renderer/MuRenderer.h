@@ -12,6 +12,7 @@
 #include "FramePixelReadback.h"
 #include "SceneLighting.h"
 
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <span>
@@ -108,14 +109,23 @@ struct Vertex3D
     std::uint32_t color; // packed ABGR
 };
 
-// Rest-pose model vertex for GPU bone skinning. The colour is per draw, not per vertex.
-// A BMD vertex follows one bone (positionBoneIndex, normalBoneIndex; its weights
-// stay 0); a vertex with weights (glTF models) is in bind space and blends up to
-// four palette joints by weight (unorm, summing to 255, the largest first).
-// tangent: the bind-space tangent of a vertex under a normal map, snorm16 xyz and
-// w = +-32767 for the handedness; all 0 otherwise (BMD vertices, glTF meshes
-// without a map).
+// Rest-pose model vertex for GPU bone skinning (BMD models): it follows one bone for its
+// position and one for its normal. The colour is per draw, not per vertex.
 struct SkinnedVertex3D
+{
+    float x, y, z;
+    float nx, ny, nz;
+    float u, v;
+    std::int32_t positionBoneIndex;
+    std::int32_t normalBoneIndex;
+};
+
+// SkinnedVertex3D with weights (glTF models), drawn with its own pipelines so that BMD
+// vertices stay small. A vertex with weights is in bind space and blends up to four palette
+// joints by weight (unorm, summing to 255, the largest first); one without follows its bones.
+// tangent: the bind-space tangent of a vertex under a normal map, snorm16 xyz and
+// w = +-32767 for the handedness; all 0 otherwise.
+struct SkinnedWeightedVertex3D
 {
     float x, y, z;
     float nx, ny, nz;
@@ -126,6 +136,9 @@ struct SkinnedVertex3D
     std::uint8_t weights[4];
     std::int16_t tangent[4];
 };
+static_assert(sizeof(SkinnedVertex3D) == 40 && sizeof(SkinnedWeightedVertex3D) == 56);
+static_assert(offsetof(SkinnedWeightedVertex3D, normalBoneIndex) == offsetof(SkinnedVertex3D, normalBoneIndex),
+              "both skinned pipelines read the leading fields at the same offsets");
 
 enum class SkinningTextureCoordinates : std::uint32_t
 {
@@ -258,6 +271,16 @@ public:
         (void)parameters;
         return false;
     }
+    [[nodiscard]] virtual bool RenderWeightedSkinnedTriangles(std::span<const SkinnedWeightedVertex3D> vertices,
+                                                              std::uint32_t color, std::uint32_t textureId,
+                                                              const SkinningParameters& parameters)
+    {
+        (void)vertices;
+        (void)color;
+        (void)textureId;
+        (void)parameters;
+        return false;
+    }
 
     // RenderTriangles of the triangles `indices` makes of `vertices` (three
     // indices per triangle, in draw order). A backend without index buffers
@@ -280,6 +303,13 @@ public:
         return false;
     }
     [[nodiscard]] virtual bool CacheSkinnedMesh(const void* mesh, std::span<const SkinnedVertex3D> vertices)
+    {
+        (void)mesh;
+        (void)vertices;
+        return false;
+    }
+    [[nodiscard]] virtual bool CacheWeightedSkinnedMesh(const void* mesh,
+                                                        std::span<const SkinnedWeightedVertex3D> vertices)
     {
         (void)mesh;
         (void)vertices;

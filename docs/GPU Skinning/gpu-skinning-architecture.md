@@ -36,6 +36,12 @@ uses the established CPU-skinned path.
 - position bone index;
 - normal bone index.
 
+That is 40 bytes. A glTF model's vertex (`SkinnedWeightedVertex3D`, 56 bytes)
+adds four joints, their weights and a tangent, and is drawn by its own
+pipelines with `skinned_weighted.vert.hlsl`, so BMD vertices do not carry them.
+Both shaders share their code through `skinned_vertex.hlsli`. The mesh cache
+holds both sizes, in 8-byte units.
+
 The colour is one packed ABGR value per draw, read as a per-instance attribute
 from vertex buffer slot 1. A mesh without a scrolling texture is cached on the
 GPU under its `Mesh_t*` the first time it is drawn (`CacheSkinnedMesh`), so

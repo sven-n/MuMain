@@ -83,6 +83,7 @@ require_source("${renderer_source}" "constexpr[ \t]+int[ \t]+k_PipelineCount[ \t
 require_shader_load_assignment(s_vertShader2D basic_textured vert VERTEX)
 require_shader_load_assignment(s_fragShaderTex basic_textured frag FRAGMENT)
 require_shader_load_assignment(s_vertShaderSkinned skinned_textured vert VERTEX)
+require_shader_load_assignment(s_vertShaderSkinnedWeighted skinned_weighted vert VERTEX)
 require_shader_load_assignment(s_vertShaderSkinnedShadow skinned_shadow vert VERTEX)
 require_source("${executable_load_source}"
     "s_vertShaderSkinnedShadow[ \t\r\n]*=[^;]*createShader[^;]*\"skinned_shadow\"[^;]*SDL_GPU_SHADERSTAGE_VERTEX[^;]*false[ \t\r\n]*\\);"
@@ -90,6 +91,9 @@ require_source("${executable_load_source}"
 require_source("${executable_load_source}"
     "s_vertShaderSkinned[ \t\r\n]*=[^;]*createShader[^;]*\"skinned_textured\"[^;]*SDL_GPU_SHADERSTAGE_VERTEX[^;]*true[ \t\r\n]*\\);"
     "skinned_textured.vert must be fatal")
+require_source("${executable_load_source}"
+    "s_vertShaderSkinnedWeighted[ \t\r\n]*=[^;]*createShader[^;]*\"skinned_weighted\"[^;]*SDL_GPU_SHADERSTAGE_VERTEX[^;]*true[ \t\r\n]*\\);"
+    "skinned_weighted.vert must be fatal")
 require_shader_load_assignment(s_fragShaderTexFog basic_textured_fog frag FRAGMENT)
 require_shader_load_assignment(s_fragShaderLit skinned_lit frag FRAGMENT)
 require_source("${executable_load_source}"
@@ -180,7 +184,7 @@ require_source("${renderer_source}" "depth_write=\\{\\}" "pipeline diagnostics m
 require_source("${renderer_source}" "cull=\\{\\}" "pipeline diagnostics must include cull state")
 require_source("${renderer_source}" "error=\\{\\}" "pipeline diagnostics must include the SDL error")
 require_source("${build_source}"
-    "pipelineInfo\\.vertex_shader[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinned[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedShadow[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinnedShadow[ \t\r\n]*:[ \t\r\n]*s_vertShader2D"
+    "pipelineInfo\\.vertex_shader[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinned[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedWeighted[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinnedWeighted[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedShadow[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinnedShadow[ \t\r\n]*:[ \t\r\n]*s_vertShader2D"
     "pipeline vertex shader handles must remain selected from the pipeline layout")
 require_source("${build_source}"
     "pipelineInfo\\.fragment_shader[ \t\r\n]*=[ \t\r\n]*GetFragmentShader\\(description\\.fragmentShader\\)"
@@ -202,7 +206,7 @@ require_source("${depth_state_source}" "\\.compare_op[ \t\r\n]*=[ \t\r\n]*SDL_GP
 reject_source("${renderer_source}" "SDL_GPU_COMPAREOP_LESS([^_]|$)"
     "no pipeline may compare depth with strict LESS")
 require_source("${log_source}"
-    "vertexShaderName[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*\"skinned_textured\\.vert\"[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedShadow[ \t\r\n]*\\?[ \t\r\n]*\"skinned_shadow\\.vert\"[ \t\r\n]*:[ \t\r\n]*\"basic_textured\\.vert\""
+    "vertexShaderName[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*\"skinned_textured\\.vert\"[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedWeighted[ \t\r\n]*\\?[ \t\r\n]*\"skinned_weighted\\.vert\"[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedShadow[ \t\r\n]*\\?[ \t\r\n]*\"skinned_shadow\\.vert\"[ \t\r\n]*:[ \t\r\n]*\"basic_textured\\.vert\""
     "pipeline diagnostics must map the built vertex layout to its exact shader identifier")
 require_source("${log_source}"
     "fragmentShaderName[ \t\r\n]*=[ \t\r\n]*GetFragmentShaderName\\(description\\.fragmentShader\\)"
