@@ -6,6 +6,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include <vector>
 #include <execution>
 #include <algorithm>
 #include <span>
@@ -2411,6 +2412,79 @@ bool CheckMonsterSkill(CHARACTER* pCharacter, OBJECT* pObject)
     return GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject);
 }
 
+namespace
+{
+// A stepping action's planted foot moves back at least this much per key (model units); slower ones (flying, riding,
+// standing) don't step and keep their own speed.
+constexpr float MinStepPerKey = 10.f;
+
+// How far the player's planted foot moves back per key of `action`, in model units, or 0 for an action that doesn't
+// step: the faster half of each foot's backward moves between keys, the larger of the two feet. Measured from the
+// skeleton once per action.
+float StepPerKey(int action)
+{
+    BMD& player = Models[MODEL_PLAYER];
+    static std::vector<float> measured;
+    if (action < 0 || action >= player.NumActions || player.BoneFoot[0] < 0 || player.BoneFoot[1] < 0)
+    {
+        return 0.f;
+    }
+    if (measured.size() != static_cast<size_t>(player.NumActions))
+    {
+        measured.assign(player.NumActions, -1.f);
+    }
+    if (measured[action] >= 0.f)
+    {
+        return measured[action];
+    }
+    constexpr int MaxKeys = 64;
+    const int keys = std::min<int>(player.Actions[action].NumAnimationKeys, MaxKeys);
+    float step = 0.f;
+    if (keys >= 2)
+    {
+        static float bones[MAX_BONES][3][4];
+        vec3_t noAngle = {0.f, 0.f, 0.f};
+        vec3_t noHead = {0.f, 0.f, 0.f};
+        float forward[2][MaxKeys];
+        for (int key = 0; key < keys; ++key)
+        {
+            player.Animation(bones, static_cast<float>(key), static_cast<float>(key), static_cast<unsigned short>(action),
+                             noAngle, noHead, false, false, nullptr, static_cast<short>(action));
+            for (int foot = 0; foot < 2; ++foot)
+            {
+                // A model faces -Y.
+                forward[foot][key] = -bones[player.BoneFoot[foot]][1][3];
+            }
+        }
+        for (int foot = 0; foot < 2; ++foot)
+        {
+            float back[MaxKeys];
+            int count = 0;
+            for (int key = 0; key < keys; ++key)
+            {
+                const float moved = forward[foot][key] - forward[foot][(key + 1) % keys];
+                if (moved > 0.f)
+                {
+                    back[count++] = moved;
+                }
+            }
+            std::sort(back, back + count);
+            float sum = 0.f;
+            for (int i = count / 2; i < count; ++i)
+            {
+                sum += back[i];
+            }
+            if (count - count / 2 > 0)
+            {
+                step = std::max(step, sum / static_cast<float>(count - count / 2));
+            }
+        }
+    }
+    measured[action] = step >= MinStepPerKey ? step : 0.f;
+    return measured[action];
+}
+} // namespace
+
 bool CharacterAnimation(CHARACTER* c, OBJECT* o)
 {
     bool Play;
@@ -2459,6 +2533,17 @@ bool CharacterAnimation(CHARACTER* c, OBJECT* o)
         if (c->TurnAction != -1 && o->CurrentAction == c->TurnAction)
         {
             PlaySpeed *= StandingTurnStepSpeed;
+        }
+        // Walking or running, the feet keep to the ground: the steps play as fast as the character really moves
+        // (CharacterMoveSpeed: its gear, mount, buffs and freezes), for the stride the action takes (StepPerKey).
+        if (o->Type == MODEL_PLAYER && c->Movement && o->Scale > 0.f)
+        {
+            const float step = StepPerKey(o->CurrentAction);
+            if (step > 0.f)
+            {
+                // (Slowing to a stop or speeding up, at the share of its speed it has: StepMomentum.)
+                PlaySpeed = CharacterMoveSpeed(c) * c->MomentumPace / (step * o->Scale);
+            }
         }
         // Hovering in place, the body's breathing keeps the wings' beat: one of its cycles per wing beat (at their
         // speed, RenderCharacterBackItem's), instead of about one and a half.
@@ -6348,14 +6433,51 @@ void MoveCharacterPosition(CHARACTER* c)
     MoveCharacterPosition(c, c->Object.Angle[2]);
 }
 
-void MoveCharacterPosition(CHARACTER* c, float heading)
+namespace
+{
+// A walking character turning back by more than this slows to a stop over about this long, the way it was going, and
+// speeds up from a stop (from rest too) over about this long. Short, as the server times the walk tile by tile.
+constexpr float MomentumTurnBackDegrees = 90.f;
+constexpr float MomentumStopSeconds = 0.12f;
+constexpr float MomentumStartSeconds = 0.15f;
+// A gap this long between steps (in world milliseconds) means the character stood still in between.
+constexpr double MomentumRestMilliseconds = 100.0;
+} // namespace
+
+float StepMomentum(CHARACTER* c, float& heading)
+{
+    const float seconds = FPS_ANIMATION_FACTOR / static_cast<float>(REFERENCE_FPS);
+    if (c->MomentumAt < 0.0 || WorldTime - c->MomentumAt > MomentumRestMilliseconds || std::isnan(c->MomentumHeading))
+    {
+        // From rest: the new way, from no speed.
+        c->MomentumHeading = heading;
+        c->MomentumPace = 0.f;
+    }
+    c->MomentumAt = WorldTime;
+    const bool turningBack = std::fabs(FarAngle(c->MomentumHeading, heading, false)) > MomentumTurnBackDegrees;
+    if (turningBack && c->MomentumPace > 0.f)
+    {
+        // Still going the old way, slowing down.
+        c->MomentumPace = std::max(0.f, c->MomentumPace - seconds / MomentumStopSeconds);
+    }
+    else
+    {
+        c->MomentumHeading = heading;
+        c->MomentumPace = std::min(1.f, c->MomentumPace + seconds / MomentumStartSeconds);
+    }
+    heading = c->MomentumHeading;
+    // Eased: it slows into the stop and out of the start.
+    return c->MomentumPace * c->MomentumPace * (3.f - 2.f * c->MomentumPace);
+}
+
+void MoveCharacterPosition(CHARACTER* c, float heading, float pace)
 {
     OBJECT* o = &c->Object;
     float Matrix[3][4];
     const vec3_t direction = {o->Angle[0], o->Angle[1], heading};
     AngleMatrix(direction, Matrix);
     vec3_t v, Velocity;
-    Vector(0.f, -CharacterMoveSpeed(c), 0.f, v);
+    Vector(0.f, -CharacterMoveSpeed(c) * pace, 0.f, v);
     VectorRotate(v, Matrix, Velocity);
     VectorAddScaled(o->Position, Velocity, o->Position, FPS_ANIMATION_FACTOR);
 
@@ -6790,7 +6912,9 @@ void MoveMonsterClient(CHARACTER* c, OBJECT* o)
                 SetPlayerStop(c);
             }
 
-            MoveCharacterPosition(c, c->MoveHeading);
+            float heading = c->MoveHeading;
+            const float pace = StepMomentum(c, heading);
+            MoveCharacterPosition(c, heading, pace);
         }
     }
     else

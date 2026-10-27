@@ -84,6 +84,9 @@ void CHARACTER::Initialize()
     TurnLag = 0.f;
     TurnLagSpeed = 0.f;
     TurnLagFacing = NAN;
+    MomentumPace = 1.f;
+    MomentumHeading = NAN;
+    MomentumAt = -1.0;
     LookTarget = -1;
     LookScanSeconds = 0.f;
     SnapTurnOffset = 0.f;

@@ -61,8 +61,13 @@ void DeleteCloth(CHARACTER* c, OBJECT* o = NULL, PART_t* p2 = NULL);
 bool CheckFullSet(CHARACTER* c);
 
 void MoveCharacterPosition(CHARACTER* c);
-// Moves the character one frame along `heading` (a walking character's MoveHeading) instead of its facing.
-void MoveCharacterPosition(CHARACTER* c, float heading);
+// Moves the character one frame along `heading` (a walking character's MoveHeading) instead of its facing, at `pace`
+// of its speed (StepMomentum's).
+void MoveCharacterPosition(CHARACTER* c, float heading, float pace = 1.f);
+// A walking character's momentum, one frame: the way it really moves this frame (in `heading`, MoveHeading coming in)
+// and the share of its speed it has. Turning back (more than a right angle) it slows to a stop the way it was going
+// before it takes the new way; from rest, and after that stop, it speeds up. Gentler turns follow at once.
+float StepMomentum(CHARACTER* c, float& heading);
 // A flying winged player's bank into a turn and slow up-and-down drift, faded in and out (each frame, everyone).
 void UpdateFlightFeel(CHARACTER* c);
 // A mount's lean into a turn from its rider's (UpdateFlightFeel leans a rider a share of the mount's).

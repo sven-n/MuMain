@@ -195,6 +195,11 @@ public:
     float       TurnLag = 0.f;
     float       TurnLagSpeed = 0.f;
     float       TurnLagFacing = NAN;
+    // A walking character's momentum (StepMomentum): how much of its speed it has (0 to 1), the way it really moves
+    // (NAN: not moving), and the world time it last moved (milliseconds; a gap means it starts again from rest).
+    float       MomentumPace = 1.f;
+    float       MomentumHeading = NAN;
+    double      MomentumAt = -1.0;
     // The character its head looks at (UpdateLookAt; an index into CharactersClient, -1: none) and how long until it
     // looks around for another, in seconds.
     short       LookTarget = -1;

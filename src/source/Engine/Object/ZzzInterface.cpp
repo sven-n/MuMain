@@ -3156,7 +3156,9 @@ void MoveHero()
             else
             {
                 g_CharacterUnRegisterBuff((&Hero->Object), eBuff_CrywolfHeroContracted);
-                MoveCharacterPosition(c, c->MoveHeading);
+                float heading = c->MoveHeading;
+                const float pace = StepMomentum(c, heading);
+                MoveCharacterPosition(c, heading, pace);
             }
         }
     }
