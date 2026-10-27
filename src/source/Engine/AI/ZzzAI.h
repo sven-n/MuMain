@@ -23,6 +23,10 @@ float FarAngle(float angle1, float angle2, bool absolute = true);
 // the fastest that still stops on `target`, by at most acceleration * seconds and never past maxSpeed. Returns the new
 // angle (0 to 360), which lands on `target` (with speed 0) rather than passing it.
 float StepEasedTurn(float angle, float target, float& speed, float seconds, float maxSpeed, float acceleration);
+// One frame of a damped spring pulling `value` back to 0: `velocity` (per second) is kept between frames, `frequency`
+// is how many times a second it would swing undamped, and `damping` how fast the swing dies out (1: no overshoot,
+// below 1: it overshoots a little and settles). The same at any frame rate.
+void StepSpring(float& value, float& velocity, float seconds, float frequency, float damping);
 // perFrame false: one spatial step of a shape built within a frame (a lightning bolt), so the turn is not time-scaled.
 float MoveHumming(vec3_t Position, vec3_t Angle, vec3_t TargetPosition, float Turn, bool perFrame = true);
 void MovePosition(vec3_t Position, vec3_t Angle, vec3_t Speed);

@@ -81,6 +81,9 @@ void CHARACTER::Initialize()
     FlightHoverApplied = 0.f;
     FlightPivotShift[0] = 0.f;
     FlightPivotShift[1] = 0.f;
+    TurnLag = 0.f;
+    TurnLagSpeed = 0.f;
+    TurnLagFacing = NAN;
     MovementType = 0;
     CollisionTime = 0;
     GuildMarkIndex = 0;

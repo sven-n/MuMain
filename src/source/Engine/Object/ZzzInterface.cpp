@@ -3127,6 +3127,7 @@ void MoveHero()
     // After the hero's own move (MoveCharacterPosition sets its height from the terrain), so the flight's drift is in
     // the height drawn; MoveCharacterClient does the others.
     UpdateFlightFeel(c);
+    UpdateTurnLag(c);
 
     CheckGate();
 

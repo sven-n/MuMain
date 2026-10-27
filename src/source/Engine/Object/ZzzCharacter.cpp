@@ -6440,6 +6440,56 @@ void UpdateFlightFeel(CHARACTER* c)
     c->FlightHoverApplied = height;
 }
 
+namespace
+{
+// The wings and the ponytail trail behind a turn on a spring: they swing back this many times a second, damped like
+// this (a little overshoot as they settle), never more than this many degrees behind.
+constexpr float TurnLagFrequency = 2.5f;
+constexpr float TurnLagDamping = 0.6f;
+constexpr float TurnLagMaxDegrees = 12.f;
+} // namespace
+
+void UpdateTurnLag(CHARACTER* c)
+{
+    const OBJECT* o = &c->Object;
+    if (o->Type != MODEL_PLAYER)
+    {
+        c->TurnLag = 0.f;
+        c->TurnLagSpeed = 0.f;
+        c->TurnLagFacing = NAN;
+        return;
+    }
+    const float facing = o->Angle[2];
+    if (std::isnan(c->TurnLagFacing))
+    {
+        c->TurnLagFacing = facing;
+    }
+    // The body turned by this much since the last frame: the wings don't, at first.
+    const float turned = FarAngle(c->TurnLagFacing, facing, false);
+    c->TurnLagFacing = facing;
+    if (turned == 0.f && c->TurnLag == 0.f && c->TurnLagSpeed == 0.f)
+    {
+        return;
+    }
+    c->TurnLag -= turned;
+    if (std::fabs(c->TurnLag) > TurnLagMaxDegrees)
+    {
+        c->TurnLag = std::copysign(TurnLagMaxDegrees, c->TurnLag);
+        if ((c->TurnLagSpeed > 0.f) == (c->TurnLag > 0.f))
+        {
+            c->TurnLagSpeed = 0.f;
+        }
+    }
+    const float seconds = FPS_ANIMATION_FACTOR / static_cast<float>(REFERENCE_FPS);
+    StepSpring(c->TurnLag, c->TurnLagSpeed, seconds, TurnLagFrequency, TurnLagDamping);
+    // Settled: nothing to do until the next turn.
+    if (std::fabs(c->TurnLag) < 0.01f && std::fabs(c->TurnLagSpeed) < 0.1f)
+    {
+        c->TurnLag = 0.f;
+        c->TurnLagSpeed = 0.f;
+    }
+}
+
 void MoveMonsterClient(CHARACTER* c, OBJECT* o)
 {
     if (c == Hero) return;
@@ -6516,6 +6566,7 @@ void MoveCharacterClient(CHARACTER* cc)
         if (cc != Hero)
         {
             UpdateFlightFeel(cc);
+            UpdateTurnLag(cc);
         }
         MoveCharacterVisual(cc, co);
 
@@ -6591,19 +6642,19 @@ void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters)
     {
         for (CHARACTER* c : activeChars)
         {
-            AnimateCharacterBones(&c->Object);
+            AnimateCharacterBones(&c->Object, c->TurnLag);
         }
     }
 }
 
-void AnimateCharacterBones(OBJECT* o)
+void AnimateCharacterBones(OBJECT* o, float turnLag)
 {
     BMD* model = &Models[o->Type];
     if (model->NumBones <= 0) return;
 
     // Model space, as render builds them: the model's BodyOrigin and BodyScale belong to whichever object set them last.
     model->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
-                     o->HeadAngle, false, false, nullptr, o->CurrentAction);
+                     o->HeadAngle, false, false, nullptr, o->CurrentAction, MAX_BONES, turnLag);
     o->EnableBoneMatrix = true;
 }
 
@@ -7064,7 +7115,8 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
                 return -1;
             }();
             namespace HeadTurn = Render::Models::HeadTurn;
-            const float shoulders = HeadTurn::ShouldersDegrees(HeadTurn::SignedYaw(o->HeadAngle[0]));
+            // And they trail a little behind the body's own turn (UpdateTurnLag).
+            const float shoulders = HeadTurn::ShouldersDegrees(HeadTurn::SignedYaw(o->HeadAngle[0])) + c->TurnLag;
             if (spine1Bone >= 0 && shoulders != 0.f)
             {
                 HeadTurn::TurnAboutUpright(ParentMatrix, -shoulders * (Q_PI / 180.f),

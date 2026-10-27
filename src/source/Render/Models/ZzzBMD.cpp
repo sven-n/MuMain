@@ -158,7 +158,7 @@ static vec3_t LightVector2 = { 0.f, -0.5f, -0.8f };
 
 void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float PriorFrame, unsigned short PriorAction,
                     vec3_t Angle, vec3_t HeadAngle, bool Parent, bool Translate, const float (*ExtParentMatrix)[4],
-                    short CurrentActionArg, int BoneMatrixCapacity)
+                    short CurrentActionArg, int BoneMatrixCapacity, float PonytailLag)
 {
     if (NumActions <= 0) return;
 
@@ -333,6 +333,21 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
 
         float Matrix[3][4];
         QuaternionMatrix(boneQuaternion, Matrix);
+        // The ponytail trailing a turn: its rotation turned about the head's X axis (the head's upright, as the head
+        // turns about), at its root, which stays where it hangs from the head.
+        if (i == PonytailBone && PonytailLag != 0.f)
+        {
+            const float radians = PonytailLag * (Q_PI / 180.f);
+            const float cosine = std::cos(radians);
+            const float sine = std::sin(radians);
+            for (int column = 0; column < 3; ++column)
+            {
+                const float y = Matrix[1][column];
+                const float z = Matrix[2][column];
+                Matrix[1][column] = cosine * y - sine * z;
+                Matrix[2][column] = sine * y + cosine * z;
+            }
+        }
         const float* Position1 = bm1->Position[PriorAnimationFrame];
         const float* Position2 = bm2->Position[currentAnimationFrame];
 
@@ -3710,6 +3725,15 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
     }
 
     FindHeadTurnBones(Bones, NumBones, HeadTurnBones);
+    PonytailBone = -1;
+    for (int i = 0; i < NumBones; ++i)
+    {
+        if (!Bones[i].Dummy && strcmp(Bones[i].Name, "Bip01 Ponytail1") == 0)
+        {
+            PonytailBone = static_cast<short>(i);
+            break;
+        }
+    }
     Init(false);
 
     m_bCompletedAlloc = true;

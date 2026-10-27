@@ -188,8 +188,13 @@ public:
     float       FlightBank = 0.f;
     float       FlightHover = 0.f;
     float       FlightHoverApplied = 0.f;
-    // The sideways shift last added (Object.Position x, y) so the bank pivots at the chest, not the feet.
+    // The sideways shift last added (Object.Position x, y) so the bank pivots at the waist, not the feet.
     float       FlightPivotShift[2] = {0.f, 0.f};
+    // How far the wings and the ponytail trail behind the body's turn (UpdateTurnLag), in degrees, how fast that
+    // changes, and the facing it last saw (NAN: none yet).
+    float       TurnLag = 0.f;
+    float       TurnLagSpeed = 0.f;
+    float       TurnLagFacing = NAN;
     char		CollisionTime; // unused?
 
     short       GuildMarkIndex;

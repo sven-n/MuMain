@@ -131,6 +131,20 @@ float StepEasedTurn(float angle, float target, float& speed, float seconds, floa
     return NormalizeAngleDegrees(angle + step);
 }
 
+void StepSpring(float& value, float& velocity, float seconds, float frequency, float damping)
+{
+    // Semi-implicit Euler in short steps, so a slow frame doesn't make the spring blow up or swing differently.
+    constexpr float MaxStepSeconds = 1.f / 240.f;
+    const float omega = 2.f * static_cast<float>(Q_PI) * frequency;
+    while (seconds > 0.f)
+    {
+        const float step = std::min(seconds, MaxStepSeconds);
+        velocity += (-omega * omega * value - 2.f * damping * omega * velocity) * step;
+        value += velocity * step;
+        seconds -= step;
+    }
+}
+
 int CalcAngle(float PositionX, float PositionY, float TargetX, float TargetY)
 {
     const float targetAngle = CreateAngle(PositionX, PositionY, TargetX, TargetY);

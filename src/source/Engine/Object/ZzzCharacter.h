@@ -31,7 +31,8 @@ void MoveCharacterClient(CHARACTER* cc);
 void MoveCharactersClient();
 void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters);
 void WaitCharactersAnimation();
-void AnimateCharacterBones(OBJECT* o);
+// `turnLag`: how far the ponytail trails behind the body's turn (CHARACTER::TurnLag), in degrees.
+void AnimateCharacterBones(OBJECT* o, float turnLag = 0.f);
 
 extern size_t g_LastActiveCharacterCount;
 extern bool g_LastAnimationWasParallel;
@@ -63,6 +64,8 @@ void MoveCharacterPosition(CHARACTER* c);
 void MoveCharacterPosition(CHARACTER* c, float heading);
 // A flying winged player's bank into a turn and slow up-and-down drift, faded in and out (each frame, everyone).
 void UpdateFlightFeel(CHARACTER* c);
+// The wings and the ponytail trailing a little behind the body's turn and settling after it (each frame, everyone).
+void UpdateTurnLag(CHARACTER* c);
 void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter = NULL, OBJECT* pHelper = NULL);
 void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCharacter = nullptr,
                            OBJECT* pHelper = nullptr);

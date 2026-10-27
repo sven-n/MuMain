@@ -200,6 +200,9 @@ public:
     // A Biped's head and the neck and spine bones below it (Bip01 Head, Neck, Spine1, Spine; -1 where the chain
     // stops), found when the model loads: the head's turn spreads into them (HeadTurn.h) while BoneHead is that head.
     short         HeadTurnBones[4] = {-1, -1, -1, -1};
+    // The Biped's ponytail root (Bip01 Ponytail1, -1: none), found when the model loads: Animation's PonytailLag
+    // swings it about the head's upright, so the hair trails behind a turn.
+    short         PonytailBone = -1;
 
     int           BoneFoot[4];
     float         BodyScale;
@@ -311,7 +314,7 @@ public:
     void Animation(float (*BoneTransform)[3][4], float AnimationFrame, float PriorAnimationFrame,
                    unsigned short PriorAction, vec3_t Angle, vec3_t HeadAngle, bool Parent = false,
                    bool Translate = true, const float (*ExtParentMatrix)[4] = nullptr, short CurrentAction = -1,
-                   int BoneMatrixCapacity = MAX_BONES);
+                   int BoneMatrixCapacity = MAX_BONES, float PonytailLag = 0.f);
     void InterpolationTrans(float(*Mat1)[4], float(*TransMat2)[4], float _Scale);
     void Transform(float(*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t BoundingBoxMax, OBB_t* OBB, bool Translate = false, float _Scale = 0.0f);
     // DXP-20 increment 2: the state-stash + OBB-from-args portion of Transform(), without the
