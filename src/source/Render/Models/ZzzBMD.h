@@ -60,6 +60,15 @@ typedef struct
     vec4_t* Quaternion;
 } BoneMatrix_t;
 
+// A second pose BMD::Animation blends into the one it builds: `Action` at `Frame` (fraction between keys), by
+// `Weight` (0: none of it, 1: all of it). A character fading from one way of moving into the next.
+struct PoseBlend
+{
+    unsigned short Action = 0;
+    float Frame = 0.f;
+    float Weight = 0.f;
+};
+
 typedef struct
 {
     char         Name[32];
@@ -315,7 +324,7 @@ public:
                    unsigned short PriorAction, vec3_t Angle, vec3_t HeadAngle, bool Parent = false,
                    bool Translate = true, const float (*ExtParentMatrix)[4] = nullptr, short CurrentAction = -1,
                    int BoneMatrixCapacity = MAX_BONES, float PonytailLag = 0.f, float HeadTurnUp = 0.f,
-                   float HeadRoll = 0.f);
+                   float HeadRoll = 0.f, const PoseBlend* Blend = nullptr);
     void InterpolationTrans(float(*Mat1)[4], float(*TransMat2)[4], float _Scale);
     void Transform(float(*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t BoundingBoxMax, OBB_t* OBB, bool Translate = false, float _Scale = 0.0f);
     // DXP-20 increment 2: the state-stash + OBB-from-args portion of Transform(), without the

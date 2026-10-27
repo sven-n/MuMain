@@ -99,6 +99,12 @@ void CHARACTER::Initialize()
     SnapTurnOffset = 0.f;
     SnapTurnSpeed = 0.f;
     SnapTurnFacing = NAN;
+    FadeAction = -1;
+    FadeFrame = 0.f;
+    FadeLeft = 0.f;
+    FadeSeconds = 0.f;
+    FadeLastAction = -1;
+    FadeLastFrame = 0.f;
     MovementType = 0;
     CollisionTime = 0;
     GuildMarkIndex = 0;

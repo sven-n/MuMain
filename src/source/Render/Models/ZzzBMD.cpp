@@ -160,8 +160,8 @@ static vec3_t LightVector2 = { 0.f, -0.5f, -0.8f };
 
 void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float PriorFrame, unsigned short PriorAction,
                     vec3_t Angle, vec3_t HeadAngle, bool Parent, bool Translate, const float (*ExtParentMatrix)[4],
-                    short CurrentActionArg, int BoneMatrixCapacity, float PonytailLag, float HeadTurnUp,
-                    float HeadRoll)
+                    short CurrentActionArg, int BoneMatrixCapacity, float PonytailLag, float HeadTurnUp, float HeadRoll,
+                    const PoseBlend* Blend)
 {
     if (NumActions <= 0) return;
 
@@ -277,6 +277,20 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
     }
 
     const bool bLockPositions = (Actions[PriorAction].LockPositions || Actions[currentAction].LockPositions);
+    // The pose blended in (Blend): its two keys and how far between them.
+    const bool blending = Blend != nullptr && Blend->Weight > 0.f && Blend->Action < NumActions &&
+                          Actions[Blend->Action].NumAnimationKeys > 0;
+    int blendKey1 = 0;
+    int blendKey2 = 0;
+    float blendBetween = 0.f;
+    if (blending)
+    {
+        const int keys = Actions[Blend->Action].NumAnimationKeys;
+        const float frame = std::fmod(std::max(Blend->Frame, 0.f), static_cast<float>(keys));
+        blendKey1 = std::min(static_cast<int>(frame), keys - 1);
+        blendKey2 = (blendKey1 + 1) % keys;
+        blendBetween = frame - static_cast<float>(blendKey1);
+    }
 
     // bones loop
     for (int i = 0; i < NumBones; i++)
@@ -333,6 +347,18 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
         {
             QuaternionCopy(q1, boneQuaternion);
         }
+        // The blended pose's rotation, toward it by its weight (a head turned above keeps its turn).
+        const BoneMatrix_t* blendMatrixes = blending ? &b->BoneMatrixes[Blend->Action] : nullptr;
+        const bool headTurned = q2 != bm2->Quaternion[currentAnimationFrame];
+        if (blendMatrixes != nullptr && !headTurned)
+        {
+            vec4_t blendQuaternion;
+            QuaternionNLERP(blendMatrixes->Quaternion[blendKey1], blendMatrixes->Quaternion[blendKey2], blendBetween,
+                            blendQuaternion);
+            vec4_t mixed;
+            QuaternionNLERP(boneQuaternion, blendQuaternion, Blend->Weight, mixed);
+            QuaternionCopy(mixed, boneQuaternion);
+        }
 
         float Matrix[3][4];
         QuaternionMatrix(boneQuaternion, Matrix);
@@ -369,6 +395,26 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
             Matrix[0][3] = Position1[0] * s2 + Position2[0] * s1;
             Matrix[1][3] = Position1[1] * s2 + Position2[1] * s1;
             Matrix[2][3] = Position1[2] * s2 + Position2[2] * s1;
+        }
+        if (blendMatrixes != nullptr)
+        {
+            // An action that locks its root in place (its keys walk forward) has it locked here too, as above, or the
+            // body would lurch forward by the walk the keys hold.
+            const bool lockedRoot = i == 0 && Actions[Blend->Action].LockPositions;
+            for (int r = 0; r < 3; ++r)
+            {
+                float blended = blendMatrixes->Position[blendKey1][r] * (1.f - blendBetween) +
+                                blendMatrixes->Position[blendKey2][r] * blendBetween;
+                if (lockedRoot && r < 2)
+                {
+                    blended = blendMatrixes->Position[0][r];
+                }
+                else if (lockedRoot)
+                {
+                    blended += BodyHeight;
+                }
+                Matrix[r][3] += (blended - Matrix[r][3]) * Blend->Weight;
+            }
         }
 
         if (b->Parent == -1)

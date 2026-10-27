@@ -273,7 +273,7 @@ namespace
 // Builds an object's bones for drawing (Calc_RenderObject, Calc_ObjectAnimation; AnimateCharacterBones builds a
 // character's the same way ahead of time): a character's body a little behind a sudden turn (UpdateSnapTurn) and its
 // ponytail trailing a turn (UpdateTurnLag); a mount's head turned where its rider looks and rolled when it shakes
-// (MountHeadTurn, MountHeadRoll).
+// (MountHeadTurn, MountHeadRoll); a character fading between ways of moving (CharacterPoseFade).
 void AnimateObjectBones(OBJECT* o, BMD* b, bool translate)
 {
     const CHARACTER* character = CharacterOfObject(o);
@@ -282,9 +282,11 @@ void AnimateObjectBones(OBJECT* o, BMD* b, bool translate)
     const bool mount = o >= Mounts && o < Mounts + MAX_MOUNTS;
     const float headTurn = mount ? MountHeadTurn[o - Mounts] : 0.f;
     const float headRoll = mount ? MountHeadRoll[o - Mounts] : 0.f;
+    // And a character fading from one way of moving into the next (CharacterPoseFade).
+    PoseBlend blend;
     float (*bones)[3][4] = o->EnableBoneMatrix ? o->BoneTransform : BoneTransform;
     b->Animation(bones, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, angle, o->HeadAngle, false,
-                 !translate, nullptr, -1, MAX_BONES, turnLag, headTurn, headRoll);
+                 !translate, nullptr, -1, MAX_BONES, turnLag, headTurn, headRoll, CharacterPoseFade(character, blend));
     // A player's feet on the ground under them (the bones are in model space when `translate` is set).
     if (character != nullptr && translate)
     {

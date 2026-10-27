@@ -2420,28 +2420,44 @@ namespace
 // standing) don't step and keep their own speed.
 constexpr float MinStepPerKey = 10.f;
 
-// How far the player's planted foot moves back per key of `action`, in model units, or 0 for an action that doesn't
-// step: the faster half of each foot's backward moves between keys, the larger of the two feet. Measured from the
-// skeleton once per action.
+struct Stride
+{
+    // How far the planted foot moves back per key (model units), 0 for an action that doesn't step.
+    float stepPerKey = -1.f;
+    // Where in the action (0 to 1 of its cycle) the first foot is furthest forward: two steppings line up by it.
+    float leftForwardAt = 0.f;
+};
+
+// An action's stride (the player's), measured from the skeleton once per action: the faster half of each foot's
+// backward moves between keys, the larger of the two feet.
+const Stride& MeasureStride(int action);
+
 float StepPerKey(int action)
 {
+    return MeasureStride(action).stepPerKey;
+}
+
+const Stride& MeasureStride(int action)
+{
     BMD& player = Models[MODEL_PLAYER];
-    static std::vector<float> measured;
+    static std::vector<Stride> measured;
+    static const Stride none{0.f, 0.f};
     if (action < 0 || action >= player.NumActions || player.BoneFoot[0] < 0 || player.BoneFoot[1] < 0)
     {
-        return 0.f;
+        return none;
     }
     if (measured.size() != static_cast<size_t>(player.NumActions))
     {
-        measured.assign(player.NumActions, -1.f);
+        measured.assign(player.NumActions, Stride{});
     }
-    if (measured[action] >= 0.f)
+    if (measured[action].stepPerKey >= 0.f)
     {
         return measured[action];
     }
     constexpr int MaxKeys = 64;
     const int keys = std::min<int>(player.Actions[action].NumAnimationKeys, MaxKeys);
     float step = 0.f;
+    float leftForwardAt = 0.f;
     if (keys >= 2)
     {
         static float bones[MAX_BONES][3][4];
@@ -2458,6 +2474,15 @@ float StepPerKey(int action)
                 forward[foot][key] = -bones[player.BoneFoot[foot]][1][3];
             }
         }
+        int frontKey = 0;
+        for (int key = 1; key < keys; ++key)
+        {
+            if (forward[0][key] > forward[0][frontKey])
+            {
+                frontKey = key;
+            }
+        }
+        leftForwardAt = static_cast<float>(frontKey) / static_cast<float>(keys);
         for (int foot = 0; foot < 2; ++foot)
         {
             float back[MaxKeys];
@@ -2482,10 +2507,118 @@ float StepPerKey(int action)
             }
         }
     }
-    measured[action] = step >= MinStepPerKey ? step : 0.f;
+    measured[action] = {step >= MinStepPerKey ? step : 0.f, leftForwardAt};
     return measured[action];
 }
 } // namespace
+
+namespace
+{
+// A player's switch from one action to the next fades over this long, by where it goes: moving, emotes and rest fade
+// gently; an attack, a skill or a hit fades just enough to lose the snap and still start at once; death and the
+// special transformations don't fade.
+constexpr float PoseFadeSeconds = 0.25f;
+constexpr float PoseFadeBriefSeconds = 0.08f;
+
+bool InRange(int action, int first, int last)
+{
+    return action >= first && action <= last;
+}
+
+float PoseFadeSecondsFor(const OBJECT* o, int from, int to)
+{
+    if (o->Type != MODEL_PLAYER)
+    {
+        return 0.f;
+    }
+    const auto still = [](int action)
+    {
+        return InRange(action, PLAYER_DIE1, PLAYER_DIE2) || action == PLAYER_COME_UP ||
+               InRange(action, PLAYER_JACK_1, PLAYER_CHANGE_UP);
+    };
+    if (still(from) || still(to))
+    {
+        return 0.f;
+    }
+    const bool gentle =
+        InRange(to, PLAYER_STOP_MALE, PLAYER_RUN_RIDE_WEAPON) || InRange(to, PLAYER_FLY_RIDE, PLAYER_RUN_RIDE_HORSE) ||
+        InRange(to, PLAYER_IDLE1_DARKHORSE, PLAYER_IDLE2_DARKHORSE) ||
+        InRange(to, PLAYER_FENRIR_RUN, PLAYER_FENRIR_WALK_ONE_LEFT) ||
+        InRange(to, PLAYER_GREETING1, PLAYER_POINT_DANCE) || InRange(to, PLAYER_SIT1, PLAYER_POSE_FEMALE1);
+    return gentle ? PoseFadeSeconds : PoseFadeBriefSeconds;
+}
+
+// One frame of the fade, before the animation plays: a switch between standing, walking and running starts one
+// (from walking to running, the new steps start where the old ones were in the stride), and a fade under way plays
+// its pose on and wears off.
+void UpdatePoseFade(CHARACTER* c, OBJECT* o, float playSpeed)
+{
+    BMD& b = Models[o->Type];
+    const float seconds = FPS_ANIMATION_FACTOR / static_cast<float>(REFERENCE_FPS);
+    const float fadeSeconds =
+        c->FadeLastAction >= 0 && o->CurrentAction != c->FadeLastAction && c->FadeLastAction < b.NumActions
+            ? PoseFadeSecondsFor(o, c->FadeLastAction, o->CurrentAction)
+            : 0.f;
+    if (fadeSeconds > 0.f)
+    {
+        c->FadeAction = c->FadeLastAction;
+        c->FadeFrame = c->FadeLastFrame;
+        c->FadeLeft = 1.f;
+        c->FadeSeconds = fadeSeconds;
+        const int oldKeys = b.Actions[c->FadeAction].NumAnimationKeys;
+        const int newKeys = b.Actions[o->CurrentAction].NumAnimationKeys;
+        const Stride& from = MeasureStride(c->FadeAction);
+        const Stride& to = MeasureStride(o->CurrentAction);
+        if (from.stepPerKey > 0.f && to.stepPerKey > 0.f && oldKeys > 0 && newKeys > 0)
+        {
+            // The same point of the stride by the feet: as far past the first foot's furthest forward.
+            const float phase = c->FadeLastFrame / static_cast<float>(oldKeys) - from.leftForwardAt;
+            const float wrapped = phase - std::floor(phase);
+            const float newPhase = wrapped + to.leftForwardAt;
+            o->AnimationFrame = (newPhase - std::floor(newPhase)) * static_cast<float>(newKeys);
+        }
+        // The fade does the blending: no blend from the last action's key as well.
+        o->PriorAction = o->CurrentAction;
+        o->PriorAnimationFrame = static_cast<float>(static_cast<int>(o->AnimationFrame));
+    }
+    else if (o->CurrentAction != c->FadeLastAction)
+    {
+        // A switch that doesn't fade (death, a transformation) ends a fade under way.
+        c->FadeLeft = 0.f;
+    }
+    else if (c->FadeLeft > 0.f && c->FadeAction >= 0 && c->FadeSeconds > 0.f)
+    {
+        c->FadeLeft = std::max(0.f, c->FadeLeft - seconds / c->FadeSeconds);
+        const Action_t& faded = b.Actions[c->FadeAction];
+        const int fadeKeys = faded.NumAnimationKeys;
+        const int keys = b.Actions[o->CurrentAction].NumAnimationKeys;
+        if (fadeKeys > 0 && keys > 0)
+        {
+            // Two strides keep one pace through the stride, as the new action plays; anything else plays on at its
+            // own speed, and an action played once holds its end.
+            const bool strides = StepPerKey(c->FadeAction) > 0.f && StepPerKey(o->CurrentAction) > 0.f;
+            const float advance =
+                strides ? playSpeed * static_cast<float>(fadeKeys) / static_cast<float>(keys) : faded.PlaySpeed;
+            const float frame = c->FadeFrame + advance * FPS_ANIMATION_FACTOR;
+            c->FadeFrame = faded.Loop ? std::min(frame, static_cast<float>(fadeKeys) - 0.01f)
+                                      : std::fmod(frame, static_cast<float>(fadeKeys));
+        }
+    }
+}
+} // namespace
+
+const PoseBlend* CharacterPoseFade(const CHARACTER* c, PoseBlend& out)
+{
+    if (c == nullptr || c->FadeLeft <= 0.f || c->FadeAction < 0)
+    {
+        return nullptr;
+    }
+    out.Action = static_cast<unsigned short>(c->FadeAction);
+    out.Frame = c->FadeFrame;
+    // Eased: it leaves gently and lets go gently.
+    out.Weight = c->FadeLeft * c->FadeLeft * (3.f - 2.f * c->FadeLeft);
+    return &out;
+}
 
 bool CharacterAnimation(CHARACTER* c, OBJECT* o)
 {
@@ -2593,7 +2726,10 @@ bool CharacterAnimation(CHARACTER* c, OBJECT* o)
         return false;
     }
 
+    UpdatePoseFade(c, o, PlaySpeed);
     Play = b->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, PlaySpeed, o->Position, o->Angle);
+    c->FadeLastAction = o->CurrentAction;
+    c->FadeLastFrame = o->AnimationFrame;
     if (o->CurrentAction == PLAYER_CHANGE_UP)
     {
         if (Play == false)
@@ -7454,12 +7590,13 @@ void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters)
     {
         for (CHARACTER* c : activeChars)
         {
-            AnimateCharacterBones(&c->Object, c->TurnLag, c->SnapTurnOffset);
+            PoseBlend blend;
+            AnimateCharacterBones(&c->Object, c->TurnLag, c->SnapTurnOffset, CharacterPoseFade(c, blend));
         }
     }
 }
 
-void AnimateCharacterBones(OBJECT* o, float turnLag, float facingOffset)
+void AnimateCharacterBones(OBJECT* o, float turnLag, float facingOffset, const PoseBlend* blend)
 {
     BMD* model = &Models[o->Type];
     if (model->NumBones <= 0) return;
@@ -7468,7 +7605,7 @@ void AnimateCharacterBones(OBJECT* o, float turnLag, float facingOffset)
     // last. The body is drawn facing a little behind a sudden turn (UpdateSnapTurn).
     vec3_t angle = {o->Angle[0], o->Angle[1], o->Angle[2] + facingOffset};
     model->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, angle, o->HeadAngle,
-                     false, false, nullptr, o->CurrentAction, MAX_BONES, turnLag);
+                     false, false, nullptr, o->CurrentAction, MAX_BONES, turnLag, 0.f, 0.f, blend);
     if (const CHARACTER* character = CharacterOfObject(o))
     {
         PlaceFeet(character, o->BoneTransform);

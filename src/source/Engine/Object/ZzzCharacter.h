@@ -33,7 +33,8 @@ void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters);
 void WaitCharactersAnimation();
 // `turnLag`: how far the ponytail trails behind the body's turn (CHARACTER::TurnLag), and `facingOffset` how far the
 // drawn body is behind its facing (CHARACTER::SnapTurnOffset), in degrees.
-void AnimateCharacterBones(OBJECT* o, float turnLag = 0.f, float facingOffset = 0.f);
+void AnimateCharacterBones(OBJECT* o, float turnLag = 0.f, float facingOffset = 0.f,
+                           const PoseBlend* blend = nullptr);
 
 extern size_t g_LastActiveCharacterCount;
 extern bool g_LastAnimationWasParallel;
@@ -86,6 +87,8 @@ void UpdateTurnLag(CHARACTER* c);
 void UpdateSnapTurn(CHARACTER* c);
 // The client character whose object `o` is, or nullptr (a mount, an item, a map object).
 CHARACTER* CharacterOfObject(const OBJECT* o);
+// The pose a character is fading out of (UpdatePoseFade), or nullptr: `out` is filled in and returned.
+const PoseBlend* CharacterPoseFade(const CHARACTER* c, PoseBlend& out);
 // Who the character's head looks at, if anyone (each frame): a player looks at what it attacks or the nearest enemy in
 // sight in a combat zone, else the nearest NPC, else another player passing by; a monster at its target; an NPC at the
 // hero passing by.

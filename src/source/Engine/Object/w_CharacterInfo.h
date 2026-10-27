@@ -221,6 +221,14 @@ public:
     float       SnapTurnOffset = 0.f;
     float       SnapTurnSpeed = 0.f;
     float       SnapTurnFacing = NAN;
+    // A fade from one way of moving into the next (UpdatePoseFade): the action faded out, its frame, how much of it is
+    // left (1 to 0), and the action and frame the character had last frame (-1: none yet).
+    int         FadeAction = -1;
+    float       FadeFrame = 0.f;
+    float       FadeLeft = 0.f;
+    float       FadeSeconds = 0.f;
+    int         FadeLastAction = -1;
+    float       FadeLastFrame = 0.f;
     char		CollisionTime; // unused?
 
     short       GuildMarkIndex;
