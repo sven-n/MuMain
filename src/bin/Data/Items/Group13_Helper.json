@@ -10,6 +10,43 @@
         "es": "Angel Guardián",
         "pt": "Anjo guardião"
       },
+      "tags": ["noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "Absorb 20% of Damage",
+            "de": "Absorbiert 20% des Schadens",
+            "es": "Absorbe el 20% del daño",
+            "id": "Menyerap 20% Kerusakan",
+            "ja": "ダメージ 20%吸収",
+            "pl": "Pochłania 20% obrażeń",
+            "pt": "Absorve 20% do dano",
+            "ru": "Поглощение 20% урона",
+            "tl": "Isipsip ang 20% ng Pinsala",
+            "uk": "Поглинання 20% шкоди",
+            "zh-TW": "吸收20%傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Max HP +50 increased",
+            "de": "Max. HP +50 erhöht",
+            "es": "HP máximo +50 aumentado",
+            "id": "HP Maks +50 meningkat",
+            "ja": "最大生命力 +50増加",
+            "pl": "Zwiększono maksymalne HP +50",
+            "pt": "HP máximo +50 aumentado",
+            "ru": "Макс. HP +50 увеличен.",
+            "tl": "Tumaas ang Max HP +50",
+            "uk": "Макс HP +50 збільшено",
+            "zh-TW": "最大生命值+50增加"
+          }
+        },
+        {
+          "text": "@life",
+          "when": ["!timed"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "pet",
@@ -38,6 +75,28 @@
         "es": "Diablillo",
         "pt": "Diabrete"
       },
+      "tags": ["noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase 30% of attacking & Wizardry Dmg",
+            "de": "Erhöht Angriffs- und Zaubereischaden um 30%",
+            "es": "Aumenta un 30% el ataque y el daño de hechicería",
+            "id": "Meningkatkan serangan & Dmg Sihir 30%",
+            "ja": "攻撃力、力 30%増加",
+            "pl": "Zwiększa obrażenia fizyczne i magiczne o 30%",
+            "pt": "Aumenta em 30% o dano de ataque e magia",
+            "ru": "Увеличение урона от атак и волшебства на 30%.",
+            "tl": "Dagdagan ang pag-atake at Wizardry Dmg nang 30%",
+            "uk": "Збільшує шкоду від атаки та магії на 30%",
+            "zh-TW": "攻擊力和魔法傷害增加30%"
+          }
+        },
+        {
+          "text": "@life",
+          "when": ["!timed"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "pet",
@@ -66,7 +125,13 @@
         "es": "Cuerno de Uniria",
         "pt": "Chifre de Uniria"
       },
-      "tags": ["mount", "hornMount"],
+      "tags": ["mount", "hornMount", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@life",
+          "when": ["!timed"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "pet",
@@ -95,7 +160,43 @@
         "es": "Cuerno de Dinorant",
         "pt": "Chifre de Dinorant"
       },
-      "tags": ["mount", "hornMount", "flying", "valuable"],
+      "tags": ["mount", "hornMount", "flying", "valuable", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase 15% of Damage",
+            "de": "Erhöht den Schaden um 15%",
+            "es": "Aumenta el daño un 15%",
+            "id": "Meningkatkan Kerusakan 15%",
+            "ja": "ダメージ 15%増加",
+            "pl": "Zwiększa obrażenia o 15%",
+            "pt": "Aumenta o dano em 15%",
+            "ru": "Увеличение урона на 15%",
+            "tl": "Dagdagan ang Pinsala nang 15%",
+            "uk": "Збільшення шкоди на 15%",
+            "zh-TW": "增加 15% 傷害"
+          }
+        },
+        {
+          "text": {
+            "en": "Absorb 10% of Damage",
+            "de": "Absorbiert 10% des Schadens",
+            "es": "Absorbe el 10% del daño",
+            "id": "Menyerap 10% Kerusakan",
+            "ja": "ダメージ 10%吸収",
+            "pl": "Pochłania 10% obrażeń",
+            "pt": "Absorve 10% do dano",
+            "ru": "Поглощение 10% урона",
+            "tl": "Isipsip ang 10% ng Pinsala",
+            "uk": "Поглинання 10% шкоди",
+            "zh-TW": "吸收10%傷害"
+          }
+        },
+        {
+          "text": "@life",
+          "when": ["!timed"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "pet",
@@ -125,7 +226,13 @@
         "es": "Caballo Oscuro",
         "pt": "Cavalo negro"
       },
-      "tags": ["mount", "flying", "darkLordPet", "valuable"],
+      "tags": ["mount", "flying", "darkLordPet", "valuable", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@life",
+          "when": ["!timed"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "pet",
@@ -149,7 +256,13 @@
         "es": "Cuervo Oscuro",
         "pt": "Corvo negro"
       },
-      "tags": ["darkLordPet", "valuable"],
+      "tags": ["darkLordPet", "valuable", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@life",
+          "when": ["!timed"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "offHand",
@@ -171,6 +284,29 @@
         "es": "Contrato (Invocación)",
         "pt": "Contrato (Invocação)"
       },
+      "tags": ["noDurabilityLine"],
+      "description": [
+        {
+          "text": "@archer",
+          "color": "yellow",
+          "levels": [0, 0]
+        },
+        {
+          "text": "@spearman",
+          "color": "yellow",
+          "levels": [1, 1]
+        }
+      ],
+      "nameLines": [
+        {
+          "text": "@archer",
+          "levels": [0, 0]
+        },
+        {
+          "text": "@spearman",
+          "levels": [1, 1]
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -255,7 +391,133 @@
         "es": "Anillo de Transformación",
         "pt": "Anel de Transformação"
       },
-      "tags": ["transformationRing"],
+      "tags": ["transformationRing", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "Durability: [{durability}]",
+            "de": "Haltbarkeit: [{durability}]",
+            "es": "Durabilidad: [{durability}]",
+            "id": "Daya Tahan: [{durability}]",
+            "ja": "耐久力: [ {durability} ]",
+            "pl": "Trwałość: [{durability}]",
+            "pt": "Durabilidade: [{durability}]",
+            "ru": "Прочность: [{durability}]",
+            "tl": "Katatagan: [{durability}]",
+            "uk": "Довговічність: [{durability}]",
+            "zh-TW": "耐久性：[{durability}]"
+          }
+        },
+        {
+          "text": "@unableToEquipWithADifferentTransformationRing",
+          "color": "red",
+          "after": "options"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{monster} Transformation Ring",
+            "de": "{monster} Verwandlungsring",
+            "es": "{monster} Anillo de transformación",
+            "id": "{monster} Cincin Transformasi",
+            "ja": "{monster} 変化の指輪",
+            "pl": "{monster} Transformation Ring",
+            "pt": "{monster} Anel de Transformação",
+            "ru": "{monster} Кольцо Трансформации",
+            "tl": "{monster} Singsing ng Pagbabago",
+            "uk": "{monster} Перстень трансформації",
+            "zh-TW": "{monster} 變身戒指"
+          },
+          "values": {"monster": "monsterName:2"},
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{monster} Transformation Ring",
+            "de": "{monster} Verwandlungsring",
+            "es": "{monster} Anillo de transformación",
+            "id": "{monster} Cincin Transformasi",
+            "ja": "{monster} 変化の指輪",
+            "pl": "{monster} Transformation Ring",
+            "pt": "{monster} Anel de Transformação",
+            "ru": "{monster} Кольцо Трансформации",
+            "tl": "{monster} Singsing ng Pagbabago",
+            "uk": "{monster} Перстень трансформації",
+            "zh-TW": "{monster} 變身戒指"
+          },
+          "values": {"monster": "monsterName:7"},
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "{monster} Transformation Ring",
+            "de": "{monster} Verwandlungsring",
+            "es": "{monster} Anillo de transformación",
+            "id": "{monster} Cincin Transformasi",
+            "ja": "{monster} 変化の指輪",
+            "pl": "{monster} Transformation Ring",
+            "pt": "{monster} Anel de Transformação",
+            "ru": "{monster} Кольцо Трансформации",
+            "tl": "{monster} Singsing ng Pagbabago",
+            "uk": "{monster} Перстень трансформації",
+            "zh-TW": "{monster} 變身戒指"
+          },
+          "values": {"monster": "monsterName:14"},
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "{monster} Transformation Ring",
+            "de": "{monster} Verwandlungsring",
+            "es": "{monster} Anillo de transformación",
+            "id": "{monster} Cincin Transformasi",
+            "ja": "{monster} 変化の指輪",
+            "pl": "{monster} Transformation Ring",
+            "pt": "{monster} Anel de Transformação",
+            "ru": "{monster} Кольцо Трансформации",
+            "tl": "{monster} Singsing ng Pagbabago",
+            "uk": "{monster} Перстень трансформації",
+            "zh-TW": "{monster} 變身戒指"
+          },
+          "values": {"monster": "monsterName:8"},
+          "levels": [3, 3]
+        },
+        {
+          "text": {
+            "en": "{monster} Transformation Ring",
+            "de": "{monster} Verwandlungsring",
+            "es": "{monster} Anillo de transformación",
+            "id": "{monster} Cincin Transformasi",
+            "ja": "{monster} 変化の指輪",
+            "pl": "{monster} Transformation Ring",
+            "pt": "{monster} Anel de Transformação",
+            "ru": "{monster} Кольцо Трансформации",
+            "tl": "{monster} Singsing ng Pagbabago",
+            "uk": "{monster} Перстень трансформації",
+            "zh-TW": "{monster} 變身戒指"
+          },
+          "values": {"monster": "monsterName:9"},
+          "levels": [4, 4]
+        },
+        {
+          "text": {
+            "en": "{monster} Transformation Ring",
+            "de": "{monster} Verwandlungsring",
+            "es": "{monster} Anillo de transformación",
+            "id": "{monster} Cincin Transformasi",
+            "ja": "{monster} 変化の指輪",
+            "pl": "{monster} Transformation Ring",
+            "pt": "{monster} Anel de Transformação",
+            "ru": "{monster} Кольцо Трансформации",
+            "tl": "{monster} Singsing ng Pagbabago",
+            "uk": "{monster} Перстень трансформації",
+            "zh-TW": "{monster} 變身戒指"
+          },
+          "values": {"monster": "monsterName:41"},
+          "levels": [5, 5]
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -280,6 +542,29 @@
         "es": "Orden (Guardián/Roca de Vida)",
         "pt": "Ordem (Guard./Pedra da Vida)"
       },
+      "tags": ["noDurabilityLine"],
+      "description": [
+        {
+          "text": "@scrollOfGuardian",
+          "color": "yellow",
+          "levels": [0, 0]
+        },
+        {
+          "text": "@placeLifeStone",
+          "color": "yellow",
+          "levels": [1, 1]
+        }
+      ],
+      "nameLines": [
+        {
+          "text": "@scrollOfGuardian",
+          "levels": [0, 0]
+        },
+        {
+          "text": "@placeLifeStone",
+          "levels": [1, 1]
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -364,7 +649,70 @@
         "es": "Pluma de Loch",
         "pt": "Pena de Loch"
       },
-      "tags": ["valuable"],
+      "tags": ["valuable", "noLevelRequirement"],
+      "description": [
+        {
+          "text": {
+            "en": "Used to upgrade wings",
+            "de": "Wird zum Verbessern von Flügeln verwendet",
+            "es": "Se utiliza para mejorar las alas.",
+            "id": "Digunakan untuk meningkatkan sayap",
+            "ja": "羽をアップグレードするための合成に使用",
+            "pl": "Służy do ulepszania Wings",
+            "pt": "Usado para atualizar asas",
+            "ru": "Используется для улучшения крыльев.",
+            "tl": "Ginagamit sa pag-upgrade ng mga pakpak",
+            "uk": "Використовується для покращення крил",
+            "zh-TW": "用於升級翅膀"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Used in combining Cape of Lord & Warrior's Cloak",
+            "de": "Wird zur Kombination von Umhang des Lords und Kriegerumhang verwendet",
+            "es": "Se utiliza para combinar la capa de Lord y la capa de guerrero.",
+            "id": "Digunakan dalam menggabungkan Cape of Lord & Warrior's Cloak",
+            "ja": "君主のマント合成時に使用",
+            "pl": "Używany do łączenia Cape of Lord i Warrior's Cloak",
+            "pt": "Usado na combinação da Capa do Senhor e da Capa do Guerreiro",
+            "ru": "Используется для объединения накидки лорда и плаща воина.",
+            "tl": "Ginagamit sa pagsasama-sama ng Cape of Lord at Warrior's Cloak",
+            "uk": "Використовується для поєднання накидки лорда та плаща воїна",
+            "zh-TW": "用於組合領主斗篷和戰士斗篷"
+          },
+          "levels": [1, 1]
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Crest of monarch",
+            "de": "Crest of Monarch",
+            "es": "Cresta del monarca",
+            "id": "Lambang raja",
+            "ja": "君主の紋章",
+            "pl": "Crest of Monarch",
+            "pt": "Crista do monarca",
+            "ru": "Герб монарха",
+            "tl": "Crest of monarch",
+            "uk": "Герб монарха",
+            "zh-TW": "君主的紋章"
+          },
+          "color": "yellow",
+          "levels": [1, 1]
+        },
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 2,
       "statProfile": "helper",
@@ -392,6 +740,161 @@
         "pt": "Fruta"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "{stat} Increases 1~3 stat points",
+            "de": "{stat} Erhöht 1~3 Statuspunkte",
+            "es": "{stat} Aumenta 1~3 puntos de estadísticas",
+            "id": "{stat} Meningkatkan 1~3 poin stat",
+            "ja": "{stat} ステータス1～3ポイント生成",
+            "pl": "{stat} Zwiększa 1-3 punkty statystyk",
+            "pt": "{stat} Aumenta 1~3 pontos de estatísticas",
+            "ru": "{stat} Увеличивает 1~3 очка характеристик.",
+            "tl": "{stat} Tumataas ng 1~3 stat point",
+            "uk": "{stat} Збільшує 1–3 очки статистики",
+            "zh-TW": "{stat} 增加1~3點屬性點"
+          },
+          "levels": [0, 4]
+        },
+        {
+          "text": {
+            "en": "{stat} Possible to decrease stat 1~9 point",
+            "de": "{stat} Verringert einen Wert um 1~9 Punkte",
+            "es": "{stat} Es posible disminuir las estadísticas de 1 a 9 puntos.",
+            "id": "{stat} Kemungkinan untuk menurunkan stat 1~9 poin",
+            "ja": "{stat} 減少ステータス1～9ポイント可能",
+            "pl": "{stat} Możliwe zmniejszenie statystyki o 1~9 punktów",
+            "pt": "{stat} Possível diminuir estatísticas de 1 a 9 pontos",
+            "ru": "{stat} Возможно понижение показателя с 1 по 9.",
+            "tl": "{stat} Posibleng bawasan ang stat 1~9 point",
+            "uk": "{stat} Можливе зниження характеристики на 1~9 балів",
+            "zh-TW": "{stat} 可減少屬性1~9點"
+          },
+          "levels": [0, 4]
+        },
+        {
+          "text": {
+            "en": "It can be used with item removed.",
+            "de": "Kann nur verwendet werden, wenn die Ausrüstung abgelegt ist.",
+            "es": "Se puede utilizar sin el artículo.",
+            "id": "Dapat digunakan dengan item dilepas.",
+            "ja": "アイテムの未装備の際、使用可能",
+            "pl": "Można użyć po zdjęciu ekwipunku.",
+            "pt": "Pode ser usado com item removido.",
+            "ru": "Его можно использовать, если предмет удален.",
+            "tl": "Maaari itong magamit kapag tinanggal ang item.",
+            "uk": "Його можна використовувати з вилученим предметом.",
+            "zh-TW": "它可以在移除物品的情況下使用。"
+          },
+          "color": "darkRed",
+          "levels": [0, 4]
+        },
+        {
+          "text": {
+            "en": "Can be equipped by Dark Lord",
+            "de": "Kann von Dunkler Lord ausgerüstet werden",
+            "es": "Puede ser equipado con señor oscuro",
+            "id": "Dapat dilengkapi dengan Pangeran Kegelapan",
+            "ja": "ダークロード使用可能",
+            "pl": "Może być używany przez: Dark Lord",
+            "pt": "Pode ser equipado por Senhor das Trevas",
+            "ru": "Может быть оснащен Темный Лорд.",
+            "tl": "Maaaring gamitan ng Dark Lord",
+            "uk": "Може бути оснащений Темний Лорд",
+            "zh-TW": "可由黑暗領主配備"
+          },
+          "color": "darkRed",
+          "colors": [
+            {
+              "when": ["class:darkLord"],
+              "color": "white"
+            }
+          ],
+          "levels": [4, 4]
+        }
+      ],
+      "levelValues": {
+        "stat": [
+          {
+            "en": "ENG",
+            "de": "ENG",
+            "es": "ENE",
+            "id": "ENG",
+            "ja": "エナジー",
+            "pl": "ENG",
+            "pt": "ENE",
+            "ru": "ЭНЕ",
+            "tl": "ENG",
+            "uk": "ЕНЕ",
+            "zh-TW": "能量"
+          },
+          {
+            "en": "STA",
+            "de": "VIT",
+            "es": "VIT",
+            "id": "STA",
+            "ja": "体力",
+            "pl": "STA",
+            "pt": "VIT",
+            "ru": "ВЫН",
+            "tl": "STA",
+            "uk": "ВИТ",
+            "zh-TW": "體力"
+          },
+          {
+            "en": "AGI",
+            "de": "BEW",
+            "es": "AGI",
+            "id": "AGI",
+            "ja": "敏捷性",
+            "pl": "AGI",
+            "pt": "AGI",
+            "ru": "ЛВК",
+            "tl": "AGI",
+            "uk": "СПР",
+            "zh-TW": "敏捷"
+          },
+          {
+            "en": "STR",
+            "de": "STÄ",
+            "es": "FUE",
+            "id": "STR",
+            "ja": "力",
+            "pl": "STR",
+            "pt": "FOR",
+            "ru": "СИЛ",
+            "tl": "STR",
+            "uk": "СИЛ",
+            "zh-TW": "力量"
+          },
+          {
+            "en": "Command",
+            "de": "Führung",
+            "es": "Dominio",
+            "id": "Kepemimpinan",
+            "ja": "統率",
+            "pl": "Dowodzenie",
+            "pt": "Comando",
+            "ru": "Командование",
+            "tl": "Pamumuno",
+            "uk": "Командування",
+            "zh-TW": "統率"
+          }
+        ]
+      },
+      "nameLines": [
+        {
+          "text": {
+            "en": "{stat} {name}"
+          },
+          "color": "yellow",
+          "levels": [0, 4]
+        },
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false,
@@ -413,7 +916,17 @@
         "es": "Rollo de Arcángel",
         "pt": "Pergaminho do arcanjo"
       },
-      "tags": ["bloodCastleTicketPart"],
+      "tags": ["bloodCastleTicketPart", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@invisibilityCloakIngredient"
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 2,
       "durability": 128,
@@ -436,7 +949,17 @@
         "es": "Hueso Sangriento",
         "pt": "Osso de sangue"
       },
-      "tags": ["bloodCastleTicketPart"],
+      "tags": ["bloodCastleTicketPart", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@invisibilityCloakIngredient"
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 2,
       "durability": 128,
@@ -459,6 +982,33 @@
         "es": "Manto de Invisibilidad",
         "pt": "Manto da invisibilidade"
       },
+      "tags": ["noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "Used when entering Blood Castle",
+            "de": "Wird beim Betreten der Blutburg verwendet",
+            "es": "Se utiliza al entrar al Castillo de Sangre.",
+            "id": "Digunakan saat memasuki Blood Castle",
+            "ja": "ブラッドキャッスルに入る時に使われます。",
+            "pl": "Używane podczas wchodzenia do Blood Castle",
+            "pt": "Usado ao entrar no Castelo de Sangue",
+            "ru": "Используется при входе в Кровавый Замок.",
+            "tl": "Ginagamit kapag pumapasok sa Blood Castle",
+            "uk": "Використовується при вході в Кривавий замок",
+            "zh-TW": "進入血色城堡時使用"
+          }
+        },
+        {
+          "text": ""
+        },
+        {
+          "text": "@remainingTimeShown"
+        },
+        {
+          "text": "@whenYouRightClick"
+        }
+      ],
       "width": 2,
       "height": 2,
       "durability": 255,
@@ -481,7 +1031,498 @@
         "es": "Arma Absoluta de Arcángel",
         "pt": "Arma absoluta do arcanjo"
       },
-      "tags": ["valuable"],
+      "tags": ["valuable", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@questItem"
+        },
+        {
+          "text": {
+            "en": "Reward received when returned to the Archangel",
+            "de": "Belohnung bei Rückgabe an den Erzengel",
+            "es": "Recompensa recibida al regresar al Arcángel",
+            "id": "Hadiah diterima saat dikembalikan ke Malaikat Agung",
+            "ja": "大天使に持っていくと報奨がもらえます。",
+            "pl": "Nagroda otrzymana po powrocie do Archanioła",
+            "pt": "Recompensa recebida quando devolvida ao Arcanjo",
+            "ru": "Награда, полученная при возвращении в Архангельск",
+            "tl": "Natanggap ang gantimpala nang ibalik sa Arkanghel",
+            "uk": "Нагорода отримана після повернення до Архангела",
+            "zh-TW": "回到大天使身邊時獲得的獎勵"
+          },
+          "color": "darkRed"
+        },
+        {
+          "text": ""
+        },
+        {
+          "text": {
+            "en": "Wizardry Damage: 107 ~ 110",
+            "de": "Zaubereischaden: 107 ~ 110",
+            "es": "Daño mágico: 107 ~ 110",
+            "id": "Kerusakan Sihir: 107 ~ 110",
+            "ja": "魔法の攻撃力: 107 ~ 110",
+            "pl": "Obrażenia magiczne: 107 ~ 110",
+            "pt": "Dano de Magia: 107 ~ 110",
+            "ru": "Волшебный урон: 107 ~ 110",
+            "tl": "Pinsala ng Wizardry: 107 ~ 110",
+            "uk": "Пошкодження магії: 107 ~ 110",
+            "zh-TW": "魔法傷害: 107 ~ 110"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "One-Handed Damage: 110 ~ 120",
+            "de": "Einhandschaden: 110 ~ 120",
+            "es": "Daño con una mano: 110 ~ 120",
+            "id": "Kerusakan Satu Tangan: 110 ~ 120",
+            "ja": "片手の攻撃力: 110 ~ 120",
+            "pl": "Obrażenia jedną ręką: 110 ~ 120",
+            "pt": "Dano com uma mão: 110 ~ 120",
+            "ru": "Урон одной рукой: 110 ~ 120",
+            "tl": "Pinsala ng Isang Kamay: 110 ~ 120",
+            "uk": "Пошкодження однією рукою: 110 ~ 120",
+            "zh-TW": "單手傷害: 110 ~ 120"
+          },
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Two-Handed Damage: 120 ~ 140",
+            "de": "Zweihandschaden: 120 ~ 140",
+            "es": "Daño a dos manos: 120 ~ 140",
+            "id": "Kerusakan Dua Tangan: 120 ~ 140",
+            "ja": "両手の攻撃力: 120 ~ 140",
+            "pl": "Obrażenia dwuręczne: 120 ~ 140",
+            "pt": "Dano com duas mãos: 120 ~ 140",
+            "ru": "Двуручный урон: 120 ~ 140",
+            "tl": "Pinsala ng Dalawang Kamay: 120 ~ 140",
+            "uk": "Пошкодження двома руками: 120 ~ 140",
+            "zh-TW": "雙手傷害: 120 ~ 140"
+          },
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "Attack speed: 20",
+            "de": "Angriffsgeschwindigkeit: 20",
+            "es": "Velocidad de ataque: 20",
+            "id": "Kecepatan serangan: 20",
+            "ja": "攻撃速度: 20",
+            "pl": "Szybkość ataku: 20",
+            "pt": "Velocidade de ataque: 20",
+            "ru": "Скорость атаки: 20",
+            "tl": "Bilis ng pag-atake: 20",
+            "uk": "Швидкість атаки: 20",
+            "zh-TW": "攻擊速度：20"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Attack speed: 35",
+            "de": "Angriffsgeschwindigkeit: 35",
+            "es": "Velocidad de ataque: 35",
+            "id": "Kecepatan serangan: 35",
+            "ja": "攻撃速度: 35",
+            "pl": "Szybkość ataku: 35",
+            "pt": "Velocidade de ataque: 35",
+            "ru": "Скорость атаки: 35",
+            "tl": "Bilis ng pag-atake: 35",
+            "uk": "Швидкість атаки: 35",
+            "zh-TW": "攻擊速度：35"
+          },
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Attack speed: 35",
+            "de": "Angriffsgeschwindigkeit: 35",
+            "es": "Velocidad de ataque: 35",
+            "id": "Kecepatan serangan: 35",
+            "ja": "攻撃速度: 35",
+            "pl": "Szybkość ataku: 35",
+            "pt": "Velocidade de ataque: 35",
+            "ru": "Скорость атаки: 35",
+            "tl": "Bilis ng pag-atake: 35",
+            "uk": "Швидкість атаки: 35",
+            "zh-TW": "攻擊速度：35"
+          },
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "Strength Requirement: 132",
+            "de": "Benötigte Stärke: 132",
+            "es": "Requisito de fuerza: 132",
+            "id": "Persyaratan Kekuatan: 132",
+            "ja": "使用可能な力: 132",
+            "pl": "Wymagana siła: 132",
+            "pt": "Requisito de força: 132",
+            "ru": "Требование к прочности: 132",
+            "tl": "Kinakailangan ng Lakas: 132",
+            "uk": "Вимоги до міцності: 132",
+            "zh-TW": "強度要求：132"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Strength Requirement: 381",
+            "de": "Benötigte Stärke: 381",
+            "es": "Requisito de fuerza: 381",
+            "id": "Persyaratan Kekuatan: 381",
+            "ja": "使用可能な力: 381",
+            "pl": "Wymagana siła: 381",
+            "pt": "Requisito de força: 381",
+            "ru": "Требование к прочности: 381",
+            "tl": "Kinakailangan ng Lakas: 381",
+            "uk": "Вимоги до міцності: 381",
+            "zh-TW": "強度要求：381"
+          },
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Strength Requirement: 140",
+            "de": "Benötigte Stärke: 140",
+            "es": "Requisito de fuerza: 140",
+            "id": "Persyaratan Kekuatan: 140",
+            "ja": "使用可能な力: 140",
+            "pl": "Wymagana siła: 140",
+            "pt": "Requisito de força: 140",
+            "ru": "Требование к прочности: 140",
+            "tl": "Kinakailangan ng Lakas: 140",
+            "uk": "Вимоги до міцності: 140",
+            "zh-TW": "強度要求：140"
+          },
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "Agility Requirement: 32",
+            "de": "Benötigte Beweglichkeit: 32",
+            "es": "Requisito de agilidad: 32",
+            "id": "Persyaratan Ketangkasan: 32",
+            "ja": "使用可能な敏捷性: 32",
+            "pl": "Wymagania dotyczące zwinności: 32",
+            "pt": "Requisito de agilidade: 32",
+            "ru": "Требование к ловкости: 32",
+            "tl": "Kinakailangan sa Liksi: 32",
+            "uk": "Вимоги до спритності: 32",
+            "zh-TW": "敏捷性需求：32"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Agility Requirement: 149",
+            "de": "Benötigte Beweglichkeit: 149",
+            "es": "Requisito de agilidad: 149",
+            "id": "Persyaratan Ketangkasan: 149",
+            "ja": "使用可能な敏捷性: 149",
+            "pl": "Wymagania dotyczące zwinności: 149",
+            "pt": "Requisito de agilidade: 149",
+            "ru": "Требование к ловкости: 149",
+            "tl": "Kinakailangan sa Liksi: 149",
+            "uk": "Вимоги до спритності: 149",
+            "zh-TW": "敏捷性需求：149"
+          },
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Agility Requirement: 350",
+            "de": "Benötigte Beweglichkeit: 350",
+            "es": "Requisito de agilidad: 350",
+            "id": "Persyaratan Ketangkasan: 350",
+            "ja": "使用可能な敏捷性: 350",
+            "pl": "Wymagania dotyczące zwinności: 350",
+            "pt": "Requisito de agilidade: 350",
+            "ru": "Требование к ловкости: 350",
+            "tl": "Kinakailangan sa Liksi: 350",
+            "uk": "Вимоги до спритності: 350",
+            "zh-TW": "敏捷性需求：350"
+          },
+          "levels": [2, 2]
+        },
+        {
+          "text": ""
+        },
+        {
+          "text": {
+            "en": "Luck (success rate of Jewel of Soul +25%)",
+            "de": "Glück (Erfolgsrate von Juwel der Seele +25%)",
+            "es": "Suerte (tasa de éxito de Jewel of Soul +25%)",
+            "id": "Keberuntungan (tingkat keberhasilan Permata Jiwa +25%)",
+            "ja": "幸運 (霊魂の宝石　成功確率 +25%)",
+            "pl": "Szczęście (wskaźnik sukcesu Jewel of Soul +25%)",
+            "pt": "Sorte (taxa de sucesso da Jóia da Alma +25%)",
+            "ru": "Удача (шанс успеха «Драгоценности души» +25%)",
+            "tl": "Suwerte (rate ng tagumpay ng Jewel of Soul +25%)",
+            "uk": "Удача (швидкість успіху Jewel of Soul +25%)",
+            "zh-TW": "幸運（靈魂寶石成功率+25%）"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Luck (critical damage rate +5%)",
+            "de": "Glück (kritische Schadensrate +5%)",
+            "es": "Suerte (tasa de daño crítico +5%)",
+            "id": "Keberuntungan (tingkat kerusakan kritis +5%)",
+            "ja": "幸運 (クリティカルダメージ確率 +5%)",
+            "pl": "Szczęście (wskaźnik obrażeń krytycznych +5%)",
+            "pt": "Sorte (taxa de dano crítico +5%)",
+            "ru": "Удача (коэффициент критического урона +5%)",
+            "tl": "Swerte (critical damage rate +5%)",
+            "uk": "Удача (рівень критичної шкоди +5%)",
+            "zh-TW": "幸運（暴擊傷害率+5%）"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Wizardry Dmg 53% rise",
+            "de": "Zaubereischaden +53%",
+            "es": "Wizardry Dmg 53% aumento",
+            "id": "Sihir Dmg 53% meningkat",
+            "ja": "魔力 53%プラス",
+            "pl": "Obrażenia magiczne +53%",
+            "pt": "Magia Dmg 53% aumento",
+            "ru": "Волшебный урон 53% увеличивается",
+            "tl": "Wizardry Dmg 53% tumaas",
+            "uk": "Wizardry Dmg 53% зростання",
+            "zh-TW": "魔法傷害 53% 上漲"
+          },
+          "color": "blue",
+          "bold": true,
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Increase Wizardry Dmg +level/20",
+            "de": "Erhöht Zaubereischaden +Level/20",
+            "es": "Aumentar el daño de hechicería +nivel/20",
+            "id": "Meningkatkan Dmg Sihir +level/20",
+            "ja": "魔力増加 +レベル/20",
+            "pl": "Zwiększa obrażenia czarodziejstwa +poziom/20",
+            "pt": "Aumenta Dano de Magia +nível/20",
+            "ru": "Увеличение магического урона +уровень/20",
+            "tl": "Taasan ang Wizardry Dmg +level/20",
+            "uk": "Збільшити Wizardry Dmg +level/20",
+            "zh-TW": "增加魔法傷害+level/20"
+          },
+          "color": "blue",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Increase Wizardry Dmg +2%",
+            "de": "Erhöht Zaubereischaden +2%",
+            "es": "Aumentar daño mágico +2%",
+            "id": "Meningkatkan Dmg Sihir +2%",
+            "ja": "魔力増加 +2%",
+            "pl": "Zwiększ obrażenia czarodziejstwa +2%",
+            "pt": "Aumenta Dano de Magia +2%",
+            "ru": "Увеличение урона от волшебства +2%",
+            "tl": "Dagdagan ang Wizardry Dmg +2%",
+            "uk": "Збільшити шкоду магії +2%",
+            "zh-TW": "增加魔法傷害+2%"
+          },
+          "color": "blue",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Cyclone Cutting skill (Mana:{mana})",
+            "de": "Fähigkeit Cyclone Cutting (Mana:{mana})",
+            "es": "Habilidad de corte de ciclón (Mana:{mana})",
+            "id": "Keterampilan Pemotongan Topan (Mana: {mana})",
+            "ja": "真空斬りスキル (マナ:{mana})",
+            "pl": "Umiejętność Cięcia Cyklonu (Mana: {mana})",
+            "pt": "Habilidade de Corte Ciclone (Mana:{mana})",
+            "ru": "Навык циклонной резки (Мана:{mana})",
+            "tl": "Kasanayan sa Cyclone Cutting (Mana:{mana})",
+            "uk": "Навички Cyclone Cutting (Мана:{mana})",
+            "zh-TW": "旋風切割技能（法力：{mana}）"
+          },
+          "values": {"mana": "skillMana:22"},
+          "color": "blue",
+          "levels": [1, 1]
+        },
+        {
+          "text": "@increaseDamageLevel20",
+          "color": "blue",
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Increase Damage +2%",
+            "de": "Erhöht Schaden +2%",
+            "es": "Aumentar daño +2%",
+            "id": "Meningkatkan Kerusakan +2%",
+            "ja": "攻撃力増加 +2%",
+            "pl": "Zwiększ obrażenia +2%",
+            "pt": "Aumentar Dano +2%",
+            "ru": "Увеличение урона +2%",
+            "tl": "Palakihin ang Pinsala +2%",
+            "uk": "Збільшення шкоди +2%",
+            "zh-TW": "增加傷害+2%"
+          },
+          "color": "blue",
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Triple Shot skill (Mana:{mana})",
+            "de": "Fähigkeit Triple Shot (Mana:{mana})",
+            "es": "Habilidad Triple Disparo (Mana:{mana})",
+            "id": "Keterampilan Tembakan Tiga Kali (Mana: {mana})",
+            "ja": "乱れ撃ちスキル (マナ:{mana})",
+            "pl": "Umiejętność Potrójnego Strzału (Mana: {mana})",
+            "pt": "Habilidade de Tiro Triplo (Mana:{mana})",
+            "ru": "Навык «Тройной выстрел» (Мана:{mana})",
+            "tl": "Triple Shot skill (Mana:{mana})",
+            "uk": "Навичка «Потрійний постріл» (мана:{mana})",
+            "zh-TW": "三重射擊技能（法力：{mana}）"
+          },
+          "values": {"mana": "skillMana:24"},
+          "color": "blue",
+          "levels": [2, 2]
+        },
+        {
+          "text": "@increaseDamageLevel20",
+          "color": "blue",
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "Increase Damage +2%",
+            "de": "Erhöht Schaden +2%",
+            "es": "Aumentar daño +2%",
+            "id": "Meningkatkan Kerusakan +2%",
+            "ja": "攻撃力増加 +2%",
+            "pl": "Zwiększ obrażenia +2%",
+            "pt": "Aumentar Dano +2%",
+            "ru": "Увеличение урона +2%",
+            "tl": "Palakihin ang Pinsala +2%",
+            "uk": "Збільшення шкоди +2%",
+            "zh-TW": "增加傷害+2%"
+          },
+          "color": "blue",
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "Excellent Damage rate +10%",
+            "de": "Exzellente Schadensrate +10%",
+            "es": "Excelente tasa de daño +10%",
+            "id": "Tingkat Kerusakan Luar Biasa +10%",
+            "ja": "エクセレントダメージ確率 +10%",
+            "pl": "Doskonały współczynnik obrażeń +10%",
+            "pt": "Excelente taxa de dano +10%",
+            "ru": "Отличный урон +10%",
+            "tl": "Napakahusay na Damage rate +10%",
+            "uk": "Відмінний рівень шкоди +10%",
+            "zh-TW": "優 破損率+10%"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Increase Attacking(Wizardry)speed +7",
+            "de": "Erhöht Angriffsgeschwindigkeit (Zauberei) +7",
+            "es": "Aumentar la velocidad de ataque (hechicería) +7",
+            "id": "Meningkatkan kecepatan Menyerang (Sihir) +7",
+            "ja": "攻撃(魔法)速度増加 +7",
+            "pl": "Zwiększ prędkość ataku (czarodziejskiego) +7",
+            "pt": "Aumenta a velocidade de ataque (feitiçaria) +7",
+            "ru": "Увеличение скорости атаки (волшебства) +7",
+            "tl": "Dagdagan ang bilis ng Pag-atake(Wizardry) +7",
+            "uk": "Збільшити швидкість атаки (чарівництво) +7",
+            "zh-TW": "增加攻擊（魔法）速度+7"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Increases acquisition rate of Life after hunting monsters +life/8",
+            "de": "Erhöht die Lebensregeneration beim Jagen von Monstern +Leben/8",
+            "es": "Aumenta la tasa de adquisición de vida después de cazar monstruos +vida/8",
+            "id": "Meningkatkan tingkat perolehan Nyawa setelah berburu monster +nyawa/8",
+            "ja": "獲得する生命増加 +生命/8",
+            "pl": "Zwiększa tempo zdobywania życia po upolowaniu potworów +życie/8",
+            "pt": "Aumenta a taxa de aquisição de Vida após caçar monstros +vida/8",
+            "ru": "Увеличивает скорость получения жизни после охоты на монстров +жизнь/8.",
+            "tl": "Pinapataas ang rate ng pagkuha ng Buhay pagkatapos manghuli ng mga halimaw +buhay/8",
+            "uk": "Збільшує швидкість отримання життя після полювання на монстрів + життя/8",
+            "zh-TW": "狩獵怪物後生命獲得率增加+life/8"
+          },
+          "color": "blue"
+        },
+        {
+          "text": "@increasesAcquisitionRateOfManaAfterHuntingMonstersMana8",
+          "color": "blue"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "Absolute Staff of Archangel",
+            "de": "Absoluter Stab des Erzengels",
+            "es": "Bastón Absoluto de Arcángel",
+            "id": "Staf Absolut Malaikat Agung",
+            "ja": "アークエンジェルスタッフ",
+            "pl": "Absolute Staff of Archangel",
+            "pt": "Cajado Absoluto do Arcanjo",
+            "ru": "Абсолютный Посох Архангела",
+            "tl": "Ganap na Staff ng Arkanghel",
+            "uk": "Абсолютний посох Архангела",
+            "zh-TW": "大天使的絕對法杖"
+          },
+          "color": "yellow",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Absolute Sword of Archangel",
+            "de": "Absolutes Schwert des Erzengels",
+            "es": "Espada Absoluta del Arcángel",
+            "id": "Pedang Malaikat Tertinggi",
+            "ja": "アークエンジェルソード",
+            "pl": "Absolute Sword of Archangel",
+            "pt": "Espada Absoluta do Arcanjo",
+            "ru": "Абсолютный Меч Архангела",
+            "tl": "Ganap na Espada ng Arkanghel",
+            "uk": "Абсолютний Меч Архангела",
+            "zh-TW": "絕對大天使之劍"
+          },
+          "color": "yellow",
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Absolute Crossbow of Archangel",
+            "de": "Absolute Armbrust des Erzengels",
+            "es": "Ballesta Absoluta de Arcángel",
+            "id": "Panah Mutlak Malaikat Agung",
+            "ja": "アークエンジェルボウ",
+            "pl": "Absolute Crossbow of Archangel",
+            "pt": "Besta Absoluta do Arcanjo",
+            "ru": "Абсолютный арбалет Архангела",
+            "tl": "Ganap na Crossbow ng Arkanghel",
+            "uk": "Абсолютний арбалет Архангела",
+            "zh-TW": "大天使的絕對弩"
+          },
+          "color": "yellow",
+          "levels": [2, 2]
+        },
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 2,
       "durability": 255,
@@ -508,6 +1549,124 @@
         "es": "Anillo de los Magos",
         "pt": "Anel dos magos"
       },
+      "tags": ["noDurabilityLine"],
+      "description": [
+        {
+          "text": "@cannotRepair",
+          "when": ["level!=1", "level!=2"],
+          "color": "red",
+          "levels": [0, 3]
+        },
+        {
+          "text": {
+            "en": "Can be dropped after level 40",
+            "de": "Kann ab Level 40 fallen gelassen werden",
+            "es": "Se puede soltar después del nivel 40.",
+            "id": "Dapat dijatuhkan setelah level 40",
+            "ja": "レベル40以上なら落とすことが可能",
+            "pl": "Można upuścić po poziomie 40",
+            "pt": "Pode ser descartado após o nível 40",
+            "ru": "Можно выбросить после уровня 40.",
+            "tl": "Maaaring i-drop pagkatapos ng level 40",
+            "uk": "Можна викинути після рівня 40",
+            "zh-TW": "等級 40 後可掉落"
+          },
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "Can be dropped after level 80",
+            "de": "Kann ab Level 80 fallen gelassen werden",
+            "es": "Se puede soltar después del nivel 80.",
+            "id": "Dapat dijatuhkan setelah level 80",
+            "ja": "レベル80以上なら落とすことが可能",
+            "pl": "Można upuścić po poziomie 80",
+            "pt": "Pode ser descartado após o nível 80",
+            "ru": "Можно выбросить после уровня 80.",
+            "tl": "Maaaring i-drop pagkatapos ng level 80",
+            "uk": "Можна викинути після рівня 80",
+            "zh-TW": "等級 80 後可掉落"
+          },
+          "levels": [2, 2]
+        },
+        {
+          "text": "@cannotStoreInVault",
+          "color": "red",
+          "levels": [1, 2]
+        },
+        {
+          "text": "@cannotBeTraded",
+          "color": "red",
+          "levels": [1, 2]
+        },
+        {
+          "text": {
+            "en": "Cannot be sold.",
+            "de": "Kann nicht verkauft werden.",
+            "es": "No se puede vender.",
+            "id": "Tidak bisa dijual.",
+            "ja": "売却不可",
+            "pl": "Nie można sprzedać.",
+            "pt": "Não pode ser vendido.",
+            "ru": "Не подлежит продаже.",
+            "tl": "Hindi maaaring ibenta.",
+            "uk": "Не можна продати.",
+            "zh-TW": "不能出售。"
+          },
+          "color": "red",
+          "levels": [1, 2]
+        },
+        {
+          "text": "@durability",
+          "when": ["!timed", "level!=1", "level!=2"]
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Ring of Warrior",
+            "de": "Ring des Kriegers",
+            "es": "Anillo de guerrero",
+            "id": "Cincin Prajurit",
+            "ja": "勇士の指輪",
+            "pl": "Ring of Warrior",
+            "pt": "Anel do Guerreiro",
+            "ru": "Кольцо Воина",
+            "tl": "Singsing ng mandirigma",
+            "uk": "Перстень Воїна",
+            "zh-TW": "戰士之戒"
+          },
+          "color": "yellow",
+          "levels": [1, 2]
+        },
+        {
+          "text": {
+            "en": "Ring of glory",
+            "de": "Ring des Ruhms",
+            "es": "anillo de gloria",
+            "id": "Cincin kemuliaan",
+            "ja": "栄誉の指輪",
+            "pl": "Ring of Glory",
+            "pt": "Anel da glória",
+            "ru": "Кольцо славы",
+            "tl": "Singsing ng kaluwalhatian",
+            "uk": "Перстень слави",
+            "zh-TW": "榮耀之戒"
+          },
+          "color": "yellow",
+          "levels": [3, 3]
+        },
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -798,6 +1957,51 @@
         "pt": "Capa do Lorde"
       },
       "tags": ["cape", "valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:capeDamageIncrease"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:capeOfLordDamageAbsorb"}
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "wings",
@@ -822,6 +2026,74 @@
         "pt": "Espírito"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Used in Dark Horse resurrection",
+            "de": "Wird zur Wiederbelebung des Dunklen Pferdes verwendet",
+            "es": "Utilizado en la resurrección de Dark Horse",
+            "id": "Digunakan dalam kebangkitan Kuda Hitam",
+            "ja": "ダークホースの復活に使います。",
+            "pl": "Używany podczas wskrzeszenia Dark Horse",
+            "pt": "Usado na ressurreição do Dark Horse",
+            "ru": "Используется в воскрешении Темной Лошади.",
+            "tl": "Ginamit sa Dark Horse resurrection",
+            "uk": "Використовується у воскресінні Dark Horse",
+            "zh-TW": "用於黑馬復活"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "Used in Dark Raven resurrection",
+            "de": "Wird zur Wiederbelebung des Dunklen Raben verwendet",
+            "es": "Utilizado en la resurrección de Dark Raven",
+            "id": "Digunakan dalam kebangkitan Dark Raven",
+            "ja": "ダークスピリットの復活に使います。",
+            "pl": "Używany do wskrzeszenia Dark Raven",
+            "pt": "Usado na ressurreição do Dark Raven",
+            "ru": "Используется при воскрешении Темного Ворона.",
+            "tl": "Ginamit sa Dark Raven resurrection",
+            "uk": "Використовується у воскресінні Dark Raven",
+            "zh-TW": "用於暗鴉復活"
+          },
+          "levels": [1, 1]
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} of Dark horse",
+            "de": "{name} (Dunkles Pferd)",
+            "es": "{name} (caballo oscuro)",
+            "id": "{name} (Kuda hitam)",
+            "ja": "{name} (ダークホース)",
+            "pl": "{name} (Dark Horse)",
+            "pt": "{name} (Cavalo negro)",
+            "ru": "{name} (Темная лошадка)",
+            "tl": "{name} (Maitim na kabayo)",
+            "uk": "{name} (Темна конячка)",
+            "zh-TW": "{name} (黑馬)"
+          },
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} of Dark Raven",
+            "de": "{name} (Dunkler Rabe)",
+            "es": "{name} (Cuervo oscuro)",
+            "id": "{name} (gagak gelap)",
+            "ja": "{name} (ダークスピリット)",
+            "pl": "{name} (Dark Raven)",
+            "pt": "{name} (Corvo Negro)",
+            "ru": "{name} (Темный ворон)",
+            "tl": "{name} (Dark Raven)",
+            "uk": "{name} (Темний ворон)",
+            "zh-TW": "{name} (暗鴉)"
+          },
+          "levels": [1, 1]
+        }
+      ],
       "width": 1,
       "height": 1,
       "classRequirements": {
@@ -836,6 +2108,37 @@
         "es": "Astilla de Armadura",
         "pt": "Estilhaço da armadura"
       },
+      "tags": ["noDurabilityLine"],
+      "description": [
+        {
+          "text": "@piecesOfTwenty"
+        },
+        {
+          "text": {
+            "en": "Fragment of horn can be made using the Divine protection of Goddess and fragment of armor.",
+            "de": "Ein Hornfragment kann aus dem göttlichen Schutz der Göttin und einem Rüstungsfragment hergestellt werden.",
+            "es": "Se puede hacer un fragmento de cuerno usando la protección divina de la Diosa y un fragmento de armadura.",
+            "id": "Fragmen tanduk dapat dibuat menggunakan perlindungan Ilahi dari Dewi dan fragmen baju besi.",
+            "ja": "女神の加護と鎧の破片の合成を通じて角笛の破片を作ることができます。",
+            "pl": "Fragment of Horn powstaje z Divine Protection of Goddess i Splinter of Armor.",
+            "pt": "Fragmento de chifre pode ser feito usando a Proteção Divina da Deusa e fragmento de armadura.",
+            "ru": "Фрагмент рога можно сделать, используя Божественную защиту Богини и фрагмент брони.",
+            "tl": "Ang fragment ng sungay ay maaaring gawin gamit ang Banal na proteksyon ng Diyosa at fragment ng baluti.",
+            "uk": "Фрагмент рогу можна зробити за допомогою Божественного захисту Богині та фрагмента обладунку.",
+            "zh-TW": "角碎片可以用女神的神聖保護和盔甲碎片來製作。"
+          },
+          "color": "yellow",
+          "after": "options"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 1,
@@ -858,6 +2161,37 @@
         "es": "Bendición de Guardián",
         "pt": "Bênção do guardião"
       },
+      "tags": ["noDurabilityLine"],
+      "description": [
+        {
+          "text": "@piecesOfTwenty"
+        },
+        {
+          "text": {
+            "en": "Fragment of horn can be made using the Divine protection of Goddess and fragment of armor.",
+            "de": "Ein Hornfragment kann aus dem göttlichen Schutz der Göttin und einem Rüstungsfragment hergestellt werden.",
+            "es": "Se puede hacer un fragmento de cuerno usando la protección divina de la Diosa y un fragmento de armadura.",
+            "id": "Fragmen tanduk dapat dibuat menggunakan perlindungan Ilahi dari Dewi dan fragmen baju besi.",
+            "ja": "女神の加護と鎧の破片の合成を通じて角笛の破片を作ることができます。",
+            "pl": "Fragment of Horn powstaje z Divine Protection of Goddess i Splinter of Armor.",
+            "pt": "Fragmento de chifre pode ser feito usando a Proteção Divina da Deusa e fragmento de armadura.",
+            "ru": "Фрагмент рога можно сделать, используя Божественную защиту Богини и фрагмент брони.",
+            "tl": "Ang fragment ng sungay ay maaaring gawin gamit ang Banal na proteksyon ng Diyosa at fragment ng baluti.",
+            "uk": "Фрагмент рогу можна зробити за допомогою Божественного захисту Богині та фрагмента обладунку.",
+            "zh-TW": "角碎片可以用女神的神聖保護和盔甲碎片來製作。"
+          },
+          "color": "yellow",
+          "after": "options"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 1,
@@ -880,7 +2214,28 @@
         "es": "Garra de Bestia",
         "pt": "Garra da besta"
       },
-      "tags": ["valuable"],
+      "tags": ["valuable", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "{durability} / 10",
+            "ja": "{durability}個/ 10個"
+          }
+        },
+        {
+          "text": "@brokenHornCanBeMadeUsingTheClawOfBeastAndFragmentOfHorn",
+          "color": "yellow",
+          "after": "options"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 1,
@@ -903,7 +2258,22 @@
         "es": "Fragmento de Cuerno",
         "pt": "Fragmento de chifre"
       },
-      "tags": ["valuable"],
+      "tags": ["valuable", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@brokenHornCanBeMadeUsingTheClawOfBeastAndFragmentOfHorn",
+          "color": "yellow",
+          "after": "options"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 1,
@@ -927,6 +2297,33 @@
         "pt": "Chifre quebrado"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Fenrir's horn can be made through item combination.",
+            "de": "Das Horn des Fenrir kann durch die Kombination von Gegenständen hergestellt werden.",
+            "es": "El cuerno de Fenrir se puede crear mediante una combinación de elementos.",
+            "id": "Tanduk Fenrir dapat dibuat melalui kombinasi item.",
+            "ja": "合成を通じてフェンリルの角笛を作ることができます。",
+            "pl": "Fenrir's Horn można wykonać poprzez kombinację przedmiotów.",
+            "pt": "O chifre de Fenrir pode ser feito através da combinação de itens.",
+            "ru": "Рог Фенрира можно сделать, комбинируя предметы.",
+            "tl": "Ang sungay ni Fenrir ay maaaring gawin sa pamamagitan ng kumbinasyon ng item.",
+            "uk": "Ріг Фенріра можна зробити за допомогою комбінації предметів.",
+            "zh-TW": "芬裡爾的號角可以透過物品組合來製作。"
+          },
+          "color": "yellow",
+          "after": "options"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white"
+        }
+      ],
       "width": 2,
       "height": 2,
       "durability": 1,
@@ -949,7 +2346,72 @@
         "es": "Cuerno de Fenrir",
         "pt": "Chifre de Fenrir"
       },
-      "tags": ["mount", "hornMount", "flying", "valuable"],
+      "tags": ["mount", "hornMount", "flying", "valuable", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@life",
+          "when": ["!timed"]
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} +Destroy",
+            "de": "{name} +Zerstören",
+            "es": "{name} +Destruir",
+            "id": "{name} +Hancurkan",
+            "ja": "{name} +破壊",
+            "pl": "{name} +Zniszcz",
+            "pt": "{name} +Destruir",
+            "ru": "{name} +Уничтожить",
+            "tl": "{name} + Wasakin",
+            "uk": "{name} +Знищити",
+            "zh-TW": "{name} +摧毀"
+          },
+          "when": ["excellentFlags=1"],
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "{name} +Protect",
+            "de": "{name} +Schützen",
+            "es": "{name} +Proteger",
+            "id": "{name} + Lindungi",
+            "ja": "{name} +守護",
+            "pl": "{name} +Chroń",
+            "pt": "{name} +Proteger",
+            "ru": "{name} +Защитить",
+            "tl": "{name} +Protektahan",
+            "uk": "{name} +Захистити",
+            "zh-TW": "{name} +保護"
+          },
+          "when": ["excellentFlags=2"],
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "{name} +Illusion",
+            "de": "{name} +Illusion",
+            "es": "{name} +Ilusión",
+            "id": "{name} +Ilusi",
+            "ja": "{name} +幻影",
+            "pl": "{name} +Iluzja",
+            "pt": "{name} +Ilusão",
+            "ru": "{name} +Иллюзия",
+            "tl": "{name} +Ilusyon",
+            "uk": "{name} +Ілюзія",
+            "zh-TW": "{name} +幻象"
+          },
+          "when": ["excellentFlags=4"],
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 2,
       "height": 2,
       "slot": "pet",
@@ -981,6 +2443,10 @@
       },
       "description": [
         {
+          "text": "@cannotRepair",
+          "color": "red"
+        },
+        {
           "text": {
             "en": "I.D. of Kantur Chief Scientist. You can enter the Refinery Tower.",
             "de": "Ausweis des Chefwissenschaftlers von Kantur. Sie können den Raffinerieturm betreten.",
@@ -994,6 +2460,14 @@
             "uk": "І.Д. головного наукового співробітника Кантур. Ви можете увійти до вежі нафтопереробного заводу.",
             "zh-TW": "ID。坎圖爾首席科學家。您可以進入煉油塔。"
           }
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow"
         }
       ],
       "width": 1,
@@ -1028,6 +2502,51 @@
         "pt": "Anel Esqueleto Transf. Acel."
       },
       "tags": ["transformationRing"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase defensive skill +10%",
+            "de": "Verteidigung erhöhen +10%",
+            "es": "Aumentar la habilidad defensiva +10%",
+            "id": "Meningkatkan keterampilan bertahan +10%",
+            "ja": "防御力増加 +10%",
+            "pl": "Zwiększa obronę +10%",
+            "pt": "Aumenta a habilidade defensiva +10%",
+            "ru": "Увеличение защитного навыка +10%",
+            "tl": "Dagdagan ang defensive skill +10%",
+            "uk": "Підвищити оборонний навик +10%",
+            "zh-TW": "增加防禦技能+10%"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "vitality +{heroLevel}",
+            "de": "Vitalität +{heroLevel}",
+            "es": "vitalidad +{heroLevel}",
+            "id": "vitalitas +{heroLevel}",
+            "ja": "生命力 +{heroLevel}",
+            "pl": "witalność +{heroLevel}",
+            "pt": "vitalidade +{heroLevel}",
+            "ru": "жизненная сила +{heroLevel}",
+            "tl": "sigla +{heroLevel}",
+            "uk": "життєва сила +{heroLevel}",
+            "zh-TW": "活力+{heroLevel}"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": "",
+          "after": "options"
+        },
+        {
+          "text": "@unableToEquipWithADifferentTransformationRing",
+          "color": "red",
+          "after": "options"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -1059,6 +2578,13 @@
         "pt": "Anel do Jack Olantern"
       },
       "tags": ["transformationRing"],
+      "description": [
+        {
+          "text": "@unableToEquipWithADifferentTransformationRing",
+          "color": "red",
+          "after": "options"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -1088,6 +2614,72 @@
         "pt": "Anel do Natal de Transf."
       },
       "tags": ["transformationRing"],
+      "description": [
+        {
+          "text": {
+            "en": "Additional Dmg +20",
+            "de": "Zusätzlicher Schaden +20",
+            "es": "Daño adicional +20",
+            "id": "Dmg Tambahan +20",
+            "ja": "追加攻撃力 +20",
+            "pl": "Dodatkowe obrażenia +20",
+            "pt": "Dano Adicional +20",
+            "ru": "Дополнительный урон +20",
+            "tl": "Karagdagang Dmg +20",
+            "uk": "Додатковий Dmg +20",
+            "zh-TW": "附加傷害+20"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Additional Wizardry Dmg +20",
+            "de": "Zusätzlicher Zaubereischaden +20",
+            "es": "Daño de hechicería adicional +20",
+            "id": "Dmg Sihir Tambahan +20",
+            "ja": "追加魔力 +20",
+            "pl": "Dodatkowe obrażenia magiczne +20",
+            "pt": "Dano Adicional de Magia +20",
+            "ru": "Дополнительный магический урон +20",
+            "tl": "Karagdagang Wizardry Dmg +20",
+            "uk": "Додатковий Wizardry Dmg +20",
+            "zh-TW": "額外魔法傷害+20"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": "",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Merry Christmas.",
+            "de": "Frohe Weihnachten.",
+            "es": "Feliz navidad.",
+            "id": "Selamat natal.",
+            "ja": "メリークリスマス！~",
+            "pl": "Wesołych Świąt.",
+            "pt": "Feliz Natal.",
+            "ru": "С Рождеством.",
+            "tl": "Maligayang Pasko.",
+            "uk": "Веселого Різдва.",
+            "zh-TW": "聖誕快樂。"
+          },
+          "color": "red",
+          "after": "options"
+        },
+        {
+          "text": "",
+          "after": "options"
+        },
+        {
+          "text": "@unableToEquipWithADifferentTransformationRing",
+          "color": "red",
+          "after": "options"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -1117,6 +2709,136 @@
         "pt": "Anel de GM"
       },
       "tags": ["transformationRing"],
+      "description": [
+        {
+          "text": {
+            "en": "Ice attribute skill increase damage +255",
+            "de": "Schaden von Eis-Fähigkeiten erhöhen +255",
+            "es": "Habilidad de atributo de hielo aumenta el daño +255",
+            "id": "Skill atribut es meningkatkan damage +255",
+            "ja": "氷属性スキル攻撃力増加 +255",
+            "pl": "Zwiększenie obrażeń umiejętności atrybutu lodu +255",
+            "pt": "Habilidade de atributo de gelo aumenta dano +255",
+            "ru": "Навык ледяного атрибута увеличивает урон +255",
+            "tl": "Ang kakayahan ng katangian ng yelo ay nagpapataas ng pinsala +255",
+            "uk": "Навичка льоду збільшує шкоду +255",
+            "zh-TW": "冰屬性技能傷害增加+255"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Poison attribute skill increase damage +255",
+            "de": "Schaden von Gift-Fähigkeiten erhöhen +255",
+            "es": "La habilidad del atributo de veneno aumenta el daño +255",
+            "id": "Keterampilan atribut racun meningkatkan kerusakan +255",
+            "ja": "毒属性スキル攻撃力増加 +255",
+            "pl": "Zwiększenie obrażeń umiejętności atrybutu trucizny +255",
+            "pt": "Habilidade de atributo venenoso aumenta dano +255",
+            "ru": "Навык атрибута яда увеличивает урон +255",
+            "tl": "Ang kakayahan ng katangian ng lason ay nagpapataas ng pinsala +255",
+            "uk": "Навик атрибута отрути збільшує шкоду +255",
+            "zh-TW": "毒屬性技能傷害增加+255"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Lightning attribute skill increase damage +255",
+            "de": "Schaden von Blitz-Fähigkeiten erhöhen +255",
+            "es": "Habilidad de atributo de rayo aumenta el daño +255",
+            "id": "Skill atribut petir meningkatkan damage +255",
+            "ja": "稲妻属性スキル攻撃力増加 +255",
+            "pl": "Zwiększenie obrażeń umiejętności atrybutu błyskawicy +255",
+            "pt": "Habilidade do atributo relâmpago aumenta o dano +255",
+            "ru": "Навык атрибута молнии увеличивает урон +255",
+            "tl": "Ang kakayahan ng katangian ng kidlat ay nagpapataas ng pinsala +255",
+            "uk": "Атрибут блискавки збільшує шкоду +255",
+            "zh-TW": "雷屬性技能傷害增加+255"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Fire attribute skill increase damage +255",
+            "de": "Schaden von Feuer-Fähigkeiten erhöhen +255",
+            "es": "Habilidad de atributo de fuego aumenta el daño +255",
+            "id": "Skill atribut api meningkatkan damage +255",
+            "ja": "炎属性スキル攻撃力増加 +255",
+            "pl": "Zwiększenie obrażeń umiejętności atrybutu ognia +255",
+            "pt": "Habilidade de atributo de fogo aumenta o dano +255",
+            "ru": "Навык атрибута огня увеличивает урон +255",
+            "tl": "Ang kakayahan ng katangian ng sunog ay nagpapataas ng pinsala +255",
+            "uk": "Навик атрибута вогню збільшує шкоду +255",
+            "zh-TW": "火屬性技能傷害增加+255"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Earth attribute skill increase damage +255",
+            "de": "Schaden von Erd-Fähigkeiten erhöhen +255",
+            "es": "Habilidad de atributo de tierra aumenta el daño +255",
+            "id": "Skill atribut bumi meningkatkan damage +255",
+            "ja": "地属性スキル攻撃力増加 +255",
+            "pl": "Zwiększenie obrażeń umiejętności atrybutu Ziemi +255",
+            "pt": "Habilidade de atributo Terra aumenta dano +255",
+            "ru": "Навык атрибута земли увеличивает урон +255",
+            "tl": "Ang kakayahan ng Earth attribute ay nagpapataas ng pinsala +255",
+            "uk": "Навичка атрибута Землі збільшує шкоду +255",
+            "zh-TW": "土屬性技能傷害增加+255"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Wind attribute skill increase damage +255",
+            "de": "Schaden von Wind-Fähigkeiten erhöhen +255",
+            "es": "Habilidad de atributo de viento aumenta el daño +255",
+            "id": "Skill atribut angin meningkatkan damage +255",
+            "ja": "風属性スキル攻撃力増加 +255",
+            "pl": "Zwiększenie obrażeń umiejętności atrybutu Wiatru +255",
+            "pt": "Habilidade do atributo Vento aumenta dano +255",
+            "ru": "Навык атрибута ветра увеличивает урон +255",
+            "tl": "Ang kakayahan ng katangian ng hangin ay nagpapataas ng pinsala +255",
+            "uk": "Навик атрибута вітру збільшує шкоду +255",
+            "zh-TW": "風屬性技能傷害增加+255"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Water attribute skill increase damage +255",
+            "de": "Schaden von Wasser-Fähigkeiten erhöhen +255",
+            "es": "Habilidad de atributo de agua aumenta el daño +255",
+            "id": "Skill atribut air meningkatkan damage +255",
+            "ja": "水属性スキル攻撃力増加 +255",
+            "pl": "Zwiększenie obrażeń umiejętności atrybutu wody +255",
+            "pt": "Habilidade de atributo água aumenta dano +255",
+            "ru": "Навык атрибута воды увеличивает урон +255",
+            "tl": "Ang kakayahan ng katangian ng tubig ay nagpapataas ng pinsala +255",
+            "uk": "Водний атрибут навички збільшує шкоду +255",
+            "zh-TW": "水屬性技能傷害增加+255"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": "",
+          "after": "options"
+        },
+        {
+          "text": "@unableToEquipWithADifferentTransformationRing",
+          "color": "red",
+          "after": "options"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -1150,6 +2872,24 @@
         "pt": "Selo da ascensão"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": "@increasesExperience",
+          "color": "blue"
+        },
+        {
+          "text": "@warpCommandWindow",
+          "color": "blue"
+        },
+        {
+          "text": "@notApplicableTo",
+          "color": "yellow"
+        },
+        {
+          "text": "@masterLevelCharacters",
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -1178,6 +2918,24 @@
         "pt": "Selo da riqueza"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": "@increasesExperienceAndDrops",
+          "color": "blue"
+        },
+        {
+          "text": "@warpCommandWindow",
+          "color": "blue"
+        },
+        {
+          "text": "@notApplicableTo",
+          "color": "yellow"
+        },
+        {
+          "text": "@masterLevelCharacters",
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -1206,6 +2964,32 @@
         "pt": "Selo do sustento"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Prevents experiences to be gained.",
+            "de": "Verhindert, dass Erfahrung gesammelt wird.",
+            "es": "Impide que se adquieran experiencias.",
+            "id": "Mencegah pengalaman diperoleh.",
+            "ja": "経験値が獲得できないように維持する効果があります。",
+            "pl": "Uniemożliwia zdobywanie doświadczenia.",
+            "pt": "Impede que experiências sejam adquiridas.",
+            "ru": "Мешает приобретению опыта.",
+            "tl": "Pinipigilan ang mga karanasan na makuha.",
+            "uk": "Заважає отримати досвід.",
+            "zh-TW": "阻止獲得經驗。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": "@warpCommandWindow",
+          "color": "blue"
+        },
+        {
+          "text": "@masterLevelEXPCannotBeAchievedDuringTheItemUsage",
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -1233,7 +3017,35 @@
         "es": "Boleto de la Plaza del Diablo",
         "pt": "Bilhete da Praça do Diabo"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "Enables entrance into Devil Square.",
+            "de": "Ermöglicht den Zugang zu Devil Square.",
+            "es": "Permite la entrada a Plaza del Diablo.",
+            "id": "Memungkinkan masuk ke Lapangan Setan.",
+            "ja": "デビルスクエア 入場時、決まった回数だけ使えます。",
+            "pl": "Umożliwia wejście do Devil Square.",
+            "pt": "Permite a entrada em Praça do Diabo.",
+            "ru": "Позволяет войти в Площадь Дьявола.",
+            "tl": "Pinapagana ang pagpasok sa Devil Square.",
+            "uk": "Дозволяє вхід у Площа диявола.",
+            "zh-TW": "允許進入 魔鬼廣場。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": "@youWillBeAssignedToAStageAccordingToYourLevel",
+          "color": "blue"
+        },
+        {
+          "text": ""
+        },
+        {
+          "text": "@usableTimes"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -1260,7 +3072,35 @@
         "es": "Boleto al Castillo Sangriento",
         "pt": "Bilhete do Castelo de Sangue"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "Enables entrance into Blood Castle.",
+            "de": "Ermöglicht den Zugang zu Blutburg.",
+            "es": "Permite la entrada a Castillo de sangre.",
+            "id": "Memungkinkan masuk ke Kastil Darah.",
+            "ja": "ブラッドキャッスル 入場時、決まった回数だけ使えます。",
+            "pl": "Umożliwia wejście do Blood Castle.",
+            "pt": "Permite a entrada em Castelo de Sangue.",
+            "ru": "Позволяет войти в Кровавый Замок.",
+            "tl": "Pinapagana ang pagpasok sa Kastilyo ng Dugo.",
+            "uk": "Дозволяє вхід у Кривавий замок.",
+            "zh-TW": "允許進入 血色城堡。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": "@youWillBeAssignedToAStageAccordingToYourLevel",
+          "color": "blue"
+        },
+        {
+          "text": ""
+        },
+        {
+          "text": "@usableTimes"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -1287,7 +3127,35 @@
         "es": "Boleto de Kalima",
         "pt": "Bilhete de Kalima"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "Enables entrance into Kalima.",
+            "de": "Ermöglicht den Zugang zu Kalima.",
+            "es": "Permite la entrada a Kalima.",
+            "id": "Memungkinkan masuk ke kalima.",
+            "ja": "カルリマ 入場時、決まった回数だけ使えます。",
+            "pl": "Umożliwia wejście do Kalima.",
+            "pt": "Permite a entrada em Kalima.",
+            "ru": "Позволяет войти в Калима.",
+            "tl": "Pinapagana ang pagpasok sa Kalima.",
+            "uk": "Дозволяє вхід у Каліма.",
+            "zh-TW": "允許進入 卡利馬。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": "@youWillBeAssignedToAStageAccordingToYourLevel",
+          "color": "blue"
+        },
+        {
+          "text": ""
+        },
+        {
+          "text": "@usableTimes"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -1314,6 +3182,24 @@
         "es": "Antiguo Rollo",
         "pt": "Pergaminho antigo"
       },
+      "description": [
+        {
+          "text": {
+            "en": "Assemble the Scroll of Blood with the contract from the Illusion Sorcery.",
+            "de": "Stellen Sie die Schriftrolle des Blutes aus dem Vertrag des Illusionszauberers her.",
+            "es": "Reúne el Pergamino de sangre con el contrato de Illusion Sorcery.",
+            "id": "Kumpulkan Gulungan Darah dengan kontrak dari Sihir Ilusi.",
+            "ja": "幻影教団の誓約と一緒に血の巻物を合成することが出来ます。",
+            "pl": "Stwórz Scroll of Blood z kontraktu od Illusion Sorcery.",
+            "pt": "Monte o Pergaminho de Sangue com o contrato da Feitiçaria Ilusão.",
+            "ru": "Соберите Свиток Крови с помощью контракта Волшебства Иллюзий.",
+            "tl": "Ipunin ang Scroll of Blood na may kontrata mula sa Illusion Sorcery.",
+            "uk": "Зберіть Сувій крові за контрактом від Illusion Sorcery.",
+            "zh-TW": "用幻象魔法的契約組裝血色捲軸。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "repairable": false,
@@ -1335,6 +3221,24 @@
         "es": "Pacto Ilusión de Hechicero",
         "pt": "Pacto Feiticeiro da Ilusão"
       },
+      "description": [
+        {
+          "text": {
+            "en": "Assemble the Scroll of Blood with the old scrolls.",
+            "de": "Stellen Sie die Schriftrolle des Blutes aus den alten Schriftrollen her.",
+            "es": "Reúne el Pergamino de Sangre con los pergaminos antiguos.",
+            "id": "Rakit Gulungan Darah dengan gulungan lama.",
+            "ja": "古い巻物と一緒に血の巻物を合成することが出来ます。",
+            "pl": "Złóż Scroll of Blood ze starymi zwojami.",
+            "pt": "Monte o Pergaminho de Sangue com os pergaminhos antigos.",
+            "ru": "Соберите Свиток Крови из старых свитков.",
+            "tl": "Ipunin ang Scroll of Blood gamit ang mga lumang scroll.",
+            "uk": "Зберіть Сувій крові зі старих сувоїв.",
+            "zh-TW": "將血液捲軸與舊捲軸組裝起來。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 2,
       "repairable": false,
@@ -1356,6 +3260,24 @@
         "es": "Rollo de Sangre",
         "pt": "Pergaminho de sangue"
       },
+      "description": [
+        {
+          "text": {
+            "en": "This is a mark of Illusion Sorcery; this is required to enter the temple.",
+            "de": "Dies ist das Zeichen von Illusion Sorcery; es wird zum Betreten des Tempels benötigt.",
+            "es": "Esta es una marca de hechicería de ilusión; esto es necesario para entrar al templo.",
+            "id": "Ini adalah tanda dari Ilmu Sihir Ilusi; ini diperlukan untuk memasuki kuil.",
+            "ja": "幻影教団の一員であることを表す証です。テンプル入場に必要です。",
+            "pl": "To znak Illusion Sorcery; jest wymagany, by wejść do świątyni.",
+            "pt": "Esta é uma marca da Feitiçaria da Ilusão; isso é necessário para entrar no templo.",
+            "ru": "Это знак волшебства иллюзий; это необходимо для входа в храм.",
+            "tl": "Ito ay isang marka ng Illusion Sorcery; ito ay kinakailangan upang makapasok sa templo.",
+            "uk": "Це ознака магії ілюзій; це потрібно для входу в храм.",
+            "zh-TW": "這是幻術的印記；這是進入寺廟所必需的。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 2,
       "height": 2,
       "durability": 1,
@@ -1379,6 +3301,16 @@
         "pt": "Chama do Condor"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": "@thirdWingIngredient"
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 2,
       "classRequirements": {
@@ -1400,6 +3332,16 @@
         "pt": "Pena do Condor"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": "@thirdWingIngredient"
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 2,
       "classRequirements": {
@@ -1420,7 +3362,7 @@
         "es": "Reiniciar Fruto de Fuerza",
         "pt": "Reiniciar força da fruta"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
       "width": 1,
       "height": 1,
       "durability": 100,
@@ -1447,7 +3389,7 @@
         "es": "Reiniciar Fruto de Rapidez",
         "pt": "Reiniciar rapidez da fruta"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
       "width": 1,
       "height": 1,
       "durability": 100,
@@ -1474,7 +3416,7 @@
         "es": "Reiniciar Fruto de Salud",
         "pt": "Reiniciar saúde da Fruta"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
       "width": 1,
       "height": 1,
       "durability": 100,
@@ -1501,7 +3443,7 @@
         "es": "Reiniciar Fruto de Energía",
         "pt": "Reiniciar energia da fruta"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
       "width": 1,
       "height": 1,
       "durability": 100,
@@ -1528,7 +3470,7 @@
         "es": "Reiniciar Fruto de Control",
         "pt": "Reiniciar controle da fruta"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
       "width": 1,
       "height": 1,
       "durability": 100,
@@ -1556,6 +3498,24 @@
         "pt": "Selo da mobilidade"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "You may freely move onward.",
+            "de": "Sie können sich frei weiterbewegen.",
+            "es": "Puedes seguir adelante libremente.",
+            "id": "Anda dapat dengan bebas bergerak maju.",
+            "ja": "移動が自由にできるようになります。",
+            "pl": "Możesz swobodnie iść dalej.",
+            "pt": "Você pode seguir em frente livremente.",
+            "ru": "Вы можете свободно двигаться дальше.",
+            "tl": "Maaari kang malayang magpatuloy.",
+            "uk": "Ви можете вільно рухатися далі.",
+            "zh-TW": "你可以自由地前進。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -1582,6 +3542,24 @@
         "pt": "Indulgência"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "It reduces the killing rate.",
+            "de": "Verringert die Anzahl der Spielermorde.",
+            "es": "Reduce la tasa de matanza.",
+            "id": "Ini mengurangi tingkat pembunuhan.",
+            "ja": "PK数値の減少効果があります。",
+            "pl": "Zmniejsza licznik zabójstw (PK).",
+            "pt": "Reduz a taxa de mortalidade.",
+            "ru": "Это снижает уровень убийств.",
+            "tl": "Binabawasan nito ang rate ng pagpatay.",
+            "uk": "Це знижує швидкість вбивства.",
+            "zh-TW": "它降低了殺滅率。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 2,
       "tradable": false,
@@ -1607,7 +3585,35 @@
         "es": "Boleto al Templo de Ilusión",
         "pt": "Bilhete do Templo da Ilusão"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "Enables entrance into Illusion Temple.",
+            "de": "Ermöglicht den Zugang zu Illusionstempel.",
+            "es": "Permite la entrada a Templo de la ilusión.",
+            "id": "Memungkinkan masuk ke Kuil Ilusi.",
+            "ja": "テンプル 入場時、決まった回数だけ使えます。",
+            "pl": "Umożliwia wejście do Illusion Temple.",
+            "pt": "Permite a entrada em Templo da Ilusão.",
+            "ru": "Позволяет войти в Храм иллюзий.",
+            "tl": "Pinapagana ang pagpasok sa Templo ng Ilusyon.",
+            "uk": "Дозволяє вхід у Храм ілюзій.",
+            "zh-TW": "允許進入 幻像神殿。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": "@youWillBeAssignedToAStageAccordingToYourLevel",
+          "color": "blue"
+        },
+        {
+          "text": ""
+        },
+        {
+          "text": "@usableTimes"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -1635,6 +3641,60 @@
         "pt": "Selo da cura"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Experience rate is increased {addOptionValue1}%",
+            "de": "Erfahrungsrate um {addOptionValue1}% erhöht",
+            "es": "La tasa de experiencia aumenta {addOptionValue1}%",
+            "id": "Tingkat pengalaman meningkat {addOptionValue1}%",
+            "ja": "経験値獲得量　{addOptionValue1}%に上昇",
+            "pl": "Doświadczenie zwiększone o {addOptionValue1}%",
+            "pt": "A taxa de experiência aumentou {addOptionValue1}%",
+            "ru": "Процент опыта увеличен {addOptionValue1}%",
+            "tl": "Tumaas ang rate ng karanasan {addOptionValue1}%",
+            "uk": "Швидкість досвіду збільшено {addOptionValue1}%",
+            "zh-TW": "經驗率增加{addOptionValue1}%"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Automatic Life Recover increment {addOptionValue2}%",
+            "de": "Automatische Lebensregeneration +{addOptionValue2}%",
+            "es": "Incremento de recuperación de vida automática {addOptionValue2}%",
+            "id": "Peningkatan Pemulihan Kehidupan Otomatis {addOptionValue2}%",
+            "ja": "生命自動回復{addOptionValue2}%上昇",
+            "pl": "Automatyczna regeneracja życia +{addOptionValue2}%",
+            "pt": "Incremento automático de recuperação de vida {addOptionValue2}%",
+            "ru": "Увеличение автоматического восстановления ресурса {addOptionValue2}%",
+            "tl": "Ang Awtomatikong Life Recover na pagtaas {addOptionValue2}%",
+            "uk": "Приріст автоматичного відновлення життя {addOptionValue2}%",
+            "zh-TW": "自動生命復原增量 {addOptionValue2}%"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "EXP achievement and the automatic life recovery rate increases.",
+            "de": "Erhöht die erhaltene Erfahrung und die automatische Lebensregeneration.",
+            "es": "El logro de EXP y la tasa de recuperación automática de vida aumentan.",
+            "id": "Pencapaian EXP dan tingkat pemulihan kehidupan otomatis meningkat.",
+            "ja": "経験値獲得量と生命自動回復量が上昇されます。",
+            "pl": "Zwiększa zdobywany EXP i automatyczną regenerację życia.",
+            "pt": "A conquista de EXP e a taxa de recuperação automática de vida aumentam.",
+            "ru": "Достижение опыта и скорость автоматического восстановления жизни увеличиваются.",
+            "tl": "EXP achievement at ang awtomatikong pagtaas ng rate ng pagbawi sa buhay.",
+            "uk": "Досягнення EXP і швидкість автоматичного відновлення життя збільшуються.",
+            "zh-TW": "EXP成就和自動生命恢復率增加。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": "@masterLevelEXPCannotBeAchievedDuringTheItemUsage",
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -1661,6 +3721,56 @@
         "pt": "Selo da divindade"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Item drop rate is increased {addOptionValue1}%",
+            "de": "Droprate von Gegenständen um {addOptionValue1}% erhöht",
+            "es": "La tasa de caída de artículos aumenta {addOptionValue1}%",
+            "id": "Tingkat penurunan item meningkat {addOptionValue1}%",
+            "ja": "アイテム獲得量 {addOptionValue1}%に上昇",
+            "pl": "Drop przedmiotów zwiększony o {addOptionValue1}%",
+            "pt": "A taxa de queda de itens aumentou {addOptionValue1}%",
+            "ru": "Шанс выпадения предметов увеличен {addOptionValue1}%",
+            "tl": "Ang rate ng pagbaba ng item ay tumaas {addOptionValue1}%",
+            "uk": "Швидкість випадання предметів збільшена {addOptionValue1}%",
+            "zh-TW": "物品掉落率增加 {addOptionValue1}%"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Automatic Mana recovery increment in {addOptionValue2}% rate",
+            "de": "Automatische Manaregeneration +{addOptionValue2}%",
+            "es": "Incremento de recuperación automática de maná en tasa de % {addOptionValue2}",
+            "id": "Peningkatan pemulihan Mana otomatis pada tingkat {addOptionValue2}%.",
+            "ja": "マナ自動回復{addOptionValue2}%上昇",
+            "pl": "Automatyczna regeneracja many +{addOptionValue2}%",
+            "pt": "Incremento automático de recuperação de Mana na taxa {addOptionValue2}%",
+            "ru": "Автоматическое увеличение восстановления маны со скоростью {addOptionValue2}%.",
+            "tl": "Awtomatikong pagtaas ng Mana recovery sa {addOptionValue2}% rate",
+            "uk": "Автоматичне приріст відновлення мани в {addOptionValue2}%.",
+            "zh-TW": "自動法力恢復增量（{addOptionValue2}% 率）"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Item achievement and the automatic Mana recovery increases onward.",
+            "de": "Erhöht die Gegenstands-Droprate und die automatische Manaregeneration.",
+            "es": "Los logros de los objetos y la recuperación automática de maná aumentan en el futuro.",
+            "id": "Pencapaian item dan pemulihan Mana otomatis meningkat dan seterusnya.",
+            "ja": "アイテム獲得量とマナ自動回復量が上昇されます。",
+            "pl": "Zwiększa drop przedmiotów i automatyczną regenerację many.",
+            "pt": "A conquista de itens e a recuperação automática de Mana aumentam posteriormente.",
+            "ru": "Достижение предмета и автоматическое восстановление маны увеличиваются.",
+            "tl": "Ang pagkamit ng item at ang awtomatikong pagbawi ng Mana ay tumataas.",
+            "uk": "Досягнення предметів і автоматичне відновлення мани збільшуються.",
+            "zh-TW": "物品成就和自動法力恢復量不斷增加。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -1686,7 +3796,33 @@
         "es": "Demonio",
         "pt": "Demônio"
       },
-      "tags": ["guardianPet", "cashShop", "valuable"],
+      "tags": ["guardianPet", "cashShop", "valuable", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "Increases Attack Power and Wizardry by 40%",
+            "de": "Erhöht Angriffskraft und Zauberei um 40%",
+            "es": "Aumenta el poder de ataque y la hechicería en un 40%",
+            "id": "Meningkatkan Kekuatan Serangan dan Sihir sebesar 40%",
+            "ja": "攻撃力、魔力40%向上",
+            "pl": "Zwiększa siłę ataku i obrażenia magiczne o 40%",
+            "pt": "Aumenta o poder de ataque e a magia em 40%",
+            "ru": "Увеличивает силу атаки и волшебство на 40%",
+            "tl": "Pinapataas ng 40% ang Attack Power at Wizardry",
+            "uk": "Збільшує силу атаки та магію на 40%",
+            "zh-TW": "攻擊力和魔法增加40%"
+          },
+          "color": "blue"
+        },
+        {
+          "text": "@increasesAttackSpeed10",
+          "color": "purple"
+        },
+        {
+          "text": "@life",
+          "when": ["!timed"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "pet",
@@ -1720,7 +3856,45 @@
         "es": "Espír. Guardián",
         "pt": "Espír. Guardião"
       },
-      "tags": ["guardianPet", "cashShop", "valuable"],
+      "tags": ["guardianPet", "cashShop", "valuable", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "Alleviates monster's damage by 30%",
+            "de": "Verringert den Schaden durch Monster um 30%",
+            "es": "Alivia el daño del monstruo en un 30%",
+            "id": "Mengurangi kerusakan monster sebesar 30%",
+            "ja": "モンスターからのダメージを30%吸収",
+            "pl": "Zmniejsza obrażenia potworów o 30%",
+            "pt": "Alivia o dano do monstro em 30%",
+            "ru": "Уменьшает урон монстра на 30%",
+            "tl": "Binabawasan ang pinsala ng halimaw ng 30%",
+            "uk": "Зменшує шкоду монстра на 30%",
+            "zh-TW": "減少怪物傷害30%"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Increases Maximum Life by 50",
+            "de": "Erhöht das maximale Leben um 50",
+            "es": "Aumenta la vida máxima en 50",
+            "id": "Meningkatkan Kehidupan Maksimum sebesar 50",
+            "ja": "最大生命力+50",
+            "pl": "Zwiększa maksymalne życie o 50",
+            "pt": "Aumenta a Vida Máxima em 50",
+            "ru": "Увеличивает максимальное количество жизни на 50.",
+            "tl": "Pinapataas ng 50 ang Pinakamataas na Buhay",
+            "uk": "Збільшує максимальне життя на 50",
+            "zh-TW": "最大生命增加 50"
+          },
+          "color": "purple"
+        },
+        {
+          "text": "@life",
+          "when": ["!timed"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "pet",
@@ -1754,6 +3928,31 @@
         "es": "Invitación a Aldea de Santa",
         "pt": "Conv. p/ Vila do Papai Noel"
       },
+      "tags": ["noDurabilityLine", "noBlankAfterOptions"],
+      "description": [
+        {
+          "text": "@usableTimes",
+          "color": "red",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Relocate to the Santa's Village by the right-mouse click.",
+            "de": "Per Rechtsklick ins Dorf des Weihnachtsmanns wechseln.",
+            "es": "Trasládese a Santa's Village haciendo clic con el botón derecho del ratón.",
+            "id": "Pindah ke Desa Santa dengan klik kanan mouse.",
+            "ja": "右クリックでサンタ村へ移動可能",
+            "pl": "Przenieś się do Wioski Świętego Mikołaja, klikając prawym przyciskiem myszy.",
+            "pt": "Mude para a Aldeia do Papai Noel com o botão direito do mouse.",
+            "ru": "Переместитесь в Деревню Санты по щелчку правой кнопки мыши.",
+            "tl": "Lumipat sa Santa's Village sa pamamagitan ng right-mouse click.",
+            "uk": "Перемістіть в село Діда Мороза, клацнувши правою кнопкою миші.",
+            "zh-TW": "透過滑鼠右鍵重新定位到聖誕老人村。"
+          },
+          "color": "blue",
+          "after": "options"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -1776,6 +3975,17 @@
         "es": "Mascota Rudolf",
         "pt": "Animal de estimação Rodolfo"
       },
+      "tags": ["noDurabilityLine"],
+      "description": [
+        {
+          "text": "@collectsSurroundingZen",
+          "color": "blue"
+        },
+        {
+          "text": "@life",
+          "when": ["!timed"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "pet",
@@ -1805,6 +4015,13 @@
         "pt": "Anel Transf. Homem da Neve"
       },
       "tags": ["transformationRing"],
+      "description": [
+        {
+          "text": "@unableToEquipWithADifferentTransformationRing",
+          "color": "red",
+          "after": "options"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -1859,7 +4076,59 @@
         "es": "Talismán de Movilidad",
         "pt": "Talismã da mobilidade"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "Save the application location.",
+            "de": "Speichert den Ort der Anwendung.",
+            "es": "Guarde la ubicación de la aplicación.",
+            "id": "Simpan lokasi aplikasi.",
+            "ja": "該当の場所を記憶することができます。",
+            "pl": "Zapisuje miejsce użycia.",
+            "pt": "Salve o local do aplicativo.",
+            "ru": "Сохраните местоположение приложения.",
+            "tl": "I-save ang lokasyon ng application.",
+            "uk": "Збережіть розташування програми.",
+            "zh-TW": "儲存應用程式位置。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Saves the location with the right-mouse-click.",
+            "de": "Speichert den Ort per Rechtsklick.",
+            "es": "Guarda la ubicación con el clic derecho del mouse.",
+            "id": "Menyimpan lokasi dengan klik kanan mouse.",
+            "ja": "右クリックすると場所が記憶されます。",
+            "pl": "Zapisuje lokalizację po kliknięciu prawym przyciskiem myszy.",
+            "pt": "Salva o local com o clique direito do mouse.",
+            "ru": "Сохраняет местоположение щелчком правой кнопки мыши.",
+            "tl": "Sine-save ang lokasyon gamit ang right-mouse-click.",
+            "uk": "Зберігає розташування клацанням правою кнопкою миші.",
+            "zh-TW": "點選滑鼠右鍵儲存位置。"
+          },
+          "when": ["durability=2"],
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Returns to the saved location by a click.",
+            "de": "Kehrt per Klick zum gespeicherten Ort zurück.",
+            "es": "Vuelve a la ubicación guardada con un clic.",
+            "id": "Kembali ke lokasi yang disimpan dengan satu klik.",
+            "ja": "クリックすると記憶した場所へ移動します。",
+            "pl": "Powrót do zapisanej lokalizacji jednym kliknięciem.",
+            "pt": "Retorna ao local salvo com um clique.",
+            "ru": "Возвращается в сохраненное место по клику.",
+            "tl": "Bumalik sa naka-save na lokasyon sa pamamagitan ng isang pag-click.",
+            "uk": "Повернення до збереженого місця клацанням.",
+            "zh-TW": "單擊即可返回已儲存的位置。"
+          },
+          "when": ["durability=1"],
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 2,
@@ -1886,7 +4155,12 @@
         "es": "Espada/Maza/Jabalina",
         "pt": "Espada/Maça/Lança"
       },
-      "tags": ["gambleItem"],
+      "tags": ["gambleItem", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@itemSkillLuckOptionWillBeRandomlyAdded"
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "pet",
@@ -1910,7 +4184,12 @@
         "es": "Báculo",
         "pt": "Bastão"
       },
-      "tags": ["gambleItem"],
+      "tags": ["gambleItem", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@itemSkillLuckOptionWillBeRandomlyAdded"
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "pet",
@@ -1934,7 +4213,12 @@
         "es": "Arco/Ballesta",
         "pt": "Arco/Besta"
       },
-      "tags": ["gambleItem"],
+      "tags": ["gambleItem", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@itemSkillLuckOptionWillBeRandomlyAdded"
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "pet",
@@ -1958,7 +4242,12 @@
         "es": "Cetro",
         "pt": "Cetro"
       },
-      "tags": ["gambleItem"],
+      "tags": ["gambleItem", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@itemSkillLuckOptionWillBeRandomlyAdded"
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "pet",
@@ -1982,7 +4271,12 @@
         "es": "Vara",
         "pt": "Cajado"
       },
-      "tags": ["gambleItem"],
+      "tags": ["gambleItem", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@itemSkillLuckOptionWillBeRandomlyAdded"
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "pet",
@@ -2007,6 +4301,68 @@
         "pt": "Anel do Panda"
       },
       "tags": ["pandaOrSkeleton", "transformationRing", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Transform into Panda.",
+            "de": "Verwandelt Sie in einen Panda.",
+            "es": "Transfórmate en Panda.",
+            "id": "Berubah menjadi Panda.",
+            "ja": "装備すると、パンダマンに変身できます。",
+            "pl": "Zmienia w pandę.",
+            "pt": "Transforme-se em Panda.",
+            "ru": "Превратитесь в Панду.",
+            "tl": "Transform sa Panda.",
+            "uk": "Перетворіться на панду.",
+            "zh-TW": "變身為熊貓。"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Zen increase 50%",
+            "de": "Zen +50%",
+            "es": "Aumento del zen 50%",
+            "id": "Zen meningkat 50%",
+            "ja": "ゼン増加50%に向上",
+            "pl": "Wzrost Zen 50%",
+            "pt": "Aumento Zen 50%",
+            "ru": "Дзен увеличение 50%",
+            "tl": "50% ang pagtaas ng Zen",
+            "uk": "Дзен збільшення 50%",
+            "zh-TW": "禪宗增加50%"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Damage/Wizardry/Curse +30",
+            "de": "Schaden/Zauberei/Fluch +30",
+            "es": "Daño/Hechicería/Maldición +30",
+            "id": "Kerusakan/Sihir/Kutukan +30",
+            "ja": "攻撃力 +30",
+            "pl": "Obrażenia/Magia/Klątwa +30",
+            "pt": "Dano/Feitiçaria/Maldição +30",
+            "ru": "Урон/Магия/Проклятие +30",
+            "tl": "Pinsala/Wizardry/Curse +30",
+            "uk": "Пошкодження/Чарівництво/Прокляття +30",
+            "zh-TW": "傷害/魔法/詛咒 +30"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": "",
+          "after": "options"
+        },
+        {
+          "text": "@unableToEquipWithADifferentTransformationRing",
+          "color": "red",
+          "after": "options"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -2040,7 +4396,37 @@
         "es": "Mascota Panda",
         "pt": "Animal de estimação Panda"
       },
-      "tags": ["pandaOrSkeleton", "valuable"],
+      "tags": ["pandaOrSkeleton", "valuable", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@autoCollectsZen",
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "EXP rate 50% increase",
+            "de": "Erfahrungsrate +50%",
+            "es": "Tasa de EXP 50% iaumentar",
+            "id": "Tingkat EXP 50% imeningkat",
+            "ja": "経験値50%向上",
+            "pl": "EXP +50%",
+            "pt": "Taxa de EXP 50% inaumento",
+            "ru": "Скорость опыта 50% increase",
+            "tl": "EXP rate 50% inadagdagan",
+            "uk": "Швидкість досвіду збільшується на 50% in",
+            "zh-TW": "EXP率50% i增加"
+          },
+          "color": "blue"
+        },
+        {
+          "text": "@increaseDefensiveSkill50",
+          "color": "blue"
+        },
+        {
+          "text": "@life",
+          "when": ["!timed"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "pet",
@@ -2075,6 +4461,56 @@
         "pt": "Talismã do Guardião"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Exp and item will be secured when character dies.",
+            "de": "Erfahrung und Gegenstände bleiben beim Tod des Charakters erhalten.",
+            "es": "La experiencia y el artículo se asegurarán cuando el personaje muera.",
+            "id": "Exp dan item akan diamankan ketika karakter mati.",
+            "ja": "キャラクター死亡時経験値及びアイテムが維持されます。",
+            "pl": "Exp i przedmiot zostaną zabezpieczone, gdy postać umrze.",
+            "pt": "Exp e item serão garantidos quando o personagem morrer.",
+            "ru": "Опыт и предмет будут сохранены после смерти персонажа.",
+            "tl": "Mase-secure ang exp at item kapag namatay ang character.",
+            "uk": "Досвід і предмет будуть захищені, коли персонаж помре.",
+            "zh-TW": "當角色死亡時，經驗值和物品將受到保護。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "No penalty for dying.",
+            "de": "Keine Strafe beim Tod.",
+            "es": "No hay pena por morir.",
+            "id": "Tidak ada penalti untuk kematian.",
+            "ja": "死亡の時ペナルティーがつきません。",
+            "pl": "Nie ma kary za śmierć.",
+            "pt": "Nenhuma penalidade por morrer.",
+            "ru": "Никакого наказания за смерть.",
+            "tl": "Walang parusa sa pagkamatay.",
+            "uk": "Жодного покарання за смерть.",
+            "zh-TW": "死亡沒有懲罰。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Right click to use.",
+            "de": "Zum Verwenden rechtsklicken.",
+            "es": "Haga clic derecho para usar.",
+            "id": "Klik kanan untuk menggunakan.",
+            "ja": "右クリックで使用します。",
+            "pl": "Kliknij prawym przyciskiem myszy, aby użyć.",
+            "pt": "Clique com o botão direito para usar.",
+            "ru": "Щелкните правой кнопкой мыши, чтобы использовать.",
+            "tl": "I-right click para gamitin.",
+            "uk": "Клацніть правою кнопкою миші, щоб використати.",
+            "zh-TW": "右鍵點擊即可使用。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2101,6 +4537,56 @@
         "pt": "Talismã de Proteção de Item"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Item durability will not be decrease for a certain period.",
+            "de": "Die Haltbarkeit von Gegenständen sinkt für einen bestimmten Zeitraum nicht.",
+            "es": "La durabilidad del artículo no disminuirá durante un período determinado.",
+            "id": "Daya tahan item tidak akan berkurang selama jangka waktu tertentu.",
+            "ja": "アイテムの耐久度が一定期間落ちません。",
+            "pl": "Trwałość przedmiotu nie ulegnie zmniejszeniu przez pewien okres.",
+            "pt": "A durabilidade do item não diminuirá por um determinado período.",
+            "ru": "Прочность предмета не будет уменьшаться в течение определенного периода.",
+            "tl": "Ang tibay ng item ay hindi bababa sa isang tiyak na panahon.",
+            "uk": "Стійкість предмета не буде знижуватися протягом певного періоду.",
+            "zh-TW": "物品耐久度在一定時間內不會減少。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Keeps item durable",
+            "de": "Erhält die Haltbarkeit von Gegenständen",
+            "es": "Mantiene el artículo duradero",
+            "id": "Menjaga barang tetap tahan lama",
+            "ja": "アイテム耐久度維持",
+            "pl": "Utrzymuje trwałość przedmiotu",
+            "pt": "Mantém o item durável",
+            "ru": "Сохраняет вещь прочной",
+            "tl": "Pinapanatiling matibay ang item",
+            "uk": "Зберігає предмет міцним",
+            "zh-TW": "保持物品耐用"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Applicable to mountable items only besides pet.",
+            "de": "Gilt nur für Reittiere, nicht für Haustiere.",
+            "es": "Aplicable solo a artículos montables además de mascotas.",
+            "id": "Hanya berlaku untuk item yang dapat dipasang selain hewan peliharaan.",
+            "ja": "ペットを除いた装着型アイテムにのみ適用されます。",
+            "pl": "Dotyczy tylko wierzchowców (bez zwierzaków).",
+            "pt": "Aplicável apenas a itens montáveis ​​além de animais de estimação.",
+            "ru": "Применимо только к монтируемым предметам, кроме питомца.",
+            "tl": "Naaangkop sa mga naka-mount na item lamang bukod sa alagang hayop.",
+            "uk": "Застосовується лише для встановлюваних елементів, крім домашніх тварин.",
+            "zh-TW": "僅適用於寵物以外的可安裝物品。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2126,6 +4612,19 @@
         "es": "Talismán de Alas de Satán",
         "pt": "Talismã das Asas de Satã"
       },
+      "description": [
+        {
+          "text": "@increasesYourLuckToCreateWingOfYourWish"
+        },
+        {
+          "text": "@talismanOfWingsOfSatan",
+          "color": "blue"
+        },
+        {
+          "text": "@talismanOfWingsOfSatan",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -2149,6 +4648,19 @@
         "es": "Talismán de Alas de Cielo",
         "pt": "Talismã das Asas do Paraíso"
       },
+      "description": [
+        {
+          "text": "@increasesYourLuckToCreateWingOfYourWish"
+        },
+        {
+          "text": "@talismanOfWingsOfHeaven",
+          "color": "blue"
+        },
+        {
+          "text": "@talismanOfWingsOfHeaven",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -2172,6 +4684,19 @@
         "es": "Talismán de Alas de Elfo",
         "pt": "Talismã das Asas do Elfo"
       },
+      "description": [
+        {
+          "text": "@increasesYourLuckToCreateWingOfYourWish"
+        },
+        {
+          "text": "@talismanOfWingsOfElf",
+          "color": "blue"
+        },
+        {
+          "text": "@talismanOfWingsOfElf",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -2195,6 +4720,19 @@
         "es": "Talismán de Alas de Maldición",
         "pt": "Talismã da Asa da Maldição"
       },
+      "description": [
+        {
+          "text": "@increasesYourLuckToCreateWingOfYourWish"
+        },
+        {
+          "text": "@talismanOfWingOfCurse",
+          "color": "blue"
+        },
+        {
+          "text": "@talismanOfWingOfCurse",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -2218,6 +4756,19 @@
         "es": "Talismán de Capa de Emperador",
         "pt": "Talismã da Capa do Imperador"
       },
+      "description": [
+        {
+          "text": "@increasesYourLuckToCreateWingOfYourWish"
+        },
+        {
+          "text": "@talismanOfCapeOfEmperor",
+          "color": "blue"
+        },
+        {
+          "text": "@talismanOfCapeOfEmperor",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -2241,6 +4792,19 @@
         "es": "Talismán de Alas de Dragón",
         "pt": "Talismã das Asas do Dragão"
       },
+      "description": [
+        {
+          "text": "@increasesYourLuckToCreateWingOfYourWish"
+        },
+        {
+          "text": "@talismanOfWingsOfDragon",
+          "color": "blue"
+        },
+        {
+          "text": "@talismanOfWingsOfDragon",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -2264,6 +4828,19 @@
         "es": "Talismán de Alas del Alma",
         "pt": "Talismã das Asas da Alma"
       },
+      "description": [
+        {
+          "text": "@increasesYourLuckToCreateWingOfYourWish"
+        },
+        {
+          "text": "@talismanOfWingsOfSoul",
+          "color": "blue"
+        },
+        {
+          "text": "@talismanOfWingsOfSoul",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -2287,6 +4864,19 @@
         "es": "Talismán de Alas de Espíritus",
         "pt": "Talismã das Asas dos Esp."
       },
+      "description": [
+        {
+          "text": "@increasesYourLuckToCreateWingOfYourWish"
+        },
+        {
+          "text": "@talismanOfWingsOfSpirits",
+          "color": "blue"
+        },
+        {
+          "text": "@talismanOfWingsOfSpirits",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -2310,6 +4900,19 @@
         "es": "Talismán Alas de Desolación",
         "pt": "Talismã da Asa do Desespero"
       },
+      "description": [
+        {
+          "text": "@increasesYourLuckToCreateWingOfYourWish"
+        },
+        {
+          "text": "@talismanOfWingOfDespair",
+          "color": "blue"
+        },
+        {
+          "text": "@talismanOfWingOfDespair",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -2333,6 +4936,19 @@
         "es": "Talismán de Alas de Oscuridad",
         "pt": "Talismã das Asas da Escuridão"
       },
+      "description": [
+        {
+          "text": "@increasesYourLuckToCreateWingOfYourWish"
+        },
+        {
+          "text": "@talismanOfWingsOfDarkness",
+          "color": "blue"
+        },
+        {
+          "text": "@talismanOfWingsOfDarkness",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -2357,6 +4973,20 @@
         "pt": "Selo Mestre da Ascensão"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": "@increasesExperience",
+          "color": "blue"
+        },
+        {
+          "text": "@warpCommandWindow",
+          "color": "blue"
+        },
+        {
+          "text": "@attackRateAndDefenseRateIncrease",
+          "when": ["durability"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2384,6 +5014,16 @@
         "pt": "Selo Mestre da Riqueza"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": "@increasesExperienceAndDrops",
+          "color": "blue"
+        },
+        {
+          "text": "@warpCommandWindow",
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2489,6 +5129,24 @@
         "pt": "Pergaminho de EXP de grupo"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Up to 170% EXP gain increase, depending on the number of members in your party.",
+            "de": "Bis zu 170% mehr Erfahrung, abhängig von der Anzahl der Mitglieder in Ihrer Party.",
+            "es": "Aumento de ganancia de hasta 170% EXP, dependiendo del número de miembros de tu grupo.",
+            "id": "Peningkatan perolehan hingga 170% EXP, tergantung pada jumlah anggota di party Anda.",
+            "ja": "経験値190%に増加、パーティー1人毎に＋10%増加",
+            "pl": "Zwiększenie zysku aż do 170% EXP, w zależności od liczby członków w Twojej grupie.",
+            "pt": "Aumento de ganho de até 170% EXP, dependendo do número de membros do seu grupo.",
+            "ru": "Увеличение получаемого урона до 170% EXP, в зависимости от количества членов вашей группы.",
+            "tl": "Hanggang 170% EXP ang pagtaas ng kita, depende sa bilang ng mga miyembro sa iyong partido.",
+            "uk": "Збільшення приросту до 170% EXP, залежно від кількості учасників у вашій групі.",
+            "zh-TW": "增益增加最多 170% EXP，取決於隊伍中的成員數量。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2515,6 +5173,24 @@
         "pt": "Aura de aumento de AG máx"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase Max. AG + Level",
+            "de": "Erhöht max. AG + Level",
+            "es": "Aumentar máx. Nivel AG +",
+            "id": "Tingkatkan Maks. AG + Tingkat",
+            "ja": "最大AG増加 + レベル",
+            "pl": "Zwiększa maks. AG + poziom",
+            "pt": "Aumentar Máx. AG + Nível",
+            "ru": "Увеличить Макс. АГ + Уровень",
+            "tl": "Dagdagan ang Max. AG + Level",
+            "uk": "Збільшити Макс. AG + рівень",
+            "zh-TW": "增加最大。 AG+等級"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2541,6 +5217,24 @@
         "pt": "Aura de aumento de SD máx"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Increase Max. SD + Levelx10",
+            "de": "Erhöht max. SD + Level x10",
+            "es": "Aumentar máx. SD + Nivelx10",
+            "id": "Tingkatkan Maks. SD+Levelx10",
+            "ja": "最大SD増加 + レベルx10",
+            "pl": "Zwiększa maks. SD + poziom×10",
+            "pt": "Aumentar Máx. SD + Nívelx10",
+            "ru": "Увеличить Макс. СД + Уровеньx10",
+            "tl": "Dagdagan ang Max. SD + Levelx10",
+            "uk": "Збільшити Макс. SD + Рівеньx10",
+            "zh-TW": "增加最大。 SD + 等級x10"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2566,7 +5260,37 @@
         "es": "Unicornio",
         "pt": "Unic. Est."
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@autoCollectsZen",
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "Zen increase 50%",
+            "de": "Zen +50%",
+            "es": "Aumento del zen 50%",
+            "id": "Zen meningkat 50%",
+            "ja": "ゼン増加50%に向上",
+            "pl": "Wzrost Zen 50%",
+            "pt": "Aumento Zen 50%",
+            "ru": "Дзен увеличение 50%",
+            "tl": "50% ang pagtaas ng Zen",
+            "uk": "Дзен збільшення 50%",
+            "zh-TW": "禪宗增加50%"
+          },
+          "color": "blue"
+        },
+        {
+          "text": "@increaseDefensiveSkill50",
+          "color": "blue"
+        },
+        {
+          "text": "@life",
+          "when": ["!timed"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "pet",
@@ -2601,6 +5325,20 @@
         "pt": "Anel do Mago Letal"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": "@cannotRepair",
+          "color": "red"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -2630,6 +5368,26 @@
         "pt": "Anel de safira"
       },
       "tags": ["cashShop", "gemJewelry", "valuable"],
+      "description": [
+        {
+          "text": "@automaticHpRecovery3"
+        },
+        {
+          "text": {
+            "en": "Increases Max Mana 4%",
+            "de": "Erhöht max. Mana um 4%",
+            "es": "Aumenta el maná máximo un 4%",
+            "id": "Meningkatkan Mana Maks 4%",
+            "ja": "最大マナ増加4%",
+            "pl": "Zwiększa maksymalną manę 4%",
+            "pt": "Aumenta a Mana Máxima em 4%",
+            "ru": "Увеличивает максимальное количество маны на 4%",
+            "tl": "Tumataas ng Max Mana 4%",
+            "uk": "Збільшує максимальну ману на 4%",
+            "zh-TW": "最大法力增加 4%"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -2658,6 +5416,26 @@
         "pt": "Anel de rubi"
       },
       "tags": ["cashShop", "gemJewelry", "valuable"],
+      "description": [
+        {
+          "text": "@automaticHpRecovery3"
+        },
+        {
+          "text": {
+            "en": "Increase Max HP +4%",
+            "de": "Erhöht max. HP +4%",
+            "es": "Incrementar HP máximo +4%",
+            "id": "Meningkatkan HP Maks +4%",
+            "ja": "最大生命力増加 +4%",
+            "pl": "Zwiększa maks. HP +4%",
+            "pt": "Aumenta HP máximo +4%",
+            "ru": "Увеличение максимального запаса здоровья +4%",
+            "tl": "Taasan ang Max HP +4%",
+            "uk": "Збільшити макс. HP +4%",
+            "zh-TW": "最大生命值增加+4%"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -2686,6 +5464,26 @@
         "pt": "Anel de topázio"
       },
       "tags": ["cashShop", "gemJewelry", "valuable"],
+      "description": [
+        {
+          "text": "@automaticHpRecovery3"
+        },
+        {
+          "text": {
+            "en": "Increases acquisition rate of Zen after hunting monsters +30%",
+            "de": "Erhöht den Zen-Ertrag beim Jagen von Monstern +30%",
+            "es": "Aumenta la tasa de adquisición de Zen después de cazar monstruos +30%",
+            "id": "Meningkatkan tingkat perolehan Zen setelah berburu monster +30%",
+            "ja": "獲得ゼンの増加 +30%",
+            "pl": "Zwiększa szybkość zdobywania Zen po polowaniu na potwory +30%",
+            "pt": "Aumenta a taxa de aquisição de Zen após caçar monstros +30%",
+            "ru": "Увеличивает скорость получения Дзен после охоты на монстров +30%",
+            "tl": "Pinapataas ang rate ng pagkuha ng Zen pagkatapos ng pangangaso ng mga halimaw +30%",
+            "uk": "Збільшує швидкість отримання Дзен після полювання на монстрів +30%",
+            "zh-TW": "狩獵怪物後禪的獲得率增加+30%"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -2714,6 +5512,26 @@
         "pt": "Anel de ametista"
       },
       "tags": ["cashShop", "gemJewelry", "valuable"],
+      "description": [
+        {
+          "text": "@automaticHpRecovery3"
+        },
+        {
+          "text": {
+            "en": "Damage Decrease +4%",
+            "de": "Schadensreduzierung +4%",
+            "es": "Disminución de daño +4%",
+            "id": "Penurunan Kerusakan +4%",
+            "ja": "ダメージ減少 +4%",
+            "pl": "Zmniejszenie obrażeń +4%",
+            "pt": "Redução de dano +4%",
+            "ru": "Уменьшение урона +4%",
+            "tl": "Pagbawas ng Pinsala +4%",
+            "uk": "Зменшення шкоди +4%",
+            "zh-TW": "傷害減少 +4%"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -2742,6 +5560,26 @@
         "pt": "Colar de rubi"
       },
       "tags": ["cashShop", "gemJewelry", "valuable"],
+      "description": [
+        {
+          "text": "@automaticHpRecovery3"
+        },
+        {
+          "text": {
+            "en": "Excellent Damage rate +10%",
+            "de": "Exzellente Schadensrate +10%",
+            "es": "Excelente tasa de daño +10%",
+            "id": "Tingkat Kerusakan Luar Biasa +10%",
+            "ja": "エクセレントダメージ確率 +10%",
+            "pl": "Szansa na obrażenia doskonałe +10%",
+            "pt": "Excelente taxa de dano +10%",
+            "ru": "Отличный урон +10%",
+            "tl": "Napakahusay na Damage rate +10%",
+            "uk": "Відмінний рівень шкоди +10%",
+            "zh-TW": "優 破損率+10%"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "pendant",
@@ -2770,6 +5608,26 @@
         "pt": "Colar de esmeralda"
       },
       "tags": ["cashShop", "gemJewelry", "valuable"],
+      "description": [
+        {
+          "text": "@automaticHpRecovery3"
+        },
+        {
+          "text": {
+            "en": "Attack Speed increase +7",
+            "de": "Angriffsgeschwindigkeit +7",
+            "es": "Aumento de velocidad de ataque +7",
+            "id": "Kecepatan Serangan meningkat +7",
+            "ja": "攻撃速度上昇 +7",
+            "pl": "Zwiększenie prędkości ataku +7",
+            "pt": "Aumento de velocidade de ataque +7",
+            "ru": "Увеличение скорости атаки +7",
+            "tl": "Tumaas ang Bilis ng Pag-atake +7",
+            "uk": "Збільшення швидкості атаки +7",
+            "zh-TW": "攻擊速度增加+7"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "pendant",
@@ -2798,6 +5656,14 @@
         "pt": "Colar de safira"
       },
       "tags": ["cashShop", "gemJewelry", "valuable"],
+      "description": [
+        {
+          "text": "@automaticHpRecovery3"
+        },
+        {
+          "text": "@increasesAcquisitionRateOfManaAfterHuntingMonstersMana8"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "pendant",
@@ -2826,6 +5692,24 @@
         "pt": "Selo da riqueza"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "Boosts the item drop rate.",
+            "de": "Erhöht die Gegenstands-Droprate.",
+            "es": "Aumenta la tasa de caída de artículos.",
+            "id": "Meningkatkan tingkat penurunan item.",
+            "ja": "アイテム獲得量を上昇させる効果があります。",
+            "pl": "Zwiększa częstotliwość wypadania przedmiotów.",
+            "pt": "Aumenta a taxa de queda de itens.",
+            "ru": "Увеличивает шанс выпадения предметов.",
+            "tl": "Pinapalakas ang rate ng pagbagsak ng item.",
+            "uk": "Збільшує швидкість випадання предметів.",
+            "zh-TW": "提高物品掉落率。"
+          },
+          "color": "blue"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -2932,7 +5816,38 @@
         "es": "Boleto Abierto; Castillo Caos",
         "pt": "Bilhete Ac. Livre Cast. Caos"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "Enables entrance into Chaos Castle.",
+            "de": "Ermöglicht den Zugang zu Chaos Castle.",
+            "es": "Permite la entrada a Castillo del Caos.",
+            "id": "Memungkinkan masuk ke Kastil Kekacauan.",
+            "ja": "カオスキャッスル 入場時、決まった回数だけ使えます。",
+            "pl": "Umożliwia wejście do Chaos Castle.",
+            "pt": "Permite a entrada em Castelo do Caos.",
+            "ru": "Позволяет войти в Замок Хаоса.",
+            "tl": "Pinapagana ang pagpasok sa Chaos Castle.",
+            "uk": "Дозволяє вхід у Замок Хаосу.",
+            "zh-TW": "允許進入 混沌城堡。"
+          }
+        },
+        {
+          "text": "@youWillBeAssignedToAStageAccordingToYourLevel"
+        },
+        {
+          "text": "@usableTimes"
+        },
+        {
+          "text": "@durability",
+          "when": ["!timed"]
+        },
+        {
+          "text": "@usableTimes",
+          "when": ["timed"]
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -2960,6 +5875,89 @@
         "pt": "Anel Transf. de Esqueleto"
       },
       "tags": ["pandaOrSkeleton", "transformationRing", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "Equip to transform into a Skeleton Warrior.",
+            "de": "Ausrüsten, um sich in einen Skelettkrieger zu verwandeln.",
+            "es": "Equípate para transformarte en un guerrero esqueleto.",
+            "id": "Lengkapi untuk berubah menjadi Skeleton Warrior.",
+            "ja": "装備するとスケルトンに変身できます。",
+            "pl": "Załóż, aby zmienić się w Skeleton Warrior.",
+            "pt": "Equipe-se para se transformar em um Guerreiro Esqueleto.",
+            "ru": "Экипируйтесь, чтобы превратиться в скелета-воина.",
+            "tl": "Equip para magtransform sa isang Skeleton Warrior.",
+            "uk": "Одягніть, щоб перетворитися на воїна-скелета.",
+            "zh-TW": "裝備後可以變身為骷髏戰士。"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Damage/Wizardry/Curse +40",
+            "de": "Schaden/Zauberei/Fluch +40",
+            "es": "Daño/Hechicería/Maldición +40",
+            "id": "Kerusakan/Sihir/Kutukan +40",
+            "ja": "攻撃力/魔力/呪い +40",
+            "pl": "Obrażenia/Magia/Klątwa +40",
+            "pt": "Dano/Feitiçaria/Maldição +40",
+            "ru": "Урон/Магия/Проклятие +40",
+            "tl": "Pinsala/Wizardry/Curse +40",
+            "uk": "Пошкодження/Чарівництво/Прокляття +40",
+            "zh-TW": "傷害/魔法/詛咒 +40"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": "",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "Equipping along with a Pet Skeleton",
+            "de": "Zusammen mit einem Haustier-Skelett ausgerüstet",
+            "es": "Equiparse con un esqueleto de mascota",
+            "id": "Dilengkapi dengan Pet Skeleton",
+            "ja": "スケルトンパージドラゴンと同時に装備すると",
+            "pl": "Założony razem z Pet Skeleton",
+            "pt": "Equipando com um esqueleto de animal de estimação",
+            "ru": "Экипировка вместе со скелетом питомца",
+            "tl": "Equipping kasama ng Pet Skeleton",
+            "uk": "Екіпірування разом зі скелетом домашньої тварини",
+            "zh-TW": "與寵物骷髏一起裝備"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "increases EXP by 30%.",
+            "de": "erhöht er die Erfahrung um 30%.",
+            "es": "aumenta la EXP en un 30%.",
+            "id": "meningkatkan EXP sebesar 30%.",
+            "ja": "経験値30%を追加獲得できます。",
+            "pl": "zwiększa EXP o 30%.",
+            "pt": "aumenta EXP em 30%.",
+            "ru": "увеличивает опыт на 30%.",
+            "tl": "nagpapataas ng EXP ng 30%.",
+            "uk": "збільшує досвід на 30%.",
+            "zh-TW": "經驗值增加 30%。"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": "",
+          "after": "options"
+        },
+        {
+          "text": "@unableToEquipWithADifferentTransformationRing",
+          "color": "red",
+          "after": "options"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -2993,7 +5991,87 @@
         "es": "Mascota Esqueleto",
         "pt": "Mascote esqueleto"
       },
-      "tags": ["pandaOrSkeleton", "valuable"],
+      "tags": ["pandaOrSkeleton", "valuable", "noDurabilityLine", "noBlankAfterOptions"],
+      "description": [
+        {
+          "text": "@collectsSurroundingZen",
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "increases Damage, Wizardry and Curse by 20%",
+            "de": "erhöht er Schaden, Zauberei und Fluch um 20%",
+            "es": "aumenta el daño, la hechicería y la maldición en un 20%",
+            "id": "meningkatkan Kerusakan, Sihir, dan Kutukan sebesar 20%",
+            "ja": "攻撃力、魔力、呪い 20%上昇",
+            "pl": "zwiększa obrażenia, obrażenia magiczne i klątwy o 20%",
+            "pt": "aumenta Dano, Magia e Maldição em 20%",
+            "ru": "увеличивает урон, волшебство и проклятие на 20%",
+            "tl": "pinapataas ng 20% ang Damage, Wizardry at Curse",
+            "uk": "збільшує шкоду, магію та прокляття на 20%",
+            "zh-TW": "傷害、魔法和詛咒增加 20%"
+          },
+          "color": "blue"
+        },
+        {
+          "text": "@increasesAttackSpeed10",
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "and EXP by 30%.",
+            "de": "und die Erfahrung um 30%.",
+            "es": "y EXP en un 30%.",
+            "id": "dan EXP sebesar 30%.",
+            "ja": "経験値 30% 上昇",
+            "pl": "i EXP o 30%.",
+            "pt": "e EXP em 30%.",
+            "ru": "и EXP на 30%.",
+            "tl": "at EXP ng 30%.",
+            "uk": "і EXP на 30%.",
+            "zh-TW": "經驗值增加 30%。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": "@life",
+          "when": ["!timed"]
+        },
+        {
+          "text": {
+            "en": "Equipping along with a Skeleton Transformation Ring",
+            "de": "Zusammen mit einem Skelett-Verwandlungsring ausgerüstet",
+            "es": "Equipado con un anillo de transformación de esqueleto",
+            "id": "Dilengkapi dengan Cincin Transformasi Kerangka",
+            "ja": "スケルトン変身指輪と同時に装備すると",
+            "pl": "Założony razem ze Skeleton Transformation Ring",
+            "pt": "Equipando com um Anel de Transformação de Esqueleto",
+            "ru": "Экипировка вместе с кольцом трансформации скелета.",
+            "tl": "Equipping kasama ng isang Skeleton Transformation Ring",
+            "uk": "Екіпірування разом із кільцем трансформації скелета",
+            "zh-TW": "與骷髏變身戒指一起裝備"
+          },
+          "color": "blue",
+          "after": "options"
+        },
+        {
+          "text": {
+            "en": "increases EXP by 30%.",
+            "de": "erhöht er die Erfahrung um 30%.",
+            "es": "aumenta la EXP en un 30%.",
+            "id": "meningkatkan EXP sebesar 30%.",
+            "ja": "経験値30%を追加獲得できます。",
+            "pl": "zwiększa EXP o 30%.",
+            "pt": "aumenta EXP em 30%.",
+            "ru": "увеличивает опыт на 30%.",
+            "tl": "nagpapataas ng EXP ng 30%.",
+            "uk": "збільшує досвід на 30%.",
+            "zh-TW": "經驗值增加 30%。"
+          },
+          "color": "blue",
+          "after": "options"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "pet",
@@ -3028,6 +6106,40 @@
         "pt": "Bilhete Ac. a Canal Pago"
       },
       "tags": ["cashShop"],
+      "description": [
+        {
+          "text": {
+            "en": "You can enter to Gold Channel.",
+            "de": "Sie können den Gold-Kanal betreten.",
+            "es": "Puedes ingresar al Canal Oro.",
+            "id": "Anda bisa masuk ke Saluran Emas.",
+            "pl": "Możesz wejść do Gold Channel.",
+            "pt": "Você pode entrar no Gold Channel.",
+            "ru": "Вы можете войти в Золотой канал.",
+            "tl": "Maaari kang pumasok sa Gold Channel.",
+            "uk": "Ви можете увійти в Gold Channel.",
+            "zh-TW": "您可以進入黃金通道。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": {
+            "en": "7 Days until Expiration",
+            "de": "Läuft in 7 Tagen ab",
+            "es": "7 días hasta el vencimiento",
+            "id": "7 Hari hingga Kedaluwarsa",
+            "ja": "使用期間7日",
+            "pl": "7 dni do wygaśnięcia",
+            "pt": "7 dias até a expiração",
+            "ru": "7 дней до истечения срока действия",
+            "tl": "7 Araw bago ang Expiration",
+            "uk": "7 днів до закінчення терміну дії",
+            "zh-TW": "距離到期還有 7 天"
+          },
+          "color": "yellow",
+          "bold": true
+        }
+      ],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -3053,7 +6165,31 @@
         "es": "Boleto Acceso a Doppenganger",
         "pt": "Bilhete Ac. Livre Doppeganger"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "Enables entrance into Doppelganger.",
+            "de": "Ermöglicht den Zugang zu Doppelgänger.",
+            "es": "Permite la entrada a doble.",
+            "id": "Memungkinkan masuk ke kembaran.",
+            "ja": "次元の狭間 入場時、決まった回数だけ使えます。",
+            "pl": "Umożliwia wejście do Doppelganger.",
+            "pt": "Permite a entrada em Sósia.",
+            "ru": "Позволяет войти в двойник.",
+            "tl": "Pinapagana ang pagpasok sa Doppelganger.",
+            "uk": "Дозволяє вхід у Двійник.",
+            "zh-TW": "允許進入 分身。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": ""
+        },
+        {
+          "text": "@usableTimes"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -3080,7 +6216,46 @@
         "es": "Boleto Acceso a Varka",
         "pt": "Bilhete Ac. Livre Varka"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "Enables entrance into Varka.",
+            "de": "Ermöglicht den Zugang zu Varka.",
+            "es": "Permite la entrada a Varka.",
+            "id": "Memungkinkan masuk ke Varka.",
+            "ja": "バルカ要塞 入場時、決まった回数だけ使えます。",
+            "pl": "Umożliwia wejście do Varka.",
+            "pt": "Permite a entrada em Varka.",
+            "ru": "Позволяет войти в Варка.",
+            "tl": "Pinapagana ang pagpasok sa Varka.",
+            "uk": "Дозволяє вхід у Варка.",
+            "zh-TW": "允許進入 瓦爾卡。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": ""
+        },
+        {
+          "text": "@usableTimes"
+        },
+        {
+          "text": {
+            "en": "Can enter the Monday - Saturday map.",
+            "de": "Kann die Karte für Montag bis Samstag betreten.",
+            "es": "Puede ingresar al mapa de lunes a sábado.",
+            "id": "Bisa masuk ke map Senin - Sabtu.",
+            "ja": "バルカ要塞の第1～6要塞に入場できます。",
+            "pl": "Można wejść na mapę od poniedziałku do soboty.",
+            "pt": "Pode entrar no mapa de segunda a sábado.",
+            "ru": "Можно войти на карту понедельник-суббота.",
+            "tl": "Maaaring pumasok sa mapa ng Lunes - Sabado.",
+            "uk": "Можна ввести карту понеділок - субота.",
+            "zh-TW": "可以輸入週一-週六的地圖。"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -3107,7 +6282,46 @@
         "es": "Boleto Acceso Mapa 7 de Varka",
         "pt": "Bil. Ac. Livre Mapa 7 Varka"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noDurabilityLine"],
+      "description": [
+        {
+          "text": {
+            "en": "Enables entrance into Varka Map 7.",
+            "de": "Ermöglicht den Zugang zu Varka Karte 7.",
+            "es": "Permite la entrada a Mapa de Varka 7.",
+            "id": "Memungkinkan masuk ke Peta Varka 7.",
+            "ja": "バルカ要塞 第7要塞 入場時、決まった回数だけ使えます。",
+            "pl": "Umożliwia wejście do Mapa Varki 7.",
+            "pt": "Permite a entrada em Mapa de Varka 7.",
+            "ru": "Позволяет войти в Карта Варки 7.",
+            "tl": "Pinapagana ang pagpasok sa Varka Mapa 7.",
+            "uk": "Дозволяє вхід у Варка Карта 7.",
+            "zh-TW": "允許進入 瓦爾卡地圖 7。"
+          },
+          "color": "blue"
+        },
+        {
+          "text": ""
+        },
+        {
+          "text": "@usableTimes"
+        },
+        {
+          "text": {
+            "en": "Can enter the Sunday map.",
+            "de": "Kann die Karte für Sonntag betreten.",
+            "es": "Puede ingresar al mapa del domingo.",
+            "id": "Bisa masuk ke map hari Minggu.",
+            "ja": "バルカ要塞の第7要塞に入場できます。",
+            "pl": "Można wejść na niedzielną mapę.",
+            "pt": "Pode entrar no mapa de domingo.",
+            "ru": "Можно войти в воскресную карту.",
+            "tl": "Maaaring pumasok sa mapa ng Linggo.",
+            "uk": "Можна ввести недільну карту.",
+            "zh-TW": "可以進入周日地圖。"
+          }
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 3,
@@ -3288,7 +6502,21 @@
         "es": "1er Boleto Armadura de la Suerte",
         "pt": "1º Bilhete de Armadura da Sorte"
       },
-      "tags": ["luckyItemTicket"],
+      "tags": ["luckyItemTicket", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@specialItemsWithCombinations",
+          "color": "blue"
+        },
+        {
+          "text": ""
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -3314,7 +6542,21 @@
         "es": "1er Boleto Pantalones de la Suerte",
         "pt": "1º Bilhete de Calças da Sorte"
       },
-      "tags": ["luckyItemTicket"],
+      "tags": ["luckyItemTicket", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@specialItemsWithCombinations",
+          "color": "blue"
+        },
+        {
+          "text": ""
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -3340,7 +6582,21 @@
         "es": "1er Boleto Yelmo de la Suerte",
         "pt": "1º Bilhete de Elmo da Sorte"
       },
-      "tags": ["luckyItemTicket"],
+      "tags": ["luckyItemTicket", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@specialItemsWithCombinations",
+          "color": "blue"
+        },
+        {
+          "text": ""
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -3366,7 +6622,21 @@
         "es": "1er Boleto Guantes de la Suerte",
         "pt": "1º Bilhete de Luvas da Sorte"
       },
-      "tags": ["luckyItemTicket"],
+      "tags": ["luckyItemTicket", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@specialItemsWithCombinations",
+          "color": "blue"
+        },
+        {
+          "text": ""
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -3392,7 +6662,21 @@
         "es": "1er Boleto Botas de la Suerte",
         "pt": "1º Bilhete de Botas da Sorte"
       },
-      "tags": ["luckyItemTicket"],
+      "tags": ["luckyItemTicket", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@specialItemsWithCombinations",
+          "color": "blue"
+        },
+        {
+          "text": ""
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -3418,7 +6702,21 @@
         "es": "2º Boleto Armadura de la Suerte",
         "pt": "2º Bilhete de Armadura da Sorte"
       },
-      "tags": ["luckyItemTicket"],
+      "tags": ["luckyItemTicket", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@specialItemsWithCombinations",
+          "color": "blue"
+        },
+        {
+          "text": ""
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -3444,7 +6742,21 @@
         "es": "2º Boleto Pantalones de la Suerte",
         "pt": "2º Bilhete de Calças da Sorte"
       },
-      "tags": ["luckyItemTicket"],
+      "tags": ["luckyItemTicket", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@specialItemsWithCombinations",
+          "color": "blue"
+        },
+        {
+          "text": ""
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -3470,7 +6782,21 @@
         "es": "2º Boleto Yelmo de la Suerte",
         "pt": "2º Bilhete de Elmo da Sorte"
       },
-      "tags": ["luckyItemTicket"],
+      "tags": ["luckyItemTicket", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@specialItemsWithCombinations",
+          "color": "blue"
+        },
+        {
+          "text": ""
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -3496,7 +6822,21 @@
         "es": "2º Boleto Guantes de la Suerte",
         "pt": "2º Bilhete de Luvas da Sorte"
       },
-      "tags": ["luckyItemTicket"],
+      "tags": ["luckyItemTicket", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@specialItemsWithCombinations",
+          "color": "blue"
+        },
+        {
+          "text": ""
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -3522,7 +6862,21 @@
         "es": "2º Boleto Botas de la Suerte",
         "pt": "2º Bilhete de Botas da Sorte"
       },
-      "tags": ["luckyItemTicket"],
+      "tags": ["luckyItemTicket", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@specialItemsWithCombinations",
+          "color": "blue"
+        },
+        {
+          "text": ""
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
       "width": 1,
       "height": 1,
       "durability": 255,

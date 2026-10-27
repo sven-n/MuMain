@@ -29,6 +29,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/AI/ZzzAI.h"
 #include "SMD.h"
+#include "BmdModulusCipher.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Core/Utilities/Log/ErrorReport.h"
 #include "Core/Utilities/Log/MuLogger.h"
@@ -3771,6 +3772,35 @@ private:
     size_t ptr;
 };
 
+namespace
+{
+// Decrypts the payload of a version 14 model, which follows the int32 payload size at ptr, in place.
+// On success, ptr points to the decrypted model data.
+bool DecryptModulusBody(unsigned char* fileData, int fileSize, int& ptr)
+{
+    std::int32_t payloadSize = 0;
+    if (fileSize - ptr < static_cast<int>(sizeof(payloadSize)))
+    {
+        return false;
+    }
+
+    std::memcpy(&payloadSize, fileData + ptr, sizeof(payloadSize));
+    const int payloadStart = ptr + static_cast<int>(sizeof(payloadSize));
+    if (payloadSize < 0 || payloadSize > fileSize - payloadStart)
+    {
+        return false;
+    }
+
+    if (!Render::Models::BmdModulusCipher::DecryptInPlace(fileData + payloadStart,
+                                                          static_cast<std::size_t>(payloadSize)))
+    {
+        return false;
+    }
+
+    ptr = payloadStart + static_cast<int>(Render::Models::BmdModulusCipher::BodyOffset);
+    return true;
+}
+} // namespace
 
 bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAlloc)
 {
@@ -3804,13 +3834,15 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
         return false;
     }
 
-    fread(fileData.get(), 1, dataSize, fp);
+    const size_t bytesRead = fread(fileData.get(), 1, dataSize, fp);
     fclose(fp);
 
-    // *** Check the "BMD" header ***
-    if (!(fileData[0] == 'B' && fileData[1] == 'M' && fileData[2] == 'D'))
+    // *** Check the "BMD" header *** (and its version byte); a file cut short has neither.
+    constexpr int HeaderSize = 4;
+    if (dataSize < HeaderSize || bytesRead != static_cast<size_t>(dataSize) ||
+        !(fileData[0] == 'B' && fileData[1] == 'M' && fileData[2] == 'D'))
     {
-        wprintf(L"[Open2] ERROR: Invalid file header (expected 'BMD') in file %.64s\n", ModelPath);
+        wprintf(L"[Open2] ERROR: Invalid file header (expected 'BMD') in file %.64ls\n", ModelPath);
         m_bCompletedAlloc = false;
         return false;
     }
@@ -3826,8 +3858,21 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
         // The on-disk size field is 32-bit; `long` is 8 bytes on LP64 (Linux
         // x64), which would read past the field and produce a garbage size.
         std::int32_t encSize = 0;
+        // The size field and then no more than the bytes after it, as for version 14.
+        if (dataSize - ptr < static_cast<int>(sizeof(encSize)))
+        {
+            wprintf(L"[Open2] ERROR: Version 12 model without its size in %.64ls\n", ModelPath);
+            m_bCompletedAlloc = false;
+            return false;
+        }
         std::memcpy(&encSize, &fileData[ptr], sizeof(encSize));
         ptr += sizeof(std::int32_t);
+        if (encSize < 0 || encSize > dataSize - ptr)
+        {
+            wprintf(L"[Open2] ERROR: Invalid version 12 model size in %.64ls\n", ModelPath);
+            m_bCompletedAlloc = false;
+            return false;
+        }
         unsigned char* encData = &fileData[ptr];
         //// wprintf(L"[Open2] Encrypted Size: %ld\n", encSize);
 
@@ -3846,9 +3891,12 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
     }
     else if (Version == 0xE)
     {
-        wprintf(L"[Open2] Version: %d\n, not yet supported. File: %.64s\n", Version, ModelPath);
-        // FIXME FOR NEW MAPS 
-        // DECRYPT KEY: webzen#@!01webzen#@!01webzen#@!0
+        if (!DecryptModulusBody(fileData.get(), dataSize, ptr))
+        {
+            wprintf(L"[Open2] ERROR: Invalid version 14 model data in %.64ls\n", ModelPath);
+            m_bCompletedAlloc = false;
+            return false;
+        }
     }
     else if (Version == 0xA)
     {
@@ -3857,7 +3905,7 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
     }
     else
     {
-        wprintf(L"[Open2] Unknown BMD version: %d\n in %.64s\n", static_cast<int>(Version), ModelPath);
+        wprintf(L"[Open2] Unknown BMD version: %d\n in %.64ls\n", static_cast<int>(Version), ModelPath);
         m_bCompletedAlloc = false;
         return false;
     }

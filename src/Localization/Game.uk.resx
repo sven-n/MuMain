@@ -156,18 +156,6 @@
     <value>Площа диявола</value>
     <comment>legacy_id=39,1145</comment>
   </data>
-  <data name="One-Handed Damage" xml:space="preserve">
-    <value>Пошкодження однією рукою</value>
-    <comment>legacy_id=40</comment>
-  </data>
-  <data name="Two-Handed Damage" xml:space="preserve">
-    <value>Пошкодження двома руками</value>
-    <comment>legacy_id=41</comment>
-  </data>
-  <data name="Wizardry Damage" xml:space="preserve">
-    <value>Пошкодження магії</value>
-    <comment>legacy_id=42</comment>
-  </data>
   <data name="Very Slow" xml:space="preserve">
     <value>Дуже повільно</value>
     <comment>legacy_id=43</comment>
@@ -260,21 +248,9 @@
     <value>Захист: %d</value>
     <comment>legacy_id=65,209</comment>
   </data>
-  <data name="Spell resistance: %d" xml:space="preserve">
-    <value>Стійкість до заклинань: %d</value>
-    <comment>legacy_id=66</comment>
-  </data>
   <data name="Defense rate: %d" xml:space="preserve">
     <value>Швидкість захисту: %d</value>
     <comment>legacy_id=67,2045</comment>
-  </data>
-  <data name="Moving speed: %d" xml:space="preserve">
-    <value>Швидкість руху: %d</value>
-    <comment>legacy_id=68</comment>
-  </data>
-  <data name="Number of items: %d" xml:space="preserve">
-    <value>Кількість позицій: %d</value>
-    <comment>legacy_id=69</comment>
   </data>
   <data name="Life: %d" xml:space="preserve">
     <value>Життя: %d</value>
@@ -283,10 +259,6 @@
   <data name="Durability: [%d/%d]" xml:space="preserve">
     <value>Довговічність: [%d/%d]</value>
     <comment>legacy_id=71</comment>
-  </data>
-  <data name="%s Resistance: %d" xml:space="preserve">
-    <value>%s Опір: %d</value>
-    <comment>legacy_id=72</comment>
   </data>
   <data name="Strength Requirement: %d" xml:space="preserve">
     <value>Вимоги до міцності: %d</value>
@@ -311,10 +283,6 @@
   <data name="Increases moving speed" xml:space="preserve">
     <value>Збільшує швидкість пересування</value>
     <comment>legacy_id=78</comment>
-  </data>
-  <data name="Wizardry Dmg %d%% rise" xml:space="preserve">
-    <value>Wizardry Dmg %d%% зростання</value>
-    <comment>legacy_id=79</comment>
   </data>
   <data name="Defend skill (Mana:%d)" xml:space="preserve">
     <value>Захистити навик (мана:%d)</value>
@@ -375,10 +343,6 @@
   <data name="Luck (critical damage rate +5%%)" xml:space="preserve">
     <value>Удача (рівень критичної шкоди +5%%)</value>
     <comment>legacy_id=94</comment>
-  </data>
-  <data name="Durability: [%d]" xml:space="preserve">
-    <value>Довговічність: [%d]</value>
-    <comment>legacy_id=95</comment>
   </data>
   <data name="Can only be used in moving unit" xml:space="preserve">
     <value>Можна використовувати лише в рухомій одиниці</value>
@@ -471,10 +435,6 @@
   <data name="Moon Cookie" xml:space="preserve">
     <value>Місячне печиво</value>
     <comment>legacy_id=118</comment>
-  </data>
-  <data name="You can register by giving it to the NPC" xml:space="preserve">
-    <value>Ви можете зареєструватися, передавши його NPC</value>
-    <comment>legacy_id=119</comment>
   </data>
   <data name="Key Function" xml:space="preserve">
     <value>Ключова функція</value>
@@ -639,10 +599,6 @@
     <value>Перемістіть курсор вниз-&gt; Налаштувати вікно чату</value>
     <comment>legacy_id=156</comment>
   </data>
-  <data name="Warp to the corresponding area after %d seconds" xml:space="preserve">
-    <value>Деформація до відповідної області через %d секунд</value>
-    <comment>legacy_id=157</comment>
-  </data>
   <data name="%s Warp scroll" xml:space="preserve">
     <value>%s Деформація сувою</value>
     <comment>legacy_id=158</comment>
@@ -676,19 +632,19 @@
     <comment>legacy_id=165</comment>
   </data>
   <data name="STR" xml:space="preserve">
-    <value>ВУЛ</value>
+    <value>СИЛ</value>
     <comment>legacy_id=166</comment>
   </data>
   <data name="AGI" xml:space="preserve">
-    <value>AGI</value>
+    <value>СПР</value>
     <comment>legacy_id=167</comment>
   </data>
   <data name="ENG" xml:space="preserve">
-    <value>ENG</value>
+    <value>ЕНЕ</value>
     <comment>legacy_id=168</comment>
   </data>
   <data name="STA" xml:space="preserve">
-    <value>STA</value>
+    <value>ВИТ</value>
     <comment>legacy_id=169</comment>
   </data>
   <data name="Wizardry Dmg:%d~%d" xml:space="preserve">
@@ -2148,16 +2104,12 @@
     <value>Поглинає 30%% of шкоди</value>
     <comment>legacy_id=575</comment>
   </data>
-  <data name="Increase 30%% of attacking &amp; Wizardry Dmg" xml:space="preserve">
-    <value>Збільште на 30%% of шкоду від атаки та магії</value>
-    <comment>legacy_id=576</comment>
-  </data>
   <data name="Increase %d%% of Damage" xml:space="preserve">
-    <value>Збільшення шкоди на %d%% of</value>
+    <value>Збільшення шкоди на %d%%</value>
     <comment>legacy_id=577</comment>
   </data>
   <data name="Absorb %d%% of Damage" xml:space="preserve">
-    <value>Поглинання шкоди %d%% of</value>
+    <value>Поглинання %d%% шкоди</value>
     <comment>legacy_id=578</comment>
   </data>
   <data name="Increase speed" xml:space="preserve">
@@ -2375,18 +2327,6 @@
   <data name="Increases acquisition rate of Mana after hunting monsters +Mana/8" xml:space="preserve">
     <value>Збільшує швидкість отримання мани після полювання на монстрів +Мана/8</value>
     <comment>legacy_id=635</comment>
-  </data>
-  <data name="Increases 1~3 stat points" xml:space="preserve">
-    <value>Збільшує 1–3 очки статистики</value>
-    <comment>legacy_id=636</comment>
-  </data>
-  <data name="The remaining time is shown" xml:space="preserve">
-    <value>Показано час, що залишився</value>
-    <comment>legacy_id=638</comment>
-  </data>
-  <data name="when you right click on your mouse." xml:space="preserve">
-    <value>коли ви клацаєте правою кнопкою миші.</value>
-    <comment>legacy_id=639</comment>
   </data>
   <data name="You will enter Devil Square (%d seconds from now)" xml:space="preserve">
     <value>Ви потрапите на площу Диявола (через %d секунд)</value>
@@ -2780,10 +2720,6 @@
     <value>Викликати</value>
     <comment>legacy_id=738</comment>
   </data>
-  <data name="Max HP +%d increased" xml:space="preserve">
-    <value>Макс HP +%d збільшено</value>
-    <comment>legacy_id=739</comment>
-  </data>
   <data name="HP +%d increased" xml:space="preserve">
     <value>HP +%d збільшено</value>
     <comment>legacy_id=740</comment>
@@ -2815,10 +2751,6 @@
   <data name="You have exchanged Dinorants" xml:space="preserve">
     <value>Ви обміняли Диноранти</value>
     <comment>legacy_id=747</comment>
-  </data>
-  <data name="Used to upgrade wings" xml:space="preserve">
-    <value>Використовується для покращення крил</value>
-    <comment>legacy_id=748</comment>
   </data>
   <data name="Must be over level 10 to use fruits" xml:space="preserve">
     <value>Щоб використовувати фрукти, рівень має бути вище 10</value>
@@ -2996,21 +2928,9 @@
     <value>Абсолютний Меч Архангела</value>
     <comment>legacy_id=812</comment>
   </data>
-  <data name="Used in the online event" xml:space="preserve">
-    <value>Використовується в онлайн-події</value>
-    <comment>legacy_id=813</comment>
-  </data>
-  <data name="Used when entering Blood Castle" xml:space="preserve">
-    <value>Використовується при вході в Кривавий замок</value>
-    <comment>legacy_id=814</comment>
-  </data>
   <data name="Reward received when returned to the Archangel" xml:space="preserve">
     <value>Нагорода отримана після повернення до Архангела</value>
     <comment>legacy_id=815</comment>
-  </data>
-  <data name="Used when creating a Cloak of Invisibility" xml:space="preserve">
-    <value>Використовується при створенні Плаща-Невидимки</value>
-    <comment>legacy_id=816</comment>
   </data>
   <data name="Absolute Crossbow of Archangel" xml:space="preserve">
     <value>Абсолютний арбалет Архангела</value>
@@ -3424,17 +3344,9 @@
     <value>Ви можете скинути кільце, коли досягнете рівня %d.</value>
     <comment>legacy_id=923</comment>
   </data>
-  <data name="Can be dropped after level %d" xml:space="preserve">
-    <value>Можна викинути після рівня %d</value>
-    <comment>legacy_id=924</comment>
-  </data>
   <data name="Ring of Wizard" xml:space="preserve">
     <value>Перстень Чарівника</value>
     <comment>legacy_id=925</comment>
-  </data>
-  <data name="Cannot Repair" xml:space="preserve">
-    <value>Неможливо відремонтувати</value>
-    <comment>legacy_id=926</comment>
   </data>
   <data name="Close (%s)" xml:space="preserve">
     <value>Закрити (%s)</value>
@@ -4072,14 +3984,6 @@
     <value>до</value>
     <comment>legacy_id=1096</comment>
   </data>
-  <data name="Stone of Friendship" xml:space="preserve">
-    <value>Камінь Дружби</value>
-    <comment>legacy_id=1098</comment>
-  </data>
-  <data name="Used in the My Friend event." xml:space="preserve">
-    <value>Використовується в події My Friend.</value>
-    <comment>legacy_id=1099</comment>
-  </data>
   <data name="Do you want to buy an item?" xml:space="preserve">
     <value>Ви хочете купити товар?</value>
     <comment>legacy_id=1100</comment>
@@ -4372,10 +4276,6 @@
     <value>Увійти можуть лише власник магічного каменю та члени групи</value>
     <comment>legacy_id=1179</comment>
   </data>
-  <data name="Kundun mark +%d level" xml:space="preserve">
-    <value>Знак Кундун + рівень %d</value>
-    <comment>legacy_id=1180</comment>
-  </data>
   <data name="%d / %d" xml:space="preserve">
     <value>%d / %d</value>
     <comment>legacy_id=1181</comment>
@@ -4508,14 +4408,6 @@
     <value>Темний ворон</value>
     <comment>legacy_id=1214</comment>
   </data>
-  <data name="Used in Dark Horse resurrection" xml:space="preserve">
-    <value>Використовується у воскресінні Dark Horse</value>
-    <comment>legacy_id=1215</comment>
-  </data>
-  <data name="Used in Dark Raven resurrection" xml:space="preserve">
-    <value>Використовується у воскресінні Dark Raven</value>
-    <comment>legacy_id=1216</comment>
-  </data>
   <data name="Pet" xml:space="preserve">
     <value>Домашня тварина</value>
     <comment>legacy_id=1217</comment>
@@ -4583,18 +4475,6 @@
   <data name="No %s." xml:space="preserve">
     <value>Ні %s.</value>
     <comment>legacy_id=1233</comment>
-  </data>
-  <data name="Increase pet attack as %d%%" xml:space="preserve">
-    <value>Збільшити атаку домашніх тварин як %d%%</value>
-    <comment>legacy_id=1234</comment>
-  </data>
-  <data name="Crest of monarch" xml:space="preserve">
-    <value>Герб монарха</value>
-    <comment>legacy_id=1235</comment>
-  </data>
-  <data name="Used in combining Cape of Lord &amp; Warrior's Cloak" xml:space="preserve">
-    <value>Використовується для поєднання накидки лорда та плаща воїна</value>
-    <comment>legacy_id=1236</comment>
   </data>
   <data name="Check the details in pet information window" xml:space="preserve">
     <value>Перевірте деталі у вікні інформації про тварин</value>
@@ -4771,14 +4651,6 @@
   <data name="Prevent equipment drop" xml:space="preserve">
     <value>Запобігайте падінню обладнання</value>
     <comment>legacy_id=1288</comment>
-  </data>
-  <data name="Sign of lord" xml:space="preserve">
-    <value>Знак владики</value>
-    <comment>legacy_id=1290</comment>
-  </data>
-  <data name="Use in siege registration" xml:space="preserve">
-    <value>Використання при реєстрації облоги</value>
-    <comment>legacy_id=1291</comment>
   </data>
   <data name="Move to vault" xml:space="preserve">
     <value>Перейти до сховища</value>
@@ -5248,22 +5120,6 @@
     <value>Камінь життя</value>
     <comment>legacy_id=1415</comment>
   </data>
-  <data name="Scroll of Guardian" xml:space="preserve">
-    <value>Сувій Охоронця</value>
-    <comment>legacy_id=1416</comment>
-  </data>
-  <data name="Damage +20%% increase effect" xml:space="preserve">
-    <value>Пошкодження +20%% inпосилення ефекту</value>
-    <comment>legacy_id=1417</comment>
-  </data>
-  <data name="Duration 60 seconds" xml:space="preserve">
-    <value>Тривалість 60 секунд</value>
-    <comment>legacy_id=1418</comment>
-  </data>
-  <data name="Only applicable for castle gate and statue" xml:space="preserve">
-    <value>Застосовується лише для воріт і статуї замку</value>
-    <comment>legacy_id=1419,1465</comment>
-  </data>
   <data name="No. of signs" xml:space="preserve">
     <value>Кількість знаків</value>
     <comment>legacy_id=1420</comment>
@@ -5400,18 +5256,6 @@
     <value>Не вдалося вистрілити з облогового знаряддя</value>
     <comment>legacy_id=1459</comment>
   </data>
-  <data name="Archer" xml:space="preserve">
-    <value>лучник</value>
-    <comment>legacy_id=1460</comment>
-  </data>
-  <data name="Spearman" xml:space="preserve">
-    <value>Списоносець</value>
-    <comment>legacy_id=1461</comment>
-  </data>
-  <data name="Place Life Stone" xml:space="preserve">
-    <value>Помістіть камінь життя</value>
-    <comment>legacy_id=1462</comment>
-  </data>
   <data name="Attacking speed +25 increase effect" xml:space="preserve">
     <value>Швидкість атаки +25 збільшує ефект</value>
     <comment>legacy_id=1463</comment>
@@ -5443,10 +5287,6 @@
   <data name="Attacking skill will increase +20%%" xml:space="preserve">
     <value>Навичка атаки збільшиться на +20%%</value>
     <comment>legacy_id=1471</comment>
-  </data>
-  <data name="Attacking speed will increase +20" xml:space="preserve">
-    <value>Швидкість атаки збільшиться на +20</value>
-    <comment>legacy_id=1472</comment>
   </data>
   <data name="Can use the skill" xml:space="preserve">
     <value>Може використовувати навик</value>
@@ -6072,14 +5912,6 @@
     <value>Функціонування альянсу буде обмежено через облогу замку.</value>
     <comment>legacy_id=1637</comment>
   </data>
-  <data name="Increase +8 AG recovery speed" xml:space="preserve">
-    <value>Збільшити швидкість відновлення AG на +8</value>
-    <comment>legacy_id=1638</comment>
-  </data>
-  <data name="Increase resistance of Lightning and Ice" xml:space="preserve">
-    <value>Збільшити опір блискавки та льоду</value>
-    <comment>legacy_id=1639</comment>
-  </data>
   <data name="Store1640" xml:space="preserve">
     <value>Магазин</value>
     <comment>legacy_id=1640</comment>
@@ -6119,14 +5951,6 @@
   <data name="be upon you." xml:space="preserve">
     <value>бути на вас.</value>
     <comment>legacy_id=1649</comment>
-  </data>
-  <data name="Blue lucky pouch" xml:space="preserve">
-    <value>Синій мішечок на щастя</value>
-    <comment>legacy_id=1650</comment>
-  </data>
-  <data name="Red lucky pouch" xml:space="preserve">
-    <value>Червоний щасливчик</value>
-    <comment>legacy_id=1651</comment>
   </data>
   <data name="Free entrance to Kalima" xml:space="preserve">
     <value>Безкоштовний вхід в Каліму</value>
@@ -6179,10 +6003,6 @@
   <data name="LugadrS12ApostlesAreHelping" xml:space="preserve">
     <value>12 апостолів Лугадра допомагають, засліплюючи воротаря біля дороги до місця спочинку Балгаса.</value>
     <comment>legacy_id=1664</comment>
-  </data>
-  <data name="Ingredients for the 3rd wing assembly." xml:space="preserve">
-    <value>Інгредієнти для складання 3-го крила.</value>
-    <comment>legacy_id=1665</comment>
   </data>
   <data name="Condor's feather" xml:space="preserve">
     <value>Кондорове перо</value>
@@ -6283,10 +6103,6 @@
   <data name="StrongMentalityAndExcellentInsightCreates" xml:space="preserve">
     <value>Сильний менталітет і чудова проникливість створюють найпотужніші заклинання прокляття. Також цей предмет витягує призивачів іншого світу та використовує проти них згубне чаклунство.</value>
     <comment>legacy_id=1690</comment>
-  </data>
-  <data name="Curse Spell increment %d%%" xml:space="preserve">
-    <value>Приріст заклинань прокляття %d%%</value>
-    <comment>legacy_id=1691</comment>
   </data>
   <data name="Curse Spell: %d ~ %d" xml:space="preserve">
     <value>Заклинання прокляття: %d ~ %d</value>
@@ -6469,7 +6285,7 @@
     <comment>legacy_id=1737</comment>
   </data>
   <data name="Command" xml:space="preserve">
-    <value>Команда</value>
+    <value>Командування</value>
     <comment>legacy_id=1738,1900</comment>
   </data>
   <data name="Long gmae time may be harmful to your health" xml:space="preserve">
@@ -6892,10 +6708,6 @@
     <value>Чи хотіли б ви відремонтувати ріг Фенріра?</value>
     <comment>legacy_id=1865</comment>
   </data>
-  <data name="+Illusion" xml:space="preserve">
-    <value>+Ілюзія</value>
-    <comment>legacy_id=1866</comment>
-  </data>
   <data name="Added %d of Life" xml:space="preserve">
     <value>Додано %d життя</value>
     <comment>legacy_id=1867</comment>
@@ -6976,10 +6788,6 @@
     <value>Натисніть кнопку, щоб повторно ініціалізувати всі статистичні точки.</value>
     <comment>legacy_id=1886</comment>
   </data>
-  <data name="Register with the NPC to receive various gifts." xml:space="preserve">
-    <value>Зареєструйтесь у NPC, щоб отримувати різні подарунки.</value>
-    <comment>legacy_id=1887</comment>
-  </data>
   <data name="Exchange has been made." xml:space="preserve">
     <value>Здійснено обмін.</value>
     <comment>legacy_id=1888</comment>
@@ -7056,10 +6864,6 @@
     <value>Щоб зменшити фрукти, зброю, обладунки та інше потрібно видалити.</value>
     <comment>legacy_id=1909</comment>
   </data>
-  <data name="Possible to decrease stat 1~9 point" xml:space="preserve">
-    <value>Можливе зниження характеристики на 1~9 балів</value>
-    <comment>legacy_id=1910</comment>
-  </data>
   <data name="Impossible since the usable fruit points are at maximum." xml:space="preserve">
     <value>Неможливо, оскільки придатні для використання точки фруктів максимальні.</value>
     <comment>legacy_id=1911</comment>
@@ -7075,18 +6879,6 @@
   <data name="Fenrir" xml:space="preserve">
     <value>Фенрір</value>
     <comment>legacy_id=1916</comment>
-  </data>
-  <data name="FragmentOfHornCanBeMade" xml:space="preserve">
-    <value>Фрагмент рогу можна зробити за допомогою Божественного захисту Богині та фрагмента обладунку.</value>
-    <comment>legacy_id=1917</comment>
-  </data>
-  <data name="Broken horn can be made using the claw of beast and fragment of horn." xml:space="preserve">
-    <value>Зламаний ріг можна зробити за допомогою пазурі звіра і фрагмента рогу.</value>
-    <comment>legacy_id=1918</comment>
-  </data>
-  <data name="Fenrir's horn can be made through item combination." xml:space="preserve">
-    <value>Ріг Фенріра можна зробити за допомогою комбінації предметів.</value>
-    <comment>legacy_id=1919</comment>
   </data>
   <data name="Can summon the Fenrir when equipped." xml:space="preserve">
     <value>Може закликати Фенріра, коли є екіпірований.</value>
@@ -7127,10 +6919,6 @@
   <data name="Skills will improve through upgrading." xml:space="preserve">
     <value>Навички покращаться шляхом вдосконалення.</value>
     <comment>legacy_id=1929</comment>
-  </data>
-  <data name="Stamina Requirement: %d" xml:space="preserve">
-    <value>Вимоги до витривалості: %d</value>
-    <comment>legacy_id=1930</comment>
   </data>
   <data name="Req LV" xml:space="preserve">
     <value>Req LV</value>
@@ -7343,18 +7131,6 @@
   <data name="Drop it to receive the gift." xml:space="preserve">
     <value>Киньте його, щоб отримати подарунок.</value>
     <comment>legacy_id=2011</comment>
-  </data>
-  <data name="Lilac candy box" xml:space="preserve">
-    <value>Бузкова цукерниця</value>
-    <comment>legacy_id=2012</comment>
-  </data>
-  <data name="Orange candy box" xml:space="preserve">
-    <value>Помаранчева цукерниця</value>
-    <comment>legacy_id=2013</comment>
-  </data>
-  <data name="Navy candy box" xml:space="preserve">
-    <value>Темно-синя цукерниця</value>
-    <comment>legacy_id=2014</comment>
   </data>
   <data name="Would you like to receive the item?" xml:space="preserve">
     <value>Бажаєте отримати товар?</value>
@@ -7948,10 +7724,6 @@
     <value>Нафтопереробний завод почав роботу. Нафтопереробний завод є частиною процесу зміни предмета на очисний камінь, який потрібно посилити. Доопрацьований предмет зникне, обов’язково перевірте предмет.</value>
     <comment>legacy_id=2224</comment>
   </data>
-  <data name="VitalityD2225" xml:space="preserve">
-    <value>життєва сила +%d</value>
-    <comment>legacy_id=2225</comment>
-  </data>
   <data name="This item is not allowed to use the private store." xml:space="preserve">
     <value>Цей товар не можна використовувати в приватному магазині.</value>
     <comment>legacy_id=2226</comment>
@@ -7975,10 +7747,6 @@
   <data name="Defense Power increase +%d" xml:space="preserve">
     <value>Збільшення сили захисту +%d</value>
     <comment>legacy_id=2231</comment>
-  </data>
-  <data name="Enjoy Halloween Festival." xml:space="preserve">
-    <value>Насолоджуйтесь фестивалем Хелловін.</value>
-    <comment>legacy_id=2232</comment>
   </data>
   <data name="Blessing of Jack O'Lantern" xml:space="preserve">
     <value>Благословення Джека О'Лантерна</value>
@@ -8024,10 +7792,6 @@
     <value>Різдво</value>
     <comment>legacy_id=2243</comment>
   </data>
-  <data name="Fireworks will appear once thrown in the field." xml:space="preserve">
-    <value>Феєрверк з'явиться, коли його кинуть у поле.</value>
-    <comment>legacy_id=2244</comment>
-  </data>
   <data name="Santa Clause" xml:space="preserve">
     <value>Дід Мороз</value>
     <comment>legacy_id=2245</comment>
@@ -8040,17 +7804,9 @@
     <value>Сніговик</value>
     <comment>legacy_id=2247</comment>
   </data>
-  <data name="Merry Christmas." xml:space="preserve">
-    <value>Веселого Різдва.</value>
-    <comment>legacy_id=2248</comment>
-  </data>
   <data name="Stonger effect has taken place." xml:space="preserve">
     <value>Має місце сильніший ефект.</value>
     <comment>legacy_id=2249</comment>
-  </data>
-  <data name="Increases the combination rate,but only up to the maximum rate." xml:space="preserve">
-    <value>Збільшує швидкість комбінації, але лише до максимальної швидкості.</value>
-    <comment>legacy_id=2250</comment>
   </data>
   <data name="Unable to increase combination rate any further." xml:space="preserve">
     <value>Неможливо збільшити коефіцієнт комбінації.</value>
@@ -8060,37 +7816,9 @@
     <value>День</value>
     <comment>legacy_id=2252,2298</comment>
   </data>
-  <data name="Experience rate is increased %d%%" xml:space="preserve">
-    <value>Швидкість досвіду збільшено %d%%</value>
-    <comment>legacy_id=2253</comment>
-  </data>
-  <data name="Item drop rate is increased %d%%" xml:space="preserve">
-    <value>Швидкість випадання предметів збільшена %d%%</value>
-    <comment>legacy_id=2254</comment>
-  </data>
   <data name="Unable to gain experience rate" xml:space="preserve">
     <value>Не вдається отримати рівень досвіду</value>
     <comment>legacy_id=2255</comment>
-  </data>
-  <data name="Increases experience gained." xml:space="preserve">
-    <value>Збільшує отриманий досвід.</value>
-    <comment>legacy_id=2256</comment>
-  </data>
-  <data name="Increases experience gained and item drop rate." xml:space="preserve">
-    <value>Збільшує отриманий досвід і швидкість випадання предметів.</value>
-    <comment>legacy_id=2257</comment>
-  </data>
-  <data name="Prevents experiences to be gained." xml:space="preserve">
-    <value>Заважає отримати досвід.</value>
-    <comment>legacy_id=2258</comment>
-  </data>
-  <data name="Enables entrance into %s." xml:space="preserve">
-    <value>Дозволяє вхід у %s.</value>
-    <comment>legacy_id=2259</comment>
-  </data>
-  <data name="usable %dtimes" xml:space="preserve">
-    <value>можна використовувати %d разів</value>
-    <comment>legacy_id=2260</comment>
   </data>
   <data name="You can achieve special items with combinations." xml:space="preserve">
     <value>Ви можете отримати спеціальні предмети за допомогою комбінацій.</value>
@@ -8123,14 +7851,6 @@
   <data name="You have achieve %s item." xml:space="preserve">
     <value>Ви отримали предмет %s.</value>
     <comment>legacy_id=2268</comment>
-  </data>
-  <data name="Congratulations. Please contact CS team and change it to item." xml:space="preserve">
-    <value>Вітаю. Будь ласка, зв’яжіться з командою CS і змініть його на елемент.</value>
-    <comment>legacy_id=2269</comment>
-  </data>
-  <data name="You will be assigned to a stage according to your level." xml:space="preserve">
-    <value>Ви будете розподілені на етап відповідно до вашого рівня.</value>
-    <comment>legacy_id=2270</comment>
   </data>
   <data name="Display general items." xml:space="preserve">
     <value>Показати загальні елементи.</value>
@@ -8228,14 +7948,6 @@
     <value>http://muonline.webzen.com/</value>
     <comment>legacy_id=2295</comment>
   </data>
-  <data name="%d%% Combination success rate increase" xml:space="preserve">
-    <value>%d%% Збільшення рівня успіху комбінації</value>
-    <comment>legacy_id=2296</comment>
-  </data>
-  <data name="Warp Command Window available." xml:space="preserve">
-    <value>Доступне вікно команд Warp.</value>
-    <comment>legacy_id=2297</comment>
-  </data>
   <data name="Hour" xml:space="preserve">
     <value>годину</value>
     <comment>legacy_id=2299</comment>
@@ -8247,10 +7959,6 @@
   <data name="Second" xml:space="preserve">
     <value>друге</value>
     <comment>legacy_id=2301</comment>
-  </data>
-  <data name="Available" xml:space="preserve">
-    <value>в наявності</value>
-    <comment>legacy_id=2302</comment>
   </data>
   <data name="Preparing." xml:space="preserve">
     <value>Готується.</value>
@@ -8307,10 +8015,6 @@
   <data name="You do not have sufficient points." xml:space="preserve">
     <value>У вас недостатньо балів.</value>
     <comment>legacy_id=2322</comment>
-  </data>
-  <data name="GM has gifted this special box." xml:space="preserve">
-    <value>GM подарував цю особливу коробку.</value>
-    <comment>legacy_id=2323</comment>
   </data>
   <data name="GM summon zone" xml:space="preserve">
     <value>Зона виклику GM</value>
@@ -8567,18 +8271,6 @@
     <value>Сувій крові</value>
     <comment>legacy_id=2396</comment>
   </data>
-  <data name="AssembleTheScrollOfBloodWith" xml:space="preserve">
-    <value>Зберіть Сувій крові за контрактом від Illusion Sorcery.</value>
-    <comment>legacy_id=2397</comment>
-  </data>
-  <data name="Assemble the Scroll of Blood with the old scrolls." xml:space="preserve">
-    <value>Зберіть Сувій крові зі старих сувоїв.</value>
-    <comment>legacy_id=2398</comment>
-  </data>
-  <data name="This is a mark of Illusion Sorcery; this is required to enter the temple." xml:space="preserve">
-    <value>Це ознака магії ілюзій; це потрібно для входу в храм.</value>
-    <comment>legacy_id=2399</comment>
-  </data>
   <data name="&lt;STEP 1: Battle Begins&gt;" xml:space="preserve">
     <value>&lt;КРОК 1: Битва починається&gt;</value>
     <comment>legacy_id=2400</comment>
@@ -8654,10 +8346,6 @@
   <data name="This is the origin of strength that protects the Illusion Temple." xml:space="preserve">
     <value>Це джерело сили, яка захищає Храм Ілюзій.</value>
     <comment>legacy_id=2419</comment>
-  </data>
-  <data name="Mobility speed reduces upon achievement." xml:space="preserve">
-    <value>Швидкість рухливості знижується після досягнення.</value>
-    <comment>legacy_id=2420</comment>
   </data>
   <data name="&lt;AM&gt; &lt;PM&gt;" xml:space="preserve">
     <value>&lt;до ранку&gt; &lt;південь&gt;</value>
@@ -8831,46 +8519,6 @@
     <value>8 Майстер Майстер</value>
     <comment>legacy_id=2464</comment>
   </data>
-  <data name="Restores HP by 100%% immediately." xml:space="preserve">
-    <value>Негайно відновлює HP на 100%% i.</value>
-    <comment>legacy_id=2500</comment>
-  </data>
-  <data name="Restores Mana by 100%% immediately." xml:space="preserve">
-    <value>Негайно відновлює ману на 100%% i.</value>
-    <comment>legacy_id=2501</comment>
-  </data>
-  <data name="You may continue to use the strengthener power." xml:space="preserve">
-    <value>Ви можете продовжувати використовувати силу підсилювача.</value>
-    <comment>legacy_id=2502</comment>
-  </data>
-  <data name="Increases Attack Speed by %d" xml:space="preserve">
-    <value>Збільшує швидкість атаки на %d</value>
-    <comment>legacy_id=2503</comment>
-  </data>
-  <data name="Increases Defense by %d" xml:space="preserve">
-    <value>Збільшує захист на %d</value>
-    <comment>legacy_id=2504</comment>
-  </data>
-  <data name="Increases Attack Power by %d" xml:space="preserve">
-    <value>Збільшує силу атаки на %d</value>
-    <comment>legacy_id=2505</comment>
-  </data>
-  <data name="Increases Wizardry by %d" xml:space="preserve">
-    <value>Збільшує Wizardry на %d</value>
-    <comment>legacy_id=2506</comment>
-  </data>
-  <data name="Increases HP by %d" xml:space="preserve">
-    <value>Збільшує HP на %d</value>
-    <comment>legacy_id=2507</comment>
-  </data>
-  <data name="Increases Mana by %d" xml:space="preserve">
-    <value>Збільшує ману на %d</value>
-    <comment>legacy_id=2508</comment>
-  </data>
-  <data name="You may freely move onward." xml:space="preserve">
-    <value>Ви можете вільно рухатися далі.</value>
-    <comment>legacy_id=2509</comment>
-  </data>
   <data name="Resets the status." xml:space="preserve">
     <value>Скидає статус.</value>
     <comment>legacy_id=2510</comment>
@@ -8878,38 +8526,6 @@
   <data name="Reset point: %d" xml:space="preserve">
     <value>Точка скидання: %d</value>
     <comment>legacy_id=2511</comment>
-  </data>
-  <data name="Strength increment +%d" xml:space="preserve">
-    <value>Приріст сили +%d</value>
-    <comment>legacy_id=2512</comment>
-  </data>
-  <data name="Quickness increment +%d" xml:space="preserve">
-    <value>Приріст швидкості +%d</value>
-    <comment>legacy_id=2513</comment>
-  </data>
-  <data name="stamina increment +%d" xml:space="preserve">
-    <value>приріст витривалості +%d</value>
-    <comment>legacy_id=2514</comment>
-  </data>
-  <data name="Energy increment +%d" xml:space="preserve">
-    <value>Приріст енергії +%d</value>
-    <comment>legacy_id=2515</comment>
-  </data>
-  <data name="Control increment +%d" xml:space="preserve">
-    <value>Приріст контролю +%d</value>
-    <comment>legacy_id=2516</comment>
-  </data>
-  <data name="Status for the set period" xml:space="preserve">
-    <value>Статус за встановлений період</value>
-    <comment>legacy_id=2517</comment>
-  </data>
-  <data name="There's an increase effect to it." xml:space="preserve">
-    <value>Є ефект збільшення.</value>
-    <comment>legacy_id=2518</comment>
-  </data>
-  <data name="It reduces the killing rate." xml:space="preserve">
-    <value>Це знижує швидкість вбивства.</value>
-    <comment>legacy_id=2519</comment>
   </data>
   <data name="Reduction point: %d" xml:space="preserve">
     <value>Точка редукції: %d</value>
@@ -8959,17 +8575,9 @@
     <value>Цей товар не можна придбати.</value>
     <comment>legacy_id=2531</comment>
   </data>
-  <data name="Attack power increment +40" xml:space="preserve">
-    <value>Приріст сили атаки +40</value>
-    <comment>legacy_id=2532</comment>
-  </data>
   <data name="Duration period: %s" xml:space="preserve">
     <value>Період тривалості: %s</value>
     <comment>legacy_id=2533</comment>
-  </data>
-  <data name="Collect Cherry Blossoms and take it to the spirit for item compensation." xml:space="preserve">
-    <value>Зберіть вишневий цвіт і віднесіть його духові за предмет компенсації.</value>
-    <comment>legacy_id=2534</comment>
   </data>
   <data name="You'll be compensated for the Cherry Blossoms branches you bring back." xml:space="preserve">
     <value>Ви отримаєте компенсацію за гілки сакури, які ви принесете.</value>
@@ -8995,18 +8603,6 @@
     <value>Виготовлення гілок сакури</value>
     <comment>legacy_id=2545</comment>
   </data>
-  <data name="700 Maximum Mana increment" xml:space="preserve">
-    <value>700 Максимальний приріст мани</value>
-    <comment>legacy_id=2549</comment>
-  </data>
-  <data name="700 Maximum Life increment" xml:space="preserve">
-    <value>700 Максимальний приріст життя</value>
-    <comment>legacy_id=2550</comment>
-  </data>
-  <data name="Restores HP by 65%% immediately." xml:space="preserve">
-    <value>Відновлює HP на 65%% iмразово.</value>
-    <comment>legacy_id=2559</comment>
-  </data>
   <data name="Cherry Blossoms branches assembly" xml:space="preserve">
     <value>Цвітіння вишні гілки збірки</value>
     <comment>legacy_id=2560</comment>
@@ -9031,69 +8627,9 @@
     <value>255 Золотих гілок сакури</value>
     <comment>legacy_id=2565</comment>
   </data>
-  <data name="Master Level EXP cannot be achieved during the item usage." xml:space="preserve">
-    <value>Майстер-рівень EXP не може бути досягнутий під час використання предмета.</value>
-    <comment>legacy_id=2566</comment>
-  </data>
-  <data name="Not applicable to" xml:space="preserve">
-    <value>Не застосовується до</value>
-    <comment>legacy_id=2567</comment>
-  </data>
-  <data name="Master Level Characters." xml:space="preserve">
-    <value>Персонажі майстерного рівня.</value>
-    <comment>legacy_id=2568</comment>
-  </data>
-  <data name="Automatic Life Recover increment %d%%" xml:space="preserve">
-    <value>Приріст автоматичного відновлення життя %d%%</value>
-    <comment>legacy_id=2569</comment>
-  </data>
-  <data name="EXP achievement and the automatic life recovery rate increases." xml:space="preserve">
-    <value>Досягнення EXP і швидкість автоматичного відновлення життя збільшуються.</value>
-    <comment>legacy_id=2570</comment>
-  </data>
-  <data name="Automatic Mana recovery increment in %d%% rate" xml:space="preserve">
-    <value>Автоматичне приріст відновлення мани в %d%%.</value>
-    <comment>legacy_id=2571</comment>
-  </data>
-  <data name="Item achievement and the automatic Mana recovery increases onward." xml:space="preserve">
-    <value>Досягнення предметів і автоматичне відновлення мани збільшуються.</value>
-    <comment>legacy_id=2572</comment>
-  </data>
-  <data name="Minimum +10 - +15 level item upgrade" xml:space="preserve">
-    <value>Мінімальне підвищення рівня +10 - +15</value>
-    <comment>legacy_id=2573</comment>
-  </data>
-  <data name="blocks the item dissipation." xml:space="preserve">
-    <value>блокує розсіювання предмета.</value>
-    <comment>legacy_id=2574</comment>
-  </data>
-  <data name="Increases Attack Power and Wizardry by 40%%" xml:space="preserve">
-    <value>Збільшує силу атаки та магію на 40%%</value>
-    <comment>legacy_id=2575</comment>
-  </data>
-  <data name="Increases Attack Speed by 10" xml:space="preserve">
-    <value>Збільшує швидкість атаки на 10</value>
-    <comment>legacy_id=2576,3069</comment>
-  </data>
-  <data name="Alleviates monster's damage by 30%%" xml:space="preserve">
-    <value>Зменшує шкоду монстра на 30%%</value>
-    <comment>legacy_id=2577</comment>
-  </data>
-  <data name="Increases Maximum Life by 50" xml:space="preserve">
-    <value>Збільшує максимальне життя на 50</value>
-    <comment>legacy_id=2578</comment>
-  </data>
   <data name="Maximum Mana +50" xml:space="preserve">
     <value>Максимальна мана +50</value>
     <comment>legacy_id=2579</comment>
-  </data>
-  <data name="Increases Critical Damage by 20%%" xml:space="preserve">
-    <value>Збільшує критичну шкоду на 20%%</value>
-    <comment>legacy_id=2580</comment>
-  </data>
-  <data name="Increses Excellent Damage by 20%%" xml:space="preserve">
-    <value>Збільшує чудову шкоду на 20%%</value>
-    <comment>legacy_id=2581</comment>
   </data>
   <data name="Carrier" xml:space="preserve">
     <value>Перевізник</value>
@@ -9122,10 +8658,6 @@
   <data name="WelcomeToSantaSVillageHere" xml:space="preserve">
     <value>Ласкаво просимо в село Діда Мороза. Ось тобі подарунок. Тут ви завжди знайдете, що принесе вам багатство.</value>
     <comment>legacy_id=2588</comment>
-  </data>
-  <data name="Relocate to the Santa's Village by the right-mouse click." xml:space="preserve">
-    <value>Перемістіть в село Діда Мороза, клацнувши правою кнопкою миші.</value>
-    <comment>legacy_id=2589</comment>
   </data>
   <data name="Would you like to move to the Santa's Village?" xml:space="preserve">
     <value>Чи хотіли б ви переїхати в село Діда Мороза?</value>
@@ -9167,10 +8699,6 @@
     <value>Швидкість відновлення АГ зросла на %d.</value>
     <comment>legacy_id=2599</comment>
   </data>
-  <data name="Surrounding Zens are automatically collected." xml:space="preserve">
-    <value>Навколишні дзени збираються автоматично.</value>
-    <comment>legacy_id=2600</comment>
-  </data>
   <data name="You may turn into a snowman if applied." xml:space="preserve">
     <value>Ви можете перетворитися на сніговика, якщо застосувати.</value>
     <comment>legacy_id=2601</comment>
@@ -9182,18 +8710,6 @@
   <data name="Move by a right-mouse-click." xml:space="preserve">
     <value>Переміщення клацанням правої кнопки миші.</value>
     <comment>legacy_id=2603</comment>
-  </data>
-  <data name="Save the application location." xml:space="preserve">
-    <value>Збережіть розташування програми.</value>
-    <comment>legacy_id=2604</comment>
-  </data>
-  <data name="Saves the location with the right-mouse-click." xml:space="preserve">
-    <value>Зберігає розташування клацанням правою кнопкою миші.</value>
-    <comment>legacy_id=2605</comment>
-  </data>
-  <data name="Returns to the saved location by a click." xml:space="preserve">
-    <value>Повернення до збереженого місця клацанням.</value>
-    <comment>legacy_id=2606</comment>
   </data>
   <data name="Would you like to save the location?" xml:space="preserve">
     <value>Бажаєте зберегти місцезнаходження?</value>
@@ -9471,153 +8987,13 @@
     <value>Забагато людей у ​​колоссі.</value>
     <comment>legacy_id=2707</comment>
   </data>
-  <data name="+10~+15 When upgrading level item please put it in combination window." xml:space="preserve">
-    <value>+10~+15 Під час підвищення рівня предмета, будь ласка, помістіть його у вікно комбінацій.</value>
-    <comment>legacy_id=2708</comment>
-  </data>
-  <data name="item/skill/luck/option will be randomly added." xml:space="preserve">
-    <value>предмет/уміння/удача/опція буде додано випадковим чином.</value>
-    <comment>legacy_id=2709</comment>
-  </data>
-  <data name="Exp and item will be secured when character dies." xml:space="preserve">
-    <value>Досвід і предмет будуть захищені, коли персонаж помре.</value>
-    <comment>legacy_id=2714</comment>
-  </data>
-  <data name="Item durability will not be decrease for a certain period." xml:space="preserve">
-    <value>Стійкість предмета не буде знижуватися протягом певного періоду.</value>
-    <comment>legacy_id=2715</comment>
-  </data>
-  <data name="Applicable to mountable items only besides pet." xml:space="preserve">
-    <value>Застосовується лише для встановлюваних елементів, крім домашніх тварин.</value>
-    <comment>legacy_id=2716</comment>
-  </data>
-  <data name="Increases your luck to create wing of your wish." xml:space="preserve">
-    <value>Збільшує вашу удачу, щоб створити крило за вашим бажанням.</value>
-    <comment>legacy_id=2717</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Satan." xml:space="preserve">
-    <value>Збільшує вашу удачу, щоб створити Wings of Satan.</value>
-    <comment>legacy_id=2718</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Dragon." xml:space="preserve">
-    <value>Збільшує вашу удачу, щоб створити Wings of Dragon.</value>
-    <comment>legacy_id=2719</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Heaven." xml:space="preserve">
-    <value>Збільшує вашу удачу, щоб створити Wings of Heaven.</value>
-    <comment>legacy_id=2720</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Soul." xml:space="preserve">
-    <value>Збільшує вашу удачу, щоб створити Wings of Soul.</value>
-    <comment>legacy_id=2721</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Elf." xml:space="preserve">
-    <value>Збільшує вашу удачу, щоб створити Wings of Elf.</value>
-    <comment>legacy_id=2722</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Spirits." xml:space="preserve">
-    <value>Збільшує вашу удачу, щоб створити Wings of Spirits.</value>
-    <comment>legacy_id=2723</comment>
-  </data>
-  <data name="Increases your luck to create Wing of Curse." xml:space="preserve">
-    <value>Збільшує вашу удачу, щоб створити Wing of Curse.</value>
-    <comment>legacy_id=2724</comment>
-  </data>
-  <data name="Increases your luck to create Wing of Despair." xml:space="preserve">
-    <value>Збільшує вашу удачу, щоб створити Wing of Despair.</value>
-    <comment>legacy_id=2725</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Darkness." xml:space="preserve">
-    <value>Збільшує вашу удачу, щоб створити Wings of Darkness.</value>
-    <comment>legacy_id=2726</comment>
-  </data>
-  <data name="Increases your luck to create Cape of Emperor." xml:space="preserve">
-    <value>Збільшує вашу удачу, щоб створити мис імператора.</value>
-    <comment>legacy_id=2727</comment>
-  </data>
   <data name="Only increases Master level exp." xml:space="preserve">
     <value>Збільшує досвід лише рівня Майстра.</value>
     <comment>legacy_id=2728</comment>
   </data>
-  <data name="No penalty for dying." xml:space="preserve">
-    <value>Жодного покарання за смерть.</value>
-    <comment>legacy_id=2729</comment>
-  </data>
-  <data name="Keeps item durable" xml:space="preserve">
-    <value>Зберігає предмет міцним</value>
-    <comment>legacy_id=2730</comment>
-  </data>
   <data name="Select to move." xml:space="preserve">
     <value>Виберіть для переміщення.</value>
     <comment>legacy_id=2731</comment>
-  </data>
-  <data name="Talisman of Wings of Satan" xml:space="preserve">
-    <value>Талісман крил сатани</value>
-    <comment>legacy_id=2732</comment>
-  </data>
-  <data name="Talisman of Wings of Heaven" xml:space="preserve">
-    <value>Талісман Крила Неба</value>
-    <comment>legacy_id=2733</comment>
-  </data>
-  <data name="Talisman of Wings of Elf" xml:space="preserve">
-    <value>Талісман Крила Ельфа</value>
-    <comment>legacy_id=2734</comment>
-  </data>
-  <data name="Talisman of Wing of Curse" xml:space="preserve">
-    <value>Талісман Крила Прокляття</value>
-    <comment>legacy_id=2735</comment>
-  </data>
-  <data name="Talisman of Cape of Emperor" xml:space="preserve">
-    <value>Талісман накидки імператора</value>
-    <comment>legacy_id=2736</comment>
-  </data>
-  <data name="Talisman of Wings of Dragon" xml:space="preserve">
-    <value>Талісман Крила Дракона</value>
-    <comment>legacy_id=2737</comment>
-  </data>
-  <data name="Talisman of Wings of Soul" xml:space="preserve">
-    <value>Талісман Крила Душі</value>
-    <comment>legacy_id=2738</comment>
-  </data>
-  <data name="Talisman of Wings of Spirits" xml:space="preserve">
-    <value>Талісман Крила Духів</value>
-    <comment>legacy_id=2739</comment>
-  </data>
-  <data name="Talisman of Wing of Despair" xml:space="preserve">
-    <value>Талісман Крила Відчаю</value>
-    <comment>legacy_id=2740</comment>
-  </data>
-  <data name="Talisman of Wings of Darkness" xml:space="preserve">
-    <value>Талісман крил темряви</value>
-    <comment>legacy_id=2741</comment>
-  </data>
-  <data name="Attack rate and defense rate increase." xml:space="preserve">
-    <value>Збільшення швидкості атаки та захисту.</value>
-    <comment>legacy_id=2742</comment>
-  </data>
-  <data name="Transform into Panda." xml:space="preserve">
-    <value>Перетворіться на панду.</value>
-    <comment>legacy_id=2743</comment>
-  </data>
-  <data name="Zen increase 50%%" xml:space="preserve">
-    <value>Дзен збільшення 50%%</value>
-    <comment>legacy_id=2744</comment>
-  </data>
-  <data name="Damage/Wizardry/Curse +30" xml:space="preserve">
-    <value>Пошкодження/Чарівництво/Прокляття +30</value>
-    <comment>legacy_id=2745</comment>
-  </data>
-  <data name="Auto-collects zen around you." xml:space="preserve">
-    <value>Автоматично збирає дзен навколо вас.</value>
-    <comment>legacy_id=2746</comment>
-  </data>
-  <data name="EXP rate 50%% increase" xml:space="preserve">
-    <value>Швидкість досвіду збільшується на 50%% in</value>
-    <comment>legacy_id=2747</comment>
-  </data>
-  <data name="Increase Defensive Skill +50" xml:space="preserve">
-    <value>Підвищення навичок захисту +50</value>
-    <comment>legacy_id=2748</comment>
   </data>
   <data name="Lugard" xml:space="preserve">
     <value>Лугард</value>
@@ -9695,14 +9071,6 @@
     <value>Вам потрібно більше %d для створення Mirror of Dimensions.</value>
     <comment>legacy_id=2776</comment>
   </data>
-  <data name="That's the only thing that will get Lugard to help you" xml:space="preserve">
-    <value>Це єдине, що змусить Лугарда вам допомогти</value>
-    <comment>legacy_id=2777</comment>
-  </data>
-  <data name="enter the Doppelganger area." xml:space="preserve">
-    <value>увійдіть у зону Doppelganger.</value>
-    <comment>legacy_id=2778</comment>
-  </data>
   <data name="Only those in possession of a Mirror of Dimensions may enter." xml:space="preserve">
     <value>Увійти можуть лише ті, хто має Дзеркало Вимірів.</value>
     <comment>legacy_id=2779</comment>
@@ -9711,45 +9079,17 @@
     <value>Орден Гайона</value>
     <comment>legacy_id=2783</comment>
   </data>
-  <data name="It contains Gaion's plans for the destruction of the empire" xml:space="preserve">
-    <value>Він містить плани Гайона щодо знищення імперії</value>
-    <comment>legacy_id=2784</comment>
-  </data>
-  <data name="and orders for the Empire Guardians." xml:space="preserve">
-    <value>і накази для Вартових Імперії.</value>
-    <comment>legacy_id=2785</comment>
-  </data>
-  <data name="You may enter the Fortress of Empire Guardians." xml:space="preserve">
-    <value>Ви можете увійти до Фортеці Вартових Імперії.</value>
-    <comment>legacy_id=2786</comment>
-  </data>
   <data name="Suspicious Scrap of Paper" xml:space="preserve">
     <value>Підозрілий клаптик паперу</value>
     <comment>legacy_id=2787</comment>
-  </data>
-  <data name="It's a worn piece of paper containing incomprehensible text." xml:space="preserve">
-    <value>Це потертий аркуш паперу з незрозумілим текстом.</value>
-    <comment>legacy_id=2788</comment>
   </data>
   <data name="No. %d Secromicon Fragment" xml:space="preserve">
     <value>№ %d Фрагмент секромікону</value>
     <comment>legacy_id=2789</comment>
   </data>
-  <data name="It's part of a Complete Secromicon." xml:space="preserve">
-    <value>Це частина повного Secromicon.</value>
-    <comment>legacy_id=2790</comment>
-  </data>
   <data name="Complete Secromicon" xml:space="preserve">
     <value>Повний Secromicon</value>
     <comment>legacy_id=2791</comment>
-  </data>
-  <data name="Indestructible Metal Secromicon" xml:space="preserve">
-    <value>Непорушний металевий секромікон</value>
-    <comment>legacy_id=2792</comment>
-  </data>
-  <data name="Contains information about Grand Wizard Etramu Lenos' research." xml:space="preserve">
-    <value>Містить інформацію про дослідження великого чарівника Етраму Леноса.</value>
-    <comment>legacy_id=2793</comment>
   </data>
   <data name="Jerint the Assistant" xml:space="preserve">
     <value>Джерінт Помічник</value>
@@ -9982,26 +9322,6 @@
   <data name="The High Vitality potion has negated the Fatigue Level penalty." xml:space="preserve">
     <value>Зілля високої життєвої сили скасовує штраф рівня втоми.</value>
     <comment>legacy_id=2874</comment>
-  </data>
-  <data name="YouCanDoAGoblinCombination" xml:space="preserve">
-    <value>Ви можете створити комбінацію гобліна із запечатаною золотою скринькою, щоб створити золоту скриньку.</value>
-    <comment>legacy_id=2875</comment>
-  </data>
-  <data name="YouCanDoAGoblinCombination2876" xml:space="preserve">
-    <value>Ви можете поєднати Гобліна з Запечатаною Срібною Скринькою, щоб створити Срібну Скриньку.</value>
-    <comment>legacy_id=2876</comment>
-  </data>
-  <data name="You can do a Goblin combination with a Gold Key to create a Golden Box." xml:space="preserve">
-    <value>Ви можете створити комбінацію гобліна із золотим ключем, щоб створити золоту скриньку.</value>
-    <comment>legacy_id=2877</comment>
-  </data>
-  <data name="You can do a Goblin combination with a Silver Key to create a Silver Box." xml:space="preserve">
-    <value>Ви можете створити комбінацію гобліна зі срібним ключем, щоб створити срібну скриню.</value>
-    <comment>legacy_id=2878</comment>
-  </data>
-  <data name="You can drop it with a fixed probability of it turning into a rare item." xml:space="preserve">
-    <value>Ви можете скинути його з фіксованою ймовірністю того, що він перетвориться на рідкісний предмет.</value>
-    <comment>legacy_id=2879,2880</comment>
   </data>
   <data name="Golden Box" xml:space="preserve">
     <value>Золота скринька</value>
@@ -10295,26 +9615,6 @@
     <value>Сталася помилка доступу до бази даних.</value>
     <comment>legacy_id=2967</comment>
   </data>
-  <data name="Increase Max. AG + Level" xml:space="preserve">
-    <value>Збільшити Макс. AG + рівень</value>
-    <comment>legacy_id=2968</comment>
-  </data>
-  <data name="Increase Max. SD + Levelx10" xml:space="preserve">
-    <value>Збільшити Макс. SD + Рівеньx10</value>
-    <comment>legacy_id=2969</comment>
-  </data>
-  <data name="Up to %d%% EXP gain increase, depending on the number of members in your party." xml:space="preserve">
-    <value>Збільшення приросту до %d%% EXP, залежно від кількості учасників у вашій групі.</value>
-    <comment>legacy_id=2970</comment>
-  </data>
-  <data name="You can acquire Goblin Points by using the MU Item Shop's storage." xml:space="preserve">
-    <value>Ви можете отримати бали гоблінів, використовуючи сховище MU Item Shop.</value>
-    <comment>legacy_id=2971</comment>
-  </data>
-  <data name="It's a box containing various items." xml:space="preserve">
-    <value>Це коробка з різними предметами.</value>
-    <comment>legacy_id=2972</comment>
-  </data>
   <data name="AnItemThatLetsYouEnjoy" xml:space="preserve">
     <value>Предмет, який дає вам змогу користуватися MU протягом 30 днів.\nМожна використовувати лише на веб-сайті MU Online.</value>
     <comment>legacy_id=2973</comment>
@@ -10495,10 +9795,6 @@
     <value>Ринок Лорен</value>
     <comment>legacy_id=3017</comment>
   </data>
-  <data name="Boosts the item drop rate." xml:space="preserve">
-    <value>Збільшує швидкість випадання предметів.</value>
-    <comment>legacy_id=3018</comment>
-  </data>
   <data name="Runedil" xml:space="preserve">
     <value>Рунеділ</value>
     <comment>legacy_id=3022</comment>
@@ -10635,10 +9931,6 @@
     <value>Двійник</value>
     <comment>legacy_id=3057</comment>
   </data>
-  <data name="Increases Max Mana 4%%" xml:space="preserve">
-    <value>Збільшує максимальну ману на 4%%</value>
-    <comment>legacy_id=3058</comment>
-  </data>
   <data name="PC Cafe Bonus" xml:space="preserve">
     <value>Бонус PC Cafe</value>
     <comment>legacy_id=3059</comment>
@@ -10662,34 +9954,6 @@
   <data name="You cannot ask others to join your party while in Loren Market." xml:space="preserve">
     <value>Ви не можете просити інших приєднатися до вашої групи, перебуваючи на ринку Лорен.</value>
     <comment>legacy_id=3064</comment>
-  </data>
-  <data name="Equip to transform into a Skeleton Warrior." xml:space="preserve">
-    <value>Одягніть, щоб перетворитися на воїна-скелета.</value>
-    <comment>legacy_id=3065</comment>
-  </data>
-  <data name="Damage/Wizardry/Curse +40" xml:space="preserve">
-    <value>Пошкодження/Чарівництво/Прокляття +40</value>
-    <comment>legacy_id=3066</comment>
-  </data>
-  <data name="Equipping along with a Pet Skeleton" xml:space="preserve">
-    <value>Екіпірування разом зі скелетом домашньої тварини</value>
-    <comment>legacy_id=3067</comment>
-  </data>
-  <data name="increases Damage, Wizardry and Curse by 20%%" xml:space="preserve">
-    <value>збільшує шкоду, магію та прокляття на 20%%</value>
-    <comment>legacy_id=3068</comment>
-  </data>
-  <data name="and EXP by 30%%." xml:space="preserve">
-    <value>і EXP на 30%%.</value>
-    <comment>legacy_id=3070</comment>
-  </data>
-  <data name="Equipping along with a Skeleton Transformation Ring" xml:space="preserve">
-    <value>Екіпірування разом із кільцем трансформації скелета</value>
-    <comment>legacy_id=3071</comment>
-  </data>
-  <data name="increases EXP by 30%%." xml:space="preserve">
-    <value>збільшує досвід на 30%%.</value>
-    <comment>legacy_id=3072</comment>
   </data>
   <data name="Chaos Castle Lv.%lu Guardsman x %lu/%lu" xml:space="preserve">
     <value>Chaos Castle Lv.%lu Guardsman x %lu/%lu</value>
@@ -10727,10 +9991,6 @@
     <value>Випадкова винагорода (різні види %lu)</value>
     <comment>legacy_id=3082</comment>
   </data>
-  <data name="Right click to use." xml:space="preserve">
-    <value>Клацніть правою кнопкою миші, щоб використати.</value>
-    <comment>legacy_id=3084</comment>
-  </data>
   <data name="+14 Item Creation" xml:space="preserve">
     <value>+14 Створення предметів</value>
     <comment>legacy_id=3086</comment>
@@ -10738,10 +9998,6 @@
   <data name="+15 Item Creation" xml:space="preserve">
     <value>+15 Створення предметів</value>
     <comment>legacy_id=3087</comment>
-  </data>
-  <data name="Unable to Equip with a Different Transformation Ring" xml:space="preserve">
-    <value>Неможливо спорядити інше кільце трансформації</value>
-    <comment>legacy_id=3088</comment>
   </data>
   <data name="Cannot be equipped while another Transformation Ring is equipped." xml:space="preserve">
     <value>Не можна одягнути, якщо є інше кільце трансформації.</value>
@@ -10803,14 +10059,6 @@
     <value>Великий Герцог#Герцог#Маркіз#Граф#Віконт#Барон#Лицар-Командор#Верховний Лицар#Лицар#Префект Гвардії#Офіцер#Лейтенант#Сержант#Рядовий</value>
     <comment>legacy_id=3104</comment>
   </data>
-  <data name="Can enter the Monday - Saturday map." xml:space="preserve">
-    <value>Можна ввести карту понеділок - субота.</value>
-    <comment>legacy_id=3105</comment>
-  </data>
-  <data name="Can enter the Sunday map." xml:space="preserve">
-    <value>Можна ввести недільну карту.</value>
-    <comment>legacy_id=3106</comment>
-  </data>
   <data name="Varka Map 7" xml:space="preserve">
     <value>Варка Карта 7</value>
     <comment>legacy_id=3107</comment>
@@ -10838,14 +10086,6 @@
   <data name="The information is not correct." xml:space="preserve">
     <value>Інформація не відповідає дійсності.</value>
     <comment>legacy_id=3113</comment>
-  </data>
-  <data name="Dark Lord use only." xml:space="preserve">
-    <value>Темний Лорд використовувати тільки.</value>
-    <comment>legacy_id=3115</comment>
-  </data>
-  <data name="You can enter to Gold Channel." xml:space="preserve">
-    <value>Ви можете увійти в Gold Channel.</value>
-    <comment>legacy_id=3116</comment>
   </data>
   <data name="TheGameClientIsLoadedOnly" xml:space="preserve">
     <value>Клієнт гри завантажується тільки через офіційний сайт. Закриття програми, спробуйте ще раз.</value>
@@ -10886,10 +10126,6 @@
   <data name="Item Drop Rate increase +%d%%" xml:space="preserve">
     <value>Збільшення швидкості випадання предметів +%d%%</value>
     <comment>legacy_id=3126</comment>
-  </data>
-  <data name="7 Days until Expiration" xml:space="preserve">
-    <value>7 днів до закінчення терміну дії</value>
-    <comment>legacy_id=3127</comment>
   </data>
   <data name="You cannot purchase this item more than once." xml:space="preserve">
     <value>Ви не можете придбати цей товар більше одного разу.</value>
@@ -11078,10 +10314,6 @@
   <data name="Expired Item" xml:space="preserve">
     <value>Термін дії минув</value>
     <comment>legacy_id=3266</comment>
-  </data>
-  <data name="Restores SD by 65%% immediately." xml:space="preserve">
-    <value>Миттєво відновлює SD на 65%% i.</value>
-    <comment>legacy_id=3267</comment>
   </data>
   <data name="Click the item to see the quest information again." xml:space="preserve">
     <value>Натисніть предмет, щоб знову переглянути інформацію про квест.</value>

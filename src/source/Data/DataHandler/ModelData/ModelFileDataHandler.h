@@ -3,6 +3,7 @@
 #include "Data/GameData/ModelData/ModelFiles.h"
 
 #include <filesystem>
+#include <span>
 #include <string>
 
 class BMD;
@@ -35,8 +36,8 @@ bool ApplyModelFile(BMD& model, int type, const ModelFiles& table);
 [[nodiscard]] std::wstring ModelFileTextureName(const ModelFileEntry& entry);
 
 // Opens the textures of Models[type] after ApplyModelFile replaced its meshes:
-// by name (the meshes' extras.texture) from `subFolder` below Data\, then the
+// by name (the meshes' extras.texture) from `subFolders` below Data\, then the
 // images the file carries for the meshes that have one. A texture found
 // nowhere is logged, never shown: the mesh draws without it.
-void OpenModelFileTextures(int type, const std::wstring& subFolder, const ModelFiles& table);
+void OpenModelFileTextures(int type, std::span<const std::wstring> subFolders, const ModelFiles& table);
 } // namespace Data::Models

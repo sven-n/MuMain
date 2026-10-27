@@ -99,6 +99,8 @@ public:
     // The level bonus table of that name, or nullptr: what a description's placeholder names.
     const LevelBonusTable* FindTable(std::string_view name) const;
     std::vector<std::string> GetTableNames() const;
+    // Whether the default or a profile gives a stat that table; the others are only for descriptions.
+    bool IsTableUsedByStats(std::string_view name) const;
     int GetExcellentDropLevelBonus() const
     {
         return m_excellentDropLevelBonus;
@@ -110,6 +112,7 @@ public:
 
 private:
     std::vector<LevelBonusTable> m_tables;
+    std::vector<bool> m_tableUsedByStats;
     std::vector<std::string> m_names;
     std::vector<ItemStatProfile> m_profiles;
     std::vector<StatProfileRule> m_rules;

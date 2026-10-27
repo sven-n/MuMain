@@ -347,6 +347,119 @@ TEST_CASE("An item's description is kept through write and read [data][items]")
     CHECK(HasErrors(badColor.issues));
 }
 
+TEST_CASE("A description line's item levels are kept through write and read, and checked [data][items]")
+{
+    ItemDefinition scroll = MakeKris();
+    scroll.group = 14;
+    scroll.number = 10;
+    scroll.slot = ItemSlot::None;
+    scroll.weaponKind = WeaponKind::None;
+    scroll.statProfile.clear();
+    ItemDescriptionLine warp;
+    warp.text.Set("en", "Warp to the corresponding area after 3 seconds");
+    warp.minLevel = 1;
+    warp.maxLevel = 8;
+    ItemDescriptionLine always;
+    always.text.Set("en", "Shown at every level");
+    scroll.description = {warp, always};
+
+    CHECK_FALSE(warp.IsShownAt(0));
+    CHECK(warp.IsShownAt(1));
+    CHECK(warp.IsShownAt(8));
+    CHECK_FALSE(warp.IsShownAt(9));
+    CHECK(always.IsShownAt(0));
+    CHECK(always.IsShownAt(ItemLevelCount - 1));
+
+    // Written on one line, and only for a line that is not shown at every level.
+    const std::string text = WriteItemGroupJson(14, std::vector<ItemDefinition>{scroll});
+    CHECK(text.find("\"levels\": [1, 8]") != std::string::npos);
+    CHECK(text.find("\"levels\"") == text.rfind("\"levels\""));
+    const ReadResult result = Read(text);
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items.front().description == scroll.description);
+    CHECK_FALSE(HasErrors(result.issues));
+    CHECK(WriteItemGroupJson(14, result.items) == text);
+
+    for (const char* levels : {R"("levels": [8, 1])", R"("levels": [0, 16])", R"("levels": [-1, 2])",
+                               R"("levels": [3])", R"("levels": 3)", R"("levels": [1.5, 2])",
+                               // Outside int's range: they'd wrap into a level (2^32 + 1 into 1) if read as an int.
+                               R"("levels": [4294967297, 4294967298])", R"("levels": [-4294967295, 2])",
+                               R"("levels": [0, 18446744073709551615])", R"("levels": [-9223372036854775808, 2])"})
+    {
+        INFO(levels);
+        const ReadResult bad = Read(std::string(R"({"formatVersion": 1, "group": 14, "items": [
+            {"number": 10, "name": "Town Portal Scroll", "description": [{"text": "x", )") +
+                                    levels + "}]}]}");
+        CHECK(HasIssue(bad.issues, ItemDataIssueSeverity::Error, "description[0].levels"));
+    }
+}
+
+TEST_CASE("An item's name lines are kept through write and read, with or without a text and a color [data][items]")
+{
+    ItemDefinition horn = MakeKris();
+    horn.group = 13;
+    horn.number = 37;
+    horn.slot = ItemSlot::None;
+    horn.weaponKind = WeaponKind::None;
+    horn.statProfile.clear();
+    // The Horn of Fenrir's Destroy kind, then its plain name; a jewel keeps the standard name in yellow.
+    ItemNameLine destroy;
+    destroy.hasText = destroy.hasColor = true;
+    destroy.text.Set("en", "{name} +Destroy");
+    destroy.color = ItemTextColor::Blue;
+    TooltipCondition kind;
+    kind.name = "excellentFlags";
+    kind.comparison = TooltipCondition::Comparison::Equal;
+    kind.number = 1;
+    destroy.when = {kind};
+    ItemNameLine plain;
+    plain.hasText = plain.hasColor = true;
+    plain.text.Set("en", "{name}");
+    plain.color = ItemTextColor::White;
+    ItemNameLine colorOnly;
+    colorOnly.hasColor = true;
+    colorOnly.color = ItemTextColor::Yellow;
+    colorOnly.minLevel = 1;
+    colorOnly.maxLevel = 3;
+    horn.nameLines = {destroy, plain, colorOnly};
+
+    const std::string text = WriteItemGroupJson(13, std::vector<ItemDefinition>{horn});
+    // A white name line writes its color, which keeps a standard color off it.
+    CHECK(text.find("\"color\": \"white\"") != std::string::npos);
+    const ReadResult result = Read(text);
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items.front().nameLines == horn.nameLines);
+    CHECK_FALSE(HasErrors(result.issues));
+    CHECK(WriteItemGroupJson(13, result.items) == text);
+
+    const ReadResult notObject = Read(R"({"formatVersion": 1, "group": 13, "items": [
+        {"number": 37, "name": "Horn of Fenrir", "nameLines": ["{name}"]}]})");
+    CHECK(HasIssue(notObject.issues, ItemDataIssueSeverity::Error, "nameLines[0]"));
+
+    // The name is always bold and the first row: a name line's "bold" and "after" are errors.
+    const ReadResult boldAndAfter = Read(R"({"formatVersion": 1, "group": 13, "items": [
+        {"number": 37, "name": "Horn of Fenrir", "nameLines": [{"text": "{name}", "bold": true, "after": "options"}]}]})");
+    CHECK(HasIssue(boldAndAfter.issues, ItemDataIssueSeverity::Error, "nameLines[0].bold"));
+    CHECK(HasIssue(boldAndAfter.issues, ItemDataIssueSeverity::Error, "nameLines[0].after"));
+}
+
+TEST_CASE("A description line's \"@\" names a shared text [data][items]")
+{
+    // "@" alone names none: an error, as in a layout, not a silent blank line.
+    const ReadResult empty = Read(R"({"formatVersion": 1, "group": 14, "items": [
+        {"number": 10, "name": "Town Portal Scroll", "description": [{"text": "@"}]}]})");
+    CHECK(HasIssue(empty.issues, ItemDataIssueSeverity::Error, "description[0].text"));
+    const ReadResult named = Read(R"({"formatVersion": 1, "group": 14, "items": [
+        {"number": 10, "name": "Town Portal Scroll", "description": [{"text": "@durability"}]}]})");
+    CHECK_FALSE(HasErrors(named.issues));
+    REQUIRE(named.items.size() == 1);
+    CHECK(named.items.front().description.front().textName == "durability");
+    // So does a level value's.
+    const ReadResult levelValue = Read(R"({"formatVersion": 1, "group": 14, "items": [
+        {"number": 10, "name": "Town Portal Scroll", "levelValues": {"stat": ["ENG", "@"]}}]})");
+    CHECK(HasIssue(levelValue.issues, ItemDataIssueSeverity::Error, "levelValues.stat[1]"));
+}
+
 TEST_CASE("An item's stat profile is kept through write and read [data][items]")
 {
     ItemDefinition kris = MakeKris();

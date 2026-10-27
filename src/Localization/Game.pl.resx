@@ -156,18 +156,6 @@
     <value>Devil Square</value>
     <comment>legacy_id=39,1145</comment>
   </data>
-  <data name="One-Handed Damage" xml:space="preserve">
-    <value>Obrażenia jedną ręką</value>
-    <comment>legacy_id=40</comment>
-  </data>
-  <data name="Two-Handed Damage" xml:space="preserve">
-    <value>Obrażenia dwuręczne</value>
-    <comment>legacy_id=41</comment>
-  </data>
-  <data name="Wizardry Damage" xml:space="preserve">
-    <value>Obrażenia magiczne</value>
-    <comment>legacy_id=42</comment>
-  </data>
   <data name="Very Slow" xml:space="preserve">
     <value>Bardzo powolny</value>
     <comment>legacy_id=43</comment>
@@ -260,21 +248,9 @@
     <value>Obrona: %d</value>
     <comment>legacy_id=65,209</comment>
   </data>
-  <data name="Spell resistance: %d" xml:space="preserve">
-    <value>Odporność na zaklęcia: %d</value>
-    <comment>legacy_id=66</comment>
-  </data>
   <data name="Defense rate: %d" xml:space="preserve">
     <value>Współczynnik obrony: %d</value>
     <comment>legacy_id=67,2045</comment>
-  </data>
-  <data name="Moving speed: %d" xml:space="preserve">
-    <value>Prędkość ruchu: %d</value>
-    <comment>legacy_id=68</comment>
-  </data>
-  <data name="Number of items: %d" xml:space="preserve">
-    <value>Ilość sztuk: %d</value>
-    <comment>legacy_id=69</comment>
   </data>
   <data name="Life: %d" xml:space="preserve">
     <value>Życie: %d</value>
@@ -283,10 +259,6 @@
   <data name="Durability: [%d/%d]" xml:space="preserve">
     <value>Trwałość: [%d/%d]</value>
     <comment>legacy_id=71</comment>
-  </data>
-  <data name="%s Resistance: %d" xml:space="preserve">
-    <value>%s Opór: %d</value>
-    <comment>legacy_id=72</comment>
   </data>
   <data name="Strength Requirement: %d" xml:space="preserve">
     <value>Wymagana siła: %d</value>
@@ -311,10 +283,6 @@
   <data name="Increases moving speed" xml:space="preserve">
     <value>Zwiększa prędkość poruszania się</value>
     <comment>legacy_id=78</comment>
-  </data>
-  <data name="Wizardry Dmg %d%% rise" xml:space="preserve">
-    <value>Obrażenia magiczne +%d%%</value>
-    <comment>legacy_id=79</comment>
   </data>
   <data name="Defend skill (Mana:%d)" xml:space="preserve">
     <value>Umiejętność Defense (Mana: %d)</value>
@@ -375,10 +343,6 @@
   <data name="Luck (critical damage rate +5%%)" xml:space="preserve">
     <value>Szczęście (wskaźnik obrażeń krytycznych +5%%)</value>
     <comment>legacy_id=94</comment>
-  </data>
-  <data name="Durability: [%d]" xml:space="preserve">
-    <value>Trwałość: [%d]</value>
-    <comment>legacy_id=95</comment>
   </data>
   <data name="Can only be used in moving unit" xml:space="preserve">
     <value>Można używać tylko w ruchomych jednostkach</value>
@@ -471,10 +435,6 @@
   <data name="Moon Cookie" xml:space="preserve">
     <value>Moon Cookie</value>
     <comment>legacy_id=118</comment>
-  </data>
-  <data name="You can register by giving it to the NPC" xml:space="preserve">
-    <value>Rejestracji można dokonać przekazując ją NPC</value>
-    <comment>legacy_id=119</comment>
   </data>
   <data name="Key Function" xml:space="preserve">
     <value>Skróty klawiszowe</value>
@@ -638,10 +598,6 @@
   <data name="Move cursor down-&gt; Adjust chat window" xml:space="preserve">
     <value>Przesuń kursor w dół-&gt; Dostosuj okno czatu</value>
     <comment>legacy_id=156</comment>
-  </data>
-  <data name="Warp to the corresponding area after %d seconds" xml:space="preserve">
-    <value>Teleportacja do wybranego obszaru za %d sekund</value>
-    <comment>legacy_id=157</comment>
   </data>
   <data name="%s Warp scroll" xml:space="preserve">
     <value>%s Warp scroll</value>
@@ -2444,10 +2400,6 @@
     <value>Pochłania 30%% obrażeń</value>
     <comment>legacy_id=575</comment>
   </data>
-  <data name="Increase 30%% of attacking &amp; Wizardry Dmg" xml:space="preserve">
-    <value>Zwiększa obrażenia fizyczne i magiczne o 30%%</value>
-    <comment>legacy_id=576</comment>
-  </data>
   <data name="Increase %d%% of Damage" xml:space="preserve">
     <value>Zwiększa obrażenia o %d%%</value>
     <comment>legacy_id=577</comment>
@@ -2671,18 +2623,6 @@
   <data name="Increases acquisition rate of Mana after hunting monsters +Mana/8" xml:space="preserve">
     <value>Zwiększa szybkość zdobywania many po polowaniu na potwory +Mana/8</value>
     <comment>legacy_id=635</comment>
-  </data>
-  <data name="Increases 1~3 stat points" xml:space="preserve">
-    <value>Zwiększa 1-3 punkty statystyk</value>
-    <comment>legacy_id=636</comment>
-  </data>
-  <data name="The remaining time is shown" xml:space="preserve">
-    <value>Wyświetlany jest pozostały czas</value>
-    <comment>legacy_id=638</comment>
-  </data>
-  <data name="when you right click on your mouse." xml:space="preserve">
-    <value>po kliknięciu prawym przyciskiem myszy.</value>
-    <comment>legacy_id=639</comment>
   </data>
   <data name="You will enter Devil Square (%d seconds from now)" xml:space="preserve">
     <value>Wejdziesz na Devil Square (za %d sekund)</value>
@@ -3076,10 +3016,6 @@
     <value>Przywołanie</value>
     <comment>legacy_id=738</comment>
   </data>
-  <data name="Max HP +%d increased" xml:space="preserve">
-    <value>Zwiększono maksymalne HP +%d</value>
-    <comment>legacy_id=739</comment>
-  </data>
   <data name="HP +%d increased" xml:space="preserve">
     <value>Zwiększono HP +%d</value>
     <comment>legacy_id=740</comment>
@@ -3111,10 +3047,6 @@
   <data name="You have exchanged Dinorants" xml:space="preserve">
     <value>Wymieniłeś Dinoranty</value>
     <comment>legacy_id=747</comment>
-  </data>
-  <data name="Used to upgrade wings" xml:space="preserve">
-    <value>Służy do ulepszania Wings</value>
-    <comment>legacy_id=748</comment>
   </data>
   <data name="Must be over level 10 to use fruits" xml:space="preserve">
     <value>Aby używać Fruit, musisz mieć poziom powyżej 10</value>
@@ -3292,21 +3224,9 @@
     <value>Absolute Sword of Archangel</value>
     <comment>legacy_id=812</comment>
   </data>
-  <data name="Used in the online event" xml:space="preserve">
-    <value>Używane podczas wydarzenia online</value>
-    <comment>legacy_id=813</comment>
-  </data>
-  <data name="Used when entering Blood Castle" xml:space="preserve">
-    <value>Używane podczas wchodzenia do Blood Castle</value>
-    <comment>legacy_id=814</comment>
-  </data>
   <data name="Reward received when returned to the Archangel" xml:space="preserve">
     <value>Nagroda otrzymana po powrocie do Archanioła</value>
     <comment>legacy_id=815</comment>
-  </data>
-  <data name="Used when creating a Cloak of Invisibility" xml:space="preserve">
-    <value>Używane podczas tworzenia Cloak of Invisibility</value>
-    <comment>legacy_id=816</comment>
   </data>
   <data name="Absolute Crossbow of Archangel" xml:space="preserve">
     <value>Absolute Crossbow of Archangel</value>
@@ -3720,17 +3640,9 @@
     <value>Pierścień możesz upuścić po osiągnięciu poziomu %d.</value>
     <comment>legacy_id=923</comment>
   </data>
-  <data name="Can be dropped after level %d" xml:space="preserve">
-    <value>Można upuścić po poziomie %d</value>
-    <comment>legacy_id=924</comment>
-  </data>
   <data name="Ring of Wizard" xml:space="preserve">
     <value>Ring of Wizard</value>
     <comment>legacy_id=925</comment>
-  </data>
-  <data name="Cannot Repair" xml:space="preserve">
-    <value>Nie można naprawić</value>
-    <comment>legacy_id=926</comment>
   </data>
   <data name="Close (%s)" xml:space="preserve">
     <value>Zamknij (%s)</value>
@@ -4368,14 +4280,6 @@
     <value>do</value>
     <comment>legacy_id=1096</comment>
   </data>
-  <data name="Stone of Friendship" xml:space="preserve">
-    <value>Stone of Friendship</value>
-    <comment>legacy_id=1098</comment>
-  </data>
-  <data name="Used in the My Friend event." xml:space="preserve">
-    <value>Używane w wydarzeniu „Znajomi”.</value>
-    <comment>legacy_id=1099</comment>
-  </data>
   <data name="Do you want to buy an item?" xml:space="preserve">
     <value>Czy chcesz kupić przedmiot?</value>
     <comment>legacy_id=1100</comment>
@@ -4668,10 +4572,6 @@
     <value>Do środka może wejść tylko właściciel magicznego kamienia i członkowie grupy</value>
     <comment>legacy_id=1179</comment>
   </data>
-  <data name="Kundun mark +%d level" xml:space="preserve">
-    <value>Kundun Mark +%d</value>
-    <comment>legacy_id=1180</comment>
-  </data>
   <data name="%d / %d" xml:space="preserve">
     <value>%d / %d</value>
     <comment>legacy_id=1181</comment>
@@ -4804,14 +4704,6 @@
     <value>Dark Raven</value>
     <comment>legacy_id=1214</comment>
   </data>
-  <data name="Used in Dark Horse resurrection" xml:space="preserve">
-    <value>Używany podczas wskrzeszenia Dark Horse</value>
-    <comment>legacy_id=1215</comment>
-  </data>
-  <data name="Used in Dark Raven resurrection" xml:space="preserve">
-    <value>Używany do wskrzeszenia Dark Raven</value>
-    <comment>legacy_id=1216</comment>
-  </data>
   <data name="Pet" xml:space="preserve">
     <value>Zwierzak</value>
     <comment>legacy_id=1217</comment>
@@ -4879,18 +4771,6 @@
   <data name="No %s." xml:space="preserve">
     <value>Brak %s.</value>
     <comment>legacy_id=1233</comment>
-  </data>
-  <data name="Increase pet attack as %d%%" xml:space="preserve">
-    <value>Zwiększa atak zwierzaka o %d%%</value>
-    <comment>legacy_id=1234</comment>
-  </data>
-  <data name="Crest of monarch" xml:space="preserve">
-    <value>Crest of Monarch</value>
-    <comment>legacy_id=1235</comment>
-  </data>
-  <data name="Used in combining Cape of Lord &amp; Warrior's Cloak" xml:space="preserve">
-    <value>Używany do łączenia Cape of Lord i Warrior's Cloak</value>
-    <comment>legacy_id=1236</comment>
   </data>
   <data name="Check the details in pet information window" xml:space="preserve">
     <value>Sprawdź szczegóły w oknie informacji o zwierzaku</value>
@@ -5067,14 +4947,6 @@
   <data name="Prevent equipment drop" xml:space="preserve">
     <value>Chroni ekwipunek przed wypadnięciem</value>
     <comment>legacy_id=1288</comment>
-  </data>
-  <data name="Sign of lord" xml:space="preserve">
-    <value>Sign of Lord</value>
-    <comment>legacy_id=1290</comment>
-  </data>
-  <data name="Use in siege registration" xml:space="preserve">
-    <value>Użyj w rejestracji oblężenia</value>
-    <comment>legacy_id=1291</comment>
   </data>
   <data name="Move to vault" xml:space="preserve">
     <value>Przenieś do skarbca</value>
@@ -5544,22 +5416,6 @@
     <value>Life Stone</value>
     <comment>legacy_id=1415</comment>
   </data>
-  <data name="Scroll of Guardian" xml:space="preserve">
-    <value>Scroll of Guardian</value>
-    <comment>legacy_id=1416</comment>
-  </data>
-  <data name="Damage +20%% increase effect" xml:space="preserve">
-    <value>Efekt zwiększenia obrażeń o 20%%</value>
-    <comment>legacy_id=1417</comment>
-  </data>
-  <data name="Duration 60 seconds" xml:space="preserve">
-    <value>Czas trwania 60 sekund</value>
-    <comment>legacy_id=1418</comment>
-  </data>
-  <data name="Only applicable for castle gate and statue" xml:space="preserve">
-    <value>Dotyczy tylko bramy zamkowej i posągu</value>
-    <comment>legacy_id=1419,1465</comment>
-  </data>
   <data name="No. of signs" xml:space="preserve">
     <value>Liczba znaków</value>
     <comment>legacy_id=1420</comment>
@@ -5696,18 +5552,6 @@
     <value>Nie udało się wystrzelić z machiny oblężniczej</value>
     <comment>legacy_id=1459</comment>
   </data>
-  <data name="Archer" xml:space="preserve">
-    <value>Łucznik</value>
-    <comment>legacy_id=1460</comment>
-  </data>
-  <data name="Spearman" xml:space="preserve">
-    <value>Włócznik</value>
-    <comment>legacy_id=1461</comment>
-  </data>
-  <data name="Place Life Stone" xml:space="preserve">
-    <value>Umieść Life Stone</value>
-    <comment>legacy_id=1462</comment>
-  </data>
   <data name="Attacking speed +25 increase effect" xml:space="preserve">
     <value>Efekt zwiększenia szybkości ataku +25</value>
     <comment>legacy_id=1463</comment>
@@ -5739,10 +5583,6 @@
   <data name="Attacking skill will increase +20%%" xml:space="preserve">
     <value>Siła ataku +20%%</value>
     <comment>legacy_id=1471</comment>
-  </data>
-  <data name="Attacking speed will increase +20" xml:space="preserve">
-    <value>Szybkość ataku wzrośnie o +20</value>
-    <comment>legacy_id=1472</comment>
   </data>
   <data name="Can use the skill" xml:space="preserve">
     <value>Można używać umiejętności</value>
@@ -6368,14 +6208,6 @@
     <value>Funkcja Sojuszu będzie ograniczona ze względu na Castle Siege.</value>
     <comment>legacy_id=1637</comment>
   </data>
-  <data name="Increase +8 AG recovery speed" xml:space="preserve">
-    <value>Zwiększa prędkość odzyskiwania +8 AG</value>
-    <comment>legacy_id=1638</comment>
-  </data>
-  <data name="Increase resistance of Lightning and Ice" xml:space="preserve">
-    <value>Zwiększa odporność na błyskawice i lód</value>
-    <comment>legacy_id=1639</comment>
-  </data>
   <data name="Store1640" xml:space="preserve">
     <value>Sklep</value>
     <comment>legacy_id=1640</comment>
@@ -6415,14 +6247,6 @@
   <data name="be upon you." xml:space="preserve">
     <value>spłynie na ciebie.</value>
     <comment>legacy_id=1649</comment>
-  </data>
-  <data name="Blue lucky pouch" xml:space="preserve">
-    <value>Blue lucky pouch</value>
-    <comment>legacy_id=1650</comment>
-  </data>
-  <data name="Red lucky pouch" xml:space="preserve">
-    <value>Red lucky pouch</value>
-    <comment>legacy_id=1651</comment>
   </data>
   <data name="Free entrance to Kalima" xml:space="preserve">
     <value>Bezpłatny wstęp do Kalimy</value>
@@ -6475,10 +6299,6 @@
   <data name="LugadrS12ApostlesAreHelping" xml:space="preserve">
     <value>Pomaga mu 12 apostołów Lugadra, oślepiając odźwiernego przy drodze do miejsca spoczynku Balgassa.</value>
     <comment>legacy_id=1664</comment>
-  </data>
-  <data name="Ingredients for the 3rd wing assembly." xml:space="preserve">
-    <value>Składnik do stworzenia skrzydeł 3. poziomu.</value>
-    <comment>legacy_id=1665</comment>
   </data>
   <data name="Condor's feather" xml:space="preserve">
     <value>Condor's Feather</value>
@@ -6579,10 +6399,6 @@
   <data name="StrongMentalityAndExcellentInsightCreates" xml:space="preserve">
     <value>Silna mentalność i doskonały wgląd tworzą najpotężniejsze zaklęcie klątwy. Również ten przedmiot przyciąga przywoływaczy z innego świata i używa przeciwko nim szkodliwej magii.</value>
     <comment>legacy_id=1690</comment>
-  </data>
-  <data name="Curse Spell increment %d%%" xml:space="preserve">
-    <value>Przyrost zaklęcia klątwy %d%%</value>
-    <comment>legacy_id=1691</comment>
   </data>
   <data name="Curse Spell: %d ~ %d" xml:space="preserve">
     <value>Zaklęcie klątwy: %d ~ %d</value>
@@ -7188,10 +7004,6 @@
     <value>Czy chciałbyś naprawić Fenrir's Horn?</value>
     <comment>legacy_id=1865</comment>
   </data>
-  <data name="+Illusion" xml:space="preserve">
-    <value>+Iluzja</value>
-    <comment>legacy_id=1866</comment>
-  </data>
   <data name="Added %d of Life" xml:space="preserve">
     <value>Dodano %d życia</value>
     <comment>legacy_id=1867</comment>
@@ -7272,10 +7084,6 @@
     <value>Kliknij przycisk, aby zresetować wszystkie punkty statystyk.</value>
     <comment>legacy_id=1886</comment>
   </data>
-  <data name="Register with the NPC to receive various gifts." xml:space="preserve">
-    <value>Zarejestruj się u NPC, aby otrzymać różne prezenty.</value>
-    <comment>legacy_id=1887</comment>
-  </data>
   <data name="Exchange has been made." xml:space="preserve">
     <value>Dokonano wymiany.</value>
     <comment>legacy_id=1888</comment>
@@ -7352,10 +7160,6 @@
     <value>Aby zmniejszyć statystykę za pomocą Fruit, zdejmij broń, zbroję i pozostały ekwipunek.</value>
     <comment>legacy_id=1909</comment>
   </data>
-  <data name="Possible to decrease stat 1~9 point" xml:space="preserve">
-    <value>Możliwe zmniejszenie statystyki o 1~9 punktów</value>
-    <comment>legacy_id=1910</comment>
-  </data>
   <data name="Impossible since the usable fruit points are at maximum." xml:space="preserve">
     <value>Niemożliwe, ponieważ możliwe do wykorzystania punkty Fruit są maksymalne.</value>
     <comment>legacy_id=1911</comment>
@@ -7371,18 +7175,6 @@
   <data name="Fenrir" xml:space="preserve">
     <value>Fenrir</value>
     <comment>legacy_id=1916</comment>
-  </data>
-  <data name="FragmentOfHornCanBeMade" xml:space="preserve">
-    <value>Fragment of Horn powstaje z Divine Protection of Goddess i Splinter of Armor.</value>
-    <comment>legacy_id=1917</comment>
-  </data>
-  <data name="Broken horn can be made using the claw of beast and fragment of horn." xml:space="preserve">
-    <value>Broken Horn powstaje z Claw of Beast i Fragment of Horn.</value>
-    <comment>legacy_id=1918</comment>
-  </data>
-  <data name="Fenrir's horn can be made through item combination." xml:space="preserve">
-    <value>Fenrir's Horn można wykonać poprzez kombinację przedmiotów.</value>
-    <comment>legacy_id=1919</comment>
   </data>
   <data name="Can summon the Fenrir when equipped." xml:space="preserve">
     <value>Po założeniu przywołuje Fenrira.</value>
@@ -7423,10 +7215,6 @@
   <data name="Skills will improve through upgrading." xml:space="preserve">
     <value>Umiejętności będą doskonalone poprzez ulepszanie.</value>
     <comment>legacy_id=1929</comment>
-  </data>
-  <data name="Stamina Requirement: %d" xml:space="preserve">
-    <value>Wymagania dotyczące wytrzymałości: %d</value>
-    <comment>legacy_id=1930</comment>
   </data>
   <data name="Req LV" xml:space="preserve">
     <value>Wymagane LV</value>
@@ -7639,18 +7427,6 @@
   <data name="Drop it to receive the gift." xml:space="preserve">
     <value>Upuść go, aby otrzymać prezent.</value>
     <comment>legacy_id=2011</comment>
-  </data>
-  <data name="Lilac candy box" xml:space="preserve">
-    <value>Lilac Candy Box</value>
-    <comment>legacy_id=2012</comment>
-  </data>
-  <data name="Orange candy box" xml:space="preserve">
-    <value>Orange Candy Box</value>
-    <comment>legacy_id=2013</comment>
-  </data>
-  <data name="Navy candy box" xml:space="preserve">
-    <value>Navy Candy Box</value>
-    <comment>legacy_id=2014</comment>
   </data>
   <data name="Would you like to receive the item?" xml:space="preserve">
     <value>Czy chcesz otrzymać przedmiot?</value>
@@ -8244,10 +8020,6 @@
     <value>Rozpoczęto przetapianie. Przetapianie zamienia przedmiot w Refining Stone służący do wzmacniania. Przetopiony przedmiot zniknie — sprawdź, czy to właściwy przedmiot.</value>
     <comment>legacy_id=2224</comment>
   </data>
-  <data name="VitalityD2225" xml:space="preserve">
-    <value>witalność +%d</value>
-    <comment>legacy_id=2225</comment>
-  </data>
   <data name="This item is not allowed to use the private store." xml:space="preserve">
     <value>Ten przedmiot nie może być używany w sklepie prywatnym.</value>
     <comment>legacy_id=2226</comment>
@@ -8271,10 +8043,6 @@
   <data name="Defense Power increase +%d" xml:space="preserve">
     <value>Zwiększenie siły obrony +%d</value>
     <comment>legacy_id=2231</comment>
-  </data>
-  <data name="Enjoy Halloween Festival." xml:space="preserve">
-    <value>Ciesz się festiwalem Halloween.</value>
-    <comment>legacy_id=2232</comment>
   </data>
   <data name="Blessing of Jack O'Lantern" xml:space="preserve">
     <value>Błogosławieństwo Jacka O'Lanterna</value>
@@ -8320,10 +8088,6 @@
     <value>Boże Narodzenie</value>
     <comment>legacy_id=2243</comment>
   </data>
-  <data name="Fireworks will appear once thrown in the field." xml:space="preserve">
-    <value>Fajerwerki pojawią się po rzuceniu na ziemię.</value>
-    <comment>legacy_id=2244</comment>
-  </data>
   <data name="Santa Clause" xml:space="preserve">
     <value>Święty Mikołaj</value>
     <comment>legacy_id=2245</comment>
@@ -8336,17 +8100,9 @@
     <value>Bałwan</value>
     <comment>legacy_id=2247</comment>
   </data>
-  <data name="Merry Christmas." xml:space="preserve">
-    <value>Wesołych Świąt.</value>
-    <comment>legacy_id=2248</comment>
-  </data>
   <data name="Stonger effect has taken place." xml:space="preserve">
     <value>Nastąpił silniejszy efekt.</value>
     <comment>legacy_id=2249</comment>
-  </data>
-  <data name="Increases the combination rate,but only up to the maximum rate." xml:space="preserve">
-    <value>Zwiększa współczynnik kombinacji, ale tylko do maksymalnego współczynnika.</value>
-    <comment>legacy_id=2250</comment>
   </data>
   <data name="Unable to increase combination rate any further." xml:space="preserve">
     <value>Nie można dalej zwiększać współczynnika kombinacji.</value>
@@ -8356,37 +8112,9 @@
     <value>Dzień</value>
     <comment>legacy_id=2252,2298</comment>
   </data>
-  <data name="Experience rate is increased %d%%" xml:space="preserve">
-    <value>Doświadczenie zwiększone o %d%%</value>
-    <comment>legacy_id=2253</comment>
-  </data>
-  <data name="Item drop rate is increased %d%%" xml:space="preserve">
-    <value>Drop przedmiotów zwiększony o %d%%</value>
-    <comment>legacy_id=2254</comment>
-  </data>
   <data name="Unable to gain experience rate" xml:space="preserve">
     <value>Nie można zdobywać doświadczenia</value>
     <comment>legacy_id=2255</comment>
-  </data>
-  <data name="Increases experience gained." xml:space="preserve">
-    <value>Zwiększa zdobywane doświadczenie.</value>
-    <comment>legacy_id=2256</comment>
-  </data>
-  <data name="Increases experience gained and item drop rate." xml:space="preserve">
-    <value>Zwiększa zdobywane doświadczenie i częstotliwość wypadania przedmiotów.</value>
-    <comment>legacy_id=2257</comment>
-  </data>
-  <data name="Prevents experiences to be gained." xml:space="preserve">
-    <value>Uniemożliwia zdobywanie doświadczenia.</value>
-    <comment>legacy_id=2258</comment>
-  </data>
-  <data name="Enables entrance into %s." xml:space="preserve">
-    <value>Umożliwia wejście do %s.</value>
-    <comment>legacy_id=2259</comment>
-  </data>
-  <data name="usable %dtimes" xml:space="preserve">
-    <value>do użycia %d razy</value>
-    <comment>legacy_id=2260</comment>
   </data>
   <data name="You can achieve special items with combinations." xml:space="preserve">
     <value>Dzięki kombinacjom możesz zdobyć specjalne przedmioty.</value>
@@ -8419,14 +8147,6 @@
   <data name="You have achieve %s item." xml:space="preserve">
     <value>Otrzymałeś przedmiot %s.</value>
     <comment>legacy_id=2268</comment>
-  </data>
-  <data name="Congratulations. Please contact CS team and change it to item." xml:space="preserve">
-    <value>Gratulacje. Skontaktuj się z obsługą, aby wymienić to na przedmiot.</value>
-    <comment>legacy_id=2269</comment>
-  </data>
-  <data name="You will be assigned to a stage according to your level." xml:space="preserve">
-    <value>Zostaniesz przydzielony do etapu zgodnie z Twoim poziomem.</value>
-    <comment>legacy_id=2270</comment>
   </data>
   <data name="Display general items." xml:space="preserve">
     <value>Pokaż przedmioty ogólne.</value>
@@ -8524,14 +8244,6 @@
     <value>http://muonline.webzen.com/</value>
     <comment>legacy_id=2295</comment>
   </data>
-  <data name="%d%% Combination success rate increase" xml:space="preserve">
-    <value>%d%% Wzrost współczynnika powodzenia kombinacji</value>
-    <comment>legacy_id=2296</comment>
-  </data>
-  <data name="Warp Command Window available." xml:space="preserve">
-    <value>Dostępne okno komend Warp.</value>
-    <comment>legacy_id=2297</comment>
-  </data>
   <data name="Hour" xml:space="preserve">
     <value>Godzina</value>
     <comment>legacy_id=2299</comment>
@@ -8543,10 +8255,6 @@
   <data name="Second" xml:space="preserve">
     <value>Sekunda</value>
     <comment>legacy_id=2301</comment>
-  </data>
-  <data name="Available" xml:space="preserve">
-    <value>Dostępny</value>
-    <comment>legacy_id=2302</comment>
   </data>
   <data name="Preparing." xml:space="preserve">
     <value>W przygotowaniu.</value>
@@ -8603,10 +8311,6 @@
   <data name="You do not have sufficient points." xml:space="preserve">
     <value>Nie masz wystarczającej liczby punktów.</value>
     <comment>legacy_id=2322</comment>
-  </data>
-  <data name="GM has gifted this special box." xml:space="preserve">
-    <value>GM podarował to specjalne pudełko.</value>
-    <comment>legacy_id=2323</comment>
   </data>
   <data name="GM summon zone" xml:space="preserve">
     <value>Strefa przywołania GM</value>
@@ -8863,18 +8567,6 @@
     <value>Scroll of Blood</value>
     <comment>legacy_id=2396</comment>
   </data>
-  <data name="AssembleTheScrollOfBloodWith" xml:space="preserve">
-    <value>Stwórz Scroll of Blood z kontraktu od Illusion Sorcery.</value>
-    <comment>legacy_id=2397</comment>
-  </data>
-  <data name="Assemble the Scroll of Blood with the old scrolls." xml:space="preserve">
-    <value>Złóż Scroll of Blood ze starymi zwojami.</value>
-    <comment>legacy_id=2398</comment>
-  </data>
-  <data name="This is a mark of Illusion Sorcery; this is required to enter the temple." xml:space="preserve">
-    <value>To znak Illusion Sorcery; jest wymagany, by wejść do świątyni.</value>
-    <comment>legacy_id=2399</comment>
-  </data>
   <data name="&lt;STEP 1: Battle Begins&gt;" xml:space="preserve">
     <value>&lt;KROK 1: Rozpoczyna się bitwa&gt;</value>
     <comment>legacy_id=2400</comment>
@@ -8950,10 +8642,6 @@
   <data name="This is the origin of strength that protects the Illusion Temple." xml:space="preserve">
     <value>To jest źródło siły, która chroni Illusion Temple.</value>
     <comment>legacy_id=2419</comment>
-  </data>
-  <data name="Mobility speed reduces upon achievement." xml:space="preserve">
-    <value>Po podniesieniu przedmiotu prędkość ruchu spada.</value>
-    <comment>legacy_id=2420</comment>
   </data>
   <data name="&lt;AM&gt; &lt;PM&gt;" xml:space="preserve">
     <value>&lt;AM&gt; &lt;PM&gt;</value>
@@ -9127,46 +8815,6 @@
     <value>8 Mistrz Mistrz</value>
     <comment>legacy_id=2464</comment>
   </data>
-  <data name="Restores HP by 100%% immediately." xml:space="preserve">
-    <value>Natychmiast przywraca 100%% HP.</value>
-    <comment>legacy_id=2500</comment>
-  </data>
-  <data name="Restores Mana by 100%% immediately." xml:space="preserve">
-    <value>Natychmiast przywraca 100%% Many.</value>
-    <comment>legacy_id=2501</comment>
-  </data>
-  <data name="You may continue to use the strengthener power." xml:space="preserve">
-    <value>Możesz nadal używać mocy wzmacniającej.</value>
-    <comment>legacy_id=2502</comment>
-  </data>
-  <data name="Increases Attack Speed by %d" xml:space="preserve">
-    <value>Zwiększa prędkość ataku o %d</value>
-    <comment>legacy_id=2503</comment>
-  </data>
-  <data name="Increases Defense by %d" xml:space="preserve">
-    <value>Zwiększa Obronę o %d</value>
-    <comment>legacy_id=2504</comment>
-  </data>
-  <data name="Increases Attack Power by %d" xml:space="preserve">
-    <value>Zwiększa siłę ataku o %d</value>
-    <comment>legacy_id=2505</comment>
-  </data>
-  <data name="Increases Wizardry by %d" xml:space="preserve">
-    <value>Zwiększa obrażenia magiczne o %d</value>
-    <comment>legacy_id=2506</comment>
-  </data>
-  <data name="Increases HP by %d" xml:space="preserve">
-    <value>Zwiększa HP o %d</value>
-    <comment>legacy_id=2507</comment>
-  </data>
-  <data name="Increases Mana by %d" xml:space="preserve">
-    <value>Zwiększa Manę o %d</value>
-    <comment>legacy_id=2508</comment>
-  </data>
-  <data name="You may freely move onward." xml:space="preserve">
-    <value>Możesz swobodnie iść dalej.</value>
-    <comment>legacy_id=2509</comment>
-  </data>
   <data name="Resets the status." xml:space="preserve">
     <value>Resetuje statystyki.</value>
     <comment>legacy_id=2510</comment>
@@ -9174,38 +8822,6 @@
   <data name="Reset point: %d" xml:space="preserve">
     <value>Punkty do zresetowania: %d</value>
     <comment>legacy_id=2511</comment>
-  </data>
-  <data name="Strength increment +%d" xml:space="preserve">
-    <value>Przyrost siły +%d</value>
-    <comment>legacy_id=2512</comment>
-  </data>
-  <data name="Quickness increment +%d" xml:space="preserve">
-    <value>Przyrost zwinności +%d</value>
-    <comment>legacy_id=2513</comment>
-  </data>
-  <data name="stamina increment +%d" xml:space="preserve">
-    <value>przyrost wytrzymałości +%d</value>
-    <comment>legacy_id=2514</comment>
-  </data>
-  <data name="Energy increment +%d" xml:space="preserve">
-    <value>Przyrost energii +%d</value>
-    <comment>legacy_id=2515</comment>
-  </data>
-  <data name="Control increment +%d" xml:space="preserve">
-    <value>Przyrost dowodzenia +%d</value>
-    <comment>legacy_id=2516</comment>
-  </data>
-  <data name="Status for the set period" xml:space="preserve">
-    <value>Statystyki na określony czas</value>
-    <comment>legacy_id=2517</comment>
-  </data>
-  <data name="There's an increase effect to it." xml:space="preserve">
-    <value>Jest w tym efekt zwiększenia.</value>
-    <comment>legacy_id=2518</comment>
-  </data>
-  <data name="It reduces the killing rate." xml:space="preserve">
-    <value>Zmniejsza licznik zabójstw (PK).</value>
-    <comment>legacy_id=2519</comment>
   </data>
   <data name="Reduction point: %d" xml:space="preserve">
     <value>Punkty redukcji: %d</value>
@@ -9255,17 +8871,9 @@
     <value>Tego przedmiotu nie można kupić.</value>
     <comment>legacy_id=2531</comment>
   </data>
-  <data name="Attack power increment +40" xml:space="preserve">
-    <value>Przyrost siły ataku +40</value>
-    <comment>legacy_id=2532</comment>
-  </data>
   <data name="Duration period: %s" xml:space="preserve">
     <value>Okres trwania: %s</value>
     <comment>legacy_id=2533</comment>
-  </data>
-  <data name="Collect Cherry Blossoms and take it to the spirit for item compensation." xml:space="preserve">
-    <value>Zbieraj Cherry Blossoms i zanieś je duchowi, aby otrzymać nagrodę.</value>
-    <comment>legacy_id=2534</comment>
   </data>
   <data name="You'll be compensated for the Cherry Blossoms branches you bring back." xml:space="preserve">
     <value>Za przyniesione Cherry Blossoms branches otrzymasz nagrodę.</value>
@@ -9291,18 +8899,6 @@
     <value>Produkcja Cherry Blossoms branches</value>
     <comment>legacy_id=2545</comment>
   </data>
-  <data name="700 Maximum Mana increment" xml:space="preserve">
-    <value>Maks. mana +700</value>
-    <comment>legacy_id=2549</comment>
-  </data>
-  <data name="700 Maximum Life increment" xml:space="preserve">
-    <value>Maks. życie +700</value>
-    <comment>legacy_id=2550</comment>
-  </data>
-  <data name="Restores HP by 65%% immediately." xml:space="preserve">
-    <value>Natychmiast przywraca HP o 65%%.</value>
-    <comment>legacy_id=2559</comment>
-  </data>
   <data name="Cherry Blossoms branches assembly" xml:space="preserve">
     <value>Łączenie Cherry Blossoms branches</value>
     <comment>legacy_id=2560</comment>
@@ -9327,69 +8923,9 @@
     <value>255 Golden Cherry Blossom Branches</value>
     <comment>legacy_id=2565</comment>
   </data>
-  <data name="Master Level EXP cannot be achieved during the item usage." xml:space="preserve">
-    <value>Podczas działania przedmiotu nie zdobywasz EXP poziomu mistrzowskiego.</value>
-    <comment>legacy_id=2566</comment>
-  </data>
-  <data name="Not applicable to" xml:space="preserve">
-    <value>Nie dotyczy</value>
-    <comment>legacy_id=2567</comment>
-  </data>
-  <data name="Master Level Characters." xml:space="preserve">
-    <value>postaci na poziomie mistrzowskim.</value>
-    <comment>legacy_id=2568</comment>
-  </data>
-  <data name="Automatic Life Recover increment %d%%" xml:space="preserve">
-    <value>Automatyczna regeneracja życia +%d%%</value>
-    <comment>legacy_id=2569</comment>
-  </data>
-  <data name="EXP achievement and the automatic life recovery rate increases." xml:space="preserve">
-    <value>Zwiększa zdobywany EXP i automatyczną regenerację życia.</value>
-    <comment>legacy_id=2570</comment>
-  </data>
-  <data name="Automatic Mana recovery increment in %d%% rate" xml:space="preserve">
-    <value>Automatyczna regeneracja many +%d%%</value>
-    <comment>legacy_id=2571</comment>
-  </data>
-  <data name="Item achievement and the automatic Mana recovery increases onward." xml:space="preserve">
-    <value>Zwiększa drop przedmiotów i automatyczną regenerację many.</value>
-    <comment>legacy_id=2572</comment>
-  </data>
-  <data name="Minimum +10 - +15 level item upgrade" xml:space="preserve">
-    <value>Przy ulepszaniu przedmiotu na +10 – +15</value>
-    <comment>legacy_id=2573</comment>
-  </data>
-  <data name="blocks the item dissipation." xml:space="preserve">
-    <value>chroni przedmiot przed zniszczeniem.</value>
-    <comment>legacy_id=2574</comment>
-  </data>
-  <data name="Increases Attack Power and Wizardry by 40%%" xml:space="preserve">
-    <value>Zwiększa siłę ataku i obrażenia magiczne o 40%%</value>
-    <comment>legacy_id=2575</comment>
-  </data>
-  <data name="Increases Attack Speed by 10" xml:space="preserve">
-    <value>Zwiększa prędkość ataku o 10</value>
-    <comment>legacy_id=2576,3069</comment>
-  </data>
-  <data name="Alleviates monster's damage by 30%%" xml:space="preserve">
-    <value>Zmniejsza obrażenia potworów o 30%%</value>
-    <comment>legacy_id=2577</comment>
-  </data>
-  <data name="Increases Maximum Life by 50" xml:space="preserve">
-    <value>Zwiększa maksymalne życie o 50</value>
-    <comment>legacy_id=2578</comment>
-  </data>
   <data name="Maximum Mana +50" xml:space="preserve">
     <value>Maksymalna mana +50</value>
     <comment>legacy_id=2579</comment>
-  </data>
-  <data name="Increases Critical Damage by 20%%" xml:space="preserve">
-    <value>Zwiększa obrażenia krytyczne o 20%%</value>
-    <comment>legacy_id=2580</comment>
-  </data>
-  <data name="Increses Excellent Damage by 20%%" xml:space="preserve">
-    <value>Zwiększa obrażenia doskonałe o 20%%</value>
-    <comment>legacy_id=2581</comment>
   </data>
   <data name="Carrier" xml:space="preserve">
     <value>Przewoźnik</value>
@@ -9418,10 +8954,6 @@
   <data name="WelcomeToSantaSVillageHere" xml:space="preserve">
     <value>Witamy w Wiosce Świętego Mikołaja. Oto prezent dla ciebie. Zawsze znajdziesz tu coś, co przyniesie ci fortunę.</value>
     <comment>legacy_id=2588</comment>
-  </data>
-  <data name="Relocate to the Santa's Village by the right-mouse click." xml:space="preserve">
-    <value>Przenieś się do Wioski Świętego Mikołaja, klikając prawym przyciskiem myszy.</value>
-    <comment>legacy_id=2589</comment>
   </data>
   <data name="Would you like to move to the Santa's Village?" xml:space="preserve">
     <value>Czy chcesz przenieść się do Wioski Świętego Mikołaja?</value>
@@ -9463,10 +8995,6 @@
     <value>Szybkość odzyskiwania AG wzrosła o %d.</value>
     <comment>legacy_id=2599</comment>
   </data>
-  <data name="Surrounding Zens are automatically collected." xml:space="preserve">
-    <value>Zen w pobliżu jest zbierany automatycznie.</value>
-    <comment>legacy_id=2600</comment>
-  </data>
   <data name="You may turn into a snowman if applied." xml:space="preserve">
     <value>Jeśli zostanie zastosowany, możesz zamienić się w bałwana.</value>
     <comment>legacy_id=2601</comment>
@@ -9478,18 +9006,6 @@
   <data name="Move by a right-mouse-click." xml:space="preserve">
     <value>Przenosi tam po kliknięciu prawym przyciskiem myszy.</value>
     <comment>legacy_id=2603</comment>
-  </data>
-  <data name="Save the application location." xml:space="preserve">
-    <value>Zapisuje miejsce użycia.</value>
-    <comment>legacy_id=2604</comment>
-  </data>
-  <data name="Saves the location with the right-mouse-click." xml:space="preserve">
-    <value>Zapisuje lokalizację po kliknięciu prawym przyciskiem myszy.</value>
-    <comment>legacy_id=2605</comment>
-  </data>
-  <data name="Returns to the saved location by a click." xml:space="preserve">
-    <value>Powrót do zapisanej lokalizacji jednym kliknięciem.</value>
-    <comment>legacy_id=2606</comment>
   </data>
   <data name="Would you like to save the location?" xml:space="preserve">
     <value>Czy chcesz zapisać lokalizację?</value>
@@ -9767,153 +9283,13 @@
     <value>Za dużo ludzi w Koloseum.</value>
     <comment>legacy_id=2707</comment>
   </data>
-  <data name="+10~+15 When upgrading level item please put it in combination window." xml:space="preserve">
-    <value>+10~+15 Podczas ulepszania przedmiotu na poziomie proszę umieścić go w oknie kombinacji.</value>
-    <comment>legacy_id=2708</comment>
-  </data>
-  <data name="item/skill/luck/option will be randomly added." xml:space="preserve">
-    <value>przedmiot/umiejętność/szczęście/opcja zostaną dodane losowo.</value>
-    <comment>legacy_id=2709</comment>
-  </data>
-  <data name="Exp and item will be secured when character dies." xml:space="preserve">
-    <value>Exp i przedmiot zostaną zabezpieczone, gdy postać umrze.</value>
-    <comment>legacy_id=2714</comment>
-  </data>
-  <data name="Item durability will not be decrease for a certain period." xml:space="preserve">
-    <value>Trwałość przedmiotu nie ulegnie zmniejszeniu przez pewien okres.</value>
-    <comment>legacy_id=2715</comment>
-  </data>
-  <data name="Applicable to mountable items only besides pet." xml:space="preserve">
-    <value>Dotyczy tylko wierzchowców (bez zwierzaków).</value>
-    <comment>legacy_id=2716</comment>
-  </data>
-  <data name="Increases your luck to create wing of your wish." xml:space="preserve">
-    <value>Zwiększa szansę na stworzenie wybranych skrzydeł.</value>
-    <comment>legacy_id=2717</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Satan." xml:space="preserve">
-    <value>Zwiększa szansę na stworzenie Wings of Satan.</value>
-    <comment>legacy_id=2718</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Dragon." xml:space="preserve">
-    <value>Zwiększa szansę na stworzenie Wings of Dragon.</value>
-    <comment>legacy_id=2719</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Heaven." xml:space="preserve">
-    <value>Zwiększa szansę na stworzenie Wings of Heaven.</value>
-    <comment>legacy_id=2720</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Soul." xml:space="preserve">
-    <value>Zwiększa szansę na stworzenie Wings of Soul.</value>
-    <comment>legacy_id=2721</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Elf." xml:space="preserve">
-    <value>Zwiększa szansę na stworzenie Wings of Elf.</value>
-    <comment>legacy_id=2722</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Spirits." xml:space="preserve">
-    <value>Zwiększa szansę na stworzenie Wings of Spirits.</value>
-    <comment>legacy_id=2723</comment>
-  </data>
-  <data name="Increases your luck to create Wing of Curse." xml:space="preserve">
-    <value>Zwiększa szansę na stworzenie Wing of Curse.</value>
-    <comment>legacy_id=2724</comment>
-  </data>
-  <data name="Increases your luck to create Wing of Despair." xml:space="preserve">
-    <value>Zwiększa szansę na stworzenie Wing of Despair.</value>
-    <comment>legacy_id=2725</comment>
-  </data>
-  <data name="Increases your luck to create Wings of Darkness." xml:space="preserve">
-    <value>Zwiększa szansę na stworzenie Wings of Darkness.</value>
-    <comment>legacy_id=2726</comment>
-  </data>
-  <data name="Increases your luck to create Cape of Emperor." xml:space="preserve">
-    <value>Zwiększa szansę na stworzenie Cape of Emperor.</value>
-    <comment>legacy_id=2727</comment>
-  </data>
   <data name="Only increases Master level exp." xml:space="preserve">
     <value>Zwiększa tylko exp na poziomie mistrzowskim.</value>
     <comment>legacy_id=2728</comment>
   </data>
-  <data name="No penalty for dying." xml:space="preserve">
-    <value>Nie ma kary za śmierć.</value>
-    <comment>legacy_id=2729</comment>
-  </data>
-  <data name="Keeps item durable" xml:space="preserve">
-    <value>Utrzymuje trwałość przedmiotu</value>
-    <comment>legacy_id=2730</comment>
-  </data>
   <data name="Select to move." xml:space="preserve">
     <value>Wybierz, aby przenieść.</value>
     <comment>legacy_id=2731</comment>
-  </data>
-  <data name="Talisman of Wings of Satan" xml:space="preserve">
-    <value>Talisman of Wings of Satan</value>
-    <comment>legacy_id=2732</comment>
-  </data>
-  <data name="Talisman of Wings of Heaven" xml:space="preserve">
-    <value>Talisman of Wings of Heaven</value>
-    <comment>legacy_id=2733</comment>
-  </data>
-  <data name="Talisman of Wings of Elf" xml:space="preserve">
-    <value>Talisman of Wings of Elf</value>
-    <comment>legacy_id=2734</comment>
-  </data>
-  <data name="Talisman of Wing of Curse" xml:space="preserve">
-    <value>Talisman of Wing of Curse</value>
-    <comment>legacy_id=2735</comment>
-  </data>
-  <data name="Talisman of Cape of Emperor" xml:space="preserve">
-    <value>Talisman of Cape of Emperor</value>
-    <comment>legacy_id=2736</comment>
-  </data>
-  <data name="Talisman of Wings of Dragon" xml:space="preserve">
-    <value>Talisman of Wings of Dragon</value>
-    <comment>legacy_id=2737</comment>
-  </data>
-  <data name="Talisman of Wings of Soul" xml:space="preserve">
-    <value>Talisman of Wings of Soul</value>
-    <comment>legacy_id=2738</comment>
-  </data>
-  <data name="Talisman of Wings of Spirits" xml:space="preserve">
-    <value>Talisman of Wings of Spirits</value>
-    <comment>legacy_id=2739</comment>
-  </data>
-  <data name="Talisman of Wing of Despair" xml:space="preserve">
-    <value>Talisman of Wing of Despair</value>
-    <comment>legacy_id=2740</comment>
-  </data>
-  <data name="Talisman of Wings of Darkness" xml:space="preserve">
-    <value>Talisman of Wings of Darkness</value>
-    <comment>legacy_id=2741</comment>
-  </data>
-  <data name="Attack rate and defense rate increase." xml:space="preserve">
-    <value>Zwiększenie współczynnika ataku i współczynnika obrony.</value>
-    <comment>legacy_id=2742</comment>
-  </data>
-  <data name="Transform into Panda." xml:space="preserve">
-    <value>Zmienia w pandę.</value>
-    <comment>legacy_id=2743</comment>
-  </data>
-  <data name="Zen increase 50%%" xml:space="preserve">
-    <value>Wzrost Zen 50%%</value>
-    <comment>legacy_id=2744</comment>
-  </data>
-  <data name="Damage/Wizardry/Curse +30" xml:space="preserve">
-    <value>Obrażenia/Magia/Klątwa +30</value>
-    <comment>legacy_id=2745</comment>
-  </data>
-  <data name="Auto-collects zen around you." xml:space="preserve">
-    <value>Automatycznie zbiera zen wokół ciebie.</value>
-    <comment>legacy_id=2746</comment>
-  </data>
-  <data name="EXP rate 50%% increase" xml:space="preserve">
-    <value>EXP +50%%</value>
-    <comment>legacy_id=2747</comment>
-  </data>
-  <data name="Increase Defensive Skill +50" xml:space="preserve">
-    <value>Obrona +50</value>
-    <comment>legacy_id=2748</comment>
   </data>
   <data name="Lugard" xml:space="preserve">
     <value>Lugard</value>
@@ -9991,14 +9367,6 @@
     <value>Do stworzenia Mirror of Dimensions potrzebujesz jeszcze %d.</value>
     <comment>legacy_id=2776</comment>
   </data>
-  <data name="That's the only thing that will get Lugard to help you" xml:space="preserve">
-    <value>Tylko to sprawi, że Lugard ci pomoże</value>
-    <comment>legacy_id=2777</comment>
-  </data>
-  <data name="enter the Doppelganger area." xml:space="preserve">
-    <value>wejść do Doppelganger.</value>
-    <comment>legacy_id=2778</comment>
-  </data>
   <data name="Only those in possession of a Mirror of Dimensions may enter." xml:space="preserve">
     <value>Wejść mogą tylko posiadacze Mirror of Dimensions.</value>
     <comment>legacy_id=2779</comment>
@@ -10007,45 +9375,17 @@
     <value>Rozkaz Gaiona</value>
     <comment>legacy_id=2783</comment>
   </data>
-  <data name="It contains Gaion's plans for the destruction of the empire" xml:space="preserve">
-    <value>Zawiera plany Gaiona dotyczące zniszczenia imperium</value>
-    <comment>legacy_id=2784</comment>
-  </data>
-  <data name="and orders for the Empire Guardians." xml:space="preserve">
-    <value>i rozkazy dla Strażników Imperium.</value>
-    <comment>legacy_id=2785</comment>
-  </data>
-  <data name="You may enter the Fortress of Empire Guardians." xml:space="preserve">
-    <value>Możesz wejść do Fortress of Empire Guardians.</value>
-    <comment>legacy_id=2786</comment>
-  </data>
   <data name="Suspicious Scrap of Paper" xml:space="preserve">
     <value>Podejrzany skrawek papieru</value>
     <comment>legacy_id=2787</comment>
-  </data>
-  <data name="It's a worn piece of paper containing incomprehensible text." xml:space="preserve">
-    <value>To zużyta kartka papieru zawierająca niezrozumiały tekst.</value>
-    <comment>legacy_id=2788</comment>
   </data>
   <data name="No. %d Secromicon Fragment" xml:space="preserve">
     <value>Secromicon Fragment nr %d</value>
     <comment>legacy_id=2789</comment>
   </data>
-  <data name="It's part of a Complete Secromicon." xml:space="preserve">
-    <value>Jest częścią Complete Secromicon.</value>
-    <comment>legacy_id=2790</comment>
-  </data>
   <data name="Complete Secromicon" xml:space="preserve">
     <value>Complete Secromicon</value>
     <comment>legacy_id=2791</comment>
-  </data>
-  <data name="Indestructible Metal Secromicon" xml:space="preserve">
-    <value>Niezniszczalny metalowy Secromicon</value>
-    <comment>legacy_id=2792</comment>
-  </data>
-  <data name="Contains information about Grand Wizard Etramu Lenos' research." xml:space="preserve">
-    <value>Zawiera informacje o badaniach Wielkiego Czarodzieja Etramu Lenos.</value>
-    <comment>legacy_id=2793</comment>
   </data>
   <data name="Jerint the Assistant" xml:space="preserve">
     <value>Jerint the Assistant</value>
@@ -10278,26 +9618,6 @@
   <data name="The High Vitality potion has negated the Fatigue Level penalty." xml:space="preserve">
     <value>Mikstura wysokiej witalności zanegowała karę za poziom zmęczenia.</value>
     <comment>legacy_id=2874</comment>
-  </data>
-  <data name="YouCanDoAGoblinCombination" xml:space="preserve">
-    <value>Połącz Sealed Golden Box u Chaos Goblina, aby stworzyć Golden Box.</value>
-    <comment>legacy_id=2875</comment>
-  </data>
-  <data name="YouCanDoAGoblinCombination2876" xml:space="preserve">
-    <value>Połącz Sealed Silver Box u Chaos Goblina, aby stworzyć Silver Box.</value>
-    <comment>legacy_id=2876</comment>
-  </data>
-  <data name="You can do a Goblin combination with a Gold Key to create a Golden Box." xml:space="preserve">
-    <value>Połącz Gold Key u Chaos Goblina, aby stworzyć Golden Box.</value>
-    <comment>legacy_id=2877</comment>
-  </data>
-  <data name="You can do a Goblin combination with a Silver Key to create a Silver Box." xml:space="preserve">
-    <value>Połącz Silver Key u Chaos Goblina, aby stworzyć Silver Box.</value>
-    <comment>legacy_id=2878</comment>
-  </data>
-  <data name="You can drop it with a fixed probability of it turning into a rare item." xml:space="preserve">
-    <value>Możesz go upuścić ze stałym prawdopodobieństwem, że zamieni się w rzadki przedmiot.</value>
-    <comment>legacy_id=2879,2880</comment>
   </data>
   <data name="Golden Box" xml:space="preserve">
     <value>Golden Box</value>
@@ -10591,26 +9911,6 @@
     <value>Wystąpił błąd dostępu do bazy danych.</value>
     <comment>legacy_id=2967</comment>
   </data>
-  <data name="Increase Max. AG + Level" xml:space="preserve">
-    <value>Zwiększa maks. AG + poziom</value>
-    <comment>legacy_id=2968</comment>
-  </data>
-  <data name="Increase Max. SD + Levelx10" xml:space="preserve">
-    <value>Zwiększa maks. SD + poziom×10</value>
-    <comment>legacy_id=2969</comment>
-  </data>
-  <data name="Up to %d%% EXP gain increase, depending on the number of members in your party." xml:space="preserve">
-    <value>Zwiększenie zysku aż do %d%% EXP, w zależności od liczby członków w Twojej grupie.</value>
-    <comment>legacy_id=2970</comment>
-  </data>
-  <data name="You can acquire Goblin Points by using the MU Item Shop's storage." xml:space="preserve">
-    <value>Goblin Points zdobywasz, korzystając z magazynu MU Item Shop.</value>
-    <comment>legacy_id=2971</comment>
-  </data>
-  <data name="It's a box containing various items." xml:space="preserve">
-    <value>To pudełko zawierające różne przedmioty.</value>
-    <comment>legacy_id=2972</comment>
-  </data>
   <data name="AnItemThatLetsYouEnjoy" xml:space="preserve">
     <value>Przedmiot, który pozwala cieszyć się MU przez 30 dni.\nMożna używać wyłącznie na stronie internetowej MU Online.</value>
     <comment>legacy_id=2973</comment>
@@ -10791,10 +10091,6 @@
     <value>Loren Market</value>
     <comment>legacy_id=3017</comment>
   </data>
-  <data name="Boosts the item drop rate." xml:space="preserve">
-    <value>Zwiększa częstotliwość wypadania przedmiotów.</value>
-    <comment>legacy_id=3018</comment>
-  </data>
   <data name="Runedil" xml:space="preserve">
     <value>Runedil</value>
     <comment>legacy_id=3022</comment>
@@ -10931,10 +10227,6 @@
     <value>Doppelganger</value>
     <comment>legacy_id=3057</comment>
   </data>
-  <data name="Increases Max Mana 4%%" xml:space="preserve">
-    <value>Zwiększa maksymalną manę 4%%</value>
-    <comment>legacy_id=3058</comment>
-  </data>
   <data name="PC Cafe Bonus" xml:space="preserve">
     <value>Bonus PC Cafe</value>
     <comment>legacy_id=3059</comment>
@@ -10958,34 +10250,6 @@
   <data name="You cannot ask others to join your party while in Loren Market." xml:space="preserve">
     <value>Będąc na Loren Market, nie możesz zapraszać innych osób do przyłączenia się do twojej grupy.</value>
     <comment>legacy_id=3064</comment>
-  </data>
-  <data name="Equip to transform into a Skeleton Warrior." xml:space="preserve">
-    <value>Załóż, aby zmienić się w Skeleton Warrior.</value>
-    <comment>legacy_id=3065</comment>
-  </data>
-  <data name="Damage/Wizardry/Curse +40" xml:space="preserve">
-    <value>Obrażenia/Magia/Klątwa +40</value>
-    <comment>legacy_id=3066</comment>
-  </data>
-  <data name="Equipping along with a Pet Skeleton" xml:space="preserve">
-    <value>Założony razem z Pet Skeleton</value>
-    <comment>legacy_id=3067</comment>
-  </data>
-  <data name="increases Damage, Wizardry and Curse by 20%%" xml:space="preserve">
-    <value>zwiększa obrażenia, obrażenia magiczne i klątwy o 20%%</value>
-    <comment>legacy_id=3068</comment>
-  </data>
-  <data name="and EXP by 30%%." xml:space="preserve">
-    <value>i EXP o 30%%.</value>
-    <comment>legacy_id=3070</comment>
-  </data>
-  <data name="Equipping along with a Skeleton Transformation Ring" xml:space="preserve">
-    <value>Założony razem ze Skeleton Transformation Ring</value>
-    <comment>legacy_id=3071</comment>
-  </data>
-  <data name="increases EXP by 30%%." xml:space="preserve">
-    <value>zwiększa EXP o 30%%.</value>
-    <comment>legacy_id=3072</comment>
   </data>
   <data name="Chaos Castle Lv.%lu Guardsman x %lu/%lu" xml:space="preserve">
     <value>Chaos Castle poz. %lu: strażnicy x %lu/%lu</value>
@@ -11023,10 +10287,6 @@
     <value>Losowa nagroda (%lu rodzajów)</value>
     <comment>legacy_id=3082</comment>
   </data>
-  <data name="Right click to use." xml:space="preserve">
-    <value>Kliknij prawym przyciskiem myszy, aby użyć.</value>
-    <comment>legacy_id=3084</comment>
-  </data>
   <data name="+14 Item Creation" xml:space="preserve">
     <value>Tworzenie przedmiotu +14</value>
     <comment>legacy_id=3086</comment>
@@ -11034,10 +10294,6 @@
   <data name="+15 Item Creation" xml:space="preserve">
     <value>Tworzenie przedmiotu +15</value>
     <comment>legacy_id=3087</comment>
-  </data>
-  <data name="Unable to Equip with a Different Transformation Ring" xml:space="preserve">
-    <value>Nie można założyć innego Transformation Ring</value>
-    <comment>legacy_id=3088</comment>
   </data>
   <data name="Cannot be equipped while another Transformation Ring is equipped." xml:space="preserve">
     <value>Nie można założyć, gdy założony jest inny Transformation Ring.</value>
@@ -11099,14 +10355,6 @@
     <value>Wielki Książę#Książę#Markiz#Hrabia#Wicehrabia#Baron#Komandor Rycerzy#Starszy Rycerz#Rycerz#Prefekt Straży#Oficer#Porucznik#Sierżant#Szeregowy</value>
     <comment>legacy_id=3104</comment>
   </data>
-  <data name="Can enter the Monday - Saturday map." xml:space="preserve">
-    <value>Można wejść na mapę od poniedziałku do soboty.</value>
-    <comment>legacy_id=3105</comment>
-  </data>
-  <data name="Can enter the Sunday map." xml:space="preserve">
-    <value>Można wejść na niedzielną mapę.</value>
-    <comment>legacy_id=3106</comment>
-  </data>
   <data name="Varka Map 7" xml:space="preserve">
     <value>Mapa Varki 7</value>
     <comment>legacy_id=3107</comment>
@@ -11134,14 +10382,6 @@
   <data name="The information is not correct." xml:space="preserve">
     <value>Informacje nie są prawidłowe.</value>
     <comment>legacy_id=3113</comment>
-  </data>
-  <data name="Dark Lord use only." xml:space="preserve">
-    <value>Tylko do użytku Dark Lorda.</value>
-    <comment>legacy_id=3115</comment>
-  </data>
-  <data name="You can enter to Gold Channel." xml:space="preserve">
-    <value>Możesz wejść do Gold Channel.</value>
-    <comment>legacy_id=3116</comment>
   </data>
   <data name="TheGameClientIsLoadedOnly" xml:space="preserve">
     <value>Klient gry ładuje się wyłącznie poprzez oficjalną stronę internetową. Zamknij aplikację i spróbuj ponownie.</value>
@@ -11182,10 +10422,6 @@
   <data name="Item Drop Rate increase +%d%%" xml:space="preserve">
     <value>Drop przedmiotów +%d%%</value>
     <comment>legacy_id=3126</comment>
-  </data>
-  <data name="7 Days until Expiration" xml:space="preserve">
-    <value>7 dni do wygaśnięcia</value>
-    <comment>legacy_id=3127</comment>
   </data>
   <data name="You cannot purchase this item more than once." xml:space="preserve">
     <value>Nie możesz kupić tego przedmiotu więcej niż raz.</value>
@@ -11374,10 +10610,6 @@
   <data name="Expired Item" xml:space="preserve">
     <value>Przedmiot wygasły</value>
     <comment>legacy_id=3266</comment>
-  </data>
-  <data name="Restores SD by 65%% immediately." xml:space="preserve">
-    <value>Natychmiast przywraca SD o 65%%.</value>
-    <comment>legacy_id=3267</comment>
   </data>
   <data name="Click the item to see the quest information again." xml:space="preserve">
     <value>Kliknij przedmiot, aby ponownie wyświetlić informacje o zadaniu.</value>

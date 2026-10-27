@@ -5,6 +5,7 @@
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
+#include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 #include "Data/GameData/ItemData/SharedItemModel.h"
 
 #include <bitset>
@@ -65,6 +66,18 @@ std::filesystem::path GetItemStatsFile();
 
 ItemStatsLoadResult LoadItemStatsFile(const std::filesystem::path& file);
 
+struct ItemTooltipLoadResult
+{
+    ItemTooltipFile file;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Items/Tooltips/Tooltip.json, relative to the client folder: the shared texts and the layouts of the item
+// tooltips, see ItemTooltipLayouts.h. In a folder of its own like the stat file.
+std::filesystem::path GetItemTooltipFile();
+
+ItemTooltipLoadResult LoadItemTooltipFile(const std::filesystem::path& file);
+
 struct GlowColorsLoadResult
 {
     std::vector<Effects::GlowColor> colors;
@@ -96,6 +109,11 @@ using ItemGroupSet = std::bitset<MAX_ITEM_TYPE>;
 // whose content did not change are not touched.
 ItemDataSaveResult SaveItemDataDirectory(const std::filesystem::path& directory, std::span<const ItemDefinition> items,
                                          std::vector<ItemDataIssue>& issues);
+
+// Writes `text` to `file` as the saves do: by a temporary file that replaces it, so a failed
+// write leaves the old file. An unchanged file is not touched.
+ItemDataSaveResult WriteItemTextFile(const std::filesystem::path& file, const std::string& text,
+                                     std::vector<ItemDataIssue>& issues);
 
 // The item models a save writes with the items.
 struct ItemModelSave

@@ -39,8 +39,11 @@ struct ObjectDescription
 {
     int id = -1;
     std::string name;
-    // player | monster | npc | pet | unknown
+    // player | monster | npc | trap | pet | other | unknown
     std::string kind = "unknown";
+    // The monster number the server created the object with; empty for a
+    // player. Summons and transformed players have one, with the kind player.
+    std::optional<int> monster;
     int x = -1;
     int y = -1;
     bool known = false;

@@ -6,6 +6,7 @@
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
+#include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 
 #include <algorithm>
 #include <string>
@@ -69,7 +70,8 @@ std::vector<ItemDataIssue> CheckSyntax(const ItemDefinition& item)
 std::vector<ItemDataIssue> CheckNames(const ItemDefinition& item, const ItemStatProfiles& profiles = MakeProfiles())
 {
     std::vector<ItemDataIssue> issues;
-    ValidateDescriptionPlaceholders(std::vector<ItemDefinition>{item}, profiles, "ItemStats.json", issues);
+    ValidateDescriptionPlaceholders(std::vector<ItemDefinition>{item}, profiles, ItemTooltipFile(), "ItemStats.json",
+                                    issues);
     return issues;
 }
 } // namespace
@@ -204,14 +206,289 @@ TEST_CASE("A description placeholder is a built-in value or a stat file table [d
     REQUIRE(nearBuiltIn.size() == 1);
     CHECK(nearBuiltIn.front().message == "has the unknown placeholder {levels}; did you mean {table:levels}?");
 
-    const std::vector<ItemDataIssue> unknown = CheckNames(MakeJewel("Durability {durability}"));
+    const std::vector<ItemDataIssue> unknown = CheckNames(MakeJewel("Sparkle {sparkle}"));
     REQUIRE(unknown.size() == 1);
     CHECK(unknown.front().message ==
-          "has the unknown placeholder {durability}; a placeholder is a built-in value ({level}) or a table of "
-          "ItemStats.json ({table:name})");
+          "has the unknown placeholder {sparkle}; a placeholder is a built-in value (docs/item-data.md), a table of "
+          "ItemStats.json ({table:name}), or one of the line's values or the item's levelValues");
+
+    // The stat line values are built in too.
+    CHECK(CheckNames(MakeJewel("Durability {durability}/{maxDurability}, {missingStrength} strength missing")).empty());
 
     // A deleted item (no name) is not checked.
-    ItemDefinition deleted = MakeJewel("{durability}");
+    ItemDefinition deleted = MakeJewel("{sparkle}");
     deleted.names = {};
     CHECK(CheckNames(deleted).empty());
+}
+
+TEST_CASE("A description line names the value of its own placeholder [data][items]")
+{
+    ItemDefinition wing = MakeJewel("Increase {percent}% of Damage");
+    wing.description[0].values = {{"percent", "table:wingDamage"}};
+    CHECK(CheckNames(wing).empty());
+
+    // It names a built-in value or a table; a typo suggests the name meant, and so does a table without "table:".
+    wing.description[0].values = {{"percent", "table:wingDamge"}};
+    const std::vector<ItemDataIssue> typo = CheckNames(wing);
+    REQUIRE(typo.size() == 1);
+    CHECK(typo.front().field == "description[0].values.percent");
+    CHECK(typo.front().message.find("did you mean \"table:wingDamage\"?") != std::string::npos);
+    wing.description[0].values = {{"percent", "wingDamage"}};
+    const std::vector<ItemDataIssue> bare = CheckNames(wing);
+    REQUIRE(bare.size() == 1);
+    CHECK(bare.front().message.find("did you mean \"table:wingDamage\"?") != std::string::npos);
+
+    // A placeholder another line binds is not this line's.
+    wing.description.push_back(wing.description[0]);
+    wing.description[0].values = {{"percent", "table:wingDamage"}};
+    wing.description[1].values = {};
+    const std::vector<ItemDataIssue> unbound = CheckNames(wing);
+    REQUIRE(unbound.size() == 1);
+    CHECK(unbound.front().message.find("unknown placeholder {percent}") != std::string::npos);
+}
+
+TEST_CASE("An item's level values fill its description's placeholders at the levels they have [data][items]")
+{
+    ItemDefinition fruits = MakeJewel("{stat} Increases 1~3 stat points");
+    fruits.description[0].minLevel = 0;
+    fruits.description[0].maxLevel = 1;
+    ItemLevelValues stat;
+    stat.name = "stat";
+    stat.values.resize(2);
+    stat.values[0].text.Set("en", "ENG");
+    stat.values[1].text.Set("en", "STA");
+    fruits.levelValues = {stat};
+    CHECK(CheckNames(fruits).empty());
+
+    // A line shown at a level without a value.
+    fruits.description[0].maxLevel = 4;
+    const std::vector<ItemDataIssue> beyond = CheckNames(fruits);
+    REQUIRE(beyond.size() == 1);
+    CHECK(beyond.front().field == "description[0].levels");
+    CHECK(beyond.front().message.find("only up to +1") != std::string::npos);
+    fruits.description[0].maxLevel = 1;
+
+    // A level value named like a built-in value is the item's own: its lines show it.
+    fruits.levelValues[0].name = "level";
+    fruits.description[0].text.Set("en", "{level} Increases 1~3 stat points");
+    CHECK(CheckNames(fruits).empty());
+
+    // One no line shows is a warning.
+    fruits.description[0].text.Set("en", "No placeholder here");
+    const std::vector<ItemDataIssue> unshown = CheckNames(fruits);
+    REQUIRE(unshown.size() == 1);
+    CHECK(unshown[0].severity == ItemDataIssueSeverity::Warning);
+    CHECK(unshown[0].field == "levelValues.level");
+    CHECK(unshown[0].message == "no line of the description shows it");
+}
+
+TEST_CASE("A level value is a text without placeholders, or a shared text the tooltip file has [data][items]")
+{
+    ItemTooltipFile tooltips;
+    tooltips.texts["energy"].Set("en", "ENG");
+    tooltips.texts["withPlaceholder"].Set("en", "+{level}");
+    ItemDefinition fruits = MakeJewel("{stat}");
+    ItemLevelValues stat;
+    stat.name = "stat";
+    stat.values.resize(4);
+    stat.values[0].textName = "energy";
+    stat.values[1].textName = "enrgy";
+    stat.values[2].textName = "withPlaceholder";
+    stat.values[3].text.Set("en", "{level}");
+    fruits.levelValues = {stat};
+    std::vector<ItemDataIssue> issues;
+    ValidateDescriptionTexts(std::vector<ItemDefinition>{fruits}, tooltips, "Tooltip.json", issues);
+    std::erase_if(issues, [](const ItemDataIssue& issue) { return issue.group == ItemDataIssue::NoItem; });
+    REQUIRE(issues.size() == 3);
+    CHECK(issues[0].field == "levelValues.stat[1]");
+    CHECK(issues[0].message.find("did you mean \"@energy\"?") != std::string::npos);
+    CHECK(issues[1].field == "levelValues.stat[2]");
+    CHECK(issues[2].field == "levelValues.stat[3]");
+    CHECK(issues[2].message == "has placeholders, which a level value cannot have");
+}
+
+TEST_CASE("A description line can show a skill's mana [data][items]")
+{
+    ItemDefinition weapon = MakeJewel("Cyclone Cutting skill (Mana:{mana})");
+    weapon.description[0].values = {{"mana", "skillMana:22"}};
+    CHECK(CheckNames(weapon).empty());
+    const std::optional<GameDataValue> mana = ReadGameDataValue("skillMana:22");
+    REQUIRE(mana.has_value());
+    CHECK(mana->kind == GameDataValueKind::SkillMana);
+    CHECK(mana->number == 22);
+    CHECK_FALSE(ReadGameDataValue("skillMana:").has_value());
+    CHECK_FALSE(ReadGameDataValue("skillMana:cyclone").has_value());
+    CHECK(ReadGameDataValue("skillName:30")->kind == GameDataValueKind::SkillName);
+    CHECK(ReadGameDataValue("monsterName:41")->kind == GameDataValueKind::MonsterName);
+    CHECK_FALSE(ReadGameDataValue("monsterName:99999").has_value());
+    CHECK(HasGameDataValuePrefix("monsterName:x"));
+    CHECK_FALSE(HasGameDataValuePrefix("monster"));
+
+    // Name lines are checked as description lines are: their placeholders, and their texts' braces.
+    ItemNameLine ring;
+    ring.hasText = true;
+    ring.text.Set("en", "{monster} Transformation Ring");
+    ring.values = {{"monster", "monsterName:2"}};
+    weapon.nameLines = {ring};
+    CHECK(CheckNames(weapon).empty());
+    weapon.nameLines[0].values = {{"monster", "monsterName:9999"}};
+    const std::vector<ItemDataIssue> noMonster = CheckNames(weapon);
+    REQUIRE(noMonster.size() == 1);
+    CHECK(noMonster.front().field == "nameLines[0].values.monster");
+    CHECK(noMonster.front().message.find("names no skill or monster") != std::string::npos);
+    weapon.nameLines[0].text.Set("en", "{name +{level}");
+    CHECK_FALSE(IssuesOf(CheckSyntax(weapon), "nameLines[0].text").empty());
+    weapon.nameLines.clear();
+
+    // A number that is no skill's.
+    weapon.description[0].values = {{"mana", "skillMana:9999"}};
+    const std::vector<ItemDataIssue> unknown = CheckNames(weapon);
+    REQUIRE(unknown.size() == 1);
+    CHECK(unknown.front().field == "description[0].values.mana");
+    CHECK(unknown.front().message.find("names no skill") != std::string::npos);
+}
+
+namespace
+{
+std::vector<ItemDataIssue> CheckTableUses(const std::vector<ItemDefinition>& items)
+{
+    std::vector<ItemDataIssue> issues;
+    ValidateTableUses(items, MakeProfiles(), ItemTooltipFile(), "ItemStats.json", issues);
+    return issues;
+}
+
+ItemDefinition MakeWing(short number, WingTier tier, const std::string& english)
+{
+    ItemDefinition wing = MakeJewel(english);
+    wing.group = 12;
+    wing.number = number;
+    wing.names.Set("en", "Wing " + std::to_string(number));
+    wing.wingTier = tier;
+    return wing;
+}
+} // namespace
+
+TEST_CASE("A table that neither a stat nor a description names is a warning [data][items]")
+{
+    // A table no stat uses is for descriptions: a warning when none names it either.
+    const std::vector<ItemDataIssue> unused = CheckTableUses({MakeJewel("No placeholders")});
+    REQUIRE(unused.size() == 1);
+    CHECK(unused.front().severity == ItemDataIssueSeverity::Warning);
+    CHECK(unused.front().source == "ItemStats.json");
+    CHECK(unused.front().field == "tables.wingDamage");
+    CHECK(CheckTableUses({MakeJewel("Increase {table:wingDamage}% of Damage")}).empty());
+}
+
+TEST_CASE("A wing has the lines the other wings of its tier have [data][items]")
+{
+    const std::string lines = "Increase {table:wingDamage}% of Damage";
+    const auto third = [&](short number) { return MakeWing(number, WingTier::Third, lines); };
+    std::vector<ItemDefinition> wings = {third(36), third(37), third(38)};
+    CHECK(CheckTableUses(wings).empty());
+
+    // A new third-tier wing without the lines.
+    wings.push_back(MakeWing(200, WingTier::Third, "Increase speed"));
+    const std::vector<ItemDataIssue> missing = CheckTableUses(wings);
+    REQUIRE(missing.size() == 1);
+    CHECK(missing.front().severity == ItemDataIssueSeverity::Warning);
+    CHECK(missing.front().number == 200);
+    CHECK(missing.front().field == "description");
+    CHECK(missing.front().message == "its wing lines are not those of the other third-tier wings of group 12: it has 1 "
+                                     "line naming no table, they have 1 line naming {table:wingDamage}");
+
+    // A wing moved to another tier keeps the tables of its old one.
+    wings.back() = MakeWing(200, WingTier::Third, "Increase {table:otherDamage}% of Damage");
+    REQUIRE(CheckTableUses(wings).size() == 1);
+
+    // One that gains or loses a line without a table.
+    wings.back() = third(200);
+    wings.back().description.push_back(wings.back().description.front());
+    wings.back().description.back().text.Set("en", "Increase speed");
+    const std::vector<ItemDataIssue> extra = CheckTableUses(wings);
+    REQUIRE(extra.size() == 1);
+    CHECK(extra.front().message.find("it has 2 lines naming {table:wingDamage}") != std::string::npos);
+}
+
+TEST_CASE("Wings of a tier that split evenly are told they disagree, none of them blamed [data][items]")
+{
+    const auto wing = [](short number, const char* text) { return MakeWing(number, WingTier::Third, text); };
+    // A pair, one wrong; and two against two.
+    for (const std::vector<ItemDefinition>& wings :
+         {std::vector<ItemDefinition>{wing(40, "Increase {table:wingDamage}%"), wing(50, "Increase {table:other}%")},
+          std::vector<ItemDefinition>{wing(36, "Increase {table:wingDamage}%"),
+                                      wing(37, "Increase {table:wingDamage}%"), wing(38, "Increase {table:other}%"),
+                                      wing(39, "Increase {table:other}%")}})
+    {
+        const std::vector<ItemDataIssue> issues = CheckTableUses(wings);
+        REQUIRE(issues.size() == 1);
+        CHECK(issues.front().message.starts_with("the third-tier wings of group 12 don't agree on their wing lines: "));
+    }
+
+    // Wings without lines don't take a side in a tie of the others.
+    std::vector<ItemDefinition> withLineless = {wing(36, "Increase {table:wingDamage}%"),
+                                                wing(37, "Increase {table:other}%"), wing(200, "x")};
+    withLineless.back().description.clear();
+    const std::vector<ItemDataIssue> tie = CheckTableUses(withLineless);
+    REQUIRE(tie.size() == 1);
+    CHECK(tie.front().message.starts_with("the third-tier wings of group 12 don't agree on their wing lines: "));
+}
+
+TEST_CASE("Wings without lines never set the lines of their tier [data][items]")
+{
+    // Two new second-tier capes without lines, next to Cape of Fighter with them: the new ones are pointed out, though
+    // they are more.
+    auto cape = [](short number, const char* text)
+    {
+        ItemDefinition item = MakeWing(number, WingTier::Second, text);
+        item.tags.Set(ItemTag::Cape);
+        return item;
+    };
+    std::vector<ItemDefinition> capes = {cape(49, "Absorb {table:wingDamage}%"), cape(201, "x"), cape(202, "x")};
+    capes[1].description.clear();
+    capes[2].description.clear();
+    const std::vector<ItemDataIssue> capeIssues = CheckTableUses(capes);
+    REQUIRE(capeIssues.size() == 2);
+    CHECK(capeIssues[0].number == 201);
+    CHECK(capeIssues[1].number == 202);
+
+    // The same for a whole batch: three new third-tier wings without lines next to two with them.
+    const std::string lines = "Increase {table:wingDamage}% of Damage";
+    std::vector<ItemDefinition> wings = {MakeWing(36, WingTier::Third, lines), MakeWing(37, WingTier::Third, lines)};
+    for (short number = 300; number < 303; ++number)
+    {
+        wings.push_back(MakeWing(number, WingTier::Third, "x"));
+        wings.back().description.clear();
+    }
+    const std::vector<ItemDataIssue> issues = CheckTableUses(wings);
+    REQUIRE(issues.size() == 3);
+    for (const ItemDataIssue& issue : issues)
+    {
+        CHECK(issue.number >= 300);
+        CHECK(issue.message.find("it has 0 lines naming no table") != std::string::npos);
+    }
+}
+
+TEST_CASE("A wing alone in its tier and group is compared with the other groups' wings of its tier [data][items]")
+{
+    const std::string lines = "Increase {table:wingDamage}% of Damage";
+    std::vector<ItemDefinition> wings = {MakeWing(36, WingTier::Third, lines), MakeWing(37, WingTier::Third, lines)};
+    // A third-tier wing of group 13, without the lines.
+    wings.push_back(MakeWing(200, WingTier::Third, "Increase speed"));
+    wings.back().group = 13;
+    const std::vector<ItemDataIssue> issues = CheckTableUses(wings);
+    REQUIRE(issues.size() == 1);
+    CHECK(issues.front().group == 13);
+    CHECK(
+        issues.front().message.starts_with("its wing lines are not those of the third-tier wings of the other groups"));
+
+    // Two wings alone in their groups, as Cape of Fighter (12) and Cape of Lord (13), aren't compared with each other.
+    std::vector<ItemDefinition> capes = {MakeWing(49, WingTier::Second, "Absorb {table:wingDamage}%"),
+                                         MakeWing(30, WingTier::Second, "Absorb {table:other}%")};
+    capes[1].group = 13;
+    CHECK(CheckTableUses(capes).empty());
+
+    // A cape is compared with capes only.
+    wings.back() = MakeWing(200, WingTier::Third, "Increase {table:otherDamage}% of Damage");
+    wings.back().tags.Set(ItemTag::Cape);
+    CHECK(CheckTableUses(wings).empty());
 }

@@ -24,6 +24,7 @@
 #include "../MuEditor/UI/ItemTools/MuItemCategoriesUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemChecksUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemFormulasUI.h"
+#include "../MuEditor/UI/ItemTools/MuItemSyncUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemGlowColorsUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemModelUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemRequirementsUI.h"
@@ -33,12 +34,20 @@
 #include "../MuEditor/UI/MapEditor/MapEditorUI.h"
 #include "../MuEditor/UI/EffectBrowser/MuEffectBrowserUI.h"
 #include "../MuEditor/UI/ItemTranslations/MuItemTranslationsUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterBrowserUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterAttacksUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterChecksUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterModelUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterPreviewUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterTranslationsUI.h"
 #include "../MuEditor/UI/ServerList/MuServerListUI.h"
 #include "../UI/Common/MuEditorUI.h"
 #include "../UI/Console/MuEditorConsoleUI.h"
 #include "I18N/All.h"
 #include "Core/Utilities/AssetLoadWorld.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
+#include "GameLogic/Monsters/MonsterModelChanges.h"
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
 #include "Core/Utilities/WorldClearing.h"
@@ -482,6 +491,9 @@ void CMuEditorCore::ConnectGameHooks()
     // the item tools change an opened item model, and the game makes it again;
     // the Grand Soul pants' mesh is made their cloth grid again after.
     g_ItemDataHandler.SetOpenedModelHooks({&MuEditor::Items::DropWornCloth, &MuEditor::Items::PrepareClothMeshes});
+    // Characters of a monster model the monster tools opened again stay
+    // inside its animations.
+    g_MonsterDataHandler.SetModelsReopenedCallback(&GameLogic::Monsters::ModelChanges::ClampAnimations);
 }
 
 void CMuEditorCore::Shutdown()
@@ -537,8 +549,11 @@ void CMuEditorCore::Update()
         // only before the renderer's frame starts.
         g_MuEffectBrowserUI.BeforeFrame();
         g_MuItemModelUI.BeforeFrame();
-        // Between frames too: item models the item tools changed are opened again.
+        g_MuMonsterPreviewUI.BeforeFrame();
+        // Between frames too: item models the item tools changed are opened
+        // again, and so are the monster models the monster tools changed.
         ReopenChangedItemModels();
+        g_MonsterDataHandler.ReopenChangedModels();
 
         SelectWindowMode();
         UpdateKeyboardNavigation();
@@ -601,9 +616,43 @@ void CMuEditorCore::RenderItemTools()
     {
         g_MuItemFormulasUI.Render(&m_windows.itemFormulas);
     }
+    if (m_windows.itemSync)
+    {
+        g_MuItemSyncUI.Render(&m_windows.itemSync);
+    }
     if (m_windows.itemChecks)
     {
         g_MuItemChecksUI.Render(&m_windows.itemChecks);
+    }
+}
+
+// The monster browser and the monster tools beside it; they show the monster
+// it selects.
+void CMuEditorCore::RenderMonsterTools()
+{
+    if (m_windows.monsterBrowser)
+    {
+        g_MuMonsterBrowserUI.Render(&m_windows.monsterBrowser);
+    }
+    if (m_windows.monsterModel)
+    {
+        g_MuMonsterModelUI.Render(&m_windows.monsterModel);
+    }
+    if (m_windows.monsterPreview)
+    {
+        g_MuMonsterPreviewUI.Render(&m_windows.monsterPreview);
+    }
+    if (m_windows.monsterAttacks)
+    {
+        g_MuMonsterAttacksUI.Render(&m_windows.monsterAttacks);
+    }
+    if (m_windows.monsterTranslations)
+    {
+        g_MuMonsterTranslationsUI.Render(&m_windows.monsterTranslations);
+    }
+    if (m_windows.monsterChecks)
+    {
+        g_MuMonsterChecksUI.Render(&m_windows.monsterChecks);
     }
 }
 
@@ -882,6 +931,7 @@ void CMuEditorCore::Render()
             g_MuServerListUI.Render(&m_windows.serverList);
         }
         RenderItemTools();
+        RenderMonsterTools();
 
         // Render console (if enabled)
         if (m_windows.console)

@@ -100,6 +100,17 @@ ItemStatProfiles::ItemStatProfiles(const ItemStatFile& file)
         m_names.push_back(profile.name);
         m_profiles.push_back(LayProfile(m_profiles[DefaultProfile], profile.stats, profile.requirements, m_tables));
     }
+    m_tableUsedByStats.resize(m_tables.size());
+    for (const ItemStatProfile& profile : m_profiles)
+    {
+        for (const StatTerms& terms : profile.stats)
+        {
+            if (terms.table >= 0 && static_cast<size_t>(terms.table) < m_tables.size())
+            {
+                m_tableUsedByStats[static_cast<size_t>(terms.table)] = true;
+            }
+        }
+    }
     for (const StatProfileRule& rule : m_rules)
     {
         m_ruleProfiles.push_back(Find(rule.profile) > DefaultProfile ? rule.profile : std::string());
@@ -165,6 +176,18 @@ const LevelBonusTable* ItemStatProfiles::FindTable(std::string_view name) const
     const auto found = std::find_if(m_tables.begin(), m_tables.end(),
                                     [&](const LevelBonusTable& table) { return table.name == name; });
     return found != m_tables.end() ? &*found : nullptr;
+}
+
+bool ItemStatProfiles::IsTableUsedByStats(std::string_view name) const
+{
+    for (size_t index = 0; index < m_tables.size(); ++index)
+    {
+        if (m_tables[index].name == name)
+        {
+            return m_tableUsedByStats[index];
+        }
+    }
+    return false;
 }
 
 std::vector<std::string> ItemStatProfiles::GetTableNames() const

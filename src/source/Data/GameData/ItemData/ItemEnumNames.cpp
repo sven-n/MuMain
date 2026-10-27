@@ -79,6 +79,9 @@ constexpr std::array<EnumName<ItemTag>, static_cast<size_t>(ItemTag::Count)> Ite
     {ItemTag::GemJewelry, "gemJewelry"},
     {ItemTag::LuckyItemTicket, "luckyItemTicket"},
     {ItemTag::Valuable, "valuable"},
+    {ItemTag::NoLevelRequirement, "noLevelRequirement"},
+    {ItemTag::NoDurabilityLine, "noDurabilityLine"},
+    {ItemTag::NoBlankAfterOptions, "noBlankAfterOptions"},
 }};
 
 constexpr std::array<EnumName<ItemRequirement>, ItemRequirementCount> ItemRequirementNames = {{

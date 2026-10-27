@@ -196,8 +196,7 @@ const std::vector<std::string>& CommandNames()
         "ping",   "scene", "state",      "nearby", "events",   "wait-for", "screenshot", "login",   "select-char",
         "logout", "quit",  "move",       "warp",   "teleport", "attack",   "skill",      "pickup",  "use",
         "equip",  "say",   "whisper",    "party",  "halt",     "hotkey",   "click-ui",   "drag-ui", "hover-ui",
-        "type",   "ui",    "slot-pixel", "trade",  "console",  "bench",
-        "bones",
+        "type",   "ui",    "slot-pixel", "trade",  "console",  "bench",    "bones",      "tooltip", "tooltip-snapshot",
     };
     return names;
 }

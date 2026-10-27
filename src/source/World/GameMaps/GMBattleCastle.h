@@ -43,7 +43,8 @@ namespace   battleCastle
     bool    RenderBattleCastleObjectMesh(OBJECT* o, BMD* b);
     void    MoveFlyBigStone(OBJECT* o);
     CHARACTER* CreateBattleCastleMonster(EMonsterType Type, int PositionX, int PositionY, int Key);
-    bool    SettingBattleCastleMonsterLinkBone(CHARACTER* c, int Type);
+    // Castle Gate 1 counts its attacks from 0 again when it appears.
+    void ResetCastleGateAttackCount(CHARACTER* c, int Type);
     bool    StopBattleCastleMonster(CHARACTER* c, OBJECT* o);
     bool    MoveBattleCastleMonster(CHARACTER* c, OBJECT* o);
     bool    SetCurrentAction_BattleCastleMonster(CHARACTER* c, OBJECT* o);

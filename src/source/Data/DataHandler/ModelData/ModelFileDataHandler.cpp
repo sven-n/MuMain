@@ -103,7 +103,7 @@ std::wstring ModelFileTextureName(const ModelFileEntry& entry)
     return name;
 }
 
-void OpenModelFileTextures(int type, const std::wstring& subFolder, const ModelFiles& table)
+void OpenModelFileTextures(int type, std::span<const std::wstring> subFolders, const ModelFiles& table)
 {
     const ModelFileEntry* entry = table.Find(type);
     if (entry == nullptr)
@@ -111,7 +111,7 @@ void OpenModelFileTextures(int type, const std::wstring& subFolder, const ModelF
         return;
     }
     std::vector<TextureProblem> problems;
-    gLoadData.OpenTexture(type, std::span<const std::wstring>(&subFolder, 1), problems);
+    gLoadData.OpenTexture(type, subFolders, problems);
     BMD& model = ::Models[type];
     Render::Models::Gltf::OpenEmbeddedTextures(model, ModelFileTextureName(*entry), GL_REPEAT, GL_NEAREST);
     LogTextureProblems(model, *entry, problems);

@@ -93,16 +93,17 @@ The loader matches the file to the model's BMD. It refuses a file (see
 - **Textures:** a PNG the material's base colour texture carries in the file
   is the mesh's texture. A mesh without one uses the texture its primitive's
   or material's `"extras": {"texture": "<name>"}` names in the monster's
-  texture folder, opened as for the BMD. Embedded images are PNG, at most
+  texture folders (`Data/Monsters/Models.json`), opened as for the BMD. Embedded images are PNG, at most
   2048 × 2048.
 - **Normal maps (Enhanced lighting only):** a material's `normalTexture`
   (PNG, tangent space, +Y up, its `scale` applied to xy) needs a TANGENT
   attribute (4 components, w = ±1 for the handedness). Classic lighting
   ignores it.
 
-Bones the game looks up by name for a monster (the Yeti's `Bip01 Head` and
-`Box03`) fall back to the root bone, with one log line, when a model has no
-bone of that name.
+A monster's head bone (`headBone` in `Data/Monsters/Models.json`, an index
+into the BMD's bones) is found in the file by that BMD bone's name, and the
+Yeti's breath bone by `Box03`. A name the model has no bone for falls back to
+the root bone, with one log line.
 
 ## Logs
 

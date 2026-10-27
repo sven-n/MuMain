@@ -7,7 +7,7 @@ group; the item models are in `src/bin/Data/Items/Models/` (see
 database; `Item_<lang>.bmd` is no longer read by the game.
 
 The data matches OpenMU's `ItemDefinition` where both sides have the same
-fields, so it can later be exchanged with the server.
+fields, so it can be exchanged with the server (see [Item Sync](#item-sync)).
 
 ---
 
@@ -17,6 +17,8 @@ fields, so it can later be exchanged with the server.
 |---|---|
 | `Group00_Sword.json` … `Group15_Etc.json` | 0–15, named after the `ITEM_GROUP_*` constants |
 | `Stats/ItemStats.json` | What the + level, excellent options, ancient sets and option level add to the stats and requirements; see [Item stats by level](#item-stats-by-level) |
+| `Tooltips/Tooltip.json` | The item tooltip's shared texts and layouts: which stat and requirement lines a tooltip shows; see [Tooltip layouts](#tooltip-layouts) |
+| `Sync/KnownDifferences.json` | Not read by the game: the differences from the server that MuEditor's Item Sync leaves unchecked; see [Item Sync](#item-sync) |
 
 The file name is only a convention; the group comes from the file content.
 
@@ -111,13 +113,15 @@ variants or option words. An online keyword need not select the same items offli
 | Field | Meaning |
 |---|---|
 | `tags` | Categories the game code asks for, e.g. `["mount", "flying"]`; see [Tags](#tags) |
+| `levelValues` | Values of the description's own placeholders, one per item level from +0: `{"stat": ["ENG", "STA", ...]}` makes `{stat}` "ENG" at +0 and "STA" at +1. Each value is a text with its translations (written like `name`) or a shared text (`"@name"`), without placeholders. A line that shows one is shown only at levels that have a value. The Fruits' `{stat}` is one. A client-only field; the bmd import keeps it |
 | `description` | Lines the tooltip shows for the item, e.g. the Jewel of Bless's "It is used to increase your item level up to 6"; see [Descriptions](#descriptions). A client-only field; the bmd import keeps it |
+| `nameLines` | How the game names the item (its tooltip, the repair window, windows, messages and ground labels) and the tooltip's name color, when not the standard name and color (see [Name lines](#name-lines)). Each is written like a `description` line without `bold` and `after` (the name is always bold and first), its text is checked like one, and its `text` and `color` may be left out. Name lines are in the item names' language (English with the options' "Translate item names" off), and a text that is empty in it keeps the standard name. A client-only field; the bmd import keeps it |
 | `width`, `height` | Size in inventory slots |
 | `slot` | Equipment slot: `mainHand`, `offHand`, `helm`, `armor`, `pants`, `gloves`, `boots`, `wings`, `pet`, `pendant`, `ring`. Left out = not equippable |
 | `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, defense per level, damage increase, absorption) depend on it; excellent second and third tier wings get no extra durability, and the chaos mix knows a wing's tier from it |
 | `weaponKind` | Only for weapons and shields: `sword`, `glove`, `axe`, `mace`, `spear`, `bow`, `crossbow`, `staff`, `book`, `shield`, as OpenMU's item groups 0 to 6: swords and the Rage Fighter's gloves (group 0; gloves are the items only the Rage Fighter may use), axes (1), maces and sceptres (2), spears (3), bows and crossbows (4: bows have the slot `offHand`, crossbows `mainHand`; arrows and bolts have no weapon kind), staffs, sticks and books (5: books have the slot `offHand`) and shields (6). While an item has the weapon kind its group gives, the bmd import and the item editor (also when it moves an item to another number) keep it matching the group, the slot and, in group 0, the class requirements (a group gives its kind only on that kind's slot, and in group 4 only to two-handed items), so a new weapon gets one too; a kind written in the file that differs from the group's stays as long as it differs. Which bow or crossbow a character holds (its animations, arrows and damage), the elf's arrows-only rule, a spear's reach and Impale, the shield defense set option, the bonus of leveled arrows and bolts, a staff's damage (it counts for the left hand), which right-hand weapons a summoner may hold in the left hand (not staffs or books), the character window's wizardry line, the tooltip's magic power line, the knight skills that need a weapon without a staff or book, Death Stab, Death Cannon and Spiral Slash, the weapon in the left hand that adds its magic options, the dual wield of Dark Knights, Magic Gladiators and Rage Fighters, and the weapon that moves into an empty right hand depend on it |
 | `potionPriority` | Only for potions with the `healingPotion`, `manaPotion`, `complexPotion` or `shieldPotion` tag: which one of a kind the game takes first, the higher the earlier (0 or left out = last; equal ones take the higher group and number first). The shipped potions count up with their size, so the largest is taken first. A client-only field (OpenMU has none); the bmd import keeps it |
-| `statProfile` | The item's profile in the [item stat file](#item-stats-by-level): what its + level, excellent options, ancient set and option level add to its stats and requirements. `"default"` names the default. The [profile rules](#item-stats-by-level) of the item stat file say which profile an item's data gives it: in the shipped file `sceptre` for the items with the `sceptre` tag, `book` for summoner books, `shield` for shields, `weapon` for the other items with a weapon kind (not arrows and bolts), `armor` for helms, armour, pants, gloves and boots, `scroll` for the items of group 15 with requirements, `helper` for the items of groups 13 and 14 with a base level requirement (`requirements.level`; the Transformation Ring's comes from `requirementsByLevel`, so it has the default), and a wing tier's profile for wings (`firstTierWing`, `secondTierWing`, `secondTierCape` for the second tier capes, `thirdTierWing`, `smallWing`). While an item has the profile its data gives, the bmd import and the item editor keep it matching (also when it moves an item to another number); a profile written in the file that differs from it stays as long as it differs: the Horn of Fenrir's data gives `helper`, and it names `"default"`. A left-out profile always follows the data; while the data gives one, the item has the default and loading warns about it, as for item files saved before the field. An item whose data stops giving its profile loses the profile's terms: a bow made one-handed, which is then no bow, loses the `weapon` profile's strength per option level |
+| `statProfile` | The item's profile in the [item stat file](#item-stats-by-level): what its + level, excellent options, ancient set and option level add to its stats and requirements. `"default"` names the default. The [profile rules](#item-stats-by-level) of the item stat file say which profile an item's data gives it: in the shipped file `sceptre` for the items with the `sceptre` tag, `book` for summoner books, `shield` for shields, `weapon` for the other items with a weapon kind (not arrows and bolts), `armor` for helms, armour, pants, gloves and boots, `scroll` for the items of group 15 with requirements, `orb` for the items of group 12 with stat requirements (the orbs, crystals and the Dark Lord's scrolls), `helper` for the items of groups 13 and 14 with a base level requirement (`requirements.level`; the Transformation Ring's comes from `requirementsByLevel`, so it has the default), and a wing tier's profile for wings (`firstTierWing`, `secondTierWing`, `secondTierCape` for the second tier capes, `thirdTierWing`, `smallWing`). While an item has the profile its data gives, the bmd import and the item editor keep it matching (also when it moves an item to another number); a profile written in the file that differs from it stays as long as it differs: the Horn of Fenrir's data gives `helper`, and it names `"default"`. A left-out profile always follows the data; while the data gives one, the item has the default and loading warns about it, as for item files saved before the field. An item whose data stops giving its profile loses the profile's terms: a bow made one-handed, which is then no bow, loses the `weapon` profile's strength per option level |
 | `twoHanded` | Weapon needs both hands |
 | `skill` | Skill the item gives |
 | `level` | Item level (the drop level); also used in price and damage calculations |
@@ -129,7 +133,7 @@ variants or option words. An online keyword need not select the same items offli
 | `attackType` | Attack type used by the client |
 | `sellValue` | Value factor used by the price calculation of some items |
 | `buyPrice` | Fixed price; when set, it replaces the calculated price |
-| `requirements` | `level`, `strength`, `dexterity`, `energy`, `vitality`, `leadership` |
+| `requirements` | `level`, `strength`, `dexterity`, `energy`, `vitality`, `leadership`. The stat requirements of the orbs, crystals and scrolls (groups 12 and 15, without a slot) are the values the game asks for, as OpenMU stores them: their profiles keep them as they are. The original client's bmd files hold weights for them, which Import from bmd turns into the values and Export as bmd and Export as S6E3 turn back (the smallest weight that gives each value). Which ones convert follows the item's profile: a requirement it keeps as it is while the default grows it (an orb given the default profile holds weights like any item) |
 | `requirementsByLevel` | A requirement for each item level 0 to 15 (one number for all of them, or 16), instead of the [item stat file's](#item-stats-by-level) formula; above +15 the +15 value counts. The Orb of Summoning has `{"energy": [30, 60, 90, 130, 170, 210, 300, 500, 0, ...]}` and the Transformation Ring `{"level": [20, 20, 20, 50, ...]}`. The base value of that requirement is not used. The bmd import keeps it |
 | `classRequirements` | Per class (`darkWizard`, `darkKnight`, `fairyElf`, `magicGladiator`, `darkLord`, `summoner`, `rageFighter`): 0 = cannot use, otherwise the class level needed |
 | `resistances` | `ice`, `poison`, `lightning`, `fire`, `earth`, `wind`, `water` |
@@ -169,8 +173,121 @@ can have several tags; the file lists them in the order below.
 | `gemJewelry` | The gem rings and necklaces from the cash shop |
 | `luckyItemTicket` | Lucky item tickets |
 | `valuable` | The game asks for confirmation before the item is sold or dropped |
+| `noLevelRequirement` | The tooltip shows no level requirement, though the item has one (Loch's Feather) |
+| `noDurabilityLine` | The tooltip shows no standard durability line, though the item has a durability: it shows none, or its description has its own (a pet's "Life", a stack's "Number of items", a ticket's "usable … times") |
+| `noBlankAfterOptions` | The tooltip leaves out the blank line after the options, so the item's lines drawn there follow the options directly (the Pet Skeleton, the Invitation to Santa Village) |
 
 Wings need no tag: an item is a wing when its `slot` is `wings`.
+
+### Tooltip layouts
+
+`Tooltips/Tooltip.json` says which lines an item tooltip shows besides the
+item's own description: damage, defense, magic defense, defense rate, the
+speeds, the resistances, the requirements with their "(lacking …)" lines, and
+the wizardry, curse and pet attack increases. It has the **shared texts**, by
+name and with their translations, and the **layouts**. Every item uses the
+layout `default` for now.
+
+```json
+{
+  "formatVersion": 1,
+  "texts": {
+    "defense": {"en": "Defense: {defense}", "de": "Verteidigung: {defense}"},
+    "lacking": {"en": "(lacking {missing})", "de": "(fehlt {missing})"}
+  },
+  "layouts": [
+    {
+      "name": "default",
+      "lines": [
+        {"section": "name"},
+        {"text": "@defense", "when": ["defense"], "colors": [{"when": ["defenseHarmonyBonus"], "color": "yellow"}, {"when": ["armour", "excellent"], "color": "blue"}]},
+        {"section": "description"},
+        {"text": "@durability", "when": ["hasDurability", "!timed", "!tag:noDurabilityLine"]},
+        {"text": "@requiredLevel", "when": ["requiredLevel", "!tag:noLevelRequirement"], "colors": [{"when": ["missingLevel"], "color": "red"}]},
+        {"text": "@lacking", "values": {"missing": "missingLevel"}, "when": ["requiredLevel", "!tag:noLevelRequirement", "missingLevel"], "color": "red"},
+        {"section": "classes"},
+        {"text": "", "when": ["tag:sceptre"]},
+        {"text": "@petAttackIncrease", "when": ["tag:sceptre"], "color": "blue", "bold": true},
+        {"section": "options"}
+      ]
+    }
+  ]
+}
+```
+
+A layout line has:
+
+- **`text`**: `"@name"` for a shared text, a text written in place (with its
+  translations, as in a description), or `""` for a blank line. Its
+  placeholders are the [built-in values](#description-placeholders) and those
+  the line's `values` names (the stat file's tables, which descriptions can
+  use, aren't checked here, so a layout can't use them yet).
+- **`when`**: the line shows only when every entry holds. An entry is
+  - a built-in value, which holds when it is not 0 (`"defense"`,
+    `"missingStrength"`), or a built-in value compared with a whole number by
+    `=`, `!=`, `<`, `<=`, `>` or `>=` (`"durability=2"`, `"level!=1"`); the
+    number is an `int`, from -2147483648 to 2147483647, with an optional `-`;
+  - a state (below);
+  - `"tag:<tag>"`, which holds when the item has that [tag](#tags);
+  - `"class:<class>"`, which holds when the hero is of that class (written as in
+    `classRequirements`: `darkLord`, `summoner`, …), whatever its rank. A line
+    that says which class can use the item is white for it and dark red for
+    the others, as the class lines the game writes.
+
+  A `!` in front turns an entry around: `"!tag:luckyItem"`. Without `when`
+  the line always shows.
+- **`color`**: the line's color, white when left out. The color names are
+  those of a description line.
+- **`colors`**: rules `{"when": [...], "color": ...}`. The first rule whose
+  `when` holds gives the color, else `color` does.
+- **`bold`**: `true` for a bold line.
+- **`values`**: a placeholder of the text and the built-in value it shows on
+  this line. One "(lacking {missing})" serves every requirement this way.
+
+The **states** a condition can name:
+
+| State | Set when |
+|---|---|
+| `hasDamage` | The item has damage above 0 to show; for a skill book, its skill's |
+| `skillBook` | A skill book or scroll (group 15): its damage line is wizardry damage |
+| `twoHanded` | A two-handed weapon |
+| `excellent`, `ancient` | An excellent or ancient item |
+| `damageHarmonyBonus`, `defenseHarmonyBonus` | A Jewel of Harmony option raises its damage or defense |
+| `strengthReduced`, `dexterityReduced` | A Jewel of Harmony option or a socket lowers that requirement |
+| `strengthRequired`, `dexterityRequired` | The item asks for that stat at all (its own requirement, before the reductions): a reduction to 0 still shows the line, at 0 |
+| `armour` | A helm, armor, pants, gloves or boots (groups 7 to 11) |
+| `wizardryWeapon` | A staff, a book, or a Magic Gladiator's sword with magic power |
+| `hasDurability` | The item keeps a durability: an item of groups 0 to 11 or 13 with a `durability` or `magicDurability`, or the wings and capes 12/0–6, 12/36–43 and 12/49–50 |
+| `timed` | A timed item, one that expires |
+| `hasOptions` | The item has options to show: a skill, luck, an additional or an excellent option |
+
+A **section** is a part of the tooltip the code still writes, and the lines
+of a layout go between them:
+
+| Section | What the code writes there |
+|---|---|
+| `name` | Everything up to the item's name, and the name |
+| `description` | The item's own texts: the code's texts for particular items, the item's [description](#fields) |
+| `classes` | The classes that can use the item, and the boots' and gloves' texts from +5 |
+| `options` | The excellent, set, socket, Jewel of Harmony and other options, to the end of the tooltip |
+
+Each layout has the four sections once each, in this order: it starts with
+`name` and ends with `options`.
+
+**Errors** when the item data loads: a `@name` that is not a shared text (in a
+layout or a description), an entry of `when` that is neither a value, a
+comparison of a value with a whole number, a state nor a known tag, an unknown
+color, a placeholder that is neither built in nor named by the line's
+`values`, a shared text of a description that names a table itself (it names one only through the line's
+`values`, which the table checks and the editor's table counts and rename read), a translation whose placeholders
+are not those of the English text,
+a text (other than a blank line) without its English text, a language code
+that has more than letters, digits and `-`, a `values` entry that names no
+built-in value, missing or misplaced sections, and no layout `default`. The
+messages suggest the name meant for a typo. **Warnings**: a shared text that
+neither a layout nor a description uses, a `values` entry the text does not
+have (a layout's or a description's line), a translation in a language the game has no texts in (as for item
+names), and a layout other than `default` (nothing uses it yet).
 
 ### Flight equipment
 
@@ -202,13 +319,23 @@ Jewel of Bless's:
 ]
 ```
 
-Each line is `{"text": ..., "color": ...}`:
+Each line is `{"text": ..., "values": {...}, "when": [...], "color": ...,
+"colors": [...], "bold": true, "levels": [first, last], "after":
+"options"}`:
 
 - **`text`** is written like `name`: a plain English text, or the texts by
   language. It is checked like a name too: the English text is required, a
   language code has only letters, digits and `-`, and a language the game
-  has no texts in is a warning. A text can have
+  has no texts in is a warning. It can also be `"@name"`, a shared text of
+  the [tooltip file](#tooltip-layouts) (`"@increaseSpeed"`), which is how a
+  text several items show is written once. A text can have
   [placeholders](#description-placeholders).
+- **`values`** names the value a placeholder of the text shows on this line:
+  a built-in value, a table as `table:` and its name (`"values":
+  {"percent": "table:wingDamageIncrease1st"}` with the shared text "Increase
+  {percent}% of Damage"), or a [game data value](#description-placeholders)
+  such as `skillMana:<skill>`, the mana a skill costs, by its number as `skill`
+  writes it (`"values": {"mana": "skillMana:22"}`).
 - **An empty text** (`{"text": ""}`) is a blank line.
 - **Long lines** wrap at about the width of the original tooltips' widest
   lines, and `\n` in a text breaks the line there (`\n\n` leaves a blank
@@ -216,14 +343,30 @@ Each line is `{"text": ..., "color": ...}`:
 - **`color`** is one of the tooltip colors: `white` (left out), `blue`,
   `red`, `yellow`, `green`, `darkRed`, `purple`, `darkBlue`, `darkYellow`,
   `greenBlue`, `gray`, `redPurple`, `violet`, `orange`.
+- **`levels`** shows the line only at those item levels, both included (`[1,
+  8]`; left out: every level): a list of two levels from 0 to 15, the first
+  not above the last. Most items that use it today are level variants (the
+  Fruits, Contract Summon, Life Stone, Rena, …), which the items design makes
+  items of their own later: their lines then move into those items and lose
+  their `levels`.
+- **`when`** shows the line only when its [conditions](#tooltip-layouts)
+  hold, and **`colors`** gives it the color of its first rule that holds, as
+  a layout line's (`["!timed"]`, `["durability=2"]`, `[{"when":
+  ["class:darkLord"], "color": "white"}]`). **`bold`** draws it bold.
+- **`"after": "options"`** draws the line after the item's options
+  (excellent, luck, skill), at the end of the tooltip, instead of with the
+  description: the transformation rings' effects and "Unable to Equip with a
+  Different Transformation Ring", for example.
 
 In the tooltip:
 
 - **Place:** after the item's damage, defense and speed lines, and before
-  its durability, requirements and options. The lines the tooltip code
-  computes from the item (the wings' damage and absorption, the Guardian
-  Angel and the Imp, the Town Portal scroll's delay) come after the
-  description.
+  its durability, requirements and options. A few lines that read the hero
+  or other tables (the Armor of Guardsman's Chaos Castle table, the Lost
+  Map, the Talisman of Mobility's saved location) are still written by the
+  tooltip code, after the description, and a few before it (the reset
+  fruits' reset points, the Talisman of Resurrection's saved place, the
+  socket seeds and spheres, the Sign of Dimensions).
 - **Language:** the UI's language, also when the item names stay English
   ("Translate item names" off).
 - **Size:** at most 32 rows. The description has them to itself, so a long
@@ -231,23 +374,93 @@ In the tooltip:
 - **Dark Horse and Dark Raven:** they show it only in shops; elsewhere the
   pet window writes their tooltip.
 
+### Name lines
+
+The tooltip's first line is the item's name. Its **standard name** is the
+item's `name` in the item names' language (the UI's, or English with the
+options' "Translate item names" off), after its set's name for an ancient item
+and "Excellent" for an excellent one, with " +level" above +0; its
+**standard color** is green-blue for an ancient item, violet for a socket
+item, green for an excellent item with options, yellow from +7, blue for an
+item with options, else white.
+
+`nameLines` changes them: the first line whose `levels` and `when` hold gives
+the name, its `text` with its [placeholders](#description-placeholders) filled
+in (left out: the standard name), and the color, its `color` (left out: the
+standard color) and then its first `colors` rule that holds. Without such a
+line, the standard name and color. The NPC shop's price line has the name's
+color.
+
+The repair window writes the same name in the same color. Elsewhere the name
+lines give only the text: the mix and quest windows, the server's messages,
+the control socket and the ground labels (which keep their own colors) write
+the line's text, and where no line holds, the item's `name` with " +level"
+above +0 (the ground labels add the set's name and the options themselves).
+There may be no item there, only its type and level: a condition on the
+item's durability or options then reads 0 (the Horn of Fenrir is plain
+"Horn of Fenrir").
+
+```json
+"nameLines": [
+  {"text": "{name}", "color": "white", "levels": [0, 0], "colors": [{"when": ["level>=7"], "color": "yellow"}, {"when": ["hasOptions"], "color": "blue"}]},
+  {"text": "{name} +{level}", "color": "white", "colors": [{"when": ["level>=7"], "color": "yellow"}, {"when": ["hasOptions"], "color": "blue"}]}
+]
+```
+
+are the wings' and capes': no "Excellent", yellow from +7, else blue with
+options. `[{"color": "yellow"}]` keeps the standard name in yellow (the
+jewels); `{"text": "{monster} Transformation Ring", "values": {"monster":
+"monsterName:2"}, "levels": [0, 0]}` names a +0 Transformation Ring after the
+Budge Dragon.
+
 ### Description placeholders
 
-A description text can show values of the item: `{name}` is replaced by the
-value of `name` for the hovered item, e.g.
+A description or name text can show values of the item: `{value}` is replaced
+by that value for the hovered item, e.g.
 `"Increases damage by {table:damageIncreaseWeapons} at +{level}"`. Item texts
 have no braces of their own, so every brace belongs to a placeholder. A
 placeholder is one of:
 
-- a **built-in value**, by its name: `{level}`, the item's + level;
+- a **built-in value**, by its name: `{level}`, the item's + level, or a value of the tooltip's stat
+  lines, as the game computes them for the item and the hero:
+  `damageMin`, `damageMax` (with the Jewel of Harmony's attack bonus; a skill
+  book's wizardry damage), `defense` (with its defense bonus), `magicDefense`,
+  `blockRate`, `attackSpeed`, `walkSpeed`, `magicPower`, `durability`,
+  `maxDurability`, the resistances `iceResistance`, `poisonResistance`,
+  `lightningResistance`, `fireResistance`, `earthResistance`, `windResistance`,
+  `waterResistance` (the item's level + 1 for a resistance it has), and for
+  `Level`, `Strength`, `Dexterity`, `Vitality`, `Energy` and `Leadership`
+  `required…` (what the item asks, after the Jewel of Harmony's and the sockets'
+  strength and agility reductions) and `missing…` (what the hero lacks of it, 0
+  when nothing), and the item's add option (the potions', scrolls', seals' and
+  charms' effect in the game's ItemAddOption data): `addOptionValue1`,
+  `addOptionValue2` and `addOptionDuration`, a text such as "1 Hour"; the
+  hero's `heroLevel`; and for the [name lines](#name-lines) the item's `name`
+  (its `name` in the item names' language), `levelPlusOne` (a packed jewel's count)
+  and `excellentFlags` (its excellent options, 0 to 63; the Horn of Fenrir's
+  1, 2 and 4 are its Destroy, Protect and Illusion kinds);
 - a **level bonus table** of [`Stats/ItemStats.json`](#item-stats-by-level),
   as `table:` and its name: the table's value at the item's + level
   (`{table:damageIncreaseWeapons}` is 3 at +1 and 66 at +15, the damage a
   weapon gains). A new table is a new placeholder.
+  The wings, capes and pets show their damage increase and absorption this
+  way: the shared text `"Increase {percent}% of Damage"` with
+  `"values": {"percent": "table:wingDamageIncrease1st"}` on the line, over the
+  table `wingDamageIncrease1st` (`{"values": 12, "perLevel": 2}`, 12 + 2 per
+  level). Such tables are only for descriptions: no stat profile names them.
+- a name the line's `values` binds to a built-in value, a table
+  (`"table:<name>"`) or a value of other game data, so one shared text serves
+  items whose numbers come from different tables; the game data values are
+  `skillMana:<skill>` (the mana a skill costs), `skillName:<skill>` (its name),
+  by its number as `skill` writes it, and `monsterName:<monster>` (a monster's
+  name, by its number in the monster data);
+- one of the item's `levelValues`, a text by item level.
 
 The tables are written apart from the built-in values, so a table may have
 any name, also one a later version gives a built-in value: `{level}` and
-`{table:level}` are not the same.
+`{table:level}` are not the same. The names of a line's `values` and the item's
+`levelValues` are the item's own: one named like a built-in value is the
+item's, on its lines.
 
 **Errors** (when the item data loads, in the save checks and in Import from
 bmd):
@@ -258,7 +471,29 @@ bmd):
   order is fine);
 - a name that is neither built in nor a table: `has the unknown placeholder
   {table:damgeIncreaseWeapons}; did you mean {table:damageIncreaseWeapons}?`.
-  A table written without `table:` gets the same hint.
+  A table written without `table:` gets the same hint;
+- a line's `values` entry that names neither a built-in value nor a table;
+- a level value with placeholders, and a line that shows a level value at a
+  level the value has none for.
+
+A level value no line shows is a warning.
+
+**Warnings:**
+
+- a table of the stat file that neither a stat nor a description names;
+- a wing (an item with a `wingTier`) whose description lines are not those of
+  most of the other wings of its tier, `cape` tag and group: the tooltip code
+  chose the wings' lines by the tier, so a new wing without them, or one moved
+  to another tier that keeps its old tier's tables, is pointed out
+  (`its wing lines are not those of the other third-tier wings of group 12:
+  it has 1 line naming no table, they have 3 lines naming …`). A wing alone
+  there is compared with the wings of its tier and `cape` tag in the other
+  groups that have more than one; Cape of Fighter (12) and Cape of Lord (13),
+  each alone and written apart by the old code, are not compared with each
+  other. Wings of a group that split evenly get one warning that they don't
+  agree, without blaming either side. Wings without lines never set the
+  lines the others are compared with, so new wings imported without them are
+  pointed out, also when they are more than the wings with lines.
 
 The shipped data is checked by the tests, so a wrong placeholder fails the
 build's tests.
@@ -407,7 +642,8 @@ The shipped profiles:
 | `armor` | 5 strength per option level: helms, armour, pants, gloves and boots |
 | `book` | Energy `20 + base * (drop level + item level) * 3 / 100`; 5 strength per option level: summoner books |
 | `helper` | Level requirement +4 per level: the items of groups 13 and 14 with a base level requirement (in the shipped data the rings, pendants, pets and Loch's Feather of group 13); the Horn of Fenrir names `"default"` |
-| `scroll` | Level requirement +4 per level; energy from the level requirement (`20 + base * level requirement * 4 / 100`) when the item has one: the skill scrolls and parchments of group 15 |
+| `scroll` | Level requirement +4 per level; the stat requirements as stored (`"base"`): the skill scrolls and parchments of group 15 |
+| `orb` | The stat requirements as stored (`"base"`): the orbs, crystals and the Dark Lord's scrolls of group 12 |
 | `sceptre` | No magic power per level after halving; 5 strength per option level: the Dark Lord's sceptres |
 | `shield` | Defense +1 per level (`defenseIncreaseShields`), no excellent part, ancient part `(defense + level) * 20 / d + 2` |
 | `firstTierWing` | Defense from `defenseBonus1stWings`; level requirement +4 per level |
@@ -417,9 +653,8 @@ The shipped profiles:
 | `thirdTierWing` | Defense from `defenseBonus3rdWings`: 4 per level up to +9, then 5 to 10 more per level |
 
 The shield also adds 5 strength per option level. Items without a profile
-or with `"default"` (arrows and bolts, jewels, potions, the orbs, crystals
-and scrolls of group 12, the Horn of Fenrir, …) have the default: their
-level requirement does not grow.
+or with `"default"` (arrows and bolts, jewels, potions, the Horn of Fenrir,
+…) have the default: their level requirement does not grow.
 
 The shipped profile rules, in order, with the items each gives its profile:
 
@@ -437,10 +672,11 @@ The shipped profile rules, in order, with the items each gives its profile:
 | 10 | `secondTierWing` | slot `wings`, wing tier `second` | 5 |
 | 11 | `thirdTierWing` | slot `wings`, wing tier `third` | 7 |
 | 12 | `default` | slot `wings` (wings without a tier) | 0 |
-| 13 | `scroll` | group 15, any base requirement | 36 |
-| 14 | `helper` | groups 13 and 14, a base level requirement | 32 |
+| 13 | `orb` | group 12, a base stat requirement | 12 |
+| 14 | `scroll` | group 15, any base requirement | 36 |
+| 15 | `helper` | groups 13 and 14, a base level requirement | 32 |
 
-The other 342 items match no rule and have the default. Rule 14 reaches the
+The other 330 items match no rule and have the default. Rule 15 reaches the
 Horn of Fenrir, which names `"default"`.
 
 **Errors** in the file stop the start like errors in the item files: a file
@@ -464,8 +700,9 @@ the file does not have (other than `"default"`); a condition the format does
 not have; and a condition that is not a list of one or more values, or a
 value that is not one of its names (for `group`, a whole number from 0 to
 15).
-**Warnings:** unknown fields, a table no stat uses, and a caption without
-English. An item whose `statProfile` the file does not have is an error, and
+**Warnings:** unknown fields, a table that neither a stat nor a
+[description placeholder](#description-placeholders) uses (see there for the
+wings' tables too), and a caption without English. An item whose `statProfile` the file does not have is an error, and
 a profile no item names is a warning.
 
 ---
@@ -745,6 +982,11 @@ The problems are:
 | `renderStyle` names a style that does not exist; the model is drawn plainly. | warning |
 | `itemEffect` names an item effect that does not exist; the model is drawn without it. | warning |
 
+A model file can be in the formats of the Season 6 client (BMD versions
+10 and 12) or in the encrypted format of later seasons' models (version
+14); files of other versions cannot be opened. The version is the fourth
+byte of the file, after `BMD`.
+
 The model names textures as `.jpg`/`.tga`; the game reads the encrypted
 copies with the same name, `.OZJ`/`.OZT`. Meshes whose texture name starts
 with `hid` are not drawn, so their texture is not loaded.
@@ -859,9 +1101,8 @@ shows it in the others.
   the base value back; excellent and ancient items get no higher stat
   requirement from them, while excellent options still raise a level given
   by level and the option level still adds the strength its stat profile
-  gives per option level; a scroll's energy,
-  whose formula takes the level requirement, follows a level given by
-  level). Below them, what the game asks at each + level
+  gives per option level; a stat requirement whose formula takes the level
+  requirement, follows a level given by level). Below them, what the game asks at each + level
   (the `/<item name>` window shows the normal item), also as excellent,
   ancient or with an option level, while a value is still being typed. Then
   the class steps (0: the
@@ -878,6 +1119,8 @@ shows it in the others.
   a problem of an item selects it and opens the tool of its field; an arrow
   key onto it only selects the item. A click on a problem of the item stat
   file (a profile or a table nothing uses) opens Item Formulas at it.
+- **Item Sync**: Export and Import of the items and item formulas with an
+  OpenMU server, see [Item Sync](#item-sync).
 - **Item Translations**: the names in all languages, see
   [translation-system.md → In the item editor](translation-system.md#in-the-item-editor).
 
@@ -1027,9 +1270,167 @@ applied, **New stat profile**, **New level bonus table**, **Copy**,
   the items keep the profile they name, and those it no longer gives count as
   picked.
 
-The server keeps its own formulas until they are synced, so what it checks
-and computes can differ from what changed formulas give. Items your
-character already has keep their values until they are made again.
+The server keeps its own formulas until they are synced (see
+[Item Sync](#item-sync)), so what it checks and computes can differ from
+what changed formulas give. Items your character already has keep their
+values until they are made again.
+
+### Item Sync
+
+Item Sync exchanges the items and the item formulas with an OpenMU server
+through a file, the *item exchange file*. The server stays authoritative:
+the client never writes to it. (OpenMU's export and import of the file, and
+Update from server, which downloads it, are later steps of phase 7; see the
+[design](superpowers/specs/2026-09-25-data-driven-items-design.md).)
+
+- **Import…** opens a file and lists how it differs from the client's
+  items and formulas: what the import would add to the client, change in
+  it or remove from it. **Apply the checked changes** first says what it
+  changes ("3 items added, 5 changed, 1 removed; 2 formula entries
+  change"; what is not checked or not listed stays as it is), then takes
+  the checked rows into the client as one step of the undo history; Save
+  Items writes the files, as for any edit.
+- **Export…** writes the client's items and formulas into the file it
+  picks, without a diff: OpenMU's import page shows what the file changes
+  on the server, and Import shows what one changes in the client. A new
+  file is written right away ("Exported 911 items and all formulas to
+  …"). A file that is there is replaced after a confirmation that says what
+  changes in it ("3 items added, 5 changed, 1 removed; 2 formula entries
+  change"), or that it cannot be read as an exchange file; a file that has
+  the client's data already is left as it is. The written file says
+  `"source": "MuMain"`.
+- **Compare two files** (folded under the path field) compares two exchange
+  files, e.g. a client export with a server export, without the client's
+  data: pick file A and file B (**Swap** swaps them), then **Compare the
+  files**. The lists say what changes from file A to file B (Added,
+  Changed, Removed under "From A to B", the values under "File A" and
+  "File B"; an item only file A has lists file A's values), in every
+  language, also one only one file has. An item a file has twice is a
+  locked row that names that file. Nothing can be applied, but a row can be
+  marked as a known difference. An import or a comparison of two files
+  replaces the other in the window.
+- An import lists only what differs. The lists say how much of what was
+  compared differs ("Items that differ (3 of 911)"), and when nothing does,
+  how many are the same ("Items: all 911 are the same in the client and the
+  file"). When the file has exactly the client's data, the window says so
+  in green ("The file matches the client: nothing differs."), e.g. for a
+  file you just exported; change an item or the file, or pick another
+  file, to see differences again. "The same" means that there is nothing to
+  take: a name in a language the file lacks, or one the client's UI does
+  not show, is not compared (no language is removed).
+- After applying, the window compares again: what was applied no longer
+  differs and leaves the list. A green line above says what was applied;
+  what was not checked stays listed and unchecked. An import is refused
+  when an item it would add, resize, give another slot or remove is worn or
+  in an item window by then (compare again).
+- The path of an import can also be typed into **Exchange file**;
+  **Compare again** compares with it. **Apply the checked changes** is off
+  while nothing is checked, while the path field holds another file than
+  the one compared, and while the client's items or formulas changed since
+  the comparison (the window says which; compare again).
+
+**The file** has the layout of the item files: items sorted by group and
+number, fields with their default value left out, LF line endings.
+
+```json
+{
+  "formatVersion": 1,
+  "source": "OpenMU",
+  "server": "…",
+  "gameVersion": "season6",
+  "formulas": {
+    "dropLevelBonus": {"excellent": 25, "ancient": 30},
+    "tables": […],
+    "default": {…},
+    "profiles": […]
+  },
+  "items": [
+    {"group": 0, "number": 0, "name": {"en": "Kris", …}, "width": 1, "height": 2, …, "statProfile": "weapon"}
+  ]
+}
+```
+
+- `source` is `MuMain` or `OpenMU`; `server`, only in a file from OpenMU,
+  names the server's installation.
+- Only `season6` data is exchanged; a file of another `gameVersion` is
+  refused, as is a `formatVersion` the client does not know.
+- `formulas` is the [item stat file](#item-stats-by-level) without its
+  `formatVersion` and its profile rules, which stay with the client.
+- `items` has the fields both sides have, with the keys and meanings of the
+  item files: the group and number, the names, size, slot, skill, drop
+  level, durability and magic durability, damage, attack and walk speed,
+  magic power, defense, block rate, resistances, the requirements (also by
+  level), the class requirements, the prices, the [rule flags](#rules)
+  without the rental ones, the tags `ammunition`, `secondClassQuestItem`
+  and `thirdClassQuestItem`, and `statProfile` (always written: the profile
+  the item uses, `default` for the default), `excellentBonus` and
+  `excellentRaisesLevel`.
+- What only the client has is not in it: the model and display data, the
+  description, the other tags, the wing tier, weapon kind, two-handed flag,
+  potion priority, attack type, magic defense and the rental flags. A file
+  with such a field is read with a warning and the field is left out; an
+  import keeps the client's.
+
+**The diff of an import**:
+
+- The **Items** list says for each item what the import does to it in the
+  client (Added, Changed, Removed). The box of an added or removed item
+  checks the whole item, the box of a changed one all its fields. A click on a row shows its fields (and selects the item in the
+  item tools): each field (`width`, `requirements.strength`, `name.de`,
+  `tags.ammunition`, …) with its value now and the file's, and a box of its
+  own.
+- The **Formulas** list has the drop level bonus, each table, each term of
+  the default and of each profile (`default.damage.table`,
+  `profiles.scroll.requirements.energy`, …) and a profile only one side
+  has. A file without formulas compares none and leaves the client's as
+  they are.
+- Checked at first: what the file changes. Unchecked: removals (also of
+  a formula entry only the client has), known differences (grey) and
+  fields with a note: the size and slot of an
+  item your character wears or an item window shows (they stay; such an
+  item is not removed either, nor added when the client has no data for it
+  yet), and a drop level above 255, which OpenMU keeps in a byte.
+- **Check all** and **Check none** take every row; **A field in all items**
+  checks or unchecks one field in every changed item.
+- **Names**: only the client's UI languages are taken from the file; a
+  language the file lacks stays as it is, and no language is removed.
+- **Stat profile**: a file's profile that the item's profile rules give
+  leaves the item following its rules; another one becomes a pick (see
+  Item Basics).
+- **Added items** get the client-only fields at their defaults; the
+  two-handed flag follows the rule of the shipped items (groups 0 to 5, a
+  hand slot, two cells wide or more) and the weapon kind follows the group,
+  as for Add item. The row says when the item has no model entry yet (link
+  one in Item Model; the browser's "without a model" filter lists it) and
+  when its profile rules give another profile than the file (a wing tier
+  or a tag such as `cape` may be missing).
+- **Removed items** go with their model entry, as Remove item does; the row
+  lists what goes with the item and what uses it at its number.
+- An item a file has more than once (OpenMU does not keep the group and
+  number unique) is a locked row: the import leaves it as it is.
+- Before the import is applied, the data as it would be gets the checks of
+  a save. With errors nothing changes; the errors are listed and the rows of
+  their items are unchecked.
+
+**Known differences** are fields and formula entries meant to differ
+between the client and the server. Ticking **Known** on a field, on an
+added or removed item or on a formula entry leaves it unchecked and grey in
+every comparison. They are kept in `Data/Items/Sync/KnownDifferences.json`
+next to the game, written when one is ticked; copy it to
+`src/bin/Data/Items/Sync` with the item files to share it. `""` stands for
+the whole item:
+
+```json
+{
+  "formatVersion": 1,
+  "items": [
+    {"group": 13, "number": 4, "fields": ["", "repairable"]}
+  ],
+  "formulas": [
+    "default.requirements.leadership"
+  ]
+}
+```
 
 ### Import from bmd / Export as bmd
 

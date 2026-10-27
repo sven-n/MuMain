@@ -6,6 +6,7 @@
 #include "Render/Renderer/BitmapUpload.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Sprites/BitmapTextureLimits.h"
+#include "Render/Sprites/GpuUploadSkip.h"
 #include "GlobalBitmapPath.h"
 
 #include "Render/RmlUi/RmlPremultiply.h"
@@ -234,9 +235,17 @@ struct MipLevels
     bool generate = false;
 };
 
+// Set by tests only (Render::Sprites::SetGpuUploadsSkipped).
+bool s_gpuUploadsSkipped = false;
+
 bool UploadTextureSDLGpu(BITMAP_t* bitmap, std::span<const std::uint8_t> pixels, int width, int height,
                          SDL_GPUFilter filter, SDL_GPUSamplerAddressMode wrapMode, const MipLevels& mips)
 {
+    if (s_gpuUploadsSkipped)
+    {
+        bitmap->mipLevels = 1;
+        return true;
+    }
     auto result = mu::UploadBitmapPixels(pixels, width, height, filter, wrapMode, mips.chain, mips.generate);
     if (!result)
     {
@@ -312,6 +321,11 @@ std::uint64_t GpuTextureBytes(const BITMAP_t& bitmap)
     return bytes;
 }
 } // namespace
+
+void Render::Sprites::SetGpuUploadsSkipped(bool skipped)
+{
+    s_gpuUploadsSkipped = skipped;
+}
 
 GLuint CGlobalBitmap::LoadImage(const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode)
 {

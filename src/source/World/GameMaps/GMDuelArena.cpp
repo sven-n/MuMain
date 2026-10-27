@@ -204,13 +204,6 @@ bool CGMDuelArena::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
     return false;
 }
 
-bool CGMDuelArena::PlayMonsterSound(OBJECT* o)
-{
-    if (IsDuelArena() == false)
-        return false;
-    return false;
-}
-
 void CGMDuelArena::PlayObjectSound(OBJECT* o) {}
 
 void CGMDuelArena::PlayBGM()

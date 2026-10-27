@@ -111,6 +111,16 @@ mu_add_test(
         test_terrain_height_grid.cpp
 )
 
+# The decryption of version 14 BMD models, round-tripped against an encryption built the way the files are.
+mu_add_test(
+    NAME bmd_modulus_cipher_tests
+    SOURCES
+        test_bmd_modulus_cipher.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Models/BmdModulusCipher.cpp
+    LINK_LIBS
+        MuCryptopp
+)
+
 # The OZT reader of CGlobalBitmap::OpenTga, without the renderer. It also reads
 # the OZT files shipped in src/bin/Data.
 mu_add_test(
