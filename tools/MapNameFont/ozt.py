@@ -23,6 +23,16 @@ def read_ozt(path):
     return rgba
 
 
+def write_ozt(path, rgba):
+    """Write RGBA uint8 (top row first) as the client's .ozt files are: 4 junk bytes, an
+    uncompressed 32-bit TGA stored bottom row first, and the TGA 2.0 footer."""
+    height, width = rgba.shape[:2]
+    header = struct.pack("<BBBHHBHHHHBB", 0, 0, 2, 0, 0, 0, 0, 0, width, height, 32, 8)
+    bgra = np.ascontiguousarray(rgba[::-1][..., [2, 1, 0, 3]], np.uint8)
+    footer = struct.pack("<II", 0, 0) + b"TRUEVISION-XFILE.\x00"
+    Path(path).write_bytes(b"\x00\x00\x02\x00" + header + bgra.tobytes() + footer)
+
+
 def write_png(path, rgb):
     rgb = np.ascontiguousarray(rgb, np.uint8)
     height, width = rgb.shape[:2]

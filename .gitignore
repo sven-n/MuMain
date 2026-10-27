@@ -59,6 +59,10 @@ src/bin/Data/Items/**/*.tmp
 # Colour grading tables (PNG) of the Enhanced post-processing, one per world.
 !src/bin/Data/Grading/
 !src/bin/Data/Grading/**
+# The map banner's ornament (OZT and its layout), cut out of the map-name images by
+# tools/MapNameFont/ornament.py.
+!src/bin/Data/Interface/MapNameOrnament/
+!src/bin/Data/Interface/MapNameOrnament/**
 **/obj/
 *.user
 *.suo

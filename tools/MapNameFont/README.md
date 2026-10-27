@@ -3,7 +3,8 @@
 Builds `src/bin/fonts/MuMapName-Italic.otf`, a font of the client's map-name lettering: the silver
 italic names the original client showed as one image per map and language
 (`Data/Local/<language>/ImgsMapName`). With it the map banner can write any name in any language
-in that lettering, sharp at every size.
+in that lettering, sharp at every size. `ornament.py` cuts the ornament under the names into
+separate images (see [The ornament](#the-ornament)).
 
 ## Run it
 
@@ -51,3 +52,34 @@ name in the font (serve the folder with `python -m http.server`, or open `index.
    letter's room, and every letter gets a little extra.
 
 Change a glyph in `recipes.py`, run the generator and look at the preview.
+
+## The ornament
+
+Under each name the original images have an ornament: a swirl on the left, one on the right, and
+the map's icon between them (a leaf for Lorencia, snowflakes for Devias). The client has no
+separate files for them; `ornament.py` cuts them out of the images:
+
+```bash
+.venv/Scripts/python tools/MapNameFont/ornament.py --data "<MU client>/Data" --out src/bin/Data/Interface/MapNameOrnament --preview out/ornament-preview
+```
+
+It writes `SwirlLeft.OZT`, `SwirlRight.OZT`, one icon per image named like the image
+(`lorencia.OZT`), and `Layout.json` with where each piece sat in the 166 x 90 image, so the
+original banner can be put back together. The game reads them as `.tga`, like its other OZT files.
+
+- **Swirls.** Every image has the same two swirls; a few exports differ only in their dark edge
+  (Devias softer; Dungeon, Icarus, Tarkan, Balgass and Swamp of Peace harder in some languages;
+  the English Raklion boss without it).
+  They are taken from the export most images share (the Portuguese Lorencia). The right swirl is
+  the left one's shape mirrored, but its shading is not, so it is a piece of its own.
+- **Icons.** The icon is the same in the English, Portuguese and Spanish image of a map, and the
+  name is not: per pixel the value of the language closest to the others is kept, so one
+  language's letters over a pixel are outvoted. Where the name and the icon still touch (two
+  languages share a name, or a descender reaches the icon), the silver fill decides: a fill piece
+  that starts below the name rows and reaches the swirls belongs to the icon, the outline and glow
+  go with the fill they are connected to, and a language's own letters only claim pixels where
+  that language shows the shared image. Where an icon overlaps a swirl, it keeps the pixels it
+  changes.
+
+Maps that share an icon share a file's content (both Kalimas, Raklion and its boss, the two
+Balgass maps).
