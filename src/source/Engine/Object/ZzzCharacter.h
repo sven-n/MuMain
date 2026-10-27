@@ -66,6 +66,12 @@ void MoveCharacterPosition(CHARACTER* c, float heading);
 void UpdateFlightFeel(CHARACTER* c);
 // The wings and the ponytail trailing a little behind the body's turn and settling after it (each frame, everyone).
 void UpdateTurnLag(CHARACTER* c);
+// Who the character's head looks at, if anyone (each frame): a player looks at what it attacks or the nearest enemy in
+// sight in a combat zone, else the nearest NPC, else another player passing by; a monster at its target; an NPC at the
+// hero passing by.
+const CHARACTER* UpdateLookAt(CHARACTER* c);
+// Turns the head toward `target`, at most `maxDegrees` to either side.
+void LookTowards(OBJECT* o, const CHARACTER* target, float maxDegrees);
 void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter = NULL, OBJECT* pHelper = NULL);
 void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCharacter = nullptr,
                            OBJECT* pHelper = nullptr);

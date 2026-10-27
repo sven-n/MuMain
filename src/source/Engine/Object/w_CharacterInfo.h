@@ -195,6 +195,10 @@ public:
     float       TurnLag = 0.f;
     float       TurnLagSpeed = 0.f;
     float       TurnLagFacing = NAN;
+    // The character its head looks at (UpdateLookAt; an index into CharactersClient, -1: none) and how long until it
+    // looks around for another, in seconds.
+    short       LookTarget = -1;
+    float       LookScanSeconds = 0.f;
     char		CollisionTime; // unused?
 
     short       GuildMarkIndex;
