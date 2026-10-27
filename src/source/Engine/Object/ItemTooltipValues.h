@@ -75,6 +75,9 @@ struct ItemTooltipValues
     // kinds).
     const wchar_t* name = nullptr;
     int levelPlusOne = 0;
+    // How many jewels or stones a bundle holds, as the game counts them (COMGEM::CalcCompiledCount, also its price and
+    // the line under its name); 0 for anything else.
+    int bundleCount = 0;
     int excellentFlags = 0;
     // The item's add option (the potions', scrolls' and seals' effects of ItemAddOption): its two values, and how long
     // it lasts in seconds, which {addOptionDuration} writes as the tooltip does ("1 Hour") only for a line showing it.

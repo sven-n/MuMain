@@ -2067,7 +2067,7 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
             TextNum++;
         }
     }
-    char tCount = COMGEM::CalcCompiledCount(ip);
+    int tCount = COMGEM::CalcCompiledCount(ip);
     if (tCount > 0)
     {
         int	nJewelIndex = COMGEM::Check_Jewel_Com(ip->Type);
