@@ -64,6 +64,8 @@ void MoveCharacterPosition(CHARACTER* c);
 void MoveCharacterPosition(CHARACTER* c, float heading);
 // A flying winged player's bank into a turn and slow up-and-down drift, faded in and out (each frame, everyone).
 void UpdateFlightFeel(CHARACTER* c);
+// A mount's lean into a turn from its rider's (UpdateFlightFeel leans a rider a share of the mount's).
+float MountLeanFromRider(float riderLean);
 // The wings and the ponytail trailing a little behind the body's turn and settling after it (each frame, everyone).
 void UpdateTurnLag(CHARACTER* c);
 // Who the character's head looks at, if anyone (each frame): a player looks at what it attacks or the nearest enemy in

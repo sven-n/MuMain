@@ -73,6 +73,8 @@ OBJECT_BLOCK ObjectBlock[256];
 OBJECT       Boids[MAX_BOIDS];
 OBJECT       Fishs[MAX_FISHS];
 OBJECT       Mounts[MAX_MOUNTS];
+float MountHeadTurn[MAX_MOUNTS] = {};
+float MountHeadRoll[MAX_MOUNTS] = {};
 OPERATE      Operates[MAX_OPERATES];
 //int   World = -1;
 float EarthQuake;
@@ -316,15 +318,19 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
 #ifdef MU_ENABLE_CONTROL_SOCKET
     const bool checkBones = BeginPrepassBoneCheck(o, b->NumBones);
 #endif
+    // A mount's head turns where its rider looks and rolls when it shakes (MountHeadTurn, MountHeadRoll).
+    const bool mount = o >= Mounts && o < Mounts + MAX_MOUNTS;
+    const float headTurn = mount ? MountHeadTurn[o - Mounts] : 0.f;
+    const float headRoll = mount ? MountHeadRoll[o - Mounts] : 0.f;
     if (o->EnableBoneMatrix)
     {
         b->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
-                     o->HeadAngle, false, !Translate);
+                     o->HeadAngle, false, !Translate, nullptr, -1, MAX_BONES, 0.f, headTurn, headRoll);
     }
     else
     {
         b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle,
-                     false, !Translate);
+                     false, !Translate, nullptr, -1, MAX_BONES, 0.f, headTurn, headRoll);
     }
 
 #ifdef MU_ENABLE_CONTROL_SOCKET

@@ -148,6 +148,8 @@ std::map<ShadowStreamId, char>& ShadowStreams()
     static auto* streams = new std::map<ShadowStreamId, char>();
     return *streams;
 }
+// Turns a head bone in the world whatever way it lies (defined below, by FindHeadTurnBones).
+void TurnHeadInWorld(const float parent[3][4], float local[3][4], const vec3_t angle, float turnUp, float roll);
 } // namespace
 
 bool  StopMotion = false;
@@ -158,7 +160,8 @@ static vec3_t LightVector2 = { 0.f, -0.5f, -0.8f };
 
 void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float PriorFrame, unsigned short PriorAction,
                     vec3_t Angle, vec3_t HeadAngle, bool Parent, bool Translate, const float (*ExtParentMatrix)[4],
-                    short CurrentActionArg, int BoneMatrixCapacity, float PonytailLag)
+                    short CurrentActionArg, int BoneMatrixCapacity, float PonytailLag, float HeadTurnUp,
+                    float HeadRoll)
 {
     if (NumActions <= 0) return;
 
@@ -333,6 +336,10 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
 
         float Matrix[3][4];
         QuaternionMatrix(boneQuaternion, Matrix);
+        if (i == BoneHead && hasHeadBone && (HeadTurnUp != 0.f || HeadRoll != 0.f) && b->Parent >= 0)
+        {
+            TurnHeadInWorld(BoneMatrix[b->Parent], Matrix, Angle, HeadTurnUp, HeadRoll);
+        }
         // The ponytail trailing a turn: its rotation turned about the head's X axis (the head's upright, as the head
         // turns about), at its root, which stays where it hangs from the head.
         if (i == PonytailBone && PonytailLag != 0.f)
@@ -3449,6 +3456,120 @@ bool DecryptModulusBody(unsigned char* fileData, int fileSize, int& ptr)
 
 namespace
 {
+// Turns a head bone's local rotation (`local`, under `parent`) by world-space turns, whatever way the bone lies in
+// its model: `turnUp` degrees about the upright, and `roll` degrees about whichever of its own axes points most along
+// where the model faces (`angle`'s facing; a four-legged Biped's head points along the snout, but its bone axes differ
+// from model to model and lean with the head). The head's place stays; only its rotation changes.
+void TurnHeadInWorld(const float parent[3][4], float local[3][4], const vec3_t angle, float turnUp, float roll)
+{
+    float parentRotation[3][3];
+    float scaleSquared = 0.f;
+    for (int r = 0; r < 3; ++r)
+    {
+        for (int c = 0; c < 3; ++c)
+        {
+            parentRotation[r][c] = parent[r][c];
+        }
+        scaleSquared += parent[r][0] * parent[r][0];
+    }
+    if (scaleSquared <= 0.f)
+    {
+        return;
+    }
+    // The head's rotation in the world, and the world rotation to put on it.
+    float head[3][3];
+    for (int r = 0; r < 3; ++r)
+    {
+        for (int c = 0; c < 3; ++c)
+        {
+            head[r][c] = parentRotation[r][0] * local[0][c] + parentRotation[r][1] * local[1][c] +
+                         parentRotation[r][2] * local[2][c];
+        }
+    }
+    const auto axisRotation = [](const float axis[3], float degrees, float out[3][3])
+    {
+        const float radians = degrees * (Q_PI / 180.f);
+        const float cosine = std::cos(radians);
+        const float sine = std::sin(radians);
+        const float rest = 1.f - cosine;
+        const float x = axis[0];
+        const float y = axis[1];
+        const float z = axis[2];
+        const float m[3][3] = {{cosine + x * x * rest, x * y * rest - z * sine, x * z * rest + y * sine},
+                               {y * x * rest + z * sine, cosine + y * y * rest, y * z * rest - x * sine},
+                               {z * x * rest - y * sine, z * y * rest + x * sine, cosine + z * z * rest}};
+        for (int r = 0; r < 3; ++r)
+        {
+            for (int c = 0; c < 3; ++c)
+            {
+                out[r][c] = m[r][c];
+            }
+        }
+    };
+    const auto multiply = [](const float a[3][3], const float b[3][3], float out[3][3])
+    {
+        float result[3][3];
+        for (int r = 0; r < 3; ++r)
+        {
+            for (int c = 0; c < 3; ++c)
+            {
+                result[r][c] = a[r][0] * b[0][c] + a[r][1] * b[1][c] + a[r][2] * b[2][c];
+            }
+        }
+        for (int r = 0; r < 3; ++r)
+        {
+            for (int c = 0; c < 3; ++c)
+            {
+                out[r][c] = result[r][c];
+            }
+        }
+    };
+    float world[3][3] = {{1.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 0.f, 1.f}};
+    if (roll != 0.f)
+    {
+        // Where the model faces: it walks along -Y before its facing (angle[2]) turns it.
+        const float facing = angle[2] * (Q_PI / 180.f);
+        const float forward[3] = {std::sin(facing), -std::cos(facing), 0.f};
+        int along = 0;
+        float best = -1.f;
+        for (int c = 0; c < 3; ++c)
+        {
+            const float length = std::sqrt(head[0][c] * head[0][c] + head[1][c] * head[1][c] + head[2][c] * head[2][c]);
+            const float dot = length > 0.f ? std::fabs(head[0][c] * forward[0] + head[1][c] * forward[1] +
+                                                       head[2][c] * forward[2]) / length
+                                           : 0.f;
+            if (dot > best)
+            {
+                best = dot;
+                along = c;
+            }
+        }
+        const float length =
+            std::sqrt(head[0][along] * head[0][along] + head[1][along] * head[1][along] + head[2][along] * head[2][along]);
+        const float axis[3] = {head[0][along] / length, head[1][along] / length, head[2][along] / length};
+        axisRotation(axis, roll, world);
+    }
+    if (turnUp != 0.f)
+    {
+        const float up[3] = {0.f, 0.f, 1.f};
+        float turn[3][3];
+        axisRotation(up, turnUp, turn);
+        multiply(turn, world, world);
+    }
+    // Back under the parent: parent^-1 * world * head, the parent's inverse its transpose over its scale squared.
+    float turned[3][3];
+    multiply(world, head, turned);
+    for (int r = 0; r < 3; ++r)
+    {
+        for (int c = 0; c < 3; ++c)
+        {
+            local[r][c] = (parentRotation[0][r] * turned[0][c] + parentRotation[1][r] * turned[1][c] +
+                           parentRotation[2][r] * turned[2][c]) /
+                          scaleSquared;
+        }
+    }
+}
+
 // HeadTurnBones: "Bip01 Head", then each bone it hangs from while it is the next of the Biped's neck and spine.
 void FindHeadTurnBones(const Bone_t* bones, int numBones, short (&found)[4])
 {

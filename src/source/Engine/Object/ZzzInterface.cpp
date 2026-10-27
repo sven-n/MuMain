@@ -2082,6 +2082,11 @@ bool UpdateCursorLook(float seconds)
 }
 } // namespace
 
+bool HeroIsGlancing()
+{
+    return s_glanceLeftSeconds > 0.f && s_mouseStillSeconds >= IdleGlanceAfterSeconds;
+}
+
 bool CheckMacroLimit(wchar_t* Text)
 {
     wchar_t string[256];

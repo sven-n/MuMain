@@ -6393,6 +6393,17 @@ constexpr float FlightFullBankTurnSpeed = 300.f;
 // The bank pivots this high above the feet (about the waist), as a flying body banks about its middle.
 constexpr float FlightBankPivotHeight = 65.f;
 
+// A mount leans into a turn up to this many degrees, and its rider this share of that, to stay balanced on it.
+constexpr float MountMaxLeanDegrees = 10.f;
+constexpr float MountRiderLeanShare = 0.5f;
+
+bool IsRiding(const CHARACTER* c)
+{
+    return c->Object.Type == MODEL_PLAYER &&
+           (c->Helper.Type == MODEL_HORN_OF_UNIRIA || c->Helper.Type == MODEL_HORN_OF_DINORANT ||
+            c->Helper.Type == MODEL_DARK_HORSE_ITEM || c->Helper.Type == MODEL_HORN_OF_FENRIR);
+}
+
 bool IsFlying(const OBJECT* o)
 {
     // Flying on, or hovering in place.
@@ -6402,11 +6413,17 @@ bool IsFlying(const OBJECT* o)
 }
 } // namespace
 
+float MountLeanFromRider(float riderLean)
+{
+    return riderLean / MountRiderLeanShare;
+}
+
 void UpdateFlightFeel(CHARACTER* c)
 {
     OBJECT* o = &c->Object;
     const bool flying = IsFlying(o);
-    if (!flying && c->FlightBank == 0.f && c->FlightHover == 0.f && c->FlightHoverApplied == 0.f &&
+    const bool riding = !flying && IsRiding(c);
+    if (!flying && !riding && c->FlightBank == 0.f && c->FlightHover == 0.f && c->FlightHoverApplied == 0.f &&
         c->FlightPivotShift[0] == 0.f && c->FlightPivotShift[1] == 0.f)
     {
         return;
@@ -6416,16 +6433,21 @@ void UpdateFlightFeel(CHARACTER* c)
     const float ease = seconds > 0.f ? 1.f - std::exp(-seconds / FlightEaseSeconds) : 0.f;
 
     // Bank: rolled into the turn by how fast it turns (TurnSpeed), the wings with it (they hang from the root).
-    const float wantedBank =
-        flying ? std::clamp(c->TurnSpeed / FlightFullBankTurnSpeed, -1.f, 1.f) * FlightMaxBankDegrees : 0.f;
+    // Riding, the rider leans a share of the mount's lean (MoveMount gives the mount all of it).
+    // A mount leans only on the move: standing, it straightens up (TurnSpeed can be left over from the last step).
+    const float maxBank = flying               ? FlightMaxBankDegrees
+                          : riding && c->Movement ? MountMaxLeanDegrees * MountRiderLeanShare
+                                                  : 0.f;
+    const float wantedBank = std::clamp(c->TurnSpeed / FlightFullBankTurnSpeed, -1.f, 1.f) * maxBank;
     const float bank = std::fabs(wantedBank - c->FlightBank) < 0.01f && wantedBank == 0.f
                            ? 0.f
                            : c->FlightBank + (wantedBank - c->FlightBank) * ease;
     o->Angle[1] += bank - c->FlightBank;
     c->FlightBank = bank;
     // The model rolls about its feet; moving it back by how far the roll carried the waist makes it pivot there.
+    // (A mount and its rider lean about where they stand, as a horse banks at the hooves.)
     float shift[2] = {0.f, 0.f};
-    if (bank != 0.f)
+    if (bank != 0.f && flying)
     {
         const vec3_t waist = {0.f, 0.f, FlightBankPivotHeight};
         const vec3_t rolled = {o->Angle[0], o->Angle[1], o->Angle[2]};
@@ -7276,9 +7298,10 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         for (int r = 0; r < 3; ++r)
             for (int c = 0; c < 4; ++c)
                 ParentMatrix[r][c] = o->BoneTransform[f->LinkBone][r][c];
-        // A player's wings hang from the root, not the back: they turn with the shoulders when the head's turn
-        // twists the spine (HeadTurn.h, as BMD::Animation turns the bones), about the upright through Spine1. A bone's
-        // turn about its X axis is the opposite way round from the world's upright, hence the minus.
+        // A player's wings take only their bone's place (Bone05, on the spine), not its turn: they turn with the back
+        // (the two spine bones below the neck, where they sit) when the head's turn twists it (HeadTurn.h, as
+        // BMD::Animation turns the bones), about the upright through Spine1. A bone's turn about its X axis is the
+        // opposite way round from the world's upright, hence the minus.
         if (o->Type == MODEL_PLAYER && f == &c->Wing)
         {
             static const int spine1Bone = []
@@ -7293,12 +7316,34 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
                 }
                 return -1;
             }();
+            // On a Uniria or a Dinorant the riding actions turn the wings' bone askew on the spine, and the wings tilt to
+            // a side (it's the actions' own keys): there they sit on the spine as they do standing, their bone's turn
+            // under the spine taken from the standing action, in their bone's place.
+            const BMD& player = Models[MODEL_PLAYER];
+            const int link = f->LinkBone;
+            if ((c->Helper.Type == MODEL_HORN_OF_UNIRIA || c->Helper.Type == MODEL_HORN_OF_DINORANT) && link >= 0 &&
+                link < player.NumBones && player.Bones[link].Parent >= 0 && !player.Bones[link].Dummy &&
+                player.Bones[link].BoneMatrixes[PLAYER_STOP_MALE].Quaternion != nullptr)
+            {
+                float standing[3][4];
+                QuaternionMatrix(player.Bones[link].BoneMatrixes[PLAYER_STOP_MALE].Quaternion[0], standing);
+                standing[0][3] = standing[1][3] = standing[2][3] = 0.f;
+                float onSpine[3][4];
+                R_ConcatTransforms(o->BoneTransform[player.Bones[link].Parent], standing, onSpine);
+                for (int r = 0; r < 3; ++r)
+                {
+                    for (int column = 0; column < 3; ++column)
+                    {
+                        ParentMatrix[r][column] = onSpine[r][column];
+                    }
+                }
+            }
             namespace HeadTurn = Render::Models::HeadTurn;
             // And they trail a little behind the body's own turn (UpdateTurnLag).
-            const float shoulders = HeadTurn::ShouldersDegrees(HeadTurn::SignedYaw(o->HeadAngle[0])) + c->TurnLag;
-            if (spine1Bone >= 0 && shoulders != 0.f)
+            const float back = HeadTurn::BackDegrees(HeadTurn::SignedYaw(o->HeadAngle[0])) + c->TurnLag;
+            if (spine1Bone >= 0 && back != 0.f)
             {
-                HeadTurn::TurnAboutUpright(ParentMatrix, -shoulders * (Q_PI / 180.f),
+                HeadTurn::TurnAboutUpright(ParentMatrix, -back * (Q_PI / 180.f),
                                            o->BoneTransform[spine1Bone][0][3], o->BoneTransform[spine1Bone][1][3]);
             }
         }
