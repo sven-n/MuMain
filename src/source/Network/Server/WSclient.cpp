@@ -44,6 +44,7 @@
 #include "Audio/DSPlaySound.h"
 
 #include "GameLogic/Events/MatchEvent.h"
+#include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Engine/AI/GOBoid.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
@@ -2464,11 +2465,10 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
         }
         break;
     case 8:
+        DeleteCharacterCompanions(c);
         if (Data->ItemGroup == 0xFF)
         {
             c->Helper.Type = -1;
-            DeleteMount(o);
-            ThePetProcess().DeletePet(c, c->Helper.Type, true);
         }
         else
         {
@@ -2769,6 +2769,8 @@ void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
             o->Kind = KIND_PLAYER;
             c->Change = true;
 
+            ReadEquipmentExtended(Key, Data2->Flags, Data2->Equipment, c);
+
             for (int j = 0; j < Data2->s_BuffCount; ++j)
             {
                 RegisterBuff(static_cast<eBuffState>(Data2->s_BuffEffectState[j]), o);
@@ -2797,9 +2799,9 @@ void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
                 c->Movement = true;
             }
 
+            memset(c->ID, 0, sizeof c->ID);
             CMultiLanguage::ConvertFromUtf8(c->ID, Data2->ID, MAX_USERNAME_SIZE);
 
-            ChangeCharacterExt(FindCharacterIndex(Key), Data2->Equipment);
         }
 
         Offset += *EntryLength;
@@ -4104,6 +4106,8 @@ BOOL ReceiveMonsterSkill(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     if (SkillNumber > ATMON_SKILL_BIGIN && SkillNumber < ATMON_SKILL_END)
     {
         sc->Object.Angle[2] = CreateAngle2D(so->Position, to->Position);
+        // The skill's own attack.
+        const GameLogic::Monsters::Attacks::SkillAttackScope skillAttack(*sc);
         SetPlayerAttack(sc);
         so->AnimationFrame = 0;
         sc->AttackTime = 1;

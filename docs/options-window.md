@@ -50,7 +50,7 @@ The window has five tabs:
 | Graphics | Quality: Enhanced graphics, anti-aliasing, anisotropic filtering, render level. Effects: the effect toggles. Shadows: the shadow toggles |
 | Audio | Sound and music volume, whisper sound |
 | Gameplay | Auto attack, slide help |
-| Interface | Language, font, UI theme, FPS counter, debug info |
+| Interface | Language, translate item names, font, UI theme, FPS counter, debug info |
 
 Each setting is a row with its name on the left and its control on the
 right, aligned in two columns. A tab's settings scroll when they don't fit,
@@ -96,6 +96,10 @@ window writes to these sections:
     Render full effects, or with Disable Shadows, no wing shadow is drawn
     (and without full effects no shadow at all).
 
+  Set from the Interface tab, applied at the next start:
+  - `TexturePack` (default empty, the original textures): the Texture Pack
+    row, the [texture pack](texture-packs.md) to read textures from first.
+
   Set by hand only, never written by the game:
   - `Backend` (`default`/`vulkan`/`direct3d12`/`metal`, case-insensitive,
     `d3d12` accepted as an alias for `direct3d12`) forces a specific SDL_gpu
@@ -109,7 +113,12 @@ window writes to these sections:
   own, through a temporary file, when a slider is let go; see "Tuning it
   yourself" in [`enhanced-look.md`](enhanced-look.md).
 - `[UI]` - `Locale`, `Font`, `RmlTheme` and `UIScalePercent` from the Display and
-  Interface tabs. `EnableAnimationTaskPool` (`0`/`1`, set by hand only, like the
+  Interface tabs. `TranslateItemNames` (default `1`): the "Translate item names"
+  checkbox under the language, applied at once; unticked, item names stay
+  English while the rest of the UI is in the chosen language. Monster and NPC
+  names follow the language either way; only the monster in a transformation
+  ring's name follows the checkbox.
+  `EnableAnimationTaskPool` (`0`/`1`, set by hand only, like the
   `--enable-taskpool` command-line flag) animates characters on worker
   threads.
 - `[Audio]` - volumes.

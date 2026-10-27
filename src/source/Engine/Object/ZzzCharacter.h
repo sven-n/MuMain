@@ -4,7 +4,6 @@
 #include "Render/Models/ZzzBMD.h"
 #include <span>
 
-extern Script_Skill MonsterSkill[];
 extern CHARACTER* CharactersClient;
 extern CHARACTER CharacterView;
 extern CHARACTER* Hero;
@@ -75,6 +74,7 @@ int HangerBloodCastleQuestItem(int Key);
 void SetAllAction(int Action);
 
 void ReleaseCharacters(void);
+void DeleteCharacterCompanions(CHARACTER* c);
 void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, unsigned char PositionY,
                             float Rotation = 0.f);
 CHARACTER* CreateCharacter(int Key, int Type, unsigned char PositionX, unsigned char PositionY, float Rotation = 0.f);
@@ -98,6 +98,8 @@ void SetChangeClass(CHARACTER* c);
 int LevelConvert(BYTE Level);
 float CharacterMoveSpeed(CHARACTER* c);
 
+// Plays the attacks of the monster's entry; Maya plays her scene. False when
+// the entry has no attacks.
 bool CheckMonsterSkill(CHARACTER* c, OBJECT* o);
 bool CharacterAnimation(CHARACTER* c, OBJECT* o);
 bool AttackStage(CHARACTER* c, OBJECT* o);

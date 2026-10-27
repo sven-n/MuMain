@@ -28,6 +28,7 @@
 #include "json.hpp"
 
 #include <cmath>
+#include <optional>
 #include <utility>
 
 // The quest dialog's page, text and answers (Scenes/SceneCore.cpp).
@@ -135,23 +136,6 @@ json TradeState()
     trade["my_confirm_wait"] = g_pTrade->GetMyTradeWait();
     trade["partner_confirmed"] = g_pTrade->IsYourConfirmed();
     return trade;
-}
-
-std::string_view ObjectKindName(int objectKind)
-{
-    switch (objectKind)
-    {
-    case KIND_PLAYER:
-        return "player";
-    case KIND_MONSTER:
-        return "monster";
-    case KIND_NPC:
-        return "npc";
-    case KIND_PET:
-        return "pet";
-    default:
-        return "unknown";
-    }
 }
 
 json EquipmentArray()
@@ -563,6 +547,8 @@ json NearbyArray()
         json described;
         described["id"] = character.Key;
         described["kind"] = ObjectKindName(character.Object.Kind);
+        const std::optional<int> monster = MonsterNumberOf(character);
+        described["monster"] = monster ? json(*monster) : json(nullptr);
         described["name"] = Core::Text::ToUtf8(character.ID);
         described["position"] = json::array({character.PositionX, character.PositionY});
         described["alive"] = character.Dead <= 0;

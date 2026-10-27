@@ -2,6 +2,7 @@
 
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
+#include "Data/GameData/ItemData/ItemStatFile.h"
 
 #include <algorithm>
 #include <string>
@@ -161,6 +162,28 @@ TEST_CASE("Item values must fit their type [data][items]")
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Error, "twoHanded"));
 }
 
+TEST_CASE("Damage and magic power past 255 are kept through write and read [data][items]")
+{
+    // A later-season weapon and staff.
+    ItemDefinition sword = MakeKris();
+    sword.damageMin = 345;
+    sword.damageMax = 380;
+    sword.magicPower = 400;
+
+    const std::string text = WriteItemGroupJson(0, std::vector<ItemDefinition>{sword});
+    CHECK(text.find(R"("damageMin": 345)") != std::string::npos);
+    const ReadResult result = Read(text);
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.issues.empty());
+    CHECK(result.items.front().damageMin == 345);
+    CHECK(result.items.front().damageMax == 380);
+    CHECK(result.items.front().magicPower == 400);
+
+    // Up to what the field holds.
+    const ReadResult tooHigh = Read(GroupFile(0, R"({"number": 0, "name": "Kris", "damageMax": 65536})"));
+    CHECK(HasIssue(tooHigh.issues, ItemDataIssueSeverity::Error, "damageMax"));
+}
+
 TEST_CASE("Unknown item fields are warnings [data][items]")
 {
     const ReadResult result =
@@ -284,6 +307,317 @@ TEST_CASE("Item tags, wing tier, potion priority and rule flags are kept through
     CHECK(read.sellable);
 }
 
+TEST_CASE("An item's description is kept through write and read [data][items]")
+{
+    ItemDefinition jewel = MakeKris();
+    jewel.group = 14;
+    jewel.number = 13;
+    jewel.slot = ItemSlot::None;
+    jewel.weaponKind = WeaponKind::None;
+    jewel.statProfile.clear();
+    // The Jewel of Bless's own tooltip line, as the client's translations have it.
+    ItemDescriptionLine first;
+    first.text.Set("en", "It is used to increase your item level up to 6");
+    first.text.Set("de", "Wird verwendet, um das Gegenstandslevel auf bis zu 6 zu erhöhen");
+    first.text.Set("es", "Se utiliza para aumentar el nivel de tu objeto hasta 6.");
+    first.text.Set("pt", "É usado para aumentar o nível do seu item até 6");
+    ItemDescriptionLine blank;
+    ItemDescriptionLine last = first;
+    last.color = ItemTextColor::Blue;
+    jewel.description = {first, blank, last};
+
+    const std::string text = WriteItemGroupJson(14, std::vector<ItemDefinition>{jewel});
+    CHECK(text.find("\"color\": \"blue\"") != std::string::npos);
+    const ReadResult result = Read(text);
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items.front().description == jewel.description);
+    CHECK_FALSE(HasErrors(result.issues));
+    CHECK(WriteItemGroupJson(14, result.items) == text);
+
+    // A line break in a text is kept; the tooltip starts a new line there.
+    ItemDefinition twoLines = jewel;
+    twoLines.description = {first};
+    twoLines.description[0].text.Set("en", "It is used to increase\nyour item level up to 6");
+    const ReadResult broken = Read(WriteItemGroupJson(14, std::vector<ItemDefinition>{twoLines}));
+    REQUIRE(broken.items.size() == 1);
+    CHECK(broken.items.front().description == twoLines.description);
+
+    const ReadResult badColor = Read(R"({"formatVersion": 1, "group": 14, "items": [
+        {"number": 13, "name": "Jewel of Bless", "description": [{"text": "x", "color": "pink"}]}]})");
+    CHECK(HasErrors(badColor.issues));
+}
+
+TEST_CASE("A description line's item levels are kept through write and read, and checked [data][items]")
+{
+    ItemDefinition scroll = MakeKris();
+    scroll.group = 14;
+    scroll.number = 10;
+    scroll.slot = ItemSlot::None;
+    scroll.weaponKind = WeaponKind::None;
+    scroll.statProfile.clear();
+    ItemDescriptionLine warp;
+    warp.text.Set("en", "Warp to the corresponding area after 3 seconds");
+    warp.minLevel = 1;
+    warp.maxLevel = 8;
+    ItemDescriptionLine always;
+    always.text.Set("en", "Shown at every level");
+    scroll.description = {warp, always};
+
+    CHECK_FALSE(warp.IsShownAt(0));
+    CHECK(warp.IsShownAt(1));
+    CHECK(warp.IsShownAt(8));
+    CHECK_FALSE(warp.IsShownAt(9));
+    CHECK(always.IsShownAt(0));
+    CHECK(always.IsShownAt(ItemLevelCount - 1));
+
+    // Written on one line, and only for a line that is not shown at every level.
+    const std::string text = WriteItemGroupJson(14, std::vector<ItemDefinition>{scroll});
+    CHECK(text.find("\"levels\": [1, 8]") != std::string::npos);
+    CHECK(text.find("\"levels\"") == text.rfind("\"levels\""));
+    const ReadResult result = Read(text);
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items.front().description == scroll.description);
+    CHECK_FALSE(HasErrors(result.issues));
+    CHECK(WriteItemGroupJson(14, result.items) == text);
+
+    for (const char* levels : {R"("levels": [8, 1])", R"("levels": [0, 16])", R"("levels": [-1, 2])",
+                               R"("levels": [3])", R"("levels": 3)", R"("levels": [1.5, 2])",
+                               // Outside int's range: they'd wrap into a level (2^32 + 1 into 1) if read as an int.
+                               R"("levels": [4294967297, 4294967298])", R"("levels": [-4294967295, 2])",
+                               R"("levels": [0, 18446744073709551615])", R"("levels": [-9223372036854775808, 2])"})
+    {
+        INFO(levels);
+        const ReadResult bad = Read(std::string(R"({"formatVersion": 1, "group": 14, "items": [
+            {"number": 10, "name": "Town Portal Scroll", "description": [{"text": "x", )") +
+                                    levels + "}]}]}");
+        CHECK(HasIssue(bad.issues, ItemDataIssueSeverity::Error, "description[0].levels"));
+    }
+}
+
+TEST_CASE("An item's name lines are kept through write and read, with or without a text and a color [data][items]")
+{
+    ItemDefinition horn = MakeKris();
+    horn.group = 13;
+    horn.number = 37;
+    horn.slot = ItemSlot::None;
+    horn.weaponKind = WeaponKind::None;
+    horn.statProfile.clear();
+    // The Horn of Fenrir's Destroy kind, then its plain name; a jewel keeps the standard name in yellow.
+    ItemNameLine destroy;
+    destroy.hasText = destroy.hasColor = true;
+    destroy.text.Set("en", "{name} +Destroy");
+    destroy.color = ItemTextColor::Blue;
+    TooltipCondition kind;
+    kind.name = "excellentFlags";
+    kind.comparison = TooltipCondition::Comparison::Equal;
+    kind.number = 1;
+    destroy.when = {kind};
+    ItemNameLine plain;
+    plain.hasText = plain.hasColor = true;
+    plain.text.Set("en", "{name}");
+    plain.color = ItemTextColor::White;
+    ItemNameLine colorOnly;
+    colorOnly.hasColor = true;
+    colorOnly.color = ItemTextColor::Yellow;
+    colorOnly.minLevel = 1;
+    colorOnly.maxLevel = 3;
+    horn.nameLines = {destroy, plain, colorOnly};
+
+    const std::string text = WriteItemGroupJson(13, std::vector<ItemDefinition>{horn});
+    // A white name line writes its color, which keeps a standard color off it.
+    CHECK(text.find("\"color\": \"white\"") != std::string::npos);
+    const ReadResult result = Read(text);
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items.front().nameLines == horn.nameLines);
+    CHECK_FALSE(HasErrors(result.issues));
+    CHECK(WriteItemGroupJson(13, result.items) == text);
+
+    const ReadResult notObject = Read(R"({"formatVersion": 1, "group": 13, "items": [
+        {"number": 37, "name": "Horn of Fenrir", "nameLines": ["{name}"]}]})");
+    CHECK(HasIssue(notObject.issues, ItemDataIssueSeverity::Error, "nameLines[0]"));
+
+    // The name is always bold and the first row: a name line's "bold" and "after" are errors.
+    const ReadResult boldAndAfter = Read(R"({"formatVersion": 1, "group": 13, "items": [
+        {"number": 37, "name": "Horn of Fenrir", "nameLines": [{"text": "{name}", "bold": true, "after": "options"}]}]})");
+    CHECK(HasIssue(boldAndAfter.issues, ItemDataIssueSeverity::Error, "nameLines[0].bold"));
+    CHECK(HasIssue(boldAndAfter.issues, ItemDataIssueSeverity::Error, "nameLines[0].after"));
+}
+
+TEST_CASE("A description line's \"@\" names a shared text [data][items]")
+{
+    // "@" alone names none: an error, as in a layout, not a silent blank line.
+    const ReadResult empty = Read(R"({"formatVersion": 1, "group": 14, "items": [
+        {"number": 10, "name": "Town Portal Scroll", "description": [{"text": "@"}]}]})");
+    CHECK(HasIssue(empty.issues, ItemDataIssueSeverity::Error, "description[0].text"));
+    const ReadResult named = Read(R"({"formatVersion": 1, "group": 14, "items": [
+        {"number": 10, "name": "Town Portal Scroll", "description": [{"text": "@durability"}]}]})");
+    CHECK_FALSE(HasErrors(named.issues));
+    REQUIRE(named.items.size() == 1);
+    CHECK(named.items.front().description.front().textName == "durability");
+    // So does a level value's.
+    const ReadResult levelValue = Read(R"({"formatVersion": 1, "group": 14, "items": [
+        {"number": 10, "name": "Town Portal Scroll", "levelValues": {"stat": ["ENG", "@"]}}]})");
+    CHECK(HasIssue(levelValue.issues, ItemDataIssueSeverity::Error, "levelValues.stat[1]"));
+}
+
+TEST_CASE("An item's stat profile is kept through write and read [data][items]")
+{
+    ItemDefinition kris = MakeKris();
+    kris.statProfile = "weapon";
+
+    const std::string text = WriteItemGroupJson(0, std::vector<ItemDefinition>{kris});
+    CHECK(text.find(R"("statProfile": "weapon")") != std::string::npos);
+    const ReadResult result = Read(text);
+    REQUIRE(result.issues.empty());
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items.front().statProfile == "weapon");
+
+    // The default profile is not written.
+    CHECK(WriteItemGroupJson(0, std::vector<ItemDefinition>{MakeKris()}).find("statProfile") == std::string::npos);
+
+    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "statProfile": "two words"})")).issues,
+                   ItemDataIssueSeverity::Error, "statProfile"));
+    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "statProfile": 5})")).issues,
+                   ItemDataIssueSeverity::Error, "statProfile"));
+}
+
+TEST_CASE("An item's excellent bonus is kept through write and read, and warns without damage [data][items]")
+{
+    ItemDefinition axe = MakeKris();
+    axe.excellentBonus = 15;
+    const ReadResult result = Read(WriteItemGroupJson(0, std::vector<ItemDefinition>{axe}));
+    REQUIRE(result.issues.empty());
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items.front().excellentBonus == 15);
+
+    ItemDefinition helm = MakeKris();
+    helm.damageMin = 0;
+    helm.damageMax = 0;
+    helm.excellentBonus = 15;
+    std::vector<ItemDataIssue> issues;
+    ValidateItems(std::vector<ItemDefinition>{helm}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "excellentBonus"));
+    CHECK_FALSE(HasErrors(issues));
+
+    issues.clear();
+    ValidateItems(std::vector<ItemDefinition>{axe}, issues);
+    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "excellentBonus"));
+}
+
+TEST_CASE("An item's excellentRaisesLevel is kept through write and read, and warns without a level requirement "
+          "[data][items]")
+{
+    ItemDefinition helm = MakeKris();
+    helm.requirements.level = 380;
+    helm.excellentRaisesLevel = false;
+    const std::string text = WriteItemGroupJson(0, std::vector<ItemDefinition>{helm});
+    CHECK(text.find(R"("excellentRaisesLevel": false)") != std::string::npos);
+    const ReadResult result = Read(text);
+    REQUIRE(result.items.size() == 1);
+    CHECK_FALSE(result.items.front().excellentRaisesLevel);
+    // The default is not written.
+    CHECK(WriteItemGroupJson(0, std::vector<ItemDefinition>{MakeKris()}).find("excellentRaisesLevel") ==
+          std::string::npos);
+
+    std::vector<ItemDataIssue> issues;
+    ValidateItems(std::vector<ItemDefinition>{helm}, issues);
+    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "excellentRaisesLevel"));
+    helm.requirements.level = 0;
+    ValidateItems(std::vector<ItemDefinition>{helm}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "excellentRaisesLevel"));
+}
+
+TEST_CASE("An item's requirements by level are kept through write and read [data][items]")
+{
+    ItemDefinition orb = MakeKris();
+    orb.requirements = {};
+    RequirementByLevel same{};
+    same.fill(7);
+    // Set in any order; they are written in the order of the requirements.
+    orb.requirementsByLevel.Set(ItemRequirement::Leadership, same);
+    orb.requirementsByLevel.Set(ItemRequirement::Energy,
+                                RequirementByLevel{30, 60, 90, 130, 170, 210, 300, 500, 0, 0, 0, 0, 0, 0, 0, 0});
+
+    const std::string text = WriteItemGroupJson(0, std::vector<ItemDefinition>{orb});
+    CHECK(
+        text.find(
+            R"("requirementsByLevel": {"energy": [30, 60, 90, 130, 170, 210, 300, 500, 0, 0, 0, 0, 0, 0, 0, 0], "leadership": 7})") !=
+        std::string::npos);
+    const ReadResult result = Read(text);
+    REQUIRE(result.issues.empty());
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items.front().requirementsByLevel == orb.requirementsByLevel);
+
+    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "requirementsByLevel": {"luck": 1}})")).issues,
+                   ItemDataIssueSeverity::Error, "requirementsByLevel.luck"));
+    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "requirementsByLevel": {"level": [1, 2]}})")).issues,
+                   ItemDataIssueSeverity::Error, "requirementsByLevel.level"));
+    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "requirementsByLevel": {"level": 70000}})")).issues,
+                   ItemDataIssueSeverity::Error, "requirementsByLevel.level"));
+
+    // A base value next to the list is not used.
+    ItemDefinition both = orb;
+    both.requirements.energy = 10;
+    std::vector<ItemDataIssue> issues;
+    ValidateItems(std::vector<ItemDefinition>{both}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "requirementsByLevel"));
+}
+
+TEST_CASE("Item validation checks the stat profiles against the stat file [data][items]")
+{
+    ItemStatFile file;
+    file.profiles.push_back({"shield", {}});
+    file.profiles.push_back({"sceptre", {}});
+    const ItemStatProfiles profiles(file);
+
+    ItemDefinition shield = MakeKris();
+    shield.statProfile = "shield";
+    ItemDefinition unknown = MakeKris();
+    unknown.number = 1;
+    unknown.statProfile = "wing";
+    ItemDefinition withoutProfile = MakeKris();
+    withoutProfile.number = 2;
+    // Deleted items (no name) count for nothing.
+    ItemDefinition deletedUnknown = MakeKris();
+    deletedUnknown.number = 3;
+    deletedUnknown.names = {};
+    deletedUnknown.statProfile = "cape";
+    ItemDefinition deletedSceptre = deletedUnknown;
+    deletedSceptre.number = 4;
+    deletedSceptre.statProfile = "sceptre";
+
+    std::vector<ItemDataIssue> issues;
+    ValidateStatProfiles(std::vector<ItemDefinition>{shield, unknown, withoutProfile, deletedUnknown, deletedSceptre},
+                         profiles, "ItemStats.json", issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Error, "statProfile"));
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "profiles.sceptre"));
+    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "profiles.shield"));
+    CHECK(issues.size() == 2);
+}
+
+TEST_CASE("Item validation warns about an excellent bonus the stat profile has no term for [data][items]")
+{
+    // Without an excellent damage term the Chaos Dragon Axe's fixed bonus would not count.
+    ItemStatFile file;
+    file.profiles.push_back({"plain", {}});
+    WrittenStatProfile withTerm{"withTerm", {}};
+    withTerm.stats[static_cast<size_t>(ItemStat::Damage)].excellent = {WrittenStatTerm::State::Values, {25, 5}};
+    file.profiles.push_back(withTerm);
+    const ItemStatProfiles profiles(file);
+
+    ItemDefinition axe = MakeKris();
+    axe.excellentBonus = 15;
+    axe.statProfile = "plain";
+    std::vector<ItemDataIssue> issues;
+    ValidateStatProfiles(std::vector<ItemDefinition>{axe}, profiles, "ItemStats.json", issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "excellentBonus"));
+
+    axe.statProfile = "withTerm";
+    issues.clear();
+    ValidateStatProfiles(std::vector<ItemDefinition>{axe}, profiles, "ItemStats.json", issues);
+    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "excellentBonus"));
+}
+
 TEST_CASE("Item slots, wing tiers and tags are written by name [data][items]")
 {
     ItemDefinition wing = MakeKris();
@@ -356,9 +690,11 @@ TEST_CASE("Item validation checks slots, wing tiers and weapon kinds [data][item
     bowInRightHand.weaponKind = WeaponKind::Bow;
     ItemDefinition spear = MakeKris();
     spear.weaponKind = WeaponKind::Spear;
+    spear.statProfile = "weapon";
     ItemDefinition shield = MakeKris();
     shield.slot = ItemSlot::OffHand;
     shield.weaponKind = WeaponKind::Shield;
+    shield.statProfile = "shield";
     // A book goes in the left hand.
     ItemDefinition bookInRightHand = MakeKris();
     bookInRightHand.weaponKind = WeaponKind::Book;
@@ -416,6 +752,35 @@ TEST_CASE("Item validation checks slots, wing tiers and weapon kinds [data][item
     issues.clear();
     ValidateItems(std::vector<ItemDefinition>{potion}, issues);
     CHECK(issues.empty());
+}
+
+TEST_CASE("Item validation warns about an item without the stat profile the profile rules give [data][items]")
+{
+    ItemStatFile file;
+    file.profiles.push_back({"shield", {}});
+    StatProfileRule shields{.profile = "shield"};
+    shields.weaponKinds.set(static_cast<size_t>(WeaponKind::Shield));
+    file.profileRules.push_back(shields);
+    const ItemStatProfiles profiles(file);
+
+    // A shield in an item file saved before the stat profiles.
+    ItemDefinition shield = MakeKris();
+    shield.slot = ItemSlot::OffHand;
+    shield.weaponKind = WeaponKind::Shield;
+
+    std::vector<ItemDataIssue> issues;
+    ValidateStatProfiles(std::vector<ItemDefinition>{shield}, profiles, "ItemStats.json", issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "statProfile"));
+    CHECK_FALSE(HasErrors(issues));
+    // The item checks run before the stat file is read; they leave it to the stat profile checks.
+    issues.clear();
+    ValidateItems(std::vector<ItemDefinition>{shield}, issues);
+    CHECK(issues.empty());
+
+    shield.statProfile = "default";
+    issues.clear();
+    ValidateStatProfiles(std::vector<ItemDefinition>{shield}, profiles, "ItemStats.json", issues);
+    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "statProfile"));
 }
 
 TEST_CASE("Rental rules are kept through write and read [data][items]")

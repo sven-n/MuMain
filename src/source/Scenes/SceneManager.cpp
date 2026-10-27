@@ -12,6 +12,7 @@
 #include <numeric>
 #include <cmath>
 #include <iterator>
+#include <thread>
 #include "SceneManager.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "UI/Diagnostics/DiagnosticsOverlay.h"
@@ -282,10 +283,10 @@ static int g_screenshotQuality = BestScreenshotQuality;
 // The readback is only ready on a later frame than the one that asked for it,
 // and a request may arrive either before or after this frame's consume pass
 // (Print Screen comes from the scene update, a scripted capture from the
-// control socket's poll). A frame the renderer skips (no swapchain image: a
-// minimized window, or too many frames in flight) delivers nothing and leaves
-// the request for the next one, so the wait allows for a few skipped frames:
-// about a second at 60 frames per second.
+// control socket's poll). A frame that renders delivers its readback when it
+// ends, so the attempts cover a request that arrives after this frame's
+// consume pass. A window that renders no frames (minimized, on Vulkan) skips
+// every frame, so its capture fails once the attempts run out.
 constexpr int MaxScreenshotConsumeAttempts = 60;
 static int g_screenshotConsumeAttempts = 0;
 
@@ -659,6 +660,16 @@ static void AddBuildLines(std::vector<std::string>& lines)
                   Core::Build::kCompiler, Core::Build::kArchitecture, Core::Build::kDate, Core::Build::kTime);
     lines.emplace_back(line);
     lines.push_back("OS: " + Core::Text::ToUtf8(Core::Platform::GetOSVersionString().c_str()));
+
+    const std::string& processor = Core::Platform::GetProcessorName();
+    std::snprintf(line, sizeof(line), "CPU: %s (%u threads)   RAM: %.1f GB",
+                  processor.empty() ? "unknown" : processor.c_str(), std::thread::hardware_concurrency(),
+                  Core::Platform::GetSystemMemoryMB() / 1024.0);
+    lines.emplace_back(line);
+
+    const char* gpu = mu::GetRenderer().GetGPUDeviceName();
+    std::snprintf(line, sizeof(line), "GPU: %s", (gpu && *gpu) ? gpu : "unknown");
+    lines.emplace_back(line);
 }
 
 // The active camera: mode, field of view, angle, distances and culling planes.

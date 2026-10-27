@@ -7,6 +7,8 @@
 #include "ItemModelMaterialJson.h"
 #include "ItemTextureFiles.h"
 
+#include "Data/GameData/Common/DataPaths.h"
+
 #include <algorithm>
 #include <limits>
 #include <set>
@@ -47,43 +49,7 @@ const std::set<std::string, std::less<>> SharedModelKeys{Keys::Name, Keys::File,
                                                          Keys::NoneBlendMeshes};
 
 constexpr std::string_view ModelFileExtension = ".bmd";
-constexpr char FolderSeparator = '/';
-constexpr char WindowsFolderSeparator = '\\';
-
-constexpr std::string_view ParentFolder = "..";
-constexpr char DriveSeparator = ':';
-
-// Paths in the model files stay inside the game folder: relative, with '/'
-// between folders, without ".." and without empty folder names. Returns
-// what is wrong, or nothing when the path is fine.
-std::string FindPathProblem(std::string_view path)
-{
-    if (path.find(WindowsFolderSeparator) != std::string_view::npos)
-    {
-        return "must use / between folders";
-    }
-    if (path.front() == FolderSeparator || path.find(DriveSeparator) != std::string_view::npos)
-    {
-        return "must be a relative path";
-    }
-
-    size_t partStart = 0;
-    while (partStart <= path.size())
-    {
-        const size_t partEnd = std::min(path.find(FolderSeparator, partStart), path.size());
-        const std::string_view part = path.substr(partStart, partEnd - partStart);
-        if (part.empty())
-        {
-            return "must not have empty folder names or end with /";
-        }
-        if (part == ParentFolder)
-        {
-            return "must not contain \"..\"";
-        }
-        partStart = partEnd + 1;
-    }
-    return {};
-}
+using Data::Paths::FindPathProblem;
 
 // ---------------------------------------------------------------- writing
 
@@ -287,13 +253,8 @@ void ItemModelReader::ReadLookName(const OrderedJson& json, const char* key, std
 
 void ItemModelReader::WarnAboutUnknownKeys(const OrderedJson& json, const std::set<std::string, std::less<>>& knownKeys)
 {
-    for (const auto& [key, value] : json.items())
-    {
-        if (!knownKeys.contains(key))
-        {
-            AddIssue(ItemDataIssueSeverity::Warning, key, "unknown field, ignored");
-        }
-    }
+    Json::WarnAboutUnknownKeys(json, knownKeys, "", [this](const std::string& field, const std::string& message)
+                               { AddIssue(ItemDataIssueSeverity::Warning, field, message); });
 }
 
 bool ItemModelReader::Read(const OrderedJson& json, ItemModelDefinition& model)

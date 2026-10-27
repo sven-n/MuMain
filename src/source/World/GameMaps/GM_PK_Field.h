@@ -34,7 +34,6 @@ public:
     void MoveBlurEffect(CHARACTER* character, OBJECT* object, BMD* bmd) override;
     bool RenderMonsterVisual(CHARACTER* character, OBJECT* object, BMD* bmd) override;
 
-    bool PlayMonsterSound(OBJECT* object) override;
     void PlayObjectSound(OBJECT* object) override;
 
     void PlayBGM();

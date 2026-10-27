@@ -41,9 +41,6 @@ bool IsValidCharacterIndex(int index)
 extern bool g_PetEnableDuel;
 
 extern double WorldTime;
-extern wchar_t TextList[50][100];
-extern int TextListColor[50];
-extern int TextBold[50];
 
 CSPetSystem::CSPetSystem()
     : m_PetOwner(nullptr), m_PetTarget(nullptr), m_PetCharacter(), m_PetType(PET_TYPE_NONE), m_pPetInfo(nullptr),
@@ -525,7 +522,7 @@ void CSPetDarkSpirit::MovePet(void)
 
         if (o->AI == PET_ATTACK)
         {
-            TargetPosition[2] += 50.f * FPS_ANIMATION_FACTOR;
+            TargetPosition[2] += 50.f;
             float Distance = MoveHumming(o->Position, o->Angle, TargetPosition, o->Velocity);
             if (Distance < 20 || o->LifeTime > 20)
             {

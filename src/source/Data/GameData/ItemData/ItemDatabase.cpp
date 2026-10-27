@@ -46,6 +46,11 @@ void ItemDatabase::Build(std::span<const ItemDefinition> definitions)
 
 void ItemDatabase::SetDisplayLocale(std::string_view locale)
 {
+    if (m_displayLocale == locale)
+    {
+        return;
+    }
+    ++m_nameVersion;
     m_displayLocale = std::string(locale);
     for (ItemDefinition& definition : m_definitions)
     {
@@ -94,6 +99,19 @@ void ItemDatabase::Set(const ItemDefinition& definition)
     BuildItemTypesByTag();
 }
 
+void ItemDatabase::SetMany(std::span<const ItemDefinition> definitions)
+{
+    for (const ItemDefinition& definition : definitions)
+    {
+        if (IsValidItemId(definition.group, definition.number))
+        {
+            Store(MakeItemType(definition.group, definition.number), definition);
+        }
+    }
+    CountExistingItems();
+    BuildItemTypesByTag();
+}
+
 void ItemDatabase::Swap(int firstItemType, int secondItemType)
 {
     if (!IsValidItemType(firstItemType) || !IsValidItemType(secondItemType))
@@ -106,6 +124,25 @@ void ItemDatabase::Swap(int firstItemType, int secondItemType)
     Store(firstItemType, std::move(second));
     Store(secondItemType, std::move(first));
     BuildItemTypesByTag();
+}
+
+void ItemDatabase::SetStatProfiles(ItemStatProfiles profiles)
+{
+    ++m_version;
+    m_statProfiles = std::move(profiles);
+    for (size_t itemType = 0; itemType < m_definitions.size(); ++itemType)
+    {
+        if (m_definitions[itemType].Exists())
+        {
+            m_ruleData[itemType].statProfile = ResolveStatProfile(m_definitions[itemType].statProfile);
+        }
+    }
+}
+
+int ItemDatabase::ResolveStatProfile(const std::string& name) const
+{
+    const int profile = m_statProfiles.Find(name);
+    return profile == ItemStatProfiles::UnknownProfile ? ItemStatProfiles::DefaultProfile : profile;
 }
 
 void ItemDatabase::BuildItemTypesByTag()
@@ -146,6 +183,7 @@ void ItemDatabase::UpdateDisplayName(ItemDefinition& definition) const
 void ItemDatabase::Store(int itemType, ItemDefinition definition)
 {
     ++m_version;
+    ++m_nameVersion;
     definition.group = GetItemGroup(itemType);
     definition.number = GetItemNumber(itemType);
     UpdateDisplayName(definition);
@@ -157,6 +195,7 @@ void ItemDatabase::Store(int itemType, ItemDefinition definition)
         ruleData.slot = definition.slot;
         ruleData.wingTier = definition.wingTier;
         ruleData.weaponKind = definition.weaponKind;
+        ruleData.statProfile = ResolveStatProfile(definition.statProfile);
         ruleData.blockedActions = 0;
         for (int action = 0; action < static_cast<int>(ItemAction::Count); ++action)
         {

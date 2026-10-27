@@ -14,6 +14,7 @@
       "height": 3,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "level": 6,
       "magicDurability": 20,
       "damageMin": 3,
@@ -42,6 +43,7 @@
       "height": 3,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "twoHanded": true,
       "level": 18,
       "magicDurability": 38,
@@ -70,6 +72,7 @@
       "height": 3,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "twoHanded": true,
       "level": 30,
       "magicDurability": 50,
@@ -98,6 +101,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "twoHanded": true,
       "level": 42,
       "magicDurability": 60,
@@ -127,6 +131,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "twoHanded": true,
       "level": 52,
       "magicDurability": 65,
@@ -155,6 +160,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "level": 59,
       "magicDurability": 66,
       "damageMin": 29,
@@ -182,6 +188,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "level": 70,
       "magicDurability": 70,
       "damageMin": 35,
@@ -210,6 +217,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "twoHanded": true,
       "level": 75,
       "magicDurability": 70,
@@ -217,6 +225,7 @@
       "damageMax": 48,
       "attackSpeed": 30,
       "magicPower": 94,
+      "excellentBonus": 25,
       "requirements": {
         "strength": 60,
         "dexterity": 10
@@ -238,6 +247,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "twoHanded": true,
       "level": 90,
       "magicDurability": 85,
@@ -267,6 +277,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "level": 100,
       "magicDurability": 91,
       "damageMin": 46,
@@ -291,10 +302,26 @@
         "pt": "Bastão divino do arcanjo"
       },
       "tags": ["divineArchangelWeapon", "valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "purple",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "purple"
+        }
+      ],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "level": 104,
       "magicDurability": 182,
       "damageMin": 153,
@@ -322,6 +349,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "level": 140,
       "magicDurability": 95,
       "damageMin": 55,
@@ -349,12 +377,14 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "level": 147,
       "magicDurability": 100,
       "damageMin": 66,
       "damageMax": 74,
       "attackSpeed": 30,
       "magicPower": 130,
+      "excellentRaisesLevel": false,
       "requirements": {
         "level": 380,
         "strength": 39,
@@ -376,6 +406,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "level": 110,
       "magicDurability": 78,
       "damageMin": 51,
@@ -402,6 +433,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "level": 28,
       "magicDurability": 50,
       "damageMin": 17,
@@ -428,6 +460,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "level": 42,
       "magicDurability": 60,
       "damageMin": 23,
@@ -454,6 +487,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "level": 59,
       "magicDurability": 65,
       "damageMin": 29,
@@ -480,6 +514,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "level": 78,
       "magicDurability": 81,
       "damageMin": 38,
@@ -506,6 +541,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "level": 100,
       "magicDurability": 91,
       "damageMin": 46,
@@ -532,12 +568,14 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "level": 110,
       "magicDurability": 95,
       "damageMin": 51,
       "damageMax": 53,
       "attackSpeed": 30,
       "magicPower": 110,
+      "excellentRaisesLevel": false,
       "requirements": {
         "level": 380,
         "strength": 64,
@@ -559,6 +597,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "level": 147,
       "magicDurability": 100,
       "damageMin": 66,
@@ -587,6 +626,7 @@
       "height": 2,
       "slot": "offHand",
       "weaponKind": "book",
+      "statProfile": "book",
       "skill": 223,
       "level": 52,
       "magicDurability": 60,
@@ -613,6 +653,7 @@
       "height": 2,
       "slot": "offHand",
       "weaponKind": "book",
+      "statProfile": "book",
       "skill": 224,
       "level": 59,
       "magicDurability": 65,
@@ -639,6 +680,7 @@
       "height": 2,
       "slot": "offHand",
       "weaponKind": "book",
+      "statProfile": "book",
       "skill": 225,
       "level": 65,
       "magicDurability": 50,
@@ -664,6 +706,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "level": 138,
       "magicDurability": 91,
       "damageMin": 57,
@@ -692,6 +735,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "level": 137,
       "magicDurability": 182,
       "damageMin": 57,
@@ -719,6 +763,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "level": 147,
       "magicDurability": 78,
       "damageMin": 55,
@@ -746,6 +791,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "level": 147,
       "magicDurability": 98,
       "damageMin": 70,
@@ -769,10 +815,26 @@
         "pt": "Bastão Divino do Arcanjo"
       },
       "tags": ["divineArchangelWeapon", "valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "purple",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "purple"
+        }
+      ],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "staff",
+      "statProfile": "weapon",
       "level": 104,
       "magicDurability": 182,
       "damageMin": 153,
@@ -782,84 +844,6 @@
       "requirements": {
         "strength": 55,
         "dexterity": 13
-      },
-      "classRequirements": {
-        "summoner": 1
-      }
-    },
-    {
-      "number": 38,
-      "name": {
-        "en": "Legendary Staff-J",
-        "de": "Legendärer Stab-J",
-        "es": "Báculo Legendario-J",
-        "pt": "Bastão lendário-J"
-      },
-      "width": 1,
-      "height": 4,
-      "slot": "mainHand",
-      "weaponKind": "staff",
-      "level": 59,
-      "magicDurability": 66,
-      "damageMin": 29,
-      "damageMax": 31,
-      "attackSpeed": 30,
-      "magicPower": 59,
-      "attackType": 3,
-      "requirements": {
-        "strength": 50
-      },
-      "classRequirements": {
-        "darkWizard": 1,
-        "magicGladiator": 1
-      }
-    },
-    {
-      "number": 39,
-      "name": {
-        "en": "Red Wing Stick-J",
-        "de": "Rotschwingenstock-J",
-        "es": "Vara Ala Roja-J",
-        "pt": "Cajado da asa vermelha-J"
-      },
-      "width": 1,
-      "height": 4,
-      "slot": "mainHand",
-      "weaponKind": "staff",
-      "level": 59,
-      "magicDurability": 65,
-      "damageMin": 29,
-      "damageMax": 31,
-      "attackSpeed": 30,
-      "magicPower": 59,
-      "requirements": {
-        "strength": 36,
-        "dexterity": 14
-      },
-      "classRequirements": {
-        "summoner": 1
-      }
-    },
-    {
-      "number": 40,
-      "name": {
-        "en": "Book of Neil-J",
-        "de": "Buch von Neil-J",
-        "es": "Libro de Lagle-J",
-        "pt": "Livro de Neil-J"
-      },
-      "width": 1,
-      "height": 2,
-      "slot": "offHand",
-      "weaponKind": "book",
-      "skill": 224,
-      "level": 59,
-      "magicDurability": 65,
-      "attackSpeed": 30,
-      "magicPower": 59,
-      "requirements": {
-        "dexterity": 25,
-        "energy": 168
       },
       "classRequirements": {
         "summoner": 1

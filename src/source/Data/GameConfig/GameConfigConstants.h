@@ -37,6 +37,8 @@ namespace CfgKeys
     // UI
     inline constexpr wchar_t CfgKeyUILocale[] = L"Locale";
     inline constexpr wchar_t CfgKeyFont[]     = L"Font";
+    // Whether item names follow the UI language; off keeps them English.
+    inline constexpr wchar_t CfgKeyTranslateItemNames[] = L"TranslateItemNames";
     // Active RmlUi theme name ("legacy"/"modern"), Data/Interface/RmlUi/themes/<name>/. Not yet
     // a full runtime hot-swap -- read once at startup. See UI::RmlBridge::RmlTheme.
     inline constexpr wchar_t CfgKeyRmlTheme[] = L"RmlTheme";
@@ -84,6 +86,9 @@ namespace CfgKeys
     // User-chosen FPS cap when VSync is off; -1 = uncapped. Same promotion story as the toggles
     // above, this time for the console-only `$fps <N>` diagnostic.
     inline constexpr wchar_t CfgKeyFpsCap[] = L"FpsCap";
+    // Active texture pack, a folder in Data/TexturePacks; empty = the original textures. Read once
+    // at startup -- see Render::Textures::TexturePack.
+    inline constexpr wchar_t CfgKeyTexturePack[] = L"TexturePack";
 }
 
 namespace CfgDefaults
@@ -102,12 +107,13 @@ namespace CfgDefaults
     inline constexpr wchar_t CfgDefaultEncryptedPassword[] = L"";
 
     inline constexpr wchar_t CfgDefaultServerIP[] = L"localhost";
-    inline constexpr int CfgDefaultServerPort = 44405;
+    inline constexpr int CfgDefaultServerPort = 44406;
 
     inline constexpr int CfgDefaultZoom = 1735;  // OrbitalCamera DEFAULT_RADIUS — matches Default-cam camera-to-Hero distance
 
     // I18N locale code; "en" is the default the resx generator falls back to.
     inline constexpr wchar_t CfgDefaultUILocale[] = L"en";
+    inline constexpr bool CfgDefaultTranslateItemNames = true;
 
     // UI font family name. Empty = each platform's built-in default (Tahoma on
     // Windows, fontconfig "sans-serif" on Linux), so the look is unchanged until
@@ -154,6 +160,7 @@ namespace CfgDefaults
     inline constexpr bool CfgDefaultDisableWingShadow = false;
     inline constexpr bool CfgDefaultDisableBodyShadows = false;
     inline constexpr int CfgDefaultFpsCap = -1;  // Uncapped
+    inline constexpr wchar_t CfgDefaultTexturePack[] = L""; // The original textures
 
     // "default" = this app's own platform-aware pick (prefers Vulkan on Windows to avoid
     // D3D12's vsync-cap bug; SDL's own auto-pick elsewhere). Other accepted values:

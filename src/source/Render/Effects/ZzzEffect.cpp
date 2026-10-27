@@ -7657,7 +7657,7 @@ void RenderWheelWeapon(OBJECT* o)
     o->Direction[2] -= (30) * FPS_ANIMATION_FACTOR;
     o->Angle[2] += o->Direction[2];
     o->Angle[1] = 90;
-    o->Position[2] += (100.f) * FPS_ANIMATION_FACTOR;
+    o->Position[2] += 100.f;
 
     float Alpha = o->Alpha;
 

@@ -14,6 +14,7 @@
       "height": 3,
       "slot": "mainHand",
       "weaponKind": "mace",
+      "statProfile": "weapon",
       "level": 7,
       "durability": 21,
       "damageMin": 7,
@@ -42,6 +43,7 @@
       "height": 3,
       "slot": "mainHand",
       "weaponKind": "mace",
+      "statProfile": "weapon",
       "skill": 19,
       "level": 13,
       "durability": 25,
@@ -71,6 +73,7 @@
       "height": 3,
       "slot": "mainHand",
       "weaponKind": "mace",
+      "statProfile": "weapon",
       "level": 22,
       "durability": 32,
       "damageMin": 22,
@@ -100,6 +103,7 @@
       "height": 3,
       "slot": "mainHand",
       "weaponKind": "mace",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 19,
       "level": 38,
@@ -129,6 +133,7 @@
       "height": 3,
       "slot": "mainHand",
       "weaponKind": "mace",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 19,
       "level": 66,
@@ -160,6 +165,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "mace",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 23,
       "level": 72,
@@ -191,6 +197,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "mace",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 23,
       "level": 75,
@@ -198,6 +205,7 @@
       "damageMin": 102,
       "damageMax": 130,
       "attackSpeed": 35,
+      "excellentBonus": 15,
       "requirements": {
         "strength": 140,
         "dexterity": 50
@@ -219,6 +227,7 @@
       "height": 3,
       "slot": "mainHand",
       "weaponKind": "mace",
+      "statProfile": "weapon",
       "level": 90,
       "durability": 50,
       "damageMin": 62,
@@ -246,6 +255,7 @@
       "height": 3,
       "slot": "mainHand",
       "weaponKind": "mace",
+      "statProfile": "sceptre",
       "skill": 66,
       "level": 54,
       "durability": 40,
@@ -275,6 +285,7 @@
       "height": 3,
       "slot": "mainHand",
       "weaponKind": "mace",
+      "statProfile": "sceptre",
       "skill": 66,
       "level": 72,
       "durability": 45,
@@ -304,6 +315,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "mace",
+      "statProfile": "sceptre",
       "skill": 66,
       "level": 82,
       "durability": 65,
@@ -333,6 +345,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "mace",
+      "statProfile": "sceptre",
       "skill": 66,
       "level": 98,
       "durability": 72,
@@ -362,6 +375,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "mace",
+      "statProfile": "sceptre",
       "skill": 66,
       "level": 140,
       "durability": 84,
@@ -387,10 +401,26 @@
         "pt": "Cetro divino do arcanjo"
       },
       "tags": ["divineArchangelWeapon", "sceptre", "valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "purple",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "purple"
+        }
+      ],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "mace",
+      "statProfile": "sceptre",
       "skill": 66,
       "level": 150,
       "durability": 90,
@@ -420,6 +450,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "mace",
+      "statProfile": "sceptre",
       "skill": 66,
       "level": 146,
       "durability": 95,
@@ -427,6 +458,7 @@
       "damageMax": 153,
       "attackSpeed": 40,
       "magicPower": 84,
+      "excellentRaisesLevel": false,
       "requirements": {
         "level": 380,
         "strength": 80,
@@ -449,6 +481,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "mace",
+      "statProfile": "sceptre",
       "skill": 66,
       "level": 110,
       "durability": 78,
@@ -476,6 +509,7 @@
       "height": 3,
       "slot": "mainHand",
       "weaponKind": "mace",
+      "statProfile": "weapon",
       "level": 121,
       "durability": 80,
       "damageMin": 106,
@@ -504,6 +538,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "mace",
+      "statProfile": "sceptre",
       "skill": 66,
       "level": 135,
       "durability": 90,
@@ -533,6 +568,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "mace",
+      "statProfile": "sceptre",
       "skill": 66,
       "level": 147,
       "durability": 86,
@@ -543,35 +579,6 @@
       "requirements": {
         "strength": 87,
         "dexterity": 20
-      },
-      "classRequirements": {
-        "darkLord": 1
-      }
-    },
-    {
-      "number": 21,
-      "name": {
-        "en": "Master Scepter-J",
-        "de": "Meisterzepter-J",
-        "es": "Cetro Maestro-J",
-        "pt": "Cetro do mestre-J"
-      },
-      "tags": ["sceptre"],
-      "width": 1,
-      "height": 3,
-      "slot": "mainHand",
-      "weaponKind": "mace",
-      "skill": 66,
-      "level": 72,
-      "durability": 45,
-      "damageMin": 57,
-      "damageMax": 68,
-      "attackSpeed": 50,
-      "magicPower": 20,
-      "attackType": 1,
-      "requirements": {
-        "strength": 87,
-        "dexterity": 18
       },
       "classRequirements": {
         "darkLord": 1

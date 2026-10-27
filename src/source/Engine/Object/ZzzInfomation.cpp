@@ -23,16 +23,16 @@
 #include "GameLogic/Pets/GIPetManager.h"
 #include "GameLogic/Items/CComGem.h"
 #include "GameLogic/Items/ItemCategories.h"
-#include "GameLogic/Items/ItemLevelBonus.h"
+#include "GameLogic/Items/ItemStats.h"
 #include "UI/Inventory/InventoryCtrl.h"
 #include "Network/Server/SocketSystem.h"
 #include "UI/Core/WindowSystem.h"
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
 
 CLASS_ATTRIBUTE     ClassAttribute[MAX_CLASS];
-MONSTER_SCRIPT      MonsterScript[MAX_MONSTER];
 GATE_ATTRIBUTE* GateAttribute = NULL;
 SKILL_ATTRIBUTE* SkillAttribute = NULL;
 ITEM_ATTRIBUTE* ItemAttribute = NULL;
@@ -179,42 +179,6 @@ void OpenGateScript(const wchar_t* FileName)
     }
 }
 
-void OpenMonsterSkillScript(const wchar_t* FileName)
-{
-    memset(MonsterSkill, -1, sizeof(Script_Skill));
-
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (fp != NULL)
-    {
-        int Size = (sizeof(Script_Skill) + sizeof(int));
-        BYTE* Buffer = new BYTE[Size];
-        int FileCount = 0;
-        fread(&FileCount, sizeof(int), 1, fp);
-        for (int i = 0; i < FileCount; i++)
-        {
-            fread(Buffer, Size, 1, fp);
-            BuxConvert(Buffer, Size);
-            int dummy = -1;
-            int Seek = 0;
-            memcpy(&dummy, Buffer + Seek, sizeof(int));
-            Seek += sizeof(int);
-            memcpy(MonsterSkill[dummy].Skill_Num, Buffer + Seek, sizeof(int) * MAX_MONSTERSKILL_NUM);
-            Seek += (sizeof(int) * MAX_MONSTERSKILL_NUM);
-            memcpy(&MonsterSkill[dummy].Slot, Buffer + Seek, sizeof(int));
-        }
-        delete[] Buffer;
-        fclose(fp);
-    }
-    else
-    {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-    }
-}
-
 void OpenNpcScript(wchar_t* FileName)
 {
     if ((SMDFile = _wfopen(FileName, L"rb")) == NULL)
@@ -301,124 +265,6 @@ int g_iCurrentDialog = -1;
 // item
 ///////////////////////////////////////////////////////////////////////////////
 
-void PrintItem(wchar_t* FileName)
-{
-    FILE* fp = _wfopen(FileName, L"wt");
-    fwprintf(fp, L"                이름  최소공격력 최대공격력 방어력 방어율 필요힘 필요민첩 필요에너지\n");
-    //fwprintf(fp,"                이름    카오스성공확률\n");
-    bool Excellent = true;
-    for (int i = 0; i < 16 * MAX_ITEM_INDEX; i++)
-    {
-        if ((i & 0x1FF) == 0)
-        {
-            fwprintf(fp, L"------------------------------------------------------------------------------------------------------\n");
-        }
-        ITEM_ATTRIBUTE* p = &ItemAttribute[i];
-        if (p->Name[0] != 0)
-        {
-            int Plus;
-            if (i >= 12 * MAX_ITEM_INDEX)
-                Plus = 1;
-            else
-                Plus = 10;
-            for (int j = 0; j < Plus; j++)
-            {
-                int Level = j;
-                int RequireStrength = 0;
-                int RequireDexterity = 0;
-                int RequireEnergy = 0;
-                int DamageMin = p->DamageMin;
-                int DamageMax = p->DamageMax;
-                int Defense = p->Defense;
-                int SuccessfulBlocking = p->SuccessfulBlocking;
-                if (DamageMin > 0)
-                {
-                    if (Excellent)
-                    {
-                        if (p->Level)
-                            DamageMin += p->DamageMin * 25 / p->Level + 5;
-                    }
-                    DamageMin += Level * 3;
-                }
-                if (DamageMax > 0)
-                {
-                    if (Excellent)
-                    {
-                        if (p->Level)
-                            DamageMax += p->DamageMin * 25 / p->Level + 5;
-                    }
-                    DamageMax += Level * 3;
-                }
-                if (Defense > 0)
-                {
-                    if (i >= ITEM_SHIELD && i < ITEM_SHIELD + MAX_ITEM_INDEX)
-                    {
-                        Defense += Level;
-                    }
-                    else
-                    {
-                        if (Excellent)
-                        {
-                            if (p->Level)
-                                Defense += p->Defense * 12 / p->Level + 4 + p->Level / 5;
-                        }
-                        Defense += Level * 3;
-                    }
-                }
-                if (SuccessfulBlocking > 0)
-                {
-                    if (Excellent)
-                    {
-                        if (p->Level)
-                            SuccessfulBlocking += p->SuccessfulBlocking * 25 / p->Level + 5;
-                    }
-                    SuccessfulBlocking += Level * 3;
-                }
-                int ItemLevel = p->Level;
-                if (Excellent)
-                    ItemLevel = p->Level + 25;
-                if (p->RequireStrength)
-                    RequireStrength = 20 + p->RequireStrength * (ItemLevel + Level * 3) * 3 / 100;
-                else
-                    RequireStrength = 0;
-                if (p->RequireDexterity)
-                    RequireDexterity = 20 + p->RequireDexterity * (ItemLevel + Level * 3) * 3 / 100;
-                else
-                    RequireDexterity = 0;
-                if (p->RequireEnergy)
-                {
-                    RequireEnergy = 20 + p->RequireEnergy * (ItemLevel + Level * 3) * 4 / 10;
-                }
-                else
-                {
-                    RequireEnergy = 0;
-                }
-                if (i >= ITEM_STAFF && i < ITEM_STAFF * MAX_ITEM_INDEX)
-                {
-                    DamageMin = DamageMin / 2 + Level * 2;
-                    DamageMax = 0;
-                }
-                ITEM ip;
-                ip.Type = i;
-                ip.ExcellentFlags = Excellent;
-                ip.Level = Level;
-                SetItemAttributes(&ip);
-
-                ItemValue(&ip, 0);
-
-                if (j == 0)
-                    fwprintf(fp, L"%20s %8d %8d %8d %8d %8d %8d %8d %8d %8d\n", p->Name, DamageMin, DamageMax, Defense, SuccessfulBlocking, RequireStrength, RequireDexterity, RequireEnergy, p->WeaponSpeed, ItemValue(&ip));
-                //fwprintf(fp,"%20s %4d%%",p->Name, iRate);
-                else
-                    fwprintf(fp, L"%17s +%d %8d %8d %8d %8d %8d %8d %8d %8d %8d\n", L"", Level, DamageMin, DamageMax, Defense, SuccessfulBlocking, RequireStrength, RequireDexterity, RequireEnergy, p->WeaponSpeed, ItemValue(&ip));
-                //fwprintf(fp,"%4d%%<+%d>",iRate,Level);
-            }
-            fwprintf(fp, L"\n");
-        }
-    }
-    fclose(fp);
-}
-
 ActionSkillType GetSkillByBook(int Type)
 {
     switch (Type)
@@ -455,351 +301,6 @@ ActionSkillType GetSkillByBook(int Type)
     case ITEM_DRAGON_ROAR_PARCHMENT: return AT_SKILL_DRAGON_ROAR;
     default:
         return AT_SKILL_UNDEFINED;
-    }
-}
-
-void ItemConvert(ITEM* ip, BYTE Attribute1, BYTE Attribute2, BYTE ancientDiscriminator)
-{
-    // todo...
-}
-
-int GetDropLevel(ITEM_ATTRIBUTE* p)
-{
-    return p->Level + 30;
-}
-
-int GetExcellentAddValue(ITEM *ip)
-{
-    if (ip->Type == ITEM_CHAOS_DRAGON_AXE)
-    {
-        return 15;
-    }
-
-    if (ip->Type == ITEM_CHAOS_NATURE_BOW)
-    {
-        return 30;
-    }
-
-    if (ip->Type == ITEM_CHAOS_LIGHTNING_STAFF)
-    {
-        return 25;
-    }
-
-    return 0;
-}
-
-// MagicPower and SuccessfulBlocking are BYTEs: a value past 255 shows as 255, not wrapped.
-constexpr int MaxByteStat = 255;
-// Second tier wings and the Capes of Lord and Fighter grow their defense by 2 per level up to
-// +9, third tier wings by 4 (other items by 3).
-constexpr int SecondTierWingDefensePerLevel = 2;
-constexpr int ThirdTierWingDefensePerLevel = 4;
-
-// Excellent and ancient items get the excellent bonus of damage, magic power,
-// blocking and defense. Wings keep their wing options in ExcellentFlags, but they
-// are not excellent. Excellent archangel weapons get it, as in OpenMU; the client
-// before 815b8828 left them out with the wings.
-static bool HasExcellentBonus(const ITEM* ip)
-{
-    return (ip->ExcellentFlags > 0 && !GameLogic::Items::IsWingItem(ip)) || ip->AncientDiscriminator > 0;
-}
-
-void CalcDamageMin(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
-{
-    //ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
-    if (p->DamageMin <= 0)
-    {
-        return;
-    }
-
-    if (HasExcellentBonus(ip))
-    {
-        if (p->Level)
-        {
-            if (excelAddValue)
-                ip->DamageMin += excelAddValue;
-            else
-                ip->DamageMin += p->DamageMin * 25 / p->Level + 5;
-        }
-    }
-
-    if (ip->AncientDiscriminator > 0)
-    {
-        ip->DamageMin += 5 + (GetDropLevel(p) / 40);
-    }
-
-    ip->DamageMin += GameLogic::Items::GetItemLevelBonus(ip->Level);
-}
-
-void CalcDamageMax(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
-{
-    if (p->DamageMax <= 0)
-    {
-        return;
-    }
-
-    if (HasExcellentBonus(ip))
-    {
-        if (p->Level)
-        {
-            if (excelAddValue)
-                ip->DamageMax += excelAddValue;
-            else
-                ip->DamageMax += p->DamageMin * 25 / p->Level + 5;
-        }
-    }
-
-    if (ip->AncientDiscriminator > 0)
-    {
-        ip->DamageMax += 5 + (GetDropLevel(p) / 40);
-    }
-
-    ip->DamageMax += GameLogic::Items::GetItemLevelBonus(ip->Level);
-}
-
-void CalcMagicPower(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
-{
-    if (p->MagicPower <= 0)
-    {
-        return;
-    }
-
-    // MagicPower is a BYTE: the sum can pass 255 before it is halved (an excellent +15
-    // Divine Staff of Archangel: 156 + 42 + 66), so it is added up in an int.
-    int magicPower = ip->MagicPower;
-    if (HasExcellentBonus(ip))
-    {
-        if (p->Level)
-        {
-            if (excelAddValue)
-                magicPower += excelAddValue;
-            else
-                magicPower += p->MagicPower * 25 / p->Level + 5;
-        }
-    }
-
-    if (ip->AncientDiscriminator > 0)
-    {
-        magicPower += 2 + (GetDropLevel(p) / 60);
-    }
-
-    magicPower += GameLogic::Items::GetItemLevelBonus(ip->Level);
-    magicPower /= 2;
-
-    if (!GameLogic::Items::IsSceptreType(ip->Type))
-    {
-        magicPower += ip->Level * 2;
-    }
-    ip->MagicPower = static_cast<BYTE>(std::min(magicPower, MaxByteStat));
-}
-
-void CalcSuccessfulBlocking(ITEM* ip, ITEM_ATTRIBUTE* p)
-{
-    if (p->SuccessfulBlocking == 0)
-    {
-        return;
-    }
-
-    int blocking = ip->SuccessfulBlocking;
-    if (HasExcellentBonus(ip))
-    {
-        if (p->Level)
-            blocking += p->SuccessfulBlocking * 25 / p->Level + 5;
-    }
-    blocking += GameLogic::Items::GetItemLevelBonus(ip->Level);
-    ip->SuccessfulBlocking = static_cast<BYTE>(std::min(blocking, MaxByteStat));
-}
-
-void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
-{
-    if (p->MagicDefense > 0)
-    {
-        ip->MagicDefense += GameLogic::Items::GetItemLevelBonus(ip->Level);
-    }
-
-    if (ip->Type == ITEM_CAPE_OF_LORD)
-    {
-        p->Defense = 15;
-        ip->Defense = 15;
-    }
-
-    if (p->Defense == 0)
-    {
-        return;
-    }
-
-    auto isAncientItem = ip->AncientDiscriminator > 0;
-    auto isExcellent = HasExcellentBonus(ip);
-    auto setItemDropLevel = GetDropLevel(p);
-
-    if (ip->Type >= ITEM_SHIELD && ip->Type < ITEM_SHIELD + MAX_ITEM_INDEX)
-    {
-        ip->Defense += ip->Level;
-        if (isAncientItem)
-        {
-            ip->Defense = ip->Defense + (ip->Defense * 20 / setItemDropLevel + 2);
-        }
-
-        return;
-    }
-
-    if (isExcellent && p->Level > 0)
-    {
-        ip->Defense += p->Defense * 12 / p->Level + 4 + p->Level / 5;
-    }
-
-    if (isAncientItem)
-    {
-        ip->Defense += ip->Defense * 3 / setItemDropLevel + 2 + setItemDropLevel / 30;
-    }
-
-    int perLevelUpToNine = GameLogic::Items::LevelBonusPerLevelUpToNine;
-    int firstStepAboveNine = GameLogic::Items::FirstLevelBonusStepAboveNine;
-    if (GameLogic::Items::IsSecondTierWing(ip))
-    {
-        perLevelUpToNine = SecondTierWingDefensePerLevel;
-    }
-    else if (GameLogic::Items::IsThirdTierWing(ip))
-    {
-        perLevelUpToNine = ThirdTierWingDefensePerLevel;
-        firstStepAboveNine = GameLogic::Items::ThirdTierWingFirstLevelBonusStepAboveNine;
-    }
-    ip->Defense += GameLogic::Items::GetItemLevelBonus(ip->Level, perLevelUpToNine, firstStepAboveNine);
-}
-
-void CalcRequirements(ITEM* ip, ITEM_ATTRIBUTE* p)
-{
-    bool isExcellent = ip->ExcellentFlags > 0;
-    bool isAncientItem = ip->AncientDiscriminator > 0;
-    int ItemLevel = p->Level;
-
-    if (isExcellent)
-    {
-        ItemLevel = p->Level + 25;
-    }
-    else if (isAncientItem)
-    {
-        ItemLevel = p->Level + 30;
-    }
-
-    int addValue = 4;
-
-    if (GameLogic::Items::IsSecondTierWingExceptCape(ip))
-    {
-        addValue = 5;
-    }
-
-    // These keep their base level requirement; the ones in the next branch grow with the + level.
-    const bool isWeaponOrArmor = ip->Type >= ITEM_SWORD && ip->Type < ITEM_WING;
-    const bool isFromOrbsToThirdTierWings = ip->Type >= ITEM_ORB_OF_TWISTING_SLASH && ip->Type <= ITEM_CAPE_OF_EMPEROR;
-    const bool isLateWingGroupKind =
-        ip->Type >= ITEM_WING_OF_DIMENSION && ip->Type < ITEM_HELPER && ip->Type != ITEM_CAPE_OF_FIGHTER;
-    const bool keepsBaseLevelRequirement =
-        isWeaponOrArmor || ip->Type == ITEM_HORN_OF_FENRIR || isFromOrbsToThirdTierWings || isLateWingGroupKind;
-
-    if (p->RequireLevel && keepsBaseLevelRequirement)
-    {
-        ip->RequireLevel = p->RequireLevel;
-    }
-    else if (p->RequireLevel && ((ip->Type >= ITEM_WING && ip->Type <= ITEM_ORB_OF_TWISTING_SLASH)
-        || (ip->Type >= ITEM_WING_OF_CURSE && ip->Type <= ITEM_WINGS_OF_DESPAIR)
-        || (ip->Type == ITEM_CAPE_OF_FIGHTER)
-        || ip->Type >= ITEM_HELPER))
-    {
-        ip->RequireLevel = p->RequireLevel + ip->Level * addValue;
-    }
-    else
-        ip->RequireLevel = 0;
-
-    if (p->RequireStrength)
-        ip->RequireStrength = 20 + (p->RequireStrength) * (ItemLevel + ip->Level * 3) * 3 / 100;
-    else	ip->RequireStrength = 0;
-
-    if (p->RequireDexterity)
-        ip->RequireDexterity = 20 + (p->RequireDexterity) * (ItemLevel + ip->Level * 3) * 3 / 100;
-    else	ip->RequireDexterity = 0;
-
-    if (p->RequireVitality)
-        ip->RequireVitality = 20 + (p->RequireVitality) * (ItemLevel + ip->Level * 3) * 3 / 100;
-    else	ip->RequireVitality = 0;
-
-    if (p->RequireEnergy)
-    {
-        if (GameLogic::Items::IsSummonerBook(ip))
-        {
-            ip->RequireEnergy = 20 + (p->RequireEnergy) * (ItemLevel + ip->Level * 1) * 3 / 100;
-        }
-        else
-
-            if ((p->RequireLevel > 0) && (ip->Type >= ITEM_ETC && ip->Type < ITEM_ETC + MAX_ITEM_INDEX))
-            {
-                ip->RequireEnergy = 20 + (p->RequireEnergy) * (p->RequireLevel) * 4 / 100;
-            }
-            else
-
-            {
-                ip->RequireEnergy = 20 + (p->RequireEnergy) * (ItemLevel + ip->Level * 3) * 4 / 100;
-            }
-    }
-    else
-    {
-        ip->RequireEnergy = 0;
-    }
-
-    if (p->RequireCharisma)
-        ip->RequireCharisma = 20 + (p->RequireCharisma) * (ItemLevel + ip->Level * 3) * 3 / 100;
-    else	ip->RequireCharisma = 0;
-
-    if (ip->Type == ITEM_ORB_OF_SUMMONING)
-    {
-        WORD Energy = 0;
-
-        switch (ip->Level)
-        {
-        case 0:Energy = 30; break;
-        case 1:Energy = 60; break;
-        case 2:Energy = 90; break;
-        case 3:Energy = 130; break;
-        case 4:Energy = 170; break;
-        case 5:Energy = 210; break;
-        case 6:Energy = 300; break;
-        case 7:Energy = 500; break;
-        }
-        ip->RequireEnergy = Energy;
-    }
-
-    if (p->RequireCharisma)
-    {
-        if (ip->Type == MODEL_DARK_RAVEN_ITEM)
-            ip->RequireCharisma = (185 + (p->RequireCharisma * 15));
-        else
-            ip->RequireCharisma = p->RequireCharisma;
-    }
-
-    if (ip->Type == ITEM_TRANSFORMATION_RING)
-    {
-        if (ip->Level <= 2)
-            ip->RequireLevel = 20;
-        else
-            ip->RequireLevel = 50;
-    }
-
-    if ((ip->Type >= ITEM_DRAGON_KNIGHT_HELM && ip->Type <= ITEM_SUNLIGHT_MASK) ||
-        (ip->Type >= ITEM_DRAGON_KNIGHT_ARMOR && ip->Type <= ITEM_SUNLIGHT_ARMOR) ||
-        (ip->Type >= ITEM_DRAGON_KNIGHT_PANTS && ip->Type <= ITEM_SUNLIGHT_PANTS) ||
-        (ip->Type >= ITEM_DRAGON_KNIGHT_GLOVES && ip->Type <= ITEM_SUNLIGHT_GLOVES) ||
-        (ip->Type >= ITEM_DRAGON_KNIGHT_BOOTS && ip->Type <= ITEM_SUNLIGHT_BOOTS) || ip->Type == ITEM_BONE_BLADE ||
-        ip->Type == ITEM_EXPLOSION_BLADE || ip->Type == ITEM_GRAND_VIPER_STAFF || ip->Type == ITEM_SYLPH_WIND_BOW ||
-        ip->Type == ITEM_SOLEIL_SCEPTER || ITEM_STORM_BLITZ_STICK == ip->Type || ITEM_AURA_HELM == ip->Type ||
-        ITEM_AURA_ARMOR == ip->Type || ITEM_AURA_PANTS == ip->Type || ITEM_AURA_GLOVES == ip->Type ||
-        ITEM_AURA_BOOTS == ip->Type || GameLogic::Items::IsLuckyItemType(ip->Type))
-    {
-        isExcellent = false;
-    }
-
-    if (isExcellent && ip->RequireLevel > 0 && !GameLogic::Items::IsWingItem(ip) && ip->Type != ITEM_HORN_OF_FENRIR)
-    {
-        ip->RequireLevel += 20;
     }
 }
 
@@ -1000,25 +501,26 @@ void CalcExcellentOptions(ITEM* ip)
 
 void SetItemAttributes(ITEM* ip)
 {
-    int excelAddValue = GetExcellentAddValue(ip);
-    
     ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
     ip->TwoHand = p->TwoHand;
     ip->WeaponSpeed = p->WeaponSpeed;
-    ip->DamageMin = p->DamageMin;
-    ip->DamageMax = p->DamageMax;
-    ip->SuccessfulBlocking = p->SuccessfulBlocking;
-    ip->Defense = p->Defense;
-    ip->MagicDefense = p->MagicDefense;
     ip->WalkSpeed = p->WalkSpeed;
-    ip->MagicPower = p->MagicPower;
 
-    CalcDamageMin(ip, p, excelAddValue);
-    CalcDamageMax(ip, p, excelAddValue);
-    CalcMagicPower(ip, p, excelAddValue);
-    CalcSuccessfulBlocking(ip, p);
-    CalcDefense(ip, p);
-    CalcRequirements(ip, p);
+    // What the + level, excellent options, ancient set and option level add, from the item stat file.
+    const GameLogic::Items::ItemStatValues stats = GameLogic::Items::ComputeItemStats(
+        *p, {ip->Type, ip->Level, ip->ExcellentFlags, ip->AncientDiscriminator, ip->OptionLevel});
+    ip->DamageMin = static_cast<WORD>(stats.damageMin);
+    ip->DamageMax = static_cast<WORD>(stats.damageMax);
+    ip->MagicPower = static_cast<WORD>(stats.magicPower);
+    ip->SuccessfulBlocking = static_cast<BYTE>(stats.blockRate);
+    ip->Defense = static_cast<WORD>(stats.defense);
+    ip->MagicDefense = static_cast<WORD>(stats.magicDefense);
+    ip->RequireLevel = static_cast<WORD>(stats.requireLevel);
+    ip->RequireStrength = static_cast<WORD>(stats.requireStrength);
+    ip->RequireDexterity = static_cast<WORD>(stats.requireDexterity);
+    ip->RequireEnergy = static_cast<WORD>(stats.requireEnergy);
+    ip->RequireVitality = static_cast<WORD>(stats.requireVitality);
+    ip->RequireCharisma = static_cast<WORD>(stats.requireLeadership);
 
     ip->SpecialNum = 0;
 
@@ -1090,7 +592,6 @@ void SetItemAttributes(ITEM* ip)
                 {
                     ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
                     ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE; ip->SpecialNum++;
-                    ip->RequireStrength += Option3 * 5;
                 }
             }
             if (ip->Type >= ITEM_STAFF && ip->Type < ITEM_STAFF + MAX_ITEM_INDEX)
@@ -1101,19 +602,16 @@ void SetItemAttributes(ITEM* ip)
                 else
                     ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC;
                 ip->SpecialNum++;
-                ip->RequireStrength += Option3 * 5;
             }
             if (ip->Type >= ITEM_SHIELD && ip->Type < ITEM_SHIELD + MAX_ITEM_INDEX)
             {
                 ip->SpecialValue[ip->SpecialNum] = Option3 * 5;
                 ip->Special[ip->SpecialNum] = AT_IMPROVE_BLOCKING; ip->SpecialNum++;
-                ip->RequireStrength += Option3 * 5;
             }
             if (ip->Type >= ITEM_HELM && ip->Type < ITEM_BOOTS + MAX_ITEM_INDEX)
             {
                 ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
                 ip->Special[ip->SpecialNum] = AT_IMPROVE_DEFENSE; ip->SpecialNum++;
-                ip->RequireStrength += Option3 * 5;
             }
             if (ip->Type >= ITEM_RING_OF_ICE && ip->Type < ITEM_HELPER + MAX_ITEM_INDEX && ip->Type != ITEM_CAPE_OF_LORD)
             {
@@ -2249,63 +1747,9 @@ WORD ItemWalkSpeed(ITEM* Item)
     return WalkSpeed;
 }
 
-int EditMonsterNumber = 0;
-int MonsterKey = 0;
-
-void OpenMonsterScript(wchar_t* FileName)
-{
-    if ((SMDFile = _wfopen(FileName, L"rb")) == nullptr)
-    {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        return;
-    }
-
-    while (true)
-    {
-        SMDToken token = GetToken();
-        if (token == END) break;
-        if (token == NAME && strcmp("end", TokenString) == 0) break;
-        MONSTER_SCRIPT* m = &MonsterScript[EditMonsterNumber++];
-        m->Type = static_cast<int>(TokenNumber);
-        token = GetToken();
-        token = GetToken();
-
-        CMultiLanguage::ConvertFromUtf8(m->Name, TokenString);
-        m->Name[MAX_MONSTER_NAME] = L'\0';
-        
-        //Token = (*GetToken)();m->Level = (int)TokenNumber;
-        //for(int i=0;i<23;i++) Token = (*GetToken)();
-    }
-    fclose(SMDFile);
-}
-
 const wchar_t* getMonsterName(int type)
 {
-    for (int i = 0; i < MAX_MONSTER; ++i)
-    {
-        if (MonsterScript[i].Type == type)
-        {
-            return MonsterScript[i].Name;
-        }
-    }
-
-    return L"()";
-}
-
-void MonsterConvert(MONSTER* m, int Level)
-{
-    MONSTER_SCRIPT* p = &MonsterScript[m->Type];
-    MONSTER_ATTRIBUTE* c = &p->Attribute;
-    m->Level = Level;
-    m->Attribute.AttackSpeed = c->AttackSpeed;
-    m->Attribute.AttackDamageMin = c->AttackDamageMin / 2 + c->AttackDamageMin / 2 * (m->Level) / 9;
-    m->Attribute.AttackDamageMax = c->AttackDamageMax / 2 + c->AttackDamageMax / 2 * (m->Level) / 9;
-    m->Attribute.Defense = c->Defense / 2 + c->Defense / 2 * (m->Level) / 9;
-    m->Attribute.AttackRating = c->AttackRating / 2 + c->AttackRating / 2 * (m->Level) / 9;
-    m->Attribute.SuccessfulBlocking = c->SuccessfulBlocking / 2 + c->SuccessfulBlocking / 2 * (m->Level) / 9;
+    return Data::Monsters::GetMonsterName(type);
 }
 
 void CreateClassAttribute(int Class, int Strength, int Dexterity, int Vitality, int Energy, int Life, int Mana, int LevelLife, int LevelMana, int VitalityToLife, int EnergyToMana)

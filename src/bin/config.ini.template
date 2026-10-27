@@ -13,9 +13,10 @@ SoundVolume=5
 MusicVolume=5
 [CONNECTION SETTINGS]
 ServerIP=localhost
-ServerPort=44405
+ServerPort=44406
 [UI]
 Locale=en
+TranslateItemNames=1
 Font=
 RmlTheme=legacy
 UIScalePercent=100

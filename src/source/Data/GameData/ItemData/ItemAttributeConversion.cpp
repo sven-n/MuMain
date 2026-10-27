@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "ItemAttributeConversion.h"
+#include "ItemStatProfiles.h"
 #include "ItemType.h"
 #include "Core/Text/Utf8.h"
 
@@ -108,8 +109,15 @@ void CopyItemAttributeStats(const ITEM_ATTRIBUTE& attribute, ItemDefinition& def
 void CopyFieldsNotInItemAttribute(const ItemDefinition& source, ItemDefinition& target)
 {
     target.tags = source.tags;
+    target.description = source.description;
+    target.nameLines = source.nameLines;
+    target.levelValues = source.levelValues;
     target.wingTier = source.wingTier;
     target.weaponKind = source.weaponKind;
+    target.statProfile = source.statProfile;
+    target.excellentBonus = source.excellentBonus;
+    target.excellentRaisesLevel = source.excellentRaisesLevel;
+    target.requirementsByLevel = source.requirementsByLevel;
     target.potionPriority = source.potionPriority;
     target.tradable = source.tradable;
     target.droppable = source.droppable;
@@ -195,6 +203,22 @@ WeaponKind GetGroupWeaponKind(const ItemDefinition& definition)
     default:
         return WeaponKind::None;
     }
+}
+
+std::string DeriveStatProfile(const ItemStatProfiles& profiles, const ItemDefinition& definition)
+{
+    return profiles.GetRuleProfile(profiles.FindRule(definition));
+}
+
+std::string FollowStatProfile(const ItemStatProfiles& profiles, const ItemDefinition* previous,
+                              const ItemDefinition& updated)
+{
+    if (previous != nullptr && !previous->statProfile.empty() &&
+        previous->statProfile != DeriveStatProfile(profiles, *previous))
+    {
+        return previous->statProfile;
+    }
+    return DeriveStatProfile(profiles, updated);
 }
 
 WeaponKind FollowGroupWeaponKind(const ItemDefinition* previous, const ItemDefinition& updated)

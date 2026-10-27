@@ -1,7 +1,16 @@
 #include "stdafx.h"
 #include "PlatformInfo.h"
 
+#include <cstring>
 #include <string>
+
+#include <SDL3/SDL_cpuinfo.h>
+
+#if defined(_MSC_VER) && (defined(_M_X64) || defined(_M_IX86))
+#include <intrin.h>
+#elif defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
+#include <cpuid.h>
+#endif
 
 #ifdef _WIN32
 #include <cwchar>       // swprintf
@@ -180,7 +189,48 @@ const std::wstring& GetOSVersionString()
     }();
     return osVersion;
 }
-
 #endif // _WIN32
+
+const std::string& GetProcessorName()
+{
+    static const std::string name = []() -> std::string
+    {
+        std::string result;
+#if defined(__APPLE__)
+        char brand[128] = {};
+        size_t len = sizeof(brand);
+        if (sysctlbyname("machdep.cpu.brand_string", brand, &len, nullptr, 0) == 0)
+            result = brand;
+#elif (defined(_MSC_VER) && (defined(_M_X64) || defined(_M_IX86))) ||     (defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__)))
+        // CPUID leaves 0x80000002..0x80000004 hold the brand string on x86.
+        int registers[4] = {};
+        char brand[49] = {};
+        for (int leaf = 0; leaf < 3; leaf++)
+        {
+#if defined(_MSC_VER)
+            __cpuid(registers, static_cast<int>(0x80000002u + leaf));
+#else
+            __get_cpuid(0x80000002u + leaf, reinterpret_cast<unsigned*>(&registers[0]),
+                        reinterpret_cast<unsigned*>(&registers[1]), reinterpret_cast<unsigned*>(&registers[2]),
+                        reinterpret_cast<unsigned*>(&registers[3]));
+#endif
+            std::memcpy(brand + leaf * sizeof(registers), registers, sizeof(registers));
+        }
+        result = brand;
+#endif
+        // Many parts pad the brand string with spaces.
+        while (!result.empty() && result.back() == ' ')
+            result.pop_back();
+        while (!result.empty() && result.front() == ' ')
+            result.erase(result.begin());
+        return result;
+    }();
+    return name;
+}
+
+int GetSystemMemoryMB()
+{
+    return SDL_GetSystemRAM();
+}
 
 }

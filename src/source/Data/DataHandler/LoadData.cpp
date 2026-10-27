@@ -15,7 +15,9 @@
 #endif
 #include "Data/GameData/ItemData/ItemTextureFiles.h"
 
+#include <algorithm>
 #include <string>
+#include <utility>
 
 CLoadData gLoadData;
 
@@ -88,6 +90,32 @@ void CLoadData::ShareModel(int Type, int OwnerType)
     Models[Type].m_iBMDSeqID = Type;
     Models[Type].ShareFrom(Models[OwnerType]);
     RememberModelFile(Type, GetModelFile(OwnerType));
+}
+
+void CLoadData::SwapModels(int First, int Second)
+{
+    if (First == Second)
+    {
+        return;
+    }
+
+    Models[First].SwapData(Models[Second]);
+    Models[First].m_iBMDSeqID = First;
+    Models[Second].m_iBMDSeqID = Second;
+
+    const size_t slotCount = static_cast<size_t>(std::max(First, Second)) + 1;
+    if (m_modelFiles.size() < slotCount)
+    {
+        m_modelFiles.resize(slotCount);
+    }
+    std::swap(m_modelFiles[First], m_modelFiles[Second]);
+#ifdef _EDITOR
+    if (m_modelLoadWorlds.size() < slotCount)
+    {
+        m_modelLoadWorlds.resize(slotCount);
+    }
+    std::swap(m_modelLoadWorlds[First], m_modelLoadWorlds[Second]);
+#endif
 }
 
 void CLoadData::RememberModelFile(int Model, const std::wstring& path)

@@ -3275,9 +3275,9 @@ void RenderObjectVisual(OBJECT* o)
 
             if (iTimeCheck >= 7950)
             {
-                Vector(o->Position[0] + (rand() % 2048 - 1024) * FPS_ANIMATION_FACTOR,
-                    o->Position[1] + (rand() % 2048 - 1024) * FPS_ANIMATION_FACTOR,
-                    o->Position[2] + (3000 + rand() % 600) * FPS_ANIMATION_FACTOR,
+                Vector(o->Position[0] + (rand() % 2048 - 1024),
+                    o->Position[1] + (rand() % 2048 - 1024),
+                    o->Position[2] + (3000 + rand() % 600),
                     Position);
                 CreateEffectFpsChecked(MODEL_FIRE, Position, o->Angle, o->Light, 9);
             }
@@ -3802,7 +3802,7 @@ void MoveObject(OBJECT* o)
         switch (o->Type)
         {
         case 8:
-            fSpeed *= pow(4.0f, FPS_ANIMATION_FACTOR);
+            fSpeed *= 4.0f;
             break;
         }
     }
@@ -5449,6 +5449,16 @@ void ItemAngle(OBJECT* o)
     }
 }
 
+namespace
+{
+// The level a ground item's model is drawn at: a Weapon of Archangel's level picks its model (CreateItemDrop), not an
+// upgrade, so the model is drawn at +0.
+int DrawnItemLevel(const ITEM& item)
+{
+    return item.Type == ITEM_WEAPON_OF_ARCHANGEL ? 0 : item.Level;
+}
+} // namespace
+
 void CreateItemDrop(ITEM_t* ip, ItemCreationParams params, vec3_t position, bool isFreshDrop)
 {
     int Type = params.Group * MAX_ITEM_INDEX + params.Number;
@@ -5538,19 +5548,18 @@ void CreateItemDrop(ITEM_t* ip, ItemCreationParams params, vec3_t position, bool
     }
     else if (Type == (int)(ITEM_WEAPON_OF_ARCHANGEL))
     {
+        // The level tells the three weapons apart: the item keeps it (its name), the model is drawn at +0
+        // (DrawnItemLevel).
         switch (n->Level)
         {
         case 0:
             o->Type = MODEL_DIVINE_STAFF_OF_ARCHANGEL;
-            n->Level = 0;
             break;
         case 1:
             o->Type = MODEL_DIVINE_SWORD_OF_ARCHANGEL;
-            n->Level = 0;
             break;
         case 2:
             o->Type = MODEL_DIVINE_CB_OF_ARCHANGEL;
-            n->Level = 0;
             break;
         }
     }
@@ -5723,9 +5732,9 @@ static void HandleItemFalling(OBJECT* o)
 // Helper: Handle item on ground (set angle and camera rotation)
 static void HandleItemOnGround(OBJECT* o)
 {
-    o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
-    if (o->Type >= MODEL_SWORD && o->Type < MODEL_STAFF + MAX_ITEM_INDEX)
-        o->Position[2] += 40.f;
+    o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + Render::Items::Display::DroppedItemHeight;
+    if (Render::Items::Display::IsLiftedOnGround(o->Type))
+        o->Position[2] += Render::Items::Display::DroppedWeaponLift;
 
     // Set default item angle
     ItemAngle(o);
@@ -5754,9 +5763,10 @@ void MoveItems()
             o->Gravity -= 6.f * FPS_ANIMATION_FACTOR;
 
             // Calculate ground height
-            float groundHeight = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
-            if (o->Type >= MODEL_SWORD && o->Type < MODEL_STAFF + MAX_ITEM_INDEX)
-                groundHeight += 40.f;
+            float groundHeight =
+                RequestTerrainHeight(o->Position[0], o->Position[1]) + Render::Items::Display::DroppedItemHeight;
+            if (Render::Items::Display::IsLiftedOnGround(o->Type))
+                groundHeight += Render::Items::Display::DroppedWeaponLift;
 
             // Check if item is on ground or still falling
             if (o->Position[2] <= groundHeight)
@@ -5862,7 +5872,7 @@ void RenderItems()
 
             if (o->Visible)
             {
-                const int drawnModel = Render::Items::Display::GetDrawnModel(o->Type, Items[i].Item.Level);
+                const int drawnModel = Render::Items::Display::GetDrawnModel(o->Type, DrawnItemLevel(Items[i].Item));
                 // Armor is animated on the character skeleton.
                 BMD* b =
                     &Models[Render::Items::Display::IsDrawnOnCharacterSkeleton(drawnModel) ? MODEL_PLAYER : drawnModel];
@@ -5900,7 +5910,8 @@ void RenderItems()
                     o->Position[2] = GetWaterTerrain(o->Position[0], o->Position[1]) + 180;
                 }
 
-                RenderPartObject(o, o->Type, NULL, Light, o->Alpha, Items[i].Item.Level, Items[i].Item.ExcellentFlags, Items[i].Item.AncientDiscriminator, true, true, true);
+                RenderPartObject(o, o->Type, NULL, Light, o->Alpha, DrawnItemLevel(Items[i].Item),
+                                 Items[i].Item.ExcellentFlags, Items[i].Item.AncientDiscriminator, true, true, true);
                 VectorCopy(vBackup, o->Position);
 
 #ifdef _EDITOR
@@ -5947,7 +5958,7 @@ void PartObjectColor(int Type, float Alpha, float Bright, vec3_t Light, bool Ext
         color = Render::Items::Glow::GetColors(Type).color;
     }
 
-    Bright *= pow(Alpha, FPS_ANIMATION_FACTOR);
+    Bright *= Alpha;
     Vector(Bright * color[0], Bright * color[1], Bright * color[2], Light);
 }
 
@@ -5961,7 +5972,7 @@ void PartObjectColor2(int Type, float Alpha, float Bright, vec3_t Light, bool Ex
     }
 
     const Render::Items::Glow::Color& color = colors.shineColor;
-    Bright *= pow(Alpha, FPS_ANIMATION_FACTOR);
+    Bright *= Alpha;
     Vector(Bright * color[0] * Light[0], Bright * color[1] * Light[1], Bright * color[2] * Light[2], Light);
 }
 

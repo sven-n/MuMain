@@ -30,8 +30,10 @@ effect code knows 464 effect types, 98 particle types, 31 lightning types
 (joints) and about 50 sprite textures; `Render/Effects/EffectRegistry` has
 started to describe them as a table instead of three large switches. Skills are
 still read from `Skill.bmd` (with a table editor, as items had before
-their phase 2), and monsters and NPCs are set up in a switch of 403 cases
-in `ZzzCharacter.cpp`.
+their phase 2), and monsters and NPCs are set up in `CreateMonster` (a
+switch of 269 cases in `ZzzCharacter.cpp`), 15 creators and 9 map processes
+outside it (see the
+[monsters design](2026-10-23-data-driven-monsters-design.md)).
 
 ## Shared decisions
 
@@ -83,34 +85,37 @@ get more:
 - **Bone labels**: readable names for the bones that looks use (see
   Bones), which belong to the model file, not to an item.
 
-**Open, to decide when the design of monsters and NPCs (MN) is written:**
-monsters, NPCs, skills and map objects also load `.bmd` files with texture
-folders and values per model (the animation speeds of monsters are set in
-code, each model has its own sounds). Either one list of models for all
-areas (a folder of its own, e.g. `Data/Models/`), or shared models per
-area (items, monsters, skills; map objects per map, as each map loads its
-own object files). Models are already used across areas: player-shaped
-NPCs wear item models and some monsters hold item weapons, so per area
-lists need references into the lists of other areas. Until then the item
-models stay in `Data/Items/Models`.
+**Decided with the [monsters design](2026-10-23-data-driven-monsters-design.md)
+(its D47, agreed 2026-10-23):** monsters, NPCs, skills and map objects also
+load `.bmd` files with texture folders and values per model (the animation
+speeds of monsters are set in code, each model has its own sounds). Models
+get a list per area instead of one list for all areas: monster and NPC models
+in `Data/Monsters/Models.json`, item models in `Data/Items/Models`; skills
+and map objects decide in their own designs. Models are used across areas
+(player-shaped NPCs wear item models, some monsters hold item weapons, the
+part models monsters drop are effect types), so the lists reference entries
+of other areas.
 
 ## Areas and order
 
 | Area | Name | Design document | Depends on | What moves into data | Editor |
 |---|---|---|---|---|---|
-| Items | Items | [items design](2026-09-25-data-driven-items-design.md), phases 0–14 | – | Item data, rules and categories, models, glow, render styles and effects (as names). | The item tools of section 9 there. |
+| Items | Items | [items design](2026-09-25-data-driven-items-design.md), phases 0–16 | – | Item data, rules and categories, models, glow, render styles and effects (as names). | The item tools of section 9 there. |
 | FX1 | Effect catalogue | [effect catalogue design](2026-10-02-effect-catalogue-design.md) (draft) | items 4c | Every effect, particle, lightning and sprite type gets a name and its creation values (the `CreateParams` of the registry) in `Data/Effects/`: the effect types (`effectTypes` in the data). Behavior stays code. Items, skills and monsters then name effect types instead of using type numbers; an item effect (`itemEffect`, what an item does every frame before it is drawn) creates instances of effect types. | Effect browser: each effect with a preview, its values, and where it is used. |
 | Items 13 | Looks in data (items) | items design, phase 13 | FX1, items 6 | What the item looks are made of (D25). | Look editor. |
-| SK1 | Skills as data | not yet | items 2 (the same format rules) | `Skill.bmd` into JSON, like the items in their phase 2: names, requirements, rules; later synced with OpenMU like the items. | Focused skill editors, like the item tools; "used by" (classes, items that give a skill, monsters). |
+| SK1 | Skills as data | not yet | items 2 (the same format rules) | `Skill.bmd` into JSON, like the items in their phase 2: names, requirements, rules; later synced with OpenMU like the items. | Focused skill editors, like the item tools; "used by" (classes, items that give a skill, monsters). A read-only view of what a skill uses: the effect types, models and sounds its code creates and the code places that handle it (from the effect browser's call sites); SK2 turns these into looks. |
 | SK2 | Skill looks | not yet | SK1, FX1, items 13 | How a skill looks when cast, flying and hitting (effects, particles, sounds, character animations), as looks (D25), mostly on the caster's bones. | Look editor, with a preview of the skill cast by a test character. |
-| MN | Monsters and NPCs | not yet | FX1, items 13, SK1 | The monster and NPC setup (model, size, the equipment of player-shaped NPCs), their looks (glow, render styles and effects as in D25; the plate of the helper NPCs, `helperNpcPlate`, moves from the items to them; the player transformations) and their skills. | Monster and NPC editors with preview; the look editor. |
+| MN | Monsters and NPCs | [monsters design](2026-10-23-data-driven-monsters-design.md) (draft), phases MN0–MN9 and MN-B in three PRs now (list and names; models and attacks; setup and NPC rules) and three later ones (sync, looks, cleanup) | items 2 (the same format rules); the OpenMU sync (MN6) needs items 7; the looks (MN8) need FX1 and items 13; skill names in the editor need SK1 | The monster list with translatable names and kind; model entries (files, textures, animation speeds, sounds, bounding boxes, weapon bones); the setup at spawn (model, size, the equipment of player-shaped NPCs, the player transformations); which animation each skill plays (the skills themselves are SK1 and SK2); NPC talk rules; their looks (glow, render styles and effects as in D25; the plate of the helper NPCs, `helperNpcPlate`, moves from the items to them). | Monster tools sharing one selection (browser, setup, attacks, model, preview, translations, checks); the look editor. |
 | FX2 | Effect behavior as data | not yet | FX1 | How effects and particles move, fade, spawn and draw, as building blocks, one effect family at a time (continuing the handlers of the registry). New effects without code. | Effect editor with a live preview. |
-| later | Map objects, buffs, pets, sounds | not yet | FX1 | To decide: the objects of the maps with their effects (most of `World/GameMaps`), buff visuals, pets and mounts (about 97 places choose animations, skills, ride height, camera and the spawned model by the mount; see "Item-specific code that is left" in the items design), sound names. | – |
+| later | Map objects, buffs, pets, sounds, NPC dialogues and quests | not yet | FX1 | To decide: the objects of the maps with their effects (most of `World/GameMaps`), buff visuals, pets and mounts (about 97 places choose animations, skills, ride height, camera and the spawned model by the mount; see "Item-specific code that is left" in the items design), sound names, NPC dialogues and quests (`NPCDialogue.bmd`, `Quest*.bmd`, `QuestWords_<lang>.bmd`), the minimap's NPC markers. | – |
 
 - **The effect catalogue comes first.** Its names are what the looks of
   items (items 13), skills (SK2) and monsters (MN) reference. It moves no
   behavior, so it is small and can be checked like the render styles.
-- **Skills before monsters,** because monsters use skills.
+- **Skills before monsters,** because monsters use skills. No monster phase
+  needs skill data, though: they keep skill numbers, and the monster tools
+  show skill names once SK1 exists, so the monster phases can start before
+  SK1.
 - **Effect behavior comes last.** Once everything references effects by
   name, their behavior can move into data without touching their users.
 - **Map objects later,** although the maps are the largest users of
@@ -134,6 +139,11 @@ and opened from the item, skill, monster and NPC editors:
 - **Effect browser** (FX1) and **effect editor** (FX2): an effect alone in a
   preview (shown on nothing, a plane, a cube or an item) and in the world in
   front of the hero, its values, and where it is used.
+- **Tool basics** (from MN1 on, monsters design D56): the editor bar's undo
+  for every area (`MuEditor::UndoTarget`, each area with a history of its
+  own), the names × languages grid, the tool window frame with its undo keys,
+  and a docking group and Windows sub-menu per area, made generic from the
+  item tools.
 
 ## When an area starts
 

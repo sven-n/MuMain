@@ -88,7 +88,7 @@ Release or RelWithDebInfo; see [build options](docs/build/README.md#build-option
 ## Running the client
 
 Run `Main.exe` from its output directory. It connects to the server in `config.ini`
-(`[CONNECTION SETTINGS]`, localhost port `44405` by default); `Main.exe connect /u<IP> /p<PORT>`
+(`[CONNECTION SETTINGS]`, localhost port `44406` by default); `Main.exe connect /u<IP> /p<PORT>`
 overrides it for that run, for example `Main.exe connect /u192.168.0.20 /p55902`. The
 [OpenMU launcher](https://github.com/MUnique/OpenMU/releases) passes the same arguments.
 The client identifies itself with version `2.04d` and serial `k1Pk2jcET48mxL3b`.
@@ -104,9 +104,9 @@ Missing keys take the defaults below. The options window writes most of them; se
 | **`[Window]`**              | `Width`, `Height`                                                                                     | `1024`, `768`        | Window or fullscreen resolution.                                                                                                                                 |
 | **`[Window]`**              | `Windowed`                                                                                            | `1`                  | `0` runs fullscreen.                                                                                                                                             |
 | **`[Audio]`**               | `SoundVolume`, `MusicVolume`                                                                          | `5`                  | `0` mutes.                                                                                                                                                       |
-| **`[LOGIN]`**               | `Language`                                                                                            | `Eng`                | Game data language: the `Data/Local/<Language>/` folder (item names, map name art).                                                                              |
+| **`[LOGIN]`**               | `Language`                                                                                            | `Eng`                | Game data language: the `Data/Local/<Language>/` folder (quest, skill and minimap texts, map name art). Item, monster and NPC names follow `[UI] Locale`.        |
 | **`[LOGIN]`**               | `RememberMe`, `SavePassword`                                                                          | `0`                  | Remember the account name, and the password too. Both are stored encrypted for this machine and user (`EncryptedUsername`, `EncryptedPassword`).                 |
-| **`[CONNECTION SETTINGS]`** | `ServerIP`, `ServerPort`                                                                              | `localhost`, `44405` | Server to connect to when no `connect` argument is given.                                                                                                        |
+| **`[CONNECTION SETTINGS]`** | `ServerIP`, `ServerPort`                                                                              | `localhost`, `44406` | Server to connect to when no `connect` argument is given.                                                                                                        |
 | **`[UI]`**                  | `Locale`                                                                                              | `en`                 | UI language (`en`, `de`, `es`, `id`, `ja`, `pl`, `pt`, `ru`, `tl`, `uk`, `zh-TW`). Switchable at runtime in the options window.                                  |
 | **`[UI]`**                  | `Font`                                                                                                | empty                | UI font family; empty uses the platform's default.                                                                                                               |
 | **`[UI]`**                  | `RmlTheme`                                                                                            | `legacy`             | UI theme: `legacy` (the original look) or `modern`. `$theme <name>` switches it for the session.                                                                 |
@@ -122,6 +122,7 @@ Missing keys take the defaults below. The options window writes most of them; se
 | **`[Render]`**              | `Backend`                                                                                             | `default`            | SDL GPU driver: `default`, `vulkan`, `direct3d12` (or `d3d12`), `metal`. Falls back to SDL's choice with a logged warning when unavailable. Edited by hand only. |
 | **`[Render]`**              | `DisableEffects`, `DisableParticles`, `DisableSkillEffectModels`, `DisableBoids`, `DisableWingShadow`, `DisableBodyShadows` | `0`                  | Rendering-cost reductions for low-end PCs, also in the options window and `$effects`.                                                                            |
 | **`[Render]`**              | `SortParticleDraws`                                                                                   | `0`                  | Opt-in depth sorting of particle draws.                                                                                                                          |
+| **`[Render]`**              | `TexturePack`                                                                                         | empty                | Active [texture pack](docs/texture-packs.md), a folder in `Data/TexturePacks/`; empty uses the original textures. Read at startup; set in the options window.    |
 | **`[ChatCommands]`**        | `Favourite<N>`, `Template<N>`                                                                         | none                 | Written by the [chat commands window](docs/chat-commands.md).                                                                                                    |
 
 A new install starts from `src/bin/config.ini.template`. Retired keys, such as
@@ -180,6 +181,9 @@ Developer diagnostics, read at startup:
 - [Options window and config](docs/options-window.md) - runtime
   resolution / windowed toggle, slider rounding, and what the options
   window stores in `config.ini`.
+- [Texture packs](docs/texture-packs.md) - installing, choosing and removing
+  packs of replacement or 2x/4x textures in `Data/TexturePacks/`, and how to
+  make one.
 - [Build guide](docs/build/README.md) - platform-specific build notes.
 - [In-game tests](docs/in-game-tests.md) - the tester next to developer
   builds that plays test scenarios with real clients against a fresh OpenMU

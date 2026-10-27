@@ -316,8 +316,9 @@ names stay English; items that teach a skill name it after a colon
    menu lists every locale from `GetAvailableLocales` by itself.
 4. Build. `ResxGen` picks up the new locale automatically from the filename;
    `GetAvailableLocales` will include it next run.
-5. To show item names in the new language, add them to the item data; see
-   [Item names](#item-names).
+5. To show item, monster and NPC names in the new language, add them to the
+   item data and the monster list; see [Item names](#item-names) and
+   [Monster and NPC names](#monster-and-npc-names).
 
 ## Item names
 
@@ -326,7 +327,10 @@ Item names are not in the `.resx` files. They are part of the item data
 `src/bin/Data/Items/*.json` holds the names by language code, using the same
 codes as the UI texts. The game shows the name for the active locale and
 falls back to English, like the UI texts; switching the locale at runtime
-updates item names too.
+updates item names too. Players who know the items by their English names can
+untick **Translate item names** under the language in the options window
+(Interface tab): item names then stay English, also in the item editor, while
+every other text follows the language.
 
 ### In the JSON files
 
@@ -345,8 +349,9 @@ Each item's `name` lists its names by language code:
 - **Add a translation:** add a line `"<code>": "<name>"`, e.g. `"pl": "Ostrze"`.
 - **Remove a translation:** delete its line; the game then shows the English
   name for that language.
-- `en` is required and must stay. A translation that is the same as the
-  English name is not needed.
+- `en` is required and must stay. A name that is the same in a language
+  (*Kris*, *Zen*) is written like the English one (`"de": "Kris"`), so it
+  is not counted as missing.
 - The order of the lines does not matter when editing by hand; the item
   editor's **Save Items** writes English first and the rest sorted by code.
 - Write the files as UTF-8. Accented and non-Latin letters can be typed as
@@ -361,23 +366,39 @@ committing).
 
 ### In the item editor
 
-Item names in the item editor are shown and edited in the current UI
-language:
+The **Item Translations** window (editor builds, **Windows → Items → Item
+Translations**) shows the item names as a grid: one row per item, one column per UI
+language, English first.
 
-1. Switch the language: in the game's options window, or in the editor's
-   language menu.
-2. Edit the name in the item table. The change is stored for that language
-   only; to change the English name, switch to English first.
-3. Clearing a translated name removes the translation; the English name is
-   shown again.
-4. **Save Items** writes the files.
+- Each language's column header says how many items have no name of their
+  own in it; **Missing in** lists only those items. A filled name keeps its
+  row until **Refresh** or another filter, so the list can be worked
+  through.
+- Edit a cell and leave it (click elsewhere, Tab or Enter) to store the
+  name. An empty cell shows the English name it falls back to, greyed.
+- Right-click a cell: **Same as English** writes the English name for a name
+  that is the same in that language; **Remove translation** removes it.
+- The search finds an item by any of its names (A to Z in either case), by
+  `group,number` or by its item type. Clicking the number selects the item
+  in the other item tools and shows the **Item Browser**. The item the
+  tools show is marked, and an item selected in another tool is scrolled
+  to (the search and filter are cleared when they hide it).
+- Columns can be hidden from the header's right-click menu. A name cannot
+  contain `||` (the item checks refuse it). The English name
+  cannot be emptied, and the names are stored whole, also when they are
+  longer than the 49 characters the game shows.
+- **Save Items** writes the files and lists each language that misses item
+  names, with how many.
+
+**Item Basics** edits the English name. Each name change is one step of
+the item tools' Undo and Redo.
 
 ### Translating items into a language the game already has
 
 The game's UI languages are `en`, `de`, `es`, `id`, `ja`, `pl`, `pt`, `ru`,
 `tl`, `uk`, `zh-CN` and `zh-TW`. Items currently have German (`de`), Portuguese (`pt`)
 and Spanish (`es`) names. To translate items into another of these languages,
-add names with that code (by hand or in the item editor); nothing else is
+add names with that code (by hand or in the Item Translations window); nothing else is
 needed. The names show as soon as a player picks that language.
 
 ### Adding a new language
@@ -388,8 +409,8 @@ language first:
 1. Add the UI language as described in [Adding a new locale](#adding-a-new-locale).
 2. Add item names with the same code.
 
-Item names for a code that is not a UI language load without errors, but
-are never shown. Import from bmd and Export as bmd only cover English,
+Item names for a code that is not a UI language are never shown; loading
+warns about them. Import from bmd and Export as bmd only cover English,
 Portuguese and Spanish (`Data/Local/Eng`, `Por`, `Spn`); names in other
 languages exist only in the JSON files.
 
@@ -434,6 +455,88 @@ language choice is retained.
 Add future translations to `Game.zh-CN.resx` by screen or feature. Keep English
 resource keys, legacy IDs, formatting arguments and command tokens unchanged.
 Missing translations intentionally use the existing English fallback.
+
+## Monster and NPC names
+
+Monster and NPC names are not in the `.resx` files either. They are in the
+monster list, `src/bin/Data/Monsters/Monsters.json`
+([monster-data.md](monster-data.md)): each monster's `name` holds the names by
+language code, like an item's. English (`en`) is the name
+every monster has; Portuguese (`pt`) and Spanish (`es`) come from the original
+client's name files.
+
+The game shows the name in the UI language and falls back to English. When
+the language changes, the monsters and NPCs on screen are renamed at once.
+Summons ("Budge Dragon of <owner>") and the Kalima gates keep the name they
+appeared with until they appear again; transformed players show the player's
+name. **Translate item names** does not change monster names; it only changes
+the monster's name inside a transformation ring's item name.
+
+The original client read the names from `Data/Local/<Language>/NpcName_<Language>.txt`
+in the `[LOGIN] Language`, apart from the UI language.
+
+The game holds up to 64 characters of a name (UTF-16 units); a longer name is
+cut, and loading warns about it. A Kalima gate shows "Magic stone of <owner>",
+which is the UI text `MagicStoneOfOwner` of the `Game` group, not a monster
+name.
+
+### In the JSON file
+
+Each monster's `name` lists its names by language code, as an item's does
+(see [In the JSON files](#in-the-json-files)):
+
+```json
+"name": {"en": "Budge Dragon", "es": "Dragón Escurridizo", "pt": "Dragão Lento"},
+```
+
+- Change, add and remove names as for items. Without an English name the
+  game shows no name for the monster in a language without a translation (a
+  warning at startup).
+- Names must not contain `||`, and names longer than 64 characters are cut
+  in the game (a warning at startup). Names for a code that is not a UI
+  language are never shown; loading warns about them.
+- The game reads `Data/Monsters` next to `Main`. The build copies
+  `src/bin/Data/Monsters` there, so after editing the file in `src/bin`,
+  build again (or edit the copy in the build folder and copy it back before
+  committing).
+
+### In the monster editor
+
+The **Monster Translations** window (editor builds, **Windows → Monsters →
+Monster Translations**) shows the monster names as a grid: one row per
+monster number, one column per UI language, English first. It works like
+[Item Translations](#in-the-item-editor):
+
+- Each language's column header says how many monsters have no name of
+  their own in it; **Missing in** lists only those monsters. A filled name
+  keeps its row until **Refresh** or another filter.
+- Edit a cell and leave it (click elsewhere, Tab or Enter) to store the
+  name. An empty cell shows the English name it falls back to, greyed.
+- Right-click a cell: **Same as English** writes the English name for a name
+  that is the same in that language; **Remove translation** removes it.
+- The search finds a monster by its number or by any of its names (A to Z in
+  either case). Clicking the number selects the monster in the other monster
+  tools and shows the **Monster Browser**. The monster the tools show is
+  marked, and a monster selected in another tool is scrolled to (the search
+  and filter are cleared when they hide it).
+- A name cannot contain `||`, and the English name cannot be emptied (252,
+  whose English name is empty, stays so). Names are stored whole, also when
+  they are longer than the 64 characters the game shows.
+- Each name change is one step of the monster tools' Undo and Redo, and it
+  reaches the monsters and NPCs of that number on screen at once.
+- **Save Monsters** writes the monster list file.
+
+### Old name files (NpcName txt)
+
+**Import names from NpcName txt** and **Export as NpcName txt** in Monster
+Translations read and write the original client's name files,
+`Data/Local/<Eng|Por|Spn>/NpcName_<Eng|Por|Spn>.txt` next to the game:
+English, Portuguese and Spanish only. The import sets the names by number
+and language on the monsters that have an entry, as one undo step; the
+export writes the names of every monster, in English where a language has
+none. Names in other languages exist only in the monster list. The rules
+are in
+[monster-data.md → Import and export of NpcName txt](monster-data.md#import-and-export-of-npcname-txt).
 
 ## Migration history
 

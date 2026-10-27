@@ -2,7 +2,11 @@
 
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemFileFit.h"
+#include "Data/GameData/ItemData/ItemStatFile.h"
+#include "Data/GameData/ItemData/ItemTooltipConditions.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Data/GameData/ItemData/StatProfileRule.h"
 
 #include "Core/Globals/_enum.h"
 
@@ -24,6 +28,20 @@ ItemDefinition MakeItem(int group, int number, const std::string& names)
     definition.number = number;
     definition.names = Data::LocalizedString::Parse(names);
     return definition;
+}
+
+// The profiles `names` (without terms of their own) and the profile rules `rules`.
+ItemStatProfiles MakeStatProfiles(const std::vector<std::string>& names, std::vector<StatProfileRule> rules)
+{
+    ItemStatFile file;
+    for (const std::string& name : names)
+    {
+        WrittenStatProfile profile;
+        profile.name = name;
+        file.profiles.push_back(profile);
+    }
+    file.profileRules = std::move(rules);
+    return ItemStatProfiles(file);
 }
 
 void SetName(ITEM_ATTRIBUTE& attribute, const std::wstring& name)
@@ -98,6 +116,105 @@ TEST_CASE("Item attribute conversion keeps every field [data][items]")
     {
         CHECK(converted.Resistance[i] == original.Resistance[i]);
     }
+}
+
+// The editor rebuilds an item from its bmd attribute, which has no tooltip data: the fields the attribute lacks come
+// from the item as it was, its description lines, level values and name lines whole.
+TEST_CASE("Converting from the item attribute keeps the client-only fields [data][items]")
+{
+    ItemDefinition source = MakeItem(SwordGroup, 0, "Kris");
+    ItemDescriptionLine written;
+    written.text.Set("en", "Increase {percent}% of Damage");
+    written.text.Set("de", "Erhöht den Schaden um {percent}%");
+    written.values = {{"percent", "wingDamageIncrease1st"}};
+    TooltipCondition condition;
+    std::string error;
+    REQUIRE(ReadTooltipCondition("level>=3", condition, error));
+    written.when = {condition};
+    written.color = ItemTextColor::Blue;
+    written.minLevel = 3;
+    written.maxLevel = 9;
+    ItemDescriptionLine shared;
+    shared.textName = "cannotRepair";
+    shared.color = ItemTextColor::Red;
+    source.description = {written, ItemDescriptionLine{}, shared};
+    ItemLevelValue stat;
+    stat.text.Set("en", "ENG");
+    ItemLevelValue sharedStat;
+    sharedStat.textName = "stamina";
+    source.levelValues = {{"stat", {stat, sharedStat}}};
+    ItemNameLine olive;
+    olive.text.Set("en", "Olive of love");
+    olive.hasText = true;
+    olive.color = ItemTextColor::Yellow;
+    olive.hasColor = true;
+    olive.minLevel = 4;
+    olive.maxLevel = 4;
+    source.nameLines = {olive};
+    source.statProfile = "weapon";
+
+    // As the bmd import makes it: the attribute's fields, nothing of the tooltip.
+    ItemDefinition target = MakeItem(SwordGroup, 0, "Kris of the bmd");
+    target.damageMin = 99;
+    CopyFieldsNotInItemAttribute(source, target);
+
+    CHECK(target.description == source.description);
+    CHECK(target.levelValues == source.levelValues);
+    CHECK(target.nameLines == source.nameLines);
+    CHECK(target.statProfile == "weapon");
+    // The attribute's own fields stay the imported ones.
+    CHECK(target.names.GetNeutral() == "Kris of the bmd");
+    CHECK(target.damageMin == 99);
+}
+
+TEST_CASE("Damage and magic power past 255 are kept, but do not fit the bmd item file [data][items]")
+{
+    ItemDefinition definition = MakeItem(SwordGroup, 51, "Later Sword");
+    definition.damageMin = 345;
+    definition.damageMax = 380;
+    definition.magicPower = 276;
+
+    ITEM_ATTRIBUTE attribute{};
+    ToItemAttribute(definition, attribute);
+    CHECK(attribute.DamageMin == 345);
+    CHECK(attribute.DamageMax == 380);
+    CHECK(attribute.MagicPower == 276);
+    CHECK(ToItemDefinition(attribute, MakeItemType(SwordGroup, 51)).damageMax == 380);
+
+    // Each value past 255 is named, with its item and the file's limit.
+    std::vector<ITEM_ATTRIBUTE> items(3);
+    items[1] = attribute;
+    const std::vector<ItemFileMisfit> misfits = FindItemFileMisfits(items.data(), static_cast<int>(items.size()));
+    REQUIRE(misfits.size() == 3);
+    CHECK(misfits[0].itemType == 1);
+    CHECK(std::string(misfits[0].field) == "DamageMin");
+    CHECK(misfits[0].value == 345);
+    CHECK(misfits[0].limit == 255);
+    CHECK(std::string(misfits[1].field) == "DamageMax");
+    CHECK(std::string(misfits[2].field) == "MagicPower");
+    CHECK(DescribeItemFileMisfits({misfits[0]}) == "Item (0,1) DamageMin is 345; a .bmd item file holds up to 255\n");
+
+    // Each field on its own.
+    for (WORD ITEM_ATTRIBUTE::* field :
+         {&ITEM_ATTRIBUTE::DamageMin, &ITEM_ATTRIBUTE::DamageMax, &ITEM_ATTRIBUTE::MagicPower})
+    {
+        ITEM_ATTRIBUTE one{};
+        one.*field = 256;
+        const std::vector<ItemFileMisfit> alone = FindItemFileMisfits(&one, 1);
+        REQUIRE(alone.size() == 1);
+        CHECK(alone[0].value == 256);
+        one.*field = 255;
+        CHECK(FindItemFileMisfits(&one, 1).empty());
+    }
+
+    attribute.DamageMin = 255;
+    attribute.DamageMax = 255;
+    attribute.MagicPower = 255;
+    CHECK(FindItemFileMisfits(&attribute, 1).empty());
+    ITEM_ATTRIBUTE_FILE file{};
+    CopyItemAttributeToDestination(file, attribute);
+    CHECK(file.DamageMax == 255);
+    CHECK(sizeof(file.DamageMax) == 1);
 }
 
 TEST_CASE("A weapon's group gives its weapon kind [data][items]")
@@ -220,6 +337,25 @@ TEST_CASE("Item names follow the display locale with English fallback [data][ite
     CHECK(potion->name == L"Large Healing Potion");
 }
 
+TEST_CASE("Another language of the item names raises the name version but not the item version [data][items]")
+{
+    ItemDatabase database;
+    database.Build(std::vector<ItemDefinition>{MakeItem(SwordGroup, 0, "Kris||pt=Cris")});
+    const int version = database.GetVersion();
+    const int nameVersion = database.GetNameVersion();
+
+    database.SetDisplayLocale("en");
+    CHECK(database.GetNameVersion() == nameVersion);
+
+    database.SetDisplayLocale("pt");
+    CHECK(database.GetNameVersion() != nameVersion);
+    CHECK(database.GetVersion() == version);
+
+    const int ptNameVersion = database.GetNameVersion();
+    database.Set(*database.Find(SwordGroup, 0));
+    CHECK(database.GetNameVersion() != ptNameVersion);
+}
+
 TEST_CASE("Item log names use English names and the item id [data][items]")
 {
     const std::vector<ItemDefinition> items = {
@@ -263,6 +399,47 @@ TEST_CASE("Editor changes update single items [data][items]")
     CHECK(database.Find(SwordGroup, 0) == nullptr);
     CHECK(database.GetAllSlots()[MakeItemType(SwordGroup, 0)].width == 2);
     CHECK(database.GetExistingItemCount() == 0);
+}
+
+TEST_CASE("A requirement given by level can be taken back [data][items]")
+{
+    RequirementsByLevel byLevel;
+    RequirementByLevel energy{};
+    energy.fill(30);
+    byLevel.Set(ItemRequirement::Energy, energy);
+    byLevel.Set(ItemRequirement::Level, energy);
+    byLevel.Remove(ItemRequirement::Energy);
+    CHECK(byLevel.Find(ItemRequirement::Energy) == nullptr);
+    REQUIRE(byLevel.Find(ItemRequirement::Level) != nullptr);
+    byLevel.Remove(ItemRequirement::Energy);
+    byLevel.Remove(ItemRequirement::Level);
+    CHECK(byLevel == RequirementsByLevel{});
+}
+
+TEST_CASE("Editor changes to many items at once update them and the tag lists [data][items]")
+{
+    ItemDatabase database;
+    database.Build(
+        std::vector<ItemDefinition>{MakeItem(SwordGroup, 0, "Kris"), MakeItem(SwordGroup, 1, "Short Sword")});
+    const int version = database.GetVersion();
+
+    std::vector<ItemDefinition> changed = {*database.Find(SwordGroup, 0), *database.Find(SwordGroup, 1),
+                                           MakeItem(SwordGroup, 2, "Rapier")};
+    for (ItemDefinition& definition : changed)
+    {
+        definition.tags.Set(ItemTag::Valuable);
+    }
+    changed[1].names = {};
+    database.SetMany(changed);
+
+    CHECK(database.HasTag(MakeItemType(SwordGroup, 0), ItemTag::Valuable));
+    CHECK(database.Find(SwordGroup, 1) == nullptr);
+    CHECK(database.Find(SwordGroup, 2) != nullptr);
+    CHECK(database.GetExistingItemCount() == 2);
+    const auto valuable = database.GetItemTypesWithTag(ItemTag::Valuable);
+    CHECK(std::vector<int>(valuable.begin(), valuable.end()) ==
+          std::vector<int>{MakeItemType(SwordGroup, 0), MakeItemType(SwordGroup, 2)});
+    CHECK(database.GetVersion() != version);
 }
 
 TEST_CASE("Swapping items moves them with their ids [data][items]")
@@ -366,6 +543,187 @@ TEST_CASE("The item types with a tag come in use order: higher potion priority, 
     changed.potionPriority = 9;
     database.Set(changed);
     CHECK(inUseOrder().front() == MakeItemType(PotionGroup, 1));
+}
+
+TEST_CASE("Item database resolves the stat profile of every item [data][items]")
+{
+    ItemStatFile file;
+    file.tables.push_back(LevelBonusTable{"linear", {}, {}, 1});
+    WrittenStatProfile shield{"shield", {}};
+    shield.stats[static_cast<size_t>(ItemStat::Defense)].table = "linear";
+    file.profiles.push_back(shield);
+
+    ItemDefinition smallShield = MakeItem(6, 0, "Small Shield");
+    smallShield.statProfile = "shield";
+    ItemDefinition shortSword = MakeItem(0, 1, "Short Sword");
+    shortSword.statProfile = "missing";
+    const int smallShieldType = MakeItemType(6, 0);
+    const int krisType = MakeItemType(0, 0);
+    const int shortSwordType = MakeItemType(0, 1);
+
+    ItemDatabase database;
+    database.Build(std::vector<ItemDefinition>{smallShield, MakeItem(0, 0, "Kris"), shortSword});
+    const auto defenseBonus = [&database](int itemType, int level)
+    {
+        const ItemStatProfiles& profiles = database.GetStatProfiles();
+        return profiles.GetLevelBonus(database.GetStatProfile(itemType).Get(ItemStat::Defense), level);
+    };
+    // Without a stat file every item has the empty default.
+    CHECK(defenseBonus(smallShieldType, 7) == 0);
+
+    database.SetStatProfiles(ItemStatProfiles(file));
+    CHECK(defenseBonus(smallShieldType, 7) == 7);
+    CHECK(defenseBonus(krisType, 7) == 0);
+    // A profile the file does not have, an empty slot and an invalid id get the default.
+    CHECK(defenseBonus(shortSwordType, 7) == 0);
+    CHECK(defenseBonus(MakeItemType(6, 1), 7) == 0);
+    CHECK(defenseBonus(-1, 7) == 0);
+
+    // Moves and edits resolve the profile again.
+    database.Swap(smallShieldType, MakeItemType(6, 5));
+    CHECK(defenseBonus(MakeItemType(6, 5), 7) == 7);
+    CHECK(defenseBonus(smallShieldType, 7) == 0);
+    ItemDefinition kris = *database.Find(krisType);
+    kris.statProfile = "shield";
+    database.Set(kris);
+    CHECK(defenseBonus(krisType, 7) == 7);
+}
+
+TEST_CASE("The stat profile an item's data gives is the one of the first profile rule it matches [data][items]")
+{
+    StatProfileRule ammunition{.profile = "default"};
+    ammunition.tags.Set(ItemTag::Ammunition);
+    StatProfileRule bows{.profile = "bow"};
+    bows.groups.set(4);
+    StatProfileRule staffs{.profile = "missing"};
+    staffs.groups.set(5);
+    const ItemStatProfiles profiles = MakeStatProfiles({"bow"}, {ammunition, bows, staffs});
+
+    ItemDefinition bolt = MakeItem(4, 7, "Bolt");
+    bolt.tags.Set(ItemTag::Ammunition);
+    // A rule for the default gives no profile, as an item that has the default names none.
+    CHECK(DeriveStatProfile(profiles, bolt).empty());
+    const ItemDefinition bow = MakeItem(4, 0, "Short Bow");
+    CHECK(DeriveStatProfile(profiles, bow) == "bow");
+    // A profile the file does not have gives the default.
+    CHECK(DeriveStatProfile(profiles, MakeItem(5, 0, "Skull Staff")).empty());
+    // No rule matches.
+    CHECK(DeriveStatProfile(profiles, MakeItem(14, 0, "Apple")).empty());
+    CHECK(DeriveStatProfile(ItemStatProfiles(), bow).empty());
+}
+
+TEST_CASE("An edited item's stat profile follows the profile rules while it is the one they give [data][items]")
+{
+    StatProfileRule shields{.profile = "shield"};
+    shields.weaponKinds.set(static_cast<size_t>(WeaponKind::Shield));
+    const ItemStatProfiles profiles = MakeStatProfiles({"custom", "shield"}, {shields});
+
+    ItemDefinition shield = MakeItem(6, 0, "Small Shield");
+    shield.slot = ItemSlot::OffHand;
+    shield.weaponKind = WeaponKind::Shield;
+    shield.statProfile = "shield";
+
+    ItemDefinition edited = shield;
+    edited.weaponKind = WeaponKind::None;
+    CHECK(FollowStatProfile(profiles, &shield, edited).empty());
+    CHECK(FollowStatProfile(profiles, nullptr, shield) == "shield");
+
+    // A profile the file sets that differs from the one the rules give stays, also "default".
+    shield.statProfile = "custom";
+    CHECK(FollowStatProfile(profiles, &shield, edited) == "custom");
+    shield.statProfile = "default";
+    CHECK(FollowStatProfile(profiles, &shield, edited) == "default");
+
+    // An item without a profile, as in item files saved before the field, takes the rules' one.
+    shield.statProfile = "";
+    CHECK(FollowStatProfile(profiles, &shield, shield) == "shield");
+}
+
+TEST_CASE("A stat profile rule matches an item that has one of the values of each condition it has [data][items]")
+{
+    ItemDefinition helm = MakeItem(7, 0, "Bronze Helm");
+    helm.slot = ItemSlot::Helm;
+
+    StatProfileRule rule{.profile = "armor"};
+    // Without conditions it matches every item.
+    CHECK(Matches(rule, helm));
+
+    rule.slots.set(static_cast<size_t>(ItemSlot::Helm));
+    rule.slots.set(static_cast<size_t>(ItemSlot::Boots));
+    CHECK(Matches(rule, helm));
+    helm.slot = ItemSlot::Pants;
+    CHECK_FALSE(Matches(rule, helm));
+    // An item without a slot meets no slot condition.
+    helm.slot = ItemSlot::None;
+    CHECK_FALSE(Matches(rule, helm));
+    helm.slot = ItemSlot::Boots;
+
+    // Every condition the rule has must hold.
+    rule.groups.set(7);
+    CHECK(Matches(rule, helm));
+    helm.group = 8;
+    CHECK_FALSE(Matches(rule, helm));
+    helm.group = 7;
+
+    rule.tags.Set(ItemTag::Cape);
+    rule.tags.Set(ItemTag::LuckyItem);
+    CHECK_FALSE(Matches(rule, helm));
+    helm.tags.Set(ItemTag::LuckyItem);
+    CHECK(Matches(rule, helm));
+
+    rule.wingTiers.set(static_cast<size_t>(WingTier::Second));
+    CHECK_FALSE(Matches(rule, helm));
+    helm.wingTier = WingTier::Second;
+    CHECK(Matches(rule, helm));
+
+    rule.weaponKinds.set(static_cast<size_t>(WeaponKind::Shield));
+    CHECK_FALSE(Matches(rule, helm));
+    helm.weaponKind = WeaponKind::Shield;
+    CHECK(Matches(rule, helm));
+}
+
+TEST_CASE("A stat profile rule's requirement condition counts base values above 0 only [data][items]")
+{
+    ItemDefinition orb = MakeItem(12, 11, "Orb of Summoning");
+    StatProfileRule rule{.profile = "scroll"};
+    rule.requirements.set(static_cast<size_t>(ItemRequirement::Energy));
+    rule.requirements.set(static_cast<size_t>(ItemRequirement::Leadership));
+    CHECK_FALSE(Matches(rule, orb));
+
+    // A requirement given by level is no base value.
+    RequirementByLevel energy{};
+    energy.fill(100);
+    orb.requirementsByLevel.Set(ItemRequirement::Energy, energy);
+    CHECK_FALSE(Matches(rule, orb));
+
+    orb.requirements.level = 10;
+    CHECK_FALSE(Matches(rule, orb));
+    orb.requirements.leadership = 1;
+    CHECK(Matches(rule, orb));
+}
+
+TEST_CASE("The first stat profile rule an item matches is the one it follows [data][items]")
+{
+    const std::vector<StatProfileRule> rules = []
+    {
+        std::vector<StatProfileRule> list(3);
+        list[0].profile = "default";
+        list[0].tags.Set(ItemTag::Ammunition);
+        list[1].profile = "weapon";
+        list[1].groups.set(4);
+        list[2].profile = "other";
+        return list;
+    }();
+
+    ItemDefinition bolt = MakeItem(4, 7, "Bolt");
+    bolt.tags.Set(ItemTag::Ammunition);
+    CHECK(FindMatchingRule(rules, bolt) == 0);
+    ItemDefinition bow = MakeItem(4, 0, "Short Bow");
+    CHECK(FindMatchingRule(rules, bow) == 1);
+    ItemDefinition potion = MakeItem(14, 0, "Apple");
+    CHECK(FindMatchingRule(rules, potion) == 2);
+
+    CHECK(FindMatchingRule(std::span(rules).first(2), potion) == NoStatProfileRule);
 }
 
 TEST_CASE("Item tag sets test several tags at once [data][items]")

@@ -11,10 +11,28 @@
 // docks the tool windows by these names.
 namespace MuEditor::WindowIds
 {
-inline constexpr char ItemEditor[] = "###ItemEditor";
+// The id the item table had, so a saved layout puts the browser where it was.
+inline constexpr char ItemBrowser[] = "###ItemEditor";
+inline constexpr char ItemBasics[] = "###ItemBasics";
+inline constexpr char ItemRequirements[] = "###ItemRequirements";
+inline constexpr char ItemRules[] = "###ItemRules";
+inline constexpr char ItemCategories[] = "###ItemCategories";
+inline constexpr char ItemModel[] = "###ItemModel";
+inline constexpr char ItemGlowColors[] = "###ItemGlowColors";
+inline constexpr char ItemFormulas[] = "###ItemFormulas";
+inline constexpr char ItemSync[] = "###ItemSync";
+inline constexpr char ItemChecks[] = "###ItemChecks";
 inline constexpr char SkillEditor[] = "###SkillEditor";
 inline constexpr char DevEditor[] = "###DevEditor";
 inline constexpr char EffectBrowser[] = "###EffectBrowser";
+inline constexpr char ItemTranslations[] = "###ItemTranslations";
+inline constexpr char ServerList[] = "###ServerList";
+inline constexpr char MonsterBrowser[] = "###MonsterBrowser";
+inline constexpr char MonsterTranslations[] = "###MonsterTranslations";
+inline constexpr char MonsterChecks[] = "###MonsterChecks";
+inline constexpr char MonsterModel[] = "###MonsterModel";
+inline constexpr char MonsterPreview[] = "###MonsterPreview";
+inline constexpr char MonsterAttacks[] = "###MonsterAttacks";
 // Titles that are not translated: the whole title is the name.
 inline constexpr char MapEditor[] = "Map Editor";
 inline constexpr char Console[] = "Console";

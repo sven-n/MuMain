@@ -74,6 +74,12 @@ No player configuration or FPS cap is required.
   takes `FPS_ANIMATION_FACTOR`: spawn offsets, start angles, random scatter,
   scale, lifetime and the start values of rates such as gravity, direction
   and velocity. The move code that applies a rate each frame scales it.
+- The same holds for a value rebuilt every frame before it is used: an aim
+  or spawn point offset from a fresh copy of a position, a draw offset the
+  function undoes afterwards, a brightness or texture coordinate computed
+  per segment, or a multiplier on a speed read fresh from the action
+  (`PlaySpeed /= 2`, since `PlayAnimation` scales the result). Only state
+  that carries over to the next frame takes the factor.
 - To choose, ask whether the line runs more often per second when the frame
   rate rises. Code that looks one-shot can run every frame while its
   condition holds: a clamped `AnimationFrame` with a `>=` test, a range of

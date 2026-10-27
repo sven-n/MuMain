@@ -17,7 +17,6 @@ void OpenNameFilterFile(const wchar_t* FileName);
 extern GATE_ATTRIBUTE* GateAttribute;
 
 void OpenGateScript(const wchar_t* FileName);
-void OpenMonsterSkillScript(const wchar_t* FileName);
 
 extern ITEM_ATTRIBUTE* ItemAttribute;
 
@@ -25,12 +24,8 @@ extern ActionSkillType GetSkillByBook(int Type);
 void SetItemAttributes(ITEM* ip);
 extern float CalcDurabilityPercent(BYTE dur, BYTE maxDur, int Level, int excellentFlags, int ancientDiscriminator = 0);
 extern int64_t ItemValue(ITEM* ip, int goldType = 1);
-extern void PrintItem(wchar_t* FileName);
 
-extern MONSTER_SCRIPT MonsterScript[MAX_MONSTER];
-
-extern void OpenMonsterScript(wchar_t* FileName);
-extern void MonsterConvert(MONSTER* m, int Level);
+// The monster's name from the monster list; "()" for a number without an entry.
 extern const wchar_t* getMonsterName(int type);
 
 extern SKILL_ATTRIBUTE* SkillAttribute;

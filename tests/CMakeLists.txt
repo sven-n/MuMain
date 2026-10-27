@@ -67,6 +67,8 @@ add_subdirectory(benchmark)
 add_subdirectory(text)
 add_subdirectory(effects)
 
+add_subdirectory(monsters)
+
 add_subdirectory(ui)
 
 add_subdirectory(editor)

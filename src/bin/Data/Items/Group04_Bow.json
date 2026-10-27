@@ -14,6 +14,7 @@
       "height": 3,
       "slot": "offHand",
       "weaponKind": "bow",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 24,
       "level": 2,
@@ -42,6 +43,7 @@
       "height": 3,
       "slot": "offHand",
       "weaponKind": "bow",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 24,
       "level": 8,
@@ -70,6 +72,7 @@
       "height": 3,
       "slot": "offHand",
       "weaponKind": "bow",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 24,
       "level": 16,
@@ -98,6 +101,7 @@
       "height": 3,
       "slot": "offHand",
       "weaponKind": "bow",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 24,
       "level": 26,
@@ -126,6 +130,7 @@
       "height": 4,
       "slot": "offHand",
       "weaponKind": "bow",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 24,
       "level": 40,
@@ -154,6 +159,7 @@
       "height": 4,
       "slot": "offHand",
       "weaponKind": "bow",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 24,
       "level": 56,
@@ -182,6 +188,7 @@
       "height": 4,
       "slot": "offHand",
       "weaponKind": "bow",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 24,
       "level": 75,
@@ -189,6 +196,7 @@
       "damageMin": 88,
       "damageMax": 106,
       "attackSpeed": 35,
+      "excellentBonus": 30,
       "requirements": {
         "strength": 40,
         "dexterity": 150
@@ -205,7 +213,12 @@
         "es": "Rayo",
         "pt": "Dardo"
       },
-      "tags": ["ammunition"],
+      "tags": ["ammunition", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@numberOfItems"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "offHand",
@@ -227,6 +240,7 @@
       "height": 2,
       "slot": "mainHand",
       "weaponKind": "crossbow",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 24,
       "level": 4,
@@ -255,6 +269,7 @@
       "height": 2,
       "slot": "mainHand",
       "weaponKind": "crossbow",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 24,
       "level": 12,
@@ -276,12 +291,14 @@
       "name": {
         "en": "Arquebus",
         "de": "Arkebuse",
-        "es": "Arcabuz"
+        "es": "Arcabuz",
+        "pt": "Arquebus"
       },
       "width": 2,
       "height": 2,
       "slot": "mainHand",
       "weaponKind": "crossbow",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 24,
       "level": 20,
@@ -310,6 +327,7 @@
       "height": 3,
       "slot": "mainHand",
       "weaponKind": "crossbow",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 24,
       "level": 32,
@@ -338,6 +356,7 @@
       "height": 3,
       "slot": "mainHand",
       "weaponKind": "crossbow",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 24,
       "level": 48,
@@ -366,6 +385,7 @@
       "height": 3,
       "slot": "mainHand",
       "weaponKind": "crossbow",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 24,
       "level": 68,
@@ -394,6 +414,7 @@
       "height": 3,
       "slot": "mainHand",
       "weaponKind": "crossbow",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 24,
       "level": 72,
@@ -418,7 +439,12 @@
         "es": "Flecha",
         "pt": "Flecha"
       },
-      "tags": ["ammunition"],
+      "tags": ["ammunition", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@numberOfItems"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "mainHand",
@@ -440,6 +466,7 @@
       "height": 4,
       "slot": "mainHand",
       "weaponKind": "crossbow",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 24,
       "level": 84,
@@ -468,6 +495,7 @@
       "height": 4,
       "slot": "offHand",
       "weaponKind": "bow",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 24,
       "level": 92,
@@ -493,10 +521,26 @@
         "pt": "Besta divina do arcanjo"
       },
       "tags": ["divineArchangelWeapon", "valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "purple",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "purple"
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "mainHand",
       "weaponKind": "crossbow",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 24,
       "level": 100,
@@ -524,6 +568,7 @@
       "height": 3,
       "slot": "mainHand",
       "weaponKind": "crossbow",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 24,
       "level": 100,
@@ -552,6 +597,7 @@
       "height": 4,
       "slot": "offHand",
       "weaponKind": "bow",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 24,
       "level": 135,
@@ -580,6 +626,7 @@
       "height": 4,
       "slot": "offHand",
       "weaponKind": "bow",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 24,
       "level": 147,
@@ -587,6 +634,7 @@
       "damageMin": 177,
       "damageMax": 200,
       "attackSpeed": 45,
+      "excellentRaisesLevel": false,
       "requirements": {
         "level": 380,
         "strength": 46,
@@ -608,6 +656,7 @@
       "height": 4,
       "slot": "offHand",
       "weaponKind": "bow",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 24,
       "level": 110,
@@ -635,6 +684,7 @@
       "height": 4,
       "slot": "offHand",
       "weaponKind": "bow",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 24,
       "level": 134,
@@ -664,6 +714,7 @@
       "height": 4,
       "slot": "offHand",
       "weaponKind": "bow",
+      "statProfile": "weapon",
       "twoHanded": true,
       "skill": 24,
       "level": 147,
@@ -677,34 +728,6 @@
       },
       "classRequirements": {
         "fairyElf": 2
-      }
-    },
-    {
-      "number": 27,
-      "name": {
-        "en": "Silver Bow-J",
-        "de": "Silberbogen-J",
-        "es": "Arco Plateado-J",
-        "pt": "Arco de prata-J"
-      },
-      "width": 2,
-      "height": 4,
-      "slot": "offHand",
-      "weaponKind": "bow",
-      "twoHanded": true,
-      "skill": 24,
-      "level": 56,
-      "durability": 48,
-      "damageMin": 59,
-      "damageMax": 71,
-      "attackSpeed": 45,
-      "attackType": 2,
-      "requirements": {
-        "strength": 30,
-        "dexterity": 100
-      },
-      "classRequirements": {
-        "fairyElf": 1
       }
     }
   ]

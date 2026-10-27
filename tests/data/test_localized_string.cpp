@@ -52,3 +52,32 @@ TEST_CASE("A plain string is a neutral text [data]")
     CHECK_FALSE(text.IsEmpty());
     CHECK(LocalizedString::Parse("").IsEmpty());
 }
+
+TEST_CASE("Only letters, digits and dashes make a locale code [data]")
+{
+    CHECK(LocalizedString::IsValidLocaleCode("pt"));
+    CHECK(LocalizedString::IsValidLocaleCode("zh-TW"));
+    CHECK_FALSE(LocalizedString::IsValidLocaleCode(""));
+    CHECK_FALSE(LocalizedString::IsValidLocaleCode("p="));
+    CHECK_FALSE(LocalizedString::IsValidLocaleCode("a||b"));
+}
+
+TEST_CASE("A text with the separator would split when parsed [data]")
+{
+    CHECK(LocalizedString::ContainsSeparator("Kris||Cris"));
+    CHECK_FALSE(LocalizedString::ContainsSeparator("Kris | Cris"));
+}
+
+TEST_CASE("A locale's own text is empty without a translation [data]")
+{
+    Data::LocalizedString names;
+    names.Set("en", "Budge Dragon");
+    names.Set("pt", "Budge Dragon");
+
+    CHECK(names.GetOwn("en") == "Budge Dragon");
+    CHECK(names.GetOwn("pt") == "Budge Dragon");
+    CHECK(names.GetOwn("es").empty());
+    CHECK(names.Get("es") == "Budge Dragon");
+    CHECK(names.HasOwn("pt"));
+    CHECK_FALSE(names.HasOwn("es"));
+}

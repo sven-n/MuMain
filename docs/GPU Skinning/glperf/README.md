@@ -25,7 +25,8 @@ milliseconds are claimed.
 
 ## Scaled diagnostic overlays
 
-`$details on` shows the compact FPS/frame/CPU summary, active SDL GPU driver, UI/RmlUi
+`$details on` shows the compact FPS/frame/CPU summary, the build, OS, processor, memory and GPU,
+active SDL GPU driver, UI/RmlUi
 timings, renderer timings, and frame-time history. `$glstats on` adds the per-pass table;
 placement-layout, input, flush, and overlay measurements live there. `$fpscounter on` shows just FPS.
 The overlays are RmlUi documents, follow UI scale, reload with the theme, and pass mouse
